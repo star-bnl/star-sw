@@ -1,11 +1,10 @@
-* 9/14/98 K. Turner (for 98h)
+* 12/8/98 K. Turner (for 98j)
 * Run BFC in following manner:
 * - read in g2t file with 1000 test events with Lambda's (from Al Saulys)
-* - run tpc fast sim 
-* - run tpc tracking
+* - run tpc fast chain
+* - run svt fast chain
 * - run global packages
-* - write xdf file containing full directories
-* PLUS ==> (see email from Al Saulys on 9/14/98 to Kathy)
+ * PLUS ==> (see email from Al Saulys on 9/14/98 to Kathy)
 *  - writes out v0 table to ntuple
 *  - makes plot from ntuple
 *
@@ -15,26 +14,26 @@
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
-   domain=' geometry tpc ctf svt global' _
-   chain='  g2tin tpg tfs tpt tid tte_e drhd dehd egr evr ev0 ddedx dpnt desum dmsft drsum ntup' _
+   domain=' geometry tpc svt global' _
+   chain='  g2tin tpg svg tfs srs tpt tid tte_e sgr svm egr evr ev0 ntup' _
    skip=0 _
    no_events=1000 _
-   input_data_file=/star/mds/users/saulys/test/v0test-g2t.xdf _
-   output_file=v0test-g2t_tfs_global_dst _
-   log=bfc_tpc_sim_global_dst_testv0.log _
+   input_data_file=/afs/rhic/star/data/samples/hijet-g2t.xdf _
+   output_file=hijet-g2t_v0_test _
+   log=bfc_test_v0.log _
    nunit=21 _
-   nfile=testv0.ntup _
+   nfile=hijet_test_v0.ntup _
    nid=121 _
    ntable=event/data/global/dst/ev0out
 *
 *
-
+* ---------------------------------------------------------------
 * Now read in ntuple and make plot
-  hi/file 31 testv0.ntup 0
+  hi/file 31 hijet_test_v0.ntup 0
   opt stat
   set stat 111111
   nt/list
-  for/file 40 testv0.ps
+  for/file 40 hijet_test_v0.ps
   meta 40 -111
   title_global ' V0s'
   nt/plot 121.inv_mass_la (inv_mass_la>1.1).and.(inv_mass_la<1.14)
