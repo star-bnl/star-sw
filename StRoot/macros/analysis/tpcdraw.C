@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.12 1999/11/24 02:01:43 snelling Exp $
+// $Id: tpcdraw.C,v 1.13 2000/01/20 02:18:28 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.13  2000/01/20 02:18:28  snelling
+// fixed St_TableSorter under Linux still crash under SUN (CINT related)
+//
 // Revision 1.12  1999/11/24 02:01:43  snelling
 // Apllied couple fixes from Li Qun
 //
@@ -88,15 +91,15 @@ int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
 
   // Create iterators for the two datasets
   St_DataSetIter tpc_data(chain->DataSet("tpc_hits"));
-  St_tcl_tphit  *hits = 0;
-  tcl_tphit_st *hit1 = 0; 
-  hits = (St_tcl_tphit *) tpc_data.Find("tphit");
+  St_tcl_tphit  *hits = NULL;
+  tcl_tphit_st *hit1 = NULL; 
+  hits = (St_tcl_tphit* ) tpc_data.Find("tphit");
   if (hits) {hit1 = hits->GetTable();}
   else { cout << "Error: tphit table header does not exist " << endl; return kStWarn; }
   if (!hit1) { cout << "Error: tphit table does not exist " << endl; return kStWarn; }
   Int_t nhits = hits->GetNRows();
   if (nhits == 0) {cout << "Error: tphit table contains zero rows " << endl; return kStWarn;}
-  St_TableSorter sortrk(*hits,"track",0,nhits-1);
+  St_TableSorter sortrk(hits,"track",0,nhits-1);
 
   St_DataSetIter tpc_tracks(chain->DataSet("tpc_tracks"));
   St_tpt_track *track = 0;
@@ -346,7 +349,7 @@ void tpcdraw() {
   pad4->Draw();
 
   pad1->cd();
-  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+  if (chain->GetOption("trs") || 
       chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     DrawPixels("x:y","(adc>2)*adc","box");
   }
@@ -357,7 +360,7 @@ void tpcdraw() {
   }  
 
   pad2->cd();
-  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+  if (chain->GetOption("trs") || 
       chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     DrawPixels("x:z","(adc>2)*adc","box");
   }
