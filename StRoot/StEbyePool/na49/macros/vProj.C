@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.7 2001/11/06 18:02:54 posk Exp $
+// $Id: vProj.C,v 1.8 2002/01/16 18:21:49 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -12,12 +12,15 @@
 //               Centrality = 0 is min. bias
 //               Centralites 7, 8, and 9 are the 
 //                 combined 1-2, 3-4, and 5-6 centralities.
-//               Makes momentum conserevation correction if pCons non-zero.
+//               Makes momentum conserevation correction if pCons is TRUE.
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
+// Revision 1.8  2002/01/16 18:21:49  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
 // Revision 1.7  2001/11/06 18:02:54  posk
 // 40 GeV compatability.
 //
@@ -31,6 +34,9 @@
 // plotGraphs.C makes the final graphs.
 //
 // $Log: vProj.C,v $
+// Revision 1.8  2002/01/16 18:21:49  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
 // Revision 1.7  2001/11/06 18:02:54  posk
 // 40 GeV compatability.
 //
@@ -50,6 +56,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "TString.h"
+//#include <math.h>
 
 TCanvas*  can;
 char      runName[6];
@@ -59,32 +66,53 @@ const int nCens = 6;
 
 void vProj(char* part = "pion") {
   
-  int       eBeam = 158; //select full beam energy
-  //int       eBeam = 40;  //select 40Gev beam energy
-  bool      pion = kFALSE;
+  int   eBeam = 158; //select full beam energy
+  //int   eBeam = 40;  //select 40Gev beam energy
+  bool  pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
-  bool   crossSection = kTRUE;
-  //bool   crossSection = kFALSE;     // use yield weighting
+  bool  crossSection = kTRUE;
+  //bool  crossSection = kFALSE;       // use yield weighting
+  bool  pCons = kTRUE;               // do momentum consevation corr.
+  //bool  pCons = kFALSE;
 
   const int nPlots = 1 + nCens + nCens/2;
   const int nHars = 2;
   int       sel   = 2;
-  float     yLow  = 2.92;             // for pt proj.
-  float     yLowY = 2.;               // for y proj.
-  float     yUp   = 5.;               // for both projs.
-  float     ptUp  = 2.;               // for both projs.
-  //float     pCons = 0.;               // no p cons. correction
-  float     pCons = 1.;               // adjustable constant for p cons.
-  float     pConsErr = 0.1;           // error in adjustable constant
-  float     sumPt2All[nCens] = {773.,623.,455.,305.,203.,122.}; // from Glenn
-  float     meanMul[nCens] = {135.,184.,152.,108.,75.,46.}; // for har 1
-  float     meanPt[nCens] = {0.166,0.255,0.288,0.282,0.279,0.275}; // for har 1
-  double    frac[nCens];
-  double    sqrtPiOver2 = 0.886;      // sqrt(pi) / 2
-  double    sqrt2 = 1.414;
-  double    res;
-  double    chiSV;
-  double    chiFact;
+  double    sqrtPiOver2 = sqrt(TMath::Pi()) / 2.;
+  double    sqrt2 = sqrt(2.);
+
+  if (eBeam == 158) {
+    double yCM    = 2.92;
+    float  yLow   = yCM;              // for pt proj.
+    float  yLowY  = 2.;               // for y proj.
+    float  yUp    = 5.;               // for both projs.
+    float  ptUp   = 2.;               // for both projs.
+    float  vYMax  = 7.;
+    float  vYMin  = -5.;
+    float  vPtMax = 20.;
+    float  vPtMin = -10.;
+    float  sumPt2All[nCens] = {773.,623.,455.,305.,203.,122.}; // from Glenn
+    float  meanMul[nCens] = {135.,184.,152.,108.,75.,46.}; // for har 1
+    float  meanPt[nCens] = {0.166,0.255,0.288,0.282,0.279,0.275}; // for har 1
+  } else if (eBeam == 40) {
+    double yCM    =  2.24;
+    float  yLow   =  yCM;              // for pt proj.
+    float  yLowY  =  1.;               // for y proj.
+    float  yUp    =  4.5;              // for both projs.
+    float  ptUp   =  2.;               // for both projs.
+    float  vYMax  =  5.;
+    float  vYMin  = -5.;
+    float  vPtMax =  5.;
+    float  vPtMin = -5.;
+    float  sumPt2All[nCens] = {579.,467.,344..,231.,155.,94.}; // from Glenn
+    float  meanMul[nCens] = {265.,230.,172.,112.,75.,45.}; // for har 1
+    //float  meanMul[nCens] = {66.,57.,43.,33.,19.,11.}; // for har 1 stripes
+    float  meanPt[nCens] = {0.326,0.322,0.316,0.309,0.302,0.297};//for har 1
+  } else {
+    cout << " Not valid beam energy" << endl;
+    return;
+  }
+
   TFile*    anaFile[nCens];
   TH2*      v2D[nCens][nHars];
   TH2*      vObs2D[nCens][nHars];
@@ -99,10 +127,8 @@ void vProj(char* part = "pion") {
   TH1F*     yieldPt[nPlots];
   TString*  histName;
   char      histTitle[30];
-  double    yCM = 2.92;
-  int       firstRunNumber = 0;
   char      fileName[30];
-  int       cent;
+  int       firstRunNumber = 0;
   TAxis*    xAxis;
   TAxis*    yAxis;
   int       xBins;
@@ -113,7 +139,6 @@ void vProj(char* part = "pion") {
   double    yieldSum;
   double    v;
   double    vErr;
-  double    deltaV;
   double    vSum;
   double    err2Sum;
   float     content;
@@ -121,23 +146,7 @@ void vProj(char* part = "pion") {
   char      selText[2];
   char      cenText[2];
   char      harText[2];
-  float     vYMax  = 7.;
-  float     vYMin  = -5.;
-  float     vPtMax = 20.;
-  float     vPtMin = -10.;
- 
-  if (eBeam == 40) {
-    yLow   =  2.24;             // for pt proj.
-    yLowY  =  1.;               // for y proj.
-    yUp    =  4.5;              // for both projs.
-    ptUp   =  2.;               // for both projs.
-    yCM    =  2.24;
-    vYMax  =  5.;
-    vYMin  = -5.;
-    vPtMax =  5.;
-    vPtMin = -5.;
-  }
-   
+    
   // set style
   gROOT->SetStyle("Bold");                              
   gROOT->ForceStyle();
@@ -147,9 +156,6 @@ void vProj(char* part = "pion") {
   if (crossSection) {
     gROOT->LoadMacro("dNdydPt.C");
   }
-
-  // convert integer to text
-  sprintf(selText, "%d", sel);
 
   // input the first run number
   if (firstRunNumber == 0) {
@@ -162,12 +168,15 @@ void vProj(char* part = "pion") {
 
   // construct out file name
   TString* outName = new TString(part);
-  if (pCons != 0.) outName->Append("Pcons");
+  if (pCons) outName->Append("Pcons");
   if (!crossSection) outName->Append("Yield");
   outName->Append(".root");
   char outFile[255] = outName->Data();
   cout << " out file = " << outFile << endl;
   delete outName;
+
+  // convert integer to text
+  sprintf(selText, "%d", sel);
 
   for (int n = 0; n < nCens; n++) {
     int runNumber = firstRunNumber + n;
@@ -181,21 +190,26 @@ void vProj(char* part = "pion") {
       cout << "### Can't find file " << fileName << endl;
       return;
     }
-    cent = runNumber % 10;                             // unit digit = cent
+    int cent = runNumber % 10;                             // unit digit = cent
     if (cent <= 0 || cent > nCens) {
       cout << " Not valid centrality = " << cent << endl;
       return;
     }
     sprintf(cenText, "%d", cent);
     
-    // calculate frac[n] for Olli's momentum conservation correction
-    if (pCons != 0.) {
-      frac[n] = meanMul[n] * meanPt[n] * meanPt[n] / sumPt2All[n];
-      cout << " fraction= " << frac[n] << endl;
+    // calculate frac[n] for momentum conservation correction
+    // assuming weights of all particles used for event plane are +1 (forward hemisphere)
+    if (pCons) {
+      double frac        = sqrt(meanMul[n] / sumPt2All[n]) * meanPt[n];
+      double frac2       = frac * frac;
+      double fracFact    = frac / sqrt(1. - frac2);
+      double fullSubFact = sqrt((2. - frac2) / (1. - frac2));
+      cout << " fraction= " << frac << ", fraction factor = " << fracFact 
+	   << ", sub-to-full-fact/sqrt(2) = " << fullSubFact/sqrt2 << endl;
     }
     
-    //get the resolutions
-    if (pCons != 0.) {
+    //get the resolution histogram
+    if (pCons) {
       histName = new TString("Flow_Res_Sel");
       histName->Append(*selText);
       resHist[n] = dynamic_cast<TH1*>(anaFile[n]->Get(histName->Data()));
@@ -206,8 +220,8 @@ void vProj(char* part = "pion") {
       delete histName;
     }      
 
-    // get the 2D v histograms
     for (int j = 0; j < nHars; j++) {
+      // get the 2D v histograms
       sprintf(harText, "%d", j+1);
       histName = new TString("Flow_v2D_Sel");
       histName->Append(*selText);
@@ -219,14 +233,19 @@ void vProj(char* part = "pion") {
 	return;
       }
       delete histName;
+      v2D[n][j]->SetMaximum(20.);
+      v2D[n][j]->SetMinimum(-20.);
       if (n==0 && j==0) {
 	yAxis = v2D[0][0]->GetYaxis();
 	yBins = yAxis->GetNbins();
 	xAxis = v2D[0][0]->GetXaxis();
 	xBins = xAxis->GetNbins();
       }
-      res = resHist[n]->GetBinContent(j+1);
-      if (pCons !=0. && j==0) {        // conservation of momentum correction
+
+      // Conservation of momentum correction for v1     
+      if (pCons && j==0) {
+
+	// Get the 2D vObs histograms
 	histName = new TString("Flow_vObs2D_Sel");
 	histName->Append(*selText);
 	histName->Append("_Har");
@@ -238,34 +257,34 @@ void vProj(char* part = "pion") {
 	}
 	delete histName;
 	v2D[n][j]->Reset();
-	chiSV = chi(res);
-	chiFact = F(chiSV/1.414);
-	cout << " ChiSV= " << chiSV << endl;
-	cout << " F= " << chiFact << endl;
+
+	// Get the resolution and calculate chi
+	double res = resHist[n]->GetBinContent(j+1);
+	double chiSV = chi(res) * fullSubFact / sqrt2;
+	double chiCorrSV = sqrt(chiSV*chiSV + frac2);
+	double resCorr = resEventPlane(chiCorrSV);
+	double chiFact = F(chiCorrSV/sqrt2);
+	cout << " ChiCorrSV= " << chiCorrSV << ", corr. = " << chiCorrSV/chiSV <<
+	  ", chiCorrJYO= " << chiCorrSV/sqrt2 << endl;
+	cout << " resCorr= " << resCorr << ", corr. = " << resCorr/res << endl;
+	cout << " F= " << chiFact << ", corr. = " << chiFact/sqrtPiOver2 << endl;
 	for (int yBin=1; yBin<=yBins; yBin++) {
 	  pt = yAxis->GetBinCenter(yBin);
 	  for (int xBin=1; xBin<=xBins; xBin++) {
 	    v = vObs2D[n][j]->GetCellContent(xBin, yBin);
 	    vErr = vObs2D[n][j]->GetCellError(xBin, yBin);
-	    //deltaV = pCons * 100. * sqrtPiOver2 * (1. - res) * pt * sqrt(frac[n]/(1.-frac[n])) /  sqrt(sumPt2All[n]);
-	    //deltaV = pCons * 100. * (sqrtPiOver2 - chiSV/sqrt2) * pt * sqrt(frac[n]/(1.-frac[n])) / sqrt(sumPt2All[n]);
-	    deltaV = pCons * 100. * chiFact * pt * sqrt(frac[n]/(1.-frac[n])) / 
-	      sqrt(sumPt2All[n]);
-	    v += deltaV;
+	    v += 100. * chiFact * pt * fracFact / sqrt(sumPt2All[n]);
 	    v2D[n][j]->SetCellContent(xBin, yBin, v);
-	    vErr = sqrt(vErr*vErr + pConsErr*deltaV*pConsErr*deltaV);
 	    v2D[n][j]->SetCellError(xBin, yBin, vErr);
 	  }
 	}
-	if (res != 0.) {
-	  v2D[n][j]->Scale(1. / res);
+	if (resCorr != 0.) {
+	  v2D[n][j]->Scale(1. / resCorr);
 	} else {
 	  cout << "resolution of the " << j+1 << "th harmonic was zero." << endl;
 	  v2D[n][j]->Reset();
 	}
       }
-      v2D[n][j]->SetMaximum(20.);
-      v2D[n][j]->SetMinimum(-20.);
     }
 
     // Get the 2D yield histograms
@@ -276,7 +295,6 @@ void vProj(char* part = "pion") {
       return;
     }
   }
-  
   // Get the axes properties
   float  xMin  = xAxis->GetXmin();
   float  xMax  = xAxis->GetXmax();
@@ -390,7 +408,6 @@ void vProj(char* part = "pion") {
 	    if (pt < ptUp) {
 	      if (crossSection) {
 		if (pion) {
-		  //yield = 1.;
 		  yield = dNdydPt(0, y - yCM, pt, n) +
 		    dNdydPt(1, y - yCM, pt, n);               // pi+ + pi-
 		} else {
@@ -433,7 +450,6 @@ void vProj(char* part = "pion") {
 	    if (j % 2 == 1 && y < yCM) v *= -1; // backward particles for odd har
 	    if (crossSection) {
 	      if (pion) {
-		//yield = 1.;
 		yield = dNdydPt(0, y - yCM, pt, n) +
 		  dNdydPt(1, y - yCM, pt, n);                 // pi+ + pi-
 	      } else {
@@ -834,9 +850,9 @@ bool Pause() {
 static Double_t resEventPlane(double chi) {
   // Calculates the event plane resolution as a function of chi
 
-  double con = 0.626657;                   // sqrt(pi/2)/2
+  double con = sqrt(TMath::Pi() / 2.) / 2.;
   double arg = chi * chi / 4.;
-
+  
   Double_t res = con * chi * exp(-arg) * (TMath::BesselI0(arg) + 
 					  TMath::BesselI1(arg)); 
 
@@ -864,10 +880,10 @@ static Double_t chi(double res) {
 static Double_t F(double chi) {
   // Calculates the F function for momentum conservation as a function of chi_JYO
 
-  double sqrtPiOver2 = 0.886;      // sqrt(pi) / 2
-  double chi2 = chi * chi;
+  double sqrtPiOver2 = sqrt(TMath::Pi()) / 2.;
+  double chi2Over2   = chi*chi/2.;
 
-  Double_t F = sqrtPiOver2 * exp(-chi2/2.) * ((1. + chi2) * TMath::BesselI0(chi2/2.) + chi2 * TMath::BesselI1(chi2/2.)) - chi; 
+  Double_t F = sqrtPiOver2 * exp(-chi2Over2) * TMath::BesselI0(chi2Over2); 
 
   return F;
 }

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.4 2001/11/06 18:02:43 posk Exp $
+// $Id: doFlowEvents.C,v 1.5 2002/01/16 18:21:35 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.5  2002/01/16 18:21:35  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
 // Revision 1.4  2001/11/06 18:02:43  posk
 // 40 GeV compatability.
 //
@@ -55,12 +58,14 @@ TBrowser *b=0;
 
 const char *fileList[] = {0};
 
+// ------------------ Prototypes ------------------------------
+
 void doFlowEvents(Int_t, const Char_t **);
 void doFlowEvents(Int_t, const Char_t *, const Char_t *);
 void doFlowEvents(Int_t nevents = 2);
 
+// ------------------ Here is the actual method ---------------
 
-// ------------------ Here is the actual method ----------------------------------
 void doFlowEvents(Int_t nevents, const Char_t **fileList)
 {
   cout <<  endl << endl <<" doFlowEvents -  input # events = " << nevents << endl;
@@ -83,11 +88,11 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowAnalysisMaker");
+
   // Make a chain with a file list
   chain  = new StChain("StChain");
-//  chain->SetDebug();
-  
-  StFileI *setFiles =0;
+  //chain->SetDebug();
+    StFileI *setFiles =0;
   if (fileList) {	//Normal case
     setFiles= new StFile(fileList);
   } else        {	//Grand Challenge
@@ -110,14 +115,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   StFlowSelection flowSelect;
   // particles:  pi+, pi-, pi, e-, e+, pbar, proton
   flowSelect->SetPidPart("pi");               // for parts. wrt plane
-  //flowSelect->SetPtPart(0., 1.);              // for parts. wrt plane
-  //flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
-  //flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
-  //flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
-  //flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
-  //flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-  //flowSelect->SetDcaPart(0., 0.8);            // for parts. wrt plane
-  //flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
+//  flowSelect->SetPtPart(0., 1.);              // for parts. wrt plane
+//  flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
+//  flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
+//  flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
+//  flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
+//  flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
+//  flowSelect->SetDcaPart(0., 0.8);            // for parts. wrt plane
+//  flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
   // uncomment next line if you make a selection object
   sprintf(makerName, "Flow");
@@ -134,7 +139,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
     goto END;
   }
   
-  if (makerName[0]=='\0') {
+  if (makerName[0]=='\0') { // blank if there is no selection object
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   } else {
     sprintf(makerName, "FlowAnalysis");
@@ -142,8 +147,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   }
 
   // Make docs
-  //flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
-  //flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
+//  flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
+//  flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
     
   // Set Debug status
 //    flowMaker->SetDebug();
@@ -153,10 +158,12 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   // Chain Init()
   //
   Int_t iInit = chain->Init();
-  if (iInit) chain->Fatal(iInit, "on init");
   chain->PrintInfo();
-  if (iInit) goto END;
-  
+  if (iInit) {
+    chain->Fatal(iInit, "on init");
+    goto END;
+  }
+
   //
   // Set the parameters
   //
@@ -222,18 +229,18 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   StFlowEvent::SetYWgt();
 
   // Calculate v2 from the 1st harmonic event plane
-  //StFlowAnalysisMaker::SetV21();
+//  StFlowAnalysisMaker::SetV21();
 
   // Make striped subevents
-  // StFlowEvent::SetStripes(1);  // either 1 or 2
+// StFlowEvent::SetStripes(1);  // either 1 or 2
 
   // Particles for the event plane
   // particles:  pi+, pi-, pi, e-, e+, pbar, proton
-  // StFlowEvent::SetPid("p");                    // for all charged particles
-  // StFlowEvent::SetPid("pi-");
+// StFlowEvent::SetPid("p");                    // for all charged particles
+// StFlowEvent::SetPid("pi-");
 
   // Use probability PID method
-  //  StFlowEvent::SetProbPid();
+//  StFlowEvent::SetProbPid();
   
   //
   // Event loop

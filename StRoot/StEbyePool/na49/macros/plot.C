@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.7 2001/11/06 18:02:46 posk Exp $
+// $Id: plot.C,v 1.8 2002/01/16 18:21:36 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.8  2002/01/16 18:21:36  posk
+// Fit q in plot.C. Updated momentum conservation corr. in vProj.C.
+//
 // Revision 1.7  2001/11/06 18:02:46  posk
 // 40 GeV compatability.
 //
@@ -130,8 +133,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vObsPt_Sel",
     "Flow_v2D_Sel",
     "Flow_vY_Sel",
-    "Flow_vPt_Sel"
-    //"Flow_q_Sel"
+    "Flow_vPt_Sel",
+    "Flow_q_Sel"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles = 31 + 1;
@@ -194,11 +197,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
   // set constants
-  float twopi   = 2. * 3.1416;
-  float etaMax  =   1.5;
-  float qMax    =   3.5;
+  float twopi   = 2. * TMath::Pi();
   float phiMax  = twopi; 
-  int   n_qBins =    50;
   float Ycm     =  2.92;
   TString* histProjName = NULL;
 
@@ -326,7 +326,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	    cout << "### Can't find histogram " << histName->Data() << endl;
 	    return;
 	  }
-	  float ptMax = hist->GetXaxis()->GetXmax();
+	  float max = hist->GetXaxis()->GetXmax();
 	}
       }
       
@@ -447,13 +447,35 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
       } else if (strstr(shortName[pageNumber],"_q")!=0) {   // q distibution
-	double area = hist->Integral() * qMax / (float)n_qBins; 
-	cout << "  Area = " << area << endl;
-	TF1* func_q = new TF1("func_q", "[0]*2.*x*exp(-x*x)", 0., qMax);
-	func_q->SetParameter(0, area);
 	gStyle->SetOptStat(100110);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
+	float n_qBins = (float)hist->GetNbinsX();
+	double area = hist->Integral() * max / n_qBins; 
+	TString* histName = new TString("Flow_Mul_Sel");
+	histName->Append(*countColumns);
+	histName->Append("_Har");
+	histName->Append(*countRows);
+	TH1* histMult = dynamic_cast<TH1*>(histFile->Get(histName->Data()));
+	if (!histMult) {
+	  cout << "### Can't find histogram " << histName->Data() << endl;
+	  return c;
+	}
+	delete histName;
+	float mult = histMult->GetMean();
+	TF1* fit_q = new TF1("qDist", qDist, 0., max, 3); // fit q dist
+	fit_q->SetParNames("v", "mult", "area");
+	float qMean = hist->GetMean();
+	//float v2N = (qMean > 1.) ? qMean - 1. : 0.;
+	//float vGuess = 100. * sqrt(v2N / mult);
+	float vGuess = (qMean > 2.) ? 8. : 1.;
+	fit_q->SetParameters(vGuess, mult, area); // initial values
+	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
+	fit_q->SetParLimits(2, 1, 1);             // area is fixed
+	hist->Fit("qDist", "Q");
+	fit_q->Draw("same");
+	TF1* func_q = new TF1("func_q", "[0]*2.*x*exp(-x*x)", 0., max);
+	func_q->SetParameter(0, area);
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
       } else if (strstr(shortName[pageNumber],"CosPhiLab")!=0) {  // CosPhiLab
@@ -491,14 +513,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(100110);
 	hist->Draw();
 	if (strstr(shortName[pageNumber],"v")!=0) {
-	  TLine* lineZeroPt  = new TLine(0., 0., ptMax, 0.);
+	  TLine* lineZeroPt  = new TLine(0., 0., max, 0.);
 	  lineZeroPt->Draw();
 	}
       } else if (strstr(shortName[pageNumber],"Bin")!=0) {    // Bin hists
 	if (strstr(shortName[pageNumber],"Pt")!=0) {
-	  TLine* lineDiagonal = new TLine(0., 0., ptMax, ptMax);
+	  TLine* lineDiagonal = new TLine(0., 0., max, max);
 	} else {
-	  TLine* lineDiagonal = new TLine(-etaMax, -etaMax, etaMax, etaMax);
+	  TLine* lineDiagonal = new TLine(-max, -max, max, max);
 	}
 	gStyle->SetOptStat(0);
 	hist->SetMarkerStyle(kFullSquare);
@@ -583,6 +605,8 @@ TCanvas* plotResolution(){
   return c;
 } 
 
+//-----------------------------------------------------------------------
+
 void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
     TCanvas* c = plot(i, selN, harN);
@@ -595,6 +619,8 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   }
   cout << "  plotAll Done" << endl;
 }
+
+//-----------------------------------------------------------------------
 
 static Double_t BetheBlochFunc(double* lnp, double* par) {
   double mass = par[0];
@@ -621,4 +647,16 @@ static Double_t BetheBlochFunc(double* lnp, double* par) {
   Double_t dedx = p0*(p1*(9.8 + p2 + d) - 1.);
   
   return dedx;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t qDist(double* q, double* par) {
+  // Calculates the q distribution given the parameters v, mult, area
+
+  double expo = par[1]*par[0]*par[0]/10000. + q[0]*q[0];
+  Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
+    TMath::BesselI0(2.*q[0]*par[0]/100.*sqrt(par[1])));
+
+  return dNdq;
 }
