@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.104 2005/02/11 23:24:31 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.105 2005/03/03 17:22:02 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -66,6 +66,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
   SetPicoEventDir("./");
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
+  pFlowEvent = 0;
 }
 
 StFlowMaker::StFlowMaker(const Char_t* name,
@@ -77,6 +78,7 @@ StFlowMaker::StFlowMaker(const Char_t* name,
   SetPicoEventDir("./");
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
+  pFlowEvent = 0;
 }
 
 //-----------------------------------------------------------------------
@@ -256,7 +258,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.104 2005/02/11 23:24:31 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.105 2005/03/03 17:22:02 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -2269,6 +2271,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.105  2005/03/03 17:22:02  posk
+// Initialized pFlowEvent in the constructors.
+//
 // Revision 1.104  2005/02/11 23:24:31  posk
 // SetCentrality works for year4.
 //
