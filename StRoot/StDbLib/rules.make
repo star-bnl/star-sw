@@ -30,8 +30,10 @@ endif
 
 
 # --> assume egcs
-CC       := /usr/local/bin/gcc
-CXX      := /usr/local/bin/g++
+#CC       := /usr/local/bin/gcc
+#CXX      := /usr/local/bin/g++
+CC       := gcc
+CXX      := g++
 
 ifeq (SunOS,$(SYSTYPE))
 
