@@ -1,8 +1,14 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.3 2000/08/24 11:26:48 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.4 2000/08/24 19:45:37 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.4  2000/08/24 19:45:37  suaide
+// small modifications: some cout has been removed
+//
 // Revision 1.3  2000/08/24 11:26:48  suaide
+//
+//
+//
 // by A. A. P. Suaide - 2000/08/24 07:25:00
 //
 // Notes:
@@ -22,17 +28,6 @@
 //    StBemcPreClusterCollection.cxx StBemcPreClusterCollection.h
 //    StBsmdePreClusterCollection.cxx StBsmdePreClusterCollection.h
 //    StBsmdpPreClusterCollection.cxx StBsmdpPreClusterCollection.h
-//
-//
-// Revision 1.3  2000/08/22 05:30:00  A. A. P. Suaide
-//     Full StEvent compatible
-//     Read hits from StEvent object. If it does not exist creates a new one
-//     write clusters in StEvent format and old format
-//     Do clustering on bemc, bprs, bsmde and bsmdp
-//     StBemcPreClusterCollection, StBemcPreClsuter now obsolete
-//     StBsmdePreClusterCollection, StBsmdePreClsuter now obsolete
-//     StBsmdpPreClusterCollection, StBsmdpPreClsuter now obsolete
-//     Included method SetClusterConditions 
 //
 // Revision 1.2  2000/07/04 02:36:52  perev
 // formal corrections, gStChain removed
@@ -376,7 +371,7 @@ void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
 //_____________________________________________________________________________
 void StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.3 2000/08/24 11:26:48 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.4 2000/08/24 19:45:37 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

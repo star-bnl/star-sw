@@ -2,7 +2,13 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.h,v $
+// Revision 1.3  2000/08/24 19:45:37  suaide
+// small modifications: some cout has been removed
+//
 // Revision 1.2  2000/08/24 11:26:48  suaide
+//
+//
+//
 // by A. A. P. Suaide - 2000/08/24 07:25:00
 //
 // Notes:
@@ -22,15 +28,6 @@
 //    StBemcPreClusterCollection.cxx StBemcPreClusterCollection.h
 //    StBsmdePreClusterCollection.cxx StBsmdePreClusterCollection.h
 //    StBsmdpPreClusterCollection.cxx StBsmdpPreClusterCollection.h
-//
-//
-// PreClusters Finder Maker for EMC
-// Revision 1.2  2000/08/22 05:30:00  A. A. P. Suaide
-//     Full StEvent compatible
-//     Do clustering on bemc, bprs, bsmde and bsmdp
-//     StBemcPreClusterCollection  now obsolete
-//     StBsmdePreClusterCollection now obsolete
-//     StBsmdpPreClusterCollection now obsolete
 //
 // Revision 1.1  2000/05/15 21:24:00  subhasis
 // initial version
