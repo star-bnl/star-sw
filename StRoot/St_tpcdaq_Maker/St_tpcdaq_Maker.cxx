@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.8  1999/03/25 22:39:10  ward
+// getPadList does not set padlist when npad==0
+//
 // Revision 1.7  1999/03/15 03:24:14  perev
 // New maker schema
 //
@@ -263,7 +266,8 @@ int St_tpcdaq_Maker::Output() {
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
       seqOffset=0; npad=mUnpacker->getPadList(ipadrow+1,&padlist); pixOffset=0;
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
-      for( ipad=0,pad=padlist[0] ; ipad<npad ; pad=padlist[++ipad] ) {
+      if(npad>0) pad=padlist[0];
+      for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
         seqStatus=mUnpacker->getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
         OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
@@ -334,7 +338,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Porky Pig. St_tpcdaq_Maker::Make().\n");
+  printf("I am Sylvester the Cat. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -355,7 +359,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.7 1999/03/15 03:24:14 perev Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.8 1999/03/25 22:39:10 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
