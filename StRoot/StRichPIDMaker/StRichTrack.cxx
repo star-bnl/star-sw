@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.14 2000/12/08 15:01:07 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.15 2000/12/08 20:09:32 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.15  2000/12/08 20:09:32  horsley
+ *  updated monte carlo ntuples, member functions in StRichMCTrack, StRichPIDMaker
+ *  changed monte carlo double xCorrection = 0 in StRichTrack to xCorrection = 0
+ *  with no declaration of the double
+ *
  *  Revision 2.14  2000/12/08 15:01:07  horsley
  *  pion switch in getNew, Orig hits
  *  case -221: -> case -211:
@@ -426,7 +431,7 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     cout << "StRichTrack::StRichTrack()\n";
     cout << "\tWARNING:\n";
     cout << "\tMC flag set.  No xCorrection (px/pz) implemented" << endl;
-    double xCorrection = 0.;
+    xCorrection = 0.;
 #endif
 
     //double xCorrection = 0.;
