@@ -1,0 +1,11 @@
+/*egr_propagete.idl              */
+/*  Table: egr_propagate           */
+
+/* 
+ */
+
+ struct egr_propagate  {
+  short       iflag;  /* switch whether to propagate to point or radius */
+  float       r;      /* reference radius */
+  float       x[3];   /* coordinates of target points */
+};
