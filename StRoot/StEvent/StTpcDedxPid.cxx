@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cxx,v 1.4 1999/08/03 18:21:54 ogilvie Exp $
+ * $Id: StTpcDedxPid.cxx,v 1.5 1999/08/11 19:29:16 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cxx,v $
- * Revision 1.4  1999/08/03 18:21:54  ogilvie
- * improved dE/dx parameterization
+ * Revision 1.5  1999/08/11 19:29:16  ogilvie
+ * gain typo fixed
+ *
+ * Revision 1.5  1999/08/11 19:29:16  ogilvie
+ * gain typo fixed
  *
  * Revision 1.4  1999/08/03 18:21:54  ogilvie
  * improved dE/dx parameterization
@@ -37,9 +40,9 @@
 #ifndef __CINT__
 #define gufld F77_NAME(gufld,GUFLD)
 #define quickid F77_NAME(quickid,QUICKID)
-Double_t StTpcDedxPid::mTpcDedxGain = 0.211089-06;
+extern "C" {Int_t type_of_call F77_NAME(quickid,QUICKID)(float *, float*);}
 #endif
-Double_t StTpcDedxPid::mTpcDedxRise = 29.060 ;
+
 Double_t StTpcDedxPid::mTpcDedxGain = 0.211089e-06;
 Double_t StTpcDedxPid::mTpcDedxOffset = -3.75785 ;
 Double_t StTpcDedxPid::mTpcDedxRise = 29.706 ;
