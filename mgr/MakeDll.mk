@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.66 1999/02/25 22:24:39 fisyak Exp $
+# $Id: MakeDll.mk,v 1.67 1999/02/28 20:25:37 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.67  1999/02/28 20:25:37  fisyak
+# Fix bug with dependencies for NODEBUG version
+#
 # Revision 1.66  1999/02/25 22:24:39  fisyak
 # Add ROOTCINTD flag
 #
@@ -200,9 +203,6 @@ endif
 
 DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))
-
-
-DEP_DIR := $(SYS_DIR)/dep/$(PKG)
 
 OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) 
 #                                                                      $(SRC_DIR) 
