@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.14 1999/01/13 17:41:17 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.15 1999/01/25 05:57:56 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.15  1999/01/25 05:57:56  sakrejda
+// obsolete table removed from the tte call
+//
 // Revision 1.14  1999/01/13 17:41:17  sakrejda
 // tabs added by Yuri so it looks better
 //
@@ -150,7 +153,6 @@ Int_t St_tpt_Maker::Make(){
       //tte_e
       St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",maxNofTracks);   m_DataSet->Add(mctrk);
       St_tte_eval *evaltrk   = new St_tte_eval("evaltrk",maxNofTracks);  m_DataSet->Add(evaltrk);
-      St_tte_res      *res   = new St_tte_res("res",1);    m_DataSet->Add(res);
       St_tpt_res      *restpt= new St_tpt_res("restpt",10*maxNofTracks);    m_DataSet->Add(restpt);
       St_DataSetIter geant(gStChain->DataSet("geant"));
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
@@ -185,7 +187,7 @@ Int_t St_tpt_Maker::Make(){
 	cout << " start run_tte " << endl;
 	Int_t Res_tte = tte(tptrack,tphit,
 			    g2t_tpc_hit,g2t_track,
-			    index,m_type,evaltrk,mctrk,res,m_tte_control);
+			    index,m_type,evaltrk,mctrk,m_tte_control);
 	if (Res_tte != kSTAFCV_OK) {cout << " Problem with tte.. " << endl;}
 	cout << " finish run_tte " << endl;
       }
@@ -219,7 +221,7 @@ void St_tpt_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.14 1999/01/13 17:41:17 sakrejda Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.15 1999/01/25 05:57:56 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
