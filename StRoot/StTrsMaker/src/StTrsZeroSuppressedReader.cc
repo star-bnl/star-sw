@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.4 2000/03/14 01:00:24 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.5 2000/03/15 18:08:56 calderon Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.5  2000/03/15 18:08:56  calderon
+ * ZSR is no longer a singleton.  Two will be needed for mixer chain.
+ *
  * Revision 1.4  2000/03/14 01:00:24  calderon
  * remove annoying beep
  *
@@ -48,28 +51,27 @@ using std::distance;
 #include "StTrsRawDataEvent.hh"
 #include "StTrsDigitalSector.hh"
 
-StTrsZeroSuppressedReader* StTrsZeroSuppressedReader::mInstance = 0;
 
-StTrsZeroSuppressedReader::StTrsZeroSuppressedReader() { /*nopt */ }
+StTrsZeroSuppressedReader::StTrsZeroSuppressedReader()
+    :mSector(1), mTheSector(0), mPadList(0), mSequence(0), mTrsEvent(0)
+{ /*nopt */ }
 
 // StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(int sector, StTpcRawEvent& theEvent) : mSector(sector), mTheEvent(theEvent)
 // {  }
 
 StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(StTpcRawDataEvent* ev)
+    :mSector(1), mTheSector(0), mPadList(0), mSequence(0)
 {
     mTrsEvent = dynamic_cast<StTrsRawDataEvent*>(ev);
     if (!mTrsEvent) {
-	cerr << "Cast Failed, object not of required type\n";
+	cerr << "Error constructing StTrsZeroSuppressedReader" << endl;
+	cerr << "Cast Failed! ev not of required type (StTrsRawDataEvent*)\n";
     }
-    mSector = 1;
-    mTheSector = mTrsEvent->mSectors[0];
-    mPadList = 0;
-    mSequence = 0;
 }
 
 int StTrsZeroSuppressedReader::setSector(int sector)
 {
-    mInstance->clear();
+    clear();
     // Check if the data is there --> getSector() in the Unpacker!
     // ...you may even want to check the mVersion to return the
     // proper mZSR...
@@ -85,19 +87,6 @@ int StTrsZeroSuppressedReader::setSector(int sector)
     }
 }
 
-StTrsZeroSuppressedReader*
-StTrsZeroSuppressedReader::instance(StTpcRawDataEvent* ev)
-{
-    if (!mInstance) mInstance = new StTrsZeroSuppressedReader(ev);
-    else {
-	cerr << "StTrsZeroSuppressedReader::instance()"  << endl;
-	cerr << "\tWARNING:" << endl;
-	cerr << "\tSingleton class is already instantiated" << endl;
-	cerr << "\tArgument ignored!!" << endl;
-	cerr << "\tContinuing..." << endl;
-    }
-    return mInstance;
-}
 
 StTrsZeroSuppressedReader::~StTrsZeroSuppressedReader()
 {
@@ -109,15 +98,10 @@ StTrsZeroSuppressedReader::~StTrsZeroSuppressedReader()
 
 int StTrsZeroSuppressedReader::checkTheData(unsigned int which)
 {
-    int status;
+    int status(0);
     
-//     PR(mTrsEvent->mSectors.size());
-    if(mTrsEvent->mSectors.size() >= which) { // bounds check
-
+    if(mTrsEvent->mSectors.size() >= which)  // bounds check
 	if ( (mTrsEvent->mSectors[(which-1)]) ) status = 1;
-	else status = 0;
-	
-    } // Bounds check
     return status;   
 }
 
