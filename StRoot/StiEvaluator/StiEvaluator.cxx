@@ -29,6 +29,7 @@
 #include "Sti/StiKalmanTrackNode.h"
 
 //StiEvaluator includes
+#include "StiTrackAssociator.h"
 #include "StiEvaluator.h"
 
 StiEvaluator* StiEvaluator::sinstance = 0;
@@ -92,19 +93,36 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
     cout <<"\nStiEvaluator::evaluateForEvent()"<<endl;
     cout <<"\tNumber of StiTracks:\t"<<trackStore->size()<<endl;
 
-    for (StiTrackContainer::stitrackvec::const_iterator it=trackStore->begin(); it!=trackStore->end(); ++it) {
+    StiTrackAssociator* associator = StiTrackAssociator::instance();
+    
+    for (StiTrackContainer::stitrackvec::const_iterator it=trackStore->begin();
+	 it!=trackStore->end(); ++it) {
 	StiTrack* temp = (*it);
 	//Now you've got the track, do what you want with it
 	StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(temp);
 	if (!track) {
-	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\tCast to Evaluable track failed.  ABORT"<<endl;
+	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t"
+		 <<"Cast to Evaluable track failed.  ABORT"<<endl;
 	    return;
 	}
 
 	//Now we have an StiEvaluableTrack
 	StTrackPairInfo* associatedPair = track->stTrackPairInfo();
+
+	//temp test (MLM)
+	StiTrackAssociator::AssocPair asPair = associator->associate(track);	
+	StTrackPairInfo* newInfo = asPair.first;
+	if (!newInfo) {
+	    cout <<"StiEvaluator::? newInfo==0"<<endl;
+	}
+	if (newInfo!=associatedPair) {
+	    cout <<"StiEvaluator::? newInfo!=associatedPair"<<endl;
+	}
+	//End temp test (MLM)
+	
 	if (!associatedPair) {
-	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t.Associated Pair==0.  Abort"<<endl;
+	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t"
+		 <<"Associated Pair==0.  Abort"<<endl;
 	    return;
 	}
 	//Call some function to actually fill TTree object(s)
@@ -112,6 +130,8 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	mEntry->setMcTrack(associatedPair->partnerMcTrack());
 	mEntry->setGlobalTrack(associatedPair->partnerTrack());
 	mEntry->setStiTrack(track);
+	mEntry->setAssociation(asPair.second); //New 11/20/01 (MLM)
+
 
 	//Clear the hit entry
 	fillHitEntry(track);
@@ -262,6 +282,9 @@ void TrackEntry::clear()
     globalTrackQ = 0;
     globalTrackM = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
     stiTrackM = stiTrackPsi = stiTrackChi2 = stiTrackNHit = 0.;
+
+    stiTrackNHits = stiTrackNTpcHits = stiTrackNSvtHits = 0;
+    stiTrackNAssocHits = stiTrackNAssocTpcHits = stiTrackNAssocSvtHits = 0;
 }
 
 void TrackEntry::setStiTrack(StiTrack *newtrack)
@@ -282,6 +305,13 @@ void TrackEntry::setStiTrack(StiTrack *newtrack)
   stiTrackPz = mom.z();
   stiTrackPt = mom.perp();
   stiTrackEta = mom.pseudoRapidity(); 
+}
+
+void TrackEntry::setAssociation(const trackPing& ping)
+{
+    stiTrackNAssocHits = ping.nPingsTpc+ping.nPingsSvt+ping.nPingsFtpc;
+    stiTrackNAssocTpcHits = ping.nPingsTpc;
+    stiTrackNAssocSvtHits = ping.nPingsSvt;
 }
 
 void TrackEntry::setMcTrack(StMcTrack *newtrack)

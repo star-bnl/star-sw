@@ -20,6 +20,7 @@ class StTrackPairInfo;
 class StiKalmanTrack;
 class StiHit;
 class StiKalmanTrackNode;
+class trackPing;
 
 //Temp class to be stored in TTree, eventually move to it's own .h, .cxx files
 #include "TObject.h"
@@ -84,6 +85,8 @@ public:
     void setMcTrack(StMcTrack*);
     void setGlobalTrack(StTrack*);
     void setStiTrack(StiTrack*);
+    void setAssociation(const trackPing&);
+
     
     void addStiHitEntry(const StiHitEntry&);
     
@@ -137,6 +140,16 @@ private:
     double stiTrackPz;
     double stiTrackPt;
     double stiTrackEta;
+
+    //raw counters of hits on track
+    unsigned int stiTrackNHits;
+    unsigned int stiTrackNTpcHits;
+    unsigned int stiTrackNSvtHits;
+
+    //counters for associated hits on tracks
+    unsigned int stiTrackNAssocHits;
+    unsigned int stiTrackNAssocTpcHits;
+    unsigned int stiTrackNAssocSvtHits;
     
     
     ClassDef(TrackEntry,1) 
