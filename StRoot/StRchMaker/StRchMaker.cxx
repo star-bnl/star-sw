@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.8 2001/10/21 21:52:51 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 2.9 2002/02/03 20:09:00 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -233,41 +233,58 @@ Int_t StRchMaker::Make() {
 
     //
     // Interogate StEvent structure
-    //    
-    if (mEvent) {
-	mTheRichCollection = mEvent->richCollection();
-	if(mTheRichCollection) {
-	    cout << "StEvent richCollection Exists" << endl;
-	    mRichCollectionPresent = 1;
-	    if(mTheRichCollection->pixelsPresent()) {
-		cout << "StEvent RichPixelCollection Exists" << endl;
-		mPixelCollectionPresent = 1;
-	    }
-	    else {
-		cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
-	    }
-	    if(mTheRichCollection->clustersPresent()) {
-		cout << "StEvent RichClusters Exists" << endl;
-		mClusterCollectionPresent = 1;
-	    }
-	    else {
-		cout << "** StEvent RichClusters DOES NOT Exist" << endl;
-	    }
+    //
+    if(!mEvent) {
+	cout << "ERROR\n";
+	cout << "StRchMaker::Make()\n";
+	cout << "****** StEvent structure does not exist\n";
+	cout << "****** Processing of RICH DATA CANNOT OCCUR\n";
+	cout << "****** StEventMaker must run before StRchMaker\n";
+	cout << "****** Aborting..." << endl;
+	abort();
+    }
+    mTheRichCollection = mEvent->richCollection();
+
+    //
+    // if there is no rich collection, check for embedding data to use,
+    // otherwise try access data via the interfaces
+    //
+    
+    if(!mTheRichCollection) {
+	St_ObjectSet *embeddedData =
+	    (St_ObjectSet*)GetDataSet("richMixer/.data/richMixedEvent");
+
+	if(!embeddedData) {
+	    cout << "\tNo RICH Embedded data" << endl;
+	    cout << "\tStEvent richCollection DOES NOT Exist" << endl;
+	    cout << "\tStEvent RichPixelCollection DOES NOT Exist" << endl;
+	    cout << "\tStEvent RichClusterCollection DOES NOT Exist" << endl;
+	    cout << "\tStEvent RichHitCollection DOES NOT Exist" << endl;
 	}
 	else {
-	    cout << "** StEvent richCollection DOES NOT Exist" << endl;
-	    cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
-	    cout << "** StEvent RichClusterCollection DOES NOT Exist" << endl;
-	    cout << "** StEvent RichHitCollection DOES NOT Exist" << endl;
+	    mTheRichCollection = (StRichCollection*)(embeddedData->GetObject());
+	    if(mTheRichCollection->pixelsPresent()) {
+		mPixelCollectionPresent = 1;
+		cout << '\t' << (mTheRichCollection->getRichPixels().size())
+		     << " pixels from the StRichMixerMaker" << endl;
+	    }
 	}
-    }
+    } // check the rich collection
     else {
-	cout << " *****WARNING IN STRCHMAKER*****" << endl;
-	cout << " *****StEvent structure does not exist" << endl;
-	cout << " *** Try make one yourself" << endl;
-	mEvent = new StEvent();
-	//AddData(new St_ObjectSet("StRichEvent", mEvent));
-
+	if(mTheRichCollection->pixelsPresent()) {
+	    cout << "StEvent RichPixelCollection Exists" << endl;
+	    mPixelCollectionPresent = 1;
+	}
+	else {
+	    cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
+	}
+	if(mTheRichCollection->clustersPresent()) {
+	    cout << "StEvent RichClusters Exists" << endl;
+	    mClusterCollectionPresent = 1;
+	}
+	else {
+	    cout << "** StEvent RichClusters DOES NOT Exist" << endl;
+	}
     }
 
     //
@@ -876,7 +893,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.8 2001/10/21 21:52:51 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.9 2002/02/03 20:09:00 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -921,6 +938,10 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.9  2002/02/03 20:09:00  lasiuk
+ * Embedded Data will be searched for in the richmixer/.data/richMixedEvent
+ * data set
+ *
  * Revision 2.8  2001/10/21 21:52:51  dunlop
  * Protection against null event->softwareMonitor()
  *
