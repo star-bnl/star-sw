@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.52 2000/01/27 22:56:58 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.53 2000/02/10 01:21:27 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.53  2000/02/10 01:21:27  calderon
+// Switch to use StTpcDb.
+// Coordinates checked for consistency.
+// Fixed problems with StTrsIstream & StTrsOstream.
+//
 // Revision 1.52  2000/01/27 22:56:58  calderon
 // add Magnetic field Db instantiation when using StTpcDb.  The
 // Magnetic Field is still obtained through gufld, so the call
@@ -188,8 +193,11 @@
 #define hISTOGRAM
 //
 // You must select a data base initializer method
-//#define tPC_DATABASE_PARAMETERS
-#define ROOT_DATABASE_PARAMETERS
+// When using TPC_DATABASE, change also definition in
+// StTrsChargeSegment.cc
+// StTrsAnalogSignalGenerator.hh
+#define TPC_DATABASE_PARAMETERS
+//#define ROOT_DATABASE_PARAMETERS
 //#define aSCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
@@ -228,9 +236,6 @@ using std::max;
 #include "TFile.h"
 #endif
 
-// General TRS
-#include "StCoordinates.hh"
-#include "StTpcCoordinateTransform.hh"
 
 // TRS
 // DataBase Initialization
@@ -302,7 +307,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.52 2000/01/27 22:56:58 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.53 2000/02/10 01:21:27 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -352,7 +357,12 @@ Int_t StTrsMaker::Init()
 #ifdef TPC_DATABASE_PARAMETERS
     // The global pointer to the Db is gStTpcDb and it should be created in the macro.
     
-    
+    if (!gStTpcDb) {
+	cout << "DATABASE MISSING!" << endl;
+	PR(gStTpcDb);
+	cout << "Can't initialize TRS" << endl;
+	return kStFatal;
+    }
     mGeometryDb =
      StTpcDbGeometry::instance(gStTpcDb);
   //mGeometryDb->print();
@@ -656,13 +666,13 @@ Int_t StTrsMaker::Make(){
     //
     St_DataSetIter geant(GetDataSet("geant"));
     
-    //St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+    
     St_g2t_tpc_hit *g2t_tpc_hit =
 	static_cast<St_g2t_tpc_hit *>(geant("g2t_tpc_hit"));
+    //PR(g2t_tpc_hit);
     int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
     g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
-    //St_g2t_track *g2t_track = (St_g2t_track *) geant("g2t_track");
     St_g2t_track *g2t_track =
 	static_cast<St_g2t_track *>(geant("g2t_track"));
     g2t_track_st *tpc_track = g2t_track->GetTable();
@@ -752,14 +762,13 @@ Int_t StTrsMaker::Make(){
 
 	    // In GEANT Global Coordinates we have to rotate
 	    // to the sector 12 position
-	    // Should use StMatrix??? or StTpcCoordinateTransform
-	    // but it is slower
+	    // Not using StTpcCoordinateTransform
+	    // because it is slower, so this requires that we make sure
+	    // the code below follows exactly what is in StTpcCoordinateTransform
 	    // It is also in StTrsChargeSegment::rotate()
-	    // should change to this SOON, but there is a time penalty because
-	    // a 2x2 matrix must be constructed
 	    double beta = (bsectorOfHit>12) ?
-		-bsectorOfHit*M_PI/6 :
-		bsectorOfHit*M_PI/6 ;   //(30 degrees)
+		(24-bsectorOfHit)*M_PI/6. :
+		bsectorOfHit*M_PI/6. ;   //(30 degrees)
 	    double cb   = cos(beta);
 	    double sb   = sin(beta);
 	    double xp = hitPosition.x()*cb - hitPosition.y()*sb;
@@ -780,16 +789,20 @@ Int_t StTrsMaker::Make(){
 					      tpc_hit->p[2]*GeV);
 
 	    //added by Hui Long ,8/24/99
+	    //Modified by M. Calderon 2/5/99
+	    
              if(bsectorOfHit>12) 
                    {
-                    sector12Coordinate.setZ(-(tpc_hit->x[2]));
-	            hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
+                    sector12Coordinate.setZ((tpc_hit->x[2])+mGeometryDb->driftDistance());
+	            //hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
 		 
                    } 
              else
 		  { 
 		    sector12Coordinate.setX(-xp);
+		    sector12Coordinate.setZ(-(tpc_hit->x[2])+mGeometryDb->driftDistance());
                     hitMomentum.setX(-pxPrime*GeV);
+		    hitMomentum.setZ(-(tpc_hit->p[2]*GeV));
                   }
                     //
 
@@ -803,12 +816,11 @@ Int_t StTrsMaker::Make(){
              int geantPID = tpc_track[tpc_hit->track_p-1].ge_pid;
 	   
 	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
-	    StTrsChargeSegment aSegment(sector12Coordinate,
+	     StTrsChargeSegment aSegment(sector12Coordinate,
 					hitMomentum,
 					(fabs(tpc_hit->de*GeV)),
 					tpc_hit->ds*centimeter,
 					geantPID);
-
 // 	    PR(hitPosition);
 // 	    PR(sector12Coordinate);
 // 	    PR(hitMomentum.mag());

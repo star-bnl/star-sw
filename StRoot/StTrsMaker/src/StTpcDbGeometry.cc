@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbGeometry.cc,v 1.3 2000/01/10 23:14:29 lasiuk Exp $
+ * $Id: StTpcDbGeometry.cc,v 1.4 2000/02/10 01:21:49 calderon Exp $
  *
  * Authors: Brain Lasiuk & Manuel Calderon de la Barca Sanchez September 8, 1999
  *
@@ -11,6 +11,11 @@
  *****************************************************************
  *
  * $Log: StTpcDbGeometry.cc,v $
+ * Revision 1.4  2000/02/10 01:21:49  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.3  2000/01/10 23:14:29  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -125,8 +130,8 @@ StTpcDbGeometry::StTpcDbGeometry(StTpcDb* globalDbPointer)
     mTimeBuckets = gTpcDbPtr->Electronics()->numberOfTimeBins();
     mEndCapZ     = 200.; 
     mFrischGrid  = 209.9;
-    mInnerSectorzOffSet = 0.;
-    mOuterSectorzOffSet = -.35;
+    mInnerSectorzOffSet = .35;
+    mOuterSectorzOffSet = 0.;
     mDriftDistance = 210.1;
 
     

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcPadCoordinate.hh,v 1.1 1998/11/10 17:12:07 fisyak Exp $
+ * $Id: StTpcPadCoordinate.hh,v 1.2 2000/02/10 01:21:46 calderon Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -11,6 +11,11 @@
  ************************************************************************
  *
  * $Log: StTpcPadCoordinate.hh,v $
+ * Revision 1.2  2000/02/10 01:21:46  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.1  1998/11/10 17:12:07  fisyak
  * Put Brian trs versin into StRoot
  *
@@ -27,7 +32,7 @@
 #define ST_TPC_PAD_COORDINATE_HH
 #include <iostream.h>
 
-#include "StGlobals.hh"
+//#include "StGlobals.hh"
 
 class StTpcPadCoordinate {
 public:

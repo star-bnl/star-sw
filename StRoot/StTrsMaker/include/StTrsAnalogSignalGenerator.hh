@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.7 2000/01/10 23:11:31 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.8 2000/02/10 01:21:47 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
+ * Revision 1.8  2000/02/10 01:21:47  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.7  2000/01/10 23:11:31  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -69,7 +74,12 @@ using std::max;
 #include "StTpcGeometry.hh"
 #include "StTpcSlowControl.hh"
 #include "StTpcElectronics.hh"
+#define TPC_DATABASE_PARAMETERS
+#ifndef TPC_DATABASE_PARAMETERS
 #include "StTpcCoordinateTransform.hh"
+#else
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
+#endif
 #include "StTrsWireHistogram.hh"
 #include "StTrsSector.hh"
 

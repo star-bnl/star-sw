@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.22 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.23 2000/02/10 01:21:51 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.23  2000/02/10 01:21:51  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.22  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -110,7 +115,13 @@
 
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
-#include "StCoordinates.hh"
+#ifndef TPC_DATABASE_PARAMETERS
+#include "StTpcLocalSectorCoordinate.hh"
+#include "StTpcPadCoordinate.hh"
+#else
+#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#include "StDbUtilities/StTpcPadCoordinate.hh"
+#endif
 
 #include "StTrsSlowAnalogSignalGenerator.hh"
 
@@ -329,8 +340,9 @@ void StTrsSlowAnalogSignalGenerator::setChargeDistribution(StDistribution v)
 void StTrsSlowAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
     //
-    // This should probably be made a data member at some point!
-    StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
+    // coordinate transform is now a data member
+    // 
+    //StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
     PR(wireHistogram->minWire());
     PR(wireHistogram->maxWire());
     if(wireHistogram->minWire()<0) {

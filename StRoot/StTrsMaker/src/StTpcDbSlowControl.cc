@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.cc,v 1.2 2000/01/10 23:14:29 lasiuk Exp $
+ * $Id: StTpcDbSlowControl.cc,v 1.3 2000/02/10 01:21:49 calderon Exp $
  *
  * Authors: Manuel Calderon de la Barca Sanchez
  *          Brian Lasiuk
@@ -13,6 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.cc,v $
+ * Revision 1.3  2000/02/10 01:21:49  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.2  2000/01/10 23:14:29  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -25,7 +30,6 @@
  *
  *
  **************************************************************************/
-#ifdef __ROOT__
 #include "StTpcDbSlowControl.hh"
 
 #ifndef ST_NO_EXCEPTIONS
@@ -143,4 +147,3 @@ void StTpcDbSlowControl::print(ostream& os) const
     os << "Gas Gainb:             "    << outerSectorGasGainb()*volt           << " /V"  << endl;
     os << endl;
 }
-#endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.hh,v 1.2 2000/01/10 23:11:29 lasiuk Exp $
+ * $Id: StTpcDbSlowControl.hh,v 1.3 2000/02/10 01:21:46 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.hh,v $
+ * Revision 1.3  2000/02/10 01:21:46  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.2  2000/01/10 23:11:29  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -23,7 +28,6 @@
  *
  *
  **************************************************************************/
-#ifdef __ROOT__
 #ifndef ST_TPC_DB_SLOW_CONTROL_HH
 #define ST_TPC_DB_SLOW_CONTROL_HH
 
@@ -101,7 +105,6 @@ private:
 //     double mOSGasGain;
 //     double mOSGasGainVzero;
 //     double mOSGasGainb;
-    // ClassDef(StTpcDbSlowControl,0)
 };
 
 inline double StTpcDbSlowControl::driftVelocity() const {return gTpcDbPtr->SlowControlSim()->driftVelocity()*(centimeter/(microsecond));}
@@ -141,5 +144,4 @@ inline double StTpcDbSlowControl::outerSectorGasGainb() const{return gTpcDbPtr->
 // inline double StTpcDbSlowControl::outerSectorGasGain() const {return mOSGasGain;}
 // inline double StTpcDbSlowControl::outerSectorGasGainVzero() const {return mOSGasGainVzero;}
 // inline double StTpcDbSlowControl::outerSectorGasGainb() const {return mOSGasGainb;}
-#endif
 #endif

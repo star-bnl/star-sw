@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcDbElectronics.cc,v 1.3 2000/01/10 23:14:29 lasiuk Exp $
+ * $Id: StTpcDbElectronics.cc,v 1.4 2000/02/10 01:21:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -11,6 +11,11 @@
  *****************************************************************
  *
  * $Log: StTpcDbElectronics.cc,v $
+ * Revision 1.4  2000/02/10 01:21:49  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.3  2000/01/10 23:14:29  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -25,7 +30,6 @@
  * files in repository.
  *
  ******************************************************************/
-#ifdef __ROOT__
 #include "SystemOfUnits.h"
 #include "StTpcDbElectronics.hh"
 //#include "StUtilities/StMessMgr.h"
@@ -164,4 +168,3 @@ void StTpcDbElectronics::print(ostream& os) const
 //     }
 //     os << endl;
 }
-#endif

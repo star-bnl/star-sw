@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.12 1999/10/04 18:06:02 long Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.13 2000/02/10 01:21:50 calderon Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,13 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.13  2000/02/10 01:21:50  calderon
+ * Switch to use StTpcDb.
+ * Coordinates checked for consistency.
+ * Fixed problems with StTrsIstream & StTrsOstream.
+ *
  * Revision 1.12  1999/10/04 18:06:02  long
- * output of z is not drift length any more due to the new definition of the coordinate system
+ *  output of z is not drift length any more due to the new definition of the coordinate system
  *
  * Revision 1.11  1999/07/13 17:46:44  lasiuk
  * diffusion
@@ -85,14 +90,19 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 {
     // Projection onto pad plane
     //PR(mGeomDb->frischGrid());
-    double frischGrid = (seg.position().z() > 0) ?
-	mGeomDb->frischGrid() : -mGeomDb->frischGrid();
+    //double frischGrid = (seg.position().z() > 0) ?
+    //mGeomDb->frischGrid() : -mGeomDb->frischGrid();
 //     PR(frischGrid);
     // must keep time/z position of cluster! -->
     // replace z component with transit (drift) distance!
-    double driftLength = (frischGrid>0) ?
-	frischGrid - seg.position().z() :
-	seg.position().z() - frischGrid ;
+//     double driftLength = (frischGrid>0) ?
+// 	frischGrid - seg.position().z() :
+// 	seg.position().z() - frischGrid ;
+    // With the present coordinate system, local z is now drift length.
+    // MCBS Feb 2000
+    double driftLength = seg.position().z(); 
+    
+     
 
     if (seg.position().y() > mGeomDb->firstOuterSectorAnodeWire())
 	driftLength += mGeomDb->outerSectorzOffSet();
@@ -119,8 +129,9 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     } // else do not alter the position!
    
     if (mLongitudinalDiffusion) {
-        double oldZ=seg.position().z();
-	seg.position().setZ(oldZ+driftLength-mGaussDistribution.shoot(driftLength,
+//      double oldZ=seg.position().z();
+// 	seg.position().setZ(oldZ+driftLength-mGaussDistribution.shoot(driftLength,
+ 	seg.position().setZ(mGaussDistribution.shoot(driftLength,
 						     (mSigmaLongitudinal*sqrt(driftLength)/ne)));
        
     }
