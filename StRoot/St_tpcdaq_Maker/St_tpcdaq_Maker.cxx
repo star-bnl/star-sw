@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.21  1999/04/08 17:21:46  ward
+// Re-init nPixelPreviousPadRow at row 13, again.
+//
 // Revision 1.20  1999/04/08 16:40:51  ward
 // Reduced table memory, will reduce more later.
 //
@@ -286,7 +289,7 @@ int St_tpcdaq_Maker::Output() {
       if(ipadrow==12) { // switch to the inner part of this sector
         raw_row_gen=raw_row_in; raw_pad_gen=raw_pad_in; rowR=0; padR=0;
         raw_seq_gen=raw_seq_in; pixel_data_gen=pixel_data_in; seqR=0; 
-        pixR=0; pixTblOff=0;
+        pixR=0; pixTblOff=0; nPixelPreviousPadRow=0;
       }
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
@@ -388,7 +391,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.20 1999/04/08 16:40:51 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.21 1999/04/08 17:21:46 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
