@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.32 2000/02/08 21:14:18 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.33 2000/02/16 15:21:11 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.33  2000/02/16 15:21:11  genevb
+// Cannot call evr with <1 tracks
+//
 // Revision 1.32  2000/02/08 21:14:18  genevb
 // Handle cases with no tracks.
 //
@@ -346,8 +349,13 @@ Int_t StPrimaryMaker::Make(){
     }
     else{    
       // evr
-      if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
-      iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+      if (NGlbTrk < 1) {
+        gMessMgr->Warning() << "Cannot call evr with <1 tracks" << endm; 
+        iRes = kSTAFCV_ERR;
+      } else {
+        if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
+        iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+      }
       //	 ================================================
     }
   
