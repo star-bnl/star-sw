@@ -75,10 +75,12 @@ Bool_t StBemcData::make(StEmcCollection* emc, StEvent* event)
     mNCRATESOK[det-1]=0;
     if(detector)
     {
+      mIsCorrupted[det-1]=kFALSE;
       for(Int_t crate=1;crate<=MAXCRATES;crate++) 
       {
         mCrateStatus[det-1][crate-1] = (Int_t)detector->crateStatus(crate);
         if(mCrateStatus[det-1][crate-1]==crateOK) mNCRATESOK[det-1]++;
+        if(mCrateStatus[det-1][crate-1]==crateHeaderCorrupt) mIsCorrupted[det-1] = kTRUE;
       }
         
       StEmcGeom* geo = StEmcGeom::instance(det);
@@ -149,10 +151,12 @@ Bool_t StBemcData::make(StMuEmcCollection* muEmc, StEvent* event)
     mNCRATESOK[det-1]=0;
     StDetectorId did = static_cast<StDetectorId>(det+kBarrelEmcTowerId-1);
     StEmcDetector* detector=emc->detector(did);
+    mIsCorrupted[det-1]=kFALSE;
     for(Int_t crate = 1;crate<=MAXCRATES;crate++) 
     {
       mCrateStatus[det-1][crate-1] = (Int_t)muEmc->getCrateStatus(crate,det);
       if(mCrateStatus[det-1][crate-1]==crateOK) mNCRATESOK[det-1]++;
+      if(mCrateStatus[det-1][crate-1]==crateHeaderCorrupt) mIsCorrupted[det-1] = kTRUE;
       if(detector) detector->setCrateStatus(crate,(StEmcCrateStatus)mCrateStatus[det-1][crate-1]);
     }
     StEmcGeom* geo = StEmcGeom::instance(det);
