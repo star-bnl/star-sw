@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.24 2004/01/23 00:54:44 akio Exp $
+// $Id: StppEvent.cxx,v 1.25 2004/01/23 01:30:18 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.25  2004/01/23 01:30:18  akio
+// Adding 2004 ntuples
+//
 // Revision 1.24  2004/01/23 00:54:44  akio
 // update for ntp2003
 //
@@ -116,6 +119,9 @@
 //trigger data2003
 #include "StTriggerData2003.h"
 #include "StDaqLib/TRG/trgStructures2003.h"
+//trigger data2004
+#include "StTriggerData2004.h"
+#include "StDaqLib/TRG/trgStructures2004.h"
 
 //StJetFinder
 #include "StJetFinder/StProtoJet.h"
@@ -133,10 +139,12 @@ ClassImp(StppEvent)
 StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 extern "C" void fpdpi0mass_(int*,int*,float*,float*, int*, int*);
 extern "C" void fillntp2003_(int*, float*, int*, float*);
+extern "C" void fillntp2004_(int*, float*, int*, float*);
 extern "C" void fillh1d_(int*, float*, float*);
 extern "C" void fillh2d_(int*, float*, float*, float*);
 
 #include "ntp2003.h"
+#include "ntp2004.h"
 
 StppEvent::StppEvent(){
     mudst=0;
@@ -162,7 +170,7 @@ StppEvent::StppEvent(){
 }
 
 StppEvent::~StppEvent() {
-    TrgDataType2003* trgd=0; FPDL012(trgd,2,0);
+    TrgDataType2003* trgd=0; FPDL012(trgd,2,0);    
     clear() ;
     tracks->Delete();
     delete tracks ;
@@ -695,7 +703,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
       if(fpdPi0Mass>0.0){
 	for(int i=0; i<5; i++){cout << result[i] << " ";}; cout<< endl;
       }
-    }else if(runN<5000000){
+    }else if(runN<4300000){
       if(trgdata){
 	int year = trgdata->year();
 	if(year==2003){
@@ -776,8 +784,91 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
       }else{
 	printf("StppEvent: No StTriggerData found\n");
       }
+    }else if(runN<5200000){
+      if(trgdata){
+	int year = trgdata->year();
+	if(year==2004){
+	  StTriggerData2004* t2004=(StTriggerData2004*)trgdata;
+	  TrgDataType2004* trgd=t2004->getTriggerStructure2004();
+	  int iin[100], iout[100];
+	  float rin[100], rout[100];
+	  iin[0]=runN;
+	  
+	  int nbuf=1;
+	  int npre=t2004->numberOfPreXing();
+	  int npost=t2004->numberOfPostXing();
+	  if (npre < npost) {
+	    nbuf = (2*npost) + 1;
+	  } else {
+	    nbuf = (2*npre) + 1;
+	  }
+	  int GB=0;
+	  //int GB = FPDL012(trgd,1,nbuf);
+	  //if(GB!=0) {printf("Taking %d bunch for layer0 FPD East DSM\n",GB);}
+	    
+	  ntp2004_.event       = eventN;
+	  ntp2004_.BChi        = trgdata->bunchCounterHigh();
+	  ntp2004_.BClo        = trgdata->bunchCounterLow();
+	  ntp2004_.Token       = trgdata->token();
+	  ntp2004_.TrgWd       = trgdata->triggerWord();
+	  ntp2004_.TrgId       = event->triggerIdCollection()->nominal()->mask();
+	  printf("Trigger wd = %d  id=%d\n",ntp2004_.TrgWd,ntp2004_.TrgId);
+	  ntp2004_.prepost     = 0;
+	  ntp2004_.bunchId     = trgdata->bunchId48Bit();
+	  ntp2004_.bunchid7bit = trgdata->bunchId7Bit();
+	  ntp2004_.spinBit     = trgdata->spinBit();
+	  ntp2004_.NPrimTrk    = nPrimTrack;
+	  ntp2004_.NTPCTrk     = nGoodTrack;
+	  ntp2004_.NEastFTPCTrk= uncorrectedNumberOfFtpcEastPrimaries(*event);
+	  ntp2004_.xVertex     = xVertex;
+	  ntp2004_.yVertex     = yVertex;
+	  ntp2004_.zVertex     = zVertex;	  
+	  ntp2004_.ntrk        = 0;
+	  int n=0;
+	  if(nPrimTrack>0) {
+	    for(int i=0; i<=tracks->GetLast(); i++) {
+	      StMuTrack *t = (StMuTrack *)(* tracks)[i];
+	      if(t->id() > 0){
+		ntp2004_.trknhit[n]=t->nHits();
+		ntp2004_.trkpt[n]  =t->pt() * t->charge();
+		ntp2004_.trketa[n] =t->eta();
+		ntp2004_.trkphi[n] =t->phi();
+		ntp2004_.trkdcax[n] =t->dcaGlobal().x();
+		ntp2004_.trkdcay[n] =t->dcaGlobal().y();
+		ntp2004_.trkdcaz[n] =t->dcaGlobal().z();
+		n++;
+		//		printf("DCA n,dcax/y/z,eta = %d %f %f %f %f\n",n,t->dcaGlobal().x(),t->dcaGlobal().y(),t->dcaGlobal().z(),t->eta());
+		ntp2004_.ntrk=n;
+	      }	    
+	    }
+	  }
+	  for(int i=0; i<8;   i++) {ntp2004_.VTXDSM[i]=trgd->TrgSum.DSMdata.VTX[i];
+	                            ntp2004_.FPDDSM[i]=trgd->TrgSum.DSMdata.FPD[i];
+				    ntp2004_.FPDENSL1[i]=trgd->rawTriggerDet[0].FPDEastNSLayer1[i];
+				    ntp2004_.FPDETBL1[i]=trgd->rawTriggerDet[0].FPDEastTBLayer1[i];
+				    ntp2004_.FPDWNSL1[i]=trgd->rawTriggerDet[0].FPDWestNSLayer1[i];
+				    ntp2004_.FPDWTBL1[i]=trgd->rawTriggerDet[0].FPDWestTBLayer1[i];
+	                            ntp2004_.FPDTDC[i]=(fpd->tdc())[i];}
+	  for(int i=0; i<16;  i++) {ntp2004_.ZDC[i]=trgd->rawTriggerDet[0].ZDC[i];}
+	  for(int i=0; i<32;  i++) {ntp2004_.ZDCSMD[i]=trgd->rawTriggerDet[0].ZDCSMD[i];}
+	  for(int i=0; i<256; i++) {ntp2004_.CTB[i]=trgd->rawTriggerDet[0].CTB[i];
+	                            ntp2004_.FPDADC[i]=(fpd->adc())[i];}
+	  for(int i=0; i<80;  i++) {ntp2004_.BBC[i]=trgd->rawTriggerDet[0].BBC[i];}
+	  for(int i=0; i<112; i++) {ntp2004_.FPDENS[i]=trgd->rawTriggerDet[GB].FPDEastNSLayer0[i];
+	                            ntp2004_.FPDWNS[i]=trgd->rawTriggerDet[0].FPDWestNSLayer0[i];}
+	  for(int i=0; i<64; i++)  {ntp2004_.FPDETB[i]=trgd->rawTriggerDet[GB].FPDEastTBLayer0[i];
+	                            ntp2004_.FPDWTB[i]=trgd->rawTriggerDet[0].FPDWestTBLayer0[i];}
+	  for(int i=0; i<32;  i++) {ntp2004_.FPDWEST[i]   =bbc->adc(i); 
+	                            ntp2004_.FPDWEST[i+32]=bbc->tdc(i);}
+	  fillntp2004_(iin,rin,iout,rout);
+	}else{
+	  printf("StppEvent: StTriggerData have wrong year %d\n",year);
+	}
+      }else{
+	printf("StppEvent: No StTriggerData found\n");
+      }
     }      
-      return 0;
+    return 0;
 }
 #endif /*__CINT__*/
 
