@@ -4,7 +4,10 @@
 #include "TRegexp.h"
 #include "TDirIter.h"
 #include "TKey.h"
+
+#ifdef __RFIO__
 #include "TRFIOFile.h"
+#endif
 
 const char* TFOPT[9] = {"0","READ","RECREATE","UPDATE",
                         "0","READ","RECREATE","UPDATE",0};
@@ -19,6 +22,7 @@ char *c=(char *)strchr(RWU,tolower(ciomode));
 return (c) ? (c-RWU)&3 : 0;
 }
 
+#ifdef __RFIO__
 extern "C" {
    int rfio_open(const char *filepath, int flags, int mode);
    int rfio_close(int s);
@@ -29,6 +33,8 @@ extern "C" {
    int rfio_unlink(const char *filepath);
    int rfio_parse(const char *name, char **host, char **path);
 };
+#endif
+
 class Cat : public TNamed {
 public:
   Cat(){fNGeant=0;fNKeys=0;fNRecs=0;fSize=0;fNFiles=0;};
@@ -207,10 +213,14 @@ Int_t StIO::IfExi(const char *name)
 {
   TString file = RFIOName(name);
 
+#ifdef __RFIO__
   if (strncmp(file,"rfio:",5))
      return !gSystem->AccessPathName(file);
   else
      return !::rfio_access((const char*)file, kFileExists);
+#else
+  return !gSystem->AccessPathName(file);
+#endif
 
 }
 //===============================================================================
