@@ -18,6 +18,8 @@ class StMuDstMaker;
 class StEmcADCtoEMaker;
 class StEmcRawHit;
 class StMuEmcPosition;
+class EEmcGeomSimple;
+class StEEmcDbMaker;
 
 #include "StJetMaker/StFourPMakers/StFourPMaker.h"
 
@@ -36,6 +38,11 @@ public:
     
     ///Clear the lists
     virtual void Clear(Option_t* opt);
+
+    ///Initialize
+    virtual Int_t Init();
+
+    void setUseEndcap(bool v) {mUseEndcap=v;}
     
 protected:
     void fillBarrelHits();
@@ -43,6 +50,7 @@ protected:
     typedef vector<StMuTrackFourVec*> BET4Vec;
     BET4Vec mVec;
     bool mCorrupt;
+    bool mUseEndcap;
     double mField;
 
     //these arrays are used to correlate tracks w/ towers
@@ -54,6 +62,11 @@ protected:
 
     StMuDstMaker* mMuDstMaker; //!
     StEmcADCtoEMaker* mAdc2E; //!
+
+        
+    EEmcGeomSimple* mEeGeom;
+    StEEmcDbMaker* mEeDb;
+
 
     
     ClassDef(StBET4pMaker,1)

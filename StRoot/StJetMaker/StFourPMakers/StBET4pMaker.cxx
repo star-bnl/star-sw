@@ -35,6 +35,13 @@ using namespace std;
 #include "StEmcRawMaker/StEmcRawMaker.h"
 #include "StEmcRawMaker/defines.h"
 
+//Endcap
+#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
+#include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
+#include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
 //StJetMaker
 #include "StJetMaker/StMuTrackFourVec.h"
 
@@ -48,10 +55,24 @@ ClassImp(StBET4pMaker)
 {
     cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
     mCorrupt = false;
+    mUseEndcap = false;
     mField = 0.;
     mMuPosition = new StMuEmcPosition();
 
 }
+
+Int_t StBET4pMaker::Init()
+{
+    cout <<"StBET4pMaker::Init()"<<endl;
+    
+    mEeGeom = new EEmcGeomSimple();
+    mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
+    assert(mEeDb); // eemcDB must be in the chain, fix it
+    mEeDb->setThreshold(3);
+    
+    return StMaker::Init();
+}
+
 
 void StBET4pMaker::Clear(Option_t* opt)
 {
@@ -111,7 +132,7 @@ Int_t StBET4pMaker::Make()
     long nTracks = uDst->numberOfPrimaryTracks();
 
     int ntkept, badflag, ftpc, loweta, higheta, badr, badhits;
-    badflag = ftpc = loweta = higheta = badr = badhits = 0;
+    ntkept = badflag = ftpc = loweta = higheta = badr = badhits = 0;
     
     for(int i = 0; i < nTracks; i++)	{
 	StMuTrack* track = uDst->primaryTracks(i);
@@ -155,10 +176,6 @@ Int_t StBET4pMaker::Make()
 	    }
 	}
 
-	
-	
-	// ------------------ Creating a new StMuTrackFourVec from here --------------------------------
-
 	//construct four momentum
 	StThreeVectorF momentum = track->momentum();
 	double mass = 0.1395700; //assume pion+ mass for now
@@ -170,10 +187,8 @@ Int_t StBET4pMaker::Make()
 	pmu->Init(track, p4, i, kTpcId );
 	mVec.push_back(pmu); //this is for memory ownership.  StBET4pMaker has to delete these in Clear()
 	tracks.push_back(pmu); //this is for expected interface to StJetMaker --> StppJetAnalyzer
-	
-	// ----------------- finished creating a new StMuTrackFourVec ----------------------------------
-	
     }
+    
     cout <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "
 	 <<badr<<" for badr, "<<badhits<<" for hits"<<endl;
     cout <<"Added:\t"<<ntkept<<"\ttracks to the container"<<endl;
@@ -193,7 +208,8 @@ Int_t StBET4pMaker::Make()
 
 	    
 	    //construct four momentum
-	    double mass = 0.1349764; //assume pi-zero mass for now
+	    //double mass = 0.1349764; //assume pi-zero mass for now
+	    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
 	    
 	    double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
 	    float theta=2.*atan(exp(-eta));
@@ -207,19 +223,19 @@ Int_t StBET4pMaker::Make()
 
 	    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
 	    double RSMD = 2.2625*100.; //radius of SMD in cm
-	    double zVertex = uDst->event()->primaryVertexPosition().z();
-	    double correctedTheta = atan( (RSMD*tan(theta)-zVertex)/RSMD);
-
-	    // ------------------ Creating a new StMuTrackFourVec from here --------------------------------
+	    StThreeVectorD towerLocation(1., 1., 1.);
+	    towerLocation.setPhi(phi);
+	    towerLocation.setTheta(theta);
+	    towerLocation.setMagnitude(RSMD/cos(theta));
+	    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+	    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
 
 	    StThreeVectorF momentum(1., 1., 1.);
 	    momentum.setPhi(phi);
-	    momentum.setTheta(correctedTheta);
+	    momentum.setTheta( towerLocation.theta() ); //use corrected theta
 	    momentum.setMag(pMag);
 	    StLorentzVectorF p4(corrected_energy, momentum);
 	    //cout <<zVertex<<"\t"<<phi<<"\t"<<theta<<"\t"<<p4.phi()<<"\t"<<p4.theta()<<"\t"<<energy<<"\t"<<corrected_energy<<endl;
-
-	    
 	    
 	    //now construct StMuTrackFourVec object for jetfinding
 	    StMuTrackFourVec* pmu = new StMuTrackFourVec();
@@ -227,14 +243,61 @@ Int_t StBET4pMaker::Make()
 	    mVec.push_back(pmu);  //for memory ownership
 	    tracks.push_back(pmu); //for jet finding interface
 	    
-	    // ----------------- finished creating a new StMuTrackFourVec ----------------------------------
-
-	
     }
-    
 
 
+    if (mUseEndcap) {
+	
+	// Now add endcap points --------------------------
+	StMuEmcCollection* muEmc = uDst->muEmcCollection();
+	assert(muEmc);
 
+	for (int id=0; id<muEmc->getNEndcapTowerADC(); ++id) {
+
+	    int rawadc, sec, sub, etabin;
+	    double adc, energy;
+
+	    muEmc->getEndcapTowerADC(id, rawadc, sec, sub, etabin);
+	    assert(sec>0 && sec<=MaxSectors);
+	
+	    //find eta and phi values from sector, subsector and etabin assuming z=0,0,0
+	    TVector3 towerCenter = mEeGeom->getTowerCenter(sec-1,sub-1,etabin-1); //careful, this is indexed from 0
+	
+	    const EEmcDbItem *dbItem = mEeDb->getT(sec,sub-1+'A',etabin);
+	    assert(dbItem); 
+	
+	    if(dbItem->fail) continue; //drop broken channels
+	    if(dbItem->stat) continue; // drop not working channels and jumpy pedestal channels
+	    if(dbItem->gain<=0.) continue; // drop it, unless you work with ADC spectra
+	    if(rawadc<dbItem->thr) continue; // drop raw ADC < ped+N*sigPed, N==3 in init
+	    
+	    adc = rawadc - (dbItem->ped);
+	    energy=adc/(dbItem->gain);
+	    if(energy < 0.01) continue; // drop if less than 10MeV for now
+	    
+	    //construct four momentum
+	    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
+	    double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
+
+	    //correct for eta shift
+	    StThreeVectorD towerLocation(towerCenter.X(), towerCenter.Y(), towerCenter.Z());
+	    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
+	    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
+
+	    //construct momentum 3-vector
+	    StThreeVectorF momentum(1., 1., 1.);
+	    momentum.setPhi( towerCenter.Phi() );
+	    momentum.setTheta( towerLocation.theta() ); //use theta from vertex subtracted point.
+	    momentum.setMag(pMag);
+	    StLorentzVectorF p4(energy, momentum);
+	    
+	    //now construct StMuTrackFourVec object for jetfinding
+	    StMuTrackFourVec* pmu = new StMuTrackFourVec();
+	    pmu->Init(0, p4, id, kEndcapEmcTowerId );
+	    mVec.push_back(pmu);  //for memory ownership
+	    tracks.push_back(pmu); //for jet finding interface
+	}
+    }
     
     cout <<StMaker::GetName()<<"::Make()\tAdded:\t"<<tracks.size()<<"\tparticles to track container"<<endl;
 
