@@ -1,10 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.23 2000/11/30 23:29:28 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.24 2000/12/08 04:54:56 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.24  2000/12/08 04:54:56  lasiuk
+ * hit filter changed for refit
+ * fillCorrectedNTuple
+ * energy loss
+ * modify distup for PID
+ *
  * Revision 2.23  2000/11/30 23:29:28  lasiuk
  * rectify constant area (pion flags)
  *
@@ -203,7 +209,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.23 2000/11/30 23:29:28 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.24 2000/12/08 04:54:56 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -327,6 +333,7 @@ Int_t StRichPIDMaker::Init() {
   }
   
   mPadPlaneDimension = mGeometryDb->padPlaneDimension();
+  mRadiatorDimension = mGeometryDb->radiatorDimension();
   
   //
   // print cut parameters upon initialization
@@ -559,16 +566,26 @@ Int_t StRichPIDMaker::Make() {
 	    
 		ringCalc = new StRichRingCalculator(richTrack,mListOfParticles[iParticle]);
 		
-		this->hitFilter(pRichHits,ringCalc);
-
 		//
 		// calculate all areas, angles using default input parameters
 		// gap correction on, no angle cut (but the constant area is still ok) and 
 		// number of points used in calculation == 3600
 		//
 		ringCalc->calculateArea();
-		this->fillPIDTraits(ringCalc);
-	    
+
+		//
+		// assign the points to the pi/K/p rings
+		//
+		this->hitFilter(pRichHits,ringCalc,0);
+
+		this->examineTemporaryHits(ringCalc,0);
+
+		//
+		// fill PID traits...can't do it here if we want
+		// to refit the tracks
+		//
+		//this->fillPIDTraits(ringCalc);
+
 		delete ringCalc;  
 	    
 		ringCalc = 0;
@@ -583,52 +600,115 @@ Int_t StRichPIDMaker::Make() {
     // tracks we can set the bit flags properly
     //
 
-    for (ii=0; ii<mListOfStRichTracks.size(); ii++) {     
-	StRichTrack* richTrack = mListOfStRichTracks[ii];
 
-	StRichPidTraits* theTraits = richTrack->getPidTrait();
-
-	if(!theTraits) {
-	    cout << "StRichPIDMaker::Make()\n";
-	    cout << "\tERROR Processing the PIDTraits\n";
-	    cout << "\tContinuing..." << endl;
-	    continue;
-	}
-
-    	if(!this->reprocessTheTraits(theTraits)) {
-	    //
-	    // if necessary I can take action here
-	    //
-	}
-
-	//
-	// fill the StTrack's StRichPidTrait with RICH PID info
-	//
-	StTrack* track = richTrack->getStTrack();
-	if (track && richTrack->getPidTrait()) {
-	    track->addPidTraits(richTrack->getPidTrait());
-	}
-	else {
-	    cout << "StRichPIDMaker::Make()\n";
-	    cout << "\tCannot fill the PidTrait to the StTrack" << endl;
-	    cout << "\tContinuing..." << endl;
-	}
-	richTrack = 0;
-    }
-
-    // 
-    // end of PID loop
+    //
+    // REFITTING
     //
     
-    //
-    // draw rings on padplane, fill software monitor 
-    //
-    this->drawPadPlane(rEvent,mPrintThisEvent);
-    this->fillRichSoftwareMonitor(rEvent);
+     for (ii=0; ii<mListOfStRichTracks.size(); ii++) {
+	 ringCalc = 0;
+
+#ifdef myRICH_WITH_MC 
+	 StRichMCTrack* richTrack = dynamic_cast<StRichMCTrack*>(mListOfStRichTracks[ii]);
+#else
+	 StRichTrack* richTrack = mListOfStRichTracks[ii]; 
+#endif
+      
+	 if (!richTrack) {
+	     cout << "StRichPIDMaker::Make()\n";
+	     cout << "\tWARNING\n";
+	     cout << "\trichTrack is bad (refit) " << endl;
+	     continue;
+	 }
+
+	 richTrack->clearHits();
+	 richTrack->correctTrajectory();
+	
+	 //
+	 // Loop over the particle hypothesis
+	 //
+	 for (size_t iParticle=0; iParticle<mListOfParticles.size(); iParticle++) {
+	  
+	     if ( richTrack->fastEnough(mListOfParticles[iParticle]) &&
+		  richTrack->isGood(mListOfParticles[iParticle]) ) {
+	    
+		 ringCalc = new StRichRingCalculator(richTrack,mListOfParticles[iParticle]);
+		 ringCalc->calculateArea();
+
+		 this->hitFilter(pRichHits,ringCalc,1);  
+
+		 this->examineTemporaryHits(ringCalc,1);
+
+		 this->fillPIDTraits(ringCalc);
+
+		 delete ringCalc; 
+		 ringCalc = 0;
+	     }
+	     
+	 } // loop over particles
+
+     } // loop over all tracks
     
-    //
-    // fill ntuples
-    //
+     this->fillCorrectedNtuple();
+
+
+//     //
+//     // Original reprocssing of the hit flags to
+//     // make sure the multiply used bit is set properly
+//     // and uniformly
+//     // For the refit it is not needed (or desired)
+//     //
+    
+//      for (ii=0; ii<mListOfStRichTracks.size(); ii++) {     
+//  	StRichTrack* richTrack = mListOfStRichTracks[ii];
+
+//  	StRichPidTraits* theTraits = richTrack->getPidTrait();
+
+//  	if(!theTraits) {
+//  	    cout << "StRichPIDMaker::Make()\n";
+//  	    cout << "\tERROR Processing the PIDTraits\n";
+//  	    cout << "\tContinuing..." << endl;
+//  	    continue;
+//  	}
+
+//      	if(!this->reprocessTheTraits(theTraits)) {
+//  	    //
+//  	    // if necessary I can take action here
+//  	    //
+//  	}
+
+//  	//
+//  	// fill the StTrack's StRichPidTrait with RICH PID info
+//  	//
+//  	StTrack* track = richTrack->getStTrack();
+//  	if (track && richTrack->getPidTrait()) {
+//  	    track->addPidTraits(richTrack->getPidTrait());
+//  	}
+//  	else {
+//  	    cout << "StRichPIDMaker::Make()\n";
+//  	    cout << "\tCannot fill the PidTrait to the StTrack" << endl;
+//  	    cout << "\tContinuing..." << endl;
+//  	}
+//  	richTrack = 0;
+//      }
+
+
+     // 
+     // end of PID loop
+     //
+
+
+
+     
+     //
+     // draw rings on padplane, fill software monitor 
+     //
+     this->drawPadPlane(rEvent,mPrintThisEvent);
+     this->fillRichSoftwareMonitor(rEvent);
+    
+     //
+     // fill ntuples
+     //
 #ifdef  myRICH_WITH_NTUPLE 
     if (kWriteNtuple) this->fillEvtNtuple(rEvent, mNumberOfPrimaries, mNegativePrimaries, pRichHits,pRichPixels);
     if (kWriteNtuple) this->fillPIDNtuple();
@@ -713,6 +793,11 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 		//
 		tempTrack->addPidTrait(new StRichPidTraits());
 
+		//
+		// energy loss for CTB
+		//
+		tempTrack->setEnergyLoss();
+
 		mListOfStRichTracks.push_back(tempTrack);
 	    }
 	    else {
@@ -741,12 +826,16 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 
 
 void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
-			       StRichRingCalculator* ringCalculator) {
+			       StRichRingCalculator* ringCalculator,int refit) {
 
 //      ofstream os("data.txt",ios::app);
 //      os << "**PDG " <<  ringCalculator->
 //  	getRing(eInnerRing)->getParticleType()->pdgEncoding() << endl;
 
+    cout << "inner index = "
+	 <<  mMaterialDb->indexOfRefractionOfC6F14At(mMaterialDb->innerWavelength()) << endl;
+    cout << "outer index = "
+	 <<  mMaterialDb->indexOfRefractionOfC6F14At(mMaterialDb->outerWavelength()) << endl;
     //
     // make sure the hits exist
     //
@@ -799,7 +888,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
     // is taken at the Anode wire plane
     //
     StThreeVectorF mipResidual =
-	( central - currentTrack->getProjectedMIP() ).perp(); 
+	( central - currentTrack->getProjectedMIP() ); 
 
     StParticleDefinition* particle =
 	ringCalculator->getRing(eInnerRing)->getParticleType();
@@ -815,7 +904,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 //      os << "LOOP OVER HITS start" << endl;
 
 #ifdef myRICH_WITH_NTUPLE
-    float distHits[29];
+    float distHits[32];
 #endif
 
     //
@@ -1255,7 +1344,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 //  	os << "normalizedD " <<  normalizedD << endl;
 
 #ifdef RICH_WITH_PAD_MONITOR
-	if(normalizedD>0 && normalizedD<1)
+	if(normalizedD>0 && normalizedD<1 && refit==1)
 	    mPadMonitor->drawMarker(hit,29,1.2,3);
 #endif
 
@@ -1265,17 +1354,17 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[1] = innerRingPoint.y();
 	distHits[2] = outerRingPoint.x();
 	distHits[3] = outerRingPoint.y();
-	distHits[4] = psi;
+	distHits[4] = psi/degree;
 	distHits[5] = abs(lengthOfD);
 	distHits[6] = normalizedD;
 
 	// OLD labels
 	distHits[7] = olddist;
 	distHits[8] = oldsigma;
-	distHits[9] = meanAngle; // the old psi
+	distHits[9] = meanAngle/degree; // the old psi
 	//
 	// the photon
-	distHits[10]  = hit.x();
+	distHits[10] = hit.x();
 	distHits[11] = hit.y();
 	//
 	// the MIP
@@ -1295,7 +1384,7 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	
 	distHits[20] = mipResidual.x();
 	distHits[21] = mipResidual.y();
-	distHits[22] = abs(mipResidual);
+	distHits[22] = mipResidual.perp();
 	
 	distHits[23] = particleType;
 	distHits[24] = cosineOfD;
@@ -1306,7 +1395,13 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[27] = currentTrack->getStTrack()->geometry()->charge();
 	distHits[28] = mVertexPos.z();
 
-	distup->Fill(distHits);
+	distHits[29] = refit;
+	distHits[30] = ringCalculator->getConstantAreaAngle()/degree;
+	distHits[31] = currentTrack->getEnergyLoss();
+
+	if ( (normalizedD>-4 && normalizedD<6) || photonNumber==1) {
+	    distup->Fill(distHits);
+	}
 #endif
 
 	//
@@ -1411,6 +1506,74 @@ void StRichPIDMaker::hitFilter(StRichRingCalculator* ringCalculator,
   return;
 }
 
+void StRichPIDMaker::examineTemporaryHits(StRichRingCalculator* ringCalc, int refit) {
+  
+    if (!ringCalc) {
+	cout << "StRichPIDMaker::examineTemporaryHits()\n";
+	cout << "\tRingCalculator Pointer is lost\n";
+	cout << "\tReturning" << endl;
+	return;
+    }
+
+
+    if (!ringCalc->getRing(eInnerRing)) {
+	cout << "StRichPIDMaker::examineTemporaryHits()\n";
+	cout << "\teInnerRing in RingCalculatoris lost\n";
+	cout << "\tReturning" << endl;
+	return;
+    }
+
+    //
+    // grab track, particle type from Ring Calculator
+    //
+    StRichTrack* richTrack = ringCalc->getRing(eInnerRing)->getTrack();
+    if(!richTrack) {
+      cout << "StRichPIDMaker::examineTemporaryHits()\n";
+      cout << "\tWARNING Cannot get StRichTrack:\n";
+      cout << "\tReturning..." << endl;
+      return;
+    }
+
+    if(!richTrack->getStTrack()) {
+      cout << "StRichPIDMaker::examineTemporaryHits()\n";
+      cout << "\tWARNING Cannot get StTrack from StRichTrack\n";
+      cout << "\tReturning..." << endl;
+      return;
+    }
+
+    if(!richTrack->getStTrack()->detectorInfo()) {
+      cout << "StRichPIDMaker::examineTemporaryHits()\n";
+      cout << "\tWARNING Cannot get DetectorInfo from StTrack\n";
+      cout << "\tReturning..." << endl;
+      return;
+    }
+    
+    StParticleDefinition* part = ringCalc->getRing(eInnerRing)->getParticleType();  
+    vector<StRichRingHit*> hits = richTrack->getRingHits(part);
+    
+    cout << "StRichPIDMaker:examineTemporaryHits()\n";
+    cout << "\tpart="<< part->name() << "     refit = " << refit << endl;
+    
+    int consthits=0;
+    int tothits=0;
+    for (size_t i=0; i<hits.size(); i++) {
+      float normalizedD = hits[i]->getDist();
+      float sigma       = hits[i]->getNSigma();
+      float psi         = hits[i]->getAngle();
+
+      //if (sigma<2) {
+      if (normalizedD<1 && normalizedD>0) {
+	tothits++;
+	if (fabs(psi)>ringCalc->getConstantAreaAngle()) consthits++;
+      }
+    }
+    
+    cout << "\ttot const hits = " << tothits << '\t' << consthits << endl; 
+    richTrack->assignHits(consthits,tothits,refit,part->pdgEncoding());
+    
+}
+
+
 void StRichPIDMaker::tagMips(StEvent* tempEvent, StSPtrVecRichHit* hits) {
   
     cout << "StRichPIDMaker::tagMips()  ---> Tagging Mips using global tracks ..." << endl;
@@ -1500,45 +1663,249 @@ bool StRichPIDMaker::checkEvent(StEvent* event) {
     return true;
 }
 
+// bool StRichPIDMaker::checkTrack(StTrack* track) {
+
+//     if (track &&
+// 	track->flag()>=0 &&
+// 	track->geometry() && 
+// 	(track->geometry()->helix().distance(mVertexPos)<mDcaCut) &&
+// 	(track->fitTraits().numberOfFitPoints(kTpcId) >= mFitPointsCut) &&
+// 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
+// 	(track->geometry()->momentum().perp() > mPtCut)) {
+  
+// 	return true;
+//     }
+  
+//     return false;
+// }
+
 bool StRichPIDMaker::checkTrack(StTrack* track) {
 
-    if (track &&
-	track->flag()>=0 &&
-	track->geometry() && 
-	(track->geometry()->helix().distance(mVertexPos)<mDcaCut) &&
-	(track->fitTraits().numberOfFitPoints(kTpcId) >= mFitPointsCut) &&
-	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
-	(track->geometry()->momentum().perp() > mPtCut)) {
-  
-	return true;
+    bool status = true;
+    float bitmask = 0;
+    if (track->flag()<0) {
+	status = false;
+	bitmask += pow(2.,0);
     }
+    
+    if (!track->geometry()) {
+	status = false;
+	bitmask += pow(2.,1);
+    }
+    
+    if (track->geometry()->helix().distance(mVertexPos) > mDcaCut) {
+	status = false;
+	bitmask += pow(2.,2);
+    }
+    
+    if (track->fitTraits().numberOfFitPoints(kTpcId) < mFitPointsCut) {
+	status = false;
+	bitmask += pow(2.,3);
+    }
+    
+    if (fabs(track->geometry()->momentum().pseudoRapidity()) > mEtaCut) {
+	status = false;
+	bitmask += pow(2.,4);
+    }
+    
+    if (track->geometry()->momentum().perp() < mPtCut) {
+	status = false;
+	bitmask += pow(2.,5);
+    }
+    cout << "StRichPIDMaker:checkTrack()\n";
+    cout << "\tbitmask = " << bitmask << endl;
+
+#ifdef myRICH_WITH_NTUPLE
+  float distHits[32];
+  distHits[0] = 0;
+  distHits[1] = 0;
+  distHits[2] = 0;
+  distHits[3] = 0;
+  distHits[4] = 0;
+  distHits[5] = 0;
+  distHits[6] = 0;
   
-    return false;
+  // OLD labels
+  distHits[7] = 0;
+  distHits[8] = 0;
+  distHits[9] = 0;
+  //
+  // the photon
+  distHits[10] = 0;
+  distHits[11] = 0;
+  //
+  // the MIP
+  distHits[12] = 0;
+  distHits[13] = 0;
+  
+  distHits[14] = 0;
+  distHits[15] = 0;
+  distHits[16] = 0;
+  
+  // Track incident angle
+  //theta = acos(-pz/sqrt(px**2+py**2+pz**2))
+  distHits[17] = 0;
+  distHits[18] = mEventN;
+  
+  distHits[19] = 0;
+  
+  distHits[20] = 0;
+  distHits[21] = 0;
+  distHits[22] = bitmask;
+  
+  distHits[23] = 0;
+  distHits[24] = 0;
+  distHits[25] = 0;
+  
+  distHits[26] = track->geometry()->momentum().mag();
+  distHits[27] = track->geometry()->charge();
+  distHits[28] = mVertexPos.z();
+  distHits[29] = 0;
+  distHits[30] = 0;
+  distHits[31] = 0;
+  
+  distup->Fill(distHits);
+#endif
+  
+  return status;
 }
 
 bool StRichPIDMaker::checkTrack(StRichTrack* track) {
 
+    bool status = true;
     StThreeVectorF extrapolatedPosition = track->getProjectedMIP();
     StThreeVectorF impactPoint          = track->getImpactPoint();
-
-    //
-    // values for the pad plane and radiator dimension should
-    // be kept as data members to avoid the dereferencing
-    //
-    if ( fabs(extrapolatedPosition.x()) < (mGeometryDb->padPlaneDimension().x() - mPadPlaneCut) &&
-	 fabs(extrapolatedPosition.y()) < (mGeometryDb->padPlaneDimension().y() - mPadPlaneCut) &&
-	 fabs(extrapolatedPosition.x()) > (mPadPlaneCut) &&
-	 fabs(extrapolatedPosition.y()) > (mPadPlaneCut) &&
-	 fabs(impactPoint.x()) < (mGeometryDb->radiatorDimension().x() - mRadiatorCut) &&
-	 fabs(impactPoint.y()) < (mGeometryDb->radiatorDimension().y() - mRadiatorCut) &&
-	 fabs(impactPoint.x()) > (mRadiatorCut) &&
-	 fabs(impactPoint.y()) > (mRadiatorCut) &&
-	 (track->getPathLength()>0 && track->getPathLength()<mPathCut) &&
-	 track->getLastHit().perp()>mLastHitCut) {
-	return true;
-    }
     
-    return false;
+    float bitmask = 0;
+    if (fabs(extrapolatedPosition.x()) > (mPadPlaneDimension.x() - mPadPlaneCut)) {
+	status = false;
+	bitmask += pow(2.,6);
+    }
+
+    if ( fabs(extrapolatedPosition.y()) > (mPadPlaneDimension.y() - mPadPlaneCut) ) {
+	status = false;
+	bitmask += pow(2.,7);
+    }
+  
+    if (fabs(extrapolatedPosition.x()) < (mPadPlaneCut) ) {
+	status = false;
+	bitmask += pow(2.,8);
+    }
+
+    if (fabs(extrapolatedPosition.y()) < (mPadPlaneCut) ) {
+	status = false;
+	bitmask += pow(2.,9);
+    }
+  
+    if (fabs(impactPoint.x()) > (mRadiatorDimension.x() - mRadiatorCut) ) {
+	status = false;
+	bitmask += pow(2.,10);
+    }
+
+    if (fabs(impactPoint.y()) > (mRadiatorDimension.y() - mRadiatorCut) ) {
+	status = false;
+	bitmask += pow(2.,11);
+    }
+
+    if (fabs(impactPoint.x()) < (mRadiatorCut)) {
+	status = false;
+	bitmask += pow(2.,12);
+    }
+
+    if (fabs(impactPoint.y()) < (mRadiatorCut)) {
+	status = false;
+	bitmask += pow(2.,13);
+    }
+
+    if (track->getPathLength()<0 || track->getPathLength()>mPathCut/centimeter) {
+	status = false;
+	bitmask += pow(2.,14);
+    }
+	 
+    if (track->getLastHit().perp()<mLastHitCut) { 
+	status = false;
+	bitmask += pow(2.,15);
+    }
+
+    cout << "StRichPIDMaker::checkTrack(St)\n";
+    cout << "\tbitmask = " << bitmask << endl;
+
+#ifdef myRICH_WITH_NTUPLE
+  float distHits[32];
+  distHits[0] = 0;
+  distHits[1] = 0;
+  distHits[2] = 0;
+  distHits[3] = 0;
+  distHits[4] = 0;
+  distHits[5] = 0;
+  distHits[6] = 0;
+  
+  // OLD labels
+  distHits[7] = 0;
+  distHits[8] = 0;
+  distHits[9] = 0;
+  //
+  // the photon
+  distHits[10] = 0;
+  distHits[11] = 0;
+  //
+  // the MIP
+  distHits[12] = track->getProjectedMIP().x();
+  distHits[13] = track->getProjectedMIP().y();
+  
+  distHits[14] = 0;
+  distHits[15] = 0;
+  distHits[16] = 0;
+  
+  // Track incident angle
+  //theta = acos(-pz/sqrt(px**2+py**2+pz**2))
+  distHits[17] = 0;
+  distHits[18] = mEventN;
+  
+  distHits[19] = 0;
+  
+  distHits[20] = 0;
+  distHits[21] = 0;
+  distHits[22] = bitmask;
+  
+  distHits[23] = 0;
+  distHits[24] = 0;
+  distHits[25] = 0;
+  
+  distHits[26] = track->getMomentum().mag();
+  distHits[27] = track->getStTrack()->geometry()->charge();
+  distHits[28] = mVertexPos.z();
+  distHits[29] = 0;
+  distHits[30] = 0;
+  distHits[31] = 0;
+  
+  distup->Fill(distHits);
+#endif
+
+
+  return status;
+  //
+  // Old code to be reimplemented when
+  // the above histogram is removed
+  //
+//     //
+//     // values for the pad plane and radiator dimension should
+//     // be kept as data members to avoid the dereferencing
+//     //
+//     if ( fabs(extrapolatedPosition.x()) < (mGeometryDb->padPlaneDimension().x() - mPadPlaneCut) &&
+// 	 fabs(extrapolatedPosition.y()) < (mGeometryDb->padPlaneDimension().y() - mPadPlaneCut) &&
+// 	 fabs(extrapolatedPosition.x()) > (mPadPlaneCut) &&
+// 	 fabs(extrapolatedPosition.y()) > (mPadPlaneCut) &&
+// 	 fabs(impactPoint.x()) < (mGeometryDb->radiatorDimension().x() - mRadiatorCut) &&
+// 	 fabs(impactPoint.y()) < (mGeometryDb->radiatorDimension().y() - mRadiatorCut) &&
+// 	 fabs(impactPoint.x()) > (mRadiatorCut) &&
+// 	 fabs(impactPoint.y()) > (mRadiatorCut) &&
+// 	 (track->getPathLength()>0 && track->getPathLength()<mPathCut) &&
+// 	 track->getLastHit().perp()>mLastHitCut) {
+// 	return true;
+//     }
+    
+//     return false;
 }
 
 bool StRichPIDMaker::checkTrackMomentum(float mag) {
@@ -1567,9 +1934,17 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
     //
 
 
-    if (!ringCalc || !ringCalc->getRing(eInnerRing)) {
+    if (!ringCalc) {
 	cout << "StRichPIDMaker::fillPIDTraits()\n";
 	cout << "\tRingCalculator Pointer is lost\n";
+	cout << "\tReturning" << endl;
+	return;
+    }
+
+
+    if (!ringCalc->getRing(eInnerRing)) {
+	cout << "StRichPIDMaker::fillPIDTraits()\n";
+	cout << "\tRingCalculator lost inner ring\n";
 	cout << "\tReturning" << endl;
 	return;
     }
@@ -1733,7 +2108,7 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 		    }
 		}
 	    }
-	    
+
 	    if(part == kaon) {
 		if( theCurrentHit->isSet(eInMultipleCAreaK) ) continue;
 
@@ -1882,9 +2257,10 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	    cout << "\tp= " << richTrack->getStTrack()->geometry()->momentum().mag() << endl;
 	}
 	else {
-	    residual.setX(richTrack->getProjectedMIP().x()-richTrack->getAssociatedMIP()->local().x());
-	    residual.setY(richTrack->getProjectedMIP().y()-richTrack->getAssociatedMIP()->local().y());
-	    residual.setZ(richTrack->getProjectedMIP().z()-richTrack->getAssociatedMIP()->local().z());
+	    residual = richTrack->getProjectedMIP() - richTrack->getAssociatedMIP()->local();
+// 	    residual.setX(richTrack->getProjectedMIP().x()-richTrack->getAssociatedMIP()->local().x());
+// 	    residual.setY(richTrack->getProjectedMIP().y()-richTrack->getAssociatedMIP()->local().y());
+// 	    residual.setZ(richTrack->getProjectedMIP().z()-richTrack->getAssociatedMIP()->local().z());
 	}
 	
 	pid->setMipResidual(residual);
@@ -2031,13 +2407,17 @@ void StRichPIDMaker::drawPadPlane(StEvent* rEvent, bool kCreatePsFile) {
    }
    
    mPadMonitor->drawRings();
-   mPadMonitor->hiLiteHits(eInAreaPi);
+   //mPadMonitor->hiLiteHits(eInAreaPi,pion);
+   //mPadMonitor->hiLiteHits(eInAreaK,kaon);
+   mPadMonitor->hiLiteHits(eInAreap,proton);
    //mPadMonitor->hiLiteHits();
-   mPadMonitor->hiLiteHits(e2SigmaPi);
-   //   mPadMonitor->hiLiteHits(e2SigmaK);
-   //   mPadMonitor->hiLiteHits(e2Sigmap);
+   //mPadMonitor->hiLiteHits(e2SigmaPi,pion);
+   //   mPadMonitor->hiLiteHits(e2SigmaK,kaon);
+   mPadMonitor->hiLiteHits(e2Sigmap,proton);
+
    mPadMonitor->drawRingInfo();
    mPadMonitor->update();  
+
    if (kCreatePsFile) {
      cout << "print it...." << endl;
      mPadMonitor->printCanvas("~anyDirectory",fileName,rEvent->id());
@@ -3180,13 +3560,14 @@ void StRichPIDMaker::initNtuples() {
     file = new TFile("/star/rcf/scratch/lasiuk/exb/dtuplerev.root","RECREATE");
     file->SetFormat(1);
 
-    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx");
-
+    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss");
 
 
     trackNtuple = new TNtuple("trackNtuple","trackwise tuple","evtn:nprimaries:nnegprimaries:posz:negz:vz:nrichtracks:globalp:globalpt:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipq:amipx:amipy:pmipx:pmipy:radx:rady:oradx:orady:otheta:ophi:ctbx:ctby:ctbz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:theta:phi:tpchits:tpcfitpoints:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits:innerwave:outerwave");
 
 #ifdef myRICH_WITH_MC
+    trackCorrectedNtuple = new TNtuple("trackCorrectedNtuple","","vertz:prims:gpx:gpy:gpz:lpx:lpy:lpz:clpx:clpy:clpz:eta:q:amipq:amipx:amipy:cpmipx:cpmipy:cradx:crady:radx:rady:pmipx:pmipy:lastx:lasty:lastz:nhits:nfits:pifact:pitotarea:piconstarea:pitotang:piconstang:pitothits:piconsthits:kafact:katotarea:kaconstarea:katotang:kaconstang:katothits:kaconsthits:prfact:prtotarea:prconstarea:prtotang:prconstang:prtothits:prconsthits:pichits:picthits:kachits:kacthits:prchits:prcthits:inwave:outwave:gradx:grady:mass");
+    
     geantTrackNtuple = new TNtuple("geantTrackNtuple","geant trackwise tuple",
 				 "evtn:nprimaries:nnegprimaries:vz:nrichtracks:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipid:amipproc:amipq:amipx:amipy:amipnpads:pmipx:pmipy:gmipid:gmipproc:gmipq:gmipx:gmipy:gmipnpads:radx:rady:oradx:orady:olocalpx:olocalpy:olocalpz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:tpchits:tpcfitpoints:innerwave:outerwave:glocalpx:glocalpy:glocalpz:gradx:grady:geantmipx:geantmipy:gstopvertx:gstopverty:gstopvertz:gphots:grecophots:gradhits:gtpccommonhits:gglobalpx:gglobalpy:gglobalpz:gid:gstopproc:gnpartners:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits");
 

@@ -1,11 +1,17 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.9 2000/11/25 11:55:14 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.10 2000/12/08 04:54:57 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.10  2000/12/08 04:54:57  lasiuk
+ *  hit filter changed for refit
+ *  fillCorrectedNTuple
+ *  energy loss
+ *  modify distup for PID
+ *
  *  Revision 2.9  2000/11/25 11:55:14  lasiuk
  *  add reprocess Traits
  *
@@ -173,6 +179,7 @@ private:
     //
     // pad plane dimensions
     StThreeVector<double>   mPadPlaneDimension; //!
+    StThreeVector<double>   mRadiatorDimension; //!
     
     StRichPadMonitor*  mPadMonitor; //!
     StRichGeometryDb*  mGeometryDb; //!
@@ -292,9 +299,11 @@ public:
     //
     // hit operations
     //
-    void hitFilter(const StSPtrVecRichHit*, StRichRingCalculator*);
+    void hitFilter(const StSPtrVecRichHit*, StRichRingCalculator*, int);
     void hitFilter(StRichRingCalculator* , StThreeVectorF&, float&, float&);
 
+    void examineTemporaryHits(StRichRingCalculator*,int);
+    
     float getHitSigma(float); 
     void  tagMips(StEvent*, StSPtrVecRichHit*);
 
