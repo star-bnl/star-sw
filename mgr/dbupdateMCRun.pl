@@ -24,8 +24,13 @@ my @Sets = (
              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
 #             "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau200/single/default/central/year_1e/hadronic_on",  
              "auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on",
-#             "auau200/single/default/central/year_1e/hadronic_on",
+             "auau200/single/default/central/year_1e/hadronic_on",
+             "auau130/mevsim/vanilla_flow/central/year_1e/hadronic_on",
+             "auau130/mevsim/vanilla/dynamic/central/year_1e/hadronic_on",
+             "auau130/mevsim/vanilla/omega/central/year_1e/hadronic_on",
+             "auau130/mevsim/vanilla/trigger/central/year_1e/hadronic_on", 
              "auau128/hijing/b0_12/halffield/year_1e/hadronic_on",
              "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
              "auau200/hijing135/default/b0_3/year_1h/hadronic_on", 
@@ -148,12 +153,11 @@ my $dflag;
 foreach $diskDir (@diskRecoDirs) {
 #  print "diskRecoDir: ", $diskDir, "\n";
   if (-d $diskDir) {
-#  print "diskRecoDir_after: ", $diskDir, "\n";
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
      next if $flname =~ /geant.root/;
-
+     next if $flname =~ /hold/;
         $maccess = "-rw-r--r--"; 
         $mdowner = "starreco";
      $fullname = $diskDir."/".$flname;
@@ -431,6 +435,7 @@ my $compont;
 my $NumMisFile = 0;
 my $NumUpFile = 0;
 my $newset;
+my @prtFS;
 
    foreach $eachRecoFile (@hpssRecoFiles) {
 
@@ -469,10 +474,20 @@ my $newset;
    $mowner = ($$eachRecoFile)->fowner;
    $msize = ($$eachRecoFile)->size;
    $mName = $mfName; 
+  if($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
+   $mrunId = 150;
+   $mfileSeq = 0; 
+ }
+  elsif($mfName =~ /rcf150_p/) {
+   $mrunId = 150;
+   @prtFS = split("_",$mfName);
+   $mfileSeq = $prtFS[2];
+}else{
    $mName =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
    $mfileSeq = $2 +0;
    $mrun = $1;
    $mrunId = substr($1,3) + 0;  
+}
    if($mfName =~  /root/) {
      $mformat = "root";
      $compont = basename("$mfName",".root");
