@@ -1,0 +1,48 @@
+#! /usr/local/bin/tcsh -f
+#BSUB -J bfc 
+#BSUB -N 
+#BSUB -q star_cas
+#BSUB -u $USER@bnl.gov 
+echo $HOST 
+source $GROUP_DIR/group_env.csh
+#source $GROUP_DIR/.starnew
+#printenv
+echo "start time: `date`" 
+set no    = 100    # -n
+set chain = \"lana\" # -c 
+set input = 0      # -i
+set output = 0     # -o
+set tfile = 0      # 
+set dir   = $SCRATCH # -d
+while ( $#argv > 0 )
+        switch ($1)
+        case -n:       2
+        shift; if ( $#argv > 0 ) set no = $1
+                breaksw
+        case -c:        # 
+        shift; if ( $#argv > 0 ) set chain = \"$1\"
+                breaksw
+        case -i:        # 
+        shift; if ( $#argv > 0 ) set input = \"$1\"
+                breaksw
+        case -o:        # 
+        shift; if ( $#argv > 0 ) set output = \"$1\"
+                breaksw
+        case -t:        # 
+        shift; if ( $#argv > 0 ) set tfile = \"$1\"
+                breaksw
+        case -d:        # 
+        shift; if ( $#argv > 0 ) set dir = $1
+                breaksw
+        endsw
+        shift
+end
+cd $dir
+ln -s $STAR/StDb/calibrations/tpc/noiseElim.19991216.000000.tpcdaq noiseElim.tpcdaq 
+echo root4star -q -b \'bfc.C\($no,$chain,$input,$output,$tfile\)\'
+root4star -q -b bfc.C\($no,$chain,$input,$output,$tfile\)
+echo "end time: `date`" 
+exit 0 
+# E_O_F
+
+
