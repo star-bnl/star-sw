@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.14 2001/10/29 13:00:38 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.15 2002/01/22 22:09:59 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.15  2002/01/22 22:09:59  jcs
+// remove unused line of code to remove warning
+//
 // Revision 1.14  2001/10/29 13:00:38  jcs
 // use new constructor in StFtpcDbReader
 //
@@ -175,7 +178,6 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 
   posVector[0]=0;
 
-ftpcDriftField_st *ftpcDriftField = m_driftfield->GetTable();
   for(i=0; i < dbReader->numberOfMagboltzBins(); i++) 
     { 
       
