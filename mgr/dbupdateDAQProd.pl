@@ -30,9 +30,9 @@ my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
-             "P00he/2000/06",
-             "P00he/2000/07",
-             "P00he/2000/08", 
+             "P00hf/2000/06",
+             "P00hf/2000/07",
+             "P00hf/2000/08", 
 );
 
 my @SetS = (
@@ -706,11 +706,11 @@ foreach my $runDsc (@runDescr) {
        $engr = int($cWMnt + $cEMnt);
        if( !defined $magF) {$magF = 0};  
 
-       if ($magF == 0) {
-       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
-     }else{
+#       if ($magF == 0) {
+#       $daqHash{$Numrun} = $ccn . $engr ."_" ."FieldOff" . "_";
+#     }else{
        $daqHash{$Numrun} = $ccn . $engr ."_" ."HalfField" . "_";
-     }
+#     }
        for ($ll = 0; $ll < scalar(@runDetector); $ll++) {
 
        if($DetecOn[$ll] != 0) { 
