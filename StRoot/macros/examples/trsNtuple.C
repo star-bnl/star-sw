@@ -1,3 +1,12 @@
+// $Id: trsNtuple.C,v 1.2 1999/06/24 20:24:57 kathy Exp $
+// $Log: trsNtuple.C,v $
+// Revision 1.2  1999/06/24 20:24:57  kathy
+// updated comment lines at top
+//
+//======================================================================
+// owner:  Herb Ward
+// what it does: see below
+//======================================================================
 //////////////////////////////////////////////////////////////////////////
 // For creating and filling an ntuple for testing Trs.
 // Herb Ward, April 10 1999.

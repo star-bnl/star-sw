@@ -1,5 +1,8 @@
-// $Id: Example_readxdfevents_makehist.C,v 1.2 1999/06/22 20:50:56 kathy Exp $ 
+// $Id: Example_readxdfevents_makehist.C,v 1.3 1999/06/24 20:24:57 kathy Exp $ 
 // $Log: Example_readxdfevents_makehist.C,v $
+// Revision 1.3  1999/06/24 20:24:57  kathy
+// updated comment lines at top
+//
 // Revision 1.2  1999/06/22 20:50:56  kathy
 // fixed macro so its more general
 //
@@ -12,8 +15,7 @@
 //    Reads an xdf file, finds a table (dst/vertex) and fills
 //    histogram with variable "z" from the table.  Draws hist. to
 //    canvas and sends to output ps file at the end.
-// NOTE: somehow doesn't know when to break out of xdf file, so you
-//  must enter the exact # events to run
+//
 //=======================================================================
 
 

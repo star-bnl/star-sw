@@ -1,9 +1,16 @@
-
-// Kathy 24June99
+// $Id: Example_read_hist_file_list.C,v 1.2 1999/06/24 20:24:56 kathy Exp $
+// $Log: Example_read_hist_file_list.C,v $
+// Revision 1.2  1999/06/24 20:24:56  kathy
+// updated comment lines at top
+//
+//=======================================================================
+// owner: Kathy Turner, 24 June 99
+// what it does: reads a flat root histogram file (not star specific) and
+//     list all histograms - one can easily add functionality to draw or
+//     send to postscript file from here
 //
 //  - adapted from macro taken from roottalk digest 
 //           http://root.cern.ch/root/roottalk/roottalk99/1228.html
-// 
 //=========================================================================
 
 void draw_hist(const char* filein="/star/u2e/liq/rootc/beam_gas_1.hist.root")
