@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.31 1999/04/07 12:59:45 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.32 1999/04/08 00:39:08 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.32  1999/04/08 00:39:08  fine
+// Work metod - workaround for ROOT bug PCON definition
+//
 // Revision 1.31  1999/04/07 12:59:45  fine
 // Fixed bug for PCON and PGON shapes
 //
@@ -442,7 +445,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.31 1999/04/07 12:59:45 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.32 1999/04/08 00:39:08 fine Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -769,7 +772,7 @@ void St_geant_Maker::Work()
         case CONE: t=new TCONE(name,"CONE","void",
                          p[0],p[1],p[2],p[3],p[4]);               break;
         case CONS: t=new TCONS(name,"CONS","void",
-                         p[0],p[1],p[2],p[3],p[4],p[5],p[6]);     break;
+                         p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
         case SPHE: t=new TSPHE(name,"SPHE","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
         case PARA: t=new TPARA(name,"PARA","void",
@@ -872,17 +875,13 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
   TString TableName(Table); 
   TString t = TableName.Strip();
   t.ToLower();
-  Char_t cmd[80];
-  Int_t Nchar = sprintf(cmd,"St_%s",t.Data());
-  if (gClassTable->GetID(cmd) < 0)
-  { cout << " Dictionary for table :" << cmd << 
-            " has not yet been defined. Skip it" << endl;
-  }
-  else 
-  { Nchar = sprintf(cmd,"new St_%s(\"%s\",%i)",t.Data(),t.Data(),*k);
-    St_Table *table = (St_Table *) gInterpreter->Calc(cmd);
-    if (table) {fgGeom->Add(table); table->Adopt(*k,iq); table->SetBit(kIsNotOwn);}
-  }
+
+  // Use St_Table::New(...)  when it is available as follows:
+  St_Table *table =  St_Table::New(t.Data(),t.Data(),iq,*k);
+  if (table) {fgGeom->Add(table); table->SetBit(kIsNotOwn);}
+  else       cout << "Dictionary for table :" << t.Data() 
+                  << " has not been defined yet. Skip it" 
+                  << endl;
 }
 //------------------------------------------------------------------------
 void  St_geant_Maker::SetDebug(EDebugLevel dbl)
