@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.6 1999/11/09 01:10:46 fine Exp $
+// $Id: StCL.h,v 1.7 1999/11/18 14:35:20 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.7  1999/11/18 14:35:20  fine
+// Class comment introduced
+//
 // Revision 1.6  1999/11/09 01:10:46  fine
 // new method int *ucopy(const *int, ...) has been introduced
 //
@@ -169,7 +172,7 @@ class StCL  {
        static double *trupck(double *u, double *s, int m);
        static double *trsat (double *s, double *a, double *b, int m, int n);
 
-    ClassDef(StCL,0)  //Interface to matrix routines
+    ClassDef(StCL,0)  //C++ replacement for CERNLIB matrix / triangle matrix packages: F110 and F112
 
 };
 
