@@ -11,7 +11,7 @@
 #include <iostream.h>
 #include <math.h>
 
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StMcEventTypes.hh"
 #include "StMcEvent.hh"
 #include "StMcEventMaker/StMcEventMaker.h"
