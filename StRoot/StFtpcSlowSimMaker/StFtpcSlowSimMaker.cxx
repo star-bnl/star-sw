@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.26 2004/06/04 11:01:51 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.27 2004/07/19 22:00:44 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.27  2004/07/19 22:00:44  jcs
+// add run number to averageTemperatureWest/East calling sequence
+//
 // Revision 1.26  2004/06/04 11:01:51  jcs
 // replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
 //
@@ -416,7 +419,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 
       // For FTPC West
       
-      returnCode = gasUtils->averageTemperatureWest(dbDate);
+      returnCode = gasUtils->averageTemperatureWest(dbDate,GetRunNumber());
 
      // test if averageBodyTemperature for FTPC West found for first event
      if (paramReader->gasTemperatureWest() == 0) {
@@ -431,7 +434,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 
      // For FTPC East
      
-     returnCode = gasUtils->averageTemperatureEast(dbDate);
+     returnCode = gasUtils->averageTemperatureEast(dbDate,GetRunNumber());
     
      // test if averageBodyTemperature for FTPC East found for first event
      if (paramReader->gasTemperatureEast() == 0 ) {
