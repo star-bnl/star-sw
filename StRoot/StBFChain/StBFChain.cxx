@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.440 2004/09/01 14:15:19 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.441 2004/09/03 00:04:04 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -233,6 +233,7 @@ Bfc_st BFC1[] = { // standard chains
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
+  {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
@@ -778,7 +779,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
   // 
-  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout,noHistos","",""
                                                              ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
   // Notes:
@@ -789,7 +790,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                    "B2004,fcf,VFMinuit,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2004"      ,"" ,"",
-  "B2004,fcf,ppOpt,VFppLMV,CtbMatchVtx,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
+  "B2004,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
              "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},   
    
 
@@ -803,14 +804,13 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
- {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
+  {"SpcChgCal","","","B2004,fcf,Corr3,OSpaceZ2,OShortR,SCEbyE,-Tree,-tags,-EvOut",
                                                                 "","","Pass0 SpaceCharge evaluator",kFALSE},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-   //  {"ITTF"        ,""  ,"",""                    ,"","","Turn on second option block for ITTF chain",kFALSE},
   {"ITTF"        ,""  ,"","Sti,svtDb",                                   "","","Turn on ITTF chain",kFALSE},
   {"SvtHitFilt"  ,"", "","",                                           "","","SVT Hit filter Maker",kFALSE},
   {"NoHits"      ,""  ,"",""                            ,"","","Don't write hits into Event.Branch",kFALSE},
@@ -893,6 +893,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
   {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE}, 
   {"VFppLMV"       ,""  ,"","",""                        ,"","... Generic VF will use ppLMV method",kFALSE}, 
+  {"VFppLMV5"      ,""  ,"","",""                ,"","... Generic VF will use ppLMV method (tuned)",kFALSE}, 
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
@@ -1534,6 +1535,7 @@ Int_t StBFChain::Instantiate()
 	      // VertexFinder method
 	      if ( GetOption("VFMinuit") ){  VtxOpt |= 0x1;}	      
 	      if ( GetOption("VFppLMV") ){   VtxOpt |= 0x2;}
+	      if ( GetOption("VFppLMV5") ){  VtxOpt |= 0x3;}
 	      gvtxMk->SetMode(VtxOpt);
 
 	      // All VertexFinders implement those (or not)
@@ -1824,6 +1826,7 @@ Int_t StBFChain::Instantiate()
   if (GetOption("Debug"))    SetDEBUG(1);
   if (GetOption("Debug1"))   SetDEBUG(1);
   if (GetOption("Debug2"))   SetDEBUG(2);
+  if (GetOption("nohisto"))  SetAttr(".histos=0","*");
   if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats(); 
   return status;
 }
