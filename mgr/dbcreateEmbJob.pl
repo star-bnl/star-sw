@@ -16,7 +16,7 @@ use File::Basename;
 use File::Find;
 use Net::FTP;
 
-require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbCpProdSetup.pl";
 
 my $debugOn=0;
 
