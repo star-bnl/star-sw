@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.67 2003/10/15 23:19:35 potekhin Exp $
+* $Id: geometry.g,v 1.68 2003/10/28 00:01:59 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.68  2003/10/28 00:01:59  potekhin
+* As agreed with Jerome, we shall prevent
+* proliferation of custom geometries to reduce
+* the various dependencies between simu and reco
+* and databases. Therefore, the experimental
+* geometry "ASYMPT1" has been removed and has
+* taken place of the "COMPLETE", which is our
+* official sandbox. The Pixel Detector is
+* defined in it right now.
+*
 * Revision 1.67  2003/10/15 23:19:35  potekhin
 * Due to an apparent need to have the "most precise"
 * geometry describing the STAR configuration in the
@@ -356,7 +366,47 @@ If LL>1
 
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
 
-  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
+
+* Retiring this version of "complete", and replacing it with a more modern one:
+*  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
+
+*****    NEW COMPLETE
+* as complete as Y2003X but with all corrections AND pixel detector
+  on COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 3;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 1;
+* careful!
+                   pipe=off;   " provisional"
+                   pixl=on;    " put the pixel detector in"
+                }
+
+
+
 
 * corrected: MWC readout, RICH reconstructed position, no TOF 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
@@ -559,42 +609,6 @@ If LL>1
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
-                }
-
-* as complete as Y2003X but with all corrections AND pixel detector
-* we introduce a family of more modern "asymptotic" geometries here,
-* which we shall name ASYMPT* (indexed)
-  on ASYMPT1    { correction 3 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
-                  "calb" 
-                     ems=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
-                     ecal_config=3   "both wheels"
-                     ecal_fill=3     "all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-                  "geometry correction "
-                     CorrNum = 3;
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdVersion = 1;
-* careful!
-                   pipe=off;   " provisional"
-                   pixl=on;    " put the pixel detector in"
                 }
 
 
