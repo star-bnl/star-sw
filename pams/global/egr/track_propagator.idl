@@ -1,0 +1,16 @@
+/* track_propagator.idl
+*  Module: track_propagator
+*
+*/
+
+#include "PAM.idl"
+#include "dst_track.idl"
+#include "egr_propagate.idl"
+
+interface track_propagator   :        amiModule {
+        STAFCV_T call
+               (  inout   dst_track  gtrack
+               ,  in      egr_propagate target
+               );
+};
+/* Last mod. for track_propagator: $Date: 1998/09/23 16:56:21 $ */
