@@ -29,7 +29,7 @@ StRareTrack::StRareTrack(StPrimaryTrack* track){
   fndedx = 0;
   StSPtrVecTrackPidTraits& traits=track->pidTraits();
   StDedxPidTraits* dedxPidTr;
-   for (int itrait = 0; itrait < traits.size(); itrait++){
+   for (unsigned int itrait = 0; itrait < traits.size(); itrait++){
          dedxPidTr = 0;
 	 if (traits[itrait]->detector() == kTpcId) {
 	       StTrackPidTraits* thisTrait = traits[itrait];

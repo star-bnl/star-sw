@@ -61,7 +61,7 @@ void StRareEvent::fillL3Info(StL3Trigger *l3trigger)
 
   // fill counters for anti-nucleus trigger
   const StPtrVecL3AlgorithmInfo& algInfo = l3EventSummary->algorithmsAcceptingEvent();
-  for (int i=0; i<algInfo.size(); i++) {
+  for (unsigned int i=0; i<algInfo.size(); i++) {
         if (algInfo[i]->id() == 6) {
 	      fL3Flag = kTRUE;
 	      fNProcessed = algInfo[i]->numberOfProcessedEvents();
