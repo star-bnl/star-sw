@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.10 2000/05/26 21:29:29 posk Exp $
+//  $Id: StFlowMaker.h,v 1.11 2000/06/01 18:26:37 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.11  2000/06/01 18:26:37  posk
+//  Increased precision of Track integer data members.
+//
 //  Revision 1.10  2000/05/26 21:29:29  posk
 //  Protected Track data members from overflow.
 //
@@ -111,7 +114,7 @@ public:
   void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.10 2000/05/26 21:29:29 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.11 2000/06/01 18:26:37 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -131,13 +134,13 @@ private:
   UInt_t           mPicoEventCounter;         // number of Bytes in nano event
   StFlowSelection* pFlowSelect;               //! selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
-  void             InitNanoEventWrite();      // open nano-DST
-  void             InitNanoEventRead();       // open nano-DST
-  void             InitPicoEventWrite();      // open nano-DST
-  void             InitPicoEventRead();       // open nano-DST
-  void             InitEventRead();           // open StEvent
-  void             InitFlowEventWrite();      // open StFlowEvent
-  void             InitFlowEventRead();       // open StFlowEvent
+  Int_t            InitNanoEventWrite();      // open nano-DST
+  Int_t            InitNanoEventRead();       // open nano-DST
+  Int_t            InitPicoEventWrite();      // open nano-DST
+  Int_t            InitPicoEventRead();       // open nano-DST
+  Int_t            InitEventRead();           // open StEvent
+  Int_t            InitFlowEventWrite();      // open StFlowEvent
+  Int_t            InitFlowEventRead();       // open StFlowEvent
   void             FillFlowEvent();           // fill the flow event
   void             FillNanoEvent();           // fill nano-DST
   Bool_t           FillFromNanoDST(const StFlowNanoEvent* pNanoEvent);

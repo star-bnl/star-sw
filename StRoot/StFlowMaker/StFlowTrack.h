@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.6 2000/05/26 21:29:34 posk Exp $
+// $Id: StFlowTrack.h,v 1.7 2000/06/01 18:26:41 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.7  2000/06/01 18:26:41  posk
+// Increased precision of Track integer data members.
+//
 // Revision 1.6  2000/05/26 21:29:34  posk
 // Protected Track data members from overflow.
 //
@@ -130,8 +133,8 @@ inline Float_t  StFlowTrack::Phi()        const { return mPhi; }
 inline Float_t  StFlowTrack::Eta()        const { return mEta; }                
 inline Float_t  StFlowTrack::Pt()         const { return mPt; }                
 inline Short_t  StFlowTrack::Charge()     const { return mCharge; }   
-inline Float_t  StFlowTrack::Dca()        const { return mDca/1000.; }
-inline Float_t  StFlowTrack::Chi2()       const { return mChi2/1000.; } 
+inline Float_t  StFlowTrack::Dca()        const { return mDca/10000.; }
+inline Float_t  StFlowTrack::Chi2()       const { return mChi2/10000.; } 
 inline Int_t    StFlowTrack::FitPts()     const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()     const { return mMaxPts; }  
 
@@ -164,10 +167,10 @@ inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }
 inline void StFlowTrack::SetCharge(Short_t charge)  { mCharge = charge; }     
 
 inline void StFlowTrack::SetDca(Float_t dca)        {
-  if (dca > maxUInt) dca = maxUInt; mDca = (UInt_t)(dca*1000.); }
+  if (dca > maxUInt) dca = maxUInt; mDca = (UInt_t)(dca*10000.); }
 
 inline void StFlowTrack::SetChi2(Float_t chi2)      {
-  if (chi2 > maxUInt) chi2 = maxUInt; mChi2 = (UInt_t)(chi2*1000.); }
+  if (chi2 > maxUInt) chi2 = maxUInt; mChi2 = (UInt_t)(chi2*10000.); }
 
 inline void StFlowTrack::SetFitPts(Int_t fitPts)    { mFitPts = fitPts; }
 

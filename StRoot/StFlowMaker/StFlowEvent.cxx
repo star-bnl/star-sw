@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.6 2000/05/20 00:55:13 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.7 2000/06/01 18:26:35 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.7  2000/06/01 18:26:35  posk
+// Increased precision of Track integer data members.
+//
 // Revision 1.6  2000/05/20 00:55:13  posk
 // Condensed flownanoevent.root somewhat.
 //
@@ -136,7 +139,7 @@ StFlowEvent::~StFlowEvent() {
 //   for (iter= pTrackCollection->begin(); iter!= pTrackCollection->end(); iter++){
 //     delete *iter;
 //   }
-//   delete pTrackCollection;
+  delete pTrackCollection;
 
 }
 
