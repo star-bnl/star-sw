@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.52 2000/08/17 18:52:29 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.53 2000/08/17 21:13:55 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.53  2000/08/17 21:13:55  lansdell
+// loop over all TPC hits for the z-hit distribution histogram
+//
 // Revision 1.52  2000/08/17 18:52:29  lansdell
 // added z distribution of hits histogram to StEventQA set
 //
@@ -381,9 +384,9 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->topologyMap().numberOfHits(kSsdSvtId)>0) m_det_id->Fill(kSsdSvtId);
 
       // z-dist of hits
-      for (UInt_t i=0; i<globtrk->detectorInfo()->hits().size(); i++) {
-	m_z_hits->Fill(globtrk->detectorInfo()->hits()[i]->position().z());
-      }
+      //for (UInt_t i=0; i<globtrk->detectorInfo()->hits().size(); i++) {
+      //m_z_hits->Fill(globtrk->detectorInfo()->hits()[i]->position().z());
+      //}
 
 // now fill all TPC histograms ------------------------------------------------
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
@@ -1209,6 +1212,11 @@ void StEventQAMaker::MakeHistPoint() {
   ULong_t ftpcHitsW = 0;
 
   if (tpcHits) {
+    // z-dist of hits
+    for (UInt_t i=0; i<24; i++)
+      for (UInt_t j=0; j<45; j++)
+	for (UInt_t k=0; k<tpcHits->sector(i)->padrow(j)->hits().size(); k++)
+	  m_z_hits->Fill(tpcHits->sector(i)->padrow(j)->hits()[k]->position().z());
     m_pnt_tpc->Fill(tpcHits->numberOfHits());
     totalHits += tpcHits->numberOfHits();
   }

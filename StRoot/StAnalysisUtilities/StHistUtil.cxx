@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.26 2000/08/17 18:52:27 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.27 2000/08/17 21:13:53 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.27  2000/08/17 21:13:53  lansdell
+// loop over all TPC hits for the z-hit distribution histogram
+//
 // Revision 1.26  2000/08/17 18:52:27  lansdell
 // added z distribution of hits histogram to StEventQA set
 //
@@ -1630,7 +1633,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms without the svt and ftpc histograms
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList6[] = {
-     "StEQaGtrkZhits",
+     "StEQaPointZhits",
      "StEQaNullPrimVtx",
      "QaInnerSectorDeDx",
      "QaOuterSectorDeDx",
@@ -1882,7 +1885,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
 // St_QA_Maker histograms for QA shift
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"qa_shift")==0) {
     Char_t* sdefList8[] = {
-     "StEQaGtrkZhits",
+     "StEQaPointZhits",
      "StEQaNullPrimVtx",
      "QaDedxAllSectors",
      "StEQaEvsumTrkGoodDTotal",

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.50 2000/08/17 18:52:30 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.51 2000/08/17 21:13:55 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.51  2000/08/17 21:13:55  lansdell
+// loop over all TPC hits for the z-hit distribution histogram
+//
 // Revision 1.50  2000/08/17 18:52:30  lansdell
 // added z distribution of hits histogram to StEventQA set
 //
@@ -763,7 +766,6 @@ void StQABookHist::BookHistGlob(){
 // for method MakeGlob - from table globtrk
 
 // general
-  m_z_hits          = QAH1F("QaGtrkZhits","globtrk: z distribution of hits",100,-200,200);
 
   m_globtrk_tot     = QAH1F("QaGtrkTot","globtrk: tot num tracks - all",40,0.,10000.);
   m_globtrk_tot_sm  = QAH1F("QaGtrkTotsm","globtrk: tot num tracks - all",40,0.,20.);
@@ -1434,6 +1436,8 @@ void StQABookHist::BookHistVertex(){
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
+
+  m_z_hits      = QAH1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
 
   m_pnt_tot     = QAH1F("QaPointTot", "point: # hits total ",100, 0.,250000.);
   m_pnt_tot_med = QAH1F("QaPointTotmed","point: # hits total ",100, 0.,2500.);
