@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.6 2003/04/29 16:22:44 perev Exp $
+ * $Id: StTPCReader.cxx,v 1.7 2004/03/04 21:51:27 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.7  2004/03/04 21:51:27  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.6  2003/04/29 16:22:44  perev
  * non TPCoriented cleanup
  *
@@ -48,8 +51,9 @@
 #include "StTPCReader.h"
 
 //_____________________________________________________________________________
-StTPCReader::StTPCReader(StDAQReader *daqr)
+StTPCReader::StTPCReader(StDAQReader *daqr,char mergeSequences)
 {
+  mMergeSequences=mergeSequences;
   ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
   fDAQReader = daqr;
   fSector = -1999;
@@ -120,7 +124,8 @@ int StTPCReader::setSector(int sector)
   fSector = sector;
 
   assert(fTPCImpReader); // Better than a crash.
-  fZeroSuppressedReader = fTPCImpReader->getZeroSuppressedReader(fSector);
+  assert( fSector<90 && (mMergeSequences==1||mMergeSequences==0) ); // See below getZeroSuppressedReader.
+  fZeroSuppressedReader = fTPCImpReader->getZeroSuppressedReader(fSector+100*mMergeSequences);
   fADCRawReader 	= fTPCImpReader->getADCRawReader(fSector);
   fPedestalReader 	= fTPCImpReader->getPedestalReader(fSector);
   fPedestalRMSReader 	= fTPCImpReader->getPedestalRMSReader(fSector);

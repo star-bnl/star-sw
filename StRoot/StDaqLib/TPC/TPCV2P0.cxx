@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.9 2002/10/13 20:43:37 ward Exp $
+ * $Id: TPCV2P0.cxx,v 1.10 2004/03/04 21:51:29 ward Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -19,6 +19,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.10  2004/03/04 21:51:29  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.9  2002/10/13 20:43:37  ward
  * Support for decoding DAQ100 data and writing it into a table.
  *
@@ -152,9 +155,11 @@ void TPCV2P0_PADK_SR::unpack(PADK_entry *entry, short paddress)
 
 ZeroSuppressedReader *TPCV2P0_Reader::getZeroSuppressedReader(int sector)
 {
+  char mergeSequences;
+  if(sector>=100) { sector-=100; mergeSequences=1; } else mergeSequences=0;
   if (ercpy->verbose) cout << "getTPCV2P0_ZS_SR sector(" << sector <<")" << endl;
   
-  TPCV2P0_ZS_SR *zsp = new TPCV2P0_ZS_SR(sector, this);
+  TPCV2P0_ZS_SR *zsp = new TPCV2P0_ZS_SR(sector, this, mergeSequences);
   if(!zsp->initialize())
   {
   if (ercpy->verbose) 

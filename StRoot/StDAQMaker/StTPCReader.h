@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.h,v 1.5 2004/01/23 16:06:43 jeromel Exp $
+ * $Id: StTPCReader.h,v 1.6 2004/03/04 21:51:27 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.h,v $
+ * Revision 1.6  2004/03/04 21:51:27  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.5  2004/01/23 16:06:43  jeromel
  * Added friend class for FCF
  *
@@ -86,7 +89,7 @@ class  StTPCReader
   friend class StRTSClientFCFMaker;  // allow RTSClient to access ptrTPCP
   public:
 
-  StTPCReader(StDAQReader *rd);
+  StTPCReader(StDAQReader *rd,char);
  ~StTPCReader();
   int close();
   int empty();
@@ -171,6 +174,7 @@ protected:
   BadChannelReader 	*fBadChannelReader;
 
 private:
+  char mMergeSequences;
   void *ptrTPCP; // Herb Oct 2002 for DAQ100.
 
   int fSector;
