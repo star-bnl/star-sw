@@ -27,7 +27,6 @@ class TChain;
 class TTree;
 class TTable;
 class TMemStat;
-class StBroadcast;
 
 class StMaker : public TDataSet{
 public:
@@ -47,7 +46,6 @@ protected:
    TDataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
    TDataSet     *m_Runco;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
-   static StBroadcast *fgBroadcast;     //! pointer to StBroadcast
    static StMaker *fgStChain;     	//!current pointer to StChain
    static StMaker *fgFailedMaker;     	//!current pointer to failed maker
    static Int_t fgTallyMaker[kStFatal+1];//!counters
@@ -100,8 +98,6 @@ public:
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
    virtual StMaker     *Cd(){return cd();};
    static  StMaker     *New(const Char_t *classname, const Char_t *name="", void *title=0);
-   void                 Broadcast(const char *subj,const char *info);
-   const   char        *GetBroadcast(const char *subj,const char *author="*") const;
 
 
    /// STAR methods
@@ -183,7 +179,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.57 2002/02/23 00:02:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.58 2002/04/14 21:51:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -212,8 +208,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.57 2002/02/23 00:02:49 perev Exp $
+// $Id: StMaker.h,v 1.58 2002/04/14 21:51:12 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.58  2002/04/14 21:51:12  perev
+// Obsolete StBroadcast
+//
 // Revision 1.57  2002/02/23 00:02:49  perev
 // NotyfyMe added
 //

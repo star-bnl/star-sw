@@ -66,7 +66,6 @@ Int_t StTreeMaker::Open(const char*)
 	return kStErr;
       }
 
-      Broadcast("InputFile",fFile.Data());
       
       fTree = StTree::GetTree(&tf,GetTreeName()); assert(fTree);
       if (GetDebug()) 
