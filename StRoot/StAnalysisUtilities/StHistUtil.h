@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.10 2000/06/29 04:46:19 lansdell Exp $
+//! $Id: StHistUtil.h,v 1.11 2000/07/07 03:52:32 genevb Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.11  2000/07/07 03:52:32  genevb
+//! AddHist improvements
+//!
 //! Revision 1.10  2000/06/29 04:46:19  lansdell
 //! removed virtual from inline methods
 //!
@@ -104,7 +107,7 @@ class StHistUtil {
   virtual Int_t   ListHists(Char_t *dirName="QA");
   virtual TList*  FindHists(Char_t *dirName="QA");
   virtual Int_t   CopyHists(TList  *dirList);
-  virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=0);
+  virtual Int_t   AddHists(TList  *dirList, Int_t nHistCopy=-1);
   virtual Int_t   PrintInfoHists(TList  *dirList,  const Char_t *fname="printinfo.out");
 
   virtual void    SetDefaultLogYList(Char_t *dirName="QA");
@@ -139,7 +142,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.10 2000/06/29 04:46:19 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.11 2000/07/07 03:52:32 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
