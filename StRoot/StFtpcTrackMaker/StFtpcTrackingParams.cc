@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.27 2004/04/06 19:03:02 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.28 2004/04/29 03:34:49 perev Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.28  2004/04/29 03:34:49  perev
+// minor cleanup
+//
 // Revision 1.27  2004/04/06 19:03:02  oldi
 // Code cleanup.
 //
@@ -250,18 +253,10 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordT
 StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, Double_t magFieldFactor) {
   // Initialization with hardcoded values (to be able to run stand alone).
   
-  if (mInstance) {
-    
-    if (magFieldFactor != mInstance->MagFieldFactor()) {
-      delete mInstance;
-      mInstance = new StFtpcTrackingParams(magFieldFactor);
-    }
-  }
-
-  else { // instance isn't there
+  if (!mInstance || magFieldFactor != mInstance->MagFieldFactor()) {
+    delete mInstance;
     mInstance = new StFtpcTrackingParams(magFieldFactor);
   }
-
   if (debug) {
     mInstance->PrintParams();
   }
