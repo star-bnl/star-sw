@@ -26,10 +26,19 @@ enum StDetectorId {
   kTpcSsdId    = kTpcSsdIdentifier,
   kTpcSvtId    = kTpcSvtIdentifier,        
   kTpcSsdSvtId = kTpcSsdSvtIdentifier,        
-  kSsdSvtId    = kSsdSvtIdentifier
+  kSsdSvtId    = kSsdSvtIdentifier,
+  kPhmdCpvId   = kPhmdCpvIdentifier,
+  kPhmdId      = kPhmdIdentifier
 };
 #endif
 
+
+// $Id: StDetectorId.h,v 1.9 2002/12/18 02:28:48 lbarnby Exp $
+//
+// $Log: StDetectorId.h,v $
+// Revision 1.9  2002/12/18 02:28:48  lbarnby
+// PMD identifiers added
+//
 
 
 
