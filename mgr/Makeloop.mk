@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.26  1998/11/13 00:19:31  fisyak
+#  Add flags for SCL St_trs_Maker
+#
 #  Revision 1.25  1998/11/05 20:09:24  fisyak
 #  add OBJY CPPFLAGS
 #
@@ -154,7 +157,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/11/05 20:09:24 $ 
+#           Last modification $Date: 1998/11/13 00:19:31 $ 
 #  default setings
 # Current Working Directory
 #
@@ -231,6 +234,7 @@ else
 	SUBDIRS := $(filter-out html,$(SUBDIRS))
 	SUBDIRS := $(strip    $(sort $(SUBDIRS)))
         SUBDIRS := $(filter-out util, $(SUBDIRS))
+        SUBDIRS := $(filter-out l3, $(SUBDIRS))
 ifneq (,$(findstring $(STAF_ARCH),hp_ux102))
         SUBDIRS := $(filter-out trg, $(SUBDIRS))
 endif
