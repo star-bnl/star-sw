@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.5 2001/04/02 12:04:34 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.6 2001/04/04 17:08:57 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.6  2001/04/04 17:08:57  jcs
+// remove references to StFtpcParamReader from StFtpcDbReader
+//
 // Revision 1.5  2001/04/02 12:04:34  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters from StarDb/ftpc
 //
@@ -140,8 +143,7 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                            m_slowsimpars);
  
     //create FTPC database reader
-    StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
-                                                  m_dimensions,
+    StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
                                                   m_padrow_z,
                                                   m_efield,
                                                   m_vdrift,

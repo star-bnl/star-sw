@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.3 2001/04/02 12:10:24 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.4 2001/04/04 17:08:42 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.4  2001/04/04 17:08:42  jcs
+// remove references to StFtpcParamReader from StFtpcDbReader
+//
 // Revision 1.3  2001/04/02 12:10:24  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -31,7 +34,6 @@
 #include "tables/St_ftpcGas_Table.h"
 #include "tables/St_ftpcDriftField_Table.h"
 
-class StFtpcParamReader;
 
 class StFtpcDbReader : public TObject 
 {
@@ -86,12 +88,10 @@ protected:
   Float_t mPhiEnd;
 
 private:
-  StFtpcParamReader *mParam;
   
 public:
   // constructor used by StFtpcClusterMaker:
-  StFtpcDbReader(StFtpcParamReader    *paramReader,
-                 St_ftpcDimensions    *dimensions,
+  StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow,
                  St_ftpcEField        *efield,
                  St_ftpcVDrift        *vdrift,
@@ -103,8 +103,7 @@ public:
                  St_ftpcTimeOffset    *timeoffset,
                  St_ftpcDriftField    *driftfield);
   // constructor used by StFtpcSlowSimMaker and StFtpcDriftMapMaker:
-  StFtpcDbReader(StFtpcParamReader    *paramReader,
-                 St_ftpcDimensions    *dimensions,
+  StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow,
                  St_ftpcEField        *efield,
                  St_ftpcVDrift        *vdrift,
