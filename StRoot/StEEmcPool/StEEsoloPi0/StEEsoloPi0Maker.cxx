@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.5 2004/08/09 20:28:31 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.6 2004/08/17 15:46:56 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -67,14 +67,14 @@ Int_t StEEsoloPi0Maker::Finish(){
 Int_t StEEsoloPi0Maker::Make(){
   
   static int n0=0,n1=0,n2=0,n3=0;
-  printf("%s::Make() is called ..........n0,1,2,3= %d %d %d %d \n",StMaker::GetName(),n0,n1,n2,n3);
+  //  printf("%s::Make() is called ..........n0,1,2,3= %d %d %d %d \n",StMaker::GetName(),n0,n1,n2,n3);
 
   n0++;
 
   clear();
 
   //............. trigger sort
-  if( !getTrig()) return;
+   if( !getTrig()) return kStOK;
   n1++;
 
 
@@ -165,6 +165,7 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
     
     const EEmcDbItem *x=db->getTile(sec,'A'+sub-1,eta,'T');
     if(x==0) continue; // it should never happened for muDst
+    if(x->fail) continue; // ignore broken towers
     
     if(adc <x->thr) continue;// value must be >ped+ N*ped_sig
     float value=adc-x->ped;
@@ -174,10 +175,8 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
     
     if(x->gain<=0 ) continue; // gains not avaliable
 
-    if(strstr(x->name,"01TA05")) continue;
-    if(strstr(x->name,"11TD09")) continue;
-    if(strstr(x->name,"09TB06")) continue;
-
+    //    if(strstr(x->name,"01TA05")) continue;
+    
     n1++;    
     float recoEner=value/x->gain/scaleFactor; // ideal
     totEner+=recoEner;
@@ -200,34 +199,30 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
 //________________________________________________
 bool StEEsoloPi0Maker::getTrig(){
   
-  printf("%s::getTrig() is called ..........\n",StMaker::GetName());
+  //  printf("%s::getTrig() is called ..........\n",StMaker::GetName());
  
   // Access to muDst .......................
   StMuEvent* muEve = mMuDstMaker->muDst()->event();
-  int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries();  // get number of primary tracks
-  StEventInfo &info=muEve->eventInfo();
+  //  int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries();  // get number of primary tracks
+  // StEventInfo &info=muEve->eventInfo();
   
   StMuTriggerIdCollection& trgIdColl=muEve->triggerIdCollection();
 
   const StTriggerId& oflTrgId=trgIdColl.nominal();
-
-  
   vector<unsigned int> trgId=oflTrgId.triggerIds();
 
-  printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
+  // printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
 
-  uint myId=15007;
   bool isGood=false;
   uint i;
   for(i = 0; i < trgId.size() ; i++){
-    printf("i=%d id=%d\n",i,trgId[i]);
-    if(trgId[i]==myId) isGood=true;
+    // printf("i=%d trgId=%d\n",i,trgId[i]);
+    //.......... minB trig in pp200 in 2004
+    if(trgId[i]==10) isGood=true;
+    if(trgId[i]==45010) isGood=true;
+    if(trgId[i]==45020) isGood=true;
   }
   
-  // StL0Trigger &trig=muEve->l0Trigger();
-  
-  
-  //StEventSummary &smry=muEve->eventSummary();
   return isGood;
 }
 
@@ -251,12 +246,15 @@ float StEEsoloPi0Maker::getCtbSum(){
       if(adc > 5) nHit++;
     }
   }
-  printf("CTB %d hit ADC>5  sumADC=%f (all) \n",nHit, ctbSum);
+  // printf("CTB %d hit ADC>5  sumADC=%f (all) \n",nHit, ctbSum);
   hA[7]->Fill(ctbSum); 
   return ctbSum;
 }
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.6  2004/08/17 15:46:56  balewski
+// clenup for pp200 in 2004
+//
 // Revision 1.5  2004/08/09 20:28:31  balewski
 // add trig selection
 //
