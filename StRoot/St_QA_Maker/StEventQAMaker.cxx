@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.41 2000/06/13 00:36:14 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.42 2000/06/23 15:44:23 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.42  2000/06/23 15:44:23  lansdell
+// restore PID method to using global tracks & retitle PID histogram
+//
 // Revision 1.41  2000/06/13 00:36:14  lansdell
 // PID histogram now only uses primary tracks
 //
@@ -852,7 +855,7 @@ void StEventQAMaker::MakeHistPID() {
   StSPtrVecTrackNode &theNodes = event->trackNodes();
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
-    StTrack *theTrack = theNodes[i]->track(primary);
+    StTrack *theTrack = theNodes[i]->track(global);
     if (!theTrack) continue;
 
     StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
