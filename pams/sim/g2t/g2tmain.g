@@ -153,8 +153,11 @@ created   22 april 98
       edir = Cdir(1:ld)//o;  Call TDM_CLEAR_ALL(edir)
 
       IQUEST(1)=IEOTRI+1
-      check NTRACK>0 & NVERTX>0 & IEOTRI==0
-
+      if (.not. ( NTRACK>0 & NVERTX>0 & IEOTRI==0) ) then
+         print *,' g2t quiting with IQUEST(1)=',Iquest(1)
+         print *,' NTRACK,NVERTX,IEOTRI=',NTRACK,NVERTX,IEOTRI
+         return
+      endif
 *     map ghea_* headers and  hepe_* particle tables:
       call agstrut('/evnt/@HEPE',Edir)
       call agstrut('/evnt/@GHEA',Edir)
