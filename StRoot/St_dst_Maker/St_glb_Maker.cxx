@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.26 1999/02/16 03:03:46 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.27 1999/02/16 21:34:01 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.27  1999/02/16 21:34:01  caines
+// Added exi back in
+//
 // Revision 1.26  1999/02/16 03:03:46  fisyak
 // Split Make and Histograms
 //
@@ -122,7 +125,7 @@
 #include "global/St_fill_dst_event_summary_Module.h"
 
 #include "St_dst_tof_Table.h"
-#include "St_dst_v0_vertex_Table.h"
+
 const Int_t St_glb_Maker::nxpT = 50;
 const Int_t St_glb_Maker::nyeta = 50;
 const Float_t St_glb_Maker::xminpT = 0.0;
@@ -254,7 +257,7 @@ Int_t St_glb_Maker::Init(){
   ev0par2->ptarm_max  = 0.3;
   ev0par2->dcapnmin   = 0.1;
   //exi
-  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",1);
+  if (!m_exiaux) m_exiaux = new St_exi_aux("exi_aux",10000);
   m_exipar = (St_exi_exipar *)  params("global/exipars/exipar");
   if (!m_exipar) {
     m_exipar = new St_exi_exipar("exipar",3);
@@ -500,13 +503,13 @@ Int_t St_glb_Maker::Make(){
     }
 #endif
     // exi
-    //cout << "Calling exi..."<< endl;
-    //if (! dst_xi_vertex) {
-    //  dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",10000);
-    //  dst.Add(dst_xi_vertex);
-    // }
-    //Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
-    //if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
+    cout << "Calling exi..."<< endl;
+    if (! dst_xi_vertex) {
+      dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",10000);
+      dst.Add(dst_xi_vertex);
+     }
+    Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
+    if (Res_exi != kSTAFCV_OK) {cout << " Problem on return from EXI " << endl;}
     // dst 
     // dst_dedx_filler
     if (tptrack && stk_track) {
@@ -723,7 +726,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.26 1999/02/16 03:03:46 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.27 1999/02/16 21:34:01 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
