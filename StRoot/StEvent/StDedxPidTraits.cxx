@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.4 1999/11/23 15:56:23 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.5 1999/11/29 17:07:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
- * Revision 2.4  1999/11/23 15:56:23  ullrich
- * Added clone() method. Was pure virtual.
+ * Revision 2.5  1999/11/29 17:07:24  ullrich
+ * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
  * Revision 2.5  1999/11/29 17:07:24  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
@@ -34,16 +34,17 @@
 
 ClassImp(StDedxPidTraits)
 
-    mNumberOfPoints(0), mDedx(0), mSigma(0) { /* noop */ }
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.5 1999/11/29 17:07:24 ullrich Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
-    StTrackPidTraits(det, meth),
-    mNumberOfPoints(n), mDedx(dedx), mSigma(sig) { /* noop */ }
+
+StDedxPidTraits::StDedxPidTraits(StDetectorId det, Short_t meth,
                                  UShort_t n, Float_t dedx, Float_t sig) :
     StTrackPidTraits(det),
     mNumberOfPoints(n), mDedx(dedx), mSigma(sig), mMethod(meth) { /* noop */ }
-    mNumberOfPoints(t.ndedx), mDedx(t.dedx[0]), mSigma(t.dedx[1]) { /* noop */ }
+
+StDedxPidTraits::StDedxPidTraits(const dst_dedx_st& t) :
     StTrackPidTraits(t),
     mNumberOfPoints(t.ndedx), mDedx(t.dedx[0]),
     mSigma(t.dedx[1]), mMethod(t.method){ /* noop */ }
@@ -58,6 +59,35 @@ StDedxPidTraits::mean() const { return mDedx; }
 
 Float_t
 StDedxPidTraits::sigma() const { return mSigma; }
+
+StObject*
+StDedxPidTraits::clone() { return new StDedxPidTraits(*this); }
+
+Short_t
+StDedxPidTraits::encodedMethod() const { return mMethod; }
+
+StDedxMethod
+StDedxPidTraits::method() const
+{
+    switch (mMethod) {
+    case kTruncatedMeanId:
+	return kTruncatedMeanId;
+	break;
+    case kEnsembleTruncatedMeanId:
+	return kEnsembleTruncatedMeanId;
+	break;
+    case kLikelihoodFitId:
+	return kLikelihoodFitId;
+	break;
+    case kWeightedTruncatedMeanId:
+	return kWeightedTruncatedMeanId;
+	break;
+    case kOtherMethodId:
+	return kOtherMethodId;
+	break;
+    default:
+	return kUndefinedMethodId;
+	break;
     }
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.cxx,v 2.3 1999/11/29 16:53:24 ullrich Exp $
+ * $Id: StTrackPidTraits.cxx,v 2.4 1999/11/29 17:07:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.cxx,v $
- * Revision 2.3  1999/11/29 16:53:24  ullrich
- * ADopted new encoding scheme for method().
+ * Revision 2.4  1999/11/29 17:07:29  ullrich
+ * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
  * Revision 2.3  1999/11/29 16:53:24  ullrich
  * ADopted new encoding scheme for method().
@@ -31,46 +31,18 @@
 
 ClassImp(StTrackPidTraits)
 
-static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.3 1999/11/29 16:53:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.4 1999/11/29 17:07:29 ullrich Exp $";
 
 StTrackPidTraits::StTrackPidTraits() :
-    mDetectorId(0), mMethod(0) { /* noop */ }
+    mDetectorId(0) { /* noop */ }
 
-StTrackPidTraits::StTrackPidTraits(StDetectorId det, Short_t meth) :
-    mDetectorId(det), mMethod(meth) { /* noop */ }
+StTrackPidTraits::StTrackPidTraits(StDetectorId det) :
+    mDetectorId(det) { /* noop */ }
 
 StTrackPidTraits::StTrackPidTraits(const dst_dedx_st& t) :
-    mDetectorId(t.det_id), mMethod(t.method) { /* noop */ }
+    mDetectorId(t.det_id) { /* noop */ }
 
 StTrackPidTraits::~StTrackPidTraits() { /* noop */ }
-
-Short_t
-StTrackPidTraits::encodedMethod() const { return mMethod; }
-
-StDedxMethod
-StTrackPidTraits::method() const
-{
-    switch (mMethod) {
-    case kTruncatedMeanId:
-	return kTruncatedMeanId;
-	break;
-    case kEnsembleTruncatedMeanId:
-	return kEnsembleTruncatedMeanId;
-	break;
-    case kLikelihoodFitId:
-	return kLikelihoodFitId;
-	break;
-    case kWeightedTruncatedMeanId:
-	return kWeightedTruncatedMeanId;
-	break;
-    case kOtherMethodId:
-	return kOtherMethodId;
-	break;
-    default:
-	return kUndefinedMethodId;
-	break;
-    }
-}
 
 Short_t
 StTrackPidTraits::detector() const { return mDetectorId; }

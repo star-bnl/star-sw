@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.2 1999/11/15 18:48:28 ullrich Exp $
+ * $Id: StTrackPidTraits.h,v 2.3 1999/11/29 17:07:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 2.2  1999/11/15 18:48:28  ullrich
- * Adapted new enums for dedx and track reco methods.
+ * Revision 2.3  1999/11/29 17:07:32  ullrich
+ * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
  *
  * Revision 2.2  1999/11/15 18:48:28  ullrich
  * Adapted new enums for dedx and track reco methods.
@@ -33,19 +33,16 @@ class dst_dedx_st;
 class StTrackPidTraits : public StObject {
 public:
     StTrackPidTraits();
-    StTrackPidTraits(StDetectorId, Short_t);
+    StTrackPidTraits(StDetectorId);
     StTrackPidTraits(const dst_dedx_st&);
     // StTrackPidTraits(const StTrackPidTraits&);            use default
     // StTrackPidTraits& operator=(const StTrackPidTraits&); use default
     virtual ~StTrackPidTraits();
     
-    StDedxMethod method() const;
-    Short_t      encodedMethod() const;
-    Short_t      detector() const;
+    Short_t detector() const;
 
 protected:
     Short_t mDetectorId;
-    Short_t mMethod;
 
     virtual StObject* clone() = 0;
     ClassDef(StTrackPidTraits,1)
