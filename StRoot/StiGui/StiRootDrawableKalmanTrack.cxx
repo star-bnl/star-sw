@@ -107,15 +107,11 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
     double xLocal = lastNode->fX;
     StiKTNForwardIterator it(lastNode);
     StiKTNForwardIterator end = it.end();
-    
     while( go && it!=end ) {
-	//cout <<"Entered loop";
-	StiKalmanTrackNode& node = *it;
-	//cout <<"\tDereferenced it";
+			StiKalmanTrackNode& node = *it;
 	
 	++it;
 	if (it==end) { //we're done
-	    //cout <<"We're finished, go on"<<endl;
 	    go=false;
 	}
 	else {
@@ -152,7 +148,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 	    //} //temporary patch
 	}
     }
-
+		//cout <<"now fill hits for real"<<endl;
     //now fill hits for real:
     //remember, we *ARE* an StiKalmanTrack (public inheritance)
     StiKalmanTrackNode* node = getLastNode(); //start at innermost
@@ -182,7 +178,7 @@ void StiRootDrawableKalmanTrack::fillHitsForDrawing()
 	}
     }
 
-    //cout <<"Hits on track:\t"<<hits<<endl;
+    cout <<"Hits on track:\t"<<hits<<endl;
     mLineHitPair.first->fillHitsForDrawing();
     mLineHitPair.second->fillHitsForDrawing();
 
