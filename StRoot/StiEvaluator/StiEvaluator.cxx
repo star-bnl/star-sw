@@ -8,6 +8,10 @@
 // and both charge signs
 // 
 // $Log: StiEvaluator.cxx,v $
+// Revision 1.35  2003/06/19 21:17:07  calderon
+// Check the file name (for debugging)
+// Set the suffix before call to create histograms for the inclusive case.
+//
 // Revision 1.34  2003/06/19 01:37:03  calderon
 // Adding all the histograms from Zbigniew.
 //
@@ -64,6 +68,7 @@ int StiEvaluator::initialize() {
     AnalysisPiPlHi.setGeantId(8);   
     AnalysisPiPlHi.setFileName(mFileName); // should already be figured out in the macro
 
+    cout << "File Name " << mFileName << endl;
     cout << "cuts " << endl;
     cout << "fit points >= " << mFitPtsLimit << endl; 
     cout << "global dca <= " << mDcaLimit    << endl; 
@@ -149,14 +154,15 @@ int StiEvaluator::initialize() {
 	    suffix = suffixes[s] + gid;
 	    mEfficiencyAnalysisVector[g*3+s].setSuffix(suffix);
 	}
+    mEfficiencyAnalysisVector[18].setSuffix("HiAll");
+    mEfficiencyAnalysisVector[19].setSuffix("MeAll");
+    mEfficiencyAnalysisVector[20].setSuffix("LoAll");
+
     cout << "booking histos" << mGeantId << endl;
     for (size_t i=0; i<mEfficiencyAnalysisVector.size(); ++i) {
 	cout << mEfficiencyAnalysisVector[i].suffix() << endl;
 	mEfficiencyAnalysisVector[i].createHistograms();
     }
-    mEfficiencyAnalysisVector[18].setSuffix("HiAll");
-    mEfficiencyAnalysisVector[19].setSuffix("MeAll");
-    mEfficiencyAnalysisVector[20].setSuffix("LoAll");
 
     return 0;
 }
