@@ -184,6 +184,10 @@ my $nDiskFiles = 0;
 
 print "\nFinding reco files in disk\n";
  
+my $maccess; 
+my $mdowner; 
+my $flname;
+
 foreach my $diskDir (@diskRecoDirs) {
   if (-d $diskDir) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
@@ -232,10 +236,6 @@ closedir DIR;
 }
 }
 print "Total reco files: $nDiskFiles\n";
-
-my $maccess; 
-my $mdowner; 
-my $flname;
 
 ##### connect to the DB
 

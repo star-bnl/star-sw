@@ -7,8 +7,8 @@
 #  L.Didenko
 ###############################################################################
 
-my $dir_arch = "/star/u/starreco/MDC4/requests/trs/archive";
-my $dir_job = "/star/u/starreco/MDC4/requests/trs/jobfiles";
+my $dir_arch = "/star/u/starreco/P01he/requests/daq/archive";
+my $dir_job = "/star/u/starreco/P01he/requests/daq/jobfiles";
 
 my @maifile;
 my $mail_line;

@@ -24,7 +24,7 @@ my $TOP_DIRD = "/star/rcf/test/dev/";
 my @dir_year = ("year_1h", "year_2001");
 my @node_dir = ("trs_redhat61", "trs_redhat61_opt");
 my @node_daq = ("daq_redhat61", "daq_redhat61_opt"); 
-my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral");
+my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral","pp_minbias");
 my @daq_dir = ("minbias", "central");
 
 my @OUT_DIR;
@@ -402,7 +402,7 @@ my @files;
       $mo = sprintf("%2.2d", $mo+1);
       $dy = sprintf("%2.2d", $dy);
   
-      if( $yr > 98 ) {
+      if( $yr > 97 ) {
         $fullyear = 1900 + $yr;
       } else {
         $fullyear = 2000 + $yr;
@@ -602,6 +602,10 @@ foreach  $eachOutNDir (@OUT_DIR) {
        $EvGen = "hadronic_cocktail";
        $EvType = substr($EvTp,3); 
     }
+       elsif ($EvTp =~ /pp_/) {
+       $EvGen = "pythia";
+       $EvType = "pp_minbias";
+     }
        elsif ($EvTp =~ /peripheral/) {
        $EvGen = "hadronic_cocktail";
        $EvType = $EvTp;
@@ -643,6 +647,10 @@ foreach  $eachOutNDir (@OUT_DIR) {
     elsif($EvTp eq "peripheral") {          
          $EvReq = 500;
  }
+    elsif($EvTp eq "pp_minbias") {          
+         $EvReq = 50;
+ }
+
        $lgFile = $eachOutNDir ."/" . $bsname . "log";
 
        if ( -f $lgFile) {
