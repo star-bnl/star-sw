@@ -22,7 +22,7 @@
       do Isys=1,2
       if (Isys.eq.1) call G2R_GET_SYS ('ECAL','EXSE',Iprin,Idigi)
       if (Isys.eq.2) call G2R_GET_SYS ('ECAL','EHMS',Iprin,Idigi)
-      if (Iprin.lt.0) return
+      if (Iprin.lt.0) goto 777
       Local  = Idigi.ge.2
 *
       i=0
@@ -42,6 +42,6 @@
          g2t_track(trac).n_esm_hit    = g2t_track(trac).n_esm_hit + 1
 
       enddo    
-      enddo
+ 777  enddo
       RETURN
       END
