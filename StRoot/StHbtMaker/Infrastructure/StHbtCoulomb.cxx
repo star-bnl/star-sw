@@ -2,7 +2,6 @@
 // 1. Reads in the dat from a file
 // 2. Performs a linear interpolation in R and creates any array of interpolations
 // 3. Interpolates in eta and returns the Coulomb correction to user
-//
 // - Randy Wells, OSU
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +96,7 @@ void StHbtCoulomb::CreateLookupTable(const double& radius) {
   double HighRadius = -1.0;
   int LowIndex = 0;
   for(int iii=1; iii<=NRadii-1; iii++) { // Loop to one less than #radii
-    if ( radius > radii[iii] && radius < radii[iii+1] ) {
+    if ( radius >= radii[iii] && radius <= radii[iii+1] ) {
       LowRadius = radii[iii];
       HighRadius = radii[iii+1];
       LowIndex = iii;
@@ -136,7 +135,7 @@ double StHbtCoulomb::CoulombCorrect(const double& eta) {
     cerr << "StHbtCoulomb::CoulombCorrect(eta) --> Trying to correct for negative radius!" << endl;
     assert(0);
   }
-  int middle=int(mNLines/2);
+  int middle=int( (mNLines-1)/2 );
   if (eta*mEta[middle]<0.0) {
     cout << "StHbtCoulomb::CoulombCorrect(eta) --> eta: " << eta << " has wrong sign for data file! " << endl;
     cerr << "StHbtCoulomb::CoulombCorrect(eta) --> eta: " << eta << " has wrong sign for data file! " << endl;
@@ -145,20 +144,42 @@ double StHbtCoulomb::CoulombCorrect(const double& eta) {
 
   double Corr = -1.0;
   
-  if ( (eta>mEta[0]) && (mEta[0]>0.0) ) Corr = mCoulomb[0];
-  if ( (eta<mEta[mNLines]) && (mEta[mNLines]<0.0) ) Corr = mCoulomb[mNLines];
-  int ii = 0;
-  while ( (ii<(mNLines-1)) && (Corr<0.0) ) { // Loop until one from the last in file
-    if ( (eta < mEta[ii]) && (eta > mEta[ii+1]) ) { // Eta is decreasing in file
-      double LowEta = mEta[ii];
-      double HighEta = mEta[ii+1];    
-      double LowCoulomb = mCoulomb[ii];
-      double HighCoulomb = mCoulomb[ii+1];
-      //      cout << LowEta << " *** Eta *** " << HighEta << endl;
-      //      cout << LowCoulomb << " *** Coulomb *** " << HighCoulomb << endl;
-      Corr = ( (eta-LowEta)*HighCoulomb+(HighEta-eta)*LowCoulomb )/(HighEta-LowEta);
+  if ( (eta>mEta[0]) && (mEta[0]>0.0) ) {
+    Corr = mCoulomb[0];
+    return (Corr);
+  }
+  if ( (eta<mEta[mNLines]) && (mEta[mNLines]<0.0) ) {
+    Corr = mCoulomb[mNLines];
+    return (Corr);
+  }
+  // This is a binary search for the bracketing pair of data points
+  int high = mNLines;
+  int low = 0;
+  int width = high-low;
+  middle = int(width/2.0); // Was instantiated above
+  while (middle > 0) {
+    if (mEta[low+middle] < eta) {
+      // eta is in the 1st half
+      high-=middle;
+      width = high-low;
+      middle = int(width/2.0);
     }
-    ii++;
+    else {
+      // eta is in the 2nd half
+      low+=middle;
+      width = high-low;
+      middle = int(width/2.0);
+    }
+  }
+  // Make sure we found the right one
+  if ( (mEta[low] >= eta) && (eta >= mEta[low+1]) ) {
+    double LowEta = mEta[low];
+    double HighEta = mEta[low+1];    
+    double LowCoulomb = mCoulomb[low];
+    double HighCoulomb = mCoulomb[low+1];
+    //      cout << LowEta << " *** Eta *** " << HighEta << endl;
+    //      cout << LowCoulomb << " *** Coulomb *** " << HighCoulomb << endl;
+    Corr = ( (eta-LowEta)*HighCoulomb+(HighEta-eta)*LowCoulomb )/(HighEta-LowEta);
   }
   if (Corr<0.0) {
     cout << "StHbtCoulomb::CoulombCorrect(eta) --> No correction" << endl;
@@ -218,7 +239,6 @@ double StHbtCoulomb::CoulombCorrect(const double& Z1Z2, const double& mass1,
   return (correction);
 }
 
-
 double StHbtCoulomb::CoulombCorrect(const StHbtPair* pair, const double& charge) {
   double mass1 = pair->track1()->FourMomentum().m();
   double mass2 = pair->track2()->FourMomentum().m();
@@ -237,7 +257,6 @@ double StHbtCoulomb::CoulombCorrect(const StHbtPair* pair, const double& charge,
   double correction = CoulombCorrect(eta2,radius);
   return (correction);
 }
-
 double StHbtCoulomb::Eta(const double& Z1Z2, const double& mass1,
 			 const double& mass2, const double& Qinv) {
   double reducedMass = mass1*mass2/(mass1+mass2);
