@@ -541,6 +541,9 @@ ClassImp(StFile)
 Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
 { 
   TString tfile,tit,base;
+  if (strstr(file,"*")) return AddWild(file);
+  
+  
   tfile = file; gSystem->ExpandPathName(tfile);
   
   if (gSystem->AccessPathName(tfile)) {// file does not exist
