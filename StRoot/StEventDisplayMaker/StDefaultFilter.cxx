@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.7 2000/09/06 21:57:52 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.8 2000/09/26 17:04:46 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -85,6 +85,7 @@ Int_t StDefaultFilter::Reset(Int_t reset)
   STFCutTracksOutOfRange = 0;
   STFKindOfColoring = 0;
   mlookFactor = 1;
+  if (mColorAxis) { delete mColorAxis; mColorAxis = 0;}
   return reset; 
 }
 //________________________________________________________________________________
@@ -214,18 +215,10 @@ Int_t StDefaultFilter::CreatePalette(TTable *obj)
    mColorAxis = new TColoredAxis(0.9,-0.95,0.9,0.95,low,high,mDeLookUp,mNbins);
    TH1F de("__de__","dedx",mNbins,low,high);
 
-   if (mDedx) {
-     St_dst_dedx *t    = (St_dst_dedx *)obj;
-     dst_dedx_st *dedx = 0;
-     dst_dedx_st *dEnd = t->end();
-     for (dedx = t->begin();dedx !=dEnd; dedx++)
-                       de.Fill(dedx->dedx[0]);
-   } else {
-     St_dst_trackC c((St_dst_track *)obj);
-     Int_t cEnd = c.GetNRows();
-     Int_t i = 0;
-     for (i=0;i<cEnd;i++) de.Fill(c.AbsMoment(i));
-   }
+      if (mDedx) 
+        Distribution((St_dst_dedx *)obj,de);
+      else
+        Distribution((St_dst_track *)obj,de);
 
    Double_t  s = de.ComputeIntegral();
    Int_t hSize = mNbins;
@@ -257,7 +250,29 @@ Int_t StDefaultFilter::CreatePalette(TTable *obj)
 }
 
 //_____________________________________________________________________________
+void StDefaultFilter::Distribution(St_dst_dedx *dedxT,TH1F &de) 
+{
+ // Calculate De/Dx distribution
+  St_dst_dedx *t    = dedxT;
+  dst_dedx_st *dedx = 0;
+  dst_dedx_st *dEnd = t->end();
+  for (dedx = t->begin();dedx !=dEnd; dedx++)
+                   de.Fill(dedx->dedx[0]);
+}
+//_____________________________________________________________________________
+void StDefaultFilter::Distribution(St_dst_track *track,TH1F &de) 
+{
+ // Calculate momentum distribution
+  St_dst_trackC c(track);
+  Int_t cEnd = c.GetNRows();
+  Int_t i = 0;
+  for (i=0;i<cEnd;i++) de.Fill(c.AbsMoment(i));
+}
+//_____________________________________________________________________________
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.8  2000/09/26 17:04:46  fine
+// Two separate Distribution methods introduced
+//
 // Revision 1.7  2000/09/06 21:57:52  fine
 // Dynamic color axis
 //
