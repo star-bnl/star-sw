@@ -1,11 +1,18 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.14 2001/02/01 17:55:30 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.15 2001/02/07 15:58:31 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.15  2001/02/07 15:58:31  lasiuk
+ *  update for production (production version and StEvent changes)
+ *  refit and momentum loss are default behavior (Nikolai's parameterization)
+ *  richCollection kept as data member
+ *  reprocess the traits is default behavior
+ *  creation of PIDTraits is done earlier
+ *
  *  Revision 2.14  2001/02/01 17:55:30  horsley
  *  set energy loss in CTB at 20 MeV (default)
  *  ifdef'd out the TrackEntryClass
@@ -102,6 +109,7 @@ using std::vector;
 #include "StDaqLib/L3/L3.Banks.hh"
 #endif
 
+// #define myPrivateVersion 1
 #ifdef myPrivateVersion	
 #include "TreeEntryClasses.h"
 #endif
@@ -129,6 +137,7 @@ class StRichPadMonitor;
 
 // StEvent
 class StEvent;
+class StRichCollection;
 class StRichPidTraits;
 class StSPtrVecRichHit;
 class StSPtrVecRichPixel;
@@ -160,7 +169,12 @@ private:
 
   int mTotalEvents;
   int mGoodEvents;
-  
+
+    //
+    // rich collection
+    //
+    const StRichCollection* mRichCollection;//!
+    
   //
   // monte carlo event
   //
@@ -174,7 +188,7 @@ private:
   int           mEventN;
   int           mEventRunId;
   
-  
+    
   //
   // Tracks in the RICH
   //
@@ -212,6 +226,10 @@ private:
   //
   // Cuts: parameters and types
   //
+  
+  // Run
+    int mProductionVersion;
+    
   // Event
   float mVertexWindow;
   
@@ -271,7 +289,7 @@ public:
 
     void initCutParameters();
     void initNtuples();
-    
+
     //
     // hit operations
     //
@@ -301,6 +319,8 @@ public:
     //
 
     void printCutParameters(ostream& os=cout) const;
+    void setProductionVersion(int no);
+    int  productionVersion() const;
     
     // Event Level
     void setVertexWindow(float);
@@ -360,4 +380,6 @@ public:
   ClassDef(StRichPIDMaker,1)
     };
 
+inline void StRichPIDMaker::setProductionVersion(int no) {mProductionVersion = no;}
+inline int  StRichPIDMaker::productionVersion() const {return mProductionVersion;}
 #endif
