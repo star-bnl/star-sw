@@ -6,6 +6,7 @@
  *      
  *
  *   change log
+ * 02-Jul-99 MJL add navigation code to get to TRGP bank
  *
  ***************************************************************************
  *  
@@ -14,10 +15,16 @@
 #ifndef TRG_READER_HH
 #define TRG_READER_HH
 #include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 
 // Detector Reader Virtual Class
 
-struct  Bank_TRGP;
+
+struct  Bank_TRGP: public Bank
+{
+  Pointer dummy[6];   //**** PLACE HOLDER for real bank definition ******
+  // look at TPC/TPCV2P0.cxx, TPCV2P0.hh for further details
+};
 
 class TRG_Reader : public DetectorReader
 {
@@ -32,7 +39,34 @@ public:
   GainReader *getGainReader(int sector){};
   CPPReader *getCPPReader(int sector){};
   BadChannelReader *getBadChannelReader(int sector){};
-  TRG_Reader(EventReader *er){cout <<"DUMMY implementation"<<endl;};
+  TRG_Reader(EventReader *er){
+    cout <<"DUMMY implementation"<<endl;
+    ercpy = er; // squirrel away pointer eventreader for our friends
+  // Fix up DATAP
+    pBankDATAP = (Bank_DATAP *)er->getDATAP();
+
+    if (!pBankDATAP->test_CRC()) ERROR(ERR_CRC);
+    if (pBankDATAP->swap() < 0) ERROR(ERR_SWAP);
+    pBankDATAP->header.CRC = 0;
+
+    // position independent pointers to lower banks, variable DATAP length
+    int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
+    Pointer *ptr = &pBankDATAP->TRG;
+    for (int i=0; i<len; i++, ptr++) {
+      if (ptr->length==0) continue;//invalid entry
+      pBankTRGP = (Bank_TRGP *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
+      if(!strncmp(pBankTRGP->header.BankType,"TRGP",4)) break;
+    }
+    if(strncmp(pBankTRGP->header.BankType,"TRGP",4)) {
+      printf("detector TRG not found in DATAP\n");
+      exit(0);
+    }
+
+    if (!pBankTRGP->test_CRC()) ERROR(ERR_CRC);
+    if (pBankTRGP->swap() < 0) ERROR(ERR_SWAP);
+    pBankTRGP->header.CRC = 0;
+  };
+
   ~TRG_Reader(){}; 
 
   int MemUsed(){};
