@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.9 1999/11/29 21:38:29 fisyak Exp $
+// $Id: StBFChain.h,v 1.10 2000/03/09 16:18:35 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.10  2000/03/09 16:18:35  fisyak
+// Make chain table local to the chain
+//
 // Revision 1.9  1999/11/29 21:38:29  fisyak
 // Add Dave Hardtke corrections, clean up print outs
 //
@@ -60,11 +63,22 @@
 //_____________________________________________________________________
 
 class St_XDFFile;
+struct BfcItem {
+  Char_t       *Key;      // nick name
+  Char_t       *Name;     // maker name
+  Char_t       *Chain;    // its chain
+  Char_t       *Opts;     // required options
+  Char_t       *Maker;    // required Makers
+  Char_t       *Libs;     // libraries to be loaded
+  Char_t       *Comment;  
+  Bool_t        Flag;     // F/T to use it in chain
+};
 
 class StBFChain : public StChain {
  private:
   St_XDFFile          *xdf_out; //! xdf output file if any
-  TFile               *m_TFile;         //TFile associated with the chain
+  TFile               *m_TFile; //TFile associated with the chain
+  BfcItem             *fBFC;// Private chain
  public:
                        StBFChain(const char *name="bfc");
    virtual            ~StBFChain();
@@ -74,7 +88,7 @@ class StBFChain : public StChain {
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);} 
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);} 
    virtual Int_t       ParseString (const TString &tChain, TString *Opt[]);
-   void                SetFlags(const Char_t *Chain="gstar tfs", Bool_t Force=kFALSE); // *MENU*
+   void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    virtual Int_t       kOpt(const TString *Tag) const; 
    virtual Int_t       kOpt(const Char_t  *Tag) const; 
@@ -96,7 +110,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.9 1999/11/29 21:38:29 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.10 2000/03/09 16:18:35 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
