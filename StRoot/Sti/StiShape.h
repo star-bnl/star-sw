@@ -19,7 +19,8 @@ public:
     float getHalfDepth() const { return halfDepth; }
     float getThickness() const { return thickness; }
     virtual StiShapeCode getShapeCode() const = 0;
-    
+    float getEdgeWidth() const { return edgeWidth; }
+
     // mutators
     void setHalfDepth(float val);
     void setThickness(float val);
@@ -28,7 +29,7 @@ protected:
     
     float halfDepth;  // 1/2 extent in z, always >= 0
     float thickness;  // radial thickness, always >= 0
-    
+    float edgeWidth;  // size of the edge using in tracking
 };
 
 #endif

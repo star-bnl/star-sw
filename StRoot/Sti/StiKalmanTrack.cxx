@@ -488,6 +488,51 @@ StThreeVector<double> StiKalmanTrack::getGlobalPointNear(double x) const
 	}
 }
 
+
+StThreeVector<double> StiKalmanTrack::getGlobalPointAt(double x) const
+{
+  // returns a point along the track in global coordinates at radius "x"
+  // Note that if the track does not pass at or near the given x value
+  // the null vector is returned.
+  //
+  // Algorithm: One first look for the node closest to "x". A "fresh"
+  // node is obtained from the factory, and its state is set to that
+  // of the found node. Then the fresh node is "propagated" to the 
+  // desired "x" position. A null vector (i.e. [0,0,0]) is returned
+  // if anything fails...
+
+    double xx,yy,zz;
+    StiKalmanTrackNode * nearNode = getNodeNear(x);
+    StiObjectFactoryInterface<StiKalmanTrackNode> * f 
+	= static_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
+    StiKalmanTrackNode * n = f->getObject();
+    n->reset();
+    n->setState(nearNode);
+    if (n==0 || nearNode==0)
+	return StThreeVector<double>(0.,0.,0.);
+    else 
+	{
+	  try 
+	    {
+	      n->propagate(x);
+	    }
+	  catch (runtime_error& rte)
+	    {
+	      return StThreeVector<double>(0.,0.,0.);
+	    }
+	  xx = n->fX;
+	  yy = n->fP0;
+	  zz = n->fP1;
+	  double alpha = n->fAlpha;
+	  double ca = cos(alpha);
+	  double sa = sin(alpha);
+	  double gx = ca*xx-sa*yy;
+	  double gy = sa*xx+ca*yy;
+	  return (StThreeVector<double>(gx,gy, zz));
+	}
+}
+
+
 StThreeVector<double> StiKalmanTrack::getMomentumNear(double x)
 {
     StiKalmanTrackNode * node = getNodeNear(x);
@@ -512,8 +557,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
     n->setState(lastNode);
     try
 	{
-	    n->propagate(0,0,0);
-				
+	    n->propagate(0.);				
 	    double p[3];
 	    double e[6];
 	    n->getMomentum(p,e);

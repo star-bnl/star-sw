@@ -496,202 +496,165 @@ void StiKalmanTrackFinder::doScanLayer()
 
 void StiKalmanTrackFinder::doNextDetector()
 {
-    //trackMes << "SKTF::doNextDetector()\t- Called" << endl;
-    if (trackDone) return;
-    if (scanningDone) return;
-    //trackMes << "SKTF::doNextDetector()\t- Begins" << endl;
-    tNode = trackNodeFactory->getObject();
-    if (tNode==0) 
-	throw logic_error("SKTF::doNextDetector()\t- ERROR - tNode==null");
-    tNode->reset();
-    try
-	{
-	    position = tNode->propagate(sNode, tDet); 
-	}
-    catch (runtime_error & rte)
-	{
+  //trackMes << "SKTF::doNextDetector()\t- Called" << endl;
+  if (trackDone) return;
+  if (scanningDone) return;
+  //trackMes << "SKTF::doNextDetector()\t- Begins" << endl;
+  tNode = trackNodeFactory->getObject();
+  if (tNode==0) 
+    throw logic_error("SKTF::doNextDetector()\t- ERROR - tNode==null");
+  tNode->reset();
+  try
+    {
+      position = tNode->propagate(sNode, tDet); 
+    }
+  catch (runtime_error & rte)
+    {
 #ifdef DEBUG
-	    trackMes << "SKTF::doNextDetector() - RunTimeError: " << rte.what();
+      trackMes << "SKTF::doNextDetector() - RunTimeError: " << rte.what();
 #endif
-	    scanningDone = true;
-	    trackDone = true;
-	    return;
-	}
+      scanningDone = true;
+      trackDone = true;
+      return;
+    }
 #ifdef DEBUG
-    trackMes << "TargetDet :"<<*tDet<<endl;
-    trackMes << "TargetNode:"<<*tNode<<endl;
+  trackMes << "TargetDet :"<<*tDet<<endl;
+  trackMes << "TargetNode:"<<*tNode<<endl;
 #endif
     
-    if (position==kFailed) 
-	{
-#ifdef DEBUG
-	    trackMes << "SKTF::doNextDetector()\t - position==kFailed" << endl;
-#endif
+  if (position<=kEdgeZplus) 
+    {
+      hasDet = true;
+      leadNode = tNode;
+      leadNode->setDetector(tDet);
+      if (tDet->isActive()) 
+	{ // active vol, look for hits
+	  if (position==kHit)
 	    scanningDone = true;
-	    trackDone = true;
-			return;
-	    //throw runtime_error("SKTF::doNextDetector()\t- RunTimeError - newNode==null");
-		}
-	if (tDet->isActive()) 
-		{ // active vol, look for hits
-	    //trackMes << "SKTF::followTrackAt()\t- tDet isActive() - Position:" << position << endl;
-	    if (position<=kEdgeZplus) 
+	  hitContainer->setDeltaD(4.); //yWindow);
+	  hitContainer->setDeltaZ(4.); //zWindow);
+	  hitContainer->setRefPoint(tNode->fX,tDet->getPlacement()->getCenterRefAngle(),tNode->fP0,tNode->fP1);
+	  bool hasMore = hitContainer->hasMore();
+	  while (hasMore)	
+	    {
+	      tNode->setHit(hitContainer->getHit());
+	      chi2 = tNode->evaluateChi2();
+	      trackMes << "SKTF::followTrackAt()\t chi2:" << chi2  << endl;
+	      if (chi2<maxChi2ForSelection && chi2 < bestChi2)
 		{
-		    hasDet = true;
-		    leadNode = tNode;
-		    //trackMes << "===============================leadNode   is at:" << leadNode << endl;
-		    //leadNode->setHit(0); // insures no hit is here...
-		    leadNode->setDetector(tDet);
-		    if (position==kHit)
-			scanningDone = true;
-		    tNode->propagateError();
-		    hitContainer->setDeltaD(10.); //yWindow);
-		    hitContainer->setDeltaZ(10.); //zWindow);
-		    //void setRefPoint(double position, double refAngle, double y, double z);
-		    //double a = tNode->fAlpha;
-		    double a = tDet->getPlacement()->getCenterRefAngle();
-		    //trackMes << "Ref Angle:" << (a*180./M_PI) << endl;
-		    
-		    //if (a<0) a+=2.*M_PI; 
-		    
-		    //trackMes << "Corrected Ref Angle:" << (a*180./M_PI) << endl;
-		    
-		    hitContainer->setRefPoint(tNode->fX,a,tNode->fP0,tNode->fP1);
-		    while (hitContainer->hasMore())	
-			{
 #ifdef DEBUG
-			    trackMes << "SKTF::followTrackAt()\t- hitContainer->hasMore()" << endl;
+		  trackMes << "SKTF::followTrackAt()\t selected hit - chi2:" << chi2 << endl;
 #endif
-			    tNode->setHit(hitContainer->getHit());
-			    chi2 = tNode->evaluateChi2();
-#ifdef DEBUG
-			    trackMes << "SKTF::followTrackAt()\t chi2:" << chi2  << endl;
-#endif
-			    if (chi2<maxChi2ForSelection && chi2 < bestChi2)
-				{
-#ifdef DEBUG
-				    trackMes << "SKTF::followTrackAt()\t selected hit - chi2:" << chi2 << endl;
-#endif
-				    hasHit = true;
-				    bestChi2 = chi2;
-				    bestNode = tNode;
-				}
-			    if (hitContainer->hasMore()) // prepare new node
-				{
-				    StiKalmanTrackNode * newNode = trackNodeFactory->getObject();
-				    if (newNode==0) 
-					throw logic_error("SKTF::followTrackAt()\t- ERROR - newNode==null");
-				    newNode->reset();			
-				    newNode->setState(tNode); // get everything from tNode
-				    newNode->setDetector(tDet); // set the local pointer to tDet
-				    tNode = newNode;  // not a memory leak because the factory handles the objects.... ;-)
-				}
-			} // searching best hit
+		  hasHit = true;
+		  bestChi2 = chi2;
+		  bestNode = tNode;
 		}
-	    //else
-	    //{
-	    //trackMes << "SKTF::followTrackAt()\t- MISSED DET" << endl;						
-	    //}
+	      hasMore = hitContainer->hasMore();
+	      if (hasMore) // prepare new node
+		{
+		  StiKalmanTrackNode * newNode = trackNodeFactory->getObject();
+		  if (newNode==0) 
+		    throw logic_error("SKTF::followTrackAt()\t- ERROR - newNode==null");
+		  newNode->reset();			
+		  newNode->setState(tNode); // get everything from tNode
+		  newNode->setDetector(tDet); // set the local pointer to tDet
+		  tNode = newNode;  // not a memory leak because the factory handles the objects.... ;-)
+		}
+	    } // searching best hit
 	}
-    else  // inactive, keep only if position==0
+      else // projection in inactive volume, scanning is done
+	scanningDone = true;
+    }
+  else if (position==kFailed) 
+    {
+#ifdef DEBUG
+      trackMes << "SKTF::doNextDetector()\t - position==kFailed" << endl;
+#endif
+      scanningDone = true;
+      trackDone = true;
+      return;
+      //throw runtime_error("SKTF::doNextDetector()\t- RunTimeError - newNode==null");
+    }
+
+
+  if (!scanningDone)
+    {
+      StiDetector * nextDet;
+      if (position==kEdgePhiPlus || position==kMissPhiPlus)
+	{
+	  if (lastMove>=0 )
+	    {
+#ifdef DEBUG
+	      trackMes << "SKTF::followTrackAt()\t- movePlusPhi()" << endl;
+#endif
+	      detectorContainer->movePlusPhi();			
+	      nextDet = **detectorContainer;
+	      if (nextDet==0 || tDet==nextDet)	
+		{
+		  //trackMes << "SKTF::followTrackAt) - ERROR - movePlusPhi() >> tDet==sDet"  << endl;
+		  scanningDone = true;
+		}
+	      tDet = nextDet;
+	      lastMove++;
+	    }
+	  else
+	    {
+	      scanningDone = true;
+#ifdef DEBUG
+	      trackMes << "SKTF::followTrackAt()\t-position==kEdgePhiPlus||kMissPhiPlus - but no PlusPhi done" << endl;
+#endif
+	    }
+		    
+	}
+      else if (position==kEdgePhiMinus || position==kMissPhiMinus)
+	{
+	  if (lastMove<=0)
+	    {
+#ifdef DEBUG
+	      trackMes << "SKTF::followTrackAt()\t- moveMinusPhi()" << endl;
+#endif
+	      detectorContainer->moveMinusPhi();
+	      nextDet = **detectorContainer;
+	      if (nextDet==0 || tDet==nextDet)	
+		{
+		  //trackMes << "SKTF::followTrackAt() - ERROR  -  moveMinusPhi() >> tDet==sDet"  << endl;
+		  scanningDone = true;
+		}
+	      tDet = nextDet;
+	      lastMove--;
+	    }
+	  else
+	    {
+	      scanningDone = true;
+#ifdef DEBUG
+	      trackMes << "SKTF::followTrackAt()\t-position==kEdgePhiMinus||kMissPhiMinus - but no MinusPhi done" << endl;
+#endif
+	    }
+	}
+      else
 	{
 #ifdef DEBUG
-	    trackMes << "SKTF::followTrackAt()\t- tDet is NOT Active() - Position:" << position;
+	  trackMes <<  "SKTF::followTrackAt()\t- Scanning set to done" << endl;
 #endif
-	    if (position<=kEdgeZplus)
-		{
-		    hasDet = true;
-#ifdef DEBUG
-		    trackMes << " but was a hit" << endl;
-#endif
-		    scanningDone = true;	
-		    tNode->propagateError();
-		    leadNode = tNode;
-		    leadNode->setDetector(tDet);
-		}
-	    //else
-	    //	{
-	    //		trackMes << " and was a miss" << endl;
-	    //	}
+	  scanningDone = true;
 	}
-    if (!scanningDone)
-	{
-	    StiDetector * nextDet;
-	    if (position==kEdgePhiPlus || position==kMissPhiPlus)
-		{
-		    if (lastMove>=0 )
-			{
-#ifdef DEBUG
-			    trackMes << "SKTF::followTrackAt()\t- movePlusPhi()" << endl;
-#endif
-			    detectorContainer->movePlusPhi();			
-			    nextDet = **detectorContainer;
-			    if (nextDet==0 || tDet==nextDet)	
-				{
-				    //trackMes << "SKTF::followTrackAt) - ERROR - movePlusPhi() >> tDet==sDet"  << endl;
-				    scanningDone = true;
-				}
-			    tDet = nextDet;
-			    lastMove++;
-			}
-		    else
-			{
-			    scanningDone = true;
-#ifdef DEBUG
-			    trackMes << "SKTF::followTrackAt()\t-position==kEdgePhiPlus||kMissPhiPlus - but no PlusPhi done" << endl;
-#endif
-			}
-		    
-		}
-	    else if (position==kEdgePhiMinus || position==kMissPhiMinus)
-		{
-		    if (lastMove<=0)
-			{
-#ifdef DEBUG
-			    trackMes << "SKTF::followTrackAt()\t- moveMinusPhi()" << endl;
-#endif
-			    detectorContainer->moveMinusPhi();
-			    nextDet = **detectorContainer;
-			    if (nextDet==0 || tDet==nextDet)	
-				{
-				    //trackMes << "SKTF::followTrackAt() - ERROR  -  moveMinusPhi() >> tDet==sDet"  << endl;
-				    scanningDone = true;
-				}
-			    tDet = nextDet;
-			    lastMove--;
-			}
-		    else
-			{
-			    scanningDone = true;
-#ifdef DEBUG
-			    trackMes << "SKTF::followTrackAt()\t-position==kEdgePhiMinus||kMissPhiMinus - but no MinusPhi done" << endl;
-#endif
-			}
-		}
-	    else
-		{
-#ifdef DEBUG
-		    trackMes <<  "SKTF::followTrackAt()\t- Scanning set to done" << endl;
-#endif
-		    scanningDone = true;
-		}
-	}
-    if (abs(lastMove)>2) scanningDone = true;
-    //printState();
+    }
+  if (abs(lastMove)>2) scanningDone = true;
+  //printState();
 }
 
 void StiKalmanTrackFinder::printState()
 {
 #ifdef DEBUG
-    trackMes << "State:"<<state;
-    if (scanningDone) 
-	trackMes << "/Scanning Done";
-    else
-	trackMes << "/Scanning NOT Done";
-    if (trackDone) 
-	trackMes << "/Track Done"<<endl;
-    else
-	trackMes << "/Track NOT Done" << endl;
+  trackMes << "State:"<<state;
+  if (scanningDone) 
+    trackMes << "/Scanning Done";
+  else
+    trackMes << "/Scanning NOT Done";
+  if (trackDone) 
+    trackMes << "/Track Done"<<endl;
+  else
+    trackMes << "/Track NOT Done" << endl;
 #endif
 }
 
