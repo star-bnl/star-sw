@@ -57,12 +57,12 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   while ($line = <In>) {
     next if $line =~ /^\s*\/\//;
     if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;}
-    if ($line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
+    if ($com && $line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
     next if ($com); 
     if ($line =~ /\/\*/) {
       $com = 1; 
       if ($line =~ /\*\//) {
-	$line =~ s/\/\**\*\///; 
+	$line =~ s/\/\*.*\*\///; 
 	$com = 0;
       }
       else {$line =~ s/\/\*.*$//;}
