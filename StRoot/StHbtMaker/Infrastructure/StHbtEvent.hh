@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.8 2000/05/03 17:44:42 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.9 2000/05/25 21:54:16 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,9 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
- * Revision 1.8  2000/05/03 17:44:42  laue
- * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
- * StHbtParticle updated for V0 pos,neg track Id
+ * Revision 1.9  2000/05/25 21:54:16  laue
+ * RotateZ implemented. Rotates momentum and helix around the z axis
  *
  * Revision 1.7  2000/02/18 21:32:23  laue
  * franksTrackCut changed. If mCharge is set to '0' there will be no cut
@@ -61,6 +60,7 @@ public:
   StHbtEvent();
   StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0); // copy constructor with track and v0 cuts
   ~StHbtEvent();
+  void RotateZ(const double);
 
   unsigned short EventNumber() const;
   unsigned short CtbMult() const;

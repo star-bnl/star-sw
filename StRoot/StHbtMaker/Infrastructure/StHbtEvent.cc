@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.6 2000/05/03 17:44:42 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.7 2000/05/25 21:54:16 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,9 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
- * Revision 1.6  2000/05/03 17:44:42  laue
- * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
- * StHbtParticle updated for V0 pos,neg track Id
+ * Revision 1.7  2000/05/25 21:54:16  laue
+ * RotateZ implemented. Rotates momentum and helix around the z axis
  *
  * Revision 1.5  2000/02/18 21:32:23  laue
  * franksTrackCut changed. If mCharge is set to '0' there will be no cut
@@ -43,6 +42,8 @@
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
 
 //___________________
 StHbtEvent::StHbtEvent(){
@@ -69,24 +70,27 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
   // create collections
   mTrackCollection = new StHbtTrackCollection;
   mV0Collection = new StHbtV0Collection;
-  // copy track collection
+  // copy track collection  
   for ( StHbtTrackIterator tIter=ev.mTrackCollection->begin(); tIter!=ev.mTrackCollection->end(); tIter++) {
-    if ( !tCut || tCut->Pass(*tIter) ) {
-      //cout << " trackCut passed " << endl;
-      StHbtTrack* trackCopy = new StHbtTrack(**tIter);
-      mTrackCollection->push_back(trackCopy);
-    }
+      if ( !tCut || tCut->Pass(*tIter) ) {
+	  //cout << " trackCut passed " << endl;
+	  StHbtTrack* trackCopy = new StHbtTrack(**tIter);
+	  mTrackCollection->push_back(trackCopy);
+      }
   }
   // copy v0 collection
   for ( StHbtV0Iterator vIter=ev.mV0Collection->begin(); vIter!=ev.mV0Collection->end(); vIter++) {
-    if ( !vCut || vCut->Pass(*vIter) ) {
-      StHbtV0* v0Copy = new StHbtV0(**vIter);
-      mV0Collection->push_back(v0Copy);
-    }
+      if ( !vCut || vCut->Pass(*vIter) ) {
+	  StHbtV0* v0Copy = new StHbtV0(**vIter);
+	  mV0Collection->push_back(v0Copy);
+      }
   }
 }
 //___________________
 StHbtEvent::~StHbtEvent(){
+#ifdef STHBTDEBUG
+  cout << " StHbtEvent::~StHbtEvent() " << endl;
+#endif
   StHbtTrackIterator iter;
   for (iter=mTrackCollection->begin();iter!=mTrackCollection->end();iter++){
     delete *iter;
@@ -102,4 +106,35 @@ StHbtEvent::~StHbtEvent(){
   delete mV0Collection;
 }
 //___________________
+void StHbtEvent::RotateZ(const double angle){
 
+  double field = 0.5;
+
+  StHbtTrackIterator iter;
+  StHbtV0Iterator V0iter;
+
+  StPhysicalHelixD helix;
+  StHbtThreeVector p;
+  StHbtThreeVector o;
+  double c;
+
+  mReactionPlane[0] += angle;
+  cout << " StHbtEvent::RotateZ(const double angle) - angle=" << angle << " rad    ";
+  cout << angle / degree << " deg " << endl; 
+  for (iter=mTrackCollection->begin();iter!=mTrackCollection->end();iter++){
+      p = (*iter)->P();    p.rotateZ(angle);  (*iter)->SetP(p);
+      p= (*iter)->Helix().momentum(field);
+      o= (*iter)->Helix().origin();
+      p.rotateZ(angle);
+      o.rotateZ(angle);
+      c= (*iter)->Helix().charge(field);
+      helix = StPhysicalHelixD(p,o,field,c);
+      (*iter)->SetHelix(helix);
+  }
+  for (V0iter=mV0Collection->begin();V0iter!=mV0Collection->end();V0iter++){
+    p=(*V0iter)->decayVertexV0();  p.rotateX(angle);   (*V0iter)->SetdecayVertexV0(p);
+    p=(*V0iter)->momV0();          p.rotateX(angle);   (*V0iter)->SetmomV0(p);    
+    p=(*V0iter)->momPos();         p.rotateX(angle);   (*V0iter)->SetmomPos(p);    
+    p=(*V0iter)->momNeg();         p.rotateX(angle);   (*V0iter)->SetmomNeg(p);
+  }
+}
