@@ -67,12 +67,13 @@ public:
   StMcEmcHitCollection* getBprsMcHits() {return getEmcMcHits(BPRS);}
   StMcEmcHitCollection* getBsmdeMcHits() {return getEmcMcHits(BSMDE);}
   StMcEmcHitCollection* getBsmdpMcHits() {return getEmcMcHits(BSMDP);}
+  StEmcCollection* getEmcCollectin() {return  mEmcCollection;}
 
   void   printmBEMC();
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.1 2000/10/23 22:53:14 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.2 2000/10/28 00:33:45 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
 };
@@ -80,8 +81,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.1 2000/10/23 22:53:14 pavlinov Exp $ 
+// $Id: StEmcSimulatorMaker.h,v 1.2 2000/10/28 00:33:45 pavlinov Exp $ 
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.2  2000/10/28 00:33:45  pavlinov
+// added methods getEmcCollectin()
+//
 // Revision 1.1  2000/10/23 22:53:14  pavlinov
 // First working C++ version
 //
