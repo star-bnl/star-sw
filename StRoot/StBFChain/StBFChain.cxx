@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.175 2001/03/03 03:04:19 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.176 2001/03/06 17:26:49 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -281,8 +281,6 @@ class St_geant_Maker; St_geant_Maker *geantMk = 0;
 class St_db_Maker;    
 static St_db_Maker *dbMk    = 0; 
 static St_db_Maker *calibMk = 0; 
-//St_db_Maker *RunLogMk = 0;
-static StMaker *tpcDBMk = 0;
 class StTreeMaker;    
 static Bool_t kMagF = kFALSE; 
 ClassImp(StBFChain)
@@ -371,7 +369,7 @@ Int_t StBFChain::Instantiate()
 	if (maker == "St_db_Maker"){
 	  St_db_Maker *mk = 0;
 	  if (Key.CompareTo("calib",TString::kIgnoreCase) == 0) {
-	    if (!calibMk) {
+	    if (!calibMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
 	      if (!GetOption("NoCintCalDb"))
 		calibMk = new St_db_Maker(fBFC[i].Name,"$STAR_ROOT/calib","$PWD/calib");
 	      else
@@ -380,7 +378,7 @@ Int_t StBFChain::Instantiate()
 	    mk = calibMk;
 	  }
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-            if (!dbMk) {
+            if (!dbMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
 	      if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
 		dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
 	      else {
@@ -460,7 +458,7 @@ Int_t StBFChain::Instantiate()
 	  continue;
 	}
 	StMaker *mk = 0;
-	if (maker == "StTpcDbMaker") mk = tpcDBMk;
+	if (maker == "StTpcDbMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
 	if (!mk) {
 	  if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	  else  {
@@ -470,7 +468,6 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options 
 	if (mk) {
-	  if (maker == "StTpcDbMaker") tpcDBMk = mk;
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
