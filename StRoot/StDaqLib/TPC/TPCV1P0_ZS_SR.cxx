@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_ZS_SR.cxx,v 1.4 1999/07/02 04:43:23 levine Exp $
+ * $Id: TPCV1P0_ZS_SR.cxx,v 1.5 1999/07/21 21:15:40 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V1.0 Zero Suppressed Reader
@@ -15,6 +15,11 @@
  * 23-Jun-99 MJL change declaration of row, rcb outside of all for loops
  ***************************************************************************
  * $Log: TPCV1P0_ZS_SR.cxx,v $
+ * Revision 1.5  1999/07/21 21:15:40  levine
+ * TPCV2P0_ZS_SR.cxx changed to include the TPCV2P0_ZS_SR::getSpacePts()
+ * (cluster-finder reader). TPCV1P0_ZS_SR.cxx changed to include empty
+ * version of the same method.
+ *
  * Revision 1.4  1999/07/02 04:43:23  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -255,6 +260,14 @@ int TPCV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,
   *SeqData = Pad_array[PadRow-1][Pad-1].seq;  // pass back pointer to Sequence array 
   return 0;
 }
+ 
+// Read the clusters (space points) found in the mezzanine cluster-finder
+int TPCV1P0_ZS_SR::getSpacePts(int PadRow, int *nSpacePts, SpacePt **SpacePts)
+{
+  cout <<"getSpacePoints() method not implemented" <<endl;
+  return 0;
+}
+
 
 int TPCV1P0_ZS_SR::MemUsed()
 {
