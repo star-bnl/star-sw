@@ -53,7 +53,7 @@ struct FilAttr => {
     flSize     => '$', 
     
 };
-
+ 
 my $prodSer = "mdc3";
 
 &beginHtml();
@@ -70,7 +70,7 @@ my %dstHpsize = ();
 my %dstDEvts = ();
 my %dstHpEvts = ();
 
-
+  $dstDEvts{"auau200/mevsim/vanilla/fluct/year_1h/hadronic_on"} = 0;
 
 ### select Geant files from FileCatalog
 my $nmfile;
@@ -170,7 +170,7 @@ $ndiskDstFiles = 0;
 
 for ($kk=0; $kk<scalar(@SetS); $kk++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND JobID LIKE '%mdc3%' AND site = 'disk_rcf'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%mdc3%' AND site = 'disk_rcf'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;

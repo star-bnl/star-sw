@@ -35,7 +35,7 @@ chdir $dir_log;
 
 foreach my $file (@list) {
         my $ltime = `mod_time $file`;
-           if( $ltime > 7200){
+           if( $ltime > 3600){
                 chop $file;
               $f_flag = 0;
               $file_sum = $file;
@@ -453,7 +453,7 @@ sub parse_log($) {
     print '=' x 80, "\n";    
 
    if ($num_event ne 0) {
- @cpu_output = `tail -220 $job_log`;
+ @cpu_output = `tail -250 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {
