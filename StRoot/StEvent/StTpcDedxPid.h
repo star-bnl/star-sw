@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.h,v 1.4 1999/07/13 13:20:35 fisyak Exp $
+ * $Id: StTpcDedxPid.h,v 1.5 1999/07/14 12:50:50 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.h,v $
- * Revision 1.4  1999/07/13 13:20:35  fisyak
- * Add lost Craig functions, use gufld for magnetic field
+ * Revision 1.5  1999/07/14 12:50:50  fisyak
+ * Add lost Set/Get functions
+ *
+ * Revision 1.5  1999/07/14 12:50:50  fisyak
+ * Add lost Set/Get functions
  *
  * Revision 1.4  1999/07/13 13:20:35  fisyak
  * Add lost Craig functions, use gufld for magnetic field
@@ -43,12 +46,13 @@ public:
   Int_t detectorInfoAvailable() const;
   Int_t meetsStandardPid() const;
   Double_t numberOfSigma(Double_t mass) const;
-  void setTpcDedxGain(Double_t gain) ;
-  void setTpcDedxOffset(Double_t offset) ;
-  void setTpcDedxRise(Double_t rise) ;
-  Double_t getTpcDedxGain() ;
-  Double_t getTpcDedxOffset() ;
-  Double_t getTpcDedxRise() ;
+  Double_t meanPidFunction(Double_t mass) const;
+  Double_t sigmaPidFunction(Double_t mass) const;
+
+  void setTpcDedxOffset(Double_t offset) {mTpcDedxOffset=offset;} 
+  void setTpcDedxRise(Double_t rise)     {mTpcDedxRise = rise ;} 
+  void setTpcDedxTcut(Double_t cut)     {mTpcDedxTcut = cut ;} 
+
   Double_t getTpcDedxOffset()            { return mTpcDedxOffset ;} 
   Double_t getTpcDedxRise()              { return mTpcDedxRise;}
   Double_t getTpcDedxTcut()              { return mTpcDedxTcut;}
