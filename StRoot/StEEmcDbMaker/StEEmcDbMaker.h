@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.18 2004/04/04 06:10:37 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -39,13 +39,16 @@ www.star.bnl.gov/STAR/eemc -->How To
 // needed DB c-structs  
 class eemcDbADCconf_st;
 class eemcDbPMTcal_st;
+class eemcDbPMTname_st;
+class eemcDbPIXcal_st;
 class eemcDbPMTped_st;
 class eemcDbPMTstat_st;
 class kretDbBlobS_st;
 
-class  StEEmcDbIndexItem1;//old, drop it
-class EEmcDbItem;
+
+class  EEmcDbItem;
 class  EEmcDbCrate;
+class  StEEmcDbIndexItem1;//old, drop it
 
 class DbFlavor {
  public:
@@ -63,28 +66,29 @@ class StEEmcDbMaker : public StMaker {
 	minMapmtCrateID=64, maxMapmtCrateID=119,
         maxTwCrateCh=128, maxMapmtCrateCh=192};
   
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.18 2004/04/04 06:10:37 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
   int myTimeStampDay;
   unsigned int myTimeStampUnix;
   void  clear();
-  void mOptimizeMapping(int is);
+  void mReloadDb(); ///< reads data from STAR-DB
+  void mOptimizeMapping(int isec);
+  void mOptimizeOthers(int isec);
+  void mOptimizeFibers(); ///< decodes crates -->fiber map
 
   //........... old
-  void mReloadDb(); ///< reads data from STAR-DB
   void mOptimizeDb(); ///< creates local fast look-up tables
-  void mOptimizeFibers(); ///< decodes crates -->fiber map
+  void mPrintItems();///< utility
+  // ........... end
   
-  //  void reloadDbConfig(int secID);
-  // void reloadDbOthers(int secID);
-
-
   // pointers to Db tables for each sector
   int *mDbsectorID; //!
   eemcDbADCconf_st  **mDbADCconf; //!
   eemcDbPMTcal_st   **mDbPMTcal ; //!
+  eemcDbPMTname_st   **mDbPMTname ; //!
+  eemcDbPIXcal_st   **mDbPIXcal ; //!
   eemcDbPMTped_st   **mDbPMTped ; //!
   eemcDbPMTstat_st  **mDbPMTstat ; //!
   kretDbBlobS_st  *mDbFiberConfBlob; //!
@@ -98,11 +102,10 @@ class StEEmcDbMaker : public StMaker {
   // local fast look-up tables
   EEmcDbItem   *byIndex; //!  assess via plain index
   EEmcDbItem   ***byCrate; //! access via crate/chan
- 
   EEmcDbCrate *mDbFiber; // maps tw & mapmt crates to DAQ fibers
-  int nFiber; // # of existing crates
+  int nFiber; // # of existing crates(Tw+Mapmt)
 
-  void mPrintItems();///< utility
+
  
   float KsigOverPed; // defines threshold
   int nFound;
@@ -162,7 +165,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.18 2004/04/04 06:10:37 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.19 2004/04/08 16:28:06 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -173,6 +176,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.19  2004/04/08 16:28:06  balewski
+// *** empty log message ***
+//
 // Revision 1.18  2004/04/04 06:10:37  balewski
 // *** empty log message ***
 //
