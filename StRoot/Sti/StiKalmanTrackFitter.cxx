@@ -89,9 +89,10 @@ static int myKount=0;myKount++;
       do {// Fit
         targetNode->setChi2(0.);
         if (!targetHit) 		break; //There is no hit.
+        assert(targetNode->getHit()==targetHit);
         StiKalmanTrackNode tryNode = *targetNode;
         targetNode->setChi2(1e52);
-        if (tryNode.nudge())		break;
+        if (tryNode.nudge(targetHit))	break;
         chi2 = tryNode.evaluateChi2(targetHit);
         if ((chi2>_pars.getMaxChi2()))	break;	//Chi2 is bad
         status = tryNode.updateNode();
