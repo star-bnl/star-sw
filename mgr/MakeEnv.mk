@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.14 1999/04/24 13:15:23 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.15 1999/08/04 23:56:51 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.15  1999/08/04 23:56:51  fisyak
+# Remove default rules
+#
 # Revision 1.14  1999/04/24 13:15:23  fisyak
 # Add --sillent mode for set SILENT environmnet variable
 #
@@ -174,18 +177,18 @@ endif
 # Makefiles
 include $(STAR_MAKE_HOME)/MakeArch.mk
 ifndef MakePam
-  MakePam := $(STAR_MAKE_HOME)/MakePam.mk
+  MakePam := $(STAR_MAKE_HOME)/MakePam.mk -r
 endif
 ifndef MakeFun
-  MakeFun := $(STAR_MAKE_HOME)/MakeFun.mk
+  MakeFun := $(STAR_MAKE_HOME)/MakeFun.mk -r
 endif
 
 ifndef MakeDll
-  MakeDll :=$(STAR_MAKE_HOME)/MakeDll.mk
+  MakeDll :=$(STAR_MAKE_HOME)/MakeDll.mk -r
 endif
 
 ifndef Makeloop
-  Makeloop :=$(STAR_MAKE_HOME)/Makeloop.mk
+  Makeloop :=$(STAR_MAKE_HOME)/Makeloop.mk -r
 endif
 ifdef SILENT
   MakePam += --silent
