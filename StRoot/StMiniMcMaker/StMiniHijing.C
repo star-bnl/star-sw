@@ -30,10 +30,12 @@ void StMiniHijing(Int_t nevents=3,
   gSystem->Load("libgeometry_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libgen_Tables");
+  gSystem->Load("libtpc_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
     
+  gSystem->Load("StDetectorDbMaker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker"); 
@@ -91,6 +93,7 @@ void StMiniHijing(Int_t nevents=3,
   krap->setGhost();
   krap->setOutDir(outDir);
   krap->setPtCut(1);
+  krap->setFileName(MainFile);
 
   // Define the cuts for the Associations
   

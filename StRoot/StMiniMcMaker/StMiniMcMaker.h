@@ -78,6 +78,7 @@ class StMiniMcMaker : public StMaker{
 
   void  Clear(Option_t *option="");
   Int_t Init();
+  Int_t InitRun(int runnumber);
   Int_t Make();
   Int_t Finish();
 
