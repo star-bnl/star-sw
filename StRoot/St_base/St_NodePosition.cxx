@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.4 1998/12/27 03:16:52 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.5 1998/12/30 22:30:17 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.5  1998/12/30 22:30:17  fine
+// St_Table::PrintHrader method has been introduced
+//
 // Revision 1.4  1998/12/27 03:16:52  fine
-// Flag WIN32 has been introduced for St_Node / St_NodePosition agaist of crashes
+// Flag WIN32 has been introduced for St_Node / St_NodePosition against of crashes
 //
 // Revision 1.3  1998/12/27 02:33:16  fine
 // St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)

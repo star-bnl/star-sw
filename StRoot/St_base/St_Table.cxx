@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.33 1998/12/21 19:45:47 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.34 1998/12/30 22:30:18 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.34  1998/12/30 22:30:18  fine
+// St_Table::PrintHrader method has been introduced
+//
 // Revision 1.33  1998/12/21 19:45:47  fisyak
 // Move ROOT includes to non system
 //
@@ -530,6 +533,19 @@ Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const
   return strbuf;
 }
 //______________________________________________________________________________
+const Char_t *St_Table::PrintHeader() const
+{
+  // Print general table inforamtion 
+     cout << endl << " ---------------------------------------------------------------------------------------" << endl
+          <<  " " << Path() 
+                 <<"  Allocated rows: "<<fN
+                 <<"\t Used rows: "<<*s_MaxIndex
+                 <<"\t Row size: "      << *s_Size << " bytes"
+      <<endl; 
+     return 0;
+}
+
+//______________________________________________________________________________
 const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst, const Char_t *collast) const 
 {
   //  
@@ -546,7 +562,13 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
    Int_t const width = 8;
    Int_t rowStep = 10; // The maximun values to print per line
    Int_t rowNumber = rownumber;
-   if (row  > GetSize())  return 0;
+   if (row  > GetSize())  { 
+        PrintHeader();
+        cout  << " ======================================================================================" << endl
+              << "   There is NO allocated row for this table"
+              << " ======================================================================================" << endl;     
+        return 0;
+   }
    if (rowNumber > GetSize()-row) rowNumber = GetSize()-row;
    if (!rowNumber) return 0;
    rowStep = TMath::Min(rowStep,rowNumber);
@@ -575,14 +597,11 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
    Int_t thisLoopLenth = 0;
    const Char_t  *nextRow;
    while (rowCount) {
-     cout << endl << " ---------------------------------------------------------------------------------------" << endl
-         <<  " " << Path() 
-                 <<"  Allocated rows: "<<fN
-                 <<"\t Used rows: "<<*s_MaxIndex
-                 <<"\t Row size: "      << *s_Size << " bytes"
-      <<endl; 
+     PrintHeader();
      if  (GetNRows() == 0) {// to Print empty table header 
-       cout << " ======================================================================================" << endl;
+        cout  << " ======================================================================================" << endl
+              << "   There is NO filled row in this table"
+              << " ======================================================================================" << endl;
        return 0; 
      }
       cout << " Table: " << classPtr->GetName()<< "\t";

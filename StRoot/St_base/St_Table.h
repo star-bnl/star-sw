@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.21 1998/12/30 01:08:02 fisyak Exp $
+// $Id: St_Table.h,v 1.22 1998/12/30 22:30:18 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.22  1998/12/30 22:30:18  fine
+// St_Table::PrintHrader method has been introduced
+//
 // Revision 1.21  1998/12/30 01:08:02  fisyak
 // Add Public SetNRows for used No. of rows
 //
@@ -121,6 +124,7 @@ public:
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
    virtual     void       Print(Option_t *buf="") { Print((Char_t *)0,Int_t(0)); }
    virtual  const Char_t *Print(Int_t row, Int_t rownumber=10, const Char_t *colfirst="", const Char_t *collast="") const; // *MENU*
+   virtual  const Char_t *PrintHeader() const; // *MENU*
                void      *ReAllocate(Int_t newsize);
    virtual     table_head_st *GetHeader() const;
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class
