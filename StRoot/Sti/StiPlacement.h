@@ -40,8 +40,8 @@ class StiPlacement{
 
 public:
 
-  enum StiRegion {kBackward, kMid, kForward, kUndefined};
-
+    enum StiRegion {kBackwardRapidity, kMidRapidity, kForwardRapidity, kUndefined};
+    
     // constructors
     StiPlacement();
 
@@ -54,12 +54,14 @@ public:
     float getCenterOrientation() const { return centerOrientation; }
     float getLayerRadius() const { return layerRadius; }
     float getZcenter() const { return zCenter; }
+    StiRegion getRegion() const {return mRegion;}
 
     // mutators
     void setNormalRep(float refAngle_, float radius_, float xOffset_);
     void setCenterRep(float refAngle_, float radius_, float orientation_);
     void setLayerRadius(float radius_){ if(radius_>=0) layerRadius = radius_; }
     void setZcenter(float val){ zCenter = val; }
+    void setRegion(StiRegion r) {mRegion = r;}
 
 protected:
 
@@ -74,7 +76,8 @@ protected:
     // independent radius for ordering
     float layerRadius;
 
-    float zCenter; 
+    float zCenter;
+    StiRegion mRegion; // backward, midrapidity, forwrad, default to kUndefined
 
 };
 

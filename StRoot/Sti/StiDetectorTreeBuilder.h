@@ -104,11 +104,11 @@ protected:
 
     ///Pointer to the current region in the tree (e.g., mid rapidity)
     StiDetectorNode* mregion;
-
+    
     ///Convenience pointer to a detector finder
     StiDetectorFinder *_detectorFinder;
-
-		Messenger&  _messenger;
+    
+    Messenger&  _messenger;
 };
 
 #endif

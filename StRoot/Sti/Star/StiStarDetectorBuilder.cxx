@@ -60,6 +60,8 @@ void StiStarDetectorBuilder::buildDetectors()
       p->setZcenter(0.);
       p->setLayerRadius(4.);
       p->setNormalRep(sector*dPhi,4.,0.);
+      p->setRegion(StiPlacement::kMidRapidity);
+
       
       StiDetector *pipeVolume = _detectorFactory->getInstance();
       name="Star/Pipe/Sector_";

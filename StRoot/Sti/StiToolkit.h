@@ -27,6 +27,7 @@ class   StiHit;
 class   StiMcTrack;
 class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
+class   StiMaker;
 template<class Factorized> class Factory;
 template<class Filtered>   class EditableFilter;
 template<class Filtered>   class Filter;
@@ -83,10 +84,12 @@ public:
   virtual StiTrackMerger        * getTrackMerger()=0;
   virtual StiVertexFinder       * getVertexFinder()=0;
   virtual StAssociationMaker    * getAssociationMaker()=0;
+  virtual StiMaker              * getStiMaker()=0;
   virtual StiResidualCalculator * getResidualCalculator()=0;
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader()=0;
 
   virtual void setAssociationMaker(StAssociationMaker * a)=0;
+  virtual void setStiMaker(StiMaker* a)=0;
   virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)=0;
   
   virtual void setGuiEnabled(bool )=0;
