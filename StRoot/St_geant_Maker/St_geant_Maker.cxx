@@ -1,8 +1,8 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.75 2002/11/01 02:11:36 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.76 2002/11/01 03:17:41 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
-// Revision 1.75  2002/11/01 02:11:36  fine
-// extra flag to build the geometry structure only introduced
+// Revision 1.76  2002/11/01 03:17:41  fine
+// the previous version has been restored. No need of the special flag
 //
 // Revision 1.74  2002/10/16 20:39:23  kopytin
 // Added code to read out BBC GSTAR tables. Needed by StBbcSimulationMaker
@@ -243,7 +243,6 @@
 #include "TTable.h"
 #include <iostream.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "TSystem.h"
 #include "GtHash.h"
@@ -382,7 +381,7 @@ TGeant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
 StMaker(name),
-fInputFile(""), fEvtHddr(0),fGeometryOnly(kFALSE)
+fInputFile(""), fEvtHddr(0)
 {
   fVolume    = 0;
   fNwGeant = nwgeant;
@@ -451,7 +450,7 @@ Int_t St_geant_Maker::Make()
 {
     Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
     Float_t  vert[4],weigh;
-    if (fGeometryOnly) return kStOK;
+
     int iRes = 0; if(iRes) {/*touch*/};
   
     Do("trig");

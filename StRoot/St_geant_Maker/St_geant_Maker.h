@@ -1,7 +1,7 @@
-// $Id: St_geant_Maker.h,v 1.29 2002/11/01 02:11:36 fine Exp $
+// $Id: St_geant_Maker.h,v 1.30 2002/11/01 03:17:42 fine Exp $
 // $Log: St_geant_Maker.h,v $
-// Revision 1.29  2002/11/01 02:11:36  fine
-// extra flag to build the geometry structure only introduced
+// Revision 1.30  2002/11/01 03:17:42  fine
+// the previous version has been restored. No need of the special flag
 //
 // Revision 1.28  2002/03/12 21:22:39  fisyak
 // Set only one StEvtHddr as default option (due to Embedding)
@@ -51,7 +51,6 @@ protected:
   TVolume*   fVolume;   //!
   TString fInputFile; // 
   StEvtHddr *fEvtHddr;//! pointer to Event Header
-  Bool_t  fGeometryOnly;  //! flag whether to make events
   virtual TShape  *MakeShape(TString *name, Int_t ivo);
   virtual TVolume *MakeVolume(TString *name, Int_t ivo, Int_t Nlevel, Int_t *Names, Int_t *Numbers);
 
@@ -69,7 +68,6 @@ public:
    virtual void   Draw(const char*);
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
-   virtual void   SetGeometry(Bool_t flag=kTRUE){ fGeometryOnly = flag;}
    virtual void   SetNwGEANT (Int_t n=2000000);
    virtual void   SetNwPAW   (Int_t n=      0);
    virtual void   SetIwtype  (Int_t n=      0);
@@ -123,7 +121,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.29 2002/11/01 02:11:36 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.30 2002/11/01 03:17:42 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
