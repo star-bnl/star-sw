@@ -43,7 +43,7 @@ CC:>--------------------------------------------------------------------
 
 CC:  Local Variable Type Declarations:
 
-      integer*4 i,detid_tpc,detid_svt,detid_ftpc,detid_ssd
+      integer*4 i,detid_tpc,detid_svt,detid_ssd
       integer*4 two4,two5,two6,two9,two10,two13,two15,two16,two17
       integer*4 two20,two21,two22,two23,two24,two25,two26,two28,two30
       integer*4 tpcx,tpcy,tpcz,tpcy10,tpcy11,tpcq,tpcdq
@@ -53,7 +53,6 @@ CC:  Local Variable Type Declarations:
 
       parameter(detid_tpc  = 1)
       parameter(detid_svt  = 2)
-      parameter(detid_ftpc = 3)
       parameter(detid_ssd  = 8)
 
       real*4    tpc_fac, svt_fac, ssd_fac
