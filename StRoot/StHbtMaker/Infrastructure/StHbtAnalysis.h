@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.11 2000/05/11 21:18:56 willson Exp $
+ * $Id: StHbtAnalysis.h,v 1.12 2000/06/15 18:54:08 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.12  2000/06/15 18:54:08  willson
+ * Methods to access cuts and correlation functions moved to derived analysis
+ * classes.
+ *
  * Revision 1.11  2000/05/11 21:18:56  willson
  * Removed StHbtThreeParticleCorrFctn's...put methods in StHbtCorrFctn
  * Some methods in derived analysis classes moved to base analysis class
@@ -87,6 +91,13 @@
 //#endif
 
 #include "StHbtMaker/Base/StHbtBaseAnalysis.h"        // base analysis class
+#include "StHbtMaker/Base/StHbtPairCut.h"     
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtParticleCut.h"
+#include "StHbtMaker/Base/StHbtCorrFctn.hh"
+#include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtPicoEventCollection.hh"
+
 //#include <string>
 
 class StHbtAnalysis : public StHbtBaseAnalysis {
@@ -99,7 +110,24 @@ public:
 
   // Gets and Sets
 
-  StHbtCorrFctn* CorrFctn(int n);     // Access to CFs within the collection
+  virtual StHbtPairCut*       PairCut();
+  virtual StHbtEventCut*      EventCut();
+  virtual StHbtParticleCut*   FirstParticleCut();
+  virtual StHbtParticleCut*   SecondParticleCut();
+
+  StHbtCorrFctnCollection* CorrFctnCollection();
+  virtual StHbtCorrFctn* CorrFctn(int n);     // Access to CFs within the collection
+  void AddCorrFctn(StHbtCorrFctn*);
+
+  void SetPairCut(StHbtPairCut*);
+  void SetEventCut(StHbtEventCut*);
+  void SetFirstParticleCut(StHbtParticleCut*);
+  void SetSecondParticleCut(StHbtParticleCut*);
+
+  unsigned int NumEventsToMix();
+  void SetNumEventsToMix(const unsigned int&);
+  StHbtPicoEventCollection* MixingBuffer();
+  bool MixingBufferFull();
 
   bool AnalyzeIdenticalParticles();
   virtual StHbtString Report();       //! returns reports of all cuts applied and correlation functions being done
@@ -113,6 +141,14 @@ public:
   friend class StHbtLikeSignAnalysis;
 
 private:
+  
+  StHbtPairCut*             mPairCut;
+  StHbtCorrFctnCollection*  mCorrFctnCollection;
+  StHbtEventCut*            mEventCut;
+  StHbtParticleCut*         mFirstParticleCut;
+  StHbtParticleCut*         mSecondParticleCut;
+  StHbtPicoEventCollection*  mMixingBuffer;
+  unsigned int mNumEventsToMix;
 
 #ifdef __ROOT__
   ClassDef(StHbtAnalysis, 0)
@@ -120,7 +156,26 @@ private:
 
 };
 
+// Get's
+inline StHbtPairCut*             StHbtAnalysis::PairCut() {return mPairCut;}
+inline StHbtEventCut*            StHbtAnalysis::EventCut() {return mEventCut;}
+inline StHbtParticleCut*         StHbtAnalysis::FirstParticleCut() {return mFirstParticleCut;}
+inline StHbtParticleCut*         StHbtAnalysis::SecondParticleCut() {return mSecondParticleCut;}
+inline StHbtCorrFctnCollection*  StHbtAnalysis::CorrFctnCollection() {return mCorrFctnCollection;}
+inline unsigned int              StHbtAnalysis::NumEventsToMix(){return mNumEventsToMix;}
+
+inline StHbtPicoEventCollection*  StHbtAnalysis::MixingBuffer() {return mMixingBuffer;}
+
 // Set's
 inline bool StHbtAnalysis::AnalyzeIdenticalParticles(){return (mFirstParticleCut==mSecondParticleCut);}
+inline void StHbtAnalysis::SetPairCut(StHbtPairCut* x) { mPairCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtAnalysis::AddCorrFctn(StHbtCorrFctn* cf) {mCorrFctnCollection->push_back(cf); cf->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtAnalysis::SetEventCut(StHbtEventCut* x) {mEventCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtAnalysis::SetFirstParticleCut(StHbtParticleCut* x) {mFirstParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+inline void StHbtAnalysis::SetSecondParticleCut(StHbtParticleCut* x) {mSecondParticleCut = x; x->SetAnalysis((StHbtBaseAnalysis*)this);}
+
+inline void StHbtAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
+inline bool StHbtAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
+
 
 #endif
