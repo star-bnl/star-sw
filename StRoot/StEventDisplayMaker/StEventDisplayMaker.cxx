@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.44 1999/12/17 23:28:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.45 1999/12/19 00:12:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -589,7 +589,7 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
     Width_t hitSize  = 2;
 
     // ---------------------------- hits filter ----------------------------- //
-    if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle); //
+    if (filter) hitColor =  filter->Channel(eventCollection,hitSize,hitStyle);//
     // ---------------------------------------------------------------------- //
 #ifdef STEVENT
     Int_t   hitCounter = 0;
@@ -625,7 +625,7 @@ Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilte
     Style_t vertexStyle = 3;
     Width_t vertexSize  = 1;
     // ---------------------------- hits filter ----------------------------- //
-    if (filter) vertexColor =  filter->Channel(vertex,vertexSize,vertexStyle); //
+    if (filter) vertexColor =  filter->Channel(vertex,vertexSize,vertexStyle);//
     // ---------------------------------------------------------------------- //
     if (vertexColor > 0) {
        const StThreeVectorF &vertexVector = ((StVertex *)vertex)->position();
@@ -807,15 +807,15 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
     St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
     Color_t hitColor = kGreen;
-    Style_t hitStyle = 20;
-    Width_t hitSize  = 2;
+    Style_t hitStyle = packed ? 5 : 20;
+    Width_t hitSize  = 1;
     i = 0;
     Int_t nextKeyIndx = 0;
     Int_t maxTrackCounter = track2Line->CountKeys();
     for (i=0;i<maxTrackCounter;i++) 
     { 
        // -------------------------- hits filter -------------------------------------- //
-       if (filter) hitColor =  filter->Channel(track2Line,nextKeyIndx,hitSize,hitStyle); //
+       if (filter) hitColor =  filter->Channel(track2Line,nextKeyIndx,hitSize,hitStyle);//
        if (filter->IsOff() ) break;                                                     //
        // ----------------------------------------------------------------------------- //
        if (hitColor > 0 && keyPositions[0]) {
@@ -919,7 +919,7 @@ void StEventDisplayMaker::PrintFilterStatus()
   }
 }
 
-#define DISPLAY_FILTER_DEFINITION(filterName)                                 \
+#define DISPLAY_FILTER_DEFINITION(filterName)                                \
 Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
 { return SetFlag(flag,_NAME2_(k,filterName)); }                              \
 StVirtualEventFilter *StEventDisplayMaker::_NAME2_(Set,filterName)(StVirtualEventFilter *filter) \
@@ -958,6 +958,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.45  1999/12/19 00:12:45  fine
+// some corrections for the packed tables
+//
 // Revision 1.44  1999/12/17 23:28:45  fine
 // clean up for the sake of docs + new class St_Table3DPackedPoints introduced
 //
