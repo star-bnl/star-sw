@@ -1,8 +1,11 @@
 //*CMZ :          23/02/99  18.27.27  by Gene Van Buren ( genevb@bnl.gov)
 //*-- Author :    Gene Van Buren ( genevb@bnl.gov)   23/02/99
 //
-// $Id: St_TableNtuple.cxx,v 1.8 1999/02/25 15:44:32 fine Exp $
+// $Id: St_TableNtuple.cxx,v 1.9 1999/03/11 01:29:52 perev Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.9  1999/03/11 01:29:52  perev
+// New schema xdf2root
+//
 // Revision 1.8  1999/02/25 15:44:32  fine
 // author's name has been introduced for HTML doc
 //
@@ -411,7 +414,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
       mType[count] = kNAN;
     }
     if (mType[count]) {
-      if ( memberDim = member->GetArrayDim() ) {    // Check for arrays
+      if ( (memberDim = member->GetArrayDim()) ) {    // Check for arrays
         memberMaxIndex = 0;
         for (i=0; i<memberDim; i++) memberMaxIndex += member->GetMaxIndex(i);
         memberSize = memberType->Size();
@@ -465,7 +468,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.8 1999/02/25 15:44:32 fine Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.9 1999/03/11 01:29:52 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());

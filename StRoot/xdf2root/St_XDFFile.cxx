@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.30 1999/03/02 03:19:02 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.31 1999/03/11 01:29:53 perev Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.31  1999/03/11 01:29:53  perev
+// New schema xdf2root
+//
 // Revision 1.30  1999/03/02 03:19:02  fine
 // re-commit, the obsolte version was in use
 //
@@ -524,8 +527,8 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
  //
   if (!dataset) return 0;
   DS_DATASET_T *ds=0;
-  St_Table *ta = (St_Table *)dataset->Data();
-  if (ta) {
+  St_Table *ta = (St_Table *)dataset;
+  if (dataset->HasData()) {
     Char_t tablespec[2000];
     if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,2000), 
                        ta->GetNRows(), ta->GetArray())) {  
