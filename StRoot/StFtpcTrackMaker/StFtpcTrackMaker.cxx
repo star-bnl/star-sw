@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.41 2002/11/06 13:46:46 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.42 2003/01/16 18:04:34 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.42  2003/01/16 18:04:34  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.41  2002/11/06 13:46:46  oldi
 // Vertex handling simplifed.
 // Global/primary fit handling simplified.
@@ -607,12 +611,12 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
       
       StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
       
-      // Residuals
+      // Residuals (fill globals only, during tracking primary isn't filled anyway)
       if (mhit->GetUsage()) {
-	m_xres->Fill(mhit->GetXResidual());
-	m_yres->Fill(mhit->GetYResidual());
-	m_rres->Fill(mhit->GetRResidual());
-	m_phires->Fill(mhit->GetPhiResidual());
+	m_xres->Fill(mhit->GetXGlobResidual());
+	m_yres->Fill(mhit->GetYGlobResidual());
+	m_rres->Fill(mhit->GetRGlobResidual());
+	m_phires->Fill(mhit->GetPhiGlobResidual());
       }
       
       if (mhit->GetPadRow() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
@@ -622,8 +626,8 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	
 	if (mhit->GetUsage()) {
-	  m_rres_vs_r_west->Fill(mhit->GetRResidual(), mhit->GetRadius());
-	  m_phires_vs_r_west->Fill(mhit->GetPhiResidual(), mhit->GetRadius());
+	  m_rres_vs_r_west->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
+	  m_phires_vs_r_west->Fill(mhit->GetPhiGlobResidual(), mhit->GetRadius());
 	}
       }
 
@@ -634,8 +638,8 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	
 	if (mhit->GetUsage()) {
-	  m_rres_vs_r_east->Fill(mhit->GetRResidual(), mhit->GetRadius());
-	  m_phires_vs_r_east->Fill(mhit->GetPhiResidual(), mhit->GetRadius());
+	  m_rres_vs_r_east->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
+	  m_phires_vs_r_east->Fill(mhit->GetPhiGlobResidual(), mhit->GetRadius());
 	}
       }
     }
@@ -658,7 +662,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.41 2002/11/06 13:46:46 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.42 2003/01/16 18:04:34 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

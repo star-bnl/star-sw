@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.hh,v 1.9 2002/11/21 15:46:30 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.10 2003/01/16 18:04:35 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.10  2003/01/16 18:04:35  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.9  2002/11/21 15:46:30  oldi
 // Enabled rotation for FTPC west. If there is an observed shift of the vertex
 // position in y-direction (in FTPC west), just fill this offset into the Db.
@@ -49,6 +53,10 @@
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
 #include "StMatrixD.hh"
+
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
 
 #include "tables/St_ftpcTrackingPars_Table.h"
 #include "tables/St_ftpcDimensions_Table.h"
@@ -136,11 +144,11 @@ private:
   StThreeVectorD mTpcPositionInGlobal; 
 
   // internal FTPC rotation
-  StMatrixD *mFtpcRotation;
-  StMatrixD *mFtpcRotationInverse;
-   Double_t mInstallationPointY[2];
-   Double_t mInstallationPointZ[2];
-   Double_t mObservedVertexOffsetY[2];
+  StMatrixD *mFtpcRotation[2];
+  StMatrixD *mFtpcRotationInverse[2];
+   Double_t  mInstallationPointY[2];
+   Double_t  mInstallationPointZ[2];
+   Double_t  mObservedVertexOffsetY[2];
   
   StMagUtilities *mMagField;       // pointer to magnetic field table
         Double_t  mMagFieldFactor;

@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.hh,v 1.16 2002/11/28 09:39:30 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.17 2003/01/16 18:04:33 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.17  2003/01/16 18:04:33  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.16  2002/11/28 09:39:30  oldi
 // Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
 // It was used do decide for global or primary fit.
@@ -177,7 +181,7 @@ public:
   Double_t   CalcDca(StFtpcVertex *vertex, Bool_t primaryFit);                    // calculation of distance of closest approach (dca) to main vertex
   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
-      void   CalcResiduals();                                                     // calulates the residuals for each point on track
+      void   CalcResiduals(Bool_t primaryFit);                                    // calulates the primary or global fit residuals for each point on track
      Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, 
 			StFtpcVertex *vertex,
 			Bool_t primary_fit);                                      // writes track to table

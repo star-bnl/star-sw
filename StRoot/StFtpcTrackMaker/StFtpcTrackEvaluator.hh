@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.9 2002/11/06 13:46:29 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.10 2003/01/16 18:04:34 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.10  2003/01/16 18:04:34  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.9  2002/11/06 13:46:29  oldi
 // Code clean ups.
 //
@@ -367,7 +371,7 @@ public:
      void   ClusterInfo();   // Shows information about geant clusters.
      void   TrackerInfo();   // Shows information about tracker output.
      void   ProblemsInfo();  // Shows information about problems.
-     void   Info();          // Shows all information.
+     void   InfoAll();       // Shows all information.
 
   ClassDef(StFtpcTrackEvaluator, 1)  //Ftpc track evaluation class
 };

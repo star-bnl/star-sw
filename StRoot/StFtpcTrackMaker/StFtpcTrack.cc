@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.cc,v 1.24 2002/11/28 09:39:25 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.25 2003/01/16 18:04:33 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.25  2003/01/16 18:04:33  oldi
+// Bugs eliminated. Now it compiles on Solaris again.
+// Split residuals for global and primary fit.
+//
 // Revision 1.24  2002/11/28 09:39:25  oldi
 // Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
 // It was used do decide for global or primary fit.
@@ -515,7 +519,7 @@ Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex, Bool_t primaryFit)
 }
 
 
-void StFtpcTrack::CalcResiduals() {
+void StFtpcTrack::CalcResiduals(Bool_t primaryFit) {
   // Calculates the residuals to the momentum fit helix for each point.
   
   StThreeVector<Double_t> nv(0., 0., 1.);
@@ -531,12 +535,21 @@ void StFtpcTrack::CalcResiduals() {
     Double_t x_hit = hit->GetX();
     Double_t y_hit = hit->GetY();
 
-    hit->SetXResidual(x_hit - x_hel);
-    hit->SetYResidual(y_hit - y_hel);
-    hit->SetRResidual(TMath::Sqrt(x_hit*x_hit + y_hit*y_hit) - TMath::Sqrt(x_hel*x_hel + y_hel*y_hel));
-    hit->SetPhiResidual(TMath::ATan2(y_hit, x_hit) - TMath::ATan2(y_hel, x_hel));
+    if (primaryFit) {
+      hit->SetXPrimResidual(x_hit - x_hel);
+      hit->SetYPrimResidual(y_hit - y_hel);
+      hit->SetRPrimResidual(TMath::Sqrt(x_hit*x_hit + y_hit*y_hit) - TMath::Sqrt(x_hel*x_hel + y_hel*y_hel));
+      hit->SetPhiPrimResidual(TMath::ATan2(y_hit, x_hit) - TMath::ATan2(y_hel, x_hel));
+    }
+
+    else { // global fit
+      hit->SetXGlobResidual(x_hit - x_hel);
+      hit->SetYGlobResidual(y_hit - y_hel);
+      hit->SetRGlobResidual(TMath::Sqrt(x_hit*x_hit + y_hit*y_hit) - TMath::Sqrt(x_hel*x_hel + y_hel*y_hel));
+      hit->SetPhiGlobResidual(TMath::ATan2(y_hit, x_hit) - TMath::ATan2(y_hel, x_hel));
+    }
   }
-   
+
   return;
 }
 
@@ -626,7 +639,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit
     mDca = 0.; // set dca to zero
   }
 
-  CalcResiduals();
+  CalcResiduals(primary_fit);
 
   return;
 }
