@@ -94,6 +94,7 @@ void *TTreeIterCast::Addr(Int_t outType)
      v = 0;
   }
   if (!v) fE[0]++;
+//  printf("TTreeIterCast::Addr = %p\n",v);
   return v;
 }
 
@@ -362,6 +363,7 @@ TTreeIterCast &TTreeIter::operator() (const char *varname)
    if (fCint)  {
      fCint = 0;
      TTreeIterCast *v =(TTreeIterCast*)addr;
+//     printf("CINT Address %p\n",(void*)v);
      return *v;//CINT workaround
    }
    return fCast;
