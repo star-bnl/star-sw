@@ -1,8 +1,9 @@
-// $Id: StEEmcDataMaker.cxx,v 1.16 2004/04/08 16:28:03 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.17 2004/07/01 04:01:14 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
 #include <assert.h>
+#include <StMessMgr.h>
 
 #include "StEventTypes.h"
 #include "StEvent.h"
@@ -17,8 +18,6 @@
 #include "StEEmcDbMaker/EEmcDbCrate.h"
 
 #include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h" 
-
-//#include "EEmcHealth.h"
 
 ClassImp(StEEmcDataMaker)
 
@@ -50,7 +49,11 @@ Int_t StEEmcDataMaker::Init(){
 
   hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
   hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
-  
+
+  hs[3]=new TH1F("snB","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
+
+  hs[4]=new TH1F("snT","total # of corruption bits in Headers per eve",220,-0.5,219.5);
+
   return StMaker::Init();
 }
 
@@ -60,11 +63,11 @@ Int_t StEEmcDataMaker::Init(){
 //___________________________________________________
 
 Int_t StEEmcDataMaker::InitRun  (int runNumber){
-  printf("\n%s::InitRun(%d) list  DB content \n",GetName(),runNumber);
+  gMessMgr->Message("","I") << GetName()<<"::InitRun("<< runNumber<<") list  DB content"<<endm;
  if(mDb==0){  
-    printf("\n\nWARN %s::InitRun() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
+   gMessMgr->Message("","W") << GetName()<<"::InitRun() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n"<<endm;
   } else if ( mDb->valid()==0 ) {
-    printf("\n\nWARN %s::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n", GetName());
+    gMessMgr->Message("","W") << GetName()<<"::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n"<<endm;
     mDb=0;
   } else {
 
@@ -79,7 +82,7 @@ Int_t StEEmcDataMaker::InitRun  (int runNumber){
 //____________________________________________________
 Int_t StEEmcDataMaker::Make(){
   if(mDb==0){  
-    printf("WARN %s::Make() did not found \"eeDb-maker\" or no DB data for EEMC, all EEMC data will be ignored\n", GetName());
+    gMessMgr->Message("","W") << GetName()<<"::Make() did not found \"eeDb-maker\" or no DB data for EEMC, all EEMC data will be ignored"<<endm;
     return kStOK;
   } 
   
@@ -88,7 +91,7 @@ Int_t StEEmcDataMaker::Make(){
   // printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
 
   hs[0]->Fill(0);
- //::::::::::::::::: copy raw data to StEvent ::::::::::::: 
+  //::::::::::::::::: copy raw data to StEvent ::::::::::::: 
   if(!copyRawData(mEvent)) return kStOK;
   hs[0]->Fill(1);
 
@@ -124,12 +127,14 @@ int   StEEmcDataMaker::copyRawData(StEvent* mEvent) {
   if(emcC==0) { // create this collection if not existing
     emcC=new StEmcCollection();
     mEvent->setEmcCollection(emcC);
-    printf("%s::Make() has added a non existing StEmcCollection()\n", GetName());
+    gMessMgr->Message("","W") << GetName()<<"::copyRawData() has added a non existing StEmcCollection()"<<endm;
   }
   
   StEmcRawData *raw=new  StEmcRawData;  
   emcC->setEemcRawData(raw);
-  printf("%s::copy %d EEMC raw data blocks eveID=%d\n",GetName(),mDb->getNFiber(),mEvent->id());
+
+  gMessMgr->Message("","I") << GetName()<<"::copyRawData() copy "<<mDb->getNFiber() <<" EEMC raw data blocks eveID="<<mEvent->id() << endm;
+
 
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
@@ -151,7 +156,7 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
 
   if(emcC==0) {
-    printf("%s::headersAreSick() no emc collection, skip\n",GetName());
+    gMessMgr->Message("","W") << GetName()<<"::headersAreSick() no emc collection, skip"<<endm;
     return true;
   }
 
@@ -163,8 +168,9 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
 
   EEfeeDataBlock block; // use utility class as the work horse
 
-  int sick=false;
   int icr;
+  int totErrBit=0;
+
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
     if(!fiber->useIt) continue; // drop masked out crates
@@ -183,16 +189,24 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
     }
 
     int trigCommand=4; // physics, 9=laser/LED, 8=??
-    int valid=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
- 
-    printf("valid=%d ",valid); fiber->print();
+    int sanity=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
 
-    if(valid) continue;
-    sick=true;
+    int i;
+    for(i=0;i<8;i++) {// examin all sanity bits
+      if(!(sanity&(1<<i))) continue;
+      totErrBit++;
+      int k=icr*10+i;
+      //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
+      hs[3]->Fill(k);
+    }
+    gMessMgr->Message("","I") << GetName()<<"::headersAreSick() errors found="<<sanity<<endm;
+    //   printf("sanity=%d ",sanity); fiber->print();
   }
 
-  printf("%s::headersAreSick()==%d\n",GetName(),sick);
-  return sick;
+   hs[4]->Fill(totErrBit);
+   
+   gMessMgr->Message("","I") << GetName()<<"::headersAreSick() totErrBit="<<totErrBit<< endm;
+  return totErrBit;
 }
 
 
@@ -201,6 +215,8 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
 //____________________________________________________
 //____________________________________________________
 int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
+  const int mxN256one=5;
+  const int mxN256tot=20;
 
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
 
@@ -209,7 +225,7 @@ int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
   StEmcRawData* raw=emcC->eemcRawData();
   assert(raw);
 
-  int nGhost=0, n256=0;
+  int nGhostTot=0, n256Tot=0;
   int icr;
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
@@ -218,18 +234,30 @@ int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
     const  UShort_t* data=raw->data(icr);
     assert(data);
     int i;
+    int nGhost=0, n256=0;
     for(i=0;i<raw->sizeData(icr);i++) {
       if((data[i] &0xff)==0 ) n256++;
       if(i>=121 && data[i]>40) nGhost++;
     }
+    nGhostTot+=nGhost;
+    n256Tot+=n256;
+    if(nGhost>0) {
+      int k=icr*10+5;
+      hs[3]->Fill(k);
+    }
+    if(n256>mxN256one) {
+      int k=icr*10+6;
+      hs[3]->Fill(k);
+    }
+    
   }
 
-  hs[1]->Fill(n256);
-  hs[2]->Fill(nGhost);
+  hs[1]->Fill(n256Tot);
+  hs[2]->Fill(nGhostTot);
 
-  printf("%s::towerDataAreSick() , n256=%d, nGhost=%d\n",GetName(),n256, nGhost);
-  if(nGhost>0) return true;
-  if(n256>20) return true;
+  gMessMgr->Message("","I") << GetName()<<"::towerDataAreSick() ,total n256="<<n256Tot <<", nGhost="<<nGhostTot<<endm; 
+  if(nGhostTot>0)return true;
+  if(n256Tot>mxN256tot) return true;
   return false;
 }
 
@@ -262,9 +290,8 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
     emcC->setDetector(emcDet[det]);
   }
 
-  printf("%s::raw2pixels() collections created\n",GetName());
+  gMessMgr->Message("","I") << GetName()<<"::raw2pixels() collections created"<<endm;
 
-#if 1
   // store data from raw blocks to StEvent
   int nDrop=0;
   int nMap=0;
@@ -328,10 +355,6 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
     } // end of loop over channels
   }// end of loop over crates 
   
-    
-  printf("%s event finished nDrop=%d nMap=%d nTow=%d nPre=%d nSMD=%d\n",GetName(), nDrop,nMap,nTow,nPre, nSmd);
-
-#endif
 
 
 #if 0 // test of tower data storage
@@ -382,13 +405,18 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  }
 #endif
  
- printf("%s filling done\n",GetName());
+ // printf("%s filling done\n",GetName());
+
 
  for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
    StEmcDetector* emcDetX= emcC->detector( StDetectorId(det));
    assert(emcDetX);
-   printf("det=%d ID=%d nHits=%d\n",det,StDetectorId(det),emcDetX->numberOfHits());
- }  
+   gMessMgr->Message("","I") <<" StEmcDetectorID="<< StDetectorId(det)<<"  nHits="<<emcDetX->numberOfHits()<<endm;
+ }
+
+    
+  gMessMgr->Message("","I") << GetName()<<"::raw2pixels() finished  nDrop="<< nDrop<<",nMap="<< nMap<<",nTow="<<nTow <<",nPre="<<nPre <<", nSmd="<<nSmd <<endm;
+  
 }
 
  
@@ -396,6 +424,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.17  2004/07/01 04:01:14  balewski
+// fix data corruption detection, cleanup
+//
 // Revision 1.16  2004/04/08 16:28:03  balewski
 // new EEMC hit indexing + new DB access
 //
