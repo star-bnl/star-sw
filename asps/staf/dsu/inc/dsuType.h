@@ -32,10 +32,11 @@
 *  prototypes
 */
 CWN_BLOCK_TYPE_T block_type(DS_TYPE_CODE_T type);
-char* basename(char* filename);
 char* block_name(char *name,long n);
 char* col2spec(char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim);
 long dsl2cwn(DS_DATASET_T *pDataset,long hid);
 long dspPrintDataset(DS_DATASET_T *pDataset);
 long xdf2rzd(int lunn, char* inFile);
-
+#ifndef linux
+char* basename(char* filename);
+#endif

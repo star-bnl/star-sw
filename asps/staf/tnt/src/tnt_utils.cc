@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "dstype.h"
+#include "asuAlloc.h"
 #include "tdmLib.h"
 #include "tntLib.h" 
 

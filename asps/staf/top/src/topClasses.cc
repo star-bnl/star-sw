@@ -10,6 +10,7 @@
 */
 
 //:----------------------------------------------- INCLUDES           --
+#include "asuAlloc.h"
 #include "topClasses.hh"
 #include "tdmClasses.hh"
 #include "top_utils.h"

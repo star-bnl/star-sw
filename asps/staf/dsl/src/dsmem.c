@@ -16,6 +16,7 @@ general routines for memory allocation
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
+#include "asuAlloc.h"
 #include "dstype.h"
 /*
  * fix for realloc bug on some versions of UNIX

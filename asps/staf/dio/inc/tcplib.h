@@ -57,21 +57,18 @@ int tcpWrite(int *pFd, char *buf, int nbytes);
 #endif /*sun4os5pc*/
 #endif /*IRIX*/
 
-#ifndef WIN32
- int close(int fd);
- int fork(void);
- int listen(int s, int backlog);
-#endif
-
 #ifndef sun
 /*-cet01b-char *memset(char *ptr, int val, int nbyte); */
 #endif
 
 #ifndef WIN32
-#ifndef Linux
+#ifndef linux
   int read(int fd, char *buf, int nbytes);
   int socket(int domain, int type, int protocol);
   int write(int fd, char *buf, int nbytes);
+  int close(int fd);
+  int fork(void);
+  int listen(int s, int backlog);
 #else
   int read(int fd, void *buf, unsigned int nbytes);
   int socket(int domain, int type, int protocol);

@@ -28,6 +28,7 @@ error has occured.
 #define ntohl(x)    (x)
 #define htonl(x)    (x)
 #endif
+#include "asuAlloc.h"
 #include "xdrtape.h"
 /*****************************************************************************
 *

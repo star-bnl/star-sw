@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
-#ifdef irix
+#if defined(irix) || defined(irix64) || defined(Linux)
 # include <sys/time.h>
 #else
 # include <time.h>

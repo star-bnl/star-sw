@@ -47,7 +47,7 @@ int getrusage();
 
 #endif /* VAX ***************************************************************/
 
-#ifdef IRIX /* IRIX definitions ***********************************************/
+#if defined(IRIX) || defined(IRIX64) /* IRIX definitions ********************/
 
 #include <sys/types.h>
 #include <sys/times.h>
