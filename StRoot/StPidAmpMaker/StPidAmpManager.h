@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.h,v 1.2 2000/04/09 16:36:43 aihong Exp $
+ * $Id: StPidAmpManager.h,v 1.3 2000/04/11 15:45:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.h,v $
+ * Revision 1.3  2000/04/11 15:45:25  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.2  2000/04/09 16:36:43  aihong
  * change for adapting NHitDcaNet added
  *
@@ -66,12 +69,10 @@ class StPidAmpManager{
      void bookAPtNHitsChannelCollection(Int_t n, Int_t* nitsAry,Int_t p, Double_t* ptAry,TString fitOpt, TString drawOpt);
 
 
-
-     void setUseBetaGammaFit(Bool_t br);
-     void setDrawOpt(TString s);
+     void passTrksAddress(StPidAmpTrkVector* trks); //!
      void printAllSetsNames();
      void printNSets();//print # of sets in store
-     void process(StPidAmpTrkVector* trks,TH3D* histo); 
+     void process(TH3D* histo); 
      void clearStore();
 
      StPidAmpChannelCollectionVector* netSets(); //!
@@ -82,7 +83,7 @@ class StPidAmpManager{
       
 
 
-     void fillTrks(StPidAmpTrkVector* trks); //!
+
   
 
      StPidAmpChannelCollectionVector* mChannelCollections; //!

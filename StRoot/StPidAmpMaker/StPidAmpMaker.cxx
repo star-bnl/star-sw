@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.cxx,v 1.3 2000/04/09 18:50:47 aihong Exp $
+ * $Id: StPidAmpMaker.cxx,v 1.4 2000/04/11 15:45:25 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.cxx,v $
+ * Revision 1.4  2000/04/11 15:45:25  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.3  2000/04/09 18:50:47  aihong
  * change Make() to read directly from dst tables instead of StEvent
  *
@@ -42,12 +45,13 @@ ClassImp(StPidAmpMaker)
 StPidAmpMaker::StPidAmpMaker(const Char_t *name) : StMaker(name)
 {
     theManager    =new StPidAmpManager(); 
+
     ampTrks     =new StPidAmpTrkVector();
     dependHisto =new TH3D("histo of dependencies","histo of dependencies",NBinNHits,0,NMaxHits,NBinPt,0,PtUpLimit,NBinX,0,XUpLimit);
     //                                                                    nhits,                pt,           x.
 
-
-
+    mNHits4BG=0;
+    theManager->passTrksAddress(ampTrks);
 
 }
 
@@ -76,14 +80,22 @@ StPidAmpMaker::Finish()
 
   //  dependHisto->Project3D("x")->Draw();
 
+        
 
     //release unused space back to memory.
         StPidAmpTrkVector tmpVector=*ampTrks;
          ampTrks->swap(tmpVector);
+
+
+
+
      
     //run...
-        if (theManager->netSets()->size()==0) theManager->bookADefaultChannelCollection("BAR","B");
-       theManager->process(ampTrks,dependHisto);
+        if (theManager->netSets()->size()==0) 
+        theManager->bookADefaultChannelCollection("BAR","B");
+
+
+       theManager->process(dependHisto);
  //    dependHisto->Draw();
 
     return kStOK;
@@ -234,6 +246,8 @@ StPidAmpMaker::AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Dou
 }
 
 
+
+    
 
 
 
