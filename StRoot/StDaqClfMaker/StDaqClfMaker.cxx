@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.2 2002/03/02 15:45:07 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.3 2002/03/08 20:33:43 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.3  2002/03/08 20:33:43  jml
+ * Instantiate and write to StEvent if "ittf" flag is set.
+ *
  * Revision 1.2  2002/03/02 15:45:07  jml
  * updated the CVS log comments
  *
@@ -38,6 +41,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <StMessMgr.h>
+#include <StEvent.h>
+#include <StEvent/StTpcHitCollection.h>
+#include <StEvent/StTpcHit.h>
+#include <StThreeVectorF.hh>
+
 
 #include "rtsSystems.h"
 #include "StDaqClfMaker.h"
@@ -62,6 +70,7 @@ StDaqClfMaker::StDaqClfMaker(const char *name):StMaker(name)
 {
   gMessMgr->Debug() << "Constructor for StDaqClfMaker()" << endm;
   fcf = NULL;
+  mCTransform = NULL;
 }
 
 StDaqClfMaker::~StDaqClfMaker() 
@@ -71,6 +80,12 @@ StDaqClfMaker::~StDaqClfMaker()
   {
     delete fcf;
     fcf = NULL;
+  }
+
+  if(mCTransform != NULL)
+  {
+    delete mCTransform;
+    mCTransform = NULL;
   }
 }
 
@@ -119,6 +134,24 @@ Int_t StDaqClfMaker::Init()
   if(x) sscanf(x,"%d",&splitRows);
   else splitRows = 1;
 
+  // Check ittf flag...
+  if(chain->GetOption("ittf"))
+  {
+    gMessMgr->Info() << "Writing to StEvent..." << endm;
+    mFill_tphit = 0;
+    mFill_stevent = 1;
+    mCreate_stevent = 1;
+  }
+  else
+  {
+    gMessMgr->Info() << "Writing to tphit... " << endm;
+    mFill_tphit = 1;
+    mFill_stevent = 0;
+    mCreate_stevent = 0;
+  }
+  mStEvent = NULL;
+  mT_tphit = NULL;
+
   gMessMgr->Info() << "prfin="<<mPrfin<<" prfout=" << mPrfout << endm;
   gMessMgr->Info() << "trfin="<<mTrfin<<" trfout=" << mTrfout << endm;
   gMessMgr->Info() << "dpad=" <<mDp<<endm;
@@ -160,34 +193,27 @@ Int_t StDaqClfMaker::Make()
 {
   PrintInfo();
 
+  // Hack for now...
+  if(mCreate_stevent)
+  {
+    
+    if(mStEvent != NULL)
+    {
+      delete mStEvent;
+      mStEvent = NULL;
+    }
+
+    St_DataSetIter ods(m_DataSet);
+    mStEvent = new StEvent();
+    ods.Add(mStEvent);
+  }
+
   St_DataSet *rawData;
   St_DataSet *sector;
   u_int croat_out[6000 * 2];                 // maximum number of clusters pad padrow * 2
   int sz;
-  int clustercount=0;
-  tss_tsspar_st *tsspar = m_tsspar->GetTable();
+  clustercount=0;
   
-  double drift_velocity = gStTpcDb->DriftVelocity();
-  gMessMgr->Info() << "The drift velocity used = " << drift_velocity << endm;
-
-
-  //InitHistograms();
-
-  rawData = (St_DataSet *)GetInputDS("tpc_raw");
-  St_DataSetIter rawIter(rawData);
-
-  // Set up tphit dataset...If exists use ould one, else create it.
-  St_DataSetIter outputDataSet(m_DataSet);
-  St_tcl_tphit *T_tphit = NULL;
-  T_tphit = (St_tcl_tphit *)outputDataSet("tphit");
-  if(T_tphit == NULL)
-  {
-    T_tphit = new St_tcl_tphit("tphit",10);
-    outputDataSet.Add(T_tphit);
-  }
-
-  tcl_tphit_st hit;
-  memset(&hit,0,sizeof(hit));
 
   // Coordinate transformer
   if(!gStTpcDb)
@@ -195,7 +221,40 @@ Int_t StDaqClfMaker::Make()
     gMessMgr->Error() << "There is no gStTpcDb pointer\n" << endm;
     exit(0);
   }
-  StTpcCoordinateTransform ctransform(gStTpcDb);
+
+  // need a coordinate transformer...
+  if(!mCTransform)
+  {
+    mCTransform = new StTpcCoordinateTransform(gStTpcDb);
+  }
+
+  mDriftVelocity = gStTpcDb->DriftVelocity();
+  gMessMgr->Info() << "The drift velocity used = " << mDriftVelocity << endm;
+
+
+  //InitHistograms();
+
+  rawData = (St_DataSet *)GetInputDS("tpc_raw");
+  St_DataSetIter rawIter(rawData);
+
+  if(mFill_tphit)
+  {
+    // Set up tphit dataset...If exists use old one, else create it.
+    St_DataSetIter outputDataSet(m_DataSet);
+  
+    mT_tphit = (St_tcl_tphit *)outputDataSet("tphit");
+    if(mT_tphit == NULL)
+    {
+      mT_tphit = new St_tcl_tphit("tphit",10);
+      outputDataSet.Add(mT_tphit);
+    }
+  }
+
+  if(mFill_stevent)
+  {
+    mTpcHitColl = new StTpcHitCollection();
+    assert(mTpcHitColl);
+  }
   
   while((sector = rawIter()) != NULL) {
 
@@ -339,84 +398,13 @@ Int_t StDaqClfMaker::Make()
 	  int cl_c = ((fmt21_f *)croat_outp)->c;
 	  croat_outp++;
 
-	  if(cl_f);   // Get rid of pesky unused variable message...
-
-	  double lx = lxFromPad(r+1,((double)cl_x/64.0));
-	  double ly = lyFromRow(r+1);
-	  double lz = lzFromTB(((double)cl_t/64.0), sectorIdx, r+1, (cl_x+32)/64);
-
-	  // t0 correction?
-	  lz -= 3.0 * tsspar->tau * drift_velocity * 1.0e-6;
-	  
-	  int cl_xb = cl_x/64;
-	  int cl_tb = cl_t/64;
-
-	  StTpcLocalSectorCoordinate local(lx,ly,lz,sectorIdx);
-	  StTpcLocalCoordinate global;   // tpt does the local --> global (DB adjustments?)
-	  ctransform(local,global);
-
-	  StGlobalCoordinate g2;
-	  ctransform(global,g2);
-						
-	  hit.cluster = clustercount;
-	  
-	  hit.flag = 0;
-	  hit.id = clustercount;
-	  // hit.alpha = ;
-	  // hit.lambda = ;
-
-	  hit.row = (r+1) + sectorIdx * 100;
-	  hit.q = (float)cl_c;
-
-	  double gain = (r<13) ? tsspar->gain_in : tsspar->gain_out;
-	  double wire_coupling = (r<13) ? tsspar->wire_coupling_in : tsspar->wire_coupling_out;
-	  hit.q *= tsspar->ave_ion_pot * tsspar->scale / (gain * wire_coupling);
-
-	  hit.x = global.position().x();
-	  hit.dx = mDp;
-	  hit.y = global.position().y();
-	  hit.dy = mDperp;
-	  hit.z = global.position().z();
-	  hit.dz = mDt;
-
-	  hit.nseq = 5;
-	  hit.npads = 5;
-
-	  hit.minpad = cl_xb - 2;
-	  if(hit.minpad < 1) 
-	  {
-	    hit.npads = cl_xb + 2;
-	    hit.minpad = 1;
-	  }
-	  hit.maxpad = cl_xb + 2;
-
-	  hit.ntmbk = 5;
-	  hit.mintmbk = cl_tb - 2;
-	  if(hit.mintmbk < 0)
-	  {
-	    hit.ntmbk = cl_tb + 3;
-	    hit.mintmbk = 0;
-	  }
-	  hit.maxtmbk = cl_tb + 2;
-
-	  hit.prf = (r>=13) ? mPrfout : mPrfin ;
-	  hit.zrf = (r>=13) ? mTrfout : mTrfin ;
-
-	  int nAlloc = T_tphit->GetTableSize();
-
-	  int nUsed = T_tphit->GetNRows();
-	  if(nUsed>nAlloc-10)
-	  {
-	    T_tphit->ReAllocate(Int_t(nAlloc*1.2+10));
-	  }
-	  T_tphit->AddAt(&hit, nUsed);
+	  saveCluster(cl_x,cl_t,cl_f,cl_c,r,sectorIdx);
 	}
       }
     }
 
     // Run afterburner for this sector
     
-
     // Histograms...
     if((histSector != -1) && (histPadrow != -1))
     {
@@ -425,6 +413,13 @@ Int_t StDaqClfMaker::Make()
 	BuildHistogram(histPadrow,adc_in,adc_out);
       }
     }
+  }
+  
+  // Save the hit collection to StEvent...
+  if(mFill_stevent)
+  {
+    mStEvent->setTpcHitCollection(mTpcHitColl);
+    mTpcHitColl = NULL;    // I don't control the pointer anymore...
   }
 
   gMessMgr->Info() <<  "Done with make:  "<<clustercount<<" clusters found" << endm;
@@ -500,7 +495,8 @@ StDaqClfCppRow *StDaqClfMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
   }
   else {
     if(i==0) {
-      return &cpp[r];
+      memcpy(storage, &cpp[r], sizeof(StDaqClfCppRow));
+      return storage;
     }
   }
   return 0;
@@ -562,7 +558,7 @@ double StDaqClfMaker::lxFromPad(int row, double pad)
  
   double pads2move = pad - (gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow(row))/2.;
   double dist2move = -pitch*(pads2move-.5);
-  
+
   return(dist2move);
 }
 
@@ -591,6 +587,112 @@ double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
     (gStTpcDb->triggerTimeOffset()*1e6      // units are s
      + gStTpcDb->Electronics()->tZero()     // units are us 
      + (timeBin)*tbWidth ); 
-  
+
   return(z - zoffset + t0zoffset);
+}
+
+// Save the cluster
+void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, int sector)
+{
+  tss_tsspar_st *tsspar = m_tsspar->GetTable();
+
+  double lx = lxFromPad(r+1,((double)cl_x/64.0));
+  double ly = lyFromRow(r+1);
+  double lz = lzFromTB(((double)cl_t/64.0), sector, r+1, (cl_x+32)/64);
+  lz -= 3.0 * tsspar->tau * mDriftVelocity * 1.0e-6;
+	  
+  int cl_xb = cl_x/64;
+  int cl_tb = cl_t/64;
+
+  StTpcLocalSectorCoordinate local(lx,ly,lz,sector);
+  StTpcLocalCoordinate global;   // tpt does the local --> global (DB adjustments?)
+  (*mCTransform)(local,global);
+
+  // Use the tphit table structure to accumulate info...	
+  tcl_tphit_st hit;
+  memset(&hit,0,sizeof(hit));
+
+  hit.cluster = clustercount;	  
+  hit.flag = 0;                 // hit.flag = cl_f;
+  hit.id = clustercount;
+  hit.row = (r+1) + sector * 100;
+
+  hit.q = (float)cl_c;
+  double gain = (r<13) ? tsspar->gain_in : tsspar->gain_out;
+  double wire_coupling = (r<13) ? tsspar->wire_coupling_in : tsspar->wire_coupling_out;
+  hit.q *= tsspar->ave_ion_pot * tsspar->scale / (gain * wire_coupling);
+
+  hit.x = global.position().x();
+  hit.dx = mDp;
+  hit.y = global.position().y();
+  hit.dy = mDperp;
+  hit.z = global.position().z();
+  hit.dz = mDt;
+
+  hit.nseq = 5;
+  hit.npads = 5;
+
+  hit.minpad = cl_xb - 2;
+  if(hit.minpad < 1) 
+  {
+    hit.npads = cl_xb + 2;
+    hit.minpad = 1;
+  }
+  hit.maxpad = cl_xb + 2;
+
+  hit.ntmbk = 5;
+  hit.mintmbk = cl_tb - 2;
+  if(hit.mintmbk < 0)
+  {
+    hit.ntmbk = cl_tb + 3;
+    hit.mintmbk = 0;
+  }
+  hit.maxtmbk = cl_tb + 2;
+
+  hit.prf = (r>=13) ? mPrfout : mPrfin ;
+  hit.zrf = (r>=13) ? mTrfout : mTrfin ;
+
+  if(mFill_tphit)
+  {
+    filltphit(&hit);
+  }
+
+  if(mFill_stevent)
+  {
+    fillStEvent(&hit);
+  }
+}
+
+void StDaqClfMaker::fillStEvent(tcl_tphit_st *hit)
+{
+  assert(mStEvent);
+  assert(mTpcHitColl);
+  
+  StThreeVectorF p(hit->x,hit->y,hit->z);
+  StThreeVectorF e(hit->dx,hit->dy,hit->dz);
+  
+  unsigned int hw = 1;         // detid_tpc
+  hw += (hit->row/100 << 4);   // sector
+  hw += (hit->row%100 << 9);   // row
+  hw += (hit->npads   << 15);  // npads
+  hw += (hit->ntmbk   << 22);  // ntmbks...
+    
+  StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q);  
+  if(!mTpcHitColl->addHit(tpcHit))
+  {
+    assert(false);
+  }
+}
+
+void StDaqClfMaker::filltphit(tcl_tphit_st *hit)
+{
+  assert(mT_tphit);
+
+  int nAlloc = mT_tphit->GetTableSize();
+  int nUsed = mT_tphit->GetNRows();
+  if(nUsed>nAlloc-10)
+  {
+    mT_tphit->ReAllocate(Int_t(nAlloc*1.2+10));
+  }
+  mT_tphit->AddAt(hit, nUsed);
 }

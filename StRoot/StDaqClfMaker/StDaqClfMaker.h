@@ -11,7 +11,10 @@
 #include <St_DataSet.h>
 #include "fcfClass.hh"
 
-class  St_tss_tsspar;
+class St_tss_tsspar;
+class StEvent;
+class StTpcCoordinateTransform;
+class StTpcHitCollection;
 
 #define MAX_PADS_EVER 256
 #define MAX_TIMEBINS_EVER 512
@@ -86,6 +89,10 @@ class StDaqClfMaker:public StMaker
 
   StDaqClfCppRow *GetCPPRow(int r, int i, StDaqClfCppRow *storage);     // split the row along mezzanine banks
 
+  void saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, int sector);
+  void fillStEvent(tcl_tphit_st *hit);
+  void filltphit(tcl_tphit_st *hit);
+
   // Need my own coordinate transformations, because
   // TPC provided transforms only work on ints.
   double lxFromPad(int row, double pad);
@@ -100,6 +107,18 @@ class StDaqClfMaker:public StMaker
   double mDt;
   double mDperp;
 
+  int mFill_tphit;
+  int mFill_stevent;
+  int mCreate_stevent;
+  int clustercount;
+
+  double mDriftVelocity;
+
+  St_tcl_tphit *mT_tphit;
+  StEvent *mStEvent;
+  StTpcHitCollection *mTpcHitColl;
+
+  StTpcCoordinateTransform *mCTransform;
   fcfClass *fcf;
   
   // TPC Parameters...
