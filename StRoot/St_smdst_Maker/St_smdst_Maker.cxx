@@ -1,5 +1,8 @@
-// $Id: St_smdst_Maker.cxx,v 1.2 1999/01/19 22:42:32 genevb Exp $
+// $Id: St_smdst_Maker.cxx,v 1.3 1999/03/12 22:10:37 perev Exp $
 // $Log: St_smdst_Maker.cxx,v $
+// Revision 1.3  1999/03/12 22:10:37  perev
+// New maker schema
+//
 // Revision 1.2  1999/01/19 22:42:32  genevb
 // update comments
 //
@@ -9,7 +12,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_smdst_Maker class for Makers                                        //
+// St_smdst_Maker class for Makers                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -26,8 +29,8 @@
 ClassImp(St_smdst_Maker)
 
 //_____________________________________________________________________________
-St_smdst_Maker::St_smdst_Maker(const char *name, const char *title):
-   StMaker(name,title) {
+St_smdst_Maker::St_smdst_Maker(const char *name):
+   StMaker(name) {
 //
 // St_smdst_Maker() constructor requires a name and title.
 //
@@ -125,12 +128,11 @@ Int_t St_smdst_Maker::Make() {
 // then calls the smdst2_am physics analysis module. If DoHistograms()
 // has been called, MakeHistograms() is run for diagnostic histograms.
 //
-   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
    St_smdst_v0 *smdst_v0  = new St_smdst_v0("smdst_v0",10000);m_DataSet->Add(smdst_v0);
    St_smdst_index *vindex = new St_smdst_index("vindex",10000);m_DataSet->Add(vindex);
    St_smdst_index *tindex = new St_smdst_index("tindex",50000);m_DataSet->Add(tindex);
 
-   St_DataSet *dst_set = gStChain->DataSet("dst");
+   St_DataSet *dst_set = GetDataSet("dst");
    if (!dst_set) {
      cout << "No dst maker defined" << endl;
      return 1;    
@@ -153,7 +155,6 @@ Int_t St_smdst_Maker::Make() {
    if (Res_smdst != kSTAFCV_OK) {
      cout << "***** Problem with smdst2_am *****" << endl;
    }
-}
    if (draw_histos) MakeHistograms();       // Strangeness Histograms
  return kStOK;
 }
@@ -227,9 +228,9 @@ void St_smdst_Maker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: St_smdst_Maker.cxx,v 1.2 1999/01/19 22:42:32 genevb Exp $\n");
+  printf("* $Id: St_smdst_Maker.cxx,v 1.3 1999/03/12 22:10:37 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
