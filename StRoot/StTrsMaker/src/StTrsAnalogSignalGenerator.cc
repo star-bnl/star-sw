@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.10 2000/06/23 00:12:40 snelling Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.11 2000/07/30 02:47:04 long Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.11  2000/07/30 02:47:04  long
+ * mDeltaPad(0)---> mDeltaPad(2)
+ *
  * Revision 1.10  2000/06/23 00:12:40  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -74,7 +77,7 @@ RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
     : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el),
       transformer(gStTpcDb),
-      mDeltaPad(6),
+      mDeltaPad(2),
       mDeltaRow(1),
       mSector(sec),
       mSignalThreshold(0.*volt),
