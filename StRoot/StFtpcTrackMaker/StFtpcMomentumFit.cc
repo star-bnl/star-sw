@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.2 2000/07/21 09:48:16 hummler Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.3 2000/07/25 15:21:56 hummler Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
-// Revision 1.2  2000/07/21 09:48:16  hummler
-// calculate correct chisquare
+// Revision 1.3  2000/07/25 15:21:56  hummler
+// use fitted instead of measured start point
 //
 // Revision 1.1  2000/05/10 13:39:19  oldi
 // Initial version of StFtpcTrackMaker
@@ -252,7 +252,11 @@ void StFtpcMomentumFit::fitPoints(StThreeVector<double> *Hit, double *xWeight, d
     orientation=-1;
 
   // create helix
-  StThreeVector<double> startHit(xval[0], yval[0], zval[0]);
+  double startAngle = mArcOffset + mArcSlope * zval[0];
+  double startX = mXCenter + mRadius * cos(startAngle);
+  double startY = mYCenter + mRadius * sin(startAngle);
+
+  StThreeVector<double> startHit(startX, startY, zval[0]);
   setParameters(1/mRadius, dipAngle, startPhase, startHit, orientation);
 
   // get z-component of B-field at 0,0,0 for first momentum guess
@@ -390,8 +394,11 @@ void StFtpcMomentumFit::fitPoints(StThreeVector<double> *Hit, double *xWeight, d
     orientation=-1;
 
   // set helix parameters to new values
-  startHit.setX(xval[0]);
-  startHit.setY(yval[0]);
+  startAngle = mArcOffset + mArcSlope * zval[0];
+  startX = mXCenter + mRadius * cos(startAngle);
+  startY = mYCenter + mRadius * sin(startAngle);
+  startHit.setX(startX);
+  startHit.setY(startY);
   setParameters(1/mRadius, dipAngle, startPhase, startHit, orientation);
   
   // set final momentum value
