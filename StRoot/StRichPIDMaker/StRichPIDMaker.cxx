@@ -1,13 +1,12 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.17 2000/11/22 16:58:05 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.18 2000/11/23 01:46:15 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.17  2000/11/22 16:58:05  lasiuk
- * Uniform setting of flags in two places
- * remove dependence of dip angle on mean and sigma
+ * Revision 2.18  2000/11/23 01:46:15  lasiuk
+ * pt threshold modification
  *
  * Revision 2.22  2000/11/28 19:21:01  lasiuk
  * correct memory leak in writing to StEvent
@@ -203,7 +202,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.17 2000/11/22 16:58:05 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.18 2000/11/23 01:46:15 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -215,7 +214,7 @@ StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(n
   //
   
   this->initCutParameters();
-    mPtCut = 0.5*GeV; // GeV/c
+  
 }
 
 StRichPIDMaker::~StRichPIDMaker() {}
