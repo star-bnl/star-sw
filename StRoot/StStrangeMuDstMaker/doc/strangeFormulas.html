@@ -272,14 +272,15 @@ known to Root must be told manually about the TTreeFormulas with lines like:
 <li>In using TFormulas, one should be careful to optimize the formulas
 for the number of calls to other formulas. TTreeFormula/TFormula is not
 smart enough to save values to repeat them, and calculates the full thing
-twice, but has a limit of 50 values one can calculate.<p>
+twice, but has a limit of 200 values one can calculate (the limit is
+actually 50 values for Root 2.24/04 and earlier versions).<p>
 
 For example, "a()+a()+a()" repeats everything necessary to find
 "a()" three times. If "a()" requires 20 values to calculate, then
-"a()+a()+a()" will fail, needing 60 values. However, this failure
-<b>does not</b> get reported to the user! A false value is returned
-which is the result of the incomplete calculation using only the first
-50 values. <b>BE WARNED!</b> In the above example, it is much better
+"a()+a()+a()" will fail (for Root 2.24/04), needing 60 values. However,
+this failure <b>does not</b> get reported to the user! A false value is
+returned which is the result of the incomplete calculation using only the
+first 50 values. <b>BE WARNED!</b> In the above example, it is much better
 to write something like "3*a()", which actually still only requires
 20 values.<p>
 
@@ -393,6 +394,14 @@ V0.topologyMap*.hasHitInTofPatch()
 V0.topologyMap*.hasHitInRich()
 V0.topologyMap*.hasHitInBarrelEmc()
 V0.topologyMap*.hasHitInEndcapEmc()
+
+-- track quality --
+V0.chi2V0()
+V0.clV0()
+V0.chi2Pos()
+V0.clPos()
+V0.chi2Neg()
+V0.clNeg()
 </pre>
 <p>
 
@@ -452,6 +461,12 @@ Xi.keyBachelor()
 -- topology maps --
 * = <b>Pos</b> or <b>Neg</b> (for V0 daughters) or <b>Bachelor</b>
 Otherwise, just as for V0 above, but with <b>Xi.</b> replacing <b>V0.</b>
+
+-- track quality --
+Xi.chi2Xi()
+Xi.clXi()
+Xi.chi2Bachelor()
+Xi.clBachelor()
 </pre>
 <p>
 
@@ -460,6 +475,60 @@ Otherwise, just as for V0 above, but with <b>Xi.</b> replacing <b>V0.</b>
 -- None at present --
 </pre>
 <p>
+
+<li>V0Mc Formulas (only loaded if V0Mc branch present in micro-DST)
+<pre>
+V0Mc.decayMode()
+V0Mc.positiveTpcHits()
+V0Mc.positiveCommonTpcHits()
+V0Mc.positiveSimTpcHits()
+V0Mc.negativeTpcHits()
+V0Mc.negativeCommonTpcHits()
+V0Mc.negativeSimTpcHits()
+V0Mc.geantIdParent()
+V0Mc.geantIdPositive()
+V0Mc.geantIdNegative()
+V0Mc.parentMomentumX()
+V0Mc.parentMomentumY()
+V0Mc.parentMomentumZ()
+V0Mc.positiveMomentumX()
+V0Mc.positiveMomentumY()
+V0Mc.positiveMomentumZ()
+V0Mc.negativeMomentumX()
+V0Mc.negativeMomentumY()
+V0Mc.negativeMomentumZ()
+V0Mc.positionX()
+V0Mc.positionY()
+V0Mc.positionZ()
+</pre>
+<p>
+
+<li>XiMc Formulas (only loaded if XiMc branch present in micro-DST)
+<pre>
+XiMc.decayMode()
+XiMc.tpcHits()
+XiMc.commonTpcHits()
+XiMc.simTpcHits()
+XiMc.geantIdParent()
+XiMc.geantIdDaughter()
+XiMc.parentMomentumX()
+XiMc.parentMomentumY()
+XiMc.parentMomentumZ()
+XiMc.daughterMomentumX()
+XiMc.daughterMomentumY()
+XiMc.daughterMomentumZ()
+XiMc.positionX()
+XiMc.positionY()
+XiMc.positionZ()
+</pre>
+<p>
+
+<li>KinkMc Formulas (only loaded if KinkMc branch present in micro-DST)
+<pre>
+Identical to XiMc Formulas with <b>KinkMc.</b> replacing <b>XiMc.</b>
+</pre>
+<p>
+
 
 </ul>
 

@@ -70,7 +70,7 @@ The Micro-DST is built using a Root
 <a href="http://root.cern.ch/root/html/TTree.html">TTree</a>,
 a class designed specifically for DSTs. The TTree is organized
 such that event-wise structure is maintained. For every event
-on the micro-DST, there exist between one and four component types,
+on the micro-DST, there exist between one and ten component types,
 described in the next subsection. While the event information is kept
 for each event on the micro-DST, the user may select which other
 components the DST will have during the creation process, selecting
@@ -87,7 +87,7 @@ TTree---
        |---previous event...
        |
        |
-       |--------------...---------...---------------...----
+       |--------------...---------...---------------...----------...
        |    |               |             |               |
        |  Event             V0            Xi             Kink
        |    |               |             |               |
@@ -104,7 +104,7 @@ TTree---
 In the above, <tt>e1</tt>, <tt>e2</tt>, etc. would be data members of the
 <tt>Event</tt> component class.<p>
 
-The eventual goal is to have each of the four components written to
+The eventual goal is to have each of the ten components written to
 separate files. This would allow someone interested in looking at
 V0's to need only the Event and V0 files available to them, as TTrees
 support the ability to read only the tree branches requested without
@@ -118,6 +118,8 @@ all branches are currently stored in one file.<p>
 Useful information on what is stored in the component classes, and
 what member functions are provided by the classes is best learned by looking
 at the <tt>*.h</tt> header files of each class in the package directory.
+It should be noted that all St*MuDst and St*Mc classes listed below inherit
+from the class StStrangeMuDst.
 
 <dl>
 <dt>Event Information (<b>StStrangeEvMuDst</b>)
@@ -140,6 +142,25 @@ store all the information about the associated V0.<p>
 <dt>Kink Information (<b>StKinkMuDst</b>)
 <dd>This class keeps data on kink parent and daughter tracks and parameters
 of the kink decay vertex.<p>
+
+<dt>V0 Monte Carlo Information (<b>StV0Mc</b>)
+<dd>This class is for Monte Carlo V0 vertex information. There may be
+a different number of these than reconstructed V0 vertices.<p>
+
+<dt>Xi Monte Carlo Information (<b>StXiMc</b>)
+<dd>Monte Carlo storage class for Xi vertices, inheriting all functionality
+from the <b>StODMc</b> class which it shares with <b>StKinkMc</b>.<p>
+
+<dt>Kink Monte Carlo Information (<b>StKinkMc</b> )
+<dd>Monte Carlo storage class for Kink vertices, also inheriting all
+functionality from <b>StODMc</b>.<p>
+
+<dt>Monte Carlo Association Information (<b>StStrangeAssoc</b> )
+<dd>The <b>StStrangeAssoc</b> class links matching reconstructed and
+Monte Carlo vertices, and there exist only as many as the number of
+matches between the two sets. There will be an association component
+for each Monte Carlo component<p>
+
 </dl>
 
 

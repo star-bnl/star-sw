@@ -75,6 +75,7 @@ the <tt>Do*()</tt> member functions:
 <li><tt>DoV0()</tt>
 <li><tt>DoXi()</tt>
 <li><tt>DoKink()</tt>
+<li><tt>DoMc()</tt>
 </ul>
 For example, calling the <tt>DoV0()</tt> member function will cause V0
 components to be created/read for the micro-DST associated with this maker.
@@ -84,6 +85,11 @@ even if they are on the micro-DST on file. Here is a brief example:
   StStrangeMuDstMaker strangeDst();
   strangeDst.DoV0();
 </pre>
+<p>
+
+Note that <tt>DoMc()</tt> turns on processing of the Monte Carlo data
+and association branches for each of the content types turned on by any
+of the first three <tt>Do*()</tt> member functions.
 <p>
 
 <hr width=10% align=left>
@@ -103,6 +109,7 @@ where something like the following is used:
   StStrangeMuDstMaker strangeDst();
   strangeDst.DoV0();     // Selects V0 vertices for micro-DST
   strangeDst.DoXi();     // Selects Xi vertices for micro-DST
+  strangeDst.DoMc();     // Selects MC info for both V0 and Xi for micro-DST
   strangeDst.SetWrite(); // Sets "write" mode (using default filenames)
 </pre>
 
@@ -179,9 +186,9 @@ Here is an example:
 
 Access to the micro-DST is then available inside the event loop.
 Member functions outlined in the section below on
-<a href="#tools">Tools from StStrangeMuDstMaker</a>
-allow the user to find out how
-many V0's, Xi's, or Kink's are in the given event and access individual
+<a href="#tools">Tools from StStrangeMuDstMaker</a> allow the user to
+find out how many V0's, Xi's, or Kink's, as well as their respective
+Monte Carlo counterparts, are in the given event and access individual
 instances of the micro-DST component classes. The user can then loop over
 all vertices from an event, and can call member functions from the
 micro-DST component classes. A good example is provided in:<br>
@@ -232,14 +239,21 @@ member function, and should be implemented in the following style:
   strangeNewDst.SetWrite("newEvMuDst.root");
 
   StStrangeMuDstMaker strangeOldDst("strangeOldMuDst");
-  strangeOldDst.DoV0();
   strangeOldDst.SetRead("oldEvMuDst.root");
 
   strangeNewDst.SubDst(strangeOldDst);
 </pre>
 The filenames used above are up to the user, and different combinations
 of strangeness micro-DST components other than simply the V0 components
-can be used.<p>
+can be used. Note that <tt>DoV0()</tt> need not be called for the old
+micro-DST maker, as the new one knows to at least try to make sure
+that the reading of the V0's is turned on.<p>
+
+If one is filtering the micro-DST, new or additional cuts are probably
+also being used. If this is the case, one should consider adding cuts
+information to the strangeness cuts list stored with the micro-DST.
+More information on how to do this is available for
+<a href="cuts.html">the cuts</a>.<p>
 
 The selection process for what goes into the sub-micro-DST can be viewed
 under two paradigms. The first paradigm encompasses a user who wants to
@@ -334,7 +348,8 @@ only in the read mode (see <a href="#reading">Reading Micro-DSTs</a>)<p>
 <br><tt>StXiMuDst* GetXi(j)</tt>
 <br><tt>StKinkMuDst* GetKink(j)</tt>
 <br>- Use the input parameter <tt>j</tt> to specify the index of the vertex
-from that event, with indices starting at zero for each event.<p>
+from that event, with indices starting at zero for each event.
+<br><p>
 
 <li>Getting a pointer to the event information:
 <br><tt>StStrangeEvMuDst* GetEvent()</tt>
@@ -342,6 +357,11 @@ from that event, with indices starting at zero for each event.<p>
 
 <li>Getting a pointer to the TTree used for the micro-DST:
 <br><tt>TTree* GetTree()</tt>
+<p>
+
+<li>Getting access to the cuts on the micro-DST:
+<br><tt>StStrangeCuts& Cuts()</tt>
+<br>- See <a href="cuts.html">documentation for StrangeCuts</a>
 <p>
 
 <li>Getting a pointer to the
@@ -356,6 +376,22 @@ the <tt>operator[]</tt>, like <tt>(*(maker.GetV0ClonesArray()))[j]</tt>, but
 this is more simply done with the <tt>Get*(j)</tt> member functions
 described above.<p>
 
+<li>Getting more detailed info for a vertex type:
+<br><tt>Get(<i>type</i>)->Get*()</tt>
+<br>- Here, <tt><i>type</i></tt> is a character string, one of:
+<br><tt>"V0"</tt>
+<br><tt>"Xi"</tt>
+<br><tt>"Kink"</tt>
+<br>- The subfunctions are one of the following:
+<br><tt>Int_t GetN()</tt> - [<tt>Get("V0")->GetN()</tt> == <tt>GetNV0()</tt> above]
+<br><tt>Int_t GetNMc()</tt>
+<br><tt>Int_t GetNAssoc()</tt>
+<br><tt>StStrangeMuDst* Get(j)</tt> - [<tt>(StV0MuDst*) Get("V0")->Get(j)</tt> == <tt>GetV0(j)</tt> above]
+<br><tt>StStrangeMuDst* GetMc(j)</tt>
+<br><tt>StStrangeAssoc* GetAssoc(j)</tt>
+<br><tt>TClonesArray* GetDataArray()</tt> - [<tt>Get("V0")->GetDataArray()</tt> == <tt>GetV0ClonesArray()</tt> above]
+<br><tt>TClonesArray* GetMcArray()</tt>
+<br><tt>TClonesArray* GetAssocArray()</tt>
 </ul>
 <P>
 
