@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.1 1998/11/10 17:12:20 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.2 1999/01/15 11:03:59 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,8 +16,8 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.1  1998/11/10 17:12:20  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/15 11:03:59  lasiuk
+ * sector 12/24 compatibility
  *
  * Revision 1.6  1999/02/16 18:15:41  fisyak
  * Check in the latest updates to fix them
@@ -74,25 +74,30 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StGlobalC
 {
     StTpcLocalCoordinate tmp;
     
-    StThreeVector<StDouble> tmp = xyFromRaw(a);
-    tmp.setZ(zFromTB(a.timeBucket()));
+void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a, StTpcLocalCoordinate& b) const 
+    if(a.sector() > 12)
+}
+void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcPadCoordinate& b)
+{
     StTpcLocalCoordinate tmp;
 
     this->operator()(a,tmp);
     this->operator()(tmp,b);
 }
 
-    StInt sector = sectorFromCoordinate(a);
+//      Raw Data          <-->  Tpc Local Coordinate
+void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcPadCoordinate& b) const 
+{
     // Covert to xy and rotate into local sector frame (12)
     StThreeVector<double> tmp = xyFromRaw(a);
     if(a.sector() > 12) {
-    StThreeVector<StDouble> tmp = rotateToLocal(a.pos(),sector);
+	tmp.setZ(-(zFromTB(a.timeBucket())));
     }
     else
 	tmp.setZ((zFromTB(a.timeBucket())));
 
     b = StTpcLocalCoordinate(tmp);
-    int tb = tBFromZ(a.pos().z());
+void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcPadCoordinate& b)
     //PR(tb);
     int sector = sectorFromCoordinate(a);
     if(a.pos().z() < 0)
@@ -115,7 +120,7 @@ void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLoca
 }
 
 //      Local Coordinate  <--> Global Coordinate
-StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<StDouble>& v, StInt *sector) const
+void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGlobalCoordinate& b) 
 {
     // Requires survey DB i/o!
 StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, int *sector) const
@@ -141,7 +146,7 @@ StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector
 StThreeVector<double>
 StTpcCoordinateTransform::padCentroid(StTpcLocalCoordinate& local, int *pad, int *row)
 {
-    const StDouble anglePerSector = M_PI/6;  // 30 degrees should be from db
+    StTpcLocalCoordinate centerOfPad;
     int nRow = rowFromLocal(local.pos());
     StTpcPadCoordinate tmp(12,                      //sector
 			   nRow,     //row
@@ -157,9 +162,9 @@ StTpcCoordinateTransform::padCentroid(StTpcLocalCoordinate& local, int *pad, int
 
 int StTpcCoordinateTransform::sectorFromCoordinate(const StTpcLocalCoordinate& a) const
 {
-int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<StDouble>& a) const
+    const double anglePerSector = M_PI/6;  // 30 degrees should be from db
 
-    const StDouble anglePerSector = M_PI/6;  // 30 degrees should be from db
+    double angle = atan2(a.pos().y(),a.pos().x());
     if(angle<0) angle+= 2*M_PI;
 
      if(angle>=0 && angle<= M_PI/2)
@@ -176,12 +181,15 @@ int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<StDouble>
 int StTpcCoordinateTransform::sectorFromCoordinate(const StThreeVector<double>& a) const
 {
     const double anglePerSector = M_PI/6;  // 30 degrees should be from db
-int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<StDouble>& b) const
+
     double angle = atan2(a.y(),a.x());
     if(angle<0) angle+= 2*M_PI;
 
      if(angle>=0 && angle<= M_PI/2)
-    if(b.y() > mTPCdb->outerSectorEdge()) {    // in the outer sector
+	 angle = M_PI/2 - angle;
+     else
+	 angle = 5*M_PI/2 - angle;
+
      double sector = (angle + anglePerSector/2)/anglePerSector;
 
      int sectorNumber = (sector<1) ? 12 : (int)sector;
@@ -196,21 +204,29 @@ int StTpcCoordinateTransform::rowFromLocal(const StThreeVector<double>& b) const
     int    offset;
     double innerSectorBoundary =
 	mTPCdb->outerSectorEdge() - mTPCdb->ioSectorSpacing();
-    
+
+    if(b.y() > innerSectorBoundary) {    // in the outer sector
+	referencePosition = mTPCdb->radialDistanceAtRow(14);
+	rowPitch          = mTPCdb->outerSectorRowPitch();
+	offset            = 14;
     }
     else if(b.y() > mTPCdb->radialDistanceAtRow(8)) {
 	referencePosition = mTPCdb->radialDistanceAtRow(8);
-    // Take care of boundaries
+	rowPitch          = mTPCdb->innerSectorRowPitch2();
+	offset            = 8;
+    }
     else {
 	referencePosition = mTPCdb->radialDistanceAtRow(1);
 	rowPitch          = mTPCdb->innerSectorRowPitch1();
 	offset            = 1;	
-    //PR(probableRow);
+    }
+
+//     PR(b.y());
 //     PR(referencePosition);
 //     PR(rowPitch);
 //     PR(offset);
     int probableRow =
-int StTpcCoordinateTransform::padFromLocal(const StThreeVector<StDouble>& b, const StInt row) const
+	static_cast<int>( (b.y() - (referencePosition-rowPitch/2))/rowPitch )+offset;
 
     if(b.y() > innerSectorBoundary && probableRow<14)
 	probableRow=14;
@@ -243,7 +259,7 @@ StThreeVector<double> StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordina
 // 	cerr << "Pad is calculated to be '" << probablePad << "'\n";
 // 	cerr << "Assigning Pad='1'"<< endl;
 	probablePad=1;
-	rotateFromLocal(StThreeVector<StDouble>(localX,localY,0), a.sector());
+    }
 
     return (probablePad);
 }
@@ -270,7 +286,7 @@ double StTpcCoordinateTransform::yFromRow(const int row)  const
     // Returns y coordinate in sector 12
     return (mTPCdb->radialDistanceAtRow(row));
 }
-    //StDouble frischGrid = 2098.998*millimeter;
+
 
 double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
 {
@@ -278,9 +294,9 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
     double pitch = (row<14) ?
 	mTPCdb->innerSectorPadPitch() :
 	mTPCdb->outerSectorPadPitch();
-    //StDouble frischGrid = 2098.998*millimeter;
+
     int pads2move = pad - (mTPCdb->numberOfPadsAtRow(row))/2;
-    //    StDouble tb = (mTPCdb->frischGrid - z)/mTPCdb->vD;
+    //    double tb = (mTPCdb->frischGrid - z)/mTPCdb->vD;
     double z = mTPCdb->frischGrid() - (mSCdb->driftVelocity()*tb);
     return(nearestInteger(tb));
 #ifndef ST_NO_NAMESPACES
