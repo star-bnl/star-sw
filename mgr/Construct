@@ -323,7 +323,7 @@ my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
 $CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $CERN_ROOT . "/include:/opt/star/include";
 $FCPPPATH ="";
 print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
-my $repository = cwd($STAR); print "repository $repository\n";
+my $repository = $STAR; print "repository $repository\n";
 Repository ($repository);# unless $param::noRepository;
 #Repository ($STAR);# unless $param::noRepository;
 (my $DirPath  = cwd()) =~ s/\/$//g;
