@@ -185,6 +185,14 @@ Int_t StiMaker::Finish()
 
 Int_t StiMaker::Init()
 {
+    //The Display
+    //cout <<"Display"<<endl;
+    mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
+    mdisplay->cd();
+    mdisplay->draw();
+    mdisplay->update();
+    //cout <<"\tdone"<<endl;
+
     //The track store
     mtrackstore = StiTrackContainer::instance();
 
@@ -239,13 +247,6 @@ Int_t StiMaker::Init()
     mdatanodefactory->reset();
     //cout <<"\tdone"<<endl;
     
-    //The Display
-    //cout <<"Display"<<endl;
-    mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
-    mdisplay->cd();
-    mdisplay->draw();
-    mdisplay->update();
-    //cout <<"\tdone"<<endl;
     
     //The Detector Tree
     //cout <<"DetectorContainer"<<endl;

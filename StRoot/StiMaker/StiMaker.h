@@ -41,7 +41,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.21 2001/09/06 15:15:36 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.22 2001/09/07 14:53:00 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -50,8 +50,6 @@ public:
     static void kill();
 
     //Gets/sets
-    void setMaterialBuildPath(char* val);
-    void setDetectorBuildPath(char* val);
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
 
