@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.h,v 1.2 2000/07/14 00:08:39 hardtke Exp $
+// $Id: StChargeStepMaker.h,v 1.3 2000/07/28 18:31:54 hardtke Exp $
 // $Log: StChargeStepMaker.h,v $
+// Revision 1.3  2000/07/28 18:31:54  hardtke
+// print out tpcDriftVelocity table
+//
 // Revision 1.2  2000/07/14 00:08:39  hardtke
 // improve speed by factor of 1000
 //
@@ -23,7 +26,7 @@ class St_tpg_detector;
 class St_tss_tsspar;
 
 class St_tcl_sector_index;
-class St_tpc_DriftVelocity;
+class St_tpcDriftVelocity;
 class St_tfc_adcxyz;
 class StTpcDb;
 
@@ -45,16 +48,23 @@ class StChargeStepMaker : public StMaker {
   virtual void   Clear(const char *opt);
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargeStepMaker.h,v 1.2 2000/07/14 00:08:39 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargeStepMaker.h,v 1.3 2000/07/28 18:31:54 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   TH1S* step[4];  //!1=west,inner:2=west,outer:3=east,inner:4=east,outer
   TH1S* derivative[4];
   TH1F* result[4];
   float GetWeightedMean(TH1S* inputHist);
-  float AddValueToAverage(int section, float value);
+  void AddToAverage(int section, float value);
   float GetAverage(int section);  
+  int GetValidityDate();
+  int GetValidityTime();
+  St_tpcDriftVelocity* driftTable();
+  void WriteTableToFile();
 
  private:
 
+  float     pastresults[100][4];
+    int     nresults[4];
+    int     lastresult[4];
   Bool_t                 m_tclPixTransOn;       // switch for pixel translation evaluation
   Bool_t                 m_raw_data_tpc;        // bool used to check if there is pixel data
 
@@ -70,15 +80,16 @@ class StChargeStepMaker : public StMaker {
   void   InitHistograms(); 
   StTpcDb*  theDb; //!
   int       theGuess; //!
-  float     pastresults[100][4];
-    int     nresults[4];
-    int     lastresults[4];
-
+  int    date;
+  int    time;
 
  protected:
 
   
   ClassDef(StChargeStepMaker, 1)       //Cint definition
 };
+
+inline int StChargeStepMaker::GetValidityDate(){return date;}
+inline int StChargeStepMaker::GetValidityTime(){return time;}
 
 #endif
