@@ -93,7 +93,8 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
   // add more patterns below
   int listA[]={1,2,3,4,5,6};
   int listB[]={1,2,3,4,5,6,84,85,86};
-  int listC[]={1,2,3,4,5,6,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99};
+  int listC[]={1,2,3,4,5,6,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,
+ 18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}; // etow+esmd+btow
 
   int *list, dim;
   if (timeStamp< 1068761131)  //Thu Nov 13 17:05:31 2003
@@ -107,7 +108,11 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
   for(ic=0;ic<block->GetEntries();ic++) {
     EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
     int crateID=b->getCrateID();
-    if(ic>=dim ||  crateID!=list[ic] || headToken!=b->getToken()) b->maskCrate();
+    // printf("XXX b=%d crID=%d=%d  tok=%d=%d\n",ic, b->getCrateID() ,list[ic],b->getToken(), headToken);
+    if(ic>=dim ||  crateID!=list[ic] || headToken!=b->getToken())
+      b->maskCrate();
+    else if(ic>=22 )
+      b->setCrateID(16+crateID); // bump up btow ID
     //pr-intf("vvv %d %d \n",i,crateID);
   }
   
@@ -134,6 +139,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.13  2004/01/27 15:13:57  balewski
+ * it is tricky with BTOW
+ *
  * Revision 1.12  2004/01/13 16:32:28  balewski
  * fix bug for sector 8 mapmt
  *
