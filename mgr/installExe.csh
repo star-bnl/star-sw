@@ -19,7 +19,7 @@ if ( -e $cwd/MakeArch.mk ) then
 else
   setenv STAF_MAKE_HOME ${STAR}/mgr
 endif
-
+echo Use makefiles from $STAF_MAKE_HOME
 
 # define STAF SYS area
  setenv STAF_SYS $cwd
@@ -38,19 +38,7 @@ gmake -f ${STAF_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} Staf
 
 
 #
-#If this is official place remove some redundant directories
-#But if it your own place do not do it. Next Make will be much faster
-
-set OffPlace = `echo $OUT | grep /afs/rhic/common/`
-if ( ${#OffPlace} ) then
-  echo '*** CLEAN UP ***'
-  
-rm -rf ${OUT}/.@sys/dep/exe
-rm -rf ${OUT}/.@sys/obj/exe
-rm -rf ${OUT}/tmp
   echo '*** DONE ***'
-
-endif
 
 
 #
