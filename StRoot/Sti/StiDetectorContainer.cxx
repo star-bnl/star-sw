@@ -89,7 +89,59 @@ StiMaterial* StiDetectorContainer::material(const MaterialMapKey& key) const
 
 void StiDetectorContainer::reset()
 {
+    mcurrent = begin();
+    for (detectormap::iterator it=begin(); it!=end(); ++it) {
+	(*it).second->reset();
+    }
     return;
+}
+
+StiDetector* StiDetectorContainer::operator*() const
+{
+    if (mcurrent==end()) return 0;
+    else {
+	StiDetPolygon& rpoly = *((*mcurrent).second);
+	return *rpoly;
+    }
+}
+
+void StiDetectorContainer::moveIn()
+{
+    double currentangle = (*mcurrent).second->operator*()->getCenterRefAngle();
+    if (mcurrent==begin()) return;
+    
+    else {
+	--mcurrent;
+	(*mcurrent).second->setToAngle(currentangle);
+    }
+    return;
+}
+
+void StiDetectorContainer::moveOut()
+{
+    if (mcurrent==end() ) {
+	return; //Nowhere to go
+    }
+    
+    else {
+    double currentangle = (*mcurrent).second->operator*()->getCenterRefAngle();
+	++mcurrent;
+	if (mcurrent==end()) {
+	    --mcurrent;
+	}
+	(*mcurrent).second->setToAngle(currentangle);
+    }
+    return;
+}
+
+void StiDetectorContainer::movePlusPhi()
+{
+    (*mcurrent).second->operator++();
+}
+
+void StiDetectorContainer::moveMinusPhi()
+{
+    (*mcurrent).second->operator--();
 }
 
 // Load all material definition files from a given directory

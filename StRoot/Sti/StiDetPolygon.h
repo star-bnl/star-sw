@@ -50,12 +50,30 @@ public:
 
     void clear();
     void clearAndDestroy();
+    void reset();
 
+    //Dereference cerrent iterator
+    StiDetector* operator*() const;
+
+    //Set iterator to position closest to this angle
+    void setToAngle(double angle);
+    
     //return pointer to detector for a given side
-    StiDetector* detector(unsigned int side);
+    StiDetector* detector(unsigned int side) const;
+    
     //return pointer to detector closest to this angle
-    StiDetector* detector(double angle);
+    StiDetector* detector(double angle) const;
 
+    //Navigation
+    
+    //iterate through side container
+
+    //Move plus in phi
+    void operator++();
+    //Move minus in phi
+    void operator--();
+
+    
     //Utility
     unsigned int side(double angle, bool debug=false) const;
 
@@ -63,6 +81,7 @@ public:
     
 protected:
     det_polygon_map msidemap; //!
+    det_polygon_map::const_iterator mcurrent; //!
     
 private:
     //ClassDef(StiDetPolygon, 1)
