@@ -1,10 +1,13 @@
 /*
  *
- * $Id: standardPlots.C,v 1.3 2002/07/02 18:58:52 andrewar Exp $
+ * $Id: standardPlots.C,v 1.4 2002/07/08 14:32:48 pruneau Exp $
  *  A. Rose, WSU
  *  
  *
  * $Log: standardPlots.C,v $
+ * Revision 1.4  2002/07/08 14:32:48  pruneau
+ * added efficiency plots
+ *
  * Revision 1.3  2002/07/02 18:58:52  andrewar
  * fixed bug with Pt plot
  *
@@ -29,6 +32,8 @@
 #include "TProfile.h"
 #include "TStyle.h"
 #include "TCanvas.h"
+#include "TF1.h"
+#include <iostream.h>
 
 #define MAX_TRACKS 7000
 void standardPlots::Loop()
@@ -51,15 +56,12 @@ void standardPlots::Loop()
 //    fChain->GetEntry(i);  // read all branches
 //by  b_branchname->GetEntry(i); //read only this branch
    if (fChain == 0) return;
-
-
-   Int_t nentries = Int_t(fChain->GetEntries());
-
-   Int_t nbytes = 0, nb = 0;
+   nentries = Int_t(fChain->GetEntries());
+   nbytes = 0;
+   nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
       Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);   nbytes += nb;
-
    }
 }
 
@@ -69,7 +71,7 @@ void standardPlots::makeTrackEffPlots()
    if (fChain == 0) return;
 
    TProfile* primaryTrackEff=new TProfile("primaryTrackEff","Sti PrimaryTracks vs. Mc PrimaryTracks",100,0,MAX_TRACKS);
-   TProfile* primaryTrackMult=new TProfile("primaryTrackEffMult","PrimaryTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
+   TProfile* primaryTrackEffMult=new TProfile("primaryTrackEffMult","PrimaryTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
    TProfile* globalTrackEff=new TProfile("globalTrackEff","Sti GlobalTracks vs. Mc GlobalTracks",100,0,MAX_TRACKS);
    TProfile* globalTrackEffMult=new TProfile("globalTrackEffMult","GlobalTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
 
@@ -81,9 +83,35 @@ void standardPlots::makeTrackEffPlots()
    TProfile* globalTrackEffPt=new TProfile("globalTrackEffPt","GlobalTrack Finding Efficiency vs. McPt",100,0,5);
    TProfile* globalTrackEffEta=new TProfile("globalTrackEffEta","GlobalTrack Finding Efficiency vs. McEta",100,-1,1);
 
-   Int_t nentries = Int_t(fChain->GetEntries());
+   
+   TH1D * pMcPtM0 = new TH1D("pMcPtM0","primaries MC Pt M0", 20, 0., 4.);
+   TH1D * pMcPtM1 = new TH1D("pMcPtM1","primaries MC Pt M1", 20, 0., 4.);
+   TH1D * pMcPtM2 = new TH1D("pMcPtM2","primaries MC Pt M2", 20, 0., 4.);
 
-   Int_t nbytes = 0, nb = 0;
+   TH1D * pPtM0 = new TH1D("pPtM0","primaries Rec Pt M0", 20, 0., 4.);
+   TH1D * pPtM1 = new TH1D("pPtM1","primaries Rec Pt M1", 20, 0., 4.);
+   TH1D * pPtM2 = new TH1D("pPtM2","primaries Rec Pt M2", 20, 0., 4.);
+
+   TH1D * pPtRM0 = new TH1D("pPtRM0","primaries Rec Pt Ratio M0", 20, 0., 4.);
+   TH1D * pPtRM1 = new TH1D("pPtRM1","primaries Rec Pt Ratio M1", 20, 0., 4.);
+   TH1D * pPtRM2 = new TH1D("pPtRM2","primaries Rec Pt Ratio M2", 20, 0., 4.);
+
+
+   TH1D * pMcEtaM0 = new TH1D("pMcEtaM0","primaries MC Eta M0",  20, -2., 2.);
+   TH1D * pMcEtaM1 = new TH1D("pMcEtaM1","primaries MC Eta M1",  20, -2., 2.);
+   TH1D * pMcEtaM2 = new TH1D("pMcEtaM2","primaries MC Eta M2",  20, -2., 2.);
+
+   TH1D * pEtaM0 = new TH1D("pEtaM0","primaries Rec Eta M0",  20, -2., 2.);
+   TH1D * pEtaM1 = new TH1D("pEtaM1","primaries Rec Eta M1",  20, -2., 2.);
+   TH1D * pEtaM2 = new TH1D("pEtaM2","primaries Rec Eta M2",  20, -2., 2.);
+
+   TH1D * pEtaRM0 = new TH1D("pEtaRM0","primaries Rec Eta Ratio M0",  20, -2., 2.);
+   TH1D * pEtaRM1 = new TH1D("pEtaRM1","primaries Rec Eta Ratio M1",  20, -2., 2.);
+   TH1D * pEtaRM2 = new TH1D("pEtaRM2","primaries Rec Eta Ratio M2",  20, -2., 2.);
+
+   nentries = Int_t(fChain->GetEntries());
+   nbytes = 0;
+   nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
       Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -95,23 +123,81 @@ void standardPlots::makeTrackEffPlots()
       primaryTrackEff->Fill((float)mMcTracks_,((float)mMatchedPairs_));
       primaryTrackEffMult->Fill((float)mMcTracks_,mPrimaryTrackEff);
 
-      //make Pt and Eta spectra of matched tracks
-      for(int iTrack=0;iTrack<mMatchedPairs_;iTrack++)
-	{
-	  if(!trackCut(ientry,iTrack)) continue;  //next track if trackCut 
-	                                          //doesn't pass
-	  primaryTrackEta->Fill(mMatchedPairs_mEtaPr[iTrack]);
-	  primaryTrackPt->Fill(mMatchedPairs_mEtaPr[iTrack]);
-	}
+      int centralityClass=0;
+      if (mMcMult<2000)
+	centralityClass=0;
+      else if (mMcMult<5000)
+	centralityClass=1;
+      else
+	centralityClass=2;
+      
+      double pt;
+      double eta;
+      int    nHits;
+      int    gId;
+      double q;
+      int iTrack;
 
       //make Pt and Eta spectra of MC tracks
-      for(int iTrack=0;iTrack<mMcTracks_;iTrack++)
+      for(iTrack=0;iTrack<mMcTracks_;iTrack++)
 	{
-	  if(!mcTrackCut(ientry,iTrack)) continue;  //next track if mcTrackCut 
-	                                          //doesn't pass
-	  mcTrackEffEta->Fill(mMcTracks_mEtaMc[iTrack]);
-	  mcTrackEffPt->Fill(mMcTracks_mPtMc[iTrack]);
+	  //if(!mcTrackCut(ientry,iTrack)) continue;  //next track if mcTrackCut doesn't pass
+	  pt    = mMcTracks_mPtMc[iTrack];
+	  eta   = mMcTracks_mEtaMc[iTrack];
+	  nHits = mMcTracks_mNHitMc[iTrack];
+	  gId   = mMcTracks_mGeantId[iTrack];
+	  q     = mMcTracks_mChargeMc[iTrack];
+
+	  mcTrackEffEta->Fill(eta);
+	  mcTrackEffPt->Fill(pt);
+	  switch (centralityClass)
+	    {
+		case 0:  
+		  if (fabs(eta)<=0.5 && gId>3 && fabs(q)>0 && nHits>25)   pMcPtM0->Fill(pt);
+		  if (pt>0.2         && gId>3 && fabs(q)>0 && nHits>25)   pMcEtaM0->Fill(eta); 
+		  break;
+		case 1:  
+		  if (fabs(eta)<=0.5 && gId>3 && fabs(q)>0 && nHits>25)   pMcPtM1->Fill(pt);
+		  if (pt>0.2         && gId>3 && fabs(q)>0 && nHits>25)   pMcEtaM1->Fill(eta); 
+		  break;
+		case 2:  
+		  if (fabs(eta)<=0.5 && gId>3 && fabs(q)>0 && nHits>25)   pMcPtM2->Fill(pt);
+		  if (pt>0.2         && gId>3 && fabs(q)>0 && nHits>25)   pMcEtaM2->Fill(eta); 
+		  break;
+	    }
 	}
+
+      //make Pt and Eta spectra of matched tracks
+      for(iTrack=0;iTrack<mMatchedPairs_;iTrack++)
+	{
+	  //if (!trackCut(ientry,iTrack)) continue;  //next track if trackCut 
+	  pt    = mMatchedPairs_mPtMc[iTrack];
+	  eta   = mMatchedPairs_mEtaMc[iTrack];
+	  nHits = mMatchedPairs_mNHitMc[iTrack];
+	  gId   = mMatchedPairs_mGeantId[iTrack];
+	  q     = mMatchedPairs_mChargeMc[iTrack];
+
+	  primaryTrackEffEta->Fill(eta);
+	  primaryTrackEffPt->Fill(pt);
+	  switch (centralityClass)
+	    {
+		case 0:  
+		  if (fabs(eta)<=0.5 && gId>3 && fabs(q)>0 && nHits>25)   pPtM0->Fill(pt);
+		  if (pt>0.2         && gId>3 && fabs(q)>0 && nHits>25)   pEtaM0->Fill(eta); 
+		  break;
+		case 1:  
+		  if (fabs(eta)<=0.5 && gId>3 && fabs(q)>0 && nHits>25)   pPtM1->Fill(pt);
+		  if (pt>0.2         && gId>3 && fabs(q)>0 && nHits>25)   pEtaM1->Fill(eta); 
+		  break;
+		case 2:  
+		  if (fabs(eta)<=0.5 && gId>3 && fabs(q)>0 && nHits>25)   pPtM2->Fill(pt);
+		  if (pt>0.2         && gId>3 && fabs(q)>0 && nHits>25)   pEtaM2->Fill(eta); 
+		  break;
+	    }
+
+	}
+
+
 
       //float mGlobalTrackEff = 0.;
       //for(int iTrack=0; iTrack<mMatchedPairs_;iTrack++)
@@ -126,6 +212,7 @@ void standardPlots::makeTrackEffPlots()
       globalTrackEffMult->Fill((float)mMcTracks_,mPrimaryTrackEff);
    }
    
+   /*
    cout <<"\tDisplaying Mc Track and Sti Track Eta Distribution:"<<endl;
    mcTrackEffEta->Draw();
    primaryTrackEta->SetMarkerColor(4);
@@ -133,15 +220,20 @@ void standardPlots::makeTrackEffPlots()
    primaryTrackEta->Draw("same");
    cout <<"\tDisplaying Mc Track and Sti Track Pt Distribution:"<<endl;
    mcTrackEffPt->Draw();
-   primaryTrackPt->SetMarkerColor(4);
-   primaryTrackPt->SetLineColor(4);
-   primaryTrackPt->Draw("same");
+   primaryTrackEffPt->SetMarkerColor(4);
+   primaryTrackEffPt->SetLineColor(4);
+   primaryTrackEffPt->Draw("same");
+   */
+   //cout <<"\tDisplaying Track Efficiency vs. Multiplicity:"<<endl;
+   //primaryTrackEffMult->Draw();
 
+   pPtRM0->Divide(pPtM0,pMcPtM0);
+   pPtRM1->Divide(pPtM1,pMcPtM1);
+   pPtRM2->Divide(pPtM2,pMcPtM2);
 
-   cout <<"\tDisplaying Track Efficiency vs. Multiplicity:"<<endl;
-   primaryTrackEffMult->Draw();
-
-
+   pEtaRM0->Divide(pEtaM0,pMcEtaM0);
+   pEtaRM1->Divide(pEtaM1,pMcEtaM1);
+   pEtaRM2->Divide(pEtaM2,pMcEtaM2);
 }
 
 
@@ -150,9 +242,9 @@ void standardPlots::makeMomentumPlots()
   cout <<"standardPlots::makeMomentumPlots | Creating Standard Momentum Plots"<<endl;
    if (fChain == 0) return;
 
-   int nentries = int(fChain->GetEntries());
-
-   int nbytes = 0, nb = 0;
+   nentries = int(fChain->GetEntries());
+   nbytes = 0;
+   nb = 0;
 
    TH3D* resolpteta = new TH3D("resolpteta","3d dpt/pt vs pt vs eta",20,-1,1,20,0,2,50,-.5,.5);
    TH3D* resolpeta = new TH3D("resolpeta","3d dp/p vs p vs eta",20,-1,1,20,0,2,50,-.5,.5);
@@ -231,9 +323,9 @@ void standardPlots::makeMomentumPlots()
 	//canvas->Modified();
  	//canvas->Update();
  	energylossPtAtEtaZero->SetBinContent(i,resolslice->GetMean());
- 	energylossPtAtEtaZero->SetBinError(i,gaus->GetParError(1));
- 	resolutionPtAtEtaZero->SetBinContent(i,gaus->GetParameter(2));
- 	resolutionPtAtEtaZero->SetBinError(i,gaus->GetParError(2));
+ 	energylossPtAtEtaZero->SetBinError(i,gaus2->GetParError(1));
+ 	resolutionPtAtEtaZero->SetBinContent(i,gaus2->GetParameter(2));
+ 	resolutionPtAtEtaZero->SetBinError(i,gaus2->GetParError(2));
     }
     energylossPtAtEtaZero->SetMarkerStyle(20);
     energylossPtAtEtaZero->SetMarkerColor(4);
@@ -254,9 +346,9 @@ void standardPlots::makeMomentumPlots()
 
 	resolslice->Fit("gaus");
  	energylossPAtEtaZero->SetBinContent(i,resolslice->GetMean());
- 	energylossPAtEtaZero->SetBinError(i,gaus->GetParError(1));
- 	resolutionPAtEtaZero->SetBinContent(i,gaus->GetParameter(2));
- 	resolutionPAtEtaZero->SetBinError(i,gaus->GetParError(2));
+ 	energylossPAtEtaZero->SetBinError(i,gaus2->GetParError(1));
+ 	resolutionPAtEtaZero->SetBinContent(i,gaus2->GetParameter(2));
+ 	resolutionPAtEtaZero->SetBinError(i,gaus2->GetParError(2));
     }
     energylossPAtEtaZero->SetMarkerStyle(20);
     energylossPAtEtaZero->SetMarkerColor(4);
@@ -266,14 +358,13 @@ void standardPlots::makeMomentumPlots()
     resolutionPAtEtaZero->SetXTitle("pt (GeV/c)");
     resolutionPAtEtaZero->Draw();
 
-
-
     //make momentum resolution plot
 
     TProfile *myMomResPlot=new TProfile("myMomResPlot","dp/p vs p.",20,0,4);
     TProfile *mySigmaMomResPlot=new TProfile("mySigmaMomResPlot","RMS(dp/p) vs p.",20,0,4);
     float totalM=0; float totalMmc=0;
-   Int_t nbytes = 0, nb = 0;
+    nbytes = 0;
+    nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
       Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);   nbytes += nb;
@@ -310,9 +401,10 @@ void standardPlots::makeFitPointsPlots()
   
    if (fChain == 0) return;
 
-   Int_t nentries = Int_t(fChain->GetEntries());
+   nentries = Int_t(fChain->GetEntries());
 
-   Int_t nbytes = 0, nb = 0;
+   nbytes = 0;
+   nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++) {
       Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
       nb = fChain->GetEntry(jentry);
@@ -352,9 +444,9 @@ void standardPlots::makeHitEffPlots()
 
    if (fChain == 0) return;
 
-   Int_t nentries = Int_t(fChain->GetEntries());
-
-   Int_t nbytes = 0, nb = 0;
+   nentries = Int_t(fChain->GetEntries());
+   nbytes = 0;
+   nb = 0;
    for (Int_t jentry=0; jentry<nentries;jentry++)
    {
       Int_t ientry = LoadTree(jentry); //in case of a TChain, ientry is the entry number in the current file
