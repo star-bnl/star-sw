@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.7 2003/10/25 02:58:50 jeromel Exp $
+ * $Id: TMemStat.cxx,v 1.8 2003/10/25 03:20:09 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -73,47 +73,49 @@ void TMemStat::Print(const char *) const
   if ( aver < LOWEST_VAL ) aver = 0.0;
   if ( rms  < LOWEST_VAL ) rms  = 0.0;
 
-  printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
+  printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
 	 GetName(),fTally,fMin,aver,fMax,rms);
 }
 //______________________________________________________________________________
 void TMemStat::Summary()
 {
+#define NUMTICKS (40+4*12+5)
 
-   Double_t dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+  Double_t dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+  int i;
 
-   if(!fgList) return;
-   fgList->Sort();
-   printf("%40s%12s%12s%12s%12s\n",
-	  "TMemStat::Summary(calls)","Min ","Aver ","Max ","RMS ");
+  if(!fgList) return;
+  fgList->Sort();
+  printf("%40.40s%12s%12s%12s%12s\n",
+	 "TMemStat::Summary(calls)","Min ","Aver ","Max ","RMS ");
 
-   for(int i=0 ; i < 40+4*12 ; i++) printf("=");
-   printf("\n");
+  for( i=0 ; i < NUMTICKS ; i++) printf("=");
+  printf("\n");
    
-   TListIter next(fgList); 
-   TMemStat  *m;
-   while((m = (TMemStat*)next())){
-     if(!m->fTally)	continue;
-     m->Print();
-     dtally++;
-     if (m->fMin < dmin) dmin=m->fMin;
-     if (m->fMax > dmax) dmax=m->fMax;
-     dmp = m->fAver/m->fTally;
-     daver += dmp; 
-     drms  += dmp*dmp;
-   }
-   if(!dtally) return;
+  TListIter next(fgList); 
+  TMemStat  *m;
+  while((m = (TMemStat*)next())){
+    if(!m->fTally)	continue;
+    m->Print();
+    dtally++;
+    if (m->fMin < dmin) dmin=m->fMin;
+    if (m->fMax > dmax) dmax=m->fMax;
+    dmp = m->fAver/m->fTally;
+    daver += dmp; 
+    drms  += dmp*dmp;
+  }
+  if(!dtally) return;
 
-   for(int i=0 ; i < 40+4*12 ; i++) printf("-");
-   printf("\n");
+  for( i=0 ; i < NUMTICKS ; i++) printf("-");
+  printf("\n");
 
-   daver /= dtally;
-   drms   = ::sqrt(fabs(drms/dtally-daver*daver));
-   printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
+  daver /= dtally;
+  drms   = ::sqrt(fabs(drms/dtally-daver*daver));
+  printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
 	  "Total",(int)dtally,dmin,daver,dmax,drms);
 
-   for(int i=0 ; i < 40+4*12 ; i++) printf("=");
-   printf("\n");
+  for( i=0 ; i < NUMTICKS ; i++) printf("=");
+  printf("\n");
 
 }
 
@@ -129,7 +131,7 @@ Double_t TMemStat::Used()
 Double_t TMemStat::ProgSize()
 {
   static char *ps = 0;
-  Double_t res=0;  
+  Double_t    res=0;
   if (!ps) {
     int pid = ::getpid();
     ps = (char*)malloc(20);
