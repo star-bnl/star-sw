@@ -226,6 +226,7 @@ Int_t StIOMaker::Finish()
     fFmtMk[i]=0;}
   fCurrMk = 0;
   StIOInterFace::Finish();
+  delete fFileSet; fFileSet=0;
   return 0;
 }
 //_____________________________________________________________________________
