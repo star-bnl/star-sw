@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.35 1999/11/20 20:50:52 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.36 1999/11/29 21:38:26 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.36  1999/11/29 21:38:26  fisyak
+// Add Dave Hardtke corrections, clean up print outs
+//
 // Revision 1.35  1999/11/20 20:50:52  fisyak
 // Rewmove consistency check from BFC table
 //
@@ -145,9 +148,9 @@
 #include "St_DataSet.h"
 #include "StChain.h"
 #include "St_XDFFile.h"
-#include "StMagF.h"
+#include "StMagF/StMagF.h"
 #include "St_geant_Maker/St_geant_Maker.h"
-#include "StDbBroker.h"
+#include "StDbBroker/StDbBroker.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
@@ -165,7 +168,9 @@ struct BfcItem {
 };
 BfcItem BFC[] = {
   {"Key"         ,"Name","Chain","Opts"                                   ,"Maker","Libs","Comment",kFALSE},
-  // time stamps
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"TIME STAMPS ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"SD97"        ,""  ,"","db"                                ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"        ,""  ,"","db"                                ,"","","Turn on 1998 test parameters",kFALSE},
   {"Y1a"         ,""  ,"","db"                                  ,"","","Turn on Year 1a parameters",kFALSE},
@@ -176,8 +181,10 @@ BfcItem BFC[] = {
   {"Y1d"         ,""  ,"","db"                                  ,"","","Turn on Year 1d parameters",kFALSE},
   {"Y1e"         ,""  ,"","db"                                  ,"","","Turn on Year 1e parameters",kFALSE},
   {"Y2a"         ,""  ,"","db"                                  ,"","","Turn on Year 2a parameters",kFALSE},
-  // chains
-  {"doEvents","" ,""  ,"xin,event,analysis,FieldOn"                                       ,"","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
   {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3t,Cdst,tree"                ,"","","Turn on chain y1a",kFALSE},
@@ -186,14 +193,17 @@ BfcItem BFC[] = {
   {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,"" ,"","y2a,tpc,svt,ftpc,l0,l3t,ems,emc,rich,Cdst,tree","","","Turn on chain y2a",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
-  //Options
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"calib"       ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"gstar"       ,"" ,"","tables,geant","","","gstar for 10 muon track with pT = 10 GeV in |eta|<1",kFALSE}, 
   {"tdaq"        ,""  ,"","er99,xin,tpc_daq"                                              ,"","","",kFALSE},  
+  {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
   {"tables"      ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
@@ -203,13 +213,18 @@ BfcItem BFC[] = {
   {"FieldOff"    ,""  ,"","-FieldOn,-HalfField,-ReverseField","StMagFC","StMagF" ,"No Field option",kFALSE},
   {"HalfField"   ,""  ,"","-FieldOn,-FieldOff,-ReverseField","StMagFC","StMagF","Half Field option",kFALSE},
   {"ReverseField",""  ,"","-FieldOn,-FieldOff,-HalfField","StMagFC","StMagF","Reverse Field option",kFALSE},
-  // Makers
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
+  {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
+  {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
+  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"geant","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize geant",kFALSE}, 
   {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt"                     ,"StChainMaker","StChain","",kFALSE},
+  {"tpcDB"       ,"tpcDB","tpc",""                                     ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"tss"         ,"tpc_raw","tpc","tls"                    ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
   {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpc","","",""               ,"use tfs       (no St_[tss_ and no Trs]Maker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
@@ -249,10 +264,7 @@ BfcItem BFC[] = {
   {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"Display"    ,"EventDisplay","","St_geom"        ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
-  {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
-  {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
-  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"Display"    ,"EventDisplay","","SCL,St_geom"    ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
@@ -265,8 +277,10 @@ Bool_t   ChainFlagSet = kFALSE;
 class StEvent;
 StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
-class St_geant_Maker; St_geant_Maker *geant   = 0;   
-class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0;
+class St_geant_Maker; St_geant_Maker *geantMk = 0;   
+class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0; 
+St_db_Maker *GeometryMk = 0; St_db_Maker *CalibrationsMk = 0;
+St_db_Maker *ConditionsMk = 0;
 class StTreeMaker;    StTreeMaker    *treeMk  = 0;
 
 ClassImp(StBFChain)
@@ -293,12 +307,13 @@ Int_t StBFChain::Load()
 	  if (!strstr(lib,libe.Data())) {
 	    iok = gSystem->Load(Libs[j]->Data());
 	    if (iok < 0)  {
-	      gMessMgr->QAInfo() << "\tproblem with loading\t" << Libs[j]->Data() << endm;
-	      gMessMgr->QAInfo() << "\tswitch off\t" << BFC[i].Key << "\t !!!!!" << endm;
+	      gMessMgr->QAInfo() << "problem with loading\t" << Libs[j]->Data() << endm;
+	      gMessMgr->QAInfo() << "switch off\t" << BFC[i].Key << "\t !!!!!" << endm;
 	      BFC[i].Flag = kFALSE;
 	      break;
 	    }
-	    else gMessMgr->QAInfo() << "\tLibrary " << Libs[j]->Data() << "\tis loaded" << endm;
+	    else gMessMgr->QAInfo() << "Library " << Libs[j]->Data() << "\t(" 
+				    << gSystem->DynamicPathName(Libs[j]->Data()) << ")\tis loaded" << endm;
 	  }
 	}
       }
@@ -347,6 +362,11 @@ Int_t StBFChain::Instantiate()
 	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
 	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
 	    dbMk = new St_db_Maker("db",mainDB,userDB);
+	    if (GetOption("tpcDB")) {
+	      GeometryMk = new St_db_Maker("Geometry","MySQL:Geometry");
+	      //            CalibrationsMk = new St_db_Maker("Calibrations","MySQL:Calibrations");
+	      //            ConditionsMk = new St_db_Maker("Conditions","MySQL:Conditions");
+	    }
 	    if (dbMk) {
 	      BFC[i].Name = (Char_t *) dbMk->GetName();
 	      SetDbOptions();
@@ -373,14 +393,14 @@ Int_t StBFChain::Instantiate()
 	  }
 	}
 	if (Key == "geant") {
-	  geant = new St_geant_Maker("geant");
-	  if (geant) {
-	    BFC[i].Name = (Char_t *) geant->GetName();
+	  geantMk = new St_geant_Maker("geant");
+	  if (geantMk) {
+	    BFC[i].Name = (Char_t *) geantMk->GetName();
 	    if (!GetOption("fzin") && !GetOption("gstar")) {
-	      geant->SetNwGEANT(5000000);
-	      geant->SetActive(kFALSE);
+	      geantMk->SetNwGEANT(5000000);
+	      geantMk->SetActive(kFALSE);
 	    }
-	    else     geant->SetNwGEANT(10000000);
+	    else     geantMk->SetNwGEANT(10000000);
 	    SetGeantOptions();
 	  }
 	  continue;
@@ -623,41 +643,34 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 }
 //_____________________________________________________________________
 void StBFChain::SetGeantOptions(){
-  if (geant) {
+  if (geantMk) {
     SetInput("geant",".make/geant/.data");
-    if (GetOption("Higz"))  geant->SetIwtype(1);
+    if (GetOption("Higz"))  geantMk->SetIwtype(1);
     if (!GetOption("fzin")) {
-      if (GetOption("SD97") || GetOption("SD98") || GetOption("Y1a") || 
-	  GetOption("ES99") || GetOption("ER99")) geant->LoadGeometry("detp geometry YEAR_1A"); 
-      else {
-	if (GetOption("Y1b"))                     geant->LoadGeometry("detp geometry YEAR_1B");
-	else {
-	  if (GetOption("Y1c"))                   geant->LoadGeometry("detp geometry YEAR_1C");
-	  else {
-	    if (GetOption("ES99"))                geant->LoadGeometry("detp geometry YEAR_1A");
-	    else {
-	      if (GetOption("ER99"))              geant->LoadGeometry("detp geometry YEAR_1A");
-	      else {
-		if (GetOption("Y2a"))             geant->LoadGeometry("detp geometry YEAR_2A");
-		else                              geant->LoadGeometry("detp geometry YEAR_2A");
-	      }
-	    }
-	  }
-	}
-      }
+            if (GetOption("SD97") || 
+		GetOption("SD98") || 
+		GetOption("Y1a")  || 
+		GetOption("ES99") || 
+		GetOption("ER99"))   geantMk->LoadGeometry("detp geometry YEAR_1A"); 
+      else {if (GetOption("Y1b"))    geantMk->LoadGeometry("detp geometry YEAR_1B");
+      else {if (GetOption("Y1c"))    geantMk->LoadGeometry("detp geometry YEAR_1C");
+      else {if (GetOption("ES99"))   geantMk->LoadGeometry("detp geometry YEAR_1A");
+      else {if (GetOption("ER99"))   geantMk->LoadGeometry("detp geometry YEAR_1A");
+      else {if (GetOption("Y2a"))    geantMk->LoadGeometry("detp geometry YEAR_2A");
+      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}}
       if (GetOption("gstar")) {
-	geant->Do("subevent 0;");
+	geantMk->Do("subevent 0;");
 	// gkine #particles partid ptrange yrange phirange vertexrange 
-	geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
-	geant->Do("mode g2tm prin 1;");
-	//  geant->Do("next;");
-	//  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-	if (GetOption("Debug")) geant->Do("debug on;");
-	geant->Do("swit 2 3;");
+	geantMk->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  0. 0.;");
+	geantMk->Do("mode g2tm prin 1;");
+	//  geantMk->Do("next;");
+	//  geantMk->Do("dcut cave z 1 10 10 0.03 0.03;");
+	if (GetOption("Debug")) geantMk->Do("debug on;");
+	geantMk->Do("swit 2 3;");
       }
     }
     else {
-      if (geant->SetInputFile(InFile->Data()) > kStOK) {
+      if (geantMk->SetInputFile(InFile->Data()) > kStOK) {
 	printf ("File %s cannot be opened. Exit! \n",InFile->Data());
 	gSystem->Exit(1);
       }
@@ -679,6 +692,18 @@ void StBFChain::SetDbOptions(){
   else                         dbMk->SetDateTime("year_2a");}}}}}}}}}
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
+  gMessMgr->QAInfo() << "Geometry Maker set time = ";
+  if (GeometryMk)  gMessMgr->QAInfo()                
+                   << GeometryMk->GetDateTime().GetDate() 
+		   << GeometryMk->GetDateTime().GetTime();
+  gMessMgr->QAInfo()  << endm;
+}
+//_____________________________________________________________________
+void StBFChain::SetDataBases(const Char_t* TimeStamp){
+  if (dbMk) dbMk->SetDateTime(TimeStamp);
+  if (GeometryMk) GeometryMk->SetDateTime(TimeStamp);
+  if (CalibrationsMk) CalibrationsMk->SetDateTime(TimeStamp);
+  if (ConditionsMk) ConditionsMk->SetDateTime(TimeStamp);
 }
 //_____________________________________________________________________
 void StBFChain::SetTreeOptions()
@@ -687,7 +712,7 @@ void StBFChain::SetTreeOptions()
   if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
   if (GetOption("Event"))    treeMk->IntoBranch("eventBranch","StEvent");
   if (GetOption("AllEvent")) {
-    if (geant) {
+    if (geantMk) {
       treeMk->IntoBranch("geantBranch","geant");
       treeMk->IntoBranch("geantBranch","geant/.data/particle");
       treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
