@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.2 2000/01/11 19:22:14 ullrich Exp $
+ * $Id: StVertex.h,v 2.3 2000/02/10 16:32:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 2.2  2000/01/11 19:22:14  ullrich
- * Added non-const parent() method.
+ * Revision 2.3  2000/02/10 16:32:21  ullrich
+ * flag changed from unsigned to signed long
  *
  * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
@@ -46,7 +46,7 @@ public:
     StVertex(const dst_vertex_st&);
     // StVertex(const StVertex&);            use default
     // StVertex& operator=(const StVertex&); use default
-    ULong_t                flag() const;
+    virtual ~StVertex();
     
     Int_t operator==(const StVertex&) const;
     Int_t operator!=(const StVertex&) const;
@@ -66,7 +66,7 @@ public:
     virtual void setFlag(Long_t);
     virtual void setCovariantMatrix(Float_t[6]);
     virtual void setChiSquared(Float_t);
-    ULong_t       mFlag;
+    virtual void setParent(StTrack*);
     virtual void addDaughter(StTrack*) = 0;
     virtual void removeDaughter(StTrack*) = 0;
 
