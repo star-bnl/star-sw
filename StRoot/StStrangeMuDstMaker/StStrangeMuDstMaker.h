@@ -159,7 +159,7 @@ class StStrangeMuDstMaker : public StMaker {
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.15 2003/09/02 17:59:04 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.16 2003/10/20 00:21:47 genevb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   //@}
@@ -314,11 +314,11 @@ inline StXiMc* StStrangeMuDstMaker::GetXiMc(Int_t i)
 inline StKinkMc* StStrangeMuDstMaker::GetKinkMc(Int_t i)
             { return (StKinkMc*) kink->GetMc(i); }
 inline StStrangeAssoc* StStrangeMuDstMaker::GetV0Assoc(Int_t i)
-            { return xi->GetAssoc(i); }
+            { return v0->GetAssoc(i); }
 inline StStrangeAssoc* StStrangeMuDstMaker::GetXiAssoc(Int_t i)
             { return xi->GetAssoc(i); }
 inline StStrangeAssoc* StStrangeMuDstMaker::GetKinkAssoc(Int_t i)
-            { return xi->GetAssoc(i); }
+            { return kink->GetAssoc(i); }
 inline TTree* StStrangeMuDstMaker::GetTree()
             { return tree; }
 inline StStrangeCuts& StStrangeMuDstMaker::Cuts()
@@ -342,8 +342,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.15 2003/09/02 17:59:04 perev Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.16 2003/10/20 00:21:47 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.16  2003/10/20 00:21:47  genevb
+// Fix a typo for Assoc introduced in vers. 3.13
+//
 // Revision 3.15  2003/09/02 17:59:04  perev
 // gcc 3.2 updates + WarnOff
 //
