@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.5 2000/06/23 14:31:53 kathy Exp $
+//! $Id: StHistUtil.h,v 1.6 2000/06/23 15:26:22 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.6  2000/06/23 15:26:22  kathy
+//! added method to return the copied array & it's size
+//!
 //! Revision 1.5  2000/06/23 14:31:53  kathy
 //! put 2 new methods in: CopyHists (must be used first), AddHists
 //!
@@ -117,6 +120,7 @@ class StHistUtil {
   virtual Int_t   Overlay1D(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
   virtual Int_t   Overlay2D(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
 
+
 // Inline methods
   virtual void    SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
   virtual void    SetZones(Int_t columns=2, Int_t rows=3);   
@@ -125,11 +129,12 @@ class StHistUtil {
   virtual void    SetPostScriptFile(const Char_t *psFileName="");
   virtual void    SetPntrToMaker(StMaker *m1);
   virtual void    SetGlobalTitle(const Char_t *globalTitle="");
-
+  virtual TH1**   getNewHist();
+  virtual Int_t   getNewHistSize();
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.5 2000/06/23 14:31:53 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.6 2000/06/23 15:26:22 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
@@ -154,5 +159,8 @@ inline void StHistUtil::SetPntrToMaker(StMaker *m1)
 inline void StHistUtil::SetGlobalTitle(const Char_t *globalTitle)
                          { m_GlobalTitle = globalTitle;}
 
+inline TH1**  StHistUtil::getNewHist()
+                            {return newHist;}
 
-
+inline Int_t StHistUtil::getNewHistSize()
+                           {return maxHistCopy; }
