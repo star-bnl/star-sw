@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.10 2000/07/22 22:11:32 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.11 2000/08/15 13:55:54 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.11  2000/08/15 13:55:54  aihong
+ * bug fixed
+ *
  * Revision 1.10  2000/07/22 22:11:32  aihong
  * move some include files to StEventUtilities & change include path
  *
@@ -43,7 +46,7 @@
  *
  **************************************************************************/
 
-
+#include <float.h>
 #include "TCanvas.h"
 #include "TF1.h"
 #include <strstream.h>
@@ -270,7 +273,10 @@ void StPidAmpNet::fillBand(){ //fill band graph
 
 
     //if a slice is in window, put its dedx and rig into graph.
-    if (mNetWindow.isInWindow(fabs(theSlice->meanRig())) && storedSth && ((theSlice->sliceInfo()->meanDedx())!=0.0)) mBandGraph->SetPoint(mBandGraph->GetN(), float(fabs(theSlice->meanRig())),float(fabs(theSlice->sliceInfo()->meanDedx()))); 
+    if (mNetWindow.isInWindow(fabs(theSlice->meanRig())) && storedSth && ((theSlice->sliceInfo()->meanDedx())!=0.0)){
+ if (float((theSlice->sliceInfo())->meanDedx())<FLT_MAX)
+ mBandGraph->SetPoint(mBandGraph->GetN(), float(fabs(theSlice->meanRig())),float(fabs(theSlice->sliceInfo()->meanDedx()))); 
+    }
   }
 
  
@@ -301,10 +307,13 @@ void StPidAmpNet::fillAmp(){//fill amp graph
   electronAmp.open("electronGraph.txt",ios::app);
   }
 
+ 
+
   for (iter=mSliceCollect->begin(); iter!=mSliceCollect->end(); iter++) {
      theSlice=*iter;
      bool storedSth=((theSlice->slice()->GetMaximum())>0);
      if (mNetWindow.isInWindow(fabs(theSlice->meanRig())) && storedSth) {
+       if (float((theSlice->sliceInfo())->amp())<FLT_MAX){
 mAmpGraph->SetPoint(mAmpGraph->GetN(),float(fabs(theSlice->meanRig())),float((theSlice->sliceInfo())->amp()));
 
   if (outputPoints4Tunning){
@@ -313,9 +322,8 @@ mAmpGraph->SetPoint(mAmpGraph->GetN(),float(fabs(theSlice->meanRig())),float((th
  if (mParticleType.id()==8 )     pionAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
  if (mParticleType.id()==45) deuteronAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
  if (mParticleType.id()==3 ) electronAmp<<"gr->SetPoint("<<(mAmpGraph->GetN()-1)<<","<<float(fabs(theSlice->meanRig()))<<","<<float((theSlice->sliceInfo())->amp())<<");"<<endl;
-
-
   }
+       }
 
      }
   }
@@ -353,6 +361,7 @@ void StPidAmpNet::fillReso(){
   for (iter=mSliceCollect->begin(); iter!=mSliceCollect->end(); iter++) {
             theSlice=*iter;
     if (mNetWindow.isInWindow(fabs(theSlice->meanRig()))&& (theSlice->sliceInfo()->meanDedx()>0.0)){
+     if (float((theSlice->sliceInfo())->sigma())<FLT_MAX)
      temp.SetBinContent(getSliceIndex(fabs(theSlice->meanRig())),((theSlice->sliceInfo())->sigma()/fabs((theSlice->sliceInfo())->meanDedx())));
      NStoredBin++;
     }
