@@ -33,6 +33,8 @@ StTreeMaker::~StTreeMaker(){
 //_____________________________________________________________________________
 Int_t StTreeMaker::Open(const char*)
 {
+  int i;
+  
   assert(strchr("rwu",fIOMode[0]));
   if(fTree) return 0;
 
@@ -65,6 +67,20 @@ Int_t StTreeMaker::Open(const char*)
 //		Register for outer world
       SetOutput(fTree);
       fTree->UpdateFile(fFile);
+//	1st branch must be mentioned in fFile
+      TString firstBr(fFile);
+      i = firstBr.Last('.'); assert(i>0);
+      firstBr.Replace(i,999,"");
+      i = firstBr.Last('.'); assert(i>0);
+      firstBr.Replace(0,i+1,"");
+
+      St_DataSet *fst = fTree->Find(firstBr);            
+      if (!fst) {//not found, add "Branch" to name
+        firstBr+="Branch";
+        fst = fTree->Find(firstBr); assert(fst);}
+      fst->Shunt(0); fTree->AddFirst(fst);
+      printf("<%s(%s)::Init> Branch %s is MAIN in tree\n",ClassName(),GetName(),fst->GetName());
+
     }
 
 //   
