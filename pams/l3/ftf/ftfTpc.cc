@@ -1,12 +1,12 @@
 /*:>-------------------------------------------------------------------
-**: FILE:       ftf_tpc.cc
+**: FILE:       ftfTpc.cc
 
 **: HISTORY:
 **:   
 **:  
 **:<------------------------------------------------------------------*/
 #include "PAM.h"
-#include "ftf_tpc.h"
+#include "ftfTpc.h"
 #include "tcl_tphit.h"
 #include "tpt_track.h"
 #include "FtfFinder.h"
@@ -24,7 +24,7 @@ extern "C" long type_of_call ftfTpc_(
   TABLE_HEAD_ST     *monitor_h,    SL3MONITOR_ST    *monitor )
 {
 /*:>--------------------------------------------------------------------
-**: ROUTINE:    ftf_tpc_
+**: ROUTINE:    ftfTpc_
 **: DESCRIPTION: Prepares data and calls fast tracking   
 **:
 **: 

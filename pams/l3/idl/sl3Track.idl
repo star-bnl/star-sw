@@ -2,7 +2,6 @@
  * Table containing tracks found by l3 tracking     
 */
    struct sl3Track{
-<<<<<<< sl3Track.idl
       float    id      ;       // id
       float    xReference ;    // x reference for conformal mapping
       float    yReference ;    // y reference for conformal mapping
@@ -18,4 +17,4 @@
       float    g2Sz   ;
       float    trackLength ;
    };
-/*  Last mod. for sl3Track: $Date: 1998/12/10 15:29:39 $ */
+/*  Last mod. for sl3Track: $Date: 1998/12/10 15:32:39 $ */
