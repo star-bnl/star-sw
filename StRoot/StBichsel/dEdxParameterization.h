@@ -64,7 +64,16 @@ class dEdxParameterization {
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
     return Interpolation(fPhi,log10bg,log2dx,z,kase);}
   void        Print();
+  const Char_t      *Tag() const {return    fTag.Data();}   
+  const TProfile2D  *P()   const {return     fP;}     
+  const TProfile2D  *A()   const {return     fA;}     
+  const TProfile2D  *I70() const {return   fI70;}   
+  const TProfile2D  *I60() const {return   fI60;}   
+  const TProfile2D  *D()   const {return     fD;}     
+  const TProfile2D  *Rms() const {return   fRms;}   
+  const TProfile2D  *W()   const {return     fW;}     
+  const TH3D        *Phi() const {return   fPhi;}     
   ClassDef(dEdxParameterization,0)
-};
+    };
 #endif
 
