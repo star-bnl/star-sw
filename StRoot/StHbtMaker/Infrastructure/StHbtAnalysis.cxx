@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.22 2002/11/03 16:40:31 magestro Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.23 2002/11/20 00:09:26 renault Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.23  2002/11/20 00:09:26  renault
+ * fill a new monitor with (hbtEvent,partCollection)
+ *
  * Revision 1.22  2002/11/03 16:40:31  magestro
  * Modified ProcessEvent(), added MakePairs() method, and implemented immediate event mixing
  *
@@ -166,6 +169,7 @@ void FillHbtParticleCollection(StHbtParticleCut*         partCut,
 	  partCollection->push_back(particle);
 	}
       }
+      pCut->FillCutMonitor(hbtEvent,partCollection);// Gael 19/06/02
       break;
     }
   case hbtKink:          // cut is cutting on Kinks  -- mal 25May2001
