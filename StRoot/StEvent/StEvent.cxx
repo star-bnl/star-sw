@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.19 2001/03/09 05:23:53 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.20 2001/03/14 02:35:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.20  2001/03/14 02:35:43  ullrich
+ * Added container and methods to handle PSDs.
+ *
  * Revision 2.19  2001/03/09 05:23:53  ullrich
  * Added new method statistics().
  *
@@ -94,6 +97,7 @@
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
 #include "StL3Trigger.h"
+#include "StPsd.h"
 #include "tables/St_event_header_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
@@ -102,8 +106,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.19 2001/03/09 05:23:53 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.19 2001/03/09 05:23:53 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.20 2001/03/14 02:35:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.20 2001/03/14 02:35:43 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -546,6 +550,46 @@ StEvent::kinkVertices() const
     return *vertices;
 }
 
+StSPtrVecPsd*
+StEvent::psds()
+{
+    StSPtrVecPsd *psdVector = 0;
+    _lookup(psdVector, mContent);
+    return psdVector;
+}
+
+const StSPtrVecPsd*
+StEvent::psds() const
+{
+    StSPtrVecPsd *psdVector = 0;
+    _lookup(psdVector, mContent);
+    return psdVector;
+}
+
+StPsd*
+StEvent::psd(StPwg p, int i)
+{
+    StSPtrVecPsdIterator iter;
+    StSPtrVecPsd *psdVector = psds();
+    if (psdVector)
+        for (iter = psdVector->begin(); iter != psdVector->end(); iter++)
+	    if ((*iter) && (*iter)->pwg() == p && (*iter)->id() == i)
+		return *iter;
+    return 0;
+}
+
+const StPsd*
+StEvent::psd(StPwg p, int i) const
+{
+    StSPtrVecPsdConstIterator iter;
+    const StSPtrVecPsd *psdVector = psds();
+    if (psdVector)
+        for (iter = psdVector->begin(); iter != psdVector->end(); iter++)
+	    if ((*iter) && (*iter)->pwg() == p && (*iter)->id() == i)
+		return *iter;
+    return 0;
+}
+
 StSPtrVecObject&
 StEvent::content() { return mContent; }
 
@@ -699,6 +743,32 @@ StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
     }
 }
 
+void
+StEvent::addPsd(StPsd* p)
+{
+    if (p) {
+	if (psd(p->pwg(), p->id())) {
+	    cerr << "StEvent::addPsd(): Error, PSD with same identifiers already exist. Nothing added." << endl;
+	    return;
+	}
+	StSPtrVecPsd* psdVector = 0;
+	_lookupOrCreate(psdVector, mContent);
+	psdVector->push_back(p);
+    }
+}
+
+void StEvent::removePsd(StPsd* p)
+{
+    StSPtrVecPsdIterator iter;
+    if (p) {
+	StSPtrVecPsd* psdVector = psds();
+	if (psdVector)
+	    for (iter = psdVector->begin(); iter != psdVector->end(); iter++)
+                if (*iter == p)
+		    psdVector->erase(iter);
+    }
+}
+
 void StEvent::Browse(TBrowser* b)
 {
     StAutoBrowse::Browse(this,b);
@@ -743,4 +813,5 @@ void StEvent::statistics()
     cout << "\t# of hits in EMC:            " << (emcCollection() ? emcCollection()->barrelPoints().size() : 0) << endl;
     cout << "\t# of hits in EEMC:           " << (emcCollection() ? emcCollection()->endcapPoints().size() : 0) << endl;
     cout << "\t# of hits in RICH:           " << (richCollection() ? richCollection()->getRichHits().size() : 0) << endl;
+    cout << "\t# of PSDs:                   " << (psds() ? psds()->size() : 0) << endl;
 }

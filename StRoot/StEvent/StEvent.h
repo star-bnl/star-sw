@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.16 2001/03/09 05:24:01 ullrich Exp $
+ * $Id: StEvent.h,v 2.17 2001/03/14 02:35:43 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.17  2001/03/14 02:35:43  ullrich
+ * Added container and methods to handle PSDs.
+ *
  * Revision 2.16  2001/03/09 05:24:01  ullrich
  * Added new method statistics().
  *
@@ -71,6 +74,7 @@
 #include "St_DataSet.h"
 #include "TString.h"
 #include "StContainers.h"
+#include "StEnumerations.h"
 
 class event_header_st;
 class dst_event_summary_st;
@@ -92,6 +96,7 @@ class StPrimaryVertex;
 class StV0Vertex;
 class StXiVertex;
 class StKinkVertex;
+class StPsd;
 
 class StEvent : public St_DataSet {
 public:
@@ -160,6 +165,11 @@ public:
     StSPtrVecKinkVertex&                kinkVertices();
     const StSPtrVecKinkVertex&          kinkVertices() const;
 
+    StPsd*                              psd(StPwg, int);
+    const StPsd*                        psd(StPwg, int) const;
+    StSPtrVecPsd*                       psds();
+    const StSPtrVecPsd*                 psds() const;
+    
     StSPtrVecObject&                    content();       // for IO purposes only
     void                                statistics();    // *MENU*
 
@@ -183,6 +193,8 @@ public:
     void setL0Trigger(StL0Trigger*);
     void setL3Trigger(StL3Trigger*);
     void addPrimaryVertex(StPrimaryVertex*);
+    void addPsd(StPsd*);
+    void removePsd(StPsd*);
     
 protected:    
     mutable StSPtrVecObject  mContent;
