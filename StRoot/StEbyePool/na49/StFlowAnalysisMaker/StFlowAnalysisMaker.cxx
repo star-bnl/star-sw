@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.1 2001/02/22 23:34:11 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.2 2001/03/16 22:42:00 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.2  2001/03/16 22:42:00  posk
+// Removed pt weighting for odd harmonics.
+//
 // Revision 1.1  2001/02/22 23:34:11  posk
 // NA49 version of STAR flow software.
 //
@@ -891,7 +894,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (!pFlowEvent->Stripes()) {
 	    // Remove autocorrelations
 	    if (rapidity < Flow::yCM && oddHar) phiWgt *= -1.;
-	    if (pFlowEvent->PtWgt())            phiWgt *= pt;
+	    if (pFlowEvent->PtWgt() && !oddHar) phiWgt *= pt;
 	    if (pFlowEvent->YWgt() && oddHar)   phiWgt *= fabs(rapidity -
 							       Flow::yCM);
 	    double meanCos = pFlowEvent->MeanCos(rapidity, pt, j);
