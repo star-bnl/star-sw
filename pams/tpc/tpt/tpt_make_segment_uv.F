@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.16 2000/11/14 22:29:08 genevb Exp $
+* $Id: tpt_make_segment_uv.F,v 1.17 2002/02/19 19:17:07 hardtke Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.17  2002/02/19 19:17:07  hardtke
+* Account for missing RDO when extending track segments
+*
 * Revision 1.16  2000/11/14 22:29:08  genevb
 * Switched from float to double in many places
 *
@@ -112,7 +115,9 @@ C     Local variables
       INTEGER islic,is_pnt,ipass
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
+      INTEGER nbadrdo,isec24
 
+      INTEGER tpc_rdo_mask
       INTEGER tpc_global_to_sector
       INTEGER tpc_sec24_to_sec12
       INTEGER tpc_row_par
@@ -140,6 +145,8 @@ C
 
       ngap = 0
       nf = 0
+      nbadrdo=0
+
 C
       ip=trk(ntrk).ipnt(1)
       x0=hit(ip).x
@@ -201,6 +208,12 @@ c              dist2=(xlast-xp(2))**2+(ylast-yp(2))**2
                xglobal(3)=10.0
 C              and check whether it lies in the same sector
                iret = tpc_global_to_sector(isec1,xglobal)
+               if (zlast.gt.0) then
+                isec24 = isec1
+               else
+                xglobal(3) = -10.0
+                iret = tpc_global_to_sector(isec24,xglobal)
+               endif               
                if(isect_trunc.eq.isec1) then
                   ns=1
                else
@@ -328,7 +341,12 @@ C                   if(ir1.lt.14.or.drow.gt.1) fact=2.0
            endif
            if(nfound.eq.0) then
 C            no candidate found in this row
-             ngap = ngap+1
+C            check to see if rdo is on before incrementing gap counter
+             if (tpc_rdo_mask(isec24,ir1) .eq. 1) then
+              ngap = ngap+1
+             else
+              nbadrdo = nbadrdo+1
+             endif
            else
 C            candidate found reset gap counter
              ngap = 0
