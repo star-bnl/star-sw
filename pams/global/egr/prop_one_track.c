@@ -3,6 +3,12 @@
 #include "math_constants.h"
 #include "phys_constants.h"
 
+/* External routines*/
+extern void prop_circle_param_();
+extern void ev0_project_track_();
+extern void prop_fine_approach_();
+
+
 float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
 {
 /*:>--------------------------------------------------------------------
@@ -27,18 +33,11 @@ float prop_one_track( float gtrack[8] , float target[2] , float ptrack[3] )
   
   
   long  iflag;
-  float bfld, xpr[2], curvf, gseed;
-  float psi, pt, tanl, x0, y0, z0, xp[2], xout[2], p[3], xv[3], xx0[3];
-  float trk[7], r1, r2, xc[2], xc1[2], xc2[2], x[2], y[2], cut, x1[3];
-  float phi0, phi;
+  float xpr[2], curvf, gseed;
+  float psi, pt, tanl, x0, y0, z0, xp[2], xout[2],  xv[3], xx0[3];
+  float trk[7], r1, xc[2];
   float pStraight[3];
-  float xlocal[3],bfield[3];
   
-
-  /* get magnetic field   
-     xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
-     gufld_(xlocal,bfield);
-     bfld = bfield[2]/10.;   */      /* Tesla */
   
   iflag=0;
   if(fabs(gtrack[6]) >= 0.001 )
