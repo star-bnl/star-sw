@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.7 2002/02/12 23:09:50 munhoz Exp $
+ * $Id: StSvtHybridData.cc,v 1.8 2003/09/17 12:57:51 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.8  2003/09/17 12:57:51  munhoz
+ * initializing pointer seq[]
+ *
  * Revision 1.7  2002/02/12 23:09:50  munhoz
  * fixing problems for new compiler
  *
@@ -194,8 +197,11 @@ int StSvtHybridData::setListSequences(int listID, int Anode, int& nSequence, StS
       
   }
 
-  if (!seq)
+  if (!seq) {
     seq = new StSequence*[nAnodes];
+    for(int i=0; i<nAnodes; i++)
+      seq[i] = NULL;
+  }
 
   // Resets the sequences for a given anode 
   if(listID >= 0 && listID < nAnodes){
