@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // Stypes                                                               //
-// $Id: Stypes.h,v 1.15 2000/03/29 03:04:02 fine Exp $                                                               
+// $Id: Stypes.h,v 1.16 2000/04/13 23:12:19 fine Exp $                                                               
 // Basic types used by STAF - ROOT interface.                           //
 //                                                                      //
 // This header file contains the set of the macro definitions           //
@@ -18,10 +18,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <Ttypes.h>
-
-#if 0
- 
-#include "Rtypes.h"
+#include "StTypeDefs.h"
 
 enum EReturnCodes { 
   kStOK=0, 	// OK
@@ -31,6 +28,11 @@ enum EReturnCodes {
   kStErr, 	// Error, drop this and go to the next event
   kStFatal      // Fatal error, processing impossible
 };  
+
+#if 0
+ 
+#include "Rtypes.h"
+
 #ifdef ANSICPP
 #   define _QUOTE2_(name1,name2) _QUOTE_(name1##name2)
 #else
@@ -137,6 +139,9 @@ void className::Streamer(TBuffer &R__b) {                        \
   TableClassStreamerImp(className,structName)
 
 // $Log: Stypes.h,v $
+// Revision 1.16  2000/04/13 23:12:19  fine
+// STAR constant came back from ROOT
+//
 // Revision 1.15  2000/03/29 03:04:02  fine
 // includes adjusted to Sun
 //
