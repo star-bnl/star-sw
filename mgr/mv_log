@@ -20,7 +20,7 @@
 # set list = `ls *evts`
 # if (-z "$list") exit 0
 #
- foreach tag (NoSpace ErrLoadLib CantRead CantOpen NoSpaceOnDev staging_failed staging_problem SegViolation BreakBusErr SimulBreak done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem)
+ foreach tag (NoSpace ErrLoadLib CantRead CantOpen NoSpaceOnDev staging-failed staging-problem SegViolation BreakBusErr SimulBreak done NoGeantHitTPC NotEnTrackSVT tfsProblem evrProblem)
     switch ($tag)
     case "NoSpace":
 #=============================
