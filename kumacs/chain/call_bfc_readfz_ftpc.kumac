@@ -15,7 +15,7 @@
    chain=' fzin rg2t fss fcl fpt_s fte_s evout' _
    skip=0 _
    no_events=1 _
-   input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/Gstardata/psc079_01_46evts.fza _
-   output_file=psc079_01_46evts _
+   input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts.fza _
+   output_file=year2a_psc079_01_46evts _
    log=bfc_readfz_ftpc.log
 
