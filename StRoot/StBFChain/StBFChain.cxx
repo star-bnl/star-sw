@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.219 2001/08/08 20:11:38 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.220 2001/08/15 15:32:38 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -143,7 +143,7 @@ Bfc_st BFC[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-  {"pp"          ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA"    ,"","","Use pp specific parameters",kFALSE},
+  {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","","Use pp specific parameters",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -277,7 +277,7 @@ Bfc_st BFC[] = {
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"         ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
@@ -317,7 +317,7 @@ Bfc_st BFC[] = {
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
-  {"SpinTag"   ,"SpinTag"  ,"",""  ,"StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
+  {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
   {"ppLPfind1"   ,"ppLPfind1"  ,"",""  ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
   {"SpinSortA"   ,"SpinSortA"  ,"",""               ,"StSpinSortMaker","StppSpin","Spin sort event",kFALSE},
   {"ppLPprojectA","ppLPprojectA","",""
@@ -325,7 +325,8 @@ Bfc_st BFC[] = {
   {"ppLPeval1"   ,"ppLPeval1"  ,"",""  ,"StppLPevalMaker","StppSpin","Evaluation of LP algo for pp",kFALSE},
   {"ppDAQfilter1","ppDAQfilter1"  ,"",""  ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
-  {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE}
+  {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
+  {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
 Int_t NoChainOptions = sizeof (BFC)/sizeof (Bfc_st);
 class StEvent;
@@ -727,27 +728,27 @@ void StBFChain::SetFlags(const Char_t *Chain)
     }
   }
   Opts.Delete();
-  // Check flags consistency   
-  if (!GetOption("NoInput")) {
-    if (!GetOption("fzin") && !GetOption("gstar") && 
-	!GetOption("xin")  && !GetOption("tdaq")) {
-      SetOption("fzin");
-      SetOption("geant");
+  if (!GetOption("NoDefault")) {
+    // Check flags consistency   
+    if (!GetOption("NoInput")) {
+      if (!GetOption("fzin") && !GetOption("gstar") && 
+	  !GetOption("xin")  && !GetOption("tdaq")) {
+	SetOption("fzin");
+	SetOption("geant");
+      }
     }
-  }
-  else {
-    if (GetOption("fzin")) SetOption("-fzin");
-    if (GetOption("in") || GetOption("xin")) {
-      SetOption("-xin");
-      SetOption("-in");
+    else {
+      if (GetOption("fzin")) SetOption("-fzin");
+      if (GetOption("in") || GetOption("xin")) {
+	SetOption("-xin");
+	SetOption("-in");
+      }
     }
+    if (!(GetOption("fzin") || GetOption("gstar"))) SetOption("magF"); 
+    if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
+    if (!GetOption("event")) SetOption("-analysis");
+    if (GetOption("NoDb")) {SetOption("-db"); SetOption("-calib");}
   }
-  if (!GetOption("FieldOn") && !GetOption("FieldOff") && 
-      !GetOption("HalfField") && !GetOption("ReverseField") &&    
-      !GetOption("fzin") &&  !GetOption("gstar")) SetOption("magF"); 
-  if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval"); 
-  if (!GetOption("event")) SetOption("-analysis");
-  if (GetOption("NoDb")) {SetOption("-db"); SetOption("-calib");}
   // Print set values
   St_Bfc *Bfc = new St_Bfc("BFChain",NoChainOptions);
   AddRunco(Bfc);
@@ -819,7 +820,7 @@ void StBFChain::SetGC (const Char_t *queue){
 void StBFChain::SetInputFile (const Char_t *infile){
   // define input file
   if (infile) fInFile = new TString(infile);
-  if (!GetOption("NoInput")) {
+  if (!GetOption("NoInput") && !GetOption("NoDefault")) {
     if (!fInFile && GetOption("fzin")) {
       fInFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
       if (GetOption("y1h")) fInFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
