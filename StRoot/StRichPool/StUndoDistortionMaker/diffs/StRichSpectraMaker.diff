@@ -1,0 +1,235 @@
+Only in StRoot/StRichSpectraMaker: .consign
+diff -urb StRoot_old/StRichSpectraMaker/StRichSpectraMaker.cxx StRoot/StRichSpectraMaker/StRichSpectraMaker.cxx
+--- StRoot_old/StRichSpectraMaker/StRichSpectraMaker.cxx	Wed May 22 22:00:52 2002
++++ StRoot/StRichSpectraMaker/StRichSpectraMaker.cxx	Tue Nov 19 13:46:34 2002
+@@ -347,7 +347,8 @@
+     mPtCut = 0.*GeV; // GeV/c
+     mEtaCut = 0.5; 
+     mLastHitCut = 100.0*centimeter;
+-    mDcaCut = 3.0*centimeter;
++// Remove this from 3 to 10000
++    mDcaCut = 10000.0*centimeter;
+     mFitPointsCut = 20;
+     mPathCut = 500*centimeter;
+     mPadPlaneCut = 1.0*centimeter;
+@@ -564,10 +565,14 @@
+     trackTuple[0] = mVertexPos.z();
+ 
+ //     cout << "Looping over " << mNumberOfPrimaries << " primary Tracks" << endl;
+-    for(size_t ii=0; ii<mNumberOfPrimaries; ii++) { // primaries
++//    for(size_t ii=0; ii<mNumberOfPrimaries; ii++) { // primaries
++    for (StSPtrVecTrackNodeIterator titer = mEvent->trackNodes().begin();
++	 titer != mEvent->trackNodes().end(); ++titer) {
++	for (size_t ientry =0; ientry < (*titer)->entries(); ++ientry) {
++	    StTrack *track = (*titer)->track(ientry);
+ 
+ //  	cout << "==> Track " << ii << "/" << (mNumberOfPrimaries-1);
+-	StTrack* track = mEvent->primaryVertex()->daughter(ii);
++//	StTrack* track = mEvent->primaryVertex()->daughter(ii);
+   	//cout << "*****Track " << ii << "\tp= " << track->geometry()->momentum().mag() << endl;
+ 
+ 	//if( !this->checkMomentumWindow(track) ) continue;
+@@ -588,10 +593,19 @@
+ 	//
+ 	// Get the PID traits, if there is an StrichPIDTrait:
+ 	//
+-	const StPtrVecTrackPidTraits&
+-	    theRichPidTraits = track->pidTraits(kRichId);
++	vector<StTrackPidTraits*> allRichPidTraits;
++	
++        StSPtrVecTrackPidTraits&
++	    theRichPidTraits = track->pidTraits();
++
++	for (StSPtrVecTrackPidTraitsIterator piter = theRichPidTraits.begin();
++	     piter != theRichPidTraits.end(); ++piter) {
++	    StRichPidTraits *tempTrait = dynamic_cast<StRichPidTraits*>(*piter);
++	    if (tempTrait) allRichPidTraits.push_back(*piter);
++	}
++	
++	if (!allRichPidTraits.size()) continue;
+ 
+-	if(!theRichPidTraits.size()) continue;
+ //   	cout << " (" << theRichPidTraits.size() << ") Pid Traits.   p= ";
+ 
+ 	//
+@@ -611,8 +625,11 @@
+ 	// info from the traits
+ 	//
+ 	
+-	StTrackPidTraits* theSelectedTrait =
+-	    theRichPidTraits[theRichPidTraits.size()-1];
++	for (vector<StTrackPidTraits*>::iterator traitIter = 
++		 allRichPidTraits.begin(); traitIter != allRichPidTraits.end();
++	     ++traitIter) {
++	    
++	    StTrackPidTraits *theSelectedTrait = *traitIter;
+ 
+ 	if(!theSelectedTrait) {
+ 	    cout << "Error in the Selected Trait\nContinuing..." << endl;
+@@ -622,6 +639,9 @@
+ 	StRichPidTraits *richPidTrait =
+ 	    dynamic_cast<StRichPidTraits*>(theSelectedTrait);
+ 
++	
++	if (!richPidTrait) continue;
++	
+ 	//
+ 	// this should not be necessary for the
+ 	// next round of production
+@@ -639,15 +659,20 @@
+ 	if(!this->assignMipResidual(track)) continue;
+ 	
+ #else
++		
+ 	trackTuple[7] = richPidTrait->signedDca2d();
+ 	trackTuple[8] = richPidTrait->signedDca3d();
+ 
+-	if(!richPidTrait->associatedMip()) continue;
++	if(!this->assignMipResidual(track)) continue;
++
++
++	
++//	if(!richPidTrait->associatedMip()) continue;
+ // 	PR(richPidTrait->associatedMip()->local());
+ //  	PR(richPidTrait->mipResidual());
+ 	
+-	mAssociatedMip = richPidTrait->associatedMip()->local();
+-	mMipResidual   = richPidTrait->mipResidual();
++//	mAssociatedMip = richPidTrait->associatedMip()->local();
++//	mMipResidual   = richPidTrait->mipResidual();
+ #endif
+ 
+ #ifdef RICH_WITH_PAD_MONITOR
+@@ -671,7 +696,7 @@
+ 	trackTuple[11] = mMipResidual.x();
+ 	trackTuple[12] = mMipResidual.y();
+ 
+-	this->doIdentification(track);
++	this->doIdentification(track,richPidTrait);
+ 
+ 	trackTuple[13] = mCalculatedResidual.x();
+ 	trackTuple[14] = mCalculatedResidual.y();
+@@ -757,12 +782,15 @@
+ 	//
+ 	// default Production
+ 	//
+-	spectraInfo->setVersion(20011);  
++	spectraInfo->setVersion(20013);  
+ 	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setRichSpectra(spectraInfo);
+ 	//
+ 	//////////////////////////////////////////////////
+ #endif	
+-    } // loop over the tracks
++	} // loop over StRichPidTraits
++	
++	} // loop over node entries
++    } // loop over the nodes
+ 
+       cout << "try clear data from histogram" << endl;
+       mHistogram->clearData();
+@@ -1061,7 +1089,7 @@
+ }
+ 
+ // ----------------------------------------------------
+-void StRichSpectraMaker::doIdentification(StTrack* track) {
++void StRichSpectraMaker::doIdentification(StTrack* track,StRichPidTraits *theRichPidTrait) {
+ 
+ //     cout << "\nStRichSpectraMaker::doIdentification()\n";
+     mHistogram->clearData();
+@@ -1074,8 +1102,8 @@
+     const StSPtrVecRichHit& richHits = mEvent->richCollection()->getRichHits();
+ //     PR(richHits.size());
+     
+-    const StPtrVecTrackPidTraits&
+-	thePidTraits = track->pidTraits(kRichId);
++//      const StPtrVecTrackPidTraits&
++//  	thePidTraits = track->pidTraits(kRichId);
+ 
+     //
+     // loop over the PID traits
+@@ -1086,20 +1114,23 @@
+     vector<StRichPhotonInfo*> thePhotonInfo;
+     
+     StThreeVectorF trackMip(-999.,-999.,-999);
+-    bool doAssociation = false;
++//    bool doAssociation = false;
++    bool doAssociation = true;
+     
+-    for(size_t jj=0; jj<thePidTraits.size(); jj++) {
++//    for(size_t jj=0; jj<thePidTraits.size(); jj++) {
++    {
+ 
+-	StRichPidTraits* theRichPidTraits =
+-	    dynamic_cast<StRichPidTraits*>(thePidTraits[jj]);
++//	StRichPidTraits* theRichPidTrait =
++//	    dynamic_cast<StRichPidTraits*>(thePidTraits[jj]);
+ 
+-	if(!theRichPidTraits) {
++	if(!theRichPidTrait) {
+ 	    cout << "StRichSpectraMaker::doIdentification()\n";
+-	    cout << "\tBad pid traits.  Continuing..." << endl;
+-	    continue;
++	    cout << "\tBad pid traits.  Returning..." << endl;
++	    return;
+ 	}
++	
+ #ifndef P00hm
+- 	if(!theRichPidTraits[jj].associatedMip()) {
++ 	if(!theRichPidTrait->associatedMip()) {
+ 	    cout << "StRichSpectraMaker::doIdentification()\n";
+ 	    cout << "\tNo Associated MIP\n";
+ 	    cout << "\tNo MIP Residual" << endl;
+@@ -1108,14 +1139,14 @@
+ 		doAssociation = true;
+ 	    }
+ 	    else {
+-		trackMip =  theRichPidTraits[jj].associatedMip()->local();
++		trackMip =  theRichPidTrait->associatedMip()->local();
+ 	    }
+ 	}
+ #endif
+ // 	PR(doAssociation);
+ 	
+ 	const StSPtrVecRichPid& theRichPids =
+-	    theRichPidTraits[jj].getAllPids();
++	    theRichPidTrait->getAllPids();
+ 
+ 	//
+ 	// Loops over the "pid" structures for each
+@@ -1479,9 +1510,13 @@
+     //
+     double eta = track->geometry()->momentum().pseudoRapidity();
+ //     PR(eta);
+-    StThreeVectorD localCorrectedRadPoint(localRadPoint.x()-.32*eta,
+-					  localRadPoint.y()+.046*sign(localRadPoint.x()),
++//      StThreeVectorD localCorrectedRadPoint(localRadPoint.x()-.32*eta,
++//  					  localRadPoint.y()+.046*sign(localRadPoint.x()),
++//  					  localRadPoint.z());
++    StThreeVectorD localCorrectedRadPoint(localRadPoint.x(),
++					  localRadPoint.y(),
+ 					  localRadPoint.z());
++    
+ //     PR(localCorrectedRadPoint);
+     StRichLocalCoordinate lCorrectedRadPt(localCorrectedRadPoint.x(),
+ 					  localCorrectedRadPoint.y(),
+Only in StRoot/StRichSpectraMaker: StRichSpectraMaker.cxx.flc
+diff -urb StRoot_old/StRichSpectraMaker/StRichSpectraMaker.h StRoot/StRichSpectraMaker/StRichSpectraMaker.h
+--- StRoot_old/StRichSpectraMaker/StRichSpectraMaker.h	Tue May 21 18:52:56 2002
++++ StRoot/StRichSpectraMaker/StRichSpectraMaker.h	Tue Nov 19 13:46:34 2002
+@@ -99,7 +99,6 @@
+ //
+ class StRichRayTracer;
+ class StRichCerenkovHistogram;
+-
+ #include "StThreeVectorF.hh"
+ #include "StParticleDefinition.hh"
+ 
+@@ -138,7 +137,7 @@
+     void drawQuickRing(StThreeVectorF&, StThreeVectorF&);
+     
+     void qualityAssessment();
+-    void doIdentification(StTrack*);
++    void doIdentification(StTrack*,StRichPidTraits*);
+     StThreeVectorF calculateRadiationPoint(StTrack*, StThreeVectorF&);
+     void calculateResidual(StTrack*);
+     void calculateIndex(double);
