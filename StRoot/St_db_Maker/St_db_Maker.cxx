@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.26 2000/03/23 14:55:55 fine Exp $
+// $Id: St_db_Maker.cxx,v 1.27 2000/04/07 15:44:42 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.27  2000/04/07 15:44:42  perev
+// Error return when MySQL is not available
+//
 // Revision 1.26  2000/03/23 14:55:55  fine
 // Adjusted to libSTAR and ROOT 2.24
 //
@@ -121,7 +124,8 @@ Int_t St_db_Maker::Init()
    fDataBase=0;
    if (!fMainDir.IsNull() && strncmp("MySQL:",(const char*)fMainDir,6)==0){
      fDataBase = OpenMySQL(((const char*)fMainDir)+6);
-     if (fDataBase) fDataBase->Pass(PrepareDB,0);
+     if (!fDataBase) return kStErr;
+     fDataBase->Pass(PrepareDB,0);
    }
 
 // 		recreate a memory resided data-structure
