@@ -1,5 +1,8 @@
-// $Id: OnlineQaTpcRaw.C,v 1.2 2000/06/09 18:53:28 kathy Exp $
+// $Id: OnlineQaTpcRaw.C,v 1.3 2000/06/12 15:19:02 kathy Exp $
 // $Log: OnlineQaTpcRaw.C,v $
+// Revision 1.3  2000/06/12 15:19:02  kathy
+// put in Sergei's code to set output hist file name correctly
+//
 // Revision 1.2  2000/06/09 18:53:28  kathy
 // update comments
 //
@@ -17,7 +20,6 @@
 //              - default is 0 which means it writes out all events 
 //                present in input file
 //    
-// outHistFile - output hist file name --> outHistFile.hist.root
 //   
 //
 //======================================================================
@@ -38,8 +40,18 @@ void OnlineQaTpcRaw(
   cout << " OnlineQaTpcRaw.C: #events to write to hist file (0=all) = " << 
             nevHistOut << endl;
 
+// Generate a name for an outHistFile using input file name
+//
+  fInFile = new TString(MainFile);
+  fFileOut = new TString(gSystem->BaseName(fInFile->Data()));
+  fFileOut->ReplaceAll(".daq",""); // remove old file extension
+  const char *histoDir = "./"; // directory for histos
+  fFileOut->Prepend(histoDir);
+  const Char_t *outHistFile= fFileOut->Data(); // done
+
+
 // define other values needed:
-   const Char_t *outHistFile="OnlineQaTpcRaw";
+  //   const Char_t *outHistFile="OnlineQaTpcRaw";
    const Char_t *topTree="OnlQaTpcTree";
    const Char_t *makerName="RawTpcQa";
 
