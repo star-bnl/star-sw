@@ -103,6 +103,7 @@ if ($#Defs > -1) {
 }
 
 if ($#src > -1) {
+  Keep $pkg;
   Program      $env2 $pkg, @src;
   Install $env2 $BIN, $pkg;
 }  
