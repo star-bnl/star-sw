@@ -50,12 +50,17 @@ using namespace std;
 #include "StiCompositeSeedFinder.h"
 #include "StiTrackFilter.h"
 #include "StiTrack.h"
+#include "StiMcTrack.h"
+#include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiKalmanTrackFinder.h"
 #include "StiMaterialInteraction.h"
 #include "StiDynamicTrackFilter.h"
 #include "StiTrackContainer.h"
 #include "StiHitErrorCalculator.h"
 #include "StiDrawableTrack.h"
+#include "StMcEvent.hh"
+#include "StMcTrack.hh"
+#include "StMcContainers.hh"
 
 ostream& operator<<(ostream&, const StiTrack&);
 
@@ -66,9 +71,11 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
     trackSeedFinder(0), 
     trackNodeFactory(0), 
     trackFactory(0), 
+    mcTrackFactory(0), 
     detectorContainer(0), 
     hitContainer(0), 
     trackContainer(0),
+    mcTrackContainer(0),
     pars(0),
     mode(StepByLayer),
     state(0),
@@ -100,6 +107,7 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
   detectorContainer = toolkit->getDetectorContainer();
   hitContainer = toolkit->getHitContainer();
   trackContainer = toolkit->getTrackContainer();
+  mcTrackContainer = toolkit->getMcTrackContainer();
   //Turn off by default
   Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
   setParameters(new StiKalmanTrackFinderParameters());
@@ -149,8 +157,10 @@ void StiKalmanTrackFinder::reset()
   toolkit->getDetectorContainer()->reset();
   toolkit->getHitFactory()->reset();
   toolkit->getTrackFactory()->reset();
+  toolkit->getMcTrackFactory()->reset();
   toolkit->getTrackNodeFactory()->reset();
   toolkit->getTrackContainer()->clear();
+  toolkit->getMcTrackContainer()->clear();
   cout << "StiKalmanTrackFinder::reset() - INFO - Done" <<endl;
 }
 
@@ -294,11 +304,11 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   try 
     {
       track = 0;
-      for (KalmanTrackMap::const_iterator it=trackContainer->begin(); 
+      for (TrackMap::const_iterator it=trackContainer->begin(); 
 	   it!=trackContainer->end(); 
 	   ++it) 
 	{
-	  track = (*it).second;
+	  track = static_cast<StiKalmanTrack*>((*it).second);
 	  try
 	    {
 	      track->extendToVertex(vertex);
@@ -621,7 +631,7 @@ int StiKalmanTrackFinder::getTrackFoundCount(StiTrackFilter * filter) const
   // reset filter counter to zero.
   filter->reset();
   // loop over all tracks and filter
-  KalmanTrackMap::const_iterator it;
+  TrackMap::const_iterator it;
   for (it=trackContainer->begin(); 
        it!=trackContainer->end(); 
        ++it) 
@@ -784,18 +794,46 @@ void StiKalmanTrackFinder::fitNextTrack()
 }
 
 void StiKalmanTrackFinder::findNextTrackSegment(){}
+
 void StiKalmanTrackFinder::update()
 {
   cout << "StiKalmanTrackFinder::update() - INFO - Starting."<<endl;
-  for (KalmanTrackMap::const_iterator it=trackContainer->begin(); 
-       it!=trackContainer->end(); 
-       ++it) 
+  TrackMap::const_iterator iter;
+  StiDrawableTrack * t;
+
+  // Monte Carlo Tracks
+  if (mcTrackContainer)
+    {
+      for (iter=mcTrackContainer->begin();iter!=mcTrackContainer->end(); ++iter) 
+	{
+	  cout << "StiKalmanTrackFinder::update() - INFO - Looping."<<endl;
+	  t = dynamic_cast<StiDrawableTrack *>((*iter).second);
+	  if (t)
+	    {
+	      cout << "StiKalmanTrackFinder::update() MC track start" << endl;
+	      t->update();
+	      cout << "StiKalmanTrackFinder::update() MC track done" << endl;
+	    }
+	  else
+	    cout << "StiKalmanTrackFinder::update() - WARNING - MC dynamic_cast failed." << endl;
+	}
+    }
+
+  // Reconstructed tracks
+  for (iter=trackContainer->begin();iter!=trackContainer->end();++iter) 
     {
       //cout << "StiKalmanTrackFinder::update() - INFO - Looping."<<endl;
-       track = (*it).second;
-       ////if (guiTrackFilter && guiTrackFilter->filter(track);
-       StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-       t->update();
+      //track = static_cast<StiKalmanTrack*>((*it).second);
+      ////if (guiTrackFilter && guiTrackFilter->filter(track);
+      // StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>((*iter).second);
+      if (t)
+	{
+	  cout << "StiKalmanTrackFinder::update() Kalman track start" << endl;
+	  t->update();
+	  cout << "StiKalmanTrackFinder::update() Kalman track done" << endl;
+	}
+      else
+	cout << "StiKalmanTrackFinder::update() - WARNING - Kalman dynamic_cast failed." << endl;
     }
   cout << "StiKalmanTrackFinder::update() - INFO - Done."<<endl;
 }
@@ -815,6 +853,18 @@ void StiKalmanTrackFinder::setEvent(StEvent * event, StMcEvent * mcEvent)
       temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(toolkit->getTrackSeedFinder());
       if (temp!=0) 
 	temp->setEvent(mcEvent);
+
+      // Store the pointers to StMcTrack in StiMcTrack
+      StSPtrVecMcTrack & mcTracks = mcEvent->tracks();
+      StiMcTrack * mcTrack;
+      StMcTrackConstIterator iter;
+      for (iter=mcTracks.begin();iter!=mcTracks.end();iter++)
+	{
+	  //cout << "Loading StMcTrack into mcTrackContainer" << endl;
+	  mcTrack = toolkit->getMcTrackFactory()->getObject();
+	  mcTrack->setStMcTrack( (*iter) );
+	  mcTrackContainer->add(mcTrack);
+	}
     }
   cout << "StiKalmanTrackFinder::setEvent(StEvent*) - INFO - Done"  << endl;
 }

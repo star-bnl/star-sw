@@ -9,10 +9,11 @@
   That is, StiTrackContainer will be the only thing that StiTracker will have to know about and
   StiTrackContainer will interface to (most likely) StEvent, unless we decide to make StiTrackContainer
   persistent.
+  <p>
+  StiTrackContainer is polymorphic and can hold all forms of StiTrack objects. That includes in
+  particular StiKalmanTrack and StiMcTrack.
 
   \author M.L. Miller (Yale Software)
-  \note StiTrackContainer is implemented as a singleton.
-  
 */
 
 #ifndef StiTrackContainer_HH
@@ -21,36 +22,40 @@
 #include <map>
 using namespace std;
 
-class StiKalmanTrack;
+class StiTrack;
 
 ///Define the Less-Than operator for track ordering in the track container.
-struct StiKalmanTrackLessThan
+struct StiTrackLessThan
 {
-    bool operator()(const StiKalmanTrack* lhs, const StiKalmanTrack* rhs) const;
+    bool operator()(const StiTrack* lhs, const StiTrack* rhs) const;
 };
 
-typedef map<StiKalmanTrack*, StiKalmanTrack*, StiKalmanTrackLessThan> KalmanTrackMap;
-typedef KalmanTrackMap::value_type KalmanTrackMapValType;
+typedef map<StiTrack*, StiTrack*, StiTrackLessThan> TrackMap;
+typedef TrackMap::value_type TrackMapValType;
 
-class StiTrackContainer : public KalmanTrackMap
+class StiTrackContainer : public TrackMap
 {
 public:
     
-    friend class nobody;
-    
-    ///Singleton access
-    static StiTrackContainer* instance();
-    static void kill();
-    
+    /// Add given track to the container
+    void add(StiTrack * track);
+
     ///Preserve simple interface to add tracks
-    void push_back(StiKalmanTrack*);
+    void push_back(StiTrack*);
     
-		//protected:
     StiTrackContainer();
     virtual ~StiTrackContainer();
     
-private:
-    static StiTrackContainer* sinstance;
 };
+
+inline void StiTrackContainer::add(StiTrack * track)
+{
+  insert(  TrackMapValType(track, track) );
+}
+
+inline void StiTrackContainer::push_back(StiTrack* track)
+{
+    insert(  TrackMapValType(track, track) );
+}
 
 #endif
