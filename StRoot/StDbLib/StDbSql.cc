@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.5 2001/02/22 23:01:56 porter Exp $
+ * $Id: StDbSql.cc,v 1.6 2001/02/23 18:35:47 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.6  2001/02/23 18:35:47  porter
+ * cleaned up a warning messages when compiled under HP's aCC
+ *
  * Revision 1.5  2001/02/22 23:01:56  porter
  * Re-introduced many-to-one name-to-table capability
  * & robustness for query errors
@@ -248,11 +251,12 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
 
  // --> prep for data query which can be 1 or more queries
    int maxID=1;
-   for(int i=0;i<numRows;i++)if(elementID[i]>maxID)maxID=elementID[i];
+   int i;
+   for(i=0;i<numRows;i++)if(elementID[i]>maxID)maxID=elementID[i];
    int* idMap = new int[maxID+1];
    int* dataIDList = new int[numRows];
    unsigned int* timeValues = new unsigned int[numRows];
-   for(int i=0;i<numRows;i++){
+   for(i=0;i<numRows;i++){
         idMap[elementID[i]]=i;
         dataIDList[i]=0;
         timeValues[i]=0;
@@ -317,7 +321,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
    if(!done && (rowsLeft>0)){
      int* elementsLeft = new int[rowsLeft];
      int j=0;
-     for(int i=0;i<numRows;i++){
+     for(i=0;i<numRows;i++){
        if(!dataIDList[i]){
 	 elementsLeft[j]=elementID[i];
          j++;
@@ -416,7 +420,8 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
    }
 
    char** dataTables=getDataTables(table,numTables);
-   for(int i=0;i<numTables;i++){
+   int i;
+   for(i=0;i<numTables;i++){
 
      ostrstream qs;
      qs<<" select unix_timestamp(beginTime) as bTime,";
@@ -489,7 +494,7 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      delete [] timeList;
    }// loop over tables
 
-   for(int i=0;i<numTables;i++) delete [] dataTables[i];
+   for(i=0;i<numTables;i++) delete [] dataTables[i];
    delete [] dataTables;
    if(retVal){
        char* dateTime=getDateTime(table->getBeginTime());
@@ -521,7 +526,8 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
    if(!columnList)return 0;
 
    char** dataTables=getDataTables(table,numTables);
-   for(int i=0;i<numTables;i++){
+   int i;
+   for(i=0;i<numTables;i++){
 
      ostrstream qs;
      qs<<" select "<<columnList<<" from "<<dataTables[i]<<" "<<whereClause<<ends;
@@ -543,7 +549,7 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
      Db.Release();
    }
 
-   for(int i=0;i<numTables;i++) delete [] dataTables[i];
+   for(i=0;i<numTables;i++) delete [] dataTables[i];
    delete [] dataTables;
 
    return numRowsReturned;
