@@ -2,6 +2,7 @@
 #define TAB_EEMC_DB_PMTCAL__hh 
 #include "eemcConstDB.hh"
 /*
+ * will retire next time, JB
  * description:  EEMC Tower Box  calibration for one sector, ver 2
  */
 struct eemcDbPMTcal {
