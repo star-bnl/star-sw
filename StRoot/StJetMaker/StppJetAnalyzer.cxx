@@ -18,6 +18,7 @@ using namespace std;
 #include "StJetFinder/StJetFinder.h"
 #include "StJetFinder/StKtCluJetFinder.h"
 #include "StJetFinder/StConeJetFinder.h"
+#include "StJetFinder/StCdfChargedConeJetFinder.h"
 
 //StMuDst
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -46,6 +47,13 @@ StppJetAnalyzer::StppJetAnalyzer(const StppAnaPars* ap, const StJetPars* pars) :
 	cout <<"StppJetAnalyzer, instantiate StKtCluJetFinder"<<endl;
 	StKtCluJetFinder* jf = new StKtCluJetFinder(*temp);
 	mFinder = jf;
+    }
+    else if (dynamic_cast<const StCdfChargedConePars*>(pars)) { //note, this if MUST come before the StConePars test
+	cout <<"StppJetAnalyzer, instantiate StCdfChargedConeJetFinder"<<endl;
+	const StCdfChargedConePars* temp = dynamic_cast<const StCdfChargedConePars*>(pars);
+	StCdfChargedConeJetFinder* jf = new StCdfChargedConeJetFinder(*temp);
+	mFinder = jf;
+	jf->print();
     }
     else if (dynamic_cast<const StConePars*>(pars)) {	
 	cout <<"StppJetAnalyzer, instantiate StConeJetFinder"<<endl;
