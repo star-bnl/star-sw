@@ -25,6 +25,7 @@ using std::find_if;
 StiDetectorContainer* StiDetectorContainer::sinstance = 0;
 
 ostream& operator<<(ostream&, const NameMapKey&);
+ostream& operator<<(ostream*, const StiDetector&);
 
 StiDetectorContainer* StiDetectorContainer::instance()
 {
@@ -90,6 +91,7 @@ void StiDetectorContainer::setToDetector(double radius, double angle)
   found that is equal to <b>layer</b>, then an error message is streamed to
   the screen and reset() is called.
 */
+
 void StiDetectorContainer::setToDetector(StiDetector* layer)
 {
     SameData<data_t> mySameData;
@@ -99,8 +101,14 @@ void StiDetectorContainer::setToDetector(StiDetector* layer)
 						  mLeafIt->const_end(),
 						  mySameData);
     if (where==mLeafIt->const_end()) {
+	cout <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 	cout <<"StiDetectorContainer::setToDetector(StiDetector*)\tError:\t";
-	cout <<"layer not found in leaves.  Reset and Abort"<<endl;
+	cout <<"layer not found in leaves.  Seg-fault"<<endl;
+	cout <<"\tlayer:\t"<<(*layer)<<"\n"<<endl;
+	cout <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"<<endl;
+	StiDetector* dummy=0;
+	//dummy->isOn(); //This ought to cause a seg-fault!
+	
 	reset();
 	return;
     }

@@ -167,9 +167,9 @@ const hitvector& StiHitContainer::hits(double refangle, double position)
 void StiHitContainer::setRefPoint(double position, double refAngle,
 				  double y, double z)
 {
-    cout <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
-    cout <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
-    cout <<"y: "<<y<<"\tz: "<<z<<endl;
+    //cout <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
+    //cout <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
+    //cout <<"y: "<<y<<"\tz: "<<z<<endl;
     
     mUtilityHit.reset();
     mUtilityHit.setPosition(position);
