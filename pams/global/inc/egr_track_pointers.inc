@@ -1,5 +1,5 @@
       INTEGER mxpnt,mxpnt_tpc
-      PARAMETER (mxpnt=120, mxpnt_tpc=100)
+      PARAMETER (mxpnt=220, mxpnt_tpc=200)
 
       STRUCTURE /track_pointers/
 	  INTEGER*4    nhit                 ! number of his per track
