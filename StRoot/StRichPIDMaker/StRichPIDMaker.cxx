@@ -1,10 +1,13 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.24 2000/12/08 04:54:56 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.25 2000/12/08 05:12:25 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.25  2000/12/08 05:12:25  lasiuk
+ * correct SUN iostream problem
+ *
  * Revision 2.24  2000/12/08 04:54:56  lasiuk
  * hit filter changed for refit
  * fillCorrectedNTuple
@@ -209,7 +212,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.24 2000/12/08 04:54:56 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.25 2000/12/08 05:12:25 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1552,7 +1555,7 @@ void StRichPIDMaker::examineTemporaryHits(StRichRingCalculator* ringCalc, int re
     vector<StRichRingHit*> hits = richTrack->getRingHits(part);
     
     cout << "StRichPIDMaker:examineTemporaryHits()\n";
-    cout << "\tpart="<< part->name() << "     refit = " << refit << endl;
+    cout << "\tpart="<< part->pdgEncoding() << "     refit = " << refit << endl;
     
     int consthits=0;
     int tothits=0;
