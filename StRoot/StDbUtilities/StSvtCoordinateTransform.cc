@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.12 2001/07/25 00:03:34 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.13 2001/08/16 20:24:42 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -15,6 +15,7 @@
  *
  *
  ***********************************************************************/
+#include "StTpcDb/StTpcDb.h" //Final transformation to mag. coords
 #include "StSvtCoordinateTransform.hh"
 #include "StCoordinates.hh"        // coordinate definitions
 #include "StGlobals.hh"
@@ -41,11 +42,17 @@ int type_of_call SvtGtoL_(float *x,float *xp,
   StSvtCoordinateTransform transform;
   
   transform.setParamPointers(NULL, geom, NULL, NULL);
-  
   StSvtLocalCoordinate b;
-  
-  transform.GlobaltoLocal(a, b, 0, *index);
-  
+
+  if( transform.TpcTransform){
+
+    StTpcLocalCoordinate TpcLocal;
+    transform.TpcTransform->operator()(a,TpcLocal);
+    transform.GlobaltoLocal(TpcLocal.position(), b, 0, *index);
+  }
+  else
+    transform.GlobaltoLocal(a, b, 0, *index);
+
   xp[0] = b.position().x();
   xp[1] = b.position().y();
   xp[2] = b.position().z();
@@ -64,21 +71,59 @@ int type_of_call SvtLtoG_(float *xp, float *x,
   transform.setParamPointers(NULL, geom, NULL, NULL);
 
   StThreeVector<double> b(0,0,0);
-  
+  StGlobalCoordinate c;
+
   transform.LocaltoGlobal(a, b, *index);
-  
-  x[0] = b.x();
-  x[1] = b.y();
-  x[2] = b.z();
+
+  if( transform.TpcTransform){
+
+    StTpcLocalCoordinate TpcLocal;
+    TpcLocal.setPosition(b);
+    transform.TpcTransform->operator()(TpcLocal,c);
+    
+    x[0] = c.position().x();
+    x[1] = c.position().y();
+    x[2] = c.position().z();
+  }
+  else{
+    x[0] = b.x();
+    x[1] = b.y();
+    x[2] = b.z();
+  }
+
   return 0;
 
 }
 //_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
+
+ TpcTransform = NULL;
+}
+
+//_____________________________________________________________________________
+
+StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
+
+  TpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 }
 //_____________________________________________________________________________
 
-StSvtCoordinateTransform::~StSvtCoordinateTransform() { /* nopt */ }
+StSvtCoordinateTransform::~StSvtCoordinateTransform() {
+  delete TpcTransform;
+ }
+
+//_____________________________________________________________________________
+void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
+						 svg_geom_st* geom, 
+						 svg_shape_st* shape,
+						 StSvtConfig* config){
+  mparam = param;
+  mgeom = geom;
+  mconfig = config;
+  mshape = shape;
+
+  
+};
 
 //_____________________________________________________________________________
 //      Raw Data          -->  Global Coordinate
@@ -87,8 +132,16 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StGloba
 {
   StSvtLocalCoordinate b;
 
+
   this->operator()(a,b);
   this->operator()(b,c);
+  
+  if( TpcTransform){
+    StTpcLocalCoordinate tpc;
+    tpc.setPosition(c.position());
+    TpcTransform->operator()(tpc,c);
+  }
+
   return;
 
 }
@@ -101,7 +154,15 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWafe
 
   StSvtLocalCoordinate b;
 
-  this->operator()(a,b);
+  if( TpcTransform){
+
+    StTpcLocalCoordinate tpc;
+    TpcTransform->operator()(a,tpc); 
+    this->operator()(tpc.position(),b);
+  }
+  else
+    this->operator()(a,b);
+
   this->operator()(b,c);
   return;
 
@@ -202,8 +263,16 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
   StThreeVector<double> x(0,0,0);
   
   LocaltoGlobal(a, x, -1);
-  
-  b.setPosition(x);
+
+  if( TpcTransform){
+
+    StTpcLocalCoordinate tpc;
+    tpc.setPosition(x);
+    TpcTransform->operator()(tpc,b);
+  }
+
+  else 
+    b.setPosition(x);
 		 
 
 }
@@ -215,6 +284,16 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
 void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLocalCoordinate& b)
 {
 
+  StGlobalCoordinate aa;
+  if( TpcTransform){
+    
+    StTpcLocalCoordinate tpc;
+    TpcTransform->operator()(a,tpc);
+    aa.setPosition(tpc.position());
+  }
+  else
+    aa.setPosition(a.position());
+
   int barrel, HardWarePos, Found;
   int iladder, ibarrel, NWafer;
   int ladderRangeLo, ladderRangeHi, ladderMax;
@@ -222,8 +301,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
   // Find out what barrel hit is on
 
-  double r = (a.position().x()*a.position().x() +
-	      a.position().y()*a.position().y());
+  double r = (aa.position().x()*aa.position().x() +
+	      aa.position().y()*aa.position().y());
 
   if( r > 169) barrel = 3;
   else if( r > 64) barrel = 2;
@@ -242,8 +321,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
      for( NWafer=1; NWafer<= mconfig->getNumberOfWafers(barrel); NWafer++){
 
-       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer)) break;
-       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer+1)) break;
+       if ( IsOnWaferZ(aa.position(),HardWarePos+100*NWafer)) break;
+       if ( IsOnWaferZ(aa.position(),HardWarePos+100*NWafer+1)) break;
      }
 
      b.setWafer(NWafer);
@@ -253,22 +332,22 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     
   case 1:
       
-      if( a.position().x() > 0 && a.position().y() > 0){
+      if( aa.position().x() >= 0 && aa.position().y() >= 0){
 	ladderRangeLo = 1;
 	ladderRangeHi = 2;
 	ladderMax = 8;
       }
-      else if(a.position().x() > 0 && a.position().y() < 0){
+      else if(aa.position().x() >= 0 && aa.position().y() < 0){
 	ladderRangeLo = 2;
 	ladderRangeHi = 4;
 	ladderMax = 0;
       }
-      else if(a.position().x() < 0 && a.position().y() < 0){
+      else if(aa.position().x() < 0 && aa.position().y() < 0){
 	ladderRangeLo = 4;
 	ladderRangeHi = 6;
 	ladderMax = 0;
       }
-      else if(a.position().x() < 0 && a.position().y() > 0){
+      else if(aa.position().x() < 0 && aa.position().y() >= 0){
 	ladderRangeLo = 6;
 	ladderRangeHi = 8;
 	ladderMax = 0;
@@ -279,22 +358,22 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
    
   case 2:
       
-    if( a.position().x() > 0 && a.position().y() > 0){
+    if( aa.position().x() > 0 && aa.position().y() > 0){
       ladderRangeLo = 1;
       ladderRangeHi = 3;
       ladderMax = 12;
     }
-    else if(a.position().x() > 0 && a.position().y() < 0){
+    else if(aa.position().x() > 0 && aa.position().y() < 0){
       ladderRangeLo = 3;
       ladderRangeHi = 6;
       ladderMax = 0;
     }
-    else if(a.position().x() < 0 && a.position().y() < 0){
+    else if(aa.position().x() < 0 && aa.position().y() < 0){
       ladderRangeLo = 6;
       ladderRangeHi = 9;
       ladderMax = 0;
     }
-    else if(a.position().x() < 0 && a.position().y() > 0){
+    else if(aa.position().x() < 0 && aa.position().y() > 0){
       ladderRangeLo = 9;
       ladderRangeHi = 12;
       ladderMax = 0;
@@ -304,22 +383,22 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     break;
     
   case 3:
-   if( a.position().x() > 0 && a.position().y() > 0){
+   if( aa.position().x() > 0 && aa.position().y() > 0){
       ladderRangeLo = 1;
       ladderRangeHi = 4;
       ladderMax = 16;
     }
-    else if(a.position().x() > 0 && a.position().y() < 0){
+    else if(aa.position().x() > 0 && aa.position().y() < 0){
       ladderRangeLo = 4;
       ladderRangeHi = 8;
       ladderMax = 0;
     }
-    else if(a.position().x() < 0 && a.position().y() < 0){
+    else if(aa.position().x() < 0 && aa.position().y() < 0){
       ladderRangeLo = 8;
       ladderRangeHi = 12;
       ladderMax = 0;
     }
-    else if(a.position().x() < 0 && a.position().y() > 0){
+    else if(aa.position().x() < 0 && aa.position().y() > 0){
       ladderRangeLo = 12;
       ladderRangeHi = 16;
       ladderMax = 0;
@@ -338,7 +417,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   do{
     for( iladder=ladderRangeLo; iladder<=ladderRangeHi; iladder++){
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
-      if( IsOnWaferR(a.position(),HardWarePos)) {
+      if( IsOnWaferR(aa.position(),HardWarePos)) {
 	Found = 1;
 	break;
       }
@@ -352,7 +431,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     for(  ibarrel=(barrel*2)-1; ibarrel<=barrel*2; ibarrel++){
       iladder = ladderMax; 
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
-      if( IsOnWaferR(a.position(),HardWarePos)) {
+      if( IsOnWaferR(aa.position(),HardWarePos)) {
 	Found = 1;
 	break;
       }
@@ -373,7 +452,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     b.setLayer(ibarrel);
     b.setLadder(iladder);
     
-    GlobaltoLocal( a.position(), b, HardWarePos, -1);
+    GlobaltoLocal( aa.position(), b, HardWarePos, -1);
 
     b.setHybrid(2);
     if( b.position().x() < 0) b.setHybrid(1);
@@ -525,31 +604,34 @@ double StSvtCoordinateTransform::CalcDriftLength(double x){
   //   v1 = velocity in focusing region ( y < ofoc cm)
   //     a,b = parameters from Sanjeev's fit 
 
-  double aa,bb,cc,v2,v1,t,distance;
+  //double aa,bb,cc,v2,v1,t;
+  double distance;
   
-  double a=1.80;
-  double b=240000;
+  //double a=1.80;
+  //double b=240000;
   // Correct value double d=0.27;
-  double d = 0.;
-  double l=mshape[0].shape[0];
+  //double d = 0.;
+  //double l=mshape[0].shape[0];
 
 
 
-  aa=l/mparam->vd;
-  bb=(b*l/mparam->vd-l-a*d+d);
-  cc=(d*b-b*l);
-  v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
-  v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
+//   aa=l/mparam->vd;
+//   bb=(b*l/mparam->vd-l-a*d+d);
+//   cc=(d*b-b*l);
+//   v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
+//   v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
   
-  v1=v1*0.8;  
+//   v1=v1*0.8;  
   
-  t=x/mparam->fsca;
+//   t=x/mparam->fsca;
   
   
-  distance= (v1*t);
+//   distance= (v1*t);
     
-  if (distance>d) distance=d+v2*(t-d/v1);
+//   if (distance>d) distance=d+v2*(t-d/v1);
   
+
+  distance = mparam->vd*x/mparam->fsca;
   return distance;
   
 }
@@ -570,27 +652,30 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
   //   v1 = velocity in focusing region ( y < ofoc cm)
   //     a,b = parameters from Sanjeev's fit 
 
-  double aa,bb,cc,v2,v1,t;
+ //  double aa,bb,cc,v2,v1,t;
   
-  double a=1.80;
-  double b=240000;
-  //COrrect in principle double d=0.27;
-  double d=0;
-  double l=mshape[0].shape[0];
+//   double a=1.80;
+//   double b=240000;
+//   //COrrect in principle double d=0.27;
+//   double d=0;
+//   double l=mshape[0].shape[0];
 
 
 
-  aa=l/mparam->vd;
-  bb=(b*l/mparam->vd-l-a*d+d);
-  cc=(d*b-b*l);
-  v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
-  v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
+//   aa=l/mparam->vd;
+//   bb=(b*l/mparam->vd-l-a*d+d);
+//   cc=(d*b-b*l);
+//   v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
+//   v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
   
-  v1=v1*0.8;  
+//   v1=v1*0.8;  
   
-  t= x/v1;
+//   t= x/v1;
 
-  if (x>d) t = (x-d)/v2 + d/v1;
+//   if (x>d) t = (x-d)/v2 + d/v1;
+
+  double t;
+  t = x/mparam->vd;
   
   return (t*mparam->fsca);
 
