@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.15 2003/03/31 17:18:56 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.16 2003/04/17 22:49:36 andrewar Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.16  2003/04/17 22:49:36  andrewar
+ * Fixed getPhase function to conform to StHelixModel convention.
+ *
  * Revision 2.15  2003/03/31 17:18:56  pruneau
  * various
  *
@@ -274,9 +277,13 @@ double StiKalmanTrackNode::getField()  const
 
 double StiKalmanTrackNode::getPhase() const
 {
+  //! This function translates between ITTF helix parameters and
+  //! StHelixModel phi. It is only used to fill StTrackGeometry.
+  //! For a StPhysicalHelix, phi must be transformed by -h*pi/2.
   const StThreeVector<double> p=getGlobalMomentum();
   double h = getHelicity();
-  return (p.y()==0&&p.x()==0) ? (1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2;
+  return (p.y()==0&&p.x()==0) ? (1-2.*h)*M_PI/4. : p.phi();
+
 }
 
 /// returns momentum and its error matrix 
@@ -301,7 +308,7 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
   // transformation matrix - needs to be set
   double a00=_cosAlpha, a01=-_sinAlpha, a02=0;
   double a10=_sinAlpha, a11= _cosAlpha, a12=0;
-  double a20= 0, a21=  0, a22=1.;
+  double a20= 0, a21=  0, a22=(pars->field<0)? -1:1;
   double px=p[0];
   double py=p[1];
   double pz=p[2];
