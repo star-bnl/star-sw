@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.50 2004/12/17 15:50:08 aihong Exp $
+// $Id: StFlowEvent.h,v 1.51 2004/12/17 22:33:08 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -35,6 +35,7 @@ public:
   Double_t       Weight(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Double_t       ZDCSMD_PsiWgtEast();
   Double_t       ZDCSMD_PsiWgtWest();
+  Double_t       ZDCSMD_PsiWgtFull();
   Int_t          EventID() const;
   Int_t          RunID() const;
   Double_t       CenterOfMassEnergy() const;
@@ -125,6 +126,8 @@ public:
   void SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetZDCSMD_PsiWeightWest(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtWest);
   void SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast); 
+  void SetZDCSMD_PsiWeightFull(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtFull);
+  void SetZDCSMD_BeamCenter(Double_t ex,Double_t ey,Double_t wx,Double_t wy);
 #endif
   static void SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
@@ -185,6 +188,8 @@ private:
   Float_t             mZDCe;                                     // ZDC east
   Float_t             mZDCw;                                     // ZDC west
   Float_t	      mZDCSMD[2][2][8];				 // ZDCSMD
+  static Double_t     mZDCSMDCenterex,mZDCSMDCenterey;           // ZDCSMD Beam Center
+  static Double_t     mZDCSMDCenterwx,mZDCSMDCenterwy;           // ZDCSMD Beam Center
   static Float_t      mEtaTpcCuts[2][2][Flow::nSels];            // range absolute values
   static Float_t      mEtaFtpcCuts[4][2][Flow::nSels];           // range values
   static Float_t      mPtTpcCuts[2][2][Flow::nSels];             // range
@@ -207,6 +212,7 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcFarWest;                        //!flattening weights Ftpc FarWest
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;		         //! ZDCSMD west Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;        		 //! ZDCSMD east Psi
+  Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtFull;                     //! ZDCSMD full Psi
 
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Float_t      mPtWgtSaturation;                          // saturation value for pt weighting
@@ -342,6 +348,10 @@ inline void StFlowEvent::SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t& pPhiW
 inline void StFlowEvent::SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast) { memcpy (mZDCSMD_PsiWgtEast, ZDCSMD_PsiWgtEast, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
 
 inline void StFlowEvent::SetZDCSMD_PsiWeightWest(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtWest) { memcpy (mZDCSMD_PsiWgtWest, ZDCSMD_PsiWgtWest, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
+
+inline void StFlowEvent::SetZDCSMD_PsiWeightFull(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtFull) { memcpy (mZDCSMD_PsiWgtFull, ZDCSMD_PsiWgtFull, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
+ 
+inline void StFlowEvent::SetZDCSMD_BeamCenter(Double_t ex,Double_t ey,Double_t wx,Double_t wy) {mZDCSMDCenterex = ex; mZDCSMDCenterey = ey; mZDCSMDCenterwx = wx; mZDCSMDCenterwy = wy;}
 #endif
 
 inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
@@ -431,7 +441,7 @@ inline void StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
 
 inline void StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
-inline void StFlowEvent::SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd) {mZDCSMD[eastwest][verthori][strip-1] = zdcsmd;}
+inline void StFlowEvent::SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd) {mZDCSMD[eastwest][verthori][strip-1] = (zdcsmd >0.)? zdcsmd:0.;}
 
 inline void StFlowEvent::SetPid(const Char_t* pid)  { 
   strncpy(mPid, pid, 9); mPid[9] = '\0'; }
@@ -475,6 +485,9 @@ inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.51  2004/12/17 22:33:08  aihong
+// add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 // Revision 1.50  2004/12/17 15:50:08  aihong
 // check in v1{3} code
 //

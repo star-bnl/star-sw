@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.88 2004/12/09 23:47:05 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.89 2004/12/17 22:33:35 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -642,11 +642,18 @@ Int_t StFlowAnalysisMaker::Init() {
   mZDC_SMD_east_vert = new TH1F("Flow_ZDC_SMD_east_vert","Flow_ZDC_SMD_east_vert",7,0.5,7.5);
   mZDC_SMD_west_hori = new TH1F("Flow_ZDC_SMD_west_hori","Flow_ZDC_SMD_west_hori",8,0.5,8.5);
   mZDC_SMD_east_hori = new TH1F("Flow_ZDC_SMD_east_hori","Flow_ZDC_SMD_east_hori",8,0.5,8.5);
-  mHistZDCSMDPsiWgtEast = new TH1F("Flow_ZDCSMDPsiWgtEast","Flow_ZDCSMDPsiWgtEast",
+  mHistZDCSMDPsiWgtEast = new TH1D("Flow_ZDCSMDPsiWgtEast","Flow_ZDCSMDPsiWgtEast",
 				   Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
-  mHistZDCSMDPsiWgtWest = new TH1F("Flow_ZDCSMDPsiWgtWest","Flow_ZDCSMDPsiWgtWest",
+  mHistZDCSMDPsiWgtWest = new TH1D("Flow_ZDCSMDPsiWgtWest","Flow_ZDCSMDPsiWgtWest",
 				   Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
-
+  mHistZDCSMDPsiWgtTest = new TH1D("Flow_ZDCSMDPsiWgtTest","Flow_ZDCSMDPsiWgtTest",
+                                   Flow::zdcsmd_nPsiBins,0.,twopi);
+  mHistZDCSMDPsiWgtFull = new TH1D("Flow_ZDCSMDPsiWgtFull","Flow_ZDCSMDPsiWgtFull",
+                                   Flow::zdcsmd_nPsiBins,0.,twopi);
+  mHistZDCSMDPsiCorTest = new TH1D("Flow_ZDCSMDPsiCorTest","Flow_ZDCSMDPsiCorTest",
+                                   Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
+  mHistZDCSMDPsiCorFull = new TH1D("Flow_ZDCSMDPsiCorFull","Flow_ZDCSMDPsiWgtFull",
+                                   Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
   TString* histTitle;
   for (int i = 0; i < Flow::nSels * Flow::nSubs; i++) {
 
@@ -1172,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.88 2004/12/09 23:47:05 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.89 2004/12/17 22:33:35 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -1205,7 +1212,8 @@ Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
   }
   mZDCSMD_e_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtEast();
   mZDCSMD_w_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtWest();
-  mFlowWeight  	   = (pFlowEvent->UseZDCSMD()) ? mZDCSMD_e_PsiWgt*mZDCSMD_w_PsiWgt:1.;
+  mZDCSMD_f_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtFull();
+  mFlowWeight  	   = (pFlowEvent->UseZDCSMD()) ? mZDCSMD_e_PsiWgt*mZDCSMD_w_PsiWgt*mZDCSMD_f_PsiWgt:1.;
   return kTRUE;
 }
 
@@ -1263,6 +1271,10 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   }
   mHistZDCSMDPsiWgtEast->Fill(pFlowEvent->ZDCSMD_PsiEst());
   mHistZDCSMDPsiWgtWest->Fill(pFlowEvent->ZDCSMD_PsiWst());
+  mHistZDCSMDPsiWgtTest->Fill(mPsi[0][0]);
+  mHistZDCSMDPsiWgtFull->Fill(mPsi[0][0],mFlowWeight/mZDCSMD_f_PsiWgt);
+  mHistZDCSMDPsiCorTest->Fill(pFlowEvent->ZDCSMD_PsiCorr());
+  mHistZDCSMDPsiCorFull->Fill(pFlowEvent->ZDCSMD_PsiCorr(),mFlowWeight/mZDCSMD_f_PsiWgt);
 
   // sub-event Psi_Subs
   for (int i = 0; i < Flow::nSubs * Flow::nSels; i++) {
@@ -1326,10 +1338,10 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	  psiSubCorr = mPsiSub[Flow::nSels*k][0] + mPsiSub[Flow::nSels*k+1][0] - 2.*mPsi[k][1];
 	}
 
-	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr),mFlowWeight);
+	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr),mFlowWeight/mZDCSMD_f_PsiWgt);
 	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
 	if (psiSubCorr > twopi / order) psiSubCorr -= twopi / order; // for v1Ep1Ep2 which gives -twopi < psiSubCorr < 2.*twopi
-	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr,mFlowWeight);
+	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr,mFlowWeight/mZDCSMD_f_PsiWgt);
       }
 
       if (j < Flow::nHars - 1) { // subevents of different harmonics
@@ -1958,7 +1970,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   TString* histTitle;
 
   // PhiWgt histogram collection
-  TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars+2);
+  TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars+3);
 
   cout << endl << "##### Analysis Maker:" << endl;
 
@@ -2239,6 +2251,9 @@ Int_t StFlowAnalysisMaker::Finish() {
   }
   phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtEast);
   phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtWest);
+  TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
+  if (pPhiWgtFile->IsOpen())
+  phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtFull);
   //GetHistList()->ls();
 
   // Write all histograms
@@ -2323,6 +2338,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.89  2004/12/17 22:33:35  aihong
+// add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 // Revision 1.88  2004/12/09 23:47:05  posk
 // Minor changes in code formatting.
 // Added hist for TPC primary dca to AnalysisMaker.

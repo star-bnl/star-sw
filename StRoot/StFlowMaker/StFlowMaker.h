@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.42 2004/12/09 23:43:37 posk Exp $
+//  $Id: StFlowMaker.h,v 1.43 2004/12/17 22:33:13 aihong Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.42 2004/12/09 23:43:37 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.43 2004/12/17 22:33:13 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -82,6 +82,10 @@ protected:
   Flow::PhiWgtFtpc_t   mPhiWgtFtpcFarWest;        //! To make event plane isotropic
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;	  //! ZDCSMD west Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;      //! ZDCSMD east Psi
+  Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtFull;      //! ZDCSMD full Psi
+  Double_t      mZDCSMDCenterEx,mZDCSMDCenterEy;           //! ZDCSMD Beam Center
+  Double_t      mZDCSMDCenterWx,mZDCSMDCenterWy;           //! ZDCSMD Beam Center
+  Double_t      mZDCSMDPed[2][2][8];                       //! ZDCSMD pedestal
 
 private:
   TString          mEventFileName;            //! IO Maker file name
@@ -169,6 +173,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.43  2004/12/17 22:33:13  aihong
+//  add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
+//
 //  Revision 1.42  2004/12/09 23:43:37  posk
 //  Minor changes in code formatting.
 //
