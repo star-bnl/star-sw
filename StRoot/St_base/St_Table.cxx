@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.83 1999/10/04 14:39:07 fine Exp $ 
+// $Id: St_Table.cxx,v 1.84 1999/10/12 16:20:41 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.84  1999/10/12 16:20:41  fine
+// Advanced version of St_Table::GetRowClass() method
+//
 // Revision 1.83  1999/10/04 14:39:07  fine
 // the fixed header size 20 was replaced with sizeof() operator
 //
@@ -235,6 +238,7 @@
 #endif
 
 #include "TROOT.h"
+#include "TBaseClass.h"
 #include "TSystem.h"
 #include "TBuffer.h"
 #include "TMath.h"
@@ -1279,14 +1283,32 @@ void St_Table::Dump()
 //______________________________________________________________________________
 TClass  *St_Table::GetRowClass() const 
 {
-  // Return TClass object defining the origial STAF table
+ // Return TClass object defining the original STAF table
 
-  //   TString buffer = Class()->GetName();
-  //  TString buffer = GetTitle();
-     TString buffer = IsA()->GetName();
+   TClass *tabClass = Class();
+   TClass *cl    = IsA();
+   TClass *clPrev = 0;
+   if (cl == tabClass) return 0;
+   TList *l = 0;
+   while (cl && cl != tabClass) {
+     l = cl->GetListOfBases();
+     clPrev = cl;
+     cl = 0;
+     TBaseClass *baseCl = 0;
+     if (  l && 
+           l->GetSize()==1 && 
+         ( baseCl = (TBaseClass *)l->First() ) && 
+           baseCl
+        )  cl = baseCl->GetClassPointer();
+     else assert (l->GetSize() == 1);
+   } 
+   if (cl ) {
+     TString buffer = clPrev->GetName();
      buffer.ReplaceAll("St_","");
      buffer += "_st";
-   return gROOT->GetClass(buffer.Data());
+     cl = gROOT->GetClass(buffer.Data());
+   }
+   return cl;
 }
 //______________________________________________________________________________
 Long_t St_Table::GetNRows() const { 
