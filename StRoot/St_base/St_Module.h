@@ -1,6 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
+// $Id: St_Module.h,v 1.3 1998/08/25 23:07:24 didenko Exp $
+// $Log: St_Module.h,v $
+// Revision 1.3  1998/08/25 23:07:24  didenko
+// New base with Tree
+//
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -156,6 +161,7 @@ public:
 
   virtual void  Call(){Int_t i=ExecuteModule();}
   virtual Int_t CheckParameters(const Char_t *names[]=0);
+  virtual Int_t CheckResults(Int_t res, const Char_t *names[]=0);
   virtual Int_t ExecuteModule();
   virtual const Char_t *GetEntryName(){return GetTitle();}  // Return the mangled name of the Fotran subroutines to be loaded dymanically
   virtual void *GetParams(Int_t idx=0){ return (-1 < idx && idx<fN ) ? (void *)st_Params[idx] : (void *)-1;}   // The total 

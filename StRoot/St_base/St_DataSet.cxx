@@ -77,7 +77,7 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
  //                                                                           //
  // St_DataSet dataset != 0 - Add the set to the St_DataSet *dataset          //
  //                                                                           //
- //                   = 0 - (by default) to the current St_DataSet defined    //
+ //                     = 0 - (by default) to the current St_DataSet defined  //
  //                          with fWorkingDataSet data member                 //
  //                                                                           //
  //  returns  the pointer to set is success or ZERO poiner                    //
@@ -415,6 +415,70 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
   if (depth) fMaxDepth = depth;
 }
 //______________________________________________________________________________
+St_DataSet *St_DataSetIter::Shunt(St_DataSet *set, St_DataSet *dataset)
+{
+ ///////////////////////////////////////////////////////////////////////////////
+ //                                                                           //
+ // Shunt - moves the set to the dataset defined with the second parameters   //
+ //                                                                           //
+ // St_DataSet dataset != 0 - Add the set to the St_DataSet *dataset          //
+ //                                                                           //
+ //                     = 0 - (by default) to the current St_DataSet defined  //
+ //                          with fWorkingDataSet data member                 //
+ //                                                                           //
+ //  returns  the pointer to set is success or ZERO poiner                    //
+ //  =======                                                                  //
+ //                                                                           //
+ //  Note: If this St_DataSetIter is empty (i.e. Pwd() returns 0), the "set"  //
+ //        becomes the "root" dataset of this iterator                        //                                                                         //
+ ///////////////////////////////////////////////////////////////////////////////
+ 
+  if (!set) return 0;
+  St_DataSet *s =  dataset;
+  if (!s) s = Pwd();
+  if (s) {
+     s->Shunt(set);
+     s = set;
+  }
+  else {
+  //  make the coming dataset the current one for the iterator
+     s = set;
+     fRootDataSet    = s;
+     fWorkingDataSet = s;
+     if (fNext) {
+       Error("Shunt","St_DataSetIter has been corrupted ;-!"); 
+       delete fNext; 
+       fNext = 0;
+     }
+     fNext = new TIter(s->fList);
+  }
+  return s;
+}
+ 
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::Shunt(St_DataSet *dataset, const Char_t *path)
+{
+ ///////////////////////////////////////////////////////////////////////////////
+ //                                                                           //
+ // Shunt                                                                     //
+ //                                                                           //
+ // Char_t path != 0 - Move a St_DataSet dataset from its parent to           //
+ //                    the St_DataSet dataset                                 //
+ //                    defined with "path"                                    //
+ //              = 0 - (by default) to the current St_DataSet defined         //
+ //                    with fWorkingDataSet data member                       //
+ //                                                                           //
+ //  returns the dataset is success or ZERO pointer                           //
+ //  =======                                                                  //
+ //                                                                           //
+ ///////////////////////////////////////////////////////////////////////////////
+ if (!dataset) return 0;
+ St_DataSet *set = 0;
+ if (path && strlen(path)) set = Next(path);
+ return Shunt(dataset,set);
+}
+
+//______________________________________________________________________________
 //______________________________________________________________________________
  
 //////////////////////////////////////////////////////////////////////////
@@ -622,6 +686,21 @@ void  St_DataSet::SetParent(St_DataSet *parent){
   SetMother(parent);                  // Adjust St_DataSet::fMother poiner as well
 }
 //______________________________________________________________________________
+void St_DataSet::Shunt(St_DataSet *dataset)
+{
+  // Remove object from the original dataset and insert into this one
+  if (!dataset) return;
+ 
+  if (!fList) {
+       fList = new TList;
+       if (fMother) fList->SetParent(fMother);
+  }
+ 
+  // Check whether this new child has got any partent yet
+  dataset->SetParent(this);
+  fList->Add(dataset);
+}
+//______________________________________________________________________________
 void St_DataSet::Update()
 {
  //
@@ -636,4 +715,4 @@ void St_DataSet::Update()
   while( set = next())
             set->Update();
 }
- 
+
