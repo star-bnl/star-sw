@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.9 2003/04/09 17:59:39 genevb Exp $
+ * $Id: StHelixModel.cxx,v 2.10 2003/12/04 03:51:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.10  2003/12/04 03:51:11  perev
+ * Set small but non zero curvature
+ *
  * Revision 2.9  2003/04/09 17:59:39  genevb
  * Add setMomentum function
  *
@@ -47,12 +50,12 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.9 2003/04/09 17:59:39 genevb Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.10 2003/12/04 03:51:11 perev Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
     mPsi = 0;
-    mCurvature = 0;
+    mCurvature = 1.e-6;
     mDipAngle = 0;
     mCharge = 0;
     mHelicity = 0;
@@ -63,7 +66,7 @@ StHelixModel::StHelixModel(short q, float psi, float c, float dip,
     : mModel(helixModel),
       mCharge(q),
       mPsi(psi),
-      mCurvature(c),
+      mCurvature(c+1.e-10),
       mDipAngle(dip),
       mOrigin(o),
       mMomentum(p),
