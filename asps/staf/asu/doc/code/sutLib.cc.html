@@ -1,0 +1,242 @@
+<HTML>
+<PRE>
+<H2>file: asu/src/sutLib.cc</H2>
+
+
+/*:Copyright 1996, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         csuLib.c
+*:DESCRIPTION:  SUT - String UTility functions
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      10may96-v001a-cet- combine several files
+*:HISTORY:      02may96-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+
+/*-------------------------------------------- INCLUDES             --*/
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;libgen.h&gt;
+#include &lt;ctype.h&gt;
+#ifdef AIX
+#include &lt;fnmatch.h&gt;
+#endif /*AIX*/
+#include "<A HREF="sutLib.h.html">sutLib.h</A>"
+#include "asuAlloc.h"
+
+/*-------------------------------------------- MACROS               --*/
+<B>#define <A NAME="_PRINTF">_PRINTF</A> printf("%s.%d-",__FILE__,__LINE__);fflush(0);printf</B>
+#ifndef <U>TRUE</U>        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+<B>#define <A NAME="TRUE">TRUE</A> 1</B>
+#endif
+#ifndef <U>FALSE</U>        //OVERLOAD CALL: FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+<B>#define <A NAME="FALSE">FALSE</A> 0</B>
+#endif
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      int sutMatchWild
+*:DESCRIPTION:  Matches a wild-card pattern to a string
+*:ARGUMENTS:    
+*:RETURN VALUE: <U>TRUE</U> or <U>FALSE</U>        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>; FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+*:&lt;---------------------------------------------------------------------
+*/
+<B>int <A NAME="sutMatchWild">sutMatchWild(</A>char *pattern,char* string)</B>
+{
+#ifdef AIX
+   int flags=0;		/* I DONT KNOW WHAT THIS SHOULD BE */
+   return !fnmatch(pattern,string,flags);
+#else
+   return gmatch(string,pattern);
+#endif /*AIX*/
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      int sutMatchReg
+*:DESCRIPTION:  Matches a regular expression pattern to a string
+*:ARGUMENTS:    
+*:RETURN VALUE: <U>TRUE</U> or <U>FALSE</U>        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>; FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+*:&lt;---------------------------------------------------------------------
+*/
+<B>int <A NAME="sutMatchReg">sutMatchReg(</A>char *pattern,char* string)</B>
+{
+   int isMatch=<U>FALSE</U>;        //OVERLOAD CALL: FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+   char *rexp=<A HREF="stafGeneric.h.html#NULL">NULL</A>;
+   char *ret0[9];		/* HACK - string limit */
+   char *newcursor=<A HREF="stafGeneric.h.html#NULL">NULL</A>;
+   char *name=<A HREF="stafGeneric.h.html#NULL">NULL</A>;
+
+   rexp = (char*)ASUALLOC(strlen(pattern) +5);
+   sprintf(rexp,"(%s)$0",pattern);fflush(0);
+
+   if( 0 == strcmp(ret0[0],string) ){
+      isMatch=<U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+   }
+   else {
+      isMatch=<U>FALSE</U>;        //OVERLOAD CALL: FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+   }
+   ASUFREE(name);
+   ASUFREE(rexp);
+   return isMatch;
+}
+
+/*--------------------------------------------------------------------*/
+/*- Return the N-th token of a delimited string. -*/
+<B>char* <A NAME="strntok">strntok(</A>const char * str,const char * del,const int n)</B>
+{
+   int i;
+   char *d,*w;
+
+   d = (char*)str;
+   for( i=0;i&lt;n;i++ ){
+      d += strspn(d,del);       /* skip del */
+      d += strcspn(d,del);      /* skip non-delimiters */
+   }
+   d += strspn(d,del);          /* skip tokens */
+   if( strcspn(d,del) &gt; 0 ){
+      w = (char*)ASUCALLOC(1,strcspn(d,del) +1);
+      strncpy(w,d,strcspn(d,del));
+      return (char*)w;
+   }
+   return <A HREF="stafGeneric.h.html#NULL">NULL</A>;
+}
+
+/*--------------------------------------------------------------------*/
+/*- Split a delimited string into an array of components. -*/
+<B>int <A NAME="strsplit">strsplit(</A>const char * str,const char * del,char*** a)</B>
+{
+   int i,j;
+   char *buf;
+   char *token;
+   char *aa[1024];                      /* LIMIT ON # COMPONENTS */
+
+/* if( !(buf = strpbrk(str,del)) )return 0; // NO DELIMITERS FOUND */
+/* will return 1 and entire str array... as strtok */
+
+   buf = (char*)ASUALLOC(strlen(str) +1);
+   strcpy(buf,str);
+   
+   i = 0;
+   for (token = strtok(buf, del); token; token = strtok(<A HREF="stafGeneric.h.html#NULL">NULL</A>, del)) {
+      /* <A HREF="#_PRINTF">_PRINTF</A>("Token[%d]: &gt;%s&lt;\n", i, token); */
+      aa[i++] = token;
+   }
+   (*a) = (char**)ASUALLOC(i*sizeof(char**));
+   for(j=0;j&lt;i;j++){
+      (*a)[j] = (char*)ASUALLOC(strlen(aa[j]) +1);
+      strcpy((*a)[j],aa[j]);
+   }
+   ASUFREE(buf);
+   return i;
+}
+
+/*--------------------------------------------------------------------*/
+/*- Extract components bracketed by open & close del.s in a string. -*/
+<B>int <A NAME="strbracket">strbracket(</A>const char *str, const char * od, const char * cd,</B>
+			char*** a)
+{
+   int i,j;
+   char *aa[1024];                      /* LIMIT ON # COMPONENTS */
+   char *buf;
+   char *optr, *cptr;
+   int olen, clen;
+
+   buf = (char*)ASUALLOC(strlen(str) +1);
+   strcpy(buf,str);
+   olen = strlen(od);			/*length of opening delimiter*/
+   clen = strlen(od);			/*length of closing delimiter*/
+/*- Find first open bracket. -*/
+   i = 0;
+   while( (optr=strstr(buf,od)) ){
+      buf = optr +1;
+      if( (cptr=strstr(buf,cd)) ){
+	 aa[i] = (char*)ASUALLOC((cptr-buf) +1);
+	 strncpy(aa[i],buf,(cptr-buf));
+	 buf = cptr +clen;
+	 i++;
+      }
+      else {
+	 buf = <A HREF="stafGeneric.h.html#NULL">NULL</A>;
+      }
+   }
+   (*a) = (char**)ASUALLOC(i*sizeof(char**));
+   for(j=0;j&lt;i;j++){
+      (*a)[j] = aa[j];
+      aa[j] = <A HREF="stafGeneric.h.html#NULL">NULL</A>;
+   }
+   ASUFREE(buf);
+   return i;
+}
+
+/*--------------------------------------------------------------------*/
+<B>int <A NAME="isInteger">isInteger(</A>char *c)</B>
+{
+   int i;
+   char *signs="+-";
+   if( (!isdigit(c[0])) && (<A HREF="stafGeneric.h.html#NULL">NULL</A> == strchr(signs,c[0])) )return <U>FALSE</U>;        //OVERLOAD CALL: FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+   for(i=1;i&lt;strlen(c);i++)if(!isdigit(c[i]))return <U>FALSE</U>;        //OVERLOAD CALL: FALSE: <A HREF="stafGeneric.h.html#FALSE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#FALSE">sutLib.cc(?)</A>
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,111 @@
+<HTML>
+<PRE>
+<H2>file: asu/inc/asuHashTable.hh</H2>
+
+
+/*:From "A C++ Toolkit" by Jonathan S Shapiro
+*:&gt;--------------------------------------------------------------------
+*:FILE:		asuHashTable.h
+*:DESCRIPTION:	C++ Hash Table
+*:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:		-- NONE KNOWN --
+*:HISTORY:	19aug95-v000a-cet- creation
+*:&lt;--------------------------------------------------------------------
+*/
+#ifdef __cplusplus
+#ifndef <A HREF="#ASUHASHTABLE_H">ASUHASHTABLE_H</A>
+<B>#define <A NAME="ASUHASHTABLE_H">ASUHASHTABLE_H</A></B>
+
+<B>struct <A NAME="hashEntry">hashEntry</A> {</B>
+	unsigned long key;	/* hash key */
+	void	*value;
+	<A HREF="#hashEntry">hashEntry</A> *next, *prev;
+	<A HREF="#hashEntry">hashEntry</A>(unsigned long newkey)
+		{key=newkey; next=0; prev=0;}
+	~<A HREF="#hashEntry">hashEntry</A>()
+	{
+		if(next) next-&gt;prev = prev;
+		if(prev) prev-&gt;next = next;
+	}
+};
+
+<B>typedef <A HREF="#hashEntry">hashEntry</A>* <A NAME="pHashEntry">pHashEntry</A>;</B>
+
+const NBUCKETS=4096;
+
+class hashTable {
+public:
+	<A HREF="asuHashTable.cc.html#hashTable">hashTable(</A>);
+	<A HREF="asuHashTable.cc.html#~hashTable">~hashTable(</A>);
+	void add(unsigned long key, void *value);
+	void *<A HREF="asuHashTable.cc.html#lookup">lookup(</A>unsigned long key);
+	void remove(unsigned long key);
+	void <A HREF="asuHashTable.cc.html#mapcar">mapcar(</A>void (*f) (<A HREF="#pHashEntry">pHashEntry</A>));
+private:
+	<A HREF="#pHashEntry">pHashEntry</A> bucket[NBUCKETS];
+	
+	<A HREF="#pHashEntry">pHashEntry</A> <A HREF="asuHashTable.cc.html#addElement">addElement(</A>unsigned long key);
+	<A HREF="#pHashEntry">pHashEntry</A> <A HREF="asuHashTable.cc.html#searchBucketFor">searchBucketFor(</A><A HREF="#pHashEntry">pHashEntry</A> p, unsigned long key);
+	
+	<A HREF="asuHashTable.cc.html#hash">hash(</A>unsigned long);
+};
+
+#endif /*<A HREF="#ASUHASHTABLE_H">ASUHASHTABLE_H</A>*/
+#endif /*__cplusplus*/
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

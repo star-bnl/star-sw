@@ -1,0 +1,121 @@
+<HTML>
+<PRE>
+<H2>file: asu/src/eml_init.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:	eml_init.C
+//:DESCRIPTION:	Functions  to initialize EML 
+//:AUTHOR:	cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:	-- STILL IN DEVELOPMENT --
+//:HISTORY:	20nov95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+#include &lt;string.h&gt;
+#include &lt;stdio.h&gt;
+#include "<A HREF="asuLib.h.html">asuLib.h</A>"
+#include "emlLib.h"	/* Error Messaging and Logging */
+
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#eml_init">eml_init(</A>)
+//:DESCRIPTION:	Initialize EML
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="eml_init">eml_init(</A>)</B>
+{
+   EML_MESSAGE("Initializing EML.");
+
+/*- Define the EML KUIP commands. -*/
+// eml_def_();
+
+/*- Initialize STAF vectors. -*/
+   eml_kuvec_init_();
+
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#eml_start">eml_start(</A>)
+//:DESCRIPTION:	Start EML
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="eml_start">eml_start(</A>)</B>
+{
+   EML_MESSAGE("Starting EML.");
+
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+//:&gt;--------------------------------------------------------------------
+//:ROUTINE:	int <A HREF="#eml_stop">eml_stop(</A>)
+//:DESCRIPTION:	Stop EML
+//:ARGUMENTS:	-- NONE --
+//:RETURN VALUE:-- NONE --
+//:&lt;--------------------------------------------------------------------
+<B>int <A NAME="eml_stop">eml_stop(</A>)</B>
+{
+   EML_MESSAGE("Stopping EML.");
+
+   return <U>TRUE</U>;        //OVERLOAD CALL: TRUE: <A HREF="stafGeneric.h.html#TRUE">stafGeneric.h(?)</A>, <A HREF="sutLib.cc.html#TRUE">sutLib.cc(?)</A>
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
