@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.65 2001/05/19 00:32:53 perev Exp $
+// $Id: doEvents.C,v 1.66 2001/09/01 19:56:41 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -41,18 +41,17 @@
 //             b. "-" to get just the one file you want
 //      file = a. file names in directory (takes all files)
 //             b. the 1 particular full file name (with directory) you want
-//      qaflag = "off"  - doesn't do anything now
-//      wrStEOut = flag to turn on=1, off=0 writing of output test.event.root
+//      qaflag = "evout"    turn on writing of output test.event.root
+//      qaflag = "display"  turn on EventDisplay
 //                 file --- set to off by default 
 //      
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "iostream.h"
 
-class    StChain;
+class     StChain;
 StChain  *chain=0;
-
-
+Int_t iEvt=0,istat=0,nEvents=0;
 void Help()
 {
     cout << "Usage: doEvents.C(startEvent,nEvents,\"path/some_dst_file.xdf\")" << endl;
@@ -81,10 +80,13 @@ void doEvents(const Int_t nEvents=2,
               
               
 // ------------------ Here is the actual method -----------------------------------------
-void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
+void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const Char_t *qaflag)
 {
 
+  nEvents = nEventsQQ;
   TString tflag = qaflag;
+  int eventDisplay = tflag.Contains("disp",TString::kIgnoreCase);
+
   cout <<  endl << endl <<" doEvents -  input # events = " << nEvents << endl;
   Int_t ilist=0;
   while(fileList[ilist]){ 
@@ -113,6 +115,16 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
     gSystem->Load("StEventMaker");
     gSystem->Load("StAnalysisMaker");
 
+//   		Special libraries for EventDisplay
+    if (eventDisplay) {//EventDisplay on
+       gSystem->Load("St_g2t");
+       gSystem->Load("geometry");
+       gSystem->Load("St_geant_Maker");
+       gSystem->Load("StEventHelper");
+       gSystem->Load("StTableUtilities");
+       gSystem->Load("StEventDisplayMaker");
+    }
+
     //
     // Handling depends on whether file is a ROOT file or XDF file
     //
@@ -133,6 +145,15 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
       setFiles->Init(Argc,Argv);
     }
  
+//   		Geant maker  for EventDisplay
+    if (eventDisplay) {
+       int NwGeant=5000000, IwType=0, NwPaw=0;
+       St_geant_Maker *geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
+       geantMk->LoadGeometry("detp geometry year2001");
+       geantMk->SetActive(kFALSE);
+    }
+
+
     TString mainBranch;
     if (fileList && fileList[0] && strstr(fileList[0],".root")) {
       mainBranch = fileList[0];
@@ -140,21 +161,23 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
       int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
       mainBranch.Replace(0,idot+1,"");
       mainBranch+="Branch";
+      printf("*** mainBranch=%s ***\n",mainBranch.Data());
     }
 
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
      IOMk->SetIOMode("r");
      IOMk->SetBranch("*",0,"0");	//deactivate all branches
      if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-//     IOMk->SetBranch("dstBranch",0,"r");
+     IOMk->SetBranch("dstBranch",0,"r");
 //     IOMk->SetBranch("runcoBranch",0,"r");
      IOMk->SetDebug();
 
     //
     // Maker to read events from file or database into StEvent
     //
-    StEventMaker *readerMaker =  new StEventMaker("events","title");
-
+    if (!mainBranch.Contains("eventBranch")) {
+      StEventMaker *readerMaker =  new StEventMaker("events","title");
+    }
     //
     //  Sample analysis maker
     //
@@ -168,6 +191,16 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
         outMk->SetIOMode("w");
         outMk->SetBranch("eventBranch","test.event.root","w");
         outMk->IntoBranch("eventBranch","StEvent");
+    }
+
+
+//   		 StEventDisplayMaker
+    if (eventDisplay) {
+
+      StEventDisplayMaker *displayMk = new StEventDisplayMaker();
+      displayMk->AddName("StEvent(All Tracks)");
+      displayMk->AddFilter(new StFilterDef("MainFilter"));
+     
     }
 
     //
@@ -190,74 +223,27 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
     //
     // Event loop
     //
-    int istat=0,i=1;
- EventLoop: if (i <= nEvents && istat!=2) {
+    istat=0,iEvt=1;
+    
+ EventLoop: if (iEvt <= nEvents && istat!=2) {
 
-     cout << endl << "============================ Event " << i
-	  << " start ============================" << endl;
+     cout << endl << "=== Event " << iEvt << " start ===" << endl;
 
      chain->Clear();
-     istat = chain->Make(i);
+     istat = chain->Make(iEvt);
 
      if (istat==2) 
          {cout << "Last  event processed. Status = " << istat << endl;}
      if (istat==3) 
          {cout << "Error event processed. Status = " << istat << endl;}
 
-//------------------ added 6/20/00 by Kathy to unpack BfcStatus table
-#if 0  //Temporary ignore
-     if (!istat) {
-         
-       ddstBranch=chain->GetDataSet("dstBranch");
 
-       TDataSetIter dstbranchIter(ddstBranch);
-
-       if (ddstBranch) {
-
-       cout << endl << " QAInfo: in dstBranch " << endl;
-
-         while (ddb=dstbranchIter.Next()) {
-
-         cout << endl << 
-             " QAInfo:   found object: " << ddb->GetName() << endl;      
-           
-         TString dsName =  ddb->GetName();
-
-           if (ddb->InheritsFrom("TTable")) { 
-
-             tabl = (TTable *)ddb;
-             cout << " QAInfo:     it is a table with #rows = " 
-                        << tabl->GetNRows() << endl;
-
-             if (dsName == "BfcStatus") {	
-// Now print out contents of BfcStatus for QA purposes
-               TDataSetIter bfcstatiter(ddb);
-               St_dst_bfc_status *bfcstat = 
-                 (St_dst_bfc_status *) bfcstatiter.Find("BfcStatus");
-               St_dst_bfc_status::iterator bth    = bfcstat->begin();
-               St_dst_bfc_status::iterator bthEnd = bfcstat->end();
-//  loop over all rows in table BfcStatus:
-               for (; bth != bthEnd; bth++)
-               {
-	         cout << " QAInfo:       BfcStatus table -- row " << ij <<
-		   ", Maker: "     <<  (*bth).maker_name <<
-                   " has istat = "  << (*bth).status << endl;	
-	       }   // for bfcstat
-             }  // if dsName
-           } // if ddb
-	 }  // while obj Next
-       } // if dstBranch
-     } //  if !istat
-#endif /*0*/
-//------------------
-
-     i++;
+     iEvt++;
      goto EventLoop;
  }
 
-    i--;
-    cout << endl << "============================ Event " << i
-	 << " finish ============================" << endl;
+    iEvt--;
+    cout << endl << "=== Event " << iEvt << " finish ===" << endl;
 
 }
 
@@ -305,6 +291,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.66  2001/09/01 19:56:41  perev
+// EventDisplay option added
+//
 // Revision 1.65  2001/05/19 00:32:53  perev
 // Skip added
 //
