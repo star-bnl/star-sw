@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.25 2000/06/30 01:57:02 porter Exp $
+ * $Id: StDbManager.cc,v 1.26 2000/08/15 22:51:51 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.26  2000/08/15 22:51:51  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.25  2000/06/30 01:57:02  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -186,6 +190,7 @@ mDomains.push_back(new dbDomain(dbOnl,"onl"));
 mDomains.push_back(new dbDomain(dbRich,"rich")); 
 mDomains.push_back(new dbDomain(dbMwc,"mwc")); 
 mDomains.push_back(new dbDomain(dbRhic,"rhic")); 
+mDomains.push_back(new dbDomain(dbSsd,"ssd")); 
 
 }
 

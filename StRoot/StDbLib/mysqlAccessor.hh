@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.10 2000/03/01 20:56:17 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.11 2000/08/15 22:51:53 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.11  2000/08/15 22:51:53  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.10  2000/03/01 20:56:17  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -109,7 +113,7 @@ StDbBuffer buff;
   virtual bool rollBack(StDbTable* table);
   
   virtual int QueryDescriptor(StDbTable* table);
-  virtual void selectDb(const char* dbName, StDbType type, StDbDomain domain);
+  virtual bool selectDb(const char* dbName, StDbType type, StDbDomain domain);
 
 
   virtual StDbBuffer* getBuffer(){return (StDbBuffer*) &buff;}; 

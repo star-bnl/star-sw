@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.12 2000/06/02 13:37:36 porter Exp $
+ * $Id: StDbDefs.hh,v 1.13 2000/08/15 22:51:51 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.13  2000/08/15 22:51:51  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.12  2000/06/02 13:37:36  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -74,7 +78,7 @@ enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, db
 
 // enumerated standard set of database domains
 
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd };
 
 #include "dbstl.h"
 #include <string.h>

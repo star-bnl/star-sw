@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tableQuery.hh,v 1.9 2000/03/01 20:56:17 porter Exp $
+ * $Id: tableQuery.hh,v 1.10 2000/08/15 22:51:53 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: tableQuery.hh,v $
+ * Revision 1.10  2000/08/15 22:51:53  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.9  2000/03/01 20:56:17  porter
  * 3 items:
  *    1. activated reConnect for server timeouts
@@ -86,7 +90,7 @@ public:
   virtual bool rollBack(StDbTable* table) = 0;
 
   virtual int QueryDescriptor(StDbTable* table) = 0;
-  virtual void selectDb(const char* dbName, StDbType type, StDbDomain domain) =0;
+  virtual bool selectDb(const char* dbName, StDbType type, StDbDomain domain) =0;
 
   virtual unsigned int getUnixTime(const char* time) = 0;
   virtual char* getDateTime(unsigned int time) = 0;

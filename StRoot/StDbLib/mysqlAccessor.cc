@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.26 2000/06/30 01:57:02 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.27 2000/08/15 22:51:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.27  2000/08/15 22:51:52  porter
+ * Added Root2DB class from Masashi Kaneta
+ * + made code more robust against requesting data from non-existent databases
+ *
  * Revision 1.26  2000/06/30 01:57:02  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -1406,7 +1410,7 @@ return true;
 
 /////////////////////////////////////////////////////////////////
 
-void
+bool
 mysqlAccessor::selectDb(const char* dbName, StDbType type, StDbDomain domain){
 
   //  if(mdbName) cout << " Switching from db="<<mdbName;
@@ -1417,7 +1421,9 @@ mdbDomain = domain;
 if(mdbName) delete [] mdbName;
 mdbName=new char[strlen(dbName)+1];
 strcpy(mdbName,dbName);
-Db.setDefaultDb(mdbName);
+
+
+return Db.setDefaultDb(mdbName);
 }
 
 
