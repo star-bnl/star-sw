@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibration.h,v 1.1 2001/09/28 19:09:40 llope Exp $
+ * $Id: StTofCalibration.h,v 1.2 2002/01/22 07:12:52 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibration.h,v $
+ * Revision 1.2  2002/01/22 07:12:52  geurts
+ * TOFP_MAX_SLATS changed from 6000 to 41
+ *
  * Revision 1.1  2001/09/28 19:09:40  llope
  * first version
  *
@@ -21,10 +24,9 @@
 using std::vector;
 #endif
 
-#define TOFP_MAX_SLATS 6000
+#define TOFP_MAX_SLATS 41
 
 struct StructSlatCalib {
-  //   StructSlatCalib() { }
   float offset_tdc;
   float cc_tdc;
   float ods_tdc;
@@ -48,7 +50,7 @@ class StTofCalibration{
   StTofCalibration();
   ~StTofCalibration();
   void init();
-  void print(); 
+  void print(ostream& os = cout); 
   int numberOfEntries() const;
   StructSlatCalib slat(int) const;
 };
