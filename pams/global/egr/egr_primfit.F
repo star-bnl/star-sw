@@ -161,10 +161,18 @@ C -- calculate track parameters near mainv
 C --      calculate the impact parameter chisq for charged track at primary vertex
             primtrk(index).iflag = -20000 ! preset in case of failure
             if(impfit(10,rver1,pveci,covi,bfield(3),mainv,bchis,covar,alen).ne.0)then
+
+C     SM modifying this to comply to iflag scheme we have 
               primtrk(index).iflag = globtrk(i).iflag
-              
+              if( (primtrk(index).iflag.ge.100).and.(primtrk(index).iflag.lt.200) )then
+                 primtrk(index).iflag = globtrk(i).iflag + 200
+              endif
+              if( (primtrk(index).iflag.ge.500).and.(primtrk(index).iflag.lt.600) )then
+                 primtrk(index).iflag = globtrk(i).iflag + 100
+              endif
+C     
               primtrk(index).method =2**kKalmanFitId
-              ndegf = ndef+2 ! two extra df for fit
+              ndegf = ndef+2   ! two extra df for fit
               primtrk(index).id=globtrk(i).id
               primtrk(index).n_max_point=globtrk(i).n_max_point + 1
               primtrk(index).n_fit_point=globtrk(i).n_fit_point + 1
