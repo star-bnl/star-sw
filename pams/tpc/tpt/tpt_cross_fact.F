@@ -1,5 +1,8 @@
-* $Id: tpt_cross_fact.F,v 1.2 1998/01/27 00:35:44 fisyak Exp $
+* $Id: tpt_cross_fact.F,v 1.3 1998/04/06 19:16:09 sakrejda Exp $
 * $Log: tpt_cross_fact.F,v $
+* Revision 1.3  1998/04/06 19:16:09  sakrejda
+* local constants replaced by include, not used variables removed
+*
 * Revision 1.2  1998/01/27 00:35:44  fisyak
 * Split sources
 *
@@ -21,7 +24,7 @@ C  xold - previous x
 C  yold - previous y
 C
 C OUTPUT ARGUMENTS:
-C  cf   - sin(crossing angle)**2
+C  cf   - cos(crossing angle)**2
 C  theta- crossing angle
 C
 C<--------------------------------------------------------------------
@@ -30,28 +33,25 @@ C Modified: 13-NOV-1997 by R.Bossingham
 C           Eliminate unused variables.
 C
       IMPLICIT NONE
-#include "tpt_const.inc"
 C______________________________________________________________________
       INTEGER idet
       REAL    xnew,ynew,xold,yold,cf,theta
       real    vlocal(3),vglobal(3)
-      REAL    pi,alpha
       integer iret,tgc_global_to_local_p,isect
-      PARAMETER (pi=3.141592653589)
+
 C_____________________________________________________________________
 
       if(cf.lt.0) then 
          cf=1.0
       else
          isect = idet/100
-         alpha = real(2*isect-1)*pi/12.0
          vglobal(1)= xnew-xold
          vglobal(2)= ynew-yold
          vglobal(3)= 0.0
          iret= tgc_global_to_local_p(isect,vglobal,vlocal)
 C
-         cf = abs(vlocal(1)/vlocal(2))
-         theta = atan(cf)
+         cf = (vlocal(2))**2/(vlocal(2)**2+vlocal(1)**2)
+         theta = atan(vlocal(1)/vlocal(2))
       endif
       tpt_cross_fact = 0
       end
