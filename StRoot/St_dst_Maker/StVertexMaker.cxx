@@ -1,12 +1,12 @@
 /*!
  *
- * StVertexMaker class ( est + evr/lmv/pplmv )                          
- * Modes: 0 = lmv/evr                                                   
- *        1 = ppLMV                                                     
+ * StVertexMaker class ( est + evr/lmv/pplmv )
+ * Modes: 0 = lmv/evr
+ *        1 = ppLMV
  *        2 = lmv/evr with VtxOffSet
- *        3 = lmv evr                                    
- *        4 = pplmv using EST if around 
- *        5 = lmv/evr with VtxOffset        
+ *        3 = lmv evr
+ *        4 = pplmv using EST if around
+ *        5 = lmv/evr with VtxOffset
  */
 
 
@@ -41,7 +41,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 int curEvNum=-1;
 
 
-ClassImp(StVertexMaker)  
+ClassImp(StVertexMaker)
 //_____________________________________________________________________________
   StVertexMaker::StVertexMaker(const char *name, int key):StMaker(name),
   m_evr_evrpar(0),
@@ -102,7 +102,7 @@ Int_t StVertexMaker::Init(){
     hPiFi[3] = new TH1F("Fin3","Match #Delta #eta",50,-1.,1.);
     hPiFi[4] = new TH1F("Fin4","Match #Delta #phi/deg",50,-10.,10.);
     hPiFi[5] = new TH1F("Fin5","No. of track match to CTB=trigBXing tracks/eve",261,-0.5,260.5);
-    hPiFi[6] =(TH1F *) new TH2F("Fin6","Vertex Y/cm vs. X/cm found",25,-5,5,25,-5,5); 
+    hPiFi[6] =(TH1F *) new TH2F("Fin6","Vertex Y/cm vs. X/cm found",25,-5,5,25,-5,5);
 
     hPiFi[7] = new TH1F("Fin7","Vertex X/cm found",100,-5,5);
     hPiFi[8] = new TH1F("Fin8","Vertex Y/cm found",100,-5,5);
@@ -115,16 +115,16 @@ Int_t StVertexMaker::Init(){
     hPiFi[13] = new TH1F("Fin13","Primary multiplicity",551,-0.5,550.5);
     hPiFi[14] = new TH1F("Fin14","Primary (global) pT distrib",100,0.,10.);
     hPiFi[15] = new TH1F("Fin15","Primary No. of points/track",51,-0.5,50.5);
-    hPiFi[16] =(TH1F *) new TH2F("vXZ","Vertex X/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5); 
-    hPiFi[17] =(TH1F *) new TH2F("vYZ","Vertex Y/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5); 
+    hPiFi[16] =(TH1F *) new TH2F("vXZ","Vertex X/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5);
+    hPiFi[17] =(TH1F *) new TH2F("vYZ","Vertex Y/cm vs. Z/cm found",50,-250,250,30,-1.5,1.5);
 
     //temp schizophrenia JB
     hPiFi[18] = new TH1F("Fin18","Vertex X/cm found, no BeamLine",100,-5,5);
     hPiFi[19] = new TH1F("Fin19","Vertex Y/cm found, no BeamLine",100,-5,5);
     hPiFi[20] = new TH1F("Fin20","Vertex Z/cm found, no BeamLine",100,-250,250);
-    
+
     hPiFi[21] = new TH1F("Fin21","Vertex Z/cm found-noBeamLine",200,-5,5);
-    hPiFi[22] =(TH1F *) new TH2F("Fin22","Vertex X/cm vs. Z/cm -noBeamLine",50,-250,250,30,-1.5,1.5); 
+    hPiFi[22] =(TH1F *) new TH2F("Fin22","Vertex X/cm vs. Z/cm -noBeamLine",50,-250,250,30,-1.5,1.5);
     //temp schizophrenia JB
 
     // matching to many bXing
@@ -140,7 +140,7 @@ Int_t StVertexMaker::Init(){
     hmtr[1] = new TH1F("mtr1","starggling (a.u.) of tracks",100,.0,10.);
     hmtr[2] = new TH1F("mtr2","Spath (cm) of tracks",100,.0,250.);
     break; }
-  default: 
+  default:
     gMessMgr->Error() << "StVertexMaker: unknown vertex switch =" << m_Mode << endm;
     return kStErr;
   } // end of lmv/evr,ppLMV switch
@@ -149,9 +149,9 @@ Int_t StVertexMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StVertexMaker::Make(){
-  PrintInfo();  
-  
-  St_DataSet *match = GetDataSet("match"); 
+  PrintInfo();
+
+  St_DataSet *match = GetDataSet("match");
   St_DataSetIter matchI(match);
   St_dst_track   *EstGlobal = 0;
   EstGlobal = (St_dst_track *) matchI("EstGlobal");
@@ -159,19 +159,19 @@ Int_t StVertexMaker::Make(){
   St_dst_track   *globtrk = (St_dst_track *) matchI("globtrk");
   if (! globtrk) {globtrk = new St_dst_track("globtrk",1); AddGarb(globtrk);}
 
-  St_dst_vertex  *vertex  = new St_dst_vertex("vertex", 4); 
+  St_dst_vertex  *vertex  = new St_dst_vertex("vertex", 4);
   StMaker* vertexDataSet;
   if (! (vertexDataSet = GetMaker("primary"))) vertexDataSet = this;
-  vertexDataSet->AddData(vertex);  
+  vertexDataSet->AddData(vertex);
 
   St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
   Int_t mdate = db->GetDateTime().GetDate();
- 
+
   int iRes=0;
   St_dst_vertex  *preVertex=0;
 
   preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex");
-  if( !preVertex)  
+  if( !preVertex)
     preVertex = (St_dst_vertex *)GetDataSet("SvtVtx/.data/preVertex");
   St_dst_vertex  *clusterVertex = (St_dst_vertex *)GetDataSet("tpc_tracks/.data/clusterVertex");
   if( preVertex ) {
@@ -189,14 +189,14 @@ Int_t StVertexMaker::Make(){
   }
 
   switch(m_Mode) { // lmv/evr or ppLMV
-    
+
   case 0:   // lmv/evr
   case 2:  // lmv/evr with VtxOffSet
   case 3:  //lmv/evr using EST
   case 5: { //lmv/evr with VtxOffSet using EST
     long NGlbTrk = 0;
     if (globtrk) NGlbTrk = globtrk->GetNRows();
-    
+
     // Using file of fixed vertices
     if (GetMatchedSize()) {                  // Match event/run IDs
       if (FixVertex(GetRunNumber(),GetEventNumber())) return kStErr;
@@ -214,7 +214,7 @@ Int_t StVertexMaker::Make(){
       // evr with fixed vertex
       vertex->AddAt(m_fixedVertex,0);
       if (NGlbTrk < 1) {
-        gMessMgr->Warning("Cannot call evr with <1 tracks"); 
+        gMessMgr->Warning("Cannot call evr with <1 tracks");
         iRes = kStErr;
       } else {
         if(Debug()) gMessMgr->Debug() <<
@@ -238,7 +238,7 @@ Int_t StVertexMaker::Make(){
 
         // evr
         if(Debug()) gMessMgr->Debug("run_evr: calling evr_am");
-	if( EstGlobal && (m_Mode == 3 || m_Mode == 5) ) 
+	if( EstGlobal && (m_Mode == 3 || m_Mode == 5) )
 	  iRes = evr_am(m_evr_evrpar,EstGlobal,vertex);
 	else
 	  iRes = evr_am(m_evr_evrpar,globtrk,vertex);
@@ -246,7 +246,7 @@ Int_t StVertexMaker::Make(){
 
     }  // end section on finding a primary vertex if not fixed
 
-    
+
     break; }
 
 
@@ -254,7 +254,7 @@ Int_t StVertexMaker::Make(){
   case 4:{ //pplmv using EST
     gMessMgr->Info() << GetName() <<
       "-maker will use ppLMV with zCutppLMV=" << zCutppLMV << "/cm" << endm;
-    
+
     if (! (ppLMVparI[1]>0)) {
       gMessMgr->Error("StVertexMaker: ppLMV not initialized!");
       return kStErr;
@@ -262,11 +262,11 @@ Int_t StVertexMaker::Make(){
 
     cout << "CTB Mode = " << this->GetCTBMode() << endl;
     CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF,this->GetCTBMode());
-    
+
 
     MatchedTrk maEstTrk(this, ppLMVparI, ppLMVparF, &ctbResponse, EstGlobal) ;
     MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse, globtrk) ;
-            
+
     if (beam4ppLMV.isOn) {// take beam line params from DB
       TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
       vertexSeed_st* vSeed =
@@ -274,11 +274,11 @@ Int_t StVertexMaker::Make(){
       SetBeam4ppLMV((int) (vSeed->weight), vSeed->x0, vSeed->y0,
 		    vSeed->dxdz, vSeed->dydz);
     }
-      
+
     iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
-    
-    if(EstGlobal and m_Mode == 4) {
-      
+
+    if(EstGlobal && m_Mode == 4) {
+
       dst_vertex_st* MyVert = vertex->GetTable();
       for( int nVert=0; nVert<vertex->GetNRows(); nVert++){
 	if( MyVert->iflag == 1) MyVert->iflag = 302;
@@ -286,14 +286,14 @@ Int_t StVertexMaker::Make(){
       }
       ppLMV4(maEstTrk,EstGlobal,vertex,mdate);
     }
-    
+
     break; }
   default:
     gMessMgr->Error() << "StVertexMaker: unknown vertex switch ="
 		      << m_Mode << endm;
     return kStErr;
   } // end of lmv/evr,ppLMV switch
-  
+
   return iRes;
 }
 //_____________________________________________________________________________
@@ -423,8 +423,17 @@ void StVertexMaker::UnFixVertex(){
 
 
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.7 2003/08/07 00:19:52 caines Exp $
+// $Id: StVertexMaker.cxx,v 1.8 2003/08/19 15:37:29 jeromel Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.8  2003/08/19 15:37:29  jeromel
+// if(EstGlobal and m_Mode == 4) (???). Replaced with &&
+// Logic is slightly changed as follow :
+// - before EST => always OK as iRes=0 always and no re-assignement of iRes
+//          TPT => counts on ppLMV4 returned value
+// - now
+//    EST or TPT, if ppLMV fails using globtrk, it fails and that is it.
+//    Logic doew not change TPT behavior but change the meaning of the EST mode.
+//
 // Revision 1.7  2003/08/07 00:19:52  caines
 // Write out the TPC only vertex as a calibration vertex if est vertex found
 //
