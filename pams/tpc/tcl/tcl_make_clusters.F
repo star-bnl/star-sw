@@ -90,19 +90,6 @@ c  4apr95 malisa - TSS now outputs data in the agreed-upon format--> remove "fro
 c  	that was built into tcl_make_clusters, and also now read the data as
 c	TPPIXEL.DATUM = adc + tdc*'400'X + nseqpix*'100000'X
 c
-c  7mar96 malisa - TSS has been "upgraded" to interface with the new geant
-c	scheme gstar, as well as the new geometry routines tgc.  This leads
-c	to changes in the structures used in this package (no more mct) as
-c	well as significant *improvements* in that there will be no more converting
-c	between different geometry conventions in the code. :)
-c	That is, no more #sectors=24/48, row#=1..13,1..32/1..45, or crap like that.
-c     - I also just do some housecleaning.  The old clusterfinder, which 
-c	works well, but with the old geant and geometry routines, is saved
-c	as tcl_make_clusters.F.pre_gstar
-c
-c  4apr96 malisa - we now get rid of the old convention that numbered pads in the
-c       *sector*.  We now number pads in the *row*.
-c
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
 
@@ -123,8 +110,6 @@ c
 
 #include "tcl_tpseq_pars.inc"
 #include "tcl_tpseq_st.inc"
-
-#include "tls_ecvalues.inc"
 
 *  Inputs:
         RECORD/ table_head_st      / pad_plane_h 
@@ -162,22 +147,86 @@ C----------------------------------------------------------------------
 	DATA    IDE1 /0/
 
         integer padptr(1:45,1:24),itpp
-        integer tls_quick_sort_i
 
 c     the following are just temporary
-        integer jjpix,numseq,istart_seq,numpix,idatum
+        integer itpp,jjpix,numseq,istart_seq,numpix,idatum
         integer iseq,iadc,itdc,ipix,itdc_last
 
 C----------------------------------------------------------------------
 
 	TCL_Make_Clusters = tucod_ok
 
+*       CALL MESSAGE(
+*    +               'TCL_Make_Clusters-I1  Making TCL table "cluster"'
+*    +               //'from "tppad" et al.' , 1, -1 )
 
 *	Need a call like this:
 *	Nsectors = TPG_Nsectors()
 
 *	But for now:
+c	Nsectors = 48 !Inner/outer are 2 sectors.
 	Nsectors = 24 !Inner/outer are 1 sector -- mal 30mar95
+
+c--------------------------------------- FRONT END ------------------------------
+c     OK, here, I build on a temporary "front-end" to the TCL package that
+c     reformats the tppixel table into the new format that Wen and I agree
+c     on.... eventually (soon), this will be done in TSS...
+c
+c FIRST, Wen now points to the *end* of the data on a pad with tppad.
+c  this is wrong and will be corrected, but for now I correct the table myself
+
+c	do itpp=tppadh.nok,2,-1
+c           tppad(itpp).jpix = tppad(itpp-1).jpix +1
+c        enddo
+c	tppad(1).jpix = 1
+c
+c SECOND, Wen no longer fills tppad.nseq at al
+c this has to be corrected, but for now, I do it myself...
+c
+c	do itpp=1,tppadh.nok
+c           numseq = 0
+c           itdc_last = -1
+c           do ipix=tppad(itpp).jpix,tppad(itpp+1).jpix-1
+c              idatum = tppixel(ipix).datum
+c              itdc = idatum/'10000'X
+c              if (itdc.ne.itdc_last+1) numseq=numseq+1
+c              itdc_last = itdc
+c           enddo
+c           tppad(itpp).nseq = numseq
+c        enddo
+c
+c THIRD, the information about npix_seq has been discarded from tppixel table
+c this should be kept, but for now, I put it back myself...
+c        do itpp=1,tppadh.nok
+c           jjpix = tppad(itpp).jpix
+c           numseq = tppad(itpp).nseq
+c           do iseq=1,numseq
+c              istart_seq = jjpix
+c              numpix = 1
+c              idatum = tppixel(jjpix).datum
+c     first, count number of pixels in sequence....
+c              itdc = idatum/'10000'X
+c 1            jjpix=jjpix+1
+c              itdc_last = itdc
+c              idatum = tppixel(jjpix).datum
+c              itdc = idatum/'10000'X
+c              if ((itdc.eq.itdc_last+1).and.
+c     +             (jjpix.lt.tppad(itpp+1).jpix)) then
+c                 numpix = numpix+1
+c                 goto 1
+c              endif
+cc     now reformat...
+c              do ipix=istart_seq,jjpix-1
+c                 idatum = tppixel(ipix).datum
+c                 itdc = idatum/'10000'X
+c                 iadc = idatum - itdc*'10000'X
+c                 tppixel(ipix).datum = iadc + itdc*'1000'X + numpix*'1000000'X
+c              enddo
+c           enddo
+c        enddo
+c
+c        write(6,*)'done with front end'
+c--------------------------- END OF FRONT END --------------------------------
 
 
 c     now we are filling the pad pointer array for each event in this top-level
@@ -187,21 +236,17 @@ c     of requiring that each of the 136560 pads have an entry.  This also allows
 c     arbitrary ordering of pads in TPPADS, as well as readout of less than full
 c     TPC (as in sector test) - 24mar95 malisa
 
+c     Note that tppad uses sectors #1-48 but rows #1-13 for inner (odd number) sectors
+c     and rows #14-45 for outer (even number) sectors, when it fills tppad.tpc_row .
+c     Meanwhile, the routines here (and henceforth) use sectors #1-24, and
+c     rows #1-48, to be consistent with current use after tphit table.
+c     Meanwhile, the routines here (and henceforth) use sectors #1-48 and 
+c     rows #1-13 for inner and rows #1-32 for outer sectors.
+c     This is accounted for in following pointer array.
 
-c it is unlikely that anyone will "shuffle" the tppad table so that all pads
-c  on a given padrow are not all following each other.  However, protect against
-c  that...
-        if (tls_quick_sort_i(
-     +       tppadh.nok,
-     +       tppad(1).tpc_row,
-     +       tppad(2).tpc_row,
-     +       tppad)
-     +       .ne.tls_sort_normal_cv) then
-           write(6,*)'TCL - error sorting tppad table!'
-           return
-        endif
 c     first, clear it....
         do sector=1,nsectors
+c           nrows = tpg_nrows_in_sector(sector)
            nrows = 45           ! mal 30mar95
            do row=1,nrows
               padptr(row,sector)=0
@@ -211,9 +256,11 @@ c     then, fill it....
         do itpp=1,tppadh.nok
            sector = tppad(itpp).tpc_row/100
            row = tppad(itpp).tpc_row - 100*sector
+           sector = (sector+1)/2                      ! to make range 1..24
+c           if (row.gt.pad_plane(1).nrow_in) row=row - pad_plane(1).nrow_in
            if (padptr(row,sector).eq.0) padptr(row,sector) = itpp
         enddo
-c     at this point, any element of padptr which =0 is a padrow without 
+c     at this point, any element of padptr which =0 is a pad without 
 c     valid data for this event.
 
 
@@ -223,6 +270,12 @@ c mal 30mar95           Nrows = TPG_Nrows_in_Sector( Sector )
 
            DO Row = 1, Nrows
 
+c	    TAS_Code = TCL_Make_Cluster_Row( Sector, Row 
+c    1                   , pad_plane_h, pad_plane
+c    1	                 , tppadh, tppad, tppixelh, tppixel, tpmcpixh
+c    1	                 , tpmcpix, Jtppad
+c    1	                 , tpclusterh, tpcluster, tpseqh, tpseq )
+
               TAS_Code = TCL_ClsRow( Sector, Row 
      1             , pad_plane_h, pad_plane
      1             , tppadh, tppad, tppixelh, tppixel, tpmcpixh
@@ -231,9 +284,9 @@ c mal 30mar95           Nrows = TPG_Nrows_in_Sector( Sector )
      1             , padptr )
     
               IF ( TAS_Code .NE. tucod_ok ) THEN
-                 CALL Message( 'TCL_Make_Clusters-E1  Failed.', 1, IDE1 )
-                 TCL_Make_Clusters = TAS_Code
-                 RETURN
+               CALL Message( 'TCL_Make_Clusters-E1  Failed.', 1, IDE1 )
+               TCL_Make_Clusters = TAS_Code
+               RETURN
               END IF
               
            END DO               !Row = 1, Nrows
@@ -348,6 +401,9 @@ C----------------------------------------------------------------------
         logical tcl_get_row_seq
         integer ide1,ide2
 
+	INTEGER     PAD_TDC_max
+	PARAMETER ( PAD_TDC_max = 1023 ) !Max. no. of TDC bins.
+
 	INTEGER     Nrowseqs_max
 	PARAMETER ( Nrowseqs_max = 40000 ) !Max. #sequences in one row.
 
@@ -385,16 +441,19 @@ c tells whether a sequence is already claimed by a cluster...
         integer ipad_seq,iptr
 
 	logical first/.true./
-	integer jsect,jrow
+	integer jsect,jrow,secpad_offset(1:45)
 
-        save first
-
-c------ 
+c------ must set up pad offset array to take care of this stupid
+c   secpad offset for each row....
 
 	if (first) then
-           first = .false.
-c any initialization stuff goes here...
-        endif
+	  first = .false.
+          secpad_offset(1) = 0
+          do jrow=2,45
+             secpad_offset(jrow)=secpad_offset(jrow-1)+
+     +		pad_plane(1).npads(jrow-1)
+          enddo
+       endif
 c-------------------
 
 C----------------------------------------------------------------------
@@ -422,39 +481,38 @@ c see if it is worth it first...
      1	               , padptr )               ) THEN
 
 
-           write(6,*)'Sect + row : ',sector,row,' nrowseqs ',nrowseqs
+	write(6,*)'Sect + row : ',sector,row,' nrowseqs ',nrowseqs
 
-           CALL Message( 'Tcl_Clsrow-E1  Failed to load pixels'
-     1          //'for a row.', 1, IDE1 )
+          CALL Message( 'Tcl_Clsrow-E1  Failed to load pixels'
+     1                //'for a row.', 1, IDE1 )
 
-           Tcl_Clsrow = tucod_fail !General failure.
-           RETURN
+	  Tcl_Clsrow = tucod_fail     !General failure.
+	  RETURN
 
-	END IF                  ! .NOT. TCL_Get_Row_Seq
+	END IF ! .NOT. TCL_Get_Row_Seq
 
-	if (nrowseqs.eq.0) return ! nothing in this row
+	if (nrowseqs.eq.0) return	! nothing in this row
 
         pads_in_row = pad_plane(1).npads(row)
 
 c remove secpad offset from ipad array returned by tcl_get_row_seq
 c  (this offset will have to be put back when storing the cluster)
-c no longer necessary 4apr96 (yeah!!!)
-c	do iseq=1,nrowseqs
-c           ipad(iseq) = ipad(iseq)-secpad_offset(row)
-c           if ((ipad(iseq).lt.0).or.(ipad(iseq).gt.pads_in_row)) 
-c     +          write(6,*)'*********** ipad major confusion!!!'
-c	enddo
+	do iseq=1,nrowseqs
+	  ipad(iseq) = ipad(iseq)-secpad_offset(row)
+          if ((ipad(iseq).lt.0).or.(ipad(iseq).gt.pads_in_row)) 
+     +         write(6,*)'*********** ipad major confusion!!!'
+	enddo
 
 c reset nseqs_pad array...
 	do jpad=1,pads_in_row
-           nseqs_pad(jpad) = 0
+	  nseqs_pad(jpad) = 0
 	enddo
 c now fill local arrays
 	do iseq=1,nrowseqs
-           jpad=ipad(iseq)
-           nseqs_pad(jpad)=nseqs_pad(jpad)+1
-           pad_seqptr(jpad,nseqs_pad(jpad))=iseq
-           used(jpad,nseqs_pad(jpad)) = .false.
+	  jpad=ipad(iseq)
+	  nseqs_pad(jpad)=nseqs_pad(jpad)+1
+	  pad_seqptr(jpad,nseqs_pad(jpad))=iseq
+	  used(jpad,nseqs_pad(jpad)) = .false.
 	enddo
 
  100	continue
@@ -575,8 +633,8 @@ c     tpcluster(tpclusterh.nok).secpad=100*sector+row
               tpseqh.nok = tpseqh.nok+1
               tpseq(tpseqh.nok).jpix = ipix(seq_in_cluster(iseq))
               tpseq(tpseqh.nok).tpc_row = 100*sector+row
-              tpseq(tpseqh.nok).secpad = ipad(seq_in_cluster(iseq))
-ccc no more!!!     +             secpad_offset(row) ! note we restore offset
+              tpseq(tpseqh.nok).secpad = ipad(seq_in_cluster(iseq))+
+     +             secpad_offset(row) ! note we restore offset
               if (iseq.ne.nseq_in_cluster) 
      +             tpseq(tpseqh.nok).next = tpseqh.nok+1
            enddo
@@ -600,8 +658,8 @@ C
 
 C   Input arguments  (One to a line with definition after ! ) 
 C
-C     Sector:     desired Sector 
-C     Row:        desired Row 
+C     Sector:     desired Sector (1-48 using TPG convention)
+C     Row:        desired Row (using TPG convention 1-13; 1-32)
 C     Nseqs_max:  dimensioning of Ipix,Ipad,Ito,Ithi,Itid from caller
 C     pad_planeh:
 C     pad_plane:
@@ -703,7 +761,7 @@ c        LOGICAL First
 
 c->RJM  this should eventually be fixed! (tppad is not "logically" packed)
         integer     mxsect,mxrow,isec,irow,ksec,lsec
-        parameter   (mxsect = 24, mxrow = 45)
+        parameter   (mxsect = 48, mxrow = 45)
 c->MAL        integer     padptr(mxrow,mxsect),saveptr,saveoff
         integer padptr(1:45,1:24)
 
@@ -730,6 +788,36 @@ c
 c       initialise return!
 c
         tcl_get_row_seq = .true.
+c
+c       set up pointers into tppad; note that tppad uses
+c       sectors 1,48 but rows 1,45; handled below by 
+c       subtracting off pad_plane(1).nrow_in for now!
+c MAL -- not now!! now it is done at top level routine
+c  and it can change for each event...
+c        if(first)then
+c           first = .false.
+c            saveptr = 0
+c            saveoff = 1
+c            do isec = 1, mxsect/4
+c               ksec = 2*isec-1
+c               do irow = 1, tpg_nrows_in_sector(ksec)
+c                  padptr(irow,ksec)=saveptr+saveoff
+c                  padptr(irow,ksec+mxsect/2)=padptr(irow,ksec)
+c     +                               +pad_plane(1).npads(irow)
+c                  saveptr = padptr(irow,ksec+mxsect/2)
+c                  saveoff = pad_plane(1).npads(irow)
+c               enddo
+c               lsec = 2*isec
+c               do irow = 1, tpg_nrows_in_sector(lsec)
+c                  padptr(irow,lsec)=saveptr+saveoff
+c                  padptr(irow,lsec+mxsect/2)=padptr(irow,lsec)
+c     +                  +pad_plane(1).npads(irow+pad_plane(1).nrow_in)
+c                  saveptr = padptr(irow,lsec+mxsect/2)
+c                  saveoff = pad_plane(1).npads(irow
+c     +                                          +pad_plane(1).nrow_in)
+c               enddo
+c            enddo
+c        endif
 
         Nseqs = 0
         Jtppad = padptr(row,sector)
@@ -740,9 +828,18 @@ c
            TCL_Get_Row_Seq = .FALSE.
            RETURN
         END IF
+c->RJM  1 April 1994; the convention for jsector adopted in tss 
+c->RJM  starts at jsector = 1; must translate from tppads 1,45 rows
+c->mal  30mar95; the convention for tss (sector=1-48,row=1-45) is still
+c->mal  the same, but now we use (and henceforth) in these codes (sector=1-24
+c->mal  row=1-45)
         Jrow    = MOD( tppad( Jtppad ).tpc_row , 100 )
+c mal        if(Jrow .gt. pad_plane(1).nrow_in)then
+c mal         Jrow = Jrow - pad_plane(1).nrow_in
+c mal        endif
         Jsector =      tppad( Jtppad ).tpc_row / 100 
-        IF     ( Jsector.NE.Sector .or. Jrow.NE.Row) THEN ! .and.->.or. 19nov94
+        jsector = (jsector+1)/2 !mal 30mar95
+       IF     ( Jsector.NE.Sector .or. Jrow.NE.Row) THEN ! .and.->.or. 19nov94
            TCL_Get_Row_Seq = .FALSE. !Fail.
            RETURN
         END IF
@@ -751,63 +848,75 @@ c
 *	Jtppad now points to the first pad-sequence in this sector/row, table tppad:
 	Done   = .FALSE.
 	DO WHILE ( .NOT. Done )
-           PAD        = tppad( Jtppad ).secpad !Unique pad ID within a sector.
-           Jpixel     = tppad( Jtppad ).jpix !Offset into the tppixel table.
-           Nsequences = tppad( Jtppad ).nseq !Number of sequences for this pad.
+	  PAD        = tppad( Jtppad ).secpad !Unique pad ID within a sector.
+	  Jpixel     = tppad( Jtppad ).jpix   !Offset into the tppixel table.
+	  Nsequences = tppad( Jtppad ).nseq   !Number of sequences for this pad.
 
-           nseqpix = 0
-           jndx = tppad(jtppad).jpix ! mal 18dec94
+          nseqpix = 0
+	  jndx = tppad(jtppad).jpix	! mal 18dec94
 
-           DO Isequence = 1, Nsequences
+ 	  DO Isequence = 1, Nsequences
 
 c BUG BUG BUG! - found 18dec94 malisa     jndx = tppad(jtppad).jpix + nseqpix
-              jndx = jndx + nseqpix
-              ldatum = tppixel(jndx).datum
+	     jndx = jndx + nseqpix
+             ldatum = tppixel(jndx).datum
 
-              nseqpix = ldatum/nseq_factor
-              tdc = (ldatum - nseq_factor*nseqpix)/tdc_factor
-              adc = ldatum - nseq_factor*nseqpix - tdc_factor*tdc
+c 24mar95 - now tppixel.datum packs data differently... malisa
+c             nseqpix = iand(idatum(2),seqmask)/'100'X
+c             adc = idatum(1)
+c             tdc_lo = iand(idatum(2),botmask)
+c             tdc_hi = ibits(idatum(2),14,2)*'100'X
+c             tdc = tdc_lo + tdc_hi
+             nseqpix = ldatum/nseq_factor
+             tdc = (ldatum - nseq_factor*nseqpix)/tdc_factor
+             adc = ldatum - nseq_factor*nseqpix - tdc_factor*tdc
 
-              MCid           = tpmcpix( jndx ).mcid !This shadows tppixel (we hope).
+             MCid           = tpmcpix( jndx ).mcid !This shadows tppixel (we hope).
 c
 c            keep only sequences with nseqpix.gt.1  !
 c
-              if(nseqpix.gt.1)then
-                 Nseqs        = Nseqs + 1 !One more pixel being stored in caller-arrays.
+             if(nseqpix.gt.1)then
+                Nseqs        = Nseqs + 1 !One more pixel being stored in caller-arrays.
 
 *	        Load the data from this sequence:
 
-                 IF ( ( Nseqs ) .GT. Nseqs_max ) THEN !No room left in the local array:
-                    CALL Message('TCL_Get_Row_Seq-E1  Nseqs_max is too '
-     +                   //'small.',1, IDE1 )
-                    TCL_Get_Row_Seq = .FALSE. !Fail.
-                    RETURN
-                 END IF
-                 Ipix( Nseqs ) = jndx !This item repeats, but it makes life easier.
-                 Ipad( Nseqs ) = PAD !This one, too...
-                 Itlo( Nseqs ) = TDC
-                 Ithi( Nseqs ) = TDC+nseqpix-1
-                 Itid( Nseqs ) = MCid        
-              endif
+                IF ( ( Nseqs ) .GT. Nseqs_max ) THEN !No room left in the local array:
+                   CALL Message('TCL_Get_Row_Seq-E1  Nseqs_max is too '
+     +                    //'small.',1, IDE1 )
+                   TCL_Get_Row_Seq = .FALSE. !Fail.
+                   RETURN
+                END IF
+                Ipix( Nseqs ) = jndx !This item repeats, but it makes life easier.
+                Ipad( Nseqs ) = PAD !This one, too...
+                Itlo( Nseqs ) = TDC
+                Ithi( Nseqs ) = TDC+nseqpix-1
+                Itid( Nseqs ) = MCid        
+             endif
 
 *	    Take no special action to start the next sequence -- it follows this one
-           END DO               !Isequence = 1, Nsequences
+	  END DO !Isequence = 1, Nsequences
 
-           Jtppad = Jtppad + 1  !Next pad.
-           IF ( Jtppad .GT. tppadh.nok ) THEN !Table exhausted -- Done.
-              Done = .TRUE.     !This is not a failure;
-              Jtppad = 1        !Reset.             !it's a normal end-of-data condition.
-           ELSE
-              Jrow    = MOD( tppad( Jtppad ).tpc_row , 100 )
-              Jsector =      tppad( Jtppad ).tpc_row / 100 
-              IF      ( Jsector .NE. Sector ) THEN !Passed it.
-                 Done = .TRUE.  !This sector (and row) is exahusted.
-              ELSE IF ( Jrow    .NE. Row    ) THEN !Passed it.
-                 Done = .TRUE.  !This row is exahusted.
-              END IF
-           END IF
+	  Jtppad = Jtppad + 1 !Next pad.
+	  IF ( Jtppad .GT. tppadh.nok ) THEN !Table exhausted -- Done.
+	    Done = .TRUE.                  !This is not a failure;
+	    Jtppad = 1 !Reset.             !it's a normal end-of-data condition.
+	  ELSE
+c-> RJM     1 April 1994; the convention for jsector adopted in tss 
+c-> RJM     starts at jsector = 1
+	    Jrow    = MOD( tppad( Jtppad ).tpc_row , 100 )
+c->mal            if(Jrow .gt. pad_plane(1).nrow_in)then
+c->mal               Jrow = Jrow - pad_plane(1).nrow_in
+c->mal            endif
+            Jsector =      tppad( Jtppad ).tpc_row / 100 
+            jsector = (jsector+1)/2
+	    IF      ( Jsector .NE. Sector ) THEN !Passed it.
+	      Done = .TRUE.                      !This sector (and row) is exahusted.
+	    ELSE IF ( Jrow    .NE. Row    ) THEN !Passed it.
+	      Done = .TRUE.                      !This row is exahusted.
+	    END IF
+	  END IF
 
-	END DO                  !WHILE ( .NOT. Done )
+	END DO !WHILE ( .NOT. Done )
 
 	RETURN
 	END
