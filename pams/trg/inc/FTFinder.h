@@ -16,7 +16,7 @@
 class FTFinder {
 
 public:
-    FTFinder::FTFinder( ) ;
+    FTFinder( ) ;
     int    FTFinder::FTF ( ) ;
     friend FTF_Track ;
 	
