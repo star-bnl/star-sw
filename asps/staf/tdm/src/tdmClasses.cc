@@ -69,13 +69,13 @@ char * tdmObject::  dslName () {
    char *cc=NULL;
    if( isDataset() ){
       if( !dsDatasetName(&c,pDSthis) ){
-	 EML_PUSHERROR(dsError("DSL_ERROR"));
+	 EML_PUSHERROR(DSL_ERROR);
 	 return NULL;
       }
    }
    else if( isTable() ){
       if( !dsTableName(&c,pDSthis) ){
-	 EML_PUSHERROR(dsError("DSL_ERROR"));
+	 EML_PUSHERROR(DSL_ERROR);
 	 return NULL;
       }
    }
@@ -93,7 +93,7 @@ unsigned char tdmObject:: isDataset () {
    bool_t r;
 
    if( !dsIsDataset(&r, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return FALSE;
    }
    if( r ){ return TRUE; }
@@ -106,7 +106,7 @@ unsigned char tdmObject:: isTable () {
    bool_t r;
 
    if( !dsIsTable(&r, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return FALSE;
    }
    if( r ){ return TRUE; }
@@ -143,7 +143,7 @@ tdmTable:: tdmTable(const char * name, const DS_DATASET_T *pDS)
    if( !dsIsTable(&result, (DS_DATASET_T *)pDS)
    ||  !result
    ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       pDSthis = NULL;
    }
    pDSthis = (DS_DATASET_T *)pDS;
@@ -159,7 +159,7 @@ tdmTable:: tdmTable(const DS_DATASET_T *pDS)
    if( !dsIsTable(&result, (DS_DATASET_T *)pDS)
    ||  !result
    ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       pDSthis = NULL;
    }
    pDSthis = (DS_DATASET_T *)pDS;
@@ -175,7 +175,7 @@ tdmTable:: tdmTable(const char *name, const char * spec, long rows)
    if( !dsNewTable(&pDSthis, (char*)name, (char*)spec, rows, pData)
    ||  !dsAllocTables(pDSthis)
    ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       pDSthis = NULL;
    }
 }
@@ -188,7 +188,7 @@ long tdmTable::  columnCount () {
    size_t ccount;
 
    if(!dsTableColumnCount(&ccount,pDSthis)) {
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_BAD_COLUMNCOUNT-*/
    }
    return (long)ccount;
@@ -200,7 +200,7 @@ char * tdmTable::  dslName () {
    char* c=NULL;
    char* cc=NULL;
    if( !dsTableName(&c, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return NULL;
    }
    cc = (char*)MALLOC(strlen(c) +1);
@@ -211,7 +211,7 @@ char * tdmTable::  dslName () {
 //----------------------------------
 void tdmTable:: maxRowCount (long maxRowCount) {
    if( !dsReallocTable(pDSthis, (size_t)maxRowCount) ){
-      dsPerror("DSL-MAXROWCOUNT_UNCHANGED");
+      dsPerror("DSL_MAXROWCOUNT_UNCHANGED");
    }
 }
 
@@ -219,7 +219,7 @@ void tdmTable:: maxRowCount (long maxRowCount) {
 long tdmTable::  maxRowCount () {
    size_t count;
    if( !dsTableMaxRowCount(&count, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_BAD_MAXROWCOUNT-*/
    }
    return (long)count;
@@ -228,7 +228,7 @@ long tdmTable::  maxRowCount () {
 //----------------------------------
 void tdmTable:: rowCount (long rowCount) {
    if( !dsSetTableRowCount(pDSthis, (size_t)rowCount) ){
-      dsPerror("DSL-ROWCOUNT_UNCHANGED");
+      dsPerror("DSL_ROWCOUNT_UNCHANGED");
    }
 }
 
@@ -236,7 +236,7 @@ void tdmTable:: rowCount (long rowCount) {
 long tdmTable::  rowCount () {
    size_t count;
    if( !dsTableRowCount(&count, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_BAD_ROWCOUNT-*/
    }
    return (long)count;
@@ -247,7 +247,7 @@ long tdmTable::  rowSize () {
    size_t rsize;
 
    if(!dsTableRowSize(&rsize,pDSthis)) {
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_BAD_ROWSIZE-*/
    }
    return (long)rsize;
@@ -259,7 +259,7 @@ char * tdmTable::  typeName () {
    char* tn=NULL;
 
    if(!dsTableTypeName(&tname,pDSthis)) {
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return NULL;
    }
    tn = (char*)MALLOC(strlen(tname) +1);
@@ -272,7 +272,7 @@ char * tdmTable::  typeSpecifier () {
    char* tspec=NULL;
 
    if(!dsTableTypeSpecifier(&tspec,pDSthis)) {
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return NULL;
    }
    char *c=(char*)MALLOC(strlen(tspec) +1);
@@ -309,7 +309,7 @@ unsigned char tdmTable :: implementsInterface (const char * iface) {
 unsigned char tdmTable:: isType (const char * aType) {
    bool_t rslt;
    if( !dsTableIsType(&rslt, pDSthis, (char*)aType) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return FALSE;
    }
    return rslt;
@@ -548,7 +548,7 @@ STAFCV_T tdmTable:: getColumn (TDM_COLUMN_T& column, long ncol) {
 long tdmTable:: columnNumber (const char * name) {
    size_t cnum;
    if( !dsFindColumn(&cnum, pDSthis, (char*)name) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_COLUMN_NOTFOUND-*/
    }
    return (long)cnum;
@@ -571,7 +571,7 @@ DS_TYPE_CODE_T tdmTable:: columnTypeCode (long ncol) {
    if( !dsColumnTypeCode(&code,pDSthis,ncol) ){
 //    return TDM_TYPE_UNKNOWN;
       					/* this should never happen*/
-      EML_PUSHERROR(dsError("DSL-INVALID_TYPE_CODE"));
+      EML_PUSHERROR(DSL_INVALID_TYPE_CODE);
    }
    return code;
 }
@@ -755,7 +755,7 @@ tdmDataset:: tdmDataset(const char * name, const DS_DATASET_T *pDS)
    if( !dsIsDataset(&result, (DS_DATASET_T *)pDS)
    ||  !result
    ){
-      EML_PUSHERROR(dsError("DSL-NO_DATASET_POINTER"));
+      EML_PUSHERROR(DSL_NO_DATASET_POINTER);
       pDSthis = NULL;
    }
    pDSthis = (DS_DATASET_T *)pDS;
@@ -771,7 +771,7 @@ tdmDataset:: tdmDataset(const DS_DATASET_T *pDS)
    if( !dsIsDataset(&result, (DS_DATASET_T *)pDS)
    ||  !result
    ){
-      EML_PUSHERROR(dsError("DSL-NO_DATASET_POINTER"));
+      EML_PUSHERROR(DSL_NO_DATASET_POINTER);
       pDSthis = NULL;
    }
    pDSthis = (DS_DATASET_T *)pDS;
@@ -790,7 +790,7 @@ tdmDataset:: tdmDataset(const char* name, long setDim)
 #else	/*OLD_DSL*/
    if( !dsNewDataset(&pDSthis, (char*)name, setDim) ){
 #endif	/*OLD_DSL*/
-      EML_PUSHERROR(dsError("DSL-NO_DATASET_POINTER"));
+      EML_PUSHERROR(DSL_NO_DATASET_POINTER);
       pDSthis = NULL;
    }
 }
@@ -805,7 +805,7 @@ char * tdmDataset::  dslName () {
    char* c;
    char* cc=NULL;
    if( !dsDatasetName(&c, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return NULL;
    }
    cc = (char*)MALLOC(strlen(c) +1);
@@ -817,7 +817,7 @@ char * tdmDataset::  dslName () {
 long tdmDataset::  entryCount () {
    size_t count;
    if( !dsDatasetEntryCount(&count, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_BAD_ENTRYCOUNT-*/
    }
    return count;
@@ -828,7 +828,7 @@ long tdmDataset::  entryCount () {
 long tdmDataset::  maxEntryCount () {
    size_t count;
    if( !dsDatasetMaxEntryCount(&count, pDSthis) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       return -1; /*-TDM_E_BAD_MAXENTRYCOUNT-*/
    }
    return count;
@@ -957,7 +957,7 @@ STAFCV_T tdmDataset:: getDescriptor (char *& descriptor) {
 tdmFactory:: tdmFactory()
 		: socFactory()
 		, socObject() {
-// EML_MESSAGE(tdmFactory -- NULL Creator);
+// EML_MESSAGE(TDM_FACTORY_NULL_CREATOR);
 }
 
 tdmFactory:: tdmFactory(const char * name)

@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_OPerators commands.
 .
- #(@)$Id: top_def.cdf,v 1.11 1998/03/16 02:23:58 fisyak Exp $
+ #(@)$Id: top_def.cdf,v 1.12 1998/07/04 02:27:30 ward Exp $
 .
 TOP is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -1184,4 +1184,24 @@ BUGS:
 SEE ALSO: 
 .
 >ACTION kam_topsort_agent_sort_%C
-**
+*************************************************************************
+>MENU \ARITHMETIC
+>GUIDANCE
+Simple arithmetic operations on tables.
+>COMMAND OPERATE
+>PARAMETERS
+TABLE 'Name of table' C
+COLUMN 'Name of column' C
+OPERATION 'Either add, multiply, divide, or subtract' C
+VALUE 'Value to apply' C
+>GUIDANCE
+Simple arithmetic operations on tables.
+Usage is almost self-explanatory.
+.
+Example:
+.
+TOP/ARITHMETIC/OPERATE /dui/tpc/tphit id subtract 1
+.
+This would subtract 1 from all the values in the id column.
+>ACTION kam_operate_%C
+*************************************************************************

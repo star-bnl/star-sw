@@ -48,13 +48,14 @@ duiFactory:: duiFactory(const char * name)
    strcpy(myCwd,"/");
    strcat(myCwd,name);
    pDSroot = NULL;
+   preciousList = NULL;
 
 #ifndef OLD_DSL
    if( !dsNewDataset(&pDSroot, (char*)name) ){
 #else   /*OLD_DSL*/
    if( !dsNewDataset(&pDSroot, (char*)name, DSET_DIM) ){
 #endif  /*OLD_DSL*/
-      EML_WARNING(dsError("DUI-NO_ROOT")); // v030b
+      EML_WARNING(DUI-NO_ROOT); // v030b
    }
    IDREF_T id;
    if( soc->idObject(myCwd,"tdmDataset",id) ){
@@ -171,10 +172,10 @@ STAFCV_T duiFactory:: df () {
 //----------------------------------
 #define DUI_PATH_SIZE 150
 STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
-      long minsize) {
+      long minsize,int control) {
   bool_t isDataset; DS_DATASET_T *pDS2; char *dsName;
   static callCnt=0;
-  int ii; char *dname,path2[DUI_PATH_SIZE+1],buf[17];
+  int newlen,ii; char *dname,path2[DUI_PATH_SIZE+1],buf[17];
   size_t iEntry,numEntries,rowsize,nrows;
   indent++; indent++; path2[0]=0;
   if(!dsIsDataset(&isDataset,pDS)) EML_ERROR(DATASET_NOT_FOUND);
@@ -188,20 +189,23 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
   if(isDataset) {
     if(!dsDatasetEntryCount(&numEntries,pDS)) EML_ERROR(DATASET_ERROR);
     if(!dsDatasetName(&dname,pDS)) EML_ERROR(DATASET_ERROR);
-    printf("%s/%s ",path,dname);
-    for(ii=57-strlen(path)-strlen(dname);ii>=0;ii--) {
-      printf("%c",(callCnt%3==0)?'-':' ');
+    if(control==0) {
+      printf("%s/%s ",path,dname);
+      for(ii=57-strlen(path)-strlen(dname);ii>=0;ii--) {
+        printf("%c",(callCnt%3==0)?'-':' ');
+      }
+      printf(" directory\n"); 
     }
-    printf(" directory\n"); callCnt++;
+    callCnt++;
     for(iEntry=0;iEntry<numEntries;iEntry++) {
       if(!dsDatasetEntry(&pDS2,pDS,iEntry)) EML_ERROR(DATASET_ERROR);
-      if(duRecurse(path2,indent,pDS2,minsize)!=STAFCV_OK) 
+      if(duRecurse(path2,indent,pDS2,minsize,control)!=STAFCV_OK) 
           EML_ERROR(DATASET_ERROR);
     }
   } else { /* is a table */
     if(!dsTableRowSize(&rowsize,pDS)) EML_ERROR(DATASET_ERROR);
     if(!dsTableMaxRowCount(&nrows,pDS)) EML_ERROR(DATASET_ERROR);
-    if((long)(nrows*rowsize)>=minsize) {
+    if( control==0 && (long)(nrows*rowsize)>=minsize ) {
       printf("%s/%s ",path,dsName);
       duiSprinfWithCommas(buf,(long)(nrows*rowsize));
       for(ii=56-strlen(buf)-strlen(path)-strlen(dsName);ii>=0;ii--) {
@@ -210,10 +214,65 @@ STAFCV_T duiFactory:: duRecurse (char *path,int indent,DS_DATASET_T *pDS,
       printf(" %s bytes  %6d rows\n",buf,nrows); callCnt++;
       totBytes+=nrows*rowsize;
     }
+    if(control==1) {
+      if(!preciousList) { printf("Error 66u. Crash imminent.\n"); exit(2); }
+      newlen=strlen(path)+strlen(dsName)+3; /*  /  \n  null */
+      preciousList=(char*)REALLOC(preciousList,strlen(preciousList)+newlen);
+      strcat(preciousList,path);   strcat(preciousList,"/");
+      strcat(preciousList,dsName); strcat(preciousList,"\n");
+    }
+    if(control==2) {  /* exact copy of control==1, except different list */
+      if(!current_list) { printf("Error 66u. Crash imminent.\n"); exit(2); }
+      newlen=strlen(path)+strlen(dsName)+3;  /*  /  \n  null */
+      current_list=(char*)REALLOC(current_list,strlen(current_list)+newlen);
+      strcat(current_list,path);   strcat(current_list,"/");
+      strcat(current_list,dsName); strcat(current_list,"\n");
+    }
   }
   EML_SUCCESS(STAFCV_OK);
 }
 //----------------------------------
+STAFCV_T duiFactory:: rm_nonprecious () {
+  DS_DATASET_T *pDS=NULL;
+  char *aPreciousTable,*aCurrentTable,isPrecious;
+  int ii;
+
+  current_list=(char*)MALLOC(1); current_list[0]=0;
+
+  if(!findNode_ds("/dui",pDS)) EML_ERROR(OBJECT_NOT_FOUND);
+
+  duRecurse("",0,pDS,0,2);   /* build current_list */
+
+  aCurrentTable=strtok(current_list,"\n");
+  while(aCurrentTable) {
+    isPrecious=0;
+    for(ii=0;;ii++) {
+      aPreciousTable=strntok(preciousList,"\n",ii);
+      if(!aPreciousTable) break;
+      if(!strcmp(aCurrentTable,aPreciousTable)) { isPrecious=7; break; }
+    }
+    if(isPrecious) {
+      printf("%20s %s\n","   precious,   save",aCurrentTable);
+    } else {
+      printf("%20s %s\n","nonprecious, remove",aCurrentTable);
+      if(!rm(aCurrentTable)) EML_ERROR(REMOVAL_FAILED);
+    }
+    aCurrentTable=strtok(NULL,"\n");
+  }
+  FREE(current_list);
+  EML_SUCCESS(STAFCV_OK);
+}
+STAFCV_T duiFactory:: precious () {
+  DS_DATASET_T *pDS=NULL;
+  if(preciousList) FREE(preciousList);
+  preciousList=(char*)MALLOC(1);
+  preciousList[0]=0;
+  if(!findNode_ds("/dui",pDS)) EML_ERROR(OBJECT_NOT_FOUND);
+  duRecurse("",0,pDS,0,1);
+  printf("Precious files:\n");
+  fputs(preciousList,stdout);
+  EML_SUCCESS(STAFCV_OK);
+}
 void duiFactory:: duiSprinfWithCommas(char *out,long in) {
   char *p,buf[77];
   int ii,len,leadoff;
@@ -242,7 +301,7 @@ STAFCV_T duiFactory:: du (const char * dirPath,long minsize) {
    FREE(p);
    for(i=strlen(path2)-1;i>=0;i--) { if(path2[i]=='/') { path2[i]=0; break; } }
    totBytes=0;
-   if(duRecurse(path2,0,pDS,minsize)!=STAFCV_OK) {
+   if(duRecurse(path2,0,pDS,minsize,0)!=STAFCV_OK) {
      EML_ERROR(CANNOT_TRAVERSE_TREE);
    }
    FREE(path2); duiSprinfWithCommas(buf,(long)totBytes);

@@ -445,7 +445,74 @@ void topSort::top_qsort(void *data,size_t rowsize,void *temp,
     top_qsort(data,rowsize,temp,pp,ii,rite,colNum,errFlag);
   }
 }
-STAFCV_T topSort:: SortTheTable(tdmTable *table) { // www 
+STAFCV_T topFactory:: topOperator (tdmTable *table,char *colName,
+    char *operation,char *valueString) {
+  DS_DATASET_T* dsPtr=table->dslPointer();
+  size_t irow,colNum,nrows; long ival; int operationType,dataType; 
+  char *aa,junk[103];
+  short shortX; unsigned short ushortX; long longX;
+  unsigned long ulongX; float floatX; double doubleX;
+  DS_TYPE_CODE_T colType;
+  float newvalue,value,fval,cellValue;
+  if(!strcmp(operation,"add")) operationType=0;
+  else if(!strcmp(operation,"subtract")) operationType=1;
+  else if(!strcmp(operation,"multiply")) operationType=2;
+  else if(!strcmp(operation,"divide")) operationType=3;
+  else {
+    EML_CONTEXT("ERROR: I need 'add', 'subtract', 'multiply' or 'divide'.\n");
+    EML_ERROR(INVALID_OPERATION);
+  }
+  value=atof(valueString);
+  if(strstr(colName,"[")) EML_ERROR(VECTOR_COLS_NOT_SUPPORTED);
+  if(!dsTableRowCount(&nrows,dsPtr)) EML_ERROR(TABLE_NOT_FOUND);
+  if(!dsFindColumn(&colNum,dsPtr,colName)) EML_ERROR(COLUMN_NOT_FOUND);
+  if(!dsColumnTypeCode(&colType,dsPtr,colNum)) EML_ERROR(CANT_GET_COL_TYPE);
+  printf("Number rows = %d, column number = %d (count from zero).\n",
+  nrows, colNum);
+  switch(colType) {
+    case DS_TYPE_SHORT:   aa=(char*)&shortX;  break;
+    case DS_TYPE_U_SHORT: aa=(char*)&ushortX; break;
+    case DS_TYPE_LONG:    aa=(char*)&longX;   break;
+    case DS_TYPE_U_LONG:  aa=(char*)&ulongX;  break;
+    case DS_TYPE_FLOAT:   aa=(char*)&floatX;  break;
+    case DS_TYPE_DOUBLE:  aa=(char*)&doubleX; break;
+    default: 
+      EML_CONTEXT("ERROR: col data types char, octet, etc not supported.\n");
+      EML_ERROR(UNSUPPORTED_COLUMN_DATA_TYPE);
+  }
+  for(irow=0;irow<nrows;irow++) {
+    if(!TableValue(&dataType,junk,&fval,&ival,irow,colNum,dsPtr,0))
+          EML_ERROR(CANT_FIND_VALUE);
+    if(dataType==1) cellValue=ival;
+    else if(dataType==0) cellValue=fval;
+    else EML_ERROR(INVALID_COLUMN_DATA_TYPE);
+    switch(operationType) {
+      case 0: newvalue=cellValue+value; break;
+      case 1: newvalue=cellValue-value; break;
+      case 2: newvalue=cellValue*value; break;
+      case 3: newvalue=cellValue/value; break;
+      default: EML_ERROR(STAF_PROGRAMMERS_ERROR);
+    }
+    switch(colType) {
+      case DS_TYPE_SHORT:   shortX=(short)newvalue; break;
+      case DS_TYPE_U_SHORT: ushortX=(unsigned short)newvalue; break;
+      case DS_TYPE_LONG:    longX=(long)newvalue; break;
+      case DS_TYPE_U_LONG:  ulongX=(unsigned long)newvalue; break;
+      case DS_TYPE_FLOAT:   floatX=(float)newvalue; break;
+      case DS_TYPE_DOUBLE:  doubleX=(double)newvalue; break;
+      default: 
+        EML_CONTEXT("ERROR: col data types char, octet, etc not supported.\n");
+        EML_ERROR(UNSUPPORTED_COLUMN_DATA_TYPE);
+    }
+    if(!dsPutCell(aa,dsPtr,irow,colNum)) EML_ERROR(PUTCELL_FAILURE);
+  }
+  EML_SUCCESS(STAFCV_OK);
+}
+/*
+extern "C" int TableValue(int *dataType,char *xx,float *fv,long *iv,
+  size_t row, size_t colNum,DS_DATASET_T *tp,int subscript);
+*/
+STAFCV_T topSort:: SortTheTable(tdmTable *table) {
   DS_DATASET_T* dsPtr = table->dslPointer();
   size_t nrows,rowsize,colNum;
   int errFlag;
@@ -561,14 +628,14 @@ STAFCV_T topJoin:: fastjoin(tdmTable * table1, tdmTable * table2
    if( NULL == table3 ){
       table3 = jTarget(table1, table2, NULL);
       if( NULL == table3 ){
-	 EML_PUSHERROR(dsError("DSL_ERROR"));
+	 EML_PUSHERROR(DSL_ERROR);
 	 EML_ERROR(FASTJOIN_FAILURE);
       }
    }
    pTbl3=table3->dslPointer();
    if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !topFastjoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       EML_ERROR(FASTJOIN_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
@@ -583,14 +650,14 @@ STAFCV_T topJoin:: join(tdmTable * table1, tdmTable * table2
    if( NULL == table3 ){
       table3 = jTarget(table1, table2, NULL);
       if( NULL == table3 ){
-	 EML_PUSHERROR(dsError("DSL_ERROR"));
+	 EML_PUSHERROR(DSL_ERROR);
 	 EML_ERROR(JOIN_FAILURE);
       }
    }
    pTbl3=table3->dslPointer();
    if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsEquijoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
-      EML_PUSHERROR(dsError("DSL_ERROR"));
+      EML_PUSHERROR(DSL_ERROR);
       EML_ERROR(JOIN_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);

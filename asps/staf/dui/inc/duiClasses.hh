@@ -42,6 +42,8 @@ public:
 //----------------------------------
 // Unix-Like commands
    virtual STAFCV_T du (const char * dirPath,long minsize);
+   virtual STAFCV_T precious ();
+   virtual STAFCV_T rm_nonprecious ();
    virtual STAFCV_T df ();
    virtual STAFCV_T cd (const char * dirPath);
    virtual STAFCV_T ln (const char * fromPath, const char * toPath); 
@@ -67,7 +69,7 @@ public:
 //-cet-17nov97-from HJWs df,du version
    virtual void duiSprinfWithCommas(char *out,long in);
    virtual STAFCV_T duRecurse (char *path,int indent,
-		DS_DATASET_T *pDS, long minsize);
+		DS_DATASET_T *pDS, long minsize,int control);
 
 
 //----------------------------------
@@ -85,6 +87,8 @@ protected:
    tdmDataset *myRoot;
    DS_DATASET_T *pDSroot;
    long totBytes;  // used with the du command
+   char *preciousList;  // list of precious tables, newline-delimited
+   char *current_list;  // list of current  tables, newline-delimited
 
 
 //:----------------------------------------------- PRIV FUNCTIONS     --

@@ -45,6 +45,8 @@ extern CC_P int dui_stop();
 #ifndef NOKUIP
 extern CC_P void dui_def_();
 
+extern CC_P void kam_dui_precious_();
+extern CC_P void kam_dui_rm_nonprecious_();
 extern CC_P void kam_dui_count_();
 extern CC_P void kam_dui_list_();
 extern CC_P void kam_dui_cd_();
@@ -62,6 +64,8 @@ extern CC_P void kam_dui_rm_();
 extern CC_P void kam_dui_rmdir_();
 #endif /*NOKUIP*/
 
+extern CC_P STAFCV_T dui_precious();
+extern CC_P STAFCV_T dui_rm_nonprecious();
 extern CC_P STAFCV_T dui_count_();
 extern CC_P STAFCV_T dui_list_();
 extern CC_P STAFCV_T dui_du();

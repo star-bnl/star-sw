@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.11 1998/05/12 03:01:02 dave Exp $  Edited by Bill Love - 24 Feb 1998
+ #(@)$Id: dui_def.cdf,v 1.12 1998/07/04 02:27:20 ward Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -575,3 +575,33 @@ BUGS:
    None known.
 .
 >ACTION kam_dui_rmdir_%C
+**********************************************************************
+** DUI/PRECIOUS
+>COMMAND PRECIOUS
+>PARAMETERS
+>GUIDANCE
+Marks all existing tables as precious.
+See the related command RM_NONPRECIOUS.
+>ACTION kam_dui_precious_%C
+**********************************************************************
+** DUI/RM_NONPRECIOUS
+>COMMAND RM_NONPRECIOUS
+>PARAMETERS
+>GUIDANCE
+Deletes all non-precious tables.
+See the related command PRECIOUS.
+Typically, you would run the PRECIOUS command before an
+event loop, and then run RM_NONPRECIOUS at the bottom
+of the loop to remove trash, ie:  
+.
+DUI/PRECIOUS
+.
+top_of_loop
+.
+contents of loop
+.
+DUI/RM_NONPRECIOUS 
+.
+bottom_of_loop
+>ACTION kam_dui_rm_nonprecious_%C
+**********************************************************************

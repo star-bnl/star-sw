@@ -49,7 +49,7 @@ int tdm_cvtDst2st(DS_DATASET_T *pT
    ||  !dsTableRowSize((size_t*)(&(header.rbytes)),pT)
    ||  !dsTableDataAddress(&pData,pT)
    ){
-      EML_PUSHERROR(dsError("cannot convert DSL table to TAS table"));
+      EML_PUSHERROR(CANNOT_CONVERT_DSL_TABLE_TO_TAS_TABLE);
       return FALSE;
    }
    tbl_h = (TABLE_HEAD_ST*)MALLOC(sizeof(header));

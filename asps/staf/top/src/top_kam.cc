@@ -66,6 +66,16 @@ kam_topsort_agent_sort_() {
   topsort_agent_sort(agent,whichTable);
 }
 
+void 
+kam_operate_() {
+  char *table = ku_gets(); 
+  char *column = ku_gets(); 
+  char *operation = ku_gets(); 
+  char *value = ku_gets(); 
+
+  top_operator(table,column,operation,value);
+}
+
 void
 kam_top_newsort_() {
   char *agent = ku_gets(); /* name of sort agent */

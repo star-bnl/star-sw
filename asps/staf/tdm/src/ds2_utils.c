@@ -68,7 +68,7 @@ int ds2ReallocTable(TABLE_HEAD_ST** ppHead,char** ppData
 	if( !dsReallocTable(pTable,newCount)
 	||  !dsTableDataAddress(&pDat, pTable)
 	){
-	   EML_ERROR(dsError("ds2ReallocTable: can't reallocate"));
+	   EML_ERROR(CANT_REALLOCATE);
 	   /*	   return FALSE;  EML_ERROR returns on its own */
 	}
 	*ppData = pDat;
