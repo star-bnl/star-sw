@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.8 2001/05/18 22:16:19 lasiuk Exp $
+ * $Id: StMagUtilities.h,v 1.9 2001/05/21 17:03:55 didenko Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,18 +11,11 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
- * Revision 1.8  2001/05/18 22:16:19  lasiuk
- * add ey component to the exb calculation (brian III)
+ * Revision 1.9  2001/05/21 17:03:55  didenko
+ * commit back right version
  *
- * Revision 1.7  2001/05/17 18:35:11  lasiuk
- * make changes to allow full transport (brian II)
- *
- * Revision 1.5  2001/04/17 16:22:29  lasiuk
- * exb transport code for drifting electrons.
- * The clock rotation and rotation of the TPC into
- * the global coordinate (magenet) system are takne
- * into account.  Transport alters x,y,z position of
- * space point.
+ * Revision 1.6  2001/04/23 17:06:04  didenko
+ * restore right version
  *
  * Revision 1.4  2001/02/08 22:26:20  jhthomas
  * Added corrections for CM electrostatic distortions
@@ -52,83 +45,44 @@
 #include "TROOT.h"
 #include "TFile.h"
 
-#include "StThreeVectorD.hh"
-
 enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
 
 class StMagUtilities {
-public:
 
-    StMagUtilities () ;
-    StMagUtilities ( const EBField map, const Float_t factor ) ;
-    virtual ~StMagUtilities() {}
+ private:
 
-    virtual void    BField ( const Float_t x[], Float_t B[] ) ;
-    virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
-    virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-    virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-    virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-    virtual void    UndoPad13Distortion( const Float_t x[], Float_t Xprime[] ) ;
-    virtual void    UndoTwistDistortion( const Float_t x[], Float_t Xprime[] ) ;
-    virtual void    UndoClockDistortion( const Float_t x[], Float_t Xprime[] ) ;
-    virtual void    UndoMembraneDistortion( const Float_t x[3], Float_t Xprime[3] ) ;
+  virtual void    ReadField ( ) ;
+  virtual Int_t   Search ( Int_t N, Float_t Xarray[], Float_t x ) ;
+  virtual Float_t QuadInterp ( const Float_t Xarray[], const Float_t Yarray[], 
+			       const Float_t x ) ;
+  virtual void    InterpolateBfield ( const Float_t r, const Float_t z, 
+				      Float_t &Br_value, Float_t &Bz_value ) ;
+  virtual void    InterpolateEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
+                                           Float_t &Er_value, Float_t &Ephi_value ) ;
 
-    void init();
-//     StThreeVectorD coordinateShift(StThreeVectorD);
-    StThreeVectorD clockRotation(StThreeVectorD);
-    
-private:
+ public:
 
-    virtual void    ReadField ( ) ;
-    virtual Int_t   Search ( Int_t N, Float_t Xarray[], Float_t x ) ;
-    virtual Float_t QuadInterp ( const Float_t Xarray[], const Float_t Yarray[], 
-				 const Float_t x ) ;
-    virtual void    InterpolateBfield ( const Float_t r, const Float_t z, 
-					Float_t &Br_value, Float_t &Bz_value ) ;
-    virtual void    InterpolateEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
-					     Float_t &Er_value, Float_t &Ephi_value ) ;
+  StMagUtilities () ;
+  StMagUtilities ( const EBField map, const Float_t factor ) ;
+  virtual ~StMagUtilities() {}
 
-    StThreeVectorD rotateToTpc(StThreeVectorD&);
-    StThreeVectorD rotateToMagnet(StThreeVectorD&);
+  virtual void    BField ( const Float_t x[], Float_t B[] ) ;
+  virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;
+  virtual void    DoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoBDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoPad13Distortion( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoTwistDistortion( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoClockDistortion( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoMembraneDistortion( const Float_t x[3], Float_t Xprime[3] ) ;
 
-    void calculateDriftTime(StThreeVectorD&);
-    
-    StThreeVectorD rKIntegration(double, double*, StThreeVectorD);
-    StThreeVectorD calculateDriftVelocity(StThreeVectorD);
-    StThreeVectorD transport(StThreeVectorD&);
-    
-private:
-    double mVdrift;
-    double mOmegaTau;
-    double mMobility;
-
-    StThreeVectorD mBNominal;
-    StThreeVectorD mEField;
-    StThreeVectorD mDriftField;
-    StThreeVectorD mtmpField;
-
-    double mFrischGrid;
-
-    StThreeVectorD mTpcCenter;
-
-
-    double mDriftTime;
-    
-    double mWestClockRotation;
-    //double mEastClockRotation;
-    double mThetaX;
-    double mThetaY;
-    double mThetaZ;
-
-    double mCx;
-    double mSx;
-    double mCy;
-    double mSy;
-    double mCz;
-    double mSz;
-    
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
 };
 
 #endif
+
+
+
+
+
