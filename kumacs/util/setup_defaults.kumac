@@ -13,6 +13,7 @@ macro run
 [TOP],_
 [TOP]/kumacs/chain,_
 [TOP]/kumacs/ctf,_
+[TOP]/kumacs/ebye,_
 [TOP]/kumacs/emc,_
 [TOP]/kumacs/ftpc,_
 [TOP]/kumacs/gen,_
@@ -24,6 +25,7 @@ macro run
 [TOP]/kumacs/trg,_
 [TOP]/kumacs/util,_    
 [TOP]/pams/ctf/kumac,_
+[TOP]/pams/ebye/kumac,_
 [TOP]/pams/emc/kumac,_
 [TOP]/pams/ftpc/kumac,_
 [TOP]/pams/gen/kumac,_
@@ -37,6 +39,7 @@ macro run
 [TOP]/pams/vpd/kumac,_
 $STAR/kumacs/chain,_
 $STAR/kumacs/ctf,_
+$STAR/kumacs/ebye,_
 $STAR/kumacs/emc,_
 $STAR/kumacs/ftpc,_
 $STAR/kumacs/gen,_
@@ -48,6 +51,7 @@ $STAR/kumacs/tpc,_
 $STAR/kumacs/trg,_
 $STAR/kumacs/util,_
 $STAR/pams/ctf/kumac,_
+$STAR/pams/ebye/kumac,_
 $STAR/pams/emc/kumac,_
 $STAR/pams/ftpc/kumac,_
 $STAR/pams/gen/kumac,_
