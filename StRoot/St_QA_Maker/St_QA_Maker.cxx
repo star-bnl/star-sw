@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.51 1999/09/21 15:05:36 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.52 1999/09/23 16:04:33 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.52  1999/09/23 16:04:33  kathy
+// change paths for include files to standard way according to Yuri's request
+//
 // Revision 1.51  1999/09/21 15:05:36  kathy
 // comment out unneccessary method: SetPntrToHistUtil because now I'm making it totally independent of the histograms printing at the end - also put in doc directory and html file - basically empty now
 //
@@ -176,25 +179,25 @@
 #include <math.h>
 #include "TMath.h"
 
-#include "St_QA_Maker.h"
-#include "StHistUtil.h"
+#include "St_QA_Maker/St_QA_Maker.h"
+#include "St_QA_Maker/StHistUtil.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 
 // tables currently in 99e,99f
-#include "St_dst_event_summary_Table.h"
-#include "St_dst_event_header_Table.h"
-#include "St_dst_track_Table.h"   // globtrk,globtrk2,primtrk
-#include "St_dst_track_aux_Table.h" //primtrk_aux
-#include "St_dst_vertex_Table.h"
-#include "St_dst_point_Table.h"
-#include "St_dst_v0_vertex_Table.h"
-#include "St_dst_xi_vertex_Table.h"
-#include "St_dst_dedx_Table.h"
-#include "St_particle_Table.h"
-#include "St_dst_TrgDet_Table.h"
-#include "St_g2t_rch_hit_Table.h"
-#include "St_dst_monitor_soft_Table.h"
+#include "tables/St_dst_event_summary_Table.h"
+#include "tables/St_dst_event_header_Table.h"
+#include "tables/St_dst_track_Table.h"   // globtrk,globtrk2,primtrk
+#include "tables/St_dst_track_aux_Table.h" //primtrk_aux
+#include "tables/St_dst_vertex_Table.h"
+#include "tables/St_dst_point_Table.h"
+#include "tables/St_dst_v0_vertex_Table.h"
+#include "tables/St_dst_xi_vertex_Table.h"
+#include "tables/St_dst_dedx_Table.h"
+#include "tables/St_particle_Table.h"
+#include "tables/St_dst_TrgDet_Table.h"
+#include "tables/St_g2t_rch_hit_Table.h"
+#include "tables/St_dst_monitor_soft_Table.h"
 
 
 const Int_t   St_QA_Maker::nxpT = 50;

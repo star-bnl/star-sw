@@ -1,6 +1,9 @@
-// $Id: StAnalysisMaker.h,v 1.8 1999/08/09 19:38:32 kathy Exp $
+// $Id: StAnalysisMaker.h,v 1.9 1999/09/23 16:04:23 kathy Exp $
 //
 // $Log: StAnalysisMaker.h,v $
+// Revision 1.9  1999/09/23 16:04:23  kathy
+// change paths for include files to standard way according to Yuri's request
+//
 // Revision 1.8  1999/08/09 19:38:32  kathy
 // checkin Curtis' changes that print out the event # with each set of QAInfo stuff
 //
@@ -49,7 +52,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
  **************************************************************************/
-#include "tables/HighPtTag.h"
+#ifndef StAnalysisMaker_HH
 #define StAnalysisMaker_HH
 #include "StMaker.h"
 #include "HighPtTag.h"
@@ -80,7 +83,7 @@ public:
   HighPtTag_st* tag() {return theTag;};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 1.8 1999/08/09 19:38:32 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 1.9 1999/09/23 16:04:23 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StAnalysisMaker, 1)
     Int_t nevents;

@@ -1,5 +1,8 @@
-// $Id: tagFiller.cc,v 1.4 1999/06/25 19:20:41 fisyak Exp $
+// $Id: tagFiller.cc,v 1.5 1999/09/23 16:04:24 kathy Exp $
 // $Log: tagFiller.cc,v $
+// Revision 1.5  1999/09/23 16:04:24  kathy
+// change paths for include files to standard way according to Yuri's request
+//
 // Revision 1.4  1999/06/25 19:20:41  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -35,12 +38,13 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
+
  * Revision for new StEvent
 #include "StEvent.h"
 #include "StGlobalTrack.h"
-#include "tables/HighPtTag.h"
+ **************************************************************************/
 #include "SystemOfUnits.h"
-static const char rcsid[] = "$Id: tagFiller.cc,v 1.4 1999/06/25 19:20:41 fisyak Exp $";
+static const char rcsid[] = "$Id: tagFiller.cc,v 1.5 1999/09/23 16:04:24 kathy Exp $";
 #include "HighPtTag.h"
 void tagFiller(StEvent& event, HighPtTag_st& hptTag)
 

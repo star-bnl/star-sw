@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.13 1999/08/09 19:38:32 kathy Exp $
+// $Id: StAnalysisMaker.cxx,v 1.14 1999/09/23 16:04:23 kathy Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.14  1999/09/23 16:04:23  kathy
+// change paths for include files to standard way according to Yuri's request
+//
 // Revision 1.13  1999/08/09 19:38:32  kathy
 // checkin Curtis' changes that print out the event # with each set of QAInfo stuff
 //
@@ -60,11 +63,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
  * Revision for new StEvent
-#include "StChain/StChain.h"
+ *
 #include "StRun.h"
 #include "StEvent.h"
 #include "StAnalysisMaker.h"
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.13 1999/08/09 19:38:32 kathy Exp $";
+#include "StChain.h"
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.14 1999/09/23 16:04:23 kathy Exp $";
 #include "StMessMgr.h"
 //  Proptotypes of little functions which perform
 //  specific analysis tasks.
