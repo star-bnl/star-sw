@@ -30,6 +30,7 @@ extern CC_P void asu_def_();
 extern CC_P void kam_asu_hello_();
 extern CC_P void kam_asu_time_();
 extern CC_P void kam_asuallocstats_();
+extern CC_P void kam_asualloclevel_();
 
 extern CC_P void asu_kuip_init_();
 #endif /*NOKUIP*/
@@ -37,6 +38,7 @@ extern CC_P void asu_kuip_init_();
 extern CC_P STAFCV_T asu_hello(char* msg);
 extern CC_P STAFCV_T asu_time();
 extern CC_P STAFCV_T asuallocstats();
+extern CC_P STAFCV_T asualloclevel(int level);
 
 /*- F77 prototypes for STAF vector functions. -*/
 extern CC_P void set_staf_status_(long* status);

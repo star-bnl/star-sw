@@ -24,7 +24,7 @@ void asuMallocInit()
    }
    fprintf(stderr,"ASU_MALLOC: Initializing ");fflush(0);
 
-   asu_mallocLevel = ASU_MALLOC_LEVEL;
+   asuMallocLevel(ASU_MALLOC_LEVEL);
 
    switch(asu_mallocLevel) {
    case ASU_MALLOC_VERBOSE:	/* ...and print every time */
@@ -59,7 +59,7 @@ void asuMallocGrowTrace(size_t m)
    asu_maxTrace = m;
    asu_mallocTrace = (ASU_MALLOCTRACE_T*)MALLOC(asu_maxTrace*sizeof(
 		ASU_MALLOCTRACE_T));
-   memcpy(asu_mallocTrace, (void*)&oldTrace
+   memcpy(asu_mallocTrace, (void*)oldTrace
 		, oldMaxTrace*sizeof(ASU_MALLOCTRACE_T));
 }
 
@@ -92,6 +92,9 @@ void asuMallocStats()
       fprintf(stderr,"\n\tmallocSize %d, freeSize %d, diff %d"
       		, asu_mallocSize, asu_freeSize
 		, asu_mallocSize - asu_freeSize);
+      fprintf(stderr,"\n\tasuMallocSize %d"
+		, (1==asu_maxTrace? 0:
+		asu_maxTrace*sizeof(ASU_MALLOCTRACE_T)));
    case ASU_MALLOC_FAST:	/* only call m&f */
    default:
       fprintf(stderr,"\n");
@@ -108,8 +111,10 @@ void asuMallocPrintTrace(void *p, size_t size, char* file, int line)
 }
 
 /*--------------------------------------------------------------------*/
-void asuMallocLevel(ASU_MALLOCLEVEL_T level)
+ASU_MALLOCLEVEL_T asuMallocLevel(ASU_MALLOCLEVEL_T level)
 {
+   ASU_MALLOCLEVEL_T oldLevel = asu_mallocLevel;
+
    switch(level) {
    case ASU_MALLOC_VERBOSE:	/* ...and print every time */
    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
@@ -133,6 +138,7 @@ void asuMallocLevel(ASU_MALLOCLEVEL_T level)
    }
 
    asu_mallocLevel = level;
+   return oldLevel;
 }
 
 /*--------------------------------------------------------------------*/
