@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.18 2004/05/05 21:13:44 aihong Exp $
+// $Id: StFlowConstants.h,v 1.19 2004/12/07 23:08:10 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,25 +21,25 @@ class Flow{
  public:
 
   enum {
-    nHars        =   4, 
-    nSels        =   2,
-    nSubs        =   2,
-    nPhiBins     = 120,
-    nPhiBinsFtpc = 120,
-    nEtaBins        = 90,
-    nEtaBinsTpcOnly = 30,
-    nPtBins      = 40,
-    nPtBinsPart  = 40,
-    nCumulIntegOrders =   3, 
-    nCumulInteg_qMax  =   8,
-    nCumulDiffOrders  =   2,
-    nCumulDiff_qMax   =   8,
-    nCents       = 9,
-    zdcsmd_nPsiBins   =   64
+    nHars             = 4, 
+    nSels             = 2,
+    nSubs             = 2,
+    nPhiBins          = 120,
+    nPhiBinsFtpc      = 120,
+    nEtaBins          = 90,
+    nEtaBinsTpcOnly   = 30,
+    nPtBins           = 40,
+    nPtBinsPart       = 40,
+    nCumulIntegOrders = 3, 
+    nCumulInteg_qMax  = 8,
+    nCumulDiffOrders  = 2,
+    nCumulDiff_qMax   = 8,
+    nCents            = 9,
+    zdcsmd_nPsiBins   = 64
   };
 
-  typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
-  typedef Double_t PhiWgtFtpc_t[nSels][nHars][nPhiBinsFtpc];
+  typedef Double_t PhiWgt_t[nSels][2][nPhiBins]; // only odd and even harmonics
+  typedef Double_t PhiWgtFtpc_t[nSels][2][nPhiBinsFtpc];
   typedef Double_t ZDCSMD_PsiWgt_t[64];  
 
   static Float_t etaMin;
@@ -59,6 +59,7 @@ class Flow{
   static Float_t zdcsmd_wx0,zdcsmd_ex0,zdcsmd_wy0,zdcsmd_ey0;
   static Float_t zdcsmdPedstal[2][2][8];
   static Float_t zdcsmdGainFac[2][2][8];
+
   ClassDef(Flow,1)               // macro for rootcint
 };
 
@@ -67,6 +68,10 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.19  2004/12/07 23:08:10  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.18  2004/05/05 21:13:44  aihong
 // Gang's code for ZDC-SMD added
 //

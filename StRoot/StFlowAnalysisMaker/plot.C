@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.60 2004/12/02 16:10:55 posk Exp $
+// $Id: plot.C,v 1.61 2004/12/07 23:10:23 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -313,9 +313,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // set row and column numbers
   char* cp = strstr(shortName[pageNumber],"Subs");
   int columns = (cp) ? nSubs + nSels : nSels;
-  int rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
-    nHars : nHars -1;
+  int rows;
+  rows = (strstr(shortName[pageNumber],"Phi_")) ? 2 : nHars;
+  if (strcmp(shortName[pageNumber],"Flow_Phi_Corr")==0) rows = nHars;
+  if (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")==0) rows = nHars -1;
   int pads = rows*columns;
+  //cout << "pads = " << pads << endl;
 
   // make the graph page
   if (multiGraph) {
@@ -778,6 +781,10 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.61  2004/12/07 23:10:23  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.60  2004/12/02 16:10:55  posk
 // Added  gInterpreter->ProcessLine(".O0");
 //

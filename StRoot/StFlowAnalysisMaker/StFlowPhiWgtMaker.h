@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.h,v 1.4 2004/05/31 20:09:26 oldi Exp $
+// $Id: StFlowPhiWgtMaker.h,v 1.5 2004/12/07 23:10:23 posk Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -37,7 +37,7 @@ public:
   Int_t    Finish();
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.4 2004/05/31 20:09:26 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.5 2004/12/07 23:10:23 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -77,7 +77,7 @@ private:
   struct histCens;	
   friend struct histCens;
   struct histCens {
-    struct histHars histHar[Flow::nHars];
+    struct histHars histHar[2];
   };
 
   struct hists;	
@@ -97,6 +97,10 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.h,v $
+// Revision 1.5  2004/12/07 23:10:23  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.4  2004/05/31 20:09:26  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.

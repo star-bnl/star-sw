@@ -1,12 +1,13 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.cxx,v 1.5 2004/08/24 20:22:40 oldi Exp $
+// $Id: StFlowPhiWgtMaker.cxx,v 1.6 2004/12/07 23:10:22 posk Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
 ////////////////////////////////////////////////////////////////////////////
 //
-// Description:  Maker to produce PhiWgt files using StFlowEvent
+// Description:  Maker to produce PhiWgt files for odd and even harmonics
+//                 using StFlowEvent
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +98,7 @@ Int_t StFlowPhiWgtMaker::Init() {
       sprintf(countSels,"%d",k+1);
       
       // for each harmonic
-      for (int j = 0; j < Flow::nHars; j++) {
+      for (int j = 0; j < 2; j++) {
 	char countHars[2];
 	sprintf(countHars,"%d",j+1);
 	
@@ -309,7 +310,7 @@ Int_t StFlowPhiWgtMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowPhiWgt", 2);
-  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.5 2004/08/24 20:22:40 oldi Exp $");
+  gMessMgr->Info("##### FlowPhiWgt: $Id: StFlowPhiWgtMaker.cxx,v 1.6 2004/12/07 23:10:22 posk Exp $");
 
   return StMaker::Init();
 }
@@ -348,7 +349,7 @@ void StFlowPhiWgtMaker::FillParticleHistograms() {
 
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
-      for (int j = 0; j < Flow::nHars; j++) {
+      for (int j = 0; j < 2; j++) {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
 	if (pFlowSelect->Select(pFlowTrack)) {
@@ -449,14 +450,14 @@ Int_t StFlowPhiWgtMaker::Finish() {
   // PhiWgt histogram collections
   TOrdCollection* phiWgtHistNames[nCens];
   for (int n = 1; n < nCens; n++) {
-    phiWgtHistNames[n] = new TOrdCollection(Flow::nSels*Flow::nHars+2);
+    phiWgtHistNames[n] = new TOrdCollection(Flow::nSels*2 + 2);
   }
 
   cout << endl << "##### PhiWgt Maker:" << endl;
   
   for (int n = 1; n < nCens; n++) {
     for (int k = 0; k < Flow::nSels; k++) {
-      for (int j = 0; j < Flow::nHars; j++) {
+      for (int j = 0; j < 2; j++) {
 	// Calculate PhiWgt
 	double meanFarEast = hist[k].histCen[n].histHar[j].mHistPhiFarEast->
 	  Integral() / (double)Flow::nPhiBins;
@@ -579,6 +580,10 @@ Int_t StFlowPhiWgtMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.cxx,v $
+// Revision 1.6  2004/12/07 23:10:22  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.5  2004/08/24 20:22:40  oldi
 // Minor modifications to avoid compiler warnings.
 //

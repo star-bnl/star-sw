@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.86 2004/08/24 20:22:36 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.87 2004/12/07 23:10:19 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -706,308 +706,6 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistMult->SetYTitle("Counts");
       delete histTitle;
 
-
-      // Phi lab
-      // Tpc (FarEast)
-      histTitle = new TString("Flow_Phi_FarEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFarEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFarEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFarEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Tpc (East)
-      histTitle = new TString("Flow_Phi_East_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Tpc (West)
-      histTitle = new TString("Flow_Phi_West_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWest->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Tpc (FarWest)
-      histTitle = new TString("Flow_Phi_FarWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFarWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFarWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFarWest->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (FarEast)
-      histTitle = new TString("Flow_Phi_FtpcFarEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFtpcFarEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFtpcFarEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcFarEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (East)
-      histTitle = new TString("Flow_Phi_FtpcEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFtpcEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (West)
-      histTitle = new TString("Flow_Phi_FtpcWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFtpcWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFtpcWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcWest->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (FarWest)
-      histTitle = new TString("Flow_Phi_FtpcFarWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFtpcFarWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFtpcFarWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcFarWest->SetYTitle("Counts");
-      delete histTitle;
-      
-      // PhiWgt new
-      // Tpc (FarEast)
-      histTitle = new TString("Flow_Phi_Weight_FarEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtFarEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFarEast->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Tpc (East)
-      histTitle = new TString("Flow_Phi_Weight_East_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtEast->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtEast->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Tpc (West)
-      histTitle = new TString("Flow_Phi_Weight_West_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtWest->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtWest->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Tpc (FarWest)
-      histTitle = new TString("Flow_Phi_Weight_FarWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtFarWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFarWest->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Ftpc (FarEast)
-      histTitle = new TString("Flow_Phi_Weight_FtpcFarEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Ftpc (East)
-      histTitle = new TString("Flow_Phi_Weight_FtpcEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Ftpc (West)
-      histTitle = new TString("Flow_Phi_Weight_FtpcWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetYTitle("PhiWgt");
-      delete histTitle;
-      
-      // Ftpc (FarWest)
-      histTitle = new TString("Flow_Phi_Weight_FtpcFarWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->SetYTitle("PhiWgt");
-      delete histTitle;
-
-
-      // Phi lab flattened
-      // Tpc (FarEast)
-      histTitle = new TString("Flow_Phi_Flat_FarEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatFarEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFarEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFarEast->SetYTitle("Counts");
-      delete histTitle;
-
-      // Tpc (East)
-      histTitle = new TString("Flow_Phi_Flat_East_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatEast = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatEast->SetYTitle("Counts");
-      delete histTitle;
-
-      // Tpc (West)
-      histTitle = new TString("Flow_Phi_Flat_West_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatWest->SetYTitle("Counts");
-      delete histTitle;
-
-      // Tpc (FarWest)
-      histTitle = new TString("Flow_Phi_Flat_FarWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatFarWest = new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFarWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFarWest->SetYTitle("Counts");
-      delete histTitle;
-
-      // Ftpc (FarEast)
-      histTitle = new TString("Flow_Phi_Flat_FtpcFarEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcFarEast =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcFarEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcFarEast->SetYTitle("Counts");
-      delete histTitle;     
-
-      // Ftpc (East)
-      histTitle = new TString("Flow_Phi_Flat_FtpcEast_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (West)
-      histTitle = new TString("Flow_Phi_Flat_FtpcWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->SetYTitle("Counts");
-      delete histTitle;
-      
-      // Ftpc (FarWest)
-      histTitle = new TString("Flow_Phi_Flat_FtpcFarWest_Sel");
-      *histTitle += k+1;
-      histTitle->Append("_Har");
-      *histTitle += j+1;
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcFarWest =	new TH1D(histTitle->Data(),
-        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcFarWest->SetXTitle
-	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlatFtpcFarWest->SetYTitle("Counts");
-      delete histTitle;
-
-
       // event plane
       histTitle = new TString("Flow_Psi_Sel");
       *histTitle += k+1;
@@ -1158,10 +856,315 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
     }
+
+    // for two harmonics
+    for (int j = 0; j < 2; j++) {
+      //float order  = (float)(j+1);
+
+      // Phi lab
+      // Tpc (FarEast)
+      histTitle = new TString("Flow_Phi_FarEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFarEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFarEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFarEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Tpc (East)
+      histTitle = new TString("Flow_Phi_East_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Tpc (West)
+      histTitle = new TString("Flow_Phi_West_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Tpc (FarWest)
+      histTitle = new TString("Flow_Phi_FarWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFarWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (FarEast)
+      histTitle = new TString("Flow_Phi_FtpcFarEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFtpcFarEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFtpcFarEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFtpcFarEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (East)
+      histTitle = new TString("Flow_Phi_FtpcEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFtpcEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFtpcEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (West)
+      histTitle = new TString("Flow_Phi_FtpcWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFtpcWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFtpcWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFtpcWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (FarWest)
+      histTitle = new TString("Flow_Phi_FtpcFarWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFtpcFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFtpcFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFtpcFarWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // PhiWgt
+      // Tpc (FarEast)
+      histTitle = new TString("Flow_Phi_Weight_FarEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtFarEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtFarEast->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Tpc (East)
+      histTitle = new TString("Flow_Phi_Weight_East_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtEast->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtEast->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Tpc (West)
+      histTitle = new TString("Flow_Phi_Weight_West_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtWest->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtWest->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Tpc (FarWest)
+      histTitle = new TString("Flow_Phi_Weight_FarWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtFarWest->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Ftpc (FarEast)
+      histTitle = new TString("Flow_Phi_Weight_FtpcFarEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Ftpc (East)
+      histTitle = new TString("Flow_Phi_Weight_FtpcEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Ftpc (West)
+      histTitle = new TString("Flow_Phi_Weight_FtpcWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Ftpc (FarWest)
+      histTitle = new TString("Flow_Phi_Weight_FtpcFarWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->Sumw2();
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetYTitle("PhiWgt");
+      delete histTitle;
+
+
+      // Phi lab flattened
+      // Tpc (FarEast)
+      histTitle = new TString("Flow_Phi_Flat_FarEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatFarEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatFarEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatFarEast->SetYTitle("Counts");
+      delete histTitle;
+
+      // Tpc (East)
+      histTitle = new TString("Flow_Phi_Flat_East_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatEast->SetYTitle("Counts");
+      delete histTitle;
+
+      // Tpc (West)
+      histTitle = new TString("Flow_Phi_Flat_West_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatWest->SetYTitle("Counts");
+      delete histTitle;
+
+      // Tpc (FarWest)
+      histTitle = new TString("Flow_Phi_Flat_FarWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatFarWest->SetYTitle("Counts");
+      delete histTitle;
+
+      // Ftpc (FarEast)
+      histTitle = new TString("Flow_Phi_Flat_FtpcFarEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast =	new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast->SetYTitle("Counts");
+      delete histTitle;     
+
+      // Ftpc (East)
+      histTitle = new TString("Flow_Phi_Flat_FtpcEast_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast =	new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (West)
+      histTitle = new TString("Flow_Phi_Flat_FtpcWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest =	new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (FarWest)
+      histTitle = new TString("Flow_Phi_Flat_FtpcFarWest_Sel");
+      *histTitle += k+1;
+      histTitle->Append("_Har");
+      *histTitle += j+1;
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest =	new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest->SetYTitle("Counts");
+      delete histTitle;
+    }
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.86 2004/08/24 20:22:36 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.87 2004/12/07 23:10:19 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1565,31 +1568,105 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  psi_i = mPsi[k][j];
 	}
 	if (pFlowSelect->Select(pFlowTrack)) {
-	  // Get detID
-	  StDetectorId detId;
-	  Bool_t kTpcFarEast  = kFALSE;
-	  Bool_t kTpcEast     = kFALSE;
-	  Bool_t kTpcWest     = kFALSE;
-	  Bool_t kTpcFarWest  = kFALSE;
-	  Bool_t kFtpcFarEast = kFALSE;
-	  Bool_t kFtpcEast    = kFALSE;
-	  Bool_t kFtpcWest    = kFALSE;
-	  Bool_t kFtpcFarWest = kFALSE;
-	  if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
-	    // Tpc track, or TopologyMap not available
-	    detId = kTpcId;
-	    // Set TpcEast and West
-	    if (pFlowEvent->FirstLastPoints()) {
-	      if (zFirstPoint > 0. && zLastPoint > 0.) {
-		kTpcFarWest = kTRUE;
-	      } else if (zFirstPoint > 0. && zLastPoint < 0.) {
-		kTpcWest = kTRUE;
-	      } else if (zFirstPoint < 0. && zLastPoint > 0.) {
-		kTpcEast = kTRUE;
+
+	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
+
+	  // Get phiWgt from file
+	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+
+	  if (j < 2) { // only first two harmonics for phiWgt
+
+	    // Get detID
+	    StDetectorId detId;
+	    Bool_t kTpcFarEast  = kFALSE;
+	    Bool_t kTpcEast     = kFALSE;
+	    Bool_t kTpcWest     = kFALSE;
+	    Bool_t kTpcFarWest  = kFALSE;
+	    Bool_t kFtpcFarEast = kFALSE;
+	    Bool_t kFtpcEast    = kFALSE;
+	    Bool_t kFtpcWest    = kFALSE;
+	    Bool_t kFtpcFarWest = kFALSE;
+	    if (map.hasHitInDetector(kTpcId) || (map.data(0) == 0 && map.data(1) == 0)) {
+	      // Tpc track, or TopologyMap not available
+	      detId = kTpcId;
+	      // Set TpcEast and West
+	      if (pFlowEvent->FirstLastPoints()) {
+		if (zFirstPoint > 0. && zLastPoint > 0.) {
+		  kTpcFarWest = kTRUE;
+		} else if (zFirstPoint > 0. && zLastPoint < 0.) {
+		  kTpcWest = kTRUE;
+		} else if (zFirstPoint < 0. && zLastPoint > 0.) {
+		  kTpcEast = kTRUE;
+		} else {
+		  kTpcFarEast = kTRUE;
+		}
 	      } else {
-		kTpcFarEast = kTRUE;
+		Float_t vertexZ = pFlowEvent->VertexPos().z();
+		if (eta > 0. && vertexZ > 0.) {
+		  kTpcFarWest = kTRUE;
+		} else if (eta > 0. && vertexZ < 0.) {
+		  kTpcWest = kTRUE;
+		} else if (eta < 0. && vertexZ > 0.) {
+		  kTpcEast = kTRUE;
+		} else {
+		  kTpcFarEast = kTRUE;
+		}
+	      }
+	    } else if (map.trackFtpcEast()) {
+	      detId = kFtpcEastId;  // eta < 0.
+	      Float_t vertexZ = pFlowEvent->VertexPos().z();
+	      if (vertexZ > 0.) {
+		kFtpcEast = kTRUE;
+	      } else { // vertexZ < 0.
+		kFtpcFarEast = kTRUE;
+	      }
+	    } else if (map.trackFtpcWest()) {
+	      detId = kFtpcWestId; // eta > 0.
+	      Float_t vertexZ = pFlowEvent->VertexPos().z();
+	      if (vertexZ > 0.) {
+		kFtpcFarWest = kTRUE;
+	      } else { // vertexZ > 0.
+		kFtpcWest = kTRUE;
 	      }
 	    } else {
+	      detId = kUnknownId;
+	    }
+	    
+	    // Calculate weights for filling histograms
+	    float wt = 1.;
+	    if (pFlowEvent->PtWgt()) {
+	      wt *= (pt < pFlowEvent->PtWgtSaturation()) ? pt : 
+		pFlowEvent->PtWgtSaturation();  // pt weighting going constant
+	    }
+	    float etaAbs = fabs(eta);
+	    if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
+	      wt *= etaAbs;
+	    }
+	    
+	    // Fill histograms with selections
+	    if (kFtpcFarEast) {
+	      histFull[k].histTwoHar[j].mHistPhiFtpcFarEast->Fill(phi,wt);
+	    } else if (kFtpcEast) {
+	      histFull[k].histTwoHar[j].mHistPhiFtpcEast->Fill(phi,wt);
+	    } else if (kFtpcWest) {
+	      histFull[k].histTwoHar[j].mHistPhiFtpcWest->Fill(phi,wt);
+	    } else if (kFtpcFarWest) {
+	      histFull[k].histTwoHar[j].mHistPhiFtpcFarWest->Fill(phi,wt);
+	    } else if (kTpcFarEast){
+	      histFull[k].histTwoHar[j].mHistPhiFarEast->Fill(phi,wt);
+	    } else if (kTpcEast){
+	      histFull[k].histTwoHar[j].mHistPhiEast->Fill(phi,wt);
+	    } else if (kTpcWest){
+	      histFull[k].histTwoHar[j].mHistPhiWest->Fill(phi,wt);
+	    } else if (kTpcFarWest){
+	      histFull[k].histTwoHar[j].mHistPhiFarWest->Fill(phi,wt);
+	    }
+	    
+	    if (pFlowEvent->FirstLastPoints() && !pFlowEvent->FirstLastPhiWgt()) {
+	      kTpcFarEast = kFALSE;
+	      kTpcEast    = kFALSE;
+	      kTpcWest    = kFALSE;
+	      kTpcFarWest = kFALSE;
 	      Float_t vertexZ = pFlowEvent->VertexPos().z();
 	      if (eta > 0. && vertexZ > 0.) {
 		kTpcFarWest = kTRUE;
@@ -1601,102 +1678,30 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 		kTpcFarEast = kTRUE;
 	      }
 	    }
-	  } else if (map.trackFtpcEast()) {
-	    detId = kFtpcEastId;  // eta < 0.
-	    Float_t vertexZ = pFlowEvent->VertexPos().z();
-	    if (vertexZ > 0.) {
-	      kFtpcEast = kTRUE;
-	    } else { // vertexZ < 0.
-	      kFtpcFarEast = kTRUE;
+	    
+	    if (oddHar && eta < 0.) phiWgt /= -1.; // only for flat hists
+	    // Fill Flat histograms
+	    if (kFtpcFarEast) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarEast->Fill(phi, phiWgt);
+	    } else if (kFtpcEast) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
+	    } else if (kFtpcWest) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgt);
+	    } else if (kFtpcFarWest) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatFtpcFarWest->Fill(phi, phiWgt);
+	    } else if (kTpcFarEast) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatFarEast->Fill(phi, phiWgt);
+	    } else if (kTpcEast) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatEast->Fill(phi, phiWgt);
+	    } else if (kTpcWest) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatWest->Fill(phi, phiWgt);
+	    } else if (kTpcFarWest) {
+	      histFull[k].histTwoHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgt);
 	    }
-	  } else if (map.trackFtpcWest()) {
-	    detId = kFtpcWestId; // eta > 0.
-	    Float_t vertexZ = pFlowEvent->VertexPos().z();
-	    if (vertexZ > 0.) {
-	      kFtpcFarWest = kTRUE;
-	    } else { // vertexZ > 0.
-	      kFtpcWest = kTRUE;
-	    }
-	  } else {
-	    detId = kUnknownId;
+	    if (oddHar && eta < 0.) phiWgt *= -1.; // restore value
+	    
 	  }
-
-	  // Calculate weights for filling histograms
-	  float wt = 1.;
-	  if (pFlowEvent->PtWgt()) {
-	    wt *= (pt < pFlowEvent->PtWgtSaturation()) ? pt : pFlowEvent->PtWgtSaturation();  // pt weighting going constant
-	  }
-	  float etaAbs = fabs(eta);
-	  if (pFlowEvent->EtaWgt() && oddHar && etaAbs > 1.) {
-	    wt *= etaAbs;
-	  }
-
-	  // Fill histograms with selections
-	  if (kFtpcFarEast) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcFarEast->Fill(phi,wt);
-	  } else if (kFtpcEast) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcEast->Fill(phi,wt);
-	  } else if (kFtpcWest) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcWest->Fill(phi,wt);
-	  } else if (kFtpcFarWest) {
-	    histFull[k].histFullHar[j].mHistPhiFtpcFarWest->Fill(phi,wt);
-	  } else if (kTpcFarEast){
-	    histFull[k].histFullHar[j].mHistPhiFarEast->Fill(phi,wt);
-	  } else if (kTpcEast){
-	    histFull[k].histFullHar[j].mHistPhiEast->Fill(phi,wt);
-	  } else if (kTpcWest){
-	    histFull[k].histFullHar[j].mHistPhiWest->Fill(phi,wt);
-	  } else if (kTpcFarWest){
-	    histFull[k].histFullHar[j].mHistPhiFarWest->Fill(phi,wt);
-	  }
-	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
-
-	  if (pFlowEvent->FirstLastPoints() && !pFlowEvent->FirstLastPhiWgt()) {
-	    kTpcFarEast = kFALSE;
-	    kTpcEast    = kFALSE;
-	    kTpcWest    = kFALSE;
-	    kTpcFarWest = kFALSE;
-	    Float_t vertexZ = pFlowEvent->VertexPos().z();
-	    if (eta > 0. && vertexZ > 0.) {
-	      kTpcFarWest = kTRUE;
-	    } else if (eta > 0. && vertexZ < 0.) {
-	      kTpcWest = kTRUE;
-	    } else if (eta < 0. && vertexZ > 0.) {
-	      kTpcEast = kTRUE;
-	    } else {
-	      kTpcFarEast = kTRUE;
-	    }
-	  }
-
-	  // Get phiWgt from file
-	  double phiWgt;
-	  if (order > 3. && !oddHar) {
-	    phiWgt = pFlowEvent->PhiWeight(k, 1, pFlowTrack);
-	  } else {
-	    phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
-	  }
-	  if (oddHar && eta < 0.) phiWgt /= -1.; // only for flat hists
-
-	  // Fill Flat histograms
-	  if (kFtpcFarEast) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcFarEast->Fill(phi, phiWgt);
-	  } else if (kFtpcEast) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
-	  } else if (kFtpcWest) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgt);
-	  } else if (kFtpcFarWest) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcFarWest->Fill(phi, phiWgt);
-	  } else if (kTpcFarEast) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFarEast->Fill(phi, phiWgt);
-	  } else if (kTpcEast) {
-	    histFull[k].histFullHar[j].mHistPhiFlatEast->Fill(phi, phiWgt);
-	  } else if (kTpcWest) {
-	    histFull[k].histFullHar[j].mHistPhiFlatWest->Fill(phi, phiWgt);
-	  } else if (kTpcFarWest) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgt);
-	  }
-	  if (oddHar && eta < 0.) phiWgt *= -1.; // restore value
-
+	  
 	  // Remove autocorrelations
 	  if (!pFlowEvent->EtaSubs() && !pFlowEvent->RanSubs()) {
 	    TVector2 Q_i;
@@ -2150,74 +2155,76 @@ Int_t StFlowAnalysisMaker::Finish() {
       }
 
       // Calculate PhiWgt
-      double meanFarEast = histFull[k].histFullHar[j].mHistPhiFarEast->Integral() 
-	/ (double)Flow::nPhiBins;
-      double meanEast = histFull[k].histFullHar[j].mHistPhiEast->Integral() 
-	/ (double)Flow::nPhiBins;
-      double meanWest = histFull[k].histFullHar[j].mHistPhiWest->Integral() 
-	/ (double)Flow::nPhiBins;
-      double meanFarWest = histFull[k].histFullHar[j].mHistPhiFarWest->Integral() 
-	/ (double)Flow::nPhiBins;
-      double meanFtpcFarEast = histFull[k].histFullHar[j].mHistPhiFtpcFarEast->Integral() 
-	/ (double)Flow::nPhiBinsFtpc;
-      double meanFtpcEast = histFull[k].histFullHar[j].mHistPhiFtpcEast->Integral() 
-	/ (double)Flow::nPhiBinsFtpc;
-      double meanFtpcWest = histFull[k].histFullHar[j].mHistPhiFtpcWest->Integral() 
-	/ (double)Flow::nPhiBinsFtpc;
-      double meanFtpcFarWest = histFull[k].histFullHar[j].mHistPhiFtpcFarWest->Integral() 
-	/ (double)Flow::nPhiBinsFtpc;
-
-      // Tpc
-      for (int i = 0; i < Flow::nPhiBins; i++) {
-	histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetBinContent(i+1,meanFarEast);
-	histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetBinError(i+1, 0.);
-	histFull[k].histFullHar[j].mHistPhiWgtEast->SetBinContent(i+1, meanEast);
-	histFull[k].histFullHar[j].mHistPhiWgtEast->SetBinError(i+1, 0.);
-	histFull[k].histFullHar[j].mHistPhiWgtWest->SetBinContent(i+1, meanWest);
-	histFull[k].histFullHar[j].mHistPhiWgtWest->SetBinError(i+1, 0.);
-	histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetBinContent(i+1,meanFarWest);
-	histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetBinError(i+1, 0.);
+      if (j < 2) {
+	double meanFarEast = histFull[k].histTwoHar[j].mHistPhiFarEast->Integral() 
+	  / (double)Flow::nPhiBins;
+	double meanEast = histFull[k].histTwoHar[j].mHistPhiEast->Integral() 
+	  / (double)Flow::nPhiBins;
+	double meanWest = histFull[k].histTwoHar[j].mHistPhiWest->Integral() 
+	  / (double)Flow::nPhiBins;
+	double meanFarWest = histFull[k].histTwoHar[j].mHistPhiFarWest->Integral() 
+	  / (double)Flow::nPhiBins;
+	double meanFtpcFarEast = histFull[k].histTwoHar[j].mHistPhiFtpcFarEast->Integral() 
+	  / (double)Flow::nPhiBinsFtpc;
+	double meanFtpcEast = histFull[k].histTwoHar[j].mHistPhiFtpcEast->Integral() 
+	  / (double)Flow::nPhiBinsFtpc;
+	double meanFtpcWest = histFull[k].histTwoHar[j].mHistPhiFtpcWest->Integral() 
+	  / (double)Flow::nPhiBinsFtpc;
+	double meanFtpcFarWest = histFull[k].histTwoHar[j].mHistPhiFtpcFarWest->Integral() 
+	  / (double)Flow::nPhiBinsFtpc;
+	
+	// Tpc
+	for (int i = 0; i < Flow::nPhiBins; i++) {
+	  histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetBinContent(i+1,meanFarEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFarEast->SetBinError(i+1, 0.);
+	  histFull[k].histTwoHar[j].mHistPhiWgtEast->SetBinContent(i+1, meanEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtEast->SetBinError(i+1, 0.);
+	  histFull[k].histTwoHar[j].mHistPhiWgtWest->SetBinContent(i+1, meanWest);
+	  histFull[k].histTwoHar[j].mHistPhiWgtWest->SetBinError(i+1, 0.);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetBinContent(i+1,meanFarWest);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFarWest->SetBinError(i+1, 0.);
+	}
+	
+	// Ftpc
+	for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetBinContent(i+1, meanFtpcFarEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->SetBinError(i+1, 0.);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetBinContent(i+1, meanFtpcFarWest);
+	  histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->SetBinError(i+1, 0.);
+	}
+	
+	// Tpc
+	histFull[k].histTwoHar[j].mHistPhiWgtFarEast->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiFarEast);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFarEast);
+	histFull[k].histTwoHar[j].mHistPhiWgtEast->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiEast);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtEast);
+	histFull[k].histTwoHar[j].mHistPhiWgtWest->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiWest);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtWest);
+	histFull[k].histTwoHar[j].mHistPhiWgtFarWest->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiFarWest);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFarWest);
+	
+	// Ftpc
+	histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcFarEast);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarEast);
+	histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcEast);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcEast);
+	histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcWest);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcWest);
+	histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest->
+	  Divide(histFull[k].histTwoHar[j].mHistPhiFtpcFarWest);
+	phiWgtHistNames->AddLast(histFull[k].histTwoHar[j].mHistPhiWgtFtpcFarWest);
       }
-
-      // Ftpc
-      for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->SetBinContent(i+1, meanFtpcFarEast);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->SetBinError(i+1, 0.);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->SetBinContent(i+1, meanFtpcFarWest);
-	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->SetBinError(i+1, 0.);
-      }
-
-      // Tpc
-      histFull[k].histFullHar[j].mHistPhiWgtFarEast->
-	Divide(histFull[k].histFullHar[j].mHistPhiFarEast);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFarEast);
-      histFull[k].histFullHar[j].mHistPhiWgtEast->
-	Divide(histFull[k].histFullHar[j].mHistPhiEast);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtEast);
-      histFull[k].histFullHar[j].mHistPhiWgtWest->
-	Divide(histFull[k].histFullHar[j].mHistPhiWest);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtWest);
-      histFull[k].histFullHar[j].mHistPhiWgtFarWest->
-	Divide(histFull[k].histFullHar[j].mHistPhiFarWest);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFarWest);
-
-      // Ftpc
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->
-	Divide(histFull[k].histFullHar[j].mHistPhiFtpcFarEast);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->
-	Divide(histFull[k].histFullHar[j].mHistPhiFtpcEast);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcEast);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->
-	Divide(histFull[k].histFullHar[j].mHistPhiFtpcWest);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcWest);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->
-	Divide(histFull[k].histFullHar[j].mHistPhiFtpcFarWest);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest);
     }
   }
   phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtEast);
@@ -2306,6 +2313,10 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.87  2004/12/07 23:10:19  posk
+// Only odd and even phiWgt hists. If the old phiWgt file contains more than
+// two harmonics, only the first two are read. Now writes only the first two.
+//
 // Revision 1.86  2004/08/24 20:22:36  oldi
 // Minor modifications to avoid compiler warnings.
 //
