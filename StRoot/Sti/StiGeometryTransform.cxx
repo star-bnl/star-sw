@@ -621,13 +621,34 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		passedFilter = filter->operator()(*hit);
 	    
 	    if (passedFilter) {
-		pair<double, double> myPair =
-		    StiGeometryTransform::instance()->angleAndPosition(hit);
-		double refAngle=myPair.first;
-		double position=myPair.second;
-		
-		const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
+
+		//pair<double, double> myPair =
+		//  StiGeometryTransform::instance()->angleAndPosition(hit);		
+		//double refAngle=myPair.first;
+		//double position=myPair.second;		
+		//const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
+
+		//Find the detector for this set of hits:
+		char szBuf[100];
+		unsigned int prow = hit->padrow();
+		unsigned int sector=hit->sector();
+		unsigned int iIttfSector=sector;
+		if (sector>12) {
+		    iIttfSector = 12 - (sector-12)%12;
+		}
+		sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d",
+			static_cast<int>(prow), static_cast<int>(iIttfSector));
+		const StiDetector* layer =
+		    StiDetectorFinder::instance()->findDetector(szBuf);
+		if (!layer) {
+		    cout <<"Error, no Detector for this hit. ERROR:\t";
+		    cout <<"Detector for (sector,padrow): (";
+		    cout <<iIttfSector<<","<<prow<<") not found.  Abort"<<endl;
+		}
+		const hitvector& stiHits = StiHitContainer::instance()->hits(layer);
+
 		if (stiHits.size()==0) 	{
+		    cout <<"Error, no StiHits for this sector, padrow"<<endl;
 		    *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no StiHits for this sector, padrow"<<endl;
 		    sti=0;
 		    return;

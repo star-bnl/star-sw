@@ -114,8 +114,19 @@ void StiHitContainer::update()
  */
 void StiHitContainer::push_back(StiHit* hit)
 {
-    mkey.refangle = hit->refangle();
-    mkey.position = hit->position();
+    //mkey.refangle = hit->refangle();
+    //mkey.position = hit->position();
+    
+    const StiDetector* det = hit->detector();
+    if (!det) {
+	cout <<"StiHitContainer::push_back(). ERROR:\t"
+	     <<"Null detector.  Abort"<<endl;
+	return;
+    }
+    //This is a coupling that I would like to get rid of, not in the spirit of the hit container!
+    mkey.refangle = det->getPlacement()->getCenterRefAngle();
+    mkey.position = det->getPlacement()->getCenterRadius();
+
     //mmap[mkey].push_back(hit);
     mmap[mkey].theHitVec.push_back(hit);
     return;
