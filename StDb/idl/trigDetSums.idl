@@ -1,0 +1,24 @@
+/*    trigDetSums.idl
+*
+*  Table: trigDetSums
+*
+*       description:
+*/ 
+
+
+struct trigDetSums { 
+
+   unsigned long  runNumber;   /*     run number  */
+   unsigned long  timeOffset;   /*     run begin time  */
+   double  ctbWest;   /*   */
+   double  ctbEast;   /*   */
+   double  ctbOR;   /*   */
+   double  TOFp;   /*   */
+   double  ctbTOFp;   /*   */
+   double  zdcWest;   /*   */
+   double  zdcEast;   /*   */
+   double  zdcX;   /*   */
+   double  mult;   /*   */
+   double  L0;   /*   */
+
+ };  
