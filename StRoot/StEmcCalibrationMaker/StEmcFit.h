@@ -1,5 +1,8 @@
-// $Id: StEmcFit.h,v 1.5 2001/12/28 21:31:09 suaide Exp $
+// $Id: StEmcFit.h,v 1.6 2001/12/29 20:33:50 suaide Exp $
 // $Log: StEmcFit.h,v $
+// Revision 1.6  2001/12/29 20:33:50  suaide
+// added documentation
+//
 // Revision 1.5  2001/12/28 21:31:09  suaide
 // Added documentation
 //
@@ -60,23 +63,23 @@ class StEmcFit : public TObject
   public: 
  
     
-                      StEmcFit();//!< Default constructor
-   virtual            ~StEmcFit();//!< Default destructor
+                      StEmcFit();///< Default constructor
+   virtual            ~StEmcFit();///< Default destructor
    
-            void      SetFuncType(Int_t t)                         { functype=t; } //!< Set function type for fit
-            void      SetNParms(Int_t n)                           { ma=n; } //!< Set number of parameters
-            void      SetParm(Int_t i,Float_t xx,Int_t st)         { a[i]=xx; ia[i]=st;} //!< Set parameter initial guess
-            void      ClearAll(); //!< Clear all
-            void      AddPoint(Float_t xx,Float_t yy,Float_t sy)   { ndata++; x[ndata]=xx; y[ndata]=yy; sig[ndata]=sy;} //!< Add fit point
-            void      Fit(); //!< Fit
-            void      Fit(Int_t); //!< Fit using a fixed number of iterations
-            Float_t   GetParameter(Int_t i)                        { return a[i]; } //!< Get parameter value
-            Float_t   GetParameterError(Int_t i)                   { return sqrt(covar[i][i]); } //!< Get parameter error
-            Float_t   GetCovariance(Int_t i,Int_t j)               { return covar[i][j]; } //!< Get covariance matrix element
-            Float_t   GetChiSquare()                               { return chisq; } //!< Get chi square / sqrt (Npoints - Nparam)
-            Int_t     GetNPoints()                                 { return ndata; } //!< Get number of points
-            Int_t     GetNParam()                                  { return ma; } //!< Get number of parameters
-            Float_t   Y(Float_t); //!< Calculates fitted function for a given X
+            void      SetFuncType(Int_t t)                         { functype=t; } ///< Set function type for fit
+            void      SetNParms(Int_t n)                           { ma=n; } ///< Set number of parameters
+            void      SetParm(Int_t i,Float_t xx,Int_t st)         { a[i]=xx; ia[i]=st;} ///< Set parameter initial guess
+            void      ClearAll(); ///< Clear all
+            void      AddPoint(Float_t xx,Float_t yy,Float_t sy)   { ndata++; x[ndata]=xx; y[ndata]=yy; sig[ndata]=sy;} ///< Add fit point
+            void      Fit(); ///< Fit
+            void      Fit(Int_t); ///< Fit using a fixed number of iterations
+            Float_t   GetParameter(Int_t i)                        { return a[i]; } ///< Get parameter value
+            Float_t   GetParameterError(Int_t i)                   { return sqrt(covar[i][i]); } ///< Get parameter error
+            Float_t   GetCovariance(Int_t i,Int_t j)               { return covar[i][j]; } ///< Get covariance matrix element
+            Float_t   GetChiSquare()                               { return chisq; } ///< Get chi square / sqrt (Npoints - Nparam)
+            Int_t     GetNPoints()                                 { return ndata; } ///< Get number of points
+            Int_t     GetNParam()                                  { return ma; } ///< Get number of parameters
+            Float_t   Y(Float_t); ///< Calculates fitted function for a given X
 
    ClassDef(StEmcFit, 1)  
 };
