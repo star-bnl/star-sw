@@ -1,7 +1,11 @@
 *
-* $Id: gcalor.F,v 1.3 2000/01/06 22:09:14 nevski Exp $
+* $Id: gcalor.F,v 1.4 2001/11/23 21:24:10 jeromel Exp $
 *
 * $Log: gcalor.F,v $
+* Revision 1.4  2001/11/23 21:24:10  jeromel
+* Pavel approved fix to gcalor in case CERNLIB_GCALOR is not defined.
+* This will prevent Solaris f77 compiler from crashing.
+*
 * Revision 1.3  2000/01/06 22:09:14  nevski
 * unlimited track/vertex version
 *
@@ -368,5 +372,9 @@ C score kinetic energy of recoil nucleus (given in MeV)
 CZ      DESTEP = DESTEP + ERMED * 1.E-3
   170 RETURN
       END
+#else
+      SUBROUTINE GCALOR
+      print *,' No GCALOR available in this version'
+      end
 #endif
 
