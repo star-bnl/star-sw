@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.22 2003/05/09 14:57:20 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.23 2003/05/09 22:07:57 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.23  2003/05/09 22:07:57  pruneau
+ * Added protection to avoid 90deg tracks and ill defined eloss
+ *
  * Revision 2.22  2003/05/09 14:57:20  pruneau
  * Synching
  *
@@ -586,11 +589,22 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double relRadThickness;
   // Half path length in previous node
   double pL1,pL2,pL3,d1,d2,d3,dxEloss;
-  pL1=fabs(previousNode->pathlength())/2.;
+  pL1=previousNode->pathlength()/2.;
   // Half path length in this node
-  pL3=fabs(pathlength())/2.;
+  pL3=pathlength()/2.;
   // Gap path length
-  pL2= fabs(pathLToNode(previousNode));
+  pL2= pathLToNode(previousNode);
+  if (pL1<0) pL1=0;
+  if (pL2<0) pL2=0;
+  if (pL3<0) pL3=0;
+  if (!finite(pL1) ||
+      !finite(pL2) ||
+      !finite(pL3))
+    {
+      //we are dealing with a track parallel to the 
+      // pad row - let's not try to correct it.
+      return;
+    }
   double x0p =-1;
   double x0Gas=-1;
   double x0=-1;
@@ -598,6 +612,19 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   x0p   = previousNode->getX0();
   d3    = tDet->getMaterial()->getDensity();
   x0    = tDet->getMaterial()->getX0();
+  if (!finite(d1) ||
+      !finite(x0p) ||
+      !finite(d3) ||
+      !finite(x0))
+    {
+      cout << " MAJOR GEOM PROBLEM"
+	   << " d1:"<< d1
+	   << " x0p:"<<x0p
+	   << " d3:"<<d3
+	   << " x0:"<<x0<<endl;
+      throw logic_error("MAJOR GEOM PROBLEM");
+    }
+
   if (pL2> (pL1+pL3)) 
     {
       pL2=pL2-pL1-pL3;
@@ -645,8 +672,14 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 	  dxEloss += d3*pL3;
 	}
     }
-  //cout <<" dx:"<<dx<<" x0p:"<<x0p<<" x0:"<<x0<<" x0Gas:"<<x0Gas<<" relRadThick:"<<relRadThickness<<endl;
   double pt = getPt();
+  if (!finite(pt) || !finite(dxEloss) || !finite(relRadThickness))
+    {
+      cout <<" dx:"<<dx<<" x0p:"<<x0p<<" x0:"<<x0<<" x0Gas:"<<x0Gas<<" relRadThick:"<<relRadThickness<<endl;
+      cout << "pt:"<<pt<<" _p4:"<<_p4<<endl;
+      cout << *this;
+      cout << *getDetector();
+    }
   double p2=(1.+_p4*_p4)*pt*pt;
   double m=pars->massHypothesis;
   double m2=m*m;
@@ -675,6 +708,24 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
   double fudge = 0.7;
   dE = fudge*sign*dxEloss*eloss;
+  if(!finite(dxEloss))
+    {
+      cout << "STKN::propagate() -E- dxEloss is NOT FINITE"<<endl;
+    }
+  if (beta2==0)
+    {
+      cout << "beta2==0"<<endl;
+    }
+  if (!finite(beta2))
+    cout << "beta2 is not finite"<<endl;
+  if (!finite(m))
+    cout << "m is not finite"<<endl;
+  if (m==0)
+    cout << "m==0"<<endl;
+  if (!finite(eloss))
+    cout << "eloss is not finite"<<endl;
+  if (!finite(_p3))
+    cout << "_p3 is NOT finite"<<endl;
   /*if (fabs(getP())<0.2)
     cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
 	 <<" pt:"<<pt<<" p:"<<sqrt(p2)<<" E="<<sqrt(e2)<<" b="
@@ -685,7 +736,31 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   if (fabs(dE)>0)
     {
       double cc=_p3;
-      _p3 = _p3 *(1.- sqrt(e2)*dE/p2);
+      double correction;
+      if (!finite(_p3)) 
+	{
+	  cout << "STKN::propagate() -E- _p3 is not finite before eloss correction."<<endl;
+	}
+      correction =1.- sqrt(e2)*dE/p2;
+      if(!finite(correction))
+	{
+	  cout << "STKN::propagate() -E- Correction is not finite"<<endl;
+	  if (p2==0)
+	    cout << "STKN::propagate() -E- p2 ==0"<<endl;
+	  if (!finite(e2))
+	    cout << "STKN::propagate() -E- !finite(e2)"<<endl;
+	  if (!finite(dE))
+	    cout << "STKN::propagate() -E- !finite(dE)"<<endl;
+	  return;
+	}
+      //limit our correction to at most 1% per layer.
+      if (correction>1.01) correction = 1.01;
+      if (correction<0.99) correction = 0.99;
+      _p3 = _p3 *correction;
+      if (!finite(_p3)) 
+	{
+	  cout << "STKN::propagate() -E- _p3 is not finite after eloss correction."<<endl;
+	}
       _p2 = _p2 + _x*(_p3-cc);
     }
 }
@@ -825,6 +900,13 @@ void StiKalmanTrackNode::updateNode()
   double dz  = _hit->z() - _p1;
   double cur = _p3 + k30*dy + k31*dz;
   double eta = _p2 + k20*dy + k21*dz;
+  if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))
+    {
+      //cout <<"PROBLEM !!!! _c00 || _c11 || k30 || k31 are no longer finite!!"<<endl;
+      //throw runtime_error("StiKalmanTrackNode::updateNode() -E- _p3 is no longer finite!!")
+      // ditch the track
+      return;
+    }
   // update state
   _p0 += k00*dy + k01*dz;
   _p1 += k10*dy + k11*dz;
@@ -832,17 +914,24 @@ void StiKalmanTrackNode::updateNode()
   _p3  = cur;
   _p4 += k40*dy + k41*dz;
   _sinCA  =  _p3*_x-_p2;
+  // The following test introduces a tracking error but happens
+  // only when the track should be aborted so we don't care...
   if (_sinCA>1.) 
     {
       //cout << " SKTN    _sinCA>1";
       //throw runtime_error("SKTN::updateNode() - WARNING - _sinCA>1");
-      _sinCA = 1.;
+      _sinCA = 0.999999;
     }
   else if (_sinCA<-1.) 
     {
-      _sinCA = -1.;
+      _sinCA = -0.999999;
     }
   _cosCA = sqrt(1.-_sinCA*_sinCA); 
+  if (_cosCA==0)
+    {
+      cout <<" |||||||||||||||||||||||||||||||_cosCA==0"<<endl;
+      return;
+    }
   // update error matrix
   double c01=_c10, c02=_c20, c03=_c30, c04=_c40;
   double c12=_c21, c13=_c31, c14=_c41;

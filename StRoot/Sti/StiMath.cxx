@@ -34,16 +34,22 @@ void StiMath::initialize()
 }
 
 ///Calculates the log of the gamma fct 
-///for integers and half-integers.
-///Returns MAX_DOUBLE for x>=100;
-double StiMath::logGamma(double x)
+///based on a clever recipee by Lanczos
+///This code taken from Numerical Recipees by Press et al.
+double StiMath::logGamma(double xx)
 {
-  if (x<0)
-    throw runtime_error("logGamma(double x) -E- Invalid argument: x<0");
-  if (x>=100.)
-    return DBL_MAX;
-  int n = int(2*x);
-  return _logGamma[n];  
+ double x,y,tmp,ser;
+ static double cof[6]={76.18009172947146,-86.50532032941677,
+  24.01409824083091,-1.231739572450155,
+  0.1208650973866179e-2,-0.5395239384953e-5};
+ int j;
+   
+ y=x=xx;
+ tmp=x+5.5;
+ tmp -= (x+0.5)*log(tmp);
+ ser=1.000000000190015;
+ for (j=0;j<=5;j++) ser += cof[j]/++y;
+ return -tmp+log(2.5066282746310005*ser/x);
 }
 
 
@@ -54,5 +60,6 @@ double StiMath::gamma(double x)
   if (x>=100.)
     return DBL_MAX;
   int n = int(2*x);
-  return log(_logGamma[n]);  
+  return exp(_logGamma[n]);  
 }
+
