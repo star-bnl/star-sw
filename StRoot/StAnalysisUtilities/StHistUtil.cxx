@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.8 2000/02/01 00:10:00 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.9 2000/02/02 16:35:48 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.9  2000/02/02 16:35:48  kathy
+// fixing hist names in default lists
+//
 // Revision 1.8  2000/02/01 00:10:00  lansdell
 // added check on max value of bins to Overlay methods; set 2D overlay to box plot
 //
@@ -849,8 +852,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkThetaTS",
  "TabQaGtrkEtaTS",
  "TabQaGtrkLengthTS",
- "TabQaGtrkChisq0T",
- "TabQaGtrkChisq1T",
+ "TabQaGtrkChisq0TS",
+ "TabQaGtrkChisq1TS",
  "TabQaGtrkNPntFE",
  "TabQaGtrkNPntMaxFE",
  "TabQaGtrkNPntFitFE",
@@ -901,7 +904,6 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaPtrkEta",
  "TabQaPtrkLength",
  "TabQaPtrkImpact",
- "TabQaPtrkNdof"
  "TabQaPtrkChisq0",
  "TabQaPtrkChisq1",
  "TabQaDedxNum",
@@ -950,6 +952,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkThetaT",
  "StEQaGtrkEtaT",
  "StEQaGtrkLengthT",
+ "StEQaGtrkChisq0T",
+ "StEQaGtrkChisq1T",
  "StEQaGtrkXf0TS",
  "StEQaGtrkYf0TS",
  "StEQaGtrkZf0TS",
@@ -972,6 +976,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkThetaTS",
  "StEQaGtrkEtaTS",
  "StEQaGtrkLengthTS",
+ "StEQaGtrkChisq0TS",
+ "StEQaGtrkChisq1TS",
  "StEQaGtrkNPntFE",
  "StEQaGtrkNPntMaxFE",
  "StEQaGtrkNPntFitFE",
@@ -1022,7 +1028,8 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaPtrkEta",
  "StEQaPtrkLength",
  "StEQaPtrkImpact",
- "StEQaPtrkNdof",
+ "StEQaPtrkChisq0",
+ "StEQaPtrkChisq1",
  "StEQaDedxNum",
  "StEQaDedxDedx0T", 
  "StEQaDedxDedx1T",
@@ -1076,33 +1083,6 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
   Char_t **sdefList=0;
   Int_t lengofList = 0;
 
-  if (strcmp(dirName,"QA")==0) {
-   Char_t* sdefList1[] = {
-    "TabQaGtrkImpactT",
-    "TabQaGtrkImpactTS",
-    "TabQaGtrkCurvT",
-    "TabQaGtrkCurvTS",
-    "TabQaPtrkImpact"
-   };
-  sdefList = sdefList1;
-  lengofList = sizeof(sdefList1)/4;  
-  }
-
-  if (strcmp(dirName,"EventQA")==0) {
-   Char_t* sdefList2[] = {
-    "StEQaGtrkImpactT",
-    "StEQaGtrkImpactTS",
-    "TabQaGtrkCurvT",
-    "TabQaGtrkCurvTS",
-    "StEQaPtrkImpact"
-   };
-  sdefList = sdefList2;
-  lengofList = sizeof(sdefList2)/4;  
-  }
-
-  //  else 
-  //  { cout << " StHistUtil::SetDefaultLogXList - no hist set in def logX list " << endl; } 
-  //   cout <<  " !! HERE I AM1 " << lengofList << endl ;
 
   Int_t numLog = 0;
 
