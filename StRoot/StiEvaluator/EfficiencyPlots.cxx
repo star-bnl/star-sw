@@ -65,22 +65,22 @@ void EfficiencyPlots::initialize()
   cout << "EfficiencyPlots::createHistograms " << getName()<< endl;
   
   _h_pt_mc   = book("_h_pt_mc",   "transverse momentum of mc tracks", 100,0., 10.);
-  _h_eta_mc  = book("_h_eta_mc",  "eta of mc tracks", 80, -2., 2.);
-  _h_phi_mc  = book("_h_phi_mc",  "phi of mc tracks", 120, -180., 180.);
-  _h_ptVsEta_mc  = book("_h_ptVsEta_mc", "transverse momentum vs eta of mc tracks", 80, -2., 2., 100, 0., 10.);
-  _h_phiVsEta_mc = book("_h_phiVsEta_mc","azituh angle(deg) vs eta of mc tracks",   80, -2., 2., 120, -180., 180.);
+  _h_eta_mc  = book("_h_eta_mc",  "eta of mc tracks", 40, -2., 2.);
+  _h_phi_mc  = book("_h_phi_mc",  "phi of mc tracks", 40, -180., 180.);
+  _h_ptVsEta_mc  = book("_h_ptVsEta_mc", "transverse momentum vs eta of mc tracks", 40, -2., 2.,  50, 0., 10.);
+  _h_phiVsEta_mc = book("_h_phiVsEta_mc","azituh angle(deg) vs eta of mc tracks",   40, -2., 2.,  40, -180., 180.);
 
   _h_pt_rec   = book("_h_pt_rec",   "transverse momentum of rec tracks", 100,0., 10.);
-  _h_eta_rec  = book("_h_eta_rec",  "eta of rec tracks", 80, -2., 2.);
-  _h_phi_rec  = book("_h_phi_rec",  "phi of rec tracks", 120, -180., 180.);
-  _h_ptVsEta_rec  = book("_h_ptVsEta_rec", "transverse momentum vs eta of rec tracks", 80, -2., 2., 100, 0., 10.);
-  _h_phiVsEta_rec = book("_h_phiVsEta_rec","azituh angle(deg) vs eta of rec tracks",   80, -2., 2., 120, -180., 180.);
+  _h_eta_rec  = book("_h_eta_rec",  "eta of rec tracks", 40, -2., 2.);
+  _h_phi_rec  = book("_h_phi_rec",  "phi of rec tracks", 40, -180., 180.);
+  _h_ptVsEta_rec  = book("_h_ptVsEta_rec", "transverse momentum vs eta of rec tracks", 40, -2., 2.,  50,    0.,  10.);
+  _h_phiVsEta_rec = book("_h_phiVsEta_rec","azituh angle(deg) vs eta of rec tracks",   40, -2., 2.,  40, -180., 180.);
 
   _h_pt_ratio   = book("_h_pt_ratio",   "efficiency vs transverse momentum of rec tracks", 100,0., 10.);
-  _h_eta_ratio  = book("_h_eta_ratio",  "efficiency vs eta of rec tracks", 80, -2., 2.);
-  _h_phi_ratio  = book("_h_phi_ratio",  "efficiency vs phi of rec tracks", 120, -180., 180.);
-  _h_ptVsEta_ratio  = book("_h_ptVsEta_ratio", "efficiency vs transverse momentum vs eta of rec tracks", 80, -2., 2., 100, 0., 10.);
-  _h_phiVsEta_ratio = book("_h_phiVsEta_ratio","efficiency vs azimuth angle(deg) vs eta of rec tracks",   80, -2., 2., 120, -180., 180.);
+  _h_eta_ratio  = book("_h_eta_ratio",  "efficiency vs eta of rec tracks", 40,   -2., 2.);
+  _h_phi_ratio  = book("_h_phi_ratio",  "efficiency vs phi of rec tracks", 40, -180., 180.);
+  _h_ptVsEta_ratio = book("_h_ptVsEta_ratio", "efficiency vs transverse momentum vs eta of rec tracks",40,-2.,2., 50,0., 10.);
+  _h_phiVsEta_ratio= book("_h_phiVsEta_ratio","efficiency vs azimuth angle(deg) vs eta of rec tracks", 40,-2.,2., 40,-180., 180.);
   
 }
 
@@ -96,15 +96,11 @@ void EfficiencyPlots::fill(StMiniMcEvent* minimcevent)
 	int id = tinymctrack->geantId(); 
 	// only look at pi-, k-, pbar = 9, 12, 15 and pi+, k+, prot = 8, 11, 14
 	if (!acceptGeantId(id)) continue; 
-	//if (!acceptEtaCut(tinymctrack->etaMc())) continue;
 	double p      = tinymctrack->pMc();
 	double pt     = tinymctrack->ptMc();
-	//double px     = tinymctrack->pxMc();
-	//double py     = tinymctrack->pyMc();
-	//double pz     = tinymctrack->pzMc();
 	double eta    = tinymctrack->etaMc();
 	double phi    = (180./3.1415927)*tinymctrack->phiMc();
-	int   nHits  = tinymctrack->nHitMc();
+	int    nHits  = tinymctrack->nHitMc();
 	if (nHits>=_minNHits)
 	  {
 	    if (acceptEtaCut(tinymctrack->etaMc())) 
@@ -128,18 +124,12 @@ void EfficiencyPlots::fill(StMiniMcEvent* minimcevent)
 	if (!acceptGeantId(id)) continue;
 	//if (!acceptPair(minimcpair)) continue; 
 	double pt_mc    = minimcpair->ptMc();
-	//double px_mc    = minimcpair->pxMc();
-	//double py_mc    = minimcpair->pyMc();
-	//double pz_mc    = minimcpair->pzMc();
 	double p_mc     = minimcpair->pMc();
 	double eta_mc   = minimcpair->etaMc();
 	double phi_mc   = (180./3.1415927)*minimcpair->phiMc();
-	int nHits      = minimcpair->nHitMc();
+	int nHits       = minimcpair->nHitMc();
 
 	double pt_rec   = minimcpair->ptPr();
-	//double px_rec   = minimcpair->pxPr();
-	//double py_rec   = minimcpair->pyPr();
-	//double pz_rec   = minimcpair->pzPr();
 	double p_rec    = minimcpair->pPr();
 	double eta_rec  = minimcpair->etaPr();
 	double phi_rec  = (180./3.1415927)*minimcpair->phiPr();

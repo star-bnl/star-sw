@@ -28,7 +28,7 @@ class StiEvaluatorHistograms : public HistogramGroup
   bool acceptEtaCut(double);
   bool acceptPair(StMiniMcPair*);
   bool acceptGeantId(int);
-  void slice(TH2D*h);
+  void slice(TH2D*h, double meanMin=-1.,double meanMax=1., double sigmaMin=0., double sigmaMax=1.);
   void divide(TH2D * h1, TH2D* h2, TH2D* h3);
 
  protected:

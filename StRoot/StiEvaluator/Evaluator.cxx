@@ -54,7 +54,7 @@ void Evaluator::save(const string &targetDirectory)
    for (iter=_histograms.begin();iter!=_histograms.end();++iter)
      {
        (*iter)->finish();
-       (*iter)->write(targetDirectory+(*iter)->getName());
+       (*iter)->write(targetDirectory+"/"+(*iter)->getName()+".root");
      }
 }
 
