@@ -1,0 +1,15 @@
+/* rl1_ks.idl */
+#include "PAM.idl"
+#include "rl0_data.idl"
+#include "rl1_ks_ctrl.idl"
+#include "rl1_ks_out.idl"
+
+interface rl1_ks : amiModule {
+        STAFCV_T call
+                ( inout rl0_data         lvl0
+                , inout rl1_ks_ctrl      cla
+                , inout rl1_ks_out       l1a
+        );
+};
+/*  Last mod. for rl1_ks: $Date: 1998/02/17 17:09:36 $ */
+
