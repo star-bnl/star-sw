@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.2 1999/07/02 03:01:56 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.3 1999/07/16 18:03:45 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.3  1999/07/16 18:03:45  pavlinov
+ * Little correction for StEclMake
+ *
  * Revision 1.2  1999/07/02 03:01:56  pavlinov
  * Little corrections for Linux
  *
@@ -28,11 +31,8 @@
 #include <math.h>
 #include "TArrayF.h"
 class StEmcGeom {
-  friend class StEmcHitCollection;  // !! 
-  friend class St_emc_Maker;        // !!
 private:
-
-  Int_t   mDetector;// Detector's number => see 
+  Int_t   mDetector;// Detector's number => see emc/inc/emc_def.h
   Int_t   mNModule; // Number of modeles (120 is default)
   Int_t   mNEta;    // Number of eta bins
   Int_t   mNSub;    // Subdivision in eta bin
