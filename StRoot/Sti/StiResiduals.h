@@ -1,7 +1,7 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResiduals.h,v 2.0 2002/12/10 21:59:59 pruneau Exp $
+ * $Id: StiResiduals.h,v 2.1 2003/03/17 19:10:25 andrewar Exp $
  *
  * /author Andrew Rose, Wayne State University 
  * October 2002
@@ -11,6 +11,9 @@
  *
  ******************
  * $Log: StiResiduals.h,v $
+ * Revision 2.1  2003/03/17 19:10:25  andrewar
+ * Added ifdef statement
+ *
  * Revision 2.0  2002/12/10 21:59:59  pruneau
  * Introducing version 2.0
  *
@@ -21,6 +24,10 @@
  * Base class for residual makers.
  *
  */
+
+
+#ifndef StiResiduals_HH
+#define StiResiduals_HH
 
 //forward declarations
 class StiTrack;
@@ -51,3 +58,4 @@ class StiResiduals
 };
   
 
+#endif
