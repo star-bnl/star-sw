@@ -161,8 +161,13 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
  cout << " StHbtBinaryReader::ReturnHbtEvent() - current filename: " << mFileName << endl;
  cout << " StHbtBinaryReader::ReturnHbtEvent() -  bytes read : " << binaryIO->bytesRead() << endl;
   //#endif
- cout << " StHbtBinaryReader::ReturnHbtEvent() - #tracks/#V0s : " << event->TrackCollection()->size() << "/";
- cout << event->V0Collection()->size() << endl;
+ if (event){
+   cout << " StHbtBinaryReader::ReturnHbtEvent() - #tracks/#V0s : " << event->TrackCollection()->size() << "/";
+   cout << event->V0Collection()->size() << endl;
+ }
+ else{
+   cout << "StHbtBinaryReader::ReturnHbtEvent() - failed cut - no StHbtEvent returned" << endl;
+ }
  return event;
 }
 
