@@ -20,6 +20,7 @@ class StiKalmanTrackFinder : public StiTrackFinder
     virtual void findTracks();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher
     
+    virtual void doNextTrackStep();
     virtual void doTrackFit();
     virtual void doTrackFind();
     virtual bool hasMore();
@@ -31,7 +32,8 @@ class StiKalmanTrackFinder : public StiTrackFinder
 
     //Local
     virtual void findTrack(StiTrack * t); //throw ( Exception);
-	virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
+    virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node);
+    //throw (Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
     void reserveHits(StiKalmanTrackNode * node);
@@ -52,8 +54,13 @@ protected:
     int maxNullCount;  
     int maxContiguousNullCount;
 
- private:
-
+private:
+    
+    StiKalmanTrack* mCurrentTrack;
+    StiKalmanTrackNode* mCurrentNode;
+    
+private:
+    
 	int       hitCount;
 	int       contiguousHitCount;
 	int       nullCount; 
