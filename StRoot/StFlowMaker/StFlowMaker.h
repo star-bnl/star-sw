@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.7 2000/05/16 20:59:32 posk Exp $
+//  $Id: StFlowMaker.h,v 1.8 2000/05/20 00:55:17 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.8  2000/05/20 00:55:17  posk
+//  Condensed flownanoevent.root somewhat.
+//
 //  Revision 1.7  2000/05/16 20:59:32  posk
 //  Voloshin's flownanoevent.root added.
 //
@@ -98,10 +101,9 @@ public:
   void          NanoEventRead(Bool_t flag=kFALSE);
   void          FlowEventWrite(Bool_t flag=kFALSE);
   void          FlowEventRead(Bool_t flag=kFALSE);
-  //void          SetNanoEventFileName(const Char_t*);
-  void          SetNanoEventFileName(Char_t* name="flownanoevent.root");
+  void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.7 2000/05/16 20:59:32 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.8 2000/05/20 00:55:17 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -109,7 +111,7 @@ protected:
   Flow::PhiWgt_t   mPhiWgt;                   // To make event plane isotropic
 
 private:
-  Char_t*          mNanoEventFileName;        // nano-DST file name
+  Char_t           mNanoEventFileName[32];    // nano-DST file name
   Bool_t           mNanoEventWrite;           // switch for nano-DST
   Bool_t           mNanoEventRead;            // switch for nano-DST
   Bool_t           mFlowEventWrite;           // switch for StFlowEvent
@@ -156,8 +158,7 @@ inline void StFlowMaker::NanoEventWrite(Bool_t flag)
 inline void StFlowMaker::NanoEventRead(Bool_t flag) 
           { mNanoEventRead=flag; mNanoEventWrite=kFALSE; mFlowEventRead=kFALSE;}
 
-//inline void StFlowMaker::SetNanoEventFileName(const Char_t* name) { mNanoEventFileName="flownanoevent.root";
-inline void StFlowMaker::SetNanoEventFileName(Char_t* name) { mNanoEventFileName=name;
-  //strncpy(mNanoEventFileName, name, 32); mNanoEventFileName[32] = '\0'; }
-}
+inline void StFlowMaker::SetNanoEventFileName(const Char_t* name) {
+  strncpy(mNanoEventFileName, name, 31); mNanoEventFileName[31] = '\0'; }
+
 #endif

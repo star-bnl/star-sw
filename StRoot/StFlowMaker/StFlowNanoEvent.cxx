@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $
+// $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -9,10 +9,8 @@
 //  The StFlowNanoEvent class has a simple event structure:
 //        TClonesArray    *fTracks;
 //
-//   The StFlowNanoEventHeader class:
 //        Int_t           mNtrack;                  // track number
-//        Long_t          mEventID;                 // event ID
-//        //UInt_t          mEventNumber;             // number of the event
+//        Int_t           mEventID;                 // event ID
 //        UInt_t          mOrigMult;                // number of StEvent tracks
 //        UInt_t          mCentrality;              // centrality bin
 //        StThreeVectorF  mVertexPos;               // primary vertex position
@@ -24,14 +22,20 @@
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowNanoEvent.cxx,v $
+// Revision 1.5  2000/05/20 00:55:17  posk
+// Condensed flownanoevent.root somewhat.
+//
 // Revision 1.4  2000/05/16 20:59:33  posk
 // Voloshin's flownanoevent.root added.
 //
 // Revision 1.2  2000/03/08 15:10:48  posk
-// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and $Log: StFlowNanoEvent.cxx,v $
-// Added $Id$ and Revision 1.4  2000/05/16 20:59:33  posk
-// Added $Id$ and Voloshin's flownanoevent.root added.
-// Added $Id$ and.
+// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and $Log: StFlowNanoEvent.cxx,v $
+// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and Revision 1.5  2000/05/20 00:55:17  posk
+// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and Condensed flownanoevent.root somewhat.
+// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and
+// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and Revision 1.4  2000/05/16 20:59:33  posk
+// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and Voloshin's flownanoevent.root added.
+// Added $Id: StFlowNanoEvent.cxx,v 1.5 2000/05/20 00:55:17 posk Exp $ and.
 //
 //
 // 

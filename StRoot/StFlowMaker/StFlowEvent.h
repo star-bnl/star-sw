@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.5 2000/05/16 20:59:30 posk Exp $
+// $Id: StFlowEvent.h,v 1.6 2000/05/20 00:55:15 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.6  2000/05/20 00:55:15  posk
+// Condensed flownanoevent.root somewhat.
+//
 // Revision 1.5  2000/05/16 20:59:30  posk
 // Voloshin's flownanoevent.root added.
 //
@@ -81,7 +84,7 @@ public:
   virtual        ~StFlowEvent();
 
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
-  Long_t         EventID() const;
+  Int_t          EventID() const;
   UInt_t         OrigMult() const;
   UInt_t         FlowEventMult() const;
   UInt_t         Centrality() const;
@@ -97,7 +100,7 @@ public:
   void SetPids();
   void PrintSelectionList();
   void MakeSubEvents();
-  void SetEventID(const Long_t&);
+  void SetEventID(const Int_t&);
   void SetOrigMult(const UInt_t&);
   void SetCentrality(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
@@ -110,7 +113,7 @@ public:
 
 private:
 
-  Long_t          mEventID;                             // ID of the event
+  Int_t           mEventID;                             // ID of the event
   UInt_t          mOrigMult;                            // number of tracks
   UInt_t          mCentrality;                          // centrality bin
   StThreeVectorF  mVertexPos;                           // primary vertex position
@@ -130,7 +133,7 @@ private:
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
   return pTrackCollection; }
 
-inline Long_t StFlowEvent::EventID() const { return mEventID; }
+inline Int_t StFlowEvent::EventID() const { return mEventID; }
 
 inline UInt_t StFlowEvent::OrigMult() const { return mOrigMult; }
 
@@ -149,8 +152,8 @@ inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t sel
 inline void StFlowEvent::SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
 { mPtCuts[0][harN][selN] = lo; mPtCuts[1][harN][selN] = hi; }
 
-inline void StFlowEvent::SetEventID(const Long_t& event) {
-  mEventID = event; }
+inline void StFlowEvent::SetEventID(const Int_t& id) {
+  mEventID = id; }
 
 inline void StFlowEvent::SetOrigMult(const UInt_t& tracks) {
   mOrigMult = tracks; }
