@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.40 2003/02/10 16:29:20 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.41 2003/02/19 22:28:32 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.41  2003/02/19 22:28:32  suaide
+// small modifications on QA histograms
+//
 // Revision 1.40  2003/02/10 16:29:20  suaide
 // small modifications
 //
@@ -578,6 +581,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 				EN+=c*ADCPOWER; 
         ADCPOWER*=ADCSUB;
       }
+      if(PED<=0) EN = 0;
       //if(ADCSUB<0) EN*=-1;
 			//correcting gain ..........
 			Float_t gain = 1;
@@ -643,8 +647,8 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				Float_t eta,phi;
 				mGeo[det]->getEtaPhi(i+1,eta,phi);
 				mHits[det]->Fill(eta,phi);
-        mAdc[det]->Fill(eta,phi,ADC);
-				mEnergyHist[det]->Fill(eta,phi,E);
+        if(ADC!=0) mAdc[det]->Fill(eta,phi,ADC);
+				if(E!=0) mEnergyHist[det]->Fill(eta,phi,E);
 			}
 		}
 		if(nHits>0)    mNhit->Fill((Float_t)nHits,(Float_t)det+1);
