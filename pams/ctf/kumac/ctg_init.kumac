@@ -1,5 +1,6 @@
  macro init
    macro/global/import *
+   exec read
  return
  
 ********************************************************************
