@@ -7,7 +7,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// $Id: St_DataSetIter.h,v 1.18 1999/12/28 21:24:07 fine Exp $                             
+// $Id: St_DataSetIter.h,v 1.19 1999/12/28 23:32:01 fine Exp $                             
 //
 // St_DataSetIter                                                       //
 //                                                                      //
@@ -52,6 +52,7 @@ public:
   virtual St_DataSet    *Add(St_DataSet *set, St_DataSet *dataset);
  
   virtual St_DataSet    *Cd(const Char_t *dirname);
+  virtual St_DataSet    *Cd(const St_DataSet *ds);
   virtual St_DataSet    *operator()( EDataSetPass mode=kContinue ) {return  Next(mode);}
   virtual St_DataSet    *operator()(const Char_t *path) { return Find(path); }
   virtual St_DataSet    *operator[](const Char_t *path);
@@ -92,23 +93,20 @@ public:
   virtual void           Notify(St_DataSet *dataset);
   const Option_t *GetOption() const                                      { return fNext ? fNext->GetOption():0; }
   virtual void           Reset(St_DataSet *l=0,Int_t depth=0);
-
   virtual St_DataSet *operator *() const ;
-  virtual St_DataSet *operator ++();
-  virtual St_DataSet *operator ++(int);
   ClassDef(St_DataSetIter,0) // class-iterator to navigate St_DataSet structure
 };
 
 inline St_DataSet *St_DataSetIter::operator *() const { return fDataSet == fNullDataSet ? fWorkingDataSet : fDataSet; }
-inline St_DataSet *St_DataSetIter::operator ++() { return Next(); }
-inline St_DataSet *St_DataSetIter::operator ++(int) { St_DataSet *ds = fDataSet; Next(); return ds == fNullDataSet ? fWorkingDataSet : ds; }
-inline const St_DataSet *St_DataSetIter::GetNullSet(){ return fNullDataSet; } // return a fake pointer == -1 casted to (St_DataSet *)
+inline const St_DataSet *St_DataSetIter::GetNullSet() { return fNullDataSet; } // return a fake pointer == -1 casted to (St_DataSet *)
 
 //__________________________________________________
 // $Log: St_DataSetIter.h,v $
+// Revision 1.19  1999/12/28 23:32:01  fine
+// St_DataSetIter  operator++ removed to avoid a future problem
+//
 // Revision 1.18  1999/12/28 21:24:07  fine
 // St_DataSetIter opeartor * and operator ++ have been implemented
-//                             
 //__________________________________________________
 #endif
 
