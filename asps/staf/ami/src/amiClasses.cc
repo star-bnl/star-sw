@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.29 1999/12/10 03:08:51 nevski Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.30 1999/12/10 03:13:38 nevski Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -108,7 +108,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
           char *b = myTblSpecs[i];
           char *a1,*b1,a0,b0,sa[50],sb[50]; 
           int  n;         
-          printf (" => BAD input -vs- required table specifications : \n");
+          printf (" => BAD input -vs- module specifications : \n");
           for (a1=a, b1=b;  *a1!=0 || *b1!=0;) 
           { 
             for (a0=' ',n=0;  *a1!=0&&a0!=','&&a0!=';'&&a0!='{';  a1++) 
