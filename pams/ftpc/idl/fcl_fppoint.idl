@@ -21,11 +21,14 @@
        float     x;        /* x-position of hit */
        float     y;        /* y-position of hit */
        float     z;        /* z-position of hit */
+       float     x_err;    /* x-position error of hit */
+       float     y_err;    /* y-position error of hit */
+       float     z_err;    /* z-position error of hit */
        float     s_phi;    /* cluster sigma in pad direction */
        float     s_r;      /* cluster sigma in drift direction */
     };
 
-/*  Last mod. for fcl_fppoint: $Date: 1998/02/23 14:32:57 $ */
+/*  Last mod. for fcl_fppoint: $Date: 1998/12/16 16:04:22 $ */
 
 
 

@@ -36,13 +36,32 @@
        float p_normalized;    /* normalized air pressure (in hPa) */
        float padtrans_e_min;  /* lowest e-field in padtrans database */
        float padtrans_e_max;  /* highest e-field in padtrans database */
+       float pad_err_diff[3]; /* point error[cm] in pad direction as */
+                              /* function of driftlength up to 2nd order*/
+       float time_err_diff[3];/* point error[cm] in time direction as */
+                              /* function of driftlength up to 2nd order*/
+       float pad_err_bad;     /* additional error for bad-fit clusters*/
+       float time_err_bad;    /* additional error for bad-fit clusters*/
+       float pad_err_unfold;  /* additional error for unfolded clusters*/
+       float time_err_unfold; /* additional error for unfolded clusters*/
+       float pad_err_failed;  /* additional error for failed-fit clusters*/
+       float time_err_failed; /* additional error for failed-fit clusters*/
+       float pad_err_cutoff;  /* additional error for cut-off clusters*/
+       float time_err_cutoff; /* additional error for cut-off clusters*/
+       float pad_err_sat;     /* additional error for saturated clusters*/
+       float time_err_sat;    /* additional error for saturated clusters*/
+       float pad_err_2mean;   /* additional error 2-pad-cluster, w.mean */
+       float pad_err_2gauss;  /* additional error 2-pad-cluster, gaussfit */
+       float pad_err_3mean;   /* additional error 3-pad-cluster, w.mean */
+       float pad_err_3gauss;  /* additional error 3-pad-cluster, gaussfit */
+       float z_err;           /* parameter for error in z-direction */ 
        char ampslopepath[200];/* path and name of ampslope database */
        char ampoffpath[200];  /* path and name of ampoff database */
        char timeoffpath[200]; /* path and name of timeoff database */
        char padtranspath[200];/* path and name of padtrans database */
    };
 
-/*  Last mod. for fcl_det: $Date: 1998/07/15 15:05:29 $ */
+/*  Last mod. for fcl_det: $Date: 1998/12/16 16:04:20 $ */
 
 
 
