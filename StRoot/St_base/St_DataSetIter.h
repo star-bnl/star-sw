@@ -89,7 +89,5 @@ public:
   ClassDef(St_DataSetIter,0)
 };
 
-inline St_DataSet *St_DataSetIter::NextDataSet(TIter &next){ return (St_DataSet *)next(); } 
-
 #endif
 

@@ -1,6 +1,12 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
+// $Id: St_DataSetIter.cxx,v 1.24 1999/04/08 16:44:08 fine Exp $
+// $Log: St_DataSetIter.cxx,v $
+// Revision 1.24  1999/04/08 16:44:08  fine
+// Working version of the NodeView family
+//
+
 //*KEEP,TDataset,T=C++.
 #include <iostream.h>
 #include <iomanip.h>
@@ -53,15 +59,16 @@ ClassImp(St_DataSetIter)
   fMaxDepth    = depth;
   fDepth       = 1;
   fDataSet     = 0; 
-  fNext = (link)? new TIter(link->GetList() ,dir):0;
+  fNext        = (link)? new TIter(link->GetList() ,dir):0;
 
   // Create a DataSet iterator to pass all nodes of the 
   //     "depth"  levels
   //  of  St_DataSet *link  
 
   if (fMaxDepth != 1) {
-     fNextSet[fDepth-1]= fNext;
+     fNextSet[0] = fNext;
      if (fMaxDepth > 100) fMaxDepth = 100;
+     fDepth = 0; 
   }
 }
 
@@ -69,14 +76,16 @@ ClassImp(St_DataSetIter)
 St_DataSetIter::~St_DataSetIter()
 {
   if (fMaxDepth != 1) {
-   for (int i = fDepth-1;i>=0;i--) {
+   Int_t level = fDepth;
+   if (level) level--;
+   for (Int_t i = level;i>=0;i--) {
      TIter *s = fNextSet[i];
      if (s) delete s;
    }
   }
   else 
      SafeDelete(fNext);
-  fDepth = 1;
+  fDepth = 0;
 }
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
@@ -193,6 +202,7 @@ Int_t St_DataSetIter::Du() const {
       cout << path << setw(TMath::Max(Int_t(40-strlen(path.Data())),Int_t(0))) << "...";
       const Char_t *type = nextset->IsFolder() ? "directory" : "table" ;
       cout << setw(10) << type;
+      cout  << " : " << setw(10) << nextset->GetTitle();
       cout << endl;   
   }
   return count;
@@ -371,6 +381,7 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
   else {
     // Check the whether the next level does exist 
     Bool_t mustNotify = kFALSE;
+    if (fDepth==0) {fDepth = 1; mustNotify = kTRUE;}
     if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) && mode == kContinue ) 
     {
       // create the next level iterator, go deeper
@@ -404,11 +415,16 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
              fDataSet = set;
         }
       }
-      if (mustNotify && fDataSet) Notify((St_DataSet *)fDataSet);
     }
   }
   return (St_DataSet *)fDataSet;
 }
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::NextDataSet(TIter &next){ 
+ St_DataSet *ds = (St_DataSet *)next(); 
+ if (ds) Notify(ds);
+ return ds;
+} 
 
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::NextDataSet(Int_t nDataSet)
@@ -485,6 +501,7 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
       
         if (yes) 
         {//go down
+          if (fDepth == 0) fDepth = 1;
           Notify(dsnext);
           fDepth++;
           ds = Find(name+len,dsnext,mkdirflag);
@@ -532,13 +549,16 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
   fDataSet = 0;
   if (fMaxDepth != 1) {
   // clean all interators
-    for (int i = fDepth-1;i>=0;i--) {
+    Int_t level = fDepth;
+    if (level) level--;
+    for (int i = level;i>=0;i--) {
       TIter *s = fNextSet[i];
       if (s) delete s;
     }
     fNext = 0; // this iterator has been deleted in the loop above
   }
-  fDepth = 1;
+
+  fDepth = 0;
 
   if (l) {
     fRootDataSet    = l;

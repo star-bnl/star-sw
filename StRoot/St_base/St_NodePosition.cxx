@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.13 1999/04/05 03:18:27 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.14 1999/04/08 16:44:10 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.14  1999/04/08 16:44:10  fine
+// Working version of the NodeView family
+//
 // Revision 1.13  1999/04/05 03:18:27  fine
 // St_Node family steps
 //
@@ -72,20 +75,7 @@
 //*KEEP,TPadView3D,T=C++.
 #include "TPadView3D.h"
 //*KEND.
- 
-#if 0
-const Int_t kMAXLEVELS = 20;
-const Int_t kVectorSize = 3;
-const Int_t kMatrixSize = kVectorSize*kVectorSize;
-const Int_t kSonsInvisible = BIT(17);
- 
-static Double_t gTranslation[kMAXLEVELS][kVectorSize];
-static Double_t gRotMatrix[kMAXLEVELS][kMatrixSize];
-static Int_t gGeomLevel = 0;
- 
-St_NodePosition *gNode;
-#endif
- 
+  
 R__EXTERN  Size3D gSize3D;
  
 ClassImp(St_NodePosition)
@@ -226,30 +216,6 @@ void St_NodePosition::Local2Master(Double_t *local, Double_t *master)
 //  and translation vector for this node must have been computed.
 //  This is automatically done by the Paint functions.
 //  Otherwise St_NodePosition::UpdateMatrix should be called before.
- 
-#if 0 
-   Double_t x,y,z;
-   Float_t bomb = gGeometry->GetBomb();
-   Double_t *matrix      = &gRotMatrix[gGeomLevel][0];
-   Double_t *translation = &gTranslation[gGeomLevel][0];
- 
-   x = bomb*translation[0]
-     + local[0]*matrix[0]
-     + local[1]*matrix[3]
-     + local[2]*matrix[6];
- 
-   y = bomb*translation[1]
-     + local[0]*matrix[1]
-     + local[1]*matrix[4]
-     + local[2]*matrix[7];
- 
-   z = bomb*translation[2]
-     + local[0]*matrix[2]
-     + local[1]*matrix[5]
-     + local[2]*matrix[8];
- 
-   master[0] = x; master[1] = y; master[2] = z;
-#endif   
 }
  
 //______________________________________________________________________________
@@ -263,34 +229,10 @@ void St_NodePosition::Local2Master(Float_t *local, Float_t *master)
 //  This is automatically done by the Paint functions.
 //  Otherwise St_NodePosition::UpdateMatrix should be called before.
  
-#if 0 
-   Float_t x,y,z;
-   Float_t bomb = gGeometry->GetBomb();
- 
-   Double_t *matrix      = &gRotMatrix[gGeomLevel][0];
-   Double_t *translation = &gTranslation[gGeomLevel][0];
- 
-   x = bomb*translation[0]
-     + local[0]*matrix[0]
-     + local[1]*matrix[3]
-     + local[2]*matrix[6];
- 
-   y = bomb*translation[1]
-     + local[0]*matrix[1]
-     + local[1]*matrix[4]
-     + local[2]*matrix[7];
- 
-   z = bomb*translation[2]
-     + local[0]*matrix[2]
-     + local[1]*matrix[5]
-     + local[2]*matrix[8];
- 
-   master[0] = x; master[1] = y; master[2] = z;
-#endif 
 }
   
 //______________________________________________________________________________
-void St_NodePosition::Paint(Option_t *option)
+void St_NodePosition::Paint(Option_t *)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*Paint Referenced node with current parameters*-*-*-*
 //*-*                   ==============================================
@@ -301,63 +243,7 @@ void St_NodePosition::Paint(Option_t *option)
 //*-*  vis = -2 shape is drawn. Its sons are not drawn
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-#if 0 
-   TPadView3D *view3D=gPad->GetView3D();
- 
-//*-*- Update translation vector and rotation matrix for new level
-   if (gGeomLevel)
-   {
- 
-      UpdateTempMatrix(&(gTranslation[gGeomLevel-1][0]),&gRotMatrix[gGeomLevel-1][0]
-                      ,fX,fY,fZ,fMatrix->GetMatrix()
-                      ,&gTranslation[gGeomLevel][0],&gRotMatrix[gGeomLevel][0]);
-      if (view3D)
-          view3D->UpdateNodeMatrix(this,option);
-   }
- 
-//*-*- Paint Referenced shape
-//   Int_t vis = fShape->GetVisibility();
-//   if ( vis == -1) return;
-   Int_t nsons = 0;
-   if (fNodes) nsons = fNodes->GetSize();
-//   if (vis == -3) {
-//     if (nsons == 0) vis = 1;
-//     else            vis = 0;
-//   }
- 
-   TAttLine::Modify();
-   TAttFill::Modify();
-   if (fVisibility && fShape->GetVisibility()) {
-      gNode = this;
-      fShape->SetLineColor(GetLineColor());
-      fShape->SetLineStyle(GetLineStyle());
-      fShape->SetLineWidth(GetLineWidth());
-      fShape->SetFillColor(GetFillColor());
-      fShape->SetFillStyle(GetFillStyle());
-      if (view3D)
-          view3D->SetAtSt_NodePosition(this,option);
-      fShape->Paint(option);
-   }
-   if ( TestBit(kSonsInvisible) ) return;
- 
-//*-*- Paint all sons
-   if(!nsons) return;
- 
-   gGeomLevel++;
-   St_NodePosition *node;
-   TObject *obj;
-   TIter  next(fNodes);
-   while ((obj = next())) {
-      if (view3D)
-          view3D->PushMatrix();
- 
-      node = (St_NodePosition*)obj;
-      node->Paint(option);
-      if (view3D)
-          view3D->PopMatrix();
-   }
-   gGeomLevel--;
-#endif 
+
 }
 //_______________________________________________________________________
 void St_NodePosition::Print(Option_t *option)
