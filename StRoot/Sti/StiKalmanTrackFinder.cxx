@@ -265,7 +265,6 @@ void StiKalmanTrackFinder::doTrackFind()
       findTrack(track);
 
       trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
-      reserveHits(track->getLastNode());
       trackContainer->push_back(track);
       track->update();  //This updates the track on the display
       trackDone = false;  // ready for a new track
