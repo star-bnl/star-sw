@@ -1,15 +1,17 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.5 2000/11/01 17:45:24 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.6 2000/11/07 14:11:43 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 2.5  2000/11/01 17:45:24  lasiuk
- *  MAJOR. hitFilter overhaul. members reordered, padplane dimension kept as
- *  a member.  addition of initTuple.  Additional dependencies of
- *  min/max algorithms
+ *  Revision 2.6  2000/11/07 14:11:43  lasiuk
+ *  initCutParameters() and diagnositis print added.
+ *  bins for <d> and sigma_d added.
+ *  TPC hits for RICH tracks written out.
+ *  (file) ptr checked before writing ntuple.
+ *  check flags on Hits instead of ADC value
  *
  *
  *  Revision 2.6  2000/11/07 14:11:43  lasiuk
@@ -147,6 +149,9 @@ private:
     //
     double mShortWave;
     double mLongWave;
+    double mDefaultShortWave;
+    double mDefaultLongWave;
+
     // hit filter
     double innerDistance,outerDistance,meanDistance;
     double innerAngle,outerAngle,meanAngle; 
@@ -157,17 +162,28 @@ private:
     
     //
     // pad plane dimensions
-    // cuts
+    StThreeVector<double>   mPadPlaneDimension; //!
+    
+    StRichPadMonitor*  mPadMonitor; //!
+    StRichGeometryDb*  mGeometryDb; //!
+    StRichMaterialsDb* mMaterialDb; //! 
+    StRichCoordinateTransform* mCoordinateTransformation; // !  
+    StRichMomentumTransform*   mMomentumTransformation; //!
+
+    //
+    // Cuts: parameters and types
     //
     // Event
     float mVertexWindow;
     
     // Hits
     int   mAdcCut;
-    int   mAdcCut;
     
     // Track
     float mLastHitCut;
+    float mDcaCut;
+    int   mFitPointsCut;
+    float mEtaCut;
     float mPtCut;
     float mPathCut;
     float mPadPlaneCut;
@@ -188,9 +204,6 @@ private:
     TFile*   file;          //!
     TNtuple* trackNtuple;   //!
     TNtuple* geantTrackNtuple;   //!
-    TNtuple* initsitup; //!
-    TNtuple* finalsitup; //!
-
     TNtuple* geantPhotonNtuple;   //!
     TNtuple* geantPixelNtuple;   //!
     TNtuple* geantCloseHitNtuple;   //!
@@ -255,6 +268,7 @@ private:
 
   
 public:
+  
     StRichPIDMaker(const Char_t *name="RICHPID", bool writeNtuple=false);
     virtual ~StRichPIDMaker();
   
@@ -280,13 +294,25 @@ public:
     Int_t fillTrackList(StEvent*, const StSPtrVecRichHit*);
 
     //
+    // functions to apply cuts
+    // and set cut parameters
+    //
+    bool checkEvent(StEvent*);
+    bool checkHit(StRichHit*);
+    bool checkTrack(StRichTrack*);
     bool checkTrack(StTrack*);
+    bool checkTrackMomentum(float);
+
+    //
+    // set/Print cut parameters at the macro Level
+    //
+
+    void printCutParameters(ostream& os=cout) const;
     
     // Event Level
     void setVertexWindow(float);
 
     // Hit Level
-    void setAdcCut(int);
     void setAdcCut(int);
 
     // Track Level
