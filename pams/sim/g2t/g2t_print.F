@@ -1,18 +1,8 @@
       FUNCTION  G2T_PRINT (  p_vert_h,             p_vert ,
      >                       p_track_h,            p_track )
       IMPLICIT  NONE
-      INTEGER*4 G2T_PRINT
-
-      INTEGER   It, Iv, Ityp, Npar, Istop, LenT, LenV, LBUF, i,
-     >          Nd, Id, NBytPW, LabelV, LabelT, Label1, IHEAD(1000)
-      Parameter (Lbuf=200,NBytPW=4)
-      INTEGER   NBUF, NtBeam, NtTarg, Ipart, eg_label, Parent, NwHead,
-     >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv 
-      REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
-     >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
-     >          d,P(4),V(3),am,time,Vcut/0.0010/
-      CHARACTER NAPART*24,Cvol*4,Cshap*4
-      Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
+      INTEGER   G2T_PRINT, Iv, i, NtBeam, NtTarg, NBUF
+      REAL      VERT(3), TOFG, UBUF(100) 
 
 #include       "g2t_print.inc"
 #include       "geant321/gcnum.inc"

@@ -17,30 +17,25 @@
       Function   G2R_GET_HIT (Csys)
       IMPLICIT   NONE
 *KEEP,genhit.
-*     - - - - - - - - - - - - - -
-      Integer         Lnmax,Lnam0,Nmh
-      Parameter       (Lnmax=50,Lnam0=35,Nmh=15)
-*     - - - - - - - - - - - - - -
-      real            xxx(3),ccc(3),QQ(Lnmax)
+      Integer         Lnmax, Nmh
+      Parameter       (Lnmax=50,Nmh=15)
       Integer         id,trac,next,volume,IQQ(Lnmax)
-      Real            x,   xx,   c,   p   ,r,rr,phi,the,eta,
-     >                tdr,tof,Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn
+      Real            x,   xx,   c,   p   ,r,rr,phi,the,eta,tdr,tof,
+     >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn,QQ(Lnmax)
       common /genhit/ id,trac,next,volume,
-     >                x(3),xx(3),c(3),p(4),r,rr,phi,the,eta,
-     >                tdr,tof,Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
+     >                x(3),xx(3),c(3),p(4),r,rr,phi,the,eta,tdr,tof,
+     >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *     - - - - - - - - - - - - - -
       character*4     Cset,Cdet
       Integer                   nvl,     numbv
-      Real                                          hits
-      common /gensit/ Cset,Cdet,nvl(Nmh),numbv(Nmh),hits(Nmh)
+      common /gensit/ Cset,Cdet,nvl(Nmh),numbv(Nmh)
 *     - - - - - - - - - - - - - -
 *KEND.
       Integer         G2R_GET_HIT,AgHITGET,G2T_VOLUME_ID,i
       real            XYZTr(nmh)
       character*3     Csys
 *
-*        call VZERO   (NVL,nmh)
          i = AgHITGET (0,XYZTr)
          G2R_GET_HIT = i
          if (i.eq.0) volume = g2t_volume_id (Csys,NUMBV)
