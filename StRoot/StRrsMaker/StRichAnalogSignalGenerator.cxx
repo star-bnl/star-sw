@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.4 2000/02/08 23:51:13 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.5 2000/02/14 01:09:46 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,9 +32,12 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
- * Revision 1.4  2000/02/08 23:51:13  lasiuk
- * removal of rrs macro---CC4.2 cannot handle it!
+ * Revision 1.5  2000/02/14 01:09:46  lasiuk
+ * add track_p to GHit c'tor
  *
+ * Revision 1.6  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.5  2000/02/14 01:09:46  lasiuk
  * add track_p to GHit c'tor
@@ -104,6 +107,8 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
     (*mTransform)(local, raw);
 
     //
+    // horizon effect - limits on rows and cols
+    //
     pair<int, int> rowLimits = calculateRowLimits(raw);
     pair<int, int> padLimits = calculatePadLimits(raw);
 
@@ -119,7 +124,7 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 	    transform(tmpRaw,tmpLoc);
     StRichLocalCoordinate tmpLoc;
 	    z = tmpLoc.position().z();
-	
+	tmpRaw.setRow(i);
 	    q00 = induceTension (( (hit.position().x()-x) - mPadLength/2)/mAnodePadPlaneSpacing,   
 				 ( (hit.position().z()-z) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
 	    q10 = induceTension (( (hit.position().x()-x) + mPadLength/2)/mAnodePadPlaneSpacing,   
@@ -135,10 +140,12 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
 	    q11 = induceTension (( (hit->position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
 				 ( (hit->position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
-	    mOutput->putSignal(i,j,s,hit.id());
+
 	    s =  q * (q00-q10-q01+q11);
 	    sum += s;
-		StRichViewer::getView()->mAnalogSignals->Fill(z,x,s);        // histograms
+		StRichViewer::getView()->mAnalogSignals->Fill(z,x,s);
+	    mOutput->putSignal(i,j,s,hit.id(),hit.trackp());
+	    
 	    // save signal on pad
 	    mOutput->putSignal(i,j,s,hit->id(),hit->trackp());
 #ifdef RICH_WITH_VIEWER

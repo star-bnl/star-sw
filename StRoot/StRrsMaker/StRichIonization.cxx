@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichIonization.cxx,v 1.5 2000/02/11 21:11:37 lasiuk Exp $
+ * $Id: StRichIonization.cxx,v 1.6 2000/02/14 01:14:06 lasiuk Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,9 +22,12 @@
  *
  *********************************************************************
  * $Log: StRichIonization.cxx,v $
- * Revision 1.5  2000/02/11 21:11:37  lasiuk
- * use new name in physics db interface
+ * Revision 1.6  2000/02/14 01:14:06  lasiuk
+ * add track_p to GHit c'tor
  *
+ * Revision 1.7  2000/03/12 23:56:34  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
  *
  * Revision 1.6  2000/02/14 01:14:06  lasiuk
  * add track_p to GHit c'tor
@@ -69,7 +72,7 @@ StRichIonization::~StRichIonization() { /* nopt */ }
 
 
     int numberOfInteractions = mRandom.Poisson( mRound(hit.ds() * mAverageNumberOfInteractions) );
-    PR(numberOfInteractions);
+{
     // locals
 	
     int numberOfInteractions = mRandom.Poisson( nearestInteger(hit.ds() * mAverageNumberOfInteractions) );
@@ -100,7 +103,7 @@ StRichIonization::~StRichIonization() { /* nopt */ }
 	while ( n <= mPhysicsDb->e_distribut.size() && p >= mPhysicsDb->e_distribut[n-1] )
 	    n++;
 	
-	    StRichGHit aGHit(x,y,z,hit.id());
+#ifdef RICH_WITH_VIEWER
 	if (StRichViewer::histograms )
 	    StRichViewer::getView()->mClusterElectrons->Fill(n);
 #endif
