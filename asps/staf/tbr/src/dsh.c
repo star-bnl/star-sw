@@ -12,7 +12,7 @@
 #include "dscuts.h"
 void Say(char *mess);
 int gAlreadyErr;
-extern int gDone;
+int gDone1;
 char *gTheBlurb="\
 NOT CRITICAL, CASUAL USERS CAN IGNORE:\n\
    At certain points this program tries to enlarge a window.  It will fail\n\
@@ -223,7 +223,7 @@ void Err(int x) {
   PP"Send email to ward@physics.utexas.edu\n");
   PP"If possible, point me to the tables and situation that caused\n");
   PP"this error.\n");
-  gDone=7; return;
+  gDone1=7; return;
 }
 void TouchUpType(void) {
   int ii;
@@ -425,7 +425,7 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
       /* PP"(%2d,%2d) len=%4d bf2=%s\n",ii,jj,strlen(xx),bf2); Sleep(2); */
       if(lineCnt>=ml) {
         PP"Table browser error.\n");
-        PP"lineCnt=%d, maxLines=%d.\n",lineCnt,ml); gDone=7; return;
+        PP"lineCnt=%d, maxLines=%d.\n",lineCnt,ml); gDone1=7; return;
       }
       tlm[lineCnt]=ii; /* see 6gg */
       subscript[lineCnt]=jj-1; /* www */
@@ -517,7 +517,7 @@ void DatasetList(int *tot,int *wh_DsA,int maxLines,char *out,int max) {
     if(strlen(out)+strlen(bf2)>max-SLACK) Err( 14); strcat(out,bf2);
     if(lineCnt>=maxLines) {
       PP"Error in the table browser error.\n");
-      PP"lineCnt=%d, maxLines=%d.\n",lineCnt,maxLines); gDone=7; return;
+      PP"lineCnt=%d, maxLines=%d.\n",lineCnt,maxLines); gDone1=7; return;
     }
     wh_DsA[lineCnt]=ii; strcat(out,"\n"); /*using SLACK*/ lineCnt++;
   }
@@ -645,7 +645,7 @@ void tbrNewDSView(DS_DATASET_T **dsPtrs,long nDsPtr) {
   /* Must wait for return before calling this again, until port to C++. */
   int ii;
   UpdateUsageLog();
-  gAlreadyErr=0; gDone=0; gNumDatasetWindows=0; /* June 28 1995 */
+  gAlreadyErr=0; gDone1=0; gNumDatasetWindows=0; /* June 28 1995 */
   gIndent=INDENT_INIT; gNDs=0;
   PP"Version %s %s.\n",__DATE__,__TIME__);
   Ose(); PP"%s",gTheBlurb); Ose();
