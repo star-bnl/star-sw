@@ -1,11 +1,27 @@
+//  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
+// 
+//*-- Author : George , Jan Balewski 
+// $Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $
+// $Log: StppTrigMaker.h,v $
+// Revision 1.2  2001/02/28 19:06:13  balewski
+// some reorganizations
+//
+// Revision 1.1.1.1  2001/01/31 14:00:07  balewski
+// First release
+//
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                     
+//  Emulates trigger response for the M-C data
+// 
+//                                                                     
+//////////////////////////////////////////////////////////////////////////
 #ifndef STAR_StppTrigMaker
 #define STAR_StppTrigMaker
    
 //////////////////////////////////////////////////////////////////////////
 //                                                              
 // StppTrigMaker : Triggering high Pt events
-//                                                                     
-//  Copy selected info from staf tables to my class of JTable 
 //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
@@ -18,11 +34,12 @@ class StppMiniDst;
 #include "TH2.h"// for histos
 class TH1F;
 class TH2F;
-struct trig_set
-{ float ctb_time_max_ns;
-  float ctb_ener_thr_mev;
-  int ctb_sumADC_min; 
-  int mwc_sect_mult_min; };
+
+struct trig_set {
+  float CtbTofMax_ns; // (ns)
+  float CtbDEnThres_mev; // (MeV)
+  int CtbnSlatMax, CtbnDiPatchMax;
+};
 
 class StppTrigMaker : public StMaker 
 {  
@@ -32,38 +49,38 @@ class StppTrigMaker : public StMaker
   struct trig_set set;
   Int_t Finish();
   TH1F *h1;
-  TH1F *h2;
-  TH1F *h3;
-  TH1F *h4;
   TH1F *h5;
   TH1F *h6;
   TH1F *h7;
   TH2F *h25;
 
-  TH1F *hj[8];
+  TH1F *hge[16];
+  TH1F *hctb[16];
+  void trigOnCtb(int&, int&, int&);
+  void trigOnMwc(int&, int&);
+  int getGeneratedLP(float &, int&, int&);
+  void addMiniDst();
 
-  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.1.1.1 2001/01/31 14:00:07 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $";
  
-   Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.1.1.1 2001/01/31 14:00:07 balewski Exp $";
-
+  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $";
 
  protected:  //....................................................
   
-
  public: //....................................................
+   void Setup(float x1, float x2,  int i1, int i2){
+     set.CtbTofMax_ns=x1;
+     set.CtbDEnThres_mev=x2;
+     set.CtbnSlatMax=i1;
+     set.CtbnDiPatchMax=i2;
+   } ;
    StppTrigMaker(const char *name="ppTrig");
-   void Setup(float x1,  float x2, int i1, int i2){
-     set.ctb_time_max_ns=x1;
-     set.ctb_ener_thr_mev=x2;
-     set.ctb_sumADC_min=i1;
-     set.mwc_sect_mult_min=i2;} ;
    virtual       ~StppTrigMaker();
    virtual Int_t Init();
    virtual Int_t  Make();
    int  decision ; // see description 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: StppTrigMaker.h,v 1.1.1.1 2001/01/31 14:00:07 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    
    ClassDef(StppTrigMaker, 1)   //StAF chain virtual base class for Makers
 };

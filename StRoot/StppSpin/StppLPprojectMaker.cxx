@@ -1,15 +1,17 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.1.1.1 2001/01/31 14:00:07 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.2 2001/02/28 19:06:12 balewski Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.2  2001/02/28 19:06:12  balewski
+// some reorganizations
+//
 // Revision 1.1.1.1  2001/01/31 14:00:07  balewski
 // First release
 //
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StppLPprojectMaker class for Makers                                        //
-//                                                                      //
+// Projects events in tho phi/pT bins depending on spin bits            //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -38,15 +40,13 @@ Int_t StppLPprojectMaker::Init(){
 
 //_____________________________________________________________________________
 Int_t StppLPprojectMaker::Make(){
- cout <<" Mmmmmmmmmmmmmmmmmmmmmm   start maker ::"<<GetName() <<" mode="<<m_Mode<<endl;
-
-  StppMiniDst *my=StppMiniDst::GetppMiniDst(this); assert(my);
-  StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
+  cout <<" Mmmmmmmmmmmmmmmmmmmmmm   start maker ::"<<GetName() <<" mode="<<m_Mode<<endl;
   
-  if(my->gLP.good<0) return kStOK;
-
-  assert(my->gLP.good);
-
+  StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
+  StppMiniDst *my=StppMiniDst::GetppMiniDst(this); assert(my); 
+  printf("ppMiniDst back: pT=%f polDir=%d\n",my->rLP.pt,my->polDir);
+  if(my->rLP.pt<0) return kStOK; //not valid event
+  
   //................................................
   hst[0]->Fill(my->gLP.pt); // all input events vs. gPT
 
