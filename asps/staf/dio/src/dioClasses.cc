@@ -138,7 +138,7 @@ bool_t result;
 STAFCV_T dioFileStream:: open (DIO_MODE_T mode) {
 
    xdr_op xdr_mode;
-   char* fo_mode="rb";
+   char fo_mode[3];
 
 //- Set XDR & fopen modes -**
    switch (mode){
