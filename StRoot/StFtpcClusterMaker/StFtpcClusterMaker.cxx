@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.74  2004/09/08 16:03:26  jcs
+// correct binning error in fcl_flags histogram
+//
 // Revision 1.73  2004/09/07 14:09:07  jcs
 // use the IAttr(".histos") to control histogrammingZ
 //
@@ -397,7 +400,7 @@ Int_t StFtpcClusterMaker::Init(){
   m_padvstime_West = new TH2F("fcl_padvstimeW","FTPCW padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
   m_padvstime_East = new TH2F("fcl_padvstimeE","FTPCE padlength vs. timelength",12,0.5,12.5,10,0.5,10.5);
   if (IAttr(".histos")) {
-     m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
+     m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,8,0.,8.);
      m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
      m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
      m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
@@ -772,8 +775,8 @@ void StFtpcClusterMaker::MakeHistograms()
     if (IAttr(".histos")) {
        Int_t flag = hit->GetFlags();
        if (flag > 0) {
-          Int_t bin = 6;
-          for (Int_t twofac=32; twofac>0; twofac=twofac/2,bin--) {
+          Int_t bin = 7;
+          for (Int_t twofac=128; twofac>0; twofac=twofac/2,bin--) {
 	     Int_t nbit = flag/twofac;
              if (nbit != 1) 	continue;
              m_flags->Fill((float)bin);
