@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.15 1999/12/23 18:09:07 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.16 2000/01/26 18:59:18 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.16  2000/01/26 18:59:18  yepes
+// *** empty log message ***
+//
 // Revision 1.15  1999/12/23 18:09:07  yepes
 // Double interface to read DAQ format or tpchit_st from tpc
 //
@@ -95,14 +98,39 @@ Int_t St_l3t_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Make(){
 //
-//   Depending on m_Mode the online or offline maker are used.
+//   Depending on m_Mode the online or offline makers are used.
 //
-   if ( !m_Mode ) return MakeOnLine();
-   else           return MakeOffLine();
+   if ( m_Mode == 0 ) {
+      if ( MakeOnLine() == kStWarn ) return MakeOffLine();
+      return kStOk ;
+   }
+   else if ( m_Mode == 1 ) {
+      if ( MakeOnLine() == kStWarn ) return kStErr ;
+   }
+   else if ( m_Mode == 3 ) {
+      if ( MakeOffLine() == kStWarn ) return kStErr ;
+   }
+   else {
+      fprintf ( stderr, "St_l3t_Maker:Make: m_Mode %d invalid option \n", m_Mode ) ;
+      fprintf ( stderr, "                   Nothing done!!!" ) ;
+   }
+   return kStOk ;
 }
  //_____________________________________________________________________________
 Int_t St_l3t_Maker::MakeOnLine(){
 
+
+// get l3 dataset
+   St_DataSet* sec_bank_set = 0 ;
+   sec_bank_set = GetInputDS("l3Clufi");
+   if ( !sec_bank_set ) {
+      fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
+      return kStWarn;
+   }
+   fprintf ( stderr, "St_l3t_Maker:MakeOnLine: Online space points as input for L3T \n" ) ;
+//
+//    Create tracker and gl3 objects
+//
    FtfSl3   tracker ;
    gl3Event gl3 ;
    int const maxBytes = 100000 ;
@@ -115,14 +143,6 @@ Int_t St_l3t_Maker::MakeOnLine(){
 // tracker.para.infoLevel = 10 ;
    gl3.bField = 0.5 ;
    tracker.reset();
-
-// get l3 dataset
-   St_DataSet* sec_bank_set = 0 ;
-   sec_bank_set = GetInputDS("l3Clufi");
-   if ( !sec_bank_set ) {
-      fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
-      return kStWarn;
-   }
 
 // create iterator
 
@@ -230,11 +250,13 @@ Int_t St_l3t_Maker::MakeOffLine(){
       fprintf ( stderr, " St_l3t_Maker::MakeOffLine: No TPC space points \n" ) ;
       return kStWarn;
    }
+   fprintf ( stderr, "St_l3t_Maker:MakeOffLine: Offline space points as input for L3T \n" ) ;
+
    Int_t nHits = tphit->GetNRows();
    St_tcl_tphit   *l3Hit = new St_tcl_tphit("l3Hit",nHits);
    m_DataSet->Add(l3Hit);
    *l3Hit = *tphit ;
-  
+
    tcl_tphit_st*  hit  = (tcl_tphit_st  *)l3Hit->GetTable();
   
    int maxTracks      = nHits / 10 ; 
@@ -304,7 +326,11 @@ Int_t St_l3t_Maker::MakeOffLine(){
       tTrk->tanl     = fTrk->tanl ;
       tTrk->z0       = fTrk->z0   ;
    }
+//
    trackH->nok = tracker.nTracks ;
+//
+   delete []tracker.hit ;
+   delete []tracker.track ;
 //
    MakeHistograms();
    return kStOk ;
