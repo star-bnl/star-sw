@@ -1,5 +1,8 @@
-* $Id: gst_year_1a.kumac,v 1.1 1998/09/08 23:09:32 fisyak Exp $
+* $Id: gst_year_1a.kumac,v 1.2 1999/01/13 13:47:53 fisyak Exp $
 * $Log: gst_year_1a.kumac,v $
+* Revision 1.2  1999/01/13 13:47:53  fisyak
+* Add global for log_file. Thanks Janet
+*
 * Revision 1.1  1998/09/08 23:09:32  fisyak
 * gstar+g2t  for 1a
 *
@@ -42,7 +45,7 @@ MACRO gst_year_1a _
  macro/global/create gstar_settings [gstar_settings]
  macro/global/create output_fzd_file   ""      'Output fz file'
  macro/global/create output_xdf_file   ""      'Output xdf file' 
- 
+ macro/global/create log_file         [log]
 * trace off
    
 ***********************************************************
@@ -76,7 +79,6 @@ MACRO gst_year_1a _
     domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
   
  macro/global/import *
- log_file = [log] 
    message ' *** log_file                --> ' [log_file]
  string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_xdf_file]
    fmessage $quote([string])  [log_file]
