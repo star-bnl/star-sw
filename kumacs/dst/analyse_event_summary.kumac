@@ -1,5 +1,6 @@
 * 10/9/98 K. Turner
-* - this kumac reads in an ntuple with the event_summary table made from dst
+* - first run call_bfc_read_dst_check.kumac then this one.
+* - This kumac reads in an ntuple with the event_summary table made from dst
 *   with i.d. 111 and makes plots
 * - input the ntuple file name!
 ******************************************************************
@@ -102,7 +103,7 @@ hi/file 21 [ntuple_file]
  opt stat
  set stat 111111
  opt date
-  zone 1 3
+  zone 2 3
 * global tracks
   opt logy
     hi/pl 101
