@@ -190,7 +190,7 @@ void StiKalmanTrack::initialize(double curvature,
 				const StThreeVectorD& origin,
 				const hitvector & hits)
 {
-  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started -----------------------------"<<endl;
+  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   hitvector::const_iterator it;
   //StiKalmanTrackNode * node  = 0;
@@ -545,10 +545,6 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
    </ol>
 	 \return outer most hit node on this track
 */
-
-int bozo;
-
-
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
   if (firstNode==0 || lastNode==0)
@@ -559,18 +555,14 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
     {
       for (it=begin();it!=end();it++)
 	{
-	  if (bozo>0) cout << "--------- 1 ----------- HIT:"<< *it<<endl;
-	  if ((*it).getHit())
-	    return &*it;
+	  if ((*it).getHit()) return &*it;
 	}
     }
   else
     {	
       for (it=end();it!=begin();it--)
 	{
-	  if (bozo>0) cout << "--------- 2 ----------- HIT:"<< *it<<endl;
-	  if ((*it).getHit())
-	    return &*it;
+	  if ((*it).getHit()) return &*it;
 	}
     }
   throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
@@ -586,10 +578,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 */
 bool  StiKalmanTrack::isPrimary() const
 {
-  bozo =1;
   StiKalmanTrackNode * node = getInnerMostHitNode();
-  bozo =0;
-  cout << "StiKalmanTrack::isPrimary() -I- innerMostHitNode->_x :" << node->_x<<endl;
   return (fabs(node->_x)<2.) ? true : false;
 }
 
@@ -774,12 +763,11 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
   tNode->reset();
   StiHit *myHit;
-  cout << "x,y,z:"<< localVertex.x() << " " <<  localVertex.y() << localVertex.z() << endl;
-  cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
-  cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
+  //cout << "x,y,z:"<< localVertex.x() << " " <<  localVertex.y() << localVertex.z() << endl;
+  //cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
+  //cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
   if (tNode->propagate(sNode, &localVertex))
     { 
-      cout << "SKT::extendToVertex() -I-1 tNode->_x:"<< tNode->_x<<endl;
       chi2 = tNode->evaluateChi2(&localVertex); 
       if (chi2<pars->maxChi2Vertex)
 	{
@@ -789,7 +777,6 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setChi2(chi2);
 	  tNode->setDetector(0);
 	  add(tNode);
-	  cout << "SKT::extendToVertex() -I-2 tNode->_x:"<< tNode->_x<<endl;
 	  trackExtended = true;
 	}
     }
