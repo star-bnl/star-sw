@@ -157,6 +157,7 @@ int main(int argc, char **argv)
 "/*------------------ STOP --------*/ \n"
 "%s"						/* asp_stops() */
 " \n"
+"   printf(\"\\n\"); \n"
 "   return 1; \n"
 "} \n"
 " \n"

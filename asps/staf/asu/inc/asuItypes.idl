@@ -1,6 +1,6 @@
 //:Copyright 1995, Lawrence Berkeley Laboratory
 //:>--------------------------------------------------------------------
-//:FILE:        asu_Itypes.idl
+//:FILE:        asuItypes.idl
 //:DESCRIPTION: Analysis Service Utilities idl file
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
