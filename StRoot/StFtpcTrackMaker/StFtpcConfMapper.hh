@@ -1,5 +1,10 @@
-// $Id: StFtpcConfMapper.hh,v 1.12 2002/04/05 16:50:11 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.13 2002/04/29 15:49:50 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.13  2002/04/29 15:49:50  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.12  2002/04/05 16:50:11  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -88,6 +93,7 @@
 #ifndef STAR_StFtpcConfMapper
 #define STAR_StFtpcConfMapper
 
+#include "StFtpcTrackingParams.hh"
 #include "StFtpcTracker.hh"
 #include "StFtpcConfMapPoint.hh"
 #include "StFtpcTrack.hh"
@@ -204,25 +210,22 @@ public:
 
   // setter
   void SetLaser(Bool_t f)    { mLaser = f;  }                                             // set laser flag
+
+  void Settings(TString method);                                                          // set settings by tracking procedure
+  void Settings(Int_t method_id);                                                         // set settings by tracking id
   void Settings(Int_t trackletlength1, Int_t trackletlength2, 
 		Int_t tracklength1, Int_t tracklength2, 
 		Int_t rowscopetracklet1, Int_t rowscopetracklet2,
 		Int_t rowscopetrack1, Int_t rowscopetrack2,
 		Int_t phiscope1, Int_t phiscope2, 
 		Int_t etascope1, Int_t etascope2);                                        // sets all settings of tracker
-  void Settings(Int_t trackletlength, Int_t tracklength, Int_t rowscopetracklet, 
-		Int_t rowscopetrack, Int_t phiscope, Int_t etascope);                     // sets settings for vertex constraint on or off
-  void MainVertexSettings(Int_t trackletlength, Int_t tracklength, Int_t rowscopetracklet, 
-			  Int_t rowscopetrack, Int_t phiscope, Int_t etascope);           //  sets settings for vertex constraint on   
-  void NonVertexSettings(Int_t trackletlength, Int_t tracklength, Int_t rowscopetracklet, 
-			 Int_t rowscopetrack, Int_t phiscope, Int_t etascope);            //  sets settings for vertex constraint off 
 
-  void SetCuts(Double_t maxangletracklet1, Double_t maxangletracklet2, Double_t maxangletrack1, Double_t maxangletrack2, 
-	       Double_t maxcircletrack1, Double_t maxcircletrack2, Double_t maxlengthtrack1, Double_t maxlengthtrack2);  // sets all cuts
-  void SetCuts(Double_t maxangletracklet, Double_t maxangletrack, Double_t maxcircletrack, Double_t maxlengthtrack);     // sets cuts for vertex constraint on or off
-  void SetTrackCuts(Double_t maxangle, Double_t maxcircle, Double_t maxlength, Bool_t vertex_constraint);                // sets cuts of tracks for the given vertex_constraint
-  void SetTrackletCuts(Double_t maxangle, Bool_t vertex_constraint);                                                     // sets cut of tracklet for the given vertex_constraint
-  void SetVertexConstraint(Bool_t f) { mVertexConstraint = f; }                                                          // sets vertex constraint (on or off)
+  void Cuts(TString method);                                                              // set cuts by tracking procedure
+  void Cuts(Int_t method_id);                                                             // set cuts by tracking id
+  void Cuts(Double_t maxangletracklet1, Double_t maxangletracklet2, Double_t maxangletrack1, Double_t maxangletrack2, 
+	    Double_t maxcircletrack1, Double_t maxcircletrack2, Double_t maxlengthtrack1, Double_t maxlengthtrack2);  // sets all cuts
+
+  void SetVertexConstraint(Bool_t f) { mVertexConstraint = f; }                                                       // sets vertex constraint (on or off)
 
   // getter
   Bool_t    GetLaser()               { return mLaser;            }  // returns laser flag
@@ -279,6 +282,7 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
       Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, 
 			       const StFtpcConfMapPoint *newhit, Bool_t backward = (Bool_t)true);                // returns true if phi and eta cut holds
               void  HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max);                // loops over tracks and looks for split tracks
+              void  HandleSplitTracks();                                                                         // HandleSplitTracks() with default values
               void  MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2);                                          // merges two tracks
               void  AdjustTrackNumbers(Int_t first_split = 0);                                                                        // renews tracknumbers
 
@@ -340,12 +344,15 @@ inline void StFtpcConfMapper::CalcEtaMinMax()
   // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
   // event. To be save, 0.01 is substracted/added.
 
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
+
   Double_t vertex_rad_squared = TMath::Power(mVertex->GetRadius2(), 2);
-  Double_t ftpc_inner_rad_squared = TMath::Power(7.73, 2);
-  Double_t ftpc_outer_rad_squared = TMath::Power(30.05, 2);
+  Double_t ftpc_inner_rad_squared = TMath::Power(params->InnerRadius(), 2);
+  Double_t ftpc_outer_rad_squared = TMath::Power(params->OuterRadius(), 2);
   
-  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_outer_rad_squared + vertex_rad_squared)/ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
-  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_inner_rad_squared - vertex_rad_squared)/ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
+  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_outer_rad_squared + vertex_rad_squared)/ (params->PadRowPosZ(0) - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
+  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_inner_rad_squared - vertex_rad_squared)/ (params->PadRowPosZ(9) + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
 
   return;
 }

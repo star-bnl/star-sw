@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.32 2002/04/09 16:10:13 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.33 2002/04/29 15:50:10 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.33  2002/04/29 15:50:10  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.32  2002/04/09 16:10:13  oldi
 // Method to get the magentic field factor moved to StFormulary. It works for
 // simulation as well, now.
@@ -137,15 +142,16 @@
 //----------Last Modified: 10.11.2000
 //----------Copyright:     &copy MDO Production 1999
 
-#include <iostream.h>
-#include <math.h>
-
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
 #include "StFtpcConfMapper.hh"
 #include "StFtpcDisplay.hh"
 #include "StFtpcTrackEvaluator.hh"
 #include "StFormulary.hh"
+#include "StFtpcTrackingParams.hh"
+
+#include <iostream.h>
+#include <math.h>
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -199,7 +205,7 @@ Int_t StFtpcTrackMaker::Init()
   assert(ftpcpars);
   St_DataSetIter  gime(ftpcpars);
   m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
-  
+
   // Create Histograms
   m_vtx_pos      = new TH1F("fpt_vtx_pos"   ,"FTPC estimated vertex position"                  ,800, -400., 400.);
   m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                               ,  3,-2. ,  2.  );
@@ -240,6 +246,9 @@ Int_t StFtpcTrackMaker::Make()
   // Setup and tracking.
 
   gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) started..." << endm;
+
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance(Debug());
 
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
   
@@ -341,24 +350,24 @@ Int_t StFtpcTrackMaker::Make()
 
   // check for the position of the main vertex
   if (isnan(primary_vertex_x) || isnan(primary_vertex_y) || isnan(primary_vertex_z)) {
-      // No tracking!
-      gMessMgr->Message("", "W", "OST") << "StFtpcTrackMaker::Make() - error in vertex calculation - no tracking" << endm;
-      return kStWarn;
+    // No tracking!
+    gMessMgr->Message("", "W", "OST") << "StFtpcTrackMaker::Make() - error in vertex calculation - no tracking" << endm;
+    return kStWarn;
   } 
 
   Double_t z = TMath::Abs(primary_vertex_z);
   Double_t radius = TMath::Sqrt(primary_vertex_x*primary_vertex_x + primary_vertex_y*primary_vertex_y);
   
-  if (z > 50.) {
+  if (z > params->MaxVertexPosZWarning()) {
     
-    if (z > 162.45) {
+    if (z > params->OuterRadius()) {
       gMessMgr->Message("Found vertex lies inside of one Ftpc. No Ftpc tracking possible.", "E", "OTS");
       
       // No tracking!
       return kStWarn;   
     }
     
-    else if (z > 100.) {
+    else if (z > params->MaxVertexPosZError()) {
       gMessMgr->Message("Found vertex is more than 100 cm off from z = 0. Ftpc tracking makes no sense.", "E", "OTS");
       
       // No tracking!
@@ -371,7 +380,7 @@ Int_t StFtpcTrackMaker::Make()
     }
   }
 
-  if (radius >= 7.73) {
+  if (radius >= params->InnerRadius()) {
     gMessMgr->Message("Found vertex x-z-position is greater than 7.73 cm (inner Ftpc radius). No Ftpc tracking possible.", "E", "OTS");
     
     // No tracking!
@@ -558,7 +567,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.32 2002/04/09 16:10:13 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.33 2002/04/29 15:50:10 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

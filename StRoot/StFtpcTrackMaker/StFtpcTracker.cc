@@ -1,5 +1,10 @@
-// $Id: StFtpcTracker.cc,v 1.19 2002/04/05 16:51:09 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.20 2002/04/29 15:50:16 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.20  2002/04/29 15:50:16  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.19  2002/04/05 16:51:09  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -773,7 +778,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     Int_t *index_arr;
   
     StFtpcTrack *track;     // track
-    StFtpcPoint *hit;         // hit
+    StFtpcPoint *hit;       // hit
   
     Int_t debug_level = 100;
     Int_t no_angle;

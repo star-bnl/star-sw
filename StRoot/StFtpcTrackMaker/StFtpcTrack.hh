@@ -1,5 +1,10 @@
-// $Id: StFtpcTrack.hh,v 1.10 2002/04/05 16:50:44 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.11 2002/04/29 15:50:05 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.11  2002/04/29 15:50:05  oldi
+// All tracking parameters moved to StFtpcTrackingParameters.cc/hh.
+// In a future version the actual values should be moved to an .idl file (the
+// interface should be kept as is in StFtpcTrackingParameters.cc/hh).
+//
 // Revision 1.10  2002/04/05 16:50:44  oldi
 // Cleanup of MomentumFit (StFtpcMomentumFit is now part of StFtpcTrack).
 // Each Track inherits from StHelix, now.
@@ -76,6 +81,7 @@
 #include "MIntArray.h"
 #include "StFtpcPoint.hh"
 #include "StFtpcVertex.hh"
+#include "StFtpcTrackingParams.hh"
 
 #include "fpt_fptrack.h"
 
@@ -273,9 +279,10 @@ inline Double_t StFtpcTrack::GetRapidity() const
 {
   // Returns the rapidity of the particle with the assumption that the particle is a pion (+/-).
 
-  Double_t m_pi = 0.13957;
+  // get tracking parameters from database
+  StFtpcTrackingParams *params = StFtpcTrackingParams::Instance();
 
-  return 0.5 * TMath::Log((m_pi + GetPz()) / (m_pi - GetPz()));
+  return 0.5 * TMath::Log((params->m_pi() + GetPz()) / (params->m_pi() - GetPz()));
 }
 
 
