@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.88 2003/01/17 02:19:40 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.89 2003/01/21 23:49:50 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -158,6 +158,7 @@ ClassImp(StEventDisplayMaker)
 //_____________________________________________________________________________
 StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 {
+  fEventControlPanel = 0;
   mEventHelper    =  0;
   m_Hall          =  0;  
   m_FullView      =  0;  
@@ -198,7 +199,6 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 //       const char *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"};
   const Int_t lvolumeNames = sizeof(volumeNames)/sizeof(char *);
   for (i=0;i<lvolumeNames;i++) AddVolume(volumeNames[i]);
-
 #ifdef R__QT
   // redefine the default application font
   QFont  myFont = QApplication::font();
@@ -209,6 +209,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   QPixmap qStarIcon(starIcon);
   fEventControlPanel  = new StEventControlPanel();
   fEventControlPanel->Bar()->setIcon(qStarIcon);
+  fEventControlPanel->Show();
   gSystem->DispatchOneEvent(1);
 #else
   gROOT->LoadMacro("EventControlPanel.C");
@@ -216,7 +217,6 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   gROOT->LoadMacro("PadControlPanel.C"  );
   fprintf(stderr," /n/n/nPlease install Qt package to run Event Display. \n \t Thank you!\n/n/n/n");
 #endif
-
 
 }
 //_____________________________________________________________________________
@@ -238,7 +238,7 @@ StEventDisplayMaker::~StEventDisplayMaker(){
      delete m_VolumeList;
      m_VolumeList = 0;
   }
-
+  delete fEventControlPanel;
 }
 
 //_____________________________________________________________________________
@@ -250,7 +250,6 @@ Int_t StEventDisplayMaker::Init(){
      // define the custom palette (may affect other pictures)
    gStyle->SetPalette(1);   
    // Call the "standard" Init()
-   
    return StMaker::Init();
 }
 
@@ -296,7 +295,6 @@ void StEventDisplayMaker::ClearGeometry()
    // Delete the geometry structure
    delete m_ShortView; m_ShortView = 0; m_EventsView = 0;
 }
-
 //______________________________________________________________________________
 void StEventDisplayMaker::AddName(const char *name,Bool_t refresh)
 {
@@ -309,8 +307,8 @@ void StEventDisplayMaker::AddName(const char *name,Bool_t refresh)
         m_ListDataSetNames->Add(new TObjString(name));
   if (strncmp(name,"StEvent",7)==0) {
 #ifdef R__QT
-     if (refresh)
-        fEventControlPanel->Refresh();
+     if (refresh && fEventControlPanel)
+           fEventControlPanel->Refresh();
 #else
      gSystem->DispatchOneEvent(1);
 #endif 
@@ -1109,6 +1107,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.89  2003/01/21 23:49:50  fine
+// The all knowm problems have been fixed
+//
 // Revision 1.88  2003/01/17 02:19:40  fine
 // Some clean up
 //
