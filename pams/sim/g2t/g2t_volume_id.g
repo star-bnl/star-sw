@@ -1,4 +1,4 @@
-* $Id: g2t_volume_id.g,v 1.41 2003/01/06 23:48:44 geurts Exp $
+* $Id: g2t_volume_id.g,v 1.42 2003/05/19 14:15:44 potekhin Exp $
 *  g2t_volume_id.g,v 
 *
 * Revision 1.38  2002/10/16 19:12:44  kopytin
@@ -88,7 +88,8 @@
 *         
       Structure  EMCG { Version, int Onoff, int fillMode}
 
-      logical          first/.true./
+      logical    first/.true./
+      logical    printOnce/.true./
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
       if (First) then
@@ -416,7 +417,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             phi       = numbv(5+shift)                        ! EPER (5 fingers)
             eta       = numbv(6+shift)                        ! ETAR (radial division)
 
-            if (6+shift != nv) print *,' G2T_VOL_ID: new chush in ECAL'
+* we signal this once
+            if(printOnce) then
+               if (6+shift != nv) print *,' G2T_VOL_ID: new inconsistency in ECAL'
+               printOnce=.false.
+            endif
 
             eemc_depth = zsubsect + 3*(section-1)
 
@@ -428,7 +433,12 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
             section   = numbv(2+shift)
             phi       = numbv(3+shift)
             eta       = numbv(5+shift)
-            if (5+shift != nv) print *,' G2T_VOL_ID: old chush in ECAL'
+
+            if(printOnce) then
+               if (5+shift != nv) print *,' G2T_VOL_ID: old inconsistency in ECAL'
+               printOnce=.false.
+            endif
+
             volume_id = 100000*rileft+1000*(5*(phi_30d-1)+phi)+10*eta+section
           endif
 
