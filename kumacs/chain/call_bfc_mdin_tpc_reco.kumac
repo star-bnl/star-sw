@@ -15,6 +15,6 @@
    chain=' mdin tpg tfc_r tcl evout' _
    skip=1 _
    no_events=2 _
-  input_data_file=/disk00000/star/test_data/tpc_s01w_981022_15h_cos_t8_f7.xdf _
+  input_data_file=/disk00000/star/mdc1_test_data/tpc_s01w_981022_15h_cos_t8_f7.xdf _
    output_file=test_cos_t8_f7_new _
    log=bfc_mdin_tpc_reco.log
