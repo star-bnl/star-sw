@@ -1,7 +1,7 @@
 #ifndef STSSDSTRIP_HH
 #define STSSDSTRIP_HH
 
-#define MAXIDMCHIT 5
+#define SSD_MAXIDMCHIT 5
 
 class StSsdStrip
 {

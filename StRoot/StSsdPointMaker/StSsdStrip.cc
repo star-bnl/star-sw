@@ -2,24 +2,24 @@
 
 StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, int rSigma, int *rIdMcHit)
 {
-  mIdMcHit   = new int[MAXIDMCHIT];
+  mIdMcHit   = new int[SSD_MAXIDMCHIT];
 
   mNStrip    = rNStrip;
   mDigitSig  = rDigitSig;
   mSigma     = rSigma;
-  for(int e=0;e<MAXIDMCHIT;e++) mIdMcHit[e] = rIdMcHit[e];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++) mIdMcHit[e] = rIdMcHit[e];
   mPrevStrip = 0;
   mNextStrip = 0;
 }
 
 StSsdStrip::StSsdStrip(int rNStrip, int rDigitSig, int rSigma)
 {
-  mIdMcHit   = new int[MAXIDMCHIT];
+  mIdMcHit   = new int[SSD_MAXIDMCHIT];
 
   mNStrip    = rNStrip;
   mDigitSig  = rDigitSig;  
   mSigma     = rSigma;
-  for(int e=0;e<MAXIDMCHIT;e++) mIdMcHit[e] = 0;
+  for(int e=0;e<SSD_MAXIDMCHIT;e++) mIdMcHit[e] = 0;
   mPrevStrip = 0;
   mNextStrip = 0;
 }
@@ -70,7 +70,7 @@ void StSsdStrip::copyTo(StSsdStrip *ptrClone)
   ptrClone->mNStrip    = this->mNStrip;
   ptrClone->mDigitSig  = this->mDigitSig;
   ptrClone->mSigma     = this->mSigma;
-  for(int e=0;e<MAXIDMCHIT;e++) ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++) ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
 }
 
 
