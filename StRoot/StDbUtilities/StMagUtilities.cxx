@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.31 2002/02/22 17:44:18 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.32 2002/02/23 02:47:50 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.32  2002/02/23 02:47:50  jhthomas
+ * Technical Bug Fix - minus one twice
+ *
  * Revision 1.31  2002/02/22 17:44:18  jhthomas
  * Get CathodeV and GG from DB. Change Defaults.  Change Instantiation argument
  * order. Update D'Oxygen documentation.  Remove 2000/2001 E field switch.
@@ -917,14 +920,14 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = (2*n-1) * TMath::Pi() / TPC_Z0 ;
-		  Double_t Cn = 4.0 * IFCShift / ( k * TPC_Z0 ) ;
+		  Double_t Cn = -4.0 * IFCShift / ( k * TPC_Z0 ) ;
 		  Double_t Numerator =
-		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI1( k*r ) -
+		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI1( k*r ) +
 		    TMath::BesselK1( k*r )         * TMath::BesselI0( k*OFCRadius ) ;
 		  Double_t Denominator =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
-		  Double_t zterm = 1 + cos( k*z ) ;
+		  Double_t zterm = 1 + TMath::Cos( k*z ) ;
 		  IntegralOverZ += Cn * zterm * Numerator / Denominator ;
 		}
 	      if  ( eZList[i] < 0 )  IntegralOverZ = -1 * IntegralOverZ ;  // Force AntiSymmetry of solutions in Z
