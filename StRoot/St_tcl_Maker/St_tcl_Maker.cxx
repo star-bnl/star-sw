@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.30 1999/03/15 22:31:04 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.31 1999/03/16 00:20:39 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.31  1999/03/16 00:20:39  sakrejda
+// switch for the cluster morphology stuff added
+//
 // Revision 1.30  1999/03/15 22:31:04  sakrejda
 // names of variables for the cluster morph. table changed
 //
@@ -456,9 +459,11 @@ Int_t St_tcl_Maker::Make(){
 
   St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
   St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",1);         local.Add(tphitau);
-//St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     local.Add(index);
   St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
-  St_tcc_morphology *morph = new St_tcc_morphology("morph",max_hit); 	   local.Add(morph);
+  St_tcc_morphology *morph    = 0;
+  if(m_tclMorphOn) {
+                        morph = new St_tcc_morphology("morph",max_hit); 	   local.Add(morph);
+  }
   St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      local.Add(tpseq);
   St_DataSet       *sector;
   St_DataSet       *raw_data_tpc = gStChain->DataSet("tpc_raw");
@@ -495,6 +500,8 @@ Int_t St_tcl_Maker::Make(){
                             tpcluster,tpseq);
 //			=======================================================
         if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
+	if (m_tclMorphOn){
+  // Create morphology table only if needed
 
         if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
 
@@ -502,7 +509,7 @@ Int_t St_tcl_Maker::Make(){
                                             tpcluster, tpseq, morph);
 //			=======================================================
         if(tcc_res) { printf("ERROR %d, tcl maker\n",tcc_res); return kStErr; }
-
+	}
 	sector_tot++;
 
 // 			TPH
@@ -542,7 +549,7 @@ Int_t St_tcl_Maker::Make(){
 
   else {
 
-// 		Row data does not exit, check GEANT. if it does then use fast cluster simulation
+// 		Raw data does not exit, check GEANT. if it does then use fast cluster simulation
     St_DataSetIter geant(GetDataSet("geant"));
     St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
     St_g2t_track   *g2t_track   = (St_g2t_track   *) geant("g2t_track");
@@ -575,7 +582,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.30 1999/03/15 22:31:04 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.31 1999/03/16 00:20:39 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
