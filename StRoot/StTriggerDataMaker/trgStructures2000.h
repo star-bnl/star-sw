@@ -200,4 +200,7 @@ struct TrgDataType2000 {
   EvtDescData2000    EvtDesc;       /* L1 Event Descriptor Data */  
   TrgSumData2000     TrgSum;        /* summary data */
   RawTrgDet2000      RAW[MAX_RAW_DATA_BLOCKS]; /* raw Detector Data with pre and post History */
+#if 0
+  ClassDef(TrgDataType2000, 1) 
+#endif
 };          /* 4952 bytes */

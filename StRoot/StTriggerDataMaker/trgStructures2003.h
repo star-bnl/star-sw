@@ -1,26 +1,26 @@
 /*
- * Header Name: trgStructures.h                                                       
- * Header Number: x.y                                                                 
- * Package Name: All                                                                  
- * Created: z. milosevich 06Dec99                                                     
- * Description: Global trigger structure header file.                                 
- *              Contains definitions of trigger data structures                       
- * History:                                                                           
- *                                                                                    
- *  06Dec99 zm  Created so offline can use and after modification for mod 8 DMA reads 
- *  08Dec99 zm  Changed Event Descriptor Structure to previous length                 
- *  03Feb00 zm  Changed "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in L0_DSM_Data structure 
- *  22Jul00 egj Added L0RegBytes and L0RegHeader to trgDataHeaders and TrgSumData.    
- *              Also added Mult_Reg, ZDC_Reg and Spare_Reg to TrgSumData, making a    
- *              total of 16 extra bytes. I compensated for this by removing 16 bytes, 
- *              (4 uints) from L2Result, wich is currently unused.                    
- *  08Dec00 JMN Changed char hdr[2] in  TrgSummary to unsigned short, which is packed 
- *  25Feb01 JMN Redesigned and expanded abbreviations to full.                        
- *  12Mar01 JMN Added additional changes from ZM                                      
- *  30May01 JMN NBNBNBNB Changed FORMAT version from 0x12 to 0x13                     
- *  02Jun01 zm  defined bit 6 in addBits info FIFO3 for L2.5 abort                    
- *  27Jun01 JMN Added definition of number of bytes used in trigger summary headers   
- *  28Jun01 JMN Added definition of ADD_BITs                                          
+ * Header Name: trgStructures.h
+ * Header Number: x.y
+ * Package Name: All
+ * Created: z. milosevich 06Dec99
+ * Description: Global trigger structure header file.
+ *              Contains definitions of trigger data structures
+ * History:
+ *
+ *  06Dec99 zm  Created so offline can use and after modification for mod 8 DMA reads
+ *  08Dec99 zm  Changed Event Descriptor Structure to previous length
+ *  03Feb00 zm  Changed "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in L0_DSM_Data structure
+ *  22Jul00 egj Added L0RegBytes and L0RegHeader to trgDataHeaders and TrgSumData.
+ *              Also added Mult_Reg, ZDC_Reg and Spare_Reg to TrgSumData, making a
+ *              total of 16 extra bytes. I compensated for this by removing 16 bytes,
+ *              (4 uints) from L2Result, wich is currently unused.
+ *  08Dec00 JMN Changed char hdr[2] in  TrgSummary to unsigned short, which is packed
+ *  25Feb01 JMN Redesigned and expanded abbreviations to full.
+ *  12Mar01 JMN Added additional changes from ZM
+ *  30May01 JMN NBNBNBNB Changed FORMAT version from 0x12 to 0x13
+ *  02Jun01 zm  defined bit 6 in addBits info FIFO3 for L2.5 abort
+ *  27Jun01 JMN Added definition of number of bytes used in trigger summary headers
+ *  28Jun01 JMN Added definition of ADD_BITs
  *  10Apr02 zm  basic strawman for new structures with new TCU and added detectors
  *  22May02 zm  removed references to current non-existent trigger event header
  *  24May02 zm  incorporated eleanor's comments
@@ -28,11 +28,11 @@
  *  19Jun02 zm  removed or commented out references to TrgEvtHeader
  *  05Aug02 JMN changes in event descriptor - moved filler word to end
  *  15Aug02 HjC correct bytes for FPD
- *  21Nov02 zm  corrections based on eleanor's email: L0 layout for bunch xing, 
- *              special and fpd elements; fpd broken down for east/west nort/south 
+ *  21Nov02 zm  corrections based on eleanor's email: L0 layout for bunch xing,
+ *              special and fpd elements; fpd broken down for east/west nort/south
  *              vs top/bottom and layer 1 or 0;
  *              also finished XXX_DATA_OFFSET and RAW_XXX_LEN for passing data from
- *              dsm nodes to l2 
+ *              dsm nodes to l2
  */
 
 #ifndef trgStructures2003_h
@@ -46,7 +46,7 @@
 #define RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from CTB, MWC with headers */
 #define TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define L1_DATA_LEN  (EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L2 */ 
+#define L1_DATA_LEN  (EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L2 */
 #define TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
 #define TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to TDI */
 
@@ -60,13 +60,13 @@
 #define MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
 #define RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
 #define BCE_DATA_OFFSET      408              /* Number of bytes BMC Raw data is offset in raw trigger structure */
-#define RAW_BCE_LEN          240  
+#define RAW_BCE_LEN          240
 #define BCW_DATA_OFFSET      648
-#define RAW_BCW_LEN          240 
+#define RAW_BCW_LEN          240
 #define BC1_DATA_OFFSET      888
-#define RAW_BC1_LEN           96 
+#define RAW_BC1_LEN           96
 #define EEC_DATA_OFFSET      992
-#define RAW_EEC_LEN          176 
+#define RAW_EEC_LEN          176
 #define FPE_DATA_OFFSET     1176              /* everything after this will have to be re-done */
 #define RAW_FPE_LEN          208
 #define FPW_DATA_OFFSET     1384
@@ -93,7 +93,7 @@ typedef struct {
   unsigned int   bunchXing_lo;                /* Two parts of RHIC bunch crossing number */
   unsigned short actionWdDetectorBitMask;     /* from Fifo 1 */
   unsigned char  actionWdTrgCommand;          /* from Fifo 1 */
-  unsigned char  actionWdDaqCommand;          /* from Fifo 1 */  
+  unsigned char  actionWdDaqCommand;          /* from Fifo 1 */
   unsigned short TrgToken;                    /* from Fifo 2 */
   unsigned short addBits;                     /* from Fifo 2 - bit 0=Contamination; bit 6=L2.5 abort; bit 7=1 is fake data */
   unsigned short DSMInput;                    /* from Fifo 3 */
@@ -106,7 +106,7 @@ typedef struct {
   unsigned short npre;                        /* pre value for detector raw data */
   unsigned short npost;                       /* post value for detector raw data */
   unsigned short dummy;                       /* dummy - filler */
-} EvtDescData2003;        /* 40 bytes total */ 
+} EvtDescData2003;        /* 40 bytes total */
 
 /* Trigger Summary Data Structures */
 
@@ -118,7 +118,7 @@ typedef struct {
   unsigned short     lastDSM[8];              /* Contents of last DSM IB - results of all DSM trees */
   unsigned short     VTX[8];                  /* Separate ZDC and BBC DSMs have been replaced with this one */
   unsigned short     EMC[8];                  /* Contents of 1 EMC IB - results of separate BEMC and EEMC DSMs */
-  unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */       
+  unsigned short     BCdata[16];              /* Contents of 2 Bunch Crossing DSMs IB's */
   unsigned short     specialTriggers[8];      /* Contents of 1 Special Trigger DSM - all the special trigger requests */
   unsigned short     FPD[8];                  /* Contents of 1 FPD IB - we are installing this DSM this year but it */
 } L0_DSM_Data2003;       /* 192 bytes total */
@@ -145,10 +145,10 @@ typedef struct {
 /* Data structure passed between L1ANA and L2 */
 
 typedef struct {
-  EvtDescData2003    EvtDesc;           /* L1 Event Descriptor Data */  
+  EvtDescData2003    EvtDesc;           /* L1 Event Descriptor Data */
   TrgSumData2003     TrgSum;            /* Summary data */
 } L1dataType2003;     /* 520 bytes */
-  
+
 /* Raw Trigger Detector data structures */
 
 typedef struct {
@@ -195,10 +195,16 @@ typedef struct {
 /*  Trigger Event Structure */
 
 struct TrgDataType2003 {
-  EvtDescData2003    EvtDesc;            /* L1 Event Descriptor Data */  
+  EvtDescData2003    EvtDesc;            /* L1 Event Descriptor Data */
   TrgSumData2003     TrgSum;             /* Summary data */
-  RawTrgDet2003      rawTriggerDet[MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History */
+  RawTrgDet2003      rawTriggerDet[MAX_RAW_DATA_BLOCKS];    
+                                           /* Raw Detector Data with pre and post History */
+#if 0
+  ClassDef(TrgDataType2003, 1) 
+#endif
 };         /* 19704 bytes */
 
 
 #endif
+
+
