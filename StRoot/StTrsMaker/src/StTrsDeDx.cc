@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.4 1999/01/23 18:47:23 fisyak Exp $
+ * $Id: StTrsDeDx.cc,v 1.5 1999/01/25 23:37:50 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.4  1999/01/23 18:47:23  fisyak
- * Cleanup for SL98l
+ * Revision 1.5  1999/01/25 23:37:50  lasiuk
+ * sun string
+ *
+ * Revision 1.5  1999/01/25 23:37:50  lasiuk
+ * sun string
  *
  * Revision 1.4  1999/01/23 18:47:23  fisyak
  * Cleanup for SL98l
@@ -76,6 +79,8 @@ using namespace units;
 
 HepJamesRandom  StTrsDeDx::mEngine;
 RandFlat        StTrsDeDx::mFlatDistribution(mEngine);
+RandPoisson     StTrsDeDx::mPoissonDistribution(mEngine);
+RandExponential StTrsDeDx::mExponentialDistribution(mEngine);
 
 //static string trsDeDxDummy = "a";
 
@@ -83,25 +88,23 @@ StTrsDeDx::StTrsDeDx()
 {
   mGas = "Ar";
   mPadLength = 1.95*centimeter;
-#ifndef __sun
   doInitialization();
-    : mPadLength(pad),  mGas(gas)
+}
 
-
+StTrsDeDx::StTrsDeDx(const string& gas, double pad)
     : mPadLength(pad)
 {
     mGas = gas;
     if((gas != "Ne")  && (gas != "Ar") &&
-	throw invalid_argument("Gas not currently Implemented.\nMust use either \"Ne\" or \"Ar\".");
+       (gas != "P10") && (gas != "p10")) {
 #ifdef ST_USES_EXCEPTIONS
-	cerr << gas << " gas not currently Implemented." << endl;
+	cerr << "oops" << endl;
 	throw invalid_argument("Gas not currently Implemented.\nMust use either \"Ne\" or \"Ar\" or \"P10\".");
 #else
 	cerr << gas.c_str() << " gas not currently Implemented." << endl;
 	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
 	cerr << "Exitting..." << endl;
 	exit(1);
-#endif
 #endif
     }
     doInitialization();
@@ -262,7 +265,6 @@ double StTrsDeDx::betheBloch(double bg) const
     double xa=log(1.649*mIonize/eV/(28.8*sqrt(mDensity*centimeter3/gram*mZa)));
 
     double f = 4.606*(xa-x0)/(pow((x1-x0),m));
-
     
     double bigx = log(bg)/log(10.);
     
@@ -289,7 +291,11 @@ double StTrsDeDx::betheBloch(double bg) const
     return (I/Io);
 }
 
+#ifndef __sun
 #if  defined(__sun) && ! defined(__GNUG__)
+#else
+    os << "==> " << mGas.c_str() << endl;
+    os << "==> " << mGas.c_str() << endl;
 #else
     os << "==> " << mGas << endl;
 #endif
