@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.41 1999/09/24 01:23:47 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.42 1999/11/09 20:38:56 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.42  1999/11/09 20:38:56  fisyak
+// Fix for ROOT 2.23
+//
 // Revision 1.41  1999/09/24 01:23:47  fisyak
 // Reduced Include Path
 //
@@ -136,6 +139,7 @@
 #include "tpc/St_tde_Module.h"
 #include "tpc/St_tte_Module.h"
 #include "TH1.h"
+#include "TF1.h"
 #include "TH2.h"
 #include "TH3.h"
 #include "TNtuple.h"
