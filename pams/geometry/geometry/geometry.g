@@ -7,7 +7,7 @@
 *  Update history:                                                        *
 *  08/19/98, PN: tof is not part of year_2a                               *
 *  12/04/98, PN: rich  + upstream part + zero degree calo                 *
-*                                                                         *
+*  09/26/99, E.Cains: 1H geometry added - one svt ladder at layer 3       *
 ***************************************************************************
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
@@ -65,7 +65,7 @@ If LL>1
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
-                  <W>;('               : year_1a,s,b,c;  year_2a      ');
+                  <W>;('               : year_1a,s,b,h,c;  year_2a    ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off, Decay_Only');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
                   <W>;('Magnetic Field : Field_on/off, field=value    ');
@@ -81,6 +81,8 @@ If LL>1
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
                                   {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=0; }
+  on YEAR_1H    { even better y1:  TPC+CTB+FTPC+caloPatch+svtLadder;  
+                                  {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=-3;}
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_2A    { asymptotic STAR;                                   tof=off; }
   on HADR_ON    { all Geant Physics On;                                       }
