@@ -7,11 +7,11 @@ CFLAGS = -g $(INCL_DIRS)
 IFACE_DIR = GENERIC
 IMPL_DIR = TPC
 
-client:	client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o MemMan.o
-	g++ $(CFLAGS) client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o  TPCV1P0.Banks.o TPCV2P0.Banks.o swaps.o MemMan.o -o client
+tpctest:	tpctest.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o 
+	g++ $(CFLAGS) tpctest.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o  TPCV1P0.Banks.o TPCV2P0.Banks.o swaps.o  -o tpctest
 
-client.o:	client.cxx
-	g++ $(CFLAGS) -c client.cxx
+tpctest.o:	tpctest.cxx
+	g++ $(CFLAGS) -c tpctest.cxx
 
 EventReader.o:	$(IFACE_DIR)/EventReader.hh $(IFACE_DIR)/EventReader.cxx
 	g++ $(CFLAGS) -c $(IFACE_DIR)/EventReader.cxx
@@ -43,8 +43,8 @@ TPCV1P0.Banks.o:	$(IFACE_DIR)/RecHeaderFormats.hh $(IMPL_DIR)/TPCV1P0.Banks.hh $
 swaps.o:	$(IFACE_DIR)/swaps.hh $(IFACE_DIR)/swaps.cxx
 	g++ $(CFLAGS) -c $(IFACE_DIR)/swaps.cxx
 
-MemMan.o:	$(IMPL_DIR)/MemMan.hh $(IMPL_DIR)/MemMan.cxx
-	g++ $(CFLAGS) -c $(IMPL_DIR)/MemMan.cxx
+#MemMan.o:	$(IMPL_DIR)/MemMan.hh $(IMPL_DIR)/MemMan.cxx
+#	g++ $(CFLAGS) -c $(IMPL_DIR)/MemMan.cxx
 
 TPCV2P0.o:	$(IFACE_DIR)/EventReader.hh $(IMPL_DIR)/TPCV2P0.hh $(IMPL_DIR)/TPCV2P0.cxx 
 	g++ $(CFLAGS) -c $(IMPL_DIR)/TPCV2P0.cxx
