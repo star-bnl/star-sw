@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.444 2004/09/16 02:14:15 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.445 2004/09/18 02:10:20 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -99,8 +99,8 @@ Bfc_st BFC1[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"doEvents"    ,""  ,"","xin,StEvent,analysis,NoDb"                                     ,"","","",kFALSE},
-  {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
+  {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                     ,"","","",kFALSE},
+  {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,event,analysis,EventQA"                             ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
@@ -196,7 +196,7 @@ Bfc_st BFC1[] = { // standard chains
                                                                     "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","","",
                                                                           "Laser Calibration Chain",kFALSE},
-  {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
+  {"L3Counter","" ,"","db,detDb,in,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
@@ -214,8 +214,8 @@ Bfc_st BFC1[] = { // standard chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -332,7 +332,7 @@ Bfc_st BFC1[] = { // standard chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"in"          ,""  ,"","xin"                                           ,"","","... Alias to xin",kFALSE},
+  {"in"          ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
                           ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -674,8 +674,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"doEvents"    ,""  ,"","xin,StEvent,analysis,NoDb"                                     ,"","","",kFALSE},
-  {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
+  {"doEvents"    ,""  ,"","in,StEvent,analysis,NoDb"                                     ,"","","",kFALSE},
+  {"drawDst"     ,""  ,"","in,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,event,analysis,EventQA"                             ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE},
   {"C2default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,ftpc,svt,emcY2"
@@ -798,7 +798,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                     "Laser Calibration Chain (tcl)",kFALSE},
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,fcf,globT,laser,LaserTest","","",
                                                                           "Laser Calibration Chain",kFALSE},
-  {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
+  {"L3Counter","" ,"","db,detDb,in,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
    "ppOpt,ry2001,in,tpc_daq,tpc,global,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
@@ -817,8 +817,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
-  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,""  ,"","in,tpc_daq"                                                   ,"","","",kFALSE},
+  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"clearDAQCTB" ,""  ,"","","" ,""                             ,"clear DAQ CTB Hits for embedding",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -943,8 +943,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"in"          ,""  ,"","xin"                                           ,"","","... Alias to xin",kFALSE},
-  {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
+  {"in"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
                           ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -2105,15 +2104,15 @@ void StBFChain::SetFlags(const Char_t *Chain)
     // Check flags consistency
     if (!GetOption("NoInput")) {
       if (!GetOption("fzin") && !GetOption("gstar") &&
-	  !GetOption("xin")  && !GetOption("tdaq")) {
-	SetOption("fzin","-NoDefault,-NoInput,-fzin,-gstar,-xin,-tdaq");
-	SetOption("geant","-NoDefault,-NoInput,-fzin,-gstar,-xin,-tdaq");
+	  !GetOption("in")  && !GetOption("tdaq")) {
+	SetOption("fzin","-NoDefault,-NoInput,-fzin,-gstar,-in,-tdaq");
+	SetOption("geant","-NoDefault,-NoInput,-fzin,-gstar,-in,-tdaq");
       }
     }
     else {
       if (GetOption("fzin")) SetOption("-fzin","NoDefault,NoInput");
-      if (GetOption("in") || GetOption("xin")) {
-	SetOption("-xin","-NoDefault,NoInput");
+      if (GetOption("in")) {
+	SetOption("-in","-NoDefault,NoInput");
 	SetOption("-in","-NoDefault,NoInput");
       }
     }
