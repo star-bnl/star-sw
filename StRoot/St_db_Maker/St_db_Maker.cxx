@@ -12,8 +12,9 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "TBrowser.h"
-#include "TSortedList.h"
 #include "TDatime.h"
+#include "TInterpreter.h"
+#include "TSystem.h"
 #include "St_db_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -21,267 +22,238 @@
 #include "St_XDFFile.h"
 
 //_________________________ class St_Validity ____________________________________
-class St_Validity : public TNamed, public TDatime  {
-private:
-   const St_FileSet *fFile;
-   Bool_t      fValid;
-   Int_t       fDate;
-   Int_t       fTime;
+class St_ValiSet : public St_DataSet{
 public:
-   St_Validity(const St_FileSet *file);
-   virtual ~St_Validity();
-   Int_t    GetBegin() const { return Get(); }
-   const    St_FileSet *GetFile() const { return fFile; }
-   Int_t    GetDate(){return fDate;}
-   Int_t    GetTime(){return fTime;}
-   Bool_t   GetValid(){ return fValid;}
-   Bool_t   IsValid(Int_t time){ return  fValid ; }
+   TDatime fTimeMin;
+   TDatime fTimeMax;
+   St_DataSet *fDat;
+   St_ValiSet(const char *name,St_DataSet *parent);
+   virtual ~St_ValiSet(){};
+   virtual void ls(Int_t lev=1);
 };
 
 //_____________________________________________________________________________
-St_Validity::St_Validity(const St_FileSet *file):fFile(file)
+St_ValiSet::St_ValiSet(const char *name,St_DataSet *parent): St_DataSet(name,parent)
 {
-// fFile = (St_FileSet *) file;
-   fValid = kFALSE;
-   Char_t *buffer = 0;
-   Char_t *point1 = 0;
-   Char_t *point2 = 0;
-   buffer = StrDup(fFile->GetName());
-   if (point1 = strchr(buffer,'.')) {
-    // Check file name format:  <name>.YYYYMMDD.hhmmss or <name>.C
-     if (point2 = strchr(point1+1,'.')) {
-        const Char_t *date  = point1+1;
-        const Char_t *hours = point2+1;
-        *point1 = 0;
-        *point2 = 0;
-        Int_t idate  = atoi(date);
-        Int_t ihours = atoi(hours);
-        if (idate) {
-           Set(idate-1900,ihours);
-           fDate = idate;
-           fTime = ihours;
-           fValid = kTRUE;
-        }
-     }
-     else {
-       if (point2 = strchr(point1+1,'C')){
-	 fDate = 199820101;
-	 fTime = 0;
-	 Set(fDate-1900,fTime);
-	 fValid = kTRUE;
-       }
-     }
-   }
-   if (fValid) { 
-      const Text_t *name = (const Char_t *)(fFile->Path());
-      SetName(name);
-      SetTitle("SDBMList");
-   }
-   else 
-      Error("St_Validity ctor"," Wrong file name %s for the period %s ",fFile->GetName(),AsString());
-   if (buffer) delete [] buffer;
+  SetTitle(".Val");
+  fTimeMin.Set(kMaxTime,0);
+  fTimeMax.Set(kMinTime,0);
 }
 
 //_____________________________________________________________________________
-St_Validity::~St_Validity(){
-}
-//_____________________________________________________________________________
-
-//___________________________ class St_DBList _________________________________
-class St_DBList : public TSortedList
+void St_ValiSet::ls(Int_t lev)
 {
- private:
-    TObjLink *m_ActiveLink;  // pointer to the active valid DB object
-    TString   m_Name;        // 
- public:
-    St_DBList(const Char_t *name=""):m_ActiveLink(0),m_Name(name) {;}
-    virtual      ~St_DBList(){}
-    TObjLink     *GetActive() const { return m_ActiveLink;}
-    const Text_t *GetName() const{ return m_Name;}
-    St_DataSet   *GetValidFile(TDatime &time);
-    St_DataSet   *GetValidFile(Int_t date, Int_t time);
-};
-
-//_____________________________________________________________________________
-St_DataSet *St_DBList::GetValidFile(TDatime &time)
-{
- Error("GetValidFile(TDatime &time)","Wrong call");
- return 0;
-}
-//_____________________________________________________________________________
-St_DataSet *St_DBList::GetValidFile(Int_t date, Int_t time)
-{
-
-  // return the pointer to the new valid dataset
-  //        = 0 if there is no valid name yet
-  TObjLink *lnk = FirstLink();
-  if (!lnk) return 0;
-
-//++  UInt_t validtime = time.Get();
-//++   UInt_t settime   = 0;
-
-  Int_t validate   = date;  
-  Int_t validtime  = time;
-
-  Int_t setdate    = 0;
-  Int_t settime    = 0;
-
-  St_Validity *validfile = 0;
-  TObjLink *nxt = 0;
-  while (lnk) {
-     St_Validity *val = (St_Validity *)lnk->GetObject();         
-     if (val) { 
-//++             settime = val->Get();
-         setdate = val->GetDate();
-         settime = val->GetTime();
-      }
-      if (validate < setdate) break;
-      if (validate == setdate && validtime < settime) break;
-      lnk = lnk->Next();
-  }
-
-  if (!lnk) {
-     Error("GetValidFile(...)","no validity for <%s>:%d %d",GetName(),date,time);
-     return 0;
-  }
-
-  if (lnk->Prev()) lnk = lnk->Prev();
-
-  validfile = (St_Validity *)lnk->GetObject();
-
-  if (m_ActiveLink != lnk  && validfile ) {
-    St_DataSet *set = 0;
-    const St_FileSet *file = validfile->GetFile();
-    if (file) {
-      const Char_t *p = 0;
-      St_DataSet *parent = file->GetParent();
-      if (parent) {
-        TString dbfile = "$STAR_ROOT/";
-//        dbfile += file->Path();
-        dbfile += validfile->GetName();
-        p=dbfile;
-        set = St_XDFFile::GetXdFile(p);
-        if (set) 
-          parent->Update(set);
-      }
-      else 
-        Error("GetValidFile"," No parent to update with <%s>",file->GetName());
-      m_ActiveLink = lnk;
-    }
-    return set;  
-  }
-  return 0;
+  printf("  %s.Validity = %s ",GetName(),fTimeMin.AsString());
+  printf(" <-> %s\n",     fTimeMax.AsString());
+  if (fDat) printf("  Contains DataSet %s\n",fDat->GetName());
+  St_DataSet::ls(lev);
 }
 
 //__________________________ class St_db_Maker  ____________________________
 ClassImp(St_db_Maker)
-
 //_____________________________________________________________________________
-St_db_Maker::St_db_Maker(const char *name, const char *title,
-                               const TString &rootdir):StMaker(name,title)
+St_db_Maker::St_db_Maker(const char *name, const char *maindir,const char *userdir)
+:StMaker(name)
 {
-   drawinit    = kFALSE;
-   m_DBList    = 0;
-   m_ValidTime.Set(19950000,0);
-   SetDbDir(rootdir);
+
+   m_MainDir = maindir;
+   if (userdir) m_UserDir=userdir;
 }
 //_____________________________________________________________________________
 St_db_Maker::~St_db_Maker(){
-  // SafeDelete(m_DataSet);
-   if (m_DBList) {
-       m_DBList->Delete();
-       delete m_DBList;
-       m_DBList = 0;
-   }
 }
 //______________________________________________________________________________
 void St_db_Maker::Browse(TBrowser *b)
 {
   StMaker::Browse(b);
-  if (m_DBList) b->Add(m_DBList,"Simple DataBase Manager");
-}
-//_____________________________________________________________________________
-void St_db_Maker::Clear(Option_t *option){
-  // SafeDelete(m_DataSet);
 }
 //_____________________________________________________________________________
 Int_t St_db_Maker::Init()
 {
-   const Char_t *f = m_RootDbDirectory;
+   TString fullpath,topdir;
 
    // recreate a memory resided data-structure
-   St_FileSet fileset(f,"db");
+   m_CurrentDir = m_MainDir;
+   St_FileSet *fileset = new St_FileSet(m_CurrentDir);
+   fileset->Purge(); ;fileset->Pass(PrepareDB,&m_CurrentDir);
+   St_FileSet *Fileset = fileset;
 
-   // Create a list of directories holding those "file"s
+   m_CurrentDir = m_UserDir; fileset = 0;
+   if (!m_CurrentDir.IsNull()) {
+     fileset = new St_FileSet(m_CurrentDir);
+     fileset->Purge();fileset->Pass(PrepareDB,&m_CurrentDir);}
 
-   fileset.Purge();
-   St_DataSetIter next(&fileset,0);
-   St_FileSet *dir = 0;
-   Int_t depth = 0;
-   TList garbage;
-   while (  dir = (St_FileSet *)next() ) 
-   {
-     if ( strcmp(dir->GetTitle(),"file") == 0)
-     {
-       // Check all "file"'s and 
-       // leave those fit the pattern "name.<date>.<time>.C" or "name.C"
-       St_Validity *valid = new St_Validity(dir);
-       if ( valid->GetValid() ) {
-          if (!m_DBList) m_DBList = new TObjArray;
-          // Check whether this directory has been registered
-          Char_t *fullpath =  StrDup(dir->Path());
-          Char_t *point = strrchr(fullpath,'.');
-          if (point) { 
-             *point = 0;
-              point = strrchr(fullpath,'.');
-              if (point) {
-                 *point = 0;
-                 St_DBList *db = (St_DBList *)m_DBList->FindObject(fullpath);
-                 if (!db) {
-                    db = new St_DBList(fullpath);
-                    m_DBList->Add(db);
-                 }
-                 db->Add(valid);
-              }
-              else 
-                  Error("Init","Path name has no second \".\" %s",(const Char_t *)(dir->Path()));
-           }
-           else 
-                   Error("Init","Path name has no  \".\" %s",(const Char_t *)(dir->Path()));
-       }
-       else {
-          // Collect the "bad" dir's to delete it later
-          garbage.Add(dir);
-          delete valid;
-       }
-     }
-   }
-   // delete the garbage
-   garbage.Delete();
-   //   gStChain->GetDb()->Update(&fileset);
-   m_DataSet->Update(&fileset);
+   if (fileset) {Fileset->Update(fileset); delete fileset;}
+
+   Fileset->Sort();
+
+   AddData(Fileset);
+   if (Debug()) Fileset->ls("*");
 // Create Histograms    
    return StMaker::Init();
 }
 
+
 //_____________________________________________________________________________
-Int_t St_db_Maker::Make(){
-  if (gStChain->Debug()) PrintInfo();
-// Look for the validity
+TDatime St_db_Maker::Time(const char *filename)
+{
+   int lfilename,lname,idate,itime;
+   
+   TDatime time; time.Set(kMaxTime,0);
+   
+   lfilename = strlen(filename);
+   lname = strcspn(filename,".");
+   if (lname+2>lfilename) return time;
+   
+   if (lname+20 <= lfilename    &&
+       filename[lname+1 ]=='.'  && 
+       filename[lname+9 ]=='.'  && 
+       filename[lname+18]=='.'  ) {// file name format:  <name>.YYYYMMDD.hhmmss.<ext>
+        idate  = atoi(filename+lname+ 2); 
+        itime  = atoi(filename+lname+11);
+    } else {			   // file name format:  <name>.<ext>
+	idate = kMinTime;
+	itime = 0;
+    }
+    time.Set(idate,itime); 
+    return time;
 
- if (!m_DBList) return 0;
-
- TIter nextdb(m_DBList);
- St_DBList *db = 0;
- while (db =  (St_DBList *)nextdb()) 
-    St_DataSet *set = db->GetValidFile(m_ValidDate,m_ValidHours);
- return kStOK;
 }
+
+int St_db_Maker::Kind(const char *filename)
+{
+   int lfilename;
+   
+   lfilename = strlen(filename);
+   if (!strcmp(filename+lfilename-4,".xdf" )) return 1;
+   if (!strcmp(filename+lfilename-2,".C"   )) return 2;
+   if (!strcmp(filename+lfilename-2,".c"   )) return 2;
+   if (!strcmp(filename+lfilename-5,".root")) return 3;
+   return 0;
+}
+//_____________________________________________________________________________
+St_DataSet *St_db_Maker::UpdateDB(St_DataSet* ds)
+{ 
+  if(!ds) return 0;
+  ds->Pass(UpdateDB,this);
+  return ds;
+}
+//_____________________________________________________________________________
+EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
+{
+  St_DataSet *set,*newdat,*bak,*ps;
+  St_ValiSet *val;
+  const char *filename;
+  TDatime timeMin,timeMax;
+   
+  TList *list = ds->GetList();
+  if (!list) 				return kContinue;
+  if (strcmp(".Val",ds->GetTitle()))	return kContinue;
+//
+//	It is our place.
+  val = (St_ValiSet*)ds;    
+  St_db_Maker *mk = (St_db_Maker*)user;    
+  UInt_t uevent = mk->GetDateTime().Get();
+
+// 		Check validity
+    if (val->fTimeMin.Get() <= uevent 
+     && val->fTimeMax.Get() >  uevent) return kPrune;
+    if (val->fDat) delete val->fDat; val->fDat=0;
+
+//	Start loop
+  bak = 0;  timeMin.Set(950101,0);
+  TListIter next(list);
+  while ((set = (St_DataSet*)next())) {
+    filename = set->GetName();
+    timeMax = St_db_Maker::Time(filename);
+    if (uevent < timeMax.Get()) break;
+    bak = set; timeMin=timeMax;
+  }   
+
+
+  if (!set) timeMax.Set(kMaxTime,0);
+  val->fTimeMin=timeMin;
+  val->fTimeMax=timeMax;
+  if (!bak) return kContinue;
+
+  TString dbfile = bak->GetTitle()+5;
+
+  ps = ds->GetParent();
+  dbfile += strchr(strstr(ps->Path(),"/.data/")+7,'/');
+  dbfile += "/"; dbfile += bak->GetName();
+  gSystem->ExpandPathName(dbfile);
+  newdat = 0;
+  TString command; 
+  switch (mk->Kind(bak->GetName())) {
+  
+    case 1: // .xdf file
+    newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
+    break;
+
+    case 2: // .C file
+
+    command = ".L "; command += dbfile;
+    gInterpreter->ProcessLine(command);
+    newdat = (St_DataSet *) gInterpreter->Calc("CreateTable()");
+    command.ReplaceAll(".L ",".U "); 
+    gInterpreter->ProcessLine(command);
+    break;
+    
+    default: assert(0);
+  }
+  val->fDat = newdat;
+  ds->GetParent()->AddFirst(newdat);
+  
+  return kPrune;  
+}
+//_____________________________________________________________________________
+EDataSetPass St_db_Maker::PrepareDB(St_DataSet* ds, void *user)
+{
+  St_DataSet *set;
+  St_ValiSet *pseudo;
+  const char *dsname,*filename,*dot;     
+  char psname[100];
+  int ldsname,lpsname;
+  
+  TList *list = ds->GetList();
+  if (!list) return kContinue;
+  if (strcmp("directory",ds->GetTitle())) return kPrune;
+  dsname = ds->GetName(); ;
+  if (!strcmp("CVS",dsname)) { delete ds; return kPrune;}
+  ldsname= strlen(dsname);
+
+  TString newTitle = "file ";
+  newTitle += *((TString*)user);
+
+//	Start loop
+  pseudo = 0; psname[0]='.'; psname[1]=0;
+  TListIter next(list);
+  while ((set = (St_DataSet*)next())) {
+    filename = set->GetTitle();
+    if (strncmp("file",filename,4))		continue;  
+    filename = set->GetName();
+    if (!(dot = strchr(filename,'.'))) 		continue;
+    if (!Kind(filename))			continue;
+    set->SetTitle(newTitle);
+    lpsname = dot - filename;
+    if (strncmp(filename,psname+1,lpsname+1)) {// make new pseudo directory
+      psname[1]=0; strncat(psname,filename,lpsname);
+      pseudo = new St_ValiSet(psname,ds); strcat(psname,".");}
+
+    set->Shunt(pseudo);}   
+  return kContinue;
+}
+//_____________________________________________________________________________
+void    St_db_Maker::SetMainDir(const Char_t *db)
+{m_MainDir = db; gSystem->ExpandPathName(m_MainDir);}
+//_____________________________________________________________________________
+void    St_db_Maker::SetUserDir(const Char_t *db)
+{m_UserDir = db; gSystem->ExpandPathName(m_UserDir);}
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.2 1999/02/16 18:15:43 fisyak Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.3 1999/03/11 01:32:56 perev Exp $\n");
   printf("***************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
