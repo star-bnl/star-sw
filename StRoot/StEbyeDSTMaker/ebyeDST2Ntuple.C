@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: ebyeDST2Ntuple.C,v 1.2 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: ebyeDST2Ntuple.C,v 1.3 2000/09/15 16:41:38 jgreid Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *
@@ -17,6 +17,9 @@
  **********************************************************************
  *
  * $Log: ebyeDST2Ntuple.C,v $
+ * Revision 1.3  2000/09/15 16:41:38  jgreid
+ * bug fix in multiple file name handler
+ *
  * Revision 1.2  2000/09/01 22:59:11  jgreid
  * version 1 revision ; multiple file handling + additional data members added
  *
@@ -68,6 +71,7 @@ void ebyeDST2Ntuple(char *dirname) {
   void* dir=gSystem->OpenDirectory(gSystem->ExpandPathName(dirname));
   int nruns=0;
   Char_t *file_name;
+  Char_t path_file[100];
   TString Tname;
   // must be big enough to handle dir listing!!!
   Char_t file_list[100][256];
@@ -82,7 +86,10 @@ void ebyeDST2Ntuple(char *dirname) {
       }
 
       if (file_name && Tname.Contains(".ebe.")) {
-        chain.Add(file_name);
+        strcpy(path_file,dirname);
+        strcat(path_file,"/");
+        strcat(path_file,file_name);
+        chain.Add(path_file);
         sprintf(&file_list[nruns],"%s/%s",dirname,file_name);
         printf("file %d: %s\n",nruns,file_list[nruns]);
         nruns++;
