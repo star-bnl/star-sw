@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.53 2003/07/07 21:58:21 posk Exp $
+// $Id: plot.C,v 1.54 2003/07/30 22:03:26 oldi Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -622,7 +622,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  hist->SetMinimum(-5.);
 	}
 	//gStyle->SetOptStat(100110);
-	hist->Fit("pol4");
 	hist->Draw();
 	if (strstr(shortName[pageNumber],"v")!=0) {
 	  TLine* lineZeroPt  = new TLine(0., 0., max, 0.);
@@ -873,6 +872,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.54  2003/07/30 22:03:26  oldi
+// Fit("pol4") taken out (which was in accidentally).
+//
 // Revision 1.53  2003/07/07 21:58:21  posk
 // Made units of momentum GeV/c instead of GeV.
 //
