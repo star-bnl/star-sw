@@ -14,12 +14,17 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIsActiveFunctor.h"
+#include "Rtypes.h"
+#include "Stiostream.h"
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/StiHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h" 
 #include "StiTpcIsActiveFunctor.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "StDbUtilities/StCoordinates.hh" 
+#include "StTpcDb/StTpcDb.h"
 #include "tables/St_HitError_Table.h"
+#include "StMatrixD.hh"
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Tpc",active,inputFile)
@@ -69,6 +74,12 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       setNSectors(row,12);
     }
 
+  //Coordinate transform used to do alignment of pad rows...
+  StTpcCoordinateTransform transform(gStTpcDb);
+  StMatrixD  local2GlobalRotation; 
+  StMatrixD  unit(3,3,1);
+  StThreeVectorD RowPosition;
+
   _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.48) ); 
   _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,  1.)        );
 
@@ -105,6 +116,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       p = new StiPlacement;
       p->setZcenter(0.);
       p->setLayerRadius(fIfcRadius);
+      p->setLayerAngle(phiForTpcSector(sector));
       p->setNormalRep(phiForTpcSector(sector), fIfcRadius, 0.);
       p->setRegion(StiPlacement::kMidRapidity);
       
@@ -127,6 +139,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       p = new StiPlacement;
       p->setZcenter(0.);
       p->setLayerRadius(fOfcRadius);
+      p->setLayerAngle(phiForTpcSector(sector));
+	  
       p->setNormalRep(phiForTpcSector(sector), fOfcRadius, 0.);
       p->setRegion(StiPlacement::kMidRapidity);      
 
@@ -148,12 +162,16 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       */
   } 
 
+  int debug = 0;
+
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows 
+  double radToDeg = 180./3.1415927;
   unsigned int _nInnerPadrows = _padPlane->numberOfInnerRows();
   for(row = 0; row<45; row++)
     {
+      //Nominal pad row information.
       // create properties shared by all sectors in this padrow
       float fRadius = _padPlane->radialDistanceAtRow(row+1);
       sprintf(name, "Tpc/Padrow_%d", row);
@@ -165,16 +183,60 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       else
 	pShape->setThickness(_padPlane->outerSectorPadLength());
       pShape->setHalfDepth(_dimensions->tpcTotalLength()/2.);
-      pShape->setHalfWidth(_padPlane->PadPitchAtRow(row+1) *
-			   _padPlane->numberOfPadsAtRow(row+1) / 2.);
+      pShape->setHalfWidth(_padPlane->PadPitchAtRow(row+1) * _padPlane->numberOfPadsAtRow(row+1) / 2.);
       pShape->setName(name);
       for(unsigned int sector = 0; sector<getNSectors(); sector++)
 	{
+
+
+	  //Retrieve position and orientation of the TPC pad rows from the database.
+	  StTpcLocalSectorDirection  dirLS[3];
+	  dirLS[0] = StTpcLocalSectorDirection(1.,0.,0.,sector+1,row+1);
+	  dirLS[1] = StTpcLocalSectorDirection(0.,1.,0.,sector+1,row+1);
+	  dirLS[2] = StTpcLocalSectorDirection(0.,0.,1.,sector+1,row+1);
+	  local2GlobalRotation = unit;
+	  for (int i = 0; i < 3; i++) 
+	    {
+	      if (debug>1) cout << "dirLS\t" << dirLS[i] << endl;
+	      StTpcLocalDirection        dirL;      
+	      StTpcLocalSectorAlignedDirection  dirLSA;
+	      transform(dirLS[i],dirLSA);   if (debug>1) cout << "dirLSA\t" << dirLSA << endl;
+	      transform(dirLSA,dirL);       if (debug>1) cout << "dirL\t" << dirL << endl;
+	      StGlobalDirection          dirG;
+	      transform(dirL,dirG);      if (debug>1) cout << "dirG\t" << dirG << endl;
+	      local2GlobalRotation(i+1,1) = dirG.position().x();
+	      local2GlobalRotation(i+1,2) = dirG.position().y();
+	      local2GlobalRotation(i+1,3) = dirG.position().z();
+	    }
+	  if (debug>1) cout << "Local2GlobalRotation = " << local2GlobalRotation << endl;
+	  double y  = transform.yFromRow(row+1);
+	  StTpcLocalSectorCoordinate  lsCoord(0., y, 0, sector+1, row+1); if (debug>1) cout << lsCoord << endl;
+	  StTpcLocalSectorAlignedCoordinate lsCoordA;  
+	  transform(lsCoord,lsCoordA);                       if (debug>1) cout << lsCoordA << endl;                   
+	  StGlobalCoordinate  gCoord; 
+	  transform(lsCoordA, gCoord);                       if (debug>1) cout << gCoord << endl;                   
+
+	  //unit vector normal to the pad plane
+	  double nx = local2GlobalRotation(2,1);
+	  double ny = local2GlobalRotation(2,2);
+	  double nz = local2GlobalRotation(2,3);
+	  double nt = sqrt(nx*nx+ny*ny);
+	  double xc = gCoord.position().x();
+	  double yc = gCoord.position().y();
+	  double zc = gCoord.position().z();
+	  double rc = sqrt(xc*xc+yc*yc);
+	  double rn = xc*nx/nt + yc*ny/nt;
+	  double phic = atan2(yc,xc);
+	  double phi2 = asin((xc*ny-nx*yc)/(nt*rc));
+	  if (debug) cout << "row:"<<row<<" sector:"<<sector<<" fRadius:"<<fRadius<<" rn:"<<rn<<" rc:"<<rc<<" phi(nominal):"<<phiForTpcSector(sector)*radToDeg<<" phic:"<<phic*radToDeg<<" phi2:"<< phi2*radToDeg<<endl;
 	  // create unique detector properties (placement & name)
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
-	  pPlacement->setNormalRep(phiForTpcSector(sector), fRadius, 0.); 
+	  pPlacement->setCenterRep(phic, rn, phi2); 
+
 	  pPlacement->setLayerRadius(fRadius);
+	  pPlacement->setLayerAngle(phiForTpcSector(sector));
+
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  sprintf(name, "Tpc/Padrow_%d/Sector_%d", row, sector);
 	  // fill in the detector object and save it in our vector
@@ -208,6 +270,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 	}// for sector
     }// for row
 
+  
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
@@ -245,3 +308,14 @@ void StiTpcDetectorBuilder::setDefaults()
   cout << _outerCalc << endl;
   cout <<"StiTpcDetectorBuilder::setDefaults() -I- Tracking Parameters set from class default values."<<endl;
 }
+
+
+/*
+
+
+
+
+
+
+
+ */
