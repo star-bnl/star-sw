@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.33 2001/11/09 21:14:46 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.34 2001/12/11 22:03:56 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,7 +45,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.33 2001/11/09 21:14:46 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.34 2001/12/11 22:03:56 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -150,13 +150,22 @@ private:
 
   // for each harmonic and each selection
   struct histFullHars {
-    TH1D*       mHistPhi;
+    TH1D*       mHistPhiFarEast;
+    TH1D*       mHistPhiEast;
+    TH1D*       mHistPhiWest;
+    TH1D*       mHistPhiFarWest;
     TH1D*       mHistPhiFtpcEast;
     TH1D*       mHistPhiFtpcWest;
-    TH1D*       mHistPhiWgt;
+    TH1D*       mHistPhiWgtFarEast;
+    TH1D*       mHistPhiWgtEast;
+    TH1D*       mHistPhiWgtWest;
+    TH1D*       mHistPhiWgtFarWest;
     TH1D*       mHistPhiWgtFtpcEast;
     TH1D*       mHistPhiWgtFtpcWest;
-    TH1D*       mHistPhiFlat;
+    TH1D*       mHistPhiFlatFarEast;
+    TH1D*       mHistPhiFlatEast;
+    TH1D*       mHistPhiFlatWest;
+    TH1D*       mHistPhiFlatFarWest;
     TH1D*       mHistPhiFlatFtpcEast;
     TH1D*       mHistPhiFlatFtpcWest;
     TH1F*       mHistPhiCorr;
@@ -166,6 +175,7 @@ private:
     TH1F*       mHistMult;
     TH1F*       mHist_q;
     TH2D*       mHistYield2D;
+    TH2D*       mHistEtaPhi2D;
     TProfile2D* mHist_vObs2D;
     TProfile*   mHist_vObsEta;
     TProfile*   mHist_vObsPt;
@@ -186,8 +196,6 @@ private:
   };
   struct histFulls histFull[Flow::nSels]; //!
 
-  static const Float_t qMax;
-
   TString      MakerName;
 
   ClassDef(StFlowAnalysisMaker, 1)              // macro for rootcint
@@ -204,6 +212,11 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.34  2001/12/11 22:03:56  posk
+// Four sets of phiWgt histograms.
+// StFlowMaker StFlowEvent::PhiWeight() changes.
+// Cumulant histogram names changed.
+//
 // Revision 1.33  2001/11/09 21:14:46  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.57 2001/11/13 22:47:17 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.58 2001/12/11 22:03:41 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -40,10 +40,6 @@
 #define PR(x) cout << "##### FlowAnalysis: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowAnalysisMaker)
-
-const Float_t StFlowAnalysisMaker::qMax   =  3.5;
-enum { n_qBins  = 50 };
-// nPhiBins is in StFlowConstants.h
 
 //-----------------------------------------------------------------------
 
@@ -106,7 +102,7 @@ Int_t StFlowAnalysisMaker::Make() {
 Int_t StFlowAnalysisMaker::Init() {
   // Book histograms
 
-  float ptMaxPart = 8.;
+  float ptMaxPart = 6.;
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
@@ -164,11 +160,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float pMin            =  -2.5;
   const float pMax            =   1.5;
   const float dEdxMax       = 0.00004;
+  const float qMax             =  3.5;
 
-
-  enum { //nEtaBins          = 30,
-	 nTriggerBins      = 11,
-	 //nPtBins           = 40,
+  enum { nTriggerBins      = 11,
 	 nChargeBins       = 50,
 	 nDcaBins          = 60,
 	 nChi2Bins         = 50,
@@ -191,7 +185,8 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nPidBins          = 50,
          nCentBins         = 10,
 	 nDedxBins        = 200,
-	 nMomenBins       = 200
+	 nMomenBins       = 200,
+	 n_qBins          = 50
   };
   
   // Trigger
@@ -705,19 +700,55 @@ Int_t StFlowAnalysisMaker::Init() {
 
 
       // Phi lab
-      // Tpc
-      histTitle = new TString("Flow_Phi_Sel");
+      // Tpc (FarEast)
+      histTitle = new TString("Flow_Phi_FarEast_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhi = new TH1D(histTitle->Data(),
+      histFull[k].histFullHar[j].mHistPhiFarEast = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhi->SetXTitle
+      histFull[k].histFullHar[j].mHistPhiFarEast->SetXTitle
 	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhi->SetYTitle("Counts");
+      histFull[k].histFullHar[j].mHistPhiFarEast->SetYTitle("Counts");
       delete histTitle;
       
-      // Ftpc (east)
+      // Tpc (East)
+      histTitle = new TString("Flow_Phi_East_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Tpc (West)
+      histTitle = new TString("Flow_Phi_West_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Tpc (FarWest)
+      histTitle = new TString("Flow_Phi_FarWest_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFarWest->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (East)
       histTitle = new TString("Flow_Phi_FtpcEast_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -729,7 +760,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
       delete histTitle;
       
-      // Ftpc (west)
+      // Ftpc (West)
       histTitle = new TString("Flow_Phi_FtpcWest_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -743,25 +774,64 @@ Int_t StFlowAnalysisMaker::Init() {
       
 
       // PhiWgt new
-      // Tpc
-      histTitle = new TString("Flow_Phi_Weight_Sel");
+      // Tpc (FarEast)
+      histTitle = new TString("Flow_Phi_Weight_FarEast_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgt =  new TH1D(histTitle->Data(),
+      histFull[k].histFullHar[j].mHistPhiWgtFarEast = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiWgt->Sumw2();
-      histFull[k].histFullHar[j].mHistPhiWgt->SetXTitle
+      histFull[k].histFullHar[j].mHistPhiWgtFarEast->Sumw2();
+      histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetXTitle
 	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiWgt->SetYTitle("PhiWgt");
+      histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetYTitle("PhiWgt");
       delete histTitle;
       
-      // Ftpc (east)
+      // Tpc (East)
+      histTitle = new TString("Flow_Phi_Weight_East_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiWgtEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiWgtEast->Sumw2();
+      histFull[k].histFullHar[j].mHistPhiWgtEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiWgtEast->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Tpc (West)
+      histTitle = new TString("Flow_Phi_Weight_West_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiWgtWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiWgtWest->Sumw2();
+      histFull[k].histFullHar[j].mHistPhiWgtWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiWgtWest->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Tpc (FarWest)
+      histTitle = new TString("Flow_Phi_Weight_FarWest_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiWgtFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiWgtFarWest->Sumw2();
+      histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Ftpc (East)
       histTitle = new TString("Flow_Phi_Weight_FtpcEast_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast =  new TH1D(histTitle->Data(),
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->Sumw2();
       histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetXTitle
@@ -769,12 +839,12 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetYTitle("PhiWgt");
       delete histTitle;
       
-      // Ftpc (west)
+      // Ftpc (West)
       histTitle = new TString("Flow_Phi_Weight_FtpcWest_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest =  new TH1D(histTitle->Data(),
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->Sumw2();
       histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetXTitle
@@ -784,19 +854,55 @@ Int_t StFlowAnalysisMaker::Init() {
       
 
       // Phi lab flattened
-      // Tpc
-      histTitle = new TString("Flow_Phi_Flat_Sel");
+      // Tpc (FarEast)
+      histTitle = new TString("Flow_Phi_Flat_FarEast_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiFlat =	new TH1D(histTitle->Data(),
+      histFull[k].histFullHar[j].mHistPhiFlatFarEast = new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
-      histFull[k].histFullHar[j].mHistPhiFlat->SetXTitle
+      histFull[k].histFullHar[j].mHistPhiFlatFarEast->SetXTitle
 	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFlat->SetYTitle("Counts");
+      histFull[k].histFullHar[j].mHistPhiFlatFarEast->SetYTitle("Counts");
       delete histTitle;
 
-      // Ftpc (east)
+      // Tpc (East)
+      histTitle = new TString("Flow_Phi_Flat_East_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFlatEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFlatEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFlatEast->SetYTitle("Counts");
+      delete histTitle;
+
+      // Tpc (West)
+      histTitle = new TString("Flow_Phi_Flat_West_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFlatWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFlatWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFlatWest->SetYTitle("Counts");
+      delete histTitle;
+
+      // Tpc (FarWest)
+      histTitle = new TString("Flow_Phi_Flat_FarWest_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFlatFarWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFlatFarWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFlatFarWest->SetYTitle("Counts");
+      delete histTitle;
+
+      // Ftpc (East)
       histTitle = new TString("Flow_Phi_Flat_FtpcEast_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -808,7 +914,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetYTitle("Counts");
       delete histTitle;
       
-      // Ftpc (west)
+      // Ftpc (West)
       histTitle = new TString("Flow_Phi_Flat_FtpcWest_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -885,7 +991,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhiCorr->SetYTitle("Counts");
       delete histTitle;
 
-      // Yield
+      // Yield(eta,pt)
       histTitle = new TString("Flow_Yield2D_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -896,6 +1002,19 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistYield2D->Sumw2();
       histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidty");
       histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
+      delete histTitle;
+
+      // Yield(eta,phi)
+      histTitle = new TString("Flow_EtaPhi2D_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistEtaPhi2D = new TH2D(histTitle->Data(),
+        histTitle->Data(), Flow::nEtaBins, Flow::etaMin, Flow::etaMax,
+			   Flow::nPhiBins, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistEtaPhi2D->Sumw2();
+      histFull[k].histFullHar[j].mHistEtaPhi2D->SetXTitle("Pseudorapidty");
+      histFull[k].histFullHar[j].mHistEtaPhi2D->SetYTitle("Azimuthal Angle (rad)");
       delete histTitle;
 
       // Flow observed
@@ -936,7 +1055,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.57 2001/11/13 22:47:17 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.58 2001/12/11 22:03:41 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1012,10 +1131,10 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   unsigned int triggerWord = pFlowEvent->L0TriggerWord();
   float trigger;
   switch (triggerWord) {
-  case 4096: trigger = 1.; break; // minbias
-  case 4352: trigger = 2.; break; // central
-  case 61952: trigger = 3.; break; // laser
-  default: trigger = 10.; break; // no clue
+  case 4096:  trigger = 1.;  break; // minbias
+  case 4352:  trigger = 2.;  break; // central
+  case 61952: trigger = 3.;  break; // laser
+  default:    trigger = 10.; break; // no clue
   }
   mHistTrigger->Fill(trigger);
 
@@ -1132,7 +1251,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     mHistCharge->Fill((float)charge);
 
     // distinguish between Tpc and Ftpc
-
     if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId) ||
 	pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
       mHistDcaFtpc      ->Fill(dca);
@@ -1257,6 +1375,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     // For Eta symmetry
     (eta > 0.) ? etaSymPosN++ : etaSymNegN++;
 
+    Float_t vertexZ = pFlowEvent->VertexPos().z();
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
       for (int j = 0; j < Flow::nHars; j++) {
@@ -1273,11 +1392,25 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (pFlowSelect->Select(pFlowTrack)) {
 	  // Get detID
 	  StDetectorId detId;
+	  Bool_t kTpcFarEast = kFALSE;
+	  Bool_t kTpcEast    = kFALSE;
+	  Bool_t kTpcWest    = kFALSE;
+	  Bool_t kTpcFarWest = kFALSE;
 	  if (pFlowTrack->TopologyMap().numberOfHits(kTpcId) || 
 	      (pFlowTrack->TopologyMap().data(0) == 0 && 
 	       pFlowTrack->TopologyMap().data(1) == 0)) {
 	    // Tpc track, or TopologyMap not available
 	    detId = kTpcId;
+	    // Set TpcEast and West
+	    if (eta > 0. && vertexZ > 0.) {
+	      kTpcFarWest = kTRUE;
+	    } else if (eta > 0. && vertexZ < 0.) {
+	      kTpcWest = kTRUE;
+	    } else if (eta < 0. && vertexZ > 0.) {
+	      kTpcEast = kTRUE;
+	    } else {
+	      kTpcFarEast = kTRUE;
+	    }
 	  } else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcEastId)) {
 	    detId = kFtpcEastId;
 	  } else if (pFlowTrack->TopologyMap().numberOfHits(kFtpcWestId)) {
@@ -1286,37 +1419,53 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	    detId = kUnknownId;
 	  }
 
-	  // Get phiWgt
-	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j, 
-						pFlowTrack->TopologyMap());
-	  if (detId == kFtpcEastId) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
-	  } else if (detId == kFtpcWestId) {
-	    histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgt);
-	  } else { // (detId == kTpcId) or otherwise !!!
-	    histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
-	  }
-
-	  // Remove autocorrelations
-	  TVector2 Q_i;
-	  if (!pFlowEvent->EtaSubs()) {
-	    if (eta < 0 && oddHar) phiWgt *= -1.;
-	    if (pFlowEvent->PtWgt()) phiWgt *= pt;
-	    Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
-	    TVector2 mQ_i = mQ[k][j] - Q_i;
-	    psi_i = mQ_i.Phi() / order;
-	    if (psi_i < 0.) psi_i += twopi / order;
-	  }
-	  
 	  // Fill histograms with selections
 	  if (detId == kFtpcEastId) {
 	    histFull[k].histFullHar[j].mHistPhiFtpcEast->Fill(phi);
 	  } else if (detId == kFtpcWestId) {
 	    histFull[k].histFullHar[j].mHistPhiFtpcWest->Fill(phi);
-	  } else { // (detId == kTpcId) or otherwise !!!
-	    histFull[k].histFullHar[j].mHistPhi->Fill(phi);
+	  } else if (kTpcFarEast){
+	    histFull[k].histFullHar[j].mHistPhiFarEast->Fill(phi);
+	  } else if (kTpcEast){
+	    histFull[k].histFullHar[j].mHistPhiEast->Fill(phi);
+	  } else if (kTpcWest){
+	    histFull[k].histFullHar[j].mHistPhiWest->Fill(phi);
+	  } else if (kTpcFarWest){
+	    histFull[k].histFullHar[j].mHistPhiFarWest->Fill(phi);
 	  }
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
+	  histFull[k].histFullHar[j].mHistEtaPhi2D->Fill(eta, phi);
+
+	  // Get phiWgt
+	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+
+	  double phiWgtRaw = phiWgt;
+	  if (pFlowEvent->PtWgt()) { // remove pt weighting
+	    phiWgtRaw /= (pt < 2.) ? pt : 2.;
+	  }
+	  if (oddHar && eta < 0.) phiWgtRaw /= -1.;
+	  if (detId == kFtpcEastId) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgtRaw);
+	  } else if (detId == kFtpcWestId) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgtRaw);
+	  } else if (kTpcFarEast) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFarEast->Fill(phi, phiWgtRaw);
+	  } else if (kTpcEast) {
+	    histFull[k].histFullHar[j].mHistPhiFlatEast->Fill(phi, phiWgtRaw);
+	  } else if (kTpcWest) {
+	    histFull[k].histFullHar[j].mHistPhiFlatWest->Fill(phi, phiWgtRaw);
+	  } else if (kTpcFarWest) {
+	    histFull[k].histFullHar[j].mHistPhiFlatFarWest->Fill(phi, phiWgtRaw);
+	  }
+
+	  // Remove autocorrelations
+	  TVector2 Q_i;
+	  if (!pFlowEvent->EtaSubs()) {
+	    Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
+	    TVector2 mQ_i = mQ[k][j] - Q_i;
+	    psi_i = mQ_i.Phi() / order;
+	    if (psi_i < 0.) psi_i += twopi / order;
+	  }
 	}
 
        	// Caculate v for all particles selected for correlation analysis
@@ -1381,18 +1530,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   corrMultN = corrMultN / (float)(Flow::nHars * Flow::nSels);
   mHistMultPart->Fill(corrMultN);
 
-}
-
-//-----------------------------------------------------------------------
-
-static Double_t qDist(double* q, double* par) {
-  // Calculates the q distribution given the parameters v, mult, area
-
-  double expo = par[1]*par[0]*par[0]*perCent*perCent + q[0]*q[0];
-  Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
-    TMath::BesselI0(2.*q[0]*par[0]*perCent*sqrt(par[1])));
-
-  return dNdq;
 }
 
 //-----------------------------------------------------------------------
@@ -1562,34 +1699,53 @@ Int_t StFlowAnalysisMaker::Finish() {
       }
 
       // Calculate PhiWgt
-      double mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
+      double meanFarEast = histFull[k].histFullHar[j].mHistPhiFarEast->Integral() 
+	/ (double)Flow::nPhiBins;
+      double meanEast = histFull[k].histFullHar[j].mHistPhiEast->Integral() 
+	/ (double)Flow::nPhiBins;
+      double meanWest = histFull[k].histFullHar[j].mHistPhiWest->Integral() 
+	/ (double)Flow::nPhiBins;
+      double meanFarWest = histFull[k].histFullHar[j].mHistPhiFarWest->Integral() 
 	/ (double)Flow::nPhiBins;
       double meanFtpcEast = histFull[k].histFullHar[j].mHistPhiFtpcEast->Integral() 
 	/ (double)Flow::nPhiBinsFtpc;
       double meanFtpcWest = histFull[k].histFullHar[j].mHistPhiFtpcWest->Integral() 
 	/ (double)Flow::nPhiBinsFtpc;
-      {for (int i = 0; i < Flow::nPhiBins; i++) {
+      for (int i = 0; i < Flow::nPhiBins; i++) {
 	// Tpc
-	histFull[k].histFullHar[j].mHistPhiWgt->SetBinContent(i+1, mean);
-	histFull[k].histFullHar[j].mHistPhiWgt->SetBinError(i+1, 0.);
-      }}
-      {for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
-	// Ftpc (east)
+	histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetBinContent(i+1,meanFarEast);
+	histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetBinError(i+1, 0.);
+	histFull[k].histFullHar[j].mHistPhiWgtEast->SetBinContent(i+1, meanEast);
+	histFull[k].histFullHar[j].mHistPhiWgtEast->SetBinError(i+1, 0.);
+	histFull[k].histFullHar[j].mHistPhiWgtWest->SetBinContent(i+1, meanWest);
+	histFull[k].histFullHar[j].mHistPhiWgtWest->SetBinError(i+1, 0.);
+	histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetBinContent(i+1,meanFarWest);
+	histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetBinError(i+1, 0.);
+      }
+      for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
+	// Ftpc
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
-	// Ftpc (west)
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
-      }}
+      }
       // Tpc
-      histFull[k].histFullHar[j].mHistPhiWgt->
-	Divide(histFull[k].histFullHar[j].mHistPhi);
-      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgt);
-      // Ftpc (east)
+      histFull[k].histFullHar[j].mHistPhiWgtFarEast->
+	Divide(histFull[k].histFullHar[j].mHistPhiFarEast);
+      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFarEast);
+      histFull[k].histFullHar[j].mHistPhiWgtEast->
+	Divide(histFull[k].histFullHar[j].mHistPhiEast);
+      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtEast);
+      histFull[k].histFullHar[j].mHistPhiWgtWest->
+	Divide(histFull[k].histFullHar[j].mHistPhiWest);
+      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtWest);
+      histFull[k].histFullHar[j].mHistPhiWgtFarWest->
+	Divide(histFull[k].histFullHar[j].mHistPhiFarWest);
+      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFarWest);
+      // Ftpc
       histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->
 	Divide(histFull[k].histFullHar[j].mHistPhiFtpcEast);
       phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcEast);
-      // Ftpc (west)
       histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->
 	Divide(histFull[k].histFullHar[j].mHistPhiFtpcWest);
       phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcWest);
@@ -1623,6 +1779,11 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.58  2001/12/11 22:03:41  posk
+// Four sets of phiWgt histograms.
+// StFlowMaker StFlowEvent::PhiWeight() changes.
+// Cumulant histogram names changed.
+//
 // Revision 1.57  2001/11/13 22:47:17  posk
 // Documentation updated. Fit to q function moved to macro.
 //

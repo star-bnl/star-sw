@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.1 2001/11/09 21:15:14 posk Exp $
+// $Id: plotCumulant.C,v 1.2 2001/12/11 22:04:22 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -17,12 +17,13 @@
 
 #include <math.h> 
 //const Int_t nHars    = 6;
-const  Int_t nHars    = 2;
+//const  Int_t nHars    = 2;
+const  Int_t nHars    = 3;
 const  Int_t nSels    = 2;
 const  Int_t nOrders  = 2;
 Int_t  runNumber      = 0;
 char   runName[6];
-char   fileNumber[4]  = "x";
+char   fileNum[4]  = "x";
 char   fileName[30];
 TFile* histFile;
 char   tmp[10];
@@ -32,7 +33,6 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
   if (orderN == 0) multiGraph = kTRUE;
-
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
@@ -41,14 +41,14 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
 
   // names of histograms made by StFlowCumulantMaker
   const char* baseName[] = {
-    "Flow_v_cumulantOrder",
-    "Flow_Cumulant_Order",
-    "Flow_CumulantEta_Order",
-    "Flow_CumulantPt_Order",
-    "Flow_vEta_cumulantOrder",
-    "Flow_vPt_cumulantOrder",
-    "Flow_Cumulant2D_Order",
-    "Flow_v2D_cumulantOrder"
+    "Flow_Cumul_v_Order",
+    "Flow_Cumul_Order",
+    "Flow_CumulEta_Order",
+    "Flow_CumulPt_Order",
+    "Flow_Cumul_vEta_Order",
+    "Flow_Cumul_vPt_Order"
+    //"Flow_Cumul2D_Order",
+    //"Flow_Cumul_v2D_Order"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nSingles =  2;
@@ -71,15 +71,15 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
     cout << " run name = " << runName << endl;
   }
 
-  // input the file number (0 opens flow.cumulant.root)
-  if (strstr(fileNumber, "x")!=0) {
-    cout << "     anaXX.root file number? [0= flow.cumulant.root] ";
-    fgets(fileNumber, sizeof(fileNumber), stdin);
-    fileNumber[strlen(fileNumber)-1] = '\0';
-    if (strlen(fileNumber) == 1 && strstr(fileNumber,"0")) {
-      sprintf(fileName, "flow.cumulant.root");
+  // input the file number (0 opens flow.hist.root)
+  if (strstr(fileNum, "x")!=0) {
+    cout << "     anaXX.root file number? [0= flow.hist.root] ";
+    fgets(fileNum, sizeof(fileNum), stdin);
+    fileNum[strlen(fileNum)-1] = '\0';
+    if (strlen(fileNum) == 1 && strstr(fileNum,"0")) {
+      sprintf(fileName, "flow.hist.root");
     } else {
-      sprintf(fileName, "ana%s.root", fileNumber);       // insert
+      sprintf(fileName, "ana%s.root", fileNum);       // insert
     }
     cout << " file name = " << fileName << endl;
     histFile = new TFile(fileName);
@@ -88,7 +88,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
   // input the page number
   while (pageNumber <= 0 || pageNumber > nNames) {
     if (pageNumber < 0) {                                 // plot all
-      plotAll(nNames, orderN, selN, harN, -pageNumber);
+      plotCumulantAll(nNames, orderN, selN, harN, -pageNumber);
       return c;
     }
     cout << "-1: \t All" << endl;                         // print menu
@@ -142,10 +142,8 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
   } else if (singleGraph) {       // single graph on a page
     int firstK = 0, firstJ = 0, lastK = 1, lastJ = 1;
   } else {                        // one graph from a multi graph page
-    int firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
+    int firstK = orderN/2 -1, firstJ = harN -1, lastK = orderN/2, lastJ = harN;
   }
-  TLine* lineZeroY  = new TLine(-4.5, 0., 4.5, 0.);
-  TLine* lineYcm    = new TLine(Ycm, -10., Ycm, 10.);
   char countSel[2];
   sprintf(countSel,"%d",selN);
   for (int j = firstJ; j < lastJ; j++) {
@@ -185,7 +183,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
 	  cout << "### Can't find histogram " << histName->Data() << endl;
 	  return c;
 	}
-	float ptMax = hist->GetXaxis()->GetXmax();
+	float xMax = hist->GetXaxis()->GetXmax();
       }
       
       // make the plots
@@ -197,6 +195,37 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
       } else {                                                // all other 1D
 	gStyle->SetOptStat(100110);
 	hist->Draw(); 
+	float yMax, yMin;
+	if (strstr(shortName[pageNumber],"Eta")!=0) {
+	  if (strstr(shortName[pageNumber],"_v")!=0) {
+	    yMax = 10.;
+	    yMin = -10.;
+	  } else {
+	    yMax = 0.005;
+	    yMin = -0.005;
+	  }
+	  hist->SetMaximum(yMax);
+	  hist->SetMinimum(yMin);
+	  TLine* lineZeroEta = new TLine(-xMax, 0., xMax, 0.);
+	  lineZeroEta->Draw();
+	  TLine* lineEtaCM   = new TLine(Ycm, yMin, Ycm, yMax);
+	  lineEtaCM->Draw();
+	} else if (strstr(shortName[pageNumber],"Pt")!=0) {
+	  if (strstr(shortName[pageNumber],"_v")!=0) {
+	    yMax = 30.;
+	    yMin = -10.;
+	  } else {
+	    yMax = 0.02;
+	    yMin = -0.02;
+	  }
+	  hist->SetMaximum(yMax);
+	  hist->SetMinimum(yMin);
+	  TLine* lineZeroPt = new TLine(0., 0., xMax, 0.);
+	  lineZeroPt->Draw();
+	} else {
+	  TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
+	  lineZeroHar->Draw();
+	}
       }
       delete histName;
     }
@@ -209,7 +238,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
   return c;
 }
 
-void plotAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t first = 1) {
+void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
     TCanvas* c = plotCumulant(i, orderN, selN, harN);
     c->Update();
@@ -219,12 +248,17 @@ void plotAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t first = 1
     else if (strstr(tmp,"q")!=0) return;
     c->Delete();
   }
-  cout << "  plotAll Done" << endl;
+  cout << "  plotCumulantAll Done" << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.2  2001/12/11 22:04:22  posk
+// Four sets of phiWgt histograms.
+// StFlowMaker StFlowEvent::PhiWeight() changes.
+// Cumulant histogram names changed.
+//
 // Revision 1.1  2001/11/09 21:15:14  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //
