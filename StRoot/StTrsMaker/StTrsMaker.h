@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.h,v 1.6 1999/03/16 02:01:45 lasiuk Exp $
+// $Id: StTrsMaker.h,v 1.7 1999/03/20 03:23:58 lasiuk Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.7  1999/03/20 03:23:58  lasiuk
+// setMiniSegmentLength()
+// setFirstSectorToProcess()
+// setLastSectorToProcess()
+//
 // Revision 1.6  1999/03/16 02:01:45  lasiuk
 // add Finish() which frees the memory allocated in Init()
 //
@@ -61,7 +66,7 @@ class StTrsUnpacker;
 
 class StTrsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.6 1999/03/16 02:01:45 lasiuk Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.7 1999/03/20 03:23:58 lasiuk Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -103,6 +108,11 @@ public:
     Int_t  Make();
     Int_t  Finish();
     void   PrintInfo();
+
+    void   setMiniSegmentLength(double);
+    void   setFirstSectorToProcess(int);
+    void   setLastSectorToProcess(int);
+    
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
 private:
