@@ -161,6 +161,16 @@ bool StppJetAnalyzer::accept(StMuTrack* p)
 	    );
 }
 
+bool StppJetAnalyzer::accept(StMuTrackFourVec* p)
+{
+    if(p->particle())
+      return(accept(p->particle()));
+    return (p
+	    && p->pt()>mPtMin
+	    && fabs(p->eta())<mEtaMax
+	    );
+}
+
 bool StppJetAnalyzer::accept(const StProtoJet& pj)
 {
     return (
@@ -215,11 +225,30 @@ void StppJetAnalyzer::fillLists()
     }
 }
 
+void StppJetAnalyzer::fillLists(StMuTrackFourVec* tracks, int numTracks)
+{
+    for (int i=0; i < numTracks; i++) {
+	if (accept(&tracks[i])) {
+	    mFourList.push_back(&tracks[i]) ; //for ownership
+	    StProtoJet tempPj(&tracks[i]);
+	    if (accept(tempPj)) { //check to make sure that nothing is wrong w/ protojet, as well!!!
+		mProtoJets.push_back( tempPj ); //for jet finding
+	    }
+	}
+    }
+}
+
 void StppJetAnalyzer::setEvent(StppEvent* e)
 {
     clear();
     mEvent=e;
     fillLists();
+}
+
+void StppJetAnalyzer::setFourVec(StMuTrackFourVec* tracks, int numTracks)
+{
+    clear();
+    fillLists(tracks, numTracks);
 }
 
 void StppJetAnalyzer::findJets()
