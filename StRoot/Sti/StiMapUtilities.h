@@ -26,15 +26,6 @@ struct MapKeyLessThan{
     double postolerance;
 };
 
-//Structures for detector map key
-struct DetectorMapKey {
-  bool operator==(const DetectorMapKey&) const;
-  bool operator<(const DetectorMapKey&) const;
-  double position;
-  double refangle;
-  double z;
-};
-
 // Structure for material, shape, or detector name map key
 struct NameMapKey {
     NameMapKey::NameMapKey(const string& str){ name = str; }
@@ -53,11 +44,6 @@ struct StHitRadiusLessThan
 struct StHitRadiusGreaterThan
 {
     bool operator() (const StHit*, const StHit*) const;
-};
-
-struct StiHitLessThan
-{
-    bool operator() (const StiHit*, const StiHit*) const;
 };
 
 struct StidHitLessThan

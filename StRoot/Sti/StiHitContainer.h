@@ -37,11 +37,11 @@ public:
     static StiHitContainer* instance();
     static void kill();
     
-    inline void setDeltaD(double val) {mdeltad = val;}
-    inline void setDeltaZ(double val) {mdeltaz = val;}
+    void setDeltaD(double);
+    void setDeltaZ(double);
 
-    inline double deltaD() const {return mdeltad;}
-    inline double deltaZ() const {return mdeltaz;}
+    double deltaD() const;
+    double deltaZ() const;
 
     //Provide for drawable derived class(es?)
     virtual void update();
@@ -55,12 +55,7 @@ public:
 
     //Gets
     const hitvector& hits(double refangle, double position);
-    const hitmap& hits() const {return mmap;}
-    
-    //Debugging Utilities
-    void print() const;
-    void print(double refangle, double position);
-    void print(double refangle, double position, ofstream&);
+    const hitmap& hits() const;
     
     //User Query Interface
     void setRefPoint(StiHit* ref);
@@ -72,19 +67,8 @@ public:
 
     //Add vertex information
     void addVertex(StiHit*); //push_back
-    void removeVertex(StiHit*); //look for, remove this vertex if found
-    void removeAllVertices(); //clear
     unsigned int numberOfVertices() const;
-    
-    void resetVertexIterator(); //set iterator to begin()
-    
-    StiHit* vertex(unsigned int i) const;
-    StiHit* firstVertex() const; //first in container
-    StiHit* lastVertex() const; //last in container
-    StiHit* nextVertex(); //next in container
-    StiHit* previousVertex(); //previous
-
-    void printVertices() const;
+    const hitvector& vertices() const;
     
 protected:
     StiHitContainer();
@@ -93,10 +77,10 @@ protected:
 private:
     //Vertex implementation
     hitvector mvertexvec; //! Container for primary vertices
-    hitvector::const_iterator mvertexiterator;
 
 private:
     static StiHitContainer* sinstance;
+    friend ostream& operator<<(ostream&, const StiHitContainer&);
     
     HitMapKey mkey; //store a map key member to avoid constructor call per hit
     
@@ -116,4 +100,72 @@ private:
     
     hitmap mmap; //! the hit container
 };
+
+//inlines
+
+inline const hitmap& StiHitContainer::hits() const 
+{
+    return mmap;
+}
+
+inline void StiHitContainer::setDeltaD(double val) 
+{
+    mdeltad = val;
+}
+
+inline void StiHitContainer::setDeltaZ(double val) 
+{
+    mdeltaz = val;
+}
+
+inline double StiHitContainer::deltaD() const 
+{
+    return mdeltad;
+}
+
+inline double StiHitContainer::deltaZ() const 
+{
+    return mdeltaz;
+}
+
+inline bool StiHitContainer::hasMore() const
+{
+    return (mcurrent!=mcandidatevec.end()) ? true : false;
+}
+
+//Return without incrementing
+inline StiHit* StiHitContainer::getCurrentHit()
+{
+    return (*mcurrent);
+}
+
+//Return and increment
+inline StiHit* StiHitContainer::getHit()
+{
+    return (*(mcurrent++));
+}
+
+//vertex inlines
+
+inline void StiHitContainer::addVertex(StiHit* val)
+{
+    mvertexvec.push_back(val);
+}
+
+inline unsigned int StiHitContainer::numberOfVertices() const
+{
+    return mvertexvec.size();
+}
+
+inline const hitvector& StiHitContainer::vertices() const
+{
+    return mvertexvec;
+}
+
+// Non -memebers
+
+ostream& operator<<(ostream&, const hitvector&);
+
+ostream& operator<<(ostream&, const StiHitContainer&);
+
 #endif
