@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.37 1999/02/23 03:13:52 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.38 1999/02/23 16:50:16 fine Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.38  1999/02/23 16:50:16  fine
+// wrong calling seq for ev0_eval2 module
+//
 // Revision 1.37  1999/02/23 03:13:52  fisyak
 // Take out fake tof
 //
@@ -559,7 +562,7 @@ Int_t St_glb_Maker::Make(){
     if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
     Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
     if (Res_ev0 != kSTAFCV_OK) {cout << " Problem on return from EV0 " << endl;}
-#if 0
+
     //  ev0_eval2
     if (stk_track && tptrack && evaltrk) {
       St_ev0_eval *ev0_eval = new St_ev0_eval("ev0_eval",20000);
@@ -569,15 +572,15 @@ Int_t St_glb_Maker::Make(){
       St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("Event/g2t_vertex");
       if (g2t_track && g2t_vertex){
 	cout << " Calling ev0_eval2.." << endl;
-    
-	Int_t Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
-				       vertex,ev0out,ev0_eval,
-				       g2t_track,g2t_vertex);
+     Int_t Res_ev0_eval = kSTAFCV_BAD;
+//    Res_ev0_eval = ev0_eval2(stk_track,tptrack,evaltrk,
+//				       vertex,ev0out,ev0_eval,
+//				       g2t_track,g2t_vertex);
     
 	if (Res_ev0_eval != kSTAFCV_OK) {cout << "Problem on return from ev0eval2" << endl;}
       }
     }
-#endif
+
     // exi
     cout << "Calling exi..."<< endl;
     if (! dst_xi_vertex) {
@@ -698,7 +701,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.37 1999/02/23 03:13:52 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.38 1999/02/23 16:50:16 fine Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
