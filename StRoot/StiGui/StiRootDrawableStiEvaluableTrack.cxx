@@ -80,19 +80,19 @@ void StiRootDrawableStiEvaluableTrack::setLineInfo()
     unsigned int lineStyle=1;
     
     if (particle == StPionPlus::instance()) {
-	mcolor=1;
+	mcolor=2;
 	//lineStyle=1;
     }
     else if (particle == StPionMinus::instance()) {
-	mcolor=1;
+	mcolor=2;
 	//lineStyle=2;
     }
     else if (particle == StKaonPlus::instance()) {
-	mcolor=2;
+	mcolor=3;
 	//lineStyle=1;
     }
     else if (particle == StKaonMinus::instance()) {
-	mcolor=2;
+	mcolor=3;
 	//lineStyle=2;
     }
     else if (particle == StProton::instance()) {
@@ -112,11 +112,11 @@ void StiRootDrawableStiEvaluableTrack::setLineInfo()
 	//lineStyle=1;
     }
     else if (particle == StElectron::instance()) {
-	mcolor=3;
+	mcolor=1;
 	//lineStyle=1;
     }
     else if (particle == StPositron::instance()) {
-	mcolor=3;
+	mcolor=1;
 	//lineStyle=2;
     }
     else { //Unkown
