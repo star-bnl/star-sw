@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.14 2000/06/26 20:58:41 perev Exp $
+// $Id: St_db_Maker.h,v 1.15 2000/07/14 02:39:21 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.15  2000/07/14 02:39:21  perev
+// SetMaxEntryTime method added
+//
 // Revision 1.14  2000/06/26 20:58:41  perev
 // multiple DBs
 //
@@ -55,8 +58,8 @@ private:
   Int_t       fIsDBTime;	//! flag to use own time stamp
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
-
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.14 2000/06/26 20:58:41 perev Exp $";
+  UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.15 2000/07/14 02:39:21 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -78,8 +81,8 @@ private:
    virtual void    SetOn (const Char_t *path);
    virtual void    SetFlavor(const char *flav){fFlavor=flav;}
    virtual void    OnOff();
-   virtual void Clear(Option_t *opt=""){if(opt){/*unused*/}};
-
+   virtual void    Clear(Option_t *opt=""){if(opt){/*unused*/}};
+           void    SetMaxEntryTime(Int_t idate,Int_t itime);
 protected:
    virtual TDataSet* UpdateDB (TDataSet* ds);
    virtual int UpdateTable(UInt_t parId, TTable* dat, TDatime val[2]);
@@ -94,7 +97,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.14 2000/06/26 20:58:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.15 2000/07/14 02:39:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
