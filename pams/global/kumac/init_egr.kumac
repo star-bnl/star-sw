@@ -43,8 +43,8 @@ message ' Creating egr tables...'
 *SCENARIO #10:
 *Description: Refits the SVT and TPC matched tracks followed by unmatched tracks
 *	Fills globtrk with all matched SVT+TPC tracks, followed by all
-*	leftover TPC tracks copied from tptrack, followed by all leftover SVT 
-*        tracks.  These SVT tracks are straight copies of svt_track but with
+*	leftover TPC tracks copied from tpctrack.
+*       The matched tracks are straight copies of svt_track but with
 *	the 1/pt value taken from tptrack.
 * SCENARIO 11
 * Description Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into 
