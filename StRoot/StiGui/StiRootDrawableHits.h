@@ -27,12 +27,9 @@ public:
 
 protected:
     StiTPolyMarker3D* mpoly;
-    double* marray;
     int mcolor;
     bool mvisible;
     unsigned int mmarker;
-    double* mPointsForRoot;
-    unsigned int mArraySize; 
     
 private:
 

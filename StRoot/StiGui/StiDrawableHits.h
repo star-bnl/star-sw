@@ -12,9 +12,18 @@
 class StiHit;
 class StThreeVectorD;
 
-typedef vector<StiHit*> const_hit_vector;
+#ifndef __CINT__
+//typedef StThreeVector<double> ThreeDimPoint_t;
+typedef double ThreeDimPoint_t; //we'll have to change this if we ever leave root
 
-class StiDrawableHits : public StiDrawable, public const_hit_vector
+typedef vector<ThreeDimPoint_t> ThreeDimPointVec_t;
+
+#else
+class ThreeDimPoint_t;
+class ThreeDimPointVec_t;
+#endif
+
+class StiDrawableHits : public StiDrawable, public ThreeDimPointVec_t
 {
 public:
 
