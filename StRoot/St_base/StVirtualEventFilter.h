@@ -1,6 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-//   
-//  
+// $Id: StVirtualEventFilter.h,v 1.3 1999/11/10 02:24:37 fine Exp $
 //
 #ifndef STAR_StVirtualEventFilter
 #define STAR_StVirtualEventFilter
@@ -41,9 +40,15 @@ class StVirtualEventFilter : public TObject {
     virtual Int_t Filter(const St_TableSorter *tableObject,Int_t index,Width_t &size,Style_t &style);
     virtual Int_t Filter(const StVertex *vertexObject,Width_t &size,Style_t &style);
     virtual Int_t Filter(const St_Table *tableObject,Int_t rowNumber,Width_t &size,Style_t &style);
+    virtual Int_t Reset(Int_t reset=0){return reset;}
     ClassDef(StVirtualEventFilter,0)
 };
 
 inline Int_t StVirtualEventFilter::Turn(Int_t flag){ Int_t s = GetFlag(); m_ActiveFlag = flag; return s;}
+
+// $Log: StVirtualEventFilter.h,v $
+// Revision 1.3  1999/11/10 02:24:37  fine
+// StVirtualFilter::Reset method has been introduced
+//
 
 #endif
