@@ -69,8 +69,8 @@
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Svt",active,inputFile)
 {
-  _trackingParameters.setName("SvtTrackingParameters");
-  _calc.setName("SvtHitErrors");
+  _trackingParameters.setName("svtTrackingParameters");
+  _calc.setName("svtHitError");
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
