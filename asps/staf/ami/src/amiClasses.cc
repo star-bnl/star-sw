@@ -54,6 +54,8 @@ FNC_PTR_T amiInvoker::  pFunction () {
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 
+   STAFCV_T status;
+
 //- Check number of tables in sequence.
    if( tbl._length != rank() ){
       EML_PRINTF("PAM = (%s) \n",name());
@@ -85,7 +87,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
       }
    }
 //- Call user-written Physics Analysis Module.
-   STAFCV_T status = ami_pamSwitch(myRank, myPamFtn, h, d);
+   status = ami_pamSwitch(myRank, myPamFtn, h, d);
 
 //- Setting NOK for tables.
    for( i=0;i<tbl._length;i++ ){
@@ -96,7 +98,9 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
       delete[] h;
       delete[] d;
    }
-   EML_SUCCESS(STAFCV_OK);
+//- WARNING!!! - Pass pure return value out to status vector.
+     set_staf_status(status);
+     return status;
 }
 
 //----------------------------------

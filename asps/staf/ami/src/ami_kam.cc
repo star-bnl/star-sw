@@ -89,10 +89,13 @@ int kam_ami_call()
    }
 
 //- Tell the AMI Broker to invoke the PAM.
-   if( !ami->callInvoker(name, tables) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
+//- WARNING!!! - PAM status already recorded!!!
+   ami->callInvoker(name, tables);
+   return TRUE;
+// if( !ami->callInvoker(name, tables) ){
+//    EML_ERROR(KAM_METHOD_FAILURE);
+// }
+// EML_SUCCESS(STAFCV_OK);
 
 }
 
