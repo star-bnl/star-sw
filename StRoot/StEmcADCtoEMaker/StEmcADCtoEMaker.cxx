@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.35 2003/01/17 23:02:25 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.36 2003/01/21 22:40:29 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.36  2003/01/21 22:40:29  suaide
+// small modification to save all tower hits
+//
 // Revision 1.35  2003/01/17 23:02:25  suaide
 // small modification
 //
@@ -567,6 +570,12 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			NHITS++;
 			//cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
 		}
+    else
+    {
+ 			if(det==0) mData->TowerEnergy[id-1] = 0;
+			if(det==2) mData->SmdeEnergy[id-1] = 0;     
+			if(det==3) mData->SmdpEnergy[id-1] = 0;        
+    }
 	}
 	cout <<"detector: "<<detname[det].Data()<<"  NHITS = "<<NHITS<<"  TOTALE = "<<TOTALE<<endl;
   return kTRUE;
@@ -639,6 +648,7 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
   {
     Bool_t Valid = kTRUE;
 		Int_t NHITS = 0;
+    Int_t NGOOD = 0;
 	  if(det==0) Valid = mData->ValidTowerEvent;
 	  if(det==2 || det==3) Valid = mData->ValidSMDEvent;	
 		if(Valid)
@@ -686,11 +696,12 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
           	}
           	detector->addHit(hit);
 						NHITS++;
+            if(E!=0) NGOOD++;
           }
       	}
     	}
 		}
-		cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<"  =  "<<NHITS<<endl;
+		cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD = "<<NGOOD<<endl;
   }  
   // finished clean up
   
@@ -705,7 +716,7 @@ Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh)
   Int_t ADC = 0;
 	Float_t E = 0;
 	Char_t S = 0;
-	if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = mData->TowerStatus[idh-1]; }
+	if(det==0) {ADC = mData->TowerADC[idh-1]; E = mData->TowerEnergy[idh-1]; S = STATUS_OK; } // save all for towers
 	if(det==2) {ADC = mData->SmdeADC[idh-1]; E = mData->SmdeEnergy[idh-1]; S = mData->SmdeStatus[idh-1]; }
 	if(det==3) {ADC = mData->SmdpADC[idh-1]; E = mData->SmdpEnergy[idh-1]; S = mData->SmdpStatus[idh-1]; }
   
