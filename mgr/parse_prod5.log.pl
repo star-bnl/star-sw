@@ -25,7 +25,7 @@ my $dir_sum;
 my $ii =0;
 
 #for ($ii =0; $ii<2; $ii++) {
- $ii = 0;
+ $ii = 1;
 $dir_log = $mdir_log . $dir_ext[$ii];
 $dir_sum = $mdir_sum . $dir_ext[$ii];
 
@@ -158,6 +158,10 @@ sub parse_log($) {
   my $avr_ftpc_hits;
   my @word_tr;
   my $i;
+  my $noEvts = 0;
+  my $first_evts = 0;
+  my $last_evts = 0; 
+  my @nparts;
   my $last_maker = 0;
   my @size_line;
   my $ij = 0;
@@ -224,7 +228,12 @@ sub parse_log($) {
    }
     # get  number of events
     if ( $line =~ /QAInfo: Done with Event/ ) {
-   
+      @nparts = split ( "/",$line);
+      $noEvts = $nparts[2];
+      $last_evts = substr($noEvts,4) + 0; 
+      if ($no_event eq 0) {
+      $first_evts = $last_evts;
+    }
       $no_event++;
   } 
     # get number of tracks, vertices and hits
@@ -233,7 +242,7 @@ sub parse_log($) {
 
            my  $string = $logfile[$num_line];
              @word_tr = split /:/,$string;
-             $no_tracks = $word_tr[2];
+              $no_tracks = $word_tr[2];
              $tot_tracks += $no_tracks; 
 #              print $word_tr[2], $no_tracks, "\n";
               $string = $logfile[$num_line + 1];
@@ -339,6 +348,8 @@ sub parse_log($) {
   
  
    print ("Number of Events Done:  ", $num_event, "\n");
+    print ("First event no. :  ", $first_evts, "\n");
+    print ("Last event no. :  ", $last_evts, "\n");
 
    print '-' x 80, "\n"; 
 
