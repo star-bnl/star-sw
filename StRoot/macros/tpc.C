@@ -42,9 +42,11 @@ void Load(){
     gSystem->Load("libmsg");
     gSystem->Load("libtls");
     gSystem->Load("St_db_Maker");
+    gSystem->Load("St_xdfin_Maker");
+#ifndef MINIDAQ
     gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
-    gSystem->Load("St_xdfin_Maker");
+#endif
 #ifndef StMagF
     gSystem->Load("geometry");
 #else
@@ -207,8 +209,10 @@ void tpc (const Int_t Nevents=1,
   chain->SetInput("calib","calib:calib");
   calibMk->SetDebug();  
 
+#ifndef MINIDAQ
   geant = new St_geant_Maker("geant");
   geant->SetNwGEANT(10 000 000);
+#endif
 
   // open input file 
   // if GTRACK is defined random events are generated
