@@ -1,5 +1,11 @@
-// $Id: St_l3t_Maker.cxx,v 1.9 1999/07/15 13:58:14 perev Exp $
+// $Id: St_l3t_Maker.cxx,v 1.10 1999/08/11 20:02:14 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.10  1999/08/11 20:02:14  yepes
+// *** empty log message ***
+//
+// Revision 1.10 1999/08/10 yepes
+// set some new parameters for ftfTpc
+//
 // Revision 1.9  1999/07/15 13:58:14  perev
 // cleanup
 //
@@ -99,6 +105,9 @@ Int_t St_l3t_Maker::Init(){
   para[0].MaxSliceTanL           =  2.0 ;
   para[0].SDPsiMaxMerge          =  0.03 ;
   para[0].SDTanlMaxMerge         =  0.01 ;
+  para[0].numberTrackingSlices   = 1 ;
+  para[0].TrackingSlices[0]      = -0.4 ;
+  para[0].TrackingSlices[1]      =  2.4 ;
 //
   para[0].sectorPhiMin[0]=45.;
   para[0].sectorPhiMin[1]=15.;
@@ -193,12 +202,16 @@ Int_t St_l3t_Maker::Make(){
 //
     *l3hit = *tphit ;
 //
-    maxNofTracks = nHits / 20 ;
+    maxNofTracks = nHits / 10 ;
     if ( maxNofTracks < 1 ) maxNofTracks = 1 ;
-    St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); m_DataSet->Add(track);
-    St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); m_DataSet->Add(mon);
+    St_tpt_track   *track = new St_tpt_track("l3Track",maxNofTracks); 
+    m_DataSet->Add(track);
+    St_sl3Monitor  *mon   = new St_sl3Monitor("sl3Monitor",1000); 
+    m_DataSet->Add(mon);
 
+    sl3TpcPara_st   *para  = m_sl3TpcPara->GetTable();
     Int_t l3out = ftfTpc ( m_sl3TpcPara, l3hit, track, mon ) ;
+    printf ( "l3out %d\n", l3out ) ;
     if (l3out != kSTAFCV_OK) iMake = kStWarn;
   }
 
