@@ -1,7 +1,10 @@
 *
-* $Id: ertrgo.F,v 1.1 1999/12/07 15:44:30 fisyak Exp $
+* $Id: ertrgo.F,v 1.2 2000/09/28 00:36:22 fisyak Exp $
 *
 * $Log: ertrgo.F,v $
+* Revision 1.2  2000/09/28 00:36:22  fisyak
+* Use g77 on linux instead of pgf77
+*
 * Revision 1.1  1999/12/07 15:44:30  fisyak
 * Add geane, new TGeant3 from Alice
 *
@@ -258,7 +261,8 @@ C.    ------------------------------------------------------------------
       VECT(6) = VECT(6)*CMOD
 *
       IF (INWVOL.EQ.0) GO TO 100
-      IF (LEPLAN .AND. LEVMIX) GO TO 200 
+*yf      IF (LEPLAN .AND. LEVMIX) GO TO 200 
+      IF (LEPLAN) GO TO 200 
 *
 * *** Particle is leaving the volume (INWVOL=2) :
 *
