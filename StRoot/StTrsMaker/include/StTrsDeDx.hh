@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.5 1999/07/19 21:42:37 lasiuk Exp $
+ * $Id: StTrsDeDx.hh,v 1.6 1999/10/21 23:52:27 calderon Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
+ * Revision 1.6  1999/10/21 23:52:27  calderon
+ * Added new constructor with char*
+ * instead of string so Solaris doesn't complain.
+ * Code is otherwise unaffected.
+ *
  * Revision 1.5  1999/07/19 21:42:37  lasiuk
  * - add tss bethe-bloche parameterization for P10.  No saturation
  *   effects are included.
@@ -83,6 +88,7 @@ public:
     
 public:
     StTrsDeDx(const string&, double = 1.95*centimeter);
+    StTrsDeDx(const char*, double = 1.95*centimeter);
     ~StTrsDeDx();
 
     // access functions
