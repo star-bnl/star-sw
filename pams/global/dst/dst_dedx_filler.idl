@@ -14,7 +14,8 @@ interface dst_dedx_filler : amiModule {
              STAFCV_T call
                      ( in     tpt_track     tpt_track,
                        in     stk_track     stk_track,
+		       in     dst_dedx      tpc_dedx,
                        out    dst_dedx      dst_dedx
              );
      };
-     /*  Last mod. for dst_dedx_filler $Date: 1998/08/24 23:55:14 $ */
+     /*  Last mod. for dst_dedx_filler $Date: 1999/08/12 17:04:43 $ */
