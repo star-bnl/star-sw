@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.67 2003/09/02 17:59:25 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.68 2003/09/13 00:42:32 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.68  2003/09/13 00:42:32  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.67  2003/09/02 17:59:25  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -53,7 +56,7 @@
 #include "St_db_Maker.h"
 #include "TDataSetIter.h"
 #include "TFileSet.h"
-#include "St_XDFFile.h"
+//VP#include "St_XDFFile.h"
 #include "StTree.h"
 #include "TTableDescriptor.h"
 #include "TTable.h"
@@ -519,7 +522,8 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
   switch (kind) {
   
     case 1: // .xdf file
-    newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
+    assert(0);
+ //    newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
     if (GetDebug()) printf("Load XdfFile:   %s\n",(const char*)dbfile);
     break;
 

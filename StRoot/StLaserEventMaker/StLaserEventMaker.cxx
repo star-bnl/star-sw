@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.29 2003/09/02 17:58:40 perev Exp $
+// $Id: StLaserEventMaker.cxx,v 1.30 2003/09/13 00:42:30 perev Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.30  2003/09/13 00:42:30  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.29  2003/09/02 17:58:40  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -84,7 +87,7 @@
 #include "StLaserEventMaker.h"
 #include "StBFChain.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+//VP#include "St_XDFFile.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_Module.h"
@@ -815,7 +818,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.29 2003/09/02 17:58:40 perev Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.30 2003/09/13 00:42:30 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.353 2003/08/21 16:11:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.354 2003/09/13 00:42:26 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -9,7 +9,7 @@
 #include "StBFChain.h"
 #include "StEvtHddr.h"
 #include "StChain.h"
-#include "St_XDFFile.h"
+//VP #include "St_XDFFile.h"
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StDbBroker/StDbBroker.h"
@@ -1517,7 +1517,7 @@ Int_t StBFChain::Instantiate()
   }
 
   if (fXdfFile) {
-    fXdfOut = new St_XDFFile(fXdfFile->Data(),"wb");
+    fXdfOut = 0;//VP new St_XDFFile(fXdfFile->Data(),"wb");
     if (!fXdfOut) status = kStErr;
   }
   SetDbOptions();
@@ -1539,7 +1539,7 @@ Int_t StBFChain::Finish()
 {
   if (fBFC) {
     delete [] fBFC; fBFC = 0;
-    SafeDelete (fXdfOut);
+//VP    SafeDelete (fXdfOut);
     if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
     return StMaker::Finish();
   }

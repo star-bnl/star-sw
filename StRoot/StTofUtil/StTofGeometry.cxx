@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.6 2003/09/02 17:59:10 perev Exp $
+ * $Id: StTofGeometry.cxx,v 1.7 2003/09/13 00:42:32 perev Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.7  2003/09/13 00:42:32  perev
+ * XDF obsolete + small fixes
+ *
  * Revision 1.6  2003/09/02 17:59:10  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -54,7 +57,7 @@
     </ul>
 
 */
-#include "St_XDFFile.h"
+//VP#include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "PhysicalConstants.h"
 #include "ctf/St_ctg_Module.h"
@@ -97,6 +100,7 @@ void StTofGeometry::init(StMaker* maker){
 
 /// initialize TOF Slat parameters from XDF file
 void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
+#if 0
   cout << "StTofGeometry: loading dBase from " << InputXdfFile << endl;
   St_XDFFile xdf(InputXdfFile);
   St_DataSet *ctfg = xdf.NextEventGet();
@@ -210,6 +214,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
       delete tofSlat;
     }
   }
+#endif //0
 }
 
 

@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.19 2003/09/02 17:58:43 perev Exp $
+// $Id: StMinidaqMaker.cxx,v 1.20 2003/09/13 00:42:31 perev Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.20  2003/09/13 00:42:31  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.19  2003/09/02 17:58:43  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -83,7 +86,7 @@
 #include "StMinidaqMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+//VP#include "St_XDFFile.h"
 #include "TROOT.h"
 #include "TFile.h"
 #include "TProfile.h"
