@@ -47,7 +47,7 @@ public:
   virtual Option_t     *GetOption() const {return fOption;};
   virtual Int_t UpdateFile(const Char_t *file);
   virtual const Char_t *GetFile();
-  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0);
+  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
   virtual Int_t SetTFile(TFile *tfile);
   virtual TFile        *GetTFile(){return fTFile;};
   virtual void SetUKey(ULong_t ukey){if (ukey!=kUMAX) fUKey=ukey;};
@@ -74,7 +74,6 @@ protected:
   TString fFile;		//  File name
   TString fOption;		//  Option string
   TFile   *fTFile;		//! Opened TFile
-  Int_t   fTFileOwner;          //! Ownership of TFile flag
   Int_t   fDebug;		//! debug level
 ClassDef(StBranch,1)
 };  
@@ -93,7 +92,7 @@ public:
   virtual void  Close(const char *opt=0);
   virtual Int_t Open();
   virtual void Clear(Option_t *opt="");
-  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0);
+  virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0,int insist=0);
   virtual void SetBaseName(const char* basename);
   virtual const char *GetBaseName() 
           {return (fBaseName.IsNull()) ? 0:(const char*)fBaseName;};
