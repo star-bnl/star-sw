@@ -1,7 +1,7 @@
-// $Id: St_ebye_Maker.h,v 1.5 1999/01/21 19:13:46 dhammika Exp $
+// $Id: St_ebye_Maker.h,v 1.6 1999/01/27 00:17:55 dhammika Exp $
 // $Log: St_ebye_Maker.h,v $
-// Revision 1.5  1999/01/21 19:13:46  dhammika
-// Updated ebye stuff which works for one event only
+// Revision 1.6  1999/01/27 00:17:55  dhammika
+// EbyE PKG works for more than one event in ROOT
 //
 // Revision 1.5  1999/01/05 14:11:08  dhammika
 // Updated to be in synch with stardev and the latest SCA V2.0 

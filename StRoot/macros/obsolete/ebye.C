@@ -1,8 +1,10 @@
-// $Id: ebye.C,v 1.5 1999/01/21 19:14:04 dhammika Exp $
+// $Id: ebye.C,v 1.6 1999/01/27 00:18:15 dhammika Exp $
 // $Log: ebye.C,v $
-// Revision 1.5  1999/01/21 19:14:04  dhammika
-// Updated ebye stuff which works for one event only
+// Revision 1.6  1999/01/27 00:18:15  dhammika
+// EbyE PKG works for more than one event in ROOT
 //
+// Revision 1.51 1999/01/26 18:14:06  dhammika
+// Minor updates
 // Revision 1.5  1999/01/05 14:11:08  dhammika
 // Updated to be in synch with stardev and the latest SCA V2.0 
 //
@@ -21,7 +23,7 @@
 #ifdef   DEBUG
 #undef   DEBUG 
 #endif
-#define  DEBUG  1
+#define  DEBUG  0
 
 Int_t iret;
 TBrowser *b = 0;
@@ -38,9 +40,9 @@ void Load(){
   gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("St_params_Maker");
-  gSystem->Load("St_calib_Maker");
-  gSystem->Load("St_dst_Maker");
-  gSystem->Load("St_run_summary_Maker");
+  //gSystem->Load("St_calib_Maker");
+  //gSystem->Load("St_dst_Maker");
+  //gSystem->Load("St_run_summary_Maker");
   //gSystem->Load("St_ana_Maker");
   gSystem->Load("ebye");
   gSystem->Load("St_ebye");
@@ -48,19 +50,20 @@ void Load(){
   printf (" Done loading shared libraries  \n"); 
 }
 
-ebye(const Int_t   SetmakePrior            = 0,
-	  const Int_t   SetmakeEnsembleAve = 0,
-	  const Int_t   SetdoAnalysis      = 1,
-	  const Int_t   Nevents            = 2,
-	  const Char_t *fileinp            = 
-	  "/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/tfs_dst/psc362_02_160evts_h_dst.xdf",
-	  //const Char_t *fileprior          = "sca_prior_dir.xdf",
-	  const Char_t *fileprior          = 0,
-	  //const Char_t *fileensembleave    = "sca_ensemble_dir.xdf",
-	  const Char_t *fileensembleave    = 0,
-	  const Char_t *fileout            = "sca_out.xdf",
-	  //const Char_t *FileOut            = "sca_out.root")
-	  const Char_t *FileOut            = 0)
+ebye(const Int_t   SetmakePrior       = 0,
+     const Int_t   SetmakeEnsembleAve = 0,
+     const Int_t   SetdoAnalysis      = 1,
+     const Int_t   Nevents            = 20,
+     const Int_t   Nskip              = 0,
+     const Char_t *fileinp            = 
+     "/star/scr2b/dhammika/psc362_02_160evts_h_dst.xdf",
+     //const Char_t *fileprior          = "sca_prior_dir.xdf",
+     const Char_t *fileprior          = 0,
+     //const Char_t *fileensembleave    = "sca_ensemble_dir.xdf",
+     const Char_t *fileensembleave    = 0,
+     const Char_t *fileout            = "sca_out.xdf",
+     //const Char_t *FileOut            = "sca_out.root")
+     const Char_t *FileOut            = 0)
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
@@ -76,8 +79,9 @@ ebye(const Int_t   SetmakePrior            = 0,
   if (FileOut)               root_out  = new TFile(FileOut,"RECREATE");
   // Create the main chain object
   if (chain) delete chain;
-  chain = new StChain("ebye_ana");
+  chain = new StChain("ebye");
   //St_TLA_Maker      *params = new St_TLA_Maker("params","params");
+  //chain->SetDebug(1);
   St_params_Maker   *params = new St_params_Maker("params","params");
   //St_calib_Maker    *calib  = new St_calib_Maker("calib","calib");
   // Set input file
@@ -87,8 +91,8 @@ ebye(const Int_t   SetmakePrior            = 0,
   }
   //  Create the makers to be called by the current chain
   //St_dst_Maker   *my_dst = new St_dst_Maker("dst","dst");
-  //St_TLA_Maker  *summary = new St_TLA_Maker("run_summary","dst");
-  St_run_summary_Maker *summary  = new St_TLA_Maker("run_summary","run/dst");
+  St_TLA_Maker  *summary = new St_TLA_Maker("run_summary","dst");
+  //St_run_summary_Maker *summary  = new St_TLA_Maker("run_summary","run/dst");
   St_TLA_Maker   *dst    = new St_TLA_Maker("dst","event/data/global/dst");
   //St_ana_Maker   *my_dst = new St_ana_Maker("dst","dst");
   St_ebye_Maker *my_ebye = new St_ebye_Maker("ebye","event/data/ebye/sca");
@@ -132,31 +136,32 @@ ebye(const Int_t   SetmakePrior            = 0,
   }
   
   // Skip events?
-  //  St_DataSet *set =chain->XDFFile()->NextEventGet();  
-  //  delete set;
+  for ( Int_t i=0; i<Nskip;i++){
+    St_DataSet *set = chain->XDFFile()->NextEventGet();  
+    delete set;
+  }
   
-  gBenchmark->Start("ebye_ana");
-  printf("====>ebye.C::Beging Benchmark(ebye_ana) \n"); 
+  gBenchmark->Start("ebye");
+  printf("====>ebye.C::Beging Benchmark(ebye) \n"); 
   Int_t i=1;
   for (Int_t i =1; i <= Nevents; i++){
     iret = chain->Make(i);
     if (iret) {
-      printf ("====>ebye.C:: <<< ERROR >>> <Chain::Make()>: failed in Event no. %d\n",i);
-      break;
+      printf ("====>ebye.C:: <<< ERROR >>> <Chain::Make()>: failed in Event no. %d \n \t  chain->Make(i) = %d \n",i, iret);
+      // break;
     }
     if (i != Nevents) chain->Clear();
     // Write out SCA output
-    if (SetdoAnalysis && xdf_out){
-      gBenchmark->Start("xdf_out");
-      St_DataSet *ebye_out = chain->DataSet("ebye");
-      //St_DataSetIter       ebyetables(ebye_out); ebyetables.Du();
-      xdf_out->NextEventPut(ebye_out); // xdf output
-      gBenchmark->Stop("xdf_out");
+    if (!iret && SetdoAnalysis ){
+      if (xdf_out){
+	gBenchmark->Start("xdf_out");
+	St_DataSet *ebye_out = chain->DataSet("ebye");
+	//St_DataSetIter       ebyetables(ebye_out); ebyetables.Du();
+	xdf_out->NextEventPut(ebye_out); // xdf output
+	gBenchmark->Stop("xdf_out");
+      }
+      printf ("====>ebye.C:: ========================== Done with Event no. %d\n",i);
     }
-    printf ("====>ebye.C::===========================================\n");
-    printf ("====>ebye.C::=========================================== ");
-    printf ("====>ebye.C:: Done with Event no. %d\n",i);
-    printf ("====>ebye.C::===========================================\n");
   }
   // Set the total #of good events processed.
   my_ebye->SetnEvents(i);
@@ -181,7 +186,7 @@ ebye(const Int_t   SetmakePrior            = 0,
       delete xdf_out;
       gBenchmark->Print("xdf_out");
     }
-    gBenchmark->Print("ebye_ana");
+    gBenchmark->Print("ebye");
   }
   else {if (!b)   b = new TBrowser;}
 }
