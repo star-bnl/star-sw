@@ -1,3 +1,8 @@
+* $Id: tpt_helix_fit.F,v 1.2 1998/01/27 00:35:47 fisyak Exp $
+* $Log: tpt_helix_fit.F,v $
+* Revision 1.2  1998/01/27 00:35:47  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_HELIX_FIT(ipt,trk,xcir,ycir,zcir,
      >                               wcir,wlin,ncir,tpar_h,tpar,ipass)
 C>----------------------------------------------------------------------

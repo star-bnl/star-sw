@@ -1,3 +1,8 @@
+* $Id: tpt_circle_pred.F,v 1.2 1998/01/27 00:35:43 fisyak Exp $
+* $Log: tpt_circle_pred.F,v $
+* Revision 1.2  1998/01/27 00:35:43  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_CIRCLE_PRED(as,bs,acent,bcent,r,n,xp,yp)
 C>---------------------------------------------------------------------
 C

@@ -1,3 +1,8 @@
+* $Id: tpt_row_sect_pnt.F,v 1.2 1998/01/27 00:35:53 fisyak Exp $
+* $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.2  1998/01/27 00:35:53  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_ROW_SECT_PNT(hit_h,hit,loc_hit,tpstart,
      >                                  tpcount,tpar_h,tpar,
      >                                  next_hit,slice_loc,slice_pnt,

@@ -1,4 +1,15 @@
+* $Id: utcmat.F,v 1.2 1998/01/27 00:35:54 fisyak Exp $
+* $Log: utcmat.F,v $
+* Revision 1.2  1998/01/27 00:35:54  fisyak
+* Split sources
+*
       SUBROUTINE UTCMAT(xcir,ycir,wcir,ncir)
+C
+C>----------------------------------------------------------------------
+C
+C UTCMAT - auxiliary routine for the circle fitting
+C
+C<----------------------------------------------------------------------
 
 C
 C      calculates weighted averages needed  *

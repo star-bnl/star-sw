@@ -1,4 +1,33 @@
+* $Id: tpt_ptcrs_uv_p.F,v 1.2 1998/01/27 00:35:51 fisyak Exp $
+* $Log: tpt_ptcrs_uv_p.F,v $
+* Revision 1.2  1998/01/27 00:35:51  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_PTCRS_UV_P(as,bs,at,bt,x0,y0,xp1,yp1)
+C>---------------------------------------------------------------------
+C
+C TPT_PTCRS_UV_P - calculates crossing of a track with a padrow 
+C                in mapped coors.
+C
+C DESCRIPTION:
+C Routine finds solutions for a set of 2 equations. A TPC row is 
+C parametrized by as*x+bs*y=1, a track is parametrized by -(y-y0)/r
+C =at*(x-x0)/r+bt where r=(x-x0)**2+(y-y0)**2.
+C
+C INPUT PARAMETERS:
+C  as - slope parameter for the row
+C  bs - intercept parameter for the row
+C  at - slope parameter for the track
+C  bt - intercept parameter for the track
+C
+C OUTPUT PARAMETERS:
+C  xp1 - x coordinates of the solutions
+C  yp1 - y coordinates of the solutions
+C
+C AUTHOR:
+C Iwona Sakrejda
+C
+C<---------------------------------------------------------------------
 
       IMPLICIT NONE
 

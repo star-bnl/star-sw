@@ -1,3 +1,8 @@
+* $Id: utcfit.F,v 1.2 1998/01/27 00:35:54 fisyak Exp $
+* $Log: utcfit.F,v $
+* Revision 1.2  1998/01/27 00:35:54  fisyak
+* Split sources
+*
       INTEGER FUNCTION UTCFIT(XCIR,YCIR,WCIR,NCIR,
      >                           SGN,R0,ACENT,BCENT,CHISQ)
 C>-----------------------------------------------------------------

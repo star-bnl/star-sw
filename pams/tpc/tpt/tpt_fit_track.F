@@ -1,3 +1,8 @@
+* $Id: tpt_fit_track.F,v 1.2 1998/01/27 00:35:46 fisyak Exp $
+* $Log: tpt_fit_track.F,v $
+* Revision 1.2  1998/01/27 00:35:46  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_FIT_TRACK(ipt,trk,hit_h,hit,
      >                               tpar_h,tpar,tte_skip,ipass)
 C>---------------------------------------------------------------------

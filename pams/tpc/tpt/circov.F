@@ -1,3 +1,8 @@
+* $Id: circov.F,v 1.2 1998/01/27 00:35:41 fisyak Exp $
+* $Log: circov.F,v $
+* Revision 1.2  1998/01/27 00:35:41  fisyak
+* Split sources
+*
       INTEGER FUNCTION CIRCOV(X,Y,W,N,A,B,R,H)
 C>--------------------------------------------------------------------
 C

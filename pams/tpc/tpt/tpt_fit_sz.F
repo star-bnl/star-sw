@@ -1,3 +1,8 @@
+* $Id: tpt_fit_sz.F,v 1.2 1998/01/27 00:35:46 fisyak Exp $
+* $Log: tpt_fit_sz.F,v $
+* Revision 1.2  1998/01/27 00:35:46  fisyak
+* Split sources
+*
       integer function tpt_fit_sz(x0,y0,at,bt,xlast,ylast,iflag,
      >                 x,y,z, az,bz,stot)
       implicit none

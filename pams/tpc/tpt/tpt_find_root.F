@@ -1,3 +1,8 @@
+* $Id: tpt_find_root.F,v 1.2 1998/01/27 00:35:45 fisyak Exp $
+* $Log: tpt_find_root.F,v $
+* Revision 1.2  1998/01/27 00:35:45  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_FIND_ROOT(k,hit_h,hit,tpar_h,tpar,pad_pl_h,
      >                               pad_pl,nroot,root,next_hit,
      >                               slice_loc,slice_pnt,ipass)

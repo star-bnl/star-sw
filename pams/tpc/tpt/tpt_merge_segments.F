@@ -1,3 +1,8 @@
+* $Id: tpt_merge_segments.F,v 1.2 1998/01/27 00:35:50 fisyak Exp $
+* $Log: tpt_merge_segments.F,v $
+* Revision 1.2  1998/01/27 00:35:50  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_MERGE_SEGMENTS(track_h,track,trk,hit_h,hit,
      >   tpar,tpar_h,ipass)
 C>---------------------------------------------------------------------
