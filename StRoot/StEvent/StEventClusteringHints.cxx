@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.12 2003/01/30 18:37:55 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.13 2003/04/16 17:48:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.13  2003/04/16 17:48:32  ullrich
+ * Added StTriggerData and inherited classe(s).
+ *
  * Revision 2.12  2003/01/30 18:37:55  ullrich
  * Added Phmd and TriggerId stuff.
  *
@@ -50,7 +53,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.12 2003/01/30 18:37:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.13 2003/04/16 17:48:32 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -71,6 +74,8 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StL3Trigger",                 "evt_trigger",  3);
     setBranch("StTriggerDetectorCollection", "evt_trigger",  3);
     setBranch("StTriggerIdCollection",       "evt_trigger",  3);
+    setBranch("StTriggerData",               "evt_trigger",  3);
+    setBranch("StTriggerData2003",           "evt_trigger",  3);
     setBranch("StSPtrVecTrackDetectorInfo",  "evt_tracks",   4);
     setBranch("StSPtrVecPrimaryVertex",      "evt_tracks",   4);
     setBranch("StSPtrVecTrackNode",          "evt_tracks",   4);
@@ -107,6 +112,8 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StL3Trigger",                 "event", 1);
     setBranch("StTriggerDetectorCollection", "event", 1);
     setBranch("StTriggerIdCollection",       "event", 1);
+    setBranch("StTriggerData",               "event", 1);
+    setBranch("StTriggerData2003",           "event", 1);
     setBranch("StSPtrVecKinkVertex",         "event", 1);
     setBranch("StSPtrVecV0Vertex",           "event", 1);
     setBranch("StSPtrVecXiVertex",           "event", 1);

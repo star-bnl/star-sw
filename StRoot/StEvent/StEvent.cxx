@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.35 2003/01/30 18:36:31 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.36 2003/04/16 17:48:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
  *
- * Do not touch anything here unless you really know what you are doing.
+ * Do not touch anything here unless you REALLY know what you are doing.
  *
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.36  2003/04/16 17:48:32  ullrich
+ * Added StTriggerData and inherited classe(s).
+ *
  * Revision 2.35  2003/01/30 18:36:31  ullrich
  * Added hooks for StTriggerIdCollection.
  *
@@ -146,6 +149,7 @@
 #include "StFpdCollection.h"
 #include "StPhmdCollection.h"
 #include "StTrackDetectorInfo.h"
+#include "StTriggerData.h"
 #include "StTriggerDetectorCollection.h"
 #include "StTriggerIdCollection.h"
 #include "StPrimaryVertex.h"
@@ -163,72 +167,11 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.35 2003/01/30 18:36:31 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.35 2003/01/30 18:36:31 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.36 2003/04/16 17:48:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.36 2003/04/16 17:48:32 ullrich Exp $";
 
 ClassImp(StEvent)
 
-#ifdef HPUX
-void _lookup(TClass *cl, StObject*&val, StSPtrVecObject &vec,int kase)
-{
-    
-    int ii = -2001;
-    for (unsigned int i=0; i<vec.size(); i++)
-	if (vec[i] && vec[i]->IsA() == cl) {ii=i; break;}
-
-    switch(kase){
-      case 0: val = (ii < 0) ? 0:vec[ii]; return;
-
-      case 1: val = (ii < 0) ? 0:vec[ii]; if (val) return; 
-              val = (StObject*)cl->New();
-              vec.push_back(val);
-              return;
-    
-      case 2: if (ii>=0) {delete vec[ii]; vec[ii]=val; return;}
-              if (!val) return;
-              vec.push_back(val);
-              return;
-    }
-}
-
-#define _LOOKUP(T)\
-void _lookup        (const T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,0);}\
-void _lookupOrCreate(const T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,1);}\
-void _lookupAndSet  (const T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,2);}\
-void _lookup        (      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,0);}\
-void _lookupOrCreate(      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,1);}\
-void _lookupAndSet  (      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,2);}
-
-_LOOKUP(StEventInfo)
-_LOOKUP(StRunInfo)
-_LOOKUP(StEventSummary)
-_LOOKUP(StSoftwareMonitor)
-_LOOKUP(StTpcHitCollection)
-_LOOKUP(StFtpcHitCollection)
-_LOOKUP(StSvtHitCollection)
-_LOOKUP(StSsdHitCollection)
-_LOOKUP(StEmcCollection)
-_LOOKUP(StRichCollection)
-_LOOKUP(StTofCollection)
-_LOOKUP(StFpdCollection)
-_LOOKUP(StPhmdCollection)
-_LOOKUP(StL0Trigger)
-_LOOKUP(StL1Trigger)
-_LOOKUP(StL3Trigger)
-_LOOKUP(StTriggerDetectorCollection)
-_LOOKUP(StTriggerIdCollection)
-_LOOKUP(StSPtrVecTrackDetectorInfo)
-_LOOKUP(StSPtrVecTrackNode)
-_LOOKUP(StSPtrVecPrimaryVertex)
-_LOOKUP(StSPtrVecCalibrationVertex)
-_LOOKUP(StSPtrVecV0Vertex)
-_LOOKUP(StSPtrVecXiVertex)
-_LOOKUP(StSPtrVecKinkVertex)
-_LOOKUP(StSPtrVecPsd)
-_LOOKUP(StPsd)
-_LOOKUP(StEventClusteringHints)
-
-#else /*-HPUX*/
 template<class T> void
 _lookup(T*& val, StSPtrVecObject &vec)
 {
@@ -264,7 +207,35 @@ _lookupAndSet(T* val, StSPtrVecObject &vec)
     if (!val) return;
     vec.push_back(val);
 }
-#endif /*-HPUX*/
+
+template<class T> void
+_lookupDynamic(T*& val, StSPtrVecObject &vec)
+{
+    val = 0;
+    for (unsigned int i=0; i<vec.size(); i++)
+        if (vec[i]) {
+	    val = dynamic_cast<T*>(vec[i]);
+	    if (val) break;	    
+	}
+}
+
+template<class T> void
+_lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
+{
+    T *test;
+    for (unsigned int i=0; i<vec.size(); i++) {
+        if (vec[i]) {
+	    test = dynamic_cast<T*>(vec[i]);
+	    if (test) {
+		delete vec[i];
+		vec[i] = val;
+		return;
+	    }	    
+	}
+    }
+    if (!val) return;
+    vec.push_back(val);
+}
 
 void
 StEvent::initToZero() { /* noop */ }
@@ -590,6 +561,22 @@ StEvent::triggerIdCollection() const
     return trg;
 }
 
+StTriggerData*
+StEvent::triggerData()
+{
+    StTriggerData *trg = 0;
+    _lookupDynamic(trg, mContent);
+    return trg;
+}
+
+const StTriggerData*
+StEvent::triggerData() const
+{
+    StTriggerData *trg = 0;
+    _lookupDynamic(trg, mContent);
+    return trg;
+}
+
 StL0Trigger*
 StEvent::l0Trigger()
 {
@@ -637,7 +624,6 @@ StEvent::l3Trigger() const
     _lookup(trg, mContent);
     return trg;
 }
-
 
 StSPtrVecTrackDetectorInfo&
 StEvent::trackDetectorInfo()
@@ -1006,6 +992,12 @@ StEvent::setTriggerIdCollection(StTriggerIdCollection* val)
 }
 
 void
+StEvent::setTriggerData(StTriggerData* val)
+{
+    _lookupDynamicAndSet(val, mContent);
+}
+
+void
 StEvent::setL0Trigger(StL0Trigger* val)
 {
     _lookupAndSet(val, mContent);
@@ -1121,6 +1113,7 @@ void StEvent::statistics()
     cout << "\tStL3Trigger:                 " << static_cast<void*>(l3Trigger());
     cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
     cout << "\tStTriggerIdCollection:       " << static_cast<void*>(triggerIdCollection());
+    cout << "\tStTriggerData:               " << static_cast<void*>(triggerData());
     cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
     cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << endl;
     cout << "\tStCalibrationVertex:         " << static_cast<void*>(calibrationVertex(0));
