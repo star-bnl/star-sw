@@ -25,7 +25,7 @@ my $ListOfWrittenClasses = ":";
 my $ListOfDefinedClasses = "";
 my $off = 0;
 open (Out, ">$LinkDef") or die "Can't open $LinkDef";
-for my $def  (split / /,$sources) {#  print "SRC:", $def, "\n";
+for my $def  (split / /,$sources) {  print "SRC:", $def, "\n";
   if ($def =~ /LinkDef/ && !($def =~/^$LinkDef$/) ) {
     open (In, $def) or die "Can't open $def";
     while ($line = <In>) {
