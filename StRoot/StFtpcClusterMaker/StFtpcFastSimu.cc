@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.5 2000/01/05 13:23:40 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.6 2000/01/27 09:47:18 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.6  2000/01/27 09:47:18  hummler
+// implement raw data reader, remove type ambiguities that bothered kcc
+//
 // Revision 1.5  2000/01/05 13:23:40  hummler
 // make cc5 happy
 //
@@ -135,7 +138,7 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 	//             calculate spatial resolution along the padrow
 
 	//       Azimuthal angle Phi (in radians)
-	phi = atan2(yi,xi);
+	phi = atan2((double) yi,(double) xi);
 	if(phi<0)
 	  phi += C_2PI;
 
@@ -177,15 +180,16 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 	    twist = C_DEG_PER_RAD*acos(twist_cosine);
 
 	    // dip-angle:
-            theta = C_DEG_PER_RAD*atan2((pt*cos(twist*C_RAD_PER_DEG)),
-				       ((g2t_ftp_hit[k].x[2]
+            theta = C_DEG_PER_RAD*
+atan2((double) (pt*cos(twist*C_RAD_PER_DEG)),
+				       (double) ((g2t_ftp_hit[k].x[2]
 					 /fabs(g2t_ftp_hit[k].x[2]))*
 					g2t_ftp_hit[k].p[2]));
 
 	    // crossing-angle: 
             cross_ang = C_DEG_PER_RAD*
-	      atan2((pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
-		   ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
+	      atan2((double) (pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
+(double) ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
 		    g2t_ftp_hit[k].p[2]));
 	    alpha  = fabs(cross_ang*C_RAD_PER_DEG);
             if(alpha>(C_PI_2))
@@ -350,7 +354,8 @@ int StFtpcFastSimu::ffs_hit_rd(int *g2t_ftp_hit_nok,
 	fcl_fppoint[ih].y = g2t_ftp_hit[ih].x[1]; 
 	fcl_fppoint[ih].z = g2t_ftp_hit[ih].x[2]; 
 	//sector number 
-	phi = atan2(fcl_fppoint[ih].y, fcl_fppoint[ih].x);
+	phi = atan2((double) fcl_fppoint[ih].y,
+                    (double) fcl_fppoint[ih].x);
 	if ( phi < 0.0 ) 
 	  phi += C_2PI;
 	dphi = myModulo((phi-phimin+C_2PI), C_2PI);
@@ -535,7 +540,8 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	
 	// azimuthal direction
 	r1[i] = sqrt(sqr(fcl_fppoint[i].x) + sqr(fcl_fppoint[i].y));
-	phi1[i] = atan2(fcl_fppoint[i].y, fcl_fppoint[i].x);
+	phi1[i] = atan2((double) fcl_fppoint[i].y,
+                        (double) fcl_fppoint[i].x);
 	if ( phi1[i] < 0.0 ) 
 	  phi1[i] += C_2PI;
 	

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.2 1999/12/02 13:20:59 hummler Exp $
+// $Id: StFtpcClusterMaker.h,v 1.3 2000/01/27 09:47:18 hummler Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.3  2000/01/27 09:47:18  hummler
+// implement raw data reader, remove type ambiguities that bothered kcc
+//
 // Revision 1.2  1999/12/02 13:20:59  hummler
 // Move cluster processing from maker to cluster finder class.
 // (Preparations for new raw data implementation.)
@@ -17,6 +20,12 @@
 #include "StMaker.h"
 #endif
 
+#ifndef __CINT__
+#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/RICH/RICH_Reader.hh"
+
+#endif /*__CINT__*/
+
 class TH1F;
 class TH2F;
 
@@ -28,11 +37,12 @@ class St_fcl_det;
 class St_fcl_zrow;
 class St_ffs_fspar;
 class St_ffs_gaspar;
+class DetectorReader;
 
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.2 1999/12/02 13:20:59 hummler Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.3 2000/01/27 09:47:18 hummler Exp $";
    St_fcl_ampoff   *m_ampoff;    //!
    St_fcl_ampslope *m_ampslope;  //!
    St_fcl_timeoff  *m_timeoff;   //!
@@ -58,7 +68,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.2 1999/12/02 13:20:59 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.3 2000/01/27 09:47:18 hummler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
