@@ -285,7 +285,7 @@ void MiniChain::setupOutput(const char * filePrefix,
       assocMakerIt->SetDebug();
 
       StMiniMcMaker * minimcMaker = new StMiniMcMaker;
-      minimcMaker->setDebug();
+      minimcMaker->SetDebug();
 
       minimcMaker->setOutDir(outdir);
       minimcMaker->setFileName(miniMcName);
