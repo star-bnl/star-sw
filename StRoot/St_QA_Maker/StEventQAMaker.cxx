@@ -1,8 +1,5 @@
-// $Id: StEventQAMaker.cxx,v 1.50 2000/08/08 16:18:34 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.49 2000/07/31 19:29:48 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
-// Revision 1.50  2000/08/08 16:18:34  lansdell
-// combined MakeHistDE and MakeHistPID code and simplified dE/dx code (factor of 7 faster)
-//
 // Revision 1.49  2000/07/31 19:29:48  lansdell
 // primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
 //
@@ -163,7 +160,6 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "HitHistograms.h"
 #include "StTpcDb/StTpcDb.h"
-#include "StarClassLibrary/StTimer.hh"
 
 ClassImp(StEventQAMaker)
 
@@ -217,10 +213,8 @@ Int_t StEventQAMaker::Make() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistEvSum() {
+  //  PrintInfo();
   // Fill histograms for event summary
-
-  //PrintInfo();
-  if (Debug()) cout << " *** in StEventQAMaker - filling event summary histograms " << endl;
 
   StEventSummary *event_summary = event->summary();
   if (event_summary) {
@@ -265,8 +259,6 @@ void StEventQAMaker::MakeHistEvSum() {
 
 //-----------------------------------------------------------------
 void StEventQAMaker::MakeHistGlob() {
-
-  if (Debug()) cout << " *** in StEventQAMaker - filling global track histograms " << endl;
 
   StSPtrVecTrackNode &theNodes = event->trackNodes();
   Int_t cnttrk=0;
@@ -609,13 +601,64 @@ void StEventQAMaker::MakeHistGlob() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistDE() {
-  // histograms filled in MakeHistPID() method
+  // Fill histograms for dE/dx
+
+  Int_t cntrows=0;
+  StSPtrVecTrackNode &theNodes = event->trackNodes();
+
+  for (UInt_t i=0; i<theNodes.size(); i++) {
+    cntrows++;
+    StTrack *theTrack = theNodes[i]->track(0);
+    if (!theTrack) continue;
+ 
+    StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
+    if (trkPidTr.size() > 0) {
+      //
+      // tpc pid algorithm , code change by Craig Ogilvie
+      //
+       
+       StDedxMethod dedxMethod =  kTruncatedMeanId; 
+       StTpcDedxPidAlgorithm tpcDedxAlgorithm(dedxMethod);
+       const StParticleDefinition* guess = theTrack->pidTraits(tpcDedxAlgorithm);
+       // checks that tpc truncated mean was successfully found
+       if (guess!=0) {
+        m_ndedxT->Fill(tpcDedxAlgorithm.traits()->numberOfPoints());
+        m_dedx0T->Fill(tpcDedxAlgorithm.traits()->mean());
+        m_dedx1T->Fill(tpcDedxAlgorithm.traits()->errorOnMean());
+       }
+
+      //  should use dynamic_cast, but will crash in root4star (why?) -CPL
+      // StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
+       // the next bit of code is incorrect, there is no guarantee that the
+       // the trkPidTr is a dedx object, it could be a tof object
+       // better to call a pid algorithm for the ftpcs
+       // 
+       StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
+       if (dedxPidTr) {
+
+	//  if (trkPidTr[0]->detector()==1) {
+	//  m_ndedxT->Fill(dedxPidTr->numberOfPoints());
+	//  m_dedx0T->Fill(dedxPidTr->mean());
+	//  m_dedx1T->Fill(dedxPidTr->errorOnMean());
+	// }
+	if (trkPidTr[0]->detector()==4) {
+	  m_ndedxFW->Fill(dedxPidTr->numberOfPoints());
+	  m_dedx0FW->Fill(dedxPidTr->mean());
+	  m_dedx1FW->Fill(dedxPidTr->errorOnMean());
+	}
+	if (trkPidTr[0]->detector()==5) {
+	  m_ndedxFE->Fill(dedxPidTr->numberOfPoints());
+	  m_dedx0FE->Fill(dedxPidTr->mean());
+	  m_dedx1FE->Fill(dedxPidTr->errorOnMean());
+	}
+      }
+    }
+  }
+  m_ndedxr->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPrim() {
-
-  if (Debug()) cout << " *** in StEventQAMaker - filling primary track histograms " << endl;
 
   Int_t cnttrk=0;
   Int_t cnttrkg=0;
@@ -953,49 +996,33 @@ void StEventQAMaker::MakeHistGen() {
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPID() {
 
-  if (Debug()) cout << " *** in StEventQAMaker - filling dE/dx histograms " << endl;
-
+  if (Debug()) cout << " *** in StEventQAMaker - filling PID histograms " << endl;
+//
+// Craig Ogilvie code
+//
   StSPtrVecTrackNode &theNodes = event->trackNodes();
-  Int_t cntrows=0;
+
   for (UInt_t i=0; i<theNodes.size(); i++) {
     StTrack *theTrack = theNodes[i]->track(global);
     if (!theTrack) continue;
-    cntrows++;
+
     StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
-    StDedxPidTraits *dedxPidTr;
-
-    for (unsigned int itrait=0; itrait<trkPidTr.size();itrait++) {
-      dedxPidTr = 0;
-      StTrackPidTraits *thisTrait = trkPidTr[itrait];
-      dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
-
-      if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
-	int ndedx = dedxPidTr->numberOfPoints();
-	double dedx = dedxPidTr->mean();
-	double error = dedxPidTr->errorOnMean();
-	double p = abs(theTrack->geometry()->momentum());
-	if (dedxPidTr->detector() == kTpcId) {
-	  m_ndedxT->Fill(ndedx);
-	  m_dedx0T->Fill(dedx);
-	  m_dedx1T->Fill(error);
-	  if (ndedx > 15) {
-	    m_p_dedx_rec->Fill((float)(p),(float)(dedx*1.e6));
-	  }
-	}
-	if (dedxPidTr->detector() == kFtpcWestId) {
-	  m_ndedxFW->Fill(ndedx);
-	  m_dedx0FW->Fill(dedx);
-	  m_dedx1FW->Fill(error);
-	}
-	if (dedxPidTr->detector() == kFtpcEastId) {
-	  m_ndedxFE->Fill(ndedx);
-	  m_dedx0FE->Fill(dedx);
-	  m_dedx1FE->Fill(error);
-	}
-      }
+    if (trkPidTr.size() > 0) {
+      
+       StDedxMethod dedxMethod =  kTruncatedMeanId; 
+       StTpcDedxPidAlgorithm tpcDedxAlgorithm(dedxMethod);
+       const StParticleDefinition* guess = theTrack->pidTraits(tpcDedxAlgorithm);
+       // checks that tpc truncated mean was successfully found
+       if (guess!=0) {
+ 	 int ndedx = tpcDedxAlgorithm.traits()->numberOfPoints();
+	 double dedx = tpcDedxAlgorithm.traits()->mean();
+	 double p    = abs(theTrack->geometry()->momentum());
+	 if (ndedx > 15) {
+            m_p_dedx_rec->Fill((float)(p),(float)(dedx*1.e6));
+	 }
+       }
     }
   }
-  m_ndedxr->Fill(cntrows);
 }
 
 //_____________________________________________________________________________

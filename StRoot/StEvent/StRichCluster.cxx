@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCluster.cxx,v 2.2 2000/08/08 14:42:10 ullrich Exp $
+ * $Id: StRichCluster.cxx,v 2.1 2000/05/22 21:44:53 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichCluster.cxx,v $
- * Revision 2.2  2000/08/08 14:42:10  ullrich
- * Added missing ClassDef and ClassImp macros.
+ * Revision 2.1  2000/05/22 21:44:53  ullrich
+ * Initial Revision
  *
  * Revision 2.1  2000/05/22 21:44:53  ullrich
  * Initial Revision
@@ -19,9 +19,7 @@
  **************************************************************************/
 #include "StRichCluster.h"
 
-static const char rcsid[] = "$Id: StRichCluster.cxx,v 2.2 2000/08/08 14:42:10 ullrich Exp $";
-
-ClassImp(StRichCluster)
+static const char rcsid[] = "$Id: StRichCluster.cxx,v 2.1 2000/05/22 21:44:53 ullrich Exp $";
 
 StRichCluster::StRichCluster()
     : mNumberOfPads(0), mNumberOfLocalMax(0), mFirstPad(0),

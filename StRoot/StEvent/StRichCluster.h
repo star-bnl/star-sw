@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCluster.h,v 2.2 2000/08/08 14:42:14 ullrich Exp $
+ * $Id: StRichCluster.h,v 2.1 2000/05/22 21:44:56 ullrich Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichCluster.h,v $
- * Revision 2.2  2000/08/08 14:42:14  ullrich
- * Added missing ClassDef and ClassImp macros.
+ * Revision 2.1  2000/05/22 21:44:56  ullrich
+ * Initial Revision
  *
  * Revision 2.1  2000/05/22 21:44:56  ullrich
  * Initial Revision
@@ -48,14 +48,13 @@ public:
     void   setMinimumAmplitudeOfLocalMax(Float_t newLocMax);
     
 private:
-    Int_t    mNumberOfPads;     // number of associated pads
-    Int_t    mNumberOfLocalMax; // number of local maxima
-    Int_t    mFirstPad;         // index of first cluster pad
-    Float_t  mMinimumAmplitudeOfLocalMax;   // lowest amplitude of all associated local maxima 
-    Float_t  mAmplitudeSum;     // sum of all pad amplitudes
-    Float_t  mAmplitude2Sum;    // sum of squares of all pad amplitudes
-    Float_t  mRms2;             // square rms of pad amplitudes
-    ClassDef(StRichCluster,1);
+   Int_t    mNumberOfPads;     // number of associated pads
+   Int_t    mNumberOfLocalMax; // number of local maxima
+   Int_t    mFirstPad;         // index of first cluster pad
+   Float_t  mMinimumAmplitudeOfLocalMax;   // lowest amplitude of all associated local maxima 
+   Float_t  mAmplitudeSum;     // sum of all pad amplitudes
+   Float_t  mAmplitude2Sum;    // sum of squares of all pad amplitudes
+   Float_t  mRms2;             // square rms of pad amplitudes
 };
 
 inline Int_t StRichCluster::numberOfPads() const { return mNumberOfPads; } 
