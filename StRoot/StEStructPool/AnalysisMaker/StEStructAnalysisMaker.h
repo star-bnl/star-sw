@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.1 2003/10/15 18:20:32 porter Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.2 2004/06/25 03:10:28 porter Exp $
  *   
  *
  *
@@ -52,12 +52,13 @@ public:
     void          logInputEvents(ostream& os);
     void          logOutputEvents(ostream& os);
     void          logOutputRate(ostream& os);
+    void          logAnalysisStats(ostream& os);
 
     void          compiledLoop();
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.1 2003/10/15 18:20:32 porter Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.2 2004/06/25 03:10:28 porter Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -134,13 +135,18 @@ inline void StEStructAnalysisMaker::logOutputRate(ostream& os){
   os<<"</processStat>"<<endl;
 }
 
-
+inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
+     for(int i=0;i<numAnalysis;i++) manalysis[i]->logStats(os);
+}
 
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.2  2004/06/25 03:10:28  porter
+ * added a new common statistics output and added electron cut with momentum slices
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
