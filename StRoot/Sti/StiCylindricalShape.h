@@ -16,7 +16,10 @@ public:
 			float halfDepth_, 
 			float thickness_,
                         float outerRadius_, 
-			float openingAngle_);
+			float openingAngle_)
+  : StiShape(name,halfDepth_, thickness_),
+    _outerRadius(outerRadius_),
+    _openingAngle(openingAngle_) {}// StiCylindricalShape()
     // accessors
     float getOuterRadius() const { return _outerRadius; }
     float getOpeningAngle() const { return _openingAngle; } 
@@ -24,8 +27,8 @@ public:
     StiShapeCode getShapeCode() const { return kCylindrical; };
 
     // mutators
-    void setOuterRadius(float val);
-    void setOpeningAngle(float val);
+    void setOuterRadius(float val) {if (val >= 0.) _outerRadius = val; }
+    void setOpeningAngle(float val){_openingAngle = val;}
 
 protected:
     
