@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.2 1999/07/01 16:17:57 pavlinov Exp $
+// $Id: StEmcHitCollection.h,v 1.3 1999/07/02 03:01:56 pavlinov Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.3  1999/07/02 03:01:56  pavlinov
+// Little corrections for Linux
+//
 // Revision 1.2  1999/07/01 16:17:57  pavlinov
 // class StEmcGeom was created and maker was remade for new maker scheme
 //
@@ -35,7 +38,7 @@
 // StEmcHitCollection class for <FONT COLOR="RED">EMc Calibrated Hit</FONT>     //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-class StEmcHitCollection : public St_DataSet , StEmcGeom {
+class StEmcHitCollection : public St_DataSet , public StEmcGeom {
 private:
 
   St_DataSet     *mEmcCalib;   //!  For StEmcCollection::ADCtoEnergy
@@ -54,7 +57,7 @@ protected:
 public: 
   StEmcHitCollection();              // For comfort
   StEmcHitCollection(const Char_t* );
-  ~StEmcHitCollection();
+  virtual ~StEmcHitCollection();
 
   inline  void    setEmcCalib(St_DataSet *var) {mEmcCalib = var;}
 

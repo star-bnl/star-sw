@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.cxx,v 1.7 1999/07/01 16:17:57 pavlinov Exp $
+// $Id: St_emc_Maker.cxx,v 1.8 1999/07/02 03:01:56 pavlinov Exp $
 // $Log: St_emc_Maker.cxx,v $
+// Revision 1.8  1999/07/02 03:01:56  pavlinov
+// Little corrections for Linux
+//
 // Revision 1.7  1999/07/01 16:17:57  pavlinov
 // class StEmcGeom was created and maker was remade for new maker scheme
 //
@@ -40,8 +43,7 @@ St_emc_Maker::St_emc_Maker(const char *name, const char *title):StMaker(name,tit
   drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_emc_Maker::~St_emc_Maker(){
-}
+St_emc_Maker::~St_emc_Maker(){ /* Nobody */ }
 //_____________________________________________________________________________
 Int_t St_emc_Maker::Init(){
   Int_t i;
@@ -131,7 +133,7 @@ void St_emc_Maker::MakeHistograms(){
 	    ene = hit->getHitEnergy(i);
 	    if(ene > 0.0){
               id = hit->getHitId(i);
-	      if(!hit->getEtaPhi(id,eta,phi)){
+	      if(hit->getEtaPhi(id, eta, phi) == 0){
 	        m_hits[det-1]->Fill(eta,phi);
 	        m_energy[det-1]->Fill(eta,phi,ene);
               }
@@ -149,7 +151,7 @@ void St_emc_Maker::MakeHistograms(){
 //_____________________________________________________________________________
 void St_emc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_emc_Maker.cxx,v 1.7 1999/07/01 16:17:57 pavlinov Exp $\n");
+  printf("* $Id: St_emc_Maker.cxx,v 1.8 1999/07/02 03:01:56 pavlinov Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

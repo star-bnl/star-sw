@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.1 1999/07/01 16:17:57 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.2 1999/07/02 03:01:56 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.2  1999/07/02 03:01:56  pavlinov
+ * Little corrections for Linux
+ *
  * Revision 1.1  1999/07/01 16:17:57  pavlinov
  * class StEmcGeom was created and maker was remade for new maker scheme
  *
@@ -48,7 +51,7 @@ private:
 public: 
   StEmcGeom(const Int_t );
   StEmcGeom(const Char_t*);
-  ~StEmcGeom(){ };
+  virtual ~StEmcGeom();
 
   Int_t    Detector() const;
   Int_t    NModule()  const;
@@ -73,7 +76,7 @@ public:
   Int_t    getPhi(const Int_t, const Int_t, Float_t &);
   Int_t    getEtaPhi(const Int_t, Float_t &,  Float_t &);
 
-  void     init(const Init_t);
+  void     initGeom(const Int_t);
   void     initBEMCorBPRS();
   void     initBSMDE();
   void     initBSMDP();

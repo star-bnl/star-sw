@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.1 1999/07/01 16:17:57 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.2 1999/07/02 03:01:55 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.2  1999/07/02 03:01:55  pavlinov
+ * Little corrections for Linux
+ *
  * Revision 1.1  1999/07/01 16:17:57  pavlinov
  * class StEmcGeom was created and maker was remade for new maker scheme
  *
@@ -20,7 +23,7 @@ ClassImp(StEmcGeom)
 // _____________________________________________________________________
 StEmcGeom::StEmcGeom(const Int_t det) 
 {
-  init(det);
+  initGeom(det);
 }
 // _____________________________________________________________________
 StEmcGeom::StEmcGeom(const Char_t *cdet) 
@@ -30,12 +33,14 @@ StEmcGeom::StEmcGeom(const Char_t *cdet)
   else if(!strcmp(cdet,"bprs")) {det=2;}
   else if(!strcmp(cdet,"bsmde")){det=3;}
   else if(!strcmp(cdet,"bsmdp")){det=4;}
-  else {printf(" StEmcGeom: Bad value of cdet %s \n", *cdet);}
+  else {printf(" StEmcGeom: Bad value of cdet %s \n", cdet);}
 
-  if(det) init(det);
+  if(det) initGeom(det);
 }
 // _____________________________________________________________________
-void StEmcGeom::init(const Int_t det) 
+StEmcGeom::~StEmcGeom() { /* Nobody */ } 
+// _____________________________________________________________________
+void StEmcGeom::initGeom(const Int_t det) 
 {
   mDetector = det;
   // Common information for all detectors

@@ -1,7 +1,7 @@
-// $Id: StEmcHitCollection.cxx,v 1.4 1999/07/01 16:17:57 pavlinov Exp $
+// $Id: StEmcHitCollection.cxx,v 1.5 1999/07/02 03:01:56 pavlinov Exp $
 // $Log: StEmcHitCollection.cxx,v $
-// Revision 1.4  1999/07/01 16:17:57  pavlinov
-// class StEmcGeom was created and maker was remade for new maker scheme
+// Revision 1.5  1999/07/02 03:01:56  pavlinov
+// Little corrections for Linux
 //
 // Revision 1.3  1999/03/03 04:12:15  fisyak
 // replace kStErr to kStWarn
@@ -211,7 +211,7 @@ St_emc_hits* StEmcHitCollection::copyToTable(const Char_t *Name){
 //_____________________________________________________________________________
 void StEmcHitCollection::printHits(Int_t n, Int_t start){
   //Print hits
-  Int_t i, j=0, m, e, s,id;
+  Int_t i, m, e, s,id;
   cout << endl << GetName() << " : ";
   if(mNHit<=0){cout << "No hits" << endl; return;}
   else{cout << mNHit << " hits" << endl;} 
@@ -245,9 +245,6 @@ void StEmcHitCollection::Browse(TBrowser *b){
 }
 //_____________________________________________________________________________
 void StEmcHitCollection::printNameTable(){
-  //Print all the hits
-  //  if(mEmsControl) printf(" Pointer of mEmsControl is %i name %s \n", mEmsControl,mEmsControl->GetName());
-  //  else printf(" <E> Pointer of mEmsControl is zero  ************** \n");
-  if(mEmcCalib)   printf(" Pointer of mEmcCalib   is %i name %s \n",mEmcCalib,mEmcCalib->GetName());
+  if(mEmcCalib)   printf(" mEmcCalib unzero,  name %s \n", mEmcCalib->GetName());
   else printf(" <E> Pointer of mEmcCalib   is zero  ************** \n");
 }
