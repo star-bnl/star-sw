@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.2 1999/01/18 21:03:32 lasiuk Exp $
+ * $Id: StTrsSector.hh,v 1.3 1999/11/11 19:45:02 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,6 +11,14 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
+ * Revision 1.3  1999/11/11 19:45:02  calderon
+ * Made variables-> data members in analog signal generator to avoid
+ * initialization time when member functions are called.
+ * Inlined:
+ *  StTrsParameterizedAnalogSignalGenerator::signalSampler()
+ *  StTrsSector::addEntry()
+ *  StTrsSector::assignTimeBins()
+ *
  * Revision 1.2  1999/01/18 21:03:32  lasiuk
  * Jan 18,1999
  *
@@ -91,4 +99,22 @@ inline tpcSector&   StTrsSector::rows() { return (mSector); }
 inline int          StTrsSector::size() const { return mSector.size();}
 inline int          StTrsSector::numberOfRows() const { return mSector.size();}
 inline int          StTrsSector::numberOfPadsInRow(int rowN) const { return mSector[(rowN-1)].size();}
+inline void StTrsSector::addEntry(int rowN, int padN, StTrsAnalogSignal& signl)
+{
+    
+#ifdef ST_SECTOR_BOUNDS_CHECK
+    if( (rowN > 0 && row <= mSector.size()) )
+	if( (padN > 0 && pad <= mSector[(rowN-1)].size()) )
+#endif
+	    mSector[(rowN-1)][(padN-1)].push_back(signl);
+}
+inline void StTrsSector::assignTimeBins(int rowN, int padN, tpcTimeBins& tbins)
+{
+#ifdef ST_SECTOR_BOUNDS_CHECK
+    if( (rowIndex > 0 && rowIndex <= mSector.size()) )
+	if( (padIndex > 0 && padIndex <= mSector[rowIndex].size()) )
+#endif
+	    mSector[(rowN-1)][(padN-1)] = tbins;
+}
+
 #endif
