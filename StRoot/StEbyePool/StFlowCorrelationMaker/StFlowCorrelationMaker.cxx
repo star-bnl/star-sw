@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCorrelationMaker.cxx,v 1.1 2001/01/31 19:47:22 snelling Exp $
+// $Id: StFlowCorrelationMaker.cxx,v 1.2 2002/02/10 22:12:45 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer
 //
@@ -520,7 +520,7 @@ Int_t StFlowCorrelationMaker::Init() {
 
 
   gMessMgr->SetLimit("##### FlowCorrelation", 20);
-  gMessMgr->Info("##### FlowCorrelation: $Id: StFlowCorrelationMaker.cxx,v 1.1 2001/01/31 19:47:22 snelling Exp $");
+  gMessMgr->Info("##### FlowCorrelation: $Id: StFlowCorrelationMaker.cxx,v 1.2 2002/02/10 22:12:45 perev Exp $");
 
   return StMaker::Init();
 }
@@ -736,7 +736,7 @@ Int_t StFlowCorrelationMaker::Finish() {
   TString* fileName = new TString("flowCorr.hist.root");
   fileName->Prepend(pFlowSelect->Number());
   TFile histFile(fileName->Data(), "RECREATE");
-  histFile.SetFormat(1);
+//VP  histFile.SetFormat(1);
   GetHistList()->Write();
   histFile.Close();
   delete fileName;
@@ -756,6 +756,9 @@ Int_t StFlowCorrelationMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCorrelationMaker.cxx,v $
+// Revision 1.2  2002/02/10 22:12:45  perev
+// Outdated SetFormat removed
+//
 // Revision 1.1  2001/01/31 19:47:22  snelling
 // A simple correlation program so far only used for simulations (no mixing)
 //
