@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.h,v 1.6 1999/08/03 18:22:08 ogilvie Exp $
+ * $Id: StTpcDedxPid.h,v 1.7 1999/08/11 20:41:48 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.h,v $
- * Revision 1.6  1999/08/03 18:22:08  ogilvie
- * improved dE/dx parameterization
+ * Revision 1.7  1999/08/11 20:41:48  fisyak
+ * Add quickPid from Aihong Tang
+ *
+ * Revision 1.7  1999/08/11 20:41:48  fisyak
+ * Add quickPid from Aihong Tang
  *
  * Revision 1.6  1999/08/03 18:22:08  ogilvie
  * improved dE/dx parameterization
@@ -36,13 +39,11 @@
  *
  **************************************************************************/
 #ifndef StTpcDedxPid_hh
-
 #define StTpcDedxPid_hh
 #include "StObject.h"
 #include "StDedxPid.h"
 class StTpcDedxPid : public StDedxPid {
 public:
-    
   StTpcDedxPid() : StDedxPid() { /* noop */ };
   StTpcDedxPid(StGlobalTrack*);
   ~StTpcDedxPid();
@@ -64,6 +65,9 @@ public:
     
   static Double_t mTpcDedxGain ;
   static Double_t mTpcDedxOffset ;
+  static Double_t mTpcDedxRise ; 
+  static Double_t mTpcDedxTcut ;  
+
   static Int_t quickPid(Float_t rig, Float_t dedx);
 
 
