@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.17 2000/04/06 20:26:55 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.18 2000/04/06 23:29:40 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.18  2000/04/06 23:29:40  calderon
+ * The parent track is now stored for all tracks.
+ *
  * Revision 1.17  2000/04/06 20:26:55  calderon
  * All particles in the particle table are now filled.
  * Relationships to parents can be followed to event generator particles.
@@ -112,7 +115,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.17 2000/04/06 20:26:55 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.18 2000/04/06 23:29:40 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -433,7 +436,7 @@ Int_t StMcEventMaker::Make()
 			<< "Wrong ordering!  Track " << gtrk+1 << "from particle table: "
 			<< "Can't assign mother track " << motherIndex
 			<< "because it has not been created yet!" << endm;
-		else egTrk->setGeneratorParent(ttempParticle[motherIndex-1]);
+		else egTrk->setParent(ttempParticle[motherIndex-1]);
 	    
 	} // Generator Tracks Loop
 	
@@ -512,12 +515,24 @@ Int_t StMcEventMaker::Make()
 		// We should rather keep the one in the g2t table, but we
 		// need to keep the information of its parentage.
 		nParticlesInBothTables++;
-		t->setGeneratorParent(ttempParticle[iEventGeneratorLabel]->generatorParent());
+		t->setParent(ttempParticle[iEventGeneratorLabel]->parent());
 		StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
 						     mCurrentMcEvent->tracks().end(),
 						     ttempParticle[iEventGeneratorLabel]);
 		mCurrentMcEvent->tracks().erase(trkToErase);
 		               		    
+	    }
+	    else {
+		// Track from GEANT, use next_parent_p to get to the parent
+		// track.  Use the same scheme as for the particle table.
+		motherIndex = trackTable[itrk].next_parent_p;
+		if ((motherIndex > 0) && (motherIndex < NTracks))
+		    if (motherIndex > itrk) 
+			gMessMgr->Warning()
+			    << "Wrong ordering!  Track " << itrk+1 << "from particle table: "
+			    << "Can't assign mother track " << motherIndex
+			    << "because it has not been created yet!" << endm;
+		    else t->setParent(ttemp[motherIndex-1]);
 	    }
 	    
 	} // Track loop
