@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.2 1999/01/15 22:53:44 wenaus Exp $
+ * $Id: StGlobalTrack.cc,v 1.3 1999/02/10 21:50:30 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,13 +13,16 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.2  1999/01/15 22:53:44  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/02/10 21:50:30  wenaus
+ * Plug memory leaks
+ *
+ * Revision 1.6  1999/02/22 03:49:43  wenaus
+ * more careful deletion handling
  *
  * Revision 1.5  1999/02/15 16:17:02  wenaus
  * fix double& -> double referencing bug
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.2 1999/01/15 22:53:44 wenaus Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.3 1999/02/10 21:50:30 wenaus Exp $";
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
@@ -34,7 +37,11 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk) : StTrack(trk)
 {
 
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
-StGlobalTrack::~StGlobalTrack() { /* noop */ }
+                             double curvature,
+  if (mTpcDedx) delete mTpcDedx;
+  if (mFtpcDedx) delete mFtpcDedx;
+  if (mSvtDedx) delete mSvtDedx;
+			     int h) : 
 
 void StGlobalTrack::setEmcHit(StEmcHit* val) { mEmcHit = val; }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.hh,v 1.3 1999/01/30 23:03:14 wenaus Exp $
+ * $Id: StRun.hh,v 1.4 1999/02/10 21:50:32 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.hh,v $
- * Revision 1.3  1999/01/30 23:03:14  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/02/10 21:50:32  wenaus
+ * Plug memory leaks
+ *
+ * Revision 1.5  1999/03/04 15:56:59  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.4  1999/02/10 21:50:32  wenaus
  * Plug memory leaks
@@ -34,6 +37,7 @@ using namespace std;
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
+
 class StRun {
 public:
     StRun();
