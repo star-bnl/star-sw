@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.13 2004/10/26 17:34:16 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.14 2004/11/16 04:33:04 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -400,7 +400,7 @@ void StEventControlPanel::Redraw()
    fgDispMk->MakeInfo("Redrawing the current event");
    {gSystem->DispatchOneEvent(1);}
    fgDispMk->ClearCanvas();
-   fgDispMk->Make();
+   fgDispMk->Redraw();
    fgDispMk->MakeInfo("Done");
 
    ResumeTopWidget();

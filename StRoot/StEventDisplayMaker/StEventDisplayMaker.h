@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.35 2004/10/07 19:41:23 perev Exp $
+// $Id: StEventDisplayMaker.h,v 1.36 2004/11/16 04:33:05 perev Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.36  2004/11/16 04:33:05  perev
+// Bug fix. Check for same value of StEvent pointer removed
+//
 // Revision 1.35  2004/10/07 19:41:23  perev
 // Tuning
 //
@@ -91,7 +94,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.35 2004/10/07 19:41:23 perev Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.36 2004/11/16 04:33:05 perev Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -104,6 +107,7 @@ static StEventDisplayInfo *fgInfo;
     TList         *m_TableCollector;   	//!
 
  protected:
+    Int_t         mRedraw;
     TVolume      *m_Hall;         	//!
     TVolumeView  *m_FullView;     	//!
     TVolumeView  *m_ShortView;    	//!
@@ -141,6 +145,7 @@ static StEventDisplayInfo *fgInfo;
    virtual void   ClearGeometry();
    virtual Int_t  Init();
    virtual Int_t  Make();
+           Int_t  Redraw();
    virtual Int_t  MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter);
    virtual Int_t  MakeEvent(const TObject *event,const char** positions);
            void   DrawIt(StPoints3DABC *pnt,const char *opt,Color_t col,Style_t sty,Size_t siz);
@@ -195,7 +200,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.35 2004/10/07 19:41:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.36 2004/11/16 04:33:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
