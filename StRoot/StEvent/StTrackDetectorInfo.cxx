@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.5 2000/04/20 13:29:58 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.6 2001/03/24 03:35:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.6  2001/03/24 03:35:00  perev
+ * clone() -> clone() const
+ *
  * Revision 2.5  2000/04/20 13:29:58  ullrich
  * Added new methods and removed inconsistencies in numberOfPoints().
  *
@@ -33,7 +36,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.5 2000/04/20 13:29:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.6 2001/03/24 03:35:00 perev Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
 { /* noop */ }
@@ -45,7 +48,7 @@ StTrackDetectorInfo::StTrackDetectorInfo(const dst_track_st& t) :
 StTrackDetectorInfo::~StTrackDetectorInfo() { /* noop */ }
 
 StObject*
-StTrackDetectorInfo::clone() { return new StTrackDetectorInfo(*this); }
+StTrackDetectorInfo::clone() const { return new StTrackDetectorInfo(*this); }
 
 const StThreeVectorF&
 StTrackDetectorInfo::firstPoint() const { return mFirstPoint; }

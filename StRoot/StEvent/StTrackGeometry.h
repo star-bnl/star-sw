@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.2 1999/10/28 22:27:41 ullrich Exp $
+ * $Id: StTrackGeometry.h,v 2.3 2001/03/24 03:35:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.3  2001/03/24 03:35:00  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  1999/10/28 22:27:41  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -46,7 +49,7 @@ public:
     virtual StTrackGeometry*      copy() const = 0;     // virtual constructor
 
 protected:    
-    virtual StObject*  clone() = 0;     // virtual constructor used in StArray
+    virtual StObject*  clone() const = 0;     // virtual constructor used in StArray
     ClassDef(StTrackGeometry,1)
 };
 

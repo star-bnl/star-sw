@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.4 2001/03/16 21:31:42 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.5 2001/03/24 03:35:00 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.5  2001/03/24 03:35:00  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  2001/03/16 21:31:42  ullrich
  * Changed version number from 1 to 2.
  *
@@ -59,6 +62,6 @@ protected:
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,2)
+    ClassDef(StTrackFitTraits,2) //!OWNSTREAMER
 };
 #endif

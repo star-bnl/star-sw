@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.4 1999/12/21 15:08:57 ullrich Exp $
+ * $Id: StKinkVertex.cxx,v 2.5 2001/03/24 03:34:51 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
+ * Revision 2.5  2001/03/24 03:34:51  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  1999/12/21 15:08:57  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
  *
@@ -35,7 +38,7 @@ using std::copy;
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.4 1999/12/21 15:08:57 ullrich Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.5 2001/03/24 03:34:51 perev Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -73,7 +76,7 @@ StKinkVertex::StKinkVertex(const dst_vertex_st& vtx, const dst_tkf_vertex_st& kv
 StKinkVertex::~StKinkVertex() {/* noop */}
 
 StObject*
-StKinkVertex::clone() { return new StKinkVertex(*this); }
+StKinkVertex::clone() const { return new StKinkVertex(*this); }
 
 StVertexId
 StKinkVertex::type() const { return kKinkVtxId; }

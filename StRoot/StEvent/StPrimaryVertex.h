@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.4 1999/11/09 15:44:22 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.5 2001/03/24 03:34:54 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.5  2001/03/24 03:34:54  perev
+ * clone() -> clone() const
+ *
  * Revision 2.4  1999/11/09 15:44:22  ullrich
  * Removed method unlink() and all calls to it.
  *
@@ -50,7 +53,7 @@ public:
 protected:
     StSPtrVecPrimaryTrack mDaughters;
 
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StPrimaryVertex,1)
 };
 #endif

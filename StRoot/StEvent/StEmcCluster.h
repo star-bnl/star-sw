@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.3 2000/07/31 22:12:23 akio Exp $
+ * $Id: StEmcCluster.h,v 2.4 2001/03/24 03:34:44 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.4  2001/03/24 03:34:44  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  2000/07/31 22:12:23  akio
  * eliminate print() for L3(?)
  *
@@ -70,7 +73,7 @@ private:
     StPtrVecEmcCluster mNeighbors;
     StPtrVecTrack      mTracks;
     
-    StObject* clone();
+    StObject* clone() const;
     ClassDef(StEmcCluster,1)
 };
 

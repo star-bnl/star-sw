@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.2 1999/10/28 22:25:45 ullrich Exp $
+ * $Id: StHelixModel.h,v 2.3 2001/03/24 03:34:49 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
+ * Revision 2.3  2001/03/24 03:34:49  perev
+ * clone() -> clone() const
+ *
  * Revision 2.2  1999/10/28 22:25:45  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -44,7 +47,7 @@ public:
     StTrackGeometry*      copy() const;     // virtual constructor
 
 protected:
-    StObject*      clone();
+    StObject*      clone() const;
     
 private:
     StTrackModel   mModel;

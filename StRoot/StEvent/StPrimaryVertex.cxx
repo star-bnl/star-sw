@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.5 2000/04/03 15:30:23 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.6 2001/03/24 03:34:53 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.6  2001/03/24 03:34:53  perev
+ * clone() -> clone() const
+ *
  * Revision 2.5  2000/04/03 15:30:23  ullrich
  * addDaughter() now assigns the right vertex, i.e. this, to
  * the primary tracks stored within this primary vertex.
@@ -36,7 +39,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.5 2000/04/03 15:30:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.6 2001/03/24 03:34:53 perev Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }
@@ -47,7 +50,7 @@ StPrimaryVertex::StPrimaryVertex(const dst_vertex_st& v) : StVertex(v)
 StPrimaryVertex::~StPrimaryVertex() {/* noop */};
 
 StObject*
-StPrimaryVertex::clone() { return new StPrimaryVertex(*this); }
+StPrimaryVertex::clone() const { return new StPrimaryVertex(*this); }
 
 StVertexId
 StPrimaryVertex::type() const { return kEventVtxId; }

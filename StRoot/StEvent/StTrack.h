@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.9 2001/03/16 20:56:46 ullrich Exp $
+ * $Id: StTrack.h,v 2.10 2001/03/24 03:34:59 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.10  2001/03/24 03:34:59  perev
+ * clone() -> clone() const
+ *
  * Revision 2.9  2001/03/16 20:56:46  ullrich
  * Added non-const version of fitTraits().
  *
@@ -116,7 +119,7 @@ protected:
     StTrackNode             *mNode;                 //$LINK
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    virtual StObject*       clone() = 0;
+    virtual StObject*       clone() const = 0;
     ClassDef(StTrack,1)
 };
 #endif

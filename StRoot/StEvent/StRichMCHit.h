@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMCHit.h,v 2.1 2000/05/22 21:44:32 ullrich Exp $
+ * $Id: StRichMCHit.h,v 2.2 2001/03/24 03:34:55 perev Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichMCHit.h,v $
+ * Revision 2.2  2001/03/24 03:34:55  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/05/22 21:44:32  ullrich
  * Initial Revision
  *
@@ -39,7 +42,7 @@ public:
     const StRichMCInfo& getMCInfo() const;
 
 protected:
-    StObject* clone();
+    StObject* clone() const;
     
     StRichMCInfo  mInfo;
     

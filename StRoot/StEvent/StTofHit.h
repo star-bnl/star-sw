@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.1 2000/12/21 23:52:25 ullrich Exp $
+ * $Id: StTofHit.h,v 2.2 2001/03/24 03:34:59 perev Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.2  2001/03/24 03:34:59  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/12/21 23:52:25  ullrich
  * Initial Revision.
  *
@@ -38,7 +41,7 @@ public:
     void setFlightTime(Float_t);
     
 protected:
-    StObject* clone();
+    StObject* clone() const;
 
     UShort_t                  mSlatIndex;
     UShort_t                  mNumberOfMips;

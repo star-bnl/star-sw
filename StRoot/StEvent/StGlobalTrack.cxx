@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.1 1999/10/28 22:25:36 ullrich Exp $
+ * $Id: StGlobalTrack.cxx,v 2.2 2001/03/24 03:34:47 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 2.2  2001/03/24 03:34:47  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  1999/10/28 22:25:36  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -23,7 +26,7 @@
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.1 1999/10/28 22:25:36 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.2 2001/03/24 03:34:47 perev Exp $";
 
 StGlobalTrack::StGlobalTrack() {/* noop */}
 
@@ -42,7 +45,7 @@ StGlobalTrack::operator=(const StGlobalTrack& track)
 StGlobalTrack::~StGlobalTrack() {/* noop */}
 
 StObject*
-StGlobalTrack::clone() { return new StGlobalTrack(*this); }
+StGlobalTrack::clone() const { return new StGlobalTrack(*this); }
 
 StTrackType
 StGlobalTrack::type() const { return global; }

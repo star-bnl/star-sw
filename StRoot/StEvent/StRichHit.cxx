@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHit.cxx,v 2.1 2000/05/22 21:44:47 ullrich Exp $
+ * $Id: StRichHit.cxx,v 2.2 2001/03/24 03:34:54 perev Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.cxx,v $
+ * Revision 2.2  2001/03/24 03:34:54  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/05/22 21:44:47  ullrich
  * Initial Revision
  *
@@ -18,7 +21,7 @@
 #include "StRichHit.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StRichHit.cxx,v 2.1 2000/05/22 21:44:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichHit.cxx,v 2.2 2001/03/24 03:34:54 perev Exp $";
 
 ClassImp(StRichHit)
     
@@ -48,5 +51,5 @@ operator<<(ostream& os, const StRichHit& hit)
 }
 
 StObject*
-StRichHit::clone() { return new StRichHit(*this); }
+StRichHit::clone() const { return new StRichHit(*this); }
 

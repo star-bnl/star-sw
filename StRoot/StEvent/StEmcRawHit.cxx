@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.3 2000/07/28 19:49:28 akio Exp $
+ * $Id: StEmcRawHit.cxx,v 2.4 2001/03/24 03:34:46 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.4  2001/03/24 03:34:46  perev
+ * clone() -> clone() const
+ *
  * Revision 2.3  2000/07/28 19:49:28  akio
  * Change in Detector Id for Endcap SMD
  *
@@ -22,7 +25,7 @@
  **************************************************************************/
 #include "StEmcRawHit.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.3 2000/07/28 19:49:28 akio Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.4 2001/03/24 03:34:46 perev Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -119,7 +122,7 @@ void
 StEmcRawHit::setEnergy(const Float_t energy) {mEnergy=energy;}   
 
 StObject*
-StEmcRawHit::clone() { return new StEmcRawHit(*this); }
+StEmcRawHit::clone() const { return new StEmcRawHit(*this); }
 
 
 

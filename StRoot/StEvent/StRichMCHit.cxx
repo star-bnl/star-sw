@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMCHit.cxx,v 2.1 2000/05/22 21:44:29 ullrich Exp $
+ * $Id: StRichMCHit.cxx,v 2.2 2001/03/24 03:34:55 perev Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichMCHit.cxx,v $
+ * Revision 2.2  2001/03/24 03:34:55  perev
+ * clone() -> clone() const
+ *
  * Revision 2.1  2000/05/22 21:44:29  ullrich
  * Initial Revision
  *
@@ -17,7 +20,7 @@
 
 #include "StRichMCHit.h"
 
-static const char rcsid[] = "$Id: StRichMCHit.cxx,v 2.1 2000/05/22 21:44:29 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichMCHit.cxx,v 2.2 2001/03/24 03:34:55 perev Exp $";
 
 ClassImp(StRichMCHit)
     
@@ -47,5 +50,5 @@ StRichMCHit::StRichMCHit(const StThreeVectorF& xg, const StThreeVectorF& dx,
 StRichMCHit::~StRichMCHit() {/* noop */}
 
 StObject*
-StRichMCHit::clone() { return new StRichMCHit(*this); }
+StRichMCHit::clone() const { return new StRichMCHit(*this); }
 
