@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.145  2005/01/17 03:56:47  pruneau
+// change track container to vector
+//
 // Revision 1.144  2005/01/17 01:32:13  perev
 // parameters protected
 //
@@ -257,28 +260,28 @@ Int_t StiMaker::Finish()
 {
   if (_pars->doPlots)
     {
-      TCanvas * canvas = new TCanvas();
+      //TCanvas * canvas = new TCanvas();
       if (_radLength)
 	{
-	  _radLength->write("StiMakerHistograms.root");
+	  _radLength->write("StiHistograms.root");
 	  //HistoDocument histoDocumentRec("html/radLength","RadLength","Radiation Length Plots",canvas);
 	  //histoDocumentRec.generateWebPage(_radLength);
 	}
       if (_recPlotter) 
 	{
-	  _recPlotter->write("StiMakerHistograms.root","UPDATE");
+	  _recPlotter->write("StiHistograms.root","UPDATE");
 	  //HistoDocument histoDocumentRec("html/rec","ReconstructedData","Reconstructed Data",canvas);
 	  //histoDocumentRec.generateWebPage(_recPlotter);
 	}
       if (_mcPlotter)
 	{
-	  _mcPlotter->write("StiMakerHistograms.root","UPDATE");
+	  _mcPlotter->write("StiHistograms.root","UPDATE");
 	  //HistoDocument histoDocumentMc("html/mc","McData","McData",canvas);
 	  //histoDocumentMc.generateWebPage(_mcPlotter);
 	}
       if (_residualCalculator)
-	_residualCalculator->write("StiMakerHistograms.root", "UPDATE"); 
-      delete canvas;
+	_residualCalculator->write("StiHistograms.root", "UPDATE"); 
+      //delete canvas;
     }
   return StMaker::Finish();
 }
@@ -390,12 +393,13 @@ Int_t StiMaker::InitRun(int run)
 					_eventDisplay->initialize();
 					_eventDisplay->draw();
 				}
-      /*if (_pars->doPlots)
-				{
-					_recPlotter = new StiTrackingPlots("R","Reconstructed");
-					if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
-					_radLength = new RadLengthPlots("R","Radiation Length Plots");
-					}*/
+      _pars->doPlots = true;
+      if (_pars->doPlots)
+	{
+	  _recPlotter = new StiTrackingPlots("R","Reconstructed");
+	  if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
+	  _radLength = new RadLengthPlots("R","Radiation Length Plots");
+	}
       _initialized=true;
       cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
@@ -452,6 +456,7 @@ Int_t StiMaker::Make()
   else
     {
       _tracker->findTracks();
+      StiHit *vertex=0;
       try
 	{
 	  if (_eventFiller && !_pars->useMcAsRec)
@@ -463,7 +468,6 @@ Int_t StiMaker::Make()
 	}
       if (_vertexFinder)
 	{
-	  StiHit *vertex=0;
 	  //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
 	  vertex = _vertexFinder->findVertex(event);
 	  if (vertex)
@@ -482,12 +486,13 @@ Int_t StiMaker::Make()
 		}						
 	    }
 	}
-      if (_recPlotter) _recPlotter->fill(_toolkit->getTrackContainer());
-      if (_mcPlotter ) _mcPlotter->fill(_toolkit->getMcTrackContainer());  
+      cout << "StiMaker::Make() -I- Calling standard plots fillers" << endl;
+      if (_recPlotter) _recPlotter->fill(_toolkit->getTrackContainer(),vertex);
+      if (_mcPlotter ) _mcPlotter->fill(_toolkit->getMcTrackContainer(),vertex);  
       if (_radLength)  _radLength->fill(_toolkit->getTrackContainer());
       if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
-  //cout<< "StiMaker::Make() -I- Done"<<endl;
+  cout<< "StiMaker::Make() -I- Done"<<endl;
 
   if (m_Mode)
     {

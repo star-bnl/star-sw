@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.21 2005/01/17 01:31:26 perev Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.22 2005/01/17 03:59:27 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.22  2005/01/17 03:59:27  pruneau
+ * change track container to vector
+ *
  * Revision 2.21  2005/01/17 01:31:26  perev
  * New parameter model
  *
@@ -276,7 +279,7 @@ StiTrackingPlots::~StiTrackingPlots()
 
 
 
-void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
+void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
 {
   //cout <<"StiTrackingPlots::fill() -I- Filling histos" <<endl;
   const StiTrack* track;
@@ -285,13 +288,17 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
   int trackCount[6];
   for (int k=0;k<4;++k) trackCount[k] = 0;
   //loop over tracks
-  for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
+  for (vector<StiTrack*>::const_iterator trackIt = mTrackStore->begin(); 
        trackIt!=mTrackStore->end();
        ++trackIt)
     {
-      track = (*trackIt).second;
+      cout << " t " << endl;
+      track = *trackIt;
       kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if( !track || !kTrack ) continue;
+      
+      bool svtVertex = false;
+      if (vertex)  svtVertex = fabs(vertex->z())<10.;
       bool good    = (1==kTrack->getFlag());
       bool primary = kTrack->isPrimary();
 
@@ -320,14 +327,16 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  globalAccepted = true;
 	  if (primary) primaryAccepted = true;
 	}
+      cout << " loop" << endl;
       for (int i=0;i<NPLOTS-1; ++i)
 	{
+	  cout << " t:" << i << endl;
 	  if (i==0 && !good)     continue;
 	  if (i==1 && !primary)  continue;
 	  if (i==2 && !globalAccepted)  continue;
 	  if (i==3 && !primaryAccepted) continue;
 
-	  if (i==4 && ! (svtPoints==0) ) continue;
+	  if (i==4 && ! (primary&&svtVertex) ) continue;
 	  if (i==5 && ! (svtPoints==1) ) continue;
 	  if (i==6 && ! (svtPoints==2) ) continue;
 	  if (i==7 && ! (svtPoints>=3) ) continue;
@@ -361,6 +370,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	  _pcaxy[i]->Fill(pcax,pcay);
 	  _pcazt[i]->Fill(pcaz,sqrt(pcax*pcax+pcay*pcay));
 
+	  cout << " F" << endl;
 	  /* 3D temporarily disabled...
 	     mGDcavNptsvEtaA->Fill(dca,mPts,eta);
 	     mGDcavNptsvPtA->Fill(dca,mPts, pt);
@@ -399,22 +409,22 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 	      const StiDetector * theDetector = node.getDetector();
 	      if (theDetector && theDetector->isActive())
 		{
-		  cout<<"Active"<< *theDetector;
+		  //cout<<"Active"<< *theDetector;
 		  
 		  int id   = theDetector->getGroupId();
 		  int key1 = theDetector->getKey(1);
 		  int key2 = theDetector->getKey(2);
 		  if (key1<0 || key2<0) {++it;continue;}
-		  int key;
-		  if (id==1) 
-		    key=5+key1;
-		  else if (id==2) 
+		  int key = -1;
+		  if (id==1 && key1>=0) 
+		    key=6+key1;
+		  else if (id==2 && key1>=0) 
 		    {
 		      key=key1;
 		      svtNnodes++;
 		    }
-		  cout << "id:"<<id<<" key1:"<<key1<<" key2:"<<key2<<" key:"<<key<<endl;
-		  if (theHit && (id==1 || id==2) )
+		  cout << " id:"<<id<<" key1:"<<key1<<" key2:"<<key2<<" key:"<<key<<endl;
+		  if (theHit && key>=0 && key<51)
 		    {
 		      cout << "=";
 		      double dx = theHit->x() - node.getX();
@@ -450,6 +460,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 			      _dzVsZ[i][key][key2]->Fill(node.getZ(),dz);
 			    }
 			}
+		      cout << "D"<<endl;
 		    } //theHit
 		} //theDetector
 	      ++it;
@@ -474,11 +485,11 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
 
 
   //cout << " anomalous event" << endl;
-  for (TrackToTrackMap::const_iterator trackIt = mTrackStore->begin(); 
+  for (vector<StiTrack*>::const_iterator trackIt = mTrackStore->begin(); 
        trackIt!=mTrackStore->end();
        ++trackIt)
     {
-      track = (*trackIt).second;      const StiTrack* track = (*trackIt).second;
+      const StiTrack* track = *trackIt;
       kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if( !track || !kTrack ) continue;
       bool good    = (1==kTrack->getFlag());
