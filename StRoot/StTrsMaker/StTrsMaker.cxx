@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.56 2000/03/24 02:43:46 long Exp $
+// $Id: StTrsMaker.cxx,v 1.57 2000/06/25 23:58:28 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.57  2000/06/25 23:58:28  fisyak
+// Remove params
+//
 // Revision 1.56  2000/03/24 02:43:46  long
 // comment out  "hitMomentum.setZ(-(tpc_hit->p[2]*GeV)); when bsectorOfHit>12"
 //
@@ -323,7 +326,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.56 2000/03/24 02:43:46 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.57 2000/06/25 23:58:28 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -410,11 +413,10 @@ Int_t StTrsMaker::Init()
 #ifdef ROOT_DATABASE_PARAMETERS
     
 //     // Create tables
-//     St_DataSetIter       local(GetDataBase("params"));
   
     //
     // Set up the DataBase access
-  St_DataSet *TrsPars = GetDataBase("params/tpc/trspars");
+  St_DataSet *TrsPars = GetDataBase("tpc/trspars");
   assert(TrsPars);
   // should use dynamic_cast when available
   geometryDataSet *Geometry    =
