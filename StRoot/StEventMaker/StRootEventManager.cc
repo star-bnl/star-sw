@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.2 1999/12/21 15:13:16 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.3 2000/01/05 16:08:25 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
- * Revision 2.2  1999/12/21 15:13:16  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.3  2000/01/05 16:08:25  ullrich
+ * Removed some unnecessary checks.
  *
  * Revision 2.4  2000/05/25 14:44:47  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -39,22 +39,18 @@ using std::string;
 #endif
 
 StRootEventManager::StRootEventManager():StEventManager() { /* noop */ }
-//  mDst.Reset(0);
-//  grab the event from the maker
+
+StRootEventManager::~StRootEventManager() { /* noop */ }
 
 ooStatus
 StRootEventManager::openEvent(const char* name)
-    if (!dsDst->GetList())      return oocError;
+{
     //  mDst.Reset(0);
     //  grab the event from the maker
     if (!mCurrentChain) 	return oocError;
     St_DataSet *dsDst = mCurrentChain->GetDataSet(name);
     if (!dsDst) 		return oocError;
-StRootEventManager::readEvent()
-{
-    //  grab the event from the maker
-    return oocSuccess;
-}
+    // if (!dsDst->GetList())      return oocError;
     mDst.Reset(dsDst);
     return oocSuccess;
 }
