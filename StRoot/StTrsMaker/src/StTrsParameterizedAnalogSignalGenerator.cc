@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.14 2000/04/20 21:25:20 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.15 2000/05/19 17:22:29 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.15  2000/05/19 17:22:29  long
+ * fix bug in central pad calculation (mCentralPad) for non_central rows.
+ *
  * Revision 1.14  2000/04/20 21:25:20  long
  * timeBinLowerLimit---><-----timeBinUpperLimit in
  * "if( signalTime-timeBinT> timeBinLowerLimit*mTimeBinWidth) break;
@@ -234,7 +237,7 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
     double sigma_xpad2;
-    double InOuterFactor=1.21;
+    double InOuterFactor=1.0075;
     double charge_fraction[5]; 
     //double mPadResponseFunctionSigma;
     //
@@ -288,7 +291,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 // 	    cout << "**Transform2Raw" << endl;
 	    transformer(xyCoord,mTpcRaw);
 //  	    PR(mTpcRaw);
-	    mCentralPad = mTpcRaw.pad();
+	    //  mCentralPad = mTpcRaw.pad();
 	    mCentralRow = mTpcRaw.row();
            
 	    //	    PR(mCentralRow);
@@ -315,8 +318,8 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 // 	    PR(mRowLimits.first);
 // 	    PR(mRowLimits.second);
 
-	    mPadLimits.first  = (mCentralPad > mDeltaPad) ?
-		mCentralPad - mDeltaPad : mCentralPad; 
+	    //	    mPadLimits.first  = (mCentralPad > mDeltaPad) ?
+	    //	mCentralPad - mDeltaPad : mCentralPad; 
 
 	    //
 	    // STEP SIZEs OF THE FACTORIZARION FUNCTION OF PAD RESPONSE FUNCTION 
@@ -328,7 +331,18 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
            
 	    //
 	    for(int irow=mRowLimits.first; irow<=mRowLimits.second; irow++) {
-		mPadLimits.second =
+		
+              mTpcRaw.setRow(irow);
+              transformer(mTpcRaw,xyCoord);
+              xyCoord.position().setX(iter->position().x());  
+              transformer(xyCoord,mTpcRaw);
+              mCentralPad = mTpcRaw.pad();	
+
+                mPadLimits.first  = (mCentralPad > mDeltaPad) ?
+	    		mCentralPad - mDeltaPad : mCentralPad; 
+
+
+                mPadLimits.second =
 		    (mCentralPad < (mGeomDb->numberOfPadsAtRow(irow) - mDeltaPad)) ?
 		    mCentralPad + mDeltaPad : mGeomDb->numberOfPadsAtRow(irow);
 //  		PR(mPadLimits.first);
