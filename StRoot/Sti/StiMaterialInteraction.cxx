@@ -47,8 +47,8 @@ StiIntersection StiMaterialInteraction::findIntersection(
   // make sure we have our output device initialized
   if(s_pMessenger==NULL){
     s_pMessenger = Messenger::instance(MessageType::kGeometryMessage);
-    MessageType::getTypeByCode(MessageType::kGeometryMessage)->setOstream(
-        new ofstream("GeometryMessageFile"));
+    //MessageType::getTypeByCode(MessageType::kGeometryMessage)->setOstream(
+    //    new ofstream("GeometryMessageFile"));
     //Messenger::setRoutingBits(MessageType::kGeometryMessage);
   }
 

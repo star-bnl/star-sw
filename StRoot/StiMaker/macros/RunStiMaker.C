@@ -12,10 +12,10 @@ void RunStiMaker(Int_t nevents=1,
 		 //const char* outfile = "/star/data22/ITTF/evaluation/Miller/Evaluation.root",
 		 const char* outfile = "Evaluation.root",
 		 bool doProfile=false, // produce profiling output? 
-		 const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
+		 //const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
 		 
   //This file points to 30 events of 10 neg muons w/ pt=.9 
-  //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
+  const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_standard/hc_standard.40_evts.event.root")
@@ -52,6 +52,8 @@ void RunStiMaker(Int_t nevents=1,
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StTpcDb");
+    gSystem->Load("StSvtClassLibrary");
+    gSystem->Load("StSvtDbMaker");
     
     cout <<"Loading StEvent"<<endl;
     gSystem->Load("StEvent");
@@ -122,16 +124,25 @@ void RunStiMaker(Int_t nevents=1,
     ioMaker->SetBranch("dstBranch",0,"r");    //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r");  //activate runco Branch
     
-    //Calibration Maker (StarDB,not a real Database!)
+    // Database:
+
+    // This is the real SQL database
     const char* calibDB = "MySQL:StarDb";
+    // This is the filesystem database which we need for tsspars, needed
+    // by TpcDb
     const char* paramsDB = "$STAR/StarDb";
-    St_db_Maker* calibMk = new St_db_Maker("StarDb",calibDB,paramsDB);
-    calibMk->SetDateTime("year_2b");
+    // this maker must be called "db" or StSvtDbMaker will crash
+    St_db_Maker* calibMk = new St_db_Maker("db",calibDB,paramsDB);
+    calibMk->SetDateTime(20010702,000000);  
+    //calibMk->SetDateTime("year_2b");
     calibMk->SetDebug();
     
-    //Read Tpc Database access
+    //Tpc Database access
     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
-	  
+
+    //Svt Database access
+    StSvtDbMaker *svtDbMk = new StSvtDbMaker("svtDb");
+
     //StEventMaker
     StEventMaker*       eventReader   = new StEventMaker("events","title");
     eventReader->doPrintEventInfo = 0;
