@@ -242,9 +242,7 @@ int strbyte_openr_(
 
 	        )
 
-/*  Description:
-
-	Open the old file for reading, named in <filename>, in byte-stream mode.    */
+/*  Description:  Open a file for reading, named in <filename>, in byte-stream mode.    */
 
 {
 
@@ -302,9 +300,7 @@ int strbyte_openw_(
 
 	       )
 
-/*  Description:
-
-	Open the new file for writing, named in <filename>, in byte-stream mode.    */
+/*  Description: Open a new file for writing, named in <filename>, in byte-stream mode.    */
 {
 
 	static char local_filename[256];  /* fopen needs a local (non-pointer) filename. */
