@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StVirtualEventFilter.h,v 1.5 1999/12/04 21:56:27 fine Exp $
+// $Id: StVirtualEventFilter.h,v 1.6 1999/12/04 21:59:57 fine Exp $
 //
 #ifndef STAR_StVirtualEventFilter
 #define STAR_StVirtualEventFilter
@@ -41,12 +41,15 @@ class StVirtualEventFilter : public TObject {
     virtual Int_t Channel(const StVertex *vertexObject,Width_t &size,Style_t &style);
     virtual Int_t Channel(const St_Table *tableObject,Int_t rowNumber,Width_t &size,Style_t &style);
     virtual Int_t Reset(Int_t reset=0){return reset;}
-    ClassDef(StVirtualEventFilter,0)
+    ClassDef(StVirtualEventFilter,0) // virtual base class for the custom "event" filters (useful for 3D visualization)
 };
 
 inline Int_t StVirtualEventFilter::Turn(Int_t flag){ Int_t s = GetFlag(); m_ActiveFlag = flag; return s;}
 
 // $Log: StVirtualEventFilter.h,v $
+// Revision 1.6  1999/12/04 21:59:57  fine
+// new class comment
+//
 // Revision 1.5  1999/12/04 21:56:27  fine
 // new non-const signature for Channel(St_TableSorter) method
 //
