@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.12 2001/09/03 19:09:40 ward Exp $
+// $Id: St_trg_Maker.h,v 1.13 2001/10/16 20:26:03 ward Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.13  2001/10/16 20:26:03  ward
+// New code from Jennifer Klay for unpacking EMC data.
+//
 // Revision 1.12  2001/09/03 19:09:40  ward
 // Runtime selection of 2000 or 2001 trigger data format.
 //
@@ -76,7 +79,7 @@ class St_trg_Maker : public StMaker {
    Bool_t drawinit;
    StDAQReader *fVictorPrelim; //!
    StTRGReader *fVictor;       //!
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.12 2001/09/03 19:09:40 ward Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.13 2001/10/16 20:26:03 ward Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    void dumpDataToScreenAndExit    ();
@@ -89,6 +92,8 @@ class St_trg_Maker : public StMaker {
    Int_t SanityCheck2000();
    int auxctbmap[16],ctbmap[120][2];  // Hardcoded from ctb_dsm.map.
    int auxmwcmap[32],mwcmap[24][4];  // Hardcoded from mwc_dsm.map.
+   void swapByteOrder( unsigned char* , unsigned char* );
+   void unpack6bits  ( unsigned char* , unsigned char* );
  
  protected:
  public: 
@@ -96,6 +101,8 @@ class St_trg_Maker : public StMaker {
    int HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1);
    int HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1);
    void Vladimir2Herbert(int,int*,int*);
+   void Emc    (St_dst_TrgDet *dst1);
+   void Emc2000(St_dst_TrgDet *dst1);
    void CtbMwcDaq    (St_dst_TrgDet *dst1);
    void CtbMwcDaq2000(St_dst_TrgDet *dst1);
    void SecondDstSim(St_dst_L0_Trigger *dst2);
@@ -119,7 +126,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.12 2001/09/03 19:09:40 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.13 2001/10/16 20:26:03 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };
