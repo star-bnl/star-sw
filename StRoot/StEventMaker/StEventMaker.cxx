@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.11  1999/07/11 23:27:49  fisyak
+// dst_TriggerDetectors => dst_TrgDet
+//
 // Revision 1.10  1999/07/09 01:17:54  fisyak
 // clean up
 //
@@ -111,8 +114,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.11  1999/07/11 23:27:49  fisyak
+// dst_TriggerDetectors => dst_TrgDet
+//
 // Revision 1.10  1999/07/09 01:17:54  fisyak
 // clean up
 //
@@ -235,7 +241,7 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
@@ -264,14 +270,14 @@ extern "C" {void gufld(Float_t *, Float_t *);}
   defEventSummary	= new dst_event_summary_st();	
   defMonitorHard	= new dst_monitor_hard_st ();	
   defMonitorSoft	= new dst_monitor_soft_st ();	
-  defTriggerDetectors	= new dst_TriggerDetectors_st();	
+  defTriggerDetectors	= new dst_TrgDet_st();	
 //		...and fill it by zeros
   memset(defRunHeader	    ,0,sizeof(dst_run_header_st      ));	
   memset(defEventHeader	    ,0,sizeof(dst_event_header_st    ));	
   memset(defEventSummary    ,0,sizeof(dst_event_summary_st   ));	
   memset(defMonitorHard	    ,0,sizeof(dst_monitor_hard_st    ));	
   memset(defMonitorSoft	    ,0,sizeof(dst_monitor_soft_st    ));	
-  memset(defTriggerDetectors,0,sizeof(dst_TriggerDetectors_st));	
+  memset(defTriggerDetectors,0,sizeof(dst_TrgDet_st));	
 //
  * Revision 2.17  2000/02/08 21:14:16  genevb
     doLoadTpcHits  = kTRUE;
@@ -348,7 +354,7 @@ Int_t StEventMaker::Make(){
   status =   theEventManager->openEvent("trg");
 	theEventManager->closeEvent();
   if (status) {
-    dstTriggerDetectors = theEventManager->returnTable_dst_TriggerDetectors(nrows); 
+    dstTriggerDetectors = theEventManager->returnTable_dst_TrgDet(nrows); 
     if (dstTriggerDetectors){
       cout << "StEventMaker: Loading triggerDetectors" << endl;
       StTriggerDetectorCollection *trgDets =
@@ -732,7 +738,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.11 1999/07/11 23:27:49 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

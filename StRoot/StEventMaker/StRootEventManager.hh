@@ -1,6 +1,9 @@
-// $Id: StRootEventManager.hh,v 1.1 1999/05/22 18:23:43 perev Exp $
+// $Id: StRootEventManager.hh,v 1.2 1999/07/11 23:27:51 fisyak Exp $
 //
 // $Log: StRootEventManager.hh,v $
+// Revision 1.2  1999/07/11 23:27:51  fisyak
+// dst_TriggerDetectors => dst_TrgDet
+//
 // Revision 1.1  1999/05/22 18:23:43  perev
 // Add classes from StEventReaderMaker
 //
@@ -75,7 +78,7 @@
   virtual ooStatus readRunSummary(dst_run_summary_st& runInfo) const;
   virtual ooStatus readHeader(dst_event_header_st&    eventInfo) const;
 
-  virtual ooStatus readTable(dst_TriggerDetectors_st& table) const;
+  virtual ooStatus readTable(dst_TrgDet_st&           table) const;
   virtual ooStatus readTable(dst_event_summary_st&    table) const;
   virtual ooStatus readTable(dst_monitor_hard_st&     table) const;
   virtual ooStatus readTable(dst_monitor_soft_st&     table) const;
@@ -85,7 +88,7 @@
   virtual dst_monitor_soft_st* 	   returnTable_dst_monitor_soft    (long& nentries) const;
   virtual dst_monitor_hard_st* 	   returnTable_dst_monitor_hard    (long& nentries) const;
   virtual dst_event_summary_st*    returnTable_dst_event_summary   (long& nentries) const;
-  virtual dst_TriggerDetectors_st* returnTable_dst_TriggerDetectors(long& nentries) const;
+  virtual dst_TrgDet_st*           returnTable_dst_TrgDet          (long& nentries) const;
   virtual dst_event_header_st* 	   returnTable_dst_event_header    (long& nentries) const;
   virtual dst_run_summary_st* 	   returnTable_dst_run_summary     (long& nentries) const;
   virtual dst_run_header_st* 	   returnTable_dst_run_header      (long& nentries) const;

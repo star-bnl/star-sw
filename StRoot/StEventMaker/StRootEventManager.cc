@@ -1,5 +1,8 @@
-// $Id: StRootEventManager.cc,v 1.2 1999/06/24 17:30:27 fisyak Exp $
+// $Id: StRootEventManager.cc,v 1.3 1999/07/11 23:27:50 fisyak Exp $
 // $Log: StRootEventManager.cc,v $
+// Revision 1.3  1999/07/11 23:27:50  fisyak
+// dst_TriggerDetectors => dst_TrgDet
+//
 // Revision 1.2  1999/06/24 17:30:27  fisyak
 // Add more print out
 //
@@ -114,7 +117,7 @@ ooStatus StRootEventManager::FUNCTION(TABLE_TYPE ## _st& table) const\
 READ_TABLE(readRunHeader,dst_run_header)
 READ_TABLE(readRunSummary,dst_run_summary)
 READ_TABLE(readHeader,dst_event_header)
-READ_TABLE(readTable,dst_TriggerDetectors)
+READ_TABLE(readTable,dst_TrgDet)
 READ_TABLE(readTable,dst_event_summary)
 READ_TABLE(readTable,dst_monitor_hard)
 READ_TABLE(readTable,dst_monitor_soft)
@@ -150,7 +153,7 @@ TABLE_TYPE ##_st* StRootEventManager::returnTable_ ## TABLE_TYPE(long& nentries)
 RETURN_TABLE(dst_monitor_soft,monitor_soft)
 RETURN_TABLE(dst_monitor_hard,monitor_hard)
     nentries = tableWrap->GetNRows();\
-RETURN_TABLE(dst_TriggerDetectors,TriggerDetectors)
+RETURN_TABLE(dst_TrgDet,TriggerDetectors)
 RETURN_TABLE(dst_event_header,event_header)
 RETURN_TABLE(dst_run_summary,run_summary)
 RETURN_TABLE(dst_run_header,run_header)
