@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridData.cc,v 1.2 2000/07/30 21:13:04 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.2  2000/07/30 21:13:04  munhoz
+ * adding correction for copy constructor and equal operator
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -61,9 +64,25 @@ StSvtHybridData::StSvtHybridData(const StSvtHybridData& hybrid)
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
   nAnodes   = hybrid.nAnodes;
-  anodeList = hybrid.anodeList;       
-  nSeq      = hybrid.nSeq;            
-  seq       = hybrid.seq;    
+
+  anodeList = new int[nAnodes];
+  nSeq = new int[nAnodes];
+  seq =  new StSequence*[nAnodes];
+
+  for(int an = 0; an < nAnodes; an++)
+    {
+      anodeList[an] = hybrid.anodeList[an];
+      nSeq[an] = hybrid.nSeq[an];
+      seq[an] = new StSequence[nSeq[an]];
+
+      for(int mseq = 0; mseq < nSeq[an] ; mseq++)
+	{
+         seq[an][mseq].startTimeBin =  hybrid.seq[an][mseq].startTimeBin;
+	 seq[an][mseq].firstAdc =  hybrid.seq[an][mseq].firstAdc;
+	 seq[an][mseq].length =  hybrid.seq[an][mseq].length;
+	}
+    }
+  
 }
 
 StSvtHybridData& StSvtHybridData::operator = (const StSvtHybridData& hybrid)
@@ -73,9 +92,25 @@ StSvtHybridData& StSvtHybridData::operator = (const StSvtHybridData& hybrid)
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
   nAnodes   = hybrid.nAnodes;
-  anodeList = hybrid.anodeList;       
-  nSeq      = hybrid.nSeq;            
-  seq       = hybrid.seq;    
+  
+  anodeList = new int[nAnodes];
+  nSeq = new int[nAnodes];
+  seq =  new StSequence*[nAnodes];
+
+  for(int an = 0; an < nAnodes; an++)
+    {
+      anodeList[an] = hybrid.anodeList[an];
+      nSeq[an] = hybrid.nSeq[an];
+      seq[an] = new StSequence[nSeq[an]];
+
+      for(int mseq = 0; mseq < nSeq[an] ; mseq++)
+	{
+         seq[an][mseq].startTimeBin =  hybrid.seq[an][mseq].startTimeBin;
+	 seq[an][mseq].firstAdc =  hybrid.seq[an][mseq].firstAdc;
+	 seq[an][mseq].length =  hybrid.seq[an][mseq].length;
+	}
+    }
+  
   return *this;
 }
 
