@@ -9,7 +9,7 @@ C   Status		: Tested with svt_hits
 C>--------------------------------------------------------------------
       IMPLICIT NONE
 #include "PAM.inc"
-#include "ev0_ev0out.inc"
+#include "ev0_aux.inc"
 C----------------------------------------------------------------------
       RECORD/ table_head_st/ ev0out_h
       RECORD/ ev0_aux_st/ ev0out(*)
