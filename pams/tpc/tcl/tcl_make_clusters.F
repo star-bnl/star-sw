@@ -462,6 +462,16 @@ c       Must initialise value of tcl_clsrow!
 c
 	Tcl_Clsrow = tucod_ok     !Success
 
+c see if it is worth it first...
+        if (tpclusterh.nok.eq.tpcluster_len) then
+           write(6,*)'TPCLUSTER table full - not searching sec,row',sector,row
+           return
+        endif
+        if (tpseqh.nok.eq.tpseq_len) then
+           write(6,*)'TPSEQ table full - not searching sec,row',sector,row
+           return
+        endif
+
 	IF ( .NOT. TCL_Get_Row_Seq
      1                 ( Sector, Row, Nrowseqs_max
      1                 , pad_plane_h, pad_plane
@@ -603,20 +613,31 @@ c  The cluster is finished... store it...
 	endif
 
 	if (nseq_in_cluster.ge.2) then	! do not store 1-sequence "clusters"
-	  tpclusterh.nok = tpclusterh.nok + 1
-c	  tpcluster(tpclusterh.nok).secpad=100*sector+row
-	  tpcluster(tpclusterh.nok).tpc_row=100*sector+row
-	  tpcluster(tpclusterh.nok).nseq=nseq_in_cluster
-	  tpcluster(tpclusterh.nok).jseq=tpseqh.nok+1
-	  do iseq=1,nseq_in_cluster
-	    tpseqh.nok = tpseqh.nok+1
-	    tpseq(tpseqh.nok).jpix = ipix(seq_in_cluster(iseq))
-	    tpseq(tpseqh.nok).tpc_row = 100*sector+row
-	    tpseq(tpseqh.nok).secpad = ipad(seq_in_cluster(iseq))+
-     +		secpad_offset(row)	! note we restore offset
-	    if (iseq.ne.nseq_in_cluster) 
-     +		tpseq(tpseqh.nok).next = tpseqh.nok+1
-	  enddo
+           if (tpclusterh.nok.eq.tpcluster_len) then
+              write(6,*)'TPCLUSTER table full- abort sec,row',
+     +             sector,row
+              return
+           endif
+           tpclusterh.nok = tpclusterh.nok + 1
+c     tpcluster(tpclusterh.nok).secpad=100*sector+row
+           tpcluster(tpclusterh.nok).tpc_row=100*sector+row
+           tpcluster(tpclusterh.nok).nseq=nseq_in_cluster
+           tpcluster(tpclusterh.nok).jseq=tpseqh.nok+1
+           do iseq=1,nseq_in_cluster
+              if (tpseqh.nok.eq.tpseq_len) then
+                 write(6,*)'TPSEQ table full- abort sec,row',
+     +                sector,row
+                 tpclusterh.nok = tpclusterh.nok -1 ! don't store half-baked cluster
+                 return
+              endif
+              tpseqh.nok = tpseqh.nok+1
+              tpseq(tpseqh.nok).jpix = ipix(seq_in_cluster(iseq))
+              tpseq(tpseqh.nok).tpc_row = 100*sector+row
+              tpseq(tpseqh.nok).secpad = ipad(seq_in_cluster(iseq))+
+     +             secpad_offset(row) ! note we restore offset
+              if (iseq.ne.nseq_in_cluster) 
+     +             tpseq(tpseqh.nok).next = tpseqh.nok+1
+           enddo
 	endif
 
 	goto 100	! find another cluster

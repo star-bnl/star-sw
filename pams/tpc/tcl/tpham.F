@@ -278,6 +278,8 @@ C-----------------------------------------------------------------------
 	integer ichek	! mal -** temp
         integer iisec,iirow,jjsec
 
+	save first,time_bucket,time_bin,id_pad	
+
 c
 c       set status
 c
@@ -383,6 +385,11 @@ c  to cluster in TPCLUSTER table....
            fflagg=0
            if (nhits.gt.1) fflagg=1
            DO ihit=1,nhits
+              if (tphith.nok.ge.tphit_len) then
+                 write(6,*)'TPHIT table full - quitting at cluster',
+     +                jtpcl
+                 return
+              endif
               tphith.nok = tphith.nok+1
 	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
               tphit(tphith.nok).cluster = jtpcl
@@ -1025,12 +1032,13 @@ c passed outputs
       real track(*)
 c local variables
       integer maxpad,maxbuck
-      parameter (maxpad=184,maxbuck=512)
+      parameter (maxpad=184,maxbuck=1024) ! upped from 512 4jan95
       integer height(1:maxpad,1:maxbuck)
       integer track_pix(1:maxpad,1:maxbuck)
       logical allowed(0:maxpad+1,0:maxbuck+1) ! go 1 beyond to avoid overwrite
                                               ! memory when laying waste
-      data allowed/95604*.true./
+c      data allowed/95604*.true./
+      data allowed/190836*.true./ ! had to increase when up from 512 to 1024
       integer jpad,jtdc,jpix
       integer kpad,ktdc
       integer index_list(10000),indx
