@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.h,v 2.2 2004/01/28 00:29:49 ullrich Exp $
+ * $Id: StTriggerData2004.h,v 2.3 2004/02/11 01:39:52 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.h,v $
+ * Revision 2.3  2004/02/11 01:39:52  ullrich
+ * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
+ *
  * Revision 2.2  2004/01/28 00:29:49  ullrich
  * Methods to retrieve ZDC data added.
  *
@@ -30,7 +33,7 @@ class StTriggerData2004 : public StTriggerData {
 public:
     StTriggerData2004();
     StTriggerData2004(const TrgDataType2004*);
-virtual ~StTriggerData2004();
+    ~StTriggerData2004();
   
     void dump() const;  //dump data into text
   
@@ -67,27 +70,27 @@ virtual ~StTriggerData2004();
     unsigned short mwc(int pmt, int prepost=0) const;
             
     // BBC
-    unsigned short bbcADC(int eastwest, int pmt, int prepost=0) const;
-    unsigned short bbcTDC(int eastwest, int pmt, int prepost=0) const;
-    unsigned short bbcADCSum(int eastwest, int prepost=0) const;
-    unsigned short bbcADCSumLargeTile(int eastwest, int prepost=0) const;
-    unsigned short bbcEarliestTDC(int eastwest, int prepost=0) const;
+    unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short bbcTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short bbcADCSum(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     unsigned short bbcTimeDifference() const;
 
     // FPD
-    unsigned short fpd(int eastwest, int module, int pmt, int prepost=0) const; 
-    unsigned short fpdSum(int eastwest, int module) const;
+    unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
+    unsigned short fpdSum(StBeamDirection eastwest, int module) const;
    
     //ZDC
     unsigned short zdcAtChannel(int channel, int prepost=0) const;
     unsigned short zdcAtAddress(int address, int prepost=0) const;
-    unsigned short zdcUnAttenuated(int eastwest, int prepost=0) const;
-    unsigned short zdcAttenuated(int eastwest, int prepost=0) const;
-    unsigned short zdcADC(int eastwest, int pmt, int prepost=0) const;
-    unsigned short zdcTDC(int eastwest, int prepost=0) const;
+    unsigned short zdcUnAttenuated(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
 
     //ZDCSMD
-    unsigned short zdcSMD(int eastwest, int verthori, int strip, int prepost=0) const;
+    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
 
     // experts only
     char* getTriggerStructure();

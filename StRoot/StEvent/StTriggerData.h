@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.5 2004/01/28 00:29:49 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.6 2004/02/11 01:39:51 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.6  2004/02/11 01:39:51  ullrich
+ * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
+ *
  * Revision 2.5  2004/01/28 00:29:49  ullrich
  * Methods to retrieve ZDC data added.
  *
@@ -30,11 +33,12 @@
 #define StTriggerData_hh
 
 #include "StObject.h"
+#include "StEnumerations.h"
 
 class StTriggerData : public StObject {
 public:
     StTriggerData();
-virtual ~StTriggerData();
+    virtual ~StTriggerData();
     
     virtual void dump() const = 0;   //dump data into text
     
@@ -43,7 +47,6 @@ virtual ~StTriggerData();
     virtual unsigned int version() const = 0;          // TrgDataType Version Number 
     virtual unsigned int numberOfPreXing() const = 0;  // # of pre xing data for detectors
     virtual unsigned int numberOfPostXing() const = 0; // # of post xing data for detectors
-  
     // generic trigger infomations
     virtual unsigned int token() const = 0;
     virtual unsigned int triggerWord() const = 0;
@@ -78,16 +81,16 @@ virtual ~StTriggerData();
     // MWC
     virtual unsigned short mwc(int sector, int prepost=0) const;
 
-    // ZDC  east=0, west=1
+    // ZDC 
     virtual unsigned short zdcAtChannel(int channel, int prepost=0) const;
     virtual unsigned short zdcAtAddress(int address, int prepost=0) const;
-    virtual unsigned short zdcUnAttenuated(int eastwest, int prepost=0) const;
-    virtual unsigned short zdcAttenuated(int eastwest, int prepost=0) const;
-    virtual unsigned short zdcADC(int eastwest, int pmt, int prepost=0) const;
-    virtual unsigned short zdcTDC(int eastwest, int prepost=0) const;
+    virtual unsigned short zdcUnAttenuated(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
 
     //ZDCSMD
-    virtual unsigned short zdcSMD(int eastwest, int verthori, int strip, int prepost=0) const;
+    virtual unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
   
     // EMC
     virtual unsigned short bemcHighTower(int eta, int phi, int prepost=0) const;
@@ -95,26 +98,31 @@ virtual ~StTriggerData();
     virtual unsigned short eemcHighTower(int eta, int phi, int prepost=0) const;
     virtual unsigned short eemcJetPatch (int eta, int phi, int prepost=0) const;
     
-    // BBC east=0, west=1
-    virtual unsigned short bbcADC(int eastwest, int pmt, int prepost=0) const;
-    virtual unsigned short bbcTDC(int eastwest, int pmt, int prepost=0) const;
-    virtual unsigned short bbcADCSum(int eastwest, int prepost=0) const;
-    virtual unsigned short bbcADCSumLargeTile(int eastwest, int prepost=0) const;
-    virtual unsigned short bbcEarliestTDC(int eastwest, int prepost=0) const;
+    // BBC bbcTDC
+    virtual unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short bbcTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
+    virtual unsigned short bbcADCSum(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short bbcADCSumLargeTile(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short bbcEarliestTDC(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short bbcTimeDifference() const;
   
-    // FPD east=0, west=1. north=0, south=1, top=2, bottom=3, north preshower=4, south preshower=5
-    virtual unsigned short fpd(int eastwest, int module, int pmt, int prepost=0) const; 
-    virtual unsigned short fpdSum(int eastwest, int module) const;
-  
+    // FPD  module #: north=0, south=1, top=2, bottom=3, north preshower=4, south preshower=5
+    virtual unsigned short fpd(StBeamDirection eastwest, int module, int pmt, int prepost=0) const; 
+    virtual unsigned short fpdSum(StBeamDirection eastwest, int module) const;
+
+    // auxiliary information
+    float zdcVertexZ() const;
+    void  setZdcVertexZ(float);
+    
     // Experts only!
     virtual char* getTriggerStructure() = 0;
   
 protected:
-    int mYear;
+    int   mYear;
+    float mZdcVertexZ;
     int prepostAddress(int prepost) const; //get pre&post xsing addess, return negative if bad.
         
-    ClassDef(StTriggerData,1) 
+    ClassDef(StTriggerData,2) 
 };
 
 //
@@ -122,6 +130,8 @@ protected:
 //  of them will be overwritten by classes inheriting from StTriggerData.
 //
 inline int StTriggerData::year() const {return mYear;}
+inline float StTriggerData::zdcVertexZ() const {return mZdcVertexZ;}
+inline void StTriggerData::setZdcVertexZ(float val) {mZdcVertexZ = val;}
 inline unsigned int StTriggerData::busyStatus() const {return 0;}
 inline unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
 inline unsigned int StTriggerData::bunchCounterLow() const {return 0;}
@@ -146,23 +156,23 @@ inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtAddress(int address, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcUnAttenuated(int eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcAttenuated(int eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcADC(int eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcTDC(int eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcSMD(int eastwest, int verthori, int strip, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcTDC(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bemcHighTower(int eta, int phi, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bemcJetPatch (int eta, int phi, int prepost) const {return 0;}
 inline unsigned short StTriggerData::eemcHighTower(int eta, int phi, int prepost) const {return 0;}
 inline unsigned short StTriggerData::eemcJetPatch (int eta, int phi, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcADC(int eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcTDC(int eastwest, int pmt, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcADCSum(int eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcADCSumLargeTile(int eastwest, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bbcEarliestTDC(int eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::bbcADCSum(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::bbcADCSumLargeTile(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
-inline unsigned short StTriggerData::fpd(int eastwest, int module, int pmt, int prepost) const {return 0;} 
-inline unsigned short StTriggerData::fpdSum(int eastwest, int module) const {return 0;}
+inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
+inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
   
 #endif
 

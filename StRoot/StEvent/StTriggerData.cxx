@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.1 2003/04/16 17:47:41 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.2 2004/02/11 01:39:49 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,17 +10,20 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.2  2004/02/11 01:39:49  ullrich
+ * Use enumeration StBeamDirector for east/west. Add member for ZDC vertex.
+ *
  * Revision 2.1  2003/04/16 17:47:41  ullrich
  * Initial Revision.
  *
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.1 2003/04/16 17:47:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.2 2004/02/11 01:39:49 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
-StTriggerData::StTriggerData() : mYear(0) { /* noop */ }
+StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999) { /* noop */ }
 
 StTriggerData::~StTriggerData() { /* noop */}
 
