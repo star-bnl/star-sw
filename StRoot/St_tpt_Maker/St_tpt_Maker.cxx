@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.54 2000/11/03 21:23:34 saulys Exp $
+// $Id: St_tpt_Maker.cxx,v 1.55 2000/11/25 23:22:51 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.55  2000/11/25 23:22:51  fisyak
+// move dEdx calculations into StdEdxMaker
+//
 // Revision 1.54  2000/11/03 21:23:34  saulys
 // Added ExB correction code
 //
@@ -178,8 +181,6 @@
 #include "tpc/St_tpt_Module.h"
 #include "tpc/St_tpt_residuals_Module.h"
 #include "tpc/St_tte_track_Module.h"
-#include "tpc/St_tde_Module.h"
-#include "tpc/St_ensemble_Module.h"
 #include "tpc/St_tte_Module.h"
 #include "TH1.h"
 #include "TF1.h"
@@ -201,15 +202,12 @@ ClassImp(St_tpt_Maker)
     m_type(0),
     m_tpt_pars(0),
     m_tpt_spars(0),
-    m_tte_control(0),
-    m_tdeparm(0),
-    m_tpipar(0)
+    m_tte_control(0)
 {
   m_iftteTrack =kFALSE;
   m_tteEvalOn=kFALSE;
   m_tptResOn=kFALSE;
   m_mkfinal=kFALSE;
-  m_ensembleOn=kTRUE;
   printf("\n TPT CONSTRUCTOR name=\"%s\"\n",GetName());
   SetInputHits("tpc_hits","tphit"); // initialize default input
 }
@@ -256,14 +254,6 @@ gMessMgr->SetLimit("TPTRSP-E1",10);
 // 	 	TTE parameters
   m_tte_control = (St_tte_control *) gime("ttepars/tte_control");
   assert(m_tte_control);
-  
-// 		TID parameters
-  m_tdeparm = (St_tdeparm*) gime("tidpars/tdeparm");
-  m_tpipar  = (St_tpipar* ) gime("tidpars/tpipar" );
-
-  if (!(m_tdeparm && m_tpipar)) 
-    Error("Init","tid parameters have not been initialized");
-  assert(m_tdeparm && m_tpipar);
   
 // 		Create Histograms
 
@@ -384,32 +374,6 @@ Int_t St_tpt_Maker::Make(){
   }
 
 //		End of residuals calculations
-
-//		TID
-  if (Debug()) cout << " start tid_run " << endl;
-  St_dst_dedx  *tpc_dedx = new St_dst_dedx("tpc_dedx",2*maxNofTracks); 
-  m_DataSet->Add(tpc_dedx);
-
-  Int_t Res_tde = tde(m_tdeparm,tphit,tptrack,m_tpg_pad_plane,tpc_dedx);
-//	   	      ================================================
-  if (Res_tde != kSTAFCV_OK) {cout << " Problem with tde.. " << endl;}
-  else {if (Debug()) cout << " finish tid_run " << endl;}
-
-//		TID ENSEMBLE
-  
-  if (m_ensembleOn){
-  if (Debug()) cout << " start tid_ensemble_run " << endl;
-  St_type_floatdata* ensemblePar= new St_type_floatdata("ensemblePar",1);
-  type_floatdata_st* ensemblePar_stf=ensemblePar->GetTable(); 
-   ensemblePar_stf[0].data=8.7e-07;
-  Int_t Res_tid_ensemble = ensemble(m_tdeparm,tphit,tptrack,tpc_dedx,ensemblePar);
-//	                   ====================================================
-  if (Res_tid_ensemble != kSTAFCV_OK) {cout << " Problem with tde ensemble.. " << endl;}
-  else {if (Debug()) cout << " finish tid_ensemble_run " << endl;}
-  delete ensemblePar;
-  }
-
-
 
 //		TTE
   if(m_tteEvalOn){
