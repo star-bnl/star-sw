@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.43 2004/11/03 23:04:05 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.44 2004/11/14 17:05:33 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -98,7 +98,7 @@ Bichsel *StdEdxY2Maker::m_Bichsel = 0;
 //_____________________________________________________________________________
 StdEdxY2Maker::StdEdxY2Maker(const char *name):
   StMaker(name), 
-  m_Minuit(0), m_Mask(-1), 
+  m_Minuit(0), m_TpcdEdxCorrection(0),  m_Mask(-1), 
   m_trigDetSums(0), m_trig(0),
   mHitsUsage(0)
 {
