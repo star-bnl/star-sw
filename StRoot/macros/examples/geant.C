@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.1 1999/01/05 01:38:03 fisyak Exp $
+// $Id: geant.C,v 1.2 1999/01/08 21:39:54 fisyak Exp $
 // $Log: geant.C,v $
+// Revision 1.2  1999/01/08 21:39:54  fisyak
+// Add Gene Van Buren bfc description
+//
 // Revision 1.1  1999/01/05 01:38:03  fisyak
 // geant with St_Nodes
 //
@@ -13,11 +16,17 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("geometry");
-  gSystem->Load("gstar");
-  gSystem->Load("St_gstar");
-  gSystem->Load("g2t");
-  gSystem->Load("St_g2t");
+  //  gSystem->Load("libmsg");
+  //  gSystem->Load("libasu");
+  //  gSystem->Load("libsoc");
+  //  gSystem->Load("libtdm");
+  //  gSystem->Load("libdui");
+  //  gSystem->Load("gstar");
+  //  gSystem->Load("St_gstar");
+  //  gSystem->Load("g2t");
+  //  gSystem->Load("St_g2t");
   gSystem->Load("St_geant_Maker");
+  gSystem->Load("St_TLA_Maker");
 }
 void geant()
 {
@@ -26,7 +35,7 @@ void geant()
   // Create the main chain object
   if (! chain) chain = new StChain("bfc");
   //  Create the makers to be called by the current chain
-  St_geom_Maker geom = new St_geom_Maker("geom","run/geant/Run");
+  St_TLA_Maker geom = new St_TLA_Maker("geom","run/geant/Run");
   if (! geant) geant = new St_geant_Maker("geant","event/geant/Event");
   geant->SetNwGEANT(20 000 000);
   //  geant->SetNwPAW(1000000);
