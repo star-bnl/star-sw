@@ -1,7 +1,11 @@
-* $Id: ecalgeo.g,v 1.13 2001/08/29 22:44:54 yqwang Exp $
+* $Id: ecalgeo.g,v 1.14 2001/09/13 18:15:13 yqwang Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
+* Revision 1.14  2001/09/13 18:15:13  yqwang
+* Endcap: West ON, Fpd: East ON, Lgd: East ON
+*
 * Revision 1.13  2001/08/29 22:44:54  yqwang
+*
 * Rotate Top and South Lgd, so their numberings agree with the actual
 * labels.
 *
@@ -125,7 +129,7 @@ Author    Rashid Mehdiyev
 *
 Fill  EMCG                          ! EM EndCAp Calorimeter basic data 
       Version  = 4.1                ! Geometry version 
-      OnOff    = {3,3,3}            ! =0 no, =1 west, =2 east, =3 both for endcap, fpd and PbG		
+      OnOff    = {1,2,2}            ! =0 no, =1 west, =2 east, =3 both for endcap, fpd and PbG		
       ChkvSim  = 0                  ! = 0 de, = 1 Cherenkov simulation for PbG
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Type     = 1                  ! =1 endcap, =2 fpd edcap prototype
