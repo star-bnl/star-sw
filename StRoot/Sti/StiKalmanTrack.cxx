@@ -6,6 +6,8 @@
 #include "StHit.h"
 
 //Sti
+#include "StiToolkit.h"
+#include "Sti/Base/Factory.h"
 #include "StiTrackFinder.h"
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
@@ -408,19 +410,24 @@ int StiKalmanTrack::getMaxPointCount() const
   int nPts = 0;
   if (firstNode)
     {
-      StiKTNBidirectionalIterator it;
-      for (it=begin();it!=end();it++)
-	{
-	  const StiDetector * detector = (*it).getDetector();
-	  if (detector)
-	    {
-	      if (detector->isActive((*it)._p0,(*it)._p1))
-		nPts++;
-	    }
-	  else
-	    nPts++; // vertex have no detector...
-	}
-    }
+			StiKTNBidirectionalIterator it;
+			int k=0;
+      for (it=begin();it!=end();it++,k++)
+				{
+					StiHit* h = (*it).getHit();
+					if (h)
+						{
+							const StiDetector * detector = h->detector();
+							if (detector)
+								{
+									if (detector->isActive((*it)._p0,(*it)._p1))
+										nPts++;
+								}
+							else
+								nPts++; // vertex have no detector...
+						}
+				}
+		}
   return nPts;
 }
 
@@ -758,20 +765,32 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiKalmanTrackNode * sNode=0;
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
+	StiHit localVertex = *vertex;
   sNode = lastNode;
+	localVertex.rotate(sNode->getRefAngle());
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
   tNode->reset();
-  tNode->propagate(sNode, vertex);
-  chi2 = tNode->evaluateChi2(vertex); 
-  if (chi2<pars->maxChi2ForSelection)
-    {
-      tNode->setHit(vertex);
-      tNode->setChi2(chi2);
-      add(tNode);
-      trackExtended = true;
-    }
-  return trackExtended;
+	//  if (tNode->propagate(sNode, vertex))
+  if (tNode->propagate(localVertex.x(),0) )
+		{
+			chi2 = tNode->evaluateChi2(&localVertex); 
+			//cout<<"Chi2 at Vertex:"<<chi2<<endl;
+			if (chi2<20.)// pars->maxChi2ForSelection)
+				{
+					// storing a pointer to the vertex 
+					// should I use localVertex?
+					StiHit * myHit = StiToolkit::instance()->getHitFactory()->getInstance();
+					*myHit = localVertex;
+					tNode->setHit(myHit);
+					tNode->setChi2(chi2);
+					tNode->setDetector(0);
+					add(tNode);
+					trackExtended = true;
+				}
+			return trackExtended;
+		}
+	return false;
 }
 
 bool StiKalmanTrack::find(int direction)

@@ -55,7 +55,8 @@ class StiHit
 public:
     ///Default constructor.
     StiHit();
-    
+    StiHit(const StiHit&);
+    const StiHit& operator=(const StiHit& );
     ///Default destructor.
     ~StiHit();
 
@@ -141,6 +142,7 @@ public:
     ///Set the number of times used
     void setTimesUsed(unsigned int);
     void reset();
+		void rotate(double angle);
     
     friend ostream& operator<<(ostream& os, const StiHit& h);
 private:

@@ -169,7 +169,6 @@ void StiKalmanTrackFinder::clear()
  */
 void StiKalmanTrackFinder::findTracks()
 {
-  cout << "StiKalmanTrackFinder::findTracks() -I- Started" <<endl;
   if (!_trackContainer)
     throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackContainer==0");
 	if (!_trackSeedFinder)
@@ -187,46 +186,38 @@ void StiKalmanTrackFinder::findTracks()
 							track = _trackSeedFinder->next();
 							if (!track) break;
 							track->find();
-							cout << "StiKalmanTrackFinder::findTracks() -I- will cast drawable track"<<endl;
+							//cout << "T: maxpoints:"<< track->getMaxPointCount();
+							//cout << " points:"<< track->getPointCount()<<endl;
 							StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-							cout << "StiKalmanTrackFinder::findTracks() -I- did cast drawable track"<<endl;
 							if (t) t->update();
-							cout << "StiKalmanTrackFinder::findTracks() -I- did track update"<<endl;
 							if (_trackFilter && _trackFilter->filter(track)) 
 								_trackContainer->push_back(track);
 							else
 								_trackContainer->push_back(track);
-							cout << "StiKalmanTrackFinder::findTracks() -I- did push back"<<endl;							
 						}
 					catch (runtime_error & rte)
 						{
 							_messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
 						}
 				}
-				cout << "StiKalmanTrackFinder::findTracks() -I- filling "<<endl;							
-				//if (_eventFiller)
-				//_eventFiller->fillEvent(_event, _trackContainer);
-				cout << "StiKalmanTrackFinder::findTracks() -I- Done with global tracks" <<endl;
+				if (_eventFiller)
+					_eventFiller->fillEvent(_event, _trackContainer);
 				if (_vertexFinder)
 					{
 						StiHit *vertex=0;
-						cout << "StiKalmanTrackFinder::findTracks() -I- calling vertex finder."<<endl;
 						vertex = _vertexFinder->findVertex(_event);
-						cout << "StiKalmanTrackFinder::findTracks() -I- Done finding vertex" <<endl;
 						if (vertex)
 							{
 								extendTracksToVertex(vertex);
-								cout << "StiKalmanTrackFinder::findTracks() -I- Done extending tracks to vertex" <<endl;
-								//if (_eventFiller)
-								//_eventFiller->fillEventPrimaries(_event, _trackContainer);
+								if (_eventFiller)
+								_eventFiller->fillEventPrimaries(_event, _trackContainer);
 							}						
-				}
+					}
 		}
 	catch (runtime_error & rte)
 		{
 			_messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
 		}
-  cout << "StiKalmanTrackFinder::findTracks() -I- Done" <<endl;
 }
   
 /*! Fit all track produced by the track seed finder. 
@@ -286,23 +277,21 @@ void StiKalmanTrackFinder::fitTracks()
 */
 void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 {
-  track = 0;
   for (TrackMap::const_iterator it=_trackContainer->begin(); 
        it!=_trackContainer->end(); 
        ++it) 
     {
-      track = static_cast<StiKalmanTrack*>((*it).second);
       try
-	{
-	  track->extendToVertex(vertex);
-	}
+				{
+					(*it).second->extendToVertex(vertex);
+				}
       catch (runtime_error & rte) 
-	{
-	  _messenger << "SKTF::extendTracksToVertex()"
-		     << "- WARNING - Run Time Error while extending a track to main vertex."<<endl
-		     << "Error Message:" << endl
-		     << rte.what() << endl;
-	}
+				{
+					_messenger << "SKTF::extendTracksToVertex()"
+										 << "- WARNING - Run Time Error while extending a track to main vertex."<<endl
+										 << "Error Message:" << endl
+										 << rte.what() << endl;
+				}
     }
 }
 
@@ -324,7 +313,6 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 			cout <<"StiKalmanTrackFinder::find(StiTrack * t, int direction) -F- track cast failed"<<endl;
 			throw logic_error("SKTF::find()\t - ERROR - dynamic_cast<StiKalmanTrack *>  returned 0");
 		}
-	cout << "OK OK OK OK "<<endl;
   int  nAdded       = 0;
   bool trackDone    = false;
   bool scanningDone = true;
@@ -346,13 +334,11 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 			cout << "StiKalmanTrackFinder::find(StiTrack * t, int direction) -I- sDet==0"<<endl;
 			throw logic_error("SKTF::find(StiTrack*) - FATAL - sDet==0");
 		}
-	cout << "progress...."<<endl;
   tNode   = 0;
   tDet    = 0;
   leadDet = sDet;
   StiKalmanTrackNode testNode;
   StiDetector * currentDet;
-	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
 	_messenger << "SKTF::find(StiTrack * t) -I- searching track"<< endl;
   while (!trackDone) 
     {
@@ -411,6 +397,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 									 testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
 								{
 									StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
+									node->reset();
 									if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
 									*node = testNode;
 									sNode = track->add(node);
@@ -503,10 +490,8 @@ void StiKalmanTrackFinder::findNextTrack()
 					//Redundant check, but it protectes against naive calls
 					if (!track) throw runtime_error("TrackSeedFinder->next() returned 0");
 					track->find();
-					cout << "dyna cast==================================================================="<<endl;
 					StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
 					if (t) t->update();
-					cout << "dyna cast===================================================================done"<<endl;
 					if (_trackFilter && _trackFilter->filter(track)) 
 						_trackContainer->push_back(track);
 					else 

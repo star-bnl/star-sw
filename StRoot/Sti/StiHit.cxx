@@ -8,12 +8,92 @@
 #include "StiPlacement.h"
 
 StiHit::StiHit()
+:  mrefangle(0),
+	 mposition(0),
+	 mx(0),
+	 my(0),
+	 mz(0), 
+	 msxx(0),
+	 msyy(0),
+	 mszz(0),
+	 msxy(0),
+	 msxz(0),
+	 msyz(0),
+	 mTimesUsed(0),
+	 mdetector(0),
+	 msthit(0),
+	 _energy(0)
 {
-    reset();
+	reset();
 }
+
+
+StiHit::StiHit(const StiHit & h) 
+:  mrefangle(h.mrefangle),
+	 mposition(h.mposition),
+	 mx(h.mx),
+	 my(h.my),
+	 mz(h.mz), 
+	 msxx(h.msxx),
+	 msyy(h.msyy),
+	 mszz(h.mszz),
+	 msxy(h.msxy),
+	 msxz(h.msxz),
+	 msyz(h.msyz),
+	 mTimesUsed(h.mTimesUsed),
+	 mdetector(h.mdetector),
+	 msthit(h.msthit),
+	 _energy(h._energy)
+{
+}
+
+const StiHit& StiHit::operator=(const StiHit & h)
+{
+	mrefangle = h.mrefangle;
+	mposition = h.mposition;
+	mx = h.mx;
+	my = h.my;
+	mz = h.mz; 
+	msxx = h.msxx;
+	msyy = h.msyy;
+	mszz = h.mszz;
+	msxy = h.msxy;
+	msxz = h.msxz;
+	msyz = h.msyz;
+	mTimesUsed = h.mTimesUsed;
+	mdetector = h.mdetector;
+	msthit = h.msthit;
+	_energy = h._energy;
+}
+
+
 
 StiHit::~StiHit()
 {}
+
+/// Convenience method to perform a rotation
+/// along the z axis
+void StiHit::rotate(double alpha)
+{
+	double ca = cos(alpha);
+  double sa = sin(alpha);
+	double rxx = ca; double rxy = sa;
+	double ryx =-sa; double ryy = ca;
+	double x = rxx*mx + rxy*my;
+	double y = ryx*mx + ryy*my;
+	mx = x;
+	my = y;
+	// A=R*S
+	double axx = rxx*msxx + rxy*msxy;
+	double axy = rxx*msxy + rxy*msyy;
+	double ayx = ryx*msxx + ryy*msxy;
+	double ayy = ryx*msxy + ryy*msyy;
+	// S=A*Rt
+	msxx = axx*rxx + axy*ryx;
+	msxy = axx*ryx + axy*ryy;
+	//msyx = ayx*rxx + ayy*rxy;
+	msyy = ayx*ryx + axy*ryy;
+}
 
 void StiHit::setError(const StMatrixF& matrix)
 {
