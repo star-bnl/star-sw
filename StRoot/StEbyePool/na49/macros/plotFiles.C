@@ -1,5 +1,12 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Id: plotFiles.C,v 1.2 2002/03/27 21:25:54 posk Exp $
+//
+// Author:        Art Poskanzer, Dec. 2001
+// Description:
 // Plots same histograms from different files produced by vProj.C.
-// Art Poskanzer, Dec. 2001
+//
+///////////////////////////////////////////////////////////////////////////////
 
 void plotFiles(Char_t* part = "pion") {
   Bool_t pion = kFALSE;
@@ -36,7 +43,7 @@ void plotFiles(Char_t* part = "pion") {
   Float_t min;
   Float_t flip;
   Float_t yCM = 2.92;
-  Float_t markerSize = 1.5;
+  Float_t markerSize = 2.0;
 
 //   Char_t* infile[nFiles];
 //   //Char_t temp[30];
@@ -156,6 +163,10 @@ void plotFiles(Char_t* part = "pion") {
     Y[i] = (TH1F*)file[i]->Get(histYName->Data());
     Y[i]->Rebin(2);
     Y[i]->Scale(0.5);
+//     if (!pion) {
+//       Y[i]->Rebin(2);
+//       Y[i]->Scale(0.5);
+//     }
     Pt[i] = (TH1F*)file[i]->Get(histPtName->Data());
     if (!pion) {
       Pt[i]->Rebin(8);
@@ -320,7 +331,11 @@ void plotFiles(Char_t* part = "pion") {
   l.SetTextAngle(0); 
   l.DrawLatex(0.7,0.05,"rapidity" );
   l.SetTextSize(0.04); 
-  l.DrawLatex(0.2,0.2,"p_{t} < 2 GeV/c");
+  if (pion) {
+    l.DrawLatex(0.2,0.2,"p_{t} < 2 GeV/c");
+  } else {
+    l.DrawLatex(0.7,0.2,"p_{t} < 2 GeV/c");
+  }
   l.SetTextSize(0.06); 
 
   l.SetTextColor(kRed); 
@@ -329,9 +344,9 @@ void plotFiles(Char_t* part = "pion") {
     l.SetTextColor(kGreen); 
     l.DrawLatex(0.57,0.6,"no corr."); 
   } else {
-    l.DrawLatex(0.55,0.45,"with corr."); 
+    l.DrawLatex(0.7,0.45,"with corr."); 
     l.SetTextColor(kGreen); 
-    l.DrawLatex(0.6,0.7,"no corr."); 
+    l.DrawLatex(0.55,0.8,"no corr."); 
   }
 
   Char_t outfile[255];
@@ -356,7 +371,7 @@ void plotFiles(Char_t* part = "pion") {
     max = 10.;
     min = -3.;
   } else {
-    max = 15.;
+    max = 10.;
     min = -5.;
   }
   hist->SetMaximum(max);
@@ -365,15 +380,16 @@ void plotFiles(Char_t* part = "pion") {
 
   if (pion) {
     //flowPt[0][0]->Draw("PC");
-    flowPt[0][0]->Fit("o2", "R");
-    flowPt[0][0]->Fit("n2", "R+");
-    flowPt[0][0]->Draw("P");
     flowPt[1][0]->Fit("o2", "R");
     flowPt[1][0]->Fit("n2", "R+");
     flowPt[1][0]->Draw("P");
+    flowPt[0][0]->Fit("o2", "R");
+    flowPt[0][0]->Fit("n2", "R+");
+    flowPt[0][0]->Draw("P");
   } else {
+    flowPt[1][0]->Fit("p2", "R");
+    flowPt[1][0]->Draw("P");
     flowPt[0][0]->Fit("p2", "R");
-    //flowPt[0][0]->Fit("n2", "R+");
     flowPt[0][0]->Draw("P");
   }
 
@@ -392,9 +408,9 @@ void plotFiles(Char_t* part = "pion") {
     l.SetTextColor(kGreen); 
     l.DrawLatex(0.6,0.57,"no corr.");
   } else {
-    l.DrawLatex(0.7,0.4,"with corr."); 
+    l.DrawLatex(0.7,0.25,"with corr."); 
     l.SetTextColor(kGreen); 
-    l.DrawLatex(0.7,0.65,"no corr.");
+    l.DrawLatex(0.7,0.7,"no corr.");
   } 
   
   sprintf(outfile, "%smb_pt.%s", outDirName->Data(), pstype);
@@ -413,3 +429,12 @@ bool Pause() {
 
   return kTRUE;
 }
+
+///////////////////////////////////////////////////////////////////////////
+//
+// $Log: plotFiles.C,v $
+// Revision 1.2  2002/03/27 21:25:54  posk
+// Moved to my directory.
+//
+//
+///////////////////////////////////////////////////////////////////////////
