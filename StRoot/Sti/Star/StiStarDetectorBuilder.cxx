@@ -90,6 +90,7 @@ void StiStarDetectorBuilder::useVMCGeometry() {
   setNSectors(0,12);
   Double_t dPhi = 2*TMath::Pi()/12;
 #endif
+  _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
   for (Int_t i = 1; i < 5; i += 2) {// loop over Be and Steel pipes
     TGeoVolume *pipe = gGeoManager->GetVolume(PipeVolumes[i  ].name);
     TGeoMaterial *pipeMaterial = pipe->GetMaterial();
