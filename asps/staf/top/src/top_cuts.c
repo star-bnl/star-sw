@@ -5,11 +5,11 @@
 #include "dscuts.h"
 
 #define PP printf(
-extern int gDone;
+extern int dsu_gDone;
 
 
 void CutsInit(void) {
-  printf("Initializing cuts.\n"); gDone=0;
+  printf("Initializing cuts.\n"); dsu_gDone=0;
 }
 
 
