@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.7 2004/03/04 21:51:27 ward Exp $
+ * $Id: StTPCReader.cxx,v 1.8 2004/03/10 05:59:04 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.8  2004/03/10 05:59:04  jeromel
+ * Implement SetSequenceMerging(). See comment in St_tpcdaq_Maker
+ *
  * Revision 1.7  2004/03/04 21:51:27  ward
  * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
  *
@@ -53,8 +56,8 @@
 //_____________________________________________________________________________
 StTPCReader::StTPCReader(StDAQReader *daqr,char mergeSequences)
 {
-  mMergeSequences=mergeSequences;
-  ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
+  mMergeSequences=mergeSequences; // won't do much since the entry point is different
+  ptrTPCP=NULL;                   // Herb Oct 2002 for DAQ100.
   fDAQReader = daqr;
   fSector = -1999;
   fTPCImpReader 	= 0;
@@ -231,5 +234,8 @@ int StTPCReader::IsBad(int Sector, int PadRow, int Pad)
   if (!fBadChannelReader) 	return -1;
   return fBadChannelReader->IsBad(PadRow,Pad);
 }
-  
-  
+
+void StTPCReader::SetSequenceMerging (char mergeSequences)
+{
+  mMergeSequences=mergeSequences;
+}
