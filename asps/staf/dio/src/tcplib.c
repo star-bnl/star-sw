@@ -12,8 +12,14 @@ modification history
 DESCRIPTION
 TBS...
 */
-#include <arpa/inet.h>
+				/*aix
+#ifdef aix
+typedef unsigned long u_long;
+typedef unsigned int u_int;
+#endif 
+				aix*/
 #include <sys/types.h>
+#include <arpa/inet.h>
 #ifndef VXWORKS
 #include <sys/time.h>
 #endif
@@ -72,7 +78,7 @@ int *pSocket;
 	remoteAddr.sin_family = htons(AF_INET);
 	remoteAddr.sin_port = htons(serverPort);
 
-	remoteAddr.sin_addr.s_addr = htons(inet_addr(hostName));
+	remoteAddr.sin_addr.s_addr = inet_addr(hostName);
 	if (remoteAddr.sin_addr.s_addr == INET_ADDR_ERROR) {
 		remoteAddr.sin_addr.s_addr = hostGetByName(hostName);
 		if (remoteAddr.sin_addr.s_addr == INET_ADDR_ERROR) {

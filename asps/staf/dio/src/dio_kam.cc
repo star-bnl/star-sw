@@ -496,35 +496,25 @@ int kam_diosockstream_port()
 }
 
 /*-------------------------------------------------------------------*/
-void kam_diosockstream_handshake_(){kam_diosockstream_handshake();}
-int kam_diosockstream_handshake()
+void kam_diosockstream_maxhandshakes_()
+		{kam_diosockstream_maxhandshakes();}
+int kam_diosockstream_maxhandshakes()
 {
    long npars = ku_npar(); /* no. of KUIP param.s */
    char* name = ku_gets();      /* stream name */
-   char* truth = ku_getc();      /* truth value */
+   long count = ku_geti();      /* maximum count value */
 
    dioSockStream* stream;
 
    if( !dio->findSockStream(name, stream) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   switch (truth[0]) {
-   case '-': case '?':
-       if( stream->requiresHandshake() ){
-	  printf("DIO:\tDOES require handshake \n");
-       } else {
-	  printf("DIO:\tDOES NOT require handshake \n");
-       }
-       break;
-   case 'T':
-       stream->requiresHandshake(TRUE);
-       break;
-   case 'F':
-       stream->requiresHandshake(FALSE);
-       break;
-   default:
-       EML_ERROR(KAM_INVALID_BOOLEAN);
-       break;
+   if( count >= 0 ){
+      stream->maxHandshakes(count);
+   }
+   else {
+      printf("DIO:\tWill try %d handshakes \n"
+		,stream->maxHandshakes());
    }
    EML_SUCCESS(STAFCV_OK);
 }

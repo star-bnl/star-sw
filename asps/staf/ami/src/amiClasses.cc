@@ -31,9 +31,13 @@ amiInvoker:: amiInvoker(const char * name, long rank
    }
    myRank = rank;
    myTblSpecs = new char* [myRank];
+   DS_DATASET_T *pTABLE=NULL; char *pDATA=NULL;
    for( int i=0;i<myRank;i++ ){
       myTblSpecs[i] = new char[strlen(specs._buffer[i]) +1];
       strcpy(myTblSpecs[i], specs._buffer[i]);
+//- HACK - should delete each table after creation
+      dsNewTable(&pTABLE,"TABLE",myTblSpecs[i],0,pDATA);
+      pTABLE=NULL; pDATA=NULL;  //- HACK
    }
    myPamFtn = pam;
 }

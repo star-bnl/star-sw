@@ -1,11 +1,71 @@
-# dio/Makefile.control
+# Sample Makefile.control - You should customize this file.
 #
-ASPS := ami dio dui tdm soc
+AIX := AIX
+HPUX := HP-UX
+IRIX := IRIX
+SUN5 := SunOS
+#
+######################################################################
+ifeq ($(IRIX),$(shell uname))
+#
+# Specify the ASPs and PAMs upon which this package depends.
+ASPS := tbr tnt ami dio dui tdm spx soc
 PAMS := pam
 #
-USER_LIBS := -ldsl -lasu
+# Specify special user libraries against which to link.
+USER_LIBS := -ldsu -ldsl -lasu
 #
+# Choose flags controlling make.
 DEBUG := TRUE
 #SHARE := TRUE
-#MOTIF := FALSE
+MOTIF := TRUE
+#
+# Specify which CERN libraries against which to link, or take default.
+CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
+#
+endif
+######################################################################
+#
+######################################################################
+ifeq ($(SUN5),$(shell uname))
+#
+# Specify the ASPs and PAMs upon which this package depends.
+ASPS := tnt ami dio dui tdm spx soc
+PAMS := pam
+#
+# Specify special user libraries against which to link.
+USER_LIBS := -ldsu -ldsl -lasu
+#
+# Choose flags controlling make.
+DEBUG := TRUE
+#SHARE := TRUE
+#MOTIF := TRUE
+#
+# Specify which CERN libraries against which to link, or take default.
+CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib \
+	pawlib graflib grafX11 packlib mathlib kernlib
+#
+endif
+######################################################################
+#
+######################################################################
+ifeq ($(HPUX),$(shell uname))
+#
+# Specify the ASPs and PAMs upon which this package depends.
+ASPS := ami dio dui tdm spx soc
+PAMS := pam
+#
+# Specify special user libraries against which to link.
+USER_LIBS := -ldsl -lasu
+#
+# Choose flags controlling make.
+DEBUG := TRUE
+#SHARE := TRUE
+#MOTIF := TRUE
+#
+# Specify which CERN libraries against which to link, or take default.
+#CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
+#
+endif
+######################################################################
 #

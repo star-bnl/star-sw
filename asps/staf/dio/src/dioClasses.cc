@@ -10,8 +10,8 @@
 
 //:----------------------------------------------- INCLUDES           --
 //- NEEDED FOR openServer() -??
-#include <arpa/inet.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -284,7 +284,7 @@ dioSockStream:: dioSockStream(const char * name, const char * hostName
    myHost = (char*)ASUALLOC(strlen(hostName) +1);
    strcpy(myHost,hostName);
    myPort = port;
-   myRequiresHandshake = TRUE; //-default 
+   myMaxHandshakes = 10; //-default
 }
 
 //----------------------------------
@@ -315,17 +315,13 @@ long dioSockStream::  bufferSize () {
 }
 
 //----------------------------------
-unsigned char dioSockStream:: requiresHandshake () {
-   return myRequiresHandshake;
+void dioSockStream:: maxHandshakes (long count) {
+   if(count >= 0)myMaxHandshakes = count;;
 }
 
 //----------------------------------
-void dioSockStream:: requiresHandshake (unsigned char truth) {
-   if( truth ){
-      myRequiresHandshake = TRUE;
-   } else {
-      myRequiresHandshake = FALSE;
-   }
+long dioSockStream::  maxHandshakes () {
+   return myMaxHandshakes;
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
@@ -368,7 +364,8 @@ STAFCV_T dioSockStream:: requestAcknowledge() {
     }
 //-- client: waiting for acknowledgement
     myXDR.x_op = XDR_DECODE;
-    printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR));
+/*  printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR)); */
+    xdrrec_skiprecord(&myXDR); /* REPLACE ^^^ */
     if (!xdr_bool(&myXDR,&ak)) {
 	perror("client get ack");
 	return STAFCV_BAD;
@@ -439,12 +436,29 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 
 //----------------------------------
 STAFCV_T dioSockStream:: getEvent (tdmDataset* destination) {
-   if( requiresHandshake() ){
-       if( !requestAcknowledge() ){		//-HACK- everytime?
-	  EML_ERROR(NO_ACKNOWLEDGEMENT);
-       }
+   long retrys=0;
+   if( 0 < maxHandshakes() ){
+      if( !requestAcknowledge() ){
+	 if( maxHandshakes() > 1 ){
+	    EML_LOG_ERROR(RETRYING_HANDSHAKE);
+	 }
+	 else {
+	    EML_ERROR(HANDSHAKE_FAILED);
+	 }
+	 while( (!requestAcknowledge()) 
+	 		&& (retrys++ < maxHandshakes())
+	 ){
+	    printf(".");		//- heartbeat();	
+	    if( retrys >= maxHandshakes() ){
+	       printf("\n");
+	       EML_ERROR(HANDSHAKE_FAILED);
+	    }
+	 }
+	 printf("\n");
+      }
    }
-   printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR));
+/* printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR)); */
+   xdrrec_skiprecord(&myXDR); /* REPLACE ^^^ */
    return dioStream::getEvent(destination);
 }
 
