@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.56 2003/10/03 14:02:23 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.57 2003/10/03 16:02:57 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.57  2003/10/03 16:02:57  suaide
+// version changed
+//
 // Revision 1.56  2003/10/03 14:02:23  suaide
 // NULL points initialization fixed
 //
@@ -158,7 +161,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
-  Float_t energyCut[]  = {-1, -1, -1, -1, -1, -1, -1, -1};
+  Float_t energyCut[]  = {-1, -1, 0.07, 0.07, -1, -1, -1, -1};
   Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDETBARREL; i++)
