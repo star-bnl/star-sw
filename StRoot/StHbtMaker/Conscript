@@ -37,7 +37,7 @@ my $PKG = $pkg;
 		  Reader/StStandardHbtEventReader.cxx
 		  Reader/StHbtAsciiReader.cxx
 		  StHbtMaker.cxx
-		 )#; print "src = @src\n";
+		 );# print "src = @src\n";
 my @h_files = qw (StHbtMaker.h
 		  CorrFctn/ExitSepCorrFctn.h
 		  CorrFctn/MinvCorrFctn.h
