@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 1.1 2000/04/05 16:39:27 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 1.2 2000/04/07 12:50:21 dunlop Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 1.1  2000/04/05 16:39:27  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/04/07 12:50:21  dunlop
+ * Fixed clearAndDestroy of StRichSinglePixelCollection mThePixels
  *
+ * MC info restored in classifyHit() member
+ * cut parameters (for decon) added in initializeCutParameters()
+ * startAmplitude set to 0.  This keeps track of the local
  * max of the hit now.
  *
  * Revision 2.1  2000/09/13 21:00:42  lasiuk
@@ -55,10 +58,9 @@ using std::back_inserter;
 
 #include "StThreeVector.hh"
 
-    for(size_t i=0; i<mThePixels.size(); i++) {
-	delete mThePixels[i];
-    }
-    mThePixels.clear();
+#include "StRichClusterAndHitFinder.h"
+
+#include "StRrsMaker/StRichGeometryDb.h"
 #include "StRrsMaker/StRichCoordinates.h"
     mGeometryDb = StRichGeometryDb::getDb(); // Singleton
 StRichClusterAndHitFinder::StRichClusterAndHitFinder()
