@@ -38,8 +38,8 @@
 
       subroutine init
 
-      include 'StSpinMaker/fpd_ntdat.inc'
-      include 'StSpinMaker/fpd_pi0dat.inc'
+#include "fpd_ntdat.inc"
+#include "fpd_pi0dat.inc"
 
 *  Initialize quantities
       esum=0
@@ -59,10 +59,10 @@
 
 *  Fills event histograms required for SMD-based pi0 reconstruction
 
-      include 'StSpinMaker/fpd_ntdat.inc'
-      include 'StSpinMaker/fpd_smdhst.inc'
-      include 'StSpinMaker/fpd_towgain.inc'
-      include 'StSpinMaker/fpd_smdpar.inc'
+#include "fpd_ntdat.inc"
+#include "fpd_smdhst.inc"
+#include "fpd_towgain.inc"
+#include "fpd_smdpar.inc"
 
       character*50 htit
       byte btit(50)
@@ -131,9 +131,9 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 
       implicit none
 
-      include 'StSpinMaker/fpd_ntdat.inc'
-      include 'StSpinMaker/fpd_pi0dat.inc'
-      include 'StSpinMaker/fpd_smd.inc'
+#include "fpd_ntdat.inc"
+#include "fpd_pi0dat.inc"
+#include "fpd_smd.inc"
 
       integer nmax
       real zgam                 ! photon energy sharing
@@ -260,9 +260,9 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
       real zvertex, bbcdiff
       integer run
 
-      include 'StSpinMaker/fpd_smdhst.inc'
-      include 'StSpinMaker/fpd_pi0dat.inc'
-      include 'StSpinMaker/fpd_ntdat.inc'
+#include "fpd_smdhst.inc"
+#include "fpd_pi0dat.inc"
+#include "fpd_ntdat.inc"
 
       real frac
       parameter (frac=0.05)
@@ -335,11 +335,11 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
       real zvertex, bbcdiff
       integer run
 
-      include 'StSpinMaker/fpd_ntdat.inc'
-      include 'StSpinMaker/fpd_pi0dat.inc'
-      include 'StSpinMaker/fpd_smdhst.inc'
-      include 'StSpinMaker/fpd_smdpar.inc'
-      include 'StSpinMaker/fpd_towgain.inc'
+#include "fpd_ntdat.inc"
+#include "fpd_pi0dat.inc"
+#include "fpd_smdhst.inc"
+#include "fpd_smdpar.inc"
+#include "fpd_towgain.inc"
 *
       integer maxns
       parameter (maxns=100)
@@ -523,7 +523,7 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 ***************************************************************
       block data fpdpar
 *----
-      include 'StSpinMaker/fpd_smdpar.inc'
+#include "fpd_smdpar.inc"
 *----Modified parameters to match those used in analysis of simulations
       data smxscl/0.373/  ! h/sqrt(3)+cladding, with h=triangle hght (cm)
       data smyscl/0.373/  ! h/sqrt(3)+cladding, with h=triangle hght (cm)
@@ -586,14 +586,14 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
      $     2.32770 , 3.12094 , 2.00260 , 1.00130 , 0.98830 /
 
 *----
-      include 'StSpinMaker/fpd_smd.inc'
+#include "fpd_smd.inc"
       data smxlo/2.0/     ! lower limit on valid SMX centroid
       data smxhi/58.0/    ! upper limit on valid SMX centroid
       data smylo/2.0/     ! lower limit on valid SMY centroid
       data smyhi/98.0/    ! upper limit on valid SMY centroid
 
 *----
-      include 'StSpinMaker/fpd_towgain.inc'
+#include "fpd_towgain.inc"
       data escal/0.04/          ! north calorimeter energy scale (GeV/ADC cnt)
 *  2-july-2002
 *  Result from high-tower vs mass analysis of fill 2161 using
@@ -611,7 +611,7 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
       end                       ! end of block data fpdpar
 ***************************************************************
       subroutine fit_smd(ihist,ipass)
-      include 'StSpinMaker/fpd_ntdat.inc'
+#include "fpd_ntdat.inc"
 *
 *  This routine performs a shower profile analysis
 *
@@ -959,8 +959,8 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 *
 *  This routine performs a shower profile analysis
 *
-      include 'StSpinMaker/fpd_ntdat.inc'
-      include 'StSpinMaker/fpd_pi0dat.inc'
+#include "fpd_ntdat.inc"
+#include "fpd_pi0dat.inc"
       external fitfunc2
 *
       parameter (maxns=100)
@@ -1164,7 +1164,7 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 *          9   ISTAT code from MINUIT
 *          10  total energy deposited in SMD plane
 *
-      include 'StSpinMaker/fpd_pi0dat.inc'
+#include "fpd_pi0dat.inc"
 
       real sigmax
       real outpar(10)
@@ -1180,7 +1180,7 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 
 ***************************************************************
       subroutine parsav2(np)
-      include 'StSpinMaker/fpd_pi0dat.inc'
+#include "fpd_pi0dat.inc"
       real sigmax
       real outpar(10)
       common/fitsmd/sigmax,outpar,
@@ -1196,8 +1196,8 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 
 ***************************************************************
       function fwhm(npln,npk)
-      include 'StSpinMaker/fpd_pi0dat.inc'
-      include 'StSpinMaker/fpd_ntdat.inc'
+#include "fpd_pi0dat.inc"
+#include "fpd_ntdat.inc"
 
       common/hfpar/param(10)
 
@@ -1245,8 +1245,8 @@ c   *      write(*,*) float(i),float(adc(i+120)),smygain(i),float(adc(i+120))*sm
 *
 *  Books histograms for neutral pion event reconstruction.
 *
-      include 'StSpinMaker/fpd_ntdat.inc'
-      include 'StSpinMaker/fpd_smdhst.inc'
+#include "fpd_ntdat.inc"
+#include "fpd_smdhst.inc"
 
       irun=runnum
 *      write(cpirun,'(i4.4)') irun

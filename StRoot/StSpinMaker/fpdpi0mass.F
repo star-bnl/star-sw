@@ -1,5 +1,5 @@
       subroutine initfpdpi0(filename)
-      include 'StSpinMaker/fpd_ntdat.inc'
+#include "fpd_ntdat.inc"
       character*100 filename
       integer ISTAT
       COMMON /PAWC/ hmem(2000000)
@@ -35,8 +35,8 @@
       end
 
       subroutine fpdpi0mass(adc,iin,rin,result,abbc,tbbc)
-      include "StSpinMaker/fpd_pi0dat.inc"
-      include "StSpinMaker/fpd_ntdat.inc"
+#include "fpd_pi0dat.inc"
+#include "fpd_ntdat.inc"
 
       integer ierr, run
       integer n, t, b
