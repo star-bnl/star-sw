@@ -1,7 +1,24 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.2 2003/04/01 23:45:04 thenry Exp $
+// $Id: StJets.h,v 1.3 2003/05/15 17:48:27 thenry Exp $
 // $Log: StJets.h,v $
+// Revision 1.3  2003/05/15 17:48:27  thenry
+// Previous versions of StJets expected only primary TPC tracks to be used by
+// the jet maker.  That changed with the introduction of EMC points.
+// Therefore, a bug existed in jetParticles, because this function
+// assumed that all the TrackToJetIndices were valid primary TPC track indices.
+// This bug has been fixed, so that if the TrackToJetIndex is greater than
+// the number of primary tracks, that index is skipped in the construction
+// of the StJets::TrackVec.  Therefore, the StJets::jetParticles function NOW
+// does exactly what it did before, completely ignoring EMC Points, even when
+// they contribute to the jet.
+//
+// In addition, a new function was added: jetTrackIndices(), which returns a
+// vector of integers corresponding to TPC track indices with the addition of
+// (EMC Point index + number TPC primary tracks)).  This function then allows
+// us to determine which tracks and which points (their indexes at least) are
+// part of each jet, even if we do not have a correctly filled StppEvent*.
+//
 // Revision 1.2  2003/04/01 23:45:04  thenry
 // Added jet track accessor functions:
 // numTracks, tracksPt, tracksPhi, tracksEta
@@ -46,6 +63,25 @@ class StProtoJet;
 class StppEvent;
 class StJet;
 
+class TrackToJetIndex : public TObject
+{
+public:
+    TrackToJetIndex(int ji=-1, int ti=-1) : mJetIndex(ji), mTrackIndex(ti) {};
+    virtual ~TrackToJetIndex() {};
+    
+    void setJetIndex(int n) {mJetIndex=n;}
+    int jetIndex() const {return mJetIndex;}
+    
+    void setTrackIndex(int n) {mTrackIndex=n;}
+    int trackIndex() const {return mTrackIndex;}
+    
+private:
+    int mJetIndex;
+    int mTrackIndex;
+    
+    ClassDef(TrackToJetIndex,1)
+};
+
 class StJets : public TObject
 {
 public:
@@ -66,6 +102,21 @@ public:
 
     ///Access to a container of the charged-tracks associated with a jet
     TrackVec jetParticles(StppEvent* event, int jetIndex);
+
+    vector<int> jetTrackIndices(int jetIndex)
+      {
+	vector<int> vec;
+	int size = mTrackToJetIndices->GetLast()+1;
+	
+	for (int i=0; i<size; ++i) {
+	  TrackToJetIndex* id = static_cast<TrackToJetIndex*>
+	    ( (*mTrackToJetIndices)[i] );
+	  int trackIndex = id->trackIndex();
+          vec.push_back( trackIndex );
+	}
+	
+	return vec;
+      };
 
 public:
     ///User Interface as per Thomas H's request.  Access jet kinematics based on index:
@@ -100,25 +151,5 @@ private:
 };
 
 //non-members ---------------------
-
-class TrackToJetIndex : public TObject
-{
-public:
-    TrackToJetIndex(int ji=-1, int ti=-1) : mJetIndex(ji), mTrackIndex(ti) {};
-    virtual ~TrackToJetIndex() {};
-    
-    void setJetIndex(int n) {mJetIndex=n;}
-    int jetIndex() const {return mJetIndex;}
-    
-    void setTrackIndex(int n) {mTrackIndex=n;}
-    int trackIndex() const {return mTrackIndex;}
-    
-private:
-    int mJetIndex;
-    int mTrackIndex;
-    
-    ClassDef(TrackToJetIndex,1)
-};
-
 
 #endif
