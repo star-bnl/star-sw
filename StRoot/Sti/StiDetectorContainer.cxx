@@ -108,14 +108,20 @@ void StiDetectorContainer::moveIn()
 	return;
     }
     else {
+	double oldOrder = (*mphi_it)->getOrderKey();
 	--mradial_it;
-	mphi_it = (*mradial_it)->begin();
+	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), oldOrder);
+	if (mphi_it == (*mradial_it)->end()) {
+	    cout <<"StiDetectorContainer::moveIn()\tError:\tFind Phi failed"<<endl;
+	    mphi_it = (*mradial_it)->begin();
+	}
 	return;
     }
 }
 
 void StiDetectorContainer::moveOut()
 {
+    
     ++mradial_it;
     if (mradial_it == mregion->end()) {
 	cout <<"StiDetectorContainer::moveOut()\tNowhere to go"<<endl;
@@ -123,7 +129,12 @@ void StiDetectorContainer::moveOut()
 	return;
     }
     else {
-	mphi_it = (*mradial_it)->begin();
+	double oldOrder = (*mphi_it)->getOrderKey();
+	mphi_it = gFindClosestOrderKey((*mradial_it)->begin(), (*mradial_it)->end(), oldOrder);
+	if (mphi_it == (*mradial_it)->end()) {
+	    cout <<"StiDetectorContainer::moveOut()\tError:\tFind Phi failed"<<endl;
+	    mphi_it = (*mradial_it)->begin();
+	}
 	return;
     }
 }
