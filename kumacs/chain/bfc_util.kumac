@@ -268,6 +268,7 @@ macro bfc_init _
 	    exec l3t_init
 	    exec create_tables_l3
       (ems) exec create_tables_emc#ems
+	    exec init_ems#read
 	    exec init_ems#init
       (jet) exec create_tables_emc#jet
 	    exec init_jet#init
