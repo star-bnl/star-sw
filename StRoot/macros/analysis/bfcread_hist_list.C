@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.14 2000/01/18 16:38:05 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.15 2000/01/19 16:29:51 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.15  2000/01/19 16:29:51  kathy
+// update macros to use default input files in /afs/rhic/star/data/samples
+//
 // Revision 1.14  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
 //
@@ -76,7 +79,7 @@ StIOMaker *IOMk=0;
 
 void bfcread_hist_list(
   const Char_t *MainFile=
-    "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.hist.root",
+    "/afs/rhic/star/data/samples/gstar.hist.root",
   const Char_t *MakerHistDir="QA",
   const Char_t *TopDirTree="bfcTree")
 {

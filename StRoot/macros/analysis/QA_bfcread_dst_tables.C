@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.16 2000/01/05 22:12:03 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.17 2000/01/19 16:29:50 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.17  2000/01/19 16:29:50  kathy
+// update macros to use default input files in /afs/rhic/star/data/samples
+//
 // Revision 1.16  2000/01/05 22:12:03  kathy
 // changed input file to current one
 //
@@ -69,8 +72,8 @@ StChain *chain;
 void QA_bfcread_dst_tables(
  Int_t nevents=1, 
  const char *MainFile=
-  "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
- const char *fname="qa_tables_tfs_lin_wed_y1b.out") {
+  "/afs/rhic/star/data/samples/gstar.dst.root",
+ const char *fname="qa_tables.out") {
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");

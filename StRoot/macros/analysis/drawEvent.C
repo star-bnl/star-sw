@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.6 1999/08/20 22:49:33 fine Exp $
+// $Id: drawEvent.C,v 1.7 2000/01/19 16:29:51 kathy Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.7  2000/01/19 16:29:51  kathy
+// update macros to use default input files in /afs/rhic/star/data/samples
+//
 // Revision 1.6  1999/08/20 22:49:33  fine
 // StChain::Finish() has been removed to keep the last picture on the screen
 //
@@ -172,3 +175,11 @@ void drawEvent(const Int_t nevents=2,
   }
   doEventsQQ(nevents,fileListQQ);
 }
+
+
+
+
+
+
+
+
