@@ -1,10 +1,20 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.15 2000/12/08 20:09:32 horsley Exp $
+ * $Id: StRichTrack.cxx,v 2.16 2000/12/14 19:20:49 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.16  2000/12/14 19:20:49  horsley
+ *  added event run id to dist ntuple,
+ *
+ *  added flag to bit mask in dist ntuple to indictae which checkTrack
+ *  check made entry to ntuple,
+ *
+ *  dist ntuple has global p_vec and not local p_vec
+ *
+ *  commented out StRichTrack pathlength check in constructor
+ *
  *  Revision 2.15  2000/12/08 20:09:32  horsley
  *  updated monte carlo ntuples, member functions in StRichMCTrack, StRichPIDMaker
  *  changed monte carlo double xCorrection = 0 in StRichTrack to xCorrection = 0
@@ -208,9 +218,9 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     double mPathLengthAtPadPlane  = mHelix.pathLength(rp,richNormal);
     
     StThreeVectorD tpcMom;
-    if (mPathLengthAtRadiator<10e10 && mPathLengthAtRadiator>0) {
+    //    if (mPathLengthAtRadiator<10e10 && mPathLengthAtRadiator>0) {
 	tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*kilogauss);	
-    }
+	//}
 
     StThreeVector<double> tpcMomentum(tpcMom.x(),
 				      tpcMom.y(),
@@ -242,7 +252,7 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     cout << "StRichTrack::StRichTrack() (L3)\n";
     cout << "\tWARNING:\n";
     cout << "\tMC flag set.  No xCorrection (px/pz) implemented" << endl;
-    double xCorrection = 0.;
+    xCorrection = 0.;
 #endif
     richTransformedImpactPoint.position().setX(richTransformedImpactPoint.position().x()-xCorrection);
 
@@ -252,7 +262,7 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
     StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
 
-    if (mPathLengthAtPadPlane < 10e10  && mPathLengthAtRadiator>0) {
+    //  if (mPathLengthAtRadiator < 10e10  && mPathLengthAtRadiator>0) {
 
 	globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
 	globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
@@ -265,7 +275,7 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
 	    .setX(localImpactPointAtAnodeWirePlane.position().x()-xCorrection);
 
 	ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,magField*kilogauss);
-    }
+	//}
 
     StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
     momentumTransformation->localMomentum(padPlaneMomentum,mMomentumAtPadPlane);
