@@ -81,40 +81,37 @@ bool StiKalmanTrackFinder::hasMore()
 
 void StiKalmanTrackFinder::doNextAction()
 {
-	try 
-		{
-			StiKalmanTrack* track = 0;
-			if (trackSeedFinder->hasMore())
-				{
-					track = trackSeedFinder->next();
-					if (!track) 
-						{
-							cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "
-									 <<endl;
-						return;
-						}
-					else 
-						{
-							cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"
-									 <<endl;							
-							track->update(); //append to display if drawable	
-							StiKalmanTrackNode * f = track->getFirstNode();
-							StiKalmanTrackNode * ccc = dynamic_cast<StiKalmanTrackNode *>(f->getFirstChild());
-							//fitInward(track->getFirstNode());
-							fitInward(ccc);
-						}
-					
-				}
-			else 
-				{
-					cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
-				}
+    try {
+	StiKalmanTrack* track = 0;
+	if (trackSeedFinder->hasMore())	{ //Redundant check, but it protectes against naive calls
+	    track = trackSeedFinder->next();
+	    if (!track) {
+		cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "
+		     <<endl;
+		return;
+	    }
+	    else {
+		cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"<<endl;
+		StiKalmanTrackNode * f = track->getFirstNode();
+		StiKalmanTrackNode * ccc = dynamic_cast<StiKalmanTrackNode *>(f->getFirstChild());
+		if (ccc==0) {
+		    cout <<"StiKalmanTrackFinder::doNextAction(): ERROR!\ttrack->getFirstChild() Failed! Abort"<<endl;
+		    return;
 		}
-	catch (Exception & e)
-		{
-			cout << "StiKalmanTrackFinder::doNextAction() - Exception: " 
-					 << e << endl;
-		}
+		fitInward(track->getFirstNode());
+		fitInward(ccc);
+		
+		trackContainer->push_back(track);
+		track->update();  //This updates the track on the display
+	    }
+	}
+	else {
+	    cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+	}
+    }
+    catch (Exception & e) {
+	cout << "StiKalmanTrackFinder::doNextAction() - Exception: " << e << endl;
+    }
 }
 
 void StiKalmanTrackFinder::findTracks()
@@ -324,8 +321,9 @@ void StiKalmanTrackFinder::fitInward(StiKalmanTrackNode * node) throw (Exception
   while (pNode->getChildCount()>0)
     {
       cNode = dynamic_cast<StiKalmanTrackNode *>(pNode->getFirstChild());
-      cout << "Child:" <<  *cNode;
+      cout << "Child: " <<  *cNode;
       cDet  = cNode->getHit()->detector();
+      
       pos = cNode->propagate(pNode,cDet);	  // evolve state from pDet to cDet
 			if (pos<0)
 				{
