@@ -278,7 +278,14 @@ row 1
 pads 23
 row 2
 pads 24
-sector 20
+sector 13, time bins 1-10,400-512
+sector 14, time bins 1-10,400-512
+sector 15, time bins 1-10,400-512
+sector 16, time bins 1-10,400-512
+sector 17, time bins 1-10,400-512
+sector 18, time bins 1-10,400-512
+sector 19, time bins 1-10,400-512
+sector 20, time bins 1-10,400-512
 row 43
 pads 33 46
 row 42
@@ -313,3 +320,7 @@ row 2
 pads 75 91 95
 row 1
 pads 26
+sector 21, time bins 1-10,400-512
+sector 22, time bins 1-10,400-512
+sector 23, time bins 1-10,400-512
+sector 24, time bins 1-10,400-512
