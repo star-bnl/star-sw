@@ -34,6 +34,7 @@ sub tableH ($) {
   print OUT "  St_",$stem,"(Text_t *name,Int_t n): St_Table(name,n,sizeof(",$stem,"_st)) {SetType(\"",$stem,"\");}\n";
   print OUT "  ",$stem,"_st *GetTable(Int_t i=0){ return ((",$stem,"_st *)s_Table)+i;}\n";
   print OUT "  ",$stem,"_st &operator[](Int_t i){ assert(i>=0 && i < GetNRows()); return *GetTable(i); }\n";
+  print OUT "  const ",$stem,"_st &operator[](Int_t i) const { assert(i>=0 && i < GetNRows()); return *((const ",$stem,"_st *)(((St_",$stem," *)this)->GetTable(i))); }\n";
   print OUT "\n";
   print OUT "  ClassDef(St_",$stem,",0) //C++ wrapper for <",$stem,"> StAF table\n";
   print OUT "};\n";
