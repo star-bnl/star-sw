@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.13 2004/01/27 18:38:18 jeromel Exp $
+ * $Id: FCFMaker.cxx,v 1.14 2004/02/03 20:05:20 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.14  2004/02/03 20:05:20  jml
+ * *** empty log message ***
+ *
  * Revision 1.13  2004/01/27 18:38:18  jeromel
  * Change SetDAQFlag to overloaded SetMode
  *
@@ -98,7 +101,7 @@
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tpcGain_Table.h"
-#include "tables/St_daq100cl_Table.h"
+#include "StDaqLib/TPC/trans_table.hh"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -395,13 +398,13 @@ Int_t StRTSClientFCFMaker::Make()
   int n_croat_cl = -1;
   if(!ignoreFileClusters)
   {
-    printf("FCFMaker: reading daq file clusters\n");
+    //printf("FCFMaker: reading daq file clusters\n");
     n_daq_file_cl = build_daq_file_clusters();
     printf("FCFMaker: done reading daq file clusters (%d found)\n",n_daq_file_cl);
   }
   if(!ignoreRawData)
   {
-    printf("FCFMaker: calculating clusters from raw data\n");
+    //printf("FCFMaker: calculating clusters from raw data\n");
     n_croat_cl = build_croat_clusters();
     printf("FCFMaker: done calculating clusters from raw data (%d found)\n",n_croat_cl);
   }
@@ -436,9 +439,9 @@ Int_t StRTSClientFCFMaker::Make()
 	mismatch_sector += e;
 	mismatch_tot += e;
 
-// 	if(e != 0) {
-// 	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)\n",s,pr);
-// 	}
+ // 	if(e != 0) {
+//  	  printf("FCFMaker: %d mismatches between daq_file & calculated clusters (s=%d, pr=%d)\n",e,s,pr);
+//  	}
       }
 
       // Do daq file cluster after burner
@@ -551,7 +554,7 @@ Int_t StRTSClientFCFMaker::Make()
 Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_seq_st *seq, int sector)
 {
   int i,j,k;
-  int r,p,s;
+  int r,p;
   int offset;
 
   offset = -1 ;
@@ -566,26 +569,61 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
       offset = (row[i].ipixel +
 		pad[pad_off + j].PadOffset);
 
+//       if((sector == 1) &&
+// 	 (r == 1)) {
+// 	printf("FCF: s=%d r=%d p=%d nseq=%d\n",
+// 	       sector,r,p,pad[pad_off+j].nseq);
+//       }
+
+      int raw_s=0;
+      int merged_s=0;
+
       for(k=0;k<pad[pad_off + j].nseq;k++) {
 	int tb = seq[seq_off+k].m + ((k>=pad[pad_off + j].SeqModBreak) ? 256 : 0);
 	int n = seq[seq_off+k].i;
 
-	s = k;
+// 	if((sector==1) &&
+// 	   (r == 1)) {
+// 	  printf("FCF: (s=%d r=%d p=%d) seq[%d] tb=%d len=%d (m=%d i=%d smb=%d)\n",
+// 		 sector,r,p,k,tb,n+1,seq[seq_off+k].m,seq[seq_off+k].i,pad[pad_off+j].SeqModBreak);
+// 	}
+
+	raw_s = k;
 	
-	if( (r>45) || (p>184) || (s>31) ||
-	    (r<1)  || (p<1)   || (s<0)) {
-	  gMessMgr->Error() << "got an illegal sequence row=" << r << ", pad=" << p << ", seq=" << s << endm;
+	if( (r>45) || (p>184) || (raw_s>31) ||
+	    (r<1)  || (p<1)   || (raw_s<0)) {
+	  gMessMgr->Error() << "got an illegal sequence row=" << r << ", pad=" << p << ", seq=" << raw_s << endm;
 	}
 
-	if(n==0) {
-	  printf("FCFMaker: Got an illegal CPP of length 0 (sector=%d row=%d pad=%d sequence=%d\n",
-		 sector,r,p,s);
+// 	if(n==0) {
+// 	  printf("FCFMaker: Got an illegal CPP of length 0 (sector=%d row=%d pad=%d sequence=%d\n",
+// 		 sector,r,p,raw_s);
+// 	}
+
+	int domerge=0;
+	if(merged_s > 0) {
+	  if(tb == (cpp[r-1].r[p-1][merged_s-1].start_bin + 
+		    cpp[r-1].r[p-1][merged_s-1].length)) {
+	    
+	    // Merging...
+	    domerge = 1;
+	  }
 	}
 
-	cpp[r-1].r[p-1][s].start_bin = tb;
-	cpp[r-1].r[p-1][s].offset = offset;
-	cpp[r-1].r[p-1][s].length = n+1;
+	if(!domerge) {
+	  cpp[r-1].r[p-1][merged_s].start_bin = tb;
+	  cpp[r-1].r[p-1][merged_s].offset = offset;
+	  cpp[r-1].r[p-1][merged_s].length = n+1;
 
+	  merged_s++;
+	}
+	else {
+	  if(cpp[r-1].r[p-1][merged_s-1].length % 31 != 0) {
+	    printf("FCFMaker: What is going on? merging short sequence len=%d\n",cpp[r-1].r[p-1][merged_s-1].length);
+	  }
+
+	  cpp[r-1].r[p-1][merged_s-1].length += n+1;
+	}
 	offset += n+1;
       } 
     }
@@ -754,8 +792,8 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
     if(t0 < 0.0) t0Corr[sector-1][row][pad+1] *= -1 ;
 
 #ifdef FCF_DEBUG_OUTPUT
-    fprintf(ff, "%d %d %d %1.3f %1.3f\n",
-	    sector, row+1, pad+1, gain, t0);
+//     fprintf(ff, "%d %d %d %1.3f %1.3f\n",
+// 	    sector, row+1, pad+1, gain, t0);
 #endif
   }
 }
@@ -1043,9 +1081,18 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 	{
 	  int time = ii + cppRow->r[pp-1][ss].start_bin;
 	  int pnt = ii + cppRow->r[pp-1][ss].offset;
-	  croat_adc[pp][time] = adc[pnt];
 
-	  //printf("s/r/p/t/adc: %d %d %d %d %d\n",sectorIdx,r+1,pp,time,adc[pnt]) ;
+
+	  // The situation is rather stupid:
+	  // tpcdaq maker converts adcs to 10 bits
+	  // fcf requires them in 8 bits even though the 
+	  // FCF_10BIT... flag is set.  Convert back here...
+	  croat_adc[pp][time] = log10to8_table[adc[pnt]];
+
+#ifdef FCF_DEBUG_OUTPUT
+	  if(sector==1 && row==0)
+	    fprintf(ff,"%d %d %d %d %d\n",sector,row+1,pp,time,log10to8_table[adc[pnt]]) ;
+#endif
 	}
       }
     }
@@ -1290,9 +1337,9 @@ int StRTSClientFCFMaker::build_daq_file_clusters()
     }
   }
 
-  for(int s=0;s<24;s++) {
-    printf("FCFMaker: sec=%d clusters=%d read from daq file\n",s+1,ncl_sector[s]);
-  }
+//   for(int s=0;s<24;s++) {
+//     printf("FCFMaker: sec=%d clusters=%d read from daq file\n",s+1,ncl_sector[s]);
+//   }
 
   if(hasClusters == 0)
     return -1;
