@@ -76,14 +76,32 @@ the tower center
       - post=kEEmcZPOST-0.1cm 
       - smd=kEEmcZSMD
 
-\section example Example
-
-\include ttmexample.C
+\section results Matching Results
+EEmcTTMMaker main "product" is a list of EEmcTTMatch'es which in turn is a EEmcTower object plus a list of StMuTrack's that fullfill the above mentioned criteria. 
+One can also ask EEmcTTMMaker to produce a nanodst ROOT file (ndst.root) with a ttm tree which contains four branches: 
+	- matches - list of matches 
+	- info    - a copy of StEventInfo from muDST
+	- summary - a copy of StEventSummary from muDST
+	- trigger - a copy of StMuTriggerIdCollection from muDST
+See also macro readnanodst.C for in Section \ref exampleread for an example how to read nanodst.
 
 Here are some examples of matched tracks (from Run2003)
         \image html  snapshot.jpg "Screen Shot"
         \image html  eemc.gif     "Two track event"
         \image latex eemc.eps     "Two track event" width=10cm
+
+
+
+\section example Example
+\subsection examplecreate Using EEmcTTMMaker
+
+\include ttmexample.C
+
+
+
+\subsection exampleread   Reading Nano DST file
+
+\include readnanodst.C	
      
 
 \section mainremarks Remarks
