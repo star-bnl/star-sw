@@ -56,11 +56,10 @@ memset(&row,0,tableSet->GetRowSize());
     row.pad_err_3mean	 =     0.0152; // additional error 3-pad-cluster, w.mean ;
     row.pad_err_3gauss	 =    0.00057; // additional error 3-pad-cluster, gaussfit ;
     row.z_err	 =       0.01; // parameter for error in z-direction ;
- memcpy(&row.ampslopepath,"\x00",1);// path and name of ampslope database 
- memcpy(&row.ampoffpath,"\x00",1);// path and name of ampoff database 
- memcpy(&row.timeoffpath,"\x00",1);// path and name of timeoff database 
- memcpy(&row.padtranspath,"\x00",1);// path and name of padtrans database 
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
 }
+
+
+
