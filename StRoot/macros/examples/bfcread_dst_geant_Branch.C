@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_geant_Branch.C,v 1.1 2000/04/14 14:36:58 kathy Exp $
+// $Id: bfcread_dst_geant_Branch.C,v 1.2 2000/04/14 14:40:16 kathy Exp $
 // $Log: bfcread_dst_geant_Branch.C,v $
+// Revision 1.2  2000/04/14 14:40:16  kathy
+// put in correct default input data set
+//
 // Revision 1.1  2000/04/14 14:36:58  kathy
 // new example to read and examine 2 different branchs - dst & geant - of DST output
 //
@@ -19,7 +22,7 @@ StChain *chain;
 void bfcread_dst_geant_Branch(
  Int_t nevents=50, 
  const char *MainFile=
- "/star/rcf/test/dev/tfs_redhat61/Wed/year_1h/hc_standard/hc_standard.40_evts.dst.root",
+ "/afs/rhic/star/data/samples/gstar.dst.root",
  const char *fname="qa_dst_geant.out")
 {
 //
