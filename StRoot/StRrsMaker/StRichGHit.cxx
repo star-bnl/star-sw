@@ -1,15 +1,18 @@
 /******************************************************
- * $Id: StRichGHit.cxx,v 1.3 2000/02/08 16:23:43 lasiuk Exp $
+ * $Id: StRichGHit.cxx,v 1.4 2000/02/08 23:50:02 lasiuk Exp $
  *
  * Description:
  *  Implementation of the GHit object.
  *
  ******************************************************
  * $Log: StRichGHit.cxx,v $
- * Revision 1.3  2000/02/08 16:23:43  lasiuk
- * change to class.  Augment constructors.
- * Incorporate system of units
+ * Revision 1.4  2000/02/08 23:50:02  lasiuk
+ * CC5 compatibility needs .c_str() for string printing
  *
+ * Revision 1.5  2000/02/14 01:12:50  lasiuk
+ * keep the track pointer info
+ *
+ * Revision 1.4  2000/02/08 23:50:02  lasiuk
  * CC5 compatibility needs .c_str() for string printing
  *
  * Revision 1.3  2000/02/08 16:23:43  lasiuk
@@ -104,7 +107,7 @@ void StRichGHit::addGlobal(double xx, double yy, double zz)
     os << "q        "  << mQuad << endl;
 void StRichGHit::full(ostream& os = cout) const
 {
-    os << "volume   "  << mVolumeId << endl;
+    os << "XLocal:  "  << mXLocal << endl;
     os << "XGlobal: "  << mXGlobal << endl;
     os << "P:       "  << mP << endl;
     os << "track_p  "  << mTrackp << endl;
