@@ -10,9 +10,9 @@
      
      ami/module/call sca_filter_
         [dst]/dstrack  _
-        [params]/ebye/sca_filter_const _
-	[params]/ebye/sca_switch _
-	[params]/ebye/sca_const _
+        [params]/ebye/sca/sca_filter_const _
+	[params]/ebye/sca/sca_switch _
+	[params]/ebye/sca/sca_const _
 	[data]/ebye/sca/sca_in
 RETURN
  
@@ -23,11 +23,11 @@ MACRO runsca
   macro/global/import *
     
     ami/module/call sca_runsca_
-        [params]/ebye/sca_switch _
-        [params]/ebye/sca_const _
+        [params]/ebye/sca/sca_switch _
+        [params]/ebye/sca/sca_const _
 	[data]/ebye/sca/sca_in _
-	[params]/ebye/sca_ensemble_ave _
-	[params]/ebye/sca_prior _
+	[calib]/ebye/sca/sca_ensemble_ave _
+	[calib]/ebye/sca/sca_prior _
 	[data]/ebye/sca/sca_out
 RETURN
 *********************************************************

@@ -1,3 +1,15 @@
+/* sca_runsca.cc
+ * written 7/98 by D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+ *-----------------------------------------------------------
+ * This is the flow control code that interfaces with staf
+ * It is also being used for root but has not been optimized
+ *   for that application
+ *-----------------------------------------------------------
+ * History:
+ * 8/7/98 L.D. Carr -- modified to take different switches
+ *-----------------------------------------------------------
+ */
+
 #include <stdlib.h>
 #include "sca_runsca.h"
 #include "Dataset.hh"
@@ -24,10 +36,9 @@ long type_of_call sca_runsca_(
   long iret;
   static int callcnt=0;
   printf(" This is call number %d.\n",++callcnt);
-  if(callcnt==20) printf("\007\n");
   if (!sca_switch->makePrior   && 
-      !sca_switch->doAnalysis  &&
-      !sca_switch->useDeltaD ) {
+      !sca_switch->makeEnsembleAve  &&
+      !sca_switch->doAnalysis ) {
     cerr << "Invalid switch values.   Exit " << endl;
     return STAFCV_BAD;
   }
@@ -40,39 +51,70 @@ long type_of_call sca_runsca_(
 	return STAFCV_BAD;
       }
   }
-  if ( !sca_switch->useDeltaD ) {
-    Dataset dataSet(sca_const_h, sca_const,
-		    sca_prior_h, sca_prior,
-		    sca_in_h,    sca_in,
-                    raw_data_name,
-		    sca_data_name );
+  //create the basic object for sca
+  Dataset dataSet(sca_const_h, sca_const,
+		  sca_prior_h, sca_prior,
+		  sca_in_h,    sca_in,
+		  raw_data_name,
+		  sca_data_name );
+  //CalcEntropy is a method common to all options
     iret = dataSet.CalcEntropy();
     if (iret)
       {
 	cerr << "CalcEntropy failed. Exit " << endl;
 	return STAFCV_BAD;
       }
-    if ( sca_switch->doAnalysis )
+  //flow control for prior, ensemble, and analysis begins here
+  if ( sca_switch->makePrior ) {
+    iret = dataSet.fillPrior(sca_prior_h, sca_prior);
+    if (iret)
       {
-	cout<<endl<<"Made it to CalcDimension"<<endl;
-	iret = dataSet.CalcDimension();
-	if (iret)
-	  {
-	    cerr << "CalcDimension failed. Exit " << endl;
-	    return  STAFCV_BAD;
-	  }
+	cerr << "fillPrior failed. Exit " << endl;
+	return  STAFCV_BAD;
       }
-    if ( sca_switch->makePrior) {
-      iret = dataSet.fillPrior(sca_prior_h, sca_prior);
-      if (iret)
-	{
-	  cerr << "fillPrior failed. Exit " << endl;
-	  return  STAFCV_BAD;
-	}
-    }
-  }
+  } //end makePrior option
+  else if ( sca_switch->makeEnsembleAve ) {
+    iret = dataSet.CalcDimension();
+    if (iret)
+      {
+	cerr << "CalcDimension failed. Exit " << endl;
+	return  STAFCV_BAD;
+      }
+    iret = dataSet.fillScaOutTable(sca_ensemble_ave_h, sca_ensemble_ave);
+    if (iret)
+      {
+	cerr << "fillScaOutTable failed. Exit " << endl;
+	return  STAFCV_BAD;
+      }
+  } //end makeEnsemble option
+  //begin doAnalysis option
+  else {
+    iret = dataSet.CalcDimension();
+    if (iret)
+      {
+	cerr << "CalcDimension failed. Exit " << endl;
+	return  STAFCV_BAD;
+      }
+    //Here should be a makeRef method
+    //  -- not yet implemented
+    //iret = dataSet.makeRef(prior and ensemble_ave pointers);
+    if (iret)
+      {
+	cerr << "CalcDimension failed. Exit " << endl;
+	return  STAFCV_BAD;
+      }
+    iret = dataSet.fillScaOutTable(sca_out_h, sca_out);
+    if (iret)
+      {
+	cerr << "fillScaOutTable failed. Exit " << endl;
+	return  STAFCV_BAD;
+      }
+  } //end doAnalysis option
+
   return STAFCV_OK;
-}
+} //end sca_runsca
+
+//define alloc_prior
 long alloc_prior(TABLE_HEAD_ST *sca_prior_h, SCA_PRIOR_ST   *sca_prior) 
 {
   int i;
