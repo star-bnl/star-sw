@@ -93,8 +93,13 @@ ARGUMENTS:
 #define MAX_SECS 24
 #define MAX_ROWS 45
 #define MAX_HITS 100000
+#ifndef TRUE
 #define TRUE  1
+#endif
+#ifndef FALSE
 #define FALSE 0
+#endif
+
 #
 #define tgc_cross_and_dip_ F77_NAME(tgc_cross_and_dip,TGC_CROSS_AND_DIP)
 extern void type_of_call tgc_cross_and_dip_(long *,float *,float *,float *);
