@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.1 2000/01/07 19:22:52 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.2 2000/01/19 15:46:05 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.2  2000/01/19 15:46:05  kathy
+// change default input files to point to ones in /afs/rhic/star/data/samples
+//
 // Revision 1.1  2000/01/07 19:22:52  kathy
 // add bfcread_dstBranch,bfcread_runcoBranch macros to show how to read dst produced from bfc.C and navigate through different branches of the file and find and list table information
 //
@@ -19,7 +22,7 @@ StChain *chain;
 void bfcread_runcoBranch(
  Int_t nevents=1, 
  const char *MainFile=
- "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root")
+"/afs/rhic/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");

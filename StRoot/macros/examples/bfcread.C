@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.20 2000/01/05 22:11:57 kathy Exp $
+// $Id: bfcread.C,v 1.21 2000/01/19 15:46:05 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.21  2000/01/19 15:46:05  kathy
+// change default input files to point to ones in /afs/rhic/star/data/samples
+//
 // Revision 1.20  2000/01/05 22:11:57  kathy
 // changed input file to current one
 //
@@ -70,7 +73,7 @@ TBrowser *brow=0;
 void bfcread(
  Int_t nevents=1, 
  const char *MainFile=
- "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root")
+"/afs/rhic/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");

@@ -1,5 +1,8 @@
-// $Id: Example_read_hist_file_list_draw_ps.C,v 1.4 1999/11/30 20:04:17 kathy Exp $
+// $Id: Example_read_hist_file_list_draw_ps.C,v 1.5 2000/01/19 15:46:05 kathy Exp $
 // $Log: Example_read_hist_file_list_draw_ps.C,v $
+// Revision 1.5  2000/01/19 15:46:05  kathy
+// change default input files to point to ones in /afs/rhic/star/data/samples
+//
 // Revision 1.4  1999/11/30 20:04:17  kathy
 // fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables
 //
@@ -38,7 +41,8 @@
 //  *-*
 //
 
-void Example_read_hist_file_list_draw_ps(const char* filein="Example_read_dst_makehist.root")
+void Example_read_hist_file_list_draw_ps(
+    const char* filein="Example_read_dst_makehist.root")
 {
 
 // open file
