@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.31 2003/09/02 17:59:41 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.32 2004/01/30 21:40:21 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.32  2004/01/30 21:40:21  pruneau
+ * some clean up of the infinite checks
+ *
  * Revision 2.31  2003/09/02 17:59:41  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -78,7 +81,6 @@
 #include <math.h>
 using namespace std;
 
-#include "Sti/Base/Messenger.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -135,7 +137,6 @@ StiMaterial * StiKalmanTrackNode::prevGas = 0;
 StiMaterial * StiKalmanTrackNode::mat = 0;
 StiMaterial * StiKalmanTrackNode::prevMat = 0;
 bool StiKalmanTrackNode::useCalculatedHitError = true;
-//Messenger & StiKalmanTrackNode::MESSENGER = *(Messenger::instance(MessageType::kNodeMessage));
 #define MESSENGER *(Messenger::instance(MessageType::kNodeMessage))
 
 //_____________________________________________________________
@@ -431,13 +432,11 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   if (position<0) 
     return position;
   position = locate(place,sh);
-  //cout <<"SKTN::propagate(pNode,tDet) -I- (2) Position:"<< position<<" Node:"<<*this<<endl;
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
   // Multiple scattering
   if (pars->mcsCalculated)
       propagateMCS(pNode,tDet);
-  //cout <<"SKTN::propagate(pNode,tDet) -I- (3) Position:"<< position<<" Node:"<<*this<<endl;
   return position;
 }
 
@@ -534,7 +533,7 @@ void StiKalmanTrackNode::nudge()
 {
   double deltaX = _hit->x()-_x;
   sinCA2=_p3*(_x+deltaX) - _p2; 
-  MESSENGER << " StiKalmanTrackNode::nudge() -I- sin(CA2):"<<sinCA2<<endl;
+  //cout << " StiKalmanTrackNode::nudge() -I- sin(CA2):"<<sinCA2<<endl;
   if (fabs(sinCA2)>1.) return;
   cosCA2   = ::sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
@@ -612,7 +611,6 @@ void StiKalmanTrackNode::propagateError()
  */
 void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet)
 {  
- 
   double relRadThickness;
   // Half path length in previous node
   double pL1,pL2,pL3,d1,d2,d3,dxEloss;
@@ -639,33 +637,33 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   x0p   = previousNode->getX0();
   d3    = tDet->getMaterial()->getDensity();
   x0    = tDet->getMaterial()->getX0();
+
   if (!finite(d1) ||
       !finite(x0p) ||
       !finite(d3) ||
       !finite(x0))
     {
-      cout << " MAJOR GEOM PROBLEM"
-	   << " d1:"<< d1
-	   << " x0p:"<<x0p
-	   << " d3:"<<d3
-	   << " x0:"<<x0<<endl;
-      throw logic_error("MAJOR GEOM PROBLEM");
+      cout << " StiKalmanTrackNode::propagate() -F- Infinite values detected"
+					 << " d1:"  << d1
+					 << " x0p:" <<x0p
+					 << " d3:"  <<d3
+					 << " x0:"  <<x0<<endl;
+      throw logic_error("StiKalmanTrackNode::propagate() -F- Infinite values detected");
     }
 
   if (pL2> (pL1+pL3)) 
     {
       pL2=pL2-pL1-pL3;
-      //cout<< "pL2':"<<pL2;
       if (dx>0)
-	{
-	  x0Gas = tDet->getGas()->getX0();
-	  d2    = tDet->getGas()->getDensity();
-	}
+				{
+					x0Gas = tDet->getGas()->getX0();
+					d2    = tDet->getGas()->getDensity();
+				}
       else
-	{
-	  x0Gas = previousNode->getGasX0(); 
-	  d2    = previousNode->getGasDensity();
-	}
+				{
+					x0Gas = previousNode->getGasX0(); 
+					d2    = previousNode->getGasDensity();
+				}
       relRadThickness = 0.;
       dxEloss = 0;
       if (x0p>0.) 
@@ -674,38 +672,44 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
 	  dxEloss += d1*pL1;
 	}
       if (x0Gas>0.)
-	{
-	  relRadThickness += pL2/x0Gas;
-	  dxEloss += d2*pL2;
-	}
+				{
+					relRadThickness += pL2/x0Gas;
+					dxEloss += d2*pL2;
+				}
       if (x0>0.)
-	{
-	  relRadThickness += pL3/x0;
-	  dxEloss += d3*pL3;
-	}
+				{
+					relRadThickness += pL3/x0;
+					dxEloss += d3*pL3;
+				}
     }
   else 
     {
       relRadThickness = 0.; 
       dxEloss = 0;
       if (x0p>0.) 
-	{
-	  relRadThickness += pL1/x0p;
-	  dxEloss += d1*pL1;
-	}
+				{
+					relRadThickness += pL1/x0p;
+					dxEloss += d1*pL1;
+				}
       if (x0>0.)
-	{
-	  relRadThickness += pL3/x0;
-	  dxEloss += d3*pL3;
-	}
+				{
+					relRadThickness += pL3/x0;
+					dxEloss += d3*pL3;
+				}
     }
   double pt = getPt();
   if (!finite(pt) || !finite(dxEloss) || !finite(relRadThickness))
     {
-      cout <<" dx:"<<dx<<" x0p:"<<x0p<<" x0:"<<x0<<" x0Gas:"<<x0Gas<<" relRadThick:"<<relRadThickness<<endl;
-      cout << "pt:"<<pt<<" _p4:"<<_p4<<endl;
-      cout << *this;
-      cout << *getDetector();
+			cout << "StiKalmanTrackNode::propagateMCS( ) -F- Infite values detected" <<endl
+					 <<"          dx: "<< dx<<endl
+					 <<"         x0p: "<< x0p<<endl
+					 <<"          x0: "<< x0<<endl
+					 <<"       x0Gas: "<< x0Gas<<endl
+					 <<" relRadThick: "<< relRadThickness<<endl
+					 <<"          pt: "<< pt<<endl
+					 << *this<<endl
+					 << *getDetector()<<endl;
+      throw logic_error("StiKalmanTrackNode::propagateMCS() -F- Infinite values detected");
     }
   double p2=(1.+_p4*_p4)*pt*pt;
   double m=pars->massHypothesis;
@@ -735,59 +739,25 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   double eloss = _elossCalculator->calculate(1.,0.5,m, beta2,5.);
   double fudge = 2.;
   dE = fudge*sign*dxEloss*eloss;
-  if(!finite(dxEloss))
+  if(!finite(dxEloss) || !finite(beta2) || !finite(m) || m==0 || !finite(eloss) || !finite(_p3) || p2==0 )
     {
-      cout << "STKN::propagate() -E- dxEloss is NOT FINITE"<<endl;
+      cout << "STKN::propagate() -E- Null or Infinite values detected" << endl
+					 << "     beta2 : " << beta2
+					 << "   dxEloss : " << dxEloss
+					 << "         m : " << m
+					 << "     eloss : " << _p3
+					 << "        p2 : " << p2
+					 << "  Logic error => ABORT" << endl;
+      throw logic_error("StiKalmanTrackNode::propagate() -F- Infinite values detected. dxEloss!=finite");
     }
-  if (beta2==0)
-    {
-      cout << "beta2==0"<<endl;
-    }
-  if (!finite(beta2))
-    cout << "beta2 is not finite"<<endl;
-  if (!finite(m))
-    cout << "m is not finite"<<endl;
-  if (m==0)
-    cout << "m==0"<<endl;
-  if (!finite(eloss))
-    cout << "eloss is not finite"<<endl;
-  if (!finite(_p3))
-    cout << "_p3 is NOT finite"<<endl;
-  /*if (fabs(getP())<0.2)
-    cout << "MCS: _x:"<<_x<<" dx:"<<dx<<" dxEloss:"<<dxEloss
-	 <<" pt:"<<pt<<" p:"<<::sqrt(p2)<<" E="<<::sqrt(e2)<<" b="
-	 << ::sqrt(beta2)<<endl
-	 << " eloss:"<<eloss<<" dE:"<<dE<<" dE/E="<<dE/::sqrt(e2)
-	 << " correction:"<<(1.- ::sqrt(e2)*dE/p2)
-	 << " pcorr:"<< _p3*(1.- ::sqrt(e2)*dE/p2) << endl;*/
   if (fabs(dE)>0)
     {
       double cc=_p3;
       double correction;
-      if (!finite(_p3)) 
-	{
-	  cout << "STKN::propagate() -E- _p3 is not finite before eloss correction."<<endl;
-	}
       correction =1.- ::sqrt(e2)*dE/p2;
-      if(!finite(correction))
-	{
-	  cout << "STKN::propagate() -E- Correction is not finite"<<endl;
-	  if (p2==0)
-	    cout << "STKN::propagate() -E- p2 ==0"<<endl;
-	  if (!finite(e2))
-	    cout << "STKN::propagate() -E- !finite(e2)"<<endl;
-	  if (!finite(dE))
-	    cout << "STKN::propagate() -E- !finite(dE)"<<endl;
-	  return;
-	}
-      //limit our correction to at most 1% per layer.
       if (correction>1.1) correction = 1.1;
-      if (correction<0.9) correction = 0.9;
+      else if (correction<0.9) correction = 0.9;
       _p3 = _p3 *correction;
-      if (!finite(_p3)) 
-	{
-	  cout << "STKN::propagate() -E- _p3 is not finite after eloss correction."<<endl;
-	}
       _p2 = _p2 + _x*(_p3-cc);
     }
 }
@@ -852,12 +822,8 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
-      //const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
-      //if (!calc)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
-      //calc->calculateError(this);
-      //cout << " _c00:"<<_c00<<" _c10:"<<_c10<<" _c11:"<<_c11<<" ey:"<<::sqrt(eyy)<<" ez:"<<::sqrt(ezz)<<endl;
       r00=_c00+eyy;
-      r01=_c10; r11=_c11+ezz;
+      r01=_c10;     r11=_c11+ezz;
     }
   else
     {
@@ -871,12 +837,6 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dy=hit->y()-_p0;
   double dz=hit->z()-_p1;
   double cc= (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
-  //cout <<"SKTN::evaluateChi2() -I- dy:"<<dy
-  //     <<" dz:"<<dz
-  //     <<" r00:"<<r00
-  //     <<" r01:"<<r01
-  //     <<" r11:"<<r11
-  //     <<" chi2:"<<cc<<endl;
   return cc;
 }
 
@@ -927,21 +887,20 @@ void StiKalmanTrackNode::updateNode()
   double dz  = _hit->z() - _p1;
   double cur = _p3 + k30*dy + k31*dz;
   double eta = _p2 + k20*dy + k21*dz;
-  if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))
-    {
-      //cout <<"PROBLEM !!!! _c00 || _c11 || k30 || k31 are no longer finite!!"<<endl;
-      //throw runtime_error("StiKalmanTrackNode::updateNode() -E- _p3 is no longer finite!!")
-      // ditch the track
-      return;
-    }
-  // update state
+
+	// Check if any of the quantities required to pursue the update
+	// are infinite. If so, it means the tracks cannot be update/propagated
+	// any longer and should therefore be abandoned. Just return. This is 
+	// not a big but rather a feature of the fact a helicoidal tracks!!!
+  if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))  return;
+  // update Kalman state
   _p0 += k00*dy + k01*dz;
   _p1 += k10*dy + k11*dz;
   _p2  = eta;
   _p3  = cur;
   _p4 += k40*dy + k41*dz;
   _sinCA  =  _p3*_x-_p2;
-  // The following test introduces a tracking error but happens
+  // The following test introduces a track propagation error but happens
   // only when the track should be aborted so we don't care...
   if (_sinCA>1.) 
     {
@@ -990,11 +949,11 @@ void StiKalmanTrackNode::updateNode()
 */
 void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
 {
-  MESSENGER << "rotate by alpha:"<< 180.*alpha/3.1415927<<endl;
-  MESSENGER << "         _alpha:"<< 180.*_alpha/3.1415927<<endl;
+  //cout << "rotate by alpha:"<< 180.*alpha/3.1415927<<endl;
+  //cout << "         _alpha:"<< 180.*_alpha/3.1415927<<endl;
   _alpha += alpha;
   _alpha = nice(_alpha);
-  MESSENGER << "    new  _alpha:"<< 180.*_alpha/3.1415927<<endl;
+  //cout << "    new  _alpha:"<< 180.*_alpha/3.1415927<<endl;
   double x1=_x; 
   double y1=_p0; 
   double ca = cos(alpha);
@@ -1003,7 +962,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   _p0=-x1*sa + y1*ca;
   _p2=_p2*ca + (_p3*y1 + _cosCA)*sa;
   _sinCA = _p3*_x - _p2;
-  MESSENGER << " _sinCA:"<<_sinCA<<endl;
+  //cout << " _sinCA:"<<_sinCA<<endl;
   if (_sinCA>1)
     {
       _sinCA = 1.; _cosCA = 0.;
@@ -1051,7 +1010,7 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
   /*
   if (newChild->_hit)
     {
-      MESSENGER<<"SKTN::add(SKTN*) -I- Add node with hit:"<<endl;
+      //cout<<"SKTN::add(SKTN*) -I- Add node with hit:"<<endl;
       newChild->hitCount = hitCount+1;
       newChild->contiguousHitCount = contiguousHitCount+1; 
       if (contiguousHitCount>pars->minContiguousHitCountForNullReset)
@@ -1062,7 +1021,7 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
     }
   else
     {
-      MESSENGER<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl;
+      //cout<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl;
       newChild->nullCount           = nullCount+1;
       newChild->contiguousNullCount = contiguousNullCount+1;
       newChild->hitCount            = hitCount;
@@ -1070,7 +1029,7 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
       }*/ 
   children.push_back(newChild);
   newChild->setParent(this);
-  MESSENGER<< *this<<endl;
+  //cout<< *this<<endl;
 }
 
 /// print to the ostream "os" the parameters of this node 
