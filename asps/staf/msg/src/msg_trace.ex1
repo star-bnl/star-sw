@@ -1,0 +1,35 @@
+
+*	msg_trace.ex1  --  msg "trace" example #1
+
+
+*	Application-specified values:
+*	<Subroutine Name>     CHARACTER*(*)
+
+*	msg fast-reference ID for the trace message:
+	INTEGER IDT1
+	SAVE IDT1       !Keep it static, or it does no good.
+	LOGICAL MSG_Enabled_Trace
+
+	DATA IDT1 /0/   !Always initialize fast-reference IDs to zero.
+
+
+*	Here's how to generate dormant trace messages -- they are skipped
+*	until explicitly activated.  They should almost always be used
+*	with fast-reference IDs (instead of -1), or they may contribute
+*	significantly to CPU usage.
+
+*	  Note:  Use Message inside of a MSG_Enabled_Trace block, since
+*	  MSG_Enabled_Trace does not ever perform msg accounting -- it only tests
+*	  the enabled status of the specified prefix: '<Subroutine Name>-T1'
+*	  If Message_Out is used instead of Message (as would occur inside
+*	  a MSG_Enabled block), then msg accounting is never performed
+*	  for this message.
+*	  If the prefix '<Subroutine Name>-T1' is undefined when this
+*	  call occurs, it gets defined, and is initialized to be Inactive.
+*	  The trace will become active only on a specific request, or
+*	  on any wildcard request AFTER the trace message has been defined.
+
+
+	IF (MSG_Enabled_Trace( '<Subroutine Name>-T1', IDT1 ) ) THEN
+	  CALL Message( '<Subroutine Name>-T1  No Junque, Stuff or Nonsense.', 1, IDT1 )
+	END IF
