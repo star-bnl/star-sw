@@ -1,9 +1,12 @@
-struct g2t_track {          /* G2t_track */ 
-  /* $Id: g2t_track.idl,v 1.7 2005/03/23 22:01:40 potekhin Exp $ */
-  /* $Log: g2t_track.idl,v $
-   * Revision 1.7  2005/03/23 22:01:40  potekhin
-   * Add fst
-   * */
+struct g2t_track {
+  /* $Id: g2t_track.idl,v 1.8 2005/03/24 00:48:54 potekhin Exp $
+     $Log: g2t_track.idl,v $
+     Revision 1.8  2005/03/24 00:48:54  potekhin
+     Killed spurious comment deliminators (CVS fluke)
+
+     Revision 1.7  2005/03/23 22:01:40  potekhin
+     Add fst
+  */
 
 
        long      eg_label;   /* generator track label (0 if GEANT track) */

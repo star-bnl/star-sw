@@ -1,8 +1,11 @@
-/* $Id: g2t_fst_hit.idl,v 1.1 2005/03/23 22:09:13 potekhin Exp $ */
-/* $Log: g2t_fst_hit.idl,v $
- * Revision 1.1  2005/03/23 22:09:13  potekhin
- * Add FST
- * */
+/* $Id: g2t_fst_hit.idl,v 1.2 2005/03/24 00:49:23 potekhin Exp $
+   $Log: g2t_fst_hit.idl,v $
+   Revision 1.2  2005/03/24 00:49:23  potekhin
+   Killed spurious comment deliminators (CVS fluke)
+
+   Revision 1.1  2005/03/23 22:09:13  potekhin
+   Add FST
+*/
 
 struct g2t_fst_hit {        /* G2t_fst_hit */ 
        long      id;           /* Primary key */
