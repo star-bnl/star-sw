@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.15 2004/01/06 21:19:34 jwebb Exp $
+// $Id: StEEmcDbMaker.h,v 1.16 2004/03/19 21:31:53 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -38,12 +38,12 @@ www.star.bnl.gov/STAR/eemc -->How To
 
 // needed DB c-structs  
 class eemcDbADCconf_st;
-//class eemcDbPMTconf_st;
 class eemcDbPMTcal_st;
 class eemcDbPMTped_st;
 class eemcDbPMTstat_st;
 
 class  StEEmcDbIndexItem1;
+class  EEmcDbCrate;
 
 class DbFlavor {
  public:
@@ -56,7 +56,7 @@ class DbFlavor {
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.15 2004/01/06 21:19:34 jwebb Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.16 2004/03/19 21:31:53 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -64,19 +64,25 @@ class StEEmcDbMaker : public StMaker {
   unsigned int myTimeStampUnix;
   void mReloadDb(); ///< reads data from STAR-DB
   void mOptimizeDb(); ///< creates local fast look-up tables
+  void mReloadCrateDb2003(); ///< dedicated access to fiber mapping
+  void mReloadCrateDb2004(); ///< dedicated access to fiber mapping
   
   // pointers to Db tables for each sector
   int *mDbsectorID; //!
   eemcDbADCconf_st  **mDbADCconf; //!
-  //  eemcDbPMTconf_st  **mDbPMTconf; //!
   eemcDbPMTcal_st   **mDbPMTcal ; //!
   eemcDbPMTped_st   **mDbPMTped ; //!
   eemcDbPMTstat_st  **mDbPMTstat ; //!
   
   // local fast look-up tables
+  //old, to be revised,jb
   StEEmcDbIndexItem1   *mDbItem1; //!  assess via logical name (sec/sub/eta)
   StEEmcDbIndexItem1   ***mLookup; //! access via crate/chan
   int mxAdcCrate, mxAdcChan;
+
+  // new, jb
+  EEmcDbCrate *mDbCrate; // maps tw & mapmt crates to DAQ fibers
+  int nCrate; // # of existing crates
 
   void mPrintItems();///< utility
  
@@ -96,6 +102,9 @@ class StEEmcDbMaker : public StMaker {
   void print(int k=0);
   void setSectors(int ,int); ///< limit the range of sectors for speed
   void setThreshold(float x);// defines threshold for ADCs
+
+  const EEmcDbCrate * getCrate(int icr);
+  const  int getNCrate(){return nCrate;}
 
   //
   // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,
@@ -128,7 +137,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.15 2004/01/06 21:19:34 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.16 2004/03/19 21:31:53 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -139,6 +148,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.16  2004/03/19 21:31:53  balewski
+// new EEMC data decoder
+//
 // Revision 1.15  2004/01/06 21:19:34  jwebb
 // Added methods for accessing preshower, postshower and SMD info.
 //

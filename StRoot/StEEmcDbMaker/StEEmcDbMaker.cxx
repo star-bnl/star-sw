@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.21 2004/01/06 21:19:34 jwebb Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.22 2004/03/19 21:31:53 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -15,10 +15,11 @@
 #include "StEEmcDbMaker.h"
 
 #include "StEEmcDbIndexItem1.h"
+#include "StEEmcDbMaker/EEmcDbCrate.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h" 
 
+
 #include "tables/St_eemcDbADCconf_Table.h"
-//#include "tables/St_eemcDbPMTconf_Table.h"
 #include "tables/St_eemcDbPMTcal_Table.h"
 #include "tables/St_eemcDbPMTped_Table.h"
 #include "tables/St_eemcDbPMTstat_Table.h"
@@ -35,9 +36,9 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   mfirstSecID=mlastSecID=mNSector=0;
   myTimeStampDay=0;
   myTimeStampUnix=0;
+
+  // old
   mDbItem1=new  StEEmcDbIndexItem1[EEindexMax];
-
-
   mxAdcCrate=113;  // use 1-6 for tower data, [64-112] for  pre/post/smd of sector 6
   mxAdcChan=192; 
   mLookup=new  StEEmcDbIndexItem1 ** [mxAdcCrate];
@@ -49,6 +50,10 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
     mLookup[i]=new StEEmcDbIndexItem1 * [mxAdcChan];
     memset(mLookup[i],0,sizeof(StEEmcDbIndexItem1 *)*mxAdcChan);// clear all pointers
   }
+
+  // new
+  mDbCrate=0; nCrate=0;
+
   setDBname("Calibrations/eemc");
   
 }
@@ -75,6 +80,9 @@ StEEmcDbMaker::~StEEmcDbMaker(){
     delete [] mDbPMTstat;
     delete [] mDbsectorID;
   }
+
+  //new
+  delete mDbCrate;
 }
 
 //________________________________________________________
@@ -135,9 +143,13 @@ void StEEmcDbMaker::setPreferedFlavor(const char *flavor, const char *nameMask){
 //________________________________________________________
 //________________________________________________________
 Int_t StEEmcDbMaker::Init(){
-  if( mNSector==0) setSectors(5,8);//default
-  setThreshold(1.0);  // defines threshold for ADCs
+  if( mNSector==0) setSectors(1,12);//default
+  setThreshold(5.0);  // defines threshold for ADCs
   // should be +2 or +3 sigma in the future
+
+  setPreferedFlavor("onlped","eemcPMTped"); // tmp for tests,JB
+
+
   return StMaker::Init();
 }
 
@@ -226,6 +238,11 @@ StEEmcDbMaker::getV(int sec, int strip ) {
 }
 
 
+const EEmcDbCrate* StEEmcDbMaker::getCrate(int icr) {
+  assert(icr>=0);
+  assert(icr<nCrate);
+  return mDbCrate+icr;
+}
 
 
 
@@ -268,7 +285,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 
   printf("%s::use(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
 
-
+  
   mReloadDb();
   mOptimizeDb();
 
@@ -276,6 +293,77 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 
   return kStOK;
 }  
+
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+void  StEEmcDbMaker::mReloadCrateDb2003(){
+  nCrate=3;
+  mDbCrate=new EEmcDbCrate[ nCrate];
+  //tmp : valid in 2003 run
+  {
+    int i;
+    char tt[100];
+    for(i=0;i<3;i++) {// tower crates
+      EEmcDbCrate *cr=mDbCrate+i;
+      sprintf(tt,"crT%d",i+3);
+      cr->setName(tt);
+      cr->crID=i+3;
+      cr->crIDswitch= cr->crID;
+      cr->fiber=i;
+      if(i==2)  cr->fiber=3;
+      cr->nch=128;
+      cr->nHead=4;
+    }// end towers
+
+  }
+  //tmp
+  
+}
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+void  StEEmcDbMaker::mReloadCrateDb2004(){
+  nCrate=22;
+  mDbCrate=new EEmcDbCrate[ nCrate];
+  //tmp : valid after  mar 9, ~23:00  R5069111
+  {
+    int i;
+    char tt[100];
+    for(i=0;i<6;i++) {// tower crates
+      EEmcDbCrate *cr=mDbCrate+i;
+      sprintf(tt,"crT%d",i+1);
+      cr->setName(tt);
+      cr->crID=i+1;
+      cr->crIDswitch= i+1;
+      cr->fiber=i;
+      cr->nch=128;
+      cr->nHead=4;
+    }// end towers
+
+    for(i=0;i<16;i++) {// smd/pre/post  crates
+      EEmcDbCrate *cr=mDbCrate+6+i;
+      int sec=5+i/4;
+      int box=1+i%4;
+      sprintf(tt,"%02dS%d",sec,box);
+      if (box==4) sprintf(tt,"%02dP1",sec);
+      cr->setName(tt);
+      cr->crID=84+i;
+      cr->crIDswitch= 84+1;
+      cr->fiber=i+2;
+      if(i==4) cr->fiber=0; // 6S1
+      if(i==7) cr->fiber=1; // 6P1
+      cr->nch=192;
+      cr->nHead=4;
+    }// end smd
+
+
+  }
+  //tmp
+  
+}
 
 //__________________________________________________
 //__________________________________________________
@@ -383,6 +471,15 @@ void  StEEmcDbMaker::mReloadDb  (){
     
   }// end of loop over flavors
  
+
+  //tmp
+  TDatime aa1=mydb->GetDateTime();
+ 
+ if (aa1.GetDate()<20040101)
+   mReloadCrateDb2003();
+ else
+   mReloadCrateDb2004();
+
 }
  
 //__________________________________________________
@@ -392,14 +489,20 @@ void  StEEmcDbMaker::mReloadDb  (){
 void  StEEmcDbMaker::print(int k){
 
   int i;
-  printf("%s::print()\n",GetName());
+  printf("%s::print(%d)\n",GetName(),k);
 
+  printf("Fiber mapping:\n");
+  for(i=0;i<nCrate;i++) mDbCrate[i].print();
+
+  int n=0;
   for(i=0; i<EEindexMax; i++) {
     if(mDbItem1[i].name[0]==0) continue;
-    mDbItem1[i].print();
+    n++;
+    if(k>0) mDbItem1[i].print();
   }
+  printf(" total non-empty DB records is %d\n",n);
 }
-
+ 
 //__________________________________________________
 //__________________________________________________
 //__________________________________________________
@@ -632,6 +735,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.22  2004/03/19 21:31:53  balewski
+// new EEMC data decoder
+//
 // Revision 1.21  2004/01/06 21:19:34  jwebb
 // Added methods for accessing preshower, postshower and SMD info.
 //
