@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.385 2004/03/01 18:46:45 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.386 2004/03/02 15:30:36 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -849,7 +849,6 @@ Bfc_st BFC2[] = {
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
                           ,"St_geant_Maker","libGeom,geometry,St_g2t,StMagF,St_geant_Maker","GEANT",kFALSE},
-  {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1084,6 +1083,7 @@ Bfc_st BFC2[] = {
   {"Display"     ,"","","TbUtil,St_geom",
                        "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
+  {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
