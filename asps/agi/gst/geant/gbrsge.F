@@ -1,7 +1,10 @@
 *
-* $Id: gbrsge.F,v 1.2 1998/04/16 16:59:30 fisyak Exp $
+* $Id: gbrsge.F,v 1.3 2000/01/06 22:09:14 nevski Exp $
 *
 * $Log: gbrsge.F,v $
+* Revision 1.3  2000/01/06 22:09:14  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:30  fisyak
 * 2nd pass with gstar
 *
@@ -169,7 +172,7 @@ C
       GBRSGE=FAC*S
 *
       IF(T.GT.THIGH) THEN
- 
+
        IF(BCUT.LT.THIGH) THEN
         RAT=BCUT/T
         S=(-LOG(RAT)-2./3.+RAT-RAT*RAT/3.)
@@ -181,7 +184,7 @@ C
         RAT=EC/TT
         S=S/(-LOG(RAT)-2./3.+RAT-RAT*RAT/3.)
        ENDIF
- 
+
         GBRSGE=GBRSGE*S
       ENDIF
 *

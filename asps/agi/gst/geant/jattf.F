@@ -5,14 +5,14 @@
 C.
 C.    ******************************************************************
 C.    *                                                                *
-C.    *       calculates attribute position in Volume bank             * 
+C.    *       calculates attribute position in Volume bank             *
 C.    *    ==>Called by : <USER>                                       *
 C.    *                                                                *
 C.    ******************************************************************
 C.
+#include "atcdes/typing.inc"
 #include "geant321/gcbank.inc"
       Integer  JATTF,Jj
-C
       JATTF  =  Jj+int(Q(Jj+5))+6
       end
- 
+

@@ -1,7 +1,10 @@
 *
-* $Id: gxcont.F,v 1.3 1999/10/18 16:45:59 nevski Exp $
+* $Id: gxcont.F,v 1.4 2000/01/06 22:09:18 nevski Exp $
 *
 * $Log: gxcont.F,v $
+* Revision 1.4  2000/01/06 22:09:18  nevski
+* unlimited track/vertex version
+*
 * Revision 1.3  1999/10/18 16:45:59  nevski
 * pgf->g77
 *
@@ -34,9 +37,9 @@
 **    *  - Time control introduced - upon the limit IQUEST(1) is set   *
 **    ******************************************************************
 **
-#include "gst/atcdes/quest.inc"
+#include "zebra/quest.inc"
 #include "geant321/pawc.inc"
-#include "gst/atcdes/sclink.inc"
+#include "atcdes/sclink.inc"
 #include "zebra/zstate.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gctmed.inc"
@@ -53,14 +56,14 @@
       Integer      IGIWTY,IwkSty,i,N,Npar,Npk,Nch,Level,Numb,Imat,
      +             NumHit,Llow,Lhigh,Llo1,Lhig1,Llo2,Lhig2,NW,
      +             Idm,Nlmat,Nmec,Kmec,ItMed,Is1,Is2
-      Real         A,Z,Dens,RadL,AbsL,ParVal,T
+      Real         A,Z,Dens,RadL,AbsL,ParVal,T,TL
       CHARACTER*20 CHNAME
       CHARACTER*4  CHMECA,CHDEB,CHSET,CHDET,CHMECS(20)
       CHARACTER*32 CHPATL,CHPAR,Cmate,Cpart,Cvec
       External     IGIWTY
 * the following is a part of the GCDRAW keeps, forgotten in the official code
-*      Integer      MyISel
-*      real         zzfu,zzfv
+      Integer      MyISel
+      real         zzfu,zzfv
       Logical      First_QNEXT/.true./
 **
 **    ------------------------------------------------------------------
@@ -93,6 +96,11 @@
          CALL KUGETR(T)
          CALL KUGETR(TIMEND)
          CALL KUGETI(ITIME)
+         if (IDEBUG.GT.0) then
+            call TIMEL(TL)
+            WRITE(CHMAIL,'('' *** GXCONT: Time left is '',F12.1)') TL
+            CALL  GMAIL(0,0)
+         endif
 *
       ELSEIF (CHPATL.EQ.'TRACK') THEN
          IF(JXYZ.NE.0)CALL MZDROP(IXDIV,JXYZ,' ')
@@ -286,4 +294,4 @@
       ENDIF
 *
    30 END
- 
+

@@ -1,13 +1,15 @@
 *
-* $Id: gxdraw.F,v 1.2 1998/04/16 16:59:49 fisyak Exp $
+* $Id: gxdraw.F,v 1.3 2000/01/06 22:09:18 nevski Exp $
 *
 * $Log: gxdraw.F,v $
+* Revision 1.3  2000/01/06 22:09:18  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:49  fisyak
 * 2nd pass with gstar
 *
 *
 #include "geant321/pilot.h"
-#if defined(CERNLIB_TEST)
 *CMZ :  1.30/00 17/04/97  17.46.54  by  Pavel Nevski
 *CMZ :  3.21/02 28/03/94  01.30.59  by  S.Giani
 *-- Author :
@@ -20,7 +22,9 @@ C.    *                                                                *
 C.    *       Authors:   R.Brun      **********                        *
 C.    *                  P.Zanarini  **********                        *
 C.    *                  S.Giani     **********                        *
-C.    *                                                                *
+C.    * Modifications:                                                 *
+C.    * PN, 13.06.99:  make volume names case sensetive                *
+C.    *     29.12.99:  extend SET/DET names                            *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -45,11 +49,12 @@ C.
 *SG
       DIMENSION VX(4),VXX(4),VVX(4),XV(4),BX(4)
       DIMENSION VY(4),VYY(4),VVY(4),YV(4),BY(4)
-      CHARACTER*4 NAME,CHNUMB,IDS,IVS,ICS,NNVV,NVNV,MOTH
-      CHARACTER*4 CHNRS,CHAX,YESNO,CENT
-      CHARACTER*4 NOPT,SAMP,KSAM,KLSA
-      CHARACTER*6 MODE
- 
+      CHARACTER*4  NAME,CHNUMB,IDS,NNVV,NVNV,MOTH
+      CHARACTER*80 IVS,ICS
+      CHARACTER*4  CHNRS,CHAX,YESNO,CENT
+      CHARACTER*4  NOPT,SAMP,KSAM,KLSA
+      CHARACTER*6  MODE
+
 *SG
       CHARACTER*80 CHTEXT
       CHARACTER*32 CHPATL,VNAME
@@ -158,7 +163,7 @@ C.
    20       CONTINUE
             NCVOLS=0
          ENDIF
- 
+
       ELSEIF (CHPATL.EQ.'CONE')THEN
          IHOLE=0
 *
@@ -205,7 +210,7 @@ C.
    30       CONTINUE
             NCVOLS=0
          ENDIF
- 
+
       ELSEIF (CHPATL.EQ.'SPHE')THEN
          IHOLE=0
 *
@@ -277,7 +282,8 @@ C.
          CALL KUGETR(Z1MAX)
 *
       ELSEIF (CHPATL.EQ.'DRAW') THEN
-         CALL KUGETC(NAME,NCH)
+         CALL KUGETS(NAME,NCH)
+         CALL AKUGET(NAME)
          CALL KUGETR(GTHETA)
          CALL KUGETR(GPHI)
          CALL KUGETR(GPSI)
@@ -327,7 +333,8 @@ C.
 *
       ELSEIF (CHPATL.EQ.'DCUT') THEN
          IHOLE=0
-         CALL KUGETC(NAME,NCH)
+         CALL KUGETS(NAME,NCH)
+         CALL AKUGET(NAME)
          CALL KUGETC(CHAX,NCH)
          IF (CHAX.EQ.'X'.OR.CHAX.EQ.'1') THEN
             IAX=1
@@ -344,7 +351,8 @@ C.
          CALL GDRAWC(NAME,IAX,CCUT,GU0,GV0,GSCU,GSCV)
 *
       ELSEIF (CHPATL.EQ.'DXCUT') THEN
-         CALL KUGETC(NAME,NCH)
+         CALL KUGETS(NAME,NCH)
+         CALL AKUGET(NAME)
          CALL KUGETR(CUTTHE)
          CALL KUGETR(CUTPHI)
          CALL KUGETR(CCUT)
@@ -404,7 +412,8 @@ C.
 *         JSIM=0
          KXXX=0
          NNPAR=NPAR
-         CALL KUGETC(NAME,NCH)
+         CALL KUGETS(NAME,NCH)
+         CALL AKUGET(NAME)
          CALL UHTOC(IQ(JVOLUM+1),4,MOMO,4)
          CALL KUGETI(LEVMAX)
          IF(NNPAR.EQ.3)THEN
@@ -719,7 +728,8 @@ C.
          IF(IOPTH.NE.0) CALL GDHITS('*','*',0,0,.2)
 *
       ELSEIF (CHPATL.EQ.'PERSP') THEN
-         CALL KUGETC(NAME,NCH)
+         CALL KUGETS(NAME,NCH)
+         CALL AKUGET(NAME)
          CALL KUGETR(DISTT)
          CALL KUGETC(SAMP,NCH)
          IF(DISTT.LT.100.)DISTT=100.
@@ -744,7 +754,7 @@ C.
   130          CONTINUE
             ENDIF
          ENDIF
- 
+
       ELSEIF (CHPATL.EQ.'LENS') THEN
          ZZFV=0.
          IWTY=IGIWTY(1)
@@ -884,4 +894,22 @@ C.
       ENDIF
 *
   999 END
-#endif
+
+      SUBROUTINE AKUGET(NAME)
+      CHARACTER*(*) NAME
+      CHARACTER*4   cnam
+      INTEGER IVOLUM
+#include "geant321/gcbank.inc"
+#include "geant321/gcunit.inc"
+#include "geant321/gcflag.inc"
+      Cnam=NAME
+      IF (JVOLUM.LE.0) RETURN
+      Call GLOOK(NAME,IQ(JVOLUM + 1),IQ(JVOLUM - 1),IVOLUM)
+      IF (IVOLUM.GT.0) RETURN
+      CALL CLTOU(NAME)
+      IF (IDEBUG.LE.0) RETURN
+      IF (CNAM.NE.' ') WRITE(LOUT,1111) Cnam,NAME
+1111  FORMAT (' GXDRAW: ',a,'  not found, converted to ',a)
+      END
+
+

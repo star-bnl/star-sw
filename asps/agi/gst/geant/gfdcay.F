@@ -1,7 +1,10 @@
 *
-* $Id: gfdcay.F,v 1.2 1998/04/16 16:59:31 fisyak Exp $
+* $Id: gfdcay.F,v 1.3 2000/01/06 22:09:15 nevski Exp $
 *
 * $Log: gfdcay.F,v $
+* Revision 1.3  2000/01/06 22:09:15  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:31  fisyak
 * 2nd pass with gstar
 *
@@ -57,4 +60,4 @@ C
 C
   99  RETURN
       END
- 
+

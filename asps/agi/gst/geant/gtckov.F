@@ -1,7 +1,10 @@
 *
-* $Id: gtckov.F,v 1.2 1998/04/16 16:59:44 fisyak Exp $
+* $Id: gtckov.F,v 1.3 2000/01/06 22:09:17 nevski Exp $
 *
 * $Log: gtckov.F,v $
+* Revision 1.3  2000/01/06 22:09:17  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:44  fisyak
 * 2nd pass with gstar
 *
@@ -46,7 +49,7 @@ C.
 #include "geant321/gcnum.inc"
 #include "geant321/gcvol1.inc"
 #include "geant321/gcunit.inc"
- 
+#include "geant321/gcflag.inc"
 #if !defined(CERNLIB_OLD)
 #include "geant321/gcvdma.inc"
 #endif
@@ -59,7 +62,7 @@ C.
 *
       REAL  R(3),U(3),QQ(3),vin(3),u_v(3)
 *     REAL  D(3)
- 
+
       LOGICAL LOLDTR
 #if !defined(CERNLIB_SINGLE)
       PARAMETER (EPSMAC=1.E-6)
@@ -114,7 +117,7 @@ C.    ------------------------------------------------------------------
 *            NMEC = 1
 *            LMEC(1)= 30
 *            GO TO 110
- 
+
             GEKRAT=0.
             IEKBIN=1
          ELSE
@@ -282,7 +285,7 @@ C.    ------------------------------------------------------------------
             ELSE
               INWVOL = 0
             ENDIF
- 
+
          ENDIF
          IF(NUMED1.EQ.NUMED2) THEN
 *
@@ -432,7 +435,7 @@ C.    ------------------------------------------------------------------
    80          NBPUSH = NBPUSH+1
                IF(NBPUSH.GT.MXPUSH) THEN
                   WRITE(CHMAIL,10300) NTMULT,NSTEP
-                  CALL GMAIL(0,0)
+                  IF (IDEBUG.GT.0) CALL GMAIL(0,0)
                   ISTOP=1
                   GOTO 110
                ELSE
@@ -495,7 +498,7 @@ C.    ------------------------------------------------------------------
    90          NBPUSH = NBPUSH+1
                IF(NBPUSH.GT.MXPUSH) THEN
                   WRITE(CHMAIL,10300) NTMULT,NSTEP
-                  CALL GMAIL(0,0)
+                  IF (IDEBUG.GT.0) CALL GMAIL(0,0)
                   ISTOP=1
                   GOTO 110
                ELSE
@@ -570,7 +573,7 @@ C.    ------------------------------------------------------------------
   100             NBPUSH = NBPUSH+1
                   IF(NBPUSH.GT.MXPUSH) THEN
                      WRITE(CHMAIL,10300) NTMULT,NSTEP
-                     CALL GMAIL(0,0)
+                     IF (IDEBUG.GT.0) CALL GMAIL(0,0)
                      ISTOP=1
                      GOTO 110
                   ELSE
@@ -632,9 +635,9 @@ c                     DABS = SQRT(D(1)**2+D(2)**2+D(3)**2)
 c                     VECT(4) = D(1)/DABS
 c                     VECT(5) = D(2)/DABS
 c                     VECT(6) = D(3)/DABS
- 
+
 c ... more generalized formula for refraction ...		nc
- 
+
 		     costp = - cost2
 	             cost_rel=cosd(acosd(cost1)-acosd(cost2))
 		     if(u(1).gt.-1.e-5.and.u(1).lt.1.e-5.and.
@@ -663,7 +666,7 @@ c ... more generalized formula for refraction ...		nc
 	 	      c3p = cost_rel * u_v(1)
 	 	      c4p = c2p/c1p
 	 	      c5p = c3p/c1p
- 
+
 		      vectn3 = (c5p - c5) / (c4 - c4p)
 	 	      vectn2 = vectn3 * c4 + c5
 		      if(vect(4).eq.0.)return
@@ -672,7 +675,7 @@ c ... more generalized formula for refraction ...		nc
 		      vect(4) = vectn1
 		      vect(5) = vectn2
 		      vect(6) = vectn3
- 
+
 c ... end correction					nc
 	 	
 		     PDOTU = -COST2

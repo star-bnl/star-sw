@@ -1,6 +1,9 @@
-* $Id: ggppar.F,v 1.1 1999/03/28 18:54:58 nevski Exp $
+* $Id: ggppar.F,v 1.2 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: ggppar.F,v $
+* Revision 1.2  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.1  1999/03/28 18:54:58  nevski
 * Added a possibility to put TRD1's in TRD1's with negative parameters
 *
@@ -26,8 +29,8 @@ C.    *   Called by : GGDVLP                                           *
 C.    *   Authors   : F.Bruyant, S.Banerjee                            *
 C.    *               (original algorithms from A.McPherson)           *
 C.    *Modifications:                                                  *
-C.    *   FCA:   Added the possibility to put TRD1's in TRD1's with    *
-C.    *          negative parameters                                   *
+C.    *   FCA:  Added the possibility to put TRD1's in TRD1's with     *
+C.    *         negative parameters                                    *
 C.    *                                                                *
 C.    ******************************************************************
 C.

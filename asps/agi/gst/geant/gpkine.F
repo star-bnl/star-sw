@@ -1,7 +1,10 @@
 *
-* $Id: gpkine.F,v 1.1 1998/08/28 14:48:38 nevski Exp $
+* $Id: gpkine.F,v 1.2 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: gpkine.F,v $
+* Revision 1.2  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.1  1998/08/28 14:48:38  nevski
 * interface KINE bank via LgKINE to eliminate 64k limitation
 *
@@ -48,7 +51,7 @@ C
       IF(JKINE.LE.0)GO TO 99
 C
       DO 20 ITRACK=I1,I2
-         JK=LgKINE(JKINE,ITRACK)
+         JK=LgKINE(JKIN,ITRACK)
          IF(JK.NE.0)THEN
             IPART=Q(JK+5)
             JPA=LQ(JPART-IPART)

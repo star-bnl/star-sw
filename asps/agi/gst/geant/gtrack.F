@@ -1,7 +1,10 @@
 *
-* $Id: gtrack.F,v 1.4 1998/06/13 22:04:21 nevski Exp $
+* $Id: gtrack.F,v 1.5 2000/01/06 22:09:18 nevski Exp $
 *
 * $Log: gtrack.F,v $
+* Revision 1.5  2000/01/06 22:09:18  nevski
+* unlimited track/vertex version
+*
 * Revision 1.4  1998/06/13 22:04:21  nevski
 * tracking in MANY corrected once more
 *
@@ -27,8 +30,21 @@ C.    *                                                                *
 C.    *    ==>Called by : GUTRAK                                       *
 C.    *       Authors   : R.Brun, F.Bruyant                            *
 C.    *                                                                *
+C.    * PN, 23.12.99 tracking logic modification summary               *
+C.    * 1. tracking in MANY: after a step is done in a MANY volume     *
+C.    *    it is possible that a new MANY (not in the existing list)   *
+C.    *    is entered and should be added to the list of alternatives  *
+C.    *    A call to GTMEDI does this when necessary                   *
+C.    * 2. trying to fix the same problem C.Giani in 99 release has    *
+C.    *    modified GTXXXX routines forcing there INWVOL=2 even when   *
+C.    *    GINVOL would tell that it is still the same volume.         *
+C.    *    This produces confusing volume re-etrance and double hits ! *
+C.    *    Old (pre-99) GT(muon,elec,hadr,hion) routines are needed    *
+C.    * 3. IWO flag was used only to debug this problem                *
+C.    *                                                                *
 C.    ******************************************************************
 C.
+      implicit none
 #include "geant321/gcbank.inc"
 #include "geant321/gccuts.inc"
 #include "geant321/gcjloc.inc"
@@ -48,12 +64,14 @@ C.
 #if defined(CERNLIB_USRJMP)
 #include "geant321/gcjump.inc"
 #endif
+      LOGICAL       LSAMVL
       COMMON/GCCHAN/LSAMVL
-      LOGICAL LSAMVL
 *
-      DIMENSION CUTS(10),MECA(5,13)
+      Integer   MECA(5,13),NLCUR,JTMN,I,INWOLD,NSTOUT,NMED
+      Real      CUTS(10),CMOD,PMOM,EPSCUR,EPSMAC,PRECOR/0/
+
       EQUIVALENCE (CUTS(1),CUTGAM),(MECA(1,1),IPAIR)
-      SAVE PRECOR
+
 #if !defined(CERNLIB_SINGLE)
       PARAMETER (EPSMAC=1.E-6)
 #endif
@@ -62,7 +80,7 @@ C.
 #endif
 C.
 C.    ------------------------------------------------------------------
-      ISTOP = 0
+      ISTOP  = 0
       EPSCUR = EPSMAC
       NSTOUT = 0
       INWOLD = 0
@@ -156,10 +174,14 @@ C.    ------------------------------------------------------------------
 *       it was exiting from last step, and if it has done this for
 *       more than 5 times, we decrease the precision of tracking
          NSTOUT=NSTOUT+1
+#if defined(CERNLIB_IWO)
+         print *,' GTRACK entering SAME volume NSTOUT=',
+     >             NSTOUT,EPSCUR,VECT
+#endif
          IF(MOD(NSTOUT,5).EQ.0) THEN
             EPSCUR=NSTOUT*EPSMAC
 *            WRITE(CHMAIL,10000)ITRA,ISTAK,NTMULT,NAPART
-*10000          FORMAT(' *** GTRACK *** Boundary loop: track ',
+*10000          FORMAT(' *** GTRAcCK *** Boundary loop: track ',
 *     +         I6,' stack ',I6,' NTMULT ',I8,1X,5A4)
 *            CALL GMAIL(1,0)
 *            WRITE (CHMAIL,10250) IEVENT,IDEVT,(NRNDM(I),I = 1,2)
@@ -258,41 +280,43 @@ C.    ------------------------------------------------------------------
 *
    90 NSTEP = NSTEP +1
       IF (NSTEP.GT.MAXNST) THEN
-         IF (ISTOP.EQ.0) THEN
-            ISTOP = 99
-            IF (IDEBUG.GT.0) THEN
-            NMEC  = NMEC +1
-            LMEC(NMEC) = 30
+        IF (ISTOP.EQ.0) THEN
+          ISTOP = 99
+          NMEC  = NMEC +1
+          LMEC(NMEC) = 30
+
+          IF (IDEBUG.GT.0) THEN
             WRITE(CHMAIL,10200) MAXNST
-            CALL GMAIL(1,0)
-            WRITE(CHMAIL,10250) IEVENT,IDEVT,(NRNDM(I),I = 1,2)
-            CALL GMAIL(0,0)
-            WRITE(CHMAIL,10300)ITRA,ISTAK,NTMULT,(NAPART(I),I=1,5),
-     +      TOFG*1.E9
-            CALL GMAIL(0,1)
 10200       FORMAT(' *** GTRACK *** More than ',I6,
      +             ' steps, tracking abandoned!')
-10250       FORMAT('                IEVENT=',I7,' IDEVT=',I7,
+            CALL GMAIL(1,0)
+
+            WRITE(CHMAIL,10250) IEVENT,IDEVT,(NRNDM(I),I = 1,2)
+10250       FORMAT(16x,'IEVENT=',I7,' IDEVT=',I7,
      +             ' Random Seeds = ',I10,2X,I10)
-10300       FORMAT('                Track',I7,' stack',I7,' NTMULT',
-     +             I9,1X,5A4,1X,'Time of flight ',F10.3,' ns')
-            ENDIF
-         ENDIF
+            CALL GMAIL(0,0)
+
+            WRITE(CHMAIL,10300) ITRA,ISTAK,NTMULT,NAPART,TOFG*1.E9
+10300       FORMAT(16x,'Track',I6,' stack',I6,' NTMULT',
+     +             I8,1X,5A4,'Time of flight ',F10.3,' ns')
+            CALL GMAIL(0,1)
+           ENDIF
+        ENDIF
       ENDIF
 *
 * *** Give control to user at end of each tracking step
 *
+#if defined(CERNLIB_IWO)
+      if (inwvol.eq.2.and.isvol.gt.0) then
+        call ginvol(VECT,isame)
+        print *,'*step*'
+        print *,
+     >' LSAMVL,isame,jsame,ignext,safety,prec,precor,epscur=',
+     >  LSAMVL,isame,jsame,ignext,safety,prec,precor,epscur
+      endif
+#endif
+
       SAFETY = SAFETY -STEP
-#if !defined(CERNLIB_USRJMP)
-      CALL GUSTEP
-#endif
-#if defined(CERNLIB_USRJMP)
-      CALL JUMPT0(JUSTEP)
-#endif
-* - pln - 11/7/94  - add user control over loopers
-      CALL GUSCNTR(PRECOR)
-*
-      IF (ISTOP.NE.0) GO TO 999
 *
 *      Renormalize direction cosines
 *
@@ -303,6 +327,17 @@ C.    ------------------------------------------------------------------
          VECT(5) = VECT(5)*CMOD
          VECT(6) = VECT(6)*CMOD
       ENDIF
+*
+#if !defined(CERNLIB_USRJMP)
+      CALL GUSTEP
+#endif
+#if defined(CERNLIB_USRJMP)
+      CALL JUMPT0(JUSTEP)
+#endif
+C - pln - 11/7/94  - add user control over loopers
+      CALL GUSCNTR(PRECOR)
+*
+      IF (ISTOP.NE.0) GO TO 999
 *
       IF (INWVOL.EQ.0) then
          if (GONLY(NLEVEL).eq.0.and.Safety.le.0.and.Iswit(10).ge.0)

@@ -1,7 +1,10 @@
 *
-* $Id: ggclos.F,v 1.3 1998/12/28 15:51:18 nevski Exp $
+* $Id: ggclos.F,v 1.4 2000/01/06 22:09:15 nevski Exp $
 *
 * $Log: ggclos.F,v $
+* Revision 1.4  2000/01/06 22:09:15  nevski
+* unlimited track/vertex version
+*
 * Revision 1.3  1998/12/28 15:51:18  nevski
 * swap clow<->chigh
 *
@@ -10,7 +13,6 @@
 *
 *
 #include "geant321/pilot.h"
-#if !defined(CERNLIB_OLD)
 *CMZ :          06/04/98  12.37.16  by  Pavel Nevski
 *CMZ :  3.21/04 13/12/94  15.29.27  by  S.Giani
 *-- Author :
@@ -42,6 +44,7 @@ C.    *                                                                *
 C.    *    Modified by S.Giani for automatic initialization of the new *
 C.    *    tracking based on virtual divisions (1993).                 *
 C.    *    PN: reset tmpmax (for CRAY)                                 *
+C.    *    PN: swap clow<->chigh
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
@@ -341,7 +344,6 @@ C.    ------------------------------------------------------------------
                 clow = chigh
                 chigh = chightf
                 iq(jphi2+in)=1
-*
               endif
             elseif(iaxis.eq.6.and.myphif.eq.0)then
              if((chigh-chmoth).gt..01.or.(clmoth-clow).gt..01)then
@@ -653,5 +655,4 @@ C.    ------------------------------------------------------------------
      +        I3,') daughters ; volume sorting not possible !')
 *                                                             END GGCLOS
   999 END
- 
-#endif
+

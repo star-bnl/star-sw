@@ -1,7 +1,10 @@
 *
-* $Id: gheish.F,v 1.3 1999/09/28 14:23:40 nevski Exp $
+* $Id: gheish.F,v 1.4 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: gheish.F,v $
+* Revision 1.4  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.3  1999/09/28 14:23:40  nevski
 * gheisha fixed fro pgf-m transition
 *
@@ -10,7 +13,6 @@
 *
 *
 #include "geant321/pilot.h"
-#if defined(CERNLIB_HADRON)
 *CMZ :          16/12/97  13.31.05  by  Pavel Nevski
 *CMZ :  3.21/02 29/03/94  15.41.38  by  S.Giani
 *-- Author :
@@ -38,59 +40,41 @@ C
 #include "geant321/gsecti.inc"
 #include "geant321/gcunit.inc"
 C --- GHEISHA COMMONS ---
-*KEEP,MXGKGH.
-      PARAMETER (MXGKGH=100)
-*KEEP,/BLANKP.
-      PARAMETER (MXGKPV=MXGKGH)
-      COMMON /VECUTY/ PV(10,MXGKPV)
+#include "geant321/mxgkgh.inc"
+#include "geant321/s_blankp.inc"
+#include "geant321/s_consts.inc"
+#include "geant321/s_event.inc"
+#include "geant321/s_prntfl.inc"
 C
-*KEEP,/CONSTS.
-      COMMON/CONSTS/ PI,TWPI,PIBTW,MP,MPI,MMU,MEL,MKCH,MK0,SMP,SMPI,
-     >               SMU,CT,CTKCH,CTK0,
-     >               ML0,MSP,MS0,MSM,MX0,MXM,CTL0,CTSP,CTSM,CTX0,CTXM,
-     >               RMASS(35),RCHARG(35)
-C
-                     REAL MP,MPI,MMU,MEL,MKCH,MK0,
-     *                    ML0,MSP,MS0,MSM,MX0,MXM
-C
-*KEEP,/EVENT.
-      PARAMETER (MXEVEN=12*MXGKGH)
-      COMMON/EVENT / NSIZE,NCUR,NEXT,NTOT,EVE(MXEVEN)
-C
-*KEEP,/PRNTFL.
-      COMMON/PRNTFL/INBCD,NEWBCD,INBIN,NEWBIN,NPEVT,NEVTP,LPRT,NPRT(10)
-                    LOGICAL LPRT,NPRT
-C
-*KEND.
 C
 C --- "NEVENT" CHANGED TO "KEVENT" IN COMMON /CURPAR/ DUE TO CLASH ---
 C --- WITH VARIABLE "NEVENT" IN GEANT COMMON ---
 C
       PARAMETER (MXGKCU=MXGKGH)
       COMMON /CURPAR /WEIGHT(10),DDELTN,IFILE,IRUN,NEVT,KEVENT,SHFLAG,
-     >                ITHST,ITTOT,ITLST,IFRND,TOFCUT,CMOM(5),CENG(5),
-     >                RS,S,ENP(10),NP,NM,NN,NR,NO,NZ,IPA(MXGKCU),
-     >                ATNO2,ZNO2
+     $                ITHST,ITTOT,ITLST,IFRND,TOFCUT,CMOM(5),CENG(5),
+     $                RS,S,ENP(10),NP,NM,NN,NR,NO,NZ,IPA(MXGKCU),
+     $                ATNO2,ZNO2
 C
 C --- "IPART" CHANGED TO "KPART" IN COMMON /RESULT/ DUE TO CLASH ---
 C --- WITH VARIABLE "IPART" IN GEANT COMMON ---
 C
       COMMON /RESULT/ XEND,YEND,ZEND,RCA,RCE,AMAS,NCH,TOF,PX,PY,PZ,
-     >                USERW,INTCT,P,EN,EK,AMASQ,DELTN,ITK,NTK,KPART,IND,
-     >                LCALO,ICEL,SINL,COSL,SINP,COSP,
-     >                XOLD,YOLD,ZOLD,POLD,PXOLD,PYOLD,PZOLD,
-     >                XSCAT,YSCAT,ZSCAT,PSCAT,PXSCAT,PYSCAT,PZSCAT
+     $                USERW,INTCT,P,EN,EK,AMASQ,DELTN,ITK,NTK,KPART,IND,
+     $                LCALO,ICEL,SINL,COSL,SINP,COSP,
+     $                XOLD,YOLD,ZOLD,POLD,PXOLD,PYOLD,PZOLD,
+     $                XSCAT,YSCAT,ZSCAT,PSCAT,PXSCAT,PYSCAT,PZSCAT
                       REAL NCH,INTCT
 C
 C --- "ABSL(21)" CHANGED TO "ABSLTH(21)" IN COMMON /MAT/ DUE TO CLASH ---
 C --- WITH VARIABLE "ABSL" IN GEANT COMMON ---
 C
       COMMON /MAT/ LMAT,
-     >             DEN(21),RADLTH(21),ATNO(21),ZNO(21),ABSLTH(21),
-     >             CDEN(21),MDEN(21),X0DEN(21),X1DEN(21),RION(21),
-     >             MATID(21),MATID1(21,24),PARMAT(21,10),
-     >             IFRAT,IFRAC(21),FRAC1(21,10),DEN1(21,10),
-     >             ATNO1(21,10),ZNO1(21,10)
+     $             DEN(21),RADLTH(21),ATNO(21),ZNO(21),ABSLTH(21),
+     $             CDEN(21),MDEN(21),X0DEN(21),X1DEN(21),RION(21),
+     $             MATID(21),MATID1(21,24),PARMAT(21,10),
+     $             IFRAT,IFRAC(21),FRAC1(21,10),DEN1(21,10),
+     $             ATNO1(21,10),ZNO1(21,10)
 C
       DIMENSION IPELOS(35)
       SAVE IDEOL
@@ -100,44 +84,18 @@ C --- TRANSFER GEANT CUT-OFFS INTO GHEISHA VALUES ---
       EQUIVALENCE (CUTS(1),CUTGAM)
       DIMENSION RNDM(1)
 C
-*KEEP,PCODIM.
-C --- DIMENSION STMTS. FOR GEANT/GHEISHA PARTICLE CODE CONVERSIONS ---
-C --- KIPART(I)=GHEISHA CODE CORRESPONDING TO GEANT   CODE I ---
-C --- IKPART(I)=GEANT   CODE CORRESPONDING TO GHEISHA CODE I ---
-C
-      DIMENSION KIPART(48),IKPART(35)
-C
-*KEEP,PCODAT.
-C --- DATA STMTS. FOR GEANT/GHEISHA PARTICLE CODE CONVERSIONS ---
-C --- KIPART(I)=GHEISHA CODE CORRESPONDING TO GEANT   CODE I ---
-C --- IKPART(I)=GEANT   CODE CORRESPONDING TO GHEISHA CODE I ---
-C
-      DATA KIPART/
-     >               1,   3,   4,   2,   5,   6,   8,   7,
-     >               9,  12,  10,  13,  16,  14,  15,  11,
-     >              35,  18,  20,  21,  22,  26,  27,  33,
-     >              17,  19,  23,  24,  25,  28,  29,  34,
-     >              35,  35,  35,  35,  35,  35,  35,  35,
-     >              35,  35,  35,  35,  30,  31,  32,  35/
-C
-      DATA IKPART/
-     >               1,   4,   2,   3,   5,   6,   8,   7,
-     >               9,  11,  16,  10,  12,  14,  15,  13,
-     >              25,  18,  26,  19,  20,  21,  27,  28,
-     >              29,  22,  23,  30,  31,  45,  46,  47,
-     >              24,  32,  48/
-C
-*KEND.
+#include "geant321/pcodim.inc"
+#include "geant321/pcodat.inc"
 C
 C --- DENOTE STABLE PARTICLES ACCORDING TO GHEISHA CODE ---
 C --- STABLE : GAMMA, NEUTRINO, ELECTRON, PROTON AND HEAVY FRAGMENTS ---
 C --- WHEN STOPPING THESE PARTICLES ONLY LOOSE THEIR KINETIC ENERGY ---
       DATA IPELOS/
-     >             1,   1,   0,   1,   0,   0,   0,   0,
-     >             0,   0,   0,   0,   0,   1,   0,   0,
-     >             0,   0,   0,   0,   0,   0,   0,   0,
-     >             0,   0,   0,   0,   0,   1,   1,   1,
-     >             0,   0,   1/
+     $             1,   1,   0,   1,   0,   0,   0,   0,
+     $             0,   0,   0,   0,   0,   1,   0,   0,
+     $             0,   0,   0,   0,   0,   0,   0,   0,
+     $             0,   0,   0,   0,   0,   1,   1,   1,
+     $             0,   0,   1/
 C
 C --- LOWERBOUND OF KINETIC ENERGY BIN IN N CROSS-SECTION TABLES ---
       DATA TEKLOW /0.0001/
@@ -189,7 +147,7 @@ C --- SET THE GHEISHA PARTICLE TYPE TO THE ONE OF GEANT ---
 C
       PRINT 8881,IPART,KPART,ISTOP
  8881 FORMAT(' *GHEISH* IPART,KPART = ',2(I3,1X),' ISTOP = ',I3/
-     > ' *GHEISH* ======> PARTICLE TYPES DO NOT MATCH <=======')
+     $ ' *GHEISH* ======> PARTICLE TYPES DO NOT MATCH <=======')
       STOP
 C
  9004 CONTINUE
@@ -226,11 +184,11 @@ C
       SINP=0.0
       COSP=1.0
 C
-      IF (ABS(P) .LE. 1.0E-10) GO TO 101
+      IF (ABS(P) .LE. 1.0E-10) GO TO 1
       SINL=PZ
       COSL=SQRT(ABS(1.0-SINL**2))
 C
- 101  CONTINUE
+ 1    CONTINUE
       CALL GRNDM(RNDM,1)
       PHI=RNDM(1)*TWPI
       IF ((PX .EQ. 0.0) .AND. (PY .EQ. 0.0)) GOTO 3
@@ -479,7 +437,7 @@ C
 C
       IF (NPRT(9)) PRINT 1002,KPART,EK,EN,P,ENP(5),ENP(6),ENP(7)
  1002 FORMAT(' *GHEISH* ENERGY BELOW CUT-OFF FOR GHEISHA PARTICLE ',I3/
-     > ' EK,EN,P,ENP(5),ENP(6),ENP(7) = ',6(G12.5,1X))
+     $ ' EK,EN,P,ENP(5),ENP(6),ENP(7) = ',6(G12.5,1X))
 C
       IF ((KPART .NE. 14) .AND. (KPART .NE. 16)) GO TO 14
       IF (KPART .EQ. 16) GO TO 86
@@ -488,14 +446,14 @@ C --- SLOW PROTON ---
  85   CONTINUE
       IF (NPRT(9)) PRINT 2003,EK,KPART
  2003 FORMAT(' *GHEISH* ROUTINE NUCREC WILL BE CALLED',
-     > ' EK = ',G12.5,' GEV  KPART = ',I3)
+     $ ' EK = ',G12.5,' GEV  KPART = ',I3)
       CALL NUCREC(NOPT,2)
 C
       IF (NOPT .NE. 0) GO TO 50
 C
       IF (NPRT(9)) PRINT 2004,EK,KPART
  2004 FORMAT(' *GHEISH* ROUTINE COSCAT WILL BE CALLED',
-     > ' EK = ',G12.5,' GEV  KPART = ',I3)
+     $ ' EK = ',G12.5,' GEV  KPART = ',I3)
       CALL COSCAT
       GO TO 40
 C
@@ -763,9 +721,9 @@ C --- CHECK KINETIC ENERGY ---
       EDEP=ABS(ENOLD-EN)
       RMASSI=EN-EK
       IF (NPRT(9) .AND. (EN .GT. ENOLD))
-     > PRINT 8888,EDEP,ENOLD,EN,EK,RMASSI
+     $ PRINT 8888,EDEP,ENOLD,EN,EK,RMASSI
  8888 FORMAT(' *GHEISH* EDEP,ENOLD,EN,EK,M = ',5(G12.5,1X)/
-     > ' *GHEISH* =======> EDEP WOULD BE NEGATIVE <========')
+     $ ' *GHEISH* =======> EDEP WOULD BE NEGATIVE <========')
       IF (ISTOP .EQ. 0) DESTEP=DESTEP+EDEP
 C
 C --- RE-INITIALIZE THE PROBABILITY FOR HADRONIC INTERACTION ---
@@ -779,8 +737,8 @@ C
       NVEDUM=KIPART(IPART)
       IF (NPRT(9)) PRINT 1003,NTOT,IPART,KPART,KKPART,NVEDUM
  1003 FORMAT(' *GHEISH* NO SEC. GEN. NTOT,IPART,KPART,KKPART,KIPART = ',
-     > 5(I3,1X)/
-     > ' CURRENT PARTICLE ON THE STACK AGAIN')
+     $ 5(I3,1X)/
+     $ ' CURRENT PARTICLE ON THE STACK AGAIN')
       GO TO 9999
 C
 C *** CURRENT PARTICLE IS NOT THE SAME AS IN THE BEGINNING OR/AND ***
@@ -790,7 +748,7 @@ C
       NVEDUM=KIPART(IPART)
       IF (NPRT(9)) PRINT 1004,NTOT,IPART,KPART,KKPART,NVEDUM
  1004 FORMAT(' *GHEISH* SEC. GEN. NTOT,IPART,KPART,KKPART,KIPART = ',
-     > 5(I3,1X))
+     $ 5(I3,1X))
 C
 C --- INITIAL PARTICLE TYPE HAS BEEN CHANGED ==> PUT NEW TYPE ON ---
 C --- THE GEANT TEMPORARY STACK ---
@@ -895,8 +853,8 @@ C --- ADD PARTICLE TO THE STACK IF STACK NOT YET FULL ---
 C
       IF (NPRT(9)) PRINT 1006,ITY,NGKINE,L,(EVE(INDEX+J),J=1,12)
  1006 FORMAT(' *GHEISH* GEANT PART. ',I3,' ALSO PUT ONTO STACK AT',
-     > ' POS. ',I3/
-     > ' EVE(',I2,') = '/12(1H ,12X,G12.5/))
+     $ ' POS. ',I3/
+     $ ' EVE(',I2,') = '/12(1H ,12X,G12.5/))
 C
  61   CONTINUE
 C
@@ -904,5 +862,4 @@ C
 C --- LIMIT THE VALUE OF NGKINE IN CASE OF OVERFLOW ---
       NGKINE=MIN(NGKINE,MXGKIN)
       END
- 
-#endif
+

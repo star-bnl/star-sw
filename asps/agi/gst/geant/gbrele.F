@@ -1,7 +1,10 @@
 *
-* $Id: gbrele.F,v 1.2 1998/04/16 16:59:29 fisyak Exp $
+* $Id: gbrele.F,v 1.3 2000/01/06 22:09:14 nevski Exp $
 *
 * $Log: gbrele.F,v $
+* Revision 1.3  2000/01/06 22:09:14  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:29  fisyak
 * 2nd pass with gstar
 *
@@ -90,7 +93,7 @@ C.
 C.    ------------------------------------------------------------------
 C.
       GBRELE=0.
- 
+
       IF(BCUT.LE.0.) GOTO 99
 ************************************
       CUTSAV=BCUT
@@ -107,7 +110,7 @@ C.
           TT=T
           EC=BCUT
       ENDIF
- 
+
       E=TT+EMASS
       IF(BCUT.GT.TT) EC=TT
 C
@@ -176,9 +179,9 @@ C
       IF(FAC.LE.0.) GOTO 99
 C
       GBRELE=FAC*S
- 
+
       IF(T.GT.THIGH) THEN
- 
+
        IF(BCUT.LT.THIGH) THEN
         RAT=BCUT/T
         S=(1.-0.5*RAT+2.*RAT*RAT/9.)
@@ -190,7 +193,7 @@ C
         RAT=EC/TT
         S=S/(EC*(1.-0.5*RAT+2.*RAT*RAT/9.))
        ENDIF
- 
+
         GBRELE=GBRELE*S
       ENDIF
 ******************************************
@@ -199,5 +202,5 @@ C
 C
   99  RETURN
       END
- 
- 
+
+

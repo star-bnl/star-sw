@@ -1,13 +1,16 @@
 *
-* $Id: gcalor.F,v 1.2 1998/04/16 16:59:30 fisyak Exp $
+* $Id: gcalor.F,v 1.3 2000/01/06 22:09:14 nevski Exp $
 *
 * $Log: gcalor.F,v $
+* Revision 1.3  2000/01/06 22:09:14  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:30  fisyak
 * 2nd pass with gstar
 *
 *
 #include "geant321/pilot.h"
-#if (defined(CERNLIB_GCALOR))&&(defined(CERNLIB_HADRON))
+#if defined(CERNLIB_GCALOR)
 *CMZ :          25/03/98  17.47.04  by  Pavel Nevski
 *CMZ :  1.04/08 31/08/95  12.01.02  by  Christian Zeitnitz
 *-- Author : Christian Zeitnitz
@@ -44,75 +47,9 @@ C. --- GEANT Commons
 #include "geant321/gccuts.inc"
 #include "geant321/gcflag.inc"
 C --- CALOR - GEANT Interface common
-*KEEP,CALGEA.
-C***************************************************************
-C
-C       CALOR-GEANT Interface common
-C
-C parameters of incident particle :
-C                   IPinc   = particle type a la CALOR
-C                   Einc    = kinetic energy
-C                   Uinc(3) = direction cosines
-C material parameters:
-C                   NCEL    = number of elements in mixture (NMTC)
-C                             GEANT material no. for MICAP
-C                   Amed(I) = mass number
-C                   Zmed(I) = charge number
-C                   Dmed(I) = Atoms/cm**3 * 1E-24
-C                   Hden    = Atoms/cm**3 * 1E-24
-C                             of H-Atoms in mixture
-C
-C particle stack:
-C            NPHETC           = number of particles
-C            Ekinet(1:NPHETC) = kinetic energy of part.
-C            IPCAL(1:NPHETC)  = particle type a la CALOR (extended)
-C            UCAL(1:NPHETC,3) = direction cosines
-C            CALTIM(1:NPHETC) = age of particle (nsec)
-C
-C            ATARGT = A no. of target nucleus
-C            ZTARGT = Z no. of target nucleus
-C
-C return of residual nucleus information
-C            NRECOL  = no. of heavy recoil products
-C            Amed(I) = mass number of residual nucleus
-C            Zmed(I) = charge number "          "
-C            EXmed   = exitation energy of nucleus
-C            ERmed(I)= recoil energy of nucleus
-C            IntCal  = type of interaction (GEANT NAMEC index)
-C return of cross section of hadronic interaction (CALSIG called)
-C            SIG =  x-section
-C
-C set by CALSIG:
-C            ICPROC = -1   undefined
-C                   =  0   NMTC called for cross-section
-C                   =  1   MICAP called for cross-section
-C                   =  2   SKALE(NMTC at 3 GeV) called for cross-section
-C                   =  3   FLUKA called for cross-section
-C            KCALL : same coding as ICPROC, but is only valid after a
-C                    call to GCALOR
-C       18/8/92  C.Zeitnitz University of Arizona
-C****************************************************************
-C
-      PARAMETER(EMAXP  = 3.495)
-      PARAMETER(EMAXPI = 2.495)
-C transition upper limit (GeV) NMTC-FLUKA
-      PARAMETER(ESKALE = 10.0)
-      PARAMETER(MXCP = 300)
-C
-      COMMON/ CALGEA / IPINC  , EINC       , UINC(3)   ,NCEL        ,
-     +                 HDEN   , AMED(100)  , ZMED(100) ,DMED(100)   ,
-     +                 NPHETC ,EKINET(MXCP),IPCAL(MXCP),UCAL(MXCP,3),
-     +                 INTCAL , EXMED      , ERMED(100),SIG         ,
-     +                 CALTIM(MXCP), ICPROC, NRECOL    ,KCALL       ,
-     +                 ATARGT , ZTARGT
-C
-*KEEP,CERRCM.
-      LOGICAL CERRF
-      COMMON/CERRCM/CERRF,IERRU
-*KEEP,CAMASS.
-      REAL*4 XMASS(0:11)
-      COMMON/CMASS/XMASS
-*KEND.
+#include "calgea.inc"
+#include "geant321/cerrcm.inc"
+#include "geant321/camass.inc"
 C
 C  Avogadro number multiplied by 1.E-24
       PARAMETER(XNAVO = 0.60221367)
@@ -139,7 +76,7 @@ C get CALOR particle type
       IF(IPART .LE. 48 )  IPINC = IGECAL(IPART)
 C
 C energy in MeV
- 
+
       EINC   =GEKIN * 1000.0
       UINC(1)=VECT(4)
       UINC(2)=VECT(5)
@@ -431,5 +368,5 @@ C score kinetic energy of recoil nucleus (given in MeV)
 CZ      DESTEP = DESTEP + ERMED * 1.E-3
   170 RETURN
       END
- 
 #endif
+

@@ -1,7 +1,10 @@
 *
-* $Id: gzinit.F,v 1.1 1998/10/31 22:20:02 nevski Exp $
+* $Id: gzinit.F,v 1.2 2000/01/06 22:09:19 nevski Exp $
 *
 * $Log: gzinit.F,v $
+* Revision 1.2  2000/01/06 22:09:19  nevski
+* unlimited track/vertex version
+*
 * Revision 1.1  1998/10/31 22:20:02  nevski
 * initialization for very big GCBANK corrected (sign was flopped)
 *
@@ -102,4 +105,4 @@ C
 C
   99  RETURN
       END
- 
+

@@ -1,7 +1,10 @@
 *
-* $Id: gpvert.F,v 1.1 1998/12/28 15:06:55 nevski Exp $
+* $Id: gpvert.F,v 1.2 2000/01/06 22:09:16 nevski Exp $
 *
 * $Log: gpvert.F,v $
+* Revision 1.2  2000/01/06 22:09:16  nevski
+* unlimited track/vertex version
+*
 * Revision 1.1  1998/12/28 15:06:55  nevski
 * minor format corrections
 *
@@ -24,8 +27,7 @@ C.    *       Author    R.Brun  *********                              *
 C.    *                                                                *
 C.    ******************************************************************
 C.    Modifications
-C.    PN, 23/12/98  formats (>=2000) corrected
-C.
+C.    PN, 23/12/98  format 2000 corrected
 #include "geant321/gcbank.inc"
 #include "geant321/gcnum.inc"
 #include "geant321/gcunit.inc"
@@ -44,7 +46,7 @@ C
       IF(JVERTX.LE.0)GO TO 99
 C
       DO 20 IVERT=I1,I2
-         JV=LQ(JVERTX-IVERT)
+         JV=LgVERT(JVERT,IVERT)
          IF(JV.NE.0)THEN
             TOFGN=Q(JV+4)*1.E+9
             NL=IQ(JV-2)
@@ -88,3 +90,4 @@ C
 C
   99  RETURN
       END
+

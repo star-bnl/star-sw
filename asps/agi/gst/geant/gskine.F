@@ -1,7 +1,10 @@
 *
-* $Id: gskine.F,v 1.3 1999/01/03 03:22:39 nevski Exp $
+* $Id: gskine.F,v 1.4 2000/01/06 22:09:17 nevski Exp $
 *
 * $Log: gskine.F,v $
+* Revision 1.4  2000/01/06 22:09:17  nevski
+* unlimited track/vertex version
+*
 * Revision 1.3  1999/01/03 03:22:39  nevski
 * more then 64K tracks and media names corrected
 *
@@ -29,33 +32,32 @@ C.    *    PN: put all unknown particles as Geantino                   *
 C.    *    PN: create next kine banks if more then 64K tracks          *
 C.    ******************************************************************
 C.
-#include "gst/atcdes/typing.inc"
+#include "atcdes/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gcnum.inc"
 #include "geant321/gcflag.inc"
 #include "geant321/gcpush.inc"
 #include "geant321/gcunit.inc"
-#include "gst/atcdes/quest.inc"
- 
+#include "zebra/quest.inc"
+
       REAL      PLAB(3),BUF(1),P2,AMASS,E
-      INTEGER   LGKINE,IPART,NV,NWBUF,NT,NTI,IER,JV,JPA,JK,JUK,NTG,
-     >          I,J,NFREE,JKIN,NPUSH
+      INTEGER   LGKINE,LGVERT,IPART,NV,NWBUF,NT,NTI,IER,JV,JPA,JK,
+     >          JUK,NTG,I,J,NFREE,JKIN,JVERT,NPUSH
 C.
 C.    ------------------------------------------------------------------
 C.
       CALL AGNEED (IER)
       IF (IER.NE.0)     GO TO 90
- 
+
       IF (NV.LE.0)      GO TO 10
       IF (JVERTX.LE.0)  GO TO 90
       IF (NV.GT.NVERTX) GO TO 90
-      JV = LQ(JVERTX- NV)
-      IF (JV.LE.0)      GO TO 90
+
 C
    10 NT     = NTRACK + 1
       IF (JKINE.EQ.0) THEN
          CALL MZBOOK(IXDIV,JKINE,JKINE,1,'KINE',NCKINE,NCKINE,2,2,0)
-*        IQ(JKINE-5)=0
+         IQ(JKINE-5)=1
       ENDIF
       J   = LgKINE(JKIN,NT)
       NTI = NT-IQ(JKIN+2)
@@ -63,27 +65,28 @@ C
       IF (NTI.GT.64000) then
          CALL MZBOOK(IXDIV,JKIN,JKIN,0,'KINE',NCKINE,NCKINE,2,2,0)
          IQ(JKIN+2)=NTRACK
-*        IQ(JKIN-5)=0
          J   = LgKINE(JKIN,NT)
          NTI = NT-IQ(JKIN+2)
       endif
- 
-      IF(NTI.GT.IQ(JKIN-2)) then
-         NPUSH=min(NPKINE*int(Alog(NT+2.)),64000-IQ(JKIN-2))
+
+      IF (NTI.GT.IQ(JKIN-2)) then
+         NPUSH=min(int(NPKINE*ALOG(NT+2.)),64000-IQ(JKIN-2))
          CALL MZPUSH(IXDIV,JKIN,NPUSH,0,'I')
       ENDIF
-      IF(NTI.GT.IQ(JKIN-2)) THEN
+
+      IF (NTI.GT.IQ(JKIN-2)) THEN
          PRINT *,' GSKINE ERROR: WRONG NTRACK ',NTRACK
          GOTO 90
       ENDIF
 C
-      IF (JPART.LE.0) GO TO 90
+      IF (JPART.LE.0 .OR. IPART.LE.0) GO TO 90
       JPA = 0
       IF (IPART.LE.IQ(JPART-2)) JPA = LQ(JPART- IPART)
-      IF (JPA.LE.0)             JPA = LQ(JPART- 48)
- 
+
+      Amass  = 0
+      if (JPA.GT.0) AMASS  = Q(JPA + 7)
+
       P2     = PLAB(1)**2 + PLAB(2)**2 + PLAB(3)**2
-      AMASS  = Q(JPA + 7)
       E      = SQRT(P2 + AMASS*AMASS)
 C
 C            Store kinematics in JKINE
@@ -91,6 +94,7 @@ C
       NTRACK = NT
       IQ(JKIN+1)=NTRACK
       CALL MZBOOK(IXDIV,JK,JKIN,-NTI,'KINE',1,1,8,3,0)
+      IQ (JK-5) = NT
       Q(JK + 1) = PLAB(1)
       Q(JK + 2) = PLAB(2)
       Q(JK + 3) = PLAB(3)
@@ -100,7 +104,7 @@ C
 C
 C            Copy user words
 C
-      IF(NWBUF.GT.0)THEN
+      IF (NWBUF.GT.0) THEN
          CALL MZBOOK(IXDIV,JUK,JK,-1,'KINU',0,0,NWBUF,3,0)
          IQ(JUK-5)=NT
 C
@@ -112,11 +116,11 @@ C
 C
 C            Connect track NT to vertex NV
 C
-      IF(NV.GT.0)THEN
-         JV = LQ(JVERTX- NV)
-         NTG = Q(JV + 7)
-         NFREE=IQ(JV-1)-7-NTG
-         IF(NFREE.LE.0)CALL MZPUSH(IXDIV,JV,0,max(2,NTG/5),'I')
+      IF (NV.GT.0) THEN
+         JV    = LgVERT(JVERT,NV)
+         NTG   = Q(JV + 7)
+         NFREE = IQ(JV-1)-7-NTG
+         IF(NFREE.LE.0) CALL MZPUSH(IXDIV,JV,0,max(2,NTG/5),'I')
          Q(JV + NTG + 8) = NT
          Q(JV + 7) = NTG + 1
       ENDIF
@@ -128,4 +132,6 @@ C
   90  NT = 0
   99  RETURN
       END
- 
+
+
+

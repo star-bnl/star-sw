@@ -1,7 +1,10 @@
 *
-* $Id: gxphys.F,v 1.2 1998/04/16 16:59:49 fisyak Exp $
+* $Id: gxphys.F,v 1.3 2000/01/06 22:09:19 nevski Exp $
 *
 * $Log: gxphys.F,v $
+* Revision 1.3  2000/01/06 22:09:19  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:49  fisyak
 * 2nd pass with gstar
 *
@@ -25,7 +28,7 @@
 **    * - ITCKOV and ILABS correlated as in GFFGO                      *
 **    ******************************************************************
 **
-#include "gst/atcdes/typing.inc"
+#include "atcdes/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gcphys.inc"
 #include "geant321/gccuts.inc"

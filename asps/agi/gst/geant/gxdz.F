@@ -1,7 +1,10 @@
 *
-* $Id: gxdz.F,v 1.2 1998/04/16 16:59:49 fisyak Exp $
+* $Id: gxdz.F,v 1.3 2000/01/06 22:09:19 nevski Exp $
 *
 * $Log: gxdz.F,v $
+* Revision 1.3  2000/01/06 22:09:19  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:49  fisyak
 * 2nd pass with gstar
 *
@@ -35,13 +38,14 @@ C.
       CHARACTER*32  CHPATL
       CHARACTER*255 DOCFIL
       CHARACTER*10  CHTOP
-      CHARACTER*12  CHTDIR
+      CHARACTER*12  CHTDIR,CWD
       CHARACTER*12  CDEF/'detm.rz'/
       LOGICAL       EXST
 C.
 C.    ------------------------------------------------------------------
 C.
       CALL KUPATL(CHPATL,NPAR)
+      CALL RZCDIR(CWD,'R')
       INQUIRE  (FILE='detm.rz',EXIST=EXST)
 *
       IF(CHPATL.EQ.'SHOW')THEN
@@ -81,21 +85,17 @@ C.
          DOCFIL=' '
          CALL KUGETC(DOCFIL,NCH)
          NCH=MAX(NCH,1)
-#endif
-#if (defined(CERNLIB_UNIX))&&(defined(CERNLIB_DZDOC))
          CALL CUTOL(DOCFIL(1:NCH))
-#endif
-#if defined(CERNLIB_DZDOC)
          If (NCH.le.1 .and. EXST) Then
             DOCFIL=CDEF
             NCH=LENOCC(CDEF)
          EndIf
-         CHOPT='IN'
+         CHOPT='INC'
          IWDISP=1
          IWMETA=0
          ILOCNR=1
          CHTOP =' '
-         CHTDIR=' '
+         CHTDIR='//RZDOC'
          IF(DOCFIL.NE.' ') THEN
             CALL GXLUNF(61, 3, IFREE)
             IF(IFREE.NE.0) THEN
@@ -118,36 +118,33 @@ C.
             CLOSE(IFREE)
             LUNIT(IFREE)=0
          ENDIF
+*
 #endif
 #if !defined(CERNLIB_DZDOC)
-*
          WRITE(CHMAIL,10000)
          CALL GMAIL(0,0)
 10000    FORMAT(' *** GXDZ *** : Sorry, command not available',
      +          ' in this implementation')
 #endif
+
       ELSEIF (CHPATL.EQ.'DISP') THEN
 #if defined(CERNLIB_DZDOC)
          CALL KUGETC(BNAME,NCH)
          DOCFIL=' '
          CALL KUGETC(DOCFIL,NCH)
          NCH=MAX(NCH,1)
-#endif
-#if (defined(CERNLIB_UNIX))&&(defined(CERNLIB_DZDOC))
          CALL CUTOL(DOCFIL(1:NCH))
-#endif
-#if defined(CERNLIB_DZDOC)
          If (NCH.le.1 .and. EXST) Then
             DOCFIL=CDEF
             NCH=LENOCC(CDEF)
          EndIf
          CALL KUGETI(NUMBER)
-         CHOPT='N'
+         CHOPT='NC'
          IWDISP=1
          IWMETA=0
          ILOCNR=1
          CHTOP =' '
-         CHTDIR=' '
+         CHTDIR='//RZDOC'
          IF (LZLOC(IXSTOR,BNAME,NUMBER).GT.0) THEN
             IF(DOCFIL.NE.' ') THEN
                CALL GXLUNF(61, 3, IFREE)
@@ -174,27 +171,24 @@ C.
                LUNIT(IFREE)=0
             ENDIF
          ENDIF
+*
 #endif
 #if !defined(CERNLIB_DZDOC)
-*
          WRITE(CHMAIL,10000)
          CALL GMAIL(0,0)
 #endif
+
       ELSEIF (CHPATL.EQ.'DIRZ') THEN
 #if defined(CERNLIB_DZDOC)
-         DOCFIL=CDEF
+         DOCFIL=' '
          CALL KUGETC(DOCFIL,NCH)
          NCH=MAX(NCH,1)
-#endif
-#if (defined(CERNLIB_UNIX))&&(defined(CERNLIB_DZDOC))
          CALL CUTOL(DOCFIL(1:NCH))
-#endif
-#if defined(CERNLIB_DZDOC)
          If (NCH.le.1 .and. EXST) Then
             DOCFIL=CDEF
             NCH=LENOCC(CDEF)
          EndIf
-         CHOPT='N'
+         CHOPT='NC'
          IWDISP=1
          IWMETA=0
          ILOCNR=1
@@ -210,4 +204,5 @@ C.
 #endif
       ENDIF
 *
-  999 END
+  999 CALL RZCDIR(CWD,'R')
+      END

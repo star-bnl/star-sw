@@ -1,7 +1,10 @@
 *
-* $Id: higclu.F,v 1.2 1998/10/24 04:59:39 nevski Exp $
+* $Id: higclu.F,v 1.3 2000/01/06 22:09:19 nevski Exp $
 *
 * $Log: higclu.F,v $
+* Revision 1.3  2000/01/06 22:09:19  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/10/24 04:59:39  nevski
 * corrections from Federico Carminati
 *
@@ -28,13 +31,15 @@ C
 C A SIMPLE TWO CLUSTER MODEL IS USED
 C THIS SHOULD BE SUFFICIENT FOR LOW ENERGY INTERACTIONS
 C
+* Modifications:
+* PN, 04/06/98 - poor man solution (SIDE was undefined)
+* FC, 01/09/98 - a better solution
 C
 #include "geant321/s_defcom.inc"
 #include "geant321/s_genio.inc"
 C
       REAL NUCSUP
       DIMENSION SIDE(MXGKCU),C1PAR(5),G1PAR(5),NUCSUP(6)
-* PN, 04/06/98 - poor man solution
       DATA      SIDE/MXGKCU*0./
       DIMENSION RNDM(3)
       DATA C1PAR/0.6,0.6,0.35,0.15,0.10/
@@ -357,9 +362,9 @@ C**
       PV( 3,MX2) =0.
       PV( 4,MX2) =MP
       PV( 5,MX2) =MP
- 
+
 C** TRANSFORM INTO CMS.
- 
+
       CALL ADD(MX1,MX2,MX)
       CALL LOR(MX1,MX,MX1)
       CALL LOR(MX2,MX,MX2)

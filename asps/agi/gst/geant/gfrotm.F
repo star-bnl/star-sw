@@ -10,16 +10,14 @@ C.    *                                                                *
 C.    ******************************************************************
 C.
 #include "geant321/gcbank.inc"
-      Integer IROT,JR
-      Real    THETA1,PHI1,THETA2,PHI2,THETA3,PHI3
 C.
-      THETA1 = -9999999.
       IF (JROTM.LE.0) GO TO 999
-      IF (IROT.LE.0)  GO TO 999
+      IF (IROT.LE.0)  go TO 999
       IF (IROT.GT.IQ(JROTM-2)) GO TO 999
- 
+
       JR=LQ(JROTM-IROT)
       IF(JR.LE.0) GO TO 999
+
 C
       THETA1 = Q(JR + 11)
       PHI1   = Q(JR + 12)
@@ -30,4 +28,7 @@ C
 C
  999  RETURN
       END
- 
+
+
+
+

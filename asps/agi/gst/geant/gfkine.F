@@ -1,7 +1,10 @@
 *
-* $Id: gfkine.F,v 1.1 1998/08/28 14:48:37 nevski Exp $
+* $Id: gfkine.F,v 1.2 2000/01/06 22:09:15 nevski Exp $
 *
 * $Log: gfkine.F,v $
+* Revision 1.2  2000/01/06 22:09:15  nevski
+* unlimited track/vertex version
+*
 * Revision 1.1  1998/08/28 14:48:37  nevski
 * interface KINE bank via LgKINE to eliminate 64k limitation
 *
@@ -57,11 +60,11 @@ C.
       IF (ITRA.LE.0)GO TO 99
       IF (ITRA.GT.NTRACK)GO TO 99
 C
-      JK = LgKINE(JKINE,ITRA)
+      JK = LgKINE(JKIN,ITRA)
       IF (JK.LE.0)GO TO 99
       NV = Q(JK + 6)
       IF (JVERTX.LE.0)GO TO 99
-      JV = LQ(JVERTX- NV)
+      JV = LgVERT(JVERT,NV)
       IF (JV.LE.0)GO TO 99
       DO 10 I=1,3
   10  VERT(I) = Q(JV + I)

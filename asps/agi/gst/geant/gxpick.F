@@ -1,7 +1,10 @@
 *
-* $Id: gxpick.F,v 1.2 1998/04/16 16:59:50 fisyak Exp $
+* $Id: gxpick.F,v 1.3 2000/01/06 22:09:19 nevski Exp $
 *
 * $Log: gxpick.F,v $
+* Revision 1.3  2000/01/06 22:09:19  nevski
+* unlimited track/vertex version
+*
 * Revision 1.2  1998/04/16 16:59:50  fisyak
 * 2nd pass with gstar
 *
@@ -226,4 +229,4 @@ C.
 10200 FORMAT(' GXPICK: perspective projection can not be handled')
 10300 FORMAT(' GXPICK: point is outside volume')
   999 END
- 
+
