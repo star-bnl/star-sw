@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.6 2004/04/14 14:55:08 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.7 2004/04/14 16:48:21 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.7  2004/04/14 16:48:21  jcs
+//   turn off DEBUG
+//
 //   Revision 1.6  2004/04/14 14:55:08  jcs
 //   temporarily turn on debug
 //   don't use flaky body temperature readings
@@ -41,7 +44,7 @@
 #include "StMessMgr.h"
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 
