@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.50 1999/01/27 23:59:50 fisyak Exp $
+# $Id: MakeDll.mk,v 1.51 1999/01/28 16:49:58 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.51  1999/01/28 16:49:58  fisyak
+# remove copying of h-files for rootcint
+#
 # Revision 1.50  1999/01/27 23:59:50  fisyak
 # More templates
 #
@@ -392,7 +395,8 @@ $(FILES_CINT_SYT) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	@echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
-	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+#$(CP) $(1ST_DEPS) .; \
+	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
@@ -418,7 +422,7 @@ $(FILES_CINT_G3) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	@echo "#pragma  link C++ class  TGeant3;"	 >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
-	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
         $(notdir $(LINKDEF))
 
@@ -432,7 +436,7 @@ $(FILES_CINT_CHAIN) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
-	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF))
 else
@@ -447,7 +451,7 @@ $(FILES_CINT_SYM) : $(GEN_DIR)/St_%Cint.cxx : $(SRC_DIR)/St_%.h
 	@echo "#endif"					 >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
-	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF))
 else
@@ -459,7 +463,7 @@ $(FILES_CINT_ORD) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	$(ORD_LINKDEF)
 	@$(CAT) $(LINKDEF)
 ifndef NT
-	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+	cd $(GEN_DIR); \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) \
         $(notdir $(LINKDEF))
 else
@@ -474,7 +478,7 @@ $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h
 	@echo "#endif"					>> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
-	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+	cd $(GEN_DIR); \
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
