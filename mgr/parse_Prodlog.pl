@@ -11,8 +11,9 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $dir_log      = "/star/rcf/prodlog/P01hc/log/daq";
-my $dir_sum      = "/star/rcf/prodlog/P01hc/sum/daq";   
+my $mdir_log      = "/star/rcf/prodlog/P01he/log/";
+my $mdir_sum      = "/star/rcf/prodlog/P01he/sum/"; 
+my @dir_ext      = ("daq","trs");  
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -26,6 +27,8 @@ my $file_sum;
 my $dir_lg       = "../log";
 my $name_log;
 my $f_flag = 0;
+my $dir_log;
+my $dir_sum;
 my $size;
 my $mTime;
 my $flname;
@@ -35,6 +38,11 @@ my $fullname;
 
 #=========================================================
 my $ii =0;
+
+#for ($ii =0; $ii<2; $ii++) {
+ $ii = 0;
+$dir_log = $mdir_log . $dir_ext[$ii];
+$dir_sum = $mdir_sum . $dir_ext[$ii];
 
 
 struct FileAttr => {
@@ -48,7 +56,7 @@ struct FileAttr => {
   while( defined($flname = readdir(DIR)) ) {
            next if $flname =~ /^\.\.?$/;
            next if $flname =~ /.err/; 
-
+#           next if $flname =~ /rcf150_p/;
         $fullname = $dir_log ."/".$flname;
          $size = (stat($fullname))[7];
                
@@ -71,7 +79,7 @@ foreach my $logFile (@list) {
        
         my $ltime = `mod_time $mfile`;
            if( $ltime > 3600){
-		    if ($msize < 25000 )  {
+		    if ($msize < 12000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
               $f_flag = 0;
@@ -299,66 +307,90 @@ sub parse_log($) {
       $Anflag = 1;
     }
 
-     if ($line =~ /QAInfo: StAnalysisMaker/ && $Anflag == 0 ) {
-           my  $string = $logfile[$num_line];
-             @word_tr = split /:/,$string;
+     if ($line =~ /track nodes:/ && $Anflag == 0 ) {
+           my  $string = $line;
+             @word_tr = split /:/,$string;            
               $no_tracks = $word_tr[2];
              $tot_tracks += $no_tracks; 
 #              print $word_tr[2], $no_tracks, "\n";
-              $string = $logfile[$num_line + 1];
+    }
+        elsif($line =~ /primary tracks:/ && $Anflag == 0 ) {
+              $string = $line;
              @word_tr = split /:/,$string;
              $no_prtracks = $word_tr[2]; 
              $tot_prtracks += $no_prtracks;
-             $string = $logfile[$num_line + 2];
+     }
+        elsif($line =~ /V0 vertices:/ && $Anflag == 0 ) {
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_vertices = $word_tr[2]; 
              $tot_vertices += $no_vertices;
-             $string = $logfile[$num_line + 3];
+     }
+        elsif($line =~ /Xi vertices:/ && $Anflag == 0 ) {     
+             $string = $line;
              @word_tr = split /:/,$string;
              $no_xivertices = $word_tr[2]; 
              $tot_xivertices += $no_xivertices;
-             $string = $logfile[$num_line + 4];
+     }
+        elsif($line =~ /Kink vertices:/ && $Anflag == 0 ) {         
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_knvertices = $word_tr[2]; 
              $tot_knvertices += $no_knvertices;
-             $string = $logfile[$num_line + 5];
+     } 
+        elsif($line =~ /TPC hits:/ && $Anflag == 0 ) { 
+             $string = $line;
              @word_tr = split /:/,$string;
              $no_tpc_hits = $word_tr[2];
              $tot_tpc_hits += $no_tpc_hits;
-             $string = $logfile[$num_line + 6];
+   }
+        elsif($line =~ /SVT hits:/ && $Anflag == 0 ) {       
+             $string = $line;
              @word_tr = split /:/,$string;
              $no_svt_hits = $word_tr[2]; 
              $tot_svt_hits += $no_svt_hits;
-             $string = $logfile[$num_line + 7];
+   }
+        elsif($line =~ /SSD hits:/ && $Anflag == 0 ) {    
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_ssd_hits = $word_tr[2];
              $tot_ssd_hits += $no_ssd_hits; 
-             $string = $logfile[$num_line + 8];
+     }
+        elsif($line =~ /FTPC hits:/ && $Anflag == 0 ) {  
+            $string = $line;
              @word_tr = split /:/,$string;
              $no_ftpc_hits = $word_tr[2];
              $tot_ftpc_hits += $no_ftpc_hits; 
            
  }   
 # check if job crashed due to break_buss_error
-     if($line =~ /bus error/) {
-         $Err_messg = "Bus error";
+     if($line =~ /Bus error/) {
+         $Err_messg = "bus error";
        }
-     elsif($line =~ /Bus error/) {
-         $Err_messg = "Bus error";
+
+# check if job crashed due to break_buss_error
+     if($line =~ /bus error/) {
+         $Err_messg = "bus error";
        }
 
 # check if job crashed due to segmentation violation
     if ($line =~ /segmentation violation/) {
              $Err_messg = "segmentation violation";
     }
+    elsif ($line =~ /Segmentation violation/) {
+             $Err_messg = "segmentation violation";
+    }
+    elsif ($line =~ /Break/) {
+             $Err_messg = "Break";
+    }
 
-     if ($line =~ /Interpreter error recovered/)  {
+    elsif ($line =~ /eventIsCorrupted/)  {
+            $Err_messg = "Corrupted event";
+    } 
+    if ($line =~ /Interpreter error recovered/)  {
              $Err_messg = "Interpreter error recovered";
 	   }
-    
-#    if ($line =~ /EventReader::eventIsCorrupted/)  {
-#             $Err_messg = "Corrupted event";
-#	   }
+
     $previous_line = $line;
 
 # check how many events have been skiped
@@ -459,7 +491,8 @@ sub parse_log($) {
    print (">>>>>>>>>>>>  Run options: <<<<<<<<<<<< \n", $run_option_string, "\n");
    print '-' x 80, "\n";
   
- 
+    $last_evts = $EvDone;
+
     print ("Number of Events Done: ", $EvDone, "\n");
     print ("Number of Events Skiped: ", $EvSkip, "\n"); 
     print ("First event no.: ", $first_evts, "\n");
@@ -542,12 +575,12 @@ sub parse_log($) {
     print '=' x 80, "\n";    
 
    if ($num_event ne 0) {
- @cpu_output = `tail -1000 $job_log`;
+ @cpu_output = `tail -1500 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {
      @part = split (" ", $end_line); 
-    if($part[0] =~ /QAInfo/ and $part[2] =~ /Real/) {        
+    if($part[0] ne "QAInfo:" and $part[2] =~ /Real/) {        
      @myword = split /:/, $end_line; 
      $Maker = $myword[1]; 
      @words = split(" ",$myword[2]);
