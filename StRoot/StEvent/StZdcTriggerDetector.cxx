@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.10 2004/04/06 19:39:44 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.11 2004/04/14 22:47:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.11  2004/04/14 22:47:06  ullrich
+ * SMD problem fixed.
+ *
  * Revision 2.10  2004/04/06 19:39:44  ullrich
  * Added ZDC SMD support.
  *
@@ -50,7 +53,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.10 2004/04/06 19:39:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.11 2004/04/14 22:47:06 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -113,12 +116,11 @@ StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
     mSumAdc[west] = t.zdcAttenuated(west);
     mSum          = t.zdcAtAddress(14);
 
-
     for (int i=0; i<mMaxZdcWords; i++) 
-      mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-8) : i));
+	mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)));
     for (int i=0; i<mMaxZdcWords; i++) 
-      mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-8) : i));
-
+	mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)));
+    
     fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0); // always 0
 }
 
