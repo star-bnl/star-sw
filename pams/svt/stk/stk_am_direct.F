@@ -52,6 +52,7 @@ C     =====================
 C     Local Declarations: 
 C     ===================
 
+      integer    malloc
       integer    ispt           ! index to space points
       integer    imctrk, mctrk, n_groups
       integer    idtrack, jdtrack
@@ -65,6 +66,8 @@ c     keys
       parameter (nmctrackmax=100000)
       integer   mctrackkey(nmctrackmax)
 
+      pointer (p_g2t_trackkey,g2t_trackkey)
+      pointer (p_mctrackkey  ,mctrackkey  )
 
       integer  tls_quick_sort_i
       integer  ok,i,nspt
@@ -94,6 +97,10 @@ C     =======
  1029 format(1x,'SVT stk_am_direct: jdtrack out of bound',i8)
 
 C     Executable Code:
+C     Create arrays
+      p_g2t_trackkey = malloc(nkinemax   *4)
+      p_mctrackkey   = malloc(nmctrackmax*4)
+
 C     ================
 C      call StInfo( 'STK_AM_DIRECT: Starting ##########################')
       stk_am_direct = stafcv_ok
@@ -104,17 +111,17 @@ C     check if the table of space points is empty
          write(msg,1001) 
          call StError(msg)
          stk_am_direct = stafcv_bad ! no svt space point
-         return
+         goto 999
       else if (geom_h.nok.eq.0) then
          write(msg,1002) 
          call StError(msg)
          stk_am_direct = stafcv_bad ! no svt geometry
-         return
+         goto 999
       else if (g2t_track_h.nok.eq.0) then
          write(msg,1004)
          call StError(msg)
          stk_am_direct = stafcv_bad ! no svt vertex
-         return
+         goto 999
       end if
 
 c     sort svt hits by wafer number
@@ -166,7 +173,7 @@ c the tracking is done with 3 layers, the ssd hits have to be ignored
                      call StError(msg)
                      mctrack_h.nok       = idtrack
                      stk_am_direct    = stafcv_bad
-                     return
+                     goto 999
                   else
                      idtrack                     = idtrack + 1
                      jdtrack                     = idtrack
@@ -204,7 +211,7 @@ C     sec=1 primary, sec=2 secondary, sec=0 unknown
                      call StError(msg)
                      mctrack_h.nok       = idtrack
                      stk_am_direct    = stafcv_bad
-                     return
+                     goto 999
                   end if
                end if
                mctrack(jdtrack).nspt  = mctrack(jdtrack).nspt + 1
@@ -250,6 +257,12 @@ c     now sort groups table by hit position within track
       
 C      call StInfo('STK_AM_DIRECT: Stopping ###########################')
       STK_AM_DIRECT=STAFCV_OK
+ 999  continue
+C     Delete arrays
+      call free(p_g2t_trackkey)
+      call free(p_mctrackkey  )
+
+
       RETURN
       END
 

@@ -54,6 +54,7 @@ C
 C Converted to STAF HLC 4/12/96
 C Modified to accept the SSD hits without using them Lilian MARTIN 09/06/98
 C iNTERNAL VARIABLES:
+      integer malloc
       integer MAXHITS
       parameter (MAXHITS=30000)
       integer n_candidate,n_spt
@@ -70,7 +71,9 @@ C iNTERNAL VARIABLES:
       logical Used(MAXHITS)
       save    Used
       integer pix_Map(576,1600,10)
-      save    pix_Map
+      pointer   (p_pix_Map, pix_Map)
+
+*VP   save    pix_Map
       real    ZCent, phi1, phi2, phi3, phiCent
       integer iS1, iS2, iS3, nnodes
       real    SCALEPHI2           ! Turns degrees into cm (sort of).
@@ -267,6 +270,7 @@ C   yet, in this case set g_last back to zero
            endif
 C
 C Reset pix_Map.
+          p_pix_Map = malloc(576*1600*10*4)
           ok = pix_Reset( pix_map, pix_info(ipass).nhitsmax,
      +        pix_info(ipass).nphi, pix_info(ipass).nz,
      +        pix_info(ipass).nhitsmax )
@@ -528,6 +532,7 @@ C     is that all?
      >      svt_hits_h.nok,' SVT hits.'
          call StInfo(mess)
       endif
+      call free(p_pix_Map)
       return
       end
       

@@ -415,6 +415,8 @@ c       integer  chip,iix,iiz
 	integer  layer,ladder,wafer,npoints(9,26,9),points(9,26,9,1000),wi,wj
 	real     posit(2,15000),uncer(2,15000)
         real     acosd,cosd,sind
+        integer malloc
+        pointer (p_points,points)
         external ran2
         integer  svtgtol
 c------------------------------------------------------------------------------c
@@ -435,6 +437,7 @@ c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 c	INITIALIIZATION:						       c
 c------------------------------------------------------------------------------c
+        p_points = malloc(9*26*9*1000 *4)
         if (srspar(1).init_ran.ne.0) then
            seed=srspar(1).init_ran
         endif
@@ -451,13 +454,13 @@ c------------------------------------------------------------------------------c
         zhat(3)=1.0
 	if (config(1).n_layer.gt.9) then
 	    print*,'npoints array not large enough!'
-	    return
+	    goto 9999
         endif
         do i=1,config(1).n_layer
             if ((config(1).n_ladder(i).gt.26).or. 
      1          (config(1).n_wafer(i).gt.9)) then
 	        print*,'npoints array not large enough!'
-	        return                
+	        goto 9999                
             endif
         enddo
 	do layer=1,config(1).n_layer
@@ -572,7 +575,7 @@ c         now we are ready to find the angle (should be between 0 and 180)
        else ! no wafer id
 	  Print*,'Can not find wafer id'
 	  svt_resolution_sim=STAFCV_BAD
-	  return
+	  goto 9999
        endif ! check if geometry available
 100    continue
        qtot=svt_qtot(de,theta,srspar_h,srspar)
@@ -821,6 +824,7 @@ c	DONE:								       c
 c------------------------------------------------------------------------------c
  999	continue
 	svt_resolution_sim=STAFCV_OK
+9999    call free(p_points)
 	return
 	end
 c------------------------------------------------------------------------------c
@@ -2312,7 +2316,6 @@ c
 c     Error Conditions:
 c
 c     Argument/Global Declarations:
-
 #include "PAM.inc"
 #include "g2t_svt_hit.inc"
 #include "scs_spt.inc"
