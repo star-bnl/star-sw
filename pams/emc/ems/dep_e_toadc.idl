@@ -10,7 +10,7 @@ interface dep_e_toadc : amiModule {
 	STAFCV_T call
         ( in  ems_control      ems_control
         , in  control_toadc    control_toadc
-        , in  ems_hits         hits_emc
+        , in  ems_hits         hits_ems
 	, out emc_hits         adc_emc1
 	, out emc_hits         adc_emc2
 	);
