@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.23 2004/10/28 00:11:33 mvl Exp $
+ * $Id: StMuDst.h,v 1.24 2004/10/29 20:18:18 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -59,9 +59,12 @@ class StPhysicalHelixD;
 
 /** 
     @class StMuDst
-    Top class of the 'dataformat'. This class exists only in memory and is not written/read to/from disk.
-    However, this class is used to hold the pointers to all the TClonesArrays that have been read from disk.
-    The class is used to navigate within a 'physics' event (to access tracks, detector info, etc).  
+    Top class of the 'dataformat'. This class exists only in memory and is not 
+    written/read to/from disk.
+    However, this class is used to hold the pointers to all the TClonesArrays that have 
+    been read from disk.
+    The class is used to navigate within a 'physics' event (to access tracks, 
+    detector info, etc).  
     
 */
 class StMuDst : public TObject {
@@ -71,7 +74,7 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0, TClonesArray *emc_arr=0, StMuEmcCollection *emc=0, TClonesArray *pmd_arr=0, StMuPmdCollection *pmd=0, TClonesArray** ezt=0);
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc_ptca=0, TClonesArray** pmd_ptca=0, TClonesArray** tof_ptca=0, TClonesArray *emc_tca=0, StMuEmcCollection *emc_col=0, TClonesArray *pmd_tca=0, StMuPmdCollection *pmd_col=0, TClonesArray** ezt_ptca=0);
   /// set pointer to current StEmcCollection
   static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
@@ -280,6 +283,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.24  2004/10/29 20:18:18  jeromel
+ * Proto arg name must not be repeated
+ *
  * Revision 1.23  2004/10/28 00:11:33  mvl
  * Added stuff to support ezTree mode of MuDstMaker.
  * This is a special mode for fast-online processing of fast-detector data.
