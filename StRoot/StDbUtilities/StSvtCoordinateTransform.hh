@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.5 2001/02/12 23:42:40 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.6 2001/06/13 16:01:26 caines Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -28,6 +28,17 @@ using std::vector;
 //#include <stdexcept>
 #endif
 
+#include "tables/St_svg_geom_Table.h"
+
+#ifndef __CINT__
+#include "StarCallf77.h"
+#define SvtLtoG_ F77_NAME(svtltog,SVTLTOG)
+#define SvtGtoL_ F77_NAME(svtgtol,SVTGTOL)
+extern "C" {
+int type_of_call SvtLtoG_(float *x, float *xp, svg_geom_st *geom, int *index);
+int type_of_call SvtGtoL_(float *x, float *xp, svg_geom_st *geom, int *index);
+}
+#endif
 #include "StThreeVector.hh"
 
 #define DEBUG_SVT 0
@@ -37,7 +48,6 @@ class StGlobalCoordinate;
 class StSvtLocalCoordinate;
 class StSvtWaferCoordinate;
 class StSvtConfig;
-class svg_geom_st;
 class svg_shape_st;
 class srs_srspar_st;
 
@@ -87,7 +97,7 @@ inline void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mgeom = geom;
   mconfig = config;
   mshape = shape;
-}
+};
 
 #endif
  
