@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.17 2000/02/29 23:04:01 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.18 2000/05/24 13:36:30 fisyak Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.18  2000/05/24 13:36:30  fisyak
+ * Add cast to make  Solaris happy
+ *
  * Revision 1.17  2000/02/29 23:04:01  jgreid
  * bug fix
  *
@@ -183,7 +186,7 @@ Int_t StEbyeScaTagsMaker::fillTag(StEvent& event) {
   
   // temporarily use the first (currently only) primary vertex
   StVertex *primeVertex;
-  StTrack *currentTrack;
+  const StTrack *currentTrack;
 
   StThreeVectorD origin(0,0,0);
   StThreeVectorD primaryVertexPosition;
