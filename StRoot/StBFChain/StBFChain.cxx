@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.60 2000/02/03 19:34:32 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.61 2000/02/07 23:42:25 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.61  2000/02/07 23:42:25  fisyak
+// Splitted tables, Don't call St_tpcdaq_Maker for Trs, only load its shared library
+//
 // Revision 1.60  2000/02/03 19:34:32  fisyak
 // Clean up St_geant_Maker::Init, move its parameters to ctor
 //
@@ -272,12 +275,33 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
-  {"gstar"       ,"" ,"","tables,geant","","","gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
-  {"tdaq"        ,""  ,"","xin,tables,tpc_daq"                                            ,"","","",kFALSE},  
+  {"gstar"       ,""  ,"","geant","",""      ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
+  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
-  {"tables"      ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"Tables      ","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
+  {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+  {"tables"      ,""  ,"","",""
+     ,"StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T","",kFALSE},
+  {"StDbT"       ,""  ,"","",""                                   ,"StDb_Tables","Load StDb_Tables",kFALSE},
+  {"ctf_T"       ,""  ,"","",""                                     ,"ctf_Tables","Load ctf_Tables",kFALSE},
+  {"ebyeT"       ,""  ,"","",""                                   ,"ebye_Tables","Load ebye_Tables",kFALSE},
+  {"emc_T"       ,""  ,"","",""                                     ,"emc_Tables","Load emc_Tables",kFALSE},
+  {"ftpcT"       ,""  ,"","",""                                   ,"ftpc_Tables","Load ftpc_Tables",kFALSE},
+  {"gen_T"       ,""  ,"","",""                                     ,"gen_Tables","Load gen_Tables",kFALSE},
+  {"geomT"       ,""  ,"","",""                           ,"geometry_Tables","Load geometry_Tables",kFALSE},
+  {"globT"       ,""  ,"","",""                               ,"global_Tables","Load global_Tables",kFALSE},
+  {"l3_T"        ,"",  "","",""                                       ,"l3_Tables","Load l3_Tables",kFALSE},
+  {"mwc_T"       ,""  ,"","",""                                     ,"mwc_Tables","Load mwc_Tables",kFALSE},
+  {"sim_T"       ,""  ,"","",""                                     ,"sim_Tables","Load sim_Tables",kFALSE},
+  {"svt_T"       ,""  ,"","",""                                     ,"svt_Tables","Load svt_Tables",kFALSE},
+  {"tpc_T"       ,""  ,"","",""                                     ,"tpc_Tables","Load tpc_Tables",kFALSE},
+  {"trg_T"       ,""  ,"","",""                                     ,"trg_Tables","Load trg_Tables",kFALSE},
+  {"vpd_T"       ,""  ,"","",""                                     ,"vpd_Tables","Load vpd_Tables",kFALSE},
+  {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","","","StarClassLibrary",                         "Load StarClassLibrary",kFALSE},
@@ -300,69 +324,72 @@ BfcItem BFC[] = {
   {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
-  {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
-  {"db"          ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"calib"       ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"magF"        ,"","","NoFieldSet,tables,db","StMagFMaker","StMagF"
+  {"geant","geant","","NoFieldSet,geomT,sim_T"
+                                         ,"St_geant_Maker","geometry,St_g2t,St_geant_Maker","GEANT",kFALSE}, 
+  {"db"          ,""  ,"","StDbT,xdf2root"       ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt,PreVtx"              ,"StChainMaker","StChain","",kFALSE},
+  {"tpc"         ,"tpc","","tpc_T,tls,db,tcl,tpt,PreVtx"               ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc",""                                     ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
-  {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
+  {"Trs"         ,"","tpc","scl"                      ,"StTrsMaker","St_tpcdaq_Maker,StTrsMaker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,""  ,"tpc","","",""                                    ,"use tfs (no StTrsMaker)",kFALSE},
-  {"tcl"         ,"tpc_hits","tpc","tables,tls"            ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
-  {"tpt"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"tcl"         ,"tpc_hits","tpc","tpc_T,tls"             ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"tpt"         ,"tpc_tracks","tpc","tpc_T,tls"           ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"      ,"","","tpt"         ,"StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"svt"         ,"svt","","tables,srs,stk"                            ,"StChainMaker","StChain","",kFALSE},
+  {"svt"         ,"svt","","svt_T,srs,stk"                             ,"StChainMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
-  {"Ftpc"        ,"ftpc"  ,"","tables,fcl,fpt"                         ,"StChainMaker","StChain","",kFALSE},
+  {"Ftpc"        ,"ftpc"  ,"","ftpcT,fcl,fpt"                          ,"StChainMaker","StChain","",kFALSE},
   {"fss"         ,"ftpc_raw","ftpc","SCL"                 ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpc","SCL"
                                    ,"StFtpcClusterMaker","StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpc","SCL"              ,"St_fpt_Maker","St_ftpc,St_fpt_Maker","",kFALSE},
-  {"emc"         ,"emc","","geant,tables,db,calib,ems,emh"             ,"StChainMaker","StChain","",kFALSE},
-  {"ems"         ,"emc_raw","emc","geant,tables"           ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
-  {"emh"         ,"emc_hits","emc","geant,tables"          ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-  {"l0"          ,"l0","","tables,ctf,mwc,trg"                         ,"StChainMaker","StChain","",kFALSE}, 
-  {"ctf"         ,"ctf","l0","tables,db"                   ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
-  {"mwc"         ,"mwc","l0","tables,db"                   ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
-  {"trg"         ,"trg","l0","tables,db"                   ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh"        ,"StChainMaker","StChain","",kFALSE},
+  {"ems"         ,"emc_raw","emc","geant,emc_T"            ,"St_ems_Maker","St_emc,St_ems_Maker","",kFALSE},
+  {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"l0"          ,"l0","","trg_T,ctf,mwc,trg"                          ,"StChainMaker","StChain","",kFALSE}, 
+  {"ctf"         ,"ctf","l0","ctf_T,db"                    ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
+  {"mwc"         ,"mwc","l0","mwc_T,db"                    ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
+  {"trg"         ,"trg","l0","trg_T,db"                    ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
-  {"l3cl"        ,"","l3","tables"                  ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
-  {"l3t"         ,"","l3","tables"                          ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
-  {"rich"        ,"","","tables"                                      ,"StRchMaker","StRchMaker","",kFALSE},
-  {"global"      ,"global","","tables,Match,primary,v0,xi,kink,dst"
+  {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
+  {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+  {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
+  {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
-  {"Match"       ,"match","global","SCL,tables,tls"
+  {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Primary"     ,"primary","global","SCL,tables,tls"
+  {"Primary"     ,"primary","global","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"          ,"v0","global","SCL,tables,tls"    ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Xi"          ,"xi","global","SCL,tables,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Kink"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dst"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Event"       ,"","","tables,SCL"                      ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
+  {"V0"          ,"v0","global","SCL,globT,tls"    ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Xi"          ,"xi","global","SCL,globT,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Kink"        ,"kink","global","SCL,globT,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"dst"         ,"dst","global","SCL,globT,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Event"       ,"","","globT,SCL"                      ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                    ,"StChainMaker","StChain","",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
+  {"StEbyeScaTagsMaker " ,"","TagsChain","Event"
+                                      ,"StStEbyeScaTagsMaker Maker","StStEbyeScaTagsMaker Maker","",kFALSE},
   {"tags"        ,"","TagsChain","Event,FlowTag,StrangeTags"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
-  {"QA"          ,"QA","","tables,SCL,global"             ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
-  {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
+  {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
+  {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"EventDisplay","","SCL,St_geom"   ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
-  {"Mc"          ,"Mc","","tables,McAss,McAna"                         ,"StChainMaker","StChain","",kFALSE},
-  {"McEvent"     ,"","Mc","Event",                   "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},       
-  {"McAss"       ,"","Mc","McEvent",                   "StAssociationMaker","StAssociationMaker","",kFALSE},       
-  {"McAna"       ,"","Mc","McEvent",                     "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},       
+  {"Mc"          ,"Mc","","sim_T,globT,McAss,McAna"                    ,"StChainMaker","StChain","",kFALSE},
+  {"McEvent"     ,"","Mc","Event",                   "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
+  {"McAss"       ,"","Mc","McEvent",                   "StAssociationMaker","StAssociationMaker","",kFALSE},
+  {"McAna"       ,"","Mc","McEvent",                     "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"       ,"","","in,db,geant,SCL","StLaserAnalysisMaker"
-                                                      ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},       
+                                                      ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,""  ,"",""                                        ,"StTreeMaker","StTreeMaker","",kFALSE}
 };
@@ -394,27 +421,34 @@ StBFChain::~StBFChain(){
 //_____________________________________________________________________________
 Int_t StBFChain::Load() 
 {
-  Int_t i, j, iok;
+  Int_t i, j, k, iok;
   for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
     if (BFC[i].Flag) {
       if (strlen(BFC[i].Libs) > 0) { 
 	TString *Libs[80];
 	Int_t NParsed = ParseString(BFC[i].Libs,Libs);
-	const Char_t *lib = gSystem->GetLibraries(); 
+	TString lib(gSystem->GetLibraries()); 
+	TString *LoadedLibs[80];
+	Int_t NLoaded = ParseString(lib,LoadedLibs);
 	for (j=0;j<=NParsed;j++) {
 	  TString libe(*Libs[j]);
-	  libe.Append(".");
-	  if (!strstr(lib,libe.Data())) {
-	    iok = gSystem->Load(Libs[j]->Data());
-	    if (iok < 0)  {
-	      gMessMgr->QAInfo() << "problem with loading\t" << Libs[j]->Data() << endm;
-	      gMessMgr->QAInfo() << "switch off\t" << BFC[i].Key << "\t !!!!!" << endm;
-	      BFC[i].Flag = kFALSE;
-	      break;
-	    }
-	    else gMessMgr->QAInfo() << "Library " << Libs[j]->Data() << "\t(" 
-				    << gSystem->DynamicPathName(Libs[j]->Data()) << ")\tis loaded" << endm;
+	  libe.Append(".so");
+	  for (k = 0; k < NLoaded; k++) {
+	    Char_t *Base =  gSystem->BaseName(LoadedLibs[k]->Data());
+	    if (!strcmp(Base,libe.Data())) goto ENDL;
 	  }
+	  //	  if (!strstr(lib,libe.Data())) {
+	  iok = gSystem->Load(Libs[j]->Data());
+	  if (iok < 0)  {
+	    printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
+		   ,Libs[j]->Data(),BFC[i].Key);
+	    BFC[i].Flag = kFALSE;
+	    break;
+	  }
+	  else printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",Libs[j]->Data(),
+		      gSystem->DynamicPathName(Libs[j]->Data()));
+	  //	  }
+	ENDL: continue;
 	}
       }
     }
