@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.24 2000/09/30 16:16:54 fisyak Exp $
+// $Id: St_XDFFile.h,v 1.25 2001/04/06 16:32:32 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.25  2001/04/06 16:32:32  fine
+// the order of inclide has been changed to make new ROOT happy
+//
 // Revision 1.24  2000/09/30 16:16:54  fisyak
 // Valery's cast
 //
@@ -57,10 +60,10 @@
 #include "Rtypes.h"
 #include "TSocket.h"
 #ifndef __CINT__
-#include "dsxdr.h"
+# include "dsxdr.h"
 #else
-typedef void XDR;
-typedef void DS_DATASET_T; 
+ class XDR;
+ class DS_DATASET_T; 
 #endif
 
 class TDataSet;
@@ -79,7 +82,7 @@ class St_XDFFile : public TObject
     const Char_t        *fMethodName;   // The name of the current method (to debug code)
     TSocket             *fSocket;       // Socket to XDF I/O
     Int_t                fRecordCount;  // No. of records read/written
-    TDataSet          *fBrowsable;    // The pointer to the record selected with ROOT Browser
+    TDataSet            *fBrowsable;    // The pointer to the record selected with ROOT Browser
     Int_t                fDebug;        // Debug Level
   protected:
     static TDataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> TDataSet. Create TDataSet object from DS_DATASET_T C-structure

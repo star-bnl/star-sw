@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.34 2000/03/23 03:27:10 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.35 2001/04/06 16:32:31 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.35  2001/04/06 16:32:31  fine
+// the order of inclide has been changed to make new ROOT happy
+//
 // Revision 1.34  2000/03/23 03:27:10  fine
 // clean up: header_table ref has been removed
 //
@@ -92,16 +95,16 @@
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
+#include "St_XDFFile.h"
+
 #include <stdlib.h>
 #include <errno.h>
 
-#include "dsxdr.h"
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TClass.h"
 #include "TSocket.h"
 #include "TBrowser.h"
-#include "St_XDFFile.h"
 #include "TDataSetIter.h"
 #include "TDataSet.h"
 #include <TTable.h>
