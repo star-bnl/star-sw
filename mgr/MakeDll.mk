@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.45 1999/01/14 13:56:40 fisyak Exp $
+# $Id: MakeDll.mk,v 1.46 1999/01/20 02:16:49 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.46  1999/01/20 02:16:49  fisyak
+# Active STAR_HOST_SYS for egcs
+#
 # Revision 1.45  1999/01/14 13:56:40  fisyak
 # Add Victors MakeFun.mk, Add StMagF
 #
@@ -106,7 +109,7 @@ else
 endif
 endif
 
-SYS_DIR := $(OUT_DIR)/.$(STAR_SYS)
+SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
 LIB_DIR := $(SYS_DIR)/lib
 
 ifdef NT
@@ -143,7 +146,7 @@ endif #/* NT */
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,base StChain xdf2root) StRoot .share .share/tables pams inc 
+INC_NAMES := $(addprefix StRoot/,base StChain xdf2root CLHEP) StRoot .share .share/tables pams inc 
 INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
 ifneq ($(ROOT_DIR),$(STAR))
@@ -203,6 +206,7 @@ DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) 
 #                                                                      $(SRC_DIR) 
 INPUT_DIRS += $(SRC_DIR) $(SRC_DIR)/src
+INPUT_DIRS += $(ROOT_DIR)
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
@@ -292,6 +296,7 @@ endef
 endif
 
 ifndef NT
+ifeq ($(PKGNAME),StRootEvent)
 define  ORD_LINKDEF
 	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
 	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
@@ -301,6 +306,17 @@ define  ORD_LINKDEF
 	echo "#pragma link C++ class $(STEM);"  	>> $(LINKDEF);\
 	echo "#endif"					>> $(LINKDEF);
 endef
+else
+define  ORD_LINKDEF
+	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
+	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
+	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
+	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
+	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
+	echo "#pragma link C++ class $(STEM);"  	>> $(LINKDEF);\
+	echo "#endif"					>> $(LINKDEF);
+endef
+endif
 
 else
 define  ORD_LINKDEF

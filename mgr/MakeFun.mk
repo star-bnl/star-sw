@@ -1,5 +1,8 @@
-# $Id: MakeFun.mk,v 1.2 1999/01/14 23:28:25 fisyak Exp $
+# $Id: MakeFun.mk,v 1.3 1999/01/20 02:16:50 fisyak Exp $
 # $Log: MakeFun.mk,v $
+# Revision 1.3  1999/01/20 02:16:50  fisyak
+# Active STAR_HOST_SYS for egcs
+#
 # Revision 1.2  1999/01/14 23:28:25  fisyak
 # Add includes
 #
@@ -105,8 +108,11 @@ $(MY_SO):     $(FNameO)
 
 ###
 
-$(FName).o: $(FName).h $(FName).$(SrcSuf)
+$(FName).$(ObjSuf): $(FName).h $(FName).$(SrcSuf) 
+$(FNameCint).$(ObjSuf): $(FNameCint).$(SrcSuf) 
 
+$(FName).$(ObjSuf):$(FName).$(SrcSuf)
+	$(CXX)  $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -c $(1ST_DEPS) -o $(ALL_TAGS)
 $(FName)LinkDef.h : $(FName).h
 	if [ -f $(FName)LinkDef.h ]; then   rm $(FName)LinkDef.h ; fi
 	cat $(FName).h | sed -e '/\#ifdef __CINT__/,/\#endif/!'d > $(FName)LinkDef.h
@@ -115,12 +121,10 @@ $(FNameCint).$(SrcSuf): $(FName).h $(FName)LinkDef.h
 	@echo "Generating dictionary ..."
 	@rootcint -f $(FNameCint).$(SrcSuf) -c $(FName).h $(FName)LinkDef.h
 
-.$(SrcSuf).$(ObjSuf):
-	$(CXX)  $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -c $<
-
-
 clean:
-		@rm -f $(OBJS) $(FNameCint).$(SrcSuf) $(FNameCint).h core
-
+		@rm -f $(OBJS) $(FNameCint).$(SrcSuf) $(FNameCint).h core $(FName)LinkDef.h $(MY_SO)*
 show:
 	@echo $(UNAME).$(UNAMER) CXX=$(CXX) KASE=$(KASE)
+	@echo INCLUDES = $(INCLUDES)
+	@echo CPPFLAGS = $(CPPFLAGS)
+	@echo CXXFLAGS = $(CXXFLAGS)
