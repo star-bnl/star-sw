@@ -16,6 +16,7 @@
 #include "TFile.h"
 #include "TList.h"
 #include "St_DataSet.h"
+#include "St_ObjectSet.h"
 #include "St_DataSetIter.h"
 
 const ULong_t kUMAX = (ULong_t)(-1);
@@ -119,7 +120,7 @@ TObject *fObj;	// Pointer to full tree
 ClassDef(StIOEvent,1)
 };
 
-class StFile : public St_DataSet
+class StFile : public St_ObjectSet
 {
 public:
   StFile(const char** fileList=0);
