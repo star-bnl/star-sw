@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPevalMaker.h,v 1.1 2001/04/12 15:19:08 balewski Exp $
+// $Id: StppLPevalMaker.h,v 1.1.1.1 2001/04/21 00:43:13 fisyak Exp $
 // $Log: StppLPevalMaker.h,v $
+// Revision 1.1.1.1  2001/04/21 00:43:13  fisyak
+// *** empty log message ***
+//
 // Revision 1.1  2001/04/12 15:19:08  balewski
 // *** empty log message ***
 //
@@ -41,7 +44,7 @@ class St_tpt_track;
 class StppLPevalMaker : public StMaker 
 {
  private: 
-  // static Char_t  m_VersionCVS = "$Id: StppLPevalMaker.h,v 1.1 2001/04/12 15:19:08 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppLPevalMaker.h,v 1.1.1.1 2001/04/21 00:43:13 fisyak Exp $";
 
   // setup
   float EtaCut;
@@ -83,7 +86,7 @@ class StppLPevalMaker : public StMaker
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StppLPevalMaker.h,v 1.1 2001/04/12 15:19:08 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StppLPevalMaker.h,v 1.1.1.1 2001/04/21 00:43:13 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StppLPevalMaker, 0)   //StAF chain virtual base class for Makers
 };

@@ -1,7 +1,13 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPevalMaker.cxx,v 1.1 2001/04/12 15:19:08 balewski Exp $
+// $Id: StppLPevalMaker.cxx,v 1.1.1.1 2001/04/21 00:43:13 fisyak Exp $
 // $Log: StppLPevalMaker.cxx,v $
+// Revision 1.1.1.1  2001/04/21 00:43:13  fisyak
+// *** empty log message ***
+//
+// Revision 1.2  2001/04/19 21:30:36  balewski
+// add I/O to ppDst
+//
 // Revision 1.1  2001/04/12 15:19:08  balewski
 // *** empty log message ***
 //
@@ -29,7 +35,7 @@
 #include "TH2.h"
 
 #include "tables/St_jdata1_Table.h"
-#include "StppMiniDst.h"  
+#include "StppDst.h"  
 
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_tcl_tphit_Table.h" 
@@ -45,21 +51,6 @@
 //tmp
 #include "tables/St_tpt_track_Table.h" 
 #include "tables/St_g2t_vertex_Table.h"
-
-// for Helix model
-#include "StarCallf77.h"
-extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
-#define gufld F77_NAME(gufld,GUFLD)
-#include "SystemOfUnits.h"
-#ifndef ST_NO_NAMESPACES
-using namespace units;
-#endif
-
-
-#define C_RAD_PER_DEG 0.0174532    
-#define C_PI 3.1416
-
-
 
 ClassImp(StppLPevalMaker)
 
@@ -132,11 +123,25 @@ Int_t StppLPevalMaker::Make()
   printf(" ppMiniDst   Access     . . .\n");
   // =========================================================
 
-  StppMiniDst *my=StppMiniDst::GetppMiniDst(this); assert(my); 
-  printf("ppMiniDst back: pT=%f \n",my->rLP.pt);
-  if(my->rLP.pt<=0) return kStOk;  //== rLP was found
+  St_DataSet* ds1=GetDataSet("dst/rec_lp");  //assert(ds1); 
+  if(ds1==NULL) {
+    printf("%s-maker, no dst/rec_lp, ignore eve\n",GetName());
+    return kStOk;
+  }
 
-  float rPt=my->rLP.pt;
+  ppDst *myR=(ppDst *)ds1->Find("rec_lp"); //assert(myR);
+  if(myR==NULL) {
+    printf("%s-maker, no rec_lp, ignore eve\n",GetName());
+    return kStOk;
+  }
+
+  assert(myR->GetNRows()==1);
+  ppDst_t *my=(ppDst_t *)myR->GetArray();
+
+  printf("ppDst found: rec pT=%f \n",my->pt);
+  if(my->pt<0) return kStOK; //not valid event
+ 
+  float rPt=my->pt;
   lpa->Rec.n++;
   lpa->Rec.h->Fill(rPt);
 
@@ -171,7 +176,7 @@ Int_t StppLPevalMaker::Make()
   // check delta phi
   float gPsi=atan2(gLP->p[1],gLP->p[0])*180/3.1416; // ==atan2(y,x) in deg
   if(gPsi<0) gPsi=360+gPsi;
-  float delPsi=fabs(my->rLP.psi - gPsi);
+  float delPsi=fabs(my->psi - gPsi);
   if(delPsi>180) delPsi=360-delPsi; // need only opening angle
 
   printf(" check PT g=%f, r=%f, g-r=%f \n",gPt, rPt,gPt-rPt); 
@@ -181,7 +186,7 @@ Int_t StppLPevalMaker::Make()
   lpa->dPT.n++;
   lpa->dPT.h->Fill(rPt);
 
-  printf("check  psi g=%f, r=%f ,del=%f\n",gPsi,my->rLP.psi,  delPsi);
+  printf("check  psi g=%f, r=%f ,del=%f\n",gPsi,my->psi,  delPsi);
   if(delPsi>DelPsiMax) return kStOk;  //<<============ cut
 
   lpa->dPsi.n++;

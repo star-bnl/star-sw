@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski
-// $Id: StppDst.h,v 1.1 2001/04/19 21:40:09 balewski Exp $
+// $Id: StppDst.h,v 1.1.1.1 2001/04/21 00:43:15 fisyak Exp $
 // $Log: StppDst.h,v $
+// Revision 1.1.1.1  2001/04/21 00:43:15  fisyak
+// *** empty log message ***
+//
 // Revision 1.1  2001/04/19 21:40:09  balewski
 // *** empty log message ***
 //

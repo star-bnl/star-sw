@@ -2,8 +2,11 @@
 // 
 // JB 4/3/01 search for only firts leading charge particle (was also second)
 // 
-// $Id: getGeneratedLP.cxx,v 1.1 2001/04/12 15:19:09 balewski Exp $
+// $Id: getGeneratedLP.cxx,v 1.1.1.1 2001/04/21 00:43:14 fisyak Exp $
 // $Log: getGeneratedLP.cxx,v $
+// Revision 1.1.1.1  2001/04/21 00:43:14  fisyak
+// *** empty log message ***
+//
 // Revision 1.1  2001/04/12 15:19:09  balewski
 // *** empty log message ***
 //

@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: pickHitLPeval.cxx,v 1.1 2001/04/12 15:19:10 balewski Exp $
+// $Id: pickHitLPeval.cxx,v 1.1.1.1 2001/04/21 00:43:15 fisyak Exp $
 // $Log: pickHitLPeval.cxx,v $
+// Revision 1.1.1.1  2001/04/21 00:43:15  fisyak
+// *** empty log message ***
+//
 // Revision 1.1  2001/04/12 15:19:10  balewski
 // *** empty log message ***
 //
