@@ -13,6 +13,53 @@ ClassImp(St_DataSetIter)
 { }
 
 //______________________________________________________________________________
+St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
+{
+ ///////////////////////////////////////////////////////////////////////////////
+ //                                                                           //
+ // Add - adds set to the dataset defined with the second parameters          //
+ //                                                                           //
+ // St_DataSet dataset != 0 - Add the set to the St_DataSet *dataset          //
+ //                                                                           //
+ //                     = 0 -  (by default) to the current St_DataSet defined //
+ //                             with s_WorkingDataSet data member             //
+ //                                                                           //
+ //  returns  the pointer to set is success or ZERO poiner                    //
+ //                                                                           //
+ ///////////////////////////////////////////////////////////////////////////////
+
+  if (!set) return 0;
+  St_DataSet *s =  dataset;
+  if (!s) s = Pwd();
+  if (s) {
+     s->Add(set);
+     s = set;
+  }
+  return s;
+}
+
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::Add(St_DataSet *dataset, const Char_t *path)
+{
+ ///////////////////////////////////////////////////////////////////////////////
+ //                                                                           //
+ // Add                                                                       //
+ //                                                                           //
+ // Char_t path != 0 - Add a St_DataSet dataset to the St_DataSet dataset     //
+ //                    defined with path                                      //
+ //              = 0 -  (by default) to the current St_DataSet defined        //
+ //                      with s_WorkingDataSet data member                    //
+ //                                                                           //
+ //  returns the dataset is success or ZERO pointer                           //
+ //                                                                           //
+ ///////////////////////////////////////////////////////////////////////////////
+ if (!dataset) return 0;
+ St_DataSet *set = 0;
+ if (path && strlen(path)) set = Next(path);
+ return Add(dataset,set);
+}
+
+//______________________________________________________________________________
 St_DataSet *St_DataSetIter::AddTable(St_Table *table, St_DataSet *dataset)
 {
  ///////////////////////////////////////////////////////////////////////////////
@@ -365,4 +412,22 @@ void St_DataSet::Remove(St_DataSet *set)
   if (s_ListOfDataSet && set) s_ListOfDataSet->Remove(set); 
 }
 
+//______________________________________________________________________________
+void St_DataSet::Update()
+{
+ //
+ //  Update()
+ //
+ //  Recursively updates all tables for all nested datasets
+ //  in inverse order
+ //
+
+  St_DataSetIter next(this);
+  St_DataSet *set = 0;
+  while( set = next())
+            set->Update();
+
+  if (s_StafTable && IsModified()) 
+         s_StafTable->Update();
+ }
 

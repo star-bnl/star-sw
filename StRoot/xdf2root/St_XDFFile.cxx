@@ -4,7 +4,7 @@
 //                                                                          //
 //   St_XDFFile                                                             //
 //                                                                          //
-//   DESCRIPTION:  Create & Read/Write, Fill the C++ objects from XDF files //
+//   DESCRIPTION:  Create,Read/Write,Fill the C++ objects from XDF files    //
 //                                                                          //
 //////////////////////////////////////////////////////////////////////////////
 
@@ -16,6 +16,8 @@
 #include "TClass.h"
 #include "St_XDFFile.h"
 #include "St_DataSet.h"
+
+ClassImp(St_XDFFile)
 
 //______________________________________________________________________________
 St_XDFFile::St_XDFFile(){
@@ -90,10 +92,8 @@ Int_t St_XDFFile::OpenXDF(Char_t *filename,Char_t *mode)
   fMethodName = "OpenXDF(Char_t *filename,Char_t *mode)";
   if (!(filename || strlen(filename))) return 3;
   Char_t *expfile = gSystem->ExpandPathName(filename); 
-  if (expfile) {
-    fName =  new Char_t[strlen(expfile)];
-    strcpy(fName,expfile); delete [] expfile;
-  }
+  if (expfile) 
+        fName =  expfile;
 
   strcpy(fType,"r"); 
   if (mode && mode[0] && mode[0]!=' ') strcpy(fType,mode);

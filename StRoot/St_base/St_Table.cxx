@@ -215,6 +215,31 @@ void St_Table::Dump()
 }
 #endif 
 //______________________________________________________________________________
+Long_t St_Table::GetNRows(){ 
+// Returns the number of the rows for the wrapped table
+return *s_MaxIndex;
+}
+//______________________________________________________________________________
+Long_t St_Table::GetRowSize(){ 
+// Returns the size (in bytes) of one table row 
+  return *s_Size;
+}
+//______________________________________________________________________________
+Long_t St_Table::GetTableSize(){ 
+// Returns the number of the used rows 
+return fN;
+}
+//______________________________________________________________________________
+void  *St_Table::GetArray() const {
+//  return the void pointer to the C-structure
+ return s_Table; }
+//______________________________________________________________________________
+const Char_t *St_Table::GetType() const { 
+//Returns the type of the wrpped C-structure
+return GetTitle();
+}
+
+//______________________________________________________________________________
 void St_Table::LinkHeader()
 {
   // Link some class data members with the STAF table header
@@ -307,7 +332,6 @@ Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf)
   if (lenbuf>0) {
 //     out << "}";
           iOut += sprintf(strbuf+iOut, "}");
-    printf("%s\n",strbuf);
   }
   else
      cout << "}" << endl;
