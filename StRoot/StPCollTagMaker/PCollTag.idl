@@ -15,14 +15,10 @@
     long  chargedMultiplicity;
     long  numberOfPhotonClusters;
     long  numberOfElectronsInEmc;
-    long  numberOfMwpcHits;
     long  numberOfPrimaryTracks;
     float         vectorSumOfPt;
     float         totalCharge;
     float         pseudorapidityOfEvent;
-    float         primaryVertexX;
-    float         primaryVertexY;
-    float         primaryVertexZ;
     float         zdc1Energy;
     float         zdc2Energy;
  } ;
