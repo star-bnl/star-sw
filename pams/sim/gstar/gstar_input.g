@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.32 2000/02/25 16:20:12 nevski Exp $
+* $Id: gstar_input.g,v 1.33 2000/02/25 16:23:19 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.33  2000/02/25 16:23:19  nevski
+* no header printed on skipped events
+*
 * Revision 1.32  2000/02/25 16:20:12  nevski
 * no header printed on skipped events
 *
@@ -121,7 +124,7 @@
 *       return: error flag                                              *
 *************************************************************************
    Implicit   None
-+CDE,GCBANK,GCNUM,SCLINK,RBBANK,AgCKINE.
++CDE,GCBANK,GCFLAG,GCNUM,SCLINK,RBBANK,AgCKINE.
    Integer          LENOCC,CSADDR,AMI_CALL,Igate,Ier,J,I
    Character        C*1, o*1, Table*120
    Integer          Irec,InEvent,NnEvent
