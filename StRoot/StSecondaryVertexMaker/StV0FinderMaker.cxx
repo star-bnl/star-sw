@@ -56,6 +56,11 @@ ClassImp(StV0FinderMaker)
   mainv.setX(0.);
   mainv.setY(0.);
   mainv.setZ(0.);
+
+  trkcnt = 0;
+  trkmax = BLOCK;
+  trkNodeRatio = 1.;
+  trkNodeRatioCnt = 0.;
   
   // Check for multiple instances
   if (mInstance != 0)
@@ -229,7 +234,7 @@ Int_t StV0FinderMaker::Prepare() {
 
   if (prepared) return kStOk;
 
-  unsigned short i,j,nNodes;
+  unsigned short i,j,nNodes,nTrksEstimate;
   StThreeVectorD p;
 
   // Get pars
@@ -272,6 +277,10 @@ Int_t StV0FinderMaker::Prepare() {
 
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   nNodes = theNodes.size();
+
+  // Initial estimate of needed vector sizes
+  nTrksEstimate = (unsigned int) (nNodes*trkNodeRatio);
+  if (nTrksEstimate > trk.size()) ExpandVectors(nTrksEstimate);
   
   // Find which global tracks to use
   trks=0;
@@ -300,23 +309,8 @@ Int_t StV0FinderMaker::Prepare() {
       //Cut: track flag
       if (tri->flag() <= 0) continue;
       
-      // Manage vector memory usage
-      //   If maximum needed is less than half allocated for 10 events, resize
-      static int trkcnt = 0;
-      static int trkmax = 0;
-      if ((trks > BLOCK) && (trks < (trk.size()/2))) {
-        if (trks > trkmax) trkmax = trks;
-        trkcnt++;
-        if (trkcnt >= 10) {
-          ExpandVectors(trkmax);
-          trkcnt = 0;
-          trkmax = 0;
-        }
-      } else {
-        trkcnt = 0;
-        trkmax = 0;
-        if (trks >= trk.size()) ExpandVectors(trks);
-      }
+      // Expand vectors if needed
+      if (trks >= trk.size()) ExpandVectors(trks+1);
 
       // Determine detector id of track i
       const StTrackTopologyMap& map = tri->topologyMap();
@@ -369,6 +363,24 @@ Int_t StV0FinderMaker::Prepare() {
       trks++;
     }
   }
+
+  // Manage vector memory usage
+  //   If maximum needed is less than 2/3rds allocated for 10 events, resize
+  if (trks < ((trk.size()*2)/3)) {
+    if (trks > trkmax) trkmax = trks;
+    trkcnt++;
+    if (trkcnt >= 10) {
+      ExpandVectors(trkmax);
+      trkcnt = 0;
+      trkmax = BLOCK;
+    }
+  } else {
+    trkcnt = 0;
+    trkmax = BLOCK;
+  }
+  trkNodeRatio = ((trkNodeRatio*trkNodeRatioCnt)+((float) trks)/((float) nNodes)) /
+                   (trkNodeRatioCnt + 1.);
+  trkNodeRatioCnt++;
   
   gMessMgr->Info() << "StV0FinderMaker : No. of nodes is : "
                    << nNodes << endm;
@@ -813,9 +825,13 @@ void StV0FinderMaker::Trim() {
 }
 //_____________________________________________________________________________
 void StV0FinderMaker::ExpandVectors(unsigned short size) {
-  unsigned int newsize = trk.size();
+  unsigned int oldsize = trk.size();
+  unsigned int newsize = oldsize;
   if (newsize > size) newsize = BLOCK;
   while (newsize <= size) newsize += BLOCK;
+  if (newsize == oldsize) return;
+  gMessMgr->Info() << IsA()->GetName() << "::ExpandVectors(" << newsize
+                   << ") for " << GetName() << endm;
   trk.resize(newsize);
   hits.resize(newsize);
   detId.resize(newsize);
@@ -825,8 +841,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.24 2004/08/23 23:14:53 genevb Exp $
+// $Id: StV0FinderMaker.cxx,v 1.25 2004/08/26 03:00:46 genevb Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.25  2004/08/26 03:00:46  genevb
+// Improved vector size management
+//
 // Revision 1.24  2004/08/23 23:14:53  genevb
 // Use resize() for vectors, and allow downsizing.
 //

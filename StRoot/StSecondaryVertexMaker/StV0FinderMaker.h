@@ -174,7 +174,7 @@ class StV0FinderMaker : public StMaker {
   //end Betty
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.9 2004/08/11 21:26:38 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.10 2004/08/26 03:00:46 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  protected:
   virtual Int_t Prepare();         //!
@@ -221,6 +221,10 @@ class StV0FinderMaker : public StMaker {
 
  private:
   static StV0FinderMaker* mInstance;      //!
+  int trkcnt;
+  int trkmax;
+  float trkNodeRatio;
+  float trkNodeRatioCnt;
 
   ClassDef(StV0FinderMaker,0)
 
@@ -229,8 +233,11 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.9 2004/08/11 21:26:38 genevb Exp $
+// $Id: StV0FinderMaker.h,v 1.10 2004/08/26 03:00:46 genevb Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.10  2004/08/26 03:00:46  genevb
+// Improved vector size management
+//
 // Revision 1.9  2004/08/11 21:26:38  genevb
 // Trade static arrays for vectors
 //
