@@ -79,14 +79,4 @@ Parameter * Parameters::getParameter(const string name)
   throw runtime_error("Parameters::getParameter(name) -E- Requested name not found");
 }
 
-/*
-void Parameters::setFactory(Factory<Parameter> * factory)
-{
-  _factory = factory;
-}
 
-Factory<Parameter> * Parameters::getFactory()
-{
-  return _factory;
-}
-*/

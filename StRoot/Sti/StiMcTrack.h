@@ -4,7 +4,7 @@
 
 class StMcTrack;
 
-class StiMcTrack : public StiTrack 
+class StiMcTrack : public StiTrack
 {
  public:  StiMcTrack();
   virtual ~StiMcTrack();
@@ -45,9 +45,16 @@ class StiMcTrack : public StiTrack
   virtual void    setStMcTrack(const StMcTrack * track);
   const StMcTrack * getStMcTrack(const StMcTrack * track) const;
   bool extendToVertex(StiHit* vertex);
+  vector<StiHit*> getHits();
  protected:
   const StMcTrack * mcTrack;
+  vector<StiHit*> _hits;
 };
+
+inline vector<StiHit*> StiMcTrack::getHits()
+{
+  return _hits;
+}
 
 inline bool StiMcTrack::extendToVertex(StiHit* vertex)
 {
@@ -68,3 +75,4 @@ inline const StMcTrack * StiMcTrack::getStMcTrack(const StMcTrack * track) const
 }
 
 #endif
+

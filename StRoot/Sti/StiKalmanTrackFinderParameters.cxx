@@ -79,15 +79,15 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxSearchWindow", 
                             "maxSearchWindow", 
                             &maxSearchWindow,         
-                            5.5, 0.5, 20., 0.1, 0)); 
+                            10., 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("searchWindowScale", 
                             "searchWindowScale",  
                             &searchWindowScale, 
-                            4.0, 0.5, 20., 0.1, 0)); 
+                            15.0, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2ForSelection",  
                             "maxChi2ForSelection",   
                             &maxChi2ForSelection, 
-                            7.0, 0.5, 200., 0.1, 0)); 
+                            20.0, 0.5, 200., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2Vertex",  
                             "maxChi2Vertex",   
                             &maxChi2Vertex, 
@@ -100,10 +100,10 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("OuterScaling",
                             "OuterScaling",
                             &outerScaling,
-                            2.2, 0., 20., 0.1, 0)); 
+                            1.4, 0., 20., 0.1, 0)); 
   add(f->getInstance()->set("InnerScaling",
                             "InnerScaling",
                             &innerScaling,
-                            2.2, 0., 20., 0.1, 0)); 
+                            1.4, 0., 20., 0.1, 0)); 
   
 } 

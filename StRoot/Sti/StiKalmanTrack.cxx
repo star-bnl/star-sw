@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.22 2003/04/22 21:20:05 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.23 2003/04/29 18:48:21 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.23  2003/04/29 18:48:21  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.22  2003/04/22 21:20:05  pruneau
  * Added hit filter
  * Tuning og finder pars
@@ -239,11 +242,11 @@ StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
 void StiKalmanTrack::initialize(double curvature,
 				double tanl,
 				const StThreeVectorD& origin,
-				const hitvector & hits)
+				const HitVectorType & hits)
 {
   TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
-  hitvector::const_iterator it;
+  HitVectorType::const_iterator it;
   //StiKalmanTrackNode * node  = 0;
   double eta   =-99999.;
   double alphaP=-99999.;
@@ -397,20 +400,23 @@ int StiKalmanTrack::getCharge() const
 */
 double  StiKalmanTrack::getChi2() const
 {
+  int theChi2 = 0;
+  if (firstNode)
+    {
+      StiKTNBidirectionalIterator it;
+      for (it=begin();it!=end();it++)
+	{
+	  if ((*it).getHit())
+	    theChi2 += (*it)._chi2;
+	}
+    }
+  return theChi2;
+  /*
   if (fittingDirection==kOutsideIn)
-    {
-      if (trackingDirection==kOutsideIn)
-	return lastNode->_chi2;
-      else
-	return firstNode->_chi2;
-    }
-  else // insideOut
-    {
-      if (trackingDirection==kOutsideIn)
-	return firstNode->_chi2;
-      else
-	return lastNode->_chi2;			
-    }
+    return getInnerMostHitNode()->_chi2;
+  else
+    return getOuterMostHitNode()->_chi2;
+  */
 }
 
 
@@ -969,3 +975,18 @@ void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)
   pars = parameters;
 }
 
+vector<StiHit*> StiKalmanTrack::getHits()
+{
+  vector<StiHit*> hits;
+  StiKalmanTrackNode* leaf = getLastNode();
+  StiKTNForwardIterator it(leaf);
+  StiKTNForwardIterator end = it.end();
+  while (it!=end) 
+    {
+      const StiKalmanTrackNode& node = *it;
+      StiHit* hit = node.getHit();
+      if (hit) hits.push_back(hit);
+      ++it;
+    }
+  return hits;
+}

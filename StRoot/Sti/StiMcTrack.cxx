@@ -22,6 +22,7 @@ bool StiMcTrack::find(int direction=kOutsideIn)
 
 void StiMcTrack::reset()
 {
+  _hits.clear();
   mcTrack = 0;
 }
 
@@ -217,4 +218,5 @@ long    StiMcTrack::getFlag() const
 {
   return (long)0;
 }
+
 

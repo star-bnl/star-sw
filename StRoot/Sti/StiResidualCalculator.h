@@ -1,11 +1,14 @@
 //StiResidualMaker.h
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.h,v 2.1 2003/04/29 14:59:02 andrewar Exp $
+ * $Id: StiResidualCalculator.h,v 2.2 2003/04/29 18:48:33 pruneau Exp $
  *
  * Author: Andrew Rose, Wayne State University, October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.h,v $
+ * Revision 2.2  2003/04/29 18:48:33  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.1  2003/04/29 14:59:02  andrewar
  * Modified to conform to naming convention. Added
  * initDetectors(StiDetectorBuilder) to switch desired detectors 'off' during
@@ -43,8 +46,9 @@ class StiKalmanTrack;
 class StiNeverActiveFunctor;
 
 #include "StDetectorId.h"
+#include "Sti/StiResiduals.h"
 
-class StiResidualCalculator: StiResiduals
+class StiResidualCalculator: public StiResiduals
 {
    public:
      StiResidualCalculator(StiHitContainer*, StiDetectorBuilder*);

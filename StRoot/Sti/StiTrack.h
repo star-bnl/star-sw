@@ -121,7 +121,7 @@ public:
   virtual double  getChi2() const=0;
   virtual void    setFlag(long v)=0;
   virtual long    getFlag() const=0;
-
+  virtual vector<StiHit*> getHits()=0;
   // Convenience Accessor using a switch
   virtual double  getValue(int key) const;
 

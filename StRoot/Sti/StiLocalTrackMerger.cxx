@@ -37,16 +37,16 @@ void StiLocalTrackMerger::mergeTracks()
     
     cout <<"\t N-tracks before merge: "<<mTrackStore->size()<<endl;
 		
-    for (TrackMap::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower) {
+    for (TrackToTrackMap::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower) {
 	if (configureMaxTrack( static_cast<StiKalmanTrack*>((*lower).second) )) {
 
 	    //Now find the bounds of search:
-	    TrackMap::iterator upper = mTrackStore->upper_bound(&mMaxTrack);
+	    TrackToTrackMap::iterator upper = mTrackStore->upper_bound(&mMaxTrack);
 	    if (lower!=upper) {
-		TrackMap::iterator start = lower;
+		TrackToTrackMap::iterator start = lower;
 		++start;
 		int i=0;
-		for (TrackMap::iterator it = start; it!=upper; ++it) {
+		for (TrackToTrackMap::iterator it = start; it!=upper; ++it) {
 		    ++i;
 		    if (sameTrack( static_cast<StiKalmanTrack*>((*start).second), 
 				   static_cast<StiKalmanTrack*>((*it).second) ) ) {

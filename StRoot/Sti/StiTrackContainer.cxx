@@ -46,7 +46,7 @@ int StiTrackContainer::getTrackCount(Filter<StiTrack> * filter) const
       // reset filter counter to zero.
       filter->reset();
       // loop over all tracks and filter
-      TrackMap::const_iterator it;
+      TrackToTrackMap::const_iterator it;
       for (it=begin(); it!=end(); ++it) 
 	filter->filter((*it).second);
       return filter->getAcceptedCount();

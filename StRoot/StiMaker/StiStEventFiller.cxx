@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.14 2003/04/29 15:28:10 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.15 2003/04/29 18:48:52 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.15  2003/04/29 18:48:52  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.14  2003/04/29 15:28:10  andrewar
  * Removed hacks to get helicity right; switch now done at source
  * (StiKalmanTrackNode).
@@ -314,7 +317,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
   int errorCount=0; 
-  for (TrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
+  for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
       StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
@@ -392,7 +395,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   //cout << "Tracks in container " << mTrackStore->size() << endl;
   int mTrackN=0;
   StiKalmanTrack* kTrack;
-  for (TrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
+  for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
       kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
       if (kTrack==0) 

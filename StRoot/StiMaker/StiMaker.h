@@ -32,6 +32,8 @@ class StiTrackingPlots;
 class StiMakerParameters;
 class StiVertexFinder;
 class EventDisplay;
+class StiResidualCalculator;
+
 template<class FILTERED> class EditableFilter;
 
 
@@ -49,7 +51,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.8 2003/04/11 16:52:01 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.9 2003/04/29 18:48:51 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
@@ -60,6 +62,7 @@ class StiMaker : public StMaker
       { _eventDisplay = eventDisplay;}
     EventDisplay* getEventDisplay() 
       { return _eventDisplay; }
+    StiToolkit * getToolkit();
 
 private:
     StiMakerParameters * _pars;
@@ -76,6 +79,7 @@ private:
     StAssociationMaker*   mAssociationMaker; //!
     StiTrackingPlots*     _recPlotter;
     StiTrackingPlots*     _mcPlotter;
+    StiResidualCalculator * _residualCalculator;
     EventDisplay *        _eventDisplay;
     EditableFilter<StiTrack> * _loaderTrackFilter;
     EditableFilter<StiHit>   * _loaderHitFilter;
@@ -84,6 +88,11 @@ private:
 };
 
 //inlines
+
+inline StiToolkit * StiMaker::getToolkit()
+{
+  return _toolkit;
+}
 
 inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
 {
