@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbcreate.pl,v 1.4 1999/09/21 12:24:00 wenaus Exp $
+# $Id: dbcreate.pl,v 1.5 1999/11/19 23:12:28 wenaus Exp $
 #
 ######################################################################
 #
@@ -14,6 +14,9 @@
 # Usage:    create.pl <pwd>
 #
 # $Log: dbcreate.pl,v $
+# Revision 1.5  1999/11/19 23:12:28  wenaus
+# take out pwd
+#
 # Revision 1.4  1999/09/21 12:24:00  wenaus
 # Update to run on Solaris, and run quieter
 #
@@ -127,10 +130,21 @@ my $nHpssDirs = 0;
 my $nHpssFiles = 0;
 
 ## Find all the Reco dirs, files in HPSS
+my $hpssHost = 'rmds01.rhic.bnl.gov';
+my $netrc = $ENV{HOME}.'/.netrc';
+open(NETRC,"<$netrc");
+my $pass = '';
+while (<NETRC>) {
+    if ( m/.*$hpssHost\s.*password\s([\S]*)\s/ ) {$pass = $1}
+}
+if ( $pass eq '' ) {
+    print "Password not found in .netrc\n";
+    exit;
+}
 my $ftpRecoHome = "/home/starreco/reco";
-my $ftpReco = Net::FTP->new("rmds02.rhic.bnl.gov", Port => 2121)
-    or die "rmds02 connect failed";
-$ftpReco->login("starreco") or die "Login failed";
+my $ftpReco = Net::FTP->new($hpssHost, Port => 2121)
+    or die "$hpssHost connect failed";
+$ftpReco->login("starreco",$pass) or die "Login failed";
 my $nRecoFiles = 0;
 my @theRecoDirs;
 my @checkedRecoDirs;
@@ -152,9 +166,9 @@ $ftpReco->quit();
 
 ## Find all the Simu dirs, files in HPSS
 my $ftpSimuHome = "/home/starsink/raw";
-my $ftpSimu = Net::FTP->new("rmds02.rhic.bnl.gov", Port => 2121)
-    or die "rmds01 connect failed";
-$ftpSimu->login("starsink","MockData") or die "Login failed";
+my $ftpSimu = Net::FTP->new($hpssHost, Port => 2121)
+    or die "$hpssHost connect failed";
+$ftpSimu->login("starsink",$pass) or die "Login failed";
 my $nSimuFiles = 0;
 my @theSimuDirs;
 my @checkedSimuDirs;
