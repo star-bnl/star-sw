@@ -1,6 +1,10 @@
-* $Id: ftpcgeo1.g,v 1.2 2005/03/31 20:05:49 potekhin Exp $
+* $Id: ftpcgeo1.g,v 1.3 2005/04/07 19:51:46 potekhin Exp $
 *
 * $Log: ftpcgeo1.g,v $
+* Revision 1.3  2005/04/07 19:51:46  potekhin
+* The Ar+C02 mix exists everywhere in FTPC, not
+* just in the sensitive volumes
+*
 * Revision 1.2  2005/03/31 20:05:49  potekhin
 * Janet has coomuncated to us that a few parameters
 * need to be updated, which is what is done here.
@@ -301,7 +305,16 @@ Block FOAL is the Al drift-electrode
 Endblock
 * ----------------------------------------------------------------------------
 Block FGAS is the FTPC gas volume
-      Material  Argon_gas
+
+**FTPC uses gas mixture Ar+CO2  50:50 by weight
+
+      Component Ar    A=40  Z=18 W=.5
+      Component C     A=12  Z=6  W=.5*12/44.
+      Component O     A=16  Z=8  W=.5*32/44.
+      Mixture   Ar_CO2 Dens=0.001879     "g/cm**3"
+*
+* was:      Material  Argon_gas
+*
       attribute FGAS   seen=1  colo=7
       temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
               ftpg_DrInIsoL+ftpg_DrInAlL2
@@ -382,12 +395,6 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FSEN is the sensitive gas volume
       Medium    sensitive  ISVOL=1
-      Component Ar    A=40  Z=18 W=.5
-      Component C     A=12  Z=6  W=.5*12/44.
-      Component O     A=16  Z=8  W=.5*32/44.
-**FTPC uses gas mixture Ar+CO2  50:50 by weight
-      Mixture   Ar_CO2 Dens=0.001879     "g/cm**3"
-
       attribute FSEN   seen=1  colo=4
 
       temp1=ftpg_RinnerMs+ftpg_DrInAlL1+ _
