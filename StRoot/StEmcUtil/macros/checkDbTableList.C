@@ -30,6 +30,7 @@ checkDbTableList(char* listFile, char* outName, bool doPrintOut=true)
   
   // loading functions macros
   gROOT->LoadMacro("$STAR/StRoot/StEmcUtil/macros/checkDbTable.C");
+//  gROOT->LoadMacro("./StRoot/StEmcUtil/macros/checkDbTable.C");
 
   // Getting file list to be checked
   ifstream inputFile(listFile); 
@@ -42,9 +43,15 @@ checkDbTableList(char* listFile, char* outName, bool doPrintOut=true)
     inputFile >> fileName;
     if (strcmp(fileName," "))
       if (!checkDbTable(fileName)) 
+      {
         outputFile << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
+        cout << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
+      }
       else
-        outputFile << fileName <<" - Tables match"<< endl;
+      {
+         outputFile << fileName <<" - Tables match"<< endl;
+         cout << fileName <<" - Tables match"<< endl;
+      }
   }
 
   outputFile.close();

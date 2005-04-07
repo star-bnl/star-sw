@@ -29,11 +29,11 @@ bool checkDbTable(char* fileSource)
   TString tableName = fileName(0,index2);
   TString date = fileName(index2+1,4) + "-" +
                  fileName(index2+5,2) + "-" +
-		 fileName(index2+7,2);
+                 fileName(index2+7,2);
 
   TString time = fileName(index2+10,2) + ":" +
                  fileName(index2+12,2) + ":" +
-		 fileName(index2+14,2);
+                 fileName(index2+14,2);
 
   TString timeStamp = date + " " + time;  
 
@@ -41,83 +41,87 @@ bool checkDbTable(char* fileSource)
   dbHandler->setTableName(tableName.Data());
   dbHandler->setTimeStamp(timeStamp.Data());    
   
-  
+  tableFile->ls();
+
   if (tableName=="bemcCalib" || tableName=="bprsCalib" )
   {
-    emcCalib_st* tableInFile = (emcCalib_st*) tableFile->Get(tableName.Data());
+    emcCalib_st* tableInFile = (emcCalib_st*) ((St_emcCalib*)tableFile->Get(tableName.Data()))->GetTable();
     emcCalib_st* tableInDb   = (emcCalib_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
   
   if (tableName=="bsmdeCalib" || tableName=="bsmdpCalib" )
   {
-    smdCalib_st* tableInFile = (smdCalib_st*) tableFile->Get(tableName.Data());
+    smdCalib_st* tableInFile = (smdCalib_st*) ((St_smdCalib*)tableFile->Get(tableName.Data()))->GetTable();
     smdCalib_st* tableInDb   = (smdCalib_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
   
   if (tableName=="bemcGain" || tableName=="bprsGain" )
   {
-    emcGain_st* tableInFile = (emcGain_st*) tableFile->Get(tableName.Data());
+    emcGain_st* tableInFile = (emcGain_st*) ((St_emcGain*)tableFile->Get(tableName.Data()))->GetTable();
     emcGain_st* tableInDb   = (emcGain_st*) dbHandler->getDbTable()->GetTable();
-     if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
   
   if (tableName=="bsmdeGain" || tableName=="bsmdpGain" )
   {
-    smdGain_st* tableInFile = (smdGain_st*) tableFile->Get(tableName.Data());
+    smdGain_st* tableInFile = (smdGain_st*) ((St_smdGain*)tableFile->Get(tableName.Data()))->GetTable();
     smdGain_st* tableInDb   = (smdGain_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   } 
   
   if (tableName=="bemcPed" || tableName=="bprsPed" )
   {
-    emcPed_st* tableInFile = (emcPed_st*) tableFile->Get(tableName.Data());
+    emcPed_st* tableInFile = (emcPed_st*) ((St_emcPed*)tableFile->Get(tableName.Data()))->GetTable();
     emcPed_st* tableInDb   = (emcPed_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
  
   if (tableName=="bsmdePed" || tableName=="bsmdpPed" )
   {
-    smdPed_st* tableInFile = (smdPed_st*) tableFile->Get(tableName.Data());
+    smdPed_st* tableInFile = (smdPed_st*) ((St_smdPed*)tableFile->Get(tableName.Data()))->GetTable();
     smdPed_st* tableInDb   = (smdPed_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
 
   if (tableName=="bemcStatus" || tableName=="bprsStatus" )
   {
-    emcStatus_st* tableInFile = (emcStatus_st*) tableFile->Get(tableName.Data());
+    emcStatus_st* tableInFile = (emcStatus_st*) ((St_emcStatus*)tableFile->Get(tableName.Data()))->GetTable();
     emcStatus_st* tableInDb   = (emcStatus_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
 
   if (tableName=="bsmdeStatus" || tableName=="bsmdpStatus" )
   {
-    smdStatus_st* tableInFile = (smdStatus_st*) tableFile->Get(tableName.Data());
+    smdStatus_st* tableInFile = (smdStatus_st*) ((St_smdStatus*)tableFile->Get(tableName.Data()))->GetTable();
     smdStatus_st* tableInDb   = (smdStatus_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
   
   if (tableName=="emcTriggerPed")
   {
-    emcTriggerPed_st* tableInFile = (emcTriggerPed_st*) tableFile->Get(tableName.Data());
+    emcTriggerPed_st* tableInFile = (emcTriggerPed_st*) ((St_emcTriggerPed*)tableFile->Get(tableName.Data()))->GetTable();
     emcTriggerPed_st* tableInDb   = (emcTriggerPed_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
       
   if (tableName=="emcTriggerStatus")
   {
-    emcTriggerStatus_st* tableInFile = (emcTriggerStatus_st*) tableFile->Get(tableName.Data());
+    emcTriggerStatus_st* tableInFile = (emcTriggerStatus_st*) ((St_emcTriggerStatus*)tableFile->Get(tableName.Data()))->GetTable();
     emcTriggerStatus_st* tableInDb   = (emcTriggerStatus_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
 
   if (tableName=="emcTriggerLUT")
   {
-    emcTriggerLUT_st* tableInFile = (emcTriggerLUT_st*) tableFile->Get(tableName.Data());
+    emcTriggerLUT_st* tableInFile = (emcTriggerLUT_st*) ((St_emcTRiggerLUT*)tableFile->Get(tableName.Data()))->GetTable();
     emcTriggerLUT_st* tableInDb   = (emcTriggerLUT_st*) dbHandler->getDbTable()->GetTable();
-    if (!compare(tableInFile,tableInDb)) equal=false;
+    equal=compare(tableInFile,tableInDb);
   }
+  tableFile->Close();
+  delete tableInFile;
+  delete dbHandler;
   return equal;
 
 }
@@ -153,7 +157,11 @@ bool compare(emcStatus_st* t1, emcStatus_st* t2)
   bool equal = true;  
   for(int i = 0; i<4800;i++) 
   { 
-    if(t1->Status[i]!=t2->Status[i]) equal = false;
+    if(t1->Status[i]!=t2->Status[i]) 
+    {
+     equal = false;
+     //cout <<"i = "<<i<<"  "<<(int)t1->Status[i]<<"  "<<(int)t2->Status[i]<<endl;
+    }
   }
   return equal;
 }
