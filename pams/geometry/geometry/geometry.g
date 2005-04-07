@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.106 2005/04/04 22:13:37 potekhin Exp $
+* $Id: geometry.g,v 1.107 2005/04/07 19:52:30 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.107  2005/04/07 19:52:30  potekhin
+* As per Janet's note, update the FTPC config
+* in Y2004C (Ar+CO2)
+*
 * Revision 1.106  2005/04/04 22:13:37  potekhin
 * Creating a new Y2004C per the request from Jamie and A.Wetzler.
 * It contains a better version of the SSD (unavailable back in 2004),
@@ -1234,11 +1238,15 @@ If LL>1
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4; "SVTT version"
                      DensConfig = 1; "gas density correction"
+* Ar+C02 in ftpc
+                     FtpcConfig = 1; "ftpc configuration"
+
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdConfig = 2;
 
+* second file version, 10 ladders
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 22;
