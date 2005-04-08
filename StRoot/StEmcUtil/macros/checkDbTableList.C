@@ -21,7 +21,7 @@
 |
 |-----------------------------------------------------------------------------*/
 
-checkDbTableList(char* listFile, char* outName, bool doPrintOut=true)
+checkDbTableList(char* listFile, char* outName)
 {
   
   // Loading basic libraries
@@ -45,24 +45,21 @@ checkDbTableList(char* listFile, char* outName, bool doPrintOut=true)
       if (!checkDbTable(fileName)) 
       {
         outputFile << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
-        cout << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
+        cout       << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
       }
       else
       {
          outputFile << fileName <<" - Tables match"<< endl;
-         cout << fileName <<" - Tables match"<< endl;
+         cout       << fileName <<" - Tables match"<< endl;
       }
   }
 
   outputFile.close();
   
   // Printing message on terminal
-  if (doPrintOut) 
-  {
-    cout << endl; 
-    cout << "_______ DB Table file list checking is done _______" << endl;
-    cout << endl;
-  }
+  cout << endl; 
+  cout << "_______ DB Table file list checking is done _______" << endl;
+  cout << endl;
 }
 //------------------------------------------------------------------------------
 

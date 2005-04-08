@@ -37,9 +37,6 @@ StDbTable* StEmcDbHandler::getDbTable()
   dbMngr->fetchDbTable(table);
   TString time=timeToSqlTime(table->getBeginDateTime()); 
   setTimeStamp((char*) time.Data());
-  cout << endl
-       << "| Table time stamp from StEmcDbHandler is " << mTimeStamp.Data() << endl
-       << "|_____________________________________________________________"<< endl;
   mTable = table;
   return mTable;
 }
