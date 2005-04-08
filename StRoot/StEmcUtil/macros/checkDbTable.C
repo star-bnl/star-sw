@@ -41,8 +41,6 @@ bool checkDbTable(char* fileSource)
   dbHandler->setTableName(tableName.Data());
   dbHandler->setTimeStamp(timeStamp.Data());    
   
-  tableFile->ls();
-
   if (tableName=="bemcCalib" || tableName=="bprsCalib" )
   {
     emcCalib_st* tableInFile = (emcCalib_st*) ((St_emcCalib*)tableFile->Get(tableName.Data()))->GetTable();
