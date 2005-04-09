@@ -39,7 +39,6 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
 {
   const EEmcDbItem *dbitem;
   cdet = 'U';
-  bool dbfail;
 
   do {
     if ( mNhits <= mIhits )  return false;    
@@ -66,20 +65,24 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
       default:
 	return false;
       }
-    dbfail = ( !dbitem || dbitem->fail || dbitem->gain < 0.5 );
-  } while ( mSuppBad && dbfail );
+  } while ( mSuppBad && ( !dbitem || dbitem->fail || dbitem->gain < 0.5 ) );
 
-  if  ( dbfail ) 
+  if  ( !dbitem || dbitem->fail || dbitem->ped < 1 ) 
     {
       e = - 100.0;
       adclessped = adc;
     }
-  else 
+  else
     {
       float acorr = adc - dbitem->ped;
-      e = acorr/dbitem->gain;
-      if ( mIsSimu && mdetector == eemc ) e *= 1.25;
       adclessped = (int) floor(acorr + 0.5);
+      if ( dbitem->gain < 0 )
+	e = -100.0;
+      else
+	{
+	  e = acorr/dbitem->gain;
+	  if ( mIsSimu && mdetector == eemc ) e *= 1.25;
+	}
     }
 
   return true;
