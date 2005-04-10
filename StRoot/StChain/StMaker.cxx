@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.163 2005/03/09 23:42:26 perev Exp $
+// $Id: StMaker.cxx,v 1.164 2005/04/10 20:32:27 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -51,27 +51,33 @@ Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
 
 static const char *DBaliases[]={
-   "sd97",     "sd98", "year_1a", "year_1b",  "year_1c",
-   "es99",     "er99",    "dc99", "year_1d",  "year_1e",
-"year_1h",  "year_2a", "year_2b","year2001", "year2003", 
- "y2003x",   "y2003a",  "y2003b",   "y2004",   "y2004x",
- "y2004a",   "y2004b",   "y2005",  "y2005x",          0
+  "sd97"   ,     "sd98",  "year_1a",  "year_1b",  "year_1c",
+  "es99"   ,     "er99",     "dc99",  "year_1d",  "year_1e",
+  "year_1h",  "year_2a",  "year_2b", "year2001", "year2003",
+  "y2003x" ,   "y2003a",   "y2003b",   
+  "y2004"  ,   "y2004x",   "y2004a",   "y2004b",   "y2004c", 
+  "y2005"  ,   "y2005x",   "y2005b",
+          0
 };   
 
 static const int   DBdates[]=  {
- 19970101,   19980101,  19990101,  19990501,   19991001,
- 19990615,   19990616,  19991206,  19991101,   19991201,
- 20000614,   20010610,  20010501,  20010615,   20021115, 
- 20021115,   20021115,  20021115,  20031120,   20031120,
- 20031120,   20031120,  20041030,  20041030,          0
+  19970101,    19980101,   19990101,   19990501,   19991001,
+  19990615,    19990616,   19991206,   19991101,   19991201,
+  20000614,    20010610,   20010501,   20010615,   20021115, 
+  20021115,    20021115,   20021115,  
+  20031120,    20031120,   20031120,   20031120,   20031120,
+  20041030,    20041030,   20041101,
+         0
 };
 
 static const int   DBtimes[]=  {
-        0,          0,         0,         0,          0,
-        0,     120000,     80000,         0,          0,
-   175430,          0,         0,         0,          0,        
-        0,          0,         0,         0,          0,
-        0,          0,         0,         0,          0
+         0,           0,          0,          0,          0,
+         0,      120000,      80000,          0,          0,
+    175430,           0,          0,          0,          0,        
+         0,           0,          0,         
+	 0,           0,          0,          0,          0,
+	 0,           0,          0,
+         0
 };
 
 // Turn the logger of the current maker
@@ -1583,6 +1589,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.164  2005/04/10 20:32:27  jeromel
+// Expanded geo (several missing in the past / doc not accurate)
+//
 // Revision 1.163  2005/03/09 23:42:26  perev
 // Clear() removed from Finish()
 //
