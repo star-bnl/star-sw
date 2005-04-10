@@ -1,11 +1,7 @@
-* $Id: g2t_volume_id.g,v 1.51 2005/03/31 18:10:38 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.50 2005/03/23 21:59:23 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
-* Revision 1.51  2005/03/31 18:10:38  potekhin
-* Correction of the SSD volume numbering, as discussed with
-* Lilian and Kai. +7000 to the number.
-*
 * Revision 1.50  2005/03/23 21:59:23  potekhin
-* Added the numbering for the IST and FST, based on Kai's code
+* Added the numbering for the IST and FST, based on Lai's code
 *
 * Revision 1.49  2004/09/13 23:14:00  potekhin
 * New material to support SSD, by Kai
@@ -200,7 +196,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endif
         
       else If (Csys=='ssd') then
-        volume_id = 7000+100*numbv(2)+numbv(1)
+        volume_id = 100*numbv(2)+numbv(1)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='tpc') then
 *2*                                        Peter M. Jacobs

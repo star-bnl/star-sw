@@ -13,7 +13,7 @@
       g2t_ist_hit_h.nok = 0
 
 
-      call G2R_GET_SYS ('ISTB','IBSS',Iprin,Idigi)
+      call G2R_GET_SYS ('ISTB','IBLA',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
        Local  = Idigi.ge.2
 

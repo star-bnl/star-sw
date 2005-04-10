@@ -10,11 +10,8 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.87 2005/04/01 21:38:31 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.86 2004/09/16 02:05:18 perev Exp $
 // $Log: St_db_Maker.cxx,v $
-// Revision 1.87  2005/04/01 21:38:31  perev
-// call Make after SetFlavor
-//
 // Revision 1.86  2004/09/16 02:05:18  perev
 // Add option to use saved dbConfig file. speedup
 //
@@ -805,22 +802,15 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
 //_____________________________________________________________________________
 void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 {
-   TDataSet *fl=0;
-   TDataSet *flaDir =0;
+   TDataSet *fl;
    if (flav) {
-     fl = 0;
-     flaDir = Find(".flavor");
-     if (flaDir) fl = flaDir->Find(tabname);
-     if (fl && strcmp(fl->GetTitle(),flav)==0) return;
-     if (fl) delete fl;
      fl = new TDataSet(tabname);
      fl->SetTitle(flav);
      AddData(fl,".flavor");
    }
    if (!TestBit(kInitBeg|kInitEnd)) 	return;
 
-   int nAkt = 0;
-   flaDir = Find(".flavor");
+   TDataSet *flaDir = Find(".flavor");
    if (!flaDir)				return;
    St_ValiSet *val;
    TDataSetIter  valNext(m_ConstSet,999);
@@ -842,7 +832,6 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 
        TDataSet *par = val->GetParent();
        val->fFla = flaType;
-       nAkt++;
        val->fTimeMin.Set(kMaxTime,0);
        val->fTimeMax.Set(kMinTime,0);
        int tabID = (int)val->fDat->GetUniqueID();
@@ -870,7 +859,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    }
 
    delete flaDir;
-   if(nAkt) Make();
+
 
 }
 //_____________________________________________________________________________

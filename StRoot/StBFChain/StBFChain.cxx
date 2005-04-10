@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.468 2005/03/03 23:41:28 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.469 2005/04/10 20:31:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -74,9 +74,11 @@ Bfc_st BFC1[] = { // standard chains
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004b","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
+  {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
 
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
+  {"RY2005b","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -97,9 +99,11 @@ Bfc_st BFC1[] = { // standard chains
   {"Y2004a" ,"","","db,detDb","","",                                      "Y2004 with PMD adjusted",kFALSE},
   {"Y2004b" ,"","","db,detDb","","",                                        "Y2004a + SSD materiau",kFALSE},
   {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
+  {"Y2004c" ,"","","db,detDb","","",                                     "Y2004a + SSD materiau V2",kFALSE},
 
   {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
   {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
+  {"Y2005b" ,"","","db,detDb","","",        "Year5 geometry + corrections SVT, FTPC gas + SSD y4c", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
@@ -211,7 +215,7 @@ Bfc_st BFC1[] = { // standard chains
   // Year 5 chains *** CHAINS WILL BE RESHAPED AS RUN PROGRESS *** Initial copy from 2004
   // THOSE MAY BE DROPPED AS WE WANT TO SUPPORT Sti BASED CHAINS
   //
-  {"B2005"       ,""  ,"","ry2005,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
+  {"B2005"       ,""  ,"","ry2005b,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                    ,"Base chain for 2005 (tpc+svt)",kFALSE},
   {"P2005"       ,""     ,"","B2005,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
                      ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
@@ -656,7 +660,7 @@ Bfc_st BFC1[] = { // standard chains
   {"ppDAQfilter1","ppDAQfilter1"  ,"",""  ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
-  {"logger"      ,""  ,"",""                                  ,"","","Use log4cxx package to manage the program messages",kFALSE},
+  {"logger"      ,""  ,"",""            ,"","","Use log4cxx package to manage the program messages",kFALSE},
   {"ITTF"        ,""  ,"","",                               "","","Just to keep option ITTF==false",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
@@ -700,9 +704,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004b","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
+  {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
 
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
+  {"RY2005b","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
 
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -723,9 +729,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2004a" ,"","","db,detDb","","",                                      "Y2004 with PMD adjusted",kFALSE},
   {"Y2004b" ,"","","db,detDb","","",                                        "Y2004a + SSD materiau",kFALSE},
   {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
+  {"Y2004c" ,"","","db,detDb","","",                                     "Y2004a + SSD materiau V2",kFALSE},
 
   {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
   {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
+  {"Y2005b" ,"","","db,detDb","","",        "Year5 geometry + corrections SVT, FTPC gas + SSD y4c", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
@@ -860,7 +868,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   // Year 5 Chains
-  {"B2005"       ,""        ,"","ry2005,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+  {"B2005"       ,""       ,"","ry2005b,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2005 ITTF (tpc+svt)",kFALSE},
   {"P2005"       ,"" ,"",
                    "B2005,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
@@ -1327,7 +1335,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"ppDAQfilter1","ppDAQfilter1"  ,"",""  ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
-  {"logger"      ,""  ,"",""                                  ,"","","Use log4cxx package to manage the program messages",kFALSE},
+  {"logger"      ,""  ,"",""            ,"","","Use log4cxx package to manage the program messages",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
 
@@ -2467,11 +2475,17 @@ void StBFChain::SetGeantOptions(){
 	       GetOption("RY2004a"))  geantMk->LoadGeometry("detp geometry y2004a");
       else if (GetOption("Y2004b") ||
 	       GetOption("RY2004b"))  geantMk->LoadGeometry("detp geometry y2004b");
+      else if (GetOption("Y2004x") ||
+	       GetOption("RY2004x"))  geantMk->LoadGeometry("detp geometry y2004x");
+      else if (GetOption("Y2004c") ||
+	       GetOption("RY2004c"))  geantMk->LoadGeometry("detp geometry y2004c");
       else if (GetOption("Y2005") ||
 	       GetOption("RY2005"))   geantMk->LoadGeometry("detp geometry y2005");
                                       // gMessMgr->Error() << "Y2005/RY2005 not yet implemented" << endm;
       else if (GetOption("Y2005x") ||
 	       GetOption("RY2005x"))  geantMk->LoadGeometry("detp geometry y2005x");
+      else if (GetOption("Y2005b") ||
+	       GetOption("RY2005b"))  geantMk->LoadGeometry("detp geometry y2005b");
 
 
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
@@ -2585,8 +2599,10 @@ void StBFChain::SetDbOptions(){
 	else if (GetOption("Y2004a"))db->SetDateTime("y2004a");
 	else if (GetOption("Y2004b"))db->SetDateTime("y2004b");
 	else if (GetOption("Y2004x"))db->SetDateTime("y2004x");
+	else if (GetOption("Y2004c"))db->SetDateTime("y2004c");
 	else if (GetOption("Y2005")) db->SetDateTime("y2005");
 	else if (GetOption("Y2005x"))db->SetDateTime("y2005x");
+	else if (GetOption("Y2005b"))db->SetDateTime("y2005b");
 	else gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;
       }
 
