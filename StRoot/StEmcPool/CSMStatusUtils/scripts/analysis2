@@ -1,6 +1,0 @@
-#!/bin/bash
-
-root4star <<+EOF
-  .x StRoot/StEmcPool/CSMStatusUtils/macros/makeStatusPlots.C()
-  
-+EOF
