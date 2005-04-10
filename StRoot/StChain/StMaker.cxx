@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.164 2005/04/10 20:32:27 jeromel Exp $
+// $Id: StMaker.cxx,v 1.165 2005/04/10 20:38:35 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -65,7 +65,7 @@ static const int   DBdates[]=  {
   19990615,    19990616,   19991206,   19991101,   19991201,
   20000614,    20010610,   20010501,   20010615,   20021115, 
   20021115,    20021115,   20021115,  
-  20031120,    20031120,   20031120,   20031120,   20031120,
+  20031120,    20031120,   20031120,   20031120,   20031125,
   20041030,    20041030,   20041101,
          0
 };
@@ -1589,6 +1589,11 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.165  2005/04/10 20:38:35  jeromel
+// TimeStamp now corrected. Hopefully,
+// http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html#Year5
+// should reflect all timestamps correctely.
+//
 // Revision 1.164  2005/04/10 20:32:27  jeromel
 // Expanded geo (several missing in the past / doc not accurate)
 //
