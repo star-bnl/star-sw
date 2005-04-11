@@ -12,7 +12,7 @@ class StiTrackFitter //: public Named, public Described, public Loadable
 public:
     StiTrackFitter() {	}
     virtual ~StiTrackFitter() {}
-    virtual void fit(StiTrack * track, int direction)=0;
+    virtual int fit(StiTrack * track, int direction)=0;
     virtual EditableParameters & getParameters()=0;
 };
 

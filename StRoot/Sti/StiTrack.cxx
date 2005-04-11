@@ -67,9 +67,9 @@ StiTrackFitter * StiTrack::getTrackFitter()
 }
 
 
-void StiTrack::fit(int direction)
+int StiTrack::fit(int direction)
 {
-  trackFitter->fit(this,direction);
+  return trackFitter->fit(this,direction);
 }
 
 bool StiTrack::find(int direction)

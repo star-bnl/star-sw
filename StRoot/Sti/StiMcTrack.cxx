@@ -13,8 +13,8 @@ StiMcTrack::StiMcTrack()
 StiMcTrack::~StiMcTrack()
 {}
 
-void StiMcTrack::fit(int direction)
-{}
+int StiMcTrack::fit(int direction)
+{ return 1;}
 
 bool StiMcTrack::find(int direction)
 {

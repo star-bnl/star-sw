@@ -25,15 +25,14 @@ StiKalmanTrackFitter::~StiKalmanTrackFitter()
       and updates are performed only if nodes hold a hit.
 	</ol>
 */
-void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
+int StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
+   enum {kMaxNErr=333};
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
-
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
-  if (track==0) 
-    throw runtime_error("StiKalmanTrack::fit() - ERROR:\t Dynamic cast to StiKalmanTrack failed");
+  assert(track); 
   StiHit * targetHit;
   StiKalmanTrackNode * targetNode; // parent node
   const StiDetector * targetDet;  // parent detector
@@ -44,7 +43,7 @@ StiKalmanTrackNode::Break(nCall);
   StiKTNBidirectionalIterator source;
   bool direction = (trackingDirection==fitDirection);
   double chi2;
-  int status = 0;
+  int status = 0,nerr =0;
   if (direction) {
     first = track->begin();
     last  = track->end();
@@ -55,13 +54,16 @@ StiKalmanTrackNode::Break(nCall);
   if (debug()) cout << "StiKalmanTrackFitter::fit set direction T/F= " << trackingDirection << "\t" << fitDirection << endl;
 // 1st count number of accepted already good nodes
   int nGoodNodes = track->getNNodes(3);
-  if (!nGoodNodes) 			return;
+  if (!nGoodNodes) 			return 1;
   double errFactor = double(nGoodNodes+1)/nGoodNodes;
 
 
   StiKalmanTrackNode *pNode = 0;
+  int iNode=0; status = 0;
   for (source=first;source!=last;source++) {
+    if (nerr>kMaxNErr) return nerr;
     do { //do refit block
+      iNode++;
       targetNode = &(*source);
       targetDet = targetNode->getDetector();
       targetHit = targetNode->getHit();
@@ -76,7 +78,7 @@ static int myKount=0;myKount++;
 	  status = targetNode->propagate(pNode,targetDet,fitDirection);	// hit
 	else if (targetHit)
 	  status = targetNode->propagate(pNode,targetHit,fitDirection);  // vertex
-	if (status) 			continue;
+	if (status)			{nerr++; continue;}
       }
       else  {
 	if (debug()) {
@@ -92,13 +94,15 @@ static int myKount=0;myKount++;
         assert(targetNode->getHit()==targetHit);
         StiKalmanTrackNode tryNode = *targetNode;
         targetNode->setChi2(1e52);
-        if (tryNode.nudge(targetHit))	break;
-        chi2 = tryNode.evaluateChi2(targetHit);
-        if ((chi2>_pars.getMaxChi2()))	break;	//Chi2 is bad
+        if (tryNode.nudge(targetHit))	{nerr++; break;}
+	chi2 = tryNode.evaluateChi2(targetHit);
+        if ((chi2>_pars.getMaxChi2()))	{nerr++; break;}	//Chi2 is bad
         status = tryNode.updateNode();
-        if (status) 			break;
+        if (status) 			{nerr++; break;}
         tryNode.setChi2(chi2);
         tryNode.resetError(errFactor);
+        assert(tryNode.getEyy()>tryNode.getCyy());
+
         *targetNode=tryNode;
       }while(0);//end fit block
       pNode = targetNode;
@@ -107,6 +111,7 @@ static int myKount=0;myKount++;
       if (debug()) cout << Form("%5d ",status) << StiKalmanTrackNode::Comment() << endl;
     }//end continue block
   }//end for of nodes
+  if (nerr>kMaxNErr) return nerr; else return 0;
 }
 
 void StiKalmanTrackFitter::setParameters(const StiKalmanTrackFitterParameters & pars)

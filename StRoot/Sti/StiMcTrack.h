@@ -8,7 +8,7 @@ class StiMcTrack : public StiTrack
 {
  public:  StiMcTrack();
   virtual ~StiMcTrack();
-  virtual void fit(int direction=kOutsideIn); 
+  virtual int fit(int direction=kOutsideIn); 
   virtual bool find(int direction=kOutsideIn);
   virtual void reset();
   virtual void getMomentum(double p[3], double e[6]) const ;
