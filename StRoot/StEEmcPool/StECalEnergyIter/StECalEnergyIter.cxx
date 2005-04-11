@@ -76,7 +76,7 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
     {
       float acorr = adc - dbitem->ped;
       adclessped = (int) floor(acorr + 0.5);
-      if ( dbitem->gain < 0 )
+      if ( dbitem->gain < 0.0001 )
 	e = -100.0;
       else
 	{
