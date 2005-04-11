@@ -54,7 +54,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
   //Instantiate energy loss detector for si material  
   //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
   double ionization = material->getIonization();
-  StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(), ionization*ionization);
+  StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(), ionization*ionization, material->getA(), material->getZ(), material->getDensity());
   
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
