@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.107 2005/04/07 19:52:30 potekhin Exp $
+* $Id: geometry.g,v 1.108 2005/04/11 17:47:09 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.108  2005/04/11 17:47:09  potekhin
+* Add the tag Y2005C, as authorized by Jerome, in order to activate
+* the latest TOF upgrades from Xin
+*
 * Revision 1.107  2005/04/07 19:52:30  potekhin
 * As per Janet's note, update the FTPC config
 * in Y2004C (Ar+CO2)
@@ -1452,6 +1456,76 @@ If LL>1
                 }
 
 ****************************************************************************************
+  on Y2005C    { TPC,FTPC,SVT and SSD correction of 2005 geometry
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 24; "second version, full barrel with corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+
+                }
+
+****************************************************************************************
   on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -1740,8 +1814,14 @@ If LL>1
              if(Itof.eq.1) then
                 write(*,*) '***********  ATTENTION : OLD VERSION OF BTOF IS NO LONGER IMPLEMENTED **********'
                 write(*,*) '***********  NO BTOF WILL BE INSTANTIATED **************************************'
-             else
+             endif
+
+             if(Itof.eq.2) then
                 call btofgeo2
+             endif
+
+             if(Itof.eq.4) then
+                call btofgeo4
              endif
    endif
      
