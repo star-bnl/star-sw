@@ -37,7 +37,7 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s)
   // Material is berylium
   //
   double ionization = _pipeMaterial->getIonization();
-  StiElossCalculator * pipeElossCalculator = new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization);
+  StiElossCalculator * pipeElossCalculator = new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization, _pipeMaterial->getA(), _pipeMaterial->getZ(), _pipeMaterial->getDensity());
 
   _beamPipeShape = new StiCylindricalShape;
   _beamPipeShape->setName("Star/pipe");
@@ -102,7 +102,7 @@ void StiStarDetectorBuilder::useVMCGeometry() {
 					pipeMaterial->GetDensity()*pipeMaterial->GetRadLen(),
 					PotI));
     Double_t ionization = _pipeMaterial->getIonization();
-    StiElossCalculator * pipeElossCalculator = new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization);
+    StiElossCalculator * pipeElossCalculator = new StiElossCalculator(_pipeMaterial->getZOverA(), ionization*ionization, _pipeMaterial->getA(), _pipeMaterial->getZ(), _pipeMaterial->getDensity());
     TGeoTube *pipeShape = (TGeoTube *) pipe->GetShape();
     Double_t Rmax = pipeShape->GetRmax();
     Double_t dZ   = pipeShape->GetDz();

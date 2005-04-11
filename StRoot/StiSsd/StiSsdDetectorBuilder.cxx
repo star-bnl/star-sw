@@ -99,7 +99,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 
     double ionization = _siMat->getIonization();
     //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
-    StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization);
+    StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
 
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endm;  
     cout << "StiSsdDetectorBuilder::buildMaterials() - I - Done "<<endl;  

@@ -91,9 +91,9 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   //  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
   // Instantiate eloss calculator for tpc gas and for field cage
   double ionization = _gas->getIonization();
-  StiElossCalculator * gasElossCalculator = new StiElossCalculator(_gas->getZOverA(),ionization*ionization);
+  StiElossCalculator * gasElossCalculator = new StiElossCalculator(_gas->getZOverA(),ionization*ionization, _gas->getA(), _gas->getZ(), _gas->getDensity());
   ionization = _fcMaterial->getIonization();
-  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization);
+  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization, _fcMaterial->getA(), _fcMaterial->getZ(), _fcMaterial->getDensity());
 
 
   // Inner field cage
@@ -376,7 +376,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 					  mat->GetDensity()*mat->GetRadLen(),
 					  PotI));
   Double_t ionization = _gas->getIonization();
-  StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gas->getZOverA(), ionization*ionization);
+  StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gas->getZOverA(), ionization*ionization, _gas->getA(), _gas->getZ(), _gas->getDensity());
   // IFC
   Double_t dPhi = 2*TMath::Pi();
   Int_t sector = 0;
@@ -394,7 +394,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 				     fcMaterial->GetDensity()*fcMaterial->GetRadLen(),
 				     PotI));
   ionization = _fcMaterial->getIonization();
-  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization);
+  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization, _fcMaterial->getA(), _fcMaterial->getZ(), _fcMaterial->getDensity());
   
   TGeoTube *fcShape = (TGeoTube *) newshape;
   Double_t Rmax = fcShape->GetRmax();

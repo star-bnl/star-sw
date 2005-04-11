@@ -1,6 +1,13 @@
 #include <stdexcept>
 #include <math.h>
 #include "StiElossCalculator.h"
+#if 1
+#include "Stiostream.h"
+#include "StarCallf77.h" 
+#define    gdrelx	 F77_NAME(gdrelx,GDRELX)
+extern "C"   void type_of_call gdrelx(float &A, float &Z, float &Dens, float &T, float &m, float &dEdx);
+
+#endif
 using namespace std;
 /// Bethe-Bloch constant in GeVg^-1cm^2
 const double StiElossCalculator::_k   = 0.307e-3;
@@ -11,11 +18,6 @@ const double StiElossCalculator::_mec = 0.510998e-3;
 /// Energy Loss Calculator Constructor
 ///\param zOverA Ratio of Z to A of the scattering material,
 ///\param  ionization2 square of the ionization potential.
-StiElossCalculator::StiElossCalculator(double zOverA, double ionization2)
-  : _zOverA(zOverA),
-    _ionization2(ionization2)
-{}
-
 StiElossCalculator::~StiElossCalculator()
 {}
 
@@ -61,5 +63,19 @@ double StiElossCalculator::calculate(double z2, double zOverA, double m, double 
 ///\return energy loss in GeV*cm^2/g.
 double StiElossCalculator::calculate(double z2, double m, double beta2) const
 {
-  return calculate(z2,_zOverA,m,beta2,_ionization2);
+#if 1
+  float dEdx;
+  float A = _A;
+  float Z = _Z;
+  float Dens = _Dens;
+  float Mass = m;
+  float T = Mass*(1./::sqrt(1 - beta2) - 1);
+  gdrelx(A,Z,Dens,T,Mass,dEdx);
+#endif
+#if 0
+  double fdEdx = calculate(z2,_zOverA, m, beta2,_ionization2);
+  cout << "StiElossCalculator::calculate(" << z2 << "," << m << "," << beta2 
+       << ") = " << fdEdx << "\tGEANT " << dEdx << "\t" << 100*(fdEdx/dEdx - 1) << endl;
+#endif
+  return dEdx;
 }
