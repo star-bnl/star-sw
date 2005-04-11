@@ -15,11 +15,11 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
   for (int i=0;i<nF;i++) {
   for (int j=0;j<nF;j++) {
 //    if (!F[i][j]) 	continue;
-    if (fabs(F[i][j])<1.e-10) 	continue;
+    if (fabs(F[i][j])<1.e-20) 	continue;
     for (int k=0;k<NP;k++) {
       int jk = idx66[j][k];
 //      if (!g[jk])	continue;
-      if (fabs(g[jk])<1.e-10)	continue;
+      if (fabs(g[jk])<1.e-20)	continue;
       fg[i][k] += F[i][j]*g[jk]; 
   }}}
 
@@ -28,7 +28,7 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
     int ik = idx66[i][k];
     double s = 0; 
     for (int j=0;j<NP;j++) {
-      if (fabs(F[k][j])<1.e-10)	continue;
+      if (fabs(F[k][j])<1.e-20)	continue;
       s += fg[i][j]*F[k][j];
     }
     G[ik] += (s + fg[i][k] + fg[k][i]);
