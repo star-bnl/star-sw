@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.23 2005/03/24 17:58:33 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.24 2005/04/11 17:25:29 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.24  2005/04/11 17:25:29  perev
+ * Cleanup
+ *
  * Revision 2.23  2005/03/24 17:58:33  perev
  * Do not allow to modify node anymore
  *
@@ -90,6 +93,7 @@
 #include "StiKalmanTrackNode.h"
 #include "StiHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
+#include "StiDebug.h"
 
 //_____________________________________________________________________________
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
@@ -100,36 +104,21 @@ StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
 //_____________________________________________________________________________
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator(const StiDefaultHitErrorCalculator & e)
 {
-  coeff[0]= e.coeff[0];
-  coeff[1]= e.coeff[1];
-  coeff[2]= e.coeff[2];
-  coeff[3]= e.coeff[3];
-  coeff[4]= e.coeff[4];
-  coeff[5]= e.coeff[5];
+  memcpy(coeff,e.coeff,sizeof(coeff));
 }
 
 //_____________________________________________________________________________
 const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(const StiDefaultHitErrorCalculator & calc)
 {
-  coeff[0]= calc.coeff[0];
-  coeff[1]= calc.coeff[1];
-  coeff[2]= calc.coeff[2];
-  coeff[3]= calc.coeff[3];
-  coeff[4]= calc.coeff[4];
-  coeff[5]= calc.coeff[5];
+  memcpy(coeff,calc.coeff,sizeof(coeff));
 	return *this;
 }
 
 //_____________________________________________________________________________
 const StiDefaultHitErrorCalculator & StiDefaultHitErrorCalculator::operator=(const HitError_st & e)
 {
-  coeff[0]= e.coeff[0];
-  coeff[1]= e.coeff[1];
-  coeff[2]= e.coeff[2];
-  coeff[3]= e.coeff[3];
-  coeff[4]= e.coeff[4];
-  coeff[5]= e.coeff[5];
-	return *this;
+  memcpy(coeff,e.coeff,sizeof(coeff));
+  return *this;
 }
 
 //_____________________________________________________________________________
@@ -137,9 +126,8 @@ StiDefaultHitErrorCalculator::~StiDefaultHitErrorCalculator()
 {}
 
 //_____________________________________________________________________________
-void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
-				    double crossZ, double intrinsicX,
-				    double driftX, double crossX)
+void StiDefaultHitErrorCalculator::set(double intrinsicZ,double driftZ,double crossZ
+                                      ,double intrinsicX,double driftX,double crossX)
 {
   coeff[0]= intrinsicZ;
   coeff[1]= driftZ;
@@ -168,15 +156,10 @@ void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
   cout << "StiDefaultHitErrorCalculator::loadDS(TDataSet & ds) -I- Started" <<endl;
 	cout << "    Fetching Hit Error for :" << getName() << endl;
   St_HitError * a = dynamic_cast<St_HitError*>(ds.Find(getName().c_str() ));
-  if (!a) throw runtime_error("StiDefaultHitErrorCalculator::loadDS(TDataSet&ds) -E- a==0");
+  assert(a);
   HitError_st * b = a->GetTable();
-  if (!b) throw runtime_error("StiDefaultHitErrorCalculator::loadDS(TDataSet&ds) -E- b==0");
-  coeff[0] = b->coeff[0];
-  coeff[1] = b->coeff[1];
-  coeff[2] = b->coeff[2];
-  coeff[3] = b->coeff[3];
-  coeff[4] = b->coeff[4];
-  coeff[5] = b->coeff[5];
+  assert(b);
+  memcpy(coeff,b->coeff,sizeof(coeff));
   cout << *this;
   cout << "StiDefaultHitErrorCalculator::loadDS(TDataSet & ds) -I- Done" <<endl;
 }
@@ -185,7 +168,7 @@ void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
 ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 {
   cout <<"Hit Error Parameters: "
-			 <<"[0] "<<c.coeff[0] << endl
+       <<"[0] "<<c.coeff[0] << endl
        <<"[1] "<<c.coeff[1] << endl
        <<"[2] "<<c.coeff[2] << endl
        <<"[3] "<<c.coeff[3] << endl
