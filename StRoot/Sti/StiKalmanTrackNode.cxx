@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.73 2005/03/30 21:01:43 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.74 2005/04/11 14:32:18 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.74  2005/04/11 14:32:18  fisyak
+ * Use gdrelx from GEANT for dE/dx calculation with accouning density effect
+ *
  * Revision 2.73  2005/03/30 21:01:43  perev
  * asserts replaced to prints
  *
@@ -1073,7 +1076,14 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
+#if 0
       assert(eyy>0);
+#else
+      if (eyy <= 0) {
+	cout << "eyy " << eyy << " reject" << endl;
+	return 1e41;
+      }
+#endif
       r00=_cYY+eyy;
       r01=_cZY;     r11=_cZZ+ezz;
     }

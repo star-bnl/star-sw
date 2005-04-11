@@ -25,7 +25,9 @@
 class StiElossCalculator
 {
  public:
-  StiElossCalculator(double zOverA, double ionization2);
+  StiElossCalculator(double zOverA, double ionization2, double A, double Z, double Dens) 
+    : _zOverA(zOverA), _ionization2(ionization2), _A(A), _Z(Z), _Dens(Dens) {}
+
   virtual ~StiElossCalculator();
   double calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
   double calculate(double z2, double m, double beta2) const;
@@ -37,6 +39,9 @@ class StiElossCalculator
   double _zOverA;
   /// square of the ionization potential.
   double _ionization2;
+  double _A;
+  double _Z;
+  double _Dens;
 };
 
 #endif

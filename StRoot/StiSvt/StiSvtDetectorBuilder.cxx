@@ -135,7 +135,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;
 
   double ionization = _siMat->getIonization();
-  StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization);
+  StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
   int nLayers = nRows;
   for(int layer = 0; layer<nLayers; layer++)
     {

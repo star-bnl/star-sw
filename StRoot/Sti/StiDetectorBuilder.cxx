@@ -122,7 +122,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 						matP->GetDensity()*matP->GetRadLen(),
 						PotI));
   Double_t ionization = matS->getIonization();
-  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), ionization*ionization);
+  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), ionization*ionization, matS->getA(), matS->getZ(),matS->getDensity());
   StiShape     *sh     = findShape(volP->GetName());
   Double_t     *xyz    = hmat->GetTranslation();
   Double_t     *rot    = hmat->GetRotationMatrix();
@@ -144,7 +144,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
     Double_t dR   = Rmax - Rmin;
     dR = TMath::Min(0.2*dZ, dR);
     if (dR < 0.1) dR = 0.1;
-    int Nr = (int) (Rmax - Rmin)/dR;
+    int Nr = (int) ((Rmax - Rmin)/dR);
     if (Nr <= 0) Nr = 1;
     dR = (Rmax - Rmin)/Nr;
     if (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg)) {
