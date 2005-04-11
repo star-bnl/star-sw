@@ -311,13 +311,28 @@ void StiTpcDetectorBuilder::loadFS(ifstream & inputFileStream)
 
 void StiTpcDetectorBuilder::setDefaults()
 {
+double iSti[6] = {.066      , 0.00012 , 0.0004    , 0.066     , 0.0004 , 0.028};
+double oSti[6] = {.02       , 0.004   ,   0.04    , 0.02      , 0.0032 , 0.09       };
+
+double iTpt[6] = {0.00168243, 0.005233, 0.05753410, 0.00312735, 0.015106, 0.02438060};
+double oTpt[6] = {0.00020278, 0.003552, 0.06456100, 0.00815800, 0.005696, 0.04484400};
+
   cout <<"StiTpcDetectorBuilder::setDefaults() -I- Tracking Parameters set from class default values."<<endl;
   _trackingParameters.setMaxChi2ForSelection(10.);
   _trackingParameters.setMinSearchWindow(1.6);
   _trackingParameters.setMaxSearchWindow(7.);
   _trackingParameters.setSearchWindowScaling(15.);
-  _innerCalc.set(.066, 1.2e-04, 0.0004, 0.066, 4.4e-4, 2.8e-02);
-  _outerCalc.set(.02, 4.e-3, 0.04, 0.02, 3.2e-3, 9.e-2);
+//  _innerCalc.set(.066, 1.2e-04, 0.0004, 0.066, 4.4e-4, 2.8e-02);
+//  _outerCalc.set(.02, 4.e-3, 0.04, 0.02, 3.2e-3, 9.e-2);
+#if 0
+_innerCalc.set(iSti[0], iSti[1],iSti[2], iSti[3],iSti[4], iSti[5]);
+_outerCalc.set(oSti[0], oSti[1],oSti[2], oSti[3],oSti[4], oSti[5]);
+#endif //0
+#if 1
+_innerCalc.set(iTpt[0], iTpt[1],iTpt[2], iTpt[3],iTpt[4], iTpt[5]);
+_outerCalc.set(oTpt[0], oTpt[1],oTpt[2], oTpt[3],oTpt[4], oTpt[5]);
+#endif //0
+
   cout << _trackingParameters << endl;
   cout << _innerCalc << endl;
   cout << _outerCalc << endl;
