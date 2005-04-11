@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.13 2005/02/07 18:34:17 fisyak Exp $
+ * $Id: StiStEventFiller.h,v 2.14 2005/04/11 17:42:53 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.14  2005/04/11 17:42:53  perev
+ * Temporary residuals saving added
+ *
  * Revision 2.13  2005/02/07 18:34:17  fisyak
  * Add VMC dead material
  *
@@ -159,7 +162,9 @@ public:
     float impactParameter(StiKalmanTrack* kTrack);
     float impactParameter(StTrack* track);
 private:
-    bool accept(StiKalmanTrack* kTrack);
+ void fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node);
+
+		    bool accept(StiKalmanTrack* kTrack);
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
     map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;

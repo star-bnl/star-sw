@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.56 2005/03/24 17:51:16 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.57 2005/04/11 17:42:39 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.57  2005/04/11 17:42:39  perev
+ * Temporary residuals saving added
+ *
  * Revision 2.56  2005/03/24 17:51:16  perev
  * print error code added
  *
@@ -766,19 +769,31 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   int dets[100]; memset(dets,0,sizeof(dets));
-  vector<StMeasuredPoint*> hitVec = track->stHits();
-  int numb = hitVec.size();
-  detInfo->setFirstPoint(hitVec[     0]->position());
-  detInfo->setLastPoint (hitVec[numb-1]->position());
-
-  for (int i=0;i<numb;i++) 
+  StiKTNIterator tNode = track->rbegin();
+  StiKTNIterator eNode = track->rend();
+  StHit *lastHit=0;
+  for (;tNode!=eNode;++tNode) 
     {
-      StHit * hh = (StHit*)hitVec[i];
+      StiKalmanTrackNode *node = &(*tNode);
+      if(!node->isValid()) 	continue;
+      if( node->getChi2()>1000) continue;
+      StiHit *stiHit = node->getHit();
+      if (!stiHit)		continue;
+      if (!stiHit->detector())	continue;
+      StHit *hh = (StHit*)stiHit->stHit();
+      if (!lastHit) detInfo->setFirstPoint(hh->position());
+      lastHit=hh;
       detInfo->addHit(hh,refCountIncr);
       hh->setFitFlag(1);
       StDetectorId id = hh->detector();
       dets[id]++;
+#if 1
+      if (!refCountIncr) continue;
+//Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
+      fillResHack(hh,stiHit,node);
+#endif
     }
+  if (lastHit) detInfo->setLastPoint(lastHit->position());
   for (int i=0;i<int(sizeof(dets)/sizeof(int));i++) {
     if (!dets[i]) continue;
     detInfo->setNumberOfPoints(dets[i],static_cast<StDetectorId>(i));
@@ -1123,4 +1138,34 @@ float StiStEventFiller::impactParameter(StTrack* track)
   //cout <<"PHelix: "<<helix<<endl;
   float dca = static_cast<float>(helix.distance(vxDD));
   return dca;
+}
+//_____________________________________________________________________________
+ void StiStEventFiller::fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node)
+ {
+ 
+ //Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
+      float psi  = node->getEta();
+      float resY = node->getY()-stiHit->y();
+      float eYY  = node->getEyy();
+      float cYY  = node->getCyy();
+      cYY = 1./(1/cYY-1/eYY);
+      if (cYY<0) cYY=0;
+      resY += resY*cYY/eYY;
+      float resZ = node->getZ()-stiHit->z();
+      float eZZ  = node->getEzz();
+      float cZZ  = node->getCzz();
+      cZZ = 1./(1/cZZ-1/eZZ);
+      if (cZZ<0) cZZ=0;
+      resZ += resZ*cZZ/eZZ;
+      
+      int iresY = (int)fabs(resY)*1000; if (iresY>4095) iresY=4095;
+      int iresZ = (int)fabs(resZ)*1000; if (iresZ>4095) iresZ=4095;
+
+      int icY   = (int)sqrt(cYY )*1000; if (icY > 2047) icY  =2047;
+      int icZ   = (int)sqrt(cZZ )*1000; if (icZ > 2047) icZ  =2047;
+      float forY = iresY + 4096*icY;    if (resY<0)     forY = -forY;
+      float forZ = iresZ + 4096*icZ;    if (resZ<0)     forZ = -forZ;
+
+      StThreeVectorF v3(psi,forY,forZ);
+      hh->setPositionError(v3);
 }
