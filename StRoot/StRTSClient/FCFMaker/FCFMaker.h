@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.12 2004/09/02 21:37:19 jml Exp $
+ * $Id: FCFMaker.h,v 1.13 2005/04/11 14:08:20 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.13  2005/04/11 14:08:20  jml
+ * flags to switch of EAST &/or WEST TPC
+ *
  * Revision 1.12  2004/09/02 21:37:19  jml
  * Reduced memory footprint
  *
@@ -155,6 +158,8 @@ class StRTSClientFCFMaker:public StMaker
  private:
   bool ignoreFileClusters;
   bool ignoreRawData;
+  bool m_EastOff;
+  bool m_WestOff;
 
   StDaqClfCppRow cpp[FCF_MAX_PADROWS];       // PADROW, PAD, SEQUENCE (0 based)
 
@@ -224,6 +229,22 @@ class StRTSClientFCFMaker:public StMaker
   Int_t Init() ;
   Int_t Make() ;
   Int_t InitRun(int run)  ;
+
+  void EastOff() { 
+    printf("<FCFMaker> Setting East TPC Off\n");
+    m_EastOff = true; 
+  }
+
+  void WestOff() { 
+    printf("<FCFMaker> Setting West TPC Off\n");
+    m_WestOff = true; 
+  }
+
+  void AllOn() {
+    printf("<FCFMaker> Setting East&West TPC On\n");
+    m_WestOff = false;
+    m_EastOff = false;
+  }
 
   int runClusterFinder(j_uintptr *result_mz_ptr,
 		       u_int *result_buff,

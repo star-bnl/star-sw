@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.26 2004/09/02 21:37:13 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.27 2005/04/11 14:08:20 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.27  2005/04/11 14:08:20  jml
+ * flags to switch of EAST &/or WEST TPC
+ *
  * Revision 1.26  2004/09/02 21:37:13  jml
  * Reduced memory footprint
  *
@@ -277,6 +280,9 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 
   mStEvent = NULL;
   mT_tphit = NULL;
+
+  m_WestOff = false;
+  m_EastOff = false;
 
   // gMessMgr->Info() << "dpad=" <<mDp<<endm;
   // gMessMgr->Info() << "dperp="<<mDperp<<endm;
@@ -619,6 +625,10 @@ Int_t StRTSClientFCFMaker::Make()
 
 
   for(int sector = 0;sector < 24; sector++) {
+
+    if(m_EastOff && sector >= 12) continue;
+    if(m_WestOff && sector < 12) continue;
+
     n_daq_file_cl_sector = 0;
     n_croat_cl_sector = 0;
     n_burned_daq_file_cl_sector = 0;
