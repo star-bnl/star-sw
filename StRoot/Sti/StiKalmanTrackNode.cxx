@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.74 2005/04/11 14:32:18 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.75 2005/04/11 17:33:55 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.75  2005/04/11 17:33:55  perev
+ * Wrong sorting accounted, check for accuracy inctreased
+ *
  * Revision 2.74  2005/04/11 14:32:18  fisyak
  * Use gdrelx from GEANT for dE/dx calculation with accouning density effect
  *
@@ -244,7 +247,7 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
-static const double kMaxEta = acos(0.2);
+static const double kMaxEta = 1.;
 static const double kMaxCur = 0.2;
 
 
@@ -351,6 +354,8 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
     _cCC=DRho*DRho;
     _cTT=DTan*DTan;
   } else {
+    if (_cYY*fak >= eyy) return;
+    if (_cZZ*fak >= ezz) return;
     for (int i=0;i<kNErrs;i++) (&_cXX)[i] *=fak;
   }  
 }
@@ -676,7 +681,14 @@ Break(nCall);
   setDetector(tDet);
   if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
 
+  StiPlacement * plaze = pNode->getDetector()->getPlacement();
+  double pLayerRadius  = plaze->getLayerRadius ();
+  double pNormalRadius = plaze->getNormalRadius();
+
   StiPlacement * place = tDet->getPlacement();
+  double nLayerRadius  = place->getLayerRadius ();
+  double nNormalRadius = place->getNormalRadius();
+
   StiShape * sh = tDet->getShape();
   int shapeCode = sh->getShapeCode();
   _refX = place->getLayerRadius();
@@ -684,7 +696,7 @@ Break(nCall);
   double endVal,dAlpha;
   switch (shapeCode) {
 
-  case kPlanar: endVal = place->getNormalRadius();
+  case kPlanar: endVal = nNormalRadius;
     { //flat volume
       dAlpha = place->getNormalRefAngle();
       dAlpha = nice(dAlpha - _alpha);
@@ -695,12 +707,11 @@ Break(nCall);
     }
     					break;
   case kDisk:  							
-  case kCylindrical: endVal = place->getNormalRadius();
+  case kCylindrical: endVal = nNormalRadius;
     {
       double xy[4];
       position = cylCross(endVal,&_cosCA,_curv,xy);
       if (position) 			return -11;
-//VP??      if (xy[0]<0.)			return -11;
       dAlpha = atan2(xy[1],xy[0]);
       if (fabs(dAlpha)<0.5e-2)		break;
       position = rotate(dAlpha);
@@ -710,7 +721,11 @@ Break(nCall);
   default: assert(0);
   }
 
-  position = propagate(endVal,shapeCode,dir); 
+// 	sometimes order is wrong, Hack it...(VP)
+  int myDir = dir;
+  if ((pNormalRadius<nNormalRadius) != (pLayerRadius<nLayerRadius)) myDir = !myDir;
+
+  position = propagate(endVal,shapeCode,myDir); 
   if (position<0)  return position;
 
   position = locate(place,sh); 
@@ -958,7 +973,7 @@ void StiKalmanTrackNode::propagateError()
 
   f[1][3]=fYE; f[1][4]=fYC; f[2][3]=fZE;f[2][4]=fZC;f[2][5]=fZT;f[3][4]=fEC;
   errPropag6(&_cXX,f,kNPars);
-  assert(_cYY>1.e-10);
+  assert(_cYY>1.e-10 && _cZZ>1.e-10 && _cEE>1.e-10&& _cCC>1.e-20&& _cTT>1.e-10);
   assert(fabs(_cXX)<1.e-6);
   _cXX = _cYX= _cZX = _cEX = _cCX = _cTX = 0;
   
@@ -1413,7 +1428,9 @@ static int nCall=0; nCall++;
   _cCY-=k30*c00+k31*c10;_cCZ-=k30*c10+k31*c11;_cCE-=k30*c20+k31*c21;_cCC-=k30*c30+k31*c31;
   _cTY-=k40*c00+k41*c10;_cTZ-=k40*c10+k41*c11;_cTE-=k40*c20+k41*c21;_cTC-=k40*c30+k41*c31;_cTT-=k40*c40+k41*c41;
 
-//  assert (_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0);
+  assert (_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0);
+  assert (_cYY < v00);
+  assert (_cZZ < v11);
   if (!(_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0)) {
     printf("StiKalmanTrackNode::updateNode *** negative errors  %g %g %g %g %g\n"
           ,_cYY,_cZZ,_cEE,_cCC,_cTT);
@@ -1522,6 +1539,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 //      last argument==2 means that only 2 first are non zero in f
   errPropag6(&_cXX,f,2 );  
   assert(_cYY+_cXX>1.e-10);
+  assert(_cZZ>1.e-10 && _cEE>1.e-10 && _cCC>1.e-20 && _cTT>1.e-10);
 #ifdef Sti_DEBUG
   TRMatrix F(kNPars,kNPars, f[0]);  
   TRMatrix I(TRArray::kUnit,kNPars);
