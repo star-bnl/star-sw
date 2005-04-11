@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.27 2004/08/03 17:23:47 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.28 2005/04/11 22:35:25 calderon Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.28  2005/04/11 22:35:25  calderon
+ * Tof Classes for Run 5.  Modifications and additions from Xin to
+ * take care of new TOF daq and electronics.  Added StTofRawData and
+ * modified containers and includes.
+ *
  * Revision 2.27  2004/08/03 17:23:47  ullrich
  * Added include file for StFpdTriggerDetector.
  *
@@ -181,6 +186,7 @@
 #include "StTofSlat.h"
 #include "StTofCell.h"
 #include "StTofData.h"
+#include "StTofRawData.h"
 #include "StTofSoftwareMonitor.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTpcHit.h"

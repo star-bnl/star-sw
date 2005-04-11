@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofData.h,v 2.3 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofData.h,v 2.4 2005/04/11 22:35:25 calderon Exp $
  *
  * Author: W.J. Llope, Sep 2001
  ***************************************************************************
@@ -14,6 +14,11 @@
  ***************************************************************************
  *
  * $Log: StTofData.h,v $
+ * Revision 2.4  2005/04/11 22:35:25  calderon
+ * Tof Classes for Run 5.  Modifications and additions from Xin to
+ * take care of new TOF daq and electronics.  Added StTofRawData and
+ * modified containers and includes.
+ *
  * Revision 2.3  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -33,7 +38,7 @@
 class StTofData : public StObject {
 public:
     StTofData();
-    StTofData(unsigned short, unsigned short, unsigned short, short, unsigned short);
+    StTofData(unsigned short, unsigned short, unsigned short, short, unsigned short, unsigned int, unsigned int);
     ~StTofData();    
 
     int operator==(const StTofData&) const;
@@ -44,13 +49,19 @@ public:
     unsigned short  tdc() const;
              short  tc() const;
     unsigned short  sc() const;
+
+    unsigned int    leadingTdc() const;
+    unsigned int    trailingTdc() const;
  
     void      setDataIndex(unsigned short);
     void      setAdc(unsigned short);
     void      setTdc(unsigned short);
     void      setTc(short);
     void      setSc(unsigned short);
-    
+
+    void      setLeadingTdc(unsigned int);
+    void      setTrailingTdc(unsigned int);
+
 protected:
     UShort_t  mDataIndex;
     UShort_t  mAdc;
@@ -58,7 +69,10 @@ protected:
     Short_t   mTc;
     UShort_t  mSc;    
 
-    ClassDef(StTofData,2)
+    UInt_t    mLeadingTdc;
+    UInt_t    mTrailingTdc;
+
+    ClassDef(StTofData,3)
 };
 
 inline void
@@ -91,6 +105,19 @@ StTofData::setSc(unsigned short rawSc)
     mSc = rawSc;
 }
 
+inline void
+StTofData::setLeadingTdc(unsigned int rawLTdc)
+{
+  mLeadingTdc = rawLTdc;
+}
+
+inline void
+StTofData::setTrailingTdc(unsigned int rawTTdc)
+{
+  mTrailingTdc = rawTTdc;
+}
+
+
 inline unsigned short
 StTofData::dataIndex() const
 {
@@ -119,6 +146,18 @@ inline unsigned short
 StTofData::sc()  const
 {
     return mSc;
+}
+
+inline unsigned int
+StTofData::leadingTdc() const
+{
+  return mLeadingTdc;
+}
+
+inline unsigned int
+StTofData::trailingTdc() const
+{
+  return mTrailingTdc;
 }
 
 ostream& operator<<(ostream& os, const StTofData&);
