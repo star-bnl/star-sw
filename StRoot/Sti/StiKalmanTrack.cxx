@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.60 2005/03/31 18:14:00 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.60 2005/03/31 18:14:00 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.61 2005/04/11 17:27:59 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.61 2005/04/11 17:27:59 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.61  2005/04/11 17:27:59  perev
+ * Error status added to fit()
+ *
  * Revision 2.60  2005/03/31 18:14:00  perev
  * getMaxPointCount() fixed(thank to Jan)
  *
@@ -926,6 +929,7 @@ bool StiKalmanTrack::find(int direction)
 static int nCall=0; nCall++;
   bool trackExtended=false;  
   bool trackExtendedOut=false;
+  int status = 0;
   setFlag(0);
   // invoke tracker to find or extend this track
   //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
@@ -933,7 +937,7 @@ static int nCall=0; nCall++;
     {
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
       if (trackFinder->find(this,kOutsideIn)) {
-          int status = refit(); if(status){};
+          status = refit(); if(status) return false;
 	  trackExtended = getNNodes(3)>5;
       }	
     }
@@ -950,9 +954,6 @@ static int nCall=0; nCall++;
     }
   if (outerMostNode->getX()<185. )
     {
-      // swap the track inside-out in preparation for the outward search/extension
-      //cout<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
-//????      swap();      
       try
 	{
 	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
@@ -965,17 +966,16 @@ static int nCall=0; nCall++;
 	}
       try
 	{
-	  if (trackExtendedOut) fit(kOutsideIn);
+          status = 0;
+	  if (trackExtendedOut) status = fit(kOutsideIn);
 	  if (debug()) cout << "StiKalmanTrack::find trackExtendedOut fit(kOutsideIn)" << *((StiTrack *) this);
+          if (status) return false;
 	}
       catch (...)
 	{
 	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in OutsideIn fit"<<endl;
 	} 
       //cout<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
-//?????      swap();
-//?????      setTrackingDirection(kOutsideIn);
-      //cout<<"StiKalmanTrack::find(int) -I- Swap back track Done"<<endl;
     }
   setFlag(1);
   //cout << " find track done" << endl;
@@ -1115,12 +1115,12 @@ int StiKalmanTrack::refit()
 //??  int nn = getNNodes(3);
 //??  if (nn<5) return -1;
   StiKalmanTrackNode *inn = getInnerMostNode(3);
-  int fail = 1;
+  int fail = 1,status;
   double pars[kNPars]; memcpy(pars,inn->getPars(),sizeof(pars));
 
   for (int iter=0;iter<kMaxIter;iter++) {
-    fit(kInsideOut);  
-    fit(kOutsideIn);
+    status = fit(kInsideOut);  if (status) return 1;
+    status = fit(kOutsideIn);  if (status) return 2;
 //??    if (getNNodes(3)<5) return -2;
     if (!inn->isValid())	continue;
     if (inn->getChi2()>1000.) 	continue;

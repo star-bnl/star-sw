@@ -86,7 +86,7 @@ public:
 
   StiTrack();
   virtual ~StiTrack()  { /* nops */  }
-  virtual void fit(int direction=kOutsideIn); 
+  virtual int  fit (int direction=kOutsideIn); 
   virtual bool find(int direction=kOutsideIn);
   virtual void reset()=0;
   virtual void getMomentum(double p[3], double e[6]) const =0;

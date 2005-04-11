@@ -14,7 +14,7 @@ class StiKalmanTrackFitter : public StiTrackFitter, public Named, public Describ
   
   StiKalmanTrackFitter();
   virtual ~StiKalmanTrackFitter();
-  virtual void fit(StiTrack * track, int direction);
+  virtual int fit(StiTrack * track, int direction);
   void setParameters(const StiKalmanTrackFitterParameters & par);
   virtual EditableParameters & getParameters();
   void load(const string & userFileName, StMaker & source)
