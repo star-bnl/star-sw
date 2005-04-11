@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.19 2004/03/01 17:44:37 fisyak Exp $
+ * $Id: StContainers.h,v 2.20 2005/04/11 22:35:25 calderon Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.20  2005/04/11 22:35:25  calderon
+ * Tof Classes for Run 5.  Modifications and additions from Xin to
+ * take care of new TOF daq and electronics.  Added StTofRawData and
+ * modified containers and includes.
+ *
  * Revision 2.19  2004/03/01 17:44:37  fisyak
  * Add Print method
  *
@@ -95,6 +100,7 @@ class StTofHit;
 class StTofSlat;
 class StTofCell;
 class StTofData;
+class StTofRawData;
 class StTrack;
 class StTrackNode;
 class StTrackPidTraits;
@@ -130,6 +136,7 @@ StCollectionDef(TofHit)
 StCollectionDef(TofSlat)
 StCollectionDef(TofCell)
 StCollectionDef(TofData)
+StCollectionDef(TofRawData)
 StCollectionDef(Track)
 StCollectionDef(TrackNode)
 StCollectionDef(TrackPidTraits)

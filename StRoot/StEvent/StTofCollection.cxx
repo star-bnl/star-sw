@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.6 2003/05/23 20:06:12 ullrich Exp $
+ * $Id: StTofCollection.cxx,v 2.7 2005/04/11 22:35:25 calderon Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,11 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.7  2005/04/11 22:35:25  calderon
+ * Tof Classes for Run 5.  Modifications and additions from Xin to
+ * take care of new TOF daq and electronics.  Added StTofRawData and
+ * modified containers and includes.
+ *
  * Revision 2.6  2003/05/23 20:06:12  ullrich
  * Restore plural for data members.
  *
@@ -35,7 +40,7 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.6 2003/05/23 20:06:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.7 2005/04/11 22:35:25 calderon Exp $";
 
 ClassImp(StTofCollection)
     
@@ -91,6 +96,17 @@ StTofCollection::tofData()
     return mTofData;
 }
 
+const StSPtrVecTofRawData&
+StTofCollection::tofRawData() const
+{
+  return mTofRawData;
+}
+
+StSPtrVecTofRawData&
+StTofCollection::tofRawData()
+{
+  return mTofRawData;
+}
 
 // void
 // StTofCollection::addUnit(const StTofUnit* aUnit)  
@@ -122,6 +138,12 @@ StTofCollection::addData(const StTofData* aData)
     if (aData) mTofData.push_back(aData);
 }
 
+void
+StTofCollection::addRawData(const StTofRawData* aRawData)
+{
+    if (aRawData) mTofRawData.push_back(aRawData);
+}
+
 
 bool
 StTofCollection::cellsPresent() const
@@ -145,5 +167,11 @@ bool
 StTofCollection::dataPresent() const
 {
     return mTofData.size();
+}
+
+bool
+StTofCollection::rawdataPresent() const
+{
+    return mTofRawData.size();
 }
 

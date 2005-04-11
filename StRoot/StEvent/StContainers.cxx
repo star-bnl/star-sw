@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.16 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.17 2005/04/11 22:35:24 calderon Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.17  2005/04/11 22:35:24  calderon
+ * Tof Classes for Run 5.  Modifications and additions from Xin to
+ * take care of new TOF daq and electronics.  Added StTofRawData and
+ * modified containers and includes.
+ *
  * Revision 2.16  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -79,6 +84,7 @@
 #include "StTofSlat.h"
 #include "StTofCell.h"
 #include "StTofData.h"
+#include "StTofRawData.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
 #include "StPsd.h"
@@ -116,6 +122,7 @@ StCollectionImp(TofHit)
 StCollectionImp(TofSlat)
 StCollectionImp(TofCell)
 StCollectionImp(TofData)
+StCollectionImp(TofRawData)
 StCollectionImp(Track)
 StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)
