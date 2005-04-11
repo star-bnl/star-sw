@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.75 2005/04/11 17:33:55 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.76 2005/04/11 22:48:30 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.76  2005/04/11 22:48:30  perev
+ * assert removed
+ *
  * Revision 2.75  2005/04/11 17:33:55  perev
  * Wrong sorting accounted, check for accuracy inctreased
  *
@@ -1325,9 +1328,7 @@ static int nCall=0; nCall++;
 			       0., 1., 0., 0., 0.);
 #endif
   double det=r00*r11 - r01*r01;
-  assert(finite(det));
-//  assert(det>1.e-10);
-  if (det<1.e-10) {
+  if (!finite(det) || det<1.e-10) {
     printf("StiKalmanTrackNode::updateNode *** zero determinant %g\n",det);
     return -11;
   }
