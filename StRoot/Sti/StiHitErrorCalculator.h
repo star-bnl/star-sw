@@ -44,7 +44,7 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 virtual void initialize(){};
 	 friend ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c);
 
- protected:
+ private:
    double coeff[6];              //0:intrinsicZ  1: driftZ   2: crossZ
                                  //3:intrinsicX  4: driftX   5: crossX
 };
