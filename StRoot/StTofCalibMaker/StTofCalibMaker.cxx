@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.10 2004/09/20 16:07:35 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.11 2005/04/12 17:33:47 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.11  2005/04/12 17:33:47  dongx
+ * update for year 5 data. not completed, leave as empty now.
+ *
  * Revision 1.10  2004/09/20 16:07:35  dongx
  * correct the nsigma in StTofPidTraits
  *
@@ -188,6 +191,12 @@ void StTofCalibMaker::initFormulas()
 //____________________________________________________________________________
 Int_t StTofCalibMaker::InitRun(int runnumber)
 {
+  // tof run configurations
+  mYear2 = (runnumber<4000000);
+  mYear3 = (runnumber>4000000&&runnumber<5000000);
+  mYear4 = (runnumber>5000000&&runnumber<6000000);
+  mYear5 = (runnumber>6000000);
+
   mTofpGeom = new StTofGeometry();
   mTofpGeom->init(this);
 
@@ -438,9 +447,19 @@ void StTofCalibMaker::clearFormulars()
 Int_t StTofCalibMaker::Make()
 {
   gMessMgr->Info(" StTofCalibMaker::Maker: starting ...","OS");
+  Int_t iret = kStOK;
+  if(mYear2||mYear3||mYear4){
+    iret = processEventYear2to4();
+  } else if(mYear5) {
+    iret = processEventYear5();
+  }
+  return kStOK;
+}
 
+//____________________________________________________________________________
+Int_t StTofCalibMaker::processEventYear2to4(){
   mEvent = (StEvent *) GetInputDS("StEvent");
-
+  
   // event selection
   if( !mEvent || !mEvent->primaryVertex() ||
       !mEvent->tofCollection() ||
@@ -450,10 +469,6 @@ Int_t StTofCalibMaker::Make()
     gMessMgr->Info("","OS") << "StTofCalibMaker -- nothing to do ... bye-bye" << endm;
     return kStOK;
   }
-
-  mYear2 = (mEvent->runId()<4000000);
-  mYear3 = (mEvent->runId()>4000000&&mEvent->runId()<5000000);
-  mYear4 = (mEvent->runId()>5000000);
   
   StThreeVectorD vtx = mEvent->primaryVertex()->position();
   Double_t vz = vtx.z();
@@ -667,6 +682,12 @@ Int_t StTofCalibMaker::Make()
 
   delete tofHit;
   
+  return kStOK;
+}
+
+//____________________________________________________________________________
+Int_t StTofCalibMaker::processEventYear5(){
+  // leave as empty now
   return kStOK;
 }
 
