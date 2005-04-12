@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.10 2004/06/10 15:54:31 dongx Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.11 2005/04/12 17:32:45 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.11  2005/04/12 17:32:45  dongx
+ * update for year 5 data. Tofp removed, so do nothing in this maker from now on.
+ *
  * Revision 1.10  2004/06/10 15:54:31  dongx
  * rename the defition of int vector
  *
@@ -141,6 +144,13 @@ Int_t StTofpMatchMaker::Init(){
 //---------------------------------------------------------------------------
 /// InitRun: (re-)initialize the tofp geometry
 Int_t StTofpMatchMaker::InitRun(int runnumber){
+
+  // determine TOF configuration from run#
+  mYear2 = (runnumber<4000000);
+  mYear3 = (runnumber>4000000&&runnumber<5000000);
+  mYear4 = (runnumber>5000000&&runnumber<6000000);
+  mYear5 = (runnumber>6000000);
+
   gMessMgr->Info("StTofpMatchMaker -- reinitializing TofGeometry (InitRun)","OS" );
   mTofGeom = new StTofGeometry();
   mTofGeom->init(this);
@@ -206,6 +216,11 @@ Int_t StTofpMatchMaker::Finish(){
 /// Make: match extrapolated TPC tracks to TOFp slats
 Int_t StTofpMatchMaker::Make(){
   gMessMgr->Info("StTofpMatchMaker -- welcome","OS");
+
+  if(mYear5) {
+    gMessMgr->Info("StTofpMatchMaker -- no TOFp in and after Run 5","OS");
+    return kStOK;
+  }
 
   // event selection ...
   StEvent *event = (StEvent *) GetInputDS("StEvent");
@@ -1108,11 +1123,6 @@ bool StTofpMatchMaker::validEvent(StEvent *event){
   }
   mTofEventCounter++;
 
-
-  // determine TOF configuration from run#
-  mYear2 = (event->runId()<4000000);
-  mYear3 = (event->runId()>4000000&&event->runId()<5000000);
-  mYear4 = (event->runId()>5000000);
 
   // 4. must be a TOF beam event, i.e. a non-strobe event
   StSPtrVecTofData  &tofData = event->tofCollection()->tofData();
