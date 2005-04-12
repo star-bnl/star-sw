@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.4 2004/07/16 18:28:18 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.5 2005/04/12 17:33:48 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.5  2005/04/12 17:33:48  dongx
+ * update for year 5 data. not completed, leave as empty now.
+ *
  * Revision 1.4  2004/07/16 18:28:18  dongx
  * -Tofp Slewing function changed in AuAu200 GeV Run IV
  * -Include those runs with eastern PVPD dead
@@ -57,7 +60,10 @@ public:
   Int_t FinishRun(int);
   Int_t Make();
   Int_t Finish();
-  
+
+  Int_t processEventYear2to4();
+  Int_t processEventYear5();
+
   /// Reset the calibration parameters
   void  resetPars();
   /// Initialize the calibration parameters from dbase
@@ -132,6 +138,7 @@ private:
     Bool_t     mYear2;
     Bool_t     mYear3;
     Bool_t     mYear4;
+    Bool_t     mYear5;
 
     Bool_t     mEastPVPDValid; // 022-035 east pVPD dead
 
@@ -167,7 +174,7 @@ private:
     Bool_t            mOuterGeometry;
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.4 2004/07/16 18:28:18 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.5 2005/04/12 17:33:48 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofCalibMaker,2)
 };
