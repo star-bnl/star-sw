@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.5 2004/05/03 23:08:50 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.6 2005/04/12 17:31:56 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.6  2005/04/12 17:31:56  dongx
+ * update for year 5 data - not completed, leave as empty at present
+ *
  * Revision 1.5  2004/05/03 23:08:50  dongx
  * change according to the update of StTofrGeometry, save CPU time by 100 times
  *
@@ -85,7 +88,10 @@ public:
     void setMaxDCA(Float_t);
     void setHistoFileName(Char_t*);
     void setNtupleFileName(Char_t*);
-   
+
+    Int_t processEventYear2to4();
+    Int_t processEventYear5();
+
 private:
     StTrackGeometry* trackGeometry(StTrack*);//!
     Int_t getTofData(StTofCollection*); // check, remap and fill local arrays with tof and pvpd data
@@ -132,6 +138,7 @@ private:
     Bool_t mYear2; //! STAR year2: TOFp+pVPD
     Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
     Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
+    Bool_t mYear5; //! STAR year5: pVPD+TOFr5
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
     string mHistoFileName; //! name of histogram file, if empty no write-out
     
@@ -213,7 +220,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.5 2004/05/03 23:08:50 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.6 2005/04/12 17:31:56 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
