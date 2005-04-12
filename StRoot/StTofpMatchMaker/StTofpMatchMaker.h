@@ -9,10 +9,13 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.6 2004/06/09 21:28:05 dongx Exp $
+ * $Id: StTofpMatchMaker.h,v 1.7 2005/04/12 17:32:45 dongx Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.7  2005/04/12 17:32:45  dongx
+ * update for year 5 data. Tofp removed, so do nothing in this maker from now on.
+ *
  * Revision 1.6  2004/06/09 21:28:05  dongx
  * update matching : checking before projecting track, improve the speed by around an order of magnitude
  *
@@ -113,6 +116,7 @@ private:
   Bool_t mYear2; //! STAR year2: TOFp+pVPD
   Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
   Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
+  Bool_t mYear5; //! STAR year5 and after: no TOFp
   Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
   string mHistoFileName; //! name of histogram file, if empty no write-out
 
@@ -182,7 +186,7 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.6 2004/06/09 21:28:05 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.7 2005/04/12 17:32:45 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpMatchMaker,0)
 };
