@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.25 2004/11/29 15:53:22 mvl Exp $
+ * $Id: StMuDst.h,v 1.26 2005/04/12 21:56:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -38,6 +38,8 @@ class StEmcCollection;
 
 class StMuTofHit;
 class StTofData;
+// run 5 - dongx
+class StTofRawData;
 
 class EztEventHeader;
 class EztTrigBlob;
@@ -216,6 +218,9 @@ public:
   static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }
   /// returns pointer to the i-th tofData
   static StTofData* tofData(int i) { return (StTofData*)tofArrays[muTofData]->UncheckedAt(i); }
+  // run 5 - dongx
+  /// returns pointer to the i-th tofRawData
+  static StTofRawData* tofRawData(int i) { return (StTofRawData*)tofArrays[muTofRawData]->UncheckedAt(i); }
 
   /// returns pointer to eztHeader 
   static  EztEventHeader* eztHeader() { return (EztEventHeader*)eztArrays[muEztHead]->UncheckedAt(0); }
@@ -257,6 +262,8 @@ public:
   // tofr
   static unsigned int numberOfTofHit()        { return tofArrays[muTofHit]->GetEntries(); }
   static unsigned int numberOfTofData()       { return tofArrays[muTofData]->GetEntries(); }
+  // run 5 - dongx
+  static unsigned int numberOfTofRawData()       { return tofArrays[muTofRawData]->GetEntries(); }
 
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
   static unsigned int GetNGlobalTrack()     { return numberOfGlobalTracks(); }   
@@ -279,6 +286,8 @@ public:
 
   static unsigned int GetNTofHit()          { return numberOfTofHit(); }
   static unsigned int GetNTofData()         { return numberOfTofData(); }
+  // run 5 - dongx
+  static unsigned int GetNTofRawData()         { return numberOfTofRawData(); }
 
   ClassDef(StMuDst,0)
 };
@@ -288,6 +297,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.26  2005/04/12 21:56:29  mvl
+ * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
+ *
  * Revision 1.25  2004/11/29 15:53:22  mvl
  * Additions by Jan for Fpd ezTree
  *

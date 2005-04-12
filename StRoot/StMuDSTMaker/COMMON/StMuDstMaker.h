@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.39 2004/10/28 00:11:33 mvl Exp $
+ * $Id: StMuDstMaker.h,v 1.40 2005/04/12 21:56:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -64,6 +64,8 @@ class StMuTofHit;
 class StMuTofHitCollection;
 class StTofCollection;
 class StTofDataCollection;
+// run 5 - dongx
+class StTofRawDataCollection;
 class StMuTofUtil;
 
 // ezTree stuff
@@ -143,7 +145,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.39 2004/10/28 00:11:33 mvl Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.40 2005/04/12 21:56:29 mvl Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -324,6 +326,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.40  2005/04/12 21:56:29  mvl
+ * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
+ *
  * Revision 1.39  2004/10/28 00:11:33  mvl
  * Added stuff to support ezTree mode of MuDstMaker.
  * This is a special mode for fast-online processing of fast-detector data.
