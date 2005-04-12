@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.76 2005/04/11 22:48:30 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.77 2005/04/12 14:35:39 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.77  2005/04/12 14:35:39  fisyak
+ * Add print out for dE/dx
+ *
  * Revision 2.76  2005/04/11 22:48:30  perev
  * assert removed
  *
@@ -302,7 +305,8 @@ StiMaterial * StiKalmanTrackNode::mat = 0;
 StiMaterial * StiKalmanTrackNode::prevMat = 0;
 bool StiKalmanTrackNode::useCalculatedHitError = true;
 #define MESSENGER *(Messenger::instance(MessageType::kNodeMessage))
-TString StiKalmanTrackNode::comment(""); 
+TString StiKalmanTrackNode::comment("");
+TString StiKalmanTrackNode::commentdEdx(""); 
 int StiKalmanTrackNode::counter = 0;
 //debug vars
 //#define STI_ERROR_TEST
@@ -1271,6 +1275,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     }
   if (fabs(dE)>0)
     {
+      if (debug()) commentdEdx = Form("%6.3g cm %6.3g keV %6.3f GeV ",dx,1e6*dE,TMath::Sqrt(e2)-m); 
       double correction =1. + ::sqrt(e2)*dE/p2;
       if (correction>1.1) correction = 1.1;
       else if (correction<0.9) correction = 0.9;
@@ -1950,8 +1955,13 @@ void StiKalmanTrackNode::backStatics(double *sav)
   dy=             sav[16];
 }
 //________________________________________________________________________________
- void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
-    Double_t dpTOverpT = 100*TMath::Sqrt(_cCC/(_curv*_curv));
-    if (dpTOverpT > 9999.9) dpTOverpT = 9999.9;
-    comment += ::Form(" %s pT %8.3f+-%6.1f",opt,getPt(),dpTOverpT);
- }
+void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
+  Double_t dpTOverpT = 100*TMath::Sqrt(_cCC/(_curv*_curv));
+  if (dpTOverpT > 9999.9) dpTOverpT = 9999.9;
+  comment += ::Form(" %s pT %8.3f+-%6.1f",opt,getPt(),dpTOverpT);
+}
+//________________________________________________________________________________
+void StiKalmanTrackNode::PrintStep() {
+  cout << comment << "\t" << commentdEdx << endl;
+  ResetComment();
+}

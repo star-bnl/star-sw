@@ -121,7 +121,7 @@ public:
   int   &getContigNullCount()  		{return contiguousNullCount;}
 
   static void Break(int kase);
-
+  static void PrintStep();
   StThreeVector<double>getPoint() const;
   StThreeVector<double>getGlobalPoint() const;
   /// Calculates and returns the momentum and error of the track at this node in global coordinates.
@@ -192,7 +192,7 @@ public:
   Int_t  debug() const {return _debug;}
   void   setDebug(Int_t m) {_debug = m;}
   void   PrintpT(Char_t *opt="");
-  static void   ResetComment(Char_t *m = "") {comment = m;}
+  static void   ResetComment(Char_t *m = "") {comment = m; commentdEdx = "";}
   static const Char_t *Comment() {return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
   void static saveStatics(double *sav);
@@ -264,6 +264,7 @@ public:
   static double fDerivTest[kNPars][kNPars];   
   static int   _debug;
   static TString comment;
+  static TString commentdEdx;
 public:
   int _Kount;  //for debug only 
 };
