@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.11 2004/08/11 18:57:44 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.12 2005/04/12 17:31:56 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.12  2005/04/12 17:31:56  dongx
+ * update for year 5 data - not completed, leave as empty at present
+ *
  * Revision 1.11  2004/08/11 18:57:44  dongx
  * deltay quality cut applied
  *
@@ -143,6 +146,12 @@ Int_t StTofrMatchMaker::Init(){
 
 //---------------------------------------------------------------------------
 Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
+
+  // determine TOF configuration from run#
+  mYear2 = (runnumber<4000000);
+  mYear3 = (runnumber>4000000&&runnumber<5000000);
+  mYear4 = (runnumber>5000000&&runnumber<6000000);
+  mYear5 = (runnumber>6000000);
 
   gMessMgr->Info("StTofrMatchMaker -- Initializing TofGeometry (InitRun)","OS");
   /////////////////////////////////////////////////////////////////////
@@ -316,6 +325,17 @@ Int_t StTofrMatchMaker::Finish(){
 Int_t StTofrMatchMaker::Make(){
   gMessMgr->Info("StTofrMatchMaker -- welcome","OS");
 
+  Int_t iret = kStOK;
+  if(mYear2||mYear3||mYear4) {
+    iret = processEventYear2to4();
+  } else if(mYear5) {
+    iret = processEventYear5();
+  }
+  return iret;
+}
+
+//---------------------------------------------------------------------------
+Int_t StTofrMatchMaker::processEventYear2to4(){
   if(mHisto) mEventCounterHisto->Fill(0);
   // event selection ...
   mEvent = (StEvent *) GetInputDS("StEvent");
@@ -970,6 +990,11 @@ Int_t StTofrMatchMaker::Make(){
   return kStOK;
 }
 
+//---------------------------------------------------------------------------
+Int_t StTofrMatchMaker::processEventYear5(){
+  // leave as empty now
+  return kStOK;
+}
 
 //---------------------------------------------------------------------------
 // store local slat collection in StEvent's tofCollection
@@ -1179,10 +1204,6 @@ bool StTofrMatchMaker::validEvent(StEvent *event){
   mTofEventCounter++;
   if(mHisto) mEventCounterHisto->Fill(4);
 
-  // determine TOF configuration from run#
-  mYear2 = (event->runId()<4000000);
-  mYear3 = (event->runId()>4000000&&event->runId()<5000000);
-  mYear4 = (event->runId()>5000000);
   
   
   // 4. must be a TOF beam event, i.e. a non-strobe event
