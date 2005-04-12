@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.h,v 1.10 2004/01/27 23:17:01 dongx Exp $ 
+ * $Id: StTofMaker.h,v 1.11 2005/04/12 17:33:18 dongx Exp $ 
  * 
  * Author: Wei-Ming Zhang / Frank Geurts
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.h,v $
+ * Revision 1.11  2005/04/12 17:33:18  dongx
+ * update for year 5 new data format. Store into TofRawData from now on.
+ *
  * Revision 1.10  2004/01/27 23:17:01  dongx
- * change for year4 run (pVPD+TOFp+TOFr')
+ *  change for year4 run (pVPD+TOFp+TOFr')
  *  - Additional TOFr' ADC and TDC channels put in
  *  - Add TOTs of TOFr' in
  *
@@ -48,11 +51,13 @@ class StTofCollection;
 class StTofSlat;
 class StTofHit;
 class StTofData;
+class StTofRawData;  // RunV
 class TH1F;
 class StEvent;
 class StTofSlatCollection;
 class StTofHitCollection;
 class StTofDataCollection;
+class StTofRawDataCollection;  // RunV
 class StTofPidTraits;
 class StTofGeometry;
 class StDAQReader;
@@ -73,12 +78,14 @@ class StTofMaker : public StMaker {
   StTofHitCollection*    mHitCollection;    //!
   StTofDataCollection*   mDataCollection;   //!
   Int_t                  tofTag;            //!
+  StTofRawDataCollection*   mRawDataCollection;     // RunV
 
   // flags
   short mTofCollectionPresent;  //!
   short mSlatCollectionPresent; //!
   short mHitCollectionPresent;  //!
   short mDataCollectionPresent; //!
+  short mRawDataCollectionPresent;   // RunV
 
   void fillStEvent();     //! ship collection to StEvent
   void storeTag();     //!
@@ -98,7 +105,7 @@ public:
   virtual Int_t Finish();
     
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.10 2004/01/27 23:17:01 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.11 2005/04/12 17:33:18 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofMaker,0)
 

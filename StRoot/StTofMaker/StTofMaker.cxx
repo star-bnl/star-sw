@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.16 2004/09/19 00:09:02 perev Exp $
+ * $Id: StTofMaker.cxx,v 1.17 2005/04/12 17:33:18 dongx Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.17  2005/04/12 17:33:18  dongx
+ * update for year 5 new data format. Store into TofRawData from now on.
+ *
  * Revision 1.16  2004/09/19 00:09:02  perev
  * Small Walgrind leak fixed
  *
@@ -80,9 +83,12 @@
 #include "StTofMaker.h"
 #include <stdlib.h>
 #include "StEventTypes.h"
+#include "StEvent/StTofData.h"
+#include "StEvent/StTofRawData.h"
 #include "StTofUtil/StTofGeometry.h"
 #include "StTofUtil/StTofDataCollection.h"
-//VP#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StTofUtil/StTofRawDataCollection.h"  //RunV
+#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TOF/TOF_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "tables/St_TofTag_Table.h"
@@ -142,9 +148,14 @@ Int_t StTofMaker::Make(){
   mDataCollection = &myDataCollection; 
   mTofCollectionPresent  = 0;
   mDataCollectionPresent = 0;
-
-//--- check for existence of collections.................
-//
+  
+  //  RunV
+  StTofRawDataCollection myRawDataCollection;
+  mRawDataCollection = &myRawDataCollection;
+  mRawDataCollectionPresent = 0;
+  
+  //--- check for existence of collections.................
+  //
   tofTag = -99;
   mEvent = (StEvent *) GetInputDS("StEvent");
   if (mEvent) {
@@ -157,14 +168,16 @@ Int_t StTofMaker::Make(){
       if(mTheTofCollection->dataPresent()) {
 	cout << " + tofDataCollection Exists" << endl;
 	mDataCollectionPresent = 1;
+      } else if(mTheTofCollection->rawdataPresent()) {
+	mRawDataCollectionPresent = 1;  //RunV
       }
-      else cout << " - tofDataCollection does not exist" << endl;
-//--
+      else cout << " - tofDataCollection & tofRawDataCollection does not exist" << endl;
+      //--
     } else {
       cout << " - tofCollection does not exist" << endl;
-      cout << " - tofDataCollection does not exist" << endl;
+      cout << " - tofDataCollection & tofRawDataCollection does not exist" << endl;	 //RunV
     }
-//-- create tofcollection...
+    //-- create tofcollection...
     if (!mTheTofCollection){
       cout << "StTofMaker Creating tofCollection in StEvent ... ";
       mTheTofCollection = new StTofCollection();
@@ -175,10 +188,10 @@ Int_t StTofMaker::Make(){
     } 	// end !mTheTofCollection check
   }   	// end mEvent check
   else cout << "StTofMaker   No StEvent structures detected ... not good!" << endl;
-//
-//--- end check for collections....
+  //
+  //--- end check for collections....
 
-// check if slatCollection not already available, get data if not
+  // check if slatCollection not already available, get data if not
   if(!mDataCollectionPresent) {
     if (m_Mode ==0) {             // default DAQ-reader setting 
       cout << "StTofMaker Will get real data from TOFpDAQ Reader ... " << endl;
@@ -196,126 +209,163 @@ Int_t StTofMaker::Make(){
 	cout << "StTofMaker TOF is not in datastream. Event skipped" << endl;
 	return kStWarn;
       }
-//
+      //
       mTheTofReader = mTheDataReader->getTOFReader();
       if (!mTheTofReader) {
 	cout << "StTofMaker Failed to getTofReader()...." << endl;
 	return kStWarn;
       }
-
+      
+      
+      
 #ifdef TOFP_DEBUG
       TOF_Reader* MyTest = dynamic_cast<TOF_Reader*>(mTheDataReader->getTOFReader());
       if (MyTest) MyTest->printRawData();
       if (MyTest->year2Data()) cout << "StTofMaker: year2 data - TOFp+pVPD" << endl;
       if (MyTest->year3Data()) cout << "StTofMaker: year3 data - TOFp+pVPD+TOFr" << endl;
       if (MyTest->year4Data()) cout << "StTofMaker: year4 data - TOFp+pVPD+TOFrprime" << endl;
+      if (MyTest->year5Data()) cout << "StTofMaker: year5 data - TOFr5+pVPD  " << endl;
 #endif
-
-//
-//--- copy daq data to collection. (TOFp and pVPD)
-//
-      int nadchit=0;
-      int ntdchit=0;
-      int iStrobe = 0;
-
-      // set limits on basic event statistics
-      int tdcHitMax=1600;
-      int pvpdStrobeMin=1500;
-      if (mTheTofReader->year3Data()||mTheTofReader->year4Data()){
-	tdcHitMax=880;
-	pvpdStrobeMin=950;
-      }
-
-      for (int i=0;i<48;i++){
-	unsigned short slatid = mTofGeom->daqToSlatId(i);
-	unsigned short rawAdc = mTheTofReader->GetAdcFromSlat(i);
-	unsigned short rawTdc = mTheTofReader->GetTdcFromSlat(i);  
-	short rawTc  = 0;
-	if (i<32) rawTc = mTheTofReader->GetTc(i);
-	unsigned short rawSc = 0;
-	if (i<12) rawSc = mTheTofReader->GetSc(i);
-	StTofData *rawTofData = new StTofData(slatid,rawAdc,rawTdc,rawTc,rawSc);
-	mDataCollection->push_back(rawTofData);      // local collection
-	if(i<41) {
-	  if (rawAdc>  50) nadchit++; 
-	  if (rawTdc<tdcHitMax) ntdchit++; 
+      
+      //
+      //--- copy daq data to collection. (TOFp and pVPD)
+      //
+      if (mTheTofReader->year2Data()||mTheTofReader->year3Data()||mTheTofReader->year4Data()){
+	int nadchit=0;
+	int ntdchit=0;
+	int iStrobe = 0;
+	
+	// set limits on basic event statistics
+	int tdcHitMax=1600;
+	int pvpdStrobeMin=1500;
+	if (mTheTofReader->year3Data()||mTheTofReader->year4Data()){
+	  tdcHitMax=880;
+	  pvpdStrobeMin=950;
 	}
-	if(i>41) {
-	  if (rawTdc>pvpdStrobeMin) iStrobe++; 
-	}
-      }    
-      if (mTheTofReader->year3Data()){
-	for (int i=48;i<132;i++){
-	  //arbitrary id, start from at 100.
-	  unsigned short id = (100-48)+i;
-	  unsigned short rawAdc = mTheTofReader->GetAdc(i);
-	  unsigned short rawTdc = 0;
-	  if (i<120) rawTdc = mTheTofReader->GetTdc(i);  
-	  StTofData *rawTofData = new StTofData(id,rawAdc,rawTdc,0,0);
-	  mDataCollection->push_back(rawTofData);
-	  if ((i>59) && (rawAdc>50))    nadchit++;
-	  if ((i<120) && (rawTdc<tdcHitMax)) ntdchit++; 
-	}
-      }
-
-      if (mTheTofReader->year4Data()){
-	for (int i=48;i<184;i++){
-	  //arbitrary id, start from at 100.
-	  unsigned short id = (100-48)+i;
-	  unsigned short rawAdc = 0;
-	  if(i<180) {
-	    rawAdc = mTheTofReader->GetAdc(i);
+	
+	for (int i=0;i<48;i++){
+	  unsigned short slatid = mTofGeom->daqToSlatId(i);
+	  unsigned short rawAdc = mTheTofReader->GetAdcFromSlat(i);
+	  unsigned short rawTdc = mTheTofReader->GetTdcFromSlat(i);  
+	  short rawTc  = 0;
+	  if (i<32) rawTc = mTheTofReader->GetTc(i);
+	  unsigned short rawSc = 0;
+	  if (i<12) rawSc = mTheTofReader->GetSc(i);
+	  // new StTofData
+	  StTofData *rawTofData = new StTofData(slatid,rawAdc,rawTdc,rawTc,rawSc,0,0);
+	  mDataCollection->push_back(rawTofData);      // local collection
+	  if(i<41) {
+	    if (rawAdc>  50) nadchit++; 
+	    if (rawTdc<tdcHitMax) ntdchit++; 
 	  }
-
-	  unsigned short rawTdc = 0;
-	  rawTdc = mTheTofReader->GetTdc(i);
-
-	  StTofData *rawTofData = new StTofData(id,rawAdc,rawTdc,0,0);
-	  mDataCollection->push_back(rawTofData);
-	  if ((i>59) && (rawAdc>50))    nadchit++;
-	  if ((rawTdc<tdcHitMax)) ntdchit++; 
+	  if(i>41) {
+	    if (rawTdc>pvpdStrobeMin) iStrobe++; 
+	  }
+	}    
+	if (mTheTofReader->year3Data()){
+	  for (int i=48;i<132;i++){
+	    //arbitrary id, start from at 100.
+	    unsigned short id = (100-48)+i;
+	    unsigned short rawAdc = mTheTofReader->GetAdc(i);
+	    unsigned short rawTdc = 0;
+	    if (i<120) rawTdc = mTheTofReader->GetTdc(i);  
+	    // new StTofData
+	    StTofData *rawTofData = new StTofData(id,rawAdc,rawTdc,0,0,0,0);
+	    mDataCollection->push_back(rawTofData);
+	    if ((i>59) && (rawAdc>50))    nadchit++;
+	    if ((i<120) && (rawTdc<tdcHitMax)) ntdchit++; 
+	  }
 	}
-      }
+	
+	if (mTheTofReader->year4Data()){
+	  for (int i=48;i<184;i++){
+	    //arbitrary id, start from at 100.
+	    unsigned short id = (100-48)+i;
+	    unsigned short rawAdc = 0;
+	    if(i<180) {
+	      rawAdc = mTheTofReader->GetAdc(i);
+	    }
+	    
+	    unsigned short rawTdc = 0;
+	    rawTdc = mTheTofReader->GetTdc(i);
+	    // new StTofData
+	    StTofData *rawTofData = new StTofData(id,rawAdc,rawTdc,0,0,0,0);
+	    mDataCollection->push_back(rawTofData);
+	    if ((i>59) && (rawAdc>50))    nadchit++;
+	    if ((rawTdc<tdcHitMax)) ntdchit++; 
+	  }
+	}
+		
+	//--- end loop over data words...
+	//
+	//--- 
+	if (iStrobe>4) {
+	  cout << "StTofMaker ... Strobe Event:" << iStrobe << endl;
+	  tofTag = -1;     	// set tag to show this was a strobe event   
+	  nAdcHitHisto->Fill(-1.);
+	  nTdcHitHisto->Fill(-1.);
+	} else {
+	  cout << "StTofMaker ... Beam Event: ~" << nadchit << " ADC and ~" 
+	       << ntdchit << " TDC Raw Hits in TRAY" << endl;
+	  tofTag = nadchit;	// set tag to show this was physics event (tofTag>=0)
+	  nAdcHitHisto->Fill(nadchit);
+	  nTdcHitHisto->Fill(ntdchit);
+	}
+	//---- 
+	//
+      } // end year2-year4
 
-//--- end loop over data words...
-//
-//--- 
-      if (iStrobe>4) {
-	cout << "StTofMaker ... Strobe Event:" << iStrobe << endl;
-	tofTag = -1;     	// set tag to show this was a strobe event   
-	nAdcHitHisto->Fill(-1.);
- 	nTdcHitHisto->Fill(-1.);
-      } else {
-	cout << "StTofMaker ... Beam Event: ~" << nadchit << " ADC and ~" 
-	     << ntdchit << " TDC Raw Hits in TRAY" << endl;
-	tofTag = nadchit;	// set tag to show this was physics event (tofTag>=0)
-	nAdcHitHisto->Fill(nadchit);
-	nTdcHitHisto->Fill(ntdchit);
-      }
-//---- 
-//
-    }
-    else if(m_Mode == 1)        // no action
+      //------  RunV Raw Data   Haidong Liu
+      if (mTheTofReader->year5Data()){
+	for (int i=0;i<(int)mTheTofReader->GetNLeadingHits();i++){  //  Leading Edge
+	  unsigned short  flag; // 1 - leading; 2 - trailing
+	  unsigned short  chn=mTheTofReader->GetLeadingGlobalTdcChan(i);
+	  unsigned int    tdc=mTheTofReader->GetLeadingTdc(i);
+	  flag=1;
+	  unsigned short  quality = 1;
+	  StTofRawData *rawTofData1 = new StTofRawData(flag,chn,tdc,quality);
+	  mRawDataCollection->push_back(rawTofData1);    
+	}
+	for (int i=0;i<(int)mTheTofReader->GetNTrailingHits();i++){  // Trailing Edge
+	  unsigned short  flag; // 1 - leading; 2 - trailing
+	  unsigned short  chn=mTheTofReader->GetTrailingGlobalTdcChan(i);
+	  unsigned int    tdc=mTheTofReader->GetTrailingTdc(i);
+	  flag=2;
+	  unsigned short  quality = 1;
+	  StTofRawData *rawTofData1 = new StTofRawData(flag,chn,tdc,quality);
+	  mRawDataCollection->push_back(rawTofData1);   
+	}
+	for (int i=0;i<TOF_MAX_TDC_CHANNELS;i++){  //TOF_MAX_TDC_CHANNELS=198;  
+	  unsigned int rawLdTdc=mTheTofReader->GetLdTdc(i);
+	  unsigned int rawTrTdc=mTheTofReader->GetTrTdc(i);
+	  StTofData *rawTofData = new StTofData(i,0,0,0,0,rawLdTdc,rawTrTdc);
+	  mDataCollection->push_back(rawTofData);
+	}
+	
+      } // end year5
+
+    } else if(m_Mode == 1)        // no action
       cout << "StTofMaker No special action required for DataCollection"<<endl;
     else {
       cout << "WRONG SetMode (" << m_Mode << ")! "
 	   << "... should be either 0 (DAQ reader) or 1(no action, SIM)" << endl;
       return kStOK;
     }
-//--- end m_mode check....
-
-  }  
-//--- end section if !mDataCollectionPresent
-
+    //--- end m_mode check....  
+    
+  } // end dataPresent
+  
+ //--- end section if !mDataCollectionPresent
+  
   cout << "StTofMaker tofTag = " << tofTag << endl;
   if (mEvent) storeTag();
-
-//--- fill StEvent, clean-up, and return...
-//
+  
+  //--- fill StEvent, clean-up, and return...
+  //
   if (mEvent) this->fillStEvent();
   mDataCollection=0;
   cout << "StTofMaker::Make() -- see you next event --" << endl;
-
+  
   return kStOK;
 }
               
@@ -332,20 +382,25 @@ void StTofMaker::fillStEvent() {
     mEvent->setTofCollection(mTheTofCollection);
   }
 
-//--- fill mTheTofCollection with ALL RAW DATA 
+  //--- fill mTheTofCollection with ALL RAW DATA 
   if(mDataCollectionPresent != 1) {
     cout << "StTofMaker::fillStEvent()  Size of mDataCollection = " << mDataCollection->size() << endl;
     for(size_t jj = 0; jj < mDataCollection->size(); jj++)
       mTheTofCollection->addData(mDataCollection->getData(jj));
   }
-
-//--- verify existence of tofCollection in StEvent (mEvent) 
-//
-// also check contents of StTofRaws filled in TofCollection. This kind of check
-// has never been done for StTofMCSlat too! (We only verified in local
-// collections) Here, we would just make sure that raw data is really in
-// TofCollection.  WMZ
-//
+  if(mRawDataCollectionPresent != 1) {
+    cout << "StTofMaker::fillStEvent()  Size of mRawDataCollection = " << mRawDataCollection->size() << endl;
+    for(size_t jj = 0; jj < mRawDataCollection->size(); jj++)
+      mTheTofCollection->addRawData(mRawDataCollection->getRawData(jj));
+  }
+  
+  //--- verify existence of tofCollection in StEvent (mEvent) 
+  //
+  // also check contents of StTofRaws filled in TofCollection. This kind of check
+  // has never been done for StTofMCSlat too! (We only verified in local
+  // collections) Here, we would just make sure that raw data is really in
+  // TofCollection.  WMZ
+  //
   cout << "StTofMaker::fillStEvent() Verifying TOF StEvent data ..." << endl;
   StTofCollection* mmTheTofCollection = mEvent->tofCollection();
   if(mmTheTofCollection){
