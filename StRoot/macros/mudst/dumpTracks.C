@@ -1,7 +1,7 @@
+{{
 /* This is a very simple example macro using the StMuDstMaker to open
  * a MuDst file and print out some event and charged track information
  */
-{{
   gROOT->Reset();
   gROOT->Macro("loadMuDst.C");
 
