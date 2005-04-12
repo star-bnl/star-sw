@@ -448,11 +448,11 @@ StiKalmanTrackNode::Break(nCall);
 
       // CP Nov 2 Try doubling the chi2 in the SVT
       //if (testNode.getX()<40.) maxChi2 = 2* maxChi2;
-      if(debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
+      if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
+      if (debug() >= 1) StiKalmanTrackNode::PrintStep();
       if (position<0 || position>kEdgeZplus) { 
 	// not reaching this detector layer - stop track
 	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
-	if (debug() > 1) cout << StiKalmanTrackNode::Comment() << endl;
 	continue; // will try the next available volume on this layer
       }
 

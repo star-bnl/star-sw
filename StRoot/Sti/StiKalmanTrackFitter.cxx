@@ -108,7 +108,7 @@ static int myKount=0;myKount++;
       pNode = targetNode;
     } while(0);//end refit block
     { //continue block
-      if (debug()) cout << Form("%5d ",status) << StiKalmanTrackNode::Comment() << endl;
+      if (debug()) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
     }//end continue block
   }//end for of nodes
   if (nerr>kMaxNErr) return nerr; else return 0;
