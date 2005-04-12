@@ -69,7 +69,9 @@ double StiElossCalculator::calculate(double z2, double m, double beta2) const
   float Z = _Z;
   float Dens = _Dens;
   float Mass = m;
-  float T = Mass*(1./::sqrt(1 - beta2) - 1);
+  double beta21 = 1 - beta2;
+  if (beta21 < 1.e-10) beta21 = 1.e-10; 
+  float T = Mass*(1./::sqrt(beta21) - 1);
   gdrelx(A,Z,Dens,T,Mass,dEdx);
 #endif
 #if 0
