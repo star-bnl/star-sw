@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.13 2004/11/29 15:53:22 mvl Exp $
+ * $Id: StMuArrays.h,v 1.14 2005/04/12 21:56:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -27,7 +27,8 @@ enum muDstTypes {muEvent=0, muPrimary, muGlobal, muOther, muL3, muRich, muState,
 enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster}; 
 
 /// @enum Tofr enumeration
-enum tofTypes {muTofHit=0, muTofData};
+// run 5 - dongx
+enum tofTypes {muTofHit=0, muTofData, muTofRawData};
 
 /// @enum eztTypes enumeration to to index the eztArrays (IUCF-ezTree)
 enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
@@ -37,7 +38,8 @@ __NARRAYS__        =9,	///< size of the 'regular stuff' arrays, i.e. number of T
 __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
-__NTOFARRAYS__     =2 ,  ///< size of the tof arrays >
+// run 5 - dongx
+__NTOFARRAYS__     =3 ,  ///< size of the tof arrays >
 __NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
 __NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NEZTARRAYS__
 };
@@ -82,6 +84,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.14  2005/04/12 21:56:29  mvl
+ * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
+ *
  * Revision 1.13  2004/11/29 15:53:22  mvl
  * Additions by Jan for Fpd ezTree
  *

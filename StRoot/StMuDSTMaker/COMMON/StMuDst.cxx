@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.33 2004/10/28 00:11:33 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.34 2005/04/12 21:56:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -279,22 +279,38 @@ StEvent* StMuDst::createStEvent() {
 
 // now get tof (after fix from Xin)
   StTofCollection *tofcoll = new StTofCollection();
-    ev->setTofCollection(tofcoll);
-    int nTofData = tofArrays[muTofData]->GetEntries();
-     for(int i=0;i<nTofData;i++) {
-       StTofData *aData;
-        if(tofData(i)) {
-          unsigned short id = tofData(i)->dataIndex();
-          unsigned short adc = tofData(i)->adc();
-          unsigned short tdc = tofData(i)->tdc();
-          short tc = tofData(i)->tc();
-          unsigned short sc = tofData(i)->sc();
-         aData = new StTofData(id, adc, tdc, tc, sc);
-        } else {
-      aData = new StTofData(0, 0, 0, 0, 0);
-          }
-  tofcoll->addData(aData);
-	      }
+  ev->setTofCollection(tofcoll);
+  int nTofData = tofArrays[muTofData]->GetEntries();
+  for(int i=0;i<nTofData;i++) {
+    StTofData *aData;
+    if(tofData(i)) {
+      unsigned short id = tofData(i)->dataIndex();
+      unsigned short adc = tofData(i)->adc();
+      unsigned short tdc = tofData(i)->tdc();
+      short tc = tofData(i)->tc();
+      unsigned short sc = tofData(i)->sc();
+      // run 5 - dongx
+      aData = new StTofData(id, adc, tdc, tc, sc, 0, 0);
+    } else {
+      aData = new StTofData(0, 0, 0, 0, 0, 0, 0);
+    }
+    tofcoll->addData(aData);
+  }
+  // run 5 - dongx
+  int nTofRawData = tofArrays[muTofRawData]->GetEntries();
+  for(int i=0;i<nTofRawData;i++) {
+    StTofRawData *aRawData;
+    if(tofRawData(i)) {
+      unsigned short leteFlag = tofRawData(i)->leteFlag();
+      unsigned short channel = tofRawData(i)->channel();
+      unsigned int tdc = tofRawData(i)->tdc();
+      unsigned short quality = tofRawData(i)->quality();
+      aRawData = new StTofRawData(leteFlag,channel,tdc,quality);
+    } else {
+      aRawData = new StTofRawData(0, 0, 0, 0);
+    }
+    tofcoll->addRawData(aRawData);
+  }
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -387,6 +403,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.34  2005/04/12 21:56:29  mvl
+ * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
+ *
  * Revision 1.33  2004/10/28 00:11:33  mvl
  * Added stuff to support ezTree mode of MuDstMaker.
  * This is a special mode for fast-online processing of fast-detector data.

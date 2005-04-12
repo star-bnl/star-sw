@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.14 2004/11/29 15:53:21 mvl Exp $
+ * $Id: StMuArrays.cxx,v 1.15 2005/04/12 21:56:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -26,6 +26,7 @@ const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent",
 							   "PmdCluster",
 							   "CpvCluster",
 /*tofArrayNames    [__NTOFARRAYS__    ]*/                  "TofHit","TofData",
+							   "TofRawData",
 /*eztArrayNames    [__NEZTARRAYS__    ]*/                  "EztHead","EztTrig",
 							   "EztETow","EztESmd","EztFpd"};
 
@@ -48,7 +49,7 @@ const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent",
 /*emcArrayTypes   [__NEMCARRAYS__     ]*/                  "StMuEmcTowerData","StMuEmcHit",
 							   "StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit","StMuEmcHit",
 /*pmdArrayTypes   [__NPMDARRAYS__     ]*/                  "StMuPmdHit","StMuPmdHit","StMuPmdCluster","StMuPmdCluster",
-/*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData",
+/*tofArrayTypes   [__NTOFARRAYS__     ]*/                  "StMuTofHit","StTofData","StTofRawData",
 /*eztArrayTypes   [__NEZTARRAYS__     ]*/                  "EztEventHeader","EztTrigBlob","EztEmcRawData","EztEmcRawData","EztFpdBlob"};
 const char** StMuArrays::strangeArrayTypes = StMuArrays::arrayTypes    +__NARRAYS__;
 const char** StMuArrays::emcArrayTypes = StMuArrays::strangeArrayTypes +__NSTRANGEARRAYS__;
@@ -65,7 +66,7 @@ int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,1000,1000,1000,1000
 /*strangeArraySizes[__NSTRANGEARRAYS__]*/                  1,1,1000,100,100,1000,100,100,1000,100,100,200,
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
-/*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200,
+/*tofArraySizes    [__NTOFARRAYS__    ]*/                  100, 200, 1000,
 /*eztArraySizes    [__NEZTARRAYS__    ]*/                  1, 1, 1, 1, 1};
 int* StMuArrays::strangeArraySizes = StMuArrays::arraySizes    +__NARRAYS__;
 int* StMuArrays::emcArraySizes = StMuArrays::strangeArraySizes +__NSTRANGEARRAYS__;
@@ -80,7 +81,7 @@ int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,
 /*strangeArrayCounters[__NSTRANGEARRAYS__]*/               0,0,0,0,0,0,0,0,0,0,0,0,
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
-/*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0,
+/*tofArrayCounters    [__NTOFARRAYS__    ]*/               0, 0, 0,
 /*eztArrayCounters    [__NEZTARRAYS__    ]*/               0, 0, 0, 0, 0};
 
 StMuArrays test;
@@ -111,6 +112,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.15  2005/04/12 21:56:29  mvl
+ * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
+ *
  * Revision 1.14  2004/11/29 15:53:21  mvl
  * Additions by Jan for Fpd ezTree
  *

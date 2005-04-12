@@ -22,7 +22,8 @@ StMuTofHitCollection* StMuTofUtil::getMuTofHit(StTofCollection *tofcol)
 
 void StMuTofUtil::fillMuTofHit(StMuTofHitCollection* muTofHit, StTofCollection* tofcol)
 {
-  if(!tofcol || !tofcol->dataPresent()) return;
+  // run 5 - dongx
+  if(!tofcol || (!tofcol->dataPresent()&&!tofcol->rawdataPresent())) return;
   if(!muTofHit) return;
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.67 2004/11/29 15:53:22 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.68 2005/04/12 21:56:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -787,7 +787,8 @@ void StMuDstMaker::fillPmd(StEvent* ev) {
 void StMuDstMaker::fillTof(StEvent* ev) {
   DEBUGMESSAGE2("");
   StTofCollection *tofcol = ev->tofCollection();
-  if( !ev || !tofcol || !tofcol->dataPresent() )
+  // run 5 - dongx
+  if( !ev || !tofcol || (!tofcol->dataPresent()&&!tofcol->rawdataPresent()) )
     return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
   StTimer timer;
   timer.start();
@@ -804,6 +805,13 @@ void StMuDstMaker::fillTof(StEvent* ev) {
   StSPtrVecTofData &tofData = tofcol->tofData();
   for(size_t i=0; i < tofData.size(); i++) {
     addType( mTofArrays[muTofData], *tofData[i] );
+  }
+
+  // run 5 - dongx
+  // fill tofRawData
+  StSPtrVecTofRawData &tofRawData = tofcol->tofRawData();
+  for(size_t i=0; i < tofRawData.size(); i++) {
+    addType( mTofArrays[muTofRawData], *tofRawData[i] );
   }
 
   timer.stop();
@@ -1211,6 +1219,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.68  2005/04/12 21:56:29  mvl
+ * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
+ *
  * Revision 1.67  2004/11/29 15:53:22  mvl
  * Additions by Jan for Fpd ezTree
  *
