@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.h,v 1.2 2004/03/09 17:43:04 dongx Exp $
+ * $Id: StTofrDaqMap.h,v 1.3 2005/04/12 17:23:15 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.h,v $
+ * Revision 1.3  2005/04/12 17:23:15  dongx
+ * Update for year 5 new data format, writter by Jing Liu
+ *
  * Revision 1.2  2004/03/09 17:43:04  dongx
  * first release
  *
@@ -45,11 +48,19 @@ class StTofrDaqMap{
  private:
   static const Int_t mDAQOVERFLOW = 255;   // daq max channel #
   static const Int_t mNTOFR = 120;   // 72
+
+  static const Int_t mNTOFR5 = 192;   // 192 for tofr5
+
   static const Int_t mNTray = 1;
   static const Int_t mNModule = 20;   // 12
+
+  static const Int_t mNModule5 = 32;   // 32 for tofr5 
+
   static const Int_t mNCell = 6;
   Int_t mTrayId[mNTOFR], mModuleId[mNTOFR], mCellId[mNTOFR];
   Int_t mAdc[mNTOFR], mTdc[mNTOFR];
+  // new arrays for tofr5
+  Int_t mGlobalTDCChan[mNTOFR5], mGlobalModuleChan[mNTOFR5];
 
  public:
   StTofrDaqMap();
@@ -58,6 +69,7 @@ class StTofrDaqMap{
   void init();
   void init(StMaker *maker);
   void initFromDbase(StMaker *maker);
+  void initFromDbaseY5(StMaker *maker);    // tofr5 
   void Reset();
 
   IntVec DaqChan2Cell( const Int_t iTofrDaq );
@@ -70,6 +82,10 @@ class StTofrDaqMap{
   Int_t DaqChan2TDCChan( const Int_t iTofrDaq );
   Int_t ADCChan2DaqChan( const Int_t iAdc );
   Int_t TDCChan2DaqChan( const Int_t iTdc );
+
+  // tofr5 interface, Jing Liu
+  IntVec Tofr5TDCChan2Cell( const Int_t iTdc );
+  Int_t Tofr5Cell2TDCChan( const Int_t iTray, const Int_t iModule, const Int_t iCell );
 
 };
 
