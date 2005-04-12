@@ -1,18 +1,21 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 2.2 2004/08/07 02:43:32 perev Exp $
+* $Id: TOF_Reader.cxx,v 2.3 2005/04/12 17:22:36 dongx Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
+* Revision 2.3  2005/04/12 17:22:36  dongx
+* Update for year 5 new data format, written by Jing Liu.
+* Previous interfaces are separated out for convenience.
+*
 * Revision 2.2  2004/08/07 02:43:32  perev
-* more test for corruption added
+*  more test for corruption added
 *
 * Revision 2.1  2004/01/28 02:47:45  dongx
 * change for year4 run (pVPD+TOFp+TOFr')
 *  - Addtional TOFr' ADCs and TDCs put in
 *  - Add TOTs of TOFr' in, combined in TDCs
-*
 *
 * Revision 2.0  2003/01/29 05:27:24  geurts
 * New TOF reader capable of reading TOF year3 data (pVPD, TOFp and TOFr).
@@ -33,135 +36,22 @@
 bool TOF_Reader::year2Data(){return (mTofRawDataVersion==1);}
 bool TOF_Reader::year3Data(){return (mTofRawDataVersion==2);}
 bool TOF_Reader::year4Data(){return (mTofRawDataVersion==3);}
+//Jing Liu
+bool TOF_Reader::year5Data(){return (mTofRawDataVersion==0);}
 
 void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
-  unsigned short numberOfDataWords, slot, channel;
-  int dataDWord, value;
-  //TofPTR->print();
-  unsigned short Token = TofPTR->header.Token;
-  if (Token==0){
-    cout << "TOF_Reader: do not know how to handle token==0"<<endl;
-    //return;
-  }
-  mTheTofArray.EventNumber = Token;
-  mTheTofArray.ByteSwapped = 0x04030201;
 
-  int tofRawDataVersion = TofPTR->header.FormatNumber;
-  if ((tofRawDataVersion <1) || (tofRawDataVersion >3)){
-    cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
-    return;
-  }
-  //fg 1. introduce rawdata consistency checks below ...
-
-  //Read ADC Bank
-  TOFADCD * TofAdcD;
-  if (TofPTR->AdcPTR.length>0) {
-    TofAdcD = (TOFADCD *) ((unsigned long *)TofPTR + TofPTR->AdcPTR.offset);
-    //TofAdcD->print();
-    TofAdcD->swap();
-    if (TofAdcD->header.Token!=Token){
-      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " ADCD " << TofAdcD->header.Token << endl;
-      mTheTofArray.EventNumber=0;
-    }
-    numberOfDataWords=TofAdcD->header.BankLength - (INT32)sizeof(TofAdcD->header)/4;
-    if (numberOfDataWords!=mMaxAdcChannels){
-      cout << "TOF_Reader: ADCD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>mMaxAdcChannels) numberOfDataWords=mMaxAdcChannels;
-    }
-    // decode and fill data structure
-    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
-      //slot    = (int)TofAdcD->data[dataDWord].adc.slot;
-      //channel = (int)TofAdcD->data[dataDWord].adc.channel; 
-      //value   = (int)TofAdcD->data[dataDWord].adc.data;
-      slot    = int( TofAdcD->data[dataDWord].data & 0x000000FF);
-      channel = int((TofAdcD->data[dataDWord].data & 0x0000FF00) >> 8);
-      value   = int((TofAdcD->data[dataDWord].data & 0xFFFF0000) >> 16);
-      mTheTofArray.AdcData[dataDWord]=value;
-    }    
+  int unpackerr=0;
+  if(year2Data()||year3Data()||year4Data()) {
+     unpackerr=UnpackYear2to4Data(TofPTR);
+     if(unpackerr>0) cout<<"TOF_READER::UnPack Year2-4 data ERROR!"<<endl;
   }
 
-  //Read TDC Bank
-  TOFTDCD * TofTdcD;
-  if (TofPTR->TdcPTR.length>0) {
-    TofTdcD = (TOFTDCD *) ((unsigned long *)TofPTR + TofPTR->TdcPTR.offset);
-    //TofTdcD->print();
-    TofTdcD->swap();
-    if (TofTdcD->header.Token!=Token){
-      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " TDCD " << TofTdcD->header.Token << endl;
-      mTheTofArray.EventNumber=0;
-    }
-    numberOfDataWords=TofTdcD->header.BankLength - (INT32)sizeof(TofTdcD->header)/4;
-    if (numberOfDataWords!=mMaxTdcChannels){
-      cout << "TOF_Reader: TDCD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>mMaxTdcChannels) numberOfDataWords=mMaxTdcChannels;
-    }
-    // decode and fill data structure
-    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
-      //slot    = (int)TofTdcD->data[dataDWord].tdc.slot;
-      //channel = (int)TofTdcD->data[dataDWord].tdc.channel; 
-      //value   = (int)TofTdcD->data[dataDWord].tdc.data;
-      slot    = int( TofTdcD->data[dataDWord].data & 0x000000FF);
-      channel = int((TofTdcD->data[dataDWord].data & 0x0000FF00) >> 8);
-      value   = int((TofTdcD->data[dataDWord].data & 0xFFFF0000) >> 16);
-      mTheTofArray.TdcData[dataDWord]=value;
-    }    
+  if(year5Data()){ 
+     unpackerr=UnpackYear5Data(TofPTR);
+     if(unpackerr>0) cout<<"TOF_READER::UnPack Year5 Data ERROR!"<<endl;
   }
 
-  //Read A2D Bank...
-  TOFA2DD * TofA2dD;
-  if (TofPTR->A2dPTR.length>0) {
-    TofA2dD = (TOFA2DD *) ((unsigned long *)TofPTR + TofPTR->A2dPTR.offset);
-    //TofA2dD->print();
-    TofA2dD->swap();
-    if (TofA2dD->header.Token!=Token){
-      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " A2DD " << TofA2dD->header.Token << endl;
-      mTheTofArray.EventNumber=0;
-    }
-    numberOfDataWords=TofA2dD->header.BankLength - (INT32)sizeof(TofA2dD->header)/4;
-    if (numberOfDataWords!=mMaxA2dChannels){
-      cout << "TOF_Reader: A2DD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>mMaxA2dChannels) numberOfDataWords=mMaxA2dChannels;
-    }
-    // decode and fill data structure
-    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
-      //slot    = (int)TofA2dD->data[dataDWord].a2d.slot;
-      //channel = (int)TofA2dD->data[dataDWord].a2d.channel; 
-      //value   = (int)TofA2dD->data[dataDWord].a2d.data;
-      slot    = int( TofA2dD->data[dataDWord].data & 0x000000FF);
-      channel = int((TofA2dD->data[dataDWord].data & 0x0000FF00) >> 8);
-      value   = int(int(TofA2dD->data[dataDWord].data) >> 16);// A2D values might be negative
-      mTheTofArray.A2dData[dataDWord]=value;
-    }    
-  }
-
-  //Read SCA Bank
-  TOFSCAD * TofScaD;
-  if (TofPTR->ScaPTR.length>0) {
-    TofScaD = (TOFSCAD *) ((unsigned long *)TofPTR + TofPTR->ScaPTR.offset);
-    //TofScaD->print();
-    TofScaD->swap();
-    if (TofScaD->header.Token!=Token){
-      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
-	   << " SCAD " << TofScaD->header.Token << endl;
-      mTheTofArray.EventNumber=0;
-    }
-    numberOfDataWords=TofScaD->header.BankLength - (INT32)sizeof(TofScaD->header)/4;
-    if (numberOfDataWords!=mMaxScaChannels){
-      cout << "TOF_Reader: SCAD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>mMaxScaChannels) numberOfDataWords=mMaxScaChannels;
-    }
-    // decode and fill data structure
-    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
-      //channel = (int)TofScaD->data[dataDWord].sca.channel; 
-      //value   = (int)TofScaD->data[dataDWord].sca.data;
-      channel = int( TofScaD->data[dataDWord].data & 0x000000FF);
-      value   = int((TofScaD->data[dataDWord].data & 0xFFFFFF00) >> 8);
-      mTheTofArray.ScaData[dataDWord]=value;
-    }
-  }
 }
 
 
@@ -222,6 +112,7 @@ unsigned short TOF_Reader::GetTdc(int daqId){
   }
   return mTheTofArray.TdcData[daqId];
 }
+
 unsigned short TOF_Reader::GetTdcFromSlat(int slatId){return GetTdc(slatId);}
 
 
@@ -338,7 +229,6 @@ unsigned short TOF_Reader::GetPvpdTdc(int pvpdId){
   return mTheTofArray.TdcData[43+pvpdId];
 }
 
-
 unsigned short TOF_Reader::GetClockAdc(){return mTheTofArray.AdcData[42];}
 
 
@@ -377,3 +267,444 @@ void TOF_Reader::printRawData(){
   cout << "\nStDaqLib/TOF/TOF_Reader  Done Printing Raw Data..." << endl;
 }
 
+
+//Jing Liu, FY05--- tofr5-------------------
+unsigned int TOF_Reader::GetLdTdc(int daqId){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  return mTheTofArray.LdTdcData[daqId];
+}
+
+unsigned int TOF_Reader::GetTrTdc(int daqId){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  return mTheTofArray.TrTdcData[daqId];
+}
+
+unsigned int TOF_Reader::GetLdmTdc(int daqId,int n){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  int chan=0;
+  for(unsigned int i=0;i<mTheTofArray.TofLeadingHits.size();i++){
+    chan = mTheTofArray.TofLeadingHits[i].globaltdcchan;
+    if(chan == daqId) break;
+  }
+  return mTheTofArray.TofLeadingHits[chan+n].tdc;
+}
+
+unsigned int TOF_Reader::GetTrmTdc(int daqId,int n){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  int chan=0;
+  for(unsigned int i=0;i<mTheTofArray.TofTrailingHits.size();i++){
+    chan = mTheTofArray.TofTrailingHits[i].globaltdcchan;
+    if(chan == daqId) break;
+  }
+  return mTheTofArray.TofTrailingHits[chan+n].tdc;
+}
+
+unsigned short TOF_Reader::GetNLdHits(int daqId){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  return mTheTofArray.LdNHit[daqId];
+}
+
+unsigned short TOF_Reader::GetNTrHits(int daqId){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  return mTheTofArray.TrNHit[daqId];
+}
+
+unsigned int TOF_Reader::GetPvpdLdTdc(int pvpdId){
+  if ((pvpdId<0) || (pvpdId>5)){
+    cout << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endl;
+    return 0;
+  }
+  return mTheTofArray.LdTdcData[192+pvpdId];
+}
+
+unsigned int TOF_Reader::GetPvpdTrTdc(int pvpdId){
+  if ((pvpdId<0) || (pvpdId>5)){
+    cout << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endl;
+    return 0;
+  }
+  return mTheTofArray.TrTdcData[192+pvpdId];
+}
+
+unsigned int TOF_Reader::GetPvpdLdmTdc(int daqId,int n){
+  if ((daqId<0) || (daqId>5)){
+    cout << "TOF_Reader::GetPvpdTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  int chan=0;
+  for(unsigned int i=0;i<mTheTofArray.TofLeadingHits.size();i++){
+    chan = mTheTofArray.TofLeadingHits[i].globaltdcchan;
+    if(chan-192 == daqId) break;
+  }
+  return mTheTofArray.TofLeadingHits[chan+n].tdc;
+}
+
+unsigned int TOF_Reader::GetPvpdTrmTdc(int daqId,int n){
+  if ((daqId<0) || (daqId>5)){
+    cout << "TOF_Reader::GetPvpdTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  int chan=0;
+  for(unsigned int i=0;i<mTheTofArray.TofTrailingHits.size();i++){
+    chan = mTheTofArray.TofTrailingHits[i].globaltdcchan;
+    if(chan-192 == daqId) break;
+  }
+  return mTheTofArray.TofTrailingHits[chan+n].tdc;
+}
+
+unsigned int TOF_Reader::GetNLeadingHits() {
+  return (unsigned int)(mTheTofArray.TofLeadingHits.size());
+}
+
+unsigned int TOF_Reader::GetLeadingEventNumber(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofLeadingHits.size()) return 0;
+  else
+    return mTheTofArray.TofLeadingHits[ihit].EventNumber;
+}
+
+unsigned short TOF_Reader::GetLeadingFiberId(int ihit) {
+  if(ihit<0 || ihit >= (int )mTheTofArray.TofLeadingHits.size()) return 9999;
+  else
+    return mTheTofArray.TofLeadingHits[ihit].fiberid;
+}
+
+unsigned short TOF_Reader::GetLeadingGlobalTdcChan(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofLeadingHits.size()) return 9999;
+  else
+    return mTheTofArray.TofLeadingHits[ihit].globaltdcchan;
+}
+
+unsigned int TOF_Reader::GetLeadingTdc(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofLeadingHits.size()) return 0;
+  else
+    return mTheTofArray.TofLeadingHits[ihit].tdc;
+}
+
+unsigned int TOF_Reader::GetNTrailingHits() {
+  return (unsigned int)(mTheTofArray.TofTrailingHits.size());
+}
+
+unsigned int TOF_Reader::GetTrailingEventNumber(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofTrailingHits.size()) return 0;
+  else
+    return mTheTofArray.TofTrailingHits[ihit].EventNumber;
+}
+
+unsigned short TOF_Reader::GetTrailingFiberId(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofTrailingHits.size()) return 9999;
+  else
+    return mTheTofArray.TofTrailingHits[ihit].fiberid;
+}
+
+unsigned short TOF_Reader::GetTrailingGlobalTdcChan(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofTrailingHits.size()) return 9999;
+  else
+    return mTheTofArray.TofTrailingHits[ihit].globaltdcchan;
+}
+
+unsigned int TOF_Reader::GetTrailingTdc(int ihit) {
+  if(ihit<0 || ihit >= (int) mTheTofArray.TofTrailingHits.size()) return 0;
+  else
+    return mTheTofArray.TofTrailingHits[ihit].tdc;
+}
+
+int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
+
+  unsigned short numberOfDataWords, slot, channel;
+  int dataDWord, value;
+  //TofPTR->print();
+  unsigned short Token = TofPTR->header.Token;
+  if (Token==0){
+    cout << "TOF_Reader: do not know how to handle token==0"<<endl;
+    //return;
+  }
+  mTheTofArray.EventNumber = Token;
+//  cout << " Token = " << Token << endl;
+  mTheTofArray.ByteSwapped = 0x04030201;
+
+  int tofRawDataVersion = TofPTR->header.FormatNumber;
+//  cout << " Raw Data Versions = " << tofRawDataVersion << endl;
+
+  if ((tofRawDataVersion <1) || (tofRawDataVersion >3)){
+    cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
+    return;
+  }
+
+  //fg 1. introduce rawdata consistency checks below ...
+
+  //Read ADC Bank
+
+  TOFADCD * TofAdcD;
+  if (TofPTR->AdcPTR.length>0) {
+    TofAdcD = (TOFADCD *) ((unsigned long *)TofPTR + TofPTR->AdcPTR.offset);
+    //TofAdcD->print();
+    TofAdcD->swap();
+    if (TofAdcD->header.Token!=Token){
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " ADCD " << TofAdcD->header.Token << endl;
+      mTheTofArray.EventNumber=0;
+    }
+    numberOfDataWords=TofAdcD->header.BankLength - (INT32)sizeof(TofAdcD->header)/4;
+    if (numberOfDataWords!=mMaxAdcChannels){
+      cout << "TOF_Reader: ADCD #channels mismatch " << numberOfDataWords  << endl;
+      if (numberOfDataWords>mMaxAdcChannels) numberOfDataWords=mMaxAdcChannels;
+    }
+    // decode and fill data structure
+    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
+      //slot    = (int)TofAdcD->data[dataDWord].adc.slot;
+      //channel = (int)TofAdcD->data[dataDWord].adc.channel; 
+      //value   = (int)TofAdcD->data[dataDWord].adc.data;
+      slot    = int( TofAdcD->data[dataDWord].data & 0x000000FF);
+      channel = int((TofAdcD->data[dataDWord].data & 0x0000FF00) >> 8);
+      value   = int((TofAdcD->data[dataDWord].data & 0xFFFF0000) >> 16);
+      mTheTofArray.AdcData[dataDWord]=value;
+    }    
+  }
+
+  //Read TDC Bank
+  TOFTDCD * TofTdcD;
+  if (TofPTR->TdcPTR.length>0) {
+    TofTdcD = (TOFTDCD *) ((unsigned long *)TofPTR + TofPTR->TdcPTR.offset);
+    //TofTdcD->print();
+    TofTdcD->swap();
+    if (TofTdcD->header.Token!=Token){
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " TDCD " << TofTdcD->header.Token << endl;
+      mTheTofArray.EventNumber=0;
+    }
+    numberOfDataWords=TofTdcD->header.BankLength - (INT32)sizeof(TofTdcD->header)/4;
+    if (numberOfDataWords!=mMaxTdcChannels){
+      cout << "TOF_Reader: TDCD #channels mismatch " << numberOfDataWords  << endl;
+      if (numberOfDataWords>mMaxTdcChannels) numberOfDataWords=mMaxTdcChannels;
+    }
+    // decode and fill data structure
+    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
+      //slot    = (int)TofTdcD->data[dataDWord].tdc.slot;
+      //channel = (int)TofTdcD->data[dataDWord].tdc.channel; 
+      //value   = (int)TofTdcD->data[dataDWord].tdc.data;
+      slot    = int( TofTdcD->data[dataDWord].data & 0x000000FF);
+      channel = int((TofTdcD->data[dataDWord].data & 0x0000FF00) >> 8);
+      value   = int((TofTdcD->data[dataDWord].data & 0xFFFF0000) >> 16);
+      mTheTofArray.TdcData[dataDWord]=value;
+    }    
+  }
+
+  //Read A2D Bank...
+  TOFA2DD * TofA2dD;
+  if (TofPTR->A2dPTR.length>0) {
+    TofA2dD = (TOFA2DD *) ((unsigned long *)TofPTR + TofPTR->A2dPTR.offset);
+    //TofA2dD->print();
+    TofA2dD->swap();
+    if (TofA2dD->header.Token!=Token){
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " A2DD " << TofA2dD->header.Token << endl;
+      mTheTofArray.EventNumber=0;
+    }
+    numberOfDataWords=TofA2dD->header.BankLength - (INT32)sizeof(TofA2dD->header)/4;
+    if (numberOfDataWords!=mMaxA2dChannels){
+      cout << "TOF_Reader: A2DD #channels mismatch " << numberOfDataWords  << endl;
+      if (numberOfDataWords>mMaxA2dChannels) numberOfDataWords=mMaxA2dChannels;
+    }
+    // decode and fill data structure
+    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
+      //slot    = (int)TofA2dD->data[dataDWord].a2d.slot;
+      //channel = (int)TofA2dD->data[dataDWord].a2d.channel; 
+      //value   = (int)TofA2dD->data[dataDWord].a2d.data;
+      slot    = int( TofA2dD->data[dataDWord].data & 0x000000FF);
+      channel = int((TofA2dD->data[dataDWord].data & 0x0000FF00) >> 8);
+      value   = int(int(TofA2dD->data[dataDWord].data) >> 16);// A2D values might be negative
+      mTheTofArray.A2dData[dataDWord]=value;
+    }    
+  }
+
+  //Read SCA Bank
+  TOFSCAD * TofScaD;
+  if (TofPTR->ScaPTR.length>0) {
+    TofScaD = (TOFSCAD *) ((unsigned long *)TofPTR + TofPTR->ScaPTR.offset);
+    //TofScaD->print();
+    TofScaD->swap();
+    if (TofScaD->header.Token!=Token){
+      cout << "TOF_Reader: Token mismatch TOFP "<< Token 
+	   << " SCAD " << TofScaD->header.Token << endl;
+      mTheTofArray.EventNumber=0;
+    }
+    numberOfDataWords=TofScaD->header.BankLength - (INT32)sizeof(TofScaD->header)/4;
+    if (numberOfDataWords!=mMaxScaChannels){
+      cout << "TOF_Reader: SCAD #channels mismatch " << numberOfDataWords  << endl;
+      if (numberOfDataWords>mMaxScaChannels) numberOfDataWords=mMaxScaChannels;
+    }
+    // decode and fill data structure
+    for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
+      //channel = (int)TofScaD->data[dataDWord].sca.channel; 
+      //value   = (int)TofScaD->data[dataDWord].sca.data;
+      channel = int( TofScaD->data[dataDWord].data & 0x000000FF);
+      value   = int((TofScaD->data[dataDWord].data & 0xFFFFFF00) >> 8);
+      mTheTofArray.ScaData[dataDWord]=value;
+    }
+  }
+  return -1;
+}
+
+int TOF_Reader::UnpackYear5Data(const Bank_TOFP * TofPTR) {
+
+  //cout<<"TOF READER 2005! "<<endl;
+  //cout<<"run no "<<ercpy->runno()<<endl;
+  //TofPTR->print();
+
+  unsigned short Token = TofPTR->header.Token;
+  if (Token==0){
+    cout << "TOF_Reader: do not know how to handle token==0"<<endl;
+    //return;
+  }
+  mTheTofArray.EventNumber = Token;
+  //  cout << " Token = " << Token << endl;
+  mTheTofArray.ByteSwapped = 0x04030201;
+
+  int tofRawDataVersion = TofPTR->header.FormatNumber;
+//  cout << " Raw Data Versions = " << tofRawDataVersion << endl;
+
+  // run 5 - dongx
+  if ((tofRawDataVersion <0) || (tofRawDataVersion >3)){
+    cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
+    //Jing Liu, the value of rawdataversion is 0 now, should change according somewhere.... 
+   //return;
+  }
+
+  //fg 1. introduce rawdata consistency checks below ...
+  // Jing Liu, read tofr5 FY05 raw data here!! 02/16/2005.
+  // Initialize raw hits vector first.
+  mTheTofArray.TofLeadingHits.clear();
+  mTheTofArray.TofTrailingHits.clear();
+
+  for(int ifib=0;ifib<4;ifib++) {   // raw data are read out from 4 fibers.
+    if(ifib>2) continue;          // for year5 run, only 3 fibers used.
+    //cout << " offset = " << TofPTR->DDLRPTR[ifib].offset << endl;
+    //cout << " length = " << dec << TofPTR->DDLRPTR[ifib].length-10 << endl;
+    if (TofPTR->DDLRPTR[ifib].length<=0) {
+      cout<<"No data words in this fiber! "<<endl;
+      continue;
+    }
+    TOFDDLR *TofDdlr = (TOFDDLR *)((unsigned long *)TofPTR + TofPTR->DDLRPTR[ifib].offset);
+    int nword = TofPTR->DDLRPTR[ifib].length-10;
+    int halftrayid=0;
+    int timeinbin=0;
+
+    int runnumber = ercpy->runno();
+    int fiboffset1[6]={1,2,3,4,5,6};
+    int fiboffset2[6]={4,5,6,1,2,3};  // we swith fiber 2,3 after run 6055081;
+    int fiboffset[6];
+    if(runnumber<6055081)  for(int i=0;i<6;i++){fiboffset[i]=fiboffset1[i];}
+    if(runnumber>=6055081) for(int i=0;i<6;i++){fiboffset[i]=fiboffset2[i];}
+ 
+    for (int iword=0;iword<nword;iword++) {
+       //cout << hex << TofDdlr->data[iword] << endl;
+       int dataword=TofDdlr->data[iword];
+       // now process data word seperately, get TDC information from data words.
+       if( (dataword&0xF0000000)>>28 == 0xe) continue;   // separator words, skip it.            
+       if( (dataword&0xF0000000)>>28 == 0xc) halftrayid = dataword&0x01;    // get halftray id!
+       // now get tdc chan, time from trailing and leading edge.
+       // some triger words will be skipped.
+       int edgeid =int( (dataword & 0xf0000000)>>28 );
+       if((edgeid !=LEADING) && (edgeid!=TRAILING)) continue;   // if not leading edge or trailing data, skip it.
+       int tdcid = (dataword & 0x0f000000)>>24;   // tdcid here is 0-15 
+       int tdcchan=0;
+       //cout<<"ifib="<<ifib<<" dataword=0x"<<hex<<dataword<<endl;
+       if(edgeid == LEADING) {     // leading edge data
+         TofRawHit templdhit;
+         templdhit.fiberid=ifib;
+         tdcchan=(dataword&0x00E00000)>>21;          // tdcchan is 0-7 here.
+	 timeinbin=((dataword&0x7ffff)<<2)+((dataword>>19)&0x03);  // time in tdc bin
+         templdhit.tdc=timeinbin;
+         // global channel number here !
+         if(ifib==0)templdhit.globaltdcchan=tdcchan + (tdcid&0x03)*8+(tdcid>>2)*24+halftrayid*96; // 0-191 for tray
+         if(ifib>=1) {   // pvpd leading edge read out from tdc 0-chan 0, tdc 1-chan 0, tdc 1-chan 2
+           if(tdcid==0&&tdcchan==0)templdhit.globaltdcchan=191 + fiboffset[0+3*(ifib-1)];
+           if(tdcid==1&&tdcchan==0)templdhit.globaltdcchan=191 + fiboffset[1+3*(ifib-1)];
+           if(tdcid==1&&tdcchan==2)templdhit.globaltdcchan=191 + fiboffset[2+3*(ifib-1)];
+         }
+         mTheTofArray.TofLeadingHits.push_back(templdhit);
+       } else if (edgeid==TRAILING){     // trailing edge data
+         TofRawHit temptrhit;
+         temptrhit.fiberid=ifib;
+         tdcchan=(dataword&0x0F80000)>>19;  // tdcchan is 0-23 here.
+         timeinbin = dataword & 0x7ffff;
+         temptrhit.tdc=timeinbin;
+         if(ifib==0)temptrhit.globaltdcchan=tdcchan +(tdcid>>2)*24+halftrayid*96;   // 0-191 for tray
+         if(ifib>=1) {
+            if(tdcid==3&&tdcchan==0)temptrhit.globaltdcchan=191 + fiboffset[0+3*(ifib-1)];
+            if(tdcid==3&&tdcchan==8)temptrhit.globaltdcchan=191 + fiboffset[1+3*(ifib-1)];
+            if(tdcid==3&&tdcchan==10)temptrhit.globaltdcchan=191+ fiboffset[2+3*(ifib-1)];
+         } 
+         mTheTofArray.TofTrailingHits.push_back(temptrhit);
+       }  else {
+         cout<<" UNKNOWN TDC data ! "<<endl;
+         return 1;
+       }
+       //cout<<"ifib="<<ifib<<" dataword="<<hex<<dataword<<" tdcid="<<tdcid<<" tdcchan="<<tdcchan<<" time="<<dec<<timeinbin<<endl;
+    }   // end loop data words
+  }     // end loop fibers
+  // dump out info. for check
+/*
+  for(unsigned int i=0;i<mTheTofArray.TofLeadingHits.size();i++){
+    cout<<"leading: fiber="<<mTheTofArray.TofLeadingHits[i].fiberid<<" channel="<<mTheTofArray.TofLeadingHits[i].globaltdcchan<<" time="<<mTheTofArray.TofLeadingHits[i].tdc<<endl;
+  }
+  for(unsigned int i=0;i<mTheTofArray.TofTrailingHits.size();i++){
+    cout<<"trailing: fiber="<<mTheTofArray.TofTrailingHits[i].fiberid<<" channel="<<mTheTofArray.TofTrailingHits[i].globaltdcchan<<" time="<<mTheTofArray.TofTrailingHits[i].tdc<<endl;
+  }
+*/
+  // count multi hit for each channels
+  for(unsigned int i=0;i<TOF_MAX_TDC_CHANNELS;i++){mTheTofArray.LdNHit[i]=0;mTheTofArray.LdTdcData[i]=0;}
+  for(unsigned int i=0;i<TOF_MAX_TDC_CHANNELS;i++){mTheTofArray.TrNHit[i]=0;mTheTofArray.TrTdcData[i]=0;}
+
+  for(unsigned int i=0;i<mTheTofArray.TofLeadingHits.size();i++){
+    int chan = mTheTofArray.TofLeadingHits[i].globaltdcchan;
+    if(chan <=0) continue; // possible?
+    mTheTofArray.LdNHit[chan]++;
+  }
+  for(unsigned int i=0;i<mTheTofArray.TofTrailingHits.size();i++){
+    int chan = mTheTofArray.TofTrailingHits[i].globaltdcchan;
+    if(chan <=0) continue; // possible?
+    mTheTofArray.TrNHit[chan]++;
+  }
+  // Use only the first LE and TE time in the fixed array!!!!
+  int oldchan=0;
+  for(unsigned int i=0;i<mTheTofArray.TofLeadingHits.size();i++){
+    int chan = mTheTofArray.TofLeadingHits[i].globaltdcchan;
+     if(chan == oldchan) continue;
+     mTheTofArray.LdTdcData[chan]=mTheTofArray.TofLeadingHits[i].tdc;
+     oldchan=chan;
+  }
+  oldchan=0;
+  for(unsigned int i=0;i<mTheTofArray.TofTrailingHits.size();i++){
+    int chan = mTheTofArray.TofTrailingHits[i].globaltdcchan;
+    if(chan == oldchan) continue;
+    mTheTofArray.TrTdcData[chan]=mTheTofArray.TofTrailingHits[i].tdc;
+    oldchan=chan;
+  }
+  /*
+  for(int i=0;i<TOF_MAX_TDC_CHANNELS;i++){
+    if(mTheTofArray.LdTdcData[i]>0)cout<<" ld chan ="<<i<<" time="<<mTheTofArray.LdTdcData[i]<<endl;
+    if(mTheTofArray.TrTdcData[i]>0)cout<<" tr chan ="<<i<<" time="<<mTheTofArray.TrTdcData[i]<<endl;
+  }
+  */
+  return -1;
+}
+
+//Jing Liu, end-----------------------
