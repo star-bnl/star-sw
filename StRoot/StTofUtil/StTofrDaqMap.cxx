@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.5 2004/05/03 22:58:26 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.6 2005/04/12 17:23:15 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.6  2005/04/12 17:23:15  dongx
+ * Update for year 5 new data format, writter by Jing Liu
+ *
  * Revision 1.5  2004/05/03 22:58:26  dongx
  * using a switch to set the ouput message
  *
@@ -29,6 +32,7 @@
 #include <iostream>
 #include "tables/St_tofModuleConfig_Table.h"
 #include "tables/St_tofCamacDaqMap_Table.h"
+#include "tables/St_tofr5Maptable_Table.h"
 #include "StMessMgr.h"
 #include "StMaker.h"
 #include "StTofrDaqMap.h"
@@ -119,6 +123,36 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
   }
 
 }
+// for tofr5------------------------------------------------------------------------
+void StTofrDaqMap::initFromDbaseY5(StMaker *maker) {
+
+  gMessMgr->Info("StTofrDaqMap -- rertieving the tofr5 channel mapping","OS");
+  ///////////////////////////////////////////////////////
+  // Load configuration parameters from dbase
+  //    need "[shell] setenv Calibrations_tof reconV0"
+  ///////////////////////////////////////////////////////
+
+  TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
+  if(!mDbTOFDataSet) {
+    gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
+    //    assert(mDbTOFDataSet);
+    return; // kStErr;
+  }
+
+  St_tofr5Maptable* tofr5maptable = static_cast<St_tofr5Maptable*>(mDbTOFDataSet->Find("tofr5Maptable"));
+  if(!tofr5maptable) {
+    gMessMgr->Error("unable to get tof Module map table","OS");
+    return; // kStErr;
+  }
+  tofr5Maptable_st* maptable = static_cast<tofr5Maptable_st*>(tofr5maptable->GetArray());
+  for (Int_t i=0;i<mNTOFR5;i++) {
+      mGlobalTDCChan[i]=(Int_t)(maptable[0].tdigchan[i]);
+      mGlobalModuleChan[i]=(Int_t)(maptable[0].modulechan[i]);
+      //      if(maker->Debug()) {
+      cout << " i=" << i << "  TDC chan =" << mGlobalTDCChan[i] << " module chan=" <<mGlobalModuleChan[i]<<endl;
+	//      }
+  }
+}
 
 void StTofrDaqMap::Reset() {
   for(Int_t i=0;i<mNTOFR;i++) {
@@ -128,6 +162,12 @@ void StTofrDaqMap::Reset() {
     mAdc[i] = -1;
     mTdc[i] = -1;
   }
+  // tofr5
+  for(int i=0;i<mNTOFR5;i++){
+    mGlobalTDCChan[i]=0;
+    mGlobalModuleChan[i]=0;
+  }
+
 }
 
 IntVec StTofrDaqMap::DaqChan2Cell( const Int_t iTofrDaq )
@@ -252,6 +292,57 @@ Int_t StTofrDaqMap::TDCChan2DaqChan( const Int_t iTdc )
       break;
     }
   }
-
   return daq;
+}
+
+//tofr5 
+
+IntVec StTofrDaqMap::Tofr5TDCChan2Cell( const Int_t iTdc)
+{
+  IntVec map;
+  map.clear();
+  // temporary
+  if(iTdc+4>=mNTOFR5) return map;
+  Int_t TdcId = mGlobalTDCChan[iTdc+4];
+
+  if ( iTdc<0 || iTdc>=mNTOFR5 || TdcId<0 || TdcId>=mNTOFR5) {
+    cout << " ERROR! Uncorrected TDC Channel number for Tofr5! " << endl;
+    return map;
+  }
+
+  Int_t Tray=93;   // only tray 93 is installed in tofr5
+  Int_t ModuleChan=(23-mGlobalModuleChan[TdcId]%24)+mGlobalModuleChan[TdcId]/24*24;
+  //  Int_t ModuleChan = mGlobalModuleChan[TdcId];
+  Int_t Module =ModuleChan/6+1;
+  Int_t Cell   = ModuleChan%6+1;
+  map.push_back(Tray);
+  map.push_back(Module);
+  map.push_back(Cell);
+
+  return map;
+}
+
+Int_t StTofrDaqMap::Tofr5Cell2TDCChan( const Int_t iTray , const Int_t iModule, const Int_t iCell )
+{
+
+  if(iModule<1 || iModule>32 ) {
+    cout<<"ERROR!!! Wrong module number !"<<endl;
+    return -1;
+  }
+  if(iCell <1 || iCell > 6) {
+    cout<<"ERROR!!! Wrong cell number ! "<<endl; 
+    return -1;
+  }
+
+  Int_t tdcchan = (iModule-1)*6+(iCell-1);
+
+  if (tdcchan<1 || tdcchan>=mNTOFR5) {
+    cout<<"ERROR!!! Wrong TDC channel number!"<<endl;
+    return -1;
+  }
+
+  if (tdcchan==mDAQOVERFLOW) {
+    return -1;
+  }
+  return tdcchan;
 }
