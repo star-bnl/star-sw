@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.28 2004/07/18 14:10:09 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.29 2005/04/13 08:14:17 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.29  2005/04/13 08:14:17  jcs
+// Invert sector numbering for Ftpc East when accessing the gain table (ftpcAmpSlope)
+// since this wasn't done when the gain table was produced
+//
 // Revision 1.28  2004/07/18 14:10:09  jcs
 // get adjustAverageWest/East from Calibrations_ftpc/ftpcGas
 //
@@ -717,6 +721,16 @@ Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
 {
   if(i>0 && i<=(numberOfSectors()*numberOfPads()) && padrow>=0 && padrow<numberOfPadrows())
     {
+       // Since the gain tables were produced without inverting the sector
+       // numbering in FTPC East, we invert the sector numbering when accessing
+       // the gain table
+       if (padrow>=10) {
+           //cout<<" padrow = "<<padrow<<" i = "<<i;
+           Int_t isec = (i-1)/numberOfPads();
+           Int_t ipad = i -isec*numberOfPads();
+           i = (5-isec)*numberOfPads()+ipad;
+           //cout<<" isec = "<<isec<<" ipad = "<<ipad<<" i =  "<<i<<endl;;
+       }
        return ampslopeTable[padrow].slope[i-1];
     }
   else
