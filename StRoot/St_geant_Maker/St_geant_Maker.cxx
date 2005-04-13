@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.97 2005/03/23 21:56:30 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.98 2005/04/13 22:27:11 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.98  2005/04/13 22:27:11  fisyak
+// Add Hit description extractor (AgstHits)
+//
 // Revision 1.97  2005/03/23 21:56:30  potekhin
 // Added the latest Kai's code for reading hits
 // from the IST and FST tables
@@ -357,6 +360,9 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_geom_gdat_Table.h"
+#include "tables/St_det_user_Table.h"
+#include "tables/St_det_hit_Table.h"
+#include "tables/St_det_path_Table.h"
 
 #include "TDataSetIter.h"
 // event header:
@@ -402,6 +408,11 @@
 #define    agvolume      F77_NAME(agvolume,AGVOLUME)
 #define    agvoluma      F77_NAME(agvoluma,AGVOLUMA)
 #define    uhtoc         F77_NAME(uhtoc,UHTOC)
+#define    agfdig0       F77_NAME(agfdig0,AGFDIG0)
+#define    agfdpar       F77_NAME(agfdpar,AGFDPAR)
+#if 0
+#define    acfromr       F77_NAME(acfromr,ACFROMR)
+#endif
 #endif
 typedef long int (*addrfun)(); 
 R__EXTERN "C" {
@@ -443,7 +454,13 @@ R__EXTERN "C" {
 #endif
   Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
+  int  type_of_call agfdig0 (const char*,const char*,int,int);
+  void type_of_call agfdpar (float &hits,const char *chit, float &alim, float &blim, float &bin, int);
+#if 0
+  Char_t type_of_call *acfromr(Float_t r=8009359);
+#endif
 }
+Char_t type_of_call *acfromr(Float_t r=8009359);
 
 
 Quest_t  *cquest; 
@@ -1333,7 +1350,10 @@ void St_geant_Maker::Agnzgete (Int_t &ILK,Int_t &IDE,
 //______________________________________________________________________________
 void St_geant_Maker::Geometry() {geometry();}
 //______________________________________________________________________________
-Int_t St_geant_Maker::Agstroot() {return agstroot();}
+Int_t St_geant_Maker::Agstroot() {
+  AgstHits();
+  return agstroot();
+}
 //_____________________________________________________________________________
 void St_geant_Maker::Gfxzrm(Int_t & Nlevel, 
 			    Float_t &x, Float_t &y, Float_t &z,
@@ -1692,4 +1712,165 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   fTopGeoVolume = volume;
   return GetTopGeoVolume();
 }
-  
+#if 1
+//________________________________________________________________________________
+Char_t *acfromr(Float_t r) {// 'TYPE'
+  const Char_t *S=" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
+  Char_t *charm = new Char_t[5];
+  memset (&charm[0], 0, 5);
+  Int_t k = (int) r;
+  for (int i = 3; i >= 0; i--) {
+    int j = 077 & k; k = k >> 6; charm[i] = S[j];
+    //    cout << "i\t" << i << "\tj\t" << j << "\tk\t" << k << "\t" << charm[i] << endl;
+  }
+  //  cout << charm << endl;
+  return charm;
+}
+#endif
+//________________________________________________________________________________
+Int_t St_geant_Maker::AgstHits() {
+  if (! geant3) return kStErr;
+  Int_t JSET = clink->jset;
+  if (JSET <= 0) return kStErr;
+  Int_t  NSET=z_iq[JSET-1];
+  Char_t Uset[8], Udet[8], Uvol[8];
+  memset (Uset, 0, 8);
+  memset (Udet, 0, 8);
+  memset (Uvol, 0, 8);
+  TDataSet *m_Detectors = new TDataSet("Detectors"); AddConst(m_Detectors);
+  for (Int_t ISET=1;ISET<=NSET;ISET++) {
+    Int_t JS=z_lq[JSET-ISET];
+    if (JS <= 0) continue;
+    Int_t NDET=z_iq[JS-1];
+    memcpy (Uset, &z_iq[JSET+ISET], 4);
+    TDataSet *set = new TDataSet(Uset);
+    m_Detectors->Add(set);
+    for (Int_t IDET=1;IDET<=NDET;IDET++) {
+      Int_t JD=z_lq[JS-IDET];
+      if (JD <=0) continue;
+      Int_t NV=z_iq[JD+2];
+      Int_t NWHI=z_iq[JD+7];
+      Int_t NWDI=z_iq[JD+8];
+      memcpy (Udet, &z_iq[JS+IDET], 4);
+      if (Debug()) {
+	cout << "  Set " << Uset << " Detector " << Udet
+	     << "  NV " << NV << " NWHI " << NWHI << " NWDI " << NWDI << endl;
+      }
+      Int_t JDU = z_lq[JD-3];
+      Int_t ivd = 0;
+      if (JDU > 0) {
+	TDataSet *det = new TDataSet(Udet);
+	set->Add(det);
+	St_det_user *detu = new St_det_user("User",1); det->Add(detu);
+	det_user_st rowU;
+	Int_t i;
+	rowU.i0      = (int) z_q[JDU+1]; 
+	rowU.N       = (int) z_q[JDU+2]; 
+	rowU.i1      = (int) z_q[JDU+3]; 
+	rowU.Nva     = (int) z_q[JDU+4]; 
+	rowU.i2      = (int) z_q[JDU+5]; 
+	rowU.Nvb     = (int) z_q[JDU+6]; 
+	rowU.Goption = (int) z_q[JDU+7]; 
+	rowU.Serial  = (int) z_q[JDU+8]; 
+	rowU.IdType  = (int) z_q[JDU+9]; 
+	rowU.Iprin   = (int) z_q[JDU+10];
+	detu->AddAt(&rowU);
+	if (Debug()) {
+	  cout << " displacement for hit description part    = 10                " << rowU.i0 << endl;     
+	  cout << " Number of all hit descriptors (both in non- and cum. parts)  " << rowU.N  << endl;     
+	  cout << " displacement for volume description part=10+10*Nh            " << rowU.i1 << endl;     
+	  cout << " Number of all volume descriptors (branching or not)          " << rowU.Nva << endl;    
+	  cout << " displacement for the free space   = 10+10*Nh+3*Nv            " << rowU.i2 << endl;     
+	  cout << " number of real volume branchings for NUMBV                   " << rowU.Nvb << endl;    
+	  cout << " Hit option: 1 - single step, 4 - Calorimetry                 " << rowU.Goption << endl;
+	  cout << " Valid serial number for this subset                          " << rowU.Serial << endl; 
+	  cout << " USER detector number                                         " << rowU.IdType << endl; 
+	  cout << " current print flag both for HITS and DIGI                    " << rowU.Iprin << endl;  
+	}
+	St_det_path *detuV = new St_det_path("Path",rowU.Nva);
+	St_det_hit  *detuH = new St_det_hit("Hit",rowU.N);
+	det->Add(detuV);
+	det->Add(detuH);
+	det_path_st rowV;
+	det_hit_st rowH;
+	agfdig0(Uset,Udet,strlen(Uset),strlen(Udet));
+	float    hits[15],alim[15],blim[15],bin[15];
+	memset (&hits[0],0,15*sizeof(float));
+	memset (&alim[0],0,15*sizeof(float));
+	memset (&blim[0],0,15*sizeof(float));
+	memset (&bin[0] ,0,15*sizeof(float));
+	const char chit[60]="";
+	agfdpar(hits[0],chit,alim[0],blim[0],bin[0],4);	
+	for (i = 0; i < rowU.N; i++) {
+	  memset(&rowH,0,detuH->GetRowSize());
+	  Int_t j = JDU + rowU.i0 + 10*i;
+	  //	  Int_t Nam   = (int) z_q[j+ 1];//     encoded hit name in Display code
+	  //	  memcpy (&rowH.hit[0], &chit[4*i], 4);
+	  Char_t *HitName = acfromr(z_q[j+ 1]);
+	  memcpy (&rowH.hit[0], HitName, 4);
+	  delete [] HitName;
+	  rowH.option = (int) z_q[j+ 2];//     encoded hit option (R-rounding,S-single step)
+	  rowH.Nb     = (int) z_q[j+ 3];//     number of bit requested
+	  rowH.Fmin   =       z_q[j+ 4];//     hit low limit
+	  rowH.Fmax   =       z_q[j+ 5];//     hit upper limit
+	  rowH.Origin =       z_q[j+ 6];//     Geant hit origin (-Fmin)
+	  rowH.Factor =       z_q[j+ 7];//     Geant packing factor
+	  rowH.Nbit   = (int) z_q[j+ 8];//     number of bit allocated
+	  rowH.Iext   = (int) z_q[j+ 9];//     address of the Geant user step routine
+	  rowH.Ifun   = (int) z_q[j+10];//     hit function code (1-18 at present)
+//  Case  IC of ( X  Y  Z   R    RR   PHI  THET ETA  TDR  CP    _
+//                U  V  W   ETOT ELOS BIRK STEP LGAM TOF  USER  _
+//                XX YY ZZ  PX   PY   PZ   SLEN PTOT LPTO rese )
+	  if (Debug()) {
+	    if (! i) 
+	    cout << "\thit \toption \tNb \tFmin \tFmax \tOrigin \tFactor \tNbit \tIext \tIfun" << endl;
+	    cout << "\t"  << setw(4) << rowH.hit 
+		 << "\t"  << rowH.option
+		 << "\t"  << rowH.Nb    
+		 << "\t"  << rowH.Fmin  //<< "/" << alim[i]
+		 << "\t"  << rowH.Fmax  //<< "/" << blim[i]
+		 << "\t"  << rowH.Origin
+		 << "\t"  << rowH.Factor //<< "/" << bin[i]
+		 << "\t"  << rowH.Nbit  
+		 << "\t"  << rowH.Iext  
+		 << "\t"  << rowH.Ifun  
+		 << endl;
+	  }
+	  detuH->AddAt(&rowH);
+	}
+	if (Debug()) detuH->Print(0,rowU.N);
+	for (i = rowU.i1; i < rowU.i2; i += 3) {
+	  memset(&rowV,0,detuV->GetRowSize());
+	  Int_t j    = JDU+i;
+	  Int_t iv   = (int) z_q[j+1];
+	  rowV.Ncopy = (int) z_q[j+2];
+	  Int_t Nam  = (int) z_iq[clink->jvolum+iv];
+	  rowV.Nb    = (int) z_q[j+3];
+	  memcpy (&rowV.VName[0], &Nam, 4);
+	  Char_t Udvol[] = "     ";
+          if (rowV.Nb > 0) {
+	    Int_t Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
+	    memcpy (Udvol, &Namd, 4);
+	  }
+	  if (Debug()) {
+	    cout << "\t" << setw(4) << rowV.VName <<  "/" << Udvol 
+		 << "\t" << rowV.Ncopy << "\t" << rowV.Nb << endl;
+	  }
+	  detuV->AddAt(&rowV);
+	}
+	if (Debug()) {
+	  for (; ivd<NV; ivd++) {
+	    Int_t Namd = (int) z_iq[JD+2*ivd+11]; ivd++;
+	    Char_t Udvol[] = "     ";
+	    memcpy (Udvol, &Namd, 4);
+	    cout << "\t" << "    " <<  "/" << Udvol << endl;
+	  }
+	  Int_t n = detuV->GetNRows();
+	  detuV->Print(0,n);
+	}
+      }
+    }
+  }
+  return kStOK;
+}
+
