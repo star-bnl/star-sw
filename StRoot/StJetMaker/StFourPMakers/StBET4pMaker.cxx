@@ -298,14 +298,24 @@ Int_t StBET4pMaker::Make()
 	    if (corrected_energy<=0.) continue;
 
 	    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
-	    double RSMD = 2.2625*100.; //radius of SMD in cm
-	    StThreeVectorD towerLocation(1., 1., 1.);
-	    towerLocation.setPhi(phi);
-	    towerLocation.setTheta(theta);
-	    towerLocation.setMagnitude(RSMD/cos(theta));
+	    //double RSMD = 2.2625*100.; //radius of SMD in cm
+	    float towerX, towerY, towerZ;
+	    geom->getXYZ(id, towerX, towerY, towerZ);
+	    StThreeVectorF towerLocation(towerX, towerY, towerZ);
+	    //cout <<"id:\t"<<id<<"\tlocation:\t"<<towerLocation<<"\teta:\t"<<towerLocation.pseudoRapidity()<<endl;
+
+	    //
+	    // AHHHH this was wrong, should be sin(theta)!!! Corrected on 04/11/05 (MLM, thanks to Dylan)
+	    //StThreeVectorD towerLocation(1., 1., 1.);
+	    //towerLocation.setPhi(phi);
+	    //towerLocation.setTheta(theta);
+	    //towerLocation.setMagnitude(RSMD/cos(theta));
+	    //Finsih AHHHH statement
+	    
 	    StThreeVectorF vertex = uDst->event()->primaryVertexPosition();
 	    towerLocation -= vertex; //shift the origin to the vertex, not (0., 0., 0.)
-
+	    //cout <<"\tvert:\t"<<vertex.z()<<"\tnewEta:\t"<<towerLocation.pseudoRapidity()<<endl;
+	    
 	    StThreeVectorF momentum(1., 1., 1.);
 	    momentum.setPhi(phi);
 	    momentum.setTheta( towerLocation.theta() ); //use corrected theta
