@@ -1,10 +1,13 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 2.3 2005/04/12 17:22:36 dongx Exp $
+* $Id: TOF_Reader.cxx,v 2.4 2005/04/13 16:02:38 dongx Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
+* Revision 2.4  2005/04/13 16:02:38  dongx
+* update for a warning message on the return value
+*
 * Revision 2.3  2005/04/12 17:22:36  dongx
 * Update for year 5 new data format, written by Jing Liu.
 * Previous interfaces are separated out for convenience.
@@ -444,7 +447,7 @@ int TOF_Reader::UnpackYear2to4Data(const Bank_TOFP * TofPTR) {
 
   if ((tofRawDataVersion <1) || (tofRawDataVersion >3)){
     cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
-    return;
+    return 1;
   }
 
   //fg 1. introduce rawdata consistency checks below ...
