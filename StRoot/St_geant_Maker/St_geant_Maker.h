@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.34 2005/02/07 21:09:20 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.35 2005/04/13 22:27:11 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.35  2005/04/13 22:27:11  fisyak
+// Add Hit description extractor (AgstHits)
+//
 // Revision 1.34  2005/02/07 21:09:20  fisyak
 // rename antique TGeant3 to TGiant3
 //
@@ -110,6 +113,7 @@ public:
 			    Int_t &k, Char_t *iq);
    virtual void     Geometry();
    virtual Int_t    Agstroot();
+   virtual Int_t    AgstHits();
    virtual Int_t    G2t_volume_id(const Char_t *name, Int_t *numbv);
 #if 1
    virtual Int_t    Agvolume(TVolume *&node,Float_t *&par,Float_t *&pos,Float_t *&mot,
@@ -149,7 +153,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.34 2005/02/07 21:09:20 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.35 2005/04/13 22:27:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
