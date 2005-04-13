@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.8 2004/04/01 21:33:46 jeromel Exp $
+ * $Id: StTofSimMaker.cxx,v 1.9 2005/04/13 16:03:29 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.9  2005/04/13 16:03:29  dongx
+ * corresponding changes because of the update of StTofData structure
+ *
  * Revision 1.8  2004/04/01 21:33:46  jeromel
  * More than one place where m_Mode should be used
  *
@@ -246,13 +249,17 @@ Int_t StTofSimMaker::Make(){
       unsigned short indexSlat = tempSlat->slatIndex();
       if (indexSlat == mGeomDb->daqToSlatId(i)){
 	slatFound = true;
-	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0);
+	//	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0);
+	// update for year 5 new format
+	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0,0,0);
 	if (Debug()) cout << indexSlat << ":  A" << tempSlat->adc() << "  T" << tempSlat->tdc() << endl;
 	mDataCollection->push_back(rawTofData);
       }
     }
     if (!slatFound){
-      StTofData *rawTofData = new  StTofData(mGeomDb->daqToSlatId(i),0,0,0,0);
+      //      StTofData *rawTofData = new  StTofData(mGeomDb->daqToSlatId(i),0,0,0,0);
+      // update for year 5 new format
+      StTofData *rawTofData = new  StTofData(mGeomDb->daqToSlatId(i),0,0,0,0,0,0);
       mDataCollection->push_back(rawTofData);
     }
   }
