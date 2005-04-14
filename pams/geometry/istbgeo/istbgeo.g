@@ -1,5 +1,17 @@
-* $Id: istbgeo.g,v 1.9 2005/02/09 15:13:01 nieuwhzs Exp $
+* $Id: istbgeo.g,v 1.10 2005/04/14 16:24:25 nieuwhzs Exp $
 * $Log: istbgeo.g,v $
+* Revision 1.10  2005/04/14 16:24:25  nieuwhzs
+* Solved problems with the modules/ladders not ending up on the proper radius
+* after they were tilted and shifted. Turned out that the first problem was
+* that the shift parallel to the module was not done properly. We'd like these
+* modules to tilt around a midpoint which is in between the sensors and have
+* this same midpoint end up on the proper radius. This is the second problem,
+* one can only tilt/rotate around the center of a volume.
+* Finally resolved the problems by (re)introducing a shift perpendicular to
+* the length of the modules. Together with the parallel shift and the tilt
+* this now positions the modules properly.
+* +++Gerrit van Nieuwenhuizen, 04/14/2005
+*
 * Revision 1.9  2005/02/09 15:13:01  nieuwhzs
 * Added second water manifold which makes it possible to center the sensor
 * assembly in the ladder mother volume, so no need for an extra radial
@@ -51,16 +63,16 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
 *****************************************************************
 +CDE,AGECOM,GCUNIT.
 * ---
-      real    angle, anglePos, angleCorr, trueR, raddeg, dr, Rlad
+      real    angle, anglePos, angleCorr, trueR, raddeg, Rlad
       integer nl,    ly,       nu
 * ---
       Content   IBMO, IBLM, IBAM, IBSS, ISTP, ISSC, ISWD, ISVD
 
-      Structure ISMG {Version, Rin,           Rout,      TotalLength}
-      Structure ISBG {Layer,   nLadder,       nUnit,     Length,
-                      LadderWidth, LadderThk, SensAThk,  Spacing,
-                      SensorWidth, SensorThk, SensorLngth,
-                      r,a,         pOffset,   aOffset}
+      Structure ISMG {Version, Rin,            Rout,        TotalLength}
+      Structure ISBG {Layer,   nLadder,        nUnit,       Length,
+                      LadderWidth, LadderThk,  SensAThk,    Spacing,
+                      SensorWidth, SensorThk,  SensorLngth,
+                      r,a,         pParOffset, pPerOffset,  aOffset}
 
       Structure ISAN {Version,  Thk, Length}
       Structure ISCG {Nummer,   W,H, Thk}
@@ -94,7 +106,8 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       r          =  7.0        ! 1st ladder nominal radius		
       a          =  0.0        ! 1st ladder nominal position angle
       aOffset    =  81.0       ! Angular offset				
-      pOffset    =  2.0        ! Position offset (shift)		
+      pParOffset =  1.5        ! Position offset parallel to the length of the module
+      pPerOffset =  0.238      ! Position offset perpendicular to the length of the module
    EndFill
 
    Fill ISBG                   ! Inner silicon tracker data
@@ -106,7 +119,8 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       r          =  12.0       ! 2nd ladder nominal radius		
       a          =  0.0        ! 2nd ladder nominal position angle	
       aOffset    =  81.0       ! Angular offset				
-      pOffset    =  2.0        ! Position offset (shift)		
+      pParOffset =  1.5        ! Position offset (shift)		
+      pPerOffset =  0.238      ! Position offset perpendicular to the length of the module
    EndFill
 
    Fill ISBG                   ! Inner silicon tracker data
@@ -118,7 +132,8 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       r          =  17.0       ! 2nd ladder nominal radius		
       a          =  0.0        ! 2nd ladder nominal position angle	
       aOffset    =  81.0       ! Angular offset				
-      pOffset    =  2.0        ! Position offset (shift)		
+      pParOffset =  1.5        ! Position offset (shift)		
+      pPerOffset =  0.238      ! Position offset perpendicular to the length of the module
    EndFill
 *--------------------------------------------------------
    Fill ISAN                   ! Aluminum Nitride Thermal Plate
@@ -174,29 +189,24 @@ Block IBMO is the mother of the ISTB detector
 
            angle = (360.0/ISBG_nLadder)*nl  ! Base tilt, to be further corrected
 
-*          The sensor assembly is not centered inside the Ladder mother,
-*          (darn water manifold won't fit), so there is extra correction to the
-*          radius
-*          GvN Because a second water manifold was added the sensor assembly
-*          now is centered inside the ladder mother volume. So, there is no
-*          need for dr anymore
-*           dr   = (ISBG_LadderThk-ISBG_SensAThk)/2.0
-           dr = 0.0
-           Rlad = ISBG_r+dr
+*          GvN Offset perpendicular to the length of the module/ladder
+*          this to move the midpoint of the sensors back on the required
+*          radius after the tilting
+           Rlad = ISBG_r+ISBG_pPerOffset
 
 *          Individual ladders can be individually tilted by using
 *          the aOffset parameter (angular offset), and the pOffset
 *          (position offset), which is the individual lateral
 *          displacement.
 
-           angleCorr = atan(ISBG_pOffset/Rlad)
+           angleCorr = atan(ISBG_pParOffset/Rlad)
 
 *          The anglePos defines the POSITION of the center of the ladder
 *          in space, along the lines of x=r*cos(...), y=r*sin(...)
 *          have to correct and convert to radians:
 
            anglePos = angle*raddeg - angleCorr       ! see above comment
-           trueR    = sqrt(Rlad**2+ISBG_pOffset**2)
+           trueR    = sqrt(Rlad**2+ISBG_pParOffset**2)
 
            Create   IBAM
            Position IBAM x = trueR*cos(anglePos) _
