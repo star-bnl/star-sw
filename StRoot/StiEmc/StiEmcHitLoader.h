@@ -31,10 +31,12 @@ public:
     virtual void loadHits(StEvent* source,
 			  Filter<StiTrack> * trackFilter, 
 			  Filter<StiHit> * hitFilter);
+#if 0
     virtual void loadMcHits(StMcEvent* source, 
 			    bool useMcAsRec,
 			    Filter<StiTrack> * trackFilter, 
 			    Filter<StiHit> * hitFilter);
+#endif //0
 };
 
 
