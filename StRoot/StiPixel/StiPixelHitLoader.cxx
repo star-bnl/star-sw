@@ -64,7 +64,7 @@ void StiPixelHitLoader::loadMcHits(StMcEvent* source,
   if(!_hitFactory) throw runtime_error("StiPixelHitLoader::loadMcHits(StMcEvent*) -F- _hitFactory==0");
   //cout << "StiPixelHitLoader::loadMcHits() -I- Loading"<<endl;
   StMcPixelHitCollection* allPixHitCol = source->pixelHitCollection();
-  for(int tiLayer=0; tiLayer<allPixHitCol->numberOfLayers(); tiLayer++)
+  for(int tiLayer=0; tiLayer<(int)allPixHitCol->numberOfLayers(); tiLayer++)
     {
     cout << "StiPixelHitLoader::loadMcHits(StMcEvent*) -I- layer " << tiLayer << endl;
     StMcPixelLayerHitCollection* pixHitCol = allPixHitCol->layer(tiLayer);
@@ -81,8 +81,8 @@ void StiPixelHitLoader::loadMcHits(StMcEvent* source,
       {
       nHitCount++;
       hit = *iterHit;
-      int row = 1;
-      int nLadder = 0;
+//      int row = 1;
+//      int nLadder = 0;
       unsigned long volId = hit->volumeId();
       unsigned long iModule = volId/1000000;
       unsigned long iLadder = (volId%1000000)/10000;
