@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.8 2004/06/08 23:02:32 jeromel Exp $
+// $Id: StTpcT0Maker.cxx,v 1.9 2005/04/14 20:26:41 jecc Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.9  2005/04/14 20:26:41  jecc
+// Now can also use FCF. Switch between TCL and FCF using m_Mode
+//
 // Revision 1.8  2004/06/08 23:02:32  jeromel
 // Made changes according to Javier. Should made it db.
 //
@@ -77,6 +80,8 @@
 #include "StTpcDb/StTpcDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
+#include "StRTSClient/FCFMaker/FCFMaker.h"
+#include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_L0_Trigger_Table.h"
 #include "StMessMgr.h"
@@ -95,18 +100,11 @@ StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
   maxRMS         = 0.05;      // t0 should be good to 50 ns
   //  mHistOut   = kFALSE;
   mHistOut=kTRUE;
-  StMaker *saveMk = cd();
-  New("St_tcl_Maker","tpc_hits");
-  New("St_tpt_Maker","tpc_tracks");
-  New("StMatchMaker","match");
-  New("StVertexMaker","vertex"); 
-  New("StPrimaryMaker","primary");
-  New("St_dst_Maker","dst");
 
   zVertexMin = -25.0; // was -40.0 until 2004
   zVertexMax =  25.0; // was 40.0  until 2004
 
-  saveMk->cd();
+  //  saveMk->cd();
 }
 //_____________________________________________________________________________
 /// Dummy destructor
@@ -138,6 +136,27 @@ Int_t StTpcT0Maker::Init(){
   dvel_assumed=0.0;
   trigger_assumed=0.0;
   length_assumed=0.0;
+
+  StMaker *saveMk = cd();
+  if(m_Mode&0x1){    
+    gMessMgr->Info() << "StTpcT0Maker will use fcf!" << endm; 
+    New("StRTSClientFCFMaker","tpc_hits");  
+  }
+  else {
+    gMessMgr->Info() << "StTpcT0Maker will use tcl!" << endm;
+    New("St_tcl_Maker","tpc_hits");    
+  }
+
+  New("St_tpt_Maker","tpc_tracks");
+  New("StMatchMaker","match");
+  New("StVertexMaker","vertex"); 
+  New("StPrimaryMaker","primary");
+  New("St_dst_Maker","dst");
+
+
+  saveMk->cd();
+
+
   return StMaker::Init();
 }
 
@@ -173,51 +192,90 @@ Int_t StTpcT0Maker::Make(){
 //   }
   t0guess = length_assumed/dvel_assumed - trigger_assumed;
   gMessMgr->Info() << "StTpcT0Maker::t0 guess = " << t0guess << " micro seconds" << endm; 
+
+  if(!(m_Mode==0||m_Mode==1)){
+    gMessMgr->Info() << "StTpcT0Maker unknown mode: " << m_Mode << endm; 
+    gMessMgr->Info() << "Check mode ... exit ... " << endm;
+    return kStFatal;
+  }
   if (!GetMaker("tpc_hits")||!GetMaker("tpc_tracks")||!GetMaker("match")||!GetMaker("vertex")||!GetMaker("primary")||!GetMaker("dst")) {
     gMessMgr->Error() << "StTpcT0Maker::Missing Another Maker, check chain options " << endm;
-      return kStFatal;
+    return kStFatal;
   }
-  St_tcl_Maker* tcl = (St_tcl_Maker*)GetMaker("tpc_hits");
-  tcl->InitRun(0);
-  GetMaker("tpc_tracks")->InitRun(0);
-  tcl->Clear();
+
+  StTpcHitMover *thm = (StTpcHitMover*)GetMaker("tpc_hit_mover");
+  if(!thm){
+    gMessMgr->Info() << "StTpcT0Maker: StTpcHitMover is not present! ExB correction will not be applied! " << endm; 
+  }
+
+  St_tcl_Maker *tcl;
+  StRTSClientFCFMaker *fcf;
+  if(m_Mode&0x1){    
+    fcf = (StRTSClientFCFMaker*)GetMaker("tpc_hits");
+    fcf->InitRun(0);
+    GetMaker("tpc_tracks")->InitRun(0);
+    fcf->Clear();
+  }
+  else {
+    tcl = (St_tcl_Maker*)GetMaker("tpc_hits");
+    tcl->InitRun(0);
+    GetMaker("tpc_tracks")->InitRun(0);
+    tcl->Clear();
+  }
+  if(thm) thm->Clear();
   GetMaker("tpc_tracks")->Clear();
   GetMaker("match")->Clear();
   GetMaker("vertex")->Clear();
   GetMaker("primary")->Clear();
   GetMaker("dst")->Clear();
-  tcl->AllOn();
-  tcl->EastOff();
-  tcl->Make();  
+  if(m_Mode&0x1){    
+    fcf->AllOn();
+    fcf->EastOff();
+    fcf->Make();  
+  }
+  else{
+    tcl->AllOn();
+    tcl->EastOff();
+    tcl->Make();  
+  }
+  if(thm) thm->Make();
   GetMaker("tpc_tracks")->Make();
   //  GetMaker("match")->InitRun(0);
   GetMaker("match")->Make();
   GetMaker("vertex")->Make();
   GetMaker("primary")->Make();
   GetMaker("dst")->Make();
-    TDataSet *ds=GetDataSet("dst/vertex");
-    if(!ds) return kStErr;
-    TDataSetIter dsiter(ds);
-    St_dst_vertex *vert = (St_dst_vertex *) dsiter.Find("vertex");
-    if (!vert)  return kStErr;
-    dst_vertex_st *sth = vert->GetTable();
-    {for (int ij=0;ij<vert->GetNRows();ij++,sth++){
-     if(sth->iflag==1&&sth->vtx_id==kEventVtxId){
-       zVertexWest = sth->z;
-       yVertexWest = sth->y;
-       xVertexWest = sth->x;
-       multWest = (float)(sth->n_daughters);
-       break;    // found primary vertex
-     }    
-    }}
-
-  tcl->Clear();
+  TDataSet *ds=GetDataSet("dst/vertex");
+  if(!ds) return kStErr;
+  TDataSetIter dsiter(ds);
+  St_dst_vertex *vert = (St_dst_vertex *) dsiter.Find("vertex");
+  if (!vert)  return kStErr;
+  dst_vertex_st *sth = vert->GetTable();
+  for (int ij=0;ij<vert->GetNRows();ij++,sth++){
+    if(sth->iflag==1&&sth->vtx_id==kEventVtxId){
+      zVertexWest = sth->z;
+      yVertexWest = sth->y;
+      xVertexWest = sth->x;
+      multWest = (float)(sth->n_daughters);
+      break;    // found primary vertex
+    }    
+  }
+  if(m_Mode&0x1)
+    fcf->Clear();
+  else 
+    tcl->Clear();
+  if(thm) thm->Clear();
   GetMaker("tpc_tracks")->Clear();
   GetMaker("match")->Clear();
   GetMaker("vertex")->Clear(); 
   GetMaker("primary")->Clear();
   GetMaker("dst")->Clear();
-  tcl->AllOn();
+
+  if(m_Mode&0x1)
+    fcf->AllOn();
+  else
+    tcl->AllOn();
+
   //check to see if event is OK
   if (zVertexWest<-998) {
     gMessMgr->Info() << "StTpcT0Maker::No Vertex Found in West End" << endm;
@@ -228,59 +286,76 @@ Int_t StTpcT0Maker::Make(){
     return kStOK;
   }
 
-  tcl->WestOff();
-  tcl->Make();  
+  if(m_Mode&0x1){
+    fcf->WestOff();
+    fcf->Make();  
+  }
+  else{
+    tcl->WestOff();
+    tcl->Make();  
+  }
+  if(thm) thm->Make();
   GetMaker("tpc_tracks")->Make();
   GetMaker("match")->Make();
   GetMaker("vertex")->Make();
   GetMaker("primary")->Make();
   GetMaker("dst")->Make();
-    TDataSet *ds1=GetDataSet("dst/vertex");
-    if (!ds1) return kStErr;
-    TDataSetIter dsiter1(ds1);
-    St_dst_vertex *vert1 = (St_dst_vertex *) dsiter1.Find("vertex");
-    if (!vert1)  return kStErr;
-    dst_vertex_st *sth1 = vert1->GetTable();
-    {for (int ij=0;ij<vert1->GetNRows();ij++,sth1++){
-     if(sth1->iflag==1&&sth1->vtx_id==kEventVtxId){
-       zVertexEast = sth1->z;
-       yVertexEast = sth1->y;
-       xVertexEast = sth1->x;
-       multEast = (float)(sth1->n_daughters);
-       break;    // found primary vertex
-     }    
-    }}
+  TDataSet *ds1=GetDataSet("dst/vertex");
+  if (!ds1) return kStErr;
+  TDataSetIter dsiter1(ds1);
+  St_dst_vertex *vert1 = (St_dst_vertex *) dsiter1.Find("vertex");
+  if (!vert1)  return kStErr;
+  dst_vertex_st *sth1 = vert1->GetTable();
+  for (int ij=0;ij<vert1->GetNRows();ij++,sth1++){
+    if(sth1->iflag==1&&sth1->vtx_id==kEventVtxId){
+      zVertexEast = sth1->z;
+      yVertexEast = sth1->y;
+      xVertexEast = sth1->x;
+      multEast = (float)(sth1->n_daughters);
+      break;    // found primary vertex
+    }
+  }
   if (zVertexEast<-998) {
     gMessMgr->Info() << "StTpcT0Maker::No Vertex Found in East End" << endm;
     return kStOK;
   }
-
-    if (zVertexEast>-999&&zVertexWest>-999&&zVertexEast>zVertexMin&&zVertexEast<zVertexMax){
-      float deltaz = zVertexEast-zVertexWest;
-      float meanz = (zVertexEast+zVertexWest)/2;
-      float corrz = deltaz+GetCorrection(meanz);
-      t0current = (corrz)/(2*dvel_assumed) + t0guess;
-      gMessMgr->Info() << "StTpcT0Maker::zVertexWest = " << zVertexWest << endm;
-      gMessMgr->Info() << "StTpcT0Maker::zVertexEast = " << zVertexEast << endm;
-      gMessMgr->Info() << "StTpcT0Maker::t0 = " << t0current << endm;
-      t0result->Fill(t0current);
-      t0guessError->Fill(t0current-t0guess);
-      xVertexDiff->Fill(xVertexEast-xVertexWest);
-      yVertexDiff->Fill(yVertexEast-yVertexWest);
-      zVertexDiff->Fill(zVertexEast-zVertexWest);
-      eventNumber = (float)GetEventNumber();
-      resNtuple->Fill(eventNumber,xVertexEast,yVertexEast,zVertexEast,xVertexWest,yVertexWest,zVertexWest,multEast,multWest,corrz);
-      if (t0current<T0HIST_MIN||t0current>T0HIST_MAX){
-         gMessMgr->Info() << "StTpcT0Maker::t0 out of defined range for histogram"<< endm;
-      }
+  
+  if (zVertexEast>-999&&zVertexWest>-999&&zVertexEast>zVertexMin&&zVertexEast<zVertexMax){
+    float deltaz = zVertexEast-zVertexWest;
+    float meanz = (zVertexEast+zVertexWest)/2;
+    float corrz = deltaz+GetCorrection(meanz);
+    t0current = (corrz)/(2*dvel_assumed) + t0guess;
+    gMessMgr->Info() << "StTpcT0Maker::zVertexWest = " << zVertexWest << endm;
+    gMessMgr->Info() << "StTpcT0Maker::zVertexEast = " << zVertexEast << endm;
+    gMessMgr->Info() << "StTpcT0Maker::t0 = " << t0current << endm;
+    t0result->Fill(t0current);
+    t0guessError->Fill(t0current-t0guess);
+    xVertexDiff->Fill(xVertexEast-xVertexWest);
+    yVertexDiff->Fill(yVertexEast-yVertexWest);
+    zVertexDiff->Fill(zVertexEast-zVertexWest);
+    eventNumber = (float)GetEventNumber();
+    resNtuple->Fill(eventNumber,xVertexEast,yVertexEast,zVertexEast,xVertexWest,yVertexWest,zVertexWest,multEast,multWest,corrz);
+    if (t0current<T0HIST_MIN||t0current>T0HIST_MAX){
+      gMessMgr->Info() << "StTpcT0Maker::t0 out of defined range for histogram"<< endm;
     }
-  tcl->Clear();
+  }
+
+  if(m_Mode&0x1)
+    fcf->Clear();
+  else
+    tcl->Clear();  
+  if(thm) thm->Clear();
   GetMaker("tpc_tracks")->Clear();
   GetMaker("match")->Clear();
   GetMaker("vertex")->Clear(); 
   GetMaker("primary")->Clear();
   GetMaker("dst")->Clear();
-  tcl->AllOn();
+
+  if(m_Mode&0x1)
+    fcf->AllOn();
+  else
+    tcl->AllOn();
+  
   if (t0result->GetEntries()>=desiredEntries){
     gMessMgr->Info() << "StTpcT0Maker::Sufficient Statistics, Ending Chain" << endm;
 //   if (t0result->GetEntries()>minEntries){
@@ -321,7 +396,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.8 2004/06/08 23:02:32 jeromel Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.9 2005/04/14 20:26:41 jecc Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
