@@ -27,10 +27,6 @@ public:
     virtual void loadHits(StEvent* source,
 			  Filter<StiTrack> * trackFilter, 
 			  Filter<StiHit> * hitFilter);
-    virtual void loadMcHits(StMcEvent* source,
-			    bool useMcAsRec,
-			    Filter<StiTrack> * trackFilter, 
-			    Filter<StiHit> * hitFilter);
 };
 
 
