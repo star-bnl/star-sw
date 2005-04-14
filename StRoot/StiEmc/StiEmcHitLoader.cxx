@@ -60,6 +60,7 @@ void StiEmcHitLoader::loadHits(StEvent* source,
     }  
 }
 
+#if 0
 void StiEmcHitLoader::loadMcHits(StMcEvent* source,
 				 bool useMcAsRec,
 				 Filter<StiTrack> * trackFilter, 
@@ -67,4 +68,4 @@ void StiEmcHitLoader::loadMcHits(StMcEvent* source,
 {
   return;
 }
-	
+#endif //0	
