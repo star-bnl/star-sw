@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.51 2005/03/31 18:10:38 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.52 2005/04/15 14:50:46 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.52  2005/04/15 14:50:46  potekhin
+* Volume enumeration added for FGT (GEM) detector
+*
 * Revision 1.51  2005/03/31 18:10:38  potekhin
 * Correction of the SSD volume numbering, as discussed with
 * Lilian and Kai. +7000 to the number.
@@ -577,12 +580,17 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *17*                                 Kai Schweda
       else If (Csys=='pix') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+
 *18*                                 Kai Schweda
       else If (Csys=='ist') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *19*                                 Kai Schweda
       else If (Csys=='fst') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+*20*                                 Kai Schweda
+      else If (Csys=='fgt') then
+        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
