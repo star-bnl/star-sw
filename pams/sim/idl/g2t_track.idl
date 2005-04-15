@@ -1,6 +1,10 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.8 2005/03/24 00:48:54 potekhin Exp $
+  /* $Id: g2t_track.idl,v 1.9 2005/04/15 14:51:54 potekhin Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.9  2005/04/15 14:51:54  potekhin
+     Addition of the FGT (GEM) detector needs
+     to be reflected in this file
+
      Revision 1.8  2005/03/24 00:48:54  potekhin
      Killed spurious comment deliminators (CVS fluke)
 
@@ -19,6 +23,7 @@ struct g2t_track {
        long      hit_ftp_p;  /* Id of first ftp hit on track linked list */
        long      hit_ist_p;  /* Id of first ist hit on track linked list */
        long      hit_fst_p;  /* Id of first fst hit on track linked list */
+       long      hit_fgt_p;  /* Id of first fgt hit on track linked list */
        long      hit_mwc_p;  /* Id of first mwc hit on track linked list */
        long      hit_pgc_p;  /* Id of first pgc hit on track linked list */
        long      hit_pmd_p;  /* Id of first psc hit on track linked list */
@@ -39,6 +44,7 @@ struct g2t_track {
        long      n_ftp_hit;  /* Nhits in forward tpc */
        long      n_ist_hit;  /* Nhits in ist */
        long      n_fst_hit;  /* Nhits in fst */
+       long      n_fgt_hit;  /* Nhits in fgt */
        long      n_mwc_hit;  /* Nhits in mwc */
        long      n_pgc_hit;  /* Nhits in pgc  ???  */
        long      n_pmd_hit;  /* Nhits in pmd (PMD) */
