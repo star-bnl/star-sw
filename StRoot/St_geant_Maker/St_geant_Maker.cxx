@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.98 2005/04/13 22:27:11 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.99 2005/04/15 14:52:37 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.99  2005/04/15 14:52:37  potekhin
+// Adding an interface for reading the FGT (GEM) hits
+//
 // Revision 1.98  2005/04/13 22:27:11  fisyak
 // Add Hit description extractor (AgstHits)
 //
@@ -377,6 +380,7 @@
 #include "g2t/St_g2t_pix_Module.h"
 #include "g2t/St_g2t_ist_Module.h"
 #include "g2t/St_g2t_fst_Module.h"
+#include "g2t/St_g2t_fgt_Module.h"
 #include "g2t/St_g2t_tpc_Module.h"
 #include "g2t/St_g2t_mwc_Module.h"
 #include "g2t/St_g2t_ftp_Module.h"
@@ -692,6 +696,17 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_fst(g2t_track,g2t_fst_hit);
     cout << "found FST hits!" << endl;
     g2t_fst_hit->Print(0,10);
+  }
+
+ geant3->Gfnhit("FGTH","FGAR", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
+    m_DataSet->Add(g2t_fgt_hit);
+    
+    iRes = g2t_fgt(g2t_track,g2t_fgt_hit);
+    cout << "found FGT hits!" << endl;
+    g2t_fgt_hit->Print(0,10);
   }
 
   geant3->Gfnhit("TPCH","TPAD", nhits);
