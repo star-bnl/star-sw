@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.108 2005/04/11 17:47:09 potekhin Exp $
+* $Id: geometry.g,v 1.109 2005/04/15 15:28:23 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.109  2005/04/15 15:28:23  potekhin
+* a) Corrected a comment that could surreptitiously break the Mortan
+* parsing and cause a bug, of the type : !----- your text here ----
+* b) Improved the formatting of comments and fixed a typo
+* c) As agreed with Jerome, added a special development tag DEV2005,
+* which will allows as to better insure consistency and backward
+* compatibility of the code when working on the improvements in the
+* current tag. Production with such a development tag will be
+* prohibited and effectively disabled, as implied in its designation.
+*
 * Revision 1.108  2005/04/11 17:47:09  potekhin
 * Add the tag Y2005C, as authorized by Jerome, in order to activate
 * the latest TOF upgrades from Xin
@@ -482,8 +492,9 @@
               sisd_level,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf
 
+***************** historical note: *********************8
 * CorrNum allows us to control incremental bug fixes in a more
-* organized manner -- obsoleted 20050324 maxim --
+* organized manner -- ! Obsoleted 20050324 maxim! --
 
 
 * The following are the versioning flags:
@@ -493,7 +504,7 @@
               FstdConfig, FtroConfig, ConeConfig, FgtdConfig, TpceConfig,
               PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
 
-*             DensConfig, ! gas density correction
+*             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
 *             BtofConfig, ! BTOF trays
 *             VpddConfig, ! VPDD
@@ -547,8 +558,6 @@ replace[;ON#{#;] with [
 * before parsing the request, set some default values:
    IPRIN    = IDEBUG
    NtrSubEv = 1000     " automatic !"
-
-* No correction by default   CorrNum = 0  -- obsoleted 20050324 maxim --
 
 * No Photon multiplicity detector or Silicon strip by default, hence init the version:
    DensConfig  = 0 ! gas density correction
@@ -712,7 +721,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* -- obsoleted 20050324 maxim -- CorrNum = 4;
+*                    -- obsoleted 20050324 maxim -- CorrNum = 4;
                      ShldConfig = 1; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      SupoConfig = 1; "FTPC Support"
@@ -753,7 +762,7 @@ If LL>1
                      fpdm=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-* CorrNum = 4;
+*                    -- Obsoleted: CorrNum = 4;
                      ShldConfig = 1; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      SupoConfig = 1; "FTPC Support"
@@ -806,7 +815,7 @@ If LL>1
                      fpdm=on
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-* CorrNum = 4;
+*                    -- Obsoleted CorrNum = 4;
                      ShldConfig = 1; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      SupoConfig = 1; "FTPC Support"
@@ -841,7 +850,7 @@ If LL>1
 * position of the wafers in year2001, which was incorrectly offset
 * by 250 um insterad of 150 um.
 
-* CorrNum = 1;
+*                    -- Obsoleted CorrNum = 1;
                      SvttConfig = 1; "SVTT version"
                      SupoConfig = 1; "FTPC Support"
 
@@ -869,7 +878,7 @@ If LL>1
                      rich=on      " have rich ";
                      Rv=2;        " save additional (fake) hits "; 
                   "ctb: central trigger barrer ";
-                     Itof=2       " vyzyvat' btofgeo2                 ";
+                     Itof=2       " call btofgeo2 ";
                      BtofConfig=4;
                   "calb: barrel calorimeter "
                      ems=on       " sector version "
@@ -891,7 +900,7 @@ If LL>1
   on YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbring is in the code   ";
+                     wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -950,7 +959,7 @@ If LL>1
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-* CorrNum = 1;
+*                    -- Obsoleted CorrNum = 1;
                      SvttConfig = 1; "SVTT version"
                      SupoConfig = 1; "FTPC Support"
                 }
@@ -988,7 +997,7 @@ If LL>1
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-* CorrNum = 2;
+*                    -- Obsoleted CorrNum = 2;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 2; "SVTT version"
                 }
@@ -1020,7 +1029,7 @@ If LL>1
                      VpddConfig=3;
                   "field version "
                      Mf=4;      "tabulated field, with correction "
-* CorrNum = 2;
+*                    -- Obsoleted CorrNum = 2;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 2; "SVTT version"
 
@@ -1073,7 +1082,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* CorrNum = 3;
+*                    -- Obsoleted CorrNum = 3;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 3; "SVTT version"
                      DensConfig = 1; "gas density correction"
@@ -1130,7 +1139,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* CorrNum = 3;
+*                    -- Obsoleted CorrNum = 3;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 3; "SVTT version"
                      DensConfig = 1; "gas density correction"
@@ -1183,7 +1192,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* CorrNum = 3;
+*                    -- Obsoleted CorrNum = 3;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 3; "SVTT version"
                      DensConfig = 1; "gas density correction"
@@ -1310,7 +1319,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* CorrNum = 3;
+*                    -- Obsoleted CorrNum = 3;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 3; "SVTT version"
                      DensConfig = 1; "gas density correction"
@@ -1365,7 +1374,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* CorrNum = 3;
+*                    -- Obsoleted CorrNum = 3;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 3; "SVTT version"
                      DensConfig = 1; "gas density correction"
@@ -1570,7 +1579,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* CorrNum = 3;
+*                    -- Obsoleted CorrNum = 3;
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 3; "SVTT version"
                      DensConfig = 1; "gas density correction"
@@ -1587,6 +1596,76 @@ If LL>1
                   "FTPC Readout barrel "
                      ftro=on;
                      FtroConfig = 1;
+
+                }
+
+****************************************************************************************
+  on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+*                    remember that with this config, the following parameters have
+*                    a different meaning because we have to (unfortunately) switch
+*                    from divisions to copies and introduce a map, which DOES
+*                    control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 24; "second version, full barrel with corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
 
                 }
 
@@ -1655,28 +1734,28 @@ If LL>1
    dcay={210,210,0.1,0.01}
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
-   write(*,*) '****** ATTENTION ACTUNG ATTENZIONE VNIMANIE UVAGA ******'
-   write(*,*) 'BtofConfig:',BtofConfig
-   write(*,*) 'CalbConfig:',CalbConfig
-   write(*,*) 'ConeConfig:',ConeConfig
-   write(*,*) 'DensConfig:',DensConfig
-   write(*,*) 'FgtdConfig:',FgtdConfig
-   write(*,*) 'FpdmConfig:',FpdmConfig
-   write(*,*) 'FstdConfig:',FstdConfig
-   write(*,*) 'FtpcConfig:',FtpcConfig
-   write(*,*) 'FtroConfig:',FtroConfig
-   write(*,*) 'IstbConfig:',IstbConfig
-   write(*,*) 'PhmdConfig:',PhmdConfig
-   write(*,*) 'PipeConfig:',PipeConfig
-   write(*,*) 'PixlConfig:',PixlConfig
-   write(*,*) 'ShldConfig:',ShldConfig
-   write(*,*) 'SisdConfig:',SisdConfig
-   write(*,*) 'SupoConfig:',SupoConfig
-   write(*,*) 'SvttConfig:',SvttConfig
-   write(*,*) 'TpceConfig:',TpceConfig
-   write(*,*) 'VpddConfig:',VpddConfig
-   write(*,*) '********** THESE ARE CONFIGURAION FLAGS USED  **********'
-   write(*,*) '******** EXPERTS CAN LOOK IN GEOMETRY.G FOR DETAIL *****'
+   write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
+   write(*,*) '******* THESE FLAGS ARE USED TO GENERATE THE GEOMETRY *******'
+   write(*,*) '                 BtofConfig: ',BtofConfig
+   write(*,*) '                 CalbConfig: ',CalbConfig
+   write(*,*) '                 ConeConfig: ',ConeConfig
+   write(*,*) '                 DensConfig: ',DensConfig
+   write(*,*) '                 FgtdConfig: ',FgtdConfig
+   write(*,*) '                 FpdmConfig: ',FpdmConfig
+   write(*,*) '                 FstdConfig: ',FstdConfig
+   write(*,*) '                 FtpcConfig: ',FtpcConfig
+   write(*,*) '                 FtroConfig: ',FtroConfig
+   write(*,*) '                 IstbConfig: ',IstbConfig
+   write(*,*) '                 PhmdConfig: ',PhmdConfig
+   write(*,*) '                 PipeConfig: ',PipeConfig
+   write(*,*) '                 PixlConfig: ',PixlConfig
+   write(*,*) '                 ShldConfig: ',ShldConfig
+   write(*,*) '                 SisdConfig: ',SisdConfig
+   write(*,*) '                 SupoConfig: ',SupoConfig
+   write(*,*) '                 SvttConfig: ',SvttConfig
+   write(*,*) '                 TpceConfig: ',TpceConfig
+   write(*,*) '                 VpddConfig: ',VpddConfig
+   write(*,*) '***** FOR EXPERTS ONLY: LOOK UP GEOMETRY.G FOR DETAIL *******'
 
 
    if (rich) ItCKOV = 1
@@ -1724,10 +1803,7 @@ If LL>1
     if(SvttConfig==3) call svttgeo3
     if(SvttConfig==4) call svttgeo4
 
-*    elseif(CorrNum==4) then
-*
-*       call svttgeo3 ! +silicon strip detector separated into its own geo file
-*    endif
+*    elseif(CorrNum==4) then call svttgeo3 ! +silicon strip detector separated into its own geo file
 
   endif
 
@@ -1760,7 +1836,8 @@ If LL>1
             if (IPRIN==0) stop 'You better stop here to avoid problems'     
          endif
 
-       else ! ------ The original version (pretty much obsolete) --------
+       else
+*        The original version (pretty much obsolete)
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          call sisdgeo
        endif
@@ -1796,7 +1873,7 @@ If LL>1
    if (ftpc) then
 	if(FtpcConfig==0) Call ftpcgeo
 	if(FtpcConfig==1) Call ftpcgeo1
-* and look at the support pieces, was: if(CorrNum==0)
+*       and look at the support pieces, was: if(CorrNum==0)
 	if(SupoConfig==0)  Call supogeo
 	if(SupoConfig==1)  Call supogeo1
    endif
