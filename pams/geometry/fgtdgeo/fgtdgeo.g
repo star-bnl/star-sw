@@ -1,5 +1,8 @@
-* $Id: fgtdgeo.g,v 1.3 2005/03/31 18:34:25 potekhin Exp $
+* $Id: fgtdgeo.g,v 1.4 2005/04/15 14:53:14 potekhin Exp $
 * $Log: fgtdgeo.g,v $
+* Revision 1.4  2005/04/15 14:53:14  potekhin
+* Add hit description to the FGT detector
+*
 * Revision 1.3  2005/03/31 18:34:25  potekhin
 * Declare the sector of the ring a sensitive volume,
 * and leave comment to that effect
@@ -121,6 +124,12 @@ Block FGSC is an Ar Sector of a Ring in the GEM detector
       Attribute FGRN  Seen=1  colo=2
 
       Shape     TUBS phi1=0 phi2=dPhi
+
+      call      GSTPAR (%Imed,'STRA',1.)
+
+      HITS    FGAR   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
+                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 
 endblock
 * -----------------------------------------------------------------------------
