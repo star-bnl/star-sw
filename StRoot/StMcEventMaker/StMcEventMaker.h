@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.12 2003/12/04 05:58:15 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.13 2005/04/18 20:12:40 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.13  2005/04/18 20:12:40  calderon
+ * Modifications to build the Fgt and Fst classes from the g2t tables.
+ *
  * Revision 1.12  2003/12/04 05:58:15  calderon
  * Introduction of Endcap EMC collections into StMcEvent.  Read the corresponding
  * g2t table for the hits, decode the volume Id and add it to the proper
@@ -77,7 +80,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.12 2003/12/04 05:58:15 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.13 2005/04/18 20:12:40 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -95,6 +98,9 @@ public:
     Bool_t  doUseTof;              //!
     Bool_t  doUseEemc;             //!
     Bool_t  doUsePixel;            //!
+    Bool_t  doUseIst;              //!
+    Bool_t  doUseFst;              //!
+    Bool_t  doUseFgt;              //!
 
     void   printEventInfo();                               // *MENU* 
     void   printEventInfoForEmcDet(unsigned int det=1);    // *MENU* 
