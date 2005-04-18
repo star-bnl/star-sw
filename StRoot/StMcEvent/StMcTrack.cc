@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.18 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.19 2005/04/18 20:11:33 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.19  2005/04/18 20:11:33  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.18  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -26,8 +29,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.18 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.19 2005/04/18 20:11:33 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.19  2005/04/18 20:11:33  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.18  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -120,7 +126,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.18 2005/01/27 23:40:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.19 2005/04/18 20:11:33 calderon Exp $";
 
 ClassImp(StMcTrack);
 
@@ -182,6 +188,8 @@ StMcTrack::~StMcTrack() {
     mEemcHits.clear();
     mPixelHits.clear();
     mIstHits.clear();
+    mFstHits.clear();
+    mFgtHits.clear();
 }
 
 void StMcTrack::initToZero()
@@ -232,7 +240,9 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Tof   Hits: " << t.tofHits().size()   << endl;
     os << "No. Eemc  Hits: " << t.eemcHits().size()  << endl;
     os << "No. Pixel Hits: " << t.pixelHits().size() << endl;
-    os << "No. Ist Hits:   " << t.istHits().size()   << endl;
+    os << "No. Ist Hits  : " << t.istHits().size()   << endl;
+    os << "No. Fst Hits  : " << t.fstHits().size()   << endl;
+    os << "No. Fgt Hits  : " << t.fgtHits().size()   << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
     os << "Pdg Code      : " << t.pdgId()  << endl;
@@ -277,6 +287,10 @@ void StMcTrack::setEemcHits(StPtrVecMcCalorimeterHit& val) { mEemcHits = val; }
 void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
 void StMcTrack::setIstHits(StPtrVecMcIstHit& val) { mIstHits = val; }
+
+void StMcTrack::setFstHits(StPtrVecMcFstHit& val) { mFstHits = val; }
+
+void StMcTrack::setFgtHits(StPtrVecMcFgtHit& val) { mFgtHits = val; }
 
 void StMcTrack::setShower(char val) { mIsShower = val; }
 
@@ -358,6 +372,16 @@ void StMcTrack::addPixelHit(StMcPixelHit* hit)
 void StMcTrack::addIstHit(StMcIstHit* hit)
 {
   mIstHits.push_back(hit);
+}
+
+void StMcTrack::addFstHit(StMcFstHit* hit)
+{
+  mFstHits.push_back(hit);
+}
+
+void StMcTrack::addFgtHit(StMcFgtHit* hit)
+{
+  mFgtHits.push_back(hit);
 }
 
 // Not very elegant.  Maybe should have kept all collections as
@@ -462,6 +486,22 @@ void StMcTrack::removeIstHit(StMcIstHit* hit)
     StMcIstHitIterator iter = find (mIstHits.begin(), mIstHits.end(),hit);
     if (iter != mIstHits.end()) {
 	mIstHits.erase(iter);
+    }
+}
+
+void StMcTrack::removeFstHit(StMcFstHit* hit)
+{
+    StMcFstHitIterator iter = find (mFstHits.begin(), mFstHits.end(),hit);
+    if (iter != mFstHits.end()) {
+	mFstHits.erase(iter);
+    }    
+}
+
+void StMcTrack::removeFgtHit(StMcFgtHit* hit)
+{
+    StMcFgtHitIterator iter = find (mFgtHits.begin(), mFgtHits.end(),hit);
+    if (iter != mFgtHits.end()) {
+	mFgtHits.erase(iter);
     }    
 }
 
