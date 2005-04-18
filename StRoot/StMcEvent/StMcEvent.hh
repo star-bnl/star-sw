@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.16 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.17 2005/04/18 20:11:32 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.17  2005/04/18 20:11:32  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.16  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -99,6 +102,8 @@ class StMcEmcHitCollection;
 class StMcTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
+class StMcFstHitCollection;
+class StMcFgtHitCollection;
 class StMcVertex;
 class g2t_event_st;
 
@@ -177,7 +182,11 @@ public:
     const StMcPixelHitCollection*  pixelHitCollection() const;
     StMcIstHitCollection*          istHitCollection();
     const StMcIstHitCollection*    istHitCollection() const;
-    
+    StMcFstHitCollection*          fstHitCollection();
+    const StMcFstHitCollection*    fstHitCollection() const;
+    StMcFgtHitCollection*          fgtHitCollection();
+    const StMcFgtHitCollection*    fgtHitCollection() const;
+
     // "Set" Methods
     
     void setEventGeneratorEventLabel(unsigned long);
@@ -212,7 +221,8 @@ public:
     void setEemcHitCollection(StMcEmcHitCollection*);              
     void setPixelHitCollection(StMcPixelHitCollection*);       
     void setIstHitCollection(StMcIstHitCollection*);       
-
+    void setFstHitCollection(StMcFstHitCollection*);       
+    void setFgtHitCollection(StMcFgtHitCollection*);       
 
 protected:
     unsigned long                  mEventGeneratorEventLabel;
@@ -250,6 +260,8 @@ protected:
     StMcEmcHitCollection*          mEemcHits;
     StMcPixelHitCollection*        mPixelHits;
     StMcIstHitCollection*          mIstHits;
+    StMcFstHitCollection*          mFstHits;
+    StMcFgtHitCollection*          mFgtHits;
     static TString                 mCvsTag;
 private:
     const StMcEvent& operator=(const StMcEvent&);
@@ -365,5 +377,12 @@ inline StMcIstHitCollection* StMcEvent::istHitCollection() { return mIstHits;}
 
 inline const StMcIstHitCollection* StMcEvent::istHitCollection() const { return mIstHits;}
 
+inline StMcFstHitCollection* StMcEvent::fstHitCollection() { return mFstHits;}
+
+inline const StMcFstHitCollection* StMcEvent::fstHitCollection() const { return mFstHits;}
+
+inline StMcFgtHitCollection* StMcEvent::fgtHitCollection() { return mFgtHits;}
+
+inline const StMcFgtHitCollection* StMcEvent::fgtHitCollection() const { return mFgtHits;}
 #endif
 

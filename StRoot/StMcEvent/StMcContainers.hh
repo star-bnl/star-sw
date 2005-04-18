@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.hh,v 2.8 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcContainers.hh,v 2.9 2005/04/18 20:11:32 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.9  2005/04/18 20:11:32  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.8  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -27,6 +30,9 @@
  * accordingly.
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.9  2005/04/18 20:11:32  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.8  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -83,6 +89,8 @@ class StMcRichHit;
 class StMcCtbHit;
 class StMcPixelHit;
 class StMcIstHit;
+class StMcFstHit;
+class StMcFgtHit;
 class StMcTofHit;
 class StMcTrack;
    
@@ -99,6 +107,8 @@ typedef vector<StMcRichHit*> StSPtrVecMcRichHit; //!
 typedef vector<StMcCtbHit*>  StSPtrVecMcCtbHit; //!
 typedef vector<StMcPixelHit*> StSPtrVecMcPixelHit; //!
 typedef vector<StMcIstHit*>  StSPtrVecMcIstHit; //!
+typedef vector<StMcFstHit*>  StSPtrVecMcFstHit; //!
+typedef vector<StMcFgtHit*>  StSPtrVecMcFgtHit; //!
 typedef vector<StMcTofHit*>  StSPtrVecMcTofHit; //!
 typedef vector<StMcTrack*>   StSPtrVecMcTrack;  //!
 // Not owners
@@ -113,6 +123,8 @@ typedef vector<StMcRichHit*> StPtrVecMcRichHit; //!
 typedef vector<StMcCtbHit*>  StPtrVecMcCtbHit; //!
 typedef vector<StMcPixelHit*> StPtrVecMcPixelHit; //!
 typedef vector<StMcIstHit*>  StPtrVecMcIstHit; //!
+typedef vector<StMcFstHit*>  StPtrVecMcFstHit; //!
+typedef vector<StMcFgtHit*>  StPtrVecMcFgtHit; //!
 typedef vector<StMcTofHit*>  StPtrVecMcTofHit; //!
 typedef vector<StMcTrack*>   StPtrVecMcTrack; //!
 #else
@@ -129,6 +141,8 @@ typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StSPtrVecMcRichHit; //!
 typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StSPtrVecMcCtbHit; //!
 typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StSPtrVecMcPixelHit; //!
 typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StSPtrVecMcIstHit; //!
+typedef vector<StMcFstHit*, allocator<StMcFstHit*> >    StSPtrVecMcFstHit; //!
+typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StSPtrVecMcFgtHit; //!
 typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StSPtrVecMcTofHit; //!
 typedef vector<StMcTrack*, allocator<StMcTrack*> >      StSPtrVecMcTrack; //!
 // Not owners
@@ -143,6 +157,8 @@ typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StPtrVecMcRichHit; //!
 typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StPtrVecMcCtbHit; //!
 typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StPtrVecMcPixelHit; //!
 typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StPtrVecMcIstHit; //!
+typedef vector<StMcFstHit*, allocator<StMcFstHit*> >    StPtrVecMcFstHit; //!
+typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StPtrVecMcFgtHit; //!
 typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StPtrVecMcTofHit; //!
 typedef vector<StMcTrack*, allocator<StMcTrack*> >      StPtrVecMcTrack; //!
 
@@ -159,6 +175,8 @@ typedef StPtrVecMcRichHit::iterator StMcRichHitIterator; //!
 typedef StPtrVecMcCtbHit::iterator  StMcCtbHitIterator; //!
 typedef StPtrVecMcPixelHit::iterator StMcPixelHitIterator; //!
 typedef StPtrVecMcIstHit::iterator  StMcIstHitIterator; //!
+typedef StPtrVecMcFstHit::iterator  StMcFstHitIterator; //!
+typedef StPtrVecMcFgtHit::iterator  StMcFgtHitIterator; //!
 typedef StPtrVecMcTofHit::iterator  StMcTofHitIterator; //!
 typedef StPtrVecMcTrack::iterator   StMcTrackIterator; //!
 //Const Iterators
@@ -173,6 +191,8 @@ typedef StPtrVecMcRichHit::const_iterator StMcRichHitConstIterator; //!
 typedef StPtrVecMcCtbHit::const_iterator  StMcCtbHitConstIterator; //!
 typedef StPtrVecMcPixelHit::const_iterator StMcPixelHitConstIterator; //!
 typedef StPtrVecMcIstHit::const_iterator  StMcIstHitConstIterator; //!
+typedef StPtrVecMcFstHit::const_iterator  StMcFstHitConstIterator; //!
+typedef StPtrVecMcFgtHit::const_iterator  StMcFgtHitConstIterator; //!
 typedef StPtrVecMcTofHit::const_iterator  StMcTofHitConstIterator; //!
 typedef StPtrVecMcTrack::const_iterator   StMcTrackConstIterator; //!
 

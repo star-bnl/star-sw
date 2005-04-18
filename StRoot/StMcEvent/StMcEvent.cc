@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.16 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.17 2005/04/18 20:11:32 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.17  2005/04/18 20:11:32  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.16  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -88,6 +91,8 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcIstHitCollection.hh"
+#include "StMcFstHitCollection.hh"
+#include "StMcFgtHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
@@ -100,12 +105,14 @@
 #include "StMcTofHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcIstHit.hh"
+#include "StMcFstHit.hh"
+#include "StMcFgtHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.16 2005/01/27 23:40:47 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.16 2005/01/27 23:40:47 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.17 2005/04/18 20:11:32 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.17 2005/04/18 20:11:32 calderon Exp $";
 ClassImp(StMcEvent);
 
 void StMcEvent::initToZero()
@@ -122,6 +129,8 @@ void StMcEvent::initToZero()
     mEemcHits = 0;
     mPixelHits = 0;
     mIstHits = 0;
+    mFstHits = 0;
+    mFgtHits = 0;
 
     // Create the collections
     
@@ -140,7 +149,8 @@ void StMcEvent::initToZero()
     mEemcHits = new StMcEmcHitCollection();
     mPixelHits = new StMcPixelHitCollection();
     mIstHits = new StMcIstHitCollection();
-
+    mFstHits = new StMcFstHitCollection();
+    mFgtHits = new StMcFgtHitCollection();
 }
 
 StMcEvent::StMcEvent()    
@@ -235,6 +245,12 @@ StMcEvent::~StMcEvent()
 
     if (mIstHits) delete mIstHits;
     mIstHits=0;
+
+   if (mFstHits) delete mFstHits;
+    mFstHits=0;
+
+   if (mFgtHits) delete mFgtHits;
+    mFgtHits=0;
 
     for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
@@ -397,4 +413,16 @@ void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 {
     if (mIstHits && mIstHits!= val) delete mIstHits;
     mIstHits = val;
+}   
+
+void StMcEvent::setFstHitCollection(StMcFstHitCollection* val)
+{
+    if (mFstHits && mFstHits!= val) delete mFstHits;
+    mFstHits = val;
+}   
+
+void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
+{
+    if (mFgtHits && mFgtHits!= val) delete mFgtHits;
+    mFgtHits = val;
 }   

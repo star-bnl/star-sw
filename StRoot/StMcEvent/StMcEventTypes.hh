@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.7 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.8 2005/04/18 20:11:33 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.8  2005/04/18 20:11:33  calderon
+ * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
+ *
  * Revision 2.7  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -77,7 +80,12 @@
 #include "StMcIstHit.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcIstLayerHitCollection.hh"
+#include "StMcFstHit.hh"
+#include "StMcFstHitCollection.hh"
+#include "StMcFstLayerHitCollection.hh"
+#include "StMcFgtHit.hh"
+#include "StMcFgtHitCollection.hh"
+#include "StMcFgtLayerHitCollection.hh"
 #include "StMcTrack.hh"
 #include "StMcVertex.hh"
-
 #endif
