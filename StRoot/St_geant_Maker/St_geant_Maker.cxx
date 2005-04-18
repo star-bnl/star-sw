@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.99 2005/04/15 14:52:37 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.100 2005/04/18 23:27:18 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.100  2005/04/18 23:27:18  potekhin
+// Correct the name for the FGT (GEM) hits
+//
 // Revision 1.99  2005/04/15 14:52:37  potekhin
 // Adding an interface for reading the FGT (GEM) hits
 //
@@ -698,7 +701,7 @@ Int_t St_geant_Maker::Make()
     g2t_fst_hit->Print(0,10);
   }
 
- geant3->Gfnhit("FGTH","FGAR", nhits);
+ geant3->Gfnhit("FGTH","FGSC", nhits);
   
   if (nhits>0) { 
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
