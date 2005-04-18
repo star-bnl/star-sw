@@ -1,5 +1,10 @@
-* $Id: fgtdgeo.g,v 1.4 2005/04/15 14:53:14 potekhin Exp $
+* $Id: fgtdgeo.g,v 1.5 2005/04/18 23:26:54 potekhin Exp $
 * $Log: fgtdgeo.g,v $
+* Revision 1.5  2005/04/18 23:26:54  potekhin
+* As Kai pointed out, need to change the FGAR
+* hist defintition to something else, and FGSC fits
+* teh convention
+*
 * Revision 1.4  2005/04/15 14:53:14  potekhin
 * Add hit description to the FGT detector
 *
@@ -127,7 +132,7 @@ Block FGSC is an Ar Sector of a Ring in the GEM detector
 
       call      GSTPAR (%Imed,'STRA',1.)
 
-      HITS    FGAR   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+      HITS    FGSC   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 
