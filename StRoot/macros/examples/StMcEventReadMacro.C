@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.18 2002/08/15 14:49:27 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.19 2005/04/18 20:13:59 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.19  2005/04/18 20:13:59  calderon
+// Add switches to load/or not the Fgt and Fst hits.
+//
 // Revision 1.18  2002/08/15 14:49:27  calderon
 // Go back to loading St_Tables instead of loading each table individually...
 // (as was the case since revision 1.12 back in April 2000!)
@@ -123,6 +126,9 @@ const char *MainFile=
     mcEventReader->doUseRich = true;
     mcEventReader->doUseBemc = true;
     mcEventReader->doUseBsmd = true;
+    mcEventReader->doUseIst  = true; 
+    mcEventReader->doUseFst  = true; 
+    mcEventReader->doUseFgt  = true; 
     //mcEventReader->SetDebug();
     // now execute the chain member functions
     
