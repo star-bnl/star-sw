@@ -1,5 +1,8 @@
-* $Id: fgtdgeo.g,v 1.5 2005/04/18 23:26:54 potekhin Exp $
+* $Id: fgtdgeo.g,v 1.6 2005/04/19 19:39:22 potekhin Exp $
 * $Log: fgtdgeo.g,v $
+* Revision 1.6  2005/04/19 19:39:22  potekhin
+* Minor naming convention fix, in the attribute name
+*
 * Revision 1.5  2005/04/18 23:26:54  potekhin
 * As Kai pointed out, need to change the FGAR
 * hist defintition to something else, and FGSC fits
@@ -126,7 +129,7 @@ Block FGSC is an Ar Sector of a Ring in the GEM detector
 
       Material  Sensitive  Isvol=1
 
-      Attribute FGRN  Seen=1  colo=2
+      Attribute FGSC  Seen=1  colo=2
 
       Shape     TUBS phi1=0 phi2=dPhi
 
