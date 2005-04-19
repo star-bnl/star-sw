@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.24 2005/02/08 17:12:37 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.25 2005/04/19 15:14:17 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.25  2005/04/19 15:14:17  genevb
+// Slight reordering of some FTPC code on user ranges in radial hists
+//
 // Revision 2.24  2005/02/08 17:12:37  genevb
 // Limiting range on some PMD histos
 //
@@ -427,32 +430,31 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	      if (!oName.CompareTo("fcl_radialW")) hobjradialW = (TH1*) obj;
 	      if (!oName.CompareTo("fcl_radialE")) hobjradialE = (TH1*) obj;
 	      if ( hobjradialW && hobjradialE) {
-		 // go to previous pad                   
-                 graphPad->cd(--padCount);
-	         if (gPad) gPad->Update();
-		 hobjradialW->SetStats(kFALSE);     
-		 hobjradialE->SetStats(kFALSE);     
-		 if ( hobjradialW->GetMaximum() >= hobjradialE->GetMaximum()) {     
-                   hobjradialW->SetTitle((TString)"FTPCW+E cluster radial position");
-                   hobjradialE->SetTitle(hobjradialW->GetTitle());
-		   hobjradialW->Draw();
-		   hobjradialW->GetXaxis()->SetRangeUser(7.0,9.0);
-		   gPad->Modified();
-		   ruler.SetLineColor(kBlack);
-                   ruler.SetLineWidth(2);
-                   ruler.DrawLine(7.8,0.,7.8,hobjradialW->GetMaximum());
-	           hobjradialE->Draw("Same");
-	         }
-                 else {
-                   hobjradialE->SetTitle((TString)"FTPCE+W cluster radial position");
-                   hobjradialW->SetTitle(hobjradialE->GetTitle());
-                   hobjradialE->Draw();
-		   hobjradialE->GetXaxis()->SetRangeUser(7.0,9.0);
-		   gPad->Modified();
-                   hobjradialW->Draw("Same");
-		   ruler.SetLineColor(kBlack);
-                   ruler.SetLineWidth(2);
-                   ruler.DrawLine(7.8,0.,7.8,hobjradialE->GetMaximum());
+		// go to previous pad                   
+                graphPad->cd(--padCount);
+	        if (gPad) gPad->Update();
+		hobjradialW->SetStats(kFALSE);     
+		hobjradialW->GetXaxis()->SetRangeUser(7.0,9.0);
+		hobjradialE->SetStats(kFALSE);     
+		hobjradialE->GetXaxis()->SetRangeUser(7.0,9.0);
+		if ( hobjradialW->GetMaximum() >= hobjradialE->GetMaximum()) {     
+                  hobjradialW->SetTitle((TString)"FTPCW+E cluster radial position");
+                  hobjradialE->SetTitle(hobjradialW->GetTitle());
+		  hobjradialW->Draw();
+		  gPad->Modified();
+		  ruler.SetLineColor(kBlack);
+                  ruler.SetLineWidth(2);
+                  ruler.DrawLine(7.8,0.,7.8,hobjradialW->GetMaximum());
+	          hobjradialE->Draw("Same");
+	        } else {
+                  hobjradialE->SetTitle((TString)"FTPCE+W cluster radial position");
+                  hobjradialW->SetTitle(hobjradialE->GetTitle());
+                  hobjradialE->Draw();
+		  gPad->Modified();
+                  hobjradialW->Draw("Same");
+		  ruler.SetLineColor(kBlack);
+                  ruler.SetLineWidth(2);
+                  ruler.DrawLine(7.8,0.,7.8,hobjradialE->GetMaximum());
 	        }		  
 
                 // make a legend
