@@ -13,7 +13,7 @@
       g2t_fgt_hit_h.nok = 0
 
 
-      call G2R_GET_SYS ('FGTD','PLAC',Iprin,Idigi)
+      call G2R_GET_SYS ('FGTD','FGSC',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
        Local  = Idigi.ge.2
 
