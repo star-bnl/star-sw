@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.470 2005/04/14 20:13:12 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.471 2005/04/19 17:27:20 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -549,10 +549,12 @@ Bfc_st BFC1[] = { // standard chains
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
 
+  {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
+  {"ssd_daq"     ,"","",""                    ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
-                                                                            "... SSD slow simulator",kFALSE},
+                                                                           "... SSD slow simulator",kFALSE},
   {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
   {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
@@ -1219,6 +1221,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
                                                                               "EEMC fast simulator",kFALSE},
 
+  {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
+  {"ssd_daq"     ,"","",""                    ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
