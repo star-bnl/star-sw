@@ -67,7 +67,7 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
       }
   } while ( mSuppBad && ( !dbitem || dbitem->fail || dbitem->gain < 0.5 ) );
 
-  if  ( !dbitem || dbitem->fail || dbitem->ped < 1 ) 
+  if  ( !dbitem || dbitem->fail || (dbitem->ped < 1 && !mIsSimu) ) 
     {
       e = - 100.0;
       adclessped = adc;
