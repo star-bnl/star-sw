@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.cxx,v 1.2 2005/04/21 09:50:28 lmartin Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.3 2005/04/21 14:55:17 lmartin Exp $
 //
 // $Log: StSsdDaqMaker.cxx,v $
+// Revision 1.3  2005/04/21 14:55:17  lmartin
+// bug in the offset correction fixed
+//
 // Revision 1.2  2005/04/21 09:50:28  lmartin
 // Hardware offset corrected for specific ladders
 //
@@ -121,6 +124,8 @@ Int_t StSsdDaqMaker::Make(){
   // mConfig->getNumberOfStrips()=768;
   // mConfig->getNumberOfWafers()=16;
   maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
+
+  cout<<" here we go... maxChannel="<<maxChannel<<endl;
   
   St_DataSet *daq = GetDataSet("StDAQReader");                 
   if (!daq) {
@@ -180,7 +185,7 @@ Int_t StSsdDaqMaker::Make(){
 		  ladder==17 ) 
 		maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers()-1;
 	      else maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
-	      for (channel=0;channel<maxChannel;channel++)
+	      for (newchannel=0;newchannel<maxChannel;newchannel++)
 		{
 		  if (ladder== 4 || ladder== 6 || ladder==10 || 
 		      ladder==11 || ladder==13 || ladder==15 ||
