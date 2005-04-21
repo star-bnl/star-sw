@@ -16,10 +16,11 @@
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "tables/St_spaceChargeCor_Table.h"
 
+#include "TFile.h"
 #include "TH2.h"
 #include "TH3.h"
-#include "TFile.h"
 #include "TF1.h"
+#include "TNtuple.h"
 
 // Histogram ranges:
 const int   SCN = 80;
@@ -33,17 +34,30 @@ const float DCH =  1.5;
 const int   PHN = 72;
 const float PI2 = TMath::TwoPi();
 
-const int   EVN = 500;
+const int   EVN = 1024;
 
+const int   ZN = 60;
+const float ZL = -150.;
+const float ZH = 150.;
+
+static TF1 ga1("ga1","[0]*exp(-0.5*(x-[1])*(x-[1])/([2]*[2]))");
+static TF1 ln1("ln1","[0]+((208.707-abs(x))*[1]/100.0)",-150.,150.);
 
 ClassImp(StSpaceChargeEbyEMaker)
   
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
-    PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE),
-    m_ExB(0), tpcDbMaker(0), tpcHitMoverMaker(0) {
+    event(0),
+    PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
+    doReset(kTRUE), doGaps(kFALSE),
+    m_ExB(0), tpcDbMaker(0), tpcHitMoverMaker(0),
+    scehist(0), timehist(0), myhist(0), myhistN(0), myhistP(0),
+    myhistE(0), myhistW(0), dczhist(0), dcehist(0), dcphist(0),
+    dcahist(0), dcahistN(0), dcahistP(0), dcahistE(0), dcahistW(0),
+    gapZhist(0), gapZhistneg(0), gapZhistpos(0),
+    gapZhisteast(0), gapZhistwest(0), ntup(0) {
 
-  HN=32;  // max events used, cannot exceed 32 used in header file
+  HN=96;  // max events used, cannot exceed 96 used in header file
   MINTRACKS=1500;
   SCALER_ERROR = 0.0006; // by eye from hist: SCvsZDCEpW.gif (liberal)
 
@@ -60,7 +74,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
   evtsnow = 0;
 
   SetMode(0); // default is mode 0 (no QA, no PrePass)
-  //QAmode=kTRUE; // For testing
+  //DoQAmode(); // For testing
 
   schist = new TH1F("SpCh","Space Charge",80,SCL,SCH);
   for (int i=0;i<HN;i++)
@@ -80,7 +94,7 @@ Int_t StSpaceChargeEbyEMaker::Finish() {
       if (PrePassdone) WriteTableToFile();
       else gMessMgr->Warning("StSpaceChargeEbyEMaker: NO SC => NO OUTPUT");
     }
-    if (QAmode) WriteQAHists();
+    WriteQAHists();
   } else {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: NO EVENTS => NO OUTPUT");
   }
@@ -90,10 +104,15 @@ Int_t StSpaceChargeEbyEMaker::Finish() {
 //_____________________________________________________________________________
 Int_t StSpaceChargeEbyEMaker::Init() {
 
+  // Use mode to set switches:
   switch (GetMode()) {
-    case (3) : PrePassmode = kTRUE; QAmode = kTRUE;  break;
-    case (2) : PrePassmode = kTRUE; break;
-    case (1) : QAmode = kTRUE; break;
+    case (1) : DoQAmode(); break;
+    case (2) : DoPrePassmode(); break;
+    case (3) : DoPrePassmode(); DoQAmode();  break;
+    case (10): DoNtuple(); break;
+    case (11): DoNtuple(); DontReset(); break;
+    case (12): DoNtuple(); DoQAmode(); break;
+    case (13): DoNtuple(); DontReset(); DoQAmode(); break;
     default  : {}
   }
 
@@ -134,15 +153,15 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   // Get instance of StMagUtilities
   if (tpcHitMoverMaker) {
     m_ExB = ((StTpcHitMover*) tpcHitMoverMaker)->getExB();
-  } else {
+  } else if (!m_ExB) {
     TDataSet *RunLog = GetDataBase("RunLog");
     if (!RunLog) gMessMgr->Warning("StSpaceChargeEbyEMaker: No RunLog found.");
     m_ExB = new StMagUtilities(
-      ((StTpcDbMaker*) tpcDbMaker)->tpcDbInterface(),RunLog,0);
+      ((StTpcDbMaker*) tpcDbMaker)->tpcDbInterface(),RunLog,(kSpaceChargeR2 | kGridLeak));
   }
 
   // Get StEvent and related info, determine if things are OK
-  StEvent* event = (StEvent*) GetInputDS("StEvent");
+  event = (StEvent*) GetInputDS("StEvent");
   if (!event) {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: no StEvent; skipping event.");
     return kStWarn;
@@ -170,8 +189,19 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     runid = event->runId();
     ntrkssum -= ntrks[curhist];
   }
-  curhist = imodHN(curhist+1);
-  schists[curhist]->Reset();
+  if (doReset) {
+    curhist = imodHN(curhist+1);
+    schists[curhist]->Reset();
+    if (doGaps) {
+      gapZhist->Reset();
+      gapZhisteast->Reset();
+      gapZhistwest->Reset();
+      gapZhistpos->Reset();
+      gapZhistneg->Reset();
+    }
+  } else {
+    if (doNtuple) ntup->Reset();
+  }
 
   // Keep time and event number
   times[curhist] = thistime;
@@ -190,6 +220,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     gMessMgr->Info()
       << "StSpaceChargeEbyEMaker: zdc west+east = "
       << runinfo->zdcWestRate()+runinfo->zdcEastRate() << endm;
+    gMessMgr->Info()
+      << "StSpaceChargeEbyEMaker: zdc coincidence = "
+      << runinfo->zdcCoincidenceRate() << endm;
   }
 
   // Fill the StEvent information for the SpaceCharge used in this event
@@ -236,19 +269,77 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 	  schists[curhist]->Fill(space);
           FillQAHists(DCA,space,ch,hh,e_or_w);
 
+
+          if ((doGaps) &&
+              (map.hasHitInRow(kTpcId,12))&&(map.hasHitInRow(kTpcId,14)) &&
+              (map.hasHitInRow(kTpcId,11))&&(map.hasHitInRow(kTpcId,15)) &&
+              (e_or_w!=0) && (TMath::Abs(ch)==1) && (oldPt>0.3))
+            FillGapHists(tri,hh,e_or_w,ch);
+
       } // loop over j tracks
   } // loop over i Nodes
 
   
   ntrks[curhist] = schists[curhist]->Integral();
   ntrkssum += ntrks[curhist];
-  
+
   // Wrap it up and make a decision
   int result = DecideSpaceCharge(thistime);
 
+  if (doGaps) DetermineGaps();
+  if (doNtuple) {
+      static float X[32];
+      static float ntent = 0.0;
+
+      if (ntent == 0.0) for (i=0; i<32; i++) X[i] = 0.0;
+      ntent++;
+      float s1 = ( doReset ? 1.0 : 1.0/ntent );
+      float s0 = 1.0 - s1;
+
+      float ee;
+      int fbin = ( doReset ? evt : 1 );
+
+      X[0]  = sc;
+      X[1]  = FindPeak(dcehist->ProjectionY("_dy",fbin,evt),ee);
+      X[2]  = s0*X[2] + s1*runinfo->zdcCoincidenceRate();
+      X[3]  = s0*X[3] + s1*runinfo->zdcWestRate();
+      X[4]  = s0*X[4] + s1*runinfo->zdcEastRate();
+      X[5]  = s0*X[5] + s1*runinfo->bbcCoincidenceRate();
+      X[6]  = s0*X[6] + s1*runinfo->bbcWestRate();
+      X[7]  = s0*X[7] + s1*runinfo->bbcEastRate();
+      X[8]  = s0*X[8] + s1*runinfo->bbcBlueBackgroundRate();
+      X[9]  = s0*X[9] + s1*runinfo->bbcYellowBackgroundRate();
+      X[10] = s0*X[10] + s1*runinfo->initialBeamIntensity(blue);   // west-bound
+      X[11] = s0*X[11] + s1*runinfo->initialBeamIntensity(yellow); // east-bound
+      X[12] = runinfo->beamFillNumber(blue);
+      X[13] = runinfo->magneticField();
+      X[14] = event->runId();
+      X[15] = event->id();
+      //X[16] = sceast;
+      //X[17] = scwest;
+      if ((QAmode) && (evt <= EVN)) {
+        X[16] = FindPeak(dcahistN->ProjectionZ("_dnz",fbin,evt,1,PHN),ee);
+        X[17] = FindPeak(dcahistP->ProjectionZ("_dpz",fbin,evt,1,PHN),ee);
+        X[18] = FindPeak(dcahistE->ProjectionZ("_dez",fbin,evt,1,PHN),ee);
+        X[19] = FindPeak(dcahistW->ProjectionZ("_dwz",fbin,evt,1,PHN),ee);
+      }
+      X[20] = gapZfitslope;
+      X[21] = gapZdivslope;
+      X[22] = gapZfitslopeneg;
+      X[23] = gapZdivslopeneg;
+      X[24] = gapZfitslopepos;
+      X[25] = gapZdivslopepos;
+      X[26] = gapZfitslopeeast;
+      X[27] = gapZdivslopeeast;
+      X[28] = gapZfitslopewest;
+      X[29] = gapZdivslopewest;
+      X[30] = s0*X[30] + s1*runinfo->spaceCharge();
+      X[31] = (float) (runinfo->spaceChargeCorrectionMode());
+      ntup->Fill(X);
+  }
+  
   lasttime = thistime;
   
-
   return result;
 }
 //_____________________________________________________________________________
@@ -346,7 +437,7 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
     scehist->SetBinError(evt,esc);
     if (PrePassmode) {
       PrePassdone = kTRUE;
-      return kStFatal; // We're happy! Let's stop!
+      return kStStop; // We're happy! Let's stop!
     }
     m_ExB->ManualSpaceChargeR2(sc);
   }
@@ -354,22 +445,27 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 }
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::FindSpaceCharge() {
-
-  static TF1 ga1("ga1","[0]*exp(-0.5*(x-[1])*(x-[1])/([2]*[2]))");
   esc = 0.;
-  if (schist->GetEntries() < 100) return;
-  double mn = schist->GetMean();
-  double rms = TMath::Abs(schist->GetRMS());
+  double res = FindPeak(schist,esc);
+  if (res > -500.) sc = res;
+}
+//_____________________________________________________________________________
+double StSpaceChargeEbyEMaker::FindPeak(TH1* hist,float& pkwidth) {
+
+  pkwidth = 0.;
+  if (hist->Integral() < 100.0) return -998.;
+  double mn = hist->GetMean();
+  double rms = TMath::Abs(hist->GetRMS());
   mn *= 1.1; rms *= 1.5;
   double lr = mn-rms;
   double ur = mn+rms;
-  double pmax = schist->GetMaximum();
+  double pmax = hist->GetMaximum();
   ga1.SetParameters(pmax,mn,rms*0.5);
   ga1.SetRange(lr,ur);
-  int fitResult = schist->Fit(&ga1,"LLR0Q");
-  if (fitResult != 0) return;
-  sc = ga1.GetParameter(1);
-  esc = TMath::Abs(ga1.GetParError(1));
+  int fitResult = hist->Fit(&ga1,"LLR0Q");
+  if (fitResult != 0) return -999.;
+  pkwidth = TMath::Abs(ga1.GetParError(1));
+  return ga1.GetParameter(1);
 
 }
 //_____________________________________________________________________________
@@ -381,8 +477,9 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 		      EVN,0.,EVN);
   dcehist  = new TH2F("DcaEve","psDCA vs. Event",
 		      EVN,0.,EVN,DCN,DCL,DCH);
-  dcphist  = new TH2F("DcaPhi","psDCA vs. Phi",
-		      PHN,0,PI2,DCN,DCL,DCH);
+  dcphist  = new TH3F("DcaPhi","psDCA vs. Phi",
+		      PHN,0,PI2,DCN,DCL,DCH,(QAmode ? 3 : 1),-1.5,1.5);
+
   AddHist(scehist);
   AddHist(timehist);
   AddHist(dcehist);
@@ -393,6 +490,8 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 		        EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
     dcahist  = new TH3F("DcaEvt","psDCA vs. Phi vs. Event",
 		        EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
+    dczhist  = new TH2F("DcaZ","psDCA vs. Z",
+		        ZN,ZL,ZH,DCN,DCL,DCH);
     myhistN  = new TH3F("SpcEvtN","SpaceCharge vs. Phi vs. Event Neg",
 			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
     myhistP  = new TH3F("SpcEvtP","SpaceCharge vs. Phi vs. Event Pos",
@@ -411,6 +510,7 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     AddHist(myhist);
     AddHist(dcahist);
+    AddHist(dczhist);
     AddHist(myhistN);
     AddHist(myhistP);
     AddHist(myhistE);
@@ -421,10 +521,24 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
     AddHist(dcahistW);
   }
 
+  if (doNtuple) ntup = new TNtuple("SC","Space Charge",
+    "sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:dcan:dcap:dcae:dcaw:gapf:gapd:gapfn:gapdn:gapfp:gapdp:gapfe:gapde:gapfw:gapdw:usc:uscmode");
+    //"sc:dca:zdcx:zdcw:zdce:bbcx:bbcw:bbce:bbcbb:bbcyb:intb:inty:fill:mag:run:event:sce:scw:dcae:dcaw:gapf:gapd:gapfn:gapdn:gapfp:gapdp:gapfe:gapde:gapfw:gapdw:usc:uscmode");
+
+  if (doGaps) {
+    gapZhist = new TH2F("Gaps","Gaps",110,-0.3,0.8,17,-200.,225.);
+    gapZhistneg = new TH2F("Gapsneg","Gaps Neg",110,-0.3,0.8,17,-200.,225.);
+    gapZhistpos = new TH2F("Gapspos","Gaps Pos",110,-0.3,0.8,17,-200.,225.);
+    gapZhisteast = new TH2F("Gapseast","Gaps East",110,-0.3,0.8,17,-200.,225.);
+    gapZhistwest = new TH2F("Gapswest","Gaps West",110,-0.3,0.8,17,-200.,225.);
+  }
+
 }
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::WriteQAHists() {
-// Only if QAmode
+// Only if QAmode or doNtuple or doGaps
+
+  if (!(QAmode || doNtuple || doGaps)) return;
 
   if (runid == 0) {
     gMessMgr->Error("StSpaceChargeEbyEMaker: No runid => No output");
@@ -444,20 +558,31 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
   }
 
   TFile ff(fname.Data(),"RECREATE");
-  myhist->Write();
-  dcehist->Write();
-  dcphist->Write();
-  dcahist->Write();
-  myhistN->Write();
-  dcahistN->Write();
-  myhistP->Write();
-  dcahistP->Write();
-  myhistE->Write();
-  dcahistE->Write();
-  myhistW->Write();
-  dcahistW->Write();
-  scehist->Write();
-  timehist->Write();
+  if (QAmode) {
+    myhist->Write();
+    dcehist->Write();
+    dcphist->Write();
+    dcahist->Write();
+    dczhist->Write();
+    myhistN->Write();
+    dcahistN->Write();
+    myhistP->Write();
+    dcahistP->Write();
+    myhistE->Write();
+    dcahistE->Write();
+    myhistW->Write();
+    dcahistW->Write();
+    scehist->Write();
+    timehist->Write();
+  }
+  if (doGaps) {
+    gapZhist->Write();
+    gapZhistneg->Write();
+    gapZhistpos->Write();
+    gapZhisteast->Write();
+    gapZhistwest->Write();
+  }
+  if (doNtuple) ntup->Write();
   ff.Close();
 
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: QA hists file: "
@@ -473,16 +598,17 @@ void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
   pairD pls = hh.pathLength(97.0);
   double pl = pls.first;
   if (TMath::Abs(pls.second) < TMath::Abs(pls.first)) pl = pls.second;
-  float Phi = hh.at(pl).phi();
+  StThreeVectorD hh_at_pl = hh.at(pl);
+  float Phi = hh_at_pl.phi();
   while (Phi < 0) Phi += PI2;
   while (Phi >= TMath::TwoPi()) Phi -= PI2;
   
   // To pile all sectors atop each other:
   // while (Phi >= TMath::Pi()/6.) Phi -= TMath::Pi()/6.;
 
-  float evtn = (float) evt - 1;
+  float evtn = ((float) evt) - 0.5;
   dcehist->Fill(evtn,DCA);
-  dcphist->Fill(Phi,DCA);
+  dcphist->Fill(Phi,DCA,(float) e_or_w);
 
   if (QAmode) {
     myhist->Fill(evtn,Phi,space);
@@ -501,6 +627,7 @@ void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
       myhistE->Fill(evtn,Phi,space);
       dcahistE->Fill(evtn,Phi,DCA);
     }
+    if ((e_or_w != 0) && (TMath::Abs(hh.dipAngle()) < 0.05)) dczhist->Fill(hh_at_pl.z(),DCA);
   }
 }
 //_____________________________________________________________________________
@@ -594,13 +721,87 @@ St_spaceChargeCor* StSpaceChargeEbyEMaker::SCTable() {
 float StSpaceChargeEbyEMaker::FakeAutoSpaceCharge() {
   // Use this to mimic what is done with the scalers, using your own code
   float zdcsum = runinfo->zdcWestRate()+runinfo->zdcEastRate();
-  float sc = 6e-8 *zdcsum;
+  float sc = 6e-8 * zdcsum;
   
   return sc;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.5 2005/02/16 17:18:06 genevb Exp $
+void StSpaceChargeEbyEMaker::FillGapHists(StTrack* tri, StPhysicalHelixD& hh,
+                                          int e_or_w, int ch) {
+  float fsign = ( event->runInfo()->magneticField() < 0 ? -1 : 1 );
+  StPtrVecHit hts = tri->detectorInfo()->hits(kTpcId);
+  float gap = 0.; float zgap = 0.; int ct=0;
+  for (UInt_t ht=0; ht<hts.size(); ht++) {
+    StTpcHit* hit = (StTpcHit*) hts[ht];
+    UInt_t prow = hit->padrow();
+    if ((prow != 12) && (prow != 14)) continue;
+    float gsign = ( prow == 14 ? -1 : 1 );
+    const StThreeVectorF& hp = hit->position();
+
+    // Avoid sector edges
+    float hphi = hp.phi() + TMath::TwoPi();
+    while (hphi > TMath::Pi()/12.) hphi -= TMath::Pi()/6.;
+    if (TMath::Abs(hphi) > 0.75*TMath::Pi()/12.) break;
+
+    gap += fsign * gsign * hh.geometricSignedDistance(hp.x(),hp.y());
+    zgap += (hp.z() / 12.795) * ( prow == 14 ? 7.4 : 5.395 ); // ~z at gap
+    ct++;
+  }
+
+  if ((ct==2) && (TMath::Abs(zgap)<200.0) && (TMath::Abs(zgap)>10.0)) {
+     gapZhist->Fill(gap,zgap);
+     if (e_or_w==1) gapZhistwest->Fill(gap,zgap);
+     else gapZhisteast->Fill(gap,zgap);
+     if (ch==1) gapZhistpos->Fill(gap,zgap);
+     else gapZhistneg->Fill(gap,zgap);
+     float znew = 208.707 - TMath::Abs(zgap);
+     if (znew > 50) {
+       gapZhist->Fill(gap*100.0/znew,210.); // normalize at z=100cm from end
+       if (e_or_w==1) gapZhistwest->Fill(gap*100.0/znew,210.);
+       else gapZhisteast->Fill(gap*100.0/znew,210.);
+       if (ch==1) gapZhistpos->Fill(gap*100.0/znew,210.);
+       else gapZhistneg->Fill(gap*100.0/znew,210.);
+     }
+   }
+}
+//_____________________________________________________________________________
+void StSpaceChargeEbyEMaker::DetermineGaps() {
+  DetermineGapHelper(gapZhistneg,gapZfitslopeneg,gapZdivslopeneg);
+  DetermineGapHelper(gapZhistpos,gapZfitslopepos,gapZdivslopepos);
+  DetermineGapHelper(gapZhisteast,gapZfitslopeeast,gapZdivslopeeast);
+  DetermineGapHelper(gapZhistwest,gapZfitslopewest,gapZdivslopewest);
+  DetermineGapHelper(gapZhist,gapZfitslope,gapZdivslope);
+}
+//_____________________________________________________________________________
+void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
+      float& divslope, float& fitslope) {
+
+  ga1.SetParameters(hh->GetEntries()/(16.*2.*10.),0.,0.1);
+  hh->FitSlicesX(&ga1,1,0,0,"LL0Q");
+  const char* hn = hh->GetName();
+  TH1D* GapsChi2 = (TH1D*) gDirectory->Get(Form("%s_chi2",hn));
+  TH1D* GapsAmp  = (TH1D*) gDirectory->Get(Form("%s_0",hn));
+  TH1D* GapsMean = (TH1D*) gDirectory->Get(Form("%s_1",hn));
+  TH1D* GapsRMS  = (TH1D*) gDirectory->Get(Form("%s_2",hn));
+
+  divslope = GapsMean->GetBinContent(17);
+  egapZdivslope = TMath::Abs(GapsMean->GetBinError(17));
+
+  GapsMean->Fit(&ln1,"R0Q");
+  fitslope = ln1.GetParameter(1);
+  egapZfitslope = TMath::Abs(ln1.GetParError(1));
+
+  delete GapsChi2;
+  delete GapsAmp;
+  delete GapsMean;
+  delete GapsRMS;
+}
+//_____________________________________________________________________________
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.6 2005/04/21 19:38:20 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.6  2005/04/21 19:38:20  genevb
+// Additional code for studying SpaceCharge
+//
 // Revision 1.5  2005/02/16 17:18:06  genevb
 // Fill StEvent info on SpaceCharge
 //
