@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.cxx,v 1.1 2005/04/15 15:11:24 lmartin Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.2 2005/04/21 09:50:28 lmartin Exp $
 //
 // $Log: StSsdDaqMaker.cxx,v $
+// Revision 1.2  2005/04/21 09:50:28  lmartin
+// Hardware offset corrected for specific ladders
+//
 // Revision 1.1  2005/04/15 15:11:24  lmartin
 // StSsdDaqMaker
 //
@@ -110,7 +113,7 @@ Int_t StSsdDaqMaker::Make(){
   int strip_number,id_wafer,id_side,count,my_channel;
   int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
   int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  int data,pedestal,noise,channel,ladder; char EastWest;
+  int data,pedestal,noise,channel,newchannel,ladder; char EastWest;
   int maxChannel;
 
   // SSD parameters independant from its configuration (half or full barrel)
@@ -172,9 +175,19 @@ Int_t StSsdDaqMaker::Make(){
 	{
 	  if (mConfig->getLadderIsActive(ladder)>0)
 	    {
+	      if (ladder== 4 || ladder== 6 || ladder==10 || 
+		  ladder==11 || ladder==13 || ladder==15 ||
+		  ladder==17 ) 
+		maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers()-1;
+	      else maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
 	      for (channel=0;channel<maxChannel;channel++)
 		{
-		  if(stssdreader->getSsdData(ladder,EastWest,channel,data,pedestal,noise)==0) 
+		  if (ladder== 4 || ladder== 6 || ladder==10 || 
+		      ladder==11 || ladder==13 || ladder==15 ||
+		      ladder==17 ) 
+		    channel= newchannel+1;
+		  else channel=newchannel;
+		  if(stssdreader->getSsdData(ladder,EastWest,newchannel,data,pedestal,noise)==0) 
 		    {
 		      //We are looking at a physics run
 		      // filling the out_strip structure...
