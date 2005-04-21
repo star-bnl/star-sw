@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.cxx,v 1.3 2005/04/21 14:55:17 lmartin Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.4 2005/04/21 14:59:47 lmartin Exp $
 //
 // $Log: StSsdDaqMaker.cxx,v $
+// Revision 1.4  2005/04/21 14:59:47  lmartin
+// useless print removed
+//
 // Revision 1.3  2005/04/21 14:55:17  lmartin
 // bug in the offset correction fixed
 //
@@ -125,8 +128,6 @@ Int_t StSsdDaqMaker::Make(){
   // mConfig->getNumberOfWafers()=16;
   maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
 
-  cout<<" here we go... maxChannel="<<maxChannel<<endl;
-  
   St_DataSet *daq = GetDataSet("StDAQReader");                 
   if (!daq) {
     gMessMgr->Warning() << "StSsdDaqMaker:Make : StDAQReader Dataset not found - Skipping the event" << endm;
