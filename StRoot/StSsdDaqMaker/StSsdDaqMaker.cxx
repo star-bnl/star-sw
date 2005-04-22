@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.cxx,v 1.4 2005/04/21 14:59:47 lmartin Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.5 2005/04/22 16:12:02 lmartin Exp $
 //
 // $Log: StSsdDaqMaker.cxx,v $
+// Revision 1.5  2005/04/22 16:12:02  lmartin
+// bug in the ladder index fixed
+//
 // Revision 1.4  2005/04/21 14:59:47  lmartin
 // useless print removed
 //
@@ -179,21 +182,21 @@ Int_t StSsdDaqMaker::Make(){
       if (id_side == 1) EastWest='W'; // side = 1 = West = N-side
       for (ladder=0;ladder<mConfig->getTotalNumberOfLadders();ladder++) 
 	{
-	  if (mConfig->getLadderIsActive(ladder)>0)
+	  if (mConfig->getLadderIsActive(ladder+1)>0)
 	    {
-	      if (ladder== 4 || ladder== 6 || ladder==10 || 
-		  ladder==11 || ladder==13 || ladder==15 ||
-		  ladder==17 ) 
+	      if ((ladder+1)== 4 || (ladder+1)== 6 || (ladder+1)==10 || 
+		  (ladder+1)==11 || (ladder+1)==13 || (ladder+1)==15 ||
+		  (ladder+1)==17 ) 
 		maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers()-1;
 	      else maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
 	      for (newchannel=0;newchannel<maxChannel;newchannel++)
 		{
-		  if (ladder== 4 || ladder== 6 || ladder==10 || 
-		      ladder==11 || ladder==13 || ladder==15 ||
-		      ladder==17 ) 
+		  if ((ladder+1)== 4 || (ladder+1)== 6 || (ladder+1)==10 || 
+		      (ladder+1)==11 || (ladder+1)==13 || (ladder+1)==15 ||
+		      (ladder+1)==17 ) 
 		    channel= newchannel+1;
 		  else channel=newchannel;
-		  if(stssdreader->getSsdData(ladder,EastWest,newchannel,data,pedestal,noise)==0) 
+		  if(stssdreader->getSsdData(ladder+1,EastWest,newchannel,data,pedestal,noise)==0) 
 		    {
 		      //We are looking at a physics run
 		      // filling the out_strip structure...
@@ -281,6 +284,7 @@ Int_t StSsdDaqMaker::Make(){
 	} // end for (ladder=0;ladder<mConfig->mConfig->getTotalNumberOfLadders();ladder++) 
     }  // end for (id_side=0;id_side<2;id_side++)
 
+  if (GetDebug()) {
     gMessMgr->Info() <<"StSsdDaqMaker::Make()/Number of raw data in the SSD" << endm;
     gMessMgr->Info() << "StSsdDaqMaker::Make()/Active Ladders:  ";
     for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
@@ -288,7 +292,7 @@ Int_t StSsdDaqMaker::Make(){
 	gMessMgr->width(5);
 	*gMessMgr<<i+1<<" ";
       }
-  
+    
     *gMessMgr<<endm;
     gMessMgr->Info() << "StSsdDaqMaker::Make()/Counts (p-side): ";
     for (int i=0;i<mConfig->getTotalNumberOfLadders();i++)
@@ -304,7 +308,7 @@ Int_t StSsdDaqMaker::Make(){
 	*gMessMgr <<ladderCountN[i]<<" ";
       }
     *gMessMgr<<endm;
-
+  }
   gMessMgr->Info() << "StSsdDaqMaker::Make()/  spa_strip->NRows= "<<spa_strip->GetNRows()<<endm;
   gMessMgr->Info() << "StSsdDaqMaker::Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm;
   return kStOK;
