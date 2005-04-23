@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.9 2005/03/23 16:07:26 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.10 2005/04/23 08:56:20 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.10  2005/04/23 08:56:20  lmartin
+// physics and pedestal data processing separated
+//
 // Revision 1.9  2005/03/23 16:07:26  lmartin
 // PrintClusterSummary and PrintPointSummary methods added
 //
@@ -56,7 +59,8 @@
 #include "StSsdHitCollection.h"
 #include "StSsdDynamicControl.h"
 #include "StSsdClusterControl.h"
-#include "tables/St_spa_strip_Table.h" //needed to call StTable->GetTable()
+#include "tables/St_spa_strip_Table.h" 
+#include "tables/St_ssdPedStrip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_slsCtrl_Table.h"
@@ -241,11 +245,28 @@ Int_t StSsdPointMaker::Make()
                                << GetName() << endm;
   // 		Create output tables
   Int_t res = 0; 
+  char* myLabel  = new char[100];
+  char* myTime = new char[100]; 
+  char* myDate = new char[100];
+
+  sprintf(myTime,"%d",GetTime());
+  sprintf(myDate,"%d%s",GetDate(),".");
+  sprintf(myLabel,"%s%s",myDate,myTime);
+  
+ // two different tables can exist (physics data or pedestal data)
   St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
-  if (!spa_strip){
+  St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");
+  if (!spa_strip || spa_strip->GetNRows()==0){
     gMessMgr->Warning("StSsdPointMaker: no input (fired strip for the SSD)");
-    return kStErr;
+    gMessMgr->Warning("StSsdPointMaker: looking for a pedestal/noise tables");
+    if (!spa_ped_strip || spa_ped_strip->GetNRows()==0) {
+      gMessMgr->Warning("StSsdPointMaker: no pedestal/noise data...");
+      return kStWarn;
+    }
+    else 
+      gMessMgr->Warning()<<"StSsdPointMaker: pedestal/noise data found : "<<spa_ped_strip->GetNRows()<<endm;
   }
+
   
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
@@ -294,46 +315,55 @@ Int_t StSsdPointMaker::Make()
   StSsdBarrel *mySsd = new StSsdBarrel(dimensions,config);
   //mySsd->initLadders(m_wafpos); 
   mySsd->initLadders(position,positionSize);
-  int stripTableSize = mySsd->readStripFromTable(spa_strip);
-  cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
-  //  mySsd->writeNoiseToFile(spa_strip);
-  mySsd->sortListStrip();
-  PrintStripSummary(mySsd);
-  //int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
-  int noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
-  cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
-  int nClusterPerSide[2];
-  nClusterPerSide[0] = 0;
-  nClusterPerSide[1] = 0;
-  mySsd->doSideClusterisation(nClusterPerSide,mClusterControl);
-  cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
-  cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
-  mySsd->sortListCluster();
-  PrintClusterSummary(mySsd);
-  //  debugUnPeu(mySsd);
-  int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
-  cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
-  mySsd->convertDigitToAnalog(mDynamicControl);
-  mySsd->convertUFrameToOther(dimensions);
-  PrintPointSummary(mySsd);
-  int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
-  cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
-  if(mSsdHitColl) 
-    cout<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endl;
-  else 
-    cout<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endl;
-  scm_spt->Purge();
-  cout<<"####        END OF SSD NEW POINT MAKER       ####"<<endl;
-  cout<<"#################################################"<<endl;
+  //The full SSD object is built only if we are processing physics data
+  if((spa_ped_strip->GetNRows()==0) && (spa_strip->GetNRows()!=0))
+    {
+      int stripTableSize = mySsd->readStripFromTable(spa_strip);
+      cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
+      //  mySsd->writeNoiseToFile(spa_strip);
+      mySsd->sortListStrip();
+      PrintStripSummary(mySsd);
+      //int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
+      int noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
+      cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
+      int nClusterPerSide[2];
+      nClusterPerSide[0] = 0;
+      nClusterPerSide[1] = 0;
+      mySsd->doSideClusterisation(nClusterPerSide,mClusterControl);
+      cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
+      cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
+      mySsd->sortListCluster();
+      PrintClusterSummary(mySsd);
+      //  debugUnPeu(mySsd);
+      int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
+      cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
+      mySsd->convertDigitToAnalog(mDynamicControl);
+      mySsd->convertUFrameToOther(dimensions);
+      PrintPointSummary(mySsd);
+      int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+      cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
+      if(mSsdHitColl) 
+	cout<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endl;
+      else 
+	cout<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endl;
+      scm_spt->Purge();
+      cout<<"####        END OF SSD NEW POINT MAKER       ####"<<endl;
+      cout<<"#################################################"<<endl;
+      makeScmCtrlHistograms();
+      if (nSptWritten) res = kStOK;
+    }
+  else
+    {
+    if((spa_strip->GetNRows()==0)&&(spa_ped_strip->GetNRows()!=0))
+      mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
+    }
   delete mySsd;
-  if (nSptWritten) res = kStOK;
  
   if(res!=kStOK){
     gMessMgr->Warning("StSsdPointMaker: no output");
     return kStWarn;
   }
 
-  makeScmCtrlHistograms();
   
   return kStOK;
 }

@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.6 2005/03/22 13:45:01 lmartin Exp $
+// $Id: StSsdBarrel.hh,v 1.7 2005/04/23 08:56:20 lmartin Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.7  2005/04/23 08:56:20  lmartin
+// physics and pedestal data processing separated
+//
 // Revision 1.6  2005/03/22 13:45:01  lmartin
 // new member mActiveLadders added
 //
@@ -18,6 +21,7 @@ class ssdWafersPosition_st;
 
 class St_ssdWafersPosition;
 class St_ssdStripCalib;
+class St_ssdPedStrip;
 class St_spa_strip;
 class St_sdm_calib_db;
 class St_scf_cluster;
@@ -44,6 +48,7 @@ class StSsdBarrel
   int   readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicControl *dynamicControl);
   int   readNoiseFromTable(St_ssdStripCalib *strip_noise, StSsdDynamicControl *dynamicControl);
   int   writeNoiseToFile(St_spa_strip *spa_strip);
+  int   writeNoiseToFile(St_ssdPedStrip *pedStrip, char myLabel[]);
   int   readClusterFromTable(St_scf_cluster *scf_cluster);
   int   writeClusterToTable(St_scf_cluster *cluster);
   int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);   
