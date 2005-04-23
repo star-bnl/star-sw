@@ -52,9 +52,12 @@ Int_t StPCollTagMaker::Make(){
 
   tagtab->AddAt(&row,0);
 
- // Find St_dst_event_summary
-   St_dst_event_summary *event_summary =  (St_dst_event_summary *) GetInputDS("dst/event_summary");
-  if (!event_summary) return 0;
+  // Find St_dst_event_summary
+  St_dst_event_summary *event_summary =  (St_dst_event_summary *) GetInputDS("dst/event_summary");
+  if (!event_summary){
+    return 0;
+    gMessMgr->Warning() << "StPCollTagMaker::Make: No dst/event_summary" << endm;
+  }
   dst_event_summary_st *event_summary_st =
     (dst_event_summary_st *)event_summary->GetTable();
 
@@ -72,8 +75,8 @@ Int_t StPCollTagMaker::Make(){
 
 
   if(tt) { 
-  row.zdc1Energy = tt->adcZDCEast;
-  row.zdc2Energy = tt->adcZDCWest;
+    row.zdc1Energy = tt->adcZDCEast;
+    row.zdc2Energy = tt->adcZDCWest;
   }
  
   Int_t  NPrimaryTracks=0;
