@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.9 2005/03/22 13:45:02 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.10 2005/04/23 08:56:20 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.10  2005/04/23 08:56:20  lmartin
+// physics and pedestal data processing separated
+//
 // Revision 1.9  2005/03/22 13:45:02  lmartin
 // new member mActiveLadders added
 //
@@ -23,6 +26,7 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 #include "tables/St_spa_strip_Table.h"
+#include "tables/St_ssdPedStrip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sdm_calib_db_Table.h"
@@ -199,6 +203,30 @@ int  StSsdBarrel::writeNoiseToFile(St_spa_strip *spa_strip)
   f1.Close();
   return spa_strip->GetNRows();
 }
+/*!
+ Method to read pedestal data and save them into a root file
+*/
+int  StSsdBarrel::writeNoiseToFile(St_ssdPedStrip *spa_ped_strip, char myLabel[])
+{ char *name =new char[100] ;
+  ssdPedStrip_st *strip = spa_ped_strip->GetTable();
+  St_ssdStripCalib *stripCal = new St_ssdStripCalib("ssdStripCalib",spa_ped_strip->GetNRows());
+  ssdStripCalib_st noise_strip;
+  for (int i = 0 ; i < spa_ped_strip->GetNRows(); i++)
+    {
+      noise_strip.id=strip[i].id_strip;
+      noise_strip.pedestals=strip[i].pedestal;
+      noise_strip.rms=strip[i].noise;
+      noise_strip.isActive=1;
+      stripCal->AddAt(&noise_strip);
+    }
+  sprintf(name,"%s%s%s","ssdStripCalib.",myLabel,".root");
+  TFile f1(name,"RECREATE");
+  stripCal->Write();
+  f1.Close();
+  return spa_ped_strip->GetNRows();
+}
+
+
 /*!
   Old method reading noise from the spa_noise table
  */
