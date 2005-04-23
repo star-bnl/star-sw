@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.9 2005/04/14 20:26:41 jecc Exp $
+// $Id: StTpcT0Maker.cxx,v 1.10 2005/04/23 09:41:29 jeromel Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.10  2005/04/23 09:41:29  jeromel
+// Minor change (wrap private root file)
+//
 // Revision 1.9  2005/04/14 20:26:41  jecc
 // Now can also use FCF. Switch between TCL and FCF using m_Mode
 //
@@ -92,6 +95,8 @@
 
 ClassImp(StTpcT0Maker)
 
+// #define JECC_DEBUG 1
+
 //_____________________________________________________________________________
 /// Default constructor
 StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
@@ -126,11 +131,13 @@ Int_t StTpcT0Maker::Init(){
   yVertexDiff = new TH1F("yVertexDiff","y Vertex: East - West",600,-0.3,0.3);
   zVertexDiff = new TH1F("zVertexDiff","z Vertex: East - West",600,-0.3,0.3);
   resNtuple = new TNtuple("resNtuple","resNtuple","event:xEast:yEast:zEast:xWest:yWest:zWest:multEast:multWest:corrDelZ");
+
   AddHist(t0result);
   AddHist(t0guessError);
   AddHist(xVertexDiff);
   AddHist(yVertexDiff);
   AddHist(zVertexDiff);
+
   date = 0;
   time = 0;
   dvel_assumed=0.0;
@@ -396,7 +403,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.9 2005/04/14 20:26:41 jecc Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.10 2005/04/23 09:41:29 jeromel Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -432,12 +439,17 @@ void StTpcT0Maker::WriteTableToFile(){
  }
 
 void StTpcT0Maker::WriteHistFile(){
+#if JECC_DEBUG
   char filename[80]; 
+
   sprintf(filename,"t0hist.%08d.%06d.root",date,time);
   TFile out(filename,"RECREATE");
+#endif
   GetHistList()->Write();
   resNtuple->Write();
+#if JECC_DEBUG
   out.Close();
+#endif
 }
 
 float StTpcT0Maker::AverageT0(){float mean = t0result->GetMean();return mean;}
