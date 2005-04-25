@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.44 2005/02/02 01:36:52 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.45 2005/04/25 19:48:37 balewski Exp $
  
 
 #include <time.h>
@@ -287,6 +287,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
 
   // overload some of DB info
   for(is=0;is<nChGain;is++) changeGainsAction(chGainL[is].Data());
+  for(is=0;is<nChMask;is++) changeMaskAction(chMaskL[is].Data());
 
 
   // exportAscii(); //tmp
@@ -931,7 +932,7 @@ void  StEEmcDbMaker::changeGains(char *fname) {
 void  
 StEEmcDbMaker::changeMask(char *fname) {
   assert(nChMask+1< mxChMask);
-  chGainL[nChMask]=fname;
+  chMaskL[nChMask]=fname;
   nChMask++;
 }
 
@@ -1032,6 +1033,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.45  2005/04/25 19:48:37  balewski
+// overwrite of masks was not working properly
+//
 // Revision 1.44  2005/02/02 01:36:52  balewski
 // few more access methods + sigPed visible in EEmcDbItem
 //
