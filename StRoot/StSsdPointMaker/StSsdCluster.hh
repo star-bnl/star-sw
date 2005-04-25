@@ -1,6 +1,9 @@
-// $Id: StSsdCluster.hh,v 1.2 2005/03/18 14:24:20 lmartin Exp $
+// $Id: StSsdCluster.hh,v 1.3 2005/04/25 14:13:23 bouchet Exp $
 //
 // $Log: StSsdCluster.hh,v $
+// Revision 1.3  2005/04/25 14:13:23  bouchet
+// new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
+//
 // Revision 1.2  2005/03/18 14:24:20  lmartin
 // missing CVS header added
 //
@@ -13,7 +16,7 @@ class StSsdCluster
 {
  public:
   StSsdCluster(int rNCluster);
-  StSsdCluster(int rNCluster, int rFirstStrip, int rClusterSize, int rTotAdc, int rFirstAdc, int rLastAdc, int rTotNoise, float rStripMean,  int rFlag, int *rMcHit);
+  StSsdCluster(int rNCluster, int rFirstStrip, int rClusterSize, int rTotAdc, int rFirstAdc, int rLastAdc, float rTotNoise, float rStripMean,  int rFlag, int *rMcHit);
   StSsdCluster(const StSsdCluster & originalCluster);
   ~StSsdCluster();
 
@@ -25,7 +28,7 @@ class StSsdCluster
   void          setTotAdc(int rTotAdc);
   void          setFirstAdc(int rFirstAdc);
   void          setLastAdc(int rLastAdc);
-  void          setTotNoise(int rTotNoise);
+  void          setTotNoise(float rTotNoise);
   void          setStripMean(float rStripMean);
   void          setFlag(int rFlag);
   void          setIdMcHit(int rIdMcHit, int iR);
@@ -39,7 +42,7 @@ class StSsdCluster
   int           getTotAdc();
   int           getFirstAdc();
   int           getLastAdc();
-  int           getTotNoise();
+  float         getTotNoise();
   float         getStripMean();
   int           getFlag();
   int           getIdMcHit(int iR);
@@ -58,7 +61,7 @@ private:
   int           mTotAdc;
   int           mFirstAdc;
   int           mLastAdc;
-  int           mTotNoise;
+  float         mTotNoise;
   float         mStripMean;
   int           mFlag;
   int          *mIdMcHit;

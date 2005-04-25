@@ -1,6 +1,9 @@
-// $Id: StSsdCluster.cc,v 1.4 2005/03/18 14:24:21 lmartin Exp $
+// $Id: StSsdCluster.cc,v 1.5 2005/04/25 14:13:23 bouchet Exp $
 //
 // $Log: StSsdCluster.cc,v $
+// Revision 1.5  2005/04/25 14:13:23  bouchet
+// new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
+//
 // Revision 1.4  2005/03/18 14:24:21  lmartin
 // missing CVS header added
 //
@@ -24,7 +27,7 @@ StSsdCluster::StSsdCluster(int rNCluster)
   mNextCluster = 0;
 }
 
-StSsdCluster::StSsdCluster(int rNCluster, int rFirstStrip, int rClusterSize, int rTotAdc, int rFirstAdc, int rLastAdc, int rTotNoise, float rStripMean, int rFlag, int *rIdMcHit)
+StSsdCluster::StSsdCluster(int rNCluster, int rFirstStrip, int rClusterSize, int rTotAdc, int rFirstAdc, int rLastAdc, float rTotNoise, float rStripMean, int rFlag, int *rIdMcHit)
 {
   mNCluster    = rNCluster;
   mFirstStrip  = rFirstStrip;
@@ -96,7 +99,7 @@ void  StSsdCluster::setFirstAdc(int rFirstAdc)
 void  StSsdCluster::setLastAdc(int rLastAdc)
 { mLastAdc = rLastAdc;}
 
-void  StSsdCluster::setTotNoise(int rTotNoise)
+void  StSsdCluster::setTotNoise(float rTotNoise)
 { mTotNoise = rTotNoise;}
 
 void  StSsdCluster::setStripMean(float rStripMean)
@@ -133,7 +136,7 @@ int StSsdCluster::getFirstAdc()
 int StSsdCluster::getLastAdc()
 {  return mLastAdc;}
 
-int StSsdCluster::getTotNoise()
+float StSsdCluster::getTotNoise()
 {  return mTotNoise;}
 
 float StSsdCluster::getStripMean()
@@ -184,7 +187,7 @@ void StSsdCluster::update(StSsdStrip *ptr,float rWeight)
 {
   int tmpTotAdc = this->mTotAdc;
   this->mTotAdc += (int)(ptr->getDigitSig()*rWeight);
-  this->mTotNoise += (int)(ptr->getSigma()*rWeight);
+  this->mTotNoise += (ptr->getSigma()*rWeight);
   if(ptr->getNStrip()<this->mFirstStrip) 
     {
       this->mFirstStrip = ptr->getNStrip();

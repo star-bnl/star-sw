@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.6 2005/03/23 16:07:26 lmartin Exp $
+// $Id: StSsdPointMaker.h,v 1.7 2005/04/25 14:13:24 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.7  2005/04/25 14:13:24  bouchet
+// new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
+//
 // Revision 1.6  2005/03/23 16:07:26  lmartin
 // PrintClusterSummary and PrintPointSummary methods added
 //
@@ -71,6 +74,13 @@ class StSsdDynamicControl;
 class StSsdClusterControl;
 class StSsdBarrel;
 
+class StSsdLadder;
+class StSsdWafer;
+class StSsdPoint;
+class StSsdPointList;
+class StSsdCluster;
+class StSsdClusterList;
+
 class StSsdPointMaker : public StMaker {
  private:
   StDbManager* mDbMgr;           //!
@@ -85,10 +95,12 @@ class StSsdPointMaker : public StMaker {
   St_ssdLaddersPosition *m_ladpos;        //!< Pointer to the ssdLadderPosition table (ladder positions)
   St_ssdSectorsPosition *m_secpos;        //!< Pointer to the ssdSectorPosition table (sector positions)
   St_ssdBarrelPosition  *m_barpos;        //!< Pointer to the ssdBarrelPosition table (barrel positions)
-  void makeScfCtrlHistograms();        //!
+  void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void writeScfCtrlHistograms();       //!
-  void makeScmCtrlHistograms();        //!
-  void writeScmCtrlHistograms();       //!
+  void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
+  void writeScmCtrlHistograms(); 
+  void makeSsdPedestalHistograms();       //!
+  void writeSsdPedestalHistograms();      //!
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
   void PrintClusterSummary(StSsdBarrel *mySsd); //!
@@ -114,8 +126,35 @@ class StSsdPointMaker : public StMaker {
   TFile *ScmCtrlFile;  //!
   TH2S  *matchisto;    //! (1p-1n) packages control matching.
   TH1S  *orthoproj;    //! orthonormal projection and perfect matching deviation.
+  TH1S  *kind;         //! kind of hits -->see StSsdWafer for definition
+  TH2S  *matchisto_1;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_2;    //! (1p-1n) packages control matching.
+  TH2S  *matchisto_3;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_4;    //! (1p-1n) packages control matching
+  TH2S  *matchisto_5;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_6;    //! (1p-1n) packages control matching.
+  TH2S  *matchisto_7;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_8;    //! (1p-1n) packages control matching
+  TH2S  *matchisto_9;    //! (1p-1n) packages control matching
+  TH2S  *matchisto_10;    //! (1p-1n) packages control matching
+  TH2S  *matchisto_11;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_12;    //! (1p-1n) packages control matching.
+  TH2S  *matchisto_13;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_14;    //! (1p-1n) packages control matching
+  TH2S  *matchisto_15;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_16;    //! (1p-1n) packages control matching.
+  TH2S  *matchisto_17;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_18;    //! (1p-1n) packages control matching
+  TH2S  *matchisto_19;    //! (1p-1n) packages control matching  
+  TH2S  *matchisto_20;    //! (1p-1n) packages control matching.
+  TH2S *occupancy_wafer; //occupancy  per wafer for the ladders
+  TH2S *occupancy_chip; //occupancy per chip for the ladders
+  TH2S *noise_chip;// mean noise per chip
+  TH2S *noise_wafer;// mean noise per wafer
+  TH2S *noise_chip_P;// mean noise per chip of the P Side
+  TH2S *noise_chip_N;// mean noise per chip of the N Side
 
- public: 
+ public:
                   StSsdPointMaker(const char *name="scm_spt");
    virtual       ~StSsdPointMaker();
    virtual Int_t  Init();
@@ -124,7 +163,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.6 2005/03/23 16:07:26 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.7 2005/04/25 14:13:24 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

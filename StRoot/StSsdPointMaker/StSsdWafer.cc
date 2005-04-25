@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.11 2005/03/18 16:42:18 lmartin Exp $
+// $Id: StSsdWafer.cc,v 1.12 2005/04/25 14:13:24 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.12  2005/04/25 14:13:24  bouchet
+// new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
+//
 // Revision 1.11  2005/03/18 16:42:18  lmartin
 // setMatcheds method modified to transmit the cluster Ids to the point
 //
@@ -121,9 +124,9 @@ void StSsdWafer::debugStrips()
   cout<<"List of "<<mStripP->getSize()<<" strips on the P side "<<endl;
   if (mStripP->getSize()>0) currentStripP = mStripP->first();
   for (int i=0;i<mStripP->getSize();i++) {
-    cout<<" id,sig,noise : "<<currentStripP->getNStrip()
-	<<" "<<currentStripP->getDigitSig()
-	<<" "<<currentStripP->getSigma()<<endl;
+        cout<<" id,sig,noise : "<<currentStripP->getNStrip()
+     	<<" "<<currentStripP->getDigitSig()
+    	<<" "<<currentStripP->getSigma()<<endl;
     if (currentStripP!=mStripP->last()) currentStripP = mStripP->next(currentStripP);
   }
 
@@ -131,9 +134,9 @@ void StSsdWafer::debugStrips()
   cout<<"List of "<<mStripN->getSize()<<" strips on the N side "<<endl;
   if (mStripN->getSize()>0) currentStripN = mStripN->first();
   for (int i=0;i<mStripN->getSize();i++) {
-    cout<<" id,sig,noise : "<<currentStripN->getNStrip()
-	<<" "<<currentStripN->getDigitSig()
-	<<" "<<currentStripN->getSigma()<<endl;
+     cout<<" id,sig,noise : "<<currentStripN->getNStrip()
+    <<" "<<currentStripN->getDigitSig()
+    <<" "<<currentStripN->getSigma()<<endl;
     if (currentStripN!=mStripN->last()) currentStripN = mStripN->next(currentStripN);
   }
 }
@@ -143,14 +146,14 @@ void StSsdWafer::debugClusters()
   cout<<"List of "<<mClusterP->getSize()<<" clusters on the P side "<<endl;
   if (mClusterP->getSize()>0) currentClusterP = mClusterP->first();
   for (int i=0;i<mClusterP->getSize();i++) {
-    cout<<"N,Size,FirstStrip,StripMean,TotAdc,FirstAdc,LastAdc,TotNoise : "<<currentClusterP->getNCluster()
-	<<" "<<currentClusterP->getClusterSize()
-	<<" "<<currentClusterP->getFirstStrip()
-	<<" "<<currentClusterP->getStripMean()
-	<<" "<<currentClusterP->getTotAdc()
-	<<" "<<currentClusterP->getFirstAdc()
-	<<" "<<currentClusterP->getLastAdc()
-	<<" "<<currentClusterP->getTotNoise()<<endl;
+      cout<<"N,Size,FirstStrip,StripMean,TotAdc,FirstAdc,LastAdc,TotNoise : "<<currentClusterP->getNCluster()
+   <<" "<<currentClusterP->getClusterSize()
+    <<" "<<currentClusterP->getFirstStrip()
+    <<" "<<currentClusterP->getStripMean()
+    <<" "<<currentClusterP->getTotAdc()
+    <<" "<<currentClusterP->getFirstAdc()
+    <<" "<<currentClusterP->getLastAdc()
+    <<" "<<currentClusterP->getTotNoise()<<endl;
     if (currentClusterP!=mClusterP->last()) currentClusterP = mClusterP->next(currentClusterP);
   }
 
@@ -158,14 +161,14 @@ void StSsdWafer::debugClusters()
   cout<<"List of "<<mClusterN->getSize()<<" clusters on the P side "<<endl;
   if (mClusterN->getSize()>0) currentClusterN = mClusterN->first();
   for (int i=0;i<mClusterN->getSize();i++) {
-    cout<<"N,Size,FirstStrip,StripMean,TotAdc,FirstAdc,LastAdc,TotNoise : "<<currentClusterN->getNCluster()
-	<<" "<<currentClusterN->getClusterSize()
-	<<" "<<currentClusterN->getFirstStrip()
-	<<" "<<currentClusterN->getStripMean()
-	<<" "<<currentClusterN->getTotAdc()
-	<<" "<<currentClusterN->getFirstAdc()
-	<<" "<<currentClusterN->getLastAdc()
-	<<" "<<currentClusterN->getTotNoise()<<endl;
+     cout<<"N,Size,FirstStrip,StripMean,TotAdc,FirstAdc,LastAdc,TotNoise : "<<currentClusterN->getNCluster()
+    	<<" "<<currentClusterN->getClusterSize()
+    <<" "<<currentClusterN->getFirstStrip()
+   <<" "<<currentClusterN->getStripMean()
+    <<" "<<currentClusterN->getTotAdc()
+     <<" "<<currentClusterN->getFirstAdc()
+    <<" "<<currentClusterN->getLastAdc()
+    <<" "<<currentClusterN->getTotNoise()<<endl;
     if (currentClusterN!=mClusterN->last()) currentClusterN = mClusterN->next(currentClusterN);
   }
 
@@ -292,7 +295,7 @@ int StSsdWafer::doFindCluster(StSsdClusterControl *clusterControl, int iSide)
   
   while(CurrentStrip) 
     {
-      if(CurrentStrip->getDigitSig()>(clusterControl->getHighCut()*CurrentStrip->getSigma()))
+      if((CurrentStrip->getDigitSig()>(clusterControl->getHighCut()*CurrentStrip->getSigma()))&&(CurrentStrip->getSigma()>0))
 	{
 	  LastScanStrip = 0;
 	  StSsdCluster *newCluster = new StSsdCluster(CurrentClusterList->getSize());
