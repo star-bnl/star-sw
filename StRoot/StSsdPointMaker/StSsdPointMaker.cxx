@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.10 2005/04/23 08:56:20 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.11 2005/04/25 14:13:23 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.11  2005/04/25 14:13:23  bouchet
+// new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
+//
 // Revision 1.10  2005/04/23 08:56:20  lmartin
 // physics and pedestal data processing separated
 //
@@ -52,6 +55,7 @@
 #include "StSsdLadder.hh"
 #include "StSsdWafer.hh"
 #include "StSsdStripList.hh"
+#include "StSsdCluster.hh"
 #include "StSsdClusterList.hh"
 #include "StSsdPointList.hh"
 #include "StSsdPoint.hh"
@@ -207,18 +211,18 @@ Int_t StSsdPointMaker::Init(){
   // 		Create SCF histograms
 
   if (IAttr(".histos")) {
-    noisDisP = new TH1F("Noise_p","Noise Distribution",25,0,25);
+    noisDisP = new TH1F("Noise_p","Noise Distribution",250,0,25);
     snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
     stpClusP = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
     totChrgP = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
     
-    noisDisN = new TH1F("Noise_n","Noise Distribution",25,0,25);
+    noisDisN = new TH1F("Noise_n","Noise Distribution",250,0,25);
     snRatioN = new TH1F("SN_n","Signal/Noise",200,0,200);
     stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
     totChrgN = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
     
     // 		Create SCM histograms
-    matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
+    matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",500,0,1000,500,0,1000);
     matchisto->SetXTitle("PSide ADC count");
     matchisto->SetYTitle("NSide ADC count");
     matchisto->SetZTitle("(1p-1n) hits");
@@ -234,8 +238,138 @@ Int_t StSsdPointMaker::Init(){
     matchisto->SetNdivisions(5,"X");
     matchisto->SetNdivisions(5,"Y");
     matchisto->SetNdivisions(10,"Z");
-    orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",80,-80,80);
-  }
+
+    orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",320,-80,80);
+    
+    kind = new TH1S("kind","Kind of hits",11,0,11);
+    kind->SetXTitle("kind");
+    kind->SetYTitle("entries");
+    kind->SetTitleOffset(2,"X");
+    kind->SetTitleOffset(2,"Y");
+    
+    matchisto_1 = new TH2S("matchingHisto_1","Matching Adc (1p-1n) for ladder 1",50,0,1000,50,0,1000);
+    matchisto_1->SetXTitle("PSide ADC count");
+    matchisto_1->SetYTitle("NSide ADC count");
+    matchisto_1->SetZTitle("(1p-1n) hits");
+
+    matchisto_2 = new TH2S("matchingHisto_2","Matching Adc (1p-1n) for ladder 2",50,0,1000,50,0,1000);
+    matchisto_2->SetXTitle("PSide ADC count");
+    matchisto_2->SetYTitle("NSide ADC count");
+    matchisto_2->SetZTitle("(1p-1n) hits");
+
+    matchisto_3 = new TH2S("matchingHisto_3","Matching Adc (1p-1n) for ladder 3",50,0,1000,50,0,1000);
+    matchisto_3->SetXTitle("PSide ADC count");
+    matchisto_3->SetYTitle("NSide ADC count");
+    matchisto_3->SetZTitle("(1p-1n) hits");
+
+    matchisto_4 = new TH2S("matchingHisto_4","Matching Adc (1p-1n) for ladder 4",50,0,1000,50,0,1000);
+    matchisto_4->SetXTitle("PSide ADC count");
+    matchisto_4->SetYTitle("NSide ADC count");
+    matchisto_4->SetZTitle("(1p-1n) hits");
+    
+    matchisto_5 = new TH2S("matchingHisto_5","Matching Adc (1p-1n) for ladder 5",50,0,1000,50,0,1000);
+    matchisto_5->SetXTitle("PSide ADC count");
+    matchisto_5->SetYTitle("NSide ADC count");
+    matchisto_5->SetZTitle("(1p-1n) hits");
+
+    matchisto_6 = new TH2S("matchingHisto_6","Matching Adc (1p-1n) for ladder 6",50,0,1000,50,0,1000);
+    matchisto_6->SetXTitle("PSide ADC count");
+    matchisto_6->SetYTitle("NSide ADC count");
+    matchisto_6->SetZTitle("(1p-1n) hits");
+
+    matchisto_7 = new TH2S("matchingHisto_7","Matching Adc (1p-1n) for ladder 7",50,0,1000,50,0,1000);
+    matchisto_7->SetXTitle("PSide ADC count");
+    matchisto_7->SetYTitle("NSide ADC count");
+    matchisto_7->SetZTitle("(1p-1n) hits");
+
+    matchisto_8 = new TH2S("matchingHisto_8","Matching Adc (1p-1n) for ladder 8",50,0,1000,50,0,1000);
+    matchisto_8->SetXTitle("PSide ADC count");
+    matchisto_8->SetYTitle("NSide ADC count");
+    matchisto_8->SetZTitle("(1p-1n) hits");
+    
+    matchisto_9 = new TH2S("matchingHisto_9","Matching Adc (1p-1n) for ladder 9",50,0,1000,50,0,1000);
+    matchisto_9->SetXTitle("PSide ADC count");
+    matchisto_9->SetYTitle("NSide ADC count");
+    matchisto_9->SetZTitle("(1p-1n) hits");
+    
+    matchisto_10 = new TH2S("matchingHisto_10","Matching Adc (1p-1n) for ladder 10",50,0,1000,50,0,1000);
+    matchisto_10->SetXTitle("PSide ADC count");
+    matchisto_10->SetYTitle("NSide ADC count");
+    matchisto_10->SetZTitle("(1p-1n) hits");
+    
+    matchisto_11 = new TH2S("matchingHisto_11","Matching Adc (1p-1n) for ladder 11",50,0,1000,50,0,1000);
+    matchisto_11->SetXTitle("PSide ADC count");
+    matchisto_11->SetYTitle("NSide ADC count");
+    matchisto_11->SetZTitle("(1p-1n) hits");
+
+    matchisto_12 = new TH2S("matchingHisto_12","Matching Adc (1p-1n) for ladder 12",50,0,1000,50,0,1000);
+    matchisto_12->SetXTitle("PSide ADC count");
+    matchisto_12->SetYTitle("NSide ADC count");
+    matchisto_12->SetZTitle("(1p-1n) hits");
+
+    matchisto_13 = new TH2S("matchingHisto_13","Matching Adc (1p-1n) for ladder 13",50,0,1000,50,0,1000);
+    matchisto_13->SetXTitle("PSide ADC count");
+    matchisto_13->SetYTitle("NSide ADC count");
+    matchisto_13->SetZTitle("(1p-1n) hits");
+
+    matchisto_14 = new TH2S("matchingHisto_14","Matching Adc (1p-1n) for ladder 14",50,0,1000,50,0,1000);
+    matchisto_14->SetXTitle("PSide ADC count");
+    matchisto_14->SetYTitle("NSide ADC count");
+    matchisto_14->SetZTitle("(1p-1n) hits");
+    
+    matchisto_15 = new TH2S("matchingHisto_15","Matching Adc (1p-1n) for ladder 15",50,0,1000,50,0,1000);
+    matchisto_15->SetXTitle("PSide ADC count");
+    matchisto_15->SetYTitle("NSide ADC count");
+    matchisto_15->SetZTitle("(1p-1n) hits");
+
+    matchisto_16 = new TH2S("matchingHisto_16","Matching Adc (1p-1n) for ladder 16",50,0,1000,50,0,1000);
+    matchisto_16->SetXTitle("PSide ADC count");
+    matchisto_16->SetYTitle("NSide ADC count");
+    matchisto_16->SetZTitle("(1p-1n) hits");
+
+    matchisto_17 = new TH2S("matchingHisto_17","Matching Adc (1p-1n) for ladder 17",50,0,1000,50,0,1000);
+    matchisto_17->SetXTitle("PSide ADC count");
+    matchisto_17->SetYTitle("NSide ADC count");
+    matchisto_17->SetZTitle("(1p-1n) hits");
+
+    matchisto_18 = new TH2S("matchingHisto_18","Matching Adc (1p-1n) for ladder 18",50,0,1000,50,0,1000);
+    matchisto_18->SetXTitle("PSide ADC count");
+    matchisto_18->SetYTitle("NSide ADC count");
+    matchisto_18->SetZTitle("(1p-1n) hits");
+    
+    matchisto_19 = new TH2S("matchingHisto_19","Matching Adc (1p-1n) for ladder 19",50,0,1000,50,0,1000);
+    matchisto_19->SetXTitle("PSide ADC count");
+    matchisto_19->SetYTitle("NSide ADC count");
+    matchisto_19->SetZTitle("(1p-1n) hits");
+
+    matchisto_20 = new TH2S("matchingHisto_20","Matching Adc (1p-1n) for ladder 20",50,0,1000,50,0,1000);
+    matchisto_20->SetXTitle("PSide ADC count");
+    matchisto_20->SetYTitle("NSide ADC count");
+    matchisto_20->SetZTitle("(1p-1n) hits");
+
+    //	Create SsdPedestal histograms
+    occupancy_wafer = new TH2S("occupancy_wafer","occupancy per wafer",40,0,40,20,0,20);
+    occupancy_chip = new TH2S("occupancy_chip","occupancy per chip",40,0,40,99,0,99);
+    noise_chip  = new TH2S("noise_chip","mean noise per chip",40,0,40,99,0,99);
+    noise_wafer  = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
+    noise_chip_P  = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
+    noise_chip_N  = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
+    occupancy_wafer->SetXTitle("Ladder");
+    occupancy_wafer->SetYTitle("Wafer");  
+    occupancy_chip->SetXTitle("Ladder");
+    occupancy_chip->SetYTitle("Chip");  
+    noise_chip->SetXTitle("Ladder");
+    noise_chip->SetYTitle("Chip");
+    noise_chip_P->SetXTitle("Ladder");
+    noise_chip_N->SetXTitle("Ladder");
+    noise_chip_P->SetYTitle("Chip"); 
+    noise_chip_N->SetYTitle("Chip");   
+    noise_wafer->SetXTitle("Ladder");
+    noise_wafer->SetYTitle("Wafer");
+
+
+
+    }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -269,7 +403,9 @@ Int_t StSsdPointMaker::Make()
 
   
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
-  m_DataSet->Add(scm_spt);
+  m_DataSet->Add(scm_spt); 
+  //St_scf_cluster *scf_cluster = new St_scf_cluster("scf_cluster",5000);//22/10
+  //m_DataSet->Add(scf_cluster);
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if(mCurrentEvent) 
     {
@@ -334,7 +470,8 @@ Int_t StSsdPointMaker::Make()
       cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
       mySsd->sortListCluster();
       PrintClusterSummary(mySsd);
-      //  debugUnPeu(mySsd);
+      makeScfCtrlHistograms(mySsd);
+      //debugUnPeu(mySsd);
       int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
       cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
       mySsd->convertDigitToAnalog(mDynamicControl);
@@ -349,13 +486,18 @@ Int_t StSsdPointMaker::Make()
       scm_spt->Purge();
       cout<<"####        END OF SSD NEW POINT MAKER       ####"<<endl;
       cout<<"#################################################"<<endl;
-      makeScmCtrlHistograms();
+      makeScmCtrlHistograms(mySsd);
       if (nSptWritten) res = kStOK;
     }
   else
     {
     if((spa_strip->GetNRows()==0)&&(spa_ped_strip->GetNRows()!=0))
-      mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
+      { 
+	cout<<"###### WRITING SSD PEDESTAL HISTOGRAMS##########"<<endl;
+	mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
+	makeSsdPedestalHistograms(); 
+	writeSsdPedestalHistograms();
+      }
     }
   delete mySsd;
  
@@ -367,48 +509,54 @@ Int_t StSsdPointMaker::Make()
   
   return kStOK;
 }
-//_____________________________________________________________________________
-void StSsdPointMaker::makeScfCtrlHistograms()
-{
-  St_DataSetIter scf_iter(m_DataSet);
-  St_scf_cluster *scf_cluster = 0;
-  scf_cluster = (St_scf_cluster *) scf_iter.Find("scf_cluster"); 
 
-// 		Fill histograms
-  if (scf_cluster->GetNRows()){
-    Int_t clustSide   = 0;  // pside = 0 et nside = 1 
-    scf_cluster_st *dClus = scf_cluster->GetTable();
-    Float_t convAdcToE = (mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip())/(pow(2.0,mDynamicControl->getNBitEncoding()));
-    for (Int_t iScf = 0; iScf < scf_cluster->GetNRows(); iScf++, dClus++)
-      {
-	clustSide = ((dClus->id_cluster/10000)-(dClus->id_cluster/100000)*10);
-	if (IAttr(".histos")) {
-	  if(!clustSide)
-	    {
-	      noisDisP->Fill(dClus->noise_count/dClus->n_strip);
-	      snRatioP->Fill((dClus->adc_count*dClus->n_strip)/dClus->noise_count);
-	      stpClusP->Fill(dClus->n_strip);
-	      totChrgP->Fill(convAdcToE*dClus->adc_count);
+//_____________________________________________________________________________
+void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
+{
+
+  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  int found;
+  Float_t convAdcToE = (mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip())/(pow(2.0,mDynamicControl->getNBitEncoding()));
+  found=0;
+  for (int i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	//if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+	  //gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
+	//}
+	//else {
+	  StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	  while (pClusterP)
+	    {  
+	      stpClusP->Fill(pClusterP->getClusterSize());
+	      totChrgP->Fill(convAdcToE*pClusterP->getTotAdc());
+	      noisDisP->Fill(pClusterP->getTotNoise()/pClusterP->getClusterSize());
+	      snRatioP->Fill((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
+	      pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);	
 	    }
-	  else
-	    {
-	      noisDisN->Fill(dClus->noise_count/dClus->n_strip);
-	      snRatioN->Fill((dClus->adc_count*dClus->n_strip)/dClus->noise_count);
-	      stpClusN->Fill(dClus->n_strip);
-	      totChrgN->Fill(convAdcToE*dClus->adc_count);
-	    }
+	  //if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
+	    //gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the N-side of this wafer "<< endm;  
+	  //}
+	  //else {
+	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	    while (pClusterN)
+	      {
+		stpClusN->Fill(pClusterN->getClusterSize());
+		totChrgN->Fill(convAdcToE*pClusterN->getTotAdc());
+		noisDisN->Fill(pClusterN->getTotNoise()/pClusterN->getClusterSize());
+		snRatioN->Fill((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());	
+		pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
+	      }	  
+	  }
 	}
       }
-  }
-}
+//  }
+//}
 //_____________________________________________________________________________
 void StSsdPointMaker::writeScfCtrlHistograms()
 {  
 
-  if (IAttr(".histos")) {
-
-    ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
-    
+    if (IAttr(".histos")) {
     noisDisP->Write();
     snRatioP->Write();
     stpClusP->Write();
@@ -419,51 +567,251 @@ void StSsdPointMaker::writeScfCtrlHistograms()
     stpClusN->Write();
     totChrgN->Write();
     
-    ScfCtrlFile->Close();
-  }
+    }
 }
-//_____________________________________________________________________________
-void StSsdPointMaker::makeScmCtrlHistograms()
-{
-  St_DataSetIter scm_iter(m_DataSet);
-  St_scm_spt *scm_spt = 0;
-  scm_spt = (St_scm_spt *) scm_iter.Find("scm_spt"); 
 
-// 		Fill histograms 
-  if (scm_spt->GetNRows()){
-    scm_spt_st *dSpt = scm_spt->GetTable();
-    Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getNBitEncoding())/(mDynamicControl->getPairCreationEnergy()*mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip());
-    for (Int_t iScm = 0; iScm < scm_spt->GetNRows(); iScm++, dSpt++)
-      {
-	if (dSpt->id_match == 11)// case 11  		    
-	  {
-	    Float_t a = 0, b = 0;
-	    a = convMeVToAdc*(dSpt->de[0]+dSpt->de[1]);
-	    b = convMeVToAdc*(dSpt->de[0]-dSpt->de[1]);
-	    if (IAttr(".histos")) {	      
-	      matchisto->Fill(a,b);
-	      orthoproj->Fill((b-a)/TMath::Sqrt(2.));
-	    }
-	  }
-      }
-    //     matchisto->Draw();
-  }
-}
 //_____________________________________________________________________________
+
+void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
+{
+  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  int found;
+  int conversion[11]={11,12,21,13,31,221,222,223,23,32,33};
+  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getNBitEncoding())/(mDynamicControl->getPairCreationEnergy()*mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip());
+  found=0;
+  for (int i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
+	  //gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
+	}
+	else {
+	  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+	  while (pSpt){
+	    if (pSpt->getNMatched() == 11)// case 11  		    
+	      {
+		Float_t a = 0, b = 0;
+		a = convMeVToAdc*(pSpt->getDe(0)+pSpt->getDe(1));
+		b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
+		matchisto->Fill(a,b);
+		orthoproj->Fill((b-a)/TMath::Sqrt(2.));
+		switch(i+1)
+		  {
+		  case 1:
+		    {
+		      matchisto_1->Fill(a,b);
+		      break;
+		    } 
+		  case 2:
+		    {
+		      matchisto_2->Fill(a,b);
+		      break;
+		    } 
+		  case 3:
+		    {
+		      matchisto_3->Fill(a,b);
+		      break;
+		    } 
+		    case 4:
+		      {
+			matchisto_4->Fill(a,b);
+			break;
+		      } 
+		  case 5:
+		    {
+		      matchisto_5->Fill(a,b);
+		      break;
+		    } 
+		  case 6:
+		    {
+		      matchisto_6->Fill(a,b);
+		      break;
+		    } 
+		  case 7:
+		    {
+		      matchisto_7->Fill(a,b);
+		      break;
+		    } 
+		  case 8:
+		    {
+		      matchisto_8->Fill(a,b);
+		      break;
+		    } 
+		  case 9:
+		    {
+		      matchisto_9->Fill(a,b);
+		      break;
+		    } 
+		  case 10:
+		    {
+		      matchisto_10->Fill(a,b);
+		      break;
+		    } 
+		  case 11:
+		    {
+		      matchisto_11->Fill(a,b);
+		      break;
+		    } 
+		  case 12:
+		    {
+		      matchisto_12->Fill(a,b);
+		      break;
+		    } 
+		  case 13:
+		    {
+		      matchisto_13->Fill(a,b);
+		      break;
+		    } 
+		  case 14:
+		    {
+		      matchisto_14->Fill(a,b);
+		      break;
+		    } 
+		  case 15:
+		    {
+		      matchisto_15->Fill(a,b);
+		      break;
+		    } 
+		  case 16:
+		    {
+		      matchisto_16->Fill(a,b);
+		      break;
+		    } 
+		  case 17:
+		    {
+		      matchisto_17->Fill(a,b);
+		      break;
+		    } 
+		  case 18:
+		    {
+		      matchisto_18->Fill(a,b);
+		      break;
+		    } 
+		  case 19:
+		    {
+		      matchisto_19->Fill(a,b);
+		      break;
+		    } 
+		  case 20:
+		    {
+		      matchisto_20->Fill(a,b);
+		      break;
+		    } 
+		  }
+		}
+	    
+	    for(int k=0;k<=11;k++)
+	      {
+		if(pSpt->getNMatched()==conversion[k])
+		  {
+		    kind->Fill(k);
+		  }
+	      }
+	    
+	    pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+	  } 
+	}
+      }
+    }
+}
+
+
+// _____________________________________________________________________________
 void StSsdPointMaker::writeScmCtrlHistograms()
 {
-  if (IAttr(".histos")) {
-    
-    ScmCtrlFile = new TFile("event/scmCtrl_histos.root","RECREATE");
-    
+    if (IAttr(".histos")) {
+      
     matchisto->Write();
     orthoproj->Write();
-    
-    ScmCtrlFile->Close();
-  }
-}
+    kind->Write();
+    matchisto_1->Write();
+    matchisto_2->Write();
+    matchisto_3->Write();
+    matchisto_4->Write();
+    matchisto_5->Write();
+    matchisto_6->Write();
+    matchisto_7->Write();
+    matchisto_8->Write();
+    matchisto_9->Write();
+    matchisto_10->Write();
+    matchisto_11->Write();
+    matchisto_12->Write();
+    matchisto_13->Write();
+    matchisto_14->Write();
+    matchisto_15->Write();
+    matchisto_16->Write();
+    matchisto_17->Write();
+    matchisto_18->Write();
+    matchisto_19->Write();
+    matchisto_20->Write();
 
+    }
+}
 //_____________________________________________________________________________
+void StSsdPointMaker::makeSsdPedestalHistograms()
+{ 
+  
+   St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");
+   cout << " StSsdPointMaker::makeSsdPedestalHistograms: PedStrip->NRows="<<spa_ped_strip->GetNRows()<<endl;
+   ssdPedStrip_st *strip = spa_ped_strip->GetTable();
+   
+   int chip;
+   int id_side;
+   int id_wafer,iWaf,iLad,idWaf;
+   int nStrip;
+  for (int i=0;i<spa_ped_strip->GetNRows();i++)
+    { 
+      nStrip=(int)(strip[i].id_strip/100000.);
+      idWaf   = strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
+      iWaf    = (int)((idWaf - 7*1000)/100 - 1);
+      iLad    = (int)(idWaf - 7*1000 - (iWaf+1)*100 - 1);
+      id_wafer=strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
+      id_side=(strip[i].id_strip-nStrip*100000-id_wafer)/10000;
+      nStrip=nStrip-1; // to havethe good number of chip [0;95]
+      chip=(int)((nStrip+(768*(iWaf)))/128.);
+      //////////////////CONVENTION///////////////////////
+      ///idWaf: 7101<--->8620
+      ///iWaf : 0<--->15
+      ///iLad : 0<--->19
+      ///nStrip:0<--->767
+      ///chip: 0<--->95
+      ///////////////////////////////////////////////////
+
+	  if(id_side==0)
+	    { 
+	      occupancy_wafer->Fill(2*iLad,iWaf,1);
+	      occupancy_chip->Fill(2*iLad,chip,1);
+	      noise_chip->Fill(2*iLad,chip,(strip[i].noise/(16.)));
+	      noise_wafer->Fill(2*iLad,iWaf,(strip[i].noise/(16.))); 
+	      noise_chip_P->Fill(iLad,chip,(strip[i].noise/(16.)));
+	    }
+	  else
+	    {
+	      occupancy_wafer->Fill((2*iLad)+1,iWaf,1);
+	      occupancy_chip->Fill((2*iLad)+1,chip,1);
+	      noise_chip->Fill((2*iLad)+1,chip,(strip[i].noise/(16.)));
+	      noise_wafer->Fill((2*iLad)+1,iWaf,(strip[i].noise/(16.)));
+	      noise_chip_N->Fill(iLad,chip,(strip[i].noise/(16.))); 
+	     
+	    }
+    }
+}
+//_____________________________________________________________________________
+
+void StSsdPointMaker::writeSsdPedestalHistograms()
+{ 
+  if (IAttr(".histos")) 
+    {
+      occupancy_wafer->Write();
+      occupancy_wafer->Write();
+      noise_chip->Write();
+      noise_wafer->Write();
+      noise_chip_P->Write();
+      noise_chip_N->Write();
+      }
+}
+ //_____________________________________________________________________________
+
 void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
 {
   int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
@@ -501,11 +849,12 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
   *gMessMgr<<endm;
 }
 
+//_____________________________________________________________________________
 void StSsdPointMaker::debugUnPeu(StSsdBarrel *mySsd)
 {
   int monladder,monwafer;
-  monladder=12;
-  monwafer=9;
+  monladder=7;
+  monwafer=6;
   mySsd->debugUnPeu(monladder,monwafer);
 }
 
@@ -595,12 +944,14 @@ void StSsdPointMaker::PrintInfo()
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
-  if (Debug()) gMessMgr->Debug() << "In StSsdPointMaker::Finish() ... "
-                               << GetName() << endm; 
-  if (IAttr(".histos")) {
+    if (Debug()) gMessMgr->Debug() << "In StSsdPointMaker::Finish() ... "
+				 << GetName() << endm; 
+      if (IAttr(".histos")) {	
+    cout<<"###### WRITING SSD PHYSICS  HISTOGRAMS##########"<<endl;
     writeScfCtrlHistograms();
     writeScmCtrlHistograms();
-  }    
+    }    
+  
   return kStOK;
 }
 

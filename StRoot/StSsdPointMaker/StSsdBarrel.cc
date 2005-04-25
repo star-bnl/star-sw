@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.10 2005/04/23 08:56:20 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.11 2005/04/25 14:13:23 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.11  2005/04/25 14:13:23  bouchet
+// new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
+//
 // Revision 1.10  2005/04/23 08:56:20  lmartin
 // physics and pedestal data processing separated
 //
@@ -307,7 +310,8 @@ int StSsdBarrel::readClusterFromTable(St_scf_cluster *scf_cluster)
   int nFirstAdc       = 0;
   int nLastAdc        = 0;
   int nAdcCount       = 0;
-  int nNoiseCount     = 0;
+  float nNoiseCount   = 0;
+//int nNoiseCount     = 0;
   float nStripMean    = 0;
   int nFlag           = 0;
 
