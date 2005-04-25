@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.77 2005/04/12 14:35:39 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.78 2005/04/25 20:20:25 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.78  2005/04/25 20:20:25  fisyak
+ * replace assert by print out
+ *
  * Revision 2.77  2005/04/12 14:35:39  fisyak
  * Add print out for dE/dx
  *
@@ -1434,9 +1437,11 @@ static int nCall=0; nCall++;
   _cCY-=k30*c00+k31*c10;_cCZ-=k30*c10+k31*c11;_cCE-=k30*c20+k31*c21;_cCC-=k30*c30+k31*c31;
   _cTY-=k40*c00+k41*c10;_cTZ-=k40*c10+k41*c11;_cTE-=k40*c20+k41*c21;_cTC-=k40*c30+k41*c31;_cTT-=k40*c40+k41*c41;
 
-  assert (_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0);
-  assert (_cYY < v00);
-  assert (_cZZ < v11);
+  if (_cYY >= v00 || _cZZ >= v11) {
+    printf("StiKalmanTrackNode::updateNode *** _cYY >= v00 || _cZZ >= v11 %g %g %g %g \n"
+          ,_cYY,v00,_cZZ,v11);
+    return -14;
+  }
   if (!(_cYY>0 && _cZZ >0 && _cEE>0 && _cCC>0 && _cTT>0)) {
     printf("StiKalmanTrackNode::updateNode *** negative errors  %g %g %g %g %g\n"
           ,_cYY,_cZZ,_cEE,_cCC,_cTT);
