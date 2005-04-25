@@ -1,5 +1,5 @@
 //#define __NOVMC__
-#include "StiVMCToolKit.h"
+#include "StiVMCToolKit.h" 
 #ifdef __ROOT__
 #include "StMaker.h"
 #endif
@@ -157,9 +157,9 @@ static ElemV_t Air[] = {
 };
 static Int_t NAir = 0;
 static ElemV_t P10[] = {
-  {"Ar",  40,18,0.95744680},
-  {"C" ,  12, 6,0.03191489},
-  {"H" ,   1, 1,0.01063830}
+  {"Ar",  40,18,0.95744680,0},
+  {"C" ,  12, 6,0.03191489,0},
+  {"H" ,   1, 1,0.01063830,0}
 };
 static Int_t NP10 = 3;
 // {"Ne", 20.1797, 10, 18.18e-6, 0},
@@ -401,6 +401,7 @@ Double_t StiVMCToolKit::GetShapeVolume(TGeoShape *shape) {
   }
 //________________________________________________________________________________ 
 Int_t StiVMCToolKit::Add2ElementList(Int_t NElem,const TGeoMaterial *mat, Elem_t *ElementList) {
+  assert(NElem>=0 && NElem<NoElemMax);
   if (! NAir) {
     NAir = sizeof(Air)/sizeof(ElemV_t);
     Double_t W = 0;
@@ -479,6 +480,7 @@ Int_t StiVMCToolKit::Add2ElementList(Int_t NElem,const TGeoMaterial *mat, Elem_t
 //________________________________________________________________________________ 
 Int_t StiVMCToolKit::Add2ElementList(Int_t NElem, Elem_t *ElementList, 
 						Int_t NElemD, Elem_t *ElementListD, Double_t weight) {
+  assert(NElem>=0 && NElem<NoElemMax);
       for (Int_t i = 0; i < NElemD; i++) {
 	ElementList[NElem].index = NElem+1;
 	ElementList[NElem].W = weight*ElementListD[i].W;
@@ -491,6 +493,7 @@ Int_t StiVMCToolKit::Add2ElementList(Int_t NElem, Elem_t *ElementList,
 }
 //________________________________________________________________________________
 Int_t StiVMCToolKit::NormolizeElementList(Int_t NElem, Elem_t *ElementList){
+  assert(NElem>=0 && NElem<NoElemMax);
   Double_t W = 0;
   for (Int_t i = 0; i < NElem; i++) W += ElementList[i].W ;
   for (Int_t i = 0; i < NElem; i++) ElementList[i].W /= W;
@@ -509,17 +512,17 @@ Int_t StiVMCToolKit::NormolizeElementList(Int_t NElem, Elem_t *ElementList){
   Int_t N = 0;
   
   for (Int_t k = 0; k < NElem; k++) {
-    if (ElementList[k].W > 0) {
-      if (k > N) ElementList[N] = ElementList[k];
-      N++;
-    }
+    if (ElementList[k].W <= 0) 	continue;
+    if (k != N)
+      ElementList[N] = ElementList[k];
+    N++;
   }
   return N;
 }
 //________________________________________________________________________________ 
 Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT, 
 					     Int_t *NElem, Elem_t *ElementList) {
-  Double_t Weight = 0;
+  Double_t Weight  = 0;
   Double_t WeightT = 0;
   if (! nodeT) {
 #if 0
@@ -927,6 +930,7 @@ Double_t StiVMCToolKit::GetPotI(const TGeoMaterial *mat) {
     if (mat->InheritsFrom("TGeoMixture")) {
       TGeoMixture *mix = (TGeoMixture *) mat;
       Int_t N = mix->GetNelements();
+      assert(N);
       Double_t *A = mix->GetAmixt();
       Double_t *Z = mix->GetZmixt();
       Double_t *W = mix->GetWmixt();
