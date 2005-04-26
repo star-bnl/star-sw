@@ -51,6 +51,15 @@ CSMStatusUtils::setDetectorFlavor(TString flavor) {
     mDetectorSize=720;
     mDetectorActualSize=720;
     mRunStatusMapPtr=&mEEMCRunStatusMap;
+    TString tms;
+    ifstream ifs("StRoot/StEmcPool/CSMStatusUtils/eemccratemap");
+    int tower, crate, channel;
+    while(!ifs.eof()) {
+      tms.ReadLine(ifs);
+      sscanf(tms.Data(),"%d %d %d",&crate,&channel,&tower);
+      eemcCrateMap[crate-1][channel] = tower;
+    }
+    ifs.close();
   }
 }
 
@@ -239,6 +248,7 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
   TString datetimestring, runnumberstring;
   firstone = kTRUE;
   for(iter=first; iter!=last; iter++) {
+    int numberofchangedchannels=0;
     runnumber = iter->first;
     runnumberstring = "";
     runnumberstring += runnumber;
@@ -266,11 +276,13 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
 //otherwise, only write down the status if this is the first run,
 //or if the status has changed
       } else if (firstone || 
-         (oldstatus != status && (statuscounter[i]/mRunStatusMapPtr->size() <= 0.1 || mRunStatusMapPtr->size() <= 3))) {
+         (oldstatus != status && (statuscounter[i]/mRunStatusMapPtr->size() <= 0.1 || mRunStatusMapPtr->size() <= 10))) {
         ofs << i << "\t" << status << endl;
+        numberofchangedchannels++;
       }
       emcstatus->Status[i-1]=status; //indexed from 0
     }
+    ofs << numberofchangedchannels << " channels changed" << endl;
     ofs.close();
     datetimestring = getDateTimeString(runnumber);
     TString statusrootfilename = 
@@ -345,8 +357,8 @@ CSMStatusUtils::makeStatusPlots(TString plotDir) {
 
 //set up output html file
   tmpstr = plotDir + "/" + mDetectorFlavor + "Status.html";
-  ofstream htmlSummary(tmpstr.Data());
-  writeHtmlHeaderSummary(htmlSummary);
+//  ofstream htmlSummary(tmpstr.Data());
+//  writeHtmlHeaderSummary(htmlSummary);
   
   Char_t buffer[2048];
 
@@ -481,6 +493,26 @@ cout << "end of fill and poor statistics!" << endl;
   	    goodTowers = analyseStatusHistogram(currentHist,plotDir,averageNumberHitsPerChan,
                   currentDateStamp,currentTimeStamp,
                   *statusVector,*pedestalmean,*pedestalwidth,*pedestalchi,hHotTower);
+        if(averageNumberHitsPerChan < 50) {
+outputlog << " fill has ended and stats suck!  Number is " << averageNumberHitsPerChan << endl;
+cout << " fill has ended and stats suck!  Number is " << averageNumberHitsPerChan << endl;
+          priorHist->Reset();
+          currentHist->Reset();
+          priorTimeStamp = 99999999;
+          currentTimeStamp = 99999999;
+          priorDateStamp = 99999999;
+          currentDateStamp = 99999999;
+          priorRunNumber = 99999999;
+          currentRunNumber = 99999999;
+          delete statusVector;
+          delete pedestalmean;
+          delete pedestalwidth;
+          delete pedestalchi;
+  	      delete hHotTower;
+          file->Close();
+          delete file;
+          continue;
+        }          
       } else {
 outputlog << " poor statistics!" << endl;
 cout << " poor statistics!" << endl;
@@ -520,7 +552,10 @@ cout << " fill has ended!" << endl;
 	    hHotTower->Draw();
 	    c1->Update();
       tmpstr = plotDir + "/run" + runnumberstring + "_" + mDetectorFlavor + "_hotTowers.gif";
-	    c1->SaveAs(tmpstr.Data());
+	    if(gROOT->IsBatch()) {
+        tmpstr = plotDir + "/run" + runnumberstring + "_" + mDetectorFlavor + "_hotTowers.eps";
+      }
+      c1->SaveAs(tmpstr.Data());
 	    delete hHotTower;
 
 //if the RI has less than 10% of the towers functioning
@@ -528,30 +563,30 @@ cout << " fill has ended!" << endl;
 	    if (goodTowers < 0.05 * mDetectorSize) {
 outputlog<<"special case - everything sucks!" << endl;
 cout<<"special case - everything sucks!" << endl;
- 	      htmlSummary << "<tr> <td>" << runnumber << "</td>" 
-	                  << "<td> BAD </td> <td> - </td> <td> - </td>"
-		          << "<td> - </td> <td> - </td> <td> - </td> </tr><br>"
-		          << endl;
+// 	      htmlSummary << "<tr> <td>" << runnumber << "</td>" 
+//	                  << "<td> BAD </td> <td> - </td> <td> - </td>"
+//		          << "<td> - </td> <td> - </td> <td> - </td> </tr><br>"
+//		          << endl;
         file->Close();
         delete file;
 	      continue;
 	    }
 
-	    htmlSummary << "<tr>" << endl 
-	                << "<td> " << "Run " << savedCurrentRunNumber << " </td> " << endl 
-	                << "<td> " << goodTowers << " good towers" << " </td>" << endl
-	                << "<td> " << getNumberOfChangedTowers(savedCurrentRunNumber) << " towers changed from previous run"//run #
-	                << " </td>" << endl;
+//	    htmlSummary << "<tr>" << endl 
+//	                << "<td> " << "Run " << savedCurrentRunNumber << " </td> " << endl 
+//	                << "<td> " << goodTowers << " good towers" << " </td>" << endl
+//	                << "<td> " << getNumberOfChangedTowers(savedCurrentRunNumber) << " towers changed from previous run"//run #
+//	                << " </td>" << endl;
 
       tmpstr = "./run" + runnumberstring + "_" + mDetectorFlavor + "_badTowers.html";
-	    htmlSummary << "<td> <a href=\"" << tmpstr.Data() << "\"> list </a></td><br>" 
-	                << endl;
+//	    htmlSummary << "<td> <a href=\"" << tmpstr.Data() << "\"> list </a></td><br>" 
+//	                << endl;
 
 // save tower status bits to the htmlfile
 
       tmpstr = plotDir + "/run" + runnumberstring + "_" + mDetectorFlavor + "_badTowers.html";
-	    ofstream htmlout(tmpstr.Data());
-	    writeHtmlHeaderBadTowerList(htmlout,savedCurrentRunNumber);
+//	    ofstream htmlout(tmpstr.Data());
+//	    writeHtmlHeaderBadTowerList(htmlout,savedCurrentRunNumber);
         
 // check if first run - if yes plot every bad tower
 // if a previous run exists just plot towers which changed status to bad,
@@ -559,8 +594,8 @@ cout<<"special case - everything sucks!" << endl;
 // since disk space is apparently "important"
 	    for (Int_t i=1; i<=mDetectorSize; i++) {
 	      if ((*statusVector)[i] != 1) {
-	        htmlout << "<tr> <td> " << i << " </td> <td> "
-                  << (*statusVector)[i] << " </td> <td> " << endl;
+//	        htmlout << "<tr> <td> " << i << " </td> <td> "
+//                 << (*statusVector)[i] << " </td> <td> " << endl;
 
 	        IntToPtrVecShortConstIter statusIter;
 	        statusIter = mRunStatusMapPtr->find(savedCurrentRunNumber);
@@ -570,7 +605,7 @@ cout<<"special case - everything sucks!" << endl;
 	          if ((*(statusIter->second))[i] == (*(preIter->second))[i] ||
                 (*(statusIter->second))[i] == 1 || //good channel
                 (*(statusIter->second))[i] == 0) { //no need to plot dead channels
-		          htmlout << "- </td> </tr><br>" << endl;
+//		          htmlout << "- </td> </tr><br>" << endl;
 		          continue;
 	          }
             if(getNumberOfChangedTowers(runnumber) > 25) continue;
@@ -585,23 +620,23 @@ cout<<"special case - everything sucks!" << endl;
 //	          sprintf(buffer,"%s/run%dtower%d_adc.gif",plotDir,iter->first,i);
 //	          c2->SaveAs(buffer);
 	        sprintf(buffer,"./run%dtower%d_adc.gif",savedCurrentRunNumber,i);
-	        htmlout << "<a href=\"" << buffer << "\" > plot </a>" 
-	            << "</td> </tr>" << endl;
+//	        htmlout << "<a href=\"" << buffer << "\" > plot </a>" 
+//	            << "</td> </tr>" << endl;
 	        delete hTemp;
 	      }
 	    }
-	    writeHtmlFooterSummary(htmlout);
-	    htmlSummary << "</tr>" << endl;
-      htmlout.close();
+//	    writeHtmlFooterSummary(htmlout);
+//	    htmlSummary << "</tr>" << endl;
+//     htmlout.close();
 //        cout << "I got here and there is no problem yet" << endl;
 //        exit(1);
     }
     file->Close();
     delete file;
   }
-  htmlSummary.close();
+//  htmlSummary.close();
   outputlog.close();
-  writeHtmlFooterSummary(htmlSummary);
+//  writeHtmlFooterSummary(htmlSummary);
   TH2F* statusHist = makeStatusVersusTimePlot();
   if (statusHist) {
     c1->cd();
@@ -766,30 +801,56 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
   
 //identical channel test
 
-//30 crates, indexed from 1
-//160 channels per crate, indexed from 0
 //towerId indexed from 1
 //histogram projection is from 2 to N+1 (stupid... but true)
 
-  for(int crate=1; crate<30; crate++) {
-    for(int channel=0; channel<160-1; channel++) {  //comparing adjacent channels
-      histogramsAreSame = kTRUE;
-      barry.GetTowerIdFromCrate(crate, channel, towerId);
-      barry.GetTowerIdFromCrate(crate, channel+1, nextTowerId);
+  if(mDetectorFlavor == "bemc") {
+//30 crates, indexed from 1
+//160 channels per crate, indexed from 0
 
-      TH1D* projnow = hist->ProjectionY("projTemp2",towerId+1,towerId+1);
-      TH1D* projnext = hist->ProjectionY("projTemp3",nextTowerId+1,nextTowerId+1);
+    for(int crate=1; crate<30; crate++) {
+      for(int channel=0; channel<160-1; channel++) {  //comparing adjacent channels
+        histogramsAreSame = kTRUE;
+        barry.GetTowerIdFromCrate(crate, channel, towerId);
+        barry.GetTowerIdFromCrate(crate, channel+1, nextTowerId);
 
-      for (Int_t i=1; i<projnow->GetXaxis()->GetNbins() && histogramsAreSame; i++) {
-        if( projnow->GetBinContent(i) != projnext->GetBinContent(i))
-          histogramsAreSame = kFALSE;
+        TH1D* projnow = hist->ProjectionY("projTemp2",towerId+1,towerId+1);
+        TH1D* projnext = hist->ProjectionY("projTemp3",nextTowerId+1,nextTowerId+1);
+
+        for (Int_t i=1; i<projnow->GetXaxis()->GetNbins() && histogramsAreSame; i++) {
+          if( projnow->GetBinContent(i) != projnext->GetBinContent(i))
+            histogramsAreSame = kFALSE;
+        }
+        if(histogramsAreSame) {
+          statusVector[towerId] |= 256;
+          statusVector[nextTowerId] |= 256;
+        }
       }
-      if(histogramsAreSame) {
-        statusVector[towerId] |= 256;
-        statusVector[nextTowerId] |= 256;
+    }
+  } else { //flavor is eemc
+//6 crates, indexed from 0
+//120 channels per crate, indexed from 0
+
+    for(int crate=0; crate<6; crate++) {
+      for(int channel=0; channel<120-1; channel++) {
+        towerId = eemcCrateMap[crate][channel];
+        nextTowerId = eemcCrateMap[crate][channel+1];
+//cout << towerId << nextTowerId << "is they!" << endl;
+        TH1D* projnow = hist->ProjectionY("projTemp2",towerId+1,towerId+1);
+        TH1D* projnext = hist->ProjectionY("projTemp3",nextTowerId+1,nextTowerId+1);
+
+        for (Int_t i=1; i<projnow->GetXaxis()->GetNbins() && histogramsAreSame; i++) {
+          if( projnow->GetBinContent(i) != projnext->GetBinContent(i))
+            histogramsAreSame = kFALSE;
+        }
+        if(histogramsAreSame) {
+          statusVector[towerId] |= 256;
+          statusVector[nextTowerId] |= 256;
+        }
       }
     }
   }
+        
 
 //hot tower/cold tower tests
   Float_t sumofhits=0, nbinhits=0;

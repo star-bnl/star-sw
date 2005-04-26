@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #change the following to your own environment
-  outDir=/star/data05/scratch/$USER/bemc
+  outDir=/star/data05/scratch/$USER/2005
   outDirlog=$outDir/log
 
 # #############################################################################
@@ -20,6 +20,7 @@ done
 
   queue=star_cas_big                 
 for (( iteration = 1 ; iteration < $niters ; iteration++ )) ; do
+#for (( iteration = 1 ; iteration < 3 ; iteration++ )) ; do
   log=log.$iteration
   blog=blog.$iteration
   rm $outDirlog/$log.gz

@@ -44,23 +44,23 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
       if (!strstr(buffer,filter)) continue;
       TFile *file = new TFile(buffer,"READ");
       if (file) {
-	      TList *keys = file->GetListOfKeys();
-	      if (keys) {
-	        TIterator* iter = keys->MakeIterator();
-	        TKey* key = NULL;
-	        while ((key = static_cast<TKey*>(iter->Next())) != NULL) {
-	          if (strstr(key->GetName(),"bemcStatusAdc") != NULL) {
-	            Char_t name[2048];
-	            Short_t keyCycle;
-	            file->DecodeNameCycle(key->GetName(),name,keyCycle);
-	            Char_t *runNumberString = name+14;
-	            //cout << runNumberString << endl;
-	            string s(name);
-	            Int_t runNumber = atoi(runNumberString);
-	            runFileMap[runNumber].insert(string(buffer));
-	          }
-	        }
-	      }
+        TList *keys = file->GetListOfKeys();
+        if (keys) {
+          TIterator* iter = keys->MakeIterator();
+          TKey* key = NULL;
+          while ((key = static_cast<TKey*>(iter->Next())) != NULL) {
+            if (strstr(key->GetName(),"bemcStatusAdc") != NULL) {
+              Char_t name[2048];
+              Short_t keyCycle;
+              file->DecodeNameCycle(key->GetName(),name,keyCycle);
+              Char_t *runNumberString = name+14;
+              //cout << runNumberString << endl;
+              string s(name);
+              Int_t runNumber = atoi(runNumberString);
+              runFileMap[runNumber].insert(string(buffer));
+            }
+          }
+        }
       }
       file->Close();
       delete file;
@@ -129,55 +129,55 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
           runTime = minirunTime;
         }
         runFillNumber = minirunFillNumber;
-	      TH2F* BEMChist = dynamic_cast<TH2F*>(file->Get(BEMChistName.c_str()));
-	      if (BEMChist) {
-	        if (!myBEMCRunHist) {
-	          outFile->cd();
-	          myBEMCRunHist = new TH2F(BEMChistName.c_str(),BEMChistName.c_str(),
-	                               BEMChist->GetXaxis()->GetNbins(),
-                  				       BEMChist->GetXaxis()->GetXmin(),
-				                         BEMChist->GetXaxis()->GetXmax(),
-				                         BEMChist->GetYaxis()->GetNbins(),
-				                         BEMChist->GetYaxis()->GetXmin(),
-				                         BEMChist->GetYaxis()->GetXmax());
-	        }
-	        myBEMCRunHist->Add(BEMChist);
-	      } else {
-	        cerr << "Didn't find histogram " << BEMChistName << " ???" << endl;
-	        cerr << "in file " << filenames->c_str() << " ???" << endl;
-	      }
-	      TH2F* BEMCenergyHist = dynamic_cast<TH2F*>(file->Get(BEMCenergyHistName.c_str()));
-	      if (BEMCenergyHist) {
-	        if (!myBEMCEnergyRunHist) {
-	          outFile->cd();
-	          myBEMCEnergyRunHist = new TH2F(BEMCenergyHistName.c_str(),BEMCenergyHistName.c_str(),
-	                                     BEMCenergyHist->GetXaxis()->GetNbins(),
-				                               BEMCenergyHist->GetXaxis()->GetXmin(),
-				                               BEMCenergyHist->GetXaxis()->GetXmax(),
-				                               BEMCenergyHist->GetYaxis()->GetNbins(),
-				                               BEMCenergyHist->GetYaxis()->GetXmin(),
-				                               BEMCenergyHist->GetYaxis()->GetXmax());
-	        }
-	        myBEMCEnergyRunHist->Add(BEMCenergyHist);
-	      } else {
-	        cerr << "Didn't find histogram " << BEMCenergyHistName << " ???" << endl;
-	      }
-	      TH2F* EEMChist = dynamic_cast<TH2F*>(file->Get(EEMChistName.c_str()));
-	      if (EEMChist) {
-	        if (!myEEMCRunHist) {
-	          outFile->cd();
-	          myEEMCRunHist = new TH2F(EEMChistName.c_str(),EEMChistName.c_str(),
-	                               EEMChist->GetXaxis()->GetNbins(),
-                  				       EEMChist->GetXaxis()->GetXmin(),
-				                         EEMChist->GetXaxis()->GetXmax(),
-				                         EEMChist->GetYaxis()->GetNbins(),
-				                         EEMChist->GetYaxis()->GetXmin(),
-				                         EEMChist->GetYaxis()->GetXmax());
-	        }
-	        myEEMCRunHist->Add(EEMChist);
-	      } else {
-	        cerr << "Didn't find histogram " << EEMChistName << " ???" << endl;
-	      }
+        TH2F* BEMChist = dynamic_cast<TH2F*>(file->Get(BEMChistName.c_str()));
+        if (BEMChist) {
+          if (!myBEMCRunHist) {
+            outFile->cd();
+            myBEMCRunHist = new TH2F(BEMChistName.c_str(),BEMChistName.c_str(),
+                                 BEMChist->GetXaxis()->GetNbins(),
+                                 BEMChist->GetXaxis()->GetXmin(),
+                                 BEMChist->GetXaxis()->GetXmax(),
+                                 BEMChist->GetYaxis()->GetNbins(),
+                                 BEMChist->GetYaxis()->GetXmin(),
+                                 BEMChist->GetYaxis()->GetXmax());
+          }
+          myBEMCRunHist->Add(BEMChist);
+        } else {
+          cerr << "Didn't find histogram " << BEMChistName << " ???" << endl;
+          cerr << "in file " << filenames->c_str() << " ???" << endl;
+        }
+        TH2F* BEMCenergyHist = dynamic_cast<TH2F*>(file->Get(BEMCenergyHistName.c_str()));
+        if (BEMCenergyHist) {
+          if (!myBEMCEnergyRunHist) {
+            outFile->cd();
+            myBEMCEnergyRunHist = new TH2F(BEMCenergyHistName.c_str(),BEMCenergyHistName.c_str(),
+                                       BEMCenergyHist->GetXaxis()->GetNbins(),
+                                       BEMCenergyHist->GetXaxis()->GetXmin(),
+                                       BEMCenergyHist->GetXaxis()->GetXmax(),
+                                       BEMCenergyHist->GetYaxis()->GetNbins(),
+                                       BEMCenergyHist->GetYaxis()->GetXmin(),
+                                       BEMCenergyHist->GetYaxis()->GetXmax());
+          }
+          myBEMCEnergyRunHist->Add(BEMCenergyHist);
+        } else {
+          cerr << "Didn't find histogram " << BEMCenergyHistName << " ???" << endl;
+        }
+        TH2F* EEMChist = dynamic_cast<TH2F*>(file->Get(EEMChistName.c_str()));
+        if (EEMChist) {
+          if (!myEEMCRunHist) {
+            outFile->cd();
+            myEEMCRunHist = new TH2F(EEMChistName.c_str(),EEMChistName.c_str(),
+                                 EEMChist->GetXaxis()->GetNbins(),
+                                 EEMChist->GetXaxis()->GetXmin(),
+                                 EEMChist->GetXaxis()->GetXmax(),
+                                 EEMChist->GetYaxis()->GetNbins(),
+                                 EEMChist->GetYaxis()->GetXmin(),
+                                 EEMChist->GetYaxis()->GetXmax());
+          }
+          myEEMCRunHist->Add(EEMChist);
+        } else {
+          cerr << "Didn't find histogram " << EEMChistName << " ???" << endl;
+        }
       }
       file->Close();
       delete file;

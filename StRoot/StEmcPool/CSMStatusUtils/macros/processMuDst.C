@@ -1,7 +1,7 @@
 void processMuDst( Char_t *jobId= "5117072.",
                  Char_t *dir="",
                  Char_t *file="/star/data35/reco/productionPP/ReversedFullField/DEV/2004/117/st_physics_5117072_raw_*.MuDst.root",
-                 Char_t *scratchDir ="/star/data05/scratch/relyea/bemc") {
+                 Char_t *scratchDir ="/star/data05/scratch/relyea/2005") {
   
   Int_t numberOfFilesInt = 1;
   
