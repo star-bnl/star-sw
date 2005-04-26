@@ -1,5 +1,13 @@
-// $Id: St_geant_Maker.cxx,v 1.100 2005/04/18 23:27:18 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.101 2005/04/26 23:40:18 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.101  2005/04/26 23:40:18  potekhin
+// As Lilian pointed out, we need to treat the SSD hits separately
+// from the SVT in the newer versions of the geometry (we decoupled
+// those a while ago).
+//
+// To this end, we use two separate variables for the number of
+// detected hits, and place them into corresponding tables.
+//
 // Revision 1.100  2005/04/18 23:27:18  potekhin
 // Correct the name for the FGT (GEM) hits
 //
@@ -380,6 +388,7 @@
 #include "g2t/St_g2t_particle_Module.h"
 // Subsystems:
 #include "g2t/St_g2t_svt_Module.h"
+#include "g2t/St_g2t_ssd_Module.h"
 #include "g2t/St_g2t_pix_Module.h"
 #include "g2t/St_g2t_ist_Module.h"
 #include "g2t/St_g2t_fst_Module.h"
@@ -657,10 +666,12 @@ Int_t St_geant_Maker::Make()
     fEvtHddr->SetAWest((*g2t_event)[0].n_wounded_west);
   }
   //---------------------- inner part -------------------------//
+
+  // Note that we treat the SSD (or SISD as we call it in geo) on
+  // the same basis as the SVT, which applies since we decoupled
+  // the two detectors
   
-  geant3->Gfnhit("SVTH","SVTD", nhit1);
-  geant3->Gfnhit("SVTH","SFSD", nhit2);
-  nhits=nhit1+nhit2;
+  geant3->Gfnhit("SVTH","SVTD", nhits);
   if (nhits>0) { 
     St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
     m_DataSet->Add(g2t_svt_hit); 
@@ -668,6 +679,16 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_svt(g2t_track,g2t_svt_hit); if (Debug() > 1) g2t_svt_hit->Print(0,10);
     //	     ===============================
   }
+
+  geant3->Gfnhit("SISH","SFSD", nhits);
+  if (nhits>0) { 
+    St_g2t_ssd_hit *g2t_ssd_hit = new St_g2t_ssd_hit("g2t_ssd_hit",nhits);
+    m_DataSet->Add(g2t_ssd_hit);
+    
+    iRes = g2t_ssd(g2t_track,g2t_ssd_hit); if (Debug() > 1) g2t_ssd_hit->Print(0,10);
+    //	     ===============================
+  }
+
   
   geant3->Gfnhit("PIXH","PLAC", nhits);
   
