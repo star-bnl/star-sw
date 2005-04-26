@@ -10,6 +10,8 @@
 #include <vector>
 #include <string>
 
+#include "StEEmcDbMaker/StEEmcDbMaker.h" 
+
 class CSMStatusUtils : public TObject {
   public:
   CSMStatusUtils() {mZerobit=512;}
@@ -31,6 +33,7 @@ class CSMStatusUtils : public TObject {
   Int_t makeStatusPlots(TString plotDir);
   
   void setDetectorFlavor(TString flavor="bemc");
+  void  setDb( StEEmcDbMaker *db ) { m_eedb = db;}
   
   void writeHtmlHeaderBadTowerList(std::ofstream& out,Int_t runnumber);
   void writeHtmlFooterBadTowerList(std::ofstream& out);
@@ -48,6 +51,8 @@ class CSMStatusUtils : public TObject {
   TString mDetectorFlavor;
   int mDetectorSize;
   int mDetectorActualSize;
+  int eemcCrateMap[6][120];
+  StEEmcDbMaker *m_eedb;
   
   Short_t mZerobit;
 

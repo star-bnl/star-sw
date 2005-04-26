@@ -60,10 +60,20 @@ Int_t StBemcStatusMaker::Make() {
   bool isGood=false;
   uint i;
   for(i = 0; i < trgId.size() ; i++){
-    if(trgId[i]==10 || trgId[i]==45010 || trgId[i]==45020) isGood=true;
+//    if(trgId[i]==10 || trgId[i]==45010 || trgId[i]==45020) isGood=true;
+//    if(trgId[i]==23) isGood=true;
+    if(trgId[i]==96011) isGood=true;
+//    if(trgId[i]==66501 || trgId[i]==66502) isGood=true;
   }
   if (!isGood) {
 //    cout <<" wrong triggers!"<<endl;
+
+    
+    //this is a huge change, I'm just doing it to see what happens
+    //with all triggers.  The only change is the removal of the
+    //following line.
+    //line put back
+    
     return kStOk;
   }
 
