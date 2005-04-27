@@ -25,7 +25,6 @@ public:
     //    virtual void AverageVolume(TGeoPhysicalNode *nodeP);
  protected:
     int rdoForPadrow(int iPadrow);
-    StiMaterial * _gas;
     StiMaterial * _fcMaterial;    
     StTpcPadPlaneI   * _padPlane; 
     StTpcDimensionsI * _dimensions; 

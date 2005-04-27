@@ -98,7 +98,7 @@ public:
   StiTrackingParameters _trackingParameters;
   string _inputFile;
   static StiDetectorBuilder* fCurrentDetectorBuilder;
-  StiMaterial    * _gasMat;
+  StiMaterial    * _gasMat; // Mother Volume material
   static   int     _debug;
 };
 

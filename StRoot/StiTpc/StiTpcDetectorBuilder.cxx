@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include "Stiostream.h"
 #include <stdexcept>
@@ -30,7 +31,7 @@
 //#define TPC_IDEAL_GEOM
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
-  : StiDetectorBuilder("Tpc",active,inputFile), _gas(0), _fcMaterial(0), _padPlane(0), _dimensions(0)
+  : StiDetectorBuilder("Tpc",active,inputFile), _fcMaterial(0), _padPlane(0), _dimensions(0)
 {
   _trackingParameters.setName("tpcTrackingParameters");
   _innerCalc.setName("tpcInnerHitError");
@@ -71,7 +72,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
     throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
   
   // change to +1 instead of +2 to remove the ofc.
-  unsigned int nRows = _padPlane->numberOfRows()+1;
+  unsigned int nRows = _padPlane->numberOfRows();
   setNRows(nRows);
   for(unsigned int row = 0; row<nRows;row++)
     {
@@ -84,16 +85,19 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   StMatrixD  unit(3,3,1);
   StThreeVectorD RowPosition;
 
-  _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.8*18.*1e-9) ); 
+  _gasMat     = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.8*18.*1e-9) ); 
   _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,      6.24*12.*1e-9) );
 
   
   //  const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
   // Instantiate eloss calculator for tpc gas and for field cage
-  double ionization = _gas->getIonization();
-  StiElossCalculator * gasElossCalculator = new StiElossCalculator(_gas->getZOverA(),ionization*ionization, _gas->getA(), _gas->getZ(), _gas->getDensity());
+  double ionization = _gasMat->getIonization();
+  StiElossCalculator * gasElossCalculator = new StiElossCalculator(_gasMat->getZOverA(),ionization*ionization, 
+								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
   ionization = _fcMaterial->getIonization();
-  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization, _fcMaterial->getA(), _fcMaterial->getZ(), _fcMaterial->getDensity());
+  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization, 
+								  _fcMaterial->getA(), _fcMaterial->getZ(), 
+								  _fcMaterial->getDensity());
 
 
   // Inner field cage
@@ -141,7 +145,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       ifcVolume->setIsDiscreteScatterer(true);
       ifcVolume->setShape(ifcShape);
       ifcVolume->setPlacement(p);
-      ifcVolume->setGas(_gas);
+      ifcVolume->setGas(_gasMat);
       ifcVolume->setMaterial(_fcMaterial);
       ifcVolume->setElossCalculator(fcElossCalculator);
       //add(ifcVolume);
@@ -167,7 +171,7 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
       ofcVolume->setIsDiscreteScatterer(true);
       ofcVolume->setShape(ofcShape);
       ofcVolume->setPlacement(p);
-      ofcVolume->setGas(_gas);
+      ofcVolume->setGas(_gasMat);
       ofcVolume->setMaterial(_fcMaterial);
       ofcVolume->setElossCalculator(fcElossCalculator);
       // remove it for now...
@@ -272,8 +276,8 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 	  pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
 	  pDetector->setIsContinuousMedium(true);
 	  pDetector->setIsDiscreteScatterer(false);
-	  pDetector->setMaterial(_gas);
-	  pDetector->setGas(_gas);
+	  pDetector->setMaterial(_gasMat);
+	  pDetector->setGas(_gasMat);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  if (row<13)
@@ -311,9 +315,10 @@ void StiTpcDetectorBuilder::loadFS(ifstream & inputFileStream)
 
 void StiTpcDetectorBuilder::setDefaults()
 {
+#if 0
 double iSti[6] = {.066      , 0.00012 , 0.0004    , 0.066     , 0.0004 , 0.028};
 double oSti[6] = {.02       , 0.004   ,   0.04    , 0.02      , 0.0032 , 0.09       };
-
+#endif
 double iTpt[6] = {0.00168243, 0.005233, 0.05753410, 0.00312735, 0.015106, 0.02438060};
 double oTpt[6] = {0.00020278, 0.003552, 0.06456100, 0.00815800, 0.005696, 0.04484400};
 
@@ -340,7 +345,10 @@ _outerCalc.set(oTpt[0], oTpt[1],oTpt[2], oTpt[3],oTpt[4], oTpt[5]);
 }
 //________________________________________________________________________________
 void StiTpcDetectorBuilder::useVMCGeometry() {
+  
+  StiVMCToolKit::SetDebug(1);
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+  SetCurrentDetectorBuilder(this);
   const VolumeMap_t TpcVolumes[] = { 
     //  {"TPCE","the TPC system in STAR","HALL_1/CAVE_1/TPCE_1","",""},
     //  {"TPCW","the TPC supporting endcap Wheel","HALL_1/CAVE_1/TPCE_1/TPCW_1-2/*","",""},
@@ -362,8 +370,10 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
   
   // change to +1 instead of +2 to remove the ofc.
+  cout << "gGeoManager " << gGeoManager << endl;
   Int_t nSystems = sizeof(TpcVolumes)/sizeof(VolumeMap_t);
-  unsigned int nRows = _padPlane->numberOfRows() + (nSystems - 2);// without inner and outer padrows
+  unsigned int nRows = _padPlane->numberOfRows();// Only sensitive detectors
+  cout << "nSystems " << nSystems << "\tnRows " << nRows << endl;
   setNRows(nRows);
   UInt_t row;
 #if 0
@@ -372,8 +382,6 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   Int_t NoStiSectors = 12;
 #endif
   for (row = 0; row < nRows - 1; row++) setNSectors(row,NoStiSectors);
-  row = nRows - 1;
-  setNSectors(row,1);
   Int_t kTIFC = -1, kTPAD = -1;
   for (Int_t system = 0; system < nSystems; system++) {
     TString name(TpcVolumes[system].name);
@@ -381,17 +389,19 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     if (name == "TPAD") {kTPAD = system; break;}
   }
   // Get Materials
-  TGeoVolume *volT = gGeoManager->GetVolume("TPAD");
-  TGeoMaterial *mat = volT->GetMaterial();
-  Double_t PotI = StiVMCToolKit::GetPotI(mat);
-  StiMaterial* _gas = add(new StiMaterial(mat->GetName(),
-					  mat->GetZ(),
-					  mat->GetA(),
-					  mat->GetDensity(),
-					  mat->GetDensity()*mat->GetRadLen(),
-					  PotI));
-  Double_t ionization = _gas->getIonization();
-  StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gas->getZOverA(), ionization*ionization, _gas->getA(), _gas->getZ(), _gas->getDensity());
+  TGeoVolume *volT = gGeoManager->GetVolume("TPAD"); assert (volT);
+  TGeoMaterial *mat = volT->GetMaterial(); assert(mat); mat->Print();
+  Double_t PotI = StiVMCToolKit::GetPotI(mat); cout << "PotI " << PotI << endl;
+  _gasMat = add(new StiMaterial(mat->GetName(),
+				mat->GetZ(),
+				mat->GetA(),
+				mat->GetDensity(),
+				mat->GetDensity()*mat->GetRadLen(),
+				PotI));
+  Double_t ionization = _gasMat->getIonization();
+  StiElossCalculator *gasElossCalculator =  new StiElossCalculator(_gasMat->getZOverA(), ionization*ionization, 
+								   _gasMat->getA(), _gasMat->getZ(), _gasMat->getDensity());
+#if 0
   // IFC
   Double_t dPhi = 2*TMath::Pi();
   Int_t sector = 0;
@@ -399,19 +409,22 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   Double_t xyzM[3];
   TGeoShape *newshape = 0;
   TGeoMedium* newmed = 0;
-  StiVMCToolKit::MakeAverageVolume(volT, newshape, newmed, xyzM);
-  TGeoMaterial *fcMaterial = newmed->GetMaterial();
-  PotI = StiVMCToolKit::GetPotI(fcMaterial);
+  StiVMCToolKit::MakeAverageVolume(volT, newshape, newmed, xyzM); newshape->Print(); newmed->Print();
+  TGeoMaterial *fcMaterial = newmed->GetMaterial(); fcMaterial->Print();
+  PotI = StiVMCToolKit::GetPotI(fcMaterial); cout << "PotI\t" << PotI << endl;
   _fcMaterial  = add(new StiMaterial(fcMaterial->GetName(),
 				     fcMaterial->GetZ(),
 				     fcMaterial->GetA(),
 				     fcMaterial->GetDensity(),
 				     fcMaterial->GetDensity()*fcMaterial->GetRadLen(),
-				     PotI));
+				     PotI)); 
+  assert(_fcMaterial); cout << *_fcMaterial << endl;
   ionization = _fcMaterial->getIonization();
-  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization, _fcMaterial->getA(), _fcMaterial->getZ(), _fcMaterial->getDensity());
-  
-  TGeoTube *fcShape = (TGeoTube *) newshape;
+  StiElossCalculator * fcElossCalculator = new StiElossCalculator(_fcMaterial->getZOverA(), ionization*ionization, 
+								  _fcMaterial->getA(), _fcMaterial->getZ(), 
+								  _fcMaterial->getDensity());
+  cout << * fcElossCalculator << endl;
+  TGeoTube *fcShape = (TGeoTube *) newshape; 
   Double_t Rmax = fcShape->GetRmax();
   Double_t Rmin = fcShape->GetRmin();
   Double_t dZ   = fcShape->GetDz();
@@ -422,10 +435,11 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
 			    Rmax-Rmin,                 // thickness
 			    Rmax,                      // outerRadius
 			    dPhi);                     // openingAngle
-  add(FCShape);
-  StiPlacement *p = new StiPlacement;
-  TGeoPhysicalNode *nodeP = gGeoManager->MakePhysicalNode(TpcVolumes[kTIFC].path);
-  TGeoHMatrix  *hmat   = nodeP->GetMatrix();
+  assert(FCShape);
+  add(FCShape);  cout << *FCShape << endl;
+  StiPlacement *p = new StiPlacement; assert(p);
+  TGeoPhysicalNode *nodeP = gGeoManager->MakePhysicalNode(TpcVolumes[kTIFC].path); nodeP->Print();
+  TGeoHMatrix  *hmat   = nodeP->GetMatrix(); hmat->Print();
   Double_t *xyz = hmat->GetTranslation();
   p->setZcenter(xyz[2]);
   p->setLayerRadius(radius);
@@ -443,10 +457,11 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
   fcDet->setIsDiscreteScatterer(true);
   fcDet->setShape(FCShape);
   fcDet->setPlacement(p);
-  fcDet->setGas(_gas);
+  fcDet->setGas(_gasMat);
   fcDet->setMaterial(_fcMaterial);
-  fcDet->setElossCalculator(fcElossCalculator);
+  fcDet->setElossCalculator(fcElossCalculator); cout << *fcDet << endl;
   add(row,sector,fcDet);
+#endif
   StDetectorDbTpcRDOMasks *s_pRdoMasks = StDetectorDbTpcRDOMasks::instance();
   StiPlanarShape *pShape;
   //Active TPC padrows 
@@ -475,7 +490,7 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
     }
     pShape->setHalfDepth(dZ*24/NoStiSectors);
     pShape->setHalfWidth(_padPlane->PadPitchAtRow(row+1) * _padPlane->numberOfPadsAtRow(row+1) / 2.);
-    pShape->setName(name.Data());
+    pShape->setName(name.Data()); cout << *pShape << endl;
     for(unsigned int sector = 0; sector<getNSectors(); sector++) {
       //Retrieve position and orientation of the TPC pad rows from the database.
       StTpcLocalSectorDirection  dirLS[3];
@@ -555,8 +570,8 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setIsActive(new StiTpcIsActiveFunctor(_active,west,east));
       pDetector->setIsContinuousMedium(true);
       pDetector->setIsDiscreteScatterer(false);
-      pDetector->setMaterial(_gas);
-      pDetector->setGas(_gas);
+      pDetector->setMaterial(_gasMat);
+      pDetector->setGas(_gasMat);
       pDetector->setShape(pShape);
       pDetector->setPlacement(pPlacement);
       if (row<13)
@@ -566,8 +581,22 @@ void StiTpcDetectorBuilder::useVMCGeometry() {
       pDetector->setElossCalculator(gasElossCalculator);
       pDetector->setKey(1,row);
       pDetector->setKey(2,sector);
-      add(row,sector,pDetector);
+      add(row,sector,pDetector); cout << *pDetector << endl;
     }// for sector
   }// for row
+#if 1
+  //  Int_t NoTpcVols = sizeof(TpcVolumes)/sizeof(VolumeMap_t);
+  TString pathT("HALL_1/CAVE_1/TPCE_1/TIFC_1");
+  TString path("");
+  for (Int_t i = 0; i < 1; i++) {
+    gGeoManager->RestoreMasterVolume(); 
+    gGeoManager->CdTop();
+    pathT = TpcVolumes[i].path;
+    gGeoManager->cd(pathT); path = pathT;
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;
+    StiVMCToolKit::LoopOverNodes(nodeT, path, TpcVolumes[i].name, MakeAverageVolume);
+  }
+#endif
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl; 
 }

@@ -1,7 +1,7 @@
 
 #ifndef StiElossCalculator_H_INCLUDED
 #define StiElossCalculator_H_INCLUDED
-
+#include "Stiostream.h"
 /*! Energy Loss Calculator
   <p>
   Service class used to calculate the specific energy loss (dEdx) of 
@@ -22,6 +22,9 @@
   
   \author Claude A Pruneau, Wayne State University
  */
+#include <string>
+using namespace std;
+
 class StiElossCalculator
 {
  public:
@@ -31,6 +34,11 @@ class StiElossCalculator
   virtual ~StiElossCalculator();
   double calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
   double calculate(double z2, double m, double beta2) const;
+  double getzOverA() const {return _zOverA;}
+  double getionization2() const {return _ionization2;}
+  double getA() const {return _A;} 
+  double getZ() const {return _Z;}
+  double getDens() const {return _Dens;}
  protected:  
   static const double _k;
   static const double _mec;
@@ -43,6 +51,7 @@ class StiElossCalculator
   double _Z;
   double _Dens;
 };
+ostream& operator<<(ostream& os, const StiElossCalculator& m);
 
 #endif
 

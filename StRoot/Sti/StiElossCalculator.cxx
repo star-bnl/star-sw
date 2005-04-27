@@ -81,3 +81,12 @@ double StiElossCalculator::calculate(double z2, double m, double beta2) const
 #endif
   return dEdx;
 }
+
+ostream& operator<<(ostream& os, const StiElossCalculator& m) {
+  os << "zOverA "<< m.getzOverA()
+     << "\tionization2 "<< m.getionization2()
+     << "\tA "<< m.getA()
+     << "\tZ "<< m.getZ()
+     << "\tDens"<< m.getDens() << endl;
+    return os;
+}
