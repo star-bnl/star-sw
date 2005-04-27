@@ -223,7 +223,7 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setIsDiscreteScatterer(true);
   pDetector->setShape(sh);
   pDetector->setPlacement(pPlacement); 
-  pDetector->setGas(getGasMat());
+  pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
   Int_t layer = getNRows();

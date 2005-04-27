@@ -750,29 +750,21 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
 }
 //________________________________________________________________________________
 TGeoManager  * StiVMCToolKit::GetVMC() {
+  TGeoManager *gGeo = 0;
 #ifndef __NOVMC__
   /*! Load Geometry
    */
-  if (gGeoManager) return gGeoManager;
-#ifdef __ROOT__
+  gGeo = gGeoManager;
+  if (gGeo) return gGeo;
   cout << "StiVMCToolKit::GetVMC() -I- Get VMC geometry" <<endl;
-  if (! StMaker::GetChain()) {
-    cout << "StiVMCToolKit::GetVMC() -I- There is no chain. Get geometry for y2005x" <<endl;
-    TFile::Open("$STAR/StarDb/VmcGeometry/Geometry.y2005x.root");
-  } else {
+  if (StMaker::GetChain()) {
     StMaker::GetChain()->GetDataBase("VmcGeometry");
   }
-#else
-  if (TString(gDirectory->GetName()) == "Rint") 
-    TFile::Open("$STAR/StarDb/VmcGeometry/Geometry.y2005x.root");
-  if (! gGeoManager) gDirectory->Get("Geometry");
-#endif
   if (! gGeoManager) 
     cout << "StiVMCToolKit::GetVMC() -E- Can't get VMC geometry" <<endl;
-  return gGeoManager;
-#else
-  return 0;
+  gGeo = gGeoManager;
 #endif
+  return gGeo;
 }
 //________________________________________________________________________________
 void StiVMCToolKit::TestVMC4Reconstruction(){

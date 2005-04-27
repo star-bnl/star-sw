@@ -2,6 +2,8 @@
 #define STI_SHAPE_H
 #include <math.h>
 #include "Sti/Base/Named.h"
+#include "Stiostream.h"
+using namespace std;
 
 // allowed values for shapeCode
 enum StiShapeCode {kPlanar = 1, kCylindrical, kConical, kDisk}; 
@@ -40,6 +42,9 @@ public:
     /// size of the edge used in tracking
     float _edgeWidth;  
 };
+//Non-members--------------------------
+
+ostream& operator<<(ostream& os, const StiShape& m);
 
 
 inline double StiShape::nice(double val)
