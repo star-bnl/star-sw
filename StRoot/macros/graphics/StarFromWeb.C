@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: StarFromWeb.C,v 1.4 2000/04/07 17:07:08 fine Exp $
+// $Id: StarFromWeb.C,v 1.5 2005/04/29 21:37:35 fine Exp $
 // $Log: StarFromWeb.C,v $
+// Revision 1.5  2005/04/29 21:37:35  fine
+// fix the  table library test
+//
 // Revision 1.4  2000/04/07 17:07:08  fine
 // adjusted to the ROOT 2.24
 //
@@ -28,21 +31,23 @@
   cout << " Loading share library" << endl;
   Bool_t NT=kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) NT=kTRUE;
-  if (NT) gSystem->Load("ROOT_STAR");
-  else  gSystem->Load("libSTAR");
+  if (NT) gSystem->Load("Table");
+  else  gSystem->Load("libTable");
   if (!gGeometry) new TGeometry;
 
   // Create canvas
 
   cout << " Creating an empty TCanvas object to draw in" << endl;
   TCanvas starCanvas("STAR","Star",400,600);
+  
   Int_t  PadColumns = 2;
   Int_t  PadRows = 2;
   starCanvas.Divide(PadColumns,PadRows);
 
   // Open remote Webfile
   cout << " Open the remote Web file with STAR geometry database in ROOT format" << endl;
-  TWebFile f("http://www.star.bnl.gov/~fine/star_year_2a.root");
+//  TWebFile f("http://www.rhic.bnl.gov/~fine/star_year_2a.root");
+  TFile f("/afs/rhic.bnl.gov/star/user/fine/WWW/star_year_2a.root");
   // read STAR geometry database remotely
   cout << " Reading STAR geometry database (the full size of this database 28K bytes - ROOT-object" << endl;
   TDataSetIter volume(HALL);
