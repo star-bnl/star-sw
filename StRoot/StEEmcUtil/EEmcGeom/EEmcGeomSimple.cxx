@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.22 2004/06/03 20:59:54 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.23 2005/04/29 03:06:03 balewski Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -219,11 +219,14 @@ EEmcGeomSimple::getTower(const TVector3& r,
   while(sub<0) sub+=mNumSSec*mNumSec;  // adjust the numbers to [0,mNumSec)
   sub %= mNumSSec;// 
 
-
-  // ------------------------------------------------------------------------
+ 
+  // -------------------------------------------------
   // these are (very) fast inline's
-  dphi = fmod((getPhiMean(sec,sub) - rPhi),TMath::TwoPi()) / getPhiHalfWidth(sec,sub);
-  deta =      (getEtaMean(eta)     - rEta                ) / getEtaHalfWidth(eta);
+  float xxx=getPhiMean(sec,sub) - rPhi;
+  if(xxx>TMath::Pi()) xxx=TMath::TwoPi()-xxx;
+  else if(xxx<-TMath::Pi()) xxx=TMath::TwoPi()+xxx;
+  dphi =xxx/ getPhiHalfWidth(sec,sub);
+  deta =(getEtaMean(eta)     - rEta ) / getEtaHalfWidth(eta);
 
   return true;
 }
@@ -328,6 +331,9 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.23  2005/04/29 03:06:03  balewski
+// *** empty log message ***
+//
 // Revision 1.22  2004/06/03 20:59:54  zolnie
 // - phi angle now adjusted to [-pi,pi] interval in accordace to TVecror3 convention
 // - replaced Jan's interesting implementation of direction2tower method with
