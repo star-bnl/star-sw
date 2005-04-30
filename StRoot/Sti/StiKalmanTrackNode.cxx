@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.78 2005/04/25 20:20:25 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.79 2005/04/30 20:45:18 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.79  2005/04/30 20:45:18  perev
+ * Less strong test for assert in propagateError
+ *
  * Revision 2.78  2005/04/25 20:20:25  fisyak
  * replace assert by print out
  *
@@ -983,7 +986,7 @@ void StiKalmanTrackNode::propagateError()
 
   f[1][3]=fYE; f[1][4]=fYC; f[2][3]=fZE;f[2][4]=fZC;f[2][5]=fZT;f[3][4]=fEC;
   errPropag6(&_cXX,f,kNPars);
-  assert(_cYY>1.e-10 && _cZZ>1.e-10 && _cEE>1.e-10&& _cCC>1.e-20&& _cTT>1.e-10);
+  assert(_cYY>1e-20 && _cZZ>1e-20 && _cEE>1e-20&& _cCC>1.e-30&& _cTT>1.e-20);
   assert(fabs(_cXX)<1.e-6);
   _cXX = _cYX= _cZX = _cEX = _cCX = _cTX = 0;
   
