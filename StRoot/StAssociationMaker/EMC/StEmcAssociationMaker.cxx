@@ -410,3 +410,27 @@ void StEmcAssociationMaker::printMaps()
     }
   }
 }
+void StEmcAssociationMaker::printTracks()
+{
+  StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  if (!mcEvent) return;
+  StSPtrVecMcTrack& tracks=mcEvent->tracks();
+  if(tracks.size()==0) return;
+
+  StMcVertex *v = mcEvent->primaryVertex();
+  if(v)
+  {
+    cout<<"Primary Vertex (x,y,z) = "<<v->position().x()<<"  "<<v->position().y()<<"  "<<v->position().z()<<"  "<<endl;
+  }
+  for(UInt_t i = 0; i<tracks.size();i++)
+  {
+    cout <<"Track " <<tracks[i]<<" Geant Id = "<<tracks[i]->geantId()<<"  pT = "<< tracks[i]->pt()
+         <<"  eta = "<<tracks[i]->pseudoRapidity()
+         <<"  phi = "<<tracks[i]->momentum().phi()<<endl;
+    cout <<"     Parent = "<<tracks[i]->parent()<<endl;
+    v = tracks[i]->startVertex();
+    if(v) cout <<"     Start vertex (x,y,z) = "<<v->position().x()<<"  "<<v->position().y()<<"  "<<v->position().z()<<"  "<<endl;  
+    v = tracks[i]->stopVertex();
+    if(v) cout <<"     Stop vertex (x,y,z)  = "<<v->position().x()<<"  "<<v->position().y()<<"  "<<v->position().z()<<"  "<<endl;  
+  }
+}
