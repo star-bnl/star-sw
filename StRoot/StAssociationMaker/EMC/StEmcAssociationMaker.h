@@ -212,6 +212,7 @@ class StEmcAssociationMaker : public StMaker
                  void           Clear(const char*);
                  
                  void           printMaps();
+                 void           printTracks();
          
          multiEmcTrackCluster*  getTrackClusterMap(Int_t i)      { if(i>0 && i<=NDETECTORS) return mTrackCluster[i-1]; else return NULL; } ///< returns multimap for association betwwen MC tracks and clusters 
          multiEmcTrackCluster*  getTrackClusterMap(const char*);  ///< returns multimap for association betwwen MC tracks and clusters 
