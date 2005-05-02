@@ -39,7 +39,7 @@ BetheBloch::BetheBloch(){
   if (! noWarn) {
   cout << "BetheBloch::BetheBloch =================================================================" << endl;
   cout << "Warning: please don't use BetheBloch::BetheBloch for any analysis after P00hm production" << endl;
-  cout << "but use insead :                                                                        " << endl;
+  cout << "but use instead :                                                                       " << endl;
   cout << "for production before P03h static function 1.e-6*BetheBloch::Sirrf(Poverm)              " << endl;
   cout << "for production after  P03h (including P03h)                                             " << endl; 
   cout << "gSystem->Load(\"StBichsel\");m = new Bichsel(); 1.e-6*m->GetI70(TMath::Log10(poverm),1.)" << endl;
