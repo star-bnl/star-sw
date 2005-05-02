@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: StarFromWeb.C,v 1.5 2005/04/29 21:37:35 fine Exp $
+// $Id: StarFromWeb.C,v 1.6 2005/05/02 16:55:33 fine Exp $
 // $Log: StarFromWeb.C,v $
+// Revision 1.6  2005/05/02 16:55:33  fine
+// fix T=Star Geometry test
+//
 // Revision 1.5  2005/04/29 21:37:35  fine
 // fix the  table library test
 //
@@ -17,7 +20,7 @@
 // owner: Valery fine
 // what it does: Shows the various view of the STAR geometry
 //=======================================================================
-
+void StarFromWeb(const char *geomFile ="/afs/rhic.bnl.gov/star/users/fine/WWW/star_year_2a.root")
 {
  // To run this example one needs the access to Internet
  // To start this example launch ROOT as follows:
@@ -27,10 +30,9 @@
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/WebStar.gif"> </P> End_Html // 
  
-  gROOT->Reset();
   cout << " Loading share library" << endl;
   Bool_t NT=kFALSE;
-  if (strcmp(gSystem.GetName(),"WinNT") == 0 ) NT=kTRUE;
+  if (strcmp(gSystem->GetName(),"WinNT") == 0 ) NT=kTRUE;
   if (NT) gSystem->Load("Table");
   else  gSystem->Load("libTable");
   if (!gGeometry) new TGeometry;
@@ -38,7 +40,7 @@
   // Create canvas
 
   cout << " Creating an empty TCanvas object to draw in" << endl;
-  TCanvas starCanvas("STAR","Star",400,600);
+  TCanvas &starCanvas = *(new TCanvas("STAR","Star",400,600));
   
   Int_t  PadColumns = 2;
   Int_t  PadRows = 2;
@@ -46,8 +48,8 @@
 
   // Open remote Webfile
   cout << " Open the remote Web file with STAR geometry database in ROOT format" << endl;
-//  TWebFile f("http://www.rhic.bnl.gov/~fine/star_year_2a.root");
-  TFile f("/afs/rhic.bnl.gov/star/user/fine/WWW/star_year_2a.root");
+  //  TWebFile f("http://www.rhic.bnl.gov/~fine/star_year_2a.root");
+  TFile f(geomFile);
   // read STAR geometry database remotely
   cout << " Reading STAR geometry database (the full size of this database 28K bytes - ROOT-object" << endl;
   TDataSetIter volume(HALL);
@@ -83,7 +85,7 @@
   gPad->x3d();
 
   cout << "Drawing ROOT TBrowser" << endl;
-  TBrowser b("STAR",HALL);
+  new TBrowser("STAR",HALL);
   cout << "Now. Try yourself:" << endl <<
   "     1. Select any STAR geometry TVolume object with  \"double-left-mouse click\" on the TVolumePosition" << endl <<
   "               TVolume object has no \";<n>\" in its name." << endl <<
