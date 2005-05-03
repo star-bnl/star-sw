@@ -2,6 +2,10 @@
 #include "StEEmcA2EMaker.h" 
 #include "StEEmcPointMaker.h"
 
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+
 ClassImp(StEEmcMixTreeMaker);
 
 // ----------------------------------------------------------------------------
@@ -33,7 +37,10 @@ Int_t StEEmcMixTreeMaker::Make()
   /// Form all pairs of points, combinatoric background
   Int_t stat = StEEmcMixMaker::Make();
   if ( stat != kStOK ) return stat;
-  
+
+  /// Set the event, run, trigger info
+  mMixEvent -> setEvent( mMuDstMaker -> muDst() -> event() );
+
   /// loop over points, add to event
   for ( UInt_t i = 0; i < mPoints.size(); i++ ) 
     mMixEvent -> addPoint ( mPoints[i] );
