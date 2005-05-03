@@ -1,5 +1,8 @@
-// $Id: StarMCStack.h,v 1.1 2005/04/25 20:44:28 fisyak Exp $
+// $Id: StarMCStack.h,v 1.2 2005/05/03 15:42:14 fisyak Exp $
 // $Log: StarMCStack.h,v $
+// Revision 1.2  2005/05/03 15:42:14  fisyak
+// Adjust for bfc
+//
 // Revision 1.1  2005/04/25 20:44:28  fisyak
 // StarVMCApplication with example in macros/starVMC.C
 //
@@ -40,6 +43,7 @@ class StarMCStack : public TVirtualMCStack {
   virtual Int_t  GetNprimary() const {return fNPrimary;}
   virtual TParticle* GetCurrentTrack()   const;
   virtual Int_t  GetCurrentTrackNumber() const {return fCurrentTrack;}
+  virtual Int_t  GetCurrentTrackId() const {return GetCurrentTrackNumber()+1;}
   virtual Int_t  GetCurrentParentTrackNumber() const;
   StarMCParticle*  GetParticle(Int_t id) const;
     

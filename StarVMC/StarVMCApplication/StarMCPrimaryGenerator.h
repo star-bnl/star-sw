@@ -1,5 +1,8 @@
-// $Id: StarMCPrimaryGenerator.h,v 1.1 2005/04/25 20:44:28 fisyak Exp $
+// $Id: StarMCPrimaryGenerator.h,v 1.2 2005/05/03 15:42:14 fisyak Exp $
 // $Log: StarMCPrimaryGenerator.h,v $
+// Revision 1.2  2005/05/03 15:42:14  fisyak
+// Adjust for bfc
+//
 // Revision 1.1  2005/04/25 20:44:28  fisyak
 // StarVMCApplication with example in macros/starVMC.C
 //
@@ -9,9 +12,8 @@
 #include "TString.h"
 #include "TMath.h"
 #include "TVirtualMCApplication.h"
-
+#include "TVector3.h"
 class TVirtualMCStack;
-class TVector3;
 
 class StarDetectorConstruction;
 
@@ -28,7 +30,9 @@ class StarMCPrimaryGenerator : public TObject {
     void  SetIsRandom(Bool_t isRandomGenerator) { fIsRandom = isRandomGenerator; }
     void  SetNofPrimaries(Int_t nofPrimaries)   { fNofPrimaries = nofPrimaries; }
     void  SetStack(TVirtualMCStack *stack)      { fStack = stack;}
+    Int_t GetNofPrimaries()                     { return fNofPrimaries;}
     TVirtualMCStack *GetStack()                 { return fStack;}
+    TVector3 &GetOrigin()                       { return fOrigin;}
     StarMCPrimaryGenerator(TVirtualMCStack* stack); 
     StarMCPrimaryGenerator(Int_t nprim=1,       Int_t Id=6, 
 			   Double_t pT_min = 0,  Double_t pT_max = 10,
@@ -49,6 +53,7 @@ class StarMCPrimaryGenerator : public TObject {
     Int_t             fId;
     Double_t          fpT_min, fpT_max, fEta_min, fEta_max, fPhi_min, fPhi_max, fZ_min, fZ_max;
     TString           fOption;  
+    TVector3          fOrigin;
   ClassDef(StarMCPrimaryGenerator,1)  //StarMCPrimaryGenerator
 };
 #endif //Star_PRIMARY_GENERATOR_H

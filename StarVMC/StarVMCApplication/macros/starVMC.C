@@ -36,6 +36,8 @@ TGeoManager  *GetVMC() {
 }
 //________________________________________________________________________________
 void Load() {
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
   //  gSystem->Load("libGeom");
   gSystem->Load("libVMC");
   //  gSystem->Load("libPhysics");
@@ -52,9 +54,9 @@ void Load() {
   gSystem->Load("libdummies");
   gSystem->Load("libgeant3");
   gSystem->Load("StarMagField");
-  gSystem->Load("StarVMCApplication");
-  gSystem->Load("libgeometry_Tables");
   gSystem->Load("libsim_Tables");
+  gSystem->Load("libgeometry_Tables");
+  gSystem->Load("StarVMCApplication");
 }
 //________________________________________________________________________________
 void starVMC(){
@@ -119,4 +121,5 @@ void starVMC(){
 #endif
   //  StMCSteppingHist::Instance()->Finish();
 #endif
+  StarMCHits::instance()->ls(4);
 }  
