@@ -16,15 +16,18 @@ class StarMCHits : public TDataSet {
   }
   virtual TDataSet  	  *Instance() const {return (TDataSet *) fgInstance;}   		       
   virtual Int_t     	   Init();					      		       
-  virtual void      	   Clear(const Option_t* opt = "") {if (fHitHolder) fHitHolder->Delete();}
+  virtual void      	   Clear(const Option_t* opt = "");
   virtual void      	   Step();					      		       
+#if 0
   virtual Float_t   	   GetHitK(Int_t k);				      		       
-  virtual void      	   SetHitHolder(TDataSet  *m) {fHitHolder = 0;}	      	       
+#endif
+  virtual void      	   SetHitHolder(TDataSet  *m) {fHitHolder = m;}	      	       
   virtual TDataSet  	  *GetDetectors() {return fDetectors;}		      	       
   virtual TObjArray 	  *GetVolUserInfo() {return fVolUserInfo;}	      		       
   virtual TDataSet  	  *GetHitHolder() {return fHitHolder;}                  				       
   virtual StHitDescriptor *GetCurrentDetector() {return fCurrentDetector;}
   virtual void      	   FillG2Table();							       	    
+  virtual void             FinishEvent();
   static  TTable    	  *NewTable(const Char_t *classname, const Char_t *name="", Int_t nrows=100); 
   static  St_g2t_Chair    *NewChair(const Char_t *type, const Char_t *name="");                       
  private:

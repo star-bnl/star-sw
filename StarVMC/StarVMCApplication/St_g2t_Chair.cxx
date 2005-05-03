@@ -1,6 +1,7 @@
 #include "Stiostream.h"
 #include "St_g2t_Chair.h"
 #include "StarMCHits.h"
+ClassImp(St_g2t_Chair);
 ClassImp(St_g2t_ctf_hitC);
 ClassImp(St_g2t_emc_hitC);
 ClassImp(St_g2t_fst_hitC);
@@ -14,13 +15,14 @@ ClassImp(St_g2t_ssd_hitC);
 ClassImp(St_g2t_svt_hitC);
 ClassImp(St_g2t_tpc_hitC);
 ClassImp(St_g2t_vpd_hitC);
+Int_t St_g2t_Chair::fDebug = 0;
 //________________________________________________________________________________
 //void St_g2t_hitsC::Fill(GHit_t &vect) {}
 //________________________________________________________________________________
 void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
   static g2t_ctf_hit_st g2t_ctf_hit;
   memset(&g2t_ctf_hit, 0, sizeof(g2t_ctf_hit_st));
-  St_g2t_ctf_hit *table = (St_g2t_ctf_hit*) Table();
+  St_g2t_ctf_hit *table = (St_g2t_ctf_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_ctf_hit.id            = nok;
@@ -64,7 +66,7 @@ void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
 void St_g2t_emc_hitC::Fill(GHit_t &vect) {
   static g2t_emc_hit_st g2t_emc_hit;
   memset(&g2t_emc_hit, 0, sizeof(g2t_emc_hit_st));
-  St_g2t_emc_hit *table = (St_g2t_emc_hit*) Table();
+  St_g2t_emc_hit *table = (St_g2t_emc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_emc_hit.id            = nok;
@@ -174,7 +176,7 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
 void St_g2t_fst_hitC::Fill(GHit_t &vect) {
   static g2t_fst_hit_st g2t_fst_hit;
   memset(&g2t_fst_hit, 0, sizeof(g2t_fst_hit_st));
-  St_g2t_fst_hit *table = (St_g2t_fst_hit*) Table();
+  St_g2t_fst_hit *table = (St_g2t_fst_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_fst_hit.id            = nok;
@@ -201,7 +203,7 @@ void St_g2t_ftp_hitC::Fill(GHit_t &vect) {
 
   static g2t_ftp_hit_st g2t_ftp_hit;
   memset(&g2t_ftp_hit, 0, sizeof(g2t_ftp_hit_st));
-  St_g2t_ftp_hit *table = (St_g2t_ftp_hit*) Table();
+  St_g2t_ftp_hit *table = (St_g2t_ftp_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_ftp_hit.id            = nok;
@@ -235,7 +237,7 @@ void St_g2t_ftp_hitC::Fill(GHit_t &vect) {
 void St_g2t_ist_hitC::Fill(GHit_t &vect) {
   static g2t_ist_hit_st g2t_ist_hit;
   memset(&g2t_ist_hit, 0, sizeof(g2t_ist_hit_st));
-  St_g2t_ist_hit *table = (St_g2t_ist_hit*) Table();
+  St_g2t_ist_hit *table = (St_g2t_ist_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_ist_hit.id            = nok;
@@ -258,7 +260,7 @@ void St_g2t_ist_hitC::Fill(GHit_t &vect) {
 void St_g2t_mwc_hitC::Fill(GHit_t &vect) {
   static g2t_mwc_hit_st g2t_mwc_hit;
   memset(&g2t_mwc_hit, 0, sizeof(g2t_mwc_hit_st));
-  St_g2t_mwc_hit *table = (St_g2t_mwc_hit*) Table();
+  St_g2t_mwc_hit *table = (St_g2t_mwc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_mwc_hit.id            = nok;
@@ -286,7 +288,7 @@ void St_g2t_mwc_hitC::Fill(GHit_t &vect) {
 void St_g2t_pix_hitC::Fill(GHit_t &vect) {
   static g2t_pix_hit_st g2t_pix_hit;
   memset(&g2t_pix_hit, 0, sizeof(g2t_pix_hit_st));
-  St_g2t_pix_hit *table = (St_g2t_pix_hit*) Table();
+  St_g2t_pix_hit *table = (St_g2t_pix_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_pix_hit.id            = nok;
@@ -309,7 +311,7 @@ void St_g2t_pix_hitC::Fill(GHit_t &vect) {
 void St_g2t_pmd_hitC::Fill(GHit_t &vect) {
   static g2t_pmd_hit_st g2t_pmd_hit;
   memset(&g2t_pmd_hit, 0, sizeof(g2t_pmd_hit_st));
-  St_g2t_pmd_hit *table = (St_g2t_pmd_hit*) Table();
+  St_g2t_pmd_hit *table = (St_g2t_pmd_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_pmd_hit.id            = nok;
@@ -330,7 +332,7 @@ void St_g2t_pmd_hitC::Fill(GHit_t &vect) {
 void St_g2t_rch_hitC::Fill(GHit_t &vect) {
   static g2t_rch_hit_st g2t_rch_hit;
   memset(&g2t_rch_hit, 0, sizeof(g2t_rch_hit_st));
-  St_g2t_rch_hit *table = (St_g2t_rch_hit*) Table();
+  St_g2t_rch_hit *table = (St_g2t_rch_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_rch_hit.id            = nok;
@@ -359,7 +361,7 @@ void St_g2t_rch_hitC::Fill(GHit_t &vect) {
 void St_g2t_ssd_hitC::Fill(GHit_t &vect) {
   static g2t_ssd_hit_st g2t_ssd_hit;
   memset(&g2t_ssd_hit, 0, sizeof(g2t_ssd_hit_st));
-  St_g2t_ssd_hit *table = (St_g2t_ssd_hit*) Table();
+  St_g2t_ssd_hit *table = (St_g2t_ssd_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_ssd_hit.id            = nok;
@@ -389,7 +391,7 @@ void St_g2t_svt_hitC::Fill(GHit_t &vect) {
   Int_t      wafer    = vect.NUMBV[2];
   Int_t      nladder  = 0;
   Int_t      volume_id = -1;
-  St_g2t_svt_hit *table = (St_g2t_svt_hit*) Table();
+  St_g2t_svt_hit *table = (St_g2t_svt_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   g2t_svt_hit.id            = nok;
   if (VolName == "SFSD") {//ssd
@@ -464,7 +466,7 @@ void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
     }
   }
   Int_t volume_id=100000*isdet+100*sector+tpad;
-  St_g2t_tpc_hit *table = (St_g2t_tpc_hit*) Table();
+  St_g2t_tpc_hit *table = (St_g2t_tpc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   g2t_tpc_hit.id            = nok;
   g2t_tpc_hit.x[0]          = vect.Middle.Global.xyzT.X();
@@ -496,7 +498,7 @@ void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
 void St_g2t_vpd_hitC::Fill(GHit_t &vect) {
   static g2t_vpd_hit_st g2t_vpd_hit;
   memset(&g2t_vpd_hit, 0, sizeof(g2t_vpd_hit_st));
-  St_g2t_vpd_hit *table = (St_g2t_vpd_hit*) Table();
+  St_g2t_vpd_hit *table = (St_g2t_vpd_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
   Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   g2t_vpd_hit.id            = nok;

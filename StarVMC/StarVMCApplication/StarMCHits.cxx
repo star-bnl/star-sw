@@ -13,7 +13,7 @@
 #include "TObjString.h"
 #include "TClass.h"
 #include "TROOT.h"
-#ifdef __ROOT__1
+#ifdef __ROOT__
 #include "StMaker.h"
 #endif
 #include "tables/St_g2t_ctf_hit_Table.h"
@@ -34,7 +34,12 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_vpd_hit_Table.h"
 #include "tables/St_particle_Table.h"
-
+//#include "tables/St_g2t_run_Table.h"
+#include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_pythia_Table.h"
+#include "tables/St_g2t_gepart_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_g2t_track_Table.h"
 StarMCHits *StarMCHits::fgInstance = 0;
 TGeant3    *StarMCHits::fgGeant3 = 0;
 ClassImp(StarMCHits);
@@ -127,7 +132,7 @@ Int_t StarMCHits::Init() {
   cout << "StarMCHits::Init() -I- Get Detectors" <<endl;
   if (! fDetectors ) delete fDetectors;
   fDetectors = 0;
-#ifdef __ROOT__1
+#ifdef __ROOT__
   if (! StMaker::GetChain()) {
 #endif
     cout << "StarMCHits::Init() -I- There is no chain. Get Detectors for y2005x" <<endl;
@@ -140,7 +145,7 @@ Int_t StarMCHits::Init() {
     fGeoData = (TDataSet *) f->Get("geom");
     delete f;
     
-#ifdef __ROOT__1
+#ifdef __ROOT__
   } else {
     fDetectors = StMaker::GetChain()->GetDataBase("VmcGeometry/Detectors");
     fGeoData   = StMaker::GetChain()->GetDataBase("VmcGeometry/geom");
@@ -171,9 +176,11 @@ Int_t StarMCHits::Init() {
       for (Int_t k = 0; k < kAll; k++) {
 	if (VolName == TString(g2t[k].Name)) {
 	  det->SetTitle(g2t[k].G2T_sys);
+#if 0
 	  if (TString(g2t[k].G2T_geom) != "") {
 	    TTable *table = ( TTable * ) fGeoData->Find(g2t[k].G2T_geom);
 	  }
+#endif
 	  break;
 	}
       }
@@ -207,6 +214,7 @@ Int_t StarMCHits::Init() {
   }
   return 0;
 }
+#if 0
 //________________________________________________________________________________
 Float_t  StarMCHits::GetHitK(Int_t k) {
   /* A g G H I T
@@ -317,6 +325,7 @@ Float_t  StarMCHits::GetHitK(Int_t k) {
 #endif
  return hit;
 }
+#endif
 //________________________________________________________________________________
 void StarMCHits::Step() {
   //  static Int_t Idevt0 = -1;
@@ -380,7 +389,7 @@ void StarMCHits::Step() {
   Double_t dEstep = fgGeant3->Edep();
   Double_t Step = fgGeant3->TrackStep();
   fHit.iPart = fgGeant3->TrackPid();
-  fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackNumber();
+  fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
   // - - - - - - - - - - - - - energy correction - - - - - - - - - -
   if (fgGeant3->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
     TArrayI proc;
@@ -443,16 +452,52 @@ void StarMCHits::Step() {
 //________________________________________________________________________________
 void StarMCHits::FillG2Table() {
   St_g2t_Chair *chair = fCurrentDetector->GetChair();
+  TTable *table = 0;
   if (! chair ) {
     TString name(fCurrentDetector->GetName());
     for (Int_t k = 0; k < kALL; k++) {
       if (name != TString(g2t[k].Name)) continue;
+#if 1
+      switch (k) {
+      case  kBPOL: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
+      case  kBCSB: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
+      case  kBRSG: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
+      case  kBXSA: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
+      case  kCSDA: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kCSUP: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kEHMS: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kELGR: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kEPCT: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kESCI: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kEXSE: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kFDSW: table = new St_g2t_fst_hit(g2t[k].G2T_name,100); chair = new St_g2t_fst_hitC(table); break;
+      case  kFREO: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
+      case  kFSEC: table = new St_g2t_ftp_hit(g2t[k].G2T_name,100); chair = new St_g2t_ftp_hitC(table); break;
+      case  kIBSS: table = new St_g2t_ist_hit(g2t[k].G2T_name,100); chair = new St_g2t_ist_hitC(table); break;
+      case  kPDGS: table = new St_g2t_pmd_hit(g2t[k].G2T_name,100); chair = new St_g2t_pmd_hitC(table); break;
+      case  kPLAC: table = new St_g2t_pix_hit(g2t[k].G2T_name,100); chair = new St_g2t_pix_hitC(table); break;
+      case  kQSCI: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
+      case  kQUAR: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
+      case  kRCSI: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
+      case  kRGAP: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
+      case  kSFSD: table = new St_g2t_svt_hit(g2t[k].G2T_name,100); chair = new St_g2t_svt_hitC(table); break;
+      case  kSVTD: table = new St_g2t_svt_hit(g2t[k].G2T_name,100); chair = new St_g2t_svt_hitC(table); break;
+      case  kTMSE: table = new St_g2t_mwc_hit(g2t[k].G2T_name,100); chair = new St_g2t_mwc_hitC(table); break;
+      case  kTPAD: table = new St_g2t_tpc_hit(g2t[k].G2T_name,100); chair = new St_g2t_tpc_hitC(table); break;
+      case  kVRAD: table = new St_g2t_vpd_hit(g2t[k].G2T_name,100); chair = new St_g2t_vpd_hitC(table); break;
+      default:	assert(0);
+      }
+      assert(table && chair);
+      StarMCHits::instance()->GetHitHolder()->Add(table);
+#else
       chair = NewChair(g2t[k].G2T_type,g2t[k].G2T_name);
       assert(chair);
+#endif
       fCurrentDetector->SetChair(chair);
       break;
     }
   }
+  assert(chair);
   chair->Fill(fHit);
 }
 //________________________________________________________________________________
@@ -487,4 +532,77 @@ St_g2t_Chair *StarMCHits::NewChair(const Char_t *type, const Char_t *name) {
   } 
   return chair;
 }
-
+//________________________________________________________________________________
+void StarMCHits::FinishEvent() {
+  TDataSet *m_DataSet = StarMCHits::instance()->GetHitHolder();
+  if (! m_DataSet) return;
+  St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
+  m_DataSet->Add(g2t_event);
+  g2t_event_st event;
+  memset (&event, 0, sizeof(g2t_event_st));
+  event.n_event            = 0;//IHEAD(2)
+  event.ge_rndm[0]         = 0;//IHEAD(3)
+  event.ge_rndm[1]         = 0;//IHEAD(4)
+  g2t_event->AddAt(&event);
+  Int_t NoVertex = 1;
+  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
+  m_DataSet->Add(g2t_vertex); 
+  g2t_vertex_st vertex;
+  StarMCPrimaryGenerator* gen = StarMCPrimaryGenerator::Instance();
+  for (Int_t iv = 0; iv < NoVertex; iv++) {
+    memset (&vertex, 0, sizeof(g2t_vertex_st));
+    vertex.id           = iv+1           ;// primary key 
+    vertex.event_p      = 0              ;// pointer to event
+    vertex.eg_label     = 0              ;// generator label (0 if GEANT)
+    vertex.eg_tof       = 0              ;// vertex production time
+    vertex.eg_proc      = 0              ;// event generator mechanism
+    memcpy(vertex.ge_volume,"   ",4);    ;// GEANT volume name
+    vertex.ge_medium    = 0              ;// GEANT Medium
+    vertex.ge_tof       = 0              ;// GEANT vertex production time
+    vertex.ge_proc      = 0              ;// GEANT mechanism (0 if eg)
+    vertex.ge_x[0]      = gen->GetOrigin().x();;// GEANT vertex coordinate
+    vertex.ge_x[1]      = gen->GetOrigin().y();
+    vertex.ge_x[2]      = gen->GetOrigin().z();
+    vertex.n_parent     = 0              ;// number of parent tracks
+    vertex.parent_p     = 0              ;// first parent track
+    vertex.is_itrmd     = 0              ;// flags intermediate vertex
+    vertex.next_itrmd_p = 0              ;// next intermedate vertex 
+    vertex.next_prim_v_p= 0              ;// next primary vertex
+    g2t_vertex->AddAt(&vertex);   
+  }
+  Int_t NTracks = StarVMCApplication::Instance()->GetStack()->GetNtrack();
+  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",NTracks);
+  m_DataSet->Add(g2t_track);
+  g2t_track_st track;
+  TParticle    *particle = 0;   
+  for (Int_t it = 0; it <NTracks; it++) {
+    memset(&track, 0, sizeof(g2t_track_st));
+    particle = StarVMCApplication::Instance()->GetStack()->PopPrimaryForTracking(it);
+    track.id             = it+1;
+    track.start_vertex_p = 1;
+    track.p[0]           = particle->Px();
+    track.p[1]           = particle->Py();
+    track.p[2]           = particle->Pz();
+    track.ptot           = particle->P();
+    track.e              = particle->Energy();
+    track.ge_pid         = particle->GetPdgCode();
+    track.charge         = particle->GetPDG()->Charge()/3;
+    track.rapidity       = -999;
+    track.pt             = particle->Pt();
+    track.eta            = particle->Eta();
+    g2t_track->AddAt(&track);
+  }
+}
+//________________________________________________________________________________
+void StarMCHits::Clear(const Option_t* opt) {
+  TObjArrayIter next(fVolUserInfo);
+  StHitDescriptor *desc = 0;
+  St_g2t_Chair *chair = 0;
+  while ((desc = (StHitDescriptor *) next())) {
+    chair = desc->GetChair();
+    if (chair) {
+      delete chair;
+      desc->SetChair(0);
+    }
+  }
+}

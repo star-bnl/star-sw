@@ -1,4 +1,4 @@
-// $Id: StarMCPrimaryGenerator.cxx,v 1.1 2005/04/25 20:44:28 fisyak Exp $
+// $Id: StarMCPrimaryGenerator.cxx,v 1.2 2005/05/03 15:42:14 fisyak Exp $
 
 #include "TVirtualMC.h"
 #include "TVirtualMCStack.h"
@@ -19,7 +19,10 @@ StarMCPrimaryGenerator::StarMCPrimaryGenerator(TVirtualMCStack* stack)
   : TObject(),
     fStack(stack),
     fIsRandom(false),
-    fNofPrimaries(1)
+    fNofPrimaries(0), fId(0),
+    fpT_min(0), fpT_max(0), fEta_min(0), fEta_max(0), fPhi_min(0), fPhi_max(0), fZ_min(0), fZ_max(0),
+    fOption(""),
+    fOrigin()
 {
   fgInstance = this;
 }
@@ -65,9 +68,9 @@ void StarMCPrimaryGenerator::GeneratePrimary(const TVector3& origin) {
  Double_t polz = 0.; 
 
  // Position
- Double_t vx  = -0.5 * origin.X(); 
- Double_t vy  = 0.; 
- Double_t vz =  0.;
+ Double_t vx  = origin.X(); 
+ Double_t vy  = origin.Y(); 
+ Double_t vz =  origin.Z(); 
  Double_t tof = 0.;
 
  // Energy (in GeV)
@@ -102,6 +105,6 @@ void StarMCPrimaryGenerator::GeneratePrimaries(const TVector3& origin)
 
 //_____________________________________________________________________________
 void StarMCPrimaryGenerator::GeneratePrimaries() {
-  TVector3 origin(0,0,fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
-  GeneratePrimaries(origin);
+  fOrigin = TVector3(0,0,fZ_min + (fZ_max-fZ_min)*gRandom->Rndm());
+  GeneratePrimaries(fOrigin);
 }

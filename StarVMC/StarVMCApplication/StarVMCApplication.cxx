@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.1 2005/04/25 20:44:28 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.2 2005/05/03 15:42:14 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -116,22 +116,27 @@ gufld  ->      TVirtualMCApplication::Instance()->Field(xdouble,bdouble);
 #include "StarMCHits.h"
 #include "TGeoManager.h"
 #include "TROOT.h"
+#include "TSystem.h"
 #include "TInterpreter.h"
 #include "TVirtualMC.h"
 #include "TPDGCode.h"
+#include "TApplication.h"
 #include "TGeant3TGeo.h"
 #include "StarMagField.h"
 ClassImp(StarVMCApplication);
 
 //_____________________________________________________________________________
-StarVMCApplication::StarVMCApplication(const char *name, const char *title)
-  : TVirtualMCApplication(name,title),
-    fStack(0),
-    fPrimaryGenerator(0),
-    fMagField(0),
-    fMcHits(0),
-    fFieldB(0) {
-// Standard constructor
+StarVMCApplication::StarVMCApplication(const char *name, const char *title) : 
+  TVirtualMCApplication(name,title),
+  fStack(0),
+  fPrimaryGenerator(0),
+  fMagField(0),
+  fMcHits(0),
+  fFieldB(0) 
+{
+  // Standard constructor
+  TString program(gSystem->BaseName(gROOT->GetApplication()->Argv(0)));
+  assert (! program.BeginsWith("root4star"));
   if (name) {
     // Create a user stack
     fStack = new StarMCStack(100); 
@@ -233,6 +238,7 @@ void StarVMCApplication::GeneratePrimaries() {
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
+  fStack->Reset();
   if (fMcHits) fMcHits->Clear();
 }
 //_____________________________________________________________________________
@@ -257,7 +263,7 @@ void StarVMCApplication::FinishEvent() {    // User actions after finishing of a
     // add scale (1.4)
   }  
   fStack->Print();
-  fStack->Reset();
+  if (fMcHits) fMcHits->FinishEvent(); // add kine info
 } 
 //_____________________________________________________________________________
 void StarVMCApplication::Field(const Double_t* x, Double_t* b) const {
