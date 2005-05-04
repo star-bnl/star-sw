@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.13 2005/03/11 15:44:25 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.14 2005/05/04 17:00:32 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #endif
 
-
+ 
 ClassImp(EEsmdCal)
 //--------------------------------------------------
 //--------------------------------------------------
@@ -50,7 +50,7 @@ EEsmdCal::EEsmdCal(){
 
   thrMipSmdE=-1; emptyStripCount=-2; 
   twMipRelEneLow=-3; twMipRelEneHigh=-4;
-  offCenter=0.7;
+  offCenter=0.7; thrMipPresAdc=-5;
   
   maxStripAdc=120; // suppress large jump in ped or sticky bits
 
@@ -89,7 +89,7 @@ void EEsmdCal::init( ){
     smdHitPl[i].set(thrMipSmdE,emptyStripCount,i+'U');
   }
 
-  printf("use thrMipSmdE/MeV=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f offCenter=%.2f maxStripAdc=%.1f \n", thrMipSmdE*1000.,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,offCenter,maxStripAdc);
+  printf("use thrMipSmdE/MeV=%.2f emptyStripCount=%d  twMipRelEne/high=%.2f/%.2f offCenter=%.2f maxStripAdc=%.1f thrMipPresAdc=%d\n", thrMipSmdE*1000.,emptyStripCount,twMipRelEneLow, twMipRelEneHigh,offCenter,maxStripAdc,thrMipPresAdc);
   assert(sectID>0 && sectID<=MaxSectors);
 
   //....................... initilize MIP energy in towers
@@ -105,6 +105,16 @@ void EEsmdCal::init( ){
   
   smdAvrMipE=0.0013; //GeV MIP;  7mm*1.8 MeV/cm
   
+#if 0  //smdMap - histos for finding mapping
+  int ij;
+  for( ij=0;ij<12;ij++) {
+    char t1[100];
+    sprintf(t1,"hM%c",'a'+ij);
+    hM[ij]=new TH1F(t1,t1,600,0.5,600.5);
+    HList->Add( hM[ij]);
+ }
+#endif
+
 }
 
 
@@ -112,6 +122,13 @@ void EEsmdCal::init( ){
 //-------------------------------------------------
 void EEsmdCal::initRun(int runID){
   printf(" EEsmdCal::initRun(%d)\n",runID);
+
+#if 0   //smdMap verification
+  if(dbMapped>0)  {
+    printf(" EEsmdCal::initRun(%d) N-th time, Ignore\n",runID);
+    return; 
+  }
+#endif
 
   assert(dbMapped<0); // at the moment DB reloading is not implemented/tested,JB
   mapTileDb();
@@ -205,6 +222,17 @@ void EEsmdCal::findSectorMip( ){
   EEsmdPlain *plU=smdHitPl+0;
   EEsmdPlain *plV=smdHitPl+1;
 
+
+#if 0  //smdMap verification
+  // verify mapping for a subset of strips
+  // U-plan must have MIP
+  if(plU->nMatch>0) {
+    int ist;
+    for(ist=0;ist<12;ist++)
+    scanSpike(smdAdc[1][30+ist-1],hM[ist]);
+  }
+#endif
+
   // calibrate P,Q,R with UxV
   for(nU=0;nU<plU->nMatch;nU++){
     for(nV=0;nV<plV->nMatch;nV++){
@@ -216,19 +244,47 @@ void EEsmdCal::findSectorMip( ){
   return;
 }
 
+#if 0 //smdMap verification
+//-------------------------------------------------
+//-------------------------------------------------
+void EEsmdCal:: scanSpike(float adc1, TH1F *h){
+  float adcTh=20;
+  if(adc1<adcTh) return;
+  int istrip;
+  for(istrip=0+3;istrip<MaxSmdStrips-3;istrip++) {
+    int iuv;
+    for(iuv=0;iuv<2;iuv++) {
+#if 0
+      if(smdAdc[iuv][istrip-3]>=adcTh) continue;
+      if(smdAdc[iuv][istrip-2]>=adcTh) continue;
+      if(smdAdc[iuv][istrip+2]>=adcTh) continue;
+      if(smdAdc[iuv][istrip+3]>=adcTh) continue;
+
+      if(smdAdc[iuv][istrip-1]>=adcTh) continue;
+      if(smdAdc[iuv][istrip+1]>=adcTh) continue;
+#endif
+      if(smdAdc[iuv][istrip  ]< adcTh) continue;
+      h->Fill(1+300*iuv+istrip);
+    }
+  }
+}
+#endif
+
 //-------------------------------------------------
 //-------------------------------------------------
 void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 
   // find MIP for a UxV pair of strips
 
+  // printf(" jj iSect=%d,iStrU=%d,iStrV=%d\n",iSect,iStrU,iStrV);
   TVector3 r=geoSmd->getIntersection (iSect,iStrU,iStrV);
-  // printf(" UxV = %f %f %f\n", r.x(),r.y(),r.z());
-
+ 
+  //  printf(" UxV = %f %f %f\n", r.x(),r.y(),r.z());
+ 
   int     iSecX, iSubX, iEtaX;
   Float_t dphi, deta;
   int ret=geoTw->getTower(r, iSecX, iSubX, iEtaX,dphi, deta);
-  //printf("ret=%d, isecX=%d isubX=%d, ietaX=%d dphi=%f, deta=%f\n",ret,iSecX, iSubX, iEtaX, dphi, deta);
+  // printf("ret=%d, isecX=%d isubX=%d, ietaX=%d dphi=%f, deta=%f\n",ret,iSecX, iSubX, iEtaX, dphi, deta);
 
   if(ret==0 || iSecX!=iSect) return;  
   //................ UxV is in a tower boundary within selected sector
@@ -246,6 +302,7 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 
   hA[9]->Fill(6);
   int iPhiX=iSect*MaxSubSec+iSubX;
+  hA[24]->Fill(iPhiX+iEtaX*MaxPhiBins);
 
   //................ auxuiliary variables 
   // logical conditions:
@@ -275,36 +332,41 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 
   if(mipT )hA[9]->Fill(8);
 
+  //...........  MIP  ADC  spectra .........................
   int iCut='d'-'a';
-  if( thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(adcT);
-  if(         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(adcP);
-  if( thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(adcQ);
-  if( thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(adcR);
-
-
-  iCut='e'-'a';
-  if( mipT && thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(adcT);
+  if(         thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(adcT);
   if( mipT &&         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(adcP);
   if( mipT && thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(adcQ);
   if( mipT && thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(adcR);
- 
-  // calibrated MIP spectra 
-  iCut='f'-'a';
-  if( thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
-  if(         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(eneP);
-  if( thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
-  if( thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
 
-  iCut='g'-'a';
-  if( mipT && thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
+
+  iCut='e'-'a';
+  if( mipT && thrP && thrQ && thrR ){
+    hT[iCut][kT][iEtaX][iPhiX]->Fill(adcT);
+    hT[iCut][kP][iEtaX][iPhiX]->Fill(adcP);
+    hT[iCut][kQ][iEtaX][iPhiX]->Fill(adcQ);
+    hT[iCut][kR][iEtaX][iPhiX]->Fill(adcR);
+  }
+  
+  // .................  calibrated (energy) MIP spectra ...............
+  iCut='f'-'a';
+  if(         thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
   if( mipT &&         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(eneP);
   if( mipT && thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
   if( mipT && thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
-  
+
+  iCut='g'-'a';
+  if( mipT && thrP && thrQ && thrR ){
+    hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
+    hT[iCut][kP][iEtaX][iPhiX]->Fill(eneP);
+    hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
+    hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
+    ((TH2F*) hA[22])->Fill( r.x(),r.y());
+  }
 
   //..................... calibration of SMD strips
   if( mipT && thrP && thrQ && thrR ) {
-    ((TH2F*) hA[22])->Fill( r.x(),r.y());
+ 
     int iuv,i2;
     const int mx=2; // # of strips from given plain
     int iStr[MaxSmdPlains];
@@ -364,7 +426,9 @@ int EEsmdCal::getUxVmip(){
   int iuv;
   for(iuv=0;iuv<MaxSmdPlains;iuv++) {
     EEsmdPlain *pl=smdHitPl+iuv;
-    pl->scanAdc(smdEne[iuv], thrMipSmdE);
+    //smdMap -- replace it
+    //pl->scanAdc(smdEne[iuv], thrMipSmdE);
+    pl->scanAdc(smdAdc[iuv], 15); // was 20 ADC
     pl->findMipPattern();
     hA[12+iuv]->Fill(pl->nMatch);
     // pl->print(1);

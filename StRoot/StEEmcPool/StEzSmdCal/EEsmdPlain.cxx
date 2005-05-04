@@ -85,7 +85,8 @@ void EEsmdPlain::findMipPattern(){
     p+=nDot;// move pointer a bit
   }
 
-  // ............. search for X
+#if 1  //smdMap -- take it off for mapping test
+  // ............. search for X 
   p=dotArray;
   while((p=strstr(p,pattX))) {
     int j=p-hitOver+nDot;
@@ -97,7 +98,7 @@ void EEsmdPlain::findMipPattern(){
     p+=nDot;// move pointer a bit
   }
 
-
+#endif
 }
 
 //-------------------------------------------------

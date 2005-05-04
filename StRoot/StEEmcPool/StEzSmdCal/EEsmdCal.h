@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*******************************************************
- * $Id: EEsmdCal.h,v 1.11 2005/02/05 00:41:37 perev Exp $
+ * $Id: EEsmdCal.h,v 1.12 2005/05/04 17:00:32 balewski Exp $
  *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -32,9 +32,9 @@ class EEmcSmdMap;
 class EEsmdCal {
  protected:
   enum {mxTile=4,kT=0, kP=1, kQ=2, kR=3, kU=0, kV=1}; // 0=tower, 1=pres1, 2=pres2, 3=post
+  int thrMipPresAdc; // (ADC) threshold on MIP signal in pre/post
 
  private: 
-  
   float thrMipSmdE; //(GeV)  threshold on MIP signal in SMD strip
   float twMipRelEneLow, twMipRelEneHigh; // relative maximal energy deviation for MIP in towers 
 
@@ -63,6 +63,10 @@ class EEsmdCal {
 
   TH1F *hT[kCut][mxTile][MaxEtaBins][MaxPhiBins]; // tower histograms 
   TH1F *hSs[kCut][MaxSmdPlains][MaxSmdStrips]; // individual SMD strips ,inclusive
+#if 0  //smdMap verification
+  TH1F *hM[12];
+  void scanSpike(float adc1, TH1F *h);
+#endif
 
   void initTileHistoAdc(char cut, char * title, int col=1); 
   void initTileHistoEne(char cut, char * title, int col=1); 
@@ -120,6 +124,7 @@ class EEsmdCal {
   void init(); 
   void initRun(int runID);// must be called after DB timestamp is known
   void setSmdCuts(float xs, int n1){ thrMipSmdE=xs; emptyStripCount=n1;}
+  void setPreCuts(int n1){ thrMipPresAdc=n1;}
   void setTwCuts( float e1, float e2 ,float r){
     twMipRelEneLow=e1; twMipRelEneHigh=e2; offCenter=r; 
   }
@@ -134,6 +139,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.12  2005/05/04 17:00:32  balewski
+ * tuned for MIP detection in CuCu200
+ *
  * Revision 1.11  2005/02/05 00:41:37  perev
  * Remove forward decl of TMath. Conflicts with ROOT
  *

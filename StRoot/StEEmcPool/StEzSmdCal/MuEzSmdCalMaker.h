@@ -2,7 +2,7 @@
 #define STAR_MuEzSmdCalMaker
 
 /************************************************************
- * $Id: MuEzSmdCalMaker.h,v 1.1 2005/03/11 15:44:25 balewski Exp $
+ * $Id: MuEzSmdCalMaker.h,v 1.2 2005/05/04 17:00:32 balewski Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -24,7 +24,7 @@ class MuEzSmdCalMaker : public StMaker, public  EEsmdCal {
 
  private: 
   StMuDstMaker* mMuDstMaker;  
-  int nInpEve, nTrigEve, nAcceptEve,nCorrEve; ///  event counters
+  int  nTrigEve, nAcceptEve,nCorrEve; ///  event counters
   EztEventHeader *eHead;
   EztEmcRawData  *eETow;
   EztEmcRawData  *eESmd;
@@ -33,7 +33,8 @@ class MuEzSmdCalMaker : public StMaker, public  EEsmdCal {
   int trigID; // filter only one trigger if non-zero
   int maxCtbSum; // filter on CTB sum if non-zero
   void unpackMuEzt(EztEmcRawData  *eRaw);
-
+  int  stripReMap(const  EEmcDbItem  *x); // use only be expert
+  void tileReMap( int &iT, int &sec , char &sub , int &eta); //by expert
 
  public: 
   MuEzSmdCalMaker(const char *self="EEstale", const char* muDstMakerName="muDstMaker");
@@ -50,7 +51,7 @@ class MuEzSmdCalMaker : public StMaker, public  EEsmdCal {
   void SetSector(int x);
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzSmdCalMaker.h,v 1.1 2005/03/11 15:44:25 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzSmdCalMaker.h,v 1.2 2005/05/04 17:00:32 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -61,6 +62,9 @@ class MuEzSmdCalMaker : public StMaker, public  EEsmdCal {
 
 
 // $Log: MuEzSmdCalMaker.h,v $
+// Revision 1.2  2005/05/04 17:00:32  balewski
+// tuned for MIP detection in CuCu200
+//
 // Revision 1.1  2005/03/11 15:44:25  balewski
 // works with muEzt, cucu200
 //

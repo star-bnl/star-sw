@@ -1,12 +1,12 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSmdCalMaker.cxx,v 1.1 2005/03/11 15:44:25 balewski Exp $
+// $Id: MuEzSmdCalMaker.cxx,v 1.2 2005/05/04 17:00:32 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <StMessMgr.h>
-
+ 
 #include "MuEzSmdCalMaker.h"
 
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
@@ -32,7 +32,7 @@ MuEzSmdCalMaker::MuEzSmdCalMaker( const char* self ,const char* muDstMakerName) 
   assert(mMuDstMaker);
 
   trgAkio=0;
-  nAcceptEve=nTrigEve=nInpEve=nCorrEve=0;
+  nAcceptEve=nTrigEve=nCorrEve=0;
   SetHList(0);
   SetTrigIdFilter(0);
   SetMaxCtbSum(0);
@@ -180,6 +180,61 @@ MuEzSmdCalMaker::Make(){
   return kStOK;
 } 
 
+
+//________________________________________________
+//________________________________________________
+void
+MuEzSmdCalMaker::tileReMap( int &iT,int &sec , char &sub , int &eta){
+  assert(1==2); //use only by expert - disabled, JB
+  if(sec==1 ) {
+    if (iT==99 ) {     ;
+    } else if( iT==2 &&  sub=='A' && eta==11 ) { // QA11<==>QB2 
+      iT=2;  sub='B'; eta=2;
+    } else if( iT==2 &&  sub=='B' && eta==2 ) {  
+      iT=2;  sub='A'; eta=11;
+    } else if( iT==0 &&  sub=='A' && eta==4 ) {  //TA4 <==> TA5
+      iT=0;  sub='A'; eta=5;
+    } else if( iT==0 &&  sub=='A' && eta==5 ) { 
+      iT=0;  sub='A'; eta=4;
+    }
+  }
+  return;
+}
+
+//________________________________________________
+//________________________________________________
+int
+MuEzSmdCalMaker:: stripReMap(const  EEmcDbItem  *x){
+  assert(1==2); //use only by expert - disabled, JB
+  int str=x->strip;
+  if(x->sec==8 && x->plane=='V' ) {
+    switch( x->strip) {
+      // connector & pair swap
+    case 209:  str=216; break;
+    case 210:  str=215; break;
+    case 211:  str=214; break;
+    case 212:  str=213; break;
+    case 213:  str=212; break;
+    case 214:  str=211; break;
+    case 215:  str=210; break;
+    case 216:  str=280; break;	  
+    case 280:  str=209; break;
+
+      // another connector
+    case 265:  str=272; break;	  
+    case 266:  str=271; break;	  
+    case 267:  str=270; break;	  
+    case 268:  str=269; break;	  
+    case 269:  str=268; break;	  
+    case 270:  str=267; break;	  
+    case 271:  str=266; break;	  
+    case 272:  str=265; break;	        
+    }
+  }
+
+  return str;
+}
+
 //________________________________________________
 //________________________________________________
 void
@@ -199,22 +254,25 @@ MuEzSmdCalMaker::unpackMuEzt(EztEmcRawData  *eRaw){
       const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
       if(x==0) continue; 
       if(x->sec!=sectID && crateID>6 ) break;// assumes crates do not cross sectors for non-towers, faster code
-      if(x->fail ) continue; // drop broken channels
-      // accept this hit
-      float adc=-100, rawAdc=-101;
- 
-      rawAdc=data[chan];  
-      adc=rawAdc-x->ped; 
-
+      if(x->fail  ) continue; // drop broken channels
+      if(x->stat & killStat) continue; // drop masked channels 
+     // accept this hit
+      float  rawAdc=data[chan];  
+      float  adc=rawAdc-x->ped; 
+      
       if(x->isSMD()) {
 	//........................  SMD  U or V .......
 	if(rawAdc>x->thr)  n3++;
 	int iuv=x->plane-'U';
-	int istr=x->strip-1;
+	int istr=x->strip -1;
+
+	// istr=stripReMap(x)-1; //<<====  S W A P S, not use it
+
 	assert(iuv>=0 && iuv<MaxSmdPlains);
 	assert(istr>=0 && istr<MaxSmdStrips);
 	smdAdc[iuv][istr]=adc;      
 	if(x->gain<=0)continue; // drop channels w/o gains
+
 	smdEne[iuv][istr]=adc/x->gain; 
 	// if(rawAdc>x->thr) 	printf("%s %f %f \n",x->name,smdEne[iuv][istr],x->gain);
       } else { 
@@ -226,16 +284,28 @@ MuEzSmdCalMaker::unpackMuEzt(EztEmcRawData  *eRaw){
 	  iT=x->name[2]-'P'+1;
 	}
 	assert(iT>=0 && iT<mxTile);
+	bool aboveThr=rawAdc>x->thr;
+	if(iT==1 || iT==2) {
+	  if( adc<=thrMipPresAdc ||  adc>(thrMipPresAdc+100) ) aboveThr=false;
+	} else if (iT==3) {
+	  if( adc<=(thrMipPresAdc/2.) || adc>(thrMipPresAdc/2.+100) ) aboveThr=false;
+	}
 
-	int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
-	int ieta=x->eta-1;
-	//	x->print();
+	//	if(iT==1 || iT==3) continue; // mask alomst all
+	int sec=x->sec;
+	char sub=x->sub;
+	int eta=x->eta;  
+
+	// tileReMap( iT,sec,sub,eta);  //<<====  S W A P S , not use it
+	
+	int iphi=(sec-1)*MaxSubSec+(sub-'A');
+	int ieta=eta-1;
 	assert(iphi>=0 && iphi<MaxPhiBins);
 	assert(ieta>=0 && ieta<MaxEtaBins);   
-	tileAdc[iT][ieta][iphi]=adc;// store towers
-	tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+	tileAdc[iT][ieta][iphi]=adc;
+	tileThr[iT][ieta][iphi]=aboveThr;
 	killT[iT][ieta][iphi]=false; // it is alive
-	if(rawAdc>x->thr) { 
+	if(aboveThr) { 
 	  if(iT==0)  
 	    n1++;
 	  else
@@ -252,6 +322,9 @@ MuEzSmdCalMaker::unpackMuEzt(EztEmcRawData  *eRaw){
 
 //---------------------------------------------------
 // $Log: MuEzSmdCalMaker.cxx,v $
+// Revision 1.2  2005/05/04 17:00:32  balewski
+// tuned for MIP detection in CuCu200
+//
 // Revision 1.1  2005/03/11 15:44:25  balewski
 // works with muEzt, cucu200
 //
