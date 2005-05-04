@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.14 2005/03/11 15:44:25 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.15 2005/05/04 17:00:32 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -44,8 +44,8 @@ void EEsmdCal::initTileHistoAdc(char cut, char *title, int col) {
 	TH1F *h;
 	if(cT[iT]=='T') 
 	  h=new TH1F(tt1,tt2,220,-20,200.);
-	else
-	  h=new TH1F(tt1,tt2,400,-200,200.);
+	else 
+	  h=new TH1F(tt1,tt2,400,-50,350.);
 	h->SetLineColor(col);
 	HList->Add(h);
 	hT[iCut][iT][iEta][iPhi]=h;
@@ -189,7 +189,7 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 	sprintf(tt1,"%c%s",cut,core);
 	sprintf(tt2,"SMD(%c) %s , %s; ADC-ped",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
-	TH1F *h=new TH1F(tt1,tt2,400,-200,200);
+	TH1F *h=new TH1F(tt1,tt2,400,-50,350);
 	//TH1F *h=new TH1F(tt1,tt2,4400,-400,4000);//tmp
 	h->SetLineColor(col);
 
@@ -400,19 +400,26 @@ void EEsmdCal::initAuxHisto(){
   //..................
   sprintf(tt1,"xy%02d",sectID);
   sprintf(tt2,"MIP position , UxV only, sect=%02d; X(cm); Y(cm) ",sectID);
-  h2=new TH2F(tt1,tt2,500,-250,250,250,-250,-0);
+  h2=new TH2F(tt1,tt2,500,-250,250,500,-250,250);
   hA[21]=(TH1F*)h2;
   
   sprintf(tt1,"xy%02dm",sectID);
   sprintf(tt2,"MIP position, best MIP, sect=%02d; X(cm); Y(cm) ",sectID);
-  h2=new TH2F(tt1,tt2,500,-250,250,250,-250,-0);
-  hA[22]=(TH1F*)h2;
-  
+  h2=new TH2F(tt1,tt2,250,-250,250,250,-250,250);
+  hA[22]=(TH1F*)h2; 
+   
   //..................
   sprintf(tt1,"eq%02dUV",sectID);
   sprintf(tt2,"#Sigma from 4-strips, best MIP, plane %02dU+V; eta bin;  #DeltaE MeV",sectID);
   h2=new TH2F(tt1,tt2,12,.5,12.5,50,-.1,7.5);
   hA[23]=(TH1F*)h2;
+
+  //................
+  sprintf(tt1,"can%02d",sectID);
+  sprintf(tt2,"# UxV candidates per tower, sector=%d; x=spiral=iPhi+60*iEta",sectID);
+  int mxTw=MaxEtaBins*MaxPhiBins;
+  hA[24]=new TH1F(tt1,tt2,mxTw,-0.5,mxTw-0.5);    
+  
 
   // add histos to the list (if provided)
   if(HList) {

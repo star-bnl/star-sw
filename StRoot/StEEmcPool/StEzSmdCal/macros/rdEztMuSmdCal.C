@@ -1,8 +1,11 @@
 TObjArray  *HList;
-int rdEztMuSmdCal( int trigID=0,//66007,
-		   int nEve=10000000,
-		   Int_t nFiles  = 400,
-		   char* file="lis/R6049127.lis", //#127=EHT6, #129=minB  
+//cucu200_minB=66007, cucu62_minB=76007
+
+
+int rdEztMuSmdCal( int trigID=0,
+		   int nEve=1000,
+		   Int_t nFiles  = 20,
+		   char* file="lis/R6049129.lis", //#127=EHT6, #129=minB  
 		   char* inDir   = "./"
 		   ){ 
 
@@ -16,8 +19,8 @@ int rdEztMuSmdCal( int trigID=0,//66007,
   assert( !gSystem->Load("StEEmcUtil")); 
   assert( !gSystem->Load("StEzSmdCal"));
 
+
   // libraries below are needed for DB interface
-  assert( !gSystem->Load("StDbLib")); 
   assert( !gSystem->Load("StDbBroker")); 
   assert( !gSystem->Load("St_db_Maker")); 
   assert( !gSystem->Load("StEEmcDbMaker")); 
@@ -26,7 +29,7 @@ int rdEztMuSmdCal( int trigID=0,//66007,
   chain = new StChain("StChain"); 
 
   printf("adding muDst from '%s' ....\n",file);
-  int sectID=5;
+  int sectID=66;
 
   // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
@@ -35,37 +38,44 @@ int rdEztMuSmdCal( int trigID=0,//66007,
   printf("total eve in chain =%d\n",nEntries);
   printf("in=%s%s=\n",inDir,file);
   //  return;
- St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
+  St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
   stDb->SetFlavor("onlPed","eemcPMTped");
   stDb->SetFlavor("sim","eemcPMTcal");
-
+  stDb->SetFlavor("sim","eemcPMTstat");
+  
   myDb=new StEEmcDbMaker("eemcDb");
-  myDb->setSectors(sectID,sectID);
+  //myDb->setSectors(sectID,sectID);
   // myDb->setSectors(firstSec, lastSec);
-  // myDb->setPreferedFlavor("expoSlope1","eemcPIXcal");
-  //myDb->changeGains("msarCalib/towgains.dat");
-   myDb->changeGains("julieGains/smdG/gains05smd.dat");
+  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/mappingSmd/smdAllMaskDay49.dat");
+  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/mappingTower/tileAllMaskDay49.dat");
+  // myDb->changeGains("julieGains/smdG/gains05smd.dat");
   //myDb->changeGains("msarCalib/PQRgains.dat");
-  //myDb->changeMask( "msarCalib/setM1.dat");
+  //myDb->changeGains("msarCalib/towgains.dat");
+
 
   // MIP cut .........
   float thrMipSmdE=0.3/1000.;
-  int emptyStripCount=6;
-  float offCenter=0.8; // fiducial area of tower =offCenter^2
-  float twMipRelEneLow=0.5, twMipRelEneHigh=1.5;  // was 0.3,2.0
-  
-  HList=new  TObjArray;
-  myMk3=new MuEzSmdCalMaker("mySmdCal","MuDst");
+  int emptyStripCount=6; 
+  float offCenter=0.6; // fiducial area of tower =offCenter^2, was 0.8
+  float twMipRelEneLow=0.5, twMipRelEneHigh=2.;  // was 0.5,1.5
+  int thrMipPresAdc=12; // thres over pedestal for pre/post
 
+  HList=new  TObjArray;
+  int id;
+  for(id=1;id<=12;id++) { sectID=id;
+  myMk3=new MuEzSmdCalMaker("mySmdCal","MuDst");
   myMk3->SetHList(HList);
-  myMk3->SetSector(sectID);
+  myMk3->SetSector(sectID); 
   myMk3->setTwCuts(twMipRelEneLow, twMipRelEneHigh,offCenter);
   myMk3->setSmdCuts(thrMipSmdE,emptyStripCount);
+  myMk3->setPreCuts(thrMipPresAdc);
+  myMk3->SetTrigIdFilter(trigID);
+  // if(id>=3) break;
+  }
 
-
-  // myMk3->SetTrigIdFilter(trigID);
-
-
+  //
+  
+  
   //myMk3->SetTrigIdFilter(66300); //zeroB
   //myMk3->SetTrigIdFilter(66007); //minB
   //   myMk3->SetTrigIdFilter(66212); //EHT19
@@ -101,7 +111,8 @@ int rdEztMuSmdCal( int trigID=0,//66007,
     printf("\n\n ====================%d  processing  ==============\n", eventCounter);
     
   }
-  myDb->print();
+   myDb->print(); //EEmcDb::exportAscii
+
   printf("sorting done, nEve=%d of %d\n",nEve, nEntries);
   int t2=time(0);
   if(t1==t2) t2++;
@@ -114,7 +125,7 @@ int rdEztMuSmdCal( int trigID=0,//66007,
          << " rate= " << eventCounter/timer.elapsedTime() <<  " Hz" << endl;
   }
   
-  myMk3->saveHisto("smdCal-B");
+  myMk3->saveHisto("smdCal-X");
   //  TString txt="soloPi0-"; txt+=trigID;  myMk3->saveHisto(txt);  
 
 
