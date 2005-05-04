@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.5 2005/02/03 02:35:11 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.6 2005/05/04 22:02:08 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -137,12 +137,12 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId) {
       //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
       if (hs[3]) hs[3]->Fill(k);
     }
-    gMessMgr->Message("","I") << GetName()<<"::headersAreSick("<<fiber->name<<"), sanity="<<sanity<<endm;
+    gMessMgr->Message("","I") << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
   }
 
   if (hs[4]) hs[4]->Fill(totErrBit);
    
-  gMessMgr->Message("","I") << GetName()<<"::headersAreSick() totErrBit "<<totErrBit<<" in all crates"<<endm;
+  gMessMgr->Message("","I") << GetName()<<"::checkHeader --> totErrBit "<<totErrBit<<" in all crates"<<endm;
   return totErrBit;
 }
 
@@ -184,7 +184,7 @@ Bool_t  StEemcRaw::towerDataAreSick(StEmcRawData* raw){
   if(hs[1]) hs[1]->Fill(n256Tot);
   if(hs[2]) hs[2]->Fill(nGhostTot);
 
-  gMessMgr->Message("","I") << GetName()<<"::towerDataAreSick() ,total n256="<<n256Tot <<", nGhost="<<nGhostTot<<endm; 
+  gMessMgr->Message("","I") << GetName()<<"::checkTowerAdc-->total n256="<<n256Tot <<", nGhost="<<nGhostTot<<endm; 
   if(nGhostTot>0)return true;
   if(n256Tot>mxN256tot) return true;
   return false;
@@ -316,6 +316,9 @@ void StEemcRaw::initHisto(){
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.6  2005/05/04 22:02:08  balewski
+// more clear printouts
+//
 // Revision 1.5  2005/02/03 02:35:11  balewski
 // accomodate MAPMT firmware change in 2005
 //
