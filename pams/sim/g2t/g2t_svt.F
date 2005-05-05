@@ -12,7 +12,7 @@
       i=0
       g2t_svt_hit_h.nok = 0
 
-      do isys=1,2
+      do isys=1,1
        if (isys.eq.1) call G2R_GET_SYS ('SVTT','SVTD',Iprin,Idigi)
        if (isys.eq.2) call G2R_GET_SYS ('SVTT','SFSD',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
