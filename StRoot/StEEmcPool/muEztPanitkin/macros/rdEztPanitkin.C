@@ -4,9 +4,9 @@ MuEzPanitkinMaker  *myMk3;
 //pp200, 2005, EJP1=96294, 
 
 int rdEztPanitkin( int trigID=0,//96294,
- int nEve=5000, 
- Int_t nFiles  =10,
- char* file="lis/R6097036.lis",
+ int nEve=2000, 
+ Int_t nFiles  =2,
+ char* file="lis/R6117017.lis", //R6121034.lis,
  char* inDir   = "./"   
  ){ 
 
@@ -50,7 +50,7 @@ int rdEztPanitkin( int trigID=0,//96294,
   //myMk3->SetTrigIdFilter(66300); //zeroB
 
   //if(trigID==66007) myMk3->SetHistoPixels();
-  // myMk3->SetSpy();
+   myMk3->SetSpy();
  
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");

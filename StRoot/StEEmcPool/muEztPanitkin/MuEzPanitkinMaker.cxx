@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzPanitkinMaker.cxx,v 1.1 2005/04/28 20:54:46 balewski Exp $
+// $Id: MuEzPanitkinMaker.cxx,v 1.2 2005/05/05 22:22:08 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -75,7 +75,7 @@ Int_t MuEzPanitkinMaker::Init(){
   qaSort=new EEqaSorter(HList,eeDb);
   qaSort->initHisto(1000,1000); // nBins, maxAdc
   qaSort->initSpy(5,1); // time constant/sec & mode,   //mode: 1=balewski@rcf, 2=eemc@evp,3=operator@evp 
-  qaSort->setPath("StRoot/StEEmcPool/muEztPanitkin/macros/","/star/u/balewski/0x/defaultPanitkinOut/");
+  qaSort->setPath("StRoot/StEEmcPool/muEztPanitkin/","/star/u/balewski/0x/defaultPanitkinOut/");
 
   if(pixlesOn) {
     rawPixels=new RawPixels(HList,eeDb);
@@ -182,6 +182,9 @@ Int_t MuEzPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: MuEzPanitkinMaker.cxx,v $
+// Revision 1.2  2005/05/05 22:22:08  balewski
+// added spy for JP
+//
 // Revision 1.1  2005/04/28 20:54:46  balewski
 // start
 //

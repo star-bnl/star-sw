@@ -12,7 +12,7 @@ class SpyGeneric {
 
  public:
   SpyGeneric(){};
-  SpyGeneric* set(TH1 * h0, TString tx );
+  SpyGeneric* set(TH1 * h0, TString tx="" );
   virtual  ~SpyGeneric(){};
   virtual bool sense(FILE *fd)=0;
 };
