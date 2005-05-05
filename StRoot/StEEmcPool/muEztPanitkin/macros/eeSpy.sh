@@ -8,7 +8,7 @@ echo "EEMC-SPY-SHELL  log=$logFile nBad=$nBad mode=$mode"
 echo "eeSpy.sh : mode=$mode" 
 case $mode in
     1)
-	pathLog=/star/data05/scratch/balewski/defaultPanitkinOut/log/
+	pathLog=/star/u/balewski/0x/defaultPanitkinOut/
 	pathMacros=StRoot/StEEmcPool/muEztPanitkin/macros/
 	break ;;
     3)
@@ -31,16 +31,18 @@ if [ $nBad -gt 0 ]; then
     #  echo display-box
     #wish $pathMacros/eeSpyBox.tcl $logFile  $nBad $pathLog  & 
     mail balewski@iucf.indiana.edu -s "$mailTit" < $fullLog
+    exit
     mail relyea@bnl.gov -s " $mailTit" < $fullLog
     mail rfatemi@iucf.indiana.edu -s "$mailTit " < $fullLog
     mail jacobs@iucf.indiana.edu -s "$mailTit " < $fullLog
+    mail wissink@iucf.indiana.edu -s "$mailTit " < $fullLog
    # wish $pathMacros/eeSpyBox.tcl -display 130.199.61.166:0.0  $logFile  $nBad $pathLog &
 
-   # exit
+   
 
    # mail sowinski@iucf.indiana.edu -s "eeSpy nBad=$nBad $logDate " < $fullLog
    #mail msar@iucf.indiana.edu -s "eeSpy nBad=$nBad $logDate " < $fullLog
-   # mail wissink@iucf.indiana.edu -s "eeSpy nBad=$nBad $logDate " < $fullLog
+   #
    # mail jwebb@iucf.indiana.edu -s "eeSpy nBad=$nBad $logDate " < $fullLog
     #wish $pathMacros/eeSpyBox.tcl -display 130.199.60.25:0.0  $logFile  $nBad $pathLog &
     

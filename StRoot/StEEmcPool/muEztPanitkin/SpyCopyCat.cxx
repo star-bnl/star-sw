@@ -108,7 +108,7 @@ SpyCopyCat::sense(FILE *fd) {
 
   // h->Draw();
   if (isBad) {
-    fprintf(fd,"\nSpyCopyCat: %s , nMax=%d , bad channels: \n      ",text.Data(),nMax);
+    fprintf(fd,"\nSpyCopyCat: %s , bad channels: ",text.Data(),nMax);
     int i;
     int k=0;
     for(i=1;i<=h->GetNbinsX();i++) {

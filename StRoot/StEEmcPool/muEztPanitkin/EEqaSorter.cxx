@@ -1,4 +1,4 @@
-// $Id: EEqaSorter.cxx,v 1.1 2005/04/28 20:54:46 balewski Exp $
+// $Id: EEqaSorter.cxx,v 1.2 2005/05/05 22:22:08 balewski Exp $
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -18,6 +18,8 @@
 
 #include "SpyCopyCat.h"
 #include "SpyCorruption.h"
+#include "SpyJPped.h"
+#include "SpyJPfreq.h"
 
 #ifndef IN_PANITKIN
   #include "StMuDSTMaker/EZTREE/StTriggerDataMother.h"
@@ -338,15 +340,25 @@ EEqaSorter::initSpy(int minSec, int mode) { // must be called after histos initi
   mySpyCC=new SpyCopyCat*[mxSpy];
   nSpy=nSpyCC=0;
   int i;
+  char txt[100];
+  for(i=1;i<=6;i++) {
+    sprintf(txt,"JP%d_sum",i);
+    mySpy[nSpy++]=(new SpyJPped)->set((TH1*)HList->FindObject(txt));
+  }
+  
+  mySpy[nSpy++]=(new SpyJPfreq)->set((TH1*)HList->FindObject("JPtotFreq"));
+
+  mySpy[nSpy++]=(new SpyCorruption)->set (hCorT[0],"ETOW corruption ");
+  mySpy[nSpy++]=(new SpyCorruption)->set (hCorS[0],"ESMD corruption ");
+  
   for(i=0;i<6;i++) mySpyCC[nSpyCC++]=new SpyCopyCat('T',i);
   for(i=0;i<48;i++) mySpyCC[nSpyCC++]=new SpyCopyCat('M',i);
-
+  
   for(i=0;i<nSpyCC;i++) {
     mySpy[nSpy++]= mySpyCC[i];
   }
   
-  mySpy[nSpy++]=(new SpyCorruption)->set (hCorT[0],"ETOW corruption ");
-  mySpy[nSpy++]=(new SpyCorruption)->set (hCorS[0],"ESMD corruption ");
+  //  HList->ls();
 
   nEveSpy=0;
   lastSpyRun=0;
@@ -393,8 +405,9 @@ EEqaSorter::spy( int runNo, int eveId){
   if(flog==0)return;
   assert(flog) ; 
   //  flog=stdout; //test
+  if(spyMode!=3)fprintf(flog,"\n\n THIS IS TEST - IGNORE \n\n      Jan\n\n");
   fprintf(flog,"BNL=%s" ,ctime((const time_t *)&uTm));
-  fprintf(flog,"run R%d, last eveID=%d, \nsampledA: %d eve in last %d seconds,  total=%d eve\n",runNo,eveId,nEveSpy,uTm-lastTm,  (int)H1tot->GetEntries());
+  fprintf(flog,"run R%d, last eveID=%d, \nsampled: %d eve in last %d seconds,  total=%d eve\n",runNo,eveId,nEveSpy,uTm-lastTm,  (int)H1tot->GetEntries());
   fprintf(flog,"unix time=%d\n" ,uTm);   
 
   lastTm=uTm;
@@ -414,7 +427,6 @@ EEqaSorter::spy( int runNo, int eveId){
     }
     fprintf(flog,"\n grand total of %d ALARMS \n",nBad);
   }
-  if(spyMode!=3)fprintf(flog,"\n\n THIS IS TEST - IGNORE \n\n      Jan\n\n");
   
   if(flog!=stdout) fclose(flog);
   TString fullName0=fullName;
@@ -435,6 +447,9 @@ EEqaSorter::spy( int runNo, int eveId){
 
 
 // $Log: EEqaSorter.cxx,v $
+// Revision 1.2  2005/05/05 22:22:08  balewski
+// added spy for JP
+//
 // Revision 1.1  2005/04/28 20:54:46  balewski
 // start
 //

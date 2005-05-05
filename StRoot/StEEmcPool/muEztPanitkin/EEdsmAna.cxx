@@ -267,7 +267,7 @@ void EEdsmAna ::initHisto(){
     sprintf(tt1,"JP%d%d_cor",steve_jp,steve_jp2);
     sprintf(tt2,"Emulated Sum Jet Patches %d vs %d",steve_jp,steve_jp2);
     //printf("iJ=%d name=%s tit=%s\n",iJ,tt1,tt2);
-    TH2F*h2=new TH2F(tt1,tt2,64,-.5,511.5,64,-.5,511.5);
+    TH2F*h2=new TH2F(tt1,tt2,60,39.5,99.5,60,39.5,99.5);
     sprintf(tt1,"Jet Patch %d Sum",steve_jp);
     h2->GetXaxis()->SetTitle(tt1);
     sprintf(tt1,"Jet Patch %d Sum",steve_jp2);

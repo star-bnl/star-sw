@@ -698,7 +698,7 @@ void  eeTrigAdjJPcor(FileType *fd, TPad *c, char *mode ) {
 
   char tit[100];
  
-  c->Divide(2,3);
+  c->Divide(3,2);
 
   char *core="JP";
   int j;
