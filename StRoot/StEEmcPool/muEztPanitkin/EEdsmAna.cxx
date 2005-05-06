@@ -540,9 +540,9 @@ void EEdsmAna::histoDsm1(){
     if(ee1outJPadc[i]>EEjpTh1def)  H5jpFreq ->Fill(steve_jp); 
     j=(i+1)%EEnJetPatch;
     //printf("histog i=%d j=%d  \n",i,j);
+    H4adjPcor[i]->Fill(ee1outJPadc[i],ee1outJPadc[j]);
     if (JPtrig[i]>0 && JPtrig[j]>0){  //Both patches over th0
       H4adjpFreq->Fill(steve_jp);
-      H4adjPcor[i]->Fill(ee1outJPadc[i],ee1outJPadc[j]);
       H4adjpSums[i]->Fill(AdjJPsum[i]);
     }
   }
