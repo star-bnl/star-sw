@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuMomentumShiftMaker.cxx,v 1.1 2005/03/17 21:55:00 mvl Exp $
+ * $Id: StMuMomentumShiftMaker.cxx,v 1.2 2005/05/07 01:56:25 jeromel Exp $
  * Author: Marco van Leeuwen, LBNL
  *
  * This class is used to correct the momenta of tracks on MicroDst after 
@@ -74,7 +74,10 @@ int StMuMomentumShiftMaker::Make() {
     return kStErr;
   }
   if (mWriteMuDst) {
-    Char_t *inBaseName=strrchr(mudstMaker->chain()->GetFile()->GetName(),'/')+1;
+    Char_t *inBaseName= strrchr(mudstMaker->chain()->GetFile()->GetName(),'/');
+    if ( ! inBaseName ) inBaseName = (Char_t *) mudstMaker->chain()->GetFile()->GetName();
+    else                inBaseName = inBaseName+1;
+
     if (mOutFile==0 || strstr(mOutFile->GetName(),inBaseName)==0) {
       if (mOutFile) {
 	mOutFile->Write();
@@ -83,9 +86,9 @@ int StMuMomentumShiftMaker::Make() {
 	mOutFile=0;
 	mOutTree=0;
       }
-      mOutFile=new TFile(mOutDir+"/"+inBaseName,"RECREATE");
+      mOutFile=new TFile(mOutDir+inBaseName,"RECREATE");
       if (!mOutFile->IsOpen()) {
-	cout << "ERROR in StMuMomentumShiftMaker::Make: cannot open output file: " << mOutDir+"/"+inBaseName << endl;
+	cout << "ERROR in StMuMomentumShiftMaker::Make: cannot open output file: " << mOutDir+inBaseName << endl;
       }
     }
   }
