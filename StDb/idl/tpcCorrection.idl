@@ -14,7 +14,7 @@ struct tpcCorrection {
                 // type = 10 (== log(1. + OffSet/x) + poly(x,npar)
   long   idx; // row index
   long   nrows; // total no. of real rows in the table; For Db interface (where nrows = 50)
-  long   npar;  // npar < 0, X = exp(x) paramterization
+  long   npar;  // npar < 0, X = exp(x) paramterization; abs(npar) >= 100 cut on range [min.max]
   double OffSet;// use for type = 10 (== log(1. + OffSet/x) + poly(x,npar)
   double min;   // fit range
   double max;   // 
