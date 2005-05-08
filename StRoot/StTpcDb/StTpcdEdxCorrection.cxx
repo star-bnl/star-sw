@@ -100,7 +100,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
       npar = 0;
       for (i = 0; i < N; i++, cor++) {
 	if (cor->nrows == 0 && cor->idx == 0) continue;
-	npar += cor->npar; 
+	npar += TMath::Abs(cor->npar); 
 	if (TMath::Abs(cor->OffSet) > 1.e-7 ||
 	    TMath::Abs(cor->min)    > 1.e-7 ||
 	    TMath::Abs(cor->max)    > 1.e-7) npar++;
@@ -140,6 +140,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   Int_t l, N;
   tpcCorrection_st *cor = 0;
   TpcSecRowCor_st *gain = 0;
+  Double_t PhiD = 0;
   for (Int_t k = 0; k <= kTpcLast; k++) {
     if (! TESTBIT(m_Mask, k)) goto ENDL;
     switch (k) {
@@ -158,6 +159,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       break;
     case kTpcPadTBins:
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.Npads*CdEdx.Ntbins));
+      break;
     case    ktpcPressure:
       LogPressure = TMath::Log(gas->barometricPressure);
       l = kTpcOutIn;
@@ -175,8 +177,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       cor = ((St_tpcCorrection *)  m_Corrections[k].Chair->Table())->GetTable();
       if (cor->nrows == 45) l = row - 1;
       cor += l;
-      if (cor->min > 0 && cor->min > ZdriftDistance) return 2;;
-      if (cor->max > 0 && ZdriftDistance > cor->max) return 2;;
+      if (cor->min > 0 && cor->min > ZdriftDistance) return 2;
+      if (cor->max > 0 && ZdriftDistance > cor->max) return 2;
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(l,ZdriftDistance));
       break;
     case    kdXCorrection:
@@ -210,7 +212,22 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
 			 -m_Corrections[k].Chair->CalcCorrection(2*kTpcOutIn+1,CdEdx.DeltaZ));
       break;
     case kEdge:
+      cor =  ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable()+kTpcOutIn;
+      if (TMath::Abs(cor->npar) >= 100) {
+	if (cor->min < 0 && cor->min > CdEdx.PhiR) return 2;;
+	if (cor->max > 0 && CdEdx.PhiR > cor->max) return 2;;
+      }
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.PhiR));
+      break;
+    case kPhiDirection:
+      PhiD = 999.;
+      if (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) PhiD = TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]);
+      cor =  ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable()+kTpcOutIn;
+      if (TMath::Abs(cor->npar) >= 100) {
+	if (cor->min < 0 && cor->min > PhiD    ) return 2;;
+	if (cor->max > 0 && PhiD     > cor->max) return 2;;
+      }
+      dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,PhiD));
       break;
     default:
       break;

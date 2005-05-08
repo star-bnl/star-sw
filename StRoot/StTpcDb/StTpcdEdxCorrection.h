@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.9 2005/01/28 17:17:10 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.10 2005/05/08 23:21:17 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -102,9 +102,9 @@ class StTpcdEdxCorrection : public TObject {
     kSpaceCharge         , // space charge near the wire
     kEdge                , // correction near edge of chamber
     kPhiDirection        , // correction wrt local interception angle 
-    kTpcLast             ,
     kdXCorrection        , //X
     kTpcPadTBins         ,
+    kTpcLast             ,
     kTpcLengthCorrection ,
     kTpcdEdxCor          ,
     kTpcAllCorrections
