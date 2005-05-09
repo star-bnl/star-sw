@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.471 2005/04/19 17:27:20 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.472 2005/05/09 14:19:59 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -550,7 +550,7 @@ Bfc_st BFC1[] = { // standard chains
                                                                               "EEMC fast simulator",kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
-  {"ssd_daq"     ,"","",""                    ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
+  {"ssd_daq"     ,"","","ssddb"               ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
@@ -1190,7 +1190,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
 
   {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent,TpcDb,SvtDb,ssdDb","StiMaker",
-   "libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc",                 "ITTF tracker",kFALSE},
+   "libGui,StEventUtilities,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1222,7 +1222,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                               "EEMC fast simulator",kFALSE},
 
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
-  {"ssd_daq"     ,"","",""                    ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
+  {"ssd_daq"     ,"","","ssddb"               ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
 
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
   {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
@@ -1635,7 +1635,11 @@ Int_t StBFChain::Instantiate()
 	    //pars->useSsd=kTRUE;         // use SSD in Sti
 
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
-	    //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
+
+	    if (GetOption("SsdIT")){
+	      pars->useSsd=kTRUE;       // use SSD in Sti
+	      pars->activeSsd=kTRUE;
+	    }
 	    if (GetOption("FtpcIT")){
 	      pars->useFtpc=kTRUE;
 	      pars->activeFtpc=kTRUE;
