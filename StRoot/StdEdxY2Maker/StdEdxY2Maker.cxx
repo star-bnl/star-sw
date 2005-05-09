@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.50 2005/05/08 23:22:20 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.51 2005/05/09 14:09:58 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -1854,7 +1854,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 void StdEdxY2Maker::PrintdEdx(Int_t iop) {
   const Char_t *Names[3] = {"CdEdx","FdEdx","dEdxS"};
   if (iop < 0 || iop > 2) return;
-  dEdx_t *dEdx;
+  dEdx_t *dEdx = 0;
   Double_t I = 0, avrz = 0;
   Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
   Int_t N60 = NdEdx - (int) (0.4*NdEdx + 0.5);
