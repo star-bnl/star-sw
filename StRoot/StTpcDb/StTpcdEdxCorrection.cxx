@@ -214,8 +214,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
     case kEdge:
       cor =  ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable()+kTpcOutIn;
       if (TMath::Abs(cor->npar) >= 100) {
-	if (cor->min < 0 && cor->min > CdEdx.PhiR) return 2;;
-	if (cor->max > 0 && CdEdx.PhiR > cor->max) return 2;;
+	Double_t PhiR = CdEdx.PhiR;
+	if (cor->min < 0 && cor->min > PhiR) return 8;
+	if (cor->max > 0 && PhiR > cor->max) return 8;
       }
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,CdEdx.PhiR));
       break;
@@ -224,8 +225,8 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
       if (TMath::Abs(CdEdx.xyzD[0]) > 1.e-7) PhiD = TMath::Abs(CdEdx.xyzD[1]/CdEdx.xyzD[0]);
       cor =  ((St_tpcCorrection *) m_Corrections[k].Chair->Table())->GetTable()+kTpcOutIn;
       if (TMath::Abs(cor->npar) >= 100) {
-	if (cor->min < 0 && cor->min > PhiD    ) return 2;;
-	if (cor->max > 0 && PhiD     > cor->max) return 2;;
+	if (cor->min < 0 && cor->min > PhiD    ) return 8;
+	if (cor->max > 0 && PhiD     > cor->max) return 8;
       }
       dE *= TMath::Exp(-m_Corrections[k].Chair->CalcCorrection(kTpcOutIn,PhiD));
       break;
