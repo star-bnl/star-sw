@@ -1,3 +1,7 @@
+// $ID$
+//
+// $LOG$ 
+
 /***************************************************************************
  * Author: christelle roy
  * Description: SSD DB access Maker
