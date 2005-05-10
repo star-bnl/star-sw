@@ -39,7 +39,6 @@ class StSsdDbMaker : public StMaker {
   StSsdDbMaker(const char *name="SsdDb");
   virtual       ~StSsdDbMaker();
   virtual Int_t  Init();
-  virtual Int_t  InitTable();
   virtual Int_t  InitRun(int runumber);
   virtual Int_t  Make();
   virtual Int_t  Finish();
@@ -53,11 +52,11 @@ class StSsdDbMaker : public StMaker {
 
   void setSsdConfig();
   void readSsdConfig();
-  void readSsdDirectConfig();
+  void setSsdDimensions();
+  void readSsdDimensions();
 
   void setSsdGeometry();
   void readSsdGeometry();
-  void readSsdDirectGeometry();
   void setSsdPedestals();
   void readSsdPedestals();
 
@@ -66,7 +65,7 @@ class StSsdDbMaker : public StMaker {
   St_SsdDb_Reader* get_SsdDb_Reader(){return m_Reader;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.3 2004/08/13 06:56:43 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.4 2005/05/10 12:41:42 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 

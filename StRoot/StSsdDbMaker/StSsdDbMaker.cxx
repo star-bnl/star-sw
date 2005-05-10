@@ -26,26 +26,24 @@ StSsdDbMaker* gStSsdDbMaker=NULL;
 St_ObjectSet *ssdSetConfig;
 St_ObjectSet *ssdSetGeom;
 St_ObjectSet *wafersPositionSetGeom;
+St_ObjectSet *dimensions;
 
 ClassImp(StSsdDbMaker)
 //_____________________________________________________________________________
 StSsdDbMaker::StSsdDbMaker(const char *name):StMaker(name)
 {
-  //  mTimeStamp    = "1970-01-01 00:00:00";
-  mTimeStamp    = "2004-07-10 00:00:00";
+  // mTimeStamp    = "2004-07-10 00:00:00";
 
   m_Reader      = NULL;
   gStSsdDbMaker = this;
   mWriter       = NULL;
-
 }
-
 //_____________________________________________________________________________
 StSsdDbMaker::~StSsdDbMaker()
 {
 
  gStSsdDbMaker = NULL; 
-  //delete m_Reader;
+ //delete m_Reader;
 }
 
 //_____________________________________________________________________________
@@ -53,186 +51,95 @@ Int_t StSsdDbMaker::Init()
 {
   if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Init - Start - " << endm;
 
-  gMessMgr->Info() << " StSsdDbMaker :: accessing to databases "<<endm;
-  setSsdDirectDb_Reader();
-    
+
+  setSsdDb_Reader();
   setSsdConfig();
-  readSsdDirectConfig();
-
+  readSsdConfig();   // read!
+  //  setSsdDimensions();
+  //  readSsdDimensions();
   setSsdGeometry();
-  // Call of readSsdDirectGeometry will be done in InitRun()
-  //  readSsdDirectGeometry();
+  readSsdGeometry(); // read!
+
 
   return StMaker::Init();
-  gMessMgr->Info() << "StSsdDbMaker :: Init() - Done - "<<endm;
-}
 
-//_____________________________________________________________________________
-Int_t StSsdDbMaker::InitTable()
-{
-  if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::InitTable" << endm;
-  
-  //setSsdDbWriter(123456789);
-
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
-
-  St_ssdWafersPosition* wafersPosition;
-  wafersPosition  = (St_ssdWafersPosition    *) local("ssd/ssdWafersPosition");
-  St_ssdConfiguration* ssdConfiguration;
-  ssdConfiguration  = (St_ssdConfiguration    *) local("ssd/ssdConfiguration");
-  St_ssdDimensions* ssdDimensions;
-  ssdDimensions  = (St_ssdDimensions   *) local("ssd/ssdDimensions");
-  
-  if (!wafersPosition) 
-    gMessMgr->Error() << "StSsdDbMaker :: No access to wafersPosition table " << endm;
-  
-  if (!ssdConfiguration) 
-    gMessMgr->Error() << "StSsdDbMaker :: No access to ssdConfiguration table " << endm;
-
-  if (!ssdDimensions) 
-    gMessMgr->Error() << "StSsdDbMaker :: No access to ssdDimensions table " << endm;
- 
-    setSsdConfig();
-  readSsdConfig();
-
-  setSsdGeometry();
-  readSsdGeometry();
-
-  return StMaker::Init();
+  gMessMgr->Info() << "StSsdDbMaker::Init() - Done - "<<endm;
 }
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::InitRun(int runumber)
 {
   gMessMgr->Info() << "StSsdDbMaker::InitRun" << endm;
-  gMessMgr->Info() << "StSsdDbMaker::readSsdDirectGeometry done here " << endm;
-  //  readSsdGeometry();
-  readSsdDirectGeometry();
+  gMessMgr->Info() << "StSsdDbMaker::readSsdGeometry done here " << endm;
+
   return kStOk;
 }
 
 //_____________________________________________________________________________
-void StSsdDbMaker::setSsdDirectDb_Reader()  
+void StSsdDbMaker::setSsdDb_Reader() // called in INIT  
 {
   if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::set_SsdDirectDb_Reader" << endm;
-  m_Reader = new St_SsdDb_Reader(),
-  mDbMgr = StDbManager::Instance();
-  mDbMgr -> setVerbose(false);             // set Verbose mode for debug
 
-  //-> connect to the db & get an empty container
-  mConfigGeom  = mDbMgr -> initConfig(dbGeometry,dbSsd);
-  mGeom    = mDbMgr -> initConfig(dbGeometry,dbSsd);
+  m_Reader = new St_SsdDb_Reader();
+  m_Reader->setDataBase(GetDataBase("Geometry/ssd"),0);
 
-  StDbTable* ssdConfigTable = mConfigGeom -> addDbTable("ssdConfiguration");
-  mDbMgr->fetchDbTable(ssdConfigTable);
-  ssdConfiguration_st *config  = (ssdConfiguration_st*) ssdConfigTable->GetTable() ;
-
-  StDbTable* ssdWafersPositionTable = mConfigGeom -> addDbTable("ssdWafersPosition");
-  mDbMgr->fetchDbTable(ssdWafersPositionTable);
-  ssdWafersPosition_st *geom  = (ssdWafersPosition_st*) ssdWafersPositionTable->GetTable() ;
-
-  StDbTable* ssdDimensionsTable = mConfigGeom -> addDbTable("ssdDimensions");
-  mDbMgr->fetchDbTable(ssdDimensionsTable);
-  ssdDimensions_st *dimensions  = (ssdDimensions_st*) ssdDimensionsTable->GetTable() ;
-
-  if (geom) 
-      m_Reader->setWafersPosition(geom);
-  else
-      gMessMgr->Error() << "No  access to wafer position " << endm;
-
-  if(config)
-    m_Reader->setSsdConfiguration(config);
-  else    
-    gMessMgr->Error()   << "No  access to ssdConfiguration table " << endm;
-
-  if(dimensions)
-    m_Reader->setSsdDimensions(dimensions);
-  else    
-    gMessMgr->Error()   << "No  access to ssdDimensions table " << endm;
-
-  
   if(!m_Reader)
     gMessMgr->Error() <<" m_Reader not defined........"<<endm;
 
   gMessMgr->Info() << " Finishing setSsdDirectDb_Reader..........."<<endm;
 }
-
-
 //_____________________________________________________________________________
-void StSsdDbMaker::setSsdDb_Reader()  
-{
-  if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::set_SsdDb_Reader" << endm;
-  m_Reader = new St_SsdDb_Reader();
-
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
-  
-  St_ssdWafersPosition* wafersPosition;
-  wafersPosition  = (St_ssdWafersPosition    *) local("ssd/ssdWafersPosition");
-  
-  
-  St_ssdConfiguration* ssdConfiguration;
-  ssdConfiguration = (St_ssdConfiguration    *) local("ssd/ssdConfiguration");
- 
-  St_ssdDimensions* ssdDimensions;
-  ssdDimensions = (St_ssdDimensions    *) local("ssd/ssdDimensions");
-  
-  if (wafersPosition) 
-      m_Reader->setWafersPosition(wafersPosition);
-  else
-      gMessMgr->Error() << "No  access to wafer position table " << endm;
-
-  if(ssdConfiguration)
-    m_Reader->setSsdConfiguration(ssdConfiguration);
-  else    
-    gMessMgr->Error()   << "No  access to ssdConfiguration table " << endm;
-
-  if(ssdDimensions)
-    m_Reader->setSsdDimensions(ssdDimensions);
-  else    
-    gMessMgr->Error()   << "No  access to ssdDimensions table " << endm;
-}
+//void StSsdDbMaker::setSsdDbWriter(int unixTime)
+//{    
+  // mUnixTimeStamp = unixTime;
+  // mWriter        = new StSsdDbWriter(mUnixTimeStamp);
+//}
 //_____________________________________________________________________________
-void StSsdDbMaker::setSsdDbWriter(int unixTime)
-{    
-  mUnixTimeStamp = unixTime;
-  mWriter        = new StSsdDbWriter(mUnixTimeStamp);
-}
-
+//void StSvtDbMaker::setSvtDbWriter(Text_t *timestamp)
+//{
+//  mTimeStamp = timestamp;
+//  mWriter    = new StSvtDbWriter(mTimeStamp);
+//}
 //_____________________________________________________________________________
 void StSsdDbMaker::setSsdConfig()
 {    
   ssdSetConfig = new St_ObjectSet("StSsdConfig");
   AddConst(ssdSetConfig);  
 }
-
-//_____________________________________________________________________________
-void StSsdDbMaker::readSsdDirectConfig()
-{      
-  gMessMgr->Info() << " StSsdDbMaker::readSsdDirectConfig - Start - " <<endm;
-
-  StDbTable* ssdConfigTable = mConfigGeom -> addDbTable("ssdConfiguration");
-  mDbMgr->fetchDbTable(ssdConfigTable);
-  ssdConfiguration_st *config  = (ssdConfiguration_st*) ssdConfigTable->GetTable() ;
-
-  if (m_Reader)
-    ssdSetConfig->SetObject((TObject*)m_Reader->getConfiguration(config));
-  else
-    gMessMgr->Error() << " Pb in readSsdDirectConfig....m_Reader Still Not Defined" <<endm;
-  
-  gMessMgr->Info() << " StSsdDbMaker::readSsdDirectConfig - End - " <<endm;
-
-}
 //_____________________________________________________________________________
 void StSsdDbMaker::readSsdConfig()
-{    
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
-  
-  St_ssdConfiguration* ssdConfiguration;
-  ssdConfiguration   = (St_ssdConfiguration    *) local("ssd/ssdConfiguration");
+{      
+  gMessMgr->Info() << " StSsdDbMaker::readSsdConfig - Start - " <<endm;
+
+  TObject* o;
   if (m_Reader)
-    ssdSetConfig->SetObject((TObject*)m_Reader->getConfiguration(ssdConfiguration));
+  {
+    o = (TObject*)m_Reader->getConfiguration();
+  }
+  else
+    gMessMgr->Error()<<" Pb in StSsdDbMaker::readSsdConfig : m_Reader Not Defined "<<endm;
+
+  if (o != ssdSetConfig->GetObject()) ssdSetConfig->SetObject(o);
+  gMessMgr->Info() << " StSsdDbMaker::readSsdConfig - End - " <<endm;
+}
+//_____________________________________________________________________________
+void StSsdDbMaker::setSsdDimensions()
+{
+  dimensions = new St_ObjectSet("StSsdDimensions");
+  AddConst(dimensions);
+}
+//_____________________________________________________________________________
+void StSsdDbMaker::readSsdDimensions()
+{
+  gMessMgr->Info() <<" SsdDbMaker::readSsdDimensions - Start - "<<endm;
+
+  TObject* o;
+  if (m_Reader) 
+    o = (TObject*)m_Reader->getDimensions();
+  else
+    gMessMgr->Error()<<" Pb in StSsdDbMaker::readSsdDimensions : m_Reader Not Defined "<<endm;
+
+  if (o != dimensions->GetObject()) dimensions->SetObject(o);
+  gMessMgr->Info() <<" SsdDbMaker::readSsdDimensions - End - "<<endm;
 }
 //_____________________________________________________________________________
 void StSsdDbMaker::setSsdGeometry()
@@ -240,42 +147,21 @@ void StSsdDbMaker::setSsdGeometry()
   wafersPositionSetGeom = new St_ObjectSet("StSsdGeometry");
   AddConst(wafersPositionSetGeom);
 }
-
-//_____________________________________________________________________________
-void StSsdDbMaker::readSsdDirectGeometry()
-{
-  gMessMgr->Info() <<" SsdDbMaker::readSsdDirectGeometry - Start - "<<endm;
-
-  StDbTable* ssdGeomTable = mGeom -> addDbTable("ssdWafersPosition");
-  mDbMgr->fetchDbTable(ssdGeomTable);
-  ssdWafersPosition_st *geom  = (ssdWafersPosition_st*) ssdGeomTable->GetTable();
-
-  if (m_Reader)
-    wafersPositionSetGeom->SetObject((TObject*)m_Reader->getGeometry(geom));
-  else
-    gMessMgr->Error()<<" Pb in StSsdDbMaker::readSsdDirectGeometry : m_Reader Not Defined "<<endm;
-
-  gMessMgr->Info() <<" SsdDbMaker::readSsdDirectGeometry - End - "<<endm;
-}
-
 //_____________________________________________________________________________
 void StSsdDbMaker::readSsdGeometry()
 {
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
-  
-  St_ssdWafersPosition* wafersPosition;
-  wafersPosition  = (St_ssdWafersPosition    *) local("ssd/ssdWafersPosition");
-  
-  St_ssdDimensions* ssdDimensions;
-  ssdDimensions  = (St_ssdDimensions    *) local("ssd/ssdDimensions");
+  gMessMgr->Info() <<" SsdDbMaker::readSsdDirectGeometry - Start - "<<endm;
 
-  if (m_Reader && wafersPosition)
-    wafersPositionSetGeom->SetObject((TObject*)m_Reader->getGeometry(wafersPosition));
+  TObject* o;
+  if (m_Reader) 
+    o = (TObject*)m_Reader->getGeometry();
   else
-      gMessMgr->Info()<<" SetGeom not done "<<endm;
-}
+    gMessMgr->Error()<<" Pb in StSsdDbMaker::readSsdDGeometry : m_Reader Not Defined "<<endm;
 
+  if (o != wafersPositionSetGeom->GetObject()) wafersPositionSetGeom->SetObject(o);
+
+  gMessMgr->Info() <<" SsdDbMaker::readSsdDirectGeometry - End - "<<endm;
+}
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::Make()
 {
