@@ -35,7 +35,7 @@ StSsdDbWriter::StSsdDbWriter(Text_t *timestamp)
 
   // set DB manager
   setDbManager();
-  testwriting();
+  //  testwriting();
 }
 
 //_____________________________________________________________________________
@@ -49,7 +49,7 @@ StSsdDbWriter::StSsdDbWriter(Int_t timestamp)
 
   // set DB manager
   setDbManager();
-  testwriting();
+  //  testwriting();
 }
 
 //_____________________________________________________________________________
@@ -68,13 +68,13 @@ void StSsdDbWriter::setDbManager()
 {
   //->get the singleton manager
   //
-  mDbMgr = StDbManager::Instance();
-  mDbMgr -> setVerbose(false);             // set Verbose mode for debug
+  //  mDbMgr = StDbManager::Instance();
+  //  mDbMgr -> setVerbose(false);             // set Verbose mode for debug
 
   //-> connect to the db & get an empty container
   //
   // mConfigCalib = mDbMgr -> initConfig(dbCalibrations,dbSsd);
-  mConfigGeom  = mDbMgr -> initConfig(dbGeometry,dbSsd);
+  //  mConfigGeom  = mDbMgr -> initConfig(dbGeometry,dbSsd);
   //  mConfigCond  = mDbMgr -> initConfig(dbConditions,dbSsd);
 
   // set the store time. (need to be only once for an ensemble of tables)
