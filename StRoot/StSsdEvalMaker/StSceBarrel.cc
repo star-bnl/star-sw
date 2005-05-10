@@ -3,6 +3,7 @@
 #include "tables/St_sdm_geom_par_Table.h"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sce_dspt_Table.h"
@@ -66,6 +67,33 @@ int StSceBarrel::readPointFromTable(St_g2t_svt_hit *g2t_svt_hit)
    //   float *p        = new float[3];
    float p[3]      = {0,0,0};
    for (i = 0; i< g2t_svt_hit->GetNRows() ; i++)
+    {
+      currWafId=g2t[i].volume_id;
+       if (currWafId > minWaf)
+	{
+	  counter++;
+	  currWafNumb = idWaferToWaferNumb(currWafId);
+	  for (j = 0; j<3; j++) p[j] = g2t[i].p[j];
+ 	  mWafers[currWafNumb]->addHit(g2t[i].id, g2t[i].id, g2t[i].track_p, g2t[i].x, g2t[i].de, p);
+	}
+    }
+   //   delete [] p;
+   return counter;
+ }
+
+int StSceBarrel::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit)
+ {
+   g2t_ssd_hit_st *g2t = g2t_ssd_hit->GetTable();
+   
+   int minWaf      = mSsdLayer*1000;
+   int currWafId   = 0;
+   int currWafNumb = 0;
+   int counter     = 0;
+   int i           = 0 ;
+   int j           = 0 ;
+   //   float *p        = new float[3];
+   float p[3]      = {0,0,0};
+   for (i = 0; i< g2t_ssd_hit->GetNRows() ; i++)
     {
       currWafId=g2t[i].volume_id;
        if (currWafId > minWaf)

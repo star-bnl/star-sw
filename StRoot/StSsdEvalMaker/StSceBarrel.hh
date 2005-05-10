@@ -7,6 +7,7 @@
   
 class St_svg_geom;
 class St_g2t_svt_hit;
+class St_g2t_ssd_hit;
 class St_scf_cluster;
 class St_scm_spt;
 class St_sce_dspt;
@@ -20,6 +21,7 @@ class StSceBarrel
   void setSsdParameters(sdm_geom_par_st  *geom_par);
   void initWafers(St_svg_geom *svg_geom);
   int  readPointFromTable(St_g2t_svt_hit *g2t_svt_hit);
+  int  readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit);
   void convertGlobalFrameToOther();
   int  readClusterFromTable(St_scf_cluster *scf_cluster);
   int  doEvalCluster(sce_ctrl_st *ctrl);

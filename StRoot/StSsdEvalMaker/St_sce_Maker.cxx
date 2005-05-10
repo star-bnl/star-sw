@@ -3,6 +3,9 @@
  ***************************************************************************
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.9  2005/05/10 10:34:54  lmartin
+ * new readPointFromTable method to load g2t_ssd_hit table
+ *
  * Revision 1.8  2003/10/08 15:44:19  suire
  * Removed a bug that happen during last commit
  *
@@ -25,6 +28,7 @@
 
 #include "StSceBarrel.hh" 
 #include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sce_dspt_Table.h"
@@ -98,14 +102,17 @@ Int_t St_sce_Maker::Make()
   if (Debug())  gMessMgr->Debug() << "In St_sce_Maker::Make() ... "
                                << GetName() << endm;
   int res = 0;
-  // 		Create output tables
+
+  // Looking for the geant SSD hit table. If absent, looking for the SVT table
   St_DataSetIter geant(GetInputDS("geant"));
+  St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
 
   St_scf_cluster *scf_cluster = (St_scf_cluster *)GetDataSet("scf_cluster/.data/scf_cluster");
 
   St_scm_spt *scm_spt = (St_scm_spt *)GetDataSet("scm_spt/.data/scm_spt");
 
+  // 		Create output tables
   St_sce_dspt *sce_dspt = new St_sce_dspt("sce_dspt",5000);
   m_DataSet->Add(sce_dspt);
 
@@ -118,8 +125,16 @@ Int_t St_sce_Maker::Make()
   StSceBarrel *mySsd = new StSceBarrel(geom_par);
   cout<<"####        SSD WAFERS INITIALIZATION        ####"<<endl;
   mySsd->initWafers(m_geom);
-  int nSsdHits = mySsd->readPointFromTable(g2t_svt_hit);
-  cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
+  int nSsdHits;
+  if (g2t_ssd_hit)
+    nSsdHits = mySsd->readPointFromTable(g2t_ssd_hit);
+  else if (g2t_svt_hit)
+    nSsdHits = mySsd->readPointFromTable(g2t_svt_hit);
+  else {
+    gMessMgr->Warning()<< "In St_sce_Maker::Make() : NO geant information for the evaluation "<<endm;
+    return kStWarn;
+  }    
+    cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
   mySsd->convertGlobalFrameToOther();
   if (scf_cluster) {
   int nReadCluster = mySsd->readClusterFromTable(scf_cluster);
@@ -359,7 +374,7 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.8 2003/10/08 15:44:19 suire Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.9 2005/05/10 10:34:54 lmartin Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
