@@ -1,6 +1,9 @@
-// $ID$
+// $Id: StSsdDbMaker.cxx,v 1.6 2005/05/10 12:48:06 reinnart Exp $
 //
-// $LOG$ 
+// $Log: StSsdDbMaker.cxx,v $
+// Revision 1.6  2005/05/10 12:48:06  reinnart
+// The new StSsdDbMaker without DirectDataBase Access
+// 
 
 /***************************************************************************
  * Author: christelle roy
