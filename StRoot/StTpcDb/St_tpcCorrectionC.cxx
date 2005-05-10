@@ -10,6 +10,7 @@ Double_t St_tpcCorrectionC::SumSeries(tpcCorrection_st *cor,  Double_t x) {
   Double_t Sum = 0;
   if (! cor) return Sum;
   Int_t N = TMath::Abs(cor->npar)%100;
+  if (N == 0) return Sum;
   static Double_t T0, T1, T2;
   // parameterization variable
   Double_t X;

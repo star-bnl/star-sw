@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.10 2005/05/08 23:21:17 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.11 2005/05/10 19:31:06 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -91,19 +91,19 @@ class StTpcdEdxCorrection : public TObject {
     kTpcSecRowB=kTpcSecRow,//S
     kTpcSecRowC          , //S
     ktpcPressure         , //P
-    ktpcTime             , //T
+    ktpcTime             , //t
     kDrift               , //O
     kMultiplicity        , //M
     kzCorrection         , //Z
-    ktpcMethaneIn        ,
-    ktpcGasTemperature   ,
-    ktpcWaterOut         ,
+    ktpcMethaneIn        , //m
+    ktpcGasTemperature   , //T
+    ktpcWaterOut         , //W 
     kTpcdCharge          , //D
-    kSpaceCharge         , // space charge near the wire
-    kEdge                , // correction near edge of chamber
-    kPhiDirection        , // correction wrt local interception angle 
+    kSpaceCharge         , //C space charge near the wire
+    kEdge                , //E correction near edge of chamber
+    kPhiDirection        , //p correction wrt local interception angle 
     kdXCorrection        , //X
-    kTpcPadTBins         ,
+    kTpcPadTBins         , //d
     kTpcLast             ,
     kTpcLengthCorrection ,
     kTpcdEdxCor          ,
