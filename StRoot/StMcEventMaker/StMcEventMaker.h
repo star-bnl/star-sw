@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.13 2005/04/18 20:12:40 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.14 2005/05/11 20:53:13 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.14  2005/05/11 20:53:13  calderon
+ * Added loading of SSD hits from g2t_ssd_hit table.
+ *
  * Revision 1.13  2005/04/18 20:12:40  calderon
  * Modifications to build the Fgt and Fst classes from the g2t tables.
  *
@@ -80,7 +83,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.13 2005/04/18 20:12:40 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.14 2005/05/11 20:53:13 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -89,6 +92,7 @@ public:
     Bool_t  doPrintCpuInfo;        //! 
     Bool_t  doUseTpc;              //!
     Bool_t  doUseSvt;              //!
+    Bool_t  doUseSsd;              //!
     Bool_t  doUseFtpc;             //!
     Bool_t  doUseRich;             //!
     Bool_t  doUseBemc;             //!

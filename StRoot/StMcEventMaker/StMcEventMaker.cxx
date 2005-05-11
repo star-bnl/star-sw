@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.52 2005/04/18 20:12:39 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.53 2005/05/11 20:53:13 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.53  2005/05/11 20:53:13  calderon
+ * Added loading of SSD hits from g2t_ssd_hit table.
+ *
  * Revision 1.52  2005/04/18 20:12:39  calderon
  * Modifications to build the Fgt and Fst classes from the g2t tables.
  *
@@ -217,6 +220,7 @@ using std::find;
 #include "tables/St_g2t_rch_hit_Table.h"
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_g2t_pix_hit_Table.h"
@@ -239,7 +243,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.52 2005/04/18 20:12:39 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.53 2005/05/11 20:53:13 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -253,6 +257,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doPrintCpuInfo   (kFALSE), 
     doUseTpc         (kTRUE),
     doUseSvt	     (kTRUE),
+    doUseSsd	     (kTRUE),
     doUseFtpc	     (kTRUE),
     doUseRich        (kTRUE),
     doUseBemc        (kTRUE),
@@ -384,6 +389,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_track   *g2t_trackTablePointer   =  (St_g2t_track   *) geantDstI("g2t_track");
     St_g2t_tpc_hit *g2t_tpc_hitTablePointer =  (St_g2t_tpc_hit *) geantDstI("g2t_tpc_hit");
     St_g2t_svt_hit *g2t_svt_hitTablePointer =  (St_g2t_svt_hit *) geantDstI("g2t_svt_hit");
+    St_g2t_ssd_hit *g2t_ssd_hitTablePointer =  (St_g2t_ssd_hit *) geantDstI("g2t_ssd_hit");
     St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
     St_g2t_rch_hit *g2t_rch_hitTablePointer =  (St_g2t_rch_hit *) geantDstI("g2t_rch_hit");
     St_g2t_emc_hit *g2t_emc_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_emc_hit");
@@ -458,6 +464,15 @@ Int_t StMcEventMaker::Make()
 	else
 	    cerr << "Table g2t_svt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	
+	//
+	// Ssd Hit Table
+	//
+	g2t_ssd_hit_st *ssdHitTable = 0;
+	if (g2t_ssd_hitTablePointer)
+	    ssdHitTable = g2t_ssd_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_ssd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
 	//
 	// Rich Hit Table
 	//
@@ -995,6 +1010,52 @@ Int_t StMcEventMaker::Make()
 	} // do use svt
 	
 	//
+	// SSD Hits
+	//
+	if (doUseSsd) {
+	  if (g2t_ssd_hitTablePointer) {
+	    StMcSsdHit* sh = 0;
+	    long NHits = g2t_ssd_hitTablePointer->GetNRows();
+	    long iTrkId = 0;
+	    long nBadVolId = 0;
+	    long ihit;
+	    for(ihit=0; ihit<NHits; ihit++) {
+		if (ssdHitTable[ihit].volume_id < 7000 || ssdHitTable[ihit].volume_id > 9000) {
+		    nBadVolId++;
+		    continue;
+		}
+		sh = new StMcSsdHit(&ssdHitTable[ihit]);
+		if (!mCurrentMcEvent->ssdHitCollection()->addHit(sh)) {// adds hit sh to collection
+		    nBadVolId++;
+		    delete sh; // If the hit couldn't be assigned, delete it.
+		    sh = 0;
+		    continue;
+		}
+		
+		// point hit to its parent and add it to collection
+		// of the appropriate track
+		
+		iTrkId = (ssdHitTable[ihit].track_p) - 1;
+		sh->setParentTrack(ttemp[iTrkId]);
+		ttemp[iTrkId]->addSsdHit(sh);
+		
+	    }
+	    if (Debug()) {
+		cout << "Filled " << mCurrentMcEvent->ssdHitCollection()->numberOfHits() << " SSD Hits" << endl;
+		cout << "Nhits, " << NHits << " rows from table" << endl;
+		if (nBadVolId)
+		    gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+					<< " SSD hits, wrong Volume Id." << endm;
+	    }
+
+	}
+	else {
+	    if (Debug()) cout << "No SSD Hits in this event" << endl;
+	}
+	} // do use ssd
+
+
+	//
 	// FTPC Hits
 	//
 	if (doUseFtpc) {
@@ -1189,7 +1250,7 @@ Int_t StMcEventMaker::Make()
 		    // of the appropriate track
 		    iTrkId = (pixHitTable[ihit].track_p) - 1;
 		    fh->setParentTrack(ttemp[iTrkId]);
-		    //ttemp[iTrkId]->addPixelHit(fh);
+		    ttemp[iTrkId]->addPixelHit(fh);
 		}
 		if (Debug()) {
 		cout << "Filled " << mCurrentMcEvent->pixelHitCollection()->numberOfHits() << " Pixel Hits" << endl;
@@ -1779,6 +1840,28 @@ StMcEventMaker::printEventInfo()
 			gotOneHit = kTRUE;
 		    }
     }
+    
+    StMcSsdHitCollection *ssdColl = mCurrentMcEvent->ssdHitCollection();
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StMcSsdHitCollection at " << (void*) ssdColl               << endl;
+    cout << "Dumping collection size and one hit only."                 << endl;
+    cout << "---------------------------------------------------------" << endl;
+    nhits = ssdColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+
+    if (ssdColl && nhits) {
+      
+      gotOneHit = kFALSE;
+      for (k=0; !gotOneHit && k<ssdColl->numberOfLayers(); k++)
+	if (ssdColl->layer(k)->hits().size()) {
+	  cout << "Ssd Hit" << endl;
+	  cout << *(ssdColl->layer(k)->hits()[0]);
+	  cout << "Parent track of this Hit" << endl;
+	  cout << *(ssdColl->layer(k)->hits()[0]->parentTrack()) << endl;
+	  gotOneHit = kTRUE;
+	}
+    }
+
     StMcTofHitCollection *tofColl = mCurrentMcEvent->tofHitCollection();
     cout << "---------------------------------------------------------" << endl;
     cout << "StMcTofHitCollection at " << (void*) tofColl             << endl;
