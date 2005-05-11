@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.1 2005/04/15 15:11:21 lmartin Exp $
+// $Id: StSsdDaqMaker.h,v 1.2 2005/05/11 13:47:30 reinnart Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.2  2005/05/11 13:47:30  reinnart
+// No connection between StSsdDaqMaker and StSsdDbMaker any more
+//
 // Revision 1.1  2005/04/15 15:11:21  lmartin
 // StSsdDaqMaker
 //
@@ -55,6 +58,7 @@ class StSsdDaqMaker : public StMaker {
   StSsdDaqMaker(const char *name="StSsdDaqMaker");
   virtual       ~StSsdDaqMaker();
   virtual Int_t Init();
+  virtual Int_t InitRun(int runumber);
   virtual Int_t  Make();
 
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
@@ -62,7 +66,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.1 2005/04/15 15:11:21 lmartin Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.2 2005/05/11 13:47:30 reinnart Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 

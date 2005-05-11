@@ -1,6 +1,10 @@
-// $Id: StSsdDaqMaker.cxx,v 1.5 2005/04/22 16:12:02 lmartin Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.6 2005/05/11 13:47:30 reinnart Exp $
 //
-// $Log: StSsdDaqMaker.cxx,v $
+// $log$
+//
+// Id: StSsdDaqMaker.cxx,v 1.5 2005/04/22 16:12:02 lmartin Exp $
+//
+// Log: StSsdDaqMaker.cxx,v $
 // Revision 1.5  2005/04/22 16:12:02  lmartin
 // bug in the ladder index fixed
 //
@@ -77,37 +81,70 @@ Int_t StSsdDaqMaker::Init(){
 
   gMessMgr->Info() << " StSsdDaqMaker::Init() - Read now Databases " << endm;
   
-  if (!gStSsdDbMaker)
-    gMessMgr->Error("StSsdDaqMaker::Init() - ERROR - gStSsdDbMaker==0");
-  else
-  {
-    St_SsdDb_Reader *pSsdDb_Reader = gStSsdDbMaker->get_SsdDb_Reader();
-
-    if (!pSsdDb_Reader)
-      gMessMgr->Error("StSsdDaqMaker::Init() - ERROR - pSsdDb_Reader==0");
-    else
-    {
-      ssdConfiguration_st*  config = pSsdDb_Reader->getSsdConfiguration() ;
-
-      if (!config)
-        gMessMgr->Error("StSsdDaqMaker::Init() - ERROR - ssdConfiguration==0");
-      else
-      {
-        mConfig = pSsdDb_Reader->getConfiguration(config);
-
-        if (mConfig)
-          gMessMgr->Info() <<"StSsdDaqMaker::Init() - SSD Configuration loaded..." << endm;
-        else
-          gMessMgr->Error("StiSsdDetectorBuilder::loadDb() - ERROR - _config==0");
-      }
-    } 
-  }
-
    gMessMgr->Info() << " StSsdDaqMaker::Init() - Done " << endm;
    return StMaker::Init();
 }
 
+//_____________________________________________________________________________
+Int_t StSsdDaqMaker::InitRun(int runumber){
 
+
+  gMessMgr->Info() << " StSsdDaqMaker::InitRun(int runumber) - Read now Databases " << endm;
+
+  St_DataSet *DbConnector = GetDataBase("Geometry/ssd");
+  if (!DbConnector){
+    gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - DbConnector==0");
+    return 0;
+  }
+
+
+  St_ssdConfiguration *configuration = (St_ssdConfiguration*)DbConnector->Find("ssdConfiguration");
+  if (!configuration){
+    gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - ssdConfiguration==0");
+    return 0;
+  }
+
+  ssdConfiguration_st *config  = (ssdConfiguration_st*) configuration->GetTable() ;
+  if (!config){
+    gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - config==0");
+    return 0;
+  }
+
+  mConfig = new StSsdConfig();
+
+  int totLadderPresent = 0;
+
+  for (int ladder = 1; ladder<=config->nMaxLadders;ladder++) 
+    {
+      gMessMgr->Info() <<" Run-IV : Ladder = "<< ladder 
+	  << " on sector = " << config->ladderIsPresent[ladder-1] 
+	  << endm;
+      if (config->ladderIsPresent[ladder-1] != 0)
+	totLadderPresent++;
+      mConfig->setLadderIsActive(ladder,config->ladderIsPresent[ladder-1]);
+    }
+
+  gMessMgr->Info() << " Run-IV : totLadderPresent = "<<totLadderPresent<<endm;  
+  mConfig->setNumberOfLadders(totLadderPresent);
+  mConfig->setNumberOfWafers(config->nMaxWafers/config->nMaxLadders);
+  mConfig->setNumberOfHybrids(2);
+  mConfig->setTotalNumberOfHybrids(2*16*totLadderPresent);
+  mConfig->setTotalNumberOfLadders(config->nMaxLadders);
+  mConfig->setNumberOfStrips(768);
+
+  mConfig->setConfiguration();
+
+  gMessMgr->Info() << "______________________________________________" << endm;
+  gMessMgr->Info() << "StSsdDaqMaker...            Via  Datababase...." << endm;
+  gMessMgr->Info() << "SSDSsdDaqMaker : ...........numberOfSectors = " << config->nMaxSectors << endm;
+  gMessMgr->Info() << "SSDSsdDaqMaker : ...........numberOfLadders = " << totLadderPresent << endm;
+  gMessMgr->Info() << "SSDSsdDaqMaker : ..numberOfWafersPerLadder  = " << config->nMaxWafers/config->nMaxLadders << endm;
+  gMessMgr->Info() << "______________________________________________" << endm;
+
+  gMessMgr->Info() << " StSsdDaqMaker::InitRun(int runumber) - Done " << endm;
+
+
+}
 //_____________________________________________________________________________
 // Make - this method is called in loop for each event
 // 
@@ -209,16 +246,28 @@ Int_t StSsdDaqMaker::Make(){
 				else my_channel=channel;                  //3/11 : decommenter
 			// the ssd mapping tables are inverted at the moment so we have to scan 
 			// them to get the correct channel.
-			if (id_side==1) {
-			  for (int kk=0;kk<maxChannel;kk++) {
-			    if (ssd_ladder_mapN[kk]==channel) my_channel=kk;
+			if ((ladder+1)%2==0) 
+			  {
+			    if (id_side==1) {
+			      for (int kk=0;kk<maxChannel;kk++) {
+				if (ssd_ladder_mapN[kk]==channel) my_channel=kk;
+			      }
+			    }
+			    else {
+			      for (int kk=0;kk<maxChannel;kk++) {
+				if (ssd_ladder_mapP[kk]==channel) my_channel=kk;
+			      }
+			    }
 			  }
-			}
-			else {
-			  for (int kk=0;kk<maxChannel;kk++) {
-			    if (ssd_ladder_mapP[kk]==channel) my_channel=kk;
+			else
+			  {
+			    if (id_side==1) {
+			      my_channel=ssd_ladder_mapN[channel];
+			    }
+			    else {
+			      my_channel=ssd_ladder_mapP[channel];
+			    }
 			  }
-			}
 			strip_number=my_channel-(my_channel/mConfig->getNumberOfStrips())*mConfig->getNumberOfStrips()+1;
 			if (id_side==0)
 			  id_wafer=7000+100*(mConfig->getNumberOfWafers()-(my_channel/mConfig->getNumberOfStrips()))+ladder+1;
