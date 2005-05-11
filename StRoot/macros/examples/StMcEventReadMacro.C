@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.19 2005/04/18 20:13:59 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.20 2005/05/11 21:02:57 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.20  2005/05/11 21:02:57  calderon
+// Add switch for SSD.
+//
 // Revision 1.19  2005/04/18 20:13:59  calderon
 // Add switches to load/or not the Fgt and Fst hits.
 //
@@ -122,6 +125,7 @@ const char *MainFile=
     mcEventReader->doPrintMemoryInfo = false;
     mcEventReader->doUseTpc = true;
     mcEventReader->doUseSvt = true;
+    mcEventReader->doUseSsd = true;
     mcEventReader->doUseFtpc = true;
     mcEventReader->doUseRich = true;
     mcEventReader->doUseBemc = true;
