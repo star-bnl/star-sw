@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHitCollection.hh,v 2.1 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcIstHitCollection.hh,v 2.2 2005/05/11 20:54:29 calderon Exp $
  * $Log: StMcIstHitCollection.hh,v $
+ * Revision 2.2  2005/05/11 20:54:29  calderon
+ * Added persistency: ClassImp, ClassDef and inheritance from StObject.
+ *
  * Revision 2.1  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -18,7 +21,7 @@
 #include "StMcIstLayerHitCollection.hh"
 class StMcIstHit;
 
-class StMcIstHitCollection {
+class StMcIstHitCollection : public StObject {
 public:
 
     StMcIstHitCollection();
@@ -33,5 +36,6 @@ public:
 private:
     enum { mNumberOfLayers = 3 };
     StMcIstLayerHitCollection mLayers[mNumberOfLayers];
+    ClassDef(StMcIstHitCollection,1)
 };
 #endif
