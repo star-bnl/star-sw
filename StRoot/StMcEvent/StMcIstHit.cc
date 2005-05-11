@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.1 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcIstHit.cc,v 2.2 2005/05/11 20:54:28 calderon Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.2  2005/05/11 20:54:28  calderon
+ * Added persistency: ClassImp, ClassDef and inheritance from StObject.
+ *
  * Revision 2.1  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -20,9 +23,11 @@
 #include "StMcIstHit.hh"
 #include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.1 2004/09/14 05:00:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.2 2005/05/11 20:54:28 calderon Exp $";
 
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
+
+ClassImp(StMcIstHit);
 
 StMcIstHit::StMcIstHit(const StThreeVectorF& x,const StThreeVectorF& p,
 			 const float de, const float ds, const long key,

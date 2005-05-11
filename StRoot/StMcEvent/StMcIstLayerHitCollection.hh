@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcIstLayerHitCollection.hh,v 2.1 2004/09/14 05:00:30 calderon Exp $
+ * $Id: StMcIstLayerHitCollection.hh,v 2.2 2005/05/11 20:54:29 calderon Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMcIstLayerHitCollection.hh,v $
+ * Revision 2.2  2005/05/11 20:54:29  calderon
+ * Added persistency: ClassImp, ClassDef and inheritance from StObject.
+ *
  * Revision 2.1  2004/09/14 05:00:30  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -27,11 +30,11 @@
 #define StMcIstLayerHitCollection_hh
 
 #include "StMcContainers.hh"
+#include "StObject.h"
 
 class StMcIstHit;
 
-class StMcIstLayerHitCollection
-{
+class StMcIstLayerHitCollection : public StObject {
 public:
     StMcIstLayerHitCollection();
     ~StMcIstLayerHitCollection();
@@ -43,6 +46,6 @@ public:
 
 private:
     StSPtrVecMcIstHit mHits;
-        
+    ClassDef(StMcIstLayerHitCollection,1)
 };
 #endif

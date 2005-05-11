@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcIstHitCollection.cc,v 2.1 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcIstHitCollection.cc,v 2.2 2005/05/11 20:54:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcIstHitCollection.cc,v $
+ * Revision 2.2  2005/05/11 20:54:29  calderon
+ * Added persistency: ClassImp, ClassDef and inheritance from StObject.
+ *
  * Revision 2.1  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -29,11 +32,9 @@
 #include "StMcIstHitCollection.hh"
 #include "StMcIstHit.hh"
 
-static const char rcsid[] = "$Id: StMcIstHitCollection.cc,v 2.1 2004/09/14 05:00:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstHitCollection.cc,v 2.2 2005/05/11 20:54:29 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcIstHitCollection)
-#endif
 
 StMcIstHitCollection::StMcIstHitCollection() { /* noop */ }
 

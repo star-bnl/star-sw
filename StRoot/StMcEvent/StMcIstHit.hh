@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.1 2004/09/14 05:00:29 calderon Exp $
+ * $Id: StMcIstHit.hh,v 2.2 2005/05/11 20:54:28 calderon Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.2  2005/05/11 20:54:28  calderon
+ * Added persistency: ClassImp, ClassDef and inheritance from StObject.
+ *
  * Revision 2.1  2004/09/14 05:00:29  calderon
  * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
  *
@@ -42,6 +45,7 @@ public:
 private:
 
     static StMemoryPool mPool; //!
+    ClassDef(StMcIstHit,1)
 };
 
 ostream&  operator<<(ostream& os, const StMcIstHit&);
