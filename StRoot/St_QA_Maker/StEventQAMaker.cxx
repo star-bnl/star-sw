@@ -995,7 +995,16 @@ void StEventQAMaker::MakeHistPrim() {
 
     for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
       StTrack *primtrk = primVtx->daughter(i);
-      if (!primtrk || primtrk->bad()) continue;
+      if (!primtrk) continue;
+
+      // May 11, 2005: currently, primVtx->daughter(i) returns only
+      // track from "primary" collection. Must see if there is also
+      // an "estPrimary" version of track.
+      // T. Ullrich says "every estPrimary has a primary", so asking
+      // for estPrimary from node of primary should work.
+      StTrack* estprimtrk = primtrk->node()->track(estPrimary);
+      if (estprimtrk) primtrk = estprimtrk;
+      if (primtrk->bad()) continue;
       hists->m_primtrk_iflag->Fill(primtrk->flag());
       
       if (primtrk->flag()>0) {
@@ -2204,8 +2213,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.67 2005/02/22 19:38:05 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.68 2005/05/11 18:16:06 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.68  2005/05/11 18:16:06  genevb
+// Fixed problem of not using estPrimary tracks
+//
 // Revision 2.67  2005/02/22 19:38:05  genevb
 // Global tracks: use estGlobal if it exists, otherwise fall back to global
 //
