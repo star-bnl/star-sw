@@ -46,11 +46,11 @@ StiSsdDetectorBuilder::~StiSsdDetectorBuilder()
 
 void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
+#ifdef __SsdInChain__
     char name[50];  
     int nRows = 1 ;
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     //load(_inputFile, source);
-
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
     //assert(gStSsdDbMaker);
@@ -182,6 +182,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 	    }
 	}
     }
+#endif
 }
 
 float StiSsdDetectorBuilder::phiForSsdLadder(unsigned int ladder) const
@@ -260,7 +261,7 @@ void StiSsdDetectorBuilder::setDefaults()
 }
 //________________________________________________________________________________
 void StiSsdDetectorBuilder::useVMCGeometry() {
-#ifndef __SsdInChain__
+#ifdef __SsdInChain__
   cout << "StiSsdDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
   SetCurrentDetectorBuilder(this);
   struct Material_t {
