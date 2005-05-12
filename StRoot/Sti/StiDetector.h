@@ -31,6 +31,7 @@ public:
     // con/destructor
     StiDetector();
     virtual ~StiDetector();
+    void reset();
     
     // accessors
     bool isOn() const {return on;}
