@@ -45,7 +45,7 @@ public:
   bool isReset();
 
   void findTracks(){}; 
-  bool find(StiTrack *track, int direction){return false;};
+  bool find(StiTrack *track, int direction,double rmin=0){return false;};
   void extendTracksToVertex(StiHit* vertex){};
   StiVertexFinder * getVertexFinder(){return 0;};
   void setVertexFinder(StiVertexFinder *){};

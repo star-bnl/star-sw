@@ -15,7 +15,7 @@ public:
   /// Find all tracks of the currently loaded event
   virtual void findTracks()=0; 
   /// Find/extend the given track, in the given direction
-  virtual bool find(StiTrack *track, int direction) = 0;
+  virtual bool find(StiTrack *track, int direction, double rmin=0) = 0;
   /// Find the next track 
   virtual StiTrack * findTrack()=0;
   /// Extent all tracks to the given vertex
