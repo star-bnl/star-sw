@@ -4,6 +4,7 @@
 #pragma link C++ class TMemStat-;
 #pragma link C++ class TTreeHelper-;
 #pragma link C++ class THelixTrack-;
+#pragma link C++ class THack-;
 #pragma link C++ class TUnixTime;
 #pragma link C++ class TDirIter;
 #pragma link C++ class TRArray+;
