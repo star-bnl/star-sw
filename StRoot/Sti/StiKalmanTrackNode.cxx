@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.80 2005/05/04 19:33:00 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.81 2005/05/12 18:10:04 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.81  2005/05/12 18:10:04  perev
+ * dL/dCurv more accurate
+ *
  * Revision 2.80  2005/05/04 19:33:00  perev
  * Supress assert
  *
@@ -250,6 +253,7 @@ using namespace std;
 #include "StiTrackingParameters.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
+#include "TString.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
 #define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
@@ -329,6 +333,7 @@ int    StiKalmanTrackNode::fDerivTestOn=-10;
 
 double StiKalmanTrackNode::fDerivTest[kNPars][kNPars];   
 int gCurrShape=0;
+double StiKalmanTrackNode::fgErrFactor=1;
 
 void StiKalmanTrackNode::Break(int kase)
 {
@@ -370,8 +375,6 @@ static const double DY=0.3,DZ=0.3,DEta=0.03,DRho=0.01,DTan=0.05;
     _cCC=DRho*DRho;
     _cTT=DTan*DTan;
   } else {
-    if (_cYY*fak >= eyy) return;
-    if (_cZZ*fak >= ezz) return;
     for (int i=0;i<kNErrs;i++) (&_cXX)[i] *=fak;
   }  
 }
@@ -697,9 +700,9 @@ Break(nCall);
   setDetector(tDet);
   if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
 
-  StiPlacement * plaze = pNode->getDetector()->getPlacement();
-  double pLayerRadius  = plaze->getLayerRadius ();
-  double pNormalRadius = plaze->getNormalRadius();
+//StiPlacement * plaze = pNode->getDetector()->getPlacement();
+//double pLayerRadius  = plaze->getLayerRadius ();
+//double pNormalRadius = plaze->getNormalRadius();
 
   StiPlacement * place = tDet->getPlacement();
   double nLayerRadius  = place->getLayerRadius ();
@@ -707,7 +710,7 @@ Break(nCall);
 
   StiShape * sh = tDet->getShape();
   int shapeCode = sh->getShapeCode();
-  _refX = place->getLayerRadius();
+  _refX = nLayerRadius;
   _layerAngle = place->getLayerAngle();
   double endVal,dAlpha;
   switch (shapeCode) {
@@ -737,11 +740,7 @@ Break(nCall);
   default: assert(0);
   }
 
-// 	sometimes order is wrong, Hack it...(VP)
-  int myDir = dir;
-  if ((pNormalRadius<nNormalRadius) != (pLayerRadius<nLayerRadius)) myDir = !myDir;
-
-  position = propagate(endVal,shapeCode,myDir); 
+  position = propagate(endVal,shapeCode,dir); 
   if (position<0)  return position;
 
   position = locate(place,sh); 
@@ -841,19 +840,22 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
 //   	if track is coming back stop tracking
 //VP  if (test<0) return -3; //Unfortunatelly correct order not garanteed
 //   propagation is not needed, return;
-  if (fabs(dx) < 1.e-6) { _state = kTNProEnd; return 0;}
+//  if (fabs(dx) < 1.e-6) { _state = kTNProEnd; return 0;}
 
   double dsin = _curv*dx;
   sinCA2=sinCA1 + dsin; 
 //	Orientation is bad. Fit is non reliable
-  if (fabs(sinCA2)>0.99) return -4;
+  if (fabs(sinCA2)>0.95) return -4;
   cosCA2   = ::sqrt((1.-sinCA2)*(1.+sinCA2));
 //	Check what sign of cosCA2 must be
   test = (2*dir-1)*_curv*dsin*cosCA1;
   if (test<0) cosCA2 = -cosCA2;
-  if (cosCA2 <=0.2) return -5;
-  assert( cosCA2>0 ); 
-  
+  if (cosCA2 <0) {// -ve cos.
+//	There is a problem: Track is going outside or wrong order of detectors
+//      There is no clear way to distinguish. Use HACK. (VP)
+     if (fabs(sinCA1-sinCA2)<0.5 && cosCA1<0) return -5;
+     cosCA2 = -cosCA2; 
+  }
   sumSin   = sinCA1+sinCA2;
   sumCos   = cosCA1+cosCA2;
   dy = dx*(sumSin/sumCos);
@@ -937,7 +939,9 @@ int StiKalmanTrackNode::nudge(StiHit *hit)
 void StiKalmanTrackNode::propagateError()
 {  
   static int nCall=0; nCall++;
+  Break(nCall);
   assert(fDerivTestOn!=-10 || _state==kTNProEnd);
+  
   if (debug() & 1) 
     {
       counter++;
@@ -949,9 +953,6 @@ void StiKalmanTrackNode::propagateError()
 	   << "c40:"<<_cTY<<" c41:"<<_cTZ<<endl;
     }
 
-  //f = F - 1
-//		it was propagated to 0. Errors the same, return
-  if (fabs(dx)<1.e-6) { _state = kTNReady; return; }
 #ifdef STI_ERROR_TEST
   testError(&_cXX,0);
 #endif// STI_ERROR_TEST
@@ -968,12 +969,10 @@ void StiKalmanTrackNode::propagateError()
 
 // 	fZC == dZ/dRho
   double dang = dl*_curv;
-  double C2LDX;
-  if (fabs(dang) < 0.02) {
-    C2LDX = (sinCA2/2-(dang)*cosCA2/6)*dl*dl;
-  } else {
-    C2LDX = (dx-cosCA2*dl)/_curv;
-  }
+  double C2LDX = dl*dl*(
+               0.5*sinCA2*pow((1+pow(dang/2,2)*sinX(dang/2)),2) +
+                   cosCA2*dang*sinX(dang));
+
   double fZC = _tanl*C2LDX/cosCA2;
 
 //  	fZT == dZ/dTanL; 
@@ -996,6 +995,7 @@ void StiKalmanTrackNode::propagateError()
     assert(_cYY>0 && _cZZ>0 && _cEE>0 && _cCC>0 && _cTT>0);
   }
   assert(fabs(_cXX)<1.e-6);
+  assert(_cYY*_cZZ-_cZY*_cZY>0);
   _cXX = _cYX= _cZX = _cEX = _cCX = _cTX = 0;
   
   testDeriv(f[0]);
@@ -1112,16 +1112,12 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
-#if 0
-      assert(eyy>0);
-#else
       if (eyy <= 0) {
 	cout << "eyy " << eyy << " reject" << endl;
 	return 1e41;
       }
-#endif
-      r00=_cYY+eyy;
-      r01=_cZY;     r11=_cZZ+ezz;
+      r00=_cYY*fgErrFactor+eyy;
+      r01=_cZY*fgErrFactor;     r11=_cZZ*fgErrFactor+ezz;
     }
   else
     {
@@ -1325,6 +1321,7 @@ static int nCall=0; nCall++;
 #ifdef STI_ERROR_TEST
   testError(&_cXX,0);
 #endif //STI_ERROR_TEST
+  assert(_cXX<1e-8);
   double r00,r01,r11;
   const StiDetector* detector = getDetector();
   double v00 = eyy;
@@ -1346,13 +1343,13 @@ static int nCall=0; nCall++;
   static const TRMatrix H(2,5, 1., 0., 0., 0., 0.,
 			       0., 1., 0., 0., 0.);
 #endif
-  double det=r00*r11 - r01*r01;
-  if (!finite(det) || det<1.e-10) {
-    printf("StiKalmanTrackNode::updateNode *** zero determinant %g\n",det);
+  _det=r00*r11 - r01*r01;
+  if (!finite(_det) || _det<1.e-10) {
+    printf("StiKalmanTrackNode::updateNode *** zero determinant %g\n",_det);
     return -11;
   }
   // inverse matrix
-  double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
+  double tmp=r00; r00=r11/_det; r11=tmp/_det; r01=-r01/_det;
   // update error matrix
   double k00=_cYY*r00+_cZY*r01, k01=_cYY*r01+_cZY*r11;
   double k10=_cZY*r00+_cZZ*r01, k11=_cZY*r01+_cZZ*r11;
@@ -1458,7 +1455,7 @@ static int nCall=0; nCall++;
           ,_cYY,_cZZ,_cEE,_cCC,_cTT);
     return -14;
   }
-
+  assert (_cYY*_cZZ-_cZY*_cZY>0);
 
 #ifdef STI_ERROR_TEST
   testError(&_cXX,1);
@@ -1575,11 +1572,13 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   }
 #endif
 
- double oldC = _cosAlpha;
- double oldS = _sinAlpha;
- _cosAlpha=oldC*ca - oldS*sa; 
- _sinAlpha=oldC*sa + oldS*ca; 
-
+// double oldC = _cosAlpha;
+// double oldS = _sinAlpha;
+// _cosAlpha=oldC*ca - oldS*sa; 
+// _sinAlpha=oldC*sa + oldS*ca; 
+   _cosAlpha=cos(_alpha);
+   _sinAlpha=sin(_alpha);
+ 
 #ifdef STI_ERROR_TEST
   testError(&_cXX,1); 
 #endif // STI_ERROR_TEST
@@ -1682,27 +1681,32 @@ void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameter
 
 
 //______________________________________________________________________________
-int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
+int StiKalmanTrackNode::locate(StiPlacement *place,StiShape *sh)
 {
+  enum {kNStd = 5};
   int position;
   double yOff, yAbsOff, detHW, detHD,edge,innerY, outerY, innerZ, outerZ, zOff, zAbsOff;
   //fast way out for projections going out of fiducial volume
   if (fabs(_z)>200. || fabs(_y)>200. ) position = -1;
+  edge  = 2.;
   if (_x<50.)      edge  = 0.3;  
-  else             edge  = 2.;
+  edge = 0; //VP the meaning of edge is not clear
   Int_t shapeCode  = sh->getShapeCode();
   switch (shapeCode) {
   case kDisk:
   case kCylindrical: // cylinder
     yOff    = nice(_alpha - place->getLayerAngle());
     yAbsOff = fabs(yOff);
+    yAbsOff -=kNStd*sqrt((_cXX+_cYY)/(_x*_x+_y*_y));
+    if (yAbsOff<0) yAbsOff=0;
     detHW = ((StiCylindricalShape *) sh)->getOpeningAngle()/2.;
     innerY = outerY = detHW;
     break;
   case kPlanar: 
   default:
     yOff = _y - place->getNormalYoffset();
-    yAbsOff = fabs(yOff);
+    yAbsOff = fabs(yOff) - kNStd*sqrt(_cYY);
+    if (yAbsOff<0) yAbsOff=0;
     detHW = sh->getHalfWidth();
     innerY = detHW - edge;
     //outerY = innerY + 2*edge;
@@ -1981,3 +1985,26 @@ void StiKalmanTrackNode::PrintStep() {
   cout << comment << "\t" << commentdEdx << endl;
   ResetComment();
 }
+//________________________________________________________________________________
+void   StiKalmanTrackNode::print(const char *opt) const
+{
+  const char *txt = "xyzect";
+  if (!opt || !opt[0]) opt = txt;
+  TString ts;
+  if (!isValid()) ts+="*";
+  if (  getHit()) ts+="h";
+  printf("%p(%s)",(void*)this,ts.Data());
+  for (int j=0;txt[j];j++) {
+    if (!strchr(opt,txt[j])) continue;
+    printf("\t%c=%g ",txt[j],(&_x)[j]);
+  }
+    printf("\n");
+}    
+    
+    
+    
+    
+    
+
+
+
