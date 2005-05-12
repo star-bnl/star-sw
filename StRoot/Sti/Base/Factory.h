@@ -10,31 +10,68 @@
   creation or instantiation of a given type of class. The class is templated.
   The template represents the base class to be intanstiated and served by the
   factory. Implementation (derived class) may serve objects from class derived
-  based on the "Factorized" template class.
+  based on the "Abstract" template class.
 */
-template<class Factorized>
-class Factory : public Named
+class BFactory : public Named
 {
- public:
+public:
   
-  Factory(const string& name)
-  : Named(name)
-    {}
+  BFactory(const string& name): Named(name)
+    {fCurCount=0; fMaxCount = 1000000;fUseCount=0;}
 
-  virtual ~Factory()
-    {}
-
-  ///Initialize this factory
-  virtual void initialize()=0;
-
-  ///Reset this factory
-  virtual void reset()=0;
+  virtual ~BFactory()
+    {;}
 
   ///Clear/delete all objects owned by this factory
   virtual void clear()=0;
 
-  ///Get a pointer to instance of objects served by this factory.
-  virtual Factorized * getInstance()=0;
+  ///Reset this factory
+  virtual void reset()=0;
+
+  ///Free an object for reuse 
+  virtual void free(void *obj)=0;
+
+  ///Free an object for reuse 
+  static void Free(void *obj);
+
+  void setMaxIncrementCount(int maxCount)	{fMaxCount=maxCount;}
+  int getMaxIncrementCount() const		{return fMaxCount;  }
+  int getCurrentSize()  const 			{return fCurCount;  }
+  int getCurrentCount() const 			{return fCurCount;  }
+protected:
+  int fMaxCount;
+  int fCurCount;
+  int fUseCount;
+  
 };
+
+template <class Abstract>
+class Factory : public BFactory
+{
+public:
+  
+  Factory(const string& name): BFactory(name)
+    {;}
+
+  virtual ~Factory()
+    {;}
+
+  ///Free an object for reuse 
+  virtual void free(Abstract *obj)=0;
+  virtual void free(void *obj)=0;
+
+  ///Get a pointer to instance of objects served by this factory.
+  virtual Abstract *getInstance()=0;
+
+};
+
+inline void BFactory::Free(void *obj)
+{
+   long *v = ((long*)obj) - 1;
+   if (!*v) v--;
+   assert((*v)&1L);
+   BFactory *f = (BFactory*)((*v)-1);
+   f->free(obj);
+}
 
 #endif
