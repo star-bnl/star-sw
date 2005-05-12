@@ -113,7 +113,21 @@ int StiTrackNode::cylCross(double r, const double dx[4],double Rho,double out[4]
  memcpy(out,res,sizeof(res));
  return 0;
  }
+//______________________________________________________________________________
  
+double StiTrackNode::sinX(double x)
+{
+  double x2 = x*x;
+  if (x2>0.5) return (sin(x)-x)/x2/x;
+  double nom = -1./6;
+  double sum = nom;
+  for (int it=4;1;it+=2) {
+    nom = -nom*x2/(it*(it+1));
+    sum +=nom;
+    if (fabs(nom) <= 1e-10*fabs(sum)) break;
+  }
+  return sum;
+} 
  
   
   

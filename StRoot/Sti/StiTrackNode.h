@@ -24,8 +24,8 @@ public:
   void   print (const char* opt="") const;
 private:
   enum {kMaxSize=10};
-  StiHit *mHits[kMaxSize];
-  double  mChi2[kMaxSize];
+  StiHit *mHits[kMaxSize+1];
+  double  mChi2[kMaxSize+1];
 };
 
 
@@ -56,6 +56,7 @@ enum eTrackNodeStatus {
   const StiDetector *getDetector() const; 
   void  setDetector(const StiDetector *detector);
   double getChi2 () const		{return _chi2;} 		
+  double getDet () const		{return _det ;} 		
   void setChi2(double chi2)		{_chi2  =chi2;}
   int getState() const 			{return _state;}
  void setReady()  			{ _state=kTNReady;}
@@ -63,11 +64,13 @@ enum eTrackNodeStatus {
 protected:   
 static void errPropag6(double G[21],const double F[6][6],int nF);
 static int  cylCross(double r, const double dx[4],double Rho,double out[4]);
+static double  sinX(double x);  // (sin(x)-x)/x**3
 
   StiTrackNode()			{reset();}    
   int _state;
   const StiDetector * _detector; 
   StiHit* _hit;
+  double _det;
   double _chi2;
 };
 
