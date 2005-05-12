@@ -1,3 +1,4 @@
+#if 0
 #ifndef Vectorized_H_Included 
 #define Vectorized_H_Included 
 #include <vector>
@@ -103,3 +104,4 @@ OBJECT*& Vectorized<OBJECT>::operator[](int index)
 */
 #endif
 
+#endif//0

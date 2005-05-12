@@ -1,3 +1,4 @@
+#if 0
 //VectorizedFactory
 
 #ifndef VectorizedFactory_HH
@@ -86,7 +87,7 @@ VectorizedFactory<Concrete,Abstract>::VectorizedFactory(const string& name,
   :  Factory<Abstract>(name),
      _originalSize(original),
      _incrementalSize(incremental),
-     _maxIncrementCount(maxInc),
+     _maxIncrementCount(maxInc*2),	//*2 temporary hack
      _currentEntry(0),
      _incrementCount(0)
 {
@@ -219,3 +220,4 @@ void VectorizedFactory<Concrete,Abstract>::instantiate(int n)
 
 
 #endif
+#endif//0
