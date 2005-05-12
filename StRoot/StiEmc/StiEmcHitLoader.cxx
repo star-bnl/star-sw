@@ -60,12 +60,3 @@ void StiEmcHitLoader::loadHits(StEvent* source,
     }  
 }
 
-#if 0
-void StiEmcHitLoader::loadMcHits(StMcEvent* source,
-				 bool useMcAsRec,
-				 Filter<StiTrack> * trackFilter, 
-				 Filter<StiHit> * hitFilter)
-{
-  return;
-}
-#endif //0	
