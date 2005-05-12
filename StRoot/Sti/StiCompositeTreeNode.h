@@ -102,6 +102,7 @@ public:
     virtual ~StiCompositeTreeNode();
     
     //Sets
+    void reset(){;}
 
     ///Set the name of the node
     void setName(const string&);
