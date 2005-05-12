@@ -1,8 +1,12 @@
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
+ * $Id: St_sce_Maker.cxx,v 1.10 2005/05/12 08:22:11 lmartin Exp $
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.10  2005/05/12 08:22:11  lmartin
+ * cvs tags added and histograms in the .hist branch
+ *
  * Revision 1.9  2005/05/10 10:34:54  lmartin
  * new readPointFromTable method to load g2t_ssd_hit table
  *
@@ -68,30 +72,31 @@ Int_t St_sce_Maker::Init(){
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
 // 		Create SCM histograms
-  devXl0 = new TH1F("xl_0","Xl [0] deviation (microns):",100,-200,200);
-  devXl0 -> SetYTitle("Nbre of Points");
-  devXl0 -> SetXTitle("Deviation (microns)");
-
-  devXl1 = new TH1F("xl_1","Xl [1] deviation (microns):",50,-6000,6000);
-  devXl0 -> SetYTitle("Nbre of Points");
-  devXl0 -> SetXTitle("Deviation (microns)");
-
-  devNrg = new TH1F("Energy","Energy deviation (MeV):",50,-50,50);
-  devXl0 -> SetYTitle("Nbre of Points");
-  devXl0 -> SetXTitle("Deviation (MeV)");
-
-  devXg0 = new TH1F("xg_0","Xg [0] deviation (microns):",100,-200,200);
-  devXl0 -> SetYTitle("Nbre of Points");
-  devXl0 -> SetXTitle("Deviation (microns)");
-
-  devXg1 = new TH1F("xg_1","Xg [1] deviation (microns):",100,-200,200);
-  devXl0 -> SetYTitle("Nbre of Points");
-  devXl0 -> SetXTitle("Deviation (microns)");
-
-  devXg2 = new TH1F("xg_2","Xg [2] deviation (microns):",50,-6000,6000);
-  devXl0 -> SetYTitle("Nbre of Points");
-  devXl0 -> SetXTitle("Deviation (microns)");
-
+  if (IAttr(".histos")) {
+    devXl0 = new TH1F("xl_0","Xl [0] deviation (microns):",100,-200,200);
+    devXl0 -> SetYTitle("Nbre of Points");
+    devXl0 -> SetXTitle("Deviation (microns)");
+    
+    devXl1 = new TH1F("xl_1","Xl [1] deviation (microns):",50,-6000,6000);
+    devXl1 -> SetYTitle("Nbre of Points");
+    devXl1 -> SetXTitle("Deviation (microns)");
+    
+    devNrg = new TH1F("Energy","Energy deviation (MeV):",50,-50,50);
+    devNrg -> SetYTitle("Nbre of Points");
+    devNrg -> SetXTitle("Deviation (MeV)");
+    
+    devXg0 = new TH1F("xg_0","Xg [0] deviation (microns):",100,-200,200);
+    devXg0 -> SetYTitle("Nbre of Points");
+    devXg0 -> SetXTitle("Deviation (microns)");
+    
+    devXg1 = new TH1F("xg_1","Xg [1] deviation (microns):",100,-200,200);
+    devXg1 -> SetYTitle("Nbre of Points");
+    devXg1 -> SetXTitle("Deviation (microns)");
+    
+    devXg2 = new TH1F("xg_2","Xg [2] deviation (microns):",50,-6000,6000);
+    devXg2 -> SetYTitle("Nbre of Points");
+    devXg2 -> SetXTitle("Deviation (microns)");
+  }
   resetSceStats();
 
   return StMaker::Init();
@@ -172,7 +177,7 @@ Int_t St_sce_Maker::Make()
     makeScmStats();
     showScmStats();
   }
-  makeScmHistograms();
+  if (IAttr(".histos")) makeScmHistograms();
 
   return kStOK;
 }
@@ -340,7 +345,8 @@ void St_sce_Maker::makeScmHistograms()
   St_DataSetIter sce_iter(m_DataSet);
   St_sce_dspt *sce_dspt = 0;
   sce_dspt = (St_sce_dspt *) sce_iter.Find("sce_dspt"); 
-
+  gMessMgr->Info()<< "In St_sce_Maker::makeScmHistograms() : sce_dspt nrows= "<<sce_dspt->GetNRows()<<endm;
+ 
 // 		Fill histograms
   if (sce_dspt->GetNRows()){
       sce_dspt_st *dSpt = sce_dspt->GetTable();
@@ -359,22 +365,19 @@ void St_sce_Maker::makeScmHistograms()
 //_____________________________________________________________________________
 void St_sce_Maker::writeScmHistograms()
 {
-  ScmFile = new TFile("event/scmEval_histos.root","RECREATE");
-
+  gMessMgr->Info()<< "In St_sce_Maker::writeScmHistograms() : saving histograms "<<endm;
   devXl0->Write();
   devXl1->Write();
   devNrg->Write();
   devXg0->Write();
   devXg1->Write();
   devXg2->Write();
-
-  ScmFile->Close();
 }
 //_____________________________________________________________________________
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.9 2005/05/10 10:34:54 lmartin Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.10 2005/05/12 08:22:11 lmartin Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -382,6 +385,7 @@ void St_sce_Maker::PrintInfo()
 Int_t St_sce_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "
                                << GetName() << endm; 
-  writeScmHistograms();
+  gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "<< GetName() << endm; 
+  if (IAttr(".histos")) writeScmHistograms();
   return kStOK;
 }

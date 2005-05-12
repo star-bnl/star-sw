@@ -1,3 +1,10 @@
+// $Id: StSceListComp.hh,v 1.2 2005/05/12 08:22:10 lmartin Exp $
+//
+// $Log: StSceListComp.hh,v $
+// Revision 1.2  2005/05/12 08:22:10  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #ifndef STSCELISTCOMP_HH
 #define STSCELISTCOMP_HH
 #include <stdlib.h>

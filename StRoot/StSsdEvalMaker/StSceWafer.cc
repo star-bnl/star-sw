@@ -1,3 +1,10 @@
+// $Id: StSceWafer.cc,v 1.2 2005/05/12 08:22:11 lmartin Exp $
+//
+// $Log: StSceWafer.cc,v $
+// Revision 1.2  2005/05/12 08:22:11  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #include "StSceWafer.hh"
 
 StSceWafer::StSceWafer(int nid)

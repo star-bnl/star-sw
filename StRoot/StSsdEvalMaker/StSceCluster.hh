@@ -1,3 +1,10 @@
+// $Id: StSceCluster.hh,v 1.2 2005/05/12 08:22:09 lmartin Exp $
+//
+// $Log: StSceCluster.hh,v $
+// Revision 1.2  2005/05/12 08:22:09  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #ifndef STSCECLUSTER_HH
 #define STSCECLUSTER_HH
 

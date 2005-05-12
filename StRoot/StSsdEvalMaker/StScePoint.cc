@@ -1,3 +1,10 @@
+// $Id: StScePoint.cc,v 1.2 2005/05/12 08:22:10 lmartin Exp $
+//
+// $Log: StScePoint.cc,v $
+// Revision 1.2  2005/05/12 08:22:10  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #include "StScePoint.hh"
 
 StScePoint::StScePoint(int rPoint, int rIdMcHit, int rIdMcTrack, int rIdWaf,  float *rXg, float rDe, float *rAngle)

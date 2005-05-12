@@ -1,3 +1,10 @@
+// $Id: StScePoint.hh,v 1.2 2005/05/12 08:22:11 lmartin Exp $
+//
+// $Log: StScePoint.hh,v $
+// Revision 1.2  2005/05/12 08:22:11  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #ifndef STSCEPOINT_HH
 #define STSCEPOINT_HH
 #include <Stiostream.h>

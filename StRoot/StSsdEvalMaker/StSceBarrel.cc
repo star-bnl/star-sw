@@ -1,3 +1,10 @@
+// $Id: StSceBarrel.cc,v 1.3 2005/05/12 08:22:03 lmartin Exp $
+//
+// $Log: StSceBarrel.cc,v $
+// Revision 1.3  2005/05/12 08:22:03  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #include "StSceBarrel.hh"
 
 #include "tables/St_sdm_geom_par_Table.h"

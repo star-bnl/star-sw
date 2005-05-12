@@ -1,3 +1,10 @@
+// $Id: StSceListCluster.cc,v 1.2 2005/05/12 08:22:10 lmartin Exp $
+//
+// $Log: StSceListCluster.cc,v $
+// Revision 1.2  2005/05/12 08:22:10  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #include "StSceListCluster.hh"
 
 StSceListCluster::StSceListCluster()

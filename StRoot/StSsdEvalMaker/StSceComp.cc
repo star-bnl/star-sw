@@ -1,3 +1,10 @@
+// $Id: StSceComp.cc,v 1.2 2005/05/12 08:22:09 lmartin Exp $
+//
+// $Log: StSceComp.cc,v $
+// Revision 1.2  2005/05/12 08:22:09  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #include "StSceComp.hh"
 
 StSceComp::StSceComp(int rComp, int rProb, int rGhostOrTrue, int rKindPackage, int rIdMatch, int rIdWaf, float *rD2e, float *rDxg, float *rDxl)

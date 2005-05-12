@@ -1,3 +1,10 @@
+// $Id: StSceWafer.hh,v 1.2 2005/05/12 08:22:11 lmartin Exp $
+//
+// $Log: StSceWafer.hh,v $
+// Revision 1.2  2005/05/12 08:22:11  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #ifndef STSCEWAFER_HH
 #define STSCEWAFER_HH
 #include <stdlib.h>
