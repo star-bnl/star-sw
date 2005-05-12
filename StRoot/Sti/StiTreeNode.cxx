@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "StiTreeNode.h"
+#include "Factory.h"
 
 
 //______________________________________________________________________________
@@ -30,14 +31,19 @@ void StiTreeNode::remove(int childIndex)
   if (childIndex>=0) 	{ //remove children
     node =children[childIndex];children[childIndex]=0;
     if (!childIndex) 	{children[0]=children[1]; children[1]=0;}
-
+    if (!node) 			return;
+    if (node->parent!=this)	return;
+    node->remove(0);
+    
   } else 		{//remove parent
     node = parent; parent=0;
+    if (!node) 			return;
+    node->remove(0);
+    node->remove(0);
+    node->remove(-1);
   }
-
-  if(!node) return;
-  node->remove(0);
-//Free(node);
+  node->reset();
+  BFactory::Free(node);
 }
 
 //______________________________________________________________________________
@@ -146,7 +152,10 @@ StiTreeNode *StiTreeNode::getLastNode() const
 {
   const StiTreeNode *node = this;
   const StiTreeNode *next = 0;
-  while ((next = node->getNextNode())) {node=next;}
+  while ((next = node->getNextNode())) {
+    node=next;
+    assert(node!=this);
+  }
   return (StiTreeNode*)node;
 }
 //______________________________________________________________________________
@@ -154,7 +163,10 @@ StiTreeNode *StiTreeNode::getFirstNode()  const
 {
   const StiTreeNode *node = this;
   const StiTreeNode *back = 0;
-  while ((back = node->getPrevNode())) {node=back;}
+  while ((back = node->getPrevNode())) {
+    node=back;
+    assert(node!=this);
+  }
   return (StiTreeNode*)node;
 }
 //______________________________________________________________________________
