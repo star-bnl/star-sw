@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.61 2005/04/11 17:27:59 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.61 2005/04/11 17:27:59 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.62 2005/05/12 17:56:17 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.62 2005/05/12 17:56:17 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.62  2005/05/12 17:56:17  perev
+ * refit tuned
+ *
  * Revision 2.61  2005/04/11 17:27:59  perev
  * Error status added to fit()
  *
@@ -247,8 +250,6 @@ void StiKalmanTrack::reset()
 {
   firstNode = 0;
   lastNode  = 0;
-  trackingDirection = kOutsideIn;
-  fittingDirection  = kOutsideIn;
   mSeedHitCount = 0;
   m      = -1.;
   mFlag  = 0;
@@ -287,7 +288,6 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, dou
 {
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Started"<<endl;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  assert(n);
   n->initialize(h,alpha,eta,curvature,tanl);
   
   add(n,direction);
@@ -373,7 +373,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   StiKalmanTrackNode * inner = getInnerMostNode();
 
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
-  inner->propagate(0.,0,trackingDirection);
+  inner->propagate(0.,0,kOutsideIn);
   double p[3];
   double e[6];
   inner->getMomentum(p,e);
@@ -607,7 +607,6 @@ double StiKalmanTrack::getTrackRadLength() const
   double x1, x2, x3;  //lengths in different media
   double totalR=0.;
   //Are we going in or out? Makes a difference which material to call
-  bool trackIn = (kOutsideIn==getTrackingDirection());
 
   StiKTNBidirectionalIterator tNode = begin();
 
@@ -647,16 +646,9 @@ double StiKalmanTrack::getTrackRadLength() const
 	   <<"\n\t\tMaterial: "<<nextNode->getDetector()->getMaterial()
 	   <<"\n\t\tLength: "<<x3
            << endl;
-      if(trackIn)
 	{
 	  if (thisNode->getX0()>0)    totalR += x1/thisNode->getX0();
 	  if (nextNode->getGasX0()>0) totalR += x2/nextNode->getGasX0();
-	  if (nextNode->getX0()>0)    totalR += x3/nextNode->getX0();
-	}
-      else
-	{
-	  if (thisNode->getX0()>0)    totalR += x1/thisNode->getX0();
-	  if (thisNode->getGasX0()>0) totalR += x2/thisNode->getGasX0();
 	  if (nextNode->getX0()>0)    totalR += x3/nextNode->getX0();
 	}
       //cache nextNode for next iteration...
@@ -688,8 +680,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
  }
   
   StiKalmanTrackNode *node;
-  int jnot = (trackingDirection==kOutsideIn)? inot:!inot;
-  StiKTNBidirectionalIterator it =(jnot) ? begin():rbegin();
+  StiKTNBidirectionalIterator it =(inot) ? begin():rbegin();
   for (;(node=it());it++){
     if (!node->isValid()) 				continue;
     StiHit *hit = node->getHit();
@@ -753,6 +744,7 @@ bool  StiKalmanTrack::isPrimary() const
 }
 
 
+//_____________________________________________________________________________
 ///return vector of nodes with hits
 vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
 {
@@ -835,7 +827,7 @@ bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate
   StiKalmanTrackNode *lastGoodNode = getInnOutMostNode(0,0);
   StiKalmanTrackNode * tNode = trackNodeFactory->getInstance();
   tNode->reset();
-  int status = tNode->propagate(lastGoodNode,alternate,trackingDirection);
+  int status = tNode->propagate(lastGoodNode,alternate,kOutsideIn);
   cout << "propagate status:"<<status<<endl;
   return false;
 }
@@ -843,8 +835,6 @@ bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate
 
 bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
-  if (trackingDirection==kInsideOut) 
-    throw logic_error("SKT::extendToVertex(const StiHit*) -E- Extension to vtx only allowed for OutsideIn");
   double chi2;
   StiKalmanTrackNode * sNode=0;
   StiKalmanTrackNode * tNode=0;
@@ -860,13 +850,12 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 
   localVertex.rotate(sNode->getAlpha());
   tNode = trackNodeFactory->getInstance();
-  tNode->reset();
   StiHit *myHit;
   //cout << "SKT::extendToVertex() -I- x,y,z:"<< localVertex.x() 
   //     << " " <<  localVertex.y() << " " << localVertex.z() << endl;
   //cout << "SKT::extendToVertex() -I- sNode->getX():"<<sNode->getX()<<endl;
   //cout << "SKT::extendToVertex() -I-0 tNode->getX():"<< tNode->getX()<<endl;
-  if (tNode->propagate(sNode, &localVertex,trackingDirection))
+  if (tNode->propagate(sNode, &localVertex,kOutsideIn))
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
@@ -912,6 +901,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
           trackExtended = (tNode->updateNode()==0);
           
 	  if (trackExtended) add(tNode,kOutsideIn);
+          else               trackNodeFactory->free(tNode);             
 #ifdef Sti_DEBUG      
 	cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
 #endif
@@ -935,10 +925,19 @@ static int nCall=0; nCall++;
   //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
   try 
     {
+      if (getNNodes(3)<4) return false;
+      status = fit(kOutsideIn);
+      if (getNNodes(3)<4) return false;
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
-      if (trackFinder->find(this,kOutsideIn)) {
+      double radSvt= 25.;
+      if (trackFinder->find(this,kOutsideIn,radSvt)) {
           status = refit(); if(status) return false;
 	  trackExtended = getNNodes(3)>5;
+      }	
+
+      if (trackFinder->find(this,kOutsideIn,0.)) {
+          status = refit(); if(status) return false;
+	  trackExtended = trackExtended || getNNodes(3)>5;
       }	
     }
   catch (runtime_error & error)
@@ -1037,9 +1036,6 @@ ostream& operator<<(ostream& os, const StiKalmanTrack& track)
     {
       os << *((StiTrack *) &track);
       os <<"List of nodes" << endl;
-
-      //      bool trackIn = (kOutsideIn==track.getTrackingDirection());
-
       StiKTNBidirectionalIterator tNode = track.begin();
       StiKTNBidirectionalIterator eNode = track.end();
       //set initial conditions for tNode, the 'current' node;
@@ -1072,7 +1068,8 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToBeam()
   //return null if there is no node to extrapolate from.
   if (!innerMostNode) return 0;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  if (n->propagateToBeam(innerMostNode,trackingDirection)) return n;
+  if (n->propagateToBeam(innerMostNode,kOutsideIn)) return n;
+  trackNodeFactory->free(n);
   return 0;
 }
 
@@ -1083,7 +1080,8 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
   //return null if there is no node to extrapolate from.
   if (!outerMostNode) return 0;
   StiKalmanTrackNode *n = trackNodeFactory->getInstance();
-  if (n->propagateToRadius(outerMostNode,radius,trackingDirection)>=0) return n;
+  if (n->propagateToRadius(outerMostNode,radius,kOutsideIn)) return n;
+  trackNodeFactory->free(n);
   return 0;
 }
 
@@ -1110,27 +1108,75 @@ void StiKalmanTrack::setFirstLastNode(StiKalmanTrackNode * node)
 //_____________________________________________________________________________
 int StiKalmanTrack::refit() 
 {
-  enum {kMaxIter=10};
-
-//??  int nn = getNNodes(3);
-//??  if (nn<5) return -1;
-  StiKalmanTrackNode *inn = getInnerMostNode(3);
+static int nCall=0; nCall++;
+  enum {kMaxIter=30};
+static double convFactor=1.;
+  double errFactor=1;
+  int nNBeg = getNNodes(3);
+  if (nNBeg<3) return -1;
+  StiKalmanTrackNode *inn,*out;
+  inn = getInnerMostNode(3);
   int fail = 1,status;
   double pars[kNPars]; memcpy(pars,inn->getPars(),sizeof(pars));
-
-  for (int iter=0;iter<kMaxIter;iter++) {
-    status = fit(kInsideOut);  if (status) return 1;
-    status = fit(kOutsideIn);  if (status) return 2;
-//??    if (getNNodes(3)<5) return -2;
-    if (!inn->isValid())	continue;
-    if (inn->getChi2()>1000.) 	continue;
-    double est=0;
+  double est;
+  int iter;
+  for (iter=0;iter<kMaxIter;iter++) {
+    est = -1.;
+    inn = getInnerMostNode(0);
+    inn->resetError(convFactor);
+    errFactor += 1./convFactor;
+    StiKalmanTrackNode::setErrFactor(errFactor);
+    status = fit(kInsideOut);  if (status) break;
+    StiKalmanTrackNode::setErrFactor(1.);
+    out = getOuterMostNode(0);
+    out->resetError(convFactor);
+    errFactor += 1./convFactor;
+    StiKalmanTrackNode::setErrFactor(errFactor);
+    status = fit(kOutsideIn);  if (status) break;
+    StiKalmanTrackNode::setErrFactor(1.);
+    inn = getInnerMostNode(3);
+    est=0;
     for (int i=1;i<kNPars;i++) {
 	est += pow(pars[i]-inn->getPars()[i],2)/inn->getDiag(i);} 
 
     memcpy(pars,inn->getPars(),sizeof(pars));
-      if (est<0.01) { fail=0; break;}
+      if (est<0.05) { fail=0; break;}
   }
+  StiKalmanTrackNode::setErrFactor(1.);
+
+  StiKTNBidirectionalIterator first = begin();
+  StiKTNBidirectionalIterator last  = end();
+  StiKTNBidirectionalIterator source;
+  double chi2;
+  double maxChi2 = fitpars->getMaxChi2();
+
+  for (source=first;source!=last;source++) {
+    StiKalmanTrackNode *node = &(*source);
+    node->resetError(errFactor);
+    if (!node->isValid())	continue;
+    StiHit *hit = node->getHit();
+    if (!hit) 			continue;
+    chi2 = node->getChi2();
+    if (chi2>1e3) 		continue;
+    chi2 = node->evaluateChi2(hit);
+    if (chi2>maxChi2) chi2=1e55;
+    node->setChi2(chi2);
+  }
+
+  int nNEnd = getNNodes(3);
+//  if (nNBeg!=nNEnd) {printf("iter=%d est=%g nNodes %d %d nCall=%d\n",iter,est,nNBeg,nNEnd,nCall);}
   return fail;
 }
+//_____________________________________________________________________________
+void StiKalmanTrack::print(const char *opt) const
+{
+  printf("\n Track %p\n",(void*)this);
 
+  StiKTNBidirectionalIterator it;
+  int n=0;
+  for (it=begin();it!=end();++it) {
+    n++;
+    printf("%3d - ",n);
+    (*it).print(opt);
+  }
+}
