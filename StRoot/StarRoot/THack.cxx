@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: THack.cxx,v 1.3 2004/04/07 17:19:20 perev Exp $
+ * $Id: THack.cxx,v 1.4 2005/05/12 18:36:29 perev Exp $
  *
  ***************************************************************************
  *
@@ -117,10 +117,32 @@ void THack::HistRelease(TDirectory *dir)
    }
 }
 
-
-
-
-
-
+//______________________________________________________________________________
+int THack::LineToD(const char *line, const char **lend,
+                   int nItems, double *Items,TString *Names)
+{
+  int nIt=0;
+  const char *l=line; char *ll,*le=0;	
+  while	((l = strstr(l,"="))) {
+    l++;
+    if(nIt>nItems) 	break;
+    if(Names)Names[nIt]="";
+    double d = strtod(l,&ll);
+    if (l==ll) 	continue;
+    le=ll;
+    Items[nIt]=d;
+    nIt++;
+    if (!Names) continue;
+    int n=0;
+    for (int jj=-2;ll+jj>=line;jj--) {
+      int space = isspace(l[jj]);
+      if (space && !n) continue;
+      if (!strchr("_()[]",l[jj]) && !isalnum(l[jj])) break;
+      Names[nIt-1].Insert(0,l+jj,1);n++;
+    }
+  }  
+  if (lend) *lend=le;
+  return nIt;
+}
 
 
