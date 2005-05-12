@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.2 2005/05/11 20:54:28 calderon Exp $
+ * $Id: StMcIstHit.hh,v 2.3 2005/05/12 22:38:30 potekhin Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.3  2005/05/12 22:38:30  potekhin
+ * Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
+ * and side() to return ladder side (1=inner,2=outer)
+ *
  * Revision 2.2  2005/05/11 20:54:28  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -30,18 +34,23 @@ class g2t_ist_hit_st;
 
 class StMcIstHit : public StMcHit {
 public:
-    StMcIstHit();
+  StMcIstHit();
   StMcIstHit(const StThreeVectorF&,const StThreeVectorF&,
-	       const float, const float, const long, const long, StMcTrack*);
-    StMcIstHit(g2t_ist_hit_st*);
-    ~StMcIstHit();
+	     const float, const float, const long, const long, StMcTrack*);
+  StMcIstHit(g2t_ist_hit_st*);
+  ~StMcIstHit();
 
-    void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
+  void* operator new(size_t)     { return mPool.alloc(); }
+  void  operator delete(void* p) { mPool.free(p); }
 
-    unsigned long layer() const; // 
-    unsigned long ladder() const; // 
-    
+  unsigned long layer() const; // 
+  unsigned long ladder() const; // 
+
+  // Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
+  // and side() to return ladder side (1=inner,2=outer)
+  unsigned long wafer() {return ((mVolumeId/10000)%20);}
+  unsigned long side() {return (((mVolumeId%200)/100)+1);} //1=inner; 2=outer;
+
 private:
 
     static StMemoryPool mPool; //!
