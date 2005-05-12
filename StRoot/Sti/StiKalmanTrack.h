@@ -91,8 +91,6 @@ class StiKalmanTrack : public StiTrack
     obtained from the factory as this eliminates (or at the very least minimizes the risk) of memory leaks.
   */
   StiKalmanTrack() :
-    trackingDirection(kOutsideIn),
-    fittingDirection(kOutsideIn),
     firstNode(0),
     lastNode(0),
     mSeedHitCount(0),
@@ -237,18 +235,8 @@ class StiKalmanTrack : public StiTrack
    void  setLastNode (StiKalmanTrackNode *n) { lastNode  = n; };
    void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };   
    void  setFirstLastNode(StiKalmanTrackNode *n);   
-
-   /// Returns the direction (kInsideOut, kOutsideIn) used in the reconstruction of this track.
-   StiDirection getTrackingDirection() const { return  trackingDirection;};
    
-   /// Returns the direction (kInsideOut, kOutsideIn) used in the fit of this track.
-   StiDirection getFittingDirection() const { return   fittingDirection;};
    
-   /// Sets the direction (kInsideOut, kOutsideIn) used in the reconstruction of this track.
-   void setTrackingDirection(StiDirection direction) { trackingDirection = direction;}
-   
-   /// Sets the direction (kInsideOut, kOutsideIn) used in the fit of this track.
-   void setFittingDirection(StiDirection direction) { fittingDirection = direction;}
    /// Method used to add a hit to this track
    virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction);
    
@@ -289,6 +277,7 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
+  void print(const char *opt="") const;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
 
@@ -298,8 +287,6 @@ protected:
   static StiKalmanTrackFitterParameters * fitpars;
   static Factory<StiKalmanTrackNode> * trackNodeFactory;
   
-  StiDirection trackingDirection;
-  StiDirection fittingDirection;
   StiKalmanTrackNode * firstNode;
   StiKalmanTrackNode * lastNode;
 
