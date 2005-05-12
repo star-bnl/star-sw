@@ -36,26 +36,23 @@ StiKalmanTrackNode::Break(nCall);
   StiHit * targetHit;
   StiKalmanTrackNode * targetNode; // parent node
   const StiDetector * targetDet;  // parent detector
-  StiDirection trackingDirection =  track->getTrackingDirection(); 
   
   StiKTNBidirectionalIterator first;
   StiKTNBidirectionalIterator last;
   StiKTNBidirectionalIterator source;
-  bool direction = (trackingDirection==fitDirection);
   double chi2;
   int status = 0,nerr =0;
-  if (direction) {
+  if (!fitDirection) {
     first = track->begin();
     last  = track->end();
   } else {
     last  = track->rend();
     first = track->rbegin();
   }
-  if (debug()) cout << "StiKalmanTrackFitter::fit set direction T/F= " << trackingDirection << "\t" << fitDirection << endl;
+  if (debug()) cout << "StiKalmanTrackFitter::fit direction = "  << fitDirection << endl;
 // 1st count number of accepted already good nodes
   int nGoodNodes = track->getNNodes(3);
-  if (!nGoodNodes) 			return 1;
-  double errFactor = double(nGoodNodes+1)/nGoodNodes;
+  if (nGoodNodes<3) 			return 1;
 
 
   StiKalmanTrackNode *pNode = 0;
@@ -69,7 +66,7 @@ StiKalmanTrackNode::Break(nCall);
       targetHit = targetNode->getHit();
       double oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
 static int myKount=0;myKount++;
-      if (!pNode && ((!targetHit)||!targetNode->isValid())) continue;
+      if (!pNode && !targetNode->isValid()) continue;
       //begin refit at first hit
       status = 0;
       if (pNode) {
@@ -84,7 +81,8 @@ static int myKount=0;myKount++;
 	if (debug()) {
 	  targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
 	  targetNode->PrintpT("S");}
-        pNode = targetNode;		continue;
+//        pNode = targetNode;		continue;
+        pNode = targetNode;		
       }
 // target node has parameters now but not fitted
 // if targetNode has hit, get chi2 and update track parameters accordingly
@@ -96,12 +94,10 @@ static int myKount=0;myKount++;
         targetNode->setChi2(1e52);
         if (tryNode.nudge(targetHit))	{nerr++; break;}
 	chi2 = tryNode.evaluateChi2(targetHit);
-        if ((chi2>_pars.getMaxChi2()))	{nerr++; break;}	//Chi2 is bad
+        if ((chi2>_pars.getMaxChi2())){nerr++; break;}	//Chi2 is bad
         status = tryNode.updateNode();
         if (status) 			{nerr++; break;}
         tryNode.setChi2(chi2);
-        tryNode.resetError(errFactor);
-        assert(tryNode.getEyy()>tryNode.getCyy());
 
         *targetNode=tryNode;
       }while(0);//end fit block
@@ -111,6 +107,9 @@ static int myKount=0;myKount++;
       if (debug()) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
     }//end continue block
   }//end for of nodes
+
+
+
   if (nerr>kMaxNErr) return nerr; else return 0;
 }
 
