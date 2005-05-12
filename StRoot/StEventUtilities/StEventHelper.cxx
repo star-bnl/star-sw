@@ -1079,6 +1079,8 @@ Int_t StColorFilterHelper::Accept(StPoints3DABC *pnt, Color_t&color, Size_t&size
 ClassImp(StVertexHelper)
 StVertexHelper::StVertexHelper(const StVertex *vtx)
 { SetVertex(vtx);} 
+StVertexHelper::StVertexHelper(const StEvent *evt)
+{ SetVertex(evt->primaryVertex(0));} 
 //______________________________________________________________________________
 void StVertexHelper::SetVertex(const StVertex *vtx){fVtx = vtx;}    
 int  StVertexHelper::GetType()               {return (int)fVtx->type();}
@@ -1113,25 +1115,32 @@ StTrackHelper::~StTrackHelper()
   delete fTHlx[0];delete fTHlx[1];
 }
 void StTrackHelper::SetTrack(const StTrack *trk){fTrk=trk;fHits=0;GetNHits();}    
-int  StTrackHelper::GetType()                 	{return fTrk->type();}
-        int     StTrackHelper::GetFlag()      	{return fTrk->flag();}
-        int     StTrackHelper::GetCharge()    	{return fTrk->geometry()->charge();}
-const StVertex *StTrackHelper::GetParent()    	{return fTrk->vertex();}	 
-      float     StTrackHelper::GetImpact()    	{return fTrk->impactParameter();}
-      float     StTrackHelper::GetCurv()      	{return fTrk->geometry()->curvature();}
-      float     StTrackHelper::GetLength()    	{return fTrk->length();}
-const StThreeVectorF &StTrackHelper::GetFirstPoint(){return fTrk->geometry()->origin();}
-const StThreeVectorF &StTrackHelper::GetLastPoint() {return fTrk->outerGeometry()->origin();}
-const StThreeVectorF &StTrackHelper::GetMom()       {return fTrk->geometry()->momentum();}
+int  StTrackHelper::GetType()  			const	{return fTrk->type();}
+        int     StTrackHelper::GetFlag()	const 	{return fTrk->flag();}
+        int     StTrackHelper::GetCharge() 	const	{return fTrk->geometry()->charge();}
+const StVertex *StTrackHelper::GetParent() 	const  	{return fTrk->vertex();}	 
+      float     StTrackHelper::GetImpact() 	const 	{return fTrk->impactParameter();}
+      float     StTrackHelper::GetCurv() 	const  	{return fTrk->geometry()->curvature();}
+      float     StTrackHelper::GetLength() 	const 	{return fTrk->length();}
+const StThreeVectorF &StTrackHelper::GetFirstPoint() const {return fTrk->geometry()->origin();}
+const StThreeVectorF &StTrackHelper::GetLastPoint()  const {return fTrk->outerGeometry()->origin();}
+const StThreeVectorF &StTrackHelper::GetMom()        const {return fTrk->geometry()->momentum();}
 //______________________________________________________________________________
-StPhysicalHelixD *StTrackHelper::GetHelix(int idx)
+StPhysicalHelixD *StTrackHelper::GetHelix(int idx) const
 {
   if (!fHelx[idx]) fHelx[idx]= new StPhysicalHelixD;
   *fHelx[idx] = (idx==0) ? fTrk->geometry()->helix():fTrk->outerGeometry()->helix();
   return fHelx[idx];
 }
 //______________________________________________________________________________
-const StPtrVecHit *StTrackHelper::GetHits()
+THelixTrack *StTrackHelper::GetTHelix(int idx) const
+{
+   StPhysicalHelixD *hlx = GetHelix(idx);
+   fTHlx[idx] = StEventHelper::MyHelix(fTHlx[idx],hlx);
+   return fTHlx[idx];
+}		
+//______________________________________________________________________________
+const StPtrVecHit *StTrackHelper::GetHits() const
 {
   if (fHits) 	return fHits;
   const StTrackDetectorInfo *tdi = fTrk->detectorInfo();
@@ -1140,14 +1149,14 @@ const StPtrVecHit *StTrackHelper::GetHits()
   		return fHits;
 }
 //______________________________________________________________________________
-int StTrackHelper::GetNHits()
+int StTrackHelper::GetNHits() const
 { 
   if (fHits) return fHits->size(); 
   GetHits();
   return (fHits)? fHits->size():0; 
 }
 //______________________________________________________________________________
-const StHit *StTrackHelper::GetHit(int idx)
+const StHit *StTrackHelper::GetHit(int idx) const
 {
   if (idx<0) 		return 0;
   if (idx>=GetNHits()) 	return 0;
@@ -1155,7 +1164,7 @@ const StHit *StTrackHelper::GetHit(int idx)
   return fHits->at(idx);
 }
 //______________________________________________________________________________
-Float_t  *StTrackHelper::GetPoints(int &npoints)
+Float_t  *StTrackHelper::GetPoints(int &npoints) const
 {
   static int ndebug=0; ndebug++;
   npoints=0;

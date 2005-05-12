@@ -35,6 +35,8 @@ class StVertexHelper: public TObject
 {
 public:
   StVertexHelper(const StVertex *vtx=0);
+  StVertexHelper(const StEvent  *evt);
+ ~StVertexHelper(){};
        void    SetVertex(const StVertex *vtx);    
         int    GetType();
         int    GetFlag();
@@ -54,27 +56,30 @@ public:
       StTrackHelper(const StTrack *trk=0);
      ~StTrackHelper();
        void     SetTrack(const StTrack *trk);    
-        int     GetType();
-        int     GetFlag();
-        int     GetCharge();
-const StVertex *GetParent();     
-      float     GetImpact();
-      float     GetCurv();
-      float     GetLength();
-const StThreeVectorF &GetFirstPoint();
-const StThreeVectorF &GetLastPoint();
-const StThreeVectorF &GetMom();
+        int     GetType() 	const;
+        int     GetFlag() 	const;
+        int     GetCharge()	const;
+const StVertex *GetParent()	const;     
+      float     GetImpact()     const;
+      float     GetCurv()       const;
+      float     GetLength()     const;
+const StThreeVectorF &GetFirstPoint() 	const;
+const StThreeVectorF &GetLastPoint()	const;
+const StThreeVectorF &GetMom() 	const;
+      float     GetPsi() const {return GetMom().phi();}
+      float     GetDip() const {return atan2(GetMom().z(),GetMom().perp());}
 
-        int     GetNHits();
-const StHit    *GetHit(int idx);
-const StPtrVecHit *GetHits();
-      StPhysicalHelixD *GetHelix(int idx=0);
-      Float_t  *GetPoints(int &npoints);
+        int     GetNHits()	const;
+const StHit    *GetHit(int idx) const;
+const StPtrVecHit *GetHits() 	const;
+      StPhysicalHelixD *GetHelix(int idx=0) 	const;
+      THelixTrack *GetTHelix(int idx=0) 	const;
+      Float_t  *GetPoints(int &npoints) 	const;
 private:
 const StTrack *fTrk;
-const StPtrVecHit *fHits;
-StPhysicalHelixD  *fHelx[2];
-THelixTrack       *fTHlx[2];
+mutable const StPtrVecHit *fHits;
+mutable StPhysicalHelixD  *fHelx[2];
+mutable THelixTrack       *fTHlx[2];
 ClassDef(StTrackHelper,0)
 };
 

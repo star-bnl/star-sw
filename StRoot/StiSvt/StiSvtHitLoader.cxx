@@ -53,21 +53,21 @@ void StiSvtHitLoader::loadHits(StEvent* source,
   if (!_hitContainer) throw runtime_error("StiSvtHitLoader::loadHits() -F- _hitContainer==0 ");
   int hitCounter = 0;
   for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel)
-    {
+  {
     StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
     if (!barrelhits) break;
     for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder)
-      {
+    {
       StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
       if (!ladderhits) break;
       for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer)
-        {
+      {
         StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
         if (!waferhits) break;
         const StSPtrVecSvtHit& hits = waferhits->hits();
         StiHitTest hitTest;
         for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it)
-          {
+        {
           if (!*it) throw runtime_error("StiSvtHitLoader::loadHits() -W- *it==0!");
           hit = static_cast<StSvtHit*>(*it);
           if (!hit) throw runtime_error("StiSvtHitLoader::loadHits() -W- hit==0!");
@@ -77,23 +77,25 @@ void StiSvtHitLoader::loadHits(StEvent* source,
           int ladder = getLadder(svtLayer,svtLadder);
           detector = _detector->getDetector(layer,ladder);
           if (!detector) throw runtime_error("StiSvtHitLoader::loadHits() -W- detector==0!");
-          if (hit && detector && hit->flag()<4)
-            {
-            stiHit = _hitFactory->getInstance();
-            stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(),hit->position().z(),hit->charge() );
-            hitTest.add(hit->position().x(),hit->position().y(),hit->position().z());
-            _hitContainer->add( stiHit );
-	    hitCounter++;
-            }
-          }
-        if (hitTest.width() > 0.1) {
-	  printf("**** SVT hits too wide (%g) barrel=%d ladder%d wafer%d\n"
-	        ,hitTest.width(),barrel,ladder,wafer);
+          if (!(hit->flag()<4)) continue;
+          stiHit = _hitFactory->getInstance();
+          stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(),hit->position().z(),hit->charge() );
+          hitTest.add(stiHit->x(),stiHit->y(),stiHit->z());
+          _hitContainer->add( stiHit );
+	  hitCounter++;
         }
-	
-        }
+        if (hitTest.getN()< 10) continue;
+        double w=hitTest.width();
+        double dx = detector->getPlacement()->getNormalRadius()-hitTest.center()[0];;
+        double ay = hitTest.yAngle()*180/3.1415;
+        double az = hitTest.zAngle()*180/3.1415;
+
+        if (w< 0.1 && fabs(dx)<1 && fabs(ay)<1 && fabs(az)<1) continue;
+	printf("**** SVT geom problem: barrel=%d ladder%d wafer%d\n",barrel,ladder,wafer);
+        printf("**** SVT dX=%g aY=%g aZ=%g\n\n",dx,ay,az);
       }
     }
+  }
   cout <<"StiSvtHitLoader::loadHits() -I- SVT Hits added:"<<hitCounter<<endl;
   cout <<"StiSvtHitLoader::loadHits() -I- Hit Container size:"<<_hitContainer->size()<<endl;
   cout <<"StiSvtHitLoader::loadHits() -I- Done"<<endl;
