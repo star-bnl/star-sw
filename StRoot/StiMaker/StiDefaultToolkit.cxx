@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.24 2004/10/08 14:50:11 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.25 2005/05/12 18:31:02 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.25  2005/05/12 18:31:02  perev
+ * New factory IMP
+ *
  * Revision 2.24  2004/10/08 14:50:11  pruneau
  * changed hit factory allocation
  *
@@ -80,7 +83,7 @@
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/EditableParameter.h"
-#include "Sti/Base/VectorizedFactory.h"
+#include "Sti/Base/StiFactory.h"
 #include "Sti/StiMcTrack.h"
 #include "Sti/StiHit.h"
 #include "Sti/StiHitContainer.h"
@@ -187,8 +190,8 @@ Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
   if (_trackFilterFactory)
     return _trackFilterFactory;
   cout << "StiDefaultToolkit::getTrackFilterFactory() -I- Instantiating StiTrackFilterFactory" << endl;
-  _trackFilterFactory = new VectorizedFactory<StiDefaultTrackFilter, 
-    Filter<StiTrack>  >("StiDefaultTrackFilterFactory",3,5,2);
+  _trackFilterFactory = StiFactory<StiDefaultTrackFilter, 
+    Filter<StiTrack>  >::myInstance();
   return _trackFilterFactory;
 }
 
@@ -197,9 +200,9 @@ Factory<EditableParameter>  * StiDefaultToolkit::getParameterFactory()
   if (_parameterFactory)
     return _parameterFactory;
   if (_guiEnabled)
-    _parameterFactory = new VectorizedFactory<RootEditableParameter,EditableParameter>("EditableParameterFactory",100,20,10);
+    _parameterFactory = StiFactory<RootEditableParameter,EditableParameter>::myInstance();
   else
-    _parameterFactory = new VectorizedFactory<EditableParameter,EditableParameter>("EditableParameterFactory",100,20,10);
+    _parameterFactory = StiFactory<EditableParameter,EditableParameter>::myInstance();
   return _parameterFactory;
 }
 
@@ -207,7 +210,7 @@ Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
   if (_hitFactory)
     return _hitFactory;
-  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,50000,15);
+  _hitFactory = StiFactory<StiHit,StiHit>::myInstance();
   return _hitFactory;
 }
 
@@ -218,11 +221,11 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
   cout << "StiDefaultToolkit::getTrackFactory() -I- "; 
   if (_guiEnabled)
     {
-      _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,10000,10);
+      _trackFactory = StiFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>::myInstance();
     }
   else // no gui needed
     {	
-      _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,10000,10);
+      _trackFactory = StiFactory<StiKalmanTrack,StiKalmanTrack>::myInstance();
     }
   return _trackFactory;
 }
@@ -233,9 +236,9 @@ Factory<StiMcTrack>* StiDefaultToolkit::getMcTrackFactory()
     return _mcTrackFactory;
   cout << "StiDefaultToolkit::getMcTrackFactory() -I- "; 
   if (_guiEnabled)
-      _mcTrackFactory = new VectorizedFactory<StiRootDrawableMcTrack,StiMcTrack>("StiRootDrawableMcTrackFactory",10000,5000,10);
+      _mcTrackFactory = StiFactory<StiRootDrawableMcTrack,StiMcTrack>::myInstance();
   else // no gui needed
-      _mcTrackFactory = new VectorizedFactory<StiMcTrack,StiMcTrack>("StiMcTrackFactory",10000,5000,10);
+      _mcTrackFactory = StiFactory<StiMcTrack,StiMcTrack>::myInstance();
   return _mcTrackFactory;
 }
 
@@ -245,9 +248,9 @@ Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
     return _detectorFactory;
   cout << "StiDefaultToolkit::getDetectorFactory() -I- Instantiating Detector Factory"; 
   if (_guiEnabled)
-    _detectorFactory = new VectorizedFactory<StiRootDrawableDetector,StiDetector>("StiRDDetectorFactory",2000,500,10);
+    _detectorFactory = StiFactory<StiRootDrawableDetector,StiDetector>::myInstance();
   else
-    _detectorFactory = new VectorizedFactory<StiDetector,StiDetector>("StiDetectorFactory",2000,500,10);
+    _detectorFactory = StiFactory<StiDetector,StiDetector>::myInstance();
   return _detectorFactory;
 }
 
@@ -255,8 +258,8 @@ Factory< StiCompositeTreeNode<StiDetector>  >* StiDefaultToolkit::getDetectorNod
 {
   if (_detectorNodeFactory)
     return _detectorNodeFactory;
-  _detectorNodeFactory = new VectorizedFactory< StiCompositeTreeNode<StiDetector>  , 
-    StiCompositeTreeNode<StiDetector>  >(" StiCompositeTreeNode<StiDetector>Factory",1000,500,10);
+  _detectorNodeFactory = StiFactory< StiCompositeTreeNode<StiDetector>  , 
+    StiCompositeTreeNode<StiDetector>  >::myInstance();
   return _detectorNodeFactory;
 }
 
@@ -265,7 +268,8 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
 {
   if (_trackNodeFactory)
     return _trackNodeFactory;
-  _trackNodeFactory = new VectorizedFactory<StiKalmanTrackNode,StiKalmanTrackNode>("StiKalmanTrackNodeFactory",40000,40000,50);
+  _trackNodeFactory = StiFactory<StiKalmanTrackNode,StiKalmanTrackNode>::myInstance();
+  _trackNodeFactory->setMaxIncrementCount(4000000);
   StiKalmanTrack::setKalmanTrackNodeFactory(_trackNodeFactory);
   return _trackNodeFactory;	
 }
