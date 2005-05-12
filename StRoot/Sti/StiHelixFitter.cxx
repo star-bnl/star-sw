@@ -50,7 +50,7 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
       {
 	//throw runtime_error("StiHelixFitter::fit(const StiHitVector& hits) -E- hits.size()<3");    {
 	cout <<"StiHelixFitter::refit(). ERROR:\t";
-	cout <<"Circle Fit Failed.  abort"<<endl;
+	cout <<"Circle Fit Failed. "<<endl;
 	mValid=false;
 	return false;
       }
@@ -81,7 +81,7 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
     
     if (!line_rc) {
 	cout <<"StiHelixFitter::refit(). ERROR:\t";
-	cout <<"Line Fit Failed.  abort"<<endl;
+	cout <<"Line Fit Failed.  "<<endl;
 	mValid=false;
 	return false;
     }
