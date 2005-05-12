@@ -7,9 +7,8 @@
 //______________________________________________________________________________
 void StiHitTest::reset()
 {
-  fN=0; fW = -1.;
-  memset(fX,   0,sizeof(fX));
-  memset(fM[0],0,sizeof(fM));
+  memset(fBeg,   0,fEnd-fBeg+1);
+  fW[0]=-1;
 }
 
 //______________________________________________________________________________
@@ -29,10 +28,10 @@ void StiHitTest::add(double x[3])
   }}
 }
 //______________________________________________________________________________
-double StiHitTest::width()
+void StiHitTest::doIt()
 {
-  if (!fN) return 0.;
-  if (fW>=0.) return fW;
+  if (!fN) 		return;
+  if (fW[0]>=0.) 	return;
   for (int i=0;i<3*4;i++) {fX[i]/=fN;}
   for (int i=0;i<3;i++) {
     for (int j=0;j<3;j++) {
@@ -40,9 +39,39 @@ double StiHitTest::width()
   }}
   TMatrixDSym Sym(3,fM[0],"");
   TVectorD vals(3);
-  Sym.EigenVectors(vals);
+  TMatrixD vecs = Sym.EigenVectors(vals);
 //  vals.Print();
-  fW =  sqrt(fabs(vals.Min()));
-  return fW;
+  memcpy(fW,   vals.GetMatrixArray(),sizeof(fW));
+  vecs.Transpose(vecs);
+  memcpy(fV[0],vecs.GetMatrixArray(),sizeof(fV));
 }
+//______________________________________________________________________________
+double StiHitTest::width(int idx)
+{
+  doIt();
+  return fW[idx];
+}
+
+//______________________________________________________________________________
+const double *StiHitTest::vector(int idx)
+{
+  doIt();
+  return fV[idx];
+}
+//______________________________________________________________________________
+double StiHitTest::yAngle() const
+{
+   double dy = fV[2][1]; double dx = fV[2][0];
+   if (dx<0) {dx=-dx;dy=-dy;}
+   return atan2(dy,dx);
+}
+//______________________________________________________________________________
+double StiHitTest::zAngle() const
+{
+   double dz = fV[2][2]; double dx = fV[2][0];
+   if (dx<0) {dx=-dx;dz=-dz;}
+   return atan2(dz,dx);
+}
+
+
 
