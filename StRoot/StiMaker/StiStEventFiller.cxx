@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.57 2005/04/11 17:42:39 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.58 2005/05/12 18:32:20 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.58  2005/05/12 18:32:20  perev
+ * Temprary hack, save residuals
+ *
  * Revision 2.57  2005/04/11 17:42:39  perev
  * Temporary residuals saving added
  *
@@ -1148,24 +1151,35 @@ float StiStEventFiller::impactParameter(StTrack* track)
       float resY = node->getY()-stiHit->y();
       float eYY  = node->getEyy();
       float cYY  = node->getCyy();
-      cYY = 1./(1/cYY-1/eYY);
-      if (cYY<0) cYY=0;
-      resY += resY*cYY/eYY;
+      float tYY = (1/cYY-1/eYY);
+      if (tYY<1e-6) tYY=1e-6;
+      tYY = 1./tYY;
+#if 0
+      resY = resY*tYY/cYY;
+#endif
       float resZ = node->getZ()-stiHit->z();
       float eZZ  = node->getEzz();
       float cZZ  = node->getCzz();
-      cZZ = 1./(1/cZZ-1/eZZ);
-      if (cZZ<0) cZZ=0;
-      resZ += resZ*cZZ/eZZ;
+      float tZZ = (1/cZZ-1/eZZ);
+      if (tZZ<1e-6) tZZ=1e-6;
+      tZZ = 1./tZZ;
+#if 0
+      resZ = resZ*tZZ/cZZ;
+#endif
+      int iresY = 4095;
+      if (fabs(resY) <4.095) iresY = (int)(fabs(resY)*1000); 
+      int iresZ = 4095;
+      if (fabs(resZ) <4.095) iresZ = (int)(fabs(resZ)*1000);
       
-      int iresY = (int)fabs(resY)*1000; if (iresY>4095) iresY=4095;
-      int iresZ = (int)fabs(resZ)*1000; if (iresZ>4095) iresZ=4095;
+      int icY   = (int)(sqrt(tYY )*1000); if (icY > 2047) icY  =2047;
+      int icZ   = (int)(sqrt(tZZ )*1000); if (icZ > 2047) icZ  =2047;
+      float forY = iresY + 4096*icY;      if (resY<0)     forY = -forY;
+      float forZ = iresZ + 4096*icZ;      if (resZ<0)     forZ = -forZ;
 
-      int icY   = (int)sqrt(cYY )*1000; if (icY > 2047) icY  =2047;
-      int icZ   = (int)sqrt(cZZ )*1000; if (icZ > 2047) icZ  =2047;
-      float forY = iresY + 4096*icY;    if (resY<0)     forY = -forY;
-      float forZ = iresZ + 4096*icZ;    if (resZ<0)     forZ = -forZ;
-
-      StThreeVectorF v3(psi,forY,forZ);
+      double chi2 = node->getChi2();   if (chi2>1000) chi2=1000;
+      int ic2 = (int)(sqrt(chi2)*100); if (ic2 > 2047) ic2  =2047;
+      int ips = (int)(fabs(psi)*1000); if (ips > 4095) ips  =4095;
+      float forX = ips + 4096*ic2;     if (psi<0) forX = -forX;
+      StThreeVectorF v3(forX,forY,forZ);
       hh->setPositionError(v3);
 }
