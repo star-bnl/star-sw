@@ -664,6 +664,26 @@ double THelixTrack::GetDCA() const
   return tmp;
 }
 //_____________________________________________________________________________
+double THelixTrack::GetDCA(double xx,double yy) const
+{
+  double xd[9]; 
+  memcpy(xd+0,fX,6*sizeof(fX[0]));
+  xd[6]=xx; xd[7]=yy;xd[8]=0;
+  xd[2]=0; xd[5]=0;	
+  THelixTrack myHlx(xd,xd+3,fRho);	
+  myHlx.Step(xd+6);
+  return myHlx.GetDCAxy();
+}	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+//_____________________________________________________________________________
 double THelixTrack::GetPeriod() const
 {
    double per = (fabs(fRho) > 1.e-10) ? fabs(2.*M_PI/fRho):1.e+10;

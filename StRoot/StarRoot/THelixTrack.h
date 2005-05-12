@@ -26,6 +26,7 @@ public:
         double GetDCA  () const;
         double GetDCAz () const;
         double GetDCAxy() const;
+        double GetDCA  (double xx,double yy) const;
         const double *GetXYZ() const {return fX;}
         const double *GetDir() const {return fP;}
         double GetRho() const {return fRho ;}
