@@ -197,6 +197,8 @@ public:
   /// rotation angle of local coordinates wrt global coordinates
   void static saveStatics(double *sav);
   void static backStatics(double *sav);
+  void   print(const char *opt) const;
+  static void setErrFactor(double ef)	{fgErrFactor=ef;}
 
  private:   
   void getHitErrors(const StiHit *hit,double ss[3]) const;
@@ -258,6 +260,7 @@ public:
   static double sumSin, sinCA1plusCA2, sumCos;
   static double radThickness, density;
   static double gasDensity,matDensity,gasRL,matRL;
+  static double fgErrFactor;
   static bool   useCalculatedHitError;
 //  debug variables
   static int    fDerivTestOn;   
