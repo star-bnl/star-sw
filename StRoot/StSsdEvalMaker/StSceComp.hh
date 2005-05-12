@@ -1,3 +1,10 @@
+// $Id: StSceComp.hh,v 1.2 2005/05/12 08:22:10 lmartin Exp $
+//
+// $Log: StSceComp.hh,v $
+// Revision 1.2  2005/05/12 08:22:10  lmartin
+// cvs tags added and histograms in the .hist branch
+//
+
 #ifndef STSCECOMP_HH
 #define STSCECOMP_HH
 #include <Stiostream.h>

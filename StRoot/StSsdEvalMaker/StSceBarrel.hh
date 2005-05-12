@@ -1,3 +1,9 @@
+// $Id: StSceBarrel.hh,v 1.3 2005/05/12 08:22:09 lmartin Exp $
+//
+// $Log: StSceBarrel.hh,v $
+// Revision 1.3  2005/05/12 08:22:09  lmartin
+// cvs tags added and histograms in the .hist branch
+//
 #ifndef STSCEBARREL_HH
 #define STSCEBARREL_HH
 #include <stdlib.h>

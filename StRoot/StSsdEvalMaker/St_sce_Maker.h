@@ -38,8 +38,6 @@ class St_sce_Maker : public StMaker {
  	    void writeScmHistograms(); //!
 
  protected:
-
-	    TFile *ScmFile; //!
 	    TH1F  *devXl0;  //! distribution of local length deviation.
 	    TH1F  *devXl1;  //! distribution of local width deviation.
 	    TH1F  *devNrg;  //! distribution of energy deviation.
@@ -58,14 +56,20 @@ class St_sce_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.8 2004/01/26 23:04:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.9 2005/05/12 08:22:11 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
+/* $Id: St_sce_Maker.h,v 1.9 2005/05/12 08:22:11 lmartin Exp $
+ *
+ */
  /**************************************************************************
  *
  * $Log: St_sce_Maker.h,v $
+ * Revision 1.9  2005/05/12 08:22:11  lmartin
+ * cvs tags added and histograms in the .hist branch
+ *
  * Revision 1.8  2004/01/26 23:04:45  perev
  * WarnOff
  *
