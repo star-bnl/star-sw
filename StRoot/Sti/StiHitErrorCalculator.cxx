@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.24 2005/04/11 17:25:29 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.25 2005/05/12 17:47:57 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.25  2005/05/12 17:47:57  perev
+ * TPC size 200==>210
+ *
  * Revision 2.24  2005/04/11 17:25:29  perev
  * Cleanup
  *
@@ -135,6 +138,7 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ,double driftZ,double cr
   coeff[3]= intrinsicX;
   coeff[4]= driftX;
   coeff[5]= crossX;
+  if (coeff[0]<=0) return;
   cout << *this << endl;
 }
 
@@ -181,7 +185,7 @@ ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node
 		                       ,double &ecross, double &edip) const
 {  
-  double dz = (200.-fabs(node->getZ()))/100.;
+  double dz = (210.-fabs(node->getZ()))/100.;
   double cosCA = node->getCos();
   double sinCA = node->getSin();
   if (cosCA<0.01) cosCA=0.01;
