@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.10 2004/06/10 15:53:50 dongx Exp $
+ * $Id: StTofGeometry.cxx,v 1.11 2005/05/13 19:37:36 perev Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.11  2005/05/13 19:37:36  perev
+ * Defence agains 1/0 added
+ *
  * Revision 1.10  2004/06/10 15:53:50  dongx
  * -head file "StHelixD.hh" included
  * -simplify the macro definition
@@ -589,8 +592,8 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
 	      distance = hitAtLayer[outerLayer] - hitAtLayer[innerLayer];	    
 	    }
 
-	    float theta_xy = atan(distance.x()/distance.y());
-	    float theta_zr = atan(distance.z()/distance.perp());
+	    float theta_xy = atan2(distance.x(),distance.y());
+	    float theta_zr = atan2(distance.z(),distance.perp());
 
 	    // make angles local to the slat
 	    theta_zr -= acos(this->tofSlat(*idErasedIter).cosang);

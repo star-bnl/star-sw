@@ -431,12 +431,12 @@ void StEventQAMaker::MakeHistGlob() {
       Float_t pT = -999.;
       pT = geom->momentum().perp();
       if (pT <= 1.e-10) continue;
-      Float_t lmevpt = TMath::Log10(pT*1000.0);
+      Float_t lmevpt = TMath::Log10(1e-30+pT*1000.0);
       Float_t theta = TMath::ASin(1.) - geom->dipAngle();
       Float_t thetad = theta/degree;
       Float_t eta = geom->momentum().pseudoRapidity();
       Float_t gmom = abs(geom->momentum());
-      Float_t lmevmom = TMath::Log10(gmom*1000.0);
+      Float_t lmevmom = TMath::Log10(1e-30+gmom*1000.0);
       Float_t chisq0 = fTraits.chi2(0);
       Float_t chisq1 = fTraits.chi2(1);
       Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints())) /
@@ -471,9 +471,9 @@ void StEventQAMaker::MakeHistGlob() {
       if (rcircle<centerOfCircleToLP) azimdifl *= -1.;
       Float_t radf = firstPoint.perp();
       
-      Float_t logImpact = TMath::Log10(globtrk->impactParameter());
+      Float_t logImpact = TMath::Log10(1e-30+globtrk->impactParameter());
       Float_t sImpact = hx.geometricSignedDistance(pvert.x(),pvert.y());
-      Float_t logCurvature = TMath::Log10(geom->curvature());
+      Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
       
       // pathLength(double x,double y) should return path length at
       // DCA in the xy-plane to a given point
@@ -1033,19 +1033,19 @@ void StEventQAMaker::MakeHistPrim() {
         cnttrkg++;
 	Float_t pT = -999.;
 	pT = geom->momentum().perp();
-        Float_t lmevpt = TMath::Log10(pT*1000.0);
+        Float_t lmevpt = TMath::Log10(1e-30+pT*1000.0);
 	Float_t theta = TMath::ASin(1.) - geom->dipAngle();
 	Float_t thetad = theta/degree;
 	Float_t eta   = geom->momentum().pseudoRapidity();
 	Float_t gmom = abs(geom->momentum());
-        Float_t lmevmom = TMath::Log10(gmom*1000.0); 
+        Float_t lmevmom = TMath::Log10(1e-30+gmom*1000.0); 
 	Float_t chisq0 = fTraits.chi2(0);
 	Float_t chisq1 = fTraits.chi2(1);
 	Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
 	  (Float_t(primtrk->numberOfPossiblePoints())+1.e-10);
         Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints()))/
 	  (Float_t(detInfo->numberOfPoints())+1.e-10);
-	Float_t logCurvature = TMath::Log10(geom->curvature());
+	Float_t logCurvature = TMath::Log10(1e-30+geom->curvature());
 	
         const StThreeVectorF& firstPoint = detInfo->firstPoint();
 	const StThreeVectorF& lastPoint = detInfo->lastPoint();
@@ -1948,8 +1948,8 @@ void StEventQAMaker::MakeHistEMC() {
           }
 	}
       }
-      if(nh>0)     hists->m_emc_nhit->Fill(log10(Double_t(nh)), Float_t(det));
-      if(energy>0) hists->m_emc_etot->Fill(log10(Double_t(energy)), Float_t(det));
+      if(nh>0)     hists->m_emc_nhit->Fill(log10(1e-30+Double_t(nh)), Float_t(det));
+      if(energy>0) hists->m_emc_etot->Fill(log10(1e-30+Double_t(energy)), Float_t(det));
     }
   }
   
@@ -1969,7 +1969,7 @@ void StEventQAMaker::MakeHistEMC() {
 	
         if(cluster.size()>0)
 	  {
-          hists->m_emc_ncl->Fill(log10(Double_t(cluster.size())),(Float_t)det);
+          hists->m_emc_ncl->Fill(log10(1e-30+Double_t(cluster.size())),(Float_t)det);
           Float_t Etot=0.0, eta, phi, sigEta, sigPhi, eCl;
           for(UInt_t j=0;j<cluster.size();j++){
             nh     = cluster[j]->nHits();
@@ -1989,7 +1989,7 @@ void StEventQAMaker::MakeHistEMC() {
             hists->m_emc_PhiInCl[det-1]->Fill(Axis_t(phi));
             Etot  += eCl;
           }
-          hists->m_emc_etotCl->Fill(log10(Etot), Axis_t(det));
+          hists->m_emc_etotCl->Fill(log10(1e-30+Etot), Axis_t(det));
 	  }
 	}
       }
@@ -2198,23 +2198,27 @@ void StEventQAMaker::MakeHistPMD() {
 	  } //module
 	  Int_t smid=d*12+j;
 	  hists->m_pmd_sm_hit[smid/2]->Fill(TotalHit,smid%2);
+          if (TotalHit<=0) continue;
 	  hists->m_pmd_sm_adc[smid/2]->Fill(TotalAdc/TotalHit,smid%2);
 	}
       }
       if (d==0) {
-	hists->m_pmd_total_hit->Fill(eventID,TMath::Log10(TOTAL_HIT_DETECTOR));
-	hists->m_pmd_total_adc->Fill(eventID,TMath::Log10(TOTAL_ADC_DETECTOR));	
+	hists->m_pmd_total_hit->Fill(eventID,TMath::Log10(1e-30+TOTAL_HIT_DETECTOR));
+	hists->m_pmd_total_adc->Fill(eventID,TMath::Log10(1e-30+TOTAL_ADC_DETECTOR));	
       } else {
-	hists->m_cpv_total_hit->Fill(eventID,TMath::Log10(TOTAL_HIT_DETECTOR));
-	hists->m_cpv_total_adc->Fill(eventID,TMath::Log10(TOTAL_ADC_DETECTOR));	
+	hists->m_cpv_total_hit->Fill(eventID,TMath::Log10(1e-30+TOTAL_HIT_DETECTOR));
+	hists->m_cpv_total_adc->Fill(eventID,TMath::Log10(1e-30+TOTAL_ADC_DETECTOR));	
       }
     }
   }
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.68 2005/05/11 18:16:06 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.69 2005/05/13 19:38:05 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.69  2005/05/13 19:38:05  perev
+// Defence agains 1/0 added
+//
 // Revision 2.68  2005/05/11 18:16:06  genevb
 // Fixed problem of not using estPrimary tracks
 //
