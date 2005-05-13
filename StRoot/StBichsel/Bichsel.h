@@ -33,13 +33,24 @@ class Bichsel {
   Double_t    GetMostProbableZ(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
     return m_dEdxParameterization->GetMostProbableZ(log10bg,log2dx,kase);
   }
+  Double_t    GetMostProbableZM(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
+    return m_dEdxParameterization->GetMostProbableZM(log10bg,log2dx,kase);
+  }
   Double_t    GetAverageZ(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
     return m_dEdxParameterization->GetAverageZ(log10bg,log2dx,kase);
+  }
+  Double_t    GetAverageZM(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
+    return m_dEdxParameterization->GetAverageZM(log10bg,log2dx,kase);
   }
   Double_t    GetRmsZ(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
     return m_dEdxParameterization->GetRmsZ(log10bg,log2dx,kase);
   }
-  Double_t    GetI70(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0);
+  Double_t    GetI70(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
+    return m_dEdxParameterization->GetI70(log10bg,log2dx,kase);
+  }
+  Double_t    GetI70M(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
+    return m_dEdxParameterization->GetI70M(log10bg,log2dx,kase);
+  }
   Double_t    GetI60(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0)  {
     return m_dEdxParameterization->GetI60(log10bg,log2dx,kase);
   }
@@ -51,7 +62,9 @@ class Bichsel {
   }
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
     return m_dEdxParameterization->GetProbability(log10bg,log2dx,z,kase);}
+#if 0
   Double_t    TofCorrection(Double_t log10bg);
+#endif
   const dEdxParameterization *Parameterization() const {return m_dEdxParameterization;}
   virtual void Print();
   const Char_t      *Tag() const {return    m_dEdxParameterization->Tag();}   

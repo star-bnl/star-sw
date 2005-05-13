@@ -27,6 +27,7 @@ void Bichsel::Clean() {
       m_dEdxParameterizations[k] = 0;
     }
 }
+#if 0
 //________________________________________________________________________________
 Double_t  Bichsel::GetI70(Double_t log10bg, Double_t log2dx, Int_t kase)  {
   Double_t Value = m_dEdxParameterization->GetI70(log10bg,log2dx,kase);
@@ -51,6 +52,7 @@ Double_t  Bichsel::TofCorrection(Double_t log10bg) {
     TMath::Log(poverm)*(par[3] + TMath::Log(poverm)*(par[4] + TMath::Log(poverm)*par[5]));
   return value;
 }
+#endif
 //________________________________________________________________________________
 void Bichsel::Print() {
   cout << "Bichsel:: " << m_Tag << endl;

@@ -66,10 +66,10 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   static const Double_t MIPBetaGamma10 = TMath::Log10(4.);
   //  fMostProbableZShift = TMath::Log(dEdxMIP) - Interpolation(fP,MIPBetaGamma10,1,0);
   //  fAverageZShift      = TMath::Log(dEdxMIP) - Interpolation(fA,MIPBetaGamma10,1,0);
-  fI70Shift           = dEdxMIP/Interpolation(fI70,MIPBetaGamma10,1,0);
-  fI60Shift           = dEdxMIP/Interpolation(fI60,MIPBetaGamma10,1,0);
-  fMostProbableZShift = TMath::Log(fI70Shift);
-  fAverageZShift      = fMostProbableZShift;
+  fI70Shift           *= dEdxMIP/GetI70(MIPBetaGamma10,1,0);
+  fI60Shift           *= dEdxMIP/GetI60(MIPBetaGamma10,1,0);
+  fMostProbableZShift  = TMath::Log(fI70Shift);
+  fAverageZShift       = fMostProbableZShift;
 };
 //________________________________________________________________________________
 dEdxParameterization::~dEdxParameterization() { 
@@ -209,3 +209,12 @@ void dEdxParameterization::Print() {
   PrP(fI70Shift); cout << endl;
   PrP(fI60Shift); cout << endl;
 } 
+//________________________________________________________________________________
+Double_t dEdxParameterization::MostProbableZCorrection(Double_t log10bg) {
+  static const Double_t pars[2] = {-3.68846e-03, 4.72944e+00}; // FitHzAllHist012P05id  FitH + Prof 050905
+  return pars[0]*TMath::Exp(-pars[1]*log10bg);
+}//________________________________________________________________________________
+Double_t dEdxParameterization::I70Correction(Double_t log10bg) {
+  static const Double_t pars[2] = {-1.65714e-02, 3.27271e+00}; //  FitH70AllHist012P05id FitH + Prof 050905
+  return TMath::Exp(pars[0]*TMath::Exp(-pars[1]*log10bg));
+}
