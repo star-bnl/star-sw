@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.24 2004/03/30 02:45:07 fisyak Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.25 2005/05/13 20:31:14 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.25  2005/05/13 20:31:14  fisyak
+ * Calculated nSigma wrt modified Bichsel I70M to account saturation
+ *
  * Revision 2.24  2004/03/30 02:45:07  fisyak
  * return DBL_MAX instead of 0 if No mTraits
  *
@@ -108,7 +111,7 @@
 #include "StBichsel/Bichsel.h"
 static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.24 2004/03/30 02:45:07 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.25 2005/05/13 20:31:14 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -187,7 +190,7 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
     if (gTrack && mTraits->length() > 0 ) {
       momentum  = abs(gTrack->geometry()->momentum());
       if (! m_Bichsel) m_Bichsel = new Bichsel();
-      dedx_expected = 1.e-6*m_Bichsel->GetI70(TMath::Log10(momentum/particle->mass()),1.0);
+      dedx_expected = 1.e-6*m_Bichsel->GetI70M(TMath::Log10(momentum/particle->mass()),1.0);
       dedx_resolution = mTraits->errorOnMean();
       if (dedx_resolution <= 0) dedx_resolution = sigmaPidFunction(particle) ;
     }
