@@ -24,17 +24,28 @@ namespace log4cxx
 	namespace varia
 	{
 		/**
-		This is a very simple filter based on string matching.
+		This is a simple filter to based on string matching and counter
 
-		<p>The filter admits two options <b>StringToMatch</b> and
-		<b>AcceptOnMatch</b>. If there is a match between the value of the
-		StringToMatch option and the message of the {@link spi::LoggingEvent 
-		LoggingEvent}, then the #decide method returns 
-		{@link spi::Filter#ACCEPT ACCEPT} if the <b>AcceptOnMatch</b> option
-		value is true, if it is false then {@link spi::Filter#DENY DENY} is 
-		returned. If there is no match, {@link spi::Filter#NEUTRAL NEUTRAL}
-		is returned.
+		<p>The filter admits three options <b>StringToCount</b>,
+		<b>RepeatMessage</b>, and <b>TotalMessages</b>. 
+      If there is a match between the value of the
+		<b>StringToCount</b> option and the message of the {@link spi::LoggingEvent 
+		LoggingEvent} then  the #decide method returns {@link spi::Filter#DENY DENY} 
+      if the <b>RepeatMessage</b> option
+		value is already less then the number of the messages met or total 
+      number of all messages has reached the threshold  defined by <b>TotalMessages</b> 
+      option value.
+      Otherwise {@link spi::Filter#NEUTRAL NEUTRAL} is returned.
+          
+            
+      It is not recommended to define both kind of thresholds, 
+      namely <b>RepeatMessage</b>, and <b>TotalMessages</b> with one the same 
+      filter instance. 
+      Create the first filter with the <b>TotalMessages</b> only followed by 
+      the chain of the filters for each pair of <b>StringToCount</b>,<b>RepeatMessage</b> 
+      you want to monitor.
 
+<!--
 		<p>See configuration files <a
 		href="../xml/doc-files/test6.xml">test6.xml</a>, <a
 		href="../xml/doc-files/test7.xml">test7.xml</a>, <a
@@ -42,6 +53,7 @@ namespace log4cxx
 		href="../xml/doc-files/test9.xml">test9.xml</a>, and <a
 		href="../xml/doc-files/test10.xml">test10.xml</a> for examples of
 		seeting up a <code>StarOptionFilter</code>.
+-->      
 		*/
 
 		class StarOptionFilter;
@@ -52,9 +64,12 @@ namespace log4cxx
 		private:
 			static String ACCEPT_REPEAT_COUNTER;
 			static String STRING_TO_COUNT_OPTION;
-
-			int  acceptRepeatCounter;
-         mutable int  currentRepeatCounter;
+			static String TOTAL_MESSAGE_LIMIT;
+         
+			        int    acceptRepeatCounter;
+			        int    acceptTotalCounter;
+         mutable int    currentRepeatCounter;
+         mutable int    currentTotalCounter;
 			mutable String lastLoggerMessageToCompare;
          bool  matchPredefinedStringOnly;
 
@@ -75,6 +90,7 @@ namespace log4cxx
 				const String& value);
          
 			void setRepeatCounterOption(int value);
+			void setTotalCounterOption(int value);
 
 			inline void setAcceptRepeatCounter(int repeat)
 				{ this->acceptRepeatCounter = repeat; }
@@ -82,6 +98,8 @@ namespace log4cxx
 			inline int RepeatCounter() const
 				{ return acceptRepeatCounter; }
 
+			inline int TotalCounter() const
+				{ return acceptTotalCounter; }
 	
 			inline const String& lastLoggerMessage() const
 				{ return lastLoggerMessageToCompare; }

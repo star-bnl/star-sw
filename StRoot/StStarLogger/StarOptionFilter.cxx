@@ -29,11 +29,13 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(StarOptionFilter)
 
 String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessage");
+String StarOptionFilter::TOTAL_MESSAGE_LIMIT    = _T("TotalMessages");
 String StarOptionFilter::STRING_TO_COUNT_OPTION = _T("StringToCount");
 
 //______________________________________________________________________________
-StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(-1),currentRepeatCounter(0)
-,matchPredefinedStringOnly(false)
+StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(-1),acceptTotalCounter(-1)
+      ,currentRepeatCounter(0),currentTotalCounter(0)
+      ,matchPredefinedStringOnly(false)
 {
 }
 
@@ -47,20 +49,25 @@ void StarOptionFilter::setOption(const String& option,
 	} 
    else if (StringHelper::equalsIgnoreCase(option,STRING_TO_COUNT_OPTION)) 
    {  
-      if ( lastLoggerMessageToCompare != value)   {
+      if ( lastLoggerMessageToCompare != value)  {
           currentRepeatCounter = 0;
           lastLoggerMessageToCompare = value;  
           matchPredefinedStringOnly  = true;
       }
       if (lastLoggerMessageToCompare.empty())  
          matchPredefinedStringOnly  = false;
+   } 
+   else if (StringHelper::equalsIgnoreCase(option,TOTAL_MESSAGE_LIMIT)) 
+   {
+		acceptRepeatCounter = OptionConverter::toInt(value,acceptTotalCounter);      
    }
 }
 //______________________________________________________________________________
 void StarOptionFilter::setRepeatCounterOption(int value)      
 { 
   //  value  = -1  there is no limit
-  //         >  0  the number of times the message can printed out sequiencially
+  //         >  0  the number of times the any or preselected message can be 
+  //               printed out sequiencially
   // 
   //        Attn: the value zero and one have one and the same meaning
   //               0 - there is no repeatition, the message can be printed at once
@@ -70,25 +77,60 @@ void StarOptionFilter::setRepeatCounterOption(int value)
 }
 
 //______________________________________________________________________________
+void StarOptionFilter::setTotalCounterOption(int value)      
+{ 
+  //  value  = -1  there is no limit
+  //         >  0  the number of times the message can be printed out sequiencially
+  // 
+  //        Attn: the value zero and one have one and the same meaning
+  //               0 - there is no repeatition, the message can be printed at once
+  //               1 - the message can be printed one times only, so "0" == "1"
+
+   acceptTotalCounter = value;  
+}
+//______________________________________________________________________________
 Filter::FilterDecision StarOptionFilter::decide(
 	const log4cxx::spi::LoggingEventPtr& event) const
 {
    Filter::FilterDecision decision = Filter::NEUTRAL;
   	const String& msg               = event->getRenderedMessage();
-	if( !msg.empty() && acceptRepeatCounter >= 0 )   {   
-	   if( strcmp(msg.c_str(),lastLoggerMessageToCompare.c_str() ) )
-   	{
-         if (!matchPredefinedStringOnly) {
-           currentRepeatCounter = 2;
-		     lastLoggerMessageToCompare = msg;
-         }
-      }
-	   else 
-	   { 
+	if( !msg.empty() ) {
+#if 1
+      if ( (acceptRepeatCounter >= 0 ) || (acceptTotalCounter >= 0 ) ) 
+      {
+         bool count =  !matchPredefinedStringOnly 
+                     || 
+                       (matchPredefinedStringOnly && !strcmp(msg.c_str(),lastLoggerMessageToCompare.c_str())) ;
+         if (count) {
+            if (acceptRepeatCounter >= 0 ) currentRepeatCounter++;
+            if (acceptTotalCounter  >= 0 ) currentTotalCounter++;
+         } else {
+            // reset the repeat counter
+            currentRepeatCounter = 0;
+            if (!matchPredefinedStringOnly && (acceptRepeatCounter >= 0 ) )
+                lastLoggerMessageToCompare = msg;
+         }    
          // we've got a match
-		   if(currentRepeatCounter > acceptRepeatCounter) 	decision = Filter::DENY;
-         currentRepeatCounter++;
-	   }
+         if(currentRepeatCounter > acceptRepeatCounter) 	decision = Filter::DENY;
+         if(currentTotalCounter  > acceptTotalCounter) 	decision = Filter::DENY;
+      }      
+#else           
+      if (acceptRepeatCounter >= 0 )   {   
+	      if( strcmp(msg.c_str(),lastLoggerMessageToCompare.c_str() ) )
+      	{
+            if (!matchPredefinedStringOnly) {
+               currentRepeatCounter       = 2;
+		         lastLoggerMessageToCompare = msg;
+            }
+         }
+   	   else 
+	      { 
+           // we've got a match
+		     if(currentRepeatCounter > acceptRepeatCounter) 	decision = Filter::DENY;
+           currentRepeatCounter++;
+	      }
+      }
+#endif      
    }
    return decision;
 }
