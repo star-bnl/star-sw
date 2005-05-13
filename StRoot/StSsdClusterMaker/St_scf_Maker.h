@@ -37,8 +37,7 @@ class St_scf_Maker : public StMaker {
   St_scf_ctrl          *m_scf_ctrl;//!
   St_sls_ctrl          *m_sls_ctrl;//!
   void makeScfCtrlHistograms(); //!
-  void writeScfCtrlHistograms(); //!
-
+ 
  protected:
 
   TFile *ScfCtrlFile; //!
@@ -61,7 +60,7 @@ class St_scf_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.7 2004/01/26 23:03:14 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.8 2005/05/13 15:16:54 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_scf_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -70,6 +69,9 @@ class St_scf_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_scf_Maker.h,v $
+ *  Revision 1.8  2005/05/13 15:16:54  bouchet
+ *  reading ssd/geom and no more writeScfCtrlHistograms and writeScmCtrlHistograms methods
+ *
  *  Revision 1.7  2004/01/26 23:03:14  perev
  *  WarnOff
  *

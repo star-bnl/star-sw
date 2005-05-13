@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.6  2005/05/13 15:16:54  bouchet
+ * reading ssd/geom and no more writeScfCtrlHistograms and writeScmCtrlHistograms methods
+ *
  * Revision 1.5  2003/10/08 03:18:09  suire
  * *** empty log message ***
  *
@@ -52,7 +55,7 @@ Int_t St_scm_Maker::Init(){
   
   m_geom_par     = (St_sdm_geom_par      *)local("ssd/sdm_geom_par");
   m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_geom         = (St_svg_geom          *)local("svgpars/geom");
+  m_geom         = (St_svg_geom          *)local("ssd/geom");
   m_sls_ctrl     = (St_sls_ctrl          *)local("ssd/sls_ctrl");
   m_scm_ctrl     = (St_scm_ctrl          *)local("ssd/scm_ctrl");
 
@@ -162,16 +165,7 @@ void St_scm_Maker::makeScmCtrlHistograms()
 //     matchisto->Draw();
   }
 }
-//_____________________________________________________________________________
-void St_scm_Maker::writeScmCtrlHistograms()
-{
-  ScmCtrlFile = new TFile("event/scmCtrl_histos.root","RECREATE");
 
-  matchisto->Write();
-  orthoproj->Write();
-
-  ScmCtrlFile->Close();
-}
 //_____________________________________________________________________________
 void St_scm_Maker::PrintInfo()
 {
@@ -182,6 +176,5 @@ void St_scm_Maker::PrintInfo()
 Int_t St_scm_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_scm_Maker::Finish() ... "
                                << GetName() << endm; 
-  writeScmCtrlHistograms();
-  return kStOK;
+   return kStOK;
 }

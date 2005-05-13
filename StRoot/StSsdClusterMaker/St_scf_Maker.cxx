@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: St_scf_Maker.cxx,v $
+ * Revision 1.6  2005/05/13 15:16:54  bouchet
+ * reading ssd/geom and no more writeScfCtrlHistograms and writeScmCtrlHistograms methods
+ *
  * Revision 1.5  2003/10/08 03:18:09  suire
  * *** empty log message ***
  *
@@ -174,25 +177,7 @@ void St_scf_Maker::makeScfCtrlHistograms()
       }
   }
 }
-//_____________________________________________________________________________
-void St_scf_Maker::writeScfCtrlHistograms()
-{  
 
-  ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
-  
-  noisDisP->Write();
-  snRatioP->Write();
-  stpClusP->Write();
-  totChrgP->Write();
-  
-  noisDisN->Write();
-  snRatioN->Write();
-  stpClusN->Write();
-  totChrgN->Write();
-    
-  ScfCtrlFile->Close();
-  
-}
 //_____________________________________________________________________________
 void St_scf_Maker::PrintInfo()
 {
@@ -202,7 +187,6 @@ void St_scf_Maker::PrintInfo()
 Int_t St_scf_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_scf_Maker::Finish() ... "
                                << GetName() << endm; 
-  writeScfCtrlHistograms();
   return kStOK;
 }
 
