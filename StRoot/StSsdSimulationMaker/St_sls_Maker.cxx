@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.8 2005/05/13 09:28:24 lmartin Exp $
+ * $Id: St_sls_Maker.cxx,v 1.9 2005/05/13 15:08:58 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.9  2005/05/13 15:08:58  bouchet
+ * reading svt/ssd tables
+ *
  * Revision 1.8  2005/05/13 09:28:24  lmartin
  * geant information read from g2t_ssd_hit table
  *
@@ -58,7 +61,7 @@ Int_t St_sls_Maker::Init(){
 // 		geometry parameters
   m_geom_par    = (St_sdm_geom_par*)local("sdm_geom_par");
   m_ctrl        = (St_sls_ctrl    *)local("sls_ctrl");
-  svtparams = GetInputDB("svt/svgpars");
+  svtparams = GetInputDB("svt/ssd");
   local.Reset(svtparams);
   m_geom        = (St_svg_geom    *)local("geom");
   if ((!m_geom_par)||(!m_geom)) {
