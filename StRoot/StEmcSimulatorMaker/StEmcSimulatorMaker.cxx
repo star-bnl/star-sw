@@ -938,6 +938,7 @@ Int_t StEmcSimulatorMaker::fillStEvent()
                 if(t[j].adc>0)
                 {
                     StEmcRawHit* hit = new StEmcRawHit(id,t[j].module, t[j].eta, t[j].sub,t[j].adc, t[j].energy);
+                    hit->setCalibrationType(0);
                     detector->addHit(hit);
                 }
         }
@@ -1233,8 +1234,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.30 2005/03/21 21:36:39 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.31 2005/05/13 15:49:36 suaide Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.31  2005/05/13 15:49:36  suaide
+// set correct StEmcRawHit::calibrationType() for simulated hits
+//
 // Revision 1.30  2005/03/21 21:36:39  suaide
 // fixed problem with chain
 //
