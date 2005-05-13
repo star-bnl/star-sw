@@ -1,9 +1,12 @@
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
- * $Id: St_sce_Maker.cxx,v 1.12 2005/05/13 15:13:50 bouchet Exp $
+ * $Id: St_sce_Maker.cxx,v 1.13 2005/05/13 16:34:59 bouchet Exp $
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.13  2005/05/13 16:34:59  bouchet
+ * showScfStats and showScmStats in the Finish
+ *
  * Revision 1.12  2005/05/13 15:13:50  bouchet
  * reading ssd/geom and no more writeScmHistograms methods
  *
@@ -129,6 +132,8 @@ Int_t St_sce_Maker::Make()
 
   sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
 
+  sce_ctrl_st  *ctrl;
+ 
   cout<<"#################################################"<<endl;
   cout<<"####      START OF SSD CHAIN EVALUATOR       ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
@@ -149,8 +154,8 @@ Int_t St_sce_Maker::Make()
   if (scf_cluster) {
   int nReadCluster = mySsd->readClusterFromTable(scf_cluster);
   cout<<"####   -> "<<nReadCluster<<" CLUSTERS READ FROM TABLE      ####"<<endl;
+  ctrl = m_ctrl->GetTable();
   int nEvaluatedCluster = mySsd->doEvalCluster(m_ctrl);
-  cout<<"####   -> "<<nEvaluatedCluster<<" CLUSTERS EVALUATED            ####"<<endl;
   }
   else cout<<"Tables for clusters are not there\n";
   if (scm_spt){ 
@@ -175,12 +180,12 @@ Int_t St_sce_Maker::Make()
   
   if (scf_cluster) {
     makeScfStats();
-    showScfStats();
+    
   }
 
   if (scm_spt) {
     makeScmStats();
-    showScmStats();
+    
   }
   if (IAttr(".histos")) makeScmHistograms();
 
@@ -372,7 +377,7 @@ void St_sce_Maker::makeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.12 2005/05/13 15:13:50 bouchet Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.13 2005/05/13 16:34:59 bouchet Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -381,5 +386,7 @@ Int_t St_sce_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "
                                << GetName() << endm; 
   gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "<< GetName() << endm; 
+  showScfStats();
+  showScmStats();
   return kStOK;
 }
