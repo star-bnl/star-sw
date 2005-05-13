@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.62 2005/05/12 17:56:17 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.62 2005/05/12 17:56:17 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.63 2005/05/13 19:33:11 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.63 2005/05/13 19:33:11 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.63  2005/05/13 19:33:11  perev
+ * Defence against all nodes are bad added
+ *
  * Revision 2.62  2005/05/12 17:56:17  perev
  * refit tuned
  *
@@ -1126,15 +1129,15 @@ static double convFactor=1.;
     inn->resetError(convFactor);
     errFactor += 1./convFactor;
     StiKalmanTrackNode::setErrFactor(errFactor);
-    status = fit(kInsideOut);  if (status) break;
+    status = fit(kInsideOut);  if (status) 	break;
     StiKalmanTrackNode::setErrFactor(1.);
     out = getOuterMostNode(0);
     out->resetError(convFactor);
     errFactor += 1./convFactor;
     StiKalmanTrackNode::setErrFactor(errFactor);
-    status = fit(kOutsideIn);  if (status) break;
+    status = fit(kOutsideIn);  if (status)	break;
     StiKalmanTrackNode::setErrFactor(1.);
-    inn = getInnerMostNode(3);
+    inn = getInnerMostNode(3);if (!inn)		break;
     est=0;
     for (int i=1;i<kNPars;i++) {
 	est += pow(pars[i]-inn->getPars()[i],2)/inn->getDiag(i);} 
