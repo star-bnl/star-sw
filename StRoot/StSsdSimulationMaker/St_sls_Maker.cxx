@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.7 2005/05/13 08:39:33 lmartin Exp $
+ * $Id: St_sls_Maker.cxx,v 1.8 2005/05/13 09:28:24 lmartin Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.8  2005/05/13 09:28:24  lmartin
+ * geant information read from g2t_ssd_hit table
+ *
  * Revision 1.7  2005/05/13 08:39:33  lmartin
  * CVS tags added
  *
@@ -26,6 +29,7 @@
 #include "StSlsBarrel.hh"
 #include "tables/St_sls_strip_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_sdm_geom_par_Table.h"
 //#include "tables/St_svg_geom_Table.h"
 #include "tables/St_sls_ctrl_Table.h"
@@ -75,6 +79,7 @@ Int_t St_sls_Maker::Make()
 
    St_DataSetIter geant(GetInputDS("geant"));
    St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
+   St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
 
    sdm_geom_par_st *geom_par = m_geom_par->GetTable();
    sls_ctrl_st *ctrl = m_ctrl->GetTable();
@@ -85,10 +90,32 @@ Int_t St_sls_Maker::Make()
    StSlsBarrel *mySsd = new StSlsBarrel(geom_par);
    cout<<"####        SSD WAFERS INITIALIZATION        ####"<<endl;
    mySsd->initWafers(m_geom);
-   int nSsdHits = mySsd->readPointFromTable(g2t_svt_hit);
+   int nSsdHits;
+   if (g2t_ssd_hit)
+     {
+       nSsdHits = mySsd->readPointFromTable(g2t_ssd_hit);
+     }
+   if (nSsdHits == 0)
+     {
+       if (g2t_svt_hit)
+         {
+           nSsdHits = mySsd->readPointFromTable(g2t_svt_hit);
+         }
+     }    
    cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
    mySsd->convertGlobalFrameToOther();
-   int inactiveHit = mySsd->removeInactiveHitInTable(g2t_svt_hit);
+   int inactiveHit;
+   if (g2t_ssd_hit)
+     {
+       inactiveHit = mySsd->removeInactiveHitInTable(g2t_ssd_hit);
+     }
+   else
+     {
+       if (g2t_svt_hit)
+         {
+           inactiveHit = mySsd->removeInactiveHitInTable(g2t_svt_hit);
+         }
+     }    
    cout<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endl;
    mySsd->chargeSharingOverStrip(ctrl);
    int nSsdStrips = mySsd->writeStripToTable(sls_strip);
