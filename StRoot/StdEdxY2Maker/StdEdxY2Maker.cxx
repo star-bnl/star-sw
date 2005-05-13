@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.51 2005/05/09 14:09:58 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.52 2005/05/13 20:28:48 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -62,9 +62,9 @@ using namespace units;
 #ifdef __THELIX__
 #include "THelixTrack.h"
 #endif /* __THELIX__ */
-const static StPidParticle NHYPS = kPidTriton;
-static Int_t tMin = 20010601;
-static Int_t tMax = 20040601;
+const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
+static Int_t tMin = 20010701;
+static Int_t tMax = 20050701;
 const static Int_t NdEdxMax  = 60;
 Int_t   StdEdxY2Maker::NdEdx = 0;
 dEdx_t *StdEdxY2Maker::CdEdx = 0;
@@ -86,7 +86,7 @@ void pmem() { TMemStat::PM();}
 //______________________________________________________________________________
 
 // QA histogramss
-const static Int_t  fNZOfBadHits = 9;
+const static Int_t  fNZOfBadHits = 10;
 static TH1F **fZOfBadHits = 0;
 static TH1F *fZOfGoodHits = 0;
 static TH1F *fPhiOfBadHits = 0;
@@ -991,6 +991,8 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   static TH3S *ResIX = 0, *ResIY = 0, *ResIZ = 0;
   static TH3S *ResOX = 0, *ResOY = 0, *ResOZ = 0;
 #endif /* __THELIX__ */
+  static TH2S *BaddEdxZPhi70[2], *BaddEdxZPhiZ[2];
+  static TH1F *BaddEdxMult70[2], *BaddEdxMultZ[2];
   static dEdxTrack *ftrack = 0;
   static int hMade = 0;
   
@@ -1349,6 +1351,14 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     ResOY = new TH3S("ResOY","y Residual for Outer versus Z and PhiD",nZR,ZMinR,ZMaxR,nPhiDR,PhiDMinR,PhiDMaxR,100,-5.,5.);
     ResOZ = new TH3S("ResOZ","z Residual for Outer versus Z and PhiD",nZR,ZMinR,ZMaxR,nPhiDR,PhiDMinR,PhiDMaxR,100,-5.,5.);
 #endif /* __THELIX__ */
+    BaddEdxZPhi70[0] = new TH2S("BaddEdxZPhi700","Z and Phi for I70 below any limits by 5 s.d.",210,-210,210,360,-180.,180.);
+    BaddEdxZPhi70[1] = new TH2S("BaddEdxZPhi701","Z and Phi for I70 above any limits by 5 s.d.",210,-210,210,360,-180.,180.);
+    BaddEdxMult70[0] = new TH1F("BaddEdxMult700","Multiplicity (log10) for I70 below any limits by 5 s.d.",100,0.,10.);
+    BaddEdxMult70[1] = new TH1F("BaddEdxMult701","Multiplicity (log10) for I70 above any limits by 5 s.d.",100,0.,10.);
+    BaddEdxZPhiZ[0] = new TH2S("BaddEdxZPhiZ0","Z and Phi for Ifit below any limits by 5 s.d.",210,-210,210,360,-180.,180.);
+    BaddEdxZPhiZ[1] = new TH2S("BaddEdxZPhiZ1","Z and Phi for Ifit above any limits by 5 s.d.",210,-210,210,360,-180.,180.);
+    BaddEdxMultZ[0] = new TH1F("BaddEdxMultZ0","Multiplicity (log10) for Ifit below any limits by 5 s.d.",100,0.,10.);
+    BaddEdxMultZ[1] = new TH1F("BaddEdxMultZ1","Multiplicity (log10) for Ifit above any limits by 5 s.d.",100,0.,10.);
     if ((TESTBIT(m_Mode, kMakeTree))&& !ftree) { 
       gMessMgr->Warning() << "StdEdxY2Maker::Histogramming Make Tree" << endm;
       ftree = new TTree("dEdxT","dEdx tree");
@@ -1439,17 +1449,25 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   if (pid70 && ! pidF) TrackLength = TrackLength70;
   Double_t Pred[NHYPS],  Pred70[NHYPS];
   Double_t PredB[NHYPS], Pred70B[NHYPS];
+  Double_t PredBMN[2], Pred70BMN[2]; 
   Double_t date = GetDateTime().Convert();
   Double_t devZ[NHYPS], devZs[NHYPS];
   Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Double_t bghyp[NHYPS];
   Int_t l;
+  PredBMN[0] = Pred70BMN[0] =  1;
+  PredBMN[1] = Pred70BMN[1] = -1;
   for (l = kPidElectron; l < NHYPS; l += 1) {
     bghyp[l] = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[l]->mass());
     PredB[l]   = 1.e-6*TMath::Exp(m_Bichsel->GetMostProbableZ(bghyp[l],1.0)); 
+    if (PredB[l] < PredBMN[0]) PredBMN[0] = PredB[l];
+    if (PredB[l] > PredBMN[1]) PredBMN[1] = PredB[l];
     Pred70B[l] = 1.e-6*m_Bichsel->GetI70(bghyp[l],1.0); 
+    if (Pred70B[l] < Pred70BMN[0]) Pred70BMN[0] = Pred70B[l];
+    if (Pred70B[l] > Pred70BMN[1]) Pred70BMN[1] = Pred70B[l];
     Pred[l] = 1.e-6*BetheBloch::Sirrf(pMomentum/StProbPidTraits::mPidParticleDefinitions[l]->mass(),60.,l==3); 
     Pred70[l] = Pred[l];
+    
     if (pid70 && TrackLength70 > 40.) {
       hist70[l][sCharge]->Fill(bghyp[l],TMath::Log(I70/Pred70[l]));
       histB[l][sCharge]->Fill(bghyp[l],TMath::Log(Pred[l]));
@@ -1470,6 +1488,33 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   Int_t  PiDkeyU3 = -1; // -"- and devZs > 5 for all others 
   Int_t lBest  = -1;
   if (pidF && TrackLength > 40.) {
+    // Bad dE/dx
+    Double_t L10Mult = -1;
+    if (m_trig) L10Mult = m_trig->mult;
+    //    StThreeVectorD pxyz = gTrack->geometry()->momentum();
+    StThreeVectorD  xyz = gTrack->geometry()->helix().at(0);
+    Double_t ZG  = xyz.z();
+    Double_t PhiDG = 180*xyz.phi();
+    if (Pred70BMN[1] > 0 && D70 > 0) {
+      if (TMath::Log(I70/Pred70BMN[0]) < -5*D70) {
+	BaddEdxZPhi70[0]->Fill(ZG,PhiDG);
+	BaddEdxMult70[0]->Fill(L10Mult);
+      }
+      if (TMath::Log(I70/Pred70BMN[1]) > 5*D70) {
+	BaddEdxZPhi70[1]->Fill(ZG,PhiDG);
+	BaddEdxMult70[1]->Fill(L10Mult);
+      }
+    }
+    if (PredBMN[1] > 0 && fitdZ > 0) {
+      if (fitZ - TMath::Log(PredBMN[0]) < -5*fitdZ) {
+	BaddEdxZPhiZ[0]->Fill(ZG,PhiDG);
+	BaddEdxMultZ[0]->Fill(L10Mult);
+      }
+      if (fitZ - TMath::Log(PredBMN[1]) > 5*fitdZ) {
+	BaddEdxZPhiZ[1]->Fill(ZG,PhiDG);
+	BaddEdxMultZ[1]->Fill(L10Mult);
+      }
+    }
 #ifdef CompareWithToF
     // use ToF 
     Double_t devToF[NHYPS];
@@ -1852,18 +1897,25 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 }
 //_____________________________________________________________________________
 void StdEdxY2Maker::PrintdEdx(Int_t iop) {
-  const Char_t *Names[3] = {"CdEdx","FdEdx","dEdxS"};
-  if (iop < 0 || iop > 2) return;
-  dEdx_t *dEdx = 0;
-  Double_t I = 0, avrz = 0;
+  const Int_t NOpts = 20;
+  const Char_t *Names[NOpts] = {"CdEdx","FdEdx","dEdxS","dEdxU","dEdxR",
+				"dEdxS","dEdxS","dEdxP","dEdxt","dEdxO",
+				"dEdxM","dEdxZ","dEdxm","dEdxT","dEdxW",
+				"dEdxC","dEdxE","dEdxp","dEdxX","dEdxd"};
+  if (iop < 0 || iop >= NOpts) return;
+  dEdx_t *pdEdx = 0; 
+  Double_t dEdx;
+  Double_t I = 0;
   Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
   Int_t N60 = NdEdx - (int) (0.4*NdEdx + 0.5);
   Double_t I70 = 0, I60 = 0;
+  Double_t avrz = 0;
   for (int i=0; i< NdEdx; i++) {
-    if (iop == 0) dEdx = &CdEdx[i];
-    else if (iop == 1) dEdx = &FdEdx[i];
-    else if (iop == 2) dEdx = &dEdxS[i];
-    I = (i*I +  dEdx->dEdx)/(i+1);
+    if (iop == 0)      {pdEdx = &CdEdx[i]; dEdx = CdEdx[i].dEdx;}
+    else if (iop == 1) {pdEdx = &FdEdx[i]; dEdx = FdEdx[i].dEdx;}
+    else if (iop == 2) {pdEdx = &dEdxS[i]; dEdx = dEdxS[i].dEdx;}
+    else if (iop >= 3) {pdEdx = &FdEdx[i]; dEdx = FdEdx[i].C[StTpcdEdxCorrection::kUncorrected+iop-3].dEdx;}
+    I = (i*I +  pdEdx->dEdx)/(i+1);
 // #ifndef __THELIX__
 //     cout << Names[iop] << "\t" << i << "\tsector\t" << dEdx->sector << "\trow\t" << dEdx->row
 // 	 << "\tdEdx(keV/cm)\t" << 1.e6*dEdx->dEdx << "\tdx\t" << dEdx->dx << "\tSum\t" << 1.e6*I << "(keV)\tProb\t" 
@@ -1879,11 +1931,11 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
 // 	 << " Prob " << dEdx->Prob << endl;
 // #endif /* __THELIX__ */
     cout << Form("%s %2i  S/R %2i/%2i dEdx(keV/cm) %8.2f dx %5.2f x[%8.2f,%8.2f,%8.2f]", 
-		 Names[iop],i,dEdx->sector,dEdx->row,1.e6*dEdx->dEdx, dEdx->dx, dEdx->xyz[0], dEdx->xyz[1], dEdx->xyz[2]);
-    cout << Form(" d[%8.2f,%8.2f,%8.2f] Sum %8.2f Prob %8.5f", dEdx->xyzD[0], dEdx->xyzD[1], dEdx->xyzD[2],1.e6*I,dEdx->Prob) << endl;
+		 Names[iop],i,pdEdx->sector,pdEdx->row,1.e6*dEdx, pdEdx->dx, pdEdx->xyz[0], pdEdx->xyz[1], pdEdx->xyz[2]);
+    cout << Form(" d[%8.2f,%8.2f,%8.2f] Sum %8.2f Prob %8.5f", pdEdx->xyzD[0], pdEdx->xyzD[1], pdEdx->xyzD[2],1.e6*I,pdEdx->Prob) << endl;
     if (iop == 2) {
-      if (i < N60) I60 += dEdx->dEdx;
-      if (i < N70) I70 += dEdx->dEdx;
+      if (i < N60) I60 += dEdx;
+      if (i < N70) I70 += dEdx;
       if (i == N60 - 1) {
 	I60 /= N60;
 	cout << " ======================= I60 \t" << I60 << endl;
@@ -1893,9 +1945,9 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
 	cout << " ======================= I70 \t" << I70 << endl;
       }
     }
-    avrz += TMath::Log(dEdx->dEdx);
+    avrz += TMath::Log(dEdx);
   }
-  avrz /= NdEdx;
+  if (NdEdx) avrz /= NdEdx;
   cout << "mean dEdx \t" << I << "\tExp(avrz)\t" << TMath::Exp(avrz) << endl;
 }
 //________________________________________________________________________________
@@ -2220,7 +2272,8 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 	 "Sector/Row gain < 0",           // 5 iok + 4
 	 "drift distance < min || drift distance > max", // 6
 	 "dE < 0 or dx < 0",              // 7
-	 "Total no.of rejected clusters"  // 8
+       "Edge effect",                     // 8
+	 "Total no.of rejected clusters"  // 9
 	 };
       for (Int_t i = 0; i < fNZOfBadHits; i++) 
 	fZOfBadHits[i] = new TH1F(Form("ZOfBadHits%i",i),
