@@ -1,6 +1,9 @@
-// $Id: StSceWafer.cc,v 1.2 2005/05/12 08:22:11 lmartin Exp $
+// $Id: StSceWafer.cc,v 1.3 2005/05/13 14:29:29 lmartin Exp $
 //
 // $Log: StSceWafer.cc,v $
+// Revision 1.3  2005/05/13 14:29:29  lmartin
+// tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
+//
 // Revision 1.2  2005/05/12 08:22:11  lmartin
 // cvs tags added and histograms in the .hist branch
 //
@@ -142,7 +145,7 @@ StSceListComp*  StSceWafer::getComPoint()
 int StSceWafer::getId()
 {  return mId; }
    
-int StSceWafer::doEvaluateCluster(sce_ctrl_st *ctrl){
+int StSceWafer::doEvaluateCluster(St_sce_ctrl *myctrl){
    int nEvaluatedCluster  = 0;
    StSceCluster *currentClusterP = 0;
    StSceCluster *currentClusterN = 0;
@@ -211,17 +214,32 @@ int StSceWafer::doEvaluateCluster(sce_ctrl_st *ctrl){
        currentSimPoint = mPoint->next(currentSimPoint);
      }
 
-   ctrl[0].TrueClusterP  += p_true;
-   ctrl[0].GhostClusterP += p_ghost;
-   ctrl[0].LostClusterP  += p_lost;
-   ctrl[0].TrueClusterN  += n_true;
-   ctrl[0].GhostClusterN += n_ghost;
-   ctrl[0].LostClusterN  += n_lost;
+   sce_ctrl_st *ctrl = myctrl->GetTable();
+   int Cumulated_p_true = ctrl->TrueClusterP;
+   int Cumulated_n_true = ctrl->TrueClusterN;
+   int Cumulated_p_ghost = ctrl->GhostClusterP;
+   int Cumulated_n_ghost = ctrl->GhostClusterN;
+   int Cumulated_p_lost = ctrl->LostClusterP;
+   int Cumulated_n_lost = ctrl->LostClusterN;
+
+   Cumulated_p_true=Cumulated_p_true+p_true;
+   Cumulated_n_true=Cumulated_n_true+n_true;
+   Cumulated_p_ghost=Cumulated_p_ghost+p_ghost;
+   Cumulated_n_ghost=Cumulated_n_ghost+n_ghost;
+   Cumulated_p_lost=Cumulated_p_lost+p_lost;
+   Cumulated_n_lost=Cumulated_n_lost+n_lost;
+   ctrl->TrueClusterP  = Cumulated_p_true;
+   ctrl->GhostClusterP = Cumulated_p_ghost;
+   ctrl->LostClusterP  = Cumulated_p_lost;
+   ctrl->TrueClusterN  = Cumulated_n_true;
+   ctrl->GhostClusterN = Cumulated_n_ghost;
+   ctrl->LostClusterN  = Cumulated_n_lost;
+   myctrl->AddAt(ctrl,0);
 
    return nEvaluatedCluster;
  }
 
-int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
+int StSceWafer::doEvaluateSpt(St_sce_ctrl *myctrl){
   int nCompared     = 0;  
   int nEvaluatedSpt = 0;
   StScePoint   *scanRecPoint    = 0;
@@ -1098,21 +1116,55 @@ int StSceWafer::doEvaluateSpt(sce_ctrl_st *ctrl){
      }
    }
    
-   ctrl[0].TrueSpt11  += true11;
-   ctrl[0].GhostSpt11 += ghost11;
-   ctrl[0].LostSpt11  += lost11;
-   ctrl[0].TrueSpt12  += true12;
-   ctrl[0].GhostSpt12 += ghost12;
-   ctrl[0].LostSpt12  += lost12;
-   ctrl[0].TrueSpt22  += true22;
-   ctrl[0].GhostSpt22 += ghost22;
-   ctrl[0].LostSpt22  += lost22;
-   ctrl[0].TrueSpt23  += true23;
-   ctrl[0].GhostSpt23 += ghost23;
-   ctrl[0].LostSpt23  += lost23;
-   ctrl[0].TrueSpt33  += true33;
-   ctrl[0].GhostSpt33 += ghost33;
-   ctrl[0].LostSpt33  += lost33;
+   sce_ctrl_st *ctrl = myctrl->GetTable();
+   int Cumulated_TrueSpt11 = ctrl->TrueSpt11;
+   int Cumulated_GhostSpt11 = ctrl->GhostSpt11;
+   int Cumulated_LostSpt11 = ctrl->LostSpt11;
+   int Cumulated_TrueSpt12 = ctrl->TrueSpt12;
+   int Cumulated_GhostSpt12 = ctrl->GhostSpt12;
+   int Cumulated_LostSpt12 = ctrl->LostSpt12;
+   int Cumulated_TrueSpt22 = ctrl->TrueSpt22;
+   int Cumulated_GhostSpt22 = ctrl->GhostSpt22;
+   int Cumulated_LostSpt22 = ctrl->LostSpt22;
+   int Cumulated_TrueSpt23 = ctrl->TrueSpt23;
+   int Cumulated_GhostSpt23 = ctrl->GhostSpt23;
+   int Cumulated_LostSpt23 = ctrl->LostSpt23;
+   int Cumulated_TrueSpt33 = ctrl->TrueSpt33;
+   int Cumulated_GhostSpt33 = ctrl->GhostSpt33;
+   int Cumulated_LostSpt33 = ctrl->LostSpt33;
+
+   Cumulated_TrueSpt11  += true11;
+   Cumulated_GhostSpt11 += ghost11;
+   Cumulated_LostSpt11  += lost11;
+   Cumulated_TrueSpt12  += true12;
+   Cumulated_GhostSpt12 += ghost12;
+   Cumulated_LostSpt12  += lost12;
+   Cumulated_TrueSpt22  += true22;
+   Cumulated_GhostSpt22 += ghost22;
+   Cumulated_LostSpt22  += lost22;
+   Cumulated_TrueSpt23  += true23;
+   Cumulated_GhostSpt23 += ghost23;
+   Cumulated_LostSpt23  += lost23;
+   Cumulated_TrueSpt33  += true33;
+   Cumulated_GhostSpt33 += ghost33;
+   Cumulated_LostSpt33  += lost33;
+
+   ctrl->TrueSpt11  = Cumulated_TrueSpt11;
+   ctrl->GhostSpt11 = Cumulated_GhostSpt11;
+   ctrl->LostSpt11  = Cumulated_LostSpt11;
+   ctrl->TrueSpt12  = Cumulated_TrueSpt12;
+   ctrl->GhostSpt12 = Cumulated_GhostSpt12;
+   ctrl->LostSpt12  = Cumulated_LostSpt12;
+   ctrl->TrueSpt22  = Cumulated_TrueSpt22;
+   ctrl->GhostSpt22 = Cumulated_GhostSpt22;
+   ctrl->LostSpt22  = Cumulated_LostSpt22;
+   ctrl->TrueSpt23  = Cumulated_TrueSpt23;
+   ctrl->GhostSpt23 = Cumulated_GhostSpt23;
+   ctrl->LostSpt23  = Cumulated_LostSpt23;
+   ctrl->TrueSpt33  = Cumulated_TrueSpt33;
+   ctrl->GhostSpt33 = Cumulated_GhostSpt33;
+   ctrl->LostSpt33  = Cumulated_LostSpt33;
+   myctrl->AddAt(ctrl,0);
 
    delete [] d2e;
    delete [] dXg;

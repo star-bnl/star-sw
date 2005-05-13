@@ -1,6 +1,9 @@
-// $Id: StSceBarrel.cc,v 1.3 2005/05/12 08:22:03 lmartin Exp $
+// $Id: StSceBarrel.cc,v 1.4 2005/05/13 14:29:28 lmartin Exp $
 //
 // $Log: StSceBarrel.cc,v $
+// Revision 1.4  2005/05/13 14:29:28  lmartin
+// tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
+//
 // Revision 1.3  2005/05/12 08:22:03  lmartin
 // cvs tags added and histograms in the .hist branch
 //
@@ -194,13 +197,13 @@ int StSceBarrel::readClusterFromTable(St_scf_cluster *scf_cluster)
   return NumberOfCluster;
 }
 
-int  StSceBarrel::doEvalCluster(sce_ctrl_st *ctrl)
+int  StSceBarrel::doEvalCluster(St_sce_ctrl *myctrl)
 {
   int nWafer    = mNLadder*mNWaferPerLadder; 
   int nClustEvaluated = 0;
    for (int iWaf = 0; iWaf < nWafer; iWaf++)
-       nClustEvaluated +=  mWafers[iWaf]->doEvaluateCluster(ctrl);
-  return nClustEvaluated;
+     nClustEvaluated +=  mWafers[iWaf]->doEvaluateCluster(myctrl);
+   return nClustEvaluated;
 }
 
 int StSceBarrel::readRecPointFromTable(St_scm_spt *rec_spt)
@@ -281,12 +284,12 @@ int StSceBarrel::readRecPointFromTable(St_scm_spt *rec_spt)
   return  rec_spt->GetNRows();  
 }
 
-int  StSceBarrel::doEvalSpt(sce_ctrl_st *ctrl)
+int  StSceBarrel::doEvalSpt(St_sce_ctrl *myctrl)
 {
   int nWafer    = mNLadder*mNWaferPerLadder; 
   int nSptEvaluated = 0;
    for (int iWaf = 0; iWaf < nWafer; iWaf++)
-       nSptEvaluated +=  mWafers[iWaf]->doEvaluateSpt(ctrl);
+       nSptEvaluated +=  mWafers[iWaf]->doEvaluateSpt(myctrl);
   return nSptEvaluated;
 }
 

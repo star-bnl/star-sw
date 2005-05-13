@@ -1,9 +1,12 @@
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
- * $Id: St_sce_Maker.cxx,v 1.10 2005/05/12 08:22:11 lmartin Exp $
+ * $Id: St_sce_Maker.cxx,v 1.11 2005/05/13 14:29:29 lmartin Exp $
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.11  2005/05/13 14:29:29  lmartin
+ * tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
+ *
  * Revision 1.10  2005/05/12 08:22:11  lmartin
  * cvs tags added and histograms in the .hist branch
  *
@@ -122,7 +125,6 @@ Int_t St_sce_Maker::Make()
   m_DataSet->Add(sce_dspt);
 
   sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
-  sce_ctrl_st  *ctrl = m_ctrl->GetTable();
 
   cout<<"#################################################"<<endl;
   cout<<"####      START OF SSD CHAIN EVALUATOR       ####"<<endl;
@@ -144,14 +146,14 @@ Int_t St_sce_Maker::Make()
   if (scf_cluster) {
   int nReadCluster = mySsd->readClusterFromTable(scf_cluster);
   cout<<"####   -> "<<nReadCluster<<" CLUSTERS READ FROM TABLE      ####"<<endl;
-  int nEvaluatedCluster = mySsd->doEvalCluster(ctrl);
+  int nEvaluatedCluster = mySsd->doEvalCluster(m_ctrl);
   cout<<"####   -> "<<nEvaluatedCluster<<" CLUSTERS EVALUATED            ####"<<endl;
   }
   else cout<<"Tables for clusters are not there\n";
   if (scm_spt){ 
   int nSsdRecSpt = mySsd->readRecPointFromTable(scm_spt);
   cout<<"####   -> "<<nSsdRecSpt<<" RECONSTRUCTED POINTS READ     ####"<<endl;
-  int nEvaluatedSpt = mySsd->doEvalSpt(ctrl);
+  int nEvaluatedSpt = mySsd->doEvalSpt(m_ctrl);
   cout<<"####   -> "<<nEvaluatedSpt<<" SPACE POINTS EVALUATED        ####"<<endl;
   }
   else cout<<"Tables for points are not there\n";
@@ -377,7 +379,7 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.10 2005/05/12 08:22:11 lmartin Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.11 2005/05/13 14:29:29 lmartin Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
