@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: St_ssd_Maker.cxx,v $
+ * Revision 1.2  2005/05/13 15:16:54  bouchet
+ * reading ssd/geom and no more writeScfCtrlHistograms and writeScmCtrlHistograms methods
+ *
  * Revision 1.1  2003/10/08 03:18:09  suire
  * *** empty log message ***
  *
@@ -72,7 +75,7 @@ Int_t St_ssd_Maker::Init(){
 
   m_geom_par     = (St_sdm_geom_par      *)local("ssd/sdm_geom_par");
   m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_geom         = (St_svg_geom          *)local("svgpars/geom");
+  m_geom         = (St_svg_geom          *)local("ssd/geom");
   m_noise        = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
   m_scf_ctrl     = (St_scf_ctrl          *)local("ssd/scf_ctrl");
   m_sls_ctrl     = (St_sls_ctrl          *)local("ssd/sls_ctrl");
@@ -251,25 +254,7 @@ void St_ssd_Maker::makeScfCtrlHistograms()
       }
   }
 }
-//_____________________________________________________________________________
-void St_ssd_Maker::writeScfCtrlHistograms()
-{  
 
-  ScfCtrlFile = new TFile("event/scfCtrl_histos.root","RECREATE");
-  
-  noisDisP->Write();
-  snRatioP->Write();
-  stpClusP->Write();
-  totChrgP->Write();
-  
-  noisDisN->Write();
-  snRatioN->Write();
-  stpClusN->Write();
-  totChrgN->Write();
-    
-  ScfCtrlFile->Close();
-  
-}
 //_____________________________________________________________________________
 void St_ssd_Maker::makeScmCtrlHistograms()
 {
@@ -296,16 +281,7 @@ void St_ssd_Maker::makeScmCtrlHistograms()
 //     matchisto->Draw();
   }
 }
-//_____________________________________________________________________________
-void St_ssd_Maker::writeScmCtrlHistograms()
-{
-  ScmCtrlFile = new TFile("event/scmCtrl_histos.root","RECREATE");
 
-  matchisto->Write();
-  orthoproj->Write();
-
-  ScmCtrlFile->Close();
-}
 //_____________________________________________________________________________
 void St_ssd_Maker::PrintInfo()
 {
@@ -315,8 +291,6 @@ void St_ssd_Maker::PrintInfo()
 Int_t St_ssd_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_ssd_Maker::Finish() ... "
                                << GetName() << endm; 
-  writeScfCtrlHistograms();
-  writeScmCtrlHistograms();
   return kStOK;
 }
 
