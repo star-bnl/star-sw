@@ -35,8 +35,7 @@ class St_sce_Maker : public StMaker {
  	    void makeScmStats(); //!
  	    void showScmStats(); //!
  	    void makeScmHistograms(); //!
- 	    void writeScmHistograms(); //!
-
+	    
  protected:
 	    TH1F  *devXl0;  //! distribution of local length deviation.
 	    TH1F  *devXl1;  //! distribution of local width deviation.
@@ -56,17 +55,20 @@ class St_sce_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.9 2005/05/12 08:22:11 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.10 2005/05/13 15:13:50 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
-/* $Id: St_sce_Maker.h,v 1.9 2005/05/12 08:22:11 lmartin Exp $
+/* $Id: St_sce_Maker.h,v 1.10 2005/05/13 15:13:50 bouchet Exp $
  *
  */
  /**************************************************************************
  *
  * $Log: St_sce_Maker.h,v $
+ * Revision 1.10  2005/05/13 15:13:50  bouchet
+ * reading ssd/geom and no more writeScmHistograms methods
+ *
  * Revision 1.9  2005/05/12 08:22:11  lmartin
  * cvs tags added and histograms in the .hist branch
  *
