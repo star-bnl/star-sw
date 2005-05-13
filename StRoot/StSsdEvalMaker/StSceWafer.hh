@@ -1,6 +1,9 @@
-// $Id: StSceWafer.hh,v 1.2 2005/05/12 08:22:11 lmartin Exp $
+// $Id: StSceWafer.hh,v 1.3 2005/05/13 14:29:29 lmartin Exp $
 //
 // $Log: StSceWafer.hh,v $
+// Revision 1.3  2005/05/13 14:29:29  lmartin
+// tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
+//
 // Revision 1.2  2005/05/12 08:22:11  lmartin
 // cvs tags added and histograms in the .hist branch
 //
@@ -37,8 +40,8 @@ class StSceWafer
   StSceListCluster* getClusterP();
   StSceListCluster* getClusterN();
   StSceListComp*  getComPoint();
-  int             doEvaluateCluster(sce_ctrl_st *ctrl);
-  int             doEvaluateSpt(sce_ctrl_st *ctrl);
+  int             doEvaluateCluster(St_sce_ctrl *myctrl);
+  int             doEvaluateSpt(St_sce_ctrl *myctrl);
 
  private:
   int              mId;
