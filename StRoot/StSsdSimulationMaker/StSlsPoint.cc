@@ -1,3 +1,10 @@
+// $Id: StSlsPoint.cc,v 1.2 2005/05/13 08:39:31 lmartin Exp $
+//
+// $Log: StSlsPoint.cc,v $
+// Revision 1.2  2005/05/13 08:39:31  lmartin
+// CVS tags added
+//
+
 #include "StSlsPoint.hh"
 
 StSlsPoint::StSlsPoint(int rNId , int rMcHit , int rMcTrack , float *rXg , float rDe, float *rAngle)

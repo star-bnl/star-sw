@@ -1,3 +1,10 @@
+// $Id: StSpaBarrel.hh,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+//
+// $Log: StSpaBarrel.hh,v $
+// Revision 1.2  2005/05/13 08:39:32  lmartin
+// CVS tags added
+//
+
 #ifndef STSPABARREL_HH
 #define STSPABARREL_HH
 #include <stdlib.h>

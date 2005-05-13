@@ -1,3 +1,10 @@
+// $Id: StSpaListNoise.cc,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+//
+// $Log: StSpaListNoise.cc,v $
+// Revision 1.2  2005/05/13 08:39:32  lmartin
+// CVS tags added
+//
+
 #include "StSpaListNoise.hh"
 
 StSpaListNoise::StSpaListNoise()

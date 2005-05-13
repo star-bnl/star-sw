@@ -1,3 +1,10 @@
+// $Id: StSlsListStrip.hh,v 1.2 2005/05/13 08:39:31 lmartin Exp $
+//
+// $Log: StSlsListStrip.hh,v $
+// Revision 1.2  2005/05/13 08:39:31  lmartin
+// CVS tags added
+//
+
 #ifndef STSLSLISTSTRIP_HH
 #define STSLSLISTSTRIP_HH
 #include "StSlsStrip.hh"

@@ -1,3 +1,10 @@
+// $Id: StSpaListNoise.hh,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+//
+// $Log: StSpaListNoise.hh,v $
+// Revision 1.2  2005/05/13 08:39:32  lmartin
+// CVS tags added
+//
+
 #ifndef STSPALISTNOISE_HH
 #define STSPALISTNOISE_HH
 #include <stdlib.h>

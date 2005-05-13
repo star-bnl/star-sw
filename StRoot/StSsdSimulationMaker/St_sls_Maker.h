@@ -38,7 +38,7 @@ class St_sls_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.6 2003/10/08 03:46:34 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.7 2005/05/13 08:39:33 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 
@@ -47,8 +47,12 @@ class St_sls_Maker : public StMaker {
 #endif
 
  /**************************************************************************
+ * $Id: St_sls_Maker.h,v 1.7 2005/05/13 08:39:33 lmartin Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.7  2005/05/13 08:39:33  lmartin
+ * CVS tags added
+ *
  * Revision 1.6  2003/10/08 03:46:34  suire
  * *** empty log message ***
  *

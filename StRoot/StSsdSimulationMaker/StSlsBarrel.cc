@@ -1,3 +1,10 @@
+// $Id: StSlsBarrel.cc,v 1.2 2005/05/13 08:39:30 lmartin Exp $
+//
+// $Log: StSlsBarrel.cc,v $
+// Revision 1.2  2005/05/13 08:39:30  lmartin
+// CVS tags added
+//
+
 #include "StSlsBarrel.hh"
 
 // #include "StSSDdcs.hh"

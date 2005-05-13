@@ -1,3 +1,10 @@
+// $Id: StSpaBarrel.cc,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+//
+// $Log: StSpaBarrel.cc,v $
+// Revision 1.2  2005/05/13 08:39:32  lmartin
+// CVS tags added
+//
+
 #include "StSpaBarrel.hh"
 
 #include "tables/St_sls_strip_Table.h"
