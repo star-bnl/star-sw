@@ -41,17 +41,28 @@ class dEdxParameterization {
   Double_t    Interpolation(TH3 *hist, Double_t X, Double_t Y, Double_t Z, Int_t kase = 0);
   Double_t    Interpolation(TH2 *hist, Double_t X, Double_t Y, Int_t kase = 0);
   Double_t    Interpolation(TH1 *hist, Double_t X, Int_t kase = 0);
+  Double_t    MostProbableZCorrection(Double_t log10bg);
+  Double_t    I70Correction(Double_t log10bg);
   Double_t    GetMostProbableZ(Double_t log10bg, Double_t log2dx, Int_t kase=0) {
     return fMostProbableZShift+Interpolation(fP,log10bg,log2dx,kase);
   }
+  Double_t    GetMostProbableZM(Double_t log10bg, Double_t log2dx, Int_t kase=0) {
+    return MostProbableZCorrection(log10bg)+GetMostProbableZ(log10bg,log2dx,kase);
+  }
   Double_t    GetAverageZ(Double_t log10bg, Double_t log2dx, Int_t kase=0) {
-    return fAverageZShift+Interpolation(fA,log10bg,log2dx,kase);
+    return fAverageZShift+MostProbableZCorrection(log10bg)+Interpolation(fA,log10bg,log2dx,kase);
+  }
+  Double_t    GetAverageZM(Double_t log10bg, Double_t log2dx, Int_t kase=0) {
+    return MostProbableZCorrection(log10bg)+GetAverageZ(log10bg,log2dx,kase);
   }
   Double_t    GetRmsZ(Double_t log10bg, Double_t log2dx, Int_t kase=0) {
     return Interpolation(fRms,log10bg,log2dx,kase);
   }
   Double_t    GetI70(Double_t log10bg, Double_t log2dx, Int_t kase=0)  {
     return fI70Shift*Interpolation(fI70,log10bg,log2dx,kase);
+  }
+  Double_t    GetI70M(Double_t log10bg, Double_t log2dx, Int_t kase=0)  {
+    return I70Correction(log10bg)*GetI70(log10bg,log2dx,kase);
   }
   Double_t    GetI60(Double_t log10bg, Double_t log2dx, Int_t kase=0)  {
     return fI60Shift*Interpolation(fI60,log10bg,log2dx,kase);
