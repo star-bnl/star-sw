@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.87 2005/04/01 21:38:31 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.88 2005/05/13 19:39:11 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.88  2005/05/13 19:39:11  perev
+// Zero validity test added
+//
 // Revision 1.87  2005/04/01 21:38:31  perev
 // call Make after SetFlavor
 //
@@ -568,6 +571,13 @@ SWITCH:  switch (kase) {
     default:  assert(0);
   }
   val->Modified(1);  
+  if (val->fTimeMin.Get() == val->fTimeMax.Get()) {
+    mk->Warning("UpdateDB","Zero size validity for %s",ds->GetName()); 
+    printf("\tTimeMin "); val->fTimeMin.Print();
+    printf("\tuevent  "); currenTime.Print();
+    printf("\tTimeMax "); val->fTimeMax.Print();
+    mk->Warning("UpdateDB","Ask Mike DeFillips WHY!!!!!"); 
+  }
   return kPrune;  
 }
 //_____________________________________________________________________________
