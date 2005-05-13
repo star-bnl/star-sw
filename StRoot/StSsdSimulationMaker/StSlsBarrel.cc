@@ -1,6 +1,9 @@
-// $Id: StSlsBarrel.cc,v 1.2 2005/05/13 08:39:30 lmartin Exp $
+// $Id: StSlsBarrel.cc,v 1.3 2005/05/13 09:28:23 lmartin Exp $
 //
 // $Log: StSlsBarrel.cc,v $
+// Revision 1.3  2005/05/13 09:28:23  lmartin
+// geant information read from g2t_ssd_hit table
+//
 // Revision 1.2  2005/05/13 08:39:30  lmartin
 // CVS tags added
 //
@@ -12,6 +15,7 @@
 
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_sls_strip_Table.h"
 
 StSlsBarrel::StSlsBarrel(sdm_geom_par_st *geom_par)
@@ -60,6 +64,37 @@ void StSlsBarrel::initWafers(St_svg_geom *geom_class)
     }
 }
 
+int StSlsBarrel::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit)
+{
+  g2t_ssd_hit_st *g2t = g2t_ssd_hit->GetTable();
+
+  // cout << "NumberOfRows = " <<  g2t_ssd_hit->GetNRows() << " size " <<  g2t_ssd_hit->GetTableSize() << endl ;
+  // g2t_ssd_hit->Print(0,g2t_ssd_hit->GetNRows());
+
+  int minWaf      = mSsdLayer*1000;
+  int currWafId   = 0;
+  int currWafNumb = 0;
+  int counter     = 0;
+  int i           = 0 ;
+  int j           = 0 ;
+  //  float *p        = new float[3];
+  float p[3]      = {0,0,0};
+  for (i = 0; i < g2t_ssd_hit->GetNRows() ; i++)
+    {
+      currWafId=g2t[i].volume_id;
+       if (currWafId > minWaf)
+	{
+	  counter++;
+	  currWafNumb=idWaferToWaferNumb(currWafId);
+	  for (j = 0; j<3; j++) p[j] = g2t[i].p[j];
+	  mWafers[currWafNumb]->addHit(g2t[i].id, g2t[i].id, g2t[i].track_p, g2t[i].x, g2t[i].de, p);
+	}
+    }
+  //  delete [] p;
+  return counter;
+}
+
+
 int StSlsBarrel::readPointFromTable(St_g2t_svt_hit *g2t_svt_hit)
 {
   g2t_svt_hit_st *g2t = g2t_svt_hit->GetTable();
@@ -98,6 +133,93 @@ void StSlsBarrel::convertGlobalFrameToOther()
       currWafer->convertGlobalToLocal();
       currWafer->convertLocalToUFrame(mDetectorLargeEdge, mDetectorSmallEdge, mTheta);
     }
+}
+
+int StSlsBarrel::removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit)
+{
+  g2t_ssd_hit_st *g2t = g2t_ssd_hit->GetTable();
+
+  StSlsListPoint *inactiveHits = new StSlsListPoint();
+  int localSize = 0;
+  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
+    {
+      //fill the list of  hits in inactive wafer areas
+      StSlsListPoint *currDeadList = (this->mWafers[iWaf])->getDeadHits(mDetectorLargeEdge, mDetectorSmallEdge, mStripPitch);
+      inactiveHits = inactiveHits->addListPoint(currDeadList);
+      delete currDeadList;
+    }
+  inactiveHits->sortPoint();
+  localSize=inactiveHits->getSize();
+  if (localSize)
+    {
+      int firstSsdPoint=0;
+      int iP1 = 0;
+      for (iP1 = 0; ((iP1 < g2t_ssd_hit->GetNRows())&&(g2t[iP1].volume_id < mSsdLayer*1000)) ; iP1++) 
+	                                                                                  firstSsdPoint=iP1;
+      firstSsdPoint++;
+      int isG2tSorted = 1;
+      int iP2 = 0;
+      for (iP2 = firstSsdPoint+1 ; (iP2 < g2t_ssd_hit->GetNRows())&&(isG2tSorted) ;iP2++)
+	{
+	  if (g2t[iP2].id < g2t[iP2 - 1].id) isG2tSorted = 0;
+	}
+      StSlsPoint *currToDele = inactiveHits->first();
+      int nDeleted = 0;
+      int isAllRemove = 0;
+      if (isG2tSorted)
+	{
+	  int ipScan = 0;
+	  int ipKeep = firstSsdPoint;
+	  for (ipScan = firstSsdPoint; (ipScan<g2t_ssd_hit->GetNRows()); ipScan++)
+	    {
+	      if ((!isAllRemove)&&(g2t[ipScan].id == currToDele->getNId()))
+		{
+		  currToDele=inactiveHits->next(currToDele);
+		  if (currToDele == 0) isAllRemove = 1;
+		  nDeleted++;
+		}
+	      else
+		{
+		  g2t[ipKeep]=g2t[ipScan];
+		  ipKeep++;
+		}
+	    }
+	  g2t_ssd_hit->SetNRows( g2t_ssd_hit->GetNRows() - nDeleted );
+	}
+      else
+	{
+	  int iLoop = 0;
+	  for (iLoop = 0 ; (iLoop < localSize)&&(!isAllRemove); iLoop++)
+	    {
+	      int ipScan = 0;
+	      int nLoopDeleted = 0;
+	      for (ipScan = firstSsdPoint; ipScan < g2t_ssd_hit->GetNRows() ; ipScan++)
+		{
+		  if (!isAllRemove)
+		    {
+		      if (g2t[ipScan].id == currToDele->getNId())
+			{
+			  currToDele=inactiveHits->next(currToDele);
+			  if (currToDele == 0)
+			    {
+			      isAllRemove = 1;
+			    }
+			  else
+			    {
+			      nDeleted++;
+			      nLoopDeleted++;
+			    }
+			}
+		    }
+		  g2t[ipScan]=g2t[ipScan + nLoopDeleted];
+		}
+	      g2t_ssd_hit->SetNRows( g2t_ssd_hit->GetNRows() - nDeleted );
+	    }
+	}
+    }
+  this->renumHitAfterRemove();
+  delete inactiveHits;
+  return localSize;  
 }
 
 int StSlsBarrel::removeInactiveHitInTable(St_g2t_svt_hit *g2t_svt_hit)
