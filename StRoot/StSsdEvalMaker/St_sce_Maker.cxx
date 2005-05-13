@@ -1,9 +1,12 @@
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
- * $Id: St_sce_Maker.cxx,v 1.11 2005/05/13 14:29:29 lmartin Exp $
+ * $Id: St_sce_Maker.cxx,v 1.12 2005/05/13 15:13:50 bouchet Exp $
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.12  2005/05/13 15:13:50  bouchet
+ * reading ssd/geom and no more writeScmHistograms methods
+ *
  * Revision 1.11  2005/05/13 14:29:29  lmartin
  * tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
  *
@@ -64,7 +67,7 @@ Int_t St_sce_Maker::Init(){
 
 // 		Geometry parameters
    m_geom_par    = (St_sdm_geom_par*)local("ssd/sdm_geom_par");
-   m_geom        = (St_svg_geom    *)local("svgpars/geom");
+   m_geom        = (St_svg_geom    *)local("ssd/geom");
    m_ctrl        = (St_sce_ctrl    *)local("ssd/sce_ctrl");
 
    
@@ -364,22 +367,12 @@ void St_sce_Maker::makeScmHistograms()
   //  sce_dspt->Print(0,5000);
 
 }
-//_____________________________________________________________________________
-void St_sce_Maker::writeScmHistograms()
-{
-  gMessMgr->Info()<< "In St_sce_Maker::writeScmHistograms() : saving histograms "<<endm;
-  devXl0->Write();
-  devXl1->Write();
-  devNrg->Write();
-  devXg0->Write();
-  devXg1->Write();
-  devXg2->Write();
-}
+
 //_____________________________________________________________________________
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.11 2005/05/13 14:29:29 lmartin Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.12 2005/05/13 15:13:50 bouchet Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -388,6 +381,5 @@ Int_t St_sce_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "
                                << GetName() << endm; 
   gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "<< GetName() << endm; 
-  if (IAttr(".histos")) writeScmHistograms();
   return kStOK;
 }
