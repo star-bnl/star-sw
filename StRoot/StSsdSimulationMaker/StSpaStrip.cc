@@ -1,3 +1,10 @@
+// $Id: StSpaStrip.cc,v 1.2 2005/05/13 08:39:33 lmartin Exp $
+//
+// $Log: StSpaStrip.cc,v $
+// Revision 1.2  2005/05/13 08:39:33  lmartin
+// CVS tags added
+//
+
 #include "StSpaStrip.hh"
 
 StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, int rDigitSig, float rAnalogSig, int *rIdMcHit)

@@ -1,3 +1,10 @@
+// $Id: StSlsPoint.hh,v 1.2 2005/05/13 08:39:31 lmartin Exp $
+//
+// $Log: StSlsPoint.hh,v $
+// Revision 1.2  2005/05/13 08:39:31  lmartin
+// CVS tags added
+//
+
 #ifndef STSLSPOINT_HH
 #define STSLSPOINT_HH
 #include <Stiostream.h>

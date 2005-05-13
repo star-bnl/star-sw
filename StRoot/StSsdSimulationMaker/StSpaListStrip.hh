@@ -1,3 +1,10 @@
+// $Id: StSpaListStrip.hh,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+//
+// $Log: StSpaListStrip.hh,v $
+// Revision 1.2  2005/05/13 08:39:32  lmartin
+// CVS tags added
+//
+
 #ifndef STSPALISTSTRIP_HH
 #define STSPALISTSTRIP_HH
 #include <stdlib.h>

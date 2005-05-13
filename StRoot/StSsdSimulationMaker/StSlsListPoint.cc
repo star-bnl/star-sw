@@ -1,3 +1,10 @@
+// $Id: StSlsListPoint.cc,v 1.2 2005/05/13 08:39:30 lmartin Exp $
+//
+// $Log: StSlsListPoint.cc,v $
+// Revision 1.2  2005/05/13 08:39:30  lmartin
+// CVS tags added
+//
+
 #include "StSlsListPoint.hh"
 
 StSlsListPoint::StSlsListPoint()

@@ -1,3 +1,10 @@
+// $Id: StSlsWafer.cc,v 1.2 2005/05/13 08:39:31 lmartin Exp $
+//
+// $Log: StSlsWafer.cc,v $
+// Revision 1.2  2005/05/13 08:39:31  lmartin
+// CVS tags added
+//
+
 #include "StSlsWafer.hh"
 
 StSlsWafer::StSlsWafer(int nid)

@@ -1,8 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
+ * $Id: St_spa_Maker.cxx,v 1.6 2005/05/13 08:39:33 lmartin Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.6  2005/05/13 08:39:33  lmartin
+ * CVS tags added
+ *
  * Revision 1.5  2003/10/08 03:46:34  suire
  * *** empty log message ***
  *

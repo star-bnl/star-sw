@@ -1,3 +1,10 @@
+// $Id: StSpaWafer.hh,v 1.2 2005/05/13 08:39:33 lmartin Exp $
+//
+// $Log: StSpaWafer.hh,v $
+// Revision 1.2  2005/05/13 08:39:33  lmartin
+// CVS tags added
+//
+
 #ifndef STSPAWAFER_HH
 #define STSPAWAFER_HH
 #include <stdlib.h>
