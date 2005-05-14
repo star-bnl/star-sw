@@ -28,8 +28,8 @@ using namespace log4cxx::helpers;
 
 IMPLEMENT_LOG4CXX_OBJECT(StarOptionFilter)
 
-String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessage");
-String StarOptionFilter::TOTAL_MESSAGE_LIMIT    = _T("TotalMessages");
+String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessageQuota");
+String StarOptionFilter::TOTAL_MESSAGE_LIMIT    = _T("TotalMessagesQuota");
 String StarOptionFilter::STRING_TO_COUNT_OPTION = _T("StringToCount");
 
 //______________________________________________________________________________

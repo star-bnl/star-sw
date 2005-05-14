@@ -27,22 +27,22 @@ namespace log4cxx
 		This is a simple filter to based on string matching and counter
 
 		<p>The filter admits three options <b>StringToCount</b>,
-		<b>RepeatMessage</b>, and <b>TotalMessages</b>. 
+		<b>RepeatMessageQuota</b>, and <b>TotalMessagesQuota</b>. 
       If there is a match between the value of the
 		<b>StringToCount</b> option and the message of the {@link spi::LoggingEvent 
 		LoggingEvent} then  the #decide method returns {@link spi::Filter#DENY DENY} 
-      if the <b>RepeatMessage</b> option
+      if the <b>RepeatMessageQuota</b> option
 		value is already less then the number of the messages met or total 
-      number of all messages has reached the threshold  defined by <b>TotalMessages</b> 
+      number of all messages has reached the threshold  defined by <b>TotalMessagesQuota</b> 
       option value.
       Otherwise {@link spi::Filter#NEUTRAL NEUTRAL} is returned.
           
             
       It is not recommended to define both kind of thresholds, 
-      namely <b>RepeatMessage</b>, and <b>TotalMessages</b> with one the same 
+      namely <b>RepeatMessageQuota</b>, and <b>TotalMessagesQuota</b> with one the same 
       filter instance. 
-      Create the first filter with the <b>TotalMessages</b> only followed by 
-      the chain of the filters for each pair of <b>StringToCount</b>,<b>RepeatMessage</b> 
+      Create the first filter with the <b>TotalMessagesQuota</b> only followed by 
+      the chain of the filters for each pair of <b>StringToCount</b>,<b>RepeatMessageQuota</b> 
       you want to monitor.
 
 <!--
