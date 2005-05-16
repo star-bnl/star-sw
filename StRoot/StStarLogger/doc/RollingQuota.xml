@@ -10,7 +10,7 @@
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
     </layout>	     
-<!--     <param name="maxfilesize" value="100">   -->
+    <param name="maxfilesize" value="100"/>
   </appender>
  
   <root>
