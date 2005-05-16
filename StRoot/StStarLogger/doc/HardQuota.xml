@@ -7,7 +7,7 @@
    It is applide to the entire application (watch "root" logger)
 -->
 
-  <appender name="D1" class="org.apache.log4j.ConsoleAppender">
+  <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
     </layout>	    
@@ -25,7 +25,7 @@
 
   <root>
      <priority value ="DEBUG" />
-     <appender-ref ref="D1" />
+     <appender-ref ref="stdout" />
   </root>
   
 </log4j:configuration>
