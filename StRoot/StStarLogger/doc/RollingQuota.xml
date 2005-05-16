@@ -2,7 +2,7 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 
 <log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
-<!-- s from 
+<!-- 
    This example create the log file 100 MGb at most   
 -->
 
@@ -10,7 +10,7 @@
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
     </layout>	     
-    <param name="maxfilesize" value="100">
+<!--     <param name="maxfilesize" value="100">   -->
   </appender>
  
   <root>
