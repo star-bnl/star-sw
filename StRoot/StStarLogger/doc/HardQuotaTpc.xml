@@ -12,7 +12,7 @@
      the unlimited number of the "FATAL" messages only
 -->
 
-  <appender name="D1" class="org.apache.log4j.ConsoleAppender">
+  <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
     </layout>	    
@@ -34,6 +34,6 @@
   
  <St_tpt_Maker>
      <priority value ="DEBUG" />
-     <appender-ref ref="D1" />
+     <appender-ref ref="stdout" />
  </St_tpt_Maker>
 </log4j:configuration>
