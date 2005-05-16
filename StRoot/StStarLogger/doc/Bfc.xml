@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+  <appender name="D1" class="org.apache.log4j.ConsoleAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
+    </layout>	    
+    <filter class="StarOptionFilter">
+       <!--
+         - - - - - - - - - - - - - - 
+           RepeatMessageQuote
+         - - - - - - - - - - - - - - 
+           "name"   - "RepeatMessageQuote" parameters to assign to number of message can be repated sequeincially
+           "value"  = -1  there is no limit (by default)
+                    >  0  the number of times the message can be printed out sequentially 
+                          (without any other message between each occurence)
+
+                          the value zero and one have one and the same meaning
+                          0 - there is no repeatition, the message can be printed at once
+                          1 - the message can be printed one times onl;y, so "0" == "1"
+            Example:
+            - - - -   <param name="RepeatMessageQuote" value="2"/>
+            Print each message no mor then 2 times sequinecaily at most.
+          - - - - - - - - - - - - - - 
+           TotalMessagesQuote
+          - - - - - - - - - - - - - - 
+           "name"   - "TotalMessagesQuote" parameters to assign to number of message can be repated sequeincially
+           "value"  = -1  there is no limit (by default)
+                    >  0  the number of times the message can printed out across the entire output                          
+                          the value zero and one have one and the same meaning
+                          0 - there is no repeatition, the message can be printed at once
+                          1 - the message can be printed one times onl;y, so "0" == "1"
+            Example:
+            - - - -    <param name="TotalMessagesQuote" value="200"/>
+            The output should contain the 200 lines at most.
+         - - - - - - - - - - - - - - 
+           StringToCount
+         - - - - - - - - - - - - - - 
+           "name"   - "StringToCount" parameters define tghe string pattern to apply ther "counter" paramters  above  
+           "value" =  "Some string" that the user message should contain to be counted 
+                       as "RepeatMessageQuote" and /or "TotalMessagesQuote" define
+                  >  0  the number of times the message can printed out across the entire output                          
+                          the value zero and one have one and the same meaning
+                          0 - there is no repeatition, the message can be printed at once
+                          1 - the message can be printed one times onl;y, so "0" == "1"
+            Example:
+            - - - -   <param name="StringToCount" value="TPC"/>
+            Count only the messages with sttring "TPC" in.
+        --> 
+        <param name="RepeatMessageQuote" value="2"/>
+        <!-- <param name="StringToCount" value="My string to filter out pattern"/>  -->
+    </filter>
+  </appender>
+  
+
+  <appender name="MYSQL" class="org.apache.log4j.MySQLAppender">
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="INSERT INTO StarLogger VALUES (&quot;%-3c{2}:%-5p %d  - %m&quot;);"/>
+    </layout>	    
+  </appender>
+
+
+  <root>
+    <priority value ="DEBUG" />
+    <appender-ref ref="D1" />
+ <!---   <appender-ref ref="MYSQL" />  -->
+  </root>
+  
+</log4j:configuration>
