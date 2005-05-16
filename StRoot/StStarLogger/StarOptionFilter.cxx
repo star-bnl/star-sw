@@ -94,6 +94,8 @@ Filter::FilterDecision StarOptionFilter::decide(
 {
    Filter::FilterDecision decision = Filter::NEUTRAL;
   	const String& msg               = event->getRenderedMessage();
+   fprintf(stderr," StarOptionFilter::decide:  %s, string quota=%d, totalQuota=%d\n"
+         , msg.c_str(),currentRepeatCounter,currentTotalCounter);
 	if( !msg.empty() ) {
 #if 1
       if ( (acceptRepeatCounter >= 0 ) || (acceptTotalCounter >= 0 ) ) 
@@ -111,8 +113,10 @@ Filter::FilterDecision StarOptionFilter::decide(
                 lastLoggerMessageToCompare = msg;
          }    
          // we've got a match
-         if(currentRepeatCounter > acceptRepeatCounter) 	decision = Filter::DENY;
-         if(currentTotalCounter  > acceptTotalCounter) 	decision = Filter::DENY;
+         if( (acceptRepeatCounter >=0 ) && (currentRepeatCounter > acceptRepeatCounter) )
+             	decision = Filter::DENY;
+         if( (acceptTotalCounter  >=0)  && (currentTotalCounter  > acceptTotalCounter) ) 	
+            decision = Filter::DENY;
       }      
 #else           
       if (acceptRepeatCounter >= 0 )   {   
