@@ -1,10 +1,17 @@
-// $Id: StScmBarrel.cc,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+// $Id: StScmBarrel.cc,v 1.3 2005/05/17 14:57:20 lmartin Exp $
 //
 // $Log: StScmBarrel.cc,v $
+// Revision 1.3  2005/05/17 14:57:20  lmartin
+// saving SSD hits into StEvent
+//
 // Revision 1.2  2005/05/17 14:16:34  lmartin
 // CVS tags added
 //
 #include "StScmBarrel.hh"
+#include "StEvent.h"
+#include "StSsdHit.h"
+#include "StSsdHitCollection.h"
+#include "StarClassLibrary/StThreeVectorF.hh"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
@@ -237,6 +244,71 @@ int StScmBarrel::writePointToTable(St_scm_spt *scm_spt)
      
      while (pSpt)
        {
+	 spt.flag          = pSpt->getFlag();
+	 spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
+	 spt.id_cluster    = pSpt->getNCluster();
+	 spt.id_globtrk    = 0;
+	 spt.id_match      = pSpt->getNMatched();
+	 for (i = 0 ; i < 5 ; i++)
+	   {	  
+	     spt.id_mchit[i]   = pSpt->getNMchit(i);
+	     spt.id_mctrack[i] = 0;
+	     spt.id_track[i]   = 0;
+	   }	  
+	 spt.id_wafer      = idCurrentWaf;
+	 for (i = 0 ; i < 3 ; i++)
+	   {	  
+	     spt.cov[i]        = 0;
+	     spt.res[i]        = 0;
+	     spt.x[i]          = pSpt->getXg(i);
+	     spt.xl[i]         = pSpt->getXl(i);
+	   }
+	 for (i = 0 ; i < 2 ; i++)
+	   {
+	     spt.mom2[i]       = 0;
+	     spt.de[i]         = pSpt->getDe(i);
+	   }
+	 scm_spt->AddAt(&spt);
+	 currRecord++;
+	 pSpt    = sptList->next(pSpt);
+       }
+    }
+  return currRecord;
+}
+
+int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl)
+{
+  scm_spt_st spt;
+  StSsdHit *currentSsdHit; 
+  // table size is 148 bytes
+  int currRecord   = 0;
+  int i            = 0;
+  int inContainer =0;
+  StThreeVectorF gPos; StThreeVectorF gPosError; 
+  int hw; float q; unsigned char c;
+
+  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
+    {
+     int idCurrentWaf = waferNumbToIdWafer(iWaf);
+     StScmListPoint *sptList = mWafers[iWaf]->getPoint();
+     StScmPoint *pSpt = sptList->first();
+     
+     while (pSpt)
+       {
+	 if (ssdHitColl){ // If Available, Fill the StEvent Container
+	   for (i = 0 ; i < 3 ; i++){
+	     gPos[i]      =  pSpt->getXg(i);
+	     gPosError[i] =  0.0; 
+	   }
+	   hw = idCurrentWaf;
+	   q =  pSpt->getDe(0);
+	   
+	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
+	   currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
+	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+	   
+	   inContainer += ssdHitColl->addHit(currentSsdHit);
+	 }
 	 spt.flag          = pSpt->getFlag();
 	 spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
 	 spt.id_cluster    = pSpt->getNCluster();

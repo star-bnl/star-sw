@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.hh,v 1.2 2005/05/17 14:16:35 lmartin Exp $
+// $Id: StScmBarrel.hh,v 1.3 2005/05/17 14:57:28 lmartin Exp $
 //
 // $Log: StScmBarrel.hh,v $
+// Revision 1.3  2005/05/17 14:57:28  lmartin
+// saving SSD hits into StEvent
+//
 // Revision 1.2  2005/05/17 14:16:35  lmartin
 // CVS tags added
 //
@@ -13,6 +16,7 @@
 class St_svg_geom;
 class St_scf_cluster;
 class St_scm_spt;
+class StSsdHitCollection;
 
 class StScmBarrel
 {
@@ -29,6 +33,7 @@ class StScmBarrel
   void  convertDigitToAnalog(sls_ctrl_st *sls_ctrl);
   void  convertUFrameToOther(sdm_geom_par_st *geom_par);
   int   writePointToTable(St_scm_spt *scm_spt);   
+  int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);   
 
   StScmWafer** mWafers;
 //   int** mDeadStripP;
