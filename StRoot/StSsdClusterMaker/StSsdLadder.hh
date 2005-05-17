@@ -1,3 +1,9 @@
+// $Id: StSsdLadder.hh,v 1.2 2005/05/17 14:16:39 lmartin Exp $
+//
+// $Log: StSsdLadder.hh,v $
+// Revision 1.2  2005/05/17 14:16:39  lmartin
+// CVS tags added
+//
 #ifndef STSSDLADDER_HH
 #define STSSDLADDER_HH
 #include <stdlib.h>

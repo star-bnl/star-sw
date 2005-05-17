@@ -1,3 +1,9 @@
+// $Id: StSsdWafer.hh,v 1.2 2005/05/17 14:16:41 lmartin Exp $
+//
+// $Log: StSsdWafer.hh,v $
+// Revision 1.2  2005/05/17 14:16:41  lmartin
+// CVS tags added
+//
 #ifndef STSSDWAFER_HH
 #define STSSDWAFER_HH
 #include <stdlib.h>

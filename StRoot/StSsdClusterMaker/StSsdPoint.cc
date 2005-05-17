@@ -1,3 +1,9 @@
+// $Id: StSsdPoint.cc,v 1.2 2005/05/17 14:16:39 lmartin Exp $
+//
+// $Log: StSsdPoint.cc,v $
+// Revision 1.2  2005/05/17 14:16:39  lmartin
+// CVS tags added
+//
 #include "StSsdPoint.hh"
 
 StSsdPoint::StSsdPoint(int rNPoint, int rNWafer, int rNumPackage, int rKindPackage)

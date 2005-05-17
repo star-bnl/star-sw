@@ -1,3 +1,9 @@
+// $Id: StSsdClusterList.hh,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+//
+// $Log: StSsdClusterList.hh,v $
+// Revision 1.2  2005/05/17 14:16:38  lmartin
+// CVS tags added
+//
 #ifndef STSSDCLUSTERLIST_HH
 #define STSSDCLUSTERLIST_HH
 #include <stdlib.h>

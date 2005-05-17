@@ -1,3 +1,9 @@
+// $Id: StScmPackage.hh,v 1.2 2005/05/17 14:16:36 lmartin Exp $
+//
+// $Log: StScmPackage.hh,v $
+// Revision 1.2  2005/05/17 14:16:36  lmartin
+// CVS tags added
+//
 #ifndef STSCMPACKAGE_HH
 #define STSCMPACKAGE_HH
 #include <stdlib.h>

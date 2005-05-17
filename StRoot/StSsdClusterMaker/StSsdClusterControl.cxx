@@ -1,3 +1,9 @@
+// $Id: StSsdClusterControl.cxx,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+//
+// $Log: StSsdClusterControl.cxx,v $
+// Revision 1.2  2005/05/17 14:16:38  lmartin
+// CVS tags added
+//
 #include <Stiostream.h>
 #include <stdlib.h>
 #include "StSsdClusterControl.h"

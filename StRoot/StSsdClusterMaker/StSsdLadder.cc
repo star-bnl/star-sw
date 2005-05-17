@@ -1,3 +1,9 @@
+// $Id: StSsdLadder.cc,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+//
+// $Log: StSsdLadder.cc,v $
+// Revision 1.2  2005/05/17 14:16:38  lmartin
+// CVS tags added
+//
 #include "StSsdLadder.hh"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_spa_strip_Table.h"

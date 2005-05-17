@@ -1,3 +1,9 @@
+// $Id: StScmWafer.cc,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+//
+// $Log: StScmWafer.cc,v $
+// Revision 1.2  2005/05/17 14:16:37  lmartin
+// CVS tags added
+//
 #include "StScmWafer.hh"
 
 // StScmWafer::StScmWafer(int nid ,int *nDeadStripP, int *nDeadStripN)

@@ -1,3 +1,9 @@
+// $Id: StSsdCluster.hh,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+//
+// $Log: StSsdCluster.hh,v $
+// Revision 1.2  2005/05/17 14:16:38  lmartin
+// CVS tags added
+//
 #ifndef STSSDCLUSTER_HH
 #define STSSDCLUSTER_HH
 #include <stdlib.h>

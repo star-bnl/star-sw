@@ -1,3 +1,9 @@
+// $Id: StScfListStrip.hh,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+//
+// $Log: StScfListStrip.hh,v $
+// Revision 1.2  2005/05/17 14:16:34  lmartin
+// CVS tags added
+//
 #ifndef STSCFLISTSTRIP_HH
 #define STSCFLISTSTRIP_HH
 #include <stdlib.h>

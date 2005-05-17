@@ -1,3 +1,9 @@
+// $Id: StScfBarrel.hh,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+//
+// $Log: StScfBarrel.hh,v $
+// Revision 1.2  2005/05/17 14:16:33  lmartin
+// CVS tags added
+//
 #ifndef STSCFBARREL_HH
 #define STSCFBARREL_HH
 #include <stdlib.h>

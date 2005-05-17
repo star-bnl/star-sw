@@ -1,3 +1,9 @@
+// $Id: StScmPoint.cc,v 1.2 2005/05/17 14:16:36 lmartin Exp $
+//
+// $Log: StScmPoint.cc,v $
+// Revision 1.2  2005/05/17 14:16:36  lmartin
+// CVS tags added
+//
 #include "StScmPoint.hh"
 
 StScmPoint::StScmPoint(int rNPoint, int rNWafer, int rNumPackage, int rKindPackage)

@@ -1,3 +1,9 @@
+// $Id: StScmListPoint.hh,v 1.2 2005/05/17 14:16:36 lmartin Exp $
+//
+// $Log: StScmListPoint.hh,v $
+// Revision 1.2  2005/05/17 14:16:36  lmartin
+// CVS tags added
+//
 #ifndef STSCMLISTPOINT_HH
 #define STSCMLISTPOINT_HH
 #include "StScmPoint.hh"

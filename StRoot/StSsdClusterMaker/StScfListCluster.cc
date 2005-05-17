@@ -1,3 +1,9 @@
+// $Id: StScfListCluster.cc,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+//
+// $Log: StScfListCluster.cc,v $
+// Revision 1.2  2005/05/17 14:16:33  lmartin
+// CVS tags added
+//
 #include "StScfListCluster.hh"
 #include "StScfListStrip.hh"
 

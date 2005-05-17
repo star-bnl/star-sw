@@ -1,3 +1,9 @@
+// $Id: StSsdStrip.hh,v 1.2 2005/05/17 14:16:40 lmartin Exp $
+//
+// $Log: StSsdStrip.hh,v $
+// Revision 1.2  2005/05/17 14:16:40  lmartin
+// CVS tags added
+//
 #ifndef STSSDSTRIP_HH
 #define STSSDSTRIP_HH
 #include <Stiostream.h>

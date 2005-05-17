@@ -1,8 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
+ * $Id: St_scm_Maker.cxx,v 1.7 2005/05/17 14:16:41 lmartin Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.7  2005/05/17 14:16:41  lmartin
+ * CVS tags added
+ *
  * Revision 1.6  2005/05/13 15:16:54  bouchet
  * reading ssd/geom and no more writeScfCtrlHistograms and writeScmCtrlHistograms methods
  *
