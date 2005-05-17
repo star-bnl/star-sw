@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.7 2005/05/17 14:16:41 lmartin Exp $
+ * $Id: St_scm_Maker.cxx,v 1.8 2005/05/17 14:57:28 lmartin Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.8  2005/05/17 14:57:28  lmartin
+ * saving SSD hits into StEvent
+ *
  * Revision 1.7  2005/05/17 14:16:41  lmartin
  * CVS tags added
  *
@@ -27,6 +30,8 @@
 #include "TFile.h"
 #include "StMessMgr.h"
 
+#include "StEvent.h"
+#include "StSsdHitCollection.h"
 #include "StScmBarrel.hh"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
@@ -106,6 +111,19 @@ Int_t St_scm_Maker::Make()
 
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
+  // create a StSsdHitCollection to save the hits
+  mCurrentEvent = (StEvent*) GetInputDS("StEvent");
+  if(mCurrentEvent) 
+    {
+      mSsdHitColl = mCurrentEvent->ssdHitCollection();
+      if (!mSsdHitColl) {
+ 	gMessMgr->Warning("StSsdPointMaker::Make : The SSD hit collection does not exist  - creating a new one");
+ 	mSsdHitColl = new StSsdHitCollection;
+ 	mCurrentEvent->setSsdHitCollection(mSsdHitColl);
+      }
+    }
+  else              
+    mSsdHitColl = 0;
 
   sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
   sls_ctrl_st      *sls_ctrl = m_sls_ctrl->GetTable();
@@ -126,7 +144,11 @@ Int_t St_scm_Maker::Make()
   cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
   mySsd->convertDigitToAnalog(sls_ctrl);
   mySsd->convertUFrameToOther(geom_par);
-  int nSptWritten = mySsd->writePointToTable(scm_spt);
+  //  int nSptWritten = mySsd->writePointToTable(scm_spt);
+  int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+  cout<< "# SSD hits:       "
+      << (mCurrentEvent->ssdHitCollection() ? mCurrentEvent->ssdHitCollection()->numberOfHits() : 0) 
+      << endl;
   cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
   scm_spt->Purge();
   cout<<"####       END OF SSD CLUSTER MATCHING       ####"<<endl;
