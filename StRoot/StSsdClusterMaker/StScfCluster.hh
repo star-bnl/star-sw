@@ -1,3 +1,9 @@
+// $Id: StScfCluster.hh,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+//
+// $Log: StScfCluster.hh,v $
+// Revision 1.2  2005/05/17 14:16:33  lmartin
+// CVS tags added
+//
 #ifndef STSCFCLUSTER_HH
 #define STSCFCLUSTER_HH
 #include <Stiostream.h>

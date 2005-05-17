@@ -1,3 +1,9 @@
+// $Id: StSsdPoint.hh,v 1.2 2005/05/17 14:16:39 lmartin Exp $
+//
+// $Log: StSsdPoint.hh,v $
+// Revision 1.2  2005/05/17 14:16:39  lmartin
+// CVS tags added
+//
 #ifndef STSSDPOINT_HH
 #define STSSDPOINT_HH
 

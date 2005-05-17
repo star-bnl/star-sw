@@ -1,3 +1,9 @@
+// $Id: StScmWafer.hh,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+//
+// $Log: StScmWafer.hh,v $
+// Revision 1.2  2005/05/17 14:16:37  lmartin
+// CVS tags added
+//
 #ifndef STSCMWAFER_HH
 #define STSCMWAFER_HH
 #include <stdlib.h>

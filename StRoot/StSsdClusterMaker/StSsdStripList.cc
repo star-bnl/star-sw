@@ -1,3 +1,9 @@
+// $Id: StSsdStripList.cc,v 1.2 2005/05/17 14:16:40 lmartin Exp $
+//
+// $Log: StSsdStripList.cc,v $
+// Revision 1.2  2005/05/17 14:16:40  lmartin
+// CVS tags added
+//
 #include "StSsdStripList.hh"
 StSsdStripList::StSsdStripList()
 {

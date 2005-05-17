@@ -1,3 +1,9 @@
+// $Id: StSsdClusterControl.h,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+//
+// $Log: StSsdClusterControl.h,v $
+// Revision 1.2  2005/05/17 14:16:38  lmartin
+// CVS tags added
+//
 #ifndef STAR_StSsdClusterControl
 #define STAR_StSsdClusterControl
 

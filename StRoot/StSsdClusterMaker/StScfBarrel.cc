@@ -1,3 +1,9 @@
+// $Id: StScfBarrel.cc,v 1.2 2005/05/17 14:16:32 lmartin Exp $
+//
+// $Log: StScfBarrel.cc,v $
+// Revision 1.2  2005/05/17 14:16:32  lmartin
+// CVS tags added
+//
 #include "StScfBarrel.hh"
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_scf_cluster_Table.h"

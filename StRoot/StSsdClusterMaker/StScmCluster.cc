@@ -1,3 +1,9 @@
+// $Id: StScmCluster.cc,v 1.2 2005/05/17 14:16:35 lmartin Exp $
+//
+// $Log: StScmCluster.cc,v $
+// Revision 1.2  2005/05/17 14:16:35  lmartin
+// CVS tags added
+//
 #include "StScmCluster.hh"
 
 StScmCluster::StScmCluster(int rNCluster)

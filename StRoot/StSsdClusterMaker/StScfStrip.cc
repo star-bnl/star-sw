@@ -1,3 +1,9 @@
+// $Id: StScfStrip.cc,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+//
+// $Log: StScfStrip.cc,v $
+// Revision 1.2  2005/05/17 14:16:34  lmartin
+// CVS tags added
+//
 #include "StScfStrip.hh"
 
 StScfStrip::StScfStrip(int rNStrip, int rDigitSig, int rSigma, int *rIdMcHit)

@@ -1,3 +1,9 @@
+// $Id: StScmCluster.hh,v 1.2 2005/05/17 14:16:35 lmartin Exp $
+//
+// $Log: StScmCluster.hh,v $
+// Revision 1.2  2005/05/17 14:16:35  lmartin
+// CVS tags added
+//
 #ifndef STSCMCLUSTER_HH
 #define STSCMCLUSTER_HH
 

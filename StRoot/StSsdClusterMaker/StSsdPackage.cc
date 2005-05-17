@@ -1,3 +1,9 @@
+// $Id: StSsdPackage.cc,v 1.2 2005/05/17 14:16:39 lmartin Exp $
+//
+// $Log: StSsdPackage.cc,v $
+// Revision 1.2  2005/05/17 14:16:39  lmartin
+// CVS tags added
+//
 #include "StSsdPackage.hh"
 
 StSsdPackage::StSsdPackage(int rNPackage, scm_ctrl_st *scm_ctrl)

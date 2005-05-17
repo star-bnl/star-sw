@@ -1,3 +1,9 @@
+// $Id: St_ssd_Maker.h,v 1.4 2005/05/17 14:16:42 lmartin Exp $
+//
+// $Log: St_ssd_Maker.h,v $
+// Revision 1.4  2005/05/17 14:16:42  lmartin
+// CVS tags added
+//
 /*!
  * \class St_ssd_Maker
  * \author B.Hippolyte, W.Pinganaud, C.Suire.   
@@ -87,7 +93,7 @@ class St_ssd_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_ssd_Maker.h,v 1.3 2005/05/13 15:16:54 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_ssd_Maker.h,v 1.4 2005/05/17 14:16:42 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_ssd_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -96,6 +102,9 @@ class St_ssd_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_ssd_Maker.h,v $
+ *  Revision 1.4  2005/05/17 14:16:42  lmartin
+ *  CVS tags added
+ *
  *  Revision 1.3  2005/05/13 15:16:54  bouchet
  *  reading ssd/geom and no more writeScfCtrlHistograms and writeScmCtrlHistograms methods
  *

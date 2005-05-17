@@ -1,3 +1,9 @@
+// $Id: StSsdBarrel.cc,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+//
+// $Log: StSsdBarrel.cc,v $
+// Revision 1.2  2005/05/17 14:16:37  lmartin
+// CVS tags added
+//
 #include "StSsdBarrel.hh"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_spa_strip_Table.h"

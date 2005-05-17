@@ -1,3 +1,9 @@
+// $Id: StScmListPackage.cc,v 1.2 2005/05/17 14:16:35 lmartin Exp $
+//
+// $Log: StScmListPackage.cc,v $
+// Revision 1.2  2005/05/17 14:16:35  lmartin
+// CVS tags added
+//
 #include "StScmListPackage.hh"
 
 StScmListPackage::StScmListPackage()

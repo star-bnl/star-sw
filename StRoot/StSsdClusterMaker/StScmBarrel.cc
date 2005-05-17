@@ -1,3 +1,9 @@
+// $Id: StScmBarrel.cc,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+//
+// $Log: StScmBarrel.cc,v $
+// Revision 1.2  2005/05/17 14:16:34  lmartin
+// CVS tags added
+//
 #include "StScmBarrel.hh"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_scf_cluster_Table.h"
