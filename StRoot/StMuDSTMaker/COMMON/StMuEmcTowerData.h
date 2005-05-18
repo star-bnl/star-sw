@@ -24,6 +24,8 @@ class StMuEmcTowerData: public TObject
     void              DeleteThis();
     int               towerADC(int id, int detector = bemc);    
     StEmcCrateStatus  crateStatus(int crate, int detector = bemc);
+    void              clearBemc();
+    void              clearEemc();
 
     // EEMC utility methods
     int   getNEndcapTowerADC(){ return nEndcapTowers;}

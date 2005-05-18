@@ -15,23 +15,37 @@ ClassImp(StMuEmcTowerData)
 
 StMuEmcTowerData::StMuEmcTowerData()
 {    
-  memset(mTowerADC,0,sizeof(mTowerADC));
-  memset(mEndcapTowerADC,0,sizeof(mEndcapTowerADC));
-  memset(mBTowCrateFlags,0,sizeof(mBTowCrateFlags));
-  memset(mBSmdCrateFlags,0,sizeof(mBSmdCrateFlags));
-  memset(mBPrsCrateFlags,0,sizeof(mBPrsCrateFlags));
-  memset(mETowCrateFlags,0,sizeof(mETowCrateFlags));
-  memset(mESmdCrateFlags,0,sizeof(mESmdCrateFlags));
-  memset(mEPrsCrateFlags,0,sizeof(mEPrsCrateFlags));
+  clearBemc();
+  clearEemc();
 } 
 
 StMuEmcTowerData::StMuEmcTowerData(StMuEmcTowerData& o) {
-  cout << "StMuEmcTowerData::StMuEmcTowerData(StMuEmcTowerData&) not implemented. Exiting." << endl;
-  exit(1);
+  memcpy(mTowerADC,o.mTowerADC,sizeof(mTowerADC));
+  memcpy(mEndcapTowerADC,o.mEndcapTowerADC,sizeof(mEndcapTowerADC));
+  memcpy(mBTowCrateFlags,o.mBTowCrateFlags,sizeof(mBTowCrateFlags));
+  memcpy(mBSmdCrateFlags,o.mBSmdCrateFlags,sizeof(mBSmdCrateFlags));
+  memcpy(mBPrsCrateFlags,o.mBPrsCrateFlags,sizeof(mBPrsCrateFlags));
+  memcpy(mETowCrateFlags,o.mETowCrateFlags,sizeof(mETowCrateFlags));
+  memcpy(mESmdCrateFlags,o.mESmdCrateFlags,sizeof(mESmdCrateFlags));
+  memcpy(mEPrsCrateFlags,o.mEPrsCrateFlags,sizeof(mEPrsCrateFlags));
 }
 
 StMuEmcTowerData::~StMuEmcTowerData()
 {
+}
+
+void StMuEmcTowerData::clearBemc() {
+  memset(mTowerADC,0,sizeof(mTowerADC));
+  memset(mBTowCrateFlags,0,sizeof(mBTowCrateFlags));
+  memset(mBSmdCrateFlags,0,sizeof(mBSmdCrateFlags));
+  memset(mBPrsCrateFlags,0,sizeof(mBPrsCrateFlags));
+}
+
+void StMuEmcTowerData::clearEemc() {
+  memset(mEndcapTowerADC,0,sizeof(mEndcapTowerADC));
+  memset(mETowCrateFlags,0,sizeof(mETowCrateFlags));
+  memset(mESmdCrateFlags,0,sizeof(mESmdCrateFlags));
+  memset(mEPrsCrateFlags,0,sizeof(mEPrsCrateFlags));
 }
 
 int StMuEmcTowerData::towerADC(int id, int detector)
