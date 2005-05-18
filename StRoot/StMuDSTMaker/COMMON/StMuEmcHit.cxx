@@ -15,12 +15,12 @@ StMuEmcHit::StMuEmcHit()
 StMuEmcHit::~StMuEmcHit()
 {
 }
-StMuEmcHit::StMuEmcHit(StMuEmcHit * hit)
+StMuEmcHit::StMuEmcHit(StMuEmcHit &hit)
 {
-    mId=(short)hit->getId();
-    mAdc=(short)hit->getAdc();
-    mCalType=(char)hit->getCalType();
-    mEnergy=hit->getEnergy();
+    mId=(short)hit.getId();
+    mAdc=(short)hit.getAdc();
+    mCalType=(char)hit.getCalType();
+    mEnergy=hit.getEnergy();
 }
 
 
