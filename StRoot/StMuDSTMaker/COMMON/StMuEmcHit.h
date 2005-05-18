@@ -12,7 +12,7 @@ class StMuEmcHit: public TObject
 {
   public:
                     StMuEmcHit();
-                    StMuEmcHit(StMuEmcHit*);
+                    StMuEmcHit(StMuEmcHit&);
     virtual         ~StMuEmcHit();
     
     int             getId()           { return (int)mId; }      ///< Return Module number
