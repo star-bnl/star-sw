@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.7 2004/10/21 02:57:25 mvl Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.8 2005/05/18 22:47:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -13,6 +13,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TBranch.h"
+#include "TChain.h"
 
 #include <vector>
 #include <algorithm>
@@ -24,22 +25,20 @@
 
 
 
-StMuDstFilterMaker::StMuDstFilterMaker(const char* name) : StMaker(name), mMuDstMaker(0) {
+StMuDstFilterMaker::StMuDstFilterMaker(const char* name) : StMaker(name), mMuDstMaker(0), mFile(0), mTTree(0), mFilterGlobals(1), mDoBemc(1), mDoEemc(1) {
   DEBUGMESSAGE2("");
+  // Create the TClonesArrays
+  createArrays();
 }
 
 /**
  * Gets pointer to the StMuDstMaker
  * Create output file and the TClonesArrays needed
  */
-int StMuDstFilterMaker::Init() {
-  if (!mMuDstMaker) throw StMuExceptionNullPointer("pointer to the StMuDstMaker not set",__PRETTYF__);
-  mFile = new TFile(mFileName.c_str(),"RECREATE","StMuDst");
+void StMuDstFilterMaker::open(const Char_t *fname) {
+  mFile = new TFile(fname,"RECREATE","StMuDst");
   if (!mFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
   mFile->SetCompressionLevel(__COMPRESSION__);
-  
-  // Create the TClonesArrays
-  createArrays();
 
   // Create a ROOT Tree and one superbranch
   DEBUGMESSAGE2("now create trees and branches");
@@ -47,7 +46,6 @@ int StMuDstFilterMaker::Init() {
   TBranch* branch;
   mTTree = new TTree("MuDst", "StMuDst",__SPLIT__);
   if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
-  mTTree->SetAutoSave(__AUTOSAVE__);  // autosave when 1 Mbyte written
   //  muDst stuff
   DEBUGMESSAGE2("arrays");
   for ( int i=0; i<__NARRAYS__; i++) {
@@ -66,17 +64,18 @@ int StMuDstFilterMaker::Init() {
     DEBUGVALUE2(i);
     branch = mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i],  __BUFFER__, __SPLIT__);
   }
-  return 0;
 }
 
 /**
  * Writes the tree to disk and closes the output file
  */
 void StMuDstFilterMaker::close(){
-  if (mTTree) mTTree->AutoSave(); 
-  mTTree = 0;
-  if (mFile) mFile->Close();
+  if (mFile) {
+    mFile->Write();
+    mFile->Close();
+  }
   mFile = 0;
+  mTTree = 0;
 }
 
 
@@ -88,9 +87,29 @@ StMuDstFilterMaker::~StMuDstFilterMaker() {
 
 int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
     DEBUGMESSAGE1("");
-    clear();
     if ( !mMuDstMaker ) return 0;
     
+    if (mFile==0 || mCurFileName != mMuDstMaker->chain()->GetFile()->GetName()) {
+       string outName;
+       if (mOutDirName.size())
+          outName=mOutDirName+'/';
+       if (mOutFileName.size()) {
+          outName+=mOutFileName;
+       }
+       else {
+         close();
+	 const Char_t *inName = mMuDstMaker->chain()->GetFile()->GetName();
+         const Char_t *baseName = strrchr(inName,'/');
+         if (!baseName)
+            baseName=inName;
+         else 
+            baseName++; 
+         outName+=baseName;
+       }
+       if (mFile==0)
+          open(outName.c_str());
+       mCurFileName = mMuDstMaker->chain()->GetFile()->GetName();
+    }
     StMuDst* muDst = mMuDstMaker->muDst();
     if ( !muDst ) return 0;
 
@@ -100,7 +119,16 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
      * the vertex is not |z|<50cm and if it has no tracks above 2GeV/c
      */
     // this is the function that decides whether the whole event shall be discarded or not
+    /*
+    cout << "event at " << muDst->event();
+    if (muDst->event() != 0)
+      cout << ", vtx z " << muDst->event()->primaryVertexPosition().z() << endl;
+    else
+      cout << endl;
+    */
+    clear();
     if ( filter(muDst)==false ) return 0;
+    DEBUGMESSAGE("Event accepted");
 
     /*
      * Now apply filters to the individual TClonesArrays.
@@ -130,6 +158,11 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
 	if ( binary_search(ids.begin(),ids.end(),track->id()) ) { // if the id is in the list
 	    addType( mArrays[muGlobal], *track );
 	}
+        else if (mFilterGlobals) {
+            if (filter(track)) {
+               addType( mArrays[muGlobal], *track);
+            } 
+        }
     }
     // primary tracks are pointing to the global tracks, we have to set the indecies right
     StMuDst::fixTrackIndices( mArrays[muPrimary],mArrays[muGlobal] );
@@ -137,11 +170,35 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     // the emc collection
     StMuEmcCollection* emc = muDst->muEmcCollection();
     if ( filter(emc) ) {
-	//addType( mEmcArrays[0], *emc ); this doesn't work since the StMuEmcCollection is not cloneable
+      // This only works if the input MuDst is in the new format 
+      // (data spread over multiple branches, not stored in StMuEmcCollection)
+      StMuEmcTowerData *typeOfTowerData=0;
+      StMuEmcHit *typeOfEmcHit=0;
+      if (mDoBemc || mDoEemc) {
+        addType( muDst->emcArray(muEmcTow), mEmcArrays[muEmcTow], typeOfTowerData ); 
+        if (mEmcArrays[muEmcTow]->GetEntries()) {
+          if (!mDoBemc) 
+            ((StMuEmcTowerData*) mEmcArrays[muEmcTow]->UncheckedAt(0))->clearBemc();
+          if (!mDoEemc) 
+            ((StMuEmcTowerData*) mEmcArrays[muEmcTow]->UncheckedAt(0))->clearEemc();
+        }
+      }
+      if (mDoBemc) {
+        addType( muDst->emcArray(muEmcPrs), mEmcArrays[muEmcPrs], typeOfEmcHit ); 
+        addType( muDst->emcArray(muEmcSmde), mEmcArrays[muEmcSmde], typeOfEmcHit ); 
+        addType( muDst->emcArray(muEmcSmdp), mEmcArrays[muEmcSmdp], typeOfEmcHit ); 
+      }
+      if (mDoEemc) {
+        addType( muDst->emcArray(muEEmcPrs), mEmcArrays[muEEmcPrs], typeOfEmcHit ); 
+        addType( muDst->emcArray(muEEmcSmdu), mEmcArrays[muEEmcSmdu], typeOfEmcHit ); 
+        addType( muDst->emcArray(muEEmcSmdv), mEmcArrays[muEEmcSmdv], typeOfEmcHit ); 
+      }
     }
     
     // write the event only if it has at least one primary track
-    if ( mArrays[muPrimary]->GetEntries()>0) mTTree->Fill();
+    if ( mArrays[muPrimary]->GetEntries()>0) { 
+      mTTree->Fill();
+    }
     return 0;
 }
 
@@ -155,6 +212,17 @@ int StMuDstFilterMaker::addType(TClonesArray* tcaTo , T t) {
   return counter;
 }
 
+template <class T>
+int StMuDstFilterMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo ,T *t) {
+  if (tcaFrom && tcaTo) {
+    int n = tcaFrom->GetEntries();
+    int counter = tcaTo->GetEntries();
+    for (int i=0; i<n;i++) {
+      new((*tcaTo)[counter++]) T( *(T*)(void*)tcaFrom->UncheckedAt(i) );
+    }
+  }
+  return 0;
+}
 
 int StMuDstFilterMaker::Finish() { 
     close();
@@ -167,7 +235,7 @@ int StMuDstFilterMaker::Finish() {
 void StMuDstFilterMaker::clear(){
   DEBUGMESSAGE2("");
 
-  mMuDstMaker->clearArrays();
+  clearArrays();
 }
 
 /**
@@ -195,6 +263,23 @@ void StMuDstFilterMaker::createArrays() {
   }
 }
 
+void StMuDstFilterMaker::clearArrays()
+{
+    /// regular stuff
+    for ( int i=0; i<__NARRAYS__; i++) {
+        mArrays[i]->Clear();
+    }
+    /// from strangeness group
+    for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
+         mStrangeArrays[i]->Clear();
+    }
+    /// from emc group
+    for ( int i=0; i<__NEMCARRAYS__; i++) {
+        mEmcArrays[i]->Clear();
+    }
+}
+
+
 /*
  * Here I define my cuts by specializing the
  * template<class T> bool filter(T*)
@@ -211,6 +296,17 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.8  2005/05/18 22:47:29  mvl
+ * Fixed StMuDstFilterMaker to work again with changes in MuDstMaker
+ * (the change in v1.6 was faulty. Thanks Alex for finding this)
+ * Added some new features suggested by Alex Suiade:
+ * - Emc data now supported (for SL04k and later MuDst).
+ *   Flags added to switch Eemc and Bemc copying seperately (setDoBemc and setDoEemc)
+ * - Global tracks are checked seperately. They were only copied
+ *   if the corresponding primary fullfills the filter() criteria.
+ *   Now they are also copied if only the global track fullfills the criteria
+ *   Can be switched with setFilterGlobals()
+ *
  * Revision 1.7  2004/10/21 02:57:25  mvl
  * Changed call to getter for StMuEmcCollection
  *

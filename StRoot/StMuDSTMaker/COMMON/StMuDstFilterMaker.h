@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.8 2004/07/27 04:31:37 mvl Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.9 2005/05/18 22:47:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -35,21 +35,25 @@ class StMuDstFilterMaker : public StMaker {
     StMuDstFilterMaker(const char* name="muDstFilter");
     ~StMuDstFilterMaker();
     
-    int Init();   ///< Create the output file and the TClonesArrays
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.8 2004/07/27 04:31:37 mvl Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.9 2005/05/18 22:47:29 mvl Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
-    void setOutputFileName(const char* name) { mFileName = string(name); }
+    void setOutputDirName(const char* name) { mOutDirName = string(name); }
+    void setOutputFileName(const char* name) { mOutFileName = string(name); }
     void setMuDstMaker( StMuDstMaker* maker) { mMuDstMaker = maker; }
+    void setFilterGlobals(int filterGlobals = 1) { mFilterGlobals = filterGlobals; }
+    void setDoBemc(int doBemc=1)                { mDoBemc = doBemc;}
+    void setDoEemc(int doEemc=1)                { mDoEemc = doEemc;}
+
  protected:
     /// specialize this function to apply filters to the individual branches
     template<class T> bool filter(T* t) { return false;}
     /// If this function returns false, the whole event is discarded
-    bool filter(StMuDst* mu) {return fabs(mu->event()->primaryVertexPosition().z())<100 ;}
+    bool filter(StMuDst* mu) {return mu->event() && fabs(mu->event()->primaryVertexPosition().z())<100 ;}
     /// Now I specialize the filter function to select individual object
     bool filter(StMuEvent* ev) {return true; }             // keep all event-wise information
     bool filter(StMuTrack* track);
@@ -60,15 +64,23 @@ class StMuDstFilterMaker : public StMaker {
 
     // output file
     TFile* mFile;
-    string mFileName;
+    string mOutDirName;
+    string mOutFileName;
+    string mCurFileName;
     TChain* mChain;
     TTree* mTTree;
-
+    Int_t mFilterGlobals;  ///< If set, keep also globals that fulfill cuts, while primary does not
+    Int_t mDoBemc;        ///< Copy barrel data (if it passes cuts)
+    Int_t mDoEemc;        ///< Copy endcap data (if it passes cuts)
     void createArrays();
+    void clearArrays();
     void clear();
     void close();
+    void open(const Char_t *);
     template <class T>
     int addType(TClonesArray* tcaTo , T t);
+    template <class T>
+    int addType(TClonesArray *tca, TClonesArray* tcaTo , T *t);
     
     /// the list of TClonesArrays to copy
     TClonesArray* mArrays[__NARRAYS__];//->
@@ -84,6 +96,17 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.9  2005/05/18 22:47:29  mvl
+ * Fixed StMuDstFilterMaker to work again with changes in MuDstMaker
+ * (the change in v1.6 was faulty. Thanks Alex for finding this)
+ * Added some new features suggested by Alex Suiade:
+ * - Emc data now supported (for SL04k and later MuDst).
+ *   Flags added to switch Eemc and Bemc copying seperately (setDoBemc and setDoEemc)
+ * - Global tracks are checked seperately. They were only copied
+ *   if the corresponding primary fullfills the filter() criteria.
+ *   Now they are also copied if only the global track fullfills the criteria
+ *   Can be switched with setFilterGlobals()
+ *
  * Revision 1.8  2004/07/27 04:31:37  mvl
  * Changed includes to class StV0MuDst etc to reduce interdependence of makers
  *
