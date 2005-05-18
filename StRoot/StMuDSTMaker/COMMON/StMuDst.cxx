@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.34 2005/04/12 21:56:29 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.35 2005/05/18 20:56:57 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -139,25 +139,31 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   for (int i=0; i<nIndex; i++) globalIndex[i]=-1;
 
   for (int i=0; i<nGlobals; i++) {
-    if (globalTracks(i)->id()<nIndex) {
-      globalIndex[ globalTracks(i)->id() ] = i;
-      globalTracks(i)->setIndex2Global(i);
-    }
-    else {
-      int newSize=(int) (1.2*nIndex);
-      globalIndex.Set(newSize);
-      for (Int_t j=nIndex; j<newSize; j++)
-        globalIndex[j]=-1;
-      nIndex=newSize;
+    StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
+    if (g) {
+      if (g->id()<nIndex) {
+        globalIndex[ globalTracks(i)->id() ] = i;
+        globalTracks(i)->setIndex2Global(i);
+      }
+      else {
+        int newSize=(int) (1.2*nIndex);
+        globalIndex.Set(newSize);
+        for (Int_t j=nIndex; j<newSize; j++)
+          globalIndex[j]=-1;
+        nIndex=newSize;
+      }
     }
   }
   // set the indices for the primary tracks
   DEBUGVALUE2(primary->GetEntries());
   for (int i=0; i<nPrimaries; i++) {
-    if (primaryTracks(i)->id()<nIndex) 
-      primaryTracks(i)->setIndex2Global( globalIndex[ primaryTracks(i)->id() ] );
-    else
-      primaryTracks(i)->setIndex2Global(-1);
+    StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
+    if (p) {
+      if (p->id()<nIndex) 
+        p->setIndex2Global( globalIndex[ p->id() ] );
+      else
+        p->setIndex2Global(-1);
+    }
   }
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -403,6 +409,11 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.35  2005/05/18 20:56:57  mvl
+ * Fixed inconsistency in fixTrackIndices (pointed out by Alex Suaide):
+ * now using the TClonesArray that are passed to the function, instead of the
+ * ones in StMuDst.
+ *
  * Revision 1.34  2005/04/12 21:56:29  mvl
  * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
  *
