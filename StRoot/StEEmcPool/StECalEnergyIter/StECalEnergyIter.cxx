@@ -11,8 +11,10 @@
 bool StECalEnergyIter::mIsSimu = false;
 
 StECalEnergyIter::StECalEnergyIter(StMuEmcCollection *emCol, int det,
-				   StEEmcDbMaker *eedb, bool flag) 
-  : mEmCol(emCol), mEEdb(eedb), mdetector(det), mIhits(0), mSuppBad(flag) {
+				   StEEmcDbMaker *eedb, bool flag,
+				   int istat) 
+  : mEmCol(emCol), mEEdb(eedb), mdetector(det), mIhits(0), mSuppBad(flag),
+    mStatBits(istat) {
 
   char cuv = 'U';
   switch (mdetector)
@@ -38,6 +40,7 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
 			    int &sec, int &eta, int &phi, char &cdet)
 {
   const EEmcDbItem *dbitem;
+  bool dbfail;
   cdet = 'U';
 
   do {
@@ -65,9 +68,10 @@ bool StECalEnergyIter::next(float &e, int &adc, int &adclessped,
       default:
 	return false;
       }
-  } while ( mSuppBad && ( !dbitem || dbitem->fail || dbitem->gain < 0.5 ) );
+    dbfail = !dbitem || dbitem->fail || (dbitem->stat & mStatBits);
+  } while ( mSuppBad && ( dbfail || dbitem->gain < 0.5 ) );
 
-  if  ( !dbitem || dbitem->fail || (dbitem->ped < 1 && !mIsSimu) ) 
+  if  ( dbfail || (dbitem->ped < 1 && !mIsSimu) ) 
     {
       e = - 100.0;
       adclessped = adc;
