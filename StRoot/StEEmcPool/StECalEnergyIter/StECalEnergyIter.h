@@ -1,4 +1,4 @@
-// $Id: StECalEnergyIter.h,v 1.3 2004/12/21 05:20:30 cadman Exp $
+// $Id: StECalEnergyIter.h,v 1.4 2005/05/19 19:35:11 cadman Exp $
 
 #ifndef STAR_StECalEnergyIter
 #define STAR_StECalEnergyIter
@@ -26,6 +26,7 @@ class StECalEnergyIter {
   int mNhits;
   int mIhits;
   int mSuppBad;
+  short mStatBits;
   static bool mIsSimu;
   inline StECalEnergyIter() { /* no-op */ }
  
@@ -33,7 +34,8 @@ class StECalEnergyIter {
   // Protected method if any
 
  public: 
-  StECalEnergyIter(StMuEmcCollection *, int, StEEmcDbMaker *, bool=true);
+  StECalEnergyIter(StMuEmcCollection *, int, StEEmcDbMaker *, bool=true,
+		   int = 0);
   bool next(float &e, int &adc, int &adclessped, int &sec, int &eta, 
 	    int &phi, char &cdet);
   inline bool operator()(float &e, int &adc, int &adclessped, int &sec, 
@@ -43,7 +45,7 @@ class StECalEnergyIter {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StECalEnergyIter.h,v 1.3 2004/12/21 05:20:30 cadman Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StECalEnergyIter.h,v 1.4 2005/05/19 19:35:11 cadman Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
