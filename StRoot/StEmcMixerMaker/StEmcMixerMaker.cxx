@@ -138,10 +138,15 @@ Int_t StEmcMixerMaker::addHits()
         rawHit1[k1]->setAdc(new_adc);
         rawHit1[k1]->setEnergy(new_edep);
         new_edep_tot+=new_edep;
+        UInt_t calib = rawHit1[k1]->calibrationType();
+        while(calib>127) calib-=128;
         if(mDoPrint && edep_add>0) 
-          gMessMgr->Info() <<"EMBEDDED HIT -> m = "<<m1<<"  e = "<<e1<<"  s = "<<s1
+          gMessMgr->Info() <<"EMBEDDED HIT -> det = "<<i+1<<"  m = "<<m1<<"  e = "<<e1<<"  s = "<<s1
+                           <<"  calib = "<<rawHit1[k1]->calibrationType()
+                           <<"  new calib = "<<calib
                            <<"  oldE = "<<oldE<<" EADD = "<<edep_add
                            <<"  newE = "<<rawHit1[k1]->energy()<<endm;
+        rawHit1[k1]->setCalibrationType(calib);
       }
       
       //Add remainig hits
