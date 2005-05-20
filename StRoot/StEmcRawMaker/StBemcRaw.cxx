@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.13 2005/02/02 11:09:59 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.14 2005/05/20 01:48:59 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.14  2005/05/20 01:48:59  suaide
+// small bug in the capacito assignement is fixed
+//
 // Revision 1.13  2005/02/02 11:09:59  suaide
 // crate Id check is back!
 //
@@ -450,6 +453,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
     if(S==1 && RAW->header(RDO+BPRSOFFSET))     
     {
       CAP = RAW->header(RDO+BPRSOFFSET,SMDCAPACITOR);
+      while(CAP>127) CAP-=128;
       return RAW->data(RDO+BPRSOFFSET,index); 
     }
     return 0;
@@ -465,6 +469,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
     if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES) 
     {
       CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
+      while(CAP>127) CAP-=128;
       return RAW->data(RDO+BSMDOFFSET,index); 
     }
     return 0;
@@ -480,6 +485,7 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
     if(S==1 && RAW->header(RDO+BSMDOFFSET) && RDO>=0 && RDO<MAXSMDCRATES)     
     {
       CAP = RAW->header(RDO+BSMDOFFSET,SMDCAPACITOR);
+      while(CAP>127) CAP-=128;
       return RAW->data(RDO+BSMDOFFSET,index); 
     }
     return 0;
