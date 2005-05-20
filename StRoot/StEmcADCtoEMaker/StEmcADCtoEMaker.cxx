@@ -98,6 +98,8 @@ Bool_t StEmcADCtoEMaker::prepareEnvironment()
   mEvent = (StEvent*)GetInputDS("StEvent");
   StEmcCollection *emc = NULL;
   mMyStEvent = kFALSE;
+
+  cout <<" **** STEVENT "<<mEvent<<endl;
   
   if(mEvent) emc = mEvent->emcCollection();
   else
