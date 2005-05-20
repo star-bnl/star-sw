@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.35 2005/05/18 20:56:57 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.36 2005/05/20 20:30:35 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -141,17 +141,17 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   for (int i=0; i<nGlobals; i++) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
-      if (g->id()<nIndex) {
-        globalIndex[ globalTracks(i)->id() ] = i;
-        globalTracks(i)->setIndex2Global(i);
-      }
-      else {
+      if (g->id() >= nIndex) {
         int newSize=(int) (1.2*nIndex);
+        if (newSize <= g->id())
+          newSize=(int) (1.2*g->id())+1;
         globalIndex.Set(newSize);
         for (Int_t j=nIndex; j<newSize; j++)
           globalIndex[j]=-1;
         nIndex=newSize;
       }
+      globalIndex[ g->id() ] = i;
+      globalTracks(i)->setIndex2Global(i);
     }
   }
   // set the indices for the primary tracks
@@ -409,6 +409,12 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.36  2005/05/20 20:30:35  mvl
+ * More fixed to StMuDst::fixTrackIndices(). The bug afafcets only few tracks
+ * for events with many tracks, so most people will not be much affected by it.
+ * After heavy filtering with StMuDstFilterMaker (many fewer tracks than tack-ids)
+ * the bug became apparent.
+ *
  * Revision 1.35  2005/05/18 20:56:57  mvl
  * Fixed inconsistency in fixTrackIndices (pointed out by Alex Suaide):
  * now using the TClonesArray that are passed to the function, instead of the
