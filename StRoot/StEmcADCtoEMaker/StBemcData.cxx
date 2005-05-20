@@ -97,6 +97,7 @@ Bool_t StBemcData::make(StEmcCollection* emc, StEvent* event)
             Int_t s=abs(rawHit[k]->sub());
             Int_t adc=rawHit[k]->adc();
             Int_t cap=rawHit[k]->calibrationType();       
+            while(cap>127) cap-=128;
             Int_t id;
             geo->getId(m,e,s,id);
             ID[det-1][NH[det-1]]  = id;
