@@ -40,6 +40,8 @@ class StEEmcMixEvent : public TObject {
   void setTotalEnergyU( Int_t s, Float_t e );
   void setTotalEnergyV( Int_t s, Float_t e );
 
+  void setHighTower( StEEmcTower &t );
+
   void Clear(Option_t *opts="");
 
  private:
@@ -83,6 +85,9 @@ class StEEmcMixEvent : public TObject {
   Int_t nTowers;
   TClonesArray *mTowers; 
 
+  /// Maximum tower
+  StEEmcTower mHighTower;
+
   ClassDef(StEEmcMixEvent,1);
 
 };
@@ -92,5 +97,7 @@ inline void StEEmcMixEvent::setEnergySeen(Float_t s){mEseen=s;}
 
 inline void StEEmcMixEvent::setTotalEnergyU(Int_t s, Float_t e){mEtotalU[s]=e;}
 inline void StEEmcMixEvent::setTotalEnergyV(Int_t s, Float_t e){mEtotalV[s]=e;}
+
+inline void StEEmcMixEvent::setHighTower ( StEEmcTower &t ){ mHighTower=t; }
 
 #endif

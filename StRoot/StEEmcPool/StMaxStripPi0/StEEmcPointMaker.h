@@ -91,6 +91,7 @@ class StEEmcPointMaker : public StMaker, public StEEmcPointUtils {
   /// Divide energy of eemc towers between identified smd points
   void shareEnergy();
   void shareEnergySimple();
+  void countRelatives();
 
   void removeCluster( StEEmcSmdClusterVec_t &clusters, Int_t key );
 

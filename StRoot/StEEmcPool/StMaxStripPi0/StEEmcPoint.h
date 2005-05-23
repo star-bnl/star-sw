@@ -30,6 +30,9 @@ class StEEmcPoint : public TObject {
   /// Add an smd cluster to this point
   void cluster( StEEmcSmdCluster c, Int_t plane ){mSmdClusters[plane]=c;} 
 
+  /// Set the number of other points which share tower energy 
+  void numberOfRelatives( Int_t r ){ mRelatives=r; }
+
   /// Get the position of this point
   TVector3 position(){ return mPosition; }
   /// Get the energy of this point
@@ -47,6 +50,10 @@ class StEEmcPoint : public TObject {
   /// Gets the specified cluster.
   /// \param c: 0=U, 1=V
   StEEmcSmdCluster cluster(Int_t c){ return mSmdClusters[c]; } 
+
+  /// Return the number of "relative" points.  A point is related if
+  /// it lies within the 3x3 patch of towers centered on this point.
+  Int_t numberOfRelatives(){ return mRelatives; }
 
   /// Returns a pointer to a new StEmcPoint, basically a
   /// 1:1 copy of this point.
@@ -75,6 +82,8 @@ class StEEmcPoint : public TObject {
   /// weights for each tower.
   StEEmcTowerVec_t mTowers;       //!
   std::vector<Float_t> mWeights;  //! 
+
+  Int_t mRelatives;
 
   StEmcPoint *mEmcPoint;
 
