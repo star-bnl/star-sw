@@ -27,6 +27,8 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
 
   scale(1.0);
 
+  mEEgeom=new EEmcGeomSimple();
+
   //$$$  std::cout << "StEEmcA2EMaker(" << name << ")" << std::endl << std::flush;
   /// Clear all towers and init index
   for ( Int_t tower=0; tower < 720; tower++ ) {
@@ -311,6 +313,15 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   mTowers[index][layer].energy( energy * mScale );
   mTowers[index][layer].raw(adc);
   mTowers[index][layer].adc(adc-ped);
+
+  /// Determine tower center and set E_T
+  UInt_t s=(UInt_t)mTowers[index][layer].sector();
+  UInt_t ss=(UInt_t)mTowers[index][layer].subsector();
+  UInt_t eb=(UInt_t)mTowers[index][layer].etabin();
+  TVector3 momentum=mEEgeom -> getTowerCenter( s,ss,eb );
+  momentum=momentum.Unit();
+  momentum*=energy;
+  mTowers[index][layer].et( (Float_t)momentum.Perp() );
 
   if ( layer==0 )
     if ( adc - ped > mHighTower->adc() ) {

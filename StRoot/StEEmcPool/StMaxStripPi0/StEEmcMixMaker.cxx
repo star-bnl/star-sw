@@ -14,7 +14,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
-//#define SIMPLE_MC
+#define SIMPLE_MC
 
 ClassImp(StEEmcMixMaker);
 
@@ -136,6 +136,8 @@ void StEEmcMixMaker::mixReal()
 #ifndef SIMPLE_MC
   if ( v.z()==0. && v.x()==0. && v.y()==0. ) return; 
 #endif
+
+
   
   /// mix all pairs of points, avoiding self-pairs
   for ( UInt_t ipoint=0; ipoint<mPoints.size()-1; ipoint++ )
@@ -144,7 +146,7 @@ void StEEmcMixMaker::mixReal()
 
 	StEEmcPoint point1=mPoints[ipoint];
 	StEEmcPoint point2=mPoints[jpoint];
-
+       
 	/// cut points with excessively low energy 
 	if ( point1.energy() < mEpoint || point2.energy() < mEpoint )
 	    continue; 
@@ -157,6 +159,8 @@ void StEEmcMixMaker::mixReal()
 	}
 
       }
+
+  
 
 
 }
