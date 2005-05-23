@@ -2,6 +2,19 @@
 ClassImp(StEEmcPair);
 
 // ----------------------------------------------------------------------------
+
+StEEmcPair::StEEmcPair()
+{
+  mMass=-1.;
+  mEnergy=-1;
+  mZgg=-1;
+  mPhigg=-1;
+  mMomentum=TVector3(0,0,0);
+  mVertex1=mMomentum;
+  mVertex2=mMomentum;
+}
+
+
 StEEmcPair::StEEmcPair( StEEmcPoint p1, StEEmcPoint p2 )
 {
   StEEmcPair(p1,p2,TVector3(0,0,0),TVector3(0,0,0));

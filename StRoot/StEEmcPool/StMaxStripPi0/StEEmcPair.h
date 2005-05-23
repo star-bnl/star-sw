@@ -10,8 +10,8 @@ class StEEmcPair : public TObject {
 
  public:
 
-  /// Default constructor, does nothing
-  StEEmcPair(){ /* nada */ };
+  /// Default constructor (don't use except for placeholder)
+  StEEmcPair();
   /// Reconstruct point pairs where vertex doesn't matter or
   /// isn't available (i.e. in production)
   StEEmcPair( StEEmcPoint p1, StEEmcPoint p2 );

@@ -29,6 +29,8 @@ class StEEmcMixEvent : public TObject {
   void addMixed ( StEEmcPair  p );
   void addTower ( StEEmcTower t ); 
 
+  void setLeadingPair( StEEmcPair &p );
+
   void addCluster( StEEmcSmdCluster c);
 
   void setEvent( StMuEvent *event );
@@ -63,6 +65,9 @@ class StEEmcMixEvent : public TObject {
   Int_t         nMixed;
   TClonesArray *mRealPairs;
   TClonesArray *mMixedPairs;
+
+  /// Pair which contains the two most energetic points
+  StEEmcPair mLeadingPair;
 
   Int_t         nPoints;
   TClonesArray *mPoints;
@@ -99,5 +104,7 @@ inline void StEEmcMixEvent::setTotalEnergyU(Int_t s, Float_t e){mEtotalU[s]=e;}
 inline void StEEmcMixEvent::setTotalEnergyV(Int_t s, Float_t e){mEtotalV[s]=e;}
 
 inline void StEEmcMixEvent::setHighTower ( StEEmcTower &t ){ mHighTower=t; }
+
+inline void StEEmcMixEvent::setLeadingPair( StEEmcPair &p ) { mLeadingPair = p; }
 
 #endif

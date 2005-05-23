@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #include "StEEmcTower.h"
 #include "StEEmcStrip.h"
@@ -114,6 +115,8 @@ class StEEmcA2EMaker : public StMaker {
   StEEmcDbMaker *mDbMaker;
   StMuDstMaker  *mMuDstMaker;
   StEventMaker  *mEventMaker;
+
+  EEmcGeomSimple *mEEgeom;
 
   /// Read data from muDst, StEvent or muEzt branches, 
   /// depending on input type

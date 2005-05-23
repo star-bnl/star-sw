@@ -133,6 +133,7 @@ class StEEmcMixMaker : public StMaker {
   /// Background pairs mixed on each event
   StEEmcPairVec_t mBackground;
 
+
   /// Accept or reject this event (trigger, qa, etc...)
   Bool_t accept(StMuEvent *);
 
@@ -143,6 +144,7 @@ class StEEmcMixMaker : public StMaker {
   void mixReal();
   /// Mix combinatoric pairs
   void mixBackground();
+
 
   TRandom *mRandom;
 
