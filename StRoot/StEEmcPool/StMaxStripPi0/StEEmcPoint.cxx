@@ -10,6 +10,7 @@ ClassImp(StEEmcPoint);
 StEEmcPoint::StEEmcPoint()
 {
   mEmcPoint=0;
+  mRelatives=999;
 }
 
 // ----------------------------------------------------------------------------
@@ -24,6 +25,7 @@ StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
   mSmdClusters[0] = p.mSmdClusters[0];
   mSmdClusters[1] = p.mSmdClusters[1];
   mEmcPoint       = p.mEmcPoint;
+  mRelatives      = p.mRelatives;
 
 }
 

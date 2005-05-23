@@ -98,6 +98,10 @@ Int_t StEEmcPointMaker::Make()
   /// do energy sharing
   //  shareEnergy(); //  <<<<<<< leads to negative point energies... rethink
   shareEnergySimple();
+
+
+  /// count the number of "related" points
+  countRelatives();
   
 
   if ( mFillStEvent )
@@ -764,7 +768,39 @@ void StEEmcPointMaker::verifyStEvent()
 }
 
 
+// ----------------------------------------------------------------------------
+void StEEmcPointMaker::countRelatives()
+{
 
+  /// Loop over all points and count how many are beneath each tower
+  Int_t npoints[720];
+  for ( Int_t i=0;i<720;i++ ) npoints[i]=0;
+
+  for ( UInt_t i=0;i<mPoints.size();i++ )    
+      npoints[ mPoints[i].tower(0).index() ]++;
+
+  /// Loop over all points and set the number of "relatives"
+  for ( UInt_t i=0;i<mPoints.size();i++ )
+    {
+
+      StEEmcTower tower=mPoints[i].tower(0);
+      Int_t nn=tower.numberOfNeighbors();
+
+      Int_t nrel=npoints[ tower.index() ] - 1; // don't count self
+      assert(nrel>=0); // pbck
+
+      for ( Int_t j=0;j<nn;j++ )
+	{
+	  StEEmcTower t2=tower.neighbor(j);
+	  nrel+=npoints[ t2.index() ];
+	}
+
+      mPoints[i].numberOfRelatives(nrel);
+
+    }
+    
+
+}
 
 
 

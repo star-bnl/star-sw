@@ -56,13 +56,29 @@ Int_t StEEmcMixTreeMaker::Make()
   /// Get list of hit towers and store in event   
   StEEmcTowerVec_t towers=mEEanalysis->towers(); 
   Float_t etotal=0.;
+  Float_t emax=0.;
+  Int_t imax=-1;
   for ( UInt_t i=0; i < towers.size(); i++ ) 
     {
-    //     mMixEvent -> addTower( towers[i] ); 
+      // need to add copy constructor before this line will work
+      //      mMixEvent -> addTower( towers[i] ); 
       etotal+= towers[i].energy();
+      if ( towers[i].energy() > emax ) {
+	emax=towers[i].energy();
+	imax=(UInt_t)i;
+      }
     }
   mMixEvent->setTotalEnergy(etotal);
   mMixEvent->setEnergySeen(mEEpoints->energySeen());
+  if ( imax>=0 ) 
+    {
+      mMixEvent->setHighTower( towers[imax] );
+    }
+  else 
+    {
+      StEEmcTower tmp;
+      mMixEvent -> setHighTower( tmp );
+    }
  
 
   /// Fill the ttree
