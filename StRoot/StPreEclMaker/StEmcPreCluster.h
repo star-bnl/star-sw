@@ -1,111 +1,109 @@
-//
-// $Id: StEmcPreCluster.h,v 1.7 2003/09/02 17:58:49 perev Exp $
-//
-// $Log: StEmcPreCluster.h,v $
-// Revision 1.7  2003/09/02 17:58:49  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.6  2001/04/17 23:51:30  pavlinov
-// Clean up before MDC4
-//
-// Revision 1.5  2001/02/01 22:23:10  suaide
-// Fixed some memory leaks
-//
-// Revision 1.4  2000/08/24 22:11:34  suaide
-//
-//
-// restored some files for background compatibility
-//
-// Revision 1.3  2000/08/24 19:45:37  suaide
-//
-//
-// small modifications: some cout has been removed
-//
-// Revision 1.2  2000/08/24 11:26:48  suaide
-//
-//
-//
-// by A. A. P. Suaide - 2000/08/24 07:25:00
-//
-// Notes:
-//
-// 1. Full StEvent Compatible
-// 2. Read hits from StEvent object
-// 3. Write clusters in StEvent format and old format to keep background
-//    compatibility
-// 4. Do clustering in bemc, bprs, bsmde, bsmdp
-// 5. Included method StPreEclMaker::SetClusterCollection
-//
-// Revision 1.1  2000/05/15 21:24:00  subhasis
-// initial version
-//
-// PreClusters Finder Maker for EMC
-//
-//
-// Authors: Alexandre A. P. Suaide (version 2.0)
-//          Subhasis Chattopadhyay,
-//          Aleksei Pavlinov , July 1999.
-//          initial version from Akio Ogawa    
-//    
-
-#ifndef STAR_StEmcPreCluster
-#define STAR_StEmcPreCluster
-
+/*!\class StEmcPreCluster
+\author Alexandre A. P. Suaide
+ 
+This is the definition of a pre cluster object for the 
+BEMC detector. It has more functionality than the regular
+StEmcCluster (StEvent) such as splitting, merging, etc which
+is very usefull for cluster finding algorithms.
+ 
+*/
+#include "TObject.h"
+#include "TList.h"
 #include <math.h>
-#include <Stiostream.h>
-#include "TArrayI.h"
-#include "StObject.h"
-#include "StEvent/StEmcDetector.h"
-class StEmcPreCluster : public StObject {
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/StEmcMath.h"
+#include "StEmcRawMaker/defines.h"
 
+#ifndef StEmcPreCluster_HH
+#define StEmcPreCluster_HH
+
+class StEmcRawHit;
+class StEmcCluster;
+class StEmcPreCluster: public TObject
+{
 private:
-  Int_t             mDetector;
-  Int_t             mModule;
-  Float_t           mEta;
-  Float_t           mPhi;
-  Float_t           mSigmaEta;
-  Float_t           mSigmaPhi;
-  Float_t           mEnergy;
-  Int_t             mNhits;
-  TArrayI           mHitsID;  
-public: 
-                    StEmcPreCluster(TArrayI*);
-                    StEmcPreCluster(Int_t,TArrayI*,Int_t);
-                    StEmcPreCluster(Int_t,TArrayI*,Int_t,StEmcDetector*);
-                    ~StEmcPreCluster();
-  Float_t           Eta() const;
-  Float_t           Phi() const;
-  Float_t           SigmaEta() const;
-  Float_t           SigmaPhi() const;
-  Float_t           Energy() const;
-  Int_t             Nhits() const;
-  Int_t             Module() const;
-  Int_t             ID(Int_t);
-  TArrayI*          HitsID();
-  virtual void      Browse(TBrowser *b);
+    StEmcGeom*  mGeom;
+    TList       mHits;
 
-  virtual void      calcMeanAndRms(StEmcDetector*,Int_t);
-  virtual void      print(ostream *os);
+    Int_t       mDetector;
+    Int_t       mMatchingId;
+    Float_t     mEta;
+    Float_t     mPhi;
+    Float_t     mSigmaEta;
+    Float_t     mSigmaPhi;
+    Float_t     mEnergy;
 
-  ClassDef(StEmcPreCluster,2)// Base class for electromagnetic calorimeter cluster
+protected:
+public:
+    StEmcPreCluster(Int_t);
+    StEmcPreCluster(StEmcPreCluster&);
+    StEmcPreCluster(StEmcCluster*);
+    virtual     ~StEmcPreCluster();
+
+    Float_t     eta() const; ///< returns the eta position of the cluster
+    Float_t     phi() const; ///< returns the phi position of the cluster
+    Float_t     sigmaEta() const; ///< returns the width in eta
+    Float_t     sigmaPhi() const; ///< returns the width in phi
+    Float_t     energy() const; ///< returns the energy of the cluster
+    Int_t       nHits() const; ///< returns the number of hits in the cluster
+    Int_t       detector() const; ///< returns the detector number
+    Int_t       matchingId() const; ///< returns the matching id with other detectors. 0 means no matching
+
+    void        addHit(StEmcRawHit*); ///< add a hit to the cluster
+    void        removeHit(StEmcRawHit*); ///< removes a hit from the cluster
+    void        removeHit(Int_t); ///< removes a ht from the cluster
+    StEmcRawHit* getHit(Int_t i)
+    {
+        return (StEmcRawHit*)mHits.At(i);
+    } ///< gets a pointer to a hit in the cluster
+
+    void        addCluster(StEmcPreCluster*); ///< add another cluster to this one. Does not delete the added cluster
+    void        addCluster(StEmcCluster*);///< add another cluster to this one. Does not delete the added cluster
+    void        subtractCluster(StEmcPreCluster*);///< subtract another cluster to this one.
+    void        subtractCluster(StEmcCluster*);///< subtract another cluster to this one.
+    StEmcPreCluster*   splitInEta(Float_t); ///< split the cluster in the eta coordinate. Returns a pointer of the splitted cluster. The spllited cluster is not added to any collection
+    StEmcPreCluster*   splitInPhi(Float_t); ///< split the cluster in the phi coordinate. Returns a pointer of the splitted cluster. The spllited cluster is not added to any collection
+
+    void        setMatchingId(Int_t a)
+    {
+        mMatchingId = a;
+    } ///< sets the matching id
+
+    void        update(); ///< updates cluster information. Calculates eta,phi, ernergy, etc  from the hits added to the cluster
+    StEmcCluster* makeStCluster(); ///< creates an StEmcCluster from the information  in this pre cluster
+
+    ClassDef(StEmcPreCluster,1)
 };
-
-ostream &operator<<(ostream&, StEmcPreCluster&); // Printing operator
-
-inline              StEmcPreCluster::~StEmcPreCluster(){ /* Nobody */ }
-inline   Float_t    StEmcPreCluster::Eta() const     {return mEta;} 
-inline   Float_t    StEmcPreCluster::Phi() const    {return mPhi;}
-inline   Float_t    StEmcPreCluster::SigmaEta() const{return mSigmaEta;}
-inline   Float_t    StEmcPreCluster::SigmaPhi() const{return mSigmaPhi;}
-inline   Float_t    StEmcPreCluster::Energy() const  {return mEnergy;}
-inline   Int_t      StEmcPreCluster::Nhits() const {return mNhits;}
-inline   Int_t      StEmcPreCluster::Module() const {return mModule;}
-inline   Int_t      StEmcPreCluster::ID(Int_t i) {return mHitsID[i];}
-inline   TArrayI    *StEmcPreCluster::HitsID() {return &mHitsID;}
-
+inline   Float_t    StEmcPreCluster::eta() const
+{
+    return mEta;
+}
+inline   Float_t    StEmcPreCluster::phi() const
+{
+    return mPhi;
+}
+inline   Float_t    StEmcPreCluster::sigmaEta() const
+{
+    return mSigmaEta;
+}
+inline   Float_t    StEmcPreCluster::sigmaPhi() const
+{
+    return mSigmaPhi;
+}
+inline   Float_t    StEmcPreCluster::energy() const
+{
+    return mEnergy;
+}
+inline   Int_t      StEmcPreCluster::nHits() const
+{
+    return mHits.GetSize();
+}
+inline   Int_t      StEmcPreCluster::detector() const
+{
+    return mDetector;
+}
+inline   Int_t      StEmcPreCluster::matchingId() const
+{
+    return mMatchingId;
+}
 #endif
-
-
-
-
-

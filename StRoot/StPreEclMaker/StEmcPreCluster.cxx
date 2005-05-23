@@ -1,232 +1,259 @@
-// $Id: StEmcPreCluster.cxx,v 1.13 2003/09/02 17:58:49 perev Exp $
-//
-// $Log: StEmcPreCluster.cxx,v $
-// Revision 1.13  2003/09/02 17:58:49  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.12  2003/01/23 03:49:59  jeromel
-// Include changed
-//
-// Revision 1.11  2001/10/01 15:36:19  pavlinov
-// cleanup
-//
-// Revision 1.10  2001/09/22 00:30:08  pavlinov
-// No public constructor for StEmcGeom
-//
-// Revision 1.9  2001/04/17 23:51:22  pavlinov
-// Clean up before MDC4
-//
-// Revision 1.8  2001/02/01 22:23:09  suaide
-// Fixed some memory leaks
-//
-// Revision 1.7  2001/01/26 21:54:23  suaide
-// fixed a small bug in the phi calculation for a given cluster
-// CVt: ----------------------------------------------------------------------
-//
-// Revision 1.6  2000/12/01 21:15:40  suaide
-//
-//
-// Small fixes in StPreEclMaker::Make()
-//       if some detector fails to find clusters it was aborting the chain
-//
-// Small fixes in StEmcPreClusterCollection::findClustersInModule()
-// Small fixes in StEmcPreClusterCollection::testOnNeighbor()
-//
-// Small fixes in StEmcPreCluster::calcMeanAndRms()
-//
-// Revision 1.5  2000/09/08 22:55:05  suaide
-//
-//
-//
-// some modifications to compile on Solaris
-//
-// Revision 1.4  2000/08/24 22:11:34  suaide
-//
-//
-// restored some files for background compatibility
-//
-// Revision 1.3  2000/08/24 19:45:36  suaide
-//
-//
-// small modifications: some cout has been removed
-//
-// Revision 1.2  2000/08/24 11:26:48  suaide
-//
-//
-//
-// by A. A. P. Suaide - 2000/08/24 07:25:00
-//
-// Notes:
-//
-// 1. Full StEvent Compatible
-// 2. Read hits from StEvent object
-// 3. Write clusters in StEvent format and old format to keep background
-//    compatibility
-// 4. Do clustering in bemc, bprs, bsmde, bsmdp
-// 5. Included method StPreEclMaker::SetClusterCollection
-//
-// Revision 1.1  2000/05/15 21:24:00  subhasis
-// initial version
-//
-// PreClusters Finder Maker for EMC
-//
-//
-// Author: Alexandre A. P. Suaide (version 2.0)
-//         Subhasis Chattopadhyay,
-//         Aleksei Pavlinov , July 1999
-//         initial version from Akio Ogawa    
-//
-
-//////////////////////////////////////////////////////////////////////////
-//                                   
-// StEmcPreCluster
-//
-// StEmcPreCluster is base class for electromagnetic cluster. Used by
-// StBemcPreCluster, StBsmdePreCluster and StBsmdePreCluster.
-//
-//////////////////////////////////////////////////////////////////////////
-
 #include "StEmcPreCluster.h"
-#include "StEvent/StEvent.h" 
-#include "StEvent/StEventTypes.h"
-#include "StEmcUtil/geometry/StEmcGeom.h"
-#include "StEmcUtil/others/StEmcMath.h"
-
+#include "StEventTypes.h"
 ClassImp(StEmcPreCluster)
 
+StEmcPreCluster::StEmcPreCluster(Int_t detector)
+{
+    mEnergy = 0.0;
+    mEta = 0.0;
+    mPhi = 0.0;
+    mSigmaEta =0.0;
+    mSigmaPhi=0.0;
+    mDetector=detector;
+    mMatchingId = 0;
+    mGeom = StEmcGeom::instance(detector);
+}
+StEmcPreCluster::StEmcPreCluster(StEmcPreCluster& cluster)
+{
+    Int_t nh = cluster.nHits();
+    for(Int_t i = 0;i<nh;i++)
+        addHit(cluster.getHit(i));
+    mDetector = cluster.detector();
+    mMatchingId = cluster.matchingId();
+    mGeom = StEmcGeom::instance(mDetector);
+    update();
+}
+StEmcPreCluster::StEmcPreCluster(StEmcCluster* cluster)
+{
+    StPtrVecEmcRawHit& hits=cluster->hit();
+    for(Int_t i=0;i<(Int_t)hits.size();i++)
+        addHit(hits[i]);
+    mDetector = (Int_t)(hits[0]->detector()-kBarrelEmcTowerId+1);
+    mMatchingId = cluster->GetUniqueID();
+    mGeom = StEmcGeom::instance(mDetector);
+    update();
+}
+StEmcPreCluster::~StEmcPreCluster()
+{
+    mHits.Clear("nodelete"); // StEvent hits are not owned by this cluster
+}
+void StEmcPreCluster::addHit(StEmcRawHit* hit)
+{
+    if(!mHits.FindObject(hit))
+        mHits.Add(hit);
+}
+void StEmcPreCluster::removeHit(StEmcRawHit* hit)
+{
+    if(mHits.FindObject(hit))
+        mHits.Remove(hit);
+}
+void StEmcPreCluster::removeHit(Int_t hitId)
+{
+    if(mHits.At(hitId))
+        mHits.Remove(mHits.At(hitId));
+}
+void StEmcPreCluster::update()
+{
+    Int_t nH = nHits();
+    mEnergy = 0.0;
+    mEta = 0.0;
+    mPhi = 0.0;
+    mSigmaEta =0.0;
+    mSigmaPhi=0.0;
+    if(nH==0)
+        return;
 
-StEmcGeom* emcgeo;
-
-//_____________________________________________________________________________
-StEmcPreCluster::StEmcPreCluster(TArrayI *hits) : StObject() 
-{
-}
-//_____________________________________________________________________________
-StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector) : StObject() 
-{
-  mEnergy = 0.0; mEta = 0.0; mPhi = 0.0; 
-  mSigmaEta =0.0; mSigmaPhi=0.0;
-  
-  mModule=mod;
-  
-  mDetector=detector;
-      
-  mNhits = hits->GetSize();
-  if(mNhits>0) 
-  {
-    mHitsID.Set(mNhits,hits->GetArray());
-  }
-  else printf(" <E> Ctor StEmcPreCluster => mNhits = %i \n", mNhits);
-}
-//_____________________________________________________________________________
-StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector,StEmcDetector* mDet)  
-{
-  mEnergy = 0.0; mEta = 0.0; mPhi = 0.0; 
-  mSigmaEta =0.0; mSigmaPhi=0.0;
-  
-  mModule=mod;
-  
-  mDetector=detector;
-    
-  mNhits = hits->GetSize();
-  if(mNhits>0) 
-  {
-    mHitsID.Set(mNhits,hits->GetArray());
-  }
-  else printf(" <E> Ctor StEmcPreCluster => mNhits = %i \n", mNhits);
-  calcMeanAndRms(mDet,mod);
-}
-//_____________________________________________________________________________
-void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
-{
-// For caclulation of cluster's characteristics.
-  emcgeo=StEmcGeom::getEmcGeom(mDetector);
-  StSPtrVecEmcRawHit& mStEventHits=mDet->module(mod)->hits();
-  Float_t etah, phih;
-  Int_t m, e, s, indh;
-  if(mNhits == 1){
-    indh = mHitsID[0];
-    m=(Int_t)mStEventHits[indh]->module();
-    e=(Int_t)mStEventHits[indh]->eta();
-    s=abs(mStEventHits[indh]->sub());
-    emcgeo->getEta(m,e, etah);      
-    emcgeo->getPhi(m,s, phih);
-    mEta      = etah;
-    mPhi      = phih;
-    mSigmaEta = 0.0;
-    mSigmaPhi = 0.0;
-    mEnergy   = mStEventHits[indh]->energy();
-  }
-  else{
-    Float_t E, phi0;
-    for(int i=0; i<mNhits; i++)
+    Int_t m,e,s;
+    Float_t E,P,energy,phi0;
+    for(Int_t i = 0;i<nH;i++)
     {
-      indh = mHitsID[i];
-      m=mStEventHits[indh]->module();
-      e=mStEventHits[indh]->eta();
-      s=abs(mStEventHits[indh]->sub());
-      
-      E = mStEventHits[indh]->energy();
-      emcgeo->getEta(m,e, etah);      
-      emcgeo->getPhi(m,s, phih);      
-      
-      if(i == 0) {phi0 =  phih; phih = 0.0;}
-      else        phih -= phi0;           // Rotate to the system of first hit 
-      phih = StEmcMath::getPhiPlusMinusPi(phih);
+        StEmcRawHit* hit = getHit(i);
+        if(hit)
+        {
+            m=(Int_t)hit->module();
+            e=(Int_t)hit->eta();
+            s=abs(hit->sub());
+            energy=hit->energy();
 
-      mEnergy   += E;
-      mEta      += etah*E;
-      mPhi      += phih*E;
-      mSigmaEta += etah*etah*E;
-      mSigmaPhi += phih*phih*E;      
+            mGeom->getEta(m,e, E);
+            mGeom->getPhi(m,s, P);
+            // Rotate to the system of first hit
+            if(i==0)
+            {
+                phi0 =  P;
+                P = 0.0;
+            }
+            else
+                P-=phi0;
+            P = StEmcMath::getPhiPlusMinusPi(P);
+
+            mEta+=E*energy;
+            mPhi+=P*energy;
+            mSigmaEta+=E*E*energy;
+            mSigmaPhi+=P*P*energy;
+            mEnergy+=energy;
+        }
     }
-
     mEta /= mEnergy;
     mSigmaEta = mSigmaEta/mEnergy - mEta*mEta;
-    if(mNhits==2 && (mStEventHits[mHitsID[0]]->eta()==mStEventHits[mHitsID[1]]->eta())) 
-      mSigmaEta = 0.0; // Same eta
-    else {
-      if(mSigmaEta <= 0.0) mSigmaEta = 0.0;
-      else mSigmaEta = ::sqrt(mSigmaEta);
-    }
+    if(mSigmaEta <= 0.0)
+        mSigmaEta = 0.0;
+    else
+        mSigmaEta = sqrt(mSigmaEta);
 
     mPhi /= mEnergy;
     mSigmaPhi = mSigmaPhi/mEnergy - mPhi*mPhi;
-    if(mNhits==2 && (mStEventHits[mHitsID[0]]->sub()==mStEventHits[mHitsID[1]]->sub()))
-       mSigmaPhi = 0.0;  // Same phi
-    else {
-      if(mSigmaPhi <= 0.0) mSigmaPhi = 0.0;
-      else mSigmaPhi = ::sqrt(mSigmaPhi);
-    }
-    mPhi += phi0;                 // Rotate to STAR system
+    if(mSigmaPhi <= 0.0)
+        mSigmaPhi = 0.0;
+    else
+        mSigmaPhi = sqrt(mSigmaPhi);
+
+    // Rotate back to STAR system
+    mPhi += phi0;
     mPhi  = StEmcMath::getPhiPlusMinusPi(mPhi);
-  }
-  //  delete emcgeo;
+
+    return;
 }
-
-void 
-StEmcPreCluster::print(ostream *os)
+void StEmcPreCluster::addCluster(StEmcPreCluster* cluster)
 {
-// Printing member function.
-  *os << " m " << Module();
-  *os << " Energy " << mEnergy << " #hits " << mNhits;
-  *os <<" HitsId => ";
-  for(Int_t i=0; i<mNhits; i++){*os <<mHitsID[i]<<" ";}
-  *os <<endl;
-
-  *os << " eta " << mEta << "+/-" << mSigmaEta;
-  *os <<"   phi " << mPhi << "+/-" << mSigmaPhi << endl;
+    if(!cluster)
+        return;
+    if(mDetector!=cluster->detector())
+        return;
+    Int_t nH = cluster->nHits();
+    for(Int_t i = 0;i<nH;i++)
+        addHit(cluster->getHit(i));
+    update();
 }
-
-ostream &operator<<(ostream &os, StEmcPreCluster &cl)
+void StEmcPreCluster::addCluster(StEmcCluster* cluster)
 {
-// Global operator << for StEmcPreCluster. 
-  cl.print(&os); return os;
+    if(!cluster)
+        return;
+    StPtrVecEmcRawHit& hits=cluster->hit();
+    if(mDetector!=(Int_t)(hits[0]->detector()-kBarrelEmcTowerId+1))
+        return;
+    for(Int_t i=0;i<(Int_t)hits.size();i++)
+        addHit(hits[i]);
+    update();
 }
-
-void 
-StEmcPreCluster::Browse(TBrowser *b)
+void StEmcPreCluster::subtractCluster(StEmcPreCluster* cluster)
 {
-  cout << (*this) << endl;
-  StObject::Browse(b);
+    if(!cluster)
+        return;
+    if(mDetector!=cluster->detector())
+        return;
+    Int_t nH = cluster->nHits();
+    for(Int_t i = 0;i<nH;i++)
+        removeHit(cluster->getHit(i));
+    update();
+}
+void StEmcPreCluster::subtractCluster(StEmcCluster* cluster)
+{
+    if(!cluster)
+        return;
+    StPtrVecEmcRawHit& hits=cluster->hit();
+    if(mDetector!=(Int_t)(hits[0]->detector()-kBarrelEmcTowerId+1))
+        return;
+    for(Int_t i=0;i<(Int_t)hits.size();i++)
+        removeHit(hits[i]);
+    update();
+}
+StEmcPreCluster* StEmcPreCluster::splitInEta(Float_t eta)
+{
+    Int_t nH = nHits();
+    if(nH<2)
+        return NULL; // no way to split only with 1 hit
+    StEmcPreCluster *cluster = NULL;
+    TList *above = new TList();
+    Float_t E;
+    Int_t m,e;
+    Bool_t hasBelow = kFALSE;
+    for(Int_t i=0;i<nH;i++)
+    {
+        StEmcRawHit* hit = getHit(i);
+        if(hit)
+        {
+            m=(Int_t)hit->module();
+            e=(Int_t)hit->eta();
+            mGeom->getEta(m,e, E);
+            if(E<=eta)
+                hasBelow=kTRUE;
+            else
+                above->Add(hit);
+        }
+    }
+    if(hasBelow && above->GetSize()>0)
+    {
+        cluster = new StEmcPreCluster(detector());
+        Int_t na = above->GetSize();
+        for(Int_t i = 0;i<na;i++)
+        {
+            StEmcRawHit* hit = (StEmcRawHit*)above->At(i);
+            removeHit(hit);
+            cluster->addHit(hit);
+        }
+        update();
+        cluster->update();
+    }
+    delete above;
+    return cluster;
+}
+StEmcPreCluster* StEmcPreCluster::splitInPhi(Float_t phi)
+{
+    Int_t nH = nHits();
+    if(nH<2)
+        return NULL; // no way to split only with 1 hit
+    StEmcPreCluster *cluster = NULL;
+    TList *above = new TList();
+    Float_t P;
+    Int_t m,s;
+    Bool_t hasBelow = kFALSE;
+    for(Int_t i=0;i<nH;i++)
+    {
+        StEmcRawHit* hit = getHit(i);
+        if(hit)
+        {
+            m=(Int_t)hit->module();
+            s=abs((Int_t)hit->sub());
+            mGeom->getPhi(m,s, P);
+            P-= phi;
+            P = StEmcMath::getPhiPlusMinusPi(P);
+            if(P<=0)
+                hasBelow=kTRUE;
+            else
+                above->Add(hit);
+        }
+    }
+    if(hasBelow && above->GetSize()>0)
+    {
+        cluster = new StEmcPreCluster(detector());
+        Int_t na = above->GetSize();
+        for(Int_t i = 0;i<na;i++)
+        {
+            StEmcRawHit* hit = (StEmcRawHit*)above->At(i);
+            removeHit(hit);
+            cluster->addHit(hit);
+        }
+        update();
+        cluster->update();
+    }
+    delete above;
+    return cluster;
+}
+StEmcCluster* StEmcPreCluster::makeStCluster()
+{
+    Int_t nH = nHits();
+    if(nH==0)
+        return NULL;
+    StEmcCluster *cluster = new StEmcCluster();
+    for(Int_t i = 0;i<nH;i++)
+        cluster->addHit(getHit(i));
+    update();
+    cluster->setEta(mEta);
+    cluster->setPhi(mPhi);
+    cluster->setSigmaEta(mSigmaEta);
+    cluster->setSigmaPhi(mSigmaPhi);
+    cluster->setEnergy(mEnergy);
+    cluster->SetUniqueID(mMatchingId);
+    return cluster;
 }
