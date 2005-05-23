@@ -1,7 +1,10 @@
-* $Id: btofgeo2.g,v 1.11 2004/07/08 01:44:09 potekhin Exp $
+* $Id: btofgeo2.g,v 1.12 2005/05/23 14:56:15 llope Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
+* Revision 1.12  2005/05/23 14:56:15  llope
+* removed unneeded Dens=0.282 statements from honeycomb Material definitions
+*
 * Revision 1.11  2004/07/08 01:44:09  potekhin
 * Restoring previosu version since I decided that Frank's
 * correction should go into a separate file number 3
@@ -571,7 +574,7 @@ EndBlock
 *
 Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run4)
       Attribute  BRTC     seen=0   colo=5
-      Material   HoneyComb Dens=0.282
+      Material   HoneyComb 
       Shape      BOX      dx=tray_Height/2-tray_WallThk,
                           dy=tray_Width/2-tray_WallThk,
                           dz=tray_Length/2-tray_WallThk
