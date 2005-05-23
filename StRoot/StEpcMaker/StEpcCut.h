@@ -1,9 +1,9 @@
 
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEpcCut.h,v 1.3 2003/09/02 17:58:03 perev Exp $
+// $Id: StEpcCut.h,v 1.4 2005/05/23 12:35:14 suaide Exp $
 //
-// Author: Subhasis Chattopadhyay 
+// Author: Subhasis Chattopadhyay
 //////////////////////////////////////////////////////////////////////
 //
 // Description: cuts for the Epc maker
@@ -18,29 +18,45 @@
 #include "Rtypes.h"
 
 
-class StEpcCut{
+class StEpcCut
+{
 public:
-            
-          StEpcCut();
-virtual   ~StEpcCut();
-//
-  static Float_t DeltaEta();
-  static Float_t DeltaPhi();
-  static Float_t RAD_SMD_E();
-  static void setDeltaEta(Float_t);
-  static void setDeltaPhi(Float_t);
-//
+
+    StEpcCut();
+    virtual   ~StEpcCut();
+    //
+    static Float_t DeltaEta();
+    static Float_t DeltaPhi();
+    static Float_t RAD_SMD_E();
+    static void setDeltaEta(Float_t);
+    static void setDeltaPhi(Float_t);
+    //
 private:
 
-  static Float_t mDeltaEta;
-  static Float_t mDeltaPhi;
-  static Float_t mRAD_SMD_E;
+    static Float_t mDeltaEta;
+    static Float_t mDeltaPhi;
+    static Float_t mRAD_SMD_E;
 };
 
-inline Float_t StEpcCut::DeltaEta() { return mDeltaEta; }
-inline Float_t StEpcCut::DeltaPhi() { return mDeltaPhi; }
-inline Float_t StEpcCut::RAD_SMD_E() { return mRAD_SMD_E; }
-inline    void StEpcCut::setDeltaEta(Float_t deltaeta) { mDeltaEta=deltaeta; }
-inline    void StEpcCut::setDeltaPhi(Float_t deltaphi) { mDeltaPhi=deltaphi; }
+inline Float_t StEpcCut::DeltaEta()
+{
+    return mDeltaEta;
+}
+inline Float_t StEpcCut::DeltaPhi()
+{
+    return mDeltaPhi;
+}
+inline Float_t StEpcCut::RAD_SMD_E()
+{
+    return mRAD_SMD_E;
+}
+inline    void StEpcCut::setDeltaEta(Float_t deltaeta)
+{
+    mDeltaEta=deltaeta;
+}
+inline    void StEpcCut::setDeltaPhi(Float_t deltaphi)
+{
+    mDeltaPhi=deltaphi;
+}
 
 #endif

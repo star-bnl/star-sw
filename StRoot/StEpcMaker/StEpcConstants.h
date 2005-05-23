@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEpcConstants.h,v 1.2 2001/11/06 23:35:27 suaide Exp $
+// $Id: StEpcConstants.h,v 1.3 2005/05/23 12:35:14 suaide Exp $
 //
-// Author: Subhasis Chattopadhyay 
+// Author: Subhasis Chattopadhyay
 //////////////////////////////////////////////////////////////////////
 //
 // Description: constants for the Epc maker
@@ -15,15 +15,15 @@
 
 class Epc
 {
-  public:
-  enum
-  { 
-    nModule =120,
-	  nPhiBin=10,
-	  nMaxNoOfClinBin=10,
-	  nMaxNoOfTrinBin=10
-  };
+public:
+    enum
+    {
+        nModule =120,
+        nPhiBin=10,
+        nMaxNoOfClinBin=10,
+        nMaxNoOfTrinBin=10
+    };
 
-  ClassDef(Epc,1)  // macro for rootCint
+    ClassDef(Epc,1)  // macro for rootCint
 };
 #endif

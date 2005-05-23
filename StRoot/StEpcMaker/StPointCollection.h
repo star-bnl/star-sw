@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.7  2005/05/23 12:35:14  suaide
+// New Point maker code
+//
 // Revision 1.6  2003/05/26 13:44:35  suaide
 // added setPrint() method
 //
@@ -30,105 +33,123 @@
 #define STAR_StPointCollection
 
 #ifndef HEP_SYSTEM_OF_UNITS_H
-#include "SystemOfUnits.h"                                                     
+  #include "SystemOfUnits.h"
 #endif
 
-#include "StEpcConstants.h"                                                     
-#include "StEpcCut.h"                                                     
-
+#include "StEpcConstants.h"
+#include "StEpcCut.h"
 #include <vector>
-#include <algorithm>  // min() max()
-#include <utility>    // pair
-
-#if !defined(ST_NO_NAMESPACES)
-using std::vector;
-using namespace units;
-using std::min;
-using std::max; 
-#endif  
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-// Syntax currently required by Solaris compiler
-#define StVector(T) vector<T, allocator<T> >
-typedef vector<int, allocator<int> > intVector;
-#else
-#define StVector(T) vector<T>
-typedef vector<int> intVector;
-#endif
-
+#include <algorithm>
+#include <utility>
 #include "TObjArray.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
 #include "TTableSorter.h"
 #include "StPi0Candidate.h"
-#include "StEpcMaker.h"
+
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+using namespace units;
+using std::min;
+using std::max;
+#endif
+
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+  #define StVector(T) vector<T, allocator<T> >
+
+typedef vector<int, allocator<int> > intVector;
+typedef vector<Float_t,allocator<Float_t> > FloatVector;
+#else
+  #define StVector(T) vector<T>
+
+typedef vector<int> intVector;
+typedef vector<Float_t> FloatVector;
+#endif
 
 class TBrowser;
 class StEmcClusterCollection;
 class StEmcCluster;
+class StEvent;
+class StEmcPoint;
+class StEmcPosition;
 
 typedef StVector(StEmcCluster*) StMatchVecClus;
 typedef StVector(StEmcCluster*)::iterator StMatchVecClusIter;
 
-#include "tables/St_dst_track_Table.h"
-
-class StPointCollection : public TDataSet 
+class StPointCollection : public TDataSet
 {
 
-  private:
+private:
     TObjArray         mPoints;
     TObjArray         mPointsReal;
     Int_t             mNPoints;
     Int_t             mNPointsReal;
     double            mBField;
     Bool_t            mPrint;
-  protected:   
+    StEmcPosition*    mPosition;
+protected:
 
-  public: 
+public:
 
-                      StPointCollection();
-                      StPointCollection(const Char_t *);
+    StPointCollection();
+    StPointCollection(const Char_t *);
     virtual           ~StPointCollection();
-    virtual  void     Browse(TBrowser* b); // mPoints .. 
+    virtual  void     Browse(TBrowser* b); // mPoints ..
 
-    void              SetBField(double B) { mBField=B; }
+    void              SetBField(double B)
+    {
+        mBField=B;
+    }
     Int_t             NPoints() const;
     const TObjArray*  Points() const;
     Int_t             NPointsReal() const;
     const TObjArray*  PointsReal() const;
 
-    Int_t             findEmcPoints(StEmcClusterCollection*,
-                                    StEmcClusterCollection*,
-                                    StEmcClusterCollection*,
-                                    StEmcClusterCollection*,
-                                    StTrackVec &);
+    Int_t             makeEmcPoints(StEvent* event);
 
-    virtual Int_t     TrackSort(const StTrackVec &) const;
+    Int_t             findMatchedClusters(StEmcClusterCollection*,
+                                          StEmcClusterCollection*,
+                                          StEmcClusterCollection*,
+                                          StEmcClusterCollection*);
+
+    StEmcPoint*       makePoint(StEmcCluster*,StEmcCluster*,StEmcCluster*,StEmcCluster*,Float_t=1);
 
     void              ClusterSort(StEmcClusterCollection*,
                                   StEmcClusterCollection*,
                                   StEmcClusterCollection*,
                                   StEmcClusterCollection*);
 
-    virtual Int_t     MatchClusterAndTrack(const StMatchVecClus,
-                                           const StMatchVecClus,
-                                           const StMatchVecClus,
-                                           const StMatchVecClus,
-                                           const FloatVector,
-                                           const FloatVector,
-                                           const FloatVector,
-                                           Int_t *);
+    virtual Int_t     matchClusters(const StMatchVecClus,
+                                    const StMatchVecClus,
+                                    const StMatchVecClus,
+                                    const StMatchVecClus);
 
-    virtual Int_t     addPoints(Float_t*);
-    void    setPrint(Bool_t a) {mPrint = a;}
+    virtual Int_t     matchToTracks(StEvent*);
 
-  ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection 
+    void    setPrint(Bool_t a)
+    {
+        mPrint = a;
+    }
+
+    ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection
 };
 //
-inline        Int_t        StPointCollection::NPointsReal() const {return mNPointsReal;}
-inline  const TObjArray*   StPointCollection::PointsReal()  const {return &mPointsReal;}
-inline        Int_t        StPointCollection::NPoints()     const {return mNPoints;}
-inline  const TObjArray*   StPointCollection::Points()      const {return &mPoints;}
+inline        Int_t        StPointCollection::NPointsReal() const
+{
+    return mNPointsReal;
+}
+inline  const TObjArray*   StPointCollection::PointsReal()  const
+{
+    return &mPointsReal;
+}
+inline        Int_t        StPointCollection::NPoints()     const
+{
+    return mNPoints;
+}
+inline  const TObjArray*   StPointCollection::Points()      const
+{
+    return &mPoints;
+}
 
 #endif
 

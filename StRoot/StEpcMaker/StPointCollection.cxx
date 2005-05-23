@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.23  2005/05/23 12:35:14  suaide
+// New Point maker code
+//
 // Revision 1.22  2004/08/13 13:08:01  suaide
 // small fixed introduced by Marco to remove ineficiencies on the
 // edges of phi bins
@@ -63,7 +66,7 @@
 // Author: Subhasis Chattopadhyay , Jan 2000
 //
 //////////////////////////////////////////////////////////////////////////
-//                                   
+//
 // StPointCollection
 //
 
@@ -73,59 +76,28 @@
 #include "StPointCollection.h"
 #include "StPi0Candidate.h"
 #include "emc_def.h"
-
-// copied from StEpcMaker
 #include <Stiostream.h>
-#include <math.h>
-#include "StChain.h"
-#include <TDataSetIter.h>
 #include <TBrowser.h>
-#include "StEpcMaker.h"
-#include "StThreeVector.hh"
-#include "StHelix.hh"
-#include "SystemOfUnits.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
-//#include "St_emc_Maker/StEmcHitCollection.h"
-#include <stdlib.h>
-#include <string.h>
-#include <vector>
-#include "StThreeVectorD.hh"
-#include "StHelixD.hh"
-#include "StPhysicalHelixD.hh"
-#include "TMath.h"
-#include "StDetectorDefinitions.h"
-#include "Stypes.h"
-#include "math_constants.h"
-#include "StAutoBrowse.h"
-
-//For StEvent
-#include "StEvent/StEvent.h"
-#include "St_ObjectSet.h"
-#include "StEvent/StEmcCollection.h"
-#include "StEvent/StEmcDetector.h"
-#include "StEvent/StEmcModule.h"
-#include "StEvent/StEmcRawHit.h"
-#include "StEvent/StEmcClusterCollection.h"
-#include "StEvent/StEmcCluster.h"
-#include "StEvent/StEmcPoint.h"
-#include "StEvent/StEnumerations.h"
-#include "StEvent/StEventTypes.h"  
-
+#include "StEmcUtil/projection/StEmcPosition.h"
+#include "StEvent.h"
+#include "StEventTypes.h"
 #include "StarCallf77.h"
-extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
-#define gufld F77_NAME(gufld,GUFLD)
+#include "TMath.h"
 
 // declaring cernlib routine (mathlib, H301) assndx to be used for matching.
 #define    assndx  F77_NAME(assndx,ASSNDX)
-extern "C" {void type_of_call assndx ( Int_t &, Float_t *, Int_t &, Int_t &,
-                                       Int_t &, Int_t *, Float_t &,Int_t*,Int_t &); }
+extern "C"
+{
+    void type_of_call assndx ( Int_t &, Float_t *, Int_t &, Int_t &,
+                               Int_t &, Int_t *, Float_t &,Int_t*,Int_t &);
+}
 
 ClassImp(StPointCollection)
 
-StEmcGeom *BemcGeomIn;
-//  StEmcGeom *BemcGeomOut;  21-sep-2001 unused
-
-const TString detname[] = {"Bemc", "Bsmde", "Bsmdp"};
+const TString detname[] =
+    {"Bemc", "Bsmde", "Bsmdp"
+    };
 // Extern for sorted emc-smd
 StMatchVecClus matchlist_bemc_clus[Epc::nModule][Epc::nPhiBin];
 StMatchVecClus matchlist_bprs_clus[Epc::nModule][Epc::nPhiBin];
@@ -136,924 +108,799 @@ FloatVector HitTrackEta;
 FloatVector HitTrackPhi;
 FloatVector HitTrackMom;
 
-//To attach to points
-StTrackVec  HitTrackPointer;
-StMatchVecClus ClusterPointer[4];
-
 //_____________________________________________________________________________
 StPointCollection::StPointCollection():TDataSet("Default")
 {
-  SetTitle("EmcPoints");
-  mPrint = kTRUE;
-  mBField = 0.5;
-  mNPoints =0;
-  mNPointsReal=0;
+    SetTitle("EmcPoints");
+    mPrint = kTRUE;
+    mBField = 0.5;
+    mNPoints =0;
+    mNPointsReal=0;
+    mPosition = new StEmcPosition();
 }
 //_____________________________________________________________________________
 StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
 {
-  SetTitle("EmcPoints");
-  mPrint = kTRUE;
-  mBField = 0.5;
-  mNPoints =0;
-  mNPointsReal=0;
+    SetTitle("EmcPoints");
+    mPrint = kTRUE;
+    mBField = 0.5;
+    mNPoints =0;
+    mNPointsReal=0;
+    mPosition = new StEmcPosition();
 }
 //_____________________________________________________________________________
 StPointCollection::~StPointCollection()
 {
     mPoints.Delete();
     //mPointsReal.Delete(); // The objects saved here are owned by StEvent
-    mNPoints =0; mNPointsReal=0;
+    mNPoints =0;
+    mNPointsReal=0;
+    delete mPosition;
 }
 
-void 
+void
 StPointCollection::Browse(TBrowser* b)
 {
-  // if(mPoints.GetSize())     b->Add((TObject*)NPoints()); // for testing 30-nov-2001
-  //if(mPointsReal.GetSize()) b->Add((TObject*)NPointsReal());
-  TDataSet::Browse(b);
+    TDataSet::Browse(b);
 }
-
 //*************** FIND EMC POINTS **********************************
-Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
-                                       StEmcClusterCollection *Bprscluster,
-                                       StEmcClusterCollection *Bsmdecluster,
-                                       StEmcClusterCollection *Bsmdpcluster,
-                                       StTrackVec& TrackToFit)
+Int_t StPointCollection::makeEmcPoints(StEvent* event)
 {
-  //Sort BEMC, SMDe, SMDp, PRS clusters according to location
-  if(mPrint) cout <<"Finding EMC Points ...\n"; 
-  ClusterSort(Bemccluster, Bprscluster,Bsmdecluster,Bsmdpcluster);
+    if(mPrint)
+        cout <<"Finding EMC Points ...\n";
+    if(!event)
+        return 0;
 
-  // Getting BemcGeom to obtain radius etc
-  BemcGeomIn  = StEmcGeom::getEmcGeom("bemc");
+    StEmcCollection* emc = event->emcCollection();
+    if(!emc)
+        return 0;
 
-  Int_t *Trcheck;
-  if(TrackToFit.size()>0)
-  {
-    if(mPrint) cout<<" Taking Tracks from StEvent for track matching**"<<endl;
-    TrackSort(TrackToFit);
+    StSPtrVecEmcPoint& points = emc->barrelPoints();
+    if(points.size())
+        points.clear();
 
-  //track check array for checking if the track is matched
-    Trcheck = new Int_t[HitTrackEta.size()];
-    for(UInt_t i1=0;i1<HitTrackEta.size(); i1++) Trcheck[i1]=0;
-  } else { // 3-dec-2001 
-    //
-    // if no tracks !!!
-    //
-    HitTrackEta.clear();
-    HitTrackPhi.clear();
-    HitTrackMom.clear();
-    HitTrackPointer.clear();
-    Trcheck = 0;
-  }
+    StEmcClusterCollection* cluster[4] = {0,0,0,0};
 
-
-// MATCHING****************
-
-  for(Int_t im=0;im<Epc::nModule;im++)
-  {
-    for(Int_t is=0;is<Epc::nPhiBin;is++)
+    for(Int_t i = 0;i<4;i++)
     {
-      if(matchlist_bemc_clus[im][is].size()>0)
-      {
-        Int_t testp=MatchClusterAndTrack(matchlist_bemc_clus[im][is],
-                                         matchlist_bprs_clus[im][is],
-                                         matchlist_bsmde_clus[im][is],
-                                         matchlist_bsmdp_clus[im][is],
-                                         HitTrackEta,
-                                         HitTrackPhi,
-                                         HitTrackMom,
-                                         Trcheck);
-        if(testp!=0)
-        {
-          if(mPrint) cout<<" GetEmcPoint not successful for "<<im<<" "<<is<<endl;
-          return kStWarn;
-        }
-      }
+        StDetectorId EmcId = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+        ;
+        StEmcDetector* EmcDet = emc->detector(EmcId);
+        if(EmcDet)
+            cluster[i] = EmcDet->cluster();
     }
-  }
-  if (Trcheck) delete [] Trcheck;
-  return kStOK;
+
+    // first find points that were already matched in the cluster finder
+
+    findMatchedClusters(cluster[0],cluster[1],cluster[2],cluster[3]);
+
+    //Sort BEMC, SMDe, SMDp, PRS clusters according to location
+    if(mPrint)
+        cout <<"Making points for non-matched clusters ...\n";
+    ClusterSort(cluster[0],cluster[1],cluster[2],cluster[3]);
+
+    // MATCHING BEMC detector clusters
+    for(Int_t im=0;im<Epc::nModule;im++)
+    {
+        for(Int_t is=0;is<Epc::nPhiBin;is++)
+        {
+            if(matchlist_bemc_clus[im][is].size()>0)
+            {
+                matchClusters(matchlist_bemc_clus[im][is],
+                              matchlist_bprs_clus[im][is],
+                              matchlist_bsmde_clus[im][is],
+                              matchlist_bsmdp_clus[im][is]);
+            }
+        }
+    }
+
+    // MATCHING points to tracks
+    matchToTracks(event);
+    return 1;
 }
-//_____________________________________________________________________________
-Int_t StPointCollection::addPoints(Float_t *hid)
+//*************** Make points for the clusters already matched ********
+Int_t StPointCollection::findMatchedClusters(StEmcClusterCollection* Bemccluster,
+        StEmcClusterCollection *Bprscluster,
+        StEmcClusterCollection *Bsmdecluster,
+        StEmcClusterCollection *Bsmdpcluster)
 {
-  StPi0Candidate *pnts = new StPi0Candidate(hid);
-  mPoints.Add(pnts);
-  mNPoints++;
-  return kStOK;
+    if(mPrint)
+        cout <<"Making points for already matched clusters ...\n";
+    if(Bemccluster)
+    {
+        Int_t Ncluster0=Bemccluster->numberOfClusters();
+        if(Ncluster0>0)
+        {
+            const StSPtrVecEmcCluster& emcclusters= Bemccluster->clusters();
+            for(UInt_t i=0;i<emcclusters.size();i++)
+            {
+                StEmcCluster *btow=(StEmcCluster*)emcclusters[i];
+                UInt_t matchId = btow->GetUniqueID();
+                if(matchId!=0)
+                {
+                    StEmcCluster *bprs = NULL;
+                    StEmcCluster *bsmde = NULL;
+                    StEmcCluster *bsmdp = NULL;
+                    if(Bprscluster)
+                    {
+                        const StSPtrVecEmcCluster& clusters= Bprscluster->clusters();
+                        for(UInt_t i=0;i<clusters.size();i++)
+                            if(  ((StEmcCluster*)clusters[i])->GetUniqueID() == matchId)
+                            {
+                                bprs = (StEmcCluster*)clusters[i];
+                                break;
+                            }
+                    }
+                    if(Bsmdecluster)
+                    {
+                        const StSPtrVecEmcCluster& clusters= Bsmdecluster->clusters();
+                        for(UInt_t i=0;i<clusters.size();i++)
+                            if(  ((StEmcCluster*)clusters[i])->GetUniqueID() == matchId)
+                            {
+                                bsmde = (StEmcCluster*)clusters[i];
+                                break;
+                            }
+                    }
+                    if(Bsmdpcluster)
+                    {
+                        const StSPtrVecEmcCluster& clusters= Bsmdpcluster->clusters();
+                        for(UInt_t i=0;i<clusters.size();i++)
+                            if(  ((StEmcCluster*)clusters[i])->GetUniqueID() == matchId)
+                            {
+                                bsmdp = (StEmcCluster*)clusters[i];
+                                break;
+                            }
+                    }
+
+                    makePoint(btow,bprs,bsmde,bsmdp);
+                }
+            }
+        }
+    }
+    return 0;
+}
+StEmcPoint* StPointCollection::makePoint(StEmcCluster* btow,StEmcCluster* bprs,StEmcCluster* bsmde,StEmcCluster* bsmdp,Float_t fraction)
+{
+    if(!btow)
+        return NULL;
+
+    if (mPrint)
+        cout <<"Making point"<<endl;
+
+    Int_t Category = 0;
+    if(btow)
+        Category = Category | 1;
+    if(bprs)
+        Category = Category | 2;
+    if(bsmde)
+        Category = Category | 4;
+    if(bsmdp)
+        Category = Category | 8;
+
+    Float_t en[4] = {0,0,0,0};
+    Float_t si[4] = {0,0,0,0};
+
+    Float_t eta    = btow->eta();
+    Float_t phi    = btow->phi();
+
+    // if fraction >0 it calculates the point energy as fraction*Energy from BTOW cluster
+    // if fraction <0 the point energy is taken as -fraction
+
+    Float_t energy = btow->energy()*fraction;
+    if(fraction<0)
+        energy = fabs(fraction);
+    Float_t sigEta = btow->sigmaEta();
+    Float_t sigPhi = btow->sigmaPhi();
+    en[0]          = btow->energy();
+    si[0]          = sqrt(eta*eta+phi*phi);
+
+    if(bprs)
+    {
+        en[1]  = bprs->energy();
+        si[1]  = sqrt(bprs->sigmaEta()*bprs->sigmaEta()+bprs->sigmaPhi()*bprs->sigmaPhi());
+    }
+
+    if(bsmde)
+    {
+        eta    = bsmde->eta();
+        sigEta = bsmde->sigmaEta();
+        en[2]  = bsmde->energy();
+        si[2]  = sqrt(bsmde->sigmaEta()*bsmde->sigmaEta()+bsmde->sigmaPhi()*bsmde->sigmaPhi());
+    }
+
+    if(bsmdp)
+    {
+        phi    = bsmdp->phi();
+        sigPhi = bsmdp->sigmaPhi();
+        en[3]  = bsmdp->energy();
+        si[3]  = sqrt(bsmdp->sigmaEta()*bsmdp->sigmaEta()+bsmdp->sigmaPhi()*bsmdp->sigmaPhi());
+    }
+
+    Float_t xp,yp,zp;
+
+    // Point position
+    xp=(StEpcCut::RAD_SMD_E())*cos(phi);
+    yp=(StEpcCut::RAD_SMD_E())*sin(phi);
+    zp=(StEpcCut::RAD_SMD_E())*sinh(eta);
+    StThreeVectorF PointPosition(xp*centimeter, yp*centimeter, zp*centimeter);
+
+    //Error in location of Point
+    xp=(StEpcCut::RAD_SMD_E())*(cos(phi+sigPhi)-cos(phi-sigPhi))/2;
+    yp=(StEpcCut::RAD_SMD_E())*(sin(phi+sigPhi)-sin(phi-sigPhi))/2;
+    zp=(StEpcCut::RAD_SMD_E())*(sinh(eta+sigEta)-sinh(eta-sigEta))/2;
+    StThreeVectorF ErrorPosition(xp*centimeter, yp*centimeter, zp*centimeter);
+
+    StThreeVectorF size(sigEta,sigPhi,0.0);
+
+    // Chisquare
+    Float_t ChiSquare = 0.0;
+
+
+    StEmcPoint *point = new StEmcPoint();
+    point->setQuality(Category);
+    point->setPosition(PointPosition);
+    point->setPositionError(ErrorPosition);
+    point->setSize(size);
+    point->setChiSquare(ChiSquare);
+    point->setEnergy(energy);
+    point->setDeltaEta(9999);
+    point->setDeltaPhi(9999);
+    for(Int_t i=0;i<4;i++)
+    {
+        StDetectorId id=static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+        point->setEnergyInDetector(id,en[i]);
+        point->setSizeAtDetector(id,si[i]);
+        if(i==0 && btow)
+            point->addCluster(id,btow);
+        else
+            point->addCluster(id,NULL);
+        if(i==1 && bprs)
+            point->addCluster(id,bprs);
+        else
+            point->addCluster(id,NULL);
+        if(i==2 && bsmde)
+            point->addCluster(id,bsmde);
+        else
+            point->addCluster(id,NULL);
+        if(i==3 && bsmdp)
+            point->addCluster(id,bsmdp);
+        else
+            point->addCluster(id,NULL);
+    }
+
+    mPointsReal.Add(point);
+    mNPointsReal++;
+
+    return point;
+
 }
 //--------------------------------------------------------------------------
-Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
-                                              const StMatchVecClus prsvec,
-                                              const StMatchVecClus evec,
-                                              const StMatchVecClus pvec,
-                                              const FloatVector E_tvec,
-                                              const FloatVector P_tvec,
-                                              const FloatVector M_tvec,
-                                              Int_t *Trcheck)
+Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
+                                       const StMatchVecClus prsvec,
+                                       const StMatchVecClus evec,
+                                       const StMatchVecClus pvec)
 
 {
-  Int_t mode=1;
-  Int_t na=0,ma=0,ida=Epc::nMaxNoOfClinBin;
-  Float_t ep[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin]; 
-  Int_t k[Epc::nMaxNoOfClinBin];
-  Float_t smin;
-  Int_t iw[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
-  Int_t idw =Epc::nMaxNoOfClinBin;
-  Int_t k_track[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
-  Float_t totAvg=0.;
-  Float_t EmcTot;
-  Float_t PrsTot;
-  Int_t iF;
-  
-  na=evec.size();
-  ma=pvec.size();
-	
-  UInt_t it;
-  Float_t PointMember[9];
-     
-  for (iF=0;iF<9;iF++) {PointMember[iF]=0.0;}
+    Int_t na=evec.size();
+    Int_t ma=pvec.size();
+    Float_t smin;
+    Int_t mode=1;
+    Int_t Category;
+    Float_t EmcTot = 0;
+    Float_t totAvg = 0;
+    Int_t idw =Epc::nMaxNoOfClinBin;
+    Int_t ida =Epc::nMaxNoOfClinBin;
 
-// will be taken as track pointer later
-	Float_t TrackMom[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
-	Float_t DeltaEta[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
-	Float_t DeltaPhi[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
-
-  for (iF=0;iF<Epc::nMaxNoOfClinBin;iF++)
-  {
-    k[iF]=0;
-    for (Int_t iL=0;iL<Epc::nMaxNoOfClinBin;iL++)
+    Float_t ep[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
+    Int_t   iw[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
+    Int_t   k[Epc::nMaxNoOfClinBin];
+    for (Int_t iF=0;iF<Epc::nMaxNoOfClinBin;iF++)
     {
-      TrackMom[iF][iL]=0.0;
-      DeltaEta[iF][iL]=0.0;
-      DeltaPhi[iF][iL]=0.0;
-      ep[iF][iL]=0.0;
-      iw[iF][iL]=0;
-      k_track[iF][iL]=0;
+        k[iF]=0;
+        for (Int_t iL=0;iL<Epc::nMaxNoOfClinBin;iL++)
+        {
+            ep[iF][iL]=0.0;
+            iw[iF][iL]=0;
+        }
     }
-  }
-  
-  Int_t Category;
-
-  if(evec.size()==0 && pvec.size()==0)
-  {
-    Category=0;
-    na=mvec.size();
-    ma=mvec.size();
-  }
-  if(evec.size()>0 && pvec.size()==0)
-  {
-    Category=1;
-    na=evec.size();
-    ma=mvec.size();
-  }
-  if(evec.size()==0 && pvec.size()>0)
-  {
-    Category=2;
-    na=mvec.size();
-    ma=pvec.size();
-  }
-  if(evec.size()>0 && pvec.size()>0)
-  {
-    Category=3;
-    na=evec.size();
-    ma=pvec.size();
-  }
-
-  EmcTot=0.0;
-  
-  if(mvec.size()>0)
-  {
-    for (UInt_t ims=0;ims<mvec.size();ims++)
+    if(evec.size()==0 && pvec.size()==0)
     {
-      StEmcCluster *cl0;
-      cl0=(StEmcCluster*)mvec[ims];
-      Float_t emen=cl0->energy();
-      EmcTot+=emen;
+        Category=0;
+        na=mvec.size();
+        ma=mvec.size();
     }
-  }
-//
-// getting pRS total, for PRS now only total is stored
-//
-  PrsTot=0.0;
-  
-  if(prsvec.size()>0)
-  {
-    for (UInt_t ims=0;ims<prsvec.size();ims++)
+    if(evec.size()>0 && pvec.size()==0)
     {
-      StEmcCluster *clp;
-      clp=(StEmcCluster*)prsvec[ims];
-      Float_t emen=clp->energy();
-      PrsTot+=emen;
+        Category=1;
+        na=evec.size();
+        ma=mvec.size();
     }
-  }
-  
-  //
-  for(Int_t ie=0;ie<na;ie++)
-  {
-    StEmcCluster *cl1;
-    for(Int_t ip=0;ip<ma;ip++)
+    if(evec.size()==0 && pvec.size()>0)
     {
-      StEmcCluster *cl2;
-      switch (Category) 
-      {
-        case 0:
-	        cl1 = (StEmcCluster*)mvec[ie];
-	        cl2 = (StEmcCluster*)mvec[ip];
-	        break;
-        case 1:
-	        cl1 = (StEmcCluster*)evec[ie];
-	        cl2 = (StEmcCluster*)mvec[ip];
-	        break;
-        case 2:
-	        cl1 = (StEmcCluster*)mvec[ie];
-	        cl2 = (StEmcCluster*)pvec[ip];
-	        break;
-        case 3:
-	        cl1 = (StEmcCluster*)evec[ie];
-	        cl2 = (StEmcCluster*)pvec[ip];
-	        break;
-      }
-/*
-// Earlier track matching was done before assignment of SMD clusters,
-// Now it is done after assignment.
-      
-// track matching
-      Int_t Trmatch=0;
-     Float_t PhitoMatch=cl2->phi();
-     Float_t EtatoMatch=cl1->eta();
-     Int_t MatchFlag=0;
-     if(E_tvec.size()>0){
-     for (it=0;it<E_tvec.size();it++){
-       if(MatchFlag!=1){
-       if(Trcheck[it]!=1){
-       Float_t EtaTrack=E_tvec[it];
-       Float_t PhiTrack=P_tvec[it];
-       if(TMath::Abs(EtatoMatch-EtaTrack)<=StEpcCut::DeltaEta() && TMath::Abs(PhitoMatch-PhiTrack)<=StEpcCut::DeltaPhi()){
-	 Trcheck[it]=1;
-	 TrackMom[ie][ip]=M_tvec[it];
-	 DeltaEta[ie][ip]=EtatoMatch-EtaTrack;
-	 DeltaPhi[ie][ip]=PhitoMatch-PhiTrack;
-	 k_track[ie][ip]=it+1;
-	 MatchFlag=1;
-	 Trmatch++;
-        }
-       }
-       }
-     }//it loop
-     }// etrack size check
-*/
-
-      Float_t diff=TMath::Abs((cl1->energy())-(cl2->energy()));
-      Float_t summ= (cl1->energy())+(cl2->energy());
-    	ep[ip][ie]=diff/summ;
+        Category=2;
+        na=mvec.size();
+        ma=pvec.size();
     }
-  }
-
-  assndx(mode,ep[0],na,ma,ida,k,smin,iw[0],idw);
-
-  int i1;
-  switch (Category) 
-  {
-    case 0:
-      for(i1=0;i1<na;i1++)
-      {
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)mvec[i1];
-	        Float_t avg_en = cl1->energy();
-	        totAvg += avg_en;
-        }
-      }
-      break;
-    case 1:
-      for(i1=0;i1<na;i1++)
-      {
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)evec[i1];
-	        Float_t avg_en = cl1->energy();
-	        totAvg += avg_en;
-        }
-      }
-      break;
-    case 2:
-      for(i1=0;i1<na;i1++)
-      {
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)mvec[i1];
-	        Float_t avg_en = cl1->energy();
-	        totAvg += avg_en;
-        }
-      }
-      break;
-    case 3:
-      for(i1=0;i1<na;i1++)
-      {
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)evec[i1];
-	        StEmcCluster *cl2;
-	        cl2 = (StEmcCluster*)pvec[k[i1]-1];
-	        Float_t avg_en = (cl1->energy()+cl2->energy())/2.;
-	        totAvg += avg_en;
-        }
-      }
-      break;
-  }
-
-  for(i1=0;i1<na;i1++)
-  {
-    Float_t PointEnergy=0.;
-    Float_t PointEta=0.;
-    Float_t PointSigEta=0.;
-    Float_t PointPhi=0.;
-    Float_t PointSigPhi=0.;
-    Float_t PointEnergyinDet[4]={0.,0.,0.,0.};
-    Float_t PointSizeinDet[4]={0.,0.,0.,0.};
-
-    for(UInt_t i=0;i<4;i++) {ClusterPointer[i].clear();}
-
-    switch (Category)
+    if(evec.size()>0 && pvec.size()>0)
     {
-      case 0:
-        if((k[i1]-1)>=0)
+        Category=3;
+        na=evec.size();
+        ma=pvec.size();
+    }
+
+    // getting total BTOW energy in the patch
+    if(mvec.size()>0)
+    {
+        for (UInt_t ims=0;ims<mvec.size();ims++)
         {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)mvec[i1];
-	        ClusterPointer[0].push_back(cl1);
-	        PointEta=cl1->eta();
-	        PointSigEta=cl1->sigmaEta();
-	        PointPhi=cl1->phi();
-	        PointSigPhi=cl1->sigmaPhi();
-	        PointEnergy=cl1->energy();
-	        PointEnergyinDet[0]=cl1->energy();
-	        PointEnergyinDet[1]=PrsTot;
-	        PointSizeinDet[0]=cl1->sigmaEta();
-	      }
-        break;
-      case 1:
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)evec[i1];
-	        ClusterPointer[2].push_back(cl1);
-	        StEmcCluster *cl2;
-	        cl2 = (StEmcCluster*)mvec[k[i1]-1];
-	        ClusterPointer[0].push_back(cl2);
-	        PointEta=cl1->eta();
-	        PointSigEta=cl1->sigmaEta();
-	        PointPhi=cl2->phi();
-	        PointSigPhi=cl2->sigmaPhi();
-	        PointEnergy=cl1->energy()*(EmcTot/totAvg);
-	        PointEnergyinDet[0]=cl2->energy();
-	        PointEnergyinDet[1]=PrsTot;
-	        PointEnergyinDet[2]=cl1->energy();
-	        PointSizeinDet[0]=cl2->sigmaEta();
-	        PointSizeinDet[2]=cl1->sigmaEta();
-	      }
-        break;
-      case 2:
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)mvec[i1];
-	        ClusterPointer[0].push_back(cl1);
-	        StEmcCluster *cl2;
-	        cl2 = (StEmcCluster*)pvec[k[i1]-1];
-	        ClusterPointer[3].push_back(cl2);
-	        PointEta=cl1->eta();
-	        PointSigEta=cl1->sigmaEta();
-	        PointPhi=cl2->phi();
-	        PointSigPhi=cl2->sigmaPhi();
-	        PointEnergy=cl1->energy()*(EmcTot/totAvg);
-	        PointEnergyinDet[0]=cl1->energy();
-	        PointEnergyinDet[1]=PrsTot;
-	        PointEnergyinDet[3]=cl2->energy();
-	        PointSizeinDet[0]=cl1->sigmaEta();
-	        PointSizeinDet[3]=cl2->sigmaPhi();
-	      }
-        break;
-      case 3:
-        if((k[i1]-1)>=0)
-        {
-	        StEmcCluster *cl1;
-	        cl1 = (StEmcCluster*)evec[i1];
-	        ClusterPointer[2].push_back(cl1);
-	        StEmcCluster *cl2;
-	        cl2 = (StEmcCluster*)pvec[k[i1]-1];
-	        ClusterPointer[3].push_back(cl2);
-	        PointEta=cl1->eta();
-	        PointSigEta=cl1->sigmaEta();
-	        PointPhi=cl2->phi();
-	        PointSigPhi=cl2->sigmaPhi();
-	        PointEnergy=((cl1->energy()+cl2->energy())/2.)*(EmcTot/totAvg);
-	        PointEnergyinDet[0]=EmcTot;
-	        PointEnergyinDet[1]=PrsTot;
-	        PointEnergyinDet[2]=cl1->energy();
-	        PointEnergyinDet[3]=cl2->energy();
-	        PointSizeinDet[2]=cl1->sigmaEta();
-	        PointSizeinDet[3]=cl2->sigmaPhi();
-          for (UInt_t ims=0;ims<mvec.size();ims++)
-          {
             StEmcCluster *cl0;
             cl0=(StEmcCluster*)mvec[ims];
-	          ClusterPointer[0].push_back(cl0);
-          }
-	      }
+            Float_t emen=cl0->energy();
+            EmcTot+=emen;
+        }
+    }
+
+    //
+    for(Int_t ie=0;ie<na;ie++)
+    {
+        StEmcCluster *cl1;
+        for(Int_t ip=0;ip<ma;ip++)
+        {
+            StEmcCluster *cl2;
+            switch (Category)
+            {
+            case 0:
+                cl1 = (StEmcCluster*)mvec[ie];
+                cl2 = (StEmcCluster*)mvec[ip];
+                break;
+            case 1:
+                cl1 = (StEmcCluster*)evec[ie];
+                cl2 = (StEmcCluster*)mvec[ip];
+                break;
+            case 2:
+                cl1 = (StEmcCluster*)mvec[ie];
+                cl2 = (StEmcCluster*)pvec[ip];
+                break;
+            case 3:
+                cl1 = (StEmcCluster*)evec[ie];
+                cl2 = (StEmcCluster*)pvec[ip];
+                break;
+            }
+
+            Float_t diff=TMath::Abs((cl1->energy())-(cl2->energy()));
+            Float_t summ= (cl1->energy())+(cl2->energy());
+            ep[ip][ie]=diff/summ;
+        }
+    }
+
+    assndx(mode,ep[0],na,ma,ida,k,smin,iw[0],idw);
+
+    int i1;
+    switch (Category)
+    {
+    case 0:
+        for(i1=0;i1<na;i1++)
+        {
+            if((k[i1]-1)>=0)
+            {
+                StEmcCluster *cl1;
+                cl1 = (StEmcCluster*)mvec[i1];
+                Float_t avg_en = cl1->energy();
+                totAvg += avg_en;
+            }
+        }
+        break;
+    case 1:
+        for(i1=0;i1<na;i1++)
+        {
+            if((k[i1]-1)>=0)
+            {
+                StEmcCluster *cl1;
+                cl1 = (StEmcCluster*)evec[i1];
+                Float_t avg_en = cl1->energy();
+                totAvg += avg_en;
+            }
+        }
+        break;
+    case 2:
+        for(i1=0;i1<na;i1++)
+        {
+            if((k[i1]-1)>=0)
+            {
+                StEmcCluster *cl1;
+                cl1 = (StEmcCluster*)mvec[i1];
+                Float_t avg_en = cl1->energy();
+                totAvg += avg_en;
+            }
+        }
+        break;
+    case 3:
+        for(i1=0;i1<na;i1++)
+        {
+            if((k[i1]-1)>=0)
+            {
+                StEmcCluster *cl1;
+                cl1 = (StEmcCluster*)evec[i1];
+                StEmcCluster *cl2;
+                cl2 = (StEmcCluster*)pvec[k[i1]-1];
+                Float_t avg_en = 0.5*(cl1->energy()+cl2->energy());
+                totAvg += avg_en;
+            }
+        }
         break;
     }
-    
-    if((k[i1]-1)>=0)
+
+    for(i1=0;i1<na;i1++)
     {
-      // track matching only for assigned pairs
-      Int_t Trmatch=0;
-      Float_t PhitoMatch=PointPhi;
-      Float_t EtatoMatch=PointEta;
-      Int_t MatchFlag=0;
-      if(E_tvec.size()>0)
-      {
-        for (it=0;it<E_tvec.size();it++)
+
+        StEmcCluster *btow  = NULL;
+        StEmcCluster *bprs  = NULL;
+        StEmcCluster *bsmde = NULL;
+        StEmcCluster *bsmdp = NULL;
+        Float_t fraction    = 1;
+        Float_t eta, phi;
+
+        switch (Category)
         {
-          if(MatchFlag!=1)
-          {
-            if(Trcheck && Trcheck[it]!=1) // 3-dec-2001
+        case 0:
+            if((k[i1]-1)>=0)
             {
-              Float_t EtaTrack=E_tvec[it];
-              Float_t PhiTrack=P_tvec[it];
-              if(TMath::Abs(EtatoMatch-EtaTrack)<=StEpcCut::DeltaEta() && TMath::Abs(PhitoMatch-PhiTrack)<=StEpcCut::DeltaPhi())
-              {
-	              Trcheck[it]=1;
-	              TrackMom[i1][k[i1]-1]=M_tvec[it];
-	              DeltaEta[i1][k[i1]-1]=EtatoMatch-EtaTrack;
-	              DeltaPhi[i1][k[i1]-1]=PhitoMatch-PhiTrack;
-	              k_track[i1][k[i1]-1]=it+1;
-	              MatchFlag=1;
-	              Trmatch++;
-              }
+                btow = (StEmcCluster*)mvec[i1];
+                eta = btow->eta();
+                phi = btow->phi();
+                fraction = 1;
             }
-          }
-        }
-      }// etrack size check
-      // track matching ends
-
-	    PointMember[0]=PointEta;
-	    //      Float_t tempeta=((StEmcCluster*)mvec[0])->eta();
-	    PointMember[1]=PointPhi;
-	    PointMember[2]=PointSigEta;
-	    PointMember[3]=PointSigPhi;
-	    PointMember[4]=PointEnergy;
-	    PointMember[8]=(Float_t)Category;
-	    if(k_track[i1][k[i1]-1]>0)
-      {
-	      PointMember[5]=TrackMom[i1][k[i1]-1];
-	      PointMember[6]=DeltaEta[i1][k[i1]-1];
-	      PointMember[7]=DeltaPhi[i1][k[i1]-1];
-	    }
-
-      Int_t testadd = addPoints(PointMember);
-	    if(testadd==1)if(mPrint) cout<<" addPoints not O.K"<<endl;
-
-	    // Point in StEvent
-
-	    Float_t xp,yp,zp;
-	    //Location of Point
-
-	    xp=(StEpcCut::RAD_SMD_E())*cos(PointPhi);
-	    yp=(StEpcCut::RAD_SMD_E())*sin(PointPhi);
-	    zp=(StEpcCut::RAD_SMD_E())*sinh(PointEta);
-	    StThreeVectorF PointPosition(xp*centimeter, yp*centimeter, zp*centimeter);
-
-	    //Error in location of Point
-	    xp=0.0;
-	    yp=0.0;
-	    zp=0.0;
-	    StThreeVectorF ErrorPosition(xp*centimeter, yp*centimeter, zp*centimeter);
-
-	    // Size of Point
-
-	    StThreeVectorF size(PointSigEta,PointSigPhi,0.0);
-
-	    // Chisquare
-	    //	Float_t ChiSquare = 0.0;
-	    //I am filling this chisquare with track mom now, so that it can be used for pi0 study , later on we need to do something so that deltaeta, deltaphican be stored.
-      // Pro Chisquare to be placed, because deltaeta, deltaphi have got their
-      // placeholders.
-
-	    Float_t ChiSquare=TrackMom[i1][k[i1]-1];
-
-	    //Energy In Detector
-	    Float_t EnergyInDetector[4];
-	    for(Int_t i=0;i<4;i++) {EnergyInDetector[i]=PointEnergyinDet[i];}
-	    Float_t SizeAtDetector[4];
- 	    for(Int_t i=0;i<4;i++) {SizeAtDetector[i]=PointSizeinDet[i];}
-	
-      StEmcPoint *point = new StEmcPoint();
-	    point->setPosition(PointPosition);
-	    point->setPositionError(ErrorPosition);
-	    point->setSize(size);
-	    point->setChiSquare(ChiSquare);
-      //Energy of Point
-	    point->setEnergy(PointEnergy);
-	    // Pointer to matched track "TrackPointer[k_track[i1][k[i1]-1]-1]"
-        
-	    if(k_track[i1][k[i1]-1]>0)
-      {
-        // Set deltaEta, DeltaPhi
-        point->setDeltaEta(DeltaEta[i1][k[i1]-1]);
-        point->setDeltaPhi(DeltaPhi[i1][k[i1]-1]);
-
-	      //Set track pointer here
-	      point->addTrack(HitTrackPointer[k_track[i1][k[i1]-1]-1]);
-	    }
-	    else
-      {
-	      //set ponter to zero
-	      point->addTrack(NULL);
-	    }
-      
-      for(Int_t i=0;i<4;i++)
-      {
-	      StDetectorId id=static_cast<StDetectorId>(i+kBarrelEmcTowerId);
-	      point->setEnergyInDetector(id,EnergyInDetector[i]);
-	      point->setSizeAtDetector(id,SizeAtDetector[i]);
-
-	      // Set Cluster Pointer for each detector
-        if(ClusterPointer[i].size()>0)
-        {
-          for (UInt_t ims=0;ims<ClusterPointer[i].size();ims++)
-          {
-	          StEmcCluster *cl;
-	          cl = (StEmcCluster*)ClusterPointer[i][ims];
-            point->addCluster(id,cl);
-          }
-        }
-        else {point->addCluster(id,NULL);}
-      }
-
-	    mPointsReal.Add(point);
-	    mNPointsReal++;
-    }
-  }
-  return kStOK;
-}
-//-------------------------------------------------------
-Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
-{
-  if(mPrint) cout <<" Inside TrackSort*** size "<<TrackToFit.size()<<endl;
-  if(mPrint) cout <<" Magnetic Field used = "<<mBField<<endl;
-  double spath;
-  //  double x0,y0,z0;
-  //  double ptinv,psi,tanl;
-  //  double px,py,pz;
-  StThreeVectorD XVertex(0.,0.,0.);
-
-	HitTrackEta.clear();
-	HitTrackPhi.clear();
-	HitTrackMom.clear();
-	HitTrackPointer.clear();
-
-  // Constants
-  //  double RIN            = 238.0;     // From Alexei, should be replaced by 
-  double RIN                = 231.23;    // From Alexei, should be replaced by 
-                                         // SMD radius
-  //  double ROUT           =248.0;      // From Alexei
-  RIN=BemcGeomIn->Radius();
-
-  // Is it SMD radius??
-  // Parameters
-  //  double Rmincut      = 4.0;
-  //  long   MinTrkPoints = 10;
-
-  double bfield = mBField; //This is now Tesla.
-
-  #ifdef ST_NO_TEMPLATE_DEF_ARGS
-    vector<StPhysicalHelixD,allocator<StPhysicalHelixD> > helices;
-  #else
-    vector<StPhysicalHelixD > helices;
-  #endif
-
-  helices.clear();
-  // Create Physical Helix
-  {
-    for(unsigned int jj=0; jj < TrackToFit.size(); jj++)
-    {
-     if (TrackToFit[jj]->geometry()!=0) {
-       //StPhysicalHelixD  Helix = TrackToFit[jj]->geometry()->helix();
-       helices.push_back(TrackToFit[jj]->geometry()->helix());
-     }
-    }
-  }
-  //  if(mPrint) cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
-
-  for(unsigned int jj=0; jj < helices.size(); jj++)
-  {
-    //    double lpath_tot = 0.0;
-    double xo = 0.0; double yo = 0.0;
-    spath = helices[jj].pathLength(xo, yo);
-    double s=0.0;
-    double R1St = ::sqrt( helices[jj].x(s)*helices[jj].x(s) + helices[jj].y(s)*helices[jj].y(s) );
-    
-    if( R1St > RIN ) {if(mPrint) cout<<"GlobSort: ERROR: Radius of First point > EmcInnerradius!! R1St= "<<R1St<<endl; return kStWarn;}
-
-    // Find Coordinates of Intersect with Emc Inner radius
-    if( R1St < RIN )
-    {
-      double ifcpath=0.0;
-      pairD  SIfc; 
-      SIfc = helices[jj].pathLength(RIN);
-      
-      ifcpath =  (SIfc.first < 0 || SIfc.second < 0) ? max(SIfc.first, SIfc.second) : min(SIfc.first, SIfc.second); 
-	
-      Int_t PhiBinI,imodI;
-      // Find momentum at this point
-      StThreeVectorD pmom;
-      pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
-      Float_t Mom = ::sqrt(pmom.x()*pmom.x()+pmom.y()*pmom.y()+pmom.z()*pmom.z());
-
-      StThreeVectorD xpos;
-      xpos = helices[jj].at(ifcpath);
-      
-      // Calculate eta and phi at the point of intersection
-	    Float_t Phi_hit=atan2(xpos.y(),xpos.x());
-	    double rr=::sqrt(xpos.x()*xpos.x()+xpos.y()*xpos.y());
-	    Float_t theta_hit=atan(rr/fabs(xpos.z()));
-	    Float_t eta_hit=-::log(tan(theta_hit/2.));
-	    if(xpos.z()<0)eta_hit=0.-eta_hit;
-
-	    Int_t imod,HitPhiBin;
-      Int_t ebin,pbin;
-	    imod=0;
-	    //
-      if(TMath::Abs(eta_hit)<1.0)
-      {
-	      Int_t & imd =imod;
-        Int_t testb=BemcGeomIn->getBin(Phi_hit,eta_hit,imd,ebin,pbin);
-	      if(testb==0)imod=imd;
-	      if(testb==0)
-        { 
-	        HitPhiBin=Int_t(TMath::Abs(eta_hit*10));
-          if(HitPhiBin>0)
-          {
-
-//       	 if((TMath::Abs(eta_hit*10)-Float_t(HitPhiBin))<=0.01){
-// For tracks projected very close to PhiBin boundry and on the increasing
-// order in terms of phibin number sometime do not find proper 
-// BEMC or SMD partner, so assignment becomes a problem.
-// Here all the tracks and later clusters away from phibin boundry by 
-// some (??) distance are placed as member of earlier phibin. This amount 
-// is somehow arbitrary, some proper method to be found. We then need to know
-// how to treat PRS in this context.
-         	  if((TMath::Abs(eta_hit*10)-Float_t(HitPhiBin))<=0.2)
+            break;
+        case 1:
+            if((k[i1]-1)>=0)
             {
-       	      HitPhiBin--;
-       	    }
-          }
-	        if(HitPhiBin>9) {HitPhiBin=9;}
-	        imodI=imod;
-	        PhiBinI=HitPhiBin;
-	        HitTrackEta.push_back(eta_hit);
-	        HitTrackPhi.push_back(Phi_hit);
-	        HitTrackMom.push_back(Mom);
-	        HitTrackPointer.push_back(TrackToFit[jj]);
+                btow  = (StEmcCluster*)mvec[k[i1]-1];
+                bsmde = (StEmcCluster*)evec[i1];
+                eta = bsmde->eta();
+                phi = btow->phi();
+                fraction = EmcTot/totAvg;
+            }
+            break;
+        case 2:
+            if((k[i1]-1)>=0)
+            {
+                btow  = (StEmcCluster*)mvec[i1];
+                bsmdp = (StEmcCluster*)pvec[k[i1]-1];
+                eta=btow->eta();
+                phi=bsmdp->phi();
+                fraction = EmcTot/totAvg;
+            }
+            break;
+        case 3:
+            if((k[i1]-1)>=0)
+            {
+                bsmde = (StEmcCluster*)evec[i1];
+                bsmdp = (StEmcCluster*)pvec[k[i1]-1];
+                fraction = -fabs(EmcTot*0.5*(bsmde->energy()+bsmdp->energy())/totAvg);
+                eta = bsmde->eta();
+                phi = bsmdp->phi();
+                Float_t delta = 999999;
+                for (UInt_t ims=0;ims<mvec.size();ims++)
+                {
+                    StEmcCluster *cl0 = (StEmcCluster*)mvec[ims];
+                    Float_t de = sqrt((eta-cl0->eta())*(eta-cl0->eta()) +
+                                      (phi-cl0->phi())*(phi-cl0->phi()));
+                    if(de<delta)
+                    {
+                        btow = cl0;
+                        delta = de;
+                    }
+                }
+            }
+            break;
         }
-      }
 
-  /*
-  // Currently we are taking intersection to the INNER cylinder only.
-
-           // Getting the intersection on the outer surface of emc
-           //
-      ifcpath=0.0;
-      SIfc = helices[jj].pathLength(ROUT);
-
-      ifcpath =  (SIfc.first < 0 || SIfc.second < 0) 
-          ? max(SIfc.first, SIfc.second) : min(SIfc.first, SIfc.second); 
-//
-      // Find momentum at this point
-//      StThreeVectorD pmom;
-      pmom = helices[jj].momentumAt(ifcpath, bfield*tesla);
-      Mom = ::sqrt(pmom.x()*pmom.x()+pmom.y()*pmom.y()+pmom.z()*pmom.z());
-//-----------------------------------------------------------------
-      StThreeVectorD xposO;
-      xposO = helices[jj].at(ifcpath);
-// Calculate eta and phi at the point of intersection
-	   Phi_hit=atan2(xposO.y(),xposO.x());
-	   rr=::sqrt(xposO.x()*xposO.x()+xposO.y()*xposO.y());
-	   theta_hit=atan(rr/fabs(xposO.z()));
-	   eta_hit=-::log(tan(theta_hit/2.));
-	   if(xposO.z()<0)eta_hit=0.-eta_hit;
-	   if(TMath::Abs(eta_hit)<1.0){   
-	   Int_t & imd =imod;
-           Int_t testb=BemcGeomIn->getBin(Phi_hit,eta_hit,imd,ebin,pbin);
-	   if(testb==0){ 
-	   HitPhiBin=Int_t(TMath::Abs(eta_hit*10));
-            if(HitPhiBin>0){
-       	 if((TMath::Abs(eta_hit*10)-Float_t(HitPhiBin))<=0.01){
-       	   HitPhiBin=HitPhiBin-1;
-       	 }
-       }
-	   if(HitPhiBin>9){HitPhiBin=9;}
-	   if(imod!=imodI || PhiBinI != HitPhiBin){
-	   HitTrackEta.push_back(eta_hit);
-	   HitTrackPhi.push_back(Phi_hit);
-	   HitTrackMom.push_back(Mom);
-	   }
-           }
-	   }
-	   
-  */
-
+        if(prsvec.size()>0)
+        {
+            Float_t delta = 999999;
+            for (UInt_t ims=0;ims<prsvec.size();ims++)
+            {
+                StEmcCluster *cl0 = (StEmcCluster*)prsvec[ims];
+                Float_t de = sqrt((eta-cl0->eta())*(eta-cl0->eta()) +
+                                  (phi-cl0->phi())*(phi-cl0->phi()));
+                if(de<delta)
+                {
+                    bprs = cl0;
+                    delta = de;
+                }
+            }
+        }
+        makePoint(btow,bprs,bsmde,bsmdp,fraction);
     }
-  }
-  if(mPrint) cout<<" END OF TRACKSORT*** size**"<<HitTrackEta.size()<<" "<<HitTrackPhi.size()<<endl;
-  return kStOK;
+    return 1;
 }
 //-----------------------------------------------------------------------
 void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
                                     StEmcClusterCollection* Bprscluster,
                                     StEmcClusterCollection* Bsmdecluster,
-	                                  StEmcClusterCollection* Bsmdpcluster)
+                                    StEmcClusterCollection* Bsmdpcluster)
 {
-  const Int_t eta_shift_fix=1;
-  if(mPrint) cout<<" I am inside PointCalc***"<<endl;
-  for(Int_t i1=0;i1<Epc::nModule;i1++)
-  {
-    for(Int_t i2=0;i2<Epc::nPhiBin;i2++)
+    // The TObject::GetUniqueID() method is used in the cluster
+    // finder to allow matching at clustering level. StEpcMaker
+    // will try to match only clusters which have UniqueID = 0
+    // clusters with UniqueID!=0 were matched at cluster finder
+    // StEpcMaker will, in these cases, use the UniqueID as plain
+    // matching information to create the corresponding points.
+    const Int_t eta_shift_fix=1;
+    if(mPrint)
+        cout<<" I am inside PointCalc***"<<endl;
+    for(Int_t i1=0;i1<Epc::nModule;i1++)
     {
-	    matchlist_bemc_clus[i1][i2].clear();
-	    matchlist_bprs_clus[i1][i2].clear();
-	    matchlist_bsmde_clus[i1][i2].clear();
-	    matchlist_bsmdp_clus[i1][i2].clear();
+        for(Int_t i2=0;i2<Epc::nPhiBin;i2++)
+        {
+            matchlist_bemc_clus[i1][i2].clear();
+            matchlist_bprs_clus[i1][i2].clear();
+            matchlist_bsmde_clus[i1][i2].clear();
+            matchlist_bsmdp_clus[i1][i2].clear();
+        }
     }
-  }
-  
-  StEmcGeom* GeomIn  = StEmcGeom::getEmcGeom("bemc");
-  
-  //BEMC
-  if(Bemccluster)
-  {
-    Int_t Ncluster0=Bemccluster->numberOfClusters();
-    if(Ncluster0>0)
-    {
-      const StSPtrVecEmcCluster& emcclusters= Bemccluster->clusters();
-	    for(UInt_t i=0;i<emcclusters.size();i++)
-      {
-        StEmcCluster *cl1=(StEmcCluster*)emcclusters[i];
-	      Float_t eta_emc=cl1->eta(); 
-	      Float_t phi_emc=cl1->phi(); 
-	      //Get the module number
-	      Int_t ebin,pbin;
-	      Int_t emc_module=0;
-	      Int_t & imd =emc_module;
-        Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
-	      if(testb==0) emc_module=imd;
-	      if(testb==0)
-        {
-          Int_t emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
-          //keeping the cluster very close to phibin boundry to the previous bin
-          //
-          //       if(mPrint) cout<<" EMC module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
-          if(!eta_shift_fix && emc_phi_bin>0)
-          {
-            //	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
-	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2)
-            {
-	            emc_phi_bin--;
-	          }
-          }
-          if(emc_phi_bin>9) {emc_phi_bin=9;}
-          //copy cl1 pointer to StMatchvec
-	        matchlist_bemc_clus[emc_module-1][emc_phi_bin].push_back(cl1);
-	      }
-	    }
-	  }
-  }
-  
-  //PRS
-  if(Bprscluster)
-  {
-    Int_t Ncluster1=Bprscluster->numberOfClusters();
-    if(Ncluster1>0)
-    {
-      const StSPtrVecEmcCluster& emcclusters= Bprscluster->clusters();
-	    for(UInt_t i=0;i<emcclusters.size();i++)
-      {
-        StEmcCluster *cl2=(StEmcCluster*)emcclusters[i];
-	      Float_t eta_emc=cl2->eta(); 
-	      Float_t phi_emc=cl2->phi(); 
-	      //Get the module number
-	      Int_t ebin,pbin;
-	      Int_t emc_module=0;
-	      Int_t emc_phi_bin=0;
-	      Int_t & imd =emc_module;
-        Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
-	      if(testb==0) emc_module=imd;
-	      if(testb==0)
-        {
-          emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
-          //keeping the cluster very close to phibin boundry to the previous bin
-          //
-          if(!eta_shift_fix && emc_phi_bin>0)
-          {
-            //	 if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
-	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2)
-            {
-	            emc_phi_bin--;
-	          }
-          }
-          if(emc_phi_bin>9) {emc_phi_bin=9;}
-          //copy cl1 pointer to StMatchvec
-          matchlist_bprs_clus[emc_module-1][emc_phi_bin].push_back(cl2);
-	      }
-	    }
-	  }
-  }
 
-  //BSMD_ETA
-  if(Bsmdecluster)
-  {
-    Int_t Ncluster2=Bsmdecluster->numberOfClusters();
-    if(Ncluster2>0)
-    {
-      const StSPtrVecEmcCluster& emcclusters= Bsmdecluster->clusters();
-	    for(UInt_t i=0;i<emcclusters.size();i++)
-      {
-        StEmcCluster *cl3=(StEmcCluster*)emcclusters[i];
-	      Float_t eta_emc=cl3->eta(); 
-	      Float_t phi_emc=cl3->phi(); 
-	      //Get the module number
-	      Int_t ebin,pbin;
-	      Int_t emc_module=0;
-	      Int_t emc_phi_bin=0;
-	      Int_t & imd =emc_module;
-        Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
-	      if(testb==0) emc_module=imd;
-	      if(testb==0) 
-        {
-          emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
-          //keeping the cluster very close to phibin boundry to the previous bin
-          //
-	        // if(mPrint) cout<<" SMDE module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
-          if(!eta_shift_fix && emc_phi_bin>0)
-          {
-            //if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01){
-	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<.2)
-            {
-	            emc_phi_bin--;
-	          }
-          }
-          if(emc_phi_bin>9) {emc_phi_bin=9;}
-          //copy cl1 pointer to StMatchvec
-	        matchlist_bsmde_clus[emc_module-1][emc_phi_bin].push_back(cl3);
-	      }
-	    }
-	  }
-  }
+    StEmcGeom* GeomIn  = StEmcGeom::getEmcGeom("bemc");
 
-  // BSMDP
-  if(Bsmdpcluster)
-  {
-    Int_t Ncluster3=Bsmdpcluster->numberOfClusters();
-    if(Ncluster3>0)
+    //BEMC
+    if(Bemccluster)
     {
-      const StSPtrVecEmcCluster& emcclusters= Bsmdpcluster->clusters();
-	    for(UInt_t i=0;i<emcclusters.size();i++)
-      {
-        StEmcCluster *cl4=(StEmcCluster*)emcclusters[i];
-	      Float_t eta_emc=cl4->eta(); 
-	      Float_t phi_emc=cl4->phi(); 
-	      //Get the module number
-	      Int_t ebin,pbin;
-	      Int_t emc_module=0;
-	      Int_t & imd =emc_module;
-        Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
-	      if(testb==0)emc_module=imd;
-	      if(testb==0)
+        Int_t Ncluster0=Bemccluster->numberOfClusters();
+        if(Ncluster0>0)
         {
-          Int_t emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
-          //keeping the cluster very close to phibin boundry to the previous bin
-          //
-          //       if(mPrint) cout<<" SMDP module no, phibin**"<<emc_module<<" "<<emc_phi_bin<<endl;
-          if(!eta_shift_fix && emc_phi_bin>0)
-          {
-	          if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
+            const StSPtrVecEmcCluster& emcclusters= Bemccluster->clusters();
+            for(UInt_t i=0;i<emcclusters.size();i++)
             {
-	            emc_phi_bin--;
-	          }
-          }
-          if(emc_phi_bin>9) {emc_phi_bin=9;}
-          //copy cl1 pointer to StMatchvec
-	        matchlist_bsmdp_clus[emc_module-1][emc_phi_bin].push_back(cl4);
-	      }
-	    }
-	  }
-  }
+                StEmcCluster *cl1=(StEmcCluster*)emcclusters[i];
+                if(mPrint)
+                    cout <<"BEMC cluster UniqueId = "<<cl1->GetUniqueID()<<endl;
+                if(cl1->GetUniqueID()==0)
+                {
+                    Float_t eta_emc=cl1->eta();
+                    Float_t phi_emc=cl1->phi();
+                    //Get the module number
+                    Int_t ebin,pbin;
+                    Int_t emc_module=0;
+                    Int_t & imd =emc_module;
+                    Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
+                    if(testb==0)
+                        emc_module=imd;
+                    if(testb==0)
+                    {
+                        Int_t emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
+                        //keeping the cluster very close to phibin boundry to the previous bin
+                        //
+                        if(!eta_shift_fix && emc_phi_bin>0)
+                        {
+                            if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2)
+                            {
+                                emc_phi_bin--;
+                            }
+                        }
+                        if(emc_phi_bin>9)
+                        {
+                            emc_phi_bin=9;
+                        }
+                        //copy cl1 pointer to StMatchvec
+                        matchlist_bemc_clus[emc_module-1][emc_phi_bin].push_back(cl1);
+                    }
+                }
+            }
+        }
+    }
+
+    //PRS
+    if(Bprscluster)
+    {
+        Int_t Ncluster1=Bprscluster->numberOfClusters();
+        if(Ncluster1>0)
+        {
+            const StSPtrVecEmcCluster& emcclusters= Bprscluster->clusters();
+            for(UInt_t i=0;i<emcclusters.size();i++)
+            {
+                StEmcCluster *cl2=(StEmcCluster*)emcclusters[i];
+                if(cl2->GetUniqueID()==0)
+                {
+                    Float_t eta_emc=cl2->eta();
+                    Float_t phi_emc=cl2->phi();
+                    //Get the module number
+                    Int_t ebin,pbin;
+                    Int_t emc_module=0;
+                    Int_t emc_phi_bin=0;
+                    Int_t & imd =emc_module;
+                    Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
+                    if(testb==0)
+                        emc_module=imd;
+                    if(testb==0)
+                    {
+                        emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
+                        //keeping the cluster very close to phibin boundry to the previous bin
+                        if(!eta_shift_fix && emc_phi_bin>0)
+                        {
+                            if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<0.2)
+                            {
+                                emc_phi_bin--;
+                            }
+                        }
+                        if(emc_phi_bin>9)
+                        {
+                            emc_phi_bin=9;
+                        }
+                        //copy cl1 pointer to StMatchvec
+                        matchlist_bprs_clus[emc_module-1][emc_phi_bin].push_back(cl2);
+                    }
+                }
+            }
+        }
+    }
+
+    //BSMD_ETA
+    if(Bsmdecluster)
+    {
+        Int_t Ncluster2=Bsmdecluster->numberOfClusters();
+        if(Ncluster2>0)
+        {
+            const StSPtrVecEmcCluster& emcclusters= Bsmdecluster->clusters();
+            for(UInt_t i=0;i<emcclusters.size();i++)
+            {
+                StEmcCluster *cl3=(StEmcCluster*)emcclusters[i];
+                if(cl3->GetUniqueID()==0)
+                {
+                    Float_t eta_emc=cl3->eta();
+                    Float_t phi_emc=cl3->phi();
+                    //Get the module number
+                    Int_t ebin,pbin;
+                    Int_t emc_module=0;
+                    Int_t emc_phi_bin=0;
+                    Int_t & imd =emc_module;
+                    Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
+                    if(testb==0)
+                        emc_module=imd;
+                    if(testb==0)
+                    {
+                        emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
+                        //keeping the cluster very close to phibin boundry to the previous bin
+                        if(!eta_shift_fix && emc_phi_bin>0)
+                        {
+                            if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<.2)
+                            {
+                                emc_phi_bin--;
+                            }
+                        }
+                        if(emc_phi_bin>9)
+                        {
+                            emc_phi_bin=9;
+                        }
+                        //copy cl1 pointer to StMatchvec
+                        matchlist_bsmde_clus[emc_module-1][emc_phi_bin].push_back(cl3);
+                    }
+                }
+            }
+        }
+    }
+
+    // BSMDP
+    if(Bsmdpcluster)
+    {
+        Int_t Ncluster3=Bsmdpcluster->numberOfClusters();
+        if(Ncluster3>0)
+        {
+            const StSPtrVecEmcCluster& emcclusters= Bsmdpcluster->clusters();
+            for(UInt_t i=0;i<emcclusters.size();i++)
+            {
+                StEmcCluster *cl4=(StEmcCluster*)emcclusters[i];
+                if(cl4->GetUniqueID()==0)
+                {
+                    Float_t eta_emc=cl4->eta();
+                    Float_t phi_emc=cl4->phi();
+                    //Get the module number
+                    Int_t ebin,pbin;
+                    Int_t emc_module=0;
+                    Int_t & imd =emc_module;
+                    Int_t testb=GeomIn->getBin(phi_emc,eta_emc,imd,ebin,pbin);
+                    if(testb==0)
+                        emc_module=imd;
+                    if(testb==0)
+                    {
+                        Int_t emc_phi_bin=Int_t(TMath::Abs(eta_emc*10));
+                        //keeping the cluster very close to phibin boundry to the previous bin
+                        if(!eta_shift_fix && emc_phi_bin>0)
+                        {
+                            if((TMath::Abs(eta_emc*10)-Float_t(emc_phi_bin))<=0.01)
+                            {
+                                emc_phi_bin--;
+                            }
+                        }
+                        if(emc_phi_bin>9)
+                        {
+                            emc_phi_bin=9;
+                        }
+                        //copy cl1 pointer to StMatchvec
+                        matchlist_bsmdp_clus[emc_module-1][emc_phi_bin].push_back(cl4);
+                    }
+                }
+            }
+        }
+    }
+}
+//--------------------------------------------------------------------------
+Int_t StPointCollection::matchToTracks(StEvent* event)
+{
+    if(!event)
+        return 0;
+
+    Float_t field = 0.5;
+    StEventSummary *evtSummary = event->summary();
+    if (evtSummary)
+        field = evtSummary->magneticField()/10;
+
+    Int_t nR = NPointsReal();
+    StEmcGeom* geom = StEmcGeom::instance("bemc");
+    if(nR>0)
+    {
+        if(mPrint)
+            cout << "Matching to tracks... NP = " << nR << endl;
+        StSPtrVecTrackNode& tracks=event->trackNodes();
+        Int_t nTracks =  tracks.size();
+        StThreeVectorD momentum,position;
+        for(Int_t t=0;t<nTracks;t++)
+        {
+            StTrack *track = tracks[t]->track(0);
+            if(track)
+            {
+                if(track->geometry())
+                {
+                    Bool_t tok = mPosition->trackOnEmc(&position,&momentum,
+                                                       track,(Double_t)field,
+                                                       (Double_t)geom->Radius());
+                    if(tok)
+                    {
+                        Float_t eta = position.pseudoRapidity();
+                        Float_t phi = position.phi();
+                        if(fabs(eta)<1)
+                        {
+                            TIter next(PointsReal());
+                            StEmcPoint *cl;
+
+                            for(Int_t i=0; i<nR; i++)
+                            {
+                                cl = (StEmcPoint*)next();
+                                if(cl)
+                                {
+                                    StThreeVectorF pos = cl->position();
+                                    Float_t etaP = pos.pseudoRapidity();
+                                    Float_t phiP = pos.phi();
+                                    Float_t D = sqrt(cl->deltaEta()*cl->deltaEta()+cl->deltaPhi()*cl->deltaPhi());
+                                    Float_t d = sqrt((eta-etaP)*(eta-etaP)+(phi-phiP)*(phi-phiP));
+                                    if(d<D)
+                                    {
+                                        cl->setDeltaEta(eta-etaP);
+                                        cl->setDeltaPhi(phi-phiP);
+                                    }
+
+                                    StThreeVectorF err = cl->positionError();
+                                    Float_t etaE = err.pseudoRapidity();
+                                    Float_t phiE = err.phi();
+
+                                    Float_t dPhi = fabs(phi-phiP);
+                                    if (dPhi>TMath::Pi())
+                                        dPhi=2*TMath::Pi()-dPhi;
+
+                                    if(fabs(eta-etaP)<fabs(etaE) && dPhi<fabs(phiE))
+                                    {
+                                        Int_t Category = cl->quality();
+                                        Category = Category | 16;
+                                        cl->setQuality(Category);
+                                        cl->addTrack(track);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
 }
