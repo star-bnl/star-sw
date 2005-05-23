@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEpcCut.cxx,v 1.3 2001/04/24 23:05:48 subhasis Exp $
+// $Id: StEpcCut.cxx,v 1.4 2005/05/23 12:35:14 suaide Exp $
 //
-// Author: Subhasis Chattopadhyay 
+// Author: Subhasis Chattopadhyay
 //////////////////////////////////////////////////////////////////////
 //
 // Description: constants for the Epc maker
@@ -17,12 +17,14 @@ Float_t StEpcCut::mRAD_SMD_E=231.23;
 
 // Will be used later to calculate different cut parameters.
 //-------------------------------------------------------------------
-StEpcCut::StEpcCut(){
-// Default constructor
+StEpcCut::StEpcCut()
+{
+    // Default constructor
 }
 //--------------------------------------------------------------------
-StEpcCut::~StEpcCut(){
-//Destructor
+StEpcCut::~StEpcCut()
+{
+    //Destructor
 }
 //------------------------------------------------------
 
