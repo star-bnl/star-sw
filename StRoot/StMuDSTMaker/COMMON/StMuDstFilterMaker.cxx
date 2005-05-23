@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.8 2005/05/18 22:47:29 mvl Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.9 2005/05/23 19:46:20 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -106,8 +106,10 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
             baseName++; 
          outName+=baseName;
        }
-       if (mFile==0)
+       if (mFile==0) {
+          cout << "Opening output file " << outName << endl;
           open(outName.c_str());
+       }
        mCurFileName = mMuDstMaker->chain()->GetFile()->GetName();
     }
     StMuDst* muDst = mMuDstMaker->muDst();
@@ -128,16 +130,16 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     */
     clear();
     if ( filter(muDst)==false ) return 0;
-    DEBUGMESSAGE("Event accepted");
 
     /*
      * Now apply filters to the individual TClonesArrays.
      */
 
     //the event wise information first
-    if ( filter( muDst->event() ) ) { 
-	 addType( mArrays[muEvent], *(muDst->event()) );
-    }
+    if ( filter( muDst->event() ) == 0 ) return 0;
+       
+    DEBUGMESSAGE("Event accepted");
+    addType( mArrays[muEvent], *(muDst->event()) );
 
     //The tracks are the most difficult part, because the different typ of tracks are related via their ids.
     //For all primary tracks that are accepted, I also want to right the global track
@@ -296,6 +298,11 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.9  2005/05/23 19:46:20  mvl
+ * Two incremental changes by Alex Suiade: A message is printed when a new output file is opened
+ * and if StMuEvent does not pass the cut, the whole event is discarded
+ * (previously, tracks could be kept, which does not make sense)
+ *
  * Revision 1.8  2005/05/18 22:47:29  mvl
  * Fixed StMuDstFilterMaker to work again with changes in MuDstMaker
  * (the change in v1.6 was faulty. Thanks Alex for finding this)
