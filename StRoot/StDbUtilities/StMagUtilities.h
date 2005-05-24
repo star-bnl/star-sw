@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.31 2005/02/17 02:00:51 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.32 2005/05/24 18:53:20 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.32  2005/05/24 18:53:20  jhthomas
+ * Add 3DGridLeak Distortion Correction and Utilities to support it.
+ *
  * Revision 1.31  2005/02/17 02:00:51  jhthomas
  * Make GetSpaceChargeMode() a public member function.
  *
@@ -121,7 +124,8 @@ enum   DistortSelect
   kSpaceChargeR2     = 0x800,    // Bit 12
   kShortedRing       = 0x1000,   // Bit 13
   kFast2DBMap        = 0x2000,   // Bit 14
-  kGridLeak          = 0x4000    // Bit 15
+  kGridLeak          = 0x4000,   // Bit 15
+  k3DGridLeak        = 0x8000    // Bit 16
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -165,10 +169,16 @@ class StMagUtilities {
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
-  virtual void    Search ( Int_t N, Float_t Xarray[], Float_t x, Int_t &low ) ;
+  virtual void    Search ( const Int_t N, const Float_t Xarray[], const Float_t x, Int_t &low ) ;
   virtual Int_t   IsPowerOfTwo (Int_t i) ;
   virtual Float_t Interpolate ( const Float_t Xarray[], const Float_t Yarray[], 
 				const Int_t ORDER, const Float_t x ) ;
+  virtual Float_t Interpolate2DTable  ( const Float_t x, const Float_t y, const Int_t nx, const Int_t ny, 
+ 				        const Float_t XV[], const Float_t YV[], const TMatrix &Array ) ;
+  virtual Float_t Interpolate3DTable ( const Float_t x,    const Float_t y,    const Float_t z,
+				       const Int_t  nx,    const Int_t  ny,    const Int_t  nz,
+				       const Float_t XV[], const Float_t YV[], const Float_t ZV[],
+				       TMatrix **ArrayofArrays ) ;
   virtual void    Interpolate2DBfield ( const Float_t r, const Float_t z, 
 					Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
@@ -183,7 +193,8 @@ class StMagUtilities {
 
   virtual void    Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **ArrayofCharge, TMatrix **ArrayofEroverEz, 
 				       TMatrix **ArrayofEPhioverEz,
-				       const Int_t ROWS, const Int_t COLUMNS, const Int_t PHISLICES, const Int_t ITERATIONS ) ;
+				       const Int_t ROWS, const Int_t COLUMNS,  const Int_t PHISLICES, const Float_t DeltaPhi, 
+				       const Int_t ITERATIONS, const Int_t SYMMETRY) ;
 
   Int_t    mDistortionMode;             // Distortion mode - determines which corrections are run
 
@@ -230,9 +241,7 @@ class StMagUtilities {
   Float_t  shiftEr[neZ][neR] ;
   Float_t  spaceEr[neZ][neR] ;
   Float_t  spaceR2Er[neZ][neR] ;
-  Float_t  gridleakEr[neZ][neR] ;
   Float_t  shortEr[neZ][neR] ;
-  Float_t  tiltEr[neZ][nePhi][neR], tiltEphi[neZ][nePhi][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
 
  public:
@@ -261,9 +270,9 @@ class StMagUtilities {
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoGridLeakDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    Undo3DGridLeakDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoShortedRingDistortion ( const Float_t x[], Float_t Xprime[] ) ;
-  virtual void    UndoTiltDistortion ( const Float_t x[], Float_t Xprime[] ) ;
 
   virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3],
 					     const Prime PrimaryOrGlobal, 
