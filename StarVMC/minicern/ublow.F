@@ -1,9 +1,9 @@
 *
-* $Id: ublow.F,v 1.1.1.1 2004/07/17 20:01:57 perev Exp $
+* $Id: ublow.F,v 1.1.1.2 2005/05/25 20:36:46 fisyak Exp $
 *
 * $Log: ublow.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:46  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -38,13 +38,13 @@
 #elif defined(CERNLIB_QMMPW)
 #include "mpwgs/ublow.F"
 #elif defined(CERNLIB_QMVAOS)||defined(CERNLIB_QMVMI)
-#include "local/allgs/ublow.F"
+#include "allgs/ublow.F"
 #elif (defined(CERNLIB_QMLNX) && !defined(CERNLIB_PPC))
-#include "local/lnxgs/ublow.F"
+#include "lnxgs/ublow.F"
 #elif (defined(CERNLIB_QMLNX) && defined(CERNLIB_PPC))
-#include "local/lnxppcgs/ublow.F"
+#include "lnxppcgs/ublow.F"
 #elif defined(CERNLIB_QMSUN)
-#include "local/sungs/ublow.F"
+#include "sungs/ublow.F"
 #elif defined(CERNLIB_QMVAX)
 #include "vaxgs/ublow.F"
 #elif defined(CERNLIB_B32)||defined(CERNLIB_B64)

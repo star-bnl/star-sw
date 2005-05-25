@@ -1,9 +1,13 @@
 *
-* $Id: mzstor.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: mzstor.F,v 1.1.1.2 2005/05/25 20:36:45 fisyak Exp $
 *
 * $Log: mzstor.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:45  fisyak
+* *** empty log message ***
+*
+* Revision 1.2  2005/05/20 10:43:20  brun
+* From Federico Carminati & Peter Hristov
+* Mods required to run on MacOSX 10.4
 *
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
@@ -157,7 +161,11 @@ C--                Calculate table off-set
 
 #if defined(CERNLIB_QPRINT)
       IF (NQLOGL.GE.-1)
+#if defined(__G95__)
+     +WRITE (IQLOG,9021) JQSTOR,CHNAME(1:4),CHNAME(5:8)
+#else
      +WRITE (IQLOG,9021) JQSTOR,NQSNAM(1),NQSNAM(2)
+#endif
      +,                  LQSTOR,LOCT,LQSTOR,LOCT,KQS,KQT,KQS,KQT
      +,                  NQSTRU,NQREF,LQ2END,NDATAT,NFEND
  9021 FORMAT (1X/' MZSTOR.  Initialize Store',I3,'  in ',2A4,

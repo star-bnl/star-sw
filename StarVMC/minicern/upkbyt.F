@@ -1,9 +1,9 @@
 *
-* $Id: upkbyt.F,v 1.1.1.1 2004/07/17 20:01:57 perev Exp $
+* $Id: upkbyt.F,v 1.1.1.2 2005/05/25 20:36:46 fisyak Exp $
 *
 * $Log: upkbyt.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:46  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -20,7 +20,7 @@
 *
 #include "kerngen/pilot.h"
 #if defined(CERNLIB_QMSUN)
-#include "local/sungs/upkbyt.F"
+#include "sungs/upkbyt.F"
 #elif !defined(CERNLIB_NOSHIFT)
       SUBROUTINE UPKBYT (MBV,JTHP,MIV,NINTP,NBITS)
 C

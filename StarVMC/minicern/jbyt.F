@@ -1,9 +1,9 @@
 *
-* $Id: jbyt.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: jbyt.F,v 1.1.1.2 2005/05/25 20:36:41 fisyak Exp $
 *
 * $Log: jbyt.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:41  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -20,7 +20,7 @@
 *
 #include "kerngen/pilot.h"
 #if defined(CERNLIB_QMSUN)
-#include "local/sungs/jbyt.F"
+#include "sungs/jbyt.F"
 #else
       FUNCTION JBYT (IZW,IZP,NZB)
 C
