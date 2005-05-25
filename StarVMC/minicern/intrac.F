@@ -1,9 +1,9 @@
 *
-* $Id: intrac.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: intrac.F,v 1.1.1.2 2005/05/25 20:36:40 fisyak Exp $
 *
 * $Log: intrac.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:40  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
@@ -24,7 +24,7 @@
 #elif defined(CERNLIB_QMMPW)
 #include "mpwgs/intrac.F"
 #elif defined(CERNLIB_QMSUN)
-#include "local/sungs/intrac.F"
+#include "sungs/intrac.F"
 #else
       LOGICAL FUNCTION INTRAC(DUMMY)
 C

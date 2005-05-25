@@ -1,9 +1,9 @@
 *
-* $Id: kerngt.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: kerngt.F,v 1.1.1.2 2005/05/25 20:36:41 fisyak Exp $
 *
 * $Log: kerngt.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:41  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -32,13 +32,13 @@
 #elif defined(CERNLIB_QMIRT)||defined(CERNLIB_QMIRTD)
 #include "irtgs/kerngt.F"
 #elif defined(CERNLIB_QMLNX)
-#include "local/lnxgs/kerngt.F"
+#include "lnxgs/kerngt.F"
 #elif defined(CERNLIB_QMSGI)
 #include "sgigs/kerngt.F"
 #elif defined(CERNLIB_QMSUN)
-#include "local/sungs/kerngt.F"
+#include "sungs/kerngt.F"
 #elif defined(CERNLIB_QMVMI)||defined(CERNLIB_QMVAO)
-#include "local/allgs/kerngt.F"
+#include "allgs/kerngt.F"
 #elif defined(CERNLIB_QMVAX)
 #include "vaxgs/kerngt.F"
 #elif defined(CERNLIB_QMDOS)

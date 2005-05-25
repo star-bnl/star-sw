@@ -1,9 +1,9 @@
 *
-* $Id: datimh.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: datimh.F,v 1.1.1.2 2005/05/25 20:36:40 fisyak Exp $
 *
 * $Log: datimh.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:40  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
@@ -22,7 +22,7 @@
 #if defined(CERNLIB_QMMPW)
 #include "mpwgs/datimh.F"
 #elif defined(CERNLIB_QMSUN)
-#include "local/sungs/datimh.F"
+#include "sungs/datimh.F"
 #elif defined(CERNLIB_QMVAX)
 #include "vaxgs/datimh.F"
 #else
