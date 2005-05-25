@@ -1,9 +1,13 @@
 *
-* $Id: q_jbit.inc,v 1.1.1.1 2004/07/17 20:01:57 perev Exp $
+* $Id: q_jbit.inc,v 1.1.1.2 2005/05/25 20:37:01 fisyak Exp $
 *
 * $Log: q_jbit.inc,v $
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:37:01  fisyak
+* *** empty log message ***
+*
+* Revision 1.3  2005/05/20 10:43:20  brun
+* From Federico Carminati & Peter Hristov
+* Mods required to run on MacOSX 10.4
 *
 * Revision 1.2  2002/12/02 16:37:45  brun
 * Changes from Federico Carminati and Peter Hristov who ported the system
@@ -64,7 +68,7 @@
 #elif defined(CERNLIB_QF_SIEM)
       JBIT (IZW,IZP)    = SHFTR (SHFTL(IZW,32-IZP), 31)
 
-#elif defined(CERNLIB_LINUX)
+#elif (defined(CERNLIB_LINUX))&&(!defined(__G95__))
       JBIT(IZW,IZP)     = AND(RSHIFT(IZW,IZP-1),1)
 
 #elif defined(CERNLIB_OS9)

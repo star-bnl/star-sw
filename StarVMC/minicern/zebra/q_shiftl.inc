@@ -1,9 +1,13 @@
 *
-* $Id: q_shiftl.inc,v 1.1.1.1 2004/07/17 20:01:58 perev Exp $
+* $Id: q_shiftl.inc,v 1.1.1.2 2005/05/25 20:37:02 fisyak Exp $
 *
 * $Log: q_shiftl.inc,v $
-* Revision 1.1.1.1  2004/07/17 20:01:58  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:37:02  fisyak
+* *** empty log message ***
+*
+* Revision 1.2  2005/05/20 10:43:20  brun
+* From Federico Carminati & Peter Hristov
+* Mods required to run on MacOSX 10.4
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -40,7 +44,7 @@
 #elif defined(CERNLIB_QF_SIEM)
       ISHFTL (IZW,NZB) = SHFTL (IZW, NZB)
 
-#elif defined(CERNLIB_LINUX)
+#elif (defined(CERNLIB_LINUX))&&(!defined(__G95__))
       ISHFTL (IZW,NZB) = LSHIFT (IZW,NZB)
 
 #elif (defined(CERNLIB_SUN))&&(!defined(CERNLIB_BUGLRSHFT))

@@ -1,9 +1,13 @@
 *
-* $Id: mzdiv.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: mzdiv.F,v 1.1.1.2 2005/05/25 20:36:43 fisyak Exp $
 *
 * $Log: mzdiv.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:43  fisyak
+* *** empty log message ***
+*
+* Revision 1.2  2005/05/20 10:43:20  brun
+* From Federico Carminati & Peter Hristov
+* Mods required to run on MacOSX 10.4
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -89,7 +93,12 @@ C--       option M, match mode of new division to neighbour
 
 #if defined(CERNLIB_QPRINT)
       IF (NQLOGL.GE.0)
+#if defined(__G95__)
+     +WRITE (IQLOG,9029) CHNAME(1:4),CHNAME(5:8),JQSTOR,NWALLO,
+     +NWMAX,MODE,KIND
+#else
      +WRITE (IQLOG,9029) NAME,JQSTOR,NWALLO,NWMAX,MODE,KIND
+#endif
  9029 FORMAT (1X/' MZDIV.   Initialize Division  ',2A4,'  in Store',I3
      F/10X,'NW/NWMAX=',2I7,',  MODE/KIND=',2I3)
 #endif

@@ -1,9 +1,9 @@
 /*
- * $Id: lnblnk.c,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+ * $Id: lnblnk.c,v 1.1.1.2 2005/05/25 20:36:41 fisyak Exp $
  *
  * $Log: lnblnk.c,v $
- * Revision 1.1.1.1  2004/07/17 20:01:56  perev
- * STAR version of Geant321 TGeant3 etc
+ * Revision 1.1.1.2  2005/05/25 20:36:41  fisyak
+ * *** empty log message ***
  *
  * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
  * initial import into CVS
@@ -36,5 +36,5 @@
 #elif defined(CERNLIB_QMIRT)||defined(CERNLIB_QMIRTD)
 #include "irtgs/lnblnk.c"
 #elif defined(CERNLIB_QMVAOS)||defined(CERNLIB_QMVMI)||defined(CERNLIB_LINUX)||defined(CERNLIB_MSSTDCALL)
-#include "local/allgs/lnblnk.c"
+#include "allgs/lnblnk.c"
 #endif 

@@ -1,9 +1,9 @@
 *
-* $Id: sbit0.F,v 1.1.1.1 2004/07/17 20:01:57 perev Exp $
+* $Id: sbit0.F,v 1.1.1.2 2005/05/25 20:36:45 fisyak Exp $
 *
 * $Log: sbit0.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:45  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
@@ -20,7 +20,7 @@
 *
 #include "kerngen/pilot.h"
 #if defined(CERNLIB_QMSUN)
-#include "local/sungs/sbit0.F"
+#include "sungs/sbit0.F"
 #else
       SUBROUTINE SBIT0 (IZW,IZP)
 C
