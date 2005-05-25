@@ -1,9 +1,13 @@
 *
-* $Id: q_jbyt.inc,v 1.1.1.1 2004/07/17 20:01:57 perev Exp $
+* $Id: q_jbyt.inc,v 1.1.1.2 2005/05/25 20:37:01 fisyak Exp $
 *
 * $Log: q_jbyt.inc,v $
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:37:01  fisyak
+* *** empty log message ***
+*
+* Revision 1.3  2005/05/20 10:43:20  brun
+* From Federico Carminati & Peter Hristov
+* Mods required to run on MacOSX 10.4
 *
 * Revision 1.2  2002/12/02 16:37:45  brun
 * Changes from Federico Carminati and Peter Hristov who ported the system
@@ -62,7 +66,7 @@
 #elif defined(CERNLIB_QF_SIEM)
       JBYT (IZW,IZP,NZB)= SHFTR (SHFTL(IZW,33-IZP-NZB), 32-NZB)
 
-#elif defined(CERNLIB_LINUX)
+#elif (defined(CERNLIB_LINUX))&&(!defined(__G95__))
       JBYT(IZW,IZP,NZB) = RSHIFT(LSHIFT(IZW,33-IZP-NZB),32-NZB)
 
 #elif defined(CERNLIB_OS9)

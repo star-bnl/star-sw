@@ -1,9 +1,12 @@
 /*
- * $Id: cfget.c,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+ * $Id: cfget.c,v 1.1.1.2 2005/05/25 20:36:39 fisyak Exp $
  *
  * $Log: cfget.c,v $
- * Revision 1.1.1.1  2004/07/17 20:01:56  perev
- * STAR version of Geant321 TGeant3 etc
+ * Revision 1.1.1.2  2005/05/25 20:36:39  fisyak
+ * *** empty log message ***
+ *
+ * Revision 1.3  2004/06/17 13:57:16  rdm
+ * remove unused label.
  *
  * Revision 1.2  2002/12/02 16:37:45  brun
  * Changes from Federico Carminati and Peter Hristov who ported the system
@@ -97,7 +100,7 @@ void type_of_call CFGET(lundes, medium, nwrec, nwtak, mbuf,
       nbdn   = read (fildes, mbuf, nbdo);
       if (nbdn == 0)               goto heof;
       if (nbdn <  0)               goto herror;
-retn: *nwtak = (nbdn - 1) / NBYTPW + 1;
+      *nwtak = (nbdn - 1) / NBYTPW + 1;
       return;
 
 /*        Handle exceptions        */

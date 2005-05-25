@@ -1,9 +1,9 @@
 *
-* $Id: ubunch.F,v 1.1.1.1 2004/07/17 20:01:57 perev Exp $
+* $Id: ubunch.F,v 1.1.1.2 2005/05/25 20:36:46 fisyak Exp $
 *
 * $Log: ubunch.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:57  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:46  fisyak
+* *** empty log message ***
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -36,13 +36,13 @@
 #elif defined(CERNLIB_QMDOS) || defined(CERNLIB_WINNT)
 #include "dosgs/ubunch.F"
 #elif defined(CERNLIB_QMVAOS)||defined(CERNLIB_QMVMI)
-#include "local/allgs/ubunch.F"
+#include "allgs/ubunch.F"
 #elif (defined(CERNLIB_QMLNX) && !defined(CERNLIB_PPC))
-#include "local/lnxgs/ubunch.F"
+#include "lnxgs/ubunch.F"
 #elif (defined(CERNLIB_QMLNX) && defined(CERNLIB_PPC))
-#include "local/lnxppcgs/ubunch.F"
+#include "lnxppcgs/ubunch.F"
 #elif defined(CERNLIB_QMSUN)
-#include "local/sungs/ubunch.F"
+#include "sungs/ubunch.F"
 #elif defined(CERNLIB_QMVAX)
 #include "vaxgs/ubunch.F"
 #elif defined(CERNLIB_B32)||defined(CERNLIB_B64)

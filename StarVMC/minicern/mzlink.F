@@ -1,9 +1,13 @@
 *
-* $Id: mzlink.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: mzlink.F,v 1.1.1.2 2005/05/25 20:36:43 fisyak Exp $
 *
 * $Log: mzlink.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/05/25 20:36:43  fisyak
+* *** empty log message ***
+*
+* Revision 1.2  2005/05/20 10:43:20  brun
+* From Federico Carminati & Peter Hristov
+* Mods required to run on MacOSX 10.4
 *
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
@@ -106,7 +110,11 @@ C--                Range of possible values for an origin-link
 
 #if defined(CERNLIB_QPRINT)
       IF (NQLOGL.GE.0)
+#if defined(__G95__)
+     +WRITE (IQLOG,9039) CHNAME(1:4),CHNAME(5:8),JQSTOR,NL,NS
+#else
      +WRITE (IQLOG,9039) NAME,JQSTOR,NL,NS
+#endif
  9039 FORMAT (1X/' MZLINK.  Initialize Link Area  ',2A4,'  for Store'
      F,I3,' NL/NS=',2I6)
 
