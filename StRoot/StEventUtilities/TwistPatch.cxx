@@ -61,13 +61,13 @@ void TwistPatch::SetEtaPars() {
 void TwistPatch::SetPtPars(int ew, int ch) {
   Double_t* arr = ptparsFull.GetArray();
   int offset = ((magf*2 + ew)*2 + ch)*4*2;
-  vtxpars = &(arr[offset]);
+  ptpars = &(arr[offset]);
 }
 
 void TwistPatch::SetPhiPars(int ew, int ch) {
   Double_t* arr = phiparsFull.GetArray();
   int offset = ((magf*2 + ew)*2 + ch)*5*2;
-  vtxpars = &(arr[offset]);
+  phipars = &(arr[offset]);
 }
 
 //////////////////////
@@ -84,8 +84,8 @@ void TwistPatch::PrimaryVertex(double& vx, double& vy, double& vz, double mag) {
     gMessMgr->Error() << "TwistPatch: unassigned magnetic field." << endm;
     return;
   }
-  if (TMath::Abs(vz)>50.) {
-    gMessMgr->Warning() << "TwistPatch: corrections invalid outsize |vz|<50cm." << endm;
+  if (TMath::Abs(vz)>40.) {
+    gMessMgr->Warning() << "TwistPatch: corrections invalid outsize |vz|<40cm." << endm;
     vx = -999.; vy = -999.; vz = -999.;
     return;
   }
@@ -101,8 +101,8 @@ void TwistPatch::PrimaryTrack(double& pt, double& phi, double& eta,
     gMessMgr->Error() << "TwistPatch: unassigned magnetic field." << endm;
     return;
   }
-  if (TMath::Abs(vz)>50.) {
-    gMessMgr->Warning() << "TwistPatch: corrections invalid outsize |vz|<50cm."
+  if (TMath::Abs(vz)>40.) {
+    gMessMgr->Warning() << "TwistPatch: corrections invalid outsize |vz|<40cm."
       << endm;
     pt = -999.; phi = 0.; eta = -999.;
     return;
@@ -362,8 +362,11 @@ void TwistPatch::CorrectP05ia() {
 }
 
 /***********************************************************************
- * $Id: TwistPatch.cxx,v 1.1 2005/05/24 19:05:02 genevb Exp $
+ * $Id: TwistPatch.cxx,v 1.2 2005/05/26 17:25:55 genevb Exp $
  * $Log: TwistPatch.cxx,v $
+ * Revision 1.2  2005/05/26 17:25:55  genevb
+ * Fixed typo with ptpars,phipars
+ *
  * Revision 1.1  2005/05/24 19:05:02  genevb
  * Introduce TwistPatch
  *
