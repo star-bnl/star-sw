@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.109 2005/04/15 15:28:23 potekhin Exp $
+* $Id: geometry.g,v 1.110 2005/05/26 16:03:31 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.110  2005/05/26 16:03:31  potekhin
+* a) As advertised before, removed the various Year 1 tags,
+* as they were taking space and weren't used anymore
+* b) Included the updated TPC backplane into the tag Y2004C,
+* along with FTRO. This makes sense as (1) it wasn't used
+* in production yet (2) similar updates were done in the
+* latest 2005 tag.
+* c) Improved formatting and comments in select places
+*
 * Revision 1.109  2005/04/15 15:28:23  potekhin
 * a) Corrected a comment that could surreptitiously break the Mortan
 * parsing and cause a bug, of the type : !----- your text here ----
@@ -499,10 +508,9 @@
 
 * The following are the versioning flags:
 
-   Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig,
-              SisdConfig, PipeConfig, CalbConfig, PixlConfig, IstbConfig,
-              FstdConfig, FtroConfig, ConeConfig, FgtdConfig, TpceConfig,
-              PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
+   Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
+              CalbConfig, PixlConfig, IstbConfig, FstdConfig, FtroConfig, ConeConfig, FgtdConfig,
+              TpceConfig, PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -530,8 +538,6 @@
 * been a correction which resulted in new code.. We check the value
 * and divide by 10 if necessary.
 
-
-
    character  Commands*4000,Geom*8
 
 * - - - - - - - - - - - - - - - - -
@@ -548,7 +554,7 @@ replace[;ON#{#;] with [
     if (Commands(j:j)  =='Y')    Geom=Commands(j:l); 
     Commands(j:l)=' ';  <W>; (' #1: #2');
 ]
-*
+
 * If geometry was already built, the local DB will be dropped completely now
 * but the request for the next geometry should be saved in a temp. par arrray
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
@@ -559,27 +565,26 @@ replace[;ON#{#;] with [
    IPRIN    = IDEBUG
    NtrSubEv = 1000     " automatic !"
 
-* No Photon multiplicity detector or Silicon strip by default, hence init the version:
-   DensConfig  = 0 ! gas density correction
-   SvttConfig  = 0 ! SVTT version
-   ShldConfig  = 0 ! SVTT shield version
 
-   PhmdConfig  = 0
-   SisdConfig  = 0
-   PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
    BtofConfig  = 1 ! ctb only
-   VpddConfig  = 1 ! vpd...
    CalbConfig  = 0 ! really make use of it starting in y2004
-   FpdmConfig  = 0 ! 0 means the original source code
-   PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
-   IstbConfig  = 0 ! 0=no, >1=version
-   FstdConfig  = 0 ! 0=no, >1=version
-   FgtdConfig  = 0 ! 0=no, >1=version
-   FtroConfig  = 0 ! 0=no, >1=version
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
-   TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
-   SupoConfig  = 0 ! 0 (def) old buggy version, 1=correction
+   DensConfig  = 0 ! gas density correction
+   FgtdConfig  = 0 ! 0=no, >1=version
+   FpdmConfig  = 0 ! 0 means the original source code
+   FstdConfig  = 0 ! 0=no, >1=version
+   FtroConfig  = 0 ! 0=no, >1=version
    FtpcConfig  = 0 ! 0  version, 1=gas correction
+   IstbConfig  = 0 ! 0=no, >1=version
+   PhmdConfig  = 0 ! No Photon multiplicity detectorby default
+   PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
+   PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
+   ShldConfig  = 0 ! SVTT shield version
+   SisdConfig  = 0 ! No Silicon strip by default
+   SupoConfig  = 0 ! 0 (def) old buggy version, 1=correction
+   SvttConfig  = 0 ! SVTT version
+   TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
+   VpddConfig  = 1 ! vpd...
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -635,7 +640,7 @@ If LL>1
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
-                  <W>;('               : year_1a,s,b,h,c;  year_2a    ');
+                  <W>;('               : year_2a                      ');
                   <W>;('               : year2000, year2001,year2002  ');
                   <W>;('               : year2003, y2003a             ');
                   <W>;('Gcalor         : Gcalor_on, Gcalor_off        ');
@@ -648,38 +653,6 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on,auto-split');
                   <W>;('--------------------------------------------- ');
                 }  
-  on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;
-                  pipeConfig=3;  "Aluminum pipe, non standard"
-                  {ftpc,vpdd,calb,ecal}=off;                           Nsi=0;
-                  mwx=1;}
-*   obsoleted pipe config still kept here for reference, improved logic through pipeConfig:
-*   if (alpipe)      {call AgDETP add ('pipg.BeLeng=', 0, 1); call AgDETP add ('pipg.S1Leng=',230,1)}
-
-
-  on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
-                  {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0;
-                  mwx=1;}
-  on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt;
-                  BtofConfig = 4;
-                  {vpdd,ecal}=off;  {rich,ems}=on; 
-                  nmod={12,0}; shift={87,0}; Itof=1; {Rv,Rp}=1;        Nsi=0;
-                  mwx=1;}
-  on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  
-                  {vpdd,ecal}=off;           Itof=1;                   Nsi=0;
-                  mwx=1;}
-
-  on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
-                  BtofConfig=4;
-                  {vpdd,ecal}=off;  {rich,ems}=on;  Itof=1; 
-                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;
-                  mwx=1;}
-
-* HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
-  on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder;  
-                  BtofConfig=4;
-                  {vpdd,ecal,ftpc}=off;  {rich,ems}=on;  Itof=1;
-                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;
-                  mwx=1;}
 
   on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                   BtofConfig=4;
@@ -689,13 +662,7 @@ If LL>1
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
 
 *************************************************************************************************************
-* Retiring this version of "complete", and replacing it with a more modern one:
-*  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
-
-*****               >>>NEW COMPLETE<<<
-*
 * as complete as Y2003X below but with all corrections AND pixel detector
-*
 *************************************************************************************************************
   on COMPLETE  { New Complete + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
@@ -1208,7 +1175,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD
+  on Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -1251,8 +1218,8 @@ If LL>1
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4; "SVTT version"
                      DensConfig = 1; "gas density correction"
-* Ar+C02 in ftpc
                      FtpcConfig = 1; "ftpc configuration"
+* Above:  Ar+C02 in ftpc
 
 
                   "Photon Multiplicity Detector Version "
@@ -1264,6 +1231,12 @@ If LL>1
                      sisd=on;
                      SisdConfig = 22;
 
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
                 }
 
 *
@@ -1679,6 +1652,8 @@ If LL>1
       {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY,IMULS}=0; Iloss=2}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
+  on NO_BREM    { No bremmstrahlung;
+                  IBREM=0;}
   on TPC_ONLY   { Minimal geometry - only TPC;
                   {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
   on SVTT_ON    { Optional SVTT added on top of the minimal geo;
