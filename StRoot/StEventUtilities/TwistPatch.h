@@ -25,8 +25,9 @@ class TwistPatch {
     /// @name Functions to patch data
     //@{
     virtual void PrimaryVertex(StThreeVectorF& vtx, double mag=-999.);
+    /// Patch primary vertex positions (use either function)
     virtual void PrimaryVertex(double& vx, double& vy, double& vz, double mag=-999.);
-    /// Patch primary vertex positions (use either function) and primary tracks
+    /// Patch primary tracks
     virtual void PrimaryTrack(double& pt, double& phi, double& eta,
 		      int ch, double vz, double mag=-999.);
     //@}
@@ -60,8 +61,11 @@ class TwistPatch {
 };
 
 /***********************************************************************
- * $Id: TwistPatch.h,v 1.1 2005/05/24 19:05:02 genevb Exp $
+ * $Id: TwistPatch.h,v 1.2 2005/05/26 17:25:55 genevb Exp $
  * $Log: TwistPatch.h,v $
+ * Revision 1.2  2005/05/26 17:25:55  genevb
+ * Fixed typo with ptpars,phipars
+ *
  * Revision 1.1  2005/05/24 19:05:02  genevb
  * Introduce TwistPatch
  *
