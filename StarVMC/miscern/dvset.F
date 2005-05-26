@@ -1,0 +1,17 @@
+*
+* $Id: dvset.F,v 1.1 2005/05/26 22:28:04 fisyak Exp $
+*
+* $Log: dvset.F,v $
+* Revision 1.1  2005/05/26 22:28:04  fisyak
+* Add stuff necessary for reconstruction packages
+*
+* Revision 1.1.1.1  1996/02/15 17:48:53  mclareni
+* Kernlib
+*
+*
+#include "kernnum/pilot.h"
+          SUBROUTINE          DVSET(N,S,Z,Z2)
+          DOUBLE PRECISION    S, Z(*), Z2(*)
+          IF(N .LE. 0)  RETURN
+#include "dzj.inc"
+#include "vset.inc"

@@ -1,0 +1,4 @@
+#include "TRandom.h"
+extern "C" Float_t rndm_(Int_t i = 0) {
+  return gRandom->Rndm(i);
+}
