@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.472 2005/05/09 14:19:59 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.473 2005/05/17 13:23:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -36,6 +36,7 @@
 #include "St_tpt_Maker/St_tpt_Maker.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
+#include "StTpcDb/StTpcDbMaker.h"
 
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
@@ -331,6 +332,10 @@ Bfc_st BFC1[] = { // standard chains
 
   {"ezTree" ,""  ,"","",""                                               ,"","Create ezTree branch",kFALSE},
   {"BEmcDebug","" ,"","",""                            ,"","Turn OFF B-EMC hit reconstruction cuts",kFALSE},
+
+  // Those options are for StTpcDbMaker
+  {"useLDV" ,""  ,"","",""                                   ,"","... uses laserDV database flavor",kFALSE},
+  {"useCDV" ,""  ,"","",""                                       ,"","... uses ofl database flavor",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -986,6 +991,10 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"ezTree" ,""  ,"","",""                                               ,"","Create ezTree branch",kFALSE},
   {"BEmcDebug","" ,"","",""                            ,"","Turn OFF B-EMC hit reconstruction cuts",kFALSE},
+
+  // Those options are for StTpcDbMaker
+  {"useLDV" ,""  ,"","",""                                   ,"","... uses laserDV database flavor",kFALSE},
+  {"useCDV" ,""  ,"","",""                                       ,"","... uses ofl database flavor",kFALSE},
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1919,15 +1928,16 @@ Int_t StBFChain::Instantiate()
 	  if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) &&
 	      GetOption("Simu"))  mk->SetMode(-10);
 	  if (maker == "StTpcDbMaker"){
-            mk->SetMode(0);
+	    StTpcDbMaker *Tmk=(StTpcDbMaker *) mk;
+            Tmk->SetMode(0);
 	    // this change may be temporary i.e. if Simulation includes
 	    // rotation/translation, this won't be necessarily true.
 	    // Will investigate further.
-            if (GetOption("Simu")) mk->SetMode(1);
+            if (GetOption("Simu")) Tmk->SetMode(1);
 	    // This is commented for now but may be used. Those extensions
 	    // were implemented by David H. on Jan 2 2002. DEfault is ofl+laserDV
-	    //mk->UseOnlyLaserDriftVelocity();    // uses laserDV database
-	    //mk->UseOnlyCathodeDriftVelocity();  // uses offl database
+	    if ( GetOption("useLDV") ) Tmk->UseOnlyLaserDriftVelocity();  // uses laserDV database
+	    if ( GetOption("useCDV") ) Tmk->UseOnlyCathodeDriftVelocity();// uses ofl database
 	  }
 	  if (maker == "StSvtDbMaker"){
             mk->SetMode(0);
