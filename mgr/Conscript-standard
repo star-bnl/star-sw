@@ -231,7 +231,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  $main::PATH_SEPARATOR . "#" . $Dir . "/../starsim/include" . 
 	    $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" . 
 	      $main::PATH_SEPARATOR . $env->{FCPATH};
-	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
+	$FPPFLAGS = " -DATLAS_UNIX -DCOMMONS_CONFIG_H -DCERNLIB_LINUX -DCPP_VERS=\"'W'\"";
       } elsif ( $pkg =~ m/^g2t/ || $pkg =~ m/^gstar/ || $pkg =~ m/^geometry/ ) {
 	$FCPATH  = $INCLUDE;
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
