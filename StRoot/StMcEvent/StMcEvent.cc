@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.17 2005/04/18 20:11:32 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.18 2005/05/27 23:37:25 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.18  2005/05/27 23:37:25  calderon
+ * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ *
  * Revision 2.17  2005/04/18 20:11:32  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -111,8 +114,8 @@
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.17 2005/04/18 20:11:32 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.17 2005/04/18 20:11:32 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.18 2005/05/27 23:37:25 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.18 2005/05/27 23:37:25 calderon Exp $";
 ClassImp(StMcEvent);
 
 void StMcEvent::initToZero()
@@ -147,6 +150,9 @@ void StMcEvent::initToZero()
     mBsmdpHits = new StMcEmcHitCollection();
     mTofHits = new StMcTofHitCollection();
     mEemcHits = new StMcEmcHitCollection();
+    mEprsHits = new StMcEmcHitCollection();
+    mEsmduHits = new StMcEmcHitCollection();
+    mEsmdvHits = new StMcEmcHitCollection();
     mPixelHits = new StMcPixelHitCollection();
     mIstHits = new StMcIstHitCollection();
     mFstHits = new StMcFstHitCollection();
@@ -240,7 +246,16 @@ StMcEvent::~StMcEvent()
     if (mEemcHits) delete mEemcHits;
     mEemcHits=0;
 
-    if (mPixelHits) delete mPixelHits;
+     if (mEprsHits) delete mEprsHits;
+    mEprsHits=0;
+
+    if (mEsmduHits) delete mEsmduHits;
+    mEsmduHits=0;
+
+    if (mEsmdvHits) delete mEsmdvHits;
+    mEsmdvHits=0;
+
+   if (mPixelHits) delete mPixelHits;
     mPixelHits=0;
 
     if (mIstHits) delete mIstHits;
@@ -401,6 +416,24 @@ void StMcEvent::setEemcHitCollection(StMcEmcHitCollection* val)
 {
     if (mEemcHits && mEemcHits!= val) delete mEemcHits;
     mEemcHits = val;
+}
+
+void StMcEvent::setEprsHitCollection(StMcEmcHitCollection* val)
+{
+    if (mEprsHits && mEprsHits!= val) delete mEprsHits;
+    mEprsHits = val;
+}
+
+void StMcEvent::setEsmduHitCollection(StMcEmcHitCollection* val)
+{
+    if (mEsmduHits && mEsmduHits!= val) delete mEsmduHits;
+    mEsmduHits = val;
+}
+
+void StMcEvent::setEsmdvHitCollection(StMcEmcHitCollection* val)
+{
+    if (mEsmdvHits && mEsmdvHits!= val) delete mEsmdvHits;
+    mEsmdvHits = val;
 }
 
 void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)

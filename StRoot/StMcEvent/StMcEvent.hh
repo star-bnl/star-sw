@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.17 2005/04/18 20:11:32 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.18 2005/05/27 23:37:25 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.18  2005/05/27 23:37:25  calderon
+ * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ *
  * Revision 2.17  2005/04/18 20:11:32  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -176,8 +179,16 @@ public:
 
     StMcTofHitCollection*          tofHitCollection();
     const StMcTofHitCollection*    tofHitCollection() const;
+
     StMcEmcHitCollection*          eemcHitCollection();
     const StMcEmcHitCollection*    eemcHitCollection() const;
+    StMcEmcHitCollection*          eprsHitCollection();
+    const StMcEmcHitCollection*    eprsHitCollection() const;
+    StMcEmcHitCollection*          esmduHitCollection();
+    const StMcEmcHitCollection*    esmduHitCollection() const;
+    StMcEmcHitCollection*          esmdvHitCollection();
+    const StMcEmcHitCollection*    esmdvHitCollection() const;
+    
     StMcPixelHitCollection*        pixelHitCollection();
     const StMcPixelHitCollection*  pixelHitCollection() const;
     StMcIstHitCollection*          istHitCollection();
@@ -219,6 +230,9 @@ public:
     void setBsmdpHitCollection(StMcEmcHitCollection*);              
     void setTofHitCollection(StMcTofHitCollection*);
     void setEemcHitCollection(StMcEmcHitCollection*);              
+    void setEprsHitCollection(StMcEmcHitCollection*);              
+    void setEsmduHitCollection(StMcEmcHitCollection*);              
+    void setEsmdvHitCollection(StMcEmcHitCollection*);
     void setPixelHitCollection(StMcPixelHitCollection*);       
     void setIstHitCollection(StMcIstHitCollection*);       
     void setFstHitCollection(StMcFstHitCollection*);       
@@ -258,6 +272,9 @@ protected:
     StMcEmcHitCollection*          mBsmdpHits;
     StMcTofHitCollection*          mTofHits;
     StMcEmcHitCollection*          mEemcHits;
+    StMcEmcHitCollection*          mEprsHits;
+    StMcEmcHitCollection*          mEsmduHits;
+    StMcEmcHitCollection*          mEsmdvHits;
     StMcPixelHitCollection*        mPixelHits;
     StMcIstHitCollection*          mIstHits;
     StMcFstHitCollection*          mFstHits;
@@ -368,6 +385,18 @@ inline const StMcTofHitCollection* StMcEvent::tofHitCollection() const { return 
 inline StMcEmcHitCollection* StMcEvent::eemcHitCollection() { return mEemcHits;}
 
 inline const StMcEmcHitCollection* StMcEvent::eemcHitCollection() const {return mEemcHits;}
+
+inline StMcEmcHitCollection* StMcEvent::eprsHitCollection() { return mEprsHits;}
+
+inline const StMcEmcHitCollection* StMcEvent::eprsHitCollection() const {return mEprsHits;}
+
+inline StMcEmcHitCollection* StMcEvent::esmduHitCollection() { return mEsmduHits;}
+
+inline const StMcEmcHitCollection* StMcEvent::esmduHitCollection() const {return mEsmduHits;}
+
+inline StMcEmcHitCollection* StMcEvent::esmdvHitCollection() { return mEsmdvHits;}
+
+inline const StMcEmcHitCollection* StMcEvent::esmdvHitCollection() const {return mEsmdvHits;}
 
 inline StMcPixelHitCollection* StMcEvent::pixelHitCollection() { return mPixelHits;}
 

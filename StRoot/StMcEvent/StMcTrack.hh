@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.17 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.18 2005/05/27 23:37:25 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.18  2005/05/27 23:37:25  calderon
+ * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ *
  * Revision 2.17  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -42,8 +45,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  *
- * $Id: StMcTrack.hh,v 2.17 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.18 2005/05/27 23:37:25 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.18  2005/05/27 23:37:25  calderon
+ * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ *
  * Revision 2.17  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -187,6 +193,12 @@ public:
     const StPtrVecMcTofHit&         tofHits() const; //!
     StPtrVecMcCalorimeterHit&       eemcHits(); //!
     const StPtrVecMcCalorimeterHit& eemcHits() const; //!
+    StPtrVecMcCalorimeterHit&       eprsHits(); //!
+    const StPtrVecMcCalorimeterHit& eprsHits() const; //!
+    StPtrVecMcCalorimeterHit&       esmduHits(); //!
+    const StPtrVecMcCalorimeterHit& esmduHits() const; //!
+    StPtrVecMcCalorimeterHit&       esmdvHits(); //!
+    const StPtrVecMcCalorimeterHit& esmdvHits() const; //!
     StPtrVecMcPixelHit&             pixelHits(); //!
     const StPtrVecMcPixelHit&       pixelHits() const; //!
     StPtrVecMcIstHit&               istHits(); //!
@@ -222,6 +234,9 @@ public:
     void setBsmdpHits(StPtrVecMcCalorimeterHit&); //!
     void setTofHits(StPtrVecMcTofHit&); //!
     void setEemcHits(StPtrVecMcCalorimeterHit&); //!
+    void setEprsHits(StPtrVecMcCalorimeterHit&); //!
+    void setEsmduHits(StPtrVecMcCalorimeterHit&); //!
+    void setEsmdvHits(StPtrVecMcCalorimeterHit&); //!
     void setPixelHits(StPtrVecMcPixelHit&); //!
     void setIstHits(StPtrVecMcIstHit&); //!
     void setFstHits(StPtrVecMcFstHit&); //!
@@ -246,6 +261,9 @@ public:
     void addBsmdpHit(StMcCalorimeterHit*); //!
     void addTofHit(StMcTofHit*); //!
     void addEemcHit(StMcCalorimeterHit*); //!
+    void addEprsHit(StMcCalorimeterHit*); //!
+    void addEsmduHit(StMcCalorimeterHit*); //!
+    void addEsmdvHit(StMcCalorimeterHit*); //!
     void addPixelHit(StMcPixelHit*); //!
     void addIstHit(StMcIstHit*); //!
     void addFstHit(StMcFstHit*); //!
@@ -263,6 +281,9 @@ public:
     void removeBsmdpHit(StMcCalorimeterHit*); //!
     void removeTofHit(StMcTofHit*); //!
     void removeEemcHit(StMcCalorimeterHit*); //!
+    void removeEprsHit(StMcCalorimeterHit*); //!
+    void removeEsmduHit(StMcCalorimeterHit*); //!
+    void removeEsmdvHit(StMcCalorimeterHit*); //!
     void removePixelHit(StMcPixelHit*); //!
     void removeIstHit(StMcIstHit*); //!
     void removeFstHit(StMcFstHit*); //!
@@ -287,6 +308,9 @@ protected:
     StPtrVecMcCalorimeterHit mBsmdpHits; //!
     StPtrVecMcTofHit         mTofHits; //!
     StPtrVecMcCalorimeterHit mEemcHits; //!
+    StPtrVecMcCalorimeterHit mEprsHits; //!
+    StPtrVecMcCalorimeterHit mEsmduHits; //!
+    StPtrVecMcCalorimeterHit mEsmdvHits; //!
     StPtrVecMcPixelHit       mPixelHits; //!
     StPtrVecMcIstHit         mIstHits; //!
     StPtrVecMcFstHit         mFstHits; //!
@@ -378,6 +402,18 @@ inline const StPtrVecMcTofHit& StMcTrack::tofHits() const { return mTofHits; }
 inline StPtrVecMcCalorimeterHit& StMcTrack::eemcHits() { return mEemcHits; }
 
 inline const StPtrVecMcCalorimeterHit& StMcTrack::eemcHits() const { return mEemcHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::eprsHits() { return mEprsHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::eprsHits() const { return mEprsHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::esmduHits() { return mEsmduHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::esmduHits() const { return mEsmduHits; }
+
+inline StPtrVecMcCalorimeterHit& StMcTrack::esmdvHits() { return mEsmdvHits; }
+
+inline const StPtrVecMcCalorimeterHit& StMcTrack::esmdvHits() const { return mEsmdvHits; }
 
 inline StPtrVecMcPixelHit& StMcTrack::pixelHits() { return mPixelHits; }
 
