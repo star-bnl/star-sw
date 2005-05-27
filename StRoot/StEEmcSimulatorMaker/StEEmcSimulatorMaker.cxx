@@ -28,7 +28,7 @@
 #include "StEmcUtil/others/emcInternalDef.h"  // For Emc-internal
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h" // For Endcap Emc
-//#include "StEEmcUtil/EEmcMC/EEmcMCData.h"     // To get some constants
+#include "StEEmcUtil/EEmcMC/StEEmcMCEnum.h"   // EEmc MC Ids and constants
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 
@@ -860,8 +860,11 @@ void StEEmcSimulatorMaker::pictureForDetector(Int_t det, Int_t logy, Int_t print
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEEmcSimulatorMaker.cxx,v 1.1 2005/05/23 19:41:23 wzhang Exp $
+// $Id: StEEmcSimulatorMaker.cxx,v 1.2 2005/05/27 16:16:28 wzhang Exp $
 // $Log: StEEmcSimulatorMaker.cxx,v $
+// Revision 1.2  2005/05/27 16:16:28  wzhang
+// Include StEEmcMCEnum.h for MC Ids
+//
 // Revision 1.1  2005/05/23 19:41:23  wzhang
 // First version
 //
