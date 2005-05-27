@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.14 2005/05/11 20:53:13 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.15 2005/05/27 23:38:06 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.15  2005/05/27 23:38:06  calderon
+ * Update of EEMC filling for eprs, esmdu and esmdv hits.
+ *
  * Revision 1.14  2005/05/11 20:53:13  calderon
  * Added loading of SSD hits from g2t_ssd_hit table.
  *
@@ -83,7 +86,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.14 2005/05/11 20:53:13 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.15 2005/05/27 23:38:06 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -101,6 +104,7 @@ public:
     Bool_t  doUseTofp;             //!
     Bool_t  doUseTof;              //!
     Bool_t  doUseEemc;             //!
+    Bool_t  doUseEsmd;             //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
     Bool_t  doUseFst;              //!
@@ -112,6 +116,7 @@ protected:
     void   fillBemc(St_g2t_emc_hit*);
     void   fillBsmd(St_g2t_emc_hit*);
     void   fillEemc(St_g2t_emc_hit*);
+    void   fillEsmd(St_g2t_emc_hit*);
 
     void   printTrackInfo(StMcTrack*);
     void   printEventInfoForEmc(StMcEmcHitCollection*); 
