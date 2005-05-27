@@ -73,41 +73,6 @@ GEANT data in MuDst format as in StEEmcSlowMaker.
 #define Esmdu 2
 #define Esmdv 3
 
-// enum copied from StEEmcUtil/EEmcMC/EEmcMCData 
-enum EEmcVolId {
-  // for Tower
-  kEEmcTowerHalfId =  100000,
-  kEEmcTowerPhiId  =    1000,
-  kEEmcTowerEtaId  =      10,
-  kEEmcTowerDepId  =       1,
-
-  // for SMDs
-  kEEmcSmdHalfId   = 1000000,
-  kEEmcSmdPhiId    =   10000,
-  kEEmcSmdPlaneId  =    1000,
-  kEEmcSmdStripId  =        1
-};
-
-enum MCDepth {       
-  kUnknownDepth    = 0,
-  kPreShower1Depth = 1,
-  kPreShower2Depth = 2,
-  kTower1Depth     = 3,
-  kTower2Depth     = 4,
-  kPostShowerDepth = 5
-};
-
-enum MCDetectorId {
-  kEEmcMCUnknownId    = 0,
-  kEEmcMCTowerId      = 1,
-  kEEmcMCPreShower1Id = 2,
-  kEEmcMCPreShower2Id = 3,
-  kEEmcMCSmdUStripId  = 4,
-  kEEmcMCSmdVStripId  = 5,
-  kEEmcMCPostShowerId = 6
-};
-
-
 class StEmcCollection;
 class StMcEmcHitCollection;
 
@@ -217,7 +182,7 @@ class StEEmcSimulatorMaker : public StMaker, public SlowSimUtil
     void                   setPrint(Bool_t a) {mPrint = a;}
     void                   setHistControl(UInt_t key) {mHistControl = key;}
 
-    virtual const char*    GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcSimulatorMaker.h,v 1.1 2005/05/23 19:41:23 wzhang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char*    GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcSimulatorMaker.h,v 1.2 2005/05/27 16:16:27 wzhang Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StEEmcSimulatorMaker,0)  // Simulation maker for EEMC
 };
@@ -226,8 +191,11 @@ class StEEmcSimulatorMaker : public StMaker, public SlowSimUtil
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcSimulatorMaker.h,v 1.1 2005/05/23 19:41:23 wzhang Exp $
+// $Id: StEEmcSimulatorMaker.h,v 1.2 2005/05/27 16:16:27 wzhang Exp $
 // $Log: StEEmcSimulatorMaker.h,v $
+// Revision 1.2  2005/05/27 16:16:27  wzhang
+// Include StEEmcMCEnum.h for MC Ids
+//
 // Revision 1.1  2005/05/23 19:41:23  wzhang
 // First version
 //
