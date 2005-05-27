@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.53 2005/05/11 20:53:13 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.54 2005/05/27 23:38:06 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.54  2005/05/27 23:38:06  calderon
+ * Update of EEMC filling for eprs, esmdu and esmdv hits.
+ *
  * Revision 1.53  2005/05/11 20:53:13  calderon
  * Added loading of SSD hits from g2t_ssd_hit table.
  *
@@ -236,14 +239,14 @@ using std::find;
 #include "StEmcUtil/geometry/StEmcGeom.h" // For Barrel Emc
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h" // For Endcap Emc
-#include "StEEmcUtil/EEmcMC/EEmcMCData.h"     // we need to get some constants
+#include "StEEmcUtil/EEmcMC/StEEmcMCEnum.h"     // we need to get some constants
 
 static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.53 2005/05/11 20:53:13 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.54 2005/05/27 23:38:06 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -266,6 +269,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseTofp        (kTRUE),
     doUseTof         (kTRUE),
     doUseEemc        (kTRUE),
+    doUseEsmd        (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
     doUseFst         (kTRUE),
@@ -398,6 +402,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_ctf_hit *g2t_tof_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tof_hit");
     St_g2t_ctf_hit *g2t_tfr_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tfr_hit");
     St_g2t_emc_hit *g2t_eem_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_eem_hit");
+    St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
     St_g2t_fst_hit *g2t_fst_hitTablePointer =  (St_g2t_fst_hit *) geantDstI("g2t_fst_hit");
@@ -523,13 +528,22 @@ Int_t StMcEventMaker::Make()
 	    if (Debug()) cerr << "Table g2t_smd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//
-	// EEMC Hit Table
+	// EEMC and EPRS Hit Table
 	//
 	g2t_emc_hit_st *eemHitTable = 0;
 	if (g2t_eem_hitTablePointer)
 	    eemHitTable = g2t_eem_hitTablePointer->GetTable();
 	else
 	    if (Debug()) cerr << "Table g2t_eem_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
+	//
+	// ESMDU and ESMDV Hit Table
+	//
+	g2t_emc_hit_st *esmHitTable = 0;
+	if (g2t_esm_hitTablePointer)
+	    esmHitTable = g2t_esm_hitTablePointer->GetTable();
+	else
+	    if (Debug()) cerr << "Table g2t_esm_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//	
 	// Pixel Hit Table
@@ -1372,8 +1386,11 @@ Int_t StMcEventMaker::Make()
 	// BSMDE and BSMDP Hits
 	if (doUseBsmd) fillBsmd(g2t_smd_hitTablePointer);
 	
-	// EEMC Hits
+	// EEMC and EPRS Hits
 	if (doUseEemc) fillEemc(g2t_eem_hitTablePointer);
+
+	// ESMDU and ESMDV Hits
+	if (doUseEsmd) fillEsmd(g2t_esm_hitTablePointer);
 
 	ttemp.clear();
 	
@@ -1578,11 +1595,17 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
     float de;
     StMcTrack *tr = 0;
     StMcCalorimeterHit *emchEemc = 0;
+    StMcCalorimeterHit *emchEprs = 0;
     StMcEmcHitCollection *eemcColl=mCurrentMcEvent->eemcHitCollection();
     if (!eemcColl) { cerr << "halt, no eemc collection in StMcEvent found" << endl; return; }
     m_DataSet->Add(eemcColl);
     eemcColl->SetName("EemcHits");
-    
+    eemcColl->SetName("EemcHits");
+    StMcEmcHitCollection *eprsColl=mCurrentMcEvent->eprsHitCollection();
+    if (!eprsColl) { cerr << "halt, no eprs collection in StMcEvent found" << endl; return; }
+    m_DataSet->Add(eprsColl);
+    eprsColl->SetName("EprsHits");
+   
     long NHits = g2t_eem_hitTablePointer->GetNRows();
 
     for(long ihit = 0; ihit<NHits; ihit++,eemHitTable++) {
@@ -1592,11 +1615,16 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
     
 	Short_t sec = 0;
 	Short_t ssec = 0;
-	Short_t half = ivid/kEEmcTowerHalfId; ivid %= kEEmcTowerHalfId;
+        ivid %= kEEmcTowerHalfId;
+//Commented out half WMZ Feb. 2005
+/*
+	Short_t half = ivid/kEEmcTowerHalfId; 
+
 	if (half != 1) {
 	  // we only read in one endcap - y2003x has two...
 	  continue;
 	}
+*/
 	Short_t phi = ivid/kEEmcTowerPhiId; ivid %= kEEmcTowerPhiId;
 	Short_t eta = ivid/kEEmcTowerEtaId; ivid %= kEEmcTowerEtaId;
 	Short_t depth = ivid/kEEmcTowerDepId; ivid %= kEEmcTowerDepId;
@@ -1650,10 +1678,13 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
 // 	     << " parent track=" << tr
 // 	     << endl;
 	
-	if (depth == EEmcMCData::kTower1Depth || 
-	    depth == EEmcMCData::kTower2Depth ||
-	    depth == EEmcMCData::kPreShower1Depth ||
-	    depth == EEmcMCData::kPreShower2Depth) {
+//  
+// eemcColl includes hits of geant-eprs with subsectorID from 1-5
+	if (depth == kTower1Depth || 
+	    depth == kTower2Depth ||
+	    depth == kPreShower1Depth ||
+	    depth == kPreShower2Depth ||
+	    depth == kPostShowerDepth) {
             emchEemc = new StMcCalorimeterHit(module_trans,eta_trans,
 					      sub_trans,de,tr);
 	    StMcEmcHitCollection::EAddHit eemcNew = eemcColl->addHit(emchEemc);
@@ -1664,23 +1695,156 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
 	    else if (eemcNew == StMcEmcHitCollection::kAdd) {
 	        // nothing to do...
 	        delete emchEemc;
+		emchEemc=0;
 	    } 
 	    else if (eemcNew == StMcEmcHitCollection::kErr) {
 	        delete emchEemc;
+		emchEemc=0;
 		gMessMgr->Warning()<<"<E> Bad hit in Eemc collection" << endm;
 	    }
 	    else {
 	        delete emchEemc;
+		emchEemc=0;
 		gMessMgr->Warning()<<"<E> Funny return value! EAddHit = " << static_cast<int>(eemcNew) << endm;
 	    }
 	}
 	else {
 	    // hm, don't know what to do here...
 	}
+
+// for eprsColl, subsector goes from 1-15 for 3 layers as in StEEmcFastMaker
+	if( depth == kPreShower1Depth ||
+	    depth == kPreShower2Depth ||
+	    depth == kPostShowerDepth) {
+	    if( depth == kPreShower2Depth)
+               sub_trans = sub_trans + 5;
+            else if( depth == kPostShowerDepth) 
+               sub_trans = sub_trans + 10;
+            emchEprs = new StMcCalorimeterHit(module_trans,eta_trans,
+					      sub_trans,de,tr);
+	    StMcEmcHitCollection::EAddHit eprsNew = eprsColl->addHit(emchEprs);
+	    if (eprsNew == StMcEmcHitCollection::kNew) {
+	      // adding the hit to the track produces a segfault
+	      tr->addEprsHit(emchEprs);
+	    } 
+	    else if (eprsNew == StMcEmcHitCollection::kErr) {
+	        delete emchEprs;
+	        emchEprs=0;
+		gMessMgr->Warning()<<"<E> Bad hit in Eprs collection" << endm;
+	    }
+	    else {
+	        delete emchEprs;
+	        emchEprs=0;
+		gMessMgr->Warning()<<"<E> Funny return value! EAddHit = " << static_cast<int>(eprsNew) << endm;
+	    }
+	}	
     }
     if (Debug()) {
 	cout << "Filled " << mCurrentMcEvent->eemcHitCollection()->numberOfHits() << " EEMC Hits" << endl;
+ 	cout << "Filled " << mCurrentMcEvent->eprsHitCollection()->numberOfHits() << " EPRS Hits" << endl;
+   }
+}
+
+
+void
+StMcEventMaker::fillEsmd(St_g2t_emc_hit* g2t_esm_hitTablePointer)
+{
+
+    if (g2t_esm_hitTablePointer == 0) {
+        if (Debug()) cout << "No EEMC-SMD Hits in this event" << endl;
+        return;
     }
+    g2t_emc_hit_st* esmHitTable = g2t_esm_hitTablePointer->GetTable();
+    float de;
+    StMcTrack *tr;
+    StMcCalorimeterHit *emchEsmdu, *emchEsmdv;
+
+    StMcEmcHitCollection *esmduColl=mCurrentMcEvent->esmduHitCollection();
+    m_DataSet->Add(esmduColl);
+    esmduColl->SetName("EsmduHits");
+    StMcEmcHitCollection *esmdvColl=mCurrentMcEvent->esmdvHitCollection();
+    m_DataSet->Add(esmdvColl);
+    esmdvColl->SetName("EsmdvHits");
+
+    long NHits = g2t_esm_hitTablePointer->GetNRows();
+    for(long ihit=0; ihit<NHits; ihit++,esmHitTable++) {
+
+// code of decoding volume_id is copied from StEEmcUtil/EEmcMC/EEmcMCdata.cxx  
+      Int_t   ivid  = esmHitTable->volume_id;
+      Short_t det   = 0;
+      Short_t phi   = ivid/kEEmcSmdPhiId;  ivid %= kEEmcSmdPhiId;
+      Short_t plane = ivid/kEEmcSmdPlaneId;ivid %= kEEmcSmdPlaneId;
+      Short_t strip = ivid/kEEmcSmdStripId;ivid %= kEEmcSmdStripId;
+
+      if (!ivid==0) {
+          cerr << "Critical error in EEMC-SMD volume id decoding" << endl;
+          return;
+      }
+
+
+/*
+ So far, phi in simulation does not have a reasonable value. The line below
+ forces it to be in right range. The line would not affect a valid sector
+ number, but may change a non-valid to a valid. It should be out later. 
+*/
+     phi = (phi%12 != 0)? phi%12:12;
+      
+// replace a switch in EEmcMCData with a map to determine U/V
+      if(plane >0 && plane < 4 && phi > 0 && phi < 13) {
+        if(kEEmcSmdMapUV[plane-1][phi-1] == 0) 
+           det = kEEmcMCSmdUStripId;
+        else if(kEEmcSmdMapUV[plane-1][phi-1] == 1) 
+           det = kEEmcMCSmdVStripId;
+        else {
+          if (Debug() >=2)  cout << "Empty Layer: Bad Plane Id = " << plane 
+                 << "or Sec Id = " << phi  << endl;
+          continue;
+        }
+      }
+      else {
+        if (Debug() >=2)  cout << "Warning: Out range Plane Id = " << plane 
+                 << "or Sec Id = " << phi  << endl; 
+        continue;
+      }
+
+      tr = ttemp[esmHitTable->track_p - 1];
+      de = esmHitTable->de;
+
+      Int_t module_trans = phi; 
+      Int_t eta_trans    = strip; 
+
+// Never set sub = -1 for SMD even StEmcRawHit->sub() shows it is -1!!!
+      Int_t sub_trans    = 0; 
+
+      if(det == kEEmcMCSmdUStripId) {
+         emchEsmdu = new StMcCalorimeterHit(module_trans,eta_trans,
+                                                     sub_trans,de,tr);
+         StMcEmcHitCollection::EAddHit esmduNew = esmduColl->addHit(emchEsmdu);
+         if (esmduNew == StMcEmcHitCollection::kNew) {
+                tr->addEsmduHit(emchEsmdu);
+         }
+         else {
+                delete emchEsmdu;
+                emchEsmdu = 0;
+         }
+      }
+      else if(det == kEEmcMCSmdVStripId) {
+         emchEsmdv = new StMcCalorimeterHit(module_trans,eta_trans,
+                                                     sub_trans,de,tr);
+         StMcEmcHitCollection::EAddHit esmdvNew = esmdvColl->addHit(emchEsmdv);
+         if (esmdvNew == StMcEmcHitCollection::kNew) {
+                tr->addEsmdvHit(emchEsmdv);
+         }
+         else {
+                delete emchEsmdv;
+                emchEsmdv = 0;
+         }
+      }
+   }      
+   if (Debug()) {
+	cout << "Filled " << mCurrentMcEvent->esmduHitCollection()->numberOfHits() << " ESMDU Hits" << endl;
+	cout << "Filled " << mCurrentMcEvent->esmdvHitCollection()->numberOfHits() << " ESMDV Hits" << endl;
+   }
 }
 
 void
