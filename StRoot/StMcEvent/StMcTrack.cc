@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.19 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.20 2005/05/27 23:37:25 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.20  2005/05/27 23:37:25  calderon
+ * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ *
  * Revision 2.19  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -29,8 +32,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.19 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.20 2005/05/27 23:37:25 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.20  2005/05/27 23:37:25  calderon
+ * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ *
  * Revision 2.19  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -126,7 +132,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.19 2005/04/18 20:11:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.20 2005/05/27 23:37:25 calderon Exp $";
 
 ClassImp(StMcTrack);
 
@@ -186,6 +192,9 @@ StMcTrack::~StMcTrack() {
     mBsmdpHits.clear();
     mTofHits.clear();
     mEemcHits.clear();
+    mEprsHits.clear();
+    mEsmduHits.clear();
+    mEsmdvHits.clear();
     mPixelHits.clear();
     mIstHits.clear();
     mFstHits.clear();
@@ -239,6 +248,9 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
     os << "No. Tof   Hits: " << t.tofHits().size()   << endl;
     os << "No. Eemc  Hits: " << t.eemcHits().size()  << endl;
+    os << "No. Eprs  Hits: " << t.eprsHits().size()  << endl;
+    os << "No. Esmdu Hits: " << t.esmduHits().size() << endl;
+    os << "No. Esmdv Hits: " << t.esmdvHits().size() << endl;
     os << "No. Pixel Hits: " << t.pixelHits().size() << endl;
     os << "No. Ist Hits  : " << t.istHits().size()   << endl;
     os << "No. Fst Hits  : " << t.fstHits().size()   << endl;
@@ -283,6 +295,12 @@ void StMcTrack::setBsmdpHits(StPtrVecMcCalorimeterHit& val) { mBsmdpHits = val; 
 void StMcTrack::setTofHits(StPtrVecMcTofHit& val) { mTofHits = val; }
 
 void StMcTrack::setEemcHits(StPtrVecMcCalorimeterHit& val) { mEemcHits = val; }
+
+void StMcTrack::setEprsHits(StPtrVecMcCalorimeterHit& val) { mEprsHits = val; }
+
+void StMcTrack::setEsmduHits(StPtrVecMcCalorimeterHit& val) { mEsmduHits = val; }
+
+void StMcTrack::setEsmdvHits(StPtrVecMcCalorimeterHit& val) { mEsmdvHits = val; }
 
 void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
@@ -362,6 +380,21 @@ void StMcTrack::addTofHit(StMcTofHit* hit)
 void StMcTrack::addEemcHit(StMcCalorimeterHit* hit)
 {
   mEemcHits.push_back(hit);
+}
+
+void StMcTrack::addEprsHit(StMcCalorimeterHit* hit)
+{
+  mEprsHits.push_back(hit);
+}
+
+void StMcTrack::addEsmduHit(StMcCalorimeterHit* hit)
+{
+  mEsmduHits.push_back(hit);
+}
+
+void StMcTrack::addEsmdvHit(StMcCalorimeterHit* hit)
+{
+  mEsmdvHits.push_back(hit);
 }
 
 void StMcTrack::addPixelHit(StMcPixelHit* hit)
@@ -471,6 +504,21 @@ void StMcTrack::removeTofHit(StMcTofHit* hit)
 void StMcTrack::removeEemcHit(StMcCalorimeterHit* hit)
 {
     removeCalorimeterHit(mEemcHits, hit);
+}
+
+void StMcTrack::removeEprsHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mEprsHits, hit);
+}
+
+void StMcTrack::removeEsmduHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mEsmduHits, hit);
+}
+
+void StMcTrack::removeEsmdvHit(StMcCalorimeterHit* hit)
+{
+    removeCalorimeterHit(mEsmdvHits, hit);
 }
 
 void StMcTrack::removePixelHit(StMcPixelHit* hit)
