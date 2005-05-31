@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.25 2005/05/12 17:47:57 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.26 2005/05/31 16:32:21 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.26  2005/05/31 16:32:21  perev
+ * Max & min errors changed to 1e-4,1.
+ *
  * Revision 2.25  2005/05/12 17:47:57  perev
  * TPC size 200==>210
  *
@@ -190,11 +193,13 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node
   double sinCA = node->getSin();
   if (cosCA<0.01) cosCA=0.01;
   double tanCA = sinCA/cosCA;
-         ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
+  ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
+  if (ecross< 1e-4) ecross = 1e-4;
+  if (ecross> 1   ) ecross = 1;
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
          edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
-  if (ecross>50) ecross = 50.; 
-  if (edip  >50) edip   = 50.; 
+  if (edip< 1e-4) edip = 1e-4;
+  if (edip> 1   ) edip = 1;
 }
 
