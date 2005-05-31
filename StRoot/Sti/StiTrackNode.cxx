@@ -128,6 +128,26 @@ double StiTrackNode::sinX(double x)
   }
   return sum;
 } 
+//______________________________________________________________________________
  
-  
+void StiTrackNode::mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]) 
+{
+  double T[kNPars][kNPars];
+
+  if (!Rot[0][0]) {memcpy(Rot[0],Pro[0],sizeof(T)); return;}
+
+  memcpy(T[0],Pro[0],sizeof(T));
+
+  for (int i=0;i<kNPars;i++) {
+  for (int j=0;j<kNPars;j++) {
+    if(!Rot[i][j]) continue;
+    for (int k=0;k<kNPars;k++) {
+      if (!Pro[k][i]) continue;
+      T[k][j] += Pro[k][i]*Rot[i][j];
+  }}} 
+  for (int i=0;i<kNPars;i++) {
+  for (int k=0;k<kNPars;k++) {
+    Rot[i][k] += T[i][k];
+}}
+}     
   
