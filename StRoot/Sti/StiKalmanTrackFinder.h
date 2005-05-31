@@ -84,7 +84,7 @@ private:
 class QAFind;
   void find(StiKalmanTrack *track, int direction,StiKalmanTrackNode *node,QAFind &qa);
   void nodeQA(StiKalmanTrackNode *node, int position,int active,QAFind &qa);
-  int  compQA(QAFind &qaBest,QAFind &qaTry);
+  int  compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2);
  
  protected:
 
