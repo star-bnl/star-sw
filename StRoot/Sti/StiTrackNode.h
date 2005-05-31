@@ -62,6 +62,7 @@ enum eTrackNodeStatus {
  void setReady()  			{ _state=kTNReady;}
   int isValid()  const 			{return _state>=kTNReady;}
 protected:   
+static void mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]); 
 static void errPropag6(double G[21],const double F[6][6],int nF);
 static int  cylCross(double r, const double dx[4],double Rho,double out[4]);
 static double  sinX(double x);  // (sin(x)-x)/x**3
