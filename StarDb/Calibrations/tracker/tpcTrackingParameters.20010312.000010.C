@@ -12,7 +12,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.minSearch  =    1.5*10; // Minimum Search Window ;
     row.maxSearch  =    8.0*10; // Maximum Search Window ;
     row.scaling	   =    3.0*10; // Search Window Scaling ;
-    row.maxChi2	   =   25.0; // Max Chi2 ;
+    row.maxChi2	   =   20.0; // Max Chi2 ;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
