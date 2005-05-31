@@ -1,10 +1,7 @@
-#if !defined(AFX_NAMED_H__2FA55545_A08B_44B7_A871_200FE41E6994__INCLUDED_)
-#define AFX_NAMED_H__2FA55545_A08B_44B7_A871_200FE41E6994__INCLUDED_
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
+#ifndef NAMED_H
+#define NAMED_H
 #include <string>
+
 using std::string;
 
 /*! 
@@ -25,25 +22,21 @@ public:
   void setName(const string & newName);
   
   /// Get the name of the object
-  const string& getName() const;
+  const string &getName() const;
   
-  /// Determine whether name is set, i.e object has a name
-  bool isNamed() const;
   
   /// Determine whether name equals given name
   bool isName(const string & aName) const;
   
-  /// Determine whether name equals that of given object
-  bool isNamedAs(const Named & named) const;
-  
- protected:
-  
+protected:
   /// Only derived class are Named
   Named(const string & aName=" ");
-  
+
+protected:
+
   string _name;
 };
 
 
 
-#endif // !defined(AFX_NAMED_H__2FA55545_A08B_44B7_A871_200FE41E6994__INCLUDED_)
+#endif // 

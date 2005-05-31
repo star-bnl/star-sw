@@ -200,7 +200,7 @@ inline  void Parameter::set(const string & name,
 			    int type,
 			    int key)
 {  
-  _name        = name;
+  setName(name);
   _description = description;
   _type        = type;
   _key         = key;
@@ -210,7 +210,7 @@ inline  void Parameter::set(const string & name,
 
 inline void   Parameter::set(const string & name,const string & description, bool  * value,int key)
 {
-  _name        = name;
+  setName(name);
   _description = description;
   _type        = Boolean;
   _key         = key;
@@ -219,7 +219,7 @@ inline void   Parameter::set(const string & name,const string & description, boo
 
 inline void   Parameter::set(const string & name,const string & description, int   * value,int key)
 { 
-  _name        = name;
+  setName(name);
   _description = description;
   _type        = Integer;
   _key         = key;
@@ -229,7 +229,7 @@ inline void   Parameter::set(const string & name,const string & description, int
 
 inline void   Parameter::set(const string & name,const string & description, float * value,int key)
 { 
-  _name        = name;
+  setName(name);
   _description = description;
   _type        = Float;
   _key         = key;
@@ -240,7 +240,7 @@ inline void   Parameter::set(const string & name,const string & description, flo
 
 inline void   Parameter::set(const string & name,const string & description, double* value,int key)
 { 
-  _name        = name;
+  setName(name);
   _description = description;
   _type        = Double;
   _key         = key;
