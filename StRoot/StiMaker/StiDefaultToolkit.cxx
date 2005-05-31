@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.25 2005/05/12 18:31:02 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.26 2005/05/31 17:12:02 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.26  2005/05/31 17:12:02  perev
+ * Fast delete used
+ *
  * Revision 2.25  2005/05/12 18:31:02  perev
  * New factory IMP
  *
@@ -208,16 +211,15 @@ Factory<EditableParameter>  * StiDefaultToolkit::getParameterFactory()
 
 Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
-  if (_hitFactory)
-    return _hitFactory;
+  if (_hitFactory) return _hitFactory;
   _hitFactory = StiFactory<StiHit,StiHit>::myInstance();
+  _hitFactory->setFastDelete();
   return _hitFactory;
 }
 
 Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
 {
-  if (_trackFactory)
-    return _trackFactory;
+  if (_trackFactory) return _trackFactory;
   cout << "StiDefaultToolkit::getTrackFactory() -I- "; 
   if (_guiEnabled)
     {
@@ -226,6 +228,7 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
   else // no gui needed
     {	
       _trackFactory = StiFactory<StiKalmanTrack,StiKalmanTrack>::myInstance();
+      _trackFactory->setFastDelete();
     }
   return _trackFactory;
 }
@@ -270,6 +273,7 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
     return _trackNodeFactory;
   _trackNodeFactory = StiFactory<StiKalmanTrackNode,StiKalmanTrackNode>::myInstance();
   _trackNodeFactory->setMaxIncrementCount(4000000);
+  _trackNodeFactory->setFastDelete();
   StiKalmanTrack::setKalmanTrackNodeFactory(_trackNodeFactory);
   return _trackNodeFactory;	
 }
