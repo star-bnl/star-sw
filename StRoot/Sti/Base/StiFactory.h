@@ -141,7 +141,8 @@ void StiFactory<Concrete,Abstract>::clear()
   StiBlock<Concrete>* b = fBTop;
   while (b) {
     StiBlock<Concrete>* d = b;
-    b=b->fNext;  delete d;
+    b=b->fNext;
+    if (fFastDel) {delete [] (char*)d;} else { delete d;}
     sz += sizeof(StiBlock<Concrete>);
   }
   fBTop=0; fHTop=0; fCurCount=0; fUseCount=0;

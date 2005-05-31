@@ -17,7 +17,7 @@ class BFactory : public Named
 public:
   
   BFactory(const string& name): Named(name)
-    {fCurCount=0; fMaxCount = 1000000;fUseCount=0;}
+    {fCurCount=0; fMaxCount = 1000000;fUseCount=0;fFastDel=0;}
 
   virtual ~BFactory()
     {;}
@@ -34,6 +34,7 @@ public:
   ///Free an object for reuse 
   static void Free(void *obj);
 
+  void setFastDelete()	{fFastDel=1;}
   void setMaxIncrementCount(int maxCount)	{fMaxCount=maxCount;}
   int getMaxIncrementCount() const		{return fMaxCount;  }
   int getCurrentSize()  const 			{return fCurCount;  }
@@ -42,6 +43,7 @@ protected:
   int fMaxCount;
   int fCurCount;
   int fUseCount;
+  int fFastDel;
   
 };
 
