@@ -65,12 +65,12 @@ template<class Event, class McEvent>
 void StiDetectorGroup<Event, McEvent>::initialize()
 {
   //instantiate all basic views.
-  _detectorViews = new StiDetectorViews(_name+"Views",_name+" Views");
+  _detectorViews = new StiDetectorViews(getName()+"Views",getName()+" Views");
   StiDetectorView * view;
-  _detectorViews->add(new StiAllVisibleDetectorView(_name+"AllVisble",_name+" All Visble",_detectorBuilder));
-  _detectorViews->add(new StiAllInvisibleDetectorView(_name+"AllInvisble",_name+" All Invisble",_detectorBuilder));
-  _detectorViews->add(new StiActiveDetectorView(_name+"Active",_name+" Active",_detectorBuilder));
-  _detectorViews->add(view = new StiSkeletonDetectorView(_name+"Skeleton",_name+" Skeleton",_detectorBuilder));
+  _detectorViews->add(new StiAllVisibleDetectorView(getName()+"AllVisble",getName()+" All Visble",_detectorBuilder));
+  _detectorViews->add(new StiAllInvisibleDetectorView(getName()+"AllInvisble",getName()+" All Invisble",_detectorBuilder));
+  _detectorViews->add(new StiActiveDetectorView(getName()+"Active",getName()+" Active",_detectorBuilder));
+  _detectorViews->add(view = new StiSkeletonDetectorView(getName()+"Skeleton",getName()+" Skeleton",_detectorBuilder));
   _detectorViews->setDefaultView(view);    
 }
 
@@ -124,13 +124,13 @@ StiHitLoader<Event,McEvent, StiDetectorBuilder> * StiDetectorGroup<Event, McEven
   if (_detectorBuilder==0)
     {
       string message = "StiDetectorGroup::getHitLoader() - ERROR - Hit loader requested for non active detector:";
-      message += _name;
+      message += getName();
       throw logic_error(message.c_str());
     }
   /*  if (_hitLoader==0)
     {
       string message = "StiDetectorGroup::getHitLoader() - ERROR - Hit loader == 0 for detector:";
-      message += _name;
+      message += getName();
       throw logic_error(message.c_str());
       }*/
   return _hitLoader;
@@ -144,7 +144,7 @@ StiDetectorBuilder * StiDetectorGroup<Event, McEvent>::getDetectorBuilder()
   if (_detectorBuilder==0)
     {
       string message = "StiDetectorGroup::getDetectorBuilder() - ERROR - builder == 0 for detector:";
-      message += _name;
+      message += getName();
       throw logic_error(message.c_str());
     }
   return _detectorBuilder; 
@@ -159,7 +159,7 @@ StiDedxCalculator * StiDetectorGroup<Event, McEvent>::getDedxCalculator()
   if (_dedxCalculator==0)
     {
       string message = "StiDetectorGroup::getDedxCalculator() - ERROR - dedxCalculator == 0 for detector:";
-      message += _name;
+      message += getName();
       throw logic_error(message.c_str());
     }
   return _dedxCalculator; 
@@ -175,7 +175,7 @@ StiElossCalculator * StiDetectorGroup<Event, McEvent>::getElossCalculator()
   if (_elossCalculator==0)
     {
       string message = "StiDetectorGroup::getElossCalculator() - ERROR - elossCalculator == 0 for detector:";
-      message += _name;
+      message += getName();
       throw logic_error(message.c_str());
     }
   return _elossCalculator; 
