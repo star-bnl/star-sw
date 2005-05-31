@@ -268,6 +268,7 @@ class StiKalmanTrack : public StiTrack
 
   bool find(int direction=kOutsideIn);
   int  refit();
+  int  refitL();
   void reserveHits();
   bool extendToVertex(StiHit* vertex);
   bool extendToVertex(StiHit* vertex, const StiDetector*alternate);
