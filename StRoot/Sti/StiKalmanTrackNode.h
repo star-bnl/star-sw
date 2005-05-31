@@ -28,8 +28,53 @@ typedef enum {
   kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus
 } StiIntersection;
   
+class StiNodePars {
+public:	
+void reset(){memset(this,0,sizeof(StiNodePars));}
+
+  /// sine and cosine of cross angle
+  double _cosCA;
+  double _sinCA;
+  double _x;   
+  /// local Y-coordinate of this track (reference plane)           
+  double _y; 
+  /// local Z-coordinate of this track (reference plane)
+  double _z;
+  /// (signed curvature)*(local Xc of helix axis - X current point on track)
+  double _eta;
+  /// signed curvature [sign = sign(-qB)]
+  double _curv;  
+  /// tangent of the track momentum dip angle
+  double _tanl;
+};
+class StiNodeMtx {
+public:	
+void reset(){memset(this,0,sizeof(StiNodeMtx));}
+  double A[kNPars][kNPars];
+};
 
 
+class StiNodeStat {
+public:	
+  StiNodeStat(){reset();}
+void reset(){memset(this,0,sizeof(StiNodeStat));}
+  double dx, dy, dl0, dl;
+  double x1,y1,cosCA1,sinCA1;
+  double x2,y2,cosCA2,sinCA2;
+  double sumSin, sumCos;
+};
+
+class StiNodeErrs {
+public:	
+void reset(){memset(this,0,sizeof(StiNodeErrs));}
+
+union{double A[1];double _cXX;};
+  double _cYX,_cYY;                       
+  double _cZX,_cZY, _cZZ;                 
+  double _cEX,_cEY, _cEZ, _cEE;           
+  double _cCX,_cCY, _cCZ, _cCE, _cCC;     
+  double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
+};  
 /*! \class StiKalmanTrackNode
   Work class used to handle Kalman filter information while
   constructing track nodes.  A node may or may not own a hit
@@ -43,6 +88,7 @@ typedef enum {
 */
 class StiKalmanTrackNode : public StiTrackNode 
 {
+friend class StiTrackNodeHelper;
 public:
   StiKalmanTrackNode(){reset();}
   virtual ~StiKalmanTrackNode(){};
@@ -97,20 +143,20 @@ public:
   double y_g() const;
   double z_g() const;
     
-  double getX() const 			{ return _x ;}
-  double getY() const 			{ return _y;}  
-  double getZ() const 			{ return _z;}
+  double getX() const 			{ return mFP._x ;}
+  double getY() const 			{ return mFP._y;}  
+  double getZ() const 			{ return mFP._z;}
   
-  double getEta  () const 		{return _eta;   }
-  double getSin  () const 		{return _sinCA;}
-  double getCos  () const 		{return _cosCA;}
+  double getEta  () const 		{return mFP._eta;   }
+  double getSin  () const 		{return mFP._sinCA;}
+  double getCos  () const 		{return mFP._cosCA;}
   double getAlpha() const 		{return _alpha;}
   double getEyy()   const 		{return eyy;}
   double getEzz()   const 		{return ezz;}
-  double getCyy()   const 		{return _cYY;}
-  double getCzz()   const 		{return _cZZ;}
-  double const *getPars()const          {return (&_x);}
-  double getDiag(int idx)const          {return (&_cXX)[(idx*(idx+3))/2];}
+  double getCyy()   const 		{return mFE._cYY;}
+  double getCzz()   const 		{return mFE._cZZ;}
+  double const *getPars()const          {return (&mFP._x);}
+  double getDiag(int idx)const          {return mFE.A[(idx*(idx+3))/2];}
   int    getHitCount () const		{return hitCount;}
   int    getNullCount() const       	{return nullCount;}
   int    getContigHitCount () const 	{return contiguousHitCount ;}
@@ -147,6 +193,7 @@ public:
   
   int  locate(StiPlacement*place,StiShape*sh);
   int  propagate(double x,int option,int dir);
+  void propagateMtx();
   void propagateError();
   int  testError(double *emx,int begend);
   void numeDeriv(double val,int kind,int shape=0,int dir=0);
@@ -212,28 +259,12 @@ public:
   /// local X-coordinate of this track (reference plane)
   double _refX;
   double _layerAngle;
-  /// sine and cosine of cross angle
-  double _cosCA;
-  double _sinCA;
-  double _x;   
-  /// local Y-coordinate of this track (reference plane)           
-  double _y; 
-  /// local Z-coordinate of this track (reference plane)
-  double _z;
-  /// (signed curvature)*(local Xc of helix axis - X current point on track)
-  double _eta;
-  /// signed curvature [sign = sign(-qB)]
-  double _curv;  
-  /// tangent of the track momentum dip angle
-  double _tanl;
-  
+  StiNodePars mFP; 
+  StiNodePars mPP; 
+  StiNodeMtx  mMtx;
   /// covariance matrix of the track parameters
-  double _cXX;
-  double _cYX,_cYY;                       
-  double _cZX,_cZY, _cZZ;                 
-  double _cEX,_cEY, _cEZ, _cEE;           
-  double _cCX,_cCY, _cCZ, _cCE, _cCC;     
-  double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
+  StiNodeErrs mFE;
+  StiNodeErrs mPE;
   float  eyy,ezz;
   int hitCount;
   int nullCount;
@@ -254,14 +285,11 @@ public:
   static StiMaterial * prevGas;
   static StiMaterial * mat;
   static StiMaterial * prevMat;
-  static double x0,y0, dx, dy, dl0, dl;
-  static double x1,y1,z1,cosCA1,sinCA1;
-  static double x2,y2,z2,cosCA2,sinCA2;
-  static double sumSin, sinCA1plusCA2, sumCos;
+  static StiNodeStat  mgP;
   static double radThickness, density;
   static double gasDensity,matDensity,gasRL,matRL;
-  static double fgErrFactor;
   static bool   useCalculatedHitError;
+  static double fgErrFactor;
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[kNPars][kNPars];   
@@ -282,24 +310,24 @@ inline double StiKalmanTrackNode::nice(double angle)
 
 inline double StiKalmanTrackNode::getCurvature() const
 {
-  return _curv;
+  return mFP._curv;
 }
 
 inline double StiKalmanTrackNode::getDipAngle() const
 {
-  return atan(_tanl);
+  return atan(mFP._tanl);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getMomentum() const
 {
   double pt = getPt();
-  return StThreeVector<double>(pt*_cosCA,pt*_sinCA,pt*_tanl);
+  return StThreeVector<double>(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP._tanl);
 }
 
 inline StThreeVectorF StiKalmanTrackNode::getMomentumF() const
 {
   double pt = getPt();
-  return StThreeVectorF(pt*_cosCA,pt*_sinCA,pt*_tanl);
+  return StThreeVectorF(pt*mFP._cosCA,pt*mFP._sinCA,pt*mFP._tanl);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalMomentum() const
@@ -318,33 +346,33 @@ inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
 
 inline int StiKalmanTrackNode::getCharge() const
 {
-  return (pars->field*_curv > 0) ? -1 : 1;
+  return (pars->field*mFP._curv > 0) ? -1 : 1;
 }
 
 inline double StiKalmanTrackNode::getTanL() const
 {
-  return _tanl;
+  return mFP._tanl;
 }
 
 inline int StiKalmanTrackNode::getHelicity()  const
 {
-  return (_curv < 0) ? -1 : 1;
+  return (mFP._curv < 0) ? -1 : 1;
 }
 
 
 inline double StiKalmanTrackNode::pitchAngle() const
 {
-  return atan(_tanl);
+  return atan(mFP._tanl);
 }
 
 inline double StiKalmanTrackNode::sinCrossAngle() const
 {
-  return _sinCA;
+  return mFP._sinCA;
 }
 
 inline double StiKalmanTrackNode::crossAngle() const
 {
-  return asin(_sinCA);
+  return asin(mFP._sinCA);
 }
 
 inline void StiKalmanTrackNode::setHitErrors(double ey,double ez)
@@ -362,7 +390,7 @@ inline void StiKalmanTrackNode::setHitErrors(double ey,double ez)
 inline double StiKalmanTrackNode::getPt() const
 {
   double curvature;
-  curvature = fabs(_curv);
+  curvature = fabs(mFP._curv);
   if (curvature<1e-12) 
     return 0.003e12*fabs(pars->field);
   else
@@ -378,7 +406,7 @@ inline double StiKalmanTrackNode::getPt() const
 */
 inline double StiKalmanTrackNode::getP() const
 {
-  return (getPt()*::sqrt(1.+_tanl*_tanl));
+  return (getPt()*::sqrt(1.+mFP._tanl*mFP._tanl));
 }
 
 inline double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2)
@@ -403,27 +431,27 @@ struct StreamX
 
 inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
 {
-  return StThreeVector<double>(_x,_y,_z);
+  return StThreeVector<double>(mFP._x,mFP._y,mFP._z);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
 {
-  return StThreeVector<double>(_cosAlpha*_x-_sinAlpha*_y, _sinAlpha*_x+_cosAlpha*_y, _z);
+  return StThreeVector<double>(_cosAlpha*mFP._x-_sinAlpha*mFP._y, _sinAlpha*mFP._x+_cosAlpha*mFP._y, mFP._z);
 }
 
 inline  double StiKalmanTrackNode::x_g() const
 {
-  return _cosAlpha*_x-_sinAlpha*_y;
+  return _cosAlpha*mFP._x-_sinAlpha*mFP._y;
 }
 
 inline  double StiKalmanTrackNode::y_g() const
 {
-  return _sinAlpha*_x+_cosAlpha*_y;
+  return _sinAlpha*mFP._x+_cosAlpha*mFP._y;
 }
 
 inline  double StiKalmanTrackNode::z_g() const
 {
-  return _z;
+  return mFP._z;
 }
 
 ///Calculate and returns pathlength within detector volume
@@ -434,7 +462,7 @@ inline double StiKalmanTrackNode::pathlength() const
   const StiDetector * det = getDetector();
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
-  return (thickness*::sqrt(1.+_tanl*_tanl)) / _cosCA;
+  return (thickness*::sqrt(1.+mFP._tanl*mFP._tanl)) / mFP._cosCA;
 }
 
 ///Return the radiation length (in cm) of the 
@@ -500,7 +528,7 @@ inline double StiKalmanTrackNode::getDedx() const
 
 inline void StiKalmanTrackNode::setCurvature(double curvature)
 {
-  _curv=curvature;
+  mFP._curv=curvature;
 }
 
 
