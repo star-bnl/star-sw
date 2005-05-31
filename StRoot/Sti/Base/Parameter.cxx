@@ -67,7 +67,7 @@ Parameter::Parameter(const string & name, const string & description, double* va
 
 Parameter::Parameter(const Parameter & parameter)
 {
-  _name = parameter._name;
+  setName(parameter.getName());
   _description = parameter._description;
   _key  = parameter._key;
   _type = parameter._type;
