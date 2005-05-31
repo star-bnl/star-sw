@@ -469,9 +469,6 @@ StiKalmanTrackNode::Break(nCall);
 
 
       StiHitContino hitCont;
-//????????????????????????????????????????????????????????????????????
-//??      if (tDet->getPlacement()->getNormalRadius()<20) active=0;
-//????????????????????????????????????????????????????????????????????
 
       if (active) {
 
@@ -525,7 +522,7 @@ StiKalmanTrackNode::Break(nCall);
         if (qaTry.qa>-2) find(track,direction,node,qaTry);
         
         if (jHit==0) { qaBest=qaTry; continue;}
-        int igor = compQA(qaBest,qaTry);
+        int igor = compQA(qaBest,qaTry,maxChi2);
         if (igor<0)  { leadNode->remove(0);}
         else         { leadNode->remove(1);qaBest=qaTry;}
       }
@@ -576,17 +573,23 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 
 }
 //______________________________________________________________________________
-int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry)
+int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
 
    if ( qaTry.qa   ==         -3)  	return -1;
    if (qaBest.qa   ==         -3)  	return  1;
+   int n = qaBest.hits; if (n<qaTry.hits) n = qaTry.hits;
+   double estBest = qaBest.sum +(n-qaBest.hits)*maxChi2;
+   double estTry  = qaTry.sum  +(n-qaTry.hits )*maxChi2;
+   if (estBest<estTry) {return -1;} else {return 1;}
+#if 0
    if (qaBest.hits >  qaTry.hits) 	return -1;
    if (qaBest.hits <  qaTry.hits) 	return  1;
    if (qaBest.nits <  qaTry.nits) 	return -1;
    if (qaBest.nits >  qaTry.nits) 	return  1;
    if (qaBest.sum  <= qaTry.sum ) 	return -1;
    					return  1;
+#endif //0
 }
 
 //______________________________________________________________________________
