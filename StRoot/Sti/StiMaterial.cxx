@@ -38,7 +38,7 @@ void StiMaterial::set(const string& name,
 		      double radLength,
 		      double ionization)
 {
-  _name = name;
+  setName(name);
   _density = density;
   _radLength = radLength;
   _a = a;
