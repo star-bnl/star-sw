@@ -72,7 +72,7 @@ Int_t StAdcPedHistoMaker::Init()
   assert(mEeGeom);
   mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
   assert(mEeDb); // eemcDB must be in the chain, fix it
-
+  SetTrigIdFilter(0);
   return kStOk;
 }
 
@@ -132,9 +132,10 @@ void StAdcPedHistoMaker::HistoAna(){
     emc->getEndcapTowerADC(i,val,sec,sub,eta);
     const EEmcDbItem *x=mEeDb -> getTile(sec,'A'+sub-1,eta,'T');
     if(x==0) continue;
-    if( l1trig.isTrigger(15007)) hPix[x->key]->Fill(val);
+    if( trigID && !l1trig.isTrigger(trigID)) continue;
+    hPix[x->key]->Fill(val);
   }
-
+  
   //.........................  P R E - P O S T .....................  
   int pNh= emc->getNEndcapPrsHits();
   for (int i=0; i < pNh; i++) {
@@ -145,7 +146,8 @@ void StAdcPedHistoMaker::HistoAna(){
     //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
     const EEmcDbItem *x=mEeDb -> getTile(sec,sub-1+'A', eta, pre-1+'P');
     if(x==0) continue;
-    if( l1trig.isTrigger(15007)) hPix[x->key]->Fill(val);
+    if( trigID && !l1trig.isTrigger(trigID)) continue;
+    hPix[x->key]->Fill(val);
   }
 
   //........................... S M D ................................
@@ -158,7 +160,8 @@ void StAdcPedHistoMaker::HistoAna(){
       float val=hit->getAdc();
       const EEmcDbItem *x=mEeDb -> getByStrip(sec,uv,strip);
       assert(x); // it should never happened for muDst
-      if( l1trig.isTrigger(15007)) hPix[x->key]->Fill(val);
+      if( trigID && !l1trig.isTrigger(trigID)) continue;
+      hPix[x->key]->Fill(val);
     }
   }
 

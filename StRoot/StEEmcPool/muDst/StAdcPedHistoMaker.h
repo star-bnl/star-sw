@@ -29,6 +29,7 @@ class TH2F;
 class StAdcPedHistoMaker : public StMaker
 {
   TObjArray  *HList; /// output histo access point
+  int trigID;
 
  public:
 
@@ -45,7 +46,7 @@ class StAdcPedHistoMaker : public StMaker
   virtual Int_t Make();
   void  Clear( Option_t *opts = "" );
   void initHisto();
-    
+  void  SetTrigIdFilter(int x) { trigID=x;}
 
   //Histogram
   void SetHList(TObjArray * x){HList=x;}
