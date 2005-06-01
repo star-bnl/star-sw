@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.63 2005/05/24 18:54:03 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.64 2005/06/01 20:52:53 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.64  2005/06/01 20:52:53  perev
+ * Workaround for new version TMatrix
+ *
  * Revision 1.63  2005/05/24 18:54:03  jhthomas
  * Add 3DGridLeak distortion correction and utilities to support it.
  *
@@ -2186,7 +2189,8 @@ Float_t StMagUtilities::Interpolate2DTable( const Float_t x, const Float_t y, co
 
   for ( Int_t j = jlow ; j < jlow + ORDER + 1 ; j++ )
     {
-      save_Array[j-jlow]  = Interpolate( &YV[klow], &Array(j,klow) , ORDER, y )   ;
+      Float_t *ajkl = &((TMatrix&)Array)(j,klow);
+      save_Array[j-jlow]  = Interpolate( &YV[klow], ajkl , ORDER, y )   ;
     }
 
   return( Interpolate( &XV[jlow], save_Array, ORDER, x ) )   ;
