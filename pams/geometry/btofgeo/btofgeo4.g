@@ -1,7 +1,10 @@
-* $Id: btofgeo4.g,v 1.2 2005/05/23 14:56:16 llope Exp $
+* $Id: btofgeo4.g,v 1.3 2005/06/01 21:16:00 llope Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo4.g,v $
+* Revision 1.3  2005/06/01 21:16:00  llope
+* includes jings bugfixes and updates for run-5
+*
 * Revision 1.2  2005/05/23 14:56:16  llope
 * removed unneeded Dens=0.282 statements from honeycomb Material definitions
 *
@@ -349,7 +352,7 @@ Module  BTOFGEO4 is the Geometry of Barrel Trigger / Time Of Flight system
                   59.66, 65.98, 71.73, 78.09, 86.36, 92.02, 98.7, 104.28,
                   112.45,118.79,125.14,131.51,139.6,145.96,152.32,158.68,
 			      167.41,173.78,180.18,186.6,195.53,202.01,208.52,215.06 } ! mrpc Zposns
-         mrpcX = { 1.61, 4,44, 1.61, 5.49, 2.0, 3.54, 5.02, 2.01,
+         mrpcX = { 1.61, 4.44, 1.61, 5.49, 2.0, 3.54, 5.02, 2.01,
                    3.36, 5.02, 2.0, 3.56, 5.02, 2.0, 5.02, 2.0,
                    2.63, 3.09, 3.6, 4.11, 3.83, 4.06, 4.21, 4.34,
 				   3.85, 3.85, 3.85, 3.85, 3.72, 3.72, 3.72, 3.72} ! mrpc Xposns
@@ -384,7 +387,9 @@ Module  BTOFGEO4 is the Geometry of Barrel Trigger / Time Of Flight system
          FEEH   =  0.15   ! tofr fee pcb thickness
          HBWid  =  0.635  ! the slim honeycomb support box width
          NGap   = 6       ! Number of gaps in MRPC
-         TrayEdgeZ = 6.0*2.54+1.0   ! tray posn along rail wrt TPC centerplane (Z)
+*         TrayEdgeZ = 6.0*2.54+1.0   ! tray posn along rail wrt TPC centerplane (Z)
+*         TrayEdgeZ = 18.737   ! tray posn along rail wrt TPC centerplane (Z)
+         TrayEdgeZ = 13.25  !tray posn along rail wrt TPC centerplane (Z).Liuj puts this new value 
       EndFill
 
 *         NPad   = 6       ! Number of pads within a MRPC
@@ -674,11 +679,12 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
       enddo
     elseif (tof==4) then
       z0 = tray_Length/2 - 0.05 - mod5_TrayEdgeZ
-      x0 = -3.66
+*      x0 = -3.66
+      x0 = -3.90   ! liuj puts this new value
       do i=1,32
-         Position BRMD  X=x0+mod4_mrpcX(i) ,
-                                 Z=z0-mod4_mrpcZ(i) ,
-                                 alphay=mod4_mrpcA(i)
+         Position BRMD  X=x0+mod5_mrpcX(i) ,
+                        Z=z0-mod5_mrpcZ(i) ,
+                        alphay=mod5_mrpcA(i)
       enddo
 
 
