@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.82 2005/05/31 16:47:56 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.83 2005/06/02 17:27:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.83  2005/06/02 17:27:41  perev
+ * More weak assert in nudge()
+ *
  * Revision 2.82  2005/05/31 16:47:56  perev
  * technical reorganization
  *
@@ -880,8 +883,9 @@ int StiKalmanTrackNode::nudge(StiHit *hit)
   if (fabs(sCA2)>0.95) 		return -7;
   double cCA2= sqrt((1.-sCA2)*(1.+sCA2));
   if (cCA2 <  0.2) 		return -8;
+  if (cCA2 >  1.0) 		cCA2 = 1.;
   double deltaY = deltaX*(mFP._sinCA+sCA2)/(mFP._cosCA+cCA2);
-  double deltaL = deltaX*mFP._cosCA+deltaY*mFP._sinCA;
+  double deltaL = deltaX*mFP._cosCA + deltaY*mFP._sinCA;
   double sind = deltaL*mFP._curv;
   if (fabs(sind)<0.02) { deltaL = deltaL*(1.+sind*sind/6);}
   else                 { deltaL = asin(sind)/mFP._curv;       }
@@ -902,8 +906,8 @@ int StiKalmanTrackNode::nudge(StiHit *hit)
 
 
 //??  assert(fabs(mFP._sinCA-sin(mFP._eta))<1e-5);
-  assert(fabs(mFP._sinCA) < 1.);
-  assert(fabs(mFP._cosCA) < 1.);
+  assert(fabs(mFP._sinCA) <  1.);
+  assert(fabs(mFP._cosCA) <= 1.);
   mPP = mFP;
   _state = kTNNudEnd;
   return 0;
