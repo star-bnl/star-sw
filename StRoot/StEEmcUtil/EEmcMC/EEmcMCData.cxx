@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.11 2004/04/08 21:34:55 perev Exp $
+// $Id: EEmcMCData.cxx,v 1.12 2005/06/03 19:19:48 balewski Exp $
 
 #include "StEventTypes.h"
 
@@ -68,13 +68,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
   St_g2t_emc_hit *emc_hit    = NULL; // tower hits
   St_g2t_emc_hit *smd_hit    = NULL; // smd hits
   g2t_event_st   *event_head = NULL; // g2t event header
-  
-  int err=0;
-
-  mLastHit  = 0;
-  memset(mHit,0x0,sizeof(struct EEmcMCHit)*mSize); 
-
-  
+    
   // get info from event header
   if( (g2t_event=(St_g2t_event *) myMk->GetDataSet("g2t_event")) == NULL ) 
     throw EEmcException1(kEEmcMCMissingEventHeader,"missing MC event header");
@@ -83,9 +77,25 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
     throw EEmcException1(kEEmcMCMissingEventHeader,"missing MC event header table");
 
   mEventID=event_head->n_event;
+  emc_hit = (St_g2t_emc_hit *) myMk->GetDataSet("g2t_eem_hit");
+  smd_hit = (St_g2t_emc_hit *) myMk->GetDataSet("g2t_esm_hit");
+  unpackGeantHits(emc_hit, smd_hit);
+  return  mLastHit;
+  
+}
 
-  // get tower data
-  if( (emc_hit = (St_g2t_emc_hit *) myMk->GetDataSet("g2t_eem_hit")) !=NULL ) {
+
+//-------------------------------------------------------------------------
+// deal with GEANT volume ID mess
+//-------------------------------------------------------------------------
+void               
+EEmcMCData::unpackGeantHits(St_g2t_emc_hit* emc_hit, St_g2t_emc_hit* smd_hit ){
+  int err=0;
+  mLastHit  = 0;
+  memset(mHit,0x0,sizeof(struct EEmcMCHit)*mSize); 
+
+ // get tower data
+  if( emc_hit !=NULL ) {
     Int_t     nhits      = emc_hit->GetNRows();
     if(nhits<=0) { 
       Warning("readEventFromChain","no tower hits (%d)",nhits);
@@ -140,6 +150,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       mHit[mLastHit].tower.ssec  = ssec;
       mHit[mLastHit].tower.eta   = eta;
       mHit[mLastHit].de          = hit->de;
+      mHit[mLastHit].track_p     = hit->track_p;
       mLastHit++;
       // printf("depth=%d nH=%d\n",depth,mLastHit);
 
@@ -152,7 +163,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
  skipTower:
 
   // get smd data
-  if( (smd_hit = (St_g2t_emc_hit *) myMk->GetDataSet("g2t_esm_hit")) != NULL ) {
+  if( smd_hit != NULL ) {
     Int_t nhits         = smd_hit->GetNRows();
 
     if(nhits<=0) { 
@@ -225,6 +236,7 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       mHit[mLastHit].sector   = sec;
       mHit[mLastHit].strip    = strip;
       mHit[mLastHit].de       = hit->de;
+      mHit[mLastHit].track_p     = hit->track_p;
 
       mLastHit++;
       if(mLastHit>=mSize && !expandMemory() ) 
@@ -233,13 +245,13 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
   }
 
  done:
-  return mLastHit;
+  return ;
 
  crash: 
-  printf("\n\n==============================\nEEmcMCData::readEventFromChain() Fatal error while decoding .fzd hits for EEMC err=%d,\n all EEMC data erased from StEvent\n=====================================\n",err);
+  printf("\n\n==============================\nEEmcMCData::readEventFromChain() Fatal error while decoding .fzd hits for EEMC err=%d,\n all EEMC data erased \n=====================================\n",err);
   mLastHit  = 0;
   memset(mHit,0x0,sizeof(struct EEmcMCHit)*mSize); 
-  return mLastHit;
+  return;
 
 }
 
@@ -277,7 +289,7 @@ EEmcMCData::setHitArray(EEmcMCHit *h, Int_t size)
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 void
-EEmcMCData::print()
+EEmcMCData::print() 
 {
   TString detName;
   Int_t   detId;
@@ -301,11 +313,11 @@ EEmcMCData::print()
     case kEEmcMCPreShower1Id:
     case kEEmcMCPreShower2Id:
     case kEEmcMCPostShowerId:
-      printf("%s sec=%2d sub=%c eta=%d de=%g\n",detName.Data(), h->sector,h->tower.ssec-1+'A',h->tower.eta,h->de); 
+      printf("%s sec=%2d sub=%c eta=%d de=%g tr_p=%d\n",detName.Data(), h->sector,h->tower.ssec-1+'A',h->tower.eta,h->de, h->track_p); 
       break;
     case kEEmcMCSmdUStripId:
     case kEEmcMCSmdVStripId:
-      printf("%s sec=%2d strip=%d de=%g\n",detName.Data(), h->sector,h->strip,h->de); 
+      printf("%s sec=%2d strip=%d de=%g tr_p=%d\n",detName.Data(), h->sector,h->strip,h->de, h->track_p); 
       break;
     default:
       cout << "**** WARNING **** detectorId=" << detId << " is unknown";
@@ -410,6 +422,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.12  2005/06/03 19:19:48  balewski
+// for embedding, GEANT unpcker was split on 2 parts
+//
 // Revision 1.11  2004/04/08 21:34:55  perev
 // Leak off
 //

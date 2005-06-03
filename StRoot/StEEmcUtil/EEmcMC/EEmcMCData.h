@@ -5,12 +5,129 @@
 #ifndef EEmcMCData_h
 #define EEmcMCData_h
 /*********************************************************************
- * $Id: EEmcMCData.h,v 1.4 2003/09/02 17:57:56 perev Exp $
+ * $Id: EEmcMCData.h,v 1.5 2005/06/03 19:19:48 balewski Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Monte Carlo Data
- *********************************************************************
+ *********************************************************************/
+#include "TObject.h"
+
+
+class   StMaker;
+
+class   St_g2t_emc_hit;
+class   St_g2t_event;
+
+class  EEeventDst;
+class  StMcEventMaker;
+
+const   Float_t kEEmcDefaultEnergyThreshold = 0.0005; // 0.5 MeV
+const   Int_t   kEEmcDefaultMCHitSize       = 0x1000; // 4k hitow
+
+
+enum EEmcVolId {
+  // for Tower
+  kEEmcTowerHalfId =  100000,
+  kEEmcTowerPhiId  =    1000,
+  kEEmcTowerEtaId  =      10,
+  kEEmcTowerDepId  =       1,
+  
+  // for SMDs
+  kEEmcSmdHalfId   = 1000000,
+  kEEmcSmdPhiId    =   10000,
+  kEEmcSmdPlaneId  =    1000,
+  kEEmcSmdStripId  =        1
+};
+
+
+struct EEmcMCHitTower { 
+  UChar_t  ssec;  // endcap subsector  1:5 (A-E)
+  UChar_t  eta;   // endcap eta        1:12
+};
+
+
+struct EEmcMCHit {
+  UChar_t  detector;  // endcap detector part  (prs,tower,post,smdu,smdv)
+  UChar_t  sector;    // endcap phi sector 1:12
+  union {
+    EEmcMCHitTower tower;
+    UShort_t strip;   // smd's  strip numbers
+  };
+  Float_t  de;        // energy loss in the element (GeV)
+  int track_p;  // parent track for this hit- if aplicable
+};
+
+  
+
+class   EEmcMCData : public TObject {
+public:
+  enum MCDepth {          // FIXME LATER: depths encoded in g2t data
+    kUnknownDepth    = 0,
+    kPreShower1Depth = 1,
+    kPreShower2Depth = 2,
+    kTower1Depth     = 3,
+    kTower2Depth     = 4,
+    kPostShowerDepth = 5
+  };
+
+
+  enum MCDetectorId {
+    kEEmcMCUnknownId    = 0,
+    kEEmcMCTowerId      = 1,
+    kEEmcMCPreShower1Id = 2,
+    kEEmcMCPreShower2Id = 3,
+    kEEmcMCSmdUStripId  = 4,
+    kEEmcMCSmdVStripId  = 5,
+    kEEmcMCPostShowerId = 6
+  };
+
+
+  EEmcMCData();                              // default constructor
+  EEmcMCData( EEmcMCData& );                 // copy constructor
+  virtual ~EEmcMCData();                     // the destructor
+
+  Int_t      readEventFromChain(StMaker *mk); // reads g2t event from chain
+  
+  Int_t      getSize()            { return mSize;    };
+  Int_t      getLastHit()         { return mLastHit; }; 
+  Int_t      getEventID()         { return mEventID; }; 
+
+  Float_t    getEnergyThreshold() { return mEthr; };
+  void       setEnergyThreshold(Float_t e) { mEthr = e; };
+
+  Int_t      getHitArray(EEmcMCHit *h, Int_t size);
+  Int_t      setHitArray(EEmcMCHit *h, Int_t size);
+
+  void       print();                                      // diagnostic print
+  void unpackGeantHits(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd);
+  const struct EEmcMCHit * getGeantHits(int &nHit){ nHit=mLastHit; return mHit;}
+
+  // obsolete functions
+  Int_t    read     (void *d, int s);   // reads  in  s bytes of hits 
+  Int_t    write    (void *d, int s);   // writes out s bytes of hits 
+  Int_t    write    (EEeventDst *);        // export hits to TTree
+
+protected:
+  Int_t             mEventID;  // WARN: not added in to binary I/O, JB
+  struct EEmcMCHit *mHit ;     // array to hold hit data
+  Int_t             mSize;     // size of the above array
+  Int_t             mLastHit;  // last hit index
+  Float_t           mEthr;     // energy threshold
+  
+private:
+  //Float_t          *mDE; // temporary array
+  Int_t             expandMemory();
+  
+  ClassDef(EEmcMCData,2) // Endcap Emc event
+};
+
+#endif
+
+/*
  * $Log: EEmcMCData.h,v $
+ * Revision 1.5  2005/06/03 19:19:48  balewski
+ * for embedding, GEANT unpcker was split on 2 parts
+ *
  * Revision 1.4  2003/09/02 17:57:56  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -56,113 +173,3 @@
  * Imported sources
  *
  *********************************************************************/
-#include "TObject.h"
-//#include "EEmcException.h"
-
-class   StMaker;
-
-class   St_g2t_emc_hit;
-class   St_g2t_event;
-
-class   EEeventDst;
-//class   EEmcException1;
-
-const   Float_t kEEmcDefaultEnergyThreshold = 0.0005; // 0.5 MeV
-const   Int_t   kEEmcDefaultMCHitSize       = 0x1000; // 4k hitow
-
-
-enum EEmcVolId {
-  // for Tower
-  kEEmcTowerHalfId =  100000,
-  kEEmcTowerPhiId  =    1000,
-  kEEmcTowerEtaId  =      10,
-  kEEmcTowerDepId  =       1,
-  
-  // for SMDs
-  kEEmcSmdHalfId   = 1000000,
-  kEEmcSmdPhiId    =   10000,
-  kEEmcSmdPlaneId  =    1000,
-  kEEmcSmdStripId  =        1
-};
-
-
-struct EEmcMCHitTower { 
-  UChar_t  ssec;  // endcap subsector  1:5 (A-E)
-  UChar_t  eta;   // endcap eta        1:12
-};
-
-
-struct EEmcMCHit {
-  UChar_t  detector;  // endcap detector part  (prs,tower,post,smdu,smdv)
-  UChar_t  sector;    // endcap phi sector 1:12
-  union {
-    EEmcMCHitTower tower;
-    UShort_t strip;   // smd's  strip numbers
-  };
-  Float_t  de;        // energy loss in the element (GeV)
-};
-
-  
-
-class   EEmcMCData : public TObject {
-public:
-  enum MCDepth {          // FIXME LATER: depths encoded in g2t data
-    kUnknownDepth    = 0,
-    kPreShower1Depth = 1,
-    kPreShower2Depth = 2,
-    kTower1Depth     = 3,
-    kTower2Depth     = 4,
-    kPostShowerDepth = 5
-  };
-
-
-  enum MCDetectorId {
-    kEEmcMCUnknownId    = 0,
-    kEEmcMCTowerId      = 1,
-    kEEmcMCPreShower1Id = 2,
-    kEEmcMCPreShower2Id = 3,
-    kEEmcMCSmdUStripId  = 4,
-    kEEmcMCSmdVStripId  = 5,
-    kEEmcMCPostShowerId = 6
-  };
-
-
-  EEmcMCData();                              // default constructor
-  EEmcMCData( EEmcMCData& );                 // copy constructor
-  virtual ~EEmcMCData();                     // the destructor
-
-  Int_t      readEventFromChain(StMaker *mk); // reads g2t event from chain
-  
-  Int_t      getSize()            { return mSize;    };
-  Int_t      getLastHit()         { return mLastHit; }; 
-  Int_t      getEventID()         { return mEventID; }; 
-
-  Float_t    getEnergyThreshold() { return mEthr; };
-  void       setEnergyThreshold(Float_t e) { mEthr = e; };
-
-  Int_t      getHitArray(EEmcMCHit *h, Int_t size);
-  Int_t      setHitArray(EEmcMCHit *h, Int_t size);
-
-  void       print();                                      // diagnostic print
-
-  // obsolete functions
-  Int_t    read     (void *d, int s);   // reads  in  s bytes of hits 
-  Int_t    write    (void *d, int s);   // writes out s bytes of hits 
-  Int_t    write    (EEeventDst *);        // export hits to TTree
-  
-protected:
-  Int_t             mEventID;  // WARN: not added in to binary I/O, JB
-  struct EEmcMCHit *mHit ;     // array to hold hit data
-  Int_t             mSize;     // size of the above array
-  Int_t             mLastHit;  // last hit index
-  Float_t           mEthr;     // energy threshold
-  
-private:
-  //Float_t          *mDE; // temporary array
-  Int_t             expandMemory();
-  
-  ClassDef(EEmcMCData,2) // Endcap Emc event
-};
-
-#endif
-
