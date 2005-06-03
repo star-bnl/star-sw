@@ -142,8 +142,11 @@ void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
   TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);  
   c->Draw();  c->cd();
   c->Divide(2,2);
-  char *name[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
- 
+  char *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
+  char *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
+  // printf("m=%p\n",m);
+  char **name=name1;
+  if(m==0) name=name2; // dirty trick, JB
   int i;
   for(i=0;i<4;i++) {
     // printf("%d %s\n",i,name[i]);
@@ -158,20 +161,13 @@ void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
   }
   // extra steps
   if(h[2]) {
-    h[2]->SetAxisRange(0.5,6.4);
-    h[2]->SetMinimum(0.);
-    int ib= h[2]->GetMaximumBin();
-    float yMax=h[2]->GetBinContent(ib);
-    ib= h[2]->GetMinimumBin();
-    float yMin=h[2]->GetBinContent(ib);
-    float r=0,er=0;
-    if(yMin>0) {
-      r=yMax/yMin;
-      er=r*sqrt(1/yMax + 1/yMin);
-    }
-    printf("JP max/min=%.2f +/- %.2f  (max=%.0f min=%.0f)\n",r,er,yMax, yMin);
+    eeJpQaMinMax(h[2]);
+  }
+  if(h[1]) {
+    eeJpQaMinMax(h[1]);
   }
   
+  if(m==0) return;
   if(h[3] && h[1]) {// start counting hot towers
     TH1* H4jpHot=h[3];
     H4jpHot->Reset(); // should be here, but online works w/o it 
@@ -196,7 +192,6 @@ void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
 	if(hx->GetBinContent(k)<10*yM) continue;
 	if(m->crCh[cr-1][k-1]) continue; // ignore masked channels
 	printf(" hot cr=%d ch=%d val=%f\n",cr,k-1,hx->GetBinContent(k));
-	
 	H4jpHot->Fill(cr);
       }
     }
@@ -806,4 +801,22 @@ void addJPphiLimits(TH1 *h){
     Lx->Add(tt);
   }
  
+}
+
+//--------------------------------------
+//--------------------------------------
+void eeJpQaMinMax(TH1 *hh) {
+    hh->SetAxisRange(0.5,6.4);
+    hh->SetMinimum(0.);
+    int ib= hh->GetMaximumBin();
+    float yMax=hh->GetBinContent(ib);
+    ib= hh->GetMinimumBin();
+    float yMin=hh->GetBinContent(ib);
+    float r=0,er=999;
+    if(yMin<=0) yMin=1;
+    if(yMax<=0) yMax=1;    
+    r=yMin/yMax;
+    er=r*sqrt(1/yMax + 1/yMin);
+    printf("JP min/max=%.2f +/- %.2f  (min=%.0f max=%.0f) \"%s\"\n",r,er,yMin, yMax,hh->GetTitle());
+    printf("#JP %.2f %.2f %.0f %.0f :%s\n",r,er,yMin, yMax,hh->GetTitle());
 }

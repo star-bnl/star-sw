@@ -59,9 +59,10 @@ void eeTrigJPfreq(FileType *fd, TPad *c);
 void eeTrigAdjJPsum(FileType *fd, TPad *c, char *);
 void eeTrigAdjJPcor(FileType *fd, TPad *c, char *);
 
-void  useTwMask(char *fname, EemcTwMask *m);
+void useTwMask(char *fname, EemcTwMask *m);
 
 //utility
 void addJPphiLimits(TH1 *h);
+void eeJpQaMinMax(TH1 *hh);
 
 //--

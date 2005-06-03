@@ -6,7 +6,7 @@ EemcTwMask *mm;
 
 //==========================
 //==========================
-void plPanitkin(TString fname="eemcQA.hist.root") {
+void plPanitkin(TString fname="eemcQA.hist.root", int flag=0) {
   gROOT -> LoadMacro("StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.h");
   gROOT -> LoadMacro("StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.cxx");
  
@@ -15,6 +15,10 @@ void plPanitkin(TString fname="eemcQA.hist.root") {
 
   printf("input Histo=%s=\n",fname.Data());  
   fd=new TFile(fname);
+  if(!fd->IsOpen()) {
+    printf(" faild to open file=%s=, exit\n",fname.Data()); 
+    return;  
+  }
   assert(fd->IsOpen());
 
   // j1(); return;
@@ -40,14 +44,10 @@ void plPanitkin(TString fname="eemcQA.hist.root") {
   pd1 = new TPad("pad1", "apd1",0.0,0.0,1,.95);
   pd1->Draw();
 
-  printf(" Ready. Type: plTw(1) ,...  plSmd(1) ,... plDSM(1) ,...  plAllps() \n");
+  printf(" Ready. Type: plTw(1) ,...  plSmd(1) ,... plDSM(1) ,...  plAllps()  flag=%d\n",flag);
 
-#if 0
-  EemcTwMask tt;
-  mm=&tt;
-  useTwMask("eemcTwMask.dat", mm); 
-  printf(" nMask=%d,  %d %d\n",mm->nMask,mm->crCh[1][1],mm->crCh[1][2] );
-#endif
+  if(flag==1) plTw(1);
+
   //plSummary();
   //  plTw(1);
   //  pd1->Print("tw.ps");
@@ -75,6 +75,7 @@ void plDSM(int panel=1) {
   pd1->Clear();
   eePlot(12,panel,fd,pd1);
 }
+
 
 
 //=========================
@@ -106,11 +107,25 @@ void plAll() {
   plSmd(7) ; pr("smd10-11");
 }
 
+
 void pr(TString core) {
   cc->Print(core+".ps");
   //
 }
 
+
+void plAllDsm(char  *path) {
+  int i;
+  for(i=1;i<=11;i++) {
+     plDSM(i); 
+     TString nn=path;
+     nn+="fig-dsm";
+     char bb='a'+i;
+     nn+=bb;
+     cc->Print(nn+".ps");
+  }
+
+}
 
 void plAllps() {
   // int nPan[3]={5,12,11};
