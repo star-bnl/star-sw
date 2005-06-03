@@ -1,29 +1,5 @@
-// $Id: StEEmcFastMaker.h,v 1.5 2004/05/26 21:28:37 jwebb Exp $
-// $Log: StEEmcFastMaker.h,v $
-// Revision 1.5  2004/05/26 21:28:37  jwebb
-// o Changes to StEEmcFastMaker to provide methods to get sampling fraction,
-//   gains, etc...
-//
-// o StMuEEmcSimuMaker is now just a shell of its former self
-//
-// o Added StMuEEmcSimuReMaker.  This maker takes a muDst as input, and uses
-//   the database maker to "massage" the ADC response, to better simulate
-//   the calorimeter as installed.  For now, it simply uses the geant
-//   energy response, combined with a single sampling fraction and the
-//   database gains and pedestals to come up with a new ADC response.
-//
-// Revision 1.4  2004/04/08 21:33:49  perev
-// Leak off
-//
-// Revision 1.3  2003/09/10 19:47:08  perev
-// ansi corrs
-//
-// Revision 1.2  2003/02/20 05:15:51  balewski
-// *** empty log message ***
-//
-// Revision 1.1  2003/01/28 23:12:59  balewski
-// star
-//
+// $Id: StEEmcFastMaker.h,v 1.6 2005/06/03 19:20:47 balewski Exp $
+
 
 /* \class StEEmcFastMaker        
 \author Jan Balewski
@@ -97,11 +73,13 @@ www.star.bnl.gov/STAR/eemc -->How To
 class EEeventDst;
 class StEvent;
 class EEmcMCData;
+class StEmcCollection;
 
-/* Translation of StEvent names:  EEMC -->BEMC
+/* Translation of StEmcCollection names:  EEMC -->BEMC
 
   WARN: preserve sub<16=2^4, eta<512=2^9, mod<128=2^7
 
+ Jan
 */
 
 
@@ -125,8 +103,7 @@ class StEEmcFastMaker : public StMaker {
   EEmcMCData  *mevIN; ///< decoded raw .fzd event
   EEeventDst *meeve;    ///<  result stored in TTRee 
 
-  void mEE2ST(EEeventDst*, StEvent*); ///< TTree-->StEvent
-  void mST2EE(EEeventDst*, StEvent*); ///< StEvent -->TTree
+  void mEE2ST(EEeventDst*, StEmcCollection* emcC); ///< TTree-->StEvent
 
   int mdbg;
   float msamplingFraction; ///< for Towers
@@ -134,13 +111,14 @@ class StEEmcFastMaker : public StMaker {
   float mfixPgain; ///< (adc=g*de ) fixed gain for pre/post shower
   float mfixSMDgain; ///< (adc=g*de ) fixed gain for SMD
 
-  StEvent *mlocalStEvent; ///< for test only
+  StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
+  bool mEmcCollectionIsLocal;
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.5 2004/05/26 21:28:37 jwebb Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.6 2005/06/03 19:20:47 balewski Exp $";
   
  protected:
  public: 
-  StEEmcFastMaker(const char *name="EEmcFastEvent");
+  StEEmcFastMaker(const char *name="EEmcFastSim");
   virtual       ~StEEmcFastMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
@@ -149,9 +127,11 @@ class StEEmcFastMaker : public StMaker {
   void SetLocalStEvent();
   void SetDbg(int k){mdbg=k;}
   void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
+  void SetEmcCollectionLocal(bool x=true){mEmcCollectionIsLocal=x;}
+  StEmcCollection * GetEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.5 2004/05/26 21:28:37 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.6 2005/06/03 19:20:47 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -161,9 +141,31 @@ class StEEmcFastMaker : public StMaker {
 #endif
 
 
-
-
-
-
-
-
+// $Log: StEEmcFastMaker.h,v $
+// Revision 1.6  2005/06/03 19:20:47  balewski
+// *** empty log message ***
+//
+// Revision 1.5  2004/05/26 21:28:37  jwebb
+// o Changes to StEEmcFastMaker to provide methods to get sampling fraction,
+//   gains, etc...
+//
+// o StMuEEmcSimuMaker is now just a shell of its former self
+//
+// o Added StMuEEmcSimuReMaker.  This maker takes a muDst as input, and uses
+//   the database maker to "massage" the ADC response, to better simulate
+//   the calorimeter as installed.  For now, it simply uses the geant
+//   energy response, combined with a single sampling fraction and the
+//   database gains and pedestals to come up with a new ADC response.
+//
+// Revision 1.4  2004/04/08 21:33:49  perev
+// Leak off
+//
+// Revision 1.3  2003/09/10 19:47:08  perev
+// ansi corrs
+//
+// Revision 1.2  2003/02/20 05:15:51  balewski
+// *** empty log message ***
+//
+// Revision 1.1  2003/01/28 23:12:59  balewski
+// star
+//

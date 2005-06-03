@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.13 2004/10/20 22:46:36 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.14 2005/06/03 19:20:47 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -19,20 +19,18 @@
 
 
 ClassImp(StEEmcFastMaker)
-//--------------------------------------------
 
-void StEEmcFastMaker::Clear(Option_t *)
-{
+//--------------------------------------------
+void 
+StEEmcFastMaker::Clear(Option_t *) {
   meeve->Clear();
   StMaker::Clear();
-}	
+}
+
 //--------------------------------------------
-
-StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name)
-{
+StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   /// Class Constructor.  
-
-  mlocalStEvent=0;
+  SetEmcCollectionLocal(false);
   mdbg=0;
   mevIN= new EEmcMCData;
   meeve=new EEeventDst;
@@ -46,7 +44,7 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name)
   //-- in a chain before any analysis on Monte Carlo is performed.
   //-- 
   //--
-  msamplingFraction=0.05;
+  msamplingFraction=0.05; 
   // towers are gain matched to fixed E_T
   maxAdc=4095;
   maxEtot=60;  // in GeV
@@ -71,14 +69,21 @@ StEEmcFastMaker::~StEEmcFastMaker(){
  delete  mevIN;
  delete  meeve;
  delete [] mfixTgain;
+ if(mEmcCollectionIsLocal){
+    mLocalStEmcCollection->Clear();
+    delete mLocalStEmcCollection;
+ }
 }
 
 //--------------------------------------------
 //--------------------------------------------
 //--------------------------------------------
-Int_t StEEmcFastMaker::Init(){
+Int_t 
+StEEmcFastMaker::Init(){
   printf("\n\n%s::Init() \n\n",GetName());
-
+  if(mEmcCollectionIsLocal) { // special use
+    printf("%s::Init() use local EmcCollection\n",GetName());
+  }  
   // Create tables
   // Create Histograms    
    return StMaker::Init();
@@ -87,10 +92,11 @@ Int_t StEEmcFastMaker::Init(){
 //--------------------------------------------
 //--------------------------------------------
 //--------------------------------------------
-Int_t StEEmcFastMaker::Make(){
+Int_t 
+StEEmcFastMaker::Make(){
   
   static int first=1;
-  printf("%s::Make()\n",GetName());
+  printf("%s::Make(), mEmcCollectionIsLocal=%d\n",GetName(),mEmcCollectionIsLocal);
   meeve->clear();
   
   int nh=-1;
@@ -102,7 +108,6 @@ Int_t StEEmcFastMaker::Make(){
     printf("%s  no geant EEMC hits found\n",GetName());
     return kStOK;
   }
-
   
   EEeventDst eeveRaw;    // raw M-C hits 
   
@@ -112,31 +117,24 @@ Int_t StEEmcFastMaker::Make(){
   
   eeveRaw.sumRawMC(meeve); //sum hits with any detector
   if(mdbg){  printf("%s::  summed eeve.print():\n",GetName());meeve->print();}
-   
-  StEvent *stevent = mlocalStEvent;
-  if(stevent==0) {
-    //printf("Access full StEvent ...\n");
-    stevent =   (StEvent *) (StEvent *) GetInputDS("StEvent");
-    assert(stevent); // do sth to provide StEvent first   
-  }  
- 
-  if(stevent->emcCollection()==0) {
-    stevent->setEmcCollection(new StEmcCollection());
-    gMessMgr->Message("","W") << GetName()<<"::Make() has added a non existing StEmcCollection()"<<endm;
-  }
-  
-  //  SetDumEE(eeve);
 
-  mEE2ST(meeve, stevent);
-  
-  if(mdbg>2) { // test copying back 
-    EEeventDst eeve2;   // after EE2St and ST2EE
-    mST2EE(&eeve2, stevent);  
-    printf( "***** before\n");
-    meeve->print();
-    printf( "***** after\n");
-    eeve2.print();
-  }
+  StEmcCollection *emcColl=0;
+  if(mEmcCollectionIsLocal) { // special use
+    mLocalStEmcCollection=new StEmcCollection();
+    gMessMgr->Message("","W") << GetName()<<"::Make() use local EmcCollection, memory leak ~1MB/event !!!!, Jan  "<<endm;
+    emcColl=mLocalStEmcCollection;
+  } else { // standard action
+    StEvent *stevent =   (StEvent *) (StEvent *) GetInputDS("StEvent");
+    assert(stevent); // do sth to provide StEvent first       
+    emcColl=stevent->emcCollection();
+    if(emcColl==0) {
+      emcColl=new StEmcCollection();
+      stevent->setEmcCollection(emcColl);
+      gMessMgr->Message("","W") << GetName()<<"::Make() has added a non existing StEmcCollection()"<<endm;
+    }
+  }  
+
+  mEE2ST(meeve, emcColl);
 
  return kStOK;
 }
@@ -145,24 +143,13 @@ Int_t StEEmcFastMaker::Make(){
 //--------------------------------------------
 //--------------------------------------------
 //--------------------------------------------
-void  StEEmcFastMaker::SetLocalStEvent(){
-  mlocalStEvent = new StEvent;
-  StEmcCollection* stemc = new StEmcCollection;
-  mlocalStEvent->setEmcCollection(stemc);
-}
-
-
-//--------------------------------------------
-//--------------------------------------------
-//--------------------------------------------
-void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
+void  
+StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
   int mxSector = kEEmcNumSectors;
-  assert(stevt); // fix dumm input
-  if(mdbg)printf("EE2ST() start %p\n",(void*)stevt);
-  eevt->print();
 
-  StEmcCollection* emcC =(StEmcCollection*)stevt->emcCollection();
-   if(mdbg)printf("EE2ST got emcCollection\n");
+  eevt->print();
+  assert(emcC);
+  if(mdbg)printf("EE2ST got emcCollection\n");
   
   for(int det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
       
@@ -265,79 +252,6 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 }
 
 
-//--------------------------------------------
-//--------------------------------------------
-//--------------------------------------------
-void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
-  printf("ST2EE: started\n");
-  printf("ST2EE: is not matched to EE2ST, fix the code first (J.B.)\n");
-  assert(1==2); // not working method, fix it if you need it
-  assert(stevt);
-  printf("ST2EE:found StEvent\n");
-  //  StTpcHitCollection* tpch = (StTpcHitCollection*)stevt->tpcHitCollection();
-  StEmcCollection* emcC =(StEmcCollection*)stevt->emcCollection();
-  assert(emcC);
-  printf("ST2EE:found EmcCollection\n");
-
-  evt->clear();
-  for(int det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
-    printf("ST2EE() det=%d \n",det);
-
-    StDetectorId id = StDetectorId(det);
-    StEmcDetector* d = emcC->detector(id);
-    if(d==0) {
-      printf("ST2EE() Found no detector collection, skipping id=%d\n",id);
-      continue;
-    }
-    printf("ST2EE() det=%d add_d=%p\n",det,(void*)d);
-
-    if(d->numberOfModules() < 1) {
-      printf("ST2EE() Found no modules in the detector collection, skipping id=%d\n",id);
-      continue;
-    }
-    for(unsigned int isec=0; isec<d->numberOfModules(); isec++){
-      StEmcModule* stmod =  d->module(isec);
-      if(stmod==0) { printf("ST2EE() couldn't get sector from StEvent, sector=%d\n",isec); continue;}
-      StSPtrVecEmcRawHit & h = stmod->hits();
-      if(h.size()>0){
-	EEsectorDst* sec = evt->getSec((int)isec);
-	if(sec==0) { 
-	  printf("ST2EE() couldn't find a sector from EEevent, Adding sector=%d\n",isec);
-	  sec = evt->addSectorDst(isec);
-	}
-	switch (det){
-	case kEndcapEmcTowerId:     
-	  for(unsigned int j=0; j<h.size() ;j++){
-	    printf("Tw  %c %d %f\n",h[j]->sub()+'A', h[j]->eta(),h[j]->energy());
-	    sec->addTwHit(h[j]->sub()+'A', h[j]->eta(),h[j]->energy());
-	  } break;
-	case kEndcapEmcPreShowerId: 
-	  for(unsigned int j=0; j<h.size() ;j++){
-	  int k = h[j]->sub();
-	  printf("Pre %d %d %f\n", k, h[j]->eta(),h[j]->energy());
-	  if(k<5)       { sec->addPre1Hit(k+'A',    h[j]->eta(),h[j]->energy()); } 
-	  else if(k<10) { sec->addPre2Hit(k-5+'A',  h[j]->eta(),h[j]->energy()); } 
-	  else          { sec->addPostHit(k-10+'A', h[j]->eta(),h[j]->energy()); } 
-	  } break;
-	case kEndcapSmdUStripId:
-	  for(unsigned int j=0; j<h.size() ;j++){
-	    printf("SmU %d %d %f\n",h[j]->eta(),h[j]->sub(),h[j]->energy());
-	    sec->addSmdUHit(h[j]->eta(), h[j]->energy());
-	  } break;
-	case kEndcapSmdVStripId:
-	  for(unsigned int j=0; j<h.size() ;j++){
-	    printf("SmV %d %d %f\n",h[j]->eta(),h[j]->sub(),h[j]->energy());
-	    sec->addSmdVHit(h[j]->eta(), h[j]->energy());
-	  } break;
-	default:
-	  assert(1==2);
-
-	}   
-      }
-    }
-  }
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -374,6 +288,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.14  2005/06/03 19:20:47  balewski
+// *** empty log message ***
+//
 // Revision 1.13  2004/10/20 22:46:36  balewski
 // add emcCollection if not exist
 //
