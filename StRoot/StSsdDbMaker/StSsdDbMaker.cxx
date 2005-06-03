@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.6 2005/05/10 12:48:06 reinnart Exp $
+// $Id: StSsdDbMaker.cxx,v 1.7 2005/06/03 21:30:41 perev Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.7  2005/06/03 21:30:41  perev
+// Move configuration Init()==>InitRun()
+//
 // Revision 1.6  2005/05/10 12:48:06  reinnart
 // The new StSsdDbMaker without DirectDataBase Access
 // 
@@ -59,22 +62,26 @@ Int_t StSsdDbMaker::Init()
   if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Init - Start - " << endm;
 
 
-  setSsdDb_Reader();
-  setSsdConfig();
-  readSsdConfig();   // read!
-  //  setSsdDimensions();
-  //  readSsdDimensions();
-  setSsdGeometry();
-  readSsdGeometry(); // read!
-
-
-  return StMaker::Init();
 
   gMessMgr->Info() << "StSsdDbMaker::Init() - Done - "<<endm;
+  return StMaker::Init();
+
 }
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::InitRun(int runumber)
 {
+static int once = 0;
+  if (!once) { //May be this "once" must be removed later (Victor)
+    once = 2005;
+    setSsdDb_Reader();
+    setSsdConfig();
+    readSsdConfig();   // read!
+    //  setSsdDimensions();
+    //  readSsdDimensions();
+    setSsdGeometry();
+    readSsdGeometry(); // read!
+  }
+  
   gMessMgr->Info() << "StSsdDbMaker::InitRun" << endm;
   gMessMgr->Info() << "StSsdDbMaker::readSsdGeometry done here " << endm;
 
@@ -89,8 +96,6 @@ void StSsdDbMaker::setSsdDb_Reader() // called in INIT
   m_Reader = new St_SsdDb_Reader();
   m_Reader->setDataBase(GetDataBase("Geometry/ssd"),0);
 
-  if(!m_Reader)
-    gMessMgr->Error() <<" m_Reader not defined........"<<endm;
 
   gMessMgr->Info() << " Finishing setSsdDirectDb_Reader..........."<<endm;
 }
@@ -117,7 +122,7 @@ void StSsdDbMaker::readSsdConfig()
 {      
   gMessMgr->Info() << " StSsdDbMaker::readSsdConfig - Start - " <<endm;
 
-  TObject* o;
+  TObject* o=0;
   if (m_Reader)
   {
     o = (TObject*)m_Reader->getConfiguration();
