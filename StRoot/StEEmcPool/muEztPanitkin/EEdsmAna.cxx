@@ -239,9 +239,10 @@ void EEdsmAna ::initHisto(){
     else  
       sprintf(tt2,"Emu Jet Patch sum >%d",thr[iJ]);
     //printf("iJ=%d name=%s tit=%s\n",iJ,tt1,tt2);
-    TH1F*h1=new TH1F(tt1,tt2,8,-.5,7.5);
+    TH1F*h1=new TH1F(tt1,tt2,6,0.5,6.5);
     h1->GetXaxis()->SetTitle("Jet Patch");
-    h1->GetYaxis()->SetTitle("Freq");
+    h1->GetYaxis()->SetTitle("Freq"); 
+    h1->SetFillColor(kBlue);
     H4jpFreq[iJ]=h1;
     HList->Add(h1);
   }
@@ -253,7 +254,7 @@ void EEdsmAna ::initHisto(){
     sprintf(tt1,"JP%d%d_sum",steve_jp,steve_jp2);
     sprintf(tt2,"Emulated Sum Jet Patches %d+%d",steve_jp,steve_jp2);
     //printf("iJ=%d name=%s tit=%s\n",iJ,tt1,tt2);
-    TH1F*h1=new TH1F(tt1,tt2,250,-.5,999.5);
+    TH1F*h1=new TH1F(tt1,tt2,200,49.5,249.5);
     h1->GetXaxis()->SetTitle("Jet Patch Emu Sum");
     h1->GetYaxis()->SetTitle("Freq");
     H4adjpSums[iJ]=h1;
@@ -541,9 +542,10 @@ void EEdsmAna::histoDsm1(){
     j=(i+1)%EEnJetPatch;
     //printf("histog i=%d j=%d  \n",i,j);
     H4adjPcor[i]->Fill(ee1outJPadc[i],ee1outJPadc[j]);
+    H4adjpSums[i]->Fill(AdjJPsum[i]);
+
     if (JPtrig[i]>0 && JPtrig[j]>0){  //Both patches over th0
       H4adjpFreq->Fill(steve_jp);
-      H4adjpSums[i]->Fill(AdjJPsum[i]);
     }
   }
 }
