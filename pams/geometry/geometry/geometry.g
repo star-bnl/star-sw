@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.110 2005/05/26 16:03:31 potekhin Exp $
+* $Id: geometry.g,v 1.111 2005/06/03 15:54:43 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.111  2005/06/03 15:54:43  potekhin
+* As agreed with all parties, we would like to run the 2004 simulation
+* with  improved geometry. In particular, the pp physics groups are calling
+* for an updated version of Y2003X (full calorimeter). We have no other
+* option but to create a new tag, Y2004Y, to reflect that.
+*
 * Revision 1.110  2005/05/26 16:03:31  potekhin
 * a) As advertised before, removed the various Year 1 tags,
 * as they were taking space and weren't used anymore
@@ -1061,6 +1067,70 @@ If LL>1
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 2;
+                }
+
+****************************************************************************************
+  on Y2004Y    { same as Y2004X but with the SVT chip correction+cone+better SSD+TPC backplane+FTRO
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+* note the full barrel same as in y2003x:
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+* Above:  Ar+C02 in ftpc
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 22;
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+
                 }
 
 ****************************************************************************************
