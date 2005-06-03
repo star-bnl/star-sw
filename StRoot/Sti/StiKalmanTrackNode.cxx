@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.83 2005/06/02 17:27:41 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.84 2005/06/03 19:57:04 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.84  2005/06/03 19:57:04  perev
+ * Bug fix, violation of array size
+ *
  * Revision 2.83  2005/06/02 17:27:41  perev
  * More weak assert in nudge()
  *
@@ -408,8 +411,8 @@ void StiKalmanTrackNode::get(double& alpha,
 {
   alpha = _alpha;
   xRef  = _refX;
-  memcpy(x,&mFP,sizeof(mFP));
-  memcpy(e,&mFE,sizeof(mFE));
+  memcpy(x,&mFP._x,kNPars*sizeof(mFP._x));
+  memcpy(e,mFE.A,sizeof(mFE));
   chi2 = getChi2();
 }
 
