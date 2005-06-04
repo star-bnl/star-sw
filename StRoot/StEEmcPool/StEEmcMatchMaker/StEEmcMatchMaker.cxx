@@ -2,7 +2,7 @@
 Author Wei-Ming Zhang              KSU    4/27/2005
 An example maker to read maps from StEEmcAssociationMaker for efficiency study
 */
-
+#if 0
 #include <Stiostream.h>
 #include "StEventTypes.h"
 #include "StMcEventTypes.hh"
@@ -248,10 +248,14 @@ Int_t StEEmcMatchMaker::Finish()
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMatchMaker.cxx,v 1.1.1.1 2005/05/31 18:54:40 wzhang Exp $
+// $Id: StEEmcMatchMaker.cxx,v 1.2 2005/06/04 23:40:36 balewski Exp $
 // $Log: StEEmcMatchMaker.cxx,v $
+// Revision 1.2  2005/06/04 23:40:36  balewski
+// temporary disabled - it is Saturde evening - Jan
+//
 // Revision 1.1.1.1  2005/05/31 18:54:40  wzhang
 // First version
 //
 //
 ///////////////////////////////////////////////////////////////////////////
+#endif
