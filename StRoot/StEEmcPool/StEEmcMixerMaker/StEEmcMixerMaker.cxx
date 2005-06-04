@@ -1,3 +1,4 @@
+#if 0
 #include <stdlib.h>
 #include <string.h>
 #include "TFile.h"
@@ -711,10 +712,14 @@ void StEEmcMixerMaker::printHits(StEvent *event)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.1.1.1 2005/05/31 18:53:25 wzhang Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.2 2005/06/04 23:40:39 balewski Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.2  2005/06/04 23:40:39  balewski
+// temporary disabled - it is Saturde evening - Jan
+//
 // Revision 1.1.1.1  2005/05/31 18:53:25  wzhang
 // First version
 //
 //
 ///////////////////////////////////////////////////////////////////////////
+#endif
