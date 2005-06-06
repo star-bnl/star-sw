@@ -1,7 +1,11 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.15 2005/05/27 23:38:06 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.16 2005/06/06 19:15:07 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.16  2005/06/06 19:15:07  calderon
+ * Update for filling EEMC hits.  All filling now done in one function,
+ * StMcEventMaker::fillEemc(), towers, prs, smdu, smdv.
+ *
  * Revision 1.15  2005/05/27 23:38:06  calderon
  * Update of EEMC filling for eprs, esmdu and esmdv hits.
  *
@@ -86,7 +90,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.15 2005/05/27 23:38:06 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.16 2005/06/06 19:15:07 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -104,7 +108,6 @@ public:
     Bool_t  doUseTofp;             //!
     Bool_t  doUseTof;              //!
     Bool_t  doUseEemc;             //!
-    Bool_t  doUseEsmd;             //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
     Bool_t  doUseFst;              //!
@@ -115,8 +118,7 @@ public:
 protected:
     void   fillBemc(St_g2t_emc_hit*);
     void   fillBsmd(St_g2t_emc_hit*);
-    void   fillEemc(St_g2t_emc_hit*);
-    void   fillEsmd(St_g2t_emc_hit*);
+    void   fillEemc(St_g2t_emc_hit* g2t_tile,St_g2t_emc_hit* g2t_smd);
 
     void   printTrackInfo(StMcTrack*);
     void   printEventInfoForEmc(StMcEmcHitCollection*); 
@@ -131,7 +133,7 @@ private:
 #endif
     Bool_t drawinit;
     StMcEvent* mCurrentMcEvent; //!  This tells CINT not to parse it.
-    
+
     ClassDef(StMcEventMaker,0)
 
 };
