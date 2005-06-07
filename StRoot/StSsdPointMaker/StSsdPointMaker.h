@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.7 2005/04/25 14:13:24 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.8 2005/06/07 11:55:09 reinnart Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.8  2005/06/07 11:55:09  reinnart
+// Initrun and good database connection
+//
 // Revision 1.7  2005/04/25 14:13:24  bouchet
 // new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
 //
@@ -85,6 +88,7 @@ class StSsdPointMaker : public StMaker {
  private:
   StDbManager* mDbMgr;           //!
   StDbConfigNode* maccess;      //!
+  St_DataSet* DbConnector;
   St_sdm_calib_db       *m_noise;         //!< Pointer to the calib_db table (noise values) 
   St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
   St_sdm_condition_db   *m_condition_db;  //!< Pointer to the condition_db table (active/inactive strip)
@@ -158,12 +162,13 @@ class StSsdPointMaker : public StMaker {
                   StSsdPointMaker(const char *name="scm_spt");
    virtual       ~StSsdPointMaker();
    virtual Int_t  Init();
+   virtual Int_t  InitRun(int runumber);
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.7 2005/04/25 14:13:24 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.8 2005/06/07 11:55:09 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
