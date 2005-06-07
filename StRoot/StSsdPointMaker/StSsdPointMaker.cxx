@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.12 2005/06/07 11:55:08 reinnart Exp $
+// $Id: StSsdPointMaker.cxx,v 1.13 2005/06/07 12:04:46 reinnart Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.13  2005/06/07 12:04:46  reinnart
+// Make Stuff moved to Initrun
+//
 // Revision 1.12  2005/06/07 11:55:08  reinnart
 // Initrun and good database connection
 //
@@ -325,7 +328,30 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       St_DataSetIter local(svtparams);
       m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
 
-      cout << "----------------------------------------" << endl << "m_noise2: " << m_noise2 << endl;
+
+      // Get once the information for configuration, wafersposition and dimensions
+      St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration");
+      config  = (ssdConfiguration_st*) configTable->GetTable() ;
+      if (!config) 
+        gMessMgr->Error() << "No  access to ssdConfiguration database" << endm;
+  
+      St_ssdWafersPosition* positionTable = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
+      positionSize = 0;
+      position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
+      if (!position) 
+        gMessMgr->Error() << "No  access to ssdWafersPosition database" << endm;
+      else
+        positionSize= positionTable->GetNRows();
+
+      St_ssdDimensions* dimensionsTable = (St_ssdDimensions*) DbConnector->Find("ssdDimensions");
+      dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
+      if (!dimensions) 
+        gMessMgr->Error() << "No  access to ssdDimensions database" << endm;
+  
+      if ((!dimensions)||(!config)){
+        gMessMgr->Error() << "No geometry or configuration parameters " << endm;
+        return kStErr;
+      }
 
     }
   else // No access to databases -> read tables
@@ -384,29 +410,7 @@ Int_t StSsdPointMaker::Make()
   else              
     mSsdHitColl = 0;
 
-  St_DataSet *DbConnector = GetDataBase("Geometry/ssd");
-  St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration");
-  ssdConfiguration_st *config  = (ssdConfiguration_st*) configTable->GetTable() ;
-  if (!config) 
-    gMessMgr->Error() << "No  access to ssdConfiguration database" << endm;
-  
-  St_ssdWafersPosition* positionTable = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
-  int positionSize = 0;
-  ssdWafersPosition_st *position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
-  if (!position) 
-    gMessMgr->Error() << "No  access to ssdWafersPosition database" << endm;
-  else
-    positionSize= positionTable->GetNRows();
 
-  St_ssdDimensions* dimensionsTable = (St_ssdDimensions*) DbConnector->Find("ssdDimensions");
-  ssdDimensions_st *dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
-  if (!dimensions) 
-    gMessMgr->Error() << "No  access to ssdDimensions database" << endm;
-  
-  if ((!dimensions)||(!config)){
-    gMessMgr->Error() << "No geometry or configuration parameters " << endm;
-    return kStErr;
-  }
 
   cout<<"#################################################"<<endl;
   cout<<"####     START OF NEW SSD POINT MAKER        ####"<<endl;
