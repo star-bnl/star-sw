@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.13 2005/06/07 12:04:46 reinnart Exp $
+// $Id: StSsdPointMaker.cxx,v 1.14 2005/06/07 16:24:47 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.14  2005/06/07 16:24:47  lmartin
+// InitRun returns kStOk
+//
 // Revision 1.13  2005/06/07 12:04:46  reinnart
 // Make Stuff moved to Initrun
 //
@@ -361,7 +364,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
   
   // 		Create SCF histograms
 
-
+  return kStOk;
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Make()
