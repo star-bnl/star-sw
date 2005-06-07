@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.473 2005/05/17 13:23:32 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.474 2005/06/07 18:16:21 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -75,6 +75,7 @@ Bfc_st BFC1[] = { // standard chains
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004b","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
+  {"RY2004Y","","","db,detDb"  ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
 
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
@@ -100,6 +101,7 @@ Bfc_st BFC1[] = { // standard chains
   {"Y2004a" ,"","","db,detDb","","",                                      "Y2004 with PMD adjusted",kFALSE},
   {"Y2004b" ,"","","db,detDb","","",                                        "Y2004a + SSD materiau",kFALSE},
   {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
+  {"Y2004y" ,"","","db,detDb","","",   "Y2004 ull barrel EMC and two caps ECAL+TPC back+SVT cables",kFALSE},
   {"Y2004c" ,"","","db,detDb","","",                                     "Y2004a + SSD materiau V2",kFALSE},
 
   {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
@@ -711,6 +713,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004b","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
+  {"RY2004Y","","","db,detDb"  ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
 
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
@@ -736,6 +739,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2004a" ,"","","db,detDb","","",                                      "Y2004 with PMD adjusted",kFALSE},
   {"Y2004b" ,"","","db,detDb","","",                                        "Y2004a + SSD materiau",kFALSE},
   {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
+  {"Y2004y" ,"","","db,detDb","","",   "Y2004 ull barrel EMC and two caps ECAL+TPC back+SVT cables",kFALSE},
   {"Y2004c" ,"","","db,detDb","","",                                     "Y2004a + SSD materiau V2",kFALSE},
 
   {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
@@ -2504,6 +2508,8 @@ void StBFChain::SetGeantOptions(){
 	       GetOption("RY2004b"))  geantMk->LoadGeometry("detp geometry y2004b");
       else if (GetOption("Y2004x") ||
 	       GetOption("RY2004x"))  geantMk->LoadGeometry("detp geometry y2004x");
+      else if (GetOption("Y2004y") ||
+	       GetOption("RY2004y"))  geantMk->LoadGeometry("detp geometry y2004y");
       else if (GetOption("Y2004c") ||
 	       GetOption("RY2004c"))  geantMk->LoadGeometry("detp geometry y2004c");
       else if (GetOption("Y2005") ||
@@ -2626,6 +2632,7 @@ void StBFChain::SetDbOptions(){
 	else if (GetOption("Y2004a"))db->SetDateTime("y2004a");
 	else if (GetOption("Y2004b"))db->SetDateTime("y2004b");
 	else if (GetOption("Y2004x"))db->SetDateTime("y2004x");
+	else if (GetOption("Y2004y"))db->SetDateTime("y2004x"); // same timestamp used
 	else if (GetOption("Y2004c"))db->SetDateTime("y2004c");
 	else if (GetOption("Y2005")) db->SetDateTime("y2005");
 	else if (GetOption("Y2005x"))db->SetDateTime("y2005x");
