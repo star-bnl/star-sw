@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.11 2005/04/25 14:13:23 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.12 2005/06/07 11:55:08 reinnart Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.12  2005/06/07 11:55:08  reinnart
+// Initrun and good database connection
+//
 // Revision 1.11  2005/04/25 14:13:23  bouchet
 // new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
 //
@@ -101,114 +104,6 @@ Int_t StSsdPointMaker::Init(){
 
   // database readout 
   gMessMgr->Info() << "Trying to access to databases " << endm;
-
-  mDbMgr = StDbManager::Instance();
-  mDbMgr -> setVerbose(false);             // set Verbose mode for debug
-
-  //-> connect to the db & get an empty container
-  maccess    = mDbMgr -> initConfig(dbGeometry,dbSsd);
-  if (maccess) 
-    {
-      gMessMgr->Info() << "SSD Databases respond " << endm;
-      StDbTable* slsCtrlTable = maccess -> addDbTable("slsCtrl");
-      mDbMgr->fetchDbTable(slsCtrlTable);
-      slsCtrl_st *control  = (slsCtrl_st*) slsCtrlTable->GetTable();
-      if (!control) 
-	gMessMgr->Error() << "No  access to slsCtrl table" << endm;
-      else
-	{
-	  mDynamicControl = new StSsdDynamicControl();
-	  mDynamicControl -> setNElectronInAMip(control->nElectronInAMip);
-	  mDynamicControl -> setADCDynamic(control->adcDynamic);
-	  mDynamicControl -> setA128Dynamic(control->a128Dynamic);
-	  mDynamicControl -> setNBitEncoding(control->nbitEncoding);
-	  mDynamicControl -> setNStripInACluster(control->nstripInACluster);
-	  mDynamicControl -> setPairCreationEnergy(control->pairCreationEnergy);
-	  mDynamicControl -> setParDiffP(control->parDiffP);
-	  mDynamicControl -> setParDiffN(control->parDiffN);
-	  mDynamicControl -> setParIndRightP(control->parIndRightP);
-	  mDynamicControl -> setParIndRightN(control->parIndRightN);
-	  mDynamicControl -> setParIndLeftP(control->parIndLeftP);
-	  mDynamicControl -> setParIndLeftN(control->parIndLeftN);
-	  mDynamicControl -> setDAQCutValue(control->daqCutValue);
-	  mDynamicControl -> printParameters();
-	}
-
-      StDbTable* clusterCtrlTable = maccess -> addDbTable("clusterControl");
-      mDbMgr->fetchDbTable(clusterCtrlTable);
-      clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
-      if (!clusterCtrl) 
-	gMessMgr->Error() << "No  access to clusterControl table" << endm;
-      else 
-	{
-	  mClusterControl = new StSsdClusterControl();
-	  mClusterControl -> setHighCut(clusterCtrl->highCut);  
-	  mClusterControl -> setTestTolerance(clusterCtrl->testTolerance);
-	  mClusterControl -> setClusterTreat(clusterCtrl->clusterTreat);
-	  mClusterControl -> setAdcTolerance(clusterCtrl->adcTolerance);
-	  mClusterControl -> setMatchMean(clusterCtrl->matchMean);
-	  mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
-	  mClusterControl -> printParameters();
-	}      
-      // to be replace by database reading when it will be filled.....
-      St_DataSet *svtparams = GetInputDB("svt");
-      St_DataSetIter       local(svtparams);
-      m_noise2       = (St_ssdStripCalib     *)local("ssd/ssdStripCalib");
-    }
-  else // No access to databases -> read tables
-    {
-      // 		Create tables
-      gMessMgr->Info() << " No access to databases so ...read tables" << endm;
-      St_DataSet *svtparams = GetInputDB("svt");
-      St_DataSetIter       local(svtparams);
-      m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-      m_noise        = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
-      m_configuration= (St_ssdConfiguration  *)local("ssd/ssdConfiguration");
-      m_wafpos       = (St_ssdWafersPosition *)local("ssd/ssdWafersPosition");
-      m_noise2       = (St_ssdStripCalib     *)local("ssd/ssdStripCalib");
-      m_dimensions   = (St_ssdDimensions     *)local("ssd/ssdDimensions");
-
-      St_slsCtrl *control;
-      control = (St_slsCtrl *)local("ssd/slsCtrl");
-      if (!control) {
-	gMessMgr->Error() << "No  access to slsCtrl table" << endm;
-      }  
-
-      St_clusterControl  *clusterCtrl;
-      clusterCtrl = (St_clusterControl *)local("ssd/clusterControl");
-      if (!clusterCtrl) {
-	gMessMgr->Error() << "No  access to clusterControl table" << endm;
-      }   
-      if (!m_condition_db) {
-	gMessMgr->Error() << "No  access to condition database" << endm;
-      }   
-      if (!m_noise) {
-	gMessMgr->Error() << "No  access to noise condition" << endm;
-      }
-      if (!m_dimensions) {
-	gMessMgr->Error() << "No  access to ssdDimensions table" << endm;
-      }
-      if (!m_configuration) {
-	gMessMgr->Error() << "No  access to ssdConfiguration table" << endm;
-      }
-      if (!m_wafpos) {
-	gMessMgr->Error() << "No  access to ssdWafersPosition table" << endm;
-      }
-
-      // Replace tables for dynamic parameters with default values
-      mDynamicControl = new StSsdDynamicControl(control);
-      mDynamicControl->printParameters();
-      // Replace tables for control parameters
-      mClusterControl = new StSsdClusterControl(clusterCtrl);
-      mClusterControl->setHighCut(5);
-      mClusterControl->printParameters();
-      // End of Setting Cluster Control parameters
-      if ((!mDynamicControl)||(!mClusterControl)) {
-	gMessMgr->Error() << "No  access to control parameters" << endm;
-      } 
-    }
-  
-  // 		Create SCF histograms
 
   if (IAttr(".histos")) {
     noisDisP = new TH1F("Noise_p","Noise Distribution",250,0,25);
@@ -370,7 +265,77 @@ Int_t StSsdPointMaker::Init(){
 
 
     }
+
   return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t StSsdPointMaker::InitRun(int runumber)
+{
+  //    mDbMgr = StDbManager::Instance();
+  //    mDbMgr->setVerbose(false);
+
+  //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
+
+
+  St_DataSet *DbConnector = GetDataBase("Geometry/ssd");
+
+  if (DbConnector) 
+    {
+      gMessMgr->Info() << "SSD Databases respond " << endm;
+      St_slsCtrl* slsCtrlTable = (St_slsCtrl*) DbConnector->Find("slsCtrl");
+      slsCtrl_st*      control      = (slsCtrl_st*) slsCtrlTable->GetTable();
+      if (!control) 
+	gMessMgr->Error() << "No  access to slsCtrl table" << endm;
+      else
+	{
+	  mDynamicControl = new StSsdDynamicControl();
+	  mDynamicControl -> setNElectronInAMip(control->nElectronInAMip);
+	  mDynamicControl -> setADCDynamic(control->adcDynamic);
+	  mDynamicControl -> setA128Dynamic(control->a128Dynamic);
+	  mDynamicControl -> setNBitEncoding(control->nbitEncoding);
+	  mDynamicControl -> setNStripInACluster(control->nstripInACluster);
+	  mDynamicControl -> setPairCreationEnergy(control->pairCreationEnergy);
+	  mDynamicControl -> setParDiffP(control->parDiffP);
+	  mDynamicControl -> setParDiffN(control->parDiffN);
+	  mDynamicControl -> setParIndRightP(control->parIndRightP);
+	  mDynamicControl -> setParIndRightN(control->parIndRightN);
+	  mDynamicControl -> setParIndLeftP(control->parIndLeftP);
+	  mDynamicControl -> setParIndLeftN(control->parIndLeftN);
+	  mDynamicControl -> setDAQCutValue(control->daqCutValue);
+	  mDynamicControl -> printParameters();
+	}
+
+      St_clusterControl* clusterCtrlTable = (St_clusterControl*) DbConnector->Find("clusterControl");
+      clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
+      if (!clusterCtrl) 
+	gMessMgr->Error() << "No  access to clusterControl table" << endm;
+      else 
+	{
+	  mClusterControl = new StSsdClusterControl();
+	  mClusterControl -> setHighCut(clusterCtrl->highCut);  
+	  mClusterControl -> setTestTolerance(clusterCtrl->testTolerance);
+	  mClusterControl -> setClusterTreat(clusterCtrl->clusterTreat);
+	  mClusterControl -> setAdcTolerance(clusterCtrl->adcTolerance);
+	  mClusterControl -> setMatchMean(clusterCtrl->matchMean);
+	  mClusterControl -> setMatchSigma(clusterCtrl->matchSigma);
+	  mClusterControl -> printParameters();
+	}      
+
+      St_DataSet *svtparams = GetInputDB("svt");
+      St_DataSetIter local(svtparams);
+      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
+
+      cout << "----------------------------------------" << endl << "m_noise2: " << m_noise2 << endl;
+
+    }
+  else // No access to databases -> read tables
+    {
+	gMessMgr->Error() << "No connection to the database in StSsdPointMaker" << endm;
+    }
+  
+  // 		Create SCF histograms
+
+
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Make()
@@ -419,23 +384,21 @@ Int_t StSsdPointMaker::Make()
   else              
     mSsdHitColl = 0;
 
-  
-  StDbTable* configTable = maccess -> addDbTable("ssdConfiguration");
-  mDbMgr->fetchDbTable(configTable);
+  St_DataSet *DbConnector = GetDataBase("Geometry/ssd");
+  St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration");
   ssdConfiguration_st *config  = (ssdConfiguration_st*) configTable->GetTable() ;
   if (!config) 
     gMessMgr->Error() << "No  access to ssdConfiguration database" << endm;
   
-  StDbTable* positionTable = maccess -> addDbTable("ssdWafersPosition");
-  mDbMgr->fetchDbTable(positionTable);
+  St_ssdWafersPosition* positionTable = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
   int positionSize = 0;
   ssdWafersPosition_st *position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
   if (!position) 
     gMessMgr->Error() << "No  access to ssdWafersPosition database" << endm;
   else
     positionSize= positionTable->GetNRows();
-  StDbTable* dimensionsTable = maccess -> addDbTable("ssdDimensions");
-  mDbMgr->fetchDbTable(dimensionsTable);
+
+  St_ssdDimensions* dimensionsTable = (St_ssdDimensions*) DbConnector->Find("ssdDimensions");
   ssdDimensions_st *dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
   if (!dimensions) 
     gMessMgr->Error() << "No  access to ssdDimensions database" << endm;
@@ -460,6 +423,7 @@ Int_t StSsdPointMaker::Make()
       mySsd->sortListStrip();
       PrintStripSummary(mySsd);
       //int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
+      cout << " readnoise  : " << m_noise2 << " : " << mDynamicControl << endl;
       int noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
       cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
       int nClusterPerSide[2];
