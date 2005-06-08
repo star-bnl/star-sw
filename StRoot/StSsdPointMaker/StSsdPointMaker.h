@@ -1,8 +1,8 @@
-// $Id: StSsdPointMaker.h,v 1.10 2005/06/08 10:33:21 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.11 2005/06/08 15:50:05 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
-// Revision 1.10  2005/06/08 10:33:21  bouchet
-// no more writing Histograms methods
+// Revision 1.11  2005/06/08 15:50:05  bouchet
+// add methods to fill the Tuple
 //
 // Revision 1.9  2005/06/07 12:04:46  reinnart
 // Make Stuff moved to Initrun
@@ -66,6 +66,7 @@ class TFile;
 class TH1F;
 class TH1S;
 class TH2S;
+class TNtuple;
 
 class St_sdm_calib_db;
 class St_sdm_condition_db;
@@ -113,13 +114,23 @@ class StSsdPointMaker : public StMaker {
   St_ssdLaddersPosition *m_ladpos;        //!< Pointer to the ssdLadderPosition table (ladder positions)
   St_ssdSectorsPosition *m_secpos;        //!< Pointer to the ssdSectorPosition table (sector positions)
   St_ssdBarrelPosition  *m_barpos;        //!< Pointer to the ssdBarrelPosition table (barrel positions)
+  float ClusterNtuple[10];
+  float hitNtuple[9];    
+  TFile *nFile;
+  TNtuple* nHitNtuple;
+  TFile *mFile;
+  TNtuple* mHitNtuple;
+
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeSsdPedestalHistograms();       //!
+  void DeclareNtuple(int *flag);
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
   void PrintClusterSummary(StSsdBarrel *mySsd); //!
   void PrintPointSummary(StSsdBarrel *mySsd); //!
+  void WriteScfTuple(StSsdBarrel *mySsd);
+  void WriteScmTuple(StSsdBarrel *mySsd);
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -168,6 +179,7 @@ class StSsdPointMaker : public StMaker {
   TH2S *noise_wafer;// mean noise per wafer
   TH2S *noise_chip_P;// mean noise per chip of the P Side
   TH2S *noise_chip_N;// mean noise per chip of the N Side
+  int flag ;
 
  public:
                   StSsdPointMaker(const char *name="scm_spt");
@@ -179,7 +191,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.10 2005/06/08 10:33:21 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.11 2005/06/08 15:50:05 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
