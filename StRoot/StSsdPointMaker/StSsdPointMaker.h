@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.9 2005/06/07 12:04:46 reinnart Exp $
+// $Id: StSsdPointMaker.h,v 1.10 2005/06/08 10:33:21 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.10  2005/06/08 10:33:21  bouchet
+// no more writing Histograms methods
+//
 // Revision 1.9  2005/06/07 12:04:46  reinnart
 // Make Stuff moved to Initrun
 //
@@ -111,11 +114,8 @@ class StSsdPointMaker : public StMaker {
   St_ssdSectorsPosition *m_secpos;        //!< Pointer to the ssdSectorPosition table (sector positions)
   St_ssdBarrelPosition  *m_barpos;        //!< Pointer to the ssdBarrelPosition table (barrel positions)
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
-  void writeScfCtrlHistograms();       //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
-  void writeScmCtrlHistograms(); 
   void makeSsdPedestalHistograms();       //!
-  void writeSsdPedestalHistograms();      //!
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
   void PrintClusterSummary(StSsdBarrel *mySsd); //!
@@ -179,7 +179,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.9 2005/06/07 12:04:46 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.10 2005/06/08 10:33:21 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

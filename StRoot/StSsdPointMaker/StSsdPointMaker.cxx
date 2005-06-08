@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.14 2005/06/07 16:24:47 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.15 2005/06/08 10:33:21 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.15  2005/06/08 10:33:21  bouchet
+// no more writing Histograms methods
+//
 // Revision 1.14  2005/06/07 16:24:47  lmartin
 // InitRun returns kStOk
 //
@@ -310,7 +313,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 	  mDynamicControl -> setDAQCutValue(control->daqCutValue);
 	  mDynamicControl -> printParameters();
 	}
-
+    
       St_clusterControl* clusterCtrlTable = (St_clusterControl*) DbConnector->Find("clusterControl");
       clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
       if (!clusterCtrl) 
@@ -361,8 +364,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
     {
 	gMessMgr->Error() << "No connection to the database in StSsdPointMaker" << endm;
     }
-  
-  // 		Create SCF histograms
+
 
   return kStOk;
 }
@@ -467,7 +469,6 @@ Int_t StSsdPointMaker::Make()
 	cout<<"###### WRITING SSD PEDESTAL HISTOGRAMS##########"<<endl;
 	mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
 	makeSsdPedestalHistograms(); 
-	writeSsdPedestalHistograms();
       }
     }
   delete mySsd;
@@ -520,26 +521,8 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 	      }	  
 	  }
 	}
-      }
-//  }
-//}
-//_____________________________________________________________________________
-void StSsdPointMaker::writeScfCtrlHistograms()
-{  
-
-    if (IAttr(".histos")) {
-    noisDisP->Write();
-    snRatioP->Write();
-    stpClusP->Write();
-    totChrgP->Write();
-    
-    noisDisN->Write();
-    snRatioN->Write();
-    stpClusN->Write();
-    totChrgN->Write();
-    
-    }
 }
+
 
 //_____________________________________________________________________________
 
@@ -686,38 +669,6 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
     }
 }
 
-
-// _____________________________________________________________________________
-void StSsdPointMaker::writeScmCtrlHistograms()
-{
-    if (IAttr(".histos")) {
-      
-    matchisto->Write();
-    orthoproj->Write();
-    kind->Write();
-    matchisto_1->Write();
-    matchisto_2->Write();
-    matchisto_3->Write();
-    matchisto_4->Write();
-    matchisto_5->Write();
-    matchisto_6->Write();
-    matchisto_7->Write();
-    matchisto_8->Write();
-    matchisto_9->Write();
-    matchisto_10->Write();
-    matchisto_11->Write();
-    matchisto_12->Write();
-    matchisto_13->Write();
-    matchisto_14->Write();
-    matchisto_15->Write();
-    matchisto_16->Write();
-    matchisto_17->Write();
-    matchisto_18->Write();
-    matchisto_19->Write();
-    matchisto_20->Write();
-
-    }
-}
 //_____________________________________________________________________________
 void StSsdPointMaker::makeSsdPedestalHistograms()
 { 
@@ -767,20 +718,7 @@ void StSsdPointMaker::makeSsdPedestalHistograms()
 	    }
     }
 }
-//_____________________________________________________________________________
 
-void StSsdPointMaker::writeSsdPedestalHistograms()
-{ 
-  if (IAttr(".histos")) 
-    {
-      occupancy_wafer->Write();
-      occupancy_wafer->Write();
-      noise_chip->Write();
-      noise_wafer->Write();
-      noise_chip_P->Write();
-      noise_chip_N->Write();
-      }
-}
  //_____________________________________________________________________________
 
 void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
@@ -917,12 +855,7 @@ void StSsdPointMaker::PrintInfo()
 Int_t StSsdPointMaker::Finish() {
     if (Debug()) gMessMgr->Debug() << "In StSsdPointMaker::Finish() ... "
 				 << GetName() << endm; 
-      if (IAttr(".histos")) {	
-    cout<<"###### WRITING SSD PHYSICS  HISTOGRAMS##########"<<endl;
-    writeScfCtrlHistograms();
-    writeScmCtrlHistograms();
-    }    
-  
+     
   return kStOK;
 }
 
