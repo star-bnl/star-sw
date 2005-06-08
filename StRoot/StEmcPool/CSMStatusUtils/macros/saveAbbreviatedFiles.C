@@ -30,4 +30,8 @@ void saveAbbreviatedFiles(const Char_t *dir="/star/u/relyea/star/2005/2005/") {
   myUtils.setDetectorFlavor("bemc");
   myUtils.readTablesFromASCII(dir,".txt");  
   myUtils.saveAbbreviatedStatusTablesToASCII(dir);  
+  CSMStatusUtils myUtils2;
+  myUtils2.setDetectorFlavor("eemc");
+  myUtils2.readTablesFromASCII(dir,".txt");  
+  myUtils2.saveAbbreviatedStatusTablesToASCII(dir);  
 }
