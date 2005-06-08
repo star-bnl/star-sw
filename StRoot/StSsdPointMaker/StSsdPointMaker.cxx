@@ -1,8 +1,8 @@
-// $Id: StSsdPointMaker.cxx,v 1.15 2005/06/08 10:33:21 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.16 2005/06/08 15:50:05 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
-// Revision 1.15  2005/06/08 10:33:21  bouchet
-// no more writing Histograms methods
+// Revision 1.16  2005/06/08 15:50:05  bouchet
+// add methods to fill the Tuple
 //
 // Revision 1.14  2005/06/07 16:24:47  lmartin
 // InitRun returns kStOk
@@ -58,6 +58,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
+#include "TNtuple.h"
 
 #include "StDbLib/StDbManager.hh"                      // Database Libraries
 #include "StDbLib/StDbConfigNode.hh"                   //
@@ -270,11 +271,10 @@ Int_t StSsdPointMaker::Init(){
     noise_chip_N->SetYTitle("Chip");   
     noise_wafer->SetXTitle("Ladder");
     noise_wafer->SetYTitle("Wafer");
-
-
-
-    }
-
+   
+    flag = 0;             // flag=0->the tuple are not filled
+    DeclareNtuple(&flag); // flag=1->the tuple are filled :this lign to decomment or not
+  }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -368,6 +368,21 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 
   return kStOk;
 }
+
+//_____________________________________________________________________________
+
+void StSsdPointMaker::DeclareNtuple(int *flag){
+ 
+  mFile = new TFile("PhysicsFile.root","RECREATE");
+ string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg";
+  mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
+  nFile = new TFile("Clusters.root","RECREATE");
+ string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc";
+  nHitNtuple     = new TNtuple("ClusTuple","Clusters Ntuple",varlist3.c_str());
+
+  *flag =  1;
+}
+
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Make()
 {
@@ -415,8 +430,7 @@ Int_t StSsdPointMaker::Make()
   else              
     mSsdHitColl = 0;
 
-
-
+ 
   cout<<"#################################################"<<endl;
   cout<<"####     START OF NEW SSD POINT MAKER        ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;  
@@ -460,6 +474,11 @@ Int_t StSsdPointMaker::Make()
       cout<<"####        END OF SSD NEW POINT MAKER       ####"<<endl;
       cout<<"#################################################"<<endl;
       makeScmCtrlHistograms(mySsd);
+
+      if(flag==1){ 
+	WriteScfTuple(mySsd);
+	WriteScmTuple(mySsd);
+      }
       if (nSptWritten) res = kStOK;
     }
   else
@@ -847,6 +866,95 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
 }
 
 //_____________________________________________________________________________
+void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
+{
+
+  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  int found;
+  found=0;
+    for (int i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	//Looking for the P-side cluster informations
+	//  if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+	    //  gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
+	// }
+	// else {
+	    StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	    while (pClusterP)
+	      {   
+		ClusterNtuple[0]=0;
+		ClusterNtuple[1]=i+1;
+		ClusterNtuple[2]=j+1;
+		ClusterNtuple[3]=pClusterP->getClusterSize();
+		ClusterNtuple[4]=((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
+		ClusterNtuple[5]=pClusterP->getTotNoise()/pClusterP->getClusterSize();
+		ClusterNtuple[6]=pClusterP->getFirstStrip();
+		ClusterNtuple[7]=pClusterP->getTotAdc();
+		pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
+		nHitNtuple->Fill(ClusterNtuple);	
+	      }
+	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+	    while (pClusterN)
+	      {	
+		ClusterNtuple[0]=1;
+		ClusterNtuple[1]=i+1;
+		ClusterNtuple[2]=j+1;
+		ClusterNtuple[3]=pClusterN->getClusterSize();
+		ClusterNtuple[4]=((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());
+		ClusterNtuple[5]=pClusterN->getTotNoise()/pClusterN->getClusterSize();
+		ClusterNtuple[6]=pClusterN->getFirstStrip();
+		ClusterNtuple[7]=pClusterN->getTotAdc();	
+		pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
+		nHitNtuple->Fill(ClusterNtuple);
+	      }	  
+	  }
+      }
+    }
+//_____________________________________________________________________________
+void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
+{
+  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  int found;
+  int conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
+  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getNBitEncoding())/(mDynamicControl->getPairCreationEnergy()*mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip());
+  found=0;
+  // gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Wafer "<<mywafer<< endm;  
+  for (int i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	  if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
+	    //   gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
+	  }
+	  else {
+	    StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
+	    while (pSpt){
+	      Float_t a = 0, b = 0;
+	      a = convMeVToAdc*(pSpt->getDe(0)+pSpt->getDe(1));
+	      b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
+	      hitNtuple[0]=a;
+	      hitNtuple[1]=b;
+	      hitNtuple[2]=i+1;
+	      hitNtuple[3]=j+1;
+	      for(int k=0;k<=11;k++)
+		{
+		  if(pSpt->getNMatched()==conversion[k])
+		    {
+		      hitNtuple[4]=k; 
+		    }
+		    }
+	      hitNtuple[5]=pSpt->getXg(0);
+	      hitNtuple[6]=pSpt->getXg(1);
+	      hitNtuple[7]=pSpt->getXg(2);
+	      mHitNtuple->Fill(hitNtuple);		 
+	      pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
+		} 
+	    }
+	  }
+      }
+    }
+
+//_____________________________________________________________________________
 void StSsdPointMaker::PrintInfo()
 {
   if (Debug()) StMaker::PrintInfo();
@@ -854,8 +962,14 @@ void StSsdPointMaker::PrintInfo()
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
     if (Debug()) gMessMgr->Debug() << "In StSsdPointMaker::Finish() ... "
-				 << GetName() << endm; 
-     
+				 << GetName() << endm;
+    if (flag)
+      {
+    mFile->Write();
+    mFile->Close();  
+    nFile->Write();
+    nFile->Close(); 
+      }
   return kStOK;
 }
 
