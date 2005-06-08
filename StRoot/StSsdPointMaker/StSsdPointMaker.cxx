@@ -1,8 +1,8 @@
-// $Id: StSsdPointMaker.cxx,v 1.16 2005/06/08 15:50:05 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.17 2005/06/08 16:03:50 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
-// Revision 1.16  2005/06/08 15:50:05  bouchet
-// add methods to fill the Tuple
+// Revision 1.17  2005/06/08 16:03:50  bouchet
+// same as previous version but par default Tuple are not filled
 //
 // Revision 1.14  2005/06/07 16:24:47  lmartin
 // InitRun returns kStOk
@@ -273,7 +273,7 @@ Int_t StSsdPointMaker::Init(){
     noise_wafer->SetYTitle("Wafer");
    
     flag = 0;             // flag=0->the tuple are not filled
-    DeclareNtuple(&flag); // flag=1->the tuple are filled :this lign to decomment or not
+    //DeclareNtuple(&flag); // flag=1->the tuple are filled :this lign to decomment or not
   }
   return StMaker::Init();
 }
