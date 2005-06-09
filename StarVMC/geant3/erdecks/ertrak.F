@@ -1,21 +1,21 @@
 *
-* $Id: ertrak.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: ertrak.F,v 1.2 2005/06/09 00:10:03 fisyak Exp $
 *
 * $Log: ertrak.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.2  2005/06/09 00:10:03  fisyak
+* comply with STAR
 *
-* Revision 1.2  2003/11/28 11:23:55  brun
-* New version of geant321 with all geant3 routines renamed from G to G3
+* Revision 1.2  2004/02/12 15:33:10  fisyak
+* move STAR version of erdecks from rexe to geant321
 *
-* Revision 1.1.1.1  2002/07/24 15:56:26  rdm
-* initial import into CVS
+* Revision 1.3  2001/05/17 20:39:12  fisyak
+* Add 'V' mode with 0 prediction
 *
-* Revision 1.1.1.1  2002/06/16 15:18:35  hristov
-* Separate distribution  of Geant3
+* Revision 1.2  2000/09/28 00:36:20  fisyak
+* Use g77 on linux instead of pgf77
 *
-* Revision 1.1.1.1  1999/05/18 15:55:15  fca
-* AliRoot sources
+* Revision 1.1  1999/12/07 15:44:30  fisyak
+* Add geane, new TGeant3 from Alice
 *
 * Revision 1.1.1.1  1996/03/06 15:37:34  mclareni
 * Add geane321 source directories
@@ -24,7 +24,7 @@
 #include "geant321/pilot.h"
 *CMZ :  3.21/02 29/03/94  15.41.49  by  S.Giani
 *-- Author :
-      SUBROUTINE ERTRAK (X1, P1, X2, P2, IPA, CHOPT)
+      integer function ERTRAK (X1, P1, X2, P2, IPA, CHOPT)
 *
 ************************************************************************
 *                                                                      *
@@ -79,6 +79,7 @@
 *
 * *** Decode character option
 *
+      ierr = 0
       CHOPTI = CHOPT
       CALL UOPTC (CHOPT, 'BELMOPVX', IOPT)
 *
@@ -94,6 +95,7 @@
       LEPLAN = IOPTP.NE.0
       LEVOLU = IOPTV.NE.0
       LEPOIN = IOPTX.NE.0
+*yf      LEVMIX = IOPTM.NE.0
 *
 * *** Check consistency of the Ch-options
 *
@@ -105,7 +107,7 @@
 *
 * *** Initialization
 *
-      IF (NEPRED.LE.0) THEN
+      IF (NEPRED.LE.0 .and. .not. LEVOLU) THEN
          WRITE (LOUT, 780)
          GO TO 99
       ENDIF
@@ -206,7 +208,7 @@
       GETOT = PVERT(4)
       GEKIN = GETOT - AMASS
       IF(GEKIN.LT.0.) GEKIN = 0.
-      CALL G3EKBIN
+      CALL GEKBIN
 *
 * *** Additional EMC initialization
 *
@@ -230,4 +232,5 @@
      +                               '. Tracking stops now')
   780 FORMAT(/,4X,'Error in ERTRAK : No prediction. Tracking stops now')
 *                                                           END ERTRAK
-  99  END
+ 99   ertrak = ierr
+      END

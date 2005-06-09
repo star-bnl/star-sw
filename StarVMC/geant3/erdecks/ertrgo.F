@@ -1,18 +1,21 @@
 *
-* $Id: ertrgo.F,v 1.1.1.1 2005/05/25 22:37:23 fisyak Exp $
+* $Id: ertrgo.F,v 1.2 2005/06/09 00:10:03 fisyak Exp $
 *
 * $Log: ertrgo.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:23  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.2  2005/06/09 00:10:03  fisyak
+* comply with STAR
 *
-* Revision 1.1.1.1  2002/07/24 15:56:26  rdm
-* initial import into CVS
+* Revision 1.2  2004/02/12 15:33:10  fisyak
+* move STAR version of erdecks from rexe to geant321
 *
-* Revision 1.1.1.1  2002/06/16 15:18:35  hristov
-* Separate distribution  of Geant3
+* Revision 1.3  2001/05/17 20:39:12  fisyak
+* Add 'V' mode with 0 prediction
 *
-* Revision 1.1.1.1  1999/05/18 15:55:15  fca
-* AliRoot sources
+* Revision 1.2  2000/09/28 00:36:22  fisyak
+* Use g77 on linux instead of pgf77
+*
+* Revision 1.1  1999/12/07 15:44:30  fisyak
+* Add geane, new TGeant3 from Alice
 *
 * Revision 1.1.1.1  1996/03/06 15:37:35  mclareni
 * Add geane321 source directories
@@ -74,6 +77,7 @@ C.    ------------------------------------------------------------------
       EPSCUR = EPSMAC
       LSAMVL = .FALSE.
       SLENG  = 0.
+      DELENG = 0.
       ISTOP  = 0
       NUMED  = 0
       NUMOLD = 0
@@ -244,6 +248,7 @@ C.    ------------------------------------------------------------------
          CALL ERTRNT
       ENDIF
 *
+      DELENG = DELENG + DESTEP
       NSTEP  = NSTEP + 1
       IF (NSTEP.GT.MXNSTP) THEN
          ISTOP = 99
@@ -267,11 +272,24 @@ C.    ------------------------------------------------------------------
       VECT(6) = VECT(6)*CMOD
 *
       IF (INWVOL.EQ.0) GO TO 100
+*yf      IF (LEPLAN .AND. LEVMIX) GO TO 200 
+      IF (LEPLAN) GO TO 200 
 *
 * *** Particle is leaving the volume (INWVOL=2) :
 *
 *     Save the current volume's tree before leaving the volume
-      IF(LEVOLU) CALL EVOLIO(NVLIN,NAMIN,NUMIN,NVLOUT,NAMOUT,NUMOUT)
+      IF(LEVOLU) then  
+        IF(NEPRED .le. 0) then
+          NMEC = NMEC + 1
+          LMEC(NMEC) = 27
+          DESTEP = DELENG
+          INLIST = 0
+          CALL ERSTOR
+          goto 999
+        endif
+      else         
+        CALL EVOLIO(NVLIN,NAMIN,NUMIN,NVLOUT,NAMOUT,NUMOUT)
+      endif
 *
 *     find the new volume
       IF (NLEVIN.GE.NLEVEL) THEN
