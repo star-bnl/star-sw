@@ -1,45 +1,41 @@
-// $Id: StarMCParticle.h,v 1.1 2005/04/25 20:44:28 fisyak Exp $
-
+// $Id: StarMCParticle.h,v 1.2 2005/06/09 20:13:47 fisyak Exp $
 #ifndef Star_PARTICLE_H
 #define Star_PARTICLE_H
+#include "TObject.h"
+#include "TRef.h"
+#include "TRefArray.h"
+#include "TParticle.h"
 
-#include <TObject.h>
-#include <TRef.h>
-#include <TRefArray.h>
+class StarMCParticle : public TObject {
+ public:
+  StarMCParticle(Int_t id=0, TParticle* particle=0) : 
+  fID(id), fIdGen(0), fParticle(particle), fMother(), fDaughters() {}
+  StarMCParticle(Int_t id, TParticle* particle, StarMCParticle* mother, Int_t IdGen = 0) : 
+  fID(id), fIdGen(IdGen), fParticle(particle), fMother(mother), fDaughters() {}
+  virtual ~StarMCParticle() {delete fParticle; fParticle = 0;}
 
-class TParticle;
-
-class StarMCParticle : public TObject
-{
-  public:
-    StarMCParticle(Int_t id, TParticle* particle);
-    StarMCParticle(Int_t id, TParticle* particle, StarMCParticle* mother);
-    StarMCParticle();
-    virtual ~StarMCParticle();     
-
-    // methods
-    void SetMother(StarMCParticle* particle);
-    void AddDaughter(StarMCParticle* particle);
-    void Print(const Option_t *opt=0) const;
-    void PrintDaughters() const;
-
-    // get methods  
-    Int_t         GetID() const;
-    TParticle*    GetParticle() const;
-    StarMCParticle* GetMother() const;
-    Int_t         GetNofDaughters() const;
-    StarMCParticle* GetDaughter(Int_t i) const;
-    
+  void SetMother(StarMCParticle* particle)   { fMother.SetObject(particle);}
+  void SetIdGen(Int_t m)                     { fIdGen = m;}
+  void AddDaughter(StarMCParticle* particle) { fDaughters.Add(particle);}
+  void Print(const Option_t *opt=0) const;
+  void PrintDaughters() const;
+  Int_t           GetID() const              { return fID;}
+  Int_t           GetIdGen() const           { return fIdGen;}
+  TParticle*      GetParticle() const        { return fParticle;}
+  StarMCParticle* GetMother() const          { return (StarMCParticle*) fMother.GetObject();}
+  Int_t           GetNofDaughters() const    { return fDaughters.GetEntriesFast();}
+  StarMCParticle* GetDaughter(Int_t i) const;
+  
   private:
-    // data members
-    Int_t       fID;
-    TParticle*  fParticle;
-    TRef        fMother;
-    TRefArray   fDaughters;
-    
-    ClassDef(StarMCParticle,1) // Extended TParticle
+  // data members
+  Int_t       fID; // index in TObjArray of fParticles
+  Int_t       fIdGen; // index in original generator particle list 
+  TParticle*  fParticle;
+  TRef        fMother;
+  TRefArray   fDaughters;
+  
+  ClassDef(StarMCParticle,1) // Extended TParticle
 };
-
 #endif //Star_PARTICLE_H   
    
 

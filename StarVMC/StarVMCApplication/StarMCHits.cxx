@@ -13,33 +13,19 @@
 #include "TObjString.h"
 #include "TClass.h"
 #include "TROOT.h"
+#include "TRandom.h"
+#include "TLorentzVector.h"
 #ifdef __ROOT__
 #include "StMaker.h"
 #endif
-#include "tables/St_g2t_ctf_hit_Table.h"
-#include "tables/St_g2t_emc_hit_Table.h"
+#include "St_g2t_Chair.h"
 #include "tables/St_g2t_event_Table.h"
-#include "tables/St_g2t_fst_hit_Table.h"
-#include "tables/St_g2t_ftp_hit_Table.h"
-#include "tables/St_g2t_ist_hit_Table.h"
-#include "tables/St_g2t_mwc_hit_Table.h"
-#include "tables/St_g2t_pix_hit_Table.h"
-#include "tables/St_g2t_pmd_hit_Table.h"
 #include "tables/St_g2t_pythia_Table.h"
-#include "tables/St_g2t_rch_hit_Table.h"
-#include "tables/St_g2t_ssd_hit_Table.h"
-#include "tables/St_g2t_svt_hit_Table.h"
-#include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
-#include "tables/St_g2t_vpd_hit_Table.h"
 #include "tables/St_particle_Table.h"
 //#include "tables/St_g2t_run_Table.h"
-#include "tables/St_g2t_event_Table.h"
-#include "tables/St_g2t_pythia_Table.h"
 #include "tables/St_g2t_gepart_Table.h"
-#include "tables/St_g2t_vertex_Table.h"
-#include "tables/St_g2t_track_Table.h"
 StarMCHits *StarMCHits::fgInstance = 0;
 TGeant3    *StarMCHits::fgGeant3 = 0;
 ClassImp(StarMCHits);
@@ -47,79 +33,108 @@ enum EHITtypes{kX=1,  kY,  kZ,   kR,    kRR,   kPHI,  kTHET, kETA,  kTDR,  kCP,
                kU,    kV,  kW,   kETOT, kELOS, kBIRK, kSTEP, kLGAM, kTOF,  kUSER,
 	       kXX,   kYY, kZZ,  kPX,   kPY,   kPZ,   kSLEN, kPTOT, kLPTO, krese};
 enum EDetectorTypes {
-  kBPOL, kBCSB, kBRSG, kBXSA, kCSDA, kCSUP, kEHMS, kELGR, kEPCT, kESCI,
-  kEXSE, kFDSW, kFREO, kFSEC, kIBSS, kPDGS, kPLAC, kQSCI, kQUAR, kRCSI,
-  kRGAP, kSFSD, kSVTD, kTMSE, kTPAD, kVRAD, kALL };
+  kBCSB,//      BCSB
+  kBPOL,//      BPOL
+  kBRSG,//      BRSG
+  kBXSA,//      BXSA
+
+  kCSDA,//      CSDA
+  kCSUP,//      CSUP      
+
+  kEHMS,//      EHMS      
+  kELGR,//            g2t_eem.F:        if (isys.eq.2) call G2R_GET_SYS ('ECAL','ELGR',Iprin,Idigi)
+  kEPCT,//            g2t_eem.F:        if (isys.eq.3) call G2R_GET_SYS ('ECAL','EPCT',Iprin,Idigi)
+  kESCI,//      ESCI      
+  kEXSE,//             g2t_esm.F:      if (Isys.eq.1) call G2R_GET_SYS ('ECAL','EXSE',Iprin,Idigi)
+  kFGTC, 
+  kFHMS,//      ->     FHMS      fpdmgeo1.g:Block FHMS is sHower Max Strip
+  kFLGR,//      ->     FLGR      fpdmgeo1.g:Block FLGR is Lead Glass detector
+  kFDSW,//      fstdgeo.g:Block FDSW is the Silicon Wafer (all active), g2t_fst.F:      call G2R_GET_SYS ('FSTD','FDSW',Iprin,Idigi)
+  kFPCT,//      ->     FPCT  fpdmgeo.g:Block FPCT is Photo Cathode    
+  kFREO,//      FREO      
+  kFSCI,//      ->    FSCI  fpdmgeo.g:Block FSCI  is the active scintillator (polystyren) layer    
+  kFSEC,//      FSEC      
+
+  kIBSS,//            g2t_ist.F:      call G2R_GET_SYS ('ISTB','IBSS',Iprin,Idigi)
+
+  kOQUA,//      ->      OQUA  richgeo.g:block OQUA e me scelto per labellare il quarzo opaco    
+
+  kPDGS,//      PDGS      
+  kPLAC,//            g2t_pix.F:      call G2R_GET_SYS ('PIXL','PLAC',Iprin,Idigi)
+
+  kQSCI,//      QSCI      
+  kQUAR,//      QUAR      
+
+  kRCSI,//      RCSI      
+  kRGAP,//      RGAP      
+
+  kSFSD,//      SFSD      
+  kSVTD,//      SVTD      
+
+  kTMSE,//      TMSE      
+  kTPAD,//      TPAD      
+  kVRAD,//      VRAD	    
+  kALL
+};
 struct Detector_G2T_t {
-  EDetectorTypes kTYpe;
+  EDetectorTypes kType;
   Char_t        *Name;
   Char_t        *G2T_type;
   Char_t        *G2T_name;
   Char_t        *G2T_sys;
   Char_t        *G2T_geom;
 };
-/*
-  g2t_event
-  particle
-  g2t_vertex
-  g2t_track
-  g2t_event
-  g2t_vertex
-  g2t_track
-  g2t_pythia
-  g2t_svt_hit SVTD SFSD	      
-  g2t_pix_hit PLAC		      
-  g2t_ist_hit IBSS		      
-  g2t_fst_hit FDSW		      
-  g2t_tpc_hit TPAD		      
-  g2t_mwc_hit TMSE		      
-  g2t_ftp_hit FSEC		      
-  g2t_ctb_hit BXSA		      
-  g2t_tof_hit BCSB		      
-  g2t_tfr_hit BRSG		      
-  g2t_rch_hit RGAP RCSI FREO QUAR 
-  g2t_emc_hit CSUP		      
-  g2t_smd_hit CSDA		      
-  g2t_eem_hit ESCI ELGR EPCT      
-  g2t_esm_hit EXSE EHMS	      
-  g2t_vpd_hit VRAD		      
-  g2t_pmd_hit PDGS		      
-  g2t_zdc_hit QSCI		      
-  g2t_bbc_hit BPOL                
-*/
 static const Detector_G2T_t g2t[kALL] = {
   //              type(cd)      name          sys    geom version
-  { kBPOL,"BPOL","g2t_ctf_hit","g2t_bbc_hit","BBCM",""}, //
-  { kBCSB,"BCSB","g2t_ctf_hit","g2t_tof_hit","BTOF","btof_btog"}, //
-  { kBRSG,"BRSG","g2t_ctf_hit","g2t_tfr_hit","BTOF","btof_btog"}, //
-  { kBXSA,"BXSA","g2t_ctf_hit","g2t_ctb_hit","BTOF","btof_btog"}, //
-  { kCSDA,"CSDA","g2t_emc_hit","g2t_smd_hit","CALB",""}, 
-  { kCSUP,"CSUP","g2t_emc_hit","g2t_emc_hit","CALB",""}, 
-  { kEHMS,"EHMS","g2t_emc_hit","g2t_esm_hit","ECAL","ecal_emcg"}, 
-  { kELGR,"ELGR","g2t_emc_hit","g2t_eem_hit","ECAL",""}, 
-  { kEPCT,"EPCT","g2t_emc_hit","g2t_eem_hit","ECAL",""}, 
-  { kESCI,"ESCI","g2t_emc_hit","g2t_eem_hit","ECAL","ecal_emcg"}, 
-  { kEXSE,"EXSE","g2t_emc_hit","g2t_esm_hit","ECAL",""}, 
-  { kFDSW,"FDSW","g2t_fst_hit","g2t_fst_hit","FSTD",""},
-  { kFREO,"FREO","g2t_rch_hit","g2t_rch_hit","RICH",""}, 
-  { kFSEC,"FSEC","g2t_ftp_hit","g2t_ftp_hit","FTPC","ftpc_ftpg"}, 
-  { kIBSS,"IBSS","g2t_ist_hit","g2t_ist_hit","ISTB",""}, 
-  { kPDGS,"PDGS","g2t_pmd_hit","g2t_pmd_hit","PHMD",""}, 
-  { kPLAC,"PLAC","g2t_pix_hit","g2t_pix_hit","PIXL",""}, 
-  { kQSCI,"QSCI","g2t_emc_hit","g2t_zdc_hit","ZCAL",""}, 
-  { kQUAR,"QUAR","g2t_rch_hit","g2t_rch_hit","RICH",""}, 
-  { kRCSI,"RCSI","g2t_rch_hit","g2t_rch_hit","RICH",""}, 
-  { kRGAP,"RGAP","g2t_rch_hit","g2t_rch_hit","RICH",""}, 
-  { kSFSD,"SFSD","g2t_svt_hit","g2t_svt_hit","SISD",""}, //g2t_ssd_hit
-  { kSVTD,"SVTD","g2t_svt_hit","g2t_svt_hit","SVTT","svtt_svtg"}, //
-  { kTMSE,"TMSE","g2t_mwc_hit","g2t_mwc_hit","TPCE",""}, 
-  { kTPAD,"TPAD","g2t_tpc_hit","g2t_tpc_hit","TPCE","tpce_tpcg"}, //
-  { kVRAD,"VRAD","g2t_vpd_hit","g2t_vpd_hit","VPDD","vpdd_vpdg"}
+  { kBCSB,"BCSB","g2t_ctf_hit","g2t_tof_hit","BTOF","btof_btog"}, // + 
+  { kBRSG,"BRSG","g2t_ctf_hit","g2t_tfr_hit","BTOF","btof_btog"}, // +
+  { kBXSA,"BXSA","g2t_ctf_hit","g2t_ctb_hit","BTOF","btof_btog"}, // +
+
+  { kBPOL,"BPOL","g2t_ctf_hit","g2t_bbc_hit","BBCM",""}, // +
+
+  { kCSDA,"CSDA","g2t_emc_hit","g2t_smd_hit","CALB",""}, // +
+  { kCSUP,"CSUP","g2t_emc_hit","g2t_emc_hit","CALB",""}, // +
+
+  { kEHMS,"EHMS","g2t_emc_hit","g2t_esm_hit","ECAL","ecal_emcg"}, // +
+  { kELGR,"ELGR","g2t_emc_hit","g2t_eem_hit","ECAL",""}, // +
+  { kEPCT,"EPCT","g2t_emc_hit","g2t_eem_hit","ECAL",""}, // +
+  { kESCI,"ESCI","g2t_emc_hit","g2t_eem_hit","ECAL","ecal_emcg"}, // +
+  { kEXSE,"EXSE","g2t_emc_hit","g2t_esm_hit","ECAL",""}, // +
+
+  { kFGTC,"FGTC","g2t_fgt_hit","g2t_fgt_hit","FGTD",""}, // +
+  { kFHMS,"FHMS","g2t_emc_hit","g2t_fpd_hit","FPDH",""},
+  { kFLGR,"FLGR","g2t_emc_hit","g2t_fpd_hit","FPDH",""},
+  { kFDSW,"FDSW","g2t_fst_hit","g2t_fst_hit","FSTD",""}, // +
+  { kFPCT,"FPCT","g2t_emc_hit","g2t_fpd_hit","FPDH",""},
+  { kFSCI,"FSCI","g2t_emc_hit","g2t_fpd_hit","FPDH",""},
+
+  { kFREO,"FREO","g2t_rch_hit","g2t_rch_hit","RICH",""}, // +
+  { kFSEC,"FSEC","g2t_ftp_hit","g2t_ftp_hit","FTPC","ftpc_ftpg"}, // +
+
+  { kIBSS,"IBSS","g2t_ist_hit","g2t_ist_hit","ISTB",""},  // +
+
+  //?  { kOQUA,"OQUA","g2t_rch_hit","g2t_rch_hit","RICH",""}, 
+  { kPLAC,"PLAC","g2t_pix_hit","g2t_pix_hit","PIXL",""}, // +
+
+  { kPDGS,"PDGS","g2t_pmd_hit","g2t_pmd_hit","PHMD",""}, // +
+
+  { kQSCI,"QSCI","g2t_emc_hit","g2t_zdc_hit","ZCAL",""}, // +
+  { kQUAR,"QUAR","g2t_rch_hit","g2t_rch_hit","RICH",""}, // +
+
+  { kRCSI,"RCSI","g2t_rch_hit","g2t_rch_hit","RICH",""}, // +
+  { kRGAP,"RGAP","g2t_rch_hit","g2t_rch_hit","RICH",""}, // +
+
+  { kSFSD,"SFSD","g2t_svt_hit","g2t_ssd_hit","SISD",""}, // +
+  { kSVTD,"SVTD","g2t_svt_hit","g2t_svt_hit","SVTT","svtt_svtg"}, // +
+
+  { kTMSE,"TMSE","g2t_mwc_hit","g2t_mwc_hit","TPCE",""}, // +
+  { kTPAD,"TPAD","g2t_tpc_hit","g2t_tpc_hit","TPCE","tpce_tpcg"}, // +
+  { kVRAD,"VRAD","g2t_vpd_hit","g2t_vpd_hit","VPDD","vpdd_vpdg"} // +
 };
 //________________________________________________________________________________
 StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) : 
   TDataSet(name,title),  fDetectors(0),fGeoData(0),  fDetList(0), 
-  fVolUserInfo(0), fCurrentDetector(0) 
+  fVolUserInfo(0), fCurrentDetector(0), fDebug(0), fSeed(0), fEventNumber(0)
 { 
   fgInstance = this; fHitHolder = this; 
   if (! fgGeant3) {
@@ -213,6 +228,279 @@ Int_t StarMCHits::Init() {
 #endif
   }
   return 0;
+}
+//________________________________________________________________________________
+void StarMCHits::Step() {
+  //  static Int_t Idevt0 = -1;
+  static Double_t Gold = 0;
+  static St_det_user *user = 0;
+  static St_det_path *path = 0;
+  static St_det_hit  *hit  = 0;
+
+  //  cout << "Call StarMCHits::Step" << endl;
+  TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+  assert(nodeT);
+  TGeoVolume *volT = nodeT->GetVolume();
+  assert(volT);
+  fCurrentDetector = (StHitDescriptor *) fVolUserInfo->At(volT->GetNumber());
+  const TGeoMedium   *med = volT->GetMedium(); 
+  /*   fParams[0] = isvol;
+       fParams[1] = ifield;
+       fParams[2] = fieldm;
+       fParams[3] = tmaxfd;
+       fParams[4] = stemax;
+       fParams[5] = deemax;
+       fParams[6] = epsil;
+       fParams[7] = stmin; */
+  Int_t Isvol = (Int_t) med->GetParam(0);
+  if (Isvol <= 0 && ! fCurrentDetector) return;
+  if (Isvol && ! fCurrentDetector ) {
+    if (Debug())
+      cout << "Active medium:" << med->GetName() << "\t for volume " << volT->GetName() 
+	   << " has no detector description" << endl;
+    return;
+  }
+  if (Isvol <= 0 &&  fCurrentDetector && Debug()) {
+    cout << "Dead medium:" << med->GetName() << "\t for volume " << volT->GetName() 
+	 << " has detector description" << endl;
+    return;
+  }
+  //  Int_t Idevt =  fgGeant3->CurrentEvent();
+  fgGeant3->TrackPosition(fHit.Current.Global.xyzT);
+  fgGeant3->TrackMomentum(fHit.Current.Global.pxyzE);
+  TGeoHMatrix  *matrixC = gGeoManager->GetCurrentMatrix();
+  fHit.Current.Global2Local(matrixC);
+  if (fgGeant3->IsTrackEntering()) {
+    user = fCurrentDetector->GetUserDesc(); det_user_st *User = user->GetTable();
+    fHit.Detector= fCurrentDetector;
+    fHit.IdType  = User->IdType;
+    fHit.Serial  = User->Serial;
+    fHit.Goption = User->Goption;
+    fHit.Nva     = User->Nva;
+    fHit.Nvb     = User->Nvb;
+    path = fCurrentDetector->GetPathDesc();
+    hit  = fCurrentDetector->GetHitDesc();
+    fHit.Entry = fHit.Current;
+    fHit.Sleng = fgGeant3->TrackLength();
+    fHit.Charge = (Int_t) fgGeant3->TrackCharge();
+    fHit.Mass = fgGeant3->TrackMass();
+    fHit.AdEstep = fHit.AStep = 0;
+    return;
+  }
+  Double_t GeKin = fHit.Current.Global.pxyzE.E() - fHit.Mass;
+  fHit.Sleng = fgGeant3->TrackLength();
+  if (fHit.Sleng == 0.) Gold = GeKin;
+  Double_t dEstep = fgGeant3->Edep();
+  Double_t Step = fgGeant3->TrackStep();
+  fHit.iPart = fgGeant3->TrackPid();
+  fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
+  // - - - - - - - - - - - - - energy correction - - - - - - - - - -
+  if (fgGeant3->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
+    TArrayI proc;
+    Int_t Nproc = fgGeant3->StepProcesses(proc);
+    Int_t Mec = 0;
+    for (Int_t i = 0; i < Nproc; i++) if (proc[i] == kPAnnihilation || proc[i] == kPStop) Mec = proc[i];
+    Int_t Ngkine = fgGeant3->NSecondaries();
+    if (fHit.iPart == kElectron && Ngkine == 0 && Mec == kPStop) dEstep = Gold;
+    else {
+      if (fHit.iPart == kPositron && Ngkine < 2 && Mec == kPAnnihilation) {
+	dEstep = Gold + 2*fHit.Mass;
+	if (Ngkine == 1) {
+	  TLorentzVector x;
+	  TLorentzVector p;
+	  Int_t IpartSec;
+	  fgGeant3->GetSecondary(0,IpartSec,x,p);
+	  dEstep -= p.E();
+	}
+      }
+    }
+  }
+  // - - - - - - - - - - - - - - - - user - - - - - - - - - - - - - - -
+  // user step
+  // - - - - - - - - - - - - - - - sensitive - - - - - - - - - - - - -
+  fHit.AdEstep += dEstep;  
+  fHit.AStep   += Step;
+  if (fHit.AdEstep == 0) return;
+  if (! fgGeant3->IsTrackExiting() && ! fgGeant3->IsTrackStop()) return;
+  fHit.Exit     = fHit.Current;
+  fHit.Middle   = fHit.Entry;
+  fHit.Middle  += fHit.Exit;
+  fHit.Middle  *= 0.5;
+  TString thePath(gGeoManager->GetPath());
+  static const TString separator("/_");
+  TObjArray *array = thePath.Tokenize(separator);
+  Int_t N = array->GetEntriesFast();
+  path = fCurrentDetector->GetPathDesc();
+  Int_t NL = path->GetNRows();
+  assert(N == 2*NL);
+  Int_t i, j;
+  TObjString *objs;
+  fHit.NVL = 0;
+  memset (fHit.NUMBV, 0, sizeof(fHit.NUMBV));
+  det_path_st *Path = path->GetTable();// path->Print(0,NL);
+  if (Debug() > 1) cout << "Path: " << thePath;
+  for (i = j = 0; i < NL; i++, j += 2, Path++) {
+    objs = (TObjString *) array->At(j);
+    assert(objs->GetString().BeginsWith(TString(Path->VName,2)));
+    if (Path->Ncopy != 1) {
+      objs = (TObjString *) array->At(j+1);
+      fHit.NUMBV[fHit.NVL] = atoi(objs->GetString().Data());
+      if (Debug() > 1) cout << "\t" << fHit.NUMBV[fHit.NVL];
+      fHit.NVL++;
+    }
+  }
+  if (Debug() > 1) cout << endl;
+  delete array;
+  FillG2Table();
+}
+//________________________________________________________________________________
+void StarMCHits::FillG2Table() {
+  St_g2t_Chair *chair = fCurrentDetector->GetChair();
+  if (! chair ) {
+    TString name(fCurrentDetector->GetName());
+    for (Int_t k = 0; k < kALL; k++) {
+      if (name != TString(g2t[k].Name)) continue;
+      chair = NewChair(g2t[k].G2T_type,g2t[k].G2T_name);
+      assert(chair);
+      fCurrentDetector->SetChair(chair);
+      break;
+    }
+  }
+  assert(chair);
+  chair->Fill(fHit);
+}
+//________________________________________________________________________________
+TTable *StarMCHits::NewTable(const Char_t *classname, const Char_t *name, Int_t nrows) {
+  TTable *table = 0;
+  if (classname) {
+    TClass *cl = gROOT->GetClass(classname);
+    if (cl) {
+      table = (TTable *)cl->New();
+      if (table) {
+	table->Set(nrows);
+	if (name && strlen(name)) table->SetName(name);
+      }
+    } 
+  }
+  return table; 
+}
+//________________________________________________________________________________
+St_g2t_Chair *StarMCHits::NewChair(const Char_t *type, const Char_t *name) {
+  TTable *table = (TTable *) StarMCHits::instance()->GetHitHolder()->Find(name);
+  TString classname("St_");
+  classname += type;
+  if (! table) {
+    table = NewTable(classname,name,100); StarMCHits::instance()->GetHitHolder()->Add(table);
+  }
+  St_g2t_Chair *chair = 0;
+  classname += "C";
+  TClass *cl = gROOT->GetClass(classname);
+  if (cl) {
+    chair = (St_g2t_Chair *)cl->New();
+    if (chair) chair->SetTable(table);
+  } 
+  return chair;
+}
+//________________________________________________________________________________
+void StarMCHits::FinishEvent() {
+  static const Double_t pEMax = 1 - 1.e-10;
+  static const Double_t yMax = TMath::ATanH(pEMax);
+  TDataSet *m_DataSet = StarMCHits::instance()->GetHitHolder();
+  if (! m_DataSet) return;
+  St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
+  m_DataSet->Add(g2t_event);
+  g2t_event_st event;
+  memset (&event, 0, sizeof(g2t_event_st));
+  fEventNumber++;
+  event.n_event            = fEventNumber;//IHEAD(2)
+  event.ge_rndm[0]         =        fSeed;//IHEAD(3)
+  event.ge_rndm[1]         =            0;//IHEAD(4)
+  event.n_run              =            1;
+  event.n_track_eg_fs      = StarVMCApplication::Instance()->GetStack()->GetNtrack();
+  event.n_track_prim       = StarVMCApplication::Instance()->GetStack()->GetNprimary();
+  event.prim_vertex_p      =            1;
+  event.b_impact           =           99;
+  event.phi_impact         =          0.5;
+  g2t_event->AddAt(&event);
+  Int_t NoVertex = 1;
+  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
+  m_DataSet->Add(g2t_vertex); 
+  g2t_vertex_st vertex;
+  Int_t NTracks = StarVMCApplication::Instance()->GetStack()->GetNtrack();
+  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",NTracks);
+  m_DataSet->Add(g2t_track);
+  g2t_track_st track;
+  StarMCParticle  *particle = 0;   
+  Int_t iv = 0;
+  TLorentzVector oldV(0,0,0,0);
+  TLorentzVector newV(0,0,0,0);
+  TLorentzVector devV(0,0,0,0);
+  for (Int_t it = 0; it <NTracks; it++) {
+    memset(&track, 0, sizeof(g2t_track_st));
+    particle = (StarMCParticle*) StarVMCApplication::Instance()->GetStack()->GetParticle(it);
+    TParticle  *part = (TParticle *) particle->GetParticle();
+    part->ProductionVertex(newV);
+    devV = newV - oldV;
+    if (iv == 0 || devV.Mag() > 1.e-7) {
+      if (iv > 0) g2t_vertex->AddAt(&vertex);
+      memset (&vertex, 0, sizeof(g2t_vertex_st));
+      iv++;
+      vertex.id           = iv             ;// primary key 
+      vertex.event_p      = 0              ;// pointer to event
+      vertex.eg_label     = 0              ;// generator label (0 if GEANT)
+      vertex.eg_tof       = 0              ;// vertex production time
+      vertex.eg_proc      = 0              ;// event generator mechanism
+      memcpy(vertex.ge_volume,"   ",4);    ;// GEANT volume name
+      vertex.ge_medium    = 0              ;// GEANT Medium
+      vertex.ge_tof       = 0              ;// GEANT vertex production time
+      vertex.ge_proc      = 0              ;// GEANT mechanism (0 if eg)
+      vertex.ge_x[0]      = newV.X()       ;// GEANT vertex coordinate
+      vertex.ge_x[1]      = newV.Y()       ;
+      vertex.ge_x[2]      = newV.Z()       ;
+      vertex.ge_tof       = newV.T()       ;
+      vertex.n_parent     = 0              ;// number of parent tracks
+      vertex.parent_p     = 0              ;// first parent track
+      vertex.is_itrmd     = 0              ;// flags intermediate vertex
+      vertex.next_itrmd_p = 0              ;// next intermedate vertex 
+      vertex.next_prim_v_p= 0              ;// next primary vertex
+      oldV                = newV;
+    }
+    vertex.n_daughter++;
+    track.id             = it+1;
+    track.eg_label       = particle->GetIdGen();
+    track.eg_pid         = part->GetPdgCode();
+    track.ge_pid         = fgGeant3->IdFromPDG(track.eg_pid);
+    track.start_vertex_p = iv;
+    track.p[0]           = part->Px();
+    track.p[1]           = part->Py();
+    track.p[2]           = part->Pz();
+    track.ptot           = part->P();
+    track.e              = part->Energy();
+    track.charge         = part->GetPDG()->Charge()/3;
+    Double_t   ratio     = part->Pz()/part->Energy();
+    ratio                = TMath::Min(1.-1e-10,TMath::Max(-1.+1e-10, ratio));
+    track.rapidity       = TMath::ATanH(ratio);
+    track.pt             = part->Pt();
+    ratio                = part->Pz()/part->P();
+    ratio                = TMath::Min(1.-1e-10,TMath::Max(-1.+1e-10, ratio));
+    track.eta            = TMath::ATanH(ratio);
+    g2t_track->AddAt(&track);
+  }
+  g2t_vertex->AddAt(&vertex);   
+}
+//________________________________________________________________________________
+void StarMCHits::Clear(const Option_t* opt) {
+  TObjArrayIter next(fVolUserInfo);
+  StHitDescriptor *desc = 0;
+  St_g2t_Chair *chair = 0;
+  while ((desc = (StHitDescriptor *) next())) {
+    chair = desc->GetChair();
+    if (chair) {
+      delete chair;
+      desc->SetChair(0);
+    }
+  }
+  if (gRandom) fSeed = gRandom->GetSeed();
 }
 #if 0
 //________________________________________________________________________________
@@ -326,283 +614,3 @@ Float_t  StarMCHits::GetHitK(Int_t k) {
  return hit;
 }
 #endif
-//________________________________________________________________________________
-void StarMCHits::Step() {
-  //  static Int_t Idevt0 = -1;
-  static Double_t Gold = 0;
-  static St_det_user *user = 0;
-  static St_det_path *path = 0;
-  static St_det_hit  *hit  = 0;
-
-  //  cout << "Call StarMCHits::Step" << endl;
-  TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-  assert(nodeT);
-  TGeoVolume *volT = nodeT->GetVolume();
-  assert(volT);
-  fCurrentDetector = (StHitDescriptor *) fVolUserInfo->At(volT->GetNumber());
-  const TGeoMedium   *med = volT->GetMedium(); 
-  /*   fParams[0] = isvol;
-       fParams[1] = ifield;
-       fParams[2] = fieldm;
-       fParams[3] = tmaxfd;
-       fParams[4] = stemax;
-       fParams[5] = deemax;
-       fParams[6] = epsil;
-       fParams[7] = stmin; */
-  Int_t Isvol = (Int_t) med->GetParam(0);
-  if (Isvol <= 0 && ! fCurrentDetector) return;
-  if (Isvol && ! fCurrentDetector) {
-    cout << "Active medium:" << med->GetName() << "\t for volume " << volT->GetName() 
-	 << " has no detector description" << endl;
-    return;
-  }
-  if (Isvol <= 0 &&  fCurrentDetector) {
-    cout << "Dead medium:" << med->GetName() << "\t for volume " << volT->GetName() 
-	 << " has detector description" << endl;
-    return;
-  }
-  //  Int_t Idevt =  fgGeant3->CurrentEvent();
-  fgGeant3->TrackPosition(fHit.Current.Global.xyzT);
-  fgGeant3->TrackMomentum(fHit.Current.Global.pxyzE);
-  TGeoHMatrix  *matrixC = gGeoManager->GetCurrentMatrix();
-  fHit.Current.Global2Local(matrixC);
-  if (fgGeant3->IsTrackEntering()) {
-    user = fCurrentDetector->GetUserDesc(); det_user_st *User = user->GetTable();
-    fHit.Detector= fCurrentDetector;
-    fHit.IdType  = User->IdType;
-    fHit.Serial  = User->Serial;
-    fHit.Goption = User->Goption;
-    fHit.Nva     = User->Nva;
-    fHit.Nvb     = User->Nvb;
-    path = fCurrentDetector->GetPathDesc();
-    hit  = fCurrentDetector->GetHitDesc();
-    fHit.Entry = fHit.Current;
-    fHit.Sleng = fgGeant3->TrackLength();
-    fHit.Charge = (Int_t) fgGeant3->TrackCharge();
-    fHit.Mass = fgGeant3->TrackMass();
-    fHit.AdEstep = fHit.AStep = 0;
-    return;
-  }
-  Double_t GeKin = fHit.Current.Global.pxyzE.E() - fHit.Mass;
-  fHit.Sleng = fgGeant3->TrackLength();
-  if (fHit.Sleng == 0.) Gold = GeKin;
-  Double_t dEstep = fgGeant3->Edep();
-  Double_t Step = fgGeant3->TrackStep();
-  fHit.iPart = fgGeant3->TrackPid();
-  fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
-  // - - - - - - - - - - - - - energy correction - - - - - - - - - -
-  if (fgGeant3->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
-    TArrayI proc;
-    Int_t Nproc = fgGeant3->StepProcesses(proc);
-    Int_t Mec = 0;
-    for (Int_t i = 0; i < Nproc; i++) if (proc[i] == kPAnnihilation || proc[i] == kPStop) Mec = proc[i];
-    Int_t Ngkine = fgGeant3->NSecondaries();
-    if (fHit.iPart == kElectron && Ngkine == 0 && Mec == kPStop) dEstep = Gold;
-    else {
-      if (fHit.iPart == kPositron && Ngkine < 2 && Mec == kPAnnihilation) {
-	dEstep = Gold + 2*fHit.Mass;
-	if (Ngkine == 1) {
-	  TLorentzVector x;
-	  TLorentzVector p;
-	  Int_t IpartSec;
-	  fgGeant3->GetSecondary(0,IpartSec,x,p);
-	  dEstep -= p.E();
-	}
-      }
-    }
-  }
-  // - - - - - - - - - - - - - - - - user - - - - - - - - - - - - - - -
-  // user step
-  // - - - - - - - - - - - - - - - sensitive - - - - - - - - - - - - -
-  fHit.AdEstep += dEstep;  
-  fHit.AStep   += Step;
-  if (fHit.Charge == 0 && fHit.AdEstep == 0) return;
-  if (! fgGeant3->IsTrackExiting() && ! fgGeant3->IsTrackStop()) return;
-  fHit.Exit     = fHit.Current;
-  fHit.Middle   = fHit.Entry;
-  fHit.Middle  += fHit.Exit;
-  fHit.Middle  *= 0.5;
-  TString thePath(gGeoManager->GetPath());
-  static const TString separator("/_");
-  TObjArray *array = thePath.Tokenize(separator);
-  Int_t N = array->GetEntriesFast();
-  path = fCurrentDetector->GetPathDesc();
-  Int_t NL = path->GetNRows();
-  assert(N == 2*NL);
-  Int_t i, j;
-  TObjString *objs;
-  fHit.NVL = 0;
-  memset (fHit.NUMBV, 0, sizeof(fHit.NUMBV));
-  det_path_st *Path = path->GetTable();// path->Print(0,NL);
-  cout << "Path: " << thePath;
-  for (i = j = 0; i < NL; i++, j += 2, Path++) {
-    objs = (TObjString *) array->At(j);
-    assert(objs->GetString().BeginsWith(TString(Path->VName,3)));
-    if (Path->Ncopy != 1) {
-      objs = (TObjString *) array->At(j+1);
-      fHit.NUMBV[fHit.NVL] = atoi(objs->GetString().Data());
-      cout << "\t" << fHit.NUMBV[fHit.NVL];
-      fHit.NVL++;
-    }
-  }
-  cout << endl;
-  delete array;
-  FillG2Table();
-}
-//________________________________________________________________________________
-void StarMCHits::FillG2Table() {
-  St_g2t_Chair *chair = fCurrentDetector->GetChair();
-  TTable *table = 0;
-  if (! chair ) {
-    TString name(fCurrentDetector->GetName());
-    for (Int_t k = 0; k < kALL; k++) {
-      if (name != TString(g2t[k].Name)) continue;
-#if 1
-      switch (k) {
-      case  kBPOL: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
-      case  kBCSB: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
-      case  kBRSG: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
-      case  kBXSA: table = new St_g2t_ctf_hit(g2t[k].G2T_name,100); chair = new St_g2t_ctf_hitC(table); break;
-      case  kCSDA: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kCSUP: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kEHMS: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kELGR: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kEPCT: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kESCI: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kEXSE: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kFDSW: table = new St_g2t_fst_hit(g2t[k].G2T_name,100); chair = new St_g2t_fst_hitC(table); break;
-      case  kFREO: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
-      case  kFSEC: table = new St_g2t_ftp_hit(g2t[k].G2T_name,100); chair = new St_g2t_ftp_hitC(table); break;
-      case  kIBSS: table = new St_g2t_ist_hit(g2t[k].G2T_name,100); chair = new St_g2t_ist_hitC(table); break;
-      case  kPDGS: table = new St_g2t_pmd_hit(g2t[k].G2T_name,100); chair = new St_g2t_pmd_hitC(table); break;
-      case  kPLAC: table = new St_g2t_pix_hit(g2t[k].G2T_name,100); chair = new St_g2t_pix_hitC(table); break;
-      case  kQSCI: table = new St_g2t_emc_hit(g2t[k].G2T_name,100); chair = new St_g2t_emc_hitC(table); break;
-      case  kQUAR: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
-      case  kRCSI: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
-      case  kRGAP: table = new St_g2t_rch_hit(g2t[k].G2T_name,100); chair = new St_g2t_rch_hitC(table); break;
-      case  kSFSD: table = new St_g2t_svt_hit(g2t[k].G2T_name,100); chair = new St_g2t_svt_hitC(table); break;
-      case  kSVTD: table = new St_g2t_svt_hit(g2t[k].G2T_name,100); chair = new St_g2t_svt_hitC(table); break;
-      case  kTMSE: table = new St_g2t_mwc_hit(g2t[k].G2T_name,100); chair = new St_g2t_mwc_hitC(table); break;
-      case  kTPAD: table = new St_g2t_tpc_hit(g2t[k].G2T_name,100); chair = new St_g2t_tpc_hitC(table); break;
-      case  kVRAD: table = new St_g2t_vpd_hit(g2t[k].G2T_name,100); chair = new St_g2t_vpd_hitC(table); break;
-      default:	assert(0);
-      }
-      assert(table && chair);
-      StarMCHits::instance()->GetHitHolder()->Add(table);
-#else
-      chair = NewChair(g2t[k].G2T_type,g2t[k].G2T_name);
-      assert(chair);
-#endif
-      fCurrentDetector->SetChair(chair);
-      break;
-    }
-  }
-  assert(chair);
-  chair->Fill(fHit);
-}
-//________________________________________________________________________________
-TTable *StarMCHits::NewTable(const Char_t *classname, const Char_t *name, Int_t nrows) {
-  TTable *table = 0;
-  if (classname) {
-    TClass *cl = gROOT->GetClass(classname);
-    if (cl) {
-      table = (TTable *)cl->New();
-      if (table) {
-	table->Set(nrows);
-	if (name && strlen(name)) table->SetName(name);
-      }
-    } 
-  }
-  return table; 
-}
-//________________________________________________________________________________
-St_g2t_Chair *StarMCHits::NewChair(const Char_t *type, const Char_t *name) {
-  TTable *table = (TTable *) StarMCHits::instance()->GetHitHolder()->Find(name);
-  TString classname("St_");
-  classname += type;
-  if (! table) {
-    table = NewTable(classname,name,100); StarMCHits::instance()->GetHitHolder()->Add(table);
-  }
-  St_g2t_Chair *chair = 0;
-  classname += "C";
-  TClass *cl = gROOT->GetClass(classname);
-  if (cl) {
-    chair = (St_g2t_Chair *)cl->New();
-    if (chair) chair->SetTable(table);
-  } 
-  return chair;
-}
-//________________________________________________________________________________
-void StarMCHits::FinishEvent() {
-  TDataSet *m_DataSet = StarMCHits::instance()->GetHitHolder();
-  if (! m_DataSet) return;
-  St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
-  m_DataSet->Add(g2t_event);
-  g2t_event_st event;
-  memset (&event, 0, sizeof(g2t_event_st));
-  event.n_event            = 0;//IHEAD(2)
-  event.ge_rndm[0]         = 0;//IHEAD(3)
-  event.ge_rndm[1]         = 0;//IHEAD(4)
-  g2t_event->AddAt(&event);
-  Int_t NoVertex = 1;
-  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",NoVertex);
-  m_DataSet->Add(g2t_vertex); 
-  g2t_vertex_st vertex;
-  StarMCPrimaryGenerator* gen = StarMCPrimaryGenerator::Instance();
-  for (Int_t iv = 0; iv < NoVertex; iv++) {
-    memset (&vertex, 0, sizeof(g2t_vertex_st));
-    vertex.id           = iv+1           ;// primary key 
-    vertex.event_p      = 0              ;// pointer to event
-    vertex.eg_label     = 0              ;// generator label (0 if GEANT)
-    vertex.eg_tof       = 0              ;// vertex production time
-    vertex.eg_proc      = 0              ;// event generator mechanism
-    memcpy(vertex.ge_volume,"   ",4);    ;// GEANT volume name
-    vertex.ge_medium    = 0              ;// GEANT Medium
-    vertex.ge_tof       = 0              ;// GEANT vertex production time
-    vertex.ge_proc      = 0              ;// GEANT mechanism (0 if eg)
-    vertex.ge_x[0]      = gen->GetOrigin().x();;// GEANT vertex coordinate
-    vertex.ge_x[1]      = gen->GetOrigin().y();
-    vertex.ge_x[2]      = gen->GetOrigin().z();
-    vertex.n_parent     = 0              ;// number of parent tracks
-    vertex.parent_p     = 0              ;// first parent track
-    vertex.is_itrmd     = 0              ;// flags intermediate vertex
-    vertex.next_itrmd_p = 0              ;// next intermedate vertex 
-    vertex.next_prim_v_p= 0              ;// next primary vertex
-    g2t_vertex->AddAt(&vertex);   
-  }
-  Int_t NTracks = StarVMCApplication::Instance()->GetStack()->GetNtrack();
-  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",NTracks);
-  m_DataSet->Add(g2t_track);
-  g2t_track_st track;
-  TParticle    *particle = 0;   
-  for (Int_t it = 0; it <NTracks; it++) {
-    memset(&track, 0, sizeof(g2t_track_st));
-    particle = StarVMCApplication::Instance()->GetStack()->PopPrimaryForTracking(it);
-    track.id             = it+1;
-    track.start_vertex_p = 1;
-    track.p[0]           = particle->Px();
-    track.p[1]           = particle->Py();
-    track.p[2]           = particle->Pz();
-    track.ptot           = particle->P();
-    track.e              = particle->Energy();
-    track.ge_pid         = particle->GetPdgCode();
-    track.charge         = particle->GetPDG()->Charge()/3;
-    track.rapidity       = -999;
-    track.pt             = particle->Pt();
-    track.eta            = particle->Eta();
-    g2t_track->AddAt(&track);
-  }
-}
-//________________________________________________________________________________
-void StarMCHits::Clear(const Option_t* opt) {
-  TObjArrayIter next(fVolUserInfo);
-  StHitDescriptor *desc = 0;
-  St_g2t_Chair *chair = 0;
-  while ((desc = (StHitDescriptor *) next())) {
-    chair = desc->GetChair();
-    if (chair) {
-      delete chair;
-      desc->SetChair(0);
-    }
-  }
-}

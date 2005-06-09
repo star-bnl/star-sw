@@ -5,6 +5,7 @@ ClassImp(St_g2t_Chair);
 ClassImp(St_g2t_ctf_hitC);
 ClassImp(St_g2t_emc_hitC);
 ClassImp(St_g2t_fst_hitC);
+ClassImp(St_g2t_fgt_hitC);
 ClassImp(St_g2t_ftp_hitC);
 ClassImp(St_g2t_ist_hitC);
 ClassImp(St_g2t_mwc_hitC);
@@ -16,16 +17,51 @@ ClassImp(St_g2t_svt_hitC);
 ClassImp(St_g2t_tpc_hitC);
 ClassImp(St_g2t_vpd_hitC);
 Int_t St_g2t_Chair::fDebug = 0;
+#define G2TBookTrackHit(A) \
+  static g2t_ ## A ## _hit_st g2t_ ## A ## _hit;\
+  memset(&g2t_ ## A ## _hit, 0, sizeof(g2t_ ## A ## _hit_st));			\
+  St_g2t_ ## A ## _hit *table = (St_g2t_ ## A ## _hit*) GetThisTable(); if (Debug()) table->Print(0,5); \
+  Int_t  nok = table->GetNRows()+1; 
+#define G2TFillNextTrack(A) \
+  g2t_ ## A ## _hit_st *row = table->GetTable(); \
+  for (Int_t i = nok - 2; i >= 0; i--) if ((row+i)->track_p == vect.iTrack) {g2t_ ## A ## _hit.next_tr_hit_p = i; break;} 
+#define G2TFillTrackHitB(A) \
+  g2t_ ## A ## _hit.id            = nok;					\
+  g2t_ ## A ## _hit.x[0]          = vect.Middle.Global.xyzT.X();		\
+  g2t_ ## A ## _hit.x[1]          = vect.Middle.Global.xyzT.Y();		\
+  g2t_ ## A ## _hit.x[2]          = vect.Middle.Global.xyzT.Z();		\
+  g2t_ ## A ## _hit.p[0]          = vect.Middle.Global.pxyzE.X();		\
+  g2t_ ## A ## _hit.p[1]          = vect.Middle.Global.pxyzE.Y();		\
+  g2t_ ## A ## _hit.p[2]          = vect.Middle.Global.pxyzE.Z();		\
+  g2t_ ## A ## _hit.tof           = vect.Middle.Global.xyzT.T();		\
+  g2t_ ## A ## _hit.de            = vect.AdEstep;				\
+  g2t_ ## A ## _hit.ds            = vect.AStep;				        \
+  g2t_ ## A ## _hit.track_p       = vect.iTrack;				\
+  g2t_ ## A ## _hit.volume_id     = volume_id; 
+#define G2TFillTrackHit(A) \
+  G2TFillTrackHitB(A) \
+  G2TFillNextTrack(A) \
+  table->AddAt(&g2t_ ## A ## _hit);
+#define G2TFillTrackRCHit(A) \
+  G2TFillTrackHitB(A) \
+  table->AddAt(&g2t_ ## A ## _hit);
+#define G2TFillTrackHitNoTOF(A) \
+  g2t_ ## A ## _hit.id            = nok;					\
+  g2t_ ## A ## _hit.x[0]          = vect.Middle.Global.xyzT.X();		\
+  g2t_ ## A ## _hit.x[1]          = vect.Middle.Global.xyzT.Y();		\
+  g2t_ ## A ## _hit.x[2]          = vect.Middle.Global.xyzT.Z();		\
+  g2t_ ## A ## _hit.p[0]          = vect.Middle.Global.pxyzE.X();		\
+  g2t_ ## A ## _hit.p[1]          = vect.Middle.Global.pxyzE.Y();		\
+  g2t_ ## A ## _hit.p[2]          = vect.Middle.Global.pxyzE.Z();		\
+  g2t_ ## A ## _hit.de            = vect.AdEstep;				\
+  g2t_ ## A ## _hit.track_p       = vect.iTrack;				\
+  g2t_ ## A ## _hit.volume_id     = volume_id;				\
+  table->AddAt(&g2t_ ## A ## _hit);
 //________________________________________________________________________________
 //void St_g2t_hitsC::Fill(GHit_t &vect) {}
 //________________________________________________________________________________
 void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
-  static g2t_ctf_hit_st g2t_ctf_hit;
-  memset(&g2t_ctf_hit, 0, sizeof(g2t_ctf_hit_st));
-  St_g2t_ctf_hit *table = (St_g2t_ctf_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_ctf_hit.id            = nok;
   Int_t volume_id = 0;
   if (VolName == "BPOL") // BBC
     volume_id = vect.NUMBV[0]*1000 + vect.NUMBV[1]*100 + vect.NUMBV[2]*10 + vect.NUMBV[3];
@@ -48,20 +84,10 @@ void St_g2t_ctf_hitC::Fill(GHit_t &vect) {
     Int_t layer      = vect.NUMBV[3];        //  layer (phi, get from hit position)
     volume_id  = layer +10*(module +100*(sector+100*rileft) );
   }
-  g2t_ctf_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_ctf_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_ctf_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_ctf_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_ctf_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_ctf_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_ctf_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_ctf_hit.de            = vect.AdEstep;
-  g2t_ctf_hit.ds            = vect.AStep;
-  g2t_ctf_hit.s_track    = vect.Sleng;
-  g2t_ctf_hit.track_p       = vect.iTrack;
-  g2t_ctf_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_ctf_hit);  
-}
+  G2TBookTrackHit(ctf);
+  g2t_ctf_hit.s_track       = vect.Sleng;				\
+  G2TFillTrackHit(ctf);
+ }
 //________________________________________________________________________________
 void St_g2t_emc_hitC::Fill(GHit_t &vect) {
   static g2t_emc_hit_st g2t_emc_hit;
@@ -125,21 +151,18 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
           volume_id=100000000*rileft+1000000*eta+1000*phi+100*forw_back+strip;
      
   } else if (VolName == "ESCI") { // eem 
-    rileft    = vect.NUMBV[0];
+    rileft    = vect.NUMBV[0];    // emcg_onoff >= 3 only
     shift     = 1;
-    iWheel = vect.NUMBV[shift];
+    iWheel = vect.NUMBV[shift];   // emcg_version >= 5 && emcg_FillMode > 2
     shift  += 1;
-    section   = vect.NUMBV[shift];                        // ECVO
-    phi_30d   = sector_hash[iWheel][vect.NUMBV[shift+1]];   // EMOD
-    zsubsect  = vect.NUMBV[shift+2];                        // ESEC (no readout)
-    zsublayer = vect.NUMBV[shift+3];                        // EMGT (no readout)
-    phi       = vect.NUMBV[shift+4];                        // EPER (5 fingers)
-    eta       = vect.NUMBV[shift+5];                        // ETAR (radial division)
+    section   = vect.NUMBV[shift];                           // ECVO
+    phi_30d   = sector_hash[iWheel-1][vect.NUMBV[shift+1]-1];// EMOD
+    zsubsect  = vect.NUMBV[shift+2];                         // ESEC (no readout)
+    zsublayer = vect.NUMBV[shift+3];                         // EMGT (no readout)
+    phi       = vect.NUMBV[shift+4];                         // EPER (5 fingers)
+    eta       = vect.NUMBV[shift+5];                         // ETAR (radial division)
     eemc_depth = zsubsect + 3*(section-1);
     volume_id = 100000*rileft + 1000*(5*(phi_30d-1)+phi) + 10*eta + eemc_depth;
-  } else if (VolName == "ELGR") { // eem 
-  } else if (VolName == "EPCT") { // eem 
-  } else if (VolName == "EXSE") { // esm 
   } else if (VolName == "EHMS") { // esm 
     rileft    = vect.NUMBV[0];
     shift     = 1;
@@ -166,48 +189,44 @@ void St_g2t_emc_hitC::Fill(GHit_t &vect) {
     volume_id = 1000000*rileft+10000*phi_30d+1000*depth+strip;
   } else if (VolName == "QSCI") { // zdc 
     volume_id = vect.NUMBV[0]*1000+vect.NUMBV[1];
+//   } else if (VolName == "ELGR") { // eem 
+//   } else if (VolName == "EPCT") { // eem 
+//   } else if (VolName == "EXSE") { // esm 
+  } else {
+    volume_id=1000*(1000*vect.NUMBV[0] + vect.NUMBV[1]) + vect.NUMBV[2];
   }
   g2t_emc_hit.de            = vect.AdEstep;
   g2t_emc_hit.track_p       = vect.iTrack;
   g2t_emc_hit.volume_id     = volume_id;
+  g2t_emc_hit_st *emc = table->GetTable();
+  for (Int_t i = 0; i < nok - 1; i++, emc++) {
+    if (emc->volume_id == g2t_emc_hit.volume_id &&
+	emc->track_p   == g2t_emc_hit.track_p) {
+      emc->de += g2t_emc_hit.de;
+      return;
+    }
+  }
   table->AddAt(&g2t_emc_hit);    
 }
 //________________________________________________________________________________
 void St_g2t_fst_hitC::Fill(GHit_t &vect) {
-  static g2t_fst_hit_st g2t_fst_hit;
-  memset(&g2t_fst_hit, 0, sizeof(g2t_fst_hit_st));
-  St_g2t_fst_hit *table = (St_g2t_fst_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_fst_hit.id            = nok;
-  Int_t volume_id = 0;
-  volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
-  g2t_fst_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_fst_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_fst_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_fst_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_fst_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_fst_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_fst_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_fst_hit.de            = vect.AdEstep;
-  g2t_fst_hit.ds            = vect.AStep;
-  g2t_fst_hit.track_p       = vect.iTrack;
-  g2t_fst_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_fst_hit);  
+  Int_t volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
+  G2TBookTrackHit(fst);
+  G2TFillTrackHit(fst);
+}
+//________________________________________________________________________________
+void St_g2t_fgt_hitC::Fill(GHit_t &vect) {
+  TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
+  Int_t volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
+  G2TBookTrackHit(fgt);
+  G2TFillTrackHit(fgt);
 }
 //________________________________________________________________________________
 void St_g2t_ftp_hitC::Fill(GHit_t &vect) {
   static Int_t  ftpc_hash[2][6] = {{ 1, 6, 5, 4, 3, 2}, // switch indexes
 				   { 6, 1, 2, 3, 4, 5}};
-
-
-  static g2t_ftp_hit_st g2t_ftp_hit;
-  memset(&g2t_ftp_hit, 0, sizeof(g2t_ftp_hit_st));
-  St_g2t_ftp_hit *table = (St_g2t_ftp_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_ftp_hit.id            = nok;
-  Int_t volume_id = 0;
 /* ftpv=1 for west, 2 for east part of the FTPC
  * ftpc_sector is the phi division of the gas layer
  * the numbering scheme below designed by Janet Seyboth,
@@ -218,172 +237,65 @@ void St_g2t_ftp_hitC::Fill(GHit_t &vect) {
  * --max-- */
   Int_t ftpv       = vect.NUMBV[0];
   Int_t padrow     = vect.NUMBV[1];
-  Int_t ftpc_sector= ftpc_hash[ftpv][vect.NUMBV[2]];
-  volume_id  = (100*ftpv+padrow)*10 + ftpc_sector;
-  g2t_ftp_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_ftp_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_ftp_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_ftp_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_ftp_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_ftp_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_ftp_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_ftp_hit.de            = vect.AdEstep;
-  g2t_ftp_hit.ds            = vect.AStep;
-  g2t_ftp_hit.track_p       = vect.iTrack;
-  g2t_ftp_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_ftp_hit);  
+  Int_t ftpc_sector= ftpc_hash[ftpv-1][vect.NUMBV[2]-1];
+  Int_t volume_id  = (100*ftpv+padrow)*10 + ftpc_sector;
+  G2TBookTrackHit(ftp);
+  G2TFillTrackHit(ftp);
 }
 //________________________________________________________________________________
 void St_g2t_ist_hitC::Fill(GHit_t &vect) {
-  static g2t_ist_hit_st g2t_ist_hit;
-  memset(&g2t_ist_hit, 0, sizeof(g2t_ist_hit_st));
-  St_g2t_ist_hit *table = (St_g2t_ist_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_ist_hit.id            = nok;
-  Int_t volume_id = 0;
-  volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
-  g2t_ist_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_ist_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_ist_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_ist_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_ist_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_ist_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_ist_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_ist_hit.de            = vect.AdEstep;
-  g2t_ist_hit.ds            = vect.AStep;
-  g2t_ist_hit.track_p       = vect.iTrack;
-  g2t_ist_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_ist_hit);  
+  Int_t volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
+  G2TBookTrackHit(ist);
+  G2TFillTrackHit(ist);
 }
 //________________________________________________________________________________
 void St_g2t_mwc_hitC::Fill(GHit_t &vect) {
-  static g2t_mwc_hit_st g2t_mwc_hit;
-  memset(&g2t_mwc_hit, 0, sizeof(g2t_mwc_hit_st));
-  St_g2t_mwc_hit *table = (St_g2t_mwc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_mwc_hit.id            = nok;
-  Int_t volume_id = 0;
   Int_t rileft    = vect.NUMBV[0];
   Int_t sector    = vect.NUMBV[1]; 
   Int_t innout    = vect.NUMBV[2];
   Int_t innour    = vect.NUMBV[3];
-  volume_id = 1000*rileft+100*innout+10*innour+sector;
-
-  g2t_mwc_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_mwc_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_mwc_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_mwc_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_mwc_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_mwc_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_mwc_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_mwc_hit.de            = vect.AdEstep;
-  g2t_mwc_hit.ds            = vect.AStep;
-  g2t_mwc_hit.track_p       = vect.iTrack;
-  g2t_mwc_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_mwc_hit);  
+  Int_t volume_id = 1000*rileft+100*innout+10*innour+sector;
+  G2TBookTrackHit(mwc);
+  g2t_mwc_hit.s_track       = vect.Sleng;				\
+  G2TFillTrackHit(mwc);
 }
 //________________________________________________________________________________
 void St_g2t_pix_hitC::Fill(GHit_t &vect) {
-  static g2t_pix_hit_st g2t_pix_hit;
-  memset(&g2t_pix_hit, 0, sizeof(g2t_pix_hit_st));
-  St_g2t_pix_hit *table = (St_g2t_pix_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_pix_hit.id            = nok;
-  Int_t volume_id = 0;
-  volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
-  g2t_pix_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_pix_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_pix_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_pix_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_pix_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_pix_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_pix_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_pix_hit.de            = vect.AdEstep;
-  g2t_pix_hit.ds            = vect.AStep;
-  g2t_pix_hit.track_p       = vect.iTrack;
-  g2t_pix_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_pix_hit);  
+  Int_t volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*10000 + vect.NUMBV[2]*100  + vect.NUMBV[3];
+  G2TBookTrackHit(pix);
+  G2TFillTrackHit(pix);
 }
 //________________________________________________________________________________
 void St_g2t_pmd_hitC::Fill(GHit_t &vect) {
-  static g2t_pmd_hit_st g2t_pmd_hit;
-  memset(&g2t_pmd_hit, 0, sizeof(g2t_pmd_hit_st));
-  St_g2t_pmd_hit *table = (St_g2t_pmd_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
-  TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_pmd_hit.id            = nok;
-  Int_t volume_id = 0;
-  volume_id = vect.NUMBV[0]*1000000 + vect.NUMBV[1]*100000 + vect.NUMBV[2]*10000 + vect.NUMBV[3]*100 + vect.NUMBV[4];
-  g2t_pmd_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_pmd_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_pmd_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_pmd_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_pmd_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_pmd_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_pmd_hit.de            = vect.AdEstep;
-  g2t_pmd_hit.track_p       = vect.iTrack;
-  g2t_pmd_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_pmd_hit);  
+  Int_t volume_id =  vect.NUMBV[0]*1000000 + vect.NUMBV[1]*100000 + vect.NUMBV[2]*10000 + vect.NUMBV[3]*100 + vect.NUMBV[4];
+  G2TBookTrackHit(pmd);
+  G2TFillTrackHitNoTOF(pmd);
 }
 //________________________________________________________________________________
 void St_g2t_rch_hitC::Fill(GHit_t &vect) {
-  static g2t_rch_hit_st g2t_rch_hit;
-  memset(&g2t_rch_hit, 0, sizeof(g2t_rch_hit_st));
-  St_g2t_rch_hit *table = (St_g2t_rch_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_rch_hit.id            = nok;
-  Int_t volume_id = 0;
   Int_t is=0;
   if      (VolName == "RGAP") is=1;
   else if (VolName == "RCSI") is=2;
   else if (VolName == "QUAR") is=3;
   else if (VolName == "FREO") is=4;
   else if (VolName == "OQUA") is=5;
-  volume_id = vect.NUMBV[0] + is*1000;
-  g2t_rch_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_rch_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_rch_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_rch_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_rch_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_rch_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_rch_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_rch_hit.de            = vect.AdEstep;
-  g2t_rch_hit.ds            = vect.AStep;
-  g2t_rch_hit.track_p       = vect.iTrack;
-  g2t_rch_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_rch_hit);  
+  Int_t volume_id = vect.NUMBV[0] + is*1000;
+  G2TBookTrackHit(rch);
+  G2TFillTrackRCHit(rch);
 }
 //________________________________________________________________________________
 void St_g2t_ssd_hitC::Fill(GHit_t &vect) {
-  static g2t_ssd_hit_st g2t_ssd_hit;
-  memset(&g2t_ssd_hit, 0, sizeof(g2t_ssd_hit_st));
-  St_g2t_ssd_hit *table = (St_g2t_ssd_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_ssd_hit.id            = nok;
-  Int_t volume_id = 0;
-  volume_id =  7000+100*vect.NUMBV[1]+vect.NUMBV[0];// ssd
-  g2t_ssd_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_ssd_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_ssd_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_ssd_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_ssd_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_ssd_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_ssd_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_ssd_hit.de            = vect.AdEstep;
-  g2t_ssd_hit.ds            = vect.AStep;
-  g2t_ssd_hit.track_p       = vect.iTrack;
-  g2t_ssd_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_ssd_hit);
+  Int_t volume_id = 7000+100*vect.NUMBV[1]+vect.NUMBV[0];// ssd
+  G2TBookTrackHit(ssd);
+  G2TFillTrackHit(ssd);
 }
 //________________________________________________________________________________
 void St_g2t_svt_hitC::Fill(GHit_t &vect) {
-  static g2t_svt_hit_st g2t_svt_hit;
-  memset (&g2t_svt_hit, 0, sizeof(g2t_svt_hit_st));
   TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
   // Helen altered SVT volume IDs so agrees with hardware defs.
   Int_t      lnumber  = vect.NUMBV[0];
@@ -391,9 +303,6 @@ void St_g2t_svt_hitC::Fill(GHit_t &vect) {
   Int_t      wafer    = vect.NUMBV[2];
   Int_t      nladder  = 0;
   Int_t      volume_id = -1;
-  St_g2t_svt_hit *table = (St_g2t_svt_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
-  g2t_svt_hit.id            = nok;
   if (VolName == "SFSD") {//ssd
     volume_id =  7000+100*vect.NUMBV[1]+vect.NUMBV[0];// ssd
   } else {//      SVTD      svt
@@ -427,29 +336,17 @@ void St_g2t_svt_hitC::Fill(GHit_t &vect) {
     }
     volume_id  = 1000*lnumber+100*wafer+ladder;
   }
-  g2t_svt_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_svt_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_svt_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_svt_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_svt_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_svt_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_svt_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_svt_hit.de            = vect.AdEstep;
-  g2t_svt_hit.ds            = vect.AStep;
-  g2t_svt_hit.track_p       = vect.iTrack;
-  g2t_svt_hit.volume_id     = volume_id;
+  G2TBookTrackHit(svt);
 #if 0
   //                  add to track linked list 
   g2t_svt_hit.next_tr_hit_p = g2t_track(trac).hit_svt_p;
   g2t_track(trac).hit_svt_p    = nok;
   g2t_track(trac).n_svt_hit    = g2t_track(trac).n_svt_hit + 1;
 #endif  
-  table->AddAt(&g2t_svt_hit);
+  G2TFillTrackHit(svt);
 }
 //________________________________________________________________________________
 void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
-  static g2t_tpc_hit_st g2t_tpc_hit;
-  memset (&g2t_tpc_hit, 0, sizeof(g2t_tpc_hit_st));
   Int_t      tpgv  = vect.NUMBV[0];
   Int_t      tpss  = vect.NUMBV[1];
   Int_t      sector= tpss+12*(tpgv-1);
@@ -466,42 +363,23 @@ void St_g2t_tpc_hitC::Fill(GHit_t &vect) {
     }
   }
   Int_t volume_id=100000*isdet+100*sector+tpad;
-  St_g2t_tpc_hit *table = (St_g2t_tpc_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
-  g2t_tpc_hit.id            = nok;
-  g2t_tpc_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_tpc_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_tpc_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_tpc_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_tpc_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_tpc_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_tpc_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_tpc_hit.de            = vect.AdEstep;
-  g2t_tpc_hit.ds            = vect.AStep;
-  g2t_tpc_hit.track_p       = vect.iTrack;
-  g2t_tpc_hit.volume_id     = volume_id;
+  G2TBookTrackHit(tpc);
+  
   Double_t GeKin            = vect.Middle.Global.pxyzE.E() - vect.Mass;
   Double_t lgam             = 0;
   if (vect.Mass > 0 && GeKin > 0 && vect.Charge != 0) 
     lgam = TMath::Log10(GeKin/vect.Mass);
   g2t_tpc_hit.lgam          = lgam;
-  
 #if 0
   //                  add to track linked list 
   g2t_tpc_hit.next_tr_hit_p = g2t_track(trac).hit_tpc_p;
   g2t_track(trac).hit_tpc_p    = nok;
   g2t_track(trac).n_tpc_hit    = g2t_track(trac).n_tpc_hit + 1;
 #endif  
-  table->AddAt(&g2t_tpc_hit);
+  G2TFillTrackHit(tpc);
 }
 //________________________________________________________________________________
 void St_g2t_vpd_hitC::Fill(GHit_t &vect) {
-  static g2t_vpd_hit_st g2t_vpd_hit;
-  memset(&g2t_vpd_hit, 0, sizeof(g2t_vpd_hit_st));
-  St_g2t_vpd_hit *table = (St_g2t_vpd_hit*) GetThisTable(); if (Debug()) table->Print(0,5);
-  Int_t nok = table->GetNRows()+1;
-  TString VolName(StarMCHits::instance()->GetCurrentDetector()->GetName());
-  g2t_vpd_hit.id            = nok;
   Int_t volume_id = 0;
   Int_t rileft    = vect.NUMBV[0];
   Int_t innout    = vect.NUMBV[1];
@@ -512,17 +390,8 @@ void St_g2t_vpd_hitC::Fill(GHit_t &vect) {
     sector    = vect.NUMBV[1];
   }
   volume_id  =  1000*rileft + 100*innout + sector;
-  g2t_vpd_hit.x[0]          = vect.Middle.Global.xyzT.X();
-  g2t_vpd_hit.x[1]          = vect.Middle.Global.xyzT.Y();
-  g2t_vpd_hit.x[2]          = vect.Middle.Global.xyzT.Z();
-  g2t_vpd_hit.p[0]          = vect.Middle.Global.pxyzE.X();
-  g2t_vpd_hit.p[1]          = vect.Middle.Global.pxyzE.Y();
-  g2t_vpd_hit.p[2]          = vect.Middle.Global.pxyzE.Z();
-  g2t_vpd_hit.tof           = vect.Middle.Global.xyzT.T();
-  g2t_vpd_hit.de            = vect.AdEstep;
-  g2t_vpd_hit.ds            = vect.AStep;
-  g2t_vpd_hit.track_p       = vect.iTrack;
-  g2t_vpd_hit.volume_id     = volume_id;
-  table->AddAt(&g2t_vpd_hit);  
+  G2TBookTrackHit(vpd);
+  g2t_vpd_hit.s_track       = vect.Sleng;				\
+  G2TFillTrackHit(vpd);
 }
 //________________________________________________________________________________

@@ -8,6 +8,7 @@
 //#include "tables/St_g2t_hits_Table.h"
 #include "tables/St_g2t_ctf_hit_Table.h"
 #include "tables/St_g2t_emc_hit_Table.h"
+#include "tables/St_g2t_fgt_hit_Table.h"
 #include "tables/St_g2t_fst_hit_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_g2t_ist_hit_Table.h"
@@ -19,13 +20,6 @@
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_vpd_hit_Table.h"
-#if 0
-#include "tables/St_g2t_event_Table.h"
-#include "tables/St_g2t_track_Table.h"
-#include "tables/St_g2t_vertex_Table.h"
-#include "tables/St_particle_Table.h"
-#include "tables/St_g2t_pythia_Table.h"
-#endif
 #include "StarHitVector.h"
 class St_g2t_Chair : public TChair {
  public:
@@ -55,7 +49,7 @@ class St_g2t_Chair : public TChair {
 };
 class St_g2t_ctf_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_ctf_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_ctf_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_ctf_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_ctf_hit,g2t_ctf_hit_st)
@@ -63,7 +57,7 @@ class St_g2t_ctf_hitC : public St_g2t_Chair	{
 };
 class St_g2t_emc_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_emc_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_emc_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_emc_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_emc_hit,g2t_emc_hit_st)
@@ -71,15 +65,23 @@ class St_g2t_emc_hitC : public St_g2t_Chair	{
 };
 class St_g2t_fst_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_fst_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_fst_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_fst_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_fst_hit,g2t_fst_hit_st)
   ClassDef(St_g2t_fst_hitC,1)
 };
+class St_g2t_fgt_hitC : public St_g2t_Chair	{    
+ public: 
+  St_g2t_fgt_hitC(TTable *table=0): St_g2t_Chair(table) {}
+  virtual ~St_g2t_fgt_hitC() {}
+  virtual void    Fill(GHit_t &vect); 
+  ClassDefChair(St_g2t_fgt_hit,g2t_fgt_hit_st)
+  ClassDef(St_g2t_fgt_hitC,1)
+};
 class St_g2t_ftp_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_ftp_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_ftp_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_ftp_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_ftp_hit,g2t_ftp_hit_st)
@@ -87,7 +89,7 @@ class St_g2t_ftp_hitC : public St_g2t_Chair	{
 };
 class St_g2t_ist_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_ist_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_ist_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_ist_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_ist_hit,g2t_ist_hit_st)
@@ -95,7 +97,7 @@ class St_g2t_ist_hitC : public St_g2t_Chair	{
 };
 class St_g2t_mwc_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_mwc_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_mwc_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_mwc_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_mwc_hit,g2t_mwc_hit_st)
@@ -103,7 +105,7 @@ class St_g2t_mwc_hitC : public St_g2t_Chair	{
 };
 class St_g2t_pix_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_pix_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_pix_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_pix_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_pix_hit,g2t_pix_hit_st)
@@ -111,7 +113,7 @@ class St_g2t_pix_hitC : public St_g2t_Chair	{
 };
 class St_g2t_pmd_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_pmd_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_pmd_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_pmd_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_pmd_hit,g2t_pmd_hit_st)
@@ -119,7 +121,7 @@ class St_g2t_pmd_hitC : public St_g2t_Chair	{
 };
 class St_g2t_rch_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_rch_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_rch_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_rch_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_rch_hit,g2t_rch_hit_st)
@@ -127,7 +129,7 @@ class St_g2t_rch_hitC : public St_g2t_Chair	{
 };
 class St_g2t_ssd_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_ssd_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_ssd_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_ssd_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_ssd_hit,g2t_ssd_hit_st)
@@ -135,7 +137,7 @@ class St_g2t_ssd_hitC : public St_g2t_Chair	{
 };
 class St_g2t_svt_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_svt_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_svt_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_svt_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_svt_hit,g2t_svt_hit_st)
@@ -143,7 +145,7 @@ class St_g2t_svt_hitC : public St_g2t_Chair	{
 };
 class St_g2t_tpc_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_tpc_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_tpc_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_tpc_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_tpc_hit,g2t_tpc_hit_st)
@@ -151,7 +153,7 @@ class St_g2t_tpc_hitC : public St_g2t_Chair	{
 };
 class St_g2t_vpd_hitC : public St_g2t_Chair	{    
  public: 
-  St_g2t_vpd_hitC(TTable *table): St_g2t_Chair(table) {}
+  St_g2t_vpd_hitC(TTable *table=0): St_g2t_Chair(table) {}
   virtual ~St_g2t_vpd_hitC() {}
   virtual void    Fill(GHit_t &vect); 
   ClassDefChair(St_g2t_vpd_hit,g2t_vpd_hit_st)

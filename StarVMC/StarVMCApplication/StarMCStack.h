@@ -1,5 +1,8 @@
-// $Id: StarMCStack.h,v 1.2 2005/05/03 15:42:14 fisyak Exp $
+// $Id: StarMCStack.h,v 1.3 2005/06/09 20:13:47 fisyak Exp $
 // $Log: StarMCStack.h,v $
+// Revision 1.3  2005/06/09 20:13:47  fisyak
+// It looks like that all hits in place (calorimeters have to be check for volumeid)
+//
 // Revision 1.2  2005/05/03 15:42:14  fisyak
 // Adjust for bfc
 //
@@ -19,7 +22,7 @@
 
 class StarMCStack : public TVirtualMCStack {
  public:
-  StarMCStack(Int_t size = 0) : fParticles(0), fCurrentTrack(-1), fNPrimary(0) {
+  StarMCStack(Int_t size = 0) : fParticles(0), fCurrentTrack(-1), fNPrimary(0), fCurrentParticle(0) {
 			if (size > 0) fParticles = new TObjArray(size);}
   virtual ~StarMCStack() {if (fParticles) fParticles->Delete(); delete fParticles;}
 
@@ -31,29 +34,28 @@ class StarMCStack : public TVirtualMCStack {
 			  TMCProcess mech, Int_t& ntr, Double_t weight,
 			  Int_t is) ;
   virtual TParticle* PopNextTrack(Int_t& track);
-  virtual TParticle* PopPrimaryForTracking(Int_t i); 
+  virtual TParticle* PopPrimaryForTracking(Int_t i) {return ((StarMCParticle *) fParticles->At(i))->GetParticle();}
   void Print(const Option_t *opt=0) const;   
   void Reset();   
    
-  // set methods
-  virtual void  SetCurrentTrack(Int_t track) {fCurrentTrack = track;}
-
-  // get methods
-  virtual Int_t  GetNtrack() const {return fParticles->GetEntriesFast();}
-  virtual Int_t  GetNprimary() const {return fNPrimary;}
+  virtual void       SetCurrentTrack(Int_t track)  {fCurrentTrack = track;}
+  virtual void       SetNprimary(Int_t nprim)      {fNPrimary = nprim;}
+  virtual Int_t      GetNtrack() const             {return fParticles->GetEntriesFast();}
+  virtual Int_t      GetNprimary() const           {return fNPrimary;}
   virtual TParticle* GetCurrentTrack()   const;
-  virtual Int_t  GetCurrentTrackNumber() const {return fCurrentTrack;}
-  virtual Int_t  GetCurrentTrackId() const {return GetCurrentTrackNumber()+1;}
-  virtual Int_t  GetCurrentParentTrackNumber() const;
-  StarMCParticle*  GetParticle(Int_t id) const;
-    
+  virtual Int_t      GetCurrentTrackNumber() const {return fCurrentTrack;}
+  virtual Int_t      GetCurrentTrackId() const     {return GetCurrentTrackNumber()+1;}
+  virtual Int_t      GetCurrentParentTrackNumber() const;
+  StarMCParticle*    GetParticle(Int_t id) const;
+  TObjArray*         GetParticles() const          {return fParticles;}
+  StarMCParticle*    GetCurrentParticle()          {return fCurrentParticle;}
   private:
     // data members
   std::stack<StarMCParticle*>  fStack;    //!
   TObjArray*                 fParticles;
   Int_t                      fCurrentTrack;
   Int_t                      fNPrimary;
-  
+  StarMCParticle*            fCurrentParticle;
   ClassDef(StarMCStack,1) // StarMCStack
 };
 
