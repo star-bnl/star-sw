@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.6 2005/05/11 13:47:30 reinnart Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.7 2005/06/09 12:41:14 lmartin Exp $
 //
 // $log$
 //
@@ -246,28 +246,16 @@ Int_t StSsdDaqMaker::Make(){
 				else my_channel=channel;                  //3/11 : decommenter
 			// the ssd mapping tables are inverted at the moment so we have to scan 
 			// them to get the correct channel.
-			if ((ladder+1)%2==0) 
-			  {
-			    if (id_side==1) {
-			      for (int kk=0;kk<maxChannel;kk++) {
-				if (ssd_ladder_mapN[kk]==channel) my_channel=kk;
-			      }
-			    }
-			    else {
-			      for (int kk=0;kk<maxChannel;kk++) {
-				if (ssd_ladder_mapP[kk]==channel) my_channel=kk;
-			      }
-			    }
+			if (id_side==1) {
+			  for (int kk=0;kk<maxChannel;kk++) {
+			    if (ssd_ladder_mapN[kk]==channel) my_channel=kk;
 			  }
-			else
-			  {
-			    if (id_side==1) {
-			      my_channel=ssd_ladder_mapN[channel];
-			    }
-			    else {
-			      my_channel=ssd_ladder_mapP[channel];
-			    }
+			}
+			else {
+			  for (int kk=0;kk<maxChannel;kk++) {
+			    if (ssd_ladder_mapP[kk]==channel) my_channel=kk;
 			  }
+			}
 			strip_number=my_channel-(my_channel/mConfig->getNumberOfStrips())*mConfig->getNumberOfStrips()+1;
 			if (id_side==0)
 			  id_wafer=7000+100*(mConfig->getNumberOfWafers()-(my_channel/mConfig->getNumberOfStrips()))+ladder+1;
