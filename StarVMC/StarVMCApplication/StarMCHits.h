@@ -22,6 +22,7 @@ class StarMCHits : public TDataSet {
   virtual Float_t   	   GetHitK(Int_t k);				      		       
 #endif
   virtual void      	   SetHitHolder(TDataSet  *m) {fHitHolder = m;}	      	       
+  virtual void             SetDebug(Int_t m=0)        {fDebug = m;}
   virtual TDataSet  	  *GetDetectors() {return fDetectors;}		      	       
   virtual TObjArray 	  *GetVolUserInfo() {return fVolUserInfo;}	      		       
   virtual TDataSet  	  *GetHitHolder() {return fHitHolder;}                  				       
@@ -30,6 +31,7 @@ class StarMCHits : public TDataSet {
   virtual void             FinishEvent();
   static  TTable    	  *NewTable(const Char_t *classname, const Char_t *name="", Int_t nrows=100); 
   static  St_g2t_Chair    *NewChair(const Char_t *type, const Char_t *name="");                       
+  virtual Int_t            Debug()        { return fDebug;}
  private:
   StarMCHits(const Char_t *name="StarMCHits",const Char_t *title="");
   static StarMCHits *fgInstance;
@@ -41,6 +43,9 @@ class StarMCHits : public TDataSet {
   TObjArray         *fVolUserInfo;
   TDataSet          *fHitHolder;
   StHitDescriptor   *fCurrentDetector;
+  Int_t              fDebug;
+  UInt_t             fSeed;
+  Int_t              fEventNumber;
   ClassDef(StarMCHits,1)
 };
 #endif

@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.2 2005/05/03 15:42:14 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.3 2005/06/09 20:13:47 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -123,6 +123,23 @@ gufld  ->      TVirtualMCApplication::Instance()->Field(xdouble,bdouble);
 #include "TApplication.h"
 #include "TGeant3TGeo.h"
 #include "StarMagField.h"
+#include "StarCallf77.h"
+#define agufld  F77_NAME(agufld,AGUFLD)
+#define gufld   F77_NAME(gufld,GUFLD)
+#define agdetp_new	 F77_NAME(agdetpnew,AGDETPNEW)
+#define agdetp_add	 F77_NAME(agdetpadd,AGDETPADD)
+R__EXTERN  "C" {
+  void type_of_call agufld(Float_t *x, Float_t *bf);
+  void type_of_call gufld(Float_t *x, Float_t *bf) {agufld(x,bf);}
+  void type_of_call agdetp_add(DEFCHARD name, Float_t* a, Int_t* b DEFCHARL namel) {
+    printf("StarVMCApplication agdetp_add(%s,%f,%i) is called\n",name,a[0],b[0]);
+    if (TString(name) == "MFLG(1).Bfield=") StarMagField::SetFactor(a[0]);
+  }
+  void type_of_call agdetp_new(DEFCHARD name DEFCHARL namel) {
+    printf("StarVMCApplication agdetp_new(%s) is called\n",name);
+  }
+}
+
 ClassImp(StarVMCApplication);
 
 //_____________________________________________________________________________
@@ -235,6 +252,8 @@ void StarVMCApplication::GeneratePrimaries() {
     fStack->PushTrack(toBeDone, -1, pdg, px, py, pz, e, vx, vy, vz, tof, polx, poly, polz, 
 		      kPPrimary, ntr, 1., 0);
   }
+  Int_t NPrimary = fStack->GetNtrack();
+  if (! NPrimary) gMC->StopRun();
 }
 //_____________________________________________________________________________
 void StarVMCApplication::BeginEvent() {    // User actions at beginning of event
@@ -253,6 +272,10 @@ void StarVMCApplication::Stepping() {    // User actions at each step
 }
 //_____________________________________________________________________________
 void StarVMCApplication::PostTrack() {    // User actions after finishing of each track
+  // delete stack only track
+  StarMCParticle *current =  fStack->GetCurrentParticle();
+  TObjArray *objs = fStack->GetParticles();
+  if (objs->IndexOf(current) < objs->LowerBound()) delete current;
 }
 //_____________________________________________________________________________
 void StarVMCApplication::FinishPrimary() {    // User actions after finishing of a primary track
