@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.64 2005/05/31 16:33:32 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.64 2005/05/31 16:33:32 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.65 2005/06/09 03:12:39 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.65 2005/06/09 03:12:39 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.65  2005/06/09 03:12:39  perev
+ * Fix typo in getNodes()
+ *
  * Revision 2.64  2005/05/31 16:33:32  perev
  * Method refitL added
  *
@@ -759,13 +762,14 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
   StiKTNBidirectionalIterator it;
   vector<StiKalmanTrackNode*> nodeVec;
   for (it=begin();it!=end();++it) {
-    const StiKalmanTrackNode* node = &(*it);
+          StiKalmanTrackNode* node = &(*it);
     const StiHit* hit = node->getHit();
     if(!hit) 				continue;
     const StiDetector *det = hit->detector();
     if (!det) 				continue;
     if (node->getDedx()<=0.)		continue;   
     if (detectorId!=det->getGroupId())	continue;
+    nodeVec.push_back(node);
   }
   return nodeVec;
 }
