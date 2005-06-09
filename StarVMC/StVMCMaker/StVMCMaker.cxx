@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.1 2005/05/24 22:58:08 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.2 2005/06/09 20:14:40 fisyak Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.2  2005/06/09 20:14:40  fisyak
+// Set Run number (=1 D)
+//
 // Revision 1.1  2005/05/24 22:58:08  fisyak
 // The first version
 //
@@ -23,19 +26,17 @@ StarVMCApplication* StVMCMaker::fgStarVMCApplication = 0;
 TGeant3TGeo*        StVMCMaker::fgGeant3 = 0;
 //_____________________________________________________________________________
 Int_t StVMCMaker::Init(){
-#if 0
   if (m_Mode%100 != 1) { // Mixer mode == 1 - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
       SetOutput(fEvtHddr);	                //Declare this "EvtHddr" for output
     }
+    fEvtHddr->SetRunNumber(fRunNo);
+    fEvtHddr->SetEventNumber(0);
+    fEvtHddr->SetEventType("VMC");
+    fEvtHddr->SetProdDateTime();
   }
-#endif
-  return StMaker::Init();
-}
-//_____________________________________________________________________________
-Int_t StVMCMaker::InitRun  (int runumber){
   TObjectSet *geom = (TObjectSet *) GetDataBase("VmcGeometry");
   assert(geom);
   if (fgStarVMCApplication) return kStOK;
@@ -81,8 +82,9 @@ Int_t StVMCMaker::InitRun  (int runumber){
   fgStarVMCApplication->SetMagField(StarMagField::Instance());
   StarMCPrimaryGenerator *generator = 0;
   if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
-  //                                                               Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
-  else                  generator = new StarMCSimplePrimaryGenerator(1, 5,   1.,     1.,0.1, 0.1, 0.57,  0.57,  0.,   0.);
+  //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
+  //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
+  else                  generator = new StarMCSimplePrimaryGenerator(80, 5,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
   assert(generator);
   if (Debug()) generator->SetDebug(1);
   fgStarVMCApplication->SetPrimaryGenerator(generator);
@@ -99,21 +101,18 @@ Int_t StVMCMaker::InitRun  (int runumber){
   } else {
     fgGeant3->SetSWIT(4,0);
   }
-  return kStOK;
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StVMCMaker::Make(){
-#if 0
-  if (! fgStarVMCApplication) InitRun(1);
   fEventNo++;
   if (fEvtHddr) {
-    fEvtHddr->SetRunNumber(1);
+    fEvtHddr->SetRunNumber(fRunNo);
     fEvtHddr->SetEventNumber(fEventNo);
     fEvtHddr->SetEventType("VMC");
     fEvtHddr->SetProdDateTime();
     //    SetDateTime();
   }  
-#endif
   TStopwatch sw;
   fgStarVMCApplication->RunMC(1);
   if (Debug())   sw.Print();

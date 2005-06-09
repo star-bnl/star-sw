@@ -1,4 +1,4 @@
-// $Id: StVMCMaker.h,v 1.1 2005/05/24 22:58:08 fisyak Exp $
+// $Id: StVMCMaker.h,v 1.2 2005/06/09 20:14:40 fisyak Exp $
 
 #ifndef STAR_StVMCMaker
 #define STAR_StVMCMaker
@@ -23,16 +23,18 @@
 
 class StVMCMaker : public StMaker {
  public: 
-  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fEvtHddr(0), fInputFile("") {}
+  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile("") {}
   virtual       ~StVMCMaker() {}
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   Clear(Option_t *option="");
   virtual Int_t  Finish();
-
-  virtual Int_t  InitRun  (int runumber);
-  virtual Int_t  FinishRun(int runumber){return 0;}; 
-  virtual void   SetDateTime(int idat=0,int itim=0);
+#if 0
+  virtual Int_t  InitRun  (Int_t runumber);
+#endif
+  virtual Int_t  FinishRun(Int_t runumber){return 0;}; 
+  virtual void   SetDateTime(Int_t idat=0,Int_t itim=0);
+  virtual void   SetRunNo(Int_t m ) {fRunNo = m;}
   virtual void   Skip(Int_t nskip);
   virtual void   SetInputFile(const Char_t *fileName) {fInputFile = fileName;}
   const Char_t  *InputFile() const {return fInputFile.Data();}
@@ -46,11 +48,12 @@ class StVMCMaker : public StMaker {
   static StarVMCApplication* fgStarVMCApplication;
   static TGeant3TGeo*        fgGeant3;
   Int_t  fEventNo;
+  Int_t  fRunNo;
   StEvtHddr *fEvtHddr;//! pointer to Event Header
   TString    fInputFile;
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.1 2005/05/24 22:58:08 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.2 2005/06/09 20:14:40 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -61,6 +64,9 @@ class StVMCMaker : public StMaker {
 
 
 // $Log: StVMCMaker.h,v $
+// Revision 1.2  2005/06/09 20:14:40  fisyak
+// Set Run number (=1 D)
+//
 // Revision 1.1  2005/05/24 22:58:08  fisyak
 // The first version
 //
