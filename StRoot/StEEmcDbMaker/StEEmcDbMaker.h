@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.29 2005/01/24 05:08:26 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.30 2005/06/09 20:04:06 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.29 2005/01/24 05:08:26 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.30 2005/06/09 20:04:06 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -148,7 +148,7 @@ class StEEmcDbMaker : public StMaker {
   const EEmcDbItem* getR(int sec, char sub, int eta){return getTile(sec,sub,eta,'R');}
   const EEmcDbItem* getU(int sec, int strip){return getStrip(sec,'U',strip);}
   const EEmcDbItem* getV(int sec, int strip){return getStrip(sec,'V',strip);}
-
+  const EEmcDbItem* StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub);
 
   //
   // Methods to acces DB info for T=tower, P=preshower-1, Q=preshower-2,
@@ -177,7 +177,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.29 2005/01/24 05:08:26 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.30 2005/06/09 20:04:06 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -188,6 +188,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.30  2005/06/09 20:04:06  balewski
+// upgrade for embedding
+//
 // Revision 1.29  2005/01/24 05:08:26  balewski
 // more get-methods
 //
