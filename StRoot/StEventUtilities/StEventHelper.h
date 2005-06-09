@@ -38,6 +38,7 @@ public:
   StVertexHelper(const StEvent  *evt);
  ~StVertexHelper(){};
        void    SetVertex(const StVertex *vtx);    
+        int    IsValid(){ return fVtx!=0;}
         int    GetType();
         int    GetFlag();
 const StThreeVectorF &GetPoint();
