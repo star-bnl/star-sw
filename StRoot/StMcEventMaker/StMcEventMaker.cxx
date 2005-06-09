@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.55 2005/06/06 19:15:07 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.56 2005/06/09 19:42:33 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.56  2005/06/09 19:42:33  perev
+ * if(Debug()) for prinout added
+ *
  * Revision 1.55  2005/06/06 19:15:07  calderon
  * Update for filling EEMC hits.  All filling now done in one function,
  * StMcEventMaker::fillEemc(), towers, prs, smdu, smdv.
@@ -250,7 +253,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.55 2005/06/06 19:15:07 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.56 2005/06/09 19:42:33 perev Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -431,7 +434,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_eventTablePointer)
 	    eventTable  = g2t_eventTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_event Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_event Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	// Check Table
 	if(!g2t_eventTablePointer->GetNRows()) {
@@ -452,7 +455,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_tpc_hitTablePointer)
 	    tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_tpc_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_tpc_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	//
 	// Ftpc Hit Table
 	//
@@ -460,7 +463,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_ftp_hitTablePointer)
 	    ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
 	else 
-	    cerr << "Table g2t_ftp_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_ftp_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//
 	// Svt Hit Table
@@ -469,7 +472,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_svt_hitTablePointer)
 	    svtHitTable = g2t_svt_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_svt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_svt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	
 	//
 	// Ssd Hit Table
@@ -478,7 +481,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_ssd_hitTablePointer)
 	    ssdHitTable = g2t_ssd_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_ssd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_ssd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//
 	// Rich Hit Table
@@ -487,7 +490,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_rch_hitTablePointer)
 	    rchHitTable = g2t_rch_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	//
 	// Ctb Hit Table
 	//
@@ -495,7 +498,7 @@ Int_t StMcEventMaker::Make()
 	if (g2t_ctb_hitTablePointer)
 	    ctbHitTable = g2t_ctb_hitTablePointer->GetTable();
 	else
-	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	// TOF Hit Tables
 	//
@@ -590,7 +593,7 @@ Int_t StMcEventMaker::Make()
 	if (particleTablePointer)
 	    particleTable = particleTablePointer->GetTable();
 	else
-	    cerr << "Table particle Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	    if (Debug()) cerr << "Table particle Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
        
        // Before filling StMcEvent, we can check whether we can actually
        // access the tables.
