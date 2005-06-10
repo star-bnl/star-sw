@@ -49,6 +49,14 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   /// return a specific cluster from a given sector, plane 
   StEEmcSmdCluster smdcluster(Int_t sec, Int_t plane, Int_t index);
 
+
+  /// Given a StEmcCluster, return the StEEmcCluster from whence
+  /// it came.
+  StEEmcCluster cluster( StEmcCluster *cl ){ return mEtoEE[ cl ]; }
+  /// Given a StEmcCluster, return the StEEmcSmdCluster from
+  /// whence it came.
+  StEEmcSmdCluster smdcluster( StEmcCluster *cl ){ return mEtoEEsmd[ cl ]; }
+
   /// Return a vector of tower clusters
   StEEmcClusterVec_t clusters( Int_t sec, Int_t layer );
   /// Return a vector of smd clusters
@@ -58,7 +66,7 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   /// fill the StEmcCollection.
   void setFillStEvent(){ mFillStEvent=true; }
 
-
+  void print();
 
  private:
  protected:
@@ -76,6 +84,9 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   /// mSmdClusters[sec][plane] provides a list of SMD
   /// clusters in the given sector for the given plane
   std::vector< std::vector< StEEmcSmdClusterVec_t > > mSmdClusters;
+
+  /// Counts clusters for full eemc, 0=T, 1=P, 2=Q, 3=R, 4=U, 5=V
+  Int_t mNumberOfClusters[6]; 
 
   /// Seed energy for 0=T, 1=P, 2=Q, 3=R, 4=U, 5=V
   Float_t mSeedEnergy[6];

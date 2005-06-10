@@ -108,6 +108,8 @@ Int_t StEEmcClusterMaker::Make()
 void StEEmcClusterMaker::Clear( Option_t *opts )
 {
 
+  std::cout << "********* StEEmcClusterMaker::Clear *************" << std::endl << std::flush;
+
   /// Clear cluster storage
   for ( Int_t sector=0; sector<12; sector++ ) {
     for ( Int_t layer=0; layer<4; layer++ )
@@ -115,6 +117,8 @@ void StEEmcClusterMaker::Clear( Option_t *opts )
     for ( Int_t plane=0; plane<2; plane++ )
       mSmdClusters[sector][plane].clear();
   }
+
+  for ( Int_t i=0;i<6;i++ ) mNumberOfClusters[i]=0;
 
   mClusterId = 0;
 
@@ -143,6 +147,8 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
 
     /// Get list of towers
     StEEmcTowerVec_t towers = mEEanalysis -> towers( layer );
+
+
 
     /// Order according to energy (STL sort is fast, N log(N))
     std::sort(towers.begin(),towers.end());
@@ -231,6 +237,7 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
       cluster.key( mClusterId++ );
 
       mTowerClusters[ seed.sector() ][ layer ].push_back( cluster );
+      mNumberOfClusters[layer]++;
      
       iter++;
 
@@ -424,6 +431,7 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	  if ( cluster.size() >= 3 ) {
 	    cluster.key( mClusterId++ );
 	    mSmdClusters[ sector ][ plane ].push_back(cluster);
+	    mNumberOfClusters[4+plane]++;
 	  }
 
 	  iseed++;
@@ -585,110 +593,246 @@ void StEEmcClusterMaker::fillStEvent()
     return;
   }
 
+  std::cout << "Adding tower clusters to StEvent at " << stevent << std::endl << std::flush;
+
   ///
   /// First the eemc tower clusters  
   ///
   StEmcDetector *detector=stevent->emcCollection()->detector(kEndcapEmcTowerId);
-  assert(detector);
+  if ( !detector )
+    {
+      Warning("fillStEvent","detector == NULL, MAJOR StEvent problem, continuing");
+      return;
+    }
   
-  /// Create a new cluster collection
-  StEmcClusterCollection *collect=new StEmcClusterCollection();
-  collect->setDetector( kEndcapEmcTowerId );
-  collect->setClusterFinderId( 123 );
-  collect->setClusterFinderParamVersion( 123 );
+
+  ///
+  /// If we found clusters, create a cluster collection for
+  /// this detector.  Otherwise, nullify the cluster collection,
+  /// otherwise we run into an assert somewhere out in "STAR" 
+  /// land... or maybe not,... no comments in barrel virtual 
+  /// finder...
+  ///
   
-  /// Loop over all EEMC sectors and fill collection
-  for ( Int_t isector=0; isector<12; isector++ )
+  if ( mNumberOfClusters[0] > 0 )
     {
 
-      /// Loop over all clusters in this sector
-      for ( UInt_t iclust=0; iclust<mTowerClusters[isector][0].size(); iclust++ ) 
+
+      ///
+      /// Obtain the cluster collection from the detector, and
+      /// prepare to fill it.  If it doesn't exist, create it.
+      ///
+      StEmcClusterCollection *collect = detector -> cluster();
+      if ( !collect ) 
+	{
+	  //Warning("fillStEvent","StEmcClusterCollection (towers) was NULL, so I'm creating one.");
+	  collect = new StEmcClusterCollection();
+	  detector->setCluster( collect );
+	}
+
+      assert(collect);
+      collect->setDetector( kEndcapEmcTowerId );
+      collect->setClusterFinderId( 123 );
+      collect->setClusterFinderParamVersion( 123 );
+  
+      /// Loop over all EEMC sectors and fill collection
+      for ( Int_t isector=0; isector<12; isector++ )
 	{
 
-	  /// Get corresponding StEmcCluster 
-	  StEmcCluster *emccluster=mTowerClusters[isector][0].at(iclust).stemc();
-	  assert(emccluster);
+	  /// Loop over all clusters in this sector
+	  for ( UInt_t iclust=0; iclust<mTowerClusters[isector][0].size(); iclust++ ) 
+	    {
+
+	      StEEmcCluster cl=mTowerClusters[isector][0].at(iclust);
+	      
+	      /// for some reason, this code doesn't work when I
+	      /// call StEEmcCluster::stemc(), but works just fine
+	      /// here....
+	      StEmcCluster *emccluster = new StEmcCluster();
+	      emccluster->setEta( cl.momentum().Eta() );
+	      emccluster->setPhi( cl.momentum().Phi() );
+	      emccluster->setSigmaEta(-1.);
+	      emccluster->setSigmaPhi(-1.);
+	      emccluster->setEnergy( cl.energy() );
+	      emccluster->SetUniqueID( cl.key() );
+#if 1
+	      for ( Int_t i=0; i< cl.numberOfTowers(); i++ ) 
+		{
+		  StEmcRawHit *hit=cl.tower(i).stemc();
+		  assert( hit );         
+		  emccluster->addHit( hit );
+		}
+#endif
+	    
+	      collect->addCluster( emccluster );
+
+	      
+	      /// association between StEmcCluster and my class
+	      mEtoEE[ emccluster ] = cl;
+	      cl.stemc( emccluster );
+
+	    }
 	  
-	  /// and add to collection
-	  collect->addCluster( emccluster );
-
-	  mEtoEE[ emccluster ] = mTowerClusters[isector][0].at(iclust);
-
 	}
 
     }
 
-  /// now set the collection in the detector
-  detector->setCluster( collect );
+  else // if ( mNumberOfClusters[0] == 0 )
+    {
 
+      detector->setCluster( NULL );
+
+    }
+
+
+
+
+  /// now set the collection in the detector
+  //  detector->setCluster( collect );
 
   ///
   /// Next the pre and postshower clusters
   ///
   detector=stevent->emcCollection()->detector(kEndcapEmcPreShowerId);
-  assert(detector);
-
-  StEmcClusterCollection *pqr = new StEmcClusterCollection();
-  pqr -> setDetector( kEndcapEmcPreShowerId );
-  pqr -> setClusterFinderId( 123 );
-  pqr -> setClusterFinderParamVersion( 321 );
-  
-  /// Loop over all EEMC sectors and fill collection
-  for ( Int_t isector=0; isector<12; isector++ )
-    
-  /// Loop over PQR
-  for ( Int_t ilayer=1; ilayer<4; ilayer++ ) 
-    
-  /// Loop over all clusters in this sector
-  for ( UInt_t iclust=0; iclust<mTowerClusters[isector][ilayer].size(); iclust++ ) 
+  if ( !detector )
+    {
+      Warning("fillStEvent","detector == NULL for pre/post, no clusters for you");
+    }
+  else if ( mNumberOfClusters[1] > 0 ||
+	    mNumberOfClusters[2] > 0 || 
+	    mNumberOfClusters[3] > 0 )
     {
 
-      /// Get corresponding StEmcCluster 
-      StEmcCluster *emccluster=mTowerClusters[isector][ilayer].at(iclust).stemc();
-      assert(emccluster);
+      StEmcClusterCollection *pqr = new StEmcClusterCollection();
+      if ( !pqr )
+	{
+	  //Warning("fillStEvent","StEmcClusterCollection (pre/post) was NULL, so I'm creating one.");
+	  pqr = new StEmcClusterCollection();
+	  detector->setCluster( pqr );
+	}
+      assert(pqr); 
+      pqr -> setDetector( kEndcapEmcPreShowerId );
+      pqr -> setClusterFinderId( 123 );
+      pqr -> setClusterFinderParamVersion( 321 );
+  
+      /// Loop over all EEMC sectors and fill collection
+      for ( Int_t isector=0; isector<12; isector++ )
+    
+      /// Loop over PQR
+      for ( Int_t ilayer=1; ilayer<4; ilayer++ ) 
+    
+      /// Loop over all clusters in this sector
+      for ( UInt_t iclust=0; iclust<mTowerClusters[isector][ilayer].size(); iclust++ ) 
+	{
 
-      pqr->addCluster( emccluster );
+	  StEEmcCluster cl=mTowerClusters[isector][ilayer].at(iclust);
 
-      mEtoEE[ emccluster ] = mTowerClusters[isector][ilayer].at(iclust);
+	  /// for some reason, this code doesn't work when I
+	  /// call StEEmcCluster::stemc(), but works just fine
+	  /// here....
+	  StEmcCluster *emccluster = new StEmcCluster();
+	  emccluster->setEta( cl.momentum().Eta() );
+	  emccluster->setPhi( cl.momentum().Phi() );
+	  emccluster->setSigmaEta(-1.);
+	  emccluster->setSigmaPhi(-1.);
+	  emccluster->setEnergy( cl.energy() );
+	  emccluster->SetUniqueID( cl.key() );
+#if 1
+	  for ( Int_t i=0; i< cl.numberOfTowers(); i++ ) 
+	    {
+	      StEmcRawHit *hit=cl.tower(i).stemc();
+	      assert( hit );         
+	      emccluster->addHit( hit );
+	    }
+#endif
+
+
+	  pqr->addCluster( emccluster );
+
+	  mEtoEE[ emccluster ] = cl;
+	  cl.stemc( emccluster );
+
+	}
+
+    }
+  else // if ( mNumberOfClusters[1, 2 OR 3] == 0 )
+    {
+
+      detector->setCluster( NULL );
 
     }
 
-  /// hang the collection off of the detector
-  detector -> setCluster ( pqr );
-	      
   
   ///
   /// Finally the U&V smd clusters
   ///
   StDetectorId ids[]={ kEndcapSmdUStripId, kEndcapSmdVStripId };
 
+
   for ( Int_t iplane=0; iplane<2; iplane++ ) 
     {
 
       detector=stevent->emcCollection()->detector(ids[iplane]);
-      
-      StEmcClusterCollection *smdc=new StEmcClusterCollection();
-      smdc->setDetector( ids[iplane] );
-      smdc->setClusterFinderId( 123 );
-      smdc->setClusterFinderParamVersion( 321 );
-      
-      for ( Int_t isector=0; isector<12; isector++ ) 
+      if ( !detector ) 
 	{
-
-	  for ( UInt_t iclust=0; iclust<mSmdClusters[isector][iplane].size(); iclust++ ) 
+	  Warning("fillStEvent","detector == NULL for smd plane, no clusters for you");
+	}
+      else if ( mNumberOfClusters[4+iplane] > 0 )
+	{
+	  
+	  StEmcClusterCollection *smdc = detector -> cluster();
+	  if ( !smdc ) 
 	    {
+	      //Warning("fillStEvent","StEmcClusterCollection (smd) was NULL, so I'm creating one.");
+	      smdc = new StEmcClusterCollection();
+	      detector->setCluster( smdc );
+	    }
+	  
+	  smdc->setDetector( ids[iplane] );
+	  smdc->setClusterFinderId( 123 );
+	  smdc->setClusterFinderParamVersion( 321 );
 
-	      StEmcCluster *emccluster=mSmdClusters[isector][iplane].at(iclust).stemc();
-	      assert(emccluster);
+	  
+	  for ( Int_t isector=0; isector<12; isector++ ) 
+	    {
+	      
+	      for ( UInt_t iclust=0; iclust<mSmdClusters[isector][iplane].size(); iclust++ ) 
+		{
+		  
+		  StEEmcSmdCluster cl = mSmdClusters[isector][iplane].at(iclust);
+		  
 
-	      smdc->addCluster( emccluster );
+		  StEmcCluster *emccluster = new StEmcCluster();
+		  emccluster->setEta( cl.mean() );
+		  emccluster->setPhi( (Float_t)iplane );
+		  emccluster->setSigmaEta(-1.);
+		  emccluster->setSigmaPhi(-1.);
+		  emccluster->setEnergy( cl.energy() );
+		  emccluster->SetUniqueID( cl.key() );
+		  for ( Int_t i=0; i< cl.numberOfStrips(); i++ ) 
+		    {
+		      StEmcRawHit *hit=cl.strip(i).stemc();
+		      assert( hit );         
+		      emccluster->addHit( hit );
+		    }		  
+		  smdc->addCluster( emccluster );
+
+		  mEtoEEsmd[ emccluster ] = cl;
+		  cl.stemc( emccluster );
+		  
+		}
+	  
 	      
 	    }
 	  
-
 	}
 
-      detector->setCluster( smdc );
+      else
+	{
+	  detector -> setCluster( NULL );
+	}
+
+
 
     }
 
@@ -699,7 +843,7 @@ void StEEmcClusterMaker::fillStEvent()
 
 // ----------------------------------------------------------------------------
 Bool_t StEEmcClusterMaker::verifyStEvent()
-{
+  {
 
   /// verify tower clusters
   StEvent *stevent=(StEvent*)GetInputDS("StEvent");
@@ -708,46 +852,61 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
     return true;
   }
   //StEmcCollection *emccollection=stevent->emcCollection();
-  
-  StEmcDetector *detector=stevent->emcCollection()->detector(kEndcapEmcTowerId);
-  assert(detector);
-  
-  StEmcClusterCollection *cc=detector->cluster();
-  assert(cc);
 
   Bool_t go = true;
-
-  /// ------------------------------------------------------------------------
-  ///
-  /// Tower-cluster checksum
-  ///
-
-  Float_t emc_sum_towers = 0.;
-  Float_t eemc_sum_towers = 0.;
-  
-  StSPtrVecEmcCluster &emcClusters=cc->clusters();
-  for ( UInt_t i=0; i<emcClusters.size(); i++ ) 
+ 
+  StEmcDetector *detector=stevent->emcCollection()->detector(kEndcapEmcTowerId);
+  if ( !detector )
     {
-      StEmcCluster *cl=emcClusters[i];
-      assert(cl);
-      emc_sum_towers += cl->energy();
-    }
-  
-  for ( Int_t sec=0; sec<12; sec++ ) 
-    {
-
-      for ( Int_t i=0; i<numberOfClusters(sec,0); i++ )
-	eemc_sum_towers += cluster(sec,0,i).energy();
+      Warning("verifyStEvent","detector == NULL for towers");
+      return false;
     }
 
-  std::cout << "StEEmcClusterMaker tower checksum: ";
-  if ( emc_sum_towers == eemc_sum_towers ) {
-    std::cout << "passed";
-  }
+  
+  StEmcClusterCollection *cc=detector->cluster();
+  if ( cc )
+    {
+
+
+      /// ------------------------------------------------------------------------
+      ///
+      /// Tower-cluster checksum
+      ///
+      
+      Float_t emc_sum_towers = 0.;
+      Float_t eemc_sum_towers = 0.;
+  
+      StSPtrVecEmcCluster &emcClusters=cc->clusters();
+      for ( UInt_t i=0; i<emcClusters.size(); i++ ) 
+	{
+	  StEmcCluster *cl=emcClusters[i];
+	  assert(cl);
+	  emc_sum_towers += cl->energy();
+	}
+      
+      for ( Int_t sec=0; sec<12; sec++ ) 
+	{
+	  
+	  for ( Int_t i=0; i<numberOfClusters(sec,0); i++ )
+	    eemc_sum_towers += cluster(sec,0,i).energy();
+	}
+      
+      std::cout << "StEEmcClusterMaker tower checksum: ";
+      if ( emc_sum_towers == eemc_sum_towers ) {
+	std::cout << "passed";
+      }
+      else {
+	std::cout << "FAILED"; go=false;
+      }
+      std::cout << std::endl;
+
+    }
   else {
-    std::cout << "FAILED"; go=false;
+
+    std::cout << "StEEmcClusterMaker tower checksum: NULL collection, nclust=" << mNumberOfClusters[0] << std::endl;
+    go &= (mNumberOfClusters[0]==0);
+
   }
-  std::cout << std::endl;
 
   /// ------------------------------------------------------------------------
   ///
@@ -757,41 +916,54 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
   Float_t eemc_sum_smdu = 0.;
 
   detector=stevent->emcCollection()->detector(kEndcapSmdUStripId);
-  assert(detector);
-
-  cc=detector->cluster();
-  assert(cc);
-
-  StSPtrVecEmcCluster &smduClusters=cc->clusters();
-
-  for ( UInt_t i=0; i<smduClusters.size(); i++ ) 
+  if ( !detector )
     {
-      StEmcCluster *cl=smduClusters[i];
-      assert(cl);
-      emc_sum_smdu += cl->energy();
+      Warning("verifyStEvent","detector == NULL for smdu");
+      return false;
     }
 
-  
-  for ( Int_t sec=0; sec<12; sec++ ) 
+  cc=detector->cluster();
+  if ( cc ) 
     {
 
-      for ( Int_t i=0; i<numberOfSmdClusters(sec,0); i++ )
-	
+      StSPtrVecEmcCluster &smduClusters=cc->clusters();
+
+      for ( UInt_t i=0; i<smduClusters.size(); i++ ) 
 	{
-	  eemc_sum_smdu += smdcluster(sec,0,i).energy();
+	  StEmcCluster *cl=smduClusters[i];
+	  assert(cl);
+	  emc_sum_smdu += cl->energy();
+	}
+      
+  
+      for ( Int_t sec=0; sec<12; sec++ ) 
+	{
+
+	  for ( Int_t i=0; i<numberOfSmdClusters(sec,0); i++ )
+	
+	    {
+	      eemc_sum_smdu += smdcluster(sec,0,i).energy();
+
+	    }
 
 	}
 
+      std::cout << "StEEmcClusterMaker smdu checksum: ";
+      if ( emc_sum_smdu == eemc_sum_smdu ) {
+	std::cout << "passed";
+      }
+      else {
+	std::cout << "FAILED"; go=false;
+      }
+      std::cout << std::endl;
+
+    }  
+  else 
+    {
+      std::cout << "StEEmcClusterMaker smdu checksum: NULL collection, nclust=" << mNumberOfClusters[4] << std::endl;
+      go &= (mNumberOfClusters[4]==0);
     }
 
-  std::cout << "StEEmcClusterMaker smdu checksum: ";
-  if ( emc_sum_smdu == eemc_sum_smdu ) {
-    std::cout << "passed";
-  }
-  else {
-    std::cout << "FAILED"; go=false;
-  }
-  std::cout << std::endl;
 
   /// -----------------------
 
@@ -799,42 +971,89 @@ Bool_t StEEmcClusterMaker::verifyStEvent()
   Float_t eemc_sum_smdv = 0.;
 
   detector=stevent->emcCollection()->detector(kEndcapSmdVStripId);
-  assert(detector);
+  if (!detector)
+    {
+      Warning("verifyStEvent","detector == NULL for smdv");
+      return false;
+    }
 
   cc=detector->cluster();
-  assert(cc);
 
-  StSPtrVecEmcCluster &smdvClusters=cc->clusters();
-
-  for ( UInt_t i=0; i<smdvClusters.size(); i++ ) 
-    {
-      StEmcCluster *cl=smdvClusters[i];
-      assert(cl);
-      emc_sum_smdv += cl->energy();
-    }
-
-  
-  for ( Int_t sec=0; sec<12; sec++ ) 
+  if ( cc )
     {
 
-      for ( Int_t i=0; i<numberOfSmdClusters(sec,1); i++ )
-	
+      StSPtrVecEmcCluster &smdvClusters=cc->clusters();
+      
+      for ( UInt_t i=0; i<smdvClusters.size(); i++ ) 
 	{
-	  eemc_sum_smdv += smdcluster(sec,1,i).energy();
-
+	  StEmcCluster *cl=smdvClusters[i];
+	  assert(cl);
+	  emc_sum_smdv += cl->energy();
 	}
+      
+      
+      for ( Int_t sec=0; sec<12; sec++ ) 
+	{
+	  
+	  for ( Int_t i=0; i<numberOfSmdClusters(sec,1); i++ )
+	    
+	    {
+	      eemc_sum_smdv += smdcluster(sec,1,i).energy();
+	      
+	    }
+	  
+	}
+      
+      std::cout << "StEEmcClusterMaker smdv checksum: ";
+      if ( emc_sum_smdv == eemc_sum_smdv ) {
+	std::cout << "passed";
+      }
+      else {
+	std::cout << "FAILED"; go=false;
+      }
+      std::cout << std::endl;
 
     }
-
-  std::cout << "StEEmcClusterMaker smdv checksum: ";
-  if ( emc_sum_smdv == eemc_sum_smdv ) {
-    std::cout << "passed";
-  }
-  else {
-    std::cout << "FAILED"; go=false;
-  }
-  std::cout << std::endl;
+  else 
+    {
+      std::cout << "StEEmcClusterMaker smdv checksum: NULL collection, nclust=" << mNumberOfClusters[5] << std::endl;
+      go &= (mNumberOfClusters[5]==0);
+    }
+  
 
   
   return go;
+}
+
+
+
+// ----------------------------------------------------------------------------
+void StEEmcClusterMaker::print()
+{
+
+  std::cout << "StEEmcClusterMaker::print()" << std::endl;
+  const Char_t *names[] = { "tower", "pre1", "pre2", "post", "smdu", "smdv" };
+  for ( Int_t i=0;i<6;i++ )
+    {
+
+      std::cout << "Number of " << names[i] 
+		<< " clusters = " << mNumberOfClusters[i] 
+		<< std::endl;
+
+    }
+
+  std::cout << "printout of tower clusters follows:" << std::endl;
+  for ( Int_t sec=0;sec<12;sec++)
+  for ( Int_t i=0;i<numberOfClusters(sec,0);i++ )
+    {
+      StEEmcCluster clust=cluster(sec,0,i);
+      clust.print();
+      //      std::cout << "cluster.key()=" << clust.key() << std::endl;
+      //      std::cout << "cluster.eta()=" << clust.momentum().Eta() << std::endl;
+      //      std::cout << "cluster.phi()=" << clust.momentum().Phi() << std::endl;      
+      //      std::cout << "cluster.energy()=" << clust.energy() << std::endl;
+    }
+
+  
+
 }
