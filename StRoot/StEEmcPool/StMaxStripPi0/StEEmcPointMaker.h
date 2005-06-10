@@ -54,6 +54,11 @@ class StEEmcPointMaker : public StMaker, public StEEmcPointUtils {
   void setFillStEvent(){ mFillStEvent=true; }
 
 
+  /// Given an StEmcPoint, return the StEEmcPoint from
+  /// whence it came
+  StEEmcPoint point( StEmcPoint *p ){ return mEtoEE[p]; }
+
+
  private:
  protected:
 
