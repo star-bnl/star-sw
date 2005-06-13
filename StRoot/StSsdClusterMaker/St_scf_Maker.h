@@ -1,6 +1,9 @@
-// $Id: St_scf_Maker.h,v 1.9 2005/05/17 14:16:41 lmartin Exp $
+// $Id: St_scf_Maker.h,v 1.10 2005/06/13 16:01:01 reinnart Exp $
 //
 // $Log: St_scf_Maker.h,v $
+// Revision 1.10  2005/06/13 16:01:01  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.9  2005/05/17 14:16:41  lmartin
 // CVS tags added
 //
@@ -29,6 +32,7 @@
 #endif
 class TFile;
 class TH1F;
+class TNtuple;
 
 class St_sdm_geom_par;
 class St_sdm_calib_db;
@@ -36,14 +40,25 @@ class StSsdClusterControl;
 class St_scf_ctrl;
 class St_sls_ctrl;
 
+class StScfBarrel;
+class StScfCluster;
+class StScfWafer;
+class StScfListCluster;
+
 class St_scf_Maker : public StMaker {
  private:
   St_sdm_geom_par      *m_geom_par;//!
   St_sdm_calib_db      *m_noise;//!
   St_scf_ctrl          *m_scf_ctrl;//!
   St_sls_ctrl          *m_sls_ctrl;//!
-  void makeScfCtrlHistograms(); //!
+  
+  float ClusterNtuple[12];
+  TFile *qFile;
+  TNtuple* qHitNtuple;
  
+  void makeScfCtrlHistograms(); //!
+  void PrintClusterDetails(int id_wafer);//!
+  void DeclareNtuple(); //!
  protected:
 
   TFile *ScfCtrlFile; //!
@@ -66,7 +81,7 @@ class St_scf_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.9 2005/05/17 14:16:41 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.10 2005/06/13 16:01:01 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_scf_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -75,6 +90,9 @@ class St_scf_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_scf_Maker.h,v $
+ *  Revision 1.10  2005/06/13 16:01:01  reinnart
+ *  Jonathan and Joerg changed the update function
+ *
  *  Revision 1.9  2005/05/17 14:16:41  lmartin
  *  CVS tags added
  *

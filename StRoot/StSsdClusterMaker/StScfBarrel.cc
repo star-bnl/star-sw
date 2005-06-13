@@ -1,6 +1,9 @@
-// $Id: StScfBarrel.cc,v 1.2 2005/05/17 14:16:32 lmartin Exp $
+// $Id: StScfBarrel.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StScfBarrel.cc,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:32  lmartin
 // CVS tags added
 //
@@ -144,21 +147,41 @@ int  StScfBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sl
 //   return noise_h->nok;
 }
 
-void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl)
+// void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster,sls_ctrl_st *sls_ctrl,scf_ctrl_st *scf_ctrl,int parameter)
+// {cout << "paramter = "<<parameter<< endl;
+//  cout <<"In doSideClusterisation "<< endl;
+//   int *wafNumbOfCluster = new int[2];
+//   int iWafer = 0;
+//   wafNumbOfCluster[0] = 0;
+//   wafNumbOfCluster[1] = 0;
+//   for (iWafer = 0 ; iWafer < mNWaferPerLadder*mNLadder; iWafer++)
+//     {
+//       mWafers[iWafer]->doClusterisation(wafNumbOfCluster, sls_ctrl, scf_ctrl,iWafer);
+//       barrelNumbOfCluster[0] += wafNumbOfCluster[0];
+//       barrelNumbOfCluster[1] += wafNumbOfCluster[1]; 
+//       cout << "in StScfBarrel ,barrelNumbOfCluster[0],barrelNumbOfCluster[1]"<< barrelNumbOfCluster[0]<<" "<<  barrelNumbOfCluster[1]<< endl;
+//     }
+//   delete[] wafNumbOfCluster;
+// }
+
+void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl)
 {
+ cout <<"In doSideClusterisation "<< endl;
   int *wafNumbOfCluster = new int[2];
   int iWafer = 0;
   wafNumbOfCluster[0] = 0;
   wafNumbOfCluster[1] = 0;
-
   for (iWafer = 0 ; iWafer < mNWaferPerLadder*mNLadder; iWafer++)
     {
-      mWafers[iWafer]->doClusterisation(wafNumbOfCluster, sls_ctrl, scf_ctrl);
+      mWafers[iWafer]->doClusterisation(wafNumbOfCluster, my_sls_ctrl, my_scf_ctrl);
       barrelNumbOfCluster[0] += wafNumbOfCluster[0];
-      barrelNumbOfCluster[1] += wafNumbOfCluster[1];
+      barrelNumbOfCluster[1] += wafNumbOfCluster[1]; 
+      //cout << "in StScfBarrel,barrelNumbOfCluster[0],barrelNumbOfCluster[1]  "<< barrelNumbOfCluster[0]<<"   "<<  barrelNumbOfCluster[1]<< endl;
     }
   delete[] wafNumbOfCluster;
 }
+
+
 
 
 int  StScfBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)

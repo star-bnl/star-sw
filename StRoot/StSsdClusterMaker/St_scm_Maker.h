@@ -1,6 +1,9 @@
-// $Id: St_scm_Maker.h,v 1.10 2005/05/17 14:57:28 lmartin Exp $
+// $Id: St_scm_Maker.h,v 1.11 2005/06/13 16:01:01 reinnart Exp $
 //
 // $Log: St_scm_Maker.h,v $
+// Revision 1.11  2005/06/13 16:01:01  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.10  2005/05/17 14:57:28  lmartin
 // saving SSD hits into StEvent
 //
@@ -31,6 +34,8 @@
 class TFile;
 class TH1S;
 class TH2S;
+class TH2F;
+class TNtuple;
 
 class St_sdm_geom_par;
 class St_sdm_condition_db;
@@ -41,6 +46,8 @@ class St_scm_ctrl;
 class StEvent;
 class StSsdHitCollection;
 
+class StTpcHitCollection;
+
 class St_scm_Maker : public StMaker {
  private:
   St_sdm_geom_par      *m_geom_par;//!
@@ -48,15 +55,32 @@ class St_scm_Maker : public StMaker {
   St_svg_geom          *m_geom;//!
   St_sls_ctrl          *m_sls_ctrl;//!
   St_scm_ctrl          *m_scm_ctrl;//!
+
+  float hitNtuple[9]; 
+  TFile *pFile;
+  TNtuple* pHitNtuple;
+float hit[4]; 
+  TFile *qFile;
+  TNtuple* qHitNtuple;
   void makeScmCtrlHistograms(); //!
+  void DeclareNtuple(); //! 
   
  protected:
-  
+
   StEvent                *mCurrentEvent;   //!
   StSsdHitCollection     *mSsdHitColl;     //!
+ 
+  StEvent                *mCurrentEvent_tpc;
+  StTpcHitCollection     *mTpcHitColl; 
+
   TFile *ScmCtrlFile; //!
   TH2S *matchisto;    //! (1p-1n) packages control matching.
   TH1S *orthoproj;    //! orthonormal projection and perfect matching deviation.
+  TH2F *globalYvsX;    //! 
+  TH2F *globalZvsX;    //! 
+  TH2F *globalZvsY;    //! 
+  TH2F *localYvsX;    //! 
+  TH1F *ladderId;    //! 
 
  public: 
                   St_scm_Maker(const char *name="scm_spt");
@@ -67,7 +91,7 @@ class St_scm_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.10 2005/05/17 14:57:28 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.11 2005/06/13 16:01:01 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
@@ -77,6 +101,9 @@ class St_scm_Maker : public StMaker {
 /***************************************************************************
  *
  * $Log: St_scm_Maker.h,v $
+ * Revision 1.11  2005/06/13 16:01:01  reinnart
+ * Jonathan and Joerg changed the update function
+ *
  * Revision 1.10  2005/05/17 14:57:28  lmartin
  * saving SSD hits into StEvent
  *

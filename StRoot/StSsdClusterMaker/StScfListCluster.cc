@@ -1,6 +1,9 @@
-// $Id: StScfListCluster.cc,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+// $Id: StScfListCluster.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StScfListCluster.cc,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:33  lmartin
 // CVS tags added
 //
@@ -169,15 +172,15 @@ void StScfListCluster::renumCluster()
   return;
 }
 
-
-int StScfListCluster::splitCluster(scf_ctrl_st *scf_ctrl, StScfCluster *CurrentCluster, int *ListAdc, StScfListStrip *currentListStrip)
+// int StScfListCluster::splitCluster(scf_ctrl_st *scf_ctrl, StScfCluster *CurrentCluster, int *ListAdc, StScfListStrip *currentListStrip)
+int StScfListCluster::splitCluster(St_scf_ctrl *my_scf_ctrl, StScfCluster *CurrentCluster, int *ListAdc, StScfListStrip *currentListStrip)
 {
   int  CurrentClusterSize = CurrentCluster->getClusterSize();
   if (CurrentClusterSize<3) return 0;
   int nSubCluster = 0;
   int isClimbOrFall = 0;
-  
-  float testTolerance = scf_ctrl[0].testTolerance;//20%
+  scf_ctrl_st *ctrl = my_scf_ctrl->GetTable();
+  float testTolerance = ctrl->testTolerance;//20%
   int *minima = new int[CurrentClusterSize];
   int *maxima = new int[CurrentClusterSize];
   int *keyToIdStrip = new int[CurrentClusterSize];
@@ -324,7 +327,7 @@ int StScfListCluster::splitCluster(scf_ctrl_st *scf_ctrl, StScfCluster *CurrentC
 	      int currentStrip = localFirstStrip;
 	      for (currentStrip = localFirstStrip; currentStrip<=(keyToIdStrip[iStripLeft]+(nStripInTheGroup/2)); currentStrip++)
 		{		  
-		  newCluster->update(currentListStrip->getStrip(currentStrip),weight);
+		  newCluster->update(currentListStrip->getStrip(currentStrip),weight,1);
 		  weight=1.;
 		  localFirstStrip=currentStrip+1;	     
 		}
@@ -337,12 +340,12 @@ int StScfListCluster::splitCluster(scf_ctrl_st *scf_ctrl, StScfCluster *CurrentC
 	      int currentStrip = localFirstStrip;
 	      for (currentStrip = localFirstStrip; currentStrip<=(keyToIdStrip[iStripLeft]+(int)(nStripInTheGroup/2)); currentStrip++)
 		{
-		  newCluster->update(currentListStrip->getStrip(currentStrip),weight);
+		  newCluster->update(currentListStrip->getStrip(currentStrip),weight,1);
 		  weight=1.;
 		  localFirstStrip=currentStrip+1;
 		}
 	      weight=0.5;
-	      newCluster->update(currentListStrip->getStrip(localFirstStrip),weight);//last strip
+	      newCluster->update(currentListStrip->getStrip(localFirstStrip),weight,1);//last strip
 	      this->addNewCluster(newCluster);
 	    }
 	  nSubCluster++;
@@ -356,7 +359,7 @@ int StScfListCluster::splitCluster(scf_ctrl_st *scf_ctrl, StScfCluster *CurrentC
 	int currentStrip = localFirstStrip;
 	for (currentStrip = localFirstStrip; currentStrip<(CurrentCluster->getFirstStrip()+CurrentCluster->getClusterSize()); currentStrip++)
 	  {		  
-	    newCluster->update(currentListStrip->getStrip(currentStrip),weight);
+	    newCluster->update(currentListStrip->getStrip(currentStrip),weight,1);
 	    weight=1.;
 	  }
 	this->addNewCluster(newCluster);

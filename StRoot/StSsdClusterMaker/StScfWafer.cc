@@ -1,6 +1,9 @@
-// $Id: StScfWafer.cc,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+// $Id: StScfWafer.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StScfWafer.cc,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:34  lmartin
 // CVS tags added
 //
@@ -15,11 +18,13 @@ StScfWafer::StScfWafer(int nid)
 }
 StScfWafer::~StScfWafer()
 {
+
   delete    mStripP;
   delete    mStripN;
   delete    mClusterP;
   delete    mClusterN;
 }
+
 
 
 StScfListCluster* StScfWafer::getClusterP()
@@ -62,17 +67,25 @@ void StScfWafer::sortStrip()
   (this->mStripP)->sortStrip();
   (this->mStripN)->sortStrip();
 }
-void StScfWafer::doClusterisation(int *NClusterPerSide, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl)
+// void StScfWafer::doClusterisation(int *NClusterPerSide, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl)
+// {
+//   int iSide = 0;
+//   this->doFindCluster(sls_ctrl, scf_ctrl, iSide,para);
+//   NClusterPerSide[0] = this->doClusterSplitting(scf_ctrl, iSide); 
+//   iSide = 1;
+//   this->doFindCluster(sls_ctrl, scf_ctrl, iSide,para); 
+//   NClusterPerSide[1] = this->doClusterSplitting(scf_ctrl, iSide);
+// }
+void StScfWafer::doClusterisation(int *NClusterPerSide,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl)
 {
   int iSide = 0;
-  this->doFindCluster(sls_ctrl, scf_ctrl, iSide);
-  NClusterPerSide[0] = this->doClusterSplitting(scf_ctrl, iSide); 
+  this->doFindCluster(my_sls_ctrl, my_scf_ctrl, iSide);
+  NClusterPerSide[0] = this->doClusterSplitting(my_scf_ctrl, iSide); 
   iSide = 1;
-  this->doFindCluster(sls_ctrl, scf_ctrl, iSide); 
-  NClusterPerSide[1] = this->doClusterSplitting(scf_ctrl, iSide);
+  this->doFindCluster(my_sls_ctrl, my_scf_ctrl, iSide); 
+  NClusterPerSide[1] = this->doClusterSplitting(my_scf_ctrl, iSide);
 }
-
-int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int iSide)
+int StScfWafer::doFindCluster(St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl, int iSide)
 {
   StScfListStrip   *CurrentListStrip   =  0;
   StScfListCluster *CurrentListCluster =  0;
@@ -104,18 +117,21 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
   
   while(CurrentStrip) 
     {
-      if(CurrentStrip->getDigitSig()>(scf_ctrl[0].high_cut*CurrentStrip->getSigma()))
-	{
-	  LastScanStrip = 0;
+      scf_ctrl_st *ctrl = my_scf_ctrl->GetTable();
+      // if(CurrentStrip->getDigitSig()>(scf_ctrl[0].high_cut*CurrentStrip->getSigma()))
+// 	{
+	if(CurrentStrip->getDigitSig()>(ctrl->high_cut*CurrentStrip->getSigma()))
+	{ 
+      LastScanStrip = 0;
 	  StScfCluster *newCluster = new StScfCluster(CurrentListCluster->getSize());
 	  nCluster++;
-	  newCluster->update(CurrentStrip,1.);
+	  newCluster->update(CurrentStrip,1.,iSide);
 	  ScanStrip = CurrentListStrip->prev(CurrentStrip);  
 	  while(ScanStrip)
 	    {
 	      if(((ScanStrip->getNStrip())-((CurrentListStrip->next(ScanStrip))->getNStrip()))==-1)
 		{
-		newCluster->update(ScanStrip,1.);
+		newCluster->update(ScanStrip,1.,iSide);
 		ScanStrip = CurrentListStrip->prev(ScanStrip);
 		}
 	      else
@@ -126,7 +142,7 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
 	    {
 	      if(((ScanStrip->getNStrip())-((CurrentListStrip->prev(ScanStrip))->getNStrip()))==1)
 		{
-		  newCluster->update(ScanStrip,1.);
+		  newCluster->update(ScanStrip,1.,iSide);
 		  ScanStrip = CurrentListStrip->next(ScanStrip);
 		  if (!ScanStrip) atTheEnd = 1;
 		}
@@ -153,7 +169,7 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
   return nCluster;
 }
 
-int StScfWafer::doClusterSplitting(scf_ctrl_st *scf_ctrl, int iSide)
+int StScfWafer::doClusterSplitting(St_scf_ctrl *my_scf_ctrl,int iSide)
 {
   StScfListStrip   *CurrentListStrip   =  0;
   StScfListCluster *CurrentListCluster =  0;
@@ -181,7 +197,7 @@ int StScfWafer::doClusterSplitting(scf_ctrl_st *scf_ctrl, int iSide)
     {   
       
       int *ListAdc = CurrentListStrip->getListAdc(CurrentCluster->getFirstStrip(),CurrentCluster->getClusterSize());
-      int toBeDeleted = CurrentListCluster->splitCluster(scf_ctrl,CurrentCluster,ListAdc,CurrentListStrip);
+      int toBeDeleted = CurrentListCluster->splitCluster(my_scf_ctrl,CurrentCluster,ListAdc,CurrentListStrip);
       if(toBeDeleted)
 	{
 	  StScfCluster *TempCluster = CurrentCluster;

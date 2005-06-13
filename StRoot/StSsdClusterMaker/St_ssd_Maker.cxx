@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_ssd_Maker.cxx
  **************************************************************************
- * $Id: St_ssd_Maker.cxx,v 1.3 2005/05/17 14:16:42 lmartin Exp $
+ * $Id: St_ssd_Maker.cxx,v 1.4 2005/06/13 16:01:01 reinnart Exp $
  *
  * $Log: St_ssd_Maker.cxx,v $
+ * Revision 1.4  2005/06/13 16:01:01  reinnart
+ * Jonathan and Joerg changed the update function
+ *
  * Revision 1.3  2005/05/17 14:16:42  lmartin
  * CVS tags added
  *
@@ -159,7 +162,8 @@ Int_t St_ssd_Maker::Make()
   int nClusterPerSide[2];
   nClusterPerSide[0] = 0;
   nClusterPerSide[1] = 0;
-  barrel->doSideClusterisation(nClusterPerSide, sls_ctrl,scf_ctrl);
+  int parameter = 5 ;
+  barrel->doSideClusterisation(nClusterPerSide, sls_ctrl,scf_ctrl,parameter);
   cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
   cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
   barrel->sortListCluster();
@@ -286,7 +290,7 @@ void St_ssd_Maker::makeScmCtrlHistograms()
   }
 }
 
-//_____________________________________________________________________________
+//____________________________________________________________________________
 void St_ssd_Maker::PrintInfo()
 {
   if (Debug()) StMaker::PrintInfo();

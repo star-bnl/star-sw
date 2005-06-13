@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.2 2005/05/17 14:16:40 lmartin Exp $
+// $Id: StSsdWafer.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:40  lmartin
 // CVS tags added
 //
@@ -85,7 +88,8 @@ StSsdPackageList* StSsdWafer::getPackage()
 {  return mPackage; }   
 
 StSsdPointList*   StSsdWafer::getPoint()
-{  return mPoint; }  
+{  return mPoint; } 
+
 
 
 void StSsdWafer::addStrip(StSsdStrip *ptr, int iSide)
@@ -143,6 +147,18 @@ void StSsdWafer::doClusterisation(int *NClusterPerSide, sls_ctrl_st *sls_ctrl, s
   doFindCluster(sls_ctrl, scf_ctrl, iSide); 
   NClusterPerSide[1] = doClusterSplitting(scf_ctrl, iSide);
 }
+// void StSsdWafer::doClusterisation(int *NClusterPerSide,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl);
+// {
+//   int iSide = 0;
+//   doFindCluster(my_sls_ctrl, my_scf_ctrl, iSide);
+//   NClusterPerSide[0] = doClusterSplitting(my_scf_ctrl, iSide); 
+//   iSide = 1;
+//   doFindCluster(sls_ctrl, my_cf_ctrl, iSide); 
+//   NClusterPerSide[1] = doClusterSplitting(my_scf_ctrl, iSide);
+// }
+
+
+
 
 int StSsdWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int iSide)
 {
