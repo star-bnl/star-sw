@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.7 2005/06/09 12:41:14 lmartin Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.8 2005/06/13 13:01:49 bouchet Exp $
 //
 // $log$
 //
@@ -161,7 +161,6 @@ Int_t StSsdDaqMaker::Make(){
   int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
   int data,pedestal,noise,channel,newchannel,ladder; char EastWest;
   int maxChannel;
-
   // SSD parameters independant from its configuration (half or full barrel)
   // mConfig->getTotalNumberOfLadders()=20;
   // mConfig->getNumberOfStrips()=768;
@@ -284,7 +283,7 @@ Int_t StSsdDaqMaker::Make(){
 		      // id_strip=10000*(10*strip_number+id_side)+id_wafer
 		      //strip number=1-mConfig->getNumberOfStrips()
 		      //id_side=0 for p side, 1 for n side
-		      if (pedestal>0) {
+		      if (pedestal>=0) {
 			//			  if (id_side==1) my_channel=maxChannel-1-channel;
 			//			  else my_channel=channel;
 			// the ssd mapping tables are inverted at the moment so we have to scan 
@@ -348,6 +347,7 @@ Int_t StSsdDaqMaker::Make(){
   }
   gMessMgr->Info() << "StSsdDaqMaker::Make()/  spa_strip->NRows= "<<spa_strip->GetNRows()<<endm;
   gMessMgr->Info() << "StSsdDaqMaker::Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm;
+ 
   return kStOK;
 }
 
