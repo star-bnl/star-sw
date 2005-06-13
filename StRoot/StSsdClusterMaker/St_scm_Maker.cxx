@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.8 2005/05/17 14:57:28 lmartin Exp $
+ * $Id: St_scm_Maker.cxx,v 1.9 2005/06/13 16:01:01 reinnart Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.9  2005/06/13 16:01:01  reinnart
+ * Jonathan and Joerg changed the update function
+ *
  * Revision 1.8  2005/05/17 14:57:28  lmartin
  * saving SSD hits into StEvent
  *
@@ -29,6 +32,8 @@
 #include "TH2.h"
 #include "TFile.h"
 #include "StMessMgr.h"
+#include "TNtuple.h"
+#include "StTpcHitCollection.h"
 
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
@@ -97,7 +102,25 @@ Int_t St_scm_Maker::Init(){
   matchisto->SetNdivisions(10,"Z");
   orthoproj = new TH1S("ProjectionOrtho","Perfect Matching Deviation",80,-80,80);
 
+  globalYvsX = new TH2F("globalYvsX","global Y vs X",100,-50,50,100,-50,50);
+  globalZvsX = new TH2F("globalZvsX","global Z vs X",100,-50,50,100,-50,50);
+  globalZvsY = new TH2F("globalZvsY","global Z vs Y",100,-50,50,100,-50,50);
+  localYvsX = new TH2F("localYvsX","local Y vs X",100,-5,5,100,-5,5);
+  ladderId = new TH1F("ladderId","ladder Id",20,0,20);
+ 
+  DeclareNtuple();
+
   return StMaker::Init();
+}//_____________________________________________________________________________
+void St_scm_Maker::DeclareNtuple()
+{
+  pFile = new TFile("event/Hits.root","RECREATE");
+  string varlist1 = "ladder:wafer:pulseP:pulseN:kind:xg:yg:zg";
+  pHitNtuple     = new TNtuple("hitNtuple","hits Ntuple",varlist1.c_str());
+  qFile = new TFile("event/detectors.root","RECREATE");
+  string varlist2 = "eventId:ssdhits:tpchits";
+  qHitNtuple     = new TNtuple("hit","hits_detectors Ntuple",varlist2.c_str());
+
 }
 //_____________________________________________________________________________
 Int_t St_scm_Maker::Make()
@@ -111,7 +134,11 @@ Int_t St_scm_Maker::Make()
 
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
-  // create a StSsdHitCollection to save the hits
+  
+  mCurrentEvent_tpc = (StEvent*) GetInputDS("StEvent");
+  mTpcHitColl = mCurrentEvent_tpc->tpcHitCollection();
+  cout<<"####   -> "<<mTpcHitColl->numberOfHits()<<" HITS WRITTEN INTO TPC   ####"<<endl;
+   
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if(mCurrentEvent) 
     {
@@ -124,7 +151,6 @@ Int_t St_scm_Maker::Make()
     }
   else              
     mSsdHitColl = 0;
-
   sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
   sls_ctrl_st      *sls_ctrl = m_sls_ctrl->GetTable();
   scm_ctrl_st      *scm_ctrl = m_scm_ctrl->GetTable();
@@ -144,15 +170,24 @@ Int_t St_scm_Maker::Make()
   cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
   mySsd->convertDigitToAnalog(sls_ctrl);
   mySsd->convertUFrameToOther(geom_par);
-  //  int nSptWritten = mySsd->writePointToTable(scm_spt);
+    //  int nSptWritten = mySsd->writePointToTable(scm_spt);
   int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
   cout<< "# SSD hits:       "
       << (mCurrentEvent->ssdHitCollection() ? mCurrentEvent->ssdHitCollection()->numberOfHits() : 0) 
       << endl;
   cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
+  if(mSsdHitColl) 
+	cout<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endl;
+  else 
+    cout<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endl;
+  
   scm_spt->Purge();
   cout<<"####       END OF SSD CLUSTER MATCHING       ####"<<endl;
   cout<<"#################################################"<<endl;
+  hit[0]=mCurrentEvent->id();
+  hit[1]=mSsdHitColl->numberOfHits();
+  hit[2]=mTpcHitColl->numberOfHits();
+  qHitNtuple->Fill(hit);
   delete mySsd;
   if (nSptWritten) res = kStOK;
  
@@ -168,6 +203,11 @@ Int_t St_scm_Maker::Make()
 //_____________________________________________________________________________
 void St_scm_Maker::makeScmCtrlHistograms()
 {
+  int iWaf=0;
+  int idWaf=0;
+  int iLad=0;
+  int i=0;
+  int conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
   St_DataSetIter scm_iter(m_DataSet);
   St_scm_spt *scm_spt = 0;
   scm_spt = (St_scm_spt *) scm_iter.Find("scm_spt"); 
@@ -179,6 +219,28 @@ void St_scm_Maker::makeScmCtrlHistograms()
     Float_t convMeVToAdc = (int)pow(2.0,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
     for (Int_t iScm = 0; iScm < scm_spt->GetNRows(); iScm++, dSpt++)
       {
+	idWaf=dSpt[i].id_wafer;
+	iWaf=(int)((idWaf-7000)/100 - 1);
+	iLad=(int)(idWaf - 7000 -(iWaf+1)*100 -1);
+	//cout << "Wafer=" << iWaf <<  "  ladder=" << iLad << " case=" << dSpt[i].id_match << endl;
+	Float_t c=0,d=0;
+	c = convMeVToAdc*(dSpt->de[0]+dSpt->de[1]);
+	d = convMeVToAdc*(dSpt->de[0]-dSpt->de[1]);
+	hitNtuple[0]=iLad+1;
+	hitNtuple[1]=iWaf+1;
+	hitNtuple[2]=c;
+	hitNtuple[3]=d;
+	hitNtuple[5]=dSpt->x[0];
+	hitNtuple[6]=dSpt->x[1];
+	hitNtuple[7]=dSpt->x[2];
+	for(int k=0;k<=11;k++)
+	  {
+	    if(dSpt->id_match==conversion[k])
+	      {
+		hitNtuple[4]=k;
+	      }
+	  } 
+	pHitNtuple->Fill(hitNtuple);
 	if (dSpt->id_match == 11)// case 11  		    
 	  {
 	    Float_t a = 0, b = 0;
@@ -186,11 +248,17 @@ void St_scm_Maker::makeScmCtrlHistograms()
 	    b = convMeVToAdc*(dSpt->de[0]-dSpt->de[1]);
 	    matchisto->Fill(a,b);
 	    orthoproj->Fill((b-a)/TMath::Sqrt(2.));
+	    globalYvsX->Fill(dSpt->x[0],dSpt->x[1]);
+	    globalZvsX->Fill(dSpt->x[0],dSpt->x[2]);
+	    globalZvsY->Fill(dSpt->x[1],dSpt->x[2]);
+	    localYvsX->Fill(dSpt->xl[0],dSpt->xl[1]);
+	    ladderId->Fill(iLad);
 	  }
       }
 //     matchisto->Draw();
   }
 }
+
 
 //_____________________________________________________________________________
 void St_scm_Maker::PrintInfo()
@@ -201,6 +269,10 @@ void St_scm_Maker::PrintInfo()
 //_____________________________________________________________________________
 Int_t St_scm_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_scm_Maker::Finish() ... "
-                               << GetName() << endm; 
-   return kStOK;
+				 << GetName() << endm; 
+  pFile->Write();
+  pFile->Close();
+  qFile->Write();
+  qFile->Close();
+  return kStOK;
 }

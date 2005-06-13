@@ -1,6 +1,9 @@
-// $Id: StScfCluster.hh,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+// $Id: StScfCluster.hh,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StScfCluster.hh,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:33  lmartin
 // CVS tags added
 //
@@ -41,7 +44,7 @@ class StScfCluster
   void          setTotNoise(int rTotNoise);
   void          setStripMean(float rStripMean);
   void          setIdMcHit(int rIdMcHit, int iR);
-  void          update(StScfStrip *ptr,float rWeight);
+  void          update(StScfStrip *ptr,float rWeight,int iSide);
   void          copyTo(StScfCluster *ptrClone);
   
 private:

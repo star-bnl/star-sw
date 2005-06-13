@@ -1,6 +1,9 @@
-// $Id: StScfWafer.hh,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+// $Id: StScfWafer.hh,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StScfWafer.hh,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:34  lmartin
 // CVS tags added
 //
@@ -13,12 +16,16 @@
 #include "StScfCluster.hh"
 #include "StScfStrip.hh"
 
+#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_scf_ctrl_Table.h"
+
 class StScfWafer
 {
  public:
                     StScfWafer(int id);
                     ~StScfWafer();
-
+  
+ 
   StScfListCluster* getClusterP();
   StScfListCluster* getClusterN();
   StScfListStrip*   getStripP();
@@ -27,16 +34,16 @@ class StScfWafer
   void              setSigmaStrip(int iStrip, int iSide, int iSigma, sls_ctrl_st *sls_ctrl);
   void              sortCluster();
   void              sortStrip();
-  void              doClusterisation(int *numberOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl);
-
+  // void              doClusterisation(int *numberOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl);
+  void              doClusterisation(int *numberOfCluster,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl);
 private:
   int               mId;
   StScfListStrip    *mStripP;
   StScfListStrip    *mStripN;
   StScfListCluster  *mClusterP;
   StScfListCluster  *mClusterN;
-  int               doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int iSide);
-  int               doClusterSplitting(scf_ctrl_st *scf_ctrl, int iSide);
+  int               doFindCluster(St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl,int iSide);
+  int               doClusterSplitting(St_scf_ctrl *my_scf_ctrl,int iSide);
 };
   
 #endif

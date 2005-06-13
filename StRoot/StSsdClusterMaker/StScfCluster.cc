@@ -1,6 +1,9 @@
-// $Id: StScfCluster.cc,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+// $Id: StScfCluster.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StScfCluster.cc,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:33  lmartin
 // CVS tags added
 //
@@ -113,7 +116,7 @@ void StScfCluster::copyTo(StScfCluster *ptrClone)
 }
 
 
-void StScfCluster::update(StScfStrip *ptr,float rWeight)
+void StScfCluster::update(StScfStrip *ptr,float rWeight,int iSide)
 {
   int tmpTotAdc = this->mTotAdc;
   this->mTotAdc += (int)(ptr->getDigitSig()*rWeight);
@@ -139,8 +142,9 @@ void StScfCluster::update(StScfStrip *ptr,float rWeight)
   while((b<5)&&(a<5)&&(ptr->getIdMcHit(b)!=0))
     {
       flag = 1;
-      for(c=0;c<5-a;c++)
-	{if(this->getIdMcHit(c)==ptr->getIdMcHit(b)) flag=0;}
+      for(c=0;c<5;c++)
+	{if(this->getIdMcHit(c)==ptr->getIdMcHit(b)) flag=0;
+      }
       if(flag)
 	{     
 	  this->setIdMcHit(ptr->getIdMcHit(b),a);
@@ -148,7 +152,7 @@ void StScfCluster::update(StScfStrip *ptr,float rWeight)
 	}
       b++;
     }
-  this->mClusterSize++;  
+  this->mClusterSize++;
   return;
 }
 

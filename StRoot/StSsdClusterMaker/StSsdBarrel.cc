@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:37  lmartin
 // CVS tags added
 //
@@ -306,7 +309,7 @@ int StSsdBarrel::writePointToTable(St_scm_spt *scm_spt)
   return currRecord;
 }
 
-void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl)
+void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl,int parameter)
 {
   int *wafNumbOfCluster = new int[2];
   wafNumbOfCluster[0] = 0;

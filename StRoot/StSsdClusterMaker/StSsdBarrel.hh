@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+// $Id: StSsdBarrel.hh,v 1.3 2005/06/13 16:01:00 reinnart Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.3  2005/06/13 16:01:00  reinnart
+// Jonathan and Joerg changed the update function
+//
 // Revision 1.2  2005/05/17 14:16:37  lmartin
 // CVS tags added
 //
@@ -31,7 +34,7 @@ class StSsdBarrel
   int   readClusterFromTable(St_scf_cluster *scf_cluster);
   int   writeClusterToTable(St_scf_cluster *cluster);
   int   writePointToTable(St_scm_spt *scm_spt);   
-  void  doSideClusterisation(int *numberOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl);   
+  void  doSideClusterisation(int *numberOfCluster,sls_ctrl_st *sls_ctrl,scf_ctrl_st *scf_ctrl,int parameter);   
   int   doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl);
   void  convertDigitToAnalog(sls_ctrl_st *sls_ctrl);
   void  convertUFrameToOther(sdm_geom_par_st *geom_par);
