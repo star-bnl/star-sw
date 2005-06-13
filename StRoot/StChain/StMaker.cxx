@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.165 2005/04/10 20:38:35 jeromel Exp $
+// $Id: StMaker.cxx,v 1.166 2005/06/13 03:03:43 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -81,11 +81,10 @@ static const int   DBtimes[]=  {
 };
 
 // Turn the logger of the current maker
-#define TURN_LOGGER(maker) {                                      \
+#define TURN_LOGGER(maker)                                        \ 
         if (!fLogger) fLogger = StMessMgr::Instance(ClassName()); \
-        StTurnLogger(maker->GetLogger());                         \
-        }                        
-
+        StTurnLogger SaveRestoreLogger(maker->GetLogger());       
+                                
         
 ClassImp(StMaker)
 
@@ -1589,6 +1588,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.166  2005/06/13 03:03:43  fine
+// fix cpp macro to save/restore maker logger
+//
 // Revision 1.165  2005/04/10 20:38:35  jeromel
 // TimeStamp now corrected. Hopefully,
 // http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html#Year5
