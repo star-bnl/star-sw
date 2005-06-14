@@ -17,11 +17,18 @@ StEEmcTower::StEEmcTower()
 void StEEmcTower::print()
 {
 
-  std::cout << "name=" << mName << std::endl;
-  std::cout << "energy=" << energy() << std::endl;
-  std::cout << "raw=" << raw() << std::endl;
-  std::cout << "adc=" << adc() << std::endl;
+    std::cout << "--------------------------- StEEmcTower::print()" << std::endl; 
+    std::cout << "name   = " << mName << std::endl;
+    std::cout << "index  = " << mIndex << std::endl; 
+    std::cout << "energy = " << energy() << std::endl;
+    std::cout << "raw    = " << raw() << std::endl;
+    std::cout << "adc    = " << adc() << std::endl;
 
+}
+
+void StEEmcTower::printLine()
+{
+  std::cout << mName << " ADC=" << raw() << " " << adc() << " E=" << energy();
 }
 
 // ----------------------------------------------------------------------------
