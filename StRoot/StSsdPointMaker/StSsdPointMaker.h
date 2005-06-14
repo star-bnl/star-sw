@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.11 2005/06/08 15:50:05 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.12 2005/06/14 12:09:16 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.12  2005/06/14 12:09:16  bouchet
+// add a histo for the pedestal and new name of the class : SsdPoint
+//
 // Revision 1.11  2005/06/08 15:50:05  bouchet
 // add methods to fill the Tuple
 //
@@ -93,7 +96,8 @@ class StSsdClusterList;
 class ssdWafersPosition_st;
 class ssdDimensions_st;
 class ssdConfiguration_st;
-
+class StRunInfo;
+class StEventInfo;
 
 class StSsdPointMaker : public StMaker {
  private:
@@ -131,6 +135,7 @@ class StSsdPointMaker : public StMaker {
   void PrintPointSummary(StSsdBarrel *mySsd); //!
   void WriteScfTuple(StSsdBarrel *mySsd);
   void WriteScmTuple(StSsdBarrel *mySsd);
+  void PrintClusterDetails(StSsdBarrel *mySsd, int mywafer); //!
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -179,10 +184,11 @@ class StSsdPointMaker : public StMaker {
   TH2S *noise_wafer;// mean noise per wafer
   TH2S *noise_chip_P;// mean noise per chip of the P Side
   TH2S *noise_chip_N;// mean noise per chip of the N Side
+  TH2S *pedestal_chip; //pedestal per chip for the ladders
   int flag ;
-
+  
  public:
-                  StSsdPointMaker(const char *name="scm_spt");
+                  StSsdPointMaker(const char *name="SsdPoint");
    virtual       ~StSsdPointMaker();
    virtual Int_t  Init();
    virtual Int_t  InitRun(int runumber);
@@ -191,7 +197,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.11 2005/06/08 15:50:05 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.12 2005/06/14 12:09:16 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
