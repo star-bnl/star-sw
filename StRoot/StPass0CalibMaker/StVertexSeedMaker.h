@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.4 2002/03/20 00:40:43 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.5 2005/06/14 18:51:31 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -22,7 +22,7 @@ class St_vertexSeed;
 
 class StVertexSeedMaker : public StMaker {
  public: 
-                  StVertexSeedMaker(const char *name="TpcT0");
+                  StVertexSeedMaker(const char *name="VtxSeedMkr");
    virtual       ~StVertexSeedMaker();
    virtual Int_t Init();
    virtual Int_t Make();
@@ -33,34 +33,36 @@ class StVertexSeedMaker : public StMaker {
 
    virtual void FitData();
    virtual void FindResult(Bool_t checkDb=kTRUE);
-   int GetValidityDate();
-   int GetValidityTime();
-   void UseEventDateTime();
-   void UseFillDateTime();
-   St_vertexSeed* VertexSeedTable();
-   void WriteTableToFile();     //Write drift velocity table (assumes correct trigger offset)
-   void SetMinEntries(int entries);  //minimum number of valid events for seed
-   void SetMaxX0Err(float err);  //maximum allowed error for x0 
-   void SetMaxY0Err(float err);  //maximum allowed error for y0 
-   void WriteHistFile();       // Write out vertexseedhist.root file w/results
-   void HistFileByDefault();   // Write out file on Finish
-   void SetVertexZmax(float zmax);  //Set max z vertex for seed calculation
-   void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
-   void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
+   virtual int GetValidityDate();
+   virtual int GetValidityTime();
+   virtual void UseEventDateTime();
+   virtual void UseFillDateTime();
+   virtual St_vertexSeed* VertexSeedTable();
+   virtual void WriteTableToFile();     //Write drift velocity table (assumes correct trigger offset)
+   virtual void SetMinEntries(int entries);  //minimum number of valid events for seed
+   virtual void SetMaxX0Err(float err);  //maximum allowed error for x0 
+   virtual void SetMaxY0Err(float err);  //maximum allowed error for y0 
+   virtual void WriteHistFile();       // Write out vertexseedhist.root file w/results
+   virtual void HistFileByDefault();   // Write out file on Finish
+   virtual void SetVertexZmax(float zmax);  //Set max z vertex for seed calculation
+   virtual void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
+   virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.4 2002/03/20 00:40:43 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.5 2005/06/14 18:51:31 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
  protected:
-   void Reset();
-   Int_t FillAssumed();
-   void FillDateTime();
-   void GetFillDateTime();
-   Bool_t BetterErrors();
-   Bool_t ChangedValues();
+   virtual void Reset();
+   virtual Int_t FillAssumed();
+   virtual void FillDateTime();
+   virtual void GetFillDateTime();
+   virtual Bool_t BetterErrors();
+   virtual Bool_t ChangedValues();
+   virtual Bool_t CheckTriggers();
+   virtual Bool_t ValidTrigger(unsigned int);
+   virtual Int_t GetEventData();
 
- private:
   TH1F* xdist;
   TH1F* ydist;
   TH1F* xerr;
@@ -72,6 +74,7 @@ class StVertexSeedMaker : public StMaker {
   float yvertex;
   float xvertex;
   float mult;
+  float trig;
   float eventNumber;
   float HIST_MIN;
   float HIST_MAX;
@@ -111,8 +114,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.4 2002/03/20 00:40:43 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.5 2005/06/14 18:51:31 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.5  2005/06/14 18:51:31  genevb
+// Updates to allow for pp2005 triggers, and inheritance
+//
 // Revision 1.4  2002/03/20 00:40:43  genevb
 // Addition of Aggregate feature, minor updates
 //

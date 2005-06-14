@@ -38,7 +38,7 @@ const char* defDir = "./StarDb/Calibrations/rhic";
 //_____________________________________________________________________________
 // C variables and functions for fit/minimization
 //_____________________________________________________________________________
-static TArrayF xVert, yVert, zVert, mult;
+static TArrayF xVert, yVert, zVert, multA;
 int nverts,nsize;
 Double_t funcX(float z,Double_t *par) {
   Double_t x = par[0] + par[1]*z;
@@ -62,7 +62,7 @@ void fnch(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag) {
     // Beam spot size (sigma) Error2 ~= 0.04 cm (400 microns)
     //                              =>  Error2^2 = 0.0016 cm^2
     // The total error should be ::sqrt(Error1^2 + Error2^2)
-    error_sq = 0.0016 + (2.45 / mult[i]); 
+    error_sq = 0.0016 + (2.45 / multA[i]); 
     delta_sq = ::pow(xVert[i]-funcX(zVert[i],par),2) +
                ::pow(yVert[i]-funcY(zVert[i],par),2);
     chisq += (delta_sq/error_sq);
@@ -73,7 +73,7 @@ void setArraySize(int n) {
   xVert.Set(n);
   yVert.Set(n);
   zVert.Set(n);
-  mult.Set(n);
+  multA.Set(n);
   nsize = n;
 }
 void addVert(float x, float y, float z, float m) {
@@ -81,7 +81,7 @@ void addVert(float x, float y, float z, float m) {
   xVert[nverts] = x;
   yVert[nverts] = y;
   zVert[nverts] = z;
-   mult[nverts] = m;
+  multA[nverts] = m;
   nverts++;
 }
 //_____________________________________________________________________________
@@ -120,7 +120,7 @@ void StVertexSeedMaker::Reset() {
   xerr->Reset();
   yerr->Reset();
   if (resNtuple) delete resNtuple;
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig");
   date = 0;
   time = 0;
   fill = -1;
@@ -162,7 +162,48 @@ Int_t StVertexSeedMaker::Make(){
     if (status != kStOk) return status;
   }
 
+  if (CheckTriggers()) {   // returns false for good events
+    gMessMgr->Info("StVertexSeedMaker: event does not satisfy triggers");
+    return kStOk;
+  }
 
+  Int_t eventResult = GetEventData();
+  if (eventResult != kStOk) return eventResult;
+
+  if (zvertex<-998) {
+    gMessMgr->Info("StVertexSeedMaker: No primary vertex");
+    return kStOk;
+  }
+
+  // Calculate guessed vertex x & y from assumed params and measured z
+  xguess = a[0] + (a[1] * zvertex);
+  yguess = a[2] + (a[3] * zvertex);
+  gMessMgr->Info() << "StVertexSeedMaker::x guess = " << xguess << endm; 
+  gMessMgr->Info() << "StVertexSeedMaker::y guess = " << yguess << endm; 
+
+  // Check to see if vertex is good for use in the fit
+  float r2vertex = xvertex*xvertex + yvertex*yvertex;
+  if ((zvertex > zVertexMin) && (zvertex < zVertexMax) &&
+      (mult >= 5) && (r2vertex < r2VertexMax)){
+    xdist->Fill(xvertex);
+    xerr ->Fill(xvertex-xguess);
+    ydist->Fill(yvertex);
+    yerr ->Fill(yvertex-yguess);
+    eventNumber = (float)GetEventNumber();
+    resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult,trig);
+    addVert(xvertex,yvertex,zvertex,mult);
+    weight += mult; // Fixed at 50
+  }
+
+  return kStOk;
+}
+//_____________________________________________________________________________
+Int_t StVertexSeedMaker::Finish() {
+  FindResult();
+  return StMaker::Finish();
+}
+//_____________________________________________________________________________
+Bool_t StVertexSeedMaker::CheckTriggers() {
   // Check trigger word
   StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
   St_DataSet *daqReaderSet = GetDataSet("StDAQReader");
@@ -183,7 +224,14 @@ Int_t StVertexSeedMaker::Make(){
   for (unsigned int iTrg = 0;
        (notTrig) && (iTrg < dbTriggerId->getIDNumRows()) ; iTrg++) {
     if (summary & (1 << (dbTriggerId->getDaqTrgId(iTrg)))) {
-      switch (dbTriggerId->getOfflineTrgId(iTrg)) {
+      if (ValidTrigger(dbTriggerId->getOfflineTrgId(iTrg))) notTrig = kFALSE;
+    }
+  }
+  return notTrig;
+}
+//_____________________________________________________________________________
+Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
+      switch (tid) {
         case (1000) :     // ppMinBias
         case (1003) :     // ppFPDe-slow
         case (1009) :     // ppFPDw-slow
@@ -197,23 +245,32 @@ Int_t StVertexSeedMaker::Make(){
         case (45203) :    // pp eht-1-slow
         case (45204) :    // pp eht-2-slow
         case (45010) :    // pp minbias
-        case (1)     :    // pp bht-1-slow
-        case (2)     :    // pp bht-2-slow
-        case (3)     :    // pp eht-1-slow
-        case (4)     :    // pp eht-2-slow
-        case (10)    :    // pp minbias
-                      { notTrig = kFALSE; }
+        //case (1)     :    // pp bht-1-slow test
+        //case (2)     :    // pp bht-2-slow test
+        //case (3)     :    // pp eht-1-slow test
+        //case (4)     :    // pp eht-2-slow test
+        //case (10)    :    // pp minbias test
+
+// 2005 pp data
+	case (96201) :    // bemc-ht1-mb
+	case (96211) :    // bemc-ht2-mb
+	case (96221) :    // bemc-jp1-mb
+	case (96233) :    // bemc-jp2-mb
+	case (96251) :    // eemc-ht1-mb
+	case (96261) :    // eemc-ht2-mb
+	case (96272) :    // eemc-jp1-mb-a
+	case (96282) :    // eemc-jp2-mb-a
+	case (96011) :    // ppMinBias
+	case (20)    :    // Jpsi
+	case (22)    :    // upsilon
+
+                      { trig = (float) tid; return kTRUE; }
         default     : {}
       }
-    }
-  }
-  if (notTrig) {
-    gMessMgr->Info("StVertexSeedMaker: event does not satisfy triggers");
-    return kStOk;
-  }
-  
-
-
+      return kFALSE;
+}
+//_____________________________________________________________________________
+Int_t StVertexSeedMaker::GetEventData() {
   // Get primary vertex from evr
   TDataSet *ds=GetDataSet("dst/vertex");
   if (!ds) {
@@ -236,37 +293,7 @@ Int_t StVertexSeedMaker::Make(){
       break;    // found primary vertex
     }
   }
-  if (zvertex<-998) {
-    gMessMgr->Info("StVertexSeedMaker: No primary vertex");
-    return kStOK;
-  }
-
-  // Calculate guessed vertex x & y from assumed params and measured z
-  xguess = a[0] + (a[1] * zvertex);
-  yguess = a[2] + (a[3] * zvertex);
-  gMessMgr->Info() << "StVertexSeedMaker::x guess = " << xguess << endm; 
-  gMessMgr->Info() << "StVertexSeedMaker::y guess = " << yguess << endm; 
-
-  // Check to see if vertex is good for use in the fit
-  float r2vertex = ::pow(xvertex,2) + ::pow(yvertex,2);
-  if ((zvertex > zVertexMin) && (zvertex < zVertexMax) &&
-      (mult >= 5) && (r2vertex < r2VertexMax)){
-    xdist->Fill(xvertex);
-    xerr ->Fill(xvertex-xguess);
-    ydist->Fill(yvertex);
-    yerr ->Fill(yvertex-yguess);
-    eventNumber = (float)GetEventNumber();
-    resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult);
-    addVert(xvertex,yvertex,zvertex,mult);
-    weight += mult; // Fixed at 50
-  }
-
-  return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StVertexSeedMaker::Finish() {
-  FindResult();
-  return StMaker::Finish();
+  return kStOk;
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::FindResult(Bool_t checkDb) {
@@ -311,7 +338,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.21 2004/08/02 01:19:33 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.22 2005/06/14 18:51:31 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -355,6 +382,10 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
 }
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteHistFile(){
+  if (resNtuple->GetEntries() == 0) {
+    gMessMgr->Info("StVertexSeedMaker: Not writing histograms - no entries!!!");
+    return;
+  }
   char filename[80]; 
   // .ROOT is NOT a typo !!!
   sprintf(filename,"%s/vertexseedhist.%08d.%06d.ROOT",defDir,date,time);
@@ -597,8 +628,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.21 2004/08/02 01:19:33 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.22 2005/06/14 18:51:31 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.22  2005/06/14 18:51:31  genevb
+// Updates to allow for pp2005 triggers, and inheritance
+//
 // Revision 1.21  2004/08/02 01:19:33  genevb
 // minor fixes for getting directories correct
 //
