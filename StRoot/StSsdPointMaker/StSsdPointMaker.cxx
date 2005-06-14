@@ -1,8 +1,8 @@
-// $Id: StSsdPointMaker.cxx,v 1.17 2005/06/08 16:03:50 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.18 2005/06/14 12:09:15 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
-// Revision 1.17  2005/06/08 16:03:50  bouchet
-// same as previous version but par default Tuple are not filled
+// Revision 1.18  2005/06/14 12:09:15  bouchet
+// add a histo for the pedestal and new name of the class : SsdPoint
 //
 // Revision 1.14  2005/06/07 16:24:47  lmartin
 // InitRun returns kStOk
@@ -73,6 +73,8 @@
 #include "StSsdPointList.hh"
 #include "StSsdPoint.hh"
 #include "StEvent.h"
+#include "StEventInfo.h"
+#include "StRunInfo.h"
 #include "StSsdHitCollection.h"
 #include "StSsdDynamicControl.h"
 #include "StSsdClusterControl.h"
@@ -259,6 +261,7 @@ Int_t StSsdPointMaker::Init(){
     noise_wafer  = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
     noise_chip_P  = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
     noise_chip_N  = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
+    pedestal_chip  = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
     occupancy_wafer->SetXTitle("Ladder");
     occupancy_wafer->SetYTitle("Wafer");  
     occupancy_chip->SetXTitle("Ladder");
@@ -270,7 +273,9 @@ Int_t StSsdPointMaker::Init(){
     noise_chip_P->SetYTitle("Chip"); 
     noise_chip_N->SetYTitle("Chip");   
     noise_wafer->SetXTitle("Ladder");
-    noise_wafer->SetYTitle("Wafer");
+    noise_wafer->SetYTitle("Wafer"); 
+    pedestal_chip->SetXTitle("Ladder");
+    pedestal_chip->SetYTitle("Chip"); 
    
     flag = 0;             // flag=0->the tuple are not filled
     //DeclareNtuple(&flag); // flag=1->the tuple are filled :this lign to decomment or not
@@ -340,6 +345,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       config  = (ssdConfiguration_st*) configTable->GetTable() ;
       if (!config) 
         gMessMgr->Error() << "No  access to ssdConfiguration database" << endm;
+      //mConfig = new StSsdConfig();
   
       St_ssdWafersPosition* positionTable = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
       positionSize = 0;
@@ -372,12 +378,11 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 //_____________________________________________________________________________
 
 void StSsdPointMaker::DeclareNtuple(int *flag){
- 
   mFile = new TFile("PhysicsFile.root","RECREATE");
- string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg";
+  string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg";
   mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
   nFile = new TFile("Clusters.root","RECREATE");
- string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc";
+  string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc";
   nHitNtuple     = new TNtuple("ClusTuple","Clusters Ntuple",varlist3.c_str());
 
   *flag =  1;
@@ -429,8 +434,7 @@ Int_t StSsdPointMaker::Make()
     }
   else              
     mSsdHitColl = 0;
-
- 
+  
   cout<<"#################################################"<<endl;
   cout<<"####     START OF NEW SSD POINT MAKER        ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;  
@@ -457,6 +461,7 @@ Int_t StSsdPointMaker::Make()
       cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
       mySsd->sortListCluster();
       PrintClusterSummary(mySsd);
+      //PrintClusterDetails(mySsd,7101);
       makeScfCtrlHistograms(mySsd);
       //debugUnPeu(mySsd);
       int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
@@ -725,6 +730,7 @@ void StSsdPointMaker::makeSsdPedestalHistograms()
 	      noise_chip->Fill(2*iLad,chip,(strip[i].noise/(16.)));
 	      noise_wafer->Fill(2*iLad,iWaf,(strip[i].noise/(16.))); 
 	      noise_chip_P->Fill(iLad,chip,(strip[i].noise/(16.)));
+	      pedestal_chip->Fill(2*iLad,chip,strip[i].pedestal);
 	    }
 	  else
 	    {
@@ -732,7 +738,8 @@ void StSsdPointMaker::makeSsdPedestalHistograms()
 	      occupancy_chip->Fill((2*iLad)+1,chip,1);
 	      noise_chip->Fill((2*iLad)+1,chip,(strip[i].noise/(16.)));
 	      noise_wafer->Fill((2*iLad)+1,iWaf,(strip[i].noise/(16.)));
-	      noise_chip_N->Fill(iLad,chip,(strip[i].noise/(16.))); 
+	      noise_chip_N->Fill(iLad,chip,(strip[i].noise/(16.)));
+	      pedestal_chip->Fill((2*iLad)+1,chip,strip[i].pedestal);
 	     
 	    }
     }
@@ -953,6 +960,68 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 	  }
       }
     }
+
+
+//_____________________________________________________________________________
+void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, int mywafer)
+{
+  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
+  int found;
+  gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - Wafer "<<mywafer<< endm;  
+  for (int i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+        if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
+          found=1;
+          //Looking for the P-side cluster informations
+          if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
+            gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
+          }
+          else {
+            gMessMgr->Info()<<"StSsdPointMaker::PrintClusterDetails() - "
+                            <<mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<" cluster(s) on the P-side of this wafer "<< endm;  
+            gMessMgr->Info()<<"StSsdPointMaker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
+            StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+            while (pClusterP){
+              gMessMgr->Info()<<"StSsdPointMaker::PrintClusterDetails() - "
+                              <<pClusterP->getNCluster()<<" "
+                              <<pClusterP->getFlag()<<" "
+                              <<pClusterP->getClusterSize()<<" "
+                              <<pClusterP->getFirstStrip()<<" "
+                              <<pClusterP->getStripMean()<<" "
+                              <<pClusterP->getTotAdc()<<" "
+                              <<pClusterP->getFirstAdc()<<" "
+                              <<pClusterP->getLastAdc()<<" "
+			      <<pClusterP->getTotNoise()<<" "
+                              <<endm;  
+              pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
+            }
+            gMessMgr->Info()<<"StSsdPointMaker::PrintClusterDetails() - "
+                            <<mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<" cluster(s) on the N-side of this wafer "<< endm;  
+            gMessMgr->Info()<<"StSsdPointMaker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
+            StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
+            while (pClusterN){
+              gMessMgr->Info()<<"StSsdPointMaker::PrintClusterDetails() - "
+                              <<pClusterN->getNCluster()<<" "
+                              <<pClusterN->getFlag()<<" "
+                              <<pClusterN->getClusterSize()<<" "
+                              <<pClusterN->getFirstStrip()<<" "
+                              <<pClusterN->getStripMean()<<" "
+                              <<pClusterN->getTotAdc()<<" "
+                              <<pClusterN->getFirstAdc()<<" "
+                              <<pClusterN->getLastAdc()<<" "
+			      <<pClusterN->getTotNoise()<<" "
+                              <<endm;  
+              pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
+            }     
+          }
+        }
+      }
+    }
+
+  if (found==0) gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - Wafer not found !!!"<<endm;  
+}
+
 
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintInfo()
