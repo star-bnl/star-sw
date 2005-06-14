@@ -11,6 +11,7 @@ StEEmcCluster::StEEmcCluster()
 
   mEmcCluster=0;
   mKey=0;
+  mEnergy=0.;
 
 }
 
@@ -70,5 +71,9 @@ void StEEmcCluster::print()
   std::cout << "phi:         " << mMomentum.Phi() << std::endl;
   std::cout << "energy:      " << mEnergy << std::endl;
   std::cout << "pt:          " << mMomentum.Perp() << std::endl;
+  for ( UInt_t i=0;i<mTowers.size();i++ )
+    {
+      mTowers[i].printLine(); std::cout << " W=" << mWeights[i] << std::endl;
+    }
 
 }
