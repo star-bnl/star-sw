@@ -56,6 +56,7 @@ class StEEmcTower : public StEEmcElement {
 
   /// Print a summary of this tower
   void print();
+  void printLine();
 
   Bool_t operator<( const StEEmcTower &other ) const { return (this->energy() < other.energy()); }
 
