@@ -1,6 +1,9 @@
-// $Id: St_scm_Maker.h,v 1.11 2005/06/13 16:01:01 reinnart Exp $
+// $Id: St_scm_Maker.h,v 1.12 2005/06/14 12:20:25 bouchet Exp $
 //
 // $Log: St_scm_Maker.h,v $
+// Revision 1.12  2005/06/14 12:20:25  bouchet
+// cleaner version
+//
 // Revision 1.11  2005/06/13 16:01:01  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -59,9 +62,6 @@ class St_scm_Maker : public StMaker {
   float hitNtuple[9]; 
   TFile *pFile;
   TNtuple* pHitNtuple;
-float hit[4]; 
-  TFile *qFile;
-  TNtuple* qHitNtuple;
   void makeScmCtrlHistograms(); //!
   void DeclareNtuple(); //! 
   
@@ -91,7 +91,7 @@ float hit[4];
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.11 2005/06/13 16:01:01 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.12 2005/06/14 12:20:25 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
@@ -101,6 +101,9 @@ float hit[4];
 /***************************************************************************
  *
  * $Log: St_scm_Maker.h,v $
+ * Revision 1.12  2005/06/14 12:20:25  bouchet
+ * cleaner version
+ *
  * Revision 1.11  2005/06/13 16:01:01  reinnart
  * Jonathan and Joerg changed the update function
  *

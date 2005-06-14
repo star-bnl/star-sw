@@ -1,6 +1,9 @@
-// $Id: StScfWafer.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
+// $Id: StScfWafer.cc,v 1.4 2005/06/14 12:20:25 bouchet Exp $
 //
 // $Log: StScfWafer.cc,v $
+// Revision 1.4  2005/06/14 12:20:25  bouchet
+// cleaner version
+//
 // Revision 1.3  2005/06/13 16:01:00  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -67,15 +70,7 @@ void StScfWafer::sortStrip()
   (this->mStripP)->sortStrip();
   (this->mStripN)->sortStrip();
 }
-// void StScfWafer::doClusterisation(int *NClusterPerSide, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl)
-// {
-//   int iSide = 0;
-//   this->doFindCluster(sls_ctrl, scf_ctrl, iSide,para);
-//   NClusterPerSide[0] = this->doClusterSplitting(scf_ctrl, iSide); 
-//   iSide = 1;
-//   this->doFindCluster(sls_ctrl, scf_ctrl, iSide,para); 
-//   NClusterPerSide[1] = this->doClusterSplitting(scf_ctrl, iSide);
-// }
+
 void StScfWafer::doClusterisation(int *NClusterPerSide,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl)
 {
   int iSide = 0;

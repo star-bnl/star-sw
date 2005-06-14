@@ -1,6 +1,9 @@
-// $Id: St_scf_Maker.h,v 1.10 2005/06/13 16:01:01 reinnart Exp $
+// $Id: St_scf_Maker.h,v 1.11 2005/06/14 12:20:25 bouchet Exp $
 //
 // $Log: St_scf_Maker.h,v $
+// Revision 1.11  2005/06/14 12:20:25  bouchet
+// cleaner version
+//
 // Revision 1.10  2005/06/13 16:01:01  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -57,7 +60,7 @@ class St_scf_Maker : public StMaker {
   TNtuple* qHitNtuple;
  
   void makeScfCtrlHistograms(); //!
-  void PrintClusterDetails(int id_wafer);//!
+  void PrintClusterDetails(StScfBarrel *barrel,int id_wafer);//!
   void DeclareNtuple(); //!
  protected:
 
@@ -81,7 +84,7 @@ class St_scf_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.10 2005/06/13 16:01:01 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.11 2005/06/14 12:20:25 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_scf_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -90,6 +93,9 @@ class St_scf_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_scf_Maker.h,v $
+ *  Revision 1.11  2005/06/14 12:20:25  bouchet
+ *  cleaner version
+ *
  *  Revision 1.10  2005/06/13 16:01:01  reinnart
  *  Jonathan and Joerg changed the update function
  *

@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.9 2005/06/13 16:01:01 reinnart Exp $
+ * $Id: St_scm_Maker.cxx,v 1.10 2005/06/14 12:20:25 bouchet Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.10  2005/06/14 12:20:25  bouchet
+ * cleaner version
+ *
  * Revision 1.9  2005/06/13 16:01:01  reinnart
  * Jonathan and Joerg changed the update function
  *
@@ -114,13 +117,9 @@ Int_t St_scm_Maker::Init(){
 }//_____________________________________________________________________________
 void St_scm_Maker::DeclareNtuple()
 {
-  pFile = new TFile("event/Hits.root","RECREATE");
+  pFile = new TFile("Hits.root","RECREATE");
   string varlist1 = "ladder:wafer:pulseP:pulseN:kind:xg:yg:zg";
   pHitNtuple     = new TNtuple("hitNtuple","hits Ntuple",varlist1.c_str());
-  qFile = new TFile("event/detectors.root","RECREATE");
-  string varlist2 = "eventId:ssdhits:tpchits";
-  qHitNtuple     = new TNtuple("hit","hits_detectors Ntuple",varlist2.c_str());
-
 }
 //_____________________________________________________________________________
 Int_t St_scm_Maker::Make()
@@ -184,10 +183,6 @@ Int_t St_scm_Maker::Make()
   scm_spt->Purge();
   cout<<"####       END OF SSD CLUSTER MATCHING       ####"<<endl;
   cout<<"#################################################"<<endl;
-  hit[0]=mCurrentEvent->id();
-  hit[1]=mSsdHitColl->numberOfHits();
-  hit[2]=mTpcHitColl->numberOfHits();
-  qHitNtuple->Fill(hit);
   delete mySsd;
   if (nSptWritten) res = kStOK;
  
@@ -272,7 +267,5 @@ Int_t St_scm_Maker::Finish() {
 				 << GetName() << endm; 
   pFile->Write();
   pFile->Close();
-  qFile->Write();
-  qFile->Close();
   return kStOK;
 }
