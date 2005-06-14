@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.84 2005/06/03 19:57:04 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.85 2005/06/14 22:22:46 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.85  2005/06/14 22:22:46  perev
+ * Replace assert to error return
+ *
  * Revision 2.84  2005/06/03 19:57:04  perev
  * Bug fix, violation of array size
  *
@@ -1450,8 +1453,12 @@ static int nCall=0; nCall++;
           ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cCC,mFE._cTT);
     return -14;
   }
-  assert (mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY>0);
-
+  double tst = mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY;
+  if (tst<=0) {
+    printf("StiKalmanTrackNode::updateNode *** YY*ZZ-YZ*YZ<0 %g %g %g %g \n"
+          ,mFE._cYY,mFE._cZZ,mFE._cZY,tst);
+    return -14;
+  }
 #ifdef STI_ERROR_TEST
   testError(mFE.A,1);
 #endif // STI_ERROR_TEST
