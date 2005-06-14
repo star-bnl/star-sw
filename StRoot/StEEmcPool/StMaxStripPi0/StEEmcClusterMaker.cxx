@@ -108,8 +108,6 @@ Int_t StEEmcClusterMaker::Make()
 void StEEmcClusterMaker::Clear( Option_t *opts )
 {
 
-  std::cout << "********* StEEmcClusterMaker::Clear *************" << std::endl << std::flush;
-
   /// Clear cluster storage
   for ( Int_t sector=0; sector<12; sector++ ) {
     for ( Int_t layer=0; layer<4; layer++ )
