@@ -20,6 +20,8 @@
 //#define SKIP_STAT
 //#define LOOSE_CUTS
 
+#define DEBUG 0
+
 ClassImp(StEEmcClusterMaker);
 
 // ----------------------------------------------------------------------------
@@ -132,12 +134,14 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
   /// "minesweeper" algorithm (apologies to Bill Gates).
   static const Int_t layer=0;
 
-  /// Weights for dividing energy of towers among 
-  /// the tower-only clusters, like Jan's algorithm.
-  Float_t weights[720]; for ( Int_t i=0;i<720;i++ ) weights[i]=0.;
 
   /// Loop over layers to go here...  maybe above init of weights
+  for ( Int_t layer=0;layer<4;layer++)
   {
+
+    /// Weights for dividing energy of towers among 
+    /// the tower-only clusters, like Jan's algorithm.
+    Float_t weights[720]; for ( Int_t i=0;i<720;i++ ) weights[i]=0.;
 
     /// Temp storage for clusters
     StEEmcClusterVec_t myClusters;
@@ -154,7 +158,8 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
     std::reverse(towers.begin(),towers.end());
    
 
-    /// Find the last tower which exceeds see threshold
+    /// Find the last tower which exceeds see threshold (actually,
+    /// "last" will be the first tower below the seed threshold).
     StEEmcTowerVec_t::iterator last = towers.begin();
     while ( last != towers.end() ) {
 
@@ -164,6 +169,10 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
       /// trying to push a tower into a nonexistant vector...
       /// did I maybe get the order wrong???
       //$$$      mSeedTowers[layer][ (*last).sector() ].push_back((*last));
+#if DEBUG
+      std::cout << "-- Seed tower ----------------------" << std::endl;
+      (*last).print();
+#endif
       last++;
     }
     
@@ -185,10 +194,11 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
 	continue;
       }
 
-      /// loop over neighboring towers and increment weights
+      /// loop over neighboring towers and increment weight
+      /// for this tower with the energy of the seed tower
       for ( Int_t in=0; in < (*iter).numberOfNeighbors(); in++ ) {
 	StEEmcTower t=(*iter).neighbor(in);
-	weights[ t.index() ] += t.energy();
+	weights[ t.index() ] += (*iter).energy();
       }
 
      
@@ -214,25 +224,41 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
 
       StEEmcCluster cluster;
       StEEmcTower seed=(*iter);
+#if DEBUG
+      std::cout << "--- Clustering ----------------" << std::endl;
+      seed.print();
+#endif
+
       TVector3 momentum;
       cluster.add(seed,1.0);
       UInt_t sec,sub,eta;
-      sec=(UInt_t)seed.sector(); sub=(UInt_t)seed.subsector(); eta=(UInt_t)seed.etabin();
+      sec=(UInt_t)seed.sector(); 
+      sub=(UInt_t)seed.subsector(); 
+      eta=(UInt_t)seed.etabin();
       TVector3 d=mEEtow->getTowerCenter(sec,sub,eta).Unit();
       momentum += ( seed.energy() * d );
 
       for ( Int_t in=0; in<seed.numberOfNeighbors(); in++ ) {
 	StEEmcTower t=seed.neighbor(in);
-	sec=(UInt_t)t.sector(); sub=(UInt_t)t.subsector(); eta=(UInt_t)t.etabin();
+	sec=(UInt_t)t.sector(); 
+	sub=(UInt_t)t.subsector(); 
+	eta=(UInt_t)t.etabin();
 	d=mEEtow->getTowerCenter(sec,sub,eta).Unit();
-	momentum += ( t.energy() * d );
-	cluster.add(t);
+	Float_t weight = seed.energy() / weights[ t.index() ];
+	momentum += ( t.energy() * d * weight );
+	cluster.add(t, weight);
+#if DEBUG
+	std::cout << "adding " << t.name() << " E=" << t.energy() << " W=" << weight << std::endl;
+#endif
       }
 
 
       /// set momentum and a unique key
       cluster.momentum( momentum );
       cluster.key( mClusterId++ );
+#if DEBUG
+      cluster.print();
+#endif
 
       mTowerClusters[ seed.sector() ][ layer ].push_back( cluster );
       mNumberOfClusters[layer]++;
