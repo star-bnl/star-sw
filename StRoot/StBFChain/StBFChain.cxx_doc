@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.1 2005/06/14 15:45:18 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.2 2005/06/14 16:12:31 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -45,6 +45,7 @@
 #define STR_OBSOLETE "WARNING *** Option is OBSOLETE ***"
 
 Bfc_st BFC1[] = { // standard chains
+// #include "BFC.h"
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -673,16 +674,12 @@ Bfc_st BFC1[] = { // standard chains
   {"ITTF"        ,""  ,"","",                               "","","Just to keep option ITTF==false",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
-
-
-//  {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
-
-
 // ITTF Chain will be put here. Option list starting from minimalistic requirements
 // and may not initially work.
 // Please, preserve the comment after = { . It is used for documentation formatting
 //
 Bfc_st BFC2[] = { // ITTF Chains
+// #include "BFC2.h"
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
