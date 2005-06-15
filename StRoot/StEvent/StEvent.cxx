@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.36 2003/04/16 17:48:32 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.37 2005/06/15 21:58:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.37  2005/06/15 21:58:16  ullrich
+ * Change sorting of primary tracks for PPV.
+ *
  * Revision 2.36  2003/04/16 17:48:32  ullrich
  * Added StTriggerData and inherited classe(s).
  *
@@ -167,8 +170,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.36 2003/04/16 17:48:32 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.36 2003/04/16 17:48:32 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.37 2005/06/15 21:58:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.37 2005/06/15 21:58:16 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -1026,14 +1029,27 @@ StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
         //
         //  Sort new entry.
         //  Vertices are ordered according to number
-        //  of daughter tracks in descending order.
+        //  of daughter tracks in descending order except
+        //  for ppvf where the tracks are ordered according
+        //  to their ranking values.
         //
         for (int i=vertexVector->size()-1; i>0; i--) {
-            if ((*vertexVector)[i]->numberOfDaughters() >
-                (*vertexVector)[i-1]->numberOfDaughters())
-                swap((*vertexVector)[i], (*vertexVector)[i-1]);
-            else
-                break;
+	  // ppvf 
+	  if (vertex->vertexFinderId() == ppvVertexFinder) {
+	      if ((*vertexVector)[i]->ranking() >
+		(*vertexVector)[i-1]->ranking())
+		swap((*vertexVector)[i], (*vertexVector)[i-1]);
+	      else
+		break;
+	  }
+	  // all other single vertex finder
+	  else {
+	      if ((*vertexVector)[i]->numberOfDaughters() >
+		(*vertexVector)[i-1]->numberOfDaughters())
+		swap((*vertexVector)[i], (*vertexVector)[i-1]);
+	      else
+		break;
+	  }
         }
     }
 }
