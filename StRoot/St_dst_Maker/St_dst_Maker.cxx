@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.81 2004/05/24 13:49:04 jcs Exp $
+// $Id: St_dst_Maker.cxx,v 1.82 2005/06/15 01:22:58 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.82  2005/06/15 01:22:58  caines
+// Setup stuff for flagging hits used in fit of traack
+//
 // Revision 1.81  2004/05/24 13:49:04  jcs
 // delete creation of St_dst_mon_soft_ftpc table - StEvent/StFtpcSoftwareMonitor filled directly
 //
@@ -252,7 +255,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.81 2004/05/24 13:49:04 jcs Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.82 2005/06/15 01:22:58 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -485,9 +488,10 @@ Int_t  St_dst_Maker::Filler(){
   scs_spt_st* sgroups = scs_spt->GetTable();
   int svtindex[10000];
   for(int i=0; i<scs_spt->GetNRows(); i++,sgroups++){
-    if(sgroups->id < 10000)
-      svtindex[sgroups->id] = sgroups->id_globtrk;
-      }
+    if(sgroups->id < 10000){
+	svtindex[sgroups->id] = sgroups->id_globtrk;
+    }
+  }
  // Get pointer to svt cluster analysis 
 
     StSvtAnalysedHybridClusters *mSvtBigHit;
@@ -644,13 +648,14 @@ Int_t  St_dst_Maker::Filler(){
 		mypoint.pos_err[0] = svtx + (1L<<20)*svty11;
 		mypoint.pos_err[1] = svty10 + (1L<<10)*svtz;
 		mypoint.id_track = 0;
-		if( mSvtBigHit->svtHitData()[clu].id < 10000)
-		mypoint.id_track = 
-		  svtindex[mSvtBigHit->svtHitData()[clu].id];
-
-		// Add the new point ; if allready allocated, will just add
-		// if realloc required, this method will increase the table
-		// size accordingly.
+		if( mSvtBigHit->svtHitData()[clu].id < 10000){
+		  
+		  mypoint.id_track = 
+		    svtindex[mSvtBigHit->svtHitData()[clu].id];
+		  // Add the new point ; if allready allocated, will just add
+		  // if realloc required, this method will increase the table
+		  // size accordingly.
+		}
 		point->AddAt(&mypoint);
 	      }
 	    }
