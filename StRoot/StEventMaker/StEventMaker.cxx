@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.73 2004/10/20 21:18:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.74 2005/06/15 01:00:53 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -1123,7 +1123,7 @@ StEventMaker::makeEvent()
 	      for (i=begin; i<end; i++) {
 		svtHit = new StSvtHit(dstPoints[i]);
 		if (svtHitColl->addHit(svtHit)) {
-		    id = dstPoints[i].id_track;
+		    id = abs(dstPoints[i].id_track);           // new (Helen) 
 		    for (k=0; k<infomap[id].size(); k++)
 		        infomap[id][k]->addHit(svtHit);
 		}
@@ -1710,8 +1710,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.73 2004/10/20 21:18:41 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.74 2005/06/15 01:00:53 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.74  2005/06/15 01:00:53  ullrich
+ * Use abs() for SVT hit track ID
+ *
  * Revision 2.73  2004/10/20 21:18:41  ullrich
  * Removed checks that prevented storage of calib. vertices.
  *
