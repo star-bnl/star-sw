@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.11 2004/08/06 15:37:09 fisyak Exp $
+ * $Id: StSvtHit.cxx,v 2.12 2005/06/15 01:21:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.12  2005/06/15 01:21:01  ullrich
+ * In constructor using dst_point: set mFitFlag
+ *
  * Revision 2.11  2004/08/06 15:37:09  fisyak
  * Add clster id
  *
@@ -51,7 +54,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.11 2004/08/06 15:37:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.12 2005/06/15 01:21:01 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -77,6 +80,7 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     mCharge = (float)(svtq - mPeak*(1L<<10));
     mFlag = static_cast<unsigned char>(iflag);
     
+    mFitFlag = (pt.id_track > 0) ? 1 : 0;
 
     //
     // Unpack position in xyz
