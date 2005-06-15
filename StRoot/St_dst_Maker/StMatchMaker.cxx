@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.45 2004/05/18 18:10:31 fisyak Exp $
+// $Id: StMatchMaker.cxx,v 1.46 2005/06/15 01:22:58 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.46  2005/06/15 01:22:58  caines
+// Setup stuff for flagging hits used in fit of traack
+//
 // Revision 1.45  2004/05/18 18:10:31  fisyak
 // comment assert
 //
@@ -681,6 +684,7 @@ Int_t StMatchMaker::Make(){
 	     if( row>7)row=7;
 	     track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
 	   }
+	   if( sgroup->ident < 0) s_spc[spt_id].id_globtrk *= -1;
 	 }
 	 
        }
