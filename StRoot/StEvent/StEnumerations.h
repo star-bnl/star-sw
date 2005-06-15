@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.21 2004/11/03 18:30:07 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.22 2005/06/15 21:46:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.22  2005/06/15 21:46:21  ullrich
+ * Added StVertexFinderId enum.
+ *
  * Revision 2.21  2004/11/03 18:30:07  ullrich
  * Added definitions for FTPC calibration vertices.
  *
@@ -266,5 +269,16 @@ enum StEmcCrateStatus {crateUnknown       = 0,
 // maximal sizes of tracking part of STAR in cm (Victor)
 enum StarMaxTrackRangeSize {kStarMaxTrackRangeR = 200,
                             kStarMaxTrackRangeZ = 269};
+
+
+/*!
+ * \enum StVertexFinderId
+ */
+enum StVertexFinderId { undefinedVertexFinder = 0,
+                        lmvVertexFinder,
+                        pplmvVertexFinder,
+                        egrVertexFinder,
+                        minuitVertexFinder,
+                        ppvVertexFinder};
 
 #endif
