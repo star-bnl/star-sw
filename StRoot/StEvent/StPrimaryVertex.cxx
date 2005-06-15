@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.10 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.11 2005/06/15 21:50:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.11  2005/06/15 21:50:32  ullrich
+ * Added members and methods to identify used vertex finder and store vertex quality.
+ *
  * Revision 2.10  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -51,13 +54,26 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.10 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.11 2005/06/15 21:50:32 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
-{ mType = kEventVtxId; }
+{init();}
 
 StPrimaryVertex::StPrimaryVertex(const dst_vertex_st& v) : StVertex(v)
-{ mType = kEventVtxId; }
+{init();}
+
+void StPrimaryVertex::init()
+{
+    mType = kEventVtxId;
+    mVertexFinderId = undefinedVertexFinder; 
+    mNumTracksUsedInFinder = 0;
+    mNumMatchesWithCTB = 0; 
+    mNumMatchesWithBEMC = 0;
+    mNumMatchesWithEEMC = 0;
+    mNumTracksCrossingCentralMembran = 0; 
+    mSumOfTrackPt = 0;
+    mRanking = 0;    
+}
 
 StPrimaryVertex::~StPrimaryVertex() {/* noop */};
 
