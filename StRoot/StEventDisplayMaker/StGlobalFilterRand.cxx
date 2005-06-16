@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterRand.cxx,v 1.2 2004/10/19 22:35:28 perev Exp $
+// $Id: StGlobalFilterRand.cxx,v 1.3 2005/06/16 19:38:25 perev Exp $
 #include "TError.h"
 #include "TRandom.h"
 #include "TSystem.h"
@@ -14,7 +14,7 @@
 #include "StHit.h"
 #include "StTrack.h"
 
-
+enum BadGood {kBadTrk=1,kGoodTrk=2,kGarbTrk=4,kNGarbTrk=8};
 ClassImp(StGlobalFilterRand)
 //_____________________________________________________________________________
 StGlobalFilterRand::StGlobalFilterRand(int BadGood,int maxNum): StGlobalFilterABC("Rand","")
@@ -44,11 +44,13 @@ void StGlobalFilterRand::Filter(TObjArray *eArr,int flag)
     if (!(kind&kHRR)) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     StPtrVecHit *hr = (StPtrVecHit *)to;
     int nhits = hr->size();
-    if (nhits<10) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
+    if (nhits<10 && !(fMode&kGarbTrk )) 	{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
+    if (nhits>10 && !(fMode&kNGarbTrk)) 	{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     StTrackHelper th(trk);
     double len = th.GetLength(); if(len){};
     double mom  = th.GetMom().mag();
-    if (mom<0.1) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
+    if (mom<0.1 && !(fMode&kGarbTrk )) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
+    if (mom>0.1 && !(fMode&kNGarbTrk)) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     nZel++;
     int bad = trk->bad();
     errh.Add(bad);
@@ -60,6 +62,9 @@ void StGlobalFilterRand::Filter(TObjArray *eArr,int flag)
      nSel++;
   }
   eArr->Compress();
+  errh.Print("StGlobalFilterRand");
+
+  
   if (!nSel) return;
   n = eArr->GetLast()+1;
   if (n<=1) return;
@@ -83,5 +88,4 @@ void StGlobalFilterRand::Filter(TObjArray *eArr,int flag)
   }
    
    printf("\nStGlobalFilterRand: %d(%d(%d)) tracks selected \n",nSel,nZel,nTot);
-   errh.Print("StGlobalFilterRand");
 }
