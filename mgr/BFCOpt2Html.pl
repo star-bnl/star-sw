@@ -14,16 +14,47 @@
 $IN = shift(@ARGV) if (@ARGV);
 $OUT= shift(@ARGV) if (@ARGV);
 
-
 $MAXCHAINOPT = 2;   # maximum number of blocks for chain definition
+$REL         = "."; # relative path to codes
 
-if( ! defined($IN) ){  $IN  = "StRoot/StBFChain/StBFChain.cxx";}
-if( ! defined($OUT)){  $OUT = "StRoot/StBFChain/doc/index.html";}
+if ( -d "StRoot"){     $REL = "StRoot/StBFChain";}
+if ( -d "StBFChain"){  $REL = "StBFChain";}
+
+if( ! defined($IN) ){  $IN  = "$REL/StBFChain.cxx";}
+if( ! defined($OUT)){  $OUT = "$REL/doc/index.html";}
+
+if ( -e "$REL/BFC.h" && -e "$REL/BFC2.h"){
+    # Do the merging on the fly and parse the merged file
+    print "New mode (separate includes)\n";
+    open(SRC, "$REL/StBFChain.cxx")         || die "Cannot open $REL/StBFChain.cxx\n";
+    open(FIN,">$REL/doc/StBFChain.cxx_doc") || die "Cannot open $REL/doc/StBFChain.cxx_doc\n";
+    while ( defined($line = <SRC>) ){
+	chomp($line);
+	if ($line =~ m/^(.include\s*\")(.*)(\"\s*)/) {
+	    if ( -e "$REL/$2" && $2 ne "StBFChain.h"){   # Any found include but not the class def
+		print "\tAdding $REL/$2 --> [$line] [$2]\n";
+		open(INT,"$REL/$2");
+		while( defined($line = <INT>) ){ print FIN $line;}
+		close(INT);
+		next;
+	    }
+	}
+	print FIN "$line\n";
+    }
+    close(SRC);
+    close(FIN);
+
+    $IN = "$REL/doc/StBFChain.cxx_doc";
+} else {
+    print "All in source mode\n";
+}
+
+
 
 if ( ! open(FI,"$IN") ){ die "Could not open $IN for reading\n";}
 
 if ($0 !~ m/^\//){
-    chomp($SELF = `pwd`);
+    chomp($SELF = `/bin/pwd`);
     $SELF = "$SELF/$0";
 } else {
     $SELF = $0;
