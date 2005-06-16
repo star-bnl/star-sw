@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.12 2005/06/14 12:09:16 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.13 2005/06/16 14:29:22 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.13  2005/06/16 14:29:22  bouchet
+// no more makeSsdPedestalHistograms() method
+//
 // Revision 1.12  2005/06/14 12:09:16  bouchet
 // add a histo for the pedestal and new name of the class : SsdPoint
 //
@@ -127,7 +130,6 @@ class StSsdPointMaker : public StMaker {
 
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
-  void makeSsdPedestalHistograms();       //!
   void DeclareNtuple(int *flag);
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
@@ -178,13 +180,6 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_18;    //! (1p-1n) packages control matching
   TH2S  *matchisto_19;    //! (1p-1n) packages control matching  
   TH2S  *matchisto_20;    //! (1p-1n) packages control matching.
-  TH2S *occupancy_wafer; //occupancy  per wafer for the ladders
-  TH2S *occupancy_chip; //occupancy per chip for the ladders
-  TH2S *noise_chip;// mean noise per chip
-  TH2S *noise_wafer;// mean noise per wafer
-  TH2S *noise_chip_P;// mean noise per chip of the P Side
-  TH2S *noise_chip_N;// mean noise per chip of the N Side
-  TH2S *pedestal_chip; //pedestal per chip for the ladders
   int flag ;
   
  public:
@@ -197,7 +192,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.12 2005/06/14 12:09:16 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.13 2005/06/16 14:29:22 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

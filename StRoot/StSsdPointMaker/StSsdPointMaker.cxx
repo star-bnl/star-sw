@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.18 2005/06/14 12:09:15 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.19 2005/06/16 14:29:22 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.19  2005/06/16 14:29:22  bouchet
+// no more makeSsdPedestalHistograms() method
+//
 // Revision 1.18  2005/06/14 12:09:15  bouchet
 // add a histo for the pedestal and new name of the class : SsdPoint
 //
@@ -253,30 +256,6 @@ Int_t StSsdPointMaker::Init(){
     matchisto_20->SetXTitle("PSide ADC count");
     matchisto_20->SetYTitle("NSide ADC count");
     matchisto_20->SetZTitle("(1p-1n) hits");
-
-    //	Create SsdPedestal histograms
-    occupancy_wafer = new TH2S("occupancy_wafer","occupancy per wafer",40,0,40,20,0,20);
-    occupancy_chip = new TH2S("occupancy_chip","occupancy per chip",40,0,40,99,0,99);
-    noise_chip  = new TH2S("noise_chip","mean noise per chip",40,0,40,99,0,99);
-    noise_wafer  = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
-    noise_chip_P  = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
-    noise_chip_N  = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
-    pedestal_chip  = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
-    occupancy_wafer->SetXTitle("Ladder");
-    occupancy_wafer->SetYTitle("Wafer");  
-    occupancy_chip->SetXTitle("Ladder");
-    occupancy_chip->SetYTitle("Chip");  
-    noise_chip->SetXTitle("Ladder");
-    noise_chip->SetYTitle("Chip");
-    noise_chip_P->SetXTitle("Ladder");
-    noise_chip_N->SetXTitle("Ladder");
-    noise_chip_P->SetYTitle("Chip"); 
-    noise_chip_N->SetYTitle("Chip");   
-    noise_wafer->SetXTitle("Ladder");
-    noise_wafer->SetYTitle("Wafer"); 
-    pedestal_chip->SetXTitle("Ladder");
-    pedestal_chip->SetYTitle("Chip"); 
-   
     flag = 0;             // flag=0->the tuple are not filled
     //DeclareNtuple(&flag); // flag=1->the tuple are filled :this lign to decomment or not
   }
@@ -492,7 +471,6 @@ Int_t StSsdPointMaker::Make()
       { 
 	cout<<"###### WRITING SSD PEDESTAL HISTOGRAMS##########"<<endl;
 	mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
-	makeSsdPedestalHistograms(); 
       }
     }
   delete mySsd;
@@ -693,57 +671,6 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
     }
 }
 
-//_____________________________________________________________________________
-void StSsdPointMaker::makeSsdPedestalHistograms()
-{ 
-  
-   St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");
-   cout << " StSsdPointMaker::makeSsdPedestalHistograms: PedStrip->NRows="<<spa_ped_strip->GetNRows()<<endl;
-   ssdPedStrip_st *strip = spa_ped_strip->GetTable();
-   
-   int chip;
-   int id_side;
-   int id_wafer,iWaf,iLad,idWaf;
-   int nStrip;
-  for (int i=0;i<spa_ped_strip->GetNRows();i++)
-    { 
-      nStrip=(int)(strip[i].id_strip/100000.);
-      idWaf   = strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
-      iWaf    = (int)((idWaf - 7*1000)/100 - 1);
-      iLad    = (int)(idWaf - 7*1000 - (iWaf+1)*100 - 1);
-      id_wafer=strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
-      id_side=(strip[i].id_strip-nStrip*100000-id_wafer)/10000;
-      nStrip=nStrip-1; // to havethe good number of chip [0;95]
-      chip=(int)((nStrip+(768*(iWaf)))/128.);
-      //////////////////CONVENTION///////////////////////
-      ///idWaf: 7101<--->8620
-      ///iWaf : 0<--->15
-      ///iLad : 0<--->19
-      ///nStrip:0<--->767
-      ///chip: 0<--->95
-      ///////////////////////////////////////////////////
-
-	  if(id_side==0)
-	    { 
-	      occupancy_wafer->Fill(2*iLad,iWaf,1);
-	      occupancy_chip->Fill(2*iLad,chip,1);
-	      noise_chip->Fill(2*iLad,chip,(strip[i].noise/(16.)));
-	      noise_wafer->Fill(2*iLad,iWaf,(strip[i].noise/(16.))); 
-	      noise_chip_P->Fill(iLad,chip,(strip[i].noise/(16.)));
-	      pedestal_chip->Fill(2*iLad,chip,strip[i].pedestal);
-	    }
-	  else
-	    {
-	      occupancy_wafer->Fill((2*iLad)+1,iWaf,1);
-	      occupancy_chip->Fill((2*iLad)+1,chip,1);
-	      noise_chip->Fill((2*iLad)+1,chip,(strip[i].noise/(16.)));
-	      noise_wafer->Fill((2*iLad)+1,iWaf,(strip[i].noise/(16.)));
-	      noise_chip_N->Fill(iLad,chip,(strip[i].noise/(16.)));
-	      pedestal_chip->Fill((2*iLad)+1,chip,strip[i].pedestal);
-	     
-	    }
-    }
-}
 
  //_____________________________________________________________________________
 
