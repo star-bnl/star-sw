@@ -70,16 +70,11 @@ class StEEmcSmdCluster : public TObject {
   /// Returns the number of SMD strips in the cluster
   Int_t numberOfStrips(){ return (Int_t)mStrips.size(); }
 
-  /// Returns the specified smd strip w/in the cluster
-  StEEmcStrip strip(Int_t s){ return mStrips[s]; }
-
   Int_t plane(){ return mStrips[0].plane(); }
   Int_t sector(){ return mStrips[0].sector(); }
 
   /// Returns a new StEmcCluster
   StEmcCluster *stemc();
-
-  void stemc( StEmcCluster *c ){ mEmcCluster = c; }
 
   void print();
 

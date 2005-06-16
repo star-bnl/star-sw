@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.15 2005/06/09 20:04:23 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.14 2005/06/03 19:20:47 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -23,12 +23,7 @@ ClassImp(StEEmcFastMaker)
 //--------------------------------------------
 void 
 StEEmcFastMaker::Clear(Option_t *) {
-  meeve->Clear();  
-  if(mEmcCollectionIsLocal) { // special use
-    delete mLocalStEmcCollection;
-    mLocalStEmcCollection=0;
-  }
-
+  meeve->Clear();
   StMaker::Clear();
 }
 
@@ -36,7 +31,7 @@ StEEmcFastMaker::Clear(Option_t *) {
 StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   /// Class Constructor.  
   SetEmcCollectionLocal(false);
-  mLocalStEmcCollection=0;
+  mdbg=0;
   mevIN= new EEmcMCData;
   meeve=new EEeventDst;
 
@@ -89,6 +84,8 @@ StEEmcFastMaker::Init(){
   if(mEmcCollectionIsLocal) { // special use
     printf("%s::Init() use local EmcCollection\n",GetName());
   }  
+  // Create tables
+  // Create Histograms    
    return StMaker::Init();
 }
 
@@ -98,15 +95,17 @@ StEEmcFastMaker::Init(){
 Int_t 
 StEEmcFastMaker::Make(){
   
-  gMessMgr->Info()<<GetName() <<"::Make() , mEmcCollectionIsLocal="<<mEmcCollectionIsLocal<<endm;
+  static int first=1;
+  printf("%s::Make(), mEmcCollectionIsLocal=%d\n",GetName(),mEmcCollectionIsLocal);
   meeve->clear();
   
   int nh=-1;
   if ( (nh = mevIN->readEventFromChain(this)) >0) {
-    gMessMgr->Info()<<GetName() <<"  RAW geant EEMC hits="<<nh<<endm;
-    if(Debug())mevIN->print();
+    printf("%s  RAW geant EEMC hits =%d \n",GetName(),nh);
+    if(first && mdbg>1)mevIN->print();
+    first=0;
   } else {
-    gMessMgr->Info()<<GetName() <<"   RAW geant EEMC not seen"<<endm;
+    printf("%s  no geant EEMC hits found\n",GetName());
     return kStOK;
   }
   
@@ -114,14 +113,15 @@ StEEmcFastMaker::Make(){
   
   // generation of TTree
   mevIN->write(&eeveRaw); // Clear & Store RAW EEevent
-  if(Debug()) {printf("%s::  raw eeveRaw.print():\n",GetName());eeveRaw.print();}
+  if(mdbg) {printf("%s::  raw eeveRaw.print():\n",GetName());eeveRaw.print();}
   
   eeveRaw.sumRawMC(meeve); //sum hits with any detector
-  if(Debug()){  printf("%s::  summed eeve.print():\n",GetName());meeve->print();}
+  if(mdbg){  printf("%s::  summed eeve.print():\n",GetName());meeve->print();}
 
   StEmcCollection *emcColl=0;
   if(mEmcCollectionIsLocal) { // special use
     mLocalStEmcCollection=new StEmcCollection();
+    gMessMgr->Message("","W") << GetName()<<"::Make() use local EmcCollection, memory leak ~1MB/event !!!!, Jan  "<<endm;
     emcColl=mLocalStEmcCollection;
   } else { // standard action
     StEvent *stevent =   (StEvent *) (StEvent *) GetInputDS("StEvent");
@@ -149,7 +149,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 
   eevt->print();
   assert(emcC);
-  if(Debug())printf("EE2ST got emcCollection\n");
+  if(mdbg)printf("EE2ST got emcCollection\n");
   
   for(int det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
       
@@ -157,13 +157,13 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
     StEmcDetector* d = new StEmcDetector(id,mxSector);
     emcC->setDetector(d);
     TClonesArray* tca;    
-    if(Debug()) printf("EE2ST() copy hits from %d EEMC sectors, det=%d\n",eevt->getNSectors(),det);
+    if(mdbg) printf("EE2ST() copy hits from %d EEMC sectors, det=%d\n",eevt->getNSectors(),det);
 
     for(int isec=0; isec<mxSector; isec++){ // over used sectors
       int secID=isec+1;
       EEsectorDst* EEsec = (EEsectorDst*)eevt->getSec(secID);
       if(EEsec==0) continue;
-      if(Debug()) printf("EE2ST() isec=%d sec_add=%p  secID=%d det=%d\n",isec,(void*)EEsec,secID,det);
+      if(mdbg) printf("EE2ST() isec=%d sec_add=%p  secID=%d det=%d\n",isec,(void*)EEsec,secID,det);
 
       switch (det){
       case kEndcapEmcTowerId: //..............................     
@@ -179,7 +179,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  //	  printf("yyy secID=%d, id2=%d\n",isec,h->module());
-	   if(Debug()) printf("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc);
+	   if(mdbg) printf("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc);
 	} break;
 	
       case kEndcapEmcPreShowerId: {//............................
@@ -191,7 +191,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
-	   if(Debug()) printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
+	   if(mdbg) printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
 	}
 
 	tca = EEsec->getPre2Hits();      
@@ -202,7 +202,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
-	    if(Debug())printf("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
+	    if(mdbg)printf("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
 	}
 
 	tca = EEsec->getPostHits();      
@@ -213,7 +213,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
-	   if(Debug()) printf("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
+	   if(mdbg) printf("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
 	}
       } break;
 
@@ -227,7 +227,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
-	  if(Debug()) printf("SMDU     %d  %d %f\n",t->strip(),adc,t->energy());
+	  if(mdbg) printf("SMDU     %d  %d %f\n",t->strip(),adc,t->energy());
 	}
       } break;
 
@@ -240,7 +240,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int sub=1;
 	  int adc= (int) (t->energy()* mfixSMDgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
-	  if(Debug())  printf("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy());
+	  if(mdbg)  printf("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy());
 	  d->addHit(h);
 	} 
       }break;
@@ -288,9 +288,6 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
-// Revision 1.15  2005/06/09 20:04:23  balewski
-// upgrade for embedding
-//
 // Revision 1.14  2005/06/03 19:20:47  balewski
 // *** empty log message ***
 //

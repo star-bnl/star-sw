@@ -333,10 +333,6 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   mHitTowers[layer].push_back( mTowers[index][layer] );
   mEnergy[sec][layer] += energy;
 
-#if 0
-  mTowers[index][layer].print();
-#endif  
-
 }
 //---
 void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc )
@@ -444,11 +440,7 @@ Bool_t StEEmcA2EMaker::fillFromSt( StEmcCollection *emc )
   /// Set StEmcRawHit pointers in StEEmcTower, towers
   ///
   StEmcDetector *detector=emc->detector(kEndcapEmcTowerId);
-  if ( !detector )
-    {
-      Warning("fillFromSt","\n**********\nemc->detector() NULL for eemc towers.  MAJOR PROBLEM, trying to procede.\n**********\n\n");
-      return false;
-    }
+  assert(detector);
 
   for ( UInt_t sec = 0; sec < detector -> numberOfModules(); sec++ )
     {
@@ -475,9 +467,9 @@ Bool_t StEEmcA2EMaker::fillFromSt( StEmcCollection *emc )
 	  assert(isubsector>=0 && isubsector<5);
 	  assert(ietabin>=0 && ietabin<12);
 
-	  Int_t iphibin = 5 * isector + isubsector;
+	  Int_t iphibin = 5*isector+isubsector;
 	  assert(iphibin>=0 && iphibin<60);
-	  Int_t index = 12 * iphibin + ietabin;
+	  Int_t index = 12*iphibin + ietabin;
 	  assert(index>=0 && index<720);
 
 #if 0
@@ -530,13 +522,9 @@ Bool_t StEEmcA2EMaker::fillFromSt( StEmcCollection *emc )
   ///
 
   detector=emc->detector(kEndcapEmcPreShowerId);
-
-  if ( !detector )
-    {
-      Warning("fillFromSt","\n**********\nemc->detector() NULL for eemc pre/post.  MAJOR PROBLEM, trying to procede.\n**********\n\n");
-    }
-  else
-    for ( UInt_t sec = 0; sec < detector -> numberOfModules(); sec++ )
+  assert(detector);
+  
+  for ( UInt_t sec = 0; sec < detector -> numberOfModules(); sec++ )
     {
 
       /// Remember to watch out for fortran holdovers in
@@ -585,12 +573,8 @@ Bool_t StEEmcA2EMaker::fillFromSt( StEmcCollection *emc )
 
       /// Get the eemc smd collections
       detector=emc->detector( ids[iplane] );
-      if ( !detector )
-	{
-	  Warning("fillFromSt","\n**********\nemc->detector() NULL for esmd plane.  MAJOR PROBLEM, trying to procede.\n**********\n\n");
-	}
-      else
-	for ( UInt_t sec = 0; sec < detector -> numberOfModules(); sec++ )
+
+      for ( UInt_t sec = 0; sec < detector -> numberOfModules(); sec++ )
 	{
 	  
 	  /// Remember to watch out for fortran holdovers in

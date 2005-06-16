@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.23 2005/06/09 19:43:54 perev Exp $
+ * $Id: StPmdClustering.cxx,v 1.22 2004/11/15 23:35:28 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,9 +17,6 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
- * Revision 1.23  2005/06/09 19:43:54  perev
- * Avoid FloatPointException
- *
  * Revision 1.22  2004/11/15 23:35:28  subhasis
  * Refs in centroidCal initialised to solve valgrind error
  *
@@ -445,11 +442,8 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmo
 	    }
 	  Double_t b1 = sumxx + sumyy;
 	  Double_t c1 = sumxx*sumyy - sumxy*sumxy;
-          double dis = b1*b1/4.-c1;
-	  if (fabs(dis) < 1e-6) dis = 0.;
-          dis = sqrt(dis);
-	  Double_t r1=b1/2.+dis;
-	  Double_t r2=b1/2.-dis;
+	  Double_t r1 = b1/2. + sqrt(b1*b1/4. - c1);
+	  Double_t r2 = b1/2. - sqrt(b1*b1/4. - c1);
 	  
 	  
 	  //! Calculate the Cluster properties for two cell SuperCluster
@@ -626,7 +620,6 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
   Double_t str[2000],str1[2000], cln[2000];
   Double_t xcl[2000], ycl[2000],clust_cell[200][2000];
   //Initialisation part starts
-  double dis;
   if(nclust>=200 || ncell >=2000){
 	  cout<<"Number of cluster of Ncell crosses limit "<<nclust<<" "<<ncell<<endl;
 	  return kStWarn;
@@ -782,11 +775,8 @@ memset(str1,0,2000*sizeof(Double_t));
 	}
 	b=sumxx+sumyy;
 	c=sumxx*sumyy-sumxy*sumxy;
-        dis = b*b/4.-c;
-	if (fabs(dis) < 1e-6) dis = 0.;
-        dis = sqrt(dis);
-	r1=b/2.+dis;
-	r2=b/2.-dis;
+	r1=b/2.+sqrt(b*b/4.-c);
+	r2=b/2.-sqrt(b*b/4.-c);
 	if(r1 < r2){
 	  *(&rcl+i) = r2;
 	  *(&rcs+i) = r1;
@@ -832,11 +822,8 @@ memset(str1,0,2000*sizeof(Double_t));
       /**** Dipak: added for calculating 'rcl' & 'rcs' similar to above  *****/
       b=sumxx+sumyy;
       c=sumxx*sumyy-sumxy*sumxy;
-      dis = b*b/4.-c;
-      if (fabs(dis) < 1e-6) dis = 0.;
-      dis = sqrt(dis);
-      r1=b/2.+dis;
-      r2=b/2.-dis;
+      r1=b/2.+sqrt(b*b/4.-c);
+      r2=b/2.-sqrt(b*b/4.-c);
       if(r1 < r2){
 	*(&rcl+i) = r2;
 	*(&rcs+i) = r1;

@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.46 2005/06/09 20:04:06 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.45 2005/04/25 19:48:37 balewski Exp $
  
 
 #include <time.h>
@@ -1030,57 +1030,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 }
 
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-/*!
-This method provides full DB information for a pixel
-INPUT Barrel-like indexes from EmcCollection, decoding must be consistent with
- /StRoot/StEEmcSimulatorMaker/StEEmcFastMaker::mEE2ST()
-OUTPUT: all avaliable DB information
-*/
-const EEmcDbItem *
-StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
-
-  const EEmcDbItem *x=0;
-  int sec=Bmod; // range 1-12
-
-  //..... towers,pre,post
-  char sub='X'; // range 'A' - 'E'
-  char cT='Y'; // range 'T','P','Q','R'
-  int  eta=Beta; // range 1-12
-  //...... SMD
-  char uv='U'; // range 'U' or 'V'
-  int strip=Beta;   // range 1-288
-  
-  switch(StDetId) { // covers all 6 layers of EEMC
-
-  case kEndcapEmcTowerId:
-    sub='A'+Bsub-1;  cT='T';
-    x=getTile(sec,sub,eta,cT); break;    
-
-  case kEndcapEmcPreShowerId:
-    sub='A'+(Bsub-1)%5;  cT='P'+(Bsub-1)/5;
-    x=getTile(sec,sub,eta,cT); break;       
-
-  case kEndcapSmdVStripId:
-    uv++;
-  case kEndcapSmdUStripId: 
-    x=getByStrip(sec,uv,strip); break;
-
-  default:
-    gMessMgr->Warning()<<GetName() <<"::getDb(), wrong detectorId=" << StDetId << " \n It is fatal - bug in the code, fix it, JB"<<endm;
-    assert(1==2); // trap for bug in the code
-  }
-  
-  return x;
-}
-
 
 
 // $Log: StEEmcDbMaker.cxx,v $
-// Revision 1.46  2005/06/09 20:04:06  balewski
-// upgrade for embedding
-//
 // Revision 1.45  2005/04/25 19:48:37  balewski
 // overwrite of masks was not working properly
 //

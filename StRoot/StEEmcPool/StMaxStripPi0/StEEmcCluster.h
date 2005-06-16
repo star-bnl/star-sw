@@ -44,14 +44,10 @@ class StEEmcCluster : public TObject {
   /// when this cluster's destructor is called.
   StEmcCluster *stemc();
 
-  void stemc(StEmcCluster *c){ mEmcCluster = c; }
-
   Int_t key(){ return mKey; }
   void  key(Int_t k){ mKey=k; }
 
   Bool_t operator==( const StEEmcCluster &other ) const { return this->tower(0).index() == other.tower(0).index(); }
-
-  void print();
   
  private:
  protected:

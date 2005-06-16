@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.2 2005/05/11 13:47:30 reinnart Exp $
+// $Id: StSsdDaqMaker.h,v 1.3 2005/06/16 14:27:00 bouchet Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.3  2005/06/16 14:27:00  bouchet
+// Pedestal Histos are filled in this Maker
+//
 // Revision 1.2  2005/05/11 13:47:30  reinnart
 // No connection between StSsdDaqMaker and StSsdDbMaker any more
 //
@@ -43,7 +46,9 @@ class St_ssdConfiguration;
 class ssdConfiguration_st;
 class St_spa_strip;
 class St_ssdPedStrip;
-
+class TH1F;
+class TH1S;
+class TH2S;
 class StSsdDaqMaker : public StMaker {
  private:
   // Private method declaration if any
@@ -53,7 +58,15 @@ class StSsdDaqMaker : public StMaker {
  protected:
   // Protected method if any
   StSsdConfig*  mConfig;
-
+  TH2S *occupancy_wafer; //occupancy  per wafer for the ladders
+  TH2S *occupancy_chip; //occupancy per chip for the ladders
+  TH2S *noise_chip;// mean noise per chip
+  TH2S *noise_wafer;// mean noise per wafer
+  TH2S *noise_chip_P;// mean noise per chip of the P Side
+  TH2S *noise_chip_N;// mean noise per chip of the N Side
+  TH2S *pedestal_chip; //pedestal per chip for the ladders
+  TH1F *occupancy;//number of inactives strips per ladder
+  TH2S *kind;//differents cases of values noise/pedestal 
  public: 
   StSsdDaqMaker(const char *name="StSsdDaqMaker");
   virtual       ~StSsdDaqMaker();
@@ -66,7 +79,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.2 2005/05/11 13:47:30 reinnart Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.3 2005/06/16 14:27:00 bouchet Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 

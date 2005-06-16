@@ -86,8 +86,6 @@ class StEEmcA2EMaker : public StMaker {
   /// \param sector: 0-11 for 12 EEMC sectors
   /// \param plane: 0=U, 1=V
   Int_t numberOfHitStrips(Int_t sector, Int_t plane ) { return (Int_t)mHitStrips[sector][plane].size(); }
-
-  StEEmcStrip hitstrip(Int_t sec,Int_t pl, Int_t hit){ return mHitStrips[sec][pl].at(hit); } 
   
   /// Return a specifed hit SMD strip
   /// \param sector: sector index, [0,11]

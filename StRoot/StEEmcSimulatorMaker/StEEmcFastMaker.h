@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.7 2005/06/09 20:04:23 balewski Exp $
+// $Id: StEEmcFastMaker.h,v 1.6 2005/06/03 19:20:47 balewski Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -105,6 +105,7 @@ class StEEmcFastMaker : public StMaker {
 
   void mEE2ST(EEeventDst*, StEmcCollection* emcC); ///< TTree-->StEvent
 
+  int mdbg;
   float msamplingFraction; ///< for Towers
   float * mfixTgain; ///<  (adc=g*de )ideal gains for Towers
   float mfixPgain; ///< (adc=g*de ) fixed gain for pre/post shower
@@ -113,7 +114,7 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
   bool mEmcCollectionIsLocal;
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.7 2005/06/09 20:04:23 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.6 2005/06/03 19:20:47 balewski Exp $";
   
  protected:
  public: 
@@ -124,12 +125,13 @@ class StEEmcFastMaker : public StMaker {
   virtual void Clear(Option_t *option="");
  
   void SetLocalStEvent();
+  void SetDbg(int k){mdbg=k;}
   void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
   void SetEmcCollectionLocal(bool x=true){mEmcCollectionIsLocal=x;}
   StEmcCollection * GetEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.7 2005/06/09 20:04:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.6 2005/06/03 19:20:47 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -140,9 +142,6 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
-// Revision 1.7  2005/06/09 20:04:23  balewski
-// upgrade for embedding
-//
 // Revision 1.6  2005/06/03 19:20:47  balewski
 // *** empty log message ***
 //

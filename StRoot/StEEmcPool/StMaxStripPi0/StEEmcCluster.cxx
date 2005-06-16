@@ -10,7 +10,6 @@ StEEmcCluster::StEEmcCluster()
 {
 
   mEmcCluster=0;
-  mKey=0;
 
 }
 
@@ -28,6 +27,7 @@ void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
 }
 
 StEEmcCluster::~StEEmcCluster(){
+  //  delete mGeom;
   /// If we have created an StEmcCluster, delete it
   //$$$  if ( mEmcCluster != 0 ) delete mEmcCluster;
 }
@@ -38,37 +38,19 @@ StEmcCluster *StEEmcCluster::stemc()
 {
 
   if ( mEmcCluster ) return mEmcCluster;
+
   mEmcCluster=new StEmcCluster();
-  return mEmcCluster;
-
-
   mEmcCluster->setEta( momentum().Eta() );
   mEmcCluster->setPhi( momentum().Phi() );
   mEmcCluster->setSigmaEta(-1.);
   mEmcCluster->setSigmaPhi(-1.);
   mEmcCluster->setEnergy( energy() );
-  mEmcCluster->SetUniqueID( mKey );
-#if 1
   for ( Int_t i=0; i< numberOfTowers(); i++ ) 
     {
       StEmcRawHit *hit=mTowers[i].stemc();
       assert( hit );         
       mEmcCluster->addHit( hit );
     }
-#endif
   
   return mEmcCluster;
-}
-
-void StEEmcCluster::print()
-{
-  
-  std::cout << "cluster key: " << mKey << std::endl;
-  std::cout << "seed tower:  " << mTowers[0].name() << std::endl;
-  std::cout << "ntowers:     " << mTowers.size() << std::endl;
-  std::cout << "eta:         " << mMomentum.Eta() << std::endl;
-  std::cout << "phi:         " << mMomentum.Phi() << std::endl;
-  std::cout << "energy:      " << mEnergy << std::endl;
-  std::cout << "pt:          " << mMomentum.Perp() << std::endl;
-
 }
