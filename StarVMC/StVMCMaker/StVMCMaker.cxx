@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.2 2005/06/09 20:14:40 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.3 2005/06/17 18:35:45 fisyak Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.3  2005/06/17 18:35:45  fisyak
+// Add flow diagram
+//
 // Revision 1.2  2005/06/09 20:14:40  fisyak
 // Set Run number (=1 D)
 //
@@ -9,6 +12,57 @@
 // The first version
 //
 //
+/* Flow diagram:
+   Load(); // shared libraries
+   GetVMC(); // define gGeoManager
+------------------
+StVMCMaker::Init()
+------------------
+
+   StarVMCApplication *appl = new StarVMCApplication("StarVMC", "The STAR VMC application");
+   Geant3TGeo* geant3 = new TGeant3TGeo("C++ Interface to Geant3"); // gMC
+   StarMCPrimaryGenerator *generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet); // a generator
+   appl->SetPrimaryGenerator(generator);
+   StarMCHits *hits = StarMCHits::instance(); 
+   appl->SetStepping(hits);
+   hits->SetHitHolder(m_DataSet); // set hit storage
+   appl->InitMC();
+   ->    gMC->SetStack(fStack);
+   ->    gMC->Init();
+   ->                  DefineParticles();
+   ->                  appl->AddParticles();
+   ->                  appl->ConstructGeometry();
+   ->                  FinishGeometry();
+   ->                  appl->InitGeometry();
+   ->                        fMcHits->Init(); // hit description
+   ->    gMC->BuildPhysics(); 
+----------------
+StVMCMaker::Make
+----------------
+   appl->RunMC(1);
+   ->    gMC->ProcessRun(1)
+   ->                  appl->BeginEvent();
+   ->                  ProcessEvent();
+   ->                    Gtrigi();
+   ->                    Gtrigc();
+   ->                    Gtrig();
+   ->                      appl->GeneratePrimaries();             // gukine
+   ->                      gtreveroot();
+   ->                               appl->Field(xdouble,bdouble); // gufld
+   ->                               appl->PreTrack();
+   ->                               g3track();
+   ->                                   appl->Stepping();         // gustep
+   ->                                       hits->Step();
+   ->                                         fill fHit
+   ->                                         FillG2Table();
+   ->                                            fCurrentDetector->GetChair()->Fill(fHit);
+   ->                                                   G2TBook[Track]Hit();
+   ->                                                   G2TFill[Track]Hit();
+   ->                               appl->PostTrack();
+   ->                  appl->FinishEvent();
+   ->                      hits->FinishEvent(); // fill run,event,track tables
+*/
+
 #include <assert.h>
 #include "TObjectSet.h"
 #include "StVMCMaker.h"
@@ -73,8 +127,6 @@ Int_t StVMCMaker::Init(){
     fgGeant3->SetCut("PPCUTM", 	.001  );
     fgGeant3->SetCut("TOFMAX", 	50.e-6);
   }
-  // The "Init" method in the gMC object causes the geometry to be cosntructed
-  fgStarVMCApplication->InitMC();
   gMessMgr->Info() << "StVMCMaker::InitRun SetMagField set as StarMagField" 
 		   << " with Map: " << StarMagField::Instance()->GetMap()
 		   << ",Factor: " << StarMagField::Instance()->GetFactor() 
@@ -93,7 +145,8 @@ Int_t StVMCMaker::Init(){
   fgStarVMCApplication->SetStepping(hits);
   //  fgStarVMCApplication->SetStepping(new StMCSteppingHist("tgeom"));
   //  fgStarVMCApplication->SetStepping(new StMCStepping);
-  fgStarVMCApplication->InitGeometry();
+  // The "Init" method in the gMC object causes the geometry to be cosntructed
+  fgStarVMCApplication->InitMC();
   if (Debug() > 1) {
     fgGeant3->SetDEBU(1,1,100);
     fgGeant3->SetSWIT(1,2);
