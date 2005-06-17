@@ -1,6 +1,6 @@
 int rdTrg2Panitkin(int nEve=10000,
-		   char* file="run6151025.1",
-		   char *pathIn="./",
+		   char* file="run6111059.1",
+		   char *pathIn="/star/u/balewski/4akio/",
 		   char *pathOut="./"
 		   ){ 
   
@@ -26,7 +26,7 @@ int rdTrg2Panitkin(int nEve=10000,
   }
   
   HList=new  TObjArray;
-  myMk3=new TrigOnlyPanitkinMaker("trig2Panitkin","MuDst");
+  myMk3=new StTrigOnlyPanitkinMaker("trig2Panitkin","MuDst");
   myMk3->SetHList(HList);
 
   chain->Init();
