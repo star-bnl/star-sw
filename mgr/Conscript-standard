@@ -237,7 +237,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
 	$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/geant321/include";
 	$FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
-      } 
+      } elsif ( $pkg =~ m/^StBFChain$/) {# add cocumentation
+	Command $env [qw(#StRoot/StBFChain/doc/index.html #StRoot/StBFChain/doc/StBFChain.cxx_doc)],
+	  qw(#StRoot/StBFChain/StBFChain.cxx #StRoot/StBFChain/BFC.h  #StRoot/StBFChain/BFC2.h),
+	    qq(BFCOpt2Html.pl);
+      }
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
