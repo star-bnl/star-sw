@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.16 2003/03/18 14:41:48 kisiel Exp $
+ * $Id: StHbtTrack.cc,v 1.17 2005/06/17 21:41:12 chajecki Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,17 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.17  2005/06/17 21:41:12  chajecki
+ * Two bugs fixed:
+ * 1. wrong value of mNHits set in one of the constructors
+ * StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
+ *
+ * 2. since year 4 the StMuTrack::nHits() returns the total number of hits.
+ * We're interested in TPC hits only so this value can be taken by
+ *  StMuTrack::topologyMap().numberOfHits(kTpcId);
+ * This change is backwards compatible so the code should work also
+ * for data <=Y3
+ *
  * Revision 1.16  2003/03/18 14:41:48  kisiel
  * Bugfix update for the theoretical part of the code. Reverts the changes to the Lednicky weight calculator, as the previuos one had problems with strong interaction
  *
@@ -124,7 +135,6 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mCharge = ST->geometry()->charge();
   mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
   mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
-  mNHits = ST->numberOfPossiblePoints(kTpcId);
   mNHitsDedx = ST->fitTraits().numberOfFitPoints(kTpcId);
 
   mNSigmaElectron = PidAlgorithm.numberOfSigma(Electron);
@@ -400,7 +410,7 @@ StHbtTrack::StHbtTrack(const StMuDst* dst, const StMuTrack* t) { // copy constru
   StMuEvent* ev = dst->event();
    mTrackType = t->type();
    mTrackId = t->id();
-   mNHits = t->nHits();
+   mNHits = t->topologyMap().numberOfHits(kTpcId);
    mNHitsPoss = t->nHitsPoss(); 
    mNHitsDedx = t->nHitsDedx(); 
    mNSigmaElectron = t->nSigmaElectron();
