@@ -6,38 +6,14 @@ class EEfeeDataBlock;
 class Collection;
 StChain *chain=0;
 
-void St2print(Int_t nevents=1,char *fname="R5086033c3.event.root")
+void St2print(Int_t nevents=10,char *fname="R5086033c3.event.root")
 {
 
-  fname="/star/data27/reco/dev/2004/05/st_physics_adc_5135048_raw_2070001.event.root";
-  fname="/star/data46/reco/dAuMinBias/FullField/P04if/2003/035/st_physics_4035002_raw_0010010.event.root";
-  fname="./st_physics_4145041_raw_0040001.event.root";
+  fname="st_physics_5109030_raw_1020001.event.root";
 
-  //
-  // First load some shared libraries we need
-  //    
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("libglobal_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StDbLib");
-  gSystem->Load("StDbBroker");
-  gSystem->Load("St_db_Maker"); 
-  gSystem->Load("StUtilities");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StMagF");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StAnalysisUtilities");
-  gSystem->Load("StEvent");
-  gSystem->Load("StTpcDb"); 
-  gSystem->Load("StEventMaker"); 
-  gSystem->Load("StMcEvent");
-  gSystem->Load("StMcEventMaker");
-  gSystem->Load("libgeometry_Tables");
-  gSystem->Load("StEmcUtil");    
-  gSystem->Load("StEEmcUtil");    
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
+  cout << " loading done " << endl;
      
   // Load my makers
 
@@ -59,7 +35,7 @@ void St2print(Int_t nevents=1,char *fname="R5086033c3.event.root")
   ioMaker->SetIOMode("r"); 
  
   // StMcEventMaker
-  StMcEventMaker *mcEventMaker = new StMcEventMaker();
+  // StMcEventMaker *mcEventMaker = new StMcEventMaker();
 
   // My Makers 
   //  StEmcTrigSimuMaker *myMk2=new StEmcTrigSimuMaker("eemcTrigMaker");
@@ -85,13 +61,17 @@ void St2print(Int_t nevents=1,char *fname="R5086033c3.event.root")
       StEvent* mEvent = (StEvent*)chain->GetInputDS("StEvent");
       assert(mEvent);// fix your chain or open the right event file
 
-      StPrimaryVertex *primVer=mEvent->primaryVertex();
-      if(primVer==0) {
-	printf("eveID=%d no vert\n", mEvent->id()); 
-      } else {
-	StThreeVectorF &ver=primVer->position();
-	int nPrim=primVer->numberOfDaughters();
-	printf("eveID=%d nPrim=%d, Vz=%f \n",mEvent->id() ,nPrim,ver.z() );
+      int nV=mEvent->numberOfPrimaryVertices();
+      int iv;
+      printf("eveID=%d  nPrimVert=%d\n", mEvent->id(),nV);
+      for(iv=0;iv<nV;iv++) {
+	StPrimaryVertex *V=mEvent->primaryVertex(iv);
+	assert(V);
+	StThreeVectorF &r=V->position();
+	StThreeVectorF &er=V->positionError();
+	printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
+	printf("  nDaugh=%d , VFid=%d:: ntr=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g xchi2=%g\n"
+	   ,V->numberOfDaughters(), V->vertexFinderId() ,V->numTracksUsedInFinder()  ,V->numMatchesWithCTB()  ,V-> numMatchesWithBEMC() ,V->numMatchesWithEEMC()  ,V->numTracksCrossingCentralMembran()  ,V->sumOfTrackPt()  ,V->ranking(), V->chiSquared());
       }
       
       //      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
