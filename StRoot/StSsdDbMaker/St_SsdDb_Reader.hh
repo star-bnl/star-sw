@@ -1,3 +1,10 @@
+// $Id: St_SsdDb_Reader.hh,v 1.5 2005/06/20 14:21:39 lmartin Exp $
+//
+// $Log: St_SsdDb_Reader.hh,v $
+// Revision 1.5  2005/06/20 14:21:39  lmartin
+// CVS tags added
+//
+
 /***************************************************************************
  * Author: christelle roy
  * Description: SSD DB access Maker
