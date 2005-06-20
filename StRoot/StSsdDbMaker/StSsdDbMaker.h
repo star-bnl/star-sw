@@ -1,3 +1,10 @@
+// $Id: StSsdDbMaker.h,v 1.5 2005/06/20 14:21:38 lmartin Exp $
+//
+// $Log: StSsdDbMaker.h,v $
+// Revision 1.5  2005/06/20 14:21:38  lmartin
+// CVS tags added
+//
+
 /***************************************************************************
  * Author: christelle roy
  * Description: SSD DB access Maker
@@ -65,7 +72,7 @@ class StSsdDbMaker : public StMaker {
   St_SsdDb_Reader* get_SsdDb_Reader(){return m_Reader;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.4 2005/05/10 12:41:42 reinnart Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSsdDbMaker.h,v 1.5 2005/06/20 14:21:38 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSsdDbMaker,0)   //StAF chain virtual base class for Makers
 };
 

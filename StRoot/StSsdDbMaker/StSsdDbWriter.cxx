@@ -1,3 +1,10 @@
+// $Id: StSsdDbWriter.cxx,v 1.4 2005/06/20 14:21:38 lmartin Exp $
+//
+// $Log: StSsdDbWriter.cxx,v $
+// Revision 1.4  2005/06/20 14:21:38  lmartin
+// CVS tags added
+//
+
 /***************************************************************************
  * Author: Joerg Reinnarth joerg.reinnarth@subatech.in2p3.fr
  ***************************************************************************

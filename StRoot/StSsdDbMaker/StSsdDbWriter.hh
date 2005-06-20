@@ -1,3 +1,10 @@
+// $Id: StSsdDbWriter.hh,v 1.2 2005/06/20 14:21:38 lmartin Exp $
+//
+// $Log: StSsdDbWriter.hh,v $
+// Revision 1.2  2005/06/20 14:21:38  lmartin
+// CVS tags added
+//
+
 /***************************************************************************
  *
  *  StSsdDbWriter.hh,v 1.01 2004/05/19 Reinnarth
@@ -9,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StSsdDbWriter.hh,v $
+ * Revision 1.2  2005/06/20 14:21:38  lmartin
+ * CVS tags added
+ *
  * Revision 1.1  2004/07/20 13:56:46  croy
  * 1st version of a writer for SSD databases
  *
