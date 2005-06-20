@@ -16,8 +16,12 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
-Revision 1.1.1.1  2005/05/25 22:36:37  fisyak
-Alice version of geant3 (-minicern)
+Revision 1.1.1.2  2005/06/20 15:20:12  fisyak
+*** empty log message ***
+
+Revision 1.6  2005/06/15 08:49:21  brun
+From Andrei Gheata:
+Change related to  usage of assemblies (that have no medium).
 
 Revision 1.5  2005/05/17 12:48:00  brun
 From Ivana:
@@ -1902,6 +1906,7 @@ void TGeant3TGeo::SetColors()
   TIter next(gGeoManager->GetListOfVolumes());
   TGeoVolume *volume;
   while ((volume = (TGeoVolume*)next())) {
+     if (volume->IsAssembly()) continue;
      TGeoMedium *medium = (TGeoMedium*)volume->GetMedium();
      Int_t icol = medium->GetId()%6+2;
      volume->SetLineColor(icol);
