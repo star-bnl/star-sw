@@ -132,7 +132,7 @@ Bool_t StEEmcClusterMaker::buildTowerClusters()
 
   /// Current algo only populates tower clusters, using Jan's 
   /// "minesweeper" algorithm (apologies to Bill Gates).
-  static const Int_t layer=0;
+  //static const Int_t layer=0;
 
 
   /// Loop over layers to go here...  maybe above init of weights
