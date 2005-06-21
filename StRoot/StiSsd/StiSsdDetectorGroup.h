@@ -1,3 +1,9 @@
+// $Id: StiSsdDetectorGroup.h,v 1.5 2005/06/21 15:31:47 lmartin Exp $
+// 
+// $Log: StiSsdDetectorGroup.h,v $
+// Revision 1.5  2005/06/21 15:31:47  lmartin
+// CVS tags added
+//
 #ifndef StiSsdDetectorGroup_H_INCLUDED
 #define StiSsdDetectorGroup_H_INCLUDED
 

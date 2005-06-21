@@ -1,3 +1,9 @@
+// $Id: StiSsdDetectorGroup.cxx,v 1.6 2005/06/21 15:31:47 lmartin Exp $
+// 
+// $Log: StiSsdDetectorGroup.cxx,v $
+// Revision 1.6  2005/06/21 15:31:47  lmartin
+// CVS tags added
+//
 #include "StiSsd/StiSsdDetectorGroup.h"
 #include "StiSsd/StiSsdHitLoader.h"
 #include "StiSsd/StiSsdDetectorBuilder.h"
