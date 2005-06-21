@@ -1,6 +1,9 @@
-// $Id: St_SsdDb_Reader.cc,v 1.5 2005/06/20 14:21:39 lmartin Exp $
+// $Id: St_SsdDb_Reader.cc,v 1.6 2005/06/21 15:06:02 lmartin Exp $
 //
 // $Log: St_SsdDb_Reader.cc,v $
+// Revision 1.6  2005/06/21 15:06:02  lmartin
+// information from the ssdDimensions table added
+//
 // Revision 1.5  2005/06/20 14:21:39  lmartin
 // CVS tags added
 //
@@ -126,12 +129,30 @@ StSsdGeometry* St_SsdDb_Reader::getGeometry()
   ssdWafersPosition_st *geom  = (ssdWafersPosition_st*) wafersPosition->GetTable();  
 
   if (!geom)
-    gMessMgr->Error() << " mSsdConfig Not Defined in getGeometry " << endm;
+    gMessMgr->Error() << "no ssdWaferPosition_st table" << endm;
     
-  StSsdWaferGeometry* waferGeom;
+  St_ssdDimensions *wafersDimensions;
+  wafersDimensions              = (St_ssdDimensions*) ssdDb[0]->Find("ssdDimensions");
+
+  if ( ! wafersDimensions ){
+    gMessMgr->Error() << "St_SsdDb_Reader::getGeometry() no ssdDimensions -- ssdDb[0] " << ssdDb[0]->Find("ssdDimensions") << endm;
+    return NULL;
+  }
+
+  ssdDimensions_st *dimensions  = (ssdDimensions_st*) wafersDimensions->GetTable();  
+
+  if (!dimensions)
+    gMessMgr->Error() << "no ssdDimensions_st table" << endm;
+  else {
+    mSsdGeom->setWaferLength(dimensions[0].waferHalfLength);
+    mSsdGeom->setWaferWidth(dimensions[0].waferHalfWidth);
+    mSsdGeom->setWaferThickness(dimensions[0].waferHalfThickness);
+    mSsdGeom->setStripPitch(dimensions[0].stripPitch);
+  }    
   gMessMgr->Info() <<" getGeometry : numberOfLadders = "<<mSsdGeom->getNumberOfLadders()
 		   <<" with numberOfWafersPerLadder  = "<<mSsdGeom->getNumberOfWafers()<<endm;
 
+  StSsdWaferGeometry* waferGeom;
   int   index  = -1;
   int   barrel =  1;
   float radius;
