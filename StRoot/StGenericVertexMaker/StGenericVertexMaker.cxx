@@ -92,8 +92,11 @@ Int_t StGenericVertexMaker::Init()
   EtaCut=1.4; // Sensible default cut
 
   gMessMgr->Info() << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
+  
+  bool isMinuit=false;
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
+    isMinuit=true;
   } else if ( m_Mode & 0x2){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(0);                 // this mode is an internal to ppLMV option switch
@@ -109,10 +112,16 @@ Int_t StGenericVertexMaker::Init()
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
     theFinder= new StMinuitVertexFinder();
+    isMinuit=true;
   }
 
-  if (use_ITTF) theFinder->DoUseITTF();
-  //    theFinder->CTBforSeed();
+  if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
+    if (use_ITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();
+    if (useCTB) ((StMinuitVertexFinder*)theFinder)->CTBforSeed();
+  } else {
+    assert(!eval); // current implementation support only Minuit Vertex finder, JB 
+  }
+ 
   //    theFinder->UseVertexConstraint(-0.265,0.4088,-0.00135,0.0004333,0.0001);
   //theFinder->UseVertexConstraint(0.0,0.0,0.0,0.0,0.0001);
   if (eval) mEvalNtuple = new TNtuple("results","results","thX:thY:thZ:thStat:goodGlob:evX:evY:evZ:evStat:nPrim:nCTB:geantX:geantY:geantZ");
@@ -122,7 +131,8 @@ Int_t StGenericVertexMaker::Init()
 }
 
 //_____________________________________________________________________________
-void StGenericVertexMaker::Clear(const char*){
+void StGenericVertexMaker::Clear(const char* opt){
+  printf(" StGenericVertexMaker::Clear()cccccccccccccccccccccccccc\n"); 
   theFinder->Clear();
 }
 
@@ -130,7 +140,6 @@ void StGenericVertexMaker::Clear(const char*){
 //_____________________________________________________________________________
 Int_t StGenericVertexMaker::InitRun(int runnumber){
   theFinder->InitRun(runnumber);
-  if (useCTB) theFinder->CTBforSeed();
   if (usebeamline) {
      double x0 = 0.;
      double y0 = 0.;
@@ -190,7 +199,6 @@ Bool_t StGenericVertexMaker::DoFit(){
   assert(event);
 
   if (theFinder->fit(event)) {
-    myvertex = theFinder->result();
     theFinder->printInfo();
   }  else {
     gMessMgr->Error() << "StGenericVertexMaker::DoFit: vertex fit failed, no vertex." << endm;
@@ -236,7 +244,7 @@ Int_t StGenericVertexMaker::Make()
 
   if(!externalFindUse){
     ///Only fill StEvent when successful
-    if (theFinder->status()!=-1){
+    if (theFinder->result()->size()>0){
       theFinder->FillStEvent(mEvent);
       nEvGood++;
     }
@@ -246,7 +254,7 @@ Int_t StGenericVertexMaker::Make()
 
 //-----------------------------------------------------------------------------
 
-void StGenericVertexMaker::MakeEvalNtuple(){
+void StGenericVertexMaker::MakeEvalNtuple(){ // only for Minuit vertex finder
 
   // get geant vertex
   St_DataSet *gds=GetDataSet("geant");
@@ -268,13 +276,18 @@ void StGenericVertexMaker::MakeEvalNtuple(){
 
   //  G E T     P R I M     V E R T E X
   primV=mEvent->primaryVertex();
+  int nCtb= ((StMinuitVertexFinder*)theFinder)->NCtbMatches(); 
+  int stat= ((StMinuitVertexFinder*)theFinder)->statusMin();
+  
   if(!primV) {
     printf("primaryVertex()=NULL\n");
-    mEvalNtuple->Fill(theFinder->result().x(),theFinder->result().y(),theFinder->result().z(),theFinder->status(),mEvent->summary()->numberOfGoodTracks(),-999.,-999.,-999.,-999.,-999.,theFinder->NCtbMatches(),gx,gy,gz);
+    // why would one access x,y,z of the vertex if it is not found, Jan ???
+    float x=999,y=999,z=999;
+    mEvalNtuple->Fill(x,y,z,stat,mEvent->summary()->numberOfGoodTracks(),-999.,-999.,-999.,-999.,-999.,nCtb,gx,gy,gz);
     }
   else {
     printf("primaryVertex()= %f, %f %f, nTracks=%d\n",primV->position().x(),primV->position().y(),primV->position().z(),primV->numberOfDaughters());
-  mEvalNtuple->Fill(theFinder->result().x(),theFinder->result().y(),theFinder->result().z(),theFinder->status(),mEvent->summary()->numberOfGoodTracks(),primV->position().x(),primV->position().y(),primV->position().z(),primV->flag(),primV->numberOfDaughters(),theFinder->NCtbMatches(),gx,gy,gz);
+  mEvalNtuple->Fill(primV->position().x(),primV->position().y(),primV->position().z(),stat               ,mEvent->summary()->numberOfGoodTracks(),primV->position().x(),primV->position().y(),primV->position().z(),primV->flag(),primV->numberOfDaughters(), nCtb,gx,gy,gz);
   }
 }
 

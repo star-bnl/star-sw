@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.14 2004/12/13 20:39:58 fisyak Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.15 2005/06/21 02:16:36 balewski Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.15  2005/06/21 02:16:36  balewski
+ * multiple prim vertices are stored in StEvent
+ *
  * Revision 1.14  2004/12/13 20:39:58  fisyak
  * Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
  *
@@ -74,10 +77,25 @@ double                   StMinuitVertexFinder::mdydz;
 bool                     StMinuitVertexFinder::requireCTB;
 int                      StMinuitVertexFinder::nCTBHits;
 
+//==========================================================
+//==========================================================
+void StMinuitVertexFinder::Clear(){
+  mClear();
+  mStatusMin    = 0;
+}
+
+void
+StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
+{
+    mExternalSeedPresent = true;
+    mExternalSeed = s;
+}
+
+
 StMinuitVertexFinder::StMinuitVertexFinder() {
   gMessMgr->Info() << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
-  mStatus    = 0;
+
   mMinNumberOfFitPointsOnTrack = 10; 
   mMinuit = new TMinuit(3);         
   mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
@@ -88,7 +106,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   requireCTB = false;
   mUseITTF   = false;
 }
-
+ 
 
  StMinuitVertexFinder::~StMinuitVertexFinder()
  {
@@ -100,6 +118,17 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
     mCTB.clear();
  }
 
+
+void
+StMinuitVertexFinder::setFlagBase(){
+  if(mUseITTF){
+    mFlagBase = 8000;
+  } else {
+    mFlagBase = 1000;
+  }
+}
+
+
 bool
 StMinuitVertexFinder::fit(StEvent* event)
 {
@@ -108,7 +137,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     //
     //  Reset vertex
     //
-    mFitError = mFitResult = StThreeVectorD(0,0,0);
+    //    mFitError = mFitResult = StThreeVectorD(0,0,0);, not needed, Clear() resets verted list,Jan
 
     setFlagBase();
 
@@ -183,7 +212,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     //
     if (mHelices.empty()) {
 	gMessMgr->Warning() << "StMinuitVertexFinder::fit: no tracks to fit." << endm;
-	mStatus = -1;
+	mStatusMin = -1;
 	return false;
     }
     gMessMgr->Info() << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
@@ -191,8 +220,8 @@ StMinuitVertexFinder::fit(StEvent* event)
 
     //
     //  Reset and clear Minuit parameters
-    //
-    mMinuit->mnexcm("CLEar", 0, 0, mStatus);
+    //mStatusMin
+    mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
     
     //
     //  Set parameters and start values. We do
@@ -213,12 +242,12 @@ StMinuitVertexFinder::fit(StEvent* event)
 	seed[2] = mExternalSeed.z();
     }
     if (!mVertexConstrain){ 
-     mMinuit->mnparm(0, "x", seed[0], step[0], 0, 0, mStatus);
-     mMinuit->mnparm(1, "y", seed[1], step[1], 0, 0, mStatus);
-     mMinuit->mnparm(2, "z", seed[2], step[2], 0, 0, mStatus);
+     mMinuit->mnparm(0, "x", seed[0], step[0], 0, 0, mStatusMin);
+     mMinuit->mnparm(1, "y", seed[1], step[1], 0, 0, mStatusMin);
+     mMinuit->mnparm(2, "z", seed[2], step[2], 0, 0, mStatusMin);
     }
     else {
-     mMinuit->mnparm(0, "z", seed[0], step[0], 0, 0, mStatus);
+     mMinuit->mnparm(0, "z", seed[0], step[0], 0, 0, mStatusMin);
     }
     //
     //  In case of one usable track only we set x = y = 0;
@@ -229,7 +258,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     if (mHelices.size() == 1) {
 	arglist[0] = 1; 
 	arglist[1] = 2;
-        if (!mVertexConstrain) 	mMinuit->mnexcm("FIX", arglist, 2, mStatus);
+        if (!mVertexConstrain) 	mMinuit->mnexcm("FIX", arglist, 2, mStatusMin);
     }
 
     //
@@ -249,7 +278,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	mWidthScale = 2;
         if (mRequireCTB) requireCTB = true;
 	gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting initial SCAN (no external z seed)" << endm;
-	mMinuit->mnexcm("SCAn", arglist, 4, mStatus);
+	mMinuit->mnexcm("SCAn", arglist, 4, mStatusMin);
 	gMessMgr->Info() << "StMinuitVertexFinder::fit : Done with initial SCAN (no external z seed)" << endm;
     }
     
@@ -276,7 +305,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       mMinuit->mnstat(fmin,fedm,errdef,npari,nparx,istat);
       if(fmin == 0.0){
 	gMessMgr->Warning() << "Vertex seed not found ?? " << endm;
-	mStatus=-1;
+	mStatusMin=-1;
 	return false;
       }
       
@@ -292,7 +321,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     mWidthScale = 1;
     if (mRequireCTB) requireCTB = true;
     gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting second SCAN" << endm;
-    mMinuit->mnexcm("SCAn", arglist, 4, mStatus);
+    mMinuit->mnexcm("SCAn", arglist, 4, mStatusMin);
     gMessMgr->Info() << "StMinuitVertexFinder::fit : Done with second SCAN" << endm;
 
     //
@@ -307,9 +336,9 @@ StMinuitVertexFinder::fit(StEvent* event)
     mWidthScale = 1;
     requireCTB = false;
     gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting minimization" << endm;
-    mMinuit->mnexcm("MINImize", 0, 0, mStatus);
+    mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
     gMessMgr->Info() << "StMinuitVertexFinder::fit : Done minimization" << endm;
-    if (mStatus) {
+    if (mStatusMin) {
 	gMessMgr->Warning() << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag." << endm;
 	return false;
     }
@@ -318,23 +347,43 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  Save and check fit result
     //
     double val, verr;
-    mMinuit->mnstat(mFmin, mFedm, mErrdef, mNpari, mNparx, mStatus);
+    mMinuit->mnstat(mFmin, mFedm, mErrdef, mNpari, mNparx, mStatusMin);
+
+    StThreeVectorD XVertex;
+    Float_t cov[6];
+    memset(cov,0,sizeof(cov));
+    
     if (!mVertexConstrain) {
       mMinuit->GetParameter(0, val, verr); 
-      mFitResult.setX(val); mFitError.setX(verr);
-      mMinuit->GetParameter(1, val, verr);
-      mFitResult.setY(val); mFitError.setY(verr);
-      mMinuit->GetParameter(2, val, verr);
-      mFitResult.setZ(val); mFitError.setZ(verr);
+      XVertex.setX(val);  cov[0]=verr;
+      
+      mMinuit->GetParameter(1, val, verr); 
+      XVertex.setY(val);  cov[2]=verr;
+
+      mMinuit->GetParameter(2, val, verr); 
+      XVertex.setZ(val);  cov[5]=verr;
+      
     }
     else {
-     mMinuit->GetParameter(0, val, verr); 
-     mFitResult.setZ(val); mFitError.setZ(verr);
-     // LSB Really error in x and y should come from error on constraint
-     // At least this way it is clear that those were fixed paramters
-     mFitResult.setX(beamX(val)); mFitError.setX(0);
-     mFitResult.setY(beamY(val)); mFitError.setY(0);
+      mMinuit->GetParameter(0, val, verr); 
+      XVertex.setZ(val);  cov[5]=verr;
+      
+      // LSB Really error in x and y should come from error on constraint
+      // At least this way it is clear that those were fixed paramters
+      XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
+      XVertex.setY(beamY(val));  cov[2]=0.1;
     }
+
+    StPrimaryVertex primV;
+    primV.setPosition(XVertex);
+    primV.setCovariantMatrix(cov); 
+    primV.setVertexFinderId(minuitVertexFinder);
+    primV.setFlag(1); // was not set earlier by this vertex finder ?? Jan
+    primV.setRanking(333);
+
+    //..... add vertex to the list
+    mVertexList.push_back(primV);
+
     delete ctbHits;
     ctbHits = 0;
     return true;
@@ -412,16 +461,20 @@ StMinuitVertexFinder::setPrintLevel(int level)
 void
 StMinuitVertexFinder::printInfo(ostream& os) const
 {
+  const StPrimaryVertex* primV =0;
+  if(mVertexList.size()>0) primV =&mVertexList[0];
     os << "StMinuitVertexFinder - Fit Statistics:" << endl;
-    os << "fitted vertex ........................ " << mFitResult << endl;
-    os << "position errors ...................... " << mFitError << endl;
+    if(primV) {
+      os << "fitted vertex ........................ " << primV->position() << endl;
+      os << "position errors ...................... " << primV->positionError()<< endl;
+    } 
     os << "# of used tracks ..................... " << mHelices.size() << endl;
     os << "minimum found (FMIN) ................. " << mFmin << endl;
     os << "estimated distance to minimum (FEDM) . " << mFedm << endl;
     os << "parameter uncertainties (ERRDEF) ..... " << mErrdef << endl;
     os << "# of parameters (NPARI) .............. " << mNpari << endl;
     os << "# of max parameters (NPARX) .......... " << mNparx << endl;
-    os << "goodness of covariance matrix (ISTAT)  " << mStatus << endl;
+    os << "goodness of covariance matrix (ISTAT)  " << mStatusMin << endl;
     os << "min # of fit points for tracks ....... " << mMinNumberOfFitPointsOnTrack << endl;
     os << "final potential width scale .......... " << mWidthScale << endl;
 }

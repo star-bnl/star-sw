@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.18 2005/03/11 22:23:53 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.19 2005/06/21 02:16:36 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -29,20 +29,21 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 #endif
 
+//==========================================================
+//==========================================================
 StppLMVVertexFinder::StppLMVVertexFinder() {
   gMessMgr->Info() << "StppLMVVertexFinder::StppLMVVertexFinder is in use." << endm;
   mBeamHelix           = 0;
-  mExternalSeedPresent = false;
   mVertexConstrain     = false;
-  mRequireCTB          = false;
-  mUseITTF             = false;
   mTotEve              = 0;
   mdxdz=mdydz=mX0=mY0  = 0;
   mMode                = 1;
 }
 
-
-void StppLMVVertexFinder::Init() {
+//==========================================================
+//==========================================================
+void 
+StppLMVVertexFinder::Init() {
 
   //jan default cuts
   if (mMode==0){
@@ -70,6 +71,31 @@ void StppLMVVertexFinder::Init() {
   }
 }
 
+//==========================================================
+//==========================================================
+void 
+StppLMVVertexFinder::Clear(){  //  Reset vertex
+  mClear();
+  mCtbHits.clear();
+  mPrimCand.clear();
+  gMessMgr->Info() << "StppLMVVertexFinder::Clear() ..." << endm;
+}
+
+//==========================================================
+//==========================================================
+void 
+StppLMVVertexFinder::addFakeVerex(float z){
+  StPrimaryVertex primV;
+  Float_t cov[6] = {1,0.0,2,0.0,0.0,3  }; 
+  StThreeVectorD XVertex(0.1,0.2,z);
+  primV.setPosition(XVertex);
+  primV.setCovariantMatrix(cov); 
+  primV.setVertexFinderId(pplmvVertexFinder);
+  primV.setFlag(1); 
+  primV.setRanking(444);
+  //..... add vertex to the list
+  mVertexList.push_back(primV);
+}
 
 //==========================================================
 //==========================================================
@@ -79,17 +105,13 @@ StppLMVVertexFinder::~StppLMVVertexFinder() {
 
 //==========================================================
 //==========================================================
-bool StppLMVVertexFinder::fit(StEvent* event) {
+bool 
+StppLMVVertexFinder::fit(StEvent* event) {
   gMessMgr->Info() << "StppLMVVertexFinder::fit() START ..." << endm;
  //
-  //  Reset vertex
-  //
-  mFitError = mFitResult = StThreeVectorD(777,888,999);
-  mCtbHits.clear();
-  mPrimCand.clear();
 
   n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
-  mStatus = -888;
+  //  mStatus = -888;
 
   mTotEve++;
   eveID=event->id();
@@ -103,7 +125,6 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   //printf("mBfield=%f tesla=%e b2=%f\n",mBfield,tesla,b[2]);
   gMessMgr->Info() << "ppLMV5:: mBfield/Tesla=" << mBfield << " b2=" << b[2] << endm;
  
-  setFlagBase(); // what is that ? JB
   //changeCuts();
 
   gMessMgr->Message("","I") << "ppLMV5::cuts"
@@ -118,16 +139,10 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
     			    <<"\n DVtxMax (dz/sig)="<<mDVtxMax
     			    <<"\n MinMatchTr ="<< mMinMatchTr
     			    <<"\n MaxZrange (cm) ="<< mMaxZrange
-    			    <<"\n RequireCTB="<<mRequireCTB
     			    <<"\n VertexConstrain="<<mVertexConstrain
     //			    <<"\n  ="<<
 			    <<endm; 
-  
-  if(!mRequireCTB){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() does not work w/o RequireCTB=true, sorry , quit" << endm;
-    return false;
-  }   
-
+   
   // get CTB info, does not  work for embeding 
   if(event->runId()<100000){
     St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
@@ -209,17 +224,18 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
     return false;
   }
   
-  //printf("Prim tr used by ppLMV for nTotEve=%d, tracks at vertex\n",mTotEve);
-  gMessMgr->Info() << "Prim tr used by ppLMV for eveID=" << eveID 
-		    << ", tracks at vertex" << endm;
 
+  gMessMgr->Info() << "Prim tr used by ppLMV for eveID=" << eveID 
+		   << ", tracks at vertex=" << mPrimCand.size()<<endm;
+
+  assert(mVertexList.size()>=1);
   for( uint j=0;j<mPrimCand.size();j++) {
-    double spath = mPrimCand[j].helix.pathLength(mFitResult.x(),mFitResult.y());
+    double spath = mPrimCand[j].helix.pathLength( mVertexList[0].position().x(),mVertexList[0].position().y());
     StThreeVectorD p=mPrimCand[j].helix.momentumAt(spath,mBfield*tesla);
     // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
   }
 	 
-  gMessMgr->Message("","I") << "Prim ppLMV Vertex at " <<  mFitResult<<endm;
+  gMessMgr->Message("","I") << "Prim ppLMV Vertex at " << mVertexList[0].position()<<endm;
   return true;
 } 
 
@@ -230,16 +246,16 @@ void
 StppLMVVertexFinder::printInfo(ostream& os) const
 {
     os << "StppLMVVertexFinder - Fit Statistics:" << endl;
-    os << "fitted vertex ........................ " << mFitResult << endl;
-    os << "position errors ...................... " << mFitError << endl;
-    os << "# of used tracks + beamL.............. " << mPrimCand.size() << endl;
-    os << "min # of fit points for tracks ....... " << mMinNumberOfFitPointsOnTrack << endl;
-}
+    os << "found prim vertices ................ " <<mVertexList.size() << endl;
+    os << "no more info printed at the moment, Jan"<<endl;
+ }
 
 
 //======================================================
 //======================================================
-void StppLMVVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
+void 
+StppLMVVertexFinder::UseVertexConstraint(double x0, double y0, 
+					 double dxdz, double dydz, double weight) {
   mVertexConstrain = true;
   mX0 = x0;
   mY0 = y0;
@@ -266,7 +282,6 @@ void StppLMVVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz,
   StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
   delete mBeamHelix;
   mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-  mExternalSeedPresent = false;
 }
 
 
@@ -274,7 +289,8 @@ void StppLMVVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz,
 
 //==========================================================
 //==========================================================
-bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
+bool 
+StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   /* upgrade:
      - used dE/dX for strag
      - use track length  
@@ -296,8 +312,6 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   if( track->flag()<0) return false;
   if( track->topologyMap().trackFtpc() )return false;
-  if( mUseITTF && track->fittingMethod()!=kITKalmanFitId ) return false;
-  if( !mUseITTF && track->fittingMethod()==kITKalmanFitId ) return false;
 
   n1++;	
 
@@ -408,7 +422,8 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
 //==========================================================
 //==========================================================
-bool  StppLMVVertexFinder::ppLMV5() { 
+bool  
+StppLMVVertexFinder::ppLMV5() { 
   //  ----------  D O   F I N D    V E R T E X
   if(mMode == 0) gMessMgr->Warning()<<"ppLMV4 cuts have been activated"<<endm; 
 
@@ -516,7 +531,7 @@ bool  StppLMVVertexFinder::ppLMV5() {
         dmax = drel;
         ikeep = itehlx;
       }
-    }
+    } 
 
     if( dmax > mDVtxMax ){
       gMessMgr->Info() << "Removing a track! dmax=" << dmax << endm;
@@ -530,12 +545,35 @@ bool  StppLMVVertexFinder::ppLMV5() {
   
   //  double  chi2pdof = chi2/(mPrimCand.size()-1);
 
+  StPrimaryVertex primV;
+  Float_t cov[6] = {C11,0.0,C22,0.0,0.0,C33  };  //  cxx,?,cyy,?,?,czz
+  
+  primV.setPosition(XVertex);
+  primV.setCovariantMatrix(cov); 
+  primV.setVertexFinderId(pplmvVertexFinder);
+  primV.setNumTracksUsedInFinder(mPrimCand.size());
+  primV.setNumMatchesWithCTB(mPrimCand.size());// the same, only matched tracks are used
+
+  /*  I do not understand if this elaborate scheme is applicable to multiple prim vertices for pp
+      http://www.star.bnl.gov/STAR/html/all_l/html/dst_vertex_flags.html
+      provide '1' as was
+  */
+  primV.setFlag(1); 
+  primV.setRanking(555);
+
+  //..... add vertex to the list
+  mVertexList.push_back(primV);
+ if(eveID%2) addFakeVerex(XVertex.z()+20);
+
+#if 0  ///old
   mFitResult=XVertex;
   mFitError.setX(sqrt(C11));   mFitError.setY(sqrt(C22));   mFitError.setZ(sqrt(C33));
+#endif
+
 
   gMessMgr->Debug() <<"ppLMV5: Primary Vertex found!\nVert position: "<<XVertex<<", accepted tracks "<<mPrimCand.size()<<" of "<<totTr<<" eveID="<<eveID<<endm;
-  printf("##V %6d %d %f %f %f    %d %d %d\n",eveID,mTotEve,XVertex.x(),XVertex.y(),XVertex.z(),NCtbSlats(),n1,NCtbMatches());
-      
+  printf("##V %6d %d %f %f %f    %d %d %d\n",eveID,mTotEve,XVertex.x(),XVertex.y(),XVertex.z(),mCtbHits.size(),n1,NCtbMatches());
+
 
   // get geant vertex
   St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
@@ -548,8 +586,8 @@ bool  StppLMVVertexFinder::ppLMV5() {
       // hPiFi[10]->Fill(GVER->ge_x[2]-rZver);
       // hPiFi[11]->Fill(GVER->ge_x[0]-rXver);
       // hPiFi[12]->Fill(GVER->ge_x[1]-rYver);
-      printf("Z Geant-found=%.2f, dx=%.2f, dy=%.2f nCtbSl=%d n1=%d eveID=%d\n",GVER->ge_x[2]-XVertex.z(),GVER->ge_x[0]-XVertex.x(),GVER->ge_x[1]-XVertex.y(),NCtbSlats(),n1,eveID);
-      printf("##G %6d %d %f %f    %d %d %d\n",eveID,mTotEve,GVER->ge_x[2],XVertex.z(),NCtbSlats(),n1,NCtbMatches());
+      printf("Z Geant-found=%.2f, dx=%.2f, dy=%.2f nCtbSl=%d n1=%d eveID=%d\n",GVER->ge_x[2]-XVertex.z(),GVER->ge_x[0]-XVertex.x(),GVER->ge_x[1]-XVertex.y(),mCtbHits.size(),n1,eveID);
+      printf("##G %6d %d %f %f    %d %d %d\n",eveID,mTotEve,GVER->ge_x[2],XVertex.z(),mCtbHits.size(),n1,NCtbMatches());
       
     }
   }
@@ -569,14 +607,8 @@ int  StppLMVVertexFinder::NCtbMatches() {
 
 //==========================================================
 //==========================================================
-int  StppLMVVertexFinder::NCtbSlats() { 
-  return mCtbHits.size();
-}
-
-
-//==========================================================
-//==========================================================
-void  StppLMVVertexFinder::changeCuts(){
+void  
+StppLMVVertexFinder::changeCuts(){
   StGenericVertexMaker *mk=(StGenericVertexMaker *)StMaker::GetChain()->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
@@ -601,6 +633,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.19  2005/06/21 02:16:36  balewski
+ * multiple prim vertices are stored in StEvent
+ *
  * Revision 1.18  2005/03/11 22:23:53  balewski
  * towards PPV
  *

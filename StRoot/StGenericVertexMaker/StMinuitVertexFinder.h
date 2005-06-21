@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.7 2004/08/04 21:57:56 balewski Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.8 2005/06/21 02:16:36 balewski Exp $
  *
  */
 
@@ -91,20 +91,36 @@ public:
     // mandatory implementations
     virtual         ~StMinuitVertexFinder();
     bool            fit(StEvent*);       
-    int             NCtbMatches();
-    int            NCtbSlats();
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
+    void           Clear();
 
-    // Added, not part of base-class
+    // Added, not part of base-class  and used by the Minuit vertex finder
+    int            NCtbMatches();    // returns the number of tracks matched to CTB                                                               
+    int            NCtbSlats();   // returns the number of CTB slats above threshold
+    void                   CTBforSeed(){   mRequireCTB = true;}
+    void                   NoCTBforSeed(){ mRequireCTB = false;}
+    void                   setExternalSeed(const StThreeVectorD&);
+
     void            setPrintLevel(int = 0);
+    int            statusMin() const {return mStatusMin;}     // Minuit status flag
+    void                   DoUseITTF(){    mUseITTF=kTRUE; }
+    void                   DoNotUseITTF(){ mUseITTF=kFALSE;}
+    void                   setFlagBase();
+    void                   SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
 
 private:
     bool accept(StTrack*) const;   // track filter
     static void fcn(int&, double*, double&, double*, int); // fit function
     static void fcn1D(int&, double*, double&, double*, int); // fit function
     
-private:
+    bool                   mUseITTF;          // Use only tracks with ITTF encoded method
+    UInt_t                 mFlagBase;         // ITTF track flag
+    bool                   mRequireCTB;       // Set maker to use CTB
+    unsigned int           mMinNumberOfFitPointsOnTrack;
+    double                 mWeight ;          // Weight in fit for vertex contraint
+    StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
+
     static vector<StPhysicalHelixD> mHelices;
     static vector<double>           mSigma;
     static vector<bool>             mCTB;
@@ -117,7 +133,10 @@ private:
     static double                   mdydz; // beam slope
     static double beamX(double z); // beamline parameterization
     static double beamY(double z); // beamline parameterization
-    //inline void setFlagBase(UInt_t base){mFlagBase=base;};
+    
+    int                    mStatusMin;           // Minuit status flag 
+    StThreeVectorD         mExternalSeed;
+    bool                   mExternalSeedPresent;
 
     
     TMinuit*                 mMinuit;
@@ -134,6 +153,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.8  2005/06/21 02:16:36  balewski
+ * multiple prim vertices are stored in StEvent
+ *
  * Revision 1.7  2004/08/04 21:57:56  balewski
  * toward smarter ppLMV5
  *

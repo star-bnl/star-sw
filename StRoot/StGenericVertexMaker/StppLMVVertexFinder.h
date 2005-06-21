@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of ppLMV
- * $Id: StppLMVVertexFinder.h,v 1.8 2004/09/03 00:09:08 jeromel Exp $
+ * $Id: StppLMVVertexFinder.h,v 1.9 2005/06/21 02:16:36 balewski Exp $
  *
  */
 
@@ -25,16 +25,21 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     bool            fit(StEvent*);         
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
+    void           Clear();
 
     // over-written method
     virtual void    Init();
+    void addFakeVerex(float z);
 
  private:
-    // double                   mWidthScale;
+  
     double          mX0  ;     // starting point of beam parameterization
     double          mY0  ;     // starting point of beam parameterization
     double          mdxdz;     // beam slope
     double          mdydz;     // beam slope
+    unsigned int           mMinNumberOfFitPointsOnTrack;
+    double                 mWeight ;          // Weight in fit for vertex contraint
+    StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
 
     //jan--------------------
     bool   matchTrack2CTB (StTrack* rTrack, float & sigma);
@@ -47,12 +52,11 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
     uint   mMinMatchTr; // minimal # of tracks matched to CTB for valid vertex
     float  mMaxZrange;// for tracks used by the vertex finder.
     int    mBLequivNtr;
-    int    n1,n2,n3,n4,n5,n6;
+    int    n1,n2,n3,n4,n5,n6; // private counters
     float  mBfield;// magnetic field
     int    mTotEve;
     int    eveID;
     int    NCtbMatches();
-    int    NCtbSlats();
     void   changeCuts();
 
     /*!
@@ -69,6 +73,9 @@ class StppLMVVertexFinder: public StGenericVertexFinder , StCtbUtility {
 /***************************************************************************
  *
  * $Log: StppLMVVertexFinder.h,v $
+ * Revision 1.9  2005/06/21 02:16:36  balewski
+ * multiple prim vertices are stored in StEvent
+ *
  * Revision 1.8  2004/09/03 00:09:08  jeromel
  * Modified code to Implement Init() and SetMode() and allow passing a switch
  * to chose the vertex finder from within the same code implementation. Was
