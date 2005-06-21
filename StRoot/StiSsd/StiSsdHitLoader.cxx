@@ -1,3 +1,9 @@
+// $Id: StiSsdHitLoader.cxx,v 1.11 2005/06/21 15:31:47 lmartin Exp $
+// 
+// $Log: StiSsdHitLoader.cxx,v $
+// Revision 1.11  2005/06/21 15:31:47  lmartin
+// CVS tags added
+//
 /*!
  * \class StiSsdHitLoader
  * \author Christelle Roy

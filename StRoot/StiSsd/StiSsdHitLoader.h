@@ -1,3 +1,9 @@
+// $Id: StiSsdHitLoader.h,v 1.6 2005/06/21 15:31:48 lmartin Exp $
+// 
+// $Log: StiSsdHitLoader.h,v $
+// Revision 1.6  2005/06/21 15:31:48  lmartin
+// CVS tags added
+//
 /*!
  * \author Christelle Roy
 */

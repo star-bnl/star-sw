@@ -1,3 +1,9 @@
+// $Id: StiSsdDetectorBuilder.cxx,v 1.20 2005/06/21 15:31:47 lmartin Exp $
+// 
+// $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.20  2005/06/21 15:31:47  lmartin
+// CVS tags added
+//
 /*!
  * \class StiSsdDetectorBuilder
  * \author Christelle Roy

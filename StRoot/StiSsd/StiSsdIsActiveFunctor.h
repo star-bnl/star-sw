@@ -1,3 +1,9 @@
+// $Id: StiSsdIsActiveFunctor.h,v 1.2 2005/06/21 15:31:48 lmartin Exp $
+// 
+// $Log: StiSsdIsActiveFunctor.h,v $
+// Revision 1.2  2005/06/21 15:31:48  lmartin
+// CVS tags added
+//
 /**
  * file StiSsdIsActiveFunctor.h
  * class StiSsdIsActiveFunctor
