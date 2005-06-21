@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.6 2004/12/13 20:39:58 fisyak Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.7 2005/06/21 02:16:36 balewski Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -13,48 +13,36 @@
 
 
 StGenericVertexFinder::StGenericVertexFinder() : 
-  mUseITTF(false), mFlagBase(0), mBeamHelix(0), mVertexConstrain(false), mWeight(0),
-  mRequireCTB(false),  mExternalSeedPresent(false), mStatus(0), mMode(0), 
-  mMinNumberOfFitPointsOnTrack(0) {}
+  mVertexConstrain(false), mMode(0){
+}
+
 
 /*!
   Adds the vertex to StEvent (currently as a primary)
   Here we invent our own flag and other data to put in
   In real life we have to get it from somewhere (as done for position)
 */
-void StGenericVertexFinder::FillStEvent(StEvent* event) const{
+//======================================================
+//======================================================
+void 
+StGenericVertexFinder::FillStEvent(StEvent* event) const{
 
-  Float_t ex,ey,ez; // Position errors 
-  ex = this->error().x();ey = this->error().y();ez = this->error().z();
-  Float_t cov[6] = {ex*ex,0.0,ey*ey,0.0,0.0,ez*ez};
-
-  Float_t xSq = 5.43;
-  Float_t probXSq = 0.2468;
-
-  StPrimaryVertex* primV = new StPrimaryVertex();
-  primV->setPosition(this->result());             //requires StThreeVectorF
-//   primV->setFlag(mFlagBase+this->status());       //requires unsigned int
-  primV->setFlag(1);                              // Should conform to dst_vertex.idl flag definition.
-  primV->setCovariantMatrix(cov);                 //requires float[6]
-  primV->setChiSquared(xSq);                      //requires float
-  primV->setProbChiSquared(probXSq);              //requires float
-
-  //primV->setParent();  //requires StTrack* but we won't use this, also
-  //addDaughter(StTrack*) and removeDaughter(StTrack*) not used here
-  //addDaughter would be used when filling primary tracks in later maker
-
-  event->addPrimaryVertex(primV);
-  gMessMgr->Debug() << "StGenericVertexFinder::FillStEvent: Added new primary vertex" << endm;
+  uint i;
+  for(i=0;i<mVertexList.size(); i++) {
+    //allocates new memory for each vertex
+    StPrimaryVertex* primV = new StPrimaryVertex(mVertexList[i]); 
+    event->addPrimaryVertex(primV);
+    gMessMgr->Info() << "StGenericVertexFinder::FillStEvent: Added "<<i+1<<" primary vertex" << endm;
+  }
 }
-
 
 
 void
-StGenericVertexFinder::setExternalSeed(const StThreeVectorD& s)
-{
-    mExternalSeedPresent = true;
-    mExternalSeed = s;
+StGenericVertexFinder::mClear(){
+  printf(" StGenericVertexFinder::mClear()dddddddddddddddddddddddddddddd\n"); 
+  mVertexList.clear();
 }
+
 
 
 void StGenericVertexFinder::NoVertexConstraint() 
@@ -63,17 +51,11 @@ void StGenericVertexFinder::NoVertexConstraint()
   gMessMgr->Info() << "StGenericVertexFinder::No Vertex Constraint" << endm;
 }
 
-void StGenericVertexFinder::setFlagBase()
-{
-  if(mUseITTF){
-    mFlagBase = 8000;
-  } else {
-    mFlagBase = 1000;
-  }
-}
-
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.7  2005/06/21 02:16:36  balewski
+// multiple prim vertices are stored in StEvent
+//
 // Revision 1.6  2004/12/13 20:39:58  fisyak
 // Add initaition of StGenericVertexFinder variables, replace mDumMaker by StMaker::GetChain() method
 //
