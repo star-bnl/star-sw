@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.h,v 1.8 2005/06/21 15:31:47 lmartin Exp $
+// $Id: StiSsdDetectorBuilder.h,v 1.9 2005/06/21 16:35:01 lmartin Exp $
 // 
 // $Log: StiSsdDetectorBuilder.h,v $
+// Revision 1.9  2005/06/21 16:35:01  lmartin
+// DetectorBuilder updated with the correct methods from StSsdUtil
+//
 // Revision 1.8  2005/06/21 15:31:47  lmartin
 // CVS tags added
 //
@@ -13,6 +16,9 @@ This class is the description of the StiSsdDetectorBuilder
 */
 #ifndef StiSsdDetectorBuilder_H
 #define StiSsdDetectorBuilder_H
+#ifndef __SsdInChain__
+#define __SsdInChain__
+#endif
 #include "StSsdUtil/StSsdGeometry.hh"
 #include "StSsdUtil/StSsdConfig.hh"
 #include "Sti/StiDetectorBuilder.h"

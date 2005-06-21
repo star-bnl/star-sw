@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.20 2005/06/21 15:31:47 lmartin Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.21 2005/06/21 16:35:01 lmartin Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.21  2005/06/21 16:35:01  lmartin
+// DetectorBuilder updated with the correct methods from StSsdUtil
+//
 // Revision 1.20  2005/06/21 15:31:47  lmartin
 // CVS tags added
 //
@@ -56,40 +59,31 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     char name[50];  
     int nRows = 1 ;
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
-    //load(_inputFile, source);
+
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
-    //assert(gStSsdDbMaker);
+
     if (!gStSsdDbMaker) {
 	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - gStSsdDbMaker==0");
     }
     St_SsdDb_Reader *pSsdDb_Reader = gStSsdDbMaker->get_SsdDb_Reader();
-    //assert(pSsdDb_Reader);
+
     if (!pSsdDb_Reader)
 	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - pSsdDb_Reader==0");
-    //St_ssdWafersPosition*  wafersPosition = pSsdDb_Reader->getWafersPosition() ;
-    ssdWafersPosition_st*  wafersPosition = pSsdDb_Reader->getWafersPosition() ;
-    _geometry = pSsdDb_Reader->getGeometry(wafersPosition);
-    //assert(pSsdDb_Reader);
+
+    _geometry = pSsdDb_Reader->getGeometry();
+
     if (_geometry) 
-	//gMessMgr->Info()<< "StiSsdDetectorBuilder : SSD Geometry loaded..."<<endm;
-      cout<< "StiSsdDetectorBuilder : SSD Geometry loaded..."<<endl;
+      gMessMgr->Info()<< "StiSsdDetectorBuilder : SSD Geometry loaded..."<<endm;
     else
 	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _geometry==0");
-    ssdConfiguration_st*  ssdConfiguration = pSsdDb_Reader->getSsdConfiguration() ;
-    _config = pSsdDb_Reader->getConfiguration(ssdConfiguration);
+
+    _config = _geometry->getSsdConfig();
     if (_config) 
-	//gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Configuration loaded..." << endm;
-      cout <<"StiSsdDetectorBuilder : SSD Configuration loaded..." << endl;
+      gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Configuration loaded..." << endm;
     else
 	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _config==0");
-    ssdDimensions_st*  ssdDimensions = pSsdDb_Reader->getSsdDimensions() ;
-    _dimensions = pSsdDb_Reader->getDimensions(ssdDimensions);
-    if (_dimensions) 
-	//gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Dimensions set..." << endm;
-      gMessMgr->Info() <<"StiSsdDetectorBuilder : SSD Dimensions set..." << endl;
-    else
-	throw runtime_error("StiSsdDetectorBuilder::loadDb() - ERROR - _dimensions==0");
+
     /*! buildMaterials : _gasMat is the gas the SSD lives in 
       _siMat corresponds to Silicon Wafers. 
       _hybridMat corresponds to Hybrids.
@@ -118,17 +112,13 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildShapes() - I - Started" << endm;
     nWafers = _config->getNumberOfWafers();
     _waferShape[layer] = new StiPlanarShape(name,
-					    //nWafers*_dimensions->getWaferWidth(), 
-					    //nWafers*_dimensions->getWaferWidth(), //too big, it wants halfDepth, not depth
-					    nWafers*_dimensions->getWaferWidth()/2., //too big, it wants halfDepth, not depth
-					    _dimensions->getWaferThickness(),
-					    //_dimensions->getWaferLength() );
-					    _dimensions->getWaferLength()/2. ); //too big? MLM 9/1/04
-    //gMessMgr->Info() <<"SSD : Wafer dimensions = "<< _dimensions->getWaferLength() 
-    //	     <<"/"<<_dimensions->getWaferThickness()<<"/"<<_dimensions->getWaferWidth()<<endm;
+					    nWafers*_geometry->getWaferWidth(), 
+					    _geometry->getWaferThickness(),
+					    _geometry->getWaferLength() );
     add(_waferShape[layer]);
-    _hybridShape[layer] = new StiPlanarShape(name,nWafers*_dimensions->getWaferWidth(),
-					     0.07,_dimensions->getWaferLength() );
+
+    _hybridShape[layer] = new StiPlanarShape(name,nWafers*_geometry->getWaferWidth(),
+					     0.07,_geometry->getWaferLength() );
     add(_hybridShape[layer]);  
     //gMessMgr->Info() << "StiSsdDetectorBuilder::buildShapes() - I - Done" << endm;
 
