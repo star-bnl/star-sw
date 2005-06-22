@@ -7,7 +7,7 @@
 #include "TCL.h"
 #include "TDataSetIter.h"
 #include "TPDGCode.h"
-#include "TGeant3.h"
+#include "TVirtualMC.h"
 #include "TArrayI.h"
 #include "TObjArray.h"
 #include "TObjString.h"
@@ -27,7 +27,6 @@
 //#include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_gepart_Table.h"
 StarMCHits *StarMCHits::fgInstance = 0;
-TGeant3    *StarMCHits::fgGeant3 = 0;
 ClassImp(StarMCHits);
 enum EHITtypes{kX=1,  kY,  kZ,   kR,    kRR,   kPHI,  kTHET, kETA,  kTDR,  kCP,
                kU,    kV,  kW,   kETOT, kELOS, kBIRK, kSTEP, kLGAM, kTOF,  kUSER,
@@ -137,10 +136,6 @@ StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) :
   fVolUserInfo(0), fCurrentDetector(0), fDebug(0), fSeed(0), fEventNumber(0)
 { 
   fgInstance = this; fHitHolder = this; 
-  if (! fgGeant3) {
-    fgGeant3 = (TGeant3 *) gMC; 
-    assert(fgGeant3);
-  }
 }
 //________________________________________________________________________________
 Int_t StarMCHits::Init() {
@@ -265,12 +260,12 @@ void StarMCHits::Step() {
 	 << " has detector description" << endl;
     return;
   }
-  //  Int_t Idevt =  fgGeant3->CurrentEvent();
-  fgGeant3->TrackPosition(fHit.Current.Global.xyzT);
-  fgGeant3->TrackMomentum(fHit.Current.Global.pxyzE);
+  //  Int_t Idevt =  gMC->CurrentEvent();
+  gMC->TrackPosition(fHit.Current.Global.xyzT);
+  gMC->TrackMomentum(fHit.Current.Global.pxyzE);
   TGeoHMatrix  *matrixC = gGeoManager->GetCurrentMatrix();
   fHit.Current.Global2Local(matrixC);
-  if (fgGeant3->IsTrackEntering()) {
+  if (gMC->IsTrackEntering()) {
     user = fCurrentDetector->GetUserDesc(); det_user_st *User = user->GetTable();
     fHit.Detector= fCurrentDetector;
     fHit.IdType  = User->IdType;
@@ -281,26 +276,26 @@ void StarMCHits::Step() {
     path = fCurrentDetector->GetPathDesc();
     hit  = fCurrentDetector->GetHitDesc();
     fHit.Entry = fHit.Current;
-    fHit.Sleng = fgGeant3->TrackLength();
-    fHit.Charge = (Int_t) fgGeant3->TrackCharge();
-    fHit.Mass = fgGeant3->TrackMass();
+    fHit.Sleng = gMC->TrackLength();
+    fHit.Charge = (Int_t) gMC->TrackCharge();
+    fHit.Mass = gMC->TrackMass();
     fHit.AdEstep = fHit.AStep = 0;
     return;
   }
   Double_t GeKin = fHit.Current.Global.pxyzE.E() - fHit.Mass;
-  fHit.Sleng = fgGeant3->TrackLength();
+  fHit.Sleng = gMC->TrackLength();
   if (fHit.Sleng == 0.) Gold = GeKin;
-  Double_t dEstep = fgGeant3->Edep();
-  Double_t Step = fgGeant3->TrackStep();
-  fHit.iPart = fgGeant3->TrackPid();
+  Double_t dEstep = gMC->Edep();
+  Double_t Step = gMC->TrackStep();
+  fHit.iPart = gMC->TrackPid();
   fHit.iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId(); // GetCurrentTrackNumber() + 1 to be consistent with g2t
   // - - - - - - - - - - - - - energy correction - - - - - - - - - -
-  if (fgGeant3->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
+  if (gMC->IsTrackStop() && TMath::Abs(fHit.iPart) == kElectron) {
     TArrayI proc;
-    Int_t Nproc = fgGeant3->StepProcesses(proc);
+    Int_t Nproc = gMC->StepProcesses(proc);
     Int_t Mec = 0;
     for (Int_t i = 0; i < Nproc; i++) if (proc[i] == kPAnnihilation || proc[i] == kPStop) Mec = proc[i];
-    Int_t Ngkine = fgGeant3->NSecondaries();
+    Int_t Ngkine = gMC->NSecondaries();
     if (fHit.iPart == kElectron && Ngkine == 0 && Mec == kPStop) dEstep = Gold;
     else {
       if (fHit.iPart == kPositron && Ngkine < 2 && Mec == kPAnnihilation) {
@@ -309,7 +304,7 @@ void StarMCHits::Step() {
 	  TLorentzVector x;
 	  TLorentzVector p;
 	  Int_t IpartSec;
-	  fgGeant3->GetSecondary(0,IpartSec,x,p);
+	  gMC->GetSecondary(0,IpartSec,x,p);
 	  dEstep -= p.E();
 	}
       }
@@ -321,7 +316,7 @@ void StarMCHits::Step() {
   fHit.AdEstep += dEstep;  
   fHit.AStep   += Step;
   if (fHit.AdEstep == 0) return;
-  if (! fgGeant3->IsTrackExiting() && ! fgGeant3->IsTrackStop()) return;
+  if (! gMC->IsTrackExiting() && ! gMC->IsTrackStop()) return;
   fHit.Exit     = fHit.Current;
   fHit.Middle   = fHit.Entry;
   fHit.Middle  += fHit.Exit;
@@ -404,7 +399,6 @@ St_g2t_Chair *StarMCHits::NewChair(const Char_t *type, const Char_t *name) {
 //________________________________________________________________________________
 void StarMCHits::FinishEvent() {
   static const Double_t pEMax = 1 - 1.e-10;
-  static const Double_t yMax = TMath::ATanH(pEMax);
   TDataSet *m_DataSet = StarMCHits::instance()->GetHitHolder();
   if (! m_DataSet) return;
   St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
@@ -469,7 +463,7 @@ void StarMCHits::FinishEvent() {
     track.id             = it+1;
     track.eg_label       = particle->GetIdGen();
     track.eg_pid         = part->GetPdgCode();
-    track.ge_pid         = fgGeant3->IdFromPDG(track.eg_pid);
+    track.ge_pid         = gMC->IdFromPDG(track.eg_pid);
     track.start_vertex_p = iv;
     track.p[0]           = part->Px();
     track.p[1]           = part->Py();
@@ -482,7 +476,7 @@ void StarMCHits::FinishEvent() {
     track.rapidity       = TMath::ATanH(ratio);
     track.pt             = part->Pt();
     ratio                = part->Pz()/part->P();
-    ratio                = TMath::Min(1.-1e-10,TMath::Max(-1.+1e-10, ratio));
+    ratio                = TMath::Min(pEMax,TMath::Max(-pEMax, ratio));
     track.eta            = TMath::ATanH(ratio);
     g2t_track->AddAt(&track);
   }

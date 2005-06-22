@@ -35,7 +35,6 @@ class StarMCHits : public TDataSet {
  private:
   StarMCHits(const Char_t *name="StarMCHits",const Char_t *title="");
   static StarMCHits *fgInstance;
-  static TGeant3    *fgGeant3;
   GHit_t             fHit;
   TDataSet          *fDetectors;
   TDataSet          *fGeoData;
