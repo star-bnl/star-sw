@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.4 2005/06/22 16:09:01 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.5 2005/06/22 22:19:37 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.5  2005/06/22 22:19:37  fisyak
+ * Add protection for absence svtHitCollection
+ *
  * Revision 2.4  2005/06/22 16:09:01  fisyak
  * Add summary of quality
  *
@@ -34,7 +37,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.4 2005/06/22 16:09:01 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.5 2005/06/22 22:19:37 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -113,23 +116,25 @@ summarizeEvent(StEvent& event, const int &nevents)
     
     UInt_t TotalNoOfSvtHits = 0, noBadSvtHits = 0, noSvtHitsUsedInFit = 0;
     StSvtHitCollection* svthits = event.svtHitCollection();
-    StSvtHit* hit;
-    for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
-      StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
-      if (!barrelhits) break;
-      for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
-	StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
-	if (!ladderhits) break;
-	for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
-	  StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
-	  if (!waferhits) break;
-	  const StSPtrVecSvtHit& hits = waferhits->hits();
-	  for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it) {
-	    hit = static_cast<StSvtHit*>(*it);
-	    if (!hit) continue;
-	    TotalNoOfSvtHits++;
-	    if (hit->flag() > 5) noBadSvtHits++;
-	    if (hit->usedInFit()) noSvtHitsUsedInFit++;
+    if (svthits) {
+      StSvtHit* hit;
+      for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
+	StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
+	if (!barrelhits) continue;
+	for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
+	  StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
+	  if (!ladderhits) continue;
+	  for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	    StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	    if (!waferhits) continue;
+	    const StSPtrVecSvtHit& hits = waferhits->hits();
+	    for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	      hit = static_cast<StSvtHit*>(*it);
+	      if (!hit) continue;
+	      TotalNoOfSvtHits++;
+	      if (hit->flag() > 5) noBadSvtHits++;
+	      if (hit->usedInFit()) noSvtHitsUsedInFit++;
+	    }
 	  }
 	}
       }
