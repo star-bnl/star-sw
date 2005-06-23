@@ -214,11 +214,13 @@ StStrArray::StStrArray(const StStrArray &from){ *this = from;}
       delete fV[i];
     } else {
       Warning("clear","Object[%d]=%p(%d) is already deleted",i,(void*)to,to);
+#if 0
       const char *mk=0;
       mk = StMkDeb::GetName(StMkDeb::GetCurrent());
       if (mk && *mk) printf("*** Now we are in %s ***\n",mk);
       mk = StMkDeb::GetUser(to);
       if (mk && *mk) printf("*** It was deleted in maker %s ***\n",mk);
+#endif
 //    assert(0);
     }
     fV[i]=0;
