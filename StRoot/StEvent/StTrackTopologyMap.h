@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.9 2003/09/02 17:58:06 perev Exp $
+ * $Id: StTrackTopologyMap.h,v 2.10 2005/06/23 19:04:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.10  2005/06/23 19:04:24  ullrich
+ * Added overloaded version of hasHitInDetector() taking up to 6 args.
+ *
  * Revision 2.9  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -63,6 +66,9 @@ public:
     bool           primaryVertexUsed() const;
     unsigned int   numberOfHits(StDetectorId) const;
     bool           hasHitInDetector(StDetectorId) const;
+    bool           hasHitInDetector(StDetectorId, StDetectorId,
+			      StDetectorId = kUnknownId, StDetectorId = kUnknownId,
+			      StDetectorId = kUnknownId, StDetectorId = kUnknownId) const;
     bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1
     bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
 

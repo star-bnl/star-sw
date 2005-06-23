@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.15 2004/08/11 05:21:22 genevb Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.16 2005/06/23 19:04:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.16  2005/06/23 19:04:24  ullrich
+ * Added overloaded version of hasHitInDetector() taking up to 6 args.
+ *
  * Revision 2.15  2004/08/11 05:21:22  genevb
  * tpcOnly excludes SSD
  *
@@ -66,7 +69,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.15 2004/08/11 05:21:22 genevb Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.16 2005/06/23 19:04:24 ullrich Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -112,7 +115,24 @@ StTrackTopologyMap::hasHitInDetector(StDetectorId id) const
 {
     return ((numberOfHits(id)) ? 1U : 0U);
 }
-    
+
+
+bool
+StTrackTopologyMap::hasHitInDetector(StDetectorId d1, StDetectorId d2,
+			       StDetectorId d3, StDetectorId d4,
+			       StDetectorId d5, StDetectorId d6) const
+{
+    //
+    //  Note d3 - d6 are optional, if not given they will have
+    //  the value kUnknownId and shouldn't be used.
+    //
+    return (hasHitInDetector(d1) && hasHitInDetector(d2) &&
+	  (d3 == kUnknownId ? true : hasHitInDetector(d3)) &&
+	  (d4 == kUnknownId ? true : hasHitInDetector(d4)) &&
+	  (d5 == kUnknownId ? true : hasHitInDetector(d5)) &&
+	  (d6 == kUnknownId ? true : hasHitInDetector(d6)));
+}
+
 bool
 StTrackTopologyMap::hasHitInSvtLayer(unsigned int layer) const
 {
