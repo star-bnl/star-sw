@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.11 2005/04/25 14:13:23 bouchet Exp $
+// $Id: StSsdBarrel.cc,v 1.12 2005/06/24 10:19:38 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.12  2005/06/24 10:19:38  lmartin
+// preventing crashes if ssdStripCalib is missing
+//
 // Revision 1.11  2005/04/25 14:13:23  bouchet
 // new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
 //
@@ -170,8 +173,8 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
   int iLad          = 0;
   int nStrip        = 0;
   int iSide         = 0;
-  float sigma       = 0;
-  int iPedestal     = 0;
+  float sigma       = 3.;
+  int iPedestal     = 100;
   int idMcHit[5]    = {0,0,0,0,0};
   int e = 0;
   for (int i = 0 ; i < spa_strip->GetNRows(); i++)
