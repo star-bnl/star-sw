@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.19 2005/06/16 14:29:22 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.20 2005/06/24 10:19:46 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.20  2005/06/24 10:19:46  lmartin
+// preventing crashes if ssdStripCalib is missing
+//
 // Revision 1.19  2005/06/16 14:29:22  bouchet
 // no more makeSsdPedestalHistograms() method
 //
@@ -317,6 +320,8 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       St_DataSet *svtparams = GetInputDB("svt");
       St_DataSetIter local(svtparams);
       m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
+      if (!m_noise2) 
+        gMessMgr->Error() << "No  access to ssdStripCalib - will use the default noise and pedestal values" << endm;
 
 
       // Get once the information for configuration, wafersposition and dimensions
@@ -425,12 +430,13 @@ Int_t StSsdPointMaker::Make()
     {
       int stripTableSize = mySsd->readStripFromTable(spa_strip);
       cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
-      //  mySsd->writeNoiseToFile(spa_strip);
       mySsd->sortListStrip();
       PrintStripSummary(mySsd);
-      //int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
-      cout << " readnoise  : " << m_noise2 << " : " << mDynamicControl << endl;
-      int noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
+      int noiseTableSize = 0;      
+      if (!m_noise2) 
+	gMessMgr->Warning("StSsdPointMaker::Make : No pedestal and noise values (ssdStripCalib table missing), will use default values");
+      else
+	noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
       cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
       int nClusterPerSide[2];
       nClusterPerSide[0] = 0;
