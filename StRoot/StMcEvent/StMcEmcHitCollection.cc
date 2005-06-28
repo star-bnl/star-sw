@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.5  2005/06/28 18:06:41  fine
+ * Remove the redundant data-member StMcEmcModuleHitCollection mModules[mNumberOfModules] causing the crash duw double destruction of one and the same object
+ *
  * Revision 2.4  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -34,11 +37,22 @@ static const char rcsid[] = "$Id ";
 
 ClassImp(StMcEmcHitCollection);
 
-StMcEmcHitCollection::StMcEmcHitCollection():TDataSet("emcHits") {/* Nothing */}
+StMcEmcHitCollection::StMcEmcHitCollection():TDataSet("emcHits",0,kTRUE) { MakeHitCollection(); }
 
-StMcEmcHitCollection::StMcEmcHitCollection(char* name):TDataSet(name) {/* Nothing */}
-StMcEmcHitCollection::StMcEmcHitCollection(const char* name):TDataSet(name) {/* Nothing */}
+StMcEmcHitCollection::StMcEmcHitCollection(char* name):TDataSet(name,0,kTRUE) {MakeHitCollection();}
+StMcEmcHitCollection::StMcEmcHitCollection(const char* name):TDataSet(name,0,kTRUE) { MakeHitCollection();}
 
+void 
+StMcEmcHitCollection::MakeHitCollection() 
+{
+   MakeCollection();
+   TObjArray *modules = GetObjArray();
+   assert(!modules);
+   // Create the dummy modules collection
+   if (modules->GetSize() != mNumberOfModules)  modules->Expand(mNumberOfModules);
+   for (int i=0; i < mNumberOfModules; i++) 
+      Add(new StMcEmcModuleHitCollection());
+}
 StMcEmcHitCollection::~StMcEmcHitCollection() 
 { /* noop */ }
     
@@ -48,22 +62,20 @@ StMcEmcHitCollection::addHit(StMcCalorimeterHit* hit)
   unsigned int m ,i; // i - array index, m - module nuumber;
     if (hit && (m = hit->module())<=mNumberOfModules && m>=1) {
       i = m - 1;
-      if(mModules[i].numberOfHits() == 0) {
+      if(thisModule(i).numberOfHits() == 0) {
 
-        mModules[i](m); // Set name
-        Add((TDataSet*)(&mModules[i]));
-
-        mModules[i].hits().push_back(hit); // New hit(first)
+        thisModule(i)(m); // Set name
+        thisModule(i).hits().push_back(hit); // New hit(first)
         return kNew;
       }
       else {
-        for(unsigned int ih=0; ih<mModules[i].numberOfHits(); ih++){
-          if((*mModules[i].hits()[ih]) == (*hit)) { // Hits from the same particle
-            (*mModules[i].hits()[ih])  += (*hit);
+        for(unsigned int ih=0; ih<thisModule(i).numberOfHits(); ih++){
+          if((*thisModule(i).hits()[ih]) == (*hit)) { // Hits from the same particle
+            (*thisModule(i).hits()[ih])  += (*hit);
             return kAdd;
           }
         }
-        mModules[i].hits().push_back(hit); // New hit
+        thisModule(i).hits().push_back(hit); // New hit
         return kNew;
       }
     }
@@ -78,7 +90,7 @@ StMcEmcHitCollection::numberOfHits() const
 {
     unsigned long sum = 0;
     for (int i=0; i<mNumberOfModules; i++) {
-	sum += mModules[i].hits().size();
+	sum += thisModule(i).hits().size();
     }
     return sum;
 }
@@ -99,9 +111,10 @@ StMcEmcModuleHitCollection*
 StMcEmcHitCollection::module(unsigned int m)
 {
 // m - module number; i-index number;  i = m - 1; // 10-may-2001 
-    unsigned int i = m - 1;
+   TObjArray &modules = *GetObjArray();
+   unsigned int i = m - 1;
     if (i>=0 && i < mNumberOfModules)
-        return &(mModules[i]);
+        return (StMcEmcModuleHitCollection *)modules[i];
     else
         return 0;
 }
@@ -109,9 +122,10 @@ StMcEmcHitCollection::module(unsigned int m)
 const StMcEmcModuleHitCollection*
 StMcEmcHitCollection::module(unsigned int m) const
 {
+    TObjArray &modules = *GetObjArray();
     unsigned int i = m - 1;
     if (i>=0 && i < mNumberOfModules)
-        return &(mModules[i]);
+        return (StMcEmcModuleHitCollection *)modules[i];
     else
         return 0;
 }
@@ -132,7 +146,7 @@ StMcEmcHitCollection::print()
   unsigned int i, m;
   for (i=0; i<mNumberOfModules; i++) {
     m = i + 1;
-    StSPtrVecMcCalorimeterHit& hits=mModules[i].hits();
+    StSPtrVecMcCalorimeterHit& hits=thisModule(i).hits();
     int nh = hits.size();
     if (nh > 0) {
       cout<<" " <<module(m)->GetName()<<" #hits "<<nh<<" Dep.Energy " << 
