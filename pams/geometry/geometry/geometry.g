@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.111 2005/06/03 15:54:43 potekhin Exp $
+* $Id: geometry.g,v 1.112 2005/06/28 16:18:22 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.112  2005/06/28 16:18:22  potekhin
+* Add config variables and steering for the GEM
+* barrel tracker -- only inlfated in the tag IST1.
+*
 * Revision 1.111  2005/06/03 15:54:43  potekhin
 * As agreed with all parties, we would like to run the 2004 simulation
 * with  improved geometry. In particular, the pp physics groups are calling
@@ -486,8 +490,9 @@
 
 * list of system on/off switches:
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
-              btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd,pixl,istb,fstd,ftro,fgtd
+              btof,vpdd,magp,calb,ecal,upst,
+              rich,zcal,mfld,bbcm,fpdm,phmd,
+              pixl,istb,gemb,fstd,ftro,fgtd
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -515,8 +520,8 @@
 * The following are the versioning flags:
 
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
-              CalbConfig, PixlConfig, IstbConfig, FstdConfig, FtroConfig, ConeConfig, FgtdConfig,
-              TpceConfig, PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
+              CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
+              FgtdConfig, TpceConfig, PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -528,6 +533,7 @@
 *             CalbConfig, ! Barrel EMC
 *             PixlConfig, ! Inner Pixel detector
 *             IstbConfig, ! Integrated Silicon Tracker
+*             GembConfig, ! Inner GEM barrel tracker 
 *             FstdConfig, ! Forward Silicon tracker Disks
 *             FtroConfig, ! FTPC Readout Electronics
 *             ConeConfig, ! SVTT support cones and cables
@@ -582,6 +588,7 @@ replace[;ON#{#;] with [
    FtroConfig  = 0 ! 0=no, >1=version
    FtpcConfig  = 0 ! 0  version, 1=gas correction
    IstbConfig  = 0 ! 0=no, >1=version
+   GembConfig  = 0 ! 0=no, >1=version
    PhmdConfig  = 0 ! No Photon multiplicity detectorby default
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
@@ -601,7 +608,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,fstd,sisd,ftro,fgtd} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -754,6 +761,9 @@ If LL>1
 * Inner STAR tracker barrel (formerly MIT detector)
                    istb=on;  "new pixel based inner tracker"
                    IstbConfig=1;
+* Inner STAR GEM barrel
+                   gemb=on;  
+                   GembConfig=1;
 * Forward STAR tracker disk
                    fstd=on;  "new pixel based forward tracker"
                    FstdConfig=1;
@@ -1791,6 +1801,7 @@ If LL>1
    write(*,*) '                 FtpcConfig: ',FtpcConfig
    write(*,*) '                 FtroConfig: ',FtroConfig
    write(*,*) '                 IstbConfig: ',IstbConfig
+   write(*,*) '                 GembConfig: ',GembConfig
    write(*,*) '                 PhmdConfig: ',PhmdConfig
    write(*,*) '                 PipeConfig: ',PipeConfig
    write(*,*) '                 PixlConfig: ',PixlConfig
@@ -2007,6 +2018,7 @@ If LL>1
    if (pixl.and.PixlConfig==2) Call pixlgeo1
 
    if (istb.and.IstbConfig>0)  Call istbgeo
+   if (gemb.and.GembConfig>0)  Call gembgeo
    if (fstd.and.FstdConfig>0)  Call fstdgeo
    if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
 
