@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtVertexMultAnalysis.cxx,v 1.1 2001/11/11 18:34:14 laue Exp $
+ * $Id: StHbtVertexMultAnalysis.cxx,v 1.2 2005/06/28 23:12:24 chajecki Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,16 @@
  ***************************************************************************
  *
  * $Log: StHbtVertexMultAnalysis.cxx,v $
+ * Revision 1.2  2005/06/28 23:12:24  chajecki
+ * UncorrectedNumberOfNegativePrimaries() -> UncorrectedNumberOfPrimaries()
+ *
+ * For data taken in Y2 and later the centrality definition bases
+ * on UncorrectedNumberOfPrimaries() while for Y1(AuAu@130)
+ * it based on UncorrectedNumberOfNegativePrimaries().
+ * But in many places of HBT code the number of negative primaries
+ * was used as a multiplicity for all productions.
+ * This has been fixed.
+ *
  * Revision 1.1  2001/11/11 18:34:14  laue
  * StHbtPicoEventCollectionVectorHideAway: updated for 3d grid
  * StHbtVertexMultAnalysis: new
@@ -161,7 +171,7 @@ void StHbtVertexMultAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
   cout << " StHbtVertexMultAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) " << endl;
   // get right mixing buffer
   double vertexZ = hbtEvent->PrimVertPos().z();
-  double mult = hbtEvent->UncorrectedNumberOfNegativePrimaries();
+  double mult = hbtEvent->UncorrectedNumberOfPrimaries();
   mMixingBuffer = mPicoEventCollectionVectorHideAway->PicoEventCollection(vertexZ,mult); 
   if (!mMixingBuffer) {
     if ( vertexZ < mVertexZ[0] ) mUnderFlowVertexZ++;
