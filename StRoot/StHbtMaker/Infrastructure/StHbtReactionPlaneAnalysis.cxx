@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.5 2004/04/12 14:05:46 magestro Exp $
+ * $Id: StHbtReactionPlaneAnalysis.cxx,v 1.6 2005/06/28 23:12:53 chajecki Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,16 @@
  ***************************************************************************
  *
  * $Log: StHbtReactionPlaneAnalysis.cxx,v $
+ * Revision 1.6  2005/06/28 23:12:53  chajecki
+ * UncorrectedNumberOfNegativePrimaries() -> UncorrectedNumberOfPrimaries()
+ *
+ * For data taken in Y2 and later the centrality definition bases
+ * on UncorrectedNumberOfPrimaries() while for Y1(AuAu@130)
+ * it based on UncorrectedNumberOfNegativePrimaries().
+ * But in many places of HBT code the number of negative primaries
+ * was used as a multiplicity for all productions.
+ * This has been fixed.
+ *
  * Revision 1.5  2004/04/12 14:05:46  magestro
  * Added Vz dimension to event-mixing
  *
@@ -162,7 +172,7 @@ void StHbtReactionPlaneAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     return;
   }
   if ( mReactionPlaneAngle<0.0 ) mReactionPlaneAngle+=2*pi;
-  int multiplicity = hbtEvent->UncorrectedNumberOfNegativePrimaries();
+  int multiplicity = hbtEvent->UncorrectedNumberOfPrimaries();
   mMixingBuffer = mPicoEventCollectionVectorHideAway->PicoEventCollection(mReactionPlaneAngle,(double)multiplicity, mVertexZ); 
   if (!mMixingBuffer) {
     if ( mReactionPlaneAngle < mReactionPlane[0] ) mUnderFlow++;
