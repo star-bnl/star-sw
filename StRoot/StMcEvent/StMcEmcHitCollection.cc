@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.6  2005/06/28 18:44:11  fine
+ * fix assert
+ *
  * Revision 2.5  2005/06/28 18:06:41  fine
  * Remove the redundant data-member StMcEmcModuleHitCollection mModules[mNumberOfModules] causing the crash duw double destruction of one and the same object
  *
@@ -47,7 +50,7 @@ StMcEmcHitCollection::MakeHitCollection()
 {
    MakeCollection();
    TObjArray *modules = GetObjArray();
-   assert(!modules);
+   assert(modules);
    // Create the dummy modules collection
    if (modules->GetSize() != mNumberOfModules)  modules->Expand(mNumberOfModules);
    for (int i=0; i < mNumberOfModules; i++) 
