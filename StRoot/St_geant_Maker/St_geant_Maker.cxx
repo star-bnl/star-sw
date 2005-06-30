@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.102 2005/06/30 22:32:56 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.103 2005/06/30 22:47:40 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.103  2005/06/30 22:47:40  potekhin
+// Adding the previosuly missing g2t_igt_hit header.
+//
 // Revision 1.102  2005/06/30 22:32:56  potekhin
 // Included the newly developed Inner GEM tracker
 // (fresh R&D by Gerrit and Nikolai), and also
@@ -397,6 +400,7 @@
 #include "g2t/St_g2t_ssd_Module.h"
 #include "g2t/St_g2t_pix_Module.h"
 #include "g2t/St_g2t_ist_Module.h"
+#include "g2t/St_g2t_igt_Module.h"
 #include "g2t/St_g2t_fst_Module.h"
 #include "g2t/St_g2t_fgt_Module.h"
 #include "g2t/St_g2t_tpc_Module.h"
