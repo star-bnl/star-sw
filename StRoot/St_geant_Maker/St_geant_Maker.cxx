@@ -1,5 +1,11 @@
-// $Id: St_geant_Maker.cxx,v 1.101 2005/04/26 23:40:18 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.102 2005/06/30 22:32:56 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.102  2005/06/30 22:32:56  potekhin
+// Included the newly developed Inner GEM tracker
+// (fresh R&D by Gerrit and Nikolai), and also
+// improved debug print statemetns in a few
+// newer detectors
+//
 // Revision 1.101  2005/04/26 23:40:18  potekhin
 // As Lilian pointed out, we need to treat the SSD hits separately
 // from the SVT in the newer versions of the geometry (we decoupled
@@ -696,8 +702,8 @@ Int_t St_geant_Maker::Make()
     St_g2t_pix_hit *g2t_pix_hit = new St_g2t_pix_hit("g2t_pix_hit",nhits);
     m_DataSet->Add(g2t_pix_hit);
     
-    iRes = g2t_pix(g2t_track,g2t_pix_hit);if (Debug() > 1) g2t_pix_hit->Print(0,10);
-    //
+    iRes = g2t_pix(g2t_track,g2t_pix_hit); if (Debug() > 1) g2t_pix_hit->Print(0,10);
+    //	     ===============================
   }
   
   geant3->Gfnhit("ISTH","IBSS", nhits);
@@ -706,9 +712,18 @@ Int_t St_geant_Maker::Make()
     St_g2t_ist_hit *g2t_ist_hit = new St_g2t_ist_hit("g2t_ist_hit",nhits);
     m_DataSet->Add(g2t_ist_hit);
     
-    iRes = g2t_ist(g2t_track,g2t_ist_hit);
-    cout << "found IST hits!" << endl;
-    g2t_ist_hit->Print(0,10);
+    iRes = g2t_ist(g2t_track,g2t_ist_hit); if (Debug() > 1) g2t_ist_hit->Print(0,10);
+    //	     ===============================
+  }
+
+  geant3->Gfnhit("GEMH","GMDI", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_igt_hit *g2t_igt_hit = new St_g2t_igt_hit("g2t_igt_hit",nhits);
+    m_DataSet->Add(g2t_igt_hit);
+    
+    iRes = g2t_igt(g2t_track,g2t_igt_hit); if (Debug() > 1) g2t_igt_hit->Print(0,10);
+    //	     ===============================
   }
 
   geant3->Gfnhit("FSTH","FDSW", nhits);
@@ -717,9 +732,8 @@ Int_t St_geant_Maker::Make()
     St_g2t_fst_hit *g2t_fst_hit = new St_g2t_fst_hit("g2t_fst_hit",nhits);
     m_DataSet->Add(g2t_fst_hit);
     
-    iRes = g2t_fst(g2t_track,g2t_fst_hit);
-    cout << "found FST hits!" << endl;
-    g2t_fst_hit->Print(0,10);
+    iRes = g2t_fst(g2t_track,g2t_fst_hit); if (Debug() > 1) g2t_fst_hit->Print(0,10);
+    //	     ===============================
   }
 
  geant3->Gfnhit("FGTH","FGSC", nhits);
@@ -728,9 +742,8 @@ Int_t St_geant_Maker::Make()
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
     m_DataSet->Add(g2t_fgt_hit);
     
-    iRes = g2t_fgt(g2t_track,g2t_fgt_hit);
-    cout << "found FGT hits!" << endl;
-    g2t_fgt_hit->Print(0,10);
+    iRes = g2t_fgt(g2t_track,g2t_fgt_hit); if (Debug() > 1) g2t_fgt_hit->Print(0,10);
+    //	     ===============================
   }
 
   geant3->Gfnhit("TPCH","TPAD", nhits);
