@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.72 2005/03/01 23:02:11 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.73 2005/06/30 09:21:48 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.73  2005/06/30 09:21:48  jcs
+// extend histogram limits to make gasGain determination easier
+//
 // Revision 1.72  2005/03/01 23:02:11  jcs
 // Correct error: TWOCYCLETRACKING should be standard, not LASERTRACKING
 //
@@ -429,11 +432,11 @@ Int_t StFtpcTrackMaker::Init()
 			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
 
-     m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 50, 0.5, 50.5);
-     m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 50, 0.5, 50.5);
+     m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 150, 0.5, 150.5);
+     m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 150, 0.5, 150.5);
 
-     m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 50, 0.5, 500.5);
-     m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 50, 0.5, 500.5);
+     m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 80, 0.5, 800.5);
+     m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 80, 0.5, 800.5);
  
      m_xres   = new TH1F("fpt_x_res",   "FTPC x residuals",   100, -0.25, 0.25);
      m_yres   = new TH1F("fpt_y_res",   "FTPC y residuals",   100, -0.25, 0.25);
@@ -859,7 +862,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.72 2005/03/01 23:02:11 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.73 2005/06/30 09:21:48 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
