@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.65 2004/12/10 23:07:46 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.66 2005/06/30 09:19:06 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.66  2005/06/30 09:19:06  jcs
+// remove commented out values which were moved to Geometry_ftpc/ftpcClusterGeom a long time ago
+//
 // Revision 1.65  2004/12/10 23:07:46  jcs
 // Only fill FTPC software monitor if it exists
 //
@@ -923,8 +926,6 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 
   bool PeakFound;
 
-  //const int DeltaTime=2;
-  //const int DeltaPad=2;
 
 #ifdef DEBUG
   printf("starting hitfinder\n");
