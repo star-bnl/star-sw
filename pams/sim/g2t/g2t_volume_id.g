@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.52 2005/04/15 14:50:46 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.53 2005/07/01 15:10:01 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.53  2005/07/01 15:10:01  potekhin
+* Adding the GEM barrel tracker
+*
 * Revision 1.52  2005/04/15 14:50:46  potekhin
 * Volume enumeration added for FGT (GEM) detector
 *
@@ -589,6 +592,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 *20*                                 Kai Schweda
       else If (Csys=='fgt') then
+        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+
+*21*                                 Gerrit van Nieuwenhuizen
+      else If (Csys=='igt') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
       else
