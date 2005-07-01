@@ -18,20 +18,27 @@
 Int_t AggregateVtxSeed(char* dir=0);
 
 Int_t AggregateVtxSeed(char* dir) {
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
-  gSystem->Load("StUtilities");
-  gSystem->Load("StDbLib");
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  loadSharedLibraries();
+
+  gSystem->Load("StDbBroker.so");
+  gSystem->Load("St_db_Maker");
+  gSystem->Load("StDetectorDbMaker");
+  gSystem->Load("StTpcDb");
+  gSystem->Load("StDbUtilities");
   gSystem->Load("StPass0CalibMaker");
 
   StVertexSeedMaker vtxSeedMk;
+  //vtxSeedMk.UseFillDateTimeFromFile();
   Int_t nfiles = vtxSeedMk.Aggregate(dir);
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.2 2003/02/11 21:43:15 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.3 2005/07/01 23:57:40 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.3  2005/07/01 23:57:40  genevb
+// Allow use of StEvent/MuDst in finding vertex seed
+//
 // Revision 1.2  2003/02/11 21:43:15  genevb
 // added needed library
 //
