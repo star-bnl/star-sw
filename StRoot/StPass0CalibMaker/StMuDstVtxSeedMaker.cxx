@@ -72,21 +72,23 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   mult = (float)(summ.numberOfGoodPrimaryTracks());
 */
   mult = (float) (mudst->primaryTracks()->GetEntries());
-  printf("HHHH %f %d\n",mult,(int) (mudst->globalTracks()->GetEntries()));
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.2 2005/07/01 21:46:01 genevb Exp $\n");
+  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.3 2005/07/01 21:46:59 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.2 2005/07/01 21:46:01 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.3 2005/07/01 21:46:59 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.3  2005/07/01 21:46:59  genevb
+// Remove extraneous print statement
+//
 // Revision 1.2  2005/07/01 21:46:01  genevb
 // Specify output directory
 //
