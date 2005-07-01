@@ -72,20 +72,24 @@ Int_t StMuDstVtxSeedMaker::GetEventData() {
   mult = (float)(summ.numberOfGoodPrimaryTracks());
 */
   mult = (float) (mudst->primaryTracks()->GetEntries());
+  printf("HHHH %f %d\n",mult,(int) (mudst->globalTracks()->GetEntries()));
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.1 2005/06/14 18:52:20 genevb Exp $\n");
+  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.2 2005/07/01 21:46:01 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.1 2005/06/14 18:52:20 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.2 2005/07/01 21:46:01 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.2  2005/07/01 21:46:01  genevb
+// Specify output directory
+//
 // Revision 1.1  2005/06/14 18:52:20  genevb
 // Introduction of code to use MuDst for beamline constraint
 //

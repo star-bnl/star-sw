@@ -33,8 +33,6 @@
 #include "TArrayF.h"
 #include "StTree.h"
 
-const char* defDir = "./StarDb/Calibrations/rhic";
-
 //_____________________________________________________________________________
 // C variables and functions for fit/minimization
 //_____________________________________________________________________________
@@ -89,11 +87,13 @@ void addVert(float x, float y, float z, float m) {
 
 ClassImp(StVertexSeedMaker)
 //_____________________________________________________________________________
-StVertexSeedMaker::StVertexSeedMaker(const char *name):StMaker(name){
+StVertexSeedMaker::StVertexSeedMaker(const char *name,
+    const char* defaultDir):StMaker(name){
   xdist = new TH1F("xdist","xdist",1000,HIST_MIN,HIST_MAX);
   ydist = new TH1F("ydist","ydist",1000,HIST_MIN,HIST_MAX);
   xerr  = new TH1F("xerr","x measured - x guess",1000,HIST_MIN,HIST_MAX);
   yerr  = new TH1F("yerr","y measured - y guess",1000,HIST_MIN,HIST_MAX);
+  defDir = defaultDir;
   resNtuple = 0;
   nsize = 0;
   setArraySize(512);
@@ -338,7 +338,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.22 2005/06/14 18:51:31 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.23 2005/07/01 21:46:01 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -346,7 +346,8 @@ void StVertexSeedMaker::PrintInfo() {
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteTableToFile(){
   char filename[80]; 
-  sprintf(filename,"%s/vertexSeed.%08d.%06d.C",defDir,date,time);
+  if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
+  sprintf(filename,"%svertexSeed.%08d.%06d.C",defDir.Data(),date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new table to:\n  "
     << filename << endm;
   TString dirname = gSystem->DirName(filename);
@@ -388,7 +389,8 @@ void StVertexSeedMaker::WriteHistFile(){
   }
   char filename[80]; 
   // .ROOT is NOT a typo !!!
-  sprintf(filename,"%s/vertexseedhist.%08d.%06d.ROOT",defDir,date,time);
+  if (defDir.Length()>0 && !defDir.EndsWith("/")) defDir.Append("/");
+  sprintf(filename,"%svertexseedhist.%08d.%06d.ROOT",defDir.Data(),date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new histograms to:\n  "
     << filename << endm;
   TString dirname = gSystem->DirName(filename);
@@ -628,8 +630,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.22 2005/06/14 18:51:31 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.23 2005/07/01 21:46:01 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.23  2005/07/01 21:46:01  genevb
+// Specify output directory
+//
 // Revision 1.22  2005/06/14 18:51:31  genevb
 // Updates to allow for pp2005 triggers, and inheritance
 //

@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.5 2005/06/14 18:51:31 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.6 2005/07/01 21:46:01 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -16,13 +16,15 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "TString.h"
 class TNtuple;
 class St_vertexSeed;
 
 
 class StVertexSeedMaker : public StMaker {
  public: 
-                  StVertexSeedMaker(const char *name="VtxSeedMkr");
+                  StVertexSeedMaker(const char *name="VtxSeedMkr",
+                    const char* defaultDir="./StarDb/Calibrations/rhic/");
    virtual       ~StVertexSeedMaker();
    virtual Int_t Init();
    virtual Int_t Make();
@@ -47,8 +49,9 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexZmax(float zmax);  //Set max z vertex for seed calculation
    virtual void SetVertexZmin(float zmin);  //Set min z vertex for seed calculation
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
+   virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.5 2005/06/14 18:51:31 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.6 2005/07/01 21:46:01 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -95,6 +98,7 @@ class StVertexSeedMaker : public StMaker {
   double ea[4]; // database errs
   double chi;
   double weight;
+  TString defDir;
 
   ClassDef(StVertexSeedMaker,0)
 };
@@ -114,8 +118,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.5 2005/06/14 18:51:31 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.6 2005/07/01 21:46:01 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.6  2005/07/01 21:46:01  genevb
+// Specify output directory
+//
 // Revision 1.5  2005/06/14 18:51:31  genevb
 // Updates to allow for pp2005 triggers, and inheritance
 //
