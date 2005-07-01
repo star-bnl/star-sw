@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.8 2004/10/12 13:52:46 kisiel Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.9 2005/07/01 00:23:15 chajecki Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -169,8 +169,9 @@ StHbtEvent* StHbtMuDstReader::ReturnHbtEvent(){
   }
   if (mEventCut){
     if (!(mEventCut->Pass(mHbtEvent))){
-      mHbtEvent = 0;
-      return 0;
+	delete mHbtEvent;
+	mHbtEvent = 0;
+	return 0;
     }
   }
   return mHbtEvent;
@@ -683,6 +684,11 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
+ * Revision 1.9  2005/07/01 00:23:15  chajecki
+ * fix of potential memory leak in ReturnHbtEvent method
+ * added 'delete mHbtEvent' if this  method returns 0
+ * (can happend if an even didn't pass an event cut)
+ *
  * Revision 1.8  2004/10/12 13:52:46  kisiel
  * Properly hadle mReaderStatus to make frontLoadedEventCut work
  *
