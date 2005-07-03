@@ -90,7 +90,7 @@ protected:
   Float_t mErrDedxBachelor;
   UShort_t mNumDedxBachelor;
 
-  ClassDef(StXiMuDst,6)
+  ClassDef(StXiMuDst,7)
 };
 
 inline StXiMuDst::StXiMuDst(StXiVertex* x1,StV0Vertex* v1,StStrangeEvMuDst* e1):
@@ -138,8 +138,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.8 2005/03/17 05:02:20 genevb Exp $
+ * $Id: StXiMuDst.hh,v 3.9 2005/07/03 19:04:34 perev Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.9  2005/07/03 19:04:34  perev
+ * Change class version to avoid ROOT bug in old version 4.00.04
+ *
  * Revision 3.8  2005/03/17 05:02:20  genevb
  * Add StMuMomentumShiftMaker friend
  *
