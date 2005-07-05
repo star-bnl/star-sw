@@ -75,6 +75,7 @@ Int_t StEmcADCtoEMaker::Make()
   TStopwatch clock;
   clock.Start();
   gMessMgr->Info() <<"StEmcADCtoEMaker::Make()******************************************************************"<<endm;  
+  mTestedCorruption = kFALSE;
   if(!prepareEnvironment()) gMessMgr->Warning()<<"Could not prepare the proper environment"<<endm;    
   if(!makeBemc()) gMessMgr->Warning()<<"Could not make BEMC detector"<<endm;
   fillHistograms();
@@ -219,4 +220,83 @@ StEmcCollection*  StEmcADCtoEMaker::getEmcCollection()
 { 
   if(mEvent) return mEvent->emcCollection(); 
   return 0;
+} 
+Bool_t  StEmcADCtoEMaker::isCorrupted()  
+{ 
+  if(!mTestedCorruption) testCorruption();
+  return mIsCorrupted;
+} 
+void  StEmcADCtoEMaker::testCorruption()  
+{ 
+  mIsCorrupted = kFALSE;
+  mTestedCorruption = kTRUE;
+  
+  StEmcCollection *emc = mEvent->emcCollection();
+  if(!emc) return;
+  
+  StEmcDetector* det = emc->detector(kBarrelEmcTowerId);
+  if(!det) { mIsCorrupted = kTRUE; return;}
+  
+  Bool_t flagsAreOk = kFALSE;
+  
+  //-------------------------- Check for P04k and later productions (this is easy) ----
+  for(int crate = 1; crate<=MAXCRATES; crate++) 
+  {
+	  StEmcCrateStatus crateStatus = det->crateStatus(crate);
+	  if (crateStatus==crateHeaderCorrupt) mIsCorrupted = kTRUE;
+    if (crateStatus==crateHeaderCorrupt || crateStatus==crateOK) flagsAreOk = kTRUE;
+  }
+  if(flagsAreOk) return;
+
+  //-------------------------- Check for pre P04k productions (this is not so easy) ---
+    
+  // If corrupt header is detected for a crate, then hits for all
+  // modules hooked up to this crate are set to zero.
+  // Then, StEmcAdcToEMaker doesn't save hits with ADC<=0 to StEvent
+  // nModulesWithNoHits together with nModulesOff (if one is not
+  // equal another) can be used for ghost pedestal removal.
+
+  /*   turns out that we don't yet have status tables for pp data, so we need to take a different
+       tack.  Thorsten writes:
+
+       But normaly a large number of crates is corrupted (in FY04 Au+Au express
+       data I've seen never less than 4, also this is just based on a very
+       limited statistics, I just had a look at some log files...). So given
+       the 15 working crates in FY04 you could set a cut at 12, which leaves
+       enough room for failing crates and will still detect corruption.
+
+  */
+  StBemcTables* tables = this->getBemcData()->getTables();
+  StEmcGeom* geom = StEmcGeom::instance("bemc");
+    
+  Int_t nModulesWithNoHits = 0;
+  Int_t nModulesOff = 0;
+    
+  for(UInt_t imod = 1; imod <= det->numberOfModules(); ++imod) 
+  { 	
+	  StEmcModule* module = det->module(imod);
+    Int_t NADCZero = 0;
+    StSPtrVecEmcRawHit& hits = module->hits();
+    for(UInt_t i = 0;i<hits.size();i++) if(hits[i]->adc()==0) NADCZero++;
+	  if(NADCZero >=20) 
+    {
+      nModulesWithNoHits += 1;	    
+	    // now find out whether this module is off in status tables
+	    Int_t nTowersNoGood = 0;
+	    for(Int_t eta = 1; eta<=20; eta++) 
+      {
+		    for(Int_t sub = 1; sub<=2; sub++) 
+        {
+		      Int_t tower_id;
+		      geom->getId(imod, eta, sub, tower_id);
+		      Int_t status;
+		      tables->getStatus(BTOW, tower_id, status);
+		      if(status!=1)  nTowersNoGood += 1; // 0 is off, 1 is good, >1 is bad
+		    }
+	    }    
+	    if(nTowersNoGood>=20)  nModulesOff += 1;
+	  }
+  }
+  if(nModulesWithNoHits != nModulesOff) mIsCorrupted = kTRUE;  
+  return;
 } 

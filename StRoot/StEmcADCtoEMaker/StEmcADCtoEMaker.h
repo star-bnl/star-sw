@@ -35,10 +35,13 @@ class StEmcADCtoEMaker : public StMaker
    
    Bool_t                   mMyStEvent;
    Bool_t                   mEmbed;
+   Bool_t                   mIsCorrupted;
+   Bool_t                   mTestedCorruption;
                       
   virtual Bool_t            prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
   virtual Bool_t            makeBemc(); ///< Make the Barrel-EMC detector
   virtual void              fillHistograms();///<Fill QA histograms*
+  virtual void              testCorruption();///<Test BTOW for corruption
 
  public:                  
                             StEmcADCtoEMaker(const char *name="Eread"); ///< StEmcADCtoEMaker constructor
@@ -52,6 +55,7 @@ class StEmcADCtoEMaker : public StMaker
   controlADCtoE_st*         getControlTable()   { return mBemcData->getControlTable();} ///< Return Control table (NULL)
   StEmcCollection*          getEmcCollection();  ///< Return emcCollection
   void                      clearStEventStaf()  { /*NOP*/}
+  Bool_t                    isCorrupted(); ///< Returns if BTOW is corrupted or not
   
   void                      setPrint(Bool_t);  ///< Set it to kFALSE if youdo not want to print messages
   void                      setEmbeddingMode(Bool_t a) {mEmbed = a; } ///< Set embedding mode (default is kFALSE)
@@ -59,7 +63,7 @@ class StEmcADCtoEMaker : public StMaker
   
   void                      printMap(Int_t,char*); ///< print map for an EMC detector
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.47 2004/10/21 16:10:47 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.48 2005/07/05 19:05:16 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 3)  
 };
