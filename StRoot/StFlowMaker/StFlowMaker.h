@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.45 2005/02/10 17:39:42 posk Exp $
+//  $Id: StFlowMaker.h,v 1.46 2005/07/06 19:39:26 fisyak Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -36,8 +36,8 @@ class StFileI;
 class TChain;
 class StHbtEvent; // Randy added these 2
 class StHbtTrack;
-class StThreeVectorF;
-class StPhysicalHelixD;
+#include "StThreeVectorF.hh"
+#include "StPhysicalHelixD.hh"
 class TClonesArray;
 
 class StFlowMaker : public StMaker {
@@ -67,7 +67,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.45 2005/02/10 17:39:42 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.46 2005/07/06 19:39:26 fisyak Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -179,6 +179,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.46  2005/07/06 19:39:26  fisyak
+//  use templated version of StThreeVectorF and StPhysicalHelixD
+//
 //  Revision 1.45  2005/02/10 17:39:42  posk
 //  Now also works with the Grid Collector.
 //

@@ -1,0 +1,4 @@
+# $Id $
+# package StFtpcTrackMaker
+# author: 
+Library:libStFtpcTrackMaker.so:LIBS +=   -lftpc_Tables  -lglobal_Tables  -lsim_Tables  -lStChain  -lStDb_Tables  -lStDbUtilities  -lStEvent  -lStTpcDb  -lPhysics

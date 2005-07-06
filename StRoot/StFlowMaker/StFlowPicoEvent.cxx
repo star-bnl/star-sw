@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.14 2004/08/24 20:24:36 oldi Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.15 2005/07/06 19:39:26 fisyak Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -23,6 +23,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <Stiostream.h>
+#include <math.h>
 #include "StFlowPicoEvent.h"
 #include "StFlowConstants.h"
 #include "TClonesArray.h"
@@ -97,6 +98,9 @@ UInt_t StFlowPicoEvent::CalcCentrality() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.15  2005/07/06 19:39:26  fisyak
+// use templated version of StThreeVectorF and StPhysicalHelixD
+//
 // Revision 1.14  2004/08/24 20:24:36  oldi
 // Minor modifications to avoid compiler warnings.
 // Small bug fix (didn't affect anyone yet).
