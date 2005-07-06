@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.9 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StTrackGeometry.h,v 2.10 2005/07/06 19:00:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.10  2005/07/06 19:00:52  fisyak
+ * Add include of StThreeVectorD.hh
+ *
  * Revision 2.9  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -48,9 +51,8 @@
 #include "StObject.h"
 #include "StEnumerations.h"
 #include "StPhysicalHelixD.hh"
-
+#include "StThreeVectorF.hh"
 class dst_track_st;
-class StThreeVectorF;
 
 class StTrackGeometry : public StObject {
 public:

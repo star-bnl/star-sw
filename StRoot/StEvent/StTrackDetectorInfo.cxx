@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.14 2004/10/20 18:55:13 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.15 2005/07/06 19:00:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.15  2005/07/06 19:00:52  fisyak
+ * Add include of StThreeVectorD.hh
+ *
  * Revision 2.14  2004/10/20 18:55:13  ullrich
  * Name of enum changed: StStarMaxR(Z) now StStarMaxTrackRangeR(Z).
  *
@@ -59,10 +62,10 @@
 #include "StFunctional.h"
 #include "StHit.h"
 #include "tables/St_dst_track_Table.h"
-
+#include "StThreeVectorD.hh"
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.14 2004/10/20 18:55:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.15 2005/07/06 19:00:52 fisyak Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
