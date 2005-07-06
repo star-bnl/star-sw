@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.18 2004/06/02 15:02:45 cmironov Exp $
+// $Id: StKinkMaker.h,v 1.19 2005/07/06 22:29:07 fisyak Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.19  2005/07/06 22:29:07  fisyak
+// Use templated StPhysicalHelixD
+//
 // Revision 1.18  2004/06/02 15:02:45  cmironov
 // Naming clash solved by changing names
 //
@@ -73,7 +76,7 @@ class St_dst_tkf_vertex;
 
 class StOldKinkLocalTrack;
 class StKinkTrkIdCheck;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 
 
 class StOldKinkMaker : public StMaker {
@@ -118,7 +121,7 @@ class StOldKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.18 2004/06/02 15:02:45 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.19 2005/07/06 22:29:07 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StOldKinkMaker,0)  
 };
     
