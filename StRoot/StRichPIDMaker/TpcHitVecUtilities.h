@@ -13,7 +13,7 @@ using std::vector;
 //Forward Declarationis
 class StTrack;
 class StTpcHit;
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 
 class TpcHitVecUtilities {
     
