@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.28 2004/11/08 22:25:38 perev Exp $
+ * $Id: StTrack.cxx,v 2.29 2005/07/06 19:00:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.29  2005/07/06 19:00:52  fisyak
+ * Add include of StThreeVectorD.hh
+ *
  * Revision 2.28  2004/11/08 22:25:38  perev
  * Remove StTrack test for wrong length. TPT only
  *
@@ -110,10 +113,10 @@
 #include "StTrackDetectorInfo.h"
 #include "StTrackPidTraits.h"
 #include "StTrackNode.h"
-
+#include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.28 2004/11/08 22:25:38 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.29 2005/07/06 19:00:52 fisyak Exp $";
 
 StTrack::StTrack()
 {
