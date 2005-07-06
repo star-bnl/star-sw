@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.hh,v 2.2 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcTofHit.hh,v 2.3 2005/07/06 20:05:28 calderon Exp $
  * $Log: StMcTofHit.hh,v $
+ * Revision 2.3  2005/07/06 20:05:28  calderon
+ * Remove forward declaration of StThreeVectorF, use #include, and only in
+ * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
+ * only a typedef, only template version of StThreeVector exists now.
+ *
  * Revision 2.2  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -18,7 +23,6 @@
 #include "StMemoryPool.hh"
 
 class StMcTrack;
-class StThreeVectorF;
 class g2t_ctf_hit_st;
 
 class StMcTofHit : public StMcHit {

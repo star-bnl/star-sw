@@ -1,6 +1,6 @@
 /**********************************************
  *
- * $Id: StMcHitComparisons.hh,v 2.2 2000/06/09 19:52:07 calderon Exp $
+ * $Id: StMcHitComparisons.hh,v 2.3 2005/07/06 20:05:28 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez
  ***********************************************
@@ -10,6 +10,11 @@
  *
  ***********************************************
  * $Log: StMcHitComparisons.hh,v $
+ * Revision 2.3  2005/07/06 20:05:28  calderon
+ * Remove forward declaration of StThreeVectorF, use #include, and only in
+ * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
+ * only a typedef, only template version of StThreeVector exists now.
+ *
  * Revision 2.2  2000/06/09 19:52:07  calderon
  * No longer use 2 different functions for SVT and TPC that do the same thing,
  * just use one function for the base class
@@ -34,7 +39,8 @@ class StMcTpcHit;
 class StMcSvtHit;
 class StMcFtpcHit;
 class StMcRichHit;
-class StThreeVectorF;
+#include "StThreeVector.hh"
+
 #if (defined __SUNPRO_CC && (__SUNPRO_CC < 0x500))
 // bool is defined in utility for SUNPRO_CC 4.2
 #include <utility> 

@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.3 2005/05/12 22:38:30 potekhin Exp $
+ * $Id: StMcIstHit.hh,v 2.4 2005/07/06 20:05:28 calderon Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.4  2005/07/06 20:05:28  calderon
+ * Remove forward declaration of StThreeVectorF, use #include, and only in
+ * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
+ * only a typedef, only template version of StThreeVector exists now.
+ *
  * Revision 2.3  2005/05/12 22:38:30  potekhin
  * Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
  * and side() to return ladder side (1=inner,2=outer)
@@ -26,7 +31,6 @@
 #include "StMemoryPool.hh"
 
 class StMcTrack;
-class StThreeVectorF;
 class g2t_ist_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)
