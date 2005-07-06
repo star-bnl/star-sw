@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.hh,v 1.2 2004/03/17 01:49:56 dongx Exp $ tofPathLength.cc,v 1.2 2003/07/11 05:08:49 geurts Exp $
+ * $Id: tofPathLength.hh,v 1.3 2005/07/06 19:20:01 fisyak Exp $ tofPathLength.cc,v 1.2 2003/07/11 05:08:49 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.hh,v $
+ * Revision 1.3  2005/07/06 19:20:01  fisyak
+ * StThreeVectorD == StThreeVector<double>
+ *
  * Revision 1.2  2004/03/17 01:49:56  dongx
  * add tofPathLength(StThreeVectorD*, StThreeVectorF*, double)
  *
@@ -22,11 +25,11 @@
 #ifndef TOFPATHLENGTH_HH
 #define TOFPATHLENGTH_HH
 #include "StThreeVector.hh"
-class StThreeVectorD;
-class StThreeVectorF;
+#include "StThreeVectorD.hh"
+#include "StThreeVectorF.hh"
 
 double tofPathLength(const StThreeVector<double>*, const StThreeVector<double>*, const double);
-double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
+//double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
 double tofPathLength(const StThreeVectorD*, const StThreeVectorF*, const double);
 double tofPathLength(const StThreeVectorF*, const StThreeVectorD*, const double);
 double tofPathLength(const StThreeVectorF*, const StThreeVectorF*, const double);
