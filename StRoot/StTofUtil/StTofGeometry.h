@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.6 2004/06/10 15:53:50 dongx Exp $
+ * $Id: StTofGeometry.h,v 1.7 2005/07/06 19:25:55 fisyak Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.7  2005/07/06 19:25:55  fisyak
+ * Use templated StThreeVector and StPhysicalHelix
+ *
  * Revision 1.6  2004/06/10 15:53:50  dongx
  * -head file "StHelixD.hh" included
  * -simplify the macro definition
@@ -47,9 +50,8 @@ using std::vector;
 #endif
 
 class StMaker;
-class StThreeVectorD;
-class StPhysicalHelixD;
-
+#include "StThreeVectorD.hh"
+#include "StPhysicalHelixD.hh"
 
 struct StructTofSlatEta{
   int ieta;
@@ -87,7 +89,7 @@ struct StructTofParam {
 typedef vector<Int_t> idVector;  
 typedef idVector::iterator idVectorIter;
 #else
-typedef vector<Int_t,allocator<Int_t>> idVector; 
+typedef vector<Int_t,allocator<Int_t> > idVector; 
 typedef idVector::iterator idVectorIter;
 #endif
 
@@ -100,7 +102,7 @@ struct StructSlatHit {
   Float_t           s;
   Float_t           theta_xy;
   Float_t           theta_zr;
-  vector<StThreeVectorD> layerHitPositions;
+  vector<StThreeVector<double> > layerHitPositions;
   Int_t             matchFlag;
 };
 
@@ -111,14 +113,13 @@ typedef vector<StructTofSlatEta> tofSlatEtaVector;
 typedef vector<StructTofSlatPhi> tofSlatPhiVector;  
 typedef vector<StructSlatHit> tofSlatHitVector; 
 #else
-typedef vector<tofSlatGeom_st,allocator<tofSlatGeom_st>> slatGeomVector;
-typedef vector<StructTofSlatEta,allocator<StructTofSlatEta>> tofSlatEtaVector; 
-typedef vector<StructTofSlatPhi,allocator<StructTofSlatPhi>> tofSlatPhiVector; 
-typedef vector<SructSlatHit,allocator<StructSlatHit>> tofSlatHitVector;
+typedef vector<tofSlatGeom_st,allocator<tofSlatGeom_st> > slatGeomVector;
+typedef vector<StructTofSlatEta,allocator<StructTofSlatEta> > tofSlatEtaVector; 
+typedef vector<StructTofSlatPhi,allocator<StructTofSlatPhi> > tofSlatPhiVector; 
+typedef vector<SructSlatHit,allocator<StructSlatHit> > tofSlatHitVector;
 #endif   
 typedef slatGeomVector::iterator slatGeomIter;
 typedef vector<StructSlatHit>::iterator tofSlatHitVectorIter; 
-
 
 
 class StTofGeometry{
@@ -132,7 +133,6 @@ class StTofGeometry{
   unsigned short mTofSlatMap[42];    //! slatId-to-daq map (derived from mTofDaqMap)
 
   int calcSlatId(const int iphi, const int ieta) const;
-
  public:
   StTofGeometry();
   ~StTofGeometry();
@@ -180,7 +180,6 @@ class StTofGeometry{
 
 };
 
-
 inline StructTofParam StTofGeometry::tofParam()
      const {return mTofParam;}
 inline unsigned short StTofGeometry::daqToSlatId(const int daqId)
@@ -191,5 +190,4 @@ inline void StTofGeometry::SetDebug(){mDebug = true;}
 inline bool StTofGeometry::Debug(){return mDebug;}
 
 const unsigned int StTofGeometry::mMaxSlatLayers(5);
-
 #endif
