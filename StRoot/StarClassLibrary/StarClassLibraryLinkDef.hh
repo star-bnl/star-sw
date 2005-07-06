@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.7 2003/05/22 21:01:02 perev Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.8 2005/07/06 18:49:57 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
+ * Revision 1.8  2005/07/06 18:49:57  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.7  2003/05/22 21:01:02  perev
  * Remove redundant dependency
  *
@@ -57,116 +60,131 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-#pragma link C++ class StThreeVectorF-;
-// #pragma link C++ function operator<<(ostream&, const StThreeVectorF&);                  
-// #pragma link C++ function operator>>(istream&, StThreeVectorF&);                        
-#pragma link C++ function abs(const StThreeVectorF&);                                      
-#pragma link C++ function cross_product(const StThreeVectorF&, const StThreeVectorF&); 
-#pragma link C++ function cross_product(const StThreeVectorF&, const StThreeVectorD&); 
-#pragma link C++ function operator+ (const StThreeVectorF&, const StThreeVectorF&);    
-#pragma link C++ function operator+ (const StThreeVectorF&, const StThreeVectorD&);    
-#pragma link C++ function operator- (const StThreeVectorF&, const StThreeVectorF&);    
-#pragma link C++ function operator- (const StThreeVectorF&, const StThreeVectorD&);    
-#pragma link C++ function operator* (const StThreeVectorF&, const StThreeVectorF&);    
-#pragma link C++ function operator* (const StThreeVectorF&, const StThreeVectorD&);    
-#pragma link C++ function operator* (const StThreeVectorF&, double);                     
-#pragma link C++ function operator* (double, const StThreeVectorF&);                     
-#pragma link C++ function operator/ (const StThreeVectorF&, double);                     
-
-#pragma link C++ class StThreeVectorD-;
-#pragma link C++ function operator<<(ostream&, const StThreeVectorD&);                     
-#pragma link C++ function operator>>(istream&, StThreeVectorD&);                           
-#pragma link C++ function abs(const StThreeVectorD&);                                         
-#pragma link C++ function cross_product(const StThreeVectorD&, const StThreeVectorD&);    
-#pragma link C++ function cross_product(const StThreeVectorD&, const StThreeVectorF&);    
-#pragma link C++ function operator+ (const StThreeVectorD&, const StThreeVectorD&);       
-#pragma link C++ function operator+ (const StThreeVectorD&, const StThreeVectorF&);       
-#pragma link C++ function operator- (const StThreeVectorD&, const StThreeVectorF&);       
-#pragma link C++ function operator- (const StThreeVectorD&, const StThreeVectorD&);       
-#pragma link C++ function operator* (const StThreeVectorD&, const StThreeVectorF&);       
-#pragma link C++ function operator* (const StThreeVectorD&, const StThreeVectorD&);       
-#pragma link C++ function operator* (const StThreeVectorD&, double);                        
-#pragma link C++ function operator* (double, const StThreeVectorD&);                        
-#pragma link C++ function operator/ (const StThreeVectorD&, double);                        
-
-#pragma link C++ class StLorentzVectorF-;
-#pragma link C++ function operator<< (ostream&, const StLorentzVectorF&);                 
-#pragma link C++ function operator+ (const StLorentzVectorF&, const StLorentzVectorF&);        
-#pragma link C++ function operator- (const StLorentzVectorF&, const StLorentzVectorF&);        
-#pragma link C++ function operator* (const StLorentzVectorF&, const StLorentzVectorF&);        
-#pragma link C++ function operator* (const StLorentzVectorF&, double);                       
-#pragma link C++ function operator* (double, const StLorentzVectorF&);                         
-#pragma link C++ function operator/ (const StLorentzVectorF&, double);                         
-#pragma link C++ function abs(const StLorentzVectorF&);
-
-#pragma link C++ class StLorentzVectorD-;
-#pragma link C++ function operator+ (const StLorentzVectorD&, const StLorentzVectorF&);  
-#pragma link C++ function operator+ (const StLorentzVectorF&, const StLorentzVectorD&);        
-#pragma link C++ function operator+ (const StLorentzVectorD&, const StLorentzVectorD&);        
-#pragma link C++ function operator- (const StLorentzVectorD&, const StLorentzVectorF&);  
-#pragma link C++ function operator- (const StLorentzVectorF&, const StLorentzVectorD&);        
-#pragma link C++ function operator- (const StLorentzVectorD&, const StLorentzVectorD&);  
-#pragma link C++ function operator<< (ostream&, const StLorentzVectorD&);                 
-#pragma link C++ function operator* (const StLorentzVectorD&, const StLorentzVectorF&);  
-#pragma link C++ function operator* (const StLorentzVectorF&, const StLorentzVectorD&);        
-#pragma link C++ function operator* (const StLorentzVectorD&, const StLorentzVectorD&);            
-#pragma link C++ function operator* (const StLorentzVectorD&, double);                     
-#pragma link C++ function operator* (double, const StLorentzVectorD&);                     
-#pragma link C++ function operator/ (const StLorentzVectorD&, double);                     
-#pragma link C++ function abs(const StLorentzVectorD&);
-
-#pragma link C++ class StMatrixF-;
-// #pragma link C++ class StMatrixRowF;
-// #pragma link C++ class StMatrixRowConstF;
-// #pragma link C++ function recovErr(const StMatrixF&);
-#pragma link C++ function operator*(const StMatrixF&,const StMatrixF&);            
-#pragma link C++ function operator*(const StMatrixF&, const StThreeVectorF&);      
-#pragma link C++ function operator*(const StMatrixF&, const StThreeVectorD&);      
-#pragma link C++ function operator*(const StThreeVectorF&, const StMatrixF&);      
-#pragma link C++ function operator*(const StThreeVectorD&, const StMatrixF&);      
-#pragma link C++ function operator*(const StMatrixF&, const StLorentzVectorF&);    
-#pragma link C++ function operator*(const StMatrixF&, const StLorentzVectorD&);    
-#pragma link C++ function operator*(const StLorentzVectorF&, const StMatrixF&);    
-#pragma link C++ function operator*(const StLorentzVectorD&, const StMatrixF&);    
-#pragma link C++ function operator+(const StMatrixF&,const StMatrixF&);            
-#pragma link C++ function operator-(const StMatrixF&,const StMatrixF&);            
-#pragma link C++ function operator<<(ostream&, const StMatrixF&);                    
-#pragma link C++ function norm_infinity(const StMatrixF&);                            
-#pragma link C++ function normInfinity(const StMatrixF&);                             
-#pragma link C++ function norm1(const StMatrixF&);                                    
-
-#pragma link C++ class StMatrixD-;
-// #pragma link C++ class StMatrixRowD;
-// #pragma link C++ class StMatrixRowConstD;
-#pragma link C++ function operator*(const StMatrixD&,const StMatrixD&);             
-#pragma link C++ function operator*(const StMatrixD&,const StMatrixF&);             
-#pragma link C++ function operator*(const StMatrixF&,const StMatrixD&);             
-#pragma link C++ function operator*(const StMatrixD&, const StThreeVectorF&);       
-#pragma link C++ function operator*(const StMatrixD&, const StThreeVectorD&);       
-#pragma link C++ function operator*(const StThreeVectorF&, const StMatrixD&);       
-#pragma link C++ function operator*(const StThreeVectorD&, const StMatrixD&);       
-#pragma link C++ function operator*(const StMatrixD&, const StLorentzVectorF&);     
-#pragma link C++ function operator*(const StMatrixD&, const StLorentzVectorD&);     
-#pragma link C++ function operator*(const StLorentzVectorF&, const StMatrixD&);     
-#pragma link C++ function operator*(const StLorentzVectorD&, const StMatrixD&);     
-#pragma link C++ function operator+(const StMatrixD&,const StMatrixD&);             
-#pragma link C++ function operator+(const StMatrixF&,const StMatrixD&);             
-#pragma link C++ function operator+(const StMatrixD&,const StMatrixF&);             
-#pragma link C++ function operator-(const StMatrixD&,const StMatrixD&);             
-#pragma link C++ function operator-(const StMatrixF&,const StMatrixD&);             
-#pragma link C++ function operator-(const StMatrixD&,const StMatrixF&);             
-#pragma link C++ function operator<<(ostream&, const StMatrixD&);                     
-#pragma link C++ function norm_infinity(const StMatrixD&);                             
-#pragma link C++ function normInfinity(const StMatrixD&);                              
-#pragma link C++ function norm1(const StMatrixD&);                                     
-
-#pragma link C++ class StHelixD;
-#pragma link C++ class pairD;
-#pragma link C++ function operator== (const StHelixD&, const StHelixD&);                         
-#pragma link C++ function operator!= (const StHelixD&, const StHelixD&);                         
-#pragma link C++ function operator<<(ostream&, const StHelixD&);                         
-
-#pragma link C++ class StPhysicalHelixD;
 #pragma link C++ class BetheBloch;
 
+#pragma link C++ class StThreeVector<float>-;
+#pragma link C++ class StThreeVector<double>-;
+#pragma link C++ class StLorentzVector<float>-;
+#pragma link C++ class StLorentzVector<double>-;
+#pragma link C++ class StMatrix<float>-;
+#pragma link C++ class StMatrix<double>-;
+#pragma link C++ class StHelix+;
+#pragma link C++ class StPhysicalHelix+;
+
+#pragma link C++ function abs(const StThreeVector&);                                      
+#pragma link C++ function cross_product(const StThreeVector<float>&, const StThreeVector<float>&); 
+#pragma link C++ function cross_product(const StThreeVector<float>&, const StThreeVector<double>&); 
+#pragma link C++ function operator+ (const StThreeVector<float>&, const StThreeVector<float>&);    
+#pragma link C++ function operator+ (const StThreeVector<float>&, const StThreeVector<double>&);    
+#pragma link C++ function operator- (const StThreeVector<float>&, const StThreeVector<float>&);    
+#pragma link C++ function operator- (const StThreeVector<float>&, const StThreeVector<double>&);    
+#pragma link C++ function operator* (const StThreeVector<float>&, const StThreeVector<float>&);    
+#pragma link C++ function operator* (const StThreeVector<float>&, const StThreeVector<double>&);    
+#pragma link C++ function operator* (const StThreeVector<float>&, double);                     
+#pragma link C++ function operator* (double, const StThreeVector<float>&);                     
+#pragma link C++ function operator/ (const StThreeVector<float>&, double);                     
+
+#pragma link C++ function operator<<(ostream&, const StThreeVector<double>&);                     
+#pragma link C++ function operator>>(istream&, StThreeVector<double>&);                           
+#pragma link C++ function abs(const StThreeVector<double>&);                                         
+#pragma link C++ function cross_product(const StThreeVector<double>&, const StThreeVector<double>&);    
+#pragma link C++ function cross_product(const StThreeVector<double>&, const StThreeVector<float>&);    
+#pragma link C++ function operator+ (const StThreeVector<double>&, const StThreeVector<double>&);       
+#pragma link C++ function operator+ (const StThreeVector<double>&, const StThreeVector<float>&);       
+#pragma link C++ function operator- (const StThreeVector<double>&, const StThreeVector<float>&);       
+#pragma link C++ function operator- (const StThreeVector<double>&, const StThreeVector<double>&);       
+#pragma link C++ function operator* (const StThreeVector<double>&, const StThreeVector<float>&);       
+#pragma link C++ function operator* (const StThreeVector<double>&, const StThreeVector<double>&);       
+#pragma link C++ function operator* (const StThreeVector<double>&, double);                        
+#pragma link C++ function operator* (double, const StThreeVector<double>&);                        
+#pragma link C++ function operator/ (const StThreeVector<double>&, double);                        
+
+#pragma link C++ function operator<< (ostream&, const StLorentzVector<float>&);                 
+#pragma link C++ function operator+ (const StLorentzVector<float>&, const StLorentzVector<float>&);        
+#pragma link C++ function operator- (const StLorentzVector<float>&, const StLorentzVector<float>&);        
+#pragma link C++ function operator* (const StLorentzVector<float>&, const StLorentzVector<float>&);        
+#pragma link C++ function operator* (const StLorentzVector<float>&, double);                       
+#pragma link C++ function operator* (double, const StLorentzVector<float>&);                         
+#pragma link C++ function operator/ (const StLorentzVector<float>&, double);                         
+#pragma link C++ function abs(const StLorentzVector<float>&);
+#pragma link C++ function operator+ (const StLorentzVector<double>&, const StLorentzVector<float>&);  
+#pragma link C++ function operator+ (const StLorentzVector<float>&, const StLorentzVector<double>&);        
+#pragma link C++ function operator+ (const StLorentzVector<double>&, const StLorentzVector<double>&);        
+#pragma link C++ function operator- (const StLorentzVector<double>&, const StLorentzVector<float>&);  
+#pragma link C++ function operator- (const StLorentzVector<float>&, const StLorentzVector<double>&);        
+#pragma link C++ function operator- (const StLorentzVector<double>&, const StLorentzVector<double>&);  
+#pragma link C++ function operator<< (ostream&, const StLorentzVector<double>&);                 
+#pragma link C++ function operator* (const StLorentzVector<double>&, const StLorentzVector<float>&);  
+#pragma link C++ function operator* (const StLorentzVector<float>&, const StLorentzVector<double>&);        
+#pragma link C++ function operator* (const StLorentzVector<double>&, const StLorentzVector<double>&);            
+#pragma link C++ function operator* (const StLorentzVector<double>&, double);                     
+#pragma link C++ function operator* (double, const StLorentzVector<double>&);                     
+#pragma link C++ function operator/ (const StLorentzVector<double>&, double);                     
+#pragma link C++ function abs(const StLorentzVector<double>&);
+
+#pragma link C++ function operator*(const StMatrix<float>&,const StMatrix<float>&);            
+#pragma link C++ function operator*(const StMatrix<float>&, const StThreeVector<float>&);      
+#pragma link C++ function operator*(const StMatrix<float>&, const StThreeVector<double>&);      
+#pragma link C++ function operator*(const StThreeVector<float>&, const StMatrix<float>&);      
+#pragma link C++ function operator*(const StThreeVector<double>&, const StMatrix<float>&);      
+#pragma link C++ function operator*(const StMatrix<float>&, const StLorentzVector<float>&);    
+#pragma link C++ function operator*(const StMatrix<float>&, const StLorentzVector<double>&);    
+#pragma link C++ function operator*(const StLorentzVector<float>&, const StMatrix<float>&);    
+#pragma link C++ function operator*(const StLorentzVector<double>&, const StMatrix<float>&);    
+#pragma link C++ function operator+(const StMatrix<float>&,const StMatrix<float>&);            
+#pragma link C++ function operator-(const StMatrix<float>&,const StMatrix<float>&);            
+#pragma link C++ function operator<<(ostream&, const StMatrix<float>&);                    
+#pragma link C++ function norm_infinity(const StMatrix<float>&);                            
+#pragma link C++ function normInfinity(const StMatrix<float>&);                             
+#pragma link C++ function norm1(const StMatrix<float>&);                                    
+
+#pragma link C++ function operator*(const StMatrix<double>&,const StMatrix<double>&);             
+#pragma link C++ function operator*(const StMatrix<double>&,const StMatrix<float>&);             
+#pragma link C++ function operator*(const StMatrix<float>&,const StMatrix<double>&);             
+#pragma link C++ function operator*(const StMatrix<double>&, const StThreeVector<float>&);       
+#pragma link C++ function operator*(const StMatrix<double>&, const StThreeVector<double>&);       
+#pragma link C++ function operator*(const StThreeVector<float>&, const StMatrix<double>&);       
+#pragma link C++ function operator*(const StThreeVector<double>&, const StMatrix<double>&);       
+#pragma link C++ function operator*(const StMatrix<double>&, const StLorentzVector<float>&);     
+#pragma link C++ function operator*(const StMatrix<double>&, const StLorentzVector<double>&);     
+#pragma link C++ function operator*(const StLorentzVector<float>&, const StMatrix<double>&);     
+#pragma link C++ function operator*(const StLorentzVector<double>&, const StMatrix<double>&);     
+#pragma link C++ function operator+(const StMatrix<double>&,const StMatrix<double>&);             
+#pragma link C++ function operator+(const StMatrix<float>&,const StMatrix<double>&);             
+#pragma link C++ function operator+(const StMatrix<double>&,const StMatrix<float>&);             
+#pragma link C++ function operator-(const StMatrix<double>&,const StMatrix<double>&);             
+#pragma link C++ function operator-(const StMatrix<float>&,const StMatrix<double>&);             
+#pragma link C++ function operator-(const StMatrix<double>&,const StMatrix<float>&);             
+#pragma link C++ function operator<<(ostream&, const StMatrix<double>&);                     
+#pragma link C++ function norm_infinity(const StMatrix<double>&);                             
+#pragma link C++ function normInfinity(const StMatrix<double>&);                              
+#pragma link C++ function norm1(const StMatrix<double>&);                                     
+
+#pragma link C++ function operator== (const StHelix&, const StHelix&);                         
+#pragma link C++ function operator!= (const StHelix&, const StHelix&);                         
+#pragma link C++ function operator<<(ostream&, const StHelix&);                         
+//IncFile=StThreeVector.hh
+//IncFile=StThreeVectorF.hh
+//IncFile=StThreeVectorD.hh
+//IncFile=StLorentzVector.hh
+//IncFile=StLorentzVectorF.hh
+//IncFile=StLorentzVectorD.hh
+//IncFile=StMatrix.hh
+//IncFile=StMatrixF.hh
+//IncFile=StMatrixD.hh
+//IncFile=StHelix.hh
+//IncFile=StHelixD.hh
+//IncFile=StPhysicalHelix.hh
+//IncFile=StPhysicalHelixD.hh
+#pragma link C++ typedef StThreeVectorF;
+#pragma link C++ typedef StThreeVectorD;
+#pragma link C++ typedef StLorentzVectorF;
+#pragma link C++ typedef StLorentzVectorD;
+#pragma link C++ typedef StMatrixF;
+#pragma link C++ typedef StMatrixD;
+#pragma link C++ typedef StHelixD;
+#pragma link C++ typedef StPhysicalHelixD;
+#pragma link C++ typedef pairD;             
+
 #endif
+

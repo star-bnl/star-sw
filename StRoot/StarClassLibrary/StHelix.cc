@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.23 2004/12/02 02:51:16 ullrich Exp $
+ * $Id: StHelix.cc,v 1.24 2005/07/06 18:49:56 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.24  2005/07/06 18:49:56  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.23  2004/12/02 02:51:16  ullrich
  * Added option to pathLenghth() and distance() to search for
  * DCA only within one period. Default stays as it was.
@@ -98,7 +101,9 @@
 #include "StHelix.hh"
 #include "PhysicalConstants.h" 
 #include "SystemOfUnits.h"
-
+#ifdef __ROOT__
+ClassImpT(StHelix,double);
+#endif
 StHelix::StHelix(){ /*noop*/ }
 
 StHelix::StHelix(double c, double d, double phase,
@@ -592,22 +597,6 @@ StHelix::pathLengths(const StHelix& h) const
     }
 }
 
-bool StHelix::valid(double WorldSize) const
-{
-
-    if (!::finite(mDipAngle    )) 	return 0;
-    if (!::finite(mH           )) 	return 0;
-    if (!::finite(mCurvature   )) 	return 0;
-    if (::fabs(mCurvature) > WorldSize)	return 0;
-
-    if (!mOrigin.valid(WorldSize))      return 0;
-    double qwe = ::fabs(::fabs(mDipAngle)-M_PI/2);
-    if (qwe < 1./WorldSize      ) 	return 0; 
-    if (abs(mH) != 1            )       return 0; 
-    if (mCurvature < 0          )	return 0;
-
-    return 1;
-}
 
 void StHelix::moveOrigin(double s)
 {
