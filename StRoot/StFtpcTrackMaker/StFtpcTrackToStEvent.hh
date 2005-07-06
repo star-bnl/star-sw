@@ -1,7 +1,7 @@
 //StFtpcTrackToStEvent.h
 /*******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.hh,v 1.4 2004/10/13 22:26:46 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.hh,v 1.5 2005/07/06 19:40:07 fisyak Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -25,7 +25,7 @@ class StFtpcTrack;
 class StFtpcPoint;
 class StHelix;
 class StHelixModel;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 
 /*! \class StFtpcTrackToStEvent
     StFtpcTrackToStEvent is a utilitity class meant to properly convert StFtpcTrack

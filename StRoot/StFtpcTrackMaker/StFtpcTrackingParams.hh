@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.17 2004/06/04 11:05:26 jcs Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.18 2005/07/06 19:40:07 fisyak Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.18  2005/07/06 19:40:07  fisyak
+// use templated version of StThreeVectorF and StPhysicalHelixD
+//
 // Revision 1.17  2004/06/04 11:05:26  jcs
 // replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
 //
@@ -73,7 +76,7 @@
 
 // SCL
 #include "SystemOfUnits.h"
-#include "StThreeVector.hh"
+#include "StThreeVectorD.hh"
 #include "StMatrixD.hh"
 
 #ifndef ST_NO_NAMESPACES
