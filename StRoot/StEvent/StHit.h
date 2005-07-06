@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.17 2005/01/26 23:04:12 perev Exp $
+ * $Id: StHit.h,v 2.18 2005/07/06 18:57:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.18  2005/07/06 18:57:48  fisyak
+ * Add StHit print out
+ *
  * Revision 2.17  2005/01/26 23:04:12  perev
  * const for Sthit* nextHit()
  *
@@ -121,6 +124,7 @@ public:
     void setQuality(UShort_t quality=0) {mQuality = quality;}
     void SetNextHit(StHit *next = 0) {mNextHit = next;}
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
+    virtual void                  Print(Option_t *option="") const;
     
 protected:
     unsigned int bits(unsigned int, unsigned int) const;
@@ -149,4 +153,5 @@ inline unsigned short  StHit::id()      const {return mId;}
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
 inline const StHit*    StHit:: nextHit() const {return mNextHit;}
 
+ostream&              operator<<(ostream& os, StHit const & v);
 #endif

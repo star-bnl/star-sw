@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.16 2004/10/13 16:10:52 ullrich Exp $
+ * $Id: StHit.cxx,v 2.17 2005/07/06 18:57:48 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.17  2005/07/06 18:57:48  fisyak
+ * Add StHit print out
+ *
  * Revision 2.16  2004/10/13 16:10:52  ullrich
  * Fixed bug in operator==
  *
@@ -70,7 +73,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.16 2004/10/13 16:10:52 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.17 2005/07/06 18:57:48 fisyak Exp $";
 
 ClassImp(StHit)
 
@@ -187,3 +190,20 @@ StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
     return vec;
 }
 
+ostream&  operator<<(ostream& os, const StHit& v)
+{
+  return os << "StHit: charge\t" << v.charge() 
+	    << "\ttrackReferenceCount " << v.trackReferenceCount()
+	    << "\tdetector " << v.detector() 
+	    << "\tposition " << v.position()
+	    << "\tpositionError " << v.positionError()
+	    << "\tcovariantMatrix " << v.covariantMatrix()
+	    << "\tusedInFit " << v.usedInFit()
+	    << "\tidTruth " << v.idTruth()
+	    << "\tquality " << v.quality()
+	    << "\tid " << v.id() 
+	    << "\thardwarePosition " << v.hardwarePosition();
+}
+
+void
+StHit::Print(Option_t *option) const {cout << *this << endl;}
