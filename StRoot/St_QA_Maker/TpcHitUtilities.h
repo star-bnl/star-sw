@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.h,v 1.4 2001/04/25 18:16:20 perev Exp $
+// $Id: TpcHitUtilities.h,v 1.5 2005/07/06 23:21:04 fisyak Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.h,v $
+// Revision 1.5  2005/07/06 23:21:04  fisyak
+// use templated StThreeVectorD
+//
 // Revision 1.4  2001/04/25 18:16:20  perev
 // HPcorrs
 //
@@ -24,7 +27,7 @@
 
 class StTrack;
 class StTpcHit;
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 
 #include <vector>
 #include <map>
