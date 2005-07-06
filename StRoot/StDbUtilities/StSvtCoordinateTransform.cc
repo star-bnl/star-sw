@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.34 2005/02/09 23:48:41 jeromel Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.35 2005/07/06 19:10:34 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -30,7 +30,7 @@
 #include <unistd.h>
 #include "TF1.h"
 #include "TString.h"
-
+#include "TMath.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
@@ -41,7 +41,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
   mFlag=0;
   mDeltaDriftVelocity = 1;
-  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
+  /*  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);*/
 }
 
 //_____________________________________________________________________________
@@ -54,7 +54,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
 
 StSvtCoordinateTransform::~StSvtCoordinateTransform()
 {
- delete mPoly9; mPoly9=0;
+  /* delete mPoly9; mPoly9=0;*/
  if (mFlag&1) delete mgeom; mgeom=0;
 }
 
@@ -722,7 +722,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	  Ratio = 3.0*10/(NewDist); // Richard stores in mm/Mus must fix that some time
 	  distance = mPoly9->Eval(x*Ratio*10e5/fsca)/10;
 	  //cout << " Full drift " << mPoly9->Eval(td*Ratio)/10 << " new distance " << distance << " original distance " <<  vd*x/fsca << endl;
-	  if( fabs(distance-vd*x/fsca) > 0.03) {
+	  if( TMath::Abs(distance-vd*x/fsca) > 0.03) {
 	    //cout << " index = " << index << "Got crazy result using data drift vel " << 
 	    // distance << " " << vd*x/fsca <<  endl;
 	   

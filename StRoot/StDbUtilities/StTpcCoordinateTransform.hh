@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.9 2004/06/05 23:31:09 fisyak Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.10 2005/07/06 19:10:34 fisyak Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.10  2005/07/06 19:10:34  fisyak
+ * Add TpcCoordinate transormation classes to dictionary, use templated StThreeVector
+ *
  * Revision 1.9  2004/06/05 23:31:09  fisyak
  * Add (sector,row) for Tpc Coordinate/Direction transformations; Change sign of t0zoffset correction (to be synch. with fcf)
  *
@@ -110,17 +113,16 @@
 
 //#define DEBUG_TPC 0
 //#define idb if(DEBUG_TPC) cout
+#include "StTpcPadCoordinate.hh"
+#include "StTpcLocalCoordinate.hh"
+#include "StTpcLocalSectorCoordinate.hh"
+#include "StTpcLocalSectorAlignedCoordinate.hh"
+#include "StGlobalCoordinate.hh"
 
-class StGlobalCoordinate;
-class StTpcLocalCoordinate;
-class StTpcLocalSectorCoordinate;
-class StTpcLocalSectorAlignedCoordinate;
-class StTpcPadCoordinate;
-
-class StGlobalDirection;
-class StTpcLocalDirection;
-class StTpcLocalSectorDirection;
-class StTpcLocalSectorAlignedDirection;
+#include "StTpcLocalDirection.hh"
+#include "StTpcLocalSectorDirection.hh"
+#include "StTpcLocalSectorAlignedDirection.hh"
+#include "StGlobalDirection.hh"
 
 class StTpcCoordinateTransform {//: public StObject {
 public:
@@ -158,20 +160,19 @@ public:
     void  operator()(const  StGlobalCoordinate& ,StTpcLocalSectorCoordinate&, int sector=0, int row = 0);
     void  operator()(const  StGlobalCoordinate& ,StTpcLocalSectorAlignedCoordinate&, int sector=0, int row = 0);
     void  operator()(const  StTpcLocalSectorDirection&, StGlobalDirection&);
-    void  operator()(const  StGlobalDirection& ,StTpcLocalSectorDirection&, int sector=0, int row = 0);
-    void  operator()(const  StGlobalDirection& ,StTpcLocalSectorAlignedDirection&, int sector=0, int row = 0);
+    void  operator()(const  StGlobalDirection& ,StTpcLocalSectorDirection&, int sector, int row = 0);
+    void  operator()(const  StGlobalDirection& ,StTpcLocalSectorAlignedDirection&, int sector, int row = 0);
 
     
 // Internal TpcCoordinate <-->  Global Coordinate
     void  operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&);
     void  operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&, int sector=0, int row = 0);
     void  operator()(const StTpcLocalDirection&, StGlobalDirection&);
-    void  operator()(const StGlobalDirection&, StTpcLocalDirection&, int sector=0, int row = 0);
+    void  operator()(const StGlobalDirection&, StTpcLocalDirection&, int sector, int row = 0);
 
 //      Raw Data          <-->  Global Coordinate
     void  operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
-    void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
-    void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&, int sector, int row = 0);
+    void  operator()(const StGlobalCoordinate&, StTpcPadCoordinate&, int sector = 0, int row = 0);
 
     StThreeVector<double> sector12Coordinate(StThreeVector<double>&, int*);
     StThreeVector<double> padCentroid(StTpcLocalSectorCoordinate&, int*, int*)  ;
@@ -180,12 +181,15 @@ public:
     
     // Transformation Routines!!
     // Raw Data From tpc local Coordinates
-    int      sectorFromCoordinate(const StTpcLocalCoordinate&)       const;
-    int      sectorFromCoordinate(const StThreeVector<double>&)      const;
+  int      sectorFromCoordinate(const StThreeVector<double>&)      const;
+  int      sectorFromCoordinate(const StTpcLocalCoordinate& a)       const {return sectorFromCoordinate(a.position());}
+  int      sectorFromCoordinate(const StTpcLocalDirection&  a)       const {return sectorFromCoordinate(a.position());}
     // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
     int      rowFromLocal(const StThreeVector<double>&)              const;
-    int      padFromLocal(const StThreeVector<double>&, const int)   const;
+    int      padFromLocal(const StThreeVector<double>&, int)         const;
   int      padFromX(double x, int row) const; 
+  int      rowFromLocal(const StTpcLocalSectorCoordinate& a)         const {return rowFromLocal(a.position());}
+  int      padFromLocal(const StTpcLocalSectorCoordinate& a)         const {return padFromLocal(a.position().x(),a.fromRow());}
     // tpc local sector Coordinates from Raw Data
     StThreeVector<double> xyFromRaw(const StTpcPadCoordinate&)      ;
     double                yFromRow(const int)                  const;
