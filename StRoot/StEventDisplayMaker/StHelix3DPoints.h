@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.h,v 1.3 2003/08/02 02:51:28 perev Exp $
+// $Id: StHelix3DPoints.h,v 1.4 2005/07/06 19:15:31 fisyak Exp $
 // $Log: StHelix3DPoints.h,v $
+// Revision 1.4  2005/07/06 19:15:31  fisyak
+// use templated StHelixD
+//
 // Revision 1.3  2003/08/02 02:51:28  perev
 // warnOff
 //
@@ -26,7 +29,7 @@
 #define STAR_StHelix3DPoints
 #include <TPoints3DABC.h>
 
-class StHelixD;
+#include "StHelixD.hh"
 class StTrack;
 
 class StHelix3DPoints : public TPoints3DABC {
