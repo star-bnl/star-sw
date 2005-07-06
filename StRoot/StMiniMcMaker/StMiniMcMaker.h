@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.10 2004/03/30 03:16:15 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.11 2005/07/06 22:23:49 fisyak Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.11  2005/07/06 22:23:49  fisyak
+ * Use templated StThreeVectorF
+ *
  * Revision 1.10  2004/03/30 03:16:15  calderon
  * Modifications for running in bfc.
  *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -68,6 +71,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.11  2005/07/06 22:23:49  fisyak
+ * Use templated StThreeVectorF
+ *
  * Revision 1.10  2004/03/30 03:16:15  calderon
  * Modifications for running in bfc.
  *  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -120,7 +126,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.10 2004/03/30 03:16:15 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.11 2005/07/06 22:23:49 fisyak Exp $ plus header comments for the macros
  *
  */
 
@@ -153,7 +159,7 @@ class StMcTrack;
 class StTrack;
 class StPrimaryTrack;
 class StIOInterFace;
-class StThreeVectorF;
+#include "StThreeVectorF.hh"
 class StTpcDedxPidAlgorithm;
 class StuProbabilityPidAlgorithm;
 class StTpcHit;
@@ -193,7 +199,7 @@ class StMiniMcMaker : public StMaker{
   Int_t Make();
   Int_t Finish();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.10 2004/03/30 03:16:15 calderon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMiniMcMaker.h,v 1.11 2005/07/06 22:23:49 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   //---- SETS -------
 
