@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.5 2004/05/03 23:07:49 dongx Exp $
+ * $Id: StTofrGeometry.h,v 1.6 2005/07/06 19:24:59 fisyak Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,11 +10,14 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
+ * Revision 1.6  2005/07/06 19:24:59  fisyak
+ * Use templated StThreeVector
+ *
  * Revision 1.5  2004/05/03 23:07:49  dongx
  * -Introduce data members to save the Tray and Sensor geometries in the initialization.
  * -Optimize the HelixCrossCellIds() function to save CPU time
  * -Introduce a new function projTrayVector()
- * -Update the ClassDef number 1->2
+ * -Update the //classDef number 1->2
  *
  *
  * Revision 1.3  2004/03/09 16:45:16  dongx
@@ -62,11 +65,11 @@ using std::vector;
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
 typedef vector<Int_t>  IntVec;
 typedef vector<Double_t>  DoubleVec;
-typedef vector<StThreeVectorD> PointVec;
+typedef vector<StThreeVector<double> > PointVec;
 #else
-typedef vector<Int_t, allocator<Int_t>>  IntVec;
-typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
-typedef vector<StThreeVectorD, allocator<StThreeVectorD>> PointVec;
+typedef vector<Int_t, allocator<Int_t> >  IntVec;
+typedef vector<Double_t, allocator<Double_t> >  DoubleVec;
+typedef vector<StThreeVector<double>, allocator<StThreeVector<double>>> PointVec;
 #endif
 
 class StTofrNode;
@@ -219,7 +222,7 @@ class StTofrNode : public TObject {
    virtual void    Print(const Option_t *opt="") const;
 
 #ifdef __ROOT__
- ClassDef(StTofrNode,2)  //Virutal TNode for TOFr geometry
+  ClassDef(StTofrNode,2)  //Virutal TNode for TOFr geometry
 #endif
 };
 
@@ -272,7 +275,7 @@ class StTofrGeomTray : public StTofrNode {
    virtual void      Print(const Option_t *opt="") const;
 
 #ifdef __ROOT__      
- ClassDef(StTofrGeomTray,1)  //Tray node in TOFr geometry
+  ClassDef(StTofrGeomTray,1)  //Tray node in TOFr geometry
 #endif
 };
 
@@ -476,7 +479,7 @@ class StTofrGeometry : public TNamed {
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
 
 #ifdef __ROOT__      
- ClassDef(StTofrGeometry,2)  //Simplified TOFr Geometry
+  ClassDef(StTofrGeometry,2)  //Simplified TOFr Geometry
 #endif
 };
 
