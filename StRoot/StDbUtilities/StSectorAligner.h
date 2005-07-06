@@ -10,7 +10,7 @@
 #include "TObject.h"
 #include "StTpcDb/StTpcDb.h"
 
-class StThreeVectorF;
+#include "StThreeVectorF.hh"
 class StTpcDb;
 
 class StSectorAligner {

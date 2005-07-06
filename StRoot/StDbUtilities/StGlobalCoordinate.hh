@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StGlobalCoordinate.hh,v 1.4 2003/09/02 17:57:51 perev Exp $
+ * $Id: StGlobalCoordinate.hh,v 1.5 2005/07/06 19:10:34 fisyak Exp $
  *
  * Author:  brian Feb 6, 1998
  *
@@ -11,6 +11,9 @@
  *************************************************************************
  *
  * $Log: StGlobalCoordinate.hh,v $
+ * Revision 1.5  2005/07/06 19:10:34  fisyak
+ * Add TpcCoordinate transormation classes to dictionary, use templated StThreeVector
+ *
  * Revision 1.4  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -54,8 +57,7 @@
 
 #include <Stiostream.h>
 
-#include "StThreeVector.hh"
-class StThreeVectorF;
+#include "StThreeVectorF.hh"
 
 class StGlobalCoordinate
 {         
