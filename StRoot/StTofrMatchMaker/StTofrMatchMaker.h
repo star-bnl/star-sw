@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.6 2005/04/12 17:31:56 dongx Exp $
+ * $Id: StTofrMatchMaker.h,v 1.7 2005/07/06 23:10:24 fisyak Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.7  2005/07/06 23:10:24  fisyak
+ * Use template StThreeVectorD
+ *
  * Revision 1.6  2005/04/12 17:31:56  dongx
  * update for year 5 data - not completed, leave as empty at present
  *
@@ -45,7 +48,7 @@ using std::vector;
 class StEvent;
 class StTrack;
 class StHelix;
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 class StTrackGeometry;
 class StTofrGeometry;
 class StTofCollection;
@@ -59,11 +62,9 @@ class TH2D;
 #if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
 typedef vector<Int_t>  IntVec;
 typedef vector<Double_t>  DoubleVec;
-typedef vector<StThreeVectorD> PointVec;
 #else
 typedef vector<Int_t, allocator<Int_t>>  IntVec;
 typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
-typedef vector<StThreeVectorD, allocator<StThreeVectorD>> PointVec;
 #endif
 
 class StTofrMatchMaker : public StMaker {
@@ -220,7 +221,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.6 2005/04/12 17:31:56 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.7 2005/07/06 23:10:24 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
