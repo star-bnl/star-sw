@@ -1,7 +1,7 @@
 #ifndef STAR_StTrackChair
 #define STAR_StTrackChair
 #include "TChair.h"
-class StHelixD;
+#include "StHelixD.hh"
 
 class StTrackChair : public TChair {
  private: 
