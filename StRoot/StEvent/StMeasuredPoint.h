@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMeasuredPoint.h,v 2.7 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StMeasuredPoint.h,v 2.8 2005/07/06 18:58:15 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMeasuredPoint.h,v $
+ * Revision 2.8  2005/07/06 18:58:15  fisyak
+ * Add print out
+ *
  * Revision 2.7  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -40,6 +43,7 @@
 #ifndef StMeasuredPoint_hh
 #define StMeasuredPoint_hh
 
+#include <Stiostream.h>
 #include "StObject.h"
 #include "StThreeVectorF.hh"
 #include "StMatrixF.hh"
@@ -60,9 +64,10 @@ public:
     virtual StMatrixF             covariantMatrix() const = 0;
     
     virtual void setPosition(const StThreeVectorF&);
-    
+    virtual void                  Print(Option_t *option="") const;
 protected:
     StThreeVectorF mPosition;
     ClassDef(StMeasuredPoint,1)
 };
+ostream&              operator<<(ostream& os, StMeasuredPoint const & v);
 #endif
