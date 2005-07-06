@@ -1,6 +1,6 @@
 /**********************************************
  *
- * $Id: StMcHitComparisons.hh,v 2.3 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcHitComparisons.hh,v 2.4 2005/07/06 21:49:51 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez
  ***********************************************
@@ -10,6 +10,9 @@
  *
  ***********************************************
  * $Log: StMcHitComparisons.hh,v $
+ * Revision 2.4  2005/07/06 21:49:51  calderon
+ * StThreeVector.hh -> StThreeVectorF.hh
+ *
  * Revision 2.3  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -39,7 +42,7 @@ class StMcTpcHit;
 class StMcSvtHit;
 class StMcFtpcHit;
 class StMcRichHit;
-#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
 
 #if (defined __SUNPRO_CC && (__SUNPRO_CC < 0x500))
 // bool is defined in utility for SUNPRO_CC 4.2
