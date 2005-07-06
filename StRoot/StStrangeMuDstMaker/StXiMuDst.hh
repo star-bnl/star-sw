@@ -13,7 +13,7 @@
 #include "StXiI.hh"
 
 class StXiVertex;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 
 class StXiMuDst : public StV0MuDst, public virtual StXiI {
   friend class StMuMomentumShiftMaker;
@@ -138,8 +138,11 @@ inline Float_t StXiMuDst::lenDedxBachelor() const
 
 
 /***********************************************************************
- * $Id: StXiMuDst.hh,v 3.9 2005/07/03 19:04:34 perev Exp $
+ * $Id: StXiMuDst.hh,v 3.10 2005/07/06 22:32:07 fisyak Exp $
  * $Log: StXiMuDst.hh,v $
+ * Revision 3.10  2005/07/06 22:32:07  fisyak
+ * Use templated StPhysicalHelixD
+ *
  * Revision 3.9  2005/07/03 19:04:34  perev
  * Change class version to avoid ROOT bug in old version 4.00.04
  *
