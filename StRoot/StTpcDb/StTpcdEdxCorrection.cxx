@@ -1,6 +1,6 @@
 /*! 
-  \class dEdx_t
-  dEdx_t class contains data for each cluster which is used during different calibartion steps
+  \class dEdxY2_t
+  dEdxY2_t class contains data for each cluster which is used during different calibartion steps
   \class StTpcdEdxCorrection
   StTpcdEdxCorrection class contains utilities  
 */
@@ -11,7 +11,7 @@
 #include "StMessMgr.h" 
 #include "tables/St_tss_tsspar_Table.h"
 #include "St_db_Maker/St_db_Maker.h"
-ClassImp(dEdx_t);
+ClassImp(dEdxY2_t);
 ClassImp(StTpcdEdxCorrection);
 static St_db_Maker *dbMk = 0;
 //________________________________________________________________________________
@@ -119,7 +119,7 @@ StTpcdEdxCorrection::~StTpcdEdxCorrection() {
   for (Int_t k = 0; k < kTpcAllCorrections; k++) SafeDelete(m_Corrections[k].Chair);
 }
 //________________________________________________________________________________
-Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) { 
+Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdxY2_t &CdEdx) { 
   //  static const Double_t Degree2Rad = TMath::Pi()/180.;
   Double_t dEU = CdEdx.dE;
   Double_t dE  = dEU;

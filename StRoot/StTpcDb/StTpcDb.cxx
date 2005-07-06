@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.39 2005/03/30 17:56:59 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.40 2005/07/06 22:26:53 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.40  2005/07/06 22:26:53  fisyak
+ * dEdx_t=>dEdxY2_t
+ *
  * Revision 1.39  2005/03/30 17:56:59  fisyak
  * Fix a bug with flavor handling, StTpcDb has to be instantiated after setting flavor
  *
@@ -511,7 +514,7 @@ TTable *StTpcDb::FindTable(const Char_t *name, Int_t dbIndex) {
     table = (TTable *) tpctrg[dbIndex]->Find(name);
     if (! (table && table->HasData()) ) {
       gMessMgr->Error() << "StTpcDb::Error Finding " << name << endm;
-    } else if (Debug()) {
+    } else if (Debug() && table->GetRowSize()< 1024) {
       StMaker *dbMk = StChain::GetChain()->Maker("db");
       if (dbMk) {
 	TDatime t[2];

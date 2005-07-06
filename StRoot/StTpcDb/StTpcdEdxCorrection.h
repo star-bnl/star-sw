@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.11 2005/05/10 19:31:06 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.12 2005/07/06 22:26:53 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -21,10 +21,10 @@ struct dE_t {
   Double_t dEdxN;
 };
 //________________________________________
-class dEdx_t : public TObject {
+class dEdxY2_t : public TObject {
  public:
-  dEdx_t() {}
-  virtual ~dEdx_t() {}
+  dEdxY2_t() {}
+  virtual ~dEdxY2_t() {}
   /* U->R->S->P->O->Z->X
      U->R (TpcAdcCorrection) -> P (tpcPressure) ->
      S (TpcSecRowB/TpcSecRowC) ->  O (TpcDriftDistOxygen) ->  
@@ -49,7 +49,6 @@ class dEdx_t : public TObject {
   Double_t dEdxL;  // log of dEdx
   Double_t dEdxN;  // normolized to BB
   dE_t     C[20]; //!
-  Double_t dETot; 
   Double_t xyz[3];  // local
   Double_t xyzD[3]; // local direction
   Double_t edge;    // distance to sector edge
@@ -57,20 +56,13 @@ class dEdx_t : public TObject {
   Double_t resXYZ[3]; // track SectorLocal residual wrt local track 
   Double_t Prob; 
   Double_t SigmaFee;
-  Double_t xscale;
-  Double_t dEIpad;  // total charge integrated so far in the pad
-  Double_t dEI3pad; // total charge integrated so far in the pad +/-
-  Double_t dEIrow;  // total charge integrated so far in the row
-  Double_t dETrow;  // total charge not integrated (time bucket only) in the row
-  Double_t dET3row; // total charge not integrated (+0 + 2 time buckets only) in the row
-  Double_t dET5row; // total charge not integrated (+0 + 4 time buckets only) in the row
   Double_t zdev; 
   Double_t zP;      // the most probable value from Bichsel
   Double_t sigmaP;  // sigma from Bichsel
   Double_t dCharge; //
   Char_t   last[1];
   void Reset() {memset(first, 0, last - first);}
-  ClassDef(dEdx_t,1)
+  ClassDef(dEdxY2_t,1)
 }; 
 struct dEdxCorrection_t {
   dEdxCorrection_t(Char_t *name = 0, Char_t *title = 0, St_tpcCorrectionC *chair=0, Int_t n=0) 
@@ -111,7 +103,7 @@ class StTpcdEdxCorrection : public TObject {
   };
   StTpcdEdxCorrection(Int_t Option=0, Int_t debug=0);
   ~StTpcdEdxCorrection();
-  Int_t dEdxCorrection(dEdx_t &dEdx); 
+  Int_t dEdxCorrection(dEdxY2_t &dEdx); 
   Int_t dEdxTrackCorrection(EOptions k, Int_t type, dst_dedx_st &dedx);
   void SettpcGas               (St_tpcGas          *m = 0);
   //  void SettrigDetSums          (St_trigDetSums     *m = 0);
