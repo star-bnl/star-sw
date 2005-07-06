@@ -15,14 +15,14 @@ modified by bum
 class StFastCircleFitter;
 class StTptCircleFitter;
 class StFastLineFitter;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 class StTrack;
 class StMcTrack;
 class StHit;
 class StTpcHit;
 class StMcTpcHit;
 class StMcHit;
-//class StThreeVectorF;
+#include "StThreeVectorF.hh"
 
 
 #ifndef __CINT__
