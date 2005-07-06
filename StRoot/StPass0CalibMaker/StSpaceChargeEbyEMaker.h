@@ -18,8 +18,8 @@ class StMagUtilities;
 class TH1F;
 class TH2F;
 class TH3F;
+#include "StPhysicalHelixD.hh"
 class TNtuple;
-class StPhysicalHelixD;
 class St_spaceChargeCor;
 class StRunInfo;
 class StEvent;
@@ -42,7 +42,7 @@ public:
           void   DontReset() { doReset = kFALSE; }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.3 2005/04/21 19:38:20 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.4 2005/07/06 22:51:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -151,8 +151,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.3 2005/04/21 19:38:20 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.4 2005/07/06 22:51:40 fisyak Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.4  2005/07/06 22:51:40  fisyak
+// use Templated StPhysicalHelixD
+//
 // Revision 1.3  2005/04/21 19:38:20  genevb
 // Additional code for studying SpaceCharge
 //
