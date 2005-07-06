@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHitCollection.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcPixelHitCollection.cc,v 2.2 2005/07/06 21:47:45 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcPixelHitCollection.cc,v $
+ * Revision 2.2  2005/07/06 21:47:45  calderon
+ * remove old ifdef, now all classes are persistent.
+ *
  * Revision 2.1  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -26,11 +29,9 @@
 #include "StMcPixelHitCollection.hh"
 #include "StMcPixelHit.hh"
 
-static const char rcsid[] = "$Id: StMcPixelHitCollection.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelHitCollection.cc,v 2.2 2005/07/06 21:47:45 calderon Exp $";
 
-#ifdef PERSISTENT
 ClassImp(StMcPixelHitCollection)
-#endif
 
 StMcPixelHitCollection::StMcPixelHitCollection() { /* noop */ }
 
