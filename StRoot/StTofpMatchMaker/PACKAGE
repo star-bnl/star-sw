@@ -1,0 +1,4 @@
+# $Id $
+# package StTofpMatchMaker
+# author: 
+Library:libStTofpMatchMaker.so:LIBS +=   -lStChain  -lStEvent  -lStTofUtil
