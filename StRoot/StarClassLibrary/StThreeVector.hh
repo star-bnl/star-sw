@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.12 2005/03/28 06:03:41 perev Exp $
+ * $Id: StThreeVector.hh,v 1.13 2005/07/06 18:49:57 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.13  2005/07/06 18:49:57  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.12  2005/03/28 06:03:41  perev
  * Defence FPE added
  *
@@ -59,7 +62,9 @@
  **************************************************************************/
 #ifndef ST_THREE_VECTOR_HH
 #define ST_THREE_VECTOR_HH
-
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
 #ifndef __CINT__
 #include <Stiostream.h>
 #include <math.h>
@@ -85,7 +90,7 @@ template<class T = double>
 class StThreeVector {
 public:    
     StThreeVector(T = 0, T = 0, T = 0);
-    ~StThreeVector();
+    virtual ~StThreeVector();
 
 #ifndef ST_NO_MEMBER_TEMPLATES
     template<class X> StThreeVector(const StThreeVector<X>&);
@@ -178,10 +183,13 @@ public:
     StThreeVector<T>& operator+= (const StThreeVector<double>&);
     StThreeVector<T>& operator-= (const StThreeVector<double>&);
 #endif
-    int             valid(double world = 1.e+5) const;
-
+  int             valid(double world = 1.e+5) const;
+    int               bad(double world = 1.e+5) const;
 protected:
     T    mX1, mX2, mX3;
+#ifdef __ROOT__
+  ClassDef(StThreeVector,3)
+#endif /* __ROOT__ */
 };
 
 #ifndef __CINT__
@@ -254,13 +262,13 @@ inline T StThreeVector<T>::z() const {return mX3;}
 template<class T>
 inline T StThreeVector<T>::theta() const
 {
-    return acos(mX3/(mag()+1e-20));
+  return acos(cosTheta());
 }
 
 template<class T>
 inline T StThreeVector<T>::cosTheta() const
 {
-    return mX3/this->mag();
+  return mX3/(mag()+1e-20);
 }
 
 template<class T>
@@ -729,15 +737,55 @@ StThreeVector<T>::pseudoProduct(const StThreeVector<double>& v) const
 #endif  // ST_NO_MEMBER_TEMPLATES
 template<class T>
 inline int
-StThreeVector<T>::valid(double world) const
+StThreeVector<T>::valid(double world) const  {return !bad(world);}
+
+template<class T>
+inline int
+StThreeVector<T>::bad(double world) const
 {
   for (int i=0;i<3;i++) {
-    if (!::finite((&mX1)[i])      ) return 0; 		
-    if ( ::fabs  ((&mX1)[i])>world) return 0; 		
+    if (!::finite((&mX1)[i])      ) return 10+i; 		
+    if ( ::fabs  ((&mX1)[i])>world) return 20+i; 		
   }		
-  return 1;		
+  return 0;		
 }
-
+#endif /*! __CINT__ */
+#ifdef __CINT__
+template<> float abs(const StThreeVector<float>& v);
+template<> double abs(const StThreeVector<double>& v);
+template<> StThreeVector<double> cross_product(const StThreeVector<double>& v1, const StThreeVector<double>& v2);
+template<> StThreeVector<float>  cross_product(const StThreeVector<float>&  v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> cross_product(const StThreeVector<float>&  v1, const StThreeVector<double>& v2);
+template<> StThreeVector<double> cross_product(const StThreeVector<double>& v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator+ (const StThreeVector<double>& v1, const StThreeVector<double>& v2);
+template<> StThreeVector<float>  operator+ (const StThreeVector<float>&  v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator+ (const StThreeVector<double>& v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator+ (const StThreeVector<float>&  v1, const StThreeVector<double>& v2);
+template<> StThreeVector<double> operator- (const StThreeVector<double>& v1, const StThreeVector<double>& v2);
+template<> StThreeVector<float>  operator- (const StThreeVector<float>&  v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator- (const StThreeVector<double>& v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator- (const StThreeVector<float>&  v1, const StThreeVector<double>& v2);
+template<> StThreeVector<double> operator* (const StThreeVector<double>& v1, const StThreeVector<double>& v2);
+template<> StThreeVector<float>  operator* (const StThreeVector<float>&  v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator* (const StThreeVector<double>& v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator* (const StThreeVector<float>&  v1, const StThreeVector<double>& v2);
+template<> StThreeVector<double> operator* (const double                 v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator* (const StThreeVector<float>&  v1, const double v2);
+template<> StThreeVector<double> operator* (const double                 v1, const StThreeVector<double>& v2);
+template<> StThreeVector<double> operator* (const StThreeVector<double>& v1, const double v2);
+template<> StThreeVector<double> operator/ (const StThreeVector<double>& v1, const StThreeVector<double>& v2);
+template<> StThreeVector<float>  operator/ (const StThreeVector<float>&  v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator/ (const StThreeVector<double>& v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator/ (const StThreeVector<float>&  v1, const StThreeVector<double>& v2);
+template<> StThreeVector<double> operator/ (const                double  v1, const StThreeVector<double>& v2);
+template<> StThreeVector<float>  operator/ (const                double  v1, const StThreeVector<float>& v2);
+template<> StThreeVector<double> operator/ (const StThreeVector<double>& v1, const double v2);
+template<> StThreeVector<double> operator/ (const StThreeVector<float>&  v1, const double v2);
+template<> istream&  operator>>(istream& is,const StThreeVector<double>& v);
+template<> istream&  operator>>(istream& is,const StThreeVector<float>& v);
+template<> ostream&  operator<<(ostream& os,const StThreeVector<double>& v);
+template<> ostream&  operator<<(ostream& os,const StThreeVector<float>& v);
+#else
 //
 //        Non-member functions
 //
@@ -809,5 +857,5 @@ istream&  operator>>(istream& is, StThreeVector<T>& v)
     v.setZ(z);
     return is;
 }
-#endif // CINT
+#endif /* ! __CINT__ */
 #endif

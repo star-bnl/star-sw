@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.15 2004/01/14 22:37:27 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.16 2005/07/06 18:49:56 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,11 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.16  2005/07/06 18:49:56  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.15  2004/01/14 22:37:27  fisyak
- * unsigned int => size_t to make alpha happy
+ *  unsigned int => size_t to make alpha happy
  *
  * Revision 1.14  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
@@ -264,7 +267,7 @@ public:
     
     // Destructor. --
     //Problem with LINUX (virtual table error when exception thrown)
-    ~StMatrix();
+    virtual ~StMatrix();
 
     //
     // access functions
@@ -376,9 +379,12 @@ protected:
     DataType *mElement;
     unsigned int mRow, mCol;
     unsigned int mSize;
+#ifdef __ROOT__
+  ClassDef(StMatrix,3)
+#endif /* __ROOT__ */
 };
 
-
+#ifndef __CINT__
 // Constructors. 
 
 template<class DataType>
@@ -1446,7 +1452,59 @@ StMatrix<DataType> dsum(const StMatrix<DataType> &m1, const StMatrix<DataType> &
     return mret;
 }
 
+#endif /* ! __CINT__ */
+#ifdef __CINT__
+template<> StMatrix<double> operator*(const StMatrix<double>& m1,const StMatrix<double>& m2);
+template<> StMatrix<double> operator*(const StMatrix<double>& m1,const StMatrix<float>&  m2);
+template<> StMatrix<double> operator*(const StMatrix<float>&  m1,const StMatrix<double>& m2);
+template<> StMatrix<float>  operator*(const StMatrix<float>&  m1,const StMatrix<float>&  m2);
 
+template<> vector<double> operator*(const StMatrix<double>& m1, const vector<double>& v);
+template<> vector<double> operator*(const vector<double>&    v, const StMatrix<double>& m1);
+template<> vector<double> operator*(const StMatrix<double>& m1, const vector<float>& v);
+template<> vector<double> operator*(const vector<float>&     v, const StMatrix<double>& m1);
+template<> vector<double> operator*(const StMatrix<float>&  m1, const vector<double>& v);
+template<> vector<double> operator*(const vector<double>&    v, const StMatrix<float>& m1);
+template<> vector<float>  operator*(const StMatrix<float>&  m1, const vector<float>& v);
+template<> vector<float>  operator*(const vector<float>&     v, const StMatrix<float>& m1);
+
+template<> StThreeVector<double> operator*(const StMatrix<double>& m1, const StThreeVector<double>& v);
+template<> StThreeVector<double> operator*(const StThreeVector<double>&    v, const StMatrix<double>& m1);
+template<> StThreeVector<double> operator*(const StMatrix<double>& m1, const StThreeVector<float>& v);
+template<> StThreeVector<double> operator*(const StThreeVector<float>&     v, const StMatrix<double>& m1);
+template<> StThreeVector<double> operator*(const StMatrix<float>&  m1, const StThreeVector<double>& v);
+template<> StThreeVector<double> operator*(const StThreeVector<double>&    v, const StMatrix<float>& m1);
+template<> StThreeVector<float>  operator*(const StMatrix<float>&  m1, const StThreeVector<float>& v);
+template<> StThreeVector<float>  operator*(const StThreeVector<float>&     v, const StMatrix<float>& m1);
+
+template<> StLorentzVector<double> operator*(const StMatrix<double>& m1, const StLorentzVector<double>& v);
+template<> StLorentzVector<double> operator*(const StLorentzVector<double>&    v, const StMatrix<double>& m1);
+template<> StLorentzVector<double> operator*(const StMatrix<double>& m1, const StLorentzVector<float>& v);
+template<> StLorentzVector<double> operator*(const StLorentzVector<float>&     v, const StMatrix<double>& m1);
+template<> StLorentzVector<double> operator*(const StMatrix<float>&  m1, const StLorentzVector<double>& v);
+template<> StLorentzVector<double> operator*(const StLorentzVector<double>&    v, const StMatrix<float>& m1);
+template<> StLorentzVector<float>  operator*(const StMatrix<float>&  m1, const StLorentzVector<float>& v);
+template<> StLorentzVector<float>  operator*(const StLorentzVector<float>&     v, const StMatrix<float>& m1);
+
+template<> StMatrix<double> operator+(const StMatrix<double>& m1,const StMatrix<double>& m2);
+template<> StMatrix<double> operator+(const StMatrix<float>&  m1,const StMatrix<double>& m2);
+template<> StMatrix<double> operator+(const StMatrix<double>& m1,const StMatrix<float>& m2);
+template<> StMatrix<float>  operator+(const StMatrix<float>&  m1,const StMatrix<float>& m2);
+template<> StMatrix<double> operator-(const StMatrix<double>& m1,const StMatrix<double>& m2);
+template<> StMatrix<double> operator-(const StMatrix<float>&  m1,const StMatrix<double>& m2);
+template<> StMatrix<double> operator-(const StMatrix<double>& m1,const StMatrix<float>& m2);
+template<> StMatrix<float>  operator-(const StMatrix<float>&  m1,const StMatrix<float>& m2);
+
+template<> ostream& operator<<(ostream& s, const StMatrix<double>& q);
+template<> ostream& operator<<(ostream& s, const StMatrix<float>& q);
+
+template<> double norm_infinity(const StMatrix<double>& m1);
+template<> double normInfinity(const StMatrix<double>& m1);
+template<> double norm1(const StMatrix<double>& m1);
+template<> float norm_infinity(const StMatrix<float>& m1);
+template<> float normInfinity(const StMatrix<float>& m1);
+template<> float norm1(const StMatrix<float>& m1);
+#else /* ! __CINT__ */
 // Non-Member
 template<class DataType, class X>
 StMatrix<DataType> operator*(const StMatrix<DataType>& m1,const StMatrix<X>& m2)
@@ -1682,6 +1740,5 @@ DataType norm1(const StMatrix<DataType>& m1)
     }
     return max;
 }
-
-
+#endif /* __CINT__ */
 #endif /* ST_MATRIX_HH */

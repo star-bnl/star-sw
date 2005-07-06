@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.9 2004/12/02 02:51:16 ullrich Exp $
+ * $Id: StHelix.hh,v 1.10 2005/07/06 18:49:56 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
+ * Revision 1.10  2005/07/06 18:49:56  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.9  2004/12/02 02:51:16  ullrich
  * Added option to pathLenghth() and distance() to search for
  * DCA only within one period. Default stays as it was.
@@ -99,7 +102,8 @@ public:
     double       distance(const StThreeVector<double>& p, bool scanPeriods = true) const;    
     
     /// checks for valid parametrization
-    bool         valid(double world = 1.e+5) const;
+    bool         valid(double world = 1.e+5) const {return !bad(world);}
+    int            bad(double world = 1.e+5) const;
     
     /// move the origin along the helix to s which becomes then s=0
     virtual void moveOrigin(double s);
@@ -126,6 +130,9 @@ protected:
     double                 mSinDipAngle;
     double                 mCosPhase;
     double                 mSinPhase;
+#ifdef __ROOT__
+  ClassDef(StHelix,1)
+#endif
 };
 
 //
@@ -177,6 +184,27 @@ inline StThreeVector<double> StHelix::at(double s) const
 inline double StHelix::pathLength(double x, double y) const
 {
     return fudgePathLength(StThreeVector<double>(x, y, 0));
+}
+inline int StHelix::bad(double WorldSize) const
+{
+
+    int ierr;
+    if (!::finite(mDipAngle    )) 	return   11;
+    if (!::finite(mCurvature   )) 	return   12;
+
+    ierr = mOrigin.bad(WorldSize);
+    if (ierr)                           return    3+ierr*100;
+
+    if (::fabs(mDipAngle)  >1.58)	return   21;
+    double qwe = ::fabs(::fabs(mDipAngle)-M_PI/2);
+    if (qwe < 1./WorldSize      ) 	return   31; 
+
+    if (::fabs(mCurvature) > WorldSize)	return   22;
+    if (mCurvature < 0          )	return   32;
+
+    if (abs(mH) != 1            )       return   24; 
+
+    return 0;
 }
 
 #endif

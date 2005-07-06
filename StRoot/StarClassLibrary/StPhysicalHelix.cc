@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.cc,v 1.6 2003/09/02 17:59:35 perev Exp $
+ * $Id: StPhysicalHelix.cc,v 1.7 2005/07/06 18:49:56 fisyak Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.cc,v $
+ * Revision 1.7  2005/07/06 18:49:56  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.6  2003/09/02 17:59:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -38,7 +41,9 @@
 #include "StPhysicalHelix.hh"
 #include "PhysicalConstants.h" 
 #include "SystemOfUnits.h"
-
+#ifdef __ROOT__
+ClassImpT(StPhysicalHelix,double);
+#endif
 StPhysicalHelix::StPhysicalHelix(){}
 
 StPhysicalHelix::~StPhysicalHelix() { /* nop */ }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.hh,v 1.3 2002/06/21 17:49:26 genevb Exp $
+ * $Id: StPhysicalHelix.hh,v 1.4 2005/07/06 18:49:56 fisyak Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.hh,v $
+ * Revision 1.4  2005/07/06 18:49:56  fisyak
+ * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
+ *
  * Revision 1.3  2002/06/21 17:49:26  genevb
  * Some minor speed improvements
  *
@@ -41,6 +44,7 @@ public:
     // curvature, dip angle, phase, origin, h
     StPhysicalHelix(double, double, double,
 		    const StThreeVector<double>&, int h=-1);
+    StPhysicalHelix();
     
     ~StPhysicalHelix();
 
@@ -57,8 +61,9 @@ public:
     // 3d DCA to 3d point signed relative to rotation
     double geometricSignedDistance(const StThreeVector<double>&) ;
     
-protected:
-    StPhysicalHelix();
+#ifdef __ROOT__
+  ClassDef(StPhysicalHelix,1)
+#endif
 };
 
 #endif
