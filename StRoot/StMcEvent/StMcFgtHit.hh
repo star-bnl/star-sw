@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.hh,v 2.1 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcFgtHit.hh,v 2.2 2005/07/06 20:05:28 calderon Exp $
  * $Log: StMcFgtHit.hh,v $
+ * Revision 2.2  2005/07/06 20:05:28  calderon
+ * Remove forward declaration of StThreeVectorF, use #include, and only in
+ * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
+ * only a typedef, only template version of StThreeVector exists now.
+ *
  * Revision 2.1  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -14,7 +19,6 @@
 #include "StMemoryPool.hh"
 
 class StMcTrack;
-class StThreeVectorF;
 class g2t_fgt_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)

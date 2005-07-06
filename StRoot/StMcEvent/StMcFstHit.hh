@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.hh,v 2.2 2005/05/12 22:48:09 potekhin Exp $
+ * $Id: StMcFstHit.hh,v 2.3 2005/07/06 20:05:28 calderon Exp $
  * $Log: StMcFstHit.hh,v $
+ * Revision 2.3  2005/07/06 20:05:28  calderon
+ * Remove forward declaration of StThreeVectorF, use #include, and only in
+ * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
+ * only a typedef, only template version of StThreeVector exists now.
+ *
  * Revision 2.2  2005/05/12 22:48:09  potekhin
  * Layer, module and plane accessors from Mirko
  *
@@ -15,9 +20,9 @@
 
 #include "StMcHit.hh"
 #include "StMemoryPool.hh"
+#include "StThreeVector.hh"
 
 class StMcTrack;
-class StThreeVectorF;
 class g2t_fst_hit_st;
 
 #if !defined(ST_NO_NAMESPACES)
