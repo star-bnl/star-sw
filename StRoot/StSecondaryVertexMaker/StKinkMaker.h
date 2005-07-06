@@ -19,11 +19,10 @@
 class StKinkLocalTrack;
 class St_tkf_tkfpar;
 class tkf_tkfpar_st;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 class StEvent;
 class StKinkVertex;
 class StTrack;
-class pairD;
 class StTrackGeometry;
 
 // enum TrackerUsage{ //See StV0FinderMaker.h */
@@ -43,7 +42,7 @@ public:
   virtual Int_t   GetTrackerUsage(){return mUseTracker;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.8 2004/09/17 03:14:06 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.9 2005/07/06 22:58:38 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:

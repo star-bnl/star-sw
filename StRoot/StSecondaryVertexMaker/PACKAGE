@@ -1,0 +1,4 @@
+# $Id $
+# package StSecondaryVertexMaker
+# author: 
+Library:libStSecondaryVertexMaker.so:LIBS +=   -lglobal_Tables  -lStChain  -lStEvent  -lStMuDSTMaker  -lPhysics
