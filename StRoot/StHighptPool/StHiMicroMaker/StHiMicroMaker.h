@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.h,v 1.3 2002/05/31 21:50:14 jklay Exp $
+ * $Id: StHiMicroMaker.h,v 1.4 2005/07/06 22:20:57 fisyak Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.h,v $
+ * Revision 1.4  2005/07/06 22:20:57  fisyak
+ * Use templated StPhysicalHelixD and StThreeVectorF
+ *
  * Revision 1.3  2002/05/31 21:50:14  jklay
  * Fixed the way centrality is calculated, see README
  *
@@ -43,8 +46,8 @@
 //
 class StHiMicroEvent;
 
-class StPhysicalHelixD;
-class StThreeVectorF;
+#include "StPhysicalHelixD.hh"
+#include "StThreeVectorF.hh"
 class StEvent;
 class StTrack;
 class StIOMaker;
