@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: tofPathLength.cc,v 1.5 2004/03/17 01:49:56 dongx Exp $
+ * $Id: tofPathLength.cc,v 1.6 2005/07/06 19:20:01 fisyak Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: tofPathLength.cc,v $
+ * Revision 1.6  2005/07/06 19:20:01  fisyak
+ * StThreeVectorD == StThreeVector<double>
+ *
  * Revision 1.5  2004/03/17 01:49:56  dongx
  * add tofPathLength(StThreeVectorD*, StThreeVectorF*, double)
  *
@@ -32,6 +35,7 @@
 #include "tofPathLength.hh"
 
 // ----------------------------------------------------------------------------------------------
+#if 0
 double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorD* endPoint, const double curvature){
   // used in StTofGeometry::tofHelixToArray
   double x,y,z;
@@ -45,6 +49,7 @@ double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorD* en
   StThreeVector<double> ep(x,y,z);
   return tofPathLength(&bp,&ep,curvature);
 }
+#endif
 
 double tofPathLength(const StThreeVectorD*  beginPoint, const StThreeVectorF* endPoint, const double curvature){
   double x,y,z;
@@ -86,7 +91,6 @@ double tofPathLength(const StThreeVectorF* beginPoint, const StThreeVectorF* end
   return tofPathLength(&bp,&ep,curvature);
 }
 
-
 // ----------------------------------------------------------------------------------------------
 double tofPathLength(const StThreeVector<double>*  beginPoint, const StThreeVector<double>* endPoint, const double curvature){
 
@@ -105,5 +109,4 @@ double tofPathLength(const StThreeVector<double>*  beginPoint, const StThreeVect
 
   return(value);
 }
-
 
