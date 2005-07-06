@@ -1,0 +1,4 @@
+# $Id $
+# package StTpcDb
+# author: 
+Library:libStTpcDb.so:LIBS +=   -lglobal_Tables  -lStChain  -lStDb_Tables  -lStDbUtilities  -lStDetectorDbMaker  -ltpc_Tables
