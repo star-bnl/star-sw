@@ -80,5 +80,7 @@
 #pragma link C++ class L0_DSM_Data2005+;
 
 #pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
+#pragma link C++ function operator<<(ostream&, const StMeasuredPoint&);        
+#pragma link C++ function operator<<(ostream&, const StHit&);        
 #endif
 
