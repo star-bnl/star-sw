@@ -9,10 +9,13 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.7 2005/04/12 17:32:45 dongx Exp $
+ * $Id: StTofpMatchMaker.h,v 1.8 2005/07/06 22:12:09 fisyak Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.8  2005/07/06 22:12:09  fisyak
+ * Use templated StThreeVectorD
+ *
  * Revision 1.7  2005/04/12 17:32:45  dongx
  * update for year 5 data. Tofp removed, so do nothing in this maker from now on.
  *
@@ -49,7 +52,7 @@
 class StEvent;
 class StTrack;
 class StHelix;
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 class StTrackGeometry;
 class StTofGeometry;
 class StTofCollection;
@@ -186,7 +189,7 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.7 2005/04/12 17:32:45 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.8 2005/07/06 22:12:09 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpMatchMaker,0)
 };
