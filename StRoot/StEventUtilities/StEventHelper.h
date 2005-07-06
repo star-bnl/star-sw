@@ -26,9 +26,9 @@ class TObjArray;
 class StRefArray;
 class StPtrVecHit;
 class BetheBloch;
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 class THelixTrack;
-class StHelixD;
+#include "StHelixD.hh"
 
 
 class StVertexHelper: public TObject
