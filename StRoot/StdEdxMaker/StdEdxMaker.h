@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.h,v 1.10 2003/09/10 19:47:53 perev Exp $
+// $Id: StdEdxMaker.h,v 1.11 2005/07/06 21:15:48 fisyak Exp $
 #ifndef STAR_StdEdxMaker
 #define STAR_StdEdxMaker
 
@@ -16,7 +16,7 @@
 class St_fee_vs_pad_row;
 class St_TpcTimeGain;
 class St_TpcDriftDistCorr;
-class StThreeVectorD;
+#include "StThreeVectorD.hh"
 class St_TpcSecRowCor;
 class StTrackChair;
 
@@ -46,7 +46,7 @@ class StdEdxMaker : public StMaker {
   void Histogramming(StTrackChair     *globtrkC, Int_t iglob);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.10 2003/09/10 19:47:53 perev Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.11 2005/07/06 21:15:48 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
