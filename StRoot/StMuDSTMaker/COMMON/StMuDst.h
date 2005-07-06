@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.26 2005/04/12 21:56:29 mvl Exp $
+ * $Id: StMuDst.h,v 1.27 2005/07/06 21:40:18 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -46,7 +46,7 @@ class EztTrigBlob;
 class EztFpdBlob;
 class EztEmcRawData;
 
-class StPhysicalHelixD;
+#include "StPhysicalHelixD.hh"
 
 #include "TObject.h"
 #include "StMuArrays.h"
@@ -297,6 +297,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.27  2005/07/06 21:40:18  fisyak
+ * use template version of StPhysicalHelixD
+ *
  * Revision 1.26  2005/04/12 21:56:29  mvl
  * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
  *

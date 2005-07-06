@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.13 2005/03/17 21:55:00 mvl Exp $
+ * $Id: StMuTrack.h,v 1.14 2005/07/06 21:40:18 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -91,7 +91,7 @@ class StMuTrack : public TObject {
     StThreeVectorF lastPoint() const; ///< Returns positions of last measured point.
     StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
-    StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyac new pid probabilities. 
+    StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
 protected:
@@ -130,7 +130,7 @@ protected:
   StThreeVectorF mLastPoint;
   StMuHelix mHelix;
   StMuHelix mOuterHelix;
-  StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyac pid probabilities.
+  StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
 
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
@@ -179,7 +179,7 @@ inline StThreeVectorF StMuTrack::firstPoint() const {return mFirstPoint;}
 inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
 //!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
-inline StMuProbPidTraits StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyac new pid probabilities. 
+inline StMuProbPidTraits StMuTrack::probPidTraits() const { return mProbPidTraits;} ///< Returns Yuri Fisyak new pid probabilities. 
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
 inline void StMuTrack::setProbabilityPidCentrality(double cent) { mProbabilityPidCentrality = cent;}
 
@@ -192,6 +192,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.14  2005/07/06 21:40:18  fisyak
+ * use template version of StPhysicalHelixD
+ *
  * Revision 1.13  2005/03/17 21:55:00  mvl
  * Added StMuMomentumShiftMaker for applying a magnetic field scaling to the reconstructed MuDst. This class accesses StMuTrack, StMuEvent and StMuHelix and some Strangeness MuDst data members as 'friend'
  *
