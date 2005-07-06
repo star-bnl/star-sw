@@ -1,39 +1,38 @@
-#include "dEdxTrack.h"
+#include "dEdxTrackY2.h"
 
-ClassImp(dEdxTrack)
-  //ClassImp(dEdx_t)
+ClassImp(dEdxTrackY2);
 
-TClonesArray *dEdxTrack::fgPoints = 0;
+TClonesArray *dEdxTrackY2::fgPoints = 0;
 
 
-dEdxTrack::dEdxTrack() {
-   if (!fgPoints) fgPoints = new TClonesArray("dEdx_t", 100);
+dEdxTrackY2::dEdxTrackY2() {
+   if (!fgPoints) fgPoints = new TClonesArray("dEdxY2_t", 100);
    fPoints = fgPoints;
    fNPoint = 0;
 }
 
 //______________________________________________________________________________
-dEdxTrack::~dEdxTrack()
+dEdxTrackY2::~dEdxTrackY2()
 {
    Clear();
 }
 
 //______________________________________________________________________________
-void dEdxTrack::AddPoint(dEdx_t &point)
+void dEdxTrackY2::AddPoint(dEdxY2_t &point)
 {
    TClonesArray &points = *fPoints;
-   new(points[fNPoint++]) dEdx_t(point);
+   new(points[fNPoint++]) dEdxY2_t(point);
 }
 
 //______________________________________________________________________________
-void dEdxTrack::Clear(Option_t *option)
+void dEdxTrackY2::Clear(Option_t *option)
 {
    fNPoint = 0;
    fPoints->Clear(option);
 }
 
 //______________________________________________________________________________
-void dEdxTrack::Reset(Option_t *option)
+void dEdxTrackY2::Reset(Option_t *option)
 {
    delete fgPoints; fgPoints = 0;
 }

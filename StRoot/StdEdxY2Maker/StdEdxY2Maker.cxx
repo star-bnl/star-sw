@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.52 2005/05/13 20:28:48 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.53 2005/07/06 18:55:07 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -67,9 +67,9 @@ static Int_t tMin = 20010701;
 static Int_t tMax = 20050701;
 const static Int_t NdEdxMax  = 60;
 Int_t   StdEdxY2Maker::NdEdx = 0;
-dEdx_t *StdEdxY2Maker::CdEdx = 0;
-dEdx_t *StdEdxY2Maker::FdEdx = 0;
-dEdx_t *StdEdxY2Maker::dEdxS = 0;
+dEdxY2_t *StdEdxY2Maker::CdEdx = 0;
+dEdxY2_t *StdEdxY2Maker::FdEdx = 0;
+dEdxY2_t *StdEdxY2Maker::dEdxS = 0;
 static  Int_t numberOfSectors;
 static  Int_t numberOfTimeBins;
 static  Int_t NumberOfRows;
@@ -78,7 +78,7 @@ static  Int_t NoPads;
 
 const static Double_t pMomin = 0.4; // range for dE/dx calibration
 const static Double_t pMomax = 0.5;
-#include "dEdxTrack.h"
+#include "dEdxTrackY2.h"
 #include "TMemStat.h"
 void pmem() { TMemStat::PM();}
 
@@ -272,7 +272,7 @@ Int_t StdEdxY2Maker::Make(){
   StTpcLocalSectorAlignedCoordinate localA, lANext;
   StThreeVectorD xyz[4];
   if (Debug() > 0) timer.start();
-  dEdx_t CdEdxT[NdEdxMax],FdEdxT[NdEdxMax],dEdxST[NdEdxMax];
+  dEdxY2_t CdEdxT[NdEdxMax],FdEdxT[NdEdxMax],dEdxST[NdEdxMax];
   CdEdx = CdEdxT; 
   FdEdx = FdEdxT; 
   dEdxS = dEdxST; 
@@ -993,7 +993,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 #endif /* __THELIX__ */
   static TH2S *BaddEdxZPhi70[2], *BaddEdxZPhiZ[2];
   static TH1F *BaddEdxMult70[2], *BaddEdxMultZ[2];
-  static dEdxTrack *ftrack = 0;
+  static dEdxTrackY2 *ftrack = 0;
   static int hMade = 0;
   
   if (! gTrack && !hMade) {
@@ -1366,9 +1366,9 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
       Int_t bufsize = 64000;
       Int_t split = 99;
       if (split)  bufsize /= 4;
-      ftrack = new dEdxTrack();
+      ftrack = new dEdxTrackY2();
       TTree::SetBranchStyle(1); //new style by default
-      TBranch *branch = ftree->Branch("dEdxTrack", "dEdxTrack", &ftrack, bufsize,split);
+      TBranch *branch = ftree->Branch("dEdxTrackY2", "dEdxTrackY2", &ftrack, bufsize,split);
       branch->SetAutoDelete(kFALSE);
     }
     return;
@@ -1393,9 +1393,10 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   StTofPidTraits* pidTof  = 0;
 #endif
   Double_t I70 = 0, D70 = 0, I70U = 0, D70U = 0, I70A = 0, D70A = 0;
-  Double_t chisq = 1e10, fitZ = 0, fitdZ = 1e10, fitZU = 0, fitdZU = 1e10;
+  Double_t fitZ = 0, fitdZ = 1e10, fitZU = 0, fitdZU = 1e10;
   Int_t N70 = 0, NF = 0, N70A = 0;
   Double_t TrackLength70 = 0, TrackLength = 0;
+  static const Int_t IdxH[4] = {kPidProton,kPidKaon,kPidPion,kPidElectron};
   if (size) {
     for (unsigned int i = 0; i < traits.size(); i++) {
       if (! traits[i]) continue;
@@ -1451,7 +1452,10 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   Double_t PredB[NHYPS], Pred70B[NHYPS];
   Double_t PredBMN[2], Pred70BMN[2]; 
   Double_t date = GetDateTime().Convert();
-  Double_t devZ[NHYPS], devZs[NHYPS];
+  Double_t devZ[NHYPS], devZs[NHYPS], devToF[NHYPS];
+  memset (devZ, 0, NHYPS*sizeof(Double_t));
+  memset (devZs, 0, NHYPS*sizeof(Double_t));
+  memset (devToF, 0, NHYPS*sizeof(Double_t));
   Double_t bg = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[kPidPion]->mass());
   Double_t bghyp[NHYPS];
   Int_t l;
@@ -1517,7 +1521,6 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     }
 #ifdef CompareWithToF
     // use ToF 
-    Double_t devToF[NHYPS];
     if (pidTof) {
       for (l = kPidElectron; l < NHYPS; l++) {
 	switch (l) {
@@ -1867,27 +1870,41 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     if ((TESTBIT(m_Mode, kCORRELATION))) Correlations();
   }
   // dE/dx tree
-  if (ftrack && ftree && TrackLength70 > 20.0) {
+  if (NdEdx > 0  && ftrack && ftree && TrackLength70 > 20.0 && pidTof) {
     ftrack->Clear();
     ftrack->sCharge = 1 - 2*sCharge;
     ftrack->p = pMomentum;
-    ftrack->Eta = Eta;
+    ftrack->pX = g3.x();
+    ftrack->pY = g3.y();
+    ftrack->pZ = g3.z();
     ftrack->R0 = gTrack->geometry()->origin().mag();
     ftrack->Z0 = gTrack->geometry()->origin().z();
     ftrack->Phi0 = gTrack->geometry()->origin().phi();
     ftrack->NoFitPoints = NoFitPoints;
+    ftrack->NdEdx = NdEdx;
     ftrack->N70 = N70;
     ftrack->I70 = I70;
+    ftrack->D70 = D70;
     ftrack->TrackLength70 = TrackLength70;
-    ftrack->NdEdx = NdEdx;
-    ftrack->chisq = chisq;
     ftrack->fitZ = fitZ;
     ftrack->fitdZ = fitdZ;
     ftrack->TrackLength = TrackLength;
-    ftrack->PredP = Pred70[kPidProton];
-    ftrack->PredK = Pred70[kPidKaon];
-    ftrack->PredPi = Pred70[kPidPion];
-    ftrack->PredE = Pred70[kPidElectron];
+    Double_t *h = 0; 
+    for (Int_t l = 0; l < 4; l++) {
+      Int_t k = IdxH[l];
+      if      (k == kPidProton  ) h = &ftrack->PredP;
+      else if (k == kPidKaon    ) h = &ftrack->PredK;
+      else if (k == kPidPion    ) h = &ftrack->Predpi;
+      else if (k == kPidElectron) h = &ftrack->PredE;
+      else continue;
+      h[0] = PredB[k];
+      h[1] = Pred70B[k];
+      h[2] = devZs[k];
+      h[3] = devZ[k];
+      h[4] = devToF[k];
+      if (pidprob) h[5] = pidprob->GetProbability(k);
+      else         h[5] = -1;
+    }
     for (Int_t k = 0; k < NdEdx; k++) {
       ftrack->AddPoint(FdEdx[k]);
     }
@@ -1903,7 +1920,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
 				"dEdxM","dEdxZ","dEdxm","dEdxT","dEdxW",
 				"dEdxC","dEdxE","dEdxp","dEdxX","dEdxd"};
   if (iop < 0 || iop >= NOpts) return;
-  dEdx_t *pdEdx = 0; 
+  dEdxY2_t *pdEdx = 0; 
   Double_t dEdx;
   Double_t I = 0;
   Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
@@ -1951,7 +1968,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
   cout << "mean dEdx \t" << I << "\tExp(avrz)\t" << TMath::Exp(avrz) << endl;
 }
 //________________________________________________________________________________
-Double_t StdEdxY2Maker::LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdx_t *dEdx) {
+Double_t StdEdxY2Maker::LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdxY2_t *dEdx) {
   //SecRowMipFitpHist298P02gh1.root  correction to most probable value vs log2(dx)
   //  static const Double_t probdx2[3] = {-3.58584e-02, 4.16084e-02,-1.45163e-02};// 
   const static Double_t ProbCut = 1.e-4;
@@ -2142,7 +2159,7 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   } // (TESTBIT(m_Mode, kGASHISTOGRAMS))n
 }
 //________________________________________________________________________________
-void StdEdxY2Maker::SpaceCharge(Int_t iok, StEvent* pEvent, StGlobalCoordinate *global, dEdx_t *CdEdx) {
+void StdEdxY2Maker::SpaceCharge(Int_t iok, StEvent* pEvent, StGlobalCoordinate *global, dEdxY2_t *CdEdx) {
   // SpaceChargeStudy
   static TProfile2D *SpaceCharge = 0, *SpaceChargeU = 0, *SpaceChargeT = 0;
   static TH2S *Space2Charge = 0, *Space2ChargeU = 0, *Space2ChargeT = 0;
