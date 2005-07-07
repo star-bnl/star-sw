@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.3 2005/03/03 01:32:03 porter Exp $
+ * $Id: StEStructTrack.cxx,v 1.4 2005/07/07 19:31:13 fisyak Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -20,7 +20,7 @@ using namespace units;
 
 ClassImp(StEStructTrack)
 
-StEStructTrack::StEStructTrack(StEStructTrack *track) : TObject() {
+  StEStructTrack::StEStructTrack(StEStructTrack *track) : TObject(), mHelix(0,0,0,StThreeVectorD(), -1) {
   mPx = track->Px();
   mPy = track->Py();
   mPz = track->Pz();
@@ -229,6 +229,9 @@ Float_t StEStructTrack::PIDpiMinus() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.4  2005/07/07 19:31:13  fisyak
+ * Add default for mHelix
+ *
  * Revision 1.3  2005/03/03 01:32:03  porter
  * fixed a bug setting 4-momentum and added data (+accessors)
  * to the track class
