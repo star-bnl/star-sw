@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.h,v 1.6 2005/07/06 19:24:59 fisyak Exp $
+ * $Id: StTofrGeometry.h,v 1.7 2005/07/07 01:22:28 fisyak Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.h,v $
+ * Revision 1.7  2005/07/07 01:22:28  fisyak
+ * Hide typedefs IntVec, DoubleVec, PointVec and methods HelixCrossCellIds,HelixCross, projTrayVector from CINT
+ *
  * Revision 1.6  2005/07/06 19:24:59  fisyak
  * Use templated StThreeVector
  *
@@ -61,8 +64,8 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
-
-#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
+#ifndef __CINT__
+#if !defined(ST_NO_TEMPLATE_DEF_ARGS)
 typedef vector<Int_t>  IntVec;
 typedef vector<Double_t>  DoubleVec;
 typedef vector<StThreeVector<double> > PointVec;
@@ -71,7 +74,7 @@ typedef vector<Int_t, allocator<Int_t> >  IntVec;
 typedef vector<Double_t, allocator<Double_t> >  DoubleVec;
 typedef vector<StThreeVector<double>, allocator<StThreeVector<double>>> PointVec;
 #endif
-
+#endif
 class StTofrNode;
 class StTofrGeomNode;
 class StTofrGeomTray;
@@ -473,11 +476,12 @@ class StTofrGeometry : public TNamed {
    Int_t             CellIdPointIn(const StThreeVectorD& point) const;
    //   Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec &idVec,
    //                               DoubleVec &pathVec, PointVec &crossVec) const;
+#ifndef __CINT__
    Bool_t            HelixCrossCellIds(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec, IntVec &idVec, DoubleVec &pathVec, PointVec &crossVec) const;
    //   Bool_t            HelixCross(const StHelixD &helix) const;
    Bool_t            HelixCross(const StHelixD &helix, IntVec validModuleVec, IntVec projTrayVec) const;
    Bool_t            projTrayVector(const StHelixD &helix, IntVec &trayVec) const;
-
+#endif
 #ifdef __ROOT__      
   ClassDef(StTofrGeometry,2)  //Simplified TOFr Geometry
 #endif
