@@ -1,52 +1,19 @@
-/***************************************************************************
+/*!
+ * \class StMcTrack
+ * \brief Monte Carlo Track class
+ * \author Manuel Calderon de la Barca Sanchez
+ * \date   July 1999
  *
- * $Id: StMcTrack.hh,v 2.18 2005/05/27 23:37:25 calderon Exp $
+ ***************************************************************************
+ *
+ * $Id: StMcTrack.hh,v 2.19 2005/07/07 18:20:49 calderon Exp $
+ *
+ ***************************************************************************
+ *
  * $Log: StMcTrack.hh,v $
- * Revision 2.18  2005/05/27 23:37:25  calderon
- * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
+ * Revision 2.19  2005/07/07 18:20:49  calderon
+ * Added support for IGT detector.
  *
- * Revision 2.17  2005/04/18 20:11:33  calderon
- * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
- *
- * Revision 2.16  2005/01/27 23:40:49  calderon
- * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
- *
- * Revision 2.15  2004/09/14 05:00:30  calderon
- * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
- *
- * Revision 2.14  2004/01/13 21:03:34  fisyak
- * Replace iostream by Stiostream.h (for icc)
- *
- * Revision 2.13  2003/12/04 05:56:47  calderon
- * Inclusion of Endcap EMC hit collection in StMcEvent and
- * of the Endcap hit vector in StMcTrack.
- * fix const of StMcVertex::parent() to avoid warnings in user code
- *
- * Revision 2.12  2003/10/08 20:17:55  calderon
- * -using <iostream>, std::cout, std::ostream.
- * -changes in FTPC volume Id.
- *   o Causes changes in decoding of plane().
- *   o sector() is added.
- *   o print volumeId and sector() in the operator<<.
- *
- * Revision 2.11  2003/09/02 17:58:41  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 2.10  2003/08/20 18:50:21  calderon
- * Addition of Tof classes and Pixel classes.  Modified track, event, and
- * container code to reflect this.
- * Fix bug in StMcVertex and in clearing of some hit collections.
- *
- * Revision 2.9  2003/02/19 03:16:05  calderon
- * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
- * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
- *
- * Revision 2.9  2003/02/18 00:00:00  gans
- * Introduction of Ctb classes.  Modified several classes
- * accordingly.
- *
- * $Id: StMcTrack.hh,v 2.18 2005/05/27 23:37:25 calderon Exp $
- * $Log: StMcTrack.hh,v $
  * Revision 2.18  2005/05/27 23:37:25  calderon
  * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
  *
@@ -203,6 +170,8 @@ public:
     const StPtrVecMcPixelHit&       pixelHits() const; //!
     StPtrVecMcIstHit&               istHits(); //!
     const StPtrVecMcIstHit&         istHits() const; //!
+    StPtrVecMcIgtHit&               igtHits(); //!
+    const StPtrVecMcIgtHit&         igtHits() const; //!
     StPtrVecMcFstHit&               fstHits(); //!
     const StPtrVecMcFstHit&         fstHits() const; //!
     StPtrVecMcFgtHit&               fgtHits(); //!
@@ -239,6 +208,7 @@ public:
     void setEsmdvHits(StPtrVecMcCalorimeterHit&); //!
     void setPixelHits(StPtrVecMcPixelHit&); //!
     void setIstHits(StPtrVecMcIstHit&); //!
+    void setIgtHits(StPtrVecMcIgtHit&); //!
     void setFstHits(StPtrVecMcFstHit&); //!
     void setFgtHits(StPtrVecMcFgtHit&); //!
 
@@ -266,6 +236,7 @@ public:
     void addEsmdvHit(StMcCalorimeterHit*); //!
     void addPixelHit(StMcPixelHit*); //!
     void addIstHit(StMcIstHit*); //!
+    void addIgtHit(StMcIgtHit*); //!
     void addFstHit(StMcFstHit*); //!
     void addFgtHit(StMcFgtHit*); //!
     void removeTpcHit(StMcTpcHit*); //!
@@ -286,6 +257,7 @@ public:
     void removeEsmdvHit(StMcCalorimeterHit*); //!
     void removePixelHit(StMcPixelHit*); //!
     void removeIstHit(StMcIstHit*); //!
+    void removeIgtHit(StMcIgtHit*); //!
     void removeFstHit(StMcFstHit*); //!
     void removeFgtHit(StMcFgtHit*); //!
 
@@ -313,6 +285,7 @@ protected:
     StPtrVecMcCalorimeterHit mEsmdvHits; //!
     StPtrVecMcPixelHit       mPixelHits; //!
     StPtrVecMcIstHit         mIstHits; //!
+    StPtrVecMcIgtHit         mIgtHits; //!
     StPtrVecMcFstHit         mFstHits; //!
     StPtrVecMcFgtHit         mFgtHits; //!
     StParticleDefinition*    mParticleDefinition; //!
@@ -422,6 +395,10 @@ inline const StPtrVecMcPixelHit& StMcTrack::pixelHits() const { return mPixelHit
 inline StPtrVecMcIstHit& StMcTrack::istHits() { return mIstHits; }
 
 inline const StPtrVecMcIstHit& StMcTrack::istHits() const { return mIstHits; }
+
+inline StPtrVecMcIgtHit& StMcTrack::igtHits() { return mIgtHits; }
+
+inline const StPtrVecMcIgtHit& StMcTrack::igtHits() const { return mIgtHits; }
 
 inline StPtrVecMcFstHit& StMcTrack::fstHits() { return mFstHits; }
 

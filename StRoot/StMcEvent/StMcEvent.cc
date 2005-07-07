@@ -1,7 +1,18 @@
-/***************************************************************************
+/*!
+ * \class  StMcEvent
+ * \brief  Event data structure to hold all information from a Monte Carlo simulation.
+ * This class is the interface to access all information from the GEANT simulations
+ * in STAR. From here one can get all vertices, tracks, hits in the event.
+ * \author Manuel Calderon de la Barca Sanchez (Yale, BNL, IU) calderon@iucf.indiana.edu
+ * \date   July 1999
  *
- * $Id: StMcEvent.cc,v 2.18 2005/05/27 23:37:25 calderon Exp $
+ ***************************************************************************
+ *
+ * $Id: StMcEvent.cc,v 2.19 2005/07/07 18:20:49 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.19  2005/07/07 18:20:49  calderon
+ * Added support for IGT detector.
+ *
  * Revision 2.18  2005/05/27 23:37:25  calderon
  * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
  *
@@ -94,6 +105,7 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcIstHitCollection.hh"
+#include "StMcIgtHitCollection.hh"
 #include "StMcFstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
 #include "StMcContainers.hh" 
@@ -108,14 +120,15 @@
 #include "StMcTofHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcIstHit.hh"
+#include "StMcIgtHit.hh"
 #include "StMcFstHit.hh"
 #include "StMcFgtHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.18 2005/05/27 23:37:25 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.18 2005/05/27 23:37:25 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.19 2005/07/07 18:20:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.19 2005/07/07 18:20:49 calderon Exp $";
 ClassImp(StMcEvent);
 
 void StMcEvent::initToZero()
@@ -132,6 +145,7 @@ void StMcEvent::initToZero()
     mEemcHits = 0;
     mPixelHits = 0;
     mIstHits = 0;
+    mIgtHits = 0;
     mFstHits = 0;
     mFgtHits = 0;
 
@@ -155,6 +169,7 @@ void StMcEvent::initToZero()
     mEsmdvHits = new StMcEmcHitCollection();
     mPixelHits = new StMcPixelHitCollection();
     mIstHits = new StMcIstHitCollection();
+    mIgtHits = new StMcIgtHitCollection();
     mFstHits = new StMcFstHitCollection();
     mFgtHits = new StMcFgtHitCollection();
 }
@@ -254,19 +269,22 @@ StMcEvent::~StMcEvent()
 
     if (mEsmdvHits) delete mEsmdvHits;
     mEsmdvHits=0;
-
-   if (mPixelHits) delete mPixelHits;
+    
+    if (mPixelHits) delete mPixelHits;
     mPixelHits=0;
-
+    
     if (mIstHits) delete mIstHits;
     mIstHits=0;
 
-   if (mFstHits) delete mFstHits;
+    if (mIgtHits) delete mIgtHits;
+    mIgtHits=0;
+
+    if (mFstHits) delete mFstHits;
     mFstHits=0;
-
-   if (mFgtHits) delete mFgtHits;
+    
+    if (mFgtHits) delete mFgtHits;
     mFgtHits=0;
-
+    
     for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
 	delete *it;    
@@ -446,6 +464,12 @@ void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 {
     if (mIstHits && mIstHits!= val) delete mIstHits;
     mIstHits = val;
+}   
+
+void StMcEvent::setIgtHitCollection(StMcIgtHitCollection* val)
+{
+    if (mIgtHits && mIgtHits!= val) delete mIgtHits;
+    mIgtHits = val;
 }   
 
 void StMcEvent::setFstHitCollection(StMcFstHitCollection* val)
