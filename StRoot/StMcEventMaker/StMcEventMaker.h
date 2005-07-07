@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.16 2005/06/06 19:15:07 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.17 2005/07/07 18:21:18 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.17  2005/07/07 18:21:18  calderon
+ * Added code for filling of IGT classes.
+ *
  * Revision 1.16  2005/06/06 19:15:07  calderon
  * Update for filling EEMC hits.  All filling now done in one function,
  * StMcEventMaker::fillEemc(), towers, prs, smdu, smdv.
@@ -90,7 +93,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.16 2005/06/06 19:15:07 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.17 2005/07/07 18:21:18 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -110,6 +113,7 @@ public:
     Bool_t  doUseEemc;             //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
+    Bool_t  doUseIgt;              //!
     Bool_t  doUseFst;              //!
     Bool_t  doUseFgt;              //!
 

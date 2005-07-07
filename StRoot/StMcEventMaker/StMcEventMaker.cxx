@@ -1,7 +1,19 @@
-/*************************************************
+/*!
+ * \class  StMcEventMaker
+ * \brief  Filling of all StMcEvent classes from g2t tables
+ * Transform all the data in the g2t tables into the corresponding
+ * StMc classes, and create the pointers to navigate
+ * from event to hits/tracks/vertices.
+ * \author Manuel Calderon de la Barca Sanchez
+ * \date   July 1999
  *
- * $Id: StMcEventMaker.cxx,v 1.56 2005/06/09 19:42:33 perev Exp $
+ *************************************************
+ *
+ * $Id: StMcEventMaker.cxx,v 1.57 2005/07/07 18:21:17 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.57  2005/07/07 18:21:17  calderon
+ * Added code for filling of IGT classes.
+ *
  * Revision 1.56  2005/06/09 19:42:33  perev
  * if(Debug()) for prinout added
  *
@@ -235,6 +247,7 @@ using std::find;
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_g2t_pix_hit_Table.h"
 #include "tables/St_g2t_ist_hit_Table.h"
+#include "tables/St_g2t_igt_hit_Table.h"
 #include "tables/St_g2t_fst_hit_Table.h"
 #include "tables/St_g2t_fgt_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
@@ -253,7 +266,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.56 2005/06/09 19:42:33 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.57 2005/07/07 18:21:17 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -278,6 +291,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseEemc        (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
+    doUseIgt         (kTRUE),
     doUseFst         (kTRUE),
     doUseFgt         (kTRUE),
     ttemp(),
@@ -410,6 +424,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
+    St_g2t_igt_hit *g2t_igt_hitTablePointer =  (St_g2t_igt_hit *) geantDstI("g2t_igt_hit");
     St_g2t_fst_hit *g2t_fst_hitTablePointer =  (St_g2t_fst_hit *) geantDstI("g2t_fst_hit");
     St_g2t_fgt_hit *g2t_fgt_hitTablePointer =  (St_g2t_fgt_hit *) geantDstI("g2t_fgt_hit");
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
@@ -567,6 +582,15 @@ Int_t StMcEventMaker::Make()
 	    istHitTable = g2t_ist_hitTablePointer->GetTable();
 	else 
 	    if (Debug()) cerr << "Table g2t_ist_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
+	//	
+	// Igt Hit Table
+	//
+	g2t_igt_hit_st *igtHitTable=0;
+	if (g2t_igt_hitTablePointer)
+	    igtHitTable = g2t_igt_hitTablePointer->GetTable();
+	else 
+	    if (Debug()) cerr << "Table g2t_igt_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//	
 	// Fst Hit Table
@@ -1314,6 +1338,37 @@ Int_t StMcEventMaker::Make()
 	}// do use ist
 
 	//
+	// Igt Hits
+	//
+	if (doUseIgt) {
+	    if (g2t_igt_hitTablePointer) {    
+		StMcIgtHit* fh = 0;
+		long  NHits = g2t_igt_hitTablePointer->GetNRows();
+		long  iTrkId = 0;
+		long ihit;
+		for(ihit=0; ihit<NHits; ihit++) {
+		    fh = new StMcIgtHit(&igtHitTable[ihit]);
+		    if (!mCurrentMcEvent->igtHitCollection()->addHit(fh)){ 
+			delete fh;
+			fh = 0;
+			continue;
+		    }
+		    // point hit to its parent and add it to collection
+		    // of the appropriate track
+		    iTrkId = (igtHitTable[ihit].track_p) - 1;
+		    fh->setParentTrack(ttemp[iTrkId]);
+		    ttemp[iTrkId]->addIgtHit(fh);
+		}
+		if (Debug()) {
+		    cout << "Filled " << mCurrentMcEvent->igtHitCollection()->numberOfHits() << " Igt Hits" << endl;
+		}
+	    }
+	    else {
+		if (Debug()) cout << "No Igt Hits in this event" << endl;
+	    }
+	}// do use igt
+
+	//
 	// Fst Hits
 	//
 	if (doUseFst) {
@@ -1915,6 +1970,26 @@ StMcEventMaker::printEventInfo()
 		cout << *(istColl->layer(k)->hits()[0]);
 		cout << "Parent track of this Hit" << endl;
 		cout << *(istColl->layer(k)->hits()[0]->parentTrack()) << endl;
+		gotOneHit = kTRUE;
+	    }
+	
+    }
+
+    StMcIgtHitCollection *igtColl = mCurrentMcEvent->igtHitCollection();
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StMcIgtHitCollection at " << (void*) igtColl               << endl;
+    cout << "Dumping collection size and one hit only."                 << endl;
+    cout << "---------------------------------------------------------" << endl;
+    nhits = igtColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    if (igtColl &&  nhits) {
+	gotOneHit = kFALSE;
+	for (k=0; !gotOneHit && k<igtColl->numberOfLayers(); k++)
+	    if (igtColl->layer(k)->hits().size()) {
+		cout << "Igt Hit" << endl;
+		cout << *(igtColl->layer(k)->hits()[0]);
+		cout << "Parent track of this Hit" << endl;
+		cout << *(igtColl->layer(k)->hits()[0]->parentTrack()) << endl;
 		gotOneHit = kTRUE;
 	    }
 	
