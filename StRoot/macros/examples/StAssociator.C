@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.35 2004/03/26 23:29:02 calderon Exp $
+// $Id: StAssociator.C,v 1.36 2005/07/07 21:19:18 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.36  2005/07/07 21:19:18  calderon
+// Load EEmcUtil.
+//
 // Revision 1.35  2004/03/26 23:29:02  calderon
 // Added switch to control the id or distance association.
 //
@@ -155,7 +158,8 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   gSystem->Load("StEvent");
 //   gSystem->Load("StEventMaker"); //not needed if event.root branch present
   gSystem->Load("StEmcUtil"); 
-
+  gSystem->Load("StEEmcUtil");
+  
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StAssociationMaker");
