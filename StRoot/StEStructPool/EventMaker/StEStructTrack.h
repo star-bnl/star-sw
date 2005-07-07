@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.3 2005/03/03 01:32:03 porter Exp $
+ * $Id: StEStructTrack.h,v 1.4 2005/07/07 19:31:13 fisyak Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -78,7 +78,7 @@ private:
 
 public:
 
-  StEStructTrack() : mIsComplete(false), mAssignedMass(0.1396) {};
+  StEStructTrack() : mIsComplete(false), mHelix(0,0,0,StThreeVectorD(), -1), mAssignedMass(0.1396) {};
   StEStructTrack(StEStructTrack* track);
   virtual ~StEStructTrack() {};
 
@@ -221,6 +221,9 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.4  2005/07/07 19:31:13  fisyak
+ * Add default for mHelix
+ *
  * Revision 1.3  2005/03/03 01:32:03  porter
  * fixed a bug setting 4-momentum and added data (+accessors)
  * to the track class
