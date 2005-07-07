@@ -1,5 +1,9 @@
-// $Id: StMcEventReadMacro.C,v 1.20 2005/05/11 21:02:57 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.21 2005/07/07 19:43:42 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.21  2005/07/07 19:43:42  calderon
+// Load EEmcUtil.
+// Add switch for Igt.
+//
 // Revision 1.20  2005/05/11 21:02:57  calderon
 // Add switch for SSD.
 //
@@ -102,6 +106,7 @@ const char *MainFile=
     gSystem->Load("StTpcDb");
     gSystem->Load("StEvent");
     gSystem->Load("StEmcUtil");
+    gSystem->Load("StEEmcUtil");
     
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
@@ -132,7 +137,8 @@ const char *MainFile=
     mcEventReader->doUseBsmd = true;
     mcEventReader->doUseIst  = true; 
     mcEventReader->doUseFst  = true; 
-    mcEventReader->doUseFgt  = true; 
+    mcEventReader->doUseFgt  = true;
+    mcEventReader->doUseIgt  = true;
     //mcEventReader->SetDebug();
     // now execute the chain member functions
     
