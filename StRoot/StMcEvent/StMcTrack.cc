@@ -1,7 +1,22 @@
-/***************************************************************************
+/*!
+ * \class StMcTrack
+ * \brief Monte Carlo Track class
+ * All information on a simulated track is stored in this class:
+ * kinematics, particle identificiation, hits left in the detector
+ * and start/stop vertices.
+ * \author Manuel Calderon de la Barca Sanchez
+ * \date   July 1999
  *
- * $Id: StMcTrack.cc,v 2.20 2005/05/27 23:37:25 calderon Exp $
+ ***************************************************************************
+ *
+ * $Id: StMcTrack.cc,v 2.21 2005/07/07 18:20:49 calderon Exp $
+ *
+ ***************************************************************************
+ *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.21  2005/07/07 18:20:49  calderon
+ * Added support for IGT detector.
+ *
  * Revision 2.20  2005/05/27 23:37:25  calderon
  * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
  *
@@ -32,8 +47,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.20 2005/05/27 23:37:25 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.21 2005/07/07 18:20:49 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.21  2005/07/07 18:20:49  calderon
+ * Added support for IGT detector.
+ *
  * Revision 2.20  2005/05/27 23:37:25  calderon
  * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
  *
@@ -132,7 +150,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.20 2005/05/27 23:37:25 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.21 2005/07/07 18:20:49 calderon Exp $";
 
 ClassImp(StMcTrack);
 
@@ -197,6 +215,7 @@ StMcTrack::~StMcTrack() {
     mEsmdvHits.clear();
     mPixelHits.clear();
     mIstHits.clear();
+    mIgtHits.clear();
     mFstHits.clear();
     mFgtHits.clear();
 }
@@ -253,6 +272,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Esmdv Hits: " << t.esmdvHits().size() << endl;
     os << "No. Pixel Hits: " << t.pixelHits().size() << endl;
     os << "No. Ist Hits  : " << t.istHits().size()   << endl;
+    os << "No. Igt Hits  : " << t.igtHits().size()   << endl;
     os << "No. Fst Hits  : " << t.fstHits().size()   << endl;
     os << "No. Fgt Hits  : " << t.fgtHits().size()   << endl;
     os << "Is Shower     : " << t.isShower() << endl;
@@ -305,6 +325,8 @@ void StMcTrack::setEsmdvHits(StPtrVecMcCalorimeterHit& val) { mEsmdvHits = val; 
 void StMcTrack::setPixelHits(StPtrVecMcPixelHit& val) { mPixelHits = val; }
 
 void StMcTrack::setIstHits(StPtrVecMcIstHit& val) { mIstHits = val; }
+
+void StMcTrack::setIgtHits(StPtrVecMcIgtHit& val) { mIgtHits = val; }
 
 void StMcTrack::setFstHits(StPtrVecMcFstHit& val) { mFstHits = val; }
 
@@ -405,6 +427,11 @@ void StMcTrack::addPixelHit(StMcPixelHit* hit)
 void StMcTrack::addIstHit(StMcIstHit* hit)
 {
   mIstHits.push_back(hit);
+}
+
+void StMcTrack::addIgtHit(StMcIgtHit* hit)
+{
+  mIgtHits.push_back(hit);
 }
 
 void StMcTrack::addFstHit(StMcFstHit* hit)
@@ -534,6 +561,14 @@ void StMcTrack::removeIstHit(StMcIstHit* hit)
     StMcIstHitIterator iter = find (mIstHits.begin(), mIstHits.end(),hit);
     if (iter != mIstHits.end()) {
 	mIstHits.erase(iter);
+    }
+}
+
+void StMcTrack::removeIgtHit(StMcIgtHit* hit)
+{
+    StMcIgtHitIterator iter = find (mIgtHits.begin(), mIgtHits.end(),hit);
+    if (iter != mIgtHits.end()) {
+	mIgtHits.erase(iter);
     }
 }
 

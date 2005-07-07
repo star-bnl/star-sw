@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.8 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.9 2005/07/07 18:20:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.9  2005/07/07 18:20:49  calderon
+ * Added support for IGT detector.
+ *
  * Revision 2.8  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -80,6 +83,9 @@
 #include "StMcIstHit.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcIstLayerHitCollection.hh"
+#include "StMcIgtHit.hh"
+#include "StMcIgtHitCollection.hh"
+#include "StMcIgtLayerHitCollection.hh"
 #include "StMcFstHit.hh"
 #include "StMcFstHitCollection.hh"
 #include "StMcFstLayerHitCollection.hh"

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.18 2005/05/27 23:37:25 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.19 2005/07/07 18:20:49 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.19  2005/07/07 18:20:49  calderon
+ * Added support for IGT detector.
+ *
  * Revision 2.18  2005/05/27 23:37:25  calderon
  * Update for EEMC, add eprs, esmdu esdmv hits to StMcEvent.
  *
@@ -105,6 +108,7 @@ class StMcEmcHitCollection;
 class StMcTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
+class StMcIgtHitCollection;
 class StMcFstHitCollection;
 class StMcFgtHitCollection;
 class StMcVertex;
@@ -193,6 +197,8 @@ public:
     const StMcPixelHitCollection*  pixelHitCollection() const;
     StMcIstHitCollection*          istHitCollection();
     const StMcIstHitCollection*    istHitCollection() const;
+    StMcIgtHitCollection*          igtHitCollection();
+    const StMcIgtHitCollection*    igtHitCollection() const;
     StMcFstHitCollection*          fstHitCollection();
     const StMcFstHitCollection*    fstHitCollection() const;
     StMcFgtHitCollection*          fgtHitCollection();
@@ -235,6 +241,7 @@ public:
     void setEsmdvHitCollection(StMcEmcHitCollection*);
     void setPixelHitCollection(StMcPixelHitCollection*);       
     void setIstHitCollection(StMcIstHitCollection*);       
+    void setIgtHitCollection(StMcIgtHitCollection*);       
     void setFstHitCollection(StMcFstHitCollection*);       
     void setFgtHitCollection(StMcFgtHitCollection*);       
 
@@ -277,6 +284,7 @@ protected:
     StMcEmcHitCollection*          mEsmdvHits;
     StMcPixelHitCollection*        mPixelHits;
     StMcIstHitCollection*          mIstHits;
+    StMcIgtHitCollection*          mIgtHits;
     StMcFstHitCollection*          mFstHits;
     StMcFgtHitCollection*          mFgtHits;
     static TString                 mCvsTag;
@@ -405,6 +413,10 @@ inline const StMcPixelHitCollection* StMcEvent::pixelHitCollection() const { ret
 inline StMcIstHitCollection* StMcEvent::istHitCollection() { return mIstHits;}
 
 inline const StMcIstHitCollection* StMcEvent::istHitCollection() const { return mIstHits;}
+
+inline StMcIgtHitCollection* StMcEvent::igtHitCollection() { return mIgtHits;}
+
+inline const StMcIgtHitCollection* StMcEvent::igtHitCollection() const { return mIgtHits;}
 
 inline StMcFstHitCollection* StMcEvent::fstHitCollection() { return mFstHits;}
 
