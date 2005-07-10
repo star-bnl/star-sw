@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.17 2005/06/17 21:41:12 chajecki Exp $
+ * $Id: StHbtTrack.cc,v 1.18 2005/07/10 02:17:21 chajecki Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.18  2005/07/10 02:17:21  chajecki
+ * Ftpc (Eeat+West) hits included in nHits()
+ *
  * Revision 1.17  2005/06/17 21:41:12  chajecki
  * Two bugs fixed:
  * 1. wrong value of mNHits set in one of the constructors
@@ -410,7 +413,7 @@ StHbtTrack::StHbtTrack(const StMuDst* dst, const StMuTrack* t) { // copy constru
   StMuEvent* ev = dst->event();
    mTrackType = t->type();
    mTrackId = t->id();
-   mNHits = t->topologyMap().numberOfHits(kTpcId);
+   mNHits = t->topologyMap().numberOfHits(kTpcId) + t->topologyMap().numberOfHits(kFtpcEastId) + t->topologyMap().numberOfHits(kFtpcWestId);
    mNHitsPoss = t->nHitsPoss(); 
    mNHitsDedx = t->nHitsDedx(); 
    mNSigmaElectron = t->nSigmaElectron();
