@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.66 2005/06/30 09:19:06 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.67 2005/07/11 13:33:03 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.67  2005/07/11 13:33:03  jcs
+// remove duplicate code
+//
 // Revision 1.66  2005/06/30 09:19:06  jcs
 // remove commented out values which were moved to Geometry_ftpc/ftpcClusterGeom a long time ago
 //
@@ -1361,12 +1364,6 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				  + fPhiError*cos(Peak->Phi)
 				  *fPhiError*cos(Peak->Phi)));
 	  thispoint->SetZerr(mParam->zDirectionError());
-#ifdef DEBUGFILE	  
-	  thispoint->SetPadPos(Peak->PadPosition);
-	  thispoint->SetTimePos(Peak->TimePosition);
-	  thispoint->SetPadPosSigma(Peak->PadSigma);
-	  thispoint->SetTimePosSigma(Peak->TimeSigma);
-#endif
 
 	}
       else
@@ -1846,12 +1843,6 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				      *fPhiError*cos(Peak[iPeakIndex].Phi)));
 	      thispoint->SetZerr(mParam->zDirectionError());
 
-#ifdef DEBUGFILE
-              thispoint->SetPadPos(Peak[iPeakIndex].PadPosition);
-              thispoint->SetTimePos(Peak[iPeakIndex].TimePosition);
-              thispoint->SetPadPosSigma(Peak[iPeakIndex].PadSigma);
-              thispoint->SetTimePosSigma(Peak[iPeakIndex].TimeSigma);
-#endif	      
 	    }
          }
             else
