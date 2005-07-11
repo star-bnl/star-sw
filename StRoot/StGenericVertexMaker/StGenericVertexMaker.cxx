@@ -25,10 +25,7 @@
 #include "StMinuitVertexFinder.h"
 #include "StppLMVVertexFinder.h"
 
-//#define PPVertex
-#ifdef PPVertex
-#include "StiPPVertex/StPPVertexFinder.h"
-#endif
+#include "StGenericVertexMaker/StiPPVertex/StPPVertexFinder.h"
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -103,18 +100,20 @@ Int_t StGenericVertexMaker::Init()
   } else if ( m_Mode & 0x4){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
-#ifdef PPVertex
+
   } else if ( m_Mode & 0x8){ // Jan's testing area
     gMessMgr->Info() << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
     theFinder= new StPPVertexFinder();
-#endif
+    if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
+      ((StPPVertexFinder*) theFinder)->setMC(true);
+    }
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
     theFinder= new StMinuitVertexFinder();
     isMinuit=true;
   }
-
+  
   if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
     if (use_ITTF)  ((StMinuitVertexFinder*)theFinder)->DoUseITTF();
     if (useCTB) ((StMinuitVertexFinder*)theFinder)->CTBforSeed();
