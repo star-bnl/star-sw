@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.26 2005/02/09 14:33:35 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.27 2005/07/11 19:20:56 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.27  2005/07/11 19:20:56  caines
+ * Add in shift due to pasa response that is accounted for in the real data t0 calc.
+ *
  * Revision 1.26  2005/02/09 14:33:35  caines
  * New electron expansion routine
  *
@@ -622,10 +625,12 @@ Int_t StSvtSimulationMaker::Make()
         else vd=vd*1e-5;
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
-     
+      
+      double PasaShift=0.1/vd*25.; //100 um shift from pasa
+
       mSvtSimulation->setDriftVelocity(vd);
       mSvtSimulation->doCloud(driftTime,energy,theta,phi);
-      mSvtSimulation->fillBuffer(anode,time,svtSimDataPixels);
+      mSvtSimulation->fillBuffer(anode,time-PasaShift,svtSimDataPixels);
            
       if (Debug()) FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak());
       
