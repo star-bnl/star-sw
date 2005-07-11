@@ -625,5 +625,11 @@ Bool_t StEEmcA2EMaker::fillFromSt( StEmcCollection *emc )
 
 
 
+Float_t StEEmcA2EMaker::energy(Int_t layer)
+{
+    Float_t sum=0.;
+    for ( Int_t sector=0;sector<12;sector++ ) sum+= energy(sector,layer); 
+    return sum;
+} 
 
 

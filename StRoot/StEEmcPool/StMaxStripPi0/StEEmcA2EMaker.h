@@ -100,6 +100,8 @@ class StEEmcA2EMaker : public StMaker {
   /// \param sector: 0..11 the 12 EEMC sectors
   /// \param layer: 0=T, 1=P, 2=Q, 3=R, 4=U, 5=V
   Float_t energy(Int_t sec, Int_t layer) { return mEnergy[sec][layer]; }
+  /// Return energy summed over full endcap
+  Float_t energy(Int_t layer); 
 
   /// Set a "scale" parameter for reconstructing MC.  Energies
   /// will be multiplied by scale.
