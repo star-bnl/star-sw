@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.9 2005/02/09 14:33:35 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.10 2005/07/11 19:20:56 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
+ * Revision 1.10  2005/07/11 19:20:56  caines
+ * Add in shift due to pasa response that is accounted for in the real data t0 calc.
+ *
  * Revision 1.9  2005/02/09 14:33:35  caines
  * New electron expansion routine
  *
@@ -122,27 +125,26 @@ Int_t StSvtEmbeddingMaker::Make()
 	return kStOk;
       }  
   }
-
+  
   //write out the state of simulation
   char st[20];
   if (mRunningEmbedding) sprintf(st,"EMBEDDING");
   else sprintf(st,"PLAIN SIMULATION");
   gMessMgr->Info()<<"SVT SlowSimulation is running in the state of :"<<st<<endm;
-
-  if (mRunningEmbedding)
-    { 
-      Int_t res;
-      res=GetSvtData();
-      if (res!=kStOk) return res;
-    }
+  
+  //  if (mRunningEmbedding)
+  //{ 
+  Int_t res;
+  res=GetSvtData();
+  if (res!=kStOk) return res;
+    //}
+  
   ClearMask(); //it has to be cleared here - needed for plain simulation
-
   for(int Barrel = 1;Barrel <= mSimPixelColl->getNumberOfBarrels();Barrel++) {
     for (int Ladder = 1;Ladder <= mSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {
       for (int Wafer = 1;Wafer <= mSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {
         for( int Hybrid = 1;Hybrid <= mSimPixelColl->getNumberOfHybrids();Hybrid++){
-          
-          mCurrentIndex = mSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
+	  mCurrentIndex = mSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
           if( mCurrentIndex < 0) continue; 
           
           mCurrentPixelData  = (StSvtHybridPixelsD*)mSimPixelColl->at(mCurrentIndex);
@@ -152,13 +154,14 @@ Int_t StSvtEmbeddingMaker::Make()
             mCurrentPixelData = new StSvtHybridPixelsD(Barrel, Ladder, Wafer, Hybrid);
             mSimPixelColl->put_at(mCurrentPixelData,mCurrentIndex);
           }
-	   
+	  
           if (mRunningEmbedding){  //do the embedding
             ClearMask(); //just in case..
             AddRawData();
           }
-          
+           
           if (mBackGrOption) CreateBackground();
+	            
 	}
       }
     }
