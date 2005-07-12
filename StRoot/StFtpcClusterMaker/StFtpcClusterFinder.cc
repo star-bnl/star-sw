@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.67 2005/07/11 13:33:03 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.68 2005/07/12 15:18:01 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.68  2005/07/12 15:18:01  jcs
+// save raw (not corrected) timeposition
+//
 // Revision 1.67  2005/07/11 13:33:03  jcs
 // remove duplicate code
 //
@@ -1927,7 +1930,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
       
       // calculate new corrected radius and deflection angle :
       
-      Peak->TimePosition=TimeCoordinate; // DEBUG only !
+      //Peak->TimePosition=TimeCoordinate; // DEBUG only !
       
       PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
       
