@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.112 2005/06/28 16:18:22 potekhin Exp $
+* $Id: geometry.g,v 1.113 2005/07/14 22:13:32 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.113  2005/07/14 22:13:32  potekhin
+* In the tag PIX1:
+* Need to actuate a thinner pipe as well as an updated
+* pixel detector geometry, to include an exoskeleton
+* for the beampipe (R&D request from Kai et al.)
+*
 * Revision 1.112  2005/06/28 16:18:22  potekhin
 * Add config variables and steering for the GEM
 * barrel tracker -- only inlfated in the tag IST1.
@@ -591,7 +597,7 @@ replace[;ON#{#;] with [
    GembConfig  = 0 ! 0=no, >1=version
    PhmdConfig  = 0 ! No Photon multiplicity detectorby default
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
-   PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
+   PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE, 3=with pipe support
    ShldConfig  = 0 ! SVTT shield version
    SisdConfig  = 0 ! No Silicon strip by default
    SupoConfig  = 0 ! 0 (def) old buggy version, 1=correction
@@ -812,10 +818,10 @@ If LL>1
                      SisdConfig = 1;
 
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
-                   pixl=on;    " put the pixel detector in"
-                   PixlConfig=2;
-* The new MIT detector
+                   pipeConfig=5;   " thinner pipe "
+                   pixl=on;        " activate "
+                   PixlConfig=3;   " source version "
+* The new inner tracker is not active here
                    istb=off;  "new pixel based inner tracker"
                    IstbConfig=0;
                 }
@@ -2016,6 +2022,7 @@ If LL>1
 
    if (pixl.and.PixlConfig==1) Call pixlgeo
    if (pixl.and.PixlConfig==2) Call pixlgeo1
+   if (pixl.and.PixlConfig==3) Call pixlgeo2
 
    if (istb.and.IstbConfig>0)  Call istbgeo
    if (gemb.and.GembConfig>0)  Call gembgeo
