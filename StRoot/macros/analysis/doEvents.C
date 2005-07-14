@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.102 2004/12/13 21:00:28 fine Exp $
+// $Id: doEvents.C,v 1.103 2005/07/14 19:25:59 fine Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -241,9 +241,9 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     
     // Set the default to display all StEvent tracks
     displayMk->AddName("StEvent(Primary Tracks)");
-    displayMk->AddName("StEvent(Kink Tracks)");
-    displayMk->AddName("StEvent(V0 Tracks)");
-    displayMk->AddName("StEvent(Xi Tracks)");
+    // displayMk->AddName("StEvent(Kink Tracks)");
+    // displayMk->AddName("StEvent(V0 Tracks)");
+    // displayMk->AddName("StEvent(Xi Tracks)");
     //      displayMk->AddName("StEvent(All Tracks)");
     // Set the default StEvent events filter
     displayMk->AddFilter(new StFilterDef("MainFilter"));
@@ -467,6 +467,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.103  2005/07/14 19:25:59  fine
+// Change the default EventDisplay options
+//
 // Revision 1.102  2004/12/13 21:00:28  fine
 // Add a protection against of batch mode for Event Display
 //
