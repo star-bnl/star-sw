@@ -1,26 +1,13 @@
-* $Id: pixlgeo2.g,v 1.1 2005/07/14 22:59:08 potekhin Exp $
+* $Id: pixlgeo2.g,v 1.2 2005/07/14 23:03:54 potekhin Exp $
 * $Log: pixlgeo2.g,v $
+* Revision 1.2  2005/07/14 23:03:54  potekhin
+* Removed obsolete CVS rlog comments, changed the color
+* of the Be exoskeleton cylinder
+*
 * Revision 1.1  2005/07/14 22:59:08  potekhin
 * An updated version of the pixel detector geometry,
 * which shall inslude the exoskeleton for the beampipe
 *
-* Revision 1.4  2005/01/06 01:59:40  potekhin
-* Added an important comment, corrected a typo in another
-*
-* Revision 1.3  2004/07/15 16:28:40  potekhin
-* Changes the outer radius of the mother volume to a more
-* reasonable value
-*
-* Revision 1.2  2004/06/28 22:51:02  potekhin
-* Cleaned out the extra ladders which were moved to
-* the MIT detector. Based on the original pixel but
-* positioned directly in cave, not inside svt
-*
-* Revision 1.1  2004/06/28 20:46:33  potekhin
-* R&D work with the pixel-based inner tracker (replacing
-* SVT) will require different configurations of the "inner"
-* pixel detector itself, hence we factor this out into a
-* separate piece of code
 *
 ******************************************************************************
 Module PIXLGEO2 is the the STAR pixel detector and beam pipe support
@@ -116,8 +103,8 @@ Block PXMO is the mother of the pixel detector volumes
 endblock
 * -----------------------------------------------------------------------------
 Block PXBX is the exoskeleton of the beampipe
-      Material  Air
-      Attribute PXBX  Seen=1  colo=3
+      Material  Berillium
+      Attribute PXBX  Seen=1  colo=1
 
       Shape TUBE Rmin=PXBG_Rin Rmax=PXBG_Rin+PXBG_Thk Dz=PXBG_Length/2.0
 EndBlock
