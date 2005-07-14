@@ -40,8 +40,6 @@ StEmcCluster *StEEmcCluster::stemc()
 
   if ( mEmcCluster ) return mEmcCluster;
   mEmcCluster=new StEmcCluster();
-  return mEmcCluster;
-
 
   mEmcCluster->setEta( momentum().Eta() );
   mEmcCluster->setPhi( momentum().Phi() );
