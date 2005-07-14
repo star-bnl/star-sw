@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.7 2005/06/21 02:16:36 balewski Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.8 2005/07/14 15:39:22 balewski Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -11,7 +11,7 @@
 #include "StMessMgr.h"
 #include "StMaker.h"
 
-
+  
 StGenericVertexFinder::StGenericVertexFinder() : 
   mVertexConstrain(false), mMode(0){
 }
@@ -53,6 +53,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.8  2005/07/14 15:39:22  balewski
+// nothing, to force recompilation of this code by Autobuild
+//
 // Revision 1.7  2005/06/21 02:16:36  balewski
 // multiple prim vertices are stored in StEvent
 //
