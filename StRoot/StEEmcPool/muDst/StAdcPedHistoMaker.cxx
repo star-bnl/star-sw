@@ -1,5 +1,6 @@
 // code 'as is' from Murad, used to generate AuAu200 pedestals from regualr muDst
 
+#if 0
 //std
 #include <map>
 #include <string>
@@ -34,51 +35,68 @@
 #include "TFile.h"
 
 //StMuDst
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
+
+
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 //StTrackMaker
-#include "StAdcPedHistoMaker.h"
 
 //Endcap
-#include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/EEmcDbItem.h"
+
 #include "StEEmcDbMaker/cstructs/eemcConstDB.hh"
 #include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+#endif
+
+//new 
+#include "StAdcPedHistoMaker.h"
+#include "StEEmcDbMaker/StEEmcDbMaker.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
+
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+
 ClassImp(StAdcPedHistoMaker)
 
-//------------
+//---------------------------
+//---------------------------
+//---------------------------
 StAdcPedHistoMaker::StAdcPedHistoMaker(const char* name, StMuDstMaker* uDstMaker)
-    : StMaker(name), mDstMaker(uDstMaker)
-{
+    : StMaker(name), mDstMaker(uDstMaker) {
   HList=0; 
-  myTable = new StBemcTables();
+  pedSub=false;
+  killMask=0;
+  SetTrigId(0);
   cout <<"StAdcPedHistoMaker::StAdcPedHistoMaker()"<<endl;
 }
 
+
+//---------------------------
+//---------------------------
+//---------------------------
 
 StAdcPedHistoMaker::~StAdcPedHistoMaker()
 {
   cout <<"StAdcPedHistoMaker::~StAdcPedHistoMaker()"<<endl;
 }
 
-Int_t StAdcPedHistoMaker::Init()
-{
 
-  mEeGeom=new EEmcGeomSimple();
-  assert(mEeGeom);
+//---------------------------
+//---------------------------
+//---------------------------
+
+Int_t 
+StAdcPedHistoMaker::Init() {
   mEeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
   assert(mEeDb); // eemcDB must be in the chain, fix it
-  SetTrigIdFilter(0);
   return kStOk;
 }
 
-Int_t StAdcPedHistoMaker::InitRun(int runNo){
+//------------------------------------
+//------------------------------------
 
-  printf("************** I'm here *************************\n");
+Int_t StAdcPedHistoMaker::InitRun(int runNo){
 
   assert(mEeDb);
   // ...................  histo for individual pixels ...
@@ -92,33 +110,34 @@ Int_t StAdcPedHistoMaker::InitRun(int runNo){
     sprintf(tt1,"a%s",x->name);
     sprintf(tt2,"ADC for %s,  cr/chan=%3.3d/%3.3d,  tube=%s; ADC",x->name,
             x->crate,x->chan,x->tube);
-    TH1F* h=new TH1F(tt1,tt2,500,-20.5,489.5);
+    TH1F* h=new TH1F(tt1,tt2,500,-20.5,479.5);
     hPix[i]=h;
     HList->Add(h);
   }
+
+  printf("StAdcPedHistoMaker::InitRun() setup:  pedSub=%d  killMask=0x%0x  trigId=%d\n", pedSub, killMask, trigID);
   return kStOk;
 }
 
-Int_t StAdcPedHistoMaker::Make()
-{
-  HistoAna();
-
-  return kStOk;
-}
-
-Int_t StAdcPedHistoMaker::Finish()
+//------------------------------------
+//------------------------------------
+Int_t 
+StAdcPedHistoMaker::Finish()
 {
   return kStOk;
 }
 
 //------------------------------------
 //------------------------------------
-void StAdcPedHistoMaker::HistoAna(){
+Int_t 
+StAdcPedHistoMaker::Make(){
 
   StMuEvent *event = mDstMaker -> muDst() -> event();
-
+  
   StMuTriggerIdCollection tic = event -> triggerIdCollection();
   StTriggerId l1trig = tic.l1();
+  if( trigID && !l1trig.isTrigger(trigID)) return  kStOk;
+
 
   //--------------------
 
@@ -132,8 +151,13 @@ void StAdcPedHistoMaker::HistoAna(){
     emc->getEndcapTowerADC(i,val,sec,sub,eta);
     const EEmcDbItem *x=mEeDb -> getTile(sec,'A'+sub-1,eta,'T');
     if(x==0) continue;
-    if( trigID && !l1trig.isTrigger(trigID)) continue;
-    hPix[x->key]->Fill(val);
+    float adc=val;
+    if(pedSub) adc-=x->ped;
+    if(killMask) { 
+      if(x->fail ) continue;  // drop broken channels
+      if(x->stat &  killMask) continue; // drop not working channels
+    }
+    hPix[x->key]->Fill(adc);
   }
   
   //.........................  P R E - P O S T .....................  
@@ -142,12 +166,16 @@ void StAdcPedHistoMaker::HistoAna(){
     int pre, sec, eta, sub;
     //muDst  ranges: sec:1-12, sub:1-5, eta:1-12 ,pre:1-3==>pre1/pre2/post
     StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
-    float val=hit->getAdc();
+    float adc=hit->getAdc();
     //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
     const EEmcDbItem *x=mEeDb -> getTile(sec,sub-1+'A', eta, pre-1+'P');
     if(x==0) continue;
-    if( trigID && !l1trig.isTrigger(trigID)) continue;
-    hPix[x->key]->Fill(val);
+    if(pedSub) adc-=x->ped;
+    if(killMask) { 
+      if(x->fail ) continue;  // drop broken channels
+      if(x->stat &  killMask) continue; // drop not working channels
+    }
+    hPix[x->key]->Fill(adc);
   }
 
   //........................... S M D ................................
@@ -157,19 +185,18 @@ void StAdcPedHistoMaker::HistoAna(){
     int nh= emc->getNEndcapSmdHits(uv);
     for (int i=0; i < nh; i++) {
       StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
-      float val=hit->getAdc();
+      float adc=hit->getAdc();
       const EEmcDbItem *x=mEeDb -> getByStrip(sec,uv,strip);
-      assert(x); // it should never happened for muDst
-      if( trigID && !l1trig.isTrigger(trigID)) continue;
-      hPix[x->key]->Fill(val);
+      if(x==0) continue;
+      if(pedSub) adc-=x->ped;
+      if(killMask) { 
+	if(x->fail ) continue;  // drop broken channels
+	if(x->stat &  killMask) continue; // drop not working channels
+      }
+      hPix[x->key]->Fill(adc);
     }
   }
+  return kStOk;
+}
 
-}
-//------------------------------------
-//------------------------------------
-void StAdcPedHistoMaker::Clear( Option_t *opts )
-{
-  return;
-}
 

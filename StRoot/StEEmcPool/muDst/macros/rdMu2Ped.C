@@ -1,13 +1,13 @@
 TObjArray  *HList;
 
 int rdMu2Ped( 
- int nEve=5000, 
+ int nEve=300, 
  Int_t nFiles  =20,
  char* file="Rnnn.lis"
  ){ 
   char* inDir   = "./"   ;
-  inDir="/star/data08/reco/ppProductionMinBias/FullField/dev/2005/144/";
-  file="st_physics_6144056_raw_2030004.MuDst.root";
+  inDir="/star/data08/reco/ppProductionMinBias/FullField/dev/2005/174/";
+  file="st_physics_6174067_raw_2040010.MuDst.root";
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -28,7 +28,7 @@ int rdMu2Ped(
   // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
   TChain* tree=muMk->chain(); assert(tree); 
-  int nEntries=tree->GetEntries();
+  int nEntries=(int) tree->GetEntries();
   printf("total eve in chain =%d\n",nEntries);
   printf("in=%s%s=\n",inDir,file);
 
@@ -43,7 +43,9 @@ int rdMu2Ped(
   HList=new  TObjArray;
   StAdcPedHistoMaker* myMk3=new StAdcPedHistoMaker("myPanitkin",muMk);
   myMk3->SetHList(HList);
-  myMk3->SetTrigIdFilter(96011); // minB-trig for pp200
+  myMk3->SetTrigId(96011); // minB-trig for pp200
+   myMk3->DoPedSubtraction();
+   myMk3->SetKillMask(0x0001 | 0x0002); // activates kill-byts as well
 
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");
@@ -51,7 +53,6 @@ int rdMu2Ped(
   chain->Init();
   chain->ls(3);
 
-  printf("All Ezt-branches set\n");
   int eventCounter=0;
   int stat=0;
   int t1=time(0);
