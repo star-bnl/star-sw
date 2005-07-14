@@ -16,8 +16,19 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
-Revision 1.1.1.2  2005/06/20 15:20:12  fisyak
+Revision 1.1.1.3  2005/07/14 13:07:27  fisyak
 *** empty log message ***
+
+Revision 1.8  2005/07/13 09:36:18  brun
+From Federico:
+  Mods for Mac and removal of stupid printout.
+
+Revision 1.7  2005/07/11 12:00:47  brun
+From Andrei Gheata:
+a fix in TGeant3TGeo::Gsmixt. The problem (found by Federico) was
+that the array of weights for mixture components in case nlmat<0 (number of
+atoms) was recomputed once by G3 itself then again inside Gsmixt, resulting
+in wrong fractions.
 
 Revision 1.6  2005/06/15 08:49:21  brun
 From Andrei Gheata:
@@ -494,7 +505,7 @@ void TGeant3TGeo::LoadAddress()
   // Assigns the address of the GEANT common blocks to the structures
   // that allow their access from C++
   //
-   printf("LoadAddress\n");
+//   printf("LoadAddress\n");
 //   TGeant3::LoadAddress();
    gcomad(PASSCHARD("GCVOL1"),(int*&) fGcvol1  PASSCHARL("GCVOL1"));
    gcvol1 = fGcvol1;
@@ -979,20 +990,7 @@ void  TGeant3TGeo::Gsmixt(Int_t imat, const char *name, Float_t *a, Float_t *z,
   //       In this case, WMAT in output is changed to relative
   //       weigths.
   //
-  g3smixt(imat,PASSCHARD(name), a, z,dens, nlmat,wmat PASSCHARL(name));
-
-  Int_t i;
-  if (nlmat < 0) {
-     nlmat = - nlmat;
-     Double_t amol = 0;
-     for (i=0;i<nlmat;i++) {
-        amol += a[i]*wmat[i];
-     }
-     for (i=0;i<nlmat;i++) {
-        wmat[i] *= a[i]/amol;
-     }
-  }
-  gGeoManager->Mixture(name, a, z, dens, nlmat, wmat, imat);
+  Mixture(imat,name,a,z,dens,nlmat,wmat);
 }
 
 //_____________________________________________________________________________
