@@ -1,9 +1,14 @@
 *
-* $Id: pfnclv.F,v 1.1.1.1 2005/05/25 22:37:58 fisyak Exp $
+* $Id: pfnclv.F,v 1.1.1.2 2005/07/14 13:08:43 fisyak Exp $
 *
 * $Log: pfnclv.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:58  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.1.1.2  2005/07/14 13:08:43  fisyak
+* *** empty log message ***
+*
+* Revision 1.2  2005/07/13 17:33:39  rdm
+* From Christian Holm:
+* I've attached a patch that fixes _some_ problems in your VMC version of
+* geant321 when using gfortran. Note in particular the `ENTRY' fix.
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -169,7 +174,7 @@
 *----------------------------------------------------------------------*
 *----------------------------------------------------------------------*
 *
-      ENTRY NCLVFX
+      ENTRY NCLVFX()
       NCLVFX = PIPIPI
       DO 5000 N=1,NPRNUC
          I = IPRNUC (N)
