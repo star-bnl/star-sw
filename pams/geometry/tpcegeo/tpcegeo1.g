@@ -1,7 +1,11 @@
 
 ****************************************************************************
-* $Id: tpcegeo1.g,v 1.2 2005/03/08 01:03:31 potekhin Exp $
+* $Id: tpcegeo1.g,v 1.3 2005/07/14 22:06:53 potekhin Exp $
 * $Log: tpcegeo1.g,v $
+* Revision 1.3  2005/07/14 22:06:53  potekhin
+* An informative diagnostics about the TPC gas density added,
+* prompted by a recent debugging session with Yuri
+*
 * Revision 1.2  2005/03/08 01:03:31  potekhin
 * Added a CVS log tag, reformatted some data structures, and removed
 * a few duplicate entries which were defined in the TPCEGEO source, which
@@ -400,8 +404,8 @@ Block  TPGV is the Gas Volume placed in TPC
 
       if(TPCG_gasCorr==1) then
          density=0.9*0.001782+0.1*0.000667
+         write(*,*) 'Older (buggy) TPC gas density = ',density
       else
-         print *,'Corrected GAS DENSITY'
 * Comment by Y.Fisyak:
 * The STAR TPC has been operating with P10 (90% Ar, 10% methane by volume)
 * at ~2 mbar above the ambient atmospheric pressure.
@@ -414,6 +418,7 @@ Block  TPGV is the Gas Volume placed in TPC
 * at STP (Standard Temperature and Pressure, 0°C and one atmosphere pressure).
 
          density=rho*(273.15/T)*PATM
+         write(*,*) 'Corrected TPC GAS DENSITY = ',density
       endif
 
       Mixture   p10   Dens=density   " g/cm**3 "
