@@ -5,11 +5,11 @@
  * Maker for minuit based vertex finder
  * Lee Barnby - modification, becomes StGenericVertexMaker
  *
- * $Id: StGenericVertexMaker.h,v 1.6 2005/03/09 19:24:18 balewski Exp $
+ * $Id: StGenericVertexMaker.h,v 1.7 2005/07/14 15:39:22 balewski Exp $
  *
  */
 
-
+   
 #ifndef STAR_StGenericVertexMaker
 #define STAR_StGenericVertexMaker
 
@@ -72,7 +72,7 @@ class StGenericVertexMaker : public StMaker
   inline void SetDoNotUseITTF(){use_ITTF=kFALSE;};
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.6 2005/03/09 19:24:18 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.7 2005/07/14 15:39:22 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StGenericVertexMaker, 0)   //StAF chain virtual base class for Makers
 };
