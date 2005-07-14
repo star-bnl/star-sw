@@ -44,8 +44,8 @@ int rdMu2Ped(
   StAdcPedHistoMaker* myMk3=new StAdcPedHistoMaker("myPanitkin",muMk);
   myMk3->SetHList(HList);
   myMk3->SetTrigId(96011); // minB-trig for pp200
-   myMk3->DoPedSubtraction();
-   myMk3->SetKillMask(0x0001 | 0x0002); // activates kill-byts as well
+  //  myMk3->DoPedSubtraction();
+  // myMk3->SetKillMask(0x0001 | 0x0002); // activates kill-byts as well
 
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");
