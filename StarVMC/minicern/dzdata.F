@@ -1,9 +1,14 @@
 *
-* $Id: dzdata.F,v 1.1.1.1 2004/07/17 20:01:56 perev Exp $
+* $Id: dzdata.F,v 1.1.1.2 2005/07/14 13:05:58 fisyak Exp $
 *
 * $Log: dzdata.F,v $
-* Revision 1.1.1.1  2004/07/17 20:01:56  perev
-* STAR version of Geant321 TGeant3 etc
+* Revision 1.1.1.2  2005/07/14 13:05:58  fisyak
+* *** empty log message ***
+*
+* Revision 1.2  2005/07/13 17:33:39  rdm
+* From Christian Holm:
+* I've attached a patch that fixes _some_ problems in your VMC version of
+* geant321 when using gfortran. Note in particular the `ENTRY' fix.
 *
 * Revision 1.1.1.1  2002/07/24 15:56:28  rdm
 * initial import into CVS
@@ -46,7 +51,12 @@
 
       CHARACTER CHROUT*(*),CHSTAK*6              ,CTEXT1*1,CSTART*3
       PARAMETER (CHROUT = 'DZDATA')
+#if defined(__GNUC__) && __GNUC__ >= 4
+      CHARACTER IHOLE*4, IQID*4
+      DATA      IHOLE  /'****'/
+#else
       DATA      IHOLE  /4H*HO*/
+#endif
 
 #if (defined(CERNLIB_DEBUGON))&&(defined(CERNLIB_VFORT))
 #include "zebra/debugvf2.inc"

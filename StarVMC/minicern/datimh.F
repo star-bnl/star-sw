@@ -1,9 +1,14 @@
 *
-* $Id: datimh.F,v 1.1.1.2 2005/05/25 20:36:40 fisyak Exp $
+* $Id: datimh.F,v 1.1.1.3 2005/07/14 13:05:58 fisyak Exp $
 *
 * $Log: datimh.F,v $
-* Revision 1.1.1.2  2005/05/25 20:36:40  fisyak
+* Revision 1.1.1.3  2005/07/14 13:05:58  fisyak
 * *** empty log message ***
+*
+* Revision 1.2  2005/07/13 17:33:39  rdm
+* From Christian Holm:
+* I've attached a patch that fixes _some_ problems in your VMC version of
+* geant321 when using gfortran. Note in particular the `ENTRY' fix.
 *
 * Revision 1.1.1.1  2002/07/24 15:56:27  rdm
 * initial import into CVS
@@ -35,10 +40,17 @@ C-    DUMMY FOR NON-ESSENTIAL ROUTINE STILL MISSING ON YOUR MACHINE
       DIMENSION ND(9), NT(9)
       DIMENSION M(8)
 
+#if defined(__GNUC__) && __GNUC__ >= 4
+      CALL UBLOW  ('29/09/79', M, 8)
+      CALL UBUNCH (M, ND, 8)
+      CALL UBLOW  ('12.00.00',M,8)
+      CALL UBUNCH (M,NT,8)
+#else
       CALL UBLOW (8H29/09/79,M,8)
       CALL UBUNCH           (M,ND,8)
       CALL UBLOW (8H12.00.00,M,8)
       CALL UBUNCH           (M,NT,8)
+#endif
       RETURN
       END
 #endif
