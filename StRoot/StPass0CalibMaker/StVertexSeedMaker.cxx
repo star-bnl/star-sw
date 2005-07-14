@@ -231,7 +231,16 @@ Bool_t StVertexSeedMaker::CheckTriggers() {
 }
 //_____________________________________________________________________________
 Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
+
+      // Conditions for caveats on test triggers
+      Bool_t run4 = (date>20040000) && (date<20040700);
+      Bool_t run5 = (date>20050000) && (date<20050700);
+      Bool_t run5_400 = run5 && (fill==7223 || fill==7224);
+
+      Bool_t valid = kFALSE;
+
       switch (tid) {
+
         case (1000) :     // ppMinBias
         case (1003) :     // ppFPDe-slow
         case (1009) :     // ppFPDw-slow
@@ -245,6 +254,7 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
         case (45203) :    // pp eht-1-slow
         case (45204) :    // pp eht-2-slow
         case (45010) :    // pp minbias
+        // see test triggers for the following:
         //case (1)     :    // pp bht-1-slow test
         //case (2)     :    // pp bht-2-slow test
         //case (3)     :    // pp eht-1-slow test
@@ -261,13 +271,56 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	case (96272) :    // eemc-jp1-mb-a
 	case (96282) :    // eemc-jp2-mb-a
 	case (96011) :    // ppMinBias
-	case (20)    :    // Jpsi
-	case (22)    :    // upsilon
+        // see test triggers for the following:
+	//case (20)    :    // Jpsi
+	//case (22)    :    // upsilon
 
-                      { trig = (float) tid; return kTRUE; }
+            valid = kTRUE;
+
+// test triggers (id < 1000)
+        case (1)     : if (
+                         run4    // 2004 pp bht-1-slow test
+	              || run5_400    // 2005 pp bemc-ht1-mb
+                          ) valid = kTRUE; break;
+        case (2)     : if (
+                         run4   // 2004 pp bht-2-slow test
+	              || run5_400    // 2005 pp bemc-jp2-mb-b
+                          ) valid = kTRUE; break;
+        case (3)     : if (
+                         run4   // p2004 p eht-1-slow test
+	              || run5_400    // 2005 pp eemc-ht2-mb
+                          ) valid = kTRUE; break;
+        case (4)     : if (
+                         run4   // 2004 pp eht-2-slow test
+	              || run5_400    // 2005 pp eemc-jp2-mb-a
+                          ) valid = kTRUE; break;
+        case (7)     : if (
+	                 run5_400    // 2005 pp bemc-ht1-mb
+                          ) valid = kTRUE; break;
+        case (8)     : if (
+	                 run5_400    // 2005 pp bemc-jp1-mb
+                          ) valid = kTRUE; break;
+        case (9)     : if (
+	                 run5_400    // 2005 pp eemc-ht1-mb
+                          ) valid = kTRUE; break;
+        case (10)    : if (
+                         run4   // 2004 pp minbias test
+	              || run5_400    // 2005 pp eemc-jp1-mb-a
+                          ) valid = kTRUE; break;
+	case (20)    : if (
+                         run5   // 2005 pp Jpsi
+                          ) valid = kTRUE; break;
+	case (21)    : if (
+	                 run5_400    // 2005 pp ppMinBias
+                          ) valid = kTRUE; break;
+	case (22)    : if (
+                         run5   // 2005 pp upsilon
+                          ) valid = kTRUE; break;
+
         default     : {}
       }
-      return kFALSE;
+      if (valid) trig = (float) tid;
+      return valid;
 }
 //_____________________________________________________________________________
 Int_t StVertexSeedMaker::GetEventData() {
@@ -338,7 +391,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.23 2005/07/01 21:46:01 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.24 2005/07/14 21:02:40 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -630,8 +683,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.23 2005/07/01 21:46:01 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.24 2005/07/14 21:02:40 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.24  2005/07/14 21:02:40  genevb
+// Modified use of test triggers
+//
 // Revision 1.23  2005/07/01 21:46:01  genevb
 // Specify output directory
 //
