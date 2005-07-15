@@ -4,9 +4,9 @@ MuEzPanitkinMaker  *myMk3;
 //pp200, 2005, EJP1=96294, 
 
 int rdEztPanitkin( int trigID=0,//96294,
- int nEve=2000, 
- Int_t nFiles  =2,
- char* file="lis/R6117017.lis", //R6121034.lis,
+ int nEve=100, 
+ Int_t nFiles  =20,
+ char* file="lis/R6049126.lis", //R6121034.lis,
  char* inDir   = "./"   
  ){ 
 
@@ -32,7 +32,7 @@ int rdEztPanitkin( int trigID=0,//96294,
   // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
   TChain* tree=muMk->chain(); assert(tree); 
-  int nEntries=tree->GetEntries();
+  int nEntries=(int) tree->GetEntries();
   printf("total eve in chain =%d\n",nEntries);
   printf("in=%s%s=\n",inDir,file);
   //return;
@@ -49,8 +49,9 @@ int rdEztPanitkin( int trigID=0,//96294,
   myMk3->SetTrigIdFilter(trigID);
   //myMk3->SetTrigIdFilter(66300); //zeroB
 
-  //if(trigID==66007) myMk3->SetHistoPixels();
-   myMk3->SetSpy();
+  //if(trigID==66007)
+  // myMk3->SetHistoPixels();
+  //  myMk3->SetSpy();
  
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");

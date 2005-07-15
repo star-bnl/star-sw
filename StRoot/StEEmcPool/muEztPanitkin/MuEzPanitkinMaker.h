@@ -2,7 +2,7 @@
 #define STAR_MuEzPanitkinMaker
 
 /************************************************************
- * $Id: MuEzPanitkinMaker.h,v 1.1 2005/04/28 20:54:46 balewski Exp $
+ * $Id: MuEzPanitkinMaker.h,v 1.2 2005/07/15 15:37:36 balewski Exp $
  ************************************************************
  Goal: wrap EEMC-Panitkin code to be used in the BFC
  *
@@ -42,7 +42,7 @@ class MuEzPanitkinMaker : public StMaker{
 
  public: 
   EEqaSorter *qaSort;// tmp public
-  MuEzPanitkinMaker(const char *self="EEstale", const char* muDstMakerName="muDstMaker");
+  MuEzPanitkinMaker(char *self="myPanitkin", char* muDstMakerName="MuDst");
   virtual       ~MuEzPanitkinMaker();
   virtual Int_t Init();
   virtual Int_t InitRun(int);
@@ -57,7 +57,7 @@ class MuEzPanitkinMaker : public StMaker{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: MuEzPanitkinMaker.h,v 1.1 2005/04/28 20:54:46 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: MuEzPanitkinMaker.h,v 1.2 2005/07/15 15:37:36 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -68,6 +68,9 @@ class MuEzPanitkinMaker : public StMaker{
 
 
 // $Log: MuEzPanitkinMaker.h,v $
+// Revision 1.2  2005/07/15 15:37:36  balewski
+// *** empty log message ***
+//
 // Revision 1.1  2005/04/28 20:54:46  balewski
 // start
 //
