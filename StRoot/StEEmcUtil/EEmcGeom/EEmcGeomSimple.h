@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.23 2005/02/07 19:44:37 jwebb Exp $
+ * $Id: EEmcGeomSimple.h,v 1.24 2005/07/15 20:53:09 balewski Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -79,6 +79,7 @@ public:
     return getTower(r,sec,sub,etabin,dphi,deta);
   };
 
+  const Float_t *getEtaBinRangeArray() { return mEtaBin;}
   
   /// gets lower Z edge of EEMC (preshower)
   inline Float_t getZ1()     const { return mZ1;  };
@@ -200,6 +201,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.24  2005/07/15 20:53:09  balewski
+ * more get methods
+ *
  * Revision 1.23  2005/02/07 19:44:37  jwebb
  * *** empty log message ***
  *
