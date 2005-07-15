@@ -35,8 +35,8 @@ BemcHitList::BemcHitList() :
 //==========================================================
 //==========================================================
 void
-BemcHitList::initRun(){
-  gMessMgr->Message("","I") <<" BemcHitList::initRun()"<<endm;
+BemcHitList::initRun(bool isMC){
+  gMessMgr->Message("","D") <<" BemcHitList::initRun()"<<endm;
   ScintHitList::initRun();
   // clear old lookup table
   int i,j,k;
@@ -71,20 +71,21 @@ BemcHitList::initRun(){
     assert( iPhi>=0);
     int iBin=iPhiEta2bin(iPhi,iEta);
     // if(id<41)
-    //    printf("id=%d m,e,s=%d:%d:%d eta=%.4f phi/deg=%.2f bin %d:%d:%d\n",id,m,e,s,eta,phi/C_PI*180,iPhi,iEta,iBin);    
+    //       printf("%d %d id=%d m,e,s=%d:%d:%d eta=%.4f phi/deg=%.2f bin %d:%d:%d\n",
+    //		   eta<0 && phi>C_PI,  status, id,m,e,s,eta,phi/C_PI*180,iPhi,iEta,iBin);    
     assert(mes2bin[m-1][e-1][s-1]==-1); //tmp, to check BTOW code
     mes2bin[m-1][e-1][s-1]=iBin;
+
+    // Assume 2004x geom, tmp, do masking based on geomtery type
+    if(isMC) if(eta<0 && phi>C_PI) continue; // dropp lower East half, tmp solution
     nB++;
     if( status!= 1)  continue; // drop broken towers
-    
-    // Assume 2004x geom, tmp, do masking based on geomtery type
-    if(eta<0 && phi>C_PI) continue; // dropp lower East half
 
     setActive(iBin);
     nA++;
   }
 
-  printf("nB=%d  nA=%d\n", nB,nA);
+  gMessMgr->Info() <<" BemcHitList::initRun() done,  active="<<nA<<" of "<<nB<<" BTOW towers" <<endm;
 
 }
 

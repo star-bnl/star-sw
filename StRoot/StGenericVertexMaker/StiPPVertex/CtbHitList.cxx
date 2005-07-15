@@ -204,7 +204,7 @@ CtbHitList::buildFromData(StTriggerData *trgD){
       float adc = trgD->ctbTraySlat(tray,slat,0);
       if(adc<mCtbThres_ch) continue;
       int iBin=realId2bin[slat][tray];
-      printf("CTB sl=%3d tr=%3d  %.1f  iBin=%d\n",slat,tray, adc,iBin );
+      // printf("CTB sl=%3d tr=%3d  %.1f  iBin=%d\n",slat,tray, adc,iBin );
       if ( getActive(iBin)<0) continue;
       setFired(iBin);
     }
@@ -223,7 +223,7 @@ CtbHitList::buildFromData(StTriggerData *trgD){
       ctbHit curHit;
       curHit.adc = ctbDet->mips(tray,slat,0);
       if(curHit.adc<mCtbThres_ch) continue;
-      printf("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc );
+      // printf("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc );
     }
   
 #endif

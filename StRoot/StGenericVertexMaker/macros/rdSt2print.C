@@ -9,9 +9,8 @@ StChain *chain=0;
 void rdSt2print(Int_t nevents=10){
 
   //  char * fname="outHT2-ppLMV/HT2d4Trg-pp200.event.root";
-  //char * fname="outHT2-PPV/HT2d4Trg-pp200.event.root";
-  // char * fname="outData-ppLMV/st_physics_5109030_raw_1020001.event.root";
-  char * fname="outData-Sti-PPV/st_physics_5109030_raw_1020001.event.root";
+  //char * fname="outData-Sti-PPV/st_physics_5109030_raw_1020001.event.root";
+  char * fname="out1/st_physics_6145042_raw_2020009.event.root";
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -65,6 +64,7 @@ void rdSt2print(Int_t nevents=10){
 
       int nV=mEvent->numberOfPrimaryVertices();
       int iv;
+      if(nV>1) printf("######\n");
       printf("eveID=%d  nPrimVert=%d\n", mEvent->id(),nV);
       for(iv=0;iv<nV;iv++) {
 	StPrimaryVertex *V=mEvent->primaryVertex(iv);
@@ -72,8 +72,8 @@ void rdSt2print(Int_t nevents=10){
 	StThreeVectorF &r=V->position();
 	StThreeVectorF &er=V->positionError();
 	printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
-	printf("  nDaugh=%d , VFid=%d:: ntr=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g xchi2=%g\n"
-	   ,V->numberOfDaughters(), V->vertexFinderId() ,V->numTracksUsedInFinder()  ,V->numMatchesWithCTB()  ,V-> numMatchesWithBEMC() ,V->numMatchesWithEEMC()  ,V->numTracksCrossingCentralMembran()  ,V->sumOfTrackPt()  ,V->ranking(), V->chiSquared());
+	printf("  nPrimTr=%d , VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
+	   ,V->numberOfDaughters(), V->vertexFinderId() ,V->numTracksUsedInFinder()  ,V->numMatchesWithCTB()  ,V-> numMatchesWithBEMC() ,V->numMatchesWithEEMC()  ,V->numTracksCrossingCentralMembrane()  ,V->sumOfTrackPt()  ,V->ranking());
       }
       
       //      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
