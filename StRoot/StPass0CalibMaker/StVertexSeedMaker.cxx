@@ -271,9 +271,18 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	case (96272) :    // eemc-jp1-mb-a
 	case (96282) :    // eemc-jp2-mb-a
 	case (96011) :    // ppMinBias
+	case (106201) :   // bemc-ht1-mb-tran
+	case (106211) :   // bemc-ht2-mb-tran
+	case (106221) :   // bemc-jp1-mb-tran
+	case (106233) :   // bemc-jp2-mb-tran
+	case (106251) :   // eemc-ht1-mb-tran
+	case (106261) :   // eemc-ht2-mb-tran
+	case (106272) :   // eemc-jp1-mb-tran
+	case (106282) :   // eemc-jp2-mb-tran
+	case (106011) :   // ppMinBias-tran
         // see test triggers for the following:
-	//case (20)    :    // Jpsi
-	//case (22)    :    // upsilon
+	//case (20)   :   // Jpsi(-tran)
+	//case (22)   :   // upsilon(-tran)
 
             valid = kTRUE;
 
@@ -308,13 +317,13 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	              || run5_400    // 2005 pp eemc-jp1-mb-a
                           ) valid = kTRUE; break;
 	case (20)    : if (
-                         run5   // 2005 pp Jpsi
+                         run5   // 2005 pp Jpsi(-tran)
                           ) valid = kTRUE; break;
 	case (21)    : if (
 	                 run5_400    // 2005 pp ppMinBias
                           ) valid = kTRUE; break;
 	case (22)    : if (
-                         run5   // 2005 pp upsilon
+                         run5   // 2005 pp upsilon(-tran)
                           ) valid = kTRUE; break;
 
         default     : {}
@@ -391,7 +400,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.24 2005/07/14 21:02:40 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.25 2005/07/15 18:38:47 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -652,6 +661,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
       date = datef;
       time = timef;
       currentFile->Close();
+      currentFile = 0;
       FindResult(kFALSE);
       Reset();
       fill = fillp;
@@ -661,6 +671,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
 
     gMessMgr->Info() << "StVertexSeedMaker: Now opening file:\n  "
       << fileName << endm;
+    if (currentFile) currentFile->Close();
     currentFile = new TFile(fileName);
     TNtuple* curNtuple = (TNtuple*) currentFile->Get("resNtuple");
     Int_t nentries = (Int_t) curNtuple->GetEntries();
@@ -676,6 +687,7 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   }
   if (currentFile) {
     currentFile->Close();
+    currentFile = 0;
     FindResult(kFALSE);
   }
   gMessMgr->Info() << "StVertexSeedMaker: Examined "
@@ -683,8 +695,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.24 2005/07/14 21:02:40 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.25 2005/07/15 18:38:47 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.25  2005/07/15 18:38:47  genevb
+// ppTrans triggers, and fix for too many open files
+//
 // Revision 1.24  2005/07/14 21:02:40  genevb
 // Modified use of test triggers
 //
