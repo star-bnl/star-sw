@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.27 2005/07/06 21:40:18 fisyak Exp $
+ * $Id: StMuDst.h,v 1.28 2005/07/15 21:45:08 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -13,6 +13,7 @@
 
 class StMuDstMaker;
 class StMuEvent;
+class StMuPrimaryVertex;
 class StMuTrack;
 class StRichSpectra;
 class StDetectorState;
@@ -132,6 +133,8 @@ public:
   /// returns pointer to the n-th TClonesArray from the ezt arrays
   static TClonesArray* eztArray(int type) { return eztArrays[type]; }
 
+  /// returns pointer to the primary vertex list
+  static TClonesArray* primaryVertices() { return arrays[muPrimaryVertex]; }
   /// returns pointer to the primary tracks list
   static TClonesArray* primaryTracks() { return arrays[muPrimary]; }
   /// returns pointer to the global tracks list
@@ -151,6 +154,8 @@ public:
 
   /// returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
   static StMuEvent* event() { return (StMuEvent*)arrays[muEvent]->UncheckedAt(0); }
+  /// return pointer to i-th primary vertex 
+  static StMuPrimaryVertex* primaryVertex(int i) { return (StMuPrimaryVertex*)arrays[muPrimaryVertex]->UncheckedAt(i); }
   /// return pointer to i-th primary track 
   static StMuTrack* primaryTracks(int i) { return (StMuTrack*)arrays[muPrimary]->UncheckedAt(i); }
   /// return pointer to i-th global track 
@@ -240,6 +245,7 @@ public:
   static  EztEmcRawData* eztESmd() 
         { return (EztEmcRawData*)eztArrays[muEztESmd]->UncheckedAt(0); }
 
+  static unsigned int numberOfPrimaryVertices()  { return arrays[muPrimaryVertex]->GetEntries(); }
   static unsigned int numberOfPrimaryTracks()  { return arrays[muPrimary]->GetEntries(); }
   static unsigned int numberOfGlobalTracks()   { return arrays[muGlobal]->GetEntries(); }
   static unsigned int numberOfOtherTracks()    { return arrays[muOther]->GetEntries(); }
@@ -265,6 +271,7 @@ public:
   // run 5 - dongx
   static unsigned int numberOfTofRawData()       { return tofArrays[muTofRawData]->GetEntries(); }
 
+  static unsigned int GetNPrimaryVertex()    { return numberOfPrimaryVertices(); }  
   static unsigned int GetNPrimaryTrack()    { return numberOfPrimaryTracks(); }  
   static unsigned int GetNGlobalTrack()     { return numberOfGlobalTracks(); }   
   static unsigned int GetNOtherTrack()      { return numberOfOtherTracks(); }    
@@ -297,6 +304,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.28  2005/07/15 21:45:08  mvl
+ * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
+ *
  * Revision 1.27  2005/07/06 21:40:18  fisyak
  * use template version of StPhysicalHelixD
  *

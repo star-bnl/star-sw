@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.20 2005/03/17 21:55:00 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.21 2005/07/15 21:45:08 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -17,6 +17,7 @@
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StParticleTypes.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 
 StuProbabilityPidAlgorithm* StMuTrack::mProbabilityPidAlgorithm=0;
 double StMuTrack::mProbabilityPidCentrality=0;
@@ -24,7 +25,7 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Global, int index2RichSpectra, bool l3) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.) {
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.) {
 
   const StTrack* globalTrack = track->node()->track(global);
 
@@ -122,13 +123,24 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
 
   if ( track->geometry() && track->geometry()->charge()) {
     mHelix = StMuHelix(track->geometry()->helix(),event->runInfo()->magneticField());
-    if (event->primaryVertex()) {
-      mP = momentumAtPrimaryVertex(event,track);
+    //if (event->primaryVertex()) {
+    if (vertex) {
+      mP = momentumAtPrimaryVertex(event,track,vertex);
       mPt = mP.perp();
       mPhi = mP.phi();
       mEta = mP.pseudoRapidity();
-      mDCA = dca(event, track);
-      if ( globalTrack ) mDCAGlobal = dca(event, globalTrack);
+      Int_t vtx_id=vtxList->IndexOf(vertex);
+      if (vtx_id >= 0) {
+        mVertexIndex=vtx_id;
+      }
+      else {
+        gMessMgr->Warning() << "Track does not point to a primary vertex" << endm;
+        mVertexIndex = -1;
+        mDCA = StThreeVectorF(-999,-999,-999);
+        mDCAGlobal = StThreeVectorF(-999,-999,-999);
+      }
+      mDCA = dca(track, vertex);
+      if ( globalTrack ) mDCAGlobal = dca(globalTrack, vertex);
 
       if (!l3) { // L3TRACKS seem to break pid    
 	int charge = track->geometry()->charge();
@@ -139,6 +151,11 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
 	mPidProbKaon=     pack2UnsignedShort( (charge>0) ? mProbabilityPidAlgorithm->beingKaonPlusProb() : mProbabilityPidAlgorithm->beingKaonMinusProb(), __PROB_SCALE__); 
 	mPidProbProton=   pack2UnsignedShort( (charge>0) ? mProbabilityPidAlgorithm->beingProtonProb()   : mProbabilityPidAlgorithm->beingAntiProtonProb(), __PROB_SCALE__); 
       }
+    }
+    else {  // vertex == 0
+      mVertexIndex = -1;
+      mDCA = StThreeVectorF(-999,-999,-999);
+      mDCAGlobal = StThreeVectorF(-999,-999,-999);
     }
   }
 
@@ -220,13 +237,37 @@ unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
   }
 }
 
-StThreeVectorD StMuTrack::dca(const StEvent* event, const StTrack* track) {
-  double pathlength = track->geometry()->helix().pathLength( event->primaryVertex()->position() );
-  return track->geometry()->helix().at(pathlength)-event->primaryVertex()->position();
+StThreeVectorF StMuTrack::dca(Int_t vtx_id) const {
+  if (vtx_id==mVertexIndex)
+    return mDCA;
+  else 
+    return dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
 }
 
-StThreeVectorD StMuTrack::momentumAtPrimaryVertex(const StEvent* event, const StTrack* track) {
-  double pathlength = track->geometry()->helix().pathLength( event->primaryVertex()->position() );
+StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
+  if (vtx_id==mVertexIndex)
+    return mDCAGlobal;
+  else {
+    if (globalTrack())
+      return globalTrack()->dca(((StMuPrimaryVertex*)StMuDst::array(muPrimaryVertex)->UncheckedAt(vtx_id))->position());
+    else 
+      return StThreeVectorF(-999,-999,-999);
+  }
+}
+
+StThreeVectorF StMuTrack::dca(const StThreeVectorF pos) const {
+  StPhysicalHelixD helix(helix());
+  double pathlength = helix.pathLength(pos);
+  return helix.at(pathlength)-pos;
+}
+
+StThreeVectorD StMuTrack::dca(const StTrack* track, const StVertex *vertex) {
+  double pathlength = track->geometry()->helix().pathLength( vertex->position() );
+  return track->geometry()->helix().at(pathlength)-vertex->position();
+}
+
+StThreeVectorD StMuTrack::momentumAtPrimaryVertex(const StEvent* event, const StTrack* track, const StVertex *vertex) {
+  double pathlength = track->geometry()->helix().pathLength( vertex->position() );
   return track->geometry()->helix().momentumAt(pathlength,event->runInfo()->magneticField()*kilogauss);
 }
 
@@ -295,6 +336,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.21  2005/07/15 21:45:08  mvl
+ * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
+ *
  * Revision 1.20  2005/03/17 21:55:00  mvl
  * Added StMuMomentumShiftMaker for applying a magnetic field scaling to the reconstructed MuDst. This class accesses StMuTrack, StMuEvent and StMuHelix and some Strangeness MuDst data members as 'friend'
  *

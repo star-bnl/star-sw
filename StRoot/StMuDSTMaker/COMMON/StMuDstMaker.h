@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.40 2005/04/12 21:56:29 mvl Exp $
+ * $Id: StMuDstMaker.h,v 1.41 2005/07/15 21:45:09 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -30,6 +30,7 @@ class StMuCut;
 class StEvent;
 class StTrackNode;
 class StTrack;
+class StVertex;
 class StRichSpectra;
 class StDetectorState;
 class StL3AlgorithmInfo;
@@ -145,7 +146,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.40 2005/04/12 21:56:29 mvl Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.41 2005/07/15 21:45:09 mvl Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -204,6 +205,8 @@ protected:
   int mCompression;
   int mBufferSize;
 
+  TObjArray mVtxList;  // List of pointers to vertices to keep track of track-vertex assignment when copying from StEvent
+
   StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 
 
@@ -233,6 +236,7 @@ virtual   void closeRead();
   void fill();
   void fillTrees(StEvent* ev, StMuCut* cut=0);
   void fillEvent(StEvent* ev, StMuCut* cut=0);
+  void fillVertices(StEvent* ev);
   void fillPmd(StEvent* ev);
   void fillEmc(StEvent* ev);
   void fillStrange(StStrangeMuDstMaker*);
@@ -249,7 +253,7 @@ virtual   void closeRead();
   template <class T>          int addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t);
   template <class T>          int addType(TClonesArray* tcaTo  , T &t);
   void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, bool l3=false);
-  int  addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3=false);
+  int  addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, const StVertex *vtx, StMuCut* cut, int index2Global, bool l3=false);
 /*   int addType(TClonesArray* tcaTo , StMuEmcCollection t); */
 
   StRichSpectra* richSpectra(const StTrack* track);
@@ -326,6 +330,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.41  2005/07/15 21:45:09  mvl
+ * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
+ *
  * Revision 1.40  2005/04/12 21:56:29  mvl
  * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
  *

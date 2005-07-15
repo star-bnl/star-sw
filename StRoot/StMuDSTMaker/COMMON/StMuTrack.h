@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.14 2005/07/06 21:40:18 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.15 2005/07/15 21:45:08 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -39,15 +39,16 @@
 class StRichSpectra;
 class StEvent;
 class StTrack;
-
+class StVertex;
 
 class StuProbabilityPidAlgorithm;
 
+class TObjArray;
 
 class StMuTrack : public TObject {
  public:
-    StMuTrack(): mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255) {/* no-op*/}; ///< default constructor
-    StMuTrack(const StEvent*, const StTrack*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false); ///< constructor from StEvent and StTrack
+    StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255) {/* no-op*/}; ///< default constructor
+    StMuTrack(const StEvent*, const StTrack*, const StVertex*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
     short flag() const; ///< Returns flag, (see StEvent manual for type information) 
@@ -55,6 +56,7 @@ class StMuTrack : public TObject {
     /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)  
     int index2Global() const;
     int index2RichSpectra() const; ///< Returns index of associated rich spectra.
+    int vertexIndex() const; ///< Returns index of associated primary vertex.
     StMuTrack* globalTrack() const; ///< Returns pointer to associated global track. Null pointer if no global track available.
     StRichSpectra* richSpectra() const; ///< Returns pointer to associated rich spectra. Null pointer if no global track available.
     unsigned short nHits() const;     ///< Return total number of hits on track.
@@ -85,8 +87,8 @@ class StMuTrack : public TObject {
     Short_t charge() const;  ///< Returns charge. 
     StThreeVectorF p() const; ///< Returns 3-momentum at dca to primary vertex.
     StThreeVectorF momentum() const; ///< Returns 3-momentum at dca to primary vertex.
-    StThreeVectorF dca() const; ///< Returns 3D distance of closest approach to primary vertex.
-    StThreeVectorF dcaGlobal() const; ///< Returns 3D distance of closest approach to primary vertex of associated global track.
+    StThreeVectorF dca(Int_t vtx_id=0) const; ///< Returns 3D distance of closest approach to primary vertex.
+    StThreeVectorF dcaGlobal(Int_t vtx_id=0) const; ///< Returns 3D distance of closest approach to primary vertex of associated global track.
     StThreeVectorF firstPoint() const; ///< Returns positions of first measured point.
     StThreeVectorF lastPoint() const; ///< Returns positions of last measured point.
     StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
@@ -100,6 +102,7 @@ protected:
   Short_t mFlag;
   Int_t mIndex2Global;
   Int_t mIndex2RichSpectra;
+  Int_t mVertexIndex;       // Primary vertex id for this track's dca
   UChar_t mNHits;           // Total number of points (was (F)tpc only)
   UChar_t mNHitsPoss;       // Total possible points (was (F)tpc only)
   UChar_t mNHitsDedx;       
@@ -134,15 +137,17 @@ protected:
 
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
-  StThreeVectorD dca(const StEvent*, const StTrack*); ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
-  StThreeVectorD momentumAtPrimaryVertex(const StEvent* event, const StTrack* track); ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
+  void setVertexIndex(int i) { mVertexIndex=i; } ///< Set index of primary vertex for which dca is stored
+  StThreeVectorF dca(const StThreeVectorF pos) const; ///< Calculate dca to a given point
+  StThreeVectorD dca(const StTrack*, const StVertex *vertex); ///< Helper function: Calculates dca from a given StTrack and the primary vertex taken from StEvent
+  StThreeVectorD momentumAtPrimaryVertex(const StEvent *event, const StTrack* track, const StVertex *vertex); ///< Helper function: Calculates the momentum at dca a given StTrack and the primary vertex taken from StEvent.
   void fillMuProbPidTraits(const StEvent*, const StTrack*); ///< Helper function to fill all the different pid values 
   static StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm; ///< StuProbabilityPidAlgorithm, we will use the same algorithm for all tracks
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
 
   friend class StMuDst;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,5)
+  ClassDef(StMuTrack,6)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -150,6 +155,7 @@ inline short StMuTrack::type() const {return mType;}
 inline short StMuTrack::flag() const {return mFlag;}
 inline int StMuTrack::index2Global() const {return mIndex2Global;}
 inline int StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
+inline int StMuTrack::vertexIndex() const {return mVertexIndex;}
 inline unsigned short StMuTrack::nHits() const {return mNHits;}
 inline unsigned short  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
 inline unsigned short  StMuTrack::nHitsFit() const {return mNHitsFit;}
@@ -173,8 +179,6 @@ inline double StMuTrack::eta() const {return mEta;}
 inline double StMuTrack::phi() const {return mPhi;}
 inline StThreeVectorF StMuTrack::p() const {return mP;}
 inline StThreeVectorF StMuTrack::momentum() const {return mP;}
-inline StThreeVectorF StMuTrack::dca() const {return mDCA;}
-inline StThreeVectorF StMuTrack::dcaGlobal() const {return mDCAGlobal;}
 inline StThreeVectorF StMuTrack::firstPoint() const {return mFirstPoint;}
 inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
@@ -192,6 +196,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.15  2005/07/15 21:45:08  mvl
+ * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
+ *
  * Revision 1.14  2005/07/06 21:40:18  fisyak
  * use template version of StPhysicalHelixD
  *
