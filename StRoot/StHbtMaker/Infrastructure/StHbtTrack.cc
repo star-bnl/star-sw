@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.18 2005/07/10 02:17:21 chajecki Exp $
+ * $Id: StHbtTrack.cc,v 1.19 2005/07/15 17:41:43 kopytin Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.19  2005/07/15 17:41:43  kopytin
+ * initialized mHiddenInfo in StHbtTrack() to null
+ *
  * Revision 1.18  2005/07/10 02:17:21  chajecki
  * Ftpc (Eeat+West) hits included in nHits()
  *
@@ -70,6 +73,12 @@
 #include "StHbtMaker/Infrastructure/StHbtAihongPid.h"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 #endif
+
+StHbtTrack::StHbtTrack()
+{
+  mHiddenInfo = NULL;
+}
+
 
 StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mTrackType = t.mTrackType;
@@ -413,7 +422,10 @@ StHbtTrack::StHbtTrack(const StMuDst* dst, const StMuTrack* t) { // copy constru
   StMuEvent* ev = dst->event();
    mTrackType = t->type();
    mTrackId = t->id();
+
+
    mNHits = t->topologyMap().numberOfHits(kTpcId) + t->topologyMap().numberOfHits(kFtpcEastId) + t->topologyMap().numberOfHits(kFtpcWestId);
+
    mNHitsPoss = t->nHitsPoss(); 
    mNHitsDedx = t->nHitsDedx(); 
    mNSigmaElectron = t->nSigmaElectron();
