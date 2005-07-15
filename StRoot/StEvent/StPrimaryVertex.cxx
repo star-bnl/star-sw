@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.11 2005/06/15 21:50:32 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.12 2005/07/15 20:17:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.12  2005/07/15 20:17:35  ullrich
+ * Corrected spelling in membrane
+ *
  * Revision 2.11  2005/06/15 21:50:32  ullrich
  * Added members and methods to identify used vertex finder and store vertex quality.
  *
@@ -54,7 +57,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.11 2005/06/15 21:50:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.12 2005/07/15 20:17:35 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -70,7 +73,7 @@ void StPrimaryVertex::init()
     mNumMatchesWithCTB = 0; 
     mNumMatchesWithBEMC = 0;
     mNumMatchesWithEEMC = 0;
-    mNumTracksCrossingCentralMembran = 0; 
+    mNumTracksCrossingCentralMembrane = 0; 
     mSumOfTrackPt = 0;
     mRanking = 0;    
 }

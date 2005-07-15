@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.10 2005/06/15 21:54:34 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.11 2005/07/15 20:17:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.11  2005/07/15 20:17:35  ullrich
+ * Corrected spelling in membrane
+ *
  * Revision 2.10  2005/06/15 21:54:34  ullrich
  * Added members and methods to identify used vertex finder and store vertex quality.
  *
@@ -82,7 +85,7 @@ public:
     unsigned short  numMatchesWithCTB() const; 
     unsigned short  numMatchesWithBEMC() const; 
     unsigned short  numMatchesWithEEMC() const; 
-    unsigned short  numTracksCrossingCentralMembran() const;  
+    unsigned short  numTracksCrossingCentralMembrane() const;  
     float           sumOfTrackPt() const; 
     float           ranking() const;
     
@@ -91,7 +94,7 @@ public:
     void setNumMatchesWithCTB(unsigned short);
     void setNumMatchesWithBEMC(unsigned short);
     void setNumMatchesWithEEMC(unsigned short);
-    void setNumTracksCrossingCentralMembran(unsigned short);
+    void setNumTracksCrossingCentralMembrane(unsigned short);
     void setSumOfTrackPt(float);
     void setRanking(float);
 
@@ -108,7 +111,7 @@ private:
     UShort_t         mNumMatchesWithCTB; 
     UShort_t         mNumMatchesWithBEMC;
     UShort_t         mNumMatchesWithEEMC;
-    UShort_t         mNumTracksCrossingCentralMembran; 
+    UShort_t         mNumTracksCrossingCentralMembrane; 
     Float_t          mSumOfTrackPt;
     Float_t          mRanking;    
 
@@ -120,7 +123,7 @@ inline unsigned short StPrimaryVertex::numTracksUsedInFinder() const {return mNu
 inline unsigned short StPrimaryVertex::numMatchesWithCTB() const {return mNumMatchesWithCTB;} 
 inline unsigned short StPrimaryVertex::numMatchesWithBEMC() const {return mNumMatchesWithBEMC;} 
 inline unsigned short StPrimaryVertex::numMatchesWithEEMC() const {return mNumMatchesWithEEMC;} 
-inline unsigned short StPrimaryVertex::numTracksCrossingCentralMembran() const {return mNumTracksCrossingCentralMembran;} 
+inline unsigned short StPrimaryVertex::numTracksCrossingCentralMembrane() const {return mNumTracksCrossingCentralMembrane;} 
 inline float StPrimaryVertex::sumOfTrackPt() const {return mSumOfTrackPt;}
 inline float StPrimaryVertex::ranking() const {return mRanking;}
 inline void StPrimaryVertex::setVertexFinderId(StVertexFinderId val) {mVertexFinderId = val;}
@@ -128,7 +131,7 @@ inline void StPrimaryVertex::setNumTracksUsedInFinder(unsigned short val) {mNumT
 inline void StPrimaryVertex::setNumMatchesWithCTB(unsigned short val) {mNumMatchesWithCTB = val;}
 inline void StPrimaryVertex::setNumMatchesWithBEMC(unsigned short val) {mNumMatchesWithBEMC = val;}
 inline void StPrimaryVertex::setNumMatchesWithEEMC(unsigned short val) {mNumMatchesWithEEMC = val;}
-inline void StPrimaryVertex::setNumTracksCrossingCentralMembran(unsigned short val) {mNumTracksCrossingCentralMembran = val;}
+inline void StPrimaryVertex::setNumTracksCrossingCentralMembrane(unsigned short val) {mNumTracksCrossingCentralMembrane = val;}
 inline void StPrimaryVertex::setSumOfTrackPt(float val) {mSumOfTrackPt = val;}
 inline void StPrimaryVertex::setRanking(float val) {mRanking = val;}
 
