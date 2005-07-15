@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.cxx,v 1.15 2005/04/12 21:56:29 mvl Exp $
+ * $Id: StMuArrays.cxx,v 1.16 2005/07/15 21:45:08 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -10,7 +10,7 @@
 
 //		ARRAY NAMES
 //============================================================================================
-const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent",
+const char* StMuArrays::arrayNames [__NALLARRAYS__    ] = {"MuEvent","PrimaryVertices",
 					                   "PrimaryTracks","GlobalTracks","OtherTracks","L3Tracks",
 					                   "RichSpectra","DetectorStates","L3AlgoAccept","L3AlgoReject",
 /*strangeArrayNames[__NSTRANGEARRAYS__]*/                  "Event","McEvent",
@@ -38,7 +38,7 @@ const char** StMuArrays::eztArrayNames = StMuArrays::tofArrayNames     +__NTOFAR
 
 //		ARRAY TYPES
 //============================================================================================
-const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent",
+const char* StMuArrays::arrayTypes [__NALLARRAYS__    ] = {"StMuEvent","StMuPrimaryVertex",
 					                   "StMuTrack","StMuTrack","StMuTrack","StMuTrack",
 					                   "StRichSpectra","StDetectorState","StL3AlgorithmInfo","StL3AlgorithmInfo",
 /*strangeArrayTypes[__NSTRANGEARRAYS__]*/                  "StStrangeEvMuDst","StStrangeEvMuDst",
@@ -62,7 +62,7 @@ const char** StMuArrays::eztArrayTypes = StMuArrays::tofArrayTypes     +__NTOFAR
 // These are intial sizes. Automatically resized if too small.
 // Choosing too large initial values gives a performance penalty when reading 
 // only selected MuDst branches 
-int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,1000,1000,1000,1000,100,100,100,100,
+int   StMuArrays::arraySizes       [__NALLARRAYS__    ] = {1,10,1000,1000,1000,1000,100,100,100,100,
 /*strangeArraySizes[__NSTRANGEARRAYS__]*/                  1,1,1000,100,100,1000,100,100,1000,100,100,200,
 /*emcArraySizes    [__NEMCARRAYS__    ]*/                  1,1000,1000,1000,1000,1000,1000,
 /*pmdArraySizes    [__NPMDARRAYS__    ]*/                  1000,1000,1000,1000,
@@ -77,7 +77,7 @@ int* StMuArrays::eztArraySizes = StMuArrays::tofArraySizes     +__NTOFARRAYS__;
 
 //		ARRAY COUNTERS
 //============================================================================================
-int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,
+int   StMuArrays::arrayCounters       [__NALLARRAYS__ ] = {0,0,0,0,0,0,0,0,0,0,
 /*strangeArrayCounters[__NSTRANGEARRAYS__]*/               0,0,0,0,0,0,0,0,0,0,0,0,
 /*emcArrayCounters    [__NEMCARRAYS__    ]*/               0,0,0,0,0,0,0,
 /*pmdArrayCounters    [__NPMDARRAYS__    ]*/               0,0,0,0,
@@ -112,6 +112,9 @@ StMuArrays::StMuArrays()
 /***************************************************************************
  *
  * $Log: StMuArrays.cxx,v $
+ * Revision 1.16  2005/07/15 21:45:08  mvl
+ * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
+ *
  * Revision 1.15  2005/04/12 21:56:29  mvl
  * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
  *

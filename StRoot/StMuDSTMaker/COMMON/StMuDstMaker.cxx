@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.68 2005/04/12 21:56:29 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.69 2005/07/15 21:45:08 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -39,6 +39,7 @@
 
 #include "StMuException.hh"
 #include "StMuEvent.h"
+#include "StMuPrimaryVertex.h"
 #include "StMuTrack.h"
 #include "StMuDebug.h"
 #include "StMuCut.h"
@@ -305,6 +306,7 @@ void  StMuDstMaker::streamerOff() {
   StXiMc::Class()->IgnoreTObjectStreamer();
   StKinkMc::Class()->IgnoreTObjectStreamer();
   StMuTrack::Class()->IgnoreTObjectStreamer();
+  StMuPrimaryVertex::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
   StMuEmcHit::Class()->IgnoreTObjectStreamer();
   StMuEmcTowerData::Class()->IgnoreTObjectStreamer();
@@ -696,6 +698,14 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
 
   try {
+    fillVertices(ev);
+  }
+  catch(StMuException e) {
+    e.print();
+    throw e;
+  }
+
+  try {
     fillTracks(ev,mTrackFilter);
   }
   catch(StMuException e) {
@@ -884,6 +894,26 @@ void StMuDstMaker::fillL3AlgorithmInfo(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+void StMuDstMaker::fillVertices(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  StTimer timer;
+  timer.start();
+
+  StMuPrimaryVertex *typeOfVertex=0;
+  Int_t n_vtx = ev->numberOfPrimaryVertices();
+  DEBUGVALUE2(n_vtx);
+  mVtxList.Clear();
+  for (Int_t i_vtx=0; i_vtx < n_vtx; i_vtx++) {
+    StPrimaryVertex *vtx=ev->primaryVertex(i_vtx);
+    addType( mArrays[muPrimaryVertex], vtx, typeOfVertex );
+    mVtxList.AddAt(ev->primaryVertex(i_vtx),i_vtx);
+  }
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
   DEBUGMESSAGE2("");
   StTimer timer;
@@ -941,14 +971,21 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
   /// do global track
   int index2Global =-1;
   if (gTCA) {
+    const StTrack *pr_tr = node->track(primary);
+    const StVertex *vtx = 0;
+    if (pr_tr)
+       vtx = pr_tr->vertex();
+    if (vtx==0)
+       vtx = ev->primaryVertex();	
+	
     tr= node->track(global);
-    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, cut, -1, l3);
+    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, vtx, cut, -1, l3);
   }
   /// do primary track track
   int index;
   if (pTCA) {
     tr = node->track(primary);
-    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, cut, index2Global, l3);
+    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
   }
   /// all other tracks
   if (oTCA) {
@@ -956,7 +993,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
     for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
       tr = node->track(j);
       if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
-	index = addTrack(oTCA, ev, tr, cut, index2Global, l3);
+	index = addTrack(oTCA, ev, tr, tr->vertex(), cut, index2Global, l3);
       }
     }
   }
@@ -964,7 +1001,7 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
-int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack* track, StMuCut* cut, int index2Global, bool l3) {
+int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack* track, const StVertex *vtx, StMuCut* cut, int index2Global, bool l3) {
   DEBUGMESSAGE3("");
   StRichSpectra typeOfStRichSpectra;
   int index = -1;
@@ -979,7 +1016,7 @@ int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack
     if (rich) {
       index2RichSpectra  =  addType( mArrays[muRich], *rich );
     }
-    new((*tca)[counter]) StMuTrack(event, track, index2Global, index2RichSpectra, l3);
+    new((*tca)[counter]) StMuTrack(event, track, vtx, index2Global, index2RichSpectra, l3, &mVtxList);
     index = counter;
   }
   catch (StMuException e) {
@@ -1219,6 +1256,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.69  2005/07/15 21:45:08  mvl
+ * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
+ *
  * Revision 1.68  2005/04/12 21:56:29  mvl
  * Changes by Xin Dong for year-5 TOF data format: extra TClonesArray and routines to fill it from StEvent (StTofRawData).
  *
