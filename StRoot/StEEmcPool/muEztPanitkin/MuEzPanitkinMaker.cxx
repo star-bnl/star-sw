@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzPanitkinMaker.cxx,v 1.2 2005/05/05 22:22:08 balewski Exp $
+// $Id: MuEzPanitkinMaker.cxx,v 1.3 2005/07/15 15:37:36 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -29,9 +29,9 @@ ClassImp(MuEzPanitkinMaker)
 
 //________________________________________________
 //________________________________________________
-MuEzPanitkinMaker::MuEzPanitkinMaker( const char* self ,const char* muDstMakerName) : StMaker(self){
-  mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
-  assert(mMuDstMaker);
+MuEzPanitkinMaker::MuEzPanitkinMaker( char* self , char* muDstMakerName) : StMaker(self){
+    mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
+   assert(mMuDstMaker);
 
   trgAkio=0;
   nTrigEve=nInpEve=0;
@@ -182,6 +182,9 @@ Int_t MuEzPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: MuEzPanitkinMaker.cxx,v $
+// Revision 1.3  2005/07/15 15:37:36  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2005/05/05 22:22:08  balewski
 // added spy for JP
 //
