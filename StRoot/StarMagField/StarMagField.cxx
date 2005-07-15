@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.1.1.1 2005/07/07 14:13:55 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.2 2005/07/15 22:17:37 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.2  2005/07/15 22:17:37  fisyak
+ * fix misleading print out
+ *
  * Revision 1.1.1.1  2005/07/07 14:13:55  fisyak
  * The version of STAR mag. field extracted from StDbUtilities/StMagUtilities to be used in Simulation and Reconstruction instead of agufld
  *
@@ -87,9 +90,9 @@ R__EXTERN  "C" {
     StarMagField::Instance()->BField(x,bf);
   }
   void type_of_call mfldgeo() {
-    printf("StarVMCApplication  mfldgeo is called\n");
+    printf("StarMagField  mfldgeo is called\n");
     if (StarMagField::Instance()) {
-      printf("StarVMCApplication  mfldgeo: old mag. field has been already instantiated. Keep it.\n");
+      printf("StarMagField  mfldgeo: old mag. field has been already instantiated. Keep it.\n");
     } else {
       new StarMagField();
     }
