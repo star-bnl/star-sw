@@ -37,15 +37,18 @@ EemcHitList::EemcHitList(StEEmcDbMaker* x, uint y, EEmcGeomSimple *z) :
   float  kSigPed=5.0; 
   eeDb-> setThreshold( kSigPed);
 
+#if 0
   // default EtaBins 2.0 -> 1.086
-  // the first 13 entries mark the bounds of the 12 eta Bins. 
   static const float defaultEtaBin[] = {
     2.0    ,
     1.9008 , 1.8065 , 1.7168 , 1.6317 , 1.5507 , 1.4738 ,
     1.4007 , 1.3312 , 1.2651 , 1.2023 , 1.1427 , 1.086 
   };
-  etaHL=defaultEtaBin;
+  // etaHL=defaultEtaBin;
+#endif
 
+  // the first 13 entries mark the bounds of the 12 eta Bins. 
+  etaHL= geomE->getEtaBinRangeArray();
   gMessMgr->Message("","I") 
     <<" EemcHitList:: use kSigPed="<<kSigPed
     <<endm;
@@ -56,7 +59,7 @@ EemcHitList::EemcHitList(StEEmcDbMaker* x, uint y, EEmcGeomSimple *z) :
 //==========================================================
 void
 EemcHitList::initRun(){
-  gMessMgr->Message("","I") <<" EemcHitList::initRun()"<<endm;
+  gMessMgr->Message("","D") <<" EemcHitList::initRun()"<<endm;
   ScintHitList::initRun();
 
   // clear old lookup table
@@ -109,7 +112,7 @@ EemcHitList::initRun(){
 	nA++;
       }
   
-  printf("nB=%d  nA=%d\n", nB,nA);
+  gMessMgr->Info() <<" EemcHitList::initRun() done,  active="<<nA<<" of "<<nB<<" ETOW  towers (only 8 upper eta rings is used) " <<endm; 
   
 }
 
@@ -126,7 +129,7 @@ int
 EemcHitList::etaBin(float eta){
 
   // in this aplication only 'nBin' ,counted from eta=1. --> eta=2., are condidered to be valid. nBin should be ~8, since no tracking is expected at eta >1.6
-
+  
   if(eta <etaHL[12]) return -1; // missed EEMC
   int i;
   for(i=0;i<nEta;i++) {
@@ -178,7 +181,7 @@ EemcHitList::build ( StEmcDetector*det, float adcMin){
       if(rawAdc< x->thr) continue; // still only ped
       float adc=rawAdc - x->ped ;
       if(adc < adcMin) continue; // too low response for MIP
-      printf("add Eemc hit %s adc=%.1f\n",x->name,adc);
+      // printf("add Eemc hit %s adc=%.1f\n",x->name,adc);
 
       setFired(iBin);
     } // end of sector

@@ -13,7 +13,7 @@ class EemcHitList : public ScintHitList {
   StEEmcDbMaker* eeDb; 
   EEmcGeomSimple *geomE;
   int name2bin[MaxSectors][MaxSubSec][MaxEtaBins]; // map --> my bin
-  const float *etaHL; // limits of eta bins
+  const Float_t *etaHL; // limits of eta bins
 
   //params
   uint killStatEEmc;

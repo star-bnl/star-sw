@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.2 2005/07/14 15:39:25 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.3 2005/07/15 20:53:25 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -147,7 +147,7 @@ void StPPVertexFinder::InitRun(int runnumber){
   if(isMC) assert(runnumber<1000000); // probably embeding job ,crash it JB
 
   ctbList->initRun();
-  bemcList->initRun();
+  bemcList->initRun(isMC);
   eemcList->initRun();
 
 }
@@ -668,7 +668,7 @@ void StPPVertexFinder:: exportVertices(){
     primV.setNumMatchesWithCTB(V->nCtb);
     primV.setNumMatchesWithBEMC(V->nBemc);
     primV.setNumMatchesWithEEMC(V->nEemc);
-    primV.setNumTracksCrossingCentralMembran(V->nTpc);
+    primV.setNumTracksCrossingCentralMembrane(V->nTpc);
     primV.setSumOfTrackPt(V->gPtSum);
     primV.setRanking(V->Lmax);
     primV.setFlag(1); //??? is it a right value?
@@ -1090,6 +1090,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 }
 /*
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.3  2005/07/15 20:53:25  balewski
+ * cleanup
+ *
  * Revision 1.2  2005/07/14 15:39:25  balewski
  * nothing, to force recompilation of this code by Autobuild
  *
