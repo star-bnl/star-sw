@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.23 2003/09/02 17:58:32 perev Exp $
+ * $Id: StHbtTrack.hh,v 1.24 2005/07/15 17:40:57 kopytin Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.24  2005/07/15 17:40:57  kopytin
+ * initialized mHiddenInfo to null in StHbtTrack()
+ *
  * Revision 1.23  2003/09/02 17:58:32  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -132,7 +135,7 @@ class StMuTrack;
 
 class StHbtTrack{
 public:
-  StHbtTrack(){/* no-op*/};
+  StHbtTrack();
   StHbtTrack(const StHbtTrack&);// copy constructor
 #ifdef __ROOT__
   StHbtTrack(const StTrack*, StHbtThreeVector);   // c-tor from StTrack of STAR DSTs
