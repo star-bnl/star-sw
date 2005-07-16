@@ -235,7 +235,7 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
       // Conditions for caveats on test triggers
       Bool_t run4 = (date>20040000) && (date<20040700);
       Bool_t run5 = (date>20050000) && (date<20050700);
-      Bool_t run5_400 = run5 && (fill==7223 || fill==7224);
+      Bool_t run5_400 = (date==20050602) || (date==20050603);
 
       Bool_t valid = kFALSE;
 
@@ -400,7 +400,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.25 2005/07/15 18:38:47 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.26 2005/07/16 21:24:03 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -695,8 +695,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.25 2005/07/15 18:38:47 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.26 2005/07/16 21:24:03 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.26  2005/07/16 21:24:03  genevb
+// Fixed bug with pp400 data from 2005
+//
 // Revision 1.25  2005/07/15 18:38:47  genevb
 // ppTrans triggers, and fix for too many open files
 //
