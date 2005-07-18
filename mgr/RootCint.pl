@@ -66,9 +66,17 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
     if (!($line =~ / class / ))		{goto PRINT;}
 
     my @words = split /([ \(,\)\;\-\!+])/, $line;
-#		my $i=0;	 foreach my $w (@words) {print "$i\t$w\n"; $i++;} 
+#    my $i=0;	 foreach my $w (@words) {print "\t$i\t$w"; $i++;}; print "\n"; 
     if ($words[10] != "class") 		{goto PRINT;}
-    my $class = $words[12]; 
+    my $class = "";
+    for (my $i = 12; $i < $#words; $i++) {
+#      print "\t$i|$words[$i]|"; 
+      next if $words[$i] eq '' or $words[$i] =~ /^\s+/; 
+      $class = $words[$i]; 
+      last;
+    } 
+#    print "class = |$class|\n";
+#    my $class = $words[12]; 
     my $classG = $class;
     if ($classG =~ /</) {($classG) = split '<', $classG;} 
     if (!$classG) 			{goto PRINT;}
@@ -123,15 +131,15 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
       else {$line =~ s/\/\*.*$//;}
     }
 #    next if ($com);
-    if ($line =~ /\#include/ && $line !~ /(<>)/) {
+    if ($line =~ /\#include/ && $line !~ /(<>)/ && $line !~ /Table\.h/) {
       (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
-      $inc_h =~ s/\"//g; 		#print "inc_h = $inc_h\n";
+      $inc_h =~ s/\"//g; #		print "inc_h = $inc_h\n";
       my $inc_hh = basename($inc_h);
       if ($sources =~ /$inc_hh/) {
-	$includes .= ":" . $inc_hh; 	#print "--includes for $h: $includes\n";
+	$includes .= ":" . $inc_hh;# 	print "--includes for $h: $includes\n";
       }
     } 
-    if ($line =~/ClassDef/) { #print "================================ $line \n";
+    if ($line =~/ClassDef/ && $line !~ /ClassDefChair/) { #print "================================ $line \n";
       if ($line =~ /\#\#/) {next;} # ClassDefs in macro definition
       my @words = split /([\(,\-\!\)])/, $line;
       my $class = $words[2];      	#print "=================class = ",$class,"\n";
@@ -220,6 +228,7 @@ for my $class (@classes) {
 	  print Out "#pragma link C++ typedef $class;\n"; print  "#pragma link C++ typedef $class;\n";
 	}
 	else {
+#	  print "======> |$class|\n";
 	  if ($class =~ /-$/) {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
 	  else {print Out "#pragma link C++ class $class+;\n"; print  "#pragma link C++ class $class+;\n";}
 	}
