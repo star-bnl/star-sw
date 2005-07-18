@@ -16,7 +16,7 @@
 
     # check which site we are working on
     set BNL=0
-    set remoteNode=stargrid02.rcf.bnl.gov 
+    set remoteNode=stargrid04.rcf.bnl.gov 
 
     # ---  URL: http://www-pdsf.nersc.gov/~username/   ----
     set localWebPage=~/public_html
@@ -73,8 +73,9 @@
 #    -------------------------------
 #    Set the proper version of STAR software release
 #    -------------------------------
-    wget http://www.star.bnl.gov/STAR/comp/ofl/pacman/caches/tarballs/pacman-3.13-pre-release-Jul06.tar.gz
-    tar -xzvf pacman-3.13-pre-release-Jul06.tar.gz
+    globus_url_copy gsiftp://stargrid04.rcf.bnl.gov//afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches/tarballs/pacman-3.13-pre-release-Jul06.tar.gz file:$SCRATCH/pacman.tar.gz
+#    wget http://www.star.bnl.gov/STAR/comp/ofl/pacman/caches/tarballs/pacman-3.13-pre-release-Jul06.tar.gz
+    tar -xzvf $SCRATCH/pacman.tar.gz
     cd pacman-3.13-pre-release-Jul06
     source setup.csh
     cd ..
