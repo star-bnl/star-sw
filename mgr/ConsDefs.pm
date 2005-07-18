@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.83 2005/03/09 18:59:41 perev Exp $
+# $Id: ConsDefs.pm,v 1.84 2005/07/18 22:19:25 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -69,7 +69,9 @@
     $CPPPATH       = "";
     $CPPFLAGS      = "";
     $EXTRA_CPPPATH = "";
-
+# simulation
+    $CERNLIB_FPPFLAGS = "";
+    $CERNLIB_CPPFLAGS = "";
     # We make the assumption that STAR_HOST_SYS will contain the string 64_
     # 64 bits test does not suffice. It comes in two flavors with lib and lib64
     # depending of backward 32 support or not. We can extend here later
@@ -104,6 +106,7 @@
     $FEXTEND       = $G77EXTEND;
     $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
     $FPPFLAGS      = $CPPCERN;
+    $EXTRA_FPPFLAGS= "";
     $CXXFLAGS     .= $CPPCERN;
     $EXTRA_FFLAGS  = "";
 
@@ -133,9 +136,13 @@
     if ( !$ROOT )       { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
     if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
-    $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
-     my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
- if ($RLIBMAP and ! -e $RLIBMAP ) {$RLIBMAP = "";}
+ $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
+ my $RLIBMAP    = "";#$ROOTSYS . "/bin/rlibmap";
+ if ($RLIBMAP and ! -e $RLIBMAP) {$RLIBMAP = "";}
+# if ($RLIBMAP) {
+#   my ($M,$S,$V) = split('.',$ROOT_LEVEL);
+#   if ($M <4 or $M == 4 and $S == 0) {$RLIBMAP = "";}
+# }
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
     $Libraries     = "";
@@ -162,8 +169,8 @@
  my $FCviaAGETOFCOM
  = " test -f %>:b.g && rm %>:b.g; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F -o %>:b.g;"
  . " test -f %>:b.f && rm %>:b.f; %AGETOF %AGETOFLAGS -V f %<:b.g -o %>:b.f;";
-# $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then grep -v '^#' %>:b.f > %>:b.for && %FC %FFLAGS %FDEBUG -c %>:b.for %Fout%>;";
- $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then %FC %FFLAGS %FDEBUG -c %>:b.f %Fout%>;";
+# $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then grep -v '^#' %>:b.f > %>:b.for && %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.for %Fout%>;";
+ $FCviaAGETOFCOM .= " if [ -f %>:b.f ]; then %FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>;";
  $FCviaAGETOFCOM .= " else ". $FCCOM . " fi";
 
  my $AGETOFCOM  = "test -f %>:b.F && rm %>:b.F;";
@@ -173,7 +180,7 @@
 # my $AGETOFCOM  = "test -f %>:b.F && rm %>:b.F; ln -s %<:f %<:b.F;";
 #    $AGETOFCOM .= "test -f %>:b.G && rm %>:b.G; %CPP %FPPFLAGS %EXTRA_FPPFLAGS %_IFLAGS %EXTRA_FCPATH %<:b.F > %>:b.G;";
 #    $AGETOFCOM .= "test -f %>:b.f && rm %>:b.f; %AGETOF %AGETOFLAGS %<:b.G -o %>:b.f &&";
-#    $AGETOFCOM .= "%FC %FFLAGS %FDEBUG -c %>:b.f %Fout%>";
+#    $AGETOFCOM .= "%FC %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -c %>:b.f %Fout%>";
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
     $NoKeep = undef;
@@ -181,20 +188,24 @@
     print "System: ", $_, "\n" unless ($param::quiet);
 
 
+
     if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
 	my($packl,$cernl,$kernl,$strip);
 
 	$strip = "";
 	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
-	     -e "$CERN_ROOT/lib/libkernlib_noshift.a" &&
-	     -e "$CERN_ROOT/bin/cernlib_noshift"){
+	     -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
+	  $packl = "packlib_noshift";
+	  $kernl = "kernlib_noshift";
+	  if (-e "$CERN_ROOT/bin/cernlib_noshift"){
 	    $cernl = "$CERN_ROOT/bin/cernlib_noshift";
-	    $packl = "packlib_noshift";
-	    $kernl = "kernlib_noshift";
-
+	  }
+	  else {
+	    $cernl = "cernlib";
+	  }
 	} else {
 	    print "WARNING: using cernlib from the default path\n";
-	    $cernl = "cernlib";
+	    $cernl = "cernlib -s";
 	    $packl = "packlib";
 	    $kernl = "kernlib";
 	}
@@ -248,7 +259,6 @@
 	$FLIBS         = $F77LIBS;
 	$FFLAGS        = "-save";
 	$FEXTEND       = "-132";
-
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
 	$SYSLIBS       = "-lm -ldl";# -rdynamic";
 	$CLIBS         = "-lm -ldl";# -rdynamic";
@@ -257,11 +267,15 @@
 	$LDFLAGS       = "";#--no-warn-mismatch";
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -u*";
-
+        $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+        $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
     } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/ || $STAR_HOST_SYS =~ /^sl/) {
         #
         # Case linux
         #
+      $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+      $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+#      print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);# print "CXX_VERSION : $CXX_VERSION\n";
         $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
@@ -279,7 +293,7 @@
 	  if ($CXX_VERSION < 3){
 	    $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
 	  } else {
-	    # this naming convention starts at gcc 3.2 which happens to
+	    # this na1ming convention starts at gcc 3.2 which happens to
 	    # have a change in the options
 	    $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
 	  }
@@ -428,15 +442,16 @@
 
     $ROOTSRC = $ROOTSYS . "/include";
 
-    $CERNINO = "";
-    if (! $ENV{MINICERN}) {
-      $CERNINO = $CERN_ROOT . "/include";
-    } else {
-      $CERNINO = "#StarVMC/minicern" . $main::PATH_SEPARATOR . "#StarVMC/StGeant321";
-    }
+    $CERNINO = $CERN_ROOT . "/include";
+#    $CERNINO = "";
+#    if (! $ENV{MINICERN}) {
+#      $CERNINO = $CERN_ROOT . "/include";
+#    } else {
+#      $CERNINO = "#StarVMC/minicern" . $main::PATH_SEPARATOR . "#StarVMC/StGeant321";
+#    }
 
     $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
-    $CPPPATH .= $main::PATH_SEPARATOR . $CERNINO;
+    $CPPPATH .= $main::PATH_SEPARATOR;# . $CERNINO;
 
     my $pwd = cwd();
     my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";
@@ -457,14 +472,12 @@
 			 "/usr/mysql  ".
 			 $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
 			 "mysql.h");
-    if ($MYSQLINCDIR) {
-	print "Use MYSQLINCDIR = \t$MYSQLINCDIR \n" if $MYSQLINCDIR && ! $param::quiet;
-    } else {
-	die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";
+    if (! $MYSQLINCDIR) {
+      die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";
     }
 
     my ($mysqllibdir)=$MYSQLINCDIR;
-    
+
     $mysqllibdir =~ s/include/$LLIB/;
 
     #print "DEBUG :: $mysqllibdir\n";
@@ -479,9 +492,8 @@
 	if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
 	$MYSQLLIB .= " -lz";
     }
-    print "Use MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n" if $MYSQLLIBDIR && ! $param::quiet;
-
-
+    print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n" 
+ if $MYSQLLIBDIR && ! $param::quiet;
     # QT
     if ( defined($QTDIR) && -d $QTDIR) {
 	if (-e $QTDIR . "/bin/moc") {
@@ -512,11 +524,14 @@
     }
 
     my @params = (
+		  'Package'       => 'None',
 		  'CPP'           => $CPP,
 		  'CPPPATH'       => $CPPPATH,
 		  'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
+		  'CERNLIB_FPPFLAGS' => $CERNLIB_FPPFLAGS,
 		  'CPPFLAGS'      => $CPPFLAGS,
 		  'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
+		  'CERNLIB_CPPFLAGS' => $CERNLIB_CPPFLAGS,
 		  'DEBUG'         => $DEBUG,
 		  'FDEBUG'        => $FDEBUG,
 		  'NOOPT'         => $NOOPT,
@@ -527,6 +542,7 @@
 		  'LIBSTDC'       => $LIBSTDC,
 		  'FC'            => $FC,
 		  'FPPFLAGS'      => $FPPFLAGS,
+		  'EXTRA_FPPFLAGS'=> $EXTRA_FPPFLAGS,
 		  'FEXTEND'       => $FEXTEND,
 		  'FFLAGS'        => $FFLAGS,
 		  'FCPATH'        => $FCPATH,
@@ -560,7 +576,7 @@
 		  'THREAD'         => $THREAD,
 		  'CRYPTLIBS'      => $CRYPTLIBS,
 		  'SYSLIBS'        => $SYSLIBS,
-		  'CERNLIBS'       => $CERNLIBS,
+		  'CERNLIBS'         => $CERNLIBS,
 		  'Libraries'      => $Libraries,
 		  'LIBS'           => $LIBS,
 		  'LD'             => $LD,
@@ -611,6 +627,8 @@
 		      'PATH'            => $PATH,
 		      'LM_LICENSE_FILE' => $LM_LICENSE_FILE,
 		      'INCLUDE'         => $INCLUDE_PATH,
+		      'ROOT'            => $ROOT,
+		      'ROOT_LEVEL'      => $ROOT_LEVEL,
 		      'ROOTSRC'         => $ROOTSRC,
 		      'ROOTSYS'         => $ROOTSYS,
 		      'CINTSYSDIR'      => $CINTSYSDIR,
@@ -631,13 +649,21 @@
 		      'OPTSTAR'         => $OPTSTAR
 		      },
 		  'Packages' => {
-		      'ROOT' => {
+          		'ROOT' => {
 			  'BINDIR'=> $ROOTSYS . "/bin",
 			  'LIBDIR'=> $ROOTSYS . "/lib",
 			  'INCDIR'=> $ROOTSYS . "/include",
 			  'RLIBMAP'  => $RLIBMAP,
 			  'ROOTCINT' => $ROOTCINT
 			  },
+			'CERNLIB' => {
+			    'BINDIR' => $CERN . "/bin",
+			    'LIBDIR' => $CERN . "/lib",
+			    'INCDIR' => $CERNINO,
+			    'FPPFLAGS' => $CERNLIB_FPPFLAGS,
+			    'CPPFLAGS' => $CERNLIB_CPPFLAGS,
+			    'CERNLIBS' => $CERNLIBS
+				     },
 		       'MYSQL' => {
 			   'LIBDIR'=> $MYSQLLIBDIR,
 			   'INCDIR'=> $MYSQLINCDIR,
