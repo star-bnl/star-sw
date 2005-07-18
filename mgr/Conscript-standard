@@ -161,6 +161,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
     $LIBPATH .= $CERN_ROOT . "/lib";
+    $LIBS .= " " . $env->{LDALL};
     foreach my $py ("pythia6205","pythia","pythia6152","pythia6136") {
       my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
       if (-f $file) {$LIBS .= " -l" . $py; last;}
@@ -169,7 +170,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
       if (-f $file) {$LIBS .= " -l" . $py; last;}
     }
-    
+    $LIBS  .= " " . $env->{LDNONE};
   } elsif ( $pkg =~ m/^StTrsMaker$/ ){
     $CPPPATH =
       "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include";
