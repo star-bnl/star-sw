@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.10 2004/11/23 01:38:46 potekhin Exp $
+# $Id: Conscript,v 1.11 2005/07/18 22:22:11 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.11  2005/07/18 22:22:11  fisyak
+# Add flag WithoutPGI to get free_ and malloc_ without PGI
+#
 # Revision 1.10  2004/11/23 01:38:46  potekhin
 # Added i386 to the "if" statement to insure compilation
 # on the older RH 7.x systems. Added the CVS ID line for
@@ -40,6 +43,7 @@ $FPPFLAGS .= " -DCPP_TITLE_CH=\"'" . $pkg . "'\"";
 $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
 $FPPFLAGS .= " -DCPP_DATE=\"`date +%%y%%m%%d`\"";
 $FPPFLAGS .= " -DCPP_TIME=\"`date +%%H%%M`\"";
+$FPPFLAGS .= " " . $env->{CERNLIB_FPPFLAGS};
 $CPPFLAGS .= " -Df2cFortran";
 $CPPPATH  = "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
@@ -47,13 +51,18 @@ $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
 $CPPFLAGS  = "-DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/) {
-  $FPPFLAGS .= " -DCERNLIB_LINUX";
+#  $FPPFLAGS .= " -DCERNLIB_LINUX";
   $CPPFLAGS .= " -DCERNLIB_LINUX";
+  if (! $PGI) {$CPPFLAGS .= " -DWithoutPGI"};
 }
 if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {
-  $FPPFLAGS .= " -DCERNLIB_MYSQL -DCERNLIB_QMGLIBC";
+#  $FPPFLAGS .= " -DCERNLIB_MYSQL -DCERNLIB_QMGLIBC";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
   $CPPFLAGS .= " -Df2cFortran -DCERNLIB_QMGLIBC";
+}
+if ($STAR_SYS =~ /x8664/) {
+  $FPPFLAGS .= " -DCERNLIB_QMLXIA64";
+  $CPPFLAGS .= " -DCERNLIB_QMLXIA64";
 }
 if ($FC =~ /pgf77/) { 
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
@@ -111,7 +120,6 @@ if ($#sources > -1) {
 my @starsim = qw(acmain.cxx deccc/traceqc.c atmain/traceq.age atmain/sterror.age deccc/mykuip.c);# deccc/idisp.c);
 my $pgm = "starsim";
 my $PGI = $env->{ENV}->{PGI};
-my $PGILIBS = "";
 script::Keep $pgm;
 my $LD = $env->{LD};
 if ($LD eq 'g++') {$LD = $env->{CC};}
@@ -121,7 +129,6 @@ my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
 my $LIBS    = $env->{LIBS};
-if ($PGILIBS) {$LIBS .= " " . $PGILIBS;}  
 $LIBS .= $env->{LDALL};
 $LIBS .= " -lstarsim";
 if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc' ) {
