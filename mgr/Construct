@@ -1,21 +1,21 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.147 2005/03/09 18:59:41 perev Exp $
+# $Id: Construct,v 1.148 2005/07/18 22:37:17 fisyak Exp $
 use Env;
-use lib $ENV{ConstructLocation};           # Modify perl include path
+use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
 
-my $xx=$ENV{ConstructLocation};
-print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
+#my $xx=$ENV{ConstructLocation};
+#print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
 
-if ( -e "mgr/Conscript-standard"){
-    $xx = " local";
-    $param::defaultConscript =
-	"mgr/Conscript-standard";          # Local construction file.
-} else {
-    $xx = " default";
-    $param::defaultConscript =
-	$STAR . "/mgr/Conscript-standard"; # Default construction file.
-}   
+#if ( -e "mgr/Conscript-standard"){
+#    $xx = " local";
+#    $param::defaultConscript =
+#	"mgr/Conscript-standard";          # Local construction file.
+#} else {
+#    $xx = " default";
+#    $param::defaultConscript =
+#	$STAR . "/mgr/Conscript-standard"; # Default construction file.
+#}   
 $param::defaultInclude   = $INCLUDE; $param::defaultInclude =~ s|^#||; print "param::defaultInclude = $param::defaultInclude\n";
 
 print "Repository used is $STAR\n" unless ($param::quiet);
@@ -56,6 +56,10 @@ if ($def->{CXX}  =~ m/-Zoi/ ){
     $OBJ = $BUILD . "/OBJ";
 }
 $LIBPATH = $LIB;
+$LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{ROOT}->{LIBDIR};
+$LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{MYSQL}->{LIBDIR};
+$LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{QT}->{LIBDIR};
+$LIBPATH .= $main::PATH_SEPARATOR . $def->{ENV}->{OPTSTAR} . "/lib";
 print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
 my $ROOTLIBS = "";
 my $ROOTGLIBS = "";
@@ -79,8 +83,8 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
   print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
   
 }
-if ( defined( $ARG{CPPPATH} ) ){$CPPPATH = $ARG{CPPPATH};}
-if ( defined( $ARG{FCPATH}  ) ){$FCPATH = $ARG{FCPATH};}
+#if ( defined( $ARG{CPPPATH} ) ){$CPPPATH = $ARG{CPPPATH};}
+#if ( defined( $ARG{FCPATH}  ) ){$FCPATH = $ARG{FCPATH};}
 ( my $DirPath = cwd() ) =~ s/\/$//g;
 print "DirPath    = $DirPath\n" unless ($param::quiet);
 
@@ -115,7 +119,7 @@ if ( $STAR_HOST_SYS =~ /^intel_wnt/ ) {
         $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/StarVMC";
         $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/" . $include . "/tables";
     }
-    my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
+#   my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
     $INCLUDE_PATH .= $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSYS} . "/include";
     if (! $ENV{MINICERN}) {
       $INCLUDE_PATH .= $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
@@ -128,12 +132,12 @@ if ( $STAR_HOST_SYS =~ /^intel_wnt/ ) {
 }
 Link $OBJ => $DirPath;
 print "Link $BUILD => $DirPath\n" unless ($param::quiet);
+#  'FCPATH'         => $FCPATH,
+#  'CPPPATH'        => $CPPPATH,
+#  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
+#  'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
 
 $env = new cons(
-  'FCPATH'         => $FCPATH,
-  'CPPPATH'        => $CPPPATH,
-  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
-  'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
   'LIBPATH'        => $LIBPATH,
   'ROOTLIBS'       => $ROOTLIBS,
   'ROOTGLIBS'      => $ROOTGLIBS,
@@ -179,9 +183,11 @@ if ( !$param::quiet ) {
   }
 }
 PrintHash($env,"\$env->{") if ($param::debug);
+my @packages = ();
+find_PACKAGE(\&find_PACKAGE,"."); #print "Packages found: @packages\n";
 my @subdirs = ();
 # install includes
-my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
+my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
 @DirsWithIncludes = map File::Basename::dirname($_), @DirsWithIncludes;
 my @DirsIdlInc = glob "pams/*/idl pams/*/inc";
 print "DirsWithIncludes = @DirsWithIncludes @DirsIdlInc\n" if ($param::debug);
@@ -193,6 +199,7 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
   closedir DIR;
   my @incT = ();
   foreach my $inc(@incs) {
+    next if $inc =~ /^\.\#/;
     if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/
 	 || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/
 	 || $inc =~ /\.idl$/ ) {
@@ -204,51 +211,72 @@ foreach my $dir (@DirsWithIncludes, @DirsIdlInc) {
     Install $env $INCLUDE, @incT;
   }
 }
-my  @items;
-if ( defined($SKIP_DIRS) ){ @items = split(" ",$SKIP_DIRS);}
-
+my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk example include kumac.*);
+#my  $excludeDirList = "^(\.|\.\.|macros|CVS|html|doc|inc|idl|local|run|wrk|example|include|kumac.*)\$";
+my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
+#print "$excludeDirList\n";
+my  $items = "";
+if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
+if ($STAR_LEVEL =~ /\.dev/ or $STAR_LEVEL =~ /\.DEV/) {
+  if ($items != "") {$items .= "|";}
+  $items .= "(SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp)";
+#  print "$items\n"; die; 
+}
+#my $exlc = "StJetMaker"; 
+#if (! $param::include or $exlc !~ /$param::include/o) {if (! $items) {$items = $exlc;} else {$items .= "|" . $exlc;}}
 #
 # Search for directories (one level down) and make
 # list of targets
 #
 
 foreach my $dir( "pams", "StRoot" ,"StPiD", "StarVMC" ) {
-    next if !-d $dir;
-    opendir( DIR, $dir ) or die "Can't open $dir\n";
-    my @subdirS = readdir DIR;
-    closedir DIR;
-    foreach my $sub_dir (@subdirS) {
-        next if $sub_dir eq '.' || $sub_dir eq '..';
-	# The above pattern survived for some time but is 
-	# COMPLETELY wrong.
-	#
-        #if ( $SKIP_DIRS && $SKIP_DIRS =~ $sub_dir ) {
-	# Although longer to search, this is the only secure way I
-	# could come up with. J.lauret August 2001
-        if ( $SKIP_DIRS ) {
-	    my $el;
-	    my $sts=1;
-	    foreach $el (@items){
-		if( $sub_dir =~ m/$el/){
-		    print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
-		    $sts = 0;
-		    last;
-		}
-	    }
-	    next if (! $sts);
-        }
+  next if !-d $dir;
+  opendir( DIR, $dir ) or die "Can't open $dir\n";
+  my @subdirS = readdir DIR;
+  closedir DIR;
+  foreach my $sub_dir (@subdirS) {# print "sub_dir = $sub_dir\n";
+    next if $sub_dir eq '.' || $sub_dir eq '..';
+    #	if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $SKIP_DIRS\n"; next;}
+    if ($sub_dir =~ $items and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
+    #		  print "param::include = $param::include $subsub_dir \n";
+    print  "skip ";
+    printf("%40s","$sub_dir");
+    printf("\tto build it you need to add %25s","+$sub_dir");
+    print  " in cons command line\n";
+    next;
+  }
 
-        my $sub_DIR = $dir . "/" . $sub_dir;
+#	# The above pattern survived for some time but is 
+#	# COMPLETELY wrong.
+#	#
+#        #if ( $SKIP_DIRS && $SKIP_DIRS =~ $sub_dir ) {
+#	# Although longer to search, this is the only secure way I
+#	# could come up with. J.lauret August 2001
+#        if ( $SKIP_DIRS ) {
+#	    my $el;
+#	    my $sts=1;
+#	    foreach $el (@items){
+#		if( $sub_dir =~ m/$el/){
+#		    print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
+#		    $sts = 0;
+#		    last;
+#		}
+#	    }
+#	    next if (! $sts);
+#        }
 
-        if (! -d $sub_DIR ) 		{next;}
-        if ( $sub_dir =~ /^\./     ) 	{next;}
-        if ( $sub_dir =~ /^macros$/) 	{next;}
-        if ( $sub_dir =~ /^test/   )	{next;}
-        if ( $sub_dir =~ /CVS/     )	{next;}
-        if ( $sub_dir =~ /^html/   )	{next;}
-        if ( $sub_dir =~ /^doc/    )	{next;}
-        if ( $sub_dir =~ /^inc$/   )	{next;}
-        if ( $sub_dir =~ /^idl$/   )	{next;}
+my $sub_DIR = $dir . "/" . $sub_dir;
+
+				   if (! -d $sub_DIR ) 		{
+  print "$sub_DIR does exist"  if ($param::debug);
+  next;
+}
+ if (#$sub_dir != 'l3' and 
+     $sub_dir =~ $excludeDirList){
+#   print "-0- $sub_dir is in excludeDirList = $excludeDirList =>$1|\n";# if ($param::debug);
+#   die if $sub_dir eq 'l3';
+   next;
+ }
 	
         opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
         my @subsubdirS = readdir DIR;
@@ -257,38 +285,30 @@ foreach my $dir( "pams", "StRoot" ,"StPiD", "StarVMC" ) {
         foreach my $subsub_dir(@subsubdirS) {
             my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
             if ( -d $subsub_DIR ) {
-                if ( $subsub_dir =~ m/\./        || 
-		     $subsub_dir =~ m/\.\./      ||
-		     $subsub_dir =~ m/CVS/       || 
-		     $subsub_dir =~ m/^doc/      ||
-		     $subsub_dir =~ m/^local/    || 
-		     $subsub_dir =~ m/^run/      ||
-		     $subsub_dir =~ m/^wrk$/     || 
-		     $subsub_dir =~ m/^example/  ||
-		     $subsub_dir =~ m/^include/  ||
-		     $subsub_dir =~ m/^macros/   ||
-		     $subsub_dir =~ /^inc$/    ||
-		     $subsub_dir =~ /^idl$/    ||
-		     $subsub_dir =~ m/^kumac/ ){
-		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
-                    next;
-		}
-#		if (($STAR =~ /\.dev/ || $STAR =~ /\.DEV/) &&   $sub_dir =~ /Pool$/  && 
-#		       ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
+	      if ( $subsub_dir =~ $excludeDirList) {
+		#print "=== Skipping $subsub_dir in $subsub_DIR\n";
+		print "-1- $subsub_dir is in excludeDirList\n"  if ($param::debug);
+		next;
+	      }
+	      if (($STAR =~ /\.dev/ or $STAR =~ /\.DEV/) and
+		    $items and $subsub_dir =~ /$items/ and
+		    ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
 #		  print "param::include = $param::include $subsub_dir \n";
-#		    print  "skip ";
-#		    printf("%40s","$sub_dir/$subsub_dir");
-#		    printf("\tto build it you need to add %25s","+$subsub_dir");
-#		    print  " in cons command line\n";
-#		  next;
-#                }
+		  print  "skip ";
+		  printf("%40s","$sub_dir/$subsub_dir");
+		  printf("\tto build it you need to add %25s","+$sub_dir/$subsub_dir");
+		  print  " in cons command line\n";
+		  next;
+                }
 		
-                if ( ( $sub_dir =~ /^sim$/    || 
+                if ( ( $sub_dir =~ /^sim$/    ||
 		       $sub_dir =~ /^gen$/    ||
 		       $sub_dir =~ /Pool$/    ||
+#		       $sub_dir =~ /StJetMaker/ ||
 		       $sub_dir =~ /Client$/ ) ){
-                    if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
-                        print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
+#                    if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
+                    if ( $items && $sub_dir =~ /$items/ ) {
+                        print "skip dir: $subsub_dir \t=> $items\n";
                         next;
                     }
                     push @subdirs, $subsub_DIR;
@@ -330,20 +350,59 @@ if ( $STAR_HOST_SYS !~ /^alpha_dux/) {
 
 foreach $dir(@sysdirlist , @subdirs ) {
     if ( -d $dir ) {
+#	next if $param::include && $dir !~ /$param::include/o;
+#	next if $param::exclude && $dir =~ /$param::exclude/o;
         print "Add dir : $dir\n" if $param::debug;
-        push @Targets, $OBJ . "/" . $dir . "/Conscript";
+#        push @Targets, $OBJ . "/" . $dir . "/Conscript";
+        push @packages, $dir;
     }
 }
+#print "packages $#packages : @packages\n";
+@packages = sortu(@packages);
+#print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
+@Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
 print "Targets = @Targets\n" if $param::debug;
 Export qw( env INCLUDE LIB BIN BUILD OBJ);
 Default qw (   .  );
 print "Debug ".join(" ",@Targets)."\n"if ($param::debug);
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
 Build @Targets;
-
-
-
+#if ($env->{Packages}->{ROOT}->{RLIBMAP}) {
+#  # Create libraries map
+  
+#  my @L = Repository_List;
+#  push @L, "."; 
+  
+#  my $glob = join (' ', map($_ . "/." . $STAR_HOST_SYS . "/lib/lib*.so",@L));# print "glob = $glob\n";
+#  my @Libs = glob $glob; 
+#  my @rootlibs = split ' ', $ROOTLIBS;
+#  foreach my $l (@rootlibs) {$l = s/-l//; if ($l) {$l = $ROOTSYS . "/lib/lib" . $l . ".so"; push @Libs, $l;}}
+#  push @Libs, $env->{ENV}->{OPTSTAR} . "/lib/liblog4cxx.so";
+#  push @Libs, "/usr/lib/libmysqlclient.so"; #print "Libs = @Libs\n";
+#  my $map = $BUILD . "/etc/STAR_LIB.map";
+#  $map =~ s/^#//;
+#  if (! -r $map)  {
+#    print "$map does not exist. Try to create.\n";
+#    Command $env [("#" . $map)], @Libs, qq(LibsDeps.pl %< > %>);
+#  }
+#  if ( -r $map) {
+#    print "$map does exist. Try to use.\n";
+#    open(IN,"$map") or die "Can't open $map";
+#    my $line;
+#    while ($line = <IN>) {
+#      next if ! $line;
+#      next if $line !~ /:/;
+#      my @words = split ':', $line;# print "words |$words[0]| |$words[1]\n";
+#      chomp($words[1]);
+#      my $lib = File::Basename::basename($words[0]);
+#      $env->{MAP}->{$lib} = $words[1];# print "lib =  $lib Deps = $env->{MAP}->{$lib} = $words[1]\n";
+#    }
+#    close (IN);
+#  }
+  
+## rm ~/.rootmap; cat $STAR_LIB/*.map > ~/.rootmap
+#}
 #___________________________________________________________________________
 sub script::wanted_dead {
     -l and not -e and print "bogus link: $File::Find::name \t--- remove it\n"
@@ -360,6 +419,40 @@ sub script::PrintHash($$) {
     else {
       if ($env->{$key}) {print $prefix, $key, "}= \t$env->{$key}\n";}
     }
+  }
+}
+#________________________________________________________________________________
+sub find_PACKAGE {
+  @packages   = ();
+  &File::Find::find(\&wanted_PACKAGE, @_);
+  return @packages;
+}
+#________________________________________________________________________________
+sub wanted_PACKAGE {
+#    print "wanted ",$_,"\n";
+  my ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if (! -d _ ) {return;}
+  if ( -d _ &&
+       (/^\./ || 
+	/^CVS$/ ||
+	/^macros$/ ||
+	/^html$/ ||
+	/^idl$/ ||
+	/^exa$/ ||
+	/^doc$/ ||
+	/^run$/ ||
+	/^examples$/ ||
+	/^local$/ ||
+	/^hold$/ ||
+	/^wrk$/)
+     ) {$File::Find::prune = 1; return;}
+  if ( /^\.\#/) {return;}
+  if ( -r _ . "/PACKAGE") {
+    $File::Find::prune = 1;
+    my $dir = File::Basename::dirname($File::Find::name);
+    $dir =~ s|\.\/||;  print "found $dir\n";
+    push @packages, $dir; 
+    return;
   }
 }
 #___________________________________________________________________________
