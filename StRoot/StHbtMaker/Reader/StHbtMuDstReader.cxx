@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstReader.cxx,v 1.9 2005/07/01 00:23:15 chajecki Exp $
+ * $Id: StHbtMuDstReader.cxx,v 1.10 2005/07/18 16:33:20 kopytin Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -506,7 +506,7 @@ void StHbtMuDstReader::addTrackNode(const StEvent* ev, const StTrackNode* node, 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
-int StHbtMuDstReader::addTrack(TClonesArray* tca, const StEvent*event, const StTrack* track, StMuCut* cut, int index2Global, bool l3) {
+int StHbtMuDstReader::addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3) {
   DEBUGMESSAGE3("");
   StRichSpectra typeOfStRichSpectra;
   int index = -1;
@@ -521,7 +521,7 @@ int StHbtMuDstReader::addTrack(TClonesArray* tca, const StEvent*event, const StT
     if (rich) {
       index2RichSpectra  =  addType( mArrays[muRich], *rich );
     }
-    new((*tca)[counter]) StMuTrack(event, track, index2Global, index2RichSpectra, l3);
+    new((*tca)[counter]) StMuTrack(event, track, 0, index2Global, index2RichSpectra, l3);
     index = counter;
   }
   catch (StMuException e) {
@@ -684,6 +684,9 @@ void StHbtMuDstReader::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StHbtMuDstReader.cxx,v $
+ * Revision 1.10  2005/07/18 16:33:20  kopytin
+ * Brought addTrack in corresponce with MvL's new StMuTrack constructor list of arguments
+ *
  * Revision 1.9  2005/07/01 00:23:15  chajecki
  * fix of potential memory leak in ReturnHbtEvent method
  * added 'delete mHbtEvent' if this  method returns 0
