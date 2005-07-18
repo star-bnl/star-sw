@@ -3,31 +3,59 @@ use strict;
 use File::Basename;
 if ($#ARGV < 0) {
   print "Usage $0 list_of_libraries\n";
-  print '$0 $STAR_LIB/*.so $ROOTSYS/lib/*.so $OPTSTAR/lib/libPythia6.so $OPTSTAR/lib/liblog4cxx.so /usr/lib/libmysqlclient.so',"\n";
+  print "$0",
+    ' $STAR_LIB/lib*.so $ROOTSYS/lib/*.so $OPTSTAR/lib/liblog4cxx.so /opt/star/sl302_gcc323/lib/libPythia6.so /usr/lib/libmysqlclient.so',"\n";
   exit 0;
 }
-my @root_exe_libs = qw(
-		       libCore.so
-		       libCint.so
-		       libHist.so
-		       libGraf.so
-		       libGraf3d.so
-		       libGpad.so
-		       libTree.so
-		       libMatrix.so
-		       libRint.so
-		      ); # list of libs already in root.exe
-my $debug = 0;
-my $root_exe_libs = join '|', @root_exe_libs; print "ignore dependencies from $root_exe_libs\n" if $debug;
+my @root_star_exe_libs =
+  qw(libCore.so
+     libCint.so
+     libHist.so
+     libGraf.so
+     libGraf3d.so
+     libGpad.so
+     libTree.so
+     libMatrix.so
+     libRint.so
+     libHbook.so
+     libStarClassLibrary.so
+     libGeom.so
+     libTable.so
+     libStarRoot
+     libSt_base.so
+     libpgf77VMC.so); # list of libs already in root.exe
+#     libgeant3.so
+#     libminicern.so
+  
+  my $debug = 0;
+my $root_star_exe_libs = join '|', @root_star_exe_libs; print "ignore dependencies from $root_star_exe_libs\n" if $debug;
 my @LoH = ();
 my $newtarget = 0;
 my $tag;
 my $dummy;
 my $LastLevel = 0;
-foreach my $Lib (@ARGV) { 
-  my $lib = File::Basename::basename($Lib);
+my @Libs = ();
+foreach my $item (@ARGV) {
+  if ($item =~ /debug/ and $item =~ /\=/) {
+    my @w = split /=/, $item; $debug = $w[1]; 
+    print "set debug = $debug\n"; next;
+  }
+  push @Libs, $item;
+} 
+foreach my $Lib (@Libs) { 
+#  my $lib = File::Basename::basename($Lib);
+  my $lib = $Lib;
+  my $realF = readlink $lib; print "$lib => $realF\n" if $debug;
+  my $pkg = "";
+  if ($realF) {
+    $pkg = File::Basename::dirname($realF);
+    if ($pkg !~ /obj/) {$pkg = "";}
+    $pkg =~ s|.*/obj/||; print "pkg = $pkg\n" if $debug;
+  }
+  my $libd = File::Basename::basename($Lib);
+  next if $libd =~ $root_star_exe_libs or $libd =~ /^lib_/;
   print "lib = $lib\n" if $debug;
-  next if $lib eq 'libSt_base.so';
+  next if $lib =~ 'libSt_baseTest';
 #  my $cmd = "nm  --demangle --extern-only  --undefined-only " . $Lib;
 #  my @listU = `$cmd`;
 #  print "listU = $#listU ==>\n" if $debug > 1;
@@ -66,8 +94,13 @@ foreach my $Lib (@ARGV) {
     next if $symbol =~ /gufld_$/;
     next if ! $symbol;
     print $line if $debug > 1;
-    if ($words[0] eq 'U' or $words[0] eq 'W') {$miss = add($miss,$symbol); next;}
-    if ($words[0] eq 'T' or $words[0] eq 'D' or $words[0] eq 'V') {$code = add($code,$symbol); next;} #$words[0] eq 'V' or
+    if (   $words[0] eq 'U'
+	or $words[0] eq 'W'
+       ) {$miss = add($miss,$symbol); next;}
+    if (   $words[0] eq 'T'
+	or $words[0] eq 'D'
+#	or $words[0] eq 'V'
+       ) {$code = add($code,$symbol); next;} #$words[0] eq 'V' or
 #   if ($words[0] eq 'D') {$data = add($data,$symbol); next;}
   }
   # clean up
@@ -83,6 +116,7 @@ foreach my $Lib (@ARGV) {
   NEXT:
   }
   my $rec = {};
+  $rec->{pkg}  = $pkg;
   $rec->{lib}  = $lib;
   $rec->{code} = $code;
 #  $rec->{data} = $data;
@@ -98,11 +132,12 @@ if ($debug) {
 }
 if ($debug) {print "LoH = "; foreach  my $rec (@LoH) {print "\t$rec->{lib}";} print "\n";}
 my @L = sort compMiss @LoH;
+if ($debug) {print "===========================\n";}
 if ($debug) {print "L = "; foreach  my $rec (@L) {print "\t$rec->{lib}";} print "\n";}
 my %H = ();
 foreach my $rec (@L) {
   my $lib =  $rec->{lib};
-  next if $lib =~ '^St' and $lib =~ '^lib';
+#  next if $lib =~ '^St' and $lib =~ '^lib';
   my @miss = split '\|', $rec->{miss};
   foreach my $slave (@LoH) {
     next if $rec eq $slave;
@@ -120,45 +155,71 @@ foreach my $rec (@L) {
       $rec->{deps} = add($rec->{deps},$slave->{lib});
 #      print "match found $match \tAdd deps: $rec->{deps}\n" if $debug;
       print "match found $match for $rec->{lib} in $slave->{lib}\n" if $debug;
+      next;
     }
   }
-# clean up trivial libs
-  my @deps = split '\|', $rec->{deps};
-  my @Deps = ();
-  foreach my $d (@deps) {
-    next if $root_exe_libs =~ /$d/;
-    push @Deps, $d;
-  }
-  my $Deps = join '|', @Deps;
-  $rec->{deps} = $Deps;
-  #
-  #  if ($debug) {
   print "$rec->{lib}:";
   my @deps = split '\|', $rec->{deps};
+  my $LIBS = "LIBS += ";
   foreach my $d (@deps) {
-    next if $root_exe_libs =~ /$d/;
-    print "\t$d";
+    print "\t$d"; my $s = File::Basename::basename($d); $s =~ s/lib/ -l/; $s =~ s/\.so//; 
+    $LIBS .= " " . $s
   }
   print "\n";
-  #}
+  if (! $debug) {
+    my $Package = $rec->{pkg} . "/PACKAGE";
+    if ($rec->{pkg}){# and $rec->{deps}) {
+      # write Package information
+      if (-w $Package) {
+	print "Update $Package\n";
+	open(IN,"$Package") or die "Can't open $Package";
+	my $OLDLIBS = "";
+	while (my $line = <IN>) {
+	  if ($line =~ /LIBS +=/) {
+	    chomp($line);
+	    my ($dummy,$lib,$libs) = split /:/, $line;
+	    if ($lib eq File::Basename::basename($rec->{lib})) {
+	      $OLDLIBS = $libs;
+	    }
+	  }
+	}
+	if ($LIBS ne $OLDLIBS) {
+	  open(OUT,">>$Package") or die "Can't open $Package";
+	  print OUT "#Library:",File::Basename::basename($rec->{lib}),":$LIBS\n";
+	  close (OUT);
+	}
+      } else {
+	print "Create $Package\n";
+	open(OUT,">$Package") or die "Can't open $Package";
+	my $p = File::Basename::basename($rec->{pkg});
+	print OUT "# \$Id \$\n";
+	print OUT "# package $p\n";
+	print OUT "# author: \n";
+	if ($LIBS) {
+	  print OUT "#Library:",File::Basename::basename($rec->{lib}),":$LIBS\n";
+	}
+	close (OUT);
+      }
+    }
+  }
   $H{$rec->{lib}} = $rec;
 }
-##print "============================= sort ======================\n" if $debug;
-##my @L = sort comp @LoH;
-##foreach my $rec (@L) {
-##  if ($debug) {
-##    print "$rec->{lib} ===> $H{$rec->{lib}}->{deps}\n";
-##    print "$rec->{lib} ===>";
-##    my @deps = split '\|', $rec->{deps};
-##    foreach my $d (@deps) {print "\t$d";}
-##    print "\n";
-##  }
-##  my $Deps = deps($rec);
-##  my @Deps = split '\|', $Deps;
-##  print "$rec->{lib} ";
-##  foreach my $d (@Deps) {print "\t$d";}
-##  print "\n";
-##}
+#print "============================= sort ======================\n"; #if $debug;
+#my @L = sort comp @LoH;
+#foreach my $rec (@L) {
+#  if ($debug) {
+#    print "$rec->{lib} ===> $H{$rec->{lib}}->{deps}\n";
+#    print "$rec->{lib} ===>";
+#    my @deps = split '\|', $rec->{deps};
+#    foreach my $d (@deps) {print "\t$d";}
+#    print "\n";
+#  }
+#  my $Deps = deps($rec);
+#  my @Deps = split '\|', $Deps;
+#  print "$rec->{lib}:";
+#  foreach my $d (@Deps) {print "\t$d";}
+#  print "\n";
+#}
 #________________________________________________________________________________
 sub getSymbolsList() {
   my $SymbolsList = "";
@@ -231,7 +292,20 @@ sub compMiss($$) {
   my ($ref1,$ref2) = @_;
   my @src1 = split '\|', $ref1->{miss};
   my @src2 = split '\|', $ref2->{miss};
-  return $#src2 <=> $#src1;
+  my $nsrc1 = $#src1;
+  my $nsrc2 = $#src2;
+  if    ($ref1->{lib} =~ /St_base/) {$nsrc1 = 0;}
+  elsif ($ref1->{lib} =~ /StChain/) {$nsrc1 = 1;}
+  elsif ($ref1->{lib} =~ /minicern/){$nsrc1 = 2;}
+  elsif ($ref1->{lib} =~ /geant3/)  {$nsrc1 = 3;}
+  elsif ($ref1->{lib} =~ /Table/)   {$nsrc1 = 4;}
+  if    ($ref2->{lib} =~ /St_base/) {$nsrc2 = 0;}
+  elsif ($ref2->{lib} =~ /StChain/) {$nsrc2 = 1;}
+  elsif ($ref2->{lib} =~ /minicern/){$nsrc2 = 2;}
+  elsif ($ref2->{lib} =~ /geant3/)  {$nsrc2 = 3;}
+  elsif ($ref2->{lib} =~ /Table/)   {$nsrc2 = 4;}
+  my $flag = $nsrc1 <=> $nsrc2;
+  return $flag;
 }
 #________________________________________________________________________________
 sub add($$) {
