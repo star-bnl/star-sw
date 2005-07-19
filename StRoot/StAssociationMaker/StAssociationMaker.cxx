@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.44 2004/06/01 18:06:02 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.45 2005/07/19 20:09:57 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.45  2005/07/19 20:09:57  perev
+ * IdTruth changes
+ *
  * Revision 1.44  2004/06/01 18:06:02  calderon
  * Check for chiSquared values for the V0's when using/not using Est tracks.
  *
@@ -794,7 +797,8 @@ Int_t StAssociationMaker::Make()
 			 iHit<tpcPadRowHitColl->hits().size();
 			 iHit++) {
 			rcTpcHit = tpcPadRowHitColl->hits()[iHit];
-			cout << iHit << "\t" << rcTpcHit->position() << "\t" << rcTpcHit->idTruth() << "\t" << rcTpcHit->quality() << endl;
+                        int qatru,idtru; idtru= rcTpcHit->idTruth(&qatru);
+			cout << iHit << "\t" << rcTpcHit->position() << "\t" << idtru << "\t" << qatru << endl;
 		    } // reco hits in debug2
 		    cout << "MC Hit Key\tX pos\tY pos\tZ pos\tparent key" << endl;		    
 		    for (StMcTpcHitIterator jHit = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin();
