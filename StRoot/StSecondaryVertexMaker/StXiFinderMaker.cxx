@@ -627,12 +627,14 @@ Bool_t StXiFinderMaker::UseV0() {
               vdotx=pV0.x()*pXi.x()+pV0.y()*pXi.y()+pV0.z()*pXi.z();
               if (bachGeom->charge() > 0)
                  {ppar=bdotx/pXi.mag();
-                  pper=::sqrt(ptot[k]*ptot[k]-ppar*ppar);
-                  }
+                  pper=(ptot[k]*ptot[k]-ppar*ppar);
+                  pper=(pper>0)? ::sqrt(ptot[k]*ptot[k]-ppar*ppar):0;
+                 }
                   else
                  {ppar=vdotx/pXi.mag();
-                  pper=::sqrt(ptot_v02-ppar*ppar);
-                  }
+                  pper=(ptot_v02-ppar*ppar);
+                  pper=(pper>0)? ::sqrt(ptot_v02-ppar*ppar):0;
+                 }
               //Cut: pt-Armanteros
               if (pper > 0.33) continue;
               //Function helixDCA(charge,xpp,pXi,bxi);
@@ -699,8 +701,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.21 2004/04/15 20:15:53 jeromel Exp $
+// $Id: StXiFinderMaker.cxx,v 1.22 2005/07/19 22:10:14 perev Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.22  2005/07/19 22:10:14  perev
+// STARFPE
+//
 // Revision 1.21  2004/04/15 20:15:53  jeromel
 // Forgot one of them
 //
