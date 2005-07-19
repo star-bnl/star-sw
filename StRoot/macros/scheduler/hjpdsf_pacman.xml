@@ -65,6 +65,8 @@
     cd ..
     pacman -get gsiftp://stargrid04.rcf.bnl.gov//afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES
     pacman -get STARGRID:hijing
+    pacman -get STARGRID:statrsim
+    source setup.csh
 
     cd $SCRATCH
 
@@ -99,14 +101,6 @@ HIJPARAMETERS
       echo "</PRE></BODY><HTML>"  >>${localLogFile}
       exit $status
    endif
-
-#    -------------------------------
-#    register the result file (for the sake of the debugging)
-#    -------------------------------
-
-    ls -l ${HIJINGOUTPUT} >>${localLogFile}
-    
-#    -------------------------------
 #    -------------------------------
 #    starting GEANT3 simulation
 #    -------------------------------
