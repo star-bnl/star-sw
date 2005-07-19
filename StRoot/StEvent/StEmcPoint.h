@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.7 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcPoint.h,v 2.8 2005/07/19 21:32:50 perev Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.8  2005/07/19 21:32:50  perev
+ * Remove clash with IdTruth
+ *
  * Revision 2.7  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -92,7 +95,12 @@ public:
     
     void addTrack(StTrack*);
   // 11-nov-03 by PAI
+
     void print();      // *MENU*    
+
+    void setQuality(int qua) {myQuality = qua ;}
+    int  quality() const     {return myQuality;}
+
 protected:
     Float_t            mEnergy;
     Float_t            mChiSquare;
@@ -103,7 +111,7 @@ protected:
     StPtrVecEmcCluster mCluster[4];
     StPtrVecEmcPoint   mNeighbors;
     StPtrVecTrack      mTracks;
-    
+    int                myQuality;
     int getDetId(const StDetectorId) const;
     ClassDef(StEmcPoint,1)
 };
