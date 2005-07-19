@@ -654,7 +654,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
   if(m_Mode != 1) return 0;
  St_ObjectSet *trsEvent=(St_ObjectSet*)GetDataSet("Event"); if(!trsEvent) return 1;
  mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());   if(!mEvent) return 3;
- mTdr = new StTrsDetectorReader(mEvent); assert(mTdr);
+ mTdr = new StTrsDetectorReader(mEvent);
  return 0;
 }
 unsigned short int St_tpcdaq_Maker::Swap2(char doSwap,unsigned short int x) {
@@ -888,6 +888,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.89  2005/07/19 22:26:23  perev
+// Redundant assert removed
+//
 // Revision 1.88  2004/05/03 23:34:58  perev
 // Possible non init WarnOff
 //
