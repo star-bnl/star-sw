@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.12 2005/06/15 01:21:01 ullrich Exp $
+ * $Id: StSvtHit.cxx,v 2.13 2005/07/19 21:37:56 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.13  2005/07/19 21:37:56  perev
+ * Cleanup
+ *
  * Revision 2.12  2005/06/15 01:21:01  ullrich
  * In constructor using dst_point: set mFitFlag
  *
@@ -54,7 +57,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.12 2005/06/15 01:21:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.13 2005/07/19 21:37:56 perev Exp $";
 
 ClassImp(StSvtHit)
     
@@ -66,18 +69,18 @@ StSvtHit::StSvtHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
                    unsigned int hw, float q, unsigned char c)
     : StHit(p, e, hw, q, c)
-{ /* noop */ }
+{ mPeak=0; }
 
 StSvtHit::StSvtHit(const dst_point_st& pt)
 {
     //
     // Unpack charge and status flag
     //
-    const unsigned int iflag = pt.charge/(1L<<17);    
-    const unsigned int svtq  = pt.charge - iflag*(1L<<17); 
+    const unsigned int iflag = pt.charge>>17;    
+    const unsigned int svtq  = pt.charge &((1L<<17)-1); 
     // mPeak is private to SvtHit
-    mPeak = (float)(svtq/(1L<<10));
-    mCharge = (float)(svtq - mPeak*(1L<<10));
+    mPeak = (float)(svtq>>10);
+    mCharge = (float)(svtq & ((1L<<10)-1));
     mFlag = static_cast<unsigned char>(iflag);
     
     mFitFlag = (pt.id_track > 0) ? 1 : 0;
@@ -87,11 +90,11 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     //
     const float maxRange   = 22;
     const float mapFactor  = 23800;
-    unsigned int svty11 = pt.position[0]/(1L<<20);
-    unsigned int svtz   = pt.position[1]/(1L<<10);
-    unsigned int svtx   = pt.position[0] - (1L<<20)*svty11;
-    unsigned int svty10 = pt.position[1] - (1L<<10)*svtz;
-    unsigned int svty   = svty11 + (1L<<10)*svty10;
+    unsigned int svty11 = pt.position[0]>>20;
+    unsigned int svtz   = pt.position[1]>>10;
+    unsigned int svtx   = pt.position[0] & ((1L<<20)-1);
+    unsigned int svty10 = pt.position[1] & ((1L<<10)-1);
+    unsigned int svty   = svty11 + (svty10<<10);
     mPosition.setX(float(svtx)/mapFactor - maxRange);
     mPosition.setY(float(svty)/mapFactor - maxRange);
     mPosition.setZ(float(svtz)/mapFactor - maxRange);
@@ -99,11 +102,11 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     //
     // Unpack error on position in xyz
     //
-    svty11 = pt.pos_err[0]/(1L<<20);
-    svtz   = pt.pos_err[1]/(1L<<10);
-    svtx   = pt.pos_err[0] - (1L<<20)*svty11;
-    svty10 = pt.pos_err[1] - (1L<<10)*svtz;
-    svty   = svty11 + (1L<<10)*svty10;
+    svty11 = pt.pos_err[0]>>20;
+    svtz   = pt.pos_err[1]>>10;
+    svtx   = pt.pos_err[0] & ((1L<<20)-1);
+    svty10 = pt.pos_err[1] & ((1L<<10)-1);
+    svty   = svty11 + svty10<<10;
     mPositionError.setX(float(svtx)/(1L<<26));
     mPositionError.setY(float(svty)/(1L<<26));
     mPositionError.setZ(float(svtz)/(1L<<26));
@@ -113,6 +116,7 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     //
     mHardwarePosition = pt.hw_position;
     mId               = pt.cluster;
+    setIdTruth(pt.id_simtrk,pt.id_quality);
 }
 
 StSvtHit::~StSvtHit() {/* noop */}

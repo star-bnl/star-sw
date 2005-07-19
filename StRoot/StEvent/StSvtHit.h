@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.11 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.12 2005/07/19 21:38:56 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.12  2005/07/19 21:38:56  perev
+ * Cleanup
+ *
  * Revision 2.11  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -97,7 +100,7 @@ inline unsigned int
 StSvtHit::index() const
 {
     // bits 4-13: Hybrid index
-    return ((mHardwarePosition>>4)%(1L<<9));
+    return (mHardwarePosition>>4)&((1L<<9)-1);
 }
 
 inline float
