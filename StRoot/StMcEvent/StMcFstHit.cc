@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.cc,v 2.3 2005/05/13 14:49:00 potekhin Exp $
+ * $Id: StMcFstHit.cc,v 2.4 2005/07/19 20:07:34 calderon Exp $
  * $Log: StMcFstHit.cc,v $
+ * Revision 2.4  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.3  2005/05/13 14:49:00  potekhin
  * Killed the debug cout, improved formatting, removed
  * unnecessary assignment operators and the previous
@@ -20,13 +24,15 @@
 #include "StMcFstHit.hh"
 #include "tables/St_g2t_fst_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.3 2005/05/13 14:49:00 potekhin Exp $";
+static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.4 2005/07/19 20:07:34 calderon Exp $";
 
 ClassImp(StMcFstHit)
     
+#ifdef POOL
 //------------------------------------------
 StMemoryPool StMcFstHit::mPool(sizeof(StMcFstHit));
 //------------------------------------------
+#endif
 StMcFstHit::StMcFstHit(const StThreeVectorF& x,const StThreeVectorF& p,
 			 const float de, const float ds, const long key,
 			 const long id,

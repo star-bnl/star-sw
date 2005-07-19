@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.hh,v 2.2 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcFgtHit.hh,v 2.3 2005/07/19 20:07:34 calderon Exp $
  * $Log: StMcFgtHit.hh,v $
+ * Revision 2.3  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.2  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -26,21 +30,25 @@ class g2t_fgt_hit_st;
 
 class StMcFgtHit : public StMcHit {
 public:
-    StMcFgtHit();
+    StMcFgtHit() : StMcHit() {}
     StMcFgtHit(const StThreeVectorF&,const StThreeVectorF&,
 	       const float, const float, const long, const long, StMcTrack*);
     StMcFgtHit(g2t_fgt_hit_st*);
     ~StMcFgtHit();
     
+#ifdef POOL
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
+#endif
 
     unsigned long layer() const; // 
     unsigned long ladder() const; // 
     
 private:
 
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
     ClassDef(StMcFgtHit,1)
 };
 

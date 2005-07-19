@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.2 2005/05/11 20:54:28 calderon Exp $
+ * $Id: StMcIstHit.cc,v 2.3 2005/07/19 20:07:34 calderon Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.3  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.2  2005/05/11 20:54:28  calderon
  * Added persistency: ClassImp, ClassDef and inheritance from StObject.
  *
@@ -23,10 +27,10 @@
 #include "StMcIstHit.hh"
 #include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.2 2005/05/11 20:54:28 calderon Exp $";
-
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.3 2005/07/19 20:07:34 calderon Exp $";
+#ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
-
+#endif
 ClassImp(StMcIstHit);
 
 StMcIstHit::StMcIstHit(const StThreeVectorF& x,const StThreeVectorF& p,

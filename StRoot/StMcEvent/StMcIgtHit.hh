@@ -6,10 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcIgtHit.hh,v 2.1 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcIgtHit.hh,v 2.2 2005/07/19 20:07:34 calderon Exp $
  *
  ***************************************************************************
  * $Log: StMcIgtHit.hh,v $
+ * Revision 2.2  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.1  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -29,25 +33,25 @@ class g2t_igt_hit_st;
 
 class StMcIgtHit : public StMcHit {
 public:
-  StMcIgtHit();
-  StMcIgtHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, const long, const long, StMcTrack*);
-  StMcIgtHit(g2t_igt_hit_st*);
-  ~StMcIgtHit();
-
-  void* operator new(size_t)     { return mPool.alloc(); }
-  void  operator delete(void* p) { mPool.free(p); }
-
-  unsigned long layer() const; // 
-  unsigned long ladder() const; // 
-
-  // Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
-  // and side() to return ladder side (1=inner,2=outer)
-  unsigned long wafer() {return ((mVolumeId/10000)%20);}
-  unsigned long side() {return (((mVolumeId%200)/100)+1);} //1=inner; 2=outer;
-
+    StMcIgtHit() : StMcHit() {}
+    StMcIgtHit(const StThreeVectorF&,const StThreeVectorF&,
+	       const float, const float, const long, const long, StMcTrack*);
+    StMcIgtHit(g2t_igt_hit_st*);
+    ~StMcIgtHit();
+    
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
+    
+    unsigned long layer() const; // 
+    unsigned long ladder() const; // 
+    
+    // Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
+    // and side() to return ladder side (1=inner,2=outer)
+    unsigned long wafer() {return ((mVolumeId/10000)%20);}
+    unsigned long side() {return (((mVolumeId%200)/100)+1);} //1=inner; 2=outer;
+    
 private:
-
+    
     static StMemoryPool mPool; //!
     ClassDef(StMcIgtHit,1)
 };
