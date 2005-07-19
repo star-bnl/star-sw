@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.13 2005/06/21 02:16:36 balewski Exp $
+ * $Id: StGenericVertexFinder.h,v 1.14 2005/07/19 21:45:53 perev Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -20,29 +20,35 @@ class StEvent;
 class StGenericVertexFinder {
  public:
   // virtual and '=0' ; those MUST be implemented
-  virtual ~StGenericVertexFinder(){};                         // virtual destructor
-  virtual bool           fit(StEvent*)=0;                     // fit the vertex
+  virtual ~StGenericVertexFinder();                           // virtual destructor
+  virtual int            fit(StEvent*)=0;                     // fit the vertex
 
+  StPrimaryVertex*       getVertex(int idx) const;
+  void                   addVertex(StPrimaryVertex*);
+  int                    size() const;
   virtual void           UseVertexConstraint(double, double, double, double, double)=0;
           void           NoVertexConstraint();
+          int            IsVertexConstraint() const {return mVertexConstrain;}
 
   virtual void           printInfo(ostream& = cout) const=0;
 
   // General (default)
   virtual void           SetMode(Int_t mode=0 ) {mMode = mode;}
+  virtual int            GetMode() const 	{return mMode;}
   virtual void           Init(){ /* noop */;}
   virtual void           Finish(){ /* noop */;}
   virtual void           InitRun  (int runumber){ /* noop */;}
-  void           mClear(); // cant't be overwritten, must be called
-  virtual void   Clear()=0;
-  const vector<StPrimaryVertex> *result() {return &mVertexList;} 
+  virtual void           Clear();
+  const std::vector<StPrimaryVertex> *result() {return &mVertexList;} 
  
   void                   FillStEvent(StEvent*) const;
 
  protected: //................................
 
   StGenericVertexFinder();
+ private:
   vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
+ protected: //................................
 
   bool                   mVertexConstrain;  // Use vertex constraint from db
   int                    mMode;             // used for any Finder behavior change
@@ -52,6 +58,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.14  2005/07/19 21:45:53  perev
+// MultiVertex
+//
 // Revision 1.13  2005/06/21 02:16:36  balewski
 // multiple prim vertices are stored in StEvent
 //

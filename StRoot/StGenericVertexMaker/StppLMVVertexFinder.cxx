@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.19 2005/06/21 02:16:36 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.20 2005/07/19 21:56:58 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -75,7 +75,7 @@ StppLMVVertexFinder::Init() {
 //==========================================================
 void 
 StppLMVVertexFinder::Clear(){  //  Reset vertex
-  mClear();
+  StGenericVertexFinder::Clear();
   mCtbHits.clear();
   mPrimCand.clear();
   gMessMgr->Info() << "StppLMVVertexFinder::Clear() ..." << endm;
@@ -94,7 +94,7 @@ StppLMVVertexFinder::addFakeVerex(float z){
   primV.setFlag(1); 
   primV.setRanking(444);
   //..... add vertex to the list
-  mVertexList.push_back(primV);
+  addVertex(&primV);
 }
 
 //==========================================================
@@ -105,7 +105,7 @@ StppLMVVertexFinder::~StppLMVVertexFinder() {
 
 //==========================================================
 //==========================================================
-bool 
+int 
 StppLMVVertexFinder::fit(StEvent* event) {
   gMessMgr->Info() << "StppLMVVertexFinder::fit() START ..." << endm;
  //
@@ -155,7 +155,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
 
   if(mCtbHits.size()<=0){
     gMessMgr->Warning() << "StppLMVVertexFinder::fit() no valid CTB hits found, quit" << endm;
-    return false;
+    return 0;
   }   
    
   //  Loop all global tracks (TPC) and store the
@@ -184,7 +184,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
   //
   if (mPrimCand.size() < mMinMatchTr){
     gMessMgr->Warning() << "StppLMVVertexFinder::fit() only "<< mPrimCand.size() << "tracks to fit - too few, quit ppLMV" << endm;
-    return false;
+    return 0;
   }
   gMessMgr->Info() << "StppLMVVertexFinder::fit() size of helix vector: " << mPrimCand.size() << endm;
  
@@ -221,22 +221,22 @@ StppLMVVertexFinder::fit(StEvent* event) {
   int ret=ppLMV5();
   if(ret==false) {
     gMessMgr->Debug() << "ppLMV did not found vertex"<< endm;
-    return false;
+    return 0;
   }
   
 
   gMessMgr->Info() << "Prim tr used by ppLMV for eveID=" << eveID 
 		   << ", tracks at vertex=" << mPrimCand.size()<<endm;
 
-  assert(mVertexList.size()>=1);
+  assert(size());
   for( uint j=0;j<mPrimCand.size();j++) {
-    double spath = mPrimCand[j].helix.pathLength( mVertexList[0].position().x(),mVertexList[0].position().y());
+    double spath = mPrimCand[j].helix.pathLength( getVertex(0)->position().x(),getVertex(0)->position().y());
     StThreeVectorD p=mPrimCand[j].helix.momentumAt(spath,mBfield*tesla);
     // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
   }
 	 
-  gMessMgr->Message("","I") << "Prim ppLMV Vertex at " << mVertexList[0].position()<<endm;
-  return true;
+  gMessMgr->Message("","I") << "Prim ppLMV Vertex at " << getVertex(0)->position()<<endm;
+  return size();
 } 
 
 
@@ -246,7 +246,7 @@ void
 StppLMVVertexFinder::printInfo(ostream& os) const
 {
     os << "StppLMVVertexFinder - Fit Statistics:" << endl;
-    os << "found prim vertices ................ " <<mVertexList.size() << endl;
+    os << "found prim vertices ................ " <<size() << endl;
     os << "no more info printed at the moment, Jan"<<endl;
  }
 
@@ -562,7 +562,7 @@ StppLMVVertexFinder::ppLMV5() {
   primV.setRanking(555);
 
   //..... add vertex to the list
-  mVertexList.push_back(primV);
+  addVertex(&primV);
  if(eveID%2) addFakeVerex(XVertex.z()+20);
 
 #if 0  ///old
@@ -633,6 +633,9 @@ StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.20  2005/07/19 21:56:58  perev
+ * MultiVertex
+ *
  * Revision 1.19  2005/06/21 02:16:36  balewski
  * multiple prim vertices are stored in StEvent
  *

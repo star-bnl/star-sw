@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.8 2005/06/21 02:16:36 balewski Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.9 2005/07/19 21:53:27 perev Exp $
  *
  */
 
@@ -90,7 +90,7 @@ public:
 
     // mandatory implementations
     virtual         ~StMinuitVertexFinder();
-    bool            fit(StEvent*);       
+    int             fit(StEvent*);       
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
     void           Clear();
@@ -153,6 +153,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.9  2005/07/19 21:53:27  perev
+ * MultiVertex
+ *
  * Revision 1.8  2005/06/21 02:16:36  balewski
  * multiple prim vertices are stored in StEvent
  *

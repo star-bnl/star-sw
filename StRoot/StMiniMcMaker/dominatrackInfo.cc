@@ -1,7 +1,10 @@
 //
-// $Id: dominatrackInfo.cc,v 1.1 2004/03/31 23:44:36 calderon Exp $
+// $Id: dominatrackInfo.cc,v 1.2 2005/07/19 22:05:19 perev Exp $
 //
 // $Log: dominatrackInfo.cc,v $
+// Revision 1.2  2005/07/19 22:05:19  perev
+// MultiVertex
+//
 // Revision 1.1  2004/03/31 23:44:36  calderon
 // Function to find the dominatrack, the number of hits belonging to the
 // dominatrack and the average hit quality of those hits (based on idTruth and
@@ -32,7 +35,7 @@ void dominatrackInfo(const StTrack* recTrack,short&dominatrackKey ,short& domina
     for (StHitIterator hi=recTpcHits.begin();
 	 hi!=recTpcHits.end(); hi++) {
 	StHit* rHit = *hi;
-	idTruths.insert( multimap<short,float>::value_type(rHit->idTruth(),rHit->quality()));
+	idTruths.insert( multimap<short,float>::value_type(rHit->idTruth(),rHit->qaTruth()));
 	uniqueIdTruths.insert(static_cast<int>(rHit->idTruth()));
     }
     // find the dominatrix track!

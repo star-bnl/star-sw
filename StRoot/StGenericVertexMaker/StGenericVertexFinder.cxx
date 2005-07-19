@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.8 2005/07/14 15:39:22 balewski Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.9 2005/07/19 21:45:07 perev Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -11,40 +11,58 @@
 #include "StMessMgr.h"
 #include "StMaker.h"
 
-  
+//______________________________________________________________________________
 StGenericVertexFinder::StGenericVertexFinder() : 
-  mVertexConstrain(false), mMode(0){
+  mVertexConstrain(false), mMode(0)
+{
 }
-
+//______________________________________________________________________________
+StGenericVertexFinder::~StGenericVertexFinder()
+{
+}
 
 /*!
   Adds the vertex to StEvent (currently as a primary)
   Here we invent our own flag and other data to put in
   In real life we have to get it from somewhere (as done for position)
 */
-//======================================================
-//======================================================
+//______________________________________________________________________________
 void 
 StGenericVertexFinder::FillStEvent(StEvent* event) const{
 
-  uint i;
-  for(i=0;i<mVertexList.size(); i++) {
+  for(UInt_t i=0;i<mVertexList.size(); i++) {
     //allocates new memory for each vertex
     StPrimaryVertex* primV = new StPrimaryVertex(mVertexList[i]); 
     event->addPrimaryVertex(primV);
     gMessMgr->Info() << "StGenericVertexFinder::FillStEvent: Added "<<i+1<<" primary vertex" << endm;
   }
 }
-
-
+//______________________________________________________________________________
+void StGenericVertexFinder::addVertex(StPrimaryVertex* vtx)
+{
+  mVertexList.push_back(*vtx);
+}
+//______________________________________________________________________________
+int StGenericVertexFinder::size() const
+{
+  return mVertexList.size();
+}
+//______________________________________________________________________________
+StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
+{
+   return (idx<(int)mVertexList.size())? (StPrimaryVertex*)(&(mVertexList[idx])) : 0;
+}
+//______________________________________________________________________________
 void
-StGenericVertexFinder::mClear(){
-  printf(" StGenericVertexFinder::mClear()dddddddddddddddddddddddddddddd\n"); 
+StGenericVertexFinder::Clear()
+{
+  printf(" StGenericVertexFinder::Clear()\n"); 
   mVertexList.clear();
 }
 
 
 
+//______________________________________________________________________________
 void StGenericVertexFinder::NoVertexConstraint() 
 {
   mVertexConstrain = false; 
@@ -53,6 +71,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.9  2005/07/19 21:45:07  perev
+// MultiVertex
+//
 // Revision 1.8  2005/07/14 15:39:22  balewski
 // nothing, to force recompilation of this code by Autobuild
 //
