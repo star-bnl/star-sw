@@ -131,7 +131,7 @@ Int_t StGenericVertexMaker::Init()
 
 //_____________________________________________________________________________
 void StGenericVertexMaker::Clear(const char* opt){
-  printf(" StGenericVertexMaker::Clear()cccccccccccccccccccccccccc\n"); 
+  printf(" StGenericVertexMaker::Clear()\n"); 
   theFinder->Clear();
 }
 
@@ -243,7 +243,7 @@ Int_t StGenericVertexMaker::Make()
 
   if(!externalFindUse){
     ///Only fill StEvent when successful
-    if (theFinder->result()->size()>0){
+    if (theFinder->size()>0){
       theFinder->FillStEvent(mEvent);
       nEvGood++;
     }

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.3 2005/07/15 20:53:25 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.4 2005/07/19 22:01:24 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -187,7 +187,7 @@ void StPPVertexFinder::initHisto() {
 //==========================================================
 void StPPVertexFinder::Clear(){
   gMessMgr->Info() << "PPVertex::Clear nEve="<<mTotEve<<  endm;
-  mClear();
+  StGenericVertexFinder::Clear();
   ctbList->clear();
   bemcList->clear();
   eemcList->clear();
@@ -315,8 +315,8 @@ StPPVertexFinder::printInfo(ostream& os) const
 
 //==========================================================
 //==========================================================
-bool 
-StPPVertexFinder::fit(StEvent* event) {
+int StPPVertexFinder::fit(StEvent* event) 
+{
   mTotEve++;
   eveID=event->id();
   gMessMgr->Info() << "\n   @@@@@@   PPVertex-1::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
@@ -325,14 +325,14 @@ StPPVertexFinder::fit(StEvent* event) {
   // tmp
 #if 0
   if( ! event->triggerIdCollection()->nominal()->isTrigger(45010)
-      || ! event->triggerIdCollection()->nominal()->isTrigger(10)) return false;
+      || ! event->triggerIdCollection()->nominal()->isTrigger(10)) return 0;
   hA[0]->Fill(2);
 #endif  
 
 
   if(mToolkit==0) {    
    gMessMgr->Warning() <<"no Sti tool kit,  PPV is OFF"<<endm;
-   return false;
+   return 0;
   }
 
   // get CTB info, does not  work for embeding 
@@ -374,7 +374,7 @@ StPPVertexFinder::fit(StEvent* event) {
    if(tracks==0) {
      gMessMgr->Warning() <<"no STi tracks , skip eve"<<endm;
      printInfo();  
-     return false ;				       
+     return 0 ;				       
    }
 
   hA[0]->Fill(4);
@@ -433,7 +433,7 @@ StPPVertexFinder::fit(StEvent* event) {
   if(nmAny<mMinMatchTr){
     gMessMgr->Info() << "StPPVertexFinder1::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
     printInfo();
-    return false;
+    return 0;
   }
   hA[0]->Fill(5);
 
@@ -475,7 +475,7 @@ StPPVertexFinder::fit(StEvent* event) {
   }
 
   if(mVertexData->size()<=0) {
-    return false; // no vertex
+    return 0; // no vertex
   }
 
 #if 0
@@ -490,7 +490,7 @@ StPPVertexFinder::fit(StEvent* event) {
 #endif
 
 
-  return true;
+  return size();
 } 
 
 
@@ -674,9 +674,9 @@ void StPPVertexFinder:: exportVertices(){
     primV.setFlag(1); //??? is it a right value?
   
     //..... add vertex to the list
-    mVertexList.push_back(primV);
+    addVertex(&primV);
   }
-  gMessMgr->Info() << "StPPVertexFinder::exportVertices(), size="<<mVertexList.size()<<endm;
+  gMessMgr->Info() << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
 }
 
 //-------------------------------------------------
@@ -1090,6 +1090,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 }
 /*
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.4  2005/07/19 22:01:24  perev
+ * MultiVertex
+ *
  * Revision 1.3  2005/07/15 20:53:25  balewski
  * cleanup
  *

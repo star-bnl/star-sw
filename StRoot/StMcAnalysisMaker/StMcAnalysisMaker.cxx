@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.27 2004/03/30 03:11:18 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.28 2005/07/19 22:04:49 perev Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.28  2005/07/19 22:04:49  perev
+ * MultiVertex
+ *
  * Revision 1.27  2004/03/30 03:11:18  calderon
  * Added information about the matching into the track Ntuple:
  *  - Dominatrack... (track with most common IdTruth, a.k.a. dominant contributor
@@ -385,7 +388,7 @@ Int_t StMcAnalysisMaker::Make()
 	    TpcHitMRPair.zR       = rhit->position().z();
 	    TpcHitMRPair.dER      = rhit->charge();
 	    TpcHitMRPair.IdR      = rhit->idTruth();
-	    TpcHitMRPair.qR       = rhit->quality();
+	    TpcHitMRPair.qR       = rhit->qaTruth();
 	    TpcHitMRPair.nR       = theHitMap->count(rhit);
 	    TpcHitMRPair.xM       = mhit->position().x();
 	    TpcHitMRPair.yM       = mhit->position().y();
@@ -411,7 +414,7 @@ Int_t StMcAnalysisMaker::Make()
 	  TpcHitMRPair.zR       = rhit->position().z();
 	  TpcHitMRPair.dER      = rhit->charge();
 	  TpcHitMRPair.IdR      = rhit->idTruth();
-	  TpcHitMRPair.qR       = rhit->quality();
+	  TpcHitMRPair.qR       = rhit->qaTruth();
 	  TpcHitMRPair.nR       = theHitMap->count(rhit);
 	  mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
 	}
@@ -549,7 +552,7 @@ Int_t StMcAnalysisMaker::Make()
       StHit* hit = *hi;
       StTpcHit* rHit = dynamic_cast<StTpcHit*>(hit);
       if (!rHit) { cout << "This Hit is not a TPC Hit"<< endl; continue;}
-      idTruths.insert( multimap<int,float>::value_type(rHit->idTruth(),rHit->quality()));
+      idTruths.insert( multimap<int,float>::value_type(rHit->idTruth(),rHit->qaTruth()));
       uniqueIdTruths.insert(static_cast<int>(rHit->idTruth()));
       pair<rcTpcHitMapIter,rcTpcHitMapIter> rBounds = theHitMap->equal_range(rHit);
       for (rcTpcHitMapIter hIter=rBounds.first; hIter!=rBounds.second; hIter++) {
