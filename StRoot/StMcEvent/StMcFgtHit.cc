@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.cc,v 2.1 2005/04/18 20:11:33 calderon Exp $
+ * $Id: StMcFgtHit.cc,v 2.2 2005/07/19 20:07:34 calderon Exp $
  * $Log: StMcFgtHit.cc,v $
+ * Revision 2.2  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.1  2005/04/18 20:11:33  calderon
  * Addition of Fgt and Fst files.  Modified other files to accomodate changes.
  *
@@ -12,11 +16,13 @@
 #include "StMcFgtHit.hh"
 #include "tables/St_g2t_fgt_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.1 2005/04/18 20:11:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.2 2005/07/19 20:07:34 calderon Exp $";
 
 ClassImp(StMcFgtHit)
 
+#ifdef POOL
 StMemoryPool StMcFgtHit::mPool(sizeof(StMcFgtHit));
+#endif
 
 StMcFgtHit::StMcFgtHit(const StThreeVectorF& x,const StThreeVectorF& p,
 			 const float de, const float ds, const long key,

@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.hh,v 2.3 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcFstHit.hh,v 2.4 2005/07/19 20:07:34 calderon Exp $
  * $Log: StMcFstHit.hh,v $
+ * Revision 2.4  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.3  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -30,24 +34,28 @@ class g2t_fst_hit_st;
 
 class StMcFstHit : public StMcHit {
 public:
-  StMcFstHit();
-  StMcFstHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, const long, const long, StMcTrack*);
-  StMcFstHit(g2t_fst_hit_st*);
-  ~StMcFstHit();
-
-  void* operator new(size_t)     { return mPool.alloc(); }
-  void  operator delete(void* p) { mPool.free(p); }
-
-  unsigned long layer() const; // 
-  unsigned long ladder() const; // 
-
-  unsigned long plane() const; //
-  unsigned long module() const;  //  
-   
+    StMcFstHit() : StMcHit() {}
+    StMcFstHit(const StThreeVectorF&,const StThreeVectorF&,
+	       const float, const float, const long, const long, StMcTrack*);
+    StMcFstHit(g2t_fst_hit_st*);
+    ~StMcFstHit();
+    
+#ifdef POOL
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
+#endif
+    
+    unsigned long layer() const; // 
+    unsigned long ladder() const; // 
+    
+    unsigned long plane() const; //
+    unsigned long module() const;  //  
+    
 private:
-
+    
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
     ClassDef(StMcFstHit,1)
 };
 

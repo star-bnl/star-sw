@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.4 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcIstHit.hh,v 2.5 2005/07/19 20:07:34 calderon Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.5  2005/07/19 20:07:34  calderon
+ * Addition of default constructor, including base class StMcHit constructor.
+ * Bracket calls to StMemoryPool inside #ifdef.
+ *
  * Revision 2.4  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -38,26 +42,30 @@ class g2t_ist_hit_st;
 
 class StMcIstHit : public StMcHit {
 public:
-  StMcIstHit();
-  StMcIstHit(const StThreeVectorF&,const StThreeVectorF&,
-	     const float, const float, const long, const long, StMcTrack*);
-  StMcIstHit(g2t_ist_hit_st*);
-  ~StMcIstHit();
-
-  void* operator new(size_t)     { return mPool.alloc(); }
-  void  operator delete(void* p) { mPool.free(p); }
-
-  unsigned long layer() const; // 
-  unsigned long ladder() const; // 
-
-  // Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
-  // and side() to return ladder side (1=inner,2=outer)
-  unsigned long wafer() {return ((mVolumeId/10000)%20);}
-  unsigned long side() {return (((mVolumeId%200)/100)+1);} //1=inner; 2=outer;
-
+    StMcIstHit() : StMcHit() {}
+    StMcIstHit(const StThreeVectorF&,const StThreeVectorF&,
+	       const float, const float, const long, const long, StMcTrack*);
+    StMcIstHit(g2t_ist_hit_st*);
+    ~StMcIstHit();
+    
+#ifdef POOL
+    void* operator new(size_t)     { return mPool.alloc(); }
+    void  operator delete(void* p) { mPool.free(p); }
+#endif
+    
+    unsigned long layer() const; // 
+    unsigned long ladder() const; // 
+    
+    // Willie: Added function wafer() to return wafer number (1-7,1-10,1-13 for layers 1,2,3)
+    // and side() to return ladder side (1=inner,2=outer)
+    unsigned long wafer() {return ((mVolumeId/10000)%20);}
+    unsigned long side() {return (((mVolumeId%200)/100)+1);} //1=inner; 2=outer;
+    
 private:
-
+    
+#ifdef POOL
     static StMemoryPool mPool; //!
+#endif
     ClassDef(StMcIstHit,1)
 };
 
