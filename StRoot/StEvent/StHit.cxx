@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.17 2005/07/06 18:57:48 fisyak Exp $
+ * $Id: StHit.cxx,v 2.18 2005/07/19 21:34:10 perev Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.18  2005/07/19 21:34:10  perev
+ * quality ==> qaTruth to avoid misleading
+ *
  * Revision 2.17  2005/07/06 18:57:48  fisyak
  * Add StHit print out
  *
@@ -73,7 +76,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.17 2005/07/06 18:57:48 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.18 2005/07/19 21:34:10 perev Exp $";
 
 ClassImp(StHit)
 
@@ -190,6 +193,18 @@ StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
     return vec;
 }
 
+void StHit::setIdTruth(int idtru,int qatru) 
+{
+  if (qatru==0) qatru = (idtru>>16);
+  idtru    = idtru&((1<<16)-1);
+  mIdTruth = (UShort_t)(idtru);
+  mQuality = (UShort_t) qatru;
+}
+
+int StHit::idTruth() const
+{
+  return mIdTruth;
+}
 ostream&  operator<<(ostream& os, const StHit& v)
 {
   return os << "StHit: charge\t" << v.charge() 
@@ -200,7 +215,7 @@ ostream&  operator<<(ostream& os, const StHit& v)
 	    << "\tcovariantMatrix " << v.covariantMatrix()
 	    << "\tusedInFit " << v.usedInFit()
 	    << "\tidTruth " << v.idTruth()
-	    << "\tquality " << v.quality()
+	    << "\tquality " << v.qaTruth()
 	    << "\tid " << v.id() 
 	    << "\thardwarePosition " << v.hardwarePosition();
 }

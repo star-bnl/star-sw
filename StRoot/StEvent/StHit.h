@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.18 2005/07/06 18:57:48 fisyak Exp $
+ * $Id: StHit.h,v 2.19 2005/07/19 21:34:24 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.19  2005/07/19 21:34:24  perev
+ * quality ==> qaTruth to avoid misleading
+ *
  * Revision 2.18  2005/07/06 18:57:48  fisyak
  * Add StHit print out
  *
@@ -107,8 +110,8 @@ public:
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
     int             usedInFit() const;
-    unsigned short  idTruth() const;
-    unsigned short  quality() const;
+    int             idTruth() const;
+    int             qaTruth() const { return mQuality; }
     unsigned short  id()      const;
     const StHit*    nextHit() const;
     unsigned int    hardwarePosition() const;
@@ -120,8 +123,7 @@ public:
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
-    void setIdTruth(UShort_t id=0) {mIdTruth=id;}
-    void setQuality(UShort_t quality=0) {mQuality = quality;}
+    void setIdTruth(Int_t idtru,Int_t qatru=0);
     void SetNextHit(StHit *next = 0) {mNextHit = next;}
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     virtual void                  Print(Option_t *option="") const;
@@ -147,8 +149,6 @@ inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
     return (mHardwarePosition>>bit) & ~(~0UL<<nbits);
 }
 
-inline unsigned short  StHit::idTruth() const {return mIdTruth;}
-inline unsigned short  StHit::quality() const {return mQuality;}
 inline unsigned short  StHit::id()      const {return mId;}
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
 inline const StHit*    StHit:: nextHit() const {return mNextHit;}
