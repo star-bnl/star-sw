@@ -200,13 +200,16 @@ int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r)
 			// choose the ID with the larger charge
 			if(hit_r->c > hit_l->c) {
 				hit_l->id_simtrk = hit_r->id_simtrk ;
+                                hit_l->id_quality= short((hit_r->id_quality*hit_r->c/double(charge))+0.5);
+			} else {
+                                hit_l->id_quality= short((hit_l->id_quality*hit_l->c/double(charge))+0.5);
 			}
 
-		}
+		} else {
 
 		// quality is the weighted mean...
-		hit_l->id_quality = (hit_l->id_quality * hit_l->c + hit_r->id_quality * hit_r->c) / charge ;
-
+		        hit_l->id_quality = (hit_l->id_quality * hit_l->c + hit_r->id_quality * hit_r->c) / charge ;
+                }
 
 		// adjust cluster ids
 		if(hit_r->cl_id != hit_l->cl_id) {

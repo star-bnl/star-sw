@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.27 2005/04/11 14:08:20 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.28 2005/07/19 22:09:02 perev Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.28  2005/07/19 22:09:02  perev
+ * IdTruth
+ *
  * Revision 1.27  2005/04/11 14:08:20  jml
  * flags to switch of EAST &/or WEST TPC
  *
@@ -1243,8 +1246,7 @@ void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
   hw += (hit->ntmbk   << 22);  // ntmbks...
 
   StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q);
-  tpcHit->setIdTruth(hit->id_simtrk);
-  tpcHit->setQuality(hit->id_quality);
+  tpcHit->setIdTruth(hit->id_simtrk,hit->id_quality);
 
   // With simulation info, not currently there!
   // StTpcHit *tpcHit = new StTpcHit(p,e,hw,hit->q,0,hit->id_simtrk,hit->id_quality);  
