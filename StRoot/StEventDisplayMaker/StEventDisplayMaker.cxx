@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.109 2005/06/16 19:38:25 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.110 2005/07/19 19:22:59 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -904,7 +904,10 @@ void  StEventDisplayMaker::DrawIt(StPoints3DABC *pnt,const char *opt
          tracksShape->SetName (pnt->GetName());
          tracksShape->SetTitle(pnt->GetTitle());
          // Draw this group
-      tracksShape->Draw();
+     // Make sure the event goes first
+     // tracksShape->Draw();
+        m_PadBrowserCanvas->GetListOfPrimitives()->AddFirst( tracksShape );
+        m_PadBrowserCanvas->Modified();
     m_TrackCollector->Add(tracksShape);
 }
 //_____________________________________________________________________________
@@ -1158,6 +1161,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.110  2005/07/19 19:22:59  fine
+// small adjustment (trakc always go first)  to make use of the trancluent OpenGL features
+//
 // Revision 1.109  2005/06/16 19:38:25  perev
 // A lot of changes
 //
