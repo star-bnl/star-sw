@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.53 2005/07/06 18:55:07 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.54 2005/07/19 22:41:51 perev Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -687,14 +687,14 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].QRatioA = -2.;
 	CdEdx[NdEdx].QSumA = 0;
 	if (PreviousCharge > 0.0) {
-	  CdEdx[NdEdx].QRatioA = TMath::Log(PreviousCharge/tpcHit->charge());
+	  CdEdx[NdEdx].QRatioA = TMath::Log(PreviousCharge/(tpcHit->charge()+1e-10));
 	  CdEdx[NdEdx].QSumA = TMath::Log10(1. + 1.e6*PreviousCharge);
 	}
 	if (NextTpcHit) {
 	  Double_t dZ = lNext.position().z() - localSect[3].position().z();
 	  if (dZ > 0) 	    CdEdx[NdEdx].DeltaZ = TMath::Log(dZ);
 	  if (NextTpcHit->charge() > 0.0 && tpcHit->charge() > 0.0) {
-	    CdEdx[NdEdx].QRatio = TMath::Log(NextTpcHit->charge()/tpcHit->charge());
+	    CdEdx[NdEdx].QRatio = TMath::Log(NextTpcHit->charge()/(tpcHit->charge()+1e-10));
 	    if (CdEdx[NdEdx].QRatio < -2.) CdEdx[NdEdx].QRatio = -2.;
 	    if (CdEdx[NdEdx].QRatio >  8.) CdEdx[NdEdx].QRatio =  8.;
 	  }
