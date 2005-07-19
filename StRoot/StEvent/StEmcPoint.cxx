@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.9 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcPoint.cxx,v 2.10 2005/07/19 21:31:45 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.10  2005/07/19 21:31:45  perev
+ * IdTruth
+ *
  * Revision 2.9  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -42,11 +45,12 @@
 #include "StEmcPoint.h"
 #include <Stiostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.9 2004/07/20 17:07:49 perev Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.10 2005/07/19 21:31:45 perev Exp $";
 
 ClassImp(StEmcPoint)
 
 StEmcPoint::StEmcPoint() { 
+
     mEnergy = 0;
     mChiSquare = 0;
     for(int i=0;i<4;i++) {
@@ -55,6 +59,7 @@ StEmcPoint::StEmcPoint() {
     }
     mDelta[0]=0;
     mDelta[1]=0;
+    myQuality =0;
 }
 
 StEmcPoint::StEmcPoint(const StThreeVectorF& p,
@@ -64,7 +69,9 @@ StEmcPoint::StEmcPoint(const StThreeVectorF& p,
                        float energy, float csq,
                        unsigned char c)
   : StHit(p,e,hp,q,c),mEnergy(energy), mChiSquare(csq), mSize(s)
-{ /* noop */ }
+{     
+  myQuality =0;
+}
 
 StEmcPoint::~StEmcPoint() {/* noop */}
 

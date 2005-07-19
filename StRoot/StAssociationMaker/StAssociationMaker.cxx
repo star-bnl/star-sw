@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.45 2005/07/19 20:09:57 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.46 2005/07/19 21:28:56 perev Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.46  2005/07/19 21:28:56  perev
+ * IdTruth
+ *
  * Revision 1.45  2005/07/19 20:09:57  perev
  * IdTruth changes
  *
@@ -797,7 +800,7 @@ Int_t StAssociationMaker::Make()
 			 iHit<tpcPadRowHitColl->hits().size();
 			 iHit++) {
 			rcTpcHit = tpcPadRowHitColl->hits()[iHit];
-                        int qatru,idtru; idtru= rcTpcHit->idTruth(&qatru);
+                        int qatru=rcTpcHit->qaTruth(); int idtru= rcTpcHit->idTruth();
 			cout << iHit << "\t" << rcTpcHit->position() << "\t" << idtru << "\t" << qatru << endl;
 		    } // reco hits in debug2
 		    cout << "MC Hit Key\tX pos\tY pos\tZ pos\tparent key" << endl;		    
