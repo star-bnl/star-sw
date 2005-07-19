@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.10 2003/12/24 13:44:54 fisyak Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.11 2005/07/19 22:23:05 perev Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.11  2005/07/19 22:23:05  perev
+ * Bug fix
+ *
  * Revision 1.10  2003/12/24 13:44:54  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -69,7 +72,6 @@ using std::distance;
 static const int MaxPixels = 512;
 static unsigned char ADCs[MaxPixels];
 static int  IDs[MaxPixels];
-static int  *IdsLocal[MaxPixels];
 static int  Npixels = 0;
 
 
@@ -114,9 +116,7 @@ int StTrsZeroSuppressedReader::setSector(int sector)
 
 StTrsZeroSuppressedReader::~StTrsZeroSuppressedReader()
 {
-    if (mSequence) delete [] mSequence;
     if (mPadList)  delete [] mPadList;
-    mSequence = 0;
     mPadList  = 0;
 }
 
@@ -205,79 +205,43 @@ int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSe
 //________________________________________________________________________________
 int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSequence** Seq, int ***Ids) {
 
-  if(mSequence) delete [] mSequence;
-  mSequence = 0;
+  *Seq=0;*Ids=0;*nSeq=0;
+  mSequence.clear();
+  mIds.clear();
   Npixels = 0;
-  memset(ADCs,     0, MaxPixels*sizeof(unsigned char ));
-  memset(IDs,      0, MaxPixels*sizeof(int ));
-  memset(IdsLocal, 0, MaxPixels*sizeof(int*));
-  *nSeq  = 0;
+  memset(ADCs,     0, sizeof(ADCs));
+  memset(IDs,      0, sizeof(Ids ));
   digitalTimeBins* TrsPadData = mTheSector->timeBinsOfRowAndPad(PadRow,Pad);
-  unsigned short currentTimeBin = 0;
-  digitalTimeBinIterator rangeBegin = TrsPadData->begin();
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-  vector<StSequence> tmp;
-#else
-  vector<StSequence, allocator<StSequence> > tmp;
-#endif
-  tmp.clear();
-  // Construct the sequences:
-  do {
-    digitalTimeBinIterator rangeEnd = find(rangeBegin, TrsPadData->end(), digitalPair(0,0));
-    int length=0;
-    //VP	distance(rangeBegin,rangeEnd,length);
-    length=rangeEnd-rangeBegin;
-    if (length){
-      StSequence aSequence;
-      aSequence.startTimeBin = currentTimeBin;
-      unsigned char adc = (*rangeBegin);
-      int            id = rangeBegin->id();
-      //      ADCs.push_back(adc); IDs.push_back(id);
-      ADCs[Npixels] = adc; 
-      IDs[Npixels]  =  id;
-      //      unsigned char &ref     = ADCs.back(); 
-      //      aSequence.firstAdc     = &ref;//(*rangeBegin);
-      aSequence.firstAdc = &ADCs[Npixels];
-      //      int           *refId   = &IDs.back();
-      //      IdsLocal[*nSeq]    = refId;
-      IdsLocal[*nSeq]    = &IDs[Npixels];
-      Npixels++;
-      currentTimeBin++;
-      digitalTimeBinIterator current = rangeBegin;
-      current++;
-      for (int i = 1; i < length; i++, currentTimeBin++, current++) {
-	adc = (*current); 
-	//	ADCs.push_back(adc);
-	id = current->id();
-	//	IDs.push_back(id);
-	ADCs[Npixels] = adc; 
-	IDs[Npixels]  =  id; 
-	Npixels++;
-      }
-      aSequence.length       = length;
-      tmp.push_back(aSequence);
-      (*nSeq)++;
-      //      currentTimeBin += length;
-    }
-    else {
-      if (rangeEnd==TrsPadData->end()) continue;
-      rangeEnd++;
-      currentTimeBin += *rangeEnd;
-      rangeEnd++;
-    }
-    rangeBegin = rangeEnd;
-  }while (rangeBegin!=TrsPadData->end());
-  
-  // Return as an array
+  if (!TrsPadData) return 1;
+  digitalTimeBins &trsPadData = *TrsPadData;
+  int nTimeBins = trsPadData.size();
+  if (!nTimeBins) return 2;
 
-  assert((unsigned int)*nSeq == tmp.size());
-  mSequence = new StSequence[*nSeq];
-  
-  //     PR(tmp.size());
-  
-  for(unsigned int ii=0; ii< tmp.size(); ii++) mSequence[ii] = tmp[ii];
-  *Seq = mSequence;
-  *Ids = &IdsLocal[0];
+  int currentTimeBin = 0;
+  // Construct the sequences:
+  StSequence aSequence;aSequence.length=0;
+
+  for (int ibin=0;ibin<nTimeBins;ibin++)  {
+    int newTimeBin = trsPadData[ibin].time();
+    if (newTimeBin>=0) {
+      if (aSequence.length) {
+        nSeq[0]++;
+        aSequence.startTimeBin = currentTimeBin;
+        aSequence.firstAdc = ADCs+Npixels-aSequence.length;
+        mSequence.push_back(aSequence);
+        mIds.push_back(IDs +Npixels-aSequence.length);
+      }
+      currentTimeBin=newTimeBin; aSequence.length=0;
+      continue;
+    }
+    aSequence.length++;
+    ADCs[Npixels] = trsPadData[ibin].adc(); 
+    IDs [Npixels] = trsPadData[ibin].id() ; 
+    Npixels++;
+  }
+
+  *Seq = &mSequence[0];
+  *Ids = &mIds[0];
   
   return 0;
 }
@@ -287,8 +251,7 @@ void StTrsZeroSuppressedReader::clear()
     //cout << "StTrsZeroSuppressedReader::clear()" << endl;
     if (mPadList) delete [] mPadList;
     mPadList = 0;
-    if (mSequence) delete [] mSequence;
-    mSequence = 0;
+    mSequence.clear();
 }
 //________________________________________________________________________________
 #if 0

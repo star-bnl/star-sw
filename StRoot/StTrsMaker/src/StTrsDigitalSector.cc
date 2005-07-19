@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.9 2003/12/24 13:44:53 fisyak Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.10 2005/07/19 22:23:05 perev Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
+ * Revision 1.10  2005/07/19 22:23:05  perev
+ * Bug fix
+ *
  * Revision 1.9  2003/12/24 13:44:53  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -87,11 +90,8 @@ void StTrsDigitalSector::clear() // clears only the time bins
 // Below, rowIndex specifies index 0..44
 void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalPadData* tbins)
 {
-#ifdef ST_SECTOR_BOUNDS_CHECK
-    if( (rowIndex > 0 && rowIndex <= mData.size()) )
-	if( (padIndex > 0 && padIndex <= mData[rowIndex].size()) )
-#endif
-	    {
+assert(0);
+		    {
 	      mData[(rowN-1)][(padN-1)].clear();
 	      digitalPadDataIterator begin = tbins->begin();
 	      digitalPadDataIterator end   = tbins->end();
@@ -102,19 +102,16 @@ void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalPadData* tbin
 //________________________________________________________________________________
 void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalTimeBins* tbins)
 {
-#ifdef ST_SECTOR_BOUNDS_CHECK
-    if( (rowIndex > 0 && rowIndex <= mData.size()) )
-	if( (padIndex > 0 && padIndex <= mData[rowIndex].size()) )
-#endif
-	    {
-	    mData[(rowN-1)][(padN-1)] = *tbins;
-	    }
+  mData[(rowN-1)][(padN-1)].clear();
+  mData[(rowN-1)][(padN-1)].swap(*tbins);
 }
 
+//________________________________________________________________________________
 void StTrsDigitalSector::assignTimeBins(StTpcPadCoordinate& coord, digitalTimeBins* tbins)
 {
     assignTimeBins(coord.row(), coord.pad(), tbins);
 }
+//________________________________________________________________________________
 int StTrsDigitalSector::cleanup()
 {
     unsigned int numberOfEmptyRows=0;

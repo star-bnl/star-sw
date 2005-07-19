@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.hh,v 1.3 2003/12/24 13:44:52 fisyak Exp $
+ * $Id: StTrsZeroSuppressedReader.hh,v 1.4 2005/07/19 22:23:04 perev Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -32,6 +32,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.hh,v $
+ * Revision 1.4  2005/07/19 22:23:04  perev
+ * Bug fix
+ *
  * Revision 1.3  2003/12/24 13:44:52  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -51,10 +54,9 @@
 
 #include "StSequence.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
-// struct StTrsSequence : public Sequence {
-//   StTrsSequence() : Sequence(), FirstId(0) {}
-//   int*           FirstId;           // ptr to the first simulated track id in the sequence           
-// };
+#include <vector>
+typedef std::vector<StSequence> VecSequence;
+typedef std::vector<int*> VecIds;
 
 class StTpcRawDataEvent;
 class StTrsRawDataEvent;
@@ -89,7 +91,8 @@ private:
     int                 mSector;
     StTrsDigitalSector* mTheSector;
     unsigned char*      mPadList;
-    StSequence*         mSequence;
+    VecSequence         mSequence;
+    VecIds              mIds;
     StTrsRawDataEvent*  mTrsEvent;
 
 };

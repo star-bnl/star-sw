@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.75 2004/03/31 19:45:57 jeromel Exp $
+// $Id: StTrsMaker.cxx,v 1.76 2005/07/19 22:20:52 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.76  2005/07/19 22:20:52  perev
+// Bug fix
+//
 // Revision 1.75  2004/03/31 19:45:57  jeromel
 // Initialize data member (valgrind report)
 //
@@ -383,7 +386,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.75 2004/03/31 19:45:57 jeromel Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.76 2005/07/19 22:20:52 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -727,7 +730,7 @@ Int_t StTrsMaker::Make(){
     if (!g2t_tpc_hit) return kStWarn;
     
     int no_tpc_hits         = g2t_tpc_hit->GetNRows();
-    g2t_tpc_hit_st *tpc_hit = g2t_tpc_hit->GetTable();
+    g2t_tpc_hit_st *tpcHit = g2t_tpc_hit->GetTable();
 
     St_g2t_track *g2t_track =
 	static_cast<St_g2t_track *>(geant("g2t_track"));
@@ -755,6 +758,7 @@ Int_t StTrsMaker::Make(){
     // Limit the  processing to a fixed number of segments
     //  no_tpc_hits = 4;
     if(no_tpc_hits<1)return kStOK;
+    g2t_tpc_hit_st *tpc_hit = tpcHit;
     for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
        int id2=tpc_hit->track_p;
          int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
@@ -911,11 +915,6 @@ Int_t StTrsMaker::Make(){
 // 	    ofs << " " << aSegment << endl;
 //   	    PR(aSegment);
 	    
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-//VPunused	    vector<int> all[3];
-#else
-//VPunused	    vector<int,allocator<int> > all[3];
-#endif
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    list<StTrsMiniChargeSegment> comp;
@@ -1214,6 +1213,8 @@ Int_t StTrsMaker::Make(){
     cout << "\nFinished at: " << ctime(&trsMakeEnd);
     double trsMakeTotal = difftime(trsMakeEnd,trsMakeBegin);
     cout << "Total StTrsMaker::Make() Processing Time: " << trsMakeTotal << " sec\n\n"; 
+    
+    CheckTruth(no_tpc_hits, tpcHit);
 
     return kStOK;
 }
@@ -1259,3 +1260,64 @@ void StTrsMaker::setNormalFactor(double FudgeFactor) {
     ((StTrsParameterizedAnalogSignalGenerator*)mAnalogSignalGenerator)->setNormalFactor(normalFactor);
   }
 }
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StarClassLibrary/StSequence.hh"
+
+void StTrsMaker::CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit)
+{
+   StSequence *seq; int nSeq,**ids;
+   int bisdet, sector, row,pad,tim;
+   TObjectSet *trsEvent=(TObjectSet*)GetDataSet("Event"); 			if(!trsEvent)  	return;
+   StTrsZeroSuppressedReader *mZsr=0;
+   StTpcRawDataEvent   *mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());	if(!mEvent) 	return;
+   StTrsDetectorReader mTdr(mEvent);
+   StTpcCoordinateTransform transform(gStTpcDb);
+
+  int noData=0,lowTruth=0;
+  for (int ih=0;ih<no_tpc_hits;ih++) {
+    int idtru =tpc_hit[ih].track_p;
+    StGlobalCoordinate global(tpc_hit[ih].x[0],tpc_hit[ih].x[1],tpc_hit[ih].x[2]);
+    StTpcPadCoordinate Pad;      transform(global,Pad);
+    sector = Pad.sector();
+    pad = Pad.pad();
+    row = Pad.row();
+    tim = Pad.timeBucket();
+    mZsr=mTdr.getZeroSuppressedReader(sector);
+    if (!mZsr) {
+       noData++;
+//       Warning("CheckTruth","%d - No Data in %d.%d.%d",noData,sector,row,pad);   
+       continue;
+    }
+    nSeq=0;
+    mZsr->getSequences(row, pad, &nSeq, &seq, &ids);
+    if (!nSeq) {
+       noData++;
+//       Warning("CheckTruth","%d - No Data in %d.%d.%d",noData,sector,row,pad);   
+       continue;
+    }
+    
+    int nAdc=0,nIds=0;
+    
+    for (int jSeq=0;jSeq<nSeq;jSeq++) {
+      int nnAdc = seq[jSeq].length;
+      int startTimeBin =  seq[jSeq].startTimeBin;
+      if (tim < startTimeBin      ) continue;
+      if (tim > startTimeBin+nnAdc) continue;
+      for (int j=0;j<nnAdc;j++) {
+        if(abs(startTimeBin+j-tim)>5) continue;
+        nAdc++;
+	if(ids[jSeq][j]==idtru) nIds++;
+      }
+    }
+    if (!nAdc) nAdc=1;
+    double pct = double(nIds)/nAdc*100;
+    if (!nIds) {
+       lowTruth++;
+//       Warning("CheckTruth","%d - Low contrib %2.1f%% in %d.%d.%d",lowTruth,pct,sector,row,pad);   
+    }
+  }
+  if (lowTruth) 
+    Warning("CheckTruth","nHits=%d lowTruth=%d pct=%2.1f%%",
+    no_tpc_hits,lowTruth,(lowTruth*100.)/no_tpc_hits);
+
+}    
