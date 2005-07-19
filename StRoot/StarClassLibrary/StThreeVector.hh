@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.13 2005/07/06 18:49:57 fisyak Exp $
+ * $Id: StThreeVector.hh,v 1.14 2005/07/19 22:27:11 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.14  2005/07/19 22:27:11  perev
+ * Cleanup
+ *
  * Revision 1.13  2005/07/06 18:49:57  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -284,13 +287,15 @@ inline T StThreeVector<T>::pseudoRapidity() const
     // change code to more optimal:
     // double m = mag();
     // return 0.5*::log( (m+z())/(m-z()) );
-    return -::log(tan(theta()/2.+1e-20));
+    double tmp = tan(theta()/2.); if (tmp <=0.) return 1e20;
+    return -::log(tmp);
 }
 
 template<class T>
 inline StThreeVector<T> StThreeVector<T>::unit() const
 {
-    return *this/this->mag();
+    double tmp = mag(); if (tmp<=0.) tmp = 1e-20;
+    return *this/tmp;
 }
 
 template <class T>
@@ -380,77 +385,49 @@ inline T StThreeVector<T>::mag2() const
 template<class T>
 inline T StThreeVector<T>::operator() (size_t i) const
 {
-    if (i == 0)
-        return mX1;
-    else if (i == 1)
-        return mX2;
-    else if (i == 2)
-        return mX3;
-    else {
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
-      throw out_of_range("StThreeVector<T>::operator(): bad index");
+    throw out_of_range("StThreeVector<T>::operator(): bad index");
 #else
-      cerr << "StThreeVector<T>::operator(): bad index" << endl;
+    cerr << "StThreeVector<T>::operator(): bad index" << endl;
 #endif
-      return 0;
-    }
+    return 0;
 }
 
 template<class T>
-inline T& StThreeVector<T>::operator() (size_t i)
+inline T& StThreeVector<T>::operator() (size_t i) 
 {
-    if (i == 0)
-        return mX1;
-    else if (i == 1)
-        return mX2;
-    else if (i == 2)
-        return mX3;
-    else {
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
-      throw out_of_range("StThreeVector<T>::operator(): bad index");
+    throw out_of_range("StThreeVector<T>::operator(): bad index");
 #else
-      cerr << "StThreeVector<T>::operator(): bad index" << endl;
+    cerr << "StThreeVector<T>::operator(): bad index" << endl;
 #endif
-      return mX3;   // have to return something here ...
-    }
+    return mX1;
 }
 
 template<class T>
 inline T StThreeVector<T>::operator[] (size_t i) const
 {
-    if (i == 0)
-        return mX1;
-    else if (i == 1)
-        return mX2;
-    else if (i == 2)
-        return mX3;
-    else {
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
       throw out_of_range("StThreeVector<T>::operator[]: bad index"); 
 #else
       cerr << "StThreeVector<T>::operator[]: bad index" << endl;
 #endif
       return 0;
-    }
 }
 
 template<class T>
-inline T& StThreeVector<T>::operator[] (size_t i)
+inline T &StThreeVector<T>::operator[] (size_t i) 
 {
-    if (i == 0)
-        return mX1;
-    else if (i == 1)
-        return mX2;
-    else if (i == 2)
-        return mX3;
-    else {
+    if (0 <=i && i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
       throw out_of_range("StThreeVector<T>::operator[]: bad index"); 
 #else
       cerr << "StThreeVector<T>::operator[]: bad index" << endl;
 #endif
-      return mX3;   // have to return something here ...
-    }
+      return mX1;
 }
 
 template<class T>
@@ -564,7 +541,7 @@ template<class T>
 template<class X>
 inline T StThreeVector<T>::angle(const StThreeVector<X>& vec) const
 {
-    double norm = this->mag2()*vec.mag2();
+    double norm = this->mag2()*vec.mag2(); 
     
     return norm > 0 ? acos(this->dot(vec)/(::sqrt(norm))) : 0;
 }
@@ -712,13 +689,15 @@ StThreeVector<T>::cross(const StThreeVector<double>& v) const
 template<class T>
 inline T StThreeVector<T>::angle(const StThreeVector<float>& v) const
 {
-    return acos(this->dot(v)/this->mag()/v.mag());
+    double tmp = mag()*v.mag(); if (tmp <=0) tmp = 1e-20;
+    return acos(this->dot(v)/tmp);
 }
 
 template<class T>
 inline T StThreeVector<T>::angle(const StThreeVector<double>& v) const
 {
-    return acos(this->dot(v)/this->mag()/v.mag());
+    double tmp = mag()*v.mag(); if (tmp <=0) tmp = 1e-20;
+    return acos(this->dot(v)/tmp);
 }
 
 template<class T>
