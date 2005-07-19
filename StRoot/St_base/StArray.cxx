@@ -210,7 +210,7 @@ StStrArray::StStrArray(const StStrArray &from){ *this = from;}
   for (i=0; i<n; i++){
     TObject *to = fV[i];
     if (!to) continue;
-    if (abs((int)to)<10000 || to->TestBit(TObject::kNotDeleted)) {
+    if (to->TObject::TestBit(TObject::kNotDeleted)) {
       delete fV[i];
     } else {
       Warning("clear","Object[%d]=%p(%d) is already deleted",i,(void*)to,to);
