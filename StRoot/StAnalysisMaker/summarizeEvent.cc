@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.5 2005/06/22 22:19:37 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.6 2005/07/19 20:08:17 perev Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.6  2005/07/19 20:08:17  perev
+ * MultiVertex corr
+ *
  * Revision 2.5  2005/06/22 22:19:37  fisyak
  * Add protection for absence svtHitCollection
  *
@@ -37,7 +40,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.5 2005/06/22 22:19:37 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.6 2005/07/19 20:08:17 perev Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -60,20 +63,21 @@ summarizeEvent(StEvent& event, const int &nevents)
     }
     gMessMgr->QAInfo() << "# track nodes:   \t"
 		       <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks << endm;
+    StPrimaryVertex *pVertex=0;
+    for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
+      StThreeVectorD primPos = pVertex->position();
+      int nDaughters = pVertex->numberOfDaughters();
+      nGoodTracks = 0;
+      for (unsigned int i=0; i < nDaughters; i++) {
+        StPrimaryTrack* pTrack = (StPrimaryTrack*)pVertex->daughter(i);
+        if (pTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
+        nGoodTracks++;
+      }
+      gMessMgr->QAInfo() << "# primary vertex("<<ipr<<"): \t"<<primPos<<endm;
 
-    int nprimary = 0;
-    if (event.primaryVertex())
-	nprimary = event.primaryVertex()->numberOfDaughters();
-    nGoodTracks = 0;
-    for (unsigned int i=0; i < nTracks; i++) {
-      node = trackNode[i]; if (!node) continue;
-      StPrimaryTrack* pTrack = static_cast<StPrimaryTrack*>(node->track(primary));
-      if (! pTrack) continue;
-      if (pTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
-      nGoodTracks++;
-    }
-    gMessMgr->QAInfo() << "# primary tracks:\t"
-		       << nprimary << ":\tones    with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks << endm;
+      gMessMgr->QAInfo() << "# primary tracks:\t"
+		         << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
+    }// end prim vtx    
     
     gMessMgr->QAInfo() << "# V0 vertices:       "
 		       << event.v0Vertices().size() << endm;
@@ -83,7 +87,7 @@ summarizeEvent(StEvent& event, const int &nevents)
     
     gMessMgr->QAInfo() << "# Kink vertices:       "
 		       << event.kinkVertices().size() << endm;
-    
+
     UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
     StTpcHitCollection* TpcHitCollection = event.tpcHitCollection();
     if (TpcHitCollection) {
@@ -149,8 +153,4 @@ summarizeEvent(StEvent& event, const int &nevents)
     gMessMgr->QAInfo() << "# FTPC hits:      "
 		       << (event.ftpcHitCollection() ? event.ftpcHitCollection()->numberOfHits() : 0) << endm;
     
-    if (event.primaryVertex()) {
-	gMessMgr->QAInfo() << "primary vertex:   "
-			   << event.primaryVertex()->position() << endm;
-    }
 }
