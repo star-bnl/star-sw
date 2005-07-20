@@ -15,6 +15,9 @@
 #include "Gtypes.h"
 #include "TPoints3DABC.h"
 #include "StThreeVectorF.hh"
+#include "StMCTruth.h"
+#include "StHelixD.hh"
+#include "StPhysicalHelixD.hh"
 
 class StEvent;
 class StTrack;
@@ -27,7 +30,6 @@ class StRefArray;
 class StPtrVecHit;
 class BetheBloch;
 #include "StPhysicalHelixD.hh"
-class THelixTrack;
 #include "StHelixD.hh"
 
 
@@ -76,6 +78,9 @@ const StPtrVecHit *GetHits() 	const;
       StPhysicalHelixD *GetHelix(int idx=0) 	const;
       THelixTrack *GetTHelix(int idx=0) 	const;
       Float_t  *GetPoints(int &npoints) 	const;
+StMCTruth GetTruth(int byNumb=0,double rXYMin=0.,double rXYMax=1000.) const; 
+
+
 private:
 const StTrack *fTrk;
 mutable const StPtrVecHit *fHits;
@@ -311,37 +316,18 @@ public:
    virtual float        *GetPars() const        = 0;
    virtual const float  *GetDefs() const        = 0;
    virtual const char  **GetNams() const        = 0;
-           bool         *GetActive() { return &fActive;}
+           bool         *GetActive() 		{ return &fActive;}
            void          SetDefs();
            bool          Active() const {return fActive;}
            void          SetActive(bool active){fActive = active;}
-
-           Int_t         AcceptCB(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
-           Int_t         AcceptCB(StPoints3DABC *pnt);
-           void          Update();
+   virtual Int_t         Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&)=0;
 protected:
    bool   fActive;// the flag whether the filter is "on"
-
-protected:
-   virtual Int_t         Accept(StPoints3DABC *pnt) =0;
-   virtual Int_t         Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
 
 private:
    static int fgDial;
    ClassDef(StFilterABC,0)
 };
-//______________________________________________________________________________
-inline Int_t StFilterABC::AcceptCB(StPoints3DABC *pnt) 
-{
-   //  Apply the user-provided filter if the filter is activated
-   return fActive ? Accept(pnt): 1;
-}
-//______________________________________________________________________________
-inline Int_t StFilterABC::AcceptCB(StPoints3DABC *pnt,Color_t &color, Size_t &size, Style_t &style) 
-{
-   //  Apply the user-provided filter if the filter is activated
-   return fActive ? Accept(pnt,color,size,style): 1;
-}
 //______________________________________________________________________________
 
 class StFilterDef : public StFilterABC { // An example of default filter
@@ -351,10 +337,9 @@ public:
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
+   Int_t   Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
 
 protected:
-   Int_t   Accept(StPoints3DABC *pnt) {return 0;}
-   Int_t   Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&);
 
 private:
   float fFirst;
@@ -387,12 +372,12 @@ public:
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
-
-protected:
-  virtual Int_t         Accept(StPoints3DABC *pnt) ;
-  Int_t Accept(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
   Int_t         Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&)
   { return Accept(pnt); } 
+
+protected:
+  Int_t Accept(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
+  Int_t Accept(StPoints3DABC *pnt);
 
 protected:
   BetheBloch* mBB;

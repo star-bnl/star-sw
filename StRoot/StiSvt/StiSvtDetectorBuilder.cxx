@@ -177,7 +177,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       // determine the radius for the detector (ladders + hybrids)
       float fLayerRadius = (fLadderRadius + fGapRadius)/2.;
 
-      double x,y,z,rc,rn, nx,ny,nz,dx,dy,dz,yOff;
+      double x,y,z,rc,rn, nx,ny,nz,dx,dy,dz;
       StSvtWaferGeometry* waferGeom;
       float fLadderPhi;
       float phiC, phiN, dPhi;
@@ -204,7 +204,6 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  phiC = fLadderPhi = atan2(y,x);
 	  phiN = atan2(ny,nx);
 	  dPhi = phiC-phiN;
-	  yOff = sqrt(rc*rc-rn*rn);
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
@@ -228,44 +227,6 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pLadder->setElossCalculator(siElossCalculator);
 
 	  add(layer,ladder,pLadder);
-#if 0	  
-	  double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
-	  double rHybrid = rc*cos(dPhi)*cos(fHalfGapPhi)/cos(fHalfLadderPhi);
-	  // hybrid 1
-	  pPlacement = new StiPlacement;
-	  pPlacement->setZcenter(0.);
-	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setLayerAngle(fLadderPhi + fDeltaPhi);
-	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, rHybrid, -offset);
-	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_1", layer, ladder);
-	  StiDetector *pHybrid1 = _detectorFactory->getInstance();
-	  pHybrid1->setName(name);
-	  pHybrid1->setIsOn(true);
-	  pHybrid1->setIsActive(new StiNeverActiveFunctor);
-	  pHybrid1->setIsContinuousMedium(true);
-	  pHybrid1->setIsDiscreteScatterer(true);
-	  pHybrid1->setGas(_gasMat);
-	  pHybrid1->setMaterial(_hybridMat);
-	  pHybrid1->setShape(_hybridShape[layer]);
-	  pHybrid1->setPlacement(pPlacement);
-	  pHybrid1->setElossCalculator(siElossCalculator);
-	  add(pHybrid1);
-	  // hybrid 2
-	  pPlacement = new StiPlacement;
-	  pPlacement->setZcenter(0.);
-	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setLayerAngle(fLadderPhi - fDeltaPhi);
-	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, rHybrid, offset);
-	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_2", layer, ladder);
-	  StiDetector *pHybrid2 = _detectorFactory->getInstance();
-	  pHybrid2->copy(*pHybrid1);
-	  pHybrid2->setName(name);
-	  pHybrid2->setPlacement(pPlacement);
-	  pHybrid2->setElossCalculator(siElossCalculator);
-	  add(pHybrid2);
-#endif
 	} // for ladder
     } // for layer
 }
