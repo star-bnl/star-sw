@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.22 2005/07/20 03:48:06 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.23 2005/07/20 04:08:47 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -257,7 +257,7 @@ StThreeVectorF StMuTrack::dcaGlobal(Int_t vtx_id) const {
 
 StThreeVectorF StMuTrack::dca(const StThreeVectorF pos) const {
   StPhysicalHelixD helix(helix());
-  double pathlength = helix.pathLength(pos);
+  double pathlength = helix.pathLength(pos, false); // do not scan periods
   return helix.at(pathlength)-pos;
 }
 
@@ -336,6 +336,10 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.23  2005/07/20 04:08:47  mvl
+ * Now also changed dca calculation in the other function (StMuTrack::dca(StThreeVectorF))
+ * instead of only the helper function for StTrack, StVertex.
+ *
  * Revision 1.22  2005/07/20 03:48:06  mvl
  * Changed dca calculation: no longer scan period of helix to get DCA.
  * This mainly affects tracks with large dcas in events with multiple vertices.
