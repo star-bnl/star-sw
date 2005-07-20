@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.21 2005/07/15 21:45:08 mvl Exp $
+ * $Id: StMuTrack.cxx,v 1.22 2005/07/20 03:48:06 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -262,7 +262,7 @@ StThreeVectorF StMuTrack::dca(const StThreeVectorF pos) const {
 }
 
 StThreeVectorD StMuTrack::dca(const StTrack* track, const StVertex *vertex) {
-  double pathlength = track->geometry()->helix().pathLength( vertex->position() );
+  double pathlength = track->geometry()->helix().pathLength( vertex->position(), false ); // do not scan periods
   return track->geometry()->helix().at(pathlength)-vertex->position();
 }
 
@@ -336,6 +336,10 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.22  2005/07/20 03:48:06  mvl
+ * Changed dca calculation: no longer scan period of helix to get DCA.
+ * This mainly affects tracks with large dcas in events with multiple vertices.
+ *
  * Revision 1.21  2005/07/15 21:45:08  mvl
  * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
  *
