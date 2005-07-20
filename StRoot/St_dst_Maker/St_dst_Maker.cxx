@@ -1,7 +1,10 @@
-// $Id: St_dst_Maker.cxx,v 1.82 2005/06/15 01:22:58 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.83 2005/07/20 19:13:33 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.83  2005/07/20 19:13:33  perev
+// Cleanup
+//
 // Revision 1.82  2005/06/15 01:22:58  caines
-// Setup stuff for flagging hits used in fit of traack
+//  Setup stuff for flagging hits used in fit of traack
 //
 // Revision 1.81  2004/05/24 13:49:04  jcs
 // delete creation of St_dst_mon_soft_ftpc table - StEvent/StFtpcSoftwareMonitor filled directly
@@ -255,7 +258,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.82 2005/06/15 01:22:58 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.83 2005/07/20 19:13:33 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -486,11 +489,10 @@ Int_t  St_dst_Maker::Filler(){
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
 
   scs_spt_st* sgroups = scs_spt->GetTable();
-  int svtindex[10000];
+  int svtindex[10000];  memset(svtindex,0,sizeof(svtindex));
   for(int i=0; i<scs_spt->GetNRows(); i++,sgroups++){
-    if(sgroups->id < 10000){
-	svtindex[sgroups->id] = sgroups->id_globtrk;
-    }
+    assert(sgroups->id >=0 && sgroups->id< 10000);
+    svtindex[sgroups->id] = sgroups->id_globtrk;
   }
  // Get pointer to svt cluster analysis 
 
@@ -533,6 +535,7 @@ Int_t  St_dst_Maker::Filler(){
  
     //dst_point_st *mypoint  = point->GetTable();
     dst_point_st mypoint;                               // will use local dst_point
+    memset(&mypoint,0,sizeof(mypoint));
     Int_t        nsize=point->GetNRows() + NSvtPoints;  // new expected size
     point->ReAllocate(nsize);                           // realloc to save time
    
@@ -563,81 +566,83 @@ Int_t  St_dst_Maker::Filler(){
 	      if( !mSvtBigHit) continue;
 	      
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
-		
-		//		if( mSvtBigHit->svtHit()[clu].flag() > 3 ||
-		//   mSvtBigHit->svtHitData()[clu].peakAdc < 15 ) continue;
+                StSvtHitData          *dat = mSvtBigHit->svtHitData()	+clu;
+		StThreeVector<double> *waf = mSvtBigHit->WaferPosition()+clu;
+		StSvtHit              *hit= mSvtBigHit->svtHit()	+clu;
+		//		if( hit->flag() > 3 ||
+		//   dat->peakAdc < 15 ) continue;
 		
 		mypoint.hw_position = 2;
 		mypoint.hw_position += (1L<<4)*(index2);
-		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
+		svtx = int(waf->x()*4);
 		
 		mypoint.hw_position += (1L<<13)*(svtx);
 		
-		svty = int(mSvtBigHit->WaferPosition()[clu].y()*4);
+		svty = int(waf->y()*4);
 		mypoint.hw_position += (1L<<22)*svty;
 		
-		if( mSvtBigHit->svtHit()[clu].charge() < (1L<<10)){
-		  mypoint.charge = (int)mSvtBigHit->svtHit()[clu].charge();
+		if( hit->charge() < (1L<<10)){
+		  mypoint.charge = (int)hit->charge();
 		}
 		else 
 		  mypoint.charge = (1L<<10)-1;
 		
-		if( mSvtBigHit->svtHitData()[clu].peakAdc < (1L<<7)){
+		if( dat->peakAdc < (1L<<7)){
 		  mypoint.charge +=  
-		    mSvtBigHit->svtHitData()[clu].peakAdc*(1L<<10);
+		    dat->peakAdc*(1L<<10);
 		}		  
 		else  
 		  mypoint.charge += (1L<<10)*((1L<<7)-1);
 		
-		mypoint.charge += (1L<<17)*mSvtBigHit->svtHit()[clu].flag();
+		mypoint.charge += (1L<<17)*hit->flag();
 		
-		if( mSvtBigHit->svtHit()[clu].position().x() > (-1*maxRange) &&
-		    mSvtBigHit->svtHit()[clu].position().x() < maxRange)
+		if( hit->position().x() > (-1*maxRange) &&
+		    hit->position().x() < maxRange)
 		  svtx = int(mapFactor*(mSvtBigHit->svtHit()[clu]
 					.position().x() + maxRange));
 		else svtx = 0;
 		
-		if( mSvtBigHit->svtHit()[clu].position().y() > (-1*maxRange) &&
-		    mSvtBigHit->svtHit()[clu].position().y() < maxRange)
+		if( hit->position().y() > (-1*maxRange) &&
+		    hit->position().y() < maxRange)
 		  svty = int(mapFactor*(mSvtBigHit->svtHit()[clu]
 					.position().y() + maxRange));
 		else svty = 0;
 		
-		if( mSvtBigHit->svtHit()[clu].position().z() > (-1*maxRange) &&
-		    mSvtBigHit->svtHit()[clu].position().z() < maxRange)
+		if( hit->position().z() > (-1*maxRange) &&
+		    hit->position().z() < maxRange)
 		  svtz = int(mapFactor*(mSvtBigHit->svtHit()[clu]
 					.position().z() + maxRange));
 		else svtz = 0;
 		svty10 = int(svty/(1L<<10));
 		svty11 = svty - (1L<<10)*svty10;
 		
+		mypoint.id_simtrk = hit->idTruth();
+		mypoint.id_quality= hit->qaTruth();
 		mypoint.position[0] = svtx + (1L<<20)*svty11;
 		mypoint.position[1] = svty10 + (1L<<10)*svtz; 
 		
 		
-		//cov =  mSvtBigHit->svtHit()[clu].positionError().x()
-		  //  *mSvtBigHit->svtHit()[clu].positionError().x();
+		//cov =  hit->positionError().x()
+		  //  *hit->positionError().x();
 		
 		  // Temporarily fill with No. anodes and No. pixels
 		  
 		  
-		  cov = 1./(100*
-			    (float)mSvtBigHit->svtHitData()[clu].numOfAnodesInClu);
+		  cov = 1./(100*(float)dat->numOfAnodesInClu);
 		  if( cov > 0.0 && cov < (1.0/float((1L<<6))))
 		    svtx = int((1L<<26)*cov);
 		  else  svtx = 0;
 		  
-		  //	cov =  mSvtBigHit->svtHit()[clu].positionError().y()
-		  // *mSvtBigHit->svtHit()[clu].positionError().y();
+		  //	cov =  hit->positionError().y()
+		  // *hit->positionError().y();
 		  
-		  cov = 1./(100*
-			    (float)mSvtBigHit->svtHitData()[clu].numOfPixelsInClu);
+		  cov = 1./(100*(float)dat->numOfPixelsInClu);
 		  if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
 		  svty = int((1L<<26)*cov);
 		else  svty = 0;
 		
-		cov =  mSvtBigHit->svtHit()[clu].positionError().z()
-		  *mSvtBigHit->svtHit()[clu].positionError().z();
+		cov =  hit->positionError().z()
+		  *hit->positionError().z();
 		if( cov > 0.0 && cov <  (1.0/float(1L<<6)))
 		  svtz = int((1L<<26)*cov);
 		else  svtz = 0;
@@ -648,14 +653,13 @@ Int_t  St_dst_Maker::Filler(){
 		mypoint.pos_err[0] = svtx + (1L<<20)*svty11;
 		mypoint.pos_err[1] = svty10 + (1L<<10)*svtz;
 		mypoint.id_track = 0;
-		if( mSvtBigHit->svtHitData()[clu].id < 10000){
-		  
-		  mypoint.id_track = 
-		    svtindex[mSvtBigHit->svtHitData()[clu].id];
-		  // Add the new point ; if allready allocated, will just add
-		  // if realloc required, this method will increase the table
-		  // size accordingly.
-		}
+static int nTimes=0; nTimes++;
+                int idx = dat->id;
+		assert(idx>=0 && idx< 10000);
+		mypoint.id_track  = svtindex[idx];
+		// Add the new point ; if allready allocated, will just add
+		// if realloc required, this method will increase the table
+		// size accordingly.
 		point->AddAt(&mypoint);
 	      }
 	    }
