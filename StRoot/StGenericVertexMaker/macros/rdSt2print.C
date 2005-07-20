@@ -4,13 +4,24 @@ class StChain;
 class  StEmcRawData;
 class EEfeeDataBlock;
 class Collection;
+class StSPtrVecTrackNodeIterator ;
+class StTriggerIdCollection;
+
 StChain *chain=0;
+//Run 6151011 :
+int trigB[5]={96211,96233,96201,96222,0};
+int trigE[5]={96261,96282,96251,96272,0};
+int trigZ[2]={96300,0};  // zerobias
+int trigM[2]={96011,0}; // minBias
+int trigJ[2]={20,0}; // J/Psi
 
-void rdSt2print(Int_t nevents=10){
+void rdSt2print(Int_t nevents=100){
 
-  //  char * fname="outHT2-ppLMV/HT2d4Trg-pp200.event.root";
-  //char * fname="outData-Sti-PPV/st_physics_5109030_raw_1020001.event.root";
-  char * fname="out1/st_physics_6145042_raw_2020009.event.root";
+  char * fname="outPPV-C/st_physics_6151011_raw_2020001.event.root";// daq1
+  //char * fname="outPPV-Z/st_zerobias_6151011_raw_2110001.event.root";// daq2
+
+  char *outF="res.dat";
+  FILE *fd=fopen(outF,"w"); assert(fd);
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
@@ -47,52 +58,88 @@ void rdSt2print(Int_t nevents=10){
   Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
   if (initStat) chain->Fatal(initStat, "during Init()");
     
-  int istat=0,iev=1;
+  int istat=0,iev=0;
 
   // Do the event loop    
-  EventLoop: 
-    if (iev<=nevents && istat!=2) 
-    {
-      chain->Clear();
-      cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
-      istat = chain->Make(iev); // This should call the Make() method in ALL makers
-      iev++; 
-      if (istat  == kStEOF || istat == kStFatal) break;
-      
-      StEvent* mEvent = (StEvent*)chain->GetInputDS("StEvent");
-      assert(mEvent);// fix your chain or open the right event file
+  while(1) {
+    if (iev>=nevents) break;
+    chain->Clear();
+    istat = chain->Make(iev); // This should call the Make() method in ALL makers
+    iev++; 
+    //    if(istat) break; 
+    cout << "---------------------- Processing Event : " << iev << " ---------------------- " << istat<<endl;
 
-      int nV=mEvent->numberOfPrimaryVertices();
-      int iv;
-      if(nV>1) printf("######\n");
-      printf("eveID=%d  nPrimVert=%d\n", mEvent->id(),nV);
+  
+    // if(iev<17) continue;
+    if (istat  == kStEOF || istat == kStFatal) break;
+    
+    StEvent* mEvent = (StEvent*)chain->GetInputDS("StEvent");
+    assert(mEvent);// fix your chain or open the right event file
+    StTriggerIdCollection *tic=mEvent->triggerIdCollection();
+    assert(tic); 
+
+    //    if(! isTrig(tic,trigM)) continue;
+    isTrig(tic,trigB);    
+    isTrig(tic,trigE);    
+    isTrig(tic,trigZ);    
+    isTrig(tic,trigM);    
+    isTrig(tic,trigJ);    
+    int nV=mEvent->numberOfPrimaryVertices();
+    int iv;
+    if(nV>1) printf("######\n");
+    printf("eveID=%d  nPrimVert=%d\n", mEvent->id(),nV);
+    fprintf(fd,"%5d %5d   %d%d%d%d%d  %2d  ",iev,mEvent->id(),
+	    isTrig(tic,trigB),isTrig(tic,trigE),isTrig(tic,trigZ),
+	    isTrig(tic,trigM), isTrig(tic,trigJ), nV);
+      
       for(iv=0;iv<nV;iv++) {
 	StPrimaryVertex *V=mEvent->primaryVertex(iv);
 	assert(V);
 	StThreeVectorF &r=V->position();
 	StThreeVectorF &er=V->positionError();
 	printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
+	fprintf(fd,"%.1f %d   ",r.z(),V->numberOfDaughters());
 	printf("  nPrimTr=%d , VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
-	   ,V->numberOfDaughters(), V->vertexFinderId() ,V->numTracksUsedInFinder()  ,V->numMatchesWithCTB()  ,V-> numMatchesWithBEMC() ,V->numMatchesWithEEMC()  ,V->numTracksCrossingCentralMembrane()  ,V->sumOfTrackPt()  ,V->ranking());
-      }
-      
-      //      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
-      // print Endcap hits in StEvent
-      //   printETOW(emcC->detector(13));
-      //    printEPRE(emcC->detector(14));
-      //printESMD(emcC->detector(15));
-      //     printESMD(emcC->detector(16));
+	       ,V->numberOfDaughters(), V->vertexFinderId() ,V->numTracksUsedInFinder()  ,
+	       V->numMatchesWithCTB()  ,V-> numMatchesWithBEMC() ,V->numMatchesWithEEMC()  ,
+	       V->numTracksCrossingCentralMembrane()  ,V->sumOfTrackPt()  ,V->ranking());
+	
+	continue;
+	int nPrTr=0;
+	//.... access prim tracks for given vertex
+	int itr;
+	for(itr=0; itr<V->numberOfDaughters(); itr++) {
+	  StTrack *track=V-> daughter(itr);
+	  if(track==0)  continue;
+	  if (track->flag() <0 ) continue;
+	  printf("itr=%d pT=%.1f eta=%.2f nFitP=%d DCA=%.1f\n",itr,
+		 track->geometry()->momentum().mag(),
+		 track->geometry()->momentum().pseudoRapidity(),
+		 track->fitTraits().numberOfFitPoints(),
+		 track->geometry()->helix().distance(V->position()));
+	  nPrTr++;
+	}
+	
+	printf("  counted nPrimTr=%d \n",nPrTr);
+      } // end of loop over vertices
+      fprintf(fd,"\n");
+    //      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
+    // print Endcap hits in StEvent
+    //   printETOW(emcC->detector(13));
+    //    printEPRE(emcC->detector(14));
+    //printESMD(emcC->detector(15));
+    //     printESMD(emcC->detector(16));
+    
+    // printRaw(emcC->eemcRawData());
+    
+    // printRawBEMC(emcC->bemcRawData());
+    
+    //  if(iev<=2) 
   
-      // printRaw(emcC->eemcRawData());
-      
-      // printRawBEMC(emcC->bemcRawData());
-      
-      //  if(iev<=2) 
-      goto EventLoop;
-    } // Event Loop
+  } // Event Loop
     chain->Finish();
     //    delete myMk2;
-   
+    fclose(fd);
     
 }
 
@@ -276,6 +323,17 @@ printESMD( StEmcDetector* det) {
 
 }
 
+//--------------------------------------
+bool     isTrig(StTriggerIdCollection *tic,int *trigL){
+  int i;
+  const StTriggerId *l1=tic->l1();
+
+  for(i=0;trigL[i]>0;i++) {
+    // printf("%d tid=%d found=%d\n",i,trigL[i],l1->isTrigger(trigL[i]));
+    if(l1->isTrigger(trigL[i])) return true;
+  }
+  return false;
+}
 
 
 

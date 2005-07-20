@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.4 2005/07/19 22:01:24 perev Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.5 2005/07/20 05:34:16 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -70,31 +70,48 @@ StPPVertexFinder::StPPVertexFinder() {
   mVertexData=new vector<VertexData>;
 
   setMC(false); // default = real Data
-  
-  fdOut=fopen("ppv.dat","w");
+  mTestMode=0; // expert only flag
+
   // special histogram for finding the vertex, not to be saved
   hL=new TH1D("wzB","Vertex likelyhood; Z /cm",2000,-200,200);
+
+  FILE *fd=fopen("ppvMode.dat","r");
+  if(fd) {
+    fscanf(fd,"%d ",&mTestMode);
+    gMessMgr->Warning() << "PPV-1 cuts have been changed to mTestMode=" << mTestMode<<endm;
+    fclose(fd);
+  }
+
 } 
 
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::Init() {
+void 
+StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
-  gMessMgr->Info() << "PPV-1 cuts have been activated" << endm; 
+  gMessMgr->Info() << "PPV-1 cuts have been activated, mTestMode=" << mTestMode<<endm;
   //.. set various params 
-  mMaxTrkDcaRxy    = 2.0; //was 1.5; 
-  mMinTrkPt        = 0.20;            
-  mMinFitPfrac     = 0.7; 
-  //  mMinNumberOfFitPointsOnTrack=15;
-  mMaxZradius      = 2.0;  //+sigTrack, to match tracks to vertex, was 1.0
-  mMaxZrange       = 150; // to accept Z_DCA of a track           
-  mMinMatchTr      = 2;              
-  mMinAdcBemc = 15; //chan, 2004 data, make it timeStamp dependent
-  mMinAdcEemc = 5; // MIP @ 6-18 ADC depending on eta
+  mMaxTrkDcaRxy = 2.0;  // cm, 
+  mMinTrkPt     = 0.20; // GeV/c           
+  mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
+  mMaxZradius   = 2.0;  //+sigTrack, to match tracks to vertex, was 1.0
+  mMaxZrange    = 150;  // to accept Z_DCA of a track           
+  mMinMatchTr   = 2;    // required to accept vertex              
+  mMinAdcBemc   = 15;   // chan, 2004 data, make it timeStamp dependent
+  mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   if(isMC) {
     mMinAdcBemc =7; //ideal BTOW gain 60 GeV ET @ 3500 ADC
+  }
+
+ // ... play with cuts, expert only
+  switch(mTestMode){
+  case 0: break; //use  default
+  case 1: mMaxZradius =4; break;
+  case 2: mMinMatchTr=4; break;
+  case 3: mMinAdcBemc*=2; mMinAdcEemc*=2; break;
+  default:;
   }
 
   //get a pointer to StiMaker:
@@ -141,7 +158,8 @@ void StPPVertexFinder::Init() {
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::InitRun(int runnumber){
+void 
+StPPVertexFinder::InitRun(int runnumber){
   gMessMgr->Info() << "PPV-1 InitRun() runNo="<<runnumber<<endm;
 
   if(isMC) assert(runnumber<1000000); // probably embeding job ,crash it JB
@@ -154,7 +172,8 @@ void StPPVertexFinder::InitRun(int runnumber){
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::initHisto() {
+void 
+StPPVertexFinder::initHisto() {
   assert(HList);
   hA[0]=new TH1F("key","event types; 1=inp, 2=minB, 3=w/CTB, 4=w/trk, 5=manyMch, 6=Bmch 7=Emch 8=anyVer",10,0.5,10.5);
   hA[1]=new TH1F("ch1","chi2/Dof for reasonable Sti tracks",100,0,10);
@@ -185,7 +204,8 @@ void StPPVertexFinder::initHisto() {
 
 //==========================================================
 //==========================================================
-void StPPVertexFinder::Clear(){
+void 
+StPPVertexFinder::Clear(){
   gMessMgr->Info() << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
   ctbList->clear();
@@ -214,7 +234,6 @@ StPPVertexFinder::printInfo(ostream& os) const
   os << "StPPVertexFinder ver=1 - Fit Statistics:" << endl;
   
   os << "StPPVertexFinder::result "<<mVertexData->size()<<" vertices found\n" << endm;
-  const float maxZerr=1; // cm
 
   int nTpcM=0, nTpcV=0;
   uint i;
@@ -258,29 +277,6 @@ StPPVertexFinder::printInfo(ostream& os) const
       printf("#GVER z=%.1f  nEve=%d nV=%d ",zGeant,mTotEve,mVertexData->size());  
     }
   }
-  fprintf(fdOut,"%3d nEve %.2f   %d %d %d    %d %d %d   %d ",mTotEve,zGeant,ctbList->getnFired(),bemcList->getnFired(),eemcList->getnFired(),mTrackData->size(),nTpcM,nTpcV,mVertexData->size());
-  if(mVertexData->size()>1) 
-    fprintf(fdOut,"nV "); 
-  else  
-    fprintf(fdOut,"nv "); 
-  fprintf(fdOut," %d\n",eveID);
-
-  float del=888;
-  for(i=0;i<mVertexData->size();i++) {
-    VertexData *V=&mVertexData->at(i);
-    printf("%.1f:%d:%d ",V->r.z(),V->nUsedTrack,V->nAnyMatch);
-    fprintf(fdOut,"     v %d  %.2f   %d %d %d   %d %d   %d %d   %d %d   %d %d",i+1,V->r.z(),V->nUsedTrack,V->nAnyMatch,V->nAnyVeto,V->nCtb,V->nCtbV,V->nBemc,V->nBemcV,V->nEemc,V->nEemcV,V->nTpc,V->nTpcV);
-    
-    if(fabs(V->r.z()-zGeant)<maxZerr) {
-      printf("****%d ",i+1);
-      fprintf(fdOut," *\n");
-      del=zGeant-V->r.z();
-      hA[13]->Fill(del);
-    } else	
-      fprintf(fdOut," ,\n");
-    
-  }
-  printf(" del=%.1f\n",del);
   
   if(isMC) {
     for(i=0;i<mTrackData->size();i++) {
@@ -290,14 +286,14 @@ StPPVertexFinder::printInfo(ostream& os) const
     }
   }
    
-  fflush(fdOut);
   printf("\n---- end of PPVertex Info\n\n");
 }
 
 
 //======================================================
 //======================================================
- void StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
+void 
+StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {
   mVertexConstrain = true;
   mX0 = x0;
   mY0 = y0;
@@ -315,8 +311,8 @@ StPPVertexFinder::printInfo(ostream& os) const
 
 //==========================================================
 //==========================================================
-int StPPVertexFinder::fit(StEvent* event) 
-{
+int 
+StPPVertexFinder::fit(StEvent* event) {
   mTotEve++;
   eveID=event->id();
   gMessMgr->Info() << "\n   @@@@@@   PPVertex-1::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
@@ -328,7 +324,6 @@ int StPPVertexFinder::fit(StEvent* event)
       || ! event->triggerIdCollection()->nominal()->isTrigger(10)) return 0;
   hA[0]->Fill(2);
 #endif  
-
 
   if(mToolkit==0) {    
    gMessMgr->Warning() <<"no Sti tool kit,  PPV is OFF"<<endm;
@@ -402,9 +397,9 @@ int StPPVertexFinder::fit(StEvent* event)
     //  dumpKalmanNodes(track);
     
     // ......... matcho various detectors ....................
-    matchTrack2CTB(track,t);
-    matchTrack2BEMC(track,t,242); // middle of tower in Rxy
-    matchTrack2EEMC(track,t,288); // middle of tower in Z
+    if(mTestMode!=5)  matchTrack2CTB(track,t);
+    if(mTestMode!=6)  matchTrack2BEMC(track,t,242); // middle of tower in Rxy
+    if(mTestMode!=7)  matchTrack2EEMC(track,t,288); // middle of tower in Z
     //.... all test done on this track .........
     mTrackData->push_back(t); 
 
@@ -440,11 +435,10 @@ int StPPVertexFinder::fit(StEvent* event)
   if(mBemc)  hA[0]->Fill(6);
   if(mEemc)  hA[0]->Fill(7);
 
-
   //............................................................
   // ...................... search for multiple vertices 
   //............................................................
-  int PlotEveN=-1; //save Z-likelihood as histo for first events
+
   int vertexID=0;
   while(1) {
     if(! buildLikelihood() ) break;
@@ -454,50 +448,34 @@ int StPPVertexFinder::fit(StEvent* event)
     bool trigV=evalVertex(V);   // V.print();
     if(!trigV) continue;
     mVertexData->push_back(V);
-
-    if(mTotEve==PlotEveN )  // for every vertex found
-      plotVertex(&V);//....... save Z-likelihood plot for first events
   }
-  if(mTotEve==PlotEveN ) plotTracksDca() ; // save trask used
-  
-  gMessMgr->Info() << "StPPVertexFinder1::fit(totEve="<<mTotEve<<") "<<mVertexData->size()<<" vertices found\n" << endm;
 
+  gMessMgr->Info() << "StPPVertexFinder1::fit(totEve="<<mTotEve<<") "<<mVertexData->size()<<" vertices found\n" << endm;
+  
   if(mVertexData->size()>0)  hA[0]->Fill(7);
   
   exportVertices();
   printInfo();
-
+  
   hA[4]->Fill(mVertexData->size());
   uint i;
   for(i=0;i<mVertexData->size();i++) {
     VertexData *V=&mVertexData->at(i);
     hA[3]->Fill(V->r.z());
   }
-
+  
   if(mVertexData->size()<=0) {
     return 0; // no vertex
   }
-
-#if 0
-  // tmp pass only one vertex
-  VertexData *V=&mVertexData->at(0);
-
-  mFitResult = StThreeVectorD(V->r.x(),V->r.y(),V->r.z() ); 
-  //  mFitError =  StThreeVectorD(V->ev.x(),V->ev.y(),V->ev.z() );
-  mFitError =  StThreeVectorD(0.1,0.1,V->ev.z() );// tmp, use real X,Y errors later
-	  
-  gMessMgr->Message("","I") << "Prim PPV-1 Vertex at " <<  mFitResult<<endm;
-#endif
-
-
+  
   return size();
 } 
 
 
-
 //==========================================================
 //==========================================================
-bool  StPPVertexFinder::buildLikelihood(){
+bool  
+StPPVertexFinder::buildLikelihood(){
   hL->Reset();
 
   float dzMax2=mMaxZradius*mMaxZradius;
@@ -543,7 +521,8 @@ bool  StPPVertexFinder::buildLikelihood(){
 
 //==========================================================
 //==========================================================
-bool  StPPVertexFinder::findVertex(VertexData &V) {
+bool  
+StPPVertexFinder::findVertex(VertexData &V) {
 
   if(hL->GetMaximum()<=0) return false; // no more tracks left
 
@@ -590,7 +569,8 @@ bool  StPPVertexFinder::findVertex(VertexData &V) {
 
 //==========================================================
 //==========================================================
-bool  StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
+bool  
+StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   // returns true if accepted
 
   int nt=mTrackData->size();
@@ -648,7 +628,8 @@ bool  StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
 
 //-------------------------------------------------
 //-------------------------------------------------
-void StPPVertexFinder:: exportVertices(){
+void 
+StPPVertexFinder::exportVertices(){
   assert(mVertexConstrain); // code is not ready for reco w/o beamLine
   uint i;
   for(i=0;i<mVertexData->size();i++) {
@@ -681,16 +662,20 @@ void StPPVertexFinder:: exportVertices(){
 
 //-------------------------------------------------
 //-------------------------------------------------
-void StPPVertexFinder::Finish() {
+void 
+StPPVertexFinder::Finish() {
   gMessMgr->Info() << "StPPVertexFinder::Finish() ...." << endm;
-  fclose(fdOut);
-  saveHisto("ppv");
+  
+  //  saveHisto("ppv");
   gMessMgr->Info() << "StPPVertexFinder::Finish() done" << endm;
+  //StIOMaker::GetFilename() -- which looks like it should return 
+  //the "current" file being processed.  YMMV.  
 }
 
 //-------------------------------------------------
 //-------------------------------------------------
-void StPPVertexFinder::saveHisto(TString fname){
+void 
+StPPVertexFinder::saveHisto(TString fname){
   TString outName=fname+".hist.root";
   TFile f( outName,"recreate");
   assert(f.IsOpen());
@@ -702,9 +687,9 @@ void StPPVertexFinder::saveHisto(TString fname){
 
 //==========================================================
 //==========================================================
-void  StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
-  
- 
+void  
+StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
+   
   //.................... print all nodes ...........
   StiKTNBidirectionalIterator it;
   int in=0,nh=0,nTpc=0;
@@ -757,81 +742,6 @@ void  StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
     cout <<endl;
     //    break; // tmp
   }
-}
-
-//-------------------------------------------------
-//-------------------------------------------------
-void StPPVertexFinder::plotVertex(VertexData *V) {
-    float z0=V->r.z();
-    float ez=V->er.z();
-    TH1D *h=( TH1D *) hL->Clone();
-    char txt[100];
-    sprintf(txt,"e%dV%d",mTotEve,V->id);
-    h->SetName(txt);
-    sprintf(txt,"lnLike vertZ=%d  nTr=%d eveID=%d",V->id,V->nUsedTrack,eveID);
-    h->SetTitle(txt);
-    h->SetAxisRange(z0-8, z0+8);
-    HList->Add(h);
-
-    TList* LL= h->GetListOfFunctions();
-
-    // add Likelyhood shape  function
-    sprintf(txt,"e%dV%dL",mTotEve,V->id);
-    TF1  *fL = new TF1(txt,"[2]- (x-[0])*(x-[0])/2/[1]/[1]",-200,200);
-    fL->SetParName(0,"z0");
-    fL->SetParName(1,"sig");
-    fL->SetParName(2,"Lmax");
-    fL->SetLineColor(kRed);
-    fL->SetLineWidth(1);
-    fL->SetParameter(0,z0);
-    fL->SetParameter(1,ez); 
-    fL->SetParameter(2,V->Lmax);
-    LL->Add(fL);
-    TLine *ln=new TLine(z0,0,z0,V->Lmax); ln->SetLineColor(kRed); 
-    LL->Add(ln);
-    ln=new TLine(z0+ez,0,z0+ez,V->Lmax); ln->SetLineColor(kRed); 
-    ln->SetLineStyle(2); LL->Add(ln);
-    ln=new TLine(z0-ez,0,z0-ez,V->Lmax); ln->SetLineColor(kRed); 
-    ln->SetLineStyle(2); LL->Add(ln);
-}
-
-//-------------------------------------------------
-//-------------------------------------------------
-void StPPVertexFinder::plotTracksDca() {
-#if 0
-    char txt[100];
-
-    sprintf(txt,"e%dGin",mTotEve);
-    TGraphErrors *g1=new TGraphErrors;
-    g1->SetMarkerStyle(27);
-    g1->SetName(txt);
-    sprintf(txt,"in-time Z along beam @ DCA, eveID=%d; Z (cm); pT (GeV/c)",eveID);
-    g1->SetTitle(txt);
-    g1->SetLineColor(kBlue);
-    g1->SetMarkerColor(kBlue);
-
-    sprintf(txt,"e%dGout",mTotEve);
-    TGraphErrors *g2=new TGraphErrors;
-    g2->SetMarkerStyle(5);
-    g2->SetName(txt);
-    sprintf(txt,"out-of-time Z along beam @ DCA, eveID=%d; Z (cm); pT (GeV/c)",eveID);
-    g2->SetTitle(txt);
-    g2->SetLineColor(kMagenta);
-    g2->SetMarkerColor(kMagenta);
-
-    int i;
-    int nt=mTrackData->size();
-    for(i=0;i<nt;i++) {
-      TrackData *t=&mTrackData->at(i);
-      TGraphErrors *g=g1;
-      if(!t->ctbMatch) g=g2; // out-of-time
-      int n=g->GetN();
-      g->SetPoint(n,t->zDca,t->gPt);
-      g->SetPointError(n,t->ezDca,0);
-    }
-    HList->Add(g1);
-    HList->Add(g2);
-#endif
 }
 
 //==========================================================
@@ -1085,11 +995,18 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 
   if(nFit<  mMinFitPfrac  * nPos) return false; // too short fragment of a track
 
-  t.scanNodes(hitPatt,jz0);
+  if(mTestMode!=4) t.scanNodes(hitPatt,jz0); // if central membrane is crossed
   return true;
 }
-/*
+
+
+
+/**************************************************************************
+ **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.5  2005/07/20 05:34:16  balewski
+ * cleanup
+ *
  * Revision 1.4  2005/07/19 22:01:24  perev
  * MultiVertex
  *
@@ -1107,3 +1024,122 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
  **************************************************************************
  **************************************************************************/
 
+#if 0
+
+old scraps of code
+
+---------------------------
+  const float maxZerr=1; // cm
+
+  fprintf(fdOut,"%3d nEve %.2f   %d %d %d    %d %d %d   %d ",mTotEve,zGeant,ctbList->getnFired(),bemcList->getnFired(),eemcList->getnFired(),mTrackData->size(),nTpcM,nTpcV,mVertexData->size());
+  if(mVertexData->size()>1) 
+    fprintf(fdOut,"nV "); 
+  else  
+    fprintf(fdOut,"nv "); 
+  fprintf(fdOut," %d\n",eveID);
+
+  float del=888;
+  for(i=0;i<mVertexData->size();i++) {
+    VertexData *V=&mVertexData->at(i);
+    printf("%.1f:%d:%d ",V->r.z(),V->nUsedTrack,V->nAnyMatch);
+    fprintf(fdOut,"     v %d  %.2f   %d %d %d   %d %d   %d %d   %d %d   %d %d",i+1,V->r.z(),V->nUsedTrack,V->nAnyMatch,V->nAnyVeto,V->nCtb,V->nCtbV,V->nBemc,V->nBemcV,V->nEemc,V->nEemcV,V->nTpc,V->nTpcV);
+    
+    if(fabs(V->r.z()-zGeant)<maxZerr) {
+      printf("****%d ",i+1);
+      fprintf(fdOut," *\n");
+      del=zGeant-V->r.z();
+      hA[13]->Fill(del);
+    } else	
+      fprintf(fdOut," ,\n");
+    
+  }
+  printf(" del=%.1f\n",del);
+
+
+===============================================================
+
+  int PlotEveN=-1; //save Z-likelihood as histo for first events
+
+    if(mTotEve==PlotEveN )  // for every vertex found
+      plotVertex(&V);//....... save Z-likelihood plot for first events
+  }
+  if(mTotEve==PlotEveN ) plotTracksDca() ; // save trask used
+
+
+//-------------------------------------------------
+//-------------------------------------------------
+void StPPVertexFinder::plotVertex(VertexData *V) {
+    float z0=V->r.z();
+    float ez=V->er.z();
+    TH1D *h=( TH1D *) hL->Clone();
+    char txt[100];
+    sprintf(txt,"e%dV%d",mTotEve,V->id);
+    h->SetName(txt);
+    sprintf(txt,"lnLike vertZ=%d  nTr=%d eveID=%d",V->id,V->nUsedTrack,eveID);
+    h->SetTitle(txt);
+    h->SetAxisRange(z0-8, z0+8);
+    HList->Add(h);
+
+    TList* LL= h->GetListOfFunctions();
+
+    // add Likelyhood shape  function
+    sprintf(txt,"e%dV%dL",mTotEve,V->id);
+    TF1  *fL = new TF1(txt,"[2]- (x-[0])*(x-[0])/2/[1]/[1]",-200,200);
+    fL->SetParName(0,"z0");
+    fL->SetParName(1,"sig");
+    fL->SetParName(2,"Lmax");
+    fL->SetLineColor(kRed);
+    fL->SetLineWidth(1);
+    fL->SetParameter(0,z0);
+    fL->SetParameter(1,ez); 
+    fL->SetParameter(2,V->Lmax);
+    LL->Add(fL);
+    TLine *ln=new TLine(z0,0,z0,V->Lmax); ln->SetLineColor(kRed); 
+    LL->Add(ln);
+    ln=new TLine(z0+ez,0,z0+ez,V->Lmax); ln->SetLineColor(kRed); 
+    ln->SetLineStyle(2); LL->Add(ln);
+    ln=new TLine(z0-ez,0,z0-ez,V->Lmax); ln->SetLineColor(kRed); 
+    ln->SetLineStyle(2); LL->Add(ln);
+}
+
+//-------------------------------------------------
+//-------------------------------------------------
+void StPPVertexFinder::plotTracksDca() {
+#if 0
+    char txt[100];
+
+    sprintf(txt,"e%dGin",mTotEve);
+    TGraphErrors *g1=new TGraphErrors;
+    g1->SetMarkerStyle(27);
+    g1->SetName(txt);
+    sprintf(txt,"in-time Z along beam @ DCA, eveID=%d; Z (cm); pT (GeV/c)",eveID);
+    g1->SetTitle(txt);
+    g1->SetLineColor(kBlue);
+    g1->SetMarkerColor(kBlue);
+
+    sprintf(txt,"e%dGout",mTotEve);
+    TGraphErrors *g2=new TGraphErrors;
+    g2->SetMarkerStyle(5);
+    g2->SetName(txt);
+    sprintf(txt,"out-of-time Z along beam @ DCA, eveID=%d; Z (cm); pT (GeV/c)",eveID);
+    g2->SetTitle(txt);
+    g2->SetLineColor(kMagenta);
+    g2->SetMarkerColor(kMagenta);
+
+    int i;
+    int nt=mTrackData->size();
+    for(i=0;i<nt;i++) {
+      TrackData *t=&mTrackData->at(i);
+      TGraphErrors *g=g1;
+      if(!t->ctbMatch) g=g2; // out-of-time
+      int n=g->GetN();
+      g->SetPoint(n,t->zDca,t->gPt);
+      g->SetPointError(n,t->ezDca,0);
+    }
+    HList->Add(g1);
+    HList->Add(g2);
+#endif
+}
+
+
+#endif
