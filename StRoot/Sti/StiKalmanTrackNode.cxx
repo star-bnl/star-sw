@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.85 2005/06/14 22:22:46 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.86 2005/07/20 17:24:25 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.86  2005/07/20 17:24:25  perev
+ * Nudge actions in evaluateChi2 added
+ *
  * Revision 2.85  2005/06/14 22:22:46  perev
  * Replace assert to error return
  *
@@ -1134,8 +1137,13 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
     return 1e60;
   }
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
-  double dyt=hit->y()-mFP._y;
-  double dzt=hit->z()-mFP._z;
+  double deltaX = hit->x()-mFP._x;
+  double deltaL = deltaX/mFP._cosCA;
+  double deltaY = mFP._sinCA *deltaL;
+  double deltaZ = mFP._tanl  *deltaL;
+
+  double dyt=(mFP._y-hit->y()) + deltaY;
+  double dzt=(mFP._z-hit->z()) + deltaZ;
   double cc= (dyt*r00*dyt + 2*r01*dyt*dzt + dzt*r11*dzt)/det;
   if (debug() & 4) {
     TRSymMatrix G(R,TRArray::kInverted);
