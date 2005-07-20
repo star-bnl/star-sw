@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.110 2005/07/19 19:22:59 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.111 2005/07/20 21:26:44 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -880,7 +880,10 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     siz = defSiz;sty=defSty;
     //		Filtration
     nextFilter.Reset();
-    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt,col,siz,sty)) break;}
+    while ((filt=(StFilterABC*)nextFilter())) {
+      if (!filt->Active()) 			continue;
+      if (!filt->Accept(pnt,col,siz,sty)) 	break;
+    }
     if (filt) {ncut++; continue;}
 
 //  Draw it
@@ -1161,6 +1164,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.111  2005/07/20 21:26:44  perev
+// qqqqq
+//
 // Revision 1.110  2005/07/19 19:22:59  fine
 // small adjustment (trakc always go first)  to make use of the trancluent OpenGL features
 //
