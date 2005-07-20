@@ -77,7 +77,8 @@ void StiSvtHitLoader::loadHits(StEvent* source,
           int ladder = getLadder(svtLayer,svtLadder);
           detector = _detector->getDetector(layer,ladder);
           if (!detector) throw runtime_error("StiSvtHitLoader::loadHits() -W- detector==0!");
-          if (!(hit->flag()<4)) continue;
+          if (hit->flag()>=4) continue;
+          if (hit->flag()< 0) continue;
           stiHit = _hitFactory->getInstance();
           stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(),hit->position().z(),hit->charge() );
           hitTest.add(stiHit->x(),stiHit->y(),stiHit->z());

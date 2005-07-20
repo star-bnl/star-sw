@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.88 2005/05/13 19:39:11 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.89 2005/07/20 17:41:34 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.89  2005/07/20 17:41:34  perev
+// Cleanup
+//
 // Revision 1.88  2005/05/13 19:39:11  perev
 // Zero validity test added
 //
@@ -122,6 +125,7 @@
 #include "TTable.h"
 #include "TUnixTime.h"
 #include "StDbBroker/StDbBroker.h"
+#include "StValiSet.h"
 
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
@@ -134,71 +138,44 @@ enum eDBMAKER {kUNIXOBJ = 0x2000};
 /////////////////////////////////////////////////////////////////////////  
                                             
 TableClassImpl(St_dbConfig,dbConfig_st)
+//__________________________ class St_db_Maker  ____________________________
+ClassImp(St_db_Maker)
 //_____________________________________________________________________________
-static int MyConfig(StMaker *mk,St_dbConfig *conf,int flag)
+int St_db_Maker::Snapshot (int flag)
 {
    int ians=0;
-   TFile *tfConfig = 0;
-   const char *fname = mk->SAttr("MyDbConfig");
+   TFile *tfSnap = 0;
+   TObjectSet set("dbSnapshot",0);
+   const char *fname = SAttr("dbSnapshot");
    if (!fname || !*fname) 					return 0;
    switch (flag) {
      case 0://Read
      if (gSystem->AccessPathName(fname, kFileExists)) 		return 0;
      if (gSystem->AccessPathName(fname, kReadPermission))	return 0;
-     tfConfig = TFile::Open(fname,"READ");
-     if (!tfConfig) 						return 0;
-     if (tfConfig->IsZombie()) {delete tfConfig; 		return 0;}
-     ians = conf->Read("MyConfig");
+     tfSnap = TFile::Open(fname,"READ");
+     if (!tfSnap) 						return 0;
+     if (tfSnap->IsZombie()) {delete tfSnap; 			return 0;}
+     ians = set.Read("dbSnapshot");
+     fDataBase = (TDataSet*)set.GetObject();
      break;
      
      case 1://Write
-     if (gSystem->AccessPathName(fname, kFileExists)) 		return 0;
-     if (gSystem->AccessPathName(fname, kWritePermission))	return 0;
-     tfConfig = TFile::Open(fname,"WRITE");
-     if (!tfConfig) 						return 0;
-     if (tfConfig->IsZombie()) {delete tfConfig; 		return 0;}
-     ians = conf->Write("MyConfig",TObject::kOverwrite);
+     if (!gSystem->AccessPathName(fname, kFileExists)) 		return 0;
+//// if (gSystem->AccessPathName(fname, kWritePermission))	return 0;
+     tfSnap = TFile::Open(fname,"NEW");
+     if (!tfSnap) 						return 0;
+     if (tfSnap->IsZombie()) {delete tfSnap; 			return 0;}
+     TDataSet *parent = fDataBase->GetParent();
+     fDataBase->Shunt(0);
+     set.SetObject(fDataBase);
+     ians = set.Write("dbSnapshot",TObject::kOverwrite);
+     fDataBase->Shunt(parent);
      break;
    }
-   delete tfConfig;
+   delete tfSnap;
    return ians;
 }
 
-//_________________________ class St_Validity ____________________________________
-class St_ValiSet : public TDataSet{
-public:
-   TDatime fTimeMin;
-   TDatime fTimeMax;
-   TDataSet *fDat;
-   TString fFla;
-   Int_t  fMod;
-   St_ValiSet(const char *name,TDataSet *parent);
-   virtual ~St_ValiSet(){};
-   virtual void ls(Int_t lev=1) const;
-   virtual void ls(const Option_t *opt) const {TDataSet::ls(opt);}
-           void Modified(int m=1){fMod=m;}
-          Int_t IsModified(){return fMod;}
-};
-
-//_____________________________________________________________________________
-St_ValiSet::St_ValiSet(const char *name,TDataSet *parent): TDataSet(name,parent)
-{
-  SetTitle(".Val");
-  fFla = "ofl";
-  fTimeMin.Set(kMaxTime,0);
-  fTimeMax.Set(kMinTime,0);
-  fDat =0;
-  Modified(0);
-}
-
-//_____________________________________________________________________________
-void St_ValiSet::ls(Int_t lev) const
-{
-  printf("  %s.Validity = %s ",GetName(),fTimeMin.AsString());
-  printf(" <-> %s\n",     fTimeMax.AsString());
-  if (fDat) printf("  Contains DataSet %s\n",fDat->GetName());
-  TDataSet::ls(lev);
-}
 
 //__________________________ class St_db_Maker  ____________________________
 ClassImp(St_db_Maker)
@@ -255,7 +232,9 @@ Int_t St_db_Maker::Init()
    fTimer[0].Start(0);
    SetBit(kInitBeg);
    fDataBase=0;
-   for (int idir=0; !fDirs[idir].IsNull(); idir++) {//loop over dirs
+   Snapshot(0);
+   int snap = fDataBase!=0;
+   for (int idir=0; !fDirs[idir].IsNull() && !snap; idir++) {//loop over dirs
 
      dir = fDirs[idir];
      gSystem->ExpandPathName(dir);
@@ -299,6 +278,7 @@ Int_t St_db_Maker::Finish()
    printf("      MySQL::Init ");fTimer[2].Print();
    printf("St_db_Maker::Make ");fTimer[1].Print();
    printf("      MySQL::Make ");fTimer[3].Print();
+   Snapshot(1);
    return 0;
 }
 
@@ -373,17 +353,13 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());    
-   int sav = MyConfig(this,fHierarchy,0);
-   if (sav) { thy = fHierarchy->GetTable(); nrows=fHierarchy->GetNRows();}
-   else {
-     thy = fDBBroker->InitConfig(dbname,nrows);
-     fTimer[0].Start(0); fTimer[2].Stop();
-     if (!thy || !nrows){
-         Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
-         return 0;}
+   thy = fDBBroker->InitConfig(dbname,nrows);
+   fTimer[0].Start(0); fTimer[2].Stop();
+   if (!thy || !nrows){
+       Warning("OpenMySQL","***Can not open MySQL DB %s ***",dbname);
+       return 0;}
 
-      fHierarchy->Adopt(nrows,thy);
-   }
+   fHierarchy->Adopt(nrows,thy);
    if (GetDebug()>1)  fHierarchy->Print(0,nrows);  
 
    top = new TDataSet(thy->parname);
@@ -432,7 +408,6 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 
    delete [] dss;
    //   top->ls(99);
-   MyConfig(this,fHierarchy,1);
    return top;   
 }
 
@@ -463,21 +438,24 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   
   val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
   val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
-
+  
+  
+  
   // small debug statement
-  if ( fDBBroker->GetBeginDate() == 0 && fDBBroker->GetEndDate() == 0 &&
-       fDBBroker->GetBeginTime() == 0 && fDBBroker->GetEndTime() == 0 ){
+  if ( val[0].Get() >= val[1].Get()) {
     Warning("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d->%d",
 	    dat->GetName(),dat->GetTitle(),
 	    fDBBroker->GetBeginDate(),fDBBroker->GetEndDate(),
-	    fDBBroker->GetBeginTime(),fDBBroker->GetEndTime()
-	    );
+	    fDBBroker->GetBeginTime(),fDBBroker->GetEndTime());
+
   }
+  assert(val[0].Get() < val[1].Get());
+
   fTimer[1].Start(0); fTimer[3].Stop();
 
   if (!dbstruct) {
     dat->SetNRows(0);
-    if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND",dat->GetName(),dat->GetTitle());
+    if(Debug()>1)  Warning("UpdateTable","Table %s.%s Not FOUND in DB",dat->GetName(),dat->GetTitle());
     return 1;
   }
 
@@ -496,13 +474,13 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
 {
   TDataSet *left,*par;
-  St_ValiSet *val;
+  StValiSet *val;
   TDatime valsCINT[2],valsSQL[2];
    
   if (strcmp(".Val",ds->GetTitle()))		return kContinue;
   //
   //	It is our place.
-  val = (St_ValiSet*)ds;    
+  val = (StValiSet*)ds;    
   St_db_Maker *mk = (St_db_Maker*)user;    
   if (mk->fUpdateMode && !val->IsModified()) 	return kPrune;
 
@@ -581,7 +559,7 @@ SWITCH:  switch (kase) {
   return kPrune;  
 }
 //_____________________________________________________________________________
-TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
+TDataSet *St_db_Maker::FindLeft(StValiSet *val, TDatime vals[2])
 {
 
 //      Search left object among ONLY CINT_DB objects. MySQL objects ignored here
@@ -680,7 +658,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
 {
   TDataSet *set;
-  St_ValiSet *pseudo;
+  StValiSet *pseudo;
   const char *dsname,*filename,*dot;     
   char psname[100];
   //int ldsname,lpsname;
@@ -713,7 +691,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
     }
     if (strncmp(filename,psname+1,lpsname)) {// make new pseudo directory
       psname[1]=0; strncat(psname,filename,lpsname);
-      pseudo = new St_ValiSet(psname,ds); //VP strcat(psname,".");
+      pseudo = new StValiSet(psname,ds); //VP strcat(psname,".");
     }
 
     set->Shunt(pseudo);
@@ -760,7 +738,7 @@ void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
 { 
   fIsDBTime=0; if (idat==0) return;
   fIsDBTime=1; fDBTime.Set(idat,itim);  
-  (void) printf("QAInfo: SetDateTime : Setting Startup Date=%d Time=%d\n",idat,itim);
+  Warning("SetDateTime","Setting Startup Date=%d Time=%d",idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetDateTime(const char *alias)
@@ -769,8 +747,7 @@ void   St_db_Maker::SetDateTime(const char *alias)
   int idat = AliasDate(alias);// <name>.YYYYMMDD.hhmmss.<ext>
   int itim = AliasTime(alias);
   assert(idat);
-  (void) printf("QAInfo: SetDateTime(\"%s\") will give Startup Date=%d Time=%d\n",
-		alias,idat,itim);
+  Warning("SetDateTime","(\"%s\") == Startup Date=%d Time=%d",alias,idat,itim);
   fDBTime.Set(idat,itim);
 }
 //_____________________________________________________________________________
@@ -815,6 +792,7 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
 //_____________________________________________________________________________
 void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 {
+   if (!fDBBroker) return;
    TDataSet *fl=0;
    TDataSet *flaDir =0;
    if (flav) {
@@ -832,9 +810,9 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    int nAkt = 0;
    flaDir = Find(".flavor");
    if (!flaDir)				return;
-   St_ValiSet *val;
+   StValiSet *val;
    TDataSetIter  valNext(m_ConstSet,999);
-   while ((val = (St_ValiSet*)valNext())) {	//DB objects loop
+   while ((val = (StValiSet*)valNext())) {	//DB objects loop
      const char *tabName = val->GetName();
      if (tabName[0] != '.')			continue;
      if (strcmp(val->GetTitle(),".Val")!=0)	continue;
@@ -892,7 +870,7 @@ Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *val) const
    if (!par)				return 2;
    TString ts = tb->GetName();
    ts.Replace(0,0,".");
-   const St_ValiSet *vs =  (St_ValiSet*)par->Find(ts);
+   const StValiSet *vs =  (StValiSet*)par->Find(ts);
    if (!vs) 				return 3;
    val[0] = vs->fTimeMin;
    val[1] = vs->fTimeMax;

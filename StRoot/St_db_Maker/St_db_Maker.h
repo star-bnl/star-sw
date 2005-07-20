@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.24 2004/08/18 20:33:56 perev Exp $
+// $Id: St_db_Maker.h,v 1.25 2005/07/20 17:41:44 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.25  2005/07/20 17:41:44  perev
+// Cleanup
+//
 // Revision 1.24  2004/08/18 20:33:56  perev
 // Timers added for MySQL and maker itself
 //
@@ -69,10 +72,7 @@ class TList;
 class TBrowser;
 class StDbBroker;
 class St_dbConfig;
-class St_ValiSet;
-
-enum DBConst {kMinTime = 19950101, kMaxTime = 20380101};
-
+class StValiSet;
 
 class St_db_Maker : public StMaker {
 private:
@@ -86,7 +86,7 @@ private:
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
   TStopwatch  fTimer[4];        //!Timer object 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.24 2004/08/18 20:33:56 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.25 2005/07/20 17:41:44 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -116,8 +116,9 @@ protected:
    virtual TDataSet* UpdateDB (TDataSet* ds);
    virtual int UpdateTable(UInt_t parId, TTable* dat, TDatime val[2]);
    virtual TDataSet *LoadTable(TDataSet* left);
-   virtual TDataSet *FindLeft(St_ValiSet *val, TDatime vals[2]);
+   virtual TDataSet *FindLeft(StValiSet *val, TDatime vals[2]);
    virtual TDataSet *OpenMySQL(const char* dbname);
+           int       Snapshot (int flag);
 
    static EDataSetPass UpdateDB (TDataSet* ds,void *user );
    static EDataSetPass PrepareDB(TDataSet* ds,void *user );
@@ -126,29 +127,11 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.24 2004/08/18 20:33:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.25 2005/07/20 17:41:44 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
+   ClassDef(St_db_Maker, 0)   
 };
 
-#if 0
-class St_dbConfig : public TTable   
-{                                          
-protected:                                 
-  static TTableDescriptor *fgColDescriptors;    
-  virtual TTableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}       
-  virtual void  SetDescriptorPointer(TTableDescriptor *list) { fgColDescriptors = list;}  
-public:                                    
-
-  St_dbConfig() : TTable("dbConfig",sizeof(dbConfig_st)) {SetType("dbConfig");}           
-  St_dbConfig(Text_t *name) : TTable(name,sizeof(dbConfig_st)) {SetType("dbConfig");}          
-  St_dbConfig(Int_t n): TTable("dbConfig",n,sizeof(dbConfig_st)) {SetType("dbConfig");}   
-  St_dbConfig(Text_t *name,Int_t n): TTable(name,n,sizeof(dbConfig_st)) {SetType("dbConfig");} 
-  dbConfig_st *GetTable(){ return (dbConfig_st *)GetArray();}                                            
-                                           
-  ClassDef(St_dbConfig,0) //  
-};                                                            
-#endif
 class St_dbConfig : public TTable   
 {                                          
   ClassDefTable(St_dbConfig,dbConfig_st)   
