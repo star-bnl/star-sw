@@ -36,6 +36,7 @@ class StMeasuredPoint;
 class StiTrackFinder;
 class StiTrackFitter;
 class StiTrack;
+class StiTrackNode;
 
 /** 
     \enum Direction
@@ -114,7 +115,7 @@ public:
   virtual int     getSeedHitCount() const =0;
   virtual void    setSeedHitCount(int c)=0;
   virtual double  getTrackLength() const=0;
-  virtual vector<StMeasuredPoint*> stHits() const=0;
+  virtual vector<const StMeasuredPoint*> stHits() const=0;
   /// Get mass of the particle that produced this track
   virtual double  getMass() const=0;
   /// Get charge of the particle that produced this track
@@ -128,7 +129,7 @@ public:
   virtual double  getValue(int key) const;
   virtual bool isPrimary() const=0;
           int    getId() const {return mId;}
-  virtual bool extendToVertex(StiHit* vertex)=0;
+  virtual StiTrackNode *extendToVertex(StiHit* vertex)=0;
   //	virtual bool extendToVertex(StiHit* vertex, const StiDetector * alternate)=0;
 
  protected:
