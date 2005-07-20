@@ -151,9 +151,9 @@ double  StiMcTrack::getTrackLength() const
   return 0;
 }
 
-vector<StMeasuredPoint*> StiMcTrack::stHits() const
+vector<const StMeasuredPoint*> StiMcTrack::stHits() const
 {
-  return vector<StMeasuredPoint*>();
+  return vector<const StMeasuredPoint*>();
 }
 
 
