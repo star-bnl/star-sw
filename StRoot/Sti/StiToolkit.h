@@ -108,6 +108,8 @@ public:
   virtual void setLoaderTrackFilter(EditableFilter<StiTrack> *)=0;
   virtual void setFinderTrackFilter(EditableFilter<StiTrack> *)=0;
 
+  virtual int getTruth(const StiHit *hit)=0;
+
   static void setToolkit(StiToolkit*toolkit);
   static StiToolkit *instance();
   static void kill();

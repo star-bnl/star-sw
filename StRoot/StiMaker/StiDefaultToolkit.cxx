@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.26 2005/05/31 17:12:02 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.27 2005/07/20 17:32:39 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.27  2005/07/20 17:32:39  perev
+ * IdTruth
+ *
  * Revision 2.26  2005/05/31 17:12:02  perev
  * Fast delete used
  *
@@ -124,6 +127,10 @@
 #include "StiGui/StiRootDrawableKalmanTrack.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "Sti/StiHitErrorCalculator.h"
+
+#include "StEvent/StHit.h"
+#include "StarClassLibrary/StMCTruth.h"
+
 
 StiDefaultToolkit::StiDefaultToolkit()
   :
@@ -415,7 +422,6 @@ StiVertexFinder * StiDefaultToolkit::getVertexFinder()
   cout << "StiDefaultToolkit::getVertexFinder() -I- Started"<<endl;
   if (_vertexFinder)
     return _vertexFinder;
-  //_vertexFinder = new StiDummyVertexFinder("StEventVertex");
   _vertexFinder = new StiStarVertexFinder("GenericVertex"); // MCBS, for Y2004 chain
   return _vertexFinder;
 }
@@ -528,3 +534,13 @@ void StiDefaultToolkit::setFinderTrackFilter(EditableFilter<StiTrack> * finderTr
 {
   _finderTrackFilter = finderTrackFilter;
 }
+
+int StiDefaultToolkit::getTruth(const StiHit *stiHit)
+{
+  if (!stiHit->detector()) return 0;
+  StHit *stHit = (StHit*)stiHit->stHit();	
+  if (!stHit) return 0;
+  return StMCTruth(stHit->idTruth(),stHit->qaTruth());
+}
+  
+  

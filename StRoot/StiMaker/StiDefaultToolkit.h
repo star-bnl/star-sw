@@ -76,6 +76,8 @@ public:
   virtual void setLoaderTrackFilter(EditableFilter<StiTrack> *);
   virtual void setFinderTrackFilter(EditableFilter<StiTrack> *);
 
+  virtual int getTruth(const StiHit *hit);
+  
  protected:
   
   bool _guiEnabled;
