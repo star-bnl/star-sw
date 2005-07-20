@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.2 2005/07/19 22:01:59 perev Exp $
+ * $Id: StPPVertexFinder.h,v 1.3 2005/07/20 05:34:16 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -40,6 +40,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void saveHisto(TString fname);
   int  mTotEve;
   int  eveID;
+  int mTestMode; // internal  param to play with cuts
 
   // params
   double mMinTrkPt;       //~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -59,18 +60,17 @@ class StPPVertexFinder: public StGenericVertexFinder {
   double          mdydz;     // beam slope
 
   // util
-  StiToolkit  *mToolkit;
-  CtbHitList  *ctbList;
-  BemcHitList  *bemcList;
-  EemcHitList  *eemcList;
-  StEEmcDbMaker *eeDb;
+  StiToolkit     *mToolkit;
+  CtbHitList     *ctbList;
+  BemcHitList    *bemcList;
+  EemcHitList    *eemcList;
+  StEEmcDbMaker  *eeDb;
   EEmcGeomSimple *geomE;
 
-  FILE *fdOut; // record ascii output of vertex finder for Jan's QA
-
+  
   void dumpKalmanNodes(const StiKalmanTrack *track);
-  void plotVertex(VertexData *);
-  void plotTracksDca();
+  //  void plotVertex(VertexData *);
+  //  void plotTracksDca();
   void initHisto();
   
 public:
@@ -83,12 +83,10 @@ public:
   StPPVertexFinder();
 
   // mandatory implementations
-  virtual         ~StPPVertexFinder();
-  int             fit(StEvent*);        
-  void            printInfo(ostream& = cout) const;
-  void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
-  //int    NCtbMatches() {return -1;}; //dumm
-  //int    NCtbSlats() {return -1;}; //dumm  
+  virtual  ~StPPVertexFinder();
+  int       fit(StEvent*);        
+  void      printInfo(ostream& = cout) const;
+  void      UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
  
   // over-written method
   virtual void  Init();
@@ -99,6 +97,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.3  2005/07/20 05:34:16  balewski
+ * cleanup
+ *
  * Revision 1.2  2005/07/19 22:01:59  perev
  * MultiVertex
  *

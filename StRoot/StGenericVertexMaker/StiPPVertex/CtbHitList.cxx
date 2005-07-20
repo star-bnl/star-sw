@@ -32,7 +32,7 @@ CtbHitList::CtbHitList() :
   
   gMessMgr->Message("","I") 
     <<" CtbHitList::set CtbThres_Ch (real)="<<mCtbThres_ch
-    <<"\n   or  CtbThres_MeV (M-C)="<<mCtbThres_mev
+    <<"  or  CtbThres_MeV (M-C)="<<mCtbThres_mev
     <<endm;
 }
 
