@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.65 2005/06/09 03:12:39 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.65 2005/06/09 03:12:39 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.66 2005/07/20 17:21:44 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.66 2005/07/20 17:21:44 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.66  2005/07/20 17:21:44  perev
+ * MultiVertex
+ *
  * Revision 2.65  2005/06/09 03:12:39  perev
  * Fix typo in getNodes()
  *
@@ -670,6 +673,38 @@ double StiKalmanTrack::getTrackRadLength() const
     cout <<"StiKalmanTrack::getTrackRadLength() -W- Total Rad Length Error: "<<totalR;
   return totalR;
 }
+//_____________________________________________________________________________
+double StiKalmanTrack::getNearBeam(StThreeVectorD *pnt,StThreeVectorD *dir) const
+{
+  StiKalmanTrackNode * inNode = lastNode;
+  StThreeVectorD in(inNode->x_g(),inNode->y_g(),inNode->z_g());
+
+  StPhysicalHelixD hlx(fabs(inNode->getCurvature()),
+		            inNode->getDipAngle(),
+		            inNode->getPhase(),
+		            in,
+		            inNode->getHelicity());
+  double per = hlx.period();
+  double len = hlx.pathLength(0.,0.);
+//  StHelix can return negative length if -ve path is shorter then +ve one
+//  period ia added in this case;
+  if (fabs(len) > fabs(len+per)) len+=per;
+  if (fabs(len) > fabs(len-per)) len-=per;
+
+  hlx.moveOrigin(len);
+  if (pnt) (*pnt) = hlx.at(0);
+
+  if (dir) {
+    double phase = hlx.phase();
+    double dip   = hlx.dipAngle();
+    int h        = hlx.h();
+
+    (*dir)[0]= -sin(phase)*cos(dip)*h;	
+    (*dir)[1]=  cos(phase)*cos(dip)*h;
+    (*dir)[2]=             sin(dip)*h;}
+
+  return fabs(len);
+}
 
 //_____________________________________________________________________________
 /*! Return the inner most hit associated with this track.
@@ -750,7 +785,8 @@ int StiKalmanTrack::getNNodes(int qua)  const
 */
 bool  StiKalmanTrack::isPrimary() const
 {
-  StiKalmanTrackNode * node = getInnerMostHitNode(2);
+  StiKalmanTrackNode * node = getInnerMostHitNode(3);
+  if (node->getDetector()) return 0;
   return (fabs(node->getX())<2.);
 }
 
@@ -776,17 +812,18 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
 
 //_____________________________________________________________________________
 ///return hits;
-vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
+vector<const StMeasuredPoint*> StiKalmanTrack::stHits() const
 {
   StiKTNBidirectionalIterator it;
-  vector<StMeasuredPoint*> hits;
+  vector<const StMeasuredPoint*> hits;
   for (it=begin();it!=end();++it) {
     const StiKalmanTrackNode* node = &(*it);
     if (!node->isValid()) 	continue;
     if (node->getChi2()>10000.) continue;
     const StiHit* hit = node->getHit();
     if (!hit) 			continue;
-    StHit *stHit = (StHit*)dynamic_cast<const StHit*>(hit->stHit());
+    if (!hit->detector())	continue;
+    const StMeasuredPoint *stHit = hit->stHit();
     if (!stHit) 		continue;
     hits.push_back(stHit);
   }
@@ -829,7 +866,7 @@ void StiKalmanTrack::reserveHits()
   runtime_error exceptions which are NOT caught here...</li>
   </ul>
 */
-bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate)
+bool StiKalmanTrack::extendToVertex(StiHit *vertex, const StiDetector * alternate)
 {
   if (!alternate)
     return extendToVertex(vertex);
@@ -845,7 +882,7 @@ bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate
 }
 
 
-bool StiKalmanTrack::extendToVertex(StiHit* vertex)
+StiTrackNode *StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
   double chi2;
   StiKalmanTrackNode * sNode=0;
@@ -853,9 +890,9 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   bool trackExtended = false;
 
   StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
-  if (!innerMostHitNode) return false;
+  if (!innerMostHitNode) 		return 0;
   // track with hits in the outer portion of the TPC only are not considered
-  if (innerMostHitNode->getX()>100.) return false;
+  if (innerMostHitNode->getX()>100.) 	return 0;
 		
   StiHit localVertex = *vertex;
   sNode = getInnerMostNode();
@@ -901,8 +938,8 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 
       _vDca = d;
       _vChi2= chi2;
-//      if (chi2<pars->maxChi2Vertex)
-      if (d<4.)
+//    if (chi2<pars->maxChi2Vertex  && d<4.)
+      if (                             d<4.)
 	{
 	  //_dca = ::sqrt(dy*dy+dz*dz);
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
@@ -912,18 +949,18 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setDetector(0);
           trackExtended = (tNode->updateNode()==0);
           
-	  if (trackExtended) add(tNode,kOutsideIn);
-          else               trackNodeFactory->free(tNode);             
 #ifdef Sti_DEBUG      
-	cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
+cout << "StiKalmanTrack::extendToVertex: TrackAfter:" << *this << endl;
 #endif
-	if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << endl;
-	
+if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << endl;
+
+	  if (trackExtended) return tNode;
+          trackNodeFactory->free(tNode);             
 	}
     }
   //else
   //  cout <<" TRACK NOT REACHING THE VERTEX PLANE!"<<endl;
-  return trackExtended;
+  return 0;
 }
 
 bool StiKalmanTrack::find(int direction)
@@ -1093,17 +1130,18 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
 }
 
 //_____________________________________________________________________________
-void StiKalmanTrack::add(StiKalmanTrackNode * node,int direction)
+void StiKalmanTrack::add(StiTrackNode * node,int direction)
 {
+   StiKalmanTrackNode *Node = (StiKalmanTrackNode*)node;
    if (lastNode==0) {
-     lastNode = firstNode = node; return;
+     lastNode = firstNode = Node; return;
    }
    if (direction==0) {
-     lastNode->add(node,direction);
-     lastNode = node;
+     lastNode->add(Node,direction);
+     lastNode = Node;
   } else {
-     firstNode->add(node,direction);
-     firstNode = node;
+     firstNode->add(Node,direction);
+     firstNode = Node;
   }
 }
 //_____________________________________________________________________________

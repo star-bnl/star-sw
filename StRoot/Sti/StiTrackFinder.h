@@ -20,6 +20,7 @@ public:
   virtual StiTrack * findTrack()=0;
   /// Extent all tracks to the given vertex
   virtual void extendTracksToVertex(StiHit* vertex)=0;
+  virtual void extendTracksToVertices(const std::vector<StiHit*> &vertices){};
   /// Reset the tracker
   virtual void reset()=0;
   /// Reset the tracker

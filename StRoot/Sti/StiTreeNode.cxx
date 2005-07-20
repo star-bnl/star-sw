@@ -45,6 +45,19 @@ void StiTreeNode::remove(int childIndex)
   node->reset();
   BFactory::Free(node);
 }
+//______________________________________________________________________________
+StiTreeNode *StiTreeNode::disconnect() 
+{
+  StiTreeNode *node =0;
+  node = parent; parent=0;
+  if (!node) 			return;
+  assert(node->children[0]==this);
+  assert(!children[1]);
+  node->children[0]=children[0];
+  if (children[0]) children[0]->parent=node;
+  children[0]=0; 
+  return node;
+}
 
 //______________________________________________________________________________
 /// Sets this node's parent to <code>newParent</code> but does not 

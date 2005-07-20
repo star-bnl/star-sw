@@ -55,12 +55,13 @@ class StiTreeNode
 
   void reset();
   void remove(int childIndex) ;
+  StiTreeNode *disconnect(); 
   void cutTail(int direction) ;
   void setParent(StiTreeNode *  newParent) ;
   StiTreeNode *getParent() 	const;
   StiTreeNode *getChildAt(int index) const;
   int getChildCount() 		const;
-  void add(StiTreeNode *  newChild,int direction);
+  void add(StiTreeNode *newChild,int direction);
   StiTreeNode *getNextNode() 	const;
   StiTreeNode *getPrevNode() 	const;
   StiTreeNode *getFirstNode()	const;

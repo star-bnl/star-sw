@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.149  2005/07/20 17:33:25  perev
+// MultiVertex
+//
 // Revision 1.148  2005/02/25 17:41:01  perev
 // Time count added
 //
@@ -470,6 +473,7 @@ Int_t StiMaker::Make()
     {
       _tracker->findTracks();
       StiHit *vertex=0;
+      const std::vector<StiHit*> *vertices=0;
       try
 	{
 	  if (_eventFiller && !_pars->useMcAsRec)
@@ -482,11 +486,15 @@ Int_t StiMaker::Make()
       if (_vertexFinder)
 	{
 	  //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
-	  vertex = _vertexFinder->findVertex(event);
-	  if (vertex)
+	  _vertexFinder->fit(event);
+	  vertices = _vertexFinder->result();
+          vertex   = _vertexFinder->getVertex(0);
+	  if (vertices && vertices->size())
+//	  if (vertex)
 	    {
 	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-	      _tracker->extendTracksToVertex(vertex);
+	      _tracker->extendTracksToVertices(*vertices);
+//	      _tracker->extendTracksToVertex(vertex);
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
 	      try
 		{

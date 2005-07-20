@@ -51,7 +51,8 @@ public:
   /// Find the next track 
   virtual StiTrack * findTrack(); 
   /// Extent all tracks to the given vertex
-  virtual void extendTracksToVertex(StiHit* vertex);
+          void extendTracksToVertex(StiHit* vertex);
+          void extendTracksToVertices(const std::vector<StiHit*> &vertices);
   /// Reset the tracker
   virtual void reset();
   /// Clear the tracker

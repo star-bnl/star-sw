@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.14 2005/04/11 17:42:53 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.15 2005/07/20 17:34:29 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.15  2005/07/20 17:34:29  perev
+ * MultiVertex
+ *
  * Revision 2.14  2005/04/11 17:42:53  perev
  * Temporary residuals saving added
  *
@@ -159,8 +162,8 @@ public:
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
     void stEventFitPoints(StiKalmanTrack* kTrack, int *nFitPoints); 
-    float impactParameter(StiKalmanTrack* kTrack);
-    float impactParameter(StTrack* track);
+    double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
+    double impactParameter(StTrack* strack, StThreeVectorD &vertexPosition);
 private:
  void fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node);
 

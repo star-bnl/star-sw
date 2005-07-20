@@ -9,7 +9,12 @@ class StiDummyVertexFinder : public StiVertexFinder
  public:
   StiDummyVertexFinder(const string & name);
   virtual ~StiDummyVertexFinder();
-  virtual StiHit * findVertex(StEvent * event);
+  int fit(StEvent * event);
+  StiHit* getVertex(int index=0);
+  void clear();
+  int  size() const {return (mVertex!=0);}
+private:  
+StiHit* mVertex;	  
 };
 
 

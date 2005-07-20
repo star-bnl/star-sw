@@ -2,46 +2,59 @@
 #include "Sti/StiDummyVertexFinder.h"
 #include "Sti/StiHit.h"
 #include "StThreeVectorF.hh"
+#include "StMatrixF.hh"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "Sti/Base/Factory.h"
 
 
+//______________________________________________________________________________
 StiDummyVertexFinder::StiDummyVertexFinder(const string & name)
   : StiVertexFinder(name)
-{}
+{
+  mVertex=0;
+}
 
+//______________________________________________________________________________
 StiDummyVertexFinder::~StiDummyVertexFinder()
 {}
+//______________________________________________________________________________
+void StiDummyVertexFinder::clear()
+{
+  mVertex = 0;
+}
 
-/// Return the main vertex held by the given StEvent
-/// A null pointer is returned if StEvent holds no valid
-/// vertex. 
-StiHit * StiDummyVertexFinder::findVertex(StEvent * event)
+//______________________________________________________________________________
+int StiDummyVertexFinder::fit(StEvent * event)
 {
   //cout <<"StiDummyVertexFinder::findVertex(StEvent * event) -I- Started"<<endl;
-  StiHit * vertex = 0;
-  if (event->primaryVertex()) 
-    {
-      //cout <<"StiDummyVertexFinder::findVertex(StEvent * event) -I- primaryVertex exist"<<endl;
-      Factory<StiHit>*facto=getHitFactory();
-      if (!facto)
-	throw runtime_error("StiDummyVertexFinder::findVertex() -F- Factory<StiHit>*==0");
-      //cout <<"StiDummyVertexFinder::findVertex(StEvent * event) -I- facto is OK"<<endl;
-      vertex = getHitFactory()->getInstance();
-      if (!vertex) 
-	throw runtime_error("StiDummyVertexFinder::findVertex(StEvent * event) -I- primaryVertex exist");
-      const StThreeVectorF& vp = event->primaryVertex()->position();
-      const StThreeVectorF& ve = event->primaryVertex()->positionError();
-      //cout <<"StiDummyVertexFinder::findVertex(StEvent * event) -I- set hit parameters"<<endl;
-      //cout << "x:"<< vp.x() << "+-" << ve.x()<<endl;
-      //cout << "y:"<< vp.y() << "+-" << ve.y()<<endl;
-      //cout << "z:"<< vp.z() << "+-" << ve.z()<<endl;
-      vertex->set(0, event->primaryVertex(), 
-		  0., 
-		  vp.x(),vp.y(),vp.z(),
-		  ve.x()*ve.x(),0.,0.,ve.y()*ve.y(),0.,ve.z()*ve.z());
-    }
-  setVertex(vertex);
-  return vertex;
+  clear();
+  StPrimaryVertex *spv = event->primaryVertex(); 
+  if (!spv) return 0;
+  // Get an instance of StHit from the factory
+  mVertex = getHitFactory()->getInstance();
+  const StThreeVectorF& vp = spv->position();
+  StMatrixF cov = spv->covariantMatrix();
+
+  cout <<"StiDummyVertexFinder::getVertex(0) -I- set hit parameters"<<endl;
+  cout << "x:"<< vp.x() << "+-" << sqrt(cov[0][0])<<endl;
+  cout << "y:"<< vp.y() << "+-" << sqrt(cov[1][1])<<endl;
+  cout << "z:"<< vp.z() << "+-" << sqrt(cov[2][2])<<endl;
+  mVertex->set(0, spv, 
+	   0., 
+	   vp.x(),vp.y(),vp.z(),
+	   cov[0][0],
+	   cov[0][1],
+	   cov[0][2],
+	   cov[1][1],
+	   cov[1][2],
+	   cov[2][2]);
+  return 1;
 }
+
+
+//______________________________________________________________________________
+StiHit* StiDummyVertexFinder::getVertex(int index) 
+{
+  return (index)? 0:(StiHit*)mVertex;
+}		

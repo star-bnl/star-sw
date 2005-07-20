@@ -30,7 +30,9 @@ using namespace std;
 #include "StiTrack.h"
 
 #include "StThreeVectorD.hh"
+#include "StMCTruth.h"
 class StiHit;
+class StiTrackNode;
 class StiKalmanTrackNode;
 class StiKalmanTrackFinderParameters;
 class StiKalmanTrackFitterParameters;
@@ -176,7 +178,15 @@ class StiKalmanTrack : public StiTrack
      the track.
     */
    double getTrackLength() const;
-   
+   /*!
+     Returns the track length (in centimeters) from the first point to beam line
+     (x=y=0).  
+     pnt is the nearest point to beam and dir direction of tracl in this point
+     The main vertex is included in the calculation if associated with 
+     the track.
+    */
+   double getNearBeam(StThreeVectorD *pnt=0,StThreeVectorD *dir=0) const;
+  
    /*!
      Returns the maximum number of points that can possibly be on the track given
      its track parameters, i.e. its position in the detector. The calculation 
@@ -213,16 +223,16 @@ class StiKalmanTrack : public StiTrack
    /// Accessor method returns the inner/outer most node associated with the track.
    /// inot: 0=inner, 1=outer; 
    /// qua : 0=nocheck, 1=with hit inside, 2=chi2 non infinit
-   /// Same for getNNodes(qua)
+   		/// Same for getNNodes(qua)
    StiKalmanTrackNode * getInnOutMostNode(int inot,int qua)  const;
-   /// Accessor method returns the outer most node associated with the track.
+   		/// Accessor method returns the outer most node associated with the track.
    StiKalmanTrackNode * getOuterMostNode(int qua=0)  const;
-   /// Accessor method returns the inner most node associated with the track.
+   		/// Accessor method returns the inner most node associated with the track.
    StiKalmanTrackNode * getInnerMostNode(int qua=0)   const;
 
-   /// Accessor method returns the outer most hit node associated with the track.
+   		/// Accessor method returns the outer most hit node associated with the track.
    StiKalmanTrackNode * getOuterMostHitNode(int qua=0)  const;
-   /// Accessor method returns the inner most hit node associated with the track.
+   		/// Accessor method returns the inner most hit node associated with the track.
    StiKalmanTrackNode * getInnerMostHitNode(int qua=0)   const;
    int                  getNNodes(int qua=0) const;
    
@@ -242,7 +252,7 @@ class StiKalmanTrack : public StiTrack
    
    /// Add a kalman track node to this track as a child to the last node of the track
    /// Return the added node 
-   virtual void add(StiKalmanTrackNode * node,int direction);
+   virtual void add(StiTrackNode * node,int direction);
   /// Convenience method to initialize a track based on seed information 
   void initialize(double curvature,
 		  double tanl,
@@ -256,7 +266,7 @@ class StiKalmanTrack : public StiTrack
    StThreeVector<double> getMomentumAtOrigin() const;
 
    virtual vector<StiHit*> getHits();
-   virtual vector<StMeasuredPoint*> stHits() const;
+   virtual vector<const StMeasuredPoint*> stHits() const;
    virtual vector<StiKalmanTrackNode*> getNodes(int detectorGroupId) const;
 	 
 
@@ -270,7 +280,7 @@ class StiKalmanTrack : public StiTrack
   int  refit();
   int  refitL();
   void reserveHits();
-  bool extendToVertex(StiHit* vertex);
+  StiTrackNode *extendToVertex(StiHit* vertex);
   bool extendToVertex(StiHit* vertex, const StiDetector*alternate);
 
   void setFlag(long v);
@@ -278,6 +288,8 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
+
+  StMCTruth getTruth(double rXYMin=0, double rXYMax=1000) const;  
   void print(const char *opt="") const;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
