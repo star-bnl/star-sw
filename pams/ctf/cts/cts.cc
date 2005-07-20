@@ -800,9 +800,9 @@ void cts_get_tof_indexes ( long volume, long &i_phi, long &i_eta ) {
 
 //WJL - tofp heierarchy is different, but pavel changed g2t_volume_id...
     i_tray_eta    = int(volume/100000) ;
-    i_counter_eta = (short)fmod((double)volume,100000.)/1000 ;
-    i_tray_phi    = (short)fmod((double)volume,1000.)/10 ;
-    i_counter_phi = (short)fmod((double)volume,10.) ;
+    i_counter_eta = (short)(volume%100000)/1000 ;
+    i_tray_phi    = (short)(volume%  1000)/10 ;
+    i_counter_phi = (short)(volume%    10);
 
 //    i_tray_eta    =  1;
 //    i_counter_phi = int(volume/100000);
