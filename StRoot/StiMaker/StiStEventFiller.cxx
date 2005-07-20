@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.58 2005/05/12 18:32:20 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.59 2005/07/20 17:34:08 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.59  2005/07/20 17:34:08  perev
+ * MultiVertex
+ *
  * Revision 2.58  2005/05/12 18:32:20  perev
  * Temprary hack, save residuals
  *
@@ -582,7 +585,6 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 
   return mEvent;
 }
-
 //_____________________________________________________________________________
 StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 {
@@ -602,166 +604,90 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   mEvent = e;
   mTrackStore = t;
   //Added residual maker...aar
-  StPrimaryVertex* vertex = mEvent->primaryVertex(0);
+  StPrimaryVertex* vertex = 0;
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
-  if(!vertex)
-    {
-      cout <<"Failed to find a primary vertex."<<endl;
-      return (StEvent*)NULL;
-    }
-  int skippedCount=0;
-  // loop over StiKalmanTracks
   cout << "StiStEventFiller::fillEventPrimaries() -I- Tracks in container:" << mTrackStore->size() << endl;
-  int mTrackN=0;
+  int mTrackN=0,mVertN=0;
   int noPipe=0;
   int ifcOK=0;
-  StiKalmanTrack* kTrack;
-
   int fillTrackCount1=0;
   int fillTrackCount2=0;
   int fillTrackCountG=0;
-  bool testing= false;
   StErrorHelper errh;
-  for (vector<StiTrack*>::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
-    {
-      kTrack = static_cast<StiKalmanTrack*>(*trackIt);
-      if (kTrack==0) 
-	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<StiKalmanTrack*>(*trackIt)==0");
-      if (!accept(kTrack)) continue;
-      map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
-      if (itKtrack == mTrkNodeMap.end())  continue;
-      //throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
-      StTrackNode* currentTrackNode = (*itKtrack).second;
-      //double globalDca = currentTrackNode->track(global)->impactParameter();
-      //Even though this is filling of primary tracks, there are certain
-      // quantities that need to be filled for global tracks that are only known
-      // after the vertex is found, such as dca.  Here we can fill them.
-      // 
-      StGlobalTrack* currentGlobalTrack = static_cast<StGlobalTrack*>(currentTrackNode->track(global));
-      assert(currentGlobalTrack->key()==kTrack->getId());
-      float globalDca = impactParameter(currentGlobalTrack);
-      currentGlobalTrack->setImpactParameter(globalDca);
-      kTrack->setGlobalDca(globalDca);
-      
-      if (kTrack->isPrimary())
-	{
-	  fillTrackCount1++;
-	  if (currentTrackNode->entries()>10)   continue;//throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries()>10");
-	  if (currentTrackNode->entries(global)<1) continue;//throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
-	  // detector info
-	  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-	  fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
-	  StPrimaryTrack* pTrack = new StPrimaryTrack;
-	  pTrack->setKey( currentGlobalTrack->key());
-	  try
-	    {  
-	      if (testing)
-		{
-		  // test begin ==============
-		  StiKalmanTrackNode* leaf = kTrack->getLastNode();
-		  StiKTNForwardIterator it(leaf);
-		  StiKTNForwardIterator end = it.end();
-		  bool weird = false;
-		  int bad = 0;
-		  bool piped = false;
-		  bool ifced = false;
-		  //bool out = false; //unused, comment out to remove compiler warning
-		  while (it!=end) 
-		    {
-		      const StiKalmanTrackNode& node = *it;
-		      if (node.getRefPosition()>2. && node.getRefPosition()<4.5)
-			{
-			  piped = true;
-			}
-		      if (node.getRefPosition()>40. && node.getX()<50.)
-			{
-			  ifced = true;
-			}
-		      double x_g = node.x_g();
-		      double y_g = node.y_g();
-		      double z_g = node.z_g();
-		      double rt_g = sqrt(x_g*x_g+y_g*y_g);
-		      StiHit * theHit = node.getHit();
-		      if (theHit)
-			{
-			  double dx = fabs(theHit->x() - node.getX());
-			  double dy = fabs(theHit->y() - node.getY());
-			  double dz = fabs(theHit->z() - node.getZ());
-			  if (dx>3 || dy>5 || dz>5)
-			    bad++;
-			}//theHit
-		      if (rt_g>200. || fabs(z_g)>200.)	weird = true;
-		      ++it;
-		    }//it!=end
-		  if (!piped) noPipe++;
-		  if (ifced)  ifcOK++;
-		  if (weird || !piped || bad>4 || !ifced)
-		    {
-		      //cout << "  ==";
-		      if (weird) cout << "WEIRD/";
-		      if (!piped)cout << "NO-PIPE/";
-		      if (bad>4) cout << "BAD>4 ("<<bad<<")/";
-		      if (!ifced) cout << "no-ifc/";
-		      //cout << "=="<<endl;
-		      
-		      StiKTNForwardIterator it2(leaf);
-		      StiKTNForwardIterator end2 = it2.end();
-		      while (it2!=end2) 
-			{
-			  const StiKalmanTrackNode& node2 = *it2;
-			  double x_g = node2.x_g();
-			  double y_g = node2.y_g();
-			  //double z_g = node2.z_g(); //unused, remove to remove compiler warning
-			  double rt_g2 = sqrt(x_g*x_g+y_g*y_g);
-			  cout << "rt:" << rt_g2 << " --" << node2 << endl;
-			  ++it2;
-			}
-		    }
-		}//testing
-	      // test end ===============
-		  
-	      fillTrack(pTrack,kTrack);
-	      // set up relationships between objects
-	      detInfoVec.push_back(detInfo);
-	      pTrack->setDetectorInfo(detInfo);
-	     
-	      currentTrackNode->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
-	      vertex->addDaughter(pTrack);
-	      StuFixTopoMap(pTrack);
-	      fillTrackCount2++;
-              int ibad = pTrack->bad();
-	      errh.Add(ibad);
-              if (ibad) {
+  int nTracks = mTrackStore->size();
+  StiKalmanTrack *kTrack = 0;
+  StPrimaryTrack *pTrack = 0;
+  StGlobalTrack  *gTrack = 0;
+  StTrackNode    *nTRack = 0;
+  for (mTrackN=0; mTrackN<nTracks;++mTrackN) {
+    kTrack = (StiKalmanTrack*)(*mTrackStore)[mTrackN];
+    if (!accept(kTrack)) 			continue;
+    map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
+    if (itKtrack == mTrkNodeMap.end())  	continue;//Sti global was rejected
+    nTRack = (*itKtrack).second;
+    assert(nTRack->entries()<=10);
+    assert(nTRack->entries(global)); 
+
+    //double globalDca = nTRack->track(global)->impactParameter();
+    //Even though this is filling of primary tracks, there are certain
+    // quantities that need to be filled for global tracks that are only known
+    // after the vertex is found, such as dca.  Here we can fill them.
+    // 
+    gTrack = static_cast<StGlobalTrack*>(nTRack->track(global));
+    assert(gTrack->key()==kTrack->getId());
+    float minDca = 1e10; //We do not know which primary. Use the smallest one
+    
+    pTrack = 0;
+    for (mVertN=0; (vertex = mEvent->primaryVertex(mVertN));mVertN++) {
+      StThreeVectorD vertexPosition = vertex->position();
+      double zPrim = vertexPosition.z();
+      // loop over StiKalmanTracks
+      float globalDca = impactParameter(gTrack,vertexPosition);
+      if (fabs(minDca) > fabs(globalDca)) minDca = globalDca;
+ 
+      if (!kTrack->isPrimary())			continue;
+      StiKalmanTrackNode *lastNode = kTrack->getLastNode();
+      StiHit *pHit = lastNode->getHit();
+      if (fabs(pHit->z_g()-zPrim)>0.1)		continue;//not this primary
+
+      fillTrackCount1++;
+      // detector info
+      StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+      fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
+      StPrimaryTrack* pTrack = new StPrimaryTrack;
+      pTrack->setKey( gTrack->key());
+
+      fillTrack(pTrack,kTrack);
+      // set up relationships between objects
+      detInfoVec.push_back(detInfo);
+      pTrack->setDetectorInfo(detInfo);
+
+      nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
+      vertex->addDaughter(pTrack);
+      StuFixTopoMap(pTrack);
+      fillTrackCount2++;
+      int ibad = pTrack->bad();
+      errh.Add(ibad);
+      if (ibad) {
 //VP	        printf("PTrack error: %s\n",errh.Say(ibad).Data());
 //VP	        throw runtime_error("StiStEventFiller::fillEventPrimaries() StTrack::bad() non zero");
-              }
-              if (pTrack->numberOfPossiblePoints()<10) 		continue;
-              if (pTrack->geometry()->momentum().mag()<0.1) 	continue;
-	      fillTrackCountG++;
-	    }
-	  catch (runtime_error & rte )
-	    {
-	      cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
-		   << rte.what() << endl;
-	      delete detInfo;
-	      delete pTrack;
-	    }
-	  catch (...)
-	    {
-	      cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
-	      delete detInfo;
-	      delete pTrack;
-	    }
-	}//end if primary
-    } // kalman track loop
-  if (skippedCount>0) cout << "StiStEventFiller::fillEventPrimaries() -I- A total of "<<skippedCount<<" StiKalmanTracks were skipped"<<endl;
+      }
+      if (pTrack->numberOfPossiblePoints()<10) 		break;
+      if (pTrack->geometry()->momentum().mag()<0.1) 	break;
+      fillTrackCountG++;
+      break;
+    } //end of verteces
+      kTrack->setGlobalDca(minDca);
+      gTrack->setImpactParameter(minDca);
+      if (pTrack) pTrack->setImpactParameter(minDca);
+
+  } // kalman track loop
   mTrkNodeMap.clear();  // need to reset for the next event
   cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
   cout <<"StiStEventFiller::fillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
   errh.Print();
   return mEvent;
 }
-
 //_____________________________________________________________________________
 /// use the vector of StHits to fill the detector info
 /// change: currently point and fit points are the same for StiKalmanTracks,
@@ -1044,12 +970,6 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   assert(tlen >0.0 && tlen<1000.);
   gTrack->setLength(tlen);// someone removed this, grrrr!!!!
  
-  if (gTrack->type()==primary) {
-      float impactParam = impactParameter(track);
-      gTrack->setImpactParameter(impactParam );
-      track->setDca(impactParam);
-  }
-
   // Follow the StDetectorId.h enumerations...
   // can't include them from here in order not to
   // create a package dependence...
@@ -1100,20 +1020,18 @@ void StiStEventFiller::stEventFitPoints(StiKalmanTrack* track, int *nFitPoints)
 }
 
 //_____________________________________________________________________________
-float StiStEventFiller::impactParameter(StiKalmanTrack* track) 
+double StiStEventFiller::impactParameter(StiKalmanTrack* track
+	                                ,StThreeVectorD &vertexPosition) 
 {
-  if (!mEvent->primaryVertex()) return 1e10;
   StiKalmanTrackNode*	node;
 
-  node = track->getInnerMostNode(); // ...
-
-  const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
+  node = track->getInnerMostNode(2); // ...
+  
 
   originD->setX(node->x_g());
   originD->setY(node->y_g());
   originD->setZ(node->z_g());
 
-  StThreeVectorD vxDD(vxF.x(),vxF.y(),vxF.z());
 
   physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
@@ -1123,24 +1041,15 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
   
 
   //cout <<"PHelix: "<<*physicalHelix<<endl;
-  float dca = static_cast<float>(physicalHelix->distance(vxDD));
-  return dca;
+  return physicalHelix->distance(vertexPosition);
 }
 //_____________________________________________________________________________
-float StiStEventFiller::impactParameter(StTrack* track) 
+double StiStEventFiller::impactParameter(StTrack* track, StThreeVectorD &vertex) 
 {
-  if (!mEvent->primaryVertex()) 
-    {
-      return DBL_MAX;
-    }
   StPhysicalHelixD helix = track->geometry()->helix();
 
-  const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
-
-  StThreeVectorD vxDD(vxF.x(),vxF.y(),vxF.z());
   //cout <<"PHelix: "<<helix<<endl;
-  float dca = static_cast<float>(helix.distance(vxDD));
-  return dca;
+  return helix.distance(vertex);
 }
 //_____________________________________________________________________________
  void StiStEventFiller::fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node)
@@ -1149,36 +1058,24 @@ float StiStEventFiller::impactParameter(StTrack* track)
  //Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
       float psi  = node->getEta();
       float resY = node->getY()-stiHit->y();
-      float eYY  = node->getEyy();
+//    float eYY  = node->getEyy();
       float cYY  = node->getCyy();
-      float tYY = (1/cYY-1/eYY);
-      if (tYY<1e-6) tYY=1e-6;
-      tYY = 1./tYY;
-#if 0
-      resY = resY*tYY/cYY;
-#endif
       float resZ = node->getZ()-stiHit->z();
-      float eZZ  = node->getEzz();
+//    float eZZ  = node->getEzz();
       float cZZ  = node->getCzz();
-      float tZZ = (1/cZZ-1/eZZ);
-      if (tZZ<1e-6) tZZ=1e-6;
-      tZZ = 1./tZZ;
-#if 0
-      resZ = resZ*tZZ/cZZ;
-#endif
       int iresY = 4095;
       if (fabs(resY) <4.095) iresY = (int)(fabs(resY)*1000); 
       int iresZ = 4095;
       if (fabs(resZ) <4.095) iresZ = (int)(fabs(resZ)*1000);
       
-      int icY   = (int)(sqrt(tYY )*1000); if (icY > 2047) icY  =2047;
-      int icZ   = (int)(sqrt(tZZ )*1000); if (icZ > 2047) icZ  =2047;
+      int icY   = (int)(sqrt(cYY )*1000+0.5); if (icY > 2047) icY  =2047;
+      int icZ   = (int)(sqrt(cZZ )*1000+0.5); if (icZ > 2047) icZ  =2047;
       float forY = iresY + 4096*icY;      if (resY<0)     forY = -forY;
       float forZ = iresZ + 4096*icZ;      if (resZ<0)     forZ = -forZ;
 
       double chi2 = node->getChi2();   if (chi2>1000) chi2=1000;
-      int ic2 = (int)(sqrt(chi2)*100); if (ic2 > 2047) ic2  =2047;
-      int ips = (int)(fabs(psi)*1000); if (ips > 4095) ips  =4095;
+      int ic2 = (int)(sqrt(chi2)*100+0.5); if (ic2 > 2047) ic2  =2047;
+      int ips = (int)(fabs(psi)*1000+0.5); if (ips > 4095) ips  =4095;
       float forX = ips + 4096*ic2;     if (psi<0) forX = -forX;
       StThreeVectorF v3(forX,forY,forZ);
       hh->setPositionError(v3);

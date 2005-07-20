@@ -281,11 +281,11 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	  rawCount++;
 	  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>(*it);
 	  if (!track) continue;
-	  bool extended = false;
 	  StiKalmanTrackNode * inner = track->getInnerMostNode();
 	  double r = inner->getRefPosition();
 	  if (r>4.1 && r<50) find(track,kOutsideIn);
-	  extended = track->extendToVertex(vertex);
+	  StiTrackNode *extended = track->extendToVertex(vertex);
+          if (extended) track->add(extended,kOutsideIn);
 	  // simple diagnostics
 	  if (extended) goodCount++;
 	  if (track->getCharge()>0)
@@ -305,6 +305,51 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
        << "                                          extendedCount:"<<goodCount<<endl
        << "                                                   plus:"<<plus<<endl
        << "                                                  minus:"<<minus<<endl;
+}
+//______________________________________________________________________________
+
+void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
+{
+  enum vertexLimits {ZMAX=10,RMAX=50,RMIN=5};
+
+  StiKalmanTrackNode *extended=0;
+  int goodCount= 0, plus=0, minus=0;
+  int nTracks = _trackContainer->size();
+  int nVertex =         vertices.size();  
+  if (!nVertex || !nTracks) return;
+
+  for (int iTrack=0;iTrack<nTracks;iTrack++)		{
+    StiKalmanTrack * track = (StiKalmanTrack*)(*_trackContainer)[iTrack];  
+    StiKalmanTrackNode *bestNode=0;  
+    StThreeVectorD nearBeam;
+    track->getNearBeam(&nearBeam);
+    for (int iVertex=0;iVertex<nVertex;iVertex++) 	{
+      StiHit *vertex = vertices[iVertex];
+      if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX) 	continue;
+
+      StiKalmanTrackNode * inner = track->getInnerMostNode();
+      double r = inner->getRefPosition();
+      if (r>RMAX) 					continue;	
+      if (r>RMIN) find(track,kOutsideIn);
+      extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
+      if (!extended) 					continue;
+      if (!bestNode) {bestNode=extended;		continue;}
+      if (bestNode->getChi2() < extended->getChi2())    continue;
+      BFactory::Free(bestNode);
+      bestNode = extended;
+    }//End vertex loop
+    
+    if(!bestNode) 	continue;
+    track->add(bestNode,kOutsideIn);
+    goodCount++;
+    if (track->getCharge()>0) plus++; else minus++;
+  }//End track loop 
+  if (debug()) {
+    cout << "SKTF::extendTracksToVertices(...) -I- rawCount:"<<nTracks<<endl
+	 << "                                 extendedCount:"<<goodCount<<endl
+	 << "                                          plus:"<<plus<<endl
+	 << "                                         minus:"<<minus<<endl;
+  }
 }
 
 /// Find extension (track) to the given track seed in the given direction

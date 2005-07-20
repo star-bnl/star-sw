@@ -2,6 +2,7 @@
 #include "Sti/StiStarVertexFinder.h"
 #include "Sti/StiHit.h"
 #include "StThreeVectorF.hh"
+#include "StMatrixF.hh"
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "Sti/Base/Factory.h"
@@ -9,63 +10,81 @@
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
 #include "StMaker.h"
 
+//______________________________________________________________________________
 StiStarVertexFinder::StiStarVertexFinder(const string & name)
-  : StiVertexFinder(name) //, StGenericVertexFinderMaker()
-{}
+  : StiVertexFinder(name) 
+{mGVF=0;}
 
+//______________________________________________________________________________
 StiStarVertexFinder::~StiStarVertexFinder()
 {}
+//______________________________________________________________________________
+void StiStarVertexFinder::clear()
+{
+  if (mGVF) mGVF->Clear();
+}
+//______________________________________________________________________________
+int StiStarVertexFinder::size() const
+{
+  return (mGVF)? mGVF->size():0;
+}
 
+//______________________________________________________________________________
 /// Return the main vertex held by the given StEvent
 /// A null pointer is returned if StEvent holds no valid
 /// vertex. 
-StiHit * StiStarVertexFinder::findVertex(StEvent * event)
+//______________________________________________________________________________
+int StiStarVertexFinder::fit(StEvent * event)
 {
-  cout <<"StiStarVertexFinder::findVertex(StEvent * event) -I- Started"<<endl;
+  cout <<"StiStarVertexFinder::fit(StEvent * event) -I- Started"<<endl;
 
-  // This factory produces an instance of the StiHit class on demand.
-  // i.e. sort of a call to new StiHit
-  Factory<StiHit>*facto=getHitFactory();
-  if (!facto)
-    // out of luck- the factory does not exist - complain vehemently
-    throw runtime_error("StiStarVertexFinder::findVertex() -F- Factory<StiHit>*==0");
-  cout <<"StiStarVertexFinder::findVertex(StEvent * event) -I- facto is OK"<<endl;
-  StiHit * vertex = 0;
-  // Get an instance of StHit from the factory
-  vertex = getHitFactory()->getInstance();
-  if (!vertex) 
-    // out of luck - got no instance from the factory - complain 
-    throw runtime_error("StiStarVertexFinder::findVertex(StEvent * event) -I- primaryVertex exist");
   
   // call the actual vertex finder method here...
   // assume the result is stored in StEvent...
-  
-  StGenericVertexMaker* gvm = (StGenericVertexMaker*)GetMaker("GenericVertex");
-  StGenericVertexFinder* gvf = gvm->GetGenericFinder();
-
+  if (!mGVF) {  
+    StGenericVertexMaker* gvm = (StGenericVertexMaker*)StMaker::GetChain()->GetMaker("GenericVertex");
+    mGVF = gvm->GetGenericFinder();
+    assert(mGVF);
+  }
+  clear();
   //AAR - modified
   // changed to fill primary vert only if fit returns true (okay)
-  if( gvf->fit(event) )
-    {
+  int nVtx = mGVF->fit(event);
+  if(nVtx)
+  {
       //vertex fit returns okay, so save
-      gvf->FillStEvent(event);
-    }
+      mGVF->FillStEvent(event);
+  }
+  return nVtx;
 
-  if(event->primaryVertex())
-    {
-     const StThreeVectorF& vp = event->primaryVertex()->position();
-     const StThreeVectorF& ve = event->primaryVertex()->positionError();
-     cout <<"StiStarVertexFinder::findVertex(StEvent * event) -I- set hit parameters"<<endl;
-     cout << "x:"<< vp.x() << "+-" << ve.x()<<endl;
-     cout << "y:"<< vp.y() << "+-" << ve.y()<<endl;
-     cout << "z:"<< vp.z() << "+-" << ve.z()<<endl;
-     vertex->set(0, event->primaryVertex(), 
-	      0., 
-	      vp.x(),vp.y(),vp.z(),
-	      ve.x()*ve.x(),0.,0.,ve.y()*ve.y(),0.,ve.z()*ve.z());
-     return vertex;
-    }
-  else return 0;
-  
+}
 
+//______________________________________________________________________________
+/// Return the main vertex held by the given StEvent
+/// A null pointer is returned if StEvent holds no valid
+/// vertex. 
+//______________________________________________________________________________
+StiHit * StiStarVertexFinder::getVertex(int idx) 
+{
+  StPrimaryVertex *spv = mGVF->getVertex(idx);
+  if (!spv) return 0;
+  // Get an instance of StHit from the factory
+  StiHit *vertex = getHitFactory()->getInstance();
+  const StThreeVectorF& vp = spv->position();
+  StMatrixF cov = spv->covariantMatrix();
+
+  cout <<"StiStarVertexFinder::getVertex("<<idx<< ") -I- set hit parameters"<<endl;
+  cout << "x:"<< vp.x() << "+-" << sqrt(cov[0][0])<<endl;
+  cout << "y:"<< vp.y() << "+-" << sqrt(cov[1][1])<<endl;
+  cout << "z:"<< vp.z() << "+-" << sqrt(cov[2][2])<<endl;
+  vertex->set(0, spv, 
+	   0., 
+	   vp.x(),vp.y(),vp.z(),
+	   cov[0][0],
+	   cov[0][1],
+	   cov[0][2],
+	   cov[1][1],
+	   cov[1][2],
+	   cov[2][2]);
+  return vertex;
 }
