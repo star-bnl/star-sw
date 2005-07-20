@@ -18,6 +18,8 @@
 #include "StMCTruth.h"
 #include "StHelixD.hh"
 #include "StPhysicalHelixD.hh"
+#include "StPhysicalHelixD.hh"
+#include "StHelixD.hh"
 
 class StEvent;
 class StTrack;
@@ -29,8 +31,7 @@ class TObjArray;
 class StRefArray;
 class StPtrVecHit;
 class BetheBloch;
-#include "StPhysicalHelixD.hh"
-#include "StHelixD.hh"
+class THelixTrack;
 
 
 class StVertexHelper: public TObject

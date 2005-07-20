@@ -40,8 +40,15 @@
 #define  __EVENTHELPER_ONLY__
 #include "StEventHelper.h"
 #undef   __EVENTHELPER_ONLY__
+#include <map>
 
 void Break(){printf("InBreak\n");}
+
+std::map<long,long>  myMap;
+typedef std::pair <long,long> MyPair;
+std::map <long,long> :: const_iterator myFinder;
+
+
 
 
 class StEventInspector : public TMemberInspector {
@@ -157,14 +164,24 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
   if (obj->InheritsFrom(StXRef::Class())){
 
      Long_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
+
+     myFinder = myMap.find((long)obj);
+     assert((inmap==0) == (myFinder==myMap.end()));
+
      if (inmap) return;
+     myMap.insert(MyPair((long)obj,1));     
      inmap = 1;fCount++;
   }
 
   if (obj->InheritsFrom(StStrArray::Class())){
 //     if (obj->IsA()==StSPtrVecTrackNode::Class()) Break();
      Long_t &inmap = (*fMap)(TMath::Hash(&obj,sizeof(void*)),(Long_t)obj);
+
+     myFinder = myMap.find((long)obj);
+     assert((inmap==0) == (myFinder==myMap.end()));
      if (inmap) return;
+     myMap.insert(MyPair((long)obj,2));     
+
      inmap = 2; fCount++;
      int vecobj = ( obj->IsA() == StSPtrVecObject::Class());  
 //     printf("%8d %p %s::%s\n",fLevel,(void*)obj,obj->GetName(),bwname);
@@ -192,12 +209,14 @@ ClassImp(StEventHelper)
 StEventHelper::StEventHelper(const TObject *evt,const char *opt)
 {
    fMap = new TExMap(10000);
+   myMap.clear();
    fObject = 0;
    Reset(evt,opt);
 }
 //______________________________________________________________________________
 StEventHelper::~StEventHelper()
 {
+   myMap.clear();
    delete fMap; fMap=0;
    Clear();
 }
@@ -210,6 +229,7 @@ void StEventHelper::Reset(const TObject *evt,const char *opt)
 {
    fObject = (TObject *)evt;
    Clear();
+   myMap.clear();
    fMap->Delete();
    if (!fObject) return;
    int kount=0;
@@ -262,23 +282,6 @@ THelixTrack *StEventHelper::MyHelix(THelixTrack *myHlx,const StHelixD *evHlx)
   myX[2]= evHlx->z(0.);
   
   myHlx->Set(myX,myDir,curv*h);
-#if 0
-  double s = 10;
-  double myXX[3];
-  myHlx->Step(s,myXX);
-  double diff = 0;
-  diff += pow(myXX[0]-evHlx->x(s),2);
-  diff += pow(myXX[1]-evHlx->y(s),2);
-  diff += pow(myXX[2]-evHlx->z(s),2);
-  diff = sqrt(diff);
-  if (diff>1.e-5) {
-  
-    printf(" X %g %g\n",myXX[0]-myX[0],evHlx->x(s)-myX[0]);
-    printf(" Y %g %g\n",myXX[1]-myX[1],evHlx->y(s)-myX[1]);
-    printf(" Z %g %g\n",myXX[2]-myX[2],evHlx->z(s)-myX[2]);
-    assert(diff<1.e-5);
-  }
-#endif
   return myHlx;		
 }		
 //______________________________________________________________________________
@@ -495,7 +498,7 @@ static const int     nlitra  = sizeof(plitra)/sizeof(Color_t);
     if (!(kind&kHRR)) ilitra = (++ilitra)%nlitra;
     int take = (kind&flag);
     if (!take) 	continue;
-    if (take&kHIT) take -=kHIT;
+//??    if (take&kHIT) take -=kHIT;
     if (!take) 	continue;
 
     np = 0;
@@ -701,44 +704,11 @@ int StFilterABC::fgDial=0;
 //______________________________________________________________________________
 StFilterABC::StFilterABC(const char *name,bool active):TNamed(name,""),fActive(active)
 {
-#ifdef OLDDISPLAY
-   char cbuf[200];
-   sprintf(cbuf,"__StEventControlPanel__.AddFilter((TObject*)%p);",(void*)this);
-   gROOT->ProcessLine(cbuf);
-#endif
-}
-//______________________________________________________________________________
-Int_t StFilterABC::Accept(StPoints3DABC *pnt, Color_t&, Size_t&, Style_t&)
-{
-  return Accept(pnt);
 }
 //______________________________________________________________________________
 void StFilterABC::SetDefs()
 {
-  for (int i=0; GetNams()[i]; i++) {GetPars()[i]=GetDefs()[i];}
-}
-//______________________________________________________________________________
-void   StFilterABC::Update()
-{
-#ifdef OLDDISPLAY
-   char cbuf[200];
-   float       *pars    = GetPars();
-   const float *defs    = GetDefs();
-   const char **namval  = GetNams();
-   int flagg = 2001;
-   if (!fgDial++) gROOT->LoadMacro("FilterDialog.C");
-   sprintf(cbuf
-  ,"new FilterDialog((char*)%p,(char**)%p,(float*)%p,(float*)%p,(int*)%p);"
-                    ,(void*)GetName(),(void*)namval,(void*)defs,(void*)pars,(void*)&flagg);
-   printf("%s\n",cbuf);
-   void *dial = (void*)gROOT->ProcessLineFast(cbuf);
-   printf("StFilterABC::Update() Waiting for update\n");
-   while(flagg) {gSystem->DispatchOneEvent(1);}
-   sprintf(cbuf,"delete ((FilterDialog*)%p);",(void*)dial);
-   printf("StFilterABC::Update: %s\n",cbuf);
-   gROOT->ProcessLine(cbuf);
-   printf("StFilterABC::Update() update finished\n");
-#endif
+  for (int i=0;GetNams() && GetNams()[i]; i++) {GetPars()[i]=GetDefs()[i];}
 }
    
 //______________________________________________________________________________
@@ -1163,6 +1133,29 @@ const StHit *StTrackHelper::GetHit(int idx) const
   if (!fHits)          	return 0;
   return fHits->at(idx);
 }
+//______________________________________________________________________________
+StMCTruth StTrackHelper::GetTruth(int byNumb,double rXYMin,double rXYMax) const
+{
+   StMCPivotTruth pivo(1);
+   int nHits = GetNHits();
+   int nUsed=0;
+   for (int jh=0;jh<nHits;jh++) {
+     const StHit *hit = GetHit(jh);
+     double r = sqrt(pow(hit->position().x(),2)+pow(hit->position().y(),2));
+     if (r<rXYMin)		continue;	
+     if (r>rXYMax) 		continue;	
+     int idTruth=hit->idTruth();
+     int wtTruth=hit->qaTruth();
+//     if (!wtTruth) wtTruth=1;
+     if (!idTruth || !wtTruth)	{
+       Warning("GetTruth","idTruth,wtTruth= %d %d",idTruth,wtTruth);
+       				continue;}
+     nUsed++; pivo.Add(idTruth,wtTruth);	
+   }		
+   if (!nUsed) return 0;
+   return pivo.Get(byNumb);
+}		
+		
 //______________________________________________________________________________
 Float_t  *StTrackHelper::GetPoints(int &npoints) const
 {
