@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.148 2005/07/18 22:37:17 fisyak Exp $
+# $Id: Construct,v 1.149 2005/07/21 14:34:40 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -184,7 +184,7 @@ if ( !$param::quiet ) {
 }
 PrintHash($env,"\$env->{") if ($param::debug);
 my @packages = ();
-find_PACKAGE(\&find_PACKAGE,"."); #print "Packages found: @packages\n";
+#find_PACKAGE(\&find_PACKAGE,"."); #print "Packages found: @packages\n";
 my @subdirs = ();
 # install includes
 my @DirsWithIncludes = glob "asps/*/.includes_for_export.flg asps/*/*/.includes_for_export.flg StDb/*/.includes_for_export.flg StarVMC/*/.includes_for_export.flg StarVMC/*/*/.includes_for_export.flg StRoot/*/.includes_for_export.flg StRoot/*/include/.includes_for_export.flg StRoot/StRTSClient/include/.includes_for_export.flg";
@@ -215,13 +215,16 @@ my @excludeDirList = qw(\. \.\. macros CVS html doc inc idl local run wrk exampl
 #my  $excludeDirList = "^(\.|\.\.|macros|CVS|html|doc|inc|idl|local|run|wrk|example|include|kumac.*)\$";
 my  $excludeDirList = "^(" . join ("|", @excludeDirList) . ")\$";
 #print "$excludeDirList\n";
-my  $items = "";
-if ( defined($SKIP_DIRS) ){ $items = join("|",split(" ",$SKIP_DIRS));}
+my  $items = "(";
+if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
 if ($STAR_LEVEL =~ /\.dev/ or $STAR_LEVEL =~ /\.DEV/) {
-  if ($items != "") {$items .= "|";}
-  $items .= "(SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp)";
-#  print "$items\n"; die; 
+  if ($items ne "(") { $items .= "|";}
+  $items .= "SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp";
+#  
 }
+if ($items ne '(') {$items .= ')';}
+else               {$items  = "";}
+# print "$items\n"; die; 
 #my $exlc = "StJetMaker"; 
 #if (! $param::include or $exlc !~ /$param::include/o) {if (! $items) {$items = $exlc;} else {$items .= "|" . $exlc;}}
 #
