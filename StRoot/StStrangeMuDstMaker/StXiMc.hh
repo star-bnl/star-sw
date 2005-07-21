@@ -66,7 +66,7 @@ public:
 
 protected:
   Int_t v0;
-  ClassDef(StXiMc,6)
+  ClassDef(StXiMc,7)
 };
 
 inline Int_t   StXiMc::charge() const {return parentCharge();}
@@ -96,8 +96,11 @@ inline Int_t   StXiMc::decayMode() const {return StKinkMc::decayMode();}
 
 
 /***********************************************************************
- * $Id: StXiMc.hh,v 3.7 2003/10/20 17:20:19 perev Exp $
+ * $Id: StXiMc.hh,v 3.8 2005/07/21 16:48:47 perev Exp $
  * $Log: StXiMc.hh,v $
+ * Revision 3.8  2005/07/21 16:48:47  perev
+ * Change ClassDef(StXiMc,6)==>7
+ *
  * Revision 3.7  2003/10/20 17:20:19  perev
  * Change the order of inheritance and increased version numbers
  *
