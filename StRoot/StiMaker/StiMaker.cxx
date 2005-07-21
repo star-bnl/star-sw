@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.150  2005/07/21 01:20:12  perev
+// clearmem is default now
+//
 // Revision 1.149  2005/07/20 17:33:25  perev
 // MultiVertex
 //
@@ -515,9 +518,9 @@ Int_t StiMaker::Make()
     }
   cout<< "StiMaker::Make() -I- Done"<<endl;
 
-  if (m_Mode)
+  if (1 || m_Mode)
     {
-    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
+//    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
       _toolkit->getHitFactory()->clear();
       _toolkit->getTrackNodeFactory()->clear();
       _toolkit->getTrackFactory()->clear();
