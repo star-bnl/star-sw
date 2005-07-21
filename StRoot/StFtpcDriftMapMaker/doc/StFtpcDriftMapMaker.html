@@ -18,7 +18,7 @@ VLINK="#088888" ALINK="#08DEB5" TYPE="FADEIN">
 <p> 
 StFtpcDriftMapMaker replaces St_fmg_Maker. It is a standalone program.
 
-<h3>  StFtpcDriftMapMaker recalculates the map for electron drift in the
+<h3>  StFtpcDriftMapMaker recalculates the maps for electron drift in the
 electric and magnetic field for the STAR Forward TPCs from parameters like gas composition, drift
 voltage and temperature. The magnetic field is taken from the gufld
 stored with the data processed in the current chain.  The heart of the code are the algorithms of both magboltz1 and
@@ -57,27 +57,39 @@ It is the same program used to calculate electron drift properties
 in the Garfield field simulation program. 
 
 <p>
-Use $STAR/StRoot/macros/FtpcDriftMapMaker.C to run StFtpcDriftMapMaker.
+Use $STAR/StRoot/macros/examples/FtpcDriftMapMaker.C to run StFtpcDriftMapMaker.
 <p>
-FtpcDriftMapMaker.C currently has one argument with which you can choose the magnetic field to be used:<BR>
-<TABLE cellspacing=2 cellpadding=0 border=0 align="center" valign="middle" width="100%">
-<TR>
-<TD><b> FullField</b></TD> <TD> Scale = 1. (this is the default option)</TD><TR>
-<TD><b> FieldOff</b></TD> <TD> Scale = 0.00002</TD><TR>
-<TD><b> HalfField</b></TD> <TD> Scale = 0.5</TD><TR>
-<TD><b> ReverseField</b></TD> <TD> Scale = -1. </TD><TR>
-
+FtpcDriftMapMaker.C  has three arguments:<BR>
+<TABLE cellspacing=3 cellpadding=0 border=0 align="center" valign="middle" width="100%"> <TR>
+<TD><b> map</b></TD> <TD> select magnetic field values</TD><TD>Default: = 2    </TD><TR>
+<TD>           </TD> <TD> = 1</TD> <TD> use constant field values</TD><TR>
+<TD>           </TD> <TD> = 2</TD> <TD> use mapped field values </TD><TR>
+<TD><b>factor</b></TD> <TD> field scaling factor </TD><TD> Default: = 1.0 (full field positive)</TD><TR>
+<TD></TD> <TD> > 0.8</TD> <TD>full field positive</TD><TR>
+<TD></TD> <TD> < 0.8 && > 0.2</TD> <TD>half field positive</TD><TR>
+<TD></TD> <TD> < 0.2 && > -0.2</TD> <TD>zero field </TD><TR>
+<TD></TD> <TD> > -0.8</TD> <TD>half field negative</TD><TR>
+<TD></TD> <TD> < -0.8</TD> <TD>full field negative</TD><TR>
 </TABLE>
-This may take several hours. Then write out the new
-StDb/params/ftpc/fclpars/padtrans.C, with a macro like 
-StRoot/macros/examples/SavePrimitive.C. 
+
+<br> FtpcDriftMapMaker.C may take several hours to run. Upon completion, it will write out the drift map tables: <br>
+<ul>
+<li> ftpcEField.C</li>
+<li> ftpcDriftField.C</li>
+<li> ftpcDeflection.C</li>
+<li> ftpcVDrift.C</li>
+<li> ftpcdDeflectiondP.C</li>
+<li> ftpcdVDriftdP.C</li>
+</ul>
+These files can be loaded into the Calibrations_ftpc offline database.
+
 
 <p>
 
 
 <p> 
-<i> This page was created by <a href=mailto:jcs@mppmu.mpg.de> Janet
-Seyboth</a> on January 20, 2001 </i>
+<i> This page was created by <a href=mailto:jcs@mppmu.mpg.de> Janet Seyboth</a> on January 20, 2001 </i><br>
+<i> This page was last updated by <a href=mailto:jcs@mppmu.mpg.de> Janet Seyboth</a> on July 21, 2005 </i>
 
 </html>
 
