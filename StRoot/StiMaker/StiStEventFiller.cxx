@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.59 2005/07/20 17:34:08 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.60 2005/07/21 21:50:24 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.60  2005/07/21 21:50:24  perev
+ * First/last point of track filled from node now
+ *
  * Revision 2.59  2005/07/20 17:34:08  perev
  * MultiVertex
  *
@@ -701,16 +704,22 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   StiKTNIterator tNode = track->rbegin();
   StiKTNIterator eNode = track->rend();
   StHit *lastHit=0;
+  StiKalmanTrackNode *lastNode=0;
   for (;tNode!=eNode;++tNode) 
-    {
+  {
       StiKalmanTrackNode *node = &(*tNode);
       if(!node->isValid()) 	continue;
       if( node->getChi2()>1000) continue;
       StiHit *stiHit = node->getHit();
       if (!stiHit)		continue;
       if (!stiHit->detector())	continue;
+      if (!lastHit) {
+        StThreeVectorF pos(node->x_g(),node->y_g(),node->z_g());
+        detInfo->setFirstPoint(pos);
+      }    
       StHit *hh = (StHit*)stiHit->stHit();
-      if (!lastHit) detInfo->setFirstPoint(hh->position());
+      if (!hh) 			continue;
+      lastNode = node;
       lastHit=hh;
       detInfo->addHit(hh,refCountIncr);
       hh->setFitFlag(1);
@@ -721,8 +730,11 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 //Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
       fillResHack(hh,stiHit,node);
 #endif
-    }
-  if (lastHit) detInfo->setLastPoint(lastHit->position());
+  }
+  if (lastHit) {
+    StThreeVectorF pos(lastNode->x_g(),lastNode->y_g(),lastNode->z_g());
+    detInfo->setLastPoint(pos);
+  }
   for (int i=0;i<int(sizeof(dets)/sizeof(int));i++) {
     if (!dets[i]) continue;
     detInfo->setNumberOfPoints(dets[i],static_cast<StDetectorId>(i));
