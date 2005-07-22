@@ -27,7 +27,7 @@ BemcHitList::BemcHitList() :
   kSigPed=5.0; 
 
   gMessMgr->Message("","I") 
-    <<" BemcHitList:: use kSigPed="<<kSigPed
+    <<"  BemcHitList::use kSigPed="<<kSigPed
     <<endm;
 }
 

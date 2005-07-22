@@ -15,9 +15,9 @@ int trigZ[2]={96300,0};  // zerobias
 int trigM[2]={96011,0}; // minBias
 int trigJ[2]={20,0}; // J/Psi
 
-void rdSt2print(Int_t nevents=100){
+void rdSt2print(Int_t nevents=10){
 
-  char * fname="outPPV-C/st_physics_6151011_raw_2020001.event.root";// daq1
+  char * fname="outPPV-E/st_physics_6151011_raw_2020001.event.root";// daq1
   //char * fname="outPPV-Z/st_zerobias_6151011_raw_2110001.event.root";// daq2
 
   char *outF="res.dat";
@@ -28,7 +28,7 @@ void rdSt2print(Int_t nevents=100){
   cout << " loading done " << endl;
      
   // Load my makers
-
+ 
   // create chain    
   chain = new StChain("bfc"); 
   //chain->SetDebug();

@@ -29,20 +29,23 @@ CtbHitList::CtbHitList() :
   mCtbThres_mev=1; //to reject slats with low dE for M-C data
   mCtbThres_ch=2 ;  //to reject slats with low ADC for real data
   geantE=new float [nBin];
-  
-  gMessMgr->Message("","I") 
-    <<" CtbHitList::set CtbThres_Ch (real)="<<mCtbThres_ch
-    <<"  or  CtbThres_MeV (M-C)="<<mCtbThres_mev
-    <<endm;
 }
 
 
 //==========================================================
 //==========================================================
 void
-CtbHitList::initRun(){
+CtbHitList::initRun(float fac){
   const float  mCtbEtaSeg=0.5,  mCtbPhiSeg=C_PI/30; // NEVER chang this two , JB
-  gMessMgr->Message("","I") <<" CtbHitList::initRun()"<<endm;
+  gMessMgr->Message("","I") <<" CtbHitList::initRun(), fac="<<fac<<endm;
+  mCtbThres_mev*=fac; // tmp to test cuts
+  mCtbThres_ch=(int) (fac*mCtbThres_ch);  // tmp to test cuts
+
+  gMessMgr->Message("","I") 
+    <<"  CtbHitList::initRun() CtbThres_Ch (real)="<<mCtbThres_ch
+    <<"  or  CtbThres_MeV (M-C)="<<mCtbThres_mev
+    <<endm;
+
   ScintHitList::initRun();
   int i;
   for(i=0;i<nBin;i++){

@@ -10,7 +10,7 @@ int rdMuDst2print(
 	  int nEve=17)
 { 
 
-  inDir="day0/outPPV-Z/"; 
+  inDir="outPPV-Z0/"; 
   file="st_physics_6151011_raw_2020001.MuDst.root";
   
   //  inDir="/star/u/mvl/mudst_dev/quick_fix/data/";
@@ -66,10 +66,11 @@ int rdMuDst2print(
 
     //   continue;     
 
-    int itr;
+    int itr; 
     for(itr=0;itr<nPrimTrAll;itr++) {
       StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
-      cout << "\nPrimary track " << itr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< endl;
+      cout << "\nPrimary track " << itr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
+      iv=pr_track->vertexIndex();
       for(iv=0; iv<nPrimV; iv++) {
 	cout << "\t primV("<<iv<<")  primDCA=" << pr_track->dca(iv) << endl;
       }

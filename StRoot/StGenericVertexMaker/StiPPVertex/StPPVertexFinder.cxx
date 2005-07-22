@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.5 2005/07/20 05:34:16 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.6 2005/07/22 21:02:08 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -42,6 +42,7 @@
 #define rxyL(t) sqrt(xL(t)*xL(t) + yL(t)*yL(t)) 
 #define xG(t)   (t->x_g())
 #define yG(t)   (t->y_g())
+#define zG(t)   (t->z_g())
 #define rxyG(t) sqrt(xG(t)*xG(t) + yG(t)*yG(t)) 
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
@@ -92,7 +93,7 @@ StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
   gMessMgr->Info() << "PPV-1 cuts have been activated, mTestMode=" << mTestMode<<endm;
   //.. set various params 
-  mMaxTrkDcaRxy = 2.0;  // cm, 
+  mMaxTrkDcaRxy = 3.0;  // cm, to match Sti prim tracks re-fit cut off 
   mMinTrkPt     = 0.20; // GeV/c           
   mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
   mMaxZradius   = 2.0;  //+sigTrack, to match tracks to vertex, was 1.0
@@ -108,9 +109,9 @@ StPPVertexFinder::Init() {
  // ... play with cuts, expert only
   switch(mTestMode){
   case 0: break; //use  default
-  case 1: mMaxZradius =4; break;
-  case 2: mMinMatchTr=4; break;
-  case 3: mMinAdcBemc*=2; mMinAdcEemc*=2; break;
+  case 1: mMaxZradius =5; break;
+  case 2: mMinMatchTr=3; break;
+  case 3: mMinAdcBemc*=1.5; mMinAdcEemc*=1.5; break;
   default:;
   }
 
@@ -364,6 +365,11 @@ StPPVertexFinder::fit(StEvent* event) {
     }
   }
 
+  if(mTestMode==5) ctbList->clear(); // test of cuts
+  if(mTestMode==6) bemcList->clear(); // test of cuts
+  if(mTestMode==7) eemcList->clear(); // test of cuts
+
+
   //get the Sti track container...
   StiTrackContainer* tracks = mToolkit->getTrackContainer();
    if(tracks==0) {
@@ -376,7 +382,7 @@ StPPVertexFinder::fit(StEvent* event) {
   
   //select reasonable tracks and add them to my list
   int k=0;
-  int mCtb=0,mBemc=0, mEemc=0,mTpc=0;
+  int kCtb=0,kBemc=0, kEemc=0,kTpc=0;
   int nmAny=0;
   for (StiTrackContainer::const_iterator it=(*tracks).begin();  it!=(*tracks).end(); ++it) {
     k++;
@@ -397,18 +403,18 @@ StPPVertexFinder::fit(StEvent* event) {
     //  dumpKalmanNodes(track);
     
     // ......... matcho various detectors ....................
-    if(mTestMode!=5)  matchTrack2CTB(track,t);
-    if(mTestMode!=6)  matchTrack2BEMC(track,t,242); // middle of tower in Rxy
-    if(mTestMode!=7)  matchTrack2EEMC(track,t,288); // middle of tower in Z
+    matchTrack2CTB(track,t);
+    matchTrack2BEMC(track,t,242); // middle of tower in Rxy
+    matchTrack2EEMC(track,t,288); // middle of tower in Z
     //.... all test done on this track .........
     mTrackData->push_back(t); 
 
     hA[5]->Fill(t.rxyDca);
 
-    if( t.mCtb>0 )  mCtb++;   
-    if( t.mBemc>0)  mBemc++;   
-    if( t.mEemc>0)  mEemc++;
-    if( t.mTpc>0 )  mTpc++;
+    if( t.mCtb>0 )  kCtb++;   
+    if( t.mBemc>0)  kBemc++;   
+    if( t.mEemc>0)  kEemc++;
+    if( t.mTpc>0 )  kTpc++;
  
     if(t.mCtb>0 || t.mBemc>0 || t.mEemc>0 || t.mTpc>0 ) nmAny++ ;
     //  t.print();
@@ -417,13 +423,13 @@ StPPVertexFinder::fit(StEvent* event) {
   ctbList ->print();
   bemcList->print();
   eemcList->print();
-  printf("\nTpcList size=%d nMatched=%d\n\n",mTrackData->size(),mTpc);
+  printf("\nTpcList size=%d nMatched=%d\n\n",mTrackData->size(),kTpc);
 
   ctbList ->doHisto();
   bemcList->doHisto();
   eemcList->doHisto();
 
-  gMessMgr->Info() << "StPPVertexFinder1::fit() nEve="<<mTotEve<<" , "<<nmAny<<" tracks with good DCA,survived matching CTB="<<mCtb<<" BEMC="<<mBemc<<" EEMC="<<mEemc<<endm;
+  gMessMgr->Info() << "StPPVertexFinder1::fit() nEve="<<mTotEve<<" , "<<nmAny<<" tracks with good DCA,survived matching CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
 
   if(nmAny<mMinMatchTr){
     gMessMgr->Info() << "StPPVertexFinder1::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
@@ -432,8 +438,8 @@ StPPVertexFinder::fit(StEvent* event) {
   }
   hA[0]->Fill(5);
 
-  if(mBemc)  hA[0]->Fill(6);
-  if(mEemc)  hA[0]->Fill(7);
+  if(kBemc)  hA[0]->Fill(6);
+  if(kEemc)  hA[0]->Fill(7);
 
   //............................................................
   // ...................... search for multiple vertices 
@@ -554,7 +560,7 @@ StPPVertexFinder::findVertex(VertexData &V) {
   float kSig= sqrt(2*(Lmax-Llow));
   float sigZ= (zHigh-zLow)/2/kSig;
   printf("  Z low/max/high=%f %f %f, kSig=%f, sig=%f\n",zLow,z0,zHigh,kSig,sigZ);
-  printf(" found  PPVertex-1(ID=%d,neve=%d) z0 =%.1f +/- %.1f\n",V.id,mTotEve,z0,sigZ);
+  printf(" found  PPVertex-1(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",V.id,mTotEve,z0,sigZ);
 
   // take x,y from beam line equation, TMP
   float x=mX0+z0*mdxdz;
@@ -595,10 +601,10 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
     else if (  t->mCtb<0) V.nCtbV++;
 
     if(  t->mBemc>0)       V.nBemc++;
-    else if (  t->mBemc<0) V.nBemc++;
+    else if (  t->mBemc<0) V.nBemcV++;
 
     if(  t->mEemc>0)       V.nEemc++;
-    else if (  t->mEemc<0) V.nEemc++;
+    else if (  t->mEemc<0) V.nEemcV++;
 
     if( t->anyMatch)     V.nAnyMatch++;
     else if (t->anyVeto) V.nAnyVeto++;
@@ -714,7 +720,7 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   TString tagPlp=" "; if((nTpc-nh)>10) tagPlp=" plp";
   TString tagMemb=" "; if(zH*zL<0) tagMemb=" memb";
 
-  cout <<"#e dumpKalmanNodes nNode="<<nn<<" actv: nTPC="<<nTpc<<" nHit="<<nh
+  cout <<"\n#e dumpKalmanNodes nNodes="<<nn<<" actv: nTPC="<<nTpc<<" nHit="<<nh
        <<" zL="<<zL<<" zH="<<zH <<tagPlp<<tagMemb
       <<endl;
  
@@ -955,7 +961,7 @@ bool
 StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   const float RxyMin=59, RxyMax=190, zMax=200;
   //generate bitt pattern for TPC nodes with hits
-
+ 
   vector<int> hitPatt;
   int nPos=0,nFit=0;
   int in=0;
@@ -964,14 +970,16 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   int jz0=0;
   StiKTNBidirectionalIterator it;
   for (it=track->begin();it!=track->end();it++) {
-    StiKalmanTrackNode& ktn = (*it);
-    float rxy=ktn.getX();
-    float z=ktn.z_g();
+    // StiKalmanTrackNode& ktn = (*it);
+    StiKalmanTrackNode* ktnp=& (*it);
+    float rxy=rxyG(ktnp); //ktn.getX();
+    float z=zG(ktnp);  //ktn.z_g();
     if(rxy<RxyMin) continue;
     if(rxy>RxyMax) continue;
     if(fabs(z)>zMax) continue;
+    //printf(" in=%d Z=%.2f  rXY=%.2f  lastRxy=%.2f\n",in,z,rxy,lastRxy);
     // .........node is within TPC fiducial volume
-    assert(lastRxy>rxy);
+    assert(lastRxy+1.>rxy); // sometimes nodes are 1 mm off, added 1 cm just in case
     lastRxy=rxy;
     if(in==0) lastZ=z;
     in++;
@@ -980,10 +988,10 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
       jz0=hitPatt.size();
     }
     lastZ=z;
-    const StiDetector * det=ktn.getDetector();
+    const StiDetector * det=ktnp->getDetector();
     assert(det);
-    bool active=ktn.getDetector()->isActive(ktn.getY(), ktn.getZ());
-    int hit=ktn.getHit()?1:0;
+    bool active=ktnp->getDetector()->isActive(yL(ktnp), zL(ktnp));
+    int hit=ktnp->getHit()?1:0;
     if(active) {
       hitPatt.push_back(hit);
       nPos++;
@@ -991,7 +999,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     }
     // cout<<"#m in="<<in<<" act="<<active<<" hit="<<hit<<" size="<<hitPatt.size()<<" jz0="<<jz0<<" z="<<z<<" Rxy="<<rxy<<endl; 
   }
-  cout<<"#m nFit="<<nFit<<" of nPos="<<nPos<<endl;
+  // cout<<"#m nFit="<<nFit<<" of nPos="<<nPos<<endl;
 
   if(nFit<  mMinFitPfrac  * nPos) return false; // too short fragment of a track
 
@@ -1004,6 +1012,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.6  2005/07/22 21:02:08  balewski
+ * bug fix & cleanup
+ *
  * Revision 1.5  2005/07/20 05:34:16  balewski
  * cleanup
  *

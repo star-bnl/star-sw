@@ -44,7 +44,7 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
   const int minCenter=4 , minMiss=6; // criteria for Match & Veto
   const int mxDev=2; // max # of deviations from expected pattern
 
-  printf("patt size=%d, jz0=%d\n",hit.size(),jz0);
+  // printf("patt size=%d, jz0=%d\n",hit.size(),jz0);
 
   int nPatt[2];
   int i;
@@ -53,7 +53,7 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
   // Scan Left end for missing hits
   memset(nPatt,0,sizeof(nPatt));
   for(i=0;i<(int)hit.size();i++) {
-    printf("i=%d hit=%d\n",i,hit[i]);
+    // printf("i=%d hit=%d\n",i,hit[i]);
     nPatt[hit[i]]++;
     if(nPatt[1]>mxDev) break;
     if(nPatt[0]<minMiss) continue;
@@ -61,12 +61,12 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
     break;
   }
 
-  printf("vetoL=%d   nUp=%d nDwn=%d\n\n",vetoL, nPatt[1],nPatt[0]);
+  // printf("vetoL=%d   nUp=%d nDwn=%d\n\n",vetoL, nPatt[1],nPatt[0]);
 
   // Scan Right end for missing hits
   memset(nPatt,0,sizeof(nPatt));
   for(i=hit.size()-1; i>=0;i--) {
-    printf("i=%d hit=%d\n",i,hit[i]);
+    // printf("i=%d hit=%d\n",i,hit[i]);
     nPatt[hit[i]]++;
     if(nPatt[1]>mxDev) break;
     if(nPatt[0]<minMiss) continue;
@@ -74,13 +74,13 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
     break;
   }
 
-  printf("vetoR=%d nUp=%d nDwn=%d\n\n",vetoR, nPatt[1],nPatt[0]);
+  // printf("vetoR=%d nUp=%d nDwn=%d\n\n",vetoR, nPatt[1],nPatt[0]);
 
   if(jz0>minCenter && jz0<(int)hit.size()-minCenter) { // examin membrane
     // Scan Left half at membrane
     memset(nPatt,0,sizeof(nPatt));
     for(i=jz0-1; i>=0;i--) {
-      printf("i=%d hit=%d\n",i,hit[i]);
+      //  printf("i=%d hit=%d\n",i,hit[i]);
       nPatt[hit[i]]++;
       if(nPatt[0]>mxDev) break;
       if(nPatt[1]<minCenter) continue;
@@ -88,13 +88,13 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
       break;
     }
     
-    printf("matchL=%d   nUp=%d nDwn=%d\n\n",matchL, nPatt[1],nPatt[0]);
+    // printf("matchL=%d   nUp=%d nDwn=%d\n\n",matchL, nPatt[1],nPatt[0]);
     
     
     // Scan Right half at membrane
     memset(nPatt,0,sizeof(nPatt));
     for(i=jz0;i<(int)hit.size();i++) {
-      printf("i=%d hit=%d\n",i,hit[i]);
+      // printf("i=%d hit=%d\n",i,hit[i]);
       nPatt[hit[i]]++;
       if(nPatt[0]>mxDev) break;
       if(nPatt[1]<minCenter) continue;
@@ -102,7 +102,7 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
       break;
     }
     
-    printf("matchR=%d   nUp=%d nDwn=%d\n\n",matchR, nPatt[1],nPatt[0]);
+    // printf("matchR=%d   nUp=%d nDwn=%d\n\n",matchR, nPatt[1],nPatt[0]);
     
   } // end of membrane test
 

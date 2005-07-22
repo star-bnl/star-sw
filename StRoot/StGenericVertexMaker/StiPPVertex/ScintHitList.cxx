@@ -42,6 +42,8 @@ ScintHitList::initRun(){
   memset(active,0,nBin*sizeof(int));
   nActive=0;
   clear();
+  gMessMgr->Message("","I") 
+    <<"Clear ScintHitList for "<<myName<<endm;
 }
 
 //==========================================================
@@ -216,8 +218,10 @@ ScintHitList::print(int k){
   printf("\n%sHitList: nActive=%d nFired=%d nTrack=%d nMatch=%d\n",myName.Data(),nActive, nFired,nTrack,nMatch);
   printf("iBin iEta iPhi active:fired:track  (LEFT: phi/deg, eta)\n");
   int i;
+  int nb=0;
   for(i=0;i<nBin;i++){
     if(k==0 && fired[i]==0 && track[i]==0) continue;
+    nb++;
     int iPhi,iEta;
     iBin2iPhiEta(i,iPhi,iEta);
     char mm=' ';
@@ -225,6 +229,7 @@ ScintHitList::print(int k){
     float etaF=bin2EtaLeft(iEta);
     printf("%3d %3d %3d   %d:%d:%d %c  (%.1f, %.3f)\n",i,iEta,iPhi,active[i],fired[i],track[i],mm,phi0+iPhi*dPhi/3.1416*180., etaF );
   }
+  printf("--- %d printed bins\n",nb);
 }
 
 //==========================================================

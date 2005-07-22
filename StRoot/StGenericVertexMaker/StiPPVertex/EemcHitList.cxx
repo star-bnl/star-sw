@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <cmath>
 
-
 #include "math_constants.h"
 
 #include <StMessMgr.h>
@@ -36,21 +35,10 @@ EemcHitList::EemcHitList(StEEmcDbMaker* x, uint y, EEmcGeomSimple *z) :
   assert(nEta<=MaxEtaBins);
   float  kSigPed=5.0; 
   eeDb-> setThreshold( kSigPed);
-
-#if 0
-  // default EtaBins 2.0 -> 1.086
-  static const float defaultEtaBin[] = {
-    2.0    ,
-    1.9008 , 1.8065 , 1.7168 , 1.6317 , 1.5507 , 1.4738 ,
-    1.4007 , 1.3312 , 1.2651 , 1.2023 , 1.1427 , 1.086 
-  };
-  // etaHL=defaultEtaBin;
-#endif
-
   // the first 13 entries mark the bounds of the 12 eta Bins. 
   etaHL= geomE->getEtaBinRangeArray();
   gMessMgr->Message("","I") 
-    <<" EemcHitList:: use kSigPed="<<kSigPed
+    <<"  EemcHitList::use kSigPed="<<kSigPed
     <<endm;
 }
 
