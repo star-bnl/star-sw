@@ -20,7 +20,7 @@ class CtbHitList : public ScintHitList {
   CtbHitList();
   ~CtbHitList();
   void clear();
-  void initRun(); 
+  void initRun(float fac=1.); 
   void buildFromMC(St_DataSet *gds);
   void buildFromData(StTriggerData *trgD);
   virtual int etaBin(float eta);
