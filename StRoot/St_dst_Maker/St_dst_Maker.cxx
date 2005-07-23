@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.83 2005/07/20 19:13:33 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.84 2005/07/23 02:50:35 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.84  2005/07/23 02:50:35  perev
+// array replaced by TArray
+//
 // Revision 1.83  2005/07/20 19:13:33  perev
 // Cleanup
 //
@@ -258,7 +261,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.83 2005/07/20 19:13:33 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.84 2005/07/23 02:50:35 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -489,9 +492,14 @@ Int_t  St_dst_Maker::Filler(){
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
 
   scs_spt_st* sgroups = scs_spt->GetTable();
-  int svtindex[10000];  memset(svtindex,0,sizeof(svtindex));
+
+  TArrayI svtIndex(10000);  int *svtindex= svtIndex.GetArray(); 
+
   for(int i=0; i<scs_spt->GetNRows(); i++,sgroups++){
-    assert(sgroups->id >=0 && sgroups->id< 10000);
+    assert(sgroups->id >=0);
+    if (sgroups->id >= svtIndex.GetSize()) {
+        svtIndex.Set(svtIndex.GetSize()*1.5);
+        svtindex= svtIndex.GetArray();} 
     svtindex[sgroups->id] = sgroups->id_globtrk;
   }
  // Get pointer to svt cluster analysis 
@@ -653,9 +661,8 @@ Int_t  St_dst_Maker::Filler(){
 		mypoint.pos_err[0] = svtx + (1L<<20)*svty11;
 		mypoint.pos_err[1] = svty10 + (1L<<10)*svtz;
 		mypoint.id_track = 0;
-static int nTimes=0; nTimes++;
                 int idx = dat->id;
-		assert(idx>=0 && idx< 10000);
+                assert(idx < svtIndex.GetSize());
 		mypoint.id_track  = svtindex[idx];
 		// Add the new point ; if allready allocated, will just add
 		// if realloc required, this method will increase the table
