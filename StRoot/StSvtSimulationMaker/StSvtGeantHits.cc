@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.cc,v 1.6 2004/03/30 21:27:12 caines Exp $
+ * $Id: StSvtGeantHits.cc,v 1.7 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.cc,v $
+ * Revision 1.7  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.6  2004/03/30 21:27:12  caines
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
@@ -27,6 +30,7 @@
  *
  **************************************************************************/
 
+#include <string.h>
 #include "StSvtGeantHits.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StDbUtilities/StSvtWaferCoordinate.hh"
@@ -37,10 +41,15 @@ ClassImp(StSvtGeantHits)
 StSvtGeantHits::StSvtGeantHits(int barrel, int ladder, int wafer, int hybrid):StSvtHybridObject(barrel,ladder,wafer,hybrid)
 {
  mNumOfHits = 0;
- mPeak = new float[MAX_HITS];
- mWaferCoord = new StSvtWaferCoordinate[MAX_HITS];
+ mPeak        = new float[MAX_HITS];
+ mWaferCoord  = new StSvtWaferCoordinate[MAX_HITS];
  mGlobalCoord = new StGlobalCoordinate[MAX_HITS];
- mLocalCoord = new StSvtLocalCoordinate[MAX_HITS];
+ mLocalCoord  = new StSvtLocalCoordinate[MAX_HITS];
+ mIdTrack     = new int[MAX_HITS];
+
+ memset(mPeak   ,0,sizeof(mPeak   [0])*MAX_HITS);
+ memset(mIdTrack,0,sizeof(mIdTrack[0])*MAX_HITS);
+
 }
 
 StSvtGeantHits::~StSvtGeantHits()
@@ -48,6 +57,7 @@ StSvtGeantHits::~StSvtGeantHits()
   delete [] mWaferCoord;
   delete [] mGlobalCoord;
   delete [] mLocalCoord;
+  delete [] mIdTrack;
 }
 
 void  StSvtGeantHits::setNumOfHits(int nhits)
@@ -85,7 +95,15 @@ void  StSvtGeantHits::setGeantHit(int index ,StSvtWaferCoordinate* waferCoord)
   mWaferCoord[index].setAnode(waferCoord->anode());
   mWaferCoord[index].setTimeBucket(waferCoord->timebucket());
 } 
+void  StSvtGeantHits::setTrackId(int index ,int idtrk)
+{
+  mIdTrack[index] = idtrk;
+}
 
+int StSvtGeantHits::getTrackId(int index)
+{
+  return mIdTrack[index];
+}
 
 void StSvtGeantHits::setGlobalCoord( int index, StThreeVector<double>* x ){
 

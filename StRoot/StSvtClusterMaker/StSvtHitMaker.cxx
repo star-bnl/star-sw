@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.35 2004/11/03 21:36:04 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.36 2005/07/23 03:37:33 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.36  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.35  2004/11/03 21:36:04  caines
  * Remove calls that need database and event time information to correct place in InitRun not Init
  *
@@ -122,9 +125,10 @@
 #include "StSvtHitMaker.h"
 
 #include "StChain.h"
-#include "St_DataSetIter.h"
-#include "St_ObjectSet.h"
+#include "TDataSetIter.h"
+#include "TObjectSet.h"
 #include "StMessMgr.h"
+#include "StMCTruth.h"
 
 #include "TFile.h"
 #include "TNtuple.h"
@@ -568,7 +572,9 @@ void StSvtHitMaker::SaveIntoTable(int numOfClusters,  int index)
       spt->id_cluster= mSvtBigHit->svtHitData()[i].id_cluster;
       spt->id_globtrk= mSvtBigHit->svtHitData()[i].id_globtrk ;
       spt->id_match= mSvtBigHit->svtHitData()[i].id_match;
-      spt->id_mctrack= 0 ;
+      int tru = mSvtBigHit->svtHit()[i].idTruth();
+      int qua = mSvtBigHit->svtHit()[i].qaTruth();
+      spt->id_mctrack= (int)StMCTruth(tru,qua);
       spt->id_track= mSvtBigHit->svtHitData()[i].id_track;
       spt->cov[0]= mSvtBigHit->svtHit()[i].positionError().x()
 	*mSvtBigHit->svtHit()[i].positionError().x();

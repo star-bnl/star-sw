@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.27 2004/03/18 04:02:56 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.28 2005/07/23 03:37:33 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.28  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.27  2004/03/18 04:02:56  caines
  * Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
  *
@@ -413,6 +416,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
           mSvtAnalysis->CluFirstTimeBin();
           mSvtAnalysis->CluLastTimeBin();
           mSvtAnalysis->MomentAnalysis();
+          mSvtAnalysis->updateTruth();
 	  //          mSvtAnalysis->SetBadAnTb(mNumOfClusters);   //note I dont look at decon here
 
 
@@ -448,7 +452,6 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
       }
     }
   }
-
   //printClusterInfo();
  
   //GetPixelData();

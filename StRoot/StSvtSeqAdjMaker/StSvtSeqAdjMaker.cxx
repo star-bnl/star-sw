@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.54 2004/04/03 01:17:25 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.55 2005/07/23 03:37:34 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.55  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.54  2004/04/03 01:17:25  caines
  * I think this time I should really have stopped valgrind complaing lets see
  *
@@ -175,6 +178,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "StSequence.hh"
+#include "StMCTruth.h"
 #include "StSvtClassLibrary/StSvtData.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
@@ -208,7 +212,6 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   anolist = NULL;
   mInvProd = NULL;
   mProbValue = NULL;
-  tempSeq1 = new StSequence[128];
 
   // Set up some defaults
 
@@ -592,11 +595,8 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	      // Skip Bad anodes
 	      //
-	      if( BadAnode){
-		if( BadAnode->isBadAnode(Anode)){
-		  continue;
-		}
-	      }
+	      if( BadAnode && BadAnode->isBadAnode(Anode)) continue;
+
 	      if( doCommon) CommonModeNoiseSub(iAnode);
 	      else SubtractFirstAnode(iAnode);
 	      //if (Debug() && !doCommon)MakeHistogramsAdc(mHybridRawData,index,Anode,1);
@@ -641,9 +641,10 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   // > than m_thresh_lo and  > m_n_seq_hi pixels with a count
   // > than m_thresh_hi  
 
-  int  nSeqOrig, nSeqNow, length, count1, count2;
+  int  nSeqOrig, nSeqNow, nSeqTruth, length, count1, count2;
   int startTimeBin,  status;
   StSequence* Sequence;
+  StMCTruth*   SeqTruth;
   unsigned char* adc;
   //int ExtraBefore = 1;
   // int ExtraAfter = 3;
@@ -653,10 +654,13 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
 
   //Anode is the index into the anolist array
    status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+   status= mHybridRawData->getListTruth     (iAnode,nSeqTruth,SeqTruth );
   //status= mHybridRawData->getSequences(Anode,nSeqOrig,Sequence);
 
   nSeqNow = 0;
-  for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
+  StSequence tempSeq1[128];
+  StMCTruth  tempTru1[128];
+    for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
     
     adc=Sequence[nSeq].firstAdc;
     length = Sequence[nSeq].length;
@@ -712,7 +716,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
 	  tempSeq1[nSeqNow].length =  (startTimeBin +length) -
 	    tempSeq1[nSeqNow].startTimeBin ;
 	}
-	
+	if (SeqTruth) tempTru1[nSeqNow]=SeqTruth[nSeq];
 	nSeqNow++;
       }
       
@@ -723,10 +727,13 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
 
   mNumOfSeq=0;
   if( nSeqNow > 0){
-  mNumOfSeq = MergeSequences(tempSeq1,nSeqNow);
+  if (SeqTruth) SeqTruth=tempTru1;
+  mNumOfSeq = MergeSequences(tempSeq1,nSeqNow,SeqTruth);
   }
 
   mHybridAdjData->setListSequences(iAnode, Anode,mNumOfSeq, tempSeq1);
+  if (SeqTruth)
+  mHybridAdjData->setListTruth    (iAnode, Anode,mNumOfSeq, tempTru1);
   
   //if (nSeqNow)
   //  cout << "For Anode=" << Anode << " Number sequnces was=" << nSeqOrig << " Number now=" << nSeqNow << endl;
@@ -743,9 +750,10 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   //Perform E896 like zero suppression. Find pixels that have consecutive ADC 
   // counts that do not have the shape of noise
 
-  int nSeqBefore, nSeqNow, count1;
+  int nSeqBefore, nSeqNow, count1, nSeqTruth;
   int startTimeBin, length, status;
   StSequence* Sequence;
+  StMCTruth*  SeqTruth;
   unsigned char* adc;
   //int ExtraBefore=1;
   //int ExtraAfter=3;
@@ -757,8 +765,10 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   double tempBuffer = 0;
   
   nSeqNow = 0;
-  
+  StSequence tempSeq1[128];
+  StMCTruth  tempTru1[128];
   status = mHybridAdjData->getListSequences(iAnode,nSeqBefore,Sequence);
+  status = mHybridRawData->getListTruth    (iAnode,nSeqTruth ,SeqTruth );
   
   for(int Seq = 0; Seq < nSeqBefore; Seq++) 
     {
@@ -813,7 +823,7 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
 		tempSeq1[nSeqNow].length =  (startTimeBin +length) -
 		  tempSeq1[nSeqNow].startTimeBin ;
 	      }
-	      
+	      if(SeqTruth) tempTru1[nSeqNow] = SeqTruth[Seq];
 	      nSeqNow++;
 	    
 	    }
@@ -824,9 +834,11 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   
   
   if( nSeqBefore >0){
-    
-    mNumOfSeq = MergeSequences(tempSeq1, nSeqNow);
+    if (SeqTruth) SeqTruth = tempTru1;
+    mNumOfSeq = MergeSequences(tempSeq1, nSeqNow,SeqTruth);
     mHybridAdjData->setListSequences(iAnode, Anode,mNumOfSeq, tempSeq1);
+    if (SeqTruth)
+    mHybridAdjData->setListTruth    (iAnode, Anode,mNumOfSeq, tempTru1);
   }
   //cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
   
@@ -835,26 +847,28 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
 }
 //_____________________________________________________________________________
 
-Int_t StSvtSeqAdjMaker::MergeSequences( StSequence* seq, int nSeq){
+Int_t StSvtSeqAdjMaker::MergeSequences( StSequence* seq, int nSeq, StMCTruth* tru){
 
   // Check and see if the end of one sequence overlaps the start of the next
   // if it does merge sequences
 
   int nSeqNow = 0;
   int EndTime;
-
+  StMCPivotTruth pivo(1);
+  if (tru) pivo.Add(tru[0]);
   for( int i=1; i<nSeq; i++){
     
     if( (seq[nSeqNow].startTimeBin + seq[nSeqNow].length) 
 	>= seq[i].startTimeBin){
       EndTime = seq[i].startTimeBin + seq[i].length;
       seq[nSeqNow].length = EndTime - seq[nSeqNow].startTimeBin;
+      if (tru) { pivo.Add(tru[i]); tru[nSeqNow] = pivo.Get();}
+      
     }
     else{
       nSeqNow++;
-      seq[nSeqNow].startTimeBin = seq[i].startTimeBin;
-      seq[nSeqNow].length = seq[i].length;
-      seq[nSeqNow].firstAdc = seq[i].firstAdc;
+      seq[nSeqNow] = seq[i];
+      if (tru){ pivo.Reset(); pivo.Add(tru[i]);} 
     }
 
   }
@@ -1124,7 +1138,6 @@ Int_t StSvtSeqAdjMaker::Reset(){
 
   //delete mInvProd;
   //delete mProbValue;
-  //delete [] tempSeq1;
 
   mSvtDataSet = NULL;
   mSvtAdjData = NULL;

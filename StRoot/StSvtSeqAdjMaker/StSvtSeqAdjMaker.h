@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.24 2004/03/18 04:05:02 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.25 2005/07/23 03:37:34 perev Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.25  2005/07/23 03:37:34  perev
+// IdTruth + Cleanup
+//
 // Revision 1.24  2004/03/18 04:05:02  caines
 // Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour, also initialise some variables that valgrind was complaining about - didnt really need to as they are sent back from function which initialises them properly always but doesnt hurt
 //
@@ -102,6 +105,7 @@ class TObjectSet;
 class StSvtHybridCollection;
 class StSvtBadAnode;
 class StSvtProbValues;
+class StMCTruth;
 
 class StSvtSeqAdjMaker : public StMaker
 {
@@ -126,7 +130,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t FindBlackAnodes(); // Find Black anodes on each hybrid
   Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
-  Int_t MergeSequences(StSequence* Seq, int nSeq); // Merge overlapping sequences
+  Int_t MergeSequences(StSequence* Seq, int nSeq,StMCTruth *Tru=0); // Merge overlapping sequences
   Int_t CreateHist(Int_t tNuOfHyb);
   void  MakeHistogramsProb(int index,int Anode);
   void  MakeHistogramsAdc(StSvtHybridData* hybridData, int index,int Anode, int Count);
@@ -137,7 +141,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.24 2004/03/18 04:05:02 caines Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.25 2005/07/23 03:37:34 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
@@ -154,7 +158,6 @@ class StSvtSeqAdjMaker : public StMaker
   StSvtInverseProducts* mInvProd;         //!
   StSvtPedSub* mSvtPedSub;                //!
   StSvtProbValues* mProbValue;            //!
-  StSequence* tempSeq1;                   //!
 
   const char* mPedFile;                   //!
 

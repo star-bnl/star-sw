@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixelsD.cc,v 1.2 2003/09/07 03:49:05 perev Exp $
+ * $Id: StSvtHybridPixelsD.cc,v 1.3 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -23,6 +23,7 @@
 
 ClassImp(StSvtHybridPixelsD)
 
+//_____________________________________________________________________________
 StSvtHybridPixelsD::StSvtHybridPixelsD() : 
   StSvtHybridObject(), TArrayD()
 {
@@ -36,6 +37,7 @@ StSvtHybridPixelsD::StSvtHybridPixelsD() :
   mPedOffset = 0;
 }
 
+//_____________________________________________________________________________
 StSvtHybridPixelsD::StSvtHybridPixelsD(int barrel, int ladder, int wafer, int hybrid, int size, double* x) : 
   StSvtHybridObject(barrel, ladder, wafer, hybrid), TArrayD()
 {
@@ -50,15 +52,20 @@ StSvtHybridPixelsD::StSvtHybridPixelsD(int barrel, int ladder, int wafer, int hy
 
   if (size)
     if (x)
-      Set(mTotalNumberOfPixels,(double*)x);
+      Set(mTotalNumberOfPixels,x);
     else
       Set(size);
   else
     Set(mTotalNumberOfPixels);
+  mTrackId.Set(GetSize());
+  mTrackId.Reset(0);
+
+  mTruthTmp=0;
 }
 
+//_____________________________________________________________________________
 StSvtHybridPixelsD::~StSvtHybridPixelsD()
-{}
+{delete mTruthTmp;}
 
 StSvtHybridPixelsD& StSvtHybridPixelsD::operator = (StSvtHybridPixelsD& h)
 {
@@ -71,6 +78,7 @@ StSvtHybridPixelsD& StSvtHybridPixelsD::operator = (StSvtHybridPixelsD& h)
   return *this;
 }
 
+//_____________________________________________________________________________
 StSvtHybridPixelsD& StSvtHybridPixelsD::operator + (StSvtHybridPixelsD& h)
 {
   double x1, x2;
@@ -87,6 +95,7 @@ StSvtHybridPixelsD& StSvtHybridPixelsD::operator + (StSvtHybridPixelsD& h)
   return *this;
 }
 
+//_____________________________________________________________________________
 double StSvtHybridPixelsD::getPixelContent(int anode, int time)
 {
   // Returns the pixel content based on the anode and time bin numbers
@@ -95,70 +104,28 @@ double StSvtHybridPixelsD::getPixelContent(int anode, int time)
   return (double)At(index);
 }
 
-void StSvtHybridPixelsD::addToPixel(int anode, int time, char x)
+//_____________________________________________________________________________
+void StSvtHybridPixelsD::addToPixel(int anode, int time, double x,int trackId)
 {
   int index = getPixelIndex(anode, time);
-  addToPixel(index, x);
+  addToPixel(index, x,trackId);
 }
 
-void StSvtHybridPixelsD::addToPixel(int index,  char x)
-{
-  double x1, sum;
-
-   x1 = At(index);
-
-   sum = x1 + x;
-
-   if (sum < 255)
-     AddAt(sum,index);
-   else
-     AddAt(255,index);
-}
-
-void StSvtHybridPixelsD::addToPixel(int anode, int time, int x)
-{
-  int index = getPixelIndex(anode, time);
-  addToPixel(index, x);
-}
-
-void StSvtHybridPixelsD::addToPixel(int index, int x)
+//_____________________________________________________________________________
+void StSvtHybridPixelsD::addToPixel(int index, double x, int trackId)
 {
   double x1, sum;
 
   x1 = At(index);
-  
   sum = x1 + x;
-  
-  if (sum >=0 && sum < 255)
-    AddAt(sum,index);
-  else if (sum < 0)
-    AddAt(0,index);
-  else if (sum > 255)
-    AddAt(255,index);
+  AddAt(sum,index);
+
+  if (fabs(x)<=0) return;
+  if (!mTruthTmp) mTruthTmp = new StMCPivotTruthMap;
+  mTruthTmp->Add(index,trackId,fabs(x));
 }
 
-void StSvtHybridPixelsD::addToPixel(int anode, int time, double x)
-{
-  int index = getPixelIndex(anode, time);
-  addToPixel(index, x);
-}
-
-void StSvtHybridPixelsD::addToPixel(int index, double x)
-{
-  double x1, sum;
-
-  x1 = At(index);
-  
-  sum = x1 + x;
-  
-  if (sum >=0 && sum < 255)
-    AddAt(sum,index);
-  else if (sum < 0)
-    AddAt(0,index);
-  else if (sum > 255)
-    AddAt(255,index);
-}
-
+//_____________________________________________________________________________
 int StSvtHybridPixelsD::getPixelIndex(int anode, int time)
 {
   // Returns an internal index for pixel (anode,time). 
@@ -171,8 +138,34 @@ int StSvtHybridPixelsD::getPixelIndex(int anode, int time)
   return index;
 }
 
+//_____________________________________________________________________________
 void StSvtHybridPixelsD::reset()
 {
   for (int i=0;i<mTotalNumberOfPixels;i++)
     AddAt(mPedOffset,i);  
 }
+
+//_____________________________________________________________________________
+StMCTruth  StSvtHybridPixelsD::getTrackId(int index)
+{
+  return mTrackId[index];
+}
+//_____________________________________________________________________________
+void StSvtHybridPixelsD::updateTruth()
+{
+
+  if (!mTruthTmp) return;
+  long index=-1;
+  while(1) {
+    StMCTruth tru = mTruthTmp->Iter(index);
+    if (index==-1) break;
+    mTrackId.AddAt(tru,(int)index);
+  }
+  delete  mTruthTmp; mTruthTmp=0;
+}  
+  
+  
+
+
+
+

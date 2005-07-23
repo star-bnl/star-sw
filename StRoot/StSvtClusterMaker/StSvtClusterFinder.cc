@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.9 2003/09/02 17:59:06 perev Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.10 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.10  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.9  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -30,6 +33,9 @@
  *  now runs faster.
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.10  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.9  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -71,8 +77,7 @@ StSvtClusterFinder::StSvtClusterFinder()
 
 hybdata = NULL;
 sequence = NULL;
-anolist = NULL;
-tempList = NULL;
+mAnolist = NULL;
 cluIndex = 0;
 mNumOfAnodes = 0;
 mSequence = 0;
@@ -105,7 +110,7 @@ StSvtClusterFinder::~StSvtClusterFinder()
 void StSvtClusterFinder::setHybridPointer(StSvtHybridData* hdata)
 {
   hybdata = hdata;
-  mNumOfAnodes = hdata->getAnodeList(anolist);
+  mNumOfAnodes = hdata->getAnodeList(mAnolist);
 }
 
 
@@ -146,7 +151,7 @@ void StSvtClusterFinder::getClusterMembers(int& mAnode, int &mSeq)
    ++cluIndex;
    memCount = 0;
    mCluster[cluIndex-1][memCount] = 1000*mAnode + mSeq;
-   //cout<<anolist[mAnode]<<endl;
+   //cout<<mAnolist[mAnode]<<endl;
    //cout<<mSeq<<endl;
    mContainer1[0] =  mCluster[cluIndex-1][memCount];
    mSeqFlag[mAnode][mSeq] = 1;
@@ -241,10 +246,10 @@ int StSvtClusterFinder::getSeqOnRight(int mAnode, int mSeqStart, int mSeqEnd, in
               
     for(int mRightSeq = 0; mRightSeq < mRightSequence ; mRightSeq++)
       {
-       if(anolist[mAnode] == 240)
+       if(mAnolist[mAnode] == 240)
         break;
                   
-       if(anolist[mRightAnode] != anolist[mAnode] + 1) //are they consecutive?
+       if(mAnolist[mRightAnode] != mAnolist[mAnode] + 1) //are they consecutive?
         break;
                    
        mRightSeqStart = sequence[mRightSeq].startTimeBin;
@@ -316,13 +321,13 @@ int StSvtClusterFinder::getSeqOnLeft(int mAnode, int& breakAn,int mSeqStart, int
 
      for(int mLeftSeq = 0; mLeftSeq < mLeftSequence ; mLeftSeq++)
 	{
-         if(anolist[mAnode] == 1)
+         if(mAnolist[mAnode] == 1)
            {
             breakAn = 0;
 	    break;
            }
                   
-          if(anolist[mLeftAnode] != anolist[mAnode] - 1) //are they consecutive?
+          if(mAnolist[mLeftAnode] != mAnolist[mAnode] - 1) //are they consecutive?
             {
              breakAn = mAnode;
              break;
@@ -411,7 +416,7 @@ int StSvtClusterFinder::ClusterSequence(int clu, int mem)
 
 int StSvtClusterFinder::ClusterActualAnode(int listAn)
 {
- return anolist[listAn];
+ return mAnolist[listAn];
 }
 
 

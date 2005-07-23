@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.27 2005/07/11 19:20:56 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.28 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,8 +18,8 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
- * Revision 1.27  2005/07/11 19:20:56  caines
- * Add in shift due to pasa response that is accounted for in the real data t0 calc.
+ * Revision 1.28  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
  *
  * Revision 1.26  2005/02/09 14:33:35  caines
  * New electron expansion routine
@@ -171,10 +171,10 @@ StSvtSimulationMaker::~StSvtSimulationMaker()
 {
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor"<<endm;
 
-  if (mSvtAngles) delete mSvtAngles;
-  if (mSvtSimulation) delete mSvtSimulation;
-  if (mElectronCloud) delete mElectronCloud;
-  if (mCoordTransform) delete mCoordTransform;
+  delete mSvtAngles;
+  delete mSvtSimulation;
+  delete mElectronCloud;
+  delete mCoordTransform;
 
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor...END"<<endm; 
 }
@@ -551,6 +551,7 @@ Int_t StSvtSimulationMaker::Make()
     {
       double anode,time;
       volId = trk_st[j].volume_id;
+      int trackId = trk_st[j].track_p;
       //cout <<"geant hit #"<<j<<" volumeID="<< volId << " x=" << trk_st[j].x[0] << " y=" << trk_st[j].x[1] << " z=" <<  trk_st[j].x[2]<<endl;
       //outGeantSvtGeom<< volId <<endl;
       if( volId > 7000) continue; // SSD hit
@@ -589,12 +590,10 @@ Int_t StSvtSimulationMaker::Make()
       
       //########### get barrel and ladder numbers correctly #################
       
-      if(layer == 1 || layer == 2)
-        barrel = 1;
-      else if(layer == 3 || layer == 4)
-        barrel = 2;
-      else
-        barrel = 3;
+static const int barrels[]={3,1,1,2,2};
+      barrel = 3;
+      if (layer<=4) barrel = barrels[layer];
+
       if ( !strncmp(mConfig->getConfiguration(), "Y1L", strlen("Y1L")) ) {
         if ((wafer == 1) || (wafer == 2) || (wafer == 3))
           ladder = 2;
@@ -625,18 +624,22 @@ Int_t StSvtSimulationMaker::Make()
         else vd=vd*1e-5;
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
-      
-      double PasaShift=0.1/vd*25.; //100 um shift from pasa
-
+     
       mSvtSimulation->setDriftVelocity(vd);
-      mSvtSimulation->doCloud(driftTime,energy,theta,phi);
-      mSvtSimulation->fillBuffer(anode,time-PasaShift,svtSimDataPixels);
+      mSvtSimulation->doCloud(driftTime,energy,theta,phi,trackId);
+      mSvtSimulation->fillBuffer(anode,time,svtSimDataPixels);
            
-      if (Debug()) FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak());
+      if (Debug()) 
+	FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak(),trackId);
       
     }
-     
-  cout<<"bad hits:"<<tmpBadCount<<endl;
+  int nSimDataPixels = mSvtSimPixelColl->size();
+  for (int index=0;index<nSimDataPixels;index++) {
+    svtSimDataPixels  = (StSvtHybridPixelsD*)mSvtSimPixelColl->at(index);
+    if (!svtSimDataPixels) continue;
+    svtSimDataPixels->updateTruth();
+  }
+  if (Debug()) gMessMgr->Info() <<"bad hits:"<<tmpBadCount<<endm;
   if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()...END" << endm;
   return kStOK;
 }
@@ -645,7 +648,7 @@ Int_t StSvtSimulationMaker::Make()
 //____________________________________________________________________________
 void StSvtSimulationMaker::FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
                     StSvtWaferCoordinate* waferCoord,StThreeVector<double>* VecG,
-		    StThreeVector<double>* VecL, double peak)
+		    StThreeVector<double>* VecL, double peak,int idtrk)
 { 
   StSvtGeantHits* geantHit;
   
@@ -662,6 +665,7 @@ void StSvtSimulationMaker::FillGeantHit(int barrel, int ladder, int wafer, int h
   geantHit->setLocalCoord(counter[index],VecL);
   geantHit->setGlobalCoord(counter[index],VecG);
   geantHit->setPeak(counter[index],peak);
+  geantHit->setTrackId(counter[index],idtrk);
   ++counter[index];
   geantHit->setNumOfHits(counter[index]);
 }
@@ -677,8 +681,7 @@ void StSvtSimulationMaker::Clear(const char*)
   //all will be deleted by StMaker::Clear()
   mSvtGeantHitColl = NULL;
 
-  if (counter) delete counter;
-  counter=NULL;
+  delete counter; counter=NULL;
 
   StMaker::Clear();
   

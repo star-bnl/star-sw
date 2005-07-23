@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.15 2005/02/09 14:33:36 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.16 2005/07/23 03:37:34 perev Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.16  2005/07/23 03:37:34  perev
+// IdTruth + Cleanup
+//
 // Revision 1.15  2005/02/09 14:33:36  caines
 // New electron expansion routine
 //
@@ -113,7 +116,7 @@ class StSvtSimulationMaker : public StMaker
   
   void FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
                     StSvtWaferCoordinate* waferCoord,StThreeVector<double>* VecG,
-		    StThreeVector<double>* VecL, double peak);  
+		    StThreeVector<double>* VecL, double peak,int idtrk);  
 
 
   Int_t getConfig();
@@ -172,7 +175,7 @@ class StSvtSimulationMaker : public StMaker
     
     
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.15 2005/02/09 14:33:36 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.16 2005/07/23 03:37:34 perev Exp $ built "__DATE__" "__TIME__; return cvs;}
     
 
   

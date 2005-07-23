@@ -48,6 +48,7 @@ public:
   double prob2(double num , double  sigma);
   int getLowTBin();
   int getHiTBin();
+  int getTrackId() const 		{return mTrackId;}
   double getTimeCenter();
   double getTimeWidth();
   double getPeak();
@@ -66,6 +67,7 @@ private:
   int mOption;
   int mLowTBin;
   int mHiTBin;
+  int mTrackId;
 
   double mDriftVel;
   double mTimeBinSize;

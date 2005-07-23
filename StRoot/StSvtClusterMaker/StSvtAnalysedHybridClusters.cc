@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.13 2004/11/24 02:41:35 jeromel Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.14 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.14  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.13  2004/11/24 02:41:35  jeromel
  * Minor protection issue on delete
  *
@@ -137,6 +140,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(StSvtAnalysis* mSvtAnalysis,
     mSvtHit[hit].setFlag((unsigned char)(mSvtAnalysis->GetCluFlag(hit)));
     mSvtHit[hit].setHardwarePosition((long)mHardWarePosition<<4);
     mSvtHit[hit].setCharge(mSvtAnalysis->GetCluCharge(hit));
+    mSvtHit[hit].setIdTruth(mSvtAnalysis->GetTruth(hit));
     
     // Take jitter out of t0 caused by SVT clock being 8 3rds of RHIC clock
     mPos[hit].setX((float)mSvtAnalysis->GetMeanClusterTimeBin(hit)+T0Jitter);
@@ -188,6 +192,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit,
   mSvtHit[mNumOfHits].setFlag((unsigned char)(mSrsHit->flag));
   mSvtHit[mNumOfHits].setHardwarePosition(mHardWarePosition<<4);
   mSvtHit[mNumOfHits].setCharge(mSrsHit->de[0]*300000); // put GEANT dE roughly into ADC counts
+  mSvtHit[mNumOfHits].setIdTruth(mSrsHit->id_mchit); // put truth
   
   mPos[mNumOfHits].setX(WaferCoord->timebucket());
   mPos[mNumOfHits].setY(WaferCoord->anode());

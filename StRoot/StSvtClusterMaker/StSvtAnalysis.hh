@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.hh,v 1.8 2003/01/28 20:27:49 munhoz Exp $
+ * $Id: StSvtAnalysis.hh,v 1.9 2005/07/23 03:37:33 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.hh,v $
+ * Revision 1.9  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.8  2003/01/28 20:27:49  munhoz
  * new filters for clusters
  *
@@ -33,14 +36,40 @@
 
 #ifndef STSVTANALYSIS_HH
 #define STSVTANALYSIS_HH
+#include  <string.h> 
 
+#include  "TArrayC.h" 
 #include  "myPoint.h" 
 #include  "StSvtHybridCluster.hh"
 
 class StSvtHybridData;
 class StSvtHybridBadAnodes;
 class StSequence;
-
+class StSvtAnalysisAux
+{
+public:		
+  int mCluFirstAnode;                     //!
+  int mCluLastAnode;                      //!
+  int mCluFirstTimeBin;                   //!
+  int mCluLastTimeBin;                    //!
+  int mCluFlag;                           //!
+  int m_oneortwo_flag;                    // added by JT
+  int mCluPeakAdc;                        //!
+  int mCluNumPixels;                      //!
+  int mCluNumAnodes;                      //!
+  int mHybridNum;                         //!
+  int mCluID;                             //!
+  int mCluDeconvID;                       //!
+  StSvtClusterMemberInfo* mInfo;          //!
+  int mTruth;
+  double mCluCharge;                      //!
+  double mMeanClusterTimeBin;             //!
+  double mMeanClusterAnode;               //!
+  double mSecondMomClusterTimeBin;        //!
+  double mSecondMomClusterAnode;          //!
+  double mCluXCov;                        //!
+  double mCluYCov;                        //!
+};
 class StSvtAnalysis 
 {
 
@@ -53,7 +82,6 @@ public:
 		     int PedOffset);
   void setArrays(int TotalNumberOfHybrids);
   void setMemory();
-  void setMoreMemory(int numOfClusters);
   void calcMoments(int clu);
   void oneOrTwoAnodeMoments(int clu, int peakPosTim);
   void finalMoments(int clu , int numAnodes);
@@ -75,6 +103,7 @@ public:
   int    GetnSvtClu();
   int    GetCluID(int clu);
   int    GetCluDeconvID(int clu);
+  int    GetTruth(int clu);
   double    GetCluCharge(int clu);
   double GetMeanClusterAnode(int clu);
   double GetMeanClusterTimeBin(int clu);
@@ -83,7 +112,7 @@ public:
   double GetCluXCov(int clu);
   double GetCluYCov(int clu);
   void   Report(int index);
-  void   ResetMeanValues();
+//void   ResetMeanValues();
   void   SetBadAnTb(int numClus);
   void   LoadAnodeGains();
 
@@ -100,6 +129,7 @@ public:
   void   SetHybIndex(int index);
   int    FillRawAdc();
   void   ClearRawAdc();
+  void   updateTruth();
 
 private:
 
@@ -133,25 +163,10 @@ private:
   StSvtHybridCluster* mHybridCluster;      //!
   StSvtHybridBadAnodes* mSvtBadAnode;             //!
   StSequence* mSvtSequence;                //!
-  int* mCluFirstAnode;                     //!
-  int* mCluLastAnode;                      //!
-  int* mCluFirstTimeBin;                   //!
-  int* mCluLastTimeBin;                    //!
-  int* mCluFlag;                           //!
-  int* m_oneortwo_flag;                    // added by JT
-  int* mCluPeakAdc;                        //!
-  int* mCluNumPixels;                      //!
-  int* mCluNumAnodes;                      //!
-  int* mHybridNum;                         //!
-  int* mCluID;                             //!
-  int* mCluDeconvID;                       //!
-  double* mCluCharge;                      //!
-  double* mMeanClusterTimeBin;             //!
-  double* mMeanClusterAnode;               //!
-  double* mSecondMomClusterTimeBin;        //!
-  double* mSecondMomClusterAnode;          //!
-  double* mCluXCov;                        //!
-  double* mCluYCov;                        //!
+  
+  TArrayC mAuxArr;
+  int mMaxClu;
+  StSvtAnalysisAux *mAux;                  //!
 
   int** m_countBadAn;                      //!
   int** m_countBadTb;                      //!

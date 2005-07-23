@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.8 2004/03/30 21:27:12 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.9 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.9  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.8  2004/03/30 21:27:12  caines
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
@@ -61,6 +64,8 @@ public:
   void setGeantHit(int index , StSvtWaferCoordinate* waferCoord);
   void setLocalCoord( int index, StThreeVector<double>* x );
   void setGlobalCoord(int index, StThreeVector<double>* x);
+  void setTrackId(int index ,int idtrk);
+  int  getTrackId(int index);
 
   int numberOfHits();
   float peak(int index);
@@ -71,19 +76,19 @@ public:
 private:
 
   int mNumOfHits;
-  StSvtWaferCoordinate* mWaferCoord;  //!
-  StSvtLocalCoordinate* mLocalCoord;  //!
-  StGlobalCoordinate*   mGlobalCoord; //!
- 
+  StSvtWaferCoordinate *mWaferCoord;  //!
+  StSvtLocalCoordinate *mLocalCoord;  //!
+  StGlobalCoordinate   *mGlobalCoord; //!
+  int                  *mIdTrack;
   float *mPeak; // mV
 
   ClassDef(StSvtGeantHits,1)
 };
 
-inline int StSvtGeantHits::numberOfHits(){return mNumOfHits;}
-inline float StSvtGeantHits::peak(int index){return mPeak[index];}
-inline StSvtWaferCoordinate* StSvtGeantHits::waferCoordinate(){return mWaferCoord;}
-inline StGlobalCoordinate* StSvtGeantHits::globalCoordinate(){return mGlobalCoord;}
-inline StSvtLocalCoordinate* StSvtGeantHits::localCoordinate(){ return mLocalCoord;}
+inline int StSvtGeantHits::numberOfHits()                     {return mNumOfHits  ;}
+inline float StSvtGeantHits::peak(int index)                  {return mPeak[index];}
+inline StSvtWaferCoordinate* StSvtGeantHits::waferCoordinate(){return mWaferCoord ;}
+inline StGlobalCoordinate* StSvtGeantHits::globalCoordinate() {return mGlobalCoord;}
+inline StSvtLocalCoordinate* StSvtGeantHits::localCoordinate(){return mLocalCoord ;}
 
 #endif
