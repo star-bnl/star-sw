@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.11 2005/02/09 14:33:35 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.12 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.12  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.11  2005/02/09 14:33:35  caines
  * New electron expansion routine
  *
@@ -50,6 +53,7 @@
 
 #include "StSvtSignal.hh"
 #include "StSvtSimulation.hh"
+#include "StMCTruth.h"
 
 //#include "tables/St_svg_geom_Table.h"
 
@@ -129,9 +133,9 @@ void StSvtSimulation::setPasaSigAttributes(int pasaSigAttributes, int numOfAnode
 
 
 //____________________________________________________________________________
-void StSvtSimulation::doCloud(double time, double Energy,double mTheta,double mPhi)
+void StSvtSimulation::doCloud(double time, double Energy,double mTheta,double mPhi,int trackId)
 {
-  mElectronCloud->setPar(Energy,mTheta,mPhi,mTimeBinSize);  //this has to be done for each hit
+  mElectronCloud->setPar(Energy,mTheta,mPhi,mTimeBinSize,trackId);  //this has to be done for each hit
   mElectronCloud->setDriftVelocity(mDriftVelocity);
   mElectronCloud->CalcExpansion(time);
   //cout<<"sigAn="<<mElectronCloud->getSigmaAnode()<<" sigT="<<mElectronCloud->getSigmaDrift()<<endl;
@@ -181,13 +185,12 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixe
 	  if(adc==0.0) continue;
 	  adc = adc/3.90625;   // in counts with 1 count <-> 4mV*1000/1024
 	  if(adc > mPeakSignal) mPeakSignal = adc;
-	  
+          int trackId = mSvtSignal->getTrackId();
+	  	  
 	  if(mPasaDebug) mPasaSignals.mTempBuffer[counter][n-1] = adc;
 	  	  
 	  int pixelIndex = svtSimDataPixels->getPixelIndex(anode, n - 1);	     
-	  double adc1 = svtSimDataPixels->getPixelContent(anode,n - 1);
-	  adc+=adc1;
-	  svtSimDataPixels->AddAt(adc,pixelIndex);
+	  svtSimDataPixels->addToPixel(pixelIndex, adc,trackId);
 	  //adc can be negative - it should be taken care of during rounding to 8 bits
 	}
       

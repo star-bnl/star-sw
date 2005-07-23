@@ -18,13 +18,13 @@ class StSvtHybridPixelsD;
 
 typedef struct  PasaSignalAttributes
 {
-   int anode[SvtSim_MaxBufferSize];                   //actual anode
-   double mPeak[SvtSim_MaxBufferSize];
+   int anode         [SvtSim_MaxBufferSize];              //actual anode
+   double mPeak      [SvtSim_MaxBufferSize];
    double mTimeCenter[SvtSim_MaxBufferSize];
-   double mTimeWidth[SvtSim_MaxBufferSize];
+   double mTimeWidth [SvtSim_MaxBufferSize];
    double mUnderShoot[SvtSim_MaxBufferSize];
    double mTempBuffer[SvtSim_MaxBufferSize][128];
-   double mCharge[SvtSim_MaxBufferSize];
+   double mCharge    [SvtSim_MaxBufferSize];
 };
 
 class StSvtSimulation:public TObject
@@ -40,7 +40,7 @@ public:
   void setTrappingConst(double trapConst);
   void setPasaSigAttributes(int pasaSigAttributes, int numOfAnodesPerHit=0);
  
-  void doCloud(double time, double Energy,double mTheta,double mPhi);
+  void doCloud(double time, double Energy,double mTheta,double mPhi,int trackId);
   void fillBuffer(double mAnHit, double mTimeHit, StSvtHybridPixelsD *svtSimDataPixels); 
  
   PasaSignalAttributes getPasaSigAttributes();

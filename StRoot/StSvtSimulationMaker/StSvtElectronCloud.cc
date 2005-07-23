@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtElectronCloud.cc,v 1.6 2005/02/09 14:33:35 caines Exp $
+ * $Id: StSvtElectronCloud.cc,v 1.7 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtElectronCloud.cc,v $
+ * Revision 1.7  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.6  2005/02/09 14:33:35  caines
  * New electron expansion routine
  *
@@ -34,7 +37,7 @@ ClassImp(StSvtElectronCloud)
 StSvtElectronCloud::StSvtElectronCloud()
 {
   setSiliconProp();               //important - sets SVT silicon properties
-
+  mTrackId = 0;
   mTotCharge = 0;
   mChargeNow = 0;
   
@@ -110,9 +113,9 @@ void StSvtElectronCloud::setTrappingConst(double trapConst)
  
 }
 
-void StSvtElectronCloud::setPar(double energy,double theta, double phi, double timBinSize)
+void StSvtElectronCloud::setPar(double energy,double theta, double phi, double timBinSize,int trackId)
 {
-    
+  mTrackId = trackId;  
   mTimBinSize = timBinSize;
   mEnergy = energy;
   mTheta = theta;

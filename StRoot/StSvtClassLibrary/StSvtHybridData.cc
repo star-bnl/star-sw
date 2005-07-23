@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.9 2004/04/29 03:45:37 perev Exp $
+ * $Id: StSvtHybridData.cc,v 1.10 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.10  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.9  2004/04/29 03:45:37  perev
  * fill array by -1. walgrind complained non itializeds variable
  *
@@ -50,38 +53,34 @@
 
 ClassImp(StSvtHybridData)
 
+//____________________________________________________________________________
 StSvtHybridData::StSvtHybridData() : StSvtHybridObject()
 {
   // Default Constructor
-  nAnodes = 0;
   mSCAZero =0;
   mTimeZero = 0;
-  anodeList = NULL;       
-  nSeq = NULL;            
-  seq = NULL;    
 }
 
+//____________________________________________________________________________
 StSvtHybridData::StSvtHybridData(int barrel, int ladder, int wafer, int hybrid) : 
   StSvtHybridObject(barrel, ladder, wafer, hybrid)
 {
   //This constructor has four input parameters: Barrel, Ladder, Wafer and Hybrid number (as expected).
-  nAnodes = 0;
   mSCAZero = 0;
   mTimeZero = 0;
-  anodeList = NULL;       
-  nSeq = NULL;            
-  seq = NULL;    
 }
 
+//____________________________________________________________________________
 StSvtHybridData::~StSvtHybridData()
 {
-  delete [] anodeList;       
-  delete [] nSeq;            
-  for (int ianode=0;ianode<nAnodes;ianode++)
-    if (seq[ianode]) delete seq[ianode];
-  delete [] seq;
+//   delete [] anodeList;       
+//   delete [] nSeq;            
+//   for (int ianode=0;ianode<nAnodes;ianode++)
+//     if (seq[ianode]) delete seq[ianode];
+//   delete [] seq;
 }
 
+//____________________________________________________________________________
 StSvtHybridData::StSvtHybridData(const StSvtHybridData& hybrid)
 {
   // Copy Constructor
@@ -89,163 +88,147 @@ StSvtHybridData::StSvtHybridData(const StSvtHybridData& hybrid)
   mLadder   = hybrid.mLadder;
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
-  nAnodes   = hybrid.nAnodes;
   mTimeZero = hybrid.mTimeZero;
   mSCAZero  = hybrid.mSCAZero;
 
-  anodeList = new int[nAnodes];
-  nSeq = new int[nAnodes];
-  seq =  new StSequence*[nAnodes];
-
-  for(int an = 0; an < nAnodes; an++)
-    {
-      anodeList[an] = hybrid.anodeList[an];
-      nSeq[an] = hybrid.nSeq[an];
-      seq[an] = new StSequence[nSeq[an]];
-
-      for(int mseq = 0; mseq < nSeq[an] ; mseq++)
-	{
-         seq[an][mseq].startTimeBin =  hybrid.seq[an][mseq].startTimeBin;
-	 seq[an][mseq].firstAdc =  hybrid.seq[an][mseq].firstAdc;
-	 seq[an][mseq].length =  hybrid.seq[an][mseq].length;
-	}
-    }
-  
+  seq       = hybrid.seq;  
+  anodeList = hybrid.anodeList;
+  lookUp    = hybrid.lookUp;
 }
 
+//____________________________________________________________________________
 StSvtHybridData& StSvtHybridData::operator = (const StSvtHybridData& hybrid)
 {
   mBarrel   = hybrid.mBarrel;
   mLadder   = hybrid.mLadder;
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
-  nAnodes   = hybrid.nAnodes;
   mTimeZero = hybrid.mTimeZero;
   mSCAZero  = hybrid.mSCAZero;
-  
-  anodeList = new int[nAnodes];
-  nSeq = new int[nAnodes];
-  seq =  new StSequence*[nAnodes];
-
-  for(int an = 0; an < nAnodes; an++)
-    {
-      anodeList[an] = hybrid.anodeList[an];
-      nSeq[an] = hybrid.nSeq[an];
-      seq[an] = new StSequence[nSeq[an]];
-
-      for(int mseq = 0; mseq < nSeq[an] ; mseq++)
-	{
-         seq[an][mseq].startTimeBin =  hybrid.seq[an][mseq].startTimeBin;
-	 seq[an][mseq].firstAdc =  hybrid.seq[an][mseq].firstAdc;
-	 seq[an][mseq].length =  hybrid.seq[an][mseq].length;
-	}
-    }
-  
+  seq       = hybrid.seq;  
+  anodeList = hybrid.anodeList;
+  lookUp    = hybrid.lookUp;
   return *this;
 }
 
+//____________________________________________________________________________
 int StSvtHybridData::getAnodeList(int*& list)
 {
   // returns the number of anodes of a given hybrid that has one or more sequences of data. 
   // The anodeList contains the number (ID) of such anodes. 
   // In the case of raw data, it returns always 240 anodes.
-
-  list = anodeList;
-  return nAnodes;
+  if (!anodeList.size()) setAnodeList();
+  list = &anodeList[0];
+  return anodeList.size();
 }
 
+//____________________________________________________________________________
 int StSvtHybridData::getSequences(int anode, int& nSequence, StSequence*& sequence)
 {
   // provides the number of sequences each anode has (nSequences) and a list of the sequences (sequence).
   // The structure StSequence (from StarClassLibrary) gives the first time bin of the sequence, 
   // the length of the sequence and a pointer for the first ADC of the sequence.
 
-
   nSequence = 0;
-  sequence = NULL;
-  for (int i=0;i<nAnodes;i++) {
-
-    if (anodeList[i]==anode) {
-      nSequence = nSeq[i];
-      sequence = seq[i];
-    }    
-  }
-	  
+  sequence  = 0;
+  if (!lookUp.size()) setAnodeList();
+  if (anode>=(int)lookUp.size())	return 0;
+  int i = lookUp[anode];
+  assert(i<(int)seq.size());
+  if (i<0 ) 				return 0;
+  nSequence = seq[i].size();
+  sequence  = &(seq[i][0]);
   return 0;
 }
 
+//____________________________________________________________________________
 int StSvtHybridData::getListSequences(int listID, int& nSequence, StSequence*&  sequence)
 {
   nSequence = 0;
   sequence = NULL;
-  if(listID >= 0 && listID < nAnodes)
+  if(listID >= 0 && listID < (int)seq.size())
     {
-      nSequence = nSeq[listID];
-      sequence = seq[listID];
+      nSequence =  seq[listID].size();
+      sequence  = &seq[listID][0];
     }
   return 0;
 }
+//____________________________________________________________________________
+int StSvtHybridData::getListTruth(int listID, int& nSequence, StMCTruth*&  sequence)
+{
+  nSequence = 0;
+  sequence = NULL;
+  if(listID >= 0 && listID < (int)seq.size())
+    {
+      nSequence =  seq[listID].mTruth.size();
+      sequence  = &seq[listID].mTruth[0];
+    }
+  if(!nSequence) sequence=0;
+  return 0;
+}
 
+//____________________________________________________________________________
 int StSvtHybridData::setListSequences(int listID, int Anode, int& nSequence, StSequence* tempSeq)
 {  
-  if (nAnodes == 0){
-    nAnodes = 240;
-    anodeList = new int[nAnodes];
-    memset(anodeList,-1,nAnodes*sizeof(int)); //fills by crazy (-1) VP
-  }
 
-  anodeList[listID] = Anode;
-  if (!nSeq) {
-    nSeq = new int[nAnodes];
-    for(int i=0; i<nAnodes; i++)
-      nSeq[i] = 0;
-      
+  int nAnodes = seq.size();
+  if (!nAnodes) {
+     nAnodes = 240; 
+     seq.resize(0);
+     seq.resize(nAnodes);
+     anodeList.resize(0);
+     lookUp.resize(0);
   }
-
-  if (!seq) {
-    seq = new StSequence*[nAnodes];
-    for(int i=0; i<nAnodes; i++)
-      seq[i] = NULL;
-  }
-
   // Resets the sequences for a given anode 
   if(listID >= 0 && listID < nAnodes){
-    if (seq[listID])
-      delete [] seq[listID];
-    if( nSequence > 0){
-      seq[listID] = new StSequence[nSequence];
-      for( int i=0; i<nSequence; i++){
-	seq[listID][i].startTimeBin = tempSeq[i].startTimeBin;
-	seq[listID][i].firstAdc = tempSeq[i].firstAdc;
-	seq[listID][i].length = tempSeq[i].length;
-      }	  
-    }
-    nSeq[listID]=nSequence;
+    seq[listID].resize(nSequence);
+    seq[listID].mAnode = Anode;
+    seq[listID].mTruth.resize(0);
+    memcpy(&(seq[listID][0]),tempSeq,nSequence*sizeof(StSequence));
+  }
+  return 0;
+}
+//____________________________________________________________________________
+int StSvtHybridData::setListTruth(int listID, int Anode, int& nSequence, StMCTruth* tempTru)
+{  
+
+  int nAnodes = seq.size();
+  // Resets the sequences for a given anode 
+  if(listID >= 0 && listID < nAnodes){
+    assert(Anode==seq[listID].mAnode);
+    assert((int)seq[listID].size()==nSequence);
+    seq[listID].mTruth.resize(nSequence);
+    memcpy(&(seq[listID].mTruth[0]),tempTru,nSequence*sizeof(StMCTruth));
   }
   return 0;
 }
 
+//____________________________________________________________________________
 int StSvtHybridData::setAnodeList()
 {
   // Loops over anode list and removes from the list those anodes who no longer have any sequences on them
  
   int newTot=0;
-  
-  if (!anodeList) {
-    anodeList = new int[nAnodes];
-    for(int i=0; i<nAnodes; i++)
-      anodeList[i] = i+1;
-  }
-
+  int nAnodes = seq.size();  
+  anodeList.resize(nAnodes);
+  int maxAnode = 0;
   for(int i=0; i<nAnodes; i++){
-
-    if( nSeq[i]!=0){
-      nSeq[newTot]=nSeq[i];
-      seq[newTot]=seq[i];
-      anodeList[newTot]=anodeList[i];
-      newTot++;
+    if(!seq[i].size()) continue;
+    if (maxAnode<seq[i].mAnode) maxAnode=seq[i].mAnode;
+    if (newTot!=i) {
+      seq[newTot].mAnode = seq[i].mAnode;
+      seq[newTot].swap(seq[i]);
+      seq[newTot].mTruth.swap(seq[i].mTruth);
     }
+    anodeList[newTot] = seq[newTot].mAnode;
+    newTot++;
   }
-  nAnodes=newTot;
+  nAnodes = newTot;
+  seq.resize(nAnodes);
+  anodeList.resize(nAnodes);
+  lookUp.resize(0);
+  lookUp.resize(maxAnode+1,-1);
+  for(int i=0; i<nAnodes; i++){lookUp[seq[i].mAnode] = i;}
+  
   return 0;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.20 2004/04/23 15:57:32 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.21 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -62,6 +62,9 @@
  *           
  * 
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.21  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.20  2004/04/23 15:57:32  caines
  * Flag as bad hits with 1 anode and peak less than 11
  *
@@ -132,6 +135,7 @@
 #include <stdlib.h>
 #include "StMessMgr.h"
 #include "StSequence.hh"
+#include "StMCTruth.h"
 #include "StDAQMaker/StSVTReader.h"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
@@ -159,7 +163,8 @@ StSvtAnalysis::StSvtAnalysis(int TotalNumberOfHybrids)
   mDriftMom1 = 0, mAnodeMom1 = 0;
   mDriftMom2 = 0, mAnodeMom2 = 0; mMom0 = 0, mNeff = 0;
   mX_err=72., mY_err=75.;                          //default bin size/::sqrt(12)
-
+  
+  mMaxClu=0;
   setMemory();
   setArrays(TotalNumberOfHybrids);
 
@@ -170,71 +175,10 @@ void StSvtAnalysis::setMemory()
   //call all new's here in init and hope we never go above 500. If we do we recall new and make it
   //the larger size. Sanjeev
 
-  tempMemberInfo           = new StSvtClusterMemberInfo*[500];	 
-
-  mCluFlag                 = new int[500];     //heap not the stack to increase speed.
-  m_oneortwo_flag          = new int[500];     //added by JT
-  mCluPeakAdc              = new int[500];     //note new is very slow to I do this here and only
-  mCluNumPixels            = new int[500];     //recall if more than 500 clusters/hybrid. Very unlikely
-  mCluNumAnodes            = new int[500];     //number of anodes>1 ADC
-  mCluCharge               = new double[500];     //ideally should make these static so they are on the 
-  mMeanClusterTimeBin      = new double[500];  //Mean Time
-  mMeanClusterAnode        = new double[500];  //Mean Anode
-  mSecondMomClusterTimeBin = new double[500];  //2nd momemnt Time
-  mSecondMomClusterAnode   = new double[500];  //2nd momemnt Anode
-  mCluXCov                 = new double[500];  //Cov or error in Anode
-  mCluYCov                 = new double[500];  //Cov or error in Time
-  mCluFirstAnode           = new int[500];     //First Anode
-  mCluLastAnode            = new int[500];     //Last  Anode
-  mCluFirstTimeBin         = new int[500];     //First Time
-  mCluLastTimeBin          = new int[500];     //Last  Time
-  mHybridNum               = new int[500];     //unique hybrid number
-  mCluID                   = new int[500];     //unique ID of cluster
-  mCluDeconvID             = new int[500];     //points to the parent cluster if deconvoluted
-
-  assert(tempMemberInfo);
-  assert(mCluLastTimeBin);          assert(mCluFirstTimeBin);
-  assert(mCluFirstAnode);           assert(mCluLastAnode);
-  assert(mCluCharge);               assert(mCluFlag);
-  assert(mMeanClusterTimeBin);      assert(mMeanClusterAnode); 
-  assert(mSecondMomClusterTimeBin); assert(mSecondMomClusterAnode); 
-  assert(mCluXCov);                 assert(mCluYCov);
-  assert(mCluPeakAdc);              assert(mCluNumPixels);           assert(mCluNumAnodes);
-  assert(mHybridNum);               assert(mCluID);                  assert(mCluDeconvID);
-
- 
+  mMaxClu = (mMaxClu)? mMaxClu*2 : 500;
+  mAuxArr.Set(mMaxClu*sizeof(StSvtAnalysisAux));
+  mAux = (StSvtAnalysisAux*)mAuxArr.GetArray();
 }
-
-void StSvtAnalysis::setMoreMemory(int numOfClusters)
-{
- if (numOfClusters>500)                                //Then we have to allocate more memory.
- {
-   mCluFlag                 = new int[numOfClusters];  //then just refill. Will speed up a lot.
-   m_oneortwo_flag          = new int[numOfClusters];  // added by JT
-   mCluPeakAdc              = new int[numOfClusters];
-   mCluNumPixels            = new int[numOfClusters];
-   mCluNumAnodes            = new int[numOfClusters];
-   mHybridNum               = new int[numOfClusters];
-   mCluID                   = new int[numOfClusters];
-   mCluDeconvID             = new int[numOfClusters];
-   mCluCharge               = new double[numOfClusters];  //shouldn't call these each time. Make static and
-   mMeanClusterTimeBin      = new double[numOfClusters];
-   mMeanClusterAnode        = new double[numOfClusters];
-   mSecondMomClusterTimeBin = new double[numOfClusters];
-   mSecondMomClusterAnode   = new double[numOfClusters];
-   mCluXCov                 = new double[numOfClusters];
-   mCluYCov                 = new double[numOfClusters];
-
-   assert(mCluCharge);               assert(mCluFlag);
-   assert(mMeanClusterTimeBin);      assert(mMeanClusterAnode); 
-   assert(mSecondMomClusterTimeBin); assert(mSecondMomClusterAnode); 
-   assert(mCluXCov);                 assert(mCluYCov);
-   assert(mCluPeakAdc);              assert(mCluNumPixels);           assert(mCluNumAnodes);
-   assert(mHybridNum);               assert(mCluID);                  assert(mCluDeconvID);
- }	
-
-}
-
 
 void StSvtAnalysis::setArrays(int TotalNumberOfHybrids)
 {
@@ -274,7 +218,6 @@ StSvtAnalysis::~StSvtAnalysis()
 {
 
 } 
-
 void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
 				StSvtHybridData* hybRawData,  
                                 StSvtHybridCluster* hybClu,
@@ -291,12 +234,10 @@ void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
   mSvtBadAnode  =  BadAnodes;
 
   mNumOfClusters = mHybridCluster->getNumberOfClusters();
-  if (mNumOfClusters>500) {
-    tempMemberInfo =  new StSvtClusterMemberInfo*[mNumOfClusters];	 
-    assert(tempMemberInfo);
-  }
+  if (mNumOfClusters>mMaxClu) setMemory();
 
   //this is called for each new event
+
    {for (int i=0; i<NumberOfHybrids; i++) {
      {for (int j=0; j<242; j++) m_countBadAn[i][j] = 0;}
      {for (int j=0; j<129; j++) m_countBadTb[i][j] = 0;}
@@ -304,41 +245,39 @@ void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
 
 }
 
+
 void StSvtAnalysis::FirstAndLastAnodes()
   // Calculate the First and last Anodes of all the clusters. Selemon
 {
   int actualAn = 0, actualan = 0, mem = 0;
   
-  if (mNumOfClusters>500) { 
-    mCluFirstAnode = new int[mNumOfClusters];
-    mCluLastAnode = new int[mNumOfClusters];
-    assert(mCluFirstAnode); assert(mCluLastAnode);
-  }
+  if (mNumOfClusters>mMaxClu) setMemory(); 
   
   for(int clu = 0; clu < mNumOfClusters; clu++)   
     {
+      StSvtAnalysisAux *aux = mAux+clu;
       mem = 0;  //add apr00 SUP
-      mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
-      tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+      mNumOfMembers  = mHybridCluster->getNumberOfMembers(clu);
+      aux->mInfo = mHybridCluster->getCluMemInfo(clu);
       
 
       if(mNumOfMembers==1)
         {
-	  mCluFirstAnode[clu] = tempMemberInfo[clu][mem].actualAnode;
-	  mCluLastAnode[clu] = mCluFirstAnode[clu];
+	  aux->mCluFirstAnode = aux->mInfo[mem].actualAnode;
+	  aux->mCluLastAnode  = aux->mCluFirstAnode;
 	}
       else
 	{
 	  {for(int j = 1; j<mNumOfMembers ; j++)
 	    {
-	      actualAn =  tempMemberInfo[clu][mem].actualAnode;
-	      actualan = tempMemberInfo[clu][j].actualAnode;
+	      actualAn =  aux->mInfo[mem].actualAnode;
+	      actualan =  aux->mInfo[j].actualAnode;
 	      
 	      if(actualAn < actualan)
-		mCluFirstAnode[clu] = actualAn;
+		aux->mCluFirstAnode = actualAn;
 	      else  
 		{
-		  mCluFirstAnode[clu]= actualan;
+		  aux->mCluFirstAnode= actualan;
 		  mem = j;
 		}
 	    }}
@@ -346,15 +285,15 @@ void StSvtAnalysis::FirstAndLastAnodes()
 	  mem = 0;
 	  {for(int j = 1; j<mNumOfMembers ; j++)
 	    {
-	      actualAn = tempMemberInfo[clu][mem].actualAnode;
-	      actualan = tempMemberInfo[clu][j].actualAnode;
+	      actualAn = aux->mInfo[mem].actualAnode;
+	      actualan = aux->mInfo[j].actualAnode;
 	      
 	      if(actualAn > actualan)
-		mCluLastAnode[clu] = actualAn;
+		aux->mCluLastAnode = actualAn;
 	      
 	      else  
 		{
-		  mCluLastAnode[clu] =  actualan;
+		  aux->mCluLastAnode =  actualan;
 		  mem = j;
 		}
 	    }}
@@ -371,45 +310,43 @@ void StSvtAnalysis::CluFirstTimeBin()
   int listAn = 0, mseq = 0, mem;
   
   // StSequence* svtSequence;
-  if (mNumOfClusters>500) {
-    mCluFirstTimeBin = new int[mNumOfClusters];
-    assert(mCluFirstTimeBin);
-  }
+  if (mNumOfClusters>mMaxClu) setMemory();
   
   for(int clu = 0; clu < mNumOfClusters; clu++)
     {
-      tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+      StSvtAnalysisAux *aux = mAux+clu;
+      aux->mInfo = mHybridCluster->getCluMemInfo(clu);
       mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
       
       mem = 0;
       
       if(mNumOfMembers==1)
 	{
-	  listAn = tempMemberInfo[clu][mem].listAnode;
-	  mseq =  tempMemberInfo[clu][mem].seq; 
+	  listAn = aux->mInfo[mem].listAnode;
+	  mseq   = aux->mInfo[mem].seq; 
 	  
 	  status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
-	  mCluFirstTimeBin[clu] = mSvtSequence[mseq].startTimeBin;
+	  aux->mCluFirstTimeBin = mSvtSequence[mseq].startTimeBin;
 	}
       else
 	{
 	  for(int j = 1; j< mNumOfMembers; j++)
 	    {
-	      listAn = tempMemberInfo[clu][mem].listAnode;
-	      mseq =  tempMemberInfo[clu][mem].seq;
+	      listAn = aux->mInfo[mem].listAnode;
+	      mseq   = aux->mInfo[mem].seq;
 	      status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
 	      SeqStart = mSvtSequence[mseq].startTimeBin; 
 	      
-	      listAn = tempMemberInfo[clu][j].listAnode;
-	      mseq =  tempMemberInfo[clu][j].seq;
+	      listAn = aux->mInfo[j].listAnode;
+	      mseq   = aux->mInfo[j].seq;
 	      status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
 	      seqStart = mSvtSequence[mseq].startTimeBin;
 	      
 	      if(SeqStart <= seqStart)
-		mCluFirstTimeBin[clu] = SeqStart;
+		aux->mCluFirstTimeBin = SeqStart;
 	      else  
 		{
-		  mCluFirstTimeBin[clu] = seqStart;
+		  aux->mCluFirstTimeBin = seqStart;
 		  mem = j;
 		}
 	    }
@@ -425,41 +362,38 @@ void StSvtAnalysis::CluLastTimeBin()
   int listAn = 0, mseq = 0, mem;
   
   //StSequence* svtSequence;
-  if (mNumOfClusters>500) {
-    mCluLastTimeBin = new int[mNumOfClusters];
-    assert(mCluLastTimeBin);
-  }
+  if (mNumOfClusters>mMaxClu) setMemory();
   
   for(int clu = 0; clu < mNumOfClusters; clu++)
     {
-      tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+      mAux[clu].mInfo = mHybridCluster->getCluMemInfo(clu);
       mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
       
       mem = 0;
       
       if(mNumOfMembers==1)
 	{
-	  listAn = tempMemberInfo[clu][mem].listAnode;
-	  mseq = tempMemberInfo[clu][mem].seq;
+	  listAn = mAux[clu].mInfo[mem].listAnode;
+	  mseq = mAux[clu].mInfo[mem].seq;
 	  status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
 	  SeqStart =  mSvtSequence[mseq].startTimeBin;
 	  SeqLength = mSvtSequence[mseq].length;
 	  SeqEnd =  SeqStart + SeqLength - 1; 
-	  mCluLastTimeBin[clu] = SeqEnd; 
+	  mAux[clu].mCluLastTimeBin = SeqEnd; 
         }
       else
 	{
 	  for(int j = 1; j< mNumOfMembers ; j++){
-	    listAn = tempMemberInfo[clu][mem].listAnode;
-	    mseq = tempMemberInfo[clu][mem].seq;
+	    listAn = mAux[clu].mInfo[mem].listAnode;
+	    mseq = mAux[clu].mInfo[mem].seq;
 	    status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
 	    
 	    SeqStart =  mSvtSequence[mseq].startTimeBin;
 	    SeqLength = mSvtSequence[mseq].length;
 	    SeqEnd =  SeqStart + SeqLength - 1;
 	    
-	    listAn = tempMemberInfo[clu][j].listAnode;
-	    mseq = tempMemberInfo[clu][j].seq;
+	    listAn = mAux[clu].mInfo[j].listAnode;
+	    mseq = mAux[clu].mInfo[j].seq;
 	    status = mHybridData->getListSequences(listAn,Seq,mSvtSequence);
 	    
 	    SeqStart =  mSvtSequence[mseq].startTimeBin;
@@ -467,9 +401,9 @@ void StSvtAnalysis::CluLastTimeBin()
 	    seqEnd =  SeqStart + SeqLength - 1; 
 	    
 	    if(SeqEnd > seqEnd)
-	      mCluLastTimeBin[clu] = SeqEnd;
+	      mAux[clu].mCluLastTimeBin = SeqEnd;
 	    else  {
-	      mCluLastTimeBin[clu] = seqEnd;
+	      mAux[clu].mCluLastTimeBin = seqEnd;
 	      mem = j;
 	    }
 	  }
@@ -490,8 +424,7 @@ void StSvtAnalysis::MomentAnalysis(){
  FillRawAdc();                              //Put the raw adcs for the whole hybrid into an 2D
                                             //Array. If there is no info value is 0.	 
 
- if(mNumOfClusters > 500)
-   setMoreMemory(mNumOfClusters);
+ if(mNumOfClusters > mMaxClu) setMemory();
  
  m_clu = mNumOfClusters-1;                              //keep track of # deconcoluted clusters. 
 
@@ -524,9 +457,9 @@ void StSvtAnalysis::LoadAnodeGains()
        if (ncols < 0) break;
        if (meanadc > 50 || meanadc<15) gain=1;
        else gain = 20/meanadc;
-       mAnodeGain[hy][an]=1;
-       //mAnodeGain[hy][an]=gain;
-       //cout << nlines << "\t" << hy << "\t" << an << "\t" << mAnodeGain[hy][an] << endl;
+       mAux[an].mAnodeGain[hy]=1;
+       //mAux[an].mAnodeGain[hy]=gain;
+       //cout << nlines << "\t" << hy << "\t" << an << "\t" << mAux[an].mAnodeGain[hy] << endl;
        nlines++;
      }
    }
@@ -547,22 +480,22 @@ void StSvtAnalysis::calcMoments(int clu){
   int mseq, Seq, stTimeBin, len;
   float ADC=0;
   unsigned char* adc;
-
+  StSvtAnalysisAux *aux = mAux + clu;
   mNumPixels = 0, mPeakADC = 0,mSumAdc = 0, mHitId=0;
   mDriftMom1 = 0, mAnodeMom1 = 0, mDriftMom2 = 0, mAnodeMom2 = 0, mMom0 = 0, mNeff = 0;
 
   int igt3=0, peakPosAn=0, peakPosTim=0, peakMem=0, peakPixel=0;             //recall 1ADC = 4mV
   
-  tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+  aux->mInfo = mHybridCluster->getCluMemInfo(clu);
   mNumOfMembers       = mHybridCluster->getNumberOfMembers(clu);   //I guess this is the number of anodes
 	     
   numAnodes = GetLastAnode(clu)-GetFirstAnode(clu)+1;     //this is not the same as mNumOfMembers for clusters while curl around!!
  
   mMyflag=0;
   for(int mem = 0; mem < mNumOfMembers; mem++) {
-    listAn   =  tempMemberInfo[clu][mem].listAnode;   //what is this??
-    mseq     =  tempMemberInfo[clu][mem].seq;
-    actualAn =  tempMemberInfo[clu][mem].actualAnode; //actual anode
+    listAn   =  aux->mInfo[mem].listAnode;   //what is this??
+    mseq     =  aux->mInfo[mem].seq;
+    actualAn =  aux->mInfo[mem].actualAnode; //actual anode
      
     mHybridData->getListSequences(listAn,Seq,mSvtSequence);
     stTimeBin = mSvtSequence[mseq].startTimeBin; 
@@ -695,22 +628,22 @@ void StSvtAnalysis::newCluster(int clu, int numAnodes, int igt3)
     int iQual, iRetu;
     static int iRows=1, iCols=1;
 
-   //These are all the objects used by the Maker to make the cluster object later.
-   mCluID[clu]                   = clu;            //unique ID
-   mCluDeconvID[clu]             = clu;            //at this point the origional cluster and deconv. one are the same
-   mCluCharge[clu]               = mMom0;          //charge
-   //mCluFlag[clu]               = mHitId;         // It will be filled later, so no need here. JT.
-   m_oneortwo_flag[clu]          = mMyflag;        // added by JT.
-   mMeanClusterTimeBin[clu]      = mDriftMom1;     //mean time
-   mMeanClusterAnode[clu]        = mAnodeMom1;     //mean anode
-   mSecondMomClusterTimeBin[clu] = mDriftMom2;     //mean 2nd moment time
-   mSecondMomClusterAnode[clu]   = mAnodeMom2;     //mean 2nd moment anode
-   mCluXCov[clu]                 = 1.*mX_err*mX_err; //error in Anode
-   mCluYCov[clu]                 = 4.*mY_err*mX_err; //error in Time is made arbitarily 2 time larger (4 time for cov). Check dist.
-   mCluPeakAdc[clu]              = mPeakADC;        //peak ADC
-   mCluNumPixels[clu]            = mNumPixels;      //number of pixels
-   mCluNumAnodes[clu]            = numAnodes;      //number of anodes including loop backs.
-   mHybridNum[clu]               = m_hybIndex;     //hybrid index.
+   //These are all the objects used by the Maker to make the cluster object la   mAux[clu].mCluID                   = clu;            //unique ID
+   StSvtAnalysisAux *aux = mAux+clu;
+   aux->mCluDeconvID             = clu;            //at this point the origional cluster and deconv. one are the same
+   aux->mCluCharge               = mMom0;          //charge
+ //aux->mCluFlag                 = mHitId;         // It will be filled later, so no need here. JT.
+   aux->m_oneortwo_flag          = mMyflag;        // added by JT.
+   aux->mMeanClusterTimeBin      = mDriftMom1;     //mean time
+   aux->mMeanClusterAnode        = mAnodeMom1;     //mean anode
+   aux->mSecondMomClusterTimeBin = mDriftMom2;     //mean 2nd moment time
+   aux->mSecondMomClusterAnode   = mAnodeMom2;     //mean 2nd moment anode
+   aux->mCluXCov                 = 1.*mX_err*mX_err; //error in Anode
+   aux->mCluYCov                 = 4.*mY_err*mX_err; //error in Time is made arbitarily 2 time larger (4 time for cov). Check dist.
+   aux->mCluPeakAdc              = mPeakADC;        //peak ADC
+   aux->mCluNumPixels            = mNumPixels;      //number of pixels
+   aux->mCluNumAnodes            = numAnodes;      //number of anodes including loop backs.
+   aux->mHybridNum               = m_hybIndex;     //hybrid index.
 
 
    for (int i1=0;i1<iRows;i1++)        //be more clever in the futre but for now....
@@ -724,13 +657,13 @@ void StSvtAnalysis::newCluster(int clu, int numAnodes, int igt3)
 
 
    //size of search area for deconvolution
-   iRows = mCluLastAnode[clu] - mCluFirstAnode[clu] +1+2;      //+2 to account for 0 paddind around side
-   iCols = mCluLastTimeBin[clu] -  mCluFirstTimeBin[clu] +1+2; 
+   iRows = mAux[clu].mCluLastAnode   - mAux[clu].mCluFirstAnode   +1+2;      //+2 to account for 0 paddind around side
+   iCols = mAux[clu].mCluLastTimeBin - mAux[clu].mCluFirstTimeBin +1+2; 
 
    Fill_Pixel_Array(clu);                                      //Fill 2D array with ADC's. Easier for the search in this format.
    iQual = CatagorizeCluster(iRows,iCols,igt3,clu);            //Classify the cluster as good or bad.
    mHitId += iQual;                                            //Update previous classification
-   mCluFlag[clu] = mHitId;                                     //Set flag
+   aux->mCluFlag = mHitId;                                     //Set flag
    if (mHitId==0 && m_deconv==1) iRetu = Deconvolve_Cluster(iRows, iCols, clu);   //do the deconvolution only for some candidates
       
    if( (int)(.5+mAnodeMom1) > 0 && (int)(.5+mAnodeMom1) <= 241 )
@@ -757,6 +690,7 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
   int d_bkt=0, d_sig=0;
   float fCut;
   static int iNumCat = 0;
+  StSvtAnalysisAux *aux = mAux + clu;
 
   iNumCat++;
   m_deconv = 0;                     //default is no deconvolution;
@@ -774,10 +708,10 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
     return iQual;
   }
   
-  if (mCluNumAnodes[clu] ==1){            // added by JT
-    if(mCluPeakAdc[clu] < 11) iQual = 11; // added by HC to remove noise hits
-    if(mCluNumPixels[clu] >10 ) iQual = 10;
-    //if (mMeanClusterTimeBin[clu]>30) iQual = 10;
+  if (aux->mCluNumAnodes ==1){             // added by JT
+    if(aux->mCluPeakAdc  < 11) iQual = 11; // added by HC to remove noise hits
+    if(aux->mCluNumPixels >10) iQual = 10;
+  //if (aux->mMeanClusterTimeBin>30) iQual = 10;
   }
 
   //
@@ -826,15 +760,15 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
   //Now figure out if we like these clusters.
 
   if (iWrgBkt>=1)                                                { iQual += 16;  m_nWrkBkt++;} // Undershoot in the wrong side
-  if (igt3<3 && (mCluCharge[clu]<15 || mCluNumPixels[clu]<4))    { iQual += 32;  m_nGt8++;   } // Cluster too small
-  if ((mSecondMomClusterTimeBin[clu]>4*mSecondMomClusterAnode[clu] && 
-       mSecondMomClusterAnode[clu]<1 && mSecondMomClusterAnode[clu]>0) ||
-      (mSecondMomClusterAnode[clu]>4*mSecondMomClusterTimeBin[clu] &&
-       mSecondMomClusterTimeBin[clu]<1 && mSecondMomClusterTimeBin[clu]>0) )  
+  if (igt3<3 && (aux->mCluCharge<15 || aux->mCluNumPixels<4))    { iQual += 32;  m_nGt8++;   } // Cluster too small
+  if ((aux->mSecondMomClusterTimeBin>4*aux->mSecondMomClusterAnode && 
+       aux->mSecondMomClusterAnode  <1 && aux->mSecondMomClusterAnode>0) ||
+      (aux->mSecondMomClusterAnode  >4*aux->mSecondMomClusterTimeBin &&
+       aux->mSecondMomClusterTimeBin<1 && aux->mSecondMomClusterTimeBin>0) )  
                                                                  { iQual += 64; m_nSig++;    }
   //added by JT
-  if ( (mSecondMomClusterTimeBin[clu]>6*mSecondMomClusterAnode[clu]) ||
-       (mSecondMomClusterAnode[clu]>6*mSecondMomClusterTimeBin[clu]) )  
+  if ( (aux->mSecondMomClusterTimeBin>6*aux->mSecondMomClusterAnode) ||
+       (aux->mSecondMomClusterAnode>6*aux->mSecondMomClusterTimeBin) )  
                                                                  { iQual += 65; m_nSig++;    }
 
 
@@ -844,17 +778,17 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
     d_bkt = 1;                        //send to deconV
     m_nUndBkt++; }                     
 
-  fCut = fabs(1.15*mSecondMomClusterTimeBin[clu] - mSecondMomClusterAnode[clu]);
-  if ( (fCut<=0.5 && mSecondMomClusterAnode[clu]<1.25 && mSecondMomClusterTimeBin[clu]<1.25) ||
-       (mSecondMomClusterAnode[clu]<0.5 &&  mSecondMomClusterTimeBin[clu]<0.5))
+  fCut = fabs(1.15*aux->mSecondMomClusterTimeBin - aux->mSecondMomClusterAnode);
+  if ( (fCut<=0.5 && aux->mSecondMomClusterAnode<1.25 && aux->mSecondMomClusterTimeBin<1.25) ||
+       (aux->mSecondMomClusterAnode<0.5 &&  aux->mSecondMomClusterTimeBin<0.5))
     d_sig = 0;   //too lazy to do the inverse of the above
   else
     d_sig = 1;
 
-  if (mCluNumAnodes[clu]>1 &&  (d_sig==1 || (mCluCharge[clu]>80 && d_bkt==1))) m_deconv = 1;
-  //if (mCluNumAnodes[clu]>1 &&  (mCluCharge[clu]>50 && d_bkt==1)) m_deconv = 1;
-  //if (mCluCharge[clu]>50) m_deconv = 1;
-  //if (mCluNumAnodes[clu]>1 &&  (d_sig==1)) m_deconv = 1;
+  if (aux->mCluNumAnodes>1 &&  (d_sig==1 || (aux->mCluCharge>80 && d_bkt==1))) m_deconv = 1;
+  //if (aux->mCluNumAnodes>1 &&  (aux->mCluCharge>50 && d_bkt==1)) m_deconv = 1;
+  //if (aux->mCluCharge>50) m_deconv = 1;
+  //if (aux->mCluNumAnodes>1 &&  (d_sig==1)) m_deconv = 1;
 
   // if (iNumCat%50 == 1) cout<<"Wrong Clusters: iGt8: "<<m_nGt8<<" WrgBkt: "<<m_nWrkBkt<<" Sig: "<<m_nSig<<endl;  
 
@@ -1057,22 +991,22 @@ int StSvtAnalysis::Fit_Peaks(int iRows, int iCols, int iNumPeaks, POINT *Peaks, 
 //Fitthe deconv. clusters. Add them to the end of the cluster table
 {
   int     i, j, k, iSum;
-  int  iX, iY;
+  int     iX, iY;
   double  fX, fY;
   int     iSum1;
   float   CovX, CovY;
   float   MomX, MomY;
   int iFirstAnode, iFirstTime;
-  
-  mCluFlag[clu] += 128;               //Lets mark this cluster as being deconvoluted  
 
-  CovX = mCluXCov[clu];                //use these for the deconv. Clusters
-  CovY = mCluYCov[clu];
-  MomX = mSecondMomClusterAnode[clu];
-  MomY = mSecondMomClusterTimeBin[clu];
+  mAux[clu].mCluFlag += 128;               //Lets mark this cluster as being deconvoluted  
+
+  CovX = mAux[clu].mCluXCov;                //use these for the deconv. Clusters
+  CovY = mAux[clu].mCluYCov;
+  MomX = mAux[clu].mSecondMomClusterAnode;
+  MomY = mAux[clu].mSecondMomClusterTimeBin;
   
-  iFirstAnode = mCluFirstAnode[clu]-1;  //need to knoe relative to where numbers
-  iFirstTime  = mCluFirstTimeBin[clu]-1;
+  iFirstAnode = mAux[clu].mCluFirstAnode-1;  //need to knoe relative to where numbers
+  iFirstTime  = mAux[clu].mCluFirstTimeBin-1;
 
   for (i = 0; i < iNumPeaks; i++)
   {
@@ -1099,31 +1033,27 @@ int StSvtAnalysis::Fit_Peaks(int iRows, int iCols, int iNumPeaks, POINT *Peaks, 
     if (iSum1 <=0) continue;   /*Should hardly happen*/
 
     m_clu++;
-    if (m_clu>499) {
-      m_clu = 499;
-      cout<<"Only enough space for 500 clusters so no deconvolution"<<endl;
-      mCluFlag[clu] -= 128;   //make good again
-      return 0;
-    }
+    if (m_clu>mMaxClu) setMemory();
 
     fX = (double) iX / iSum;
     fY = (double) iY / iSum;
 
-    mCluID[m_clu]                   = m_clu;                 //new id gets put at end of hit table
-    mCluDeconvID[m_clu]             = clu;                   //points to hit which was deconvoluted
-    mMeanClusterAnode[m_clu]        = fX + iFirstAnode+0.5;  /*so goes from 0-239  CHECK THIS!!!!!!!!*/
-    mMeanClusterTimeBin[m_clu]      = fY + iFirstTime+0.5;   /*so goes from 0-127*/
-    mCluPeakAdc[m_clu]              = (int)Peaks[i].val;          //peakADC
-    mCluCharge[m_clu]               = iSum;                  //should not be used in de/dx
-    mCluFlag[m_clu]                 = 2;                     //says deconvoluted hit
-    mSecondMomClusterTimeBin[m_clu] = MomX;                  //Not really accuratly determined
-    mSecondMomClusterAnode[m_clu]   = MomY;                  //Not really accuratly determined
-    mCluXCov[m_clu]                 = ::sqrt(2.)*CovX*Peaks[i].error; //errors based on origional error scaled by peak/valley
-    mCluYCov[m_clu]                 = ::sqrt(2.)*CovY*Peaks[i].error;
-    mCluNumPixels[m_clu]            = 9999;   //so dont mess up signal/noise calculation.
-    mCluNumAnodes[m_clu]            = 9999;   //ill defined for deconvolution
+    mAux[m_clu].mCluID                   = m_clu;                 //new id gets put at end of hit table
+    mAux[m_clu].mCluDeconvID             = clu;                   //points to hit which was deconvoluted
+    mAux[m_clu].mMeanClusterAnode        = fX + iFirstAnode+0.5;  /*so goes from 0-239  CHECK THIS!!!!!!!!*/
+    mAux[m_clu].mMeanClusterTimeBin      = fY + iFirstTime+0.5;   /*so goes from 0-127*/
+    mAux[m_clu].mCluPeakAdc              = (int)Peaks[i].val;          //peakADC
+    mAux[m_clu].mCluCharge               = iSum;                  //should not be used in de/dx
+    mAux[m_clu].mCluFlag                 = 2;                     //says deconvoluted hit
+    mAux[m_clu].mSecondMomClusterTimeBin = MomX;                  //Not really accuratly determined
+    mAux[m_clu].mSecondMomClusterAnode   = MomY;                  //Not really accuratly determined
+
+    mAux[m_clu].mCluXCov                 = ::sqrt(2.)*CovX*Peaks[i].error; //errors based on origional error scaled by peak/valley
+    mAux[m_clu].mCluYCov                 = ::sqrt(2.)*CovY*Peaks[i].error;
+    mAux[m_clu].mCluNumPixels            = 9999;   //so dont mess up signal/noise calculation.
+    mAux[m_clu].mCluNumAnodes            = 9999;   //ill defined for deconvolution
    
-    //cout<<"In Deconvolute: x:" << mMeanClusterAnode[m_clu] << " y: " << mMeanClusterTimeBin[m_clu] 
+    //cout<<"In Deconvolute: x:" << mAux[m_clu].mMeanClusterAnode << " y: " << mAux[m_clu].mMeanClusterTimeBin 
     //    << " Peak: " << mCluPeakAdc[m_clu] << endl;
     //cout<<"_____________________________"<<endl<<endl;
       
@@ -1163,27 +1093,10 @@ ARGUMENTS: iRows, iCols  : size of the array needed
 ------------------------------------------------------------------*/
 int** StSvtAnalysis::malloc_matrix_d (int iRows, int iCols)
 {
-  int     **Array;
-  int       i, j;
-  
-  //cout<<"Enter malloc"<<endl;
-
-  Array = (int**) new int[iRows];
-  if (Array == NULL) return NULL;
-  
-  for (i = 0; i < iRows; i++)
-  {
-    Array[i] = (int*) new int[iCols];
-    if (Array[i] == NULL)
-    {
-      cout<<"Error allocating memory for pixel array!"<<endl;
-      while (--i >= 0) delete [] Array[i];
-      delete [] Array;
-      break;
-    }
-      
-    for (j=0; j<iCols; j++) Array[i][j] = 0;
-  }
+  int **Array = new int*[iRows];
+  int  *buf   = new int[iRows*iCols];
+  memset(buf,0,sizeof(int)*iRows*iCols);
+  for (int i = 0; i < iRows; i++){Array[i] = buf; buf+=iCols;}
   
   return Array;
 }
@@ -1197,12 +1110,10 @@ ARGUMENTS:    *Array[] pointer to the array
 ARGUMENTS:    iRows    number of rows in the array
 ------------------------------------------------------------------*/
 
-void StSvtAnalysis::free_matrix_d (int *Array[], int iRows)
+void StSvtAnalysis::free_matrix_d (int *Array[], int )
 {
-  int i;
-  for (i = iRows - 1; i >= 0; i--)
-    if (Array[i]) delete [] Array[i];
-  delete [] Array;
+   delete [] Array[0];
+   delete [] Array;
 }
 
 
@@ -1225,24 +1136,24 @@ int StSvtAnalysis::Fill_Pixel_Array(int clu)
   m_row_p = 0; 
   m_adc_p = 0;   // ADC of the cluster PEAK, pedoffset subtracted
 
-  tempMemberInfo[clu] = mHybridCluster->getCluMemInfo(clu);
+  mAux[clu].mInfo = mHybridCluster->getCluMemInfo(clu);
   mNumOfMembers        = mHybridCluster->getNumberOfMembers(clu);
 
   //cout<<"in fill: number of anodes: "<<numAnodes<<endl;
 
   for(int mem = 0; mem < mNumOfMembers; mem++)            //loop over anodes (can be same anode if curls!!)
   {
-    listAn   =  tempMemberInfo[clu][mem].listAnode; 
-    mseq     =  tempMemberInfo[clu][mem].seq;
-    actualAn =  tempMemberInfo[clu][mem].actualAnode; //actual anode
+    listAn   =  mAux[clu].mInfo[mem].listAnode; 
+    mseq     =  mAux[clu].mInfo[mem].seq;
+    actualAn =  mAux[clu].mInfo[mem].actualAnode; //actual anode
 		  
     mHybridData->getListSequences(listAn,Seq,mSvtSequence);
     stTimeBin  = mSvtSequence[mseq].startTimeBin; 
     adc        = mSvtSequence[mseq].firstAdc;
 
     len  = mSvtSequence[mseq].length + 1-1;   
-    iRow = actualAn - mCluFirstAnode[clu] + 1;     //we pad the sides with 0 hence the -1
-    iCol = stTimeBin - mCluFirstTimeBin[clu] + 1;
+    iRow = actualAn  - mAux[clu].mCluFirstAnode   + 1;     //we pad the sides with 0 hence the -1
+    iCol = stTimeBin - mAux[clu].mCluFirstTimeBin + 1;
 
     //cout << "Clu=" << clu<< " Irow=" << iRow << " Actual An=" << actualAn << " iCol=" << iCol <<  " stTimeBucket=" << stTimeBin << " and finally len=" << len << endl;
      
@@ -1328,14 +1239,14 @@ void StSvtAnalysis::SetBadAnTb(int nClus)
   int iAn, iTb;
 
   for (int i=0; i<nClus; i++) {
-    iHyb = mHybridNum[i];
-    iAn  = (int)(.5+mMeanClusterAnode[i]);
-    iTb  = (int)(.5+mMeanClusterTimeBin[i]);
+    iHyb = mAux[i].mHybridNum;
+    iAn  = (int)(.5+mAux[i].mMeanClusterAnode);
+    iTb  = (int)(.5+mAux[i].mMeanClusterTimeBin);
     if( iAn >=1 && iAn < 242){
-      if (m_countBadAn[iHyb][iAn]>4) {mCluFlag[i] += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
+      if (m_countBadAn[iHyb][iAn]>4) {mAux[i].mCluFlag += 4;}// cout<<"Hot Anodes: "<<iAn<<" Hyb: "<<iHyb<<endl;}
     }
     if( iTb >=0 && iTb < 129){
-      if (m_countBadTb[iHyb][iTb]>4) {mCluFlag[i] += 4;}//cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
+      if (m_countBadTb[iHyb][iTb]>4) {mAux[i].mCluFlag += 4;}//cout<<"Hot Time: "<<iTb<<" Hyb: "<<iHyb<<endl;}
       //if (iHyb==11) cout<<"Hot Stuff: "<<iAn<<" "<<m_countBadAn[iHyb][iAn]<<" "<<mCluFlag[i]<<endl;
     }
   }
@@ -1354,49 +1265,43 @@ int StSvtAnalysis::GetnSvtClu()
 
 int StSvtAnalysis::GetCluID(int clu)
 {
-  return mCluID[clu];
+  return mAux[clu].mCluID;
 }
 
 int StSvtAnalysis::GetCluDeconvID(int clu)
 {
-  return mCluDeconvID[clu];
+  return mAux[clu].mCluDeconvID;
 }
 
 int StSvtAnalysis::GetFirstAnode(int clu)
 {
-return mCluFirstAnode[clu];
+return mAux[clu].mCluFirstAnode;
 }
 
 int StSvtAnalysis::GetLastAnode(int clu)
 {
-return mCluLastAnode[clu];
+return mAux[clu].mCluLastAnode;
 }
 
 int StSvtAnalysis::GetFirstTimeBin(int clu)
 {
-return mCluFirstTimeBin[clu];
+return mAux[clu].mCluFirstTimeBin;
 }
 
 int StSvtAnalysis::GetLastTimeBin(int clu)
 {
-return mCluLastTimeBin[clu];
+return mAux[clu].mCluLastTimeBin;
 }
 
 
 int StSvtAnalysis::GetCluFlag(int clu)
 {
-  if( mCluFlag[clu] < 0 || mCluFlag[clu] > 255){
-    return 255;
-  }
-  else{
-    return mCluFlag[clu];
-  }
+    return mAux[clu].mCluFlag;
 }
-
 
 double StSvtAnalysis::GetCluCharge(int clu)
 {
-return mCluCharge[clu];
+return mAux[clu].mCluCharge;
 }
 
 int StSvtAnalysis::GetDeconvFlag(int clu)
@@ -1406,71 +1311,81 @@ return m_deconv;
 
 double StSvtAnalysis::GetMeanClusterAnode(int clu)
 {
- return mMeanClusterAnode[clu];
+ return mAux[clu].mMeanClusterAnode;
 }
 
 double StSvtAnalysis::GetMeanClusterTimeBin(int clu)
 {
- return mMeanClusterTimeBin[clu];
+ return mAux[clu].mMeanClusterTimeBin;
 } 
 
 double StSvtAnalysis::GetSecondMomClusterAnode(int clu)
 {
- return mSecondMomClusterAnode[clu];
+ return mAux[clu].mSecondMomClusterAnode;
 }
 
 double StSvtAnalysis::GetSecondMomClusterTimeBin(int clu)
 {
- return mSecondMomClusterTimeBin[clu];
+ return mAux[clu].mSecondMomClusterTimeBin;
 }
 
 double StSvtAnalysis::GetCluXCov(int clu)
 {
- return mCluXCov[clu];
+ return mAux[clu].mCluXCov;
 }  
 
 double StSvtAnalysis::GetCluYCov(int clu)
 {
- return mCluYCov[clu];
+ return mAux[clu].mCluYCov;
 }
 
 int StSvtAnalysis::GetCluPeakAdc(int clu)
 {
- return mCluPeakAdc[clu];
+ return mAux[clu].mCluPeakAdc;
 } 
 
 int StSvtAnalysis::GetCluNumPixels(int clu)
 {
- return mCluNumPixels[clu];
+ return mAux[clu].mCluNumPixels;
 } 
 
 int StSvtAnalysis::GetCluNumAnodes(int clu)
 {
- return mCluNumAnodes[clu];
+ return mAux[clu].mCluNumAnodes;
 } 
 
+int StSvtAnalysis::GetTruth(int clu)
+{
+ return mAux[clu].mTruth;
+} 
 int StSvtAnalysis::return_oneortwoanode_flag(int clu)
 {
- return m_oneortwo_flag[clu];
+ return mAux[clu].m_oneortwo_flag;
 } 
-
-
-void StSvtAnalysis::ResetMeanValues()
+void StSvtAnalysis::updateTruth()
+  // Calculate the first time bin in the cluster. Selemon
 {
- delete [] mMeanClusterTimeBin;
- delete [] mMeanClusterAnode;
- delete [] mSecondMomClusterTimeBin;
- delete [] mSecondMomClusterAnode;
- delete [] mCluFirstAnode;
- delete [] mCluLastAnode;
- delete [] mCluLastTimeBin;
- delete [] mCluFirstTimeBin;
- delete [] mCluCharge;
- delete [] mCluFlag;
- delete [] mCluXCov;
- delete [] mCluYCov;
- delete [] mCluPeakAdc;
- delete [] mCluNumPixels;
- delete [] mCluNumAnodes;
-}
+  int status , nTru;
+  int listAn = 0, mseq = 0, mem;
+  StMCTruth *truList;
+  
+  for(int clu = 0; clu < mNumOfClusters; clu++)
+    {
+      StSvtAnalysisAux *aux = mAux+clu;
+      if (!aux->mInfo) continue;
+      mNumOfMembers = mHybridCluster->getNumberOfMembers(clu);
+      
+      mem = 0;
+      StMCPivotTruth pivo(1);
+      for(int j = 0; j< mNumOfMembers; j++){
+	listAn = aux->mInfo[mem].listAnode;
+	mseq   = aux->mInfo[mem].seq;
+	status = mHybridData->getListTruth(listAn,nTru,truList);
+        if (!truList) return;
+	pivo.Add(truList[mseq]);
+      } 
+      aux->mTruth = int(pivo.Get());
+    }
+  }
+
 

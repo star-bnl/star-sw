@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.8 2003/04/05 22:36:22 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.9 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.9  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.8  2003/04/05 22:36:22  caines
  * Fix filling on local coords so its time and anode not cm
  *
@@ -39,7 +42,7 @@
  **************************************************************************/
 #ifndef STSVTANALYSEDHYBRIDCLUSTERS_HH
 #define STSVTANALYSEDHYBRIDCLUSTERS_HH
-
+#include <string.h>
 #include "StSvtClassLibrary/StSvtHybridObject.hh" 
 #include "StarClassLibrary/StThreeVector.hh"
 #include "StEvent/StSvtHit.h"
@@ -56,13 +59,13 @@ typedef struct StSvtHitData
  int id_globtrk;
  int id_match;
  int id_track;
+ int id_simtrk;  
 
  int peakAdc;
  int numOfAnodesInClu;
  int numOfPixelsInClu;
-    
  double mom2[2];
-
+ StSvtHitData(){memset(this,0,sizeof(StSvtHitData));}
 } StSvtHitData;
 
 

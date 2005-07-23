@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.8 2005/02/09 14:33:35 caines Exp $
+ * $Id: StSvtSignal.cc,v 1.9 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.9  2005/07/23 03:37:34  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.8  2005/02/09 14:33:35  caines
  * New electron expansion routine
  *
@@ -206,6 +209,7 @@ void StSvtSignal::setCloud(StSvtElectronCloud* elCloud)
  //mSigmaMinor = mSigmaMinor*0.0001555989583;         // [micro seconds]
  */
 
+ mTrackId = elCloud->getTrackId();
  mSigmaMajor = elCloud->getSigmaDrift();
  double sigmaMajor2 = mSigmaMajor*mSigmaMajor;
  mSigmaMinor = elCloud->getSigmaAnode(); 

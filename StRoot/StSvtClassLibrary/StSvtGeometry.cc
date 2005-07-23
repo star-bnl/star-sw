@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeometry.cc,v 1.2 2002/01/31 21:57:35 caines Exp $
+ * $Id: StSvtGeometry.cc,v 1.3 2005/07/23 03:37:33 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtGeometry.cc,v $
+ * Revision 1.3  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.2  2002/01/31 21:57:35  caines
- * Get ladder and barrels correct for the middle layer
+ *  Get ladder and barrels correct for the middle layer
  *
  * Revision 1.1  2001/08/16 21:02:03  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
@@ -61,35 +64,10 @@ StSvtGeometry& StSvtGeometry::operator = (const StSvtGeometry& geom)
 int StSvtGeometry::getBarrelID(int layer, int ladder)
 {
   int barrel = -1;
+static const int tbBarrel[6][2]={
+{1,-1},{-1,1},{2,-1},{-1,2},{3,-1},{-1,3}};  
 
-  switch (layer) {
-  case 1:
-    if (ladder%2 == 0)
-      barrel = 1;
-    break;
-  case 2:
-    if (ladder%2 != 0)
-      barrel = 1;
-    break;
-  case 3:
-    //if (!ladder%2)
-    if (ladder%2 == 0)
-      barrel = 2;
-    break;
-  case 4:
-    //if (ladder%2)
-    if (ladder%2 != 0)
-      barrel = 2;
-    break;
-  case 5:
-    if (ladder%2 == 0)
-      barrel = 3;
-    break;
-  case 6:
-    if (ladder%2 != 0)
-      barrel = 3;
-    break;
-  }
+  if (layer>0 && layer<=6) barrel = tbBarrel[layer-1][ladder&1];
 
   return barrel;
 }
@@ -101,9 +79,9 @@ int StSvtGeometry::getWaferIndex(int barrel, int ladder, int wafer)
 
 int StSvtGeometry::getWaferIndex(int HardWarePos)
 {
-  int layer = (int)HardWarePos/1000;
-  int wafer = (int)(HardWarePos - layer*1000)/100;
-  int ladder = (int)(HardWarePos - layer*1000 - wafer*100);
+  int layer  = (int)(HardWarePos/1000);
+  int wafer  = (int)(HardWarePos/100 )%10;
+  int ladder = (int)(HardWarePos%100 );
   int barrel = getBarrelID(layer,ladder);
 
   if (barrel > 0)

@@ -28,7 +28,7 @@ public:
   void setTrappingConst(double trapConst);
   void setDiffusionConst(double diffConst);
 
-  void setPar(double energy,double theta, double phi,double timeBinSize); 
+  void setPar(double energy,double theta, double phi,double timeBinSize,int trackId); 
   void CalcExpansion(double mTc);
   void runge_kutta4(int steps, double t0, double steplen,int save);
   void adamsBushFort(int steps, double t0, double steplen);
@@ -40,6 +40,7 @@ public:
   double getSigmaMinor();
   double getPhi();
   double getChargeAtAnode();
+  int    getTrackId() const {return mTrackId;}
   // double getTotCharge(){return mTotCharge;}; 
 private:
   void setInitWidths(double w1, double w2);
@@ -73,7 +74,7 @@ private:
   double mPermitivity;                        // [e/(mm-V)]
   double mSi_Mobility;                     // [mm**2/(V-micro seconds)]
   double mLifeTime;                           // [micro seconds]
-
+  int    mTrackId;
   void CalculateDiffXY();          
   void GetDerivatives(double &dSx,double &dSy,double &dSxy,double SX,double SY,double SXY,double time);
 

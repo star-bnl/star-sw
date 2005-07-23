@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterFinder.hh,v 1.3 2003/01/28 20:28:28 munhoz Exp $
+ * $Id: StSvtClusterFinder.hh,v 1.4 2005/07/23 03:37:33 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.hh,v $
+ * Revision 1.4  2005/07/23 03:37:33  perev
+ * IdTruth + Cleanup
+ *
  * Revision 1.3  2003/01/28 20:28:28  munhoz
  * new filters for clusters
  *
@@ -66,8 +69,7 @@ private:
       int mContainer1[500];                      //temporary container for new members
       int mContainer2[500];                      //temporary container for new members
       
-      int* tempList;
-      int* anolist;
+      int* mAnolist;
 
   //ClassDef(StSvtClusterFinder,1)
 

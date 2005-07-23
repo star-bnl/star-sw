@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.8 2005/02/09 14:33:35 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.9 2005/07/23 03:37:34 perev Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -20,9 +20,11 @@
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtDaq.hh"
 #include "StSequence.hh"
+#include "StMCTruth.h"
 #include "StMessMgr.h"
 #include "StSvtConversionTable.h"
 
+//__________________________________________________________________________________________________
 ClassImp(StSvtOnlineSeqAdjSimMaker)
 
 StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(name)
@@ -300,6 +302,7 @@ void StSvtOnlineSeqAdjSimMaker::FillRawData()
   Char_t *mAdcArray=mCurrent8bitPixelData->GetArray(); // array of [128*240]  
   
   StSequence tmpSeq[128];  //buffer for sequences on one anode
+  StMCTruth  tmpTru[128];  //buffer for truth on one anode
   for (int ianode=0;ianode<240;ianode++)
     {  
       int seqCount=0; //number of sequences on current anode
@@ -312,6 +315,7 @@ void StSvtOnlineSeqAdjSimMaker::FillRawData()
           tmpSeq[0].startTimeBin =0;
           tmpSeq[0].firstAdc=(unsigned char*)(mAdcArray+ianode*128);
           tmpSeq[0].length = 128;
+          tmpTru[0] = 0;
           seqCount=1;
           hybridData->setListSequences(anodes, an, seqCount, tmpSeq);
           anodes++;
@@ -319,6 +323,7 @@ void StSvtOnlineSeqAdjSimMaker::FillRawData()
         }
                
       int pixCount=0; ///number of pixels in current sequence
+      StMCPivotTruth pivo;
         for(int tim = 0; tim <= 128; tim++)
           {//loop over time bins in one anode
             unsigned char adc; 
@@ -327,16 +332,20 @@ void StSvtOnlineSeqAdjSimMaker::FillRawData()
             
             if (adc>0)
               {
-                if (pixCount==0){ //starting new sequence
+                StMCTruth tru =mCurrentPixelData->getTrackId(ianode*128 + tim);
+		if (pixCount==0){ //starting new sequence
+                  pivo.Reset();
                   tmpSeq[seqCount].startTimeBin = tim;
                   tmpSeq[seqCount].firstAdc=(unsigned char*)(mAdcArray+ianode*128 + tim);
                 }
+                if(int(tru)) pivo.Add(tru,adc);
                 pixCount++;
               }
             else
               {
                 if(pixCount>0){//end of sequence
                   tmpSeq[seqCount].length = pixCount;
+                  tmpTru[seqCount] = pivo.Get();
                   seqCount++;
                   pixCount=0;
                 }
@@ -348,6 +357,7 @@ void StSvtOnlineSeqAdjSimMaker::FillRawData()
         if(seqCount>0){ //save found sequences
           //cout<<"found sequences:"<<seqCount<<endl;
           hybridData->setListSequences(anodes,ianode+1, seqCount, tmpSeq);
+          hybridData->setListTruth    (anodes,ianode+1, seqCount, tmpTru);
           anodes++;
         }
         
@@ -461,7 +471,7 @@ void StSvtOnlineSeqAdjSimMaker::RawAnodes()
 //____________________________________________________________________________
 void  StSvtOnlineSeqAdjSimMaker::ClearMask()
 {
-  for (int  i=0;i<128*240;i++)mMask[i]=kFALSE;
+  memset(mMask,0,128*240*sizeof(mMask[0]));
 }
 
 //____________________________________________________________________________
