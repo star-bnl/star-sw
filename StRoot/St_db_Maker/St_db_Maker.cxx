@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.89 2005/07/20 17:41:34 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.90 2005/07/25 03:01:58 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.90  2005/07/25 03:01:58  perev
+// SetFlavor was not called if (fDbBroker==0)
+//
 // Revision 1.89  2005/07/20 17:41:34  perev
 // Cleanup
 //
@@ -792,7 +795,7 @@ Int_t  St_db_Maker::Save(const char *path,const TDatime *newtime)
 //_____________________________________________________________________________
 void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 {
-   if (!fDBBroker) return;
+   if (flav && tabname && !fDBBroker) return;
    TDataSet *fl=0;
    TDataSet *flaDir =0;
    if (flav) {
