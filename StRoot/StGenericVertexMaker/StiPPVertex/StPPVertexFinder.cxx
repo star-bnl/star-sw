@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.6 2005/07/22 21:02:08 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.7 2005/07/26 02:49:08 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -702,6 +702,8 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   float zL=999, zH=-999;
   for (it=track->begin();it!=track->end();it++,in++) {
     StiKalmanTrackNode& ktn = (*it);
+    if(!ktn.isValid()) continue; // from Victor
+    if(ktn.getHit() && ktn.getChi2() >1000) continue; // from Victor
     const StiDetector * det=ktn.getDetector();
     assert(det);
     float rxy=ktn.getX();
@@ -727,15 +729,16 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
   // ........................print both ends  ....................
   cout <<"#e  |P|="<<track->getP()<<" pT="<<track->getPt()<<" eta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<endl; 
   StiKalmanTrackNode* inNode=track->getInnerMostNode();
-  cout<<"#e @InnerMostNode x:"<< inNode->x_g()<<" y:"<< inNode->y_g()<<" z:"<< inNode->z_g()<<endl;
+  cout<<"#e @InnerMostNode x:"<< inNode->x_g()<<" y:"<< inNode->y_g()<<" z:"<< inNode->z_g()<<" Eta="<<inNode->getEta()<<" |P|="<<inNode->getP()<<endl;
   StiKalmanTrackNode* ouNode=track->getOuterMostNode();
-  cout<<"#e @OuterMostNode g x:"<< ouNode->x_g()<<" y:"<< ouNode->y_g()<<" z:"<< ouNode->z_g()<<" Eta="<<ouNode->getEta()<<endl;
-
+  cout<<"#e @OuterMostNode g x:"<< ouNode->x_g()<<" y:"<< ouNode->y_g()<<" z:"<< ouNode->z_g()<<" Eta="<<ouNode->getEta()<<" |P|="<<ouNode->getP()<<endl;
 
  in=0;
   for (it=track->begin();it!=track->end();it++,in++) {
     // if(in>=2 && in<nn-5) continue; // print only ends of the track
     StiKalmanTrackNode& ktn = (*it);
+    if(!ktn.isValid()) continue; // from Victor
+    if(ktn.getHit() && ktn.getChi2() >1000) continue; // from Victor
     float sy=sqrt(ktn.getCyy());
     float sz=sqrt(ktn.getCzz());
     const StiDetector * det=ktn.getDetector();
@@ -967,24 +970,34 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
   int in=0;
   float lastRxy=9999;
   float lastZ=9999;
+  float zMembraneDepth=1; // (cm) ignore signe change for nodes so close to membrane
+
   int jz0=0;
   StiKTNBidirectionalIterator it;
   for (it=track->begin();it!=track->end();it++) {
-    // StiKalmanTrackNode& ktn = (*it);
     StiKalmanTrackNode* ktnp=& (*it);
+    if(!ktnp->isValid()) continue; // from Victor
+    if(ktnp->getHit() && ktnp->getChi2() >1000) continue; // from Victor
     float rxy=rxyG(ktnp); //ktn.getX();
     float z=zG(ktnp);  //ktn.z_g();
     if(rxy<RxyMin) continue;
     if(rxy>RxyMax) continue;
     if(fabs(z)>zMax) continue;
-    //printf(" in=%d Z=%.2f  rXY=%.2f  lastRxy=%.2f\n",in,z,rxy,lastRxy);
     // .........node is within TPC fiducial volume
-    assert(lastRxy+1.>rxy); // sometimes nodes are 1 mm off, added 1 cm just in case
+    if(lastRxy<=rxy){
+      gMessMgr->Warning() << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack below is out of order and is ignorred in (some) of vertex finder analysis"<<"\n  Z="<<z<<" rXY="<<rxy<<" last_rxy="<<lastRxy<<endm;
+      dumpKalmanNodes(track);
+      continue;
+    }
     lastRxy=rxy;
     if(in==0) lastZ=z;
     in++;
-    if(lastZ*z<0) { // track just crossed Z=0 plane
-      assert(jz0==0); // only one crosss point is expected
+    if(lastZ*z<0. && fabsf(z)>zMembraneDepth) { // track just crossed Z=0 plane
+      if(jz0>0) {
+	gMessMgr->Warning() << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack crosses Z=0 for the 2nd time, this track has a strange list of nodes - continue"<<endm;
+	dumpKalmanNodes(track);
+      }
+      //assert(jz0==0); // only one crosss point is expected
       jz0=hitPatt.size();
     }
     lastZ=z;
@@ -1012,6 +1025,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.7  2005/07/26 02:49:08  balewski
+ * more flexible for node pathologies
+ *
  * Revision 1.6  2005/07/22 21:02:08  balewski
  * bug fix & cleanup
  *

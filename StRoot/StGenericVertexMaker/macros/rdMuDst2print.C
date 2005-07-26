@@ -7,13 +7,17 @@ int rdMuDst2print(
 	  char* file    = "R50530.MuDst.root",
 	  Int_t nFiles  = 1, 
 	  char* inDir   = "./",
-	  int nEve=17)
+	  int nEve=10)
 { 
 
-  inDir="outPPV-Z0/"; 
-  file="st_physics_6151011_raw_2020001.MuDst.root";
+  inDir="./"; 
+  //file="st_physics_6122011_raw_1020010.MuDst.root";
+  //file="st_physics_6145042_raw_2030006.MuDst.root";
   
-  //  inDir="/star/u/mvl/mudst_dev/quick_fix/data/";
+   inDir="JPsi/R6145042/out1/";
+  file="st_physics_adc_6145042_raw_2050001.MuDst.root";
+
+  // inDir="/star/u/mvl/mudst_dev/quick_fix/data/";
   // file="st_physics_5109030_raw_1020001.MuDst.root";
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -38,8 +42,10 @@ int rdMuDst2print(
     if(eventCounter>=nEve) break;
     chain->Clear();
     stat = chain->Make();
+    if(stat) break; // EOF or input error
+    printf("stat=%d\n", stat);
     eventCounter++;
-     if(eventCounter<17) continue;
+    // if(eventCounter<17) continue;
 
     // Access to muDst .......................
     StMuEvent* muEve = muMk->muDst()->event();
@@ -59,25 +65,36 @@ int rdMuDst2print(
       StThreeVectorF &r=V->position();
       StThreeVectorF &er=V->posError();
       printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
-      int nPrimTr =-1;//V->nDaughters();   // get number of primary tracks
+      // count prim tracks for this vert
+      int nPrimTr =0;
+      int itr; 
+      for(itr=0;itr<nPrimTrAll;itr++) {
+	StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
+	if(pr_track->vertexIndex()!=iv) continue;
+	if(pr_track->flag()<=0) continue;
+	nPrimTr ++;
+      }
       printf("  nPrimTr=%d , VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
 	     ,nPrimTr, V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
     } 
 
-    //   continue;     
+    continue;     
 
-    int itr; 
-    for(itr=0;itr<nPrimTrAll;itr++) {
-      StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
-      cout << "\nPrimary track " << itr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
-      iv=pr_track->vertexIndex();
-      for(iv=0; iv<nPrimV; iv++) {
+    for(iv=0;iv<nPrimV;iv++) {
+      printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
+      int itr; 
+      int ntr=0;
+      for(itr=0;itr<nPrimTrAll;itr++) {
+	StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
+	if(pr_track->vertexIndex()!=iv) continue;
+	if(pr_track->flag()<=0) continue;	
+	ntr++;
+	cout << "\nPrimary track " << ntr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
 	cout << "\t primV("<<iv<<")  primDCA=" << pr_track->dca(iv) << endl;
-      }
-      // cout << "\t first point " << pr_track->firstPoint() << endl;
-      // cout << "\t last point " << pr_track->lastPoint() << endl;
-            
-    }
+	// cout << "\t first point " << pr_track->firstPoint() << endl;
+	// cout << "\t last point " << pr_track->lastPoint() << endl;
+      } // end of loop over tracks
+    }// end of loop over vertices
     
    continue; 
 
