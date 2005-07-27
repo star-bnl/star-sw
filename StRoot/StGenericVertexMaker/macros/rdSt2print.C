@@ -15,9 +15,9 @@ int trigZ[2]={96300,0};  // zerobias
 int trigM[2]={96011,0}; // minBias
 int trigJ[2]={20,0}; // J/Psi
 
-void rdSt2print(Int_t nevents=10){
+void rdSt2print(char * fname="aa.event.root", Int_t nevents=20){
 
-  char * fname="outPPV-E/st_physics_6151011_raw_2020001.event.root";// daq1
+  fname="outPPV-G/st_physics_6151011_raw_2020001.event.root";// daq1
   //char * fname="outPPV-Z/st_zerobias_6151011_raw_2110001.event.root";// daq2
 
   char *outF="res.dat";
@@ -64,9 +64,9 @@ void rdSt2print(Int_t nevents=10){
   while(1) {
     if (iev>=nevents) break;
     chain->Clear();
-    istat = chain->Make(iev); // This should call the Make() method in ALL makers
+    istat = chain->Make(); 
     iev++; 
-    //    if(istat) break; 
+    if(istat) break; 
     cout << "---------------------- Processing Event : " << iev << " ---------------------- " << istat<<endl;
 
   
@@ -98,7 +98,7 @@ void rdSt2print(Int_t nevents=10){
 	StThreeVectorF &r=V->position();
 	StThreeVectorF &er=V->positionError();
 	printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
-	fprintf(fd,"%.1f %d   ",r.z(),V->numberOfDaughters());
+	fprintf(fd,"%.1f %d  ",r.z(),V->numberOfDaughters());
 	printf("  nPrimTr=%d , VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
 	       ,V->numberOfDaughters(), V->vertexFinderId() ,V->numTracksUsedInFinder()  ,
 	       V->numMatchesWithCTB()  ,V-> numMatchesWithBEMC() ,V->numMatchesWithEEMC()  ,

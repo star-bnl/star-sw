@@ -14,7 +14,7 @@ int rdMuDst2print(
   //file="st_physics_6122011_raw_1020010.MuDst.root";
   //file="st_physics_6145042_raw_2030006.MuDst.root";
   
-   inDir="JPsi/R6145042/out1/";
+  // inDir="JPsi/R6145042/out1/";
   file="st_physics_adc_6145042_raw_2050001.MuDst.root";
 
   // inDir="/star/u/mvl/mudst_dev/quick_fix/data/";
@@ -78,7 +78,7 @@ int rdMuDst2print(
 	     ,nPrimTr, V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
     } 
 
-    continue;     
+    //  continue;   // do NOT print prim tracks for each vertex  
 
     for(iv=0;iv<nPrimV;iv++) {
       printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
@@ -91,6 +91,7 @@ int rdMuDst2print(
 	ntr++;
 	cout << "\nPrimary track " << ntr << " momentum " << pr_track->p() << endl;  cout << "\t flag=" << pr_track->flag() << " nHits=" << pr_track->nHits()<< " vertID="<<  pr_track->vertexIndex()<< endl;
 	cout << "\t primV("<<iv<<")  primDCA=" << pr_track->dca(iv) << endl;
+	if(pr_track->dca(iv).mag()>5) 	cout << "^^^^^ 3D DCA magnitude="<<pr_track->dca(iv).mag()<<endl;
 	// cout << "\t first point " << pr_track->firstPoint() << endl;
 	// cout << "\t last point " << pr_track->lastPoint() << endl;
       } // end of loop over tracks
