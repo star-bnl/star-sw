@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.7 2005/07/26 02:49:08 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.8 2005/07/27 06:08:19 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -93,10 +93,10 @@ StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
   gMessMgr->Info() << "PPV-1 cuts have been activated, mTestMode=" << mTestMode<<endm;
   //.. set various params 
-  mMaxTrkDcaRxy = 3.0;  // cm, to match Sti prim tracks re-fit cut off 
+  mMaxTrkDcaRxy = 3.0;  // cm 
   mMinTrkPt     = 0.20; // GeV/c           
   mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
-  mMaxZradius   = 2.0;  //+sigTrack, to match tracks to vertex, was 1.0
+  mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
   mMaxZrange    = 150;  // to accept Z_DCA of a track           
   mMinMatchTr   = 2;    // required to accept vertex              
   mMinAdcBemc   = 15;   // chan, 2004 data, make it timeStamp dependent
@@ -163,9 +163,12 @@ void
 StPPVertexFinder::InitRun(int runnumber){
   gMessMgr->Info() << "PPV-1 InitRun() runNo="<<runnumber<<endm;
 
-  if(isMC) assert(runnumber<1000000); // probably embeding job ,crash it JB
+  if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
+  assert(runnumber<7000000); // real BTOW HV not known for 2006+,crash it, JB
 
-  ctbList->initRun();
+  if(mTestMode==3)  ctbList->initRun(1.5); //expert only
+  else  ctbList->initRun(); // defult
+
   bemcList->initRun(isMC);
   eemcList->initRun();
 
@@ -1025,6 +1028,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.8  2005/07/27 06:08:19  balewski
+ * tuning PPV cuts
+ *
  * Revision 1.7  2005/07/26 02:49:08  balewski
  * more flexible for node pathologies
  *
