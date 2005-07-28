@@ -32,11 +32,12 @@ template<class Object>
 class StiBlock {
 public:
 enum {kSize=100};
-     StiBlock(StiBlock **bTop,StiHolder<Object> **hTop);
+     StiBlock(StiBlock **bTop,StiHolder<Object> **hTop,char *buf);
 void reset(StiBlock **bTop,StiHolder<Object> **hTop);
 int getSize() const {return kSize;}
 
 StiBlock *fNext;
+char     *fBuff;
 StiHolder<Object> fArr[kSize];
 };
 
@@ -69,8 +70,9 @@ StiHolder<Concrete> *fHTop;
 //______________________________________________________________________________
 //______________________________________________________________________________
 template <class Object>
-StiBlock<Object>::StiBlock(StiBlock **bTop,StiHolder<Object> **hTop)
+StiBlock<Object>::StiBlock(StiBlock **bTop,StiHolder<Object> **hTop,char *buf)
 {
+  fBuff=buf;
   reset(bTop,hTop);
 }
 template <class Object>
@@ -87,8 +89,7 @@ void StiBlock<Object>::reset(StiBlock **bTop,StiHolder<Object> **hTop)
 template <class Object>
 StiHolder<Object>::StiHolder()
 {
-  int n = (char*)&fObj -(char*)&fNext;
-  memset(&fNext,0,n);
+  fNext=0;
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -110,9 +111,16 @@ StiFactory<Concrete,Abstract>* StiFactory<Concrete,Abstract>::myInstance()
 template <class Concrete, class Abstract>
 Abstract *StiFactory<Concrete,Abstract>::getInstance() 
 {
+  enum {FENCE = sizeof(double)+2*sizeof(long)};
   if (!fHTop)  {
     assert(fCurCount < fMaxCount);  
-    new StiBlock<Concrete>(&fBTop,&fHTop);
+    if (fFastDel)    {
+       int   nBuf = sizeof(StiBlock<Concrete>) + FENCE;
+       char *cBuf = new char[nBuf];
+       new StiBlock<Concrete>(&fBTop,&fHTop,cBuf);
+    } else {
+       new StiBlock<Concrete>(&fBTop,&fHTop,   0);
+    }
     fCurCount += fBTop->getSize();
   }
   StiHolder<Concrete> *h = fHTop;
@@ -142,7 +150,7 @@ void StiFactory<Concrete,Abstract>::clear()
   while (b) {
     StiBlock<Concrete>* d = b;
     b=b->fNext;
-    if (fFastDel) {delete [] (char*)d;} else { delete d;}
+    if (fFastDel) {delete [] d->fBuff;} else { delete d;}
     sz += sizeof(StiBlock<Concrete>);
   }
   fBTop=0; fHTop=0; fCurCount=0; fUseCount=0;
