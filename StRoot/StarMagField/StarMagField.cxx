@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.2 2005/07/15 22:17:37 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.3 2005/07/28 19:46:01 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,16 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.3  2005/07/28 19:46:01  fisyak
+ * Add:
+ * -  frindge magnetic field from P.Nevski extrapolation,
+ * -  lock mechanism for Magnetic Field parameters
+ * Remove:
+ * -  Electric Field (Still part of StDbUtilitie/StMagUtilities)
+ *
+ * Comparision between mfldgeo and StarMagField calculation for Z and R components of mag.field
+ * is at http://www.star.bnl.gov/~fisyak/star/MagField/
+ *
  * Revision 1.2  2005/07/15 22:17:37  fisyak
  * fix misleading print out
  *
@@ -60,7 +70,7 @@ are in gauss, cm.
 
 To do:  <br>
 - Finish pulling parameters out of DB rather than from #define. 
-- Use Magnet current rather than MagFactor
+- Use Magnet current rather than MafFactor
 - Add a routine to distort the track if we are given a Geant Vector full of points == a track
 - Add simulated B field map in the regions where the field is not mapped.
 
@@ -72,13 +82,7 @@ To do:  <br>
 #include "StarCallf77.h"
 #include "TString.h"
 #include "TSystem.h"
-StarMagField::EBField  StarMagField::gMap  =   kMapped;   // Global flag to indicate static arrays are full
-Float_t  StarMagField::gFactor  = 1.0 ;        // Multiplicative factor (allows scaling and sign reversal)
-Float_t  StarMagField::gRescale = 1.0 ;        // Multiplicative factor (allows re-scaling wrt which map read)
-Float_t  StarMagField::BDipole  = -42.67;      //  field value (kG)
-Float_t  StarMagField::RmaxDip  =  15.34;      //  Inner field volume radius
-Float_t  StarMagField::ZminDip  =  980.0;      //  StArt of the DX mAgnet in Z
-Float_t  StarMagField::ZmaxDip  = 1350.0;      //  End of the DX mAgnet in Z
+
 StarMagField *StarMagField::fgInstance = 0;
 //________________________________________
 
@@ -90,27 +94,215 @@ R__EXTERN  "C" {
     StarMagField::Instance()->BField(x,bf);
   }
   void type_of_call mfldgeo() {
-    printf("StarMagField  mfldgeo is called\n");
+    printf("request for StarMagField from mfldgeo\n");
     if (StarMagField::Instance()) {
-      printf("StarMagField  mfldgeo: old mag. field has been already instantiated. Keep it.\n");
+      printf("StarMagField  mfldgeo: The field has been already instantiated. Keep it.\n");
     } else {
+      printf("StarMagField  instantiate default field\n");
       new StarMagField();
     }
   }
 }
 ClassImp(StarMagField);
-StarMagField::StarMagField ( EBField map, Float_t factor)       
-{ 
+struct BFLD_t { 
+  Int_t version; 
+  Char_t *code; 
+  Float_t date; Int_t kz; Float_t rmaxx, zmaxx, rrm, zz1, zz2;
+  Float_t RmaxInn, ZmaxInn;
+  Int_t   nrp, nzp;
+};
+static const BFLD_t BFLD = {// real field
+  3        , // version
+  "opt1"   , // code:    fit version code				  
+  22.10    , // date: 	 fit date 					  
+  22       , // kz:   	 number of z lines				  
+  270      , // rmaxx:	 maximum radius of extrapolated measurements 
+  290      , // zmaxx:	 maximum length of extrapolated measurements 
+  400      , // rrm:  	 maximum radius of all fields		  
+  270      , // zz1:  	 length of measured field interpolation	  
+  800      , // zz2:  	 max length of all fields                    
+  264.265  , // RmaxInn: Inner field volume radius
+  312.500  , // ZmaxInn: Inner field volume length
+  200      , // nrp:     number of R nodes in the map
+  800        // nzp:     number of Z nodes in the map
+};
+struct BDAT_t { 
+  Int_t N;
+  Float_t Zi, Ri[20], Bzi[20], Bri[20]; 
+};
+static const Int_t nZext = 23;
+static const BDAT_t BDAT[nZext] = { // calculated STAR field
+  { 15   , // Number of field points 
+    0.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0,
+       200.0, 225.0, 250.0, 275.0, 300.0, 375.0, 400.0 } , // Radius
+    {4704.6,4768.0,4946.6,5148.3,5128.6,4927.3,4844.9,4830.1,
+     4823.3,4858.0,5110.9,3402.4, -18.1, -13.6, -25.0 } , // Axial  field
+    {  0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0, 0.0,
+       0.0, 0.0, 0.0,  0.0, 0.0, 0.0, 0.0 } },// Radial field == 0 @ z = 0
+  //    {  0.0, 131.3, 188.4,  74.1,-148.6,-164.8, -53.2,  23.8,
+  //       97.4, 213.7, 329.3,  75.3,  18.2, -44.3, -36.5 } },// Radial field
+  { 15   , // Number of field points
+    270.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0,
+       200.0, 225.0, 250.0, 275.0, 300.0, 375.0, 400.0 } , // Radius
+    {4704.6,4768.0,4946.6,5148.3,5128.6,4927.3,4844.9,4830.1,
+     4823.3,4858.0,5110.9,3402.4, -18.1, -13.6, -25.0 } , // Axial  field
+    {  0.0, 131.3, 188.4,  74.1,-148.6,-164.8, -53.2,  23.8,
+       97.4, 213.7, 329.3,  75.3,  18.2, -44.3, -36.5 } },// Radial field
+  { 15   , // Number of field points
+    280.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0,
+       200.0, 225.0, 250.0, 275.0, 300.0, 375.0, 400.0 } , // Radius
+    {4568.8,4649.8,4898.6,5241.5,5234.5,4883.9,4806.5,4802.4,
+     4781.7,4771.8,5057.8,3504.2,-144.8, -15.0, -28.0 } , // Axial  field
+    {  0.0, 188.6, 297.5, 151.9,-241.2,-242.5, -60.1,  19.5,
+       92.3, 244.3, 541.5, 396.8,  83.6, -49.9, -40.6 } },// Radial field
+  { 15   , // Number of field points
+    290.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0,
+       200.0, 225.0, 250.0, 275.0, 300.0, 375.0, 400.0 } , // Radius
+    {4383.8,4478.4,4801.1,5378.7,5431.1,4771.4,4765.5,4778.2,
+     4741.4,4651.9,4852.9,3684.4,   6.9, -16.9, -31.6 } , // Axial  field
+    {  0.0, 260.2, 456.5, 312.9,-414.5,-349.8, -51.7,  14.4,
+       74.7, 234.0, 858.0, 726.3, 355.0, -56.5, -45.0 } },// Radial field
+  { 15   , // Number of field points
+    300.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0,
+       200.0, 225.0, 250.0, 275.0, 300.0, 375.0, 400.0 } , // Radius
+    {4142.1,4240.8,4614.8,5546.4,5829.1,4450.0,4737.6,4761.4,
+     4711.3,4534.1,4231.0,4067.5,-880.0, -19.3, -36.2 } , // Axial  field
+    {  0.0, 341.1, 669.5, 661.0,-766.7,-480.9, -24.5,   8.8,
+       43.5, 149.9,1333.6, 999.3,  53.6, -64.2, -49.8 } },// Radial field
+  { 15   , // Number of field points
+    310.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0,
+       200.0, 225.0, 250.0, 275.0, 300.0, 375.0, 400.0 } , // Radius
+    {3842.7,3930.2,4292.5,5589.1,6643.0,3236.8,4733.0,4755.1,
+     4699.4,4485.0,1931.8,4782.0,  50.2, -22.8, -42.0 } , // Axial  field
+    {  0.0, 421.2, 915.6,1382.6,-1482.8,-1019.7,  1.2,  2.0,
+       1.9,  -2.3,2069.4, 791.7, 240.6, -73.6, -54.9 } },// Radial field
+  { 8   , // Number of field points
+    320.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 375.0, 400.0 } , // Radius
+    {3491.2,3552.1,3807.3,4923.7,7889.6,1983.9, -28.0, -49.4 } , // Axial  field
+    {  0.0, 485.7,1133.5,2502.8, -38.8,-174.8, -85.1, -60.0 } },// Radial field
+  { 7   , // Number of field points
+    330.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 250.0, 375.0, 400.0 } , // Radius
+    {3105.3,3127.0,3200.4,3268.9,  -3.5, -36.6, -59.0 } , // Axial  field
+    {  0.0, 521.1,1246.1,3029.5,9199.2, -99.4, -64.5 } },// Radial field
+  { 6   , // Number of field points
+    340.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 375.0, 400.0 } , // Radius
+    {2706.4,2686.8,2574.5,1826.7, -51.8, -71.0 } , // Axial  field
+    {  0.0, 520.6,1218.1,2485.3,-116.9, -67.3 } },// Radial field
+  { 6   , // Number of field points
+    350.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 375.0, 400.0 } , // Radius
+    {2317.7,2264.6,2026.3,1142.6, -80.8, -85.1 } , // Axial  field
+    {  0.0, 487.6,1082.3,1787.2,-133.8, -67.0 } },// Radial field
+  { 8   , // Number of field points
+    360.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 250.0, 375.0, 400.0 } , // Radius
+    {1958.5,1885.6,1595.6, 829.2,-563.7,4895.8,-127.6, -99.8 } , // Axial  field
+    {  0.0, 432.4, 901.7,1265.8, 788.0,9507.4,-134.0, -62.2 } },// Radial field
+  { 17   , // Number of field points
+    370.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0, 200.0, 
+       225.0, 250.0, 275.0, 300.0, 325.0, 350.0, 375.0, 400.0 } , // Radius
+    {1637.8,1562.2,1276.7, 678.9,  15.7, 251.6, 384.9, 503.7, 683.3, 
+     1087.1,1868.1,-1320.5,-593.9,-391.5,-345.9,-168.2,-112.9 } , // Axial field
+    {  0.0, 367.3, 720.6, 900.1, 421.6,  60.4,  37.1,  44.5,  79.7,
+       229.6,2339.4, 654.6, 114.6,  35.9, -30.0,-101.8, -52.4 } },// Radial field
+  { 17   , // Number of field points
+    380.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0, 200.0,  
+       225.0, 250.0, 275.0, 300.0, 325.0, 350.0, 375.0, 400.0 } , // Radius
+    {1373.5,1296.6,1045.5, 603.2, 221.4, 278.6, 382.7, 488.2, 638.7,
+     892.4, 708.6,-709.9,-515.0,-364.7,-293.1,-181.5,-122.1 } , // Axial  field
+    {  0.0, 302.3, 563.3, 650.3, 369.7, 120.0,  79.6,  96.2, 169.1,
+       430.1,1454.7, 860.7, 228.6,  77.5, -10.8, -60.2, -39.4 } },// Radial field
+  { 17   , // Number of field points
+    390.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0, 200.0, 
+       225.0, 250.0, 275.0, 300.0, 325.0, 350.0, 375.0, 400.0 } , // Radius
+    {1151.2,1083.6, 877.2, 557.6, 308.9, 305.2, 377.6, 463.3, 573.3, 
+     684.5, 377.5,-376.2,-415.2,-326.0,-258.2,-179.8,-126.9 } , // Axial  field
+    {  0.0, 243.7, 437.7, 486.1, 319.9, 155.1, 115.2, 139.4, 232.4, 
+       494.6,1019.1, 751.4, 289.6, 112.2,  19.4, -26.7, -25.0 } },// Radial field
+  { 17   , // Number of field points
+    400.0   , // distance to  Z=0
+    {  0.0,  25.0,  50.0,  75.0, 100.0, 125.0, 150.0, 175.0, 200.0, 
+       225.0, 250.0, 275.0, 300.0, 325.0, 350.0, 375.0, 400.0 } , // Radius
+    {971.6, 914.8, 751.6, 520.8, 348.0, 323.7, 369.1, 432.0, 500.9, 
+     520.4, 251.2,-214.3,-320.8,-282.3,-230.2,-171.7,-127.7 } , // Axial  field
+    {  0.0, 194.5, 341.1, 375.8, 277.5, 171.7, 142.1, 172.1, 269.4, 
+       486.6, 769.0, 624.1, 308.0, 137.2,  44.9,  -1.4, -11.2 } },// Radial field
+  { 9   , // Number of field points
+    450.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    {481.5, 423.2, 325.1, 283.8, 242.6,  88.2, -85.2,-123.1,-103.9 } , // Axial 
+    {  0.0, 119.3, 157.5, 174.6, 248.4, 314.8, 220.8,  95.4,  32.3 } },// Radial
+  { 9   , // Number of field points
+    500.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    {291.3, 273.2, 234.4, 192.6, 136.7,  53.6, -25.6, -64.6, -72.5 } , // Axial 
+    {  0.0,  60.7, 103.2, 135.9, 168.1, 177.4, 140.6,  84.7,  41.9 } },// Radial
+  { 9   , // Number of field points
+    550.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    {190.4, 181.9, 159.6, 127.7,  86.0,  37.1,  -7.3, -35.9, -48.9 } , // Axial
+    {  0.0,  37.8,  69.7,  94.3, 110.3, 110.8,  92.6,  64.2,  37.3 } },// Radial
+  { 9   , // Number of field points
+    600.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    {126.9, 121.7, 107.1,  84.9,  56.8,  26.4,  -1.2, -21.2, -32.9 } , // Axial 
+    {  0.0,  25.0,  46.9,  63.4,  72.6,  72.2,  62.3,  46.3,  29.2 } },// Radial
+  { 9   , // Number of field points
+    650.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    { 84.8,  81.4,  71.7,  56.8,  38.3,  18.7,   0.8, -13.1, -22.2 } , // Axial
+    {  0.0,  16.7,  31.4,  42.4,  48.2,  48.1,  42.4,  32.8,  21.6 } },// Radial
+  { 9   , // Number of field points
+    700.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    { 56.7,  54.4,  47.9,  38.0,  25.9,  13.1,   1.3,  -8.3, -15.0 } , // Axial
+    {  0.0,  11.2,  21.1,  28.4,  32.4,  32.5,  29.1,  23.0,  15.5 } },// Radial
+  { 9   , // Number of field points
+    750.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    { 37.7,  36.2,  31.9,  25.4,  17.5,   9.1,   1.2,  -5.4, -10.1 } , // Axial
+    {  0.0,   7.6,  14.3,  19.3,  22.0,  22.2,  20.1,  16.1,  11.0 } },// Radial
+  { 9   , // Number of field points
+    800.0   , // distance to  Z=0
+    {  0.0,  50.0, 100.0, 150.0, 200.0, 250.0, 300.0, 350.0, 400.0 } , // Radius
+    { 24.8,  23.8,  21.0,  16.8,  11.6,   6.1,   0.9,  -3.5,  -6.7 } , // Axial
+    {  0.0,   5.2,   9.8,  13.3,  15.2,  15.4,  14.1,  11.4,   7.9 } },// Radial
+};
+//________________________________________________________________________________
+StarMagField::StarMagField ( EBField map, Float_t factor, 
+			     Bool_t lock, Float_t rescale, 
+			     Float_t BDipole, Float_t RmaxDip,
+			     Float_t ZminDip, Float_t ZmaxDip) :
+  fMap(map), 
+  fFactor(factor),   fRescale(rescale),
+  fBDipole(BDipole), fRmaxDip(RmaxDip), 
+  fZminDip(ZminDip), fZmaxDip(ZmaxDip), 
+  fLock(lock)
+{
   if (fgInstance) {
-     printf("Cannot initialise twice StarMagField class\n");
-     assert(0);
+    printf("Cannot initialise twice StarMagField class\n");
+    assert(0);
   }
   fgInstance = this;
   if (map == kUndefined) {
-    printf("StarMagField is instantiated with predefined factor %f and map %i\n",gFactor, gMap);
+    printf("StarMagField is instantiated with predefined factor %f and map %i\n",fFactor, fMap);
   } else {
-    gFactor = factor ;
-    gMap = map ;                        // Do once & select the requested map (mapped or constant)
+    fFactor = factor ;
+    fMap = map ;                        // Do once & select the requested map (mapped or constant)
+    fLock = lock;
+    if (fLock) printf("StarMagField is locked, no modification from DB will be accepted\n");
   }
   ReadField() ;                       // Read the Magnetic
 }
@@ -127,32 +319,48 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
 
 {                          
 
-  Float_t r, z, Br_value, Bz_value ;
-
+  static Float_t r, z, Br_value, Bz_value ;
+  Br_value =  Bz_value = 0;
   B[0] = B[1] = B[2] = 0;
   z  = x[2] ;
   r  = TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
+  Float_t za = TMath::Abs(z);
+  if (za > fZminDip && za < fZmaxDip && r < fRmaxDip) {//     beam Dipole   
+    B[1] = TMath::Sign(fBDipole, z);
+    B[2] = TMath::Abs(B[1]/1000.);
+    return;
+  }
   if (z >= ZList[0] && z <= ZList[nZ-1] && r <= Radius[nR-1]) { // within Map
+    Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
+    B[0] = Br_value ;
+    B[2] = Bz_value ;
     if ( r != 0.0 )      {
-      Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-      B[0] = Br_value * (x[0]/r) ;
-      B[1] = Br_value * (x[1]/r) ;
-      B[2] = Bz_value ; 
+      B[1] = B[0] * (x[1]/r) ;
+      B[0] = B[0] * (x[0]/r) ;
     }
-    else {
-      Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-      B[0] = Br_value ;
-      B[2] = Bz_value ;
-    }
+    return;
   }
-  else {
-    //     beam Dipole   
-    Float_t za = TMath::Abs(z);
-    if (za > ZminDip && za < ZmaxDip & r < RmaxDip) {
-      B[1] = TMath::Sign(BDipole, z);
-      B[2] = TMath::Abs(B[1]/1000.);
-    }
+  Interpolate2ExtDBfield( r, z, Br_value, Bz_value ) ;	
+  if (za <= BFLD.zmaxx && r <= BFLD.rmaxx) {
+    static const Float_t zero = 0;
+    static const Float_t one = 1;
+    Float_t wz = (za - ZList[nZ-1] )/(BFLD.zmaxx - ZList[nZ-1]);
+    Float_t wr = (r  - Radius[nR-1])/(BFLD.rmaxx - Radius[nR-1]);
+    Float_t w  = TMath::Min(TMath::Max(zero,TMath::Max(wz,wr)),one);
+    Float_t rm = TMath::Min(r,Radius[nR-1]);    
+    Float_t zm = TMath::Sign(TMath::Min(za,ZList[nZ-1]),z);    
+    Float_t BrI, BzI;
+    Interpolate2DBfield( rm, zm, BrI, BzI ) ;
+    Br_value = (1-w)*BrI + w*Br_value;
+    Bz_value = (1-w)*BzI + w*Bz_value;
+  }  
+  B[0] = Br_value ;
+  B[2] = Bz_value ;
+  if ( r != 0.0 )      {
+    B[1] = B[0] * (x[1]/r) ;
+    B[0] = B[0] * (x[0]/r) ;
   }
+  return;
 }
 
 
@@ -229,23 +437,23 @@ void StarMagField::ReadField( )
   TString MapLocation ;
   TString BaseLocation = "$STAR/StarDb/StMagF/" ;     // Base Directory for Maps
 
-  if ( gMap == kMapped )                    // Mapped field values
+  if ( fMap == kMapped )                    // Mapped field values
     {
-      if ( TMath::Abs(gFactor) > 0.8 )      // Scale from full field data 
+      if ( TMath::Abs(fFactor) > 0.8 )      // Scale from full field data 
 	{
-	  if ( gFactor > 0 )
+	  if ( fFactor > 0 )
 	    {
 	      filename   = "bfield_full_positive_2D.dat" ;
 	      filename3D = "bfield_full_positive_3D.dat" ;
 	      comment    = "Measured Full Field" ;
-	      gRescale   = 1 ;                // Normal field 
+	      fRescale   = 1 ;                // Normal field 
 	    }
 	  else
 	    {
 	      filename   = "bfield_full_negative_2D.dat" ;
 	      filename3D = "bfield_full_negative_3D.dat" ;
 	      comment    = "Measured Full Field Reversed" ;
-	      gRescale   = -1 ;               // Reversed field
+	      fRescale   = -1 ;               // Reversed field
 	    }
 	}
       else                                  // Scale from half field data             
@@ -253,14 +461,14 @@ void StarMagField::ReadField( )
 	  filename   = "bfield_half_positive_2D.dat" ;
 	  filename3D = "bfield_half_positive_3D.dat" ;
           comment    = "Measured Half Field" ;
-	  gRescale   = 2 ;                    // Adjust scale factor to use half field data
+	  fRescale   = 2 ;                    // Adjust scale factor to use half field data
 	}
     }
-  else if ( gMap == kConstant )             // Constant field values
+  else if ( fMap == kConstant )             // Constant field values
     {
       filename = "const_full_positive_2D.dat" ;
       comment  = "Constant Full Field" ;
-      gRescale = 1 ;                        // Normal field
+      fRescale = 1 ;                        // Normal field
     }
   else
     {
@@ -268,8 +476,8 @@ void StarMagField::ReadField( )
       exit(1) ;
     }
       
-  printf("StMagUtilities::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),gFactor);
-  printf("StMagUtilities::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),gFactor*gRescale);
+  printf("StMagUtilities::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),fFactor);
+  printf("StMagUtilities::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
   
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
@@ -336,7 +544,7 @@ void StarMagField::ReadField( )
 	}
     }
 
-  else if ( gMap == kConstant )             // Constant field values
+  else if ( fMap == kConstant )             // Constant field values
 
     {
       for ( Int_t i=0 ; i < nPhi ; i++ ) 
@@ -378,7 +586,7 @@ void StarMagField::Interpolate2DBfield( const Float_t r, const Float_t z, Float_
 
   Float_t fscale ;
 
-  fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
+  fscale = 0.001*fFactor*fRescale ;               // Scale STAR maps to work in kGauss, cm
 
   const   Int_t ORDER = 1  ;                      // Linear interpolation = 1, Quadratic = 2        
   static  Int_t jlow=0, klow=0 ;                            
@@ -401,6 +609,39 @@ void StarMagField::Interpolate2DBfield( const Float_t r, const Float_t z, Float_
   Bz_value  = fscale * Interpolate( &ZList[jlow], save_Bz, ORDER, z )   ; 
 
 }
+//________________________________________________________________________________
+void StarMagField::Interpolate2ExtDBfield( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) {
+  static Float_t ZExtList[nZext];
+  static Bool_t  first = kTRUE;
+  if (first) {
+    for (Int_t j = 0; j < nZext; j++) ZExtList[j] = BDAT[j].Zi;
+    first = kFALSE;
+  }
+  Float_t za = TMath::Abs(z);
+  if (za > BFLD.zz2 || r > BFLD.rrm) return;
+  if (za < ZList[nZ-1] && r < Radius[nR-1]) return;
+  Float_t fscale  = 0.001*fFactor;// Scale STAR maps to work in kGauss, cm. Table only for Full Field, no Rescale ! 
+
+  const   Int_t ORDER = 1  ;                      // Linear interpolation = 1, Quadratic = 2        
+  static  Int_t jlow=0, klow=0 ;                            
+  Float_t save_Br[ORDER+1] ;
+  Float_t save_Bz[ORDER+1] ;
+  Search ( nZext, ZExtList,  za, jlow ) ;
+  if ( jlow < 0 ) jlow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
+  if ( jlow + ORDER  >=    nZext - 1 ) jlow =   nZext - 1 - ORDER ;
+
+  for ( Int_t j = jlow ; j < jlow + ORDER + 1 ; j++ ) {
+    Int_t N = BDAT[j].N;
+    Search ( N, (Float_t *) (&BDAT[j].Ri[0]), r, klow ) ;
+    if ( klow < 0 ) klow = 0 ;
+    if ( klow + ORDER  >=    BDAT[j].N - 1 ) klow =   BDAT[j].N - 1 - ORDER ;
+    save_Br[j-jlow]   = Interpolate( &BDAT[j].Ri[klow], &BDAT[j].Bri[klow], ORDER, r )   ;
+    save_Bz[j-jlow]   = Interpolate( &BDAT[j].Ri[klow], &BDAT[j].Bzi[klow], ORDER, r )   ;
+  }
+  Br_value  = fscale * Interpolate( &ZExtList[jlow], save_Br, ORDER, za )   ; 
+  Bz_value  = fscale * Interpolate( &ZExtList[jlow], save_Bz, ORDER, za )   ; 
+  if (z < 0) Br_value  = - Br_value;
+}
 
 /// Interpolate the B field map - 3D interpolation
 
@@ -410,7 +651,7 @@ void StarMagField::Interpolate3DBfield( const Float_t r, const Float_t z, const 
 
   Float_t fscale ;
 
-  fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
+  fscale = 0.001*fFactor*fRescale ;               // Scale STAR maps to work in kGauss, cm
 
   const   Int_t ORDER = 1 ;                       // Linear interpolation = 1, Quadratic = 2   
   static  Int_t ilow=0, jlow=0, klow=0 ;
@@ -447,9 +688,8 @@ void StarMagField::Interpolate3DBfield( const Float_t r, const Float_t z, const 
 
 }
 
-
 //________________________________________
-
+#if 0
 /// Interpolate the E field map - 2D interpolation
 
 void StarMagField::Interpolate2DEdistortion( const Float_t r, const Float_t z, 
@@ -514,7 +754,7 @@ void StarMagField::Interpolate3DEdistortion( const Float_t r, const Float_t phi,
   Ephi_value   = Interpolate( &eZList[ilow], saved_Ephi, ORDER, z )  ;
  
 }
-
+#endif
 
 //________________________________________
 
@@ -602,16 +842,39 @@ void StarMagField::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
   if ( x == Xarray[N-1] ) low = N-2 ;
   if ( x == Xarray[0]   ) low = 0 ;
-
+  
+ }
+//________________________________________________________________________________
+#define PPLOCK(A) \
+  void StarMagField::Set ## A (Float_t m) {				\
+    if (!fLock) f ## A  = m;					\
+    else printf("StarMagField::Set"#A"() "#A" is locked at %f; Set to %f is ignored\n", f ## A ,m); \
+  }
+PPLOCK(Factor)
+PPLOCK(Rescale)
+PPLOCK(BDipole)
+PPLOCK(RmaxDip)
+PPLOCK(ZminDip)
+PPLOCK(ZmaxDip)
+#undef PPLOCK
+//________________________________________________________________________________
+void StarMagField::SetLock () {
+  if (! fLock) {
+    fLock = kTRUE;
+    printf("StarMagField::SetLock lock StarMagField parameters\n");
+    Print();
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
+//________________________________________________________________________________
+#define PrintPar(A) printf("StarMagField:: "#A"\t%f\n",f ## A)
+void StarMagField::Print () {
+  if (fLock) printf("StarMagField parameters are locked\n");
+  printf("StarMagField:: Map\t%i\n",fMap  );
+  PrintPar(Factor );
+  PrintPar(Rescale);
+  PrintPar(BDipole);
+  PrintPar(RmaxDip);
+  PrintPar(ZminDip);
+  PrintPar(ZmaxDip);
+}
+#undef PrintPar
