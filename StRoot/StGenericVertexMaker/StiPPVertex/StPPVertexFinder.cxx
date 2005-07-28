@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.8 2005/07/27 06:08:19 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.9 2005/07/28 20:57:14 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -79,7 +79,7 @@ StPPVertexFinder::StPPVertexFinder() {
   FILE *fd=fopen("ppvMode.dat","r");
   if(fd) {
     fscanf(fd,"%d ",&mTestMode);
-    gMessMgr->Warning() << "PPV-1 cuts have been changed to mTestMode=" << mTestMode<<endm;
+    gMessMgr->Warning() << "PPV cuts have been changed to mTestMode=" << mTestMode<<endm;
     fclose(fd);
   }
 
@@ -91,13 +91,13 @@ StPPVertexFinder::StPPVertexFinder() {
 void 
 StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
-  gMessMgr->Info() << "PPV-1 cuts have been activated, mTestMode=" << mTestMode<<endm;
+  gMessMgr->Info() << "PPV-2 cuts have been activated, mTestMode=" << mTestMode<<endm;
   //.. set various params 
   mMaxTrkDcaRxy = 3.0;  // cm 
   mMinTrkPt     = 0.20; // GeV/c           
   mMinFitPfrac  = 0.7;  // nFit /nPossible points on the track
   mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
-  mMaxZrange    = 150;  // to accept Z_DCA of a track           
+  mMaxZrange    = 200;  // to accept Z_DCA of a track           
   mMinMatchTr   = 2;    // required to accept vertex              
   mMinAdcBemc   = 15;   // chan, 2004 data, make it timeStamp dependent
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
@@ -143,7 +143,7 @@ StPPVertexFinder::Init() {
   eemcList->initHisto( HList);
 
   gMessMgr->Message("","I") 
-    << "PPV-1::cuts"
+    << "PPV::cuts"
     <<"\n MinFitPfrac=nFit/nPos  ="<< mMinFitPfrac 
     <<"\n MaxTrkDcaRxy/cm="<<mMaxTrkDcaRxy
     <<"\n MinTrkPt GeV/c ="<<mMinTrkPt
@@ -161,7 +161,7 @@ StPPVertexFinder::Init() {
 //==========================================================
 void 
 StPPVertexFinder::InitRun(int runnumber){
-  gMessMgr->Info() << "PPV-1 InitRun() runNo="<<runnumber<<endm;
+  gMessMgr->Info() << "PPV InitRun() runNo="<<runnumber<<endm;
 
   if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
   assert(runnumber<7000000); // real BTOW HV not known for 2006+,crash it, JB
@@ -319,7 +319,7 @@ int
 StPPVertexFinder::fit(StEvent* event) {
   mTotEve++;
   eveID=event->id();
-  gMessMgr->Info() << "\n   @@@@@@   PPVertex-1::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
+  gMessMgr->Info() << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
 
   hA[0]->Fill(1);
   // tmp
@@ -563,7 +563,7 @@ StPPVertexFinder::findVertex(VertexData &V) {
   float kSig= sqrt(2*(Lmax-Llow));
   float sigZ= (zHigh-zLow)/2/kSig;
   printf("  Z low/max/high=%f %f %f, kSig=%f, sig=%f\n",zLow,z0,zHigh,kSig,sigZ);
-  printf(" found  PPVertex-1(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",V.id,mTotEve,z0,sigZ);
+  printf(" found  PPVertex(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",V.id,mTotEve,z0,sigZ);
 
   // take x,y from beam line equation, TMP
   float x=mX0+z0*mdxdz;
@@ -1028,6 +1028,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.9  2005/07/28 20:57:14  balewski
+ * extand zMax range to 200cm, call it PPV-2
+ *
  * Revision 1.8  2005/07/27 06:08:19  balewski
  * tuning PPV cuts
  *

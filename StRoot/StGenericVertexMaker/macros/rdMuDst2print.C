@@ -11,11 +11,9 @@ int rdMuDst2print(
 { 
 
   inDir="./"; 
-  //file="st_physics_6122011_raw_1020010.MuDst.root";
-  //file="st_physics_6145042_raw_2030006.MuDst.root";
   
-  // inDir="JPsi/R6145042/out1/";
-  file="st_physics_adc_6145042_raw_2050001.MuDst.root";
+  inDir="/star/data09/reco/ppProduction/FullField/DEV_ittf.ppv/2005/169/";
+  file="st_physics_6169107_raw_2010010.MuDst.root";
 
   // inDir="/star/u/mvl/mudst_dev/quick_fix/data/";
   // file="st_physics_5109030_raw_1020001.MuDst.root";
@@ -52,11 +50,17 @@ int rdMuDst2print(
 
     StEventInfo &info=muEve->eventInfo();
     int nPrimV=muMk->muDst()->numberOfPrimaryVertices();
-    
+    StMuTriggerIdCollection &tic=muEve->triggerIdCollection();
+
+    int trigID=96211;
+    bool fired=tic.nominal().isTrigger(trigID);
+  
     Int_t nPrimTrAll=muMk->muDst()->GetNPrimaryTrack();
     Int_t nGlobTrAll=muMk->muDst()->GetNGlobalTrack();
     
     printf("\n\n ====================%d  processing eventID %d nPrimV=%d nPrimTr=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nPrimTrAll,nGlobTrAll);
+    printf("TrigID=%d fired=%d\n",trigID,fired);
+    
     if(nPrimV>1) printf("######\n");
     int iv;
     for(iv=0;iv<nPrimV;iv++) {
@@ -78,7 +82,7 @@ int rdMuDst2print(
 	     ,nPrimTr, V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
     } 
 
-    //  continue;   // do NOT print prim tracks for each vertex  
+    continue;   // do NOT print prim tracks for each vertex  
 
     for(iv=0;iv<nPrimV;iv++) {
       printf("  Prim tracks belonging to %d prim vertex:\n",iv);      
