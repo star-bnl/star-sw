@@ -64,10 +64,10 @@
     cd pacman-3.13-pre-release-Jul06
     source setup.csh
     cd ..
-    pacman -get gsiftp://stargrid04.rcf.bnl.gov//afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES
-    pacman -get STARGRID:hijing
-    pacman -get STARGRID:starlib
-    pacman -get STARGRID:starsim
+    pacman -trust-all-caches -get gsiftp://stargrid04.rcf.bnl.gov//afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES
+    pacman -trust-all-caches -get STARGRID:hijing
+    pacman -trust-all-caches -get STARGRID:starlib
+    pacman -trust-all-caches -get STARGRID:starsim
     pwd
     source setup.csh
 
