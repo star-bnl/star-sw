@@ -44,7 +44,7 @@ protected:
   int fCurCount;
   int fUseCount;
   int fFastDel;
-  
+static double fgTotal;  
 };
 
 template <class Abstract>
