@@ -117,11 +117,12 @@ Abstract *StiFactory<Concrete,Abstract>::getInstance()
     if (fFastDel)    {
        int   nBuf = sizeof(StiBlock<Concrete>) + FENCE;
        char *cBuf = new char[nBuf];
-       new StiBlock<Concrete>(&fBTop,&fHTop,cBuf);
+       new((StiBlock<Concrete>*)cBuf) StiBlock<Concrete>(&fBTop,&fHTop,cBuf);
     } else {
        new StiBlock<Concrete>(&fBTop,&fHTop,   0);
     }
     fCurCount += fBTop->getSize();
+    fgTotal   += sizeof(StiBlock<Concrete>)*1e-6;
   }
   StiHolder<Concrete> *h = fHTop;
   fHTop = h->fNext;
@@ -152,9 +153,10 @@ void StiFactory<Concrete,Abstract>::clear()
     b=b->fNext;
     if (fFastDel) {delete [] d->fBuff;} else { delete d;}
     sz += sizeof(StiBlock<Concrete>);
+    fgTotal -= sizeof(StiBlock<Concrete>)*1e-6;
   }
   fBTop=0; fHTop=0; fCurCount=0; fUseCount=0;
-  printf("*** %s::clear() %g MegaBytes \n",getName().c_str(),sz*1e-6);
+  printf("*** %s::clear() %g MegaBytes Total %g\n",getName().c_str(),sz*1e-6,fgTotal);
 }
 //______________________________________________________________________________
 template <class Concrete, class Abstract>
