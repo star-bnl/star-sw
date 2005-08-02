@@ -66,12 +66,18 @@ class StEEmcA2EMaker : public StMaker {
   /// \param index: tower index ranging from 0-719
   /// \param layer: layer index, 0=T, 1=P, 2=Q, 3=R
   StEEmcTower tower(Int_t index, Int_t layer=0) { return mTowers[index][layer]; }
+
   /// Return a specified tower element
   /// \param sector: tower sector, counting from 0 [0,11]
   /// \param subsector: tower subsector A-E, counting from 0 [0,4]
   /// \param etabin: tower etabin, counting from 0 [0,11] 
   /// \param layer: layer index, 0=T, 1=P, 2=Q, 3=R
   StEEmcTower tower(Int_t sector, Int_t subsector, Int_t etabin, Int_t layer=0){return tower(index(sector,subsector,etabin),layer);}
+
+  /// Return a pointer to the tower element which the specified
+  /// vector (origin at 0,0,0) points to.  A NULL is returned if
+  /// no valid tower exists at that position.
+  StEEmcTower *tower( TVector3 &r, Int_t layer );
   
   /// Given tower sector, subsector, translate to phibin 
   Int_t phibin( Int_t sector, Int_t subsector ) { return sector * 5 + subsector; } 

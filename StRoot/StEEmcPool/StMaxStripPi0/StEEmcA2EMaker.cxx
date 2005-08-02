@@ -633,3 +633,10 @@ Float_t StEEmcA2EMaker::energy(Int_t layer)
 } 
 
 
+// ----------------------------------------------------------------------------
+StEEmcTower *StEEmcA2EMaker::tower( TVector3 &r, Int_t layer )
+{
+  Int_t sec=-1,sub=-1,eta=-1;
+  if ( !mEEgeom->getTower(r,sec,sub,eta) ) return NULL;
+  return &mTowers[ index(sec,sub,eta) ][layer];
+}
