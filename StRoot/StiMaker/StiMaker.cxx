@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.151  2005/08/04 04:03:19  perev
+// Cleanup
+//
 // Revision 1.150  2005/07/21 01:20:12  perev
 // clearmem is default now
 //
@@ -179,10 +182,11 @@
 #include <math.h>
 #include <string>
 #include "StChain.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
+#include "TDataSet.h"
+#include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "SystemOfUnits.h"
+#include "TMemStat.h"
 #include "PhysicalConstants.h"
 #include "StDetectorId.h"
 #include "StEventTypes.h"
@@ -521,9 +525,11 @@ Int_t StiMaker::Make()
   if (1 || m_Mode)
     {
 //    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
+//      TMemStat::PrintMem("Before StiFactory clear()");
       _toolkit->getHitFactory()->clear();
       _toolkit->getTrackNodeFactory()->clear();
       _toolkit->getTrackFactory()->clear();
+//      TMemStat::PrintMem("After  StiFactory clear()");
     }
   return kStOK;
 }
