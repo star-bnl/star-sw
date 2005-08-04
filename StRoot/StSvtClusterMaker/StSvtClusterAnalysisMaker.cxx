@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.28 2005/07/23 03:37:33 perev Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.29 2005/08/04 04:06:08 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.29  2005/08/04 04:06:08  perev
+ * clear of collection added
+ *
  * Revision 1.28  2005/07/23 03:37:33  perev
  * IdTruth + Cleanup
  *
@@ -696,7 +699,13 @@ Int_t StSvtClusterAnalysisMaker::Finish(){
 }
 //____________________________________________________________________________
 
-void StSvtClusterAnalysisMaker::Clear(Option_t *option){
+void StSvtClusterAnalysisMaker::Clear(Option_t *option)
+{
+  if(mSvtAnalColl) {
+    int n = mSvtAnalColl->size(); 
+    mSvtAnalColl->clear();
+    mSvtAnalColl->resize(n);
+  }
   StMaker::Clear(option);
 }
 
