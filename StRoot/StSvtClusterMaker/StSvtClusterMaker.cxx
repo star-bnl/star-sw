@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.10 2004/01/27 02:32:58 perev Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.11 2005/08/04 04:06:38 perev Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.11  2005/08/04 04:06:38  perev
+// clear of collection added
+//
 // Revision 1.10  2004/01/27 02:32:58  perev
 // LeakOff
 //
@@ -191,7 +194,6 @@ Int_t StSvtClusterMaker::Finish(){
 }
 
 //_____________________________________________________________________________
-
 Int_t StSvtClusterMaker::Reset(){
 
   if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::reset() ..."  << 
@@ -207,7 +209,16 @@ Int_t StSvtClusterMaker::Reset(){
 
  return kStOK;
 }
-
+//_____________________________________________________________________________
+void StSvtClusterMaker::Clear(const char *)
+{
+ if (mClusterColl) {
+   int n =  mClusterColl->size();
+   mClusterColl->clear();
+   mClusterColl->resize(n);
+ }
+ StMaker::Clear();
+}
 //_____________________________________________________________________________
 ClassImp(StSvtClusterMaker)
 

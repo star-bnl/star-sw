@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.7 2003/09/10 19:47:35 perev Exp $
+// $Id: StSvtClusterMaker.h,v 1.8 2005/08/04 04:06:54 perev Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.8  2005/08/04 04:06:54  perev
+// clear of collection added
+//
 // Revision 1.7  2003/09/10 19:47:35  perev
 // ansi corrs
 //
@@ -52,16 +55,17 @@ class StSvtClusterMaker : public StMaker
   StSvtClusterMaker( StSvtClusterMaker& clumaker);
   virtual ~StSvtClusterMaker();
 
-  virtual Int_t Init();
-  virtual Int_t Make();
-  virtual Int_t Finish();
-
+  Int_t Init();
+  Int_t Make();
+  Int_t Finish();
+  void  Clear(const char *opt="");
+  
   Int_t Reset();
   Int_t GetSvtRawData();
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.7 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.8 2005/08/04 04:06:54 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
