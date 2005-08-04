@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.86 2005/07/20 17:24:25 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.87 2005/08/04 03:52:54 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.87  2005/08/04 03:52:54  perev
+ * Cleanup
+ *
  * Revision 2.86  2005/07/20 17:24:25  perev
  * Nudge actions in evaluateChi2 added
  *
@@ -1438,8 +1441,8 @@ static int nCall=0; nCall++;
   mFP._tanl  = tanl;
   mFP._sinCA = sinCA;
   mFP._cosCA = ::sqrt((1.-mFP._sinCA)*(1.+mFP._sinCA)); 
-  mFP = mFP;
-  // update error matrix
+
+// update error matrix
   double c00=mFE._cYY;                       
   double c10=mFE._cZY, c11=mFE._cZZ;                 
   double c20=mFE._cEY, c21=mFE._cEZ;//, c22=mFE._cEE;           
