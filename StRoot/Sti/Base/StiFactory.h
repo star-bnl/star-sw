@@ -111,13 +111,15 @@ StiFactory<Concrete,Abstract>* StiFactory<Concrete,Abstract>::myInstance()
 template <class Concrete, class Abstract>
 Abstract *StiFactory<Concrete,Abstract>::getInstance() 
 {
-  enum {FENCE = sizeof(double)+2*sizeof(long)};
+  enum {FENCE = sizeof(double)+2*sizeof(long)+1};
   if (!fHTop)  {
     assert(fCurCount < fMaxCount);  
     if (fFastDel)    {
        int   nBuf = sizeof(StiBlock<Concrete>) + FENCE;
        char *cBuf = new char[nBuf];
+       cBuf[nBuf-1]=46;
        new((StiBlock<Concrete>*)cBuf) StiBlock<Concrete>(&fBTop,&fHTop,cBuf);
+       assert(cBuf[nBuf-1]==46);
     } else {
        new StiBlock<Concrete>(&fBTop,&fHTop,   0);
     }
