@@ -98,7 +98,6 @@ void StiPixelHitLoader::loadMcHits(StMcEvent* source,
         }
       detector = _detector->getDetector(iLayer, iSector);
       StiHit * stiHit = _hitFactory->getInstance();
-      if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
       stiHit->reset();
       double sigma = 0.; // um
       double x = hit->position().x();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.16 2004/03/18 01:51:05 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.17 2005/08/04 04:07:27 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.17  2005/08/04 04:07:27  perev
+ * Cleanup
+ *
  * Revision 1.16  2004/03/18 01:51:05  caines
  * Make sure GetDaqReader returns something as it is declared Int_t
  *
@@ -143,7 +146,7 @@ Int_t StSvtDaqMaker::SetSvtData()
   else
     fSvtData = new StSvtDaqData(fConfig);
 
-  fSvtSet->SetObject((TObject*)fSvtData);
+  fSvtSet->SetObject(fSvtData);
 
   return kStOK;
 }
@@ -382,7 +385,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.16 2004/03/18 01:51:05 caines Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.17 2005/08/04 04:07:27 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

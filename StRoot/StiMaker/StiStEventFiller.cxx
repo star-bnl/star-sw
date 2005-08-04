@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.60 2005/07/21 21:50:24 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.61 2005/08/04 04:04:19 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.61  2005/08/04 04:04:19  perev
+ * Cleanup
+ *
  * Revision 2.60  2005/07/21 21:50:24  perev
  * First/last point of track filled from node now
  *
@@ -1003,7 +1006,8 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
 //_____________________________________________________________________________
 bool StiStEventFiller::accept(StiKalmanTrack* track)
 {
-    if(track->getTrackLength()<0) return 0; // insert other filters for riff-raff we don't want in StEvent here.
+    if(track->getNNodes(3)<=5) 		return 0; // insert other filters for riff-raff we don't want in StEvent here.
+    if(track->getTrackLength()<=0) 	return 0; // insert other filters for riff-raff we don't want in StEvent here.
 //    if(track->getFitPointCount(kSvtId)<2) return 0;
     return 1;
 }
