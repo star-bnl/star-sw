@@ -131,6 +131,8 @@ public:
           int    getId() const {return mId;}
   virtual StiTrackNode *extendToVertex(StiHit* vertex)=0;
   //	virtual bool extendToVertex(StiHit* vertex, const StiDetector * alternate)=0;
+  virtual int  refit()=0;
+  virtual int  refitL()=0;
 
  protected:
   static StiTrackFinder * trackFinder;
