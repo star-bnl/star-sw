@@ -34,6 +34,7 @@ public:
     virtual ~StiTrackContainer();  
     void add(StiTrack * track);
     int getTrackCount(Filter<StiTrack> * filter) const;
+    void sort();
     
 };
 
