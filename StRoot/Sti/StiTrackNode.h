@@ -55,8 +55,8 @@ enum eTrackNodeStatus {
   void setHit(StiHit* hit)		{_hit   =hit;}
   const StiDetector *getDetector() const; 
   void  setDetector(const StiDetector *detector);
-  double getChi2 () const		{return _chi2;} 		
-  double getDet () const		{return _det ;} 		
+  double getChi2 ()  const		{return _chi2;} 		
+  double getDeterm() const		{return _det ;} 		
   void setChi2(double chi2)		{_chi2  =chi2;}
   int getState() const 			{return _state;}
  void setReady()  			{ _state=kTNReady;}
