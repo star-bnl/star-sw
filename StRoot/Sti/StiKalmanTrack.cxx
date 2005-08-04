@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.66 2005/07/20 17:21:44 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.66 2005/07/20 17:21:44 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.67 2005/08/04 03:50:31 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.67 2005/08/04 03:50:31 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.67  2005/08/04 03:50:31  perev
+ * removeLastNode() added
+ *
  * Revision 2.66  2005/07/20 17:21:44  perev
  * MultiVertex
  *
@@ -577,8 +580,10 @@ int StiKalmanTrack::getFitPointCount(int detectorId)    const
 double StiKalmanTrack::getTrackLength() const
 {
   StiKalmanTrackNode * inNode = getInnerMostHitNode(3);
+  if (!inNode) 					return 0;
   StThreeVectorD in(inNode->x_g(),inNode->y_g(),inNode->z_g());
   StiKalmanTrackNode * otNode = getOuterMostHitNode(3);
+  if (!otNode) 					return 0;
   if (inNode==otNode) 				return 0;
   if (otNode->getX()-inNode->getX()<1e-3) 	return 0;
   StThreeVectorD ot(otNode->x_g(),otNode->y_g(),otNode->z_g());
@@ -1149,6 +1154,13 @@ void StiKalmanTrack::setFirstLastNode(StiKalmanTrackNode * node)
 {
  firstNode = (StiKalmanTrackNode*)node->getFirstNode();
   lastNode = (StiKalmanTrackNode*)node->getLastNode ();
+}
+//_____________________________________________________________________________
+void StiKalmanTrack::removeLastNode()
+{
+  StiTreeNode *node = lastNode;
+  lastNode = (StiKalmanTrackNode*)node->disconnect();
+  BFactory::Free(node);
 }
 //_____________________________________________________________________________
 int StiKalmanTrack::refit() 

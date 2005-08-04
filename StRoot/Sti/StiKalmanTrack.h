@@ -219,7 +219,8 @@ class StiKalmanTrack : public StiTrack
   const StiKTNBidirectionalIterator& end()    const;
 	StiKTNBidirectionalIterator  rbegin() const;
   const StiKTNBidirectionalIterator& rend()   const;
-  
+  void  removeLastNode();  
+
    /// Accessor method returns the inner/outer most node associated with the track.
    /// inot: 0=inner, 1=outer; 
    /// qua : 0=nocheck, 1=with hit inside, 2=chi2 non infinit
