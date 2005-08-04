@@ -48,7 +48,9 @@ class StiMcTrack : public StiTrack
   StiTrackNode *extendToVertex(StiHit* vertex){return 0;}
   vector<StiHit*> getHits();
   void addHit(StiHit *hit);
-          bool isPrimary() const;
+  bool isPrimary() const;
+  int  refit()	{return 0;}
+  int  refitL()	{return 0;}
 
  protected:
   const StMcTrack * mcTrack;
