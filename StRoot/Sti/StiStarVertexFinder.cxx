@@ -66,6 +66,7 @@ int StiStarVertexFinder::fit(StEvent * event)
 //______________________________________________________________________________
 StiHit * StiStarVertexFinder::getVertex(int idx) 
 {
+static const double fakeErr2=1e-4;
   StPrimaryVertex *spv = mGVF->getVertex(idx);
   if (!spv) return 0;
   // Get an instance of StHit from the factory
@@ -80,11 +81,11 @@ StiHit * StiStarVertexFinder::getVertex(int idx)
   vertex->set(0, spv, 
 	   0., 
 	   vp.x(),vp.y(),vp.z(),
-	   cov[0][0],
-	   cov[0][1],
-	   cov[0][2],
-	   cov[1][1],
-	   cov[1][2],
-	   cov[2][2]);
+	   fakeErr2,
+	   0,
+	   0,
+	   fakeErr2,
+	   0,
+	   fakeErr2); //Errors are zeros. Only track err accounted
   return vertex;
 }
