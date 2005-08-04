@@ -310,7 +310,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
 {
-  enum vertexLimits {ZMAX=10,RMAX=50,RMIN=5};
+  enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=3,RMAX=50,RMIN=5};
 
   StiKalmanTrackNode *extended=0;
   int goodCount= 0, plus=0, minus=0;
@@ -323,26 +323,40 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
     StiKalmanTrackNode *bestNode=0;  
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
-    for (int iVertex=0;iVertex<nVertex;iVertex++) 	{
+    if (nearBeam.perp2()>RMAX2d*RMAX2d) 		continue;
+    StiKalmanTrackNode * inner = track->getInnerMostNode();
+    double r = inner->getRefPosition();
+    if (r>RMAX) 					continue;	
+    if (r>RMIN) find(track,kOutsideIn);
+    for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
-      if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX) 	continue;
+//VP  if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX2d) 	continue;
+      if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
 
-      StiKalmanTrackNode * inner = track->getInnerMostNode();
-      double r = inner->getRefPosition();
-      if (r>RMAX) 					continue;	
-      if (r>RMIN) find(track,kOutsideIn);
       extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
+
       if (!extended) 					continue;
       if (!bestNode) {bestNode=extended;		continue;}
-      if (bestNode->getChi2() < extended->getChi2())    continue;
+      if (bestNode->getChi2()+log(bestNode->getDeterm())
+         <extended->getChi2()+log(extended->getDeterm()))continue;
       BFactory::Free(bestNode);
       bestNode = extended;
     }//End vertex loop
     
-    if(!bestNode) 	continue;
+    if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
+    int         ifail = 0;
+static int REFIT=0;
+    if (REFIT) {
+                ifail = track->refit();
+    if (!ifail) ifail = track->refitL();
+    if (!ifail) ifail = track->getInnerMostHitNode()!=bestNode;
+}
+// something is wrong. It is not a primary
+    if (ifail) { track->removeLastNode();continue;}
     goodCount++;
     if (track->getCharge()>0) plus++; else minus++;
+
   }//End track loop 
   if (debug()) {
     cout << "SKTF::extendTracksToVertices(...) -I- rawCount:"<<nTracks<<endl
@@ -592,7 +606,7 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 //		Check and count node
   if (node->getHit()) {
     if (debug() > 2)cout << " got Hit! "<<endl ;
-    qa.sum = node->getChi2() + log(node->getDet());
+    qa.sum = node->getChi2() + log(node->getDeterm());
     qa.hits=1; qa.qa=1;
     node->getHitCount()++;
     node->getContigHitCount()++;
