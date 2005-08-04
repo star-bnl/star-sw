@@ -1,7 +1,14 @@
-* $Id: btofgeo4.g,v 1.3 2005/06/01 21:16:00 llope Exp $
+* $Id: btofgeo4.g,v 1.4 2005/08/04 23:37:37 potekhin Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo4.g,v $
+* Revision 1.4  2005/08/04 23:37:37  potekhin
+* Jing must have forgotten to define a non-zero
+* size for the volume "BLEM", which was already fixed
+* in the previous version of the code but is missing
+* in this one. Since this source was never used in prod,
+* there will be no effect on the data.
+*
 * Revision 1.3  2005/06/01 21:16:00  llope
 * includes jings bugfixes and updates for run-5
 *
@@ -889,7 +896,9 @@ Block BFEE is a G10 FrontEndElectronics board for TOF
 EndBlock
 Block BLEM is a Lemo connector on the FEE boards
       Attribute BLEM seen=0   colo=3
-      Shape     BOX   dx=0 dy=0 dz=0
+      Shape     BOX   dx=(0.68/2 + (0.9-0.72)/2),
+                        dy=(0.68/2),
+                        dz=(2.0/2 + (0.8+1.0)/2)
 **      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
 **      Create    BPIP  Rmin=0.62/2 Rmax=0.68/2 dz=1.0/2
 **      Position  BRAI  x=0            y=0 z=0
