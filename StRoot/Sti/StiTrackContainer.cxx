@@ -29,9 +29,7 @@ bool StiTrackLessThan::operator()(const StiTrack* lhs, const StiTrack* rhs) cons
 {
   double lhsCurv = lhs->getCurvature();
   double rhsCurv = rhs->getCurvature();
-  if (lhsCurv==0. || rhsCurv==0.) 
-    return false;
-  return (1./lhsCurv < 1./rhsCurv);
+  return fabs(lhsCurv) < fabs(rhsCurv);
 }
 
 /*! Get the number of tracks held by this container that satisfies the given track filter.
@@ -53,4 +51,8 @@ int StiTrackContainer::getTrackCount(Filter<StiTrack> * filter) const
     }
   else
     return size();
+}
+void StiTrackContainer::sort() 
+{
+  std::sort(begin(),end(),StiTrackLessThan());
 }
