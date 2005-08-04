@@ -1,7 +1,14 @@
-* $Id: btofgeo2.g,v 1.12 2005/05/23 14:56:15 llope Exp $
+* $Id: btofgeo2.g,v 1.13 2005/08/04 23:39:24 potekhin Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
+* Revision 1.13  2005/08/04 23:39:24  potekhin
+* A very old bug, with BLEM having zero sizes and being
+* neve properly sized. Since this volume effectively
+* didn't exist, for that reason, we are now removing
+* it altogether, to avoid annoying error messages
+* when running VMC software
+*
 * Revision 1.12  2005/05/23 14:56:15  llope
 * removed unneeded Dens=0.282 statements from honeycomb Material definitions
 *
@@ -70,10 +77,11 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
 *
-*   List of GEANT volumes produce here:
+*   List of GEANT volumes: note BLEM was removed 20050804 due to the ancient bug
+*   which assigned null size to it, so it doesn't matter anyway
       Content   BTOF,BTOH,BSEC,BTRA,BUND,BTFT,BASE,BARM,BANG,
                 BWAT,BCOV,BXTR,BMTC,BTTC,BMAA,BMTD,
-                BASS,BXSA,BCSB,BCCV,BFEE,BLEM,
+                BASS,BXSA,BCSB,BCCV,BFEE,
                 BCPM,BCSK,BTSK,BZEL,BCEL,BCEB,BCON,BPLA,
                 BCOO,BRAI,BPIP,BPIQ,
                 BRTC,BRMD,BRHC,BRCB,BRMY,BRGR,BROG,
@@ -788,37 +796,38 @@ Block BCON is a generic plastic block for various connectors, foam-support-angle
       Shape     BOX       dx=0 dy=0 dz=0
 EndBlock
 *
+* -- removing blem --
 Block BFEE is a G10 FrontEndElectronics board for TOF
       Attribute BFEE seen=0   colo=3
       Material  G10
       Shape     BOX  dx=0  dy=0  dz=0
-      Create    BLEM
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-6.0 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-2.5 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=1.   z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=4.5  z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=8.   z=-2 alphax=180 
+*      Create    BLEM
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=2 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=2 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=2 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=2 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=-6.0 z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=-2.5 z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=1.   z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=4.5  z=-2 alphax=180 
+*      Position  BLEM x=toff_ElecThck+(0.7/2) y=8.   z=-2 alphax=180 
 EndBlock
-Block BLEM is a Lemo connector on the FEE boards
-      Attribute BLEM seen=0   colo=3
-      Shape     BOX   dx=0 dy=0 dz=0
+*Block BLEM is a Lemo connector on the FEE boards
+*      Attribute BLEM seen=0   colo=3
+*      Shape     BOX   dx=0 dy=0 dz=0
 **      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
 **      Create    BPIP  Rmin=0.62/2 Rmax=0.68/2 dz=1.0/2
 **      Position  BRAI  x=0            y=0 z=0
 **      Position  BPIP  x=(0.9-0.72)/2 y=0 z=(0.7+1.0)/2
-      Create and Position    BPIP  x=(0.9-0.72)/2 y=0 z=(0.8+1.0)/2,
-                                   Rmin=0.62/2 Rmax=0.68/2 dz=2.0/2
-EndBlock
+*      Create and Position    BPIP  x=(0.9-0.72)/2 y=0 z=(0.8+1.0)/2,
+*                                   Rmin=0.62/2 Rmax=0.68/2 dz=2.0/2
+*EndBlock
 *
 *******************************************************************************
 *******************************************************************************
