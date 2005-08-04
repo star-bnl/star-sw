@@ -15,6 +15,7 @@ struct spaceChargeCor {
    double  fullFieldA;   /*  Postive Full " " */
    double  satRate;   /* Saturation Rate Hz  */
    float   factor;    /*  Multiplicative Factor */
-   float   detector;    /* 0=RICH, 1=BBC, 2=ZDC */
+   float   detector;    /* 0=RICH, 1=BBCx, 2=ZDCx e+w, 4=BBCe+w */
+   float   offset;      /* Offset at zero luminosity */
 
  };  
