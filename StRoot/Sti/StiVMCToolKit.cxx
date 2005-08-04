@@ -669,7 +669,7 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   shapeT->ComputeBBox();  
   TGeoBBox * Box = (TGeoBBox *) shapeT; 
   Double_t dx, dy, dz, rmin, rmax;
-  Double_t paramsBC[3];
+  Double_t paramsBC[4];
   shapeT->GetBoundingCylinder(paramsBC);
   Double_t volBB = 8*Box->GetDX()*Box->GetDY()*Box->GetDZ();
   Double_t volBC = 2*TMath::Pi()*(paramsBC[1] - paramsBC[0])*Box->GetDZ();
