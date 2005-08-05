@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.92 2005/02/11 23:17:14 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.93 2005/08/05 20:13:35 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1180,7 +1180,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.92 2005/02/11 23:17:14 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.93 2005/08/05 20:13:35 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1225,7 +1225,6 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 
   // trigger
   unsigned int triggers =  StFlowCutEvent::TriggersFound();
-  //unsigned int triggerWord = pFlowEvent->L0TriggerWord();
   mHistTrigger->Fill(triggers);
 
   // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
@@ -2321,6 +2320,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.93  2005/08/05 20:13:35  posk
+// Improved first guess for qDist fit.
+//
 // Revision 1.92  2005/02/11 23:17:14  posk
 // Fixed trigger histogram.
 //
