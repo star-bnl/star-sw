@@ -93,6 +93,58 @@ For example, to direct the message to the "error" logger on needs:
   LOG_ERROR << "My error message" << endm;
 </pre>  </code> </b>
 
+<a name="#nologgermacros"></a>
+The macros above provide an extra benefit to develop and 
+use your code with no logger at all.
+Just add into your implementation the lines as follows:
+</pre> </code> </b>
+<ul>
+<li>
+<b><code> <pre>
+#ifndef LOG_INFO 
+#  define LOG_INFO cout
+#  define endm  endl
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_WARN 
+#  define LOG_WARN cout
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_INFO 
+#  define LOG_INFO cout
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_ERRORINFO 
+#  define LOG_ERROR  cerr
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_FATAL
+#  define LOG_FATAL cerr
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_DEBUG
+#  define LOG_DEBUG cout
+#endif
+</pre> </code> </b>
+<li>
+<b><code> <pre>
+#ifndef LOG_QA
+#  define LOG_QA cout
+#endif
+</pre> </code> </b>
+</ul>
+or something like this.
+
 <a name="#use"></a>
 <h2> How to use the manager </h2>
 
@@ -107,7 +159,8 @@ To use the STAR message manager your code has to contain the STAR message manage
   and use that interface <a href="#macros">CPP macros</a>
 
 <P>
- By default STAR "root4star" framework works with the old STAR message manager implementation.
+ By default STAR "root4star" framework works with the old STAR message 
+ manager implementation.
 
 <p>
   To turn the new one one should load the extra shared library.
@@ -119,8 +172,7 @@ To use the STAR message manager your code has to contain the STAR message manage
    <b><code>
    <pre>
      &gt;root4star
-     root4star[0] .x LoadLogger.C
-     root4star[0] .x Bfc.C(1, . . . )
+     root4star[0] .x Bfc.C(1, ". . . logger", . . .  )
    </pre>
    </code></b>
  <p>
@@ -132,7 +184,7 @@ To use the STAR message manager your code has to contain the STAR message manage
    time parameters this can be defined via the <a href="#conf">logger configuration</a> file.
  <p>
    
-   In other words the author of the code should not apply the "Advanced methods" described by   
+   In the other words the author of the code should not apply the "Advanced methods" described by   
    <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"> "Section II"</a> 
    from the use code as soon as this can be done outside of the code at run-time.
  <p>
@@ -282,6 +334,10 @@ with
       LOG_INFO << "DbFill: structure: " << structName << endm;
    </pre>
    </code></b>
+   
+   It is safe to add these macro to your code. YOu still will be able to use and compile your code with no logger with <a href="#nologgermacros">
+a simple addition</a>.
+   
 <a name="#printCprintf"></a>
 <h3> "C"output subroutines</h3>
 
@@ -311,8 +367,18 @@ may be replaced with
    </code></b>
 
 <a name="#examples"></a>
-<H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>
-
+<!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
+<H2>Examples (under construction yet)"</H2>
+The example of the configuration files below are available 
+to copy from <b><code>$STAR/StRoot/StStarLogger/docs</b></code> directory 
+or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/doc">STAR CVS repository</a>
+<ul>
+<li><a href="Bfc.xml"> <b><code>Bfc.xml</code></b></a> - describes the STAR custom <b><code>StarOptionFilter</code></b> parameters
+<li><a href="HardQuotaRange.xml"> <b><code>HardQuotaRange.xml</code></b></a> - allows at most  400 messsage of the level "Debug" and "Info" 
+<li><a href="HardQuotaTpc.xml"> <b><code>HardQuotaTpc.xml</code></b></a> - allows at most 400 messages from <b><code>St_tpt_Maker</code></b>
+<li><a href="HardQuota.xml"> HardQuota.xml</code></b></a> - allows at most  400 non-Info  messages
+<li><a href="RollingQuota.xml"> <b><code>RollingQuota.xml</code></b></a> - allows 100 MGb log file at most   
+</ul>
 <hr>
 <small>
 Webmaster: <a href="mailto:fine@bnl.gov">Valeri Fine</a>
