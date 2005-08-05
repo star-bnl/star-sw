@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.22 2005/02/08 22:37:55 posk Exp $
+// $Id: plotCen.C,v 1.23 2005/08/05 20:13:44 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,7 +36,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
-  gROOT->SetStyle("Bold");                              // set style
+  gROOT->SetStyle("Pub");                              // set style
   gROOT->ForceStyle();
 
   int canvasWidth = 600, canvasHeight = 780;             // portrait
@@ -48,7 +48,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   } else {
     rows    = nCens/columns;
   }
-  //int pads    = rows*columns;
   int pads    = nCens;
 
   // names of histograms made by StFlowAnalysisMaker
@@ -420,7 +419,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptFit(111);
       hist->Draw("E1");
     } else if (strstr(shortName[pageNumber],"_q")!=0) {    // q distibution
-      gStyle->SetOptStat(10);
+      gStyle->SetOptStat(110);
       gStyle->SetOptFit(111);
       double area = hist->Integral() * qMax / (float)n_qBins; 
       TString* histMulName = new TString("Flow_Mul_Sel");
@@ -437,8 +436,10 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       TF1* fit_q = new TF1("qDist", qDist, 0., qMax, 4);
       fit_q->SetParNames("v", "mult", "area", "g");
       float qMean = hist->GetMean();
-      float v2N = (qMean > 1.) ? qMean - 1. : 0.;
-      float vGuess = 100. * sqrt(v2N / mult);
+      float vGuess = (qMean > 1.) ? sqrt(2.*(qMean - 1.) / mult) : 0.06;
+      // the 0.06 is a wild guess
+      vGuess *= 100.;
+      cout << "vGuess = " << vGuess << endl;
       fit_q->SetParameters(vGuess, mult, area, 0.3); // initial values
       fit_q->SetParLimits(1, 1, 1);               // mult is fixed
       fit_q->SetParLimits(2, 1, 1);               // area is fixed
@@ -590,6 +591,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.23  2005/08/05 20:13:44  posk
+// Improved first guess for qDist fit.
+//
 // Revision 1.22  2005/02/08 22:37:55  posk
 // Fixed trigger histogram for year=4.
 //

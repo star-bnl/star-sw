@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.62 2004/12/09 23:47:11 posk Exp $
+// $Id: plot.C,v 1.63 2005/08/05 20:13:43 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,7 +45,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
-  gROOT->SetStyle("Bold");                              // set style
+  gROOT->SetStyle("Pub");                              // set style
   gROOT->ForceStyle();
   //gStyle->SetOptStat(kFALSE);
 
@@ -550,7 +550,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
       } else if (strstr(shortName[pageNumber],"_q")!=0) {   // q distibution
-	gStyle->SetOptStat(10);
+	gStyle->SetOptStat(110);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
 	float n_qBins = (float)hist->GetNbinsX();
@@ -569,13 +569,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TF1* fit_q = new TF1("qDist", qDist, 0., max, 4);
 	fit_q->SetParNames("v", "mult", "area", "g");
 	float qMean = hist->GetMean();
-	float v2N = (qMean > 1.) ? qMean - 1. : 0.;
-	float vGuess = 100. * sqrt(v2N / mult);
-	fit_q->SetParameters(vGuess, mult, area, 0.5); // initial values
+	float vGuess = (qMean > 1.) ? sqrt(2.*(qMean - 1.) / mult) : 0.06;
+	// the 0.06 is a wild guess
+	vGuess *= 100.;
+	cout << "vGuess = " << vGuess << endl;
+	fit_q->SetParameters(vGuess, mult, area, 0.3); // initial values
 	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
 	fit_q->SetParLimits(2, 1, 1);             // area is fixed
 	hist->Fit("qDist", "Q");
-	//fit_q->Draw("same");
 	fit_q->Draw();
  	fit_q->FixParameter(3, 0.);               // g is fixed
 	fit_q->SetLineStyle(kDotted);
@@ -777,6 +778,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.63  2005/08/05 20:13:43  posk
+// Improved first guess for qDist fit.
+//
 // Revision 1.62  2004/12/09 23:47:11  posk
 // Minor changes in code formatting.
 // Added hist for TPC primary dca to AnalysisMaker.
