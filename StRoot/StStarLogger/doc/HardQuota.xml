@@ -2,9 +2,10 @@
 <!DOCTYPE configuration>
 
 <configuration xmlns='http://logging.apache.org/'>
-<!-- s from 
-   This example allows first 400 messages at most and and remove all no-INFO messages.
-   It is applide to the entire application (watch "root" logger)
+<!--
+      This example allows first 400 messages at most and removes all not-INFO messages.
+      It is applied to the entire application (watch "root" logger)
+  Note: The "stdout" name of the appender below  is an aribrary name of choice
 -->
 
   <appender name="stdout" class="org.apache.log4j.ConsoleAppender">

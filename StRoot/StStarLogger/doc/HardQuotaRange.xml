@@ -2,12 +2,11 @@
 <!DOCTYPE configuration>
 
 <configuration xmlns='http://logging.apache.org/'>
-
-<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
-<!-- s from 
+<!--
    This example allows first 400 messages at most and preserve there 
-   the messages with the level from DEBUF to INFO 
-   It is applide to the entire application (watch "root" logger)
+   the messages with the level from DEBUG to INFO 
+   It is applied to the entire application (watch "root" logger)
+   
 -->
 
   <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
@@ -32,4 +31,4 @@
      <appender-ref ref="stdout" />
   </root>
   
-<configuration>
+</configuration>

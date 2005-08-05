@@ -2,14 +2,17 @@
 <!DOCTYPE configuration>
 
 <configuration xmlns='http://logging.apache.org/'>
-<!-- s from 
+<!--
    This example:
    - allows first 400 messages at most and a
-     remove all no-DEBUG messages.
-     It is applied to the St_tpt_Maker only
+     remove all no-DEBUG messages coming from
+     St_tpt_Maker
    
    - All other makers are allowed to report 
      the unlimited number of the "FATAL" messages only
+     with the default appender
+     
+  Note: The "stdout" name of the appender below  is an aribrary name of choice
 -->
 
   <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
@@ -24,10 +27,8 @@
          <param name="LevelToMatch"  value="DEBUG"/>
          <param name="AcceptOnMatch" value="true"/>
     </filter>
-
   </appender>
  
-
   <root>
      <priority value ="FATAL" />
   </root>
