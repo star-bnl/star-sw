@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.91 2005/07/26 16:48:13 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.92 2005/08/05 23:44:33 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.92  2005/08/05 23:44:33  perev
+// Test for unseted time in SetFlavor added
+//
 // Revision 1.91  2005/07/26 16:48:13  perev
 // SetFlavor/fDbBroker bug fixed
 //
@@ -804,17 +807,18 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
      fl = 0;
      flaDir = Find(".flavor");
      if (flaDir) fl = flaDir->Find(tabname);
-     if (fl && strcmp(fl->GetTitle(),flav)==0) return;
+     if (fl && strcmp(fl->GetTitle(),flav)==0) 	return;
      if (fl) delete fl;
      fl = new TDataSet(tabname);
      fl->SetTitle(flav);
      AddData(fl,".flavor");
    }
-   if (!TestBit(kInitBeg|kInitEnd)) 	return;
-   if (!fDBBroker)			return;
+   if (!TestBit(kInitBeg|kInitEnd)) 		return;
+   if (!fDBBroker)				return;
+   if (GetDateTime().GetDate() >= 20330101)	return;
    int nAkt = 0;
    flaDir = Find(".flavor");
-   if (!flaDir)				return;
+   if (!flaDir)					return;
    StValiSet *val;
    TDataSetIter  valNext(m_ConstSet,999);
    while ((val = (StValiSet*)valNext())) {	//DB objects loop
