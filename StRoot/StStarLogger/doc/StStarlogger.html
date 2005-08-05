@@ -378,7 +378,26 @@ may be replaced with
             << endm;
    </pre>
    </code></b>
-
+<h3> STAR "Message Manager"</h3>
+Since the "logger" is  <a href="#logger">another implementation</a> of the STAR "Message Manager" abstract 
+interface, the existing invocations of the manager should work with the new "log4cxx" implemenation 
+with out any change.
+However one is adviced to adjust it for the sake of the consistency.
+<p>
+For example,  the expression
+   <b><code>
+   <pre>
+       gMessMgr->Error() << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
+   </pre>
+   </code></b>
+can be replaced with  
+   <b><code>
+   <pre>
+       LOG_ERR << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
+   </pre>
+   </code></b>
+and versa verse.
+ 
 <a name="#examples"></a>
 <!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
 <H2>Examples of the custom configuration files (under construction yet)"</H2>
