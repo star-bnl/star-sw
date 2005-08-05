@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!DOCTYPE configuration>
 
-<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
+<configuration xmlns='http://logging.apache.org/'>
 <!-- 
    This example create the log file 100 MGb at most   
 -->
@@ -18,4 +18,4 @@
      <appender-ref ref="file100MGb" />
   </root>
   
-</log4j:configuration>
+</configuration>
