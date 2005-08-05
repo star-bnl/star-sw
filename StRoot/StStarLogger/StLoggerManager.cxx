@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StLoggerManager                                                     //
+// StLoggerManager                                                      //
 //                                                                      //
 // This class manages the messages in STAR software. It is a singleton. //
 // It inherits from StMessMgr, which provides the external interface.   //
@@ -14,6 +14,8 @@
 #ifdef __ROOT__
 #include "TROOT.h"
 #include "TSystem.h"
+#include "TString.h"
+#include "TEnv.h"
 #endif
 
 #ifndef  _NO_IMPLEMENTATION_
@@ -35,7 +37,7 @@
 #include <log4cxx/consoleappender.h>
 #include <log4cxx/patternlayout.h>
 #include <log4cxx/layout.h>
-
+#include <log4cxx/xml/domconfigurator.h>
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
@@ -150,12 +152,20 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
 //
   if (!mInstance) {
     // BasicConfigurator::configure();
+    const char *proEnv = 0;
+#ifndef __ROOT__
     String propertyFile = "log4j.xml";
+#else    
+    TString fullPropertyFileName = gEnv->GetValue("Logger.Configuration","log4j.xml");
+    gSystem->ExpandPathName(fullPropertyFileName);
+    String propertyFile = (const char*)fullPropertyFileName;
+    proEnv = gSystem->Getenv("STAR_LOGGER_PROPERTY");
+#endif    
     StarOptionFilterPtr filter;
-    const char *proEnv = gSystem->Getenv("STAR_LOGGER_PROPERTY");
     if (proEnv && proEnv[0] ) propertyFile=proEnv;
     if (!gSystem->AccessPathName(propertyFile.c_str())) {
-       PropertyConfigurator::configure(propertyFile);
+       xml::DOMConfigurator::configure(propertyFile);
+//             PropertyConfigurator::configure(propertyFile);
     } else {       
      	// BasicConfigurator::configure();
        LoggerPtr root = Logger::getRootLogger();
@@ -381,7 +391,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.12 2005/03/07 23:17:09 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.13 2005/08/05 19:39:14 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -703,8 +713,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.12 2005/03/07 23:17:09 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.13 2005/08/05 19:39:14 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.13  2005/08/05 19:39:14  fine
+// Make use of the DOM Configurator instead of PropertyConfigurator
+//
 // Revision 1.12  2005/03/07 23:17:09  fine
 // Fix a bug to allow mnay logger insatnces to print out without any mess
 //
