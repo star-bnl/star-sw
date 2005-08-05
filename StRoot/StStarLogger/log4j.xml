@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<!DOCTYPE configuration>
 
-<log4j:configuration debug="true" xmlns:log4j="http://jakarta.apache.org/log4j/">
+<configuration xmlns='http://logging.apache.org/'>
+
   <appender name="D1" class="org.apache.log4j.ConsoleAppender">
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
@@ -13,4 +14,4 @@
     <appender-ref ref="D1" />
   </root>
   
-</log4j:configuration>
+<configuration>
