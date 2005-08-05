@@ -168,11 +168,11 @@ To use the STAR message manager your code has to contain the STAR message manage
   This means to instantiate the new logger it is enough to call <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C"><b><code>"LoadLogger.C"</code></b></a>
   followed by you your ROOT macro invocation. 
   <p>
-   For example to get BFC.C works with the new logger schema one needs to start the "root4star" session and call TWO macros:
+   For example to get bfc.C works with the new logger schema one needs to start the "root4star" session and call TWO macros:
    <b><code>
    <pre>
      &gt;root4star
-     root4star[0] .x Bfc.C(1, ". . . logger", . . .  )
+     root4star[0] .x bfc.C(1, ". . . logger", . . .  )
    </pre>
    </code></b>
  <p>
@@ -393,7 +393,7 @@ For example,  the expression
 can be replaced with  
    <b><code>
    <pre>
-       LOG_ERR << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
+       LOG_ERROR << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
    </pre>
    </code></b>
 and versa verse.
