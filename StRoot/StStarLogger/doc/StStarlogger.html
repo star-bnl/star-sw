@@ -200,8 +200,15 @@ the <a href="#examples">custom configuration</a> with the
 <b><code>"log4j.xml"</code></b> file in the current working directory.
 
 <a name="#env"></a>
+The custom name and directory for the logger configuration file can be provided via ROOT resource file.
+One may add to his/her <b><code>".rootrc"</code></b> file the line:
+<b><code><pre>
+   Logger.Configuration     $STAR/StRoot/StStarLogger/doc/HardQuota.xml
+</pre></code></b>
+to do that.
+<br>
 One can alternate the default configuration file name and its location via <b><code>STAR_LOGGER_PROPERTY</code></b>
-environment variable.
+environment variable as well.
 <p>
 <a name="#fileExample"></a>
 For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml</code></b></a> 
