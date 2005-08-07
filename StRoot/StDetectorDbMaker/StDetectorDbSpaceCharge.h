@@ -18,6 +18,7 @@ public:
     double                     getSpaceChargeCoulombs(double scaleFactor);
     float                      getSpaceChargeFactor();
     float                      getSpaceChargeDetector();
+    float                      getSpaceChargeOffset();
     friend ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v);
 
     // These fuction will be public
