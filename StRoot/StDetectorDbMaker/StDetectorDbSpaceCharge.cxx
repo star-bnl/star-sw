@@ -103,14 +103,16 @@ double StDetectorDbSpaceCharge::getSpaceChargeCoulombs(double scaleFactor){
 	case (1) : mult = scalers->getBBCX(); break;
 	case (2) : mult = scalers->getZDCX(); break;
 	case (3) : mult = scalers->getZDCEast()+scalers->getZDCWest(); break;
+	case (4) : mult = scalers->getBBCEast()+scalers->getBBCWest(); break;
 	default  : mult = 0.;
     }
     double saturation = this->getSpaceChargeSatRate();
     double correction = this->getSpaceChargeCorrection(scaleFactor);
     double factor     = this->getSpaceChargeFactor();
+    double offset     = this->getSpaceChargeOffset();
 
     double intens = (mult < saturation) ? mult : saturation;
-    return factor * intens * correction;
+    return (factor * intens * correction) + offset;
     
 };
 
@@ -150,6 +152,16 @@ float StDetectorDbSpaceCharge::getSpaceChargeDetector(){
     
 };
 
+/// Returns offset to use for Space Charge
+float StDetectorDbSpaceCharge::getSpaceChargeOffset(){
+    float value = 0;
+    if(mSpaceCharge){
+	value = mSpaceCharge->offset;
+    }
+    return value;
+    
+};
+
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
 
@@ -165,6 +177,7 @@ ostream& operator<<(ostream& os, StDetectorDbSpaceCharge& v){
     os << "Coulombs:            " << v.getSpaceChargeCoulombs() << endl;
     os << "Shape Scale Factor:  " << v.getSpaceChargeFactor() << endl;
     os << "Detector:            " << v.getSpaceChargeDetector() << endl;
+    os << "Offset:              " << v.getSpaceChargeOffset() << endl;
     
     return os;
 };
