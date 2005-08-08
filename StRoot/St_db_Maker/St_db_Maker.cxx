@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.92 2005/08/05 23:44:33 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.93 2005/08/08 18:00:37 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.93  2005/08/08 18:00:37  perev
+// Move test of crazy date in SetFlavor to the end
+//
 // Revision 1.92  2005/08/05 23:44:33  perev
 // Test for unseted time in SetFlavor added
 //
@@ -815,7 +818,6 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    }
    if (!TestBit(kInitBeg|kInitEnd)) 		return;
    if (!fDBBroker)				return;
-   if (GetDateTime().GetDate() >= 20330101)	return;
    int nAkt = 0;
    flaDir = Find(".flavor");
    if (!flaDir)					return;
@@ -867,6 +869,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    }
 
    delete flaDir;
+   if (GetDateTime().GetDate() >= 20330101)	return;
    if(nAkt) Make();
 
 }
