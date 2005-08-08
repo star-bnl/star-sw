@@ -17,7 +17,8 @@ static Complex MyFactor(double rho,double drho,double s)
 // Solve this equation for Taylor representation of A(L)
 // static int Iter=0;
   Complex arr[3],add;
-  Complex Sum=0.; //
+  Complex Sum; //
+  Sum = 0.0;
   arr[0] = 1.; arr[1] = 0.;
   drho = drho/rho;
   double ss = s;
