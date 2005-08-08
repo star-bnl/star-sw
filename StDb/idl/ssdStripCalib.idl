@@ -12,7 +12,7 @@
 
 struct ssdStripCalib {
   long id;         /* 10000*(10*id_strip+id_side)+id_wafer */
-  long pedestals;  /* 0-255*/
-  long rms;        /* 0-255*/
-  long isActive;   /* 0=inactive; 1=active */
+  short pedestals;  /* 0-255*/
+  short rms;        /* 0-255*/
+  short isActive;   /* 0=inactive; 1=active */
 };
