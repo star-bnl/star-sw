@@ -90,6 +90,8 @@ public:
   virtual int  fit (int direction=kOutsideIn); 
   virtual bool find(int direction=kOutsideIn);
   virtual void reset()=0;
+  virtual void unset(){;}
+  virtual void reduce(){;}
   virtual void getMomentum(double p[3], double e[6]) const =0;
   virtual StThreeVector<double> getMomentumAtOrigin() const =0; //3-momentum at first point
   virtual double  getCurvature()      const=0;   // transverse curvature
