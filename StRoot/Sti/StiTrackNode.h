@@ -51,6 +51,7 @@ enum eTrackNodeStatus {
   virtual ~StiTrackNode(){};    
   const StiTrackNode& operator=(const StiTrackNode& node);  
   void reset();
+  void unset(){;}
   StiHit * getHit() const 		{return _hit;}
   void setHit(StiHit* hit)		{_hit   =hit;}
   const StiDetector *getDetector() const; 
@@ -61,6 +62,8 @@ enum eTrackNodeStatus {
   int getState() const 			{return _state;}
  void setReady()  			{ _state=kTNReady;}
   int isValid()  const 			{return _state>=kTNReady;}
+  double getRefPosition() const;
+  double getLayerAngle()  const;
 protected:   
 static void mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]); 
 static void errPropag6(double G[21],const double F[6][6],int nF);
