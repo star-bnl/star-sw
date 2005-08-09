@@ -27,38 +27,38 @@ class StiDefaultToolkit : public StiToolkit
 public:
   
   StiDefaultToolkit() ;
-  virtual Factory<StiHit>          * getHitFactory();
-  virtual Factory<StiKalmanTrack>  * getTrackFactory();
-  virtual Factory<StiMcTrack>      * getMcTrackFactory();
-  virtual Factory<StiDetector>      * getDetectorFactory();
-  virtual Factory<StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory();
-  virtual Factory<StiKalmanTrackNode>   * getTrackNodeFactory();
-  virtual Factory<EditableParameter>    * getParameterFactory();
-  virtual Factory<Filter<StiTrack>  >  * getTrackFilterFactory();
+  virtual Factory<StiHit>          *getHitFactory();
+  virtual Factory<StiKalmanTrack>  *getTrackFactory();
+  virtual Factory<StiMcTrack>      *getMcTrackFactory();
+  virtual Factory<StiDetector>     *getDetectorFactory();
+  virtual Factory<StiCompositeTreeNode<StiDetector> >  *getDetectorNodeFactory();
+  virtual Factory<StiKalmanTrackNode>   *getTrackNodeFactory();
+  virtual Factory<StiNodeExt>      *getTrackNodeExtFactory();
+  virtual Factory<EditableParameter>    *getParameterFactory();
+  virtual Factory<Filter<StiTrack>  >   *getTrackFilterFactory();
 
   // common object containers
-  virtual StiMasterDetectorBuilder * getDetectorBuilder();
-  virtual StiDetectorContainer     * getDetectorContainer();
-  virtual StiDetectorGroups<StEvent,StMcEvent> * getDetectorGroups();
-  virtual StiHitContainer          * getHitContainer();
-  virtual StiHitContainer          * getMcHitContainer();
-  virtual StiTrackContainer        * getTrackContainer();
-  virtual StiTrackContainer        * getMcTrackContainer();
+  virtual StiMasterDetectorBuilder *getDetectorBuilder();
+  virtual StiDetectorContainer     *getDetectorContainer();
+  virtual StiDetectorGroups<StEvent,StMcEvent> *getDetectorGroups();
+  virtual StiHitContainer          *getHitContainer();
+  virtual StiHitContainer          *getMcHitContainer();
+  virtual StiTrackContainer        *getTrackContainer();
+  virtual StiTrackContainer        *getMcTrackContainer();
   
   // service and convenience class objects.
-  virtual StiDetectorFinder      * getDetectorFinder();
-  virtual StiTrackFinder         * getTrackSeedFinder();
-  virtual StiTrackFinder         * getTrackFinder();
-  virtual StiTrackFitter         * getTrackFitter();
-  virtual StiTrackMerger         * getTrackMerger();
-  virtual StiVertexFinder        * getVertexFinder();
-  virtual StAssociationMaker     * getAssociationMaker();
-  virtual StiMaker               * getStiMaker();          
-  virtual StiResidualCalculator  * getResidualCalculator();
-  virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader();
+  virtual StiDetectorFinder      *getDetectorFinder();
+  virtual StiTrackFinder         *getTrackSeedFinder();
+  virtual StiTrackFinder         *getTrackFinder();
+  virtual StiTrackFitter         *getTrackFitter();
+  virtual StiTrackMerger         *getTrackMerger();
+  virtual StiVertexFinder        *getVertexFinder();
+//??virtual StAssociationMaker     *getAssociationMaker();
+  virtual StiResidualCalculator  *getResidualCalculator();
+  virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> *getHitLoader();
 
-  virtual void setAssociationMaker(StAssociationMaker * a);
-  virtual void setStiMaker(StiMaker* a);
+//??  virtual void setAssociationMaker(StAssociationMaker *a);
+//??  virtual void setStiMaker(StiMaker *a);
   virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup);
 
   //RootEditableParameter & getParameters();
@@ -69,9 +69,9 @@ public:
   void setEvaluatorEnabled(bool);
   bool isEvaluatorEnabled() const;
    
-  virtual EditableFilter<StiHit>   * getLoaderHitFilter();
-  virtual EditableFilter<StiTrack> * getLoaderTrackFilter();
-  virtual EditableFilter<StiTrack> * getFinderTrackFilter();
+  virtual EditableFilter<StiHit>   *getLoaderHitFilter();
+  virtual EditableFilter<StiTrack> *getLoaderTrackFilter();
+  virtual EditableFilter<StiTrack> *getFinderTrackFilter();
   virtual void setLoaderHitFilter(EditableFilter<StiHit>   *);
   virtual void setLoaderTrackFilter(EditableFilter<StiTrack> *);
   virtual void setFinderTrackFilter(EditableFilter<StiTrack> *);
@@ -87,39 +87,40 @@ public:
   virtual ~StiDefaultToolkit();
   
   // small object factories
-  Factory< Filter<StiTrack>  > * _trackFilterFactory;
-  Factory<EditableParameter>   * _parameterFactory;
-  Factory<StiHit>              * _hitFactory;
-  Factory<StiKalmanTrack>      * _trackFactory;
-  Factory<StiMcTrack>          * _mcTrackFactory;
-  Factory<StiDetector>         * _detectorFactory;
-  Factory< StiCompositeTreeNode<StiDetector> > * _detectorNodeFactory;
-  Factory<StiKalmanTrackNode>                  * _trackNodeFactory;
+  Factory< Filter<StiTrack>  > *_trackFilterFactory;
+  Factory<EditableParameter>   *_parameterFactory;
+  Factory<StiHit>              *_hitFactory;
+  Factory<StiKalmanTrack>      *_trackFactory;
+  Factory<StiMcTrack>          *_mcTrackFactory;
+  Factory<StiDetector>         *_detectorFactory;
+  Factory< StiCompositeTreeNode<StiDetector> > *_detectorNodeFactory;
+  Factory<StiKalmanTrackNode>                  *_trackNodeFactory;
+  Factory<StiNodeExt>                          *_trackNodeExtFactory;
   
   // common object containers 
-  StiMasterDetectorBuilder     * _detectorBuilder;
-  StiDetectorContainer         * _detectorContainer;
-  StiDetectorGroups<StEvent,StMcEvent> * _detectorGroups;  
-  StiHitContainer              * _hitContainer;
-  StiHitContainer              * _mcHitContainer;
-  StiTrackContainer            * _trackContainer;
-  StiTrackContainer            * _mcTrackContainer;
+  StiMasterDetectorBuilder     *_detectorBuilder;
+  StiDetectorContainer         *_detectorContainer;
+  StiDetectorGroups<StEvent,StMcEvent> *_detectorGroups;  
+  StiHitContainer              *_hitContainer;
+  StiHitContainer              *_mcHitContainer;
+  StiTrackContainer            *_trackContainer;
+  StiTrackContainer            *_mcTrackContainer;
   
   // service and convenience class objects.
-  StiDetectorFinder       * _detectorFinder;
-  StiTrackFinder          * _trackSeedFinder;
-  StiTrackFinder          * _trackFinder;
-  StiTrackFitter          * _trackFitter;
-  StiTrackMerger          * _trackMerger;
-  StiVertexFinder         * _vertexFinder;
-  StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> * _hitLoader;
-  StAssociationMaker       * _associationMaker;
-    StiMaker                 * _stiMaker;
-  StiResidualCalculator    * _residualCalculator;
+  StiDetectorFinder       *_detectorFinder;
+  StiTrackFinder          *_trackSeedFinder;
+  StiTrackFinder          *_trackFinder;
+  StiTrackFitter          *_trackFitter;
+  StiTrackMerger          *_trackMerger;
+  StiVertexFinder         *_vertexFinder;
+  StiHitLoader<StEvent,StMcEvent, StiDetectorBuilder> *_hitLoader;
+//??  StAssociationMaker       *_associationMaker;
+//??    StiMaker                 *_stiMaker;
+  StiResidualCalculator    *_residualCalculator;
 
-  EditableFilter<StiHit>   * _loaderHitFilter;
-  EditableFilter<StiTrack> * _loaderTrackFilter;
-  EditableFilter<StiTrack> * _finderTrackFilter;
+  EditableFilter<StiHit>   *_loaderHitFilter;
+  EditableFilter<StiTrack> *_loaderTrackFilter;
+  EditableFilter<StiTrack> *_finderTrackFilter;
 
 };
 

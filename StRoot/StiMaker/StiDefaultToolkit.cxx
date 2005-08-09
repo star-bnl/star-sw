@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.27 2005/07/20 17:32:39 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.28 2005/08/09 15:22:41 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.28  2005/08/09 15:22:41  perev
+ * Add new factory for Node extention
+ *
  * Revision 2.27  2005/07/20 17:32:39  perev
  * IdTruth
  *
@@ -125,7 +128,7 @@
 #include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiGui/StiRootDrawableKalmanTrack.h"
-#include "StAssociationMaker/StAssociationMaker.h"
+//??#include "StAssociationMaker/StAssociationMaker.h"
 #include "Sti/StiHitErrorCalculator.h"
 
 #include "StEvent/StHit.h"
@@ -145,6 +148,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   _detectorFactory(0),
   _detectorNodeFactory(0),
   _trackNodeFactory(0),
+  _trackNodeExtFactory(0),
   _detectorBuilder(),
   _detectorContainer(0),
   _detectorGroups(0),
@@ -159,8 +163,8 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackMerger(0),
   _vertexFinder(0),
   _hitLoader(0),
-  _associationMaker(0),
-  _stiMaker(0),
+//??  _associationMaker(0),
+//??  _stiMaker(0),
   _residualCalculator(0),
   _loaderHitFilter(0),
   _loaderTrackFilter(0),
@@ -184,6 +188,7 @@ StiDefaultToolkit::~StiDefaultToolkit()
   StiDetectorFinder::kill(); 
   Messenger::kill();
   delete _trackNodeFactory;
+  delete _trackNodeExtFactory;
   delete _trackContainer;
   delete _mcTrackContainer;
   delete _trackFactory;
@@ -283,6 +288,16 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
   _trackNodeFactory->setFastDelete();
   StiKalmanTrack::setKalmanTrackNodeFactory(_trackNodeFactory);
   return _trackNodeFactory;	
+}
+
+Factory<StiNodeExt>* StiDefaultToolkit::getTrackNodeExtFactory()
+{
+  if (_trackNodeExtFactory)
+    return _trackNodeExtFactory;
+  _trackNodeExtFactory= StiFactory<StiNodeExt,StiNodeExt>::myInstance();
+  _trackNodeExtFactory->setMaxIncrementCount(4000000);
+  _trackNodeExtFactory->setFastDelete();
+  return _trackNodeExtFactory;	
 }
 
 StiDetectorGroups<StEvent,StMcEvent> * StiDefaultToolkit::getDetectorGroups()
@@ -446,6 +461,7 @@ StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHi
   return _hitLoader;
 }
 
+#if 0 //??
 StAssociationMaker * StiDefaultToolkit::getAssociationMaker()
 {
   if (!_associationMaker)
@@ -473,7 +489,7 @@ void StiDefaultToolkit::setStiMaker(StiMaker * a)
   if (!_stiMaker)
     throw runtime_error(" StiDefaultToolkit::setStiMaker() - FATAL - _stiMaker==0");
 }
-
+#endif //?? 0
 void StiDefaultToolkit::setGuiEnabled(bool guiEnabled)
 {
 	_guiEnabled = guiEnabled;
