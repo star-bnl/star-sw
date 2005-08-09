@@ -113,7 +113,8 @@ class StiKalmanTrack : public StiTrack
   static void setParameters(StiKalmanTrackFinderParameters* p);
   static void setFitParameters(StiKalmanTrackFitterParameters* p);
 
-  void    reset();
+  void reset();
+  void unset(){;}
   
   /// Calculates and returns the momentum and error of the track 
   void    getMomentum(double p[3], double e[6]) const ;
@@ -289,6 +290,8 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
+  
+  void reduce();
 
   StMCTruth getTruth(double rXYMin=0, double rXYMax=1000) const;  
   void print(const char *opt="") const;

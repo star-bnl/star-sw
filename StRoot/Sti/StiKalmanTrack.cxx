@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.67 2005/08/04 03:50:31 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.67 2005/08/04 03:50:31 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.68 2005/08/09 14:51:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.68 2005/08/09 14:51:25 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.68  2005/08/09 14:51:25  perev
+ * Add reduce method, reducing all the nodes
+ *
  * Revision 2.67  2005/08/04 03:50:31  perev
  * removeLastNode() added
  *
@@ -1158,7 +1161,7 @@ void StiKalmanTrack::setFirstLastNode(StiKalmanTrackNode * node)
 //_____________________________________________________________________________
 void StiKalmanTrack::removeLastNode()
 {
-  StiTreeNode *node = lastNode;
+  StiKalmanTrackNode *node = lastNode;
   lastNode = (StiKalmanTrackNode*)node->disconnect();
   BFactory::Free(node);
 }
@@ -1261,6 +1264,12 @@ static int nCall=0;nCall++;
     pNode = targetNode;
   }//end for of nodes
   return 0;
+}
+//_____________________________________________________________________________
+void StiKalmanTrack::reduce() 
+{
+  StiKTNBidirectionalIterator source;
+  for (source=begin();source!=end();source++) {(*source).reduce();}
 }
 //_____________________________________________________________________________
 void StiKalmanTrack::print(const char *opt) const
