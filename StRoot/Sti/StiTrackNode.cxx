@@ -129,7 +129,6 @@ double StiTrackNode::sinX(double x)
   return sum;
 } 
 //______________________________________________________________________________
- 
 void StiTrackNode::mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNPars]) 
 {
   double T[kNPars][kNPars];
@@ -150,4 +149,22 @@ void StiTrackNode::mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNP
     Rot[i][k] += T[i][k];
 }}
 }     
-  
+//______________________________________________________________________________
+double StiTrackNode::getRefPosition() const
+{
+  if(!_detector) {
+    assert(_hit);
+    return _hit->x();
+  }
+  StiPlacement * place = _detector->getPlacement();
+  assert(place);
+  return place->getLayerRadius();
+}
+//______________________________________________________________________________
+  double StiTrackNode::getLayerAngle()  const
+{
+  assert(_detector);
+  StiPlacement * place = _detector->getPlacement();
+  assert(place);
+  return place->getLayerAngle();
+}
