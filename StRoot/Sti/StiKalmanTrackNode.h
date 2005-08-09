@@ -75,6 +75,21 @@ union{double A[1];double _cXX;};
   double _cCX,_cCY, _cCZ, _cCE, _cCC;     
   double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
 };  
+
+class StiNodeExt {
+public:
+void reset(){mPP.reset();mPE.reset();mMtx.reset();}
+void unset(){;}
+public:
+  StiNodePars mPP; 
+  StiNodeMtx  mMtx;
+  StiNodeErrs mPE;
+};
+
+
+
+
+
 /*! \class StiKalmanTrackNode
   Work class used to handle Kalman filter information while
   constructing track nodes.  A node may or may not own a hit
@@ -90,13 +105,15 @@ class StiKalmanTrackNode : public StiTrackNode
 {
 friend class StiTrackNodeHelper;
 public:
-  StiKalmanTrackNode(){reset();}
-  virtual ~StiKalmanTrackNode(){};
-  const StiKalmanTrackNode& operator=(const StiKalmanTrackNode&node);  
+  StiKalmanTrackNode(){_ext=0; reset();}
+  StiKalmanTrackNode(const StiKalmanTrackNode &node);
+  virtual ~StiKalmanTrackNode(){reduce();_Kount=-1;};
+  const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
   
   double mcs2(double relRadThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
+  void unset(){reduce();}
   /// Resets errors for refit
   void resetError(double fak=0);
   /// Initialize this node with the given hit information
@@ -134,11 +151,7 @@ public:
   double getP() const;
   /// Calculates and returns the transverse momentum of the track at this node.
   double getPt() const;
-  
-  double getRefPosition() const {return _refX;}
-  
-  double getLayerAngle() const {return _layerAngle;}
-  
+    
   double x_g() const;
   double y_g() const;
   double z_g() const;
@@ -161,10 +174,10 @@ public:
   int    getNullCount() const       	{return nullCount;}
   int    getContigHitCount () const 	{return contiguousHitCount ;}
   int    getContigNullCount() const 	{return contiguousNullCount;}
-  int   &getHitCount () 		{return hitCount;}
-  int   &getNullCount()        		{return nullCount;}
-  int   &getContigHitCount ()  		{return contiguousHitCount ;}
-  int   &getContigNullCount()  		{return contiguousNullCount;}
+  char  &getHitCount () 		{return hitCount;}
+  char  &getNullCount()        		{return nullCount;}
+  char  &getContigHitCount ()  		{return contiguousHitCount ;}
+  char  &getContigNullCount()  		{return contiguousNullCount;}
 
   static void Break(int kase);
   static void PrintStep();
@@ -236,6 +249,8 @@ public:
   double getDensity() const;
   double getGasDensity() const;
 
+  void   extend();
+  void   reduce();
   Int_t  debug() const {return _debug;}
   void   setDebug(Int_t m) {_debug = m;}
   void   PrintpT(Char_t *opt="");
@@ -246,50 +261,54 @@ public:
   void static backStatics(double *sav);
   void   print(const char *opt) const;
   static void setErrFactor(double ef)	{fgErrFactor=ef;}
-
+  
  private:   
+  static StiNodeExt *nodeExtInstance();
   void getHitErrors(const StiHit *hit,double ss[3]) const;
+
+//  Extended members 
+ public:
+ 
+  const StiNodePars &mPP() const                      {return _ext->mPP; } 
+        StiNodePars &mPP()       {if (!_ext) extend(); return _ext->mPP; } 
+  const StiNodeErrs &mPE() const                      {return _ext->mPE; } 
+        StiNodeErrs &mPE()       {if (!_ext) extend(); return _ext->mPE; } 
+  const StiNodeMtx &mMtx() const                      {return _ext->mMtx;} 
+        StiNodeMtx &mMtx()       {if (!_ext) extend(); return _ext->mMtx;} 
 
  protected:   
 
   char _beg[1];  
   double _alpha;
-  double _cosAlpha;
-  double _sinAlpha;
-  /// local X-coordinate of this track (reference plane)
-  double _refX;
-  double _layerAngle;
   StiNodePars mFP; 
-  StiNodePars mPP; 
-  StiNodeMtx  mMtx;
   /// covariance matrix of the track parameters
   StiNodeErrs mFE;
-  StiNodeErrs mPE;
   float  eyy,ezz;
-  int hitCount;
-  int nullCount;
-  int contiguousHitCount;
-  int contiguousNullCount;
+  char hitCount;
+  char nullCount;
+  char contiguousHitCount;
+  char contiguousNullCount;
   char   _end[1];
+  StiNodeExt *_ext;
   static StiKalmanTrackFinderParameters * pars;
 
-  static int counter;
-  static Messenger &  _messenger;
+//??  static int counter;
+//??  static Messenger &  _messenger;
 
-  static bool  recurse;
-  static int   shapeCode;
-  static const StiDetector * det;
-  static const StiPlanarShape * planarShape;
-  static const StiCylindricalShape * cylinderShape;
-  static StiMaterial * gas;
-  static StiMaterial * prevGas;
-  static StiMaterial * mat;
-  static StiMaterial * prevMat;
+//??  static int   shapeCode;
+//??  static const StiDetector * det;
+//??  static const StiPlanarShape * planarShape;
+//??  static const StiCylindricalShape * cylinderShape;
+//??  static StiMaterial * gas;
+//??  static StiMaterial * prevGas;
+//??  static StiMaterial * mat;
+//??  static StiMaterial * prevMat;
   static StiNodeStat  mgP;
-  static double radThickness, density;
-  static double gasDensity,matDensity,gasRL,matRL;
+//??  static double radThickness, density;
+//??  static double gasDensity,matDensity,gasRL,matRL;
   static bool   useCalculatedHitError;
   static double fgErrFactor;
+  static int fgRefit;
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[kNPars][kNPars];   
@@ -436,17 +455,17 @@ inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
 
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
 {
-  return StThreeVector<double>(_cosAlpha*mFP._x-_sinAlpha*mFP._y, _sinAlpha*mFP._x+_cosAlpha*mFP._y, mFP._z);
+  return StThreeVector<double>(cos(_alpha)*mFP._x-sin(_alpha)*mFP._y, sin(_alpha)*mFP._x+cos(_alpha)*mFP._y, mFP._z);
 }
 
 inline  double StiKalmanTrackNode::x_g() const
 {
-  return _cosAlpha*mFP._x-_sinAlpha*mFP._y;
+  return cos(_alpha)*mFP._x-sin(_alpha)*mFP._y;
 }
 
 inline  double StiKalmanTrackNode::y_g() const
 {
-  return _sinAlpha*mFP._x+_cosAlpha*mFP._y;
+  return sin(_alpha)*mFP._x+cos(_alpha)*mFP._y;
 }
 
 inline  double StiKalmanTrackNode::z_g() const
