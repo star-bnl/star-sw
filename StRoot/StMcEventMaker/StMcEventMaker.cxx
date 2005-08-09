@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.57 2005/07/07 18:21:17 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.58 2005/08/09 03:31:57 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.58  2005/08/09 03:31:57  perev
+ * LeakFix
+ *
  * Revision 1.57  2005/07/07 18:21:17  calderon
  * Added code for filling of IGT classes.
  *
@@ -266,7 +269,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.57 2005/07/07 18:21:17 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.58 2005/08/09 03:31:57 perev Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -1633,10 +1636,10 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
     if (Debug()) {
        gMessMgr->Info() << GetName() << "fillEemc() called" << endm;
     }
-    EEmcMCData* mEemcGeant = new EEmcMCData;
-    mEemcGeant->unpackGeantHits(g2t_tile, g2t_smd);
+    EEmcMCData mEemcGeant;
+    mEemcGeant.unpackGeantHits(g2t_tile, g2t_smd);
     if (Debug()>1) {
-	mEemcGeant->print();
+	mEemcGeant.print();
     }
     
     StMcEmcHitCollection *eemcColl=mCurrentMcEvent->eemcHitCollection();
@@ -1659,7 +1662,7 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
     esmdvColl->SetName("EsmdvHits");
     
     int nHit;
-    const EEmcMCHit *h  = mEemcGeant->getGeantHits(nHit);
+    const EEmcMCHit *h  = mEemcGeant.getGeantHits(nHit);
     for(Int_t i=0; i<nHit; i++,h++) {
 	int detId=h->detector;
 	assert(h->track_p>0); // tmp, to catch bugs,JB
@@ -1675,7 +1678,7 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
 	Bmodule=h->sector;
 	int off=0; // used only for pres1,pres2, and postshower
 	StMcCalorimeterHit * stMcHit=0;
-	StMcEmcHitCollection::EAddHit addRet;
+	StMcEmcHitCollection::EAddHit addRet=StMcEmcHitCollection::kErr;
 	if (Debug()>1) printf("StMcAdd:detID=%d iHit=%d de=%g\n",detId,i,h->de);
 	
 	switch(detId) { // covers all 6 layers of EEMCS
@@ -1722,8 +1725,8 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
 	
 	// garbage  collector
 	switch (addRet ){
-	case StMcEmcHitCollection::kNew:
-	case StMcEmcHitCollection::kAdd: break; // do nothing
+	case StMcEmcHitCollection::kNew: break;
+	case StMcEmcHitCollection::kAdd: delete stMcHit; break; // delete used but not needed anymore hit
 	case StMcEmcHitCollection::kErr:
 	    gMessMgr->Warning()<<"<E> Bad hit in Eemc collection" << endm;
 	    delete stMcHit;
@@ -1735,7 +1738,6 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
 	}
     }// end of loop over GEANT hits
     if (Debug()) gMessMgr->Info()<<GetName() <<"::fillEemc()   done, nHit="<<nHit<<endm;
-    delete mEemcGeant;
 }
 
 
