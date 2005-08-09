@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.15 2005/05/04 17:00:32 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.16 2005/08/09 18:46:31 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -366,7 +366,7 @@ void EEsmdCal::initAuxHisto(){
     hA[5+i]=h;    
   }
 
-  sprintf(tt1,"myStat%02d",sectID);
+  sprintf(tt1,"my%02dStat",sectID);
   hA[9]=new TH1F (tt1,"type of events ",30,.5,30.5);
 
   for(i=0;i<MaxSmdPlains;i++) {    
@@ -415,7 +415,7 @@ void EEsmdCal::initAuxHisto(){
   hA[23]=(TH1F*)h2;
 
   //................
-  sprintf(tt1,"can%02d",sectID);
+  sprintf(tt1,"ca%02d",sectID);
   sprintf(tt2,"# UxV candidates per tower, sector=%d; x=spiral=iPhi+60*iEta",sectID);
   int mxTw=MaxEtaBins*MaxPhiBins;
   hA[24]=new TH1F(tt1,tt2,mxTw,-0.5,mxTw-0.5);    

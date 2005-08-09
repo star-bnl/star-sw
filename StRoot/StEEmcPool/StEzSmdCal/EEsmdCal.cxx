@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.14 2005/05/04 17:00:32 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.15 2005/08/09 18:46:31 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -244,31 +244,6 @@ void EEsmdCal::findSectorMip( ){
   return;
 }
 
-#if 0 //smdMap verification
-//-------------------------------------------------
-//-------------------------------------------------
-void EEsmdCal:: scanSpike(float adc1, TH1F *h){
-  float adcTh=20;
-  if(adc1<adcTh) return;
-  int istrip;
-  for(istrip=0+3;istrip<MaxSmdStrips-3;istrip++) {
-    int iuv;
-    for(iuv=0;iuv<2;iuv++) {
-#if 0
-      if(smdAdc[iuv][istrip-3]>=adcTh) continue;
-      if(smdAdc[iuv][istrip-2]>=adcTh) continue;
-      if(smdAdc[iuv][istrip+2]>=adcTh) continue;
-      if(smdAdc[iuv][istrip+3]>=adcTh) continue;
-
-      if(smdAdc[iuv][istrip-1]>=adcTh) continue;
-      if(smdAdc[iuv][istrip+1]>=adcTh) continue;
-#endif
-      if(smdAdc[iuv][istrip  ]< adcTh) continue;
-      h->Fill(1+300*iuv+istrip);
-    }
-  }
-}
-#endif
 
 //-------------------------------------------------
 //-------------------------------------------------
@@ -348,7 +323,7 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
     hT[iCut][kR][iEtaX][iPhiX]->Fill(adcR);
   }
   
-  // .................  calibrated (energy) MIP spectra ...............
+  // .................  calibrate (energy) MIP spectra ...............
   iCut='f'-'a';
   if(         thrP && thrQ && thrR ) hT[iCut][kT][iEtaX][iPhiX]->Fill(eneT);
   if( mipT &&         thrQ && thrR ) hT[iCut][kP][iEtaX][iPhiX]->Fill(eneP);
@@ -426,9 +401,8 @@ int EEsmdCal::getUxVmip(){
   int iuv;
   for(iuv=0;iuv<MaxSmdPlains;iuv++) {
     EEsmdPlain *pl=smdHitPl+iuv;
-    //smdMap -- replace it
-    //pl->scanAdc(smdEne[iuv], thrMipSmdE);
-    pl->scanAdc(smdAdc[iuv], 15); // was 20 ADC
+    pl->scanAdc(smdEne[iuv], thrMipSmdE);// use if SMD gains are  known
+    //pl->scanAdc(smdAdc[iuv], 15); // use if SMD gains are NOT known
     pl->findMipPattern();
     hA[12+iuv]->Fill(pl->nMatch);
     // pl->print(1);
@@ -508,4 +482,30 @@ void EEsmdCal::finish(int k){
 
 }
 
+
+#if 0 //smdMap verification
+//-------------------------------------------------
+//-------------------------------------------------
+void EEsmdCal:: scanSpike(float adc1, TH1F *h){
+  float adcTh=20;
+  if(adc1<adcTh) return;
+  int istrip;
+  for(istrip=0+3;istrip<MaxSmdStrips-3;istrip++) {
+    int iuv;
+    for(iuv=0;iuv<2;iuv++) {
+#if 0
+      if(smdAdc[iuv][istrip-3]>=adcTh) continue;
+      if(smdAdc[iuv][istrip-2]>=adcTh) continue;
+      if(smdAdc[iuv][istrip+2]>=adcTh) continue;
+      if(smdAdc[iuv][istrip+3]>=adcTh) continue;
+
+      if(smdAdc[iuv][istrip-1]>=adcTh) continue;
+      if(smdAdc[iuv][istrip+1]>=adcTh) continue;
+#endif
+      if(smdAdc[iuv][istrip  ]< adcTh) continue;
+      h->Fill(1+300*iuv+istrip);
+    }
+  }
+}
+#endif
 

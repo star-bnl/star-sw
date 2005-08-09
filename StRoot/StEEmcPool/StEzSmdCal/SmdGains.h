@@ -4,9 +4,10 @@
 #ifndef SmdGains_h
 #define SmdGains_h
 /*******************************************************
- * $Id: SmdGains.h,v 1.4 2004/10/08 14:34:50 balewski Exp $
+ * $Id: SmdGains.h,v 1.5 2005/08/09 18:46:31 balewski Exp $
  *******************************************************
- This code should run only on histogram files, not on events, JB
+ This code should run only on histogram files,
+ not on events, JB
  *
  *******************************************************/
 
@@ -73,7 +74,6 @@ class SmdGains :public TObject{
 
   TFile* open(TString);
   void init();
-  void finish(int k=0);
   void doSlopesOnly(float fac=1.);
   void saveHisto(char *fname=0);
   void saveGains(FILE *fd=0);
@@ -88,6 +88,9 @@ class SmdGains :public TObject{
 
 /*****************************************************************
  * $Log: SmdGains.h,v $
+ * Revision 1.5  2005/08/09 18:46:31  balewski
+ * after smd calib in 2005
+ *
  * Revision 1.4  2004/10/08 14:34:50  balewski
  * as used for PQRUV calib for pp200, 2004
  *

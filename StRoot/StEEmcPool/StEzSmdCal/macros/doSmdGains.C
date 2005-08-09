@@ -3,14 +3,17 @@ SmdGains *task=0;
 TObjArray  *HList;
 TFile *fd;
 
-doSmdGains( int sectID=5 , int iU=0){
+doSmdGains( int sectID=2 , int iU=1){
   
-  TString iPath="/star/data05/scratch/balewski/outD0/";//BNL
-  iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outE2/";//LBL
+  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter1e/";//BNL
+  iPath="iter2-out/";
+
+  //  iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outE2/";//LBL
   
+
   char *libL[]={
-   "../StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so", // some hidden dependence
-   "../StRoot/StEEmcPool/StEzSmdCal/libEzSmdCal.so",
+   "StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so", // some hidden dependence
+   "StRoot/StEEmcPool/StEzSmdCal/libEzSmdCal.so",
  };
  
  gStyle->SetPalette(1,0);
@@ -24,30 +27,38 @@ doSmdGains( int sectID=5 , int iU=0){
   HList=new TObjArray;
   task=new SmdGains;
   
-  char tt[100];
-  sprintf(tt,"mipA%02d",sectID);
+  char tt[500];
+  sprintf(tt,"%ssum-sect%d.hist.root",iPath.Data(),sectID);
 
-  fd=task->open(iPath+tt+".hist.root"); 
-  //fd=task->open(iPath+"R5112018.hist.root"); 
+  fd=task->open(tt); 
+  // fd=task->open(iPath+"smdCal-R6049129.hist.root"); 
+  // fd=task->open(iPath+"sum.hist.root"); 
   //  return;
 
   task->set(HList,sectID,'U'+iU);
   task->init();
-  int str1=1,str2=288;
+ 
+  int str1=267,str2=270;
 
-  //  plotAllTiles(); return;
-  //  task->fitSlopesSmd(250,280,1); return;
-  //  fitSlopesSmdPlain(); // plot all strips w/ slopes for one plain
 
 #if 0
-  task->fitSlopesSmd(str1,str2); 
-  //task->fitSlopesSmd(261,290,1);
-  task-> doSlopesOnly(760.); 
+  //=== iteration 0 =====> SMD gains from slopes
+  // just plot all SMD slopes for given sector for one plain
+  for(str1=1;str1<288;str1+=30) {
+    str2=str1+30;
+    if(str2>288) str2=288;
+    task->fitSlopesSmd(str1,str2,0); 
+    task-> doSlopesOnly(760./1.4); // for CuCu200-minB
+    // break;
+  }
 #endif
 
+
 #if 1
-  task->doGainCorr(str1,str2,15,0);
-  task->plTGraph("pol0",1,3); // avearge MIP energy  
+  //=== iteration 1 =====> SMD gains from MIPs from pairs of strips
+  str1=1; str2=288;
+  task->doGainCorr(str1,str2,12,1);
+  task->plTGraph("pol0",1,1); // avearge MIP energy  
   task->saveHisto();
 
   if(0) {
@@ -55,28 +66,19 @@ doSmdGains( int sectID=5 , int iU=0){
     task->plTGraph("pol0",0); // individual gain corrections
 
   }
-  return;
-#endif
+ #endif
+
+  /* === iteration 1b =====> run reCalSmd.C to 
+     - average gain corrections among plains
+     - calculate new gains from the old gains
+  */
+
   char tt[100];
   sprintf(tt,"smd%02d%c.dat",sectID,'U'+iU);
   FILE *fd=fopen(tt,"w"); assert(fd);
   fprintf(fd,"# gains for SMD plain %02d%c, inverted slopes\n# stripName, gain[ch/GeV], erGain, anything\n",sectID,'U'+iU);
   task->saveGains(fd);
   fclose(fd);
-  return;
-  // ....... slopes only:  
-  task->fitSlopes(251,259); return;
-   
-
-  return;
-  
-
-  //
-
-  //.... absolute average MIP position
-  
-  task->finish(0);
-
   return;
  
 } 
@@ -95,17 +97,3 @@ void  plotAllTiles() {
   }
 }
 
-//-------------------------------
-// plot all strips w/ slopes for one plain
-void  fitSlopesSmdPlain(){
-  int k;
-  for(k=0;k<10;k++) {
-    int str1=30*k;
-    task->fitSlopesSmd(1+str1,30+str1,3);
-  }
-}
-
-//------------------------------
-
-//  task->doOneStripEne(str1,str2); // fit individaul energy of strips
-//  task->doGainCorr(str1,str2);
