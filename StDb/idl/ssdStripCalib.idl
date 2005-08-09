@@ -12,6 +12,6 @@
 
 struct ssdStripCalib {
   long id;         /* 10000*(10*id_strip+id_side)+id_wafer */
-  octet pedestals;  /* 0-255*/
-  octet rms;        /* 0-255*/
+  octet pedestals[3];  /* 0-255*/
+  octet rms[3];        /* 0-255*/
 };
