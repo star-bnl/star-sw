@@ -17,7 +17,8 @@ class BFactory : public Named
 public:
   
   BFactory(const string& name): Named(name)
-    {fCurCount=0; fMaxCount = 1000000;fUseCount=0;fFastDel=0;}
+    {fCurCount=0; fMaxCount = 1000000;fUseCount=0;fFastDel=0;
+     fInstCount=0;fFreeCount=0;}
 
   virtual ~BFactory()
     {;}
@@ -44,6 +45,8 @@ protected:
   int fCurCount;
   int fUseCount;
   int fFastDel;
+  int fInstCount;
+  int fFreeCount;
 static double fgTotal;  
 };
 
