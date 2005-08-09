@@ -1,6 +1,6 @@
 
  <h2>How to draw the STAR geometry alone :</h2>
-    Sometimes the only thing one wants to see is the GEANT3 definition of the STAR geometry alone.
+    Sometimes the only thing one wants to see is the GEANT3 definition of <a href="http://root.bnl.gov/QtRoot/StarCompleteView.png">the STAR geometry</a> alone.
     To do that the simple ROOT macro GeomDraw.C has been introduced. It is as simple as type :         
     <small>
                      <bold><code><pre>
@@ -9,7 +9,8 @@
                   </code></BOLD></SMALL>   
                   
  Some particular version of the geometry can be drawn also.
-
+ <p>
+ The macro has 3 default parameters.
 <p>
 <center>
     <small><bold><code>
@@ -59,8 +60,15 @@
     <li> Turn Qt ROOT Layer on (see: <a href="http://www.rhic.bnl.gov/~fine/EventDisplay"> http://www.rhic.bnl.gov/~fine/EventDisplay</a>)
     <li> Select "OpenGL view" from the "View" menu of ROOT TCanvas
  </ol>
- <p>
- To adjust the so-called bombFactor you can invoke
+ The ROOT built-in OpenGL Viewer is capable to make a hardcopy of the picture using 
+ <a href="http://root.bnl.gov/QtRoot/TQtSaveAsDialog.gif"> the various pixel formats</a> 
+ as well as high-quality <a href="http://root.bnl.gov/QtRoot/StarBombView.pdf">Postscript one</a>.
+ <br><small>
+ Please be advised 
+ to read the <a href="http://root.bnl.gov/QtRoot/QtRoot.html#GLX">"Why my computer complains, "Missing "GLX" extension?" </a> topic.
+ </small>
+  <p>
+ To adjust the so-called <code>"bombFactor"</code> you can invoke
  the C++ statement from the ROOT command prompt:
 
 <center>
