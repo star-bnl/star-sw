@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.152  2005/08/09 15:23:18  perev
+// Add new factory for Node extention
+//
 // Revision 1.151  2005/08/04 04:03:19  perev
 // Cleanup
 //
@@ -258,7 +261,7 @@ ClassImp(StiMaker)
 
 {
     cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
-    _toolkit->setStiMaker(this);
+//??    _toolkit->setStiMaker(this);
 }
 
 StiMaker::~StiMaker() 
@@ -528,6 +531,7 @@ Int_t StiMaker::Make()
 //      TMemStat::PrintMem("Before StiFactory clear()");
       _toolkit->getHitFactory()->clear();
       _toolkit->getTrackNodeFactory()->clear();
+      _toolkit->getTrackNodeExtFactory()->clear();
       _toolkit->getTrackFactory()->clear();
 //      TMemStat::PrintMem("After  StiFactory clear()");
     }
