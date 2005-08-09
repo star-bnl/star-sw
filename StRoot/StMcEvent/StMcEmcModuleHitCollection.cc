@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.cc,v $
+ * Revision 2.5  2005/08/09 03:31:01  perev
+ * Cleanup
+ *
  * Revision 2.4  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -28,7 +31,7 @@
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 
-static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.4 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.5 2005/08/09 03:31:01 perev Exp $";
 
 ClassImp(StMcEmcModuleHitCollection)
 
@@ -50,10 +53,8 @@ void StMcEmcModuleHitCollection::init(const unsigned int m)
 
 StMcEmcModuleHitCollection::~StMcEmcModuleHitCollection()
 {
-    for (unsigned int i=0; i<mHits.size(); i++) {
-        delete mHits[i];
-        mHits[i] = 0;
-    }
+    int n = mHits.size();
+    for (int i=0; i<n; i++) {delete mHits[i];}
     mHits.clear();
 }
 

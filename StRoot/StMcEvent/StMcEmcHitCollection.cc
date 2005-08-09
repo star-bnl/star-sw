@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.7  2005/08/09 03:30:30  perev
+ * Cleanup
+ *
  * Revision 2.6  2005/06/28 18:44:11  fine
  * fix assert
  *
@@ -52,7 +55,6 @@ StMcEmcHitCollection::MakeHitCollection()
    TObjArray *modules = GetObjArray();
    assert(modules);
    // Create the dummy modules collection
-   if (modules->GetSize() != mNumberOfModules)  modules->Expand(mNumberOfModules);
    for (int i=0; i < mNumberOfModules; i++) 
       Add(new StMcEmcModuleHitCollection());
 }
@@ -82,7 +84,10 @@ StMcEmcHitCollection::addHit(StMcCalorimeterHit* hit)
         return kNew;
       }
     }
-    else return kErr; // Bad number of module
+    else {
+      Warning("addHit","Wrong hit: module=%d but mNumberOfModules=%d",m,mNumberOfModules);
+      return kErr; // Bad number of module
+    }
 }
 
 unsigned int
