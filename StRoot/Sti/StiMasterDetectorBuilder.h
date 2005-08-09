@@ -11,6 +11,7 @@ public:
     virtual bool hasMore() const;
     virtual StiDetector * next();
     virtual void reset();
+    virtual void unset(){;}
     virtual void build(StMaker&source);
     virtual void add(StiDetectorBuilder *builder);
 		virtual StiDetectorBuilder * get(const string & name);

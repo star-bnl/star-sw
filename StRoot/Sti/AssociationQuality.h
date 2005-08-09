@@ -8,6 +8,7 @@ public:
   AssociationQuality();
   ~AssociationQuality();
   void reset();
+  void unset(){;}
   void setFirst(StiTrack *first);
   void setSecond(StiTrack *second);
   void setQuality(double quality);

@@ -15,6 +15,7 @@ public:
   virtual ~StiCompositeFinder();
   void initialize(){};
   void reset();
+  void unset(){;}
   StiTrack * findTrack();
  protected:
   vector<StiTrackFinder*>::iterator _currentFinder;

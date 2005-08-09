@@ -42,6 +42,7 @@ public:
   Filter<StiTrack>    * getTrackFilter();
   EditableParameters  & getParameters();
   virtual void reset();
+  virtual void unset(){;}
   bool isReset();
 
   void findTracks(){}; 

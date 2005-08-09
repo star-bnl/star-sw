@@ -1,7 +1,7 @@
 //StiDrawableTrack.h
 /***********************************************************************
  *
- * $Id: StiDrawableTrack.h,v 2.2 2003/01/24 06:10:40 pruneau Exp $
+ * $Id: StiDrawableTrack.h,v 2.3 2005/08/09 14:47:57 perev Exp $
  *
  * \class StiDrawableTrack
  *   Abstract base class used to define the interface to drawable tracks
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StiDrawableTrack.h,v $
+ * Revision 2.3  2005/08/09 14:47:57  perev
+ * Dummy unset() method added
+ *
  * Revision 2.2  2003/01/24 06:10:40  pruneau
  * removing centralized io
  *
@@ -28,6 +31,7 @@ public:
     virtual void fillHitsForDrawing()=0;
     virtual void update();
     virtual void reset()=0;
+    virtual void unset(){;}
 };
 
 inline void StiDrawableTrack::update()

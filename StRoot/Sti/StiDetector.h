@@ -32,6 +32,7 @@ public:
     StiDetector();
     virtual ~StiDetector();
     void reset();
+    void unset(){;}
     
     // accessors
     bool isOn() const {return on;}

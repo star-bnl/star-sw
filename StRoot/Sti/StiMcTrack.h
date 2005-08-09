@@ -11,6 +11,7 @@ class StiMcTrack : public StiTrack
           int fit(int direction=kOutsideIn); 
           bool find(int direction=kOutsideIn);
           void reset();
+          void unset(){;}
           void getMomentum(double p[3], double e[6]) const ;
           StThreeVector<double> getMomentumAtOrigin() const ; //3-momentum at first point
           StThreeVector<double> getMomentumNear(double x) ; //3-momentum at arb. point

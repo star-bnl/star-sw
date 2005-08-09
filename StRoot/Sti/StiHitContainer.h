@@ -135,6 +135,7 @@ public:
   virtual void add(StiHit*);
   virtual unsigned int size() const;
   virtual void reset();
+  virtual void unset(){;}
   virtual void clear();
   //Sort all of the hits in the container.
   virtual void sortHits();
