@@ -125,7 +125,7 @@ int StiTrackNodeHelper::propagateError(StiNodeErrs &lastFE)
   StiNodePars savePars = mSNode->mFP;
   if (detS)  mSNode->propagateMCS(mPNode,detS);
   mSNode->mFP = savePars;
-  mSNode->mPP = savePars;
+  mSNode->mPP() = savePars;
   mPE = mSNode->mFE;
   mFE = mPE;
   mSNode->mFE=fe;
@@ -143,7 +143,7 @@ int StiTrackNodeHelper::fake1Fit()
     propagate(&mPNode->mFP);
     propagateError(mPNode->mFE);
     mSNode->mFE = mFE;
-    mSNode->mPE = mFE;
+    mSNode->mPE() = mFE;
   }
   StiHit *hit = mSNode->getHit();  
   if (!hit) 	return 0;
