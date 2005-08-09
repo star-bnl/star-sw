@@ -180,7 +180,8 @@ static int nCall=0;nCall++;
           if (!track) break; // no more seeds
           track->find();
 	  //cout << " find completed" << endl;
-	  if (track->getFlag()<1) continue;
+          track->reduce();
+	  if (track->getFlag()<1) { BFactory::Free(track); continue;}
 	  //cout << " apply filter" << endl;
           if (!_trackFilter || _trackFilter->filter(track))
             {
@@ -190,17 +191,8 @@ static int nCall=0;nCall++;
 	    //cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
 	    if (track->getChi2()<0) track->setFlag(2);
 
-
-	    //StiKalmanTrack * kt = static_cast<StiKalmanTrack*>(track);
-	    //StiKalmanTrackNode * n = kt->extrapolateToBeam();
-	    //if (n) cout << "node at beam:"<<*n<<endl;
-	    //n = kt->extrapolateToRadius(220.);
-	    //if (n) cout << "node at 220 cm:"<<*n<<endl;
-
             }
 
-	  //else
-	  //cout << " track not saved +++++++++++++++++++++++++++++++++++++!!!!!!" << endl;
         }
         catch (runtime_error & rte)
         {
@@ -218,31 +210,6 @@ static int nCall=0;nCall++;
   //else
   //  cout << "SKTF::findTracks() -I- Done"<<endl;
 }
-
-/* Fit all track produced by the track seed finder.
-<p>
-This method is useful when the seed finder returns full tracks produced
-by a 3rd party track finder e.g. the tpt package.
-<p>Fitted tracks are added to the track container if no track
-filter is set or if they satisfy the track filter requirements.
-void StiKalmanTrackFinder::fitTracks()
-{
-  StiTrack * track = 0;
-  try
-    {
-      track = _trackSeedFinder->findTrack();
-      if (track)
-        {
-        track->fit(kOutsideIn); //track->setFlag(0);
-        if (!_trackFilter || _trackFilter->filter(track))  _trackContainer->push_back(track);
-        }
-    }
-  catch (runtime_error & rte)
-    {
-    cout << "StiKalmanTrackFinder::fitTracks() - Run Time Error :" << rte.what() << endl;
-    }
-}
-*/
 
 //______________________________________________________________________________
 /*
@@ -286,6 +253,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	  if (r>4.1 && r<50) find(track,kOutsideIn);
 	  StiTrackNode *extended = track->extendToVertex(vertex);
           if (extended) track->add(extended,kOutsideIn);
+          track->reduce();
 	  // simple diagnostics
 	  if (extended) goodCount++;
 	  if (track->getCharge()>0)
@@ -352,6 +320,7 @@ static int REFIT=0;
     if (!ifail) ifail = track->refitL();
     if (!ifail) ifail = track->getInnerMostHitNode()!=bestNode;
 }
+    track->reduce();
 // something is wrong. It is not a primary
     if (ifail) { track->removeLastNode();continue;}
     goodCount++;
