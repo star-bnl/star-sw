@@ -23,6 +23,7 @@ public:
 union {
   StiHolder *fNext;
   long       fLong;
+  char       fChar[1];
 };
  Object fObj;
 };
@@ -89,7 +90,7 @@ void StiBlock<Object>::reset(StiBlock **bTop,StiHolder<Object> **hTop)
 template <class Object>
 StiHolder<Object>::StiHolder()
 {
-  fNext=0;
+  memset(fChar,0,((char*)&fObj)-fChar);
 }
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -126,6 +127,7 @@ Abstract *StiFactory<Concrete,Abstract>::getInstance()
     fCurCount += fBTop->getSize();
     fgTotal   += sizeof(StiBlock<Concrete>)*1e-6;
   }
+  fInstCount++;
   StiHolder<Concrete> *h = fHTop;
   fHTop = h->fNext;
   h->fNext=0;
@@ -139,9 +141,10 @@ template <class Concrete, class Abstract>
 void StiFactory<Concrete,Abstract>::free(Abstract *obj)
 {
   static const int shift = (char*)(&(((StiHolder<Concrete>*)1)->fObj))-(char*)1;
+  obj->unset();
   StiHolder<Concrete>* h = (StiHolder<Concrete>*)((char*)obj-shift);
   assert((h->fLong-1)== (long)this);
-  h->fNext = fHTop; fHTop=h; fUseCount--;
+  h->fNext = fHTop; fHTop=h; fUseCount--; fFreeCount++;
 }
 
 //______________________________________________________________________________
@@ -158,7 +161,9 @@ void StiFactory<Concrete,Abstract>::clear()
     fgTotal -= sizeof(StiBlock<Concrete>)*1e-6;
   }
   fBTop=0; fHTop=0; fCurCount=0; fUseCount=0;
-  printf("*** %s::clear() %g MegaBytes Total %g\n",getName().c_str(),sz*1e-6,fgTotal);
+  printf("*** %s::clear() %g MegaBytes Total %g Inst/Free=%d %d\n"
+        ,getName().c_str(),sz*1e-6,fgTotal,fInstCount,fFreeCount);
+  fInstCount=0; fFreeCount=0;
 }
 //______________________________________________________________________________
 template <class Concrete, class Abstract>
