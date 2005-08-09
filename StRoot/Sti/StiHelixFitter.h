@@ -68,6 +68,7 @@ public:
 
     ///Full internal clear.
     void reset();
+    void unset(){;}
 
     bool fit(const StiHitVector&);
 

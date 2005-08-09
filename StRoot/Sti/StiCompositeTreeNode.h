@@ -103,6 +103,7 @@ public:
     
     //Sets
     void reset(){;}
+    void unset(){;}
 
     ///Set the name of the node
     void setName(const string&);

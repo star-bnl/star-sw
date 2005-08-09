@@ -54,6 +54,7 @@ class StiTreeNode
   const StiTreeNode& operator=(const StiTreeNode& node);  
 
   void reset();
+  void unset(){;}
   void remove(int childIndex) ;
   StiTreeNode *disconnect(); 
   void cutTail(int direction) ;

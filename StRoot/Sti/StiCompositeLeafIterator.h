@@ -59,6 +59,7 @@ public:
     
     ///Reset iterator to point to first leaf
     void reset();
+    void unset(){;}
     
     ///Dereference iterator, just as an STL iterator.
     tnode_t* operator*() const;

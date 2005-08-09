@@ -149,6 +149,7 @@ public:
     ///Set the number of times used
     void setTimesUsed(unsigned int);
     void reset();
+    void unset(){;}
     void rotate(double angle);
     double getValue(int key) const;
     double getPseudoRapidity() const;

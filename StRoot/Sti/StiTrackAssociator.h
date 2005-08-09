@@ -12,6 +12,7 @@ class StiTrackAssociator : public TrackAssociator
   StiTrackAssociator(Factory<Association> * associationFactory);
   virtual ~StiTrackAssociator();
   void reset();
+  void unset(){;}
   void build(StiTrackContainer * firstTrackContainer,
 	     StiTrackContainer * secondTrackContainer);
   StiTrackToTrackMap * getEvalTrackToRefTrackMap();

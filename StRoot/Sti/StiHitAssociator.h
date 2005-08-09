@@ -17,6 +17,7 @@ class StiHitAssociator
 			 StiHitContainer * referenceContainer,
 			 AssociationFilter<StiHit> * associationFilter);
   virtual void reset();
+  virtual void unset(){;}
   StiHit * getEvaluatedHit(StiHit * referenceHit);
   StiHit * getReferenceHit(StiHit * evaluatedHit);
 

@@ -55,6 +55,8 @@ public:
           void extendTracksToVertices(const std::vector<StiHit*> &vertices);
   /// Reset the tracker
   virtual void reset();
+  virtual void unset(){;}
+
   /// Clear the tracker
   virtual void clear();
   /// Get the track filter currently used by the tracker
