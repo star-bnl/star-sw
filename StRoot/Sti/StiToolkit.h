@@ -23,12 +23,13 @@ class   StiDetector;
 class   StiTrack;
 class   StiKalmanTrack;
 class   StiKalmanTrackNode;
+class   StiNodeExt;
 class   StiHit;
 class   StiMcTrack;
 class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
 template<class EVENT, class MCEVENT> class StiDetectorGroups;
-class   StiMaker;
+//??class   StiMaker;
 template<class Factorized> class Factory;
 template<class Filtered>   class EditableFilter;
 template<class Filtered>   class Filter;
@@ -49,7 +50,7 @@ class 	StiTrackFinder;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
 class   StiVertexFinder;
-class   StAssociationMaker;
+//??class   StAssociationMaker;
 class   EditableParameter;
 class   StiResidualCalculator;
 
@@ -64,6 +65,7 @@ public:
   virtual Factory<StiKalmanTrack> * getTrackFactory()=0;
   virtual Factory<StiMcTrack> * getMcTrackFactory()=0;
   virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;
+  virtual Factory<StiNodeExt>         * getTrackNodeExtFactory()=0;
   virtual Factory<StiDetector>  * getDetectorFactory()=0;
   virtual Factory<StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory()=0;
   virtual Factory<EditableParameter>  * getParameterFactory()=0;
@@ -85,13 +87,13 @@ public:
   virtual StiTrackFitter        * getTrackFitter()=0;
   virtual StiTrackMerger        * getTrackMerger()=0;
   virtual StiVertexFinder       * getVertexFinder()=0;
-  virtual StAssociationMaker    * getAssociationMaker()=0;
-  virtual StiMaker              * getStiMaker()=0;
+//??  virtual StAssociationMaker    * getAssociationMaker()=0;
+//??  virtual StiMaker              * getStiMaker()=0;
   virtual StiResidualCalculator * getResidualCalculator()=0;
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader()=0;
 
-  virtual void setAssociationMaker(StAssociationMaker * a)=0;
-  virtual void setStiMaker(StiMaker* a)=0;
+//??  virtual void setAssociationMaker(StAssociationMaker * a)=0;
+//??  virtual void setStiMaker(StiMaker* a)=0;
   virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)=0;
   
   virtual void setGuiEnabled(bool )=0;
