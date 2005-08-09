@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSmdCalMaker.cxx,v 1.2 2005/05/04 17:00:32 balewski Exp $
+// $Id: MuEzSmdCalMaker.cxx,v 1.3 2005/08/09 18:46:31 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -126,7 +126,7 @@ Int_t
 MuEzSmdCalMaker::Make(){
   clear();
   nInpEve++;
-  gMessMgr->Message("","D") <<GetName()<<"::Make() is called "<<endm;
+  gMessMgr->Message("","W") <<GetName()<<"::Make() is called "<<endm;
   
   //..........  acquire EztHeader
   eHead= mMuDstMaker->muDst()->eztHeader();
@@ -135,6 +135,13 @@ MuEzSmdCalMaker::Make(){
   }
 
   if(nInpEve==1) eHead->print();
+
+#if 0
+  vector<unsigned int> trgL=mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().triggerIds();
+  printf("trigL len=%d\n",trgL.size());
+  int ii;
+  for(ii=0;ii<trgL.size();ii++) printf("ii=%d trigID=%d\n",ii,trgL[ii]);
+#endif
 
   if(trigID ) {// filter by triggerID on demand
     if (! mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(trigID)) return kStOK;
@@ -149,8 +156,8 @@ MuEzSmdCalMaker::Make(){
 
   //  trgAkio=new StTriggerDataMother(eTrig);
   // trgAkio->dump();
-  // eETow->print();
-  // eESmd->print();
+  //eETow->print(0);
+  // eESmd->print(0);
   //  eHead->print();
   
   // .... process adata ......
@@ -322,6 +329,9 @@ MuEzSmdCalMaker::unpackMuEzt(EztEmcRawData  *eRaw){
 
 //---------------------------------------------------
 // $Log: MuEzSmdCalMaker.cxx,v $
+// Revision 1.3  2005/08/09 18:46:31  balewski
+// after smd calib in 2005
+//
 // Revision 1.2  2005/05/04 17:00:32  balewski
 // tuned for MIP detection in CuCu200
 //

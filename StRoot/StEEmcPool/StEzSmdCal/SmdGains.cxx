@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.5 2004/11/02 21:29:08 balewski Exp $
+// $Id: SmdGains.cxx,v 1.6 2005/08/09 18:46:31 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -62,10 +62,8 @@ void SmdGains::init(){
  
   //................ TGRaphs
   TGraphErrors*  gr=new TGraphErrors;
-  gr->SetMarkerStyle(21);
-  gr->SetName("gc"+plCore); // final gains 
-  gr->SetTitle(plCore+ " calculated gain correction ; strip ID; gain corr");
-  grA[0]=gr;
+
+  grA[0]=0;
   
   gr=new TGraphErrors;
   gr->SetMarkerStyle(24);
@@ -79,8 +77,6 @@ void SmdGains::init(){
   
   //............... other initializations ...........
   printf("cuts for %s : adcMin=%d ,adcMax=%d minSum=%d maxRelEr=%f\n",plCore.Data(),adcMin,adcMax,minSum, maxRelEr);
-  //c1=new TCanvas("aa","aa",300,400);// small
-  c1=new TCanvas("aa","aa",800,700);// big
 
   for(i=0;i<mxS;i++) str[i].id=i+1;
 
@@ -107,20 +103,20 @@ void SmdGains::doGainCorr(int str1, int str2, int ns, int pl){
   if(pl==0) 
     c2=new TCanvas(nn,nn,300,400);
   else
-    c2=new TCanvas(nn,nn,600,700);
+    c2=new TCanvas(nn,nn,600,800);
 
-  c2->Divide(4,5);
+  c2->Divide(5,6);
   int i,k;
   for(i=str1,k=1; i<mxS; i+=ns,k++) {
     if(i>=str2) break;
     c2->cd(k);
      avrMipNEne(i,ns);
   }
-  c2->cd(19);  hA[1]->Draw();
-  c2->cd(20);  hA[2]->Draw();
+  c2->cd(29);  hA[1]->Draw();
+  c2->cd(30);  hA[2]->Draw();
 
-  if( pl&1) c2->Print(nn+".ps");
-  if( pl&2) c2->Print(nn+".gif");
+    if( pl&1) c2->Print(nn+".ps");
+  // if( pl&2) c2->Print(nn+".gif");
 
 }
 
@@ -209,11 +205,11 @@ void SmdGains:: plTGraph( char *shpFunc,int ig, int pl){
   printf("plot %s\n",gr->GetName());
   TString nn=gr->GetName();
   nn="C"+nn;  
-  c2=new TCanvas(nn,nn,300,400);
+  c2=new TCanvas(nn,nn,300,250);
   gr->Draw("AP");
   gr->Fit(shpFunc);
-  gr->SetMinimum(0.9);
-  gr->SetMaximum(1.7);
+  gr->SetMinimum(0.7);
+  gr->SetMaximum(1.8);
 
   gnCorFn=gr->GetFunction(shpFunc); assert(gnCorFn);
   gnCorFn->SetLineColor(kRed);
@@ -257,7 +253,10 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
   printf("fitSlopes() %s\n",tit);
   TString ttC=tit;
 
-  
+  TLine *ln0=new TLine(0,0,0,5000); // memory leak
+  ln0->SetLineColor(kGreen);
+
+  if(c1==0) c1=new TCanvas("aa1","aa1",800,700);// big
   c1->Clear();
   if(pl)
     c1->Divide(5,6);
@@ -274,28 +273,39 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
     StripG *s=&str[i-1];
     sprintf(tit,"a%s%03d",plCore.Data(),i);
     TH1F* h= (TH1F*)fdIn->Get(tit); assert(h);
-    h->Rebin(4);
+    h->Rebin(2);
     HList->Add(h);
     c1->cd(k+1);
     h->SetAxisRange(adcMin,adcMax);
     float sum=h->Integral();
-    h->SetAxisRange(-50,1.5*adcMax);
+    h->SetAxisRange(-20,1.5*adcMax);
     //printf(" %s sum=%f\n",h->GetName(),sum);
     
     hA[0]->Fill(i,sum);
     s->sum1=(int)sum;
     h->Draw(); h->SetLineColor(kBlue);gPad->SetLogy();
     gPad->SetGridx(0);      gPad->SetGridy(0);
-    h->SetMinimum(.9);    h->SetMaximum(3000);
-    
+    float ymax=6000-str1*10;    h->SetMaximum(ymax);
+    float ymin=100.9-str1/2.7;   
+    if(i<=30) ymin=0.9;
+    h->SetMinimum(ymin);    
+
     Lx=h->GetListOfFunctions();    assert(Lx);
-    ln=new TLine(adcMin,0,adcMin,30000); ln->SetLineColor(kMagenta); Lx->Add(ln);
-    ln=new TLine(adcMax,0,adcMax,30000);  ln->SetLineColor(kMagenta);  Lx->Add(ln);
+    ln=new TLine(adcMin,0,adcMin,30000); ln->SetLineColor(kMagenta);ln->SetLineStyle(2);
+    Lx->Add(ln);
+    ln=new TLine(adcMax,0,adcMax,30000);  ln->SetLineColor(kMagenta); ln->SetLineStyle(2);
+    Lx->Add(ln);
     if(sum<minSum) { s->flag+=1; continue;}
     h->Fit("expo","RQ","",adcMin,adcMax);
+
+    // ....exceptions in 2005 data, day 49
+    if(strstr(h->GetName(),"a02V269")) h->Fit("expo","RQ","",60,130);
+    if(strstr(h->GetName(),"a06U077")) h->Fit("expo","RQ","",800,150);
+       //... end
+    ln0->Draw();
     TF1* f=h->GetFunction("expo");
     f->SetLineColor(kRed);
-    f->SetLineWidth(2);
+    f->SetLineWidth(1);
     double *par=f->GetParameters();
     double *epar=f->GetParErrors();
 
@@ -324,6 +334,7 @@ void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
   float xLow=-50;
 
   if(cT=='T') { adcMin=15;  adcMax=45; } // towers
+  if(c1==0) c1=new TCanvas("aa2","aa2",800,700);// big
 
   c1->Clear();
   if(pl)
@@ -388,7 +399,7 @@ void SmdGains::fitSlopesTile(int eta1, int nEta, char cT, int pl) {
 //-------------------------------------------------
 void SmdGains:: doSlopesOnly(float fac){
   printf("working on gains from slopes only, fac=%f\n",fac);
-  TGraphErrors*  gr=grA[0];
+
   int i;
   // ...... realtive gains
   for(i=0;i<mxS;i++) {
@@ -402,13 +413,11 @@ void SmdGains:: doSlopesOnly(float fac){
       s->gc=s->egc=0;
     }
 
-    int n=gr->GetN();
-    gr->SetPoint(n,s->id,s->gc);
-    gr->SetPointError(n,0,s->egc);
   }
   
 }
 
+#if 0
 //-------------------------------------------------
 //-------------------------------------------------
 void SmdGains:: finish(int k) {
@@ -418,13 +427,10 @@ void SmdGains:: finish(int k) {
     s->print();
   }
   
-  c1->Clear();
-  c1->Divide(1,2);
-  c1->cd(1);  hA[0]->Draw();
-  c1->cd(2);  grA[0]->Draw("PA");
-  grA[0]->SetMinimum(0.);
   
 }
+
+#endif
 
 //-------------------------------------------------
 //-------------------------------------------------
@@ -490,6 +496,9 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.6  2005/08/09 18:46:31  balewski
+ * after smd calib in 2005
+ *
  * Revision 1.5  2004/11/02 21:29:08  balewski
  * ange hist range
  *

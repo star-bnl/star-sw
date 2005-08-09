@@ -33,7 +33,7 @@ void EEsmdPlain::set(float th, int nd, char uv0) {
   pattX[len]=0; // string  terminatinon 
   pattX[nDot]='x';
 
-  printf("Set %c-plain , nDot=%d, thrE=%.2f, pattXX='%s'\n",uv,nDot,thresE,pattXX);
+  printf("Set %c-plain , nDot=%d, thrE/MeV=%.2f, pattXX='%s'\n",uv,nDot,thresE*1000.,pattXX);
 }
 
 //-------------------------------------------------
