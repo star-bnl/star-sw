@@ -18,6 +18,7 @@ Table of Contents:
 <ul>
 <li><a href="#logger">Integration log4j package for STAR framework</a>
 <li><a href="#makers">Logger for STAR Makers</a>
+<li><a href="#global">Global logger: "BFC" and "QA"</a>
 <li><a href="#macros">New macros</a>
 <li><a href="#use">How to use</a>
 <li><a href="#conf">How to configure</a>
@@ -41,17 +42,28 @@ Table of Contents:
   framework send their log messages to the abstract STAR messenger. 
   To merge the STAR existing framework with the log4j package, 
   it was only a matter of creating another implementation of 
-  the STAR messenger interface. Additionally, and to meet 
+  the STAR messenger interface - 
+     <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
+     <b><code>StLoggerManager</code></b><a>. 
+  Additionally, to meet 
   the STAR production needs, a standard set of the logger 
   appender and filter features were either developed or enhanced. 
   We added one extra appender to communicate with the STAR 
-  production MySQL database and created a custom logger filter 
+  production MySQL database, namely
+  <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
+     <b><code>StMySQLAppender</code></b><a>, 
+   and created a custom logger filter, 
+  <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
+     <b><code>StarOptionFilter</code></b><a>.     
   to be able to select/suspend the messages according to the 
   STAR production manager's criteria. Once again, and due to 
   the already existing OO messenger implementation in the 
-  STAR production system, enabling the new scheme did not 
+  STAR production system, enabling the new scheme does not 
   require modifying any existing piece of the STAR code. 
-  It was sufficient to dynamically load the new implementation 
+  It is sufficient to dynamically load the new implementation 
+  (see 
+  <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C?rev=HEAD">
+  <b><code>LoadLogger.C</code></b></a> macro 
   and provide an external XML <a href="#conf">configuration file</a> 
   for the logger as needed. 
 
@@ -71,6 +83,27 @@ Table of Contents:
    The base StMaker class internally governs the logger selection to make sure the current
   logger  matches the logger of the current active StMaker instance.
 
+<a name="#global"></a>
+<h2>Global "Loggers": <b><code>"BFC"</code></b> and <b><code>"QA"</code></b></h2>
+ The STAR software infrastructure provides two default global loggers. 
+<ul>
+<li>
+<blockquota>
+  The <b><code>"BFC"</code></b> logger is a top logger for all loggers created by any particular StMaker instance.
+  This logger is redirected  with the messages those are created out of the scope of any StMaker object. 
+</blockquota> 
+
+<li>
+<blockquota>
+  The <b><code>"QA"</code></b> logger is a dedicated global logger to  handle all messages 
+  sent with <a href="#macros"><b><code>LOG_QA</code></b></a> macro (see: "New macro" section below)</a> 
+  for the so-called <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#i1">"QAInfo - Q"-type messages.</a> 
+</blockquota> 
+</ul>
+
+Since both <b><code>"QA"</code></b> as well as <b><code>"BFC"</code></b> are the normal loggers 
+it can be provided with the dedicated filters, layouts, and appenders to <a href="#conf">customize</a> it output.
+
 <a name="#macros"></a>
 <h2> New macros </h2>
 
@@ -84,6 +117,7 @@ the CPP macros as follows:
   <li> <b><code>LOG_ERROR</code></a> </b>
   <li> <b><code>LOG_FATAL</code></a> </b>
   <li> <b><code>LOG_DEBUG</code></a> </b>
+  <a name="#log_qa_macros"></a>
   <li> <b><code>LOG_QA</code></a> </b>
 </ul>
 are followed by the C++ output "stream" elements  and ended up with the <b><code>"endm"</code></b> object.
@@ -242,11 +276,15 @@ These four types are necessary to empower the developers with the capabilities
 to log messages according to message type and level, to control at runtime 
 how these messages are formatted, and lastly to decide where they are reported. 
 <p>
-For each logger one can define the"priority value" (message level) and the arbitrary number of the different appenders.
-For each appender one can specify one layout if any  and arbitrary number of the filters.
+For each logger one can define the "priority value" (message level) and the arbitrary number 
+of the different appenders.
+For each appender one can specify one layout if any  and arbitrary number of the filters. 
+The different "loggers" can share the appenders explicitly as an xml "appender-ref"  parameter defines.
+The "appenders" can be shared implicitly, since the "children" loggers inherit the "parent" appenders 
+and other attributes  "by default".
 <p>
 
-The C++ version of the package provide the ready-to-eat components to choose from:
+The C++ version of the package provides the ready-to-eat components to choose from:
 See: <a href="http://logging.apache.org/log4cxx/">http://logging.apache.org/log4cxx</a>
 <p>
 The layout may be supplied with the custom format string.
@@ -322,14 +360,17 @@ Examples:
   
 <a name="#print"></a>
 <h2> "Print statement" transition</h2>
- To enjoy the new logger feature one should replace the "regular" C++ I/O stream output statement or C output function  with that calling the loggers.
-This transition is simple and straightforward.
+ To enjoy the new logger feature one should replace the "regular" C++ I/O stream output statement 
+ or C output function  with that calling the loggers.
+ This transition is simple and straightforward.
 <p>
 <a name="#printCplus"></a>
 <h3> "C++" output stream statements </h3>
-If you use the C++ output streams like <b><code>"cout"</code></b>, <b><code>"cerr"</code></b>  to get an access to the logger it is enough to 
+ If you use the C++ output streams like <b><code>"cout"</code></b>, <b><code>"cerr"</code></b>  
+ to get an access to the logger it is enough to 
 <ul>
-<li> replace the <b><code>"cout"</code></b> and <b><code>"cerr"</code></b> object with the appropriated <a href="#macros">logger macros</a>
+<li> replace the <b><code>"cout"</code></b> and <b><code>"cerr"</code></b> object 
+with the appropriated <a href="#macros">logger macros</a>
 and 
 <li>replace the <b><code>"endl"</code></b> object with <b><code>"endm"</code></b> ones.
 </ul>
@@ -410,6 +451,7 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 <li><a href="HardQuotaTpc.xml"> <b><code>HardQuotaTpc.xml</code></b></a> - allows at most 400 messages from <b><code>St_tpt_Maker</code></b>
 <li><a href="HardQuota.xml"> HardQuota.xml</code></b></a> - allows at most  400 non-Info  messages
 <li><a href="RollingQuota.xml"> <b><code>RollingQuota.xml</code></b></a> - allows 100 MGb log file at most   
+<li><a href="QACustom.xml"> <b><code>QACustom.xml</code></b></a> - defines the custom level and format for QA messages
 </ul>
 <hr>
 <small>
