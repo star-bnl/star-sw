@@ -10,7 +10,7 @@
      ***************************************************************
      ***************************************************************
 </pre></b>
-STAR logger is a the logger-based implementation of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">
+STAR logger is a the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">logger-based</a> implementation of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">
 STAR message manager interface</a>
 
 <p>
@@ -29,7 +29,7 @@ Table of Contents:
 <h2> Integration log4j package for STAR framework</h2>
 
 
-  Integration of the <a href="http://logging.apache.org">log4j</a> packages and STAR offline framework 
+  Integration of the <a href="http://wiki.apache.org/logging-log4j/Log4JProjectPages">log4j</a> packages and STAR offline framework 
   was straightforward due to an already existing OO  
   <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">design</a> 
   for processing message streams. For the STAR C++ production code  the 
@@ -230,8 +230,9 @@ To use the STAR message manager your code has to contain the STAR message manage
 
 <a name="#file"></a>
 To overwrite the STAR default output logger configuration one can provide 
-the <a href="#examples">custom configuration</a> with the 
-<b><code>"log4j.xml"</code></b> file in the current working directory.
+the <a href="#examples">custom configuration</a> with the file 
+in <a href="http://wiki.apache.org/logging-log4j/Log4jXmlFormat">XML format</a>, 
+<b><code>"log4j.xml"</code></b>,  in the current working directory.
 
 <a name="#env"></a>
 The custom name and directory for the logger configuration file can be provided via ROOT resource file.
