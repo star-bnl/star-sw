@@ -279,10 +279,15 @@ how these messages are formatted, and lastly to decide where they are reported.
 <p>
 For each logger one can define the "priority value" (message level) and the arbitrary number 
 of the different appenders.
+For the standard levels, we have 
+<center><b><pre>DEBUG < INFO < WARN < ERROR < FATAL. 
+</pre></b></center>
+
 For each appender one can specify one layout if any  and arbitrary number of the filters. 
 The different "loggers" can share the appenders explicitly as an xml "appender-ref"  parameter defines.
 The "appenders" can be shared implicitly, since the "children" loggers inherit the "parent" appenders 
-and other attributes  "by default".
+and other attributes  "by default" (see: <a href="http://logging.apache.org/log4j/docs/manual.html" 
+<b>Short introduction to log4j</b></a> for the futher information)
 <p>
 
 The C++ version of the package provides the ready-to-eat components to choose from:
