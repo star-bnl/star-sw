@@ -33,8 +33,8 @@
      <priority value ="FATAL" />
   </root>
   
- <St_tpt_Maker>
+ <logger name="St_tpt_Maker">
      <priority value ="DEBUG" />
      <appender-ref ref="stdout" />
- </St_tpt_Maker>
+ </logger>
 </configuration>
