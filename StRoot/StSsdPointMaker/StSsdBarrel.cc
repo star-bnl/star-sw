@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.12 2005/06/24 10:19:38 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.13 2005/08/11 08:13:08 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.13  2005/08/11 08:13:08  lmartin
+// ssdStripCalib table new format included
+//
 // Revision 1.12  2005/06/24 10:19:38  lmartin
 // preventing crashes if ssdStripCalib is missing
 //
@@ -199,9 +202,8 @@ int  StSsdBarrel::writeNoiseToFile(St_spa_strip *spa_strip)
   for (int i = 0 ; i < spa_strip->GetNRows(); i++)
     {
       noise_strip.id=strip[i].id_strip;
-      noise_strip.pedestals=strip[i].id_mchit[0];
-      noise_strip.rms=strip[i].adc_count;
-      noise_strip.isActive=1;
+      noise_strip.pedestals=(unsigned char) strip[i].id_mchit[0];
+      noise_strip.rms=(unsigned char) strip[i].adc_count;
       stripCal->AddAt(&noise_strip);
     }
   TFile f1("ssdStripCalib.root","NEW");
@@ -220,9 +222,8 @@ int  StSsdBarrel::writeNoiseToFile(St_ssdPedStrip *spa_ped_strip, char myLabel[]
   for (int i = 0 ; i < spa_ped_strip->GetNRows(); i++)
     {
       noise_strip.id=strip[i].id_strip;
-      noise_strip.pedestals=strip[i].pedestal;
-      noise_strip.rms=strip[i].noise;
-      noise_strip.isActive=1;
+      noise_strip.pedestals= (unsigned char) strip[i].pedestal;
+      noise_strip.rms=(unsigned char) strip[i].noise;
       stripCal->AddAt(&noise_strip);
     }
   sprintf(name,"%s%s%s","ssdStripCalib.",myLabel,".root");
