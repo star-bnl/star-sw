@@ -31,6 +31,9 @@ StEEmcClusterMaker::StEEmcClusterMaker(const Char_t *name):StMaker(name)
   /// by default, do not populate the StEmcClusterCollection
   mFillStEvent = 0;
 
+  /// default, do not supress seeds adjacent to clusters 
+  mSuppress = false; 
+
   /// each cluster (tower, pre/post, smd) are assigned a unique id in
   /// the order in which they are collected
   mClusterId = 0;
@@ -402,19 +405,21 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	/// falls below Nsigma threshold and is not marked
 	/// as dead.
 	Bool_t owned[288]; for (Int_t i=0;i<288;i++) owned[i]=false;
+	Bool_t xseed[288]; for (Int_t i=0;i<288;i++) xseed[i]=false;
 
 	StEEmcStripVec_t::iterator iseed=seeds.begin();
 	while ( iseed != seeds.end() ) {
 	  
 	  /// Verify that this seed is not owned by another cluster
 	  Int_t index=(*iseed).index();
-	  if ( owned[index] ) {
+	  if ( owned[index] || (mSuppress&&xseed[index]) ) {
 	    iseed++;
 	    continue;
 	  }
 
 	  /// This seed is now the property of a cluster
 	  owned[index]=true;
+	  xseed[index]=true;
 	  /// Create our cluster
 	  StEEmcSmdCluster cluster;
 	  /// And give it the strip
@@ -433,6 +438,7 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 #endif
 	    /// Mark this strip as owned
 	    owned[ strip.index() ] = true;
+	    xseed[ strip.index() ] = true;
 	    /// Add to cluster
 	    cluster.add(strip);	    	    
 	  }
@@ -447,6 +453,7 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 #endif
 	    /// Mark this strip as owned
 	    owned[ strip.index() ] = true;
+	    xseed[ strip.index() ] = true;
 	    /// Add to cluster
 	    cluster.add(strip);	    	    
 	  }
@@ -456,7 +463,25 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	    cluster.key( mClusterId++ );
 	    mSmdClusters[ sector ][ plane ].push_back(cluster);
 	    mNumberOfClusters[4+plane]++;
+
+            // disallow strips on either side of the cluster
+	    // from forming seeds
+	    Int_t ns=cluster.numberOfStrips();
+	    Int_t left=999,right=-999;
+       	    for ( Int_t is=0;is<ns;is++ )
+	    {
+		StEEmcStrip s=cluster.strip(is);
+		if ( s.index()<left ) left=s.index();
+		if ( s.index()>right ) right=s.index();
+	    }
+
+	    xseed[left-1]=true;
+	    xseed[left-2]=true;
+	    xseed[right+1]=true;
+	    xseed[right+2]=true;
+	    
 	  }
+	  
 
 	  iseed++;
 	}	             	

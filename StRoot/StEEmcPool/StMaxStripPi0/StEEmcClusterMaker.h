@@ -66,12 +66,17 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   /// fill the StEmcCollection.
   void setFillStEvent(){ mFillStEvent=true; }
 
+  /// Suppress cluster splitting
+  void suppress(){ mSuppress=true; } 
+
   void print();
 
  private:
  protected:
 
   Int_t mClusterId;
+
+  Bool_t mSuppress; 
 
   /// mSeedTowers[sec][layer] provides a list of tower
   /// elements which exceeded the user-specified seed.
