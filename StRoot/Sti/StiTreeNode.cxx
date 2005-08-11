@@ -50,7 +50,7 @@ StiTreeNode *StiTreeNode::disconnect()
 {
   StiTreeNode *node =0;
   node = parent; parent=0;
-  if (!node) 			return;
+  if (!node) 			return 0;
   assert(node->children[0]==this);
   assert(!children[1]);
   node->children[0]=children[0];
