@@ -39,6 +39,8 @@ StEEmcMixMaker::StEEmcMixMaker(const Char_t *name,Int_t s):StMaker(name)
   StEEmcPointVec_t points;
   for ( Int_t i=0; i<40; i++ ) mPool.push_back(points);
 
+  mFixedVertex=TVector3(-999.,-999.,-999.);
+
 }
 
 // ----------------------------------------------------------------------------
@@ -67,27 +69,9 @@ Int_t StEEmcMixMaker::Make()
 
   mH1[1]->Fill("accepted",1.0);
 
-
-  /*
-
-  /// Get the list of points from the point maker
-  std::vector<Int_t>::iterator isector=mSectorList.begin();
-  while ( isector != mSectorList.end() ) {
-    StEEmcPointVec_t points=mEEpoints->points( (*isector) );
-    //std::copy( points.begin(), points.end(), mPoints.end() );    
-    StEEmcPointVec_t::iterator ipoint=points.begin();
-    while ( ipoint!=points.end() ) {
-      mPoints.push_back( (*ipoint) );
-      ipoint++;
-    }
-    isector++;
-  }
-
-  */
-
+  /// Get the list of points
   mPoints=mEEpoints->points();
-  
-  
+    
   /// Not enough points in event
   if ( mPoints.size() <= 1 ) return kStOK;
   mH1[1]->Fill( "2+ points", 1.0);
@@ -133,11 +117,15 @@ void StEEmcMixMaker::mixReal()
   if ( !event ) return ; 
   StThreeVectorF v=event->primaryVertexPosition();
   TVector3 vertex = TVector3(v.x(),v.y(),v.z());
-#ifndef SIMPLE_MC
-  if ( v.z()==0. && v.x()==0. && v.y()==0. ) return; 
-#endif
 
 
+  /// Verify that we have a valid (or user specified) event vertex
+  if ( mFixedVertex.Z()<-500. ) {
+    if ( v.z()==0. && v.x()==0. && v.y()==0. ) return; 
+  }
+  else
+    vertex=mFixedVertex;
+  
   
   /// mix all pairs of points, avoiding self-pairs
   for ( UInt_t ipoint=0; ipoint<mPoints.size()-1; ipoint++ )
@@ -147,9 +135,19 @@ void StEEmcMixMaker::mixReal()
 	StEEmcPoint point1=mPoints[ipoint];
 	StEEmcPoint point2=mPoints[jpoint];
        
-	/// cut points with excessively low energy 
-	if ( point1.energy() < mEpoint || point2.energy() < mEpoint )
-	    continue; 
+	/// Require points to be in specified sectors
+	Bool_t go1 = false;
+	Bool_t go2 = false;
+	for ( UInt_t isec=0;isec<mSectorList.size();isec++ )
+	  {
+	    go1 |= point1.sector() == mSectorList[isec];
+	    go2 |= point2.sector() == mSectorList[isec];
+	  }
+	if ( !(go1&&go2) ) continue;
+
+
+	/// same sector
+	if ( point1.sector() != point2.sector() ) continue;
 
 	count++;
 	mCandidates.push_back ( StEEmcPair( point1, point2, vertex, vertex ) );
@@ -160,9 +158,7 @@ void StEEmcMixMaker::mixReal()
 
       }
 
-  
-
-
+ 
 }
 
 void StEEmcMixMaker::mixBackground()
@@ -185,9 +181,13 @@ void StEEmcMixMaker::mixBackground()
   if ( !event ) return; 
   StThreeVectorF v=event->primaryVertexPosition();
   TVector3 vertex = TVector3(v.x(),v.y(),v.z());
-#ifndef SIMPLE_MC
-  if ( v.z()==0. && v.x()==0. && v.y()==0. ) return;
-#endif
+
+  if ( mFixedVertex.Z()<-500. ) {
+    if ( v.z()==0. && v.x()==0. && v.y()==0. ) return; 
+  }
+  else
+    vertex=mFixedVertex;
+
 
   /// loop over all points in current event
   for ( UInt_t i=0; i<mPoints.size(); i++ ) {
@@ -199,9 +199,18 @@ void StEEmcMixMaker::mixBackground()
 
       StEEmcPoint point2=points[j];
 
-      /// cut points with excessively low energy 
-      if ( point1.energy() < mEpoint || point2.energy() < mEpoint )
-	continue; 
+      /// Require points to be in specified sectors
+      Bool_t go1 = false;
+      Bool_t go2 = false;
+      for ( UInt_t isec=0;isec<mSectorList.size();isec++ )
+	  {
+	    go1 |= point1.sector() == mSectorList[isec];
+	    go2 |= point2.sector() == mSectorList[isec];
+	  }
+      if ( !(go1&&go2) ) continue;
+
+      /// same sector
+      if ( point1.sector() != point2.sector() ) continue;
 
       /// add to background
       mBackground.push_back( StEEmcPair( point1, point2, vertex, vertex ) );
