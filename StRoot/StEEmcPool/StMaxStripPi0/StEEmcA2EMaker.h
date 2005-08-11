@@ -86,7 +86,8 @@ class StEEmcA2EMaker : public StMaker {
   
 
   /// Returns the tower with the largest ADC response
-  StEEmcTower hightower();
+  /// \param layer: TPQR=0123 
+  StEEmcTower hightower(Int_t layer=0);
   
   /// Return number of hit SMD strips for the specified sector, plane
   /// \param sector: 0-11 for 12 EEMC sectors
@@ -108,6 +109,12 @@ class StEEmcA2EMaker : public StMaker {
   Float_t energy(Int_t sec, Int_t layer) { return mEnergy[sec][layer]; }
   /// Return energy summed over full endcap
   Float_t energy(Int_t layer); 
+
+  /// Return number of hits (number of elements above threshold)
+  /// for the specified sector and layer. 
+  /// \param sector: 0..11 the 12 EEMC sectors
+  /// \param layer: 0=T, 1=P, 2=Q, 3=R, 4=U, 5=V
+  Int_t numberOfHits(Int_t sec, Int_t layer){ return mHits[sec][layer]; } 
 
   /// Set a "scale" parameter for reconstructing MC.  Energies
   /// will be multiplied by scale.
@@ -160,7 +167,7 @@ class StEEmcA2EMaker : public StMaker {
   /// mHitTowers[3] = vector of hit postshower elements
   std::vector< StEEmcTowerVec_t > mHitTowers;
 
-  StEEmcTower *mHighTower;
+  StEEmcTower *mHighTower[4];
 
   /// Same concept as with the hit towers, but this time
   /// applied to the SMD planes.  mHitStrips[sec][plane][n]
@@ -172,6 +179,7 @@ class StEEmcA2EMaker : public StMaker {
   /// Summed energy (towers) or energy deposit (pre,post,smd)
   /// in each sector.  0=T,1=P,2=Q,3=R,4=U,5=V
   Float_t mEnergy[kEEmcNumSectors][6];
+  Int_t   mHits[kEEmcNumSectors][6]; 
 
   ClassDef(StEEmcA2EMaker,1);
 
@@ -181,7 +189,7 @@ inline void StEEmcA2EMaker::threshold(Float_t c, Int_t l){ mSigmaPed[l]=c; }
 inline void StEEmcA2EMaker::database(const Char_t *name){ mDbName=name; }
 inline void StEEmcA2EMaker::source(const Char_t *name, Int_t type){ mInputName=name; mInputType=type; }
 
-inline StEEmcTower StEEmcA2EMaker::hightower(){ return *mHighTower; }
+inline StEEmcTower StEEmcA2EMaker::hightower(Int_t layer){ return *mHighTower[layer]; }
 
 
 #endif

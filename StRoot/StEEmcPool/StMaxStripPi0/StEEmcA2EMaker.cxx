@@ -39,6 +39,17 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
     }
   }
 
+  
+
+  for ( Int_t i=0;i<12;i++ )
+      for ( Int_t j=0;j<6;j++ )
+      {
+	  mEnergy[i][j] = 0.;
+	  mHits[i][j]   = 0;
+      } 
+  
+
+
   /// Now set pointers to all neighboring towers
   for ( Int_t tower=0; tower < 720; tower++ ) 
     {
@@ -79,8 +90,12 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
     }
  
 
+
   /// Set high tower pointer
-  mHighTower=&mTowers[0][0];
+  mHighTower[0]=&mTowers[0][0];
+  mHighTower[1]=&mTowers[0][1];
+  mHighTower[2]=&mTowers[0][2];
+  mHighTower[3]=&mTowers[0][3];
 
   /// Clear and init all strips
   for ( Int_t sec=0; sec<12; sec++ ) {
@@ -99,6 +114,8 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
   mMuDstMaker = 0;
   mEventMaker = 0;
 
+
+
   /// Initialize default thresholds, nsigma above ped
   threshold(3.0,0); /// towers
   threshold(3.0,1); /// pre1
@@ -109,6 +126,8 @@ StEEmcA2EMaker::StEEmcA2EMaker(const Char_t *name) : StMaker(name)
 
   /// Create storage banks for hit towers and strips.
   /// THESE SHOULD NOT BE CLEARED!
+
+
 
   /// Vector of towers, one per layer (0=T,1=P,2=Q,3=R)
   StEEmcTowerVec_t t;
@@ -293,7 +312,7 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   /// Abort if the db has this marked as a bad or questionable channel
 #if 1
   if ( dbitem -> fail ) return;  
-  if ( dbitem -> stat ) return;
+  //if ( dbitem -> stat ) return;
 #endif  
 
   Float_t ped       = dbitem -> ped;
@@ -302,17 +321,19 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
 
   /// Ignore all ADC below a user-specified threshold
   if ( adc < threshold ) return;
+  mHits[sec][layer]++; 
+
+  /// Raw and ped subtracted adc
+  mTowers[index][layer].raw(adc);
+  mTowers[index][layer].adc(adc-ped);
 
   /// Make sure gain is positive, nonzero
   if ( gain <= 0. ) return;
-
   /// Determine energy
   Float_t energy = ( adc - ped + 0.5 ) / gain;
   
   /// And set detector response
   mTowers[index][layer].energy( energy * mScale );
-  mTowers[index][layer].raw(adc);
-  mTowers[index][layer].adc(adc-ped);
 
   /// Determine tower center and set E_T
   UInt_t s=(UInt_t)mTowers[index][layer].sector();
@@ -323,10 +344,10 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   momentum*=energy;
   mTowers[index][layer].et( (Float_t)momentum.Perp() );
 
-  if ( layer==0 )
-    if ( adc - ped > mHighTower->adc() ) {
-      mHighTower = &mTowers[index][0];
-    }
+  if ( !mTowers[index][layer].fail() )
+      if ( adc - ped > mHighTower[layer]->adc() ) {
+	  mHighTower[layer] = &mTowers[index][layer];
+      }
 
   /// Push back list of all hit towers, preshower, postshower
 
@@ -358,7 +379,7 @@ void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc
 
   /// Abort if the db has this marked as bad or questionable 
   if ( dbitem -> fail ) return;
-  if ( dbitem -> stat ) return;
+  //if ( dbitem -> stat ) return;
 
   Float_t ped       = dbitem -> ped;
   Float_t gain      = dbitem -> gain;
@@ -366,16 +387,19 @@ void StEEmcA2EMaker::addSmdHit( Int_t sec, Int_t plane, Int_t strip, Float_t adc
 
   /// Ignore all ADC below a user-specified threshold
   if ( adc < threshold ) return;
+  mHits[sec][plane+4]++; 
 
-  /// Make sure gain is positive, nonzero
+  /// Set raw and ped subtracted ADC
+  mStrips[sec][plane][strip].raw(adc);
+  mStrips[sec][plane][strip].adc(adc-ped);
+
+ /// Make sure gain is positive, nonzero
   if ( gain <= 0. ) return;
 
   /// Determine energy
   Float_t energy = ( adc - ped + 0.5 ) / gain;
 
   mStrips[sec][plane][strip].energy(energy);
-  mStrips[sec][plane][strip].raw(adc);
-  mStrips[sec][plane][strip].adc(adc-ped);
 
   mHitStrips[sec][plane].push_back( mStrips[sec][plane][strip] );
 
@@ -414,8 +438,10 @@ void StEEmcA2EMaker::Clear(Option_t *opts)
 
   /// Clear sector energy sums
   for ( Int_t i = 0; i < 12; i++ ) 
-    for ( Int_t j = 0; j < 6; j++ ) 
+    for ( Int_t j = 0; j < 6; j++ ) { 
       mEnergy[i][j] = 0.; 
+      mHits[i][j]=0;
+    }
       
 
   
