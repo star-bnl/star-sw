@@ -16,6 +16,9 @@ class StEEmcTower : public StEEmcElement {
   StEEmcTower();
   ~StEEmcTower(){ /* nada */ };
 
+  /// copy constructor
+  StEEmcTower( const StEEmcTower &other );
+
   /// Sets the index for this tower, pre- or postshower element.
   /// See StEEmcAnalysisMaker.  This single index will define the
   /// position of the element on the endcap, as well as its 

@@ -14,6 +14,27 @@ StEEmcTower::StEEmcTower()
 }
 
 // ----------------------------------------------------------------------------
+StEEmcTower::StEEmcTower( const StEEmcTower &other )
+{
+  mIndex=other.mIndex;
+  mLayer=other.mLayer;
+  mSector=other.mSector;
+  mPhibin=other.mPhibin;
+  mSubsector=other.mSubsector;
+  mEtabin=other.mEtabin;
+  mET=other.mET;
+  mNeighbors=other.mNeighbors;
+
+  mRaw=other.mRaw;
+  mAdc=other.mAdc;
+  mEnergy=other.mEnergy;
+  mStat=other.mStat;
+  mFail=other.mFail;
+  mName=other.mName;
+  mstRawHit=other.mstRawHit;
+}
+
+// ----------------------------------------------------------------------------
 void StEEmcTower::print()
 {
 
