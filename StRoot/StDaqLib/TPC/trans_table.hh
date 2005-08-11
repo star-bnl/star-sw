@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: trans_table.hh,v 1.4 2004/03/15 23:55:03 jeromel Exp $
+ * $Id: trans_table.hh,v 1.5 2005/08/11 00:26:13 perev Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: 10-bit to 8-bit translation table
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: trans_table.hh,v $
+ * Revision 1.5  2005/08/11 00:26:13  perev
+ * defenc against multiple include added
+ *
  * Revision 1.4  2004/03/15 23:55:03  jeromel
  * Unused method removed
  *
@@ -27,7 +30,8 @@
  **************************************************************************/
 
 /*  10-to-8-bit Translation Table, 0-1023:   */
-
+#ifndef TRANS_TABLE_HH
+#define TRANS_TABLE_HH
  static unsigned char log10to8_table[1024] ={
 
   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
@@ -137,3 +141,4 @@ static unsigned short log8to10_table[256] = {
 //  char x = log10to8_table[0];
 //  x = log8to10_table[0];
 //}	
+#endif // TRANS_TABLE_HH
