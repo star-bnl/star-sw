@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.13 2005/08/11 08:13:08 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.14 2005/08/11 13:51:38 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.14  2005/08/11 13:51:38  lmartin
+// PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
+//
 // Revision 1.13  2005/08/11 08:13:08  lmartin
 // ssdStripCalib table new format included
 //
@@ -227,7 +230,7 @@ int  StSsdBarrel::writeNoiseToFile(St_ssdPedStrip *spa_ped_strip, char myLabel[]
       stripCal->AddAt(&noise_strip);
     }
   sprintf(name,"%s%s%s","ssdStripCalib.",myLabel,".root");
-  TFile f1(name,"RECREATE");
+  TFile f1(name,"RECREATE","SSD ped and noise file",9);
   stripCal->Write();
   f1.Close();
   return spa_ped_strip->GetNRows();

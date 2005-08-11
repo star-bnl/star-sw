@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.13 2005/06/16 14:29:22 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.14 2005/08/11 13:51:39 lmartin Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.14  2005/08/11 13:51:39  lmartin
+// PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
+//
 // Revision 1.13  2005/06/16 14:29:22  bouchet
 // no more makeSsdPedestalHistograms() method
 //
@@ -92,10 +95,14 @@ class StSsdBarrel;
 
 class StSsdLadder;
 class StSsdWafer;
+class StSsdStrip;
+class StSsdStripList;
 class StSsdPoint;
 class StSsdPointList;
 class StSsdCluster;
 class StSsdClusterList;
+class StSsdPackage;
+class StSsdPackageList;
 class ssdWafersPosition_st;
 class ssdDimensions_st;
 class ssdConfiguration_st;
@@ -137,7 +144,10 @@ class StSsdPointMaker : public StMaker {
   void PrintPointSummary(StSsdBarrel *mySsd); //!
   void WriteScfTuple(StSsdBarrel *mySsd);
   void WriteScmTuple(StSsdBarrel *mySsd);
+  void PrintStripDetails(StSsdBarrel *mySsd, int mywafer); //!
   void PrintClusterDetails(StSsdBarrel *mySsd, int mywafer); //!
+  void PrintPointDetails(StSsdBarrel *mySsd, int mywafer); //!
+  void PrintPackageDetails(StSsdBarrel *mySsd, int mywafer); //!
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -192,7 +202,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.13 2005/06/16 14:29:22 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.14 2005/08/11 13:51:39 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
