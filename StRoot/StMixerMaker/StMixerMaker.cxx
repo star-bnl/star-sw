@@ -84,8 +84,9 @@ StMixerMaker::StMixerMaker(const char *name,char *kind1,char *kind2):StMaker(nam
 								     mMergeSequences(1),
 								     mFirstSector(1),
 								     mLastSector(24)  
-{ /* nopt */ }
-
+{ 
+  mAllTheDataMixer=0;
+}
 
 StMixerMaker::~StMixerMaker() { /* nopt */ }
 
@@ -130,7 +131,6 @@ Int_t StMixerMaker::InitRun(int RunId) {
 
   // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
   // which is accessible via the StTrsUnpacker.  Initialize the pointers!
-  mAllTheDataMixer=0;
   
   // Construct constant data sets.  This is what is passed downstream
   mAllTheDataMixer = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());

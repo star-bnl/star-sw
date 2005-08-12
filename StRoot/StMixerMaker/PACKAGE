@@ -1,0 +1,5 @@
+# $Id $
+# package StMixerMaker
+# author: 
+Library:libStMixerMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -l_StTpcDb  -l_StTrsMaker
+#Library:libStMixerMaker.so:LIBS +=   -lStChain  -lStDAQMaker  -lStTpcDb  -lStTrsMaker
