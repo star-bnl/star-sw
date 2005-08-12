@@ -120,7 +120,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      Clear();
      iMake = Make(jCur);
 
-     if (outMk && iMake == kStErr) {outMk->IMake(jCur); mNFailed++;}
+     if (outMk && iMake == kStErr) {/*outMk->IMake(jCur);*/ mNFailed++;}
      if (iMake%10 == kStEOF || iMake%10==kStFatal)	break;
      mNTotal++;
      evnt.Stop("QAInfo:");
@@ -147,8 +147,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.50 2004/11/04 22:26:38 fine Exp $
+// $Id: StChain.cxx,v 1.51 2005/08/12 21:27:31 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.51  2005/08/12 21:27:31  perev
+// Remove call output in the case or read error
+//
 // Revision 1.50  2004/11/04 22:26:38  fine
 // populate the package with save/restore the logger and edit some messages
 //
