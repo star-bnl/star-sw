@@ -40,6 +40,7 @@ StEEmcMixMaker::StEEmcMixMaker(const Char_t *name,Int_t s):StMaker(name)
   for ( Int_t i=0; i<40; i++ ) mPool.push_back(points);
 
   mFixedVertex=TVector3(-999.,-999.,-999.);
+  mSigmaVertex=-999.;
 
 }
 
@@ -123,8 +124,10 @@ void StEEmcMixMaker::mixReal()
   if ( mFixedVertex.Z()<-500. ) {
     if ( v.z()==0. && v.x()==0. && v.y()==0. ) return; 
   }
-  else
+  else {
     vertex=mFixedVertex;
+    if ( mSigmaVertex > 0. ) vertex[2]=( mFixedVertex.Z() + mRandom->Gaus(0.,mSigmaVertex));
+  }
   
   
   /// mix all pairs of points, avoiding self-pairs
@@ -185,8 +188,10 @@ void StEEmcMixMaker::mixBackground()
   if ( mFixedVertex.Z()<-500. ) {
     if ( v.z()==0. && v.x()==0. && v.y()==0. ) return; 
   }
-  else
+  else {
     vertex=mFixedVertex;
+    if ( mSigmaVertex > 0. ) vertex[2]=( mFixedVertex.Z() + mRandom->Gaus(0.,mSigmaVertex)); 
+  }
 
 
   /// loop over all points in current event
