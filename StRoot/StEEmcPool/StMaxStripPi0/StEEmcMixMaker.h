@@ -89,11 +89,13 @@ class StEEmcMixMaker : public StMaker {
 
 
   void fixedVertex(Float_t x, Float_t y, Float_t z){ mFixedVertex=TVector3(x,y,z); }
+  void floatVertex(Float_t x, Float_t y, Float_t z, Float_t s){ fixedVertex(x,y,z); mSigmaVertex=s; }
 
  private:
  protected:
 
   TVector3 mFixedVertex;
+  Float_t  mSigmaVertex;
 
   Float_t mETcut;
   Float_t mZcut;
