@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.476 2005/06/16 20:27:47 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.477 2005/08/12 00:21:11 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -506,6 +506,8 @@ Int_t StBFChain::Instantiate()
 	    if( GetOption("OSpaceZ2") ){      mask |=   (kSpaceChargeR2 << 1); }
 	    if( GetOption("OShortR") ){       mask |=   (kShortedRing   << 1); }
 	    if( GetOption("OGridLeak") ){     mask |=   (kGridLeak      << 1); }
+	    if( GetOption("OGridLeak3D") ){   mask |=   (k3DGridLeak    << 1); }
+
 
 	    (void) printf("StBFChain:: ExB The option passed will be %d 0x%X\n",mask,mask);
 	    mk->SetMode(mask);

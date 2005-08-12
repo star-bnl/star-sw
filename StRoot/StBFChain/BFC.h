@@ -262,6 +262,7 @@
   {"OSpaceZ2"    ,""  ,"","",""                                   ,"","Space Charge corrections R2",kFALSE},
   {"OShortR"     ,""  ,"","",""                                       ,"","Shorted Ring correction",kFALSE},
   {"OGridLeak"   ,""  ,"","",""                                          ,"","Grid Leak correction",kFALSE},
+  {"OGridLeak3D" ,""  ,"","",""                                       ,"","3D Grid Leak correction",kFALSE},
   {"AlignSectors",""  ,"","",""                          ,"","Activate Sector Alignment correction",kFALSE},
 
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
