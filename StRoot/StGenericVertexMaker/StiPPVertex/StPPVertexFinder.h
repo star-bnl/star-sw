@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.3 2005/07/20 05:34:16 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.4 2005/08/12 18:35:28 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -78,7 +78,8 @@ public:
   void Finish();
 
   TH1F *hA[mxH];
-  TH1D *hL; // likelyhood distribution
+  TH1D *hL ; // likelyhood distribution
+  TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
   TObjArray * HList;
   StPPVertexFinder();
 
@@ -97,6 +98,11 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.4  2005/08/12 18:35:28  balewski
+ * more accurate calculation of Z-vertex error
+ * by accounting for average weight of tracks contributing to the likelihood,
+ *  Now errZ is of 0.5-1.5 mm, was ~2x smaller
+ *
  * Revision 1.3  2005/07/20 05:34:16  balewski
  * cleanup
  *

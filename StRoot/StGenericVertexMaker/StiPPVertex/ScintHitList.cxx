@@ -194,7 +194,7 @@ ScintHitList:: addTrack(float eta, float phi){
   iBin=iPhiEta2bin(iPhi,iEta);
   track[iBin]++;
   nTrack++;
-  printf(" %s-addTrack() eta=%.3f phi/deg=%.1f iBin=%d fired=%d iEta=%d iPhi=%d\n",myName.Data(),eta,phi/3.1416*180,iBin,fired[iBin],iEta,iPhi);
+  //  printf(" %s-addTrack() eta=%.3f phi/deg=%.1f iBin=%d fired=%d iEta=%d iPhi=%d\n",myName.Data(),eta,phi/3.1416*180,iBin,fired[iBin],iEta,iPhi);
   if( fired[iBin]>0) { 
     nMatch++;
     if(h[6]) {// drop if histos not initialized

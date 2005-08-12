@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.9 2005/07/28 20:57:14 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.10 2005/08/12 18:35:27 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -74,7 +74,12 @@ StPPVertexFinder::StPPVertexFinder() {
   mTestMode=0; // expert only flag
 
   // special histogram for finding the vertex, not to be saved
-  hL=new TH1D("wzB","Vertex likelyhood; Z /cm",2000,-200,200);
+  int nb=2000;
+  float zRange=200;// (cm)
+  hL=new TH1D("ppvL","Vertex likelyhood; Z /cm",nb,-zRange,zRange);
+  // needed only for  better errZ calculation
+  hM=new TH1D("ppvM","cumulative track multiplicity; Z /cm",nb,-zRange,zRange);
+  hW=new TH1D("ppvM","cumulative track weight; Z /cm",nb,-zRange,zRange);
 
   FILE *fd=fopen("ppvMode.dat","r");
   if(fd) {
@@ -398,7 +403,7 @@ StPPVertexFinder::fit(StEvent* event) {
     if( !examinTrackDca(track,t)) continue; 
     if( !matchTrack2Membrane(track,t)) continue;// & kill if nFitP too small
 
-    cout <<"\n#e itr="<<k<<" gPt="<<track->getPt()<<" gEta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<" of "<<track->getMaxPointCount()<<" poolSize="<< mTrackData->size()<<endl;
+    // cout <<"\n#e itr="<<k<<" gPt="<<track->getPt()<<" gEta="<<track->getPseudoRapidity()<<" nFitP="<<track->getFitPointCount()<<" of "<<track->getMaxPointCount()<<" poolSize="<< mTrackData->size()<<endl;
 
     hA[1]->Fill(track->getChi2());
     hA[2]->Fill(track->getFitPointCount());
@@ -486,6 +491,8 @@ StPPVertexFinder::fit(StEvent* event) {
 bool  
 StPPVertexFinder::buildLikelihood(){
   hL->Reset();
+  hM->Reset();
+  hW->Reset();
 
   float dzMax2=mMaxZradius*mMaxZradius;
 
@@ -496,12 +503,14 @@ StPPVertexFinder::buildLikelihood(){
   int n1=0;
   int i;
 
-  double *L=hL->GetArray(); // main likelyhood histogram 
+  double *La=hL->GetArray(); // PPV main likelyhood histogram 
+  double *Ma=hM->GetArray(); // track multiplicity  histogram 
+  double *Wa=hW->GetArray(); // track weight histogram 
   
   for(i=0;i<nt;i++) {
     TrackData *t=&mTrackData->at(i);
     if(t->vertexID!=0) continue; // track already used
-    n1++;
+    if(t->anyMatch) n1++;
     //  t->print();
     float z0=t->zDca;
     float ez=t->ezDca;
@@ -518,13 +527,15 @@ StPPVertexFinder::buildLikelihood(){
       float dz=z-z0;
       float xx=base-dz*dz/2/ez2;
       if(xx<=0) continue;
-      L[j]+=xx*totW;
+      La[j]+=xx*totW;
+      Ma[j]+=1.;
+      Wa[j]+=totW;
       // printf("z=%f dz=%f  xx=%f\n",z,dz,xx);
     }
     // break; // tmp , to get only one track
   }
 
-  printf("::buildLikelihood() trackPool=%d Lmax=%f\n",n1,hL->GetMaximum());
+  printf("::buildLikelihood() matchedTrackPool=%d Lmax=%f\n",n1,hL->GetMaximum());
   return n1>=mMinMatchTr;
 }
 
@@ -538,10 +549,14 @@ StPPVertexFinder::findVertex(VertexData &V) {
   int iMax=hL-> GetMaximumBin();
   float z0=hL-> GetBinCenter(iMax);
   float Lmax=hL-> GetBinContent(iMax);
+  float accM=hM-> GetBinContent(iMax);
+  float accW=hW-> GetBinContent(iMax);
+  assert(accM>0);
+  float avrW=accW/accM;
 
   // search for sigma of the vertex
   float Llow=0.9* Lmax;
-  if((Lmax-Llow)<8 )  Llow=Lmax-8;  // to be at least 4 sigma
+  if((Lmax-Llow)<8*avrW )  Llow=Lmax-8*avrW;  // to be at least 4 sigma
   int i;
   double *L=hL->GetArray(); // likelyhood 
 
@@ -560,10 +575,13 @@ StPPVertexFinder::findVertex(VertexData &V) {
   printf("iLow/iMax/iHigh=%d/%d/%d\n",iLow,iMax,iHigh);
   float zLow=hL-> GetBinCenter(iLow);
   float zHigh=hL-> GetBinCenter(iHigh);
-  float kSig= sqrt(2*(Lmax-Llow));
+  printf(" accM=%f  accW=%f  avrW=%f\n",accM,accW,avrW);   
+
+  float kSig= sqrt(2*(Lmax-Llow)/avrW);
   float sigZ= (zHigh-zLow)/2/kSig;
   printf("  Z low/max/high=%f %f %f, kSig=%f, sig=%f\n",zLow,z0,zHigh,kSig,sigZ);
   printf(" found  PPVertex(ID=%d,neve=%d) z0 =%.2f +/- %.2f\n",V.id,mTotEve,z0,sigZ);
+
 
   // take x,y from beam line equation, TMP
   float x=mX0+z0*mdxdz;
@@ -888,7 +906,7 @@ StPPVertexFinder::matchTrack2BEMC(const StiKalmanTrack* track,TrackData &t, floa
   if(phi<0) phi+=2*C_PI;// now phi is [0,2Pi] as for Cyl slats
   float eta=posCyl.pseudoRapidity();
   
-  cout<<"#e @bemcNode xyz="<<posCyl<<" etaDet="<<eta<<" phi/deg="<<phi/3.1416*180<<" path/cm="<<path<<endl;
+  // cout<<"#e @bemcNode xyz="<<posCyl<<" etaDet="<<eta<<" phi/deg="<<phi/3.1416*180<<" path/cm="<<path<<endl;
 
   if(fabs(eta)<1) hA[11]->Fill(posCyl.z());
   
@@ -1028,6 +1046,11 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.10  2005/08/12 18:35:27  balewski
+ * more accurate calculation of Z-vertex error
+ * by accounting for average weight of tracks contributing to the likelihood,
+ *  Now errZ is of 0.5-1.5 mm, was ~2x smaller
+ *
  * Revision 1.9  2005/07/28 20:57:14  balewski
  * extand zMax range to 200cm, call it PPV-2
  *

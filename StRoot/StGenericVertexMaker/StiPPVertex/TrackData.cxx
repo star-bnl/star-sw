@@ -109,7 +109,7 @@ TrackData::scanNodes(vector<int> &hit, int jz0){
   bool match=  matchL && matchR;
   bool veto=(vetoL || vetoR) && !match;
 
-  printf(" TPC Conclusion: tpcMatch=%d  tpcVeto=%d \n\n",match,veto);
+  //  printf(" TPC Conclusion: tpcMatch=%d  tpcVeto=%d \n\n",match,veto);
   updateAnyMatch(match,veto,mTpc);
   weight*=getTpcWeight();
 }
