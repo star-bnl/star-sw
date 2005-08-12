@@ -112,7 +112,7 @@ double StDetectorDbSpaceCharge::getSpaceChargeCoulombs(double scaleFactor){
     double offset     = this->getSpaceChargeOffset();
 
     double intens = (mult < saturation) ? mult : saturation;
-    return (factor * intens * correction) + offset;
+    return factor * (intens-offset) * correction ;
     
 };
 
@@ -152,7 +152,7 @@ float StDetectorDbSpaceCharge::getSpaceChargeDetector(){
     
 };
 
-/// Returns offset to use for Space Charge
+/// Returns offset in luminosity measure to use for Space Charge
 float StDetectorDbSpaceCharge::getSpaceChargeOffset(){
     float value = 0;
     if(mSpaceCharge){
