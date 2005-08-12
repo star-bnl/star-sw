@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.27  2005/07/19 22:23:05  perev
- * Bug fix
+ * Revision 1.28  2005/08/12 19:11:34  fisyak
+ * Move SL05e to HEAD (wait till Victor will fix his fixes)
  *
  * Revision 1.26  2003/12/24 13:44:53  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -118,6 +118,11 @@ unsigned char StTrsFastDigitalSignalGenerator::do10to8Translation(int index)cons
    
      if(index<-1.0e-30)index=0;
      if(index>1023)index=1023;
+    
+   
+  
+     
+     
      return log10to8_table[index];
 }            
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
@@ -125,42 +130,143 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
    
     // Loop over the sector
 
+    tpcTimeBins currentPad; 
   
    
     // Make a digital Pad!
-      digitalTimeBins  digPadData;
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+    vector<digitalPair> digitalPadData;
+#else
+    vector<digitalPair, allocator<digitalPair> > digitalPadData;
+#endif
     // Remember mSector is the "normal" analog sector! 
       cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
       for(int irow=1; irow<=mSector->numberOfRows(); irow++) { 
 	for(unsigned int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
            
-	  tpcTimeBins &currentPad = mSector->timeBinsOfRowAndPad(irow,ipad); 
+	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad); 
+           
+	    if(!currentPad.size()) continue;
+   	    //cout << "dig() r/p " << irow << '/' << ipad << endl;
+	    // Make sure the digital Pad is clear!
+	    digitalPadData.clear();
+	    //   cout<<irow<<" row "<<ipad<<" pad"<<endl;
+         
+	    unsigned int currentTimeBin = digitalPadData.size();
+	    //  cout<<currentTimeBin<<"  should be 0 "<<endl;
+// 	    PR(currentTimeBin);
+	    unsigned int zeroCounter = 0;
+	    for(mTimeSequenceIterator  = currentPad.begin();
+		mTimeSequenceIterator != currentPad.end();
+		mTimeSequenceIterator++) {
 
-	  int currentSize = currentPad.size();
-	  if(!currentSize) continue;
-   	  //cout << "dig() r/p " << irow << '/' << ipad << endl;
-	  // Make sure the digital Pad is clear!
-	  digPadData.clear();
-	  //   cout<<irow<<" row "<<ipad<<" pad"<<endl;
+		//PR(*mTimeSequenceIterator);
+		unsigned int timeBinIndex =
+		    static_cast<unsigned int>(mTimeSequenceIterator->time());
+		if (timeBinIndex > currentTimeBin) {
+		    //cout << "Positive time shift" << endl;
+		    // remove previous zero if any
+		    if (digitalPadData.size() && !((char)digitalPadData.back())) digitalPadData.pop_back(); 
+		    // add zeros
+		    zeroCounter += timeBinIndex - currentTimeBin; 
+		    for (int j=0; j < floor(zeroCounter/255.); j++) {
+			digitalPadData.push_back(digitalPair(0,0));
+			digitalPadData.push_back(digitalPair(255,0));
+			zeroCounter -= 255;
+		    }
+		    if (zeroCounter) digitalPadData.push_back(digitalPair(0,0));
+		    currentTimeBin = timeBinIndex;
+		}
+		else if (timeBinIndex < currentTimeBin){
+		    //cout << "Negative Time Shift" << endl;
+		    mTimeSequenceIterator+= currentTimeBin-timeBinIndex;
+		}
+	        
+		int temporary_digitalAmplitude =
+		  static_cast<int>(mTimeSequenceIterator->amplitude()/mSimpleConversion+0.5);//add 0.5  for test ,by HL
+		
+		// here we have a 10 bit number!
+		// Find in Mike Levine's array from:
+		// StDaqLib/TPC/trans_table.hh
+		// what the appropriate 8 bit number is!
+		
+		
+		// Conversion
+		// Must take into account the 8 <--> 10 bit conversion
+		// TRS calculates on a linear scale and then must
+		// convert to 8 bit data
+		
+		
+		unsigned char digitalAmplitude = 
+		    do10to8Translation(temporary_digitalAmplitude);
+		
+		
+		timeBinIndex = static_cast<int>(mTimeSequenceIterator->time());
+		// Normal processing without shift
+		if(digitalAmplitude>255) digitalAmplitude = 255;
+		
+		if(digitalAmplitude != 0) {
+		    if (zeroCounter) {
+			digitalPadData.push_back(digitalPair(static_cast<unsigned char>(zeroCounter),0));
+			zeroCounter = 0;
+		    }
+		    digitalPadData.push_back(digitalPair(static_cast<unsigned char>(digitalAmplitude),mTimeSequenceIterator->id()));
+		    currentTimeBin++;
+		    if (currentTimeBin==mNumberOfTimeBins)
+			break; //In case the time sequence hasn't finished, because of a time shift.
+		}
+		// Otherwise there is no signal!
+		else {
+		    if (!zeroCounter) digitalPadData.push_back(digitalPair(0,0));
+		    else if(zeroCounter==255) {
+			digitalPadData.push_back(digitalPair(255,0));
+			digitalPadData.push_back(digitalPair(0,0));
+			zeroCounter=0;
+		    }
+		    zeroCounter++;
+		    currentTimeBin++;
+		    if (currentTimeBin==mNumberOfTimeBins){
+			digitalPadData.push_back(digitalPair(static_cast<unsigned char>(zeroCounter),0));
+			zeroCounter = 0;
+			break;
+		    }
+		}
+	    } // the iterator (mTimeSequence)
+	    if (currentTimeBin < mNumberOfTimeBins) {
+		//cout << "Adding remaining zeros (should couple with - time shift)" << endl;
+		if (zeroCounter == 0) digitalPadData.push_back(digitalPair(0,0));
+		zeroCounter += mNumberOfTimeBins - currentTimeBin;
+		for (int k=0; k<floor(zeroCounter/255.); k++) {
+		    digitalPadData.push_back(digitalPair(255,0));
+		    digitalPadData.push_back(digitalPair(0,0));
+		    zeroCounter-=255;
+		}
+		if (zeroCounter) digitalPadData.push_back(digitalPair(static_cast<unsigned char>(zeroCounter),0));
+		else digitalPadData.pop_back();
+	    }
+// 	    PR(currentTimeBin);
+// 	    PR(mNumberOfTimeBins);
 
-	  int currentTimeBin = -2005;
-	  for (int icur=0;icur<currentSize;icur++) {
 
-	    int timeBinIndex = currentPad[icur].time();
-            assert(timeBinIndex > currentTimeBin);
-            if (timeBinIndex != currentTimeBin+1) digPadData.push_back(digitalPair(timeBinIndex));
-            currentTimeBin = timeBinIndex;
+	    
+	    // print it out:
+//   	    PR(digitalPadData.size());
+// 	    PR(irow);
+// 	    PR(ipad);
+//   	    for(int ii=0; ii<digitalPadData.size(); ii++) {
+//   		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << endl;
+//   	    }
+	    
+	    currentPad.clear();
+	    mDigitalSector->assignTimeBins(irow,ipad,&digitalPadData);
+	    //sleep(2);
 
-	    int temporary_digitalAmplitude = (currentPad[icur].amplitude()/mSimpleConversion+0.5);
-	    unsigned char digitalAmplitude = do10to8Translation(temporary_digitalAmplitude);
-            int id = currentPad[icur].id();
-            digPadData.push_back(digitalPair(digitalAmplitude,id));
-	  } // the iterator (mTimeSequence)
-//VP	currentPad.clear();
-	mDigitalSector->assignTimeBins(irow,ipad,&digPadData);
+  	} // pads
+    
+    }// rows
+        
+    
 
-      } // pads
-   }// rows
 }
 
 void StTrsFastDigitalSignalGenerator::addCorrelatedNoise()

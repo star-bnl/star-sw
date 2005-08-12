@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.9 2005/07/19 22:22:02 perev Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.10 2005/08/12 19:11:34 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,8 +24,8 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
- * Revision 1.9  2005/07/19 22:22:02  perev
- * Bug fix
+ * Revision 1.10  2005/08/12 19:11:34  fisyak
+ * Move SL05e to HEAD (wait till Victor will fix his fixes)
  *
  * Revision 1.8  2003/12/24 13:44:51  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -81,23 +81,26 @@ using std::vector;
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 
 class digitalPair : public pair<unsigned char,int> {
-union {short mId;short mTime;};
-unsigned char mAdc;
-unsigned char mFlg;
 public:
-  digitalPair(unsigned char adc, int id) {mId=id;mAdc=adc;mFlg=0;}
-  digitalPair(int timeBin) {mTime=timeBin;mAdc=0;mFlg=1;}
-  operator unsigned char  () {return mAdc; }
-  operator unsigned char *() {return &mAdc;}
-  int adc() { return mAdc;}
-  int id()  { return mId;}
-  int time(){ return (mFlg)? (int)mTime : -1;}
+  digitalPair(unsigned char adc, int id) : pair<unsigned char,int>(adc,id) {}
+  ~digitalPair() {}
+  operator unsigned char () {return first;}
+  operator unsigned char *() {return &first;}
+  int id() { return second;}
 };
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+typedef vector<unsigned char>      digitalPadData;
+typedef vector<digitalPair>        digitalTimeBins;
+typedef vector<digitalTimeBins>    digitalPadRow;
+typedef vector<digitalPadRow>      digitalSector;
+typedef vector<digitalPair>::iterator digitalTimeBinIterator;
+#else
 typedef vector<unsigned char, allocator<unsigned char> >     digitalPadData;
 typedef vector<digitalPair, allocator<digitalPair> >         digitalTimeBins;
 typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
 typedef vector<digitalPadRow, allocator<digitalPadRow> >     digitalSector;
 typedef vector<digitalPair, allocator<digitalPair> >::iterator digitalTimeBinIterator;
+#endif
 
 typedef digitalPadData::iterator                 digitalPadDataIterator;
 typedef digitalTimeBins::iterator                digitalTimeBinsIterator;
