@@ -118,7 +118,7 @@ double  StiMcTrack::getDca3(StiTrack *t) const
   return 0;
 }
 
-int     StiMcTrack::getPointCount() const
+int     StiMcTrack::getPointCount(int) const
 {
   return mcTrack->tpcHits().size();
 }

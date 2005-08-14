@@ -27,7 +27,7 @@ class StiMcTrack : public StiTrack
           double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
           double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
           double  getDca(const StiHit*)const {return 0;} //WarnOff
-          int     getPointCount() const;
+          int     getPointCount   (int detectorId=0) const;
           int     getFitPointCount(int detectorId=0) const; 
           int     getGapCount() const;
           int     getMaxPointCount(int detectorId=0) const;

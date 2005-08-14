@@ -109,7 +109,7 @@ public:
     }   // distance of closest approach to main vertex
   virtual double  getDca2(StiTrack *t) const=0;   // distance of closest approach to given track - 2D calc
   virtual double  getDca3(StiTrack *t) const=0;   // distance of closest approach to given track - 3D calc
-  virtual int     getPointCount() const=0;
+  virtual int     getPointCount   (int detectorId=0) const=0;
   virtual int     getFitPointCount(int detectorId=0) const=0; 
   virtual int     getGapCount() const=0;
   virtual int     getMaxPointCount(int detectorId=0) const=0;
