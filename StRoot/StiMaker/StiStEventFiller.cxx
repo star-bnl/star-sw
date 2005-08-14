@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.61 2005/08/04 04:04:19 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.62 2005/08/14 01:24:40 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.62  2005/08/14 01:24:40  perev
+ * test for nhits<5 removed
+ *
  * Revision 2.61  2005/08/04 04:04:19  perev
  * Cleanup
  *
@@ -712,7 +715,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   {
       StiKalmanTrackNode *node = &(*tNode);
       if(!node->isValid()) 	continue;
-      if( node->getChi2()>1000) continue;
+
       StiHit *stiHit = node->getHit();
       if (!stiHit)		continue;
       if (!stiHit->detector())	continue;
@@ -1006,9 +1009,18 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
 //_____________________________________________________________________________
 bool StiStEventFiller::accept(StiKalmanTrack* track)
 {
-    if(track->getNNodes(3)<=5) 		return 0; // insert other filters for riff-raff we don't want in StEvent here.
-    if(track->getTrackLength()<=0) 	return 0; // insert other filters for riff-raff we don't want in StEvent here.
-//    if(track->getFitPointCount(kSvtId)<2) return 0;
+#if 0
+    int nPossiblePoints = track->getMaxPointCount(0);
+    int nMeasuredPoints = track->getPointCount   (0);
+    int nFittedPoints   = track->getFitPointCount(0);
+    if (nFittedPoints  <  5 )					return 0;
+    if (nFittedPoints < 10 && nFittedPoints*2 < nPossiblePoints)return 0;
+#endif
+    if(track->getTrackLength()<=0) 				return 0; 
+    if(track->getPt()<=0.1) 					return 0;
+    // insert other filters for riff-raff we don't want in StEvent here.
+    
+
     return 1;
 }
 //_____________________________________________________________________________
