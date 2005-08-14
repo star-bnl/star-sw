@@ -192,6 +192,7 @@ static int nCall=0;nCall++;
 	    if (track->getChi2()<0) track->setFlag(2);
 
             }
+           else {BFactory::Free(track);}
 
         }
         catch (runtime_error & rte)
@@ -381,11 +382,11 @@ void StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
 
-  const double degToRad = 3.1415927/180.;
-  const double radToDeg = 180./3.1415927;
-  const double ref1  = 50.*degToRad;
-  //  const double ref2  = 2.*3.1415927-ref1;
-  const double ref1a  = 110.*degToRad;
+static const double degToRad = 3.1415927/180.;
+static const double radToDeg = 180./3.1415927;
+static const double ref1  = 50.*degToRad;
+//static  const double ref2  = 2.*3.1415927-ref1;
+static  const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
 
   int status;
