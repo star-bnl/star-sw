@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.68 2005/08/09 14:51:25 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.68 2005/08/09 14:51:25 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.69 2005/08/14 01:10:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.69 2005/08/14 01:10:55 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.69  2005/08/14 01:10:55  perev
+ * Non empty unset(). Free all nodes when track is freed
+ *
  * Revision 2.68  2005/08/09 14:51:25  perev
  * Add reduce method, reducing all the nodes
  *
@@ -452,14 +455,18 @@ double  StiKalmanTrack::getChi2() const
    </ol>
 	 \return number of hits.
 */
-int StiKalmanTrack::getPointCount() const
+int StiKalmanTrack::getPointCount(int detectorId) const
 {
+  const StiDetector *detector=0;   
   int nPts = 0;
   StiKTNBidirectionalIterator it;
   for (it=begin();it!=end();it++) {
     StiKalmanTrackNode *node = &(*it);
-    if (!node->isValid()) continue;
-    if (!node->getHit() ) continue;
+    if (!node->isValid()) 	continue;
+    if (node->getHit())		continue;
+    detector = node->getDetector();  
+    if (!detector) 		continue;
+    if (detectorId && detector->getGroupId() != detectorId) 	continue;
     nPts++;
   }
   return nPts;
@@ -1270,6 +1277,14 @@ void StiKalmanTrack::reduce()
 {
   StiKTNBidirectionalIterator source;
   for (source=begin();source!=end();source++) {(*source).reduce();}
+}
+//_____________________________________________________________________________
+void StiKalmanTrack::unset() 
+{
+  if (!lastNode) return;
+  StiKTNBidirectionalIterator source;
+  for (source=begin();source!=end();source++) {BFactory::Free(&(*source));}
+  lastNode=0; firstNode=0;
 }
 //_____________________________________________________________________________
 void StiKalmanTrack::print(const char *opt) const
