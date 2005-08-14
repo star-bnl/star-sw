@@ -114,7 +114,7 @@ class StiKalmanTrack : public StiTrack
   static void setFitParameters(StiKalmanTrackFitterParameters* p);
 
   void reset();
-  void unset(){;}
+  void unset();
   
   /// Calculates and returns the momentum and error of the track 
   void    getMomentum(double p[3], double e[6]) const ;
@@ -165,7 +165,7 @@ class StiKalmanTrack : public StiTrack
    double getPrimaryDca() const;
 
 	 /// Return the number of hits associated with this track.
-   int getPointCount() const;
+   int getPointCount(int detectorId=0) const;
 
 	 /// Returns the number of hits associated and used in the fit of this track.
    int getFitPointCount(int detectorId=0) const;  
