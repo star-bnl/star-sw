@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.11 2005/08/14 23:49:55 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.12 2005/08/15 13:04:08 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -74,8 +74,8 @@ StPPVertexFinder::StPPVertexFinder() {
   mTestMode=0; // expert only flag
 
   // special histogram for finding the vertex, not to be saved
-  int nb=4000;
-  float zRange=200;// (cm)
+  int nb=5000;
+  float zRange=250;// (cm)
   hL=new TH1D("ppvL","Vertex likelyhood; Z /cm",nb,-zRange,zRange);
   // needed only for  better errZ calculation
   hM=new TH1D("ppvM","cumulative track multiplicity; Z /cm",nb,-zRange,zRange);
@@ -1046,6 +1046,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.12  2005/08/15 13:04:08  balewski
+ * Z-range +/- 250 cm
+ *
  * Revision 1.11  2005/08/14 23:49:55  balewski
  * smaller bins for Z-likelihood, limit siZ >=1 mm
  *
