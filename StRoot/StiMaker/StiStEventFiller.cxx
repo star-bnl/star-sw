@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.63 2005/08/16 20:37:23 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.64 2005/08/16 21:09:06 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.64  2005/08/16 21:09:06  perev
+ * remeve 5fit cut
+ *
  * Revision 2.63  2005/08/16 20:37:23  perev
  * remove small pt cut
  *
@@ -963,7 +966,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   if (totFitPoints<5) {
       int flag = gTrack->flag();
       //keep most sig. digit, set last digit to 2, and flip sign
-      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
+//??      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
   }
 
 }
