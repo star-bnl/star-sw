@@ -196,11 +196,16 @@
   // Year 5 Chains
   {"B2005"       ,""       ,"","ry2005b,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2005 ITTF (tpc+svt)",kFALSE},
+  {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
+                                                             ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
   {"P2005"       ,"" ,"",
                    "B2005,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
               "","","Production chain for 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2005"      ,"" ,"",
    "B2005,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+  {"pp2005a"      ,"" ,"",
+   "B2005a,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
