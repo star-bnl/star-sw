@@ -173,12 +173,16 @@
   //
   {"B2005"       ,""  ,"","ry2005b,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                    ,"Base chain for 2005 (tpc+svt)",kFALSE},
+  {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,-SvtDedx,Kalman,tags,Tree,evout","",""
+                                                                  ,"Base chain for 2005 (tpc only)",kFALSE},
   {"P2005"       ,""     ,"","B2005,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
                      ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   {"pp2005"     ,""   ,"",
    "B2005,fcf,ppOpt,VFppLMV5,-PreVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3",
                          "","","Production chain for 2005 pp data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-  
+  {"pp2005a"      ,"" ,"",
+   "B2005a,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},  
 
 
   // Other chains/Calibration
@@ -282,6 +286,8 @@
   //{"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
   {"VFppLMV"       ,""  ,"","",""                        ,"","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5"      ,""  ,"","",""                ,"","...VertexMaker will use ppLMV method (tuned)",kFALSE},
+    // this option will not be enabled in non-ITTF mode
+  {"VFPPV"         ,""  ,"","VFppLMV5",""             ,"","... WARNING VFPPV is NOT valid with TPT",kFALSE},
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
