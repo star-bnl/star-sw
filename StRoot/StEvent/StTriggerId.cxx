@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.cxx,v 2.3 2004/10/11 23:00:20 ullrich Exp $
+ * $Id: StTriggerId.cxx,v 2.4 2005/08/16 22:36:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.cxx,v $
+ * Revision 2.4  2005/08/16 22:36:27  ullrich
+ * Fixed bug in copy and assignement operator (mMask not assigned).
+ *
  * Revision 2.3  2004/10/11 23:00:20  ullrich
  * Add copy constructor and assign. op., implement ostream op., define to enum.
  *
@@ -41,6 +44,7 @@ StTriggerId::~StTriggerId()  {/* noop */}
 
 StTriggerId::StTriggerId(const StTriggerId &id) {
     mIdx = id.mIdx;
+    mMask = id.mMask;
     for(int i=0 ; i < mMaxTriggerIds ; ++i){
         mId[i]                = id.mId[i];
         mVersion[i]           = id.mVersion[i];
@@ -53,7 +57,8 @@ StTriggerId::StTriggerId(const StTriggerId &id) {
 const StTriggerId &StTriggerId::operator=(const StTriggerId &id) {
     if (&id==this) return id;
   
-    mIdx=id.mIdx;
+    mIdx = id.mIdx;
+    mMask = id.mMask;
     
     for(int i=0 ; i < mMaxTriggerIds ; ++i) {
         mId[i]                = id.mId[i];
