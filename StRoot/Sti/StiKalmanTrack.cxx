@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.69 2005/08/14 01:10:55 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.69 2005/08/14 01:10:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.70 2005/08/16 20:11:10 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.70 2005/08/16 20:11:10 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.70  2005/08/16 20:11:10  perev
+ * Typo corrected
+ *
  * Revision 2.69  2005/08/14 01:10:55  perev
  * Non empty unset(). Free all nodes when track is freed
  *
@@ -463,7 +466,7 @@ int StiKalmanTrack::getPointCount(int detectorId) const
   for (it=begin();it!=end();it++) {
     StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) 	continue;
-    if (node->getHit())		continue;
+    if (!node->getHit())	continue;
     detector = node->getDetector();  
     if (!detector) 		continue;
     if (detectorId && detector->getGroupId() != detectorId) 	continue;
