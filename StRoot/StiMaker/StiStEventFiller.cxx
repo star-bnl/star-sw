@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.62 2005/08/14 01:24:40 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.63 2005/08/16 20:37:23 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.63  2005/08/16 20:37:23  perev
+ * remove small pt cut
+ *
  * Revision 2.62  2005/08/14 01:24:40  perev
  * test for nhits<5 removed
  *
@@ -1015,9 +1018,9 @@ bool StiStEventFiller::accept(StiKalmanTrack* track)
     int nFittedPoints   = track->getFitPointCount(0);
     if (nFittedPoints  <  5 )					return 0;
     if (nFittedPoints < 10 && nFittedPoints*2 < nPossiblePoints)return 0;
+    if(track->getPt()<=0.1) 					return 0;
 #endif
     if(track->getTrackLength()<=0) 				return 0; 
-    if(track->getPt()<=0.1) 					return 0;
     // insert other filters for riff-raff we don't want in StEvent here.
     
 
