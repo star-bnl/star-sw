@@ -1,3 +1,13 @@
+* $Id: cavegeo.g,v 1.4 2005/08/16 01:00:12 potekhin Exp $
+*
+* $Log: cavegeo.g,v $
+* Revision 1.4  2005/08/16 01:00:12  potekhin
+* Shielding study: we need a bigger cave (tm).
+* Created a version of the cave, steered from geometry.g,
+* which is longer and can accomodate magnets and such.
+*
+* Added the CVS log lines, 10 years after the fact.
+*
 *****************************************************************************
 module   CAVEGEO  builds CAVE for GSTAR
 Author   Peter Jacobs, LBL
