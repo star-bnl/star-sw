@@ -77,34 +77,26 @@ StKinkMaker::~StKinkMaker(){
 
 */
 Int_t StKinkMaker::Init(){
-  m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
-  {
-    tkf_tkfpar_st parRow;  
-    memset(&parRow,0,sizeof(tkf_tkfpar_st));
-    parRow.dcaParentDaughterMax      =  0.5;
-    parRow.parentPtMin               =  0.2;   
-    parRow.vertexRMax2D              =  179.;  
-    parRow.vertexRMin2D              =  133.;  
-    parRow.thetaMin                  =  1.; 
-    parRow.numOfPadRows              =  40;  	// not used (value for year1)
-    parRow.parentDipAngleMax         =  0.79;	
-    parRow.impactCut                 =  2.;
-    parRow.parentLastDaughterStart2D =  14.;
-    parRow.parentLastDaughterStartZ  =  20.;
-    parRow.projectPointZDiff         =  2.;
-    parRow.distanceKinkParent2D      =  14.;
-    parRow.distanceKinkDaughter2D    =  14.;
-    parRow.distanceKinkParentZ       =  20.;
-    parRow.distanceKinkDaughterZ     =  20.;
-    m_tkfpar->AddAt(&parRow, 0);
+  TDataSet* dbDataSet = GetDataBase("Calibrations/tracker");
+  if (!dbDataSet) {
+    gMessMgr->Error(
+      "StKinkMaker::Init() : could not find appropriate database.");
+    return kStErr; 
   }
+  m_tkfpar = (St_tkf_tkfpar*) (dbDataSet->FindObject("tkf_tkfpar"));
+  if (!m_tkfpar) {
+    gMessMgr->Error(
+      "StKinkMaker::Init() : could not find tkf_tkfpar in database.");
+    return kStErr;
+  }
+  // AddRunCont(m_tkfpar);
 
   // m_Mode -> SetTrackerUsage()
   if      (m_Mode == 1) SetTrackerUsage(kTrackerUseTPT);
   else if (m_Mode == 2) SetTrackerUsage(kTrackerUseITTF);
   else if (m_Mode == 3) SetTrackerUsage(kTrackerUseBOTH);
 
-  AddRunCont(m_tkfpar);
+ 
   return StMaker::Init();
 }
 //=============================================================================
@@ -118,6 +110,7 @@ Int_t StKinkMaker::Make(){//called for each event
   TObjArray trackArray(MAXNUMOFTRACKS);trackArray.SetOwner();
  
   tkf_tkfpar_st *tkfpar = m_tkfpar->GetTable();
+  gMessMgr->Info()<<"StKinkMaker: impact parameter"<<tkfpar->impactCut<<endm;
   StThreeVectorF p,start,end;
 
   //******* GET 
