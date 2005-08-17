@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.6 2005/05/04 22:02:08 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.7 2005/08/17 20:50:44 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -15,6 +15,7 @@
 #include <StEEmcDbMaker/EEmcDbCrate.h>
 
 #include <StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h>  // for corruption tests
+#include "StMuDSTMaker/EZTREE/EztEmcRawData.h"
 
 #include "StEemcRaw.h"
 
@@ -107,13 +108,22 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId) {
 
   int icr;
   int totErrBit=0;
-  
+  int nOn=0;
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
     if(!fiber->useIt) continue; // drop masked out crates
+
     if(raw->sizeHeader(icr)<=0) continue;  //drop cartes not present in data blocks
     //printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
-    //    const  UShort_t* head=raw->header(icr); assert(head);
+   
+    int isOff=EztEmcRawData::isCrateOFF(raw->header(icr));
+    // printf("AAA icr=%d isOff=%d\n",icr,isOff);
+    if(isOff) { // kill this fiber for the rest of this job 
+      mDb->setFiberOff(icr);
+      gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() detected icr="<<icr<< " to be OFF,\n this fiber is ignored till the end of this job" << endm;
+      continue;
+    }
+    nOn++;
     block.clear();
     block.setHead(raw->header(icr));
 
@@ -142,7 +152,7 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId) {
 
   if (hs[4]) hs[4]->Fill(totErrBit);
    
-  gMessMgr->Message("","I") << GetName()<<"::checkHeader --> totErrBit "<<totErrBit<<" in all crates"<<endm;
+  gMessMgr->Message("","I") << GetName()<<"::checkHeader --> totErrBit "<<totErrBit<<" in "<<nOn<<" crates"<<endm;
   return totErrBit;
 }
 
@@ -316,6 +326,9 @@ void StEemcRaw::initHisto(){
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.7  2005/08/17 20:50:44  balewski
+// drop only crates which are off insetad of the whole event
+//
 // Revision 1.6  2005/05/04 22:02:08  balewski
 // more clear printouts
 //
