@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.15 2005/07/20 17:34:29 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.16 2005/08/17 22:04:42 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.16  2005/08/17 22:04:42  perev
+ * PoinCount cleanup
+ *
  * Revision 2.15  2005/07/20 17:34:29  perev
  * MultiVertex
  *
@@ -161,7 +164,6 @@ public:
     void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
-    void stEventFitPoints(StiKalmanTrack* kTrack, int *nFitPoints); 
     double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
     double impactParameter(StTrack* strack, StThreeVectorD &vertexPosition);
 private:
