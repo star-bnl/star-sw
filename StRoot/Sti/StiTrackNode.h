@@ -47,6 +47,9 @@ enum eTrackNodeStatus {
   kTNNudEnd     =11, // TrackNode end nudge
   kTNFitEnd 	=12, // TrackNode end fit
   kTNInit 	=13}; // TrackNode initialized
+enum eTrackNodeFlags {
+  kTNRefit 	= 1 // TrackNode in refit stage
+};
 
   virtual ~StiTrackNode(){};    
   const StiTrackNode& operator=(const StiTrackNode& node);  
@@ -62,6 +65,7 @@ enum eTrackNodeStatus {
   int getState() const 			{return _state;}
  void setReady()  			{ _state=kTNReady;}
   int isValid()  const 			{return _state>=kTNReady;}
+  int isFitted() const 			{return (_hit && _chi2<1e3);}
   double getRefPosition() const;
   double getLayerAngle()  const;
 protected:   
@@ -76,6 +80,8 @@ static double  sinX(double x);  // (sin(x)-x)/x**3
   StiHit* _hit;
   double _det;
   double _chi2;
+public:
+static int mgFlag;
 };
 
 
