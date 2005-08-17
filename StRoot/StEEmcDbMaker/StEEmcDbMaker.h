@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.30 2005/06/09 20:04:06 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.31 2005/08/17 20:51:14 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -65,7 +65,7 @@ class StEEmcDbMaker : public StMaker {
   // private:
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.30 2005/06/09 20:04:06 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.31 2005/08/17 20:51:14 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -127,6 +127,7 @@ class StEEmcDbMaker : public StMaker {
   void changeGains(char *fname);// Replace gains for  initialized channels
   void changeMask(char *fname);// Replace stat/fail mask for initialized channels 
   const EEmcDbCrate * getFiber(int icr);
+  void  setFiberOff(int icr);
   const  int getNFiber(){return nFiber;}
   const  EEmcDbItem* getByIndex(int ikey); ///< returns full DB info for one pixel
   void exportAscii(char *fname="eemcDbDump.dat") const; 
@@ -177,7 +178,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.30 2005/06/09 20:04:06 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.31 2005/08/17 20:51:14 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -188,6 +189,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.31  2005/08/17 20:51:14  balewski
+// allow to mask fibers based on event content
+//
 // Revision 1.30  2005/06/09 20:04:06  balewski
 // upgrade for embedding
 //
