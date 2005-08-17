@@ -169,6 +169,9 @@ class StiKalmanTrack : public StiTrack
 
 	 /// Returns the number of hits associated and used in the fit of this track.
    int getFitPointCount(int detectorId=0) const;  
+
+	 /// Returns all the PointCount far all detectors and types of nodes
+   void getAllPointCount(int count[1][3],int maxDetId) const;
    
 	 /// Return the number of gaps on this track. 
    int getGapCount() const;

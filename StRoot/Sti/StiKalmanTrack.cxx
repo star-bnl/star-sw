@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.70 2005/08/16 20:11:10 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.70 2005/08/16 20:11:10 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.71 2005/08/17 22:00:17 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.71 2005/08/17 22:00:17 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.71  2005/08/17 22:00:17  perev
+ * getAllPointCount(...) added
+ *
  * Revision 2.70  2005/08/16 20:11:10  perev
  * Typo corrected
  *
@@ -490,9 +493,8 @@ int StiKalmanTrack::getMaxPointCount(int detectorId) const
 {
   int nPts = 0;
   StiKTNBidirectionalIterator it;
-  int k=0;
 
-  for (it=begin();it!=end();it++,k++){
+  for (it=begin();it!=end();it++){
     const StiKalmanTrackNode *node = &(*it);
     if (!node->isValid()) 					continue;
     const StiDetector *detector = node->getDetector();
@@ -569,15 +571,46 @@ int StiKalmanTrack::getFitPointCount(int detectorId)    const
     StiHit* hit = node->getHit();
     if (!hit)				continue;
     if (node->getChi2()>chi2Max)	continue;
-    if (detectorId) {
-      const StiDetector *det = hit->detector();
-      if (!det)				continue;  
-//VPif (node->getDedx()<=0.)		continue; //??
-      if (detectorId!=det->getGroupId())continue;
-    }
+    const StiDetector *det = hit->detector();
+    if (!det)				continue;  
+    if (detectorId && detectorId!=det->getGroupId())continue;
     fitPointCount++;
   }
   return fitPointCount;
+}
+//_____________________________________________________________________________
+void StiKalmanTrack::getAllPointCount(int count[1][3],int maxDetId) const
+{
+//  output array actually is count[maxDetId+1][3] 
+//  count[0] all detectors
+//  count[detId] for particular detector
+//  count[detId][0] == number of possible points
+//  count[detId][1] == number of measured points
+//  count[detId][2] == number of fitted   points
+enum {kPP=0,kMP=1,kFP=2};
+
+  memset(count[0],0,(maxDetId+1)*3*sizeof(int));
+  StiKTNBidirectionalIterator it;
+
+  for (it=begin();it!=end();it++){
+    const StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) 	continue;
+    const StiDetector *detector = node->getDetector();
+    if (!detector)		continue;
+    int detId = detector->getGroupId();
+    StiHit* h = node->getHit();
+
+//fill possible points
+    if (h || detector->isActive(node->getY(),node->getZ())) {
+       count[0][kPP]++; count[detId][kPP]++;
+    }
+    
+    if (!h ) 			continue;
+//fill measured points
+    count[0][kMP]++; count[detId][kMP]++;
+    if (!node->isFitted()) 	continue;
+    count[0][kFP]++; count[detId][kFP]++;
+  }
 }
 
 //_____________________________________________________________________________
