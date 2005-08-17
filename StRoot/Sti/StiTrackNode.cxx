@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "StiTrackNode.h"
+int StiTrackNode::mgFlag=0;
+
 //______________________________________________________________________________
 void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 {
