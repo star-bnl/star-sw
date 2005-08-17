@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.48 2005/08/17 22:00:48 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.49 2005/08/17 22:08:45 balewski Exp $
  
 
 #include <time.h>
@@ -1091,8 +1091,11 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.49  2005/08/17 22:08:45  balewski
+// cleanup
+//
 // Revision 1.48  2005/08/17 22:00:48  balewski
-// remove assert to please Jerome
+// remove assert 
 //
 // Revision 1.47  2005/08/17 20:51:14  balewski
 // allow to mask fibers based on event content
