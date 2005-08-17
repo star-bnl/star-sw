@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.7 2005/08/17 20:50:44 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.8 2005/08/17 20:59:32 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -120,7 +120,7 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId) {
     // printf("AAA icr=%d isOff=%d\n",icr,isOff);
     if(isOff) { // kill this fiber for the rest of this job 
       mDb->setFiberOff(icr);
-      gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() detected icr="<<icr<< " to be OFF,\n this fiber is ignored till the end of this job" << endm;
+      gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() detected icr="<<icr<< "="<<fiber->name<<" to be OFF,\n this fiber is ignored till the end of this job" << endm;
       continue;
     }
     nOn++;
@@ -326,6 +326,9 @@ void StEemcRaw::initHisto(){
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.8  2005/08/17 20:59:32  balewski
+// cleanup
+//
 // Revision 1.7  2005/08/17 20:50:44  balewski
 // drop only crates which are off insetad of the whole event
 //
