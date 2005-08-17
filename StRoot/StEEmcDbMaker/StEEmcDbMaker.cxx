@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.47 2005/08/17 20:51:14 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.48 2005/08/17 22:00:48 balewski Exp $
  
 
 #include <time.h>
@@ -218,8 +218,10 @@ const EEmcDbCrate* StEEmcDbMaker::getFiber(int icr) {
 //__________________________________________________
 
 void  StEEmcDbMaker::setFiberOff(int icr) {
-  assert(icr>=0);
-  assert(icr<nFiber);
+  if(icr<0 || icr>=nFiber ) {
+    gMessMgr->Message("","W") << "StEEmcDbMaker::setFiberOff(icr="<<icr<< ") out of range, ignorred" << endm;
+    return;
+  }
   mDbFiber[icr].useIt=false;
 }
 
@@ -1089,6 +1091,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.48  2005/08/17 22:00:48  balewski
+// remove assert to please Jerome
+//
 // Revision 1.47  2005/08/17 20:51:14  balewski
 // allow to mask fibers based on event content
 //
