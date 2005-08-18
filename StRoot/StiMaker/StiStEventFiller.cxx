@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.65 2005/08/17 22:04:36 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.66 2005/08/18 22:31:47 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.66  2005/08/18 22:31:47  perev
+ * More tests
+ *
  * Revision 2.65  2005/08/17 22:04:36  perev
  * PoinCount cleanup
  *
@@ -398,7 +401,6 @@ using namespace std;
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
 
-
 //_____________________________________________________________________________
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 {
@@ -726,6 +728,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 
       StiHit *stiHit = node->getHit();
       if (!stiHit)		continue;
+      assert(node->getDetector()==stiHit->detector());
       if (!stiHit->detector())	continue;
       if (!lastHit) {
         StThreeVectorF pos(node->x_g(),node->y_g(),node->z_g());
@@ -733,13 +736,14 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       }    
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
+      assert(node->getDetector()->getGroupId()==hh->detector());
       lastNode = node;
       lastHit=hh;
       detInfo->addHit(hh,refCountIncr);
+//      if (!refCountIncr) continue;
       hh->setFitFlag(0);
       if (node->isFitted()) hh->setFitFlag(1);
 #if 0
-      if (!refCountIncr) continue;
 //Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
       fillResHack(hh,stiHit,node);
 #endif
@@ -750,7 +754,6 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   }
   int dets[kMaxId][3];
   track->getAllPointCount(dets,kMaxId-1);
-
   for (int i=1;i<kMaxId;i++) {
     if (!dets[i][1]) continue;
     detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
