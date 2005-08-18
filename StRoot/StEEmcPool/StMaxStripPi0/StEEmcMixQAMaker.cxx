@@ -74,9 +74,11 @@ Int_t StEEmcMixQAMaker::Init()
       /// init our dynamic array of histograms
       std::vector<TH1F *> tmp;
       hMassR.push_back( tmp );
-      hMassM.push_back( tmp );
       hZvertexR.push_back( tmp );
-      hZvertexM.push_back( tmp );
+      hZggR.push_back( tmp );
+      hPhiggR.push_back( tmp );
+      hEnergyR.push_back( tmp );
+
       TString sec_name = "-sec";sec_name+=sec+1;
       for ( UInt_t ptbin=0;ptbin<mBins.size()-1;ptbin++ )
 	{
@@ -87,15 +89,23 @@ Int_t StEEmcMixQAMaker::Init()
 	  TString htitle="Dipoint invariant mass, sector=";htitle+=sec+1;
 	  htitle+=", ptbin="; htitle+=(Int_t)ptbin;
 	  hMassR[sec].push_back( new TH1F(hname,htitle,360,0.,3.60) );
-	  hname.ReplaceAll("R","M");
-	  hMassM[sec].push_back( new TH1F(hname,htitle,360,0.,3.60) );
 
 	  hname="hZvertexR";hname+=sec_name;hname+=bin_name;
 	  htitle="Event vertex";htitle+=sec+1;
 	  htitle+=", ptbin="; htitle+=(Int_t)ptbin;
 	  hZvertexR[sec].push_back(new TH1F(hname,htitle,150,-150.,150.));
-	  hname.ReplaceAll("R","M");
-	  hZvertexM[sec].push_back(new TH1F(hname,htitle,150,-150.,150.));
+
+	  hname="hZggR";hname+=sec_name;hname+=bin_name;
+	  htitle="Zgg = |E1-E2|/E, sector= ";htitle+=sec+1; htitle+=", ptbin=";htitle+=(Int_t)ptbin;
+	  hZggR[sec].push_back(new TH1F(hname,htitle,50,0.,1.));	  	 
+	  
+	  hname="hPhiggR";hname+=sec_name;hname+=bin_name;
+	  htitle="Opening angle, sector=";htitle+=sec+1;htitle+=", ptbin=";htitle+=(Int_t)ptbin;
+	  hPhiggR[sec].push_back(new TH1F(hname,htitle,50,0.,0.1));	 
+
+	  hname="hEnergyR";hname+=sec_name;hname+=bin_name;
+	  htitle+="Energy, sector=";htitle+=sec+1;htitle+=", ptbin=";htitle+=(Int_t)ptbin;
+	  hEnergyR[sec].push_back(new TH1F(hname,htitle,50,0.,50.));
 	  
 	}
 
@@ -103,15 +113,22 @@ Int_t StEEmcMixQAMaker::Init()
       TString hname="hMassR";hname+=sec_name;hname+="-unbinned";
       TString htitle="Dipoint invariant mass, sector=";htitle+=sec+1;
       hMassR[sec].push_back( new TH1F(hname,htitle,360,0.,3.6) );
-      hname.ReplaceAll("R","M");
-      hMassM[sec].push_back( new TH1F(hname,htitle,360,0.,3.6) );
 			     
       hname="hZvertexR";hname+=sec_name;hname+="-unbinned";
-      htitle="Event vertex";htitle+=sec+1;
+      htitle="Event vertex, sector=";htitle+=sec+1;
       hZvertexR[sec].push_back(new TH1F(hname,htitle,150,-150.,150.));
-      hname.ReplaceAll("R","M");
-      hZvertexM[sec].push_back(new TH1F(hname,htitle,150,-150.,150.));
 
+      hname="hZggR";hname+=sec_name;hname+="-unbinned";
+      htitle="Zgg = |E1-E2|/E, sector=";htitle+=sec+1;
+      hZggR[sec].push_back(new TH1F(hname,htitle,50,0.,1.));
+      
+      hname="hPhiggR";hname+=sec_name;hname+="-unbinned";
+      htitle="Opening angle, sector=";htitle+=sec+1;
+      hPhiggR[sec].push_back(new TH1F(hname,htitle,50,0.,0.1));
+
+      hname="hEnergyR";hname+=sec_name;hname+="-unbinned";
+      htitle+="Energy, sector=";htitle+=sec+1;
+      hEnergyR[sec].push_back(new TH1F(hname,htitle,50,0.,50.));
     }
 
 

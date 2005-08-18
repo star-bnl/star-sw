@@ -55,15 +55,11 @@ class StEEmcMixQAMaker : public StMaker
   /// Mass spectra as a function of sector and pT
   std::vector<Float_t>               mBins;     //! Bin boundaries in pT
   std::vector< std::vector<TH1F *> > hMassR;    //! Inv mass of real pairs
-  std::vector< std::vector<TH1F *> > hMassM;    //! Inv mass of mixed pairs
   std::vector< std::vector<TH1F *> > hZggR;     //!
-  std::vector< std::vector<TH1F *> > hZggM;     //!
   std::vector< std::vector<TH1F *> > hPhiggR;   //!
-  std::vector< std::vector<TH1F *> > hPhiggM;   //!
   std::vector< std::vector<TH1F *> > hEnergyR;  //!
-  std::vector< std::vector<TH1F *> > hEnergyM;  //!
   std::vector< std::vector<TH1F *> > hZvertexR; //!
-  std::vector< std::vector<TH1F *> > hZvertexM; //!
+
 
   /// integrated
   TH1F *hMassRall;
