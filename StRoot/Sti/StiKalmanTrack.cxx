@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.71 2005/08/17 22:00:17 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.71 2005/08/17 22:00:17 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.72 2005/08/18 02:35:23 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.72 2005/08/18 02:35:23 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.72  2005/08/18 02:35:23  perev
+ * Cleanup
+ *
  * Revision 2.71  2005/08/17 22:00:17  perev
  * getAllPointCount(...) added
  *
@@ -570,7 +573,7 @@ int StiKalmanTrack::getFitPointCount(int detectorId)    const
     if(!node->isValid())		continue;
     StiHit* hit = node->getHit();
     if (!hit)				continue;
-    if (node->getChi2()>chi2Max)	continue;
+    if (!node->isFitted())		continue;
     const StiDetector *det = hit->detector();
     if (!det)				continue;  
     if (detectorId && detectorId!=det->getGroupId())continue;
