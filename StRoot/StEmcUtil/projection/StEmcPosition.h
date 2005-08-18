@@ -29,6 +29,7 @@ class StMcTrack;
 class StEmcGeom;
 class StVertex;
 class StMcVertex;
+class StPhysicalHelixD;
 
 class StEmcPosition : public TObject
 {
@@ -39,6 +40,7 @@ class StEmcPosition : public TObject
 
     Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StTrack*,Double_t,Double_t=225.405,Int_t=1);    ///< Track projection utility
     Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StMcTrack*,Double_t,Double_t=225.405,Int_t=1);  ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StPhysicalHelixD*,Double_t,Double_t=225.405,Int_t=1);  ///< Track projection utility
     
     Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StTrack*,Double_t,Double_t=225.405);   ///< Track projection utility
     Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,Double_t,Double_t=225.405); ///< Track projection utility
