@@ -752,7 +752,7 @@ void StEEmcClusterMaker::fillStEvent()
 	    mNumberOfClusters[3] > 0 )
     {
 
-      StEmcClusterCollection *pqr = new StEmcClusterCollection();
+      StEmcClusterCollection *pqr = detector -> cluster();
       if ( !pqr )
 	{
 	  //Warning("fillStEvent","StEmcClusterCollection (pre/post) was NULL, so I'm creating one.");
