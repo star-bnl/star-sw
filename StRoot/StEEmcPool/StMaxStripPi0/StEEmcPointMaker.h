@@ -53,6 +53,11 @@ class StEEmcPointMaker : public StMaker, public StEEmcPointUtils {
   /// fill the StEmcCollection.
   void setFillStEvent(){ mFillStEvent=true; }
 
+  /// Energy sharing mode.
+  /// \param mode: 0=smd, 1=tower-shape (iterated).
+  void setEnergyMode(Int_t mode){ mEnergyMode=mode; }
+  void setLimit(Int_t l){ mLimit=l; }
+
 
   /// Given an StEmcPoint, return the StEEmcPoint from
   /// whence it came
@@ -96,6 +101,7 @@ class StEEmcPointMaker : public StMaker, public StEEmcPointUtils {
   /// Divide energy of eemc towers between identified smd points
   void shareEnergy();
   void shareEnergySimple();
+  void shareEnergySmd();
   void countRelatives();
 
   void removeCluster( StEEmcSmdClusterVec_t &clusters, Int_t key );
@@ -110,6 +116,8 @@ class StEEmcPointMaker : public StMaker, public StEEmcPointUtils {
   Float_t mEseen;
 
   Bool_t mFillStEvent;
+  Int_t mEnergyMode;
+  Int_t mLimit;
 
   /// Map connecting StEEmcPoint to StEmcPoint
   std::map<StEmcPoint *, StEEmcPoint> mEtoEE;    //!
