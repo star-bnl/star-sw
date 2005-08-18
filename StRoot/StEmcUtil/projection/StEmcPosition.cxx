@@ -37,6 +37,50 @@ StEmcPosition::~StEmcPosition()
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
+                            StPhysicalHelixD* helix, Double_t magField, Double_t radius, Int_t option)
+{
+  StThreeVectorD Zero(0,0,0);
+  *atFinal=Zero;
+  *momentumAtFinal=Zero;
+
+  pairD pathLength = helix->pathLength(radius);
+
+  Double_t s,s1,s2; 
+  s=0;
+  s1 = pathLength.first;
+  s2 = pathLength.second;
+
+  Bool_t goProj;
+  goProj = kFALSE;
+
+  if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // Track couldn't be projected!
+
+  if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
+                    // first point of track. The smaller solution is taken when both are positive
+  {
+    if (s1 >= 0 && s2 >= 0) {s = s1; goProj = kTRUE; }
+    if (s1 >= 0 && s2 < 0) { s = s1; goProj = kTRUE; }
+    if (s1 < 0 && s2 >= 0) { s = s2; goProj = kTRUE; }
+  }
+  
+  if (option == -1) // Selects negative path lenght to project track backwards along its helix relative to
+                    // first point of track. The smaller absolute solution is taken when both are negative 
+  {
+    if (s1 <= 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
+    if (s1 <= 0 && s2 > 0) { s = s1; goProj = kTRUE; }
+    if (s1 > 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
+  }
+	
+  if (goProj) 
+  {
+    *atFinal = helix->at( s );
+    *momentumAtFinal = helix->momentumAt( s, magField*tesla );
+  }
+  return goProj;
+}
+
+//------------------------------------------------------------------------------
+Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
                             StTrack* track, Double_t magField, Double_t radius, Int_t option)
 {
   StThreeVectorD Zero(0,0,0);
