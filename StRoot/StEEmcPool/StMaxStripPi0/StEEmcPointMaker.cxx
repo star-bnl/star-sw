@@ -38,6 +38,8 @@ StEEmcPointMaker::StEEmcPointMaker(const Char_t *name):StMaker(name)
 
     mTowerThreshold=0.;
     mFillStEvent=false;
+    mEnergyMode=1;
+    Int_t mLimit=10;
 
 }
 
@@ -97,7 +99,11 @@ Int_t StEEmcPointMaker::Make()
 
   /// do energy sharing
   //  shareEnergy(); //  <<<<<<< leads to negative point energies... rethink
-  shareEnergySimple();
+
+  if ( mEnergyMode == 1 )
+    shareEnergySimple();
+  else
+    shareEnergySmd();
 
 
   /// count the number of "related" points
@@ -581,6 +587,10 @@ Float_t StEEmcPointMaker::fracp2t( StEEmcPoint &p, StEEmcTower &t )
   Float_t xphi=(Float_t)t.phibin();
   Double_t X[]={xphi,xeta}; 
 
+  /// Get the eta/phi bin for the tower beneath the point
+  Float_t xeta0=(Float_t)p.tower(0).etabin();
+  Float_t xphi0=(Float_t)p.tower(0).phibin();
+
   /// Get the position of the point on the endcap.  If the point is off
   /// the endcap, we're hosed.  but just return 0.
   Int_t sec,sub,eta;
@@ -589,8 +599,9 @@ Float_t StEEmcPointMaker::fracp2t( StEEmcPoint &p, StEEmcTower &t )
   dphi/=2.0;
   deta/=2.0;
 
-  Float_t xetap=xeta+deta;
-  Float_t xphip=xphi+dphi;
+  /// Position of the point in fractional eta,phi space
+  Float_t xetap=xeta0+deta;
+  Float_t xphip=xphi0+dphi;
   Double_t P[]={xphip,xetap,1.0};
 
   return eeTowerFunction( X, P );
@@ -602,7 +613,7 @@ Float_t StEEmcPointMaker::fracp2t( StEEmcPoint &p, StEEmcTower &t )
 void StEEmcPointMaker::shareEnergySimple()
 {
 
-  static Int_t limit=1;
+  Int_t limit=mLimit; // algo quickly converges on energy
   Int_t count=0;
 
   while ( count++ < limit ) 
@@ -632,9 +643,11 @@ void StEEmcPointMaker::shareEnergySimple()
 
 	}
 
+
       /// Loop over all points and divide energy of each tower
       /// between the points according to the ratio of the energy
       /// of the point in the tower to the total predicted
+      
       for ( UInt_t i=0;i<mPoints.size();i++ )
 	{
 
@@ -665,6 +678,7 @@ void StEEmcPointMaker::shareEnergySimple()
 	}
 
     }
+
 
 
 
@@ -805,6 +819,56 @@ void StEEmcPointMaker::countRelatives()
 
 
 
+// ----------------------------------------------------------------------------
+void StEEmcPointMaker::shareEnergySmd()
+{
 
+  /// Sum of the smd-energy of all points which are in or adjacent
+  /// to tower with a given index.
+  Float_t sumw[720];for ( Int_t i=0;i<720;i++ )sumw[i]=0.;
+
+  for ( UInt_t ipoint=0;ipoint<mPoints.size();ipoint++ )
+    {
+
+
+      StEEmcPoint point=mPoints[ipoint];
+      StEEmcTower tower=point.tower(0);
+      sumw[tower.index()]+=point.energy();
+
+      for ( Int_t itow=0;itow<tower.numberOfNeighbors();itow++ )
+	{
+	  StEEmcTower t=tower.neighbor(itow);
+	  Int_t index=t.index();
+	  sumw[index]+=point.energy();
+	}
+     
+    }
+
+  /// Now loop over all points and divide energy of each tower in
+  /// proportion to the smd response
+
+  for ( UInt_t ipoint=0;ipoint<mPoints.size();ipoint++ )
+    {
+      
+      StEEmcPoint point=mPoints[ipoint]; // note reference
+      StEEmcTower tower = point.tower(0);
+      Float_t epoint = 0.;
+      Int_t index = tower.index();
+      epoint += tower.energy() * point.energy() / sumw[index];
+
+      for ( Int_t itow=0;itow<tower.numberOfNeighbors();itow++ )
+	{
+	  StEEmcTower t=tower.neighbor(itow);
+	  index = t.index();
+	  epoint += t.energy() * point.energy() / sumw[index];
+	}
+
+      //      point.energy( epoint );
+      mPoints[ipoint].energy(epoint);
+
+    }
+
+
+}
 
 
