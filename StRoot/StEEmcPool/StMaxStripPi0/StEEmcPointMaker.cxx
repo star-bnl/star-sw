@@ -39,7 +39,7 @@ StEEmcPointMaker::StEEmcPointMaker(const Char_t *name):StMaker(name)
     mTowerThreshold=0.;
     mFillStEvent=false;
     mEnergyMode=1;
-    Int_t mLimit=10;
+    mLimit=10;
 
 }
 
