@@ -251,7 +251,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	  if (!track) continue;
 	  StiKalmanTrackNode * inner = track->getInnerMostNode();
 	  double r = inner->getRefPosition();
-	  if (r>4.1 && r<50) find(track,kOutsideIn);
+//VP	  if (r>4.1 && r<50) find(track,kOutsideIn);
 	  StiTrackNode *extended = track->extendToVertex(vertex);
           if (extended) track->add(extended,kOutsideIn);
           track->reduce();
