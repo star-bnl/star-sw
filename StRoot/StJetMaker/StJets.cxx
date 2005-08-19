@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.7 2005/03/23 14:59:20 mmiller Exp $
+// $Id: StJets.cxx,v 1.8 2005/08/19 21:34:14 jeromel Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.8  2005/08/19 21:34:14  jeromel
+// TClonesArray to TObjArray safe change
+//
 // Revision 1.7  2005/03/23 14:59:20  mmiller
 // Update to add PythiaAssociator, correct EMC simulation path
 //
@@ -210,7 +213,7 @@ StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
     TrackVec vec;
     int size = mTrackToJetIndices->GetLast()+1;
 
-    TClonesArray& tracks = *( event->primaryTracks() );
+    TObjArray& tracks = *( event->primaryTracks() );
     Int_t maxNumTracks = tracks.GetLast()+1;
     
     for (int i=0; i<size; ++i) {
