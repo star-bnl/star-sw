@@ -23,13 +23,13 @@ towers and real eta/phi positions considering the collision vertex.
 
 #include "StarClassLibrary/StThreeVectorD.hh"
 #include "StarClassLibrary/StThreeVectorF.hh"
+#include "StPhysicalHelixD.hh"
 
 class StTrack;
 class StMcTrack;
 class StEmcGeom;
 class StVertex;
 class StMcVertex;
-class StPhysicalHelixD;
 
 class StEmcPosition : public TObject
 {
