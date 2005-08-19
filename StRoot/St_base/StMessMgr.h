@@ -173,6 +173,7 @@ class StMessMgr : public ostrstream {
         *   */
   virtual bool isDebugEnabled()  const;
   virtual bool isWarnEnabled()   const;
+  virtual bool isWarningEnabled() const;
   virtual bool isErrorEnabled()  const;
   virtual bool isInfoEnabled()   const;
   virtual bool isFatalEnabled()  const;
@@ -312,4 +313,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.6 2004/11/04 22:25:56 fine Exp $
+// $Id: StMessMgr.h,v 1.7 2005/08/19 21:26:52 fine Exp $
