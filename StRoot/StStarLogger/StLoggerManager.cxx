@@ -15,7 +15,9 @@
 #include "TROOT.h"
 #include "TSystem.h"
 #include "TString.h"
+#include "TError.h"
 #include "TEnv.h"
+#include "TVirtualMutex.h"
 #endif
 
 #ifndef  _NO_IMPLEMENTATION_
@@ -49,7 +51,100 @@ class  StMessage  {
 };
 
 const char *StLoggerManager::fgLevels = "FEWIDQ";
+#ifdef __ROOT__
+//    ROOT Error handling subrotuine
+//______________________________________________________________________________
+static void Log4cxx4RootErrorHandler(Int_t level, Bool_t abort, const char *location, const char *msg)
+{
+   // This is derived fron  the ROO "default rror handler function" TError.cxx
+   // The default error handler function. It prints the message on stderr and
+   // if abort is set it aborts the application.
 
+   
+ //  The level is defined by the current logger level
+   NDC::push("ROOT");
+         
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)
+if (gErrorIgnoreLevel == kUnset) {
+      
+       R__LOCKGUARD2(gErrorMutex);
+#else 
+       {       
+#endif       
+
+      gErrorIgnoreLevel = 0;
+      if (gEnv) {
+         TString level = gEnv->GetValue("Root.ErrorIgnoreLevel", "Info");
+         if (!level.CompareTo("Info",TString::kIgnoreCase))
+            gErrorIgnoreLevel = kInfo;
+         else if (!level.CompareTo("Warning",TString::kIgnoreCase))
+            gErrorIgnoreLevel = kWarning;
+         else if (!level.CompareTo("Error",TString::kIgnoreCase))
+            gErrorIgnoreLevel = kError;
+         else if (!level.CompareTo("Break",TString::kIgnoreCase))
+            gErrorIgnoreLevel = kBreak;
+         else if (!level.CompareTo("SysError",TString::kIgnoreCase))
+            gErrorIgnoreLevel = kSysError;
+         else if (!level.CompareTo("Fatal",TString::kIgnoreCase))
+            gErrorIgnoreLevel = kFatal;
+      }
+   }
+
+   if (level < gErrorIgnoreLevel)
+      return;
+
+
+    if (level >= kFatal)
+        LOG_FATAL << msg << endm;
+   else if (level >= kSysError)
+        LOG_FATAL << msg << endm;  
+   else if (level >= kBreak)
+        LOG_FATAL << msg << endm;  
+   else if (level >= kError)
+        LOG_ERROR << msg << endm;
+//   else if (level >= kWarning)
+//        LOG_WARN << msg << endm;
+   else if (level >= kInfo)
+        LOG_INFO << msg << endm;
+
+#if 0
+   const char *type = 0;
+
+   if (level >= kInfo)
+      type = "Info";
+   if (level >= kWarning)
+      type = "Warning";
+   if (level >= kError)
+      type = "Error";
+   if (level >= kBreak)
+      type = "\n *** Break ***";
+   if (level >= kSysError)
+      type = "SysError";
+   if (level >= kBreak && level < kSysError)
+      
+      DebugPrint("%s %s\n", type, msg);
+   else if (!location || strlen(location) == 0)
+      DebugPrint("%s: %s\n", type, msg);
+   else
+      DebugPrint("%s in <%s>: %s\n", type, location, msg);
+
+   fflush(stderr);
+#endif   
+   
+   if (abort) {
+#if 0      
+      DebugPrint("aborting\n");
+      fflush(stderr);
+#endif       
+      if (gSystem) {
+         gSystem->StackTrace();
+         gSystem->Abort();
+      } else
+         ::abort();
+   }
+   NDC::pop();
+}
+#endif
 //________________________________________
 std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
 // std::ostream& operator<<(std::ostream& os, StMessage* stm) {
@@ -186,6 +281,9 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
    ((StLoggerManager *)mInstance)->SetStarOptionFilter(filter);
     // if (gMessMgr) delete gMessMgr; gMessMgr = 0;
     gMessMgr  = mInstance;
+    // Set the ROOT ErrorHanlding via logger as well
+    // See: $ROOTSYS/include/TError.h
+    SetErrorHandler(Log4cxx4RootErrorHandler);
   }
   return mInstance;
 }
@@ -391,7 +489,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.13 2005/08/05 19:39:14 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.14 2005/08/19 21:01:05 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -713,8 +811,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.13 2005/08/05 19:39:14 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.14 2005/08/19 21:01:05 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.14  2005/08/19 21:01:05  fine
+// Manage the ROOT messages with the StarLogger
+//
 // Revision 1.13  2005/08/05 19:39:14  fine
 // Make use of the DOM Configurator instead of PropertyConfigurator
 //
