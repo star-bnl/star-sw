@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuRefMult.hh,v 1.6 2005/02/05 01:02:10 perev Exp $
+ * $Id: StuRefMult.hh,v 1.7 2005/08/19 03:50:58 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez Aug 2000
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StuRefMult.hh,v $
+ * Revision 1.7  2005/08/19 03:50:58  perev
+ * Marco request
+ *
  * Revision 1.6  2005/02/05 01:02:10  perev
  * test for zero momentum added
  *
@@ -52,13 +55,9 @@
 #define StuRefMult_hh
 
 #include "StEventTypes.h"
-inline unsigned int
-uncorrectedNumberOfNegativePrimaries(const StEvent& evt)
-{
-    const StPrimaryVertex* primVtx = evt.primaryVertex();
 
-    if (!primVtx) return 0;
-    
+inline unsigned int
+uncorrectedNumberOfNegativePrimaries(const StPrimaryVertex*& primVtx) {
     const StSPtrVecPrimaryTrack& tracks = primVtx->daughters();
     size_t countedTracks = 0;
     for (StSPtrVecPrimaryTrackConstIterator iter = tracks.begin(); iter != tracks.end(); iter++) {
@@ -73,13 +72,18 @@ uncorrectedNumberOfNegativePrimaries(const StEvent& evt)
     }
     return countedTracks;
 }
+
 inline unsigned int
-uncorrectedNumberOfPositivePrimaries(const StEvent& evt)
+uncorrectedNumberOfNegativePrimaries(const StEvent& evt, int vtx_id = 0)
 {
-    const StPrimaryVertex* primVtx = evt.primaryVertex();
+    const StPrimaryVertex* primVtx = evt.primaryVertex(vtx_id);
 
     if (!primVtx) return 0;
+    return uncorrectedNumberOfNegativePrimaries(primVtx);
+}
     
+inline unsigned int
+uncorrectedNumberOfPositivePrimaries(const StPrimaryVertex*& primVtx) {
     const StSPtrVecPrimaryTrack& tracks = primVtx->daughters();
     size_t countedTracks = 0;
     for (StSPtrVecPrimaryTrackConstIterator iter = tracks.begin(); iter != tracks.end(); iter++) {
@@ -94,13 +98,24 @@ uncorrectedNumberOfPositivePrimaries(const StEvent& evt)
     }
     return countedTracks;
 }
+
 inline unsigned int
-uncorrectedNumberOfPrimaries(const StEvent& evt)
+uncorrectedNumberOfPositivePrimaries(const StEvent& evt, int vtx_id = 0)
 {
-    const StPrimaryVertex* primVtx = evt.primaryVertex();
+    const StPrimaryVertex* primVtx = evt.primaryVertex(vtx_id);
+
+    if (!primVtx) return 0;
+    
+    return uncorrectedNumberOfPositivePrimaries(primVtx);
+}
+    
+inline unsigned int
+uncorrectedNumberOfPrimaries(const StEvent& evt, int vtx_id = 0)
+{
+    const StPrimaryVertex* primVtx = evt.primaryVertex(vtx_id);
     
     if (!primVtx) return 0;
     
-    return uncorrectedNumberOfPositivePrimaries(evt) + uncorrectedNumberOfNegativePrimaries(evt);
+    return uncorrectedNumberOfPositivePrimaries(primVtx) + uncorrectedNumberOfNegativePrimaries(primVtx);
 }
 #endif
