@@ -39,6 +39,8 @@ bool  StMessMgr::isDebugEnabled()  const{ return true; }
 //______________________________________________________________________________
 bool  StMessMgr::isWarnEnabled()   const{ return true; }
 //______________________________________________________________________________
+bool  StMessMgr::isWarningEnabled()   const{ return isWarnEnabled(); }
+//______________________________________________________________________________
 bool  StMessMgr::isErrorEnabled()  const{ return true; }
 //______________________________________________________________________________
 bool  StMessMgr::isInfoEnabled()   const{ return true; }
@@ -254,4 +256,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.5 2004/11/04 22:25:56 fine Exp $
+// $Id: StMessMgr.cxx,v 1.6 2005/08/19 21:26:52 fine Exp $
