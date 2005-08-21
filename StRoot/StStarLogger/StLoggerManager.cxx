@@ -314,7 +314,7 @@ StMessMgr& StLoggerManager::Message(const char* mess, const char* type,
 //   'E' - error
 //   'W' - warning
 //   'I' - info
-//   'D' - debugS
+//   'D' - debug
 //   'Q' - QA 
 //------------------------------
 //
@@ -489,7 +489,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.14 2005/08/19 21:01:05 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.15 2005/08/21 20:20:18 perev Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -811,8 +811,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.14 2005/08/19 21:01:05 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.15 2005/08/21 20:20:18 perev Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.15  2005/08/21 20:20:18  perev
+// fix typo in comment
+//
 // Revision 1.14  2005/08/19 21:01:05  fine
 // Manage the ROOT messages with the StarLogger
 //
