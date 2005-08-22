@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.29 2005/08/19 19:46:05 mvl Exp $
+ * $Id: StMuDst.h,v 1.30 2005/08/22 17:29:12 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -124,11 +124,11 @@ public:
   /// Temporary array to collect tracks from currect primary vertex
   static TObjArray *mCurrPrimaryTracks;
   /// Helper function to collect tracks for the current prim vertex
-  void collectVertexTracks();
+  static void collectVertexTracks();
   
 public:
   /// Set the index number of the current primary vertex (used by both primaryTracks() functions and for StMuEvent::refMult())
-  void setVertexIndex(Int_t vtx_id);
+  static void setVertexIndex(Int_t vtx_id);
   /// Get the index number of the current primary vertex 
   static Int_t currentVertexIndex() {return mCurrVertexId; }
   /// returns pointer to the n-th TClonesArray 
@@ -149,7 +149,7 @@ public:
   /// returns pointer to a list of tracks belonging to the selected primary vertex
   static TObjArray* primaryTracks() { return mCurrPrimaryTracks; } 
   /// returns pointer to the global tracks list
-  static TClonesArray* globalTracks() { return arrays[muGlobal]; }
+  static TObjArray* globalTracks() { return arrays[muGlobal]; }
   /// returns pointer to the other tracks list (all tracks that are not flagged as primary of global)
   static TClonesArray* otherTracks() { return arrays[muOther]; }
   /// returns pointer to the l3Tracks list
@@ -165,7 +165,9 @@ public:
 
   /// returns pointer to current StMuEvent (class holding the event wise information, e.g. event number, run number)
   static StMuEvent* event() { return (StMuEvent*)arrays[muEvent]->UncheckedAt(0); }
-  /// return pointer to i-th primary vertex 
+  /// return pointer to current primary vertex
+  static StMuPrimaryVertex* primaryVertex() { return (StMuPrimaryVertex*)arrays[muPrimaryVertex]->UncheckedAt(mCurrVertexId); }
+  /// return pointer to i-th primary vertex
   static StMuPrimaryVertex* primaryVertex(int i) { return (StMuPrimaryVertex*)arrays[muPrimaryVertex]->UncheckedAt(i); }
   /// return pointer to i-th primary track 
   static StMuTrack* primaryTracks(int i) { return (StMuTrack*)mCurrPrimaryTracks->UncheckedAt(i); }
@@ -317,6 +319,11 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.30  2005/08/22 17:29:12  mvl
+ * Made setVertexId static, changed globalTracks() to return
+ * TObjArray* (for similarity to primaryTracks.h)
+ * and added primaryVertex() to return current vertex
+ *
  * Revision 1.29  2005/08/19 19:46:05  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
