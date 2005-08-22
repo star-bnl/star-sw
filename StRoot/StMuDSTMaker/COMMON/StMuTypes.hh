@@ -12,6 +12,7 @@
 #include "StMuEmcPoint.h"
 #include "StMuEmcUtil.h"
 #include "StMuEvent.h"
+#include "StMuPrimaryVertex.h"
 #include "StMuFilter.h"
 #include "StMuHelix.h"
 #include "StMuL3EventSummary.h"
