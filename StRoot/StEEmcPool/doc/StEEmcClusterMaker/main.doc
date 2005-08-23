@@ -1,0 +1,47 @@
+/**
+
+\mainpage StEEmcClusterMaker - Produces clusters in all 6 layers  
+\author Jason C. Webb         
+\date    created 2005
+\version 1.0
+
+ \section steemcclustermaker_towers Tower, pre- and postshower algorithm
+
+ The clustering-algorithm used for tower clusters (as well as preshower 
+ and postshower clusters) is the 
+ <a href="http://www.star.bnl.gov/STAR/eemc/simulations/MineSweeper/">Minesweeper</a>
+ algorithm originally developed by Jan Balewski. 
+
+ \section steemcclustermaker_smd The SMD Algorithm
+
+ The SMD clustering algorithm starts by finding all strips which 
+ exceed a user-specified seed threshold.  These strips are sorted
+ by energy, and we work from the most energetic seed to the least
+ energetic seed.
+
+ Strips adjacent to the smd seed are added to the cluster and removed
+ from the pool of seed strips.  The number of adjacent strips added
+ is specified by the user in the setMaxExtent(max) method.
+
+ Once a cluster is identified, the seed threshold is raised in the
+ vicinity of that cluster.  For details, see buildSmdClusters().
+
+ \section steemcclustermaker_smd_cuts SMD Cluster Cuts
+
+ In order to form a cluster, we require a minimum of three smd strips.
+ Fewer strips suggests a MIP, although low-energy EM showers (<~ 1 GeV)
+ can deposit energy in only two consecutive smd strips.
+
+ The user may also specify the suppress() option for the cluster
+ maker.  When this option is used, the two smd strips adjacent to
+ the cluster are removed from the pool of smd seed strips.  This
+ reduces the effects of false cluster splitting, i.e. where a 
+ fluctuation in the size of the EM shower combined with the fixed
+ size of the cluster leads to the formation of a false smd cluster.
+  
+\subsection examplecreate Using StEEmcA2EMaker 
+
+\include runEEmcClusterMaker.C 
+
+*/
+
