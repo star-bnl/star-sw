@@ -1,0 +1,38 @@
+/**
+
+\mainpage StEEmcA2EMaker - Energy to ADC maker                    
+\author Jason C. Webb         
+\date    created 2005
+\version 1.0
+
+
+\section intro Introduction
+
+   This is a set of classes which provides a convienent way to represent EEMC data.
+The StEEmcA2EMaker is the core object, reading in events from either the MuDst
+or StEvent formats.  Support for EZtree branches of the MuDst may be added in
+the future.
+
+   StEEmcA2EMaker reads in the raw ADC values and accesses the databse for each
+detector element to lookup the pedestal and gain.  For every detector element
+(tower, pre/postshower, smd) the pedestal will be subtracted.  The raw
+and pedestal-subtracted ADC values will be saved into an StEEmcTower or
+StEEmcStrip object (as appropriate).  Detector elements which 
+
+1. Are not marked with a "fail" bit in the database, and
+
+2. Exceed a user-specified threshold above pedestal
+
+are corrected for gains.  For towers, we store the equivalent electromagnetic
+energy in GeV.  For preshower/postshower elements and SMD strips, we 
+record the energy deposited in GeV.  
+
+   Access to the reconstructed energy (or energy deposit) is through member functions
+of StEEmcA2EMaker. 
+  
+\subsection examplecreate Using StEEmcA2EMaker 
+
+\include runEEmcA2EMaker.C 
+
+*/
+
