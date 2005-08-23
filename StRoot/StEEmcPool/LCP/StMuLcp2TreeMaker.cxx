@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StMuLcp2TreeMaker.cxx,v 1.4 2004/01/06 17:25:26 balewski Exp $
+// $Id: StMuLcp2TreeMaker.cxx,v 1.5 2005/08/23 21:09:23 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -227,11 +227,12 @@ Int_t StMuLcp2TreeMaker::Make(){
   // scan for good globals, to match Olg's analysis
   {
     //    TClonesArray*  globTrA=dst->globalTracks();
-    TClonesArray*  globTrA=dst->primaryTracks();
+    TObjArray*  globTrA=dst->primaryTracks();
     //printf("tot Glob=%d\n", globTrA->GetEntries());
     int nTr=0;
     for (int i=0; i<globTrA->GetEntries();i++) {
-      StMuTrack* gTr = (StMuTrack*)globTrA->UncheckedAt(i);
+      TObject &oo=globTrA[i];
+      const StMuTrack* gTr = (StMuTrack*)(&oo);// perhaps it works? JB
       if(gTr->flag() <=0) continue;
       StThreeVectorF dca=gTr->dcaGlobal();
       if(!gTr->topologyMap().trackTpcOnly()) continue;
@@ -266,7 +267,8 @@ StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDC
   int lpMatch=0;
   float maxPt=XminPt;// init pT  
   for (int i=0; i<nTr; i++) {
-    StMuTrack* pTr = (StMuTrack*)primTrA->UncheckedAt(i);
+    TObject &oo=primTrA[i];
+    StMuTrack* pTr = (StMuTrack*)(&oo);// perhaps it works? JB
     if(pTr->flag() <=0) continue;
     if(!pTr->topologyMap().trackTpcOnly()) continue;
     if(pTr->globalTrack()->nHitsFit()>15 ) nTr0++; // was just: nTr0++;
@@ -364,6 +366,9 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
 
 
 // $Log: StMuLcp2TreeMaker.cxx,v $
+// Revision 1.5  2005/08/23 21:09:23  balewski
+// fix to follow muDst evolution
+//
 // Revision 1.4  2004/01/06 17:25:26  balewski
 // get LCP from Geant info
 //
