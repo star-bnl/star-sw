@@ -1,4 +1,4 @@
-// $Id: StMuLcp2TreeMaker.h,v 1.3 2003/11/12 18:43:41 balewski Exp $
+// $Id: StMuLcp2TreeMaker.h,v 1.4 2005/08/23 21:09:23 balewski Exp $
 
 #ifndef STAR_StMuLcp2TreeMaker
 #define STAR_StMuLcp2TreeMaker
@@ -21,7 +21,7 @@ class StMuDstMaker;
 class TFile;
 class TH1F;
 class TH2F;
-class TClonesArray;
+//class TClonesArray;
 class TTree;
 class StMuTrack;
 //class ExampleUsage;
@@ -31,7 +31,7 @@ class CtbMatching;
 class StMuLcp2TreeMaker : public StMaker {
  private:
   StMuDstMaker* mMuDstMaker;
-  TClonesArray* primTrA;
+  TObjArray* primTrA;
   //ExampleUsage *rejector;
   TFile *hfile;
   TH1F *h[16]; 
@@ -83,7 +83,7 @@ class StMuLcp2TreeMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.3 2003/11/12 18:43:41 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.4 2005/08/23 21:09:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -94,6 +94,9 @@ class StMuLcp2TreeMaker : public StMaker {
 
 
 // $Log: StMuLcp2TreeMaker.h,v $
+// Revision 1.4  2005/08/23 21:09:23  balewski
+// fix to follow muDst evolution
+//
 // Revision 1.3  2003/11/12 18:43:41  balewski
 // final for LCP paper
 //
