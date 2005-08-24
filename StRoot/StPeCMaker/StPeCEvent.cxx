@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.16 2003/11/25 01:54:26 meissner Exp $
+// $Id: StPeCEvent.cxx,v 1.17 2005/08/24 20:58:00 jeromel Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.17  2005/08/24 20:58:00  jeromel
+// TClone to TObj fix
+//
 // Revision 1.16  2003/11/25 01:54:26  meissner
 // correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
 //
@@ -300,7 +303,7 @@ Int_t StPeCEvent::fill(StMuDst *mudst) {
   // Int_t nGlobals = 0, SumQ = 0; 
   // Float_t SumPx = 0.0, SumPy = 0.0;  
   // float px, py;
-  TClonesArray* muTracks = 0;
+  TObjArray* muTracks = 0;
   StMuEvent* event = 0;
   StMuTrack *tp = 0;
   
