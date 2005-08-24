@@ -168,7 +168,7 @@ Int_t StBET4pMaker::Make()
 
     if (0) {
 	//First look at global tracks to remove MIP response from BTOWers
-	TClonesArray& gtracks = *(uDst->globalTracks());
+	TObjArray& gtracks = *(uDst->globalTracks());
 	int nglobals =  gtracks.GetLast()+1;
     
 	for(int t=0; t<nglobals; ++t)  {
