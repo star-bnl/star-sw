@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.27 2004/10/21 13:31:36 balewski Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.28 2005/08/24 14:17:12 jwebb Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -10,8 +10,8 @@
  * of towers with associated tracks (list of EEmcTTMatch objects)
  *
  * \author Piotr A. Zolnierczuk
- * $Date: 2004/10/21 13:31:36 $
- * $Revision: 1.27 $
+ * $Date: 2005/08/24 14:17:12 $
+ * $Revision: 1.28 $
  *
  * \section ttmakerremarks Remarks
  *
@@ -234,8 +234,9 @@ EEmcTTMMaker::Make(){
   }
   // ignore event too many tracks
   if( muEvent->ctbMultiplicity() > mMaxCTBsum ) return kStOK;
-  //
-  TClonesArray      *tracks = muDst->primaryTracks();   // fetch primary tracks
+  
+  // tracks are now in a TObjArray -- JCW 08/24/05 
+  TObjArray *tracks = muDst->primaryTracks(); // get primary tracks 
   if (!tracks) { 
     Warning("Make","%s: no tracks for this event",GetName());
     return kStErr;
@@ -476,6 +477,10 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.28  2005/08/24 14:17:12  jwebb
+// Primary tracks now in a TObjArray.  Code has been updated, and should
+// "just work".
+//
 // Revision 1.27  2004/10/21 13:31:36  balewski
 // to match new name of emcCollection in muDst
 //
