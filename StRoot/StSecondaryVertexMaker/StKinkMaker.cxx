@@ -89,7 +89,7 @@ Int_t StKinkMaker::Init(){
       "StKinkMaker::Init() : could not find tkf_tkfpar in database.");
     return kStErr;
   }
-  // AddRunCont(m_tkfpar);
+  AddRunCont(m_tkfpar);
 
   // m_Mode -> SetTrackerUsage()
   if      (m_Mode == 1) SetTrackerUsage(kTrackerUseTPT);
@@ -206,7 +206,7 @@ Int_t StKinkMaker::Make(){//called for each event
     if (myParentGeometry1->momentum().perp() < tkfpar->parentPtMin ) continue;
     cutPPt++;        
 
-    //### cut : impact parameter parent < 2.0 cm
+    //### cut : impact parameter parent
     mParentImpact = parentHelix.distance(mEventVertex);
     if (mParentImpact > tkfpar->impactCut ) continue;
     cutPImpact++;
@@ -228,7 +228,7 @@ Int_t StKinkMaker::Make(){//called for each event
       
       //### cut:daughter impact parameter >2cm
       mDaughterImpact = daughterHelix.distance(mEventVertex);
-      if (mDaughterImpact < tkfpar->impactCut ) continue;
+      if (mDaughterImpact < mParentImpact) continue;
                 
       //### cut:last_pt-first_pt < 14 (radial) and < 20 (z)
       if (fabs(myDaughterGeometry1->origin().perp() - myParentGeometry11->origin().perp())
@@ -429,7 +429,15 @@ Int_t StKinkMaker::Make(){//called for each event
 
  }//loop i .. parents
   // trackArray.Delete(); 
-  gMessMgr->Info() << " StKinkMaker:: Found " << kinkCandidate << " kink candidates " << endm;
+  gMessMgr->Info() << "StKinkMaker:: Found " << kinkCandidate << " kink candidates " << endm;
+
+  //========================================================================
+  // Look for kinks in which 2 different parents are sharing the same daughter
+  // mark the coresonding  kink vertices by changing the decayAngle value
+  // the new decay angle is [old*100+99]
+  // make the vertex found zombie ???!!!
+
+  if(kinkVertices.size()>1) Crop();
   return kStOK; 
 }
 	
@@ -592,3 +600,50 @@ void StKinkMaker::SetTrackerUsage(Int_t opt)
   gMessMgr->Info() << "StKinkMaker::SetTrackerUsage : Setting option to " << mUseTracker << endm;
 }
 		
+void StKinkMaker::Crop(){
+  // Loop over kinks and remove (makeZombie() )+ change the decay angle for those that have one daughter sharing two different parents
+  gMessMgr->Info()<<"StKinkMaker::Crop() : Starting ...."<<endm;
+  event = (StEvent *)GetInputDS("StEvent");
+  StSPtrVecKinkVertex& kinkVertices = event->kinkVertices();
+  StKinkVertex* kinkVtxPtr1 = 0;//new StKinkVertex();
+  StKinkVertex* kinkVtxPtr2 = 0;// new StKinkVertex();
+  StTrack* daughterTrk1 = 0;
+  StTrack* daughterTrk2 = 0;
+  int iKinks = kinkVertices.size();
+  ///////////////////////////////////////////////////////////////////////
+  // take pairs of consecutive kink vertices and check for same track key() for daugther
+  for(Int_t ikv1=0; ikv1<iKinks-1; ikv1++) {//first kink vertex from teh container
+    kinkVtxPtr1 = kinkVertices[ikv1];
+    daughterTrk1=kinkVtxPtr1->daughter();
+    //  gMessMgr->Info()<<"###########StKinkMaker:daughter1->key()"<<daughterTrk1->key()<<endm;                  
+    for(Int_t ikv2=ikv1+1; ikv2<iKinks; ikv2++) {//next kink vertex in the container
+
+      kinkVtxPtr2 = kinkVertices[ikv2]; 
+      daughterTrk2=kinkVtxPtr2->daughter();
+    //  gMessMgr->Info()<<"###########StKinkMaker: daughter2->key()"<<daughterTrk2->key()<<endm;  
+      if(daughterTrk1->key() == daughterTrk2->key()) {
+	float decAngKinkVtx1 = kinkVtxPtr1->decayAngle();
+        float decAngKinkVtx2 = kinkVtxPtr2->decayAngle(); 
+        kinkVtxPtr1->setDecayAngle(decAngKinkVtx1*100+99);
+	kinkVtxPtr2->setDecayAngle(decAngKinkVtx2*100+99);        
+      }
+
+    }//second vertex loop
+  }//first vtx loop
+
+  ///////////////////////////////////////////////////////////////////////
+  // make Zombie the kink vertices with problems
+ //  for(int ikv=iKinks-1;ikv>=0;ikv--){
+//     kinkVertex = kinkVertices[ikv];
+//     if( (kinkVertex->geantIdDaughter()%100) == 99){
+
+//       kinkVertex->makeZombie();
+//       //   gMessMgr->Info()<<"###########StKinkMaker: AFTER "<<kinkVertex->decayAngle()%100<<endm;  
+//       iKinks--;
+//     }
+//   }
+
+//   gMessMgr->Info()<<"StKinkMaker::Crop() : saving "<< iKinks << " Kink Candidates" <<endm;
+
+
+}
