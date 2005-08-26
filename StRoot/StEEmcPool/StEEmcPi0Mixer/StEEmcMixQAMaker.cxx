@@ -54,9 +54,11 @@ StEEmcMixQAMaker::StEEmcMixQAMaker(const Char_t *name):StMaker(name)
   maxPerEvent   = 100; // eg no cut
   maxPerCluster = 2;   // default number of points associated with 6-18 towers 
                        // which make up the pi0 candidate's energy
-
   zVertexMin=-150.0;
-  zVertexMax=  50.0;
+  zVertexMax= 150.0;
+
+  minZgg = 0.0;
+  maxZgg = 1.0;
 
   minTowerFrac = 0.0;
 
@@ -81,7 +83,7 @@ Int_t StEEmcMixQAMaker::Init()
     {
       TString name="hYXpair";name+=sec+1;
       TString title="Y vs X [cm] of stable pi0, sector ";title+=sec+1;
-      hYXpair.push_back(new TH2F(name,title,250,-250.,250.,250,-250.,250.));
+      hYXpair.push_back(new TH2F(name,title,125,-250.,250.,125,-250.,250.));
       name="hYXhigh";name+=sec+1;
       title="Y vs X [cm] of higher energy gamma, sector ";title+=sec+1;
       hYXhigh.push_back(new TH2F(name,title,250,-250.,250.,250,-250.,250.));
@@ -157,6 +159,7 @@ Int_t StEEmcMixQAMaker::Init()
       hname="hEnergyR";hname+=sec_name;hname+="-unbinned";
       htitle+="Energy, sector=";htitle+=sec+1;
       hEnergyR[sec].push_back(new TH1F(hname,htitle,50,0.,50.));
+
     }
 
 
@@ -242,10 +245,14 @@ Int_t StEEmcMixQAMaker::Make()
 
 	  /// Find pt bin
 	  Int_t bin = ptbin( pair );
-	  std::cout << "sector=" << sec << " mass=" << pair.mass() << " pt = " << pair.pt() << " bin=" << bin << std::endl;
+	  std::cout << "pair=" << i << " ptmin=" << mBins[bin] << " ptmax=" << mBins[bin+1] << " mass=" << pair.mass() << " zgg=" << pair.zgg() << std::endl;
 
-	  /// event not in a valid pt bin
-	  //	  if ( bin < 0 ) continue;
+	  /// 
+	  /// Kinematics cuts
+	  ///
+
+	  /// zgg cuts
+	  if ( pair.zgg() < minZgg || pair.zgg() > maxZgg ) continue;
 
 	  /// verify vertex cut
 	  if ( pair.vertex().Z() < zVertexMin ||
@@ -266,10 +273,27 @@ Int_t StEEmcMixQAMaker::Make()
 	      /// pt binned
 	      if ( bin>=0 ) hZvertexR[sec][bin] -> Fill( pair.vertex().Z() );
 	      if ( bin>=0 ) hZvertexR[ 12][bin] -> Fill( pair.vertex().Z() );
-	      hZvertexRall -> Fill( pair.vertex().Z() );
-	      
+	      hZvertexRall -> Fill( pair.vertex().Z() );	      
 	      hZvertexR[sec].back() -> Fill( pair.vertex().Z() ); // unbinned
 	      hZvertexR[ 12].back() -> Fill( pair.vertex().Z() ); // int sect
+
+	      if ( bin>= 0 ) hZggR[sec][bin] -> Fill( pair.zgg() );
+	      if ( bin>= 0 ) hZggR[ 12][bin] -> Fill( pair.zgg() );
+	      hZggR[sec].back() -> Fill( pair.zgg() );
+	      hZggR[ 12].back() -> Fill( pair.zgg() );
+
+	      if ( bin>= 0 ) hPhiggR[sec][bin] -> Fill( pair.phigg() );
+	      if ( bin>= 0 ) hPhiggR[ 12][bin] -> Fill( pair.phigg() );
+	      hPhiggR[sec].back() -> Fill( pair.phigg() );
+	      hPhiggR[ 12].back() -> Fill( pair.phigg() );
+
+	      if ( bin>= 0 ) hEnergyR[sec][bin] -> Fill( pair.energy() );
+	      if ( bin>= 0 ) hEnergyR[ 12][bin] -> Fill( pair.energy() );
+	      hEnergyR[sec].back() -> Fill( pair.energy() );
+	      hEnergyR[ 12].back() -> Fill( pair.energy() );
+
+
+						      
 
 	      /// pt integrated
 
