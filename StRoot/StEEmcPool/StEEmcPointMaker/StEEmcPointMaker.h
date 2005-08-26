@@ -41,6 +41,10 @@ class StEEmcPointMaker : public StMaker {
   /// a point.  Default is zero.
   void towerThreshold( Float_t t) { mTowerThreshold=t; }
 
+  /// Sets an smd matching requirement, maximum allowed
+  /// value of |Eu-Ev|/2(Eu+Ev)
+  void smdMatch( Float_t s ){ mSmdMatch = s; }
+
   /// Return vector of all points found in endcap 
   StEEmcPointVec_t points();
   /// Return number of points
@@ -125,8 +129,14 @@ class StEEmcPointMaker : public StMaker {
   /// energy response function
   Float_t  fracp2t( StEEmcPoint &p, StEEmcTower &t );
 
-  /// ...
+  /// Minimum tower threshold to consider a U,V pair of clusters a
+  /// valid smd point.  Cut removes U,V pairs from being considered
+  /// for association in findPoints().
   Float_t mTowerThreshold;
+  /// Maximum allowed value for |Eu-Ev|/2(Eu+Ev) to form a candidate smd
+  /// point in buildSmdPoints().  Cut is applied before U,V clusters are
+  /// matched in findPoints().
+  Float_t mSmdMatch;
   /// Energy seen by the algorithm
   Float_t mEseen;
   /// Option to fill StEvent
