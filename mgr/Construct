@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.149 2005/07/21 14:34:40 fisyak Exp $
+# $Id: Construct,v 1.150 2005/08/26 14:54:31 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -7,20 +7,21 @@ use ConsDefs;
 #my $xx=$ENV{ConstructLocation};
 #print "Path used for ConsDefs is $xx\n" unless ($param::quiet);
 
-#if ( -e "mgr/Conscript-standard"){
-#    $xx = " local";
+if ( -e "mgr/Conscript-standard"){
+    $xx = " local";
 #    $param::defaultConscript =
 #	"mgr/Conscript-standard";          # Local construction file.
-#} else {
-#    $xx = " default";
+} else {
+    $xx = " default";
 #    $param::defaultConscript =
 #	$STAR . "/mgr/Conscript-standard"; # Default construction file.
-#}   
-$param::defaultInclude   = $INCLUDE; $param::defaultInclude =~ s|^#||; print "param::defaultInclude = $param::defaultInclude\n";
+}   
+$param::defaultInclude = $INCLUDE; 
+$param::defaultInclude =~ s|^#||; print "param::defaultInclude = $param::defaultInclude\n";
 
-print "Repository used is $STAR\n" unless ($param::quiet);
+print "Repository used is $STAR\n"                         unless ($param::quiet);
 print "Use$xx Conscript from $param::defaultConscript \n"  unless ($param::quiet);
-print "Install includes\n" unless ($param::quiet);
+print "Install includes\n"                                 unless ($param::quiet);
 
 my $include = $param::defaultInclude; mkdir $include if ! -d $include;
 
@@ -87,6 +88,7 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
 #if ( defined( $ARG{FCPATH}  ) ){$FCPATH = $ARG{FCPATH};}
 ( my $DirPath = cwd() ) =~ s/\/$//g;
 print "DirPath    = $DirPath\n" unless ($param::quiet);
+$CWD = $DirPath;
 
 $repository = `echo $STAR`;
 chop($repository);
@@ -366,7 +368,7 @@ foreach $dir(@sysdirlist , @subdirs ) {
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
 print "Targets = @Targets\n" if $param::debug;
-Export qw( env INCLUDE LIB BIN BUILD OBJ);
+Export qw( env CWD INCLUDE LIB BIN BUILD OBJ);
 Default qw (   .  );
 print "Debug ".join(" ",@Targets)."\n"if ($param::debug);
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
