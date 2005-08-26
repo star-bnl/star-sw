@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.63 2005/08/05 20:13:43 posk Exp $
+// $Id: plot.C,v 1.64 2005/08/26 19:00:25 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,7 +21,8 @@
 #include "TMath.h" 
 #include <iostream.h>
 
-const    Int_t nHars    = 4;
+//const    Int_t nHars    = 4;
+const    Int_t nHars    = 2;
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
 Int_t    runNumber      = 0;
@@ -35,8 +36,8 @@ TCanvas* can;
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   gInterpreter->ProcessLine(".O0");
 
-  //Bool_t includeFtpc = kTRUE;
-  Bool_t includeFtpc = kFALSE;
+  Bool_t includeFtpc = kTRUE;
+  //Bool_t includeFtpc = kFALSE;
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -45,7 +46,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
-  gROOT->SetStyle("Pub");                              // set style
+  //gROOT->SetStyle("Pub");                              // set style
+  gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
   //gStyle->SetOptStat(kFALSE);
 
@@ -107,28 +109,28 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_PidMult",
     "Flow_Phi_FarEast_Sel",                      // first multi graph hist
     "Flow_Phi_Flat_FarEast_Sel",
-    "Flow_Phi_Weight_FarEast_Sel",
+    //"Flow_Phi_Weight_FarEast_Sel",
     "Flow_Phi_East_Sel",
     "Flow_Phi_Flat_East_Sel",
-    "Flow_Phi_Weight_East_Sel",
+    //"Flow_Phi_Weight_East_Sel",
     "Flow_Phi_West_Sel",
     "Flow_Phi_Flat_West_Sel",
-    "Flow_Phi_Weight_West_Sel",
+    //"Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FarWest_Sel",
     "Flow_Phi_Flat_FarWest_Sel",
-    "Flow_Phi_Weight_FarWest_Sel",
+    //"Flow_Phi_Weight_FarWest_Sel",
     "Flow_Phi_FtpcFarEast_Sel",
     "Flow_Phi_Flat_FtpcFarEast_Sel",
-    "Flow_Phi_Weight_FtpcFarEast_Sel",
+    //"Flow_Phi_Weight_FtpcFarEast_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
-    "Flow_Phi_Weight_FtpcEast_Sel",
+    //"Flow_Phi_Weight_FtpcEast_Sel",
     "Flow_Phi_FtpcWest_Sel",
     "Flow_Phi_Flat_FtpcWest_Sel",
-    "Flow_Phi_Weight_FtpcWest_Sel",
+    //"Flow_Phi_Weight_FtpcWest_Sel",
     "Flow_Phi_FtpcFarWest_Sel",
     "Flow_Phi_Flat_FtpcFarWest_Sel",
-    "Flow_Phi_Weight_FtpcFarWest_Sel",
+    //"Flow_Phi_Weight_FtpcFarWest_Sel",
     "Flow_Mul_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
@@ -247,10 +249,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   for (int n = 0; n < nNames; n++) {
     baseName[n]  = new char[35];
     shortName[n] = new char[35];
+    float etaMax;
     if (includeFtpc) {
       strcpy(baseName[n], baseName1[n]);
+      etaMax  =   4.5;
     } else {
       strcpy(baseName[n], baseName2[n]);
+      etaMax  =   1.5;
     }
     strcpy(shortName[n], baseName[n]);
     char* cp = strstr(shortName[n],"_Sel");
@@ -307,7 +312,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   // set constants
   float twopi   = 2. * TMath::Pi();
-  float etaMax  =   1.5;
   float phiMax  = twopi; 
   float Ycm     =   0.0;
   TString* histProjName = NULL;
@@ -778,6 +782,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.64  2005/08/26 19:00:25  posk
+// plot style back to bold
+//
 // Revision 1.63  2005/08/05 20:13:43  posk
 // Improved first guess for qDist fit.
 //
