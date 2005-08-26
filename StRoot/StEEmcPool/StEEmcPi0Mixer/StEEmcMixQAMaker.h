@@ -48,6 +48,9 @@ class StEEmcMixQAMaker : public StMaker
   Float_t zVertexMin;/**<-- minimum z vertex */
   Float_t zVertexMax;/**<-- maximum z vertex */
 
+  Float_t minZgg; /**<-- minimum zgg */
+  Float_t maxZgg; /**<-- maximum zgg */
+
   /// add a pT bin from the last boundary added to this value 
   void addBin(Float_t b){ assert(b>mBins.back()); mBins.push_back(b); }
 
