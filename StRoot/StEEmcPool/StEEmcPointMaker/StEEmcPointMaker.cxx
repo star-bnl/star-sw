@@ -65,6 +65,7 @@ StEEmcPointMaker::StEEmcPointMaker(const Char_t *name):StMaker(name)
     mFillStEvent=false;
     mEnergyMode=1;
     mLimit=10;
+    mSmdMatch = 999.0;
 
 }
 
@@ -191,7 +192,7 @@ StEEmcPointVec_t StEEmcPointMaker::buildSmdPoints( Int_t sector,
 	  /// tower, or a "fail" bit to be set and one of the
 	  /// other tower detectors to fire (pre/postshower).
 	  Bool_t good = false;
-	  if ( mEEanalysis->tower(sec,sub,eta).energy() > 0. ) 
+	  if ( mEEanalysis->tower(sec,sub,eta).energy() > mTowerThreshold ) 
 	    good=true;
 	  else if ( mEEanalysis->tower(sec,sub,eta).fail() ) 
 	    {
@@ -201,6 +202,12 @@ StEEmcPointVec_t StEEmcPointMaker::buildSmdPoints( Int_t sector,
 		    good=true;		
 		}
 	    }
+
+	  /// furthermore, we may require a degree of energy
+	  /// matching between the smd points
+	  Float_t uvdiff = TMath::Abs( uc.energy() - vc.energy() );
+	  Float_t uvavg  = 0.5 * ( uc.energy() + vc.energy() );
+	  if ( uvdiff > mSmdMatch * uvavg ) good = false;
 	  
 	  if ( good ) {
 
