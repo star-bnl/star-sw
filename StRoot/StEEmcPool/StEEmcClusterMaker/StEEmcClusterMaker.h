@@ -69,8 +69,9 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   /// fill the StEmcCollection.
   void setFillStEvent(){ mFillStEvent=true; }
 
-  /// Suppress cluster splitting
-  void suppress(){ mSuppress=true; } 
+  /// Suppress seeds in the n strips on either side of an 
+  /// already identified smd cluster.  Default = 0.
+  void suppress(Int_t n=2){ mSuppress=n; } 
 
   /// Skips over strips with "fail" bits set, if true
   void skip(Bool_t s=true){ mSkip=s; }
@@ -88,7 +89,7 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   Int_t mClusterId;
   
   /// Supress seeds adjacent to clusters
-  Bool_t mSuppress; 
+  Int_t mSuppress; 
   /// Skip strips if failbit set
   Bool_t mSkip;
   /// Loose cuts option

@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:58:45 $
- * $Revision: 1.1 $
+ * $Date: 2005/08/26 14:54:10 $
+ * $Revision: 1.2 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -72,7 +72,7 @@ StEEmcClusterMaker::StEEmcClusterMaker(const Char_t *name):StMaker(name)
   mFillStEvent = 0;
 
   /// default, do not supress seeds adjacent to clusters 
-  mSuppress = false; 
+  mSuppress = 0;
 
   mLoose=false;
   mSkip=true;
@@ -518,11 +518,17 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 		if ( s.index()<left ) left=s.index();
 		if ( s.index()>right ) right=s.index();
 	    }
-
+	    /*
 	    xseed[left-1]=true;
 	    xseed[left-2]=true;
 	    xseed[right+1]=true;
 	    xseed[right+2]=true;
+	    */
+	    for ( Int_t ii=0;ii<=mSuppress;ii++ )
+	      {
+		if ( left-ii>=0   ) xseed[left-ii] = true;
+		if ( right+ii<288 ) xseed[right+ii]= true;
+	      }
 	    
 	  }
 	  
