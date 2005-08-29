@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.12 2005/07/19 15:54:19 fisyak Exp $
+# $Id: Conscript,v 1.13 2005/08/29 23:03:36 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.13  2005/08/29 23:03:36  fisyak
+# add FPP flag for non pgi version
+#
 # Revision 1.12  2005/07/19 15:54:19  fisyak
 # Fix handle PGI version
 #
@@ -26,9 +29,11 @@ my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $FC     = $env->{FC};
 my $FCPATH = $env->{FCPATH};
 my $FFLAGS = $env->{FFLAGS};
-my $FPPFLAGS = $env->{FPPFLAGS};
+my $FPPFLAGS = $env->{FPPFLAGS}; #print "FPPFLAGS = $FPPFLAGS\n";
+$FPPFLAGS .= " " . $env->{Packages}->{CERNLIB}->{FPPFLAGS}; #print "FPPFLAGS = $FPPFLAGS\n";
 my $FEXTEND = $env->{FEXTEND};
-my $CPPFLAGS = $env->{CPPFLAGS};
+my $CPPFLAGS = $env->{CPPFLAGS}; #print "CPPFLAGS = $CPPFLAGS\n";
+$CPPFLAGS .= " " . $env->{Packages}->{CERNLIB}->{CPPFLAGS}; #print "CPPFLAGS = $CPPFLAGS\n";
 my $CPPPATH = $env->{CPPPATH};
 my $pkg  = "starsim"; 
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
@@ -46,19 +51,12 @@ $FPPFLAGS .= " -DCPP_TITLE_CH=\"'" . $pkg . "'\"";
 $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
 $FPPFLAGS .= " -DCPP_DATE=\"`date +%%y%%m%%d`\"";
 $FPPFLAGS .= " -DCPP_TIME=\"`date +%%H%%M`\"";
-$FPPFLAGS .= " " . $env->{CERNLIB_FPPFLAGS};
 $CPPFLAGS .= " -Df2cFortran";
 $CPPPATH  = "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
 $CPPFLAGS  = "-DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
-my $PGI = $env->{ENV}->{PGI};
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/) {
-#  $FPPFLAGS .= " -DCERNLIB_LINUX";
-  $CPPFLAGS .= " -DCERNLIB_LINUX";
-  if (! $PGI) {$CPPFLAGS .= " -DWithoutPGI"};
-}
 if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {
 #  $FPPFLAGS .= " -DCERNLIB_MYSQL -DCERNLIB_QMGLIBC";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
@@ -73,6 +71,8 @@ if ($FC =~ /pgf77/) {
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
 }
+my $PGI = $env->{ENV}->{PGI};
+if ($FC =~ /g77/ and ! $PGI) {$CPPFLAGS .= " -DWithoutPGI"};
 $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
 		    'FFLAGS'       => $FFLAGS,
