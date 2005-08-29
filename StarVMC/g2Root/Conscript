@@ -38,7 +38,7 @@ my $LD        = $env->{LD}; #!
 #if ($LD eq 'g++') {
 #  $LD = "gcc";
 #}
-#if ($LD eq $env->{CC} or $LD eq $env->{CXX}) {$LD = $FC;}
+if ($LD eq $env->{CC} or $LD eq $env->{CXX}) {$LD = $FC;}
 #if ($LD eq 'gcc') {$LDFLAGS = "-Wl,-Bstatic";}
 my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
 if ($FC eq 'g77') { 
