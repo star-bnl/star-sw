@@ -3,8 +3,8 @@ class Bichsel;
 Bichsel *m_Bichsel = 0;
 class BetheBloch;
 BetheBloch *m_BetheBloch = 0;
-const Int_t NF = 4;
-const Char_t *FNames[4] = {"BetheBloch","Girrf","Sirrf","B70"};
+const Int_t NF = 5;
+const Char_t *FNames[5] = {"BetheBloch","Girrf","Sirrf","B70M","B70"};
 //________________________________________________________________________________
 Double_t bfunc(Double_t *x,Double_t *par) {
   if (! m_BetheBloch) m_BetheBloch = new BetheBloch();
@@ -41,6 +41,17 @@ Double_t bichsel70(Double_t *x,Double_t *par) {
   //  Double_t Scale = BetheBloch::Sirrf(4.,par[2],k)/
   //    TMath::Exp(m_Bichsel->GetI70(TMath::Log10(4),par[3]));
   return 1e-6*m_Bichsel->GetI70(TMath::Log10(poverm),par[3]);
+}
+//________________________________________________________________________________
+Double_t bichsel70M(Double_t *x,Double_t *par) {
+  Double_t pove   = x[0];
+  Double_t poverm = pove/par[0];
+  Int_t type = par[1];
+  Int_t k = 0;
+  if (type == 3) k = 1;
+  //  Double_t Scale = BetheBloch::Sirrf(4.,par[2],k)/
+  //    TMath::Exp(m_Bichsel->GetI70(TMath::Log10(4),par[3]));
+  return 1e-6*m_Bichsel->GetI70M(TMath::Log10(poverm),par[3]);
 }
 //________________________________________________________________________________
 Double_t bichsel60(Double_t *x,Double_t *par) {
@@ -100,8 +111,8 @@ void bichselP() {
 	  func = new TF1(FunName,bichsel70,1.e-2,1.e3,5);
 	  func->SetLineColor(6);
 	}
-	else {if (TString(FNames[f]) == "B60") {
-	    func = new TF1(FunName,bichsel60,1.e-2,1.e3,5);
+	else {if (TString(FNames[f]) == "B70M") {
+	    func = new TF1(FunName,bichsel70M,1.e-2,1.e3,5);
 	    func->SetLineColor(7);
 	  }}}}
     if (! func) continue;
@@ -113,7 +124,7 @@ void bichselP() {
     else if (name == "Girrf") name += ": Geant3 prediction (for simulated data only)";
     else if (name == "Bz") name += ": Bichsel most probable";
     else if (name == "B70") name += ": Bichsel, 30 % truncation (for production P03h and after)";
-    else if (name == "B60") name += ": Bichsel, 40 % truncation";
+    else if (name == "B70M") name += ": Bichsel, 30 % truncation, with correction for saturation";
     leg->AddEntry(func,name.Data(),"L");
   }
   leg->Draw();
