@@ -2,20 +2,20 @@
 #include "St_g2t_Chair.h"
 #include "StarMCHits.h"
 ClassImp(St_g2t_Chair);
-ClassImp(St_g2t_ctf_hitC);
-ClassImp(St_g2t_emc_hitC);
-ClassImp(St_g2t_fst_hitC);
-ClassImp(St_g2t_fgt_hitC);
-ClassImp(St_g2t_ftp_hitC);
-ClassImp(St_g2t_ist_hitC);
-ClassImp(St_g2t_mwc_hitC);
-ClassImp(St_g2t_pix_hitC);
-ClassImp(St_g2t_pmd_hitC);
-ClassImp(St_g2t_rch_hitC);
-ClassImp(St_g2t_ssd_hitC);
-ClassImp(St_g2t_svt_hitC);
-ClassImp(St_g2t_tpc_hitC);
-ClassImp(St_g2t_vpd_hitC);
+ClassImp(St_g2t_ctf_hitC)
+ClassImp(St_g2t_emc_hitC)
+ClassImp(St_g2t_fst_hitC)
+ClassImp(St_g2t_fgt_hitC)
+ClassImp(St_g2t_ftp_hitC)
+ClassImp(St_g2t_ist_hitC)
+ClassImp(St_g2t_mwc_hitC)
+ClassImp(St_g2t_pix_hitC)
+ClassImp(St_g2t_pmd_hitC)
+ClassImp(St_g2t_rch_hitC)
+ClassImp(St_g2t_ssd_hitC)
+ClassImp(St_g2t_svt_hitC)
+ClassImp(St_g2t_tpc_hitC)
+ClassImp(St_g2t_vpd_hitC)
 Int_t St_g2t_Chair::fDebug = 0;
 #define G2TBookTrackHit(A) \
   static g2t_ ## A ## _hit_st g2t_ ## A ## _hit;\
