@@ -24,11 +24,30 @@ class TRSymMatrix : public TRArray {
   virtual ETRMatrixType GetMatrixType() const {return kSemiPosDefinedSymMatrix;}
   virtual Double_t Product(const TRVector& A,ETRMatrixCreatorsOp kop);
   virtual void    Print(Option_t *opt="") const;
+  Double_t       &operator()(Int_t i)                    {return TRArray::operator[](i);}
+  Double_t       &operator()(Int_t i,Int_t j);
+  Double_t       &operator()(Int_t i,Int_t j) const;
  protected:
   Int_t     fNrows;            // number of rows 
  public:
   ClassDef(TRSymMatrix,1)  // TRSymMatrix class (double precision)
 };
 ostream& operator<<(ostream& s,const TRSymMatrix &target);
+inline Double_t &TRSymMatrix::operator()(Int_t i,Int_t j){
+  if (j < 0 || j >= fNrows) {
+    ::Error("TRSymMatrix::operator()", "index j %d out of bounds (size: %d, this: 0x%08x)", 
+	    j, fNrows, this); 
+    j = 0;
+  }
+  if (i < 0 || i >= fNrows) {
+    ::Error("TRSymMatrix::operator()", "index i %d out of bounds (size: %d, this: 0x%08x)", 
+	    i, fNrows, this); 
+    i = 0;
+  }
+  Int_t m = i;
+  Int_t l = j;
+  if (i > j) {m = j; l = i;}
+  return TArrayD::operator[](m + (l+1)*l/2);
+}
 #endif
 
