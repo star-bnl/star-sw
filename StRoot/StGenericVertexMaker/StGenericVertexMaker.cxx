@@ -184,7 +184,7 @@ Int_t StGenericVertexMaker::Finish()
    out.Close();
   }
   
-  theFinder->Finish();  
+  if(theFinder) theFinder->Finish();  
   return  kStOK;
 }
 
