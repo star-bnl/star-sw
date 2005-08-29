@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.3 2005/07/28 19:46:01 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.4 2005/08/29 22:59:56 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.4  2005/08/29 22:59:56  fisyak
+ * Fix printouts
+ *
  * Revision 1.3  2005/07/28 19:46:01  fisyak
  * Add:
  * -  frindge magnetic field from P.Nevski extrapolation,
@@ -48,7 +51,7 @@
 
 A package of Bfield. Methods included to read the correct Bfield map and scale it 
 according to a scale factor provided during instantiation.
-
+The statement from W.Love is that the Bfield map accuracy FWHM = 1 G.
 <p>
 
 An enumerated argument provided at the time of instantiation selects
@@ -476,8 +479,8 @@ void StarMagField::ReadField( )
       exit(1) ;
     }
       
-  printf("StMagUtilities::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),fFactor);
-  printf("StMagUtilities::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
+  printf("StarMagField::ReadField  Reading  Magnetic Field  %s,  Scale factor = %f \n",comment.Data(),fFactor);
+  printf("StarMagField::ReadField  Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),fFactor*fRescale);
   
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
