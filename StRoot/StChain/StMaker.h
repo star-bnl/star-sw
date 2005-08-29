@@ -44,11 +44,10 @@ class StMaker : public TDataSet{
 public:
    typedef  enum {kNormal, kDebug} EDebugLevel;
    enum {kSTAFCV_BAD, kSTAFCV_OK, kSTAFCV_ERR=2, kSTAFCV_FATAL=3} EModule_return_Status;
-   enum {kInitBeg = BIT(1), kInitEnd = BIT(2)
-        ,kMakeBeg = BIT(3), kCleaBeg = BIT(4)
-        ,kFiniBeg = BIT(5), kFiniEnd = BIT(6)
-        ,kActive  = BIT(7)};
-
+   enum EMakerStatus {kInitBeg = 1, kInitEnd = 2,
+		      kMakeBeg = 3, kCleaBeg = 4,
+		      kFiniBeg = 5, kFiniEnd = 6,
+		       kActive  = 7};
 protected:
 
    TDataSet     *m_DataSet;             //!  
@@ -71,7 +70,7 @@ protected:
    TStopwatch      m_Timer;             //!Timer object
    TMemStat       *fMemStatMake;        //!TMemStat for Make
    TMemStat       *fMemStatClear;       //!TMemStat for Clear
-
+   Int_t           fStatus;             //!Maker status
    mutable StMessMgr      *fLogger;             // This object logger instance
    mutable StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
 
@@ -164,12 +163,16 @@ public:
    virtual TList       *GetMakeList() const ;
    virtual StMaker     *GetParentMaker () const;
    virtual StMaker     *GetMaker (const char *mkname);
-   virtual Bool_t       IsActive() {return TestBit(kActive);}
+   virtual Bool_t       IsActive() {return TestBIT(kActive);}
    virtual StMaker     *Maker (const char *mkname){return GetMaker (mkname);};
 
 
+   /// Maker Status Bits 
+   virtual void         SetBIT(EMakerStatus k)   {SETBIT(fStatus,k);}
+   virtual void         ResetBIT(EMakerStatus k) {CLRBIT(fStatus,k);}
+   virtual Bool_t       TestBIT(EMakerStatus k)  {return (Bool_t) ((fStatus & BIT(k)) != 0); }
    /// Setters for flags and switches
-   virtual void         SetActive(Bool_t k=kTRUE) {if(k) {SetBit(kActive);} else {ResetBit(kActive);}} 
+   virtual void         SetActive(Bool_t k=kTRUE) {if(k) SetBIT(kActive); else ResetBIT(kActive);} 
    virtual void         SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
    virtual void         SetDEBUG(Int_t l=1);                     // *MENU*
    virtual void         SetFlavor(const char *flav,const char *tabname);  //Set DB Flavor
@@ -208,7 +211,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.72 2005/01/26 23:02:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.73 2005/08/29 21:42:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -266,8 +269,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.72 2005/01/26 23:02:48 perev Exp $
+// $Id: StMaker.h,v 1.73 2005/08/29 21:42:21 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.73  2005/08/29 21:42:21  fisyak
+// switch from fBits to fStatus for StMaker control bits
+//
 // Revision 1.72  2005/01/26 23:02:48  perev
 // private ==> protected
 //

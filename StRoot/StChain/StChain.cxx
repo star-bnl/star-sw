@@ -70,18 +70,20 @@ void StChain::Clear(Option_t *option)
 {
  // StartTimer();
  StMaker::Clear(option);
+ // TCollection::EmptyGarbageCollection();
  // StopTimer();
 }
 //_____________________________________________________________________________
 Int_t StChain::Finish(){
  // StartTimer();
- if (TestBit(kFiniEnd)){ 
+ if (TestBIT(kFiniEnd)){ 
    Warning("Finish","chain %s.%s Finished twice, Ignore it"
            ,GetName(),ClassName());
    return 1;
  }
  Int_t res = StMaker::Finish();
- SetBit  (kFiniEnd);
+ // TCollection::EmptyGarbageCollection();
+ SetBIT  (kFiniEnd);
  // StopTimer();
  PrintTotalTime();
  return res;
@@ -147,8 +149,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.51 2005/08/12 21:27:31 perev Exp $
+// $Id: StChain.cxx,v 1.52 2005/08/29 21:42:20 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.52  2005/08/29 21:42:20  fisyak
+// switch from fBits to fStatus for StMaker control bits
+//
 // Revision 1.51  2005/08/12 21:27:31  perev
 // Remove call output in the case or read error
 //
