@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.12 2003/09/02 17:58:40 perev Exp $
+// $Id: StMagFMaker.cxx,v 1.13 2005/08/29 22:54:26 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.13  2005/08/29 22:54:26  fisyak
+// switch to StarMagField
+//
 // Revision 1.12  2003/09/02 17:58:40  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -47,57 +50,53 @@
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include <assert.h>
 #include <Stiostream.h>
 #include "StMagFMaker.h"
-#include "StBFChain.h"
 #include "St_geant_Maker/St_geant_Maker.h"
 #include "tables/St_MagFactor_Table.h"
+#include "StMessMgr.h" 
 #include "StMagF.h"
-#ifndef __CINT__
+#include "StarMagField.h"
 #include "StarCallf77.h"
-#define    agdetp_new	 F77_NAME(agdetpnew,AGDETPNEW)
-#define    agdetp_add	 F77_NAME(agdetpadd,AGDETPADD)
+#if 0
+#define    agdetpnew	 F77_NAME(agdetpnew,AGDETPNEW)
+#define    agdetpadd	 F77_NAME(agdetpadd,AGDETPADD)
 #define    mfldgeo	 F77_NAME(mfldgeo,MFLDGEO)
 R__EXTERN  "C" {
- void type_of_call     agdetp_new (DEFCHARD DEFCHARL);
- void type_of_call     agdetp_add (DEFCHARD, Float_t*, Int_t*  DEFCHARL);
+ void type_of_call     agdetpnew (DEFCHARD DEFCHARL);
+ void type_of_call     agdetpadd (DEFCHARD, Float_t*, Int_t*  DEFCHARL);
  void type_of_call     mfldgeo();
 }
 #endif
-
 ClassImp(StMagFMaker)
 ClassImp(StMagF)
   
   //_____________________________________________________________________________
-StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(kFALSE),fScale(1){}
+StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0){}
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::InitRun(Int_t RunNo){
-  StBFChain *chain = (StBFChain *) GetChain();
-  if (chain) {
-    if (chain->GetOption("FieldON"))            fScale = 1;
-    else {if (chain->GetOption("FieldOff"))     fScale = 2.e-5;
-    else {if (chain->GetOption("HalfField"))    fScale = 0.5;     
-    else {
-      if (!fMagFactor) {
-	TDataSet *RunLog = GetDataBase("RunLog");
-	fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
-      }
-      fScale = (*fMagFactor)[0].ScaleFactor;
-    }}}
-    if (chain->GetOption("ReverseField")) fScale = - fScale;
+  if (StarMagField::Instance() && StarMagField::Instance()->IsLocked()) {
+    // Passive mode, do not change scale factor
+    gMessMgr->Info() << "StMagFMaker::InitRun passive mode. Don't update Mag.Field from DB" << endm;
+    return kStOK;
   }
-  if (fMagF) cout << "Reset STAR magnetic field with scale factor " << fScale << endl;
-  else       cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
-  fMagF = kTRUE;
-  agdetp_new (PASSCHARD("MFLD") PASSCHARL("MFLD"));
-  Int_t One   = 1;
-  Float_t Three   = 3;
-  agdetp_add (PASSCHARD("MFLG(1).Version="),&Three,&One PASSCHARL("MFLG(1).Version="));
-  Float_t Field = 5*fScale;
-  agdetp_add (PASSCHARD("MFLG(1).Bfield="),&Field,&One PASSCHARL("MFLG(1).Bfield="));
-  mfldgeo();
+  if (!fMagFactor) {
+    TDataSet *RunLog = GetDataBase("RunLog");
+    fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
+  }
+  Float_t       fScale = (*fMagFactor)[0].ScaleFactor;
+  gMessMgr->Info() << "StMagFMaker::InitRun active mode ";
+  if (! StarMagField::Instance()) {
+    new StarMagField ( StarMagField::kMapped, fScale);
+    gMessMgr->Info() << "Initialize STAR magnetic field with scale factor " << fScale << endm;
+  }
+  else if (StarMagField::Instance()) {
+    StarMagField::Instance()->SetFactor(fScale);
+    gMessMgr->Info() << "Reset STAR magnetic field with scale factor " << fScale << endm;
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
