@@ -65,7 +65,7 @@ StEEmcPointMaker::StEEmcPointMaker(const Char_t *name):StMaker(name)
     mFillStEvent=false;
     mEnergyMode=1;
     mLimit=10;
-    mSmdMatch = 999.0;
+    mSmdMatch = 0.;
 
 }
 
@@ -205,9 +205,14 @@ StEEmcPointVec_t StEEmcPointMaker::buildSmdPoints( Int_t sector,
 
 	  /// furthermore, we may require a degree of energy
 	  /// matching between the smd points
+	  /*
 	  Float_t uvdiff = TMath::Abs( uc.energy() - vc.energy() );
 	  Float_t uvavg  = 0.5 * ( uc.energy() + vc.energy() );
 	  if ( uvdiff > mSmdMatch * uvavg ) good = false;
+	  */
+	  Float_t Eu=uc.energy();
+	  Float_t Ev=vc.energy();
+	  if ( Eu < mSmdMatch * Ev || Ev < mSmdMatch * Eu ) good=false;
 	  
 	  if ( good ) {
 
