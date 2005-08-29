@@ -8,10 +8,19 @@ my $ObjDir = "#" . $obj_dir;
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg = "pgf77VMC";
 my $SO_PKG = "lib" . $pkg . ".so";
-if ($env->{ENV}{PGI} and $env->{ENV}{PGILIB}) {
-  my @pgflibs = ($env->{ENV}->{PGILIB} . "/libpgftnrtl.a",
+my $FC = $env->{FC};
+my @pgflibs = ();
+if ($STAR_SYS =~ /\.*_icc80/) {
+  @pgflibs = ("/usr/intel80/ifc/lib/libifcoremt.a",
+	      "/usr/intel80/ifc/lib/libifcore.a");
+  Command $env [ $SO_PKG ], @pgflibs, qq(cd $obj_dir; ar -x %1; ar -x %2;  %SO %SOFLAGS %SoOUT%>:f *.o;);
+  
+} elsif ($env->{ENV}{PGI} and $env->{ENV}{PGILIB}) {
+  @pgflibs = ($env->{ENV}->{PGILIB} . "/libpgftnrtl.a",
 		 $env->{ENV}->{PGILIB} . "/libpgc.a",
 		 $env->{ENV}->{PGILIB} . "/libpgnod_prof.a");
   Command $env [ $SO_PKG ], @pgflibs, qq(cd $obj_dir; ar -x %1; ar -x %2; ar -x %3; %SO %SOFLAGS %SoOUT%>:f *.o;);
+}
+if ($#pgflibs > -1) {
   Install $env $LIB, $SO_PKG;
 }
