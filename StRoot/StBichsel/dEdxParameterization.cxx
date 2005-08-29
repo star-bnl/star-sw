@@ -14,7 +14,7 @@
 
 #define  PrP(A)  cout << "\t" << (#A) << " = \t" << ( A )
 
-ClassImp(dEdxParameterization);
+ClassImp(dEdxParameterization)
 //________________________________________________________________________________
 dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
 					   const Double_t MostProbableZShift,
@@ -70,7 +70,7 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag, Int_t keep3D,
   fI60Shift           *= dEdxMIP/GetI60(MIPBetaGamma10,1,0);
   fMostProbableZShift  = TMath::Log(fI70Shift);
   fAverageZShift       = fMostProbableZShift;
-};
+}
 //________________________________________________________________________________
 dEdxParameterization::~dEdxParameterization() { 
   SafeDelete(fP);  
@@ -81,7 +81,7 @@ dEdxParameterization::~dEdxParameterization() {
   SafeDelete(fRms);
   SafeDelete(fW);
   SafeDelete(fPhi);
-};    
+}    
 //________________________________________________________________________________
 Double_t    dEdxParameterization::Interpolation(Int_t Narg, TH1 *hist, Double_t *XYZ, Int_t kase) {
   assert(hist);
