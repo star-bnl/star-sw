@@ -16,8 +16,8 @@ my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
 print "+-+-+- STAR=".$env->{ENV}->{STAR}."\n"  if $param::debug;
 print "+-+-+- cwd=".$CWD."\n"                  if $param::debug;
-
-if ( ($IsRepo = (stat($env->{ENV}->{STAR}."/."))[1] == (stat($CWD."/."))[1] ) ){
+my $IsRepo = (stat($env->{ENV}->{STAR}."/."))[1] == (stat($CWD."/."))[1];
+if ( $IsRepo ){
     print "... REPOSITORY compilation  ...\n"  if $param::debug;
 } else {
     print "... USER area compilation   ...\n"  if $param::debug;
@@ -335,7 +335,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #    push @src, "gcinit.F";
   } elsif ( $Dir =~ m/StarVMC/ && $pkg =~ /ecal|Tpc|star/) {
     $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/include";
-  } elsif ( $pkg =~ m/^StBFChain$/ && ! $IsRepo) {# add documentation
+  } elsif ( $pkg =~ m/^StBFChain$/ && $IsRepo) {print "\t add documentation for $pkg\n";
     Command $env ["#StRoot/StBFChain/BFC.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP %< > %>);
     Command $env ["#StRoot/StBFChain/BFC2.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP -D__BFC2__ %< > %>);
     Command $env [qw(#StRoot/StBFChain/doc/index.html #StRoot/StBFChain/doc/StBFChain.cxx_doc)],
