@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.4 2005/06/17 18:36:11 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.5 2005/08/29 22:50:12 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -24,7 +24,7 @@ R__EXTERN  "C" {
   void type_of_call gufld(Float_t *x, Float_t *bf) {agufld(x,bf);}
   void type_of_call agdetp_add(DEFCHARD name, Float_t* a, Int_t* b DEFCHARL namel) {
     printf("StarVMCApplication agdetp_add(%s,%f,%i) is called\n",name,a[0],b[0]);
-    if (TString(name) == "MFLG(1).Bfield=") StarMagField::SetFactor(a[0]);
+    if (TString(name) == "MFLG(1).Bfield=") StarMagField::Instance()->SetFactor(a[0]);
   }
   void type_of_call agdetp_new(DEFCHARD name DEFCHARL namel) {
     printf("StarVMCApplication agdetp_new(%s) is called\n",name);
