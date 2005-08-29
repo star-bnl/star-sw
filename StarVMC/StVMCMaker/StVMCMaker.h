@@ -1,4 +1,4 @@
-// $Id: StVMCMaker.h,v 1.2 2005/06/09 20:14:40 fisyak Exp $
+// $Id: StVMCMaker.h,v 1.3 2005/08/29 22:49:31 fisyak Exp $
 
 #ifndef STAR_StVMCMaker
 #define STAR_StVMCMaker
@@ -34,7 +34,7 @@ class StVMCMaker : public StMaker {
 #endif
   virtual Int_t  FinishRun(Int_t runumber){return 0;}; 
   virtual void   SetDateTime(Int_t idat=0,Int_t itim=0);
-  virtual void   SetRunNo(Int_t m ) {fRunNo = m;}
+  virtual void   SetRunNo(Int_t m ) {fRunNo = m < 1 || m >= 1000000 ? 1 : m;}
   virtual void   Skip(Int_t nskip);
   virtual void   SetInputFile(const Char_t *fileName) {fInputFile = fileName;}
   const Char_t  *InputFile() const {return fInputFile.Data();}
@@ -53,7 +53,7 @@ class StVMCMaker : public StMaker {
   TString    fInputFile;
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.2 2005/06/09 20:14:40 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.3 2005/08/29 22:49:31 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -64,6 +64,9 @@ class StVMCMaker : public StMaker {
 
 
 // $Log: StVMCMaker.h,v $
+// Revision 1.3  2005/08/29 22:49:31  fisyak
+// add check for run no.
+//
 // Revision 1.2  2005/06/09 20:14:40  fisyak
 // Set Run number (=1 D)
 //
