@@ -38,6 +38,9 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   /// Maximum distance around seed strip to cluster smd strips  
   void setMaxExtent( Int_t m );  
 
+  /// Minimum number of strips to form a cluster
+  void setMinStrips( Int_t m ){ mMinStrips=m; }
+
   /// Factor above which an smd strip must exceed the minimum
   /// "floor" energy in order to be considered a seed... 
   void setSeedFloor( Float_t f=2.0 ); 
@@ -114,6 +117,8 @@ class StEEmcClusterMaker : public StMaker, public SlowSimUtil {
   Float_t mSeedEnergy[6];
   /// Maximum distance from SMD seed strips  
   Int_t mMaxExtent; 
+  /// Minimum number of smd strips to form seed
+  Int_t mMinStrips;
   /// blah...
   Float_t mSeedFloor; 
 
