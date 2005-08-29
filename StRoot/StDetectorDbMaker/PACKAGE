@@ -1,0 +1,5 @@
+# $Id $
+# package StDetectorDbMaker
+# author: 
+Library:libStDetectorDbMaker.so:LIBS +=   -lStChain
+#Library:libStDetectorDbMaker.so:LIBS +=   -lStChain
