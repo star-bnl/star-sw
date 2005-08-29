@@ -1,0 +1,6 @@
+# $Id $
+# package St_geant_Maker
+# author: 
+#Library:libSt_geant_Maker.so:LIBS +=   -lg2t  -lgen_Tables  -lgeometryNoField  -lgeometry  -lsim_Tables  -lStarMagField  -lStChain  -lSt_g2t
+Library:libSt_geant_Maker.so:LIBS +=   -lg2t  -lgen_Tables -lStDb_Tables -lsim_Tables -lStChain  -lSt_g2t -lStarMagField
+#Library:libSt_geant_Maker.so:LIBS +=   -lg2t  -lgeant3  -lgen_Tables  -lgeometryNoField  -lgeometry  -lminicern  -lsim_Tables  -lStarMagField  -lStChain  -lSt_g2t

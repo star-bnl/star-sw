@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.103 2005/06/30 22:47:40 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.104 2005/08/29 21:47:09 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.104  2005/08/29 21:47:09  fisyak
+// Changes for VMC
+//
 // Revision 1.103  2005/06/30 22:47:40  potekhin
 // Adding the previosuly missing g2t_igt_hit header.
 //
@@ -343,6 +346,7 @@
 #include "TMaterial.h"
 #include "TMixture.h"
 #include "TString.h"
+#include "TRegexp.h"
 #include "TInterpreter.h"
 #include "TClassTable.h"    
 #include "TVolume.h"
@@ -371,22 +375,28 @@
 #include "TGeoVolume.h"
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
+#include "TObjString.h"
 #ifdef __CC5__
 #include <TGiant3.h>
 #else
 #include "TGiant3.h"
 #endif
-#include "tables/St_g2t_run_Table.h"
+#if 0
+#include "StBFChain.h"
+#endif
+#include "StarMagField.h"
+//#include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_pythia_Table.h"
 #include "tables/St_g2t_gepart_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_geom_gdat_Table.h"
+#include "tables/St_MagFactor_Table.h"
 #include "tables/St_det_user_Table.h"
 #include "tables/St_det_hit_Table.h"
 #include "tables/St_det_path_Table.h"
-
+#include "tables/St_mfld_mflg_Table.h"
 #include "TDataSetIter.h"
 // event header:
 #include "g2t/St_g2t_get_event_Module.h"
@@ -418,7 +428,10 @@
 #include "g2t/St_g2t_vpd_Module.h"
 #include "g2t/St_g2t_pmd_Module.h"
 #include "g2t/St_g2t_bbc_Module.h"
+#include "St_db_Maker/St_db_Maker.h"
 #include "StarCallf77.h" 
+#include "StMagF.h"
+#include "StMessMgr.h"
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
 #define    agstroot	 F77_NAME(agstroot,AGSTROOT)
@@ -429,11 +442,13 @@
 #define    gfxzrm	 F77_NAME(gfxzrm,GFXZRM)
 #define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
 #define    agnzgete	 F77_NAME(agnzgete,AGNZGETE)
-#define    agstroot	 F77_NAME(agstroot,AGSTROOT)
 #define    rootmaptable  F77_NAME(rootmaptable,ROOTMAPTABLE)
 #define    agvolume      F77_NAME(agvolume,AGVOLUME)
 #define    agvoluma      F77_NAME(agvoluma,AGVOLUMA)
 #define    uhtoc         F77_NAME(uhtoc,UHTOC)
+#if 0
+#define    mfldgeo       F77_NAME(mfldgeo,MFLDGEO)
+#endif
 #define    agfdig0       F77_NAME(agfdig0,AGFDIG0)
 #define    agfdpar       F77_NAME(agfdpar,AGFDPAR)
 #if 0
@@ -452,8 +467,10 @@ R__EXTERN "C" {
   
   Int_t type_of_call g2t_volume_id (DEFCHARD, int* DEFCHARL);
   void type_of_call gfrotm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&);
-  void type_of_call gfxzrm   (Int_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,Float_t&,
-			      Float_t&,Float_t&,Float_t&,Float_t&);
+  void type_of_call gfxzrm   (Int_t &NLEV_0,Float_t &X,Float_t &Y,Float_t &Z,
+			      Float_t &TET1,Float_t &PHI1,
+			      Float_t &TET2,Float_t &PHI2,
+			      Float_t &TET3,Float_t &PHI3,Float_t &TYPE);
   void type_of_call agnzgete (Int_t &ILK,Int_t &IDE,
 			      Int_t &NPART,Int_t &IRUN,Int_t &IEVT,DEFCHARD CGNAM,
 			      Float_t *VERT,Int_t &IWTFL,Float_t &WEIGH DEFCHARL);
@@ -480,6 +497,9 @@ R__EXTERN "C" {
 #endif
   Int_t type_of_call agvoluma(void*,void*,void*,void*,void*,void*,void*,void*,void*,void*);
   void type_of_call uhtoc(Int_t&,Int_t &,DEFCHARD,Int_t& DEFCHARL);
+#if 0
+  void type_of_call mfldgeo();
+#endif
   int  type_of_call agfdig0 (const char*,const char*,int,int);
   void type_of_call agfdpar (float &hits,const char *chit, float &alim, float &blim, float &bin, int);
 #if 0
@@ -506,39 +526,26 @@ typedef struct {
 typedef struct {
   Float_t lseen, lstyle, lwidth, lcolor, lfill;
 } attributes;
-extern "C" 
-{
-}
+
+static Int_t ifz = 0;
+static Int_t ifn = 0;
+
 ClassImp(St_geant_Maker)
   
-  TDataSet *St_geant_Maker::fgGeom = 0;
+TDataSet *St_geant_Maker::fgGeom = 0;
 TGiant3  *St_geant_Maker::geant3 = 0;
+St_geant_Maker *St_geant_Maker::fgGeantMk = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
   StMaker(name), 
   fNwGeant(nwgeant), fNwPaw(nwpaw), fIwType(iwtype),
   fVolume(0), fTopGeoVolume(0), 
-  fInputFile(""), fEvtHddr(0)
+  fInputFile(""), fEvtHddr(0), mInitialization(""), mFieldOpt("")
 {
+  fgGeantMk = this;
   fgGeom  = new TDataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
-  // Initialize GEANT
-  
-  if (! geant3) {
-    PrintInfo();
-    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
-    assert(geant3);
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-    csets  = (Gcsets_t *) geant3->Gcsets();
-  }
 }
 //_____________________________________________________________________________
 TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
@@ -566,15 +573,125 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
-  
-  if (m_Mode != 1) { // Mixer mode == 1 - do not modify EvtHddr
+  // Initialize GEANT
+  if (! geant3) {
+    PrintInfo();
+    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+    assert(geant3);
+    cquest = (Quest_t  *) geant3->Quest();
+    clink  = (Gclink_t *) geant3->Gclink();
+    cflag  = (Gcflag_t *) geant3->Gcflag();
+    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+    cnum   = (Gcnum_t  *) geant3->Gcnum();
+    z_iq   = (Int_t    *) geant3->Iq();
+    z_lq   = (Int_t    *) geant3->Lq();
+    z_q    = (Float_t  *) geant3->Q();
+    csets  = (Gcsets_t *) geant3->Gcsets();
+  }
+  TString InputFile(fInputFile);
+  if (mInitialization != "") {
+    Do(mInitialization.Data()); 
+  }
+  if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
+    //                                       -"-          .nt then add "user/input user" 
+    TObjArray *obj = InputFile.Tokenize(" ");
+    TIter next(obj);
+    TObjString *o = (TObjString *) obj->First();
+    TString file(o->GetString());
+    delete obj;
+    TString kuip("");
+    if (file.Contains(".fz")) {kuip = "gfile p ";         kuip += file; ifz = 1;}
+    if (file.Contains(".nt")) {
+      kuip = "user/input user "; kuip += file; ifn = 1;
+    }
+    if (kuip != "") {
+      Do(kuip.Data()); 
+      if (cquest->iquest[0] > kStOK) {
+	gMessMgr->Info() << "St_geant_Maker::Init File " << file.Data() << " cannot be opened. Exit!" << endm;
+	gSystem->Exit(1);
+      }
+      InputFile.ReplaceAll(file.Data(),"");
+      if (InputFile != "") Do(InputFile.Data());
+      InputFile = "";
+    }
+  }
+  if (! ifz) Geometry();
+  Do("gclose all");
+  Agstroot();
+  m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
+  if (m_geom_gdat)  {
+    AddRunco(new St_geom_gdat(*m_geom_gdat));
+  }
+  BookHist();   // Create Histograms    
+  if (m_Mode%100 != 1 &&  IsActive() ) { // Mixer mode == 1 or reco - do not modify EvtHddr and MagF
     fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     if (!fEvtHddr) {                            // Standalone run
       fEvtHddr = new StEvtHddr(m_ConstSet);
-      SetOutput(fEvtHddr);	                //Declare this "EvtHddr" for output
+      fEvtHddr->SetRunNumber(1);                // to have run positive and < 1000000 (to avoid mess with RunLog)
+      SetOutput(fEvtHddr);	              //Declare this "EvtHddr" for output
+    }
+    if (! ifz ) {
+      // if Simulation is read from zebra file set Scale to value got from the file
+      // if Simulation is done on fly use mFieldOpt field option set by StBFChain
+      // if data use Scale for Db unless it has been reset by StBFChain field option (in IsActive)
+      if (! m_geom_gdat) {
+	m_geom_gdat = new St_geom_gdat("geom_gdat",1);
+	AddRunco(m_geom_gdat);
+	geom_gdat_st row = {{0,0}, 1, "gstar"};
+	m_geom_gdat->AddAt(&row);
+      }
+    } else {// set mag. field from already simulated data, only 5 option allowed
+      Float_t mfscale = 1; 
+      if (m_geom_gdat)  {
+	geom_gdat_st *gdat = m_geom_gdat->GetTable();
+	mfscale = gdat->mfscale;
+	gMessMgr->Info() << "St_geant_Maker::Init geom_gdata is found in fz-file ! ";
+      } else {
+	St_mfld_mflg *mfld_mflg = (St_mfld_mflg *) Find(".const/geom/mfld_mflg");
+	if (mfld_mflg) {
+	  gMessMgr->Info() << "St_geant_Maker::Init mfld_mflg is found in fz-file ! ";
+	  mfld_mflg_st *s = mfld_mflg->GetTable();
+	  mfscale = s->bfield/5.0;
+	} else 
+	  gMessMgr->Info() << "St_geant_Maker::Init geom_gdata is missing in fz-file ! Use default mag.field scale factor ";
+      }
+      gMessMgr->Info()  << "St_geant_Maker::Init mfscale = " << mfscale		       << endm;
+      struct Field_t {
+	Char_t *name;
+	Float_t scale;
+      };
+      Field_t FieldOptions[5] = {
+	{"FullMagFNegative", -1.0},
+	{"FullMagFPositive",  1.0},
+	{"HalfMagFNegative", -0.5},
+	{"HalfMagFPositive",  0.5},
+	{"ZeroMagF",          0.0}
+      };
+      TString FieldOption("");
+      for (Int_t i = 0; i < 5; i++) {
+	if (TMath::Abs(mfscale - FieldOptions[i].scale) < 2.e-2) {
+	  FieldOption = FieldOptions[i].name;
+	  break;
+	}
+      }
+      if (FieldOption != "") {
+	SetFlavor(FieldOption.Data(),        "MagFactor");
+	gMessMgr->QAInfo() << "St_geant_Maker::Init  SetFlavor(\"" << FieldOption.Data() 
+			   << "\",\"MagFactor\")" << endm;
+      }
+      if (! StarMagField::Instance()) {
+	new StarMagField ( StarMagField::kMapped, mfscale, kTRUE);
+	gMessMgr->QAInfo() << "St_geant_Maker::Init  Create StarMagField and lock it"
+			   << endm;
+      }
+      else {
+	StarMagField::Instance()->SetFactor(mfscale);
+	StarMagField::Instance()->SetLock();
+	gMessMgr->QAInfo() << "St_geant_Maker::Init  Reset StarMagField and lock it"
+			   << endm;
+      }
     }
   }
-  BookHist();   // Create Histograms    
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -585,7 +702,6 @@ Int_t St_geant_Maker::Make()
   Float_t  vert[4],weigh;
   
   int iRes = 0; if(iRes) {/*touch*/};
-  
   Do("trig");
   
   // check EoF
@@ -609,6 +725,10 @@ Int_t St_geant_Maker::Make()
       fEvtHddr->SetEventNumber(*(z_iq+clink->jhead+2));
     }
     if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
+    fEvtHddr->SetProdDateTime();
+#if 0
+    SetDateTime();
+#endif
   }
   if (npart>0) {  
     St_particle  *particle   = new St_particle("particle",npart);
@@ -636,20 +756,22 @@ Int_t St_geant_Maker::Make()
       // 	fEvtHddr->SetAEast(east);
       
       // Update the run number, if necessary
-      if (fEvtHddr->GetRunNumber()!=p->vhep[0]) fEvtHddr->SetRunNumber((int)p->vhep[0]);
+      if ( m_Mode%100 != 1 && 
+	   p->vhep[0] > 0 && p->vhep[0] < 10000 && 
+	   fEvtHddr->GetRunNumber() != p->vhep[0]) {
+	fEvtHddr->SetRunNumber((int)p->vhep[0]);
       
-      fEvtHddr->SetEventNumber((int)p->vhep[1]);
-      fEvtHddr->SetProdDateTime();
-      
-      Int_t id = p->jdahep[0];
-      Int_t it = p->jdahep[1];
-      
-      if (id <=        0) id = 19991231;
-      if (id <= 19000000) id +=19000000;
-      if (id >= 20500000) id = 19991231;
-      if (it <         0) it = 235959;
-      if (it >    246060) it = 235959;
-      fEvtHddr->SetDateTime(id,it);
+	fEvtHddr->SetEventNumber((int)p->vhep[1]);
+	Int_t id = p->jdahep[0];
+	Int_t it = p->jdahep[1];
+	
+	if (id <=        0) id = 19991231;
+	if (id <= 19000000) id +=19000000;
+	if (id >= 20500000) id = 19991231;
+	if (it <         0) it = 235959;
+	if (it >    246060) it = 235959;
+	fEvtHddr->SetDateTime(id,it);
+      }
     }
   }
   
@@ -680,7 +802,7 @@ Int_t St_geant_Maker::Make()
   // Note that we treat the SSD (or SISD as we call it in geo) on
   // the same basis as the SVT, which applies since we decoupled
   // the two detectors
-  
+  nhits = 0;
   geant3->Gfnhit("SVTH","SVTD", nhits);
   if (nhits>0) { 
     St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
@@ -690,6 +812,7 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
 
+  nhits = 0;
   geant3->Gfnhit("SISH","SFSD", nhits);
   if (nhits>0) { 
     St_g2t_ssd_hit *g2t_ssd_hit = new St_g2t_ssd_hit("g2t_ssd_hit",nhits);
@@ -700,6 +823,7 @@ Int_t St_geant_Maker::Make()
   }
 
   
+  nhits = 0;
   geant3->Gfnhit("PIXH","PLAC", nhits);
   
   if (nhits>0) { 
@@ -710,6 +834,7 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("ISTH","IBSS", nhits);
   
   if (nhits>0) { 
@@ -730,6 +855,7 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
 
+  nhits = 0;
   geant3->Gfnhit("FSTH","FDSW", nhits);
   
   if (nhits>0) { 
@@ -740,7 +866,8 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
 
- geant3->Gfnhit("FGTH","FGSC", nhits);
+  nhits = 0;
+  geant3->Gfnhit("FGTH","FGSC", nhits);
   
   if (nhits>0) { 
     St_g2t_fgt_hit *g2t_fgt_hit = new St_g2t_fgt_hit("g2t_fgt_hit",nhits);
@@ -760,6 +887,7 @@ Int_t St_geant_Maker::Make()
   }
   
   
+  nhits = 0;
   geant3->Gfnhit("TPCH","TMSE", nhits);
   if (nhits>0) { 
     St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
@@ -768,6 +896,7 @@ Int_t St_geant_Maker::Make()
     //	     ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("FTPH","FSEC", nhits);
   if (nhits>0){
     St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
@@ -776,6 +905,7 @@ Int_t St_geant_Maker::Make()
     //           ===============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("BTOH","BXSA", nhits);
   if (nhits>0) { 
     St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
@@ -784,6 +914,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("BTOH","BCSB", nhits);
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
@@ -792,6 +923,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("BTOH","BRSG", nhits);
   if (nhits>0) {
     St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
@@ -801,6 +933,7 @@ Int_t St_geant_Maker::Make()
   }
   
   
+  nhit1 = nhit2 = nhit3 = nhit4 = 0;
   geant3->Gfnhit("RICH","RGAP", nhit1);
   geant3->Gfnhit("RICH","RCSI", nhit2);
   geant3->Gfnhit("RICH","FREO", nhit3);
@@ -815,6 +948,7 @@ Int_t St_geant_Maker::Make()
   }
   
   //---------------------- calorimeters -------------------------//
+  nhits = 0;
   geant3->Gfnhit("CALH","CSUP", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
@@ -823,6 +957,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("CALH","CSDA", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
@@ -831,6 +966,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhit1 = nhit2 = nhit3 = 0;
   geant3->Gfnhit("ECAH","ESCI", nhit1);
   geant3->Gfnhit("ECAH","ELGR", nhit2);
   geant3->Gfnhit("ECAH","EPCT", nhit3);
@@ -841,7 +977,7 @@ Int_t St_geant_Maker::Make()
     iRes = g2t_eem(g2t_track,g2t_eem_hit); if (Debug() > 1) g2t_eem_hit->Print(0,10);
     //           ==============================
   }
-  
+  nhit1 = nhit2 = 0;
   geant3->Gfnhit("ECAH","EXSE", nhit1);
   geant3->Gfnhit("ECAH","EHMS", nhit2);
   nhits = nhit1+nhit2;
@@ -852,6 +988,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("VPDH","VRAD", nhits);
   if (nhits>0) {
     St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
@@ -860,6 +997,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("PHMH","PDGS", nhits);
   if (nhits>0) {
     St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
@@ -868,6 +1006,7 @@ Int_t St_geant_Maker::Make()
     //           ==============================
   }
   
+  nhits = 0;
   geant3->Gfnhit("ZCAH","QSCI", nhits);
   if (nhits>0) {
     St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
@@ -877,6 +1016,7 @@ Int_t St_geant_Maker::Make()
   }
   
   
+  nhits = 0;
   geant3->Gfnhit("BBCH","BPOL", nhits);
   if (nhits>0) 
     {
@@ -903,19 +1043,22 @@ Int_t St_geant_Maker::Make()
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
+#if 0
   if (strlen(option)) Do (option); 
   Geometry();
   Do("gclose all");
   Agstroot();
+#else
+  mInitialization = option; 
+#endif
 }
 //_____________________________________________________________________________
-void St_geant_Maker::Draw(const char*)
+void St_geant_Maker::Draw(const char* opt)
 { 
   Int_t two = 2;
   Int_t zero = 0;
   Int_t one = 1;
   Char_t *path = " ";
-  Char_t *opt = "IN";
   Dzddiv (two,zero,path,opt,one,zero,one,one);
 }
 //_____________________________________________________________________________
@@ -1324,19 +1467,6 @@ void  St_geant_Maker::SetDebug(Int_t dbl)
 Int_t St_geant_Maker::SetInputFile(const char *file)
 {
   fInputFile = file;
-  TString kuip("gfile p "); kuip += fInputFile;
-  Do((const char*)kuip); 
-  if (cquest->iquest[0]) {return kStEOF;}
-  Do("gclose all");
-  Agstroot();
-  
-  St_geom_gdat *gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
-  
-  if(gdat) {
-    St_geom_gdat *gdat_copy = new St_geom_gdat(*gdat);
-    AddRunco(gdat_copy);
-  }
-  
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -1382,9 +1512,15 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
   if (table) {fgGeom->Add(table); table->SetBit(kIsNotOwn);}
 #endif
 #endif
-  else       cout << "Dictionary for table :" << t.Data() 
-                  << " has not been defined yet. Skip it" 
-                  << endl;
+  if (fgGeantMk->Debug() > 1) {
+    if (table) {
+      Int_t N = table->GetNRows(); 
+      if (N > 10) N = 10; table->Print(0,N);
+    }
+    else gMessMgr->Debug() << "St_geant_Maker::Dictionary for table :" << t.Data() 
+			   << " has not been defined yet. Skip it" 
+			   << endm;
+  }
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::G2t_volume_id(const Char_t *name, Int_t *numbv){
@@ -1433,7 +1569,7 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 
 void St_geant_Maker::BookHist(){
   
-  cout << "***********  St_geant_Maker - bookhist!!!! *********" << endl;
+  gMessMgr->Info() << "St_geant_Maker::***********  St_geant_Maker - bookhist!!!! *********" << endm;
   
   m_histvx =0;
   m_histvy =0;
@@ -1457,32 +1593,28 @@ void St_geant_Maker::FillHist(){
   // get geant event vertex
   TDataSet *geant = GetDataSet("geant"); 
   if( !geant ){
-    cout << " No pointer to GEANT DataSet \n" << endl; 
+    gMessMgr->Info() << "St_geant_Maker:: No pointer to GEANT DataSet \n" << endm; 
   }
   
   St_g2t_vertex *geantVertex=(St_g2t_vertex *) geant->Find("g2t_vertex"); 
   if( !geantVertex ){
-    cout << " NULL pointer to St_g2t_vertex table\n"<< endl;
+    gMessMgr->Info() << "St_geant_Maker:: NULL pointer to St_g2t_vertex table\n"<< endm;
   }
   
   if( geantVertex->GetNRows()<=0) { 
-    cout << " empty St_g2t_vertex table\n" << endl; 
+    gMessMgr->Info() << "St_geant_Maker:: empty St_g2t_vertex table\n" << endm; 
   } 
   
   g2t_vertex_st *gvt=geantVertex->GetTable();
   
-  cout << " geant event vertex: " << 
-    gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endl;
+  gMessMgr->Info() << "St_geant_Maker:: geant event vertex: " << 
+    gvt->ge_x[0] << "\t" << gvt->ge_x[1] << "\t" << gvt->ge_x[2] << endm;
   
   m_histvx->Fill(gvt->ge_x[0]);
   m_histvy->Fill(gvt->ge_x[1]);
   m_histvz->Fill(gvt->ge_x[2]);
 }
 //________________________________________________________________________________
-void St_geant_Maker::SetNwGEANT(Int_t n){cout << "St_geant_Maker::SetNwGEANT is obsolete now\n";}
-void St_geant_Maker::SetNwPAW(Int_t n){cout << "St_geant_Maker::SetNwPAW is obsolete now\n";}
-void St_geant_Maker::SetIwtype(Int_t n){cout << "St_geant_Maker::SetIwtype is obsolete now\n";}
-//_____________________________________________________________________________
 TGeoVolume* St_geant_Maker::Ag2Geom() { 
   typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
 		PGON,PCON,ELTU,HYPE,GTRA=28,CTUB} shapes;
@@ -1639,7 +1771,12 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
     Float_t *att     = volu+6+np;
     Int_t    nin     = 0;
 
-    if (mother)  nin = (Int_t) mother[2];        //    Int_t konly = (int) p[npar];
+    if (mother)  nin = (Int_t) mother[2];        
+    Int_t konly = (int) position[7];
+    Bool_t kmany = konly != 1 && ntot > 0 && nin > 0;
+    if (kmany) {
+      cout << "Many Volume" << endl;
+    }
 
     H = (GtHash*) VolumeH.GetPointer((void *)Name.Data(),1);
     if (!H) {	//new nick: 
@@ -1740,14 +1877,27 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
 	  TranslationH.SetPointer(translation);
 	}
       }
-      if (!matrix) {
-	if (! translation) volume->AddNode(newVolume, (Int_t) copy,gGeoIdentity);
-	else               volume->AddNode(newVolume, (Int_t) copy,translation);
-      } 
+      if (! kmany) {
+	if (!matrix) {
+	  if (! translation) volume->AddNode(newVolume, (Int_t) copy,gGeoIdentity);
+	  else               volume->AddNode(newVolume, (Int_t) copy,translation);
+	} 
+	else {
+	  if (! translation) volume->AddNode(newVolume, (Int_t) copy,new TGeoCombiTrans(0,0,0,matrix));
+	  else               volume->AddNode(newVolume, (Int_t) copy,
+					     new TGeoCombiTrans(xyz[0],xyz[1],xyz[2],matrix));
+	}
+      }
       else {
-	if (! translation) volume->AddNode(newVolume, (Int_t) copy,new TGeoCombiTrans(0,0,0,matrix));
-	else               volume->AddNode(newVolume, (Int_t) copy,
-					   new TGeoCombiTrans(xyz[0],xyz[1],xyz[2],matrix));
+	if (!matrix) {
+	  if (! translation) volume->AddNodeOverlap(newVolume, (Int_t) copy,gGeoIdentity);
+	  else               volume->AddNodeOverlap(newVolume, (Int_t) copy,translation);
+	} 
+	else {
+	  if (! translation) volume->AddNodeOverlap(newVolume, (Int_t) copy,new TGeoCombiTrans(0,0,0,matrix));
+	  else               volume->AddNodeOverlap(newVolume, (Int_t) copy,
+					     new TGeoCombiTrans(xyz[0],xyz[1],xyz[2],matrix));
+	}
       }
     }
     volume=newVolume; 
@@ -1768,6 +1918,81 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   fTopGeoVolume = volume;
   return GetTopGeoVolume();
 }
+#if 0
+//________________________________________________________________________________
+void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
+  if ( m_Mode%100 != 1 && fEvtHddr ) {
+    if (! m_geom_gdat) { // taken from starsim/agzio/agfinfo.age
+      gMessMgr->Info() << "St_geant_Maker:: geom_gdat table is missing. Try to get it from GEANT." << endm;
+      Int_t jrung = clink->jrung;
+      if (jrung > 0 && z_iq[jrung-1]>=10) {
+	Int_t jrunh = z_lq[jrung-1];
+	if (jrunh > 0) {
+	  Int_t l = z_iq[jrunh-1];
+	  Char_t *buf = new Char_t[4*l+1];
+	  memcpy (buf,  &z_iq[jrunh+1], 4*l);
+	  buf[4*l] = '\0';
+	  TString C(buf);
+	  delete [] buf;
+	  Ssiz_t begin, index;
+	  begin = index = 0;
+	  TString version;
+	  Float_t mfscale = 5;
+	  //	  TRegexp separator(";");
+	  while ( ( begin < C.Length()) && (index != kNPOS) ) {
+	    //	    index = C.Index(separator,&end, begin);
+	    index = C.Index(';',1, begin,TString::kExact);
+	    if (index > begin) {
+	      TString line(C(begin,index-begin));
+	      line.ToLower();
+	      if (Debug()) cout << line << endl;
+	      if (line.Contains("detp")) {
+		Int_t indx = line.Index("year");
+		if (indx) {
+		  Int_t end = line.Index(" ",1,indx,TString::kExact);
+		  if (end > indx) {
+		    version = TString(line(indx,end-indx));
+		  }
+		}
+		indx = line.Index("field");
+		if (indx) {
+		  Int_t eq = line.Index("=",indx+4,TString::kExact);
+		  sscanf(line.Data()+eq+1,"%f",&mfscale);
+		}
+	      }
+	    }
+	    begin = index + 1;
+	  }
+	  if (version.Length()) {
+	    m_geom_gdat = new St_geom_gdat("geom_gdat",1);
+	    AddRunco(m_geom_gdat);
+	    geom_gdat_st gdat;
+	    gdat.system[0] = 0;
+	    gdat.system[1] = 0;
+	    gdat.mfscale   = mfscale/5.;
+	    memset (&gdat.gtag[0], 0, 8);
+	    strncpy(&gdat.gtag[0], version.Data(), 8);
+	    m_geom_gdat->AddAt(&gdat);
+	    if (Debug()) m_geom_gdat->Print(0,1);
+	    if (StarMagField::Instance()) StarMagField::Instance()->SetFactor(gdat.mfscale);
+	  }
+	} 
+      }
+    }
+    if (m_geom_gdat) {
+      geom_gdat_st *gdat = m_geom_gdat->GetTable();
+      TString version(&gdat->gtag[0],8);
+      version.Strip();
+      version.ToLower();
+      if (version != "") {
+	Int_t id = St_db_Maker::AliasDate(version.Data());
+	Int_t it = St_db_Maker::AliasTime(version.Data());
+	fEvtHddr->SetDateTime(id,it);
+      }
+    }  
+  }
+}
+#endif
 #if 1
 //________________________________________________________________________________
 Char_t *acfromr(Float_t r) {// 'TYPE'
@@ -1929,4 +2154,3 @@ Int_t St_geant_Maker::AgstHits() {
   }
   return kStOK;
 }
-
