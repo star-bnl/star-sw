@@ -41,8 +41,7 @@ class StEEmcPointMaker : public StMaker {
   /// a point.  Default is zero.
   void towerThreshold( Float_t t) { mTowerThreshold=t; }
 
-  /// Sets an smd matching requirement, maximum allowed
-  /// value of |Eu-Ev|/2(Eu+Ev)
+  /// Sets an smd matching requirement, Eu>s*Ev&&Ev>2*Eu
   void smdMatch( Float_t s ){ mSmdMatch = s; }
 
   /// Return vector of all points found in endcap 
