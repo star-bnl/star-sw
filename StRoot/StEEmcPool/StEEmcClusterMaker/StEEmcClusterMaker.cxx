@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/26 14:54:10 $
- * $Revision: 1.2 $
+ * $Date: 2005/08/29 16:17:51 $
+ * $Revision: 1.3 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -120,6 +120,8 @@ StEEmcClusterMaker::StEEmcClusterMaker(const Char_t *name):StMaker(name)
   mEEtow=new EEmcGeomSimple();
   mEEsmd=EEmcSmdGeom::instance();
   mEEmap=EEmcSmdMap::instance();
+
+  mMinStrips=3;
   
 }
 
@@ -503,7 +505,7 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	  }
 	  
 	  /// Push the cluster into our storage vector
-	  if ( cluster.size() >= 3 ) {
+	  if ( cluster.size() >= mMinStrips ) {
 	    cluster.key( mClusterId++ );
 	    mSmdClusters[ sector ][ plane ].push_back(cluster);
 	    mNumberOfClusters[4+plane]++;
