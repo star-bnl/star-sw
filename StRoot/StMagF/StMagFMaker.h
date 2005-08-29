@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.h,v 1.5 2003/09/10 19:47:21 perev Exp $
+// $Id: StMagFMaker.h,v 1.6 2005/08/29 22:54:27 fisyak Exp $
 // $Log: StMagFMaker.h,v $
+// Revision 1.6  2005/08/29 22:54:27  fisyak
+// switch to StarMagField
+//
 // Revision 1.5  2003/09/10 19:47:21  perev
 // ansi corrs
 //
@@ -32,8 +35,6 @@ class St_MagFactor;
 class StMagFMaker : public StMaker {
  private:
   St_MagFactor *fMagFactor; //!
-  Bool_t         fMagF; //!
-  Float_t       fScale; //!
  protected:
  public: 
                   StMagFMaker(const char *name="MagField");
@@ -42,7 +43,7 @@ class StMagFMaker : public StMaker {
    virtual Int_t  InitRun(Int_t run);
    Int_t          Make() {return kStOK;}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.5 2003/09/10 19:47:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.6 2005/08/29 22:54:27 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMagFMaker,0)   //StAF chain virtual base class for Makers
 };
