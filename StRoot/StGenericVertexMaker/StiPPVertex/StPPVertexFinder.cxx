@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.13 2005/08/17 15:07:39 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.14 2005/08/30 22:08:43 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -67,8 +67,8 @@ StPPVertexFinder::StPPVertexFinder() {
   HList=0;
   mToolkit =0;
   memset(hA,0,sizeof(hA));
-  mTrackData=new vector<TrackData>;
-  mVertexData=new vector<VertexData>;
+  //x mTrackData=new vector<TrackData>;
+  //x mVertexData=new vector<VertexData>;
 
   setMC(false); // default = real Data
   mTestMode=0; // expert only flag
@@ -220,8 +220,8 @@ StPPVertexFinder::Clear(){
   ctbList->clear();
   bemcList->clear();
   eemcList->clear();
-  mTrackData->clear();
-  mVertexData->clear();
+  mTrackData.clear();
+  mVertexData.clear();
   eveID=-1;
 
 }
@@ -230,8 +230,8 @@ StPPVertexFinder::Clear(){
 //==========================================================
 //==========================================================
 StPPVertexFinder::~StPPVertexFinder() {
-  delete mTrackData;
-  delete mVertexData;
+  //x delete mTrackData;
+  //x delete mVertexData;
   delete geomE;
 }
 
@@ -242,13 +242,13 @@ StPPVertexFinder::printInfo(ostream& os) const
 {
   os << "StPPVertexFinder ver=1 - Fit Statistics:" << endl;
   
-  os << "StPPVertexFinder::result "<<mVertexData->size()<<" vertices found\n" << endm;
+  os << "StPPVertexFinder::result "<<mVertexData.size()<<" vertices found\n" << endm;
 
   int nTpcM=0, nTpcV=0;
   uint i;
   int k=0;
-  for(i=0;i<mTrackData->size();i++) {
-    TrackData *t=&mTrackData->at(i);
+  for(i=0;i<mTrackData.size();i++) {
+    const TrackData *t=&mTrackData[i];
     if(  t->mTpc>0)   nTpcM++;
     else if (  t->mTpc<0) nTpcV++;
     hA[9]->Fill(t->zDca);
@@ -264,12 +264,12 @@ StPPVertexFinder::printInfo(ostream& os) const
   }
   hA[6]->Fill(nTpcM);
   hA[7]->Fill(nTpcV);
-  hA[15]->Fill(mTrackData->size());
+  hA[15]->Fill(mTrackData.size());
 
-  printf("dcaTrackList->size()=%d \n",mTrackData->size());
-  printf("\n List of found %d vertices\n",mVertexData->size());
-  for(i=0;i<mVertexData->size();i++) {
-    VertexData *V=&mVertexData->at(i);
+  printf("dcaTrackList->size()=%d \n",mTrackData.size());
+  printf("\n List of found %d vertices\n",mVertexData.size());
+  for(i=0;i<mVertexData.size();i++) {
+    const VertexData *V=& mVertexData[i];
     V->print(os);
   }
   float zGeant=999;
@@ -283,13 +283,13 @@ StPPVertexFinder::printInfo(ostream& os) const
       // --------------  A C C E S S    G E A N T   V E R T E X  (for histo)
       g2t_vertex_st *GVER= g2t_ver->GetTable();
       zGeant=GVER->ge_x[2];
-      printf("#GVER z=%.1f  nEve=%d nV=%d ",zGeant,mTotEve,mVertexData->size());  
+      printf("#GVER z=%.1f  nEve=%d nV=%d ",zGeant,mTotEve,mVertexData.size());  
     }
   }
   
   if(isMC) {
-    for(i=0;i<mTrackData->size();i++) {
-      TrackData *t=&mTrackData->at(i);
+    for(i=0;i<mTrackData.size();i++) {
+      const TrackData *t=&mTrackData[i];
       if(t->vertexID<=0) continue; // skip not used or pileup vertex 
       hA[12]->Fill(zGeant-t->zDca);
     }
@@ -415,7 +415,7 @@ StPPVertexFinder::fit(StEvent* event) {
     matchTrack2BEMC(track,t,242); // middle of tower in Rxy
     matchTrack2EEMC(track,t,288); // middle of tower in Z
     //.... all test done on this track .........
-    mTrackData->push_back(t); 
+    mTrackData.push_back(t); 
 
     hA[5]->Fill(t.rxyDca);
 
@@ -431,7 +431,7 @@ StPPVertexFinder::fit(StEvent* event) {
   ctbList ->print();
   bemcList->print();
   eemcList->print();
-  printf("\nTpcList size=%d nMatched=%d\n\n",mTrackData->size(),kTpc);
+  printf("\nTpcList size=%d nMatched=%d\n\n",mTrackData.size(),kTpc);
 
   ctbList ->doHisto();
   bemcList->doHisto();
@@ -461,24 +461,24 @@ StPPVertexFinder::fit(StEvent* event) {
     if(! findVertex(V)) break;
     bool trigV=evalVertex(V);   // V.print();
     if(!trigV) continue;
-    mVertexData->push_back(V);
+    mVertexData.push_back(V);
   }
 
-  gMessMgr->Info() << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData->size()<<" vertices found\n" << endm;
+  gMessMgr->Info() << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found\n" << endm;
   
-  if(mVertexData->size()>0)  hA[0]->Fill(7);
+  if(mVertexData.size()>0)  hA[0]->Fill(7);
   
   exportVertices();
   printInfo();
   
-  hA[4]->Fill(mVertexData->size());
+  hA[4]->Fill(mVertexData.size());
   uint i;
-  for(i=0;i<mVertexData->size();i++) {
-    VertexData *V=&mVertexData->at(i);
+  for(i=0;i<mVertexData.size();i++) {
+    VertexData *V=&mVertexData[i];
     hA[3]->Fill(V->r.z());
   }
   
-  if(mVertexData->size()<=0) {
+  if(mVertexData.size()<=0) {
     return 0; // no vertex
   }
   
@@ -496,7 +496,7 @@ StPPVertexFinder::buildLikelihood(){
 
   float dzMax2=mMaxZradius*mMaxZradius;
 
-  int nt=mTrackData->size();
+  int nt=mTrackData.size();
   printf("StPPVertexFinder::buildLikelihood() pool of nTracks=%d\n",nt);
   if(nt<=0) return false;
 
@@ -508,7 +508,7 @@ StPPVertexFinder::buildLikelihood(){
   double *Wa=hW->GetArray(); // track weight histogram 
   
   for(i=0;i<nt;i++) {
-    TrackData *t=&mTrackData->at(i);
+    const TrackData *t=&mTrackData[i];
     if(t->vertexID!=0) continue; // track already used
     if(t->anyMatch) n1++;
     //  t->print();
@@ -600,13 +600,13 @@ bool
 StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   // returns true if accepted
 
-  int nt=mTrackData->size();
+  int nt=mTrackData.size();
   gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<endm;
   int n1=0;
   int i;
   
   for(i=0;i<nt;i++) {
-    TrackData *t=&mTrackData->at(i);
+    TrackData *t=&mTrackData[i];
     if(t->vertexID!=0) continue;
     if(! t->matchVertex(V,mMaxZradius)) continue; // track to fare
     // this track belongs to this vertex
@@ -641,7 +641,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
     //V.print(cout);
     gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
     for(i=0;i<nt;i++) {
-      TrackData *t=&mTrackData->at(i);
+      TrackData *t=&mTrackData[i];
       if(t->vertexID!=V.id) continue;
       t->vertexID=-V.id;
     }
@@ -652,15 +652,15 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   return true;
 }
 
-
+ 
 //-------------------------------------------------
 //-------------------------------------------------
 void 
 StPPVertexFinder::exportVertices(){
   assert(mVertexConstrain); // code is not ready for reco w/o beamLine
   uint i;
-  for(i=0;i<mVertexData->size();i++) {
-    VertexData *V=&mVertexData->at(i);
+  for(i=0;i<mVertexData.size();i++) {
+    VertexData *V=&mVertexData[i];
     StThreeVectorD r(V->r.x(),V->r.y(),V->r.z());
     Float_t cov[6];
     memset(cov,0,sizeof(cov)); 
@@ -1046,6 +1046,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.14  2005/08/30 22:08:43  balewski
+ * drop '*' from declaration of   mTrackData &  mVertexData
+ *
  * Revision 1.13  2005/08/17 15:07:39  balewski
  * cleanup, irrelevant for pp200 production
  *
