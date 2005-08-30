@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/30 20:41:05 $
- * $Revision: 1.4 $
+ * $Date: 2005/08/30 21:40:29 $
+ * $Revision: 1.5 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -689,7 +689,7 @@ void StEEmcClusterMaker::fillStEvent()
       for ( UInt_t iclust=0; iclust<mTowerClusters[isector][ilayer].size(); iclust++ ) 
 	{
 
-	  StEEmcCluster cl=mTowerClusters[isector][ilayer].at(iclust);
+	  StEEmcCluster cl=(mTowerClusters[isector][ilayer])[iclust];
 
 	  /// for some reason, this code doesn't work when I
 	  /// call StEEmcCluster::stemc(), but works just fine
@@ -763,7 +763,7 @@ void StEEmcClusterMaker::fillStEvent()
 	      for ( UInt_t iclust=0; iclust<mSmdClusters[isector][iplane].size(); iclust++ ) 
 		{
 		  
-		  StEEmcSmdCluster cl = mSmdClusters[isector][iplane].at(iclust);
+		  StEEmcSmdCluster cl = (mSmdClusters[isector][iplane])[iclust];
 		  
 
 		  StEmcCluster *emccluster = new StEmcCluster();
