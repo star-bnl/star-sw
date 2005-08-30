@@ -20,10 +20,12 @@ my $IsDotDev = 0;
 if ($env->{ENV}->{STAR} =~ /\.(dev|DEV)/) {$IsDotDev = 1;}
 my $IsRepo = (stat($env->{ENV}->{STAR}."/."))[1] == (stat($CWD."/."))[1];
 
-if ( $IsRepo ){
-    print "... REPOSITORY compilation  ...\n"  if ! $IsDotDev;
-} else {
-    print "... USER area compilation   ...\n"  if ! $IsDotDev;
+if ($param::debug) {
+  if ( $IsRepo && ! $IsDotDev ){
+    print "... REPOSITORY compilation  ...\n";
+  } else {
+    print "... USER area compilation   ...\n";
+  }
 }
 
 
