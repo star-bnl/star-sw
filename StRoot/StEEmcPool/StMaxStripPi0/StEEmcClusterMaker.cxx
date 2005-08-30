@@ -692,7 +692,7 @@ void StEEmcClusterMaker::fillStEvent()
 	  for ( UInt_t iclust=0; iclust<mTowerClusters[isector][0].size(); iclust++ ) 
 	    {
 
-	      StEEmcCluster cl=mTowerClusters[isector][0].at(iclust);
+	      StEEmcCluster cl=(mTowerClusters[isector][0])[iclust];
 	      
 	      /// for some reason, this code doesn't work when I
 	      /// call StEEmcCluster::stemc(), but works just fine
@@ -774,7 +774,7 @@ void StEEmcClusterMaker::fillStEvent()
       for ( UInt_t iclust=0; iclust<mTowerClusters[isector][ilayer].size(); iclust++ ) 
 	{
 
-	  StEEmcCluster cl=mTowerClusters[isector][ilayer].at(iclust);
+	  StEEmcCluster cl=(mTowerClusters[isector][ilayer])[iclust];
 
 	  /// for some reason, this code doesn't work when I
 	  /// call StEEmcCluster::stemc(), but works just fine
@@ -848,7 +848,7 @@ void StEEmcClusterMaker::fillStEvent()
 	      for ( UInt_t iclust=0; iclust<mSmdClusters[isector][iplane].size(); iclust++ ) 
 		{
 		  
-		  StEEmcSmdCluster cl = mSmdClusters[isector][iplane].at(iclust);
+		  StEEmcSmdCluster cl = (mSmdClusters[isector][iplane])[iclust];
 		  
 
 		  StEmcCluster *emccluster = new StEmcCluster();
