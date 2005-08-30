@@ -159,5 +159,5 @@ inline void StEEmcPointMaker::clusters(const Char_t *n){ mNameClusters=n; }
 inline StEEmcPointVec_t StEEmcPointMaker::points(){ return mPoints ; }
 
 inline Int_t StEEmcPointMaker::numberOfPoints(){ return mPoints.size(); } 
-inline StEEmcPoint StEEmcPointMaker::point(Int_t ip){ return mPoints.at(ip); } 
+inline StEEmcPoint StEEmcPointMaker::point(Int_t ip){ return mPoints[ip]; } 
 #endif
