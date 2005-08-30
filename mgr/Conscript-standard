@@ -11,16 +11,19 @@ my $STAR_SYS     = $env->{ENV}->{STAR_SYS};
 my $STAR_VERSION = $env->{ENV}->{STAR_VERSION};         # print "#####  $STAR_VER\n";
 my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
-@Repo   = Repository_List unless $param::noRepository;  #print "Repositories = |@Repo|\n";
+@Repo   = Repository_List unless $param::noRepository;#   print "Repositories = |@Repo|\n";
 
 
 print "+-+-+- STAR=".$env->{ENV}->{STAR}."\n"  if $param::debug;
 print "+-+-+- cwd=".$CWD."\n"                  if $param::debug;
+my $IsDotDev = 0;
+if ($env->{ENV}->{STAR} =~ /\.(dev|DEV)/) {$IsDotDev = 1;}
 my $IsRepo = (stat($env->{ENV}->{STAR}."/."))[1] == (stat($CWD."/."))[1];
+
 if ( $IsRepo ){
-    print "... REPOSITORY compilation  ...\n"  if $param::debug;
+    print "... REPOSITORY compilation  ...\n"  if ! $IsDotDev;
 } else {
-    print "... USER area compilation   ...\n"  if $param::debug;
+    print "... USER area compilation   ...\n"  if ! $IsDotDev;
 }
 
 
@@ -335,7 +338,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 #    push @src, "gcinit.F";
   } elsif ( $Dir =~ m/StarVMC/ && $pkg =~ /ecal|Tpc|star/) {
     $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/include";
-  } elsif ( $pkg =~ m/^StBFChain$/ && $IsRepo) {print "\t add documentation for $pkg\n";
+  } elsif ( $pkg =~ m/^StBFChain$/ && (! $IsRepo || $IsDotDev) ) {print "\t add documentation for $pkg\n";
     Command $env ["#StRoot/StBFChain/BFC.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP %< > %>);
     Command $env ["#StRoot/StBFChain/BFC2.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP -D__BFC2__ %< > %>);
     Command $env [qw(#StRoot/StBFChain/doc/index.html #StRoot/StBFChain/doc/StBFChain.cxx_doc)],
