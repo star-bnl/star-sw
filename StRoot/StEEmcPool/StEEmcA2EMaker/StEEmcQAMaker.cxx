@@ -5,8 +5,8 @@
  * This maker produces some useful QA histograms using StEEmcA2EMaker
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:55:31 $
- * $Revision: 1.1 $
+ * $Date: 2005/08/30 19:42:17 $
+ * $Revision: 1.2 $
  *
  */
  
@@ -23,7 +23,7 @@ ClassImp(StEEmcQAMaker);
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h" 
 #include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
 
-#include "StEEmcPool/StMaxStripPi0/StEEmcA2EMaker.h"
+#include "StEEmcA2EMaker.h"
 
 // ----------------------------------------------------------------------------
 StEEmcQAMaker::StEEmcQAMaker( const Char_t *name ) : StMaker(name)

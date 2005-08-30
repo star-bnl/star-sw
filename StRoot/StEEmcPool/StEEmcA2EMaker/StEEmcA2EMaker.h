@@ -101,19 +101,21 @@ class StEEmcA2EMaker : public StMaker {
   /// \param sec: sector containing the hit
   /// \param pl: plane containing the hit (0=U, 1=V)
   /// \param hit: [0, numberOfHitStrips())
-  StEEmcStrip hitstrip(Int_t sec,Int_t pl, Int_t hit){ return mHitStrips[sec][pl].at(hit); } 
+  StEEmcStrip hitstrip(Int_t sec,Int_t pl, Int_t hit){ return mHitStrips[sec][pl][hit]; } 
   
   /// Return a specifed hit SMD strip
   /// \param sector: sector index, [0,12)
   /// \param plane: plane index, 0=U, 1=V
   /// \param strip: strip index, runs [0,288)
-  StEEmcStrip strip(Int_t sector, Int_t plane, Int_t strip) { return mStrips[sector][plane][strip]; }
+  StEEmcStrip strip(Int_t sector, Int_t plane, Int_t strip) 
+    { return mStrips[sector][plane][strip]; }
   
   /// Get the energy (towers) or energy deposit (pre,post,smd) in
   ///  the specified sector
   /// \param sector: 0..11 the 12 EEMC sectors
   /// \param layer: 0=T, 1=P, 2=Q, 3=R, 4=U, 5=V
-  Float_t energy(Int_t sector, Int_t layer) { return mEnergy[sector][layer]; }
+  Float_t energy(Int_t sector, Int_t layer) 
+    { return mEnergy[sector][layer]; }
   /// Return energy summed over full endcap
   Float_t energy(Int_t layer); 
 
