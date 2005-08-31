@@ -1,0 +1,5 @@
+# $Id $
+# package Sti
+# author: 
+Library:libSti.so:LIBS +=   -lStChain  -lStDb_Tables   -l_StEvent  -l_StEEmcUtil -lStGenericVertexMaker  -lStiGui -lGui -lStMcEvent
+#Library:libSti.so:LIBS +=   -lgeant3  -lStChain  -lStDb_Tables  -lStEvent  -lStGenericVertexMaker  -lStiGui  -lStMcEvent
