@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.9 2003/09/30 08:13:14 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.10 2005/08/31 15:05:08 fisyak Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.10  2005/08/31 15:05:08  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.9  2003/09/30 08:13:14  jcs
 // StarClassLibrary must be loaded before StDbUtilities (needs StThreeVectorF)
 //
@@ -49,6 +52,7 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
+    gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
     gSystem->Load("libftpc_Tables");
     gSystem->Load("StFtpcDriftMapMaker");

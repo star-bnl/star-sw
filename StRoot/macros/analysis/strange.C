@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.13 2000/05/09 19:38:42 kathy Exp $
+// $Id: strange.C,v 1.14 2005/08/31 15:03:09 fisyak Exp $
 // $Log: strange.C,v $
+// Revision 1.14  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.13  2000/05/09 19:38:42  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
@@ -118,6 +121,7 @@ void strange(Int_t nevents,const Char_t **fileList,const char *qaflag)
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StEventMaker");
   gSystem->Load("StSmdstMaker");

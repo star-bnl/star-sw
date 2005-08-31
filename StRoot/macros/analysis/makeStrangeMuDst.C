@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.5 2003/02/10 16:50:08 genevb Exp $
+// $Id: makeStrangeMuDst.C,v 2.6 2005/08/31 15:03:09 fisyak Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.6  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 2.5  2003/02/10 16:50:08  genevb
 // simple updates
 //
@@ -54,6 +57,7 @@ void load() {
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StTpcDb");
   // The following is needed if reading from dst Branch instead of Event Branch

@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.11 2001/09/21 02:21:57 jeromel Exp $
+// $Id: drawEvent.C,v 1.12 2005/08/31 15:03:09 fisyak Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.12  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.11  2001/09/21 02:21:57  jeromel
 // StTpcDb needed by StEventMaker.
 //
@@ -119,6 +122,7 @@ void doEventsQQ(const Int_t nevents=999,
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StEvent");
   gSystem->Load("StTpcDb");

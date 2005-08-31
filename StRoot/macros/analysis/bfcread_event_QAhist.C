@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.12 2005/01/27 05:28:58 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.13 2005/08/31 15:03:09 fisyak Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.13  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.12  2005/01/27 05:28:58  genevb
 // open runcoBranch
 //
@@ -124,6 +127,7 @@ void bfcread_event_QAhist(
   gSystem->Load("StEmcUtil");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StPmdUtil");
   gSystem->Load("St_QA_Maker");  

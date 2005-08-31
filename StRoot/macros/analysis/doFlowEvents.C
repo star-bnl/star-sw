@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.58 2005/02/10 18:01:38 posk Exp $
+// $Id: doFlowEvents.C,v 1.59 2005/08/31 15:03:09 fisyak Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -143,6 +143,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   //
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");    // ?
   //gSystem->Load("StMuDSTMaker");
   
@@ -716,6 +717,9 @@ int gcInit(const char *request)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.59  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.58  2005/02/10 18:01:38  posk
 // Option for working with the Grid Collector.
 //
