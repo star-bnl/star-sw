@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: mDstRead.C,v 3.2 2001/09/21 02:21:57 jeromel Exp $
+// $Id: mDstRead.C,v 3.3 2005/08/31 15:03:09 fisyak Exp $
 // Author: Thomas Ullrich, Oct 2000
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // $Log: mDstRead.C,v $
+// Revision 3.3  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 3.2  2001/09/21 02:21:57  jeromel
 // StTpcDb needed by StEventMaker.
 //
@@ -57,6 +60,7 @@ void mDstRead(Int_t nevents, const Char_t **fileList)
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
+    gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");

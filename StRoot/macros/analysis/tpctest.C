@@ -1,5 +1,8 @@
-// $Id: tpctest.C,v 1.9 2000/01/25 16:06:37 fisyak Exp $
+// $Id: tpctest.C,v 1.10 2005/08/31 15:03:09 fisyak Exp $
 // $Log: tpctest.C,v $
+// Revision 1.10  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.9  2000/01/25 16:06:37  fisyak
 // g2r -> g2t
 //
@@ -49,6 +52,7 @@ void Load(){
     gSystem->Load("StUtilities");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("libmsg");
   gSystem->Load("tls");

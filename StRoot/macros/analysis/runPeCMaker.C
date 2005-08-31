@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.7 2001/09/21 02:21:57 jeromel Exp $
+// $Id: runPeCMaker.C,v 1.8 2005/08/31 15:03:09 fisyak Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.8  2005/08/31 15:03:09  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.7  2001/09/21 02:21:57  jeromel
 // StTpcDb needed by StEventMaker.
 //
@@ -100,6 +103,7 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
+    gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");

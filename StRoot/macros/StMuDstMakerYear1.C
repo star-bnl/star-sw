@@ -57,6 +57,7 @@ void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
   gSystem->Load("StChain");
   gSystem->Load("StDaqLib");
   gSystem->Load("St_Tables");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StUtilities");
   gSystem->Load("StTreeMaker");

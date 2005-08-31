@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.9 2000/04/13 21:46:22 kathy Exp $
+// $Id: StHbtExample.C,v 1.10 2005/08/31 15:05:08 fisyak Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.10  2005/08/31 15:05:08  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.9  2000/04/13 21:46:22  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -58,6 +61,7 @@ void StHbtExample(Int_t nevents=1,
     gSystem->Load("libgen_Tables");
     gSystem->Load("StUtilities");  // new addition 22jul99
     gSystem->Load("StAnalysisUtilities");  // needed by V0dstMaker
+    gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");

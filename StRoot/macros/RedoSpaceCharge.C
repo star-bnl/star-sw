@@ -75,6 +75,7 @@ void load() {
   gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
   gSystem->Load("StSecondaryVertexMaker");
+  gSystem->Load("StarMagField");
   gSystem->Load("StMagF");
   gSystem->Load("StDbLib.so");
   gSystem->Load("StDbBroker.so");
@@ -181,8 +182,11 @@ void RedoSpaceCharge(const int NEvts,
 }
 
 //----------------------------------------------------------
-// $Id: RedoSpaceCharge.C,v 1.1 2003/07/11 20:26:54 genevb Exp $
+// $Id: RedoSpaceCharge.C,v 1.2 2005/08/31 15:02:43 fisyak Exp $
 // $Log: RedoSpaceCharge.C,v $
+// Revision 1.2  2005/08/31 15:02:43  fisyak
+// Add dependence StMagF vs StarMagField
+//
 // Revision 1.1  2003/07/11 20:26:54  genevb
 // Introduction of RedoSpaceCharge.C macro
 //
