@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.20 2005/08/29 22:45:17 fisyak Exp $
+// $Id: bfcMixer.C,v 1.21 2005/08/31 19:47:14 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 #if !defined(__CINT__) || defined(__MAKECINT__)
@@ -44,7 +44,7 @@ StBFChain *chain1, *chain2, *chain3;
 //_____________________________________________________________________
 void Load(){
   gSystem->Load("St_base");
-  Bool_t needLogger = gSystem->Load("liblog4cxx.so"); 
+  Bool_t needLogger = gSystem->Load("liblog4cxx.so") <= 0; 
   if (needLogger) {
     gSystem->Load("StStarLogger.so");
     //    gInterpreter->ProcessLine("StLoggerManager::StarLoggerInit();");//    TMemStat::PrintMem("load StStarLogger");
