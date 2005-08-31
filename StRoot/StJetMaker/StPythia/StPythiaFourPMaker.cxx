@@ -88,10 +88,11 @@ Int_t StPythiaFourPMaker::Make()
     StThreeVectorF out1(mSimuMaker->parton1[1], mSimuMaker->parton1[2], mSimuMaker->parton1[3]);
     StThreeVectorF out2(mSimuMaker->parton2[1], mSimuMaker->parton2[2], mSimuMaker->parton2[3]);
 
-    if (out1.perp()<3. || out2.perp()<3.) {
-	cout <<"q2 too soft. "<<endl;
-	return StMaker::Make();
-    }
+    //Wow, how did this survive, big potential bias! Removed 8/31, MLM (sorry!!!!!!!)
+    //if (out1.perp()<3. || out2.perp()<3.) {
+	//cout <<"q2 too soft. "<<endl;
+	//return StMaker::Make();
+    //}
 
 
     //cout <<"Look at:\t"<<particleTabPtr->GetNRows()<<"\tparticles in event record"<<endl;
