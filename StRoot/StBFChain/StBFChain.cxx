@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.478 2005/08/29 21:45:57 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.479 2005/08/31 20:08:18 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -293,7 +293,12 @@ Int_t StBFChain::Instantiate()
       //pars->useSsd=kTRUE;         // use SSD in Sti
       
       if (GetOption("SvtIT")) cmd += "pars->activeSvt=kTRUE;";
+
       //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
+      if (GetOption("SsdIT")){
+	cmd += "pars->useSsd=kTRUE;";
+	cmd += "pars->activeSsd=kTRUE;";
+      }
       if (GetOption("FtpcIT")){
 	cmd += "pars->useFtpc=kTRUE;";
 	cmd += "pars->activeFtpc=kTRUE;";
