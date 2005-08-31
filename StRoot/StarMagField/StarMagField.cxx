@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.4 2005/08/29 22:59:56 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.5 2005/08/31 15:45:43 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.5  2005/08/31 15:45:43  fisyak
+ * Make agufld a function to have comis happy (FPE)
+ *
  * Revision 1.4  2005/08/29 22:59:56  fisyak
  * Fix printouts
  *
@@ -92,9 +95,10 @@ StarMagField *StarMagField::fgInstance = 0;
 #define agufld           F77_NAME(agufld,AGUFLD)
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
 R__EXTERN  "C" {
-  void type_of_call agufld(Float_t *x, Float_t *bf) {
+  Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
     if (! StarMagField::Instance()) new StarMagField();
     StarMagField::Instance()->BField(x,bf);
+    return 0;
   }
   void type_of_call mfldgeo() {
     printf("request for StarMagField from mfldgeo\n");
