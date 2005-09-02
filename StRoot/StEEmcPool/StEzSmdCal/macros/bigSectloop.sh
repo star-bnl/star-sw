@@ -2,12 +2,12 @@
 #path=xxx
 
 for sec in 1 2 3 4 5 6 7 8 9 10 11 12 ; do
-#for sec in 1  ; do
+#for sec in 2  ; do
     echo working on sector $sec ...
-   # bsub -q star_cas -o log.A$sec root4star -b hadd.C\(${sec}\)
-   # exit
-   #done
-   #exit	
+    bsub -q star_cas_short -o log.A$sec root4star -b hadd.C\(${sec}\)
+   
+   done
+   exit	
        root.exe -b >&log.M$sec <<EOF 
    .x  doSmdGains.C( $sec , 0 )
    .x  doSmdGains.C( $sec , 1 )

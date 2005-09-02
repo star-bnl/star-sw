@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.16 2005/09/02 04:27:52 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.17 2005/09/02 22:11:24 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -280,6 +280,18 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   hA[24]->Fill(iPhiX+iEtaX*MaxPhiBins);
 
   //................ auxuiliary variables 
+  // ped corrected adc
+  float adcT=tileAdc[kT][iEtaX][iPhiX];
+  float adcP=tileAdc[kP][iEtaX][iPhiX];
+  float adcQ=tileAdc[kQ][iEtaX][iPhiX];
+  float adcR=tileAdc[kR][iEtaX][iPhiX];
+
+  // calibrated energy
+  float eneT=tileEne[kT][iEtaX][iPhiX];  // GeV
+  float eneP=tileEne[kP][iEtaX][iPhiX]*1000; // MeV
+  float eneQ=tileEne[kQ][iEtaX][iPhiX]*1000; // MeV
+  float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
+
   // logical conditions:
   // to recover few tiles mark all faild towers as with ADC>thres
 
@@ -287,11 +299,11 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   bool thrQ= tileThr[kQ][iEtaX][iPhiX] ;
   bool thrR= tileThr[kR][iEtaX][iPhiX] ;
 
-#if 1 // additional cut one energy , after a calibration is avaliable
-  float MipPQReneThrs=0.7/1000.;  // ==0.7 MeV
-  thrP= thrP && tileEne[kP][iEtaX][iPhiX]> MipPQReneThrs ;
-  thrQ= thrQ && tileEne[kR][iEtaX][iPhiX]> MipPQReneThrs;
-  thrR= thrR && tileEne[kQ][iEtaX][iPhiX]> MipPQReneThrs;
+#if 1 // additional cut one energy , after pre/post calibration is avaliable
+  float MipPQReneThrsMeV=0.7;  // ==0.7 MeV
+  thrP= thrP && eneP> MipPQReneThrsMeV ;
+  thrQ= thrQ && eneQ> MipPQReneThrsMeV ;
+  thrR= thrR && eneR> MipPQReneThrsMeV ;
 #endif
 
   //.... account for masked pixels
@@ -305,17 +317,6 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   mipT=  mipT || killT[kT][iEtaX][iPhiX]; // recover dead tower
  // printf("iphi=%d ieta=%d Tene=%f mipEne=%f mipT=%d\n",iPhiX,iEtaX,tileEne[kT][iEtaX][iPhiX],towerMipE[iEtaX],mipT);
 
-  // ped corrected adc
-  float adcT=tileAdc[kT][iEtaX][iPhiX];
-  float adcP=tileAdc[kP][iEtaX][iPhiX];
-  float adcQ=tileAdc[kQ][iEtaX][iPhiX];
-  float adcR=tileAdc[kR][iEtaX][iPhiX];
-
-  // calibrated energy
-  float eneT=tileEne[kT][iEtaX][iPhiX];  // GeV
-  float eneP=tileEne[kP][iEtaX][iPhiX]*1000; // MeV
-  float eneQ=tileEne[kQ][iEtaX][iPhiX]*1000; // MeV
-  float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
 
   if(thrR) hA[9]->Fill(7);
 
