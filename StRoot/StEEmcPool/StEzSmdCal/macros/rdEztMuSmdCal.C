@@ -12,14 +12,9 @@ int rdEztMuSmdCal( int run=6049126,
 
   //char* file="lis/R6049091.lis"; //#127=EHT6, #129=minB  
   char* inDir   = "./";
-  TString outF="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2a";outF="iter2-out/";
+  TString outF="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2a";outF="iter3-out/";
   
-
-
- char*  file=fileS.Data();
-
-  //inDir="/star/data05/scratch/hew/";
-  // file="st_physics_6135012_raw_1040002.MuDst.root";
+  char*  file=fileS.Data();
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();  
@@ -27,7 +22,6 @@ int rdEztMuSmdCal( int run=6049126,
 
   assert( !gSystem->Load("StEEmcUtil")); 
   assert( !gSystem->Load("StEzSmdCal"));
-
 
   // libraries below are needed for DB interface
   assert( !gSystem->Load("StDbBroker")); 
@@ -56,8 +50,15 @@ int rdEztMuSmdCal( int run=6049126,
   myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/smdAllMaskDay49v1.dat");
   myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/tileAllMaskDay49v1.dat");
 
+  //....... pre/post
   //  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/smdAllSecG-slopes.dat");
   myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter2-inp/smdAllSec-absGain.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsP-allSect.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsQ-allSect.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsR-allSect.dat");
+
+  // ... towers
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsT-allSect.dat");
 
   //myDb->setSectors(5,5);
 
@@ -66,21 +67,22 @@ int rdEztMuSmdCal( int run=6049126,
   int emptyStripCount=7; 
   float offCenter=0.7; // fiducial area of tower =offCenter^2, was 0.8
   float twMipRelEneLow=0.5, twMipRelEneHigh=2.;  // was 0.5,1.5
-  int thrMipPresAdc=12; // thres over pedestal for pre/post
+  int thrMipPresAdc=7; // thres over pedestal for pre/post (was 12 if no energy cut)
 
   HList=new  TObjArray;
   int id;
-  for(id=1;id<=12;id++) { sectID=id;
-  //  sectID=5;
-  myMk3=new MuEzSmdCalMaker("mySmdCal","MuDst");
-  myMk3->SetHList(HList);
-  myMk3->SetSector(sectID); 
-  myMk3->setTwCuts(twMipRelEneLow, twMipRelEneHigh,offCenter);
-  myMk3->setSmdCuts(thrMipSmdE,emptyStripCount);
-  myMk3->setPreCuts(thrMipPresAdc);
-  myMk3->SetTrigIdFilter(trigID);
-  // if(id>=3)
-  //break;
+  for(id=1;id<=12;id++) { 
+    sectID=id;
+    //  sectID=5;
+    myMk3=new MuEzSmdCalMaker("mySmdCal","MuDst");
+    myMk3->SetHList(HList);
+    myMk3->SetSector(sectID); 
+    myMk3->setTwCuts(twMipRelEneLow, twMipRelEneHigh,offCenter);
+    myMk3->setSmdCuts(thrMipSmdE,emptyStripCount);
+    myMk3->setPreCuts(thrMipPresAdc);
+    myMk3->SetTrigIdFilter(trigID);
+    // if(id>=3)
+    //break;
   }
 
   gMessMgr->SwitchOn("I");

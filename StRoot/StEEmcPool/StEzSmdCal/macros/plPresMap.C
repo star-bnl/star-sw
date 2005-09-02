@@ -4,8 +4,9 @@ TFile *f;
 TCanvas *cc;
 
 plPresMap(TString hFile="m1"){
-  f=new TFile("smdCal-X"+hFile+".hist.root");
-  gStyle->SetPalette(1,0);
+  //  f=new TFile("smdCal-X"+hFile+".hist.root");
+  f=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect5.hist.root");
+   gStyle->SetPalette(1,0);
   return;
 }
 
