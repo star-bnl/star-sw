@@ -14,7 +14,7 @@ fitTower() {
   // f=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect5.hist.root");
 
   TH1F *h1=new TH1F("mpv","MPV gated w/ MIP ; MPV of ADC-ped",40,-5,35); 
-  TH1F *h2=new TH1F("mpvE","relative error of MPV , MIP gated; err(MPV)/MPV ",50,0,0.5); 
+  TH1F *h2=new TH1F("mpvE","relative error of MPV , MIP gated; err(MPV)/MPV ",50,0,0.3); 
 
 
  // stupid root tricks:
@@ -203,7 +203,7 @@ TString plotOne(TH1F *ha, TH1F *hd, float &MPV, float &MPVerr) {
  
   if(fabs(epar[0])<0.05)  return "singF"; // single bin pathology
   if(par[4]/par[0]>0.60)  return "wideG";
-  hd->SetAxisRange(5,50);
+  hd->SetAxisRange(3,50);
   float sum=hd->Integral();
   if(sum<150)  return "lowS";
 
@@ -218,7 +218,7 @@ void openAll(char cT) {
   int i;
   char txt[200];
   for(i=0;i<12;i++) {
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect%d.hist.root",i+1);
+    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }

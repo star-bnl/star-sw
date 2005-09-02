@@ -12,7 +12,8 @@ int rdEztMuSmdCal( int run=6049126,
 
   //char* file="lis/R6049091.lis"; //#127=EHT6, #129=minB  
   char* inDir   = "./";
-  TString outF="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2a";outF="iter3-out/";
+  TString outF="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2xx";
+  outF="iter3-out/";
   
   char*  file=fileS.Data();
 

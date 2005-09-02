@@ -8,7 +8,7 @@ TString  inPath;
 
 //=========================
 plSmdCal(TString  hFile="R60490922"){
-    inPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter1e/";
+    inPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/";
     // inPath="iter1e-out/";
     // inPath="iter2-out/";
   f=new TFile(inPath+hFile+".hist.root");
