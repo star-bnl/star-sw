@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.15 2005/08/09 18:46:31 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.16 2005/09/02 04:27:52 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -282,9 +282,23 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   //................ auxuiliary variables 
   // logical conditions:
   // to recover few tiles mark all faild towers as with ADC>thres
-  bool thrP= tileThr[kP][iEtaX][iPhiX] || killT[kP][iEtaX][iPhiX];
-  bool thrQ= tileThr[kQ][iEtaX][iPhiX] || killT[kQ][iEtaX][iPhiX];
-  bool thrR= tileThr[kR][iEtaX][iPhiX] || killT[kR][iEtaX][iPhiX];
+
+  bool thrP= tileThr[kP][iEtaX][iPhiX] ;
+  bool thrQ= tileThr[kQ][iEtaX][iPhiX] ;
+  bool thrR= tileThr[kR][iEtaX][iPhiX] ;
+
+#if 1 // additional cut one energy , after a calibration is avaliable
+  float MipPQReneThrs=0.7/1000.;  // ==0.7 MeV
+  thrP= thrP && tileEne[kP][iEtaX][iPhiX]> MipPQReneThrs ;
+  thrQ= thrQ && tileEne[kR][iEtaX][iPhiX]> MipPQReneThrs;
+  thrR= thrR && tileEne[kQ][iEtaX][iPhiX]> MipPQReneThrs;
+#endif
+
+  //.... account for masked pixels
+  thrP= thrP || killT[kP][iEtaX][iPhiX];
+  thrQ= thrQ || killT[kQ][iEtaX][iPhiX];
+  thrR= thrR || killT[kR][iEtaX][iPhiX];
+
   // check MIP upper/lower limits
   float RelTwEne=tileEne[kT][iEtaX][iPhiX]/towerMipE[iEtaX];
   bool mipT=  RelTwEne>twMipRelEneLow &&  RelTwEne<twMipRelEneHigh;
