@@ -1,6 +1,10 @@
-* $Id: shldgeo.g,v 1.1 2005/08/16 00:57:23 potekhin Exp $
+* $Id: shldgeo.g,v 1.2 2005/09/02 16:30:30 potekhin Exp $
 *
 * $Log: shldgeo.g,v $
+* Revision 1.2  2005/09/02 16:30:30  potekhin
+* Waypoint check-in -- before I separate the magnets into a separatefile,
+* I want to have this code saved in CVS
+*
 * Revision 1.1  2005/08/16 00:57:23  potekhin
 * New source: the upstream shielding
 *
@@ -12,56 +16,74 @@ Module SHLDGEO is the shielding
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 *
-      Content  SHLD, SHBS, SHLS, SHBI, SHFI, SHOL, QONE, QTWO, QTHR
+      Content  SHLD, SHBS, SHLS, SHBI, SHFI, SHOL,
+               SFLR,
+               MGMT, DZER,QONE, QTWO, QTHR
 *
-      Structure SHLG {  Version,     Z,
-                            dx,     dy,     dz,
-                         baseX,  baseLevel,  baseZ,
-                        baseDx, baseDy,
-                         slabX,  slabZ,
-                        slabDy, slabDz, fiDz, fiDy, hole}
+      Structure SHLG {  Version ,     Z,
+                            dx,      dy,       dz,
+                     baseLevel,   baseZ,   baseDx,  baseDy,
+                         slabX,   slabZ,   slabDy,  slabDz,
+                          fiDz,    fiDy,     holeX,  holeY,
+                      floorThk,floorLen,floorWidth, floorPos
+                     }
 
       Structure SHLQ { Version,
-                       Q0,
-                       Q1, ri1, ro1, dz1,
-                       Q2, ri2, ro2, dz2,
-                       Q3, ri3, ro3, dz3
+                       Q0,    MotherR,MotherL,Xoffset,Angle,
+                       DzeroL,DzeroRi,DzeroRo,
+                       Q1,        ri1,    ro1, dz1,
+                       Q2,        ri2,    ro2, dz2,
+                       Q3,        ri3,    ro3, dz3
                      }
+
 *
 *    local variable for section positioning
-      Real    Yslab, Width, Yfi
+      Real    Yslab, ShieldHalfHeight, Yfi
 *
 * -----------------------------------------------------------------------------
 *
    Fill SHLG    !  Shielding Geometry Data
       Version   = 1       ! geometry version  
-      Z         = 1920    ! position of the shielding
-      dx        = 120     ! half-x dimension
-      dy        = 145     ! half-y dimension
+      Z         = 1750    ! position of the shielding
+      dx        = 170     ! half-x dimension
+      dy        = 150     ! half-y dimension
       dz        = 100     ! half-z dimension
 
-      baseX     =  30     ! base position
-      baseLevel =-145     ! base position on the floor
+      baseLevel =-125     ! base position on the floor
       baseZ     =  0      ! base position
 
-      baseDx    =  40     ! base half-x dimension
+      baseDx    =  60     ! base half-x dimension
       baseDy    =  30     ! base half-y dimension
 
       slabX     =   0     ! slab position
       slabZ     = -30     ! slab position
 
-      slabDy    =  40     ! slab half-y dimension
+      slabDy    =  30     ! slab half-y dimension
       slabDz    =  30     ! slab half-z dimension
 
-      fiDz      =  50     ! forward iron slab half-thickness
-      fiDy      =  57     ! half-height
+      fiDz      =  47     ! forward iron slab half-thickness
+      fiDy      =  55     ! half-height
 
-      hole      =  10     ! beam hole half-size
+      holeX     =  20     ! beam hole half-size in X
+      holeY     =  10     ! beam hole half-size in Y
+      floorThk  =  70     ! Concrete floor thickness
+      floorLen  =  3900   ! Concrete floor length
+      floorWidth=  340    ! Concrete floor width
+      floorPos  =  2800   ! Concrete floor z-position
    EndFill
 * -----------------------------------------------------------------------------
    Fill SHLQ    !  Quadrupole Geometry Data
       Version   =   1     ! geometry version  
       Q0        = 2485.26 ! offset point that corresponds to 1505.92 in CAD notation, end of D0
+      MotherR   = 19      ! radius of the mother containing D0,Q1,Q2,Q3
+      MotherL   = 1610    ! length of the mother containing D0,Q1,Q2,Q3
+
+      Xoffset   = 26      ! Offset ot the mother
+      Angle     = 0.3     ! Angle to the symmetry axis
+
+      DzeroL    = 385.26  ! D0 length
+      DzeroRi   =  4.775  ! D0 inner radius
+      DzeroRo   = 15.995  ! D0 outer radius
 *
       Q1        = 88.59   ! offset 1
       ri1       =  6.355  ! inner 1
@@ -84,17 +106,21 @@ Module SHLDGEO is the shielding
 
 
       USE      SHLG
+
+      ShieldHalfHeight=(shlg_baseDy+shlg_slabDy+shlg_fiDy)
+
+*      if(0.eq.1) then
       Create   SHLD
-      Position SHLD in CAVE z=shlg_Z
+      Position SHLD in CAVE x=0.0 y=shlg_baseLevel+ShieldHalfHeight z=shlg_Z
+*      endif
 
-      Create QONE
-      Position QONE in CAVE z=shlq_q0+shlq_q1+shlq_dz1/2.0
+      Create SFLR
+      Position SFLR in CAVE x=0 y=shlg_baseLevel-0.5*shlg_floorThk z=shlg_floorPos
 
-      Create QTWO
-      Position QTWO in CAVE z=shlq_q0+shlq_q2+shlq_dz2/2.0
+      Create MGMT
+      Position MGMT in CAVE x= shlq_Xoffset y=0 z=shlq_q0-shlq_DzeroL+shlq_MotherL/2.0 AlphaY= shlq_Angle
+      Position MGMT in CAVE x=-shlq_Xoffset y=0 z=shlq_q0-shlq_DzeroL+shlq_MotherL/2.0 AlphaY=-shlq_Angle
 
-      Create QTHR
-      Position QTHR in CAVE z=shlq_q0+shlq_q3+shlq_dz3/2.0
 
 *
 * -----------------------------------------------------------------------------
@@ -103,14 +129,14 @@ Block SHLD is the shield mother volume in the STAR cave
       Medium    Standard
       Attribute SHLD   Seen=1  colo=2
 
-      SHAPE     BOX    dx=shlg_dx dy=shlg_dy dz=shlg_dz
+      SHAPE     BOX    dx=shlg_dx dy=ShieldHalfHeight dz=shlg_dz
 
       Create    SHBS
 
-      Position  SHBS x=+shlg_dx-shlg_baseDx y=shlg_baseLevel+shlg_baseDy z=0
-      Position  SHBS x=-shlg_dx+shlg_baseDx y=shlg_baseLevel+shlg_baseDy z=0
+      Position  SHBS x=+shlg_dx-shlg_baseDx y=-ShieldHalfHeight+shlg_baseDy z=0
+      Position  SHBS x=-shlg_dx+shlg_baseDx y=-ShieldHalfHeight+shlg_baseDy z=0
 
-      Yslab = shlg_baseLevel+2.0*shlg_baseDy+shlg_slabDy
+      Yslab = -ShieldHalfHeight+2.0*shlg_baseDy+shlg_slabDy
 
       Create    SHLS
       Position  SHLS x= shlg_slabX y=Yslab z=-shlg_dz+shlg_slabDz
@@ -118,7 +144,7 @@ Block SHLD is the shield mother volume in the STAR cave
       Create    SHBI
       Position  SHBI x=0.0 y=Yslab z=shlg_slabDz
 
-      Yfi = shlg_baseLevel+2.0*shlg_baseDy+2.0*shlg_slabDy+shlg_fiDy
+      Yfi = -ShieldHalfHeight+2.0*(shlg_baseDy+shlg_slabDy)+shlg_fiDy
 
       Create    SHFI
       Position  SHFI x=0.0 y=Yfi z=-shlg_dz+shlg_fiDz
@@ -126,12 +152,23 @@ Block SHLD is the shield mother volume in the STAR cave
 *
 EndBlock
 * -----------------------------------------------------------------------------
+Block SFLR is the floor
+      Attribute SFLR   Seen=1  colo=3
+
+      component Si  Z=14 A=28.08  W=1
+      component O2  Z=8  A=16     W=2
+      Mixture   ShieldConc  dens=2.5    " PDG: absl=67.4/2.5 radl=10.7
+      Medium    Standard
+
+      Shape BOX dx=shlg_floorWidth/2.0 dy=shlg_floorThk/2.0 dz=shlg_floorLen/2.0
+EndBlock
+* -----------------------------------------------------------------------------
 Block SHBS is the shield base
       Attribute SHBS   Seen=1  colo=3
 
       component Si  Z=14 A=28.08  W=1
       component O2  Z=8  A=16     W=2
-      Mixture   ShieldConc  dens=2.5    " PDG: absl=67.4/2.5 radl=10.7
+      Mixture   BaseConc  dens=2.5    " PDG: absl=67.4/2.5 radl=10.7
       Medium    Standard
 
       SHAPE     BOX    dx=shlg_baseDx dy=shlg_baseDy dz=shlg_dz
@@ -139,7 +176,7 @@ EndBlock
 
 * -----------------------------------------------------------------------------
 Block SHLS is the lateral slab
-      Material  ShieldConc
+      Material  BaseConc
       Attribute SHBS   Seen=1  colo=3
 
       Shape BOX dx=shlg_dx dy=shlg_slabDy dz=shlg_slabDz
@@ -158,7 +195,7 @@ Block SHFI is the forward iron slab
 
       Shape BOX dx=shlg_dx dy=shlg_fiDy dz=shlg_fiDz
       Create SHOL
-      Position SHOL y=-shlg_fiDy+shlg_hole
+      Position SHOL y=-shlg_fiDy+shlg_holeY
 
 EndBlock
 * -----------------------------------------------------------------------------
@@ -166,7 +203,34 @@ Block SHOL is the hole in the forward iron slab
       Material  Air
       Attribute SHOL   Seen=1  colo=6
 
-      Shape BOX dx=shlg_hole dy=shlg_hole dz=shlg_fiDz
+      Shape BOX dx=shlg_holeX dy=shlg_holeY dz=shlg_fiDz
+EndBlock
+* -----------------------------------------------------------------------------
+Block MGMT is the magnet mother
+      Material  Air
+      Attribute MGMT   Seen=1  colo=3
+
+      Shape TUBE Rmin=0.0 Rmax=shlq_MotherR dZ=shlq_MotherL/2.0
+
+      Create DZER
+      Position DZER in MGMT z=-shlq_MotherL/2.0+shlq_DzeroL/2.0
+
+      Create QONE
+      Position QONE in MGMT z=-shlq_MotherL/2.0+(shlq_q1+shlq_DzeroL)+shlq_dz1/2.0
+
+      Create QTWO
+      Position QTWO in MGMT z=-shlq_MotherL/2.0+(shlq_q2+shlq_DzeroL)+shlq_dz2/2.0
+
+      Create QTHR
+      Position QTHR in MGMT z=-shlq_MotherL/2.0+(shlq_q3+shlq_DzeroL)+shlq_dz3/2.0
+
+EndBlock
+* -----------------------------------------------------------------------------
+Block DZER is the D0 yoke
+      Material  Iron
+      Attribute DZER   Seen=1  colo=1
+
+      Shape TUBE Rmin=shlq_DzeroRi Rmax=shlq_DzeroRo dZ=shlq_DzeroL/2.0
 EndBlock
 * -----------------------------------------------------------------------------
 Block QONE is the Q1 yoke
