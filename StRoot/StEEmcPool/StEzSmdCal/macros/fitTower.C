@@ -271,7 +271,7 @@ float fitGausLand(TH1F *h) {
   float x1=xcentd-10;
   float x2=xcentd*2.;
   if(x1<0) x1=0;
-  if(x2<xcentd)+10 x2=xcentd+10; 
+  if(x2<xcentd) x2=xcentd+10; 
 
   h->Fit(funcd,"R","",x1,x2);
   //h->Fit(funcd,"R","",20,70);
