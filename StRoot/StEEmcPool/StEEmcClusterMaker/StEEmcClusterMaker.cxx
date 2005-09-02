@@ -6,8 +6,8 @@
  * and smd strips.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/30 21:40:29 $
- * $Revision: 1.5 $
+ * $Date: 2005/09/02 02:06:39 $
+ * $Revision: 1.6 $
  *
  * \section steemcclustermaker_towers Tower, pre- and postshower algorithm
  *
@@ -328,7 +328,6 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 
   Int_t max_extent = mMaxExtent;
 
-
   /// Loop over all sectors
   for ( Int_t sector=0; sector<12; sector++ ) 
     /// Loop over all planes
@@ -348,7 +347,6 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
   	/// Order in descending energy
     	std::reverse(strips.begin(),strips.end());
 
-
 	/// Copy energy of all hit strips into an array
 	StEEmcStripVec_t::iterator istrip=strips.begin();
 	while ( istrip != strips.end() ) {
@@ -356,13 +354,13 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	    istrip++;
 	    continue;
 	  }
-
 	  energy[ (*istrip).index() ] = (*istrip).energy();
 	  istrip++;
 	}
 	
 	/// We'll flag each seed strip
 	std::vector<Bool_t> seed_flags( strips.size(), false );
+
 
 	/// Iterate over strips and find seeds
 	Int_t nstrip=0;
@@ -436,12 +434,10 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	      if ( 0.05 * eseed > floor[i] ) floor[i] = 0.05 * eseed;
 
 	  }
-
 #endif
 	  istrip++;
 
 	}// found all seed strips
-
 
 	/// Now for each seed strip, add all contiguous, 
 	/// adjacent SMD strips out to +/- 3 strips on 
@@ -469,9 +465,12 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	  /// And give it the strip
 	  cluster.add( (*iseed) );
 
+	  Int_t ind_max = TMath::Min(287,index+max_extent); 
+	  Int_t ind_min = TMath::Max(0,  index-max_extent); 
+
 	  /// Now go +/- 3 strips on either side and add them
 	  /// to the cluster, respecting continuity etc...
-	  for ( Int_t i=index+1; i<=index+max_extent; i++ ) {
+	  for ( Int_t i=index+1; i<=ind_max; i++ ) {
 	    /// Get the strip
 	    StEEmcStrip strip=mEEanalysis->strip(sector,plane,i);
 	    /// Break if not continuous (and not dead)
@@ -487,7 +486,7 @@ Bool_t StEEmcClusterMaker::buildSmdClusters()
 	    /// Add to cluster
 	    cluster.add(strip);	    	    
 	  }
-	  for ( Int_t i=index-1; i>=index-max_extent; i-- ) {
+	  for ( Int_t i=index-1; i>=ind_min; i-- ) {
 	    /// Get the strip
 	    StEEmcStrip strip=mEEanalysis->strip(sector,plane,i);
 	    /// Break if not continuous (and not dead)
