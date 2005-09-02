@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.114 2005/08/16 00:56:13 potekhin Exp $
+* $Id: geometry.g,v 1.115 2005/09/02 18:20:35 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.115  2005/09/02 18:20:35  potekhin
+* Added separate config variables for the Quad section
+* (which includes D0) -- way upstream area
+*
 * Revision 1.114  2005/08/16 00:56:13  potekhin
 * Modified the development tag DEV2005 to configure the
 * geometry for the shielding studies. Added steering for
@@ -507,7 +511,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld
+              shld,quad
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -537,7 +541,7 @@
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
-              ShldConfig
+              ShldConfig, QuadConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -560,6 +564,7 @@
 *             SupoConfig  ! FTPC support
 *             FtpcConfig  ! FTPC
 *             ShldConfig  ! Beam shield
+*             QuadConfig  ! All magnets from D0 and up
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -609,6 +614,7 @@ replace[;ON#{#;] with [
    PhmdConfig  = 0 ! No Photon multiplicity detectorby default
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE, 3=with pipe support
+   QuadConfig  = 0 ! No D0 and quads by default
    ShldConfig  = 0 ! No Beam Shield by default
    SisdConfig  = 0 ! No Silicon strip by default
    SupoConfig  = 0 ! 0 (def) old buggy version, 1=correction
@@ -626,7 +632,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -1675,8 +1681,13 @@ If LL>1
                   "svt: 3 layers ";
 
                      CaveConfig = 2; " longer cave with shielding "
+
                      ShldConfig = 1; " shield configuration "
                      shld=on;
+
+                     QuadConfig = 1; " magnets configuration "
+                     quad=on;
+
                      zcal=off;
 
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -1852,9 +1863,10 @@ If LL>1
    call AgDETP add ('pipv.pipeConfig=',pipeConfig,2);
    if (pipe)        Call pipegeo
 
-* Upstream and shield
+* Upstream (DX), shield, and D0+Q1+Q2+Q3
    if (upst)        Call upstgeo
    if (shld)        Call shldgeo
+   if (quad)        Call quadgeo
 
 * --- 
    Call AGSFLAG('SIMU',2)
