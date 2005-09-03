@@ -13,15 +13,15 @@ fitPrePost() {
   //  f=new TFile("june18.hist.root");
   // f=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect5.hist.root");
 
-  TH1F *h1=new TH1F("mpv","MPV from Pres-1, MIP gated; MPV of ADC-ped",35,-5,65); 
-  TH1F *h2=new TH1F("mpvE","relative error of MPV from Pres-1, MIP gated; err(MPV)/MPV ",50,0,0.5); 
+  TH1F *h1=new TH1F("mpv","MPV  MIP gated; MPV of ADC-ped",35,-5,65); 
+  TH1F *h2=new TH1F("mpvE","relative error of MPV , MIP gated; err(MPV)/MPV ",50,0,0.5); 
 
-  TH1F *h3=new TH1F("mpvS","relative width of L-peak, from Pres-1, MIP gated; sigma/MPV",25,0.,1.); 
+  TH1F *h3=new TH1F("mpvS","relative width of L-peak,  MIP gated; sigma/MPV",25,0.,1.); 
 
   
- TH2F *h4=new TH2F("mpv2","MPV from Pres-1; gated w/ MIP ; inclusive spectrum;",25,0,50,25,0,25); 
+ TH2F *h4=new TH2F("mpv2","MPV from ; gated w/ MIP ; inclusive spectrum;",25,0,50,25,0,25); 
  
-  char cT='T';
+  char cT='R';
   openAll(cT);
   
   const float feta[]=
@@ -34,7 +34,7 @@ fitPrePost() {
   int eta;
   char sub='C';
   
-  for(eta=1;eta<=1;eta++) {
+  for(eta=1;eta<=12;eta++) {
     int nErr=0, nOK=0;
     float mpvL=999, mpvH=0; 
     h1->Reset(); h2->Reset(); h3->Reset(); h4->Reset(); 
@@ -268,7 +268,7 @@ void openAll(char cT) {
   int i;
   char txt[200];
   for(i=0;i<12;i++) {
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2-out/sum-sect%d.hist.root",i+1);
+    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }
