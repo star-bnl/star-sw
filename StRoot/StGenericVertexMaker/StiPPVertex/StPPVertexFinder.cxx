@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.14 2005/08/30 22:08:43 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.15 2005/09/03 16:41:53 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -242,7 +242,7 @@ StPPVertexFinder::printInfo(ostream& os) const
 {
   os << "StPPVertexFinder ver=1 - Fit Statistics:" << endl;
   
-  os << "StPPVertexFinder::result "<<mVertexData.size()<<" vertices found\n" << endm;
+  os << "StPPVertexFinder::result "<<mVertexData.size()<<" vertices found\n" << endl;
 
   int nTpcM=0, nTpcV=0;
   uint i;
@@ -1046,6 +1046,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.15  2005/09/03 16:41:53  balewski
+ * bug fix: <<endm replaced with <<endl
+ *
  * Revision 1.14  2005/08/30 22:08:43  balewski
  * drop '*' from declaration of   mTrackData &  mVertexData
  *
