@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.479 2005/08/31 20:08:18 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.480 2005/09/05 17:00:28 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -389,11 +389,11 @@ Int_t StBFChain::Instantiate()
     }
     
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pMk->DoV0();";                                  // Set StrangeMuDstMaker parameters
-      cmd += "pMk->DoXi();";
-      cmd += "pMk->DoKink();";
-      cmd += "pMk->SetNoKeep();";                            // Set flag for output OFF
+      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
+      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
+      cmd += "pSMMk->DoXi();";
+      cmd += "pSMMk->DoKink();";
+      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
       ProcessLine(cmd);
     }
     
@@ -407,9 +407,9 @@ Int_t StBFChain::Instantiate()
     //  CMuDST         -> regular MuDST only
     //  ezTree,CMuDST  -> both
     if (maker == "StMuDstMaker" && GetOption("ezTree") ){
-      TString cmd(Form("StMuDstMaker *pMk = (StMuDstMaker *) %p;",mk));
-      if ( ! GetOption("CMuDST")) cmd += "pMk->SetStatus(\"*\",0);"; 
-      cmd += "pMk->SetStatus(\"EztAll\",1);";
+      TString cmd(Form("StMuDstMaker *pMuMk = (StMuDstMaker *) %p;",mk));
+      if ( ! GetOption("CMuDST")) cmd += "pMuMk->SetStatus(\"*\",0);"; 
+      cmd += "pMuMk->SetStatus(\"EztAll\",1);";
       ProcessLine(cmd);
     }
 

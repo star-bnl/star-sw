@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.2 2005/08/29 21:57:16 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.3 2005/09/05 17:00:38 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1574,7 +1574,12 @@ Int_t StBFChain::Instantiate()
       //pars->useSsd=kTRUE;         // use SSD in Sti
       
       if (GetOption("SvtIT")) cmd += "pars->activeSvt=kTRUE;";
+
       //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
+      if (GetOption("SsdIT")){
+	cmd += "pars->useSsd=kTRUE;";
+	cmd += "pars->activeSsd=kTRUE;";
+      }
       if (GetOption("FtpcIT")){
 	cmd += "pars->useFtpc=kTRUE;";
 	cmd += "pars->activeFtpc=kTRUE;";
@@ -1665,11 +1670,11 @@ Int_t StBFChain::Instantiate()
     }
     
     if (maker == "StStrangeMuDstMaker" && GetOption("CMuDST")&& GetOption("StrngMuDST") ) {
-      TString cmd(Form("StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) %p;",mk));
-      cmd += "pMk->DoV0();";                                  // Set StrangeMuDstMaker parameters
-      cmd += "pMk->DoXi();";
-      cmd += "pMk->DoKink();";
-      cmd += "pMk->SetNoKeep();";                            // Set flag for output OFF
+      TString cmd(Form("StStrangeMuDstMaker *pSMMk = (StStrangeMuDstMaker*) %p;",mk));
+      cmd += "pSMMk->DoV0();";                                 // Set StrangeMuDstMaker parameters
+      cmd += "pSMMk->DoXi();";
+      cmd += "pSMMk->DoKink();";
+      cmd += "pSMMk->SetNoKeep();";                            // Set flag for output OFF
       ProcessLine(cmd);
     }
     
@@ -1683,9 +1688,9 @@ Int_t StBFChain::Instantiate()
     //  CMuDST         -> regular MuDST only
     //  ezTree,CMuDST  -> both
     if (maker == "StMuDstMaker" && GetOption("ezTree") ){
-      TString cmd(Form("StMuDstMaker *pMk = (StMuDstMaker *) %p;",mk));
-      if ( ! GetOption("CMuDST")) cmd += "pMk->SetStatus(\"*\",0);"; 
-      cmd += "pMk->SetStatus(\"EztAll\",1);";
+      TString cmd(Form("StMuDstMaker *pMuMk = (StMuDstMaker *) %p;",mk));
+      if ( ! GetOption("CMuDST")) cmd += "pMuMk->SetStatus(\"*\",0);"; 
+      cmd += "pMuMk->SetStatus(\"EztAll\",1);";
       ProcessLine(cmd);
     }
 
