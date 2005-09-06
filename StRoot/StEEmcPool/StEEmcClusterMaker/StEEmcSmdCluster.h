@@ -85,6 +85,10 @@ class StEEmcSmdCluster : public TObject {
   /// Returns the specified smd strip w/in the cluster
   StEEmcStrip strip(Int_t s){ return mStrips[s]; }
 
+  /// Returns the seed strip (by convention, the first
+  /// strip added to the cluster).
+  StEEmcStrip seed(){ assert(mStrips.size()>0); return mStrips[0]; } 
+
   /// Return the plane of the cluster
   Int_t plane(){ return mPlane; }
   /// Return the sector of the cluster
