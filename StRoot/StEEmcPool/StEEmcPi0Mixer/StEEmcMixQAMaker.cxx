@@ -74,6 +74,7 @@ Int_t StEEmcMixQAMaker::Init()
 
 
   hNcandidates = new TH1F("hNcandidates","Number of pairs",30,0.,30.);
+  hNcandidatesR = new TH1F("hNcandidatesR","Number of pairs [0.1,0.18] per sector",12,0.,12.);
 
   hMassRall=new TH1F("hMassRall","Dipoint invariant mass, integrated",360,0.,3.6);
   hZvertexRall=new TH1F("hZvertexRall","Event vertex",150,-150.,150.);
@@ -183,7 +184,6 @@ Int_t StEEmcMixQAMaker::Make()
 
   hNcandidates -> Fill( mEEmixer -> numberOfCandidates() );
 
-
   ///
   /// Use standard list of real points
   ///
@@ -269,6 +269,8 @@ Int_t StEEmcMixQAMaker::Make()
 	  /// Gated quantities
 	  if ( pair.mass() > mMin && pair.mass() <= mMax )
 	    {
+
+		hNcandidatesR->Fill( pair.point(0).sector() ) ;
 
 	      /// pt binned
 	      if ( bin>=0 ) hZvertexR[sec][bin] -> Fill( pair.vertex().Z() );
