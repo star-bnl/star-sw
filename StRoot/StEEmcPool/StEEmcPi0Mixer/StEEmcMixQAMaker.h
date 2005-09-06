@@ -63,6 +63,7 @@ class StEEmcMixQAMaker : public StMaker
   Bool_t mBackground; /**<-- specifies whether or not we are histograming a mixed event background */
 
   TH1F *hNcandidates; /**<-- number of reconstructed pi0 candidates per event */
+  TH1F *hNcandidatesR; /**<-- number of reconstructed pi0 candidtaes per sector [0.1,0.18] */ 
 
   /// Y vs X of pi0 pairs
   std::vector<TH2F *> hYXpair;  //! Y vs X of pi0 pair
