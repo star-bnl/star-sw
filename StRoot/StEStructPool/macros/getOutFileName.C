@@ -1,4 +1,5 @@
-char* getOutFileName(const char* baseDir, const char* jobName, const char* type){
+char* getOutFileName(const char* baseDir, const char* jobName,
+                     const char* type,    const char* centTag){
 
     char* jobid=gSystem->Getenv("JOBID");
 
@@ -30,29 +31,33 @@ char* getOutFileName(const char* baseDir, const char* jobName, const char* type)
     createDir+=outArea.Data();
     system(createDir.Data());
  
-    char* exten[]={".root",".estruct.root",".txt"};
+    char* exten[]={".root",".root",".txt"};
     int iext = 0;
        
-    TString outputFile(outArea.Data());
+    TString outputFileFile(outArea.Data());
     if(strstr(type,"cut")){
-      outputFile+="cutHists";
+      outputFileFile+="cutHists";
+      outputFileFile+=centTag;
     } else if(strstr(type,"data")){
-      outputFile+="dataHists";
+      outputFileFile+="dataHists";
+      outputFileFile+=centTag;
+    } else if(strstr(type,"QA")){
+      outputFileFile+="QA";
     } else if(strstr(type,"stats")){
-      outputFile+="stats";
+      outputFileFile+="stats";
       iext=2;
     } else {
-      outputFile+="events";
+      outputFileFile+="events";
       iext=1;
     }
 
-    outputFile+="_";
-    if(ptr)outputFile+=ptr;
-    outputFile+=exten[iext];
+    outputFileFile+="_";
+    if(ptr)outputFileFile+=ptr;
+    outputFileFile+=exten[iext];
 
     delete [] JobID;
-    char* retVal=new char[strlen(outputFile.Data())+1];
-    strcpy(retVal,outputFile.Data());
+    char* retVal=new char[strlen(outputFileFile.Data())+1];
+    strcpy(retVal,outputFileFile.Data());
   
     return retVal;
 };
