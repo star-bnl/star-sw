@@ -1,0 +1,401 @@
+<jobDescription>
+    <jobType>
+        <Hijing><!-- Of course we need the Hijing parameters. --><hijingParams>
+                <hEnergy Comment=" Frame/Energy                    ">
+                    <charValue widget="entry"> 'CMS' </charValue>
+                    <floatValue widget="entry"> 200.0 </floatValue>
+                </hEnergy>
+                <hProjectile Comment=" Projectile  type/A/Z            ">
+                    <charValue widget="entry"> 'A' </charValue>
+                    <intValue widget="entry"> 197 </intValue>
+                    <intValue widget="entry">  79 </intValue>
+                </hProjectile>
+                <hTarget Comment=" Target      type/A/Z            ">
+                    <charValue widget="entry"> 'A' </charValue>
+                    <intValue widget="entry"> 197 </intValue>
+                    <intValue widget="entry">  79 </intValue>
+                </hTarget>
+                <hImpact Comment=" Impact parameter min/max (fm)   ">
+                    <floatValue widget="entry">  0.0 </floatValue>
+                    <floatValue widget="entry"> 20.0 </floatValue>
+                </hImpact>
+                <hQuench Comment=" Jet quenching (1=yes/0=no)      ">
+                    <intValue widget="entry"> 1 </intValue>
+                </hQuench>
+                <hHardScattering Comment=" Hard scattering/pt jet          ">
+                    <intValue widget="entry"> 0 </intValue>
+                    <floatValue widget="entry"> 2.0 </floatValue>
+                </hHardScattering>
+                <hMaxJets Comment=" Max # jets per nucleon (D=10)   ">
+                    <intValue widget="entry"> 0 </intValue>
+                </hMaxJets>
+                <hIHPR2_11_12 Comment=" Set ihpr2(11) and ihpr2(12)     ">
+                    <intValue widget="entry"> 1 </intValue>
+                    <intValue widget="entry"> 0 </intValue>
+                </hIHPR2_11_12>
+                <hIHPR2_21_18 Comment=" Set ihpr2(21) and ihpr2(18)     ">
+                    <intValue widget="entry"> 0 </intValue>
+                    <intValue widget="entry"> 0 </intValue>
+                </hIHPR2_21_18>
+                <hBProduction Comment=" set B production                ">
+                    <floatValue widget="entry"> 1.5 </floatValue>
+                </hBProduction>
+                <hIStat Comment=" istat=1 old istat&gt;1 new         ">
+                    <intValue widget="entry"> 2 </intValue>
+                </hIStat>
+            </hijingParams>
+        </Hijing>
+    </jobType>
+    <standardElements>
+        <jobControl>
+            <jobName widget="entry" id="jobName">hijing200JOff</jobName>
+            <outputDir widget="entry" id="outputDir">$env(MYDATA)/Hijing/auau200/JetOff</outputDir>
+            <starLibVersion widget="entry" id="starLibVersion">$env(STAR_VERSION)</starLibVersion>
+            <localDir widget="entry" id="localDir">/afs/rhic/star/users/prindle/star/fluctuations</localDir>
+            <eventsPerJob widget="entry" id="eventsPerJob">10000</eventsPerJob>
+            <jobPurpose widget="text">Generic run of AuAu Hijing at 200GeV with no jets.
+            </jobPurpose>
+        </jobControl>
+<!-- To drive everything we need an xml file for star-submit. --><starSubmit nProcesses="20" simulateSubmission="true">
+            <command>
+    starver <refer refersTo="starLibVersion"/>
+
+    cd <refer refersTo="localDir"/>
+
+    root4star -q -b <refer refersTo="outputDir"/>
+/scripts/doEStruct.C\(\"\",\"$SCRATCH\",\"<refer refersTo="outputDir"/>
+/scripts\",<refer refersTo="eventsPerJob"/>
+\)
+                        </command>
+            <stdout URL="file:logs/$JOBID.log"/>
+            <output fromScratch="data/*/*.root" toURL="file:data/"/>
+            <output fromScratch="cuts/*/*.root" toURL="file:cuts/"/>
+            <output fromScratch="QA/*.root" toURL="file:QA/"/>
+            <output fromScratch="stats/*.txt" toURL="file:stats/"/>
+        </starSubmit>
+<!-- Need appropriate event cuts. --><eventCuts>
+            <eventCut Comment="centrality cut, number of tracks in |eta| &lt; 0.5">
+                <cutName>centrality</cutName>
+                <Value widget="entry">1</Value>
+                <Value widget="entry">2000</Value>
+            </eventCut>
+            <eventCut Comment="number of tracks passing track cuts">
+                <cutName>numTracks</cutName>
+                <Value widget="entry">1</Value>
+                <Value widget="entry">2000</Value>
+            </eventCut>
+        </eventCuts>
+<!-- And appropriate track cuts. --><trackCuts>
+            <trackCut Comment="charge cut">
+                <cutName>Charge</cutName>
+                <Value widget="entry">-1</Value>
+                <Value widget="entry">1</Value>
+            </trackCut>
+            <trackCut Comment="pt cut">
+                <cutName>Pt</cutName>
+                <Value widget="entry">0.15</Value>
+                <Value widget="entry">2.0</Value>
+            </trackCut>
+            <trackCut Comment="phi cut">
+                <cutName>Phi</cutName>
+                <Value widget="entry">-1</Value>
+                <Value widget="entry">1</Value>
+            </trackCut>
+            <trackCut Comment="eta cut">
+                <cutName>Eta</cutName>
+                <Value widget="entry">-1</Value>
+                <Value widget="entry">1</Value>
+            </trackCut>
+        </trackCuts>
+<!-- The doEStruct macro is complicated.
+             The main part should is in a generic file which we merge in. --><doEStructMacro>
+            <analysisType id="analysisType" widget="entry">StEStructFluctuation</analysisType>
+            <centralityInEtaOne id="centralityInEtaOne" widget="entry">false</centralityInEtaOne>
+            <cutBinMode id="cutBinMode" widget="entry">57</cutBinMode>
+            <libraries id="libraries" widget="none">
+    gSystem-&gt;Load("THijing");
+    sprintf(buffer,"%s/hijev.inp",scriptDir);
+    THijing *hijingGenerator = new THijing(buffer);
+            </libraries>
+            <centralities id="centralities" widget="entry">0.0 6.0 8.6 10.6 12.4 14.0 20.0</centralities>
+            <ptCuts id="ptCuts" widget="entry">0.15 0.5 2.0</ptCuts>
+            <ptCentralities id="ptCentralities" widget="entry">0.0 6.0 8.6 10.6 12.4 14.0 20.0</ptCentralities>
+            <declareSimHistograms id="declareSimHistograms" widget="text"><!-- A few Hijing specific histogram declarations. -->
+        TH1D *impact   = new TH1D("impact","impact",100,0.0,20.0);
+        TH1D *binary   = new TH1D("binary","binary",2000,0.5,2000.5);
+        TH1D *participant = new TH1D("participant","participant",500,0.5,500.5);
+
+        TH1D **bin = new TH1D*[mbNBins-1];
+        TH1D **part = new TH1D*[mbNBins-1];
+        for (int i=0;i&lt;mbNBins-1;i++) {
+            sprintf(buffer,"binary_%i",i);
+            bin[i]  = new TH1D(buffer,buffer,2000,0.5,2000.5);
+            sprintf(buffer,"participant_%i",i);
+            part[i] = new TH1D(buffer,buffer,500,0.5,500.5);
+        }
+            </declareSimHistograms>
+            <fillSimHistograms id="fillSimHistograms" widget="text">
+        if (analysis-&gt;mCurrentEvent) {
+            impact-&gt;Fill(hijingGenerator-&gt;GetImpactParameter());
+            binary-&gt;Fill(hijingGenerator-&gt;GetBinaryCollisions());
+            participant-&gt;Fill(hijingGenerator-&gt;GetParticipants());
+            iCen = analysis-&gt;mCurrentEvent-&gt;Centrality();
+            if (iCen &gt;= 0) {
+                bin[iCen]-&gt;Fill(hijingGenerator-&gt;GetBinaryCollisions());
+                part[iCen]-&gt;Fill(hijingGenerator-&gt;GetParticipants());
+            }
+        }
+            </fillSimHistograms>
+            <saveSimHistograms id="saveSimHistograms" widget="text">
+    impact-&gt;Write();
+    binary-&gt;Write();
+    participant-&gt;Write();
+    for (int i=0;i&lt;mbNBins-1;i++) {
+        bin[i]-&gt;Write();
+        part[i]-&gt;Write();
+    }
+            </saveSimHistograms>
+            <declareReader id="declareReader" widget="text"><!-- Reader depends on type of data. -->
+    StEStructHijing** readers = new StEStructHijing*[numberOfAnalyses];
+    if (!strcmp(analysisType,"StEStructFluctuation")) {
+        readers[0] = new StEStructHijing(hijingGenerator,ecuts[0],tcuts[0],skipMake[0],centralityInEtaOne,-1,-1);
+    } else {
+        for (int i=0;i&lt;numberOfAnalyses;i++) {
+            readers[i] = new StEStructHijing(hijingGenerator,ecuts[i],tcuts[i],skipMake[i],centralityInEtaOne,i,-1);
+        }
+    }
+            </declareReader>
+            <main widget="text">
+void doEStruct( const char* filelist,
+                const char* outputDir,
+                const char* scriptDir,
+                int maxNumEvents = 1000 ) {
+
+    char cutFile[1024];
+    char buffer[1024];
+
+    const char* scratchDir = <variable stringInLine="jobName"/>
+
+
+    sprintf(cutFile,"%s/CutsFile.txt",scriptDir);
+
+    gROOT-&gt;LoadMacro("load2ptLibs.C");
+    load2ptLibs();
+    gROOT-&gt;LoadMacro("getOutFileName.C");
+    gROOT-&gt;LoadMacro("support.C");
+
+    <variable refersTo="libraries"/>
+
+
+
+    // simple (global) centrality definition ...not persistant to event file.
+    StEStructCentrality* cent=StEStructCentrality::Instance();
+    const double mbBins[] = <variable listOf="centralities"/>
+
+
+    int mbNBins = <variable sumOf="centralities"/>
+
+
+    cent-&gt;setCentralities(mbBins,mbNBins);
+    <!-- Histograms to keep track of centrality definitions. -->
+    TH1D *cenClass   = new TH1D("cenClass","cenClass",mbNBins,-1.5,mbNBins-0.5);
+    TH1D *impactDefs   = new TH1D("impactDefs","impactDefs",mbNBins,0.5,mbNBins+0.5);
+    for (int i=0;i&lt;mbNBins;i++) {
+        impactDefs-&gt;Fill(i,mbBins[i]);
+    }
+
+
+    char *analysisType = <variable stringInLine="analysisType"/>
+
+
+
+    int numberOfAnalyses;
+    if (!strcmp(analysisType,"StEStructFluctuation")) {
+        numberOfAnalyses = 1;
+        const  double ptCut[] = <variable listOf="ptCuts"/>
+
+
+        int mbNPts = <variable sumOf="ptCuts"/>
+
+
+        const  double ptMultCut[] = <variable listOf="ptCentralities"/>
+
+
+        int mbNPtBins = <variable sumOf="ptCentralities"/>
+
+
+        cent-&gt;setPts(ptCut,mbNPts,ptMultCut,mbNPtBins);
+        <!-- Histograms to keep track of pt-centrality definitions. -->
+        TH1D *ptCenClass = new TH1D("ptCenClass","ptCenClass",mbNPtBins,-1.5,mbNPtBins-0.5);
+        TH1D *ptRanges     = new TH1D("ptRanges","ptRanges",mbNPts,-0.5,mbNPts+0.5);
+        for (int i=0;i&lt;mbNPts;i++) {
+            ptRanges-&gt;Fill(i,ptCut[i]);
+        }
+        TH1D *impactPtDefs = new TH1D("impactPtDefs","impactPtDefs",mbNPtBins,0.5,mbNPtBins+0.5);
+        for (int i=0;i&lt;mbNPtBins;i++) {
+            impactPtDefs-&gt;Fill(i,ptMultCut[i]);
+        }
+        StEStructFluctAnal**       analysis = new StEStructFluctAnal*[numberOfAnalyses];
+    } else if (!strcmp(analysisType,"StEStructCorrelation")) {
+        numberOfAnalyses = mbNBins;
+        // choose the mode for the binning
+        int cutBinMode = <variable intInLine="cutBinMode"/>
+
+
+        StEStructCutBin* cb=StEStructCutBin::Instance();
+        cb-&gt;setMode(cutBinMode);
+        StEStruct2ptCorrelations** analysis = new StEStruct2ptCorrelations*[numberOfAnalyses];
+    }
+
+    <variable refersTo="declareHistograms"/>
+
+
+
+
+    // Need an EStruct maker.
+    StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker(analysisType);
+
+    // Set up the Analysis codes and initialize the cuts.
+
+    bool centralityInEtaOne = <variable boolInLine="centralityInEtaOne"/>
+
+
+    char** dataDirs             = getDirNames("data",numberOfAnalyses);
+    char** cutDirs              = getDirNames("cuts",numberOfAnalyses);
+    char** QADirs               = getDirNames("QA",numberOfAnalyses);
+    char** outputFile           = new char*[numberOfAnalyses];
+    StEStructEventCuts** ecuts  = new StEStructEventCuts*[numberOfAnalyses];
+    StEStructTrackCuts** tcuts  = new StEStructTrackCuts*[numberOfAnalyses];
+    bool* skipMake = new bool[numberOfAnalyses];
+    for(int i=0;i&lt;numberOfAnalyses;i++){
+        ecuts[i]      = new StEStructEventCuts(cutFile);
+        tcuts[i]      = new StEStructTrackCuts(cutFile);
+        skipMake[i]   = true;
+        outputFile[i] = getOutFileName(outputDir,scratchDir,dataDirs[i]);
+    }
+    skipMake[0] = false;
+
+    <variable refersTo="declareReader"/>
+
+
+
+    //  build the numberOfAnalyses readers and numberOfAnalyses analysis objects
+    //  analysis = analysis interface and contains pair-cut object (needs file)
+    for(int i=0;i&lt;numberOfAnalyses;i++){
+        if (!strcmp(analysisType,"StEStructFluctuation")) {
+            analysis[i] = new StEStructFluctAnal();
+            analysis[i]-&gt;setCutFile(cutFile,cent);
+        } else if (!strcmp(analysisType,"StEStructCorrelation")) {
+            analysis[i] = new StEStruct2ptCorrelations();
+            analysis[i]-&gt;setCutFile(cutFile);
+        }
+        analysis[i]-&gt;setOutputFileName(outputFile[i]);
+        estructMaker-&gt;SetReaderAnalysisPair(readers[i],analysis[i]);
+    }
+
+
+    int istat=0, i=0;
+    estructMaker-&gt;Init();
+    estructMaker-&gt;startTimer();
+
+    int counter=0;
+    while (istat!=2) {
+
+        istat=estructMaker-&gt;Make();
+
+        int iCen;
+        int iPtCen;
+        if (analysis[iCen]-&gt;mCurrentEvent) {
+            iCen = analysis[iCen]-&gt;mCurrentEvent-&gt;Centrality();
+            if (iCen &gt; -1) {
+                cenClass-&gt;Fill(iCen);
+            }
+            if (!strcmp(analysisType,"StEStructFluctuation")) {
+                iPtCen = analysis[iCen]-&gt;mCurrentEvent-&gt;PtCentrality();
+                if (iPtCen &gt; -1) {
+                    ptCenClass-&gt;Fill(iPtCen);
+                }
+            }
+        }
+
+        <variable refersTo="fillHistograms"/>
+
+
+
+        i++; counter++;
+        if (counter==100) {
+            cout&lt;&lt;"doing event ="&lt;&lt;i&lt;&lt;endl;
+            counter=0;
+        }
+        if ( maxNumEvents!=0 &amp;&amp; i&gt;=maxNumEvents ) {
+            istat=2;
+        }
+    }
+    estructMaker-&gt;stopTimer();
+    char* statsFileName=getOutFileName(outputDir,scratchDir,"stats");
+    ofstream ofs(statsFileName);
+
+    cout&lt;&lt;endl;
+    estructMaker-&gt;logAnalysisTime(cout);
+    estructMaker-&gt;logInputEvents(cout);
+    estructMaker-&gt;logOutputEvents(cout);
+    estructMaker-&gt;logOutputRate(cout);
+
+    for (int i=0;i&lt;numberOfAnalyses;i++) {
+        ofs&lt;&lt;"  *************** ";
+        ofs&lt;&lt;" Cut Stats for Analysis Number = "&lt;&lt;i;
+        ofs&lt;&lt;"  *************** "&lt;&lt;endl;
+        ecuts[i]-&gt;printCuts(cout);
+        tcuts[i]-&gt;printCuts(cout);
+
+        StEStructPairCuts* pcuts = NULL;
+        if (analysis) {
+            pcuts = &amp;analysis[i]-&gt;getPairCuts();
+            if (pcuts) {
+                pcuts-&gt;printCuts(ofs);
+            } else {
+                ofs&lt;&lt;" No pair cuts for this centrality."&lt;&lt;endl;
+            }
+        }
+
+        // 
+        // --&gt; root cut file
+        // 
+        char  *rootCutFile = getOutFileName(outputDir,scratchDir,cutDirs[i]);
+        TFile *tfc = new TFile(rootCutFile,"RECREATE");
+        ecuts[i]-&gt;writeCutHists(tfc);
+        tcuts[i]-&gt;writeCutHists(tfc);
+        impactDefs-&gt;Write();
+        if (!strcmp(analysisType,"StEStructFluctuation")) {
+            ptRanges-&gt;Write();
+            impactPtDefs-&gt;Write();
+        }
+        if (pcuts) {
+            pcuts-&gt;writeCutHists(tf);
+        }
+        tfc-&gt;Close();
+    }
+    // 
+    // --&gt; root QA file
+    // Only fill QA for fluctuations.
+    // Only have one object in this case.
+    // 
+    if (!strcmp(analysisType,"StEStructFluctuation")) {
+        char  *rootQAFile=getOutFileName(outputDir,scratchDir,QADirs[0]);
+        TFile *tfq = new TFile(rootQAFile,"RECREATE");
+        analysis[0]-&gt;writeQAHists(tfq);
+        cenClass-&gt;Write();
+        ptCenClass-&gt;Write();
+        <variable refersTo="saveHistograms"/>
+
+
+        tfq-&gt;Close();
+    }
+
+    estructMaker-&gt;Finish();
+}
+                        </main>
+        </doEStructMacro>
+    </standardElements>
+</jobDescription>
+

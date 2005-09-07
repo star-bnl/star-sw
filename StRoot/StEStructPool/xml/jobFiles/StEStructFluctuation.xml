@@ -1,0 +1,49 @@
+<!-- I am getting a cr when I resolve a variable which causes the
+     ending ;, " and/or } to be on the following line.
+     To deal with this I put these characters into the transformation.
+     Seems awkward. Also end up with ""; lines in cases where the
+     variable is empty. -->
+<jobDescription>
+    <standardElements>
+        <doEStructMacro>
+            <analysisType id='analysisType' widget='combobox'>StEStructFluctuation</analysisType>
+            <ptCuts id='ptCuts' widget='entry'>0.15 0.5 2.0</ptCuts>
+            <cutModeInit id='cutModeInit' widget='none'>;</cutModeInit>
+            <declarePtDefHistograms id='declarePtDefHistograms' widget='text'>
+    int numberOfAnalyses = 1;
+    cent-&gt;setPts(ptCut,mbNPts,ptMultCut,mbNPtBins);
+    TH1D *ptCenClass = new TH1D("ptCenClass","ptCenClass",mbNPtBins,-1.5,mbNPtBins-0.5);
+    TH1D *ptRanges     = new TH1D("ptRanges","ptRanges",mbNPts,-0.5,mbNPts+0.5);
+    for (int i=0;i&lt;mbNPts;i++) {
+        ptRanges-&gt;Fill(i,ptCut[i]);
+    }
+    TH1D *impactPtDefs = new TH1D("impactPtDefs","impactPtDefs",mbNPtBins,0.5,mbNPtBins+0.5);
+    for (int i=0;i&lt;mbNPtBins;i++) {
+        impactPtDefs-&gt;Fill(i,ptMultCut[i]);
+    }
+    StEStructFluctAnal** analysis = new StEStructFluctAnal*[numberOfAnalyses];
+    StEStructFluctAnal* currentAnalysis;
+            </declarePtDefHistograms>
+            <declareAnalysis id='declareAnalysis' widget='text'>
+        analysis[i] = new StEStructFluctAnal();
+            </declareAnalysis>
+            <getCurrentAnalysis id='getCurrentAnalysis' widget='none'>
+        currentAnalysis = (StEStructFluctAnal *) estructMaker->mCurrentAnalysis;
+            </getCurrentAnalysis>
+            <fillPtDefHistograms id='fillPtDefHistograms' widget='text'>
+            iPtCen = analysis[0]-&gt;mCurrentEvent-&gt;PtCentrality();
+            ptCenClass-&gt;Fill(iPtCen);
+            </fillPtDefHistograms>
+            <pairCutsWrite id='pairCutsWrite' widget='none'>;</pairCutsWrite>
+            <savePtDefHistograms id='savePtDefHistograms' widget='text'>
+        analysis[0]-&gt;writeQAHists(tfq);
+        cenClass-&gt;Write();
+        ptCenClass-&gt;Write();
+        ptRanges-&gt;Write();
+        impactDefs-&gt;Write();
+        impactPtDefs-&gt;Write();
+            </savePtDefHistograms>
+        </doEStructMacro>
+
+    </standardElements>
+</jobDescription>
