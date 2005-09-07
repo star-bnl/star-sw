@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.2 2004/06/25 03:10:28 porter Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.3 2005/09/07 20:18:39 prindle Exp $
  *   
  *
  *
@@ -55,10 +55,11 @@ public:
     void          logAnalysisStats(ostream& os);
 
     void          compiledLoop();
+    StEStructAnalysis* mCurrentAnalysis;
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.2 2004/06/25 03:10:28 porter Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.3 2005/09/07 20:18:39 prindle Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -144,6 +145,13 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.3  2005/09/07 20:18:39  prindle
+ * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   EventCuts.h:   Added trigger cuts including cucu and year 4.
+ *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
+ *                    before making centrality cut.
+ *   TrackCuts:     Random changes. Moved some variables from private to public.o
+ *
  * Revision 1.2  2004/06/25 03:10:28  porter
  * added a new common statistics output and added electron cut with momentum slices
  *

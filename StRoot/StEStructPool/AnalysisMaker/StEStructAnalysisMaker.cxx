@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.1 2003/10/15 18:20:31 porter Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.2 2005/09/07 20:18:35 prindle Exp $
  *
  *************************************************************************
  *
@@ -105,6 +105,7 @@ StEStructAnalysisMaker::Make(){
    //        Thus, an event can only be sent to 1 of the analysis modules.
    //
    //
+   mCurrentAnalysis = 0;
    for(int i=0;i<numReaders;i++){
      if(!(pEStructEvent=mreader[i]->next())){
        if(mreader[i]->done()) return kStEOF;
@@ -112,6 +113,7 @@ StEStructAnalysisMaker::Make(){
        manalysis[i]->doEvent(pEStructEvent);
        mEventProcessedCounter++;
        mEventProcessedPerType[i]++;
+       mCurrentAnalysis = manalysis[i];
        break;
      }
    }
@@ -146,6 +148,13 @@ void StEStructAnalysisMaker::compiledLoop(){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.2  2005/09/07 20:18:35  prindle
+ * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   EventCuts.h:   Added trigger cuts including cucu and year 4.
+ *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
+ *                    before making centrality cut.
+ *   TrackCuts:     Random changes. Moved some variables from private to public.o
+ *
  * Revision 1.1  2003/10/15 18:20:31  porter
  * initial check in of Estruct Analysis maker codes.
  *

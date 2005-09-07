@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.h,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructTrackCuts.h,v 1.2 2005/09/07 20:18:44 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -20,7 +20,7 @@
 
 class StEStructTrackCuts : public StEStructCuts {
 
-protected:
+public:
 
    CutName mflagName;
    CutName mchargeName;
@@ -55,8 +55,6 @@ protected:
   void init();
   void initCuts();
   void initNames();
-
-public:
 
   StEStructTrackCuts();
   StEStructTrackCuts(const char* cutFileName);
@@ -159,11 +157,15 @@ inline bool StEStructTrackCuts::goodEta(float c){
   
 }
 
-inline bool StEStructTrackCuts::goodElectron(float c){
-  mvalues[mnsigmaEName.idx] =c;
-  return ( (mnsigmaE[0]==mnsigmaE[1] && mnsigmaE[0]==0) ||
-      (c>=mnsigmaE[0] && c<=mnsigmaE[1])  ) ;
-  
+inline bool StEStructTrackCuts::goodElectron(float c) {
+    mvalues[mnsigmaEName.idx] =c;
+    if (mnsigmaE[0]==mnsigmaE[1] && mnsigmaE[0]==0) {
+        return true;
+    }
+    if (mnsigmaE[0]<=c && c<=mnsigmaE[1]) {
+        return true;
+    }
+    return false;
 }
 
 inline bool StEStructTrackCuts::goodPion(float c){
@@ -193,6 +195,13 @@ inline bool StEStructTrackCuts::goodProton(float c){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.h,v $
+ * Revision 1.2  2005/09/07 20:18:44  prindle
+ * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   EventCuts.h:   Added trigger cuts including cucu and year 4.
+ *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
+ *                    before making centrality cut.
+ *   TrackCuts:     Random changes. Moved some variables from private to public.o
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *

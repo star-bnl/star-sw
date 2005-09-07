@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.3 2004/09/24 01:41:42 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.4 2005/09/07 20:18:42 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -24,16 +24,30 @@
 #include "StDetectorId.h"
 
 
-StEStructMuDstReader::StEStructMuDstReader(): mMaker(0), mECuts(0), mTCuts(0), mInChain(false) , mAmDone(false){};
-
-
-StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts, bool inChain) : mAmDone(false) { 
-
-    mInChain=inChain;
-    setMuDstMaker(maker,inChain); 
+StEStructMuDstReader::StEStructMuDstReader() {
+    mhasdEdxCuts  = 0;
+    mMaker        = 0;
+    mECuts        = 0;
+    mTCuts        = 0;
+    mInChain      = false;
+    mAmDone       = false;
+    mUseAllTracks = false;
+    mCentBin      = 0;
+};
+StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
+                                           StEStructEventCuts* ecuts,
+                                           StEStructTrackCuts* tcuts,
+                                           bool inChain,
+                                           bool useAllTracks,
+                                           int  centBin) {
+    mhasdEdxCuts  = 0;
+    mMaker        = maker;
     setEventCuts(ecuts);
     setTrackCuts(tcuts);
-
+    mInChain      = inChain;
+    mAmDone       = false;
+    mUseAllTracks = useAllTracks;
+    mCentBin      = centBin;
 };
 
 //-------------------------------------------------------------------------
@@ -45,7 +59,15 @@ void StEStructMuDstReader::setMuDstMaker(StMuDstMaker* maker, bool inChain){
 };
 
 void StEStructMuDstReader::setEventCuts(StEStructEventCuts* ecuts) { mECuts=ecuts; };
-void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) { mTCuts=tcuts; };
+void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) {
+    mTCuts=tcuts;
+    if ( !mTCuts->goodElectron(100.0) ) {      
+        mhasdEdxCuts = 1;
+        dEdxBefore = new TH2F("dEdxNoCut","dEdxNoCut",150,0,1.5,150,0,0.000015);
+        dEdxAfter  = new TH2F("dEdxCut","dEdxCut",150,0,1.5,150,0,0.000015);
+        mTCuts->addCutHists(dEdxBefore, dEdxAfter, "dEdXPlots");
+    }
+};
 
 bool StEStructMuDstReader::hasMaker() { return (mMaker) ? true : false ; }
 bool StEStructMuDstReader::hasEventCuts() { return (mECuts) ? true : false ; }
@@ -69,143 +91,177 @@ StEStructEvent* StEStructMuDstReader::next() {
 }
      
 //-------------------------------------------------------------------------
+// Apr 12, 2005 djp Jeff put centrality cuts into the event cuts and
+//                  cut on refMult. I am changing this to use the
+//                  centrality bin returned by the centrality object.
+//                  This allows me to use total number of tracks passing cuts
+//                  if I choose.
+//  The problem is that to use all tracks passing cuts we have to count tracks
+//  before we determine the centrality bin. Probably this amount of time is
+//  small compared to rest of analysis.
 StEStructEvent* StEStructMuDstReader::fillEvent(){
 
- StEStructEvent* retVal=NULL;
- StMuDst* muDst=mMaker->muDst();
- StMuEvent* muEvent=muDst->event();
- if(!muEvent)    return retVal;
+    StEStructEvent* retVal = new StEStructEvent();
+    StMuDst* muDst=mMaker->muDst();
+    StMuEvent* muEvent=muDst->event();
+    if (!muEvent) {
+        delete retVal;
+        retVal=NULL;
+        return retVal;
+    }
  
- /*  
-  *
-  */
+    unsigned int tword=muEvent->l0Trigger().triggerWord();
+    int refMult=muEvent->refMult();
+    mRefMult = 0;
 
- unsigned int tword=muEvent->l0Trigger().triggerWord();
- int refMult=muEvent->refMult();
-// djp 9/23/2004  MuDst events with vertex at 0,0,0 are bad.
-    mrefMult = 0;
+    float x=muEvent->eventSummary().primaryVertexPosition().x();
+    float y=muEvent->eventSummary().primaryVertexPosition().y();
+    float z=muEvent->eventSummary().primaryVertexPosition().z();
 
- float x=muEvent->eventSummary().primaryVertexPosition().x();
- float y=muEvent->eventSummary().primaryVertexPosition().y();
- float z=muEvent->eventSummary().primaryVertexPosition().z();
+    bool useEvent=true;
 
- bool useEvent=true;
-
-// djp 9/23/2004  MuDst events with vertex at 0,0,0 are bad.
- if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
+    if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
         useEvent = false;
- } else if(!mECuts->goodTrigger(muEvent) ||
-    !mECuts->goodPrimaryVertexZ(z) ||
-    !mECuts->goodCentrality(refMult)) {
-     useEvent=false;
- }
- 
- retVal = new StEStructEvent();
+    } else if (!mECuts->goodTrigger(muEvent)  ||
+               !mECuts->goodPrimaryVertexZ(z) ||
+               !mECuts->goodCentrality(refMult)) {
+        useEvent=false;
+    }
+    int nTracks = countGoodTracks();
+    if (mUseAllTracks) {
+        retVal->SetCentrality( (double) nTracks );
+    } else {
+        retVal->SetCentrality( (double) muEvent->refMult());
+    }
+    int jCent = retVal->Centrality();
+    if ((mCentBin >= 0) && (jCent != mCentBin)) {
+        useEvent = false;
+    } else {
+        retVal->SetEventID(muEvent->eventNumber());
+        retVal->SetRunID(muEvent->runNumber());
+        retVal->SetOrigMult(muEvent->eventSummary().numberOfTracks());
+        retVal->SetVertex(x,y,z);
+        retVal->SetCentMult((int)muEvent->refMult());
+        retVal->SetZDCe((float)muEvent->zdcAdcAttentuatedSumEast());
+        retVal->SetZDCw((float)muEvent->zdcAdcAttentuatedSumWest());
+        retVal->SetBField((float)muEvent->magneticField());
 
- retVal->SetEventID(muEvent->eventNumber());
- retVal->SetRunID(muEvent->runNumber());
- retVal->SetOrigMult(muEvent->eventSummary().numberOfTracks());
- retVal->SetVertex(x,y,z);
- retVal->SetCentMult((int)muEvent->refMult());
- retVal->SetCentrality((int)muEvent->refMult());
- retVal->SetZDCe((float)muEvent->zdcAdcAttentuatedSumEast());
- retVal->SetZDCw((float)muEvent->zdcAdcAttentuatedSumWest());
- retVal->SetBField((float)muEvent->magneticField());
+        if (!fillTracks(retVal)) {
+            useEvent=false; 
+        }
+        if (!mECuts->goodNumberOfTracks(mRefMult)) {
+            useEvent=false;
+        }
+    }
+    mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
+    mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
+    mECuts->fillHistogram(mECuts->centralityName(),(float)refMult,useEvent);
+    mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,useEvent);
 
- if(!fillTracks(retVal))useEvent=false; 
- if(!mECuts->goodNumberOfTracks(mrefMult))useEvent=false;
+    if (!useEvent) {
+        delete retVal;
+        retVal=NULL;
+    }
 
- mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
- mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
- mECuts->fillHistogram(mECuts->centralityName(),(float)refMult,useEvent);
- mECuts->fillHistogram(mECuts->numTracksName(),(float)mrefMult,useEvent);
- 
- if( !useEvent){
-   delete retVal;
-   retVal=NULL;
- }
-
- if(retVal)retVal->FillChargeCollections();
- 
- return retVal;
+    if (retVal) {
+        retVal->FillChargeCollections();
+    }
+    return retVal;
 } 
  
 
 //-------------------------------------------------------------
 bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
 
-  //
-  // create a single EbyE track, check cuts,
-  // fill variables, add to StEStructEvent tracks which
-  // does a copy.
-  //
+    //
+    // create a single EbyE track, check cuts,
+    // fill variables, add to StEStructEvent tracks which
+    // does a copy.
+    //
 
-  mrefMult=0;
-  StMuDst* muDst=mMaker->muDst();
-  int numPrimaries=muDst->primaryTracks()->GetEntries();
-  if(0==numPrimaries)return false;
+    StMuDst* muDst=mMaker->muDst();
+    int numPrimaries=muDst->primaryTracks()->GetEntries();
+    if (0==numPrimaries) {
+        return false;
+    }
 
-  StEStructTrack* eTrack = new StEStructTrack();
+    StEStructTrack* eTrack = new StEStructTrack();
+    for(int i=0; i<numPrimaries; i++) {
+        bool useTrack=true;
+        eTrack->SetInComplete();
+        StMuTrack* track=muDst->primaryTracks(i);
 
-  for(int i=0; i<numPrimaries; i++){
+        if (mhasdEdxCuts) {
+            dEdxBefore->Fill((track->p()).mag(),track->dEdx());
+        }
 
-    eTrack->SetInComplete();
-    StMuTrack* track=muDst->primaryTracks(i);
-    
+        useTrack = isTrackGood( track );
+        mTCuts->fillHistograms(useTrack);
+
+        if (useTrack) {
+            if (mhasdEdxCuts) {
+                dEdxAfter->Fill((track->p()).mag(),track->dEdx());
+            }
+            fillEStructTrack(eTrack,track);
+            estructEvent->AddTrack(eTrack);
+        }
+    }
+    delete eTrack;
+    return true;
+}
+//-------------------------------------------------------------
+// This method checks all track cuts.
+// No histogramming or copying data around.
+bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
+
     bool useTrack=true;
-    if(track->pt()<0.15)continue;
 
-    useTrack = ( mTCuts->goodFlag(track->flag()) && useTrack);
-    useTrack = ( mTCuts->goodCharge(track->charge()) && useTrack);
-    useTrack = ( mTCuts->goodNFitPoints(track->nHitsFit()) && useTrack);
+    useTrack = (mTCuts->goodFlag(track->flag()) && useTrack);
+    useTrack = (mTCuts->goodCharge(track->charge()) && useTrack);
+    useTrack = (mTCuts->goodNFitPoints(track->nHitsFit()) && useTrack);
     useTrack = (mTCuts->goodNFitNMax((float)((float)track->nHitsFit()/(float)track->nHitsPoss())) && useTrack);
     useTrack = (mTCuts->goodGlobalDCA(track->dcaGlobal().magnitude()) && useTrack);
     useTrack = (mTCuts->goodEta(track->eta()) && useTrack);
     useTrack = (mTCuts->goodChi2(track->chi2()) && useTrack);
     useTrack = (mTCuts->goodPhi(track->phi()) && useTrack);
 
-    /*    comment out any general dedx-pid for now
-
-    int pid=0;
-    int pidMask=15;
-
-    if( mTCuts->goodElectron(track->nSigmaElectron()) )pid=1<<0;
-    if( mTCuts->goodPion(track->nSigmaPion()) ) pid=1<<1;
-    if( mTCuts->goodKaon(track->nSigmaKaon()) ) pid=1<<2;
-    if( mTCuts->goodProton(track->nSigmaProton()) ) pid=1<<3;
-
-    useTrack = ( useTrack && (pid & pidMask) ); // any good PID we keep
-    */
-
-
-
-    //--> But add a quick electron removal... for selected pt ranges
-
-    if(mTCuts->goodElectron( fabs(track->nSigmaElectron()) ) ){      
-       float p=(track->p()).mag();
-       if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) useTrack=false;
+    //--> But add a quick electron removal... for selected p ranges
+    //    Note I only want to do this if I am defining an electron dEdx cut.
+    if (mhasdEdxCuts) {
+        if (mTCuts->goodElectron( track->nSigmaElectron() )) {      
+            float p = (track->p()).mag();
+            if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) {
+                useTrack=false;
+            }
+        }
     }
-
     //--> end of electron pid
-
-    if(useTrack)mrefMult++;
 
     useTrack = (mTCuts->goodPt(track->pt()) && useTrack);
     float _r=track->pt()/0.139;
     float yt=log(sqrt(1+_r*_r)+_r);
     useTrack = (mTCuts->goodYt(yt) && useTrack);
 
-    mTCuts->fillHistograms(useTrack);
+    return useTrack;
+}
 
-    if(useTrack) { 
-      fillEStructTrack(eTrack,track);
-      estructEvent->AddTrack(eTrack);
-     }  
-
-  }
-
-  delete eTrack;
-  return true;
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------
+// This method counts all good track.
+// No histogramming or copying data around.
+int StEStructMuDstReader::countGoodTracks() {
+    mRefMult=0;
+    StMuDst* muDst=mMaker->muDst();
+    int numPrimaries=muDst->primaryTracks()->GetEntries();
+    if (0==numPrimaries) {
+        return 0;
+    }
+    for(int i=0; i<numPrimaries; i++) {
+        if (isTrackGood(muDst->primaryTracks(i))) {
+            mRefMult++;
+        }
+    }
+    return mRefMult;
 }
 
 //-------------------------------------------------------------------------
@@ -261,12 +317,12 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
- * Revision 1.3  2004/09/24 01:41:42  prindle
- * Allow for cuts to be defined by character strings. I use this to select trigger
- * cuts appropriate for run periods
- *
- * Revision 1.2  2004/06/25 03:10:29  porter
- * added a new common statistics output and added electron cut with momentum slices
+ * Revision 1.4  2005/09/07 20:18:42  prindle
+ * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   EventCuts.h:   Added trigger cuts including cucu and year 4.
+ *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
+ *                    before making centrality cut.
+ *   TrackCuts:     Random changes. Moved some variables from private to public.o
  *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
