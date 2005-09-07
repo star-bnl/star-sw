@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.5 2005/03/28 22:10:51 msd Exp $
+ * $Id: StEStructSupport.cxx,v 1.6 2005/09/07 20:26:16 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -89,8 +89,10 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs, float n
   if(npairs){
     mnpairs = new float[6];
     for(int i=0;i<6;i++)mnpairs[i]=npairs[i];
+  } else {
+    mnpairs = 0;
   }
-  else mnpairs = 0;
+
 }
 
 StEStructSupport::~StEStructSupport(){ 
@@ -141,6 +143,7 @@ TH1** StEStructSupport::getLocalClones(const char* name){
     hlocal[i]=(TH1*)hset[i]->Clone();
     hlocal[i]->Sumw2();  // trigger error propogation
   }
+  delete hset;
 
   return hlocal;
 }
@@ -178,6 +181,7 @@ TH1** StEStructSupport::getPtClones(const char* name){
     hlocal[i]=(TH1*)hset[i]->Clone();
     hlocal[i]->Sumw2();  // trigger error propogation
   }
+  delete hset;
 
   return hlocal;
 }
@@ -236,9 +240,16 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt){
     } else if(2==opt){
       TH1* tmp=getSqrt(hlocal[i+3]);
       if(tmp)retVal[i]->Divide(tmp);  // delta-rho/sqrt(rho_mix);
+      delete tmp;
     }
 
   }
+
+  // Free memory of hlocal.
+  for(int i=0;i<_pair_totalmax;i++) {
+    delete hlocal[i];
+  }
+  delete hlocal;
 
   retVal[3]->Add(retVal[0],retVal[2],1.0,-1.0);  // delta-rho
   if(mNbar!=1.0)for(int i=0;i<4;i++) retVal[i]->Scale(mNbar); // Nbar scaling
@@ -332,6 +343,7 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
     } else if(opt>=2){                 // delta-rho/sqrt(rho_mix)
       TH1* tmp=getSqrt(hlocal[i+3]);
       retVal[i]->Divide(tmp);
+      delete tmp;
     } // else opt==2                     
   }
  
@@ -340,6 +352,12 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
 
   // scale with nbar if requested 
   if(mNbar!=1.0)for(int i=0;i<4;i++) retVal[i]->Scale(mNbar); // Nbar scaling
+
+  // Free local histograms.
+  for(int i=0;i<_pair_totalmax;i++) {
+    delete hlocal[i];
+  }
+  delete hlocal;
 
   return retVal;
 }
@@ -389,7 +407,8 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt){
        double n = hlocal[i]->GetBinContent(ix, iy) / nEventsSame; // number
        double a = hlocal[i+6]->GetBinContent(ix, iy) / nEventsSame; // ptxpt
        double b = hlocal[i+12]->GetBinContent(ix, iy) / nEventsSame; // pt+pt
-       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsSame;// mixN
+//       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsSame;// mixN
+       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / 1 / nEventsSame;// mixN
        double z = 0;
        if( mixn != 0 ) {
 	 switch(opt){
@@ -425,6 +444,109 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt){
   retVal[1]->Add(tmpVal[1]);
   retVal[2]->Add(retVal[0],retVal[1],1.0,-1.0);
   retVal[3]->Add(retVal[0],retVal[1],1.0,1.0);
+
+  // Free local histograms.
+  for (int i=1;i<3;i++) {
+      delete tmpVal[i];
+  }
+  for(int i=0;i<_pair_totalmax;i++) {
+    delete hlocal[i];
+  }
+  delete hlocal;
+
+  return retVal;
+
+}
+TH1** StEStructSupport::buildPtMixChargeTypes(const char* name, int opt){
+
+  if(!mtf) return (TH1**)NULL;
+  TH1F *hptInclusive = (TH1F *)mtf->Get("pt");
+  double ptHat = hptInclusive->GetMean();
+  TH1F *hNEventsMixed = (TH1F *)mtf->Get("NEventsMixed");
+  double nEventsMixed = hNEventsMixed->GetEntries();
+  cout <<"ptHat = " << ptHat << '\t'<<"nEventsMixed = " << nEventsMixed << endl;
+
+  // -- here we get 18 hists: 
+  //    3 groups of 6 (Sibpp,Sibpm,Sibmm,Mixpp,Mixpm,Mixmm) 
+  //    1st 6 are number, 2nd 6 are pt1*pt2 ,3rd are pt1+pt2
+
+  TH1** hlocal=getPtClones(name);
+
+  // four returned hists
+  TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
+  const char* nm[4]={"LS","US","CD","CI"};
+  const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
+
+  for(int i=0;i<4;i++){
+    retVal[i]=(TH1*)hlocal[0]->Clone();
+    retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
+    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i])); 
+    retVal[i]->Scale(0.); // zero the hists
+  }
+
+  const char* tmp[3]={"PP","PM","MM"};  
+  TH1* tmpVal[3]; // ++,+-,--
+  for(int i=0;i<3;i++){
+    tmpVal[i]=(TH1*)hlocal[0]->Clone();
+    tmpVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",tmp[i]));
+    tmpVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tmp[i])); 
+    tmpVal[i]->Scale(0.); // zero the hists 
+  }
+
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,18);
+
+  for(int i=0;i<3;i++){
+    for(int ix=0;ix<=tmpVal[i]->GetNbinsX();ix++){
+     for(int iy=0;iy<=tmpVal[i]->GetNbinsY();iy++){
+       double n = hlocal[i+3]->GetBinContent(ix, iy) / nEventsMixed; // number
+       double a = hlocal[i+9]->GetBinContent(ix, iy) / nEventsMixed; // ptxpt
+       double b = hlocal[i+15]->GetBinContent(ix, iy) / nEventsMixed; // pt+pt
+//       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsMixed;// mixN
+       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / 1 / nEventsMixed;// mixN
+       double z = 0;
+       if( mixn != 0 ) {
+	 switch(opt){
+	 case 0:
+	   {
+	    z = (a - b * ptHat + n * ptHat * ptHat ) / sqrt(double(mixn));
+            break;
+	   } 
+	 case 1:
+	   {
+	    z = -1.0*(a - b * ptHat) / sqrt(double(mixn));
+            break;
+	   } 
+	 case 2:
+	   {
+	    z = ( n * ptHat * ptHat ) / sqrt(double(mixn));
+            break;
+	   } 
+	 default:
+	   {
+	    z = (a - b * ptHat + n * ptHat * ptHat ) / sqrt(double(mixn));
+            break;
+	   } 
+	 }
+       }
+       tmpVal[i]->SetBinContent(ix, iy, z);
+        
+     }
+    }
+  }
+
+  retVal[0]->Add(tmpVal[0],tmpVal[2]);
+  retVal[1]->Add(tmpVal[1]);
+  retVal[2]->Add(retVal[0],retVal[1],1.0,-1.0);
+  retVal[3]->Add(retVal[0],retVal[1],1.0,1.0);
+
+  // Free local histograms.
+  for (int i=1;i<3;i++) {
+      delete tmpVal[i];
+  }
+  for(int i=0;i<_pair_totalmax;i++) {
+    delete hlocal[i];
+  }
+  delete hlocal;
 
   return retVal;
 
@@ -599,8 +721,8 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
- * Revision 1.5  2005/03/28 22:10:51  msd
- * Fixed initialization of npairs
+ * Revision 1.6  2005/09/07 20:26:16  prindle
+ * Support: Fixed some meory leaks.
  *
  * Revision 1.4  2005/03/08 21:56:42  porter
  * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
