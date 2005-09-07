@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.4 2005/03/03 01:30:43 porter Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.5 2005/09/07 20:21:15 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -26,6 +26,7 @@
 
 #include "TROOT.h"
 #include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
+#include "StEStructPool/EventMaker/StEStructCentrality.h"
 #include "StEStructPairCuts.h"
 #include "StEStructBinning.h"
 #include "StEStructBuffer.h"
@@ -40,31 +41,6 @@ class StTimer;
 class StEStruct2ptCorrelations: public StEStructAnalysis {
 
  protected:
-
-  int  manalysisMode; //! simple enumeration of analyses ...
-  bool mskipPairCuts; //!
-  bool mdoPairCutHistograms; //!
-  bool mInit;  //! found need when overridding this class
-  bool mDeleted;//! "     " ...
-
-  StEStructEvent*        mCurrentEvent;  //!  pointer to EStruct2pt data 
-  StEStructPairCuts      mPair; //! for pairs (1 at a time) and all pair cuts
-
-  char*     moutFileName; //!
-  StTimer*  mtimer;       //!
-
-  StEStructEvent*     mMixingEvent;  //! dummy      //  Previous Event Stored 
-  StEStructBuffer      mbuffer[10];  // 10 slices in z-vertex
-  int             mbuffCounter[10];
-
-  //-> (pre) histograms & histograms for analysis.
-  // All are arrays of 6 for 6 charged sign and combinatoric types;
-  // 0,1,2 for Sibling (++,+-,--)
-  // 3,4,5, for Mixed  (++,+-,--)
-  
-  int numPairs[6];
-  int numPairsProcessed[6];
-  int mpossiblePairs[6];
 
   TH1F* mHNEvents[2];
   TH1F** mHpt;
@@ -140,13 +116,38 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
  public:
 
+  int  manalysisMode; //! simple enumeration of analyses ...
+  bool mskipPairCuts; //!
+  bool mdoPairCutHistograms; //!
+  bool mInit;  //! found need when overridding this class
+  bool mDeleted;//! "     " ...
+
+  StEStructEvent*        mCurrentEvent;  //!  pointer to EStruct2pt data 
+  StEStructPairCuts      mPair; //! for pairs (1 at a time) and all pair cuts
+
+  char*     moutFileName; //!
+  StTimer*  mtimer;       //!
+
+  StEStructEvent*     mMixingEvent;  //! dummy      //  Previous Event Stored 
+  StEStructBuffer      mbuffer[10];  // 10 slices in z-vertex
+  int             mbuffCounter[10];
+
+  //-> (pre) histograms & histograms for analysis.
+  // All are arrays of 6 for 6 charged sign and combinatoric types;
+  // 0,1,2 for Sibling (++,+-,--)
+  // 3,4,5, for Mixed  (++,+-,--)
+  
+  int numPairs[6];
+  int numPairsProcessed[6];
+  int mpossiblePairs[6];
+
   StEStruct2ptCorrelations(int mode=0);
   StEStruct2ptCorrelations(const char* cutFileName, int mode=0);
   virtual ~StEStruct2ptCorrelations();
 
   StEStructPairCuts& getPairCuts();
   void  setAnalysisMode(int mode);
-  void  setCutFile(const char* cutFileName);  
+  void  setCutFile(const char* cutFileName, StEStructCentrality *cent);  
 
   //---> support of interface  
   void  setOutputFileName(const char* outFileName);
@@ -155,10 +156,14 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   void  init();
   void  cleanUp();
   void  finish();
+
   virtual void  fillHistograms();
-  virtual void  writeHistograms(TFile* tf);
-  virtual void  initArraysAndHistograms();
-  virtual void  deleteArraysAndHistograms();
+  virtual void  writeHistograms();
+    void  initArrays();
+    void  deleteArrays();
+    void  initHistograms();
+    void  deleteHistograms();
+
 
   // analysis specific functions 
   bool  makeSiblingAndMixedPairs();
@@ -175,7 +180,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
 inline void StEStruct2ptCorrelations::setAnalysisMode(int mode){ manalysisMode=mode;};
 
-inline void StEStruct2ptCorrelations::setCutFile(const char* cutFileName){
+inline void StEStruct2ptCorrelations::setCutFile(const char* cutFileName,
+                                                 StEStructCentrality *cent){
   mPair.setCutFile(cutFileName);
   mPair.loadCuts();
 }
@@ -212,6 +218,11 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.5  2005/09/07 20:21:15  prindle
+ * 2ptCorrelations: Rearranged array/histogram initialization/destruction.
+ *                    Now histograms are only allocated at end of job,
+ *                    just before they are filled then written.
+ *
  * Revision 1.4  2005/03/03 01:30:43  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
