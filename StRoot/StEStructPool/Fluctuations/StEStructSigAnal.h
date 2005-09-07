@@ -5,8 +5,9 @@
 
 #include "multStruct.h"
 #include "StEStructSigmas.h"
-#include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
-#include "Stiostream.h"
+#include "../AnalysisMaker/StEStructAnalysis.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 class TFile;
 class TH2F;

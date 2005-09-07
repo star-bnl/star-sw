@@ -1,28 +1,46 @@
-#define AUAUDATA
-
 #ifndef __STESTRUCTFLUCTUATIONS__H
 #define __STESTRUCTFLUCTUATIONS__H
 
-
 #include "multStruct.h"
-#include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
-#include "StEStructPool/Correlations/StEStructPairCuts.h"
-
-#undef TERMINUSSTUDY
 
 class TFile;
 class TH1F;
 class TH1D;
 class TH2F;
-class StEStructEvent;
-class StEStructTrack;
-class StTimer;
 
 class StEStructFluct {
 
  protected:
 
  public:
+
+    StEStructFluct( char *key, int totBins,
+                    float EtaMin, float EtaMax,
+                    float PtMin,  float PtMax );
+    virtual ~StEStructFluct();
+
+    void  initArrays();
+    void  deleteArrays();
+    void  initHistograms();
+    void  deleteHistograms();
+
+    void  fillHistograms();
+    void  writeHistograms();
+    void  writeQAHistograms();
+
+    void AddToBin( int iBin,
+                   double plus,    double minus,
+                   double pplus,   double pminus,
+                   double psqplus, double psqminus );
+    void fillOccupancies( double dPhi,  double dEta,
+                          double nPlus, double nMinus,
+                          double pPlus, double pMinus );
+    void fillMults( double nPlus, double nMinus,
+                    double pPlus, double pMinus );
+    void fillEtaZ( float z, float eta,
+                   int maxFitPoints, int foundPoints, int nFitPoints,
+                   int iF, int iL );
+    void fillPtHist( double pt, int sign );
 
   // For ease of I/O I put info into histograms.
   // Accumulating into histograms is very slow, so I
@@ -86,9 +104,6 @@ class StEStructFluct {
     TH1F *ptPlus;
     TH1F *ptMinus;
 
-  // Here is the object I use to hold the binned tracks.
-    multStruct      *ms;
-    
   // mKey is a unique string which we use to identify histograms that
   // belong to this object. Important when reading histograms produced
   // by this object.
@@ -97,42 +112,7 @@ class StEStructFluct {
     float mEtaMin, mEtaMax;
     float mPtMin,  mPtMax;
 
-    void  initArrays();
-    void  deleteArrays();
-    void  initHistograms();
-    void  deleteHistograms();
-
-    StEStructFluct( char *key, int totBins,
-                    float EtaMin, float EtaMax,
-                    float PtMin,  float PtMax );
-    virtual ~StEStructFluct();
-
-
-  //---> support of interface
-    void  fillHistograms();
-    void  writeHistograms();
-    void  writeQAHistograms();
-
-  // analysis specific functions 
-    void makeMultStruct();
-    void AddEvent(multStruct *ms);
-    void AddToBin( int iBin,
-                   double plus,    double minus,
-                   double pplus,   double pminus,
-                   double psqplus, double psqminus );
-    void fillOccupancies( double dPhi,  double dEta,
-                          double nPlus, double nMinus,
-                          double pPlus, double pMinus );
-    void fillMults( double nPlus, double nMinus,
-                    double pPlus, double pMinus );
-    void fillEtaZ( float z, float eta,
-                   int maxFitPoints, int foundPoints, int nFitPoints,
-                   int iF, int iL );
-    void fillPtHist( double pt, int sign );
-
     ClassDef(StEStructFluct,1)
 };
 
 #endif
-
-

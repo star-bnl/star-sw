@@ -15,64 +15,98 @@
 ClassImp(StEStructFluctAnal)
 
 //--------------------------------------------------------------------------
-StEStructFluctAnal::StEStructFluctAnal(int mode, int invokePairCuts,
-            int etaSumMode, int phiSumMode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false) {
-    doingPairCuts  = invokePairCuts;
-    etaSummingMode = etaSumMode;
-    phiSummingMode = phiSumMode;
+StEStructFluctAnal::StEStructFluctAnal(int mode, int etaSumMode, int phiSumMode): manalysisMode(mode)  {
+    mEtaSumMode      = etaSumMode;
+    mPhiSumMode      = phiSumMode;
+    mCurrentEvent = 0;
+    mCentralities = 0;
+
     mEtaMin = -1.1;
     mEtaMax =  1.1;
-    mFluct   = 0;
-    mPtFluct = 0;
-    mnCentEvents = 0;
-    mptnplus     = 0;
-    mptnminus    = 0;
-    mptpplus     = 0;
-    mptpminus    = 0;
+    mPtMin  =  0.0;
+    mPtMax  =  9.9;
 
-    mnCents = 0;
-    mnPts = 0;
-    mnPtCents = 0;
-    init();
+    mnTotEvents  = 0;
+    mnCentEvents = 0;
+    mnTotBins    = 0;
+    mnCents      = 0;
+    mnPts        = 0;
+    mnPtCents    = 0;
+
+
+    mFluct    = 0;
+    mPtFluct  = 0;
+    mptnplus  = 0;
+    mptnminus = 0;
+    mptpplus  = 0;
+    mptpminus = 0;
+
+    initHistograms();
 }
 
 //--------------------------------------------------------------------------
 StEStructFluctAnal::~StEStructFluctAnal() {
-    cleanUp();
+    delete ms;  ms = 0;
+    deleteHistograms();
+    deleteCentralityObjects();
 }
 
+void StEStructFluctAnal::setCutFile(const char* cutFileName, StEStructCentrality *cent) {
+    setEtaLimits(cutFileName);
+    setPtLimits(cutFileName);
 
-void StEStructFluctAnal::init() {
-    mCurrentEvent=NULL;
-
-    if (manalysisMode & 1) {
-        mskipPairCuts = true;
-    } else if (manalysisMode & 2) {
-        mdoPairCutHistograms = true;
+    mCentralities = dynamic_cast<StEStructCentrality*>(cent);
+    if (!mCentralities) {
+        printf("Invalid centrality object passed into StEStructFluctAnal::setCutFile!!!!!\n");
     }
-    if (manalysisMode & 4) {
-        mUseAllEtaTracks = true;
-    } else {
-        mUseAllEtaTracks = false;
+    createCentralityObjects();
+    ms = new multStruct(mCentralities->numPts());
+    mPair.setCutFile(cutFileName);
+    mPair.loadCuts();
+};
+void StEStructFluctAnal::createCentralityObjects() {
+    deleteCentralityObjects();
+
+    mnCents = mCentralities->numCentralities() - 1;
+    mnCentEvents = new int[mnCents];
+    for (int jC=0;jC<mnCents;jC++) {
+        mnCentEvents[jC] = 0;
     }
 
-    initHistograms();
+    mFluct = new StEStructFluct*[mnCents]; 
+    char key[1024];
+    for (int jC=0;jC<mnCents;jC++) {
+        sprintf(key,"%i",jC);
+        mFluct[jC] = new StEStructFluct(key,mnTotBins,mEtaMin,mEtaMax,mPtMin,mPtMax);
+    }
+    mnPts     = mCentralities->numPts() - 1;
+    mnPtCents = mCentralities->numPtCentralities() - 1;
+    mPtFluct = new StEStructFluct*[mnPtCents*mnPts]; 
+    for (int jC=0;jC<mnPtCents;jC++) {
+        for (int jP=0;jP<mnPts;jP++) {
+            sprintf(key,"%i_%i",jC,jP);
+            int index = jP + jC*mnPts;
+            mPtFluct[index] = new StEStructFluct(key,mnTotBins,mEtaMin,mEtaMax,mPtMin,mPtMax);
+        }
+    }
+
+    mptnplus  = new double[mnPts];
+    mptnminus = new double[mnPts];
+    mptpplus  = new double[mnPts];
+    mptpminus = new double[mnPts];
 }
-void StEStructFluctAnal::initCentralityObjects() {
+void StEStructFluctAnal::deleteCentralityObjects() {
     if (mFluct) {
         for (int i=0;i<mnCents;i++) {
             delete mFluct[i];  mFluct[i] = 0;
         }
-        delete [] mFluct;
+        delete [] mFluct; mFluct = 0;
     }
     if (mPtFluct) {
-        for (int i=0;i<mnPts;i++) {
-            for (int j=0;j<mnPtCents*mnPts;j++) {
-                delete mPtFluct[i];  mPtFluct[i] = 0;
-            }
+        for (int i=0;i<mnPts*mnPtCents;i++) {
             delete [] mPtFluct[i];  mPtFluct[i] = 0;
         }
-    delete [] mPtFluct;  mPtFluct = 0;
+        delete [] mPtFluct;  mPtFluct = 0;
     }
     if (mnCentEvents) {
         delete [] mnCentEvents;  mnCentEvents = 0;
@@ -89,41 +123,8 @@ void StEStructFluctAnal::initCentralityObjects() {
     if (mptpminus) {
         delete [] mptpminus;  mptpminus = 0;
     }
-
-    mnCents = mCentralities->numCentralities() - 1;
-    mnTotEvents = 0;
-    mnCentEvents = new int[mnCents];
-    for (int i=0;i<mnCents;i++) {
-        mnCentEvents[i] = 0;
-    }
-
-    mFluct = new StEStructFluct*[mnCents]; 
-    char key[1024];
-    for (int i=0;i<mnCents;i++) {
-        sprintf(key,"%i",i);
-        mFluct[i] = new StEStructFluct(key,mTotBins,mEtaMin,mEtaMax,mPtMin,mPtMax);
-    }
-    mnPts     = mCentralities->numPts() - 1;
-    mnPtCents = mCentralities->numPtCentralities() - 1;
-    mPtFluct = new StEStructFluct*[mnPtCents*mnPts]; 
-    for (int i=0;i<mnPtCents;i++) {
-        for (int j=0;j<mnPts;j++) {
-            sprintf(key,"%i_%i",i,j);
-            int index = j + i*mnPtCents;
-            mPtFluct[index] = new StEStructFluct(key,mTotBins,mEtaMin,mEtaMax,mPtMin,mPtMax);
-        }
-    }
-
-    mptnplus  = new double[mnPts];
-    mptnminus = new double[mnPts];
-    mptpplus  = new double[mnPts];
-    mptpminus = new double[mnPts];
 }
 
-void StEStructFluctAnal::cleanUp() {
-    delete ms;
-    deleteHistograms();
-}
 // Parse cuts file for limits on eta.
 void StEStructFluctAnal::setEtaLimits( const char* cutFileName ) {
     ifstream from(cutFileName);
@@ -172,11 +173,11 @@ void StEStructFluctAnal::setEtaLimits( const char* cutFileName ) {
     if (ival != 2) {
         cout << " Did not find a line containing Eta and two numbers in file " << cutFileName <<endl; 
     } else {
-        mEtaMin = strtod(val[1],0);
-        mEtaMax = strtod(val[2],0);
+        mEtaMin = strtof(val[1],0);
+        mEtaMax = strtof(val[2],0);
     }
     from.close();
-    delete [] val;
+    delete [] val;  val = 0;
 }
 // Parse cuts file for limits on pt.
 void StEStructFluctAnal::setPtLimits( const char* cutFileName ) {
@@ -226,11 +227,11 @@ void StEStructFluctAnal::setPtLimits( const char* cutFileName ) {
     if (ival != 2) {
         cout << " Did not find a line containing Pt and two numbers in file " << cutFileName <<endl; 
     } else {
-        mPtMin = strtod(val[1],0);
-        mPtMax = strtod(val[2],0);
+        mPtMin = strtof(val[1],0);
+        mPtMax = strtof(val[2],0);
     }
     from.close();
-    delete [] val;
+    delete [] val;  val = 0;
 }
 
 //
@@ -238,127 +239,40 @@ void StEStructFluctAnal::setPtLimits( const char* cutFileName ) {
 //
 //--------------------------------------------------------------------------
 bool StEStructFluctAnal::doEvent(StEStructEvent* event) {
-    if(!event) {
+    if (!event) {
         return false;
     }
 
-    if(2>event->Ntrack()) {
-        delete event;
+    if (1 > event->Ntrack()) {
+        delete event;  event = 0;
         return true;
     }
 
-    moveEvents();
-    mCurrentEvent=event;
-    if (doingPairCuts) {
-        if(!doPairCuts()) {
-            return false;
-        }
+    if (mCurrentEvent) {
+        delete mCurrentEvent;
     }
-    makeMultStruct();
+    mCurrentEvent=event;
+    fillMultStruct();
     return true;
 }
 
 //--------------------------------------------------------------------------
-void StEStructFluctAnal::moveEvents() {
 
-    if (!mCurrentEvent) {
-        return;
-    }
-    delete mCurrentEvent;  mCurrentEvent = 0;
-//    if(mMixingEvent) delete mMixingEvent;
-//    mMixingEvent=mCurrentEvent;
-
-}
-
-
-//--------------------------------------------------------------------------
-bool StEStructFluctAnal::doPairCuts() {
-
-  if(!mCurrentEvent) return false; // logic problem!
-
-  pairCuts(mCurrentEvent,mCurrentEvent,0);
-  pairCuts(mCurrentEvent,mCurrentEvent,1);
-  pairCuts(mCurrentEvent,mCurrentEvent,2);
-
-  return true;
-}
-
-//--------------------------------------------------------------------------
-void StEStructFluctAnal::pairCuts(StEStructEvent* e1, StEStructEvent* e2, int j){
-
-  if(j>=3) return;
-  StEStructTrackCollection* tc1 = 0;
-  StEStructTrackCollection* tc2 = 0;
-
-  switch(j) {
-    case 0: {
-        tc1=e1->TrackCollectionP();
-        tc2=e2->TrackCollectionP();
-        mPair.setPairType(0);
-        break;
-    }
-    case 1: {
-        tc1=e1->TrackCollectionP();
-        tc2=e2->TrackCollectionM();
-        mPair.setPairType(1);
-        break;
-    }
-    case 2: {
-        tc1=e1->TrackCollectionM();
-        tc2=e2->TrackCollectionM();
-        mPair.setPairType(0);
-        break;
-    }
-    default: {
-        return;
-    }
-  }
-
-
-  StEStructTrackIterator Iter1;
-  StEStructTrackIterator Iter2;
-  StEStructTrack* t;
-
-  for(Iter1=tc1->begin(); Iter1!=tc1->end();++Iter1){
-
-    mPair.SetTrack1(*Iter1);
-
-    if(j==0 || j==2) { 
-       Iter2=Iter1+1; 
-    } else { 
-       Iter2=tc2->begin(); 
-    }
-
-    for(; Iter2!=tc2->end(); ++Iter2){
-
-      mPair.SetTrack2(*Iter2);
-      if( mPair.cutPair(mdoPairCutHistograms) ){
-
-          // When a pair of tracks fails cuts mark both of them somehow.
-          t = *Iter1;
-          t->SetChi2(-1.0);
-          t = *Iter2;
-          t->SetChi2(-1.0);
-
-      };// pair cut
-    };// iter2 loop
-  };// iter 1 loop
-
-}
 // Modified 8/18/2004 djp
 // Assume Chi2, Eta cuts done in Track cuts.
-void StEStructFluctAnal::makeMultStruct() {
+void StEStructFluctAnal::fillMultStruct() {
     StEStructTrackCollection* tc;
     StEStructTrackIterator Iter;
     StEStructTrack* t;
 
-    int jEta, jPhi, jPt, jCent, jPtCent, totMult = 0;
+    int   jEta, jPhi, jPt, jCent, jPtCent, totMult = 0;
+    float totPt = 0;
 
     ms->NewEvent(mCurrentEvent->Vx(), mCurrentEvent->Vy(), mCurrentEvent->Vz() );
-    if (mUseAllEtaTracks) {
-        mCurrentEvent->SetCentrality( (double) mCurrentEvent->Ntrack() );
-    }
     jCent   = mCurrentEvent->Centrality();
+    if ((jCent < 0) || (mnCents <= jCent)) {
+        return;
+    }
     jPtCent = mCurrentEvent->PtCentrality();
 
     tc = mCurrentEvent->TrackCollectionP();
@@ -376,6 +290,7 @@ void StEStructFluctAnal::makeMultStruct() {
 
         ms->AddTrack( jPhi, jEta, jPt, +1, t->Pt() );
         totMult++;
+        totPt += t->Pt();
 
 
         StTrackTopologyMap *map = new StTrackTopologyMap(t->TopologyMapData(0),t->TopologyMapData(1));
@@ -392,18 +307,16 @@ void StEStructFluctAnal::makeMultStruct() {
                 break;
             }
         }
-        if ((-1 < jCent) && (jCent < mnCents)) {
-            mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
-                                     t->NFoundPoints(), t->NFitPoints(), iF, iL );
-            mFluct[jCent]->fillPtHist( t->Pt(), +1 );
-        }
-        int index = jPt + jPtCent*mnPtCents;
+        mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
+                                 t->NFoundPoints(), t->NFitPoints(), iF, iL );
+        mFluct[jCent]->fillPtHist( t->Pt(), +1 );
+        int index = jPt + jPtCent*mnPts;
         if ((-1 < index) && (index < mnPtCents*mnPts)) {
             mPtFluct[index]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
                                        t->NFoundPoints(), t->NFitPoints(), iF, iL );
             mPtFluct[index]->fillPtHist( t->Pt(), +1 );
         }
-        delete map;
+        delete map;  map = 0;
     }
     tc = mCurrentEvent->TrackCollectionM();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
@@ -420,6 +333,7 @@ void StEStructFluctAnal::makeMultStruct() {
 
         ms->AddTrack( jPhi, jEta, jPt, -1, t->Pt() );
         totMult++;
+        totPt += t->Pt();
 
         StTrackTopologyMap *map = new StTrackTopologyMap(t->TopologyMapData(0),t->TopologyMapData(1));
         int iF=1, iL=45;
@@ -435,12 +349,10 @@ void StEStructFluctAnal::makeMultStruct() {
                 break;
             }
         }
-        if ((-1 < jCent) && (jCent < mnCents)) {
-            mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
-                                     t->NFoundPoints(), t->NFitPoints(), iF, iL );
-            mFluct[jCent]->fillPtHist( t->Pt(), -1 );
-        }
-        int index = jPt + jPtCent*mnPtCents;
+        mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
+                                 t->NFoundPoints(), t->NFitPoints(), iF, iL );
+        mFluct[jCent]->fillPtHist( t->Pt(), -1 );
+        int index = jPt + jPtCent*mnPts;
         if ((-1 < index) && (index < mnPtCents*mnPts)) {
             mPtFluct[index]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
                                        t->NFoundPoints(), t->NFitPoints(), iF, iL );
@@ -449,17 +361,21 @@ void StEStructFluctAnal::makeMultStruct() {
         delete map;
     }
 
-    AddEvent(ms);
+    AddEvent();
     hRefMultiplicity->Fill(mCurrentEvent->CentMult());
     hMultiplicity->Fill(totMult);
+    hMultiplicityBinned->Fill(pow((double)totMult,0.25));
+    hPt->Fill(totPt);
+    hPtBinned->Fill(pow((double)totPt,0.25));
 }
-void StEStructFluctAnal::AddEvent(multStruct *ms) {
+void StEStructFluctAnal::AddEvent() {
     double delEta, delPhi;
     int jCent, jPtCent;
 
     mnTotEvents++;
 
-    if ((jCent = mCurrentEvent->Centrality()) < 0) {
+    jCent = mCurrentEvent->Centrality();
+    if ((jCent < 0) || (mnCents <= jCent)) {
         return;
     }
     mnCentEvents[jCent]++;
@@ -469,7 +385,7 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
     //    To try getting better performance I move all variable declarations
     //    outside these loops.
     int iPhi, jPhi, kPhi, lPhi, dPhi, iEta, jEta, kEta, lEta, dEta;
-    int iBin, jPt;
+    int jBin, jPt;
     double NPlus, NMinus, PtPlus, PtMinus, Pt2Plus, Pt2Minus;
     double ptNPlus, ptNMinus, ptPtPlus, ptPtMinus, ptPt2Plus, ptPt2Minus;
     for (jPhi=0;jPhi<NPHIBINS;jPhi++) {
@@ -479,12 +395,11 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
 
             // Second two loops are over all bins at this scale
             // Details of this are chosen by the summingMode.
-            iBin = offset[jPhi][jEta];
+            jBin = offset[jPhi][jEta];
             iPhi = 1;
             while ( (kPhi=getPhiStart(iPhi,dPhi)) >= 0) {
                 iEta = 1;
                 while ( (kEta=getEtaStart(iEta,dEta)) >= 0) {
-                    iBin++;
 
                     // Next loop is over Pt binning.
                     // We keep bins that are summed over all pt in
@@ -495,7 +410,7 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
                     NPlus    = 0, NMinus   = 0;
                     PtPlus   = 0, PtMinus  = 0;
                     Pt2Plus  = 0, Pt2Minus = 0;
-                    for (jPt=0;jPt<=mnPts;jPt++) {
+                    for (jPt=0;jPt<mnPts;jPt++) {
                         // Final two loops sum the small bins.
                         ptNPlus    = 0, ptNMinus   = 0;
                         ptPtPlus   = 0, ptPtMinus  = 0;
@@ -510,9 +425,9 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
                                 ptPt2Minus += ms->mTrackBinMinus[jPt][lPhi][lEta][2];
                             }
                         }
-                        int index = jPt + jPtCent*mnPtCents;
+                        int index = jPt + jPtCent*mnPts;
                         if ((-1 < index) && (index < mnPtCents*mnPts)) {
-                            mPtFluct[index]->AddToBin( iBin,
+                            mPtFluct[index]->AddToBin( jBin,
                                                        ptNPlus,   ptNMinus,
                                                        ptPtPlus,  ptPtMinus,
                                                        ptPt2Plus, ptPt2Minus );
@@ -525,10 +440,11 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
                         Pt2Minus += ptPt2Minus;
                     }
 
-                    mFluct[jCent]->AddToBin( iBin,
+                    mFluct[jCent]->AddToBin( jBin,
                                              NPlus,   NMinus,
                                              PtPlus,  PtMinus,
                                              Pt2Plus, Pt2Minus );
+                    jBin++;
                     iEta++;
                 }
                 iPhi++;
@@ -560,7 +476,7 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
                 pm = ms->GetPtMinus(jPhi,jEta,jPt);
                 if (jPt<mnPts) {
                     if (jPtCent >= 0) {
-                        int index = jPt + jPtCent*mnPtCents;
+                        int index = jPt + jPtCent*mnPts;
                         mPtFluct[index]->fillOccupancies( dp, de, np, nm, pp, pm );
 
                         mptnplus[jPt]  += np;
@@ -589,7 +505,7 @@ void StEStructFluctAnal::AddEvent(multStruct *ms) {
             nm = mptnminus[jPt];
             pp = mptpplus[jPt];
             pm = mptpminus[jPt];
-            int index = jPt + jPtCent*mnPtCents;
+            int index = jPt + jPtCent*mnPts;
             mPtFluct[index]->fillMults( np, nm, pp, pm );
         }
     }
@@ -603,7 +519,7 @@ int StEStructFluctAnal::getEtaStart( int iEta, int dEta ) {
     if (dEta > NETABINS) {
         return -1;
     }
-    if (1 == etaSummingMode) {
+    if (1 == mEtaSumMode) {
         int nEta = NETABINS / dEta;
         int oEta = NETABINS % dEta;
         if ( iEta*dEta <= NETABINS ) {
@@ -616,31 +532,31 @@ int StEStructFluctAnal::getEtaStart( int iEta, int dEta ) {
             return oEta+(iEta-nEta-1)*dEta;
         }
         return -1;
-    } else if (2 == etaSummingMode) {
+    } else if (2 == mEtaSumMode) {
         if (iEta+dEta <= NETABINS) {
             return iEta - 1;
         } else {
             return -1;
         }
-    } else if (3 == etaSummingMode) {
+    } else if (3 == mEtaSumMode) {
         if (iEta > 1) {
             return -1;
         } else {
             return 0;
         }
-    } else if (4 == etaSummingMode) {
+    } else if (4 == mEtaSumMode) {
         if (iEta > 1) {
             return -1;
         } else {
             return NETABINS-dEta-1;
         }
-    } else if (5 == etaSummingMode) {
+    } else if (5 == mEtaSumMode) {
         if (iEta > 1) {
             return -1;
         } else {
             return (NETABINS-dEta) / 2;
         }
-    } else if (6 == etaSummingMode) {
+    } else if (6 == mEtaSumMode) {
         int nEta = NETABINS / dEta;
         if (iEta > nEta) {
             return -1;
@@ -654,7 +570,7 @@ int StEStructFluctAnal::getPhiStart( int iPhi, int dPhi ) {
     if (dPhi > NPHIBINS) {
         return -1;
     }
-    if (1 == phiSummingMode) {
+    if (1 == mPhiSumMode) {
         int nPhi = NPHIBINS / dPhi;
         int oPhi = NPHIBINS % dPhi;
         if ( iPhi*dPhi <= NPHIBINS ) {
@@ -667,31 +583,31 @@ int StEStructFluctAnal::getPhiStart( int iPhi, int dPhi ) {
             return oPhi+(iPhi-nPhi-1)*dPhi;
         }
         return -1;
-    } else if (2 == phiSummingMode) {
+    } else if (2 == mPhiSumMode) {
         if (iPhi+dPhi <= NPHIBINS) {
             return iPhi - 1;
         } else {
             return -1;
         }
-    } else if (3 == phiSummingMode) {
+    } else if (3 == mPhiSumMode) {
         if (iPhi > 1) {
             return -1;
         } else {
             return 0;
         }
-    } else if (4 == phiSummingMode) {
+    } else if (4 == mPhiSumMode) {
         if (iPhi > 1) {
             return -1;
         } else {
             return NPHIBINS-dPhi - 1;
         }
-    } else if (5 == phiSummingMode) {
+    } else if (5 == mPhiSumMode) {
         if (iPhi > 1) {
             return -1;
         } else {
             return (NPHIBINS-dPhi) / 2;
         }
-    } else if (6 == phiSummingMode) {
+    } else if (6 == mPhiSumMode) {
         int nPhi = NPHIBINS / dPhi;
         if (iPhi > nPhi) {
             return -1;
@@ -702,7 +618,7 @@ int StEStructFluctAnal::getPhiStart( int iPhi, int dPhi ) {
     return -1;
 }
 int StEStructFluctAnal::getNumEtaBins( int dEta ) {
-    if (1 == etaSummingMode) {
+    if (1 == mEtaSumMode) {
         int nEta = NETABINS / dEta;
         int oEta = NETABINS % dEta;
         if ( 0 == oEta ) {
@@ -710,22 +626,22 @@ int StEStructFluctAnal::getNumEtaBins( int dEta ) {
         } else {
             return 2 * nEta;
         }
-    } else if (2 == etaSummingMode) {
+    } else if (2 == mEtaSumMode) {
         return NETABINS + 1 - dEta;
-    } else if (3 == etaSummingMode) {
+    } else if (3 == mEtaSumMode) {
         return 1;
-    } else if (4 == etaSummingMode) {
+    } else if (4 == mEtaSumMode) {
         return 1;
-    } else if (5 == etaSummingMode) {
+    } else if (5 == mEtaSumMode) {
         return 1;
-    } else if (5 == etaSummingMode) {
+    } else if (5 == mEtaSumMode) {
         int nEta = NETABINS / dEta;
         return nEta;
     }
     return 0;
 }
 int StEStructFluctAnal::getNumPhiBins( int dPhi ) {
-    if (1 == phiSummingMode) {
+    if (1 == mPhiSumMode) {
         int nPhi = NPHIBINS / dPhi;
         int oPhi = NPHIBINS % dPhi;
         if ( 0 == oPhi ) {
@@ -733,38 +649,40 @@ int StEStructFluctAnal::getNumPhiBins( int dPhi ) {
         } else {
             return 2 * nPhi;
         }
-    } else if (2 == phiSummingMode) {
+    } else if (2 == mPhiSumMode) {
         return NPHIBINS + 1 - dPhi;
-    } else if (3 == phiSummingMode) {
+    } else if (3 == mPhiSumMode) {
         return 1;
-    } else if (4 == phiSummingMode) {
+    } else if (4 == mPhiSumMode) {
         return 1;
-    } else if (5 == phiSummingMode) {
+    } else if (5 == mPhiSumMode) {
         return 1;
-    } else if (5 == phiSummingMode) {
+    } else if (5 == mPhiSumMode) {
         int nPhi = NPHIBINS / dPhi;
         return nPhi;
     }
     return 0;
 }
 
-void StEStructFluctAnal::writeHistograms(TFile* tf){
-
-    tf->cd();
+void StEStructFluctAnal::writeHistograms(){
 
     TH1F *hEtaLimits = new TH1F("EtaLimits","EtaLimits",2,1,2);
     hEtaLimits->SetBinContent(1,mEtaMin);
     hEtaLimits->SetBinContent(2,mEtaMax);
     hEtaLimits->Write();
+    delete hEtaLimits;  hEtaLimits = 0;
     hRefMultiplicity->Write();
     hMultiplicity->Write();
+    hMultiplicityBinned->Write();
+    hPt->Write();
+    hPtBinned->Write();
 
     for (int i=0;i<mnCents;i++) {
         mFluct[i]->writeHistograms();
     }
     for (int i=0;i<mnPtCents;i++) {
         for (int j=0;j<mnPts;j++) {
-            int index = j + i*mnPtCents;
+            int index = j + i*mnPts;
             mPtFluct[index]->writeHistograms();
         }
     }
@@ -778,11 +696,8 @@ void StEStructFluctAnal::writeHistograms(TFile* tf){
     hfUnique->Write();
 
 
-    cout << "For this analysis we used doingPairCuts = " << doingPairCuts << endl;
-    cout << "(0 means don't invoke pair cuts, 1 means invoke pair cuts.)" << endl;
-    cout << endl;
-    cout << "For this analysis we have used etaSummingMode = " << etaSummingMode << endl;
-    cout << "For this analysis we have used phiSummingMode = " << phiSummingMode << endl;
+    cout << "For this analysis we have used mEtaSumMode = " << mEtaSumMode << endl;
+    cout << "For this analysis we have used mPhiSumMode = " << mPhiSumMode << endl;
     cout << "(1 = start at bin 0. Fit as many non-overlapping bins as possible" <<endl;
     cout << "   If it doesn't end evenly start at end and work back.)" << endl;
     cout << "(2 = start at bin 0, shift over one bin until we hit the end.)" << endl;
@@ -808,7 +723,7 @@ void StEStructFluctAnal::writeQAHists(TFile* qatf) {
     }
     for (int i=0;i<mnPtCents;i++) {
         for (int j=0;j<mnPts;j++) {
-            int index = j + i*mnPtCents;
+            int index = j + i*mnPts;
             mPtFluct[index]->writeQAHistograms();
         }
     }
@@ -816,12 +731,13 @@ void StEStructFluctAnal::writeQAHists(TFile* qatf) {
 }
 
 //--------------------------------------------------------------------------
-void StEStructFluctAnal::setOutputFileName(const char* outFileName) {
-}
 void StEStructFluctAnal::initHistograms(){
 
-    hRefMultiplicity = new TH1F("RefMultiplicity","RefMultiplicity",1500,1,1500);
-    hMultiplicity = new TH1F("Multiplicity","Multiplicity",1500,1,1500);
+    hRefMultiplicity = new TH1F("RefMultiplicity","RefMultiplicity",2000,1,2000);
+    hMultiplicity = new TH1F("Multiplicity","Multiplicity",2000,1,2000);
+    hMultiplicityBinned = new TH1F("MultiplicityBinned","MultiplicityBinned",120,1.0,7.0);
+    hPt = new TH1F("Pt","Pt",2000,1,2000);
+    hPtBinned = new TH1F("PtBinned","PtBinned",120,0.0,6.0);
 
     // Now we allocate arrays to store information.
     // Need to keep track of all bins at each scale.
@@ -853,27 +769,43 @@ void StEStructFluctAnal::initHistograms(){
             off += iBin;
         }
     }
-    mTotBins = off;
+    mnTotBins = off;
 cout << "Creating histograms for bins, uniqueness etc. " << endl;
     hnBins   = new TH2F("nBins",  "nBins",  NPHIBINS,0.5,NPHIBINS+0.5,NETABINS,0.5,NETABINS+0.5);
     hoffset = new TH2F("offset","offset",NPHIBINS,0.5,NPHIBINS+0.5,NETABINS,0.5,NETABINS+0.5);
     hfUnique = new TH2F("fUnique","fUnique",NPHIBINS,0.5,NPHIBINS+0.5,NETABINS,0.5,NETABINS+0.5);
-    for (int iPhi=1;iPhi<=NPHIBINS;iPhi++) {
-        int jPhi = iPhi - 1;
-        for (int iEta=1;iEta<=NETABINS;iEta++) {
-            int jEta = iEta - 1;
-            hnBins->SetBinContent(iPhi,iEta,nBins[jPhi][jEta]);
-            hoffset->SetBinContent(iPhi,iEta,offset[jPhi][jEta]);
-            hfUnique->SetBinContent(iPhi,iEta,fUnique[jPhi][jEta]);
+    for (int jPhi=0;jPhi<NPHIBINS;jPhi++) {
+        for (int jEta=0;jEta<NETABINS;jEta++) {
+            hnBins->SetBinContent(jPhi+1,jEta+1,nBins[jPhi][jEta]);
+            hoffset->SetBinContent(jPhi+1,jEta+1,offset[jPhi][jEta]);
+            hfUnique->SetBinContent(jPhi+1,jEta+1,fUnique[jPhi][jEta]);
         }
     }
 }
 
 void StEStructFluctAnal::deleteHistograms() {
-    delete hnBins;
-    delete hoffset;
-    delete hfUnique;
+    if (hRefMultiplicity) {
+        delete hRefMultiplicity;  hRefMultiplicity = 0;
+    }
+    if (hMultiplicity) {
+        delete hMultiplicity;     hMultiplicity = 0;
+    }
+    if (hMultiplicityBinned) {
+        delete hMultiplicityBinned;     hMultiplicityBinned = 0;
+    }
+    if (hPt) {
+        delete hPt;     hPt = 0;
+    }
+    if (hPtBinned) {
+        delete hPtBinned;     hPtBinned = 0;
+    }
+    if (hnBins) {
+        delete hnBins;            hnBins = 0;
+    }
+    if (hoffset) {
+        delete hoffset;           hoffset = 0;
+    }
+    if (hfUnique) {
+        delete hfUnique;          hfUnique = 0;
+    }
 }
-
-
-

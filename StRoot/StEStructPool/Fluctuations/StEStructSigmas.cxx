@@ -19,6 +19,8 @@ StEStructSigmas::StEStructSigmas( char *key,
     mEtaMin = EtaMin;
     mEtaMax = EtaMax;
     mpreFix = strdup(preFix);
+    mEtaSumMode = 1;
+    mPhiSumMode = 1;
     initHistograms();
 }
 //--------------------------------------------------------------------------
@@ -38,6 +40,9 @@ void StEStructSigmas::fillHistograms() {
 //--------------------------------------------------------------------------
 void StEStructSigmas::NHistograms() {
     char buffer[255];
+    binTupleStruct   bTuple;
+    scaleTupleStruct sTuple;
+    sumTupleStruct   STuple;
 
     TH2F *hnBins   = (TH2F *) gDirectory->Get("nBins");
     TH2F *hoffset = (TH2F *) gDirectory->Get("offset");
@@ -52,6 +57,12 @@ void StEStructSigmas::NHistograms() {
     NPlus->Reset();
     NMinus->Reset();
     NPlusMinus->Reset();
+
+    NSigCorrection->Reset();
+    NDelCorrection->Reset();
+    NPlusCorrection->Reset();
+    NMinusCorrection->Reset();
+    NPlusMinusCorrection->Reset();
 
     NSigErrors->Reset();
     NDelErrors->Reset();
@@ -98,9 +109,26 @@ void StEStructSigmas::NHistograms() {
         hNPlusMinus[jStat] = (TH1D *) gDirectory->Get(buffer);
     }
 
+    double vecCI[NPHIBINS][NETABINS][3];
+    double vecCD[NPHIBINS][NETABINS][3];
+    double vecPP[NPHIBINS][NETABINS][3];
+    double vecMM[NPHIBINS][NETABINS][3];
+    double vecPM[NPHIBINS][NETABINS][3];
+    double BCI = 0, nBCI = 0, BCD = 0, nBCD = 0, BPP = 0, nBPP = 0;
+    double BMM = 0, nBMM = 0, BPM = 0, nBPM = 0;
     int mBin, oBin;
     for (int iPhi=1;iPhi<=mNPhiBins;iPhi++) {
+        int jPhi = iPhi - 1;
         for (int iEta=1;iEta<=mNEtaBins;iEta++) {
+            int jEta = iEta - 1;
+            for (int i=0;i<3;i++) {
+                vecCI[jPhi][jEta][i] = 0;
+                vecCD[jPhi][jEta][i] = 0;
+                vecPP[jPhi][jEta][i] = 0;
+                vecMM[jPhi][jEta][i] = 0;
+                vecPM[jPhi][jEta][i] = 0;
+            }
+
             double NS[16], ND[2], NP[5], NM[5], NC[8];
             double sigSq, psigSq, msigSq;
             double Ss = 0, nSs = 0, DSs = 0, nDSs = 0;
@@ -113,7 +141,39 @@ void StEStructSigmas::NHistograms() {
             mBin = (int) hnBins->GetBinContent(iPhi,iEta);
             oBin = (int) hoffset->GetBinContent(iPhi,iEta);
 
+            int iEtaBin = 0, iPhiBin = 1;
+            double mCI[2][2], mCD[2][2], mPP[2][2], mMM[2][2], mPM[2][2];
+            double vCI[2],    vCD[2],    vPP[2],    vMM[2],    vPM[2];
+            double mInv[2][2], mDet;
+            int nEtaBin = getNumEtaBins(iEta);
+//            int nPhiBin = getNumPhiBins(iEta);
+            float phi1, phi2, eta1, eta2;
+            double f3;
+            for (int i=0;i<2;i++) {
+                vCI[i] = 0;
+                vCD[i] = 0;
+                vPP[i] = 0;
+                vMM[i] = 0;
+                vPM[i] = 0;
+                for (int j=0;j<2;j++) {
+                    mCI[i][j] = 0;
+                    mCD[i][j] = 0;
+                    mPP[i][j] = 0;
+                    mMM[i][j] = 0;
+                    mPM[i][j] = 0;
+                }
+            }
             for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
+                iEtaBin++;
+                if (iEtaBin > nEtaBin) {
+                    iEtaBin = 1;
+                    iPhiBin++;
+                }
+                phi1 = 0 + 2*3.1415926*getPhiStart(iPhiBin,iPhi)/mNPhiBins;
+                phi2 = phi1 + iPhi * 2*3.1415926 / mNPhiBins;
+                eta1 = mEtaMin + (mEtaMax-mEtaMin)*getEtaStart(iEtaBin,iEta)/mNEtaBins;
+                eta2 = eta1 + iEta * (mEtaMax-mEtaMin) / mNEtaBins;
+                f3   = (pow(eta2,3)-pow(eta1,3))/(3*(eta2-eta1));
                 sumEvents = hTotEvents[0]->GetBinContent(iBin);
                 if (sumEvents > 0) {
                     for (int jStat=0;jStat<16;jStat++) {
@@ -130,6 +190,29 @@ void StEStructSigmas::NHistograms() {
                         nSs  += 1;
                         DSs  += (4 + sigSq/NSum) * sigSq / sumEvents;
                         nDSs += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                        bTuple.type     = 1;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq-1;
+                        bTuple.sig2_1   = 0;
+                        bTuple.sig2_2   = 0;
+                        bTuple.nbar     = NSum;
+                        bTuple.events   = sumEvents;
+                        bTuple.f3       = f3;
+                        binTuple->Fill(&bTuple.type);
+                        vecCI[jPhi][jEta][0] += 1;
+                        vecCI[jPhi][jEta][1] += sigSq-1;
+                        vecCI[jPhi][jEta][2] += f3;
+                        if (nEtaBin > 3) {
+                            mCI[0][0] += 1;
+                            mCI[0][1] += f3;
+                            mCI[1][0] += f3;
+                            mCI[1][1] += f3*f3;
+                            vCI[0]    += sigSq-1;
+                            vCI[1]    += (sigSq-1)*f3;
+                        }
 
                         double NDiff = NS[0] - NS[1];
                         double DiffSq = NS[2] - 2*NS[3] + NS[4];
@@ -138,6 +221,29 @@ void StEStructSigmas::NHistograms() {
                         nSd  += 1;
                         DSd  += (4 + sigSq/NSum) * sigSq / sumEvents;
                         nDSd += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                        bTuple.type     = 2;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq-1;
+                        bTuple.sig2_1   = 0;
+                        bTuple.sig2_2   = 0;
+                        bTuple.nbar     = NSum;
+                        bTuple.events   = sumEvents;
+                        bTuple.f3       = f3;
+                        binTuple->Fill(&bTuple.type);
+                        vecCD[jPhi][jEta][0] += 1;
+                        vecCD[jPhi][jEta][1] += sigSq-1;
+                        vecCD[jPhi][jEta][2] += f3;
+                        if (nEtaBin > 3) {
+                            mCD[0][0] += 1;
+                            mCD[0][1] += f3;
+                            mCD[1][0] += f3;
+                            mCD[1][1] += f3*f3;
+                            vCD[0]    += sigSq-1;
+                            vCD[1]    += (sigSq-1)*f3;
+                        }
                     }
                 }
 
@@ -154,6 +260,29 @@ void StEStructSigmas::NHistograms() {
                         DSp  += (4 + sigSq/NP[0]) * sigSq / plusEvents;
                         nDSp += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                         psigSq = sigSq;
+                        bTuple.type     = 3;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq-1;
+                        bTuple.sig2_1   = 0;
+                        bTuple.sig2_2   = 0;
+                        bTuple.nbar     = NP[0];
+                        bTuple.events   = plusEvents;
+                        bTuple.f3       = f3;
+                        binTuple->Fill(&bTuple.type);
+                        vecPP[jPhi][jEta][0] += 1;
+                        vecPP[jPhi][jEta][1] += sigSq-1;
+                        vecPP[jPhi][jEta][2] += f3;
+                        if (nEtaBin > 3) {
+                            mPP[0][0] += 1;
+                            mPP[0][1] += f3;
+                            mPP[1][0] += f3;
+                            mPP[1][1] += f3*f3;
+                            vPP[0]    += sigSq-1;
+                            vPP[1]    += (sigSq-1)*f3;
+                        }
                     }
                 } else {
                     for (int jStat=0;jStat<5;jStat++) {
@@ -174,6 +303,29 @@ void StEStructSigmas::NHistograms() {
                         DSm  += (4 + sigSq/NM[0]) * sigSq / minusEvents;
                         nDSm += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                         msigSq = sigSq;
+                        bTuple.type     = 4;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq-1;
+                        bTuple.sig2_1   = 0;
+                        bTuple.sig2_2   = 0;
+                        bTuple.nbar     = NM[0];
+                        bTuple.events   = minusEvents;
+                        bTuple.f3       = f3;
+                        binTuple->Fill(&bTuple.type);
+                        vecMM[jPhi][jEta][0] += 1;
+                        vecMM[jPhi][jEta][1] += sigSq-1;
+                        vecMM[jPhi][jEta][2] += f3;
+                        if (nEtaBin > 3) {
+                            mMM[0][0] += 1;
+                            mMM[0][1] += f3;
+                            mMM[1][0] += f3;
+                            mMM[1][1] += f3*f3;
+                            vMM[0]    += sigSq-1;
+                            vMM[1]    += (sigSq-1)*f3;
+                        }
                     }
                 } else {
                     for (int jStat=0;jStat<5;jStat++) {
@@ -197,6 +349,29 @@ void StEStructSigmas::NHistograms() {
                         DSc  += (psigSq + msigSq) / plusMinusEvents +
                                     (1/NC[0]+1/NC[1])*sigSq*sigSq/4;
                         nDSc += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                        bTuple.type     = 5;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq;
+                        bTuple.sig2_1   = 0;
+                        bTuple.sig2_2   = 0;
+                        bTuple.nbar     = sqrt(NP[0]*NM[0]);
+                        bTuple.events   = plusMinusEvents;
+                        bTuple.f3       = f3;
+                        binTuple->Fill(&bTuple.type);
+                        vecPM[jPhi][jEta][0] += 1;
+                        vecPM[jPhi][jEta][1] += sigSq;
+                        vecPM[jPhi][jEta][2] += f3;
+                        if (nEtaBin > 3) {
+                            mPM[0][0] += 1;
+                            mPM[0][1] += f3;
+                            mPM[1][0] += f3;
+                            mPM[1][1] += f3*f3;
+                            vPM[0]    += sigSq;
+                            vPM[1]    += sigSq*f3;
+                        }
                     }
                 }
 //                plusMinusEvents = hTotEvents[0]->GetBinContent(iBin);
@@ -215,31 +390,223 @@ void StEStructSigmas::NHistograms() {
 //                }
             }
 
+            sTuple.phiScale = iPhi;
+            sTuple.etaScale = iEta;
+            mDet = mCI[0][0]*mCI[1][1] - mCI[0][1]*mCI[1][0];
+            if (mDet > 0.00000001) {
+                mInv[0][0] = +mCI[1][1] / mDet;
+                mInv[1][0] = -mCI[1][0] / mDet;
+                mInv[0][1] = -mCI[0][1] / mDet;
+                mInv[1][1] = +mCI[0][0] / mDet;
+                sTuple.type = 1;
+                sTuple.A    = (vCI[0]*mInv[0][0] + vCI[1]*mInv[1][0]) / (iPhi*iEta);
+                sTuple.B    = (vCI[0]*mInv[0][1] + vCI[1]*mInv[1][1]) / (iPhi*iEta);
+                sTuple.nBins  = mCI[0][0];
+                sTuple.f3     = mCI[0][1];
+                sTuple.f3sq   = mCI[1][1];
+                sTuple.sig2   = vCI[0];
+                sTuple.sig2f3 = vCI[1];
+                scaleTuple->Fill(&sTuple.type);
+                BCI  += sTuple.B;
+                nBCI += 1;
+            }
+            mDet = mCD[0][0]*mCD[1][1] - mCD[0][1]*mCD[1][0];
+            if (mDet > 0.00000001) {
+                mInv[0][0] = +mCD[1][1] / mDet;
+                mInv[1][0] = -mCD[1][0] / mDet;
+                mInv[0][1] = -mCD[0][1] / mDet;
+                mInv[1][1] = +mCD[0][0] / mDet;
+                sTuple.type = 2;
+                sTuple.A    = (vCD[0]*mInv[0][0] + vCD[1]*mInv[1][0]) / (iPhi*iEta);
+                sTuple.B    = (vCD[0]*mInv[0][1] + vCD[1]*mInv[1][1]) / (iPhi*iEta);
+                sTuple.nBins  = mCD[0][0];
+                sTuple.f3     = mCD[0][1];
+                sTuple.f3sq   = mCD[1][1];
+                sTuple.sig2   = vCD[0];
+                sTuple.sig2f3 = vCD[1];
+                scaleTuple->Fill(&sTuple.type);
+                BCD  += sTuple.B;
+                nBCD += 1;
+            }
+            mDet = mPP[0][0]*mPP[1][1] - mPP[0][1]*mPP[1][0];
+            if (mDet > 0.00000001) {
+                mInv[0][0] = +mPP[1][1] / mDet;
+                mInv[1][0] = -mPP[1][0] / mDet;
+                mInv[0][1] = -mPP[0][1] / mDet;
+                mInv[1][1] = +mPP[0][0] / mDet;
+                sTuple.type = 3;
+                sTuple.A    = (vPP[0]*mInv[0][0] + vPP[1]*mInv[1][0]) / (iPhi*iEta);
+                sTuple.B    = (vPP[0]*mInv[0][1] + vPP[1]*mInv[1][1]) / (iPhi*iEta);
+                sTuple.nBins  = mPP[0][0];
+                sTuple.f3     = mPP[0][1];
+                sTuple.f3sq   = mPP[1][1];
+                sTuple.sig2   = vPP[0];
+                sTuple.sig2f3 = vPP[1];
+                scaleTuple->Fill(&sTuple.type);
+                BPP  += sTuple.B;
+                nBPP += 1;
+            }
+            mDet = mMM[0][0]*mMM[1][1] - mMM[0][1]*mMM[1][0];
+            if (mDet > 0.00000001) {
+                mInv[0][0] = +mMM[1][1] / mDet;
+                mInv[1][0] = -mMM[1][0] / mDet;
+                mInv[0][1] = -mMM[0][1] / mDet;
+                mInv[1][1] = +mMM[0][0] / mDet;
+                sTuple.type = 4;
+                sTuple.A    = (vMM[0]*mInv[0][0] + vMM[1]*mInv[1][0]) / (iPhi*iEta);
+                sTuple.B    = (vMM[0]*mInv[0][1] + vMM[1]*mInv[1][1]) / (iPhi*iEta);
+                sTuple.nBins  = mMM[0][0];
+                sTuple.f3     = mMM[0][1];
+                sTuple.f3sq   = mMM[1][1];
+                sTuple.sig2   = vMM[0];
+                sTuple.sig2f3 = vMM[1];
+                scaleTuple->Fill(&sTuple.type);
+                BMM  += sTuple.B;
+                nBMM += 1;
+            }
+            mDet = mPM[0][0]*mPM[1][1] - mPM[0][1]*mPM[1][0];
+            if (mDet > 0.00000001) {
+                mInv[0][0] = +mPM[1][1] / mDet;
+                mInv[1][0] = -mPM[1][0] / mDet;
+                mInv[0][1] = -mPM[0][1] / mDet;
+                mInv[1][1] = +mPM[0][0] / mDet;
+                sTuple.type = 5;
+                sTuple.A    = (vPM[0]*mInv[0][0] + vPM[1]*mInv[1][0]) / (iPhi*iEta);
+                sTuple.B    = (vPM[0]*mInv[0][1] + vPM[1]*mInv[1][1]) / (iPhi*iEta);
+                sTuple.nBins  = mPM[0][0];
+                sTuple.f3     = mPM[0][1];
+                sTuple.f3sq   = mPM[1][1];
+                sTuple.sig2   = vPM[0];
+                sTuple.sig2f3 = vPM[1];
+                scaleTuple->Fill(&sTuple.type);
+                BPM  += sTuple.B;
+                nBPM += 1;
+            }
             if (nSs > 0) {
-                NSig->SetBinContent(iPhi,iEta,Ss/nSs);
+//                NSig->SetBinContent(iPhi,iEta,Ss/nSs);
                 NSigErrors->SetBinContent(iPhi,iEta,sqrt(DSs)/nDSs);
             }
             if (nSd > 0) {
-                NDel->SetBinContent(iPhi,iEta,Sd/nSs);
+//                NDel->SetBinContent(iPhi,iEta,Sd/nSs);
                 NDelErrors->SetBinContent(iPhi,iEta,sqrt(DSd)/nDSd);
             }
             if (nSp > 0) {
-                NPlus->SetBinContent(iPhi,iEta,Sp/nSp);
+//                NPlus->SetBinContent(iPhi,iEta,Sp/nSp);
                 NPlusErrors->SetBinContent(iPhi,iEta,sqrt(DSp)/nDSp);
             }
             if (nSm > 0) {
-                NMinus->SetBinContent(iPhi,iEta,Sm/nSm);
+//                NMinus->SetBinContent(iPhi,iEta,Sm/nSm);
                 NMinusErrors->SetBinContent(iPhi,iEta,sqrt(DSm)/nDSm);
             }
             if (nSc > 0) {
-                NPlusMinus->SetBinContent(iPhi,iEta,Sc/nSc);
+//                NPlusMinus->SetBinContent(iPhi,iEta,Sc/nSc);
                 NPlusMinusErrors->SetBinContent(iPhi,iEta,sqrt(DSc)/nDSc);
+            }
+        }
+    }
+    STuple.type  = 1;
+    STuple.B     = BCI;
+    STuple.nBins = nBCI;
+    sumTuple->Fill(&STuple.type);
+    STuple.type  = 2;
+    STuple.B     = BCD;
+    STuple.nBins = nBCD;
+    sumTuple->Fill(&STuple.type);
+    STuple.type  = 3;
+    STuple.B     = BPP;
+    STuple.nBins = nBPP;
+    sumTuple->Fill(&STuple.type);
+    STuple.type  = 4;
+    STuple.B     = BMM;
+    STuple.nBins = nBMM;
+    sumTuple->Fill(&STuple.type);
+    STuple.type  = 5;
+    STuple.B     = BPM;
+    STuple.nBins = nBPM;
+    sumTuple->Fill(&STuple.type);
+
+    BCI = BCI / nBCI;
+    BCD = BCD / nBCD;
+    BPP = BPP / nBPP;
+    BMM = BMM / nBMM;
+    BPM = BPM / nBPM;
+    double delS, corr, a, b, f;
+    double fFull = (pow(mEtaMax,3)-pow(mEtaMin,3))/(3*(mEtaMax-mEtaMin));
+    for (int jPhi=0;jPhi<mNPhiBins;jPhi++) {
+        int iPhi = jPhi + 1;
+        for (int jEta=0;jEta<mNEtaBins;jEta++) {
+            int iEta = jEta + 1;
+            if (vecCI[jPhi][jEta][0] > 0) {
+                a = vecCI[jPhi][jEta][1]/vecCI[jPhi][jEta][0];
+                b = BCI * iPhi*iEta;
+                f = vecCI[jPhi][jEta][2]/vecCI[jPhi][jEta][0];
+//                delS = a + b*(1.0/3 - f);
+                corr = b*(f - fFull);
+//                corr = b*f;
+                delS = a - corr;
+                NSig->SetBinContent(iPhi,iEta,delS);
+                NSigCorrection->SetBinContent(iPhi,iEta,corr);
+            } else {
+                NSig->SetBinContent(iPhi,iEta,0);
+            }
+            if (vecCD[jPhi][jEta][0] > 0) {
+                a = vecCD[jPhi][jEta][1]/vecCD[jPhi][jEta][0];
+                b = BCD * iPhi*iEta;
+                f = vecCD[jPhi][jEta][2]/vecCD[jPhi][jEta][0];
+//                delS = a + b*(1.0/3 - f);
+                corr = b*(f - fFull);
+//                corr = b*f;
+                delS = a - corr;
+                NDel->SetBinContent(iPhi,iEta,delS);
+                NDelCorrection->SetBinContent(iPhi,iEta,corr);
+            } else {
+                NDel->SetBinContent(iPhi,iEta,0);
+            }
+            if (vecPP[jPhi][jEta][0] > 0) {
+                a = vecPP[jPhi][jEta][1]/vecPP[jPhi][jEta][0];
+                b = BPP * iPhi*iEta;
+                f = vecPP[jPhi][jEta][2]/vecPP[jPhi][jEta][0];
+//                delS = a + b*(1.0/3 - f);
+                corr = b*(f - fFull);
+//                corr = b*f;
+                delS = a - corr;
+                NPlus->SetBinContent(iPhi,iEta,delS);
+                NPlusCorrection->SetBinContent(iPhi,iEta,corr);
+            } else {
+                NPlus->SetBinContent(iPhi,iEta,0);
+            }
+            if (vecMM[jPhi][jEta][0] > 0) {
+                a = vecMM[jPhi][jEta][1]/vecMM[jPhi][jEta][0];
+                b = BMM * iPhi*iEta;
+                f = vecMM[jPhi][jEta][2]/vecMM[jPhi][jEta][0];
+//                delS = a + b*(1.0/3 - f);
+                corr = b*(f - fFull);
+//                corr = b*f;
+                delS = a - corr;
+                NMinus->SetBinContent(iPhi,iEta,delS);
+                NMinusCorrection->SetBinContent(iPhi,iEta,corr);
+            } else {
+                NMinus->SetBinContent(iPhi,iEta,0);
+            }
+            if (vecPM[jPhi][jEta][0] > 0) {
+                a = vecPM[jPhi][jEta][1]/vecPM[jPhi][jEta][0];
+                b = BPM * iPhi*iEta;
+                f = vecPM[jPhi][jEta][2]/vecPM[jPhi][jEta][0];
+//                delS = a + b*(1.0/3 - f);
+                corr = b*(f - fFull);
+//                corr = b*f;
+                delS = a - corr;
+                NPlusMinus->SetBinContent(iPhi,iEta,delS);
+                NPlusMinusCorrection->SetBinContent(iPhi,iEta,corr);
+            } else {
+                NPlusMinus->SetBinContent(iPhi,iEta,0);
             }
         }
     }
 }
 void StEStructSigmas::PHistograms() {
     char buffer[255];
+    binTupleStruct bTuple;
 
     TH2F *hnBins   = (TH2F *) gDirectory->Get("nBins");
     TH2F *hoffset = (TH2F *) gDirectory->Get("offset");
@@ -352,7 +719,7 @@ void StEStructSigmas::PHistograms() {
             double PS[16], PD[16], PP[11], PM[11], PC[17];
 
             double pHat[3], pHat2[3];
-            double sigSq, sigHat, DsigHat;
+            double sigSq0, sigSq1, sigSq2, sigHat, DsigHat;
             double Ss[] = {0, 0, 0}, nSs = 0, DSs = 0, nDSs = 0, hSs = 0, hDSs = 0;
             double Sd[] = {0, 0, 0}, nSd = 0, DSd = 0, nDSd = 0;
             double Sp[] = {0, 0, 0}, nSp = 0, DSp = 0, nDSp = 0, hSp = 0, hDSp = 0;
@@ -368,12 +735,22 @@ void StEStructSigmas::PHistograms() {
             mBin = (int) hnBins->GetBinContent(iPhi,iEta);
             oBin = (int) hoffset->GetBinContent(iPhi,iEta);
 
+            int iEtaBin = 0, iPhiBin = 1;
+            int nEtaBin = getNumEtaBins(iEta);
+            float phi1, phi2, eta1, eta2;
             for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
+                iEtaBin++;
+                if (iEtaBin > nEtaBin) {
+                    iEtaBin = 1;
+                    iPhiBin++;
+                }
+                phi1 = 0 + 2*3.1415926*getPhiStart(iPhiBin,iPhi)/mNPhiBins;
+                phi2 = phi1 + iPhi * 2*3.1415926 / mNPhiBins;
+                eta1 = mEtaMin + (mEtaMax-mEtaMin)*getEtaStart(iEtaBin,iEta)/mNEtaBins;
+                eta2 = eta1 + iEta * (mEtaMax-mEtaMin) / mNEtaBins;
                 totEvents = hTotEvents[0]->GetBinContent(iBin);
                 sumEvents = hTotEvents[1]->GetBinContent(iBin);
                 if (sumEvents > 0) {
-                    double r = sumEvents / totEvents;
-                    r = 1;
                     for (int jStat=0;jStat<16;jStat++) {
                         NS[jStat] = hNSum[jStat]->GetBinContent(iBin) / sumEvents;
                     }
@@ -409,35 +786,65 @@ void StEStructSigmas::PHistograms() {
                         hSs     += sigHat;
                         DsigHat  = 4*pHat2[0]*sigHat / (NSum*sumEvents);
                         hDSs    += DsigHat;
-                        sigSq    = PS[8] - 2*pHat[1]*PS[6] - 2*pHat[2]*PS[7]
+                        sigSq0   = PS[8] - 2*pHat[1]*PS[6] - 2*pHat[2]*PS[7]
                                      + pHat2[1]*NS[5] + 2*pHat[1]*pHat[2]*NS[6] + pHat2[2]*NS[7];
-                        Ss[0]   += (sigSq - sigHat) * r;
-                        sigSq    = PS[5] - 2*pHat[1]*PS[3] - 2*pHat[2]*PS[4]
+                        Ss[0]   += sigSq0 - sigHat;
+                        sigSq1   = PS[5] - 2*pHat[1]*PS[3] - 2*pHat[2]*PS[4]
                                      + pHat2[1]*NS[2] + 2*pHat[1]*pHat[2]*NS[3] + pHat2[2]*NS[4];
-                        Ss[1]   += (sigSq/NSum - sigHat) * r;
-                        sigSq    = PS[11] - 2*pHat[1]*PS[9] - 2*pHat[2]*PS[10]
+                        Ss[1]   += sigSq1/NSum - sigHat;
+                        sigSq2   = PS[11] - 2*pHat[1]*PS[9] - 2*pHat[2]*PS[10]
                                      + pHat2[1]*NS[8] + 2*pHat[1]*pHat[2]*NS[9] + pHat2[2]*NS[10];
-                        Ss[2]   += NSum * (sigSq - sigHat*NS[15]) * r;
+                        Ss[2]   += NSum * (sigSq2 - sigHat*NS[15]);
                         nSs     += 1;
+                        bTuple.type     = 6;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0 - sigHat;
+                        bTuple.sig2_1   = sigSq1/NSum - sigHat;
+                        bTuple.sig2_2   = NSum * (sigSq2 - sigHat*NS[15]);
+                        bTuple.nbar     = NSum;
+                        bTuple.events   = sumEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
 
                         DSs      += (PS[13] - 4*pHat[0]*PS[12] + 6*pHat2[0]*PS[8]
                                    - 4*pHat[0]*pHat2[0]*PSum + pHat2[0]*pHat2[0]*NSum) *NSum/sumEvents;
                         nDSs     += sqrt(hfUnique->GetBinContent(iPhi,iEta));
 
-                        sigSq       = PD[5] - 2*pHat[1]*PD[3] + 2*pHat[2]*PD[4]
+                        sigSq0    = PD[5] - 2*pHat[1]*PD[3] + 2*pHat[2]*PD[4]
                                      + pHat2[1]*NS[5] - 2*pHat[1]*pHat[2]*NS[6] + pHat2[2]*NS[7];
-                        Sd[0]    += (sigSq - sigHat) * r;
-                        sigSq       = PD[2] - 2*pHat[1]*PD[0] + 2*pHat[2]*PD[1]
+                        Sd[0]    += sigSq0 - sigHat;
+                        sigSq1    = PD[2] - 2*pHat[1]*PD[0] + 2*pHat[2]*PD[1]
                                      + pHat2[1]*NS[2] - 2*pHat[1]*pHat[2]*NS[3] + pHat2[2]*NS[4];
-                        Sd[1]    += (sigSq/NSum - sigHat) * r;
-                        sigSq       = PD[8] - 2*pHat[1]*PD[6] + 2*pHat[2]*PD[7]
+                        Sd[1]    += sigSq1/NSum - sigHat;
+                        sigSq2    = PD[8] - 2*pHat[1]*PD[6] + 2*pHat[2]*PD[7]
                                      + pHat2[1]*NS[8] - 2*pHat[1]*pHat[2]*NS[9] + pHat2[2]*NS[10];
-                        Sd[2]    += NSum * (sigSq - sigHat*NS[15]) * r;
+                        Sd[2]    += NSum * (sigSq2 - sigHat*NS[15]);
                         nSd      += 1;
+// Ss[0] += PD[2]/NSum;
+// Ss[1] += 2*pHat[1]*PD[0]/NSum;
+// Ss[2] += 2*pHat[2]*PD[1]/NSum;
+// Sd[0] += pHat2[1]*NS[2]/NSum;
+// Sd[1] += 2*pHat[1]*pHat[2]*NS[3]/NSum;
+// Sd[2] += pHat2[2]*NS[4]/NSum;
 
                         DSd      += (PD[11] - 4*pHat[0]*PD[12] + 6*pHat2[0]*PD[13]
                                           - 4*pHat[0]*pHat2[0]*PD[14] + pHat2[0]*pHat2[0]*PD[15]) *NSum/sumEvents;
                         nDSd     += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                        bTuple.type     = 7;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0 - sigHat;
+                        bTuple.sig2_1   = sigSq1/NSum - sigHat;
+                        bTuple.sig2_2   = NSum * (sigSq2 - sigHat*NS[15]);
+                        bTuple.nbar     = NSum;
+                        bTuple.events   = sumEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
                     }
                 }
 
@@ -458,17 +865,29 @@ void StEStructSigmas::PHistograms() {
                         hSp     += sigHat;
                         DsigHat  = 4*pHat2[1]*sigHat / (NP[0]*plusEvents);
                         hDSp    += DsigHat;
-                        sigSq    = PP[5] - PP[1]*PP[1]/NP[0];
-                        Sp[0]   += sigSq - sigHat;
-                        sigSq    = PP[4] - 2*pHat[1]*PP[2] + pHat2[1]*NP[1];
-                        Sp[1]   += sigSq/NP[0] - sigHat;
-                        sigSq    = PP[6] - 2*pHat[1]*PP[3] + pHat2[1];
-                        Sp[2]   += NP[0] * (sigSq - sigHat*NP[4]);
+                        sigSq0   = PP[5] - PP[1]*PP[1]/NP[0];
+                        Sp[0]   += sigSq0 - sigHat;
+                        sigSq1   = PP[4] - 2*pHat[1]*PP[2] + pHat2[1]*NP[1];
+                        Sp[1]   += sigSq1/NP[0] - sigHat;
+                        sigSq2   = PP[6] - 2*pHat[1]*PP[3] + pHat2[1];
+                        Sp[2]   += NP[0] * (sigSq2 - sigHat*NP[4]);
                         nSp     += 1;
 
                         DSp     += (PP[8] - 4*pHat[1]*PP[7] + 6*pHat2[1]*PP[5]
                                           - 4*pHat[1]*pHat2[1]*PP[1] + pHat2[1]*pHat2[1]*NP[0]) *NP[0]/plusEvents;
                         nDSp    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                        bTuple.type     = 8;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0 - sigHat;
+                        bTuple.sig2_1   = sigSq1/NP[0] - sigHat;
+                        bTuple.sig2_2   = NP[0] * (sigSq2 - sigHat*NP[4]);
+                        bTuple.nbar     = NP[0];
+                        bTuple.events   = plusEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
                     }
                 } else {
                     for (int jStat=0;jStat<5;jStat++) {
@@ -496,17 +915,29 @@ void StEStructSigmas::PHistograms() {
                         hSm     += sigHat;
                         DsigHat  = 4*pHat2[2]*sigHat / (NM[0]*minusEvents);
                         hDSm    += DsigHat;
-                        sigSq    = PM[5] - PM[1]*PM[1]/NM[0];
-                        Sm[0]   += sigSq - sigHat;
-                        sigSq    = PM[4] - 2*pHat[2]*PM[2] + pHat2[2]*NM[1];
-                        Sm[1]   += sigSq/NM[0] - sigHat;
-                        sigSq    = PM[6] - 2*pHat[2]*PM[3] + pHat2[2];
-                        Sm[2]   += NM[0] * (sigSq - sigHat*NM[4]);
+                        sigSq0   = PM[5] - PM[1]*PM[1]/NM[0];
+                        Sm[0]   += sigSq0 - sigHat;
+                        sigSq1   = PM[4] - 2*pHat[2]*PM[2] + pHat2[2]*NM[1];
+                        Sm[1]   += sigSq1/NM[0] - sigHat;
+                        sigSq2   = PM[6] - 2*pHat[2]*PM[3] + pHat2[2];
+                        Sm[2]   += NM[0] * (sigSq2 - sigHat*NM[4]);
                         nSm     += 1;
 
                         DSm     += (PM[8] - 4*pHat[2]*PM[7] + 6*pHat2[2]*PM[5]
                                           - 4*pHat[2]*pHat2[2]*PM[1] + pHat2[2]*pHat2[2]*NM[0]) * NM[0] / minusEvents;
                         nDSm    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                        bTuple.type     = 9;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0 - sigHat;
+                        bTuple.sig2_1   = sigSq1/NM[0] - sigHat;
+                        bTuple.sig2_2   = NM[0] * (sigSq2 - sigHat*NM[4]);
+                        bTuple.nbar     = NM[0];
+                        bTuple.events   = minusEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
                     }
                 } else {
                     for (int jStat=0;jStat<5;jStat++) {
@@ -530,16 +961,29 @@ void StEStructSigmas::PHistograms() {
                         PC[jStat] = hPPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
                     }
 
-                    sigSq   = PC[16] - pHat[2]*PC[10] - pHat[1]*PC[11] + pHat[1]*pHat[2]*NC[5];
-                    Sc[0]  += sigSq;
+                    sigSq0  = PC[16] - pHat[2]*PC[10] - pHat[1]*PC[11] + pHat[1]*pHat[2]*NC[5];
+                    Sc[0]  += sigSq0;
+                    sigSq1  = 0;
                     if (NP[0]*NM[0] > 0) {
-                        sigSq   = PC[14] - pHat[2]*PC[5]  - pHat[1]*PC[4]  + pHat[1]*pHat[2]*NC[2];
-                        Sc[1]  += sigSq/sqrt(NP[0]*NM[0]);
+                        sigSq1  = PC[14] - pHat[2]*PC[5]  - pHat[1]*PC[4]  + pHat[1]*pHat[2]*NC[2];
+                        Sc[1]  += sigSq1/sqrt(NP[0]*NM[0]);
                     }
-                    sigSq   = PC[15] - pHat[2]*PC[2]  - pHat[1]*PC[3]  + pHat[1]*pHat[2];
-                    Sc[2]  += sigSq*sqrt(NP[0]*NM[0]);
+                    sigSq2  = PC[15] - pHat[2]*PC[2]  - pHat[1]*PC[3]  + pHat[1]*pHat[2];
+                    Sc[2]  += sigSq2*sqrt(NP[0]*NM[0]);
                     nSc    += 1;
                     nDSc    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+                    bTuple.type     = 10;
+                    bTuple.phiScale = iPhi;
+                    bTuple.etaScale = iEta;
+                    bTuple.phi      = (phi1+phi2)/2;
+                    bTuple.eta      = (eta1+eta2)/2;
+                    bTuple.sig2     = sigSq0;
+                    bTuple.sig2_1   = sigSq1/sqrt(NP[0]*NM[0]);
+                    bTuple.sig2_2   = sigSq2*sqrt(NP[0]*NM[0]);
+                    bTuple.nbar     = sqrt(NP[0]*NM[0]);
+                    bTuple.events   = plusMinusEvents;
+                    bTuple.f3       = 0;
+                    binTuple->Fill(&bTuple.type);
                 }
 //                plusMinusEvents = hTotEvents[1]->GetBinContent(iBin);
 //                if (plusMinusEvents > 0) {
@@ -619,6 +1063,7 @@ void StEStructSigmas::PHistograms() {
 }
 void StEStructSigmas::PNHistograms() {
     char buffer[255];
+    binTupleStruct bTuple;
 
     TH2F *hnBins   = (TH2F *) gDirectory->Get("nBins");
     TH2F *hoffset = (TH2F *) gDirectory->Get("offset");
@@ -719,7 +1164,7 @@ void StEStructSigmas::PNHistograms() {
             double NS[16], ND[2],  NP[5],  NM[5],  NC[8];
             double PS[16], PD[16], PP[11], PM[11], PC[17];
 
-            double sigSq, pHat[3];
+            double sigSq0, sigSq1, sigSq2, pHat[3];
             double Ss[] = {0, 0, 0}, nSs = 0;
             double Sd[] = {0, 0, 0}, nSd = 0;
             double Sp[] = {0, 0, 0}, nSp = 0;
@@ -733,7 +1178,19 @@ void StEStructSigmas::PNHistograms() {
             mBin = (int) hnBins->GetBinContent(iPhi,iEta);
             oBin = (int) hoffset->GetBinContent(iPhi,iEta);
 
+            int iEtaBin = 0, iPhiBin = 1;
+            int nEtaBin = getNumEtaBins(iEta);
+            float phi1, phi2, eta1, eta2;
             for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
+                iEtaBin++;
+                if (iEtaBin > nEtaBin) {
+                    iEtaBin = 1;
+                    iPhiBin++;
+                }
+                phi1 = 0 + 2*3.1415926*getPhiStart(iPhiBin,iPhi)/mNPhiBins;
+                phi2 = phi1 + iPhi * 2*3.1415926 / mNPhiBins;
+                eta1 = mEtaMin + (mEtaMax-mEtaMin)*getEtaStart(iEtaBin,iEta)/mNEtaBins;
+                eta2 = eta1 + iEta * (mEtaMax-mEtaMin) / mNEtaBins;
                 totEvents = hTotEvents[0]->GetBinContent(iBin);
                 sumEvents = hTotEvents[1]->GetBinContent(iBin);
                 if (sumEvents > 0) {
@@ -761,34 +1218,58 @@ void StEStructSigmas::PNHistograms() {
                         } else {
                             pHat[2] = 0;
                         }
-                        sigSq   = (PS[15] - NSum*PS[14]
+                        sigSq0  = (PS[15] - NSum*PS[14]
                                   - pHat[1]*(NS[12] - NSum*NS[11])
                                   - pHat[2]*(NS[14] - NSum*NS[13])) / sqrt(NSum);
-                        Ss[0]  += sigSq;
-                        sigSq   = (PS[3]+PS[4]
+                        Ss[0]  += sigSq0;
+                        sigSq1  = (PS[3]+PS[4]
                                   - pHat[1]*(NS[2] + NS[3])
                                   - pHat[2]*(NS[3] + NS[4])) / NSum;
-                        Ss[1]  += sigSq;
-                        sigSq   = (-PS[9] - PS[10]
+                        Ss[1]  += sigSq1;
+                        sigSq2  = (-PS[9] - PS[10]
                                    + pHat[1]*(NS[8] + NS[9])
                                    + pHat[2]*(NS[9] + NS[10])) * NSum;
-                        Ss[2]  += sigSq;
+                        Ss[2]  += sigSq2;
                         nSs +=1;
+                        bTuple.type     = 11;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0;
+                        bTuple.sig2_1   = sigSq1;
+                        bTuple.sig2_2   = sigSq2;
+                        bTuple.nbar     = NSum;
+                        bTuple.events   = sumEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
 
                         double NDiff = NS[0] - NS[1];
-                        sigSq   = PD[10] - NDiff*PD[9]
+                        sigSq0  = PD[10] - NDiff*PD[9]
                                   - pHat[1]*(ND[0]-NDiff*NS[11])
                                   + pHat[2]*(ND[1]-NDiff*NS[13]);
-                        Sd[0]  += sigSq / sqrt(NSum);
-                        sigSq   = PD[0] - PD[1]
+                        Sd[0]  += sigSq0 / sqrt(NSum);
+                        sigSq1  = PD[0] - PD[1]
                                   - pHat[1]*(NS[2] - NS[3])
                                   + pHat[2]*(NS[3] - NS[4]);
-                        Sd[1]  += sigSq / NSum;
-                        sigSq   = PD[3] - PD[4] - NDiff*(PD[6]+PD[7])
+                        Sd[1]  += sigSq1 / NSum;
+                        sigSq2  = PD[3] - PD[4] - NDiff*(PD[6]+PD[7])
                                   - pHat[1]*(NS[5]-NS[6] - NDiff*(NS[8]+NS[9]))
                                   + pHat[2]*(NS[6]-NS[7] - NDiff*(NS[9]+NS[10]));
-                        Sd[2]  += sigSq;
+                        Sd[2]  += sigSq2;
                         nSd += 1;
+                        bTuple.type     = 12;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0/sqrt(NSum);
+                        bTuple.sig2_1   = sigSq1/NSum;
+                        bTuple.sig2_2   = sigSq2;
+                        bTuple.nbar     = NSum;
+                        bTuple.events   = sumEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
                     }
                 }
 
@@ -803,14 +1284,26 @@ void StEStructSigmas::PNHistograms() {
                     }
                     if (NP[0] > 0) {
                         pHat[1] = PP[1] / NP[0];
-                        sigSq  = PP[10] - NP[0]*PP[9]
+                        sigSq0 = PP[10] - NP[0]*PP[9]
                                   - pHat[1]*NP[3] + PP[1]*NP[2];
-                        Sp[0]  += sigSq / sqrt(NP[0]);
-                        sigSq  = PP[2] - pHat[1]*NP[1];
-                        Sp[1]  += sigSq / NP[0];
-                        sigSq  = PP[1] - NP[0]*PP[3];
-                        Sp[2]  += sigSq;
+                        Sp[0]  += sigSq0 / sqrt(NP[0]);
+                        sigSq1 = PP[2] - pHat[1]*NP[1];
+                        Sp[1]  += sigSq1 / NP[0];
+                        sigSq2 = PP[1] - NP[0]*PP[3];
+                        Sp[2]  += sigSq2;
                         nSp    += 1;
+                        bTuple.type     = 13;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0/sqrt(NP[0]);
+                        bTuple.sig2_1   = sigSq1/NP[0];
+                        bTuple.sig2_2   = sigSq2;
+                        bTuple.nbar     = NP[0];
+                        bTuple.events   = plusEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
                     }
                 } else {
                     for (int jStat=0;jStat<5;jStat++) {
@@ -832,14 +1325,26 @@ void StEStructSigmas::PNHistograms() {
                     }
                     if (NM[0] > 0) {
                         pHat[2] = PM[1] / NM[0];
-                        sigSq  = PM[10] - NM[0]*PM[9]
+                        sigSq0 = PM[10] - NM[0]*PM[9]
                                   - pHat[2]*NM[3] + PM[1]*NM[2];
-                        Sm[0]  += sigSq / sqrt(NM[0]);
-                        sigSq  = PM[2] - pHat[2]*NM[1];
-                        Sm[1]  += sigSq / NM[0];
-                        sigSq  = PM[1] - NM[0]*PM[3];
-                        Sm[2]  += sigSq;
+                        Sm[0]  += sigSq0 / sqrt(NM[0]);
+                        sigSq1 = PM[2] - pHat[2]*NM[1];
+                        Sm[1]  += sigSq1 / NM[0];
+                        sigSq2 = PM[1] - NM[0]*PM[3];
+                        Sm[2]  += sigSq2;
                         nSm    += 1;
+                        bTuple.type     = 14;
+                        bTuple.phiScale = iPhi;
+                        bTuple.etaScale = iEta;
+                        bTuple.phi      = (phi1+phi2)/2;
+                        bTuple.eta      = (eta1+eta2)/2;
+                        bTuple.sig2     = sigSq0/sqrt(NM[0]);
+                        bTuple.sig2_1   = sigSq1/NM[0];
+                        bTuple.sig2_2   = sigSq2;
+                        bTuple.nbar     = NM[0];
+                        bTuple.events   = minusEvents;
+                        bTuple.f3       = 0;
+                        binTuple->Fill(&bTuple.type);
                     }
                 } else {
                     for (int jStat=0;jStat<5;jStat++) {
@@ -862,35 +1367,65 @@ void StEStructSigmas::PNHistograms() {
                     for (int jStat=0;jStat<17;jStat++) {
                         PC[jStat] = hPPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
                     }
+                    sigSq0 = 0;
                     if (NM[0] > 0) {
-                        sigSq = (PC[12] - NC[1]*PC[6]
+                        sigSq0 = (PC[12] - NC[1]*PC[6]
                                   - pHat[1]*NC[6] + pHat[1]*NC[1]*NC[3]) / sqrt(NM[0]);
-                        Sc1[0] += sigSq;
+                        Sc1[0] += sigSq0;
                     }
+                    sigSq1 = 0;
                     if (NP[0]*NM[0] > 0) {
-                        sigSq = (PC[5] - pHat[1]*NC[2]) / sqrt(NP[0]*NM[0]);
-                        Sc1[1] += sigSq;
+                        sigSq1 = (PC[5] - pHat[1]*NC[2]) / sqrt(NP[0]*NM[0]);
+                        Sc1[1] += sigSq1;
                     }
+                    sigSq2 = 0;
                     if (NM[0] > 0) {
-                        sigSq = (PC[8] - NC[1]*PC[2]) * sqrt(NP[0]/NM[0]);
-                        Sc1[2] += sigSq;
+                        sigSq2 = (PC[8] - NC[1]*PC[2]) * sqrt(NP[0]/NM[0]);
+                        Sc1[2] += sigSq2;
                     }
                     nSc1 += 1;
+                    bTuple.type     = 15;
+                    bTuple.phiScale = iPhi;
+                    bTuple.etaScale = iEta;
+                    bTuple.phi      = (phi1+phi2)/2;
+                    bTuple.eta      = (eta1+eta2)/2;
+                    bTuple.sig2     = sigSq0;
+                    bTuple.sig2_1   = sigSq1;
+                    bTuple.sig2_2   = sigSq2;
+                    bTuple.nbar     = sqrt(NM[0]*NP[0]);
+                    bTuple.events   = plusMinusEvents;
+                    bTuple.f3       = 0;
+                    binTuple->Fill(&bTuple.type);
 
+                    sigSq0 = 0;
                     if (NP[0] > 0) {
-                        sigSq = (PC[13] - NC[0]*PC[7]
+                        sigSq0 = (PC[13] - NC[0]*PC[7]
                                   - pHat[2]*NC[7] + pHat[2]*NC[0]*NC[4]) / sqrt(NP[0]);
-                        Sc2[0] += sigSq;
+                        Sc2[0] += sigSq0;
                     }
+                    sigSq1 = 0;
                     if (NP[0]*NM[0] > 0) {
-                        sigSq = (PC[4] - pHat[2]*NC[2]) / sqrt(NP[0]*NM[0]);
-                        Sc2[1] += sigSq;
+                        sigSq1 = (PC[4] - pHat[2]*NC[2]) / sqrt(NP[0]*NM[0]);
+                        Sc2[1] += sigSq1;
                     }
+                    sigSq2 = 0;
                     if (NP[0] > 0) {
-                        sigSq = (PC[9] - NC[0]*PC[3]) * sqrt(NM[0]/NP[0]);
-                        Sc2[2] += sigSq;
+                        sigSq2 = (PC[9] - NC[0]*PC[3]) * sqrt(NM[0]/NP[0]);
+                        Sc2[2] += sigSq2;
                     }
                     nSc2 += 1;
+                    bTuple.type     = 16;
+                    bTuple.phiScale = iPhi;
+                    bTuple.etaScale = iEta;
+                    bTuple.phi      = (phi1+phi2)/2;
+                    bTuple.eta      = (eta1+eta2)/2;
+                    bTuple.sig2     = sigSq0;
+                    bTuple.sig2_1   = sigSq1;
+                    bTuple.sig2_2   = sigSq2;
+                    bTuple.nbar     = sqrt(NM[0]*NP[0]);
+                    bTuple.events   = plusMinusEvents;
+                    bTuple.f3       = 0;
+                    binTuple->Fill(&bTuple.type);
                 }
 //                plusMinusEvents = hTotEvents[4]->GetBinContent(iBin);
 //                if (plusMinusEvents > 0) {
@@ -998,6 +1533,11 @@ void StEStructSigmas::writeHistograms() {
     NPlus->Write();
     NMinus->Write();
     NPlusMinus->Write();
+    NSigCorrection->Write();
+    NDelCorrection->Write();
+    NPlusCorrection->Write();
+    NMinusCorrection->Write();
+    NPlusMinusCorrection->Write();
     for (int iType=0;iType<3;iType++) {
         PSig[iType]->Write();
         PDel[iType]->Write();
@@ -1039,6 +1579,9 @@ void StEStructSigmas::writeHistograms() {
     sigSPtHatErrors->Write();
     sigPPtHatErrors->Write();
     sigMPtHatErrors->Write();
+    binTuple->Write();
+    scaleTuple->Write();
+    sumTuple->Write();
 }
 
 //--------------------------------------------------------------------------
@@ -1056,6 +1599,16 @@ void StEStructSigmas::initHistograms() {
     NMinus = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
     sprintf( line, "NPlusMinus_%s", mKey );
     NPlusMinus = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
+    sprintf( line, "NSigCorrection_%s", mKey );
+    NSigCorrection = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
+    sprintf( line, "NDelCorrection_%s", mKey );
+    NDelCorrection = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
+    sprintf( line, "NPlusCorrection_%s", mKey );
+    NPlusCorrection = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
+    sprintf( line, "NMinusCorrection_%s", mKey );
+    NMinusCorrection = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
+    sprintf( line, "NPlusMinusCorrection_%s", mKey );
+    NPlusMinusCorrection = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
 
     for (int iType=0;iType<3;iType++) {
         sprintf( line, "PSig%i_%s", iType, mKey );
@@ -1134,17 +1687,32 @@ void StEStructSigmas::initHistograms() {
     sigPPtHatErrors = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
     sprintf( line, "MsigPtHatErrors_%s", mKey );
     sigMPtHatErrors = new TH2D(line,line,mNPhiBins,0.0,6.2831852,mNEtaBins,0.0,mEtaMax-mEtaMin);
+
+    sprintf( line, "binTuple_%s", mKey );
+    binTuple = new TNtuple(line,"sigma dependence on eta",
+            "type:phiScale:etaScale:phi:eta:sig2:sig2_1:sig2_2:nbar:events:f3");
+    sprintf( line, "scaleTuple_%s", mKey );
+    scaleTuple = new TNtuple(line,"fitting dependence on eta",
+            "type:phiScale:etaScale:A:B:nBins:f3:f3sq:sig2:sig2f3");
+    sprintf( line, "sumTuple_%s", mKey );
+    sumTuple = new TNtuple(line,"fit parameters for eta",
+            "type:B:nBins");
 }
 
 //--------------------------------------------------------------------------
 void StEStructSigmas::deleteHistograms() {
 
-cout << "Deleting bin***Var2, bin***Errors histograms." << endl;
+printf("Deleting bin***Var2, bin***Errors histograms.\n");
     delete NSig;
     delete NDel;
     delete NPlus;
     delete NMinus;
     delete NPlusMinus;
+    delete NSigCorrection;
+    delete NDelCorrection;
+    delete NPlusCorrection;
+    delete NMinusCorrection;
+    delete NPlusMinusCorrection;
     for (int iType=0;iType<3;iType++) {
         delete PSig[iType];
         delete PDel[iType];
@@ -1186,4 +1754,165 @@ cout << "Deleting bin***Var2, bin***Errors histograms." << endl;
     delete sigSPtHatErrors;
     delete sigPPtHatErrors;
     delete sigMPtHatErrors;
+
+    delete binTuple;
+    delete scaleTuple;
+    delete sumTuple;
+}
+//
+// Copy these from StEStructFluctAnal.cxx.
+// Probably should declare these routines static
+// and leave them in that file.
+//
+// iEta runs from 1 up to the number of etaBins that fit in,
+// according to the binning mode.
+// Return starting bin (first bin is called 0.)
+// When iEta is too big return -1.
+int StEStructSigmas::getEtaStart( int iEta, int dEta ) {
+    if (dEta > NETABINS) {
+        return -1;
+    }
+    if (1 == mEtaSumMode) {
+        int nEta = NETABINS / dEta;
+        int oEta = NETABINS % dEta;
+        if ( iEta*dEta <= NETABINS ) {
+            return (iEta-1)*dEta;
+        }
+        if (0 == oEta) {
+            return -1;
+        }
+        if (oEta+(iEta-nEta)*dEta <= NETABINS) {
+            return oEta+(iEta-nEta-1)*dEta;
+        }
+        return -1;
+    } else if (2 == mEtaSumMode) {
+        if (iEta+dEta <= NETABINS) {
+            return iEta - 1;
+        } else {
+            return -1;
+        }
+    } else if (3 == mEtaSumMode) {
+        if (iEta > 1) {
+            return -1;
+        } else {
+            return 0;
+        }
+    } else if (4 == mEtaSumMode) {
+        if (iEta > 1) {
+            return -1;
+        } else {
+            return NETABINS-dEta-1;
+        }
+    } else if (5 == mEtaSumMode) {
+        if (iEta > 1) {
+            return -1;
+        } else {
+            return (NETABINS-dEta) / 2;
+        }
+    } else if (6 == mEtaSumMode) {
+        int nEta = NETABINS / dEta;
+        if (iEta > nEta) {
+            return -1;
+        }
+        int oEta = (NETABINS % dEta) / 2;
+        return oEta + (iEta-1)*dEta;
+    }
+    return -1;
+}
+int StEStructSigmas::getPhiStart( int iPhi, int dPhi ) {
+    if (dPhi > NPHIBINS) {
+        return -1;
+    }
+    if (1 == mPhiSumMode) {
+        int nPhi = NPHIBINS / dPhi;
+        int oPhi = NPHIBINS % dPhi;
+        if ( iPhi*dPhi <= NPHIBINS ) {
+            return (iPhi-1)*dPhi;
+        }
+        if (0 == oPhi) {
+            return -1;
+        }
+        if (oPhi+(iPhi-nPhi)*dPhi <= NPHIBINS) {
+            return oPhi+(iPhi-nPhi-1)*dPhi;
+        }
+        return -1;
+    } else if (2 == mPhiSumMode) {
+        if (iPhi+dPhi <= NPHIBINS) {
+            return iPhi - 1;
+        } else {
+            return -1;
+        }
+    } else if (3 == mPhiSumMode) {
+        if (iPhi > 1) {
+            return -1;
+        } else {
+            return 0;
+        }
+    } else if (4 == mPhiSumMode) {
+        if (iPhi > 1) {
+            return -1;
+        } else {
+            return NPHIBINS-dPhi - 1;
+        }
+    } else if (5 == mPhiSumMode) {
+        if (iPhi > 1) {
+            return -1;
+        } else {
+            return (NPHIBINS-dPhi) / 2;
+        }
+    } else if (6 == mPhiSumMode) {
+        int nPhi = NPHIBINS / dPhi;
+        if (iPhi > nPhi) {
+            return -1;
+        }
+        int oPhi = (NPHIBINS % dPhi) / 2;
+        return oPhi + (iPhi-1)*dPhi;
+    }
+    return -1;
+}
+int StEStructSigmas::getNumEtaBins( int dEta ) {
+    if (1 == mEtaSumMode) {
+        int nEta = NETABINS / dEta;
+        int oEta = NETABINS % dEta;
+        if ( 0 == oEta ) {
+            return nEta;
+        } else {
+            return 2 * nEta;
+        }
+    } else if (2 == mEtaSumMode) {
+        return NETABINS + 1 - dEta;
+    } else if (3 == mEtaSumMode) {
+        return 1;
+    } else if (4 == mEtaSumMode) {
+        return 1;
+    } else if (5 == mEtaSumMode) {
+        return 1;
+    } else if (5 == mEtaSumMode) {
+        int nEta = NETABINS / dEta;
+        return nEta;
+    }
+    return 0;
+}
+int StEStructSigmas::getNumPhiBins( int dPhi ) {
+    if (1 == mPhiSumMode) {
+        int nPhi = NPHIBINS / dPhi;
+        int oPhi = NPHIBINS % dPhi;
+        if ( 0 == oPhi ) {
+            return nPhi;
+        } else {
+            return 2 * nPhi;
+        }
+    } else if (2 == mPhiSumMode) {
+        return NPHIBINS + 1 - dPhi;
+    } else if (3 == mPhiSumMode) {
+        return 1;
+    } else if (4 == mPhiSumMode) {
+        return 1;
+    } else if (5 == mPhiSumMode) {
+        return 1;
+    } else if (5 == mPhiSumMode) {
+        int nPhi = NPHIBINS / dPhi;
+        return nPhi;
+    }
+    return 0;
 }
