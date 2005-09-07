@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.h,v 1.1 2003/11/21 23:48:00 prindle Exp $
+ * $Id: StEStructFlat.h,v 1.2 2005/09/07 20:22:51 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,20 +23,31 @@ class StEStructTrackCuts;
 
 class StEStructFlat : public StEStructEventReader {
 
-  int meventCount;
-  int meventsToDo;
-  bool mAmDone;
-  int mrefMult;
-
+  StEStructEvent*     mFlatEvent;
   StEStructEventCuts* mECuts;
   StEStructTrackCuts* mTCuts;
+  bool mInChain;
+  bool mAmDone;
+  bool mUseAllTracks;
+  int  mCentBin;
+  int  mRefMult;
+  int  mEventsToDo;
 
   void fillTracks(StEStructEvent* estructEvent);
+  bool isTrackGood(float *v, float *p, float eta);
+  int  countGoodTracks();
+
+  int mEventCount;
 
  public:
 
   StEStructFlat();
-  StEStructFlat(int nevents, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts);
+  StEStructFlat( StEStructEventCuts* ecuts,
+                 StEStructTrackCuts* tcuts,
+                 bool inChain,
+                 bool useAllTracks,
+                 int  centBin,
+                 int  eventsToDo);
 
   virtual ~StEStructFlat(){};
   void setSeed(int iseed);
@@ -50,7 +61,7 @@ class StEStructFlat : public StEStructEventReader {
 
   virtual StEStructEvent* next();
   virtual bool         done();
-  virtual StEStructEvent* generateEvent();
+  void    generateEvent();
 
   ClassDef(StEStructFlat,1)
 };
@@ -126,6 +137,9 @@ inline float* StEStructFlat::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructFlat.h,v $
+ * Revision 1.2  2005/09/07 20:22:51  prindle
+ * Flat: Random changes to eta and phi distributions (which don't have to be flat).
+ *
  * Revision 1.1  2003/11/21 23:48:00  prindle
  * Include my toy event generator in cvs
  *
