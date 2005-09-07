@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.5 2005/03/03 01:30:43 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.6 2005/09/07 20:21:13 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -67,7 +67,7 @@ void StEStruct2ptCorrelations::init(){
   for(int i=0;i<6;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
 
   for(int i=0;i<10;i++)mbuffCounter[i]=0;
-  initArraysAndHistograms();
+  initArrays();
 
   /* Event count via Nch distribution */
   mHNEvents[0]=new TH1F("NEventsSame","NEventsSame",1000,0.,2000.);
@@ -94,16 +94,19 @@ void StEStruct2ptCorrelations::finish(){
     return;
   }
 
+  initHistograms();
   fillHistograms();
   TFile * tf=new TFile(moutFileName,"RECREATE");
-  writeHistograms(tf);
+  tf->cd();
+  writeHistograms();
   tf->Close();
+  deleteHistograms();
 }
 
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::cleanUp(){ 
   if(mDeleted) return;
-  deleteArraysAndHistograms(); 
+  deleteArrays(); 
   mDeleted=true;
 }
 
@@ -509,9 +512,7 @@ void StEStruct2ptCorrelations::fillHistograms(){
 
 
 //--------------------------------------------------------------------------
-void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
-
-  tf->cd();
+void StEStruct2ptCorrelations::writeHistograms() {
 
   for(int j=0;j<2;j++)mHNEvents[j]->Write(); 
 
@@ -552,11 +553,11 @@ void StEStruct2ptCorrelations::writeHistograms(TFile* tf){
 }
 
 //--------------------------------------------------------------------------
-void StEStruct2ptCorrelations::initArraysAndHistograms(){
+void StEStruct2ptCorrelations::initArrays(){
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
 
-  // storage arrays first
+  // storage arrays
   for(int i=0;i<6;i++){
      mYtYt[i]=new ytBins*[numCutBins];
      mAtSYtDYt[i]=new dytBins*[numCutBins];
@@ -638,8 +639,72 @@ void StEStruct2ptCorrelations::initArraysAndHistograms(){
 
    }
   }
+}
 
+void StEStruct2ptCorrelations::deleteArrays(){
 
+  int numCutBins=StEStructCutBin::Instance()->getNumBins();
+
+  for(int i=0;i<6;i++){
+
+   for(int j=0;j<numCutBins;j++){
+
+   delete []  mYtYt[i][j];
+   delete []  mPtPt[i][j];
+
+   delete []  mEtaEta[i][j];
+   delete []  mPhiPhi[i][j];
+   delete []  mPrEtaEta[i][j];
+   delete []  mPrPhiPhi[i][j];
+   delete []  mSuEtaEta[i][j];
+   delete []  mSuPhiPhi[i][j];
+
+   delete []  mAtSYtDYt[i][j];
+   delete []  mAtSPtDPt[i][j];
+
+   delete []  mJtDYtDPhi[i][j];
+   delete []  mJtDYtDEta[i][j];
+   delete []  mJtDEtaDPhi[i][j];
+   delete []  mJtSEtaDPhi[i][j];
+
+   delete []  mPrJtDEtaDPhi[i][j];
+   delete []  mPrJtSEtaDPhi[i][j];
+   delete []  mSuJtDEtaDPhi[i][j];
+   delete []  mSuJtSEtaDPhi[i][j];
+
+   }   
+   delete []  mYtYt[i];
+   delete []  mPtPt[i];
+
+   delete []  mEtaEta[i];
+   delete []  mPhiPhi[i];
+   delete []  mPrEtaEta[i];
+   delete []  mPrPhiPhi[i];
+   delete []  mSuEtaEta[i];
+   delete []  mSuPhiPhi[i];
+
+   delete []  mAtSYtDYt[i];
+   delete []  mAtSPtDPt[i];
+
+   delete []  mJtDYtDPhi[i];
+   delete []  mJtDYtDEta[i];
+   delete []  mJtDEtaDPhi[i];
+   delete []  mJtSEtaDPhi[i];
+   delete []  mPrJtDEtaDPhi[i];
+   delete []  mPrJtSEtaDPhi[i];
+   delete []  mSuJtDEtaDPhi[i];
+   delete []  mSuJtSEtaDPhi[i];
+
+   delete []  mQinv[i];
+  }
+
+}
+
+//--------------------------------------------------------------------------
+
+void StEStruct2ptCorrelations::initHistograms(){
+
+  int numCutBins=StEStructCutBin::Instance()->getNumBins();
   StEStructBinning* b=StEStructBinning::Instance();
 
   // histograms second
@@ -700,66 +765,11 @@ void StEStruct2ptCorrelations::initArraysAndHistograms(){
 
     }
   }
-
 }
 
-//--------------------------------------------------------------------------
-void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
+void StEStruct2ptCorrelations::deleteHistograms(){
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
-
-  for(int i=0;i<6;i++){
-
-   for(int j=0;j<numCutBins;j++){
-
-   delete []  mYtYt[i][j];
-   delete []  mPtPt[i][j];
-
-   delete []  mEtaEta[i][j];
-   delete []  mPhiPhi[i][j];
-   delete []  mPrEtaEta[i][j];
-   delete []  mPrPhiPhi[i][j];
-   delete []  mSuEtaEta[i][j];
-   delete []  mSuPhiPhi[i][j];
-
-   delete []  mAtSYtDYt[i][j];
-   delete []  mAtSPtDPt[i][j];
-
-   delete []  mJtDYtDPhi[i][j];
-   delete []  mJtDYtDEta[i][j];
-   delete []  mJtDEtaDPhi[i][j];
-   delete []  mJtSEtaDPhi[i][j];
-
-   delete []  mPrJtDEtaDPhi[i][j];
-   delete []  mPrJtSEtaDPhi[i][j];
-   delete []  mSuJtDEtaDPhi[i][j];
-   delete []  mSuJtSEtaDPhi[i][j];
-
-   }   
-   delete []  mYtYt[i];
-   delete []  mPtPt[i];
-
-   delete []  mEtaEta[i];
-   delete []  mPhiPhi[i];
-   delete []  mPrEtaEta[i];
-   delete []  mPrPhiPhi[i];
-   delete []  mSuEtaEta[i];
-   delete []  mSuPhiPhi[i];
-
-   delete []  mAtSYtDYt[i];
-   delete []  mAtSPtDPt[i];
-
-   delete []  mJtDYtDPhi[i];
-   delete []  mJtDYtDEta[i];
-   delete []  mJtDEtaDPhi[i];
-   delete []  mJtSEtaDPhi[i];
-   delete []  mPrJtDEtaDPhi[i];
-   delete []  mPrJtSEtaDPhi[i];
-   delete []  mSuJtDEtaDPhi[i];
-   delete []  mSuJtSEtaDPhi[i];
-
-   delete []  mQinv[i];
-  }
 
   for(int i=0;i<6;i++){
     for(int j=0;j<numCutBins;j++){
@@ -812,8 +822,6 @@ void StEStruct2ptCorrelations::deleteArraysAndHistograms(){
    delete [] mHQinv[i];
 
   }
-
-
 }
 
 //-----------------------------------------------------------------
@@ -843,6 +851,11 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.6  2005/09/07 20:21:13  prindle
+ * 2ptCorrelations: Rearranged array/histogram initialization/destruction.
+ *                    Now histograms are only allocated at end of job,
+ *                    just before they are filled then written.
+ *
  * Revision 1.5  2005/03/03 01:30:43  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
