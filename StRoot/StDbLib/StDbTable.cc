@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.37 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbTable.cc,v 1.38 2005/09/07 22:03:04 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.38  2005/09/07 22:03:04  deph
+ * update to correct padding issue for pacted tables
+ *
  * Revision 1.37  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -165,6 +168,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.38  2005/09/07 22:03:04  deph
+ * update to correct padding issue for pacted tables
+ *
  * Revision 1.37  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -579,10 +585,20 @@ StDbTable::createMemory(int nrows) {
    return retVal;
  }
 
-  if(mdescriptor && mdescriptor->getNumElements()>0){
+// mdescriptor->getNumElements();
+//if (mdescriptor) {
+//cout <<"**************CHECKIT************"<<endl;
+//} 
+ if(mdescriptor && mdescriptor->getNumElements()>0){
     //     if(mrows==0) mrows = 1;
-     int len = mrows*mdescriptor->getTotalSizeInBytes();
-     if(len>0){
+      //int len = mrows*mdescriptor->getTotalSizeInBytes();
+     int len;
+     if (!mdescriptor->getTrowSize()){
+       len =  mrows*mdescriptor->getTotalSizeInBytes();
+     }else{
+      len = mrows*mdescriptor->getTrowSize();
+     }
+      if(len>0){
       if(mdata)delete [] mdata;
       mdata=new char[len];
       memset(mdata,0,len);
@@ -637,10 +653,16 @@ StDbTable::setElementID(int* elements, int nrows) {
 
 //////////////////////////////////////////////////////////////////////
 void StDbTable::resizeNumRows(int nrows){
-  // if only some rows aer returned, this is called to
+  // if only some rows are returned, this is called to
   // compress memory
 
-  unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
+  //unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
+  unsigned int rowsize;
+  if (!mdescriptor->getTrowSize()) {
+     rowsize=mdescriptor->getTotalSizeInBytes();
+  }else{
+      rowsize=mdescriptor->getTrowSize();
+   }
   unsigned int len = mrows*rowsize;
   unsigned int newlen = nrows*rowsize;
 
@@ -669,7 +691,13 @@ StDbTable::addNRows(int numRows){
   if(!mdescriptor) return;
 
   int newRows = numRows+mrows;
-  unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
+  //unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
+  unsigned int rowsize;
+  if(!mdescriptor->getTrowSize()) {
+     rowsize=mdescriptor->getTotalSizeInBytes();
+  }else{
+      rowsize=mdescriptor->getTrowSize();
+   }
   unsigned int len = newRows*rowsize;
   char* newData = new char[len]; 
   memset(newData,0,len);
@@ -781,8 +809,14 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 void
 StDbTable::getElementSpecs(int elementNum, char*& c, char*& name, unsigned int& length,StTypeE& type){
 
+     int tRow = mdescriptor->getTrowSize();
     unsigned int tSize=mdescriptor->getTotalSizeInBytes();
-    unsigned int rowIndex = ((unsigned int)mrowNumber)*tSize;
+    unsigned int rowIndex;
+    if (!tRow) {
+        rowIndex = ((unsigned int)mrowNumber)*tSize;
+     }else{
+        rowIndex = ((unsigned int)mrowNumber)*tRow;
+     }
     int i = elementNum;
     c = &mdata[rowIndex];
     int current = mdescriptor->getElementOffset(i);
