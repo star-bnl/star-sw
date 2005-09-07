@@ -1,0 +1,56 @@
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2254011" -limit 0 -delim '/' | grep 0033
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2271006" -limit 0 -delim '/' | grep 0215
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2237038" -limit 0 -delim '/' | grep 0140
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2256010" -limit 0 -delim '/' | grep 0027
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2273005" -limit 0 -delim '/' | grep 0335
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2237041" -limit 0 -delim '/' | grep 0032
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2259031" -limit 0 -delim '/' | grep 0062
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2295030" -limit 0 -delim '/' | grep 0101
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2238009" -limit 0 -delim '/' | grep 0008
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2266013" -limit 0 -delim '/' | grep 0041
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2298001" -limit 0 -delim '/' | grep 0057
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2240044" -limit 0 -delim '/' | grep 0002
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2268036" -limit 0 -delim '/' | grep 0007
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2299021" -limit 0 -delim '/' | grep 0037
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2241022" -limit 0 -delim '/' | grep 0123
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2269018" -limit 0 -delim '/' | grep 0015
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2303001" -limit 0 -delim '/' | grep 0043
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2242011" -limit 0 -delim '/' | grep 0026
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2270023" -limit 0 -delim '/' | grep 0069
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2306015" -limit 0 -delim '/' | grep 0170
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2242013" -limit 0 -delim '/' | grep 0255
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2270023" -limit 0 -delim '/' | grep 0273
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2308028" -limit 0 -delim '/' | grep 0050
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2252024" -limit 0 -delim '/' | grep 0012
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2270025" -limit 0 -delim '/' | grep 0021
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2310044" -limit 0 -delim '/' | grep 0037
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2252042" -limit 0 -delim '/' | grep 0110
+get_file_list.pl -keys node,path,filename -cond "filetype=daq_reco_MuDst,sanity=1,storage!=HPSS,runnumber=2270055" -limit 0 -delim '/' | grep 0157
+
+
+
+pc2231//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gd/2001/254/st_physics_2254011_raw_0033.MuDst.root
+pc2112//export/data/star/reco/ProductionMinBias/FullField/P02gd/2001/271/st_physics_2271006_raw_0215.MuDst.root
+pc2129//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/237/st_physics_2237038_raw_0140.MuDst.root
+pc2124//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gd/2001/256/st_physics_2256010_raw_0027.MuDst.root
+pc2129//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/237/st_physics_2237041_raw_0032.MuDst.root
+pc2116//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gd/2001/259/st_physics_2259031_raw_0062.MuDst.root
+pc2129//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gc/2001/295/st_physics_2295030_raw_0101.MuDst.root
+pc2123//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gd/2001/266/st_physics_2266013_raw_0041.MuDst.root
+pc2103//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/240/st_physics_2240044_raw_0002.MuDst.root
+pc2121//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gd/2001/268/st_physics_2268036_raw_0007.MuDst.root
+pc2630//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gc/2001/299/st_physics_2299021_raw_0037.MuDst.root
+pc2117//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/241/st_physics_2241022_raw_0123.MuDst.root
+pc2127//export/data/star/reco/ProductionMinBias/FullField/P02gc/2001/269/st_physics_2269018_raw_0015.MuDst.root
+pc2111//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/242/st_physics_2242011_raw_0026.MuDst.root
+pc2103//export/data/star/reco/MinBiasVertex/ReversedHalfField/P02ge/2001/306/st_physics_2306015_raw_0170.MuDst.root
+pc2111//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/242/st_physics_2242013_raw_0255.MuDst.root
+pc2127//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gd/2001/308/st_physics_2308028_raw_0050.MuDst.root
+pc2231//export/data/star/reco/MinBiasVertex/ReversedFullField/P02ge/2001/252/st_physics_2252024_raw_0012.MuDst.root
+pc2112//export/data/star/reco/ProductionMinBias/ReversedFullField/P02gc/2001/310/st_physics_2310044_raw_0037.MuDst.root
+
+
+
+
+
+/auto/pdsfdv37/starprod/reco/ProductionMinBias/FullField/P02gd/2001/273/st_physics_2273005_raw_0335.MuDst.root /auto/pdsfdv37/starprod/reco/MinBiasVertex/ReversedFullField/P02ge/2001/238/st_physics_2238009_raw_0008.MuDst.root /auto/pdsfdv37/starprod/reco/ProductionMinBias/ReversedFullField/P02gc/2001/298/st_physics_2298001_raw_0057.MuDst.root /auto/pdsfdv37/starprod/reco/ProductionMinBias/ReversedFullField/P02gc/2001/303/st_physics_2303001_raw_0043.MuDst.root /auto/pdsfdv37/starprod/reco/ProductionMinBias/FullField/P02gc/2001/270/st_physics_2270023_raw_0069.MuDst.root /auto/pdsfdv37/starprod/reco/ProductionMinBias/FullField/P02gc/2001/270/st_physics_2270023_raw_0273.MuDst.root /auto/pdsfdv37/starprod/reco/ProductionMinBias/FullField/P02gc/2001/270/st_physics_2270025_raw_0021.MuDst.root /auto/pdsfdv37/starprod/reco/ProductionMinBias/FullField/P02gc/2001/270/st_physics_2270055_raw_0157.MuDst.root
