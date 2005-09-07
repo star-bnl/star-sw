@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTableDescriptorI.h,v 1.7 2001/10/24 04:05:20 porter Exp $
+ * $Id: StTableDescriptorI.h,v 1.8 2005/09/07 22:04:02 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTableDescriptorI.h,v $
+ * Revision 1.8  2005/09/07 22:04:02  deph
+ * update to correct padding issue for packed tables
+ *
  * Revision 1.7  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -71,6 +74,8 @@ public:
   virtual char* getElementName(int elementNum)                 const = 0;
   virtual unsigned int getElementOffset(int elementNum)        const = 0;
   virtual unsigned int getElementSize(int elementNum)          const = 0;
+  //MPD
+  virtual int getTrowSize()           = 0;
   virtual StTypeE getElementType(int elementNum)               const = 0;
   virtual unsigned int* getElementDimensions(int elementNum)   const = 0;
   virtual unsigned int getElementLength(int elementNum)        const = 0;

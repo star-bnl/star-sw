@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.24 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.25 2005/09/07 22:04:02 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.25  2005/09/07 22:04:02  deph
+ * update to correct padding issue for packed tables
+ *
  * Revision 1.24  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -127,6 +130,7 @@
 #include <math.h>
 #include "stdb_streams.h"
 
+int StDbTableDescriptor::rowSizeTT = 0;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -414,6 +418,15 @@ void StDbTableDescriptor::endRowPadding(){
 #endif
 
 };
+
+
+
+
+
+       
+       
+      
+
 
 
 
