@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.2 2004/09/24 01:41:42 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.3 2005/09/07 20:18:40 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -69,7 +69,22 @@ public:
 inline void StEStructEventCuts::loadUserCuts(const char* name, const char** vals, int nvals){}
 
 inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
-    if (!strcmp("AuAu62GeVMinBias2004",mRunPeriod)) {
+    if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
+        if (muEvent->triggerIdCollection().nominal().isTrigger(76007) ||
+            muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
+            return true;
+        }
+    } else if (!strcmp("CuCu200GeVProductionMinBias2005",mRunPeriod)) {
+        if (muEvent->triggerIdCollection().nominal().isTrigger(86007)) {
+            return true;
+        }
+    } else if (!strcmp("AuAu200GeVMinBias2004",mRunPeriod)) {
+        if (muEvent->triggerIdCollection().nominal().isTrigger(25007) ||
+            muEvent->triggerIdCollection().nominal().isTrigger(15007) ||
+            muEvent->triggerIdCollection().nominal().isTrigger(15003)) {
+            return true;
+        }
+    } else if (!strcmp("AuAu62GeVMinBias2004",mRunPeriod)) {
         if (((muEvent->triggerIdCollection().nominal().isTrigger(35004) ||
               muEvent->triggerIdCollection().nominal().isTrigger(35007))
             ||
@@ -121,6 +136,13 @@ inline bool StEStructEventCuts::goodNumberOfTracks(unsigned int n){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.3  2005/09/07 20:18:40  prindle
+ * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   EventCuts.h:   Added trigger cuts including cucu and year 4.
+ *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
+ *                    before making centrality cut.
+ *   TrackCuts:     Random changes. Moved some variables from private to public.o
+ *
  * Revision 1.2  2004/09/24 01:41:42  prindle
  * Allow for cuts to be defined by character strings. I use this to select trigger
  * cuts appropriate for run periods
