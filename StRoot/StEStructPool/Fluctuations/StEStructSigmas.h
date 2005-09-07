@@ -3,24 +3,26 @@
 #ifndef __STESTRUCTSIGMAS__H
 #define __STESTRUCTSIGMAS__H
 
-
+#include <TNtuple.h>
 #include "multStruct.h"
-#include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
-#include "Stiostream.h"
+#include "../AnalysisMaker/StEStructAnalysis.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 class TFile;
 class TH1F;
 class TH1D;
 class TH2F;
 class TH2D;
+class TNtuple;
 
 class StEStructSigmas {
 
  protected:
  public:
 
-    int   mNPhiBins;
-    int   mNEtaBins;
+    int   mNPhiBins, mPhiSumMode;
+    int   mNEtaBins, mEtaSumMode;
     float mEtaMin, mEtaMax;
     char *mKey;
     char *mpreFix;
@@ -30,6 +32,11 @@ class StEStructSigmas {
     TH2D *NPlus;
     TH2D *NMinus;
     TH2D *NPlusMinus;
+    TH2D *NSigCorrection;
+    TH2D *NDelCorrection;
+    TH2D *NPlusCorrection;
+    TH2D *NMinusCorrection;
+    TH2D *NPlusMinusCorrection;
 
     // Have different measures of pt fluctuations.
     // First is based on \Delta\sigma^2.
@@ -75,6 +82,10 @@ class StEStructSigmas {
     TH2D *sigPPtHatErrors;
     TH2D *sigMPtHatErrors;
 
+    TNtuple *binTuple;
+    TNtuple *scaleTuple;
+    TNtuple *sumTuple;
+
     void  initHistograms();
     void  deleteHistograms();
 
@@ -91,9 +102,44 @@ class StEStructSigmas {
 
     void  writeHistograms();
 
+    int getEtaStart( int iEta, int dEta );
+    int getPhiStart( int iPhi, int dPhi );
+    int getNumEtaBins( int dEta );
+    int getNumPhiBins( int dPhi );
 
     ClassDef(StEStructSigmas,1)
 };   
+
+struct binTupleStruct {
+    float type;
+    float phiScale;
+    float etaScale;
+    float phi;
+    float eta;
+    float sig2;
+    float sig2_1;
+    float sig2_2;
+    float nbar;
+    float events;
+    float f3;
+};
+struct scaleTupleStruct {
+    float type;
+    float phiScale;
+    float etaScale;
+    float A;
+    float B;
+    float nBins;
+    float f3;
+    float f3sq;
+    float sig2;
+    float sig2f3;
+};
+struct sumTupleStruct {
+    float type;
+    float B;
+    float nBins;
+};
 
 
 #endif

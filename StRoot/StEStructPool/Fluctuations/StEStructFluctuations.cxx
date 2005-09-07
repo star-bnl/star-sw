@@ -5,10 +5,6 @@
 #include "TH2F.h"
 #include "TFile.h"
 
-#include "StEStructPool/EventMaker/StEStructEvent.h"
-#include "StEStructPool/EventMaker/StEStructTrack.h"
-#include "StTimer.hh"
-
 #include <stdlib.h>
 
 
@@ -34,11 +30,10 @@ StEStructFluct::~StEStructFluct() {
     free( mKey );
 }
 
-void StEStructFluct::AddToBin( int    iBin,
+void StEStructFluct::AddToBin( int    jBin,
                                double Nplus,    double Nminus,
                                double Ptplus,   double Ptminus,
                                double PtSqplus, double PtSqminus ) {
-    int jBin = iBin - 1;
     TotEvents[0][jBin]++;
 
     // This routine is called in an inner loop.
@@ -191,7 +186,7 @@ void StEStructFluct::AddToBin( int    iBin,
             PPlusMinus[10][jBin] += Ptplus*sqm/sqp;
             PPlusMinus[12][jBin] += Ptplus*Nminus/sqp;
         }
-        if (Nplus > 0) {
+        if (Nminus > 0) {
             PPlusMinus[3][jBin] += Ptminus/Nminus;
             PPlusMinus[7][jBin] += Ptminus/sqm;
             PPlusMinus[9][jBin] += Ptminus*Nplus/Nminus;
@@ -305,51 +300,51 @@ void StEStructFluct::fillHistograms() {
     // Here I copy from arrays top histograms so I can write the histograms.
 
     for (int jStat=0;jStat<5;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-             hTotEvents[jStat]->SetBinContent(iBin+1,TotEvents[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+             hTotEvents[jStat]->SetBinContent(jBin+1,TotEvents[jStat][jBin]);
         }
     }
 
     for (int jStat=0;jStat<16;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hNSum[jStat]->SetBinContent(iBin+1,NSum[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hNSum[jStat]->SetBinContent(jBin+1,NSum[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<2;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hNDiff[jStat]->SetBinContent(iBin+1,NDiff[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hNDiff[jStat]->SetBinContent(jBin+1,NDiff[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<5;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hNPlus[jStat]->SetBinContent(iBin+1,NPlus[jStat][iBin]);
-            hNMinus[jStat]->SetBinContent(iBin+1,NMinus[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hNPlus[jStat]->SetBinContent(jBin+1,NPlus[jStat][jBin]);
+            hNMinus[jStat]->SetBinContent(jBin+1,NMinus[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<8;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hNPlusMinus[jStat]->SetBinContent(iBin+1,NPlusMinus[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hNPlusMinus[jStat]->SetBinContent(jBin+1,NPlusMinus[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<16;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hPSum[jStat]->SetBinContent(iBin+1,PSum[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hPSum[jStat]->SetBinContent(jBin+1,PSum[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<16;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hPDiff[jStat]->SetBinContent(iBin+1,PDiff[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hPDiff[jStat]->SetBinContent(jBin+1,PDiff[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<11;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hPPlus[jStat]->SetBinContent(iBin+1,PPlus[jStat][iBin]);
-            hPMinus[jStat]->SetBinContent(iBin+1,PMinus[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hPPlus[jStat]->SetBinContent(jBin+1,PPlus[jStat][jBin]);
+            hPMinus[jStat]->SetBinContent(jBin+1,PMinus[jStat][jBin]);
         }
     }
     for (int jStat=0;jStat<17;jStat++) {
-        for (int iBin=0;iBin<mTotBins;iBin++) {
-            hPPlusMinus[jStat]->SetBinContent(iBin+1,PPlusMinus[jStat][iBin]);
+        for (int jBin=0;jBin<mTotBins;jBin++) {
+            hPPlusMinus[jStat]->SetBinContent(jBin+1,PPlusMinus[jStat][jBin]);
         }
     }
 }
@@ -452,7 +447,7 @@ void StEStructFluct::initArrays() {
     sprintf( line, "ptMinus_%s", mKey );
     ptMinus = new TH1F(line,line,100,mPtMin,mPtMax);
 
-cout << "Allocating arrays to store info." << endl;
+    printf("Allocating arrays to store info.\n");
     for (int jStat=0;jStat<5;jStat++) {
         TotEvents[jStat] = new double[mTotBins];
         memset(TotEvents[jStat], 0, sizeof(double)*mTotBins );
@@ -499,7 +494,7 @@ cout << "Allocating arrays to store info." << endl;
 //--------------------------------------------------------------------------
 void StEStructFluct::deleteArrays() {
 
-cout << "Deleting occupancy histograms." << endl;
+    printf("Deleting occupancy histograms.\n");
     delete occNSum;
     delete occNPlus;
     delete occNMinus;
@@ -530,7 +525,7 @@ cout << "Deleting occupancy histograms." << endl;
     delete ptPlus;
     delete ptMinus;
 
-cout << "freeing Arrays." << endl;
+    printf("freeing Arrays.\n");
     for (int jStat=0;jStat<5;jStat++) {
         delete [] TotEvents[jStat];
     }
@@ -567,7 +562,7 @@ cout << "freeing Arrays." << endl;
 void StEStructFluct::initHistograms() {
     char line[255];
 
-cout << "Allocating histograms for I/O for key " << mKey << endl;
+    printf("Allocating histograms for I/O for key %s\n", mKey);
     sprintf( line, "TotalEvents_%s", mKey);
     hTotEvents[0] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
     sprintf( line, "TotalSumEvents_%s", mKey);
@@ -620,7 +615,7 @@ cout << "Allocating histograms for I/O for key " << mKey << endl;
 //--------------------------------------------------------------------------
 void StEStructFluct::deleteHistograms() {
 
-cout << "freeing h Array histograms." << endl;
+    printf("freeing h Array histograms.\n");
     for (int jStat=0;jStat<5;jStat++) {
         delete hTotEvents[jStat];
     }

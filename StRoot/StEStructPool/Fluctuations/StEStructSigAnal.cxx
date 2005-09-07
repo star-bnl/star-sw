@@ -10,7 +10,7 @@ ClassImp(StEStructSigAnal)
 
 //--------------------------------------------------------------------------
 StEStructSigAnal::StEStructSigAnal( char *inputFile, char *prefix ) {
-  cout << "Creating StEStructSigAnal object." << endl;
+  printf("Creating StEStructSigAnal object.\n");
     mInputFile = strdup( inputFile );
     mpreFix    = strdup( prefix );
     initArrays();
@@ -91,31 +91,31 @@ void StEStructSigAnal::initArrays() {
 
     mInFile = new TFile( mInputFile );
     normalizeCounters();
-cout << "Scanning for centrality bins." << endl;
+printf("Scanning for centrality bins.\n");
     mnCents = 0;
-    for (int i=0;i<20;i++) {
+    for (int i=0;i<100;i++) {
         sprintf( hist, "NSum%i_0", i );
         if (gDirectory->Get(hist)) {
             mnCents++;
         }
     }
-cout << "Found " << mnCents << " centrality bins. " << endl;
+printf("Found %i centrality bins. \n", mnCents);
     mnPts = 0;
-    for (int i=0;i<10;i++) {
+    for (int i=0;i<100;i++) {
         sprintf( hist, "%sNSum0_%i_0", mpreFix, i );
         if (gDirectory->Get(hist)) {
             mnPts++;
         }
     }
-cout << "Found " << mnPts << " Pt bins. " << endl;
+printf("Found %i Pt bins. \n", mnPts);
     mnPtCents = 0;
-    for (int i=0;i<10;i++) {
+    for (int i=0;i<100;i++) {
         sprintf( hist, "%sNSum%i_0_0", mpreFix, i );
         if (gDirectory->Get(hist)) {
             mnPtCents++;
         }
     }
-cout << "Found " << mnPtCents << " Pt centrality bins. " << endl;
+printf("Found %i Pt centrality bins. \n", mnPtCents);
 
     // Want our histograms to stay around when we close mInputFile and
     // open a new one.

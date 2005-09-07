@@ -6,12 +6,10 @@
 #include "multStruct.h"
 #include "StEStructFluctuations.h"
 #include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
-#include "StEStructPool/Correlations/StEStructPairCuts.h"
 #include "StEStructPool/EventMaker/StEStructCentrality.h"
+#include "StEStructPool/Correlations/StEStructPairCuts.h"
 
-#undef TERMINUSSTUDY
-
-class TFile;
+#include "TFile.h"
 class TH1F;
 class TH1D;
 class TH2F;
@@ -24,30 +22,53 @@ class StEStructFluctAnal: public StEStructAnalysis {
  protected:
 
  public:
+    StEStructFluctAnal( int mode=0, int etaSumMode=1, int phiSumMode=1 );
+    virtual ~StEStructFluctAnal();
 
-    int  manalysisMode;                 //! simple enumeration of analyses ...
-    bool mskipPairCuts;                 //!
-    bool mdoPairCutHistograms;          //!
-    bool  mUseAllEtaTracks;             //!
+    StEStructPairCuts& getPairCuts();
+    void  setCutFile(   const char* cutFileName, StEStructCentrality *cent );
+    void  setEtaLimits( const char* cutFileName );
+    void  setPtLimits(  const char* cutFileName );
+
+  //---> support of interface  
+    virtual void setOutputFileName(const char* outFileName);
+    bool  doEvent(StEStructEvent* p);
+    void  finish();
+
+  // analysis specific functions 
+    void initHistograms();
+    void deleteHistograms();
+    void createCentralityObjects();
+    void deleteCentralityObjects();
+    void fillMultStruct();
+    void AddEvent();
+    int getEtaStart( int iEta, int dEta );
+    int getPhiStart( int iPhi, int dPhi );
+    int getNumEtaBins( int dEta );
+    int getNumPhiBins( int dPhi );
+    void  writeHistograms();
+    void  writeQAHists(TFile* qatf);
+
+
+   // Member declarations.
+    int  manalysisMode;                  //! simple enumeration of analyses ...
+    char *moutFileName;
+    int  mEtaSumMode, mPhiSumMode;
 
     StEStructEvent      *mCurrentEvent;  //!  pointer to EStruct2pt data 
-    StEStructPairCuts    mPair;          //! for pairs (1 at a time) and all pair cuts
     StEStructCentrality *mCentralities;
 
-    int   doingPairCuts;
-    int   etaSummingMode, phiSummingMode;
+    StEStructPairCuts    mPair; //! Simply so I can support getPairCuts and doEstruct macro doesn't barf.
+
     float mEtaMin, mEtaMax;
     float mPtMin,  mPtMax;
-    TH1F *hRefMultiplicity;
-    TH1F *hMultiplicity;
-    int   histosFilled;
 
     double *mptnplus;
     double *mptnminus;
     double *mptpplus;
     double *mptpminus;
 
-    int   mTotBins;
+    int   mnTotBins;
     int   mnTotEvents, *mnCentEvents;
     int   mnCents, mnPts, mnPtCents;
     StEStructFluct **mFluct, **mPtFluct;
@@ -58,73 +79,36 @@ class StEStructFluctAnal: public StEStructAnalysis {
 
   // Histogram declarations.
   // These will be summed over all events for all jobs.
-  // We run a followup job to calculate \delta\sigma^2
+  // We run followup jobs to calculate \delta\sigma^2 and plot
+  // reference histograms.
+    TH1F *hRefMultiplicity;
+    TH1F *hMultiplicity;
+    TH1F *hMultiplicityBinned;
+    TH1F *hPt;
+    TH1F *hPtBinned;
     TH2F *hnBins;
     TH2F *hoffset;
     TH2F *hfUnique;
 
   // Here is the object I use to hold the binned tracks.
-    multStruct      *ms;
-
-    void  initHistograms();
-    void  deleteHistograms();
-    void  moveEvents();
-
-    StEStructFluctAnal( int mode=4, int invokePairCuts = 0,
-                        int etaSumMode=1, int phiSumMode=1 );
-    virtual ~StEStructFluctAnal();
-
-    StEStructPairCuts& getPairCuts();
-    void  setAnalysisMode( int mode );
-    void  setCutFile(   const char* cutFileName, StEStructCentrality *cent );
-    void  setEtaLimits( const char* cutFileName );
-    void  setPtLimits(  const char* cutFileName );
-
-  //---> support of interface  
-    bool loadUserCuts(const char* name, const char** vals, int nvals);
-    virtual void setOutputFileName(const char* outFileName);
-    bool  doEvent(StEStructEvent* p);
-    void  init();
-    void  cleanUp();
-    void  finish() {};
-    void  fillHistograms();
-    void  writeHistograms(TFile* tf);
-    void  writeQAHists(TFile* qatf);
-
-  // analysis specific functions 
-    void initCentralityObjects();
-    void makeMultStruct();
-    void AddEvent(multStruct *ms);
-    int getEtaStart( int iEta, int dEta );
-    int getPhiStart( int iPhi, int dPhi );
-    int getNumEtaBins( int dEta );
-    int getNumPhiBins( int dPhi );
-
-    bool  doPairCuts();
-    void  pairCuts(StEStructEvent* e1, StEStructEvent* e2, int j);
-
+    multStruct *ms;
 
     ClassDef(StEStructFluctAnal,1)
 };   
 
+inline void StEStructFluctAnal::setOutputFileName(const char* outFileName) {
+    if(!outFileName) return;
+    moutFileName=new char[strlen(outFileName)+1];
+    strcpy(moutFileName,outFileName);
+}
+inline void StEStructFluctAnal::finish() {
+    TFile * tf=new TFile(moutFileName,"RECREATE");
+    tf->cd();
+    writeHistograms();
+    tf->Close();
+};
 inline StEStructPairCuts& StEStructFluctAnal::getPairCuts() {
-    return mPair;
-};
-inline void StEStructFluctAnal::setAnalysisMode(int mode){
-    manalysisMode=mode;
-};
-
-inline void StEStructFluctAnal::setCutFile(const char* cutFileName, StEStructCentrality *cent){
-    mPair.setCutFile(cutFileName);
-    mPair.loadCuts();
-    setEtaLimits(cutFileName);
-    setPtLimits(cutFileName);
-
-    mCentralities = cent;
-    initCentralityObjects();
-    ms  = new multStruct(mCentralities->numPts());
-};
+  return mPair;
+}
 
 #endif
-
-
