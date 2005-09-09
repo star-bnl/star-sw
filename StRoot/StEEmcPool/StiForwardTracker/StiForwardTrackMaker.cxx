@@ -1,6 +1,6 @@
 // -- Author : Victor Perevoztchikov
 // 
-// $Id: StiForwardTrackMaker.cxx,v 1.1 2005/09/08 21:42:03 balewski Exp $
+// $Id: StiForwardTrackMaker.cxx,v 1.2 2005/09/09 15:55:00 balewski Exp $
 
 #include <StMessMgr.h>
 
@@ -24,7 +24,7 @@
 #define zL(t)   (t->getZ())
 #define ezL(t)  sqrt(t->getCzz())
 #define eyL(t)  sqrt(t->getCyy())
-
+ 
 
 ClassImp(StiForwardTrackMaker)
 
@@ -35,7 +35,7 @@ StiForwardTrackMaker::StiForwardTrackMaker(const char *name):StMaker(name){
   HList=0;
   memset(hA,0,sizeof(hA));
   mMaxTrkDcaRxy = 3.0;  // cm
-
+  mMaxZdca = 4; // cm
 }
 
 
@@ -64,8 +64,12 @@ Int_t StiForwardTrackMaker::Init(){
   initHisto();
   HList->ls();
 
-  //  gMessMgr->Info() << "PPV-2 cuts have been activated, mTestMode=" << mTestMode<<endm;
-  
+  gMessMgr->Info() << GetName()
+     <<"::Cuts"
+     <<"\n MaxTrkDcaRxy/cm="<<mMaxTrkDcaRxy
+     <<"\n mMaxZdca="<<mMaxZdca
+   //<<"\n  ="<<
+     <<endm;
 
   return StMaker::Init();
 }
@@ -94,7 +98,6 @@ Int_t StiForwardTrackMaker::Make(){
     gMessMgr->Info() << GetName()<<" event dropped, no vertex found"<<endm;
     return kStOK;
   }
-
   
   int iv;
   for(iv=0;iv<nV;iv++) {
@@ -113,21 +116,33 @@ Int_t StiForwardTrackMaker::Make(){
     return kStErr ;
   }
 
-  int nAny=0;
-  int nTry=0;
+  int nAny=0, nTry=0, nAcc=0;
   for (StiTrackContainer::const_iterator it=(*tracks).begin();  it!=(*tracks).end(); ++it) {
     const StiKalmanTrack* track = static_cast<StiKalmanTrack*>(*it);
-    if(track->getFlag()!=true) continue; // drop bad events
+    if(track->getFlag()!=true) continue; // drop bad tracks
     nAny++;
+    if(nAny>9) break;  // tmp, crashes on 10th track in Sti track contaner, terribe hack
+    cout<<"\n#a kalTrack: nTr="<<nAny<<" flag="<<track->getFlag()<<"  nFitP="<<track->getFitPointCount()<<" is Prim="<<track->isPrimary()<<endl;
+    cout<<"#b kalTrack: pT="<<track->getPt()<<endl;
+ 
+//   cout<<"#b kalTrack:"<<*track<<endl;
 
-    //.... test... find zDca for all tracks with eta>0.8
-    if(track->getPseudoRapidity()<0.8) continue;
     float zDca, ezDca, rxyDca;
     examinTrackDca(track, zDca, ezDca, rxyDca);
     nTry++;
+    
+    // do matching to vertex
+    for(iv=0;iv<nV;iv++) {
+      StPrimaryVertex *V=event->primaryVertex(iv);  assert(V);
+      const StThreeVectorF &v=V->position();
+      if( fabs(zDca-v.z()) > mMaxZdca )continue;
+      nAcc++;
+      cout<<" tr Matched , dZ="<<zDca-v.z()<<endl;
+      break; 	 
+    }
   }
- 
-  gMessMgr->Info() << "\n"<<GetName()<<"  found "<<nAny<<" sti input tracks, try ZDca for "<<nTry<<endm;
+  
+  gMessMgr->Info() << "\n"<<GetName()<<"  found "<<nAny<<" sti input tracks, try ZDca for "<<nTry<<", match to vertex:"<<nAcc<<"\n"<<endm;
 
   return kStOK;
 }
@@ -205,6 +220,9 @@ StiForwardTrackMaker::examinTrackDca(const StiKalmanTrack*track,
 
 
 // $Log: StiForwardTrackMaker.cxx,v $
+// Revision 1.2  2005/09/09 15:55:00  balewski
+// prototype with hardcoded hacks
+//
 // Revision 1.1  2005/09/08 21:42:03  balewski
 // star
 //

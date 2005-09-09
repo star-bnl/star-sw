@@ -1,4 +1,4 @@
-// $Id: StiForwardTrackMaker.h,v 1.1 2005/09/08 21:42:03 balewski Exp $
+// $Id: StiForwardTrackMaker.h,v 1.2 2005/09/09 15:55:00 balewski Exp $
 
 #ifndef STAR_StiForwadrTrackMaker
 #define STAR_StiForwadrTrackMaker
@@ -28,6 +28,7 @@ class StiForwardTrackMaker : public StMaker {
 
   //.... params,cuts
   double mMaxTrkDcaRxy;   //DCA to nominal beam line for each track
+  double mMaxZdca;     //zDCA cutoff for prim tracks in cm
  
   //..... util
   StiToolkit     *mToolkit;
@@ -52,7 +53,7 @@ class StiForwardTrackMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.1 2005/09/08 21:42:03 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.2 2005/09/09 15:55:00 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -63,6 +64,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.2  2005/09/09 15:55:00  balewski
+// prototype with hardcoded hacks
+//
 // Revision 1.1  2005/09/08 21:42:03  balewski
 // star
 //
