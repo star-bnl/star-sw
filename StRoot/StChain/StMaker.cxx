@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.168 2005/08/29 21:42:21 fisyak Exp $
+// $Id: StMaker.cxx,v 1.169 2005/09/09 21:32:32 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -807,7 +807,7 @@ Int_t StMaker::Make()
      
      if (Debug() || ret) 
 #ifdef STAR_LOGGER     
-        LOG_ERROR << "*** " << maker->ClassName() << "::Make() == " 
+        LOG_INFO << "*** " << maker->ClassName() << "::Make() == " 
                   << RetCodeAsString(ret) << "(" << ret << ") ***" 
                   << endm;
 #else
@@ -1600,6 +1600,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.169  2005/09/09 21:32:32  perev
+// ERROR message ==> INFO
+//
 // Revision 1.168  2005/08/29 21:42:21  fisyak
 // switch from fBits to fStatus for StMaker control bits
 //
