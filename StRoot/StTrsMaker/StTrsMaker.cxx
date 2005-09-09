@@ -1,9 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.77 2005/08/12 19:11:32 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.78 2005/09/09 22:12:48 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
-// Revision 1.77  2005/08/12 19:11:32  fisyak
-// Move SL05e to HEAD (wait till Victor will fix his fixes)
+// Revision 1.78  2005/09/09 22:12:48  perev
+// Bug fix + IdTruth added
+//
+// Revision 1.76  2005/07/19 22:20:52  perev
+// Bug fix
 //
 // Revision 1.75  2004/03/31 19:45:57  jeromel
 // Initialize data member (valgrind report)
@@ -15,7 +18,7 @@
 // gcc 3.2 updates + WarnOff
 //
 // Revision 1.72  2003/05/02 23:54:18  hardtke
-// Allow user to adjust normalFactor (i.e. Fudge Factor)
+// Allow user to adjust mNormalFactor (i.e. Fudge Factor)
 //
 // Revision 1.71  2003/04/30 20:38:56  perev
 // Warnings cleanup. Modified lines marked VP
@@ -285,8 +288,8 @@
 
 #include "StTrsMaker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
-#include "St_ObjectSet.h"
+#include "TDataSetIter.h"
+#include "TObjectSet.h"
 
 #include <Stiostream.h>
 #include <unistd.h>    // needed for access()/sleep()
@@ -386,7 +389,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.77 2005/08/12 19:11:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.78 2005/09/09 22:12:48 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -396,19 +399,15 @@ ClassImp(StTrsMaker)
 
 
 
-StTrsMaker::StTrsMaker(const char *name):StMaker(name),
-					 //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
-					 mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
-					 mFirstSectorToProcess(1),
-					 mLastSectorToProcess(24), 
-					 mWriteToFile(0),
-					 mReadFromFile(0),
-					 mUseParameterizedSignalGenerator(1) // test trial,Hui Long
+StTrsMaker::StTrsMaker(const char *name):StMaker(name)
 {
-    mTrsNtupleFile = 0;
-    mWireHistogram = 0;
-    mWireNtuple = mContinuousAnalogNtuple = mDiscreteAnalogNtuple = mDigitalNtuple = 0;
-    normalFactor = 1.0;
+   memset(mBeg,0,mEnd-mBeg+1); //Zero all
+
+   mMiniSegmentLength			=(4.*millimeter);  // test trial,Hui Long
+   mFirstSectorToProcess		=(1);
+   mLastSectorToProcess			=(24); 
+   mUseParameterizedSignalGenerator	=(1); // test trial,Hui Long
+   mNormalFactor 			= 1.;
 }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
@@ -465,7 +464,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
   
     //
     // Set up the DataBase access
-  St_DataSet *TrsPars = GetDataBase("tpc/trspars");
+  TDataSet *TrsPars = GetDataBase("tpc/trspars");
   assert(TrsPars);
   // should use dynamic_cast when available
   geometryDataSet *Geometry    =
@@ -590,31 +589,32 @@ Int_t StTrsMaker::InitRun(int runnumber)
    mChargeTransporter->setLongitudinalDiffusion(true); // used to be true
    mChargeTransporter->setExB(false);
 
+   mAnalogSignalGenerator = 0;
    if(mUseParameterizedSignalGenerator) {
    //**************for the ParameterizedAnalogSignalGenerator
-   mAnalogSignalGenerator =
-     StTrsParameterizedAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
+     mAnalogSignalGenerator = StTrsParameterizedAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
+     StTrsParameterizedAnalogSignalGenerator *myGen = dynamic_cast<StTrsParameterizedAnalogSignalGenerator*>(mAnalogSignalGenerator);
+
    // Any options that are needed can go here:
    //*******************************************************
-   mAnalogSignalGenerator->setDeltaPad(2);
-   mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
-   mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
-   mAnalogSignalGenerator->addNoise(true);
-   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(true);
-   ((StTrsParameterizedAnalogSignalGenerator*)mAnalogSignalGenerator)->setNormalFactor(normalFactor);
+     myGen->setDeltaPad(2);
+     myGen->setSignalThreshold(.1*millivolt);
+     myGen->setSuppressEmptyTimeBins(true);
+     myGen->addNoise(true);
+     myGen->generateNoiseUnderSignalOnly(true);
+     myGen->setNormalFactor(mNormalFactor);
    }
    else {
-
-   mAnalogSignalGenerator =
-       StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
+     StTrsSlowAnalogSignalGenerator *myGen = dynamic_cast<StTrsSlowAnalogSignalGenerator*>
+     (StTrsSlowAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector));
+     mAnalogSignalGenerator = myGen;
    //
    // Set the function for the induced charge on Pad
    // -->StTrsSlowAnalogSignalGenerator::endo
    //-->StTrsSlowAnalogSignalGenerator::gatti
    //-->StTrsSlowAnalogSignalGeneratommetricGaussianApproximation:
 // 	    retr::dipole
-   static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-       setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
+     myGen->setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
    //
    // Set the function for the Analog Electronics signal shape
    //-->StTrsSlowAnalogSignalGenerator::delta
@@ -622,15 +622,14 @@ Int_t StTrsMaker::InitRun(int runnumber)
    //-->StTrsSlowAnalogSignalGenerator::symmetricGaussianExact
    //-->asymmetricGaussianApproximation
    //-->StTrsSlowAnalogSignalGenerator::realShaper
-   static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
-       setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
-   //mAnalogSignalGenerator->setDeltaRow(0);
-   mAnalogSignalGenerator->setDeltaPad(2);
-   mAnalogSignalGenerator->setSignalThreshold(.0*millivolt);
-   mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
-   mAnalogSignalGenerator->addNoise(true);
-   mAnalogSignalGenerator->generateNoiseUnderSignalOnly(true);
-   mAnalogSignalGenerator->setNoiseRMS(900);  // set in  #e
+     myGen->setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+     //myGen->setDeltaRow(0);
+     myGen->setDeltaPad(2);
+     myGen->setSignalThreshold(.0*millivolt);
+     myGen->setSuppressEmptyTimeBins(true);
+     myGen->addNoise(true);
+     myGen->generateNoiseUnderSignalOnly(true);
+     myGen->setNoiseRMS(900);  // set in  #e
    }
 
    mDigitalSignalGenerator =
@@ -654,7 +653,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
    // Construct constant data sets.  This is what is passed downstream
    if (!mAllTheData) {
     mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
-    AddConst(new St_ObjectSet("Event"  , mAllTheData, 0));
+    AddConst(new TObjectSet("Event"  , mAllTheData, 0));
    }
    if ((Debug()/10)%10 > 0) {
      mTrsNtupleFile          = new TFile("TrsOutput.root","RECREATE","Trs Ntuples");
@@ -718,9 +717,9 @@ Int_t StTrsMaker::Make(){
     // Read the GEANT info
     // these structures/classes are defined in:
     // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
-    // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
+    // $STAR/StRoot/base/TDataSet.h & St_Table.h 
     //
-    St_DataSetIter geant(GetDataSet("geant"));
+    TDataSetIter geant(GetDataSet("geant"));
     
     
     St_g2t_tpc_hit *g2t_tpc_hit =
@@ -730,7 +729,7 @@ Int_t StTrsMaker::Make(){
     if (!g2t_tpc_hit) return kStWarn;
     
     int no_tpc_hits         = g2t_tpc_hit->GetNRows();
-    g2t_tpc_hit_st *tpc_hit = g2t_tpc_hit->GetTable();
+    g2t_tpc_hit_st *tpcHit = g2t_tpc_hit->GetTable();
 
     St_g2t_track *g2t_track =
 	static_cast<St_g2t_track *>(geant("g2t_track"));
@@ -758,6 +757,7 @@ Int_t StTrsMaker::Make(){
     // Limit the  processing to a fixed number of segments
     //  no_tpc_hits = 4;
     if(no_tpc_hits<1)return kStOK;
+    g2t_tpc_hit_st *tpc_hit = tpcHit;
     for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
        int id2=tpc_hit->track_p;
          int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
@@ -914,11 +914,6 @@ Int_t StTrsMaker::Make(){
 // 	    ofs << " " << aSegment << endl;
 //   	    PR(aSegment);
 	    
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-//VPunused	    vector<int> all[3];
-#else
-//VPunused	    vector<int,allocator<int> > all[3];
-#endif
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    list<StTrsMiniChargeSegment> comp;
@@ -1217,6 +1212,8 @@ Int_t StTrsMaker::Make(){
     cout << "\nFinished at: " << ctime(&trsMakeEnd);
     double trsMakeTotal = difftime(trsMakeEnd,trsMakeBegin);
     cout << "Total StTrsMaker::Make() Processing Time: " << trsMakeTotal << " sec\n\n"; 
+    
+    CheckTruth(no_tpc_hits, tpcHit);
 
     return kStOK;
 }
@@ -1257,8 +1254,69 @@ Int_t StTrsMaker::Finish()
 }
 
 void StTrsMaker::setNormalFactor(double FudgeFactor) {
-  normalFactor = FudgeFactor;
-  if (mUseParameterizedSignalGenerator&&mAnalogSignalGenerator) {
-    ((StTrsParameterizedAnalogSignalGenerator*)mAnalogSignalGenerator)->setNormalFactor(normalFactor);
-  }
+  mNormalFactor = FudgeFactor;
+//VP  if (mUseParameterizedSignalGenerator&&mAnalogSignalGenerator) {
+//VP    mAnalogSignalGenerator->setNormalFactor(mNormalFactor);
+//VP  }
 }
+#include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StarClassLibrary/StSequence.hh"
+
+void StTrsMaker::CheckTruth(int no_tpc_hits, g2t_tpc_hit_st *tpc_hit)
+{
+   StSequence *seq; int nSeq;int **ids;
+   int sector, row,pad,tim;
+   TObjectSet *trsEvent=(TObjectSet*)GetDataSet("Event"); 			if(!trsEvent)  	return;
+   StTrsZeroSuppressedReader *mZsr=0;
+   StTpcRawDataEvent   *mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());	if(!mEvent) 	return;
+   StTrsDetectorReader mTdr(mEvent);
+   StTpcCoordinateTransform transform(gStTpcDb);
+
+  int noData=0,lowTruth=0;
+  for (int ih=0;ih<no_tpc_hits;ih++) {
+    int idtru =tpc_hit[ih].track_p;
+    StGlobalCoordinate global(tpc_hit[ih].x[0],tpc_hit[ih].x[1],tpc_hit[ih].x[2]);
+    StTpcPadCoordinate Pad;      transform(global,Pad);
+    sector = Pad.sector();
+    pad = Pad.pad();
+    row = Pad.row();
+    tim = Pad.timeBucket();
+    mZsr=mTdr.getZeroSuppressedReader(sector);
+    if (!mZsr) {
+       noData++;
+//       Warning("CheckTruth","%d - No Data in %d.%d.%d",noData,sector,row,pad);   
+       continue;
+    }
+    nSeq=0;
+    mZsr->getSequences(row, pad, &nSeq, &seq, &ids);
+    if (!nSeq) {
+       noData++;
+//       Warning("CheckTruth","%d - No Data in %d.%d.%d",noData,sector,row,pad);   
+       continue;
+    }
+    
+    int nAdc=0,nIds=0;
+    
+    for (int jSeq=0;jSeq<nSeq;jSeq++) {
+      int nnAdc = seq[jSeq].length;
+      int startTimeBin =  seq[jSeq].startTimeBin;
+      if (tim < startTimeBin      ) continue;
+      if (tim > startTimeBin+nnAdc) continue;
+      for (int j=0;j<nnAdc;j++) {
+        if(abs(startTimeBin+j-tim)>5) continue;
+        nAdc++;
+	if(ids[jSeq][j]==idtru) nIds++;
+      }
+    }
+    if (!nAdc) nAdc=1;
+    double pct = double(nIds)/nAdc*100; if (pct){};
+    if (!nIds) {
+       lowTruth++;
+//       Warning("CheckTruth","%d - Low contrib %2.1f%% in %d.%d.%d",lowTruth,pct,sector,row,pad);   
+    }
+  }
+  if (lowTruth) 
+    Warning("CheckTruth","nHits=%d lowTruth=%d pct=%2.1f%%",
+    no_tpc_hits,lowTruth,(lowTruth*100.)/no_tpc_hits);
+
+}    

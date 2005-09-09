@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.8 2000/02/10 01:21:47 calderon Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.9 2005/09/09 22:12:48 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
+ * Revision 1.9  2005/09/09 22:12:48  perev
+ * Bug fix + IdTruth added
+ *
  * Revision 1.8  2000/02/10 01:21:47  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -89,18 +92,18 @@ public:
     virtual ~StTrsAnalogSignalGenerator() {/* nopt */}
 
     // Charge Induction
-    virtual void inducedChargeOnPad(StTrsWireHistogram*)     = 0;
+    virtual void inducedChargeOnPad(StTrsWireHistogram*)     	= 0;
 
     // Sampling
-    virtual void   sampleAnalogSignal()                      = 0;
-    virtual double signalSampler(double, StTrsAnalogSignal&) = 0;
+    virtual void   sampleAnalogSignal()                      	= 0;
+    virtual double signalSampler(double, StTrsAnalogSignal&) 	= 0;
 
     // access and set
     void           setDeltaPad(int);
     void           setDeltaRow(int);
     void           setSignalThreshold(double);
     void           setSuppressEmptyTimeBins(bool);
-
+    virtual void   setNormalFactor(double FudgeFactor) {assert(0);}
     // noise generation
     void           addNoise(bool);
     void           setNoiseRMS(double);

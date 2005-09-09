@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.10 2005/08/12 19:11:34 fisyak Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.11 2005/09/09 22:12:48 perev Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,8 +24,11 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
- * Revision 1.10  2005/08/12 19:11:34  fisyak
- * Move SL05e to HEAD (wait till Victor will fix his fixes)
+ * Revision 1.11  2005/09/09 22:12:48  perev
+ * Bug fix + IdTruth added
+ *
+ * Revision 1.9  2005/07/19 22:22:02  perev
+ * Bug fix
  *
  * Revision 1.8  2003/12/24 13:44:51  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -80,27 +83,29 @@ using std::vector;
 
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 
-class digitalPair : public pair<unsigned char,int> {
+typedef std::vector<unsigned char, allocator<unsigned char > >  vectorADC;
+typedef std::vector<          int, allocator<           int> >  vectorIDT;
+
+class digitalPair {
+int mTime;
+vectorADC mAdc;
+vectorIDT mIdt; 
 public:
-  digitalPair(unsigned char adc, int id) : pair<unsigned char,int>(adc,id) {}
-  ~digitalPair() {}
-  operator unsigned char () {return first;}
-  operator unsigned char *() {return &first;}
-  int id() { return second;}
+  digitalPair(int time)       {mTime=time;}
+void add(int adc,int idt=0)   {mAdc.push_back((unsigned char )adc);
+                               mIdt.push_back((unsigned short)idt);}
+
+  unsigned char* adc() const  {return (unsigned char*)&mAdc[0];}			
+            int* idt() const  {return (          int*)&mIdt[0];}			
+  int size() const            {return mAdc.size();}
+  int time() const            {return mTime;}
+
 };
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<unsigned char>      digitalPadData;
-typedef vector<digitalPair>        digitalTimeBins;
-typedef vector<digitalTimeBins>    digitalPadRow;
-typedef vector<digitalPadRow>      digitalSector;
-typedef vector<digitalPair>::iterator digitalTimeBinIterator;
-#else
 typedef vector<unsigned char, allocator<unsigned char> >     digitalPadData;
 typedef vector<digitalPair, allocator<digitalPair> >         digitalTimeBins;
 typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
 typedef vector<digitalPadRow, allocator<digitalPadRow> >     digitalSector;
 typedef vector<digitalPair, allocator<digitalPair> >::iterator digitalTimeBinIterator;
-#endif
 
 typedef digitalPadData::iterator                 digitalPadDataIterator;
 typedef digitalTimeBins::iterator                digitalTimeBinsIterator;
@@ -114,18 +119,18 @@ public:
     
 
     // access functions
-    digitalTimeBins*   timeBinsOfRowAndPad(int, int);
-    digitalPadRow*     padsOfRow(int);
+    digitalTimeBins*   timeBinsOfRowAndPad(int rowN, int padN);
+    digitalPadRow*     padsOfRow(int rowN);
     digitalSector*     rows();
 
-    int  numberOfRows()             const;
-    int  numberOfPadsInRow(int)     const;
-    int  numberOfTimeBins(int, int) const;
+    int  numberOfRows()             		const;
+    int  numberOfPadsInRow(int rowN)		const;
+    int  numberOfTimeBins(int rowN, int padN) 	const;
     
     // Adding
     void clear();
 
-    void assignTimeBins(int, int, digitalPadData*);
+//obsolete(VP)    void assignTimeBins(int rowN, int padN, digitalPadData* tbins);
     void assignTimeBins(int, int, digitalTimeBins*);
     void assignTimeBins(StTpcPadCoordinate&, digitalTimeBins*);
     // When writing, make sure we don't carry unnecessary zeros:
