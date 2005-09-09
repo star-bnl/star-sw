@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMCTruth.h,v 1.1 2005/07/19 22:40:32 perev Exp $
+ * $Id: StMCTruth.h,v 1.2 2005/09/09 21:42:03 perev Exp $
  *
  * Author: Victor Perev, Jun 2005
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMCTruth.h,v $
+ * Revision 1.2  2005/09/09 21:42:03  perev
+ * Method Size() added
+ *
  * Revision 1.1  2005/07/19 22:40:32  perev
  * IdTruth classes
  *
@@ -37,6 +40,7 @@ public:
   void Add(int trackId, double wt);
   void Add(StMCTruth Id,double wt);
   void Add(StMCTruth Id);
+  int  Size() const {return fN;}
   StMCTruth Get(int byCount=0) const;
 private:
   enum {HOWMANY=20};
