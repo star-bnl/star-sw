@@ -109,8 +109,8 @@ class St_tpcdaq_Maker : public StMaker {
    int getSector(Int_t isect);
    int getPadList(int whichPadRow,unsigned char **padlist);
    int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
-   void AsicThresholds(float gain,int *nseq,StSequence **lst);
-   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, int ***listOfIds=0);
+   void AsicThresholds(float gain,int *nseq,StSequence **lst,int ***idt);
+   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList, int ***listOfIds);
    void SetDAQFlag(Int_t);
    void SetNoiseEliminationStuff();
    void WriteStructToScreenAndExit();
@@ -129,7 +129,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
    // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.40 2004/03/10 05:49:52 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.41 2005/09/09 22:14:17 perev Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
@@ -140,8 +140,11 @@ class St_tpcdaq_Maker : public StMaker {
 
 
 
-// $Id: St_tpcdaq_Maker.h,v 1.40 2004/03/10 05:49:52 jeromel Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.41 2005/09/09 22:14:17 perev Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.41  2005/09/09 22:14:17  perev
+// IdTruth added
+//
 // Revision 1.40  2004/03/10 05:49:52  jeromel
 // This unfortunatly appears all diferent but main changes are
 // - doxygenized
