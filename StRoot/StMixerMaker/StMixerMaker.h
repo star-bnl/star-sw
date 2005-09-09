@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.9 2004/04/01 02:37:50 jeromel Exp $
+ * $Id: StMixerMaker.h,v 1.10 2005/09/09 22:08:11 perev Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.10  2005/09/09 22:08:11  perev
+ * IdTruth added
+ *
  * Revision 1.9  2004/04/01 02:37:50  jeromel
  * Last commit forgot to advertize that writeFile() was removed but is used
  * in embedding. Corrected.
@@ -49,7 +52,7 @@
 #endif
 
 //#include <vector>
-#include <utility>
+//#include <utility>
 
 // Dbs
 class StTpcGeometry;
@@ -59,7 +62,6 @@ class StTpcElectronics;
 // Processes 
 class StMixerFastDigitalSignalGenerator;
 class StTrsDigitalSignalGenerator;
-class StMixerEmbedding;
 
 // Containers
 class StTrsAnalogSignal;
@@ -70,15 +72,34 @@ class StTrsDigitalSector;
 class StTrsRawDataEvent;
 
 class StTrsOstream;
-
 class StTpcRawDataEvent;
 class StSequence;
+class StTPCReader;
+class StTrsDetectorReader;
+class StTrsZeroSuppressedReader;
+
+class StMixerReader {
+public:
+ StMixerReader();
+ void Set(StTPCReader         *r);
+ void Set(StTrsDetectorReader *r);
+ int  getSequences(int sector,int row,int pad,int *nseq,StSequence **listOfSequences, int ***listIdTruth=0);//!
+ int  getPadList  (int sector,int row, unsigned char **padList);
+ void Clear();
+private:
+ void SetSector(int sector);
+private:
+ int mSector;
+ StTPCReader 		   *mTpcReader;
+ StTrsZeroSuppressedReader *mTrsReader;
+ StTrsDetectorReader       *mTrsDetectorReader;
+};
+
 
 class StMixerMaker : public StMaker {
 
  private:
-    Char_t            *gConfig1; //!
-    Char_t            *gConfig2; //!
+    char            *gConfig[2]; //!
     StMixerMaker(const StMixerMaker&);
     StMixerMaker& operator=(const StMixerMaker&);
 
@@ -89,17 +110,11 @@ class StMixerMaker : public StMaker {
     
     // Processes
     StTrsDigitalSignalGenerator     *mDigitalSignalGenerator; //!
-    StMixerEmbedding                *mEmbedding; //!
 
     // Container
     StTrsSector               *mSector; //!
-    StTrsSector               *mSector1; //!
-    StTrsSector               *mSector2; //!
-    StTrsDigitalSector        *mDigitalSector; //!
-
     // I/O streams
     char*                        mOutputFileName; //!
-    //StTrsOstream*                mOutputStreamMixer; //!
     int                          mNumberOfEvents; //!
 
     // Output
@@ -110,6 +125,8 @@ class StMixerMaker : public StMaker {
 
     int                          mFirstSector;
     int                          mLastSector;
+
+    StMixerReader                mReader[2];
 
  protected:
 
@@ -122,19 +139,16 @@ class StMixerMaker : public StMaker {
     
     void Clear(Option_t *option="");  // called after every event to cleanup 
 
-    Char_t   *GetConfig1() {return gConfig1;}
-    Char_t   *GetConfig2() {return gConfig2;}
-    int   getSequences1(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
-    int   getSequences2(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
+    char   *GetConfig(int i) {return gConfig[i-1];}
 
     int   writeFile(char*, int);   //!
     char SetSequenceMerging(char); //!
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.9 2004/04/01 02:37:50 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.10 2005/09/09 22:08:11 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
-    ClassDef(StMixerMaker, 2)  // StAF chain virtual base class for Makers
+    ClassDef(StMixerMaker, 0)  // 
 };
 
 #endif
