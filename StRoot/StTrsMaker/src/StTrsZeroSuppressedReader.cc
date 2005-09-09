@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.12 2005/08/12 19:11:35 fisyak Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.13 2005/09/09 22:12:49 perev Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
- * Revision 1.12  2005/08/12 19:11:35  fisyak
- * Move SL05e to HEAD (wait till Victor will fix his fixes)
+ * Revision 1.13  2005/09/09 22:12:49  perev
+ * Bug fix + IdTruth added
+ *
+ * Revision 1.11  2005/07/19 22:23:05  perev
+ * Bug fix
  *
  * Revision 1.10  2003/12/24 13:44:54  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -69,15 +72,11 @@ using std::distance;
 #include "StGlobals.hh"
 #include "StTrsRawDataEvent.hh"
 #include "StTrsDigitalSector.hh"
-static const int MaxPixels = 512;
-static unsigned char ADCs[MaxPixels];
-static int  IDs[MaxPixels];
-static int  *IdsLocal[MaxPixels];
-static int  Npixels = 0;
 
 
+//________________________________________________________________________________
 StTrsZeroSuppressedReader::StTrsZeroSuppressedReader()
-    :mSector(1), mTheSector(0), mPadList(0), mSequence(0), mTrsEvent(0)
+    :mSector(-1), mTheSector(0), mPadList(0), mSequence(0), mTrsEvent(0)
 { 
   assert(sizeof(StSequence) == sizeof(Sequence)); 
 }
@@ -85,8 +84,9 @@ StTrsZeroSuppressedReader::StTrsZeroSuppressedReader()
 // StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(int sector, StTpcRawEvent& theEvent) : mSector(sector), mTheEvent(theEvent)
 // {  }
 
+//________________________________________________________________________________
 StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(StTpcRawDataEvent* ev)
-    :mSector(1), mTheSector(0), mPadList(0), mSequence(0)
+    :mSector(-1), mTheSector(0), mPadList(0), mSequence(0)
 {
   assert(sizeof(StSequence) == sizeof(Sequence)); 
   
@@ -97,6 +97,7 @@ StTrsZeroSuppressedReader::StTrsZeroSuppressedReader(StTpcRawDataEvent* ev)
     }
 }
 
+//________________________________________________________________________________
 int StTrsZeroSuppressedReader::setSector(int sector)
 {
     clear();
@@ -109,18 +110,13 @@ int StTrsZeroSuppressedReader::setSector(int sector)
 	    mTheSector = mTrsEvent->mSectors[sector-1];
 	    return 1;
     }
-    else {
-	return 0;
-    }
+    return 0;
 }
 
 
+//________________________________________________________________________________
 StTrsZeroSuppressedReader::~StTrsZeroSuppressedReader()
 {
-    if (mSequence) delete [] mSequence;
-    if (mPadList)  delete [] mPadList;
-    mSequence = 0;
-    mPadList  = 0;
 }
 
 int StTrsZeroSuppressedReader::checkTheData(unsigned int which)
@@ -134,13 +130,8 @@ int StTrsZeroSuppressedReader::checkTheData(unsigned int which)
 
 int StTrsZeroSuppressedReader::getPadList(int padRow, unsigned char **padList)
 {
-    if(mPadList) {
-	delete [] mPadList;
-	mPadList = 0;
-    }
+    mPadList.clear();
     //
-    // Count the sequences on the pad and store the list
-    int numberOfPadsWithSignals = 0;
     //
     // Should be data base derived quatities...
     if(padRow<1 || padRow>45) {
@@ -156,131 +147,49 @@ int StTrsZeroSuppressedReader::getPadList(int padRow, unsigned char **padList)
 //     PR(padRow);
 //     PR(mTheSector->numberOfPadsInRow(padRow));
 
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<unsigned char> tmp;
-#else
-    vector<unsigned char, allocator<unsigned char> > tmp;
-#endif
-    tmp.clear();
     // Loop over all the pads:
     for(int ii=1; ii<=mTheSector->numberOfPadsInRow(padRow); ii++) {
 	if (mTheSector->numberOfTimeBins(padRow,ii) > 0) {
   	    //cout << " pad " << ii << " " << (mTheSector->numberOfTimeBins(padRow,ii)) << endl;
-	    numberOfPadsWithSignals++;
-	    tmp.push_back(ii);
+	    mPadList.push_back(ii);
 	}
     }
 
-    if (tmp.size() == 0) {
-	mPadList = 0;
-    }
-    else {
-	// Otherwise fill the pad list
-	mPadList = new unsigned char[(tmp.size())];
+    *padList = &mPadList[0];
 
-	for(unsigned int ii=0; ii< tmp.size(); ii++) {
-	    mPadList[ii] = tmp[ii];
-// 	    PR(static_cast<int>(mPadList[ii]));
-	}
-
-	*padList = mPadList;
-    }
-
-    return numberOfPadsWithSignals;
+    return mPadList.size();
 }
-
-int getInt3(unsigned char a) { return static_cast<int>(a);}
 
 //int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSequence** Seq)
-//________________________________________________________________________________
-int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, Sequence** Seq) {
-  return getSequences(PadRow, Pad, nSeq, (StSequence**) Seq);
-}
 //________________________________________________________________________________
 int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, Sequence** Seq, int ***Ids) {
   return getSequences(PadRow, Pad, nSeq, (StSequence**) Seq, Ids);
 }
 //________________________________________________________________________________
-int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSequence** Seq) {
-  int **Ids;
-  return StTrsZeroSuppressedReader::getSequences(PadRow, Pad,nSeq, Seq, &Ids);
-}
-//________________________________________________________________________________
 int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSequence** Seq, int ***Ids) {
 
-  if(mSequence) delete [] mSequence;
-  mSequence = 0;
-  Npixels = 0;
-  memset(ADCs,     0, MaxPixels*sizeof(unsigned char ));
-  memset(IDs,      0, MaxPixels*sizeof(int ));
-  memset(IdsLocal, 0, MaxPixels*sizeof(int*));
-  *nSeq  = 0;
+  *Seq=0;if (Ids) *Ids=0;*nSeq=0;
+  mSequence.clear();
+  mIds.clear();
   digitalTimeBins* TrsPadData = mTheSector->timeBinsOfRowAndPad(PadRow,Pad);
-  unsigned short currentTimeBin = 0;
-  digitalTimeBinIterator rangeBegin = TrsPadData->begin();
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-  vector<StSequence> tmp;
-#else
-  vector<StSequence, allocator<StSequence> > tmp;
-#endif
-  tmp.clear();
-  // Construct the sequences:
-  do {
-    digitalTimeBinIterator rangeEnd = find(rangeBegin, TrsPadData->end(), digitalPair(0,0));
-    int length=0;
-    //VP	distance(rangeBegin,rangeEnd,length);
-    length=rangeEnd-rangeBegin;
-    if (length){
-      StSequence aSequence;
-      aSequence.startTimeBin = currentTimeBin;
-      unsigned char adc = (*rangeBegin);
-      int            id = rangeBegin->id();
-      //      ADCs.push_back(adc); IDs.push_back(id);
-      ADCs[Npixels] = adc; 
-      IDs[Npixels]  =  id;
-      //      unsigned char &ref     = ADCs.back(); 
-      //      aSequence.firstAdc     = &ref;//(*rangeBegin);
-      aSequence.firstAdc = &ADCs[Npixels];
-      //      int           *refId   = &IDs.back();
-      //      IdsLocal[*nSeq]    = refId;
-      IdsLocal[*nSeq]    = &IDs[Npixels];
-      Npixels++;
-      currentTimeBin++;
-      digitalTimeBinIterator current = rangeBegin;
-      current++;
-      for (int i = 1; i < length; i++, currentTimeBin++, current++) {
-	adc = (*current); 
-	//	ADCs.push_back(adc);
-	id = current->id();
-	//	IDs.push_back(id);
-	ADCs[Npixels] = adc; 
-	IDs[Npixels]  =  id; 
-	Npixels++;
-      }
-      aSequence.length       = length;
-      tmp.push_back(aSequence);
-      (*nSeq)++;
-      //      currentTimeBin += length;
-    }
-    else {
-      if (rangeEnd==TrsPadData->end()) continue;
-      rangeEnd++;
-      currentTimeBin += *rangeEnd;
-      rangeEnd++;
-    }
-    rangeBegin = rangeEnd;
-  }while (rangeBegin!=TrsPadData->end());
-  
-  // Return as an array
+  if (!TrsPadData) return 1;
+  digitalTimeBins &trsPadData = *TrsPadData;
+  int nTimeBins = trsPadData.size();
+  if (!nTimeBins) return 2;
 
-  assert((unsigned int)*nSeq == tmp.size());
-  mSequence = new StSequence[*nSeq];
-  
-  //     PR(tmp.size());
-  
-  for(unsigned int ii=0; ii< tmp.size(); ii++) mSequence[ii] = tmp[ii];
-  *Seq = mSequence;
-  *Ids = &IdsLocal[0];
+  // Construct the sequences:
+  StSequence aSequence;
+
+  for (int ibin=0;ibin<nTimeBins;ibin++)  {
+    aSequence.length       = trsPadData[ibin].size();
+    aSequence.startTimeBin = trsPadData[ibin].time();
+    aSequence.firstAdc     = trsPadData[ibin].adc();
+    mSequence.push_back(aSequence);
+    mIds.push_back(trsPadData[ibin].idt());
+  }
+  *nSeq = mSequence.size();
+  *Seq = &mSequence[0];
+  if (Ids) *Ids = &mIds[0];
   
   return 0;
 }
@@ -288,21 +197,7 @@ int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, StSe
 void StTrsZeroSuppressedReader::clear()
 {
     //cout << "StTrsZeroSuppressedReader::clear()" << endl;
-    if (mPadList) delete [] mPadList;
-    mPadList = 0;
-    if (mSequence) delete [] mSequence;
-    mSequence = 0;
+    mPadList.clear();
+    mSequence.clear();
+    mIds.clear();
 }
-//________________________________________________________________________________
-#if 0
-int StTrsZeroSuppressedReader::getSpacePts(int PadRow, int* nSpacePts, SpacePt** SpacePoints)
-{
-    cout << "StTrsZeroSuppressedReader::getSpacePts() NOT IMPLEMENTED!!" << endl;
-    return 0;
-}
-
-int StTrsZeroSuppressedReader::MemUsed()
-{
-    return 0;
-}
-#endif

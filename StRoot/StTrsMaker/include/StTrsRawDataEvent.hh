@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsRawDataEvent.hh,v 1.4 1999/10/11 23:55:13 calderon Exp $
+ * $Id: StTrsRawDataEvent.hh,v 1.5 2005/09/09 22:12:48 perev Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsRawDataEvent.hh,v $
+ * Revision 1.5  2005/09/09 22:12:48  perev
+ * Bug fix + IdTruth added
+ *
  * Revision 1.4  1999/10/11 23:55:13  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -52,11 +55,7 @@ public:
     void          clear();
     
 public:
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<StTrsDigitalSector*> mSectors;
-#else
     vector<StTrsDigitalSector*, allocator<StTrsDigitalSector*> > mSectors;
-#endif
 };
 
 #endif

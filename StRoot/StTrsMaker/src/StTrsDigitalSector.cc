@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.11 2005/08/12 19:11:34 fisyak Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.12 2005/09/09 22:12:49 perev Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
- * Revision 1.11  2005/08/12 19:11:34  fisyak
- * Move SL05e to HEAD (wait till Victor will fix his fixes)
+ * Revision 1.12  2005/09/09 22:12:49  perev
+ * Bug fix + IdTruth added
+ *
+ * Revision 1.10  2005/07/19 22:23:05  perev
+ * Bug fix
  *
  * Revision 1.9  2003/12/24 13:44:53  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
@@ -88,36 +91,29 @@ void StTrsDigitalSector::clear() // clears only the time bins
 
 // Caution: rowN specifies rowNumber 1..45
 // Below, rowIndex specifies index 0..44
+#if 0
 void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalPadData* tbins)
 {
-#ifdef ST_SECTOR_BOUNDS_CHECK
-    if( (rowIndex > 0 && rowIndex <= mData.size()) )
-	if( (padIndex > 0 && padIndex <= mData[rowIndex].size()) )
-#endif
-	    {
-	      mData[(rowN-1)][(padN-1)].clear();
-	      digitalPadDataIterator begin = tbins->begin();
-	      digitalPadDataIterator end   = tbins->end();
-	      for (digitalPadDataIterator iter = begin; iter != end; iter++)
-		mData[(rowN-1)][(padN-1)].push_back(digitalPair(*iter,0));
-	    }
+assert(0); // Method can not work with such input
+  mData[(rowN-1)][(padN-1)].clear();
+  int n = tbins->size();
+  for (int i=0;i<n;i++){
+    mData[(rowN-1)][(padN-1)].push_back(digitalPair((*tbins)[i],0));}
 }
+#endif
 //________________________________________________________________________________
 void StTrsDigitalSector::assignTimeBins(int rowN, int padN, digitalTimeBins* tbins)
 {
-#ifdef ST_SECTOR_BOUNDS_CHECK
-    if( (rowIndex > 0 && rowIndex <= mData.size()) )
-	if( (padIndex > 0 && padIndex <= mData[rowIndex].size()) )
-#endif
-	    {
-	    mData[(rowN-1)][(padN-1)] = *tbins;
-	    }
+  mData[(rowN-1)][(padN-1)].clear();
+  mData[(rowN-1)][(padN-1)].swap(*tbins);
 }
 
+//________________________________________________________________________________
 void StTrsDigitalSector::assignTimeBins(StTpcPadCoordinate& coord, digitalTimeBins* tbins)
 {
     assignTimeBins(coord.row(), coord.pad(), tbins);
 }
+//________________________________________________________________________________
 int StTrsDigitalSector::cleanup()
 {
     unsigned int numberOfEmptyRows=0;

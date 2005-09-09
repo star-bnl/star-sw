@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.hh,v 1.6 2003/12/24 13:44:51 fisyak Exp $
+ * $Id: StTrsAnalogSignal.hh,v 1.7 2005/09/09 22:12:48 perev Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.hh,v $
+ * Revision 1.7  2005/09/09 22:12:48  perev
+ * Bug fix + IdTruth added
+ *
  * Revision 1.6  2003/12/24 13:44:51  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -34,6 +37,7 @@
  ******************************************************************/
 #ifndef ST_TRS_ANALOGSIGNAL_HH
 #define ST_TRS_ANALOGSIGNAL_HH
+#include <assert.h>
 
 #include <Stiostream.h>
 #include <utility>
@@ -49,6 +53,7 @@ public:
     ~StTrsAnalogSignal();
     //StTrsAnalogSignal(const StTrsAnalogSignal&);            // use default
     //StTrsAnalogSignal& operator=(const StTrsAnalogSignal&); // use default
+    StTrsAnalogSignal& operator+=(const StTrsAnalogSignal&); 
     
     // access functions
     float time()         const;
@@ -62,15 +67,15 @@ public:
     
 protected:
     int                   mId; // geant track no.
-    pair<float, float>    mAnalogSignal;
+    float                 mTime;
+    float                 mAmp;
 };
 
-inline float StTrsAnalogSignal::time() const {return mAnalogSignal.first;}
-inline float StTrsAnalogSignal::amplitude() const {return mAnalogSignal.second;}
-inline void StTrsAnalogSignal::setTime(float t) { mAnalogSignal.first = t;}
-inline void StTrsAnalogSignal::setAmplitude(float a) { mAnalogSignal.second = a;}
-inline void StTrsAnalogSignal::scaleAmplitude(float fac) {mAnalogSignal.second *= fac;}
-
+inline float StTrsAnalogSignal::time() const 		 {return mTime;}
+inline float StTrsAnalogSignal::amplitude() const 	 {return mAmp; }
+inline void  StTrsAnalogSignal::setTime(float t) 	 { mTime = t;  }
+inline void  StTrsAnalogSignal::setAmplitude(float a) 	 { mAmp  = a;  }
+inline void  StTrsAnalogSignal::scaleAmplitude(float fac){ mAmp *= fac;}
 // Non-member function
 ostream& operator<<(ostream&, const StTrsAnalogSignal&);
 

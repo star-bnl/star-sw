@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.33 2005/08/12 19:11:34 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.34 2005/09/09 22:12:49 perev Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,8 +11,11 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
- * Revision 1.33  2005/08/12 19:11:34  fisyak
- * Move SL05e to HEAD (wait till Victor will fix his fixes)
+ * Revision 1.34  2005/09/09 22:12:49  perev
+ * Bug fix + IdTruth added
+ *
+ * Revision 1.32  2005/07/19 22:23:05  perev
+ * Bug fix
  *
  * Revision 1.31  2004/05/03 23:31:12  perev
  * Possible non init WarnOff
@@ -662,7 +665,8 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 
                     for(int itbin2=bin_low;itbin2<=bin_high;itbin2++){
                    
-                      index=irow2*bin_end*pad_end+ipad2*bin_end+itbin2;
+//VP                  index=irow2*bin_end*pad_end+ipad2*bin_end+itbin2;
+                      index=(irow2*pad_end+ipad2)*bin_end+itbin2;
 		      //yf		      *(SignalSum+index)+=chargeOfSignal*SignalInTimeBin[itbin2]; 
 		      addSignal(id, chargeOfSignal*SignalInTimeBin[itbin2], *(SignalSum+index));
                    

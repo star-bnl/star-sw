@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.7 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsSector.cc,v 1.8 2005/09/09 22:12:49 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
+ * Revision 1.8  2005/09/09 22:12:49  perev
+ * Bug fix + IdTruth added
+ *
  * Revision 1.7  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -51,7 +54,9 @@
  *
  **************************************************************************/
 #include "StTrsSector.hh"
+#include "StMCTruth.h"
 
+//______________________________________________________________________________
 StTrsSector::StTrsSector(StTpcGeometry* geoDb)
 {
     tpcTimeBins  timeBins;
@@ -73,8 +78,10 @@ StTrsSector::StTrsSector(StTpcGeometry* geoDb)
 //     }
 }
 
+//______________________________________________________________________________
 StTrsSector::~StTrsSector() {/* nopt */}
 
+//______________________________________________________________________________
 void StTrsSector::clear() // clears only the time bins
 {
     //cout << "in StTrsSector::clear()" << endl;
@@ -97,6 +104,7 @@ void StTrsSector::clear() // clears only the time bins
 // 	    mSector[(rowN-1)][(padN-1)].push_back(signl);
 // }
 
+//______________________________________________________________________________
 void StTrsSector::addEntry(StTpcPadCoordinate& coord, StTrsAnalogSignal& sig)
 {
     addEntry(coord.row(), coord.pad(), sig);
@@ -113,7 +121,40 @@ void StTrsSector::addEntry(StTpcPadCoordinate& coord, StTrsAnalogSignal& sig)
 // 	    mSector[(rowN-1)][(padN-1)] = tbins;
 // }
 
+//______________________________________________________________________________
 void StTrsSector::assignTimeBins(StTpcPadCoordinate& coord, tpcTimeBins& tbins)
 {
     assignTimeBins(coord.row(), coord.pad(), tbins);
+}
+//______________________________________________________________________________
+int StTrsSector::sort()
+{
+  int nadd=0;
+  StMCPivotTruth  pivo(1);
+  int nrows = mSector.size();
+  for (int irow=0;irow<nrows;irow++) {
+    int npads = mSector[irow].size();
+    for (int ipad=0; ipad<npads; ipad++) {
+      tpcTimeBins &tb = mSector[irow][ipad];
+      int ntb = tb.size();
+      if (ntb<2) continue;
+      std::sort(tb.begin(), tb.end(),StTrsAnalogSignalComparator());
+      int jl=0,jr=1;
+      for (;1;jr++) {
+        assert(jr==ntb || tb[jl].time() <= tb[jr].time());
+        if (jr==ntb || tb[jl].time() < tb[jr].time()) {
+          if (pivo.Size()) {tb[jl].setId(pivo.Get()); pivo.Reset();}
+          if (jr==ntb) break;
+          jl++; if (jl != jr) tb[jl] = tb[jr];
+        } else {
+          nadd++;
+          if (!pivo.Size()) pivo.Add(tb[jl].id(),tb[jl].amplitude());
+          pivo.Add(tb[jr].id(),tb[jr].amplitude());
+	  tb[jl]+=tb[jr];
+	}
+      }
+      tb.resize(jl+1);
+    }
+  }
+  return nadd;
 }

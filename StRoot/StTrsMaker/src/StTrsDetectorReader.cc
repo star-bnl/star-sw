@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDetectorReader.cc,v 1.4 2003/12/24 13:44:53 fisyak Exp $
+ * $Id: StTrsDetectorReader.cc,v 1.5 2005/09/09 22:12:49 perev Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDetectorReader.cc,v $
+ * Revision 1.5  2005/09/09 22:12:49  perev
+ * Bug fix + IdTruth added
+ *
  * Revision 1.4  2003/12/24 13:44:53  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -63,7 +66,7 @@ StTrsDetectorReader::~StTrsDetectorReader()
 StTrsZeroSuppressedReader* StTrsDetectorReader::getZeroSuppressedReader(int sector)
 {
     if(mZSR->setSector(sector))  return mZSR;
-    else return 0;
+    return 0;
 	
 }
 #if 0
