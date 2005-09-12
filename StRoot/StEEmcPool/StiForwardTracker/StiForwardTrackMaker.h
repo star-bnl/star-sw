@@ -1,4 +1,4 @@
-// $Id: StiForwardTrackMaker.h,v 1.2 2005/09/09 15:55:00 balewski Exp $
+// $Id: StiForwardTrackMaker.h,v 1.3 2005/09/12 21:08:21 balewski Exp $
 
 #ifndef STAR_StiForwadrTrackMaker
 #define STAR_StiForwadrTrackMaker
@@ -16,6 +16,7 @@
 #endif
 class StiToolkit;
 class StiKalmanTrack;
+class StPrimaryVertex; //tmp
 
 class StiForwardTrackMaker : public StMaker {
  private:
@@ -34,6 +35,8 @@ class StiForwardTrackMaker : public StMaker {
   StiToolkit     *mToolkit;
   enum {mxHA=8};
   TH1F *hA[mxHA];
+  class VertexV{public: float z,ez;};
+  vector<VertexV> vertL;
 
   void initHisto();
 
@@ -43,17 +46,20 @@ class StiForwardTrackMaker : public StMaker {
   virtual       ~StiForwardTrackMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
+  Int_t  MakeInSti(); // tmp, split of make on 2 parts
+  Int_t  MakeAfterSti(); // tmp,
   virtual Int_t Finish();
   virtual void Clear(const char* opt);
   TObjArray * HList;
   void saveHisto(TString fname);
+  void addVertex(float z, float ez); //tmp, hack Sti
 
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.2 2005/09/09 15:55:00 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.3 2005/09/12 21:08:21 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -64,6 +70,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.3  2005/09/12 21:08:21  balewski
+// split Make to InSti and AfterSti
+//
 // Revision 1.2  2005/09/09 15:55:00  balewski
 // prototype with hardcoded hacks
 //

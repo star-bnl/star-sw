@@ -1,6 +1,6 @@
 // -- Author : Victor Perevoztchikov
 // 
-// $Id: StiForwardTrackMaker.cxx,v 1.2 2005/09/09 15:55:00 balewski Exp $
+// $Id: StiForwardTrackMaker.cxx,v 1.3 2005/09/12 21:08:21 balewski Exp $
 
 #include <StMessMgr.h>
 
@@ -78,37 +78,31 @@ Int_t StiForwardTrackMaker::Init(){
 //_____________________________________________________________________________
 /// Make - this method is called in loop for each event
 Int_t StiForwardTrackMaker::Make(){
+  return  MakeAfterSti();
+}
 
+//_____________________________________________________________________________
+/// Inside Sti
+Int_t StiForwardTrackMaker::MakeInSti(){
+  int nV=vertL.size();
+  StEvent *event = (StEvent *) GetInputDS("StEvent");
+
+  gMessMgr->Info() << "\n JJJ1  "<<GetName()<<":: MakeInSti(), eveID="<<event->id()<<" nVert="<<nV<<endm;
   if(mToolkit==0) {
-    gMessMgr->Warning() <<"no Sti tool kit "<<GetName()<<" is  OFF"<<endm;
+    gMessMgr->Warning()<<GetName()<<"no Sti tool kit "<<GetName()<<" is  OFF"<<endm;
     return kStErr;
   }
 
-  StEvent *event = (StEvent *) GetInputDS("StEvent");
-  assert(event);
-  eveID=event->id();
-  mTotEve++;
-  int nV=event->numberOfPrimaryVertices();
-  
-  gMessMgr->Info() << "\n JJJ  "<<GetName()<<" START nEve="<<mTotEve<<"  eveID="<<eveID<< " nPrimVertex="<<nV<< endm;
-
-  hA[0]->Fill(nV);
-
-  if(nV<=0) {
-    gMessMgr->Info() << GetName()<<" event dropped, no vertex found"<<endm;
-    return kStOK;
-  }
-  
   int iv;
+
+
   for(iv=0;iv<nV;iv++) {
-    StPrimaryVertex *V=event->primaryVertex(iv);
-    assert(V);
-    const StThreeVectorF &v=V->position();
-    const StThreeVectorF &ev=V->positionError();
-    printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,v.z(),ev.z()  );
-    hA[1]->Fill(v.z());
+    VertexV V=vertL[iv];
+    printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,V.z,V.ez  );
+    hA[1]->Fill(V.z);
   }
   
+
   //get the Sti track container...
   StiTrackContainer* tracks = mToolkit->getTrackContainer();
   if(tracks==0) {
@@ -116,28 +110,28 @@ Int_t StiForwardTrackMaker::Make(){
     return kStErr ;
   }
 
+ 
   int nAny=0, nTry=0, nAcc=0;
   for (StiTrackContainer::const_iterator it=(*tracks).begin();  it!=(*tracks).end(); ++it) {
     const StiKalmanTrack* track = static_cast<StiKalmanTrack*>(*it);
     if(track->getFlag()!=true) continue; // drop bad tracks
     nAny++;
-    if(nAny>9) break;  // tmp, crashes on 10th track in Sti track contaner, terribe hack
-    cout<<"\n#a kalTrack: nTr="<<nAny<<" flag="<<track->getFlag()<<"  nFitP="<<track->getFitPointCount()<<" is Prim="<<track->isPrimary()<<endl;
-    cout<<"#b kalTrack: pT="<<track->getPt()<<endl;
- 
-//   cout<<"#b kalTrack:"<<*track<<endl;
+    //   if(nAny>9) break;  // tmp, crashes on 10th track in Sti track contaner, terribe hack
+    cout<<"\n#a kalTrack: nTr="<<nAny<<" flag="<<track->getFlag()<<"  nFitP="<<track->getFitPointCount()<<" is Prim="<<track->isPrimary()<<" pT="<<track->getPt()<<endl;
+    // cout<<"#b kalTrack: pT="<<track->getPt()<<endl;
+    //cout<<"#b kalTrack:"<<*track<<endl;
 
     float zDca, ezDca, rxyDca;
-    examinTrackDca(track, zDca, ezDca, rxyDca);
+    if(!examinTrackDca(track, zDca,  ezDca, rxyDca)) continue;
     nTry++;
-    
-    // do matching to vertex
+    cout<<"#c nTry="<<nTry<<" zDca="<<zDca<<endl;
+
+    //.... match track to a vertex
     for(iv=0;iv<nV;iv++) {
-      StPrimaryVertex *V=event->primaryVertex(iv);  assert(V);
-      const StThreeVectorF &v=V->position();
-      if( fabs(zDca-v.z()) > mMaxZdca )continue;
+      VertexV V=vertL[iv];
+      if( fabs(zDca-V.z) > mMaxZdca )continue;
       nAcc++;
-      cout<<" tr Matched , dZ="<<zDca-v.z()<<endl;
+      cout<<" tr Matched , dZ="<<zDca-V.z<<" nAcc="<<nAcc<<endl;
       break; 	 
     }
   }
@@ -148,11 +142,35 @@ Int_t StiForwardTrackMaker::Make(){
 }
 
 //_____________________________________________________________________________
+/// Inside Sti
+Int_t StiForwardTrackMaker::MakeAfterSti(){
+
+  StEvent *event = (StEvent *) GetInputDS("StEvent");
+  assert(event);
+  eveID=event->id();
+  mTotEve++;
+  int nV=event->numberOfPrimaryVertices();
+  
+  gMessMgr->Info() << "\n JJJ2  "<<GetName()<<"MakeAfterSti(), START nEve="<<mTotEve<<"  eveID="<<eveID<< " nPrimVertex="<<nV<< endm;
+
+  hA[0]->Fill(nV);
+
+  if(nV<=0) {
+    gMessMgr->Info() << GetName()<<" event dropped, no vertex found"<<endm;
+    return kStOK;
+  }
+  
+
+  return kStOK;
+}
+
+//_____________________________________________________________________________
 // called before each event
 void 
 StiForwardTrackMaker::Clear(const char* opt){
   gMessMgr->Info() <<GetName()<<"::Clear()"<<  endm;
   eveID=0;
+  vertL.clear();
 }   
 
 //=======================================================
@@ -194,7 +212,7 @@ bool
 StiForwardTrackMaker::examinTrackDca(const StiKalmanTrack*track,
 		    float &zDca, float &ezDca, float &rxyDca){
 
-  cout <<"#e  track->getPseudoRapidity()="<<track->getPseudoRapidity()<<" track->getFitPointCount()="<<track->getFitPointCount()<<endl;
+  // cout <<"#e  track->getPseudoRapidity()="<<track->getPseudoRapidity()<<" track->getFitPointCount()="<<track->getFitPointCount()<<endl;
 
   // .......... test DCA to beam .............
   StiKalmanTrack track1=*track; // clone track
@@ -217,9 +235,20 @@ StiForwardTrackMaker::examinTrackDca(const StiKalmanTrack*track,
   return true;
 }
 
-
+//-------------------------------------------------
+//-------------------------------------------------
+void
+StiForwardTrackMaker::addVertex(float z, float ez){
+  VertexV V;
+  V.z=z;
+  V.ez=ez;
+  vertL.push_back(V);
+}
 
 // $Log: StiForwardTrackMaker.cxx,v $
+// Revision 1.3  2005/09/12 21:08:21  balewski
+// split Make to InSti and AfterSti
+//
 // Revision 1.2  2005/09/09 15:55:00  balewski
 // prototype with hardcoded hacks
 //
