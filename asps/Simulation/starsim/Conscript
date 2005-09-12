@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.13 2005/08/29 23:03:36 fisyak Exp $
+# $Id: Conscript,v 1.14 2005/09/12 14:40:34 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.14  2005/09/12 14:40:34  fisyak
+# add missing ';'
+#
 # Revision 1.13  2005/08/29 23:03:36  fisyak
 # add FPP flag for non pgi version
 #
@@ -72,7 +75,7 @@ if ($FC =~ /pgf77/) {
   $FEXTEND  = $env->{G77EXTEND};
 }
 my $PGI = $env->{ENV}->{PGI};
-if ($FC =~ /g77/ and ! $PGI) {$CPPFLAGS .= " -DWithoutPGI"};
+if ($FC =~ /g77/ and ! $PGI) {$CPPFLAGS .= " -DWithoutPGI";}
 $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
 		    'FFLAGS'       => $FFLAGS,
