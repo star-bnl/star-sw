@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.5 2005/08/31 15:45:43 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.6 2005/09/12 13:56:27 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.6  2005/09/12 13:56:27  fisyak
+ * Fix B[0] = B[1] = 0 at r = 0
+ *
  * Revision 1.5  2005/08/31 15:45:43  fisyak
  * Make agufld a function to have comis happy (FPE)
  *
@@ -339,11 +342,10 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
   }
   if (z >= ZList[0] && z <= ZList[nZ-1] && r <= Radius[nR-1]) { // within Map
     Interpolate2DBfield( r, z, Br_value, Bz_value ) ;
-    B[0] = Br_value ;
     B[2] = Bz_value ;
     if ( r != 0.0 )      {
-      B[1] = B[0] * (x[1]/r) ;
-      B[0] = B[0] * (x[0]/r) ;
+      B[0] = Br_value * (x[0]/r) ;
+      B[1] = Br_value * (x[1]/r) ;
     }
     return;
   }
@@ -361,11 +363,10 @@ void StarMagField::BField( const Float_t x[], Float_t B[] )
     Br_value = (1-w)*BrI + w*Br_value;
     Bz_value = (1-w)*BzI + w*Bz_value;
   }  
-  B[0] = Br_value ;
   B[2] = Bz_value ;
   if ( r != 0.0 )      {
-    B[1] = B[0] * (x[1]/r) ;
-    B[0] = B[0] * (x[0]/r) ;
+    B[0] = Br_value * (x[0]/r) ;
+    B[1] = Br_value * (x[1]/r) ;
   }
   return;
 }
