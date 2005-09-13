@@ -1,11 +1,11 @@
-// $Id: StiForwardTrackMaker.h,v 1.3 2005/09/12 21:08:21 balewski Exp $
+// $Id: StiForwardTrackMaker.h,v 1.4 2005/09/13 14:24:16 kocolosk Exp $
 
-#ifndef STAR_StiForwadrTrackMaker
-#define STAR_StiForwadrTrackMaker
+#ifndef STAR_StiForwardTrackMaker
+#define STAR_StiForwardTrackMaker
 
 /*!
  *                                                                     
- * \class  StiForwadrTrackMaker
+ * \class  StiForwardTrackMaker
  * \author Adam & Jan
 
  *
@@ -17,6 +17,11 @@
 class StiToolkit;
 class StiKalmanTrack;
 class StPrimaryVertex; //tmp
+
+class StiHitContainer;
+class StiTrackContainer;
+class StiLocalTrackSeedFinder;
+class StiDetectorContainer;
 
 class StiForwardTrackMaker : public StMaker {
  private:
@@ -30,6 +35,7 @@ class StiForwardTrackMaker : public StMaker {
   //.... params,cuts
   double mMaxTrkDcaRxy;   //DCA to nominal beam line for each track
   double mMaxZdca;     //zDCA cutoff for prim tracks in cm
+  double mMinEta;		//eta cutoff for hits used in constructing forward tracks
  
   //..... util
   StiToolkit     *mToolkit;
@@ -37,10 +43,21 @@ class StiForwardTrackMaker : public StMaker {
   TH1F *hA[mxHA];
   class VertexV{public: float z,ez;};
   vector<VertexV> vertL;
+  StiHitContainer* mAllHits;
+  StiHitContainer* mForwardHits;
+  StiTrackContainer* mTrackSeeds;
+  StiLocalTrackSeedFinder* mSeedGenerator;
 
   void initHisto();
 
   bool examinTrackDca(const StiKalmanTrack *track,float &zDca, float &ezDca, float &rxyDca);
+  
+  void getForwardHits(StiHitContainer* allHits, StiHitContainer* forwardHits, StiDetectorContainer* detector, double minEta);
+  //stores hits from allHits with eta > minEta in forwardHits container.  anything previously in forwardHits is lost
+  
+  void buildTrackSeeds(const StiHitContainer* forwardHits, StiTrackContainer* trackSeeds, StiLocalTrackSeedFinder* seedGenerator);
+  //takes forward hits and uses Mike's seed finder to store track segments in the trackSeeds container
+  
  public: 
   StiForwardTrackMaker(const char *name="forwTrack");
   virtual       ~StiForwardTrackMaker();
@@ -59,7 +76,7 @@ class StiForwardTrackMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.3 2005/09/12 21:08:21 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.4 2005/09/13 14:24:16 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -70,6 +87,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.4  2005/09/13 14:24:16  kocolosk
+// implemented getForwardHits() and buildTrackSeeds() functions
+//
 // Revision 1.3  2005/09/12 21:08:21  balewski
 // split Make to InSti and AfterSti
 //
