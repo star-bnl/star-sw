@@ -1,4 +1,4 @@
-// $Id: StVMCMaker.h,v 1.3 2005/08/29 22:49:31 fisyak Exp $
+// $Id: StVMCMaker.h,v 1.4 2005/09/13 21:34:29 fisyak Exp $
 
 #ifndef STAR_StVMCMaker
 #define STAR_StVMCMaker
@@ -23,15 +23,13 @@
 
 class StVMCMaker : public StMaker {
  public: 
-  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile("") {}
+  StVMCMaker(const char *name="geant") : StMaker(name),fEventNo(0), fRunNo(1), fEvtHddr(0), fInputFile(""), fInitRun(0), fVolume(0) {}
   virtual       ~StVMCMaker() {}
-  virtual Int_t  Init();
+  virtual Int_t  Init() {return StMaker::Init();}
   virtual Int_t  Make();
   virtual void   Clear(Option_t *option="");
   virtual Int_t  Finish();
-#if 0
-  virtual Int_t  InitRun  (Int_t runumber);
-#endif
+  virtual Int_t  InitRun  (Int_t runumber = 0);
   virtual Int_t  FinishRun(Int_t runumber){return 0;}; 
   virtual void   SetDateTime(Int_t idat=0,Int_t itim=0);
   virtual void   SetRunNo(Int_t m ) {fRunNo = m < 1 || m >= 1000000 ? 1 : m;}
@@ -40,20 +38,26 @@ class StVMCMaker : public StMaker {
   const Char_t  *InputFile() const {return fInputFile.Data();}
   static StarVMCApplication* GetStarVMCApplication() {return fgStarVMCApplication;}
   static TGeant3TGeo*        GetGeant3()             {return fgGeant3;}
+  TDataSet* GetVolume() { return fVolume; }
  private:
   // Private method declaration if any
  
  protected:
   // Protected method if any
+  virtual TDataSet  *FindDataSet (const char* logInput,
+				  const StMaker *uppMk=0,
+				  const StMaker *dowMk=0) const ;
   static StarVMCApplication* fgStarVMCApplication;
   static TGeant3TGeo*        fgGeant3;
-  Int_t  fEventNo;
-  Int_t  fRunNo;
-  StEvtHddr *fEvtHddr;//! pointer to Event Header
-  TString    fInputFile;
+  Int_t                      fEventNo;
+  Int_t                      fRunNo;
+  StEvtHddr                 *fEvtHddr;//! pointer to Event Header
+  TString                    fInputFile;
+  Int_t                      fInitRun;
+  TDataSet*                  fVolume;   //!
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.3 2005/08/29 22:49:31 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.4 2005/09/13 21:34:29 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -64,6 +68,9 @@ class StVMCMaker : public StMaker {
 
 
 // $Log: StVMCMaker.h,v $
+// Revision 1.4  2005/09/13 21:34:29  fisyak
+// Move initialization from Init to InitRun, add conversion TGeoVolume to TVolume for StEventDisplayMaker and TofMatchers
+//
 // Revision 1.3  2005/08/29 22:49:31  fisyak
 // add check for run no.
 //
