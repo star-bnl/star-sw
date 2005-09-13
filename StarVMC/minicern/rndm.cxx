@@ -1,9 +1,10 @@
 #include "TRandom.h"
 extern "C" {
   //  if (! gRandom) new TRandom();
-  Float_t rndm_(Int_t i = 0) {
-    return gRandom->Rndm(i);
-  }
+  Float_t rndm_(Int_t i = 0) {    return gRandom->Rndm(i);  }
+  Float_t ranf_()            {    return rndm_(0);  }
+  Float_t freq_ (Float_t x)  {    return TMath::Freq(x); }
+
 #ifdef  __GNUC__
 #define C_RAD_PER_DEG  0.017453292519943295769237
 #define C_DEG_PER_RAD 57.295779513082320876798155
