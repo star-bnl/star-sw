@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.5 2005/08/29 22:50:12 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.6 2005/09/13 21:37:05 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -13,23 +13,6 @@
 #include "TPDGCode.h"
 #include "TApplication.h"
 #include "TGeant3TGeo.h"
-#include "StarMagField.h"
-#include "StarCallf77.h"
-#define agufld  F77_NAME(agufld,AGUFLD)
-#define gufld   F77_NAME(gufld,GUFLD)
-#define agdetp_new	 F77_NAME(agdetpnew,AGDETPNEW)
-#define agdetp_add	 F77_NAME(agdetpadd,AGDETPADD)
-R__EXTERN  "C" {
-  void type_of_call agufld(Float_t *x, Float_t *bf);
-  void type_of_call gufld(Float_t *x, Float_t *bf) {agufld(x,bf);}
-  void type_of_call agdetp_add(DEFCHARD name, Float_t* a, Int_t* b DEFCHARL namel) {
-    printf("StarVMCApplication agdetp_add(%s,%f,%i) is called\n",name,a[0],b[0]);
-    if (TString(name) == "MFLG(1).Bfield=") StarMagField::Instance()->SetFactor(a[0]);
-  }
-  void type_of_call agdetp_new(DEFCHARD name DEFCHARL namel) {
-    printf("StarVMCApplication agdetp_new(%s) is called\n",name);
-  }
-}
 
 ClassImp(StarVMCApplication);
 
