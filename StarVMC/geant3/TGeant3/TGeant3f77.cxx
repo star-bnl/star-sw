@@ -466,7 +466,7 @@ void gftmed(Int_t &numed, char *name, Int_t &nmat, Int_t &isvol,
   //
   char vname[24]; strncpy(vname,name,lname); vname[lname] = 0;
   geant3->Gftmed(numed, vname, nmat, isvol, ifield, fieldm, tmaxfd, stemax,  
-         deemax, epsil, stmin);
+		 deemax, epsil, stmin, ubuf, nbuf);
 }
 
  
