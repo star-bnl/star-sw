@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.h,v 1.1 2005/04/25 20:44:28 fisyak Exp $
+// $Id: StarVMCApplication.h,v 1.2 2005/09/13 21:37:05 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -10,7 +10,7 @@
 #include "TVirtualMCApplication.h"
 #include "StarMCPrimaryGenerator.h"
 #include "StarMCStack.h"
-class StarMagField;
+#include "StarMagField.h"
 class StarMCHits;
 class StarVMCApplication : public TVirtualMCApplication {
  public:
@@ -46,7 +46,11 @@ class StarVMCApplication : public TVirtualMCApplication {
   virtual StarMCPrimaryGenerator *GetPrimaryGenerator() const {return fPrimaryGenerator;}
   virtual StarMagField           *GetMagField() const {return fMagField;}
   virtual StarMCStack            *GetStack() const {return fStack;}
-  private:
+    
+  virtual Double_t TrackingRmax() const { return 1.e4; }
+  virtual Double_t TrackingZmax() const { return 1.e5; } 
+  
+ private:
   // methods
   
   // data members
