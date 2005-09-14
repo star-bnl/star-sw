@@ -39,7 +39,7 @@ bool StEStructAscii::hasTrackCuts() { return (mTCuts) ? true : false ; }
 //-------------------------------------------------------------------------
 StEStructEvent* StEStructAscii::next() {
 
-  if( (!in.good()&&meventCount>0) || meventCount==meventsToDo || in.eof() ){  // quit on read error, event limit, or eof   
+  if( (!in.good()&&meventCount>0) || ((meventsToDo>0)&&(meventCount==meventsToDo)) || in.eof() ){  // quit on read error, event limit, or eof   
     mAmDone=true;
     in.close();  // Close the ifstream when finished
     cout << "Done.  Quitting after " << meventCount << " events." << endl; 
@@ -73,8 +73,8 @@ StEStructEvent* StEStructAscii::generateEvent(){
 //--------------------------------------------------------------------------
 void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
 
-  // Console I/O inspired by $ROOTSYS/tutorials/basic.C
-  // see protected/estruct/msd/humanic for the file format  
+  // See protected/estruct/msd/humanic for this file format
+  // All we really read is momentum px,py,pz
 
   mrefMult=0;
 
@@ -191,6 +191,9 @@ void StEStructAscii::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructAscii.cxx,v $
+ * Revision 1.2  2005/09/14 17:18:38  msd
+ * Setting numEvents to 0 now does all events in file
+ *
  * Revision 1.1  2004/06/28 19:54:54  msd
  * Initial check-in
  *
