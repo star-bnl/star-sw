@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.3 2005/09/07 20:18:39 prindle Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.4 2005/09/14 17:08:27 msd Exp $
  *   
  *
  *
@@ -30,7 +30,7 @@ class StEStructEvent;
 class StEStructAnalysisMaker : public StMaker {
 
 public:
-                   StEStructAnalysisMaker(const Char_t *name="EbyE 2-pt");
+                   StEStructAnalysisMaker(const Char_t *name="ESTRUCT 2-pt");
     virtual       ~StEStructAnalysisMaker();
     
     void          Clear(Option_t *option="");
@@ -59,7 +59,7 @@ public:
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.3 2005/09/07 20:18:39 prindle Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.4 2005/09/14 17:08:27 msd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -145,8 +145,11 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.4  2005/09/14 17:08:27  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.3  2005/09/07 20:18:39  prindle
- * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
  *   EventCuts.h:   Added trigger cuts including cucu and year 4.
  *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
  *                    before making centrality cut.

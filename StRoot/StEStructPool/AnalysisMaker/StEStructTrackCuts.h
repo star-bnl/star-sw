@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.h,v 1.2 2005/09/07 20:18:44 prindle Exp $
+ * $Id: StEStructTrackCuts.h,v 1.3 2005/09/14 17:08:37 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,6 +29,7 @@ public:
    CutName mglobalDCAName;
    CutName mchi2Name;
    CutName mptName;
+   CutName mxtName;
    CutName mytName;
    CutName mphiName;
    CutName metaName;
@@ -45,6 +46,7 @@ public:
   float mchi2[2];
   float mpt[2];
   float myt[2];
+  float mxt[2];
   float mphi[2];
   float meta[2];  
   float mnsigmaE[2];
@@ -72,6 +74,7 @@ public:
   bool goodGlobalDCA(float g);
   bool goodChi2(float x);
   bool goodPt(float p);
+  bool goodXt(float p);
   bool goodYt(float p);
   bool goodPhi(float p);
   bool goodEta(float e);
@@ -143,6 +146,14 @@ inline bool StEStructTrackCuts::goodYt(float c){
   
 }
 
+inline bool StEStructTrackCuts::goodXt(float c){
+  mvalues[mxtName.idx] =c;
+  return ( (mxt[0]==mxt[1] && mxt[0]==0) ||
+	   (c>=mxt[0] && c<=mxt[1])  ) ;
+
+}
+
+
 inline bool StEStructTrackCuts::goodPhi(float c){
   mvalues[mphiName.idx] =c;
   return ( (mphi[0]==mphi[1] && mphi[0]==0) ||
@@ -157,15 +168,23 @@ inline bool StEStructTrackCuts::goodEta(float c){
   
 }
 
+/*
 inline bool StEStructTrackCuts::goodElectron(float c) {
-    mvalues[mnsigmaEName.idx] =c;
-    if (mnsigmaE[0]==mnsigmaE[1] && mnsigmaE[0]==0) {
-        return true;
-    }
-    if (mnsigmaE[0]<=c && c<=mnsigmaE[1]) {
-        return true;
-    }
-    return false;
+  mvalues[mnsigmaEName.idx] =c;
+  if (mnsigmaE[0]==mnsigmaE[1] && mnsigmaE[0]==0) {
+    return true;
+  }
+  if (mnsigmaE[0]<=c && c<=mnsigmaE[1]) {
+    return true;
+  }
+  return false;
+}
+*/
+inline bool StEStructTrackCuts::goodElectron(float c){
+  mvalues[mnsigmaEName.idx] =c;
+  return ( (mnsigmaE[0]==mnsigmaE[1] && mnsigmaE[0]==0) ||
+	   (c>=mnsigmaE[0] && c<=mnsigmaE[1])  ) ;
+
 }
 
 inline bool StEStructTrackCuts::goodPion(float c){
@@ -195,8 +214,11 @@ inline bool StEStructTrackCuts::goodProton(float c){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.h,v $
+ * Revision 1.3  2005/09/14 17:08:37  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.2  2005/09/07 20:18:44  prindle
- * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
  *   EventCuts.h:   Added trigger cuts including cucu and year 4.
  *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
  *                    before making centrality cut.

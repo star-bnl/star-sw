@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.3 2005/09/07 20:18:40 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.4 2005/09/14 17:08:34 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -63,7 +63,7 @@ public:
 
 
   ClassDef(StEStructEventCuts,1)
-
+    
 };
 
 inline void StEStructEventCuts::loadUserCuts(const char* name, const char** vals, int nvals){}
@@ -112,11 +112,11 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
 }
 
 inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
-    mvalues[mpVertexZName.idx] = z;
-    if (mpVertexZ[0]==mpVertexZ[1] && mpVertexZ[0]==0) {
-        return true;
-    }
-    return (z>=mpVertexZ[0] && z<=mpVertexZ[1]);
+  mvalues[mpVertexZName.idx] = z;
+  if (mpVertexZ[0]==mpVertexZ[1] && mpVertexZ[0]==0) {
+    return true;
+  }
+  return (z>=mpVertexZ[0] && z<=mpVertexZ[1]);
 }
 
 inline bool StEStructEventCuts::goodCentrality(unsigned int c){
@@ -136,8 +136,11 @@ inline bool StEStructEventCuts::goodNumberOfTracks(unsigned int n){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.4  2005/09/14 17:08:34  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.3  2005/09/07 20:18:40  prindle
- * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
  *   EventCuts.h:   Added trigger cuts including cucu and year 4.
  *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
  *                    before making centrality cut.

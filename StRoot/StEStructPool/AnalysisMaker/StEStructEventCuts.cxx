@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.3 2004/09/24 01:41:41 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.4 2005/09/14 17:08:33 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -47,33 +47,68 @@ void StEStructEventCuts::initNames(){
 }
 
 bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int nvals){
-
-    if (!strcmp(name,mtWordName.name)) {
-        if (1 == nvals) {
-            sscanf(vals[0],"%s\t",mRunPeriod);
-            mtWordName.idx = 0;
-        } else {
-            mtWord[0]=(unsigned int)atoi(vals[0]); 
-            mtWord[1]=(unsigned int)atoi(vals[1]);
-            if(mtWord[0]==mtWord[1]){ // histogram needs some help in this case.
-                float arange[2];
-                arange[0]=mtWord[0]-0.05*mtWord[0];
-                arange[1]=mtWord[0]+0.05*mtWord[0];
-                mtWordName.idx=createCutHists(name,arange);
-            } else {
-                mtWordName.idx=createCutHists(name,mtWord);
-            }
-            return true;
-        }
+  
+  if (!strcmp(name,mtWordName.name)) {
+    if (1 == nvals) {  
+      sscanf(vals[0],"%s\t",mRunPeriod);
+      //mtWordName.idx = 0;
+      // check for valid name and create hists
+      bool validRun = 0;
+      if (!strcmp("AuAu200GeVMinBias2001",mRunPeriod)) {
+	// For use with trgsetupname=ProductionMinBias; productions P02gc,P02gd,P02ge; recommended |Vz|<25
+	mtWord[0] = 4000;  
+	mtWord[1] = 4500;
+	validRun = 1;
+      }
+      else if (!strcmp("AuAu200GeVMinBias2004",mRunPeriod)) {
+	// trgsetupname=productionMinBias; production P05ia; recommended |Vz|<30 (15007), -10<Vz<50 (15003)
+	//mtWord[0] = 15000;  mtWord[1] = 15010;  
+	mtWord[0] = 0;  
+	mtWord[1] = 15;  //for some reason, the l0triggerWord in the MuDST is not the trigger ID       
+	validRun = 1;
+      }
+      else if (!strcmp("AuAu62GeVMinBias2004",mRunPeriod)) {
+	// trgsetupname=production62Gev; productions P04id,P04ie,P05ic; recommended |Vz|<30
+	mtWord[0] = 35000;
+	mtWord[1] = 35020;
+	validRun = 1;
+      }
+      else if (!strcmp("CuCu200GeVProductionMinBias2005",mRunPeriod)) {
+	// ...
+	mtWord[0] = 86000;  // untested
+	mtWord[1] = 86020;
+	validRun = 1; 
+      }	
+      else if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
+	// ...
+	mtWord[0] = 76000;  // untested
+	mtWord[1] = 76020;
+	validRun = 1; 
+      }
+      if (validRun) mtWordName.idx=createCutHists(name,mtWord);
+      else cout << "  Warning: unknown run period " << name << endl;      
+    } else {
+      mtWord[0]=(unsigned int)atoi(vals[0]); 
+      mtWord[1]=(unsigned int)atoi(vals[1]);
+      if(mtWord[0]==mtWord[1]){ // histogram needs some help in this case.
+	float arange[2];  
+	arange[0]=mtWord[0]-0.05*mtWord[0];
+	arange[1]=mtWord[0]+0.05*mtWord[0];
+	mtWordName.idx=createCutHists(name,arange);
+      } else {
+	mtWordName.idx=createCutHists(name,mtWord);
+      }
+      return true;
     }
- 
+  }
+    
   if(!strcmp(name,mpVertexZName.name)){
     mpVertexZ[0]=atof(vals[0]); 
     mpVertexZ[1]=atof(vals[1]);
     mpVertexZName.idx=createCutHists(name,mpVertexZ);
     return true;
   }    
-
+    
   if(!strcmp(name,mcentralityName.name)){
     mcentrality[0]=(unsigned int)atoi(vals[0]);
     mcentrality[1]=(unsigned int)atoi(vals[1]);
@@ -88,9 +123,9 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
     return true;
   }    
     
-
+    
   return false;
-
+    
 };
 
 
@@ -112,6 +147,9 @@ void StEStructEventCuts::printCuts(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.4  2005/09/14 17:08:33  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.3  2004/09/24 01:41:41  prindle
  * Allow for cuts to be defined by character strings. I use this to select trigger
  * cuts appropriate for run periods
