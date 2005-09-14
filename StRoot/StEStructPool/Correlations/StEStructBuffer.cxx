@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBuffer.cxx,v 1.3 2005/03/28 22:59:08 porter Exp $
+ * $Id: StEStructBuffer.cxx,v 1.4 2005/09/14 17:14:22 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -8,14 +8,19 @@
  *
  * Description:  Data buffer to hold events for mixing per z-vertex
  *
- *  The algorithm is such that looping over events ceases cause the element,
- *        mEvent[_MAXEBYEBUFFER_]=NULL  
+ *  The algorithm is such that looping over events eventually returns the element,
+ *        mEvent[MAXBUFFERSIZE]=NULL  
  *
- *  The buffer is filled from [0] to [_MAX.._ -1] and numEvent counter
- *  then stays and _MAX_-1 (so it should be called 'numEventIndex').
- *  Once filled, event in [_MAX_-1] is deleted, all events are moved
+ *  The buffer is filled from [0] to [MAX.. -1] and numEvent counter
+ *  then stays and MAX-1 (so it should be called 'numEventIndex').
+ *  Once filled, event in [MAX-1] is deleted, all events are moved
  *  'down' in the array and current event is added at [0].
  *
+ *  To include a delta-N cut (mixed event multiplicity difference), I needed
+ *  to increase the buffer size.  So now the actual size is defined by MAXBUFFERSIZE,
+ *  and _MAXEBYEBUFFER_ is the number of mixed events we will try to make.
+ *
+ *  The delta-N cut is currently hard-coded to 100.
  *
  ***********************************************************************/
 #include "StEStructBuffer.h"
@@ -26,8 +31,8 @@
 StEStructBuffer::StEStructBuffer(){
 
   mnumEvents=0;
-  mEvent=new StEStructEvent*[_MAXEBYEBUFFER_+1];
-  for(int i=0;i<=_MAXEBYEBUFFER_;i++)mEvent[i]=NULL;
+  mEvent=new StEStructEvent*[MAXBUFFERSIZE+1];
+  for(int i=0;i<=MAXBUFFERSIZE;i++)mEvent[i]=NULL;
   resetCounter();
 
 }
@@ -35,7 +40,7 @@ StEStructBuffer::StEStructBuffer(){
 
 StEStructBuffer::~StEStructBuffer(){
     
-  for(int i=0;i<mnumEvents;i++)delete mEvent[i];
+  for(int i=0;i<=mnumEvents;i++)delete mEvent[i];
   delete [] mEvent;
 
 }
@@ -43,7 +48,7 @@ StEStructBuffer::~StEStructBuffer(){
 void StEStructBuffer::addEvent(StEStructEvent* event){
 
   if(!event)return;
-  if(mnumEvents==_MAXEBYEBUFFER_-1){
+  if(mnumEvents==MAXBUFFERSIZE-1){
     if(mEvent[mnumEvents]){ 
       delete mEvent[mnumEvents];
       mEvent[mnumEvents]=NULL;
@@ -51,14 +56,44 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
   } else {
     mnumEvents++;
   }
-  for(int i=mnumEvents-1;i>0;i--)mEvent[i]=mEvent[i-1];
+  //for(int i=mnumEvents-1;i>0;i--)mEvent[i]=mEvent[i-1];
+  for(int i=mnumEvents;i>0;i--)mEvent[i]=mEvent[i-1];
   mEvent[0]=event;
+
+}
+
+StEStructEvent* StEStructBuffer::nextEvent(int mult){
+  // Searches for an event with multiplicity difference from mult less than DELTANMAX
+  // Finish if number of returned events = _MAXEBYEBUFFER_ or we run out of buffer
+
+  if(mnumMixed==_MAXEBYEBUFFER_) return NULL;  // are we already done?
+  mcurEvent++;
+  while(mEvent[mcurEvent]) {
+    if(abs(mult - mEvent[mcurEvent]->Ntrack()) <= DELTANMAX) break;  
+    mcurEvent++;
+    if(mcurEvent>MAXBUFFERSIZE) cout << "   *** ERROR ***: BUFFER OVERFLOW" << endl;  // should never happen
+  }
+  mnumMixed++;
+  return mEvent[mcurEvent];
+
+}
+
+
+void StEStructBuffer::Print(){
+  for(int i=0;i<=MAXBUFFERSIZE;i++) {
+    if (mEvent[i]) cout << i <<": " << mEvent[i]->Ntrack() << "\t";
+    else cout <<  i <<": NULL" << "\t";
+  }
+  cout << endl;
 
 }
 
 /***********************************************************************
  *
  * $Log: StEStructBuffer.cxx,v $
+ * Revision 1.4  2005/09/14 17:14:22  msd
+ * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
+ *
  * Revision 1.3  2005/03/28 22:59:08  porter
  * I opened a memory leak on last ci due to forgetting how StEStructBuffer
  * actually worked! This is now fixed with explaination in description.

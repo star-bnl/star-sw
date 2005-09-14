@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.2 2005/03/03 01:30:44 porter Exp $
+ * $Id: StEStructCutBin.cxx,v 1.3 2005/09/14 17:14:23 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,10 +29,16 @@ StEStructCutBin::~StEStructCutBin(){};
 
 void StEStructCutBin::setMode(int mode){
 
-  if(mcutModeName){
+  /* if(mcutModeName && mode!=mcutMode){
     cout<<" Changing cut mode from mode="<<mcutMode<<" to mode="<<mode<<endl;
     delete [] mcutModeName;
-  }
+    }*/
+
+  bool silent = false;  // do we need to output cutbin info?
+  if (mcutModeName && mode==mcutMode) silent = true;
+  if (!silent && mode!=mcutMode) cout<<" Changing cut mode from mode="<<mcutMode<<" to mode="<<mode<<endl;
+ 
+  if(mcutModeName) delete [] mcutModeName; 
   mcutModeName=new char[64];
 
   switch(mode){
@@ -52,7 +58,10 @@ void StEStructCutBin::setMode(int mode){
     }
   case 2:
     {
-      setMode(1); // mode 2 is now obsolete ... same as mode 1
+      mnumBins=4;
+      strcpy(mcutModeName,"Trig/Assoc. Pt, 4 bins");
+      initPtBinMode0();
+      //setMode(1); // mode 2 is now obsolete ... same as mode 1
       //      mnumBins=56;
       //      strcpy(mcutModeName," yt_sum vs yt_delta Cut Binning, 54 bins");
       //      initPtBinMode2();
@@ -80,7 +89,7 @@ void StEStructCutBin::setMode(int mode){
   }
 
   mcutMode=mode;
-  cout<<"  Cut Bin Mode = "<<printCutBinName()<<endl;
+  if (!silent) cout<<"  Cut Bin Mode = "<<printCutBinName()<<endl;
 }
 //------------------------- Mode=0 ----------------------------------------
 // no cut
@@ -143,6 +152,7 @@ void StEStructCutBin::initPtBinMode1(){
 
 //------------------------ Mode=2 -------------------------------------------
 
+// TAKEN OVER FOR TRIGGER STUDY
 //********* 
 //********* OBSOLETE!!! used to be 2x finer than mode1 but never used
 //*********
@@ -167,9 +177,34 @@ void StEStructCutBin::initPtBinMode1(){
                      12,24,35,45,52,52,54};
 
 */
-//------------------------------------------------------------
+
 int StEStructCutBin::getCutBinMode2(StEStructPairCuts* pc){
-   return getCutBinMode1(pc);
+
+  // Now set to copy a trig/assoc study with pt 2.5<trig<3
+  //   .3<assoc<.8 = bin 1,  .8<assoc<1.3 = bin 2, 1.3<assoc<1.8 = bin 3
+  //   everything else = bin 0
+  
+  float min,max,temp;
+  int retVal;
+
+  min=pc->Track1()->Pt();
+  max=pc->Track2()->Pt();
+  if( min > max ){
+    temp=min;
+    min=max;
+    max=temp;
+  }
+                                                                                                             
+  if (max>3.0 || max<2.5) retVal=0;
+  else if (min<0.3 || min>1.8) retVal=0;
+  else {
+    retVal=2;
+    if (min<0.8) retVal=1; 
+    if (min>1.3) retVal=3;
+  }
+  
+  return retVal;
+
 }
 
 /*
@@ -208,7 +243,8 @@ void StEStructCutBin::initPtBinMode2(){ return initPtBinMode1(); }
 // 2,6,10,14 same-side small deta
 // 3,7,11,15 same-side large deta
 
-static int __yt_deta_dphi_bin[4][4]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+//static int __yt_deta_dphi_bin[4][4]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+static int __yt_deta_dphi_bin[4][4]={ {0,1,2,3}, {4,5,6,7}, {8,9,10,11}, {12,13,14,15} };  // remove compiler warning
 
 int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
 
@@ -380,6 +416,9 @@ void StEStructCutBin::initPtBinMode4(){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.3  2005/09/14 17:14:23  msd
+ * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
+ *
  * Revision 1.2  2005/03/03 01:30:44  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)

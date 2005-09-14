@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.3 2005/03/03 01:30:43 porter Exp $
+ * $Id: StEStructBinning.cxx,v 1.4 2005/09/14 17:14:21 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -58,7 +58,7 @@ StEStructBinning::StEStructBinning(){
   nSEta = ESTRUCT_SETA_BINS-1;
   dSEta=(maxSEta-minSEta)/(float)nSEta;
 
-  //--> yt (x) ranges <--
+  //--> yt ranges <--
   
   minYt=0.9; //0.15;
   maxYt=5.0;//4.5; // 0.925;
@@ -74,13 +74,20 @@ StEStructBinning::StEStructBinning(){
   minSYt=0.9; //2 * minYt;
   nSYt = ESTRUCT_SYT_BINS-1;
   dSYt=(maxSYt-minSYt)/(float)nSYt;
+  
+  /*maxDeltaYt=5.;//3.0;
+    minDeltaYt=0.;//0; //-3.0;
+    nDeltaYt = ESTRUCT_DELTAYT_BINS-1;
+    dDeltaYt=(maxDeltaYt-minDeltaYt)/(float)nDeltaYt; */
+  
+  //--> xt ranges <--
+  
+  minXt= 1 - exp(-(sqrt(0.15*0.15+0.139*0.139)-0.139)/0.4);  // from Aya's code
+  maxXt=0.99; // from Aya's code
+  nXt = ESTRUCT_XT_BINS-1;
+  dXt = (maxXt-minXt)/(float)nXt;
 
-  maxDeltaYt=5.;//3.0;
-  minDeltaYt=0.;//0; //-3.0;
-  nDeltaYt = ESTRUCT_DELTAYT_BINS-1;
-  dDeltaYt=(maxDeltaYt-minDeltaYt)/(float)nDeltaYt; 
-
-  //--> pt (x) ranges <--
+  //--> pt ranges <--
   
   minPt=0.15; //0.15;
   maxPt=6.0;//4.5; // 0.925;
@@ -97,12 +104,21 @@ StEStructBinning::StEStructBinning(){
   nSPt = ESTRUCT_SPT_BINS-1;
   dSPt=(maxSPt-minSPt)/(float)nSPt;
 
+   //--> TPC Separation ranges <--
+  maxTPCSep = 50;  //cm
+  minTPCSep = 0;
+  nTPCSep = ESTRUCT_TPCSEP_BINS - 1;
+  dTPCSep = (maxTPCSep-minTPCSep)/(float)nTPCSep;
+
 };
 
 
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.4  2005/09/14 17:14:21  msd
+ * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
+ *
  * Revision 1.3  2005/03/03 01:30:43  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
