@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.6 2005/09/07 20:26:16 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.7 2005/09/14 17:25:37 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -407,8 +407,7 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt){
        double n = hlocal[i]->GetBinContent(ix, iy) / nEventsSame; // number
        double a = hlocal[i+6]->GetBinContent(ix, iy) / nEventsSame; // ptxpt
        double b = hlocal[i+12]->GetBinContent(ix, iy) / nEventsSame; // pt+pt
-//       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsSame;// mixN
-       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / 1 / nEventsSame;// mixN
+       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / nEventsSame;// mixN
        double z = 0;
        if( mixn != 0 ) {
 	 switch(opt){
@@ -457,6 +456,7 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt){
   return retVal;
 
 }
+//----------------------------------------------------------------
 TH1** StEStructSupport::buildPtMixChargeTypes(const char* name, int opt){
 
   if(!mtf) return (TH1**)NULL;
@@ -501,8 +501,7 @@ TH1** StEStructSupport::buildPtMixChargeTypes(const char* name, int opt){
        double n = hlocal[i+3]->GetBinContent(ix, iy) / nEventsMixed; // number
        double a = hlocal[i+9]->GetBinContent(ix, iy) / nEventsMixed; // ptxpt
        double b = hlocal[i+15]->GetBinContent(ix, iy) / nEventsMixed; // pt+pt
-//       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / _MAXEBYEBUFFER_ / nEventsMixed;// mixN
-       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / 1 / nEventsMixed;// mixN
+       double mixn = hlocal[i+3]->GetBinContent(ix, iy) / nEventsMixed;// mixN
        double z = 0;
        if( mixn != 0 ) {
 	 switch(opt){
@@ -721,8 +720,13 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.7  2005/09/14 17:25:37  msd
+ * minor tweak
+ *
  * Revision 1.6  2005/09/07 20:26:16  prindle
- * Support: Fixed some meory leaks.
+ *
+ *
+ *     Support: Fixed some meory leaks.
  *
  * Revision 1.4  2005/03/08 21:56:42  porter
  * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
