@@ -1,4 +1,4 @@
-// $Id: StiForwardTrackMaker.h,v 1.4 2005/09/13 14:24:16 kocolosk Exp $
+// $Id: StiForwardTrackMaker.h,v 1.5 2005/09/14 14:15:14 kocolosk Exp $
 
 #ifndef STAR_StiForwardTrackMaker
 #define STAR_StiForwardTrackMaker
@@ -39,7 +39,7 @@ class StiForwardTrackMaker : public StMaker {
  
   //..... util
   StiToolkit     *mToolkit;
-  enum {mxHA=8};
+  enum {mxHA=10};
   TH1F *hA[mxHA];
   class VertexV{public: float z,ez;};
   vector<VertexV> vertL;
@@ -49,8 +49,6 @@ class StiForwardTrackMaker : public StMaker {
   StiLocalTrackSeedFinder* mSeedGenerator;
 
   void initHisto();
-
-  bool examinTrackDca(const StiKalmanTrack *track,float &zDca, float &ezDca, float &rxyDca);
   
   void getForwardHits(StiHitContainer* allHits, StiHitContainer* forwardHits, StiDetectorContainer* detector, double minEta);
   //stores hits from allHits with eta > minEta in forwardHits container.  anything previously in forwardHits is lost
@@ -58,6 +56,10 @@ class StiForwardTrackMaker : public StMaker {
   void buildTrackSeeds(const StiHitContainer* forwardHits, StiTrackContainer* trackSeeds, StiLocalTrackSeedFinder* seedGenerator);
   //takes forward hits and uses Mike's seed finder to store track segments in the trackSeeds container
   
+  void matchVertex(StiTrackContainer* tracks, vector<VertexV> &vertL, double &mMaxZdca, int &nV);
+
+  bool examineTrackDca(const StiKalmanTrack *track,float &zDca, float &ezDca, float &rxyDca);
+    
  public: 
   StiForwardTrackMaker(const char *name="forwTrack");
   virtual       ~StiForwardTrackMaker();
@@ -76,7 +78,7 @@ class StiForwardTrackMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.4 2005/09/13 14:24:16 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.5 2005/09/14 14:15:14 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -87,6 +89,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.5  2005/09/14 14:15:14  kocolosk
+// restrict to TPC hits, added histos, moved code to matchVertex() function
+//
 // Revision 1.4  2005/09/13 14:24:16  kocolosk
 // implemented getForwardHits() and buildTrackSeeds() functions
 //
