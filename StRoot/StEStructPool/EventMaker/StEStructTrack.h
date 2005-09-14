@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.4 2005/07/07 19:31:13 fisyak Exp $
+ * $Id: StEStructTrack.h,v 1.5 2005/09/14 17:21:20 msd Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -21,6 +21,7 @@
 #include "StLorentzVectorF.hh"
 #include "StHelix.hh"
 #include "StPhysicalHelixD.hh"
+#include "StPhysicalHelix.hh"
 
 class StEStructTrack : public TObject {
 
@@ -46,7 +47,6 @@ private:
   Float_t       mPIDp;
   Float_t       mPIDk;
   Float_t       mPIDd;
-
   Float_t       mDedx;
   Float_t       mChi2;
 
@@ -64,7 +64,7 @@ private:
   //-> From old StEbye2ptTrack.... note none are persistent
 
   Bool_t            mIsComplete; //!
-  StHelixD          mHelix; //!
+  StPhysicalHelixD  mHelix;  //! Helix taken from MuDST
   Float_t           mPt; //!
   Float_t           mYt; //!
   Float_t           mXt; //!
@@ -75,6 +75,7 @@ private:
   StThreeVectorF    mNominalTpcEntrancePoint; //!
   StThreeVectorF    mMidTpcPoint; //!
   int               mytbin; //!
+
 
 public:
 
@@ -154,7 +155,8 @@ public:
   const StThreeVectorF&   MidTpcPoint()                const;
   const StThreeVectorF&   StartPos()                   const;
   const StLorentzVectorF& FourMomentum()               const;
-  const StHelixD& Helix()                              const;
+  const StPhysicalHelixD& Helix()                      const;
+
   Float_t  Xt() const;
   Float_t  Yt() const;
 
@@ -201,6 +203,8 @@ public:
   void SetComplete() { mIsComplete=true; };
   void SetInComplete() { mIsComplete=false; };
 
+  void SetHelix(StPhysicalHelixD h) {mHelix=h;} 
+
   ClassDef(StEStructTrack, 2)   // macro for rootcint
 };
 
@@ -210,7 +214,8 @@ inline const StThreeVectorF& StEStructTrack::NominalTpcEntrancePoint() const { r
 inline const StThreeVectorF& StEStructTrack::MidTpcPoint() const{ return mMidTpcPoint; }; 
 inline const StThreeVectorF& StEStructTrack::StartPos() const{ return mStartPos; };
 inline const StLorentzVectorF& StEStructTrack::FourMomentum() const { return mFourMomentum;};
-inline const StHelixD& StEStructTrack::Helix() const{ return mHelix;}; 
+inline const StPhysicalHelixD& StEStructTrack::Helix() const{ return mHelix;}; 
+
 inline Float_t  StEStructTrack::Xt() const { return mXt;};
 inline Float_t  StEStructTrack::Yt() const { return mYt;};
 inline int      StEStructTrack::getYtBin() const { return mytbin; };
@@ -221,6 +226,9 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.5  2005/09/14 17:21:20  msd
+ * Simplified helix fitting by taking helix from mudst instead of calculating from scratch
+ *
  * Revision 1.4  2005/07/07 19:31:13  fisyak
  * Add default for mHelix
  *
