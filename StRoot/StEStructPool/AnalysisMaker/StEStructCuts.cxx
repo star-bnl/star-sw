@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.3 2005/02/09 23:08:44 porter Exp $
+ * $Id: StEStructCuts.cxx,v 1.4 2005/09/14 17:08:31 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -88,8 +88,7 @@ bool StEStructCuts::loadCutDB() {
 
   bool flag = false;
 
-  if (!strcmp(mcutFileName,"test-1")) {
-    // Some crazy cuts for testing... 
+  if (!strcmp(mcutFileName,"testdb")) {      // Some crazy cuts for testing... 
     loadBaseCuts("primaryVertexZ","-15","25");        
     loadBaseCuts("Pt","0.15","5");                    
     loadBaseCuts("Phi","-1","0.8");                   
@@ -99,7 +98,7 @@ bool StEStructCuts::loadCutDB() {
   }
 
   // ***** begin copy here ******* 
-  if (!strcmp(mcutFileName,"template")) {   // example template for adding new cuts 
+  if (!strcmp(mcutFileName,"template")) {   // example template for adding new cut systems to the db
     /***********************************************************************************************
      * Title:  example cuts for 200 GeV p-p correlation analysis
      * PA:  john doe
@@ -112,10 +111,10 @@ bool StEStructCuts::loadCutDB() {
     
     // syntax: loadBaseCuts("cut name", "min value", "max value")  
     //   min and max define the accepted region; e.g. loadBaseCut("mycut","0","1") cuts everything below 0 and above 1
-    // Note: some cuts (names begin with "good") need to be called with loadUserCuts instead of loadBaseCuts
+    // Note: in a few special cases, some cuts may need to be called with loadUserCuts instead of loadBaseCuts
 
     // Event Cuts
-    loadBaseCuts("primaryVertexZ","-25.","25");           // primary vertex cut
+    loadBaseCuts("primaryVertexZ","-50.","50");           // primary vertex cut
     
     // Track Cuts
     loadBaseCuts("Flag","0","2000");                      // track flag cut
@@ -143,9 +142,42 @@ bool StEStructCuts::loadCutDB() {
     
     flag = true;
   }
-  // ******** end copy here *******
-  
-  //if (!flag) cout << "No entry for " << mcutFileName << " found in database.  Looking for file..." << endl;    
+  // ******** end copy here ********
+
+  //  Aya's Au-Au 130
+  if (!strcmp(mcutFileName,"AuAu130")) {   // example template for adding new cut systems to the db
+    /***********************************************************************************************
+     * Title:  Aya's Cut System for Au-Au 130 
+     * PA:  Aya Ishihara
+     * fileCatalog:  n/a, both minbias and central datasets from year 2000 130 GeV
+     * Notes:  Cut System used for all 130 analysis, publications include: nucl-ex/0411003,
+     *            nucl-ex/0406035, nucl-ex/0408012, nucl-ex/0308033
+     *         Webpages at protected/estruct/aya:  
+     *            AxialCI/axialCI.html, AxialCD/detaxdphiCD.html, TransverseCI/mtxmtCI.html
+     ***********************************************************************************************/
+
+    // Event Cuts
+    loadBaseCuts("primaryVertexZ","-75.","75");           // primary vertex cut
+
+    // Track Cuts
+    loadBaseCuts("Flag","0","2000");                      // track flag cut
+    loadBaseCuts("Charge","-1","1");                      // charge cut
+    loadBaseCuts("NFitPoints","10","50");                 // fit points cut
+    loadBaseCuts("NFitPerNMax","0.52","1.0");             // fitpoints per possible cut
+    loadBaseCuts("GlobalDCA","0.","3.0");                 // global DCA cut
+    loadBaseCuts("Pt","0.15","2.0");                      // pt cut
+    loadBaseCuts("Phi","-1","1");                         // phi cut
+    loadBaseCuts("Eta","-1.3","1.3");                     // eta cut
+
+    // Pair Cuts
+    //loadBaseCuts("HBT",    "0.3","0.523","0.15","0.8");   // HBT
+    //loadBaseCuts("Coulomb","0.3","0.523","0.15","0.8");   // Coulomb
+    //loadBaseCuts("Merging","10","10");                    // Merging 
+    //loadBaseCuts("Crossing","30","10","1.0");             // Crossing (aka Mid-TPC separation, LS & US splitting) 
+
+    flag = true;
+  }
+
   
   return flag;
 }
@@ -209,15 +241,27 @@ bool StEStructCuts::loadCuts(){
 } 
 
 //-------------------------------------------------------------------    
-bool StEStructCuts::loadBaseCuts(const char* name,const char* val1,const char* val2) {
-  // Overloaded function
-  char** tmp = new char*[2];
+bool StEStructCuts::loadBaseCuts(const char* name,const char* val1,const char* val2,const char* val3,const char* val4) {
+  // Overloaded function, takes up to 4 args and puts them in a string array for loadBaseCuts
+  int count = 2;
+  if (val3) count = 3;
+  if (val4) count = 4;
+  char** tmp = new char*[count];
   tmp[0] = new char[strlen(val1) + 1];
   tmp[1] = new char[strlen(val2) + 1];
   strcpy(tmp[0],val1);
   strcpy(tmp[1],val2);
-  if(loadBaseCuts(name, (const char**)tmp, 2)) return true;
-  else return false;
+  if (count>=3) {
+    tmp[2] = new char[strlen(val3) + 1];
+    strcpy(tmp[2],val3);
+  }
+  if (count==4) {
+    tmp[3] = new char[strlen(val4) + 1];
+    strcpy(tmp[3],val4);
+  }
+  bool retVal = loadBaseCuts(name, (const char**)tmp, count);
+  delete [] tmp;
+  return retVal;
 }
 
 //-------------------------------------------------------------------
@@ -229,6 +273,7 @@ void StEStructCuts::loadUserCuts(const char* name,const char* val1,const char* v
   strcpy(tmp[0],val1);
   strcpy(tmp[1],val2);
   loadUserCuts(name, (const char**)tmp, 2);
+  delete [] tmp;
 }
 
 //-------------------------------------------------------------------            
@@ -353,6 +398,9 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.4  2005/09/14 17:08:31  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.3  2005/02/09 23:08:44  porter
  * added method to add histograms directly instead of under
  * the control of the class. Useful for odd 2D hists that don't

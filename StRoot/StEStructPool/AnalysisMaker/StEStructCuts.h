@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.h,v 1.3 2005/02/09 23:08:44 porter Exp $
+ * $Id: StEStructCuts.h,v 1.4 2005/09/14 17:08:32 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -71,9 +71,9 @@ public:
   virtual void fillHistograms(bool passed);
   virtual void writeCutHists(TFile* tf);
   virtual bool loadBaseCuts(const char* name,const char** vals,int nvals)=0;
-  virtual bool loadBaseCuts(const char* name,const char* val1,const char* val2);  // overloaded to accept strings
+  bool loadBaseCuts(const char* name,const char* val1,const char* val2,const char* val3="",const char* val4="");  // overloaded to accept strings
   virtual void loadUserCuts(const char* name,const char** vals,int nvals)=0; 
-  virtual void loadUserCuts(const char* name,const char* val1,const char* val2);  // overloaded to accept strings
+  void loadUserCuts(const char* name,const char* val1,const char* val2);  // overloaded to accept strings
   virtual void printCuts(ostream& of) = 0;
   virtual void printCuts(const char* fileName);
   virtual bool loadCutDB();   // Loads pre-compiled cuts from database
@@ -123,6 +123,9 @@ inline bool StEStructCuts::isLoaded(){ return (mcutFileName) ? true : false ; }
 /***********************************************************************
  *
  * $Log: StEStructCuts.h,v $
+ * Revision 1.4  2005/09/14 17:08:32  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.3  2005/02/09 23:08:44  porter
  * added method to add histograms directly instead of under
  * the control of the class. Useful for odd 2D hists that don't

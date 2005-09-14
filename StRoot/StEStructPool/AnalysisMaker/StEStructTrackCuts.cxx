@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.cxx,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructTrackCuts.cxx,v 1.2 2005/09/14 17:08:36 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -39,8 +39,13 @@ void StEStructTrackCuts::initCuts(){
    mchi2[0]=mchi2[1]=0;
    mpt[0]=mpt[1]=0;
    myt[0]=myt[1]=0;
+   mxt[0]=mxt[1]=0;
    mphi[0]=mphi[1]=0;
    meta[0]=meta[1]=0;  
+   mnsigmaE[0]=mnsigmaE[1]=0;
+   mnsigmaPi[0]=mnsigmaPi[1]=0;
+   mnsigmaK[0]=mnsigmaK[1]=0;
+   mnsigmaP[0]=mnsigmaP[1]=0;
  
 }
 
@@ -53,7 +58,8 @@ void StEStructTrackCuts::initNames(){
   strcpy(mglobalDCAName.name,"GlobalDCA");
   strcpy(mchi2Name.name,"Chi2");
   strcpy(mptName.name,"Pt");
-  strcpy(mytName.name,"Yt");
+  strcpy(mytName.name,"Yt"); 
+  strcpy(mxtName.name,"Xt") ;
   strcpy(mphiName.name,"Phi");
   strcpy(metaName.name,"Eta");
   strcpy(mnsigmaEName.name,"NSigmaElectron");
@@ -106,9 +112,16 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
     mptName.idx = createCutHists(name,mpt);
     return true;
   }
+
   if(!strcmp(name,mytName.name)){ 
     myt[0]=atof(vals[0]); myt[1]=atof(vals[1]);
     mytName.idx = createCutHists(name,myt);
+    return true;
+  }
+
+  if(!strcmp(name,mxtName.name)){
+    mxt[0]=atof(vals[0]); mxt[1]=atof(vals[1]);
+    mxtName.idx = createCutHists(name,mxt);
     return true;
   }
 
@@ -163,14 +176,14 @@ void StEStructTrackCuts::printCuts(ostream& ofs){
   ofs<<endl;
   ofs<<mflagName.name<<","<<mflag[0]<<","<<mflag[1]<<"\t\t\t"<<" # track flag cut"<<endl;
   ofs<<mchargeName.name<<","<<mcharge[0]<<","<<mcharge[1]<<"\t\t\t"<<" # charge cut"<<endl;
-  ofs<<mnfitpointsName.name<<","<<mnfitpoints[0]<<","<<mnfitpoints[1]<<"\t\t\t"<<" # fit points cut"<<endl;
-  ofs<<mnfitnmaxName.name<<","<<mnfitnmax[0]<<","<<mnfitnmax[1]<<"\t\t\t"<<" # fitpoints per possible cut"<<endl;
+  ofs<<mnfitpointsName.name<<","<<mnfitpoints[0]<<","<<mnfitpoints[1]<<"\t\t"<<" # fit points cut"<<endl;
+  ofs<<mnfitnmaxName.name<<","<<mnfitnmax[0]<<","<<mnfitnmax[1]<<"\t\t"<<" # fitpoints per possible cut"<<endl;
   ofs<<mglobalDCAName.name<<","<<mglobalDCA[0]<<","<<mglobalDCA[1]<<"\t\t\t"<<" # global DCA cut"<<endl;
   ofs<<mchi2Name.name<<","<<mchi2[0]<<","<<mchi2[1]<<"\t\t\t"<<" # chi square cut"<<endl;
-  ofs<<mptName.name<<","<<mpt[0]<<","<<mpt[1]<<"\t\t\t\t"<<" # pt cut"<<endl;
-  ofs<<mytName.name<<","<<myt[0]<<","<<myt[1]<<"\t\t\t\t"<<" # yt cut"<<endl;
-  ofs<<mphiName.name<<","<<mphi[0]/M_PI<<","<<mphi[1]/M_PI<<"\t\t\t\t"<<" # phi cut in factor of pi"<<endl;
-  ofs<<metaName.name<<","<<meta[0]<<","<<meta[1]<<"\t\t\t\t"<<" # eta cut"<<endl;
+  ofs<<mptName.name<<","<<mpt[0]<<","<<mpt[1]<<"\t\t\t"<<" # pt cut"<<endl;
+  ofs<<mytName.name<<","<<myt[0]<<","<<myt[1]<<"\t\t\t"<<" # yt cut"<<endl;
+  ofs<<mphiName.name<<","<<mphi[0]/M_PI<<","<<mphi[1]/M_PI<<"\t\t\t"<<" # phi cut in factor of pi"<<endl;
+  ofs<<metaName.name<<","<<meta[0]<<","<<meta[1]<<"\t\t\t"<<" # eta cut"<<endl;
   ofs<<mnsigmaEName.name<<","<<mnsigmaE[0]<<","<<mnsigmaE[1]<<"\t\t"<<" # num sigma electron cut"<<endl;
   ofs<<mnsigmaPiName.name<<","<<mnsigmaPi[0]<<","<<mnsigmaPi[1]<<"\t\t\t"<<" # num sigma Pion cut"<<endl;
   ofs<<mnsigmaKName.name<<","<<mnsigmaK[0]<<","<<mnsigmaK[1]<<"\t\t\t"<<" # num sigma Kaon cut"<<endl;
@@ -183,6 +196,9 @@ void StEStructTrackCuts::printCuts(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.cxx,v $
+ * Revision 1.2  2005/09/14 17:08:36  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *

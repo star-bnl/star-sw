@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.4 2005/09/07 20:18:42 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.5 2005/09/14 17:08:34 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -112,7 +112,7 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
  
     unsigned int tword=muEvent->l0Trigger().triggerWord();
     int refMult=muEvent->refMult();
-    mRefMult = 0;
+    mNumGoodTracks = 0;
 
     float x=muEvent->eventSummary().primaryVertexPosition().x();
     float y=muEvent->eventSummary().primaryVertexPosition().y();
@@ -149,14 +149,14 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
         if (!fillTracks(retVal)) {
             useEvent=false; 
         }
-        if (!mECuts->goodNumberOfTracks(mRefMult)) {
+        if (!mECuts->goodNumberOfTracks(mNumGoodTracks)) {
             useEvent=false;
         }
     }
     mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
     mECuts->fillHistogram(mECuts->centralityName(),(float)refMult,useEvent);
-    mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,useEvent);
+    mECuts->fillHistogram(mECuts->numTracksName(),(float)mNumGoodTracks,useEvent);
 
     if (!useEvent) {
         delete retVal;
@@ -227,20 +227,23 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
 
     //--> But add a quick electron removal... for selected p ranges
     //    Note I only want to do this if I am defining an electron dEdx cut.
-    if (mhasdEdxCuts) {
-        if (mTCuts->goodElectron( track->nSigmaElectron() )) {      
-            float p = (track->p()).mag();
-            if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) {
-                useTrack=false;
-            }
-        }
+    if (mhasdEdxCuts && mTCuts->goodElectron( track->nSigmaElectron() ) && useTrack )  {      
+      float p = (track->p()).mag();
+      if( (p>0.2 && p<0.45) || (p>0.7 && p<0.8) ) {
+	useTrack=false;
+	//cout << "  cut e:  p = " << p << ", nsig = " << track->nSigmaElectron() << endl;
+      }
     }
     //--> end of electron pid
 
-    useTrack = (mTCuts->goodPt(track->pt()) && useTrack);
-    float _r=track->pt()/0.139;
+    float pt = track->pt();
+    useTrack = (mTCuts->goodPt(pt) && useTrack);
+    float _r=pt/0.139;
     float yt=log(sqrt(1+_r*_r)+_r);
     useTrack = (mTCuts->goodYt(yt) && useTrack);
+    float mt = sqrt(pt*pt + 0.139*0.139);
+    float xt = 1 - exp( -1*(mt-0.139)/0.4 );
+    useTrack = (mTCuts->goodXt(xt) && useTrack);
 
     return useTrack;
 }
@@ -250,7 +253,7 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
 // This method counts all good track.
 // No histogramming or copying data around.
 int StEStructMuDstReader::countGoodTracks() {
-    mRefMult=0;
+    mNumGoodTracks=0;
     StMuDst* muDst=mMaker->muDst();
     int numPrimaries=muDst->primaryTracks()->GetEntries();
     if (0==numPrimaries) {
@@ -258,10 +261,10 @@ int StEStructMuDstReader::countGoodTracks() {
     }
     for(int i=0; i<numPrimaries; i++) {
         if (isTrackGood(muDst->primaryTracks(i))) {
-            mRefMult++;
+            mNumGoodTracks++;
         }
     }
-    return mRefMult;
+    return mNumGoodTracks;
 }
 
 //-------------------------------------------------------------------------
@@ -311,14 +314,19 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
   eTrack->SetFlag(mTrack->flag());
   eTrack->SetCharge(mTrack->charge());
 
+  eTrack->SetHelix(mTrack->helix());
+
 }; 
   
 
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.5  2005/09/14 17:08:34  msd
+ * Fixed compiler warnings, a few tweaks and upgrades
+ *
  * Revision 1.4  2005/09/07 20:18:42  prindle
- * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
  *   EventCuts.h:   Added trigger cuts including cucu and year 4.
  *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
  *                    before making centrality cut.
