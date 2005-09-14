@@ -107,35 +107,7 @@ if (gErrorIgnoreLevel == kUnset) {
    else if (level >= kInfo)
         LOG_INFO << msg << endm;
 
-#if 0
-   const char *type = 0;
-
-   if (level >= kInfo)
-      type = "Info";
-   if (level >= kWarning)
-      type = "Warning";
-   if (level >= kError)
-      type = "Error";
-   if (level >= kBreak)
-      type = "\n *** Break ***";
-   if (level >= kSysError)
-      type = "SysError";
-   if (level >= kBreak && level < kSysError)
-      
-      DebugPrint("%s %s\n", type, msg);
-   else if (!location || strlen(location) == 0)
-      DebugPrint("%s: %s\n", type, msg);
-   else
-      DebugPrint("%s in <%s>: %s\n", type, location, msg);
-
-   fflush(stderr);
-#endif   
-   
    if (abort) {
-#if 0      
-      DebugPrint("aborting\n");
-      fflush(stderr);
-#endif       
       if (gSystem) {
          gSystem->StackTrace();
          gSystem->Abort();
@@ -489,7 +461,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.15 2005/08/21 20:20:18 perev Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.16 2005/09/14 15:35:25 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -811,8 +783,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.15 2005/08/21 20:20:18 perev Exp $
+// $Id: StLoggerManager.cxx,v 1.16 2005/09/14 15:35:25 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.16  2005/09/14 15:35:25  fine
+// Clean up the code
+//
 // Revision 1.15  2005/08/21 20:20:18  perev
 // fix typo in comment
 //
