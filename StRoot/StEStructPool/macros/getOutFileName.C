@@ -1,8 +1,7 @@
 char* getOutFileName(const char* baseDir, const char* jobName,
                      const char* type,    const char* centTag){
 
-  //char* jobid=gSystem->Getenv("JOBID");
-  char* jobid=const_cast<char*>(gSystem->Getenv("JOBID"));
+    char* jobid=gSystem->Getenv("JOBID");
 
     if(!jobid){
       jobid=new char[3];
