@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.4 2004/06/25 03:13:41 porter Exp $
+ * $Id: StEStructEvent.cxx,v 1.5 2005/09/14 17:21:14 msd Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -19,7 +19,7 @@ ClassImp(StEStructEvent)
 //-------------------------------------------------------
 StEStructEvent::StEStructEvent() {
   
-  fTracks = new TClonesArray("StEStructTrack", 1200);
+  fTracks = new TClonesArray("StEStructTrack", 1200);  // 1200 is not the max size, just an initial suggestion for ROOT
   mNtrack = 0;
 
   mTrackCollectionM=new StEStructTrackCollection();
@@ -71,9 +71,11 @@ void StEStructEvent::AddTrack(StEStructTrack* inputTrack) {
   // the standard but not well know C++ operator "new with placement"
   // is called. If tracks[i] is 0, a new Track object will be created
   // otherwise the previous Track[i] will be overwritten.
+  //  [Note: new with placement is now the only way to fill a TClonesArray,
+  //  see the ROOT class documentation for details] 
 
-  TClonesArray &tracks = *fTracks;
-  new(tracks[mNtrack++]) StEStructTrack(inputTrack);
+  TClonesArray &tracks = *fTracks;  // this is a reference:  tracks = *fTracks
+  new(tracks[mNtrack++]) StEStructTrack(inputTrack);  
 }
 
 
@@ -103,7 +105,7 @@ void StEStructEvent::FillChargeCollections(){
     StEStructTrack* aTrack=(StEStructTrack*)Tracks()->UncheckedAt(i);
     if(!aTrack->isComplete()){
       aTrack->FillTransientData();
-      aTrack->evalTrajectory(Vx(),Vy(),Vz(),BField());
+      aTrack->FillTpcReferencePoints();
       aTrack->SetComplete();
     }
 
@@ -127,6 +129,9 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.5  2005/09/14 17:21:14  msd
+ * Simplified helix fitting by taking helix from mudst instead of calculating from scratch
+ *
  * Revision 1.4  2004/06/25 03:13:41  porter
  * updated centrality methods and put a test in StEStructEvent.cxx
  *

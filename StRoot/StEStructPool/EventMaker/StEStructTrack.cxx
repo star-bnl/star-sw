@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.4 2005/07/07 19:31:13 fisyak Exp $
+ * $Id: StEStructTrack.cxx,v 1.5 2005/09/14 17:21:19 msd Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -59,7 +59,9 @@ ClassImp(StEStructTrack)
   mMap[0] = track->TopologyMapData(0);
   mMap[1] = track->TopologyMapData(1);
   mTPCNHits = track->TopologyMapTPCNHits();
-  
+
+  mHelix = track->Helix();
+
   //
   // check to see if one can complete ... requires event level information
   // such as bfield. If so, complete and set, if not set incomplete.
@@ -67,7 +69,6 @@ ClassImp(StEStructTrack)
  if(track->isComplete()){
     FillTransientData();
     mStartPos=track->StartPos();
-    mHelix = track->Helix();
     FillTpcReferencePoints();
     mIsComplete=true;
  } else {
@@ -103,11 +104,16 @@ void StEStructTrack::evalXt(){
   //
   // cut and paste from Aya's code
   //
-  float PionMass = 0.139;
+  // Aya calls this Xmt, it doesn't seem to be what she used for the XtXt paper, so I'll use the standard instead
+  /*float PionMass = 0.139;
   float Temperature = 0.25;
   float Minimum = (1+(PionMass/Temperature))*exp(-PionMass/Temperature);
   float mtOnly = sqrt((mPx*mPx)+(mPy*mPy)+PionMass*PionMass);
-  mXt=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;
+  mXt=1-(1+(mtOnly/Temperature))*exp(-mtOnly/Temperature)/Minimum;*/
+
+  float PionMass = 0.139;
+  float mt = Mt(PionMass);
+  mXt = 1 - exp( -1*(mt-PionMass)/0.4 );
 
 };
 
@@ -127,62 +133,34 @@ void StEStructTrack::evalFourMomentum(const float mass){
 }
 
 //----------------------------------------------------------
-void StEStructTrack::evalTrajectory(float pvx, float pvy, float pvz, double bField){
-
-  //
-  // this is taken verbatum from Aya's code
-  // I don't understand the various varients of 
-  // 3-vectors and helices.... but will just use them
-
-  StThreeVector<double> p(mPx*GeV,mPy*GeV,mPz*GeV);
-
-  StThreeVector<double> dcap(mBxPrimary,mByPrimary,mBzPrimary);
-  StThreeVector<double> vertexp(pvx,pvy,pvz);
-  StThreeVector<double> originp=dcap+vertexp;
-
-  StThreeVectorF dca(mBxPrimary,mByPrimary,mBzPrimary);
-  StThreeVectorF vertex(pvx,pvy,pvz);
-  mStartPos=dca+vertex;
-
-  const double q = (double)mCharge;
-  // const double B = 2.0*0.249117*tesla;
-  
-
-  StPhysicalHelix thisHelix(p,originp,q,bField*kilogauss);  
-  StHelixD helix(thisHelix.curvature(), thisHelix.dipAngle(), thisHelix.phase(), mStartPos, thisHelix.h());
-  mHelix = helix;
-
-  FillTpcReferencePoints();
-  mIsComplete=true;
-
-}
-
-//----------------------------------------------------------
 void StEStructTrack::FillTpcReferencePoints(){
-  //
-  // now eval the nominal points at Exit, Entrance, & MidTpc
-  //
+  // Uses fitted helix to calculate intersection points in the TPC
 
   static StThreeVectorF WestEnd(0.,0.,200.);
   static StThreeVectorF EastEnd(0.,0.,-200.);
   static StThreeVectorF EndCapNormal(0.,0.,1.0);
 
-  pairD candidates = mHelix.pathLength(200.0);  //
+  // In this use, pathLength(r) returns the helix path length to the intersection of a cylinder with radius r.
+  // There are 2 mathematical solutions, so both are returned in the pairD class  where first < second.
+  // If the first is <0 it is unphysical, so we would use the second.
+
+  // The exit point is a special case, we need to find if the track exited the side or endcaps of TPC
+  pairD candidates = mHelix.pathLength(200.0);  
   double sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   double endLength = mHelix.pathLength(WestEnd,EndCapNormal);
   if (endLength < 0.0) endLength = mHelix.pathLength(EastEnd,EndCapNormal);
   double firstExitLength = (endLength < sideLength) ? endLength : sideLength;
   mNominalTpcExitPoint = mHelix.at(firstExitLength);
 
-
   candidates = mHelix.pathLength(50.0);
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   mNominalTpcEntrancePoint = mHelix.at(sideLength);
 
-
   candidates = mHelix.pathLength(127.0);  
   sideLength = (candidates.first > 0) ? candidates.first : candidates.second;
   mMidTpcPoint = mHelix.at(sideLength);
+
+  mIsComplete=true;  // finished with calculations
 
 }
 
@@ -229,6 +207,9 @@ Float_t StEStructTrack::PIDpiMinus() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.5  2005/09/14 17:21:19  msd
+ * Simplified helix fitting by taking helix from mudst instead of calculating from scratch
+ *
  * Revision 1.4  2005/07/07 19:31:13  fisyak
  * Add default for mHelix
  *
