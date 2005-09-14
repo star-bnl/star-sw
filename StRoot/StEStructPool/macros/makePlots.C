@@ -30,13 +30,13 @@ int findAxisNames(const char* hname, int& prefixid, int* varid, int* combid){
 
 
   // now find the type
-  char* tnames[]={"Mt","Eta","Phi","Pt"};
-  char* ptr[4];
+  char* tnames[]={"Yt","Eta","Phi","Pt","Xt"};
+  char* ptr[5];
   char* ptr1[2]={NULL,NULL};
   int icount=0;
   int nameid[2]={-1,-1};
 
-  for(int i=0;i<4;i++){
+  for(int i=0;i<5;i++){
     ptr[i]=strstr(newname,tnames[i]);
     if(ptr[i]){
       ptr1[icount]=ptr[i];
@@ -108,12 +108,16 @@ bool makePlots4P(TH2F** hists, const char* plttype, int opt=0){
     return false;
   }
 
+  c1 = new TCanvas();
+  c1->Divide(2,2);
+
+
   int ititle=0;
   if(prefixid>3)ititle=1;
 
   TLatex tl;
   tl.SetTextFont(12);
-  char* tlNames[]={"y_{t,","#eta_{","#phi_{","p_{t,"};
+  char* tlNames[]={"y_{t,", "#eta_{", "#phi_{", "p_{t,", "X_{t,"};
   char* tl2Names[]={"#Delta}","#Sigma}"};
   char* xvsy[]={"1}","2}"};
 
@@ -145,8 +149,8 @@ bool makePlots4P(TH2F** hists, const char* plttype, int opt=0){
     h->SetStats(0);
     c1->cd(i+1);
     if(strstr(plttype,"surf")){ 
-     gPad->SetPhi(50);
-     gPad->SetTheta(50);
+      c1->SetPhi(50);
+      c1->SetTheta(50);
      ivl=2;
     }
     h->Draw(plttype);
