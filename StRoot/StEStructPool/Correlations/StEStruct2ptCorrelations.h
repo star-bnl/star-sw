@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.5 2005/09/07 20:21:15 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.6 2005/09/14 17:14:20 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -42,8 +42,10 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
  protected:
 
-  TH1F* mHNEvents[2];
+  // Event-level hists
+  TH1F*  mHNEvents[2];
   TH1F** mHpt;
+  TH2F*  mHmix;
 
   // HBT parameters
   qBins *mQinv[6]; //!  1D
@@ -51,6 +53,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   //-> X vs X 
   ytBins **mYtYt[6]; //!
+  xtBins **mXtXt[6]; //! Xt, legacy quantity
   ptBins **mPtPt[6]; //!
   etaBins **mEtaEta[6]; //!
   phiBins **mPhiPhi[6]; //!
@@ -63,6 +66,7 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
 
   TH2F ** mHYtYt[6]; //!
+  TH2F ** mHXtXt[6]; //!
   TH2F ** mHPtPt[6]; //!
   TH2F ** mHEtaEta[6]; //!
   TH2F ** mHPhiPhi[6]; //!
@@ -88,18 +92,61 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   // Sum Y vs Delta X
   dytBins  **mAtSYtDYt[6];     //! smt array of dmt bins
   dptBins  **mAtSPtDPt[6];     //! smt array of dmt bins
-
-  TH2F ** mHAtSYtDYt[6];
-  TH2F ** mHAtSPtDPt[6];
-
-  // Sum Y vs Sum X
   dphiBins **mJtSEtaDPhi[6];//! 
   dphiBins **mPrJtSEtaDPhi[6];//! 
   dphiBins **mSuJtSEtaDPhi[6];//! 
 
+  TH2F ** mHAtSYtDYt[6];
+  TH2F ** mHAtSPtDPt[6];
   TH2F ** mHJtSEtaDPhi[6];//!
   TH2F ** mHPrJtSEtaDPhi[6];//!
   TH2F ** mHSuJtSEtaDPhi[6];//!
+
+  // TPC Separation
+  TPCSepBins *mTPCAvgTSep[6];  //1D
+  TPCSepBins *mTPCAvgZSep[6];  
+  TPCSepBins *mTPCEntTSep[6];  
+  TPCSepBins *mTPCEntZSep[6];  
+  TPCSepBins *mTPCMidTSep[6];  
+  TPCSepBins *mTPCMidZSep[6];  
+  TPCSepBins *mTPCExitTSep[6];  
+  TPCSepBins *mTPCExitZSep[6];  
+
+  TPCSepBins *mTPCMidTdptP[6]; //! needed to differentiate by sign of deltaPt   
+  TPCSepBins *mTPCMidTdptN[6]; //! to evaluate pair crossing cut   
+  TPCSepBins *mTPCMidZdptP[6];  
+  TPCSepBins *mTPCMidZdptN[6];  
+
+  TH1F **  mHTPCAvgTSep[6]; 
+  TH1F **  mHTPCAvgZSep[6];  
+  TH1F **  mHTPCEntTSep[6]; 
+  TH1F **  mHTPCEntZSep[6];  
+  TH1F **  mHTPCMidTSep[6]; 
+  TH1F **  mHTPCMidZSep[6];  
+  TH1F **  mHTPCExitTSep[6]; 
+  TH1F **  mHTPCExitZSep[6];  
+
+  TH1F **  mHTPCMidTdptP[6];  
+  TH1F **  mHTPCMidTdptN[6];  
+  TH1F **  mHTPCMidZdptP[6];  
+  TH1F **  mHTPCMidZdptN[6];
+
+  TPCSepBins **mTPCAvgTZ[6];  //2D
+  TPCSepBins **mTPCEntTZ[6];  
+  TPCSepBins **mTPCMidTZ[6];  
+  TPCSepBins **mTPCExitTZ[6];  
+  dptBins **mTPCEntTdpt[6];  // T vs delta-Pt; for joint hists, use bin type of y axis
+  dptBins **mTPCMidTdpt[6];
+  dptBins **mTPCExitTdpt[6];   
+
+  TH2F **  mHTPCAvgTZ[6];  
+  TH2F **  mHTPCEntTZ[6];  
+  TH2F **  mHTPCMidTZ[6];  
+  TH2F **  mHTPCExitTZ[6];  
+  TH2F **  mHTPCEntTdpt[6];
+  TH2F **  mHTPCMidTdpt[6];
+  TH2F **  mHTPCExitTdpt[6];
+
 
   // generic histogram create functions to simplify the code
   //
@@ -109,16 +156,15 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   void createHist2D(TH2F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
   void createHist1D(TH1F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
-
-
-
   void  moveEvents();
+
 
  public:
 
   int  manalysisMode; //! simple enumeration of analyses ...
   bool mskipPairCuts; //!
   bool mdoPairCutHistograms; //!
+  bool mdoPairDensityHistograms; 
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
 
@@ -129,8 +175,18 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   StTimer*  mtimer;       //!
 
   StEStructEvent*     mMixingEvent;  //! dummy      //  Previous Event Stored 
-  StEStructBuffer      mbuffer[10];  // 10 slices in z-vertex
-  int             mbuffCounter[10];
+
+  // *** had a problem using constants here (dyn. libs wouldn't load), doing this for now...
+  //int kNumBuffers = 20;  // number of z-vertex bins 
+  //const static int kBuffRange = 50;   // max |Vz| 
+  //const static int kBuffWidth = 2*kBuffRange / kNumBuffers;
+  int kNumBuffers;
+  int kBuffRange;
+  int kBuffWidth;
+  //StEStructBuffer      mbuffer[kNumBuffers];  // kNumBuffers slices in z-vertex from -kBuffRange to +kBuffRange
+  //int             mbuffCounter[kNumBuffers];
+  StEStructBuffer      mbuffer[30];  // kNumBuffers slices in z-vertex from -kBuffRange to +kBuffRange
+  int             mbuffCounter[30];
 
   //-> (pre) histograms & histograms for analysis.
   // All are arrays of 6 for 6 charged sign and combinatoric types;
@@ -218,8 +274,12 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.6  2005/09/14 17:14:20  msd
+ * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
+ *
  * Revision 1.5  2005/09/07 20:21:15  prindle
- * 2ptCorrelations: Rearranged array/histogram initialization/destruction.
+ *
+ *   2ptCorrelations: Rearranged array/histogram initialization/destruction.
  *                    Now histograms are only allocated at end of job,
  *                    just before they are filled then written.
  *

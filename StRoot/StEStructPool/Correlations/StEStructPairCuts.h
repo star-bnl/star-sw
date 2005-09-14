@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.5 2005/03/03 01:30:44 porter Exp $
+ * $Id: StEStructPairCuts.h,v 1.6 2005/09/14 17:14:25 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,6 +33,11 @@ protected:
   CutName mQualityName;
   CutName mMidTpcSepLSName;
   CutName mMidTpcSepUSName;
+  CutName mHBTName;
+  CutName mCoulombName;
+  CutName mMergingName;
+  CutName mCrossingName;
+
 
   float mdphi[2];
   float mdeta[2];
@@ -43,16 +48,22 @@ protected:
   float mQuality[2];
   float mMidTpcSepLS[2];
   float mMidTpcSepUS[2];
+  float mHBT[4];
+  float mCoulomb[4];
+  float mMerging[2];
+  float mCrossing[3];
 
   bool  mdeltaPhiCut,    mdeltaEtaCut,    mdeltaMtCut;
   bool  mqInvCut,        mEntSepCut,      mExitSepCut,   mQualityCut;
   bool  mMidTpcSepLSCut, mMidTpcSepUSCut;
- 
+  bool  mHBTCut,         mCoulombCut,     mMergingCut,   mCrossingCut;
+
   int   mdphiCounter[4], mdetaCounter[4], mdmtCounter[4];
   int   mqInvCounter[4],   mEntSepCounter[4],  mExitSepCounter[4],  mQualityCounter[4];
   int   msplitLSCounter[4],  msplitUSCounter[4];
+  int   mHBTCounter[4],  mCoulombCounter[4], mMergingCounter[4], mCrossingCounter[4];  
 
-  // if data stored for subsequent use.... e.g. next cut, historamming
+  // if data stored for subsequent use.... e.g. next cut, histogramming
   float  mdeltaPhi, mdeltaEta, mdeltaMt;
   float  mqInvarient,  mEntranceSeparation, mExitSeparation, mQualityVal;
   float  mMidTpcSeparationLS, mMidTpcSeparationUS;
@@ -65,6 +76,8 @@ protected:
   int mretVal; //! just a dummy holder used a lot
 
   int  mcutMode;  // cut space definitions
+
+  float mZoffset; // Z offset in primary vertex; correction for mixed event pair separations 
 
   void init();
   void initCuts();
@@ -116,54 +129,68 @@ const  StEStructTrack*      Track2() const;
        float                 mInv()   const;
 
 //-----For Pair Cut
-       double                  quality()                   const;
-       double                  NominalTpcExitSeparation()    const;
-       double                  NominalTpcEntranceSeparation() const;
-       double                  OpeningAngle()               const;
-       double                  MidTpcXYSeparation()    const;
-       double                  MidTpcZSeparation()    const;
-       double                  MidTpcSeparation() const;
+       double                  quality()                        const;
+       double                  OpeningAngle()                   const;
+       double                  NominalTpcEntranceSeparation()   const;
+       double                  NominalTpcXYEntranceSeparation() const;
+       double                  NominalTpcZEntranceSeparation()  const;
+       double                  MidTpcXYSeparation()             const;
+       double                  MidTpcZSeparation()              const;
+       double                  MidTpcSeparation()               const;
+       double                  NominalTpcExitSeparation()       const;
+       double                  NominalTpcXYExitSeparation()     const;
+       double                  NominalTpcZExitSeparation()      const;    
+       double                  NominalTpcAvgXYSeparation()      const;
+       double                  NominalTpcAvgZSeparation()       const;
+
+       void                    SetZoffset(float Zoffset) { mZoffset = Zoffset; };
+       float                   GetZoffset() { return mZoffset; };
+
        void setPairType(int type);
        int  cutPair();
        int  cutPair(bool doHistograms);
        int  cutPairHistograms();
 
-	 // explicit cut coding... 
-	 // for Pair cuts we have to break the model of
-	 // non-duplicate codes simply because even checking a 
-	 // bool for each cut is expensive when done N1*N2*Ncut times
+       // explicit cut coding... 
+       // for Pair cuts we have to break the model of
+       // non-duplicate codes simply because even checking a 
+       // bool for each cut is expensive when done N1*N2*Ncut times
+       
+       /* because of the expense 1st check wether we need to do further */
 
-        /* because of the expense 1st check wether we need to do further */
+       int  goodDeltaPhi();
+       int  goodDeltaEta();
+       int  goodDeltaMt();
+       
+       int  cutDeltaPhi();
+       int  cutDeltaEta();
+       int  cutDeltaMt();
+       int  cutqInvORNominalEntranceSep();
+       int  cutqInv();
+       int  cutEntranceSep();
+       int  cutMidTpcSepUS();
+       int  cutMidTpcSepLS();
+       int  cutExitSep();
+       int  cutQuality();
+       int  cutHBT();
+       int  cutCoulomb();
+       int  cutMerging();
+       int  cutCrossing();
+       
+       // calls above set but fills histogramming variables
+       int  cutDeltaPhiH();
+       int  cutDeltaEtaH();
+       int  cutDeltaMtH();
+       int  cutqInvH();
+       int  cutEntranceSepH();
+       int  cutMidTpcSepUSH();
+       int  cutMidTpcSepLSH();
+       int  cutExitSepH();
+       int  cutQualityH();
 
-	 int  goodDeltaPhi();
-	 int  goodDeltaEta();
-         int  goodDeltaMt();
-
-	 int  cutDeltaPhi();
-	 int  cutDeltaEta();
-         int  cutDeltaMt();
-         int  cutqInvORNominalEntranceSep();
-         int  cutqInv();
-         int  cutEntranceSep();
-	 int  cutMidTpcSepUS();
-         int  cutMidTpcSepLS();
-         int  cutExitSep();
-         int  cutQuality();
-
-	 // calls above set but fills histogramming variables
-	 int  cutDeltaPhiH();
-	 int  cutDeltaEtaH();
-         int  cutDeltaMtH();
-         int  cutqInvH();
-         int  cutEntranceSepH();
-	 int  cutMidTpcSepUSH();
-         int  cutMidTpcSepLSH();
-         int  cutExitSepH();
-         int  cutQualityH();
-
-	 // for new GodPair study
-
-	 int correlationDepth();
+       // for new GoodPair study
+       
+       int correlationDepth();
 
 
 
@@ -352,10 +379,72 @@ inline int StEStructPairCuts::cutQuality(){
   return 0;
 }
 
+inline int StEStructPairCuts::cutHBT(){
+  if(!mHBTCut || mType==1 || mType==3) return 0;  // HBT applies only to LS pairs
+  float dpt = fabs(DeltaPt());  // DeltaPt is signed, DeltaEta and DeltaPhi aren't
+  if ( DeltaEta()<mHBT[0] && DeltaPhi()<mHBT[1] && dpt<mHBT[2] 
+       && mTrack1->Pt()<mHBT[3] && mTrack2->Pt()<mHBT[3] )
+    return ++(mHBTCounter[mType]);
+  return 0;
+}
+
+inline int StEStructPairCuts::cutCoulomb(){
+  if(!mCoulombCut) return 0;
+  float dpt = fabs(DeltaPt());  // DeltaPt is signed, DeltaEta and DeltaPhi aren't
+  if ( DeltaEta()<mCoulomb[0] && DeltaPhi()<mCoulomb[1] && dpt<mCoulomb[2]
+       && mTrack1->Pt()<mCoulomb[3] && mTrack2->Pt()<mCoulomb[3] )
+    return ++(mCoulombCounter[mType]);
+  return 0;
+}
+
+inline int StEStructPairCuts::cutMerging(){
+  if(!mMergingCut) return 0;
+  if ( NominalTpcAvgXYSeparation()<mMerging[0] && 
+       NominalTpcAvgZSeparation() <mMerging[1])
+    return ++(mMergingCounter[mType]);
+  return 0;
+}
+
+inline int StEStructPairCuts::cutCrossing(){
+  // Crossing geometries are a little complicated...
+  // Pair   Cut if:   
+  // + +    dPt & dPhi opp. sign
+  // - -    dPt & dPhi same sign
+  // + -    dPhi>0
+  // - +    dPhi<0  
+  // Above table is for positive field, for reversed field switch charge signs
+  // I'm going to explicity list each case rather then try to be clever here.
+
+  if(!mCrossingCut) return 0;  // make the common case fast
+  mretVal = 0;
+  if ( MidTpcXYSeparation()<mCrossing[0] && MidTpcZSeparation()<mCrossing[1])  {
+    float dphi = mTrack1->Phi()-mTrack2->Phi(); // signed DeltaPhi
+    float dpt =  mTrack1->Pt()- mTrack2->Pt();  // signed DeltaPt
+    if (mType==1 || mType==3) {   // US pair
+      if(mCrossing[2]>=0) { // pos field
+	if (mTrack1->Charge()>0 && dphi>0)  mretVal = 1;  // + -
+	if (mTrack1->Charge()<0 && dphi<0)  mretVal = 1;  // - + currently does not occur
+      } else {              // rev field
+	if (mTrack1->Charge()>0 && dphi<0)  mretVal = 1;  // rev +- : same as -+ above
+        if (mTrack1->Charge()<0 && dphi>0)  mretVal = 1;  // rev -+ : same as +- above
+      } 
+    } else {                      // LS pair
+      if(mCrossing[2]>=0) { // pos field
+	if (mTrack1->Charge()>0 && dphi*dpt<0)  mretVal = 1;  // + +
+	if (mTrack1->Charge()<0 && dphi*dpt>0)  mretVal = 1;  // - -
+      } else {              // rev field
+	if (mTrack1->Charge()>0 && dphi*dpt>0)  mretVal = 1;  // rev ++ : same as --
+        if (mTrack1->Charge()<0 && dphi*dpt<0)  mretVal = 1;  // rev -- : same as ++
+      }
+    }
+  }
+  if (mretVal==0) return 0;
+  return ++(mCrossingCounter[mType]);
+}
 
 inline int StEStructPairCuts::cutDeltaPhiH(){
   if(!mdeltaPhiCut) return 0;
-  mretVal=cutDeltaPhi();;
+  mretVal=cutDeltaPhi();
   mvalues[mdphiName.idx]=mdeltaPhi;
   return mretVal;
 }
@@ -372,35 +461,35 @@ inline int StEStructPairCuts::cutDeltaEtaH(){
 
 inline int StEStructPairCuts::cutDeltaMtH(){
   if(!mdeltaMtCut) return 0;
-  mretVal=cutDeltaMt();;
+  mretVal=cutDeltaMt();
   mvalues[mdmtName.idx]=mdeltaMt;
   return mretVal;
 }
 
 inline int StEStructPairCuts::cutqInvH(){
   if(!mqInvCut) return 0;
-  mretVal=cutqInv();;
+  mretVal=cutqInv();
   mvalues[mqInvName.idx]=mqInvarient;
   return mretVal;
 }
 
 inline int StEStructPairCuts::cutEntranceSepH(){
   if(!mEntSepCut) return 0;
-  mretVal=cutEntranceSep();;
+  mretVal=cutEntranceSep();
   mvalues[mEntSepName.idx]=mEntranceSeparation;
   return mretVal;
 }
 
 inline int StEStructPairCuts::cutMidTpcSepLSH(){
   if(!mMidTpcSepLSCut) return 0;
-  mretVal=cutMidTpcSepLS();;
+  mretVal=cutMidTpcSepLS();
   mvalues[mMidTpcSepLSName.idx]=mMidTpcSeparationLS;
   return mretVal;
 }
 
 inline int StEStructPairCuts::cutMidTpcSepUSH(){
   if(!mMidTpcSepUSCut) return 0;
-  mretVal=cutMidTpcSepUS();;
+  mretVal=cutMidTpcSepUS();
   mvalues[mMidTpcSepUSName.idx]=mMidTpcSeparationUS;
   return mretVal;
 }
@@ -408,14 +497,14 @@ inline int StEStructPairCuts::cutMidTpcSepUSH(){
 
 inline int StEStructPairCuts::cutExitSepH(){
   if(!mExitSepCut) return 0;
-  mretVal=cutExitSep();;
+  mretVal=cutExitSep();
   mvalues[mExitSepName.idx]=mExitSeparation;
   return mretVal;
 }
 
 inline int StEStructPairCuts::cutQualityH(){
   if(!mQualityCut) return 0;
-  mretVal=cutQuality();;
+  mretVal=cutQuality();
   mvalues[mQualityName.idx]=mQualityVal;
   return mretVal;
 }
@@ -470,6 +559,9 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.6  2005/09/14 17:14:25  msd
+ * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
+ *
  * Revision 1.5  2005/03/03 01:30:44  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)

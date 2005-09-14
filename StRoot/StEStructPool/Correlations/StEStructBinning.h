@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.6 2005/03/03 01:30:43 porter Exp $
+ * $Id: StEStructBinning.h,v 1.7 2005/09/14 17:14:21 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,8 +28,9 @@
 #define ESTRUCT_PHI_BINS 26
 #define ESTRUCT_ETA_BINS 26
 #define ESTRUCT_YT_BINS 26
-#define ESTRUCT_DELTAYT_BINS 26
+//#define ESTRUCT_DELTAYT_BINS 26  //use dyt instead
 #define ESTRUCT_PT_BINS 41
+#define ESTRUCT_XT_BINS 26
 
 #define ESTRUCT_DPHI_BINS 29
 #define ESTRUCT_DETA_BINS 29
@@ -42,6 +43,7 @@
 #define ESTRUCT_SPT_BINS 41
 
 #define ESTRUCT_Q_BINS 51
+#define ESTRUCT_TPCSEP_BINS 50
 
 struct qBins {
   float q[ESTRUCT_Q_BINS];
@@ -88,20 +90,29 @@ struct sptBins {
   float spt[ESTRUCT_SPT_BINS]; 
 };
 
-struct deltaYtBins {
-  double dyt[ESTRUCT_DELTAYT_BINS];
+struct xtBins {
+  double xt[ESTRUCT_XT_BINS];
 };
 
+
+/*struct deltaYtBins {  //use dyt
+  double dyt[ESTRUCT_DELTAYT_BINS];
+  };*/
+
+struct TPCSepBins {
+  float sep[ESTRUCT_TPCSEP_BINS];
+};
 
 class StEStructBinning {
 
 protected:
 
-  float maxPhi, minPhi, dPhi;    //! phi bins
-  float maxEta, minEta, dEta;    //! eta bins
-  float maxYt, minYt, dYt;       //! yt (x) bins
-  float maxPt, minPt, dPt;       //! mt (x) bins
-  int   nPhi, nEta, nYt, nPt;         //! n-bins
+  float maxPhi, minPhi, dPhi;     //! phi bins
+  float maxEta, minEta, dEta;     //! eta bins
+  float maxYt, minYt, dYt;        //! yt (x) bins
+  float maxXt, minXt, dXt;        //! xt bins
+  float maxPt, minPt, dPt;        //! mt (x) bins
+  int   nPhi, nEta, nYt, nPt, nXt;//! n-bins
 
   float maxDPhi, minDPhi, dDPhi; //! delta phi bins
   float maxDEta, minDEta, dDEta; //! delta eta bins
@@ -115,12 +126,15 @@ protected:
   float maxSPt, minSPt, dSPt;    //! sigma mt (x) bins
   int   nSPhi, nSEta, nSYt, nSPt;         //! n-bins
  
-  float maxDeltaYt, minDeltaYt, dDeltaYt; //! really yt 
-  int   nDeltaYt;                   //! n-bins
+  //float maxDeltaYt, minDeltaYt, dDeltaYt; //! really yt  //use dyt
+  //int   nDeltaYt;                   //! n-bins
 
   float maxQ,minQ,dQ;
   int   nQ;
   int i,j;
+
+  float maxTPCSep, minTPCSep, dTPCSep; //! TPC separation dist
+  int   nTPCSep;
 
   StEStructBinning();
   StEStructBinning(StEStructBinning& me){};
@@ -134,14 +148,18 @@ public:
   int iphi(float phi);
   int ieta(float eta);
   int iyt(float yt);
+  int ixt(float xt);
   int ipt(float pt);
   int iq(float q);
+  int isep(float sep);
 
   float phiVal(int iphi);
   float etaVal(int ieta);
   float ytVal(int iyt);
+  float xtVal(int ixt);
   float ptVal(int ipt);
   float qVal(int iq);
+  float sepVal(int is);
 
   int idphi(float phi);
   int ideta(float eta);
@@ -163,12 +181,12 @@ public:
   float sytVal(int isyt);
   float sptVal(int ispt);
     
-  int   iDeltaYt(float yt);
+  /*int   iDeltaYt(float yt);  //use dyt
   float deltaYtMax()    { return maxDeltaYt; }
   float deltaYtMin()    { return minDeltaYt; }
   float getBinWidthDeltaYt()  { return dDeltaYt; }
   int   deltaYtBins() { return nDeltaYt; }
-  float deltaYtVal(int ideltaYt);
+  float deltaYtVal(int ideltaYt);*/
 
   float qMax()   { return maxQ; }
   float qMin()   { return minQ; }
@@ -190,6 +208,11 @@ public:
   float ytMin()    { return minYt; }
   float getBinWidthYt()  { return dYt; }
   int   ytBins() { return nYt; }
+
+  float xtMax() { return maxXt; }
+  float xtMin() { return minXt; }
+  float getBinWidthXt() { return dXt; }
+  int   xtBins() { return nXt; }
 
   float ptMax()    { return maxPt; }
   float ptMin()    { return minPt; }
@@ -236,6 +259,10 @@ public:
   float getBinWidthSPt()  { return dSPt; }
   int   sptBins() { return nSPt; }
 
+  float TPCSepMax()  { return maxTPCSep; }
+  float TPCSepMin()  { return minTPCSep; }
+  int   TPCSepBins() { return nTPCSep;   }
+
 };
 
 inline StEStructBinning* StEStructBinning::Instance(){
@@ -251,6 +278,16 @@ inline int StEStructBinning::iq(float q){
   if( q < minQ ) return ESTRUCT_Q_BINS - 1;
   int j = (int)((q-minQ)/dQ);
   return (j > ESTRUCT_Q_BINS - 2) ? ESTRUCT_Q_BINS - 1 : j;
+}
+
+inline float StEStructBinning::sepVal(int is){
+  return minTPCSep+is*dTPCSep+dTPCSep/2;
+}
+
+inline int StEStructBinning::isep(float sep){
+  if( sep < minTPCSep ) return ESTRUCT_TPCSEP_BINS - 1;
+  int j = (int)((sep-minTPCSep)/dTPCSep);
+  return (j > ESTRUCT_TPCSEP_BINS - 2) ? ESTRUCT_TPCSEP_BINS - 1 : j;
 }
 
 inline int StEStructBinning::iphi(float phi){
@@ -344,7 +381,7 @@ inline float StEStructBinning::dytVal(int idyt){
   return minDYt+idyt*dDYt+dDYt/2;
 }
 
-inline int StEStructBinning::iDeltaYt(float yt){
+/*inline int StEStructBinning::iDeltaYt(float yt){
   if( yt < minDeltaYt ) return ESTRUCT_DELTAYT_BINS - 1;
   int j = (int)((yt-minDeltaYt)/dDeltaYt);
   return (j > ESTRUCT_DELTAYT_BINS - 2) ? ESTRUCT_DELTAYT_BINS-1 : j;
@@ -352,6 +389,16 @@ inline int StEStructBinning::iDeltaYt(float yt){
 
 inline float StEStructBinning::deltaYtVal(int ideltaYt){
   return minDeltaYt+ideltaYt*dDeltaYt+dDeltaYt/2;
+  }*/
+
+inline int StEStructBinning::ixt(float xt){
+  if( xt < minXt ) return ESTRUCT_XT_BINS - 1;
+  int j = (int)((xt-minXt)/dXt);
+  return (j > ESTRUCT_XT_BINS - 2) ? ESTRUCT_XT_BINS - 1 : j;
+}
+
+inline float StEStructBinning::xtVal(int ixt){
+  return minXt+ixt*dXt+dXt/2;
 }
 
 inline int StEStructBinning::ipt(float pt){
@@ -389,6 +436,9 @@ inline float StEStructBinning::dptVal(int idpt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.7  2005/09/14 17:14:21  msd
+ * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
+ *
  * Revision 1.6  2005/03/03 01:30:43  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
