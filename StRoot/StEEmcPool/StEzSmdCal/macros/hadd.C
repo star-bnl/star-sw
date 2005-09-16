@@ -12,16 +12,18 @@ TFile *Target;
 void MergeRootfile( TDirectory *target, TList *sourcelist );
 
 void hadd(int sectID=5) {
-  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/";
+  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter4-out/";
+  iPath="iter5-pp/";
   TString out=iPath;
 
   out+="sum-sect";  out+=sectID;
   Target = TFile::Open( out+".hist.root", "RECREATE" );
-  // 
 
+  //... CuCu minB events ....
   char *runL="R60490911 R60490912  R60490921 R60490922 R6049126 R60491291 R60491292  R6049130  R6049131 R60500161 R60500162  R60500171  R60500172 R6050018 R6050019 R60500201   R60500202";
-  //crash  R60500202 
-  // char *runL=" R6049126  R6049130 R6049131 ";
+
+  //... pp minB events ....
+  char *runL=" R61710371  R61710372  R61710373  R61720911 R61720912 R61720913 R61730681 R61730682 R61730683 R61730771 R61730772 R61730773 ";
   FileList = new TList();
 
   char *run=strtok(runL," "); // init 'strtok'

@@ -21,7 +21,7 @@ fitPrePost() {
   
  TH2F *h4=new TH2F("mpv2","MPV from ; gated w/ MIP ; inclusive spectrum;",25,0,50,25,0,25); 
  
-  char cT='R';
+  char cT='Q';
   openAll(cT);
   
   const float feta[]=
@@ -97,7 +97,7 @@ fitPrePost() {
     printf("%s\n",txt);
     system(txt);
     fprintf(wfd,"     <td> <a href=\"%s\"> PDF </a>\n",pdfN);    
-    fprintf(wfd,"     <td> %.1f -%.1f \n",mpvL,mpvH);
+    fprintf(wfd,"     <td> %.1f to %.1f \n",mpvL,mpvH);
     
     gStyle->SetOptStat(1111111);
 
@@ -256,7 +256,7 @@ TString QaOne(TH1F *ha, TH1F *hd,char cT ) {
   
   hd->SetAxisRange(5,50);
   float sum=hd->Integral();
-  if(sum<100)  return "lSum";
+  if(sum<20)  return "lSum";
   //  if(sum>500)  return "hSum";
   return "";
 }
@@ -268,7 +268,7 @@ void openAll(char cT) {
   int i;
   char txt[200];
   for(i=0;i<12;i++) {
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
+    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }

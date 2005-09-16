@@ -3,10 +3,20 @@ int a='A', b='B',c='C',d='D',e='E';
 TFile *f;
 TCanvas *cc;
 
-plPresMap(TString hFile="m1"){
-  //  f=new TFile("smdCal-X"+hFile+".hist.root");
-  f=new TFile("/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect5.hist.root");
-   gStyle->SetPalette(1,0);
+plPresMap(int sect=8){
+  TString path="./";
+  path="/star/data05/scratch/balewski/2005-eemcCal/";
+  //path+="/day49-hist/iter2-out/";
+  //path+="/day171-hist/iter4-outA/";
+   path="iter5-pp/";
+  path+="sum-sect";
+  path+=sect;
+  path+=".hist.root";
+  
+  f=new TFile(path);
+  assert(f->IsOpen());
+  //f=new TFile("iter4-out/R6173068.hist.root");
+  gStyle->SetPalette(1,0);
   return;
 }
 
@@ -24,7 +34,7 @@ plPres(  int sec=5,  int sub=E,  int eta=3 ) {
   char name[100];
   sprintf(name,"tower-%02d%c%02d",sec,sub,eta);
    
-  cc=new TCanvas(name,name,450,460);
+  cc=new TCanvas(name,name,550,560);
   cc->Divide(2,2);
 
   int binL=5,binH=50;
@@ -64,6 +74,7 @@ plPres(  int sec=5,  int sub=E,  int eta=3 ) {
     h->Draw("same");
     h->Rebin(reb);
     h->SetFillColor( h->GetLineColor( )); 
+    h->SetFillStyle(3644);
 
     float r=0;
     if(dN) r=1.*eN/dN;
