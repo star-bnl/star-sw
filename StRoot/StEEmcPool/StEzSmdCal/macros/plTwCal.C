@@ -23,9 +23,12 @@ plTwCal(int keta=0 ){
   //  readG(gIdeal,"../iterIdeal/");
   // readG(gAu200,"../iterSlopeAuAu200/"); // ~online
   // readG(gAu62,"../iterPiotr/"); // best MIP w/ TPC
-  readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/"); // best MIP w/ SMD
+  //  readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter4-inp/"); // best MIP w/ SMD
+  readG(gFinal,"0xcucu/"); // best MIP w/ SMD
+
+
   // readG(gSlpp,"../../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter4/"); // best slopes
-  
+   
   //plAllGains(gSlpp);
   plAllGains(gFinal);
   // plAllGains(gAu62);  return;  
@@ -134,10 +137,10 @@ int  plAllGains(int v1) {
   char tit[200];
   int ieta=4;
 
-  sprintf(tit,"2005 EEMC tower gains from MIP w/ UxV, CuCu200 day49, FINAL; eta bin; gain (ch/GeV)");
+  sprintf(tit,"2005 EEMC tower gains from MIPs w/ UxV, day49, absolute scale=pp; eta bin; gain (ch/GeV)");
   
   gr->SetTitle(tit);
-  h=new TH2F("cc",tit,10,0.91,13.1,10,0,60);
+  h=new TH2F("cc",tit,10,0.91,13.1,10,0,50);
 
   int iphi;
 
@@ -287,7 +290,9 @@ initHist() {
     sprintf(tit2,"MIPgain*slope , etaBin=%d",ieta+1);
     hX[ieta]=new TH1F(tit,tit2,20,.5,1.5);
     iGain[ieta]=maxADC/maxEt/cosh(eta[ieta]);
+    printf("%.3f ", iGain[ieta]);
   }
+    printf(" <- ideal gains\n");
 }
 
 

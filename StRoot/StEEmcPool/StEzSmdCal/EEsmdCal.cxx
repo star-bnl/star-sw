@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.17 2005/09/02 22:11:24 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.18 2005/09/16 20:18:40 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -300,7 +300,7 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   bool thrR= tileThr[kR][iEtaX][iPhiX] ;
 
 #if 1 // additional cut one energy , after pre/post calibration is avaliable
-  float MipPQReneThrsMeV=0.7;  // ==0.7 MeV
+  float MipPQReneThrsMeV=0.6;  
   thrP= thrP && eneP> MipPQReneThrsMeV ;
   thrQ= thrQ && eneQ> MipPQReneThrsMeV ;
   thrR= thrR && eneR> MipPQReneThrsMeV ;

@@ -7,10 +7,11 @@ TCanvas *cc;
 TString  inPath;
 
 //=========================
-plSmdCal(TString  hFile="R60490922"){
-    inPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/";
-    // inPath="iter1e-out/";
-    // inPath="iter2-out/";
+plSmdCal(TString  hFile="R60500171"){
+  inPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter5-cucu/";
+  //inPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/";
+    
+  // inPath="iter5-pp/";
   f=new TFile(inPath+hFile+".hist.root");
   
   gStyle->SetPalette(1,0);
@@ -20,13 +21,13 @@ plSmdCal(TString  hFile="R60490922"){
 
 //====================
 plOne(int sec=1, float zMax=10., int sepSect=1) {
-    if(sepSect) {// read each sector from different input file
-      TString fname="sum-sect"; fname+=sec;
-     f=new TFile(inPath+fname+".hist.root");
-    }
- 
-
-  char name[100];
+  if(sepSect) {// read each sector from different input file
+    TString fname="sum-sect"; fname+=sec;
+    f=new TFile(inPath+fname+".hist.root");
+  }
+  
+  printf("\n MIP yield for sector=%d --------------------\n",sec);
+  char name[100], title[500];
   sprintf(name,"mip%02d",sec);
   cc=new TCanvas(name,name,1000,700);
   cc->Range(0,0,1,1);
@@ -65,11 +66,13 @@ plOne(int sec=1, float zMax=10., int sepSect=1) {
   // int binL=5,binH=150;   int ped=50; char cT='R';//pre/post
   
   sprintf(name,"y%02d",sec);
-  TH1F * hy=new TH1F(name,"MIP  yield per tower; tower ID=sub+eta*5,  1=A12,2=B12,3=C12,...6=A11,..,11=A10, 21=A8, 31=A6, 41=A4, 51=A2",60,.5,60.5);
+  sprintf(title,"MIP  yield per tower, sector=%d; tower ID=sub+eta*5,  1=A12,2=B12,3=C12,...6=A11,..,11=A10, 21=A8, 31=A6, 41=A4, 51=A2",sec);
+  TH1F * hy=new TH1F(name,title,60,.5,60.5);
   sprintf(name,"m%02d",sec); 
-  TH1F * hm=new TH1F(name,"MIP yiled / UxV  yield ; tower ID=sub+eta*5, ....",60,.5,60.5); hm->SetMarkerStyle(20); 
+  TH1F * hm=new TH1F(name,"MIP yiled / UxV  yield ; tower ID=sub+eta*5, ....(as above)",60,.5,60.5); hm->SetMarkerStyle(20); 
   hm->SetMarkerColor(kRed);
-
+  hm->SetMinimum(-0.001);
+  // hm->SetMaximum(0.03);
   int sub,eta=5;
 
   sprintf(name,"ca%02d",sec);
@@ -83,19 +86,22 @@ plOne(int sec=1, float zMax=10., int sepSect=1) {
     sprintf(name,"e%02d%c%c%02d",sec,cT,sub,eta);
     TH1F *h1=(TH1F *)f->Get(name); assert(h1);
     //h1->Draw();
-    float xx=h1->Integral(binL+ped,binH+ped);
+    float nMip=h1->Integral(binL+ped,binH+ped);
     
     // get normalization
     int iPhi=(sec-1)*5+sub-'A';
     int iSpir=iPhi+(eta-1)*60;
     float nUxV=huxv->GetBinContent(iSpir+1);
-    printf("x=%2d  %s Y=%.0f  iSpir=%d  N=%.1f\n",ix,name,xx,iSpir,nUxV);
+    float rat=-1.;
+    if(nUxV>0) rat=nMip/nUxV;
 
-    if(xx==0) xx=0.2;
-    hy->Fill(ix,xx);
+    printf("x=%2d  %s  iSpir=%3d  nUxV=%d  nMip=%d  -->R=%.3f\n",ix,name,iSpir,nUxV,nMip,rat);
 
-    hm->SetBinContent(ix,xx/nUxV);
-    hm->SetBinError(ix,sqrt(xx)/nUxV);
+    if(nMip==0) nMip=0.2;
+    hy->Fill(ix,nMip);
+
+    hm->SetBinContent(ix,rat);
+    hm->SetBinError(ix,sqrt(nMip)/nUxV);
     //break; 
   }
   c1->cd(1);
@@ -110,13 +116,15 @@ plOne(int sec=1, float zMax=10., int sepSect=1) {
   hm->Draw();
   hm->SetStats(0);
 
-  sprintf(name,"mip%02d.gif",sec); cc->Print(name);
+  sprintf(name,"mip%02d.ps",sec); cc->Print(name);
 }
 
 //=============================================
 pl2Dall(float zMax=10., int bestMip=0, int sepSect=1) {
 
-  c=new TCanvas("xy","xy",600,630);
+  char *tit="12secUxV";
+  if(bestMip) tit="12secMIP";
+  cc=new TCanvas(tit,tit,600,630);
   for(int sec=1;sec<=12;sec++) {
     char txt[100];
     if(sepSect) {//
@@ -157,3 +165,9 @@ pl2Dall(float zMax=10., int bestMip=0, int sepSect=1) {
   gPad->SetGrid();
 }
 
+
+//-------------
+void do12(){
+  int i;
+  for(i=1;i<=12;i++) plOne(i,30);
+}

@@ -2,18 +2,19 @@ TObjArray  *HList;
 //cucu200_minB=66007, cucu62_minB=76007
 //pp200_minB=96011
 
-int rdEztMuSmdCal( int run=6049126,
-		   int trigID=66007,
-		   int nEve=1000000,
+int rdEztMuSmdCal( int run=61720913,
+		   int trigID=96011,
+		   int nEve=300000,
 		   Int_t nFiles  = 2000
 		   ){ 
   TString fileS="lis/R";
   fileS+=run;  fileS+=".lis";
-
-  //char* file="lis/R6049091.lis"; //#127=EHT6, #129=minB  
   char* inDir   = "./";
+  // inDir   ="/star/data05/scratch/eemcdb/muDst/2005/171/037b/"; fileS="st_physics_6171037_raw_2020001.MuDst.root";
+  // fileS="lis/R61730x.lis";
+
   TString outF="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter2xx";
-  outF="iter3-out/";
+  outF="iter5-pp/";
   
   char*  file=fileS.Data();
 
@@ -43,32 +44,18 @@ int rdEztMuSmdCal( int run=6049126,
   printf("in=%s%s=\n",inDir,file);
   //  return;
   St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
-  stDb->SetFlavor("onlPed","eemcPMTped");
-  stDb->SetFlavor("sim","eemcPMTcal");
-  //stDb->SetFlavor("sim","eemcPMTstat");
+  // stDb->SetFlavor("onlPed","eemcPMTped");
   
   myDb=new StEEmcDbMaker("eemcDb");
-  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/smdAllMaskDay49v1.dat");
-  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/tileAllMaskDay49v1.dat");
-
-  //....... pre/post
-  //  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/smdAllSecG-slopes.dat");
-  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter2-inp/smdAllSec-absGain.dat");
-  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsP-allSect.dat");
-  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsQ-allSect.dat");
-  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsR-allSect.dat");
-
-  // ... towers
-  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsT-allSect.dat");
-
+  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter5-out/auxilMask.dat");
   //myDb->setSectors(5,5);
 
   // MIP cut .........
   float thrMipSmdE=0.5/1000.;
   int emptyStripCount=7; 
-  float offCenter=0.7; // fiducial area of tower =offCenter^2, was 0.8
+  float offCenter=0.7; // fiducial area of tower =offCenter^2, was 0.8,CuCuwas0.7
   float twMipRelEneLow=0.5, twMipRelEneHigh=2.;  // was 0.5,1.5
-  int thrMipPresAdc=7; // thres over pedestal for pre/post (was 12 if no energy cut)
+  int thrMipPresAdc=8; // thres over pedestal for pre/post (was 12 if no energy cut)
 
   HList=new  TObjArray;
   int id;
@@ -113,10 +100,10 @@ int rdEztMuSmdCal( int run=6049126,
     // printf ("stat=%d\n",stat);
     if(eventCounter%200!=0)continue;
 
-    printf("\n\n ====================%d  processing  ==============\n", eventCounter);
+    printf("====================%5d  processing  ==============\n", eventCounter);
     
   }
-  //   myDb->print(); //EEmcDb::exportAscii
+  myDb->print(); //EEmcDb::exportAscii
 
   printf("sorting done, nEve=%d of %d\n",nEve, nEntries);
   int t2=time(0);
@@ -139,10 +126,35 @@ int rdEztMuSmdCal( int run=6049126,
   sprintf(tt1,"my%02dStat",sectID);
   h=(TH1F *) HList->FindObject(tt1);   assert(h);
   float *my=h->GetArray();
-  printf("sec=%d nInp=%d  -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",sectID,nEve,my[2],my[3],my[4],my[5]);
+  printf("sec=%d nInp=%d  -->UxV multi=%.1f  one=%.1f any=%.1f tw=%.1f\n",sectID,eventCounter,my[2],my[3],my[4],my[5]);
   printf(" -->MIP cntr=%.1f w/tag=%.1f \n",my[6],my[7]);
   
   chain->Finish();
 }
 
+
+#if 0
+AUXILIARY code
+  // stDb->SetFlavor("sim","eemcPMTcal");
+  //stDb->SetFlavor("sim","eemcPMTstat");
+
+
+  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/smdAllMaskDay49v1.dat");
+  myDb->changeMask( "/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/tileAllMaskDay49v1.dat");
+
+  //....... pre/post
+  //  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter1-inp/smdAllSecG-slopes.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter2-inp/smdAllSec-absGain.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsP-allSect.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsQ-allSect.dat");
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsR-allSect.dat");
+
+  // ... towers
+  //  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter3-inp/gainsT-allSect.dat");
+
+
+for pp
+  myDb->changeGains("/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter5-out/auxilGain.dat");
+
+#endif
 

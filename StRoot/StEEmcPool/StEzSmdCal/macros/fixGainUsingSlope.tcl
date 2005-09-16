@@ -1,8 +1,8 @@
+#!/usr/bin/tclsh
 #!/usr/local/ActiveTcl/bin/tclsh
-#!/usr/bin/wish
 
-set my(inp) in/gainsT-allSect.dat 
-set my(out) gainsT-iter3.dat 
+set my(out) xx.gain
+set my(inp) /star/u/balewski/WWW-E/calibration/run5/absMipCal/iter4-out/gainsT-allSect.dat
 set out(name) ""
 
 #===================================
@@ -76,8 +76,8 @@ proc fixOneTile { pix0 } {
     set sN 0
     foreach x $tL {
 	set pix [string replace $pix0 3 3 $x]
-	#puts "$pix:[string first $pix $$my(pixL) ] "
-	if { [string first $pix $$my(pixL) ]>=0 } continue
+	if { [string first $pix $my(pixL) ]>=0 } continue
+	if { [string first $pix $my(maskL) ]>=0 } continue
 	set r [expr  $out($pix-g)*$outB($pix-s) ]
 	set sR [expr $sR + $r ]
 	incr sN
@@ -86,7 +86,10 @@ proc fixOneTile { pix0 } {
     set fac [expr $sR/$sN]
     puts "fac=$fac sN=$sN"
     set newG [expr $fac/$outB($pix0-s) ]
+
     puts "$pix sl=$outB($pix-s) nG=$newG"
+    puts " old: $out($pix-all)"
+
     set out($pix0-g) [format %.3f $newG]
     set out($pix0-eg) 1.000
 }
@@ -129,19 +132,25 @@ proc pr5 { pix0 } {
 #   M A I N 
 #===================================
 readInpGain 
-exit
+#exit
 #set xpix "07TD03"
-set my(pixL) " 08TB07 04TB07 06TA07 07TD03 08TE05 08TD07 08TD09 01TD12 03TE12"
+#CuCu200: 
+#set my(pixL) " 08TB07 04TB07 06TA07 07TD03 08TE05 08TD07 08TD09 01TD12 03TE12"
+set my(maskL) "empty"
+
+
+#ppAny in 2005
+set my(pixL) "08TD09"
+
 
 foreach xpix $my(pixL) {
-    #set xpix "04TB07"
     puts "fit slopes around $xpix ...."
     catch { exec root -b -q  fitSlope5.C\("$xpix\") } ret ;#puts "ret=$ret"
     readOneSlope $xpix 
-    #pr5 $xpix
+    pr5 $xpix
     fixOneTile $xpix
     pr5 $xpix
-  #break
+#  break
 } 
    writeAll
 exit

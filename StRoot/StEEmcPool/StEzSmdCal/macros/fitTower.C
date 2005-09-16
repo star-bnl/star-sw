@@ -5,6 +5,37 @@ TFile *fdA[12];
 FILE *wfd=stdout; // output web page
 FILE *gfd;
 
+
+//========================
+void openAll(char cT) {
+  int i;
+  char txt[200];
+  for(i=0;i<12;i++) {
+    //    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
+    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
+    fdA[i]=new TFile(txt);
+    assert(fdA[i]->IsOpen());
+  }
+  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c-allSect.dat",cT); 
+  gfd=fopen(txt,"w");
+  assert(gfd);
+  fprintf(gfd,"# final %c-gains from MIP using UxV\n",cT);
+  fprintf(gfd,"# format: gain (ch/GeV) & errGain, GausLandauFit: MPV(ADC) & errMPV, pedFit: means(ADC) & err \n");
+
+  
+  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c.html",cT);
+  
+  wfd=fopen(txt,"w");
+  assert(wfd);
+  
+  fprintf(wfd,"MIP -- > <a href=\"gains%c-allSect.dat\"> final %c-gains</a> table \n",cT,cT);
+  fprintf(wfd,"<table border=1>\n");
+  fprintf(wfd,"<tr> <th> etaBin <th> problems <th> # of good<th> # of errors <br> +warn <th> spectra <br> (60 tiles)<th> MPV range <br>(ADC) <th> summary <br> plot\n");
+  
+  
+}
+
+
 //======================================
 fitTower() {
   gStyle->SetStatW(0.22);
@@ -38,9 +69,9 @@ fitTower() {
     fprintf(wfd," <tr> <th> %d <td> \n",eta); 
     gStyle->SetOptStat(1001111);
 
-    for(sec=1; sec<=12;sec++) {
+    for(sec=1; sec<=1;sec++) {
       TFile *f=fdA[sec-1];
-      for(sub='A';sub<='E';sub++)     {
+      for(sub='E';sub<='E';sub++)     {
 	sprintf(core,"%02d%c%c%02d",sec,cT,sub,eta);
 	TString coreT=core;
 	ha=(TH1F*)f->Get("a"+coreT);
@@ -52,6 +83,7 @@ fitTower() {
 	  hd->Rebin(4);
 	  printf("tower=%s rebinned\n",core);
 	}
+
 	c=new TCanvas("aa","aa",400,400);
 	c->Divide(1,2);  c->cd(1);
 	hDum->Draw();  gPad->SetLogy();
@@ -186,14 +218,18 @@ TString plotOne(TH1F *ha, TH1F *hd, float &MPV, float &MPVerr) {
   fprintf(gfd,"%s %.2f %.2f    %5.1f %5.2f    %5.2f %5.2f\n",core,gain,sig,meanD,errorD,meanA,errorA);
   
   if(fabs(meanA)>1.) return "pedOff";
-  if(ha->GetEntries() <=0) return "empty";
+  if(ha->GetEntries() <=5) return "noPed";
+  ha->SetAxisRange(-3.,3.);
+  if(ha->Integral()<0.9*ha->GetEntries()) return "Multped";
+
+  if(hd->GetEntries() <=5) return "noMip";
  
   // deviation of gain from the goal
   TListIter it(hd->GetListOfFunctions()); 
   TLine *w=(TLine*)it.Next() ;
   w->Print();
   float del=MPV-w->GetX1();
-  printf(" MPV=%f, del=%f\n",MPV,del);
+  printf(" %s MPV=%f, del=%f goal=%f\n",hd->GetName(),MPV,del,w->GetX1());
   float eps=0.30;
   if(MPV<(1-eps)*w->GetX1())  return "lowG";
   if(MPV>(1+eps)*w->GetX1())  return "highG";
@@ -205,41 +241,12 @@ TString plotOne(TH1F *ha, TH1F *hd, float &MPV, float &MPVerr) {
   if(par[4]/par[0]>0.60)  return "wideG";
   hd->SetAxisRange(3,50);
   float sum=hd->Integral();
-  if(sum<150)  return "lowS";
+  if(sum<20)  return "lowS"; // was 150 for CuCu
 
 
    return "";
 }
 
-
-
-//========================
-void openAll(char cT) {
-  int i;
-  char txt[200];
-  for(i=0;i<12;i++) {
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
-    fdA[i]=new TFile(txt);
-    assert(fdA[i]->IsOpen());
-  }
-  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c-allSect.dat",cT); 
-  gfd=fopen(txt,"w");
-  assert(gfd);
-  fprintf(gfd,"# final %c-gains from MIP using UxV\n",cT);
-  fprintf(gfd,"# format: gain (ch/GeV) & errGain, GausLandauFit: MPV(ADC) & errMPV, pedFit: means(ADC) & err \n");
-
-  
-  sprintf(txt,"/star/u/balewski/WWW/tmp/gains%c.html",cT);
-  
-  wfd=fopen(txt,"w");
-  assert(wfd);
-  
-  fprintf(wfd,"MIP -- > <a href=\"gains%c-allSect.dat\"> final %c-gains</a> table \n",cT,cT);
-  fprintf(wfd,"<table border=1>\n");
-  fprintf(wfd,"<tr> <th> etaBin <th> problems <th> # of good<th> # of errors <br> +warn <th> spectra <br> (60 tiles)<th> MPV range <br>(ADC) <th> summary <br> plot\n");
-  
-  
-}
 
 
 //---------------------------------------
