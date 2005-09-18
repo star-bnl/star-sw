@@ -21,6 +21,7 @@ StEEmcPoint::StEEmcPoint()
 {
   mEmcPoint=0;
   mRelatives=999;
+  for ( Int_t i=0;i<4;i++ ) mEnergy[i]=0.; 
 }
 
 // ----------------------------------------------------------------------------
@@ -28,7 +29,8 @@ StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
 {
 
   mPosition       = p.mPosition;
-  mEnergy         = p.mEnergy;
+  for ( Int_t i = 0; i < 4; i++ ) 
+  mEnergy[i]      = p.mEnergy[i]; 
   mFraction       = p.mFraction;
   mTowers         = p.mTowers;
   mWeights        = p.mWeights;
@@ -115,7 +117,7 @@ void StEEmcPoint::print()
   std::cout << "---------------------------------" << std::endl;
   std::cout << " X=" << mPosition.X() 
             << " Y=" << mPosition.Y() 
-            << " energy=" << mEnergy
+            << " energy=" << mEnergy[0] 
             << " frac=" << mFraction
             << std::endl;
 

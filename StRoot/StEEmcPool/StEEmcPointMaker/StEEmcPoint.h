@@ -22,7 +22,7 @@ class StEEmcPoint : public TObject {
   /// Set the position of this point at the SMD plane
   void position( TVector3 p ) { mPosition=p; }
   /// Set the energy of this point
-  void energy( Float_t e ) { mEnergy=e; }
+  void energy( Float_t e, Int_t layer=0 ) { mEnergy[layer]=e; }
   /// Set the fraction of the tower energy used
   void fraction ( Float_t f ) { mFraction=f; }
   /// Add a tower with specified weight to the point
@@ -36,11 +36,11 @@ class StEEmcPoint : public TObject {
   /// Get the position of this point
   TVector3 position(){ return mPosition; }
   /// Get the energy of this point
-  Float_t  energy(){ return mEnergy; }
+  Float_t  energy(Int_t layer){ return mEnergy[layer]; }
   /// Get the fraction of tower energy associated with this point
   Float_t  fraction(){ return mFraction; }
   /// Get the energy of this point
-  Float_t  energy() const { return mEnergy; }
+  Float_t  energy(Int_t layer=0) const { return mEnergy[layer]; }
   /// Gets the number of towers
   Int_t numberOfTowers(){ return (Int_t)mTowers.size(); }
   /// Gets a specific tower
@@ -79,7 +79,6 @@ class StEEmcPoint : public TObject {
   /// Sets mean U position
   void v(Float_t vv){ mV=vv; }
 
- 
   /// print
   void print();
   
@@ -94,7 +93,7 @@ class StEEmcPoint : public TObject {
   /// Position of the point
   TVector3 mPosition;
   /// Energy of the point
-  Float_t mEnergy;
+  Float_t mEnergy[4];
   /// ...
   Float_t mFraction;
 

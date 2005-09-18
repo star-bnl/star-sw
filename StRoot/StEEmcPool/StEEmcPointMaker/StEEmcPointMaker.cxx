@@ -115,7 +115,7 @@ Int_t StEEmcPointMaker::Make()
   ///  
   for ( UInt_t i=0;i<mPoints.size();i++ )
     {
-      mPoints[i].energy( mPoints[i].energy()/0.007/2. );
+      mPoints[i].energy( (Float_t)(mPoints[i].energy()/0.007/2.) );
     }
 
 
@@ -863,6 +863,7 @@ void StEEmcPointMaker::shareEnergySmd()
   /// Sum of the smd-energy of all points which are in or adjacent
   /// to tower with a given index.
   Float_t sumw[720];for ( Int_t i=0;i<720;i++ )sumw[i]=0.;
+  Float_t sumw1[720];for ( Int_t i=0;i<720;i++ )sumw1[i]=0.;
 
   for ( UInt_t ipoint=0;ipoint<mPoints.size();ipoint++ )
     {
@@ -871,6 +872,7 @@ void StEEmcPointMaker::shareEnergySmd()
       StEEmcPoint point=mPoints[ipoint];
       StEEmcTower tower=point.tower(0);
       sumw[tower.index()]+=point.energy();
+      sumw1[tower.index()]+=point.energy(); 
 
       for ( Int_t itow=0;itow<tower.numberOfNeighbors();itow++ )
 	{
@@ -889,19 +891,40 @@ void StEEmcPointMaker::shareEnergySmd()
       
       StEEmcPoint point=mPoints[ipoint]; // note reference
       StEEmcTower tower = point.tower(0);
+      StEEmcTower pre1  = mEEanalysis->tower(tower.index(),1); 
+      StEEmcTower pre2  = mEEanalysis->tower(tower.index(),2); 
+      StEEmcTower post  = mEEanalysis->tower(tower.index(),3); 
+
       Float_t epoint = 0.;
+      Float_t epre1  = 0.; 
+      Float_t epre2  = 0.; 
+      Float_t epost  = 0.;  
+
       Int_t index = tower.index();
       epoint += tower.energy() * point.energy() / sumw[index];
+      epre1  += pre1.energy()  * point.energy() / sumw1[index]; 
+      epre2  += pre2.energy()  * point.energy() / sumw1[index]; 
+      epost  += post.energy()  * point.energy() / sumw[index]; 
 
       for ( Int_t itow=0;itow<tower.numberOfNeighbors();itow++ )
 	{
 	  StEEmcTower t=tower.neighbor(itow);
+//	  StEEmcTower p=pre1.neighbor(itow);
+//	  StEEmcTower q=pre2.neighbor(itow);
+	  StEEmcTower r=post.neighbor(itow); 
+
 	  index = t.index();
 	  epoint += t.energy() * point.energy() / sumw[index];
+//	  epre1  += p.energy() * point.energy() / sumw[index];
+//	  epre2  += q.energy() * point.energy() / sumw[index];
+	  epost  += r.energy() * point.energy() / sumw[index];
 	}
 
       //      point.energy( epoint );
       mPoints[ipoint].energy(epoint);
+      mPoints[ipoint].energy(epre1,1);
+      mPoints[ipoint].energy(epre2,2);
+      mPoints[ipoint].energy(epost,3); 
 
     }
 
