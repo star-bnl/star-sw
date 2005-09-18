@@ -269,7 +269,7 @@ Int_t StEEmcPointFitMaker::FitSector(Int_t sector)
       point.sigma( sigma );
       point.u(u);
       point.v(v); 
-      point.energy( nmip * 1.3 / 0.007 / 1000.0 );
+      point.energy( (Float_t)(nmip * 1.3 / 0.007 / 1000.0) );
       TVector3 position = mEEsmd->getIntersection( sector, (Int_t)u, (Int_t)v );
       point.position( position );
       StEEmcTower *tower = mEEanalysis->tower(position,0);
