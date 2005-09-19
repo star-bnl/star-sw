@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.12 2005/02/02 01:36:50 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.13 2005/09/19 21:41:51 balewski Exp $
  
 #include <stdio.h>
 #include <string.h>
@@ -92,7 +92,7 @@ int EEmcDbItem::importAscii(FILE *fd){
     n=sscanf(buf,"%s %d %d %d %c %d %f %f %f %x %x %s %d",name,&crate,&chan,&sec,&plane,&strip,&gain,&ped,&thr,&stat,&fail,tube,&key);
   }
   else if (name0[2]=='T' || name0[2]=='P' || name0[2]=='Q' || name0[2]=='R' ) {    
-    n=sscanf(buf,"%s %d %d %d %c %d %f  %f %f %x %x %s %d",name,&crate,&chan,&sec,&sub,&eta,&gain,&ped,&thr,&stat,&fail,tube,&key);
+    n=sscanf(buf,"%s %d %d %d %c %d %f  %f %f %x %x %s %d",name,&crate,&chan,&sec,&sub,&eta,&gain,&ped,&thr,&stat,&fail,&tube,&key);
   }
   else 
     return -3;
@@ -203,6 +203,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.13  2005/09/19 21:41:51  balewski
+// bug : '&' was missing in importAscii()
+//
 // Revision 1.12  2005/02/02 01:36:50  balewski
 // few more access methods + sigPed visible in EEmcDbItem
 //
