@@ -1,4 +1,4 @@
-// $Id: StiForwardTrackMaker.h,v 1.5 2005/09/14 14:15:14 kocolosk Exp $
+// $Id: StiForwardTrackMaker.h,v 1.6 2005/09/21 15:37:06 kocolosk Exp $
 
 #ifndef STAR_StiForwardTrackMaker
 #define STAR_StiForwardTrackMaker
@@ -31,6 +31,8 @@ class StiForwardTrackMaker : public StMaker {
   
   // misc counter
   int mTotEve;
+  int mTotMatchedSeeds;
+  int mTotMatchedTracks;
 
   //.... params,cuts
   double mMaxTrkDcaRxy;   //DCA to nominal beam line for each track
@@ -56,7 +58,7 @@ class StiForwardTrackMaker : public StMaker {
   void buildTrackSeeds(const StiHitContainer* forwardHits, StiTrackContainer* trackSeeds, StiLocalTrackSeedFinder* seedGenerator);
   //takes forward hits and uses Mike's seed finder to store track segments in the trackSeeds container
   
-  void matchVertex(StiTrackContainer* tracks, vector<VertexV> &vertL, double &mMaxZdca, int &nV);
+  void matchVertex(StiTrackContainer* tracks, vector<VertexV> &vertL, double &mMaxZdca, int &nV, TH1* h, int &totalMatched);
 
   bool examineTrackDca(const StiKalmanTrack *track,float &zDca, float &ezDca, float &rxyDca);
     
@@ -78,7 +80,7 @@ class StiForwardTrackMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.5 2005/09/14 14:15:14 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.6 2005/09/21 15:37:06 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -89,6 +91,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.6  2005/09/21 15:37:06  kocolosk
+// modified matchVertex() so that |deltaZ| could be plotted separately for old, new tracks
+//
 // Revision 1.5  2005/09/14 14:15:14  kocolosk
 // restrict to TPC hits, added histos, moved code to matchVertex() function
 //
