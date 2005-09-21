@@ -1,6 +1,6 @@
 // -- Author : Victor Perevoztchikov
 // 
-// $Id: StiForwardTrackMaker.cxx,v 1.5 2005/09/14 14:15:06 kocolosk Exp $
+// $Id: StiForwardTrackMaker.cxx,v 1.6 2005/09/21 15:37:06 kocolosk Exp $
 
 #include <StMessMgr.h>
 
@@ -42,6 +42,8 @@ ClassImp(StiForwardTrackMaker)
 StiForwardTrackMaker::StiForwardTrackMaker(const char *name):StMaker(name){
 	mToolkit=0;
 	mTotEve=0;
+	mTotMatchedSeeds=0;
+	mTotMatchedTracks=0;
 	HList=0;
 	memset(hA,0,sizeof(hA));
 	mMaxTrkDcaRxy = 3.0;  // cm
@@ -159,12 +161,6 @@ Int_t StiForwardTrackMaker::MakeInSti()
 		else if(xG(hit)<0)			phi = phi + 3.14;
 		hA[3]->Fill(phi);				
 		
-		//used hits
-		hA[7]->Fill(hit->timesUsed());
-		if(hit->timesUsed() > 0){
-			hA[4]->Fill( -log( rxyG(hit)/(zG(hit)+rG(hit)) ) );
-			hA[5]->Fill(phi);
-		}
 		it++;
 	}
 
@@ -178,9 +174,9 @@ Int_t StiForwardTrackMaker::MakeInSti()
 	
 	cout<<"There are "<<tracks->getTrackCount(0)<<" original tracks and "<<mTrackSeeds->getTrackCount(0)<<" forward track seeds"<<endl;
 	
-	matchVertex(tracks,vertL,mMaxZdca,nV);
+	matchVertex(tracks,vertL,mMaxZdca,nV,hA[9],mTotMatchedTracks);
 	
-	matchVertex(mTrackSeeds,vertL,mMaxZdca,nV);
+	matchVertex(mTrackSeeds,vertL,mMaxZdca,nV,hA[8],mTotMatchedSeeds);
 			
 	return kStOK;
 }
@@ -228,13 +224,14 @@ StiForwardTrackMaker::initHisto() {
 	hA[0]=new TH1F("nV","No. of vertices per eve",20,-0.5,19.5);
 	hA[1]=new TH1F("zV","reconstructed vertices (any); Z (cm)",200,-200,200);
 	
-	hA[2] = new TH1F("etaHits","eta of forward hits",20,0.8,2.1);
-	hA[3] = new TH1F("phiHits","phi of forward hits",20,-3.14,3.14);
-	hA[4] = new TH1F("etaUsed","eta of hits used for track seeds",20,0.8,2.1);
-	hA[5] = new TH1F("phiUsed","phi of hits used for track seeds",20,-3.14,3.14);
+	hA[2] = new TH1F("etaNotUsed","eta of unused forward hits",20,0.8,2.1);
+	hA[3] = new TH1F("phiNotUsed","phi of unused forward hits",20,-3.14,3.14);
+	hA[4] = new TH1F("etaUsed","eta of hits used by previous tracker",20,0.8,2.1);
+	hA[5] = new TH1F("phiUsed","phi of hits used by previous tracker",20,-3.14,3.14);
 	hA[6] = new TH1F("seedHits","number of seed hits used for each track",15,1,15);
 	hA[7] = new TH1F("timesUsed","number of times a hit is used for seed",3,0,2);
-	hA[8] = new TH1F("deltaZ","zDCA-zVertex for both sets of tracks",200,-200,200);
+	hA[8] = new TH1F("deltaZseeds","zDCA-zVertex for track seeds",200,-200,200);
+	hA[9] = new TH1F("deltaZtracks","zDCA-zVertex for old tracks",200,-200,200);
 	
 	int i;  
 	for(i=0;i<mxHA; i++) if(hA[i]) HList->Add(hA[i]);
@@ -258,6 +255,7 @@ StiForwardTrackMaker::saveHisto(TString fname){
 Int_t
 StiForwardTrackMaker::Finish(){
 	saveHisto(GetName());
+	cout<<"Total matched track seeds: "<<mTotMatchedSeeds<<" and total matched tracks: "<<mTotMatchedTracks<<endl;
 	return kStOK;
 }
 
@@ -273,7 +271,20 @@ void StiForwardTrackMaker::getForwardHits(StiHitContainer* allHits, StiHitContai
 	{
 		hit = &(*it);		
 		StDetectorId id = (static_cast <const StHit*>(hit->stHit()))->detector();	//restricting to TPC hits; doesn't seem to do anything
-		if( rxyG(hit)/(zG(hit)+rG(hit)) < exp(-minEta)  &&  id==kTpcId ) forwardHits->add(hit);
+		if( rxyG(hit)/(zG(hit)+rG(hit)) < exp(-minEta)  &&  id==kTpcId)
+		{
+			if(hit->timesUsed()==0)forwardHits->add(hit);
+			else	//this is a previously used hit, just put it in a histogram
+			{
+				hA[4]->Fill( -log( rxyG(hit)/(zG(hit)+rG(hit)) ) );	//eta of hit
+				
+				//phi (is this calculation correct?)
+				float phi = atan(yG(hit)/xG(hit));
+				if(xG(hit)<0 && yG(hit)<0)	phi = phi - 3.14;
+				else if(xG(hit)<0)			phi = phi + 3.14;
+				hA[5]->Fill(phi);				
+			}
+		}
 		it++;
 	}
 	
@@ -284,7 +295,6 @@ void StiForwardTrackMaker::getForwardHits(StiHitContainer* allHits, StiHitContai
 void StiForwardTrackMaker::buildTrackSeeds(const StiHitContainer* forwardHits, StiTrackContainer* trackSeeds, StiLocalTrackSeedFinder* seedGenerator)
 {
 	StiTrack* track = seedGenerator->findTrack();
-	vector <StiHit*> hits;
 	float zDCA, ezDCA, RxyDCA;
 	int goodTracks = 0;
 	
@@ -304,18 +314,18 @@ void StiForwardTrackMaker::buildTrackSeeds(const StiHitContainer* forwardHits, S
 }
 
 
-void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <VertexV> &vertL, double &mMaxZdca, int &nV)
+void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <VertexV> &vertL, double &mMaxZdca, int &nV, TH1* h, int &totalMatched)
 {
-	int nAny=0, nTry=0, nAcc=0;
+	int nAll=0, nAny=0, nTry=0, nAcc=0;
 	for (StiTrackContainer::const_iterator it=(*tracks).begin();  it!=(*tracks).end(); ++it) {
 		const StiKalmanTrack* track = static_cast<StiKalmanTrack*>(*it);
-		if(track->getFlag()!=true) continue; // drop bad tracks
-		nAny++;
+		nAll++;
+		if(track->getFlag()!=true) nAny++; // don't drop bad tracks for now, all track seeds currently flagged as bad
 		cout<<"\n#a kalTrack: nTr="<<nAny<<" flag="<<track->getFlag()<<"  nFitP="<<track->getFitPointCount()<<" is Prim="<<track->isPrimary()<<" pT="<<track->getPt()<<endl;
 		// cout<<"#b kalTrack: pT="<<track->getPt()<<endl;
 		//cout<<"#b kalTrack:"<<*track<<endl;
 		
-		float zDca, ezDca, rxyDca;
+	float zDca, ezDca, rxyDca;
 		if(!examineTrackDca(track, zDca,  ezDca, rxyDca)) continue;
 		nTry++;
 		cout<<"#c nTry="<<nTry<<" zDca="<<zDca<<endl;
@@ -323,7 +333,7 @@ void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <Vertex
 		//.... match track to a vertex
 		for(int iv=0;iv<nV;iv++) {
 			VertexV V=vertL[iv];
-			hA[8]->Fill(zDca-V.z);
+			h->Fill(zDca-V.z);
 			if( fabs(zDca-V.z) > mMaxZdca )continue;
 			nAcc++;
 			cout<<" tr Matched , dZ="<<zDca-V.z<<" nAcc="<<nAcc<<endl;
@@ -331,7 +341,8 @@ void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <Vertex
 		}
 	}
 	
-	gMessMgr->Info() << "\n"<<GetName()<<"  found "<<nAny<<" sti input tracks, try ZDca for "<<nTry<<", match to vertex:"<<nAcc<<"\n"<<endm;
+	gMessMgr->Info() << "\n"<<GetName()<<" We have "<<nAll<<" tracks, found "<<nAny<<" flagged tracks, try ZDca for "<<nTry<<", match to vertex:"<<nAcc<<"\n"<<endm;
+	totalMatched = nAcc + totalMatched;
 }	
 
 bool
@@ -372,6 +383,9 @@ StiForwardTrackMaker::addVertex(float z, float ez){
 }
 
 // $Log: StiForwardTrackMaker.cxx,v $
+// Revision 1.6  2005/09/21 15:37:06  kocolosk
+// modified matchVertex() so that |deltaZ| could be plotted separately for old, new tracks
+//
 // Revision 1.5  2005/09/14 14:15:06  kocolosk
 // restrict to TPC hits, added histos, moved code to matchVertex() function
 //
