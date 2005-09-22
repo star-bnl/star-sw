@@ -1,7 +1,10 @@
 *
-* $Id: gdedxcalc.F,v 1.1 1999/07/28 02:14:12 caines Exp $
+* $Id: gdedxcalc.F,v 1.1 2005/09/22 22:49:26 fisyak Exp $
 *
 * $Log: gdedxcalc.F,v $
+* Revision 1.1  2005/09/22 22:49:26  fisyak
+* move to erdecks
+*
 * Revision 1.1  1999/07/28 02:14:12  caines
 * Add in kalman filter code
 *
