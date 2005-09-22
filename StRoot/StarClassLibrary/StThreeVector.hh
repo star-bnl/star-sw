@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.14 2005/07/19 22:27:11 perev Exp $
+ * $Id: StThreeVector.hh,v 1.15 2005/09/22 20:09:20 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.15  2005/09/22 20:09:20  fisyak
+ * Make StLorentzVector persistent
+ *
  * Revision 1.14  2005/07/19 22:27:11  perev
  * Cleanup
  *
@@ -85,14 +88,13 @@ using std::out_of_range;
 #endif
 #endif // __CINT__
 
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-template<class T>
-#else
-template<class T = double>
-#endif
-class StThreeVector {
+template<class T> class StThreeVector {
 public:    
     StThreeVector(T = 0, T = 0, T = 0);
+  //                     ROOT_VERSION(5,03,01)
+#if ROOT_VERSION_CODE >= 328449
+   StThreeVector(TRootIOCtor*) : mX1(0), mX2(0), mX3(0) {}
+#endif
     virtual ~StThreeVector();
 
 #ifndef ST_NO_MEMBER_TEMPLATES
@@ -202,7 +204,6 @@ protected:
 template<class T>
 inline StThreeVector<T>::StThreeVector(T x, T y, T z)
     : mX1(x), mX2(y), mX3(z) {/* nop */}
-
 template<class T>
 inline StThreeVector<T>::~StThreeVector() {/* nop */}
 

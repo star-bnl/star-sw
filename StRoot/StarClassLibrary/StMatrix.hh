@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.16 2005/07/06 18:49:56 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.17 2005/09/22 20:09:20 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.17  2005/09/22 20:09:20  fisyak
+ * Make StLorentzVector persistent
+ *
  * Revision 1.16  2005/07/06 18:49:56  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -235,12 +238,7 @@ using std::vector;
 // in types.h assumed:
 // typedef   unsigned int  size_t;
 
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-template<class DataType>
-#else
-template<class DataType = double>
-#endif
-class StMatrix {
+template<class DataType> class StMatrix {
 public:
     StMatrix();
     StMatrix(size_t p, size_t q, size_t init=0);

@@ -3,7 +3,6 @@
 #include "TBuffer.h"
 #include "TClass.h"
 ClassImpT(StMatrix,float);
-ClassImpT(StMatrix,double);
 //________________________________________________________________________________
 template <> void StMatrix<float>::Streamer(TBuffer &R__b)
 {
