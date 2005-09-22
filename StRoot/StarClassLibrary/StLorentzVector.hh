@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.10 2005/07/06 18:49:56 fisyak Exp $
+ * $Id: StLorentzVector.hh,v 1.11 2005/09/22 20:09:20 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.11  2005/09/22 20:09:20  fisyak
+ * Make StLorentzVector persistent
+ *
  * Revision 1.10  2005/07/06 18:49:56  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -59,13 +62,7 @@
 #define ST_LORENTZ_VECTOR_HH
 
 #include "StThreeVector.hh"
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-template<class T>
-#else
-template<class T = double>
-#endif
-class StLorentzVector {
+template<class T> class StLorentzVector {
 public:
     StLorentzVector(T = 0, T = 0, T = 0, T = 0);
     virtual ~StLorentzVector();
