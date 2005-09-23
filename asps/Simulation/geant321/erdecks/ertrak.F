@@ -1,7 +1,10 @@
 *
-* $Id: ertrak.F,v 1.2 2004/02/12 15:33:10 fisyak Exp $
+* $Id: ertrak.F,v 1.3 2005/09/23 14:17:26 fisyak Exp $
 *
 * $Log: ertrak.F,v $
+* Revision 1.3  2005/09/23 14:17:26  fisyak
+* force loading of mytrack, gdedxcalc
+*
 * Revision 1.2  2004/02/12 15:33:10  fisyak
 * move STAR version of erdecks from rexe to geant321
 *
@@ -72,6 +75,7 @@
      ,               (IOPT(4),IOPTM), (IOPT(5),IOPTO), (IOPT(6),IOPTP),
      ,               (IOPT(7),IOPTV), (IOPT(8),IOPTX)
       CHARACTER      CHOPT*(*)
+      external mytrack, gdedxcalc
 *
 *
 * *** Decode character option
