@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.1 2005/09/14 17:28:11 msd Exp $
+ * $Id: StEStructHijing.cxx,v 1.2 2005/09/23 23:42:34 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -159,8 +159,8 @@ void StEStructHijing::fillTracks(StEStructEvent* estructEvent) {
         eTrack->SetPhi(phi);
         eTrack->SetDedx(0);
         eTrack->SetChi2(1);
-        eTrack->SetTopologyMapData(0, 4294967168);
-        eTrack->SetTopologyMapData(1, 16383);
+        eTrack->SetTopologyMapData(0, 0xffffff80);
+        eTrack->SetTopologyMapData(1, 0x3fff);
         eTrack->SetTopologyMapTPCNHits(45);
         eTrack->SetNMaxPoints(45);
         eTrack->SetNFoundPoints(45);

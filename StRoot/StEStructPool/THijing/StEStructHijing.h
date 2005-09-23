@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.1 2005/09/14 17:28:17 msd Exp $
+ * $Id: StEStructHijing.h,v 1.2 2005/09/23 23:42:38 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -50,7 +50,7 @@ class StEStructHijing : public StEStructEventReader {
                   int  eventsToDo = 100);
 
   virtual ~StEStructHijing(){};
-  void setHijingReader(THijing* hijing);
+  void setHijingReader(THijing* hijing);  // This method appears to be un-used.
   void setEventCuts(StEStructEventCuts* cuts);
   void setTrackCuts(StEStructTrackCuts* cuts);
   bool hasGenerator();
@@ -69,6 +69,35 @@ inline bool StEStructHijing::done(){ return mAmDone; };
 
 inline bool StEStructHijing::measureable(int pid){
   bool retVal=false;
+
+  switch(pid){
+
+  // I don't think Hijing can produce these, but they are
+  // defined by the pdg (I think, see www.slac.stanford.edu/BFROOT/www/Computing/Environment/NewUser/htmlbug/node51.html)
+  // because GEANT can make them and they are measurable so I
+  // include them here. djp   Sept. 12, 2005
+  case 95:
+    {   // deuteron
+       retVal=true;
+       break;
+    }
+  case 96:
+    {   // triton
+      retVal=true;
+      break;
+    }
+  case 97:
+    {   // Helium 4
+      retVal=true;
+      break;
+    }
+  default:
+    {
+      break;
+    }
+  }
+
+
   if(pid<0)pid*=-1;
 
   switch(pid){
@@ -90,6 +119,11 @@ inline bool StEStructHijing::measureable(int pid){
     }
   case 11:
     {   // electron
+      retVal=true;
+      break;
+    }
+  case 13:
+    {   // muon
       retVal=true;
       break;
     }
