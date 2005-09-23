@@ -39,7 +39,7 @@ hell is in this directory.
                         <xs:element name='Pythia'>
                             <xs:complexType>
                                 <xs:all>
-                                    <xs:element ref='pythiaMacro'/>
+                                    <xs:element ref='pythiaInit'/>
                                 </xs:all>
                                 <xs:attribute URL='pythiaDefault.xml'/>
                                 <xs:attribute Comment='Generate and analyze Pythia directly'/>
@@ -525,9 +525,14 @@ hell is in this directory.
     </xs:complexType>
 </xs:element>
 <xs:element name='declareReader'>
-    <xs:complexType>
-        <xs:restriction base='xs:string'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
+    <xs:complexType mixed='true'>
+        <xs:attribute name='id' use='required'/>
+        <xs:all>
+            <xs:element ref='pyFrameValue'  minOccurs='0'/>
+            <xs:element ref='pyBeamValue'   minOccurs='0'/>
+            <xs:element ref='pyTargetValue' minOccurs='0'/>
+            <xs:element ref='pyEnergyValue' minOccurs='0'/>
+        </xs:all>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Reader depends on type of analysis</xs:attribute>
     </xs:complexType>
@@ -607,6 +612,34 @@ hell is in this directory.
     </xs:complexType>
 </xs:element>
 
+<xs:element name='pyFrameValue'>
+    <xs:complexType>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='none'/>
+        <xs:attribute name='Comment' type='xs:string'>Kinematic frame for Pythia</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='pyBeamValue'>
+    <xs:complexType>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='none'/>
+        <xs:attribute name='Comment' type='xs:string'>Beam specification for Pythia</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='pyTargetValue'>
+    <xs:complexType>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='none'/>
+        <xs:attribute name='Comment' type='xs:string'>Target specification for Pythia</xs:attribute>
+    </xs:complexType>
+</xs:element>
+<xs:element name='pyEnergyValue'>
+    <xs:complexType>
+        <xs:attribute name='id' type='xs:decimal' use='required'/>
+        <xs:attribute name='widget' type='widgetTypes' default='none'/>
+        <xs:attribute name='Comment' type='xs:string'>Energy specification for Pythia</xs:attribute>
+    </xs:complexType>
+</xs:element>
 <xs:simpleType name='integerList'>
     <xs:list itemType='xs:integer'/>
 </xs:simpleType>
@@ -749,21 +782,108 @@ hell is in this directory.
     <xs:attribute name='widget' type='widgetTypes'/>
 </xs:complexType>
 
+
 <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
-<!-- Pythia is just a bunch of text. Include widget attribute -->
-<xs:element name='pythiaMacro'>
+<!-- Here we define a schema for initialization of Pythia. -->
+<xs:element name='pythiaInit'>
     <xs:complexType>
-        <xs:sequence>
-            <xs:element ref='code'/>
-        </xs:sequence>
+        <xs:all>
+            <xs:element ref='pyFrame'/>
+            <xs:element ref='pyBeam'/>
+            <xs:element ref='pyTarget'/>
+            <xs:element ref='pyEnergy'/>
+        </xs:all>
     </xs:complexType>
 </xs:element>
 
-<xs:element name='code'>
+<!-- We only allow Frame to be CMS or FIXT.
+     To include 3MOM, 4MOM and 5MOM we need to add an interface to P (which
+     I think is a variable in a common block.) If this is useful we can do
+     it, but I will wait till it is requested by someone who will test it. -->
+<xs:element name='pyFrame'>
     <xs:complexType>
-        <xs:restriction base='xs:string'/>
+        <xs:restriction base='pyKinematicFrame'/>
         <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Kinematic reference frame of interaction</xs:attribute>
     </xs:complexType>
 </xs:element>
+
+<xs:simpleType name='pyKinematicFrame'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='CMS'  Comment='Collision takes place in center of mass system'/>
+            <xs:enumeration value='FIXT' Comment='Collision happens in lab frame, target at rest'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+
+<!-- pyBeam and pyTarget are restricted to the types of particles
+     Pythia knows about.. -->
+<xs:element name='pyBeam'>
+    <xs:restriction base='particleType'/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+    <xs:attribute name='Comment' type='xs:string' use='required'>Particle type of beam</xs:attribute>
+</xs:element>
+<xs:element name='pyTarget'>
+    <xs:restriction base='particleType'/>
+    <xs:attribute name='widget' type='widgetTypes'/>
+    <xs:attribute name='Comment' type='xs:string' use='required'>Particle type of target</xs:attribute>
+</xs:element>
+
+<!-- Energy is a float. -->
+<xs:element name='pyEnergy'>
+    <xs:complexType>
+        <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Center of mass or beam energy</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<!-- The event cut name is restricted to valid cut names.
+     We omit a number of gamma from e, mu tau which look for
+     kinematic limits in array CKIN. If these are of interest we
+     can include an interface to this array.
+     Also pomerons and reggeons are not included in this particle
+     list since the documentation says the distribution functions
+     for these are not included and they will not work. -->
+<xs:simpleType name='particleType'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='e-'        Comment='electron'/>
+            <xs:enumeration value='e+'        Comment='positron'/>
+            <xs:enumeration value='nu_e'      Comment='electron neutrino'/>
+            <xs:enumeration value='nu_ebar'   Comment='anti-electron neutrino'/>
+            <xs:enumeration value='mu-'       Comment='muon'/>
+            <xs:enumeration value='mu+'       Comment='positive muon'/>
+            <xs:enumeration value='nu_mu'     Comment='muon neutrino'/>
+            <xs:enumeration value='nu_mubar'  Comment='anti-muon neutrino'/>
+            <xs:enumeration value='tau-'      Comment='tau'/>
+            <xs:enumeration value='tau+'      Comment='positive tau'/>
+            <xs:enumeration value='nu_tau'    Comment='tau neutrino'/>
+            <xs:enumeration value='nu_taubar' Comment='anti-tau neutrino'/>
+            <xs:enumeration value='gamma'     Comment='gamma'/>
+            <xs:enumeration value='pi0'       Comment='neutral pion'/>
+            <xs:enumeration value='pi+'       Comment='positive pion'/>
+            <xs:enumeration value='pi-'       Comment='negative pion'/>
+            <xs:enumeration value='n0'        Comment='neutron'/>
+            <xs:enumeration value='nbar0'     Comment='anti neutron'/>
+            <xs:enumeration value='p'         Comment='proton'/>
+            <xs:enumeration value='pbar-'     Comment='anti-proton'/>
+            <xs:enumeration value='K+'        Comment='positive Kaon'/>
+            <xs:enumeration value='K-'        Comment='negative Kaon'/>
+            <xs:enumeration value='KS0'       Comment='neutral K short'/>
+            <xs:enumeration value='KL0'       Comment='neutral K long'/>
+            <xs:enumeration value='Lambda0'   Comment='Lambd'/>
+            <xs:enumeration value='Sigma-'    Comment='negative Sigma'/>
+            <xs:enumeration value='Sigma0'    Comment='neutral Sigma'/>
+            <xs:enumeration value='Sigma+'    Comment='positive Sigma'/>
+            <xs:enumeration value='Xi-'       Comment='negative cascade'/>
+            <xs:enumeration value='Xi0'       Comment='neutral cascade'/>
+            <xs:enumeration value='Omega-'    Comment='Omega baryon'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
 
 </xs:schema>

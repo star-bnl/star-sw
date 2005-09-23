@@ -243,16 +243,16 @@ proc ::jobCreate::createWindow {} {
     set file [menu $m.file]
     $m add cascade -label File -menu $file
     $file add command -label "New Schema File..." -command [namespace code getNewSchema]
-    $file add command -label "Create Job Files" -command [namespace code createJobFiles]
-    $file add command -label "Submit Job..." -command [namespace code submitJob]
-    $file add command -label "Start jobMonitor" -command [namespace code startJobMonitor]
+    $file add command -label "Create Job Files"   -command [namespace code createJobFiles]
+    $file add command -label "Submit Job"         -command [namespace code submitJob]
+    $file add command -label "Start jobMonitor"   -command [namespace code startJobMonitor]
     $file add command -label Exit -command [namespace code exit]
     set edit [menu $m.edit]
     $m add cascade -label Edit -menu $edit
     $edit add command -label PlaceHolder
     set help [menu $m.help]
     $m add cascade -label Help -menu $help
-    $help add command -label "Another PlaceHolder"
+    $help add command -label Help -command [namespace code [list displayHelp ""]]
     pack [frame $::jobCreate::interfaceWindow.all]
 
     +JobDescriptionFrame $::jobCreate::interfaceWindow.all
@@ -308,6 +308,7 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
         }
         GEANT {
             set vals [list GEANTAuAu200_b_0_3.lis \
+                           GEANTPP200_minbias.lis \
                            dataCuCu62_2005_ProductionMinBias_nfc.lis \
                            dataCuCu200_2005_ProductionMinBias_nfc.lis]
         }
@@ -323,7 +324,9 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
                            hijing200GeVAuAuJetOff.lis]
         }
         Pythia {
-            set vals [list flat.lis]
+            set vals [list flat.lis \
+                           pythia200GeVPP.lis \
+                           pythia2.lis]
         }
     }
     set ::jobCreate::jobXmlFile ""
@@ -476,12 +479,20 @@ proc ::jobCreate::+doEStructMacro {f} {
     set sNode [$::jobCreate::schemaInfo selectNodes //*\[@name='doEStructMacro'\]]
     foreach sN [$sNode getElementsByTagName xs:element] {
         set name [$sN getAttribute ref]
+        if {[lsearch [$sN attributes] minOccurs] >= 0} {
+            set min  [$sN getAttribute minOccurs]
+        } else {
+            set min 1
+        }
         set sN [$::jobCreate::schemaInfo selectNodes //*\[@name='$name'\]]
         set cNode [$sN selectNodes .//*\[@name='Comment'\]]
         set comment [$cNode text]
         set wNode [$sN selectNodes .//*\[@name='widget'\]]
 
         set node [$jNode getElementsByTagName $name]
+        if {$node eq "" && $min == 0} {
+            continue
+        }
         if {[lsearch [$node attributes] widget] >= 0} {
             set wType [$node getAttribute widget]
         }
@@ -534,7 +545,61 @@ proc ::jobCreate::+hijingParams {f} {
     }
 }
 # 8 ############################################################################
-proc ::jobCreate::+pythiaMacro {f} {
+proc ::jobCreate::+pythiaInit {f} {
+    set jNode [$::jobCreate::jobInfo getElementsByTagName pythiaInit]
+
+    set sNode [$::jobCreate::schemaInfo selectNodes //*\[@name='pythiaInit'\]]
+    foreach sN [$sNode getElementsByTagName xs:element] {
+        set name [$sN getAttribute ref]
+        set sN [$::jobCreate::schemaInfo selectNodes //*\[@name='$name'\]]
+        set cNode [$sN selectNodes .//*\[@name='Comment'\]]
+        set comment [$cNode text]
+        set wNode [$sN selectNodes .//*\[@name='widget'\]]
+
+        set node [$jNode getElementsByTagName $name]
+        if {[lsearch [$node attributes] widget] >= 0} {
+            set wType [$node getAttribute widget]
+        }
+        if {$wType eq "combobox"} {
+            m+PythiaParameter $f $name $node
+        } elseif {$wType eq "entry"} {
+            label $f.$name -text $name
+            variable code${f}$name [$node text]
+            entry $f.${name}Code                \
+                    -textvariable ::jobCreate::code${f}$name \
+                    -width 40                   \
+                    -validate all               \
+                    -vcmd [namespace code "modifyPythiaParameter $node %P %W %V"]
+            grid $f.$name $f.${name}Code -sticky w
+        } else {
+            continue
+        }
+        ::DynamicHelp::register $f.$name balloon $comment
+    }
+}
+################################################################################
+# Adapted from m+AnalysisType.
+# Give user choice of any of the enumerated types.
+################################################################################
+proc ::jobCreate::m+PythiaParameter {f el node} {
+    set val [$node text]
+    set sNode [$::jobCreate::schemaInfo selectNodes //*\[@name='$el'\]]
+    set sR    [$sNode getElementsByTagName xs:restriction]
+    set type  [$sR getAttribute base]
+    set sR2   [$::jobCreate::schemaInfo selectNodes //*\[@name='$type'\]]
+    set vals [list]
+    foreach sN [$sR2 getElementsByTagName xs:enumeration] {
+        lappend vals [$sN getAttribute value]
+    }
+
+    label $f.l$el -text $el
+    variable cVal${f}$el $val
+    ComboBox::create $f.combo$el \
+            -editable     false  \
+            -values       $vals  \
+            -textvariable ::jobCreate::cVal${f}$el \
+            -modifycmd   [namespace code "modifyPythiaParameter $node \[$f.combo$el get\] $f.combo$el %V"]
+    grid $f.l$el $f.combo$el -sticky w
 }
 
 ################################################################################
@@ -597,7 +662,7 @@ proc ::jobCreate::modifyNode {node val e cond} {
     set nChild [$node childNodes]
     set curr [$nChild nodeValue]
     $nChild nodeValue $val
-    if {[catch {is-a [$node nodeName] [$node asList]}]} {
+    if {[catch {is-a [$node nodeName] [$node asList]} err]} {
         $nChild nodeValue $curr
         $e configure -foreground red
         return true
@@ -811,6 +876,20 @@ proc ::jobCreate::modifyHijingParam {node val e cond} {
     return true
 }
 ################################################################################
+# Wrapper around modifyNode for actions specific to changes in Pythia
+# parameters. Mostly want to update visual doEStruct.C
+################################################################################
+proc ::jobCreate::modifyPythiaParameter {node val e cond} {
+    set new [string trim $val]
+    if {![modifyNode $node $new $e $cond]} {
+        return true
+    }
+    if {[info exists ::jobCreate::showingMain] && $::jobCreate::showingMain} {
+        displayCode [$::jobCreate::jobInfo getElementsByTagName main] {}
+    }
+    return true
+}
+################################################################################
 # Wrapper around modifyNode for actions specific to changes in jobControl
 # information. Currently we make sure dispay of <job> or <main> is updated.
 ################################################################################
@@ -867,7 +946,7 @@ proc ::jobCreate::displayCode {node title} {
         scrollbar .fileText.y -command {.fileText.t yview}
         scrollbar .fileText.x -command {.fileText.t xview} -orient horizontal
         grid .fileText.t .fileText.y
-        grid .fileText.x ^
+        grid .fileText.x x
         grid .fileText.t -sticky news
         grid .fileText.y -sticky ns
         grid .fileText.x -sticky we
@@ -1312,14 +1391,6 @@ proc ::jobCreate::createJobFiles {} {
         puts $f [applyXsl hijingParams.xsl asText]
         close $f
     }
-    # Might have Pythia macro
-    set pNode [$::jobCreate::jobInfo getElementsByTagName pythiaMacro]
-    if {$pNode ne ""} {
-#>>>>>
-        set f [open $path/scripts/pythiaMacro.C w]
-        puts $f [applyXsl pythiaMacro.xsl asText]
-        close $f
-    }
 
     # Save the dom tree as an xml file
     # (use value of jobName for the file name.)
@@ -1465,4 +1536,268 @@ proc ::jobCreate::exit {} {
     destroy $::jobCreate::interfaceWindow
     namespace delete ::jobCreate::
     ::exit
+}
+# displayHelp --
+#    Invoked via menu
+#
+# Arguments:
+#    Widget to display help in. If empty create a toplevel named .jobCreateHelp
+#    containing a scrolled text widget.
+# Result:
+#    Display help text in a toplevel widget.
+#    If toplevel exists already reuse it. Else create a new toplevel.
+# Side effects:
+#    May create a new toplevel widget.
+#
+proc ::jobCreate::displayHelp {w} {
+    if {[string equal $w ""]} {
+        catch {destroy .jobCreateHelp}
+        toplevel .jobCreateHelp
+        wm transient .jobCreateHelp $::jobCreate::interfaceWindow
+        wm title .jobCreateHelp "jobCreate Help"
+        if {[regexp {(\+[0-9]+)(\+[0-9]+)$} [wm geom $::jobCreate::interfaceWindow] => wx wy]} {
+            wm geom .jobCreateHelp "+[expr {$wx+35}]+[expr {$wy+35}]"
+        }
+        set w .jobCreateHelp.t
+        text $w -wrap word -width 70 -height 28 -pady 10 \
+                -yscrollcommand {.jobCreateHelp.s set}
+        scrollbar .jobCreateHelp.s -command {.jobCreateHelp.t yview}
+        grid $w .jobCreateHelp.s
+        grid $w -sticky news
+        grid .jobCreateHelp.s -sticky ns
+        button .jobCreateHelp.quit -text Dismiss -command {catch {destroy .jobCreateHelp}}
+        grid .jobCreateHelp.quit -
+        grid columnconfigure .jobCreateHelp 0 -weight 1
+        grid rowconfigure .jobCreateHelp 0 -weight 1
+    }
+
+    $w tag config header -justify center -font bold -foreground red
+    $w tag config header2  -justify center -font bold
+    set margin [font measure [$w cget -font] " o "]
+    set margin2 [font measure [$w cget -font] " - "]
+    $w tag config bullet -lmargin2 $margin
+    $w tag config bullet -font "[font actual [$w cget -font]] -weight bold"
+    $w tag config n -lmargin1 $margin -lmargin2 $margin2
+
+    $w insert end "STAR analysis batch job submission interface" header "\nby Duncan Prindle\n\n" header2
+
+
+    $w insert end " o What does this do?\n" bullet
+
+    $w insert end "- The purpose of this program is to create the batch jobs " n
+    $w insert end "necessary for running EStruct analysis on all data sets. " n
+    $w insert end "The data sets include data that has been processed to the " n
+    $w insert end "MuDest level, GEANT that has been processed to the MuDst " n
+    $w insert end "level and Hijing, Pythia and GeVSim taken directly from " n
+    $w insert end "the event generators. The output from these batch jobs is " n
+    $w insert end "typically combined and then run through another analysis " n
+    $w insert end "step that is much less CPU intensive. This second processing " n
+    $w insert end "step is not incorporated within this analysis framework.\n" n
+
+    $w insert end "- A typical batch job requires a number of files including " n
+    $w insert end "a cuts file, a doEStruct.C macro and an xml file to be " n
+    $w insert end "passed to the scheduler. The scheduler creates an additional " n
+    $w insert end "set of script and filelist files. Hijing and GeVSim also " n
+    $w insert end "have files to contol their behaviour.\n" n
+
+    $w insert end "- This interface allows the user to select a standard " n
+    $w insert end "EStruct fluctuation or correlation analysis job " n
+    $w insert end "and modify everything while doing its best to keep it all " n
+    $w insert end "consistent.\n\n\n" n
+
+
+    $w insert end "Menus\n\n" header
+
+    $w insert end " o File\n" bullet
+    $w insert end "- New Schema File...\n" n
+    $w insert end "  Primarily for debugging/developing.\n" n
+    $w insert end "- Create Job Files\n" n
+    $w insert end "  Create output directory hierarchy and populate with files " n
+    $w insert end "created by this interface. (Does not invoke the scheduler.)\n" n
+    $w insert end "- Submit Job\n" n
+    $w insert end "  Create output directory hierarchy, populate it with files " n
+    $w insert end "created by this interface, then invoke the scheduler.\n" n
+    $w insert end "- Start jobMonitor\n" n
+    $w insert end "  Start a companion program, jobMonitor, which allows " n
+    $w insert end "monitoring, killing, fixing and re-submitting batch jobs. " n
+    $w insert end "(See that program for more detailed help on it.)\n" n
+    $w insert end "- Exit (or ^C)\n" n
+    $w insert end "  Exit from jobCreate. If jobMonitor has been started from " n
+    $w insert end "jobCreate we kill it too.\n" n
+
+
+    $w insert end "Analysis Type\n\n" header
+
+    $w insert end " o Data:\n" bullet
+    $w insert end "- This allows the selection of a job for any of the " n
+    $w insert end "largs STAR datasets.\n" n
+
+    $w insert end " o GEANT:\n" bullet
+    $w insert end "- This allows the selection of from a set of 'standard' " n
+    $w insert end "GEANT jobs.\n" n
+
+    $w insert end " o Hijing:\n" bullet
+    $w insert end "- This allows the selection of from a set of 'standard' " n
+    $w insert end "Hijing jobs. The user will be able modify all of the Hijing " n
+    $w insert end "parameters (that are accessible via hijev.inp.)\n" n
+
+    $w insert end " o Pythia:\n" bullet
+    $w insert end "- This allows the selection of from a set of 'standard' " n
+    $w insert end "Pythia jobs. The user will be able to modify the parameters " n
+    $w insert end "that are used in the pythia initialization call. " n
+    $w insert end "(CURRENTLY THIS EDITING HAS NO EFFECT. I NEED TO FIX SOME XML ISSUES.)\n" n
+
+    $w insert end " o Browse:\n" bullet
+    $w insert end "- This invokes a file browser allowing selection of a pre-existing " n
+    $w insert end "xml file that contains a job description. This can be used to load " n
+    $w insert end "a file from a previously submitted job.\n\n" n
+
+    $w insert end "After selecting one of the analysis types, selecting one " n
+    $w insert end "of the specific jobs via the drop-down box and hitting " n
+    $w insert end "'Use selection' (or bypassing this with the 'Broswe' button) " n
+    $w insert end "you will will see a set of frames each of which can be expanded/contracted. " n
+    $w insert end "The actual frames depend on the type of analysis job.\n\n\n" n
+
+
+    $w insert end "jobControl\n\n" header
+
+    $w insert end "Most of these parameters are used by more than one of the other " n
+    $w insert end "blocks.\n\n" n
+
+    $w insert end " o jobName:\n" bullet
+    $w insert end "- A scratch directory with this name is created in /tmp/\$USER " n
+    $w insert end "where the output root files are written.\n" n
+
+    $w insert end " o outputDir:\n" bullet
+    $w insert end "- Output root files are copied to this directory at end of job. " n
+    $w insert end "In many of the default xml files I use an environment variable " n
+    $w insert end "MYDATA as the first part of the path. This allows me to use " n
+    $w insert end "the same code on rcf and pdsf.\n" n
+
+    $w insert end " o starLibVersion:\n" bullet
+    $w insert end "- Taken from an environment variable by default.\n" n
+
+    $w insert end " o localDir:\n" bullet
+    $w insert end "- This is the directory from which you have run cons " n
+    $w insert end "to create the shared libraries you will use for this job.\n" n
+
+    $w insert end " o eventsPerJob:\n" bullet
+    $w insert end "- Passed into doEStruct.\n" n
+
+    $w insert end " o jobPurpose:\n" bullet
+    $w insert end "- Arbitrary text which will be written into a README file " n
+    $w insert end "in the outputDir. Use this to remind yourself what the job was for " n
+    $w insert end "sometime in the future when you have forgotten running it.\n\n" n
+
+
+    $w insert end "starSubmit\n" header
+
+    $w insert end " o show <job>\n" bullet
+    $w insert end "- Pops up window containing xml file that will be used in " n
+    $w insert end "star-submit command\n\n" n
+
+    $w insert end "Everything else in this frame should be described on the STAR web page " n
+    $w insert end "describing the scheduler. " n
+    $w insert end "(See http://www.star.bnl.gov/STAR/comp/Grid/scheduler/manual.htm#3 perhaps.) " n
+    $w insert end "To add an Attribute/Eelement that has not been included select it " n
+    $w insert end "in the combobox and click 'include attribute/element' " n
+    $w insert end "To remove an Attribute/Element click the button with the red x.\n\n" n
+
+    $w insert end "- toURL and fromURL attributes will have OUTPUTDIR replaced by " n
+    $w insert end "the outputDir specified in the jobControl frame if the path " n
+    $w insert end "starts with file:OUTPUTDIR\n\n" n
+
+    $w insert end "- fromScratch attributes will have the outputDir specified in the jobControl " n
+    $w insert end "frame prepended.\n\n\n" n
+
+
+    $w insert end "eventCuts, trackCuts, pairCuts\n\n" header
+
+    $w insert end "- Select cut in combobox, then 'Add New Cut' to include a cut. " n
+    $w insert end "Click on button with red x to exclude cut.\n\n" n
+
+
+    $w insert end "doEStructMacro\n\n" header
+
+    $w insert end "- The doEStruct macro is made up from parts that depend on what " n
+    $w insert end "type of job is required. Some of these can be modified.\n\n" n
+
+    $w insert end " o analysisType\n" bullet
+    $w insert end "- Choice of StEStructFluctuation or StEStructCorrelation.\n\n" n
+
+    $w insert end "Common in both analysisType choices are:\n\n" n
+
+    $w insert end " o centralities\n" bullet
+    $w insert end "- Space separated list of numbers. If 'centralityInEtaOne' is true " n
+    $w insert end "these numbers refer to the number of tracks passing cuts. For Hjing " n
+    $w insert end "if 'centralityInEtaOne' is false these refer to impact parameter.\n\n" n
+
+    $w insert end " o centralityInEtaOne\n" bullet
+    $w insert end "- true or false. See 'centralities' for more information.\n\n" n
+
+    $w insert end " o declareReader\n" bullet
+    $w insert end "- Code to declare the reader. \n\n" n
+
+    $w insert end " o declareAnalysis\n" bullet
+    $w insert end "- Code to declare the analysis. \n\n" n
+
+    $w insert end " o main\n" bullet
+    $w insert end "- This is the doEStruct macro that will be used. " n
+    $w insert end "It is not directly editable (but automatically reflects " n
+    $w insert end "changes that modify it.) \n\n" n
+
+    $w insert end "Only in StEStructFluctuation:\n\n" n
+
+    $w insert end " o ptCuts\n" bullet
+    $w insert end "- In addition to doing analysis for complete pt range specified " n
+    $w insert end "by track cuts we do analysis in these bins. \n\n" n
+
+    $w insert end " o ptCentralities\n" bullet
+    $w insert end "- All pt bins have same centrality selection but this is " n
+    $w insert end "different than the cuts for the entire pt range. \n\n" n
+
+    $w insert end " o declarePtDefHistograms\n" bullet
+    $w insert end "- Code to store pt cut information in histograms in order to " n
+    $w insert end "save information with output of job. (These pt histograms really should not " n
+    $w insert end "show up in this gui, should they?)\n\n" n
+
+    $w insert end " o fillPtDefHistograms\n" bullet
+    $w insert end "- Code to fill pt cut histogram (in event loop). \n\n" n
+
+    $w insert end " o savePtDefHistograms\n" bullet
+    $w insert end "- Code to writeout pt cut histograms with rest of output. \n\n" n
+
+
+    $w insert end "Only in StEStructCorrelation:\n\n" n
+
+    $w insert end " o cutModeInit\n" bullet
+    $w insert end "- Initialize cut mode. \n\n" n
+
+    $w insert end " o paitCutsWrite\n" bullet
+    $w insert end "- Write out pair cuts. (Probably should not show up in gui.) \n\n" n
+
+
+
+    $w insert end "hijingParams\n" header
+
+    $w insert end "- This shows (and makes editable) all parameters from hijev.inp\n\n" n
+
+
+    $w insert end "pythiaInit\n" header
+
+    $w insert end " o Currently this section does not modify actual doEStruct macro.\n" bullet
+    $w insert end "- As a work around part of the doEStruct macro can be edited directly " n
+    $w insert end "within the doEStructMacro frame." n
+
+    $w insert end "- This shows (and makes editable) parameters passed into the pythia " n
+    $w insert end "Some of the options for pyFrame are not avaliable. In particular, " n
+    $w insert end "in order for '3MOM', '4MOM', and '5MOM' to work properly values in a " n
+    $w insert end "common block have to be set. We can add an interface to these in principle.\n\n" n
+
+
+    $w insert end "- Not all values for pyBeam and pyTarget are available. " n
+    $w insert end "In particular gammas from bremstrahlung of e, mu and tau " n
+    $w insert end "require values in a common block to be set. " n
+
+    $w config -state disabled
 }
