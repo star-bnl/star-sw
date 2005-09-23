@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.4 2004/09/24 01:43:12 prindle Exp $
+ * $Id: StEStructPythia.h,v 1.5 2005/09/23 23:37:25 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,22 +23,34 @@ class StEStructTrackCuts;
 
 class StEStructPythia : public StEStructEventReader {
 
-  TPythia6* mpythia;
-  int meventCount;
-  int meventsToDo;
-  bool mAmDone;
-  int mrefMult;
-  bool mstarTrigger;
-
+  TPythia6* mPythia;
   StEStructEventCuts* mECuts;
   StEStructTrackCuts* mTCuts;
+  bool mInChain;
+  bool mAmDone;
+  bool mUseAllTracks;
+  int mCentBin;
+  int mRefMult;
+  int mrefMult;
+  int mEventsToDo;
+
 
   void fillTracks(StEStructEvent* estructEvent);
+  bool isTrackGood(int i);
+  int  countGoodTracks();
+
+  int mEventCount;
 
  public:
 
   StEStructPythia();
-  StEStructPythia(int nevents, TPythia6* pythia, StEStructEventCuts* ecuts, StEStructTrackCuts* tcuts);
+  StEStructPythia(TPythia6* pythia,
+                  StEStructEventCuts* ecuts,
+                  StEStructTrackCuts* tcuts,
+                  bool inChain,
+                  bool useAllTracks,
+                  int  multBin,
+                  int  eventsToDo);
 
   virtual ~StEStructPythia(){};
   void setEventCuts(StEStructEventCuts* cuts);
@@ -51,7 +63,6 @@ class StEStructPythia : public StEStructEventReader {
 
   virtual StEStructEvent* next();
   virtual bool         done();
-  virtual StEStructEvent* generateEvent();
 
   ClassDef(StEStructPythia,1)
 };
@@ -62,8 +73,35 @@ inline bool StEStructPythia::done(){ return mAmDone; };
 inline bool StEStructPythia::measureable(int pid){
   bool retVal=false;
 
+  switch(pid){
+
+  // I don't think Pythia can produce these, but they are
+  // defined by the pdg (I think, see www.slac.stanford.edu/BFROOT/www/Computing/Environment/NewUser/htmlbug/node51.html)
+  // because GEANT can make them and they are measurable so I
+  // include them here. djp   Sept. 13, 2005
+  case 95:
+    {   // deuteron
+       retVal=true;
+       break;
+    }
+  case 96:
+    {   // triton
+      retVal=true;
+      break;
+    }
+  case 97:
+    {   // Helium 4
+      retVal=true;
+      break;
+    }
+  default:
+    {
+      break;
+    }
+  }
+
+
   if(pid<0)pid*=-1;
-//  if(pid!=211)return false;
 
   switch(pid){
 
@@ -84,6 +122,11 @@ inline bool StEStructPythia::measureable(int pid){
     }
   case 11:
     {   // electron
+      retVal=true;
+      break;
+    }
+  case 13:
+    {   // muon
       retVal=true;
       break;
     }
@@ -139,6 +182,12 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.5  2005/09/23 23:37:25  prindle
+ * Starting to add vertex distribution and track acceptance dependance on
+ * number of possible hits.
+ *   Make Pythia interface look like Hijing interface so it now works within
+ * my Fluctuation and Correlation framework.
+ *
  * Revision 1.4  2004/09/24 01:43:12  prindle
  * Add call to define centrality by multiplicity.
  *
