@@ -64,8 +64,17 @@ proc ::jobMonitor::lremove {args} {
 # Side effects:
 #    Controls added to main window
 #
+# Wanted to allow multiple windows to exist (which I can do easily)
+# but I also need to put each incarnation into a separate namespace.
 proc ::jobMonitor::createWindow {} {
-    set ::jobMonitor::bWindow [toplevel .jobMonitor]
+    set window .jobMonitor
+    set num 0
+#    while {[winfo exists .jobMonitor$num]} {
+#        incr num
+#    }
+    set window .jobMonitor$num
+
+    set ::jobMonitor::bWindow [toplevel $window]
     set m [menu $::jobMonitor::bWindow.menu]
     $::jobMonitor::bWindow configure -menu $m
 
@@ -98,10 +107,10 @@ proc ::jobMonitor::createWindow {} {
     # Fill in fields
     #
     frame       $::jobMonitor::bWindow.f1
-    label       $::jobMonitor::bWindow.f1.source_label    -text "Source Directory:" -justify left
+    label       $::jobMonitor::bWindow.f1.source_label    -text "scripts directory:" -justify left
     entry       $::jobMonitor::bWindow.f1.scriptDir       -textvariable ::jobMonitor::scriptDir
     button      $::jobMonitor::bWindow.f1.selectScriptDir -text "Browse" -command [namespace code getScriptDirectory]
-    label       $::jobMonitor::bWindow.f1.result_label    -text "Result Directory:" -justify left
+    label       $::jobMonitor::bWindow.f1.result_label    -text "logs directory:" -justify left
     entry       $::jobMonitor::bWindow.f1.logDir          -textvariable ::jobMonitor::logDir
     button      $::jobMonitor::bWindow.f1.selectLogDir    -text "Browse" -command [namespace code getLogDirectory]
 
@@ -121,7 +130,7 @@ proc ::jobMonitor::createWindow {} {
     # Result window
     #
     frame $::jobMonitor::bWindow.f2
-    text  $::jobMonitor::bWindow.f2.text -font "Courier 10" -wrap none \
+    text  $::jobMonitor::bWindow.f2.text -font "Courier 10" -wrap word \
                            -yscrollcommand {$::jobMonitor::bWindow.f2.y set}   \
                            -xscrollcommand {$::jobMonitor::bWindow.f2.x set}
     scrollbar $::jobMonitor::bWindow.f2.x -command {$::jobMonitor::bWindow.f2.text xview} -orient horizontal
@@ -165,7 +174,7 @@ proc ::jobMonitor::createWindow {} {
     # Minimize possible confusion by disabling edits of text widget.
     $::jobMonitor::bWindow.f2.text config -state disabled
 
-    wm title $::jobMonitor::bWindow jobMonitor
+    wm title $::jobMonitor::bWindow "jobMonitor $num"
 }
 # searchFiles --
 #    Search for files in the current directory that match the given
@@ -186,7 +195,7 @@ proc ::jobMonitor::searchFiles {} {
         unset ::jobMonitor::tagName
     }
 
-    $::jobMonitor::bWindow.f2.text config -state normal
+    $::jobMonitor::bWindow.f2.text config -state normal -wrap none
     # Delete old tags, create new tags and clear count of matches.
     $::jobMonitor::bWindow.f2.text tag delete [$::jobMonitor::bWindow.f2.text tag names]
     set iTag 0
@@ -686,7 +695,6 @@ proc ::jobMonitor::killSelected {} {
             foreach qj $qstatList {
                 if {[lsearch $qj $f] >= 0} {
                     set jobID [lindex $qj 0]
-                    puts "eval exec qdel $jobID"
                     catch {eval exec qdel $jobID}
                 }
             }
@@ -958,98 +966,100 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "jobMonitor" header "\nby Duncan Prindle\n\n" header2
 
     $w insert end " o What does this do?\n" bullet
-    $w insert end "- The purpose of this monitor is to browse the output " n
-    $w insert end "created by the multiple batch jobs submitted by the STAR " n
-    $w insert end "scheduler (star-submit-template.) " n
-    $w insert end "This tool searches all the log files for patterns " n
-    $w insert end "and displays all the lines containing these patterns. " n
-    $w insert end "This enables me to see some property, such as total " n
-    $w insert end "CPU, for all my completed jobs in one screen. " n
-    $w insert end "More importantly I can see all the jobs that " n
-    $w insert end "failed and why they failed. " n
-    $w insert end "After finding what went wrong and fixing it " n
-    $w insert end "I can re-run the job at the push of a button. " n
-    $w insert end "(I typically have 100 to 200 files to look at and simply " n
-    $w insert end "using cat is a little too tedious for me.)\n\n" n
+    $w insert end "- The purpose of this program is to monitor the running " n
+    $w insert end "and then browse the output of batch jobs. " n
+    $w insert end "You can kill jobs you don't like, make minor changes " n
+    $w insert end "in filelists or other control files, and resubmit " n
+    $w insert end "jobs.\n" n
+    $w insert end "- The monitored jobs are those described by csh files " n
+    $w insert end "in the script directory and/or the log files in " n
+    $w insert end "the logs directory. These are not displayed in " n
+    $w insert end "this browser until a Search is made. The search " n
+    $w insert end "can be an empty string.\n\n" n
 
     $w insert end "jobMonitor Window\n\n" header
 
-    $w insert end " o Source Directory:\n" bullet
+    $w insert end " o script directory:\n" bullet
     $w insert end "- This is the directory containing the *.csh files " n
-    $w insert end "created and submitted by the scheduler. " n
-    $w insert end "This entry is only used when you want to " n
-    $w insert end "re-submit jobs.\n\n" n
+    $w insert end "created and submitted by the scheduler.\n\n" n
 
-    $w insert end " o Result Directory:\n" bullet
+    $w insert end " o logs directory:\n" bullet
     $w insert end "- This is the directory containing the log files " n
     $w insert end "produced by the batch jobs. By default only files named " n
-    $w insert end "*.out are examined. The extension can be changed with the " n
-    $w insert end "Edit/log file type menu.\n\n" n
+    $w insert end "*.log are examined. The extension can be changed with the " n
+    $w insert end "'Edit->log file type' menu.\n\n" n
 
     $w insert end " o Regular expression:\n" bullet
     $w insert end "- This is a list of regular expressions. " n
     $w insert end "In its simplest form a regular expression is simply " n
-    $w insert end "a text string, such as 'CPU' or 'segmentation'. " n
+    $w insert end "a text string, such as 'CPU' or 'segmentation'.\n" n
+    $w insert end "- If there is a log file in the logs directory it will " n
+    $w insert end "be searched. Otherwise the csh file will be searched. " n
     $w insert end "To include a space enclose the string in \"\" or \{\}. " n
-    $w insert end "Every line of every *.out file is matched against " n
-    $w insert end "every regular expression in your list.\n\n" n
+    $w insert end "Every line of every file is matched against " n
+    $w insert end "every regular expression in your list, so if you have big " n
+    $w insert end "log files this may take a while.\n\n" n
 
     $w insert end " o Search:\n" bullet
     $w insert end "- Searching through the log files is done " n
-    $w insert end "every time you push the Search button.\n\n" n
+    $w insert end "every time you push the Search button (or hit Enter " n
+    $w insert end "when the search entry widget has focus.)\n\n" n
 
-    $w insert end " o Text area\n" bullet
+    $w insert end " o Results area\n" bullet
     $w insert end "- This contains the file names of all files that have " n
     $w insert end "been searched. After every file name are every line in " n
     $w insert end "the file that contains a match to any of your " n
     $w insert end "regular expressions. The matches are color highlighted. " n
     $w insert end "The first five regular expressions get different colors.\n" n
-    $w insert end "- Left-Clicking on the filename will bring up a window " n
-    $w insert end "displaying the contents of that file.\n\n\n" n
+    $w insert end "- Left-Clicking on the filename will bring up a 'File " n
+    $w insert end "Viewing Window' displaying the contents of that file.\n" n
+    $w insert end "- A checkbox on the line with the file will select/deselect " n
+    $w insert end "that file. This is used by some of the menu selections.\n" n
+    $w insert end "- A button to the left of the filename will query the " n
+    $w insert end "batch system for the current job status and display " n
+    $w insert end "status of that job. The actual status code depends on " n
+    $w insert end "the batch system.\n" n
+    $w insert end "- Right clicking on the file name invokes a popup menu " n
+    $w insert end "(which is described below.)\n\n" n
 
     $w insert end "File Viewing Window\n\n" header
 
-    $w insert end "- The text of the selected file is displayed in the main " n
+    $w insert end " o Log/csh file contents\n" bullet
+    $w insert end "The text of the selected file is displayed in the main " n
     $w insert end "area. The matches are colored as before. " n
     $w insert end "An empirical observation; when a job is run and the " n
     $w insert end "output file exists the new output " n
     $w insert end "is appended to the existing file. This is quite handy when " n
     $w insert end "it takes more than one attempt before the job succeeds. " n
-    $w insert end "(I assume something, lsf?, does this intentionally. " n
-    $w insert end "It is possible, as far as I know, that this is an accident.)\n\n" n
-
-    $w insert end " o Resubmit job:\n" bullet
-    $w insert end "- This button, if enabled, allows you to re-run the job. " n
-    $w insert end "Of course you should find and fix the reason the job " n
-    $w insert end "did not run before trying to run it again. " n
-    $w insert end "I find I often have bad root files in my filelist and " n
-    $w insert end "when I remove the one or two bad files the job runs to " n
-    $w insert end "completion.\n\n" n
-
-    $w insert end " o Resubmit job entry.\n" bullet
-    $w insert end "- This contains the actual command that will be used " n
-    $w insert end "to submit the job, and editing it before pushing " n
-    $w insert end "the Resubmit job: button will have an effect. " n
-    $w insert end "This command will be invoked from " n
-    $w insert end "the directory containing the *.csh file it was " n
-    $w insert end "extracted from.\n\n" n
-
-    $w insert end " o Edit csh script.\n" bullet
-    $w insert end "- Invokes an editor with the file that was used to submit " n
-    $w insert end "this job. The environment variable EDITOR is used " n
-    $w insert end "as the editor. This can be changed with the menu " n
-    $w insert end "Edit/Editor\n\n" n
-
-    $w insert end " o Edit filelist.\n" bullet
-    $w insert end "- Invokes an editor with the filelist that was used to submit " n
-    $w insert end "this job. The environment variable EDITOR is used " n
-    $w insert end "as the editor. This can be changed with the menu " n
-    $w insert end "Edit/Editor\n\n" n
+    $w insert end "(I believe this behaiviour depends on the batch system " n
+    $w insert end "so it may change in the future.)\n\n" n
 
 
     $w insert end "Menus\n\n" header
+
     $w insert end " o File\n" bullet
+    $w insert end "- Select all jobs: " n
+    $w insert end "  Toggles between selecting and de-selecting all jobs.\n" n
+    $w insert end "- Submit selected jobs: " n
+    $w insert end "  Scans the csh script for a jobs submission command and " n
+    $w insert end "invokes it. For each line we look for an lsf command then " n
+    $w insert end "an SGE command. As soon as we find one we use it.\n" n
+    $w insert end "- Kill selected jobs: " n
+    $w insert end " Hopefully only kills jobs that have been selected\n" n
+    $w insert end "- Clear selected job errors: " n
+    $w insert end " When an SGE job encounters certain types of errors " n
+    $w insert end "(can't create ouput file for example (I think)) " n
+    $w insert end "it suspends the job and won't restart it until" n
+    $w insert end "the error is cleared.\n" n
+    $w insert end "- Update status: " n
+    $w insert end " Asks the batch system for the current job status and " n
+    $w insert end "displays it in the button on the jobname line. When the " n
+    $w insert end "job is done SGE returns no information on it (or more " n
+    $w insert end "precisely, I haven't figured out a good way to get " n
+    $w insert end "the information) while lsf will tell us the job is done " n
+    $w insert end "(at least for a little while.)\n" n
     $w insert end "- Exit: I hope this is obvious. \n\n" n
+
     $w insert end " o Edit\n" bullet
     $w insert end "- Ignore case: Respect/Ignore case in regular expression match.\n" n
     $w insert end "- Editor: Set editor to use when editing csh, list files\n" n
@@ -1057,6 +1067,23 @@ proc ::jobMonitor::displayHelp {w} {
 
     $w insert end " o Help\n" bullet
     $w insert end "- Help: Bring up this text in its own window. \n\n" n
+
+    $w insert end "Popup Menus\n\n" header
+
+    $w insert end " o edit csh\n" bullet
+    $w insert end "Edit csh script using selected editor.\n" n
+    $w insert end " o edit log\n" bullet
+    $w insert end "Edit log file using selected editor.\n" n
+    $w insert end " o edit filelist\n" bullet
+    $w insert end "Edit filelist file using selected editor. Sometimes " n
+    $w insert end "when a single file causes the job to crash. " n
+    $w insert end "it can be convenient to remove that data file " n
+    $w insert end "and rerun the job.\n" n
+    $w insert end " o bpeek\n" bullet
+    $w insert end "When the job is currently running under the lsf. " n
+    $w insert end "batch system this allows a peek at the cached output." n
+    $w insert end "(Note that with SGE you can look at the partial " n
+    $w insert end "log file directly.)\n\n" n
 
     $w config -state disabled
 }
