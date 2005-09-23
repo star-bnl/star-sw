@@ -21,10 +21,10 @@ StEStructFluctAnal::StEStructFluctAnal(int mode, int etaSumMode, int phiSumMode)
     mCurrentEvent = 0;
     mCentralities = 0;
 
-    mEtaMin = -1.1;
-    mEtaMax =  1.1;
+    mEtaMin = -1.0;
+    mEtaMax =  1.0;
     mPtMin  =  0.0;
-    mPtMax  =  9.9;
+    mPtMax  = 99.9;
 
     mnTotEvents  = 0;
     mnCentEvents = 0;
@@ -52,7 +52,9 @@ StEStructFluctAnal::~StEStructFluctAnal() {
 }
 
 void StEStructFluctAnal::setCutFile(const char* cutFileName, StEStructCentrality *cent) {
-    setEtaLimits(cutFileName);
+// Want to expand range of eta cuts beyond range used in analysis so that we
+// can add a vertex dependent offset.
+//    setEtaLimits(cutFileName);
     setPtLimits(cutFileName);
 
     mCentralities = dynamic_cast<StEStructCentrality*>(cent);
@@ -259,7 +261,7 @@ bool StEStructFluctAnal::doEvent(StEStructEvent* event) {
 //--------------------------------------------------------------------------
 
 // Modified 8/18/2004 djp
-// Assume Chi2, Eta cuts done in Track cuts.
+// Assume Chi2 cut done in Track cuts.
 void StEStructFluctAnal::fillMultStruct() {
     StEStructTrackCollection* tc;
     StEStructTrackIterator Iter;
@@ -274,11 +276,15 @@ void StEStructFluctAnal::fillMultStruct() {
         return;
     }
     jPtCent = mCurrentEvent->PtCentrality();
+    double etaOff = etaOffset( mCurrentEvent->Vz() );
 
     tc = mCurrentEvent->TrackCollectionP();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
         t = *Iter;
-        jEta = int(NETABINS*(t->Eta()-mEtaMin)/(mEtaMax-mEtaMin));
+        if ( (t->Eta() > mEtaMax+etaOff) || (mEtaMin+etaOff > t->Eta()) ) {
+            continue;
+        }
+        jEta = int(NETABINS*(t->Eta()-(mEtaMin+etaOff))/(mEtaMax-mEtaMin));
         if ((jEta < 0) || (NETABINS <= jEta)) {
             continue;
         }
@@ -321,7 +327,10 @@ void StEStructFluctAnal::fillMultStruct() {
     tc = mCurrentEvent->TrackCollectionM();
     for(Iter=tc->begin(); Iter!=tc->end(); ++Iter){
         t = *Iter;
-        jEta = int(NETABINS*(t->Eta()-mEtaMin)/(mEtaMax-mEtaMin));
+        if ( (t->Eta() > mEtaMax+etaOff) || (mEtaMin+etaOff > t->Eta()) ) {
+            continue;
+        }
+        jEta = int(NETABINS*(t->Eta()-(mEtaMin+etaOff))/(mEtaMax-mEtaMin));
         if ((jEta < 0) || (NETABINS <= jEta)) {
             continue;
         }
@@ -808,4 +817,10 @@ void StEStructFluctAnal::deleteHistograms() {
     if (hfUnique) {
         delete hfUnique;          hfUnique = 0;
     }
+}
+float StEStructFluctAnal::etaOffset( float vz ) {
+    
+    double eta1 = -log(tan(atan(160.0/(200+vz))/2));
+    double eta2 = -log(tan(atan(160.0/(200-vz))/2));
+    return (eta2-eta1)/2;
 }

@@ -46,8 +46,9 @@ class StEStructFluctAnal: public StEStructAnalysis {
     int getPhiStart( int iPhi, int dPhi );
     int getNumEtaBins( int dEta );
     int getNumPhiBins( int dPhi );
-    void  writeHistograms();
-    void  writeQAHists(TFile* qatf);
+    void   writeHistograms();
+    void   writeQAHists(TFile* qatf);
+    float etaOffset( float vz );
 
 
    // Member declarations.
