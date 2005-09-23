@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 1.1 2004/12/15 17:02:56 balewski Exp $
+// $Id: StEEmcSlowMaker.cxx,v 1.2 2005/09/23 01:30:10 jwebb Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -55,6 +55,10 @@ Int_t StEEmcSlowMaker::Init(){
   eeDb=(StEEmcDbMaker*)GetMaker("eemcDb");
   assert( eeDb);
   if ( mHList ) InitHisto();
+  if ( mSmearPed ) {
+      mAddPed = true; 
+      gMessMgr->Message("","I")<<GetName()<<"::Init() detected mSmearPed, toggling mAddPed to true (be sure peds are loaded in DB!)" << endm; 
+  }
   return StMaker::Init();
 }
 
@@ -93,6 +97,9 @@ void StEEmcSlowMaker::InitHisto(){
   h=new TH1F(tt1,tt2,100,0,200.);
   hA[3]=h;
 
+
+  hA[4]=new TH1F("hADCtow","Initial ADC for towers",512+32,-32.,512.);
+  hA[5]=new TH1F("hADCtow2","Finial ADC fot towers",512+32,-32.,512.);
 
   //..................
   sprintf(tt1,"adc%02d",sectID);
@@ -150,12 +157,54 @@ Int_t StEEmcSlowMaker::Make(){
   
   mKSigma = eeDb -> KsigOverPed;
 
+  /// Run slow simulator on towers
+  MakeTow(emc);
   /// Run slow simulator on pre/postshower
   MakePre(emc);
   /// Run slow simulator on smd
   MakeSMD(emc);
  
   return  kStOK;
+
+}
+// ----------------------------------------------------------------------------
+void StEEmcSlowMaker::MakeTow( StMuEmcCollection *emc )
+{
+
+  if ( !mAddPed && !mSmearPed ) return;
+
+  /// loop over all eemc towers
+  for (Int_t i=0; i < emc->getNEndcapTowerADC(); i++) 
+    {
+
+
+      /// Get the ADC value stored for this tower
+      int sec,eta,sub,adc; //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
+      emc->getEndcapTowerADC(i,adc,sec,sub,eta);
+      if ( mHList ) hA[4]->Fill( adc );
+
+      /// tmp, for fasted analysis use only hits from sectors init in DB
+      if (sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+
+      /// Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+      assert(eeDb); 
+      const EEmcDbItem *x=eeDb-> getTile(sec,sub-1+'A', eta,  'T' );
+      if ( x==0 ) continue;
+
+      Float_t fadc = (Float_t)adc;
+      if ( mAddPed ) fadc += x -> ped;
+      if ( mSmearPed ) fadc = gRandom -> Gaus( x->ped, x->sigPed );
+      adc=(Int_t)fadc;
+
+      /// may as well put the caps lock on and program in fortran
+      /// if we're counting from 1.  shhesh.  
+      Int_t FTNNDX = i+1;
+      emc->setTowerADC(FTNNDX,adc,eemc); 
+      if ( mHList ) hA[5]->Fill(adc);
+
+      emc->getEndcapTowerADC(i,adc,sec,sub,eta);
+
+     }
 
 }
 
@@ -307,6 +356,9 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc )
 }
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 1.2  2005/09/23 01:30:10  jwebb
+// Tower peds now added  if option is set.
+//
 // Revision 1.1  2004/12/15 17:02:56  balewski
 // try 2
 //
