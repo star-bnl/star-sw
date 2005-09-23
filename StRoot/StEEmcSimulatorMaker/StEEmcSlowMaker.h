@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 1.1 2004/12/15 17:02:56 balewski Exp $
+// $Id: StEEmcSlowMaker.h,v 1.2 2005/09/23 01:30:11 jwebb Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -83,6 +83,10 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
   TH1F *hA[mxH]; // some global (test) histograms  
   void InitHisto();
 
+  /// Process endcap tower and overwrite ADC values with
+  /// new values computed by the slow simulator.
+  void MakeTow( StMuEmcCollection *emc );
+
   /// Process endcap preshower and overwrite ADC values with
   /// new values computed by the slow simulator
   void MakePre( StMuEmcCollection *emc );
@@ -155,7 +159,7 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 1.1 2004/12/15 17:02:56 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 1.2 2005/09/23 01:30:11 jwebb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -178,6 +182,9 @@ inline void StEEmcSlowMaker::setNpePerMipPre( Float_t npe ) { Pmip2pe = npe; }
 
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 1.2  2005/09/23 01:30:11  jwebb
+// Tower peds now added  if option is set.
+//
 // Revision 1.1  2004/12/15 17:02:56  balewski
 // try 2
 //
