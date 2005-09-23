@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.cxx,v 1.3 2005/09/07 20:22:47 prindle Exp $
+ * $Id: StEStructFlat.cxx,v 1.4 2005/09/23 23:37:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,6 +26,7 @@ StEStructFlat::StEStructFlat() {
     mCentBin      = 0;
     mEventCount   = 0;
     mAmDone       = false;
+    mgRand2Good   = false;
 }
 StEStructFlat::StEStructFlat( StEStructEventCuts* ecuts,
                               StEStructTrackCuts* tcuts,
@@ -42,6 +43,7 @@ StEStructFlat::StEStructFlat( StEStructEventCuts* ecuts,
     mCentBin      = centBin;
     mEventCount   = 0;
     mAmDone       = false;
+    mgRand2Good   = false;
 };
 
 bool StEStructFlat::hasGenerator() { return true; };
@@ -68,12 +70,7 @@ StEStructEvent* StEStructFlat::next() {
         mEventCount++;
     }
 
-
-    mFlatEvent->SetVx(0);
-    mFlatEvent->SetVy(0);
-    mFlatEvent->SetVz(0);
-    mFlatEvent->SetBField(0.5);
-
+    float z = mFlatEvent->Vz();
     int nTracks = countGoodTracks();
     if (mUseAllTracks) {
         mFlatEvent->SetCentrality( (double) nTracks );
@@ -82,8 +79,10 @@ StEStructEvent* StEStructFlat::next() {
     }
     int jCent = mFlatEvent->Centrality();
     if (((mCentBin >= 0) && (jCent != mCentBin)) ||
+        !mECuts->goodPrimaryVertexZ(z)           ||
         !mECuts->goodNumberOfTracks(mRefMult)) {
         mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,false);
+        mECuts->fillHistogram(mECuts->primaryVertexZName(),z,false);
         return (StEStructEvent*) NULL;
     } else {
         mFlatEvent->SetNtrack(mRefMult);
@@ -91,12 +90,18 @@ StEStructEvent* StEStructFlat::next() {
         mFlatEvent->SetCentMult(mRefMult);
         mFlatEvent->FillChargeCollections();
         mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,true);
+    mECuts->fillHistogram(mECuts->primaryVertexZName(),z,true);
         return mFlatEvent;
     }
 }
 
 //--------------------------------------------------------------------------
 void StEStructFlat::generateEvent() {
+    mFlatEvent->SetVx(0);
+    mFlatEvent->SetVy(0);
+    mFlatEvent->SetVz(30*gRand48());
+    mFlatEvent->SetBField(0.5);
+
     fillTracks(mFlatEvent);
 }   
 
@@ -105,15 +110,14 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
 
     mRefMult = 0;
     StEStructTrack* eTrack = new StEStructTrack();
-    int pid;
+    int pid, sign;
 
 //    int    numCharge = int( -5*log(drand48()) );
     int    numCharge, numInEta = 850;
-    double v2      = 0.2, pi = 3.1415926;
+    double v2      = 0.05, pi = 3.1415926;
     double eta, quadEta = 0.2, etaMax = 2;
-    double phi, phiSector, phiOff, sectorWidth;
-    double sectorGap = 2, gapDepth = 0.2;
-    int    numSector = 12, iSector;
+    double phi, phiOff, sectorWidth;
+    int    numSector = 12;
 
     sectorWidth = 360 / numSector;
     phiOff = 360*drand48();
@@ -126,51 +130,47 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
 
         eTrack->SetInComplete();
         if (i < numCharge/2) {
+            sign = +1;
             pid = 211;
         } else {
+            sign = -1;
             pid = -211;
         }
-        pt  = 0.1 - 0.5 * log(drand48());
         double etaAmp = 0, randAmp = 1;
         while (randAmp > etaAmp) {
             eta     = etaMax*(2*drand48() - 1);
             etaAmp  = 1 + quadEta*eta*eta;
             randAmp = drand48()*etaMaxAmp;
         }
-        pz  = sqrt( pt*pt + 0.139*0.139) * (exp(eta)-exp(-eta)) / 2;
 
-        
-        double r = 1.1;
-        while (r > 1-gapDepth) {
-            // Put flow into phi.
+        // Put flow into phi.
+        phi = 360*drand48();
+        double h   = (1+v2)*drand48();
+        while ( h > (1+v2*cos(2*phi*pi/180)) ) {
             phi = 360*drand48();
-            double h   = (1+v2)*drand48();
-            while ( h > (1+v2*cos(2*phi*pi/180)) ) {
-                phi = 360*drand48();
-                h   = (1+v2)*drand48();
-            }
-            phi += phiOff;
-            while (phi > 360) {
-                phi -= 360;
-            }
-            iSector = int( phi / sectorWidth );
-            phiSector = phi - sectorWidth*iSector;
-            if (phiSector > sectorGap) {
-                r = 0;
-            } else {
-                r = drand48();
-            }
+            h   = (1+v2)*drand48();
         }
+        phi += phiOff;
         while (phi > 180) {
             phi -= 360;
         }
+
+        pt  = 0.1 - 0.5 * log(drand48());
+        pz  = sqrt( pt*pt + 0.139*0.139) * (exp(eta)-exp(-eta)) / 2;
 
         p[0] = pt*cos(phi*pi/180);
         p[1] = pt*sin(phi*pi/180);
         p[2] = pz;
         v[0] = 0;
         v[1] = 0;
-        v[2] = 0;
+        v[2] = estructEvent->Vz();
+
+        // Check outer radius of track or radius of track at pad-plane,
+        // which ever is bigger. Reject track if this is less than 137.
+        if (maxRadius(eta,pt,v[2]) < 155.0) {
+            continue;
+        }
+
         if (!isTrackGood(v,p,eta)) {
             mTCuts->fillHistograms(false);
             continue;
@@ -199,8 +199,8 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
         eTrack->SetPhi(phi*pi/180);
         eTrack->SetDedx(0);
         eTrack->SetChi2(1);
-        eTrack->SetTopologyMapData(0, 4294967168);
-        eTrack->SetTopologyMapData(1, 16383);
+        eTrack->SetTopologyMapData(0, 0xffffff80);
+        eTrack->SetTopologyMapData(1, 0x3fff);
         eTrack->SetTopologyMapTPCNHits(45);
         eTrack->SetNMaxPoints(45);
         eTrack->SetNFoundPoints(45);
@@ -217,6 +217,27 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
     estructEvent->SetCentrality( (double) mRefMult );
     delete eTrack;
     return;
+}
+
+
+//-------------------------------------------------------------
+// This method calculates maximum distance of track from beam axis.
+// This point might be at the endplane or at twice the radius of curvature.
+double StEStructFlat::maxRadius(double eta, double pt, double vz) {
+    double pi = 3.14159265359;
+    double lambda = pi/2 - 2*atan(exp(-eta));
+    double s;
+    if (lambda > 0) {
+        s = (+200 - vz) / sin(lambda);
+    } else {
+        s = (-200 - vz) / sin(lambda);
+    }
+    double r = pt / 0.0015;
+    double phi = s * cos(lambda) / r;
+    if (phi < pi) {
+        return r * sqrt(2 - 2*cos(phi));
+    }
+    return 2*r;
 }
 
 //-------------------------------------------------------------
@@ -257,15 +278,40 @@ void StEStructFlat::setTrackCuts(StEStructTrackCuts* cuts) {
     if (mTCuts) delete mTCuts;
     mTCuts=cuts;
 }
+double StEStructFlat::gRand48() {
+    double x1, x2, w;
+ 
+    if (mgRand2Good) {
+        mgRand2Good = false;
+        return mgRand2;
+    }
+    do {
+        x1 = 2.0 * drand48() - 1.0;
+        x2 = 2.0 * drand48() - 1.0;
+        w = x1 * x1 + x2 * x2;
+    } while ( w >= 1.0 );
 
+    w = sqrt( (-2.0 * log( w ) ) / w );
+    mgRand2 = x2 * w;
+    mgRand2Good = true;
+    return x1*w;
+}
 
 
 
 /**********************************************************************
  *
  * $Log: StEStructFlat.cxx,v $
+ * Revision 1.4  2005/09/23 23:37:18  prindle
+ * Starting to add vertex distribution and track acceptance dependance on
+ * number of possible hits.
+ *   Make Pythia interface look like Hijing interface so it now works within
+ * my Fluctuation and Correlation framework.
+ *
  * Revision 1.3  2005/09/07 20:22:47  prindle
- * Flat: Random changes to eta and phi distributions (which don't have to be flat).
+ *
+ *
+ *     Flat: Random changes to eta and phi distributions (which don't have to be flat).
  *
  * Revision 1.2  2003/11/25 22:45:14  prindle
  * Commiting changes so I can move code to rhic
