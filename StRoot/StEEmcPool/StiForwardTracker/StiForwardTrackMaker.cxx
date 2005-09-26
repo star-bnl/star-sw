@@ -1,6 +1,6 @@
 // -- Author : Victor Perevoztchikov
 // 
-// $Id: StiForwardTrackMaker.cxx,v 1.6 2005/09/21 15:37:06 kocolosk Exp $
+// $Id: StiForwardTrackMaker.cxx,v 1.7 2005/09/26 14:03:54 kocolosk Exp $
 
 #include <StMessMgr.h>
 
@@ -20,6 +20,7 @@
 #include "Sti/StiHit.h"
 #include "Sti/StiSortedHitIterator.h"
 #include "Sti/StiDetectorContainer.h"
+#include "Sti/StiKalmanTrackFinder.h"
 
 #include "StDetectorId.h"
 #include "StHit.h"
@@ -54,6 +55,7 @@ StiForwardTrackMaker::StiForwardTrackMaker(const char *name):StMaker(name){
 	mForwardHits = 0;
 	mTrackSeeds = 0;
 	mSeedGenerator = 0;
+	mTrackFinder = 0;
 }
 
 
@@ -90,6 +92,10 @@ Int_t StiForwardTrackMaker::Init(){
 	
 	//instantiate the seed generator
 	mSeedGenerator = new StiLocalTrackSeedFinder("mSeedGenerator","builds track seeds",mToolkit->getTrackFactory(), mForwardHits,mToolkit->getDetectorContainer());
+	
+	//initialize the Kalman track finder
+	mTrackFinder = new StiKalmanTrackFinder(mToolkit);
+	//mTrackFinder->initialize();
 	
 	HList=new TObjArray(0);
 	initHisto();
@@ -143,6 +149,10 @@ Int_t StiForwardTrackMaker::MakeInSti()
 	cout<<"We started with " << mAllHits->size() << " hits and ended with " << mForwardHits->size() << " in the forward region" << endl;
 	
 	buildTrackSeeds(mForwardHits, mTrackSeeds, mSeedGenerator);
+	
+	//use Kalman to extend tracks, build covariance matrix, and add more hits
+	extendTracks();	
+
 	
 	//make some histograms
 	StiSortedHitIterator it = StiSortedHitIterator(mForwardHits, mToolkit->getDetectorContainer()->begin(), mToolkit->getDetectorContainer()->end());
@@ -228,9 +238,10 @@ StiForwardTrackMaker::initHisto() {
 	hA[3] = new TH1F("phiNotUsed","phi of unused forward hits",20,-3.14,3.14);
 	hA[4] = new TH1F("etaUsed","eta of hits used by previous tracker",20,0.8,2.1);
 	hA[5] = new TH1F("phiUsed","phi of hits used by previous tracker",20,-3.14,3.14);
-	hA[6] = new TH1F("seedHits","number of seed hits used for each track",15,1,15);
-	hA[7] = new TH1F("timesUsed","number of times a hit is used for seed",3,0,2);
-	hA[8] = new TH1F("deltaZseeds","zDCA-zVertex for track seeds",200,-200,200);
+	hA[6] = new TH1F("seedHits","number of seed hits used for each track",20,1,20);
+	hA[7] = new TH1F("trackHits1","total # of hits/track after inward Kalman",20,1,20);
+	hA[10] = new TH1F("trackHits2","total # of hits/track after outward Kalman",20,1,20);
+	hA[8] = new TH1F("deltaZkalman","zDCA-zVertex for tracks after Kalman",200,-200,200);
 	hA[9] = new TH1F("deltaZtracks","zDCA-zVertex for old tracks",200,-200,200);
 	
 	int i;  
@@ -295,23 +306,40 @@ void StiForwardTrackMaker::getForwardHits(StiHitContainer* allHits, StiHitContai
 void StiForwardTrackMaker::buildTrackSeeds(const StiHitContainer* forwardHits, StiTrackContainer* trackSeeds, StiLocalTrackSeedFinder* seedGenerator)
 {
 	StiTrack* track = seedGenerator->findTrack();
-	float zDCA, ezDCA, RxyDCA;
-	int goodTracks = 0;
-	
-	
+		
 	while(track != 0)
 	{
 		hA[6]->Fill(track->getPointCount());
 		trackSeeds->add(track);
-		if(examineTrackDca(static_cast<StiKalmanTrack*>(track), zDCA, ezDCA, RxyDCA)){
-			goodTracks++;
-			cout << "This track passed the cut "<<*track<<endl;
-		}
 		track = seedGenerator->findTrack();
 	}
-	
-	cout<<goodTracks<<" of the forward track seeds passed the examineTrackDca() cut"<<endl;
 }
+
+void StiForwardTrackMaker::extendTracks()
+{
+	mTrackFinder->initialize();
+	//mTrackFinder->clear();
+	
+	float zDCA, ezDCA, RxyDCA;
+	//int goodTracks = 0;
+		
+	for(StiTrackContainer::const_iterator it=mTrackSeeds->begin(); it!=mTrackSeeds->end(); it++)
+	{
+		while(mTrackFinder->find(*it,0,2)){}; //extend inward
+		hA[7]->Fill((*it)->getPointCount());
+		while(mTrackFinder->find(*it,1,0)){}; //extend outward
+		hA[10]->Fill((*it)->getPointCount());
+		
+		if(examineTrackDca(static_cast<StiKalmanTrack*>(*it), zDCA, ezDCA, RxyDCA)){
+	//		goodTracks++;
+			cout << "This track passed the cut "<<**it<<endl;
+		}		
+	}
+	
+	//cout<<goodTracks<<" of the forward track seeds passed the examineTrackDca() cut"<<endl;
+}
+		
+	
 
 
 void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <VertexV> &vertL, double &mMaxZdca, int &nV, TH1* h, int &totalMatched)
@@ -321,14 +349,14 @@ void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <Vertex
 		const StiKalmanTrack* track = static_cast<StiKalmanTrack*>(*it);
 		nAll++;
 		if(track->getFlag()!=true) nAny++; // don't drop bad tracks for now, all track seeds currently flagged as bad
-		cout<<"\n#a kalTrack: nTr="<<nAny<<" flag="<<track->getFlag()<<"  nFitP="<<track->getFitPointCount()<<" is Prim="<<track->isPrimary()<<" pT="<<track->getPt()<<endl;
+		//cout<<"\n#a kalTrack: nTr="<<nAny<<" flag="<<track->getFlag()<<"  nFitP="<<track->getFitPointCount()<<" is Prim="<<track->isPrimary()<<" pT="<<track->getPt()<<endl;
 		// cout<<"#b kalTrack: pT="<<track->getPt()<<endl;
 		//cout<<"#b kalTrack:"<<*track<<endl;
 		
 	float zDca, ezDca, rxyDca;
 		if(!examineTrackDca(track, zDca,  ezDca, rxyDca)) continue;
 		nTry++;
-		cout<<"#c nTry="<<nTry<<" zDca="<<zDca<<endl;
+		//cout<<"#c nTry="<<nTry<<" zDca="<<zDca<<endl;
 		
 		//.... match track to a vertex
 		for(int iv=0;iv<nV;iv++) {
@@ -336,7 +364,7 @@ void StiForwardTrackMaker::matchVertex(StiTrackContainer* tracks, vector <Vertex
 			h->Fill(zDca-V.z);
 			if( fabs(zDca-V.z) > mMaxZdca )continue;
 			nAcc++;
-			cout<<" tr Matched , dZ="<<zDca-V.z<<" nAcc="<<nAcc<<endl;
+		//	cout<<" tr Matched , dZ="<<zDca-V.z<<" nAcc="<<nAcc<<endl;
 			break; 	 
 		}
 	}
@@ -355,15 +383,15 @@ StiForwardTrackMaker::examineTrackDca(const StiKalmanTrack*track,
 	StiKalmanTrack track1=*track; // clone track
 	StiKalmanTrackNode* bmNode=track1.extrapolateToBeam();
 	if(bmNode==0)  {
-		cout<<"#a @beam  DCA NULL"<<endl; 
+	//	cout<<"#a @beam  DCA NULL"<<endl; 
 		return false ;
 	}
 	
 	float rxy=rxyG(bmNode);
-	cout<<"#e @beam global DCA x:"<< bmNode->x_g()<<" y:"<< bmNode->y_g()<<" z:"<< bmNode->z_g()<<" Rxy="<< rxy <<endl;
+	//cout<<"#e @beam global DCA x:"<< bmNode->x_g()<<" y:"<< bmNode->y_g()<<" z:"<< bmNode->z_g()<<" Rxy="<< rxy <<endl;
 	if(rxy>mMaxTrkDcaRxy) return false;
 	
-	cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<xL(bmNode)<<" y="<<yL(bmNode)<<" +/- "<<eyL(bmNode)<<" z="<<zL(bmNode)<<" +/- "<<ezL(bmNode)<<endl;
+	//cout<<"#e inBeam |P|="<<bmNode->getP()<<" pT="<<bmNode->getPt()<<" local x="<<xL(bmNode)<<" y="<<yL(bmNode)<<" +/- "<<eyL(bmNode)<<" z="<<zL(bmNode)<<" +/- "<<ezL(bmNode)<<endl;
 	
 	zDca=zG(bmNode);
 	ezDca=ezL(bmNode);
@@ -383,6 +411,9 @@ StiForwardTrackMaker::addVertex(float z, float ez){
 }
 
 // $Log: StiForwardTrackMaker.cxx,v $
+// Revision 1.7  2005/09/26 14:03:54  kocolosk
+// added Kalman propagation for forward track seeds
+//
 // Revision 1.6  2005/09/21 15:37:06  kocolosk
 // modified matchVertex() so that |deltaZ| could be plotted separately for old, new tracks
 //
