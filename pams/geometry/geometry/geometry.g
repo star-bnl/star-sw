@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.115 2005/09/02 18:20:35 potekhin Exp $
+* $Id: geometry.g,v 1.116 2005/09/26 21:44:18 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.116  2005/09/26 21:44:18  potekhin
+* We need a convenient way to optionally remove the SVT from
+* the simulation, to facilitate conversion and brems studies.
+* To this end, add  "SVTT_OFF" to the list of options
+*
 * Revision 1.115  2005/09/02 18:20:35  potekhin
 * Added separate config variables for the Quad section
 * (which includes D0) -- way upstream area
@@ -1773,6 +1778,8 @@ If LL>1
                   {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
   on SVTT_ON    { Optional SVTT added on top of the minimal geo;
                      svtt=on; }
+  on SVTT_OFF   { Optionally remove the SVTT;
+                     svtt=off; }
 *
   on PIPE_ON    { Optional pipe added on top of the minimal geo;
                      pipe=on; }
@@ -1787,6 +1794,9 @@ If LL>1
                      ecal=on; }
   on CALB_ON    { Optional CALB added on top of the minimal geo;
                      calb=on; }
+
+  on SHIELD_OFF { Can switch the shield off in the DEV geom;
+                     shld=off; }
 
   on PIXL_ON    { Optional PIXL added on top of the minimal geo;
                      pixl=on; }
