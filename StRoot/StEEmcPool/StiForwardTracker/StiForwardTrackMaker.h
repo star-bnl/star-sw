@@ -1,4 +1,4 @@
-// $Id: StiForwardTrackMaker.h,v 1.6 2005/09/21 15:37:06 kocolosk Exp $
+// $Id: StiForwardTrackMaker.h,v 1.7 2005/09/26 14:03:55 kocolosk Exp $
 
 #ifndef STAR_StiForwardTrackMaker
 #define STAR_StiForwardTrackMaker
@@ -22,6 +22,7 @@ class StiHitContainer;
 class StiTrackContainer;
 class StiLocalTrackSeedFinder;
 class StiDetectorContainer;
+class StiKalmanTrackFinder;
 
 class StiForwardTrackMaker : public StMaker {
  private:
@@ -41,7 +42,7 @@ class StiForwardTrackMaker : public StMaker {
  
   //..... util
   StiToolkit     *mToolkit;
-  enum {mxHA=10};
+  enum {mxHA=11};
   TH1F *hA[mxHA];
   class VertexV{public: float z,ez;};
   vector<VertexV> vertL;
@@ -49,6 +50,8 @@ class StiForwardTrackMaker : public StMaker {
   StiHitContainer* mForwardHits;
   StiTrackContainer* mTrackSeeds;
   StiLocalTrackSeedFinder* mSeedGenerator;
+  StiKalmanTrackFinder* mTrackFinder;
+  
 
   void initHisto();
   
@@ -57,6 +60,9 @@ class StiForwardTrackMaker : public StMaker {
   
   void buildTrackSeeds(const StiHitContainer* forwardHits, StiTrackContainer* trackSeeds, StiLocalTrackSeedFinder* seedGenerator);
   //takes forward hits and uses Mike's seed finder to store track segments in the trackSeeds container
+  
+  void extendTracks();
+  //takes track seeds and extends them using Kalman
   
   void matchVertex(StiTrackContainer* tracks, vector<VertexV> &vertL, double &mMaxZdca, int &nV, TH1* h, int &totalMatched);
 
@@ -80,7 +86,7 @@ class StiForwardTrackMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.6 2005/09/21 15:37:06 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StiForwardTrackMaker.h,v 1.7 2005/09/26 14:03:55 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -91,6 +97,9 @@ class StiForwardTrackMaker : public StMaker {
 
 
 // $Log: StiForwardTrackMaker.h,v $
+// Revision 1.7  2005/09/26 14:03:55  kocolosk
+// added Kalman propagation for forward track seeds
+//
 // Revision 1.6  2005/09/21 15:37:06  kocolosk
 // modified matchVertex() so that |deltaZ| could be plotted separately for old, new tracks
 //
