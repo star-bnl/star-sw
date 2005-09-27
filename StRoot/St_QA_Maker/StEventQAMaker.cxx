@@ -17,7 +17,6 @@
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
 #include "StMcEventTypes.hh"
-#include "StMcEventMaker/StMcEventMaker.h"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StDbUtilities/StCoordinates.hh"
 // include this because it's not in StCoordinates.hh yet
@@ -2075,10 +2074,8 @@ void StEventQAMaker::MakeHistEval() {
   if (Debug()) 
     gMessMgr->Info(" *** in StEventQAMaker - filling Eval histograms ");
   
-  if (!(gROOT->GetClass("StMcEventMaker"))) return;
-  StMcEvent* mcEvent = 0;
-  StMcEventMaker* mcEventMaker = (StMcEventMaker*) GetMaker("StMcEvent");
-  if (mcEventMaker) mcEvent = mcEventMaker->currentMcEvent();
+  StMcEvent* mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+  if (!mcEvent) return;
   StMcVertex* mcprimaryVertex = mcEvent->primaryVertex();
   StPrimaryVertex* primaryVertex = event->primaryVertex();
   if ((primaryVertex) && (mcprimaryVertex)) {
@@ -2214,8 +2211,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.69 2005/05/13 19:38:05 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.70 2005/09/27 20:32:22 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.70  2005/09/27 20:32:22  genevb
+// New method for StMcEvent access
+//
 // Revision 2.69  2005/05/13 19:38:05  perev
 // Defence agains 1/0 added
 //
