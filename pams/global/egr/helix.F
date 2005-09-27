@@ -172,7 +172,6 @@ CCC        ENDIF
         DOUBLE PRECISION PI, PINMIN, RR1MIN
         DOUBLE PRECISION PH0, X0, Y0, X1, Y1, HRH, RRH, RR1
         DOUBLE PRECISION R1, PH1, DPH, X2, Y2, PH2
-#include "geant321/gcvolu.inc"
 ***        IMPLICIT DOUBLE PRECISION(A-H,O-Z)
 *--
         PARAMETER  (PI     = 3.1415926536D0)
@@ -205,7 +204,7 @@ CCC        ENDIF
         CHARACTER*4 MECAN
         CHARACTER*20 NATMED
 *--
-        NLEVEL = 0
+        call resetNlevel
         PH0 = PIN(1) / RIN
         X0  = RIN * COS( PH0 )
         Y0  = RIN * SIN( PH0 )
