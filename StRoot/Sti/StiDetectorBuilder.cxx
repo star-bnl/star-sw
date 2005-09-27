@@ -202,7 +202,9 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
     Double_t  dPhi = acos((xc*nx+yc*ny)/(rc*nt));
     Double_t  phiC = atan2(yc,xc);
     Double_t  phiN = atan2(ny,nx);
-    dPhi = phiC-phiN;
+    dPhi = phiC-phiN; //  in [-pi/2, pi/2]
+    if (dPhi <= -M_PI/2) dPhi += M_PI;
+    if (dPhi >   M_PI/2) dPhi -= M_PI;
     //    Double_t yOff = sqrt(rc*rc-rn*rn);
     pPlacement = new StiPlacement;
     pPlacement->setZcenter(zc);
