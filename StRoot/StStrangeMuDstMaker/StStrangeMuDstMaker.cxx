@@ -9,7 +9,6 @@
 #include "THack.h"
 #include "StTree.h"
 #include "StEvent/StEvent.h"
-#include "StMcEventMaker/StMcEventMaker.h"
 #include "StEvent.h"
 #include "StStrangeEvMuDst.hh"
 #include "StStrangeCuts.hh"
@@ -333,9 +332,7 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
 
   gMessMgr->Info("StStrangeMuDstMaker::MakeCreateMcDst(): running...");
   
-  StMcEvent* mcEvent = 0;
-  StMcEventMaker* mcEventMaker = (StMcEventMaker*) GetMaker("StMcEvent");
-  if (mcEventMaker) mcEvent = mcEventMaker->currentMcEvent();
+  StMcEvent* mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
   if (!mcEvent)   {
     gMessMgr->Error() << "StStrangeMuDstMaker: no StMcEvent! \n" 
 	 << " mc branch and assoc branch  will not be filled. " << endm;       
@@ -643,8 +640,11 @@ char* StStrangeMuDstMaker::GetFile() const {
 }       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.33 2004/11/02 17:54:07 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.34 2005/09/27 20:32:22 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.34  2005/09/27 20:32:22  genevb
+// New method for StMcEvent access
+//
 // Revision 3.33  2004/11/02 17:54:07  genevb
 // Leave corrupt file protection to ROOT / Remove my protection
 //
