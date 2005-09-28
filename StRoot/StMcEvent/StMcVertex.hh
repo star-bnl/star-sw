@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.11 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.12 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.12  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.11  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -81,17 +84,20 @@ public:
     
     // "Get" Methods
     
-    const StThreeVectorF&       position() const;
-    StPtrVecMcTrack&            daughters();
-    unsigned int                numberOfDaughters();
-    StMcTrack*                  daughter(unsigned int);
-    const StMcTrack*            parent() const;
-    string const               &geantVolume() const;
-    float                       tof() const;
-    long                        geantProcess() const;
-    long                        generatorProcess() const;
-    long                        key() const;
-    long                        geantMedium() const; 
+  const StThreeVectorF&       position() const          { return *&mPosition;}
+  StPtrVecMcTrack&            daughters()               { return *&mDaughters; } 
+  const StPtrVecMcTrack&      daughters() const         { return *&mDaughters; } 
+  unsigned int                numberOfDaughters()       { return mDaughters.size(); }
+  unsigned int                numberOfDaughters() const { return mDaughters.size(); }
+  StMcTrack*                  daughter(unsigned int i)  { return (i < mDaughters.size() ? mDaughters[i] : 0); }
+  const StMcTrack*            daughter(unsigned int i) const { return (i < mDaughters.size() ? mDaughters[i] : 0); }
+  const StMcTrack*            parent() const            { return mParent; }   
+  string const               &geantVolume() const       { return *&mGeantVolume; }
+  float tof() const { return mTof; }  
+  long geantProcess() const { return mGeantProcess; }      
+  long geantMedium() const { return mGeantMedium; }      
+  long generatorProcess() const { return mGeneratorProcess; }      
+  long key() const { return mKey; }      
     
   // "Set" Methods
   
@@ -116,32 +122,5 @@ protected:
     long                 mGeantMedium;
     ClassDef(StMcVertex,1)
 };
-#ifndef __CINT__
 ostream&  operator<<(ostream& os, const StMcVertex&);
-#endif
-inline const StThreeVectorF& StMcVertex::position() const { return mPosition;}
-
-inline StPtrVecMcTrack& StMcVertex::daughters(){ return mDaughters; }       
-
-inline unsigned int StMcVertex::numberOfDaughters() { return mDaughters.size(); }
-
-inline StMcTrack* StMcVertex::daughter(unsigned int i)
-{
-    return (i < mDaughters.size() ? mDaughters[i] : 0);
-}
-
-inline const StMcTrack* StMcVertex::parent() const { return mParent; }          
-
-inline string const &StMcVertex::geantVolume() const { return mGeantVolume; }   
-
-inline float StMcVertex::tof() const { return mTof; }  
-
-inline long StMcVertex::geantProcess() const { return mGeantProcess; }      
-
-inline long StMcVertex::geantMedium() const { return mGeantMedium; }      
-
-inline long StMcVertex::generatorProcess() const { return mGeneratorProcess; }      
-
-inline long StMcVertex::key() const { return mKey; }      
-
 #endif

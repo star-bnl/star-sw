@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.8  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.7  2005/08/09 03:30:30  perev
  * Cleanup
  *
@@ -37,8 +40,9 @@
 #include "StMcEmcHitCollection.hh"
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
+#include "StMcTrack.hh"
 #include "TObjectSet.h"
-
+#include "TDataSetIter.h"
 static const char rcsid[] = "$Id ";
 
 ClassImp(StMcEmcHitCollection);
@@ -89,9 +93,6 @@ StMcEmcHitCollection::addHit(StMcCalorimeterHit* hit)
       return kErr; // Bad number of module
     }
 }
-
-unsigned int
-StMcEmcHitCollection::numberOfModules() const { return mNumberOfModules; }
 
 unsigned long
 StMcEmcHitCollection::numberOfHits() const
@@ -145,20 +146,24 @@ StMcEmcHitCollection::Browse(TBrowser *b)
   print();
 }
 
-void
-StMcEmcHitCollection::print()
-{
-  //  cout<<"\n  "<<numberOfHits()<<" hits for "<<GetName()<<" sum Energy "<<sum()<<"\n";
-  cout<<"-----------\n"<<GetName()<<" has "<<numberOfHits()<<" hits in "
-      <<GetListSize()<<" modules. Deposit Energy "<<sum()<<" GeV \n-----------\n";
+void StMcEmcHitCollection::print() {  cout << *this << endl; }
+//________________________________________________________________________________
+ostream&  operator<<(ostream& os, const StMcEmcHitCollection &emcColl) {
+  os<<"-----------\n"<<emcColl.GetName()<<" has "<<emcColl.numberOfHits()<<" hits in "
+      <<emcColl.GetListSize()<<" modules. Deposit Energy "<<emcColl.sum()<<" GeV \n-----------\n";
   unsigned int i, m;
-  for (i=0; i<mNumberOfModules; i++) {
+  for (i=0; i<emcColl.numberOfModules(); i++) {
     m = i + 1;
-    StSPtrVecMcCalorimeterHit& hits=thisModule(i).hits();
+    const StSPtrVecMcCalorimeterHit& hits = emcColl.thisModule(i).hits();
     int nh = hits.size();
     if (nh > 0) {
-      cout<<" " <<module(m)->GetName()<<" #hits "<<nh<<" Dep.Energy " << 
-      module(m)->sum()<<"\n";
+      os<<" " <<emcColl.module(m)->GetName()<<" #hits "<<nh<<" Dep.Energy " << 
+      emcColl.module(m)->sum()<< endl;
+      os << *(emcColl.module(m)->hits())[0];
+      os << "Parent track of this Hit" << endl;
+      StMcTrack *track = (emcColl.module(m)->hits())[0]->parentTrack();
+      if (track) os << *track << endl;
     }
   }
+  return os;
 }

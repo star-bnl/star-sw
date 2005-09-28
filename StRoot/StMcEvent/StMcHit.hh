@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.8 2004/01/13 21:02:51 fisyak Exp $
+ * $Id: StMcHit.hh,v 2.9 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.9  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.8  2004/01/13 21:02:51  fisyak
  * Add inheritance from StObject
  *
@@ -72,13 +75,13 @@ public:
     
 
   // "Get" Methods
-    virtual const StThreeVectorF&      position() const;
-    virtual const StThreeVectorF& localMomentum() const;
-    virtual float                            dE() const;
-    virtual float                            dS() const;
-    virtual long                            key() const;
-    virtual long                       volumeId() const;
-    virtual StMcTrack*              parentTrack() const;	
+    virtual const StThreeVectorF&      position() const { return mPosition;}
+    virtual const StThreeVectorF& localMomentum() const { return mLocalMomentum;}
+    virtual float                            dE() const { return mdE; }
+    virtual float                            dS() const { return mdS; }
+    virtual long                            key() const { return mKey; }
+    virtual long                       volumeId() const { return mVolumeId; }
+    virtual StMcTrack*              parentTrack() const	{ return mParentTrack; }	
   // "Set" Methods
 
     virtual void setPosition(const StThreeVectorF&);
@@ -99,23 +102,6 @@ protected:
     StMcTrack*           mParentTrack;
   ClassDef(StMcHit,1)
 };
-#ifndef __CINT__
 ostream&  operator<<(ostream& os, const StMcHit&);
-
-inline const StThreeVectorF& StMcHit::position() const { return mPosition;}
-
-inline const StThreeVectorF& StMcHit::localMomentum() const { return mLocalMomentum;}
-
-inline float StMcHit::dE() const { return mdE; }
-
-inline float StMcHit::dS() const { return mdS; }
-
-inline long StMcHit::key() const { return mKey; }
-
-inline long StMcHit::volumeId() const { return mVolumeId; }
-
-inline StMcTrack* StMcHit::parentTrack() const { return mParentTrack; }	
-
-#endif
 #endif
 

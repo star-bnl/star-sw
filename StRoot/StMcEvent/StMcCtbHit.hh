@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.hh,v 2.3 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcCtbHit.hh,v 2.4 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcCtbHit.hh,v $
+ * Revision 2.4  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.3  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -43,7 +46,7 @@ public:
 #endif    
 private:
 #ifdef POOL
-    static StMemoryPool mPool; //!
+    static StMemoryPool mPool; 
 #endif
     float               mTof;
     ClassDef(StMcCtbHit,1)

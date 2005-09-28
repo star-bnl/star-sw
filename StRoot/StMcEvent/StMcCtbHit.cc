@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcCtbHit.cc,v 2.4 2005/01/27 23:40:46 calderon Exp $
+ * $Id: StMcCtbHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcCtbHit.cc,v $
+ * Revision 2.5  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.4  2005/01/27 23:40:46  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -22,7 +25,7 @@
  */
 #include "StMcCtbHit.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.4 2005/01/27 23:40:46 calderon Exp $";
+static const char rcsid[] = "$Id: StMcCtbHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcCtbHit::mPool(sizeof(StMcCtbHit));
 #endif
@@ -50,15 +53,14 @@ StMcCtbHit::~StMcCtbHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcCtbHit& h)
 {
-    os << "Position       : " << h.position() << endl; 
-    os << "Local Momentum : " << h.localMomentum()    << endl;
-    unsigned int tray;
-    unsigned int slat;
-    h.get_slat_tray(slat,tray);
-    os << "Slat            : " << slat    << endl;
-    os << "Tray            : " << tray   << endl;
-    os << "T. of Flight   : " << h.tof()   << endl;
-    return os;
+  os << "CtbHit\t" << *((StMcHit *) &h);
+  unsigned int tray;
+  unsigned int slat;
+  h.get_slat_tray(slat,tray);
+  os << "\tSlat: " << slat
+     << " Tray: " << tray
+     << " TofF: " << h.tof();
+  return os;
 }
 
 void StMcCtbHit::get_slat_tray(unsigned int &slat_out, unsigned int &tray_out ) const {

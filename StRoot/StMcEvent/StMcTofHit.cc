@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.cc,v 2.3 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcTofHit.cc,v 2.4 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcTofHit.cc,v $
+ * Revision 2.4  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.3  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -16,7 +19,7 @@
  ***************************************************************************/
 #include "StMcTofHit.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.3 2005/01/27 23:40:48 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.4 2005/09/28 21:30:15 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcTofHit::mPool(sizeof(StMcTofHit));
 #endif
@@ -45,10 +48,8 @@ StMcTofHit::StMcTofHit(g2t_ctf_hit_st* pt)
 StMcTofHit::~StMcTofHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcTofHit& h) {
-    os << "Position       : " << h.position() << endl; 
-    os << "Local Momentum : " << h.localMomentum()    << endl;
-    os << "volume-id      : " << h.volumeId() << endl;
-    os << "T. of Flight   : " << h.tof()   << endl;
-    os << "path length    : " << h.sTrack()   << endl;
-    return os;
+  os << "TofHit\t" << *((StMcHit *) &h)
+     << "\tT. of Flight: " << h.tof()
+     << " path length: " << h.sTrack();
+  return os;
 }

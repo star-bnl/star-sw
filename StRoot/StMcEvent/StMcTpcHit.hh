@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.9 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcTpcHit.hh,v 2.10 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.10  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.9  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -80,7 +83,7 @@ public:
     float         lgamma()     const {return mLgamma;}
 private:
 #ifdef POOL
-    static StMemoryPool         mPool; //!
+    static StMemoryPool         mPool; 
 #endif
     float                       mLgamma; //  ALOG10(GEKin/AMass) from g2t_tpc_hit
     ClassDef(StMcTpcHit,1)

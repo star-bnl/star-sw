@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.19 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.20 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.20  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.19  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -124,13 +127,78 @@
 #include "StMcFstHit.hh"
 #include "StMcFgtHit.hh"
 #include "tables/St_g2t_event_Table.h"
+#include "TDataSetIter.h"
 
 
-
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.19 2005/07/07 18:20:49 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.19 2005/07/07 18:20:49 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.20 2005/09/28 21:30:14 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.20 2005/09/28 21:30:14 fisyak Exp $";
 ClassImp(StMcEvent);
+#if 0
+template<class T> void
+_lookup(T*& val, StSPtrVecObject &vec)
+{
+    val = 0;
+    for (unsigned int i=0; i<vec.size(); i++)
+        if (vec[i] && typeid(*vec[i]) == typeid(T)) {
+            val = static_cast<T*>(vec[i]);
+            break;
+        }
+}
 
+template<class T> void
+_lookupOrCreate(T*& val, StSPtrVecObject &vec)
+{
+    T* t = 0;
+    _lookup(t, vec);
+    if (!t) {
+        t = new T;
+        vec.push_back(t);
+    }
+    val = t;
+}
+
+template<class T> void
+_lookupAndSet(T* val, StSPtrVecObject &vec)
+{
+    for (unsigned int i=0; i<vec.size(); i++)
+        if (vec[i] && typeid(*vec[i]) == typeid(T)) {
+            delete vec[i];
+            vec[i] = val;
+            return;
+        }
+    if (!val) return;
+    vec.push_back(val);
+}
+
+template<class T> void
+_lookupDynamic(T*& val, StSPtrVecObject &vec)
+{
+    val = 0;
+    for (unsigned int i=0; i<vec.size(); i++)
+        if (vec[i]) {
+	    val = dynamic_cast<T*>(vec[i]);
+	    if (val) break;	    
+	}
+}
+
+template<class T> void
+_lookupDynamicAndSet(T* val, StSPtrVecObject &vec)
+{
+    T *test;
+    for (unsigned int i=0; i<vec.size(); i++) {
+        if (vec[i]) {
+	    test = dynamic_cast<T*>(vec[i]);
+	    if (test) {
+		delete vec[i];
+		vec[i] = val;
+		return;
+	    }	    
+	}
+    }
+    if (!val) return;
+    vec.push_back(val);
+}
+#endif
 void StMcEvent::initToZero()
 {
     
@@ -142,7 +210,6 @@ void StMcEvent::initToZero()
     mRichHits = 0;            
     mCtbHits = 0;
     mTofHits = 0;
-    mEemcHits = 0;
     mPixelHits = 0;
     mIstHits = 0;
     mIgtHits = 0;
@@ -157,16 +224,19 @@ void StMcEvent::initToZero()
     mFtpcHits = new StMcFtpcHitCollection();
     mRichHits = new StMcRichHitCollection();
     mCtbHits = new StMcCtbHitCollection();
-
+#if 0
     mBemcHits  = new StMcEmcHitCollection();
     mBprsHits  = new StMcEmcHitCollection();
     mBsmdeHits = new StMcEmcHitCollection();
     mBsmdpHits = new StMcEmcHitCollection();
+#endif
     mTofHits = new StMcTofHitCollection();
+#if 0
     mEemcHits = new StMcEmcHitCollection();
     mEprsHits = new StMcEmcHitCollection();
     mEsmduHits = new StMcEmcHitCollection();
     mEsmdvHits = new StMcEmcHitCollection();
+#endif
     mPixelHits = new StMcPixelHitCollection();
     mIstHits = new StMcIstHitCollection();
     mIgtHits = new StMcIgtHitCollection();
@@ -242,7 +312,7 @@ StMcEvent::~StMcEvent()
 
     if (mCtbHits) delete mCtbHits;
     mCtbHits=0;
-    
+#if 0    
     if (mBemcHits) delete mBemcHits;
     mBemcHits=0;
 
@@ -269,7 +339,7 @@ StMcEvent::~StMcEvent()
 
     if (mEsmdvHits) delete mEsmdvHits;
     mEsmdvHits=0;
-    
+#endif    
     if (mPixelHits) delete mPixelHits;
     mPixelHits=0;
     
@@ -312,24 +382,22 @@ int StMcEvent::operator!=(const StMcEvent& e) const
 
 ostream&  operator<<(ostream& os, const StMcEvent& e)
 {
-    os << "Label : " << e.eventGeneratorEventLabel() << endl; 
-    os << "Run   : " << e.runNumber() << endl;
-    os << "Id    : " << e.eventNumber() << endl;
-    os << "Type  : " << e.type() << endl;
-    os << "Participant Protons  East: " << e.zEast() << endl;
-    os << "Participant Protons  West: " << e.zWest() << endl;
-    os << "Participant Neutrons East: " << e.nEast() << endl;
-    os << "Participant Neutrons West: " << e.nWest() << endl;
-    os << "# Ev. Gen. Fin. St. Track: " << e.eventGeneratorFinalStateTracks() << endl;
-    os << "Number of Primary Tracks : " << e.numberOfPrimaryTracks() << endl;
-    os << "Subprocess Id    : " << e.subProcessId() << endl;
-    os << "Impact Parameter : " << e.impactParameter()   << endl;
-    os << "Phi Reaction Pl. : " << e.phiReactionPlane()  << endl;
-    os << "Trig. Time Offset: " << e.triggerTimeOffset() << endl;
-    os << "N Binary Coll.   : " << e.nBinary() << endl;
-    os << "N Wounded East   : " << e.nWoundedEast() << endl;
-    os << "N Wounded West   : " << e.nWoundedWest() << endl;
-    os << "N Jets           : " << e.nJets() << endl;
+    os << "Label: " << e.eventGeneratorEventLabel()
+       << "\tRun: " << e.runNumber()
+       << "\tId: " << e.eventNumber() 
+       << "\tType: " << e.type() << endl;
+    os << "Participant Protons  East: " << e.zEast() << "\tWest: " << e.zWest() << endl;
+    os << "Participant Neutrons East: " << e.nEast() << "\tWest: " << e.nWest() << endl;
+    os << "# Ev. Gen. Fin. St. Track: " << e.eventGeneratorFinalStateTracks() 
+       << "\tNumber of Primary Tracks : " << e.numberOfPrimaryTracks() << endl;
+    os << "Subprocess Id    : " << e.subProcessId()
+       << "\tImpact Parameter : " << e.impactParameter()
+       << "\tPhi Reaction Pl. : " << e.phiReactionPlane()
+       << "\tTrig. Time Offset: " << e.triggerTimeOffset() << endl;
+    os << "N Binary Coll.   : " << e.nBinary()
+       << "\tWounded East   : " << e.nWoundedEast()
+       << "\tWounded West   : " << e.nWoundedWest()
+       << "\tJets           : " << e.nJets() << endl;
     return os;
 }
 
@@ -399,7 +467,7 @@ void StMcEvent::setRichHitCollection(StMcRichHitCollection* val)
     if (mRichHits && mRichHits!= val) delete mRichHits;
     mRichHits = val;
 }              
-
+#if 0
 void StMcEvent::setBemcHitCollection(StMcEmcHitCollection* val)
 {
     if (mBemcHits && mBemcHits!= val) delete mBemcHits;
@@ -423,13 +491,13 @@ void StMcEvent::setBsmdpHitCollection(StMcEmcHitCollection* val)
     if (mBsmdpHits && mBsmdpHits!= val) delete mBsmdpHits;
     mBsmdpHits = val;
 }              
-
+#endif
 void StMcEvent::setTofHitCollection(StMcTofHitCollection* val)
 {
     if (mTofHits && mTofHits!= val) delete mTofHits;
     mTofHits = val;
 }
-
+#if 0
 void StMcEvent::setEemcHitCollection(StMcEmcHitCollection* val)
 {
     if (mEemcHits && mEemcHits!= val) delete mEemcHits;
@@ -453,7 +521,7 @@ void StMcEvent::setEsmdvHitCollection(StMcEmcHitCollection* val)
     if (mEsmdvHits && mEsmdvHits!= val) delete mEsmdvHits;
     mEsmdvHits = val;
 }
-
+#endif
 void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)
 {
     if (mPixelHits && mPixelHits!= val) delete mPixelHits;
@@ -483,3 +551,153 @@ void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
     if (mFgtHits && mFgtHits!= val) delete mFgtHits;
     mFgtHits = val;
 }   
+#define PrintHeader(Name,name) \
+  const StMc ## Name ## HitCollection *name ## Coll = name ## HitCollection();\
+  cout << "---------------------------------------------------------" << endl;\
+  if (! all) {\
+    cout << " and one hit only.";					\
+    cout << "StMc"#Name"HitCollection at " << (void*) name ## Coll             << endl;	\
+    cout << "Dumping collection size";					\
+    cout << " and one hit only.";					\
+    cout << endl;							\
+  }									\
+  cout << "---------------------------------------------------------" << endl;\
+  nhits = name ## Coll->numberOfHits();\
+  cout << "# of hits in StMc"#Name"HitCollection = " << nhits << endl;
+#define PrintHitCollection(Name,name)					\
+  PrintHeader(Name,name)						\
+    if ( name ## Coll &&  nhits) {					\
+      nh = name ## Coll->hits().size();					\
+      if (nh) {								\
+	if (! all) {nh = 1;  gotOneHit = kTRUE;}			\
+	for (i = 0; i < nh; i++) cout << *(name ## Coll->hits()[i]) << endl; \
+      }									\
+    }
+#define PrintHitCollectionL(Name,name,layer,Layers)			\
+  PrintHeader(Name,name)						\
+    if ( name ## Coll &&  nhits) {					\
+      gotOneHit = kFALSE;						\
+      for (k=0; !gotOneHit && k<name ## Coll->numberOf ## Layers(); k++) \
+	if (name ## Coll->layer(k))				\
+	  {								\
+	    { nh = name ## Coll->layer(k)->hits().size();	\
+	      if (nh) {							\
+		if (! all) {nh = 1;  gotOneHit = kTRUE;}		\
+		for (i = 0; i < nh; i++) cout << *(name ## Coll->layer(k)->hits()[i]) << endl; \
+	      }								\
+	    }								\
+	  }								\
+    }
+
+//________________________________________________________________________________
+void StMcEvent::Print(Option_t *option) const {
+  TString Opt(option);
+  Int_t all = 0;
+  if (Opt.Contains("all",TString::kIgnoreCase)) all = 1;
+  cout << "*********************************************************" << endl;
+  cout << "*                  StMcEvent Information                *" << endl;
+  cout << "*********************************************************" << endl;
+  cout << *this << endl;
+  cout << "---------------------------------------------------------" << endl;
+  cout << "StSPtrVecMcTrack"                                          << endl;
+  if (! all) 
+    cout << "Dumping first element in collection only (if available). " << endl;
+  cout << "---------------------------------------------------------" << endl;
+  Int_t Ntracks = tracks().size();
+  cout << "collection size = " << Ntracks    << endl;
+  if (Ntracks) {
+    if (! all) {
+      for (int i = 0; i < 1; i++) {
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StMcTrack # " << i << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << *(tracks()[i])                             << endl;
+      }
+    } else {
+      tracks()[0]->Print("desc");
+      for (int i = 0; i < Ntracks; i++) tracks()[i]->Print("short");
+    }
+  }
+  cout << "---------------------------------------------------------" << endl;
+  cout << "StMcVertex"                                                << endl;
+  cout << "---------------------------------------------------------" << endl;
+  if (primaryVertex()) {
+    cout << "Primary Vertex at "
+	 << *(primaryVertex())                         << endl;
+    cout << "---------------------------------------------------------" << endl;
+  }
+  Int_t nVertices = vertices().size();
+  cout << "StSPtrVecMcVertex"                                         << endl;
+  cout << "# of Vertices    : " << nVertices << endl;
+  cout << "---------------------------------------------------------" << endl;
+  cout << "Dumping second element in collection (First is Primary). " << endl;
+  if (nVertices > 1) {
+    if (! all) nVertices = 2;
+    for (int i = 1; i < nVertices; i++) {
+      cout << i+1 << "'st StMcVertex at " << *(vertices()[i])       << endl;
+    }
+  }
+  
+  UInt_t       i, j, k, nhits, nh;
+  Bool_t             gotOneHit;
+  PrintHeader(Tpc,tpc)
+  if (tpcColl && nhits) {
+    gotOneHit = kFALSE;
+    for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
+      for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++) {
+	const StSPtrVecMcTpcHit &hits = tpcColl->sector(k)->padrow(j)->hits();
+	nh = hits.size();
+	if (nh) {
+	  if (! all ) 
+	    cout << *hits[0] << endl;
+	  else for (i = 0; i < nh; i++) cout << *hits[i] << endl;
+	  if (! all) {
+	    gotOneHit = kTRUE;
+	    cout << "Dumping all the z coordinates and track key in this padrow" << endl;
+	    cout << "Should be sorted according to z: " << endl;
+	    cout << "---------------------------------------------------------" << endl;
+	    for (i = 0; i < nh; i++) 
+	      cout << "\t" << hits[i]->position().z() << ":" <<  hits[i]->parentTrack()->key();
+	    cout << endl;
+	  }
+	}
+      }
+  }
+  PrintHitCollectionL(Ftpc,ftpc,plane,Planes);
+  PrintHitCollection(Rich,rich);
+  
+  PrintHeader(Svt,svt)
+  if (svtColl && nhits) {
+    nhits = svtColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    
+    gotOneHit = kFALSE;
+    for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
+      for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
+	for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
+	  nh = svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size();
+	  if (nh) {
+	    if (! all) {nh = 1;  gotOneHit = kTRUE;}
+	    for (i = 0; i < nh; i++) cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[i]) << endl;
+	  }
+  }
+  PrintHitCollectionL(Ssd,ssd,layer,Layers);
+  PrintHitCollection(Tof,tof);
+  PrintHitCollectionL(Pixel,pixel,layer,Layers);
+  PrintHitCollectionL(Ist,ist,layer,Layers);
+  PrintHitCollectionL(Igt,igt,layer,Layers);
+  PrintHitCollectionL(Fst,fst,layer,Layers);
+  PrintHitCollectionL(Fgt,fgt,layer,Layers);
+  
+  TDataSet *mcEvent = (TDataSet *) this;
+  TDataSetIter next(mcEvent);
+  TDataSet *ds = 0;
+  while( (ds = next())) {
+    StMcEmcHitCollection *emcColl = dynamic_cast<StMcEmcHitCollection *>(ds);
+    if (emcColl) emcColl->print();
+  }
+}  
+#undef  PrintHitCollection
+#undef  PrintHitCollectionL
+#undef  PrintHeader
+  

@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.17 2005/07/07 18:21:18 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.18 2005/09/28 21:30:51 fisyak Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.18  2005/09/28 21:30:51  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 1.17  2005/07/07 18:21:18  calderon
  * Added code for filling of IGT classes.
  *
@@ -82,7 +85,7 @@ class St_g2t_emc_hit;
 class StMcEventMaker : public StMaker {
 public:
 
-    StMcEventMaker(const char* name = "StMcEvent", const char* title = "");
+    StMcEventMaker(const char* name = "StMcEventMaker", const char* title = "");
     virtual ~StMcEventMaker();
 
     virtual void  Clear(const char* opt="");
@@ -90,10 +93,8 @@ public:
     virtual Int_t Make();
     virtual Int_t Finish();
 
-    StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
-
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.17 2005/07/07 18:21:18 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.18 2005/09/28 21:30:51 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -118,14 +119,11 @@ public:
     Bool_t  doUseFgt;              //!
 
     void   printEventInfo();                               // *MENU* 
-    void   printEventInfoForEmcDet(unsigned int det=1);    // *MENU* 
 protected:
     void   fillBemc(St_g2t_emc_hit*);
     void   fillBsmd(St_g2t_emc_hit*);
     void   fillEemc(St_g2t_emc_hit* g2t_tile,St_g2t_emc_hit* g2t_smd);
 
-    void   printTrackInfo(StMcTrack*);
-    void   printEventInfoForEmc(StMcEmcHitCollection*); 
 
 private:
 #ifndef ST_NO_TEMPLATE_DEF_ARGS	  
@@ -135,10 +133,9 @@ private:
     vector<StMcTrack*, allocator<StMcTrack*> > ttemp; //!
     vector<StMcTrack*, allocator<StMcTrack*> > ttempParticle; //!
 #endif
-    Bool_t drawinit;
     StMcEvent* mCurrentMcEvent; //!  This tells CINT not to parse it.
 
-    ClassDef(StMcEventMaker,0)
+    ClassDef(StMcEventMaker,1)
 
 };
 

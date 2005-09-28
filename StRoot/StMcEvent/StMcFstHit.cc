@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.cc,v 2.4 2005/07/19 20:07:34 calderon Exp $
+ * $Id: StMcFstHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcFstHit.cc,v $
+ * Revision 2.5  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.4  2005/07/19 20:07:34  calderon
  * Addition of default constructor, including base class StMcHit constructor.
  * Bracket calls to StMemoryPool inside #ifdef.
@@ -24,7 +27,7 @@
 #include "StMcFstHit.hh"
 #include "tables/St_g2t_fst_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.4 2005/07/19 20:07:34 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $";
 
 ClassImp(StMcFstHit)
     
@@ -52,9 +55,8 @@ StMcFstHit::StMcFstHit(g2t_fst_hit_st* pt)
 StMcFstHit::~StMcFstHit() {/* noop */ }
 //------------------------------------------
 ostream&  operator<<(ostream& os, const StMcFstHit& h) {
-  os << "Position      : " << h.position() << endl; 
-  os << "Local Momentum: " << h.localMomentum() << endl; 
-  os << "Layer         : " << h.layer()    << endl;
+  os << "FstHit\t" << *((StMcHit *) &h)
+     << "\tLayer:" << h.layer();
   return os;
 }
 

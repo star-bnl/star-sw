@@ -1,6 +1,9 @@
-// $Id: StMcCalorimeterHit.cc,v 2.4 2005/01/27 23:40:46 calderon Exp $
+// $Id: StMcCalorimeterHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $
 //
 // $Log: StMcCalorimeterHit.cc,v $
+// Revision 2.5  2005/09/28 21:30:14  fisyak
+// Persistent StMcEvent
+//
 // Revision 2.4  2005/01/27 23:40:46  calderon
 // Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
 //
@@ -22,7 +25,7 @@
 #include "StMcTrack.hh"
 #include "StParticleDefinition.hh"
 
-// static const char rcsid[] = "$Id: StMcCalorimeterHit.cc,v 2.4 2005/01/27 23:40:46 calderon Exp $";
+// static const char rcsid[] = "$Id: StMcCalorimeterHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $";
 
 //StMemoryPool StMcCalorimeterHit::mPool(sizeof(StMcCalorimeterHit));
 ClassImp(StMcCalorimeterHit);
@@ -75,18 +78,18 @@ void StMcCalorimeterHit::setParentTrack(StMcTrack* val) { mParentTrack = val; }
     
 ostream& operator<<(ostream& os, const StMcCalorimeterHit & h)
 {
-    os << " m: " << h.module();
-    os << " e: " << h.eta();
-    os << " s: " << h.sub();
-    os << " dE: " << h.dE();
+  os << "CalHit\t" 
+     << " m: " << h.module()
+     << " e: " << h.eta()
+     << " s: " << h.sub()
+     << " dE: " << h.dE();
     if(h.parentTrack()) {
       StMcTrack* t=h.parentTrack();
       if(t->particleDefinition()){
-        os << " | g2t key  : " << t->key();
-        os << " Name: "<<(t->particleDefinition()->name()).c_str();
+        os << " | g2t key  : " << t->key()
+	   << " Name: "<<(t->particleDefinition()->name()).c_str();
       }
     }
     else os <<" Parent track undefined ";
-    os <<endl;
     return os;
 }

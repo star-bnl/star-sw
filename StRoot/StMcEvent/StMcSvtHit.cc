@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.9 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSvtHit.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.10  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.9  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -44,7 +47,7 @@
 #include "StMcSvtHit.hh"
 #include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.9 2005/01/27 23:40:48 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
 #endif
@@ -73,12 +76,10 @@ StMcSvtHit::~StMcSvtHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcSvtHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl;
-    os << "Volume Id     : " << h.volumeId() << endl;
-    os << "Layer         : " << h.layer()    << endl;
-    os << "Ladder        : " << h.ladder()   << endl;
-    os << "Wafer         : " << h.wafer()    << endl;
-    os << "Barrel        : " << h.barrel()   << endl;
-    return os;
+  os << "SvtHit\t" << *((StMcHit *) &h)
+     << "\tLayer: " << h.layer()  
+     << " Ladder: " << h.ladder() 
+     << " Wafer: " << h.wafer()  
+     << " Barrel: " << h.barrel();
+  return os;
 }

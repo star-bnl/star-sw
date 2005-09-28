@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.cc,v 2.6 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcRichHit.cc,v 2.7 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcRichHit.cc,v $
+ * Revision 2.7  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.6  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -29,7 +32,7 @@
 #include "StMcRichHit.hh"
 #include "tables/St_g2t_rch_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.6 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.7 2005/09/28 21:30:15 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcRichHit::mPool(sizeof(StMcRichHit));
 #endif
@@ -58,10 +61,9 @@ StMcRichHit::~StMcRichHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcRichHit& h)
 {
-    os << "Position       : " << h.position() << endl; 
-    os << "Local Momentum : " << h.localMomentum()    << endl;
-    os << "Pad            : " << h.pad()    << endl;
-    os << "Row            : " << h.row()   << endl;
-    os << "T. of Flight   : " << h.tof()   << endl;
-    return os;
+  os << "RichHit\t" << *((StMcHit *) &h)
+     << "\tPad:" << h.pad()
+     << " Row:" << h.row() 
+     << " T. of Flight:" << h.tof();
+  return os;
 }

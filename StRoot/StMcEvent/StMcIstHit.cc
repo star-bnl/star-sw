@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.3 2005/07/19 20:07:34 calderon Exp $
+ * $Id: StMcIstHit.cc,v 2.4 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.4  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.3  2005/07/19 20:07:34  calderon
  * Addition of default constructor, including base class StMcHit constructor.
  * Bracket calls to StMemoryPool inside #ifdef.
@@ -27,7 +30,7 @@
 #include "StMcIstHit.hh"
 #include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.3 2005/07/19 20:07:34 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.4 2005/09/28 21:30:15 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
@@ -53,10 +56,9 @@ StMcIstHit::~StMcIstHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcIstHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "Layer         : " << h.layer()    << endl;
-    return os;
+  os << "IstHit\t" << *((StMcHit *) &h)
+     << "\tLayer:" << h.layer();
+  return os;
 }
 
 unsigned long

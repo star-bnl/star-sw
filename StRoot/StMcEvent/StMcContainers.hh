@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.hh,v 2.10 2005/07/07 18:20:48 calderon Exp $
+ * $Id: StMcContainers.hh,v 2.11 2005/09/28 21:30:14 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.11  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.10  2005/07/07 18:20:48  calderon
  * Added support for IGT detector.
  *
@@ -33,6 +36,9 @@
  * accordingly.
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.11  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.10  2005/07/07 18:20:48  calderon
  * Added support for IGT detector.
  *
@@ -103,110 +109,110 @@ class StMcTrack;
    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 // Owners
-typedef vector<StMcHit*>     StSPtrVecMcHit;    //! 
-typedef vector<StMcVertex*>  StSPtrVecMcVertex; //!
-typedef vector<StMcCalorimeterHit*>     StSPtrVecMcCalorimeterHit;  //! 
-typedef vector<StMcSvtHit*>  StSPtrVecMcSvtHit; //!
-typedef vector<StMcSsdHit*>  StSPtrVecMcSsdHit; //!
-typedef vector<StMcTpcHit*>  StSPtrVecMcTpcHit; //!
-typedef vector<StMcFtpcHit*> StSPtrVecMcFtpcHit; //!
-typedef vector<StMcRichHit*> StSPtrVecMcRichHit; //!
-typedef vector<StMcCtbHit*>  StSPtrVecMcCtbHit; //!
-typedef vector<StMcPixelHit*> StSPtrVecMcPixelHit; //!
-typedef vector<StMcIstHit*>  StSPtrVecMcIstHit; //!
-typedef vector<StMcIgtHit*>  StSPtrVecMcIgtHit; //!
-typedef vector<StMcFstHit*>  StSPtrVecMcFstHit; //!
-typedef vector<StMcFgtHit*>  StSPtrVecMcFgtHit; //!
-typedef vector<StMcTofHit*>  StSPtrVecMcTofHit; //!
-typedef vector<StMcTrack*>   StSPtrVecMcTrack;  //!
+typedef vector<StMcHit*>     StSPtrVecMcHit;     
+typedef vector<StMcVertex*>  StSPtrVecMcVertex; 
+typedef vector<StMcCalorimeterHit*>     StSPtrVecMcCalorimeterHit;   
+typedef vector<StMcSvtHit*>  StSPtrVecMcSvtHit; 
+typedef vector<StMcSsdHit*>  StSPtrVecMcSsdHit; 
+typedef vector<StMcTpcHit*>  StSPtrVecMcTpcHit; 
+typedef vector<StMcFtpcHit*> StSPtrVecMcFtpcHit; 
+typedef vector<StMcRichHit*> StSPtrVecMcRichHit; 
+typedef vector<StMcCtbHit*>  StSPtrVecMcCtbHit; 
+typedef vector<StMcPixelHit*> StSPtrVecMcPixelHit; 
+typedef vector<StMcIstHit*>  StSPtrVecMcIstHit; 
+typedef vector<StMcIgtHit*>  StSPtrVecMcIgtHit; 
+typedef vector<StMcFstHit*>  StSPtrVecMcFstHit; 
+typedef vector<StMcFgtHit*>  StSPtrVecMcFgtHit; 
+typedef vector<StMcTofHit*>  StSPtrVecMcTofHit; 
+typedef vector<StMcTrack*>   StSPtrVecMcTrack;  
 // Not owners
-typedef vector<StMcVertex*>  StPtrVecMcVertex; //!
-typedef vector<StMcCalorimeterHit*>     StPtrVecMcCalorimeterHit;  //! 
-typedef vector<StMcHit*>     StPtrVecMcHit;    //! 
-typedef vector<StMcSvtHit*>  StPtrVecMcSvtHit; //!
-typedef vector<StMcSsdHit*>  StPtrVecMcSsdHit; //!
-typedef vector<StMcTpcHit*>  StPtrVecMcTpcHit; //!
-typedef vector<StMcFtpcHit*> StPtrVecMcFtpcHit; //!
-typedef vector<StMcRichHit*> StPtrVecMcRichHit; //!
-typedef vector<StMcCtbHit*>  StPtrVecMcCtbHit; //!
-typedef vector<StMcPixelHit*> StPtrVecMcPixelHit; //!
-typedef vector<StMcIstHit*>  StPtrVecMcIstHit; //!
-typedef vector<StMcIgtHit*>  StPtrVecMcIgtHit; //!
-typedef vector<StMcFstHit*>  StPtrVecMcFstHit; //!
-typedef vector<StMcFgtHit*>  StPtrVecMcFgtHit; //!
-typedef vector<StMcTofHit*>  StPtrVecMcTofHit; //!
-typedef vector<StMcTrack*>   StPtrVecMcTrack; //!
+typedef vector<StMcVertex*>  StPtrVecMcVertex; 
+typedef vector<StMcCalorimeterHit*>     StPtrVecMcCalorimeterHit;   
+typedef vector<StMcHit*>     StPtrVecMcHit;     
+typedef vector<StMcSvtHit*>  StPtrVecMcSvtHit; 
+typedef vector<StMcSsdHit*>  StPtrVecMcSsdHit; 
+typedef vector<StMcTpcHit*>  StPtrVecMcTpcHit; 
+typedef vector<StMcFtpcHit*> StPtrVecMcFtpcHit; 
+typedef vector<StMcRichHit*> StPtrVecMcRichHit; 
+typedef vector<StMcCtbHit*>  StPtrVecMcCtbHit; 
+typedef vector<StMcPixelHit*> StPtrVecMcPixelHit; 
+typedef vector<StMcIstHit*>  StPtrVecMcIstHit; 
+typedef vector<StMcIgtHit*>  StPtrVecMcIgtHit; 
+typedef vector<StMcFstHit*>  StPtrVecMcFstHit; 
+typedef vector<StMcFgtHit*>  StPtrVecMcFgtHit; 
+typedef vector<StMcTofHit*>  StPtrVecMcTofHit; 
+typedef vector<StMcTrack*>   StPtrVecMcTrack; 
 #else
 //Owners
-typedef vector<StMcHit*, allocator<StMcHit*> >          StSPtrVecMcHit; //!
-typedef vector<StMcVertex*, allocator<StMcVertex*> >    StSPtrVecMcVertex; //!
+typedef vector<StMcHit*, allocator<StMcHit*> >          StSPtrVecMcHit; 
+typedef vector<StMcVertex*, allocator<StMcVertex*> >    StSPtrVecMcVertex; 
 typedef vector<StMcCalorimeterHit*, allocator<StMcCalorimeterHit*> > 
-StSPtrVecMcCalorimeterHit;  //!
-typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >    StSPtrVecMcSvtHit; //!
-typedef vector<StMcSsdHit*, allocator<StMcSsdHit*> >    StSPtrVecMcSsdHit; //!
-typedef vector<StMcTpcHit*, allocator<StMcTpcHit*> >    StSPtrVecMcTpcHit; //!
-typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >  StSPtrVecMcFtpcHit; //!
-typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StSPtrVecMcRichHit; //!
-typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StSPtrVecMcCtbHit; //!
-typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StSPtrVecMcPixelHit; //!
-typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StSPtrVecMcIstHit; //!
-typedef vector<StMcIgtHit*, allocator<StMcIgtHit*> >    StSPtrVecMcIgtHit; //!
-typedef vector<StMcFstHit*, allocator<StMcFstHit*> >    StSPtrVecMcFstHit; //!
-typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StSPtrVecMcFgtHit; //!
-typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StSPtrVecMcTofHit; //!
-typedef vector<StMcTrack*, allocator<StMcTrack*> >      StSPtrVecMcTrack; //!
+StSPtrVecMcCalorimeterHit;  
+typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >    StSPtrVecMcSvtHit; 
+typedef vector<StMcSsdHit*, allocator<StMcSsdHit*> >    StSPtrVecMcSsdHit; 
+typedef vector<StMcTpcHit*, allocator<StMcTpcHit*> >    StSPtrVecMcTpcHit; 
+typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >  StSPtrVecMcFtpcHit; 
+typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StSPtrVecMcRichHit; 
+typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StSPtrVecMcCtbHit; 
+typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StSPtrVecMcPixelHit; 
+typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StSPtrVecMcIstHit; 
+typedef vector<StMcIgtHit*, allocator<StMcIgtHit*> >    StSPtrVecMcIgtHit; 
+typedef vector<StMcFstHit*, allocator<StMcFstHit*> >    StSPtrVecMcFstHit; 
+typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StSPtrVecMcFgtHit; 
+typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StSPtrVecMcTofHit; 
+typedef vector<StMcTrack*, allocator<StMcTrack*> >      StSPtrVecMcTrack; 
 // Not owners
-typedef vector<StMcVertex*, allocator<StMcVertex*> >    StPtrVecMcVertex; //!
-typedef vector<StMcCalorimeterHit*, allocator<StMcCalorimeterHit*> > StPtrVecMcCalorimeterHit;  //!
-typedef vector<StMcHit*, allocator<StMcHit*> >          StPtrVecMcHit; //!
-typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >    StPtrVecMcSvtHit; //!
-typedef vector<StMcSsdHit*, allocator<StMcSsdHit*> >    StPtrVecMcSsdHit; //!
-typedef vector<StMcTpcHit*, allocator<StMcTpcHit*> >    StPtrVecMcTpcHit; //!
-typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >  StPtrVecMcFtpcHit; //!
-typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StPtrVecMcRichHit; //!
-typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StPtrVecMcCtbHit; //!
-typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StPtrVecMcPixelHit; //!
-typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StPtrVecMcIstHit; //!
-typedef vector<StMcIgtHit*, allocator<StMcIgtHit*> >    StPtrVecMcIgtHit; //!
-typedef vector<StMcFstHit*, allocator<StMcFstHit*> >    StPtrVecMcFstHit; //!
-typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StPtrVecMcFgtHit; //!
-typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StPtrVecMcTofHit; //!
-typedef vector<StMcTrack*, allocator<StMcTrack*> >      StPtrVecMcTrack; //!
+typedef vector<StMcVertex*, allocator<StMcVertex*> >    StPtrVecMcVertex; 
+typedef vector<StMcCalorimeterHit*, allocator<StMcCalorimeterHit*> > StPtrVecMcCalorimeterHit;  
+typedef vector<StMcHit*, allocator<StMcHit*> >          StPtrVecMcHit; 
+typedef vector<StMcSvtHit*, allocator<StMcSvtHit*> >    StPtrVecMcSvtHit; 
+typedef vector<StMcSsdHit*, allocator<StMcSsdHit*> >    StPtrVecMcSsdHit; 
+typedef vector<StMcTpcHit*, allocator<StMcTpcHit*> >    StPtrVecMcTpcHit; 
+typedef vector<StMcFtpcHit*, allocator<StMcFtpcHit*> >  StPtrVecMcFtpcHit; 
+typedef vector<StMcRichHit*, allocator<StMcRichHit*> >  StPtrVecMcRichHit; 
+typedef vector<StMcCtbHit*, allocator<StMcCtbHit*> >    StPtrVecMcCtbHit; 
+typedef vector<StMcPixelHit*, allocator<StMcPixelHit*> >  StPtrVecMcPixelHit; 
+typedef vector<StMcIstHit*, allocator<StMcIstHit*> >    StPtrVecMcIstHit; 
+typedef vector<StMcIgtHit*, allocator<StMcIgtHit*> >    StPtrVecMcIgtHit; 
+typedef vector<StMcFstHit*, allocator<StMcFstHit*> >    StPtrVecMcFstHit; 
+typedef vector<StMcFgtHit*, allocator<StMcFgtHit*> >    StPtrVecMcFgtHit; 
+typedef vector<StMcTofHit*, allocator<StMcTofHit*> >    StPtrVecMcTofHit; 
+typedef vector<StMcTrack*, allocator<StMcTrack*> >      StPtrVecMcTrack; 
 
 #endif // no template default arguments
 //Iterators
-typedef StPtrVecMcVertex::iterator  StMcVertexIterator; //!
-typedef StPtrVecMcCalorimeterHit::iterator  StMcCalorimeterHitIterator; //!
-typedef StPtrVecMcHit::iterator     StMcHitIterator; //!
-typedef StPtrVecMcSvtHit::iterator  StMcSvtHitIterator; //!
-typedef StPtrVecMcSsdHit::iterator  StMcSsdHitIterator; //!
-typedef StPtrVecMcTpcHit::iterator  StMcTpcHitIterator; //!
-typedef StPtrVecMcFtpcHit::iterator StMcFtpcHitIterator; //!
-typedef StPtrVecMcRichHit::iterator StMcRichHitIterator; //!
-typedef StPtrVecMcCtbHit::iterator  StMcCtbHitIterator; //!
-typedef StPtrVecMcPixelHit::iterator StMcPixelHitIterator; //!
-typedef StPtrVecMcIstHit::iterator  StMcIstHitIterator; //!
-typedef StPtrVecMcIgtHit::iterator  StMcIgtHitIterator; //!
-typedef StPtrVecMcFstHit::iterator  StMcFstHitIterator; //!
-typedef StPtrVecMcFgtHit::iterator  StMcFgtHitIterator; //!
-typedef StPtrVecMcTofHit::iterator  StMcTofHitIterator; //!
-typedef StPtrVecMcTrack::iterator   StMcTrackIterator; //!
+typedef StPtrVecMcVertex::iterator  StMcVertexIterator; 
+typedef StPtrVecMcCalorimeterHit::iterator  StMcCalorimeterHitIterator; 
+typedef StPtrVecMcHit::iterator     StMcHitIterator; 
+typedef StPtrVecMcSvtHit::iterator  StMcSvtHitIterator; 
+typedef StPtrVecMcSsdHit::iterator  StMcSsdHitIterator; 
+typedef StPtrVecMcTpcHit::iterator  StMcTpcHitIterator; 
+typedef StPtrVecMcFtpcHit::iterator StMcFtpcHitIterator; 
+typedef StPtrVecMcRichHit::iterator StMcRichHitIterator; 
+typedef StPtrVecMcCtbHit::iterator  StMcCtbHitIterator; 
+typedef StPtrVecMcPixelHit::iterator StMcPixelHitIterator; 
+typedef StPtrVecMcIstHit::iterator  StMcIstHitIterator; 
+typedef StPtrVecMcIgtHit::iterator  StMcIgtHitIterator; 
+typedef StPtrVecMcFstHit::iterator  StMcFstHitIterator; 
+typedef StPtrVecMcFgtHit::iterator  StMcFgtHitIterator; 
+typedef StPtrVecMcTofHit::iterator  StMcTofHitIterator; 
+typedef StPtrVecMcTrack::iterator   StMcTrackIterator; 
 //Const Iterators
-typedef StPtrVecMcVertex::const_iterator  StMcVertexConstIterator; //!
-typedef StPtrVecMcCalorimeterHit::const_iterator  StMcCalorimeterHitConstIterator;//!
-typedef StPtrVecMcHit::const_iterator     StMcSvtConstIterator; //!
-typedef StPtrVecMcSvtHit::const_iterator  StMcSvtHitConstIterator; //!
-typedef StPtrVecMcSsdHit::const_iterator  StMcSsdHitConstIterator; //!
-typedef StPtrVecMcTpcHit::const_iterator  StMcTpcHitConstIterator; //!
-typedef StPtrVecMcFtpcHit::const_iterator StMcFtpcHitConstIterator; //!
-typedef StPtrVecMcRichHit::const_iterator StMcRichHitConstIterator; //!
-typedef StPtrVecMcCtbHit::const_iterator  StMcCtbHitConstIterator; //!
-typedef StPtrVecMcPixelHit::const_iterator StMcPixelHitConstIterator; //!
-typedef StPtrVecMcIstHit::const_iterator  StMcIstHitConstIterator; //!
-typedef StPtrVecMcIgtHit::const_iterator  StMcIgtHitConstIterator; //!
-typedef StPtrVecMcFstHit::const_iterator  StMcFstHitConstIterator; //!
-typedef StPtrVecMcFgtHit::const_iterator  StMcFgtHitConstIterator; //!
-typedef StPtrVecMcTofHit::const_iterator  StMcTofHitConstIterator; //!
-typedef StPtrVecMcTrack::const_iterator   StMcTrackConstIterator; //!
-
+typedef StPtrVecMcVertex::const_iterator  StMcVertexConstIterator; 
+typedef StPtrVecMcCalorimeterHit::const_iterator  StMcCalorimeterHitConstIterator;
+typedef StPtrVecMcHit::const_iterator     StMcSvtConstIterator; 
+typedef StPtrVecMcSvtHit::const_iterator  StMcSvtHitConstIterator; 
+typedef StPtrVecMcSsdHit::const_iterator  StMcSsdHitConstIterator; 
+typedef StPtrVecMcTpcHit::const_iterator  StMcTpcHitConstIterator; 
+typedef StPtrVecMcFtpcHit::const_iterator StMcFtpcHitConstIterator; 
+typedef StPtrVecMcRichHit::const_iterator StMcRichHitConstIterator; 
+typedef StPtrVecMcCtbHit::const_iterator  StMcCtbHitConstIterator; 
+typedef StPtrVecMcPixelHit::const_iterator StMcPixelHitConstIterator; 
+typedef StPtrVecMcIstHit::const_iterator  StMcIstHitConstIterator; 
+typedef StPtrVecMcIgtHit::const_iterator  StMcIgtHitConstIterator; 
+typedef StPtrVecMcFstHit::const_iterator  StMcFstHitConstIterator; 
+typedef StPtrVecMcFgtHit::const_iterator  StMcFgtHitConstIterator; 
+typedef StPtrVecMcTofHit::const_iterator  StMcTofHitConstIterator; 
+typedef StPtrVecMcTrack::const_iterator   StMcTrackConstIterator; 
+//     ClassDef(StMcContainers,0)
 #endif //StMcContainers

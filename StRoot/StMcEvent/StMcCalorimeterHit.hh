@@ -1,6 +1,9 @@
-// $Id: StMcCalorimeterHit.hh,v 2.6 2005/01/27 23:40:46 calderon Exp $
+// $Id: StMcCalorimeterHit.hh,v 2.7 2005/09/28 21:30:14 fisyak Exp $
 //
 // $Log: StMcCalorimeterHit.hh,v $
+// Revision 2.7  2005/09/28 21:30:14  fisyak
+// Persistent StMcEvent
+//
 // Revision 2.6  2005/01/27 23:40:46  calderon
 // Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
 //
@@ -74,7 +77,7 @@ protected:
     StMcTrack*           mParentTrack;
 
   //private:
-  //  static StMemoryPool mPool; //!
+  //  static StMemoryPool mPool; 
     ClassDef(StMcCalorimeterHit,1)
 };
 

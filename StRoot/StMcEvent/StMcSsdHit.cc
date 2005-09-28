@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcSsdHit.cc,v 2.3 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcSsdHit.cc,v $
+ * Revision 2.3  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.2  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -23,7 +26,7 @@
 #include "StMcSsdHit.hh"
 #include "tables/St_g2t_ssd_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.3 2005/09/28 21:30:15 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcSsdHit::mPool(sizeof(StMcSsdHit));
 #endif
@@ -52,10 +55,9 @@ StMcSsdHit::~StMcSsdHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcSsdHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "Layer         : " << h.layer()    << endl;
-    return os;
+  os << "SsdHit\t" << *((StMcHit *) &h)
+     << "\tLayer: " << h.layer();
+  return os;
 }
 
 unsigned long

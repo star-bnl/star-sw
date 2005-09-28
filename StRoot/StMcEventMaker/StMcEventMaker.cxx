@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.58 2005/08/09 03:31:57 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.59 2005/09/28 21:30:51 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.59  2005/09/28 21:30:51  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 1.58  2005/08/09 03:31:57  perev
  * LeakFix
  *
@@ -269,7 +272,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.58 2005/08/09 03:31:57 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.59 2005/09/28 21:30:51 fisyak Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -312,7 +315,7 @@ StMcEventMaker::~StMcEventMaker()
 {
     // StMcEventMaker - destructor
     if (Debug()>=2) cout << "Inside ReaderMaker Destructor" << endl;
-    SafeDelete(mCurrentMcEvent);  //
+    //    SafeDelete(mCurrentMcEvent);  //
 
 }
 
@@ -325,7 +328,7 @@ void StMcEventMaker::Clear(const char*)
     if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();    
     // StMcEventMaker - Clear,
     if (mCurrentMcEvent) {
-	delete mCurrentMcEvent;
+      //	delete mCurrentMcEvent;
 	mCurrentMcEvent = 0;
     }
     if (doPrintMemoryInfo) {
@@ -433,12 +436,14 @@ Int_t StMcEventMaker::Make()
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
 
     // For backwards compatibility, look for the rch and particle tables also in the dstBranch
-    St_DataSetIter dstDstI(GetDataSet("dst"));
-    if (!particleTablePointer)
+    TDataSet *dst = GetDataSet("dst");
+    if (dst) {
+      St_DataSetIter dstDstI(dst);
+      if (!particleTablePointer)
 	particleTablePointer    = (St_particle    *) dstDstI("particle");
-    if (!g2t_rch_hitTablePointer)
+      if (!g2t_rch_hitTablePointer)
 	g2t_rch_hitTablePointer = (St_g2t_rch_hit *) dstDstI("g2t_rch_hit");
-
+    }
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
     if (g2t_vertexTablePointer && g2t_trackTablePointer){
@@ -686,6 +691,7 @@ Int_t StMcEventMaker::Make()
 	    gMessMgr->Warning() << "Could not create StMcEvent! Exit from StMcEventMaker." << endm;
 	    return kStWarn;
 	}
+	AddData(mCurrentMcEvent);
 	//______________________________________________________________________
 	// Step 2 - Fill Vertices - we do not fill parent/daughters until Step 3
 	
@@ -759,6 +765,7 @@ Int_t StMcEventMaker::Make()
 
 	long motherIndex = -1;  // Set it to some unused number. 
 	{for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
+	    if (particleTable[gtrk].isthep > 3) continue; // skip comment fields
 	    egTrk = new StMcTrack(&(particleTable[gtrk]));
 	    egTrk->setEventGenLabel(gtrk+1);
 	    ttempParticle[gtrk] = egTrk;
@@ -957,9 +964,9 @@ Int_t StMcEventMaker::Make()
 			else nBadVolId++;
 			continue;
 		    }
-		    
+		    //		    g2t_tpc_hitTablePointer->Print(ihit,1);		  
 		    th = new StMcTpcHit(&tpcHitTable[ihit]);
-		    
+		    //		    cout << "McTpcHit\t" << ihit << *th << endl;
 		    if(!mCurrentMcEvent->tpcHitCollection()->addHit(th)) {// adds hit th to collection
 			nBadVolId++;
 			delete th;
@@ -988,7 +995,21 @@ Int_t StMcEventMaker::Make()
 			  iPadrow<mCurrentMcEvent->tpcHitCollection()->sector(iSector)->numberOfPadrows();
 			  iPadrow++) {
 			StSPtrVecMcTpcHit& tpcHits = mCurrentMcEvent->tpcHitCollection()->sector(iSector)->padrow(iPadrow)->hits();
+			if (Debug() > 2) {
+			  Int_t nhits = tpcHits.size();
+			  cout << "Tpc hits before sort" << endl;
+			  for (int i = 0; i < nhits; i++) {
+			    cout << *(tpcHits[i]) << endl;
+			  }
+			}
 			sort (tpcHits.begin(), tpcHits.end(), compMcHit() );
+			if (Debug() > 2) {
+			  Int_t nhits = tpcHits.size();
+			  cout << "Tpc hits after sort" << endl;
+			  for (int i = 0; i < nhits; i++) {
+			    cout << *(tpcHits[i]) << endl;
+			  }
+			}
 			
 		    }
 	    } // pointer exists
@@ -1500,12 +1521,7 @@ StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
     StMcCalorimeterHit *emchBemc, *emchBprs;
 	
     StMcEmcHitCollection *bemcColl=mCurrentMcEvent->bemcHitCollection();
-    m_DataSet->Add(bemcColl);
-    bemcColl->SetName("BemcHits");
     StMcEmcHitCollection  *bprsColl=mCurrentMcEvent->bprsHitCollection();
-    m_DataSet->Add(bprsColl);
-    bprsColl->SetName("BprsHits");
-		
     long NHits = g2t_emc_hitTablePointer->GetNRows();
 		
     for(long ihit=0; ihit<NHits; ihit++,emcHitTable++) { 
@@ -1586,12 +1602,7 @@ StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
     StMcCalorimeterHit *emchBsmde, *emchBsmdp;
 
     StMcEmcHitCollection *bsmdeColl=mCurrentMcEvent->bsmdeHitCollection();
-    m_DataSet->Add(bsmdeColl);
-    bsmdeColl->SetName("BsmdeHits");
     StMcEmcHitCollection *bsmdpColl=mCurrentMcEvent->bsmdpHitCollection();
-    m_DataSet->Add(bsmdpColl);
-    bsmdpColl->SetName("BsmdpHits");
-
     long NHits = g2t_smd_hitTablePointer->GetNRows();
     for(long ihit=0; ihit<NHits; ihit++,smdHitTable++) { 
 	geomBsmd->getVolIdBsmd(smdHitTable->volume_id, module,eta,sub,detector); // Must check ??
@@ -1652,14 +1663,6 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
 	return;
     }
     
-    m_DataSet->Add(eemcColl);
-    eemcColl->SetName("EemcHits");
-    m_DataSet->Add(eprsColl);
-    eprsColl->SetName("EprsHits");
-    m_DataSet->Add(esmduColl);
-    esmduColl->SetName("EsmduHits");
-    m_DataSet->Add(esmdvColl);
-    esmdvColl->SetName("EsmdvHits");
     
     int nHit;
     const EEmcMCHit *h  = mEemcGeant.getGeantHits(nHit);
@@ -1744,354 +1747,10 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_tile, St_g2t_emc_hit* g2t_smd){
 void
 StMcEventMaker::printEventInfo()
 {
-    cout << "*********************************************************" << endl;
-    cout << "*                  StMcEvent Information                *" << endl;
-    cout << "*********************************************************" << endl;
-
     cout << "---------------------------------------------------------" << endl;
     cout << "StMcEvent at " << (void*) mCurrentMcEvent                  << endl;
     cout << "---------------------------------------------------------" << endl;
-    if (mCurrentMcEvent)
-	cout << *mCurrentMcEvent << endl;
-    else
-	return;
-
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecMcTrack"                                          << endl;
-    cout << "Dumping first element in collection only (if available). " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "collection size = " << mCurrentMcEvent->tracks().size()    << endl;
-    if (mCurrentMcEvent->tracks().size()) {
-	cout << "---------------------------------------------------------" << endl;
-	cout << "StMcTrack at "
-	     << (void*) mCurrentMcEvent->tracks()[0]                        << endl;
-	cout << "---------------------------------------------------------" << endl;
-	cout << *(mCurrentMcEvent->tracks()[0])                             << endl;
-    }
-
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcVertex"                                                << endl;
-    cout << "Dumping vertex info and first daughter track.            " << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "Primary Vertex at "
-	 << (void*) mCurrentMcEvent->primaryVertex()                    << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << *(mCurrentMcEvent->primaryVertex())                         << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "Daughters of Primary Vertex : "
-	 << mCurrentMcEvent->primaryVertex()->numberOfDaughters() << endl;
-    if (mCurrentMcEvent->primaryVertex()->numberOfDaughters()) {
-	cout << "First Daughter of Primary Vertex" << endl;
-	cout << *(mCurrentMcEvent->primaryVertex()->daughter(0));
-    }
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StSPtrVecMcVertex"                                         << endl;
-    cout << "# of Vertices    : " << mCurrentMcEvent->vertices().size() << endl;
-    cout << "---------------------------------------------------------" << endl;
-    cout << "Dumping second element in collection (First is Primary). " << endl;
-    if (mCurrentMcEvent->vertices().size()>1) {
-	cout << "---------------------------------------------------------" << endl;
-	cout << "Second StMcVertex at "
-	     << (void*) mCurrentMcEvent->vertices()[1]                      << endl;
-	cout << "---------------------------------------------------------" << endl;
-	cout << *(mCurrentMcEvent->vertices()[1])                           << endl;
-	cout << "---------------------------------------------------------" << endl;
-	cout << "Daughters of second Vertex : "
-	     << mCurrentMcEvent->vertices()[1]->numberOfDaughters() << endl;
-	if (mCurrentMcEvent->vertices()[1]->numberOfDaughters()) {
-	    cout << "First Daughter of this Vertex" << endl;
-	    cout << *(mCurrentMcEvent->vertices()[1]->daughter(0));
-	}
-	
-    }
-
-    
-    unsigned int       i, j, k, nhits;
-    Bool_t             gotOneHit;
-    StMcTpcHitCollection *tpcColl = mCurrentMcEvent->tpcHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcTpcHitCollection at " << (void*) tpcColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = tpcColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (tpcColl && nhits) {
-	
-	
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
-	    for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
-		if (tpcColl->sector(k)->padrow(j)->hits().size()) {
-		    cout << "Tpc Hit" << endl;
-		    cout << *(tpcColl->sector(k)->padrow(j)->hits()[0]);
-		    cout << "Parent track of this Hit" << endl;
-		    cout << *(tpcColl->sector(k)->padrow(j)->hits()[0]->parentTrack()) << endl;
-		    gotOneHit = kTRUE;
-		    cout << "Dumping all the z coordinates in this padrow" << endl;
-		    cout << "Should be sorted according to z: " << endl;
-		    cout << "---------------------------------------------------------" << endl;
-    		    for (StMcTpcHitIterator thi = tpcColl->sector(k)->padrow(j)->hits().begin();
-			 thi!=tpcColl->sector(k)->padrow(j)->hits().end(); thi++)
-			cout << (*thi)->position().z() << " ";
-		    cout << endl;
-		}
-    }
-    
-    StMcFtpcHitCollection *ftpcColl = mCurrentMcEvent->ftpcHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcFtpcHitCollection at " << (void*) ftpcColl             << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = ftpcColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (ftpcColl &&  nhits) {
-	
-	
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<ftpcColl->numberOfPlanes(); k++)
-	    if (ftpcColl->plane(k)->hits().size()) {
-		cout << "Ftpc Hit" << endl;
-		cout << *(ftpcColl->plane(k)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(ftpcColl->plane(k)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-    }
-    
-    StMcRichHitCollection *richColl = mCurrentMcEvent->richHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcRichHitCollection at " << (void*) richColl             << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = richColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (richColl &&  nhits) {
-	
-	if (richColl->hits().size()) {
-	    cout << "Rich Hit" << endl;
-	    cout << *(richColl->hits()[0]);
-	    cout << "Parent track of this Hit" << endl;
-	    cout << *(richColl->hits()[0]->parentTrack()) << endl;
-		
-	}
-    }
-    
-    StMcSvtHitCollection *svtColl = mCurrentMcEvent->svtHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcSvtHitCollection at " << (void*) svtColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = svtColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-
-    if (svtColl && nhits) {
-	
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
-	    for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
-		for (i=0; !gotOneHit && i<svtColl->barrel(k)->ladder(j)->numberOfWafers(); i++)
-		    if (svtColl->barrel(k)->ladder(j)->wafer(i)->hits().size()) {
-			cout << "Svt Hit" << endl;
-			cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]);
-			cout << "Parent track of this Hit" << endl;
-			cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[0]->parentTrack()) << endl;
-			gotOneHit = kTRUE;
-		    }
-    }
-    
-    StMcSsdHitCollection *ssdColl = mCurrentMcEvent->ssdHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcSsdHitCollection at " << (void*) ssdColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = ssdColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-
-    if (ssdColl && nhits) {
-      
-      gotOneHit = kFALSE;
-      for (k=0; !gotOneHit && k<ssdColl->numberOfLayers(); k++)
-	if (ssdColl->layer(k)->hits().size()) {
-	  cout << "Ssd Hit" << endl;
-	  cout << *(ssdColl->layer(k)->hits()[0]);
-	  cout << "Parent track of this Hit" << endl;
-	  cout << *(ssdColl->layer(k)->hits()[0]->parentTrack()) << endl;
-	  gotOneHit = kTRUE;
-	}
-    }
-
-    StMcTofHitCollection *tofColl = mCurrentMcEvent->tofHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcTofHitCollection at " << (void*) tofColl             << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = tofColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (tofColl &&  nhits) {
-	
-	if (tofColl->hits().size()) {
-	    cout << "Tof Hit" << endl;
-	    cout << *(tofColl->hits()[0]);
-	    cout << "Parent track of this Hit" << endl;
-	    cout << *(tofColl->hits()[0]->parentTrack()) << endl;
-	    
-	}
-    }
-    StMcPixelHitCollection *pixelColl = mCurrentMcEvent->pixelHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcPixelHitCollection at " << (void*) pixelColl           << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = pixelColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (pixelColl &&  nhits) {
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<pixelColl->numberOfLayers(); k++)
-	    if (pixelColl->layer(k)->hits().size()) {
-		cout << "Pixel Hit" << endl;
-		cout << *(pixelColl->layer(k)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(pixelColl->layer(k)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-	
-    }
-
-    StMcIstHitCollection *istColl = mCurrentMcEvent->istHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcIstHitCollection at " << (void*) istColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = istColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (istColl &&  nhits) {
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<istColl->numberOfLayers(); k++)
-	    if (istColl->layer(k)->hits().size()) {
-		cout << "Ist Hit" << endl;
-		cout << *(istColl->layer(k)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(istColl->layer(k)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-	
-    }
-
-    StMcIgtHitCollection *igtColl = mCurrentMcEvent->igtHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcIgtHitCollection at " << (void*) igtColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = igtColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (igtColl &&  nhits) {
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<igtColl->numberOfLayers(); k++)
-	    if (igtColl->layer(k)->hits().size()) {
-		cout << "Igt Hit" << endl;
-		cout << *(igtColl->layer(k)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(igtColl->layer(k)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-	
-    }
-
-    StMcFstHitCollection *fstColl = mCurrentMcEvent->fstHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcFstHitCollection at " << (void*) fstColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = fstColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (fstColl &&  nhits) {
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<fstColl->numberOfLayers(); k++)
-	    if (fstColl->layer(k)->hits().size()) {
-		cout << "Fst Hit" << endl;
-		cout << *(fstColl->layer(k)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(fstColl->layer(k)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-	
-    }
-
-    StMcFgtHitCollection *fgtColl = mCurrentMcEvent->fgtHitCollection();
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcFgtHitCollection at " << (void*) fgtColl               << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    nhits = fgtColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    if (fgtColl &&  nhits) {
-	gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<fgtColl->numberOfLayers(); k++)
-	    if (fgtColl->layer(k)->hits().size()) {
-		cout << "Fgt Hit" << endl;
-		cout << *(fgtColl->layer(k)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(fgtColl->layer(k)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-	
-    }
-
-    cout << endl;
-
-    printEventInfoForEmc(mCurrentMcEvent->bemcHitCollection());
-    printEventInfoForEmc(mCurrentMcEvent->bprsHitCollection());
-    printEventInfoForEmc(mCurrentMcEvent->bsmdeHitCollection());
-    printEventInfoForEmc(mCurrentMcEvent->bsmdpHitCollection());
-    printEventInfoForEmc(mCurrentMcEvent->eemcHitCollection());
-    
-}  
-
-void
-StMcEventMaker::printEventInfoForEmc(StMcEmcHitCollection *emcColl)
-{
-    bool gotOneHit;
-    unsigned int i, m;
-    
-    if(emcColl==0){
-	cout<<"<W> In StMcEventMaker::printEventInfoForEmc emcColl undefined" << endl;
-	return;
-    }
-    cout << "---------------------------------------------------------" << endl;
-    cout << "StMcEmcHitCollection at " << (void*) emcColl;
-    cout << "  name "<<emcColl->GetName() << endl;
-    cout << "Dumping collection size and one hit only."                 << endl;
-    cout << "---------------------------------------------------------" << endl;
-    int nhits = emcColl->numberOfHits();
-    cout << "# of hits in collection = " << nhits << endl;
-    
-    if (emcColl && nhits) {
-	gotOneHit = kFALSE;
-	for (i=0; !gotOneHit && i<emcColl->numberOfModules(); i++){
-	  m = i + 1; // module number
-	    if (emcColl->module(m)->hits().size()){
-		cout << *(emcColl->module(m)->hits()[0]);
-		cout << "Parent track of this Hit" << endl;
-		cout << *(emcColl->module(m)->hits()[0]->parentTrack()) << endl;
-		gotOneHit = kTRUE;
-	    }
-	}
-	cout << endl;
-    }
-}
-
-void
-StMcEventMaker::printEventInfoForEmcDet(unsigned int det)
-{
-  StMcEmcHitCollection* emcCol =  mCurrentMcEvent->bemcHitCollection();
-
-  switch (det){
-  case 1: emcCol = mCurrentMcEvent->bemcHitCollection();  break;
-  case 2: emcCol = mCurrentMcEvent->bprsHitCollection();  break;
-  case 3: emcCol = mCurrentMcEvent->bsmdeHitCollection(); break;
-  case 4: emcCol = mCurrentMcEvent->bsmdpHitCollection(); break;
-  }
-
-  printEventInfoForEmc(emcCol);
-}   
-    
+    if (! mCurrentMcEvent) return;
+    cout << *mCurrentMcEvent << endl;
+    mCurrentMcEvent->Print("");
+}    
