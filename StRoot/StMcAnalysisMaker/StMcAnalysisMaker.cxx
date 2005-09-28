@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.28 2005/07/19 22:04:49 perev Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.29 2005/09/28 22:52:52 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.29  2005/09/28 22:52:52  calderon
+ * Changed access to StMcEvent to use GetDataSet to be consistent with persistent StMcEvent.
+ *
  * Revision 1.28  2005/07/19 22:04:49  perev
  * MultiVertex
  *
@@ -278,7 +281,7 @@ Int_t StMcAnalysisMaker::Make()
   StEvent* rEvent =  (StEvent*) GetInputDS("StEvent");
   
   // StMcEvent
-  StMcEvent* mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  StMcEvent* mEvent = (StMcEvent*) GetDataSet("StMcEvent");
   
   // StAssociationMaker
   StAssociationMaker* assoc = 0;
