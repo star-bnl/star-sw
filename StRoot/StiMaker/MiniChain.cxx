@@ -88,7 +88,6 @@ void MiniChain::run(int first,
         {
         //assocMaker   = new StAssociationMaker("EgrStAssociationMaker");
         _toolkit->setMcEnabled(true);
-        _stiMaker->setMcEventMaker(mcEventMaker);
         //_stiMaker->setAssociationMaker(assocMaker);
         }
       if (_pars->useGui)

@@ -22,7 +22,6 @@ class StiKalmanTrackFinder;
 class StiKalmanTrackFitter;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
-class StMcEventMaker;
 class StAssociationMaker;
 class StiTrackMerger;
 class StiToolkit;
@@ -51,9 +50,8 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.15 2004/03/25 22:43:11 andrewar Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.16 2005/09/28 21:46:36 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
-    void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
     void setParameters(StiMakerParameters * pars);
     StiMakerParameters * getParameters();
@@ -79,7 +77,6 @@ private:
     StiStEventFiller *    _eventFiller;
     StiTrackContainer *   _trackContainer;
     StiVertexFinder*      _vertexFinder;
-    StMcEventMaker*       mMcEventMaker; //!
     StAssociationMaker*   mAssociationMaker; //!
     StiTrackingPlots*     _recPlotter;
     StiTrackingPlots*     _mcPlotter;
@@ -99,10 +96,6 @@ inline StiToolkit * StiMaker::getToolkit()
   return _toolkit;
 }
 
-inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
-{
-    mMcEventMaker = val;
-}
 
 inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
 {
