@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.6 2005/06/28 18:06:41 fine Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.7 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.7  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.6  2005/06/28 18:06:41  fine
  * Remove the redundant data-member StMcEmcModuleHitCollection mModules[mNumberOfModules] causing the crash duw double destruction of one and the same object
  *
@@ -28,45 +31,42 @@
 class StMcCalorimeterHit;
 
 class StMcEmcHitCollection : public TDataSet {
-public:
+ public:
   enum  EAddHit {kNull, kErr, kNew, kAdd};
-public:
-    StMcEmcHitCollection();
-    StMcEmcHitCollection(char*);
-    StMcEmcHitCollection(const char*);
-    virtual ~StMcEmcHitCollection();
-    
-    StMcEmcHitCollection::EAddHit  addHit(StMcCalorimeterHit*);
-    unsigned long numberOfHits() const;
-    unsigned int numberOfModules() const;
-    float    sum() const;
-    
-    StMcEmcModuleHitCollection*       module(unsigned int m);
-    const StMcEmcModuleHitCollection* module(unsigned int m) const;
-
-    StMcEmcModuleHitCollection&       Module(unsigned int m);
-    const StMcEmcModuleHitCollection& Module(unsigned int m) const;
-    
-    virtual Bool_t IsFolder() const {return kTRUE;} // It is a directory for modules 
-    virtual void Browse(TBrowser *b);
-    void    print();
-protected:
-    void MakeHitCollection();
-    StMcEmcModuleHitCollection&       thisModule(unsigned int m);
-    const StMcEmcModuleHitCollection& thisModule(unsigned int m) const;
-private:
-    enum {mNumberOfModules=120};
-    ClassDef(StMcEmcHitCollection,1)
+  enum {mNumberOfModules=120};
+  StMcEmcHitCollection();
+  StMcEmcHitCollection(char*);
+  StMcEmcHitCollection(const char*);
+  virtual ~StMcEmcHitCollection();
+  
+  StMcEmcHitCollection::EAddHit  addHit(StMcCalorimeterHit*);
+  unsigned long numberOfHits() const;
+  unsigned int numberOfModules() const { return mNumberOfModules; }
+  float    sum() const;
+  
+  StMcEmcModuleHitCollection*       module(unsigned int m);
+  const StMcEmcModuleHitCollection* module(unsigned int m) const;
+  
+  StMcEmcModuleHitCollection&       Module(unsigned int m);
+  const StMcEmcModuleHitCollection& Module(unsigned int m) const;
+  
+  StMcEmcModuleHitCollection&       thisModule(unsigned int m) {
+    TObjArray &modules = *GetObjArray();
+    return *(StMcEmcModuleHitCollection *)modules[m];
+  }
+  const StMcEmcModuleHitCollection& thisModule(unsigned int m) const {
+    TObjArray &modules = *GetObjArray();
+    return *(const StMcEmcModuleHitCollection *)modules[m];
+  }
+  
+  virtual Bool_t IsFolder() const {return kTRUE;} // It is a directory for modules 
+  virtual void Browse(TBrowser *b);
+  void    print();
+ protected:
+  void MakeHitCollection();
+ private:
+  ClassDef(StMcEmcHitCollection,1)
 };
 
-inline       StMcEmcModuleHitCollection& StMcEmcHitCollection::thisModule(unsigned int m)
-{
-   TObjArray &modules = *GetObjArray();
-   return *(StMcEmcModuleHitCollection *)modules[m];
-}
-inline const StMcEmcModuleHitCollection& StMcEmcHitCollection::thisModule(unsigned int m) const
-{    
-   TObjArray &modules = *GetObjArray();
-   return *(StMcEmcModuleHitCollection *)modules[m];
-}
+ostream&  operator<<(ostream& os, const StMcEmcHitCollection&);
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.4 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcPixelHit.cc,v 2.5 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.5  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.4  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -23,7 +26,7 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.4 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.5 2005/09/28 21:30:15 fisyak Exp $";
 
 #ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
@@ -53,10 +56,9 @@ StMcPixelHit::~StMcPixelHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcPixelHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "Layer         : " << h.layer()    << endl;
-    return os;
+  os << "PixelHit\t" << *((StMcHit *) &h)
+     << "\tLayer:" << h.layer();
+  return os;
 }
 
 unsigned long

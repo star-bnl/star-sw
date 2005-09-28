@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.hh,v 2.4 2005/07/06 20:05:28 calderon Exp $
+ * $Id: StMcPixelHit.hh,v 2.5 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcPixelHit.hh,v $
+ * Revision 2.5  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.4  2005/07/06 20:05:28  calderon
  * Remove forward declaration of StThreeVectorF, use #include, and only in
  * StMcHit base class.  StThreeVectorF is not a class anymore, it is now
@@ -50,7 +53,7 @@ public:
 private:
 
 #ifdef POOL
-    static StMemoryPool mPool; //!
+    static StMemoryPool mPool; 
 #endif
     ClassDef(StMcPixelHit,1)
 };

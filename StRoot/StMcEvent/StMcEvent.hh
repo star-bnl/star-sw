@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.19 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.20 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.20  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.19  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -98,13 +101,14 @@
 #include "StMcContainers.hh" 
 #include "TString.h"
 #include "TDataSet.h"
+#include "TBrowser.h"
 class StMcTpcHitCollection;
 class StMcFtpcHitCollection;
 class StMcRichHitCollection;
 class StMcCtbHitCollection;
 class StMcSvtHitCollection;
 class StMcSsdHitCollection;
-class StMcEmcHitCollection;
+#include "StMcEmcHitCollection.hh"
 class StMcTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
@@ -116,314 +120,203 @@ class g2t_event_st;
 
 class StMcEvent : public TDataSet {
     
-public:
-    StMcEvent();  
-    StMcEvent(g2t_event_st*);
-    virtual ~StMcEvent();
-    
-    int operator==(const StMcEvent&) const;
-    int operator!=(const StMcEvent&) const;
-    
-    void initToZero();
-
-
-    //"Get" Methods
+ public:
+  StMcEvent();  
+  StMcEvent(g2t_event_st*);
+  virtual ~StMcEvent();
   
-    // The following stuff will be read directly from g2t_event table
-    static const TString&        cvsTag() {return mCvsTag; }   
-    
-    unsigned long                eventGeneratorEventLabel() const;
-    unsigned long                eventNumber() const;
-    unsigned long                runNumber() const;              
-    unsigned long                type() const;
-    unsigned long                zWest() const;
-    unsigned long                nWest() const;
-    unsigned long                zEast() const;
-    unsigned long                nEast() const;
-    unsigned long                eventGeneratorFinalStateTracks() const;
-    unsigned long                numberOfPrimaryTracks() const;
-    unsigned long                subProcessId() const;  
-    float                        impactParameter() const;
-    float                        phiReactionPlane() const;
-    float                        triggerTimeOffset() const;
-    unsigned long                nBinary() const;
-    unsigned long                nWoundedEast() const;
-    unsigned long                nWoundedWest() const;
-    unsigned long                nJets() const;
-    
-    
-    StMcVertex*                    primaryVertex();
-    const StMcVertex*              primaryVertex() const;
-    StSPtrVecMcVertex&             vertices();
-    const StSPtrVecMcVertex&       vertices() const;
-    StSPtrVecMcTrack&              tracks();
-    const StSPtrVecMcTrack&        tracks() const;
-    StMcTpcHitCollection*          tpcHitCollection();
-    const StMcTpcHitCollection*    tpcHitCollection()const;
-    StMcSvtHitCollection*          svtHitCollection();
-    const StMcSvtHitCollection*    svtHitCollection() const;
-    StMcSsdHitCollection*          ssdHitCollection();
-    const StMcSsdHitCollection*    ssdHitCollection() const;
-    StMcFtpcHitCollection*         ftpcHitCollection();
-    const StMcFtpcHitCollection*   ftpcHitCollection() const;
-    StMcRichHitCollection*         richHitCollection();
-    const StMcRichHitCollection*   richHitCollection() const;
-    StMcCtbHitCollection*          ctbHitCollection();
-    const StMcCtbHitCollection*    ctbHitCollection() const;
-    
-    StMcEmcHitCollection*          bemcHitCollection();
-    const StMcEmcHitCollection*    bemcHitCollection() const;
-    StMcEmcHitCollection*          bprsHitCollection();
-    const StMcEmcHitCollection*    bprsHitCollection() const;
-
-    StMcEmcHitCollection*          bsmdeHitCollection();
-    const StMcEmcHitCollection*    bsmdeHitCollection() const;
-    StMcEmcHitCollection*          bsmdpHitCollection();
-    const StMcEmcHitCollection*    bsmdpHitCollection() const;
-
-    StMcTofHitCollection*          tofHitCollection();
-    const StMcTofHitCollection*    tofHitCollection() const;
-
-    StMcEmcHitCollection*          eemcHitCollection();
-    const StMcEmcHitCollection*    eemcHitCollection() const;
-    StMcEmcHitCollection*          eprsHitCollection();
-    const StMcEmcHitCollection*    eprsHitCollection() const;
-    StMcEmcHitCollection*          esmduHitCollection();
-    const StMcEmcHitCollection*    esmduHitCollection() const;
-    StMcEmcHitCollection*          esmdvHitCollection();
-    const StMcEmcHitCollection*    esmdvHitCollection() const;
-    
-    StMcPixelHitCollection*        pixelHitCollection();
-    const StMcPixelHitCollection*  pixelHitCollection() const;
-    StMcIstHitCollection*          istHitCollection();
-    const StMcIstHitCollection*    istHitCollection() const;
-    StMcIgtHitCollection*          igtHitCollection();
-    const StMcIgtHitCollection*    igtHitCollection() const;
-    StMcFstHitCollection*          fstHitCollection();
-    const StMcFstHitCollection*    fstHitCollection() const;
-    StMcFgtHitCollection*          fgtHitCollection();
-    const StMcFgtHitCollection*    fgtHitCollection() const;
-
-    // "Set" Methods
-    
-    void setEventGeneratorEventLabel(unsigned long);
-    void setEventNumber(unsigned long);
-    void setRunNumber(unsigned long);
-    void setType(unsigned long);
-    void setZWest(unsigned long);
-    void setNWest(unsigned long);
-    void setZEast(unsigned long);
-    void setNEast(unsigned long);
-    void setEventGeneratorFinalStateTracks(unsigned long);
-    void setNumberOfPrimaryTracks(unsigned long);
-    void setImpactParameter(float);
-    void setPhiReactionPlane(float);
-    void setTriggerTimeOffset(float);
-    void setNBinary(unsigned long);
-    void setNWoundedEast(unsigned long);
-    void setNWoundedWest(unsigned long);
-    void setNJets(unsigned long);
-    void setPrimaryVertex(StMcVertex*);  
-    void setTpcHitCollection(StMcTpcHitCollection*);               
-    void setSvtHitCollection(StMcSvtHitCollection*);               
-    void setSsdHitCollection(StMcSsdHitCollection*);               
-    void setFtpcHitCollection(StMcFtpcHitCollection*);              
-    void setRichHitCollection(StMcRichHitCollection*);
-    void setCtbHitCollection(StMcCtbHitCollection*);              
-    void setBemcHitCollection(StMcEmcHitCollection*);              
-    void setBprsHitCollection(StMcEmcHitCollection*);              
-    void setBsmdeHitCollection(StMcEmcHitCollection*);              
-    void setBsmdpHitCollection(StMcEmcHitCollection*);              
-    void setTofHitCollection(StMcTofHitCollection*);
-    void setEemcHitCollection(StMcEmcHitCollection*);              
-    void setEprsHitCollection(StMcEmcHitCollection*);              
-    void setEsmduHitCollection(StMcEmcHitCollection*);              
-    void setEsmdvHitCollection(StMcEmcHitCollection*);
-    void setPixelHitCollection(StMcPixelHitCollection*);       
-    void setIstHitCollection(StMcIstHitCollection*);       
-    void setIgtHitCollection(StMcIgtHitCollection*);       
-    void setFstHitCollection(StMcFstHitCollection*);       
-    void setFgtHitCollection(StMcFgtHitCollection*);       
-
-protected:
-    unsigned long                  mEventGeneratorEventLabel;
-    unsigned long                  mEventNumber;
-    unsigned long                  mRunNumber;
-    unsigned long                  mType;  
-    unsigned long                  mZWest;
-    unsigned long                  mNWest;
-    unsigned long                  mZEast;
-    unsigned long                  mNEast;
-    unsigned long                  mEvGenFSTracks; // Number of final state event generator tracks
-    unsigned long                  mPrimaryTracks;
-    unsigned long                  mSubProcessId; // Pythia subprocess Id
-    float                          mImpactParameter;
-    float                          mPhiReactionPlane;
-    float                          mTriggerTimeOffset; // time offset wrt trigger event
-    unsigned long                  mNBinary;           // Number of Binary Collisions
-    unsigned long                  mNWoundedEast;      // Number of Wounded Nucleons East
-    unsigned long                  mNWoundedWest;      // Number of Wounded Nucleons West
-    unsigned long                  mNJets;             // Number of Jets
-    StMcVertex*                    mPrimaryVertex;
-    StSPtrVecMcVertex              mVertices;
-    StSPtrVecMcTrack               mTracks;
-    StMcTpcHitCollection*          mTpcHits;
-    StMcSvtHitCollection*          mSvtHits;
-    StMcSsdHitCollection*          mSsdHits;
-    StMcFtpcHitCollection*         mFtpcHits;
-    StMcRichHitCollection*         mRichHits;
-    StMcCtbHitCollection*          mCtbHits;
-    StMcEmcHitCollection*          mBemcHits;
-    StMcEmcHitCollection*          mBprsHits;
-    StMcEmcHitCollection*          mBsmdeHits;
-    StMcEmcHitCollection*          mBsmdpHits;
-    StMcTofHitCollection*          mTofHits;
-    StMcEmcHitCollection*          mEemcHits;
-    StMcEmcHitCollection*          mEprsHits;
-    StMcEmcHitCollection*          mEsmduHits;
-    StMcEmcHitCollection*          mEsmdvHits;
-    StMcPixelHitCollection*        mPixelHits;
-    StMcIstHitCollection*          mIstHits;
-    StMcIgtHitCollection*          mIgtHits;
-    StMcFstHitCollection*          mFstHits;
-    StMcFgtHitCollection*          mFgtHits;
-    static TString                 mCvsTag;
-private:
-    const StMcEvent& operator=(const StMcEvent&);
-    StMcEvent(const StMcEvent&);
-    ClassDef(StMcEvent,1)
-};
+  int operator==(const StMcEvent&) const;
+  int operator!=(const StMcEvent&) const;
+  
+  void initToZero();
+  
+  
+  //"Get" Methods
+  
+  // The following stuff will be read directly from g2t_event table
+  static const TString&                    cvsTag()       {return mCvsTag; }
+  unsigned long          eventGeneratorEventLabel() const {return mEventGeneratorEventLabel; }		
+  unsigned long                       eventNumber() const {return mEventNumber; }					
+  unsigned long                         runNumber() const {return mRunNumber;}
+  unsigned long                              type() const {return mType;}
+  unsigned long                             zWest() const {return mZWest;}
+  unsigned long                             nWest() const {return mNWest;}
+  unsigned long                             zEast() const {return mZEast;}
+  unsigned long                             nEast() const {return mNEast;}
+  unsigned long    eventGeneratorFinalStateTracks() const {return mEvGenFSTracks;}		
+  unsigned long             numberOfPrimaryTracks() const {return mPrimaryTracks;}				
+  unsigned long                      subProcessId() const {return mSubProcessId;}					
+  float                           impactParameter() const {return mImpactParameter; }					
+  float                          phiReactionPlane() const {return mPhiReactionPlane; }					
+  float                         triggerTimeOffset() const {return mTriggerTimeOffset;}					
+  unsigned long                           nBinary() const {return mNBinary;}						
+  unsigned long                      nWoundedEast() const {return mNWoundedEast;}					
+  unsigned long                      nWoundedWest() const {return mNWoundedWest;}
+  unsigned long                             nJets() const {return mNJets;}  
+  StMcVertex*                       primaryVertex()       {return mPrimaryVertex;}
+  const StMcVertex*                 primaryVertex() const {return mPrimaryVertex;}					
+  StSPtrVecMcVertex&                     vertices()       {return mVertices;}
+  const StSPtrVecMcVertex&               vertices() const {return mVertices;}					
+  StSPtrVecMcTrack&                        tracks()       {return mTracks;}
+  const StSPtrVecMcTrack&                  tracks() const {return mTracks;}						
+  StMcTpcHitCollection*          tpcHitCollection()       {return mTpcHits;}					
+  const StMcTpcHitCollection*    tpcHitCollection() const {return mTpcHits;}				
+  StMcSvtHitCollection*          svtHitCollection()       {return mSvtHits;}					
+  const StMcSvtHitCollection*    svtHitCollection() const {return mSvtHits;}				
+  StMcSsdHitCollection*          ssdHitCollection()       {return mSsdHits;}					
+  const StMcSsdHitCollection*    ssdHitCollection() const {return mSsdHits;}				
+  StMcFtpcHitCollection*        ftpcHitCollection()       {return mFtpcHits;}					
+  const StMcFtpcHitCollection*  ftpcHitCollection() const {return mFtpcHits;}			
+  StMcRichHitCollection*        richHitCollection()       {return mRichHits;}					
+  const StMcRichHitCollection*  richHitCollection() const {return mRichHits;}			
+  StMcCtbHitCollection*          ctbHitCollection()       {return mCtbHits;}					
+  const StMcCtbHitCollection*    ctbHitCollection() const {return mCtbHits;}				
+  			        
+  StMcEmcHitCollection*          emcHitCollection(const Char_t *name) {
+    StMcEmcHitCollection *emcHitColl = (StMcEmcHitCollection*) Find(name);				   	
+    if (! emcHitColl) {emcHitColl = new StMcEmcHitCollection(); emcHitColl->SetName(name);}		   
+    return emcHitColl;											   	
+  }													   
+  const StMcEmcHitCollection*    emcHitCollection(const Char_t *name) const {
+    return (const StMcEmcHitCollection*) this->Find(name);
+  }
+  StMcEmcHitCollection*         bemcHitCollection()       {return emcHitCollection("BemcHits");}		        
+  const StMcEmcHitCollection*   bemcHitCollection() const {return emcHitCollection("BemcHits");}	   
+  StMcEmcHitCollection*         bprsHitCollection()       {return emcHitCollection("BprsHits");}
+  const StMcEmcHitCollection*   bprsHitCollection() const {return emcHitCollection("BprsHits");}
+  StMcEmcHitCollection*        bsmdeHitCollection()       {return emcHitCollection("BsmdeHits");}
+  const StMcEmcHitCollection*  bsmdeHitCollection() const {return emcHitCollection("BsmdeHits");}
+  StMcEmcHitCollection*        bsmdpHitCollection()       {return emcHitCollection("BsmdpHits");}
+  const StMcEmcHitCollection*  bsmdpHitCollection() const {return emcHitCollection("BsmdpHits");}
+  			      
+  StMcTofHitCollection*          tofHitCollection()       {return mTofHits;}		
+  const StMcTofHitCollection*    tofHitCollection() const {return mTofHits;}
+  			      
+  StMcEmcHitCollection*         eemcHitCollection()       {return emcHitCollection("EemcHits");}
+  const StMcEmcHitCollection*   eemcHitCollection() const {return emcHitCollection("EemcHits");}
+  StMcEmcHitCollection*         eprsHitCollection()       {return emcHitCollection("EprsHits");}
+  const StMcEmcHitCollection*   eprsHitCollection() const {return emcHitCollection("BemcHits");}
+  StMcEmcHitCollection*        esmduHitCollection()       {return emcHitCollection("EsmduHits");}
+  const StMcEmcHitCollection*  esmduHitCollection() const {return emcHitCollection("EsmduHits");}
+  StMcEmcHitCollection*        esmdvHitCollection()       {return emcHitCollection("EsmdvHits");}
+  const StMcEmcHitCollection*  esmdvHitCollection() const {return emcHitCollection("EsmdvHits");}
+  
+  StMcPixelHitCollection*      pixelHitCollection()       {return mPixelHits;}				
+  const StMcPixelHitCollection*pixelHitCollection() const {return mPixelHits;}		
+  StMcIstHitCollection*          istHitCollection()       {return mIstHits;}				
+  const StMcIstHitCollection*    istHitCollection() const {return mIstHits;}			
+  StMcIgtHitCollection*          igtHitCollection()       {return mIgtHits;}				
+  const StMcIgtHitCollection*    igtHitCollection() const {return mIgtHits;}			
+  StMcFstHitCollection*          fstHitCollection()       {return mFstHits;}
+  const StMcFstHitCollection*    fstHitCollection() const {return mFstHits;}	         
+  StMcFgtHitCollection*          fgtHitCollection()       {return mFgtHits;}		         
+  const StMcFgtHitCollection*    fgtHitCollection() const {return mFgtHits;}
+  
+  // "Set" Methods
+  
+  void setEventGeneratorEventLabel(unsigned long);
+  void setEventNumber(unsigned long);
+  void setRunNumber(unsigned long);
+  void setType(unsigned long);
+  void setZWest(unsigned long);
+  void setNWest(unsigned long);
+  void setZEast(unsigned long);
+  void setNEast(unsigned long);
+  void setEventGeneratorFinalStateTracks(unsigned long);
+  void setNumberOfPrimaryTracks(unsigned long);
+  void setImpactParameter(float);
+  void setPhiReactionPlane(float);
+  void setTriggerTimeOffset(float);
+  void setNBinary(unsigned long);
+  void setNWoundedEast(unsigned long);
+  void setNWoundedWest(unsigned long);
+  void setNJets(unsigned long);
+  void setPrimaryVertex(StMcVertex*);  
+  void setTpcHitCollection(StMcTpcHitCollection*);               
+  void setSvtHitCollection(StMcSvtHitCollection*);               
+  void setSsdHitCollection(StMcSsdHitCollection*);               
+  void setFtpcHitCollection(StMcFtpcHitCollection*);              
+  void setRichHitCollection(StMcRichHitCollection*);
+  void setCtbHitCollection(StMcCtbHitCollection*);              
+#if 0
+  void setBemcHitCollection(StMcEmcHitCollection*);              
+  void setBprsHitCollection(StMcEmcHitCollection*);              
+  void setBsmdeHitCollection(StMcEmcHitCollection*);              
+  void setBsmdpHitCollection(StMcEmcHitCollection*);              
+#endif
+  void setTofHitCollection(StMcTofHitCollection*);
+#if 0
+  void setEemcHitCollection(StMcEmcHitCollection*);              
+  void setEprsHitCollection(StMcEmcHitCollection*);              
+  void setEsmduHitCollection(StMcEmcHitCollection*);              
+  void setEsmdvHitCollection(StMcEmcHitCollection*);
+#endif
+  void setPixelHitCollection(StMcPixelHitCollection*);       
+  void setIstHitCollection(StMcIstHitCollection*);       
+  void setIgtHitCollection(StMcIgtHitCollection*);       
+  void setFstHitCollection(StMcFstHitCollection*);       
+  void setFgtHitCollection(StMcFgtHitCollection*);       
+  virtual void Print(Option_t *option="") const; // *MENU* 
+  virtual void Browse(TBrowser *b) {TDataSet::Browse(b); Print("");}
+ protected:
+  unsigned long                  mEventGeneratorEventLabel;
+  unsigned long                  mEventNumber;
+  unsigned long                  mRunNumber;
+  unsigned long                  mType;  
+  unsigned long                  mZWest;
+  unsigned long                  mNWest;
+  unsigned long                  mZEast;
+  unsigned long                  mNEast;
+  unsigned long                  mEvGenFSTracks; // Number of final state event generator tracks
+  unsigned long                  mPrimaryTracks;
+  unsigned long                  mSubProcessId; // Pythia subprocess Id
+  float                          mImpactParameter;
+  float                          mPhiReactionPlane;
+  float                          mTriggerTimeOffset; // time offset wrt trigger event
+  unsigned long                  mNBinary;           // Number of Binary Collisions
+  unsigned long                  mNWoundedEast;      // Number of Wounded Nucleons East
+  unsigned long                  mNWoundedWest;      // Number of Wounded Nucleons West
+  unsigned long                  mNJets;             // Number of Jets
+  StMcVertex*                    mPrimaryVertex;
+  StSPtrVecMcVertex              mVertices;
+  StSPtrVecMcTrack               mTracks;
+  StMcTpcHitCollection*          mTpcHits;
+  StMcSvtHitCollection*          mSvtHits;
+  StMcSsdHitCollection*          mSsdHits;
+  StMcFtpcHitCollection*         mFtpcHits;
+  StMcRichHitCollection*         mRichHits;
+  StMcCtbHitCollection*          mCtbHits;
+#if 0
+  StMcEmcHitCollection*          mBemcHits;
+  StMcEmcHitCollection*          mBprsHits;
+  StMcEmcHitCollection*          mBsmdeHits;
+  StMcEmcHitCollection*          mBsmdpHits;
+#endif
+  StMcTofHitCollection*          mTofHits;
+#if 0
+  StMcEmcHitCollection*          mEemcHits;
+  StMcEmcHitCollection*          mEprsHits;
+  StMcEmcHitCollection*          mEsmduHits;
+  StMcEmcHitCollection*          mEsmdvHits;
+#endif
+  StMcPixelHitCollection*        mPixelHits;
+  StMcIstHitCollection*          mIstHits;
+  StMcIgtHitCollection*          mIgtHits;
+  StMcFstHitCollection*          mFstHits;
+  StMcFgtHitCollection*          mFgtHits;
+#if 0
+  mutable StSPtrVecObject        mContent;
+#endif
+  static TString                 mCvsTag;
+ private:
+  const StMcEvent& operator=(const StMcEvent&);
+  StMcEvent(const StMcEvent&);
+  ClassDef(StMcEvent,1)
+    };
 
 ostream&  operator<<(ostream& os, const StMcEvent&);
 
 // Definition of "Get" methods
 
-inline unsigned long StMcEvent::eventGeneratorEventLabel() const { return mEventGeneratorEventLabel; }
-
-inline unsigned long StMcEvent::eventNumber() const { return mEventNumber; }
-
-inline unsigned long StMcEvent::runNumber() const { return mRunNumber;}             
-
-inline unsigned long StMcEvent::type() const { return mType;}             
-
-inline unsigned long StMcEvent::zWest() const { return mZWest;}
-
-inline unsigned long StMcEvent::nWest() const { return mNWest;}
-
-inline unsigned long StMcEvent::zEast() const { return mZEast;}
-
-inline unsigned long StMcEvent::nEast() const { return mNEast;}
-
-inline unsigned long StMcEvent::eventGeneratorFinalStateTracks() const { return mEvGenFSTracks;}
-
-inline unsigned long StMcEvent::numberOfPrimaryTracks() const { return mPrimaryTracks;}
-
-inline unsigned long StMcEvent::subProcessId() const { return mSubProcessId;}
-
-inline float StMcEvent::impactParameter() const { return mImpactParameter; }
-
-inline float StMcEvent::phiReactionPlane() const { return mPhiReactionPlane; }
-
-inline float StMcEvent::triggerTimeOffset() const { return mTriggerTimeOffset;}
-
-inline unsigned long StMcEvent::nBinary() const { return mNBinary;}
-				
-inline unsigned long StMcEvent::nWoundedEast() const { return mNWoundedEast;}
-				
-inline unsigned long StMcEvent::nWoundedWest() const { return mNWoundedWest;}
-				
-inline unsigned long StMcEvent::nJets() const { return mNJets;}
-
-inline StMcVertex* StMcEvent::primaryVertex() { return mPrimaryVertex;}
-
-inline const StMcVertex* StMcEvent::primaryVertex() const { return mPrimaryVertex;}
-
-inline StSPtrVecMcVertex& StMcEvent::vertices() { return mVertices;}
-
-inline const StSPtrVecMcVertex& StMcEvent::vertices() const { return mVertices;}
-
-inline StSPtrVecMcTrack& StMcEvent::tracks() { return mTracks;}
-
-inline const StSPtrVecMcTrack& StMcEvent::tracks() const { return mTracks;}
-
-inline StMcTpcHitCollection* StMcEvent::tpcHitCollection() { return mTpcHits;}
-
-inline const StMcTpcHitCollection* StMcEvent::tpcHitCollection() const { return mTpcHits;}
-
-inline StMcSvtHitCollection* StMcEvent::svtHitCollection() { return mSvtHits;}
-
-inline const StMcSvtHitCollection* StMcEvent::svtHitCollection() const { return mSvtHits;}
-
-inline StMcSsdHitCollection* StMcEvent::ssdHitCollection() { return mSsdHits;}
-
-inline const StMcSsdHitCollection* StMcEvent::ssdHitCollection() const { return mSsdHits;}
-
-inline StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() { return mFtpcHits;}
-
-inline const StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() const { return mFtpcHits;}
-
-inline StMcRichHitCollection* StMcEvent::richHitCollection() { return mRichHits;}
-
-inline const StMcRichHitCollection* StMcEvent::richHitCollection() const { return mRichHits;}
-
-inline StMcCtbHitCollection* StMcEvent::ctbHitCollection() { return mCtbHits;}
-
-inline const StMcCtbHitCollection* StMcEvent::ctbHitCollection() const { return mCtbHits;}
-
-inline StMcEmcHitCollection* StMcEvent::bemcHitCollection() { return mBemcHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::bemcHitCollection() const {return mBemcHits;}
-
-inline StMcEmcHitCollection* StMcEvent::bprsHitCollection() { return mBprsHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::bprsHitCollection() const {return mBprsHits;}
-
-inline StMcEmcHitCollection* StMcEvent::bsmdeHitCollection() { return mBsmdeHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::bsmdeHitCollection() const {return mBsmdeHits;}
-
-inline StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() { return mBsmdpHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::bsmdpHitCollection() const {return mBsmdpHits;}
-
-inline StMcTofHitCollection* StMcEvent::tofHitCollection() { return mTofHits;}
-
-inline const StMcTofHitCollection* StMcEvent::tofHitCollection() const { return mTofHits;}
-
-inline StMcEmcHitCollection* StMcEvent::eemcHitCollection() { return mEemcHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::eemcHitCollection() const {return mEemcHits;}
-
-inline StMcEmcHitCollection* StMcEvent::eprsHitCollection() { return mEprsHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::eprsHitCollection() const {return mEprsHits;}
-
-inline StMcEmcHitCollection* StMcEvent::esmduHitCollection() { return mEsmduHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::esmduHitCollection() const {return mEsmduHits;}
-
-inline StMcEmcHitCollection* StMcEvent::esmdvHitCollection() { return mEsmdvHits;}
-
-inline const StMcEmcHitCollection* StMcEvent::esmdvHitCollection() const {return mEsmdvHits;}
-
-inline StMcPixelHitCollection* StMcEvent::pixelHitCollection() { return mPixelHits;}
-
-inline const StMcPixelHitCollection* StMcEvent::pixelHitCollection() const { return mPixelHits;}
-
-inline StMcIstHitCollection* StMcEvent::istHitCollection() { return mIstHits;}
-
-inline const StMcIstHitCollection* StMcEvent::istHitCollection() const { return mIstHits;}
-
-inline StMcIgtHitCollection* StMcEvent::igtHitCollection() { return mIgtHits;}
-
-inline const StMcIgtHitCollection* StMcEvent::igtHitCollection() const { return mIgtHits;}
-
-inline StMcFstHitCollection* StMcEvent::fstHitCollection() { return mFstHits;}
-
-inline const StMcFstHitCollection* StMcEvent::fstHitCollection() const { return mFstHits;}
-
-inline StMcFgtHitCollection* StMcEvent::fgtHitCollection() { return mFgtHits;}
-
-inline const StMcFgtHitCollection* StMcEvent::fgtHitCollection() const { return mFgtHits;}
 #endif
 

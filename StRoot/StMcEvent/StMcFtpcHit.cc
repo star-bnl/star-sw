@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.11 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.12 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.12  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.11  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -56,7 +59,7 @@
 #include "StMcFtpcHit.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.11 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.12 2005/09/28 21:30:14 fisyak Exp $";
 
 ClassImp(StMcFtpcHit);
 #ifdef POOL
@@ -85,11 +88,9 @@ StMcFtpcHit::~StMcFtpcHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl;
-    os << "Volume Id     : " << h.volumeId() << endl;
-    os << "Plane         : " << h.plane()    << endl;
-    os << "Sector        : " << h.sector()   << endl;
+  os << "FtpcHit\t" << *((StMcHit *) &h)
+     << "\tPlane:"   << h.plane()
+     << " Sector:"  << h.sector();
     return os;
 }
 

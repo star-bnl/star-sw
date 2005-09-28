@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.5 2005/07/19 20:07:34 calderon Exp $
+ * $Id: StMcIstHit.hh,v 2.6 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.6  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.5  2005/07/19 20:07:34  calderon
  * Addition of default constructor, including base class StMcHit constructor.
  * Bracket calls to StMemoryPool inside #ifdef.
@@ -64,7 +67,7 @@ public:
 private:
     
 #ifdef POOL
-    static StMemoryPool mPool; //!
+    static StMemoryPool mPool; 
 #endif
     ClassDef(StMcIstHit,1)
 };

@@ -12,10 +12,13 @@
  *
  ***************************************************************************
  *
- * $Id: StMcIgtHit.cc,v 2.1 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcIgtHit.cc,v 2.2 2005/09/28 21:30:15 fisyak Exp $
  *
  ***************************************************************************
  * $Log: StMcIgtHit.cc,v $
+ * Revision 2.2  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.1  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -26,7 +29,7 @@
 #include "StMcIgtHit.hh"
 #include "tables/St_g2t_igt_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIgtHit.cc,v 2.1 2005/07/07 18:20:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIgtHit.cc,v 2.2 2005/09/28 21:30:15 fisyak Exp $";
 
 StMemoryPool StMcIgtHit::mPool(sizeof(StMcIgtHit));
 
@@ -52,10 +55,9 @@ StMcIgtHit::~StMcIgtHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcIgtHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "Layer         : " << h.layer()    << endl;
-    return os;
+  os << "IgtHit\t" << *((StMcHit *) &h)
+     << "\tLayer:" << h.layer();
+  return os;
 }
 
 unsigned long

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.9 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.10  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.9  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -43,7 +46,7 @@
 #include "StMcTpcHit.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.9 2005/01/27 23:40:48 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $";
 
 #ifdef POOL
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
@@ -72,11 +75,10 @@ StMcTpcHit::~StMcTpcHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcTpcHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "Sector        : " << h.sector()     << endl;
-    os << "Pad Row       : " << h.padrow()     << endl;
-    return os;
+  os << "TpcHit\t" << *((StMcHit *) &h)
+     << "\tSector:" << h.sector()    
+     << " PadRow:" << h.padrow();
+  return os;
 }
 
 

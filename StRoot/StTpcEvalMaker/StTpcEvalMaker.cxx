@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.10 2003/09/02 17:59:13 perev Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.11 2005/09/28 21:32:53 fisyak Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.11  2005/09/28 21:32:53  fisyak
+// * Persistent StMcEvent
+// *
 // * Revision 1.10  2003/09/02 17:59:13  perev
 // * gcc 3.2 updates + WarnOff
 // *
@@ -75,14 +78,11 @@ using std::distance;
 #include "StMcTrack.hh"
 #include "StMcVertex.hh"
 
-#include "StEventMaker/StEventMaker.h"
-#include "StMcEventMaker/StMcEventMaker.h"
-
 #include "StTpcEvalMaker.h"
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.10 2003/09/02 17:59:13 perev Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.11 2005/09/28 21:32:53 fisyak Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -159,7 +159,7 @@ Int_t StTpcEvalMaker::Make()
 	}
     // StEvent    
     mStEvent = (StEvent*) GetInputDS("StEvent");
-    mStMcEvent =  ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+    mStMcEvent =  (StMcEvent*) GetDataSet("StMcEvent");
     if (!(mStEvent && mStMcEvent)) 
 	{
 	    cout<<" NO EVENT DATA FOUND!!!"<<endl;

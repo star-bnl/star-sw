@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.21 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.22 2005/09/28 21:30:15 fisyak Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.22  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.21  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -47,8 +50,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.21 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.22 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.22  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.21  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -150,7 +156,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.21 2005/07/07 18:20:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.22 2005/09/28 21:30:15 fisyak Exp $";
 
 ClassImp(StMcTrack);
 
@@ -283,7 +289,81 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     
     return os;
 }
-
+void StMcTrack::Print(Option_t *option) const {
+  TString opt(option);
+  if (opt == "") {cout << *this << endl; return;}
+  if (opt.Contains("desc",TString::kIgnoreCase)) {
+    //       0        1         2         3         4
+    //       1234567890123456789012345678901234567890
+    cout << "Particle"
+	 << " Four Momentum                  " 
+	 << "Pt      " 
+	 << "Rapidity" 
+	 << "  Pseudo" 
+	 << " Id"  
+	 << "   Pdg"  
+	 << "Egl"  
+	 << "Key"
+	 << "Hit"
+	 << "Tpc" 
+	 << "Svt" 
+	 << "Ssd" 
+	 << "Fpc" 
+	 << "Rch" 
+	 << "Ctb" 
+	 << "Bmc" 
+	 << "Bpr" 
+	 << "Bse" 
+	 << "Bsp" 
+	 << "Tof" 
+	 << "Emc" 
+	 << "Eps" 
+	 << "Esu" 
+	 << "Esv" 
+	 << "Pxl" 
+	 << "Ist"  
+	 << "Igt"  
+	 << "Fst"  
+	 << "Fgt"  
+	 << "ISh" << endl;
+    return;
+  }
+  TString Name("        ");
+  if (particleDefinition()) Name = particleDefinition()->name().c_str();
+    cout << 
+      Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
+	   Name.Data(),
+	   fourMomentum().x(), fourMomentum().y(), fourMomentum().z(), fourMomentum().t(), 
+	   pt(),
+	   rapidity(),
+	   pseudoRapidity(),
+	   geantId(),
+	   pdgId(),
+	   eventGenLabel(),
+	   key(),  
+	   tpcHits().size(),
+	   svtHits().size(),
+	   ssdHits().size(),
+	   ftpcHits().size(),
+	   richHits().size(),
+	   ctbHits().size(),
+	   bemcHits().size(),
+	   bprsHits().size(),
+	   bsmdeHits().size(),
+	   bsmdpHits().size(),
+	   tofHits().size(),
+	   eemcHits().size(),
+	   eprsHits().size(),
+	   esmduHits().size(),
+	   esmdvHits().size(),
+	   pixelHits().size(),
+	   istHits().size(),
+	   igtHits().size(),
+	   fstHits().size(),
+	   fgtHits().size(),
+	   isShower())
+	 << endl;
+}
 void StMcTrack::setFourMomentum(const StLorentzVectorF& val) { mFourMomentum = val; }
 
 void StMcTrack::setStartVertex(StMcVertex* val) { mStartVertex = val; }
@@ -589,3 +669,10 @@ void StMcTrack::removeFgtHit(StMcFgtHit* hit)
 }
 
 //void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }
+StParticleDefinition* StMcTrack::particleDefinition() { 
+  if (mParticleDefinition) return mParticleDefinition; 
+  if (mGeantId > 0) mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(mGeantId);
+  if (mParticleDefinition) return mParticleDefinition; 
+  if (mPdgId)  mParticleDefinition = StParticleTable::instance()->findParticle(mPdgId);
+  return mParticleDefinition;
+}

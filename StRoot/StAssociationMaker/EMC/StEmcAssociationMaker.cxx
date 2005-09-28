@@ -14,7 +14,6 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StMcEventTypes.hh"
 #include "StMcEvent.hh"
-#include "StMcEventMaker/StMcEventMaker.h"
 #include "StEventTypes.h"
 #include <StMessMgr.h>
 
@@ -107,8 +106,7 @@ Int_t StEmcAssociationMaker::Make()
   if(mPrint) gMessMgr->Info() << "StEmcAssociationMaker::Make()" << endm;
   
   // Getting McEvent object
-  if(!GetMaker("StMcEvent")) return kStWarn;
-  StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  StMcEvent* mcEvent= (StMcEvent*) GetDataSet("StMcEvent");
   if (!mcEvent) return kStWarn;
   StSPtrVecMcTrack& tracks=mcEvent->tracks();
   if(tracks.size()==0) return kStWarn;
@@ -412,7 +410,7 @@ void StEmcAssociationMaker::printMaps()
 }
 void StEmcAssociationMaker::printTracks()
 {
-  StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  StMcEvent* mcEvent=(StMcEvent*) GetDataSet("StMcEvent");
   if (!mcEvent) return;
   StSPtrVecMcTrack& tracks=mcEvent->tracks();
   if(tracks.size()==0) return;

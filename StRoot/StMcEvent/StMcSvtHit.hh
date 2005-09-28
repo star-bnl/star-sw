@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.10 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.11 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.11  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.10  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -81,7 +84,7 @@ public:
 
 protected:
 #ifdef POOL
-    static StMemoryPool mPool;  //!
+    static StMemoryPool mPool;  
 #endif
     ClassDef(StMcSvtHit,1)
 };

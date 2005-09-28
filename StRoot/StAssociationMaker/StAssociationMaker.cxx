@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.46 2005/07/19 21:28:56 perev Exp $
+ * $Id: StAssociationMaker.cxx,v 1.47 2005/09/28 21:31:46 fisyak Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.47  2005/09/28 21:31:46  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 1.46  2005/07/19 21:28:56  perev
  * IdTruth
  *
@@ -32,7 +35,7 @@
  * use IdTruth information for hit matching if any
  *
  * Revision 1.38  2003/10/08 20:15:03  calderon
- * using <iostream> and std::cout, std::ostream, as well as <cmath>.
+ * using "Stiostream.h" and std::cout, std::ostream, as well as <cmath>.
  *
  * Revision 1.37  2003/09/02 17:55:28  perev
  * gcc 3.2 updates + WarnOff
@@ -197,7 +200,7 @@
  *************************************************/
 
 
-#include <iostream>
+#include "Stiostream.h"
 #include <iterator>
 #include <stdlib.h>
 #include <string>
@@ -208,10 +211,9 @@
 using std::string;
 using std::vector;
 using std::find_if;
-#endif
 using std::cout;
 using std::ostream;
-
+#endif
 #include "StAssociationMaker.h"
 #include "StMcParameterDB.h"
 #include "StTrackPairInfo.hh"
@@ -232,8 +234,7 @@ using std::ostream;
 
 #include "StMcEventTypes.hh"
 
-#include "StEventMaker/StEventMaker.h"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEvent.hh"
 
 #include "StMemoryInfo.hh"
 // // Define the comparison to be used in the multimaps
@@ -739,7 +740,7 @@ Int_t StAssociationMaker::Make()
     // Get StMcEvent
     //
     StMcEvent* mEvent = 0;
-    mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+    mEvent = (StMcEvent*) GetDataSet("StMcEvent");
     if (!mEvent) {
 	gMessMgr->Error() << "No StMcEvent!!! " << endm;
 	gMessMgr->Error() << "Bailing out ..." << endm;

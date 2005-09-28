@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.9 2005/01/27 23:40:49 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.10  2005/09/28 21:30:15  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.9  2005/01/27 23:40:49  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -53,9 +56,10 @@ using std::find;
 #endif
 
 #include "StMcVertex.hh"
+#include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.9 2005/01/27 23:40:49 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $";
 
 ClassImp(StMcVertex);
 
@@ -107,11 +111,18 @@ int StMcVertex::operator!=(const StMcVertex& v) const
 
 ostream&  operator<<(ostream& os, const StMcVertex& v)
 {
-    os << "Position      : " << v.position() << endl; 
-    os << "Geant Volume  : " << v.geantVolume().c_str() << endl;
-    os << "Time of Flight: " << v.tof() << endl;
-    os << "Geant Process : " << v.geantProcess() << endl;
-    return os;
+  os << "StMcVertex: pos:"
+     << "Position      : " << Form("%8.3f%8.3f%8.3f",v.position().x(),v.position().y(),v.position().z())
+     << "Geant Volume  : " << v.geantVolume().c_str()
+     << "Time of Flight: " << v.tof()
+     << "Geant Process : " << v.geantProcess();
+  Int_t nDaughters = v.numberOfDaughters();
+  os << "N. Daughters: " << nDaughters;
+  for (int j = 0; j < nDaughters; j++) {
+    os << "\t" << v.daughter(j)->key();
+  }
+  
+  return os;
 }
 
 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.7 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcHit.cc,v 2.8 2005/09/28 21:30:14 fisyak Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.8  2005/09/28 21:30:14  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 2.7  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -34,10 +37,10 @@
  *
  **************************************************************************/
 #include "StMcHit.hh"
-
+#include "TString.h"
 #include "tables/St_g2t_hits_Table.h"
-
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.7 2005/01/27 23:40:47 calderon Exp $";
+#include "StMcTrack.hh"
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.8 2005/09/28 21:30:14 fisyak Exp $";
 ClassImp(StMcHit);
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
@@ -97,11 +100,12 @@ void StMcHit::setParentTrack(StMcTrack* val) { mParentTrack = val; }
     
 ostream& operator<<(ostream& os, const StMcHit& h)
 {
-    os << "Id: " << h.key() << endl;
-    os << "Position: " << h.position() << endl;
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "dE: " << h.dE() << endl;
-    os << "dS: " << h.dS() << endl;
-    os << "Vol Id: " << h.volumeId() << endl;
+  if (h.parentTrack()) os << Form("%5i/%5i",h.key(),h.parentTrack()->key());
+  else                 os << Form("%5i/undef",h.key());
+  os   << "\txyz: "   << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) 
+       << "\tpxyzL: " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z())  
+       << "\tdE: "    << Form("%8.2f",1e6*h.dE())  
+       << "\tdS: "    << Form("%8.2f",h.dS()) 
+       << "\tVolId: " << h.volumeId();
     return os;
 }
