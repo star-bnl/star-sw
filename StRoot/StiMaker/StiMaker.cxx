@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.153  2005/09/28 21:46:36  fisyak
+// Persistent StMcEvent
+//
 // Revision 1.152  2005/08/09 15:23:18  perev
 // Add new factory for Node extention
 //
@@ -193,7 +196,7 @@
 #include "PhysicalConstants.h"
 #include "StDetectorId.h"
 #include "StEventTypes.h"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEvent.hh"
 #include "Sti/Base/EditableFilter.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackContainer.h"
@@ -250,7 +253,6 @@ ClassImp(StiMaker)
     _eventFiller(0),
     _trackContainer(0),
     _vertexFinder(0),
-    mMcEventMaker(0),
     mAssociationMaker(0),
     _recPlotter(0),
     _mcPlotter(0),
@@ -460,16 +462,9 @@ Int_t StiMaker::Make()
 
   if (_toolkit->isMcEnabled() )
     {
-      if (!mMcEventMaker)
-	mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("StMcEvent"));
-      if (mMcEventMaker)
-	{
-	  mcEvent= mMcEventMaker->currentMcEvent();
-	  if (!mcEvent) 
-	    throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
-	}
-      else
-	throw runtime_error("StiMaker::Make() -E- mMcEventMaker == 0");
+      mcEvent= (StMcEvent *) GetDataSet("StMcEvent");
+      if (!mcEvent) 
+	throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
     }
   else 
     mcEvent = 0;
