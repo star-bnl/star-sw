@@ -71,7 +71,8 @@ Int_t StPythiaFourPMaker::Make()
 
 
     //SubProcess ID from StMcEventMaker
-    StMcEvent* mcEvent = dynamic_cast<StMcEvent*>( mMcEventMaker->currentMcEvent() );
+    StMcEvent* mcEvent = (StMcEvent*) GetDataSet("StMcEvent");
+    //StMcEvent* mcEvent = dynamic_cast<StMcEvent*>( mMcEventMaker->currentMcEvent() );
     if(!mcEvent)  {
 	cout <<"No McEvent!!!"<<endl;
 	return kStErr;
