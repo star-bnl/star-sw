@@ -1,5 +1,5 @@
 //*-- Author : Renee Fatemi 
-// $Id: StJetSimuWeightMaker.cxx,v 1.1 2004/10/12 18:49:12 mmiller Exp $
+// $Id: StJetSimuWeightMaker.cxx,v 1.2 2005/09/28 18:18:12 mmiller Exp $
 
 #include "TFile.h"
 #include "StJetMaker/StJetSimuUtil/StJetSimuWeightMaker.h"
@@ -39,7 +39,8 @@ Int_t StJetSimuWeightMaker::Init(){
 Int_t StJetSimuWeightMaker::Make(){
 
   //SubProcess ID from StMcEventMaker
-  StMcEvent* mcEvent = (StMcEvent*) mcEventMaker->currentMcEvent();
+    StMcEvent* mcEvent = (StMcEvent*) GetDataSet("StMcEvent"); 
+    //StMcEvent* mcEvent = (StMcEvent*) mcEventMaker->currentMcEvent();
   if(!mcEvent)  {
     printf("No McEvent!!!");
     return kStErr;
