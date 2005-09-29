@@ -32,7 +32,10 @@ class StHbtMcEventReader : public StHbtEventReader, public StHbtCheckPdgIdList {
   StHbtString Report();
   
   // sets and gets for the other makers
-  void SetTheMcEventMaker(StMaker*); 
+  void SetTheMcEventMaker(StMaker*);       // NOTE! this is now obsolete, as we get the maker via "GetDataSet"
+                                           // but I leave it in just to not break any macros - malisa 28sep2005
+                                           // You can Set it if you want, but it just doesn't do anything
+
   StMaker* TheMcEventMaker();
 
 #ifdef __ROOT__  

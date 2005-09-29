@@ -131,9 +131,14 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   // ********************************
   // get pointer to eventMaker, event
   // ********************************
-  StEvent* rEvent = 0;
-  StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
-  rEvent = tempMaker->event();
+
+  // the following lines commented out as per S&C request September 2005 - malisa
+  //  StEvent* rEvent = 0;
+  // StEventMaker* tempMaker = (StEventMaker*) mTheEventMaker;
+  //  rEvent = tempMaker->event();
+  // and they are replaced by the one following line
+  StEvent* rEvent = (StEvent*) StMaker::GetChain()->GetDataSet("StEvent"); 
+  // end changes malisa sept2005
   if (!rEvent){
     cout << "StHbtAssociationReader - No StEvent!!! " << endl;
     return 0;
@@ -143,9 +148,16 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   // get pointer to mcEventMaker, Event *
   // **************************************
   StMcEvent* mEvent = 0;  //!
-  StMcEventMaker* mTempMaker = (StMcEventMaker*) mTheMcEventMaker;
-  //mEvent = ((StMcEventMaker*) (StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
-  mEvent = mTempMaker->currentMcEvent();
+
+
+  // malisa sept2005 - similar change as above
+  // StMcEventMaker* mTempMaker = (StMcEventMaker*) mTheMcEventMaker;
+  // mEvent = mTempMaker->currentMcEvent();
+  // 28sep2005 - mike lisa replaces the two lines above with the
+  // following one as per http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/  
+  mEvent = (StMcEvent*) StMaker::GetChain()->GetDataSet("StMcEvent");
+
+
   if (!mEvent){
     cout << "StHbtAssociationReader - No StMcEvent!!! " << endl;
     return 0;
