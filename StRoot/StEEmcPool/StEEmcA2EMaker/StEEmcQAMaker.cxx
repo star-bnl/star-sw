@@ -5,8 +5,8 @@
  * This maker produces some useful QA histograms using StEEmcA2EMaker
  *
  * \author Jason C. Webb
- * $Date: 2005/08/30 19:42:17 $
- * $Revision: 1.2 $
+ * $Date: 2005/09/29 16:27:50 $
+ * $Revision: 1.3 $
  *
  */
  
@@ -35,6 +35,7 @@ StEEmcQAMaker::StEEmcQAMaker( const Char_t *name ) : StMaker(name)
   mSamplingFractionT=0.04;
   mSamplingFractionU=0.007;
   mSamplingFractionV=0.007;
+  mSoftTrig = 0.;
 }
 
 // ----------------------------------------------------------------------------
@@ -60,6 +61,8 @@ Int_t StEEmcQAMaker::Init()
 	TString hname="hTrigId";hname+=mTriggerList[trig];
 	TString htitle="Triggers analysed per sector [0,12)";
 	hTriggers.push_back(new TH1F(hname,htitle,12,0.,12.));
+
+	hTriggersHard.push_back(new TH1F(hname+"hard",htitle,12,0.,12.));
     } 
   //    UInt_t trig=mTriggerList.size();
   hTriggers.push_back(new TH1F("hTrigOr","Any trigger in trigger list [0,12)",12,0.,12.));
@@ -202,20 +205,38 @@ Bool_t StEEmcQAMaker::CheckTriggers()
     StTriggerId l1trig = tic.l1();
 
     /// Get the highest tower in the event
+    /*
     StEEmcTower ht = mEEanalysis->hightower(); 
     if ( ht.fail() ) return false; 
+    */
+    StEEmcTower ht;
+    Bool_t got_ht = false;
+    for ( Int_t i=0;i<mEEanalysis->numberOfHitTowers(0);i++ )
+      {
+	StEEmcTower tow=mEEanalysis->hittower(i,0);
+	if ( tow.et() > ht.et() && !(tow.fail()) ) 
+	  {
+	    ht=tow;
+	    got_ht = true;
+	  }
+      }
+    if ( !got_ht ) return false;
 
     /// Scan trigger list for high tower 
     Bool_t go=false;                
+
     if ( mTriggerList.size() == 0 ) go = true; // no triggers requested 
     for ( UInt_t i=0;i<mTriggerList.size();i++ )
     {
 	Int_t myId = mTriggerList[i]; 
-	if ( l1trig.isTrigger( myId ) ) {
+	if ( l1trig.isTrigger( myId ) && ht.et() > mSoftTrig ) {
 	   go=true;
 	   hTriggers[i] -> Fill ( ht.sector() );  
 	   mSectorTrigger = ht.sector();
 	} 
+	if ( l1trig.isTrigger( myId ) ) {
+	  hTriggersHard[i]->Fill( ht.sector() );
+	}
     } 
     if ( go ) hTriggers[ mTriggerList.size() ] -> Fill( ht.sector() ); 
 
