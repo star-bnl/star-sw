@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.4 2005/09/14 17:08:27 msd Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.5 2005/09/29 17:40:25 msd Exp $
  *   
  *
  *
@@ -30,7 +30,7 @@ class StEStructEvent;
 class StEStructAnalysisMaker : public StMaker {
 
 public:
-                   StEStructAnalysisMaker(const Char_t *name="ESTRUCT 2-pt");
+                   StEStructAnalysisMaker(const Char_t *name="ESTRUCT 2pt");
     virtual       ~StEStructAnalysisMaker();
     
     void          Clear(Option_t *option="");
@@ -38,14 +38,14 @@ public:
     Int_t         Make();
     Int_t         Finish();
 
-  void          SetReaderAnalysisPair(StEStructEventReader* reader, StEStructAnalysis * analysis);
+    void          SetReaderAnalysisPair(StEStructEventReader* reader, StEStructAnalysis * analysis);
     void          SetEventReader(StEStructEventReader* reader);
     void          SetAnalysis(StEStructAnalysis * analysis);
     void          toggleMemoryInfo();
     int           getNumberOfEventsLooped();
     int           getNumberOfEventsProcessed();
 
-    StMuTimer*      getTimer();
+    StMuTimer*    getTimer();
     void          startTimer();
     void          stopTimer();
     void          logAnalysisTime(ostream& os);
@@ -59,7 +59,7 @@ public:
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.4 2005/09/14 17:08:27 msd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.5 2005/09/29 17:40:25 msd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -145,6 +145,9 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.5  2005/09/29 17:40:25  msd
+ * Changed empty analysis to create plots for determining centrality bins
+ *
  * Revision 1.4  2005/09/14 17:08:27  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *
