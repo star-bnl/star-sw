@@ -44,6 +44,9 @@ class StEEmcPair : public TObject {
   /// Returns vertex of pair
   TVector3 vertex();
 
+  /// Prints a one-line summary of the pair
+  void print();
+
  private:
  protected:
 
@@ -61,7 +64,7 @@ class StEEmcPair : public TObject {
   TVector3 mVertex;   /**<- event vertex (real pi0), average vertex (mixed)*/
 
   StEEmcPoint mPoint[2]; /**<- points */
-  
+
   /// Makes class available in root
   ClassDef(StEEmcPair,1);
 

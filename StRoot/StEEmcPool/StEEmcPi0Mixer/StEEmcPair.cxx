@@ -18,6 +18,7 @@
  */
 
 #include "StEEmcPair.h"
+#include <iostream>
 ClassImp(StEEmcPair);
 
 // ----------------------------------------------------------------------------
@@ -108,4 +109,16 @@ StEEmcPair::StEEmcPair( const StEEmcPair &old )
   mMomentum=TVector3(0,0,0);
   /// kompute kinematics
   Kinematics();
+}
+
+// ----------------------------------------------------------------------------
+void StEEmcPair::print()
+{
+  std::cout << "pair mass=" << mass() 
+	    << " e1=" << mPoint[0].energy() 
+	    << " e2=" << mPoint[1].energy()
+	    << " zgg=" << zgg() 
+	    << " tow1=" << mPoint[0].tower(0).name() 
+	    << " zvert=" << mVertex.Z() 
+	    << std::endl;
 }
