@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSmdCalMaker.cxx,v 1.3 2005/08/09 18:46:31 balewski Exp $
+// $Id: MuEzSmdCalMaker.cxx,v 1.4 2005/09/29 13:57:57 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -33,16 +33,16 @@ MuEzSmdCalMaker::MuEzSmdCalMaker( const char* self ,const char* muDstMakerName) 
 
   trgAkio=0;
   nAcceptEve=nTrigEve=nCorrEve=0;
-  SetHList(0);
-  SetTrigIdFilter(0);
-  SetMaxCtbSum(0);
-
+  setHList(0);
+  setTrigIdFilter(0);
+  setMaxCtbSum(0);
+  setEZtree();
 }
 
 //________________________________________________
 //________________________________________________
-void MuEzSmdCalMaker::SetSector(int sec){
-  setSector(sec);
+void MuEzSmdCalMaker::setSector(int sec){
+  EEsmdCal::setSector(sec);
   TString name=GetName();
   name+="-";
   name+=sec;
@@ -118,16 +118,23 @@ MuEzSmdCalMaker::Clear(const Option_t*){
   //  delete trgAkio; //JAN: perhaps is a memory leak? But crashes
 }
 
-
-
 //________________________________________________
 //________________________________________________
 Int_t 
 MuEzSmdCalMaker::Make(){
   clear();
   nInpEve++;
-  gMessMgr->Message("","W") <<GetName()<<"::Make() is called "<<endm;
+  gMessMgr->Message("","D") <<GetName()<<"::Make() is called , useEZtree="<<useEZtree<<endm;
   
+  if(useEZtree)  return MakeEZtree();
+  
+  return MakeRegular();
+}
+
+//________________________________________________
+//________________________________________________
+Int_t 
+MuEzSmdCalMaker::MakeEZtree(){
   //..........  acquire EztHeader
   eHead= mMuDstMaker->muDst()->eztHeader();
   if(eHead==0) {
@@ -135,13 +142,6 @@ MuEzSmdCalMaker::Make(){
   }
 
   if(nInpEve==1) eHead->print();
-
-#if 0
-  vector<unsigned int> trgL=mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().triggerIds();
-  printf("trigL len=%d\n",trgL.size());
-  int ii;
-  for(ii=0;ii<trgL.size();ii++) printf("ii=%d trigID=%d\n",ii,trgL[ii]);
-#endif
 
   if(trigID ) {// filter by triggerID on demand
     if (! mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(trigID)) return kStOK;
@@ -181,6 +181,39 @@ MuEzSmdCalMaker::Make(){
 
   unpackMuEzt(eETow);
   unpackMuEzt(eESmd);
+    
+  findSectorMip();// do real analysis
+ 
+  return kStOK;
+} 
+
+//________________________________________________
+//________________________________________________
+Int_t 
+MuEzSmdCalMaker::MakeRegular(){
+  gMessMgr->Message("","D") <<GetName()<<"::MakeRegular() is called , useEZtree="<<useEZtree<<endm;
+  
+#if 0
+  vector<unsigned int> trgL=mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().triggerIds();
+  printf("trigL len=%d\n",trgL.size());
+  int ii;
+  for(ii=0;ii<trgL.size();ii++) printf("ii=%d trigID=%d\n",ii,trgL[ii]);
+#endif
+
+  if(trigID ) {// filter by triggerID on demand
+    if (! mMuDstMaker->muDst()->event()->triggerIdCollection().nominal().isTrigger(trigID)) return kStOK;
+  }
+  nTrigEve++;
+
+  // M-C case, when muDst data are zero supressed 
+  memset(killT,false,sizeof(killT));// default is working if zero suppressed
+
+
+  unpackMuTails();
+  unpackMuSmd();
+  nAcceptEve++;
+  
+  // printf("UU (bool) killThr T=%d P=%d Q=%d R=%d\n",killT[0][3][14],killT[1][3][14],killT[2][3][14],killT[3][3][14]);
     
   findSectorMip();// do real analysis
  
@@ -327,8 +360,166 @@ MuEzSmdCalMaker::unpackMuEzt(EztEmcRawData  *eRaw){
   // printf("%s-->nTow=%d nPQR=%d nSMD=%d\n",GetName(),n1,n2,n3);
 }
 
+//________________________________________________
+//________________________________________________
+void
+MuEzSmdCalMaker::unpackMuTails(){
+
+  // Access to muDst .......................
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
+  if (!emc) {
+    gMessMgr->Warning() <<"No EMC data for this event"<<endm;    return;
+  }
+  
+  int i ;
+  //printf("aaa %d %d \n",eeDb->mfirstSecID,eeDb->mlastSecID);
+  //.........................  T O W E R S .....................
+  for (i=0; i< emc->getNEndcapTowerADC(); i++) {
+    int sec,eta,sub,rawAdc; //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
+    emc->getEndcapTowerADC(i,rawAdc,sec,sub,eta);
+    if(sec!=sectID) continue;
+    //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+    const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
+    assert(x); // it should never happened for muDst
+    if(x->fail || x->stat &  killStat) {// drop not working channels
+      killTail(x,0); 
+      continue; 
+    }
+    float adc=rawAdc-x->ped; // ped subtracted ADC
+
+    //W A R N !! HARDCODDED SF correction
+    // adc/=0.8; //replace SF of 5% used in M_C generation by 4% believed to be true as of October 2005
+
+    bool aboveThr=rawAdc>x->thr;
+
+    int iT=0; // towers
+    recordTail( x,adc,aboveThr,iT);
+
+  }// end of loop over towers
+
+ //.........................  P R E - P O S T .....................  
+  int pNh= emc->getNEndcapPrsHits();
+  for (i=0; i < pNh; i++) {
+    int pre, sec,eta,sub;
+    //muDst  ranges: sec:1-12, sub:1-5, eta:1-12 ,pre:1-3==>pre1/pre2/post
+    StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+    float rawAdc=hit->getAdc();
+    //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+    const EEmcDbItem *x=eeDb-> getTile(sec,sub-1+'A', eta, pre-1+'P');
+    assert(x); // it should never happened for muDst
+    if(sec!=sectID) continue;
+    int iT=pre;// store P,Q,R depending on 'iT'
+    assert(iT>=0 && iT<mxTile);
+    if(x->fail || x->stat &  killStat) {// drop not working channels
+      killTail(x,iT); 
+      continue; 
+    }
+
+    float adc=rawAdc-x->ped; // ped subtracted ADC
+
+    bool aboveThr=rawAdc > x->thr;
+    //pre1,2
+    if( adc<=thrMipPresAdc ||  adc>(thrMipPresAdc+100) ) aboveThr=false;
+    if(iT==33){ //post, tmp for M-C ADC is 2x larger
+      if( adc<=(thrMipPresAdc/2.) || adc>(thrMipPresAdc/2.+100) ) aboveThr=false;
+    }
+
+    recordTail( x,adc,aboveThr,iT);
+  }
+
+  return ;
+}
+
+//________________________________________________
+//________________________________________________
+void
+MuEzSmdCalMaker::unpackMuSmd(){
+  
+  // Access to muDst .......................
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
+  if (!emc) {
+    gMessMgr->Warning() <<"No EMC data for this event"<<endm;    return;
+  }
+  
+  //.......................  S M D ................................
+  char uv='U';
+  for(uv='U'; uv <='V'; uv++) {
+    int sec,strip;
+    int nh= emc->getNEndcapSmdHits(uv);
+    int i;
+    for (i=0; i < nh; i++) {
+      StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
+      float rawAdc=hit->getAdc();
+      const EEmcDbItem *x=eeDb->getByStrip(sec,uv,strip);
+      assert(x); // it should never happened for muDst
+      if(sec!=sectID) continue;
+      
+      if(x->fail ) continue;  // drop broken channels
+      if(x->stat &  killStat) continue; // drop not working channels
+      float adc=rawAdc-x->ped; // ped subtracted ADC
+      // x->print(); printf("adc=%f\n",adc);
+      int iuv=x->plane-'U';
+      int istr=x->strip -1;
+      
+      assert(iuv>=0 && iuv<MaxSmdPlains);
+      assert(istr>=0 && istr<MaxSmdStrips);
+      smdAdc[iuv][istr]=adc;      
+      if(x->gain<=0)continue; // drop channels w/o gains
+      
+      smdEne[iuv][istr]=adc/x->gain; 
+     }
+  }
+}
+
+//________________________________________________
+//________________________________________________
+void 
+MuEzSmdCalMaker::recordTail( const  EEmcDbItem  *x, float  adc, bool aboveThr,	int iT) {
+  int sec=x->sec;
+  char sub=x->sub;
+  int eta=x->eta;  
+
+#if 0
+  if(strstr(x->name,"C10")) {
+    printf("\nadc=%f iT=%d abTthr=%d \n",adc,iT,aboveThr);  x->print(); 
+  }
+#endif
+
+  // tileReMap( iT,sec,sub,eta);  //<<====  S W A P S , not use it
+  
+  int iphi=(sec-1)*MaxSubSec+(sub-'A');
+  int ieta=eta-1;
+  assert(iphi>=0 && iphi<MaxPhiBins);
+  assert(ieta>=0 && ieta<MaxEtaBins);   
+  tileAdc[iT][ieta][iphi]=adc;
+  tileThr[iT][ieta][iphi]=aboveThr;
+  killT[iT][ieta][iphi]=false; // it is alive
+
+  if(x->gain<=0) return;// drop channels w/o gains
+  tileEne[iT][ieta][iphi]=adc/x->gain;
+}
+
+
+//________________________________________________
+//________________________________________________
+void 
+MuEzSmdCalMaker::killTail( const  EEmcDbItem  *x, int iT) {
+  int sec=x->sec;
+  char sub=x->sub;
+  int eta=x->eta;  
+ 
+  int iphi=(sec-1)*MaxSubSec+(sub-'A');
+  int ieta=eta-1;
+  assert(iphi>=0 && iphi<MaxPhiBins);
+  assert(ieta>=0 && ieta<MaxEtaBins);   
+  killT[iT][ieta][iphi]=true; // is dead
+}
+
 //---------------------------------------------------
 // $Log: MuEzSmdCalMaker.cxx,v $
+// Revision 1.4  2005/09/29 13:57:57  balewski
+// after SMD gains were rescaled
+//
 // Revision 1.3  2005/08/09 18:46:31  balewski
 // after smd calib in 2005
 //

@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.18 2005/09/16 20:18:40 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.19 2005/09/29 13:57:57 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -123,7 +123,7 @@ void EEsmdCal::init( ){
 void EEsmdCal::initRun(int runID){
   printf(" EEsmdCal::initRun(%d)\n",runID);
 
-#if 0   //smdMap verification
+#if 1   //smdMap verification
   if(dbMapped>0)  {
     printf(" EEsmdCal::initRun(%d) N-th time, Ignore\n",runID);
     return; 
@@ -251,15 +251,15 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 
   // find MIP for a UxV pair of strips
 
-  // printf(" jj iSect=%d,iStrU=%d,iStrV=%d\n",iSect,iStrU,iStrV);
+  //printf("\n jj iSect=%d,iStrU=%d,iStrV=%d\n",iSect,iStrU,iStrV);
   TVector3 r=geoSmd->getIntersection (iSect,iStrU,iStrV);
  
-  //  printf(" UxV = %f %f %f\n", r.x(),r.y(),r.z());
+  //printf(" UxV = %f %f %f\n", r.x(),r.y(),r.z());
  
   int     iSecX, iSubX, iEtaX;
   Float_t dphi, deta;
   int ret=geoTw->getTower(r, iSecX, iSubX, iEtaX,dphi, deta);
-  // printf("ret=%d, isecX=%d isubX=%d, ietaX=%d dphi=%f, deta=%f\n",ret,iSecX, iSubX, iEtaX, dphi, deta);
+  //printf("ret=%d, isecX=%d isubX=%d, ietaX=%d dphi=%f, deta=%f\n",ret,iSecX, iSubX, iEtaX, dphi, deta);
 
   if(ret==0 || iSecX!=iSect) return;  
   //................ UxV is in a tower boundary within selected sector
@@ -294,28 +294,33 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 
   // logical conditions:
   // to recover few tiles mark all faild towers as with ADC>thres
+  bool thrP=false,  thrQ=false,  thrR=false, thrDum=false;
+  bool *thr_p[mxTile]={&thrDum,&thrP,&thrQ,&thrR};
 
-  bool thrP= tileThr[kP][iEtaX][iPhiX] ;
-  bool thrQ= tileThr[kQ][iEtaX][iPhiX] ;
-  bool thrR= tileThr[kR][iEtaX][iPhiX] ;
-
-#if 1 // additional cut one energy , after pre/post calibration is avaliable
-  float MipPQReneThrsMeV=0.6;  
-  thrP= thrP && eneP> MipPQReneThrsMeV ;
-  thrQ= thrQ && eneQ> MipPQReneThrsMeV ;
-  thrR= thrR && eneR> MipPQReneThrsMeV ;
+  int iT;
+  for (iT=kP; iT<=kR;iT++) {// loop over pre/post
+    bool thr=tileThr[iT][iEtaX][iPhiX] ;   // .... ADC must be above ped
+    thr= thr || killT[iT][iEtaX][iPhiX];   //.... account for masked pixels
+#if 0 //....  after pre/post calibration is avaliable
+    float preMipRelEneLow=0.6, preMipRelEneHigh=3.0; // tmp
+    float ene2Mip=tileEne[iT][iEtaX][iPhiX]/presMipE[iEtaX];
+    thr= thr &&   ene2Mip>preMipRelEneLow &&  ene2Mip<preMipRelEneHigh; 
 #endif
+    (*thr_p[iT])=thr;    // .... record final answer
+  }
 
-  //.... account for masked pixels
-  thrP= thrP || killT[kP][iEtaX][iPhiX];
-  thrQ= thrQ || killT[kQ][iEtaX][iPhiX];
-  thrR= thrR || killT[kR][iEtaX][iPhiX];
+  //printf("bb1 (adc)  P=%.1f Q=%.1f R=%.1f iphiX=%d\n",tileAdc[1][iEtaX][iPhiX],tileAdc[2][iEtaX][iPhiX],tileAdc[3][iEtaX][iPhiX],iPhiX);
+  //printf("bb2 (bool) thr P=%d Q=%d R=%d\n",thrP,thrQ,thrR);
+
+
+  //printf("bb3 (bool) thr P=%d Q=%d R=%d\n",thrP,thrQ,thrR);
+
 
   // check MIP upper/lower limits
   float RelTwEne=tileEne[kT][iEtaX][iPhiX]/towerMipE[iEtaX];
   bool mipT=  RelTwEne>twMipRelEneLow &&  RelTwEne<twMipRelEneHigh;
   mipT=  mipT || killT[kT][iEtaX][iPhiX]; // recover dead tower
- // printf("iphi=%d ieta=%d Tene=%f mipEne=%f mipT=%d\n",iPhiX,iEtaX,tileEne[kT][iEtaX][iPhiX],towerMipE[iEtaX],mipT);
+  // printf("iphi=%d ieta=%d Tene=%f mipEne=%f mipT=%d adcT=%.1f\n",iPhiX,iEtaX,tileEne[kT][iEtaX][iPhiX],towerMipE[iEtaX],mipT,tileAdc[kT][iEtaX][iPhiX]);
 
 
   if(thrR) hA[9]->Fill(7);

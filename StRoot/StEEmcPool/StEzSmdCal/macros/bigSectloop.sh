@@ -1,10 +1,12 @@
 #!/bin/bash
 #path=xxx
+queue=star_cas_short
+#queue=star_cas_mem
 
 for sec in 1 2 3 4 5 6 7 8 9 10 11 12 ; do
 #for sec in 2  ; do
     echo working on sector $sec ...
-    bsub -q star_cas_short -o log.Hadd$sec root4star -b hadd.C\(${sec}\)
+    bsub -q $queue -o log.Hadd$sec root4star -b hadd.C\(${sec}\)
     #root4star -b -q hadd.C\(${sec}\)
    
    done

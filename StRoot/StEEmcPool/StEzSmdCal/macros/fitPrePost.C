@@ -21,7 +21,7 @@ fitPrePost() {
   
  TH2F *h4=new TH2F("mpv2","MPV from ; gated w/ MIP ; inclusive spectrum;",25,0,50,25,0,25); 
  
-  char cT='Q';
+  char cT='P';
   openAll(cT);
   
   const float feta[]=
@@ -41,7 +41,7 @@ fitPrePost() {
     fprintf(wfd," <tr> <th> %d <td> \n",eta); 
     gStyle->SetOptStat(1001111);
 
-    for(sec=1; sec<=12;sec++) {
+    for(sec=1; sec<=3;sec++) {
       TFile *f=fdA[sec-1];
       for(sub='A';sub<='E';sub++)     {
 	sprintf(core,"%02d%c%c%02d",sec,cT,sub,eta);
@@ -70,10 +70,12 @@ fitPrePost() {
 	if(mpvL>mpv) mpvL=mpv;
 	if(mpvH<mpv) mpvH=mpv;
 	
-        int ieta=eta-1;
+        int ieta=eta-1; 
+
         float fac=TMath::TanH(feta[ieta])/0.0009; // assumed 0.9 MeV per plastic
         float err=sqrt(mpvEr*mpvEr+1);
-        float gain=mpv*fac, sig=err*fac;
+        float gain=mpv*fac; 
+        float sig=err*fac;
         fprintf(gfd,"%s %.0f %.0f %.1f %.1f \n",core,gain,sig,mpv,mpvEr);
       
 	h1->Fill(mpv);
@@ -268,7 +270,9 @@ void openAll(char cT) {
   int i;
   char txt[200];
   for(i=0;i<12;i++) {
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
+    //  sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
+    // sprintf(txt,"./iter12-mc/sum-sect%d.hist.root",i+1);
+    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/sum-sect%d.hist.root",i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }

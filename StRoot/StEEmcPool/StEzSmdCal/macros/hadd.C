@@ -13,7 +13,7 @@ void MergeRootfile( TDirectory *target, TList *sourcelist );
 
 void hadd(int sectID=5) {
   TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter4-out/";
-  iPath="iter5-pp/";
+  iPath="iter14-pp/";
   TString out=iPath;
 
   out+="sum-sect";  out+=sectID;
@@ -24,6 +24,9 @@ void hadd(int sectID=5) {
 
   //... pp minB events ....
   char *runL=" R61710371  R61710372  R61710373  R61720911 R61720912 R61720913 R61730681 R61730682 R61730683 R61730771 R61730772 R61730773 ";
+//... M-C events
+//char *runL=" R123101  R123102  R123103 R123104 R123105 R123106 R123107 R123108 R123109 R123110  R123111 R123112";  
+
   FileList = new TList();
 
   char *run=strtok(runL," "); // init 'strtok'

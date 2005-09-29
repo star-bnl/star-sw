@@ -7,11 +7,11 @@ TCanvas *cc;
 TString  inPath;
 
 //=========================
-plSmdCal(TString  hFile="R60500171"){
+plSmdCal(TString  hFile="R61710371"){
   inPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter5-cucu/";
-  //inPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/";
-    
-  // inPath="iter5-pp/";
+  inPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter5-pp/";
+  // inPath="/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/";  
+  inPath="iter14-pp/";
   f=new TFile(inPath+hFile+".hist.root");
   
   gStyle->SetPalette(1,0);

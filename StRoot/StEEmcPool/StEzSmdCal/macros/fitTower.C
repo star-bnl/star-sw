@@ -10,9 +10,11 @@ FILE *gfd;
 void openAll(char cT) {
   int i;
   char txt[200];
-  for(i=0;i<12;i++) {
+  for(i=0;i<3;i++) {
     //    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter3-out/sum-sect%d.hist.root",i+1);
-    sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
+    //sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter4-outA/sum-sect%d.hist.root",i+1);
+    sprintf(txt,"./iter12-mc/sum-sect%d.hist.root",i+1);
+    //sprintf(txt,"/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter11-mc/sum-sect%d.hist.root",i+1);
     fdA[i]=new TFile(txt);
     assert(fdA[i]->IsOpen());
   }
@@ -69,9 +71,9 @@ fitTower() {
     fprintf(wfd," <tr> <th> %d <td> \n",eta); 
     gStyle->SetOptStat(1001111);
 
-    for(sec=1; sec<=1;sec++) {
+    for(sec=1; sec<=3;sec++) {
       TFile *f=fdA[sec-1];
-      for(sub='E';sub<='E';sub++)     {
+      for(sub='A';sub<='E';sub++)     {
 	sprintf(core,"%02d%c%c%02d",sec,cT,sub,eta);
 	TString coreT=core;
 	ha=(TH1F*)f->Get("a"+coreT);
