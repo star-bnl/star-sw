@@ -3,14 +3,15 @@ int a='A', b='B',c='C',d='D',e='E';
 TFile *f;
 TCanvas *cc;
 
-plPresMap(int sect=8){
+plPresMap(int sect=3){
   TString path="./";
   path="/star/data05/scratch/balewski/2005-eemcCal/";
   //path+="/day49-hist/iter2-out/";
-  //path+="/day171-hist/iter4-outA/";
-   path="iter5-pp/";
-  path+="sum-sect";
-  path+=sect;
+  // path+="/day171-hist/iter5-pp/";
+  path+="/mc-hist/iter8-mc/";
+  path="iter14-pp/";
+  path+="sum-sect";  path+=sect;
+  //path+="R112";
   path+=".hist.root";
   
   f=new TFile(path);
@@ -29,13 +30,13 @@ plPresSect(int sec=1) {
   }
 }
 
-plPres(  int sec=5,  int sub=E,  int eta=3 ) {
+plPres(  int sec=3,  int sub=c,  int eta=10 ) {
   int reb0=4;
   char name[100];
   sprintf(name,"tower-%02d%c%02d",sec,sub,eta);
    
-  cc=new TCanvas(name,name,550,560);
-  cc->Divide(2,2);
+  cc=new TCanvas(name,name,550,560);  cc->Divide(2,2);  // 2x2
+  // cc=new TCanvas(name,name,300,900);  cc->Divide(1,4); // slim
 
   int binL=5,binH=50;
   const int nT=4;

@@ -24,14 +24,26 @@ plTwCal(int keta=0 ){
   // readG(gAu200,"../iterSlopeAuAu200/"); // ~online
   // readG(gAu62,"../iterPiotr/"); // best MIP w/ TPC
   //  readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter4-inp/"); // best MIP w/ SMD
-  readG(gFinal,"0xcucu/"); // best MIP w/ SMD
+  //  readG(gFinal,"0xcucu/"); // best MIP w/ SMD
 
 
   // readG(gSlpp,"../../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter4/"); // best slopes
    
   //plAllGains(gSlpp);
-  plAllGains(gFinal);
-  // plAllGains(gAu62);  return;  
+
+  //readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter6-mc-sec1to3/",'T');
+  // readG(gFinal,"/star/u/balewski/WWW/tmp-iter12-mc/",'T');
+  // plAllGains(gFinal);
+  // return;
+
+
+  //..... patch for per/post gains
+  // readG(gFinal,"/star/u/balewski/WWW-E/calibration/run5/absMipCal/iter6-mc-sec1to3/",'R');
+  readG(gFinal,"/star/u/balewski/WWW/tmp/",'P');
+                                    plGainsRaw(gFinal,'P');
+
+
+
   return;  
   
   //  writeG("./",gSlpp); return;// be carefull
@@ -73,11 +85,11 @@ plTwCal(int keta=0 ){
 
 //========================
 //========================
-int readG( int iv, char *path) {
+int readG( int iv, char *path, char cT='T') {
   char fname[200];
 
   // use one common file for input
-  sprintf(fname,"%s%s",path,"gainsT-allSect.dat");
+  sprintf(fname,"%sgains%c-allSect.dat",path,cT);
   printf("reading gains from %s\n",fname);    
   FILE *fd=fopen(fname, "r"); assert(fd);
   
@@ -107,14 +119,15 @@ int readG( int iv, char *path) {
       //printf("=%s=\n",buf);
       int  n=sscanf(buf,"%s %f %f",name,&gx, &egx);
       assert(n==3);
-      assert(name[2]=='T');
+      assert(name[2]==cT);
       int isec=atoi(name)-1;
       int isub=name[3]-'A';
       int ieta=atoi(name+4)-1;
+     
       int iphi=5*isec+isub;
       printf("%s %d %d %d %d\n",name, isec,isub,ieta,iphi);
       if(gx==0) continue;
-      if(isSlope) {
+      if(isSlope&&0) {// not used any more
 	float r=fabs(egx/gx);
 	gx=slFac[ieta]/gx; 
 	egx=r*gx;
@@ -124,6 +137,7 @@ int readG( int iv, char *path) {
       eg[iv][ieta][iphi]=egx;
     }// loop over towers
   }// loop over sectors
+
 }
 
   
@@ -137,7 +151,8 @@ int  plAllGains(int v1) {
   char tit[200];
   int ieta=4;
 
-  sprintf(tit,"2005 EEMC tower gains from MIPs w/ UxV, day49, absolute scale=pp; eta bin; gain (ch/GeV)");
+  //  sprintf(tit,"2005 EEMC tower gains from MIPs w/ UxV, day49, absolute scale=pp; eta bin; gain (ch/GeV)");
+  sprintf(tit,"Reco EEMC tower gains from M-C, SF=5%; eta bin; gain (ch/GeV)");
   
   gr->SetTitle(tit);
   h=new TH2F("cc",tit,10,0.91,13.1,10,0,50);
@@ -165,6 +180,59 @@ int  plAllGains(int v1) {
   gPad->SetGridy(0);
   gPad->SetGridx(0);
 }
+
+
+  
+//========================
+//========================
+int  plGainsRaw(int v1, char cT='X') {
+  TGraphErrors *gr=new TGraphErrors;
+  gr->SetMarkerStyle(8);
+  gr->SetMarkerColor(kRed);
+  gr->SetMarkerSize(0.5);
+  char tit[200];
+  int ieta=4;
+
+  sprintf(tit,"Reconstructed %c-shower gains for M-C , INPUT=23000; eta bin; gain (ch/GeV)",cT);
+  
+  gr->SetTitle(tit);
+  TString tt=cT; tt+="-shower";
+  h=new TH2F(tt,tit,10,0.91,13.1,10,0,40000);
+
+  c=new TCanvas(tt,tt,500,400);
+  int iphi;
+
+  for(ieta=0; ieta<mxEta;ieta++)
+  for(iphi=iphi1;iphi<iphi2;iphi++) {
+    int sec=1+(iphi/5);
+    char sub='A'+iphi%5;
+
+    float g1=g[v1][ieta][iphi];
+    float eg1=eg[v1][ieta][iphi];
+    if(g1<=10) continue;
+    float x=ieta+1.+iphi/60.;
+    int n=gr->GetN();
+    gr->SetPoint(n,x,g1);
+    gr->SetPointError(n,0,eg1);
+  }                                         
+  //  gr->Print();
+
+  h->Draw();  gr->Draw("P");
+  //gr->Draw("PA");
+ 
+  gr->Fit("pol1");
+
+  ln=new TLine(0,23000,13,23000);
+  ln->SetLineColor(kRed);
+  ln->SetLineStyle(2);
+  ln->Draw();
+
+  gPad->SetGridy(0);
+  gPad->SetGridx(0);
+  c->Print(tt+".gif");
+}
+
+
 
 
 //========================

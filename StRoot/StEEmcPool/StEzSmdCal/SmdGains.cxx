@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.6 2005/08/09 18:46:31 balewski Exp $
+// $Id: SmdGains.cxx,v 1.7 2005/09/29 13:57:57 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -300,7 +300,7 @@ void SmdGains::fitSlopesSmd(int str1, int str2, int pl) {
 
     // ....exceptions in 2005 data, day 49
     if(strstr(h->GetName(),"a02V269")) h->Fit("expo","RQ","",60,130);
-    if(strstr(h->GetName(),"a06U077")) h->Fit("expo","RQ","",800,150);
+    if(strstr(h->GetName(),"a06U077")) h->Fit("expo","RQ","",80,150); // was wrong [800,150]
        //... end
     ln0->Draw();
     TF1* f=h->GetFunction("expo");
@@ -496,6 +496,9 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.7  2005/09/29 13:57:57  balewski
+ * after SMD gains were rescaled
+ *
  * Revision 1.6  2005/08/09 18:46:31  balewski
  * after smd calib in 2005
  *

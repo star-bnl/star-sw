@@ -3,10 +3,12 @@ SmdGains *task=0;
 TObjArray  *HList;
 TFile *fd;
 
-doSmdGains( int sectID=2 , int iU=1){
+doSmdGains( int sectID=3 , int iU=1){
   
-  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter1e/";//BNL
-  iPath="iter2-out/";
+  TString iPath="/star/data05/scratch/balewski/2005-eemcCal/day49-hist/iter1e/";
+  iPath="/star/data05/scratch/balewski/2005-eemcCal/day171-hist/iter5-pp/";
+  //iPath="/star/data05/scratch/balewski/2005-eemcCal/mc-hist/iter8-mc/";
+  iPath="iter14-pp/";
 
   //  iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outE2/";//LBL
   
