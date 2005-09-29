@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.18 2004/07/27 19:34:34 jeromel Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.19 2005/09/29 15:53:08 fisyak Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.19  2005/09/29 15:53:08  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 1.18  2004/07/27 19:34:34  jeromel
  * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
  *
@@ -96,6 +99,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.19  2005/09/29 15:53:08  fisyak
+ * Persistent StMcEvent
+ *
  * Revision 1.18  2004/07/27 19:34:34  jeromel
  * Patch for pileup. Not a primary => a parent but in pileup, not true anymore ...
  *
@@ -181,7 +187,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.18 2004/07/27 19:34:34 jeromel Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.19 2005/09/29 15:53:08 fisyak Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -225,8 +231,7 @@
 
 #include "StEventTypes.h"
 #include "StMcEventTypes.hh"
-#include "StEventMaker/StEventMaker.h"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEvent.hh"
 #include "StuRefMult.hh"
 #include "StTpcDedxPidAlgorithm.h"
 #include "StuProbabilityPidAlgorithm.h"
@@ -465,7 +470,7 @@ StMiniMcMaker::Make()
   //
   mRcEvent = (StEvent*) GetDataSet("StEvent");
   if(!mRcEvent) return kStOk; // last event apparently
-  mMcEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  mMcEvent = (StMcEvent*) GetDataSet("StMcEvent");
   if(!mMcEvent) return kStErr;
   mRun = (StRun*) GetDataSet("StRun");
   if(!mRun) cout << "Cannot get StRun" << endl;
