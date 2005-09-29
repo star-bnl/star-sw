@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.16 2005/07/19 21:52:45 perev Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.17 2005/09/29 22:17:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.17  2005/09/29 22:17:30  fisyak
+ * more strict cut for failed vertex
+ *
  * Revision 1.16  2005/07/19 21:52:45  perev
  * MultiVertex
  *
@@ -306,7 +309,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       Int_t npari,nparx,istat; // more dummies
       Double_t fmin; // Used for the test - function value chi-sq.
       mMinuit->mnstat(fmin,fedm,errdef,npari,nparx,istat);
-      if(fmin == 0.0){
+      if(fmin > -1e-5){
 	gMessMgr->Warning() << "Vertex seed not found ?? " << endm;
 	mStatusMin=-1;
 	return 0;
