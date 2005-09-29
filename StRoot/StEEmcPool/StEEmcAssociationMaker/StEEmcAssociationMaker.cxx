@@ -15,7 +15,6 @@
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 #include "StMcEventTypes.hh"
 #include "StMcEvent.hh"
-#include "StMcEventMaker/StMcEventMaker.h"
 #include "StEventTypes.h"
 #include <StMessMgr.h>
 
@@ -110,8 +109,7 @@ Int_t StEEmcAssociationMaker::Make()
   if(mPrint) gMessMgr->Info() << "StEEmcAssociationMaker::Make()" << endm;
   
   // Getting McEvent object
-  if(!GetMaker("StMcEvent")) return kStWarn;
-  StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  StMcEvent* mcEvent= (StMcEvent*) GetDataSet("StMcEvent");
   if (!mcEvent) return kStWarn;
   StSPtrVecMcTrack& tracks=mcEvent->tracks();
   if(tracks.size()==0) return kStWarn;
@@ -462,8 +460,11 @@ void StEEmcAssociationMaker::printHits(StEvent *event)
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcAssociationMaker.cxx,v 1.1.1.1 2005/05/31 18:54:13 wzhang Exp $
+// $Id: StEEmcAssociationMaker.cxx,v 1.2 2005/09/29 14:58:10 fisyak Exp $
 // $Log: StEEmcAssociationMaker.cxx,v $
+// Revision 1.2  2005/09/29 14:58:10  fisyak
+// Persistent StMcEvent
+//
 // Revision 1.1.1.1  2005/05/31 18:54:13  wzhang
 // First version
 //
