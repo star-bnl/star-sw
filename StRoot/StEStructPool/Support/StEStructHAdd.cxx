@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.3 2005/03/08 21:56:42 porter Exp $
+ * $Id: StEStructHAdd.cxx,v 1.4 2005/09/29 17:42:14 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -24,7 +24,7 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
 
   const char* base[]={"Sib","Mix"};
   const char* tpe[]={"pp","pm","mm"};
-  const char* knd[]={"YtYt","PtPt",
+  const char* knd[]={"YtYt","PtPt", "XtXt",
                      "EtaEta","PhiPhi",
                      "PrEtaEta","PrPhiPhi",
                      "SuEtaEta","SuPhiPhi",
@@ -38,9 +38,9 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
 
   for(int i=0;i<2;i++){
     for(int j=0;j<3;j++){
-      for(int k=0;k<18;k++){
+      for(int k=0;k<19;k++){
         TString htype;
-        if(k<17){
+        if(k<18){
          htype+=base[i];htype+=tpe[j];
 	} else if(i>0 || j>0){
           continue;
@@ -103,6 +103,9 @@ void StEStructHAdd::addCuts(const char* outfile, const char* infile, int* nlist,
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.4  2005/09/29 17:42:14  msd
+ * Added Xt to hadd
+ *
  * Revision 1.3  2005/03/08 21:56:42  porter
  * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
  * view individual terms separately
