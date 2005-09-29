@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.cc,v 2.4 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTofHit.cc,v 2.5 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcTofHit.cc,v $
+ * Revision 2.5  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.4  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -19,7 +23,7 @@
  ***************************************************************************/
 #include "StMcTofHit.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.4 2005/09/28 21:30:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.5 2005/09/29 01:01:10 calderon Exp $";
 #ifdef POOL
 StMemoryPool StMcTofHit::mPool(sizeof(StMcTofHit));
 #endif
@@ -48,8 +52,9 @@ StMcTofHit::StMcTofHit(g2t_ctf_hit_st* pt)
 StMcTofHit::~StMcTofHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcTofHit& h) {
-  os << "TofHit\t" << *((StMcHit *) &h)
-     << "\tT. of Flight: " << h.tof()
-     << " path length: " << h.sTrack();
+    os << "TofHit\t" << endl;
+    os << *((StMcHit *) &h);
+    os << "T. of Flight    : " << h.tof() << endl;
+    os << "path length     : " << h.sTrack() << endl;
   return os;
 }

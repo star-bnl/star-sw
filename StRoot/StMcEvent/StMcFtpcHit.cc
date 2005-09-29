@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.12 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcFtpcHit.cc,v 2.13 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.13  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.12  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -59,7 +63,7 @@
 #include "StMcFtpcHit.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.12 2005/09/28 21:30:14 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.13 2005/09/29 01:01:10 calderon Exp $";
 
 ClassImp(StMcFtpcHit);
 #ifdef POOL
@@ -88,9 +92,10 @@ StMcFtpcHit::~StMcFtpcHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 {
-  os << "FtpcHit\t" << *((StMcHit *) &h)
-     << "\tPlane:"   << h.plane()
-     << " Sector:"  << h.sector();
+    os << "FtpcHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Plane        : "  << h.plane() << endl;
+    os << "Sector       : "  << h.sector() << endl;;
     return os;
 }
 

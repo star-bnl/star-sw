@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.cc,v 2.2 2005/07/19 20:07:34 calderon Exp $
+ * $Id: StMcFgtHit.cc,v 2.3 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcFgtHit.cc,v $
+ * Revision 2.3  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.2  2005/07/19 20:07:34  calderon
  * Addition of default constructor, including base class StMcHit constructor.
  * Bracket calls to StMemoryPool inside #ifdef.
@@ -16,7 +20,7 @@
 #include "StMcFgtHit.hh"
 #include "tables/St_g2t_fgt_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.2 2005/07/19 20:07:34 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.3 2005/09/29 01:01:10 calderon Exp $";
 
 ClassImp(StMcFgtHit)
 
@@ -44,9 +48,9 @@ StMcFgtHit::~StMcFgtHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcFgtHit& h)
 {
-    os << "Position      : " << h.position() << endl; 
-    os << "Local Momentum: " << h.localMomentum() << endl; 
-    os << "Layer         : " << h.layer()    << endl;
+    os << "StMcFgtHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Layer           : " << h.layer()    << endl;
     return os;
 }
 

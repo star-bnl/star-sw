@@ -12,10 +12,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcIgtHit.cc,v 2.2 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcIgtHit.cc,v 2.3 2005/09/29 01:01:10 calderon Exp $
  *
  ***************************************************************************
  * $Log: StMcIgtHit.cc,v $
+ * Revision 2.3  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.2  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -29,7 +33,7 @@
 #include "StMcIgtHit.hh"
 #include "tables/St_g2t_igt_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIgtHit.cc,v 2.2 2005/09/28 21:30:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcIgtHit.cc,v 2.3 2005/09/29 01:01:10 calderon Exp $";
 
 StMemoryPool StMcIgtHit::mPool(sizeof(StMcIgtHit));
 
@@ -55,9 +59,10 @@ StMcIgtHit::~StMcIgtHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcIgtHit& h)
 {
-  os << "IgtHit\t" << *((StMcHit *) &h)
-     << "\tLayer:" << h.layer();
-  return os;
+    os << "IgtHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Layer           : " << h.layer() << endl;
+    return os;
 }
 
 unsigned long

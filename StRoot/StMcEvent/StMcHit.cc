@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.8 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcHit.cc,v 2.9 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.9  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.8  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -40,7 +44,7 @@
 #include "TString.h"
 #include "tables/St_g2t_hits_Table.h"
 #include "StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.8 2005/09/28 21:30:14 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.9 2005/09/29 01:01:10 calderon Exp $";
 ClassImp(StMcHit);
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
@@ -100,12 +104,13 @@ void StMcHit::setParentTrack(StMcTrack* val) { mParentTrack = val; }
     
 ostream& operator<<(ostream& os, const StMcHit& h)
 {
-  if (h.parentTrack()) os << Form("%5i/%5i",h.key(),h.parentTrack()->key());
-  else                 os << Form("%5i/undef",h.key());
-  os   << "\txyz: "   << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) 
-       << "\tpxyzL: " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z())  
-       << "\tdE: "    << Form("%8.2f",1e6*h.dE())  
-       << "\tdS: "    << Form("%8.2f",h.dS()) 
-       << "\tVolId: " << h.volumeId();
+    if (h.parentTrack())
+	os << "Key, parent Key : " << Form("%5i/%5i",h.key(),h.parentTrack()->key()) << endl;
+    else                   os << "Key             : " << Form("%5i/undef",h.key()) << endl;
+    os << "Position xyz    : "   << Form("%8.2f%8.2f%8.2f",h.position().x(), h.position().y(), h.position().z()) << endl;
+    os << "Local Momentum  : " << Form("%8.2f%8.2f%8.2f",h.localMomentum().x()  ,h.localMomentum().y()  ,h.localMomentum().z())  << endl;
+    os << "dE              : "    << Form("%8.2f",1e6*h.dE())  << endl;
+    os << "dS              : "    << Form("%8.2f",h.dS()) << endl;
+    os << "VolId           : " << h.volumeId() << endl;
     return os;
 }
