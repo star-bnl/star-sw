@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcFstHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcFstHit.cc,v $
+ * Revision 2.6  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.5  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -27,7 +31,7 @@
 #include "StMcFstHit.hh"
 #include "tables/St_g2t_fst_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.5 2005/09/28 21:30:14 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $";
 
 ClassImp(StMcFstHit)
     
@@ -55,8 +59,9 @@ StMcFstHit::StMcFstHit(g2t_fst_hit_st* pt)
 StMcFstHit::~StMcFstHit() {/* noop */ }
 //------------------------------------------
 ostream&  operator<<(ostream& os, const StMcFstHit& h) {
-  os << "FstHit\t" << *((StMcHit *) &h)
-     << "\tLayer:" << h.layer();
+    os << "FstHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Layer           : " << h.layer() << endl;
   return os;
 }
 

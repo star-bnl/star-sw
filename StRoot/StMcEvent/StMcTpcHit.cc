@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTpcHit.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.11  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.10  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -46,7 +50,7 @@
 #include "StMcTpcHit.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.10 2005/09/28 21:30:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $";
 
 #ifdef POOL
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
@@ -75,9 +79,10 @@ StMcTpcHit::~StMcTpcHit() {/* noop */}
 
 ostream&  operator<<(ostream& os, const StMcTpcHit& h)
 {
-  os << "TpcHit\t" << *((StMcHit *) &h)
-     << "\tSector:" << h.sector()    
-     << " PadRow:" << h.padrow();
+    os << "TpcHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Sector   :" << h.sector() << endl;
+    os << "PadRow   :" << h.padrow() << endl;
   return os;
 }
 

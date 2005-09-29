@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.cc,v 2.3 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcSsdHit.cc,v 2.4 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcSsdHit.cc,v $
+ * Revision 2.4  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.3  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -26,7 +30,7 @@
 #include "StMcSsdHit.hh"
 #include "tables/St_g2t_ssd_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.3 2005/09/28 21:30:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.4 2005/09/29 01:01:10 calderon Exp $";
 #ifdef POOL
 StMemoryPool StMcSsdHit::mPool(sizeof(StMcSsdHit));
 #endif
@@ -55,8 +59,9 @@ StMcSsdHit::~StMcSsdHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcSsdHit& h)
 {
-  os << "SsdHit\t" << *((StMcHit *) &h)
-     << "\tLayer: " << h.layer();
+    os << "SsdHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Layer           : " << h.layer() << endl;
   return os;
 }
 

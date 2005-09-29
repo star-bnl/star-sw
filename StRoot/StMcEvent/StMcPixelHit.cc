@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.5 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcPixelHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.6  2005/09/29 01:01:10  calderon
+ * Fixed bugs in printing event and hit information.
+ * Format operator<< for various classes.
+ *
  * Revision 2.5  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -26,7 +30,7 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.5 2005/09/28 21:30:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $";
 
 #ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
@@ -56,8 +60,9 @@ StMcPixelHit::~StMcPixelHit() {/* noop */ }
 
 ostream&  operator<<(ostream& os, const StMcPixelHit& h)
 {
-  os << "PixelHit\t" << *((StMcHit *) &h)
-     << "\tLayer:" << h.layer();
+    os << "PixelHit" << endl;
+    os << *((StMcHit *) &h);
+    os << "Layer           : " << h.layer() << endl;
   return os;
 }
 
