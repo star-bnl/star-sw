@@ -149,8 +149,13 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   // get pointer to mcEventMaker, Event *
   // **************************************
   StMcEvent* mcEvent = 0;  //!
-  StMcEventMaker* tempMaker = (StMcEventMaker*) mTheMcEventMaker;
-  mcEvent = tempMaker->currentMcEvent();
+
+  // StMcEventMaker* mTempMaker = (StMcEventMaker*) mTheMcEventMaker;
+  // mcEvent = mTempMaker->currentMcEvent();
+  // 28sep2005 - mike lisa replaces the two lines above with the
+  // following one as per http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/  
+  mcEvent = (StMcEvent*) StMaker::GetChain()->GetDataSet("StMcEvent");
+
   if (!mcEvent){
     cout << "StHbtMcEventReader - No StMcEvent!!! " << endl;
     return 0;

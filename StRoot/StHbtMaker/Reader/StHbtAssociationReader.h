@@ -40,7 +40,9 @@ class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdLi
 
   // sets and gets for the other makers
   void SetTheEventMaker(StMaker*);
-  void SetTheMcEventMaker(StMaker*);
+  void SetTheMcEventMaker(StMaker*);    // NOTE! this is now obsolete, as we get the maker via "GetDataSet"
+                                        // but I leave it in just to not break any macros - malisa 28sep2005
+                                        // You can Set it if you want, but it just doesn't do anything
   void SetTheAssociationMaker(StMaker*);
   //void SetTheV0Maker(StMaker*);
   StMaker* TheEventMaker();
