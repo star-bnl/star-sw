@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.21 2005/07/07 19:43:42 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.22 2005/09/29 00:46:19 fisyak Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.22  2005/09/29 00:46:19  fisyak
+// Persistent McEvent
+//
 // Revision 1.21  2005/07/07 19:43:42  calderon
 // Load EEmcUtil.
 // Add switch for Igt.
@@ -90,103 +93,34 @@ TBrowser *brow=0;
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
 void StMcEventReadMacro(Int_t nevents=1,
-const char *MainFile=
- "/afs/rhic/star/data/samples/*.geant.root")
-{
-// Load all the System libraries
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
-    gSystem->Load("StUtilities");
-
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
+			const char *MainFile= "/star/rcf/test/new/trs_sl302.ittf/year_2005/cucu200_minbias/rcf1216_05_200evts.geant.root") {
+  gROOT->LoadMacro("bfc.C");
+  bfc(-1,"in,McEvent,y2005x",MainFile);
+  // IO Maker
+  StIOMaker *IOMk = (StIOMaker *) chain->Maker("inputStream");
+  IOMk->SetDebug();
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+  IOMk->SetBranch("geantBranch",0,"r");
+  IOMk->SetBranch("dstBranch",0,"r");
+  // StMcEvent
+  StMcEventMaker  *mcEventReader  = (StMcEventMaker  *) chain->Maker("StMcEventMaker");
+  mcEventReader->doPrintEventInfo = true;
+  mcEventReader->doPrintMemoryInfo = false;
+  mcEventReader->doUseTpc = true;
+  mcEventReader->doUseSvt = true;
+  mcEventReader->doUseSsd = true;
+  mcEventReader->doUseFtpc = true;
+  mcEventReader->doUseRich = true;
+  mcEventReader->doUseBemc = true;
+  mcEventReader->doUseBsmd = true;
+  mcEventReader->doUseIst  = true; 
+  mcEventReader->doUseFst  = true; 
+  mcEventReader->doUseFgt  = true;
+  mcEventReader->doUseIgt  = true;
     
-    gSystem->Load("StDetectorDbMaker");
-    gSystem->Load("StTpcDb");
-    gSystem->Load("StEvent");
-    gSystem->Load("StEmcUtil");
-    gSystem->Load("StEEmcUtil");
-    
-    gSystem->Load("StMcEvent");
-    gSystem->Load("StMcEventMaker");
-    
-    //	TOP maker
-    chain = new StChain("StMcEventMainChain"); 
-    chain->SetDebug();
-
-    // IO Maker
-    StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
-    IOMk->SetDebug();
-    IOMk->SetIOMode("r");
-    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-    IOMk->SetBranch("geantBranch",0,"r");
-    IOMk->SetBranch("dstBranch",0,"r");
-    
-
-    // StMcEvent
-    StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
-    mcEventReader->doPrintEventInfo = true;
-    mcEventReader->doPrintMemoryInfo = false;
-    mcEventReader->doUseTpc = true;
-    mcEventReader->doUseSvt = true;
-    mcEventReader->doUseSsd = true;
-    mcEventReader->doUseFtpc = true;
-    mcEventReader->doUseRich = true;
-    mcEventReader->doUseBemc = true;
-    mcEventReader->doUseBsmd = true;
-    mcEventReader->doUseIst  = true; 
-    mcEventReader->doUseFst  = true; 
-    mcEventReader->doUseFgt  = true;
-    mcEventReader->doUseIgt  = true;
-    //mcEventReader->SetDebug();
-    // now execute the chain member functions
-    
-    chain->PrintInfo();
-    Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
-    if (initStat) chain->Fatal(initStat, "during Init()");
-    
-    int istat=0,iev=1;
- EventLoop: if (iev<=nevents && istat!=2) {
-     chain->Clear();
-     cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
-     istat = chain->Make(iev); // This should call the Make() method in ALL makers
-     if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
-     if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
-     iev++; goto EventLoop;
-     
-     // this next part is just for doing the browser:
-     //create browser with name=BName,title=Btitle
-    
-//     Event = chain->GetDataSet("geant");
-//     Event->ls(9);
-//     brow = new TBrowser("BName","BTitle");    
-    
-//     // To view tables in Ntuple format
-//     St_DataSetIter geantDstI(Event);
-//     St_g2t_vertex  *g2t_vertexTablePointer  =  (St_g2t_vertex *)  geantDstI("g2t_vertex");
-//     St_g2t_track   *g2t_trackTablePointer   =  (St_g2t_track *)   geantDstI("g2t_track");
-//     St_g2t_tpc_hit *g2t_tpc_hitTablePointer =  (St_g2t_tpc_hit *) geantDstI("g2t_tpc_hit");
-//     St_g2t_svt_hit *g2t_svt_hitTablePointer =  (St_g2t_svt_hit *) geantDstI("g2t_svt_hit");
-//     St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
-    
-//     gSystem->Load("xdf2root"); // Needed for some reason
-    
-//     St_TableNtuple vertexNtuple(*g2t_vertexTablePointer);
-//     St_TableNtuple trackNtuple(*g2t_trackTablePointer);
-//     St_TableNtuple tpc_hitNtuple(*g2t_tpc_hitTablePointer);
-//     St_TableNtuple svt_hitNtuple(*g2t_svt_hitTablePointer);
-//     St_TableNtuple ftp_hitNtuple(*g2t_ftp_hitTablePointer);
-    
-//     vertexNtuple.Fill(*g2t_vertexTablePointer);
-//     trackNtuple.Fill(*g2t_trackTablePointer);
-//     tpc_hitNtuple.Fill(*g2t_tpc_hitTablePointer);
-//     svt_hitNtuple.Fill(*g2t_svt_hitTablePointer);
-//     ftp_hitNtuple.Fill(*g2t_ftp_hitTablePointer);
-    
-    
-  } // Event Loop
-    //chain->Finish(); // This should call the Finish() method in ALL makers
-                   // Comment this line out if you want to access the information
-                   // at the command line.
+  chain->PrintInfo();
+  Int_t initStat = chain->Init(); // This should call the Init() method in ALL makers
+  if (initStat) chain->Fatal(initStat, "during Init()");
+  chain->EventLoop(1,nevents);
 }
