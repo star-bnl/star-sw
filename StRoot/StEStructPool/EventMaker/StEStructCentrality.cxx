@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.cxx,v 1.4 2004/09/24 01:46:45 prindle Exp $
+ * $Id: StEStructCentrality.cxx,v 1.5 2005/09/29 17:41:50 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -117,9 +117,16 @@ void StEStructCentrality::setCentralities(const double* centralities, const int 
     }
     mnumCentralities=num;
 }
+
 int StEStructCentrality::numCentralities() {
-    return mnumCentralities;
+  if(!mcentralities) {  // this is set with mnumCentralities in setCentralities
+    cout<<" Error:: numCentralities requested without initialization "<<endl;
+    return -1;
+  }
+
+  return mnumCentralities;
 }
+
 double StEStructCentrality::centralityLimit( const int index ) {
     if ((index < 0) || (mnumCentralities <index)) {
         return -1;
@@ -178,6 +185,9 @@ double StEStructCentrality::ptCentralityLimit( const int index ) {
 /***********************************************************************
  *
  * $Log: StEStructCentrality.cxx,v $
+ * Revision 1.5  2005/09/29 17:41:50  msd
+ * Added initialization check to numCentralities
+ *
  * Revision 1.4  2004/09/24 01:46:45  prindle
  * Added call for setPtLimit. I use this in fluctuations which prevented
  * a fresh CVS checkout from compiling
