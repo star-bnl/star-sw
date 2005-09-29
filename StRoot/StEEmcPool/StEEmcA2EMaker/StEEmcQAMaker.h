@@ -38,6 +38,7 @@ class StEEmcQAMaker : public StMaker
   Float_t  zVertexMin; /**<- Minimum z vertex */
   Float_t  zVertexMax; /**<- Maximum z vertex */
 
+  void softTrigger( Float_t s ) { mSoftTrig = s; }
 
  private:
  protected:
@@ -67,7 +68,10 @@ class StEEmcQAMaker : public StMaker
 
   /// Histograms for counting triggers (one per trigger ID)
   std::vector<TH1F *> hTriggers; 
+  std::vector<TH1F *> hTriggersHard;
 
+  /// Software trigger threshold
+  Float_t mSoftTrig;
   
   Int_t mSectorTrigger; /**<- index of sector in which trigger fired */
 
