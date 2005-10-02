@@ -154,7 +154,7 @@ void StEEmcMixMaker::mixReal()
     if ( mSigmaVertex > 0. ) vertex[2]=( mFixedVertex.Z() + mRandom->Gaus(0.,mSigmaVertex));
   }
   
-  
+ 
   /// mix all pairs of points, avoiding self-pairs
   for ( UInt_t ipoint=0; ipoint<mPoints.size()-1; ipoint++ )
     for ( UInt_t jpoint=ipoint+1; jpoint<mPoints.size(); jpoint++ )
