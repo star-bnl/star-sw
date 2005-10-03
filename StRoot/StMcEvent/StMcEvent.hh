@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.20 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcEvent.hh,v 2.21 2005/10/03 14:08:02 fisyak Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.21  2005/10/03 14:08:02  fisyak
+ * fix memory leak with EmcHitCollections
+ *
  * Revision 2.20  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -174,7 +177,7 @@ class StMcEvent : public TDataSet {
   			        
   StMcEmcHitCollection*          emcHitCollection(const Char_t *name) {
     StMcEmcHitCollection *emcHitColl = (StMcEmcHitCollection*) Find(name);				   	
-    if (! emcHitColl) {emcHitColl = new StMcEmcHitCollection(); emcHitColl->SetName(name);}		   
+    if (! emcHitColl) {emcHitColl = new StMcEmcHitCollection(); emcHitColl->SetName(name); Add(emcHitColl);}		   
     return emcHitColl;											   	
   }													   
   const StMcEmcHitCollection*    emcHitCollection(const Char_t *name) const {
