@@ -10,21 +10,14 @@ StMuDstMaker* muMk;
 StChain *chain=0;
 
 
-int rdMu2spinTest( char* Rrun    ="R6173011",
-		   int off7=0,  int off48=0,
+int rdMu2spinTest( char* Rrun    ="R6171021",
 		   Int_t nFiles  = 20,
 		   char* inDir   = "./lis/",
-		   int nEve=2000)
+		   int nEve=10)
 {
 
   #define  USE_DB  
   char *outPath="iter1/";
-
-  //old
-
- // char* file="/star/data46/reco/ppProduction/FullField/P05if/2005/173/st_physics_6173071_raw_2030015.MuDst.root"
- // char* file="/star/data03/daq/2005/janMisc/st_physics_6156028_raw_2040010.MuDst.root"
-  //char* file="/star/data05/scratch/balewski/2005-bXing-muDst/174/st_fast_6174031_raw_2100003.MuDst.root"
 
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -60,9 +53,13 @@ int rdMu2spinTest( char* Rrun    ="R6173011",
   hbxI=new TH1F("bXI","Intended fill pattern vs. STAR bXing; bXing at STAR IP",120,-0.5,119.5);
 #endif
 
-  hbx48=new TH1F("bX48","Rate vs. true bXing from bx48; bXing at STAR IP",120,-0.5,119.5);
+  hbx48=new TH1F("bX48","Rate vs. raw bx48; bXing= raw bx48",120,-0.5,119.5);
+  hbx7=new TH1F("bX7","Rate vs. raw bx48; bXing= raw bx48",120,-0.5,119.5);
 
-  hbx7=new TH1F("bX7","Rate vs. true bXing from bx7; bXing at STAR IP",120,-0.5,119.5);
+  hbx48c=new TH1F("bX48c","Rate vs. STAR IP bXing(bx48); bXing= bx48+offset",120,-0.5,119.5);
+  hbx7c=new TH1F("bX7c","Rate vs. STAR IP bXing(bx48); bXing= bx48+offset",120,-0.5,119.5);
+
+  hbx48cm=new TH1F("bX48cm","Masking ON, Rate vs. STAR IP bXing(bx48) ; bXing= bx48+offset",120,-0.5,119.5);
 
   int t1=time(0);
   chain->Init();
@@ -90,10 +87,18 @@ int rdMu2spinTest( char* Rrun    ="R6173011",
     StL0Trigger *trig=&(muEve->l0Trigger());
     int bx48=trig->bunchCrossingId();
     int bx7=trig->bunchCrossingId7bit(runNo);
-    int bxStar48= (bx48+off48)%120;
-    int bxStar7= (bx7+off7)%120;
-    hbx48->Fill(bxStar48);
-    hbx7->Fill(bxStar7);
+    hbx48->Fill(bx48);
+    hbx7->Fill(bx7);
+
+#ifdef USE_DB 
+    assert(spDb->offsetBX48minusBX7(bx48,bx7)==0);
+    int bxStar48= spDb->BXstarUsingBX48(bx48);
+    int bxStar7=spDb->BXstarUsingBX7(bx7);
+    hbx48c->Fill(bxStar48);
+    hbx7c->Fill(bxStar7);
+    if(!spDb->isMaskedUsingBX48(bx48) ) hbx48cm->Fill(bxStar48);
+#endif
+
    if(eventCounter%500==0) printf("\n\n ====================%d  processing eventID %d nPrim=%d ==============\n", eventCounter++,info.id(),nPrim);
 
   }
@@ -109,10 +114,13 @@ int rdMu2spinTest( char* Rrun    ="R6173011",
   new TFile(fileH,"recreate");
   hbx48->Write();
   hbx7->Write();
+  hbx48c->Write();
+  hbx7c->Write();
+  hbx48cm->Write();
   
 #ifdef USE_DB
   //play with spinDb information
-  // spDb->print(0);
+  //spDb->print(0); // 0=short, 1=huge
   const int * spin8bits=spDb->getSpin8bits();
   for(int bx=0;bx<120;bx++){
     bool isFilled=(spin8bits[bx] & 0x11)==0x11;
@@ -123,7 +131,8 @@ int rdMu2spinTest( char* Rrun    ="R6173011",
   }
   hbxI->Write();
 #endif
-  //fileH->Close();
+
+
   chain->Finish();
   
   

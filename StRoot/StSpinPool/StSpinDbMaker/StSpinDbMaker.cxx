@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.1 2005/09/30 23:47:45 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.2 2005/10/03 20:40:17 balewski Exp $
  
 
 #include <time.h>
@@ -68,7 +68,7 @@ StSpinDbMaker::InitRun  (int runNumber){
   gMessMgr->Message("","I") << GetName()<<"::InitRun  " <<endm;
   clearTables();
   requestDataBase();
-  //  if(valid()) // tmp ?
+  //  if(isValid()) // tmp ?
   optimizeTables();
   gMessMgr->Message("","I") << GetName()<<"::InitRun()  Found "<< nFound<<" SPIN related tables "<<endm;
 
@@ -105,7 +105,7 @@ void  StSpinDbMaker::requestDataBase(){
   getTable<St_spinDbStar,spinDbStar_st>(spindb,"spinStar",&mTabSpinStar);  
   getTable<St_spinDbBXmask,spinDbBXmask_st>(spindb,"spinBXmask",&mTabSpinBXmask);  
    
-  gMessMgr->Message("","I") << GetName()<<"::Request valid="<< valid()<<endm;
+  gMessMgr->Message("","I") << GetName()<<"::Request valid="<< isValid()<<endm;
 
 
 }
@@ -240,7 +240,7 @@ StSpinDbMaker::getTable(TDataSet *mydb,  TString tabName,   T_st** outTab ){
 //--------------------------------------------------
 bool
 StSpinDbMaker::isPolDir(spinDbEnum polDir){
-  if(!valid()) return false;
+  if(!isValid()) return false;
   int i;  
   //  for(i=0;i<SPINDbMaxRing;i++) printf("rot(%d)=%d\n",i,mTabSpinV124->rotatorState[i]);
   
@@ -253,7 +253,7 @@ StSpinDbMaker::isPolDir(spinDbEnum polDir){
 //--------------------------------------------------
 int
 StSpinDbMaker:: spin4usingBX48(int bx48){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return -1;
   int bx=(bx48+mTabSpinStar->bXoff48)%SPINDbMaxBXings;
   // printf("inspin4..., bx48=%d bx=%d\n",bx48,bx);
@@ -264,7 +264,7 @@ StSpinDbMaker:: spin4usingBX48(int bx48){
 //--------------------------------------------------
 int
 StSpinDbMaker::spin8usingBX48(int bx48){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return -1;
   int bx=(bx48+mTabSpinStar->bXoff48)%SPINDbMaxBXings;
   return spin8bits[bx];
@@ -274,7 +274,7 @@ StSpinDbMaker::spin8usingBX48(int bx48){
 //--------------------------------------------------
 int
 StSpinDbMaker::BX48offset(){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   return mTabSpinStar->bXoff48;
 }
 
@@ -282,7 +282,7 @@ StSpinDbMaker::BX48offset(){
 //--------------------------------------------------
 bool
 StSpinDbMaker::isBXfilledUsingBX48(int bx48){
-  if(!valid()) return false;
+  if(!isValid()) return false;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return false;
   int bx=(bx48+mTabSpinStar->bXoff48)%SPINDbMaxBXings;
   return  ((spin8bits[bx] & 0x11)==0x11);
@@ -292,16 +292,27 @@ StSpinDbMaker::isBXfilledUsingBX48(int bx48){
 //--------------------------------------------------
 int
 StSpinDbMaker:: BXstarUsingBX48(int bx48){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return -1;
   return (bx48+mTabSpinStar->bXoff48)%SPINDbMaxBXings;
 }
 
 //--------------------------------------------------
 //--------------------------------------------------
+bool
+StSpinDbMaker:: isMaskedUsingBX48(int bx48){
+  if(!isValid()) return true;
+  if(bx48<0 || bx48>=SPINDbMaxBXings) return true;
+  int bxStar= BXstarUsingBX48(bx48);
+  return mTabSpinBXmask->bXmask[bxStar];
+} 
+
+
+//--------------------------------------------------
+//--------------------------------------------------
 int
 StSpinDbMaker::offsetBX48minusBX7(int bx48, int bx7){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   int bxa=BXstarUsingBX48(bx48);
   int bxb=BXstarUsingBX7(bx7);
   if(bxa<0 || bxb<0) return -1;
@@ -344,7 +355,7 @@ StSpinDbMaker::getSpin8bits(){
 //--------------------------------------------------
 int
 StSpinDbMaker::BX7offset(){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   return mTabSpinStar->bXoff7;
 }
 
@@ -353,7 +364,7 @@ StSpinDbMaker::BX7offset(){
 //--------------------------------------------------
 int
 StSpinDbMaker:: BXstarUsingBX7(int bx7){
-  if(!valid()) return -1;
+  if(!isValid()) return -1;
   if(bx7<0 || bx7>=SPINDbMaxBXings) return -1;
   return (bx7+mTabSpinStar->bXoff7)%SPINDbMaxBXings;
 }
@@ -366,22 +377,29 @@ void StSpinDbMaker::print(int level) {
 
   printf("SpinDb::print(level=%d) ...\n",level);
 
-  printf("Dump spinDB: valid=%d polTrans=%d polLong=%d BX7off=%d BX48off=%d\n", valid(), isPolDirTrans(), isPolDirLong(), BX7offset(), BX48offset());
-  if(!valid()) return;
+  printf("Dump spinDB: valid=%d polTrans=%d polLong=%d BX7off=%d BX48off=%d\n", isValid(), isPolDirTrans(), isPolDirLong(), BX7offset(), BX48offset());
+  if(!isValid()) return;
   printf("     spinDB: timeBucket offset: Blue=%d Yell=%d\n",getBucketOffsets()[blueRing],getBucketOffsets()[yellRing]);
-  printf("DB records labels:\n V124: %s \n Star: %s\n",mTabSpinV124->comment,mTabSpinStar->comment); 
+  printf("DB records labels:\n V124: %s \n BXoffset: %s\n BXmask: %s\n\n",mTabSpinV124->comment,mTabSpinStar->comment,mTabSpinBXmask->comment); 
   printf("dump of spin bits  @ STAR IP, for 120 bXings, range [0,119]\n");
   int bx;
+
+  printf("bXstar  spin8  spin4(dec) filled?  masked?  bx48   blueBx yellBx\n");
+
   for(bx=SPINDbMaxBXings-BX48offset();bx<2*SPINDbMaxBXings-BX48offset();bx++) {
-    int bx48=bx%SPINDbMaxBXings;
+    int bx48=bx%SPINDbMaxBXings;// this is dangerous, but works right
     int bXstar=BXstarUsingBX48(bx48);
     int blueBx=(bXstar+getBucketOffsets()[blueRing]/3)%SPINDbMaxBXings;
     int yellBx=(bXstar+getBucketOffsets()[yellRing]/3)%SPINDbMaxBXings;
     int spin8=spin8usingBX48(bx48);
     int spin4=spin4usingBX48(bx48);
-    char *ftt="empty";
+    char *ftt="empty ";
     if (isBXfilledUsingBX48(bx48))ftt="filled";
-    printf("bXstar=%3d   spin8=0x%02x  spin4=%2d (dec) %6s  bx48=%3d   blueBx=%3d yellBx=%3d\n",bXstar,spin8,spin4,ftt,bx48,blueBx,yellBx);
+    char *mtt="use "; 
+    if(isMaskedUsingBX48(bx48))mtt="*mask*";
+    printf("  %3d    0x%02x       %2d    %6s   %6s   %3d     %3d    %3d\n",bXstar,spin8,spin4,ftt,mtt,bx48,blueBx,yellBx);
+    //  printf("bx48=%d mU=%d bxStar=%d mR=%d\n", bx48,isMaskedUsingBX48(bx48),bXstar,mTabSpinBXmask->bXmask[bXstar]);
+    //  printf(" \n");    assert(1==2);
   }
   
   if(level<=0) return;
@@ -390,12 +408,19 @@ void StSpinDbMaker::print(int level) {
   for(j=0;j<SPINDbMaxBuckets;j++) 
     printf("timeBucket=%3d rawV124=0x%x\n",j,getRawV124bits()[j]);
 
+  printf("dump raw bXing mask \n STAR bXing mask (0=use, none-0=drop)\n");
+  for(j=0;j<SPINDbMaxBXings;j++) 
+    printf("%3d  %d\n",j,mTabSpinBXmask->bXmask[j]);
+
 
 }
 
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.2  2005/10/03 20:40:17  balewski
+// clenup
+//
 // Revision 1.1  2005/09/30 23:47:45  balewski
 // start
 //
