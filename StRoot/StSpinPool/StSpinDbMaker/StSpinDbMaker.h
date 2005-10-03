@@ -1,4 +1,4 @@
-// $Id: StSpinDbMaker.h,v 1.1 2005/09/30 23:47:46 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.2 2005/10/03 20:40:17 balewski Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
@@ -25,7 +25,7 @@ class StSpinDbMaker : public StMaker {
   spinDbBXmask_st *mTabSpinBXmask;
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.1 2005/09/30 23:47:46 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.2 2005/10/03 20:40:17 balewski Exp $";
   void clearTables();///< clear lookup tables
   void requestDataBase(); ///< reads tables from STAR-DB
   void optimizeTables(); ///< produces lookup tables
@@ -45,7 +45,7 @@ class StSpinDbMaker : public StMaker {
   void print(int level=0);// dump spinDb content for current time stamp
   void setDBname(TString name){ dbName=name;}
 
-  bool valid(){ return nFound==3;} // true if all DB tables found
+  bool isValid(){ return nFound==3;} // true if all DB tables found
   bool isPolDirTrans(){return isPolDir(polDirTrans);}
   bool isPolDirLong(){return isPolDir(polDirLong);}
 
@@ -54,6 +54,7 @@ class StSpinDbMaker : public StMaker {
   int   BXstarUsingBX48(int bx48); // bXing at STAR IP, [0,119]
   int   BX48offset(); // STAR bXing=(bx48+48off)%120
   bool  isBXfilledUsingBX48(int bx48);
+  bool  isMaskedUsingBX48(int bx48); // returns true _also_ if DB is empty
 
   int   spin8usingBX7(int bx7); // 8bit spin information
   int   spin4usingBX7(int bx7); // 4bit spin information
@@ -76,7 +77,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.1 2005/09/30 23:47:46 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.2 2005/10/03 20:40:17 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -87,6 +88,9 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.2  2005/10/03 20:40:17  balewski
+// clenup
+//
 // Revision 1.1  2005/09/30 23:47:46  balewski
 // start
 //

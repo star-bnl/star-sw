@@ -2,7 +2,7 @@
 
 #CSTRUCTS= $(STAR)/StRoot/StEEmcDbMaker/cstructs
 CSTRUCTS = ../cstructs
-STDB_API = ../../StDbLib
+STDB_API = ../../../StDbLib
 
 
 MYSQLINC=-I/usr/include/mysql

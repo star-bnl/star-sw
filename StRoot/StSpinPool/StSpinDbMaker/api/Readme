@@ -38,7 +38,7 @@ Load BXmask
 mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "select comment,dataID,beginTime,endTime from spinBXmask where BeginTime>'2005-01-01' and  BeginTime<'2006-03-25'  order by beginTime "
 
 xxxxxxxxxxxxxx  DELETE spinStar  xxxxxxxxxxx
-mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "delete from spinV124 where dataID=5"
+mysql --host=robinson.star.bnl.gov --port=3306 Calibrations_rhic -e "delete from spinBXmask where dataID=1"
 
 
 
