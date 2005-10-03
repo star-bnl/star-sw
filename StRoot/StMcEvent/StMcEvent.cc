@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.22 2005/10/01 00:01:10 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.23 2005/10/03 16:58:17 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.23  2005/10/03 16:58:17  calderon
+ * Fixed bug in logic of printing 2nd vertex.
+ *
  * Revision 2.22  2005/10/01 00:01:10  calderon
  * Fixed bug in printing of parent tracks.  Was calling the hit array out of bounds.
  *
@@ -137,8 +140,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.22 2005/10/01 00:01:10 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.22 2005/10/01 00:01:10 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.23 2005/10/03 16:58:17 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.23 2005/10/03 16:58:17 calderon Exp $";
 ClassImp(StMcEvent);
 #if 0
 template<class T> void
@@ -662,23 +665,23 @@ void StMcEvent::Print(Option_t *option) const {
   cout << "StSPtrVecMcVertex"                                         << endl;
   cout << "# of Vertices    : " << nVertices << endl;
   cout << "---------------------------------------------------------" << endl;
-  if (!all) { 
-      cout << "Dumping second element in collection (First is Primary). " << endl;
-      cout << "---------------------------------------------------------" << endl;
-  }
   if (nVertices > 1) {
+      cout << "Daughters of second Vertex : " << vertices()[1]->numberOfDaughters() << endl;
+      if (vertices()[1]->numberOfDaughters()) {
+	  cout << "First Daughter of this Vertex" << endl;
+	  cout << *(vertices()[1]->daughter(0)) << endl;
+      }
       if (! all) nVertices = 2;
+      cout << "---------------------------------------------------------" << endl;
+      cout << "Dumping vertices" << endl;
       for (int i = 1; i < nVertices; i++) {
+	  cout << "---------------------------------------------------------" << endl;
 	  cout << "StMcVertex " << i+1 << " at " << vertices()[i]  << endl;
 	  cout << "---------------------------------------------------------" << endl;
 	  cout << *(vertices()[i]) << endl;
 	  cout << "---------------------------------------------------------" << endl;	  
       }
-  }
-  cout << "Daughters of second Vertex : " << vertices()[1]->numberOfDaughters() << endl;
-  if (vertices()[1]->numberOfDaughters()) {
-      cout << "First Daughter of this Vertex" << endl;
-      cout << *(vertices()[1]->daughter(0)) << endl;
+  
   }
   UInt_t       i, j, k,ii, nhits, nh;
   Bool_t             gotOneHit;
