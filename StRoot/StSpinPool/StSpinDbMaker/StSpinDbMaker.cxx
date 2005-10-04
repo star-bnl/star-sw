@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.2 2005/10/03 20:40:17 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.3 2005/10/04 18:47:38 balewski Exp $
  
 
 #include <time.h>
@@ -69,7 +69,9 @@ StSpinDbMaker::InitRun  (int runNumber){
   clearTables();
   requestDataBase();
   //  if(isValid()) // tmp ?
-  optimizeTables();
+ 
+  if(mTabSpinV124) optimizeTables();
+  
   gMessMgr->Message("","I") << GetName()<<"::InitRun()  Found "<< nFound<<" SPIN related tables "<<endm;
 
   return StMaker::InitRun(runNumber);
@@ -105,7 +107,7 @@ void  StSpinDbMaker::requestDataBase(){
   getTable<St_spinDbStar,spinDbStar_st>(spindb,"spinStar",&mTabSpinStar);  
   getTable<St_spinDbBXmask,spinDbBXmask_st>(spindb,"spinBXmask",&mTabSpinBXmask);  
    
-  gMessMgr->Message("","I") << GetName()<<"::Request valid="<< isValid()<<endm;
+  gMessMgr->Message("","I") << GetName()<<"::Request isValid="<< isValid()<<endm;
 
 
 }
@@ -126,7 +128,7 @@ void  StSpinDbMaker::optimizeTables  (){
   
   //        Zero    Posit   Negat   Empty
   const int nibZ=9, nibP=3, nibN=5, nibE=0;
-  printf("optimizeTables: bucketOffset: B=%d Y=%d\n",mTabSpinV124->bucketOffset[blueRing],mTabSpinV124->bucketOffset[yellRing]);
+  // printf("optimizeTables: bucketOffset: B=%d Y=%d\n",mTabSpinV124->bucketOffset[blueRing],mTabSpinV124->bucketOffset[yellRing]);
   
   int bx;
   int nP2=0,nP1=0,nP0=0,nPer=0;
@@ -176,9 +178,15 @@ void  StSpinDbMaker::optimizeTables  (){
     }
     //  printf("bx=%4d  b=%4d y=%4d  bNib=x%x yNib=x%x  spin8=x%2x spin4=%2d\n",bx,bBucket/3, yBucket/3,bNib,yNib,spin8,spin4); 
 
-  }   
-  gMessMgr->Message("","I") <<"  SPINDB mOptimized() "<<
-    "bXing w/ pol2="<<nP2<<" pol1="<<nP1<<" unPol="<<nP0<<" errPol="<<nPer<<endm; 
+  } 
+
+  char *polDir="scrambled";
+  if(isPolDirTrans()) polDir="Transverse";
+  if(isPolDirLong()) polDir="Longitudinal";
+  
+  gMessMgr->Message("","I")<< GetName()<<"::InitRun mOptimized() "<<
+     "\n        polDir="<<polDir<<
+     "  bXing w/ pol2="<<nP2<<" pol1="<<nP1<<" unPol="<<nP0<<" errPol="<<nPer<<endm; 
   return;
 } 
 
@@ -208,16 +216,16 @@ StSpinDbMaker::getTable(TDataSet *mydb,  TString tabName,   T_st** outTab ){
   char name[1000];
   sprintf(name,"%s",tabName.Data());
   
-  gMessMgr->Message("","D") <<"SPINDB request="<< name <<endm;
+  gMessMgr->Message("","D") << GetName()<<"::InitRun  request="<< name <<endm;
 
   St_T *ds= (St_T *)mydb->Find(name);
   if(ds==0) {
-    gMessMgr->Message("","W") <<"SPINDB  table='"<< name <<"' not Found in DB, continue "<<endm;
+    gMessMgr->Message("","W") << GetName()<<"::InitRun   table='"<< name <<"' not Found in DB, continue "<<endm;
     return ;
   }
 
   if(ds->GetNRows()!=1) {
-    gMessMgr->Message("","W") <<"SPINDB  table='"<< name <<"' no records, continue "<<endm; 
+    gMessMgr->Message("","W") << GetName()<<"::InitRun  table='"<< name <<"' no records, continue "<<endm; 
     return ;
   }
   
@@ -240,7 +248,7 @@ StSpinDbMaker::getTable(TDataSet *mydb,  TString tabName,   T_st** outTab ){
 //--------------------------------------------------
 bool
 StSpinDbMaker::isPolDir(spinDbEnum polDir){
-  if(!isValid()) return false;
+  if(!mTabSpinV124) return false;
   int i;  
   //  for(i=0;i<SPINDbMaxRing;i++) printf("rot(%d)=%d\n",i,mTabSpinV124->rotatorState[i]);
   
@@ -418,6 +426,9 @@ void StSpinDbMaker::print(int level) {
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.3  2005/10/04 18:47:38  balewski
+// cleanup
+//
 // Revision 1.2  2005/10/03 20:40:17  balewski
 // clenup
 //
