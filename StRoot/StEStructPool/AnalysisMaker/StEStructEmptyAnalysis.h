@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.h,v 1.3 2005/09/29 17:40:31 msd Exp $
+ * $Id: StEStructEmptyAnalysis.h,v 1.4 2005/10/04 16:06:19 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,15 +26,14 @@ class StEStructEmptyAnalysis : public StEStructAnalysis {
 
   char* moutFileName;
   
-  int mhm[14];        // Jeff had these in place, frankly not sure what they're for...
+  int mhm[14];        // Jeff had these in place for p-p analysis, frankly not sure what they're for...
   TH1F** etaMean[3];
   TH1F** phiMean[3];
   TH1F** ytMean[3];
   
   // Make some plots for determining centrality bins
   TH1F* hNEvent;  // dNevent/dNch
-  TH1F* hNEvent2; // transformed to dNevent/dNch^1/4 vs Nch^1/4
-  
+  TH1F* hvar;     //variable bins;  I'd like to use a TGraph instead of TH1F, but hadd doesn't support graphs...
 
  public:
 
@@ -63,6 +62,9 @@ inline void StEStructEmptyAnalysis::setCutFile(const char* cutFileName, StEStruc
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.h,v $
+ * Revision 1.4  2005/10/04 16:06:19  msd
+ * Finalized centrality plots
+ *
  * Revision 1.3  2005/09/29 17:40:31  msd
  * Changed empty analysis to create plots for determining centrality bins
  *

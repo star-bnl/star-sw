@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.cxx,v 1.3 2005/09/29 17:40:30 msd Exp $
+ * $Id: StEStructEmptyAnalysis.cxx,v 1.4 2005/10/04 16:06:15 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -58,8 +58,11 @@ StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
   }
 
   hNEvent = new TH1F("hNEvent","dNevent/dNch",1200,0,1200);
-  hNEvent2 = new TH1F("hNEvent2","dNevent / dNch^{1/4} vs Nch^{1/4}",500,0,7);
-  
+
+  float varxbins[1200];
+  varxbins[0]=0;
+  for(int i=1; i<1200; i++) varxbins[i]=pow(i,0.25)-0.00001;
+  hvar = new TH1F("hvar","var bin",1199,varxbins);
 
 };
 
@@ -70,10 +73,10 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
   int mult = event->Ntrack();
   //cout << " doing event " << event->EventID() << " with mult " << mult << endl; //***
   hNEvent->Fill(mult);
-  hNEvent2->Fill(pow(mult,0.25));  // hopefully this will do it...
+  hvar->Fill(pow(mult,0.25));
   
-  // just comment all this stuff out...
-  /*
+
+  // Below is Jeff's p-p stuff; I'm so tempted to just comment all this out...  
   int id=event->Ntrack();
   if(id>=1){
 
@@ -114,7 +117,7 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
     }
 
   }
-  */
+  
 
   delete event;
   return true;
@@ -128,33 +131,10 @@ void StEStructEmptyAnalysis::finish(){
     return;
   }
 
-  // finish transform of hNevent2
-  /*
-  TH1F* htemp1 = (TH1F*)hNEvent->Clone("htemp1");
-  TH1F* htemp2 = (TH1F*)hNEvent2->Clone("htemp2");
-
-  htemp1->SetTitle("dNev/dNch^{1/4}");
-  htemp2->SetTitle("dNev/dNch^{1/4} vs Nch^{1/4}");
-
-  for(int i=1; i<=hNEvent2->GetNbinsX(); i++) {
-    float x1 = hNEvent2->GetBinCenter(i);  // x1 = n^1/4
-    float y1 = hNEvent2->GetBinContent(i); // y1 = dNev/dNch (or dNch^1/4 ?)
-    float y2 = 4*pow(x1, 3)*y1; // y2 = 4n^3/4 * y1 
-    htemp2->SetBinContent(i, y2);
-  }
-
-  for(int i=1; i<=hNEvent->GetNbinsX(); i++) {
-    float x1 = hNEvent->GetBinCenter(i);  // x1 = n;
-    float y1 = hNEvent->GetBinContent(i); // y1 = dNev/dNch
-    float y2 = 4*pow(x1, (float)0.75)*y1; // y2 = 4n^3/4 * y1
-    htemp1->SetBinContent(i, y2);
-  }
-  */
-
   TFile * tf=new TFile(moutFileName,"RECREATE");
   tf->cd();
 
-  /*
+  // Jeff's plots
   for(int i=0;i<3;i++){
     for(int j=0;j<6;j++){
       etaMean[i][j]->Write();
@@ -162,19 +142,24 @@ void StEStructEmptyAnalysis::finish(){
       ytMean[i][j]->Write();
     }
   }
-  */
+  
 
+  // Centrality plots
   hNEvent->Write();
-  hNEvent2->Write();
-  //htemp1->Write();
-  //htemp2->Write();
+  
+  for(int i=1; i<=hvar->GetNbinsX(); i++)  hvar->SetBinContent(i, hvar->GetBinContent(i)*4*pow(hvar->GetBinLowEdge(i),3) );
+  hvar->Write();
 
   tf->Close();
+
 }
 
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.cxx,v $
+ * Revision 1.4  2005/10/04 16:06:15  msd
+ * Finalized centrality plots
+ *
  * Revision 1.3  2005/09/29 17:40:30  msd
  * Changed empty analysis to create plots for determining centrality bins
  *
