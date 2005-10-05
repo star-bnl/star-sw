@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.3 2005/10/04 18:47:38 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.4 2005/10/05 13:41:47 balewski Exp $
  
 
 #include <time.h>
@@ -68,7 +68,6 @@ StSpinDbMaker::InitRun  (int runNumber){
   gMessMgr->Message("","I") << GetName()<<"::InitRun  " <<endm;
   clearTables();
   requestDataBase();
-  //  if(isValid()) // tmp ?
  
   if(mTabSpinV124) optimizeTables();
   
@@ -329,6 +328,23 @@ StSpinDbMaker::offsetBX48minusBX7(int bx48, int bx7){
   return diff;
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+bool
+StSpinDbMaker::isBXfilledUsingBXstar(int bxStar){
+  if(!isValid()) return false;
+  if(bxStar<0 || bxStar>=SPINDbMaxBXings) return false;
+   return  ((spin8bits[bxStar] & 0x11)==0x11);
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+bool
+StSpinDbMaker::isBXmaskedUsingBXstar(int bxStar){
+  if(!isValid()) return true;
+  if(bxStar<0 || bxStar>=SPINDbMaxBXings) return true;
+   return mTabSpinBXmask->bXmask[bxStar];
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -426,6 +442,9 @@ void StSpinDbMaker::print(int level) {
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.4  2005/10/05 13:41:47  balewski
+// more get-methods
+//
 // Revision 1.3  2005/10/04 18:47:38  balewski
 // cleanup
 //

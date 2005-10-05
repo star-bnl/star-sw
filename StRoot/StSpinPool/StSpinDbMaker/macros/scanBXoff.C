@@ -1,4 +1,4 @@
-scanBXoff( char* Rrun    = "R6174042") {
+scanBXoff( char* Rrun    = "R6104032") {
   gStyle->SetPalette(1,0);
   gStyle->SetOptStat(11);
   
