@@ -10,14 +10,14 @@ StMuDstMaker* muMk;
 StChain *chain=0;
 
 
-int rdMu2spinTest( char* Rrun    ="R6171021",
+int rdMu2spinTest( char* Rrun    ="R6175007",
 		   Int_t nFiles  = 20,
 		   char* inDir   = "./lis/",
 		   int nEve=10)
 {
 
-  #define  USE_DB  
-  char *outPath="iter1/";
+    #define  USE_DB  
+  char *outPath="iterX/";
 
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -36,6 +36,8 @@ int rdMu2spinTest( char* Rrun    ="R6171021",
     
   // create chain    
   chain = new StChain("StChain"); 
+  // inDir   ="/star/u/jwebb/work/2005/TEST/";
+  // fileL="test.lis";
 
   printf("adding muDst from '%s' ....\n",fileL.Data());
   // Now we add Makers to the chain...   
@@ -120,12 +122,13 @@ int rdMu2spinTest( char* Rrun    ="R6171021",
   
 #ifdef USE_DB
   //play with spinDb information
-  //spDb->print(0); // 0=short, 1=huge
+  // spDb->print(0); // 0=short, 1=huge
   const int * spin8bits=spDb->getSpin8bits();
   for(int bx=0;bx<120;bx++){
     bool isFilled=(spin8bits[bx] & 0x11)==0x11;
     if(isFilled) hbxI->Fill(bx);
-
+    assert(isFilled==spDb->isBXfilledUsingBXstar(bx));
+    spDb->isBXmaskedUsingBXstar(bx);
     //    if(spDb->isBXfilledUsingBX48(bx48)) hbxI->Fill(bxStar);
     //printf("bxStar=%3d   bx48=%3d   fill=%d\n",bxStar,bx48,spDb->isBXfilledUsingBX48(bx48));
   }

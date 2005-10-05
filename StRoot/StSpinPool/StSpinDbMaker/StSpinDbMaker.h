@@ -1,4 +1,4 @@
-// $Id: StSpinDbMaker.h,v 1.2 2005/10/03 20:40:17 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.3 2005/10/05 13:41:47 balewski Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
@@ -25,7 +25,7 @@ class StSpinDbMaker : public StMaker {
   spinDbBXmask_st *mTabSpinBXmask;
  public:
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.2 2005/10/03 20:40:17 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.3 2005/10/05 13:41:47 balewski Exp $";
   void clearTables();///< clear lookup tables
   void requestDataBase(); ///< reads tables from STAR-DB
   void optimizeTables(); ///< produces lookup tables
@@ -62,8 +62,10 @@ class StSpinDbMaker : public StMaker {
   int   BX7offset(); // STAR bXing=(bx7+7off)%120
   bool  isBXfilledUsingBX7(int bx7);
 
-  int  offsetBX48minusBX7(int bx48, int bx7); //should be zero for every run
-   
+  int   offsetBX48minusBX7(int bx48, int bx7); //should be zero for every run
+  bool  isBXfilledUsingBXstar(int bxStar);
+  bool  isBXmaskedUsingBXstar(int bxStar);
+  
   // expert only ....
   const unsigned char *getRawV124bits();
   const int *getBucketOffsets();
@@ -77,7 +79,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.2 2005/10/03 20:40:17 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.3 2005/10/05 13:41:47 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -88,6 +90,9 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.3  2005/10/05 13:41:47  balewski
+// more get-methods
+//
 // Revision 1.2  2005/10/03 20:40:17  balewski
 // clenup
 //
