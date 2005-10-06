@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.480 2005/09/05 17:00:28 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.481 2005/10/06 18:58:05 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -32,8 +32,8 @@
 #endif
 
 // NoChainOptions -> Number of chain options auto-calculated
-Int_t NoChainOptions;
-
+Int_t NoChainOptions = 0;
+St_Bfc *chainOpt = 0;
 ClassImp(StBFChain)
   
 //_____________________________________________________________________________
@@ -62,15 +62,13 @@ void StBFChain::Setup(Int_t mode) {
 #else
   gROOT->LoadMacro(file);
 #endif
-  St_Bfc *chainOpt  = (St_Bfc *) gInterpreter->Calc("CreateTable()");
+  chainOpt  = (St_Bfc *) gInterpreter->Calc("CreateTable()");
   cmd = ".U ";
   cmd += file;
   gInterpreter->ProcessLine(cmd);
-  Bfc_st *rows = chainOpt->GetTable();
   assert(chainOpt);
   NoChainOptions = chainOpt->GetNRows();
-  fBFC = new Bfc_st[NoChainOptions];
-  memcpy (fBFC, rows, NoChainOptions*sizeof (Bfc_st));
+  fBFC = chainOpt->GetTable();
   FDate  = FTime  = 0;
   FDateS = FTimeS = 0;
 }
@@ -265,8 +263,14 @@ Int_t StBFChain::Instantiate()
     if (! mk) goto Error;
     
     // special maker options
+    // m_Mode xyz 
+    //        x = 1 phys_off
+    //        y = 1 Passive mode (do not call RunMC()
+    //        z = 1 Mixer Mode 
     if (maker == "StVMCMaker") {
-      if (GetOption("VMCPassive")) mk->SetActive(kFALSE);
+      if (GetOption("VMCPassive")) {// don't use mk->SetActive(kFALSE) because we want to have InitRun
+	mk->SetMode(mk->GetMode() + TMath::Sign(10,mk->GetMode()));
+      }
       else {
 	if (GetOption("phys_off")) mk->SetMode(mk->GetMode() + TMath::Sign(100,mk->GetMode()));
 	if (fInFile != "")  ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data()));
@@ -345,6 +349,7 @@ Int_t StBFChain::Instantiate()
       cmd += "parameterDB->setYCutSvt(.08);"; // 800 um
       cmd += "parameterDB->setZCutSvt(.08);"; // 800 um
       cmd += "parameterDB->setReqCommonHitsSvt(1);"; // Require 1 hits in common for tracks to be associated
+      if (GetOption("IdTruth")) cmd += Form("((StAssociationMaker *) %p)->useIdAssoc();",mk);
       ProcessLine(cmd);
     }
     // usually, we do maker first and option second but the
@@ -766,7 +771,8 @@ Int_t StBFChain::Skip(int nskip)
 Int_t StBFChain::Finish()
 {
   if (fBFC) {
-    delete [] fBFC; fBFC = 0;
+    SafeDelete(chainOpt);
+    fBFC = 0;
     if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
     return StMaker::Finish();
   }
@@ -856,38 +862,12 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
   }
-#if 0
-  // Not ready yet
-  // Check that option can be library name or / and Maker
-  static Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
-  TString File = *tag; File += ".so";
-  Char_t *file = gSystem->Which(path,File.Data(),kReadPermission);
-  if (file) {
-    Bfc_st *temp = fBFC;
-    fBFC = new Bfc_st[NoChainOptions+1];
-    memcpy (fBFC, temp, NoChainOptions*sizeof(Bfc_st));
-    delete [] temp;
-    memcpy (&fBFC[NoChainOptions].Key, tag->Data(), strlen(tag->Data()));
-    fBFC[NoChainOptions].Name = "";
-    fBFC[NoChainOptions].Chain = "";
-    fBFC[NoChainOptions].Opts = "";
-    fBFC[NoChainOptions].Maker = "";
-    if (tag->Contains("Maker")) memcpy (&fBFC[NoChainOptions].Maker, tag->Data(), strlen(tag->Data()));
-    memcpy (&fBFC[NoChainOptions].Libs, tag->Data(), strlen(tag->Data()));
-    fBFC[NoChainOptions].Comment = "";
-    fBFC[NoChainOptions].Flag = 0;
-    NoChainOptions++;
-    return NoChainOptions-1;
-  }
-#endif
   if ( (strncmp( Tag.Data() ,"dbv",3) || 
 	strncmp( Tag.Data() ,"sdt",3)   ) &&
-       strlen(Tag.Data()) == 11 ){
-  } else {
-    if (Check) {
-      gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
-      abort(); //assert(1);
-    }
+       strlen(Tag.Data()) == 11 ) return 0;
+  if (Check) {
+    gMessMgr->Error() << "Option " << Tag.Data() << " has not been recognized" << endm;
+    abort(); //assert(1);
   }
   return 0;
 }
@@ -995,13 +975,24 @@ void StBFChain::SetFlags(const Char_t *Chain)
   TObjArray Opts;
   Int_t nParsed = ParseString(tChain,Opts,kTRUE);
   for (Int_t l = 0; l < nParsed; l++) {
-    TString string = ((TObjString *)Opts[l])->GetString(); 
-    Int_t in = string.Index("=");
+    TString Tag = ((TObjString *)Opts[l])->GetString(); 
     Int_t kgo;
-    if (in <= 0) {
-      string.ToLower();
+    Int_t in = Tag.Index("=");
+    if (in > 0) {// string with  "="
+      TString subTag(Tag.Data(),in);
+      subTag.ToLower(); //printf ("Chain %s\n",tChain.Data());
+      kgo = kOpt(subTag.Data());
+      if (kgo > 0) {
+	memset(fBFC[kgo].Comment,0,200); // be careful size of Comment
+	SetOption(kgo,fBFC[k].Key);
+	TString Comment(Tag.Data()+in+1,Tag.Capacity()-in-1);
+	strcpy (fBFC[kgo].Comment, Comment.Data());
+	gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
+      }
+    } else {
+      Tag.ToLower();
       // printf ("Chain %s\n",tChain.Data());
-      kgo = kOpt(string.Data());
+      kgo = kOpt(Tag.Data(),kFALSE);
       if (kgo != 0){
 	SetOption(kgo);
       } else {
@@ -1010,31 +1001,66 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	// SetDbOptions() only (removing the fBFC[i].Flag check) but the
 	// goal here is to avoid user's histeria by displaying extra
 	// messages NOW !!! Debug: dbv20040917
-	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
-	  (void) sscanf(string.Data(),"dbv%d",&FDate);
+	if( ! strncmp( Tag.Data() ,"dbv",3) && strlen(Tag.Data()) == 11){
+	  (void) sscanf(Tag.Data(),"dbv%d",&FDate);
 	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
 	       << FDate  << endl;
-	} else if( ! strncmp( string.Data() ,"sdt",3) && strlen(string.Data()) == 11){
-	  (void) sscanf(string.Data(),"sdt%d",&FDateS);
+	} else if( ! strncmp( Tag.Data() ,"sdt",3) && strlen(Tag.Data()) == 11){
+	  (void) sscanf(Tag.Data(),"sdt%d",&FDateS);
 	  cout << " ... but still will be considered as a dynamic timestamp (DateTime)     "
 	       << FDateS << endl;
-	} else {
-	  cout << " Invalid Option " << string.Data() << ". !! ABORT !! " << endl;
-	  abort(); //assert(1);
-	  return;
+	} else { // Check for predefined db time stamps ?
+	  const DbAlias_t *DbAlias = GetDbAliases();
+	  Int_t found = 0;
+	  for (Int_t i = 0; DbAlias[i].tag; i++) {
+	    Bfc_st row = {"","","","db,detDb","","","",kTRUE};
+	    if (! Tag.CompareTo(DbAlias[i].tag,TString::kIgnoreCase)) {
+	      found = i;
+	      memcpy (&row.Key, Tag.Data(), strlen(Tag.Data()));
+	      chainOpt->AddAt(&row);
+	      NoChainOptions = chainOpt->GetNRows();
+	      fBFC = chainOpt->GetTable();
+	      break;
+	    }
+	    TString dbTag("r");
+	    dbTag += DbAlias[i].tag;
+	    if (! Tag.CompareTo(dbTag,TString::kIgnoreCase)) {
+	      found = i;
+	      memcpy (&row.Key, Tag.Data(), strlen(Tag.Data()));
+	      chainOpt->AddAt(&row);
+	      NoChainOptions = chainOpt->GetNRows();
+	      fBFC = chainOpt->GetTable();
+	      break;
+	    }
+	  } 
+	  kgo = kOpt(Tag.Data(),kFALSE);
+	  if (kgo != 0){
+	    SetOption(kgo);
+	  } else {
+	    // Check that option can be library name or / and Maker
+	    static Char_t *path = ".:.$STAR_HOST_SYS/lib::.$STAR_HOST_SYS/LIB:$STAR/.$STAR_HOST_SYS/lib:$STAR/.$STAR_HOST_SYS/LIB";
+	    TString File = Tag; File += ".so";
+	    Char_t *file = gSystem->Which(path,File.Data(),kReadPermission);
+	    if (file) {
+	      TString Maker("");
+	      Bfc_st row = {"","","","","","","",kTRUE};
+	      memcpy (&row.Key, Tag.Data(), strlen(Tag.Data()));
+	      if (Tag.Contains("Maker")) memcpy (&row.Maker, Tag.Data(), strlen(Tag.Data()));
+	      memcpy (&row.Libs, Tag.Data(), strlen(Tag.Data()));
+	      chainOpt->AddAt(&row);
+	      NoChainOptions = chainOpt->GetNRows();
+	      fBFC = chainOpt->GetTable();
+	    }
+	    kgo = kOpt(Tag.Data(),kFALSE);
+	    if (kgo != 0) {
+	      SetOption(kgo);
+	    } else {
+	      cout << " Invalid Option " << Tag.Data() << ". !! ABORT !! " << endl;
+	      abort(); //assert(1);
+	      return;
+	    }
+	  }
 	}
-      }
-    } else {
-      // string with  "="
-      TString substring(string.Data(),in);
-      substring.ToLower(); //printf ("Chain %s\n",tChain.Data());
-      kgo = kOpt(substring.Data());
-      if (kgo > 0) {
-	memset(fBFC[kgo].Comment,0,200); // be careful size of Comment
-	SetOption(kgo,fBFC[k].Key);
-	TString Comment(string.Data()+in+1,string.Capacity()-in-1);
-	strcpy (fBFC[kgo].Comment, Comment.Data());
-	gMessMgr->QAInfo() << Form(" Set        %s = %s", fBFC[kgo].Key,fBFC[kgo].Comment) << endm;
       }
     }
   }
@@ -1050,8 +1076,26 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	SetOption("geant","Default,-fzin,-ntin,-gstar,TGiant3");
 	SetOption("MagF","Default,-fzin,-ntin,-gstar,TGiant3");
       }
-    } else {
-      SetOption("-geant","Default,-TGiant3");
+    } else {                                  // root
+      if (GetOption("fzin")) {
+	gMessMgr->Error() << "Option fzin cannot be used in root.exe. Use root4star" << endm;
+	abort();
+      }
+      if (GetOption("ntin")) {
+	gMessMgr->Error() << "Option ntin cannot be used in root.exe. Use root4star" << endm;
+	abort();
+      }
+      if (GetOption("gstar")) {
+	SetOption("VMC","Default,-TGiant3,gstar");
+	SetOption("-gstar","Default,-TGiant3");
+      }
+      SetOption("-geant","Default,-TGiant3"); 
+      SetOption("-geantL","Default,-TGiant3"); 
+      SetOption("-geometry","Default,-TGiant3");
+      SetOption("-geomNoField","Default,-TGiant3");
+      if (! (GetOption("VMC") || GetOption("VMCPassive"))) {
+	SetOption("VMCPassive","Default,-TGiant3");
+      }
     }
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
@@ -1157,33 +1201,31 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
   else {
     if (GetOption("gstar"))  fFileOut = "gtrack";
     if (GetOption("VMC"))    fFileOut = "VMC";
-    else {
-      if (fInFile != "") {
-	if (GetOption("fzin") || GetOption("ntin")) {
-	  TObjArray words;
-	  ParseString(fInFile,words);
-	  TIter nextL(&words);
-	  TObjString *word = 0;
-	  while ((word = (TObjString *) nextL())) {
-	    if (word->GetString().Contains(".fz") ||
-		word->GetString().Contains(".nt")) {
-	      fFileOut = gSystem->BaseName(word->GetName());
-	      break;
-	    }
+    if (fInFile != "") {
+      if (GetOption("fzin") || GetOption("ntin")) {
+	TObjArray words;
+	ParseString(fInFile,words);
+	TIter nextL(&words);
+	TObjString *word = 0;
+	while ((word = (TObjString *) nextL())) {
+	  if (word->GetString().Contains(".fz") ||
+	      word->GetString().Contains(".nt")) {
+	    fFileOut = gSystem->BaseName(word->GetName());
+	    break;
 	  }
 	}
-	else fFileOut = gSystem->BaseName(fInFile.Data());
-	if (  fFileOut != "") {
-	  fFileOut.ReplaceAll("*","");
-	  fFileOut.ReplaceAll("..",".");
-	  fFileOut.ReplaceAll(".daq","");
-	  fFileOut.ReplaceAll(".fzd","");
-	  fFileOut.ReplaceAll(".fz","");
-	  fFileOut.ReplaceAll(".nt","");
-	  fFileOut.ReplaceAll(".root","");
-	  fFileOut.Strip();
-	  fFileOut.Append(".root");
-	}
+      }
+      else fFileOut = gSystem->BaseName(fInFile.Data());
+      if (  fFileOut != "") {
+	fFileOut.ReplaceAll("*","");
+	fFileOut.ReplaceAll("..",".");
+	fFileOut.ReplaceAll(".daq","");
+	fFileOut.ReplaceAll(".fzd","");
+	fFileOut.ReplaceAll(".fz","");
+	fFileOut.ReplaceAll(".nt","");
+	fFileOut.ReplaceAll(".root","");
+	fFileOut.Strip();
+	fFileOut.Append(".root");
       }
     }
   }
@@ -1221,55 +1263,17 @@ void StBFChain::SetGeantOptions(){
     TString GeomVersion("");
     if (!GetOption("fzin")) {
       GeomVersion = "y2004x";
-      if      (GetOption("SD97") ||
-	       GetOption("SD98") ||
-	       GetOption("Y1a")  ||
-	       GetOption("ES99") ||
-	       GetOption("ER99") ||
-	       GetOption("DC99"))     GeomVersion = "YEAR_1A";
-      else if (GetOption("Y1b"))      GeomVersion = "YEAR_1B";
-      else if (GetOption("Y1E"))      GeomVersion = "YEAR_1E";
-      else if (GetOption("Y1h") ||
-	       GetOption("RY1h"))     GeomVersion = "YEAR_1H";
-      else if (GetOption("Y1s"))      GeomVersion = "YEAR_1S";
-      else if (GetOption("Y2000")  || GetOption("year2000") ||
-	       GetOption("RY2000") ||
-	       GetOption("RY2000a"))  GeomVersion = "year2000";
-      else if (GetOption("Y2a"))      GeomVersion = "YEAR_2A";
-      else if (GetOption("Y2001")  || GetOption("year2001") ||
-	       GetOption("Y2001n") ||
-	       GetOption("RY2001"))   GeomVersion = "year2001";
-      else if (GetOption("year2002")) GeomVersion = "year2002";
-      else if (GetOption("Y2003")  || GetOption("year2003") ||
-	       GetOption("RY2003"))   GeomVersion = "year2003";
-      else if (GetOption("Y2003a") ||
-	       GetOption("RY2003a"))  GeomVersion = "y2003a";
-      else if (GetOption("Y2003b") || 
-	       GetOption("RY2003b"))  GeomVersion = "y2003b";
-      else if (GetOption("Y2003X") || 
-	       GetOption("RY2003X"))  GeomVersion = "y2003x";
-      else if (GetOption("Y2004") ||
-	       GetOption("RY2004"))   GeomVersion = "y2004";
-      else if (GetOption("Y2004a") || 
-	       GetOption("RY2004a"))  GeomVersion = "y2004a";
-      else if (GetOption("Y2004b") || 
-	       GetOption("RY2004b"))  GeomVersion = "y2004b";
-      else if (GetOption("Y2004x") ||
-	       GetOption("RY2004x"))  GeomVersion = "y2004x";
-      else if (GetOption("Y2004y") ||
-	       GetOption("RY2004y"))  GeomVersion = "y2004y";
-      else if (GetOption("Y2004c") ||
-	       GetOption("RY2004c"))  GeomVersion = "y2004c";
-      else if (GetOption("Y2005") ||
-	       GetOption("RY2005"))   GeomVersion = "y2005";
-      // gMessMgr->Error() << "Y2005/RY2005 not yet implemented" << endm;
-      else if (GetOption("Y2005x") || 
-	       GetOption("RY2005x"))  GeomVersion = "y2005x";
-      else if (GetOption("Y2005b") ||
-	       GetOption("RY2005b"))  GeomVersion = "y2005b";
-      else if (GetOption("Y2b"))      GeomVersion = "YEAR_2b";
-      else if (GetOption("Complete")) GeomVersion = "complete";
-      else if (GetOption("Ist1"))     GeomVersion = "ist1";
+      const DbAlias_t *DbAlias = GetDbAliases();
+      Int_t found = 0;
+      for (Int_t i = 0; DbAlias[i].tag; i++) {
+	TString r("r");
+	r +=  DbAlias[i].tag;
+	if ( !GetOption(DbAlias[i].tag,kFALSE) && !GetOption(r,kFALSE)) continue;
+	GeomVersion = DbAlias[i].geometry;
+	found = i;
+	break;
+      }
+      if (! found) gMessMgr->QAInfo() << "StBFChain::SetGeantOptions() Chain has not found geometry tag. Use " << GeomVersion << endm;
       TString GeometryOpt("detp geometry ");
       GeometryOpt += GeomVersion;
       ProcessLine(Form("((St_geant_Maker *) %p)->LoadGeometry(\"%s\");",geantMk,GeometryOpt.Data()));
@@ -1337,38 +1341,16 @@ void StBFChain::SetDbOptions(){
 	
 	db->SetDateTime(FDateS,FTimeS);
       } else {
-	if (GetOption("SD97"))       db->SetDateTime("sd97");
-	else if (GetOption("SD98"))  db->SetDateTime("sd98");
-	else if (GetOption("Y1a"))   db->SetDateTime("year_1a");
-	else if (GetOption("Y1b"))   db->SetDateTime("year_1b");
-	else if (GetOption("Y1s"))   db->SetDateTime("year_1s");
-	else if (GetOption("ES99"))  db->SetDateTime("es99");
-	else if (GetOption("ER99"))  db->SetDateTime("er99");
-	else if (GetOption("DC99"))  db->SetDateTime("dc99");
-	else if (GetOption("Y1d"))   db->SetDateTime("year_1d");
-	else if (GetOption("Y1e"))   db->SetDateTime("year_1e");
-	else if (GetOption("Y1h"))   db->SetDateTime("year_1h");
-	else if (GetOption("Y2000")) db->SetDateTime("year_1h");
-	else if (GetOption("Y2a"))   db->SetDateTime("year_2a");
-	else if (GetOption("Y2b"))   db->SetDateTime("year_2b");
-	else if (GetOption("Y2001")) db->SetDateTime("year_2b");
-	// Year_2b ** db ** timestamp does not reflect
-	// svt shift. Small hack to make it work.
-	else if (GetOption("Y2001n"))db->SetDateTime("year2001");
-	else if (GetOption("Y2003")) db->SetDateTime("year2003");
-	else if (GetOption("Y2003a"))db->SetDateTime("y2003a");
-	else if (GetOption("Y2003b"))db->SetDateTime("y2003b");
-	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
-	else if (GetOption("Y2004")) db->SetDateTime("y2004");
-	else if (GetOption("Y2004a"))db->SetDateTime("y2004a");
-	else if (GetOption("Y2004b"))db->SetDateTime("y2004b");
-	else if (GetOption("Y2004x"))db->SetDateTime("y2004x");
-	else if (GetOption("Y2004y"))db->SetDateTime("y2004x");
-	else if (GetOption("Y2004c"))db->SetDateTime("y2004c");
-	else if (GetOption("Y2005")) db->SetDateTime("y2005");
-	else if (GetOption("Y2005x"))db->SetDateTime("y2005x");
-	else if (GetOption("Y2005b"))db->SetDateTime("y2005b");
-	else gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;
+	const DbAlias_t *DbAlias = GetDbAliases();
+	Int_t found = 0;
+	for (Int_t i = 0; DbAlias[i].tag; i++) {
+	  if (GetOption(DbAlias[i].tag,kFALSE)) {
+	    db->SetDateTime(DbAlias[i].tag);
+	    found = i;
+	    break;
+	  }
+	}
+	if (! found) gMessMgr->QAInfo() << "StBFChain::SetDbOptions() Chain has not set a time-stamp" << endm;
       }
       // Show date settings
       gMessMgr->QAInfo() << db->GetName()
@@ -1440,6 +1422,10 @@ void StBFChain::SetTreeOptions()
   if (GetOption("Event") && GetOption("EvOut")){
     cout << "Will Write StEvent out, treeMk->GetFile() = "  << treeMk->GetFile() << endl;
     treeMk->IntoBranch("eventBranch","StEvent");
+  }
+  if (GetOption("McEvent") && GetOption("McEvOut")){
+    cout << "Will Write StMcEvent out, treeMk->GetFile() = "  << treeMk->GetFile() << endl;
+    treeMk->IntoBranch("McEventBranch","StMcEvent");
   }
   if (GetOption("GeantOut")) treeMk->IntoBranch("geantBranch","geant");
   if (GetOption("AllEvent")) {
