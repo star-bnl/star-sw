@@ -211,8 +211,7 @@ Int_t StarMCHits::Init() {
 #if 0
     cout << "Volume:\t" << i << "\t" << vol->GetName() << "\t" << vol->GetTitle() << "\t" << uid;
 #endif
-    TString title(vol->GetTitle());
-    if (title == "" || title == "Top volume") title =  vol->GetName();
+    TString title(vol->GetName(),4);
     TObject *det = fDetList->FindObject(title.Data());
 #if 0
     if (det) cout << "\tDetector: " << det->GetName();// << "\t" << det->GetTitle();
@@ -336,7 +335,7 @@ void StarMCHits::Step() {
   if (Debug() > 1) cout << "Path: " << thePath;
   for (i = j = 0; i < NL; i++, j += 2, Path++) {
     objs = (TObjString *) array->At(j);
-    assert(objs->GetString().BeginsWith(TString(Path->VName,2)));
+    assert(objs->GetString().BeginsWith(TString(Path->VName,4)));
     if (Path->Ncopy != 1) {
       objs = (TObjString *) array->At(j+1);
       fHit.NUMBV[fHit.NVL] = atoi(objs->GetString().Data());
