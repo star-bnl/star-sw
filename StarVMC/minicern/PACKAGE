@@ -1,4 +1,0 @@
-# $Id $
-# package minicern
-# author: 
-#Library:libminicern.so:LIBS +=   -lPythia6

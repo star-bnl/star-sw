@@ -1,1 +1,0 @@
-#error "File is obsolete"
