@@ -39,6 +39,16 @@ class StMessMgr;
 class StTurnLogger;
 
 class StTestMaker;
+
+struct DbAlias_t {
+  Char_t *tag;
+  Int_t date;
+  Int_t time;
+  Char_t *geometry;
+  Char_t *comment;
+};
+
+
 class StMaker : public TDataSet{
 
 public:
@@ -206,12 +216,14 @@ public:
    static const char   *RetCodeAsString(int kode);
    static      Int_t    AliasDate(const char *alias);
    static      Int_t    AliasTime(const char *alias);
+   static      Char_t  *AliasGeometry(const char *alias);
+   static const DbAlias_t  *GetDbAliases();
    static      void     SetTestMaker(StTestMaker *mk){fgTestMaker=mk;}
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.73 2005/08/29 21:42:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.74 2005/10/06 18:55:45 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -269,8 +281,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.73 2005/08/29 21:42:21 fisyak Exp $
+// $Id: StMaker.h,v 1.74 2005/10/06 18:55:45 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.74  2005/10/06 18:55:45  fisyak
+// Add all used simulation time stamps and geometries
+//
 // Revision 1.73  2005/08/29 21:42:21  fisyak
 // switch from fBits to fStatus for StMaker control bits
 //
