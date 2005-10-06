@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.85 2005/08/29 21:37:04 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.86 2005/10/06 18:49:59 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -264,6 +264,7 @@
 	$CRYPTLIBS     = "-lcrypt";
 	$LD            = $CXX;
 	$LDFLAGS       = "";#--no-warn-mismatch";
+	$F77LD         = $LD;
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -u*";
         $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
@@ -311,6 +312,9 @@
 	}
         $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
+#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
+#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
+#        $SOFLAGS   = "-shared -Wl,--no-define-common";
 
 	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
 	$CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
@@ -326,6 +330,7 @@
             $CXX = "insure -g -Zoi \"compiler_cpp g++\"";
             $LD  = $CXX;
             $SO  = $CXX;
+	    $F77LD         = $LD;
         }
         if ($PGI) {
 	  $FC    = "pgf77";
@@ -380,6 +385,7 @@
 	$LDEXPORT      = " -Wl,-call_shared -Wl,-expect_unresolved -Wl,\"*\""; #-B symbolic
         $LDALL         = " -Wl,-all";
         $LDNONE        = " -Wl,-none";
+	$F77LD         = $LD;
 	$SO            = $CXX;
 	$SOFLAGS       = "-shared -nocxxstd -Wl,-expect_unresolved,*,-msym,-soname,";
 	$OSFID        .= " ST_NO_NAMESPACES";
@@ -425,6 +431,7 @@
         $CFLAGS     = "-KPIC";
         $LD         = $CXX;
         $LDFLAGS    = " -Bdynamic";
+	$F77LD         = $LD;
         $SO         = $CXX;
         $SOFLAGS    = "-G -ptr%ObjDir";
 
@@ -435,6 +442,7 @@
             $CXX = "insure -g -Zoi \"compiler_cpp CC\"";
             $LD  = $CXX;
             $SO  = $CXX;
+	    $F77LD         = $LD;
         }
     }
 
