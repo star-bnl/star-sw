@@ -114,12 +114,4 @@ inline EditableParameters       & StiLocalTrackSeedFinder::getParameters()
   return _pars;
 }
 
-
-struct ScaleHitError
-{
-    ScaleHitError(double val) : scale(val) {};
-    double scale;
-    void operator()(StiHit*) const;
-};
-
 #endif
