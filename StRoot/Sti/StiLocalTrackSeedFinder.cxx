@@ -126,7 +126,6 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
       //cout <<"StiLocalTrackSeedFinder::makeTrack() -W- Extension failed size()<_pars._seedLength+_pars._extrapMinLength"<<endl;
       return track;
     }
-  for_each( _seedHits.begin(), _seedHits.end(), ScaleHitError(10.) );
   track = initializeTrack(_trackFactory->getInstance());
   //cout <<"StiLocalTrackSeedFinder::makeTrack() -I- Done"<<endl;
   return track;
