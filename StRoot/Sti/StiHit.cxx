@@ -168,7 +168,7 @@ double StiHit::getPseudoRapidity() const
   else
     return 1.e10;
 }
-void StiHit::StiHit::reset()
+void StiHit::reset()
 {
   mrefangle = mposition = 0;
   mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = _xg = _yg = _zg = _energy= 0.;

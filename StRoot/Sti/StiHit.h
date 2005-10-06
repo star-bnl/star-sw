@@ -140,8 +140,6 @@ public:
     ///Set the position error matrix for the measurement from an StMatrixF
     ///object.
     void setError(const StMatrixF&);
-    ///Scale all errors by the given factor
-    void scaleError(float);
     ///Set the pointer to the StiDetector from which the hit arose.
     void setDetector(const StiDetector*det) {mdetector=det;};
     ///Set the pointer to the corresponding StHit object.
@@ -176,12 +174,6 @@ private:
 public:
     int mCount;
 };
-
-
-inline void StiHit::scaleError(float scale)
-{
-  for (int i=0;i<6;i++) (&msxx)[i]*=scale;
-}
 inline float StiHit::x()   const {return mx;}
 inline float StiHit::y()   const {return my;}
 inline float StiHit::z()   const {return mz;}
