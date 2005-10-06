@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StTofpMcAnalysisMaker.cxx,v 1.1 2004/03/16 04:58:55 geurts Exp $
+ * $Id: StTofpMcAnalysisMaker.cxx,v 1.2 2005/10/06 19:58:15 fisyak Exp $
  * $Log: StTofpMcAnalysisMaker.cxx,v $
+ * Revision 1.2  2005/10/06 19:58:15  fisyak
+ * Adjust for persistent StMcEvent
+ *
  * Revision 1.1  2004/03/16 04:58:55  geurts
  * *** empty log message ***
  *
@@ -18,7 +21,6 @@
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 #include "StEventMaker/StEventMaker.h"
-#include "StMcEventMaker/StMcEventMaker.h"
 #include "StTofUtil/StTofGeometry.h"
 #include "StTofUtil/tofPathLength.hh"
 #include "StMessMgr.h"
@@ -277,8 +279,7 @@ Int_t StTofpMcAnalysisMaker::Make(){
   rEvent = (StEvent*) GetInputDS("StEvent");
 
   // StMcEvent
-  StMcEvent* mEvent = 0;
-  mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
+  StMcEvent* mEvent = (StMcEvent*) GetDataSet("StMcEvent");
 
   // StAssociationMaker
   StAssociationMaker* assoc = 0;
