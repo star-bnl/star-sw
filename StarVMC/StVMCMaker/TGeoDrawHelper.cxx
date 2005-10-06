@@ -1,6 +1,6 @@
 // Author: Valeri Fine   19/01/2004
 /****************************************************************************
-** $Id: TGeoDrawHelper.cxx,v 1.1 2005/09/13 21:32:59 fisyak Exp $
+** $Id: TGeoDrawHelper.cxx,v 1.2 2005/10/06 18:39:48 fisyak Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine. Brookhaven National Laboratory.
 **                                    All rights reserved.
@@ -199,10 +199,8 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
    if (top )  {
        // if (!top->IsVolumeMulti()) 
       TShape *thisShape = MakeShape(top->GetShape());
-      // swap title <==> name
-      TString name = top->GetTitle();
-      if (name.IsNull() ) name = top->GetName();
       TString title = top->GetName();
+      TString name = TString(title, 4);
       topVolume = new TVolume(name,title,thisShape); 
       topVolume->SetLineColor(top->GetLineColor()); topVolume->SetLineStyle(top->GetLineStyle());
       topVolume->SetLineWidth(top->GetLineWidth()); topVolume->SetFillColor(top->GetLineColor());
@@ -241,7 +239,7 @@ TVolume *TGeoDrawHelper::MakeVolume( TGeoVolume *top, std::map<TGeoVolume *,TVol
                const Double_t   *trans     = geoMatrix->GetTranslation();
                const Double_t   *rotation  = geoMatrix->GetRotationMatrix();
                TRotMatrix *matrix          = geoMatrix->IsIdentity() ? 0 : GetMatrix(rotation);
-               topVolume->Add(nextVolume, trans[0],trans[1],trans[2],matrix, geoNode->GetIndex());
+               topVolume->Add(nextVolume, trans[0],trans[1],trans[2],matrix, geoNode->GetNumber());
    }  }  }  }
    if (!toFlag)  delete volumeMap;
    return topVolume;
