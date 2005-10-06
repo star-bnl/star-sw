@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.36 2005/08/29 21:47:09 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.37 2005/10/06 19:23:07 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.37  2005/10/06 19:23:07  fisyak
+// Add set date/time from fz-file
+//
 // Revision 1.36  2005/08/29 21:47:09  fisyak
 // Changes for VMC
 //
@@ -91,7 +94,7 @@ public:
    virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
-#if 0
+#if 1
    virtual void   SetDateTime(int idat=0,int itim=0);//
 #endif
            void   SetFieldOpt(const char *opt) {mFieldOpt = opt;}
@@ -166,7 +169,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.36 2005/08/29 21:47:09 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.37 2005/10/06 19:23:07 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
