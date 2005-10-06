@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.169 2005/09/09 21:32:32 perev Exp $
+// $Id: StMaker.cxx,v 1.170 2005/10/06 18:55:45 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -48,35 +48,109 @@ StMaker     *StMaker::fgFailedMaker = 0;
 StTestMaker *StMaker::fgTestMaker   = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
+/* geometry version from Maxim 09/29/2005
+year2000                     VMC
+year_2a         
+year_2b
+year2001                     VMC
+year2002                     VMC
+year2003                     VMC
+y2003a                       VMC
+y2003b                       VMC
+y2003x                       VMC
+y2004                        VMC
+y2004a                       VMC
+y2004b                       VMC
+y2004c                       VMC
+y2004x                       VMC
+y2004y                       VMC
+y2005                        VMC  
+y2005b                       VMC     
+y2005c                       VMC
+y2005x                       VMC
+dev2005   - non-production
+complete   - non-production
+ist1   - non-production      VMC
+pix1   - non-production
+----------------
+old version of db tags 
+{"sd97",        19970101,     0},
+{"sd98",        19980101,     0},
+{"year_1a",     19990101,     0},
+{"year_1b",     19990501,     0},
+{"es99",        19990615,     0},
+{"er99",        19990616,120000},
+{"year_1c",     19991001,     0},
+{"year_1d",     19991101,     0},
+{"year_1e",     19991201,     0},
+{"dc99",        19991206, 80000},
+{"y2000",       20000614,175430},
+{"year_2b",     20010501,     0},
+{"year_2a",     20010610,     0},
+{"year2001",    20010615,     0},
+{"year2003",    20021115,     0},
+{"y2003b",      20021115,     0},
+{"y2003a",      20021115,     0},
+{"y2003x",      20021115,     0},
+{"y2004b",      20031120,     0},
+{"y2004a",      20031120,     0},
+{"y2004x",      20031120,     0},
+{"y2004",       20031120,     0},
+{"y2004c",      20031125,     0},
+{"y2005x",      20041030,     0},
+{"y2005",       20041030,     0},
+{"y2005b",      20041101,     0},
+{"y2005c",      20041201,     0},
 
-static const char *DBaliases[]={
-  "sd97"   ,     "sd98",  "year_1a",  "year_1b",  "year_1c",
-  "es99"   ,     "er99",     "dc99",  "year_1d",  "year_1e",
-  "year_1h",  "year_2a",  "year_2b", "year2001", "year2003",
-  "y2003x" ,   "y2003a",   "y2003b",   
-  "y2004"  ,   "y2004x",   "y2004a",   "y2004b",   "y2004c", 
-  "y2005"  ,   "y2005x",   "y2005b",
-          0
-};   
 
-static const int   DBdates[]=  {
-  19970101,    19980101,   19990101,   19990501,   19991001,
-  19990615,    19990616,   19991206,   19991101,   19991201,
-  20000614,    20010610,   20010501,   20010615,   20021115, 
-  20021115,    20021115,   20021115,  
-  20031120,    20031120,   20031120,   20031120,   20031125,
-  20041030,    20041030,   20041101,
-         0
-};
-
-static const int   DBtimes[]=  {
-         0,           0,          0,          0,          0,
-         0,      120000,      80000,          0,          0,
-    175430,           0,          0,          0,          0,        
-         0,           0,          0,         
-	 0,           0,          0,          0,          0,
-	 0,           0,          0,
-         0
+*/
+static const DbAlias_t fDbAlias[] = {// geometry  Comment            old 
+  {"sd97",        19970101,     0, "year2000", ""}, //       {"sd97",        19970101,     0}
+  {"sd98",        19980101,     0, "year2000", ""}, // 	     {"sd98",        19980101,     0}
+  {"y1a",         19990101,     0, "year2000", ""}, // 	     
+  {"year_1a",     19990101,     0, "year2000", ""}, // 	     {"year_1a",     19990101,     0}
+  {"y1b",         19990501,     0, "year2000", ""}, // 	     
+  {"year_1b",     19990501,     0, "year2000", ""}, // 	     {"year_1b",     19990501,     0}
+  {"y1s",         19990501,     0, "year2000", ""}, // 	     
+  {"year_1s",     19990501,     0, "year2000", ""}, // 	     
+  {"es99",        19990615,     0, "year2000", ""}, // 	     {"es99",        19990615,     0}
+  {"er99",        19990616,120000, "year2000", ""}, // 	     {"er99",        19990616,120000}
+  {"year_1c",     19991001,     0, "year2000", ""}, // 	     {"year_1c",     19991001,     0}
+  {"y1d",         19991101,     0, "year2000", ""}, // 	     
+  {"year_1d",     19991101,     0, "year2000", ""}, // 	     {"year_1d",     19991101,     0}
+  {"y1e",         19991201,     0, "year2000", ""}, // 	     
+  {"year_1e",     19991201,     0, "year2000", ""}, // 	     {"year_1e",     19991201,     0}
+  {"dc99",        19991206, 80000, "year2000", ""}, // 	     {"dc99",        19991206, 80000}
+  {"y1h",         20000614,175430, "year2000", ""}, // 	     
+  {"y2000",       20000614,175430, "year2000", ""}, // 	     {"y2000",       20000614,175430}
+  {"y2b",         20010501,     0, "year_2b", ""},
+  {"y2001",       20010501,     0, "year2001", ""},
+  {"year_2b",     20010501,     0, "year_2b", ""},  // 	     {"year_2b",     20010501,     0}
+  {"year2002",    20010502,     0, "year2002", ""},
+  {"y2a",         20010610,     0, "year_2a", ""}, 
+  {"year_2a",     20010610,     0, "year_2a", ""},  // 	     {"year_2a",     20010610,     0}
+  {"y2001n",      20010615,     0, "year2001", ""}, //	     
+  {"year2001",    20010615,     0, "year2001", ""}, //	     {"year2001",    20010615,     0}
+  {"y2003",       20021115,     0, "year2003", ""}, // 	     
+  {"year2003",    20021115,     0, "year2003", ""}, // 	     {"year2003",    20021115,     0}
+  {"y2003x",      20021115,     1, "y2003x", ""},   // 	     {"y2003x",      20021115,     0}
+  {"y2003a",      20021115,     2, "y2003a", ""},   // 	     {"y2003a",      20021115,     0}
+  {"y2003b",      20021115,     3, "y2003b", ""},   // 	     {"y2003b",      20021115,     0}
+  {"y2004",       20031120,     0, "y2004",  ""},   // 	     {"y2004",       20031120,     0}
+  {"y2004x",      20031120,     1, "y2004x", ""},   // 	     {"y2004x",      20031120,     0}
+  {"y2004y",      20031120,     2, "y2004y", ""},  
+  {"y2004a",      20031120,     3, "y2004a", ""},   // 	     {"y2004a",      20031120,     0}
+  {"y2004b",      20031120,     4, "y2004b", ""},   // 	     {"y2004b",      20031120,     0}
+  {"y2004c",      20031125,     0, "y2004c", ""},   // 	     {"y2004c",      20031125,     0}
+  {"y2005x",      20041030,     0, "y2005x", ""},   //	     {"y2005x",      20041030,     0}
+  {"y2005",       20041030,     0, "y2005", ""},    // 	     {"y2005",       20041030,     0}
+  {"y2005b",      20041101,     0, "y2005b", ""},   //       {"y2005b",      20041101,     0}
+  {"y2005c",      20041201,     0, "y2005c", ""},   //       {"y2005c",      20041201,     0}
+  {"dev2005",     20190101,     0, "dev2005",  "non-production"},
+  {"complete",    20190101,     1, "complete", "non-production"},
+  {"ist1",        20190101,     2, "ist1", "non-production"},
+  {"pix1",        20190101,     3, "pix1", "non-production"},
+  {0,                    0,     0}
 };
 
 // Turn the logger of the current maker
@@ -831,8 +905,8 @@ Int_t StMaker::Make()
 void StMaker::FatalErr(int Ierr, const char *com)
 {
 #ifdef STAR_LOGGER     
-    LOG_QA    << Form("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
-    LOG_FATAL << Form("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com) << endm;
+    LOG_QA    << Form("QAInfo:%s::Fatal: Error %d %s",GetName(),Ierr,com) << endm;
+    LOG_FATAL << Form("QAInfo:%s::Fatal: Error %d %s",GetName(),Ierr,com) << endm;
 #else
     printf("QAInfo:%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
 #endif        
@@ -878,8 +952,8 @@ void StMaker::PrintInfo()
    const char *cvs = GetCVS();
    const char *built = strstr(cvs,"built");
 #ifdef STAR_LOGGER       
-   if (built > cvs) LOG_QA << Form("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs)<< endm;
-   else             LOG_QA << Form("QAInfo:%-20s    from %s\n",ClassName(),cvs) << endm;
+   if (built > cvs) LOG_QA << Form("QAInfo:%-20s %s from %.*s",ClassName(),built,built-cvs,cvs)<< endm;
+   else             LOG_QA << Form("QAInfo:%-20s    from %s",ClassName(),cvs) << endm;
 #else   
    if (built > cvs) printf("QAInfo:%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
    else             printf("QAInfo:%-20s    from %s\n",ClassName(),cvs);
@@ -1271,11 +1345,13 @@ static void doPs(const char *who, const char *where)
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
 #endif    
   TMemStat::PrintMem(0);
+#if 0
 #ifdef STAR_LOGGER_BUG  
   LOG_QA << endm;
 #else  
   printf("\n");
 #endif  
+#endif
 }
 
 //_____________________________________________________________________________
@@ -1551,21 +1627,33 @@ Int_t StMaker::AliasDate(const char *alias)
 
 {
 
-  int n = strcspn(alias," ."); if (n<4) return 0;
+  int n = strcspn(alias," ."); if (n<3) return 0;
   int i;
-  for (i=0;DBaliases[i] && strncmp(alias,DBaliases[i],n);i++) {} 
-  return DBdates[i];
+  for (i=0;fDbAlias[i].tag && strncmp(alias,fDbAlias[i].tag,n);i++) {} 
+  return fDbAlias[i].date;
 }
 //_____________________________________________________________________________
 Int_t StMaker::AliasTime(const char *alias)
 
 {
 
-  int n = strcspn(alias," ."); if (n<4) return 0;
+  int n = strcspn(alias," ."); if (n<3) return 0;
   int i;
-  for (i=0;DBaliases[i] && strncmp(alias,DBaliases[i],n);i++) {} 
-  return DBtimes[i];
+  for (i=0;fDbAlias[i].tag && strncmp(alias,fDbAlias[i].tag,n);i++) {} 
+  return fDbAlias[i].time;
 }
+//_____________________________________________________________________________
+Char_t *StMaker::AliasGeometry(const char *alias)
+
+{
+
+  int n = strcspn(alias," ."); if (n<3) return 0;
+  int i;
+  for (i=0;fDbAlias[i].tag && strncmp(alias,fDbAlias[i].tag,n);i++) {} 
+  return fDbAlias[i].geometry;
+}
+//_____________________________________________________________________________
+const DbAlias_t *StMaker::GetDbAliases() {return fDbAlias;}
 //_____________________________________________________________________________
 ClassImp(StTestMaker)
 //_____________________________________________________________________________
@@ -1586,9 +1674,9 @@ void StTestMaker::SetNext(StMaker *mk)
 void StTestMaker::Print(const char *) const
 {
 #ifdef STAR_LOGGER    
-   if (fLast) { LOG_INFO << Form("%s: Last Maker %s::%s(%p)\n",
+   if (fLast) { LOG_INFO << Form("%s: Last Maker %s::%s(%p)",
               ClassName(),fLast->ClassName(),fLast->GetName(),(void*)fLast)<< endm;}
-   if (fNext) { LOG_INFO << Form("%s: Next Maker %s::%s(%p)\n",
+   if (fNext) { LOG_INFO << Form("%s: Next Maker %s::%s(%p)",
               ClassName(),fNext->ClassName(),fNext->GetName(),(void*)fNext) << endm;}
 #else
    if (fLast) printf("%s: Last Maker %s::%s(%p)\n",
@@ -1600,6 +1688,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.170  2005/10/06 18:55:45  fisyak
+// Add all used simulation time stamps and geometries
+//
 // Revision 1.169  2005/09/09 21:32:32  perev
 // ERROR message ==> INFO
 //
