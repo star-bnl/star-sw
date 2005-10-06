@@ -12,7 +12,7 @@
 #include "tables/St_tss_tsspar_Table.h"
 #include "St_db_Maker/St_db_Maker.h"
 ClassImp(dEdxY2_t);
-ClassImp(StTpcdEdxCorrection);
+ClassImp(StTpcdEdxCorrection)
 static St_db_Maker *dbMk = 0;
 //________________________________________________________________________________
 StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) : 
