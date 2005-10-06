@@ -1,4 +1,5 @@
 #include "StiMasterDetectorBuilder.h"
+#include "TGeoManager.h"
 
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
   : StiDetectorBuilder("MasterDetectorBuilder",active,"none")
@@ -20,6 +21,10 @@ void StiMasterDetectorBuilder::reset()
  */
 void StiMasterDetectorBuilder::build(StMaker&source)
 {
+  TGeoManager *gGeoManagerSV = gGeoManager; gGeoManager = 0;
+  if (gGeoManagerSV) {
+    gGeoManagerSV->Clone("Clone");
+  }
   cout << "StiMasterDetectorBuilder::build() -I- Started"<<endl;
   vector<StiDetectorBuilder*>::iterator iter;
   unsigned int nRows=0;
@@ -52,6 +57,8 @@ void StiMasterDetectorBuilder::build(StMaker&source)
 	  row++;
 	}
     }
+  //  SafeDelete(gGeoManager);
+  gGeoManager = gGeoManagerSV;
   cout << "StiMasterDetectorBuilder::build() -I- Done"<<endl;
 }
 
