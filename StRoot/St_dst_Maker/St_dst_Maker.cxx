@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.84 2005/07/23 02:50:35 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.85 2005/10/06 20:21:28 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.85  2005/10/06 20:21:28  fisyak
+// Protection versus division by 0
+//
 // Revision 1.84  2005/07/23 02:50:35  perev
 // array replaced by TArray
 //
@@ -261,7 +264,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.84 2005/07/23 02:50:35 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.85 2005/10/06 20:21:28 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -635,17 +638,17 @@ Int_t  St_dst_Maker::Filler(){
 		
 		  // Temporarily fill with No. anodes and No. pixels
 		  
-		  
-		  cov = 1./(100*(float)dat->numOfAnodesInClu);
-		  if( cov > 0.0 && cov < (1.0/float((1L<<6))))
-		    svtx = int((1L<<26)*cov);
-		  else  svtx = 0;
-		  
+		cov = 999.;
+		if (dat->numOfAnodesInClu > 0) cov = 1./(100*(float)dat->numOfAnodesInClu);
+		if( cov > 0.0 && cov < (1.0/float((1L<<6))))
+		  svtx = int((1L<<26)*cov);
+		else  svtx = 0;
+		
 		  //	cov =  hit->positionError().y()
 		  // *hit->positionError().y();
-		  
-		  cov = 1./(100*(float)dat->numOfPixelsInClu);
-		  if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
+		cov = 999.;
+		if (dat->numOfPixelsInClu > 0) 	cov = 1./(100*(float)dat->numOfPixelsInClu);
+		if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
 		  svty = int((1L<<26)*cov);
 		else  svty = 0;
 		
