@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.94 2005/08/29 21:44:20 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.95 2005/10/06 18:46:30 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.95  2005/10/06 18:46:30  fisyak
+// Add protection for validity date < 19950101
+//
 // Revision 1.94  2005/08/29 21:44:20  fisyak
 // switch from fBits to fStatus for StMaker control bits; account replacing of UInt_t by Int_t for m_runNumber
 //
@@ -451,21 +454,32 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   // 		if descriptor filled, no need for newdat
   void *dbstruct = fDBBroker->Use(dat->GetUniqueID(),parId);
 //  printf("FLAVOR: %s.%s\n",dat->GetName(),fDBBroker->GetFlavor());
-  
-  val[0].Set(fDBBroker->GetBeginDate(),fDBBroker->GetBeginTime());
-  val[1].Set(fDBBroker->GetEndDate  (),fDBBroker->GetEndTime  ());
-  
-  
+  Int_t d1 = fDBBroker->GetBeginDate(); 
+  Int_t t1 = fDBBroker->GetBeginTime();
+  if (d1 < 19950101) {
+    Warning("UpdateTable","Table %s.%s Unacceptable Begin Date/Time %d/%d reset to 19950101/000001",
+	    dat->GetName(),dat->GetTitle(),d1,t1); 
+    d1 = 19950101; t1 = 1;
+  }
+  Int_t d2 = fDBBroker->GetEndDate  ();
+  Int_t t2 = fDBBroker->GetEndTime  ();
+  if (d2 < 19950101) {
+    Warning("UpdateTable","Table %s.%s Unacceptable End Date/Time %d/%d reset to 19950101/000001",
+	    dat->GetName(),dat->GetTitle(),d2,t2); 
+    d2 = 19950101; t2 = 1;
+  }
+  val[0].Set(d1,t1);
+  val[1].Set(d2,t2);
   
   // small debug statement
   if ( val[0].Get() >= val[1].Get()) {
-    Warning("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d->%d",
-	    dat->GetName(),dat->GetTitle(),
-	    fDBBroker->GetBeginDate(),fDBBroker->GetEndDate(),
-	    fDBBroker->GetBeginTime(),fDBBroker->GetEndTime());
-
+    printf("val[0].Get() = %d >= val[1].Get() = %d\n",val[0].Get(),val[1].Get());
+    printf("UpdateTable: Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d\n",
+	    dat->GetName(),dat->GetTitle(),d1,t1,d2,t2);
+    Error("UpdateTable","Table %s.%s Suspicious Ranges Date/Time %d/%d->%d/%d",
+	  dat->GetName(),dat->GetTitle(),d1,t1,d2,t2);
+    assert(! ( val[0].Get() >= val[1].Get()));
   }
-  assert(val[0].Get() < val[1].Get());
 
   fTimer[1].Start(0); fTimer[3].Stop();
 
