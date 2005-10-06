@@ -22,7 +22,7 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
   if (allProc)        cout << " Process them non stop";
   else                cout << " Start Dialog after test fails";
   cout << endl;
-  if (makePNG)        cout << " Create png files with result of comparision" << endl;
+  if (makePNG)        cout << " Create png files with result of failed comparision" << endl;
   cout << "Probability cut is " << probCut << endl;
   Int_t NF = 0;
   if (File1 != "")  F12[0] = TFile::Open(File1);
@@ -52,10 +52,14 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
   TObject *obj = 0;
   TH1 *h, *h1, *h2;
   if (! gROOT->IsBatch()) c1 = new TCanvas("c1","c1",800,500);
-  while ((obj = next())) {
+  Int_t nhists = 0;
+  while ((obj = next()) && nhists <10000 ) {
+    nhists++; cout << obj->GetName() << " hist " << nhists << endl;
     Double_t prob = 0;
     Double_t probN= 0;
     Int_t ifMult = 0;
+    Bool_t makepng = makePNG;
+    cout << "obj " << obj->GetName() << "/" << obj->GetTitle() << endl;
     if ( obj->IsA()->InheritsFrom( "TH1" )) {
       if (obj->IsA()->InheritsFrom( "StMultiH1F" )) ifMult = 1;
       if (ifMult) {
@@ -86,6 +90,8 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
       prob = h1->KolmogorovTest(h2,"UOD");
       probN = h1->KolmogorovTest(h2,"UOND");
       TString pngName(h1->GetName());
+      Int_t Fail = prob < probCut || probN < probCut;
+      if (! Fail) makepng = kFALSE;
       if (prob < probCut) pngName += "FailS";
       if (probN < probCut) pngName += "FailN";
       h2->SetLineColor(2);
@@ -128,7 +134,7 @@ void Kolmogorov(const Char_t *file1 = "", const Char_t *file2 = "",
 	c1->Update();
 	pngName += ".png";
 	pngName.ReplaceAll(" ","");
-	if (makePNG)
+	if (makepng)
 	  TVirtualX::Instance()->WritePixmap(c1->GetCanvasID(),-1,-1,pngName.Data());
       }
       if (prob < probCut || probN < probCut) {
