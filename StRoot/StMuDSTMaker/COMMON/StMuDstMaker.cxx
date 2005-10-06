@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.70 2005/08/19 19:46:05 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.71 2005/10/06 01:30:30 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -607,7 +607,7 @@ void StMuDstMaker::read(){
   if (mChain->GetCurrentFile()) {
     DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
   }
-  int bytes = 0;
+  int bytes = mChain->GetEntry(mEventCounter++);
   while (bytes==0 ) {
     DEBUGVALUE3(mEventCounter);
     if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
@@ -1257,6 +1257,11 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.71  2005/10/06 01:30:30  mvl
+ * Changed some of the logic in StMuChainMaker: Now files are no longer opened
+ * and checked at the start of the job, but simply added to the TChain. TChain
+ * automatically skips corrupted files (this is a new feature).
+ *
  * Revision 1.70  2005/08/19 19:46:05  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks

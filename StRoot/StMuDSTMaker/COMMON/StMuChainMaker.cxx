@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.24 2004/04/09 21:09:27 jeromel Exp $
+ * $Id: StMuChainMaker.cxx,v 1.25 2005/10/06 01:30:30 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -214,24 +214,14 @@ void StMuChainMaker::add( StMuStringIntPair filenameEvents) {
 	}
     }
     
-    if (entries==0) { // try to read the number of event from the db reader 
+    if (entries==0 || entries==TChain::kBigNumber) { // try to read the number of event from the db reader 
 	entries = mDbReader->entries(file.c_str());
     }
-    //TFile *f1 = TFile::Open(file.c_str());
-    if (entries==0) { // open the file and get the number of events
-      TFile f1(file.c_str());
-      TTree* tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
-      if (tree) entries = (int)tree->GetEntries();
-      f1.Close();
-    } 
-    //if ( f1 ){
-    //  f1->Close();
-    //  delete f1;
-      mChain->Add( file.c_str(), entries );
-      mFileCounter++;
-      //} else {
-      //  gMessMgr->Error() << "StMuChainMaker::add: Could not add " << file << endm;
-      //}
+    // If entries==0, TChain will open the file and get the number of entries
+    // If entries==TChain::kBigNumber, TChain will start reading 
+    //    and figure aout the numbers of events while going along
+    mChain->Add( file.c_str(), entries );
+    mFileCounter++;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -252,7 +242,7 @@ void StMuChainMaker::fromDir(string dir) {
     if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the list of files
-      mFileList.push_back( StMuStringIntPair( fullFile, 0 ) );
+      mFileList.push_back( StMuStringIntPair( fullFile, TChain::kBigNumber ) );
       delete []fullFile;
     }
   }   
@@ -343,7 +333,7 @@ void StMuChainMaker::fromList(string list) {
   for (;inputStream->good();) {
       inputStream->getline(line,512);
       if  ( inputStream->good() ) {
-	  int numberOfEvents = 0;
+	  int numberOfEvents = TChain::kBigNumber;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
           if(iret) {/*warnOff*/}
 	  if ( pass(name,mSubFilters) ) {
@@ -359,7 +349,7 @@ void StMuChainMaker::fromList(string list) {
 void StMuChainMaker::fromFile(string file) {
   DEBUGMESSAGE2("");
   DEBUGMESSAGE2(mTreeName.c_str());
-  mFileList.push_back( StMuStringIntPair( file, 0 ) );
+  mFileList.push_back( StMuStringIntPair( file, TChain::kBigNumber ) );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -379,6 +369,11 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.25  2005/10/06 01:30:30  mvl
+  * Changed some of the logic in StMuChainMaker: Now files are no longer opened
+  * and checked at the start of the job, but simply added to the TChain. TChain
+  * automatically skips corrupted files (this is a new feature).
+  *
   * Revision 1.24  2004/04/09 21:09:27  jeromel
   * Did not think of wildcards ...
   *
