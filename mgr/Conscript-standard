@@ -341,10 +341,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   } elsif ( $Dir =~ m/StarVMC/ && $pkg =~ /ecal|Tpc|star/) {
     $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/include";
   } elsif ( $pkg =~ m/^StBFChain$/ && (! $IsRepo || $IsDotDev) ) {print "\t add documentation for $pkg\n";
-    Command $env ["#StRoot/StBFChain/BFC.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP %< > %>);
-    Command $env ["#StRoot/StBFChain/BFC2.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP -D__BFC2__ %< > %>);
+    Command $env ["#StRoot/StBFChain/doc/BFC.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP %< > %>);
+    Command $env ["#StRoot/StBFChain/doc/BFC2.h"], qw(#StRoot/StBFChain/BigFullChain.h), qq (%CPP -D__BFC2__ %< > %>);
     Command $env [qw(#StRoot/StBFChain/doc/index.html #StRoot/StBFChain/doc/StBFChain.cxx_doc)],
-      qw(#StRoot/StBFChain/StBFChain.cxx #StRoot/StBFChain/BFC.h  #StRoot/StBFChain/BFC2.h),
+      qw(#StRoot/StBFChain/StBFChain.cxx #StRoot/StBFChain/doc/BFC.h  #StRoot/StBFChain/doc/BFC2.h),
 	qq(BFCOpt2Html.pl);
   }
   if ( $#idlM > -1 ) {
