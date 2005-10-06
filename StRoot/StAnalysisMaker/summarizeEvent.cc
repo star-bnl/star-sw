@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.6 2005/07/19 20:08:17 perev Exp $
+ * $Id: summarizeEvent.cc,v 2.7 2005/10/06 20:01:58 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.7  2005/10/06 20:01:58  fisyak
+ * add information about ftpc tracks, adjust hit.flag cut to >3
+ *
  * Revision 2.6  2005/07/19 20:08:17  perev
  * MultiVertex corr
  *
@@ -40,7 +43,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.6 2005/07/19 20:08:17 perev Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.7 2005/10/06 20:01:58 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -54,19 +57,22 @@ summarizeEvent(StEvent& event, const int &nevents)
     UInt_t nTracks = trackNode.size();
     StTrackNode *node = 0;
     UInt_t nGoodTracks = 0;
+    UInt_t nGoodFtpcTracks = 0;
     for (unsigned int i=0; i < nTracks; i++) {
       node = trackNode[i]; if (!node) continue;
       StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
       if (! gTrack) continue;
+      if (gTrack->flag() >= 700) nGoodFtpcTracks++;
       if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
       nGoodTracks++;
     }
     gMessMgr->QAInfo() << "# track nodes:   \t"
-		       <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks << endm;
+		       <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
+		       << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
     StPrimaryVertex *pVertex=0;
     for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
       StThreeVectorD primPos = pVertex->position();
-      int nDaughters = pVertex->numberOfDaughters();
+      unsigned int nDaughters = pVertex->numberOfDaughters();
       nGoodTracks = 0;
       for (unsigned int i=0; i < nDaughters; i++) {
         StPrimaryTrack* pTrack = (StPrimaryTrack*)pVertex->daughter(i);
@@ -136,7 +142,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 	      hit = static_cast<StSvtHit*>(*it);
 	      if (!hit) continue;
 	      TotalNoOfSvtHits++;
-	      if (hit->flag() > 5) noBadSvtHits++;
+	      if (hit->flag() >3) noBadSvtHits++;
 	      if (hit->usedInFit()) noSvtHitsUsedInFit++;
 	    }
 	  }
@@ -144,13 +150,57 @@ summarizeEvent(StEvent& event, const int &nevents)
       }
     }
     gMessMgr->QAInfo() << "# SVT hits:          " << TotalNoOfSvtHits 
-		       << ":\tBad ones(flag>5): " << noBadSvtHits 
+		       << ":\tBad ones(flag >3): " << noBadSvtHits 
 		       << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
     
-    gMessMgr->QAInfo() << "# SSD hits:       "
-		       << (event.ssdHitCollection() ? event.ssdHitCollection()->numberOfHits() : 0) << endm;
+    UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
+    StSsdHitCollection* ssdhits = event.ssdHitCollection();
+    if (ssdhits) {
+      StSsdHit* hit;
+      for (unsigned int ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
+	StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
+	if (!ladderhits) continue;
+	for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	  StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	  if (!waferhits) continue;
+	  const StSPtrVecSsdHit& hits = waferhits->hits();
+	  for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	    hit = static_cast<StSsdHit*>(*it);
+	    if (!hit) continue;
+	    TotalNoOfSsdHits++;
+	    if (hit->flag() >3) noBadSsdHits++;
+	    if (hit->usedInFit()) noSsdHitsUsedInFit++;
+	  }
+	}
+      }
+    }
+    gMessMgr->QAInfo() << "# SSD hits:          " << TotalNoOfSsdHits 
+		       << ":\tBad ones(flag>3): " << noBadSsdHits 
+		       << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
     
-    gMessMgr->QAInfo() << "# FTPC hits:      "
-		       << (event.ftpcHitCollection() ? event.ftpcHitCollection()->numberOfHits() : 0) << endm;
+    UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
+    StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
+    if (ftpchits) {
+      StFtpcHit* hit;
+      for (unsigned int plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
+	StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
+	if (!planehits) continue;
+	for (unsigned int sector=0; sector<planehits->numberOfSectors(); ++sector) {
+	  StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
+	  if (!sectorhits) continue;
+	  const StSPtrVecFtpcHit& hits = sectorhits->hits();
+	  for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	    hit = static_cast<StFtpcHit*>(*it);
+	    if (!hit) continue;
+	    TotalNoOfFtpcHits++;
+	    if (hit->flag() > 3) noBadFtpcHits++;
+	    if (hit->usedInFit()) noFtpcHitsUsedInFit++;
+	  }
+	}
+      }
+    }
+    gMessMgr->QAInfo() << "# FTPC hits:         " << TotalNoOfFtpcHits 
+		       << ":\tBad ones(flag>3): " << noBadFtpcHits 
+		       << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
     
 }
