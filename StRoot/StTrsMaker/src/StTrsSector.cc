@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.8 2005/09/09 22:12:49 perev Exp $
+ * $Id: StTrsSector.cc,v 1.9 2005/10/06 19:59:10 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
+ * Revision 1.9  2005/10/06 19:59:10  fisyak
+ * adjust for ICC
+ *
  * Revision 1.8  2005/09/09 22:12:49  perev
  * Bug fix + IdTruth added
  *
@@ -138,7 +141,11 @@ int StTrsSector::sort()
       tpcTimeBins &tb = mSector[irow][ipad];
       int ntb = tb.size();
       if (ntb<2) continue;
+#ifndef __ICC
       std::sort(tb.begin(), tb.end(),StTrsAnalogSignalComparator());
+#else
+      sort(tb.begin(), tb.end(),StTrsAnalogSignalComparator());
+#endif
       int jl=0,jr=1;
       for (;1;jr++) {
         assert(jr==ntb || tb[jl].time() <= tb[jr].time());
