@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.116 2005/09/26 21:44:18 potekhin Exp $
+* $Id: geometry.g,v 1.117 2005/10/06 17:54:57 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.117  2005/10/06 17:54:57  potekhin
+* a) in DEV2005, provide a way to use a highly customised version of the SVT
+* b) create a key that enables the user to lower the electromagnetic processes
+* GEANT cut to 10 keV, from the KUMAC script without the need to recompile.
+*
 * Revision 1.116  2005/09/26 21:44:18  potekhin
 * We need a convenient way to optionally remove the SVT from
 * the simulation, to facilitate conversion and brems studies.
@@ -1740,7 +1745,7 @@ If LL>1
 * important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
 
                      SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 4; "SVTT version"
+                     SvttConfig = 5; "SVTT version"
                      DensConfig = 1; "gas density correction"
                      FtpcConfig = 1; "ftpc configuration"
 
@@ -1774,6 +1779,11 @@ If LL>1
                   {IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY}=0; Iloss=2}
   on NO_BREM    { No bremmstrahlung;
                   IBREM=0;}
+
+  on LOW_EM     { Low cuts on ElectroMagnetic processes;
+                  CUTGAM=0.00001;
+                  CUTELE=0.00001;}
+
   on TPC_ONLY   { Minimal geometry - only TPC;
                   {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
   on SVTT_ON    { Optional SVTT added on top of the minimal geo;
@@ -1913,6 +1923,7 @@ If LL>1
     if(SvttConfig==2) call svttgeo2
     if(SvttConfig==3) call svttgeo3
     if(SvttConfig==4) call svttgeo4
+    if(SvttConfig==5) call svttgeo5
 
 *    elseif(CorrNum==4) then call svttgeo3 ! +silicon strip detector separated into its own geo file
 
