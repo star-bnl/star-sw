@@ -1,5 +1,15 @@
-* $Id: phmdgeo.g,v 1.12 2004/04/28 00:34:21 potekhin Exp $
+* $Id: phmdgeo.g,v 1.13 2005/10/06 21:46:38 potekhin Exp $
 * $Log: phmdgeo.g,v $
+* Revision 1.13  2005/10/06 21:46:38  potekhin
+* Needed to reorganize the code in order to make it VMC compatible.
+* The old structure had an incosistent path to hits, and VMC had trouble
+* accessing the hits data.
+*
+* The 3 sectors on the PMD are now described by the same block, and there
+* is logic to ensure they are inflated correctly according to a flag (so we
+* create proper geometry just like before. There is no distinct  PHMT, it has
+* been absorbed into PHMS. In addition, formatting improvements have been made.
+*
 * Revision 1.12  2004/04/28 00:34:21  potekhin
 * Introduced a proper version flag which helps
 * steering from outside (geometry.g). Used it
@@ -78,7 +88,7 @@
                     Int nx(5),Int ny(5),Int mx(7),Int my(7),
                     hexd2(10),hexd1(10),dpara(6)}
 
-    Integer         J,Itype,Ncellx,Ncelly,N,Mcellx
+    Integer         J,Itype,Ncellx,Ncelly,N,Mcellx,ipms
     Real xb,yb,zb,xlen,xlen0,ylen,ylen0,phi,phideg,xpos,ypos,xsize,ysize
     Real sm_thick,zz,root32,root34,SizeN,xlen1,xlen2,xsize1,xlen3,ylen3
     Real phideg1,phideg2,phideg3,phi1,phi2,phi3,xpos1,ypos1,ylen1,ylen2
@@ -157,164 +167,153 @@ Block PHMD the PMD box volume and fill with air
       phi1=phideg1*degrad
       phi2=phideg2*degrad
       phi3=phideg3*degrad
-
+	ipms = 1
       create and position   PHMS x=xlen3*cos(phi1)-ylen3*sin(phi1)+5*pmdg_th_air,
                                  y=xlen3*sin(phi1)+ylen3*cos(phi1),
                                  z=0 Alphaz=phideg1 Ncopy=1 
 
+	ipms = 2
       create and position   PHMS x=xlen3*cos(phi2)-ylen3*sin(phi2)-5*pmdg_th_air,
                                  y=xlen3*sin(phi2)+ylen3*cos(phi2),
                                  z=0 Alphaz=phideg2 Ncopy=2
 
-      create and position   PHMT x=zlen2*cos(phi3)-zlen1*sin(phi3),
+	ipms = 3
+      create and position   PHMS x=zlen2*cos(phi3)-zlen1*sin(phi3),
                                  y=zlen2*sin(phi3)+zlen1*cos(phi3),
                                  z=0 Alphaz=phideg3 Ncopy=3
 
 endblock    
 * -----------------------------------------------------------------------
 Block PHMS the PMD sector volume - 1/3rd of PHMD
+*  20051006 - consolidated with PHMT
+      Material  Air
+      Medium    Standard
+ 
+      Attribute PHMS     seen=1  colo=2 "serial = ipms"
 
-      Attribute PHMS     seen=1  colo=2
-       Material  Air
-       Medium    STandard
-       Shape     para dx = xlen3*2. dy = -ylen3 dz=sm_thick/2.,
-                      Alph=30. thet=0 phi=0  
+* Note how the logic is based on the ipms flag -- we create 
+      if (ipms != 3) then                          
+      	Shape     para dx = xlen3*2. dy = -ylen3 dz=sm_thick/2., Alph=30. thet=0 phi=0  
+* --- Place the CPV in PMD with front edge 550cm from the target ---
+	phideg =0
+	ypos   = (SizeN(72)+SizeN(48))*root34 
+	xlen2 = -(SizeN(72)+SizeN(48))/4.
+	xsize1 = (SizeN(72)+SizeN(48))/2.
+
+* Modules numbered in an anti-clockwise manner
+      	do Itype = 1,5
+        	xsize = SizeN(pmdg_Nx(Itype))
+	        ysize = SizeN(pmdg_Ny(Itype))-pmdg_boundary/root32
+		if(Itype>2)ysize= SizeN(pmdg_Ny(Itype))
+	        xlen0  = xsize/2
+		ylen0  = (ysize)*root34 
+	        ylen   = (ysize-pmdg_boundary/root32)*root34
+        	xpos = xlen2 -xsize1 +xsize/2.+ SizeN(pmdg_Ny(Itype))/4.
+	        if(Itype>2)ylen = (ysize-pmdg_boundary/root34)*root34
+	        ylen1=0.
+	        ylen2=0.
+
+		xlen1=1.
+		if(Itype==2)xlen1=-1.
+		if(Itype>2)xlen1=0.
+
+	        zlen=1.
+	        if(Itype==2)zlen=-1.
+        	if(Itype>2)zlen=0.
+
+	        zb = 0
+	        NcellX = pmdg_Nx(Itype)
+	        NcellY = pmdg_Ny(Itype)
+
+	        if (Itype==1) xpos=xpos + xsize + SizeN(pmdg_Ny(Itype))- 11.*pmdg_boundary/(4.*root32)-pmdg_CELL_RADIUS*2./3.
+	        if (Itype==2) xpos=xpos + SizeN(pmdg_Ny(Itype))/2.-pmdg_boundary/(4.*root32)
+	        if (Itype==3) xpos=xpos 
+  		if (Itype==4) xpos=xpos + 2.*xsize1-xsize/2.
+	        if (Itype==5) xpos=xpos + 2.*xsize1-xsize 
+	        ypos = ypos-ylen0
+	        Create PHSR 
+	        Position PHSR x=xpos y=ypos z=0., AlphaZ=phideg   
+
+	        ypos = ypos-ylen0
+	        if (Itype==3) ypos=(SizeN(72)+SizeN(48))*root34 
+
+        enddo  ! Itype
+      else     !          PHMT
+        Shape     PARA dx=zlen2*2. dy=-zlen1 dz=sm_thick/2., Alph=30. thet=0 phi=0  
                           
 * --- Place the CPV in PMD with front edge 550cm from the target ---
-       phideg =0
-      ypos   = (SizeN(72)+SizeN(48))*root34 
-      xlen2 = -(SizeN(72)+SizeN(48))/4.
-      xsize1 = (SizeN(72)+SizeN(48))/2.
+        phideg =0
+        ypos1   = (SizeN(72)+SizeN(48)+2.*pmdg_boundary/root32+.375)*root34 
+        xlen2 = -(SizeN(72)+SizeN(48)+3.75*pmdg_th_air)/4.
+        xsize1 = (SizeN(72)+SizeN(48)+4.5*pmdg_th_air)/2.
+
 * Modules numbered in an anti-clockwise manner
+        do Itype = 1,7
+	        xsize = SizeN(pmdg_Mx(Itype))
+		ysize = SizeN(pmdg_My(Itype))
+	        xlen0 = xsize/2
+		ylen0 = (ysize)*root34 
+	        zlen0 = (ysize)*root34 
 
-      do Itype = 1,5
-        xsize = SizeN(pmdg_Nx(Itype))
-        ysize = SizeN(pmdg_Ny(Itype))-pmdg_boundary/root32
-	if(Itype>2)ysize= SizeN(pmdg_Ny(Itype))
-        xlen0  = xsize/2
-	ylen0  = (ysize)*root34 
-        ylen   = (ysize-pmdg_boundary/root32)*root34
-        xpos = xlen2 -xsize1 +xsize/2.+ SizeN(pmdg_Ny(Itype))/4.
-        if(Itype>2)ylen = (ysize-pmdg_boundary/root34)*root34
-        ylen1=0.
-        ylen2=0.
-	xlen1=1.
-	if(Itype==2)xlen1=-1.
-	if(Itype>2)xlen1=0.
-        zlen=1.
-        if(Itype==2)zlen=-1.
-        if(Itype>2)zlen=0.
-        zb = 0
-        NcellX = pmdg_Nx(Itype)
-        NcellY = pmdg_Ny(Itype)
-        if (Itype==1)xpos=xpos + xsize + SizeN(pmdg_Ny(Itype))- 11.*pmdg_boundary/(4.*root32)-_
-                                                   pmdg_CELL_RADIUS*2./3.
-        if (Itype==2)xpos=xpos + SizeN(pmdg_Ny(Itype))/2.-pmdg_boundary/(4.*root32)
-        if (Itype==3)xpos = xpos 
-        if (Itype==4)xpos=xpos + 2.*xsize1-xsize/2.
-        if (Itype==5)xpos = xpos +2.*xsize1 - xsize 
-        ypos = ypos-ylen0
-        Create PHSR 
-        Position PHSR x=xpos y=ypos z=0., 
-                      AlphaZ=phideg   
+	        if(Itype==2) zlen0=(ysize-pmdg_boundary/root32)*root34+3.75*pmdg_th_air
+	        if(Itype==3) zlen0=(ysize-pmdg_boundary/root32)*root34-3.75*pmdg_th_air 
+	        if(Itype==4) zlen0=(ysize)*root34+3.75*pmdg_th_air 
+	        if(Itype==5) zlen0=(ysize+pmdg_boundary/root32)*root34 
+	        xpos1 = xlen2 -xsize1 + xsize/2.+ ysize/4.
+	        ylen = (ysize-2*pmdg_boundary)*root34
 
-        ypos = ypos-ylen0
-        if (Itype==3) ypos=(SizeN(72)+SizeN(48))*root34 
+		ylen1 = 0.
+		if(Itype==1) ylen1=1.
+	        if(Itype==2) ylen1=-1.
+	        if(Itype==3) ylen1=-1.
+	        if(Itype==5) ylen1=2.
+		if(Itype==6) ylen1=1.
 
-      enddo
-endblock
-* ----------------------------------------------------------------------- 
-Block PHMT the PMD 3rd sector volume - 1/3rd of PHMD
+	 	ylen2 = 0.
+        	if(Itype==2) ylen2=1.
+	        if(Itype==3) ylen2=1.
+	        if(Itype==5) ylen2=-1.
 
-      Attribute PHMT     seen=1  colo=2
-       Material  Air
-       Medium    STandard
-       Shape     PARA dx=zlen2*2. dy=-zlen1 dz=sm_thick/2.,
-                      Alph=30. thet=0 phi=0  
-                          
-* --- Place the CPV in PMD with front edge 550cm from the target ---
-       phideg =0
-      ypos1   = (SizeN(72)+SizeN(48)+2.*pmdg_boundary/root32+.375)*root34 
-      xlen2 = -(SizeN(72)+SizeN(48)+3.75*pmdg_th_air)/4.
-      xsize1 = (SizeN(72)+SizeN(48)+4.5*pmdg_th_air)/2.
-* Modules numbered in an anti-clockwise manner
-
-      do Itype = 1,7
-        xsize = SizeN(pmdg_Mx(Itype))
-	ysize = SizeN(pmdg_My(Itype))
-        xlen0  = xsize/2
-	ylen0  = (ysize)*root34 
-        zlen0=(ysize)*root34 
-        if(Itype==2)zlen0=(ysize-pmdg_boundary/root32)*root34+3.75*pmdg_th_air
-        if(Itype==3)zlen0=(ysize-pmdg_boundary/root32)*root34-3.75*pmdg_th_air 
-        if(Itype==4)zlen0=(ysize)*root34+3.75*pmdg_th_air 
-        if(Itype==5)zlen0=(ysize+pmdg_boundary/root32)*root34 
-        xpos1 = xlen2 -xsize1 + xsize/2.+ ysize/4.
-        ylen = (ysize-2*pmdg_boundary)*root34
-
-	ylen1 = 0.
-	if(Itype==1)ylen1=1.
-        if(Itype==2)ylen1=-1.
-        if(Itype==3)ylen1=-1.
-        if(Itype==5)ylen1=2.
-	if(Itype==6)ylen1=1.
-
-	ylen2 = 0.
-        if(Itype==2)ylen2=1.
-        if(Itype==3)ylen2=1.
-        if(Itype==5)ylen2=-1.
-
-        xlen1=0.
-	if(Itype==1)xlen1=-2.
-	if(Itype==2)xlen1=3.
-	if(Itype==3)xlen1=1.
-	if(Itype==5)xlen1=-1.
-	if(Itype==6)xlen1=2.
+	        xlen1=0.
+		if(Itype==1) xlen1=-2.
+		if(Itype==2) xlen1=3.
+		if(Itype==3) xlen1=1.
+		if(Itype==5) xlen1=-1.
+		if(Itype==6) xlen1=2.
 
 
-	zlen=0.
-	if(Itype==2)zlen=0.75
-        if(Itype==3)zlen=-0.75
-        if(Itype==5)zlen=-1.
+		zlen=0.
+		if(Itype==2) zlen=0.75
+	        if(Itype==3) zlen=-0.75
+	        if(Itype==5) zlen=-1.
 
-        zb = 0
-        NcellX = pmdg_Mx(Itype)
-        NcellY = pmdg_My(Itype)
+        	zb = 0
+	        NcellX = pmdg_Mx(Itype)
+	        NcellY = pmdg_My(Itype)
 
-        if (Itype==1)xpos1=xpos1 + SizeN(pmdg_Mx(Itype+1))/2.+2.*ysize-_
-                                          2* pmdg_boundary/root32-pmdg_boundary/3.
+	        if (Itype==1) xpos1=xpos1 + SizeN(pmdg_Mx(Itype+1))/2.+2.*ysize-2* pmdg_boundary/root32-pmdg_boundary/3.
+       		if (Itype==2) xpos1=xpos1 + xsize/2.+ ysize/2.-pmdg_boundary*root32-pmdg_boundary-2.25*pmdg_th_air
+	        if (Itype==3) xpos1=xpos1 + SizeN(pmdg_Mx(Itype-1))/2 - pmdg_boundary-2.25*pmdg_th_air
+	        if (Itype==4) xpos1 = xpos1 -pmdg_boundary*root32
+	        if (Itype==5) xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2.-ysize +3*pmdg_boundary*root32+2.25*pmdg_th_air
+	        if (Itype==6) xpos1=xpos1 + 2.*xsize1-xsize/2.+pmdg_boundary/root32+2.25*pmdg_th_air
+	        if (Itype==7) xpos1=xpos1 + 2.*xsize1-xsize-pmdg_boundary/(2.*root32)+pmdg_boundary
 
-        if (Itype==2)xpos1=xpos1 + xsize/2.+ ysize/2.-pmdg_boundary*root32-pmdg_boundary-_
-                                                              2.25*pmdg_th_air
+	        ypos1 = ypos1-zlen0
+	        Create PHSR 
+		Position PHSR x=xpos1 y=ypos1 z=0., AlphaZ=phideg   
 
-        if (Itype==3)xpos1=xpos1 + SizeN(pmdg_Mx(Itype-1))/2 - pmdg_boundary-2.25*pmdg_th_air
-
-        if (Itype==4)xpos1 = xpos1 -pmdg_boundary*root32
-
-
-        if (Itype==5)xpos1 = xpos1+2.*xsize1-xsize+ SizeN(pmdg_Mx(Itype-1))/2._
-                                            -ysize +3*pmdg_boundary*root32+2.25*pmdg_th_air
-        if (Itype==6)xpos1=xpos1 + 2.*xsize1-xsize/2.+pmdg_boundary/root32+2.25*pmdg_th_air
-                                                   
-        if (Itype==7)xpos1=xpos1 + 2.*xsize1-xsize-pmdg_boundary/(2.*root32)+pmdg_boundary
-
-
-                                                    
-
-        ypos1 = ypos1-zlen0
-        Create PHSR 
-	 Position PHSR x=xpos1 y=ypos1 z=0.,
-                      AlphaZ=phideg   
-        ypos1 = ypos1-zlen0
-        if (Itype==4) ypos1=(SizeN(72)+SizeN(48)+2.*pmdg_boundary/root32+.375)*root34 
-        if (Itype==5) ypos1=(SizeN(72)+SizeN(48)+2.*pmdg_boundary/root32+.375)*root34 
-        if (Itype==6) ypos1=ypos1-4.*pmdg_th_air
-      enddo
+	        ypos1 = ypos1-zlen0
+	        if (Itype==4) ypos1=(SizeN(72)+SizeN(48)+2.*pmdg_boundary/root32+.375)*root34 
+        	if (Itype==5) ypos1=(SizeN(72)+SizeN(48)+2.*pmdg_boundary/root32+.375)*root34 
+	        if (Itype==6) ypos1=ypos1-4.*pmdg_th_air
+        enddo
+      endif
 endblock
 * -------------------------------------------------------
 Block PHSR is a detector box made in air
       Material  Air
-      Attribute PHSR   seen=1    colo=6
+      Attribute PHSR   seen=1    colo=6 serial = 0
       Shape     PARA   dx=xlen0-ylen1*pmdg_boundary/(2.*root32),
                        dy=ylen0-ylen2*pmdg_boundary*root34/root32,
                        dz=sm_thick/2 Alph=30 thet=0 phi=0
