@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.104 2005/08/29 21:47:09 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.105 2005/10/06 19:23:07 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.105  2005/10/06 19:23:07  fisyak
+// Add set date/time from fz-file
+//
 // Revision 1.104  2005/08/29 21:47:09  fisyak
 // Changes for VMC
 //
@@ -726,7 +729,7 @@ Int_t St_geant_Maker::Make()
     }
     if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
     fEvtHddr->SetProdDateTime();
-#if 0
+#if 1
     SetDateTime();
 #endif
   }
@@ -1918,7 +1921,7 @@ TGeoVolume* St_geant_Maker::Ag2Geom() {
   fTopGeoVolume = volume;
   return GetTopGeoVolume();
 }
-#if 0
+#if 1
 //________________________________________________________________________________
 void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
   if ( m_Mode%100 != 1 && fEvtHddr ) {
