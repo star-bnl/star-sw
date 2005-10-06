@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.150 2005/08/26 14:54:31 jeromel Exp $
+# $Id: Construct,v 1.151 2005/10/06 18:49:04 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -243,12 +243,14 @@ foreach my $dir( "pams", "StRoot" ,"StPiD", "StarVMC" ) {
     next if $sub_dir eq '.' || $sub_dir eq '..';
     #	if ($items and $sub_dir =~ /$items/) {print "skip dir: $sub_dir \t=> $SKIP_DIRS\n"; next;}
     if ($sub_dir =~ $items and ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
-    #		  print "param::include = $param::include $subsub_dir \n";
-    print  "skip ";
-    printf("%40s","$sub_dir");
-    printf("\tto build it you need to add %25s","+$sub_dir");
-    print  " in cons command line\n";
-    next;
+      #		  print "param::include = $param::include $subsub_dir \n";
+      if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
+	print  "skip ";
+	printf("%40s","$sub_dir");
+	printf("\tto build it you need to add %25s","+$sub_dir");
+	print  " in cons command line\n";
+      }
+      next;
   }
 
 #	# The above pattern survived for some time but is 
@@ -299,10 +301,12 @@ my $sub_DIR = $dir . "/" . $sub_dir;
 		    $items and $subsub_dir =~ /$items/ and
 		    ( ! $param::include or  $sub_dir !~ /$param::include/o )    ) {
 #		  print "param::include = $param::include $subsub_dir \n";
+		if ($STAR_LEVEL !~ /\.dev/ and $STAR_LEVEL !~ /\.DEV/) {
 		  print  "skip ";
 		  printf("%40s","$sub_dir/$subsub_dir");
 		  printf("\tto build it you need to add %25s","+$sub_dir/$subsub_dir");
 		  print  " in cons command line\n";
+		}
 		  next;
                 }
 		
@@ -364,6 +368,10 @@ foreach $dir(@sysdirlist , @subdirs ) {
 }
 #print "packages $#packages : @packages\n";
 @packages = sortu(@packages);
+my $qtRoot = "qtRoot";
+if ($param::include and $qtRoot =~ /$param::include/) {
+  push @packages, $qtRoot if ( -d $qtRoot );
+}
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
