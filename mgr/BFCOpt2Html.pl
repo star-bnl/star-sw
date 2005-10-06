@@ -23,7 +23,7 @@ if ( -d "StBFChain"){  $REL = "StBFChain";}
 if( ! defined($IN) ){  $IN  = "$REL/StBFChain.cxx";}
 if( ! defined($OUT)){  $OUT = "$REL/doc/index.html";}
 
-if ( -e "$REL/BFC.h" && -e "$REL/BFC2.h"){
+if ( -e "$REL/doc/BFC.h" && -e "$REL/doc/BFC2.h"){
     # Do the merging on the fly and parse the merged file
     print "New mode (separate includes)\n";
     open(SRC, "$REL/StBFChain.cxx")         || die "Cannot open $REL/StBFChain.cxx\n";
@@ -31,9 +31,9 @@ if ( -e "$REL/BFC.h" && -e "$REL/BFC2.h"){
     while ( defined($line = <SRC>) ){
 	chomp($line);
 	if ($line =~ m/^(\/\/.include\s*\")(.*)(\"\s*)/) {
-	    if ( -e "$REL/$2" && $2 ne "StBFChain.h"){   # Any found include but not the class def
-		print "\tAdding $REL/$2 --> [$line] [$2]\n";
-		open(INT,"$REL/$2");
+	    if ( -e "$REL/doc/$2" && $2 ne "StBFChain.h"){   # Any found include but not the class def
+		print "\tAdding $REL/doc/$2 --> [$line] [$2]\n";
+		open(INT,"$REL/doc/$2");
 		while( defined($line = <INT>) ){ print FIN $line;}
 		close(INT);
 		next;
