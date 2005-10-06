@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.4 2005/10/05 13:41:47 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.5 2005/10/06 16:36:32 balewski Exp $
  
 
 #include <time.h>
@@ -24,6 +24,7 @@ ClassImp(StSpinDbMaker)
 StSpinDbMaker::StSpinDbMaker(const char *name):StMaker(name){
   gMessMgr->Message("","D") <<GetName()<<endm;
   setDBname("Calibrations/rhic");
+  nFound=0;
 }
 
 
@@ -399,10 +400,14 @@ StSpinDbMaker:: BXstarUsingBX7(int bx7){
 //--------------------------------------------------
 void StSpinDbMaker::print(int level) {
 
-  printf("SpinDb::print(level=%d) ...\n",level);
+  printf("SpinDb::print(level=%d) ...valid=%d \n",level,isValid());
+  if(!isValid()) {
+    printf("       SpinDb not loaded or some tables not found, nFound=%d \n spinDB will not work if InitRun() was executed !!!\n\n",nFound);
+    return;
+  }
 
   printf("Dump spinDB: valid=%d polTrans=%d polLong=%d BX7off=%d BX48off=%d\n", isValid(), isPolDirTrans(), isPolDirLong(), BX7offset(), BX48offset());
-  if(!isValid()) return;
+
   printf("     spinDB: timeBucket offset: Blue=%d Yell=%d\n",getBucketOffsets()[blueRing],getBucketOffsets()[yellRing]);
   printf("DB records labels:\n V124: %s \n BXoffset: %s\n BXmask: %s\n\n",mTabSpinV124->comment,mTabSpinStar->comment,mTabSpinBXmask->comment); 
   printf("dump of spin bits  @ STAR IP, for 120 bXings, range [0,119]\n");
@@ -442,6 +447,9 @@ void StSpinDbMaker::print(int level) {
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.5  2005/10/06 16:36:32  balewski
+// protection against printing not initialized DB content
+//
 // Revision 1.4  2005/10/05 13:41:47  balewski
 // more get-methods
 //
