@@ -110,8 +110,8 @@ inline void StiDedxCalculator::setDetectorFilter(StDetectorId detector)
 }
 
 
-inline StDetectorId StiDedxCalculator::whichDetId(){return mDetector;};
-inline double       StiDedxCalculator::whatUseFraction(){return mFraction;};
+inline StDetectorId StiDedxCalculator::whichDetId(){return mDetector;}
+inline double       StiDedxCalculator::whatUseFraction(){return mFraction;}
 
 
 #endif

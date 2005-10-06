@@ -68,7 +68,7 @@ public:
     void operator++();
     
     ///Define !=
-    bool operator!=(const typename tnode_vec::const_iterator&) {
+    bool operator!=(const typename tnode_vec::const_iterator& rhs) {
 	  return (mcurrentleaf != rhs);
     }
 
