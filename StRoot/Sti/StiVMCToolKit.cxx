@@ -858,7 +858,7 @@ TGeoPhysicalNode *StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const Char
   TGeoVolume *volT = nodeT->GetVolume(); 
   const Char_t *nameT = volT->GetName();
   TGeoPhysicalNode *nodeP = 0;
-  if (name && ! strcmp(nameT,name)) {
+  if (name && ! strncmp(nameT,name,4)) {
     //    if (TString(nameT) == TString(VolumesToBeAveraged[i].name)) {
     TGeoShape *newshape = 0;
     TGeoMedium* newmed = 0;
