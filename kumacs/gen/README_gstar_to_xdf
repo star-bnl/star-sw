@@ -1,7 +1,0 @@
-The input to gstar_to_xdf.kumac is a text ASCII file opened in 
-fortran 77 under the
-name evgen.evt  . Set up a soft link to the event generator ASCII text file of
-interst.  ln -s dir evgen.evt
-There is a sample in /afs/rhic/star/data/samples/   area
-          ln -s /afs/rhic/star/data/samples/evgen.evt evgen.evt
-

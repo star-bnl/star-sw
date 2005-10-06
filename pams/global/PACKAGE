@@ -1,8 +1,0 @@
-# $Id $
-# package global
-# author: 
-Library:libglobal.so:LIBS +=   -l_StTpcDb  -ltls
-Library:libSt_global.so:LIBS +=   -l_StTpcDb  -ltls
-#Library:libglobal_Tables.so:LIBS += 
-#Library:libglobal.so:LIBS +=   -lgeant3  -lminicern  -lStTpcDb  -ltls
-#Library:libSt_global.so:LIBS +=   -lgeant3  -lminicern  -lStTpcDb  -ltls
