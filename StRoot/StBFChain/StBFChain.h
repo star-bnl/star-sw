@@ -79,14 +79,14 @@ class StBFChain : public StChain {
    virtual TFile      *GetTFile() {return fTFile;}
    virtual Option_t*   GetOption() const{return TObject::GetOption();}
    virtual Bool_t      GetOption(const Int_t k)  const;
-   virtual Bool_t      GetOption(const TString *Opt) const {return GetOption(kOpt(Opt));}
-   virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
+   virtual Bool_t      GetOption(const TString *Opt, Bool_t Check = kTRUE) const {return GetOption(kOpt(Opt,Check));}
+   virtual Bool_t      GetOption(const Char_t  *Opt, Bool_t Check = kTRUE) const {return GetOption(kOpt(Opt,Check));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const TString &GetFileIn()  const {return *(&fInFile);}
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.34 2005/08/29 21:45:57 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.35 2005/10/06 18:58:31 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
