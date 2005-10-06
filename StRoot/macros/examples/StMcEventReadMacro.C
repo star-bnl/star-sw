@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.22 2005/09/29 00:46:19 fisyak Exp $
+// $Id: StMcEventReadMacro.C,v 1.23 2005/10/06 20:25:21 fisyak Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.23  2005/10/06 20:25:21  fisyak
+// Don't need db
+//
 // Revision 1.22  2005/09/29 00:46:19  fisyak
 // Persistent McEvent
 //
@@ -86,7 +89,6 @@
 class StChain;
 class St_DataSet;
 St_DataSet *Event;
-StChain *chain;
 TBrowser *brow=0;
 
 
@@ -95,7 +97,7 @@ TBrowser *brow=0;
 void StMcEventReadMacro(Int_t nevents=1,
 			const char *MainFile= "/star/rcf/test/new/trs_sl302.ittf/year_2005/cucu200_minbias/rcf1216_05_200evts.geant.root") {
   gROOT->LoadMacro("bfc.C");
-  bfc(-1,"in,McEvent,y2005x",MainFile);
+  bfc(-1,"in,McEvent,nodefault",MainFile);
   // IO Maker
   StIOMaker *IOMk = (StIOMaker *) chain->Maker("inputStream");
   IOMk->SetDebug();
