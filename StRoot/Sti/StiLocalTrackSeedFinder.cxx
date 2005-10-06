@@ -370,11 +370,6 @@ void StiLocalTrackSeedFinder::print() const
   cout <<"\n Search Window in Z:\t"<<_pars._deltaZ<<endl;
 }
 
-void ScaleHitError::operator()(StiHit* hit) const
-{
-  hit->scaleError(scale);
-}
-
 void StiLocalTrackSeedFinder::loadDS(TDataSet&ds)
 {
   cout << "StiLocalTrackSeedFinder::loadDS(TDataSet&) -I- Started" << endl;
