@@ -10,6 +10,8 @@
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h" 
 #include "StEvent/StTriggerId.h" 
 
+#include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
+
 class StEEmcMixMaker;
 class StEEmcPointMaker;
 class StRFEmcTrigMaker;
@@ -38,6 +40,8 @@ class StEEmcPi0Analysis : public StMaker
   Int_t Init();
   /// processes a single event
   Int_t Make();
+  /// init run
+  Int_t InitRun(Int_t);
   /// clears the maker
   void  Clear(Option_t *opts=""){ /* nada */ };
   /// specifies the name of the mixer and the mass range for 
@@ -49,6 +53,8 @@ class StEEmcPi0Analysis : public StMaker
   void mudst(const Char_t *name); 
   /// specifies the name of the analysis maker
   void analysis(const Char_t *name); 
+  /// specifies the name of the spin db maker
+  void spin(const Char_t *name);
 
   /// Add trigger ID to process
   void trigger(Int_t trig){ mTriggerList.push_back(trig); }
@@ -77,6 +83,8 @@ class StEEmcPi0Analysis : public StMaker
   StMuDstMaker *mMuDst; 
   /// pointer to analysis maker
   StEEmcA2EMaker *mEEanalysis; 
+  /// pointer to the spin database
+  StSpinDbMaker  *mSpinDb;
 
   std::vector<Int_t> mTriggerList;   /**<-- list of triggers to process */
   Int_t mMinBias;                    /**<-- id of the min bias trigger */
@@ -87,6 +95,19 @@ class StEEmcPi0Analysis : public StMaker
   SpinHistos *mHistograms[5];
   SpinHistos *mBackgrounds[5];
   SpinCuts   *mCuts; 
+  TH1F       *hFillPatternI;    /**<-- intended fill pattern */
+  TH1F       *hSpin4;           /**<-- number of times code sees spin state*/
+  TH1F       *hBx7;             /**<--  7-bit bunch crossing */
+  TH1F       *hBx48;            /**<-- 48-bit bunch crossing */
+  TH2F       *hBx7diffBx48;     /**<--  7-bit bunch crossing - 48bit */
+  TH1F       *hBxStar;          /**<-- star beam crossing */
+  TH1F       *hBxStarPi0;       /**<-- gated on pi0 */ 
+
+  TH2F       *hMassBx;          /**<-- mass vs bunch crossing */
+  TH2F       *hZvertBx;         /**<-- z vertex (gated) vs bunch crossing */
+  TH2F       *hZggBx;           /**<-- zgg vs bunch crossing */
+  TH2F       *hEtaBx;           /**<-- eta vs bunch crossing */ 
+
 
   enum EventCutTypes { 
       kEvent=0,
@@ -116,12 +137,18 @@ class StEEmcPi0Analysis : public StMaker
   Bool_t accept(StMuDst *mu); 
   Bool_t accept(StEEmcPair pair, Bool_t fill=true ); 
 
+  /// method to retrieve 4bit spin state 
+  Int_t getSpinState(StMuDst *mu, Int_t &bxs);
+
   TString mFilename;
   TFile *mFile; 
 
   /// Trigger simulation for MC 
   StRFEmcTrigMaker *mTrigSim;
   Int_t mTrigSimThreshold;
+
+  Int_t mRunNumber;
+  Bool_t mSpinSort;
 
   /// EEMC tower geometry
   EEmcGeomSimple *mEEgeom;

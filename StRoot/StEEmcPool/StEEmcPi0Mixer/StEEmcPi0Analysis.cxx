@@ -37,6 +37,7 @@ StEEmcPi0Analysis::StEEmcPi0Analysis(const Char_t *name):StMaker(name)
     mTrigSim = 0;
     mTrigSimThreshold = 0;
     mEEgeom=new EEmcGeomSimple();
+    mSpinSort = true;
 }
 
 // ----------------------------------------------------------------------------
@@ -48,26 +49,71 @@ Int_t StEEmcPi0Analysis::Init()
   // book histograms for pi0 analysis
   mBackgrounds[ kAny  ] = new SpinHistos("AnyB", "combinatoric spectra, unsorted");
 
+  mHistograms[1]=new SpinHistos("PP","Pi0 spectra, PP, spin4=dec5");
+  mHistograms[2]=new SpinHistos("PN","Pi0 spectra, PN, spin4=dec6");
+  mHistograms[3]=new SpinHistos("NP","Pi0 spectra, NP, spin4=dec9");
+  mHistograms[4]=new SpinHistos("NN","Pi0 spectra, NN, spin4=dec10");
+
   hEventCounter=new TH1F("hEventCounter","Event counts",10,0.,10.);
   hEventCounter -> GetXaxis() -> SetBinLabel(1,"raw");
   hEventCounter -> GetXaxis() -> SetBinLabel(2,"minb");
   hEventCounter -> GetXaxis() -> SetBinLabel(3,"hw trg");
-  hEventCounter -> GetXaxis() -> SetBinLabel(4,"sw trg");
+  hEventCounter -> GetXaxis() -> SetBinLabel(5,"sw trg");
   hEventCounter -> GetXaxis() -> SetBinLabel(5,"sw trg[3,6]");
   hEventCounter -> GetXaxis() -> SetBinLabel(6,"vertex");
-  hPairCounter=new TH1F("hPairCounter","Pair counts",10,0.,10.);
- 
-  return StMaker::Init();
-}
+  hPairCounter  = new TH1F("hPairCounter","Pair counts",10,0.,10.);
+  hFillPatternI = new TH1F("hFillPatternI","Intended fill pattern:bunch X-ing @ STAR IP:n runs",120,0.,120.);
+  hSpin4        = new TH1F("hSpin4","Spin 4:spin4 state",11,0.,11.);
+  hBx7          = new TH1F("hBx7","7-bit bunch crossing:bx7",120,0.,120.);
+  hBx48         = new TH1F("hBx48","48-bit bunch crossing:bx48",120,0.,120.);
+  hBx7diffBx48  = new TH2F("hBx7diffBx48","bx1=(bx7-off7)%120, bx2=(bx48-off48)%120;bx7;bx1-bx2",120,0.,120.,21,-10.5,10.5);
+  hBxStar       =new TH1F("hBxStar","Beam x-ing at STAR IP;star bunch x-ing",120,0.,120.); 
+  hBxStarPi0    =new TH1F("hBxStarPi0","Beam x-ing at STAR IP with pi0 detected;star bunch x-ing",120,0.,120.); 
 
+  hMassBx=new TH2F("hMassBx","Beam x-ing vs Mass;M [GeV];STAR bunch xing",120,0.,1.2,120,0.,120.); 
+  hZvertBx=new TH2F("hZvertBx","Beam x-ing vs Z vertex [0.1,0.18]",150,-150.,150.,120,0.,120.); 
+  hZggBx=new TH2F("hZggBx","Beam x-ing vs Zgg",100,0.,1.,120,0.,120.);
+  hEtaBx=new TH2F("hEtaBx","Beam x-ing vs eta",120,0.8,2.2,120,0.,120.); 
+  return StMaker::Init(); 
+}
+// ----------------------------------------------------------------------------
+Int_t StEEmcPi0Analysis::InitRun(Int_t run)
+{
+  
+  mSpinDb->print(0); // 0=short, 1=huge
+  Info("InitRun","run number = %d",run);
+  const Int_t *spin8bits=mSpinDb->getSpin8bits();
+  for(int bx=0;bx<120;bx++){
+    Bool_t isFilled=(spin8bits[bx] & 0x11)==0x11;
+    if(isFilled) hFillPatternI->Fill(bx);
+  }
+
+  mRunNumber = run;
+  
+  return StMaker::InitRun(run);
+
+}
 // ----------------------------------------------------------------------------
 Int_t StEEmcPi0Analysis::Make()
 {
+
+  
+  /// Determine spin state.
+  Int_t spin4 = -1;
+  Int_t bxStar = -1; 
+  if ( mSpinDb -> isValid() && mSpinDb -> isPolDirLong() ) 
+    spin4=getSpinState( mMuDst->muDst(), bxStar );
+
+
+  hBxStar -> Fill( bxStar ); 
 
   /// Check trigger 
   if ( !accept( mMuDst->muDst() ) ) return kStOK; 
 
   hPairCounter -> Fill( kEvent ); 
+
+  /// map spin decimal bits to histograms
+  static Int_t mymap[]={0,0,0,0,0,1,2,0,0,3,4};
 
   /// Loop over all candidate pairs
   for ( Int_t i=0;i<mEEmixer->numberOfCandidates();i++ )
@@ -76,8 +122,31 @@ Int_t StEEmcPi0Analysis::Make()
       StEEmcPair pair = mEEmixer->candidate(i);
       hPairCounter -> Fill( kPair ); 
       if ( !accept( pair ) ) continue; 
+
+      std::cout << "spin4=" << spin4 << " ";
       pair.print();
       mHistograms[ kAny ] -> Fill( pair );
+
+      /// If spin sorting has been disabled
+      if ( !mSpinSort ) {
+	std::cout << "Problem detected, spin sorting disabled" << std::endl;
+	continue;
+      }
+      
+      spin4=getSpinState( mMuDst->muDst(),bxStar );
+      if ( spin4>=0 )
+      if ( mymap[spin4] ) {
+	mHistograms[ mymap[spin4] ] -> Fill( pair );
+      }
+
+      hMassBx->Fill(pair.mass(),bxStar); 
+      if ( pair.mass()>0.1 && pair.mass() < 0.18 ) {
+	  hBxStarPi0->Fill(bxStar); 
+	  hZvertBx->Fill(pair.vertex().Z(),bxStar);
+	  hZggBx->Fill(pair.zgg(),bxStar);
+	  hEtaBx->Fill(pair.momentum().Eta(),bxStar); 
+      }
+      
 
     }
  
@@ -121,6 +190,12 @@ void StEEmcPi0Analysis::analysis(const Char_t *name)
     mEEanalysis=(StEEmcA2EMaker*)GetMaker(name);
     assert(mEEanalysis); 
 } 
+// ----------------------------------------------------------------------------
+void StEEmcPi0Analysis::spin(const Char_t *name) 
+{
+  mSpinDb=(StSpinDbMaker*)GetMaker(name);
+  /// no assert, null pointer expected if running on MC
+}
 // ----------------------------------------------------------------------------
 Bool_t StEEmcPi0Analysis::twoBodyCut( StEEmcPair &pair )
 {
@@ -339,3 +414,45 @@ Bool_t StEEmcPi0Analysis::accept( StEEmcPair pair, Bool_t fill )
 
 } 
 
+// ----------------------------------------------------------------------------
+Int_t StEEmcPi0Analysis::getSpinState( StMuDst *mudst, Int_t &bxStar )
+{
+
+  StMuEvent   *event = mudst -> event();
+  StL0Trigger *trig  =&(event->l0Trigger());
+
+  Int_t bx48 = trig->bunchCrossingId();
+  Int_t bx7  = trig->bunchCrossingId7bit( mRunNumber );  
+
+  bxStar = mSpinDb->BXstarUsingBX48(bx48);
+
+  //////////////////////////////////////////////////////////////////////
+  /// HARDCODED KLUDGE 
+  if ( bx7 == 0 || bx7 == 119 ) return -1; // kick 0 and 119 out of mix
+  if ( bxStar==20||bxStar==60 ) return -1; // kicked bunches
+  //////////////////////////////////////////////////////////////////////
+
+  hBx7->Fill( bx7 );
+  hBx48->Fill( bx48 );
+  hBx7diffBx48->Fill( bx7, mSpinDb->offsetBX48minusBX7(bx48,bx7) );
+
+  //$$$::cout << "bx7=" << bx7 << " bx48=" << bx48 << std::endl << std::flush;
+
+  if ( mSpinDb -> isMaskedUsingBX48(bx48) ) return -1;  // return an error flag
+  if ( mSpinDb->offsetBX48minusBX7(bx48,bx7)!=0 ) std::cout << "BUNCH CROSSINGS INCONSISTENT" << std::endl << std::flush;
+
+  //  assert(mSpinDb->offsetBX48minusBX7(bx48,bx7)==0); // scaler boards were not in sync
+  //  mSpinSort = (mSpinDb->offsetBX48minusBX7(bx48,bx7)==0);
+  // disable spin sorting and clear histograms
+  if ( mSpinDb->offsetBX48minusBX7(bx48,bx7)!=0 )
+    {
+      mSpinSort = false; 
+      for ( Int_t ii=1;ii<=4;ii++ ) mHistograms[ii]->Clear();
+    }
+
+
+  Int_t spin4 = mSpinDb->spin4usingBX48(bx48);
+  hSpin4->Fill(spin4);
+  return spin4;
+
+}

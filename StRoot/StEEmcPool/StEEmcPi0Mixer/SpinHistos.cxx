@@ -103,3 +103,20 @@ void SpinHistos::Fill( StEEmcPair &pair )
 
 }
 // ----------------------------------------------------------------------------
+void SpinHistos::Clear(Option_t *opts)
+{
+
+  hMass->Reset();
+  hPT->Reset();
+  hZgg->Reset();
+  hZvert->Reset();
+  hEta->Reset();
+  hPhiggVsEnergy->Reset();
+  for ( Int_t i=0;i<3;i++ ) hYX[i]->Reset();
+  hE1E2->Reset();
+  hEsmd->Reset();
+  hEpre1->Reset();
+  hEpre2->Reset();
+  hEpost->Reset();
+  hEpre12->Reset();
+}
