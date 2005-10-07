@@ -29,6 +29,10 @@ class SpinHistos : public TDirectory
 
   void Fill( StEEmcPair &pair );
 
+  /// Resets all spectra in the event that a spin sorting problem 
+  /// is detected.
+  void Clear(Option_t *opts="");
+
  private:
  protected:
   
@@ -58,8 +62,8 @@ class SpinHistos : public TDirectory
   TH2F *hEpre1;          /**<-- E pre1 / E pi0 vs Epi0 */
   TH2F *hEpre2;          /**<-- E pre2 / E pi0 vs Epi0 */
   TH2F *hEpost;          /**<-- E post / E pi0 vs Epi0 */ 
-  TH2F *hEpre12;          /**<-- E pre2 vs E pre1 */
-  
+  TH2F *hEpre12;         /**<-- E pre2 vs E pre1 */
+
   ClassDef(SpinHistos,1);
 
 };
