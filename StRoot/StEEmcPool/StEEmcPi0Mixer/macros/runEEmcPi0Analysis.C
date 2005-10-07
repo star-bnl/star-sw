@@ -21,6 +21,7 @@ class StEEmcPointMaker;
 class StEEmcPointFitMaker;
 class StEEmcMixMaker;
 class StEEmcMixQAMaker;
+class StSpinDbMaker;
 
 //--
 //-- globals
@@ -37,15 +38,17 @@ StEEmcPointMaker   *mEEpoints     = 0;
 StEEmcMixMaker     *mEEmixer      = 0;
 StEEmcMixQAMaker   *mEEmixqa      = 0;
 
+StSpinDbMaker      *mSpinDb       = 0;
+
 Int_t               count         = 0;
 Int_t               stat          = 0; 
 
 Int_t prescale = 100; 
 
-void runEEmcPi0Analysis( Int_t nevents = 50, 
-			 Char_t *name = "mcpi0_5000_06TC05_15.MuDst.root",
-			 Char_t *ofile= "mcpi0_5000_06TC05_15.root",
-			 Char_t *path = "/star/data04/sim/jwebb/MonteCarlo/single_gamma/", 
+void runEEmcPi0Analysis( Int_t nevents = -1, 
+			 Char_t *name = "test.lis",
+			 Char_t *ofile= "test.root",
+			 Char_t *path = "./", 
 			 Int_t nfiles = 100
 			 )
 {
@@ -100,6 +103,12 @@ void runEEmcPi0Analysis( Int_t nevents = 50,
   //mEEmcDatabase -> setSectors(1,7); 
   gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
+
+
+  //--
+  //-- Initialize SPIN database
+  //--
+  mSpinDb = new StSpinDbMaker("mSpinDb");
 
 
 #ifdef MONTE_CARLO
@@ -187,7 +196,7 @@ void runEEmcPi0Analysis( Int_t nevents = 50,
   mEEpi0analysis->points("mEEpoints");
   mEEpi0analysis->mixer("mEEmixer");
   mEEpi0analysis->analysis("AandE"); 
-
+  mEEpi0analysis->spin("mSpinDb");
 
   mEEmixer2 = new StEEmcMixMaker("mEEmixer2");
   mEEmixer2 -> mudst("MuDst");
@@ -204,6 +213,7 @@ void runEEmcPi0Analysis( Int_t nevents = 50,
   mEEpi0analysis2->points("mEEpoints");
   mEEpi0analysis2->mixer("mEEmixer");
   mEEpi0analysis2->analysis("AandE"); 
+  mEEpi0analysis2->spin("mSpinDb");
 
 
   mEEmixer3 = new StEEmcMixMaker("mEEmixer3");
@@ -212,16 +222,35 @@ void runEEmcPi0Analysis( Int_t nevents = 50,
   mEEmixer3 -> points("mEEpoints");
   for ( Int_t i=0;i<12;i++ ) // activate all 12 sectors
     mEEmixer3->sector(i); 
-  mEEmixer3->trigger(26); // EHT2
-  mEEmixer3->fixedVertex(0.,0.,-30.0); 
+  mEEmixer3->trigger(96282); // jet patch 2
 
   mEEpi0analysis3=new StEEmcPi0Analysis("pi0analy3");
-  mEEpi0analysis3->trigger(26);
+  mEEpi0analysis3->trigger(96282); // jet patch 2 
   mEEpi0analysis3->minbias(96011);
   mEEpi0analysis3->mudst("MuDst");
   mEEpi0analysis3->points("mEEpoints");
   mEEpi0analysis3->mixer("mEEmixer");
   mEEpi0analysis3->analysis("AandE"); 
+  mEEpi0analysis3->spin("mSpinDb");
+  mEEpi0analysis3->cuts()->setTowerCut(0.0); 
+
+  mEEmixer4 = new StEEmcMixMaker("mEEmixer4");
+  mEEmixer4 -> mudst("MuDst");
+  mEEmixer4 -> analysis("AandE");
+  mEEmixer4 -> points("mEEpoints");
+  for ( Int_t i=0;i<12;i++ ) // activate all 12 sectors
+    mEEmixer4->sector(i); 
+  mEEmixer4->trigger(96272); // jet patch 2
+
+  mEEpi0analysis4=new StEEmcPi0Analysis("pi0analy4");
+  mEEpi0analysis4->trigger(96272); // jet patch 2 
+  mEEpi0analysis4->minbias(96011);
+  mEEpi0analysis4->mudst("MuDst");
+  mEEpi0analysis4->points("mEEpoints");
+  mEEpi0analysis4->mixer("mEEmixer");
+  mEEpi0analysis4->analysis("AandE"); 
+  mEEpi0analysis4->spin("mSpinDb");
+  mEEpi0analysis4->cuts()->setTowerCut(0.0); 
 
   mChain->ls(3);
   mChain->Init();
@@ -342,9 +371,13 @@ void runEEmcPi0Analysis( Int_t nevents = 50,
   file->cd("eht1");
   mEEpi0analysis2->GetHistList()->Write(); 
   file->cd();
-  file->mkdir("eht1f");
-  file->cd("eht1f"); 
+  file->mkdir("ejp2");
+  file->cd("ejp2"); 
   mEEpi0analysis3->GetHistList()->Write(); 
+  file->cd();
+  file->mkdir("ejp1");
+  file->cd("ejp1"); 
+  mEEpi0analysis4->GetHistList()->Write(); 
   file->Close();
   
   
@@ -376,5 +409,7 @@ void LoadLibs()
 #else
   gSystem->Load("StMaxStripPi0");
 #endif 
+
+  gSystem->Load("StSpinDbMaker");
 }
 
