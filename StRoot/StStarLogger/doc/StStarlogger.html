@@ -125,10 +125,32 @@ are followed by the C++ output "stream" elements  and ended up with the <b><code
 For example, to direct the message to the "error" logger on needs:
 
 <b><code> <pre>
-  LOG_ERROR << "My error message" << endm;
+   { LOG_ERROR << "My error message" << endm; }
 </pre>  </code> </b>
 
 <a name="#nologgermacros"></a>
+<b>Attention !!! </b> Keep in mind the <b><code>LOG_ERROR </code> </b> 
+is a CPP macro with <b><code>if</code> </b> C++ statement inside.
+This means you should surround it with the curly brackets if the macro is used inside 
+of another <b><code>if</code> </b> statement.
+<P>
+For example:
+<b><code> <pre>
+    if ( a > 0)
+       LOG_ERROR << "the varibale is positive" << endm;
+     else 
+       LOG_INFO << "the variable is Ok" << endm;
+</pre>  </code> </b>
+will not work as one expects. To get the desirable effect you need
+<b><code> <pre>
+    if ( a > 0) {
+       LOG_ERROR << "the varibale is positive" << endm;
+    } else {
+       LOG_INFO << "the variable is Ok" << endm;
+    }
+</pre>  </code> </b>
+instead.
+<p>
 The macros above provide an extra benefit to develop and 
 use your code with no logger at all.
 Just add into your implementation the lines as follows:
