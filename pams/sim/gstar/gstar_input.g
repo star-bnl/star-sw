@@ -1,6 +1,11 @@
-* $Id: gstar_input.g,v 1.40 2003/12/19 17:55:09 potekhin Exp $
+* $Id: gstar_input.g,v 1.41 2005/10/10 16:55:43 potekhin Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.41  2005/10/10 16:55:43  potekhin
+* Augmented the Ntuple header handling in order
+* to intercept event characterization info from
+* Herwig (999995)
+*
 * Revision 1.40  2003/12/19 17:55:09  potekhin
 * Changed the debug print to a more descriptive one,
 * when initializing the MPAR event header struct.
@@ -364,24 +369,31 @@ c ---- Column-Wise-Ntuples ----
    {  Irec(Igate)+=1; 
       Call HGNT(Id+Igate*1000,Irec(Igate),ier); if (ier!=0) goto :err:;
 
-      if Istat>10 & ipdg>999990
-      {
-        if ipdg=999999
-        {
-           if nin>0   { Irec(Igate)-=1; Break; }
-           InEvent+=1; if (InEvent<NnEvent) Next;  
-           NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
-           do i=1,5   { IdEvHep(i) = Pxyz(i);  }
-           Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
-           if L<=0 {print *,' READ_NT error: cant find GENT bank'; goto :err:;}
+      if Istat>10 & ipdg>999990 {
+          if ipdg=999999 {
+             if nin>0   { Irec(Igate)-=1; Break; }
+             InEvent+=1; if (InEvent<NnEvent) Next;  
+             NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
+             do i=1,5   { IdEvHep(i) = Pxyz(i);  }
+
+             Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
+             if L<=0 {print *,' READ_NT error: cant find GENT bank'; goto :err:;}
            * print *,' Rebank done with L,ia = ',L,ia
         }
-        elseif ipdg=999998 {call Ucopy(Pxyz,Hpar,  4)}
-        elseif ipdg=999997 {call Ucopy(Pxyz,Comp,  4)}
-        elseif ipdg<=999996{k=999997-ipdg;
-          Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
-          if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
-          do i=1,4 { IQ(L+4*k+i)=Pxyz(i); }
+        elseif ipdg= 999998 {call Ucopy(Pxyz,Hpar,  4)}
+        elseif ipdg= 999997 {call Ucopy(Pxyz,Comp,  4)}
+        elseif ipdg= 999996 {k=999997-ipdg;
+             Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
+             if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
+
+             do i=1,4 {
+                IQ(L+4*k+i)=Pxyz(i);
+             }
+        }
+        elseif ipdg<=999995 {k=1;
+             Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
+             if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
+                IQ(L+4)=Pxyz(2);
         }
         else {print *,' Yet unknown HEP header '}
 
