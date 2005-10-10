@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StarMagField.cxx,v 1.6 2005/09/12 13:56:27 fisyak Exp $
+ * $Id: StarMagField.cxx,v 1.7 2005/10/10 19:26:59 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StarMagField.cxx,v $
+ * Revision 1.7  2005/10/10 19:26:59  fisyak
+ * Ignore default request for StarMagField from mfldgeo
+ *
  * Revision 1.6  2005/09/12 13:56:27  fisyak
  * Fix B[0] = B[1] = 0 at r = 0
  *
@@ -99,18 +102,32 @@ StarMagField *StarMagField::fgInstance = 0;
 #define mfldgeo          F77_NAME(mfldgeo,MFLDGEO)
 R__EXTERN  "C" {
   Float_t type_of_call agufld(Float_t *x, Float_t *bf) {
+    bf[0] = bf[1] = bf[2] = 0;
+#if 1
     if (! StarMagField::Instance()) new StarMagField();
     StarMagField::Instance()->BField(x,bf);
+#else
+    if (StarMagField::Instance()) 
+      StarMagField::Instance()->BField(x,bf);
+    else {
+      printf("agufld:: request for non initialized mag.field, return 0\n");
+      assert(StarMagField::Instance());
+    }
+#endif
     return 0;
   }
+//________________________________________
   void type_of_call mfldgeo() {
-    printf("request for StarMagField from mfldgeo\n");
+#if 1
+    printf("Ignore request for StarMagField from mfldgeo\n");
+#else
     if (StarMagField::Instance()) {
       printf("StarMagField  mfldgeo: The field has been already instantiated. Keep it.\n");
     } else {
       printf("StarMagField  instantiate default field\n");
       new StarMagField();
     }
+#endif
   }
 }
 ClassImp(StarMagField);
