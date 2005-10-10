@@ -422,7 +422,7 @@ For example, replace of your plain C++ statement:
 with
    <b><code>
    <pre>
-      LOG_INFO << "DbFill: structure: " << structName << endm;
+      { LOG_INFO << "DbFill: structure: " << structName << endm; }
    </pre>
    </code></b>
    
@@ -451,9 +451,11 @@ For example, to enable "logger", the line
 may be replaced with
    <b><code>
    <pre>
-  LOG_DEBUG <<
-     Form(" %d pre and %d post crossing data available",numberOfPreXing(),numberOfPostXing())
-            << endm;
+ {
+   LOG_DEBUG <<
+      Form(" %d pre and %d post crossing data available",numberOfPreXing(),numberOfPostXing())
+             << endm;
+ }
    </pre>
    </code></b>
 <h3> STAR "Message Manager"</h3>
@@ -471,7 +473,7 @@ For example,  the expression
 can be replaced with  
    <b><code>
    <pre>
-       LOG_ERROR << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm;
+      { LOG_ERROR << "StZdcVertexMaker::Init():  in ZdcVertexMaker did not find ZdcCalPars." << endm; }
    </pre>
    </code></b>
 and versa verse.
