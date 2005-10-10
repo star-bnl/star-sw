@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.7 2005/09/14 17:14:17 msd Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.8 2005/10/10 16:22:51 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -103,10 +103,10 @@ void StEStruct2ptCorrelations::init(){
   cout << "  Do Pair Density Hists = " << mdoPairDensityHistograms << endl;
 
   for(int i=0;i<6;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
-  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
   kNumBuffers = 30;
   kBuffRange = 75;
   kBuffWidth = 2*kBuffRange / kNumBuffers;
+  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
   cout << "  Mixing events with deltaZ = " << kBuffWidth << " and deltaN = " << DELTANMAX;
   cout << ", " << _MAXEBYEBUFFER_ << " mixed events for each event." << endl;
 
@@ -1254,6 +1254,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.8  2005/10/10 16:22:51  msd
+ * fixing bug in buffer initialization
+ *
  * Revision 1.7  2005/09/14 17:14:17  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *
