@@ -92,20 +92,21 @@ if (gErrorIgnoreLevel == kUnset) {
 
    if (level < gErrorIgnoreLevel)
       return;
+   
 
-
-    if (level >= kFatal)
+   if (level >= kFatal) {
         LOG_FATAL << msg << endm;
-   else if (level >= kSysError)
+     } else if (level >= kSysError) {
         LOG_FATAL << msg << endm;  
-   else if (level >= kBreak)
+     } else if (level >= kBreak) {
         LOG_FATAL << msg << endm;  
-   else if (level >= kError)
+     } else if (level >= kError) { 
         LOG_ERROR << msg << endm;
 //   else if (level >= kWarning)
 //        LOG_WARN << msg << endm;
-   else if (level >= kInfo)
+     } else if (level >= kInfo) {
         LOG_INFO << msg << endm;
+     }
 
    if (abort) {
       if (gSystem) {
@@ -461,7 +462,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.16 2005/09/14 15:35:25 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.17 2005/10/10 20:24:17 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -783,8 +784,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.16 2005/09/14 15:35:25 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.17 2005/10/10 20:24:17 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.17  2005/10/10 20:24:17  fine
+// Bug fix: add the brackets around the if statements
+//
 // Revision 1.16  2005/09/14 15:35:25  fine
 // Clean up the code
 //
