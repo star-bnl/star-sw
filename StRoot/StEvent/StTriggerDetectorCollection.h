@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.5 2004/08/03 17:21:15 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.6 2005/10/10 22:27:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,8 +12,11 @@
  * Description:
  *
  ***************************************************************************
- *
+ *`
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.6  2005/10/10 22:27:42  ullrich
+ * Added setXXX functions.
+ *
  * Revision 2.5  2004/08/03 17:21:15  ullrich
  * Fpd as trigger detector added.
  *
@@ -71,6 +74,14 @@ public:
     const StEmcTriggerDetector& emc() const;
     StFpdTriggerDetector&       fpd();
     const StFpdTriggerDetector& fpd() const;
+
+    void setCtbTriggerDetector(const StCtbTriggerDetector&);
+    void setMwcTriggerDetector(const StMwcTriggerDetector&);
+    void setVpdTriggerDetector(const StVpdTriggerDetector&);
+    void setZdcTriggerDetector(const StZdcTriggerDetector&);
+    void setBbcTriggerDetector(const StBbcTriggerDetector&);
+    void setEmcTriggerDetector(const StEmcTriggerDetector&);
+    void setFpdTriggerDetector(const StFpdTriggerDetector&);
     
 protected:
     StCtbTriggerDetector mCtb;
@@ -83,4 +94,13 @@ protected:
     
     ClassDef(StTriggerDetectorCollection,4)
 };
+
+inline void StTriggerDetectorCollection::setCtbTriggerDetector(const StCtbTriggerDetector& val) {mCtb = val;}
+inline void StTriggerDetectorCollection::setMwcTriggerDetector(const StMwcTriggerDetector& val) {mMwc = val;}
+inline void StTriggerDetectorCollection::setVpdTriggerDetector(const StVpdTriggerDetector& val) {mVpd = val;}
+inline void StTriggerDetectorCollection::setZdcTriggerDetector(const StZdcTriggerDetector& val) {mZdc = val;}
+inline void StTriggerDetectorCollection::setBbcTriggerDetector(const StBbcTriggerDetector& val) {mBbc = val;}
+inline void StTriggerDetectorCollection::setEmcTriggerDetector(const StEmcTriggerDetector& val) {mEmc = val;}
+inline void StTriggerDetectorCollection::setFpdTriggerDetector(const StFpdTriggerDetector& val) {mFpd = val;}
+
 #endif
