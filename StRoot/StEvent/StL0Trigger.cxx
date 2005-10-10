@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.10 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.11 2005/10/10 19:24:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.11  2005/10/10 19:24:38  ullrich
+ * run number range check, and updated for run5.
+ *
  * Revision 2.10  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -56,7 +59,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.10 2004/08/03 17:22:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.11 2005/10/10 19:24:38 ullrich Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -298,7 +301,7 @@ StL0Trigger::spinBits(int runNumber) const
 	spin4 = (ldsm0>>11) & 0x1;
 	return spin1+spin2*2+spin3*4+spin4*8;
     }
-    else if (runNumber<6000000){
+    else if (runNumber<7000000){
 	ldsm0 = (mLastDsmArray[7]/16)%256;
 	spin1 = (ldsm0/ 2)%2;
 	spin2 = (ldsm0/ 4)%2;
@@ -317,7 +320,7 @@ StL0Trigger::spinBitYellowUp(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>8) & 0x1;
     }
-    else if (runNumber<6000000){
+    else if (runNumber<7000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/2)%2;
     }
@@ -332,7 +335,7 @@ StL0Trigger::spinBitYellowDown(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>9) & 0x1;
     }
-    else if (runNumber<6000000){
+    else if (runNumber<7000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/ 4)%2;
     }
@@ -347,7 +350,7 @@ StL0Trigger::spinBitBlueUp(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>9) & 0x1;
     }
-    else if (runNumber<6000000){
+    else if (runNumber<7000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/32)%2;
     }
@@ -362,7 +365,7 @@ StL0Trigger::spinBitBlueDown(int runNumber) const
     if (runNumber<4000000){
 	return (mLastDsmArray[0]>>10) & 0x1;
     }
-    else if (runNumber<6000000){
+    else if (runNumber<7000000){
 	int ldsm0 = (mLastDsmArray[7]/16)%256;
 	return (ldsm0/64)%2;
     }
