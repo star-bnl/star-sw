@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.cxx,v 1.4 2005/10/04 16:06:15 msd Exp $
+ * $Id: StEStructEmptyAnalysis.cxx,v 1.5 2005/10/10 16:22:28 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -27,6 +27,7 @@ StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
 
   const char* ctype[]={"Pos","Neg","All"};
 
+  mhm[0]=mhm[1]=0;
   mhm[2]=mhm[3]=0;
   mhm[4]=mhm[5]=1;
   mhm[6]=mhm[7]=2;
@@ -76,8 +77,8 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
   hvar->Fill(pow(mult,0.25));
   
 
-  // Below is Jeff's p-p stuff; I'm so tempted to just comment all this out...  
-  int id=event->Ntrack();
+  // Below is Jeff's p-p stuff; I'm tempted to just comment all this out...  
+    int id=event->Ntrack();
   if(id>=1){
 
     if(id<=13){
@@ -97,10 +98,12 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
       if(i==1)tcol=event->TrackCollectionM();
       StEStructTrackIterator Iter;
       for(Iter=tcol->begin(); Iter!=tcol->end();++Iter){
-	npart[i]+=1.0;
-        etaSum[i]+=(*Iter)->Eta();
-        phiSum[i]+=(*Iter)->Phi();
-        ytSum[i]+=(*Iter)->Yt();
+	if(*Iter) {
+	  npart[i]+=1.0;
+	  etaSum[i]+=(*Iter)->Eta();
+	  phiSum[i]+=(*Iter)->Phi();
+	  ytSum[i]+=(*Iter)->Yt();
+	}
       }
       if(npart[i]>0.){
 	etaMean[i][id]->Fill(etaSum[i]/npart[i]);
@@ -157,6 +160,9 @@ void StEStructEmptyAnalysis::finish(){
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.cxx,v $
+ * Revision 1.5  2005/10/10 16:22:28  msd
+ * stability fixes, yet another tweak of output hists
+ *
  * Revision 1.4  2005/10/04 16:06:15  msd
  * Finalized centrality plots
  *
