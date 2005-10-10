@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.h,v 1.4 2005/10/04 16:06:19 msd Exp $
+ * $Id: StEStructEmptyAnalysis.h,v 1.5 2005/10/10 16:22:31 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,7 +26,7 @@ class StEStructEmptyAnalysis : public StEStructAnalysis {
 
   char* moutFileName;
   
-  int mhm[14];        // Jeff had these in place for p-p analysis, frankly not sure what they're for...
+  int mhm[14];        // Jeff had these in place for p-p analysis, probably don't need them anymore
   TH1F** etaMean[3];
   TH1F** phiMean[3];
   TH1F** ytMean[3];
@@ -62,6 +62,9 @@ inline void StEStructEmptyAnalysis::setCutFile(const char* cutFileName, StEStruc
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.h,v $
+ * Revision 1.5  2005/10/10 16:22:31  msd
+ * stability fixes, yet another tweak of output hists
+ *
  * Revision 1.4  2005/10/04 16:06:19  msd
  * Finalized centrality plots
  *
