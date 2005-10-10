@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.9 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.10 2005/10/10 19:24:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.10  2005/10/10 19:24:38  ullrich
+ * run number range check, and updated for run5.
+ *
  * Revision 2.9  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -83,11 +86,11 @@ public:
     unsigned int bunchCrossingId7bit(int) const;
     unsigned int bunchCrossingId() const;
     
-    int spinBits(int runNumber=3000000) const;
-    int spinBitYellowUp(int runNumber=3000000) const;
-    int spinBitYellowDown(int runNumber=3000000) const;
-    int spinBitBlueUp(int runNumber=3000000) const;
-    int spinBitBlueDown(int runNumber=3000000) const;
+    int spinBits(int) const;
+    int spinBitYellowUp(int) const;
+    int spinBitYellowDown(int) const;
+    int spinBitBlueUp(int) const;
+    int spinBitBlueDown(int) const;
 
     void setMwcCtbMultiplicity(int);
     void setMwcCtbDipole(int);
