@@ -31,15 +31,15 @@ void centrality(const char* infile)  {
   hvar->Scale( 1.0/hvar->Integral("width") );
   
   float x1,y1,x2,y2;
-  float gx1[1200],  gx2[1200], gy[1200];
+  float gx1[1199],  gx2[1199], gy[1199];
   for(int i=1; i<=nev->GetNbinsX(); i++) {
     x1 = nev->GetBinLowEdge(i);
     x2 = pow(x1, 0.25);   // x2 = n^1/4
     y1 = nev->GetBinContent(i);
     y2 = pow(x1, 0.75)*y1; // y2 = n^3/4 * dNev/dNch 
-    gx1[i-1]=x1; gx2[i-1]=x2; gy[i-1]=y2; 
+    if (i>1) { gx1[i-2]=x1; gx2[i-2]=x2; gy[i-2]=y2; }  // skipping 1st bin (nch=0) 
   }
-  TGraph* tg = new TGraph(1200, gx2,gy);
+  TGraph* tg = new TGraph(1199, gx2,gy);
 
   float sum;
   int num,i;
@@ -84,24 +84,28 @@ void centrality(const char* infile)  {
   
   cout << endl << "*** Using graph" << endl;
   float gsum = 0;
-  for(i=1; i<1200-1; i++) gsum+= gy[i] * (gx2[i+1]-gx2[i]);
+  for(i=0; i<1199-1; i++) gsum+= gy[i] * (gx2[i+1]-gx2[i]);
   sum=0;
   num=0;
-  float gyint[1200];
+  float gyint[1199];
   float xint; //interpolated value
-  for(i=1; i<1200-1; i++) {
+  for(i=0; i<1199-1; i++) {
     sum += (gy[i]/gsum) * (gx2[i+1]-gx2[i]);
     gyint[i]=sum;
     if(1-sum<=cent[num]) {
-      xint = (1-cent[num]-gyint[i-1])*(gx1[i]-gx1[i-1])/(gyint[i]-gyint[i-1]);
+      if (i>0) xint = (1-cent[num]-gyint[i-1])*(gx1[i]-gx1[i-1])/(gyint[i]-gyint[i-1]);
+      else xint = 0;
       int foo = (int)(xint + 0.5);
       cout << "Crossed " << cent[num] << " at " << gx1[i]; 
       cout << "\t\tInterpolated value = " << gx1[i-1]+xint << endl;
       num++;
     }
   }
-  tgint = new TGraph(1200, gx2, gyint);
-  tgint2 = new TGraph(1200, gx1, gyint);
+  // I skipped the endpoints above to avoid i+1 boundary problems, need to correct for this
+  gyint[1198]=1.0;
+
+  tgint = new TGraph(1199, gx2, gyint);
+  tgint2 = new TGraph(1199, gx1, gyint);
 
   /*
     // single window output
