@@ -211,17 +211,15 @@ TFile *StIO::Open(const char *name, Option_t *option,const char *title,Int_t com
 //_______________________________________________________________________________
 Int_t StIO::IfExi(const char *name)
 {
-  TString file = RFIOName(name);
-
-#ifdef __RFIO__
-  if (strncmp(file,"rfio:",5))
-     return !gSystem->AccessPathName(file);
-  else
-     return !::rfio_access((const char*)file, kFileExists);
-#else
-  return !gSystem->AccessPathName(file);
-#endif
-
+  TString file = (name);
+  gSystem->ExpandPathName(file); 
+  if (!gSystem->AccessPathName(file)) return 1;
+  int l = file.Length();
+  if (file(l-5,5)!=".root") return 0;
+  TFile *tf = TFile::Open(file);
+  int z = (!tf || tf->IsZombie());
+  delete tf;   
+  return !z;
 }
 //===============================================================================
 
