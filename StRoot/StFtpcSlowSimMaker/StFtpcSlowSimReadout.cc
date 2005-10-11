@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.17 2005/10/11 11:27:37 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.18 2005/10/11 12:41:00 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.18  2005/10/11 12:41:00  jcs
+// If isec=6, set isec=0 to avoid segmentation violations
+//
 // Revision 1.17  2005/10/11 11:27:37  jcs
 // remove +twopi in call to WhichPad when calculating pad_min,twopi is added in WhichPad
 //
@@ -417,6 +420,9 @@ int StFtpcSlowSimReadout::WhichPad(const float phi, int &isec)
     // phi and phi_min in rad
     float dphi = fmod(phi-phiMin+twopi,twopi);
     isec = (int)(dphi/(phiMax-phiMin));
+    // Due to insufficient numerical precision, it is possible that in some cases isec=6
+    // but 0<=isec<=5. If isec=6, set isec=0 to avoid segmentation violations
+    if (isec == 6) isec = 0;
     dphi = dphi - isec*(phiMax-phiMin)- mDb->radiansPerBoundary()/2;
     int ipad = (int) (dphi/mDb->radiansPerPad());  // no +0.5 since pad 0 really starts at 0 and ends at 1
     if (ipad < 0)  {
