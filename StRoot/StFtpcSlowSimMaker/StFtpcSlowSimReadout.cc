@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.16 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.17 2005/10/11 11:27:37 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.17  2005/10/11 11:27:37  jcs
+// remove +twopi in call to WhichPad when calculating pad_min,twopi is added in WhichPad
+//
 // Revision 1.16  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -246,7 +249,7 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	  int isec_max;
 	  int pad_max_save=0;
 	  int npad;
-	  int pad_min = WhichPad(phi-width_phi+twopi,isec_min);
+	  int pad_min = WhichPad(phi-width_phi,isec_min);
 	  int pad_max = WhichPad(phi+width_phi,isec_max);
 
 	  if ( isec_min > isec_max )
