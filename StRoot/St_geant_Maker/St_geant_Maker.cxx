@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.105 2005/10/06 19:23:07 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.106 2005/10/12 22:58:56 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.106  2005/10/12 22:58:56  fisyak
+// SetDateTime from fz-file if it was not set before
+//
 // Revision 1.105  2005/10/06 19:23:07  fisyak
 // Add set date/time from fz-file
 //
@@ -1935,6 +1938,7 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
 	  Char_t *buf = new Char_t[4*l+1];
 	  memcpy (buf,  &z_iq[jrunh+1], 4*l);
 	  buf[4*l] = '\0';
+	  gMessMgr->Info() << "St_geant_Maker::SetDateTime runh buffer: " << buf << endm;
 	  TString C(buf);
 	  delete [] buf;
 	  Ssiz_t begin, index;
@@ -1990,7 +1994,11 @@ void St_geant_Maker::SetDateTime(Int_t idat, Int_t itime) {
       if (version != "") {
 	Int_t id = St_db_Maker::AliasDate(version.Data());
 	Int_t it = St_db_Maker::AliasTime(version.Data());
-	fEvtHddr->SetDateTime(id,it);
+	if (id &&  GetDate() >= 20330101) {
+	  gMessMgr->Info() << "St_geant_Maker::SetDateTime Date/Time = " 
+			   << id << "/" << it << "\tas " << version << endm;
+	  fEvtHddr->SetDateTime(id,it);
+	}
       }
     }  
   }
