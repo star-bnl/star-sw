@@ -77,11 +77,7 @@ if ($param::debug) {
 
 
 # Two tasks / two clones
-$env1 = $env->clone('CPPPATH'  => $CPPPATH,
-		    'CPPFLAGS' => $CPPFLAGS,
-		    'SOFLAGS'  => $SOFLAGS);
-
-$env2 = $env->clone('Libraries' => $Libraries,
+$env1 = $env->clone('Libraries' => $Libraries,
 		    'LIBPATH'   => $LIBPATH,
 		    'CXXFLAGS'  => $CXXFLAGS,
 		    'CPPFLAGS'  => $CPPFLAGS,
@@ -98,7 +94,7 @@ Install      $env1 $LIB, $libr;
 my $Plibr = $LIB."/".File::Basename::basename($libr);
 
 script::Keep  $pkg;
-Depends       $env2 $pkg, $Plibr;
-Program       $env2 $pkg, $main;
-Install $env2 $BIN, $pkg;
+Depends       $env1 $pkg, $Plibr;
+Program       $env1 $pkg, $main;
+Install $env1 $BIN, $pkg;
   
