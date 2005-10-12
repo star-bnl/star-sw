@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.86 2005/10/06 18:49:59 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.87 2005/10/12 21:27:22 potekhin Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -284,10 +284,11 @@
         if ($CXX_VERSION < 3) {
 	  $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
 	}
-      # else {$OSFID .= " ST_NO_MEMBER_TEMPLATES";}
-            # ansi works only with gcc3.2 actually ...
-	    # may be removed later ...
-      $CXXFLAGS    .= " -ansi";
+      else {
+            # ansi works only with gcc3.2 actually ... may be removed later ...
+	$CXXFLAGS    .= " -ansi";
+      }
+
       if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } # -fpermissive ?
       #	  else {
       #	  print "CXXFLAGS = $CXXFLAGS\n"; die;
