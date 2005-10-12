@@ -1,7 +1,12 @@
 /*
-** $Id: dblib.cxx,v 1.4 2005/10/12 20:07:19 potekhin Exp $
+** $Id: dblib.cxx,v 1.5 2005/10/12 21:26:06 potekhin Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.5  2005/10/12 21:26:06  potekhin
+** Comment out the previous "fix", as we now have a better solution
+** by excluding "-ansi" in the branch of Cons specific for this Linux version
+** and compiler (i386, 2.96)
+**
 ** Revision 1.4  2005/10/12 20:07:19  potekhin
 ** Fix the problem of undeclared "strdup" by adding the missing declaration.
 ** This module is unused anyway nowadays, so this will at least make it compile.
@@ -167,7 +172,7 @@ int my_query(ostringstream *Query);
 #        include <stdlib.h>
 #        include <string.h>
 #        include <strstream.h>
-extern char *strdup (__const char *__s) __THROW __attribute_malloc__;
+// extern char *strdup (__const char *__s) __THROW __attribute_malloc__;
 int my_query(ostrstream *Query);
 #endif
 
