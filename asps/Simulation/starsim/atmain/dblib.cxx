@@ -1,7 +1,11 @@
 /*
-** $Id: dblib.cxx,v 1.3 2004/11/24 00:08:35 potekhin Exp $
+** $Id: dblib.cxx,v 1.4 2005/10/12 20:07:19 potekhin Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.4  2005/10/12 20:07:19  potekhin
+** Fix the problem of undeclared "strdup" by adding the missing declaration.
+** This module is unused anyway nowadays, so this will at least make it compile.
+**
 ** Revision 1.3  2004/11/24 00:08:35  potekhin
 ** Corrected one typo which misused the ostrstream declaration,
 ** deleted an extra parenthesis and added two buffers that were
@@ -163,11 +167,13 @@ int my_query(ostringstream *Query);
 #        include <stdlib.h>
 #        include <string.h>
 #        include <strstream.h>
+extern char *strdup (__const char *__s) __THROW __attribute_malloc__;
 int my_query(ostrstream *Query);
 #endif
 
 #include "mysql.h"
 #include "mysql_com.h"
+
 
 // #include "m_string.h" //for strmov
 // extern "C" char *strmov(char *dst,const char *src);//from mysqlclient lib
