@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.10 2005/07/06 18:49:56 fisyak Exp $
+ * $Id: StHelix.hh,v 1.11 2005/10/13 22:23:27 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
+ * Revision 1.11  2005/10/13 22:23:27  genevb
+ * NoSolution is public
+ *
  * Revision 1.10  2005/07/06 18:49:56  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -107,6 +110,8 @@ public:
     
     /// move the origin along the helix to s which becomes then s=0
     virtual void moveOrigin(double s);
+    
+    static const double NoSolution;
     
 protected:
     StHelix();
