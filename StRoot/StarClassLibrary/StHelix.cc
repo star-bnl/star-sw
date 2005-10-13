@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.25 2005/10/13 22:25:35 genevb Exp $
+ * $Id: StHelix.cc,v 1.26 2005/10/13 23:15:13 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.26  2005/10/13 23:15:13  genevb
+ * Save a few calculations
+ *
  * Revision 1.25  2005/10/13 22:25:35  genevb
  * pathLength to plane now finds nearest approach to intersection regardless of # of loops
  *
@@ -456,17 +459,20 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 //		(cos(angMax)-1)/angMax = 0.1
         const double angMax = 0.21;
         double deltas = fabs(angMax/(mCurvature*mCosDipAngle));
-	double dampingFactor = exp(-0.5);
+//              dampingFactor = exp(-0.5);
+	double dampingFactor = 0.60653;
 	int i;
 
 	for (i=0; i<MaxIterations; i++) {
 	    a  = t*s+mPhase;
+            double sina = sin(a);
+            double cosa = cos(a);
 	    f  = A +
-		 n.x()*cos(a) +
-		 n.y()*sin(a) +
+		 n.x()*cosa +
+		 n.y()*sina +
 		 u*s;
-	    fp = -n.x()*sin(a)*t +
-		  n.y()*cos(a)*t +
+	    fp = -n.x()*sina*t +
+		  n.y()*cosa*t +
 		  u;
             if ( fabs(fp)*deltas <= fabs(f) ) { //too big step
                int sgn = 1;
