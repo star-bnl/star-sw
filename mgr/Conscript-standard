@@ -458,10 +458,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       
       if ( $STAR_SYS !~ /^intel_wnt$/ ) {
 	my $stic_cmd = 
-	  "test -d /tmp/\$\$ && rm -rf /tmp/\$\$ ; ".
-	    "mkdir /tmp/\$\$ && cd /tmp/\$\$ && ".
+	  "test -d /tmp/$<$$ && /bin/rm -rf /tmp/$<$$ ; ".
+	    "/bin/mkdir /tmp/$<$$ && cd /tmp/$<$$ && ".
 	      "$STIC -s -r $STIC_CPPPATH -q %<:a && mv %>:f %>:a && ".
-		"cd /tmp  &&  rm -rf /tmp/\$\$";
+		"cd /tmp  &&  /bin/rm -rf /tmp/$<$$";
 	Command $env2 [$modh], @idlS, qq($stic_cmd);
 	Command $env2 [$modi], @idlS, qq($stic_cmd);
 	Command $env2 [$modH], @idlS, qq($stic_cmd);
