@@ -28,6 +28,7 @@ class CSMStatusUtils : public TObject {
   Int_t getNumberOfChangedTowers(Int_t runnumber);
   
   TH2F* makeStatusVersusTimePlot();
+  void plotAllStatuses(TString rootfiledir="/star/data05/scratch/relyea/2005/DONE/",int year=2005,int runstart=0);
   Int_t makeCombinedStatusTable(std::vector<Short_t>& statusVector);
   
   Int_t makeStatusPlots(TString plotDir);
