@@ -1,4 +1,4 @@
-void makeStatusPlots(TString dir="/star/u/relyea/star/2005/2005/", 
+void makeStatusPlots(TString dir="/star/u/relyea/star/2005/2005/DONE/", 
                      TString filter=".cal.total.hist.root", 
 		     const TString plotDir="/star/u/relyea/star/2005/2005/") {
   //
@@ -22,8 +22,8 @@ void makeStatusPlots(TString dir="/star/u/relyea/star/2005/2005/",
   
   CSMStatusUtils myUtils;
   myUtils.initializeHistFileFromDir(dir,filter);
+//  myUtils.setDetectorFlavor("bemc");
+//  myUtils.makeStatusPlots(plotDir);  
   myUtils.setDetectorFlavor("eemc");
-  myUtils.makeStatusPlots(plotDir);  
-  myUtils.setDetectorFlavor("bemc");
   myUtils.makeStatusPlots(plotDir);  
 }

@@ -150,6 +150,142 @@ cout << buffer << " is status file that was read" << endl;
   return mRunStatusMapPtr->size();
 }
 
+void
+CSMStatusUtils::plotAllStatuses(TString rootfiledir,int year,int runstart) {
+  void* dir = NULL;
+  TString tmpstr;
+  vector<Int_t> runlist;
+  int runnumber;
+  if ((dir = gSystem->OpenDirectory(rootfiledir.Data())) != NULL) {
+    const Char_t *dirEntry;
+    while ((dirEntry = gSystem->GetDirEntry(dir)) != NULL) {
+      Char_t buffer[2048];
+      strcpy(buffer,rootfiledir.Data());
+      strcat(buffer,dirEntry);
+      if (!strstr(buffer,".root")) continue;
+      if (strstr(buffer,"run.root")) continue;
+      Char_t* needle = strstr(buffer,"run");
+      Int_t runNumber = 0;
+      if (needle) {
+        needle+=3;
+        Char_t runString[10];
+        strncpy(runString,needle,7);
+        runNumber = atoi(runString);
+        runlist.push_back(runNumber);
+      }
+    }
+  }
+  tm ptm;
+  ptm.tm_year = year-1900;
+  int firstdate=99999999, firsttime,lastdate=0, lasttime, firstrun=99999999, lastrun=0;
+  IntToPtrVecShortConstIter first = mRunStatusMapPtr->begin();
+  IntToPtrVecShortConstIter last = mRunStatusMapPtr->end();
+  IntToPtrVecShortConstIter iter = first;
+  for(iter=first;iter!=last;iter++) {
+    runnumber = iter->first;
+    if(runnumber < runstart) continue;
+    if(firstdate > mRunDatestampMap[runnumber]) {
+      firstdate = mRunDatestampMap[runnumber];
+      firsttime = mRunTimestampMap[runnumber];
+    } else if (firstdate == mRunDatestampMap[runnumber] && firsttime > mRunTimestampMap[runnumber]) {
+      firsttime = mRunTimestampMap[runnumber];
+    }
+    if(lastdate < mRunDatestampMap[runnumber]) {
+      lastdate = mRunDatestampMap[runnumber];
+      lasttime = mRunTimestampMap[runnumber];
+    } else if (lastdate == mRunDatestampMap[runnumber] && lasttime < mRunTimestampMap[runnumber]) {
+      lasttime = mRunTimestampMap[runnumber];
+    }
+    if(firstrun > runnumber && runnumber > runstart) firstrun = runnumber;
+    if(lastrun < runnumber) lastrun = runnumber;
+  }
+//cout << firstdate << "\t" << firsttime <<  "\t" << lastdate <<  "\t" << lasttime << endl;
+  int bigyearnumber = year*10000;
+//cout << bigyearnumber << endl;
+  ptm.tm_mon = ((firstdate-bigyearnumber)/100)+1;
+  ptm.tm_mday = (firstdate-bigyearnumber)%100;
+  ptm.tm_hour = firsttime/10000;
+  ptm.tm_min = (firsttime%10000)/100;
+  ptm.tm_sec = firsttime%100;
+  time_t firstdatet = mktime(&ptm);
+  ptm.tm_mon = ((lastdate-bigyearnumber)/100)+1;
+  ptm.tm_mday = (lastdate-bigyearnumber)%100;
+  ptm.tm_hour = lasttime/10000;
+  ptm.tm_min = (lasttime%10000)/100;
+  ptm.tm_sec = lasttime%100;
+  time_t lastdatet = mktime(&ptm);
+//  int difference = lastrun - firstrun;
+  int diffseconds = (int)difftime(lastdatet,firstdatet);
+  TCanvas* tc = new TCanvas("peter","Status vs Run Number",800,800);
+  tc->cd();
+  int timegap = 3600;
+//cout << diffseconds << "\t" << timegap << "\t" << diffseconds/timegap << endl;
+  TH2F* histogram = new TH2F("stevegeech","Time (Hours) vs BEMC Channels (bad)",4801,-0.5,4800.5,diffseconds/timegap+1,-0.5,diffseconds/timegap+0.5);
+//cout << diffseconds/timegap << "is the difference" << endl;
+  //  TH2F* histogram = new TH2F("stevegeech","Status vs Run Number",4801,-0.5,4800.5,runlist.size()+1,-0.5,runlist.size()+0.5);
+/*  for(int i=0; i<runlist.size(); i++) {
+    runnumber = runlist[i];
+    cout << i<< runnumber << endl;
+    if(runnumber<6100000 || runnumber>6130000) continue;
+    vector<Short_t>* statusVector = (*mRunStatusMapPtr)[runnumber];
+    if(statusVector) {
+      for(int j=1; j<2401; j++) {
+//        if((*statusVector)[j]==1) histogram->Fill(j,runnumber);
+//      cout << i << endl;
+      }
+    }
+  }*/
+  vector<int> binbounds;
+  int currentbin;
+  for(iter=first;iter!=last;iter++) {
+    runnumber = iter->first;
+    if(runnumber < runstart) continue;
+    vector<Short_t>* statusVector = (*mRunStatusMapPtr)[runnumber];
+    if(statusVector) {
+      ptm.tm_mon = ((mRunDatestampMap[runnumber]-bigyearnumber)/100)+1;
+      ptm.tm_mday = (mRunDatestampMap[runnumber]-bigyearnumber)%100;
+      ptm.tm_hour = mRunTimestampMap[runnumber]/10000;
+      ptm.tm_min = (mRunTimestampMap[runnumber]%10000)/100;
+      ptm.tm_sec = mRunTimestampMap[runnumber]%100;
+      time_t timet = mktime(&ptm);
+      double timedifference = difftime(timet,firstdatet);
+      int ratiodifftogap = (int)timedifference/timegap;
+      currentbin = histogram->GetBin(0,ratiodifftogap)/(mDetectorSize+3);
+//cout << runnumber << "\trrrr" << currentbin << endl;
+      binbounds.push_back(currentbin);
+    }
+  }
+  binbounds.push_back(currentbin);
+  int bb=0;
+  for(iter=first;iter!=last;iter++) {
+    runnumber = iter->first;
+    if(runnumber < runstart) continue;
+    vector<Short_t>* statusVector = (*mRunStatusMapPtr)[runnumber];
+    if(statusVector) {
+//      ptm.tm_mon = ((mRunDatestampMap[runnumber]-bigyearnumber)/100)+1;
+//      ptm.tm_mday = (mRunDatestampMap[runnumber]-bigyearnumber)%100;
+//      ptm.tm_hour = mRunTimestampMap[runnumber]/10000;
+//      ptm.tm_min = (mRunTimestampMap[runnumber]%10000)/100;
+//      ptm.tm_sec = mRunTimestampMap[runnumber]%100;
+//      time_t timet = mktime(&ptm);
+//      double timedifference = difftime(timet,firstdatet);
+//cout << timedifference/timegap << endl;      
+//cout << binbounds[bb] << "\t" << binbounds[bb+1] << endl;      
+      for(int i=1; i<4801; i++) {
+        if((*statusVector)[i]!=1) {
+          for(int bound=binbounds[bb]; bound<binbounds[bb+1]; bound++) {
+            histogram->Fill(i,bound);
+//cout << "I fill here" << i << endl;
+          }
+        }
+      }
+//cout << "ended the filling" << endl;
+    }
+    bb++;
+  }
+  histogram->Draw("colz");
+}
+
 //this finds out which towers' statuses changed between runs
 //and writes only the changes to the abbreviated status files
 
@@ -287,12 +423,13 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
     datetimestring = getDateTimeString(runnumber);
     TString statusrootfilename = 
         directory + "/status/" + mDetectorFlavor + "Status" + datetimestring + "root";
-    TFile fout_status(statusrootfilename.Data(),"RECREATE");
-    fout_status.cd();
+    TFile* fout_status = new TFile(statusrootfilename.Data(),"RECREATE");
+    fout_status->cd();
     bemc_status->AddAt(emcstatus,0);
     bemc_status->Write();
-//    fout_status.Close();
+    fout_status->Close();
     delete bemc_status;
+    delete fout_status;
 
     preiter = iter;
     firstone = kFALSE;
@@ -759,19 +896,54 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 //only get hits above 64.  So that eliminates 64.  Also, sometimes
 //a channel has a pedestal above 32, but the hit spectrum doesn't
 //extend to 64 (this happens with surprising regularity).  That
-//eliminates 32.  Now the tricky one - 16.  I saw cases in which
-//channels had hit spectra which ran from 16 to 31.  I also saw cases
-//in which one of the outliers was above 48.  This made it appear
-//as though the 16 bit was stuck on.  In fact, I know of no good way
-//to say that it wasn't.  So I've taken the 16 bit out of the mix.
-//It's slightly upsetting to me to have to do that, but other than
-//adding together ALL the 2dhistos from ALL runs and seeing if a
-//channel had a permanently stuck bit (which should be done!!!), I
-//can't see a good workaround. -DRR
+//eliminates 32.
+//I'm adding 16 to the mix because of an obviously stuck bit in the
+//barrel.  To do so, I'm doing a separate loop with a separate test
+//which searches for the stuck on/off state of the 16 bit, and then
+//looks to see whether it can find 3 or more "clumps" of data.
+//(in other words, N/16 = j, j must take on at least 3 values)
 
       int numberofnonzerohits = 0;
       Short_t bitoff = 0;
-      Short_t biton = (1+2+4+8);
+      Short_t bitcompare = (1+2+4+8);
+      Short_t biton = bitcompare;
+      Short_t sixteenbiton = 16;
+      for(Short_t bin=1; bin<maxBin; bin++) {
+        if(proj->GetBinContent(bin) > 0) {
+          bitoff |= (bin-1);
+          biton &= (bin-1);
+          sixteenbiton &= (bin-1);
+          numberofnonzerohits++;
+        }
+      }
+      Bool_t typea=kFALSE,typeb=kFALSE,typec=kFALSE;
+      if((bitoff & 16) != 16 || (sixteenbiton & 16) != 0) {  //these will not happen together
+        for(Short_t bin=1; bin<maxBin; bin++) {
+          if(proj->GetBinContent(bin) > 0) {
+            if(!typea) {
+              typea=kTRUE;
+              bin = bin/16*16+15;
+            } else if(!typeb) {
+              typeb=kTRUE;
+              bin = bin/16*16+15;
+            } else if(!typec) {
+              typec=kTRUE;
+              break;
+            }
+          }
+        }
+      }
+      
+      if((bitoff & bitcompare) != bitcompare && numberofnonzerohits > 10)
+        statusVector[chanId] = statusVector[chanId] | (8+128);
+      if(biton != 0 && numberofnonzerohits > 10)
+        statusVector[chanId] = statusVector[chanId] | (8+64);
+
+      if((bitoff & 16) != 16 && typec && numberofnonzerohits > 10)
+        statusVector[chanId] = statusVector[chanId] | (8+128);
+      if((sixteenbiton & 16) != 0 && typec && numberofnonzerohits > 10)
+        statusVector[chanId] = statusVector[chanId] | (8+64);
+
       for(Short_t bin=1; bin<maxBin; bin++) {
         if(proj->GetBinContent(bin) > 0) {
           bitoff |= (bin-1);
@@ -779,12 +951,9 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
           numberofnonzerohits++;
         }
       }
-      Short_t bitcompare = (1+2+4+8);
-      if((bitoff & bitcompare) != bitcompare && numberofnonzerohits > 10)
-        statusVector[chanId] = statusVector[chanId] | (8+128);
-      if(biton != 0 && numberofnonzerohits > 10)
-        statusVector[chanId] = statusVector[chanId] | (8+64);
-
+      
+      
+      
 //total number of hits test
       Float_t entries = proj->Integral(1,proj->GetXaxis()->GetNbins());
       if (entries == 0) {
@@ -859,7 +1028,7 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
         
 
 //hot tower/cold tower tests
-  Float_t sumofhits=0, nbinhits=0;
+  Float_t sumofhits=0, nbinhits=0, ncratehottowers=0;
   Int_t goodTowers = 0;
   for(int i=1; i<mDetectorSize+1; i++) {
     if(hHotTower->GetBinContent(i) > 2) {
@@ -868,6 +1037,7 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
     }
   }
   if(nbinhits!=0) {
+//redo to nullify effects of hot and cold towers on the average
 //individual channel tests
     averageNumberOfHitsPerChannel = sumofhits/nbinhits;
     for(int i=1; i<mDetectorSize+1; i++) {
@@ -876,18 +1046,33 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
     }
 //crate tests
 //(tighter cold tower test for whole crates to catch timing problems)
+//
+//This is not trivial.
+//Pretend that some crate is malfunctioning.
+//I realized that the malfunction could take *any* form,
+//meaning it could include both hot and cold towers.
+//Consequently, my crate test now says the following:
+//If more than 25% of the towers are hot, it's a bad crate.
+//Otherwise, ignore ALL hot towers when averaging the crate channels
+//together to see if the crate is malfunctioning.
+//I've also set the cut to be 20% of the average, as opposed to 10%
+//like individual channels.
+//
     if(mDetectorFlavor == "bemc") {
       for(int crate=1; crate<31; crate++) {
         sumofhits = 0;
         nbinhits = 0;
+        ncratehottowers=0;
         for(int channel=0; channel<160; channel++) {
           barry.GetTowerIdFromCrate(crate, channel, towerId);
-          if(hHotTower->GetBinContent(towerId) > 2) {
+          if(hHotTower->GetBinContent(towerId) > 10*averageNumberOfHitsPerChannel) {
+            ncratehottowers++;
+          } else if(hHotTower->GetBinContent(towerId) > 2) {
             sumofhits += hHotTower->GetBinContent(towerId);
             nbinhits++;
           }
         }
-        if(sumofhits/nbinhits < averageNumberOfHitsPerChannel/10) {
+        if(nbinhits == 0 || (nbinhits != 0 && sumofhits/nbinhits < averageNumberOfHitsPerChannel/5) || ncratehottowers >= 40) {
           for(int channel=0; channel<160; channel++) {
             barry.GetTowerIdFromCrate(crate, channel, towerId);
             statusVector[towerId] |= 2+16;
@@ -898,14 +1083,17 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       for(int crate=0; crate<6; crate++) {
         sumofhits = 0;
         nbinhits = 0;
+        ncratehottowers=0;
         for(int channel=0; channel<120; channel++) {
           towerId = eemcCrateMap[crate][channel];
-          if(hHotTower->GetBinContent(towerId) > 2) {
+          if(hHotTower->GetBinContent(towerId) > 10*averageNumberOfHitsPerChannel) {
+            ncratehottowers++;
+          } else if(hHotTower->GetBinContent(towerId) > 2) {
             sumofhits += hHotTower->GetBinContent(towerId);
             nbinhits++;
           }
         }
-        if(sumofhits/nbinhits < averageNumberOfHitsPerChannel/10) {
+        if(nbinhits == 0 || (nbinhits != 0 && sumofhits/nbinhits < averageNumberOfHitsPerChannel/5) || ncratehottowers >= 30) {
           for(int channel=0; channel<120; channel++) {
             towerId = eemcCrateMap[crate][channel];
             statusVector[towerId] |= 2+16;
@@ -1070,7 +1258,7 @@ CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
   TString datetimestring = getDateTimeString(runNumber);
   TString pedrootfilename = directory + "/pedestals/" + mDetectorFlavor
       + "Ped" + datetimestring + "root";
-  TFile fout_status(pedrootfilename.Data(),"RECREATE");
+  TFile* fout_status = new TFile(pedrootfilename.Data(),"RECREATE");
 
   Short_t shortpedmean,shortpedwidth;
   for (UInt_t i = 1; i < statusVector.size(); i++) {
@@ -1092,9 +1280,12 @@ CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
   tmpstr = "gzip " + pedtxtfilename;
   gSystem->Exec(tmpstr.Data());
 
+  fout_status->cd();
   bemc_ped->AddAt(&t_ped,0);
   bemc_ped->Write();
+  fout_status->Close();
   delete bemc_ped;
+  delete fout_status;
 }
 
 //this finds the runs which are at the ends of fills, and writes
@@ -1133,7 +1324,9 @@ CSMStatusUtils::findFillEnds() {
         
       priorRunNumber = runnumber;
       priorRunFillNumber = runFillNumber;
-    }    
+    }
+    file->Close();
+    delete file;
   }
 }
         

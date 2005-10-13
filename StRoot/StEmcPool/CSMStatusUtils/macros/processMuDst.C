@@ -18,6 +18,7 @@ void processMuDst( Char_t *jobId= "5117072.",
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   // load db libraries
+  gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
   gSystem->Load("StDbUtilities");
@@ -49,6 +50,7 @@ void processMuDst( Char_t *jobId= "5117072.",
   St_db_Maker *dbMaker = new St_db_Maker("StarDb","MySQL:StarDb");
   StEmcADCtoEMaker *adc2EMaker = new StEmcADCtoEMaker();
   adc2EMaker->setPrint(kFALSE);
+  adc2EMaker->saveAllStEvent(kTRUE);
   
   StBemcStatusMaker* myBemcStatusMaker = new StBemcStatusMaker(muDstMaker);
   myBemcStatusMaker->setOutputDirectory(scratchDir);

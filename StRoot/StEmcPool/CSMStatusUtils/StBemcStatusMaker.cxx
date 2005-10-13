@@ -62,7 +62,7 @@ Int_t StBemcStatusMaker::Make() {
   for(i = 0; i < trgId.size() ; i++){
 //    if(trgId[i]==10 || trgId[i]==45010 || trgId[i]==45020) isGood=true;
 //    if(trgId[i]==23) isGood=true;
-    if(trgId[i]==96011) isGood=true;
+    if(trgId[i]==96011 || trgId[i]==106011) isGood=true;
 //    if(trgId[i]==66501 || trgId[i]==66502) isGood=true;
   }
   if (!isGood) {
