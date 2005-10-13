@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.152 2005/10/12 22:00:52 jeromel Exp $
+# $Id: Construct,v 1.153 2005/10/13 15:20:29 jeromel Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -366,7 +366,7 @@ foreach $dir(@sysdirlist , @subdirs ) {
         push @packages, $dir;
     }
 }
-print "packages $#packages : @packages\n";
+#print "Packages $#packages : @packages\n";
 @packages = sortu(@packages);
 my $qtRoot = "qtRoot";
 if ($param::include and $qtRoot =~ /$param::include/) {
@@ -374,12 +374,16 @@ if ($param::include and $qtRoot =~ /$param::include/) {
 }
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
-#@Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
-@Targets = map('#' . $_ . "/Conscript", @packages);
-print "Targets = @Targets\n" if $param::debug;
+@Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
+#@Targets = map('#' . $_ . "/Conscript", @packages);
+
+if ($param::debug){
+    print "Packages $#packages : @packages\n";
+    print "Targets $#Targets   : @Targets\n" ;
+}
 Export qw( env CWD INCLUDE LIB BIN BUILD OBJ);
 Default qw (   .  );
-#print "Debug ".join(" ",@Targets)."\n"if ($param::debug);
+
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
 Build @Targets;
 #if ($env->{Packages}->{ROOT}->{RLIBMAP}) {
@@ -420,7 +424,7 @@ Build @Targets;
 #___________________________________________________________________________
 sub script::wanted_dead {
     -l and not -e and print "bogus link: $File::Find::name \t--- remove it\n"
-      and `rm $_`;
+      and unlink($_);
 }
 #____________________________________________________________
 sub script::PrintHash($$) {
