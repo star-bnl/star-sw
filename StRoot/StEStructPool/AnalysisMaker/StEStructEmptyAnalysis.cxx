@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.cxx,v 1.5 2005/10/10 16:22:28 msd Exp $
+ * $Id: StEStructEmptyAnalysis.cxx,v 1.6 2005/10/14 13:51:05 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -32,9 +32,9 @@ StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
   mhm[4]=mhm[5]=1;
   mhm[6]=mhm[7]=2;
   mhm[8]=mhm[9]=3;
-  mhm[10]=mhm[11]=mhm[13]=4;
+  mhm[10]=mhm[11]=4;
+  mhm[12]=mhm[13]=4;
  
-
   for(int i=0;i<3;i++){
 
     etaMean[i]=new TH1F*[6];
@@ -160,6 +160,9 @@ void StEStructEmptyAnalysis::finish(){
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.cxx,v $
+ * Revision 1.6  2005/10/14 13:51:05  msd
+ * Yet another fix of code I'm not using
+ *
  * Revision 1.5  2005/10/10 16:22:28  msd
  * stability fixes, yet another tweak of output hists
  *
