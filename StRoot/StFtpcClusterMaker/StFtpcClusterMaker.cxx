@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.79  2005/10/14 07:29:01  jcs
+// Calculate microsecondsPerTimebin from RHIC ClockFrequency
+// If RHIC ClockFrequency = 0, use default value from database
+//
 // Revision 1.78  2005/03/23 14:32:28  jcs
 // additional changes for using body + extra temperatures starting with y2005
 //
@@ -298,6 +302,8 @@ extern "C" void gufld(float *, float *);
 #include "StSoftwareMonitor.h"
 #include "StFtpcSoftwareMonitor.h"
 
+#include "StDetectorDbMaker/StDetectorDbClock.h"
+
 ClassImp(StFtpcClusterMaker)
 
   //_____________________________________________________________________________
@@ -384,6 +390,15 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
   }     
+
+  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+  double freq = dbclock->getCurrentFrequency()/1000000.0;
+  if ( freq != 0) 
+      microsecondsPerTimebin = 1./(freq/2.);
+  else
+      microsecondsPerTimebin = 0.;
+ 
+
   return 0;
 }
 //_____________________________________________________________________________
@@ -521,7 +536,9 @@ Int_t StFtpcClusterMaker::Make()
 			  m_clustergeo);	
 
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
+     dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
      cout<<"Using the following values from database:"<<endl;
+     cout<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<endl;
      cout<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endl;
      cout<<"          Asic2EastNotInverted      = "<<dbReader.Asic2EastNotInverted()<<endl;
      cout<<"          tzero                     = "<<dbReader.tZero()<<endl;
