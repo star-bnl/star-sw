@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.20 2004/07/18 14:10:04 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.21 2005/10/14 07:29:01 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.21  2005/10/14 07:29:01  jcs
+// Calculate microsecondsPerTimebin from RHIC ClockFrequency
+// If RHIC ClockFrequency = 0, use default value from database
+//
 // Revision 1.20  2004/07/18 14:10:04  jcs
 // get adjustAverageWest/East from Calibrations_ftpc/ftpcGas
 //
@@ -322,6 +326,11 @@ public:
   Int_t deltaTime() {return mDeltaTime;}
   Int_t deltaPad() {return mDeltaPad;}
   Float_t minChargeWindow() {return mMinChargeWindow;}
+
+  Int_t setMicrosecondsPerTimebin(Float_t f) {
+     if (f != 0.0) mMicrosecondsPerTimebin=f;
+     return 0;
+   }
 
 };
 
