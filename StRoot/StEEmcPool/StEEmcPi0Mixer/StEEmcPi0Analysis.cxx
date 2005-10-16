@@ -18,6 +18,7 @@ a call to cuts().)
 #include "StEEmcPool/StEEmcPointMaker/StEEmcPointMaker.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TTree.h" 
 #include "TFile.h" 
 #include <stdio.h>
 #include <iostream>
@@ -38,6 +39,7 @@ StEEmcPi0Analysis::StEEmcPi0Analysis(const Char_t *name):StMaker(name)
     mTrigSimThreshold = 0;
     mEEgeom=new EEmcGeomSimple();
     mSpinSort = true;
+    
 }
 
 // ----------------------------------------------------------------------------
@@ -64,6 +66,7 @@ Int_t StEEmcPi0Analysis::Init()
   hPairCounter  = new TH1F("hPairCounter","Pair counts",10,0.,10.);
   hFillPatternI = new TH1F("hFillPatternI","Intended fill pattern:bunch X-ing @ STAR IP:n runs",120,0.,120.);
   hSpin4        = new TH1F("hSpin4","Spin 4:spin4 state",11,0.,11.);
+  hSpin4mb      = new TH1F("hSpin4mb","Spin 4:spin4 state",11,0.,11.);
   hBx7          = new TH1F("hBx7","7-bit bunch crossing:bx7",120,0.,120.);
   hBx48         = new TH1F("hBx48","48-bit bunch crossing:bx48",120,0.,120.);
   hBx7diffBx48  = new TH2F("hBx7diffBx48","bx1=(bx7-off7)%120, bx2=(bx48-off48)%120;bx7;bx1-bx2",120,0.,120.,21,-10.5,10.5);
@@ -74,6 +77,16 @@ Int_t StEEmcPi0Analysis::Init()
   hZvertBx=new TH2F("hZvertBx","Beam x-ing vs Z vertex [0.1,0.18]",150,-150.,150.,120,0.,120.); 
   hZggBx=new TH2F("hZggBx","Beam x-ing vs Zgg",100,0.,1.,120,0.,120.);
   hEtaBx=new TH2F("hEtaBx","Beam x-ing vs eta",120,0.8,2.2,120,0.,120.); 
+  mRealEvent=new StEEmcMixEvent();
+  mMixedEvent=new StEEmcMixEvent(); 
+  mRealTree=new TTree("mRealTree","Real Events");
+  mRealTree->Branch("MixEvent","StEEmcMixEvent",&mRealEvent);
+  mMixedTree=new TTree("mMixedTree","Mixed Events");
+  mMixedTree->Branch("MixEvent","StEEmcMixEvent",&mMixedEvent); 
+
+  AddObj( mRealTree, ".hist" );
+  AddObj( mMixedTree, ".hist" ); 
+
   return StMaker::Init(); 
 }
 // ----------------------------------------------------------------------------
@@ -112,6 +125,11 @@ Int_t StEEmcPi0Analysis::Make()
 
   hPairCounter -> Fill( kEvent ); 
 
+  mRealEvent -> setEvent( mMuDst->muDst()->event() ); 
+  mRealEvent -> setSpin4( spin4 ); 
+  mMixedEvent -> setEvent( mMuDst->muDst()->event() ); 
+  mMixedEvent -> setSpin4( spin4 ); 
+
   /// map spin decimal bits to histograms
   static Int_t mymap[]={0,0,0,0,0,1,2,0,0,3,4};
 
@@ -122,6 +140,8 @@ Int_t StEEmcPi0Analysis::Make()
       StEEmcPair pair = mEEmixer->candidate(i);
       hPairCounter -> Fill( kPair ); 
       if ( !accept( pair ) ) continue; 
+
+      mRealEvent -> addPair( pair ); 
 
       std::cout << "spin4=" << spin4 << " ";
       pair.print();
@@ -157,8 +177,12 @@ Int_t StEEmcPi0Analysis::Make()
       StEEmcPair pair = mEEmixer->mixedCandidate(i);
       if ( !accept( pair, false ) ) continue;
       mBackgrounds[ kAny ] -> Fill( pair );
+      mMixedEvent -> addPair( pair ); 
 
     }
+
+  if ( mRealEvent->nPairs > 0 ) mRealTree->Fill();
+  if ( mMixedEvent->nPairs > 0 ) mMixedTree->Fill(); 
 
 
   return kStOK;
@@ -421,15 +445,27 @@ Int_t StEEmcPi0Analysis::getSpinState( StMuDst *mudst, Int_t &bxStar )
   StMuEvent   *event = mudst -> event();
   StL0Trigger *trig  =&(event->l0Trigger());
 
+  StMuTriggerIdCollection tic = event -> triggerIdCollection();
+  StTriggerId l1trig = tic.l1();
+
+
   Int_t bx48 = trig->bunchCrossingId();
   Int_t bx7  = trig->bunchCrossingId7bit( mRunNumber );  
 
   bxStar = mSpinDb->BXstarUsingBX48(bx48);
 
+  mRealEvent->bx48 = bx48;
+  mRealEvent->bx7  = bx7;
+  mRealEvent->bxStar = bxStar; 
+
+  mMixedEvent->bx48=bx48;
+  mMixedEvent->bx7 =bx7;
+  mMixedEvent->bxStar=bxStar; 
+
   //////////////////////////////////////////////////////////////////////
   /// HARDCODED KLUDGE 
   if ( bx7 == 0 || bx7 == 119 ) return -1; // kick 0 and 119 out of mix
-  if ( bxStar==20||bxStar==60 ) return -1; // kicked bunches
+  if ( bx7 == 14 || bx7 == 54 ) return -1; 
   //////////////////////////////////////////////////////////////////////
 
   hBx7->Fill( bx7 );
@@ -453,6 +489,16 @@ Int_t StEEmcPi0Analysis::getSpinState( StMuDst *mudst, Int_t &bxStar )
 
   Int_t spin4 = mSpinDb->spin4usingBX48(bx48);
   hSpin4->Fill(spin4);
+
+  if ( l1trig.isTrigger(96011) ) hSpin4mb -> Fill(spin4); 
+
+  
   return spin4;
 
 }
+// ----------------------------------------------------------------------------
+void StEEmcPi0Analysis::Clear(Option_t *opts)
+{
+    mRealEvent -> Clear();
+    mMixedEvent -> Clear(); 
+} 

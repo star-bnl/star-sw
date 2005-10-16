@@ -12,6 +12,8 @@
 
 #include "StSpinPool/StSpinDbMaker/StSpinDbMaker.h"
 
+#include "StEEmcMixEvent.h" 
+
 class StEEmcMixMaker;
 class StEEmcPointMaker;
 class StRFEmcTrigMaker;
@@ -21,6 +23,7 @@ class TFile;
 class SpinCuts; 
 class EEmcGeomSimple;
 class StEEmcA2EMaker; 
+class TTree; 
 
 #include <vector>
 #include "StEEmcPair.h"
@@ -43,7 +46,7 @@ class StEEmcPi0Analysis : public StMaker
   /// init run
   Int_t InitRun(Int_t);
   /// clears the maker
-  void  Clear(Option_t *opts=""){ /* nada */ };
+  void  Clear(Option_t *opts="");
   /// specifies the name of the mixer and the mass range for 
   /// gated histograms.
   void mixer(const Char_t *name);
@@ -108,6 +111,8 @@ class StEEmcPi0Analysis : public StMaker
   TH2F       *hZggBx;           /**<-- zgg vs bunch crossing */
   TH2F       *hEtaBx;           /**<-- eta vs bunch crossing */ 
 
+  TH1F       *hSpin4mb;         /**<-- spin state w/ mb */ 
+
 
   enum EventCutTypes { 
       kEvent=0,
@@ -152,6 +157,12 @@ class StEEmcPi0Analysis : public StMaker
 
   /// EEMC tower geometry
   EEmcGeomSimple *mEEgeom;
+
+  StEEmcMixEvent *mRealEvent;
+  StEEmcMixEvent *mMixedEvent; 
+
+  TTree *mRealTree;
+  TTree *mMixedTree; 
 
   /// Makes class availabel to root
   ClassDef(StEEmcPi0Analysis,1);  
