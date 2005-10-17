@@ -1,5 +1,8 @@
-* $Id: g2t_ssd.F,v 1.2 2005/10/17 16:58:40 potekhin Exp $
+* $Id: g2t_ssd.F,v 1.3 2005/10/17 18:33:23 potekhin Exp $
 * $Log: g2t_ssd.F,v $
+* Revision 1.3  2005/10/17 18:33:23  potekhin
+* Correct a typo (extraneous line commented out)
+*
 * Revision 1.2  2005/10/17 16:58:40  potekhin
 * Comment out a print statement which produced excessive amounts
 * of output
@@ -23,8 +26,8 @@
        if (Iprin.lt.0) go to 99
        Local  = Idigi.ge.2
 
+      Do While (G2R_GET_HIT('ssd') .eq. 0)
 * --maxim-- comment out excessive print out 20051017
-*       Do While (G2R_GET_HIT('ssd') .eq. 0)
 *          print *,i,id,trac,next,volume,
 *     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
 *     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
