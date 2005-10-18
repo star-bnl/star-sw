@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.28 2005/07/23 03:37:34 perev Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.29 2005/10/18 18:59:24 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.29  2005/10/18 18:59:24  caines
+ * Addtional code change for improving PASA shift
+ *
  * Revision 1.28  2005/07/23 03:37:34  perev
  * IdTruth + Cleanup
  *
@@ -170,11 +173,11 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 StSvtSimulationMaker::~StSvtSimulationMaker()
 {
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor"<<endm;
-
-  delete mSvtAngles;
-  delete mSvtSimulation;
-  delete mElectronCloud;
-  delete mCoordTransform;
+ 
+  if (mSvtAngles) delete mSvtAngles;
+  if (mSvtSimulation) delete mSvtSimulation;
+  if (mElectronCloud) delete mElectronCloud;
+  if (mCoordTransform) delete mCoordTransform;
 
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::destructor...END"<<endm; 
 }
@@ -625,9 +628,11 @@ static const int barrels[]={3,1,1,2,2};
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
      
+      double PasaShift=0.1/vd*25.; //100 um shift from pasa
+
       mSvtSimulation->setDriftVelocity(vd);
       mSvtSimulation->doCloud(driftTime,energy,theta,phi,trackId);
-      mSvtSimulation->fillBuffer(anode,time,svtSimDataPixels);
+      mSvtSimulation->fillBuffer(anode,time-PasaShift,svtSimDataPixels);
            
       if (Debug()) 
 	FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak(),trackId);
@@ -681,7 +686,7 @@ void StSvtSimulationMaker::Clear(const char*)
   //all will be deleted by StMaker::Clear()
   mSvtGeantHitColl = NULL;
 
-  delete counter; counter=NULL;
+  if (counter) delete counter; counter=NULL;
 
   StMaker::Clear();
   
