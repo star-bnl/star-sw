@@ -9,5 +9,6 @@
 struct ftpcElectronics { 
 
    double  tZero;   /*   us (microseconds)  */
+   double  uSecondsPerTimebin;   /*   us (microseconds)  */
 
  };  
