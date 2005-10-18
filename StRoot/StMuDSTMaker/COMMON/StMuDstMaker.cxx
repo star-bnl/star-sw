@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.71 2005/10/06 01:30:30 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.72 2005/10/18 17:55:43 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -247,7 +247,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(256), mReadTracks(1),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mTrackFilter(0), mL3TrackFilter(0),
+  mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
   mPmdCollectionArray(0), mPmdCollection(0)
@@ -662,7 +662,7 @@ void StMuDstMaker::openWrite(string fileName) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::closeWrite(){
-  cout << __PRETTYF__ << endl;
+  DEBUGMESSAGE(__PRETTYF__);
   if (mTTree && mCurrentFile) {
     cout << " ##### " << __PRETTYF__ << endl;
     cout << " ##### File=" << mCurrentFile->GetName() << " ";
@@ -1257,6 +1257,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.72  2005/10/18 17:55:43  mvl
+ * Fixed initialisation problem of mCurrentFile, leading to potential segvio when creating MuDst
+ *
  * Revision 1.71  2005/10/06 01:30:30  mvl
  * Changed some of the logic in StMuChainMaker: Now files are no longer opened
  * and checked at the start of the job, but simply added to the TChain. TChain
