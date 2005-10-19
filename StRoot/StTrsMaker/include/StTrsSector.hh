@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.6 2005/09/09 22:12:48 perev Exp $
+ * $Id: StTrsSector.hh,v 1.7 2005/10/19 21:42:23 perev Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
+ * Revision 1.7  2005/10/19 21:42:23  perev
+ * Add include <algorith> for sort
+ *
  * Revision 1.6  2005/09/09 22:12:48  perev
  * Bug fix + IdTruth added
  *
@@ -52,6 +55,7 @@
 #define ST_TRS_SECTOR_HH
 
 #include <vector>
+#include <algorithm>
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::vector;
 #endif
