@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.29 2005/10/18 18:59:24 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.30 2005/10/19 21:22:30 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -18,6 +18,9 @@
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.30  2005/10/19 21:22:30  caines
+ * Make PASA shift 200 microns
+ *
  * Revision 1.29  2005/10/18 18:59:24  caines
  * Addtional code change for improving PASA shift
  *
@@ -628,7 +631,8 @@ static const int barrels[]={3,1,1,2,2};
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
      
-      double PasaShift=0.1/vd*25.; //100 um shift from pasa
+      // double PasaShift=0.1/vd*25.; //100 um shift from pasa
+      double PasaShift=0.2/vd*25.; //100 um shift from pasa
 
       mSvtSimulation->setDriftVelocity(vd);
       mSvtSimulation->doCloud(driftTime,energy,theta,phi,trackId);
