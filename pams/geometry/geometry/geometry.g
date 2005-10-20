@@ -1,5 +1,13 @@
-* $Id: geometry.g,v 1.117 2005/10/06 17:54:57 potekhin Exp $
+* $Id: geometry.g,v 1.118 2005/10/20 20:17:47 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.118  2005/10/20 20:17:47  potekhin
+* a) added a few parameters to the "low_em" setting to
+* better simulate soft EM processes, if needed
+* b) added logic for calling the latest svttgeo6
+* c) added Y2003C, Y2004D and Y2005D to take advantage of this
+* new SVT geometry file. Added same to DEV2005 for development
+* purposes
+*
 * Revision 1.117  2005/10/06 17:54:57  potekhin
 * a) in DEV2005, provide a way to use a highly customised version of the SVT
 * b) create a key that enables the user to lower the electromagnetic processes
@@ -1018,6 +1026,37 @@ If LL>1
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 2; "SVTT version"
                 }
+****************************************************************************************
+  on Y2003C    { Better SVT model on top of 2003B: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,0}; shift={75,0}; " 60 sectors " 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=1     " sectors 2-5 filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=3;
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+*                    -- Obsoleted CorrNum = 2;
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                }
 
 ****************************************************************************************
   on Y2003X    { same as y2003b but with full calorimeters and phmd
@@ -1353,6 +1392,72 @@ If LL>1
                      TpceConfig = 2;
                 }
 
+****************************************************************************************
+  on Y2004D    { Better SVT on top of Y2004B
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+                  "calb" 
+                     CalbConfig = 1  " Please see note in Y2004A"
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+* Above:  Ar+C02 in ftpc
+
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+* second file version, 10 ladders
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 22;
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+                }
+
+*
 *
 **********************************************************************
 * Corrections and enhancements in y2004:
@@ -1622,6 +1727,76 @@ If LL>1
                 }
 
 ****************************************************************************************
+  on Y2005D    { Better SVT on top of Y2005C
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 24; "second version, full barrel with corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+
+                }
+
+****************************************************************************************
   on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -1745,7 +1920,7 @@ If LL>1
 * important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
 
                      SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 5; "SVTT version"
+                     SvttConfig = 6; "SVTT version"
                      DensConfig = 1; "gas density correction"
                      FtpcConfig = 1; "ftpc configuration"
 
@@ -1782,7 +1957,12 @@ If LL>1
 
   on LOW_EM     { Low cuts on ElectroMagnetic processes;
                   CUTGAM=0.00001;
-                  CUTELE=0.00001;}
+                  CUTELE=0.00001;
+                  BCUTE =0.00001;
+                  BCUTM =0.00001;
+                  DCUTE =0.00001;
+                  DCUTM =0.00001;
+                }
 
   on TPC_ONLY   { Minimal geometry - only TPC;
                   {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
@@ -1918,12 +2098,14 @@ If LL>1
 * Optionally, switch to a larger inner shield, AND smaller beampipe support 
     if(SvshConfig==1) call AgDETP add ('svtg.SupportVer=',2 ,1)
 
+* Ugly, but I don't want to hash function pointers in Fortran:
     if(SvttConfig==0) call svttgeo
     if(SvttConfig==1) call svttgeo1
     if(SvttConfig==2) call svttgeo2
     if(SvttConfig==3) call svttgeo3
     if(SvttConfig==4) call svttgeo4
     if(SvttConfig==5) call svttgeo5
+    if(SvttConfig==6) call svttgeo6
 
 *    elseif(CorrNum==4) then call svttgeo3 ! +silicon strip detector separated into its own geo file
 
