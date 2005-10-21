@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.19 2004/05/03 23:31:46 perev Exp $
+// $Id: StObject.cxx,v 1.20 2005/10/21 21:13:52 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.20  2005/10/21 21:13:52  perev
+// test added to avoid copy to itself. Make walgrin happy
+//
 // Revision 1.19  2004/05/03 23:31:46  perev
 // Possible non init WarnOff
 //
@@ -153,7 +156,8 @@ void StUUId::Streamer(TBuffer &R__b)
 //_____________________________________________________________________________
 StUUId &StUUId::operator=(const StUUId &from)
 {
-  memcpy(fID,from.fID,16); return *this;
+  if (this != &from) memcpy(fID,from.fID,sizeof(fID));
+  return *this;
 }
 //_____________________________________________________________________________
 StUUId &StUUId::operator=(const char  *from )
