@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.8 2005/02/23 05:17:18 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.9 2005/10/21 00:54:06 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,6 +9,9 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
+ * Revision 1.9  2005/10/21 00:54:06  subhasis
+ * fillStEvent crash due to mismatch in length of pmdclust and phmdclust fixed
+ *
  * Revision 1.8  2005/02/23 05:17:18  subhasis
  * DiscbyNN option fixed
  *
@@ -350,14 +353,18 @@ void StPmdDiscriminatorMaker::fillStEvent(StPmdCollection* cluster_hit,StPhmdCol
 	  Int_t nclust = clusters->Nclusters();
 	  TIter next(clusters->Clusters());
 	  StPmdCluster *spmcl1;
-	  cout<<"nclust "<<nclust<<endl;
+	  int nclust_phmd=pmdclusters.size();
 
-	  for(Int_t i=0; i<nclust ; i++)
+	  int loopcls=0;
+	  if(nclust==nclust_phmd)loopcls=nclust;
+	  if(nclust<nclust_phmd)loopcls=nclust;
+	  if(nclust>nclust_phmd)loopcls=nclust_phmd;
+
+	  for(Int_t i=0; i<loopcls ; i++)
 	    {
 	      spmcl1 = (StPmdCluster*)next();
 	      int edeppid=spmcl1->CluEdepPID();
 	      StPhmdCluster *cl1=(StPhmdCluster*)pmdclusters[i];
-              cout<<"cl1, edeppid  "<<i<<" "<<cl1<<" "<<edeppid<<endl;
 		if(!cl1)break;
 	      if(cl1)cl1->setEnergyPid(edeppid);
 	    }
