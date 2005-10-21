@@ -1,6 +1,10 @@
-* $Id: svttgeo6.g,v 1.1 2005/10/20 19:15:35 potekhin Exp $
+* $Id: svttgeo6.g,v 1.2 2005/10/21 18:53:10 potekhin Exp $
 *
 * $Log: svttgeo6.g,v $
+* Revision 1.2  2005/10/21 18:53:10  potekhin
+* Change orientation of the non-sensitive trapezoids by 90
+* to account for the way the wafer is positioned in the assembly
+*
 * Revision 1.1  2005/10/20 19:15:35  potekhin
 * An updated version with the more precise "butterfly" shape of the
 * actual sensitive area
@@ -97,7 +101,7 @@ Module  SVTTGEO6  is the SVT: corrected wafers and sensitive volumes
       Real           yPCB, A, CuThk, sq, tube_angle
       Real           radii(6), rad_cones_in(5),rad_cones_out(5), rad_offset, shield_phi(4)
 
-      Real           trapX,ssidX,ssirY
+      Real           trapY,ssidX,ssirY
 
       Integer        i_phi
 
@@ -935,9 +939,9 @@ Block SVTD is an active wafer volume
 
       Shape     BOX        dy=swca_WaferLen/2 
 *
-      trapX=swca_SensLen/2.0-(swca_SensLen-swca_SensGir)/2.0
+      trapY=swca_SensWid/2.0-(swca_SensWid-swca_SensGir)/2.0
 
-      Create STRA; Position STRA x=+trapX Ort=YZX; Position STRA  x=-trapX Ort=YZX AlphaZ=180
+      Create STRA; Position STRA y=+trapY Ort=YZX AlphaZ=90; Position STRA  y=-trapY Ort=YZX AlphaZ=-90
 
 *
       ssidX=swca_WaferLen/2.0-(swca_WaferLen-swca_SensLen)/4.0
