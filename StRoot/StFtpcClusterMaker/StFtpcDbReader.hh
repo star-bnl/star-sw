@@ -1,6 +1,11 @@
-// $Id: StFtpcDbReader.hh,v 1.21 2005/10/14 07:29:01 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.22 2005/10/24 13:43:01 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.22  2005/10/24 13:43:01  jcs
+// If microsecondsPerTimebin calculated from RHIC clock frequency, store in
+// Calibrations_ftpc/ftpcElectronics database table. Otherwise get default
+// value from Calibrations_ftpc/ftpcElectronics database table.
+//
 // Revision 1.21  2005/10/14 07:29:01  jcs
 // Calculate microsecondsPerTimebin from RHIC ClockFrequency
 // If RHIC ClockFrequency = 0, use default value from database
@@ -130,7 +135,6 @@ protected:
   Float_t mPhiPerSector;
   Float_t mRadiansPerPad;
   Float_t mRadiansPerBoundary;
-  Float_t mMicrosecondsPerTimebin;
   Float_t mSensitiveVolumeInnerRadius;
   Float_t mSensitiveVolumeOuterRadius;
 
@@ -165,6 +169,7 @@ protected:
   Float_t mAdjustAverageEast;
 
   Float_t mTZero;
+  Float_t mMicrosecondsPerTimebin;
 
   Float_t mOffsetCathodeWest;
   Float_t mOffsetCathodeEast;
@@ -181,6 +186,7 @@ protected:
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
   ftpcTimeOffset_st *timeoffsetTable;
+  ftpcElectronics_st *electronicsTable;
   //SlowSimulator parameters
   Float_t mPadLength;
   Float_t mPadPitch;
@@ -278,7 +284,6 @@ public:
   Float_t padPitch()     {return mPadPitch;}
   Float_t radiansPerPad() {return mRadiansPerPad;}
   Float_t radiansPerBoundary() {return mRadiansPerBoundary;}
-  Float_t microsecondsPerTimebin() {return mMicrosecondsPerTimebin;}
   Float_t sensitiveVolumeInnerRadius() {return mSensitiveVolumeInnerRadius;}
   Float_t sensitiveVolumeOuterRadius() {return mSensitiveVolumeOuterRadius;}
 
@@ -303,6 +308,7 @@ public:
   Float_t adjustAverageEast() {return mAdjustAverageEast;}
 
   Float_t tZero() {return mTZero;}
+  Float_t microsecondsPerTimebin() {return mMicrosecondsPerTimebin;}
 
   Float_t driftCathodeVoltage() {return mDriftCathodeVoltage;}
   Float_t minimumDriftField() {return mMinimumDriftField;}

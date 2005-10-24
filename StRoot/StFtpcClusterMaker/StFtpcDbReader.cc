@@ -1,6 +1,11 @@
-// $Id: StFtpcDbReader.cc,v 1.29 2005/04/13 08:14:17 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.30 2005/10/24 13:43:01 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.30  2005/10/24 13:43:01  jcs
+// If microsecondsPerTimebin calculated from RHIC clock frequency, store in
+// Calibrations_ftpc/ftpcElectronics database table. Otherwise get default
+// value from Calibrations_ftpc/ftpcElectronics database table.
+//
 // Revision 1.29  2005/04/13 08:14:17  jcs
 // Invert sector numbering for Ftpc East when accessing the gain table (ftpcAmpSlope)
 // since this wasn't done when the gain table was produced
@@ -135,7 +140,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mRadiansPerPad              = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
     mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
-    mMicrosecondsPerTimebin     = dimensionsTable->sizeOfTimebin;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
   } else {
@@ -257,9 +261,10 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   }
 
   //  just copy electronics table start to pointer
-  ftpcElectronics_st* electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
    mTZero = electronicsTable->tZero;
+   mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
   }
@@ -333,7 +338,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     mRadiansPerPad          = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
     mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
-    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
   } else {
@@ -433,6 +437,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   ftpcElectronics_st* electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
    mTZero = electronicsTable->tZero;
+   mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
   }
@@ -633,6 +638,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
 StFtpcDbReader::~StFtpcDbReader()
 {
 
+// write back table entries that have set functions:
+   electronicsTable->uSecondsPerTimebin = mMicrosecondsPerTimebin;
 //   cout << "StFtpcDbReader destructed" << endl;
 }
 
