@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.21 2003/09/02 17:58:32 perev Exp $
+ * $Id: StHbtEvent.cc,v 1.23 2005/08/19 21:19:11 chajecki Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.23  2005/08/19 21:19:11  chajecki
+ * line 326: the same change as in line 235
+ *
+ * Revision 1.22  2005/08/19 11:33:31  chajecki
+ * fix due to the last changes in MuDst
+ * line 235: TClonesArray* tracks=0; to TObjArray* tracks=0;
+ * see for more details:
+ * http://www.star.bnl.gov/HyperNews-star/protected/get/starsoft/5949.html
+ *
  * Revision 1.21  2003/09/02 17:58:32  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -232,7 +241,7 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
   mTrackCollection = new StHbtTrackCollection();
 
   // copy track collection  
-  TClonesArray* tracks=0;
+  TObjArray*  tracks=0;  
   switch (trackType) {
   case 0: tracks = dst->globalTracks(); break;
   case 1: tracks = dst->primaryTracks(); break;
@@ -314,7 +323,7 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType, bool readV0Daughters) 
   mTrackCollection = new StHbtTrackCollection();
 
   // copy track collection  
-  TClonesArray* tracks=0;
+  TObjArray* tracks=0;
   switch (trackType) {
   case 0: tracks = dst->globalTracks(); break;
   case 1: tracks = dst->primaryTracks(); break;

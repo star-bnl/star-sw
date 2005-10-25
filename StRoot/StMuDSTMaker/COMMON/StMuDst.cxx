@@ -1,9 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.36 2005/05/20 20:30:35 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.37 2005/08/19 19:46:05 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
+
+#include <map>
 
 #include "StMuDst.h"
 
@@ -35,6 +37,9 @@ TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
 StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
 StEmcCollection *StMuDst::mEmcCollection = 0;
 TClonesArray** StMuDst::eztArrays    = 0;
+
+Int_t StMuDst::mCurrVertexId = 0;
+TObjArray* StMuDst::mCurrPrimaryTracks  = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -111,6 +116,28 @@ void StMuDst::set(TClonesArray** theArrays,
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+void StMuDst::collectVertexTracks() {
+  if (mCurrPrimaryTracks == 0)
+    mCurrPrimaryTracks = new TObjArray();
+  Int_t n_track = arrays[muPrimary]->GetEntriesFast();
+  mCurrPrimaryTracks->Clear();
+  for (Int_t i_track = 0; i_track < n_track; i_track++) {
+    if (((StMuTrack*)arrays[muPrimary]->UncheckedAt(i_track))->vertexIndex() == mCurrVertexId)
+	mCurrPrimaryTracks->AddLast(arrays[muPrimary]->UncheckedAt(i_track));
+  }
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::setVertexIndex(Int_t vtx_id) {
+  if (mCurrVertexId == vtx_id)  
+     return;
+  mCurrVertexId = vtx_id;
+  collectVertexTracks();  
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
 void StMuDst::fixTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
@@ -132,24 +159,13 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
 
   int nGlobals = global->GetEntries();
   int nPrimaries = primary->GetEntries();
-  // fill an array with the indices to the global tracks as function of trackId
-  TArrayI globalIndex(2*nGlobals);
-
-  int nIndex=globalIndex.GetSize();
-  for (int i=0; i<nIndex; i++) globalIndex[i]=-1;
+  // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
+  map<short,unsigned short> globalIndex;
 
   for (int i=0; i<nGlobals; i++) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
-      if (g->id() >= nIndex) {
-        int newSize=(int) (1.2*nIndex);
-        if (newSize <= g->id())
-          newSize=(int) (1.2*g->id())+1;
-        globalIndex.Set(newSize);
-        for (Int_t j=nIndex; j<newSize; j++)
-          globalIndex[j]=-1;
-        nIndex=newSize;
-      }
+      globalIndex[g->id()] = i;
       globalIndex[ g->id() ] = i;
       globalTracks(i)->setIndex2Global(i);
     }
@@ -159,7 +175,7 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
   for (int i=0; i<nPrimaries; i++) {
     StMuTrack *p = (StMuTrack*) primary->UncheckedAt(i);
     if (p) {
-      if (p->id()<nIndex) 
+      if (globalIndex[p->id()]) 
         p->setIndex2Global( globalIndex[ p->id() ] );
       else
         p->setIndex2Global(-1);
@@ -184,7 +200,7 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 StEvent* StMuDst::createStEvent() {
-  static TObjArray nodes;
+  static map<short, StTrackNode*> nodes;
 
   DEBUGMESSAGE1("");
   StTimer timer;
@@ -225,36 +241,36 @@ StEvent* StMuDst::createStEvent() {
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
   int nGlobals = arrays[muGlobal]->GetEntries();
-  nodes.Clear(); // tracknodes are owned by StEvent
+  nodes.clear(); // tracknodes are owned by StEvent
 
   // add global tracks to tracknodes
   for (int i=0; i<nGlobals; i++) if(globalTracks(i)) {
-    int id = globalTracks(i)->id();
+    short id = globalTracks(i)->id();
     StMuTrack *mt = globalTracks(i);
     if (!mt) 		continue;
     if (mt->bad())	continue;
     StTrack *st = createStTrack(mt);
     if (!st)		continue;
-    nodes.AddAtAndExpand(new StTrackNode(),id);
-    ((StTrackNode*)nodes[id])->addTrack(st);
+    nodes[id]=new StTrackNode;
+    nodes[id]->addTrack(st);
   }
 
   /// add primary tracks to tracknodes and primary vertex
   int nPrimaries = arrays[muPrimary]->GetEntries();
   for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
-    int id = primaryTracks(i)->id();
-    if (nodes[id]==0) nodes.AddAtAndExpand(new StTrackNode(),id);
+    short id = primaryTracks(i)->id();
+    if (nodes[id]==0) {
+      nodes[id]=new StTrackNode();
+    }
     StTrack* t = createStTrack(primaryTracks(i));
-    ((StTrackNode*)nodes[id])->addTrack( t );
+    nodes[id]->addTrack( t );
     vp->addDaughter( t );
   }
 
   /// add all tracknodes to the event
-  Int_t nNodes=nodes.GetEntriesFast();
-  for (int i=0; i<nNodes; i++) {
-    if (nodes[i]) ev->trackNodes().push_back((StTrackNode*)nodes[i]);
+  for (map<short, StTrackNode*>::iterator i_pair = nodes.begin(); i_pair != nodes.end(); i_pair++) {
+    ev->trackNodes().push_back((*i_pair).second);
   } 
-
   /// do the same excercise for the l3 tracks
   /// we do this later
   /// we do this later
@@ -372,7 +388,7 @@ StTrack* StMuDst::createStTrack(StMuTrack* track) {
   if (tg) t->setOuterGeometry( tg );
 
   t->setLength(track->length());
-  t->setImpactParameter((track->dca()).mag());
+  t->setImpactParameter(track->dca().mag());
   t->addPidTraits(new StDedxPidTraits(kTpcId, kTruncatedMeanId, track->nHitsDedx(), track->dEdx(),0));
   Float_t a[2],b[15];
   a[0]=track->chi2();
@@ -409,6 +425,24 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.37  2005/08/19 19:46:05  mvl
+ * Further updates for multiple vertices. The main changes are:
+ * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
+ *    belonging to the 'current' primary vertex. The index number of the
+ *    'current' vertex can be set using StMuDst::setCurrentVertex().
+ *    This also affects StMuDst::primaryTracks(int i) and
+ *    StMuDst::numberOfprimaryTracks().
+ * 2) refMult is now stored for all vertices, in StMuPrimaryVertex. The
+ *    obvious way to access these numbers is from the StMuprimaryVertex structures,
+ *    but for ebakcward compatibility a function is provided in StMuEvent as well
+ *    (this is the only function taht works for existing MuDst)
+ *
+ * As an aside, I've also changes the internals of StMuDst::createStEvent and
+ * StMuDst::fixTrackIndices() to be able to deal with a larger range of index numbers for tracks as generated by Ittf.
+ *
+ * BIG FAT WARNING: StMudst2StEventMaker and StMuDstFilterMaker
+ * do not fully support the multiple vertex functionality yet.
+ *
  * Revision 1.36  2005/05/20 20:30:35  mvl
  * More fixed to StMuDst::fixTrackIndices(). The bug afafcets only few tracks
  * for events with many tracks, so most people will not be much affected by it.

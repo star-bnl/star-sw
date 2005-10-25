@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.6 2004/06/30 15:58:36 putschke Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.7 2005/08/19 03:44:28 perev Exp $
  ***************************************************************************
  *
  * Description:
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.7  2005/08/19 03:44:28  perev
+ * Marco updates
+ *
  * Revision 1.6  2004/06/30 15:58:36  putschke
  * Fix comments !
  *
@@ -58,11 +61,9 @@
 #include "StEventTypes.h"
 
 inline bool
-multiplicityEventCutFtpc(const StEvent& evt)
+multiplicityEventCutFtpc(const StPrimaryVertex*& primVtx)
 {
 
-  const StPrimaryVertex* primVtx = evt.primaryVertex();
-  
   if (!primVtx) return false;
   else if (fabs(primVtx->position().x())<10e-3 && fabs(primVtx->position().y())<10e-3 && fabs(primVtx->position().z())<10e-3) return false;
   else if (fabs(primVtx->position().z())>=50) return false;
@@ -72,12 +73,11 @@ multiplicityEventCutFtpc(const StEvent& evt)
 
 }
 
+
 inline unsigned int
-uncorrectedNumberOfFtpcEastPrimaries(const StEvent& evt)
+uncorrectedNumberOfFtpcEastPrimaries(const StPrimaryVertex*& primVtx)
 {
-    if (!multiplicityEventCutFtpc(evt)) return 9999;
-    
-    const StPrimaryVertex* primVtx = evt.primaryVertex();
+    if (!multiplicityEventCutFtpc(primVtx)) return 9999;
     const StSPtrVecPrimaryTrack& tracks = primVtx->daughters();
 
     size_t countedTracks = 0;
@@ -97,11 +97,17 @@ uncorrectedNumberOfFtpcEastPrimaries(const StEvent& evt)
 }
 
 inline unsigned int
-uncorrectedNumberOfFtpcWestPrimaries(const StEvent& evt)
+uncorrectedNumberOfFtpcEastPrimaries(const StEvent& evt, int vtx_id = 0)
 {
-    if (!multiplicityEventCutFtpc(evt)) return 9999;
+    const StPrimaryVertex* primVtx = evt.primaryVertex(vtx_id);
+    return uncorrectedNumberOfFtpcEastPrimaries(primVtx);
+}
 
-    const StPrimaryVertex* primVtx = evt.primaryVertex();
+inline unsigned int
+uncorrectedNumberOfFtpcWestPrimaries(const StPrimaryVertex*& primVtx)
+{
+
+    if (!multiplicityEventCutFtpc(primVtx)) return 9999;
     const StSPtrVecPrimaryTrack& tracks = primVtx->daughters();
 
     size_t countedTracks = 0;
@@ -120,11 +126,20 @@ uncorrectedNumberOfFtpcWestPrimaries(const StEvent& evt)
 }
 
 inline unsigned int
-uncorrectedNumberOfFtpcPrimaries(const StEvent& evt)
+uncorrectedNumberOfFtpcWestPrimaries(const StEvent& evt, int vtx_id = 0)
+{
+    const StPrimaryVertex* primVtx = evt.primaryVertex(vtx_id);
+    return uncorrectedNumberOfFtpcWestPrimaries(primVtx);
+}
+
+
+inline unsigned int
+uncorrectedNumberOfFtpcPrimaries(const StEvent& evt, int vtx_id)
 {   
-  if (!multiplicityEventCutFtpc(evt)) return 9999;
+  const StPrimaryVertex* primVtx = evt.primaryVertex(vtx_id);
+  if (!multiplicityEventCutFtpc(primVtx)) return 9999;
   
-  return uncorrectedNumberOfFtpcWestPrimaries(evt) + uncorrectedNumberOfFtpcEastPrimaries(evt);
+  return uncorrectedNumberOfFtpcWestPrimaries(primVtx) + uncorrectedNumberOfFtpcEastPrimaries(primVtx);
 }
 
 inline unsigned int

@@ -53,7 +53,7 @@ analysis make a different choice.
 #define EEMCSTAT_STKBT    0x0002 // sticky lower bits
 #define EEMCSTAT_HOTHT    0x0004 // masked for HT trigger
 #define EEMCSTAT_HOTJP    0x0008 // masked for JP trigger
-//                        0x010 is free
+#define EEMCSTAT_HIGPED   0x0010 // ped is very high but channel seems to work
 #define EEMCSTAT_HOTSTR   0x0020 // hot esmd strip
 #define EEMCSTAT_JUMPED   0x0040 // jumpy/wide ped over several chan
 

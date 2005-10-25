@@ -168,7 +168,7 @@ Int_t StBET4pMaker::Make()
 
     if (0) {
 	//First look at global tracks to remove MIP response from BTOWers
-	TClonesArray& gtracks = *(uDst->globalTracks());
+	TObjArray& gtracks = *(uDst->globalTracks());
 	int nglobals =  gtracks.GetLast()+1;
     
 	for(int t=0; t<nglobals; ++t)  {
@@ -205,6 +205,9 @@ Int_t StBET4pMaker::Make()
 	    ++badflag;
 	    continue;
 	}
+	//MLM 8/17/05 -- adapt to use with multiple vertices:
+	if (track->dcaGlobal().mag()>3.) continue;
+
 	if (track->topologyMap().trackFtpcEast()==true || track->topologyMap().trackFtpcWest()==true) {
 	    ++ftpc;
 	    continue;

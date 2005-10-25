@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.46 2005/07/06 19:39:26 fisyak Exp $
+//  $Id: StFlowMaker.h,v 1.48 2005/08/23 20:29:43 oldi Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -67,7 +67,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.46 2005/07/06 19:39:26 fisyak Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.48 2005/08/23 20:29:43 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -132,8 +132,8 @@ private:
   TChain*          pMuChain;                  //! pointer to chain of mu-DST files
   StMuEvent*       pMuEvent;                  //! pointer to Mu-DST Event
   TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array
-  TClonesArray*    pMuTracks;                 //! Mu-DST Primary Tracks
-  TClonesArray*    pMuGlobalTracks;           //! Mu-DST Global Tracks
+  TObjArray*       pMuTracks;                 //! Mu-DST Primary Tracks
+  TObjArray*       pMuGlobalTracks;           //! Mu-DST Global Tracks
 
   Float_t          CalcDcaSigned(const StThreeVectorF pos, 
 				 const StTrack* track);
@@ -179,6 +179,12 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.48  2005/08/23 20:29:43  oldi
+//  Latest fix to comply with MuDst changes.
+//
+//  Revision 1.47  2005/08/19 19:49:13  oldi
+//  Change to be in compliance with recent changes in the MuDsts.
+//
 //  Revision 1.46  2005/07/06 19:39:26  fisyak
 //  use templated version of StThreeVectorF and StPhysicalHelixD
 //
