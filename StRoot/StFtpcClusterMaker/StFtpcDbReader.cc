@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.30 2005/10/24 13:43:01 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.31 2005/10/25 14:38:28 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.31  2005/10/25 14:38:28  jcs
+// correct electronicsTable definition used for StFtpcSlowSimMaker
+//
 // Revision 1.30  2005/10/24 13:43:01  jcs
 // If microsecondsPerTimebin calculated from RHIC clock frequency, store in
 // Calibrations_ftpc/ftpcElectronics database table. Otherwise get default
@@ -434,7 +437,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   }
 
   //  just copy electronics table start to pointer
-  ftpcElectronics_st* electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
    mTZero = electronicsTable->tZero;
    mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
