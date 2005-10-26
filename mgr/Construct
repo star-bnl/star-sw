@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.153 2005/10/13 15:20:29 jeromel Exp $
+# $Id: Construct,v 1.154 2005/10/26 21:41:30 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -62,28 +62,7 @@ $LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{MYSQL}->{LIBDIR};
 $LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{QT}->{LIBDIR};
 $LIBPATH .= $main::PATH_SEPARATOR . $def->{ENV}->{OPTSTAR} . "/lib";
 print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
-my $ROOTLIBS = "";
-my $ROOTGLIBS = "";
-my $RINTLIBS  = "-lRint ";
 
-if ( defined( $ARG{ROOTLIBS} ) ) {
-    $ROOTLIBS = $ARG{ROOTLIBS};
-    print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
-
-} else {
-  if ( defined( $ARG{YesNew} ) ) { $ROOTLIBS = " -lNew "; }
-  if( $ENV{ROOT_LEVEL} gt "3.02.00"){
-      # New root scheme
-      $ROOTLIBS .=
-	  " -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics";
-  } else {
-      # Old 'cons' build root scheme.
-      $ROOTLIBS .=
-	  " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
-  }
-  print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
-  
-}
 #if ( defined( $ARG{CPPPATH} ) ){$CPPPATH = $ARG{CPPPATH};}
 #if ( defined( $ARG{FCPATH}  ) ){$FCPATH = $ARG{FCPATH};}
 ( my $DirPath = cwd() ) =~ s/\/$//g;
@@ -138,12 +117,8 @@ print "Link $BUILD => $DirPath\n" unless ($param::quiet);
 #  'CPPPATH'        => $CPPPATH,
 #  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
 #  'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
-
 $env = new cons(
   'LIBPATH'        => $LIBPATH,
-  'ROOTLIBS'       => $ROOTLIBS,
-  'ROOTGLIBS'      => $ROOTGLIBS,
-  'RINTLIBS'       => $RINTLIBS
 );
 Ignore qw(
   include/geant321/incbeg.inc
@@ -174,6 +149,7 @@ if ( !$param::quiet ) {
 		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries br
 		 SO SOFLAGS br 
 		 LIBG2C LIBSTDC br
+		 ROOTLIBS br
 		);
   my $tab = "";
   foreach my $p ( @list ) {
