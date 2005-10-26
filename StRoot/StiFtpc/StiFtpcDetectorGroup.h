@@ -3,14 +3,13 @@
 
 #include "Sti/StiDetectorGroup.h"
 class StEvent;
-class StMcEvent;
 class StiDetectorBuilder;
 
 /*! Convenience class defining the FTPC detector group
   <p>
   \author Claude A Pruneau, Wayne State University
 */
-class StiFtpcDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
+class StiFtpcDetectorGroup : public StiDetectorGroup<StEvent>
 {
   public:
   StiFtpcDetectorGroup(bool active, const string & inputFile);

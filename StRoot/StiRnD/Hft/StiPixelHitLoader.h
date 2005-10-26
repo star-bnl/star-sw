@@ -3,7 +3,6 @@
 #include "Sti/StiHitLoader.h"
 
 class StEvent;
-class StMcEvent;
 class StiDetectorBuilder;
 class StTpcHit;
 
@@ -17,28 +16,20 @@ This class is substantially morphed from the class StiHitFiller
 originally written by Mike Miller.
 \author Claude A Pruneau (Wayne)
 */
-class StiPixelHitLoader : public StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>
+class StiPixelHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
 {
 public:
   StiPixelHitLoader();
   StiPixelHitLoader(StiHitContainer * hitContainer,
-                    StiHitContainer * mcHitContainer,
                     Factory<StiHit> * hitFactory,
                     StiDetectorBuilder * detector);
   virtual ~StiPixelHitLoader();
   virtual void loadHits(StEvent* source,
                         Filter<StiTrack> * trackFilter,
                         Filter<StiHit> * hitFilter);
-  virtual void loadMcHits(StMcEvent* source,bool useMcAsRec,
-                          Filter<StiTrack> * trackFilter,
-                          Filter<StiHit> * hitFilter,
-                          StMcTrack & stMcTrack,
-                          StiMcTrack & stiMcTrack);
-
  protected:
   // temporary hit ptr used to determine whether mc hits from a given event are
   // already loaded.
-  StMcPixelHit * saveHit;
 };
 
 #endif

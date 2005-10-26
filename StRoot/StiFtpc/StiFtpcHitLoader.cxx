@@ -11,17 +11,15 @@
 #include "Sti/StiDetectorFinder.h"
 #include "Sti/StiDetector.h"
 #include "StEvent.h"
-#include "StMcEvent.hh"
 
 StiFtpcHitLoader::StiFtpcHitLoader()
-  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("FtpcHitLoader")
+  : StiHitLoader<StEvent,StiDetectorBuilder>("FtpcHitLoader")
 {}
     
 StiFtpcHitLoader::StiFtpcHitLoader(StiHitContainer* hitContainer,
-				   StiHitContainer* mcHitContainer,
 				   Factory<StiHit>*hitFactory,
 				   StiDetectorBuilder*detector)
-  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("FtpcHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
+  : StiHitLoader<StEvent,StiDetectorBuilder>("FtpcHitLoader",hitContainer,hitFactory,detector)
 {}
 
 StiFtpcHitLoader::~StiFtpcHitLoader()

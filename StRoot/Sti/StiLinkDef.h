@@ -58,7 +58,6 @@
 //#pragma link C++ class StiMasterHitLoader;
 #pragma link C++ class StiMaterial;
 #pragma link C++ class StiMath;
-#pragma link C++ class StiMcTrack;
 #pragma link C++ class StiNeverActiveFunctor;
 #pragma link C++ class StiPlacement;
 #pragma link C++ class StiPlanarShape;

@@ -3,7 +3,6 @@
 
 #include "Sti/StiHitLoader.h"
 class StEvent;
-class StMcEvent;
 class StiDetectorBuilder;
 
 /*! \class StiSvtHitLoader
@@ -17,25 +16,18 @@ class StiDetectorBuilder;
 
   \author Claude A Pruneau (Wayne) and M.L. Miller (Yale Software)
  */
-class StiSvtHitLoader : public StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>
+class StiSvtHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
 {
 public:
 
 	StiSvtHitLoader();
 	StiSvtHitLoader(StiHitContainer      * hitContainer,
-			StiHitContainer      * mcHitContainer,
 			Factory<StiHit>      * hitFactory,
 			StiDetectorBuilder   * detector);
 	virtual ~StiSvtHitLoader();
 	virtual void loadHits(StEvent* source,
 			      Filter<StiTrack> * trackFilter, 
 			      Filter<StiHit> * hitFilter);
-	virtual void loadMcHits(StMcEvent* source,
-				bool useMcAsRec,
-				Filter<StiTrack> * trackFilter, 
-				Filter<StiHit> * hitFilter,
-				StMcTrack & stMcTrack,
-				StiMcTrack & stiMcTrack);
 	int getLayer(int svtLayer) const;
 	int getLadder(int svtLayer, int svtLadder) const;
 	

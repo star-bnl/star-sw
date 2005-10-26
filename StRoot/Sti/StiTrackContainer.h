@@ -4,7 +4,7 @@
   StiTrackContainer is a container of track based on the STL vector class.
   <p>
   StiTrackContainer is polymorphic and can hold all forms of StiTrack objects. That includes in
-  particular StiKalmanTrack and StiMcTrack.
+  particular StiKalmanTrack.
 
   \author M.L. Miller (Yale Software)
   \author C.A. Pruneau(Wayne State University)

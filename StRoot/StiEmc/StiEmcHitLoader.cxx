@@ -11,20 +11,18 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiDetector.h"
 #include "StEvent.h"
-#include "StMcEvent.hh"
 #ifndef ST_NO_NAMESPACES
 using namespace std;
 #endif
 
 StiEmcHitLoader::StiEmcHitLoader()
-  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("EmcHitLoader")
+  : StiHitLoader<StEvent,StiDetectorBuilder>("EmcHitLoader")
 {}
     
 StiEmcHitLoader::StiEmcHitLoader(StiHitContainer* hitContainer,
-				 StiHitContainer* mcHitContainer,
 				 Factory<StiHit>*hitFactory,
 				 StiDetectorBuilder*detector)
-  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("EmcHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
+  : StiHitLoader<StEvent,StiDetectorBuilder>("EmcHitLoader",hitContainer,hitFactory,detector)
 {}
 
 StiEmcHitLoader::~StiEmcHitLoader()

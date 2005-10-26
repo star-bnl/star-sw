@@ -4,17 +4,10 @@
 
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
-#include "StMcHit.hh"
-#include "StMcSvtHit.hh"
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
 #include "Sti/Base/Factory.h"
 #include "StiSvt/StiSvtHitLoader.h"
 #include "Sti/StiHit.h"
 #include "Sti/StiTrack.h"
-#include "Sti/StiMcTrack.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiDetectorFinder.h"
@@ -22,14 +15,13 @@
 #include "Sti/StiHitTest.h"
 
 StiSvtHitLoader::StiSvtHitLoader()
-: StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SvtHitLoader")
+: StiHitLoader<StEvent,StiDetectorBuilder>("SvtHitLoader")
 {}
 
 StiSvtHitLoader::StiSvtHitLoader(StiHitContainer* hitContainer,
-                                 StiHitContainer* mcHitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder*detector)
-: StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SvtHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
+: StiHitLoader<StEvent,StiDetectorBuilder>("SvtHitLoader",hitContainer,hitFactory,detector)
 {}
 
 StiSvtHitLoader::~StiSvtHitLoader()
@@ -100,39 +92,6 @@ void StiSvtHitLoader::loadHits(StEvent* source,
   cout <<"StiSvtHitLoader::loadHits() -I- SVT Hits added:"<<hitCounter<<endl;
   cout <<"StiSvtHitLoader::loadHits() -I- Hit Container size:"<<_hitContainer->size()<<endl;
   cout <<"StiSvtHitLoader::loadHits() -I- Done"<<endl;
-}
-
-
-void StiSvtHitLoader::loadMcHits(StMcEvent* source,
-                                 bool useMcAsRec,
-                                 Filter<StiTrack> * trackFilter,
-                                 Filter<StiHit> * hitFilter,
-                                 StMcTrack & stMcTrack,
-                                 StiMcTrack & stiMcTrack)
-{
-  const StPtrVecMcSvtHit& hits = stMcTrack.svtHits();
-  //cout<< "StiSvtHitLoader::loadMcHits() -I- size():"<< hits.size() << endl;
-  for (vector<StMcSvtHit*>::const_iterator iterHit = hits.begin();
-       iterHit != hits.end();
-       iterHit++)
-    {
-    StMcSvtHit*hit=*iterHit;
-    if (!hit)	throw runtime_error("StiSvtHitLoader::loadMcHits(...) -E- hit==0");
-    int svtLayer = hit->layer();
-    int svtLadder = hit->ladder();
-    int layer = getLayer(svtLayer);
-    int ladder = getLadder(svtLayer,svtLadder);
-    StiDetector * detector = _detector->getDetector(layer,ladder);
-    if (!detector) throw runtime_error("StiSvtHitLoader::loadMcHits(...) -E- Detector element not found");
-    StiHit * stiHit = _hitFactory->getInstance();
-    if(!stiHit) throw runtime_error("StiSvtHitLoader::loadMcHits(...) -E- stiHit==0");
-    stiHit->reset();
-    stiHit->setGlobal(detector,0,hit->position().x(),hit->position().y(),hit->position().z(),hit->dE());
-    _mcHitContainer->add( stiHit );
-    //cout << "StiSvtHitLoader::loadMcHits() -I- Adding " << *stiHit << endl;
-    stiMcTrack.addHit(stiHit);
-    if (useMcAsRec)  _hitContainer->add( stiHit );
-    }
 }
 
 

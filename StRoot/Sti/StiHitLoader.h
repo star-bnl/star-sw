@@ -9,10 +9,8 @@
 #include "Sti/StiToolkit.h"
 class StiHit;
 class StiTrack;
-class StiMcTrack;
 class StiHitContainer;
 class StiTrackContainer;
-class StMcTrack;
 
 /*!
   \class StiHitLoader
@@ -33,7 +31,7 @@ class StMcTrack;
   \author Claude A Pruneau (Wayne) and M.L. Miller (Yale Software)
 */
 
-template <class Source1, class Source2, class Detector>
+template <class Source1, class Detector>
 class StiHitLoader : public Named
 {
  public:
@@ -41,151 +39,95 @@ class StiHitLoader : public Named
   StiHitLoader(const string & name);
   StiHitLoader(const string & name,
 	       StiHitContainer* hitContainer,
-	       StiHitContainer* mcHitContainer,
 	       Factory<StiHit>*hitFactory,
 	       Detector * detector);
   virtual ~StiHitLoader();
   virtual void loadEvent(Source1 *source1, 
-			 Source2 *source2,	
 			 Filter<StiTrack> * trackFilter, 
 			 Filter<StiHit>   * hitFilter);
   virtual void loadHits(Source1 * source,	
 			Filter<StiTrack> * trackFilter, 
 			Filter<StiHit>   * hitFilter); 
-  virtual void loadMcHits(Source2 * source,
-			  bool useMcAsRec,	
-			  Filter<StiTrack> * trackFilter, 
-			  Filter<StiHit>   * hitFilter,
-			  StMcTrack & stMcTrack,
-			  StiMcTrack & stiMcTrack);
   virtual void setHitContainer(StiHitContainer* hitContainer);
-  virtual void setMcHitContainer(StiHitContainer* hitContainer);
   virtual void setHitFactory(Factory<StiHit>*hitFactory);
   virtual void setDetector(Detector*detector);
   virtual Detector* getDetector(); 
-  virtual void setUseMcAsRec(bool value);
-  virtual bool useMcAsRec() const;
  protected:
   StiHitContainer     * _hitContainer;
-  StiHitContainer     * _mcHitContainer;
   StiTrackContainer   * _trackContainer;
-  StiTrackContainer   * _mcTrackContainer;
   Factory<StiHit>     * _hitFactory;
   Factory<StiKalmanTrack> * _trackFactory;
-  Factory<StiMcTrack> * _mcTrackFactory;
   Detector            * _detector;
   StiDetectorFinder   * _detectorFinder;
-  bool                _useMcAsRec;
 };
 
-template<class Source1, class Source2, class Detector>
-StiHitLoader<Source1, Source2,Detector>::StiHitLoader(const string & name)
+template<class Source1, class Detector>
+StiHitLoader<Source1, Detector>::StiHitLoader(const string & name)
   :  Named(name),
      _hitContainer(StiToolkit::instance()->getHitContainer()),
-     _mcHitContainer(StiToolkit::instance()->getMcHitContainer()),
      _trackContainer(StiToolkit::instance()->getTrackContainer()),
-     _mcTrackContainer(StiToolkit::instance()->getMcTrackContainer()),
      _hitFactory(StiToolkit::instance()->getHitFactory()),
      _trackFactory(StiToolkit::instance()->getTrackFactory()),
-     _mcTrackFactory(StiToolkit::instance()->getMcTrackFactory()),
      _detector(0),
      _detectorFinder(StiDetectorFinder::instance())
 {}
     
-template<class Source1, class Source2, class Detector>
-StiHitLoader<Source1, Source2,Detector>::StiHitLoader(const string & name,
+template<class Source1, class Detector>
+StiHitLoader<Source1, Detector>::StiHitLoader(const string & name,
 					    StiHitContainer* hitContainer,
-					    StiHitContainer* mcHitContainer,
 					    Factory<StiHit>*hitFactory,
 					    Detector * detector)
   :  Named(name),
      _hitContainer(hitContainer),
-     _mcHitContainer(mcHitContainer),
      _trackContainer(StiToolkit::instance()->getTrackContainer()),
-     _mcTrackContainer(StiToolkit::instance()->getMcTrackContainer()),
      _hitFactory(hitFactory),
      _trackFactory(StiToolkit::instance()->getTrackFactory()),
-     _mcTrackFactory(StiToolkit::instance()->getMcTrackFactory()),
      _detector(detector),
      _detectorFinder(StiDetectorFinder::instance())
 {}
 
-template<class Source1, class Source2, class Detector>
-StiHitLoader<Source1, Source2,Detector>::~StiHitLoader()
-{}
+template<class Source1, class Detector>StiHitLoader<Source1, Detector>::~StiHitLoader(){}
 
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1, 
-							Source2 * source2,
+template<class Source1, class Detector>
+void StiHitLoader<Source1, Detector>::loadEvent(Source1 *source1, 
 							Filter<StiTrack> * trackFilter, 
 							Filter<StiHit> * hitFilter)
 {
   cout << "Loader "<<_name<<" loading event"<<endl;
-  /*if (source1 && !_useMcAsRec)
-    loadHits(source1,trackFilter,hitFilter);
-  if (source2)
-  loadMcHits(source2,_useMcAsRec,trackFilter,hitFilter);*/
 }
 
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::setHitContainer(StiHitContainer* hitContainer)
+template<class Source1, class Detector>
+void StiHitLoader<Source1,Detector>::setHitContainer(StiHitContainer* hitContainer)
 {
   _hitContainer = hitContainer;
 }
  
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::setMcHitContainer(StiHitContainer* mcHitContainer)
-{
-  _mcHitContainer = mcHitContainer;
-}
     
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
+template<class Source1, class Detector>
+void StiHitLoader<Source1,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
 {
   _hitFactory = hitFactory;
 }
 
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::setDetector(Detector *detector)
+template<class Source1,class Detector>
+void StiHitLoader<Source1,Detector>::setDetector(Detector *detector)
 {
   _detector = detector;
 }
 
-template<class Source1, class Source2, class Detector>
-Detector* StiHitLoader<Source1, Source2,Detector>::getDetector()
+template<class Source1,class Detector>
+Detector* StiHitLoader<Source1,Detector>::getDetector()
 {
   return _detector;
 }
 
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::setUseMcAsRec(bool value)
-{
-  _useMcAsRec = value;
-}
 
-template<class Source1, class Source2, class Detector>
-bool StiHitLoader<Source1, Source2,Detector>::useMcAsRec() const
-{
-  return _useMcAsRec;
-}
-
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadHits(Source1 * source,
+template<class Source1,class Detector>
+void StiHitLoader<Source1,Detector>::loadHits(Source1 * source,
 						       Filter<StiTrack> * trackFilter, 
 						       Filter<StiHit> * hitFilter)
 {
-  cout << "StiHitLoader<Source1, Source2,Detector>::loadHits( ... ) -E- Called for "<<_name<<endl;
-}
-
-template<class Source1, class Source2, class Detector>
-void StiHitLoader<Source1, Source2,Detector>::loadMcHits(Source2 * source
-							,bool useMcAsRec
-							,Filter<StiTrack> * trackFilter 
-							,Filter<StiHit> * hitFilter
-							,StMcTrack  &stMcTrack
-							,StiMcTrack &stiMcTrack)
-{
-  cout << "StiHitLoader<Source1, Source2,Detector>::loadMcHits( ... ) -E- Called for "<<_name<<endl;
+  cout << "StiHitLoader<Source1,Detector>::loadHits( ... ) -E- Called for "<<_name<<endl;
 }
 
 #endif

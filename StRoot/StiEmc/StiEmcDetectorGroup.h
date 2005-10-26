@@ -4,14 +4,13 @@
 #include "Sti/StiDetectorGroup.h"
 
 class StEvent;
-class StMcEvent;
 class StiDetectorBuilder;
 
 /*! Convenience class defining the EMC detector group
   <p>
   \author Claude A Pruneau, Wayne State University
 */
-class StiEmcDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
+class StiEmcDetectorGroup : public StiDetectorGroup<StEvent>
 {
   public:
   StiEmcDetectorGroup(bool active, const string & inputFile);

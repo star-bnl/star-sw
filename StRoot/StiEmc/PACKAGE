@@ -1,0 +1,5 @@
+# $Id $
+# package StiEmc
+# author: 
+Library:libStiEmc.so:LIBS +=  -l_StEvent -l_StMcEventMaker  -lStChain -lSti -lStiGui -lGui
+#Library:libStiEmc.so:LIBS +=   -lStEvent  -lStiGui  -lSti

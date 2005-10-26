@@ -5,17 +5,11 @@
 #include "Sti/Base/Described.h"
 #include "Sti/StiDetectorGroup.h"
 
-template<class Event, class McEvent>
-class StiDetectorGroups : public Named, public Described, public vector<StiDetectorGroup<Event,McEvent>* >
+template<class Event>
+class StiDetectorGroups : public Named, public Described, public vector<StiDetectorGroup<Event>* >
 {
 public:
-    StiDetectorGroups(const string &name,const string &description);
-    virtual ~StiDetectorGroups(){}; 
+    StiDetectorGroups(const string &name,const string &description) : Named(name), Described(description) {}
+    virtual ~StiDetectorGroups() {} 
 };
-
-template<class Event, class McEvent>
-StiDetectorGroups<Event,McEvent>::StiDetectorGroups(const string &name,const string &description )
-  : Named(name),
-    Described(description)
-{}
 #endif 
