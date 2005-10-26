@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.481 2005/10/06 18:58:05 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.482 2005/10/26 21:51:47 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -279,19 +279,19 @@ Int_t StBFChain::Instantiate()
     if (maker == "StiMaker") {
       TString cmd(Form("StiMaker *stiMk = (StiMaker*) %p;",mk));
       cmd += "StiToolkit  * tk   = stiMk->getToolkit();";
-      cmd += "if (! tk)  { tk   = new StiDefaultToolkit();";
-      cmd += "tk->setGuiEnabled(kFALSE);tk->setMcEnabled(kFALSE);}";
+      cmd += "if (! tk)  { tk   = new StiDefaultToolkit();}";
+      //      cmd += "tk->setGuiEnabled(kFALSE);tk->setMcEnabled(kFALSE);}";
       cmd += "StiMakerParameters * pars = stiMk->getParameters();";
       cmd += "if ( ! pars ) {pars = new StiMakerParameters();stiMk->setParameters(pars);}";
-      cmd += "pars->useGui        = kFALSE;";
-      cmd += "pars->useMcAsRec    = kFALSE;";
-      cmd += "pars->doSimulation  = kFALSE;";
-      cmd += "pars->doAssociation = kFALSE;";
+      //      cmd += "pars->useGui        = kFALSE;";
+      //      cmd += "pars->useMcAsRec    = kFALSE;";
+      //      cmd += "pars->doSimulation  = kFALSE;";
+      //      cmd += "pars->doAssociation = kFALSE;";
       cmd += "pars->doPlots       = kFALSE;";
       cmd += "pars->useTpc        = kTRUE;";
       cmd += "pars->activeTpc     = kTRUE;";
-      cmd += "pars->doStEventInput= kTRUE;"; // We always want to have this I think?
-      cmd += "pars->doStEventOutput=kTRUE;";
+      //      cmd += "pars->doStEventInput= kTRUE;"; // We always want to have this I think?
+      //      cmd += "pars->doStEventOutput=kTRUE;";
       cmd += "pars->useSvt=kTRUE;";         // SVT used in Sti but not active. ??
       // Pre-2001 data, will build only 1 ladder?
       //pars->useSsd=kTRUE;         // use SSD in Sti
