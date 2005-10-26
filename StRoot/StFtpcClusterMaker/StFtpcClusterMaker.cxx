@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.80  2005/10/26 14:01:09  jcs
+// Set gas temperature to default values when running fss so that database
+// values are printed out only once
+//
 // Revision 1.79  2005/10/14 07:29:01  jcs
 // Calculate microsecondsPerTimebin from RHIC ClockFrequency
 // If RHIC ClockFrequency = 0, use default value from database
@@ -663,6 +667,10 @@ Int_t StFtpcClusterMaker::Make()
 
       gMessMgr->Message("", "I", "OS") << "created StFTPCReader from tables" << endm;
       using_FTPC_slow_simulator = 1;
+  
+      // Set gas temperature to default values so that database values printed only once
+      paramReader.setGasTemperatureWest(dbReader.defaultTemperatureWest());
+      paramReader.setGasTemperatureEast(dbReader.defaultTemperatureEast());
     }
     else {
       
