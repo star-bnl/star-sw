@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.86 2005/10/06 18:49:59 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.88 2005/10/26 21:41:29 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -60,6 +60,29 @@
     if ( !$ROOT )       { $ROOT       = $AFS_RHIC."/star/ROOT"; }
     if ( !$ROOT_LEVEL ) { $ROOT_LEVEL = "2.25.01"; }
     if ( !$ROOTSYS )    { $ROOTSYS    = $ROOT . "/" . $ROOT_LEVEL; }
+    my $rootlibs = `root-config --nonew --libs`; chomp($rootlibs);
+    my @List = ();
+    my $threadlib = "";
+    foreach my $f (split ' ', $rootlibs) {
+      next if $f =~ /^-L/;
+      if ($f =~ /thread/) {$threadlib = " " . $f; next;}
+      next if $f !~ /^-l/ or $f eq '-lm' or $f eq '-ldl';
+      push @List, $f;
+    }
+    my $ROOTLIBS = join ' ', @List;
+#    print "ROOTLIBS = $ROOTLIBS   threadlib = $threadlib\n";
+    my $rootcflags = `root-config --cflags`; chomp($rootcflags);
+    my $ROOTCFLAGS = "";
+    @List = ();
+    foreach my $f (split ' ', $rootcflags) {
+      next if $f =~ /^-I/;
+      push @List, $f;
+    }
+    if ($#List >= 0) {
+      $ROOTCFLAGS = " " . join ' ', @List;
+    } 
+# print "ROOTCFLAGS = $ROOTCFLAGS\n";
+# die;
     $SRPDIR   = $ROOTSYS . "/lib";
     $SRPFLAGS = "";                  # -DR__SRP -I" . $SRPDIR . "/include";
     $SRPLIBS  = "";                  # -L" . $SRPDIR . "/lib -lsrp -lgmp";
@@ -284,10 +307,11 @@
         if ($CXX_VERSION < 3) {
 	  $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
 	}
-      # else {$OSFID .= " ST_NO_MEMBER_TEMPLATES";}
-            # ansi works only with gcc3.2 actually ...
-	    # may be removed later ...
-      $CXXFLAGS    .= " -ansi";
+      else {
+            # ansi works only with gcc3.2 actually ... may be removed later ...
+	$CXXFLAGS    .= " -ansi";
+      }
+
       if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } # -fpermissive ?
       #	  else {
       #	  print "CXXFLAGS = $CXXFLAGS\n"; die;
@@ -444,8 +468,13 @@
             $SO  = $CXX;
 	    $F77LD         = $LD;
         }
+    } else {
+      die "Unsupported platform $STAR_HOST_SYS\n";
     }
-
+    $SYSLIBS   .= $threadlib;
+    $CLIBS     .= $threadlib;
+    $CFLAGS    .= $ROOTCFLAGS;
+    $CXXFLAGS  .= $ROOTCFLAGS;
     if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
     $OSFID    .= " __ROOT__";
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
@@ -456,12 +485,6 @@
     $ROOTSRC = $ROOTSYS . "/include";
 
     $CERNINO = $CERN_ROOT . "/include";
-#    $CERNINO = "";
-#    if (! $ENV{MINICERN}) {
-#      $CERNINO = $CERN_ROOT . "/include";
-#    } else {
-#      $CERNINO = "#StarVMC/minicern" . $main::PATH_SEPARATOR . "#StarVMC/StGeant321";
-#    }
 
     $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
     $CPPPATH .= $main::PATH_SEPARATOR;# . $CERNINO;
@@ -545,6 +568,7 @@
 		  'CPPFLAGS'      => $CPPFLAGS,
 		  'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
 		  'CERNLIB_CPPFLAGS' => $CERNLIB_CPPFLAGS,
+		  'ROOTLIBS'      => $ROOTLIBS,
 		  'DEBUG'         => $DEBUG,
 		  'FDEBUG'        => $FDEBUG,
 		  'NOOPT'         => $NOOPT,
@@ -666,6 +690,7 @@
 			  'BINDIR'=> $ROOTSYS . "/bin",
 			  'LIBDIR'=> $ROOTSYS . "/lib",
 			  'INCDIR'=> $ROOTSYS . "/include",
+			  'LIBS'  => $ROOTLIBS,
 			  'RLIBMAP'  => $RLIBMAP,
 			  'ROOTCINT' => $ROOTCINT
 			  },

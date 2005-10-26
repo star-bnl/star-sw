@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.151 2005/10/06 18:49:04 fisyak Exp $
+# $Id: Construct,v 1.154 2005/10/26 21:41:30 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -62,28 +62,7 @@ $LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{MYSQL}->{LIBDIR};
 $LIBPATH .= $main::PATH_SEPARATOR . $def->{Packages}->{QT}->{LIBDIR};
 $LIBPATH .= $main::PATH_SEPARATOR . $def->{ENV}->{OPTSTAR} . "/lib";
 print "Set LIB = $LIB BIN = $BIN OBJ = $OBJ INCLUDE = $INCLUDE LIBPATH = $LIBPATH\n";
-my $ROOTLIBS = "";
-my $ROOTGLIBS = "";
-my $RINTLIBS  = "-lRint ";
 
-if ( defined( $ARG{ROOTLIBS} ) ) {
-    $ROOTLIBS = $ARG{ROOTLIBS};
-    print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
-
-} else {
-  if ( defined( $ARG{YesNew} ) ) { $ROOTLIBS = " -lNew "; }
-  if( $ENV{ROOT_LEVEL} gt "3.02.00"){
-      # New root scheme
-      $ROOTLIBS .=
-	  " -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics";
-  } else {
-      # Old 'cons' build root scheme.
-      $ROOTLIBS .=
-	  " -lBase -lClib -lCont -lMeta -lNet -lUnix -lZip -lCint -lPhysics -lMatrix -lHist -lGpad -lGraf -lGraf3d -lTree -lGui -lGpad -lPhysics -lMatrix";
-  }
-  print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
-  
-}
 #if ( defined( $ARG{CPPPATH} ) ){$CPPPATH = $ARG{CPPPATH};}
 #if ( defined( $ARG{FCPATH}  ) ){$FCPATH = $ARG{FCPATH};}
 ( my $DirPath = cwd() ) =~ s/\/$//g;
@@ -138,12 +117,8 @@ print "Link $BUILD => $DirPath\n" unless ($param::quiet);
 #  'CPPPATH'        => $CPPPATH,
 #  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
 #  'EXTRA_CFLAGS'   => $EXTRA_CFLAGS,
-
 $env = new cons(
   'LIBPATH'        => $LIBPATH,
-  'ROOTLIBS'       => $ROOTLIBS,
-  'ROOTGLIBS'      => $ROOTGLIBS,
-  'RINTLIBS'       => $RINTLIBS
 );
 Ignore qw(
   include/geant321/incbeg.inc
@@ -174,6 +149,7 @@ if ( !$param::quiet ) {
 		 LD LDFLAGS EXTRA_LDFLAGS LIBPATH LIBS Libraries br
 		 SO SOFLAGS br 
 		 LIBG2C LIBSTDC br
+		 ROOTLIBS br
 		);
   my $tab = "";
   foreach my $p ( @list ) {
@@ -362,11 +338,11 @@ foreach $dir(@sysdirlist , @subdirs ) {
 #	next if $param::include && $dir !~ /$param::include/o;
 #	next if $param::exclude && $dir =~ /$param::exclude/o;
         print "Add dir : $dir\n" if $param::debug;
-#        push @Targets, $OBJ . "/" . $dir . "/Conscript";
+        #push @Targets, $OBJ . "/" . $dir . "/Conscript";
         push @packages, $dir;
     }
 }
-#print "packages $#packages : @packages\n";
+#print "Packages $#packages : @packages\n";
 @packages = sortu(@packages);
 my $qtRoot = "qtRoot";
 if ($param::include and $qtRoot =~ /$param::include/) {
@@ -375,10 +351,15 @@ if ($param::include and $qtRoot =~ /$param::include/) {
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
-print "Targets = @Targets\n" if $param::debug;
+#@Targets = map('#' . $_ . "/Conscript", @packages);
+
+if ($param::debug){
+    print "Packages $#packages : @packages\n";
+    print "Targets $#Targets   : @Targets\n" ;
+}
 Export qw( env CWD INCLUDE LIB BIN BUILD OBJ);
 Default qw (   .  );
-print "Debug ".join(" ",@Targets)."\n"if ($param::debug);
+
 Depends $env $STAR . "/mgr/RootCint.pl", $env->{ENV}->{ROOTSYS} . "/bin/rootcint";
 Build @Targets;
 #if ($env->{Packages}->{ROOT}->{RLIBMAP}) {
@@ -419,7 +400,7 @@ Build @Targets;
 #___________________________________________________________________________
 sub script::wanted_dead {
     -l and not -e and print "bogus link: $File::Find::name \t--- remove it\n"
-      and `rm $_`;
+      and unlink($_);
 }
 #____________________________________________________________
 sub script::PrintHash($$) {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.24 2005/07/06 18:49:56 fisyak Exp $
+ * $Id: StHelix.cc,v 1.26 2005/10/13 23:15:13 genevb Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
+ * Revision 1.26  2005/10/13 23:15:13  genevb
+ * Save a few calculations
+ *
+ * Revision 1.25  2005/10/13 22:25:35  genevb
+ * pathLength to plane now finds nearest approach to intersection regardless of # of loops
+ *
  * Revision 1.24  2005/07/06 18:49:56  fisyak
  * Replace StHelixD, StLorentzVectorD,StLorentzVectorF,StMatrixD,StMatrixF,StPhysicalHelixD,StThreeVectorD,StThreeVectorF by templated version
  *
@@ -104,6 +110,8 @@
 #ifdef __ROOT__
 ClassImpT(StHelix,double);
 #endif
+const double StHelix::NoSolution = 3.e+33;
+
 StHelix::StHelix(){ /*noop*/ }
 
 StHelix::StHelix(double c, double d, double phase,
@@ -424,12 +432,6 @@ double StHelix::pathLength(const StThreeVector<double>& r,
     // the max. largest value for s is returned.
     //
     double s;
-//#ifndef ST_NO_NUMERIC_LIMITS 
-//    const double NoSolution = numeric_limits<double>::max();
-//#else
-//    const double NoSolution = DBL_MAX;
-//#endif
-    const double NoSolution = 3.e+33;
 
     if (mSingularity) {
 	double t = n.z()*mSinDipAngle +
@@ -438,46 +440,61 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 	if (t == 0)
 	    s = NoSolution;
 	else
-	    s = (r*n - mOrigin*n)/t;
+	    s = ((r - mOrigin)*n)/t;
     }
     else {
         const double MaxPrecisionNeeded = micrometer;
         const int    MaxIterations      = 20;
         	
-	double A = mCurvature*(mOrigin*n - r*n) -
+	double A = mCurvature*((mOrigin - r)*n) -
 	           n.x()*mCosPhase - 
 	           n.y()*mSinPhase;
 	double t = mH*mCurvature*mCosDipAngle;
+	double u = n.z()*mCurvature*mSinDipAngle;
 	
 	double a, f, fp;
 	double sOld = s = 0;  
+	double shiftOld = 0;
+	double shift;
 //		(cos(angMax)-1)/angMax = 0.1
         const double angMax = 0.21;
-        int maxSteps = int((6.28/angMax)*1.1);
-        double deltas = fabs(angMax/mCurvature/mCosDipAngle);
+        double deltas = fabs(angMax/(mCurvature*mCosDipAngle));
+//              dampingFactor = exp(-0.5);
+	double dampingFactor = 0.60653;
+	int i;
 
-	for (int i=0; i<MaxIterations; i++) {
-	  if (i == MaxIterations) return NoSolution;
+	for (i=0; i<MaxIterations; i++) {
 	    a  = t*s+mPhase;
+            double sina = sin(a);
+            double cosa = cos(a);
 	    f  = A +
-		 n.x()*cos(a) +
-		 n.y()*sin(a) +
-		 n.z()*mCurvature*mSinDipAngle*s;
-	    fp = -n.x()*sin(a)*t +
-		  n.y()*cos(a)*t +
-		  n.z()*mCurvature*mSinDipAngle;
+		 n.x()*cosa +
+		 n.y()*sina +
+		 u*s;
+	    fp = -n.x()*sina*t +
+		  n.y()*cosa*t +
+		  u;
             if ( fabs(fp)*deltas <= fabs(f) ) { //too big step
-               i--;if ((maxSteps--)<0) return NoSolution;
                int sgn = 1;
                if (fp<0.) sgn = -sgn;
                if (f <0.) sgn = -sgn;
-               s -= sgn*deltas;
+	       shift = sgn*deltas;
+	       if (shift == -shiftOld) { // don't get stuck shifting +/-deltas
+	         deltas *= dampingFactor; // dampen magnitude of shift
+		 shift = sgn*deltas;
+		 // allow iterations to run out
+	       } else {
+	         i--; // don't count against iterations
+	       }
             } else {
-               s -= f/fp;
+               shift = f/fp;
             }
+	    s -= shift;
+	    shiftOld = shift;
 	    if (fabs(sOld-s) < MaxPrecisionNeeded) break;
 	    sOld = s;
 	}
+        if (i == MaxIterations) return NoSolution;
     }
     return s;
 }
@@ -485,12 +502,6 @@ double StHelix::pathLength(const StThreeVector<double>& r,
 pair<double, double>
 StHelix::pathLengths(const StHelix& h) const
 {
-//#ifndef ST_NO_NUMERIC_LIMITS 
-//    const double NoSolution = numeric_limits<double>::max();
-//#else
-//    const double NoSolution = DBL_MAX;
-//#endif
-    const double NoSolution = 3.e+33;
 
     //
     //	Cannot handle case where one is a helix

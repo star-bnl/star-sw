@@ -247,7 +247,7 @@
       call rzldir(' ',' ')
 
       call g2rin
-      call mapGen ! map for generic names
+
       call toroot(fname)
       lg = lenocc(gname)
       lf = lenocc(fname)
@@ -1175,9 +1175,9 @@ C
          ivod=q(jin+2)
          if (nvflags(ivod).eq.1) goto 996
          cname=' '
-         if(.not.map_found(iq(jvolum+ivod),cname)) then
+*         if(.not.map_found(iq(jvolum+ivod),cname)) then
             write(cname,'(a4)')iq(jvolum+ivod)
-         endif
+*         endif
             gname = ' '
             write(gname,'(a4)')iq(lq(jvolum-ivod)-4)
 *         Print 4445,iq(jvolum+ivod)
@@ -1213,13 +1213,12 @@ C
       end
 
       subroutine realname(cname, pname)
-      character *20 cname
+      character *4 cname
       character *20 pname
       nind = 0
       pname = ' '
-      n1 = lenocc(cname)
-      write(pname,'(a)')cname(1:n1) 
-      do i=1,n1
+      write(pname,'(a4)')cname 
+      do i=1,4
           nind = nind+1
           pname(nind:nind)=cname(i:i)
           if(ichar(cname(i:i)).eq.0) then 
@@ -1246,139 +1245,137 @@ C
       end      
       
       subroutine ptname(cname, pname)
-      character *20 cname
+      character *4 cname
       character *20 pname
       pname = ' '
-      n1 = lenocc(cname)
-      write(pname,'(a)')cname(1:n1) 
-      do i=1,n1
+      write(pname,'(a4)')cname 
+      do i=1,4
           if(ichar(cname(i:i)).eq.0) then 
              pname(i:i)='_'
-             !pname(5:5)='_'
+             pname(5:5)='_'
           endif
           if(ichar(cname(i:i)).eq.92) then 
              pname(i:i)='a'
-             !pname(5:5)='a'
+             pname(5:5)='a'
           endif
           if(cname(i:i).eq.'?') then 
              pname(i:i)='b'
-             !pname(5:5)='b'
+             pname(5:5)='b'
           endif
           if(cname(i:i).eq.'`') then
              pname(i:i)='c'
-             !pname(5:5)='c'
+             pname(5:5)='c'
           endif
           if(cname(i:i).eq.' ') then
              pname(i:i)='_'
           endif
           if(cname(i:i).eq.'+') then
              pname(i:i)='d'
-             !pname(5:5)='d'
+             pname(5:5)='d'
           endif
           if(cname(i:i).eq.'-') then
              pname(i:i)='e'
-             !pname(5:5)='e'
+             pname(5:5)='e'
           endif
           if(cname(i:i).eq.'*') then
              pname(i:i)='f'
-             !pname(5:5)='f'
+             pname(5:5)='f'
           endif
           if(cname(i:i).eq.'/') then
              pname(i:i)='g'
-             !pname(5:5)='g'
+             pname(5:5)='g'
           endif
           if(cname(i:i).eq.'.') then
              pname(i:i)='h'
-             !pname(5:5)='h'
+             pname(5:5)='h'
           endif
           if(cname(i:i).eq.'''') then
              pname(i:i)='i'
-             !pname(5:5)='i'
+             pname(5:5)='i'
           endif
           if(cname(i:i).eq.';') then
              pname(i:i)='j'
-             !pname(5:5)='j'
+             pname(5:5)='j'
           endif
           if(cname(i:i).eq.':') then
-             pname(i:i) = '_'
-             !pname(i:i)='k'
-             !pname(5:5)='k'
+             pname(i:i)='k'
+             pname(5:5)='k'
           endif
           if(cname(i:i).eq.',') then
              pname(i:i)='l'
-             !pname(5:5)='l'
+             pname(5:5)='l'
           endif
           if(cname(i:i).eq.'<') then
              pname(i:i)='m'
-             !pname(5:5)='m'
+             pname(5:5)='m'
           endif
           if(cname(i:i).eq.'>') then
              pname(i:i)='n'
-             !pname(5:5)='n'
+             pname(5:5)='n'
           endif
           if(cname(i:i).eq.'!') then
              pname(i:i)='o'
-             !pname(5:5)='o'
+             pname(5:5)='o'
           endif
           if(cname(i:i).eq.'@') then
              pname(i:i)='p'
-             !pname(5:5)='p'
+             pname(5:5)='p'
           endif
           if(cname(i:i).eq.'#') then
              pname(i:i)='q'
-             !pname(5:5)='q'
+             pname(5:5)='q'
           endif
           if(cname(i:i).eq.'$') then
              pname(i:i)='r'
-             !pname(5:5)='r'
+             pname(5:5)='r'
           endif
           if(cname(i:i).eq.'%') then
              pname(i:i)='s'
-             !pname(5:5)='s'
+             pname(5:5)='s'
           endif
           if(cname(i:i).eq.'^') then
              pname(i:i)='t'
-             !pname(5:5)='t'
+             pname(5:5)='t'
           endif
           if(cname(i:i).eq.'&') then
              pname(i:i)='u'
-             !pname(5:5)='u'
+             pname(5:5)='u'
           endif
           if(cname(i:i).eq.'(') then
              pname(i:i)='v'
-             !pname(5:5)='v'
+             pname(5:5)='v'
           endif
           if(cname(i:i).eq.')') then
              pname(i:i)='x'
-             !pname(5:5)='x'
+             pname(5:5)='x'
           endif
           if(cname(i:i).eq.'[') then
              pname(i:i)='y'
-             !pname(5:5)='y'
+             pname(5:5)='y'
           endif
           if(cname(i:i).eq.']') then
              pname(i:i)='z'
-             !pname(5:5)='z'
+             pname(5:5)='z'
           endif
           if(cname(i:i).eq.'{') then
              pname(i:i)='c'
-             !pname(5:5)='a'
+             pname(5:5)='a'
           endif
           if(cname(i:i).eq.'}') then
              pname(i:i)='c'
-             !pname(5:5)='b'
+             pname(5:5)='b'
           endif
           if(cname(i:i).eq.'=') then
              pname(i:i)='c'
-             !pname(5:5)='d'
+             pname(5:5)='d'
           endif
           if(cname(i:i).eq.'~') then
              pname(i:i)='c'
-             !pname(5:5)='e'
+             pname(5:5)='e'
           endif
           if(cname(i:i).eq.'|') then
              pname(i:i)='c'
-             !pname(5:5)='f'
+             pname(5:5)='f'
           endif
       enddo
       if ((ichar(pname(1:1)).ge.48).and.
@@ -1518,7 +1515,7 @@ C--------------------------------------------------------------
       subroutine create_map(fname)
       character*80 fname
 
-      Parameter (max_MAPS = 20000)
+      Parameter (max_MAPS = 1000)
       integer nmap,nalias,id(max_MAPS),ialias(max_MAPS)
       character*20 names(max_MAPS)
       common /maps_pool/ nmap,nalias,id,ialias,names
@@ -1587,7 +1584,7 @@ C-------------------------------------------------------------------
       integer idv
       character*20 name
 
-      Parameter (max_MAPS = 20000)
+      Parameter (max_MAPS = 1000)
       integer nmap,nalias,id(max_MAPS),ialias(max_MAPS)
       character*20 names(max_MAPS)
       common /maps_pool/ nmap,nalias,id,ialias,names
@@ -2098,76 +2095,3 @@ C
 *
   99  RETURN
       END
-      subroutine mapGen
-*KEEP,HCBOOK.
-      parameter (nwpaw=4000000)
-      common/pawc/paw(nwpaw)
-
-      INTEGER   IQ(2), LQ(8000)
-      REAL            Q(2)
-      EQUIVALENCE (LQ(1),paw(11)),(IQ(1),paw(19)),(Q(1),paw(19))
-
-      INTEGER       JDIGI ,JDRAW ,JHEAD ,JHITS ,JKINE ,JMATE ,JPART
-     +      ,JROTM ,JRUNG ,JSET  ,JSTAK ,JGSTAT,JTMED ,JTRACK,JVERTX
-     +      ,JVOLUM,JXYZ  ,JGPAR ,JGPAR2,JSKLT
-C
-      COMMON/GCLINK/JDIGI ,JDRAW ,JHEAD ,JHITS ,JKINE ,JMATE ,JPART
-     +      ,JROTM ,JRUNG ,JSET  ,JSTAK ,JGSTAT,JTMED ,JTRACK,JVERTX
-     +      ,JVOLUM,JXYZ  ,JGPAR ,JGPAR2,JSKLT
-C
-*KEEP,GCNUM.
-      COMMON/GCNUM/NMATE ,NVOLUM,NROTM,NTMED,NTMULT,NTRACK,NPART
-     +            ,NSTMAX,NVERTX,NHEAD,NBIT
-*
-      Parameter (max_MAPS = 20000)
-      integer nmap,nalias,id(max_MAPS),ialias(max_MAPS)
-      character*20 names(max_MAPS)
-      common /maps_pool/ nmap,nalias,id,ialias,names
-
-      character*80 line
-      character*1 comment,blank
-      character*4 chid
-      character*4 cname, gname
-      nmap = 0
-      nalias = 0
-      IF(JVOLUM.NE.0 ) NVOLUM = IQ(JVOLUM-2)
-      do 50 ivo = 1,nvolum
-         if (lq(jvolum-ivo).eq.0)go to 50        ! <--  That's
-         call uhtoc(iq(jvolum+ivo),4,cname,4)    ! <--
-         call uhtoc(iq(lq(jvolum-ivo)-4),4,gname,4)    ! <--
-* has been fixed in phmdgeo         if (gname .eq. 'PHMT') gname = 'PHMS'
-         if (cname .eq. gname) go to 50
-         do  i=1,4
-            if (ichar(cname(i:i)).eq.0)cname(i:i) = ' '
-            if (ichar(gname(i:i)).eq.0)gname(i:i) = ' '
-         enddo
-         n1=lenocc(cname)
-         if(n1.lt.4)then
-            do  i=n1+1,4
-               cname(i:i)='&'
-            enddo
-         endif
-         n1=lenocc(gname)
-         if(n1.lt.4)then
-            do i=n1+1,4
-               gname(i:i)='&'
-            enddo 
-         endif
-         nmap = nmap + 1
-         if (nmap .gt. max_MAPS) then
-            write (*,*) 'limit on map has been reached'
-         else
-            id(nmap) = iq(jvolum+ivo)
-            names(nmap) = gname//':'//cname
-            ialias(nmap) = 0
-#if 0
-            write(*,*) 'name : ',cname,' gname :', gname, ' names: '
-     +           , names(nmap)
-            if (cname(1:3) .eq. 'PHM') then
-               write(*,*) 'name : ',cname,' gname :', gname
-               write(*,*) '=========================='
-            endif
-#endif
-         endif
- 50   continue
-      end

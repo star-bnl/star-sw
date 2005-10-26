@@ -1,4 +1,4 @@
-// $Id: StarMCHBPrimaryGenerator.cxx,v 1.2 2005/10/06 18:45:28 fisyak Exp $
+// $Id: StarMCHBPrimaryGenerator.cxx,v 1.1 2005/06/09 20:13:47 fisyak Exp $
 #include "StarMCHBPrimaryGenerator.h"
 #include "tables/St_particle_Table.h"
 #include "TDatabasePDG.h"
@@ -6,6 +6,7 @@
 ClassImp(StarMCHBPrimaryGenerator);
 struct HepEvent_t {
   Int_t            itrac;
+  Char_t           istat;
   particle_st          p;
 };
 //_____________________________________________________________________________
@@ -61,19 +62,6 @@ void StarMCHBPrimaryGenerator::GeneratePrimary(const TVector3& origin) {
 //_____________________________________________________________________________
 void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from HBOOK NTuple
   static HepEvent_t event;
-  static Int_t   &itrac = *(&event.itrac);
-  static Int_t   &ip    = *(&event.itrac);
-  static Int_t   &istat = *(&event.p.isthep);
-  static Int_t   &ipdg  = *(&event.p.idhep);
-  static Int_t   &moth1 = *(&event.p.jmohep[0]);
-  static Int_t   &moth2 = *(&event.p.jmohep[1]);
-  static Int_t   &idau1 = *(&event.p.jdahep[0]);
-  static Int_t   &idau2 = *(&event.p.jdahep[1]);
-  static Float_t *Pxyz  =   &event.p.phep[0];
-  static Float_t &ener  = *(&event.p.phep[3]);
-  static Float_t &mass  = *(&event.p.phep[4]);
-  static Float_t *Vxyz  =   &event.p.vhep[0];
-  static Float_t &Vtime = *(&event.p.vhep[3]);
   static St_particle *particle = 0;
   static Double_t ct = TMath::Ccgs()/0.1; // mm s^-1
   Double_t polx = 0, poly = 0, polz = 0;
@@ -86,16 +74,16 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
     fHBTree = (TTree*) fHBFile->Get(Form("h%i",fHbtId));
     assert(fHBTree);
     fHBTree->SetBranchAddress("itrac",&event.itrac);
-    fHBTree->SetBranchAddress("istat",&event.p.isthep);
-    fHBTree->SetBranchAddress("ipdg" ,&event.p.idhep);
+    fHBTree->SetBranchAddress("istat",&event.istat);
+    fHBTree->SetBranchAddress("ipdg",&event.p.idhep);
     fHBTree->SetBranchAddress("moth1",&event.p.jmohep[0]);
     fHBTree->SetBranchAddress("moth2",&event.p.jmohep[1]);
     fHBTree->SetBranchAddress("idau1",&event.p.jdahep[0]);
     fHBTree->SetBranchAddress("idau2",&event.p.jdahep[1]);
-    fHBTree->SetBranchAddress("Pxyz" ,&event.p.phep[0]);
-    fHBTree->SetBranchAddress("ener" ,&event.p.phep[3]);
-    fHBTree->SetBranchAddress("mass" ,&event.p.phep[4]);
-    fHBTree->SetBranchAddress("Vxyz" ,&event.p.vhep[0]);
+    fHBTree->SetBranchAddress("Pxyz",&event.p.phep[0]);
+    fHBTree->SetBranchAddress("ener",&event.p.phep[3]);
+    fHBTree->SetBranchAddress("mass",&event.p.phep[4]);
+    fHBTree->SetBranchAddress("Vxyz",&event.p.vhep[0]);
     fHBTree->SetBranchAddress("Vtime",&event.p.vhep[3]);
     fnEntries = fHBTree->GetEntriesFast();
     fEntry = 0;
@@ -114,18 +102,16 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
   Int_t NpHEP = 0;
   Int_t NPrim = 0;
   Int_t IdGen = 0;
-  particle_st header;
-  Int_t   *IdEvHep =   &header.jmohep[0];
-  Float_t &Mass    = *(&header.phep[4]);
-  Float_t *Hpar    =   &header.phep[0];
-  Float_t *Comp    =   &header.vhep[0];
-  header.isthep    = -1;
   for (; fEntry<fnEntries;fEntry++) {
     Long64_t ientry = fHBTree->LoadTree(fEntry);
     if (ientry < 0) break;
     nb = fHBTree->GetEntry(fEntry);   nbytes += nb;
+    event.p.isthep = event.istat;
+    if (event.istat > 10 && event.p.idhep > 999990) {
+      NpHEP = event.itrac;
+      if (event.p.idhep  <= 999996) event.p.idhep = 999997 - event.p.idhep;
+    }
     if (Debug()) {
-#if 0
       printf("%5i%5i%4i%7i%5i%5i%5i%5i",
 	     (int) ientry, event.itrac, event.p.isthep, event.p.idhep, 
 	     event.p.jmohep[0],event.p.jmohep[1], 
@@ -133,43 +119,17 @@ void StarMCHBPrimaryGenerator::GeneratePrimaries() {// generate primaries from H
       printf("%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n",
 	     event.p.phep[0], event.p.phep[1], event.p.phep[2], event.p.phep[3], event.p.phep[4], 
 	     event.p.vhep[0], event.p.vhep[1], event.p.vhep[2], event.p.vhep[3]);	     
-#endif
-      printf("%5i%5i%4i%7i%5i%5i%5i%5i",
-	     (int) ientry, itrac, istat, ipdg, 
-	     moth1,moth2, 
-	     idau1,idau2);
-      printf("%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n",
-	     Pxyz[0], Pxyz[1], Pxyz[2], ener, mass, 
-	     Vxyz[0], Vxyz[1], Vxyz[2], Vtime);	     
     }
-    if (istat >= 10) {
-      if (ipdg > 999990) {
-	if (ipdg == 999999) {
-	  for (Int_t i = 0; i < 4; i++) IdEvHep[i] = (int) Pxyz[i]; Mass = Pxyz[4];
-	  NpHEP=ip;
-	} else {
-	  if ( ipdg == 999998) {for (Int_t i = 0; i < 4; i++) Hpar[i] = Pxyz[i];}
-	  else {
-	    if ( ipdg== 999997)  {for (Int_t i = 0; i < 4; i++) Comp[i] = Pxyz[i];}
-	  }
-	}
-	header.isthep = istat;
-	header.idhep  = ipdg;
-      }
-    } else {
-      if (! NPrim && header.isthep > 0) particle->AddAt(&header);
-      if (particle) {particle->AddAt(&event.p.isthep); IdGen = particle->GetNRows();}
+    if (particle) {particle->AddAt(&event.p.isthep); IdGen = particle->GetNRows();}
+    if (event.istat < 10) {
       if ( TDatabasePDG::Instance()->GetParticle(event.p.idhep)) {
 	// Add particle to stack 
 	Int_t parent = event.p.jmohep[0] - 1;
 	toBeDone = 1;
 	if (event.p.isthep >= 2 || event.p.jdahep[0] || event.p.jdahep[1]) toBeDone = 0;
 	((StarMCStack *)fStack)->PushTrack(toBeDone, parent, event.p.idhep, 
-					   event.p.phep[0], event.p.phep[1], 
-					   event.p.phep[2], event.p.phep[3],// px, py, pz, e, 
-					   fOrigin.x()+event.p.vhep[0]/10, 
-					   fOrigin.y()+event.p.vhep[1]/10, 
-					   fOrigin.z()+event.p.vhep[2]/10, 
+					   event.p.phep[0], event.p.phep[1], event.p.phep[2], event.p.phep[3],// px, py, pz, e, 
+					   fOrigin.x()+event.p.vhep[0]/10, fOrigin.y()+event.p.vhep[1]/10, fOrigin.z()+event.p.vhep[2]/10, 
 					   event.p.vhep[3]/ct,//vx, vy, vz, tof, (mm->cm) 
 					   polx, poly, polz, 
 					   kPPrimary, ntr, 1., IdGen); // mech, &ntr, weight, status
