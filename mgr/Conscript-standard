@@ -460,7 +460,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  $env2->{ENV}->{STICTMP} = "/tmp/$<$$";
 	  my $stic_cmd = 
 	      "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
-	      "/bin/mkdir \$STICTMP && cd \$STICTMP && ".
+	      "/bin/mkdir -m 777 \$STICTMP && cd \$STICTMP && ".
 	      "$STIC -s -r $STIC_CPPPATH -q %<:a && /bin/mv %>:f %>:a && ".
 	      "cd /tmp  &&  /bin/rm -rf \$STICTMP";
 	Command $env2 [$modh], @idlS, qq($stic_cmd);
@@ -636,7 +636,8 @@ if ( $#idlL > -1 ) {
 	if ( $STAR_SYS !~ /^intel_wnt$/ ) {
 	    $env3->{ENV}->{STICTMP} = "/tmp/$<$$";
 	    my $stic_cmd  = 
-		"/bin/mkdir -p \$STICTMP && cd \$STICTMP && ".
+	      "test -d \$STICTMP && /bin/rm -rf \$STICTMP ; ".
+		"/bin/mkdir -p -m 777 \$STICTMP && cd \$STICTMP && ".
 		"$STIC -q %<:a && ".
 		"(/bin/mv %>:f %>:a ; cd /tmp ; /bin/rm -rf \$STICTMP)";
 	  Command $env3 [$idlh], @Deps, qq ($stic_cmd);
