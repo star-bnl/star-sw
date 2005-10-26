@@ -1,5 +1,9 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.28 2005/03/23 14:33:18 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.29 2005/10/26 14:07:32 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.29  2005/10/26 14:07:32  jcs
+// Calculate  microsecondsPerTimebin from RHIC clock frequency if available,
+// otherwise use default from database
+//
 // Revision 1.28  2005/03/23 14:33:18  jcs
 // changes to use body + extra temperature readings starting with y2005
 // (necessary for embedding)
@@ -138,6 +142,8 @@ extern "C" void gufld(float *, float *);
 #include "tables/St_fcl_ftpcsqndx_Table.h" 
 #include "tables/St_fcl_ftpcadc_Table.h" 
 
+#include "StDetectorDbMaker/StDetectorDbClock.h"
+
 ClassImp(StFtpcSlowSimMaker)
 
 //_____________________________________________________________________________
@@ -187,31 +193,43 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
      SetFlavor("ffp10kv","ftpcdVDriftdP");
      SetFlavor("ffp10kv","ftpcDeflection");
      SetFlavor("ffp10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to ffp10kv"<<endm;
   }
   else if ( gFactor > 0.2 ) {
      SetFlavor("hfp10kv","ftpcVDrift");
      SetFlavor("hfp10kv","ftpcdVDriftdP");
      SetFlavor("hfp10kv","ftpcDeflection");
      SetFlavor("hfp10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to hfp10kv"<<endm;
   }
   else if ( gFactor > -0.2 ) {
      SetFlavor("zf10kv","ftpcVDrift");
      SetFlavor("zf10kv","ftpcdVDriftdP");
      SetFlavor("zf10kv","ftpcDeflection");
      SetFlavor("zf10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to zf10kv"<<endm;
   }
   else if ( gFactor > -0.8 ) {
      SetFlavor("hfn10kv","ftpcVDrift");
      SetFlavor("hfn10kv","ftpcdVDriftdP");
      SetFlavor("hfn10kv","ftpcDeflection");
      SetFlavor("hfn10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to hfn10kv"<<endm;
   }
   else {
      SetFlavor("ffn10kv","ftpcVDrift");
      SetFlavor("ffn10kv","ftpcdVDriftdP");
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
+     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to ffn10kv"<<endm;
   }    
+
+  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+  double freq = dbclock->getCurrentFrequency()/1000000.0;
+  if ( freq != 0)
+     microsecondsPerTimebin = 1./(freq/2.);
+  else
+     microsecondsPerTimebin = 0.;
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -357,7 +375,9 @@ Int_t StFtpcSlowSimMaker::Make(){
 //  cout<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endl;
 
     if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
+       dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
        cout<<"Using the following values from database:"<<endl;
+       cout<<"          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<endl;
        cout<<"          EastIsInverted            = "<<dbReader->EastIsInverted()<<endl;
        cout<<"          Asic2EastNotInverted      = "<<dbReader->Asic2EastNotInverted()<<endl;
        cout<<"          tzero                     = "<<dbReader->tZero()<<endl;
