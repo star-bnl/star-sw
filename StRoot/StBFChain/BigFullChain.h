@@ -31,6 +31,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2003","","","db,detDb"                   ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
   {"RY2003a","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
   {"RY2003b","","","db,detDb"                         ,"","","Real data with Year3 study geometry ",kFALSE},
+  {"RY2003c","","","db,detDb"                ,"","","Real data with Year3 study geometry, new SVT ",kFALSE},
   {"RY2003X","","","db,detDb"           ,"","","tempative 2003: Real data with Year4 trigger study",kFALSE},
   {"RY2004" ,"","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
   {"RY2004a","","","db,detDb"                          ,"","","Real data with Year4 study geometry",kFALSE},
@@ -38,11 +39,13 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2004X","","","db,detDb"                             ,"","","Year4 full barrel study geometry",kFALSE},
   {"RY2004Y","","","db,detDb"  ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
+  {"RY2004d","","","db,detDb"                                  ,"","","Year4 geometry with ne wSVT",kFALSE},
     
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005b","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005c","","","db,detDb"                                      ,"","","the best Year5 geometry",kFALSE},
+  {"RY2005d","","","db,detDb"                                             ,"","","y2005c + new SVT",kFALSE},
     
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
@@ -56,6 +59,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                                   "Year2003 geometry with corrected barrel EMC and SVT layer radii",kFALSE},
   {"Y2003b" ,"","","db,detDb","","",
     "Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the SVT",kFALSE},
+  {"Y2003c" ,"","","db,detDb","","",
+"Year2003 geometry with corrected barrel EMC and SVT layer radii and extra material in the new SVT",kFALSE},
     
   {"Y2004"  ,"","","db,detDb","","",                            
        "Initial Yea4 geometry - TPC, SVT, SSD, CTB(TOF), FTPC, EMC, ECAL, PMD, BBC, ZDC, FPD, pVPD",kFALSE},
@@ -64,11 +69,13 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2004x" ,"","","db,detDb","","",                 "Y2004 with full barrel EMC and two caps ECAL",kFALSE},
   {"Y2004y" ,"","","db,detDb","","",  "Y2004 full barrel EMC and two caps ECAL+TPC back+SVT cables",kFALSE},
   {"Y2004c" ,"","","db,detDb","","",                                     "Y2004a + SSD materiau V2",kFALSE},
+  {"Y2004d" ,"","","db,detDb","","",                                             "Y2004c + new SVT",kFALSE},
 
   {"Y2005"  ,"","","db,detDb","","",                                      "Initial Year5 geometry", kFALSE},
   {"Y2005x" ,"","","db,detDb","","",                              "Full barrel EMC Year5 geometry", kFALSE},
   {"Y2005b" ,"","","db,detDb","","",        "Year5 geometry + corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005c" ,"","","db,detDb","","",   "Year5 geometry + more corrections SVT, FTPC gas + SSD y4c", kFALSE},
+  {"Y2005d" ,"","","db,detDb","","",                                            "y2005c + new SVT", kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
@@ -542,9 +549,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 #ifdef __BFC2__
   {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker",
                                                                             "Generic Vertex Finder",kFALSE},
-  {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb,StMcEvent","StiMaker",
-   "Gui,StEventUtilities,StMcEventMaker,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",
-   "ITTF tracker"                                                                                  ,kFALSE},
+  {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
+   "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",              "ITTF tracker",kFALSE},
 #endif /* __BFC2__ */
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
