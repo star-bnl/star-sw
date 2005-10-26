@@ -17,25 +17,24 @@
 #define StiToolkit_H 1
 
 class   StEvent;
-class   StMcEvent;
-template<class Event, class McEvent>class StiDetectorGroup;
 class   StiDetector;
 class   StiTrack;
 class   StiKalmanTrack;
 class   StiKalmanTrackNode;
 class   StiNodeExt;
 class   StiHit;
-class   StiMcTrack;
 class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
-template<class EVENT, class MCEVENT> class StiDetectorGroups;
+//#include "Sti/StiDetectorGroups.h"
+template<class Event> class StiDetectorGroup;
+template<class EVENT> class StiDetectorGroups;
 //??class   StiMaker;
 template<class Factorized> class Factory;
 template<class Filtered>   class EditableFilter;
 template<class Filtered>   class Filter;
 template<class T>          class StiCompositeTreeNode;
-template<class X,class y, class z>  class StiHitLoader;
-template<class X,class y, class z>  class StiMasterHitLoader;
+template<class X,class y>  class StiHitLoader;
+template<class X,class y>  class StiMasterHitLoader;
 
 
 // common object containers
@@ -63,7 +62,6 @@ class StiToolkit
 public:
   virtual Factory<StiHit> * getHitFactory()=0;
   virtual Factory<StiKalmanTrack> * getTrackFactory()=0;
-  virtual Factory<StiMcTrack> * getMcTrackFactory()=0;
   virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;
   virtual Factory<StiNodeExt>         * getTrackNodeExtFactory()=0;
   virtual Factory<StiDetector>  * getDetectorFactory()=0;
@@ -74,11 +72,9 @@ public:
   // common object containers 
   virtual StiMasterDetectorBuilder * getDetectorBuilder()=0;
   virtual StiDetectorContainer  * getDetectorContainer()=0;
-  virtual StiDetectorGroups<StEvent,StMcEvent> * getDetectorGroups()=0;
+  virtual StiDetectorGroups<StEvent> * getDetectorGroups()=0;
   virtual StiHitContainer       * getHitContainer()=0;
-  virtual StiHitContainer       * getMcHitContainer()=0;
   virtual StiTrackContainer     * getTrackContainer()=0;
-  virtual StiTrackContainer     * getMcTrackContainer()=0;
   
   // service and convenience class objects.
   virtual StiDetectorFinder     * getDetectorFinder()=0;
@@ -90,16 +86,12 @@ public:
 //??  virtual StAssociationMaker    * getAssociationMaker()=0;
 //??  virtual StiMaker              * getStiMaker()=0;
   virtual StiResidualCalculator * getResidualCalculator()=0;
-  virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader()=0;
+  virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
 
 //??  virtual void setAssociationMaker(StAssociationMaker * a)=0;
 //??  virtual void setStiMaker(StiMaker* a)=0;
-  virtual void add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)=0;
+  virtual void add(StiDetectorGroup<StEvent>* detectorGroup)=0;
   
-  virtual void setGuiEnabled(bool )=0;
-  virtual bool isGuiEnabled() const=0;
-  virtual void setMcEnabled(bool)=0;
-  virtual bool isMcEnabled() const=0;
   virtual void setEvaluatorEnabled(bool)=0;
   virtual bool isEvaluatorEnabled() const=0;
 

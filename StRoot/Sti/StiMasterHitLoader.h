@@ -4,12 +4,8 @@
 #include <stdexcept>
 #include <vector>
 #include "StiHitLoader.h"
-#include "StMcTrack.hh"
-#include "StMcTpcHit.hh"
-#include "Sti/StiMcTrack.h"
 #include "Sti/StiTrackContainer.h"
 #include "StEvent.h"
-#include "StMcEvent.hh"
 #include "StEventTypes.h"
 
 /*! \class StiMasterHitLoader
@@ -30,95 +26,73 @@ diverse sources.
 
 \author Claude A Pruneau (Wayne)
 */
-template<class Source1, class Source2,class Detector>
-class StiMasterHitLoader : public StiHitLoader<Source1, Source2,Detector>,
-public vector< StiHitLoader<Source1, Source2,Detector> *>
+template<class Source1, class Detector>
+class StiMasterHitLoader : public StiHitLoader<Source1, Detector>,
+public vector< StiHitLoader<Source1, Detector> *>
 {
 public:
 
   StiMasterHitLoader();
   StiMasterHitLoader(const string& name,
                      StiHitContainer* hitContainer,
-                     StiHitContainer* mcHitContainer,
                      Factory<StiHit>*hitFactory,
                      Detector*transform);
   virtual ~StiMasterHitLoader();
-  void addLoader(StiHitLoader<Source1, Source2,Detector>*loader);
+  void addLoader(StiHitLoader<Source1, Detector>*loader);
   void loadEvent(Source1 *source1,
-                 Source2 *source2,
                  Filter<StiTrack> * trackFilter,
                  Filter<StiHit>   * hitFilter);
-  void loadAllMcHits(StMcEvent* source,
-                  bool useMcAsRec,
-                  Filter<StiTrack> * trackFilter,
-                  Filter<StiHit> * hitFilter);
   void setHitContainer(StiHitContainer* hitContainer);
-  void setMcHitContainer(StiHitContainer* hitContainer);
   void setHitFactory(Factory<StiHit>*hitFactory);
   virtual void setDetector(Detector*detector);
-  virtual void setUseMcAsRec(bool value);
 protected:
-    typedef StiHitLoader<Source1,Source2,Detector>* HitLoaderKey;
+    typedef StiHitLoader<Source1,Detector>* HitLoaderKey;
   typedef vector< HitLoaderKey >  HitLoaderVector;
   typedef typename HitLoaderVector::iterator HitLoaderIter;
   typedef typename HitLoaderVector::const_iterator HitLoaderConstIter;
   //HitLoaderVector _hitLoaders;
 };
 
-template<class Source1, class Source2,class Detector>
-StiMasterHitLoader<Source1, Source2,Detector>::StiMasterHitLoader()
-: StiHitLoader<Source1, Source2,Detector>("MasterHitLoader",0,0,0)
+template<class Source1, class Detector>
+StiMasterHitLoader<Source1,Detector>::StiMasterHitLoader()
+: StiHitLoader<Source1, Detector>("MasterHitLoader",0,0,0)
 {}
 
-template<class Source1, class Source2,class Detector>
-StiMasterHitLoader<Source1, Source2,Detector>::StiMasterHitLoader(const string& name,
+template<class Source1,class Detector>
+StiMasterHitLoader<Source1,Detector>::StiMasterHitLoader(const string& name,
                                                                   StiHitContainer* hitContainer,
-                                                                  StiHitContainer* mcHitContainer,
                                                                   Factory<StiHit>*hitFactory,
                                                                   Detector*transform)
-: StiHitLoader<Source1, Source2,Detector>(name,hitContainer,mcHitContainer,hitFactory,transform)
+: StiHitLoader<Source1, Detector>(name,hitContainer,hitFactory,transform)
 {}
 
-template<class Source1, class Source2,class Detector>
-StiMasterHitLoader<Source1, Source2,Detector>::~StiMasterHitLoader()
+template<class Source1,class Detector>
+StiMasterHitLoader<Source1, Detector>::~StiMasterHitLoader()
 {}
 
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::addLoader(StiHitLoader<Source1, Source2,Detector>*loader)
+template<class Source1,class Detector>
+void StiMasterHitLoader<Source1, Detector>::addLoader(StiHitLoader<Source1, Detector>*loader)
 {
   push_back(loader);
 }
 
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1,
-                                                              Source2 * source2,
+template<class Source1, class Detector>
+void StiMasterHitLoader<Source1, Detector>::loadEvent(Source1 *source1,
                                                               Filter<StiTrack> * trackFilter,
                                                               Filter<StiHit>   * hitFilter)
 {
   if(!_hitContainer)
     throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
   _hitContainer->clear();
-  if (source2)
-    {
-    if(!_mcHitContainer)
-      throw runtime_error("StiMasterHitLoader::loadEvent( ) -F- _hitContainer==0");
-    _mcHitContainer->clear();
-    }
   HitLoaderConstIter iter;
   for (iter=begin();iter!=end();iter++)
     (*iter)->loadHits(source1,trackFilter, hitFilter);
-    if (source2)
-      {
-      loadAllMcHits(source2,_useMcAsRec,trackFilter,hitFilter);
-      _mcHitContainer->sortHits();
-      _mcHitContainer->reset();
-      }
   _hitContainer->sortHits();
   _hitContainer->reset();//declare all hits as unused...
 }
 
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::setHitContainer(StiHitContainer* hitContainer)
+template<class Source1, class Detector>
+void StiMasterHitLoader<Source1, Detector>::setHitContainer(StiHitContainer* hitContainer)
 {
   _hitContainer = hitContainer;
   HitLoaderIter iter;
@@ -126,83 +100,21 @@ void StiMasterHitLoader<Source1, Source2,Detector>::setHitContainer(StiHitContai
     (*iter)->setHitContainer(hitContainer);
 }
 
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::setMcHitContainer(StiHitContainer* mcHitContainer)
-{
-  _mcHitContainer = mcHitContainer;
-  HitLoaderIter iter;
-  for (iter=begin();iter!=end();iter++)
-    (*iter)->setMcHitContainer(mcHitContainer);
-}
 
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
+template<class Source1, class Detector>
+void StiMasterHitLoader<Source1,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
 {
   HitLoaderIter iter;
   for (iter=begin();iter!=end();iter++)
     (*iter)->setHitFactory(hitFactory);
 }
 
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::setDetector(Detector*transform)
+template<class Source1,class Detector>
+void StiMasterHitLoader<Source1,Detector>::setDetector(Detector*transform)
 {
-  throw runtime_error("StiMasterHitLoader<Source1, Source2,Detector>::setDetector(Detector*) - This call is Forbiden in StiMasterHitLoader");
+  throw runtime_error("StiMasterHitLoader<Source1,Detector>::setDetector(Detector*) - This call is Forbiden in StiMasterHitLoader");
 }
 
-
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::setUseMcAsRec(bool value)
-{
-  _useMcAsRec = value;
-  HitLoaderIter iter;
-  for (iter=begin();iter!=end();iter++)
-    (*iter)->setUseMcAsRec(value);
-}
-
-template<class Source1, class Source2,class Detector>
-void StiMasterHitLoader<Source1, Source2,Detector>::loadAllMcHits(StMcEvent* source,
-                                                               bool useMcAsRec,
-                                                               Filter<StiTrack> * trackFilter,
-                                                               Filter<StiHit> * hitFilter)
-{
-  cout << "StiMasterHitLoader::loadMcHits(StEvent*) -I- Started" << endl;
-  if(!_mcHitContainer)    throw runtime_error("StiMasterHitLoader::loadMcHits(StEvent*) -F- _mcHitContainer==0");
-  if(!_mcTrackFactory)    throw runtime_error("StiMasterHitLoader::loadMcHits() -F- _mcTrackFactory==0");
-  if (!_mcTrackContainer) throw runtime_error("StiMasterHitLoader::loadMcHitss() -F- _mcTrackContainer==0");
-  if(!_hitFactory)        throw runtime_error("StiMasterHitLoader::loadMcHits(StMcEvent*) -F- _hitFactory==0");
-  cout << "StiMasterHitLoader::loadMcHits() -I- Loading"<<endl;
-  StSPtrVecMcTrack & stMcTracks = source->tracks();
-  StiMcTrack * stiMcTrack;
-  StMcTrack  * stMcTrack;
-  int nPlusTracks  = 0;
-  int nMinusTracks = 0;
-  for ( StMcTrackConstIterator iter=stMcTracks.begin();iter!=stMcTracks.end();++iter)
-    {
-    stMcTrack = *iter;
-    stiMcTrack = _mcTrackFactory->getInstance();
-    stiMcTrack->reset();
-    stiMcTrack->setStMcTrack( stMcTrack );
-    if (!trackFilter || trackFilter->filter( stiMcTrack) )
-      {
-      _mcTrackContainer->add( stiMcTrack);
-      for (HitLoaderConstIter iLoader=begin();iLoader!=end();++iLoader)
-        (*iLoader)->loadMcHits(source,useMcAsRec,trackFilter, hitFilter, *stMcTrack, *stiMcTrack);
-      if (stiMcTrack->getCharge()>0)
-        ++nPlusTracks;
-      else
-        ++nMinusTracks;
-      }
-    }
-  cout << "StiMasterHitLoader::loadMcHits() -I- Event Loaded"<< endl
-    << "============================================================================="<< endl
-    << "      hitContainer size = " << _hitContainer->size()<<endl
-    << "  mc  hitContainer size = " << _mcHitContainer->size()<<endl
-    << " mc track Container size= " << _mcTrackContainer->size()<<endl
-    << "               nTracks  = " << nPlusTracks+nMinusTracks << endl
-    << "           nPlusTracks  = " << nPlusTracks << endl
-    << "          nMinusTracks  = " << nMinusTracks << endl;
-  cout << "StiMasterHitLoader::loadMcHits(StEvent*) -I- Done" << endl;
-}
 
 #endif
 

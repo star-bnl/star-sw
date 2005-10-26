@@ -6,30 +6,22 @@
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiDetectorBuilder.h"
-template<class Event, class McEvent,class Detector> class StiHitLoader;
+template<class Event,class Detector> class StiHitLoader;
 class StiDedxCalculator;
 class StiElossCalculator;
-#include "StiGui/StiDetectorViews.h"
-#include "StiGui/StiAllVisibleDetectorView.h"
-#include "StiGui/StiAllInvisibleDetectorView.h"
-#include "StiGui/StiActiveDetectorView.h"
-#include "StiGui/StiSkeletonDetectorView.h"
 
-template<class Event, class McEvent>
+template<class Event>
 class StiDetectorGroup : public Named
 {
   public:
 
   /// Get a hit loader appropriate for this detector group
-  virtual StiHitLoader<Event,McEvent,StiDetectorBuilder> * getHitLoader();
+  virtual StiHitLoader<Event,StiDetectorBuilder> * getHitLoader();
   
   /// Get a detector builder appropriate for this detector group
   virtual StiDetectorBuilder * getDetectorBuilder();
 
-  virtual void initialize();
-
-  ///Get Detector Views for this group
-  StiDetectorViews * getDetectorViews();
+  virtual void initialize() {}
 
   /// Get a pid calculator appropriate for this detector group
   /// A dedx calculator is used after the track are fitted
@@ -47,36 +39,23 @@ class StiDetectorGroup : public Named
 
   StiDetectorGroup(const string & name);
   StiDetectorGroup(const string & name,
-		   StiHitLoader<Event,McEvent,StiDetectorBuilder> * hitLoader,
+		   StiHitLoader<Event,StiDetectorBuilder> * hitLoader,
 		   StiDetectorBuilder * detectorBuilder,
 		   StiDedxCalculator *  dedxCalculator,
 		   StiElossCalculator * elossCalculator);
   ~StiDetectorGroup();
-  StiHitLoader<Event,McEvent,StiDetectorBuilder> * _hitLoader;
+  StiHitLoader<Event,StiDetectorBuilder> * _hitLoader;
   StiDetectorBuilder * _detectorBuilder;
   StiDedxCalculator *  _dedxCalculator;
   StiElossCalculator * _elossCalculator; 
-  StiDetectorViews   * _detectorViews;
   /// Detector group identifier.
   int _groupId;
 };
 
-template<class Event, class McEvent>
-void StiDetectorGroup<Event, McEvent>::initialize()
-{
-  //instantiate all basic views.
-  _detectorViews = new StiDetectorViews(getName()+"Views",getName()+" Views");
-  StiDetectorView * view;
-  _detectorViews->add(new StiAllVisibleDetectorView(getName()+"AllVisble",getName()+" All Visble",_detectorBuilder));
-  _detectorViews->add(new StiAllInvisibleDetectorView(getName()+"AllInvisble",getName()+" All Invisble",_detectorBuilder));
-  _detectorViews->add(new StiActiveDetectorView(getName()+"Active",getName()+" Active",_detectorBuilder));
-  _detectorViews->add(view = new StiSkeletonDetectorView(getName()+"Skeleton",getName()+" Skeleton",_detectorBuilder));
-  _detectorViews->setDefaultView(view);    
-}
 
-template<class Event, class McEvent>
-StiDetectorGroup<Event, McEvent>::StiDetectorGroup(const string & name,
-					  StiHitLoader<Event,McEvent,StiDetectorBuilder> * hitLoader,
+template<class Event>
+StiDetectorGroup<Event>::StiDetectorGroup(const string & name,
+					  StiHitLoader<Event,StiDetectorBuilder> * hitLoader,
 					  StiDetectorBuilder * detectorBuilder,
 					  StiDedxCalculator *  dedxCalculator,
 					  StiElossCalculator * elossCalculator)
@@ -85,7 +64,6 @@ StiDetectorGroup<Event, McEvent>::StiDetectorGroup(const string & name,
      _detectorBuilder(detectorBuilder),
      _dedxCalculator(dedxCalculator),
      _elossCalculator(elossCalculator),
-     _detectorViews(0),
      _groupId(-1)
 {
   // If a loader was specified, make sure it uses the selected detector builder.
@@ -96,30 +74,28 @@ StiDetectorGroup<Event, McEvent>::StiDetectorGroup(const string & name,
   initialize();
 }
 
-template<class Event, class McEvent>
-StiDetectorGroup<Event, McEvent>::StiDetectorGroup(const string & name)
+template<class Event>
+StiDetectorGroup<Event>::StiDetectorGroup(const string & name)
   : Named(name),
      _hitLoader(0),
      _detectorBuilder(0),
      _dedxCalculator(0),
      _elossCalculator(0),
-     _detectorViews(0),
      _groupId(-1)
 {
   initialize();
 }
 
-template<class Event, class McEvent>
-StiDetectorGroup<Event, McEvent>::~StiDetectorGroup()
+template<class Event>
+StiDetectorGroup<Event>::~StiDetectorGroup()
 {
   delete _hitLoader;
   delete _detectorBuilder;
-  delete _detectorViews;
 }
 
 /// Get a hit loader appropraite for this detector group
-template<class Event, class McEvent>
-StiHitLoader<Event,McEvent, StiDetectorBuilder> * StiDetectorGroup<Event, McEvent>::getHitLoader()
+template<class Event>
+StiHitLoader<Event,StiDetectorBuilder> * StiDetectorGroup<Event>::getHitLoader()
 {
   if (_detectorBuilder==0)
     {
@@ -138,8 +114,8 @@ StiHitLoader<Event,McEvent, StiDetectorBuilder> * StiDetectorGroup<Event, McEven
 
 
 /// Get a detector builder appropriate for this detector group
-template<class Event, class McEvent>
-StiDetectorBuilder * StiDetectorGroup<Event, McEvent>::getDetectorBuilder()
+template<class Event>
+StiDetectorBuilder * StiDetectorGroup<Event>::getDetectorBuilder()
 {
   if (_detectorBuilder==0)
     {
@@ -153,8 +129,8 @@ StiDetectorBuilder * StiDetectorGroup<Event, McEvent>::getDetectorBuilder()
 /// Get a pid calculator appropriate for this detector group
 /// A dedx calculator is used after the track are fitted
 /// to determine the average (or appropriate measure) dedx.
-template<class Event, class McEvent>
-StiDedxCalculator * StiDetectorGroup<Event, McEvent>::getDedxCalculator()
+template<class Event>
+StiDedxCalculator * StiDetectorGroup<Event>::getDedxCalculator()
 { 
   if (_dedxCalculator==0)
     {
@@ -169,8 +145,8 @@ StiDedxCalculator * StiDetectorGroup<Event, McEvent>::getDedxCalculator()
 /// Get an energy loss calculator appropriate for this detector group
 /// An eloss calculator is used in the kalman propagation to determine
 /// the track energy loss.
-template<class Event, class McEvent>
-StiElossCalculator * StiDetectorGroup<Event, McEvent>::getElossCalculator()
+template<class Event>
+StiElossCalculator * StiDetectorGroup<Event>::getElossCalculator()
 {
   if (_elossCalculator==0)
     {
@@ -181,23 +157,17 @@ StiElossCalculator * StiDetectorGroup<Event, McEvent>::getElossCalculator()
   return _elossCalculator; 
 }
 
-template<class Event, class McEvent>
-inline void StiDetectorGroup<Event, McEvent>::setGroupId(int id)
+template<class Event>
+inline void StiDetectorGroup<Event>::setGroupId(int id)
 {
   if (_detectorBuilder) _detectorBuilder->setGroupId(id);
   _groupId = id;
 }
 
-template<class Event, class McEvent>
-inline int  StiDetectorGroup<Event, McEvent>::getGroupId() const
+template<class Event>
+inline int  StiDetectorGroup<Event>::getGroupId() const
 {
   return _groupId;
-}
-
-template<class Event, class McEvent>
-inline StiDetectorViews * StiDetectorGroup<Event, McEvent>::getDetectorViews()
-{
-  return _detectorViews;
 }
 
 #endif

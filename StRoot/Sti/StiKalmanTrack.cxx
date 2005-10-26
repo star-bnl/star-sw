@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.72 2005/08/18 02:35:23 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.72 2005/08/18 02:35:23 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.73 2005/10/26 21:55:02 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.73 2005/10/26 21:55:02 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.73  2005/10/26 21:55:02  fisyak
+ * get rid off dependencies from StMcEvent
+ *
  * Revision 2.72  2005/08/18 02:35:23  perev
  * Cleanup
  *
@@ -566,7 +569,7 @@ int    StiKalmanTrack::getGapCount()    const
 int StiKalmanTrack::getFitPointCount(int detectorId)    const  
 {
   int fitPointCount  = 0;
-  double chi2Max = fitpars->getMaxChi2();
+  //yf  double chi2Max = fitpars->getMaxChi2();
   StiKTNBidirectionalIterator it;
   for (it=begin();it!=end();it++)  {
     StiKalmanTrackNode* node = &(*it); 

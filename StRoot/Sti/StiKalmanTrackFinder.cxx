@@ -51,14 +51,12 @@ void StiKalmanTrackFinder::initialize()
   _toolkit = StiToolkit::instance();
   _trackNodeFactory  = _toolkit->getTrackNodeFactory();
   _trackFactory      = _toolkit->getTrackFactory();
-  _mcTrackFactory    = _toolkit->getMcTrackFactory();
   _hitFactory        = _toolkit->getHitFactory();
   _detectorContainer = _toolkit->getDetectorContainer();
   _detectorContainer->reset();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
   _hitContainer      = _toolkit->getHitContainer();
   _trackContainer    = _toolkit->getTrackContainer();
-  _mcTrackContainer  = _toolkit->getMcTrackContainer();
   _vertexFinder      = _toolkit->getVertexFinder();
   /*
   StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
@@ -84,16 +82,13 @@ _trackFilter(0),
 _trackSeedFinder(0),
 _trackNodeFactory(0),
 _trackFactory(0),
-_mcTrackFactory(0),
 _hitFactory(0),
 _detectorContainer(0),
 _hitContainer(0),
 _trackContainer(0),
-_mcTrackContainer(0),
 _vertexFinder(0),
 _eventFiller(0),
-_event(0),
-_mcEvent(0)
+_event(0)
 {
   cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Started"<<endl;
 StiKalmanTrack::setParameters(&_pars);
@@ -142,10 +137,8 @@ Reset the state of the finder  to "no event loaded"
 void StiKalmanTrackFinder::clear()
 {
   //cout << "StiKalmanTrackFinder::clear() -I- Starting" <<endl;
-  _mcTrackContainer->clear();
   _hitContainer->clear();
   _hitFactory->reset();
-  _mcTrackFactory->reset();
   reset();
   //cout << "StiKalmanTrackFinder::clear() -I- Done" <<endl;
 }
@@ -250,7 +243,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>(*it);
 	  if (!track) continue;
 	  StiKalmanTrackNode * inner = track->getInnerMostNode();
-	  double r = inner->getRefPosition();
+	  //yf	  double r = inner->getRefPosition();
 //VP	  if (r>4.1 && r<50) find(track,kOutsideIn);
 	  StiTrackNode *extended = track->extendToVertex(vertex);
           if (extended) track->add(extended,kOutsideIn);

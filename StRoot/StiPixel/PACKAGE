@@ -1,0 +1,5 @@
+# $Id $
+# package StiPixel
+# author: 
+Library:libStiPixel.so:LIBS +=   -lStiGui -lGui  -lSti -lStChain -lStMcEvent -l_StEvent
+#Library:libStiPixel.so:LIBS +=   -lStiGui  -lSti  -lStMcEvent

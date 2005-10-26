@@ -1,6 +1,9 @@
-// $Id: StiSsdHitLoader.cxx,v 1.11 2005/06/21 15:31:47 lmartin Exp $
+// $Id: StiSsdHitLoader.cxx,v 1.12 2005/10/26 21:59:12 fisyak Exp $
 // 
 // $Log: StiSsdHitLoader.cxx,v $
+// Revision 1.12  2005/10/26 21:59:12  fisyak
+// get rid off dependencies from StMcEvent
+//
 // Revision 1.11  2005/06/21 15:31:47  lmartin
 // CVS tags added
 //
@@ -15,8 +18,6 @@
 
 #include "StEventTypes.h"
 #include "StEvent.h"
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
 #include "Sti/Base/Factory.h"
 #include "StiSsd/StiSsdHitLoader.h"
 #include "Sti/StiHit.h"
@@ -28,14 +29,13 @@
 #include "Sti/StiDetector.h"
 
 StiSsdHitLoader::StiSsdHitLoader()
-  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SsdHitLoader")
+  : StiHitLoader<StEvent,StiDetectorBuilder>("SsdHitLoader")
 {}
     
 StiSsdHitLoader::StiSsdHitLoader(StiHitContainer* hitContainer,
-				 StiHitContainer* mcHitContainer,
 				 Factory<StiHit>*hitFactory,
 				 StiDetectorBuilder*detector)
-  : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SsdHitLoader",hitContainer,mcHitContainer,hitFactory,detector)
+  : StiHitLoader<StEvent,StiDetectorBuilder>("SsdHitLoader",hitContainer,hitFactory,detector)
 {}
 
 StiSsdHitLoader::~StiSsdHitLoader()
@@ -101,17 +101,6 @@ void StiSsdHitLoader::loadHits(StEvent* source,
     }
 
   cout <<"StiSsdHitLoader::loadHits() - I - Done <====> Number of SSD Hits = " <<compt<<endl; 
-}
-	
-
-void StiSsdHitLoader::loadMcHits(StMcEvent* source,
-				 bool useMcAsRec,
-				 Filter<StiTrack> * trackFilter, 
-				 Filter<StiHit> * hitFilter,
-                                 StMcTrack & stMcTrack,
-                                 StiMcTrack & stiMcTrack)
-{
-  return;
 }
 	
 

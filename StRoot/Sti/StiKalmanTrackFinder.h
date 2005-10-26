@@ -16,14 +16,12 @@ class StiKalmanTrackFactory;
 class StiHitContainer;
 class StiTrackContainer;
 class StiTrack;
-class StiMcTrack;
 class StiKalmanTrack;
 class StiKalmanTrackNode;
 class StEvent;
-class StMcEvent;
 class StiStEventFiller;
 template<class Factorized>class Factory;
-template<class Event,class McEvent,class Detector>class StiHitLoader;
+template<class Event,class Detector>class StiHitLoader;
 
 
 ///\class StiKalmanTrackFinder  
@@ -97,17 +95,14 @@ class QAFind;
     StiTrackFinder              * _trackSeedFinder;
     Factory<StiKalmanTrackNode> * _trackNodeFactory;
     Factory<StiKalmanTrack>     * _trackFactory;
-    Factory<StiMcTrack>         * _mcTrackFactory;
     Factory<StiHit>             * _hitFactory;
     StiDetectorContainer        * _detectorContainer;
-    StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * _hitLoader;
+    StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
     StiHitContainer             * _hitContainer;
     StiTrackContainer           * _trackContainer;
-    StiTrackContainer           * _mcTrackContainer;
     StiVertexFinder             * _vertexFinder;
     StiStEventFiller            * _eventFiller;
     StEvent                     * _event;
-    StMcEvent                   * _mcEvent;
 
 private:
     

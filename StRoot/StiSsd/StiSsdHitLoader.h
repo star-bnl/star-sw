@@ -1,6 +1,9 @@
-// $Id: StiSsdHitLoader.h,v 1.6 2005/06/21 15:31:48 lmartin Exp $
+// $Id: StiSsdHitLoader.h,v 1.7 2005/10/26 21:59:12 fisyak Exp $
 // 
 // $Log: StiSsdHitLoader.h,v $
+// Revision 1.7  2005/10/26 21:59:12  fisyak
+// get rid off dependencies from StMcEvent
+//
 // Revision 1.6  2005/06/21 15:31:48  lmartin
 // CVS tags added
 //
@@ -12,7 +15,6 @@
 
 #include "Sti/StiHitLoader.h"
 class StEvent;
-class StMcEvent;
 class StiDetectorBuilder;
 
 
@@ -27,25 +29,18 @@ class StiDetectorBuilder;
 
   \author Claude A Pruneau (Wayne) and M.L. Miller (Yale Software)
  */
-class StiSsdHitLoader : public StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>
+class StiSsdHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
 {
 public:
 
     StiSsdHitLoader();
     StiSsdHitLoader(StiHitContainer      * hitContainer,
-		    StiHitContainer      * mcHitContainer,
 		    Factory<StiHit>      * hitFactory,
 		    StiDetectorBuilder   * detector);
     virtual ~StiSsdHitLoader();
     virtual void loadHits(StEvent* source,
 			  Filter<StiTrack> * trackFilter, 
 			  Filter<StiHit> * hitFilter);
-    virtual void loadMcHits(StMcEvent* source,
-			    bool useMcAsRec,
-			    Filter<StiTrack> * trackFilter, 
-			    Filter<StiHit> * hitFilter,
-			    StMcTrack & stMcTrack,
-			    StiMcTrack & stiMcTrack);
 };
 
 #endif

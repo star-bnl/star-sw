@@ -3,11 +3,10 @@
 #include "StiEmc/StiEmcHitLoader.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "StEvent.h"
-#include "StMcEvent.hh"
 #include <stdexcept>
 
 StiEmcDetectorGroup::StiEmcDetectorGroup(bool active, const string & inputFile)
-  : StiDetectorGroup<StEvent,StMcEvent>("EMC",
+  : StiDetectorGroup<StEvent>("EMC",
 			      active?new StiEmcHitLoader():0,
 			      new StiEmcDetectorBuilder(active,inputFile),
 			      0,
