@@ -29,14 +29,6 @@ class StiMakerParameters : public TObject
   bool activePixel;
   bool useResidualCalculator;
 
-  bool useMcAsRec;
-  bool useGui;
-  bool doSimulation;
-  bool doAssociation;
-  bool doMiniMcEvent;
-  bool doDst;
-  bool doStEventOutput;
-  bool doStEventInput;  
   bool doPlots;
 
   char* trackerInputFile;
