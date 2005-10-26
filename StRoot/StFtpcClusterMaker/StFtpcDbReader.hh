@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.22 2005/10/24 13:43:01 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.23 2005/10/26 14:03:43 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.23  2005/10/26 14:03:43  jcs
+// Change setMicrosecondsPerTimebin
+//
 // Revision 1.22  2005/10/24 13:43:01  jcs
 // If microsecondsPerTimebin calculated from RHIC clock frequency, store in
 // Calibrations_ftpc/ftpcElectronics database table. Otherwise get default
@@ -186,7 +189,6 @@ protected:
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
   ftpcTimeOffset_st *timeoffsetTable;
-  ftpcElectronics_st *electronicsTable;
   //SlowSimulator parameters
   Float_t mPadLength;
   Float_t mPadPitch;
@@ -243,6 +245,7 @@ public:
 
 
   ~StFtpcDbReader();
+
   Float_t padrowZPosition(Int_t i); 
   Float_t magboltzEField(Int_t i);
   Float_t magboltzVDrift(Int_t i,Int_t padrow);
@@ -259,6 +262,7 @@ public:
   Int_t setMagboltzDeflection(Int_t i, Int_t padrow, Float_t  newvalue);
   Int_t setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t  newvalue);
   Int_t setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t  newvalue);
+  Int_t setMicrosecondsPerTimebin(Float_t newvalue);
 
   // inline get functions
   Int_t numberOfPadrows() {return mNumberOfPadrows;}
@@ -332,11 +336,6 @@ public:
   Int_t deltaTime() {return mDeltaTime;}
   Int_t deltaPad() {return mDeltaPad;}
   Float_t minChargeWindow() {return mMinChargeWindow;}
-
-  Int_t setMicrosecondsPerTimebin(Float_t f) {
-     if (f != 0.0) mMicrosecondsPerTimebin=f;
-     return 0;
-   }
 
 };
 
