@@ -20,6 +20,7 @@ void StEEmcMixEvent::setEvent( StMuEvent *event )
   mL0trigger             = event->l0Trigger();
   mMuTriggerIdCollection = event->triggerIdCollection();
   mMagneticField         = event->magneticField();
+  mBbcTrigger            = event->bbcTriggerDetector();
 
 }
 
