@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.31 2005/10/25 14:38:28 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.32 2005/10/26 14:03:43 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.32  2005/10/26 14:03:43  jcs
+// Change setMicrosecondsPerTimebin
+//
 // Revision 1.31  2005/10/25 14:38:28  jcs
 // correct electronicsTable definition used for StFtpcSlowSimMaker
 //
@@ -264,7 +267,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   }
 
   //  just copy electronics table start to pointer
-  electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
    mTZero = electronicsTable->tZero;
    mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
@@ -437,7 +440,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   }
 
   //  just copy electronics table start to pointer
-  electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
    mTZero = electronicsTable->tZero;
    mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
@@ -640,9 +643,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
 
 StFtpcDbReader::~StFtpcDbReader()
 {
-
-// write back table entries that have set functions:
-   electronicsTable->uSecondsPerTimebin = mMicrosecondsPerTimebin;
 //   cout << "StFtpcDbReader destructed" << endl;
 }
 
@@ -845,4 +845,16 @@ Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t ne
       gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, not changed", "W", "OS");
       return 0;
     }
+}
+
+Int_t StFtpcDbReader::setMicrosecondsPerTimebin(Float_t newvalue)
+{
+   if ( newvalue > 0.0 ) {
+     mMicrosecondsPerTimebin = newvalue;
+     gMessMgr->Info()<<"mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" calculated from RHIC Clock Frequency"<<endm;
+   }
+   else  {
+     gMessMgr->Info()<<"mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" default value from database"<<endm;
+   }
+   return 0;
 }
