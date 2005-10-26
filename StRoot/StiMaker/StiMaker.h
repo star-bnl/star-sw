@@ -12,7 +12,6 @@ using std::string;
 #include "Sti/StiKalmanTrackFitter.h"
 
 class StEvent;
-class StMcEvent;
 class StiHit;
 class StiTrack;
 class StiStEventFiller;
@@ -45,7 +44,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.17 2005/10/06 20:38:46 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.18 2005/10/26 21:54:11 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setParameters(StiMakerParameters * pars);
     StiMakerParameters * getParameters();
@@ -64,7 +63,7 @@ private:
     bool                 eventIsFinished;
     bool                 _initialized;
     StiToolkit  *        _toolkit;
-    StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * _hitLoader;
+    StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
     StiTrackFinder *       _seedFinder;
     StiKalmanTrackFinder * _tracker;
     StiKalmanTrackFitter * _fitter;

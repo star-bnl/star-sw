@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.155  2005/10/26 21:54:10  fisyak
+// Remove dead classes, gid rid off dependencies from StMcEvent and StiGui
+//
 // Revision 1.154  2005/10/06 20:38:46  fisyak
 // Clean up
 //
@@ -199,7 +202,6 @@
 #include "PhysicalConstants.h"
 #include "StDetectorId.h"
 #include "StEventTypes.h"
-#include "StMcEvent.hh"
 #include "Sti/Base/EditableFilter.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackContainer.h"
@@ -221,7 +223,6 @@
 #include "Sti/StiDetectorContainer.h"
 #include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiStEventFiller.h"
-#include "StiGui/EventDisplay.h"
 #include "StiDefaultToolkit.h"
 #include "StiMaker.h"
 #include "TFile.h"
@@ -297,6 +298,7 @@ Int_t StiMaker::Init()
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
   
   _loaderHitFilter = 0; // not using this yet.
+#if 0
   _loaderTrackFilter = new StiDefaultTrackFilter("LoaderTrackFilter","MC Tracks Filter"); 
   _loaderTrackFilter->add(new EditableParameter("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi));
   _loaderTrackFilter->add(new EditableParameter("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi));
@@ -318,13 +320,14 @@ Int_t StiMaker::Init()
   _loaderTrackFilter->add(new EditableParameter("chargeMax", "Max Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
   _toolkit->setLoaderHitFilter(_loaderHitFilter);
   _toolkit->setLoaderTrackFilter(_loaderTrackFilter);
+#endif
   InitDetectors();
   return kStOk;
 }
 
 Int_t StiMaker::InitDetectors()
 {
-  StiDetectorGroup<StEvent,StMcEvent> * group;
+  StiDetectorGroup<StEvent> * group;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
   _toolkit->add(new StiStarDetectorGroup(false,"none"));
   if (_pars->useTpc)
@@ -381,7 +384,6 @@ Int_t StiMaker::InitRun(int run)
 			_seedFinder = _toolkit->getTrackSeedFinder();
       _seedFinder->initialize();
       _hitLoader  = _toolkit->getHitLoader();
-      _hitLoader->setUseMcAsRec(_pars->useMcAsRec);
       _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
       _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 			_tracker->load("trackFinderPars.dat",*this);
@@ -393,11 +395,6 @@ Int_t StiMaker::InitRun(int run)
 				throw runtime_error("StiMaker::Make() -F- tracker is not a StiKalmanTrackFinder");
       _tracker->initialize();
       _tracker->clear();
-      if (_toolkit->isGuiEnabled())
-				{
-					_eventDisplay->initialize();
-					_eventDisplay->draw();
-				}
       _initialized=true;
       cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
@@ -410,7 +407,6 @@ Int_t StiMaker::Make()
   cout <<"StiMaker::Make() -I- Starting on new event"<<endl;
 
   eventIsFinished = false;
-  StMcEvent * mcEvent;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
 
   if (!event)
@@ -431,28 +427,17 @@ Int_t StiMaker::Make()
       return -1;
     }
 
-  if (_toolkit->isMcEnabled() )
-    {
-      mcEvent= (StMcEvent *) GetDataSet("StMcEvent");
-      if (!mcEvent) 
-	throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
-    }
-  else 
-    mcEvent = 0;
   
   _tracker->clear();
-  _hitLoader->loadEvent(event,mcEvent,_loaderTrackFilter,_loaderHitFilter);
+  _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
   _seedFinder->reset();
-  if (_toolkit->isGuiEnabled())
-    _eventDisplay->draw();
-  else
     {
       _tracker->findTracks();
       StiHit *vertex=0;
       const std::vector<StiHit*> *vertices=0;
       try
 	{
-	  if (_eventFiller && !_pars->useMcAsRec)
+	  if (_eventFiller)
 	    _eventFiller->fillEvent(event, _trackContainer);
 	}
       catch (runtime_error & rte)
@@ -474,7 +459,7 @@ Int_t StiMaker::Make()
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
 	      try
 		{
-		  if (_eventFiller && !_pars->useMcAsRec)
+		  if (_eventFiller)
 		    _eventFiller->fillEventPrimaries(event, _trackContainer);
 		}  
 	      catch (runtime_error & rte)
