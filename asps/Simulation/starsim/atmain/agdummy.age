@@ -1,7 +1,11 @@
-* $Id: agdummy.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: agdummy.age,v 1.2 2005/10/26 21:45:41 fisyak Exp $
 * $Name:  $
 * $Log: agdummy.age,v $
+* Revision 1.2  2005/10/26 21:45:41  fisyak
+* add reference to mytrack,gdedxcalc for icc
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.7  2002/12/16 18:23:04  nevski
 * adding RootGenEventProperties into root io
@@ -16,7 +20,7 @@ Replace[LIST #;] with [ #1 _
  "Geant  "   GfKine,GfVert,GfPart,GfPath,GDtoM,GMtoD,GlVolu,Grun,
              GpKine,GLast,GsCKOV,GpIons,Grndm,Granor,Gfnhit,
              GsRung,GfRung,GpRung,GsHead,GfHead,GpHead,
-             GfDet,GfDetu,GfDeth,GfDetd,GfDeta,
+             GfDet,GfDetu,GfDeth,GfDetd,GfDeta,mytrack,gdedxcalc,
  "vector "   vdist,vscale,vadd,vmod,vfill,Ublank,Ufill,Uzero,IuLast,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,lvmaxa,lzlong,
  "sorting"   sortzv,zsorvh,intsor,assndx,
