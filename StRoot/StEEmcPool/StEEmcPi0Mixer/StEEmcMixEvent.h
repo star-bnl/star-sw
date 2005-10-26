@@ -14,6 +14,7 @@
 #include "StEvent/StL0Trigger.h"
 #include "StEvent/StTriggerIdCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StEvent/StBbcTriggerDetector.h"
 
 #define MAX_PAIRS 5 
 
@@ -40,6 +41,7 @@ class StEEmcMixEvent : public TObject {
   StRunInfo               mRunInfo;  
   StL0Trigger             mL0trigger;
   StMuTriggerIdCollection mMuTriggerIdCollection;
+  StBbcTriggerDetector    mBbcTrigger;
 
   Double_t                mMagneticField;
 
