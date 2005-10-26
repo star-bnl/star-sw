@@ -27,7 +27,7 @@ my $PGI       = $env->{ENV}->{PGI};
 my $PGILIB    = $env->{ENV}->{PGILIB};
 my $FLIBS     = $env->{FLIBS};
 
-$LDFLAGS     .= $env->{LDEXPORT} . " -pthread";
+$LDFLAGS     .= $env->{LDEXPORT};# . " -pthread";
 $LIBS        .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
 
 if ($FC =~ /pgf77/) {
@@ -53,12 +53,13 @@ if ($FC =~ /pgf77/) {
 
 $FPPFLAGS = "-D__ROOT__ -DCERNLIB_TYPE -DCERNLIB_UNIX -DCERNLIB_BSLASH -DCERNLIB_DZDOC -DCERNLIB_SHL ".
   "-DCERNLIB_NONEWL -DCERNLIB_HIGZ -DCERNLIB_CG  -DCERNLIB_HADRON";
-  $CPPFLAGS  = "-pthread -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
+#  $CPPFLAGS  = "-pthread -D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
+  $CPPFLAGS  = "-D__ROOT__ -DCERNLIB_QMGLIBC -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL " .
   "-DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($FC =~ /g77/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
-$LIBS .= $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
+$LIBS .= " " . $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 my $FEXTEND   = $env->{FEXTEND};
