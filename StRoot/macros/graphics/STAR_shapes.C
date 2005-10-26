@@ -75,6 +75,8 @@
    node1->Add(new TVolume("NODE13","NODE13","SPHE"),10,-400,500);
    node1->Add(new TVolume("NODE14","NODE14","SPHE1"),10, 250,300);
    node1->Add(new TVolume("NODE15","NODE15","SPHE2"),10,-100,-200);
+   
+   node1->MarkAll();
 
    // Create "view" object of the "node1" to browse 
    TVolumeView view(*node1);   
@@ -86,7 +88,7 @@
    //  Draw the geometry using the x3d viewer.
    //  Note that this viewver may also be invoked from the "View" menu in
    //  the canvas tool bar
-    c1->x3d();
+   //  c1->x3d();
    //
    // once in x3d viewer, type m to see the menu.
    // For example typing r will show a solid model of this geometry.
