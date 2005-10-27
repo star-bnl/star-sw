@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.1.1.1 2005/05/25 22:36:36 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.1.1.2 2005/10/27 15:57:59 fisyak Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -971,6 +971,7 @@ protected:
   TGeant3 & operator=(const TGeant3&) {return *this;}
 
   // array conversion
+  Float_t* CreateFloatArray(Float_t*  array, Int_t size) const;
   Float_t* CreateFloatArray(Double_t* array, Int_t size) const;
   Int_t    NextKmat() const;
 
