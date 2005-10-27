@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.56 2005/02/11 23:24:29 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.57 2005/10/27 17:53:19 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -451,7 +451,7 @@ Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
 
-      double phiWgt = PhiWeight(selN, harN, pFlowTrack);      
+      double phiWgt = Weight(selN, harN, pFlowTrack);      
       float phi = pFlowTrack->Phi();
       theG *= (1. + (phiWgt/mult) * (2.* Zx * cos(phi * order) + 
 				     2.* Zy * sin(phi * order) ) );            
@@ -515,7 +515,7 @@ Double_t StFlowEvent::G_Mix(StFlowSelection* pFlowSelect, Double_t Z1x, Double_t
 
 
 
-      double phiWgt = PhiWeightRaw(selN, harN, pFlowTrack);      
+      double phiWgt = 1.;//no need raw phi weight for cumulant method.
       float phi = pFlowTrack->Phi();
       double pt = pFlowTrack->Pt();
       double eta = pFlowTrack->Eta();
@@ -575,7 +575,12 @@ TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) {
 //-------------------------------------------------------------
 
 Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
+
  // Return sum of weights**2
+
+ // This method is called only by cumulant method. It won't return the true 
+ // SumWeightSquare if called in standard method, in which the raw phi weight 
+ // is applied. -TAH
 
   int selN = pFlowSelect->Sel();
   int harN = pFlowSelect->Har();
@@ -587,7 +592,7 @@ Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
       
-      double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+      double phiWgt = Weight(selN, harN, pFlowTrack);
       SumOfWeightSqr += phiWgt*phiWgt;
     }
   }
@@ -1099,6 +1104,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.57  2005/10/27 17:53:19  aihong
+// changes made so that the cumulant method won't pick up the raw phi weight
+//
 // Revision 1.56  2005/02/11 23:24:29  posk
 // SetCentrality works for year4.
 //

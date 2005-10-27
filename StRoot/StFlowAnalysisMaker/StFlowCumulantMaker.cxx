@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.20 2004/12/17 15:50:09 aihong Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.21 2005/10/27 17:53:18 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -517,7 +517,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.20 2004/12/17 15:50:09 aihong Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.21 2005/10/27 17:53:18 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -669,17 +669,16 @@ void StFlowCumulantMaker::FillParticleHistograms() {
       double cumuTempMixFlip;
       double order = 0.;
       double phiWgt = 1.;
-      double phiWgtRaw = 1.; //no ptwgt or eta wgt folded in.
+      double phiWgtRaw = 1.; //no need raw phi weight for cumulants.
+
       for (int j = 0; j < Flow::nHars; j++) {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
 	order  = (double)(j+1);
 	
  	if (pFlowSelect->Select(pFlowTrack)) {
-	  
-	  // Get phiWgt
-	  phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
-          phiWgtRaw = pFlowEvent->PhiWeightRaw(k, j, pFlowTrack);
+	  	  // Get phiWgt
+	  phiWgt = pFlowEvent->Weight(k, j, pFlowTrack);
 	}
 	
 	// Caculate v for all particles selected for correlation analysis
@@ -1414,6 +1413,9 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.21  2005/10/27 17:53:18  aihong
+// changes made so that the cumulant method won't pick up the raw phi weight
+//
 // Revision 1.20  2004/12/17 15:50:09  aihong
 // check in v1{3} code
 //
