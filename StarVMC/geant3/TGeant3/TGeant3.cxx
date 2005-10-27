@@ -16,8 +16,16 @@
 
 /*
 $Log: TGeant3.cxx,v $
-Revision 1.1.1.1  2005/05/25 22:36:36  fisyak
-Alice version of geant3 (-minicern)
+Revision 1.1.1.2  2005/10/27 15:57:58  fisyak
+*** empty log message ***
+
+Revision 1.46  2005/07/21 17:54:37  brun
+Implement same code in the float* versions that were already implemented
+in the Double* versions.
+
+Revision 1.45  2005/07/20 09:22:50  brun
+From Federico:
+Fixes to compile with gcc4CVS: ----------------------------------------------------------------------
 
 Revision 1.44  2005/05/21 05:48:33  brun
 In TGeant3::Init put the code calling ConstructGeometry conditional
@@ -1873,7 +1881,7 @@ Bool_t TGeant3::DefineParticle(Int_t pdg, const char* name, TMCParticleType type
 
 //_____________________________________________________________________________
 Bool_t  TGeant3::DefineIon(const char* name, Int_t Z, Int_t A, Int_t Q,
-                           Double_t excEnergy, Double_t mass)
+                           Double_t /* excEnergy */, Double_t mass)
 {
 //
 // Set a user defined ion.
@@ -2520,7 +2528,19 @@ void TGeant3::Mixture(Int_t& kmat, const char* name, Float_t* a, Float_t* z,
   // weigths.
   //
 
-  G3Mixture(kmat, name, a, z, dens, nlmat, wmat);
+  Float_t* fa = CreateFloatArray(a, TMath::Abs(nlmat));
+  Float_t* fz = CreateFloatArray(z, TMath::Abs(nlmat));
+  Float_t* fwmat = CreateFloatArray(wmat, TMath::Abs(nlmat));
+
+  G3Mixture(kmat, name, fa, fz, dens, nlmat, fwmat);
+  Int_t i;
+  for (i=0; i<TMath::Abs(nlmat); i++) {
+    a[i] = fa[i]; z[i] = fz[i]; wmat[i] = fwmat[i];
+  }
+
+  delete [] fa;
+  delete [] fz;
+  delete [] fwmat;
 }
 
 //_____________________________________________________________________________
@@ -2789,7 +2809,7 @@ Double_t TGeant3::Etot() const
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 //____________________________________________________________________________
-void  TGeant3::Gfile(const char *filename, const char *option)
+void  TGeant3::Gfile(const char * /*filename*/, const char * /*option*/)
 {
   //
   //    Routine to open a GEANT/RZ data base.
@@ -4615,7 +4635,7 @@ void TGeant3::SetAUTO(Int_t par)
 
 
 //_____________________________________________________________________________
-void TGeant3::SetBOMB(Float_t boom)
+void TGeant3::SetBOMB(Float_t /*boom*/)
 {
   //
   //  BOOM  : Exploding factor for volumes position
@@ -5774,6 +5794,30 @@ void TGeant3::SetTrack(Int_t done, Int_t parent, Int_t pdg, Float_t *pmom,
   GetStack()->PushTrack(done, parent, pdg, pmom[0], pmom[1], pmom[2], e,
                        vpos[0], vpos[1], vpos[2], tof, polar[0], polar[1], polar[2],
                        mech, ntr, weight, is);
+}
+
+
+//_____________________________________________________________________________
+Float_t* TGeant3::CreateFloatArray(Float_t* array, Int_t size) const
+{
+// Converts Double_t* array to Float_t*,
+// !! The new array has to be deleted by user.
+// ---
+
+  Float_t* floatArray;
+  if (size>0) {
+    floatArray = new Float_t[size];
+    for (Int_t i=0; i<size; i++)
+      if (array[i] >= FLT_MAX ) 
+        floatArray[i] = FLT_MAX/100.;
+      else	
+        floatArray[i] = array[i];
+  }
+  else {
+    //floatArray = 0;
+    floatArray = new Float_t[1];
+  }
+  return floatArray;
 }
 
 
