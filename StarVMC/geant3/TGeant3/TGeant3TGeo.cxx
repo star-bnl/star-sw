@@ -16,8 +16,27 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
-Revision 1.1.1.3  2005/07/14 13:07:27  fisyak
+Revision 1.1.1.4  2005/10/27 15:58:03  fisyak
 *** empty log message ***
+
+Revision 1.12  2005/07/28 12:02:17  brun
+From Andrei:
+- Fixed problem of material indices when coming from FORTRAN code
+(TGeant3TGeo::Gsmate)
+- when loading the geometry from file, the value of radlen stored in TGeo is
+injected in G3 (with negative sign not to be recomputed by G3) but abslen is
+recomputed since it is not valid in TGeo.
+
+Revision 1.11  2005/07/27 13:06:52  brun
+Simplify logic in TGeant3TGeo::Mixture (Float_t* case)
+
+Revision 1.10  2005/07/21 17:54:37  brun
+Implement same code in the float* versions that were already implemented
+in the Double* versions.
+
+Revision 1.9  2005/07/20 09:22:51  brun
+From Federico:
+Fixes to compile with gcc4CVS: ----------------------------------------------------------------------
 
 Revision 1.8  2005/07/13 09:36:18  brun
 From Federico:
@@ -695,7 +714,9 @@ void TGeant3TGeo::Material(Int_t& kmat, const char* name, Double_t a, Double_t z
   //  nbuf               number of user words
   //
 
-  G3Material(kmat, name, a, z, dens, radl, absl, buf, nwbuf);
+  Float_t* fbuf = CreateFloatArray(buf, nwbuf);
+  G3Material(kmat, name, a, z, dens, radl, absl, fbuf, nwbuf);
+  delete [] fbuf;
 
   fMCGeo->Material(kmat, name, a, z, dens, radl, absl, buf, nwbuf);
 }
@@ -927,7 +948,7 @@ void  TGeant3TGeo::Ggclos()
 }
 
 //_____________________________________________________________________________
-void  TGeant3TGeo::Gprint(const char *name)
+void  TGeant3TGeo::Gprint(const char * /*name*/)
 {
   //
   // Routine to print data structures
@@ -990,7 +1011,8 @@ void  TGeant3TGeo::Gsmixt(Int_t imat, const char *name, Float_t *a, Float_t *z,
   //       In this case, WMAT in output is changed to relative
   //       weigths.
   //
-  Mixture(imat,name,a,z,dens,nlmat,wmat);
+  g3smixt(imat,PASSCHARD(name),a,z,dens,nlmat,wmat PASSCHARL(name));
+  fMCGeo->Mixture(imat, name, a, z, dens, TMath::Abs(nlmat), wmat);
 }
 
 //_____________________________________________________________________________
@@ -1279,7 +1301,7 @@ void  TGeant3TGeo::Gsdvt2(const char *name, const char *mother, Double_t step,
 }
 
 //_____________________________________________________________________________
-void  TGeant3TGeo::Gsord(const char *name, Int_t iax)
+void  TGeant3TGeo::Gsord(const char * /*name*/, Int_t /*iax*/)
 {
   //
   //    Flags volume CHNAME whose contents will have to be ordered
@@ -1577,7 +1599,7 @@ void TGeant3TGeo::Gsatt(const char *name, const char *att, Int_t val)
 }
 
 //_____________________________________________________________________________
-Int_t TGeant3TGeo::Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum)
+Int_t TGeant3TGeo::Glvolu(Int_t /*nlev*/, Int_t * /*lnam*/,Int_t * /*lnum*/)
 {
   //
   //  nlev   number of leveles deap into the volume tree
@@ -1600,7 +1622,7 @@ Int_t TGeant3TGeo::Glvolu(Int_t nlev, Int_t *lnam,Int_t *lnum)
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdshow(Int_t iview)
+void TGeant3TGeo::Gdshow(Int_t /*iview*/)
 {
   //
   //  IVIEW  View number
@@ -1611,7 +1633,7 @@ void TGeant3TGeo::Gdshow(Int_t iview)
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdopt(const char *name,const char *value)
+void TGeant3TGeo::Gdopt(const char * /*name*/,const char * /*value*/)
 {
   //
   //  NAME   Option name
@@ -1645,8 +1667,8 @@ void TGeant3TGeo::Gdopt(const char *name,const char *value)
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdraw(const char *name,Double_t theta, Double_t phi, Double_t psi,
-		    Double_t u0,Double_t v0,Double_t ul,Double_t vl)
+void TGeant3TGeo::Gdraw(const char * /*name*/,Double_t /*theta*/, Double_t /*phi*/, Double_t /*psi*/,
+			Double_t /*u0*/,Double_t /*v0*/,Double_t /*ul*/,Double_t /*vl*/)
 {
   //
   //  NAME   Volume name
@@ -1686,8 +1708,8 @@ void TGeant3TGeo::Gdraw(const char *name,Double_t theta, Double_t phi, Double_t 
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdrawc(const char *name,Int_t axis, Float_t cut,Float_t u0,
-		     Float_t v0,Float_t ul,Float_t vl)
+void TGeant3TGeo::Gdrawc(const char * /*name*/,Int_t /*axis*/, Float_t /*cut*/,Float_t /*u0*/,
+			 Float_t /*v0*/,Float_t /*ul*/,Float_t /*vl*/)
 {
   //
   //  NAME   Volume name
@@ -1709,9 +1731,9 @@ void TGeant3TGeo::Gdrawc(const char *name,Int_t axis, Float_t cut,Float_t u0,
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdrawx(const char *name,Float_t cutthe, Float_t cutphi,
-		     Float_t cutval, Float_t theta, Float_t phi, Float_t u0,
-		     Float_t v0,Float_t ul,Float_t vl)
+void TGeant3TGeo::Gdrawx(const char * /*name*/,Float_t /*cutthe*/, Float_t /*cutphi*/,
+		     Float_t /*cutval*/, Float_t /*theta*/, Float_t /*phi*/, Float_t /*u0*/,
+			 Float_t /*v0*/,Float_t /*ul*/,Float_t /*vl*/)
 {
   //
   //  NAME   Volume name
@@ -1734,7 +1756,7 @@ void TGeant3TGeo::Gdrawx(const char *name,Float_t cutthe, Float_t cutphi,
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdspec(const char *name)
+void TGeant3TGeo::Gdspec(const char * /*name*/)
 {
   //
   //  NAME   Volume name
@@ -1749,7 +1771,7 @@ void TGeant3TGeo::Gdspec(const char *name)
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::DrawOneSpec(const char *name)
+void TGeant3TGeo::DrawOneSpec(const char * /*name*/)
 {
   //
   //  Function called when one double-clicks on a volume name
@@ -1759,7 +1781,7 @@ void TGeant3TGeo::DrawOneSpec(const char *name)
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::Gdtree(const char *name,Int_t levmax, Int_t isel)
+void TGeant3TGeo::Gdtree(const char * /*name*/,Int_t /*levmax*/, Int_t /*isel*/)
 {
   //
   //  NAME   Volume name
@@ -1778,7 +1800,7 @@ void TGeant3TGeo::Gdtree(const char *name,Int_t levmax, Int_t isel)
 }
 
 //_____________________________________________________________________________
-void TGeant3TGeo::GdtreeParent(const char *name,Int_t levmax, Int_t isel)
+void TGeant3TGeo::GdtreeParent(const char * /*name*/,Int_t /*levmax*/, Int_t /*isel*/)
 {
   //
   //  NAME   Volume name
@@ -1798,20 +1820,23 @@ Int_t  TGeant3TGeo::ImportMaterial(const TGeoMaterial* mat)
   Int_t kmat;
   const TGeoMixture* mixt = dynamic_cast<const TGeoMixture*>(mat);
   if (mixt) {
+    // TGeo stores only proportions by weigth
     Int_t nlmat = mixt->GetNelements();
     Float_t* fa = CreateFloatArray(mixt->GetAmixt(), TMath::Abs(nlmat));
     Float_t* fz = CreateFloatArray(mixt->GetZmixt(), TMath::Abs(nlmat));
     Float_t* fwmat = CreateFloatArray(mixt->GetWmixt(), TMath::Abs(nlmat));
-    G3Mixture(kmat, mixt->GetName(), fa, fz, mixt->GetDensity(), nlmat, fwmat);
+    G3Mixture(kmat, mixt->GetName(), fa, fz, mixt->GetDensity(), TMath::Abs(nlmat), fwmat);
     delete [] fa;
     delete [] fz;
     delete [] fwmat;
   }
   else {
     Float_t* buf = 0;
+    // Inject radlen with negative sign to be stored in G3
+    Double_t radlen = mat->GetRadLen();
+    // Ignore abslen from TGeo and let G3 compute it
     G3Material(kmat, mat->GetName(), mat->GetA(), mat->GetZ(),
-               mat->GetDensity(), mat->GetRadLen(), mat->GetIntLen(), buf, 0);
-                                    // Is fIntLen == absl ??
+               mat->GetDensity(), -radlen, 0, buf, 0);
   }
   return kmat;
 }
@@ -1950,7 +1975,7 @@ void gtmediTGeo(Float_t *x, Int_t &numed)
 
 
 //______________________________________________________________________
-void gmediaTGeo(Float_t *x, Int_t &numed, Int_t &check)
+void gmediaTGeo(Float_t *x, Int_t &numed, Int_t & /*check*/)
 {
    gCurrentNode = gGeoManager->FindNode(x[0],x[1],x[2]);
    if (gGeoManager->IsOutside()) {
@@ -2091,7 +2116,7 @@ void gtnextTGeo()
 
 
 //______________________________________________________________________
-void ggperpTGeo(Float_t *x, Float_t *norm, Int_t &ierr)
+void ggperpTGeo(Float_t * /*x*/, Float_t *norm, Int_t &ierr)
 {
 // Computes the normal to the next crossed surface, assuming that
 // FindNextBoundary() was already called.

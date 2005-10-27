@@ -459,7 +459,7 @@ void gfpart(Int_t &ipart, char *name, Int_t &itrtyp,
 void gftmed(Int_t &numed, char *name, Int_t &nmat, Int_t &isvol,  
 		   Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd, 
 		    Float_t &stemax, Float_t &deemax, Float_t &epsil, 
-		    Float_t &stmin, Float_t *ubuf, Int_t *nbuf, const Int_t lname) 
+		    Float_t &stmin, Float_t * /*ubuf*/, Int_t * /*nbuf*/, const Int_t lname) 
 { 
   //
   // Return parameters for tracking medium NUMED
@@ -491,7 +491,7 @@ void gsdk(Int_t &ipart, Float_t *bratio, Int_t *mode)
  
 //_____________________________________________________________________________
 void gsmate(Int_t &imat, const char *name, Float_t &a, Float_t &z,  
-		   Float_t &dens, Float_t &radl, Float_t &absl, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
+		   Float_t &dens, Float_t &radl, Float_t &absl, Float_t */*ubuf*/, Int_t &/*nbuf*/, const Int_t lname) 
 { 
   //
   // Defines a Material
@@ -536,7 +536,7 @@ void gsmixt(Int_t &imat, const char *name, Float_t *a, Float_t *z,
  
 //_____________________________________________________________________________
 void gspart(Int_t &ipart, const char *name, Int_t &itrtyp,  
-		   Float_t &amass, Float_t &charge, Float_t &tlife, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
+		   Float_t &amass, Float_t &charge, Float_t &tlife, Float_t * /*ubuf*/, Int_t & /*nbuf*/, const Int_t lname) 
 { 
   //
   // Store particle parameters
@@ -557,7 +557,7 @@ void gspart(Int_t &ipart, const char *name, Int_t &itrtyp,
 void gstmed(Int_t &numed, const char *name, Int_t &nmat, Int_t &isvol,  
 		      Int_t &ifield, Float_t &fieldm, Float_t &tmaxfd,
 		      Float_t &stemax, Float_t &deemax, Float_t &epsil,
-		      Float_t &stmin, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
+		      Float_t &stmin, Float_t * /*ubuf*/, Int_t & /*nbuf*/, const Int_t lname) 
 { 
   //
   //  NTMED  Tracking medium number
@@ -809,7 +809,7 @@ void gtreve()
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 //_____________________________________________________________________________
-void gdxyz(Int_t &it)
+void gdxyz(Int_t & /*it*/)
 {
   //
   // Draw the points stored with Gsxyz relative to track it
@@ -1234,7 +1234,7 @@ void gckmat(Int_t &itmed, char* natmed)
 }
 
 //_____________________________________________________________________________
-void gdelete(Int_t &iview)
+void gdelete(Int_t & /*iview*/)
 { 
   //
   //  IVIEW  View number
@@ -1273,7 +1273,7 @@ void gdclose()
 }
  
 //_____________________________________________________________________________
-void gdshow(Int_t &iview)
+void gdshow(Int_t & /*iview*/)
 { 
   //
   //  IVIEW  View number
@@ -1435,7 +1435,7 @@ void gdhead(Int_t &isel, const char *name, Float_t &chrsiz)
 }
 
 //_____________________________________________________________________________
-void gdman(Float_t &u, Float_t &v, const char *type)
+void gdman(Float_t &u, Float_t &v, const char * /*type*/)
 { 
   //
   //  Draw a 2D-man at position (U0,V0)
