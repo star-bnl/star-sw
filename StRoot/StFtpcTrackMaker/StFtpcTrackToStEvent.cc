@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.11 2005/03/10 02:21:09 perev Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.12 2005/10/27 19:56:39 fisyak Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -468,7 +468,7 @@ unsigned short StFtpcTrackToStEvent::EncodedStEventFitPoints(StFtpcTrack* track)
 float StFtpcTrackToStEvent::ImpactParameter(StFtpcTrack* track) {
   
   if (!mEvent->primaryVertex()) {
-    return DBL_MAX;
+    return 3.e33;
   }
   
   else {
