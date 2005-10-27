@@ -15,8 +15,12 @@
 
 /*
 $Log: G3toRoot.cxx,v $
-Revision 1.1.1.1  2005/05/25 22:36:37  fisyak
-Alice version of geant3 (-minicern)
+Revision 1.1.1.2  2005/10/27 15:58:05  fisyak
+*** empty log message ***
+
+Revision 1.4  2005/07/21 17:50:46  brun
+From Frederico
+Use MakeCopy instead of Copy
 
 Revision 1.3  2004/01/28 08:17:52  brun
 Reintroduce the Geant3 graphics classes (thanks Andreas Morsch)
@@ -581,7 +585,7 @@ void G3toRoot::ConvertToRootShapes(TFolder *item, G3Node** node, Int_t nNodes)
 	
 	if (ncopy) {
 	    for (Int_t icop = 0; icop < ncopy; icop++) {
-		G3Volume* copy = volume->Copy(icop);
+		G3Volume* copy = volume->MakeCopy(icop);
 		
 		sprintf(nameN,"%s%d" , volume->GetName(), icop+1);
 		if (copy->Posp()) {
