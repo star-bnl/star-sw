@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: G3Volume.h,v 1.1.1.1 2005/05/25 22:36:37 fisyak Exp $ */
+/* $Id: G3Volume.h,v 1.1.1.2 2005/10/27 15:58:01 fisyak Exp $ */
 
 #include <TGListTree.h>
 #include "TROOT.h"
@@ -64,7 +64,7 @@ public:
     virtual void  Parameters(Int_t i, TArrayF& param) const;
     virtual TList* Copies() const {return fCopies;}
     virtual void  AddCopy(G3Volume* volume);
-    virtual G3Volume* Copy(Int_t i);
+    virtual G3Volume* MakeCopy(Int_t i); 
 
     virtual Int_t  NCopies() const {return fNCopies;}
     virtual Bool_t Posp() const {return fPosp;}
@@ -122,7 +122,6 @@ private:
     Int_t    fIdCopy;      // copy flag
     TObject* fItem;        //!current item
     G3Volume & operator=(const G3Volume&) {return *this;}
-    void     Copy(TObject &object) const {;}  // not implemented
 
     ClassDef(G3Volume,1) // G3 Volume for G3 GUI
 };
