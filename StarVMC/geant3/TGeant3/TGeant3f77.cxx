@@ -536,7 +536,7 @@ void gsmixt(Int_t &imat, const char *name, Float_t *a, Float_t *z,
  
 //_____________________________________________________________________________
 void gspart(Int_t &ipart, const char *name, Int_t &itrtyp,  
-		   Float_t &amass, Float_t &charge, Float_t &tlife, Float_t *ubuf*, Int_t &nbuf, const Int_t lname) 
+	    Float_t &amass, Float_t &charge, Float_t &tlife, Float_t *ubuf, Int_t &nbuf, const Int_t lname) 
 { 
   //
   // Store particle parameters
