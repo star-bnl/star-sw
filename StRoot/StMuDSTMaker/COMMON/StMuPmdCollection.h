@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.h,v 1.4 2004/10/19 01:39:35 mvl Exp $
+ * $Id: StMuPmdCollection.h,v 1.5 2005/10/28 05:18:32 mvl Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.h,v $
+ * Revision 1.5  2005/10/28 05:18:32  mvl
+ * Added getters for hit and cluster arrays on requets of Subhasis
+ *
  * Revision 1.4  2004/10/19 01:39:35  mvl
  * Changed for splitting on file. Added support for hits
  *
@@ -43,11 +46,13 @@ class StMuPmdCollection: public TObject
     void              Clear(Option_t *option=""){clear(option);}     
     void              DeleteThis();
     
+    TClonesArray     *getClusterArray(int detector) {return mPmdClusters[detector];}
     int               getNClusters(int detector);
     StMuPmdCluster*   getCluster(int clusterId,int detector);    
 
     void              addCluster(int detector);
         
+    TClonesArray     *getHitArray(int detector) {return mPmdHits[detector];}
     int               getNHits(int detector);
     StMuPmdHit*       getHit(int hitId,int detector);    
 
