@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochFunction.hh,v 1.3 2003/10/25 00:35:33 perev Exp $
+ * $Id: BetheBlochFunction.hh,v 1.4 2005/11/01 18:38:37 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBlochFunction.hh,v $
+ * Revision 1.4  2005/11/01 18:38:37  aihong
+ * switch to functions from TMath
+ *
  * Revision 1.3  2003/10/25 00:35:33  perev
  * Defence against non physical region added
  *
@@ -64,7 +67,7 @@ double BetheBlochFunction(double *rig,double *par) {
           if (gb2 > 0.0) b2=1.0/(1.0 + 1.0/gb2);
           else return 0.0;
           if (myValue*gb2<=1.) return 0; //VP non physical region
-	  myDedx=calib*charge*charge*(1.0/::pow(b2,prefactor))*(::pow(::log(myValue*gb2),0.7) - postfactor*b2 )- mFactor;
+	  myDedx=calib*charge*charge*(1.0/TMath::Power(b2,prefactor))*(TMath::Power(TMath::Log(myValue*gb2),0.7) - postfactor*b2 )- mFactor;
           if (myDedx > satura) myDedx=satura;   
 
           return myDedx;
