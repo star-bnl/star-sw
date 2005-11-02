@@ -227,11 +227,13 @@ To use the STAR message manager your code has to contain the STAR message manage
   This means to instantiate the new logger it is enough to call <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/LoadLogger.C"><b><code>"LoadLogger.C"</code></b></a>
   followed by you your ROOT macro invocation. 
   <p>
-   For example to get bfc.C works with the new logger schema one needs to start the "root4star" session and call TWO macros:
+   However for <b><code>bfc.C</code></b> the new interface is set as "default". To tune it off and use the old version one should 
+   apply <b><code> "-logger" </code></b> option
+   
    <b><code>
    <pre>
      &gt;root4star
-     root4star[0] .x bfc.C(1, ". . . logger", . . .  )
+     root4star[0] .x bfc.C(1, ". . . -logger", . . .  )
    </pre>
    </code></b>
  <p>
