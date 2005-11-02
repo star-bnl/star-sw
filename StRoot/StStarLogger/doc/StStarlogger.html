@@ -25,6 +25,8 @@ Table of Contents:
 <li><a href="#print">"Print statement" transition</a>
 <li><a href="#root">ROOT messages handling</a>
 <li><a href="#examples">"Examples (under construction yet)"</a>
+<li><a href="#deprecated">"The deprecated<a> functionality 
+                          of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">the old messager"</a>
 </ul>
 <a name="#logger"></a>
 <h2> Integration log4j package for STAR framework</h2>
@@ -507,7 +509,7 @@ Namely, one still can define it via "ROOT Environment" providing the line
 alike within his/her <a href="#conf">custom <b><code>".rootrc"</code></b> file</a>.  The ROOT rule is applied first.
 <a name="#examples"></a>
 <!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
-<H2>Examples of the custom configuration files (under construction yet)"</H2>
+<H2>Examples of the custom configuration files (under construction yet)</H2>
 The example of the configuration files below are available 
 to copy from <b><code>$STAR/StRoot/StStarLogger/docs</b></code> directory 
 or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/doc">STAR CVS repository</a>
@@ -519,6 +521,38 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 <li><a href="RollingQuota.xml"> <b><code>RollingQuota.xml</code></b></a> - allows 100 MGb log file at most   
 <li><a href="QACustom.xml"> <b><code>QACustom.xml</code></b></a> - defines the custom level and format for QA messages
 </ul>
+
+<a name="#deprecated"></a>
+<h2>The deprecated functionality</h2>
+Some redundant functions described by<br> 
+
+<a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"><b>Section II. Advanced features</b></a>,
+namely, 
+<ul>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii1">II-1.  Message summary </a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii2">II-2.  Specifying options and output streams</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii3">II-3.  Non-accounted messages</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii4">II-4.  Turning off printing of message prefix</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii5">II-5.  Turning off printing of the leading "St"</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii6">II-6.  Turning on printing of the time-date stamp</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii7">II-7.  Access to the current message</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii8">II-8.  Finding a message</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii9">II-9.  Finding a list of messages</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii10">II-10. Finding messages within a list</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii11">II-11. Printing a list of messages</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii12">II-12. Formatting output</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii13">II-13. Limiting message counts</a>
+<li><a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr/#ii14">II-14. Memory usage management </a>
+</ul>
+<br>
+
+still remain of the part of the STAR messager interface. However they are deprecated because they do allow to change
+the logger functionality from with the code.
+This way, it may have interfered with the options ordered through the configuration file.
+
+The presence  of these functions do not cause any run-time / compile error. However it does not lead to the expected behavior either.
+One is advised to remove the invocations of these functions from his/her code and use <a href="#conf"> the "xml" configuration file</a> instead.
+
 <hr>
 <small>
 Webmaster: <a href="mailto:fine@bnl.gov">Valeri Fine</a>
