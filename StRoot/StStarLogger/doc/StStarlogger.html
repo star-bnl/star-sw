@@ -436,8 +436,8 @@ a simple addition</a>.
 <a name="#printCprintf"></a>
 <h3> "C"output subroutines</h3>
 
-One advises the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method 
-simplify the transition the programs those contain the C-language output subroutines like <b><code>"printf"</code></b> or <b><code>"fprintf"</code></b>.
+Use the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method 
+to simplify your programs transition those contain the C-language output subroutines like <b><code>"printf"</code></b> or <b><code>"fprintf"</code></b>.
 
 You may add the appropriated  <a href="#macros">logger macros</a> followed by the former <b><code>printf</code></b> statement 
 followed by <b><code>"endm"</code></b> object and 
@@ -465,8 +465,10 @@ may be replaced with
 <h3> STAR "Message Manager"</h3>
 Since the "logger" is  <a href="#logger">another implementation</a> of the STAR "Message Manager" abstract 
 interface, the existing invocations of the manager should work with the new "log4cxx" implemenation 
-with out any change.
-However one is adviced to adjust it for the sake of the consistency.
+without any change.
+However some functions became redundand and they are <a href="#deprecated">deprecated<a/>.
+
+Calling others should be adjusted for the sake of the consistency.
 <p>
 For example,  the expression
    <b><code>
