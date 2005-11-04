@@ -12,42 +12,42 @@
          - - - - - - - - - - - - - - 
            RepeatMessageQuote
          - - - - - - - - - - - - - - 
-           "name"   - "RepeatMessageQuote" parameters to assign to number of message can be repated sequeincially
+           "name"   - "RepeatMessageQuote" parameters to assign to number of messages to be repeated sequeintially
            "value"  = -1  there is no limit (by default)
                     >  0  the number of times the message can be printed out sequentially 
                           (without any other message between each occurence)
 
                           the value zero and one have one and the same meaning
                           0 - there is no repeatition, the message can be printed at once
-                          1 - the message can be printed one times onl;y, so "0" == "1"
+                          1 - the message can be printed one time only, so "0" == "1"
             Example:
             - - - -   <param name="RepeatMessageQuote" value="2"/>
-            Print each message no mor then 2 times sequinecaily at most.
+            Print each message no more then 2 times sequientialy at most.
           - - - - - - - - - - - - - - 
            TotalMessagesQuote
           - - - - - - - - - - - - - - 
-           "name"   - "TotalMessagesQuote" parameters to assign to number of message can be repated sequeincially
+           "name"   - "TotalMessagesQuote" parameters to assign to number of messages to be repeated sequeintially
            "value"  = -1  there is no limit (by default)
                     >  0  the number of times the message can printed out across the entire output                          
                           the value zero and one have one and the same meaning
                           0 - there is no repeatition, the message can be printed at once
-                          1 - the message can be printed one times onl;y, so "0" == "1"
+                          1 - the message can be printed one time only, so "0" == "1"
             Example:
             - - - -    <param name="TotalMessagesQuote" value="200"/>
             The output should contain the 200 lines at most.
          - - - - - - - - - - - - - - 
            StringToCount
          - - - - - - - - - - - - - - 
-           "name"   - "StringToCount" parameters define tghe string pattern to apply ther "counter" paramters  above  
+           "name"   - "StringToCount" parameters define the string pattern to apply the "counter" paramters above  
            "value" =  "Some string" that the user message should contain to be counted 
                        as "RepeatMessageQuote" and /or "TotalMessagesQuote" define
                   >  0  the number of times the message can printed out across the entire output                          
                           the value zero and one have one and the same meaning
                           0 - there is no repeatition, the message can be printed at once
-                          1 - the message can be printed one times onl;y, so "0" == "1"
+                          1 - the message can be printed one times only, so "0" == "1"
             Example:
             - - - -   <param name="StringToCount" value="TPC"/>
-            Count only the messages with sttring "TPC" in.
+            Count only the messages with the string "TPC" in.
         --> 
         <param name="RepeatMessageQuote" value="2"/>
         <!-- <param name="StringToCount" value="My string to filter out pattern"/>  -->
