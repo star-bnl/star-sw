@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.5 2005/10/06 16:36:32 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.6 2005/11/04 18:56:07 balewski Exp $
  
 
 #include <time.h>
@@ -66,13 +66,13 @@ StSpinDbMaker::clearTables(){
 //__________________________________________________
 Int_t  
 StSpinDbMaker::InitRun  (int runNumber){
-  gMessMgr->Message("","I") << GetName()<<"::InitRun  " <<endm;
+  LOG_DEBUG << GetName()<<"::InitRun  " <<endm;
   clearTables();
   requestDataBase();
  
   if(mTabSpinV124) optimizeTables();
   
-  gMessMgr->Message("","I") << GetName()<<"::InitRun()  Found "<< nFound<<" SPIN related tables "<<endm;
+  LOG_DEBUG << GetName()<<"::InitRun()  Found "<< nFound<<" SPIN related tables "<<endm;
 
   return StMaker::InitRun(runNumber);
 }  
@@ -82,8 +82,8 @@ StSpinDbMaker::InitRun  (int runNumber){
 //__________________________________________________
 
 void  StSpinDbMaker::requestDataBase(){
- 
-  printf("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p \n",GetName(),(void*)GetMaker("StarDb"),(void*)GetMaker("db"));
+  
+  LOG_DEBUG <<Form ("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p ",GetName(),(void*)GetMaker("StarDb"),(void*)GetMaker("db"))<<endm;
   
 
   St_db_Maker* stdb = (St_db_Maker*)GetMaker("StarDb");
@@ -92,13 +92,13 @@ void  StSpinDbMaker::requestDataBase(){
     
   StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
   
-  gMessMgr->Message("","I") << GetName()<<"::RequestDataBase(),  event time stamp="<< (int)fEvtHddr->GetUTime()<< " , yyyy/mm/dd="<< fEvtHddr->GetDate()<<" hh/mm/ss="<<fEvtHddr->GetTime()<<endm;  
+  LOG_INFO << GetName()<<"::RequestDataBase(),\n     event time stamp="<< (int)fEvtHddr->GetUTime()<< " , yyyy/mm/dd="<< fEvtHddr->GetDate()<<" hh/mm/ss="<<fEvtHddr->GetTime()<<endm;  
   
-  gMessMgr->Message("","I") << GetName()<<"::RequestDataBase(), access DB='"<<dbName<<"'  use timeStamp="<< stdb->GetDateTime().AsString()<<endm;
+  LOG_DEBUG << GetName()<<"::RequestDataBase(), access DB='"<<dbName<<"'  use timeStamp="<< stdb->GetDateTime().AsString()<<endm;
   
   TDataSet *spindb=GetDataBase(dbName );
   if(spindb==0) {
-    gMessMgr->Message("","E") << GetName()<<"::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
+    LOG_ERROR << GetName()<<"::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
     return ;
     // down-stream makers should check for presence of dataset
   }
@@ -107,7 +107,7 @@ void  StSpinDbMaker::requestDataBase(){
   getTable<St_spinDbStar,spinDbStar_st>(spindb,"spinStar",&mTabSpinStar);  
   getTable<St_spinDbBXmask,spinDbBXmask_st>(spindb,"spinBXmask",&mTabSpinBXmask);  
    
-  gMessMgr->Message("","I") << GetName()<<"::Request isValid="<< isValid()<<endm;
+   LOG_INFO << GetName()<<"::Request isValid="<< isValid()<<endm;
 
 
 }
@@ -184,7 +184,7 @@ void  StSpinDbMaker::optimizeTables  (){
   if(isPolDirTrans()) polDir="Transverse";
   if(isPolDirLong()) polDir="Longitudinal";
   
-  gMessMgr->Message("","I")<< GetName()<<"::InitRun mOptimized() "<<
+  LOG_INFO<< GetName()<<"::InitRun mOptimized() "<<
      "\n        polDir="<<polDir<<
      "  bXing w/ pol2="<<nP2<<" pol1="<<nP1<<" unPol="<<nP0<<" errPol="<<nPer<<endm; 
   return;
@@ -447,6 +447,9 @@ void StSpinDbMaker::print(int level) {
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.6  2005/11/04 18:56:07  balewski
+// cleanup of printouts
+//
 // Revision 1.5  2005/10/06 16:36:32  balewski
 // protection against printing not initialized DB content
 //
