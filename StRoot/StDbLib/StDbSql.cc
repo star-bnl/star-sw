@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.26 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbSql.cc,v 1.27 2005/11/07 14:45:44 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.27  2005/11/07 14:45:44  deph
+ * Changed the SQL operator IN to one of the following: = if row =1 ; between if block of element IDs are contiguous; or IN if they are not
+ *
  * Revision 1.26  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -294,11 +297,12 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
   char* elementString=getElementList(elementID,numRows);
   char* dataTable=getDataTable(table,reqTime);
 
- // Query DB for the endtime -> earliest time of next row 
+// Query DB for the endtime -> earliest time of next row 
   Db << " select beginTime + 0 as mendDateTime, ";
   Db << " unix_timestamp(beginTime) as mendTime from "<<dataTable;
   Db << baseString <<" AND beginTime>from_unixtime("<<reqTime<<")"; 
-  Db << " And elementID In("<<elementString<<")";
+//  Db << " And elementID In("<<elementString<<")";
+  Db << " And elementID "<<elementString;
   Db << " Order by beginTime limit 1"<<endsql; 
     
   sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
@@ -349,7 +353,8 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
    Db <<" select unix_timestamp(beginTime) as bTime,"<<dataTable<<".* from ";
    Db << dataTable << baseString;
    Db <<" AND beginTime<=from_unixtime("<<reqTime<<")";
-   Db <<" AND elementID In("<<elementString<<") "; 
+   //Db <<" AND elementID In("<<elementString<<") "; 
+   Db <<" AND elementID "<<elementString; 
    Db <<" Order by beginTime desc limit "<< rowsLeft <<endsql;
 
    sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
@@ -386,7 +391,7 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
          j++;
        }
      }
-     elementString = getElementList(elementsLeft,rowsLeft);
+     elementString = getElementListIN(elementsLeft,rowsLeft);
      delete [] elementsLeft;
    } else {
      done=true;
@@ -455,7 +460,8 @@ bool StDbSql::updateEndTime(StDbTable* table, const char* dataTable, unsigned in
   int* wrows = table->getWrittenRows(nrows);
   
   Db<<" select unix_timestamp(Min(endTime)) as mendTime from "<<dataTable;
-  Db<<" where dataID In("<<getElementList(wrows,nrows)<<")"<<endsql;
+ // Db<<" where dataID In("<<getElementList(wrows,nrows)<<")"<<endsql;
+  Db<<" where dataID "<<getElementList(wrows,nrows)<<endsql;
 
   if( (Db.NbRows()>0) && Db.Output(&buff)){
     unsigned int t1 = table->getEndTime();
@@ -583,7 +589,8 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause, int opt){
      if(table->IsIndexed() && t1>0 && !opt){
        Db<<" select unix_timestamp(beginTime) as eTime from "<<dataTables[i];
        Db<<" where beginTime>from_unixtime("<<t1<<")";
-       Db<<" and elementID In("<<getElementList(elements,retRows)<<")";
+       //Db<<" and elementID In("<<getElementList(elements,retRows)<<")";
+       Db<<" and elementID "<<getElementList(elements,retRows);
        Db<<" Order by beginTime limit 1"<<endsql;
      
        sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
@@ -1409,15 +1416,45 @@ char*
 StDbSql::getElementList(int* e, int num){
 
 // prepares comma separated list of integers
+// using the between operator
 
  StString es;
  if(!e){ 
    es<<0;
  } else {
-   for(int i=0;i<num-1;i++)es<<e[i]<<",";
-   es<<e[num-1];
+   // for(int i=0;i<num-1;i++)//es<<e[i]<<",";
+     {
+//MPD
+       // if (e[0] == 0){
+       if (num == 1){
+	 es<<"= "<<e[0];
+       } else if(e[0]< num) {
+	 es<<"between "<<e[0]<<" and "<<num;
+       } else {
+	 es<<"between "<<num <<" and "<<e[0];
+       }
+     }
+     // es<<e[num-1];
  }
 
+ return mRetString(es);
+}
+////////////////////////////////////////////////
+char*
+StDbSql::getElementListIN(int* e, int num){
+// prepares comma separated list of integers
+// using the IN operator
+
+
+ StString es;
+ if(!e){ 
+   es<<0;
+ } else {
+   es<<"In (";
+   for(int i=0;i<num-1;i++) es<<e[i]<<",";  
+   es<<e[num-1];
+ }
+ es<<")";
  return mRetString(es);
 }
 
