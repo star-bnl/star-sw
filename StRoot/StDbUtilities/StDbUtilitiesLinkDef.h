@@ -14,6 +14,10 @@
 #pragma link C++ class StTpcPadCoordinate!-;
 #pragma link C++ class StTpcCoordinateTransform!-;
 
+/* #pragma link C++ class StSvtCoordinateTransform!-; */
+/* #pragma link C++ class StSvtLocalCoordinate!-; */
+/* #pragma link C++ class StSvtWaferCoordinate!-; */
+
 #pragma link C++ function operator<<(ostream&, const StTpcLocalCoordinate&);
 #pragma link C++ function operator<<(ostream&, const StTpcLocalDirection&);
 #pragma link C++ function operator<<(ostream&, const StTpcLocalSectorAlignedCoordinate&);
@@ -39,11 +43,11 @@
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate&, StGlobalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate& ,StTpcLocalSectorCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalSectorDirection&, StGlobalDirection&);
-#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection& ,StTpcLocalSectorDirection&);
+#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection& ,StTpcLocalSectorDirection&,int, int);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&, StGlobalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcLocalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcLocalDirection&, StGlobalDirection&);
-#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection&, StTpcLocalDirection&);
+#pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalDirection&, StTpcLocalDirection&,int, int);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StTpcPadCoordinate&, StGlobalCoordinate&);
 #pragma link C++ function   StTpcCoordinateTransform::operator()(const StGlobalCoordinate&, StTpcPadCoordinate&);
 
