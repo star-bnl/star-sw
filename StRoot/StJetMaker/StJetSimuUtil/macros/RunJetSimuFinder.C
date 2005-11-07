@@ -43,7 +43,7 @@ void RunJetSimuFinder(int nevents = 100,
     }
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
-    gSystem->Load("StMagF");
+    //gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StMcEvent");

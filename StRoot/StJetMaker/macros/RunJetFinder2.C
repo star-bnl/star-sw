@@ -25,7 +25,7 @@ void RunJetFinder2(int nevents=100,
     }
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
-    gSystem->Load("StMagF");
+    //gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
     gSystem->Load("StDbUtilities");
     gSystem->Load("StMcEvent");
@@ -110,6 +110,7 @@ void RunJetFinder2(int nevents=100,
 
     TChain* muchain = muDstMaker->chain();
     assert(chain);
+    /*
     TObjArray* branches = muchain->GetListOfBranches();
     assert(branches);
     TObjArray branchesToKill;
@@ -145,6 +146,7 @@ void RunJetFinder2(int nevents=100,
 	    }
 	}
     }
+    */
     
     for (Int_t iev=0; iev<nevents; iev++) {
 	cout << "****************************************** " << endl;

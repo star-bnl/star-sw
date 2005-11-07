@@ -278,7 +278,6 @@ Int_t StBET4pMaker::Make()
 	    //construct four momentum
 	    double mass = 0.; //assume photon mass for now, that makes more sense for towers, I think.
 	    
-	    double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
 	    float theta=2.*atan(exp(-eta));
 
 	    //do a quick correction for hadronic MIP eneryg deposition:
@@ -299,6 +298,10 @@ Int_t StBET4pMaker::Make()
 	    }
 	    
 	    if (corrected_energy<=0.) continue;
+
+	    //NOTE, MLM fix 11/07/05
+	    //double pMag = (energy>mass) ? sqrt(energy*energy - mass*mass) : energy; //NOTE: this is a little naive treatment!
+	    double pMag = (corrected_energy>mass) ? sqrt(corrected_energy*corrected_energy - mass*mass) : corrected_energy;
 
 	    //now correct for eta-shift due to non-zero z_vertex (but note, no correction to Energy!)
 	    //double RSMD = 2.2625*100.; //radius of SMD in cm
@@ -331,6 +334,9 @@ Int_t StBET4pMaker::Make()
 	    pmu->Init(0, p4, id, kBarrelEmcTowerId );
 	    mVec.push_back(pmu);  //for memory ownership
 	    tracks.push_back(pmu); //for jet finding interface
+
+	    //cout <<"corrected energy"<<endl;
+	    //cout <<"E:\t"<<pmu->e()<<"\tp:\t"<<pmu->p()<<"\tm:\t"<<pmu->mass()<<"\tE^2-p^2:\t"<<pmu->e()*pmu->e() - pmu->p()*pmu->p()<<endl;
 	    
     }
 
