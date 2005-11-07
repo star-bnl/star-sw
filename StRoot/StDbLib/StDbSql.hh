@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.9 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbSql.hh,v 1.10 2005/11/07 14:46:44 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.10  2005/11/07 14:46:44  deph
+ * added protoype for function that accepts IN for non contiguous elementIDs
+ *
  * Revision 1.9  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -120,6 +123,7 @@ protected:
   char* getFlavorQuery(const char* flavor);
   char* getProdTimeQuery(unsigned int prodTime);
   char* getElementList(int* elements, int num);
+  char* getElementListIN(int* elements, int num);
   char* getColumnList(StDbTable* table,char* tableName=0, char* funcName=0);
   char* getEmptyString();
 
