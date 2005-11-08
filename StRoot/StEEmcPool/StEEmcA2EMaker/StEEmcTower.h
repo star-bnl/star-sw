@@ -67,6 +67,10 @@ class StEEmcTower : public StEEmcElement {
   /// A tower is "less than" another tower if its energy is less than it
   Bool_t operator<( const StEEmcTower &other ) const { return (this->energy() < other.energy()); }
 
+  /// Clears the tower
+  void Clear(Option_t *opts=""){ mET=0.; StEEmcElement::Clear(opts); } 
+
+
  private:
  protected:
 
