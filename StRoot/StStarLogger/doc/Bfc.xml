@@ -18,7 +18,7 @@
                           (without any other message between each occurence)
 
                           the value zero and one have one and the same meaning
-                          0 - there is no repeatition, the message can be printed at once
+                          0 - the message can not be printed at all 
                           1 - the message can be printed one time only, so "0" == "1"
             Example:
             - - - -   <param name="RepeatMessagesQuota" value="2"/>
@@ -30,7 +30,7 @@
            "value"  = -1  there is no limit (by default)
                     >  0  the number of times the message can printed out across the entire output                          
                           the value zero and one have one and the same meaning
-                          0 - there is no repeatition, the message can be printed at once
+                          0 - the message can not be printed at all
                           1 - the message can be printed one time only, so "0" == "1"
             Example:
             - - - -    <param name="TotalMessagesQuota" value="200"/>
