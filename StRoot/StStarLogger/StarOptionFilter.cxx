@@ -43,6 +43,8 @@ StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(-1),acceptTotalCounte
 void StarOptionFilter::setOption(const String& option,
 	const String& value)
 {
+   // fprintf(stderr, " StarOptionFilter::setOption option = %s; value = %s\n"
+   //    , option.c_str(), value.c_str());
 	if (StringHelper::equalsIgnoreCase(option, ACCEPT_REPEAT_COUNTER))
 	{
 		acceptRepeatCounter = OptionConverter::toInt(value,acceptRepeatCounter);
@@ -59,8 +61,8 @@ void StarOptionFilter::setOption(const String& option,
    } 
    else if (StringHelper::equalsIgnoreCase(option,TOTAL_MESSAGE_LIMIT)) 
    {
-		acceptRepeatCounter = OptionConverter::toInt(value,acceptTotalCounter);      
-   }
+		acceptTotalCounter = OptionConverter::toInt(value,acceptTotalCounter);      
+  }
 }
 //______________________________________________________________________________
 void StarOptionFilter::setRepeatCounterOption(int value)      
@@ -70,8 +72,8 @@ void StarOptionFilter::setRepeatCounterOption(int value)
   //               printed out sequiencially
   // 
   //        Attn: the value zero and one have one and the same meaning
-  //               0 - there is no repeatition, the message can be printed at once
-  //               1 - the message can be printed one times only, so "0" == "1"
+  //               0 - the message can not be printed at all
+  //               1 - the message can be printed one times only
 
    acceptRepeatCounter = value;  
 }
@@ -83,8 +85,8 @@ void StarOptionFilter::setTotalCounterOption(int value)
   //         >  0  the number of times the message can be printed out sequiencially
   // 
   //        Attn: the value zero and one have one and the same meaning
-  //               0 - there is no repeatition, the message can be printed at once
-  //               1 - the message can be printed one times only, so "0" == "1"
+  //               0 - the message can not be printed at all
+  //               1 - the message can be printed one times only
 
    acceptTotalCounter = value;  
 }
@@ -94,16 +96,16 @@ Filter::FilterDecision StarOptionFilter::decide(
 {
    Filter::FilterDecision decision = Filter::NEUTRAL;
   	const String& msg               = event->getRenderedMessage();
-   //fprintf(stderr," StarOptionFilter::decide:  %s, string quota=%d, totalQuota=%d\n"
-   //      , msg.c_str(),currentRepeatCounter,currentTotalCounter);
+   //fprintf(stderr," StarOptionFilter::decide:  %s, string quota=%d, totalQuota=%d match =%d\n"
+   //      , msg.c_str(),currentRepeatCounter,currentTotalCounter, matchPredefinedStringOnly);
 	if( !msg.empty() ) {
 #if 1
       if ( (acceptRepeatCounter >= 0 ) || (acceptTotalCounter >= 0 ) ) 
       {
-         bool count =  !matchPredefinedStringOnly 
+          bool count =  !matchPredefinedStringOnly 
                      || 
-                       (matchPredefinedStringOnly && !strcmp(msg.c_str(),lastLoggerMessageToCompare.c_str())) ;
-         if (count) {
+                       (matchPredefinedStringOnly && strstr(msg.c_str(),lastLoggerMessageToCompare.c_str())) ;
+        if (count) {
             if (acceptRepeatCounter >= 0 ) currentRepeatCounter++;
             if (acceptTotalCounter  >= 0 ) currentTotalCounter++;
          } else {
@@ -113,9 +115,10 @@ Filter::FilterDecision StarOptionFilter::decide(
                 lastLoggerMessageToCompare = msg;
          }    
          // we've got a match
-         if( (acceptRepeatCounter >=0 ) && (currentRepeatCounter > acceptRepeatCounter) )
+         if( count && (acceptRepeatCounter >=0 ) && (currentRepeatCounter > acceptRepeatCounter) )
              	decision = Filter::DENY;
-         if( (acceptTotalCounter  >=0)  && (currentTotalCounter  > acceptTotalCounter) ) 	
+               
+         if( count && (acceptTotalCounter  >=0)  && (currentTotalCounter  > acceptTotalCounter) ) 	
             decision = Filter::DENY;
       }      
 #else           
