@@ -1,0 +1,5 @@
+# $Id $
+# package StSvtClusterMaker
+# author: 
+Library:libStSvtClusterMaker.so:LIBS +=   -lglobal_Tables  -lsim_Tables  -lStChain  -lStDbUtilities  -l_StEvent  -lStSvtClassLibrary  -lStSvtSeqAdjMaker  -lStSvtSimulationMaker  -lsvt_Tables
+#Library:libStSvtClusterMaker.so:LIBS +=   -lglobal_Tables  -lsim_Tables  -lStChain  -lStDbUtilities  -lStEvent  -lStSvtClassLibrary  -lStSvtSeqAdjMaker  -lStSvtSimulationMaker  -lsvt_Tables
