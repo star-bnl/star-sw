@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.14 2005/07/23 03:37:33 perev Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.15 2005/11/09 22:08:36 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.15  2005/11/09 22:08:36  fisyak
+ * Use for IdTruth id_mctrack (instead of id_mchit)
+ *
  * Revision 1.14  2005/07/23 03:37:33  perev
  * IdTruth + Cleanup
  *
@@ -192,7 +195,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit,
   mSvtHit[mNumOfHits].setFlag((unsigned char)(mSrsHit->flag));
   mSvtHit[mNumOfHits].setHardwarePosition(mHardWarePosition<<4);
   mSvtHit[mNumOfHits].setCharge(mSrsHit->de[0]*300000); // put GEANT dE roughly into ADC counts
-  mSvtHit[mNumOfHits].setIdTruth(mSrsHit->id_mchit); // put truth
+  mSvtHit[mNumOfHits].setIdTruth(mSrsHit->id_mctrack,100); // put truth
   
   mPos[mNumOfHits].setX(WaferCoord->timebucket());
   mPos[mNumOfHits].setY(WaferCoord->anode());
