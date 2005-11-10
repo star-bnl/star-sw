@@ -8,8 +8,8 @@
 
 struct pmdCalibSummary { 
 
-   oct  Operator[64];   /*     Operator Name  */
-   oct  Comments[256];   /*     comments  */
+   octet  Operator[64];   /*     Operator Name  */
+   octet  Comments[256];   /*     comments  */
    long  DetNumber;   /*     detector number  */
    long  SMNumber; /* supermodule number */
    long  FirstRun;   /*     first run used for calibration  */
