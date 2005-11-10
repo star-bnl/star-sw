@@ -1,6 +1,13 @@
-* $Id: gstar_input.g,v 1.41 2005/10/10 16:55:43 potekhin Exp $
+* $Id: gstar_input.g,v 1.42 2005/11/10 20:13:50 potekhin Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.42  2005/11/10 20:13:50  potekhin
+* Modified handling of the event header data,
+* harvesting more info from the herwig ntuple. Incompatible
+* with previous version of the herwig ntuple, but much cleaner
+* code, and worth it. Coordinated with the recent check in of
+* herwig hwigr module.
+*
 * Revision 1.41  2005/10/10 16:55:43  potekhin
 * Augmented the Ntuple header handling in order
 * to intercept event characterization info from
@@ -347,10 +354,32 @@ c ---- Column-Wise-Ntuples ----
 *
    Integer           Id/999/,StartVx/0/,Ubuf/0/,num(4),
                      Ge_pid,nin,nv,nt,ier,L,Ia,i,k
+
    Character         CWD*20, Cform*8/'/6I 9F'/
    Logical           First/.true./
 *
+ structure     MPAR { int Version, int SUBPR, int Nbin, int NWE, int NWW, int Njets, int NREJ }
 
+* careful here, a direct import from apythia's pyth_header:
+ structure PYTH {int Version, int SUBPR,
+                 real MANDS,  real MANDT,  real MANDU,
+                 real HARDP,  real COSTH,
+                 real BJOR1,  real BJOR2}
+
+
+* declare the mandatory strings etc
+ character*40 module/'hepevnt'/,
+              mcomment/'Pythia and Herwig'/,
+              bank_title,
+              author/'maxim'/,
+              created/'20051109'/
+ integer      iprin/0/
+
+* variables to pass on the captured data:
+*              real xx1,xx2,costh,s,t,et
+*              integer subpr
+
+*
    CDIR='//'//'HEPEVNT'//CHAR(48+Igate)
    Call RZCDIR(CWD, 'R')
    Call RZCDIR(CDIR,' ')
@@ -369,7 +398,7 @@ c ---- Column-Wise-Ntuples ----
    {  Irec(Igate)+=1; 
       Call HGNT(Id+Igate*1000,Irec(Igate),ier); if (ier!=0) goto :err:;
 
-      if Istat>10 & ipdg>999990 {
+      if (Istat.gt.10.and.ipdg.gt.999990) {
           if ipdg=999999 {
              if nin>0   { Irec(Igate)-=1; Break; }
              InEvent+=1; if (InEvent<NnEvent) Next;  
@@ -382,26 +411,64 @@ c ---- Column-Wise-Ntuples ----
         }
         elseif ipdg= 999998 {call Ucopy(Pxyz,Hpar,  4)}
         elseif ipdg= 999997 {call Ucopy(Pxyz,Comp,  4)}
-        elseif ipdg= 999996 {k=999997-ipdg;
+        elseif ipdg= 999996 {
+             k=999997-ipdg;
              Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
              if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
 
-             do i=1,4 {
-                IQ(L+4*k+i)=Pxyz(i);
-             }
+             do i=1,4 {IQ(L+4*k+i)=Pxyz(i);}
         }
-        elseif ipdg<=999995 {k=1;
-             Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
-             if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
-                IQ(L+4)=Pxyz(2);
+        elseif ipdg=999995 {
+
+             fill /evnt/pass/mpar(1) ! Hijing and General
+                Version = 2          ! version
+                SUBPR   = Moth(2)    ! subprocess id
+             endfill                  
+
+	     Fill /EVNT/PASS/PYTH    ! Pythia and Herwig
+        	Version=1            ! version
+	        SUBPR = Moth(2)      ! Herwig subprocess ID
+	        MANDS = Vxyz(1)      ! Mandelstam s of the hard subprocess
+	        MANDT = Vxyz(2)      ! Mandelstam t of the hard subprocess
+	        MANDU = 0            ! Mandelstam u of the hard subprocess
+	        HARDP = Vxyz(3)      ! pT of the hard  subprocess in partonic CM frame
+	        COSTH = Pxyz(3)      ! COS theta of hard subprocess in partonic CM frame
+	        BJOR1 = Pxyz(1)      ! Bjorken x of 1st parton in after initial radiation
+	        BJOR2 = Pxyz(2)      ! Bjorken x of 2nd particle after inital radiation
+	     endfill
         }
-        else {print *,' Yet unknown HEP header '}
+        elseif ipdg.le.999994 {
+             print *,' Yet unknown HEP header ', ipdg
+        }
+
 
         Call Ucopy  (IdEvHep,Moth,4)
         Call Ucopy  (Hpar,   Pxyz,4)
         Call Ucopy  (Comp,   Vxyz,4)
         Ip=0; Nin=0; mass=IdEvHep(5)
       }
+
+*******************************************************************
+*  k=1; ! obsolete
+*             Call REBANK('/EVNT/PASS/MPAR',num,4*(k+1),L,ia)
+*             if L<=0 {print *,' READ_NT error: cant find MPAR bank'; goto :err:;}
+*  this is actually the second element in the structure:
+*             IQ(L+4)=Pxyz(2);
+*        elseif ipdg<=999994 {
+*	     Fill /EVNT/PASS/PYTH  ! comment
+*        	Version=1        ! version
+*	        SUBPR = Pxyz(2)  ! Pythia subprocess ID
+*	        MANDS = 0        ! Mandelstam s of the hard subprocess
+*	        MANDT = 0        ! Mandelstam t of the hard subprocess
+*	        MANDU = 0        ! Mandelstam u of the hard subprocess
+*	        HARDP = 0        ! pT of the hard  subprocess in partonic CM frame
+*	        COSTH = 0        ! COS theta of hard subprocess in partonic CM frame
+*	        BJOR1 = 0        ! Bjorken x of 1st parton in after initial radiation
+*	        BJOR2 = 0        ! Bjorken x of 2nd particle after inital radiation
+*	     endfill
+*        }
+*       catch:
+*******************************************************************
 
       if (InEvent<NnEvent) Next;  
       Nin+=1; num(3)=Nin;  
@@ -625,6 +692,14 @@ Replace [READ[DIGIT](#)#;] with _
  Old Structure GENT {int IstHEP, int IdHEP, int JmoHEP(2), int JdaHEP(2),
                      PHEP(3), ENER, MASS, VHEP(3), TIME }
  structure     MPAR { int Version, int SUBPR, int Nbin, int NWE, int NWW, int Njets, int NREJ }
+
+* careful here, a direct import from apythia's pyth_header:
+ structure PYTH {int Version, int SUBPR,
+                 real MANDS,  real MANDT,  real MANDU,
+                 real HARDP,  real COSTH,
+                 real BJOR1,  real BJOR2}
+
+
 
      If (LkEvnt==0) Call MZBOOK(IxDIV,LKAR P2,LkEvnt, 1,'EVNT',2,2,7,2,0)
 
