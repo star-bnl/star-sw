@@ -390,6 +390,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Geometry+Mag","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"pgf77"    ,"" ,"","",""                                                   ,"pgf77VMC","Fortran",kFALSE},
+  {"minicern"    ,"" ,"","",""                                               ,"minicern","minicern",kFALSE},
+  {"mysql"    ,"" ,"","",""                                                  ,"mysqlclient","MySQL",kFALSE},
   {"geometry"    ,"" ,"","",""                                     ,"geometry","geometry+Mag.Field",kFALSE},
   {"StarMagField","", "","magF"                              ,"","StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
@@ -474,9 +477,12 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"TrsMini"     ,"","tpcChain","scl,tpcDB,-Trs,-tpc_daq,Simu","StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
     
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
+  {"St_tpc"      ,"","","tpc_T,tpcDb"                                               ,"","St_tpc","",kFALSE},
+  {"St_svt"      ,"","","svt_T,svtDb"                                               ,"","St_svt","",kFALSE},
+  //  {"StGlobal"     ,"","","globT",                                                 ,"","St_global","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
-  {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
-  {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls","St_tcl_Maker","St_tpc,St_tcl_Maker",
+  {"tfs"         ,"","tpcChain","Simu,tcl"                         ,"","","use tfs (no StTrsMaker)",kFALSE},
+  {"tcl"         ,"tpc_hits","tpcChain","tls,St_tpc,StEvent","St_tcl_Maker","St_tcl_Maker",
                                                                         "Cluster Finder (from raw)",kFALSE},
   {"fcf"         ,"","tpcChain","daq,-tcl",      "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
@@ -484,15 +490,15 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
   {"TpcHitMover" ,"tpc_hit_mover","tpcChain","StEvent",
                       "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
-  {"tpt"   ,"tpc_tracks","tpcChain","tpc_T,tls,TpcHitMover","St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
-  {"tpt_old"     ,"tpc_tracks","tpcChain","tpc_T,tls",      "St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
-  {"TpcT0"       ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman","StTpcT0Maker",
-              "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StPass0CalibMaker","",kFALSE},
+  {"tpt"   ,"tpc_tracks","tpcChain","tls,St_tpc,TpcHitMover",      "St_tpt_Maker","St_tpt_Maker","",kFALSE},
+  {"tpt_old"     ,"tpc_tracks","tpcChain","St_tpc,tls",            "St_tpt_Maker","St_tpt_Maker","",kFALSE},
+  {"TpcT0"  ,"TpcT0","","ctf_T,ftpcT,tls,St_tpc,St_svt,tpc_daq,kalman,StEvent","StTpcT0Maker",
+                            "St_tcl_Maker,St_tpt_Maker,St_global,St_dst_Maker,StPass0CalibMaker","",kFALSE},
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
   {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tdaq,tpc,-tpt,-PreVtx"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},
-  {"PreVtx"      ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
-                                       "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"PreVtx"      ,"","tpcChain","tpt,SCL,sim_T,St_tpc,St_svt,ftpcT,ctf_T",
+                                                     "StPreVertexMaker","St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,SvtCL,Est,SvtVtx"                    ,"StMaker","StChain","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
   {"SvtSlowSim"  ,"","","SvtSSim,SvtOnlSeq"         ,"","","Short cut for SvtSlowSim and SvtOnlSeq",kFALSE},
@@ -505,40 +511,53 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"SvtOnlSeq"   ,"SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
                                              ,"StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
     
-  {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
-                                  ,"St_srs_Maker","St_tpc,St_svt,StSvtClusterMaker,St_srs_Maker","",kFALSE},
+  {"sfs"         ,"","","srs"                          ,"","","St_srs_Maker in fast mode m_Mode==1",kFALSE},
+  {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,St_tpc,St_svt,SvtCL,-sss,-SvtSlowSim,StEvent"
+                                                ,"St_srs_Maker","StSvtClusterMaker,St_srs_Maker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain","SvtCL"                  ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
   {"SvtSeqAdj"   ,"SvtSeqAdj","svtChain","SvtCL"          ,"StSvtSeqAdjMaker","StSvtSeqAdjMaker","",kFALSE},
-  {"SvtClu"      ,"SvtClu","svtChain","StEvent,SvtCL"   ,"StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
+  {"SvtClu"   ,"SvtClu","svtChain","svt_T,StEvent,SvtCL","StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
   {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
-  {"stk"        ,"svt_tracks","svtChain","tls,SvtCL","St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
-  {"Est"         ,"","svtChain","globT"              ,"StEstMaker","St_global,St_svt,StEstMaker","",kFALSE},
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,dst,SCL,dEdxY2"
-                                                              ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
-  {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
-                                                 ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"point"      ,"point","globalChain","SCL,tables,tls","StPointlMaker","St_global,St_dst_Maker","",kFALSE},
-  {"Vertex"     ,"Vertex","globalChain","SCL,tls"
-                           ,"StVertexMaker","St_svt,St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
-  {"Primary"    ,"primary","globalChain","SCL,globT,tls"
-                                               ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+
+  {"stk"        ,"svt_tracks","svtChain","tls,St_tpc,St_svt,SvtCL","St_stk_Maker","St_stk_Maker","",kFALSE},
+  {"Est"         ,"","svtChain","St_svt"                    ,"StEstMaker","St_global,StEstMaker","",kFALSE},
+  {"global"      ,"globalChain","","globT,St_tpc,St_svt,Match,vertex,primary,dst,SCL,dEdxY2"
+                                                                            ,"StMaker","StChain","",kFALSE},
+  {"Match"       ,"match","globalChain","SCL,tpc_T,St_svt,tls"
+                                                        ,"StMatchMaker","St_global,St_dst_Maker","",kFALSE},
+  //{"point"     ,"point","globalChain","SCL,tables,tls","StPointlMaker","St_global,St_dst_Maker","",kFALSE},
+  {"Vertex"     ,"Vertex","globalChain","SCL,St_svt,tls"
+                                   ,"StVertexMaker","St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
+  {"Primary"  ,"primary","globalChain","SCL,St_svt,tls","StPrimaryMaker","St_global,St_dst_Maker","",kFALSE},
+  {"V0"         ,"v0","globalChain","SCL,St_svt,tls"        ,"StV0Maker","St_global,St_dst_Maker","",kFALSE},
+  {"Xi"         ,"xi","globalChain","SCL,St_svt,tls"        ,"StXiMaker","St_global,St_dst_Maker","",kFALSE},
+  {"Kink","kink","globalChain"     ,"SCL,tls,St_svt"  ,"StOldKinkMaker" ,"St_global,St_dst_Maker","",kFALSE},
     
   {"Fglobal"     ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
   {"Fprimary"    ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
     
-  {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
-                                                 ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"dst"         ,"dst","globalChain","St_svt,dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT"
+                                                        ,"St_dst_Maker","St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
+  {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
+  {"ssd_daq"     ,"","","ssddb,St_svt"               ,"StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
+  {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
+  {"sls"         ,"","","tls,Simu,St_tpc,St_svt,SvtCL","St_sls_Maker","StSsdSimulationMaker",
+                                                                           "... SSD slow simulator",kFALSE},
+  {"spa"         ,"","","tls,Simu,St_tpc,St_svt,SvtCL","St_spa_Maker","StSsdSimulationMaker",
+                                                                     "... SSD Pedestal Annihilator",kFALSE},
+  {"scf"        ,"","","St_svt,St_tpc" ,"St_scf_Maker","StSsdClusterMaker","... SSD cluster finder",kFALSE},
+  {"scm"        ,"","","St_svt,St_tpc" ,"St_scm_Maker","StSsdClusterMaker",
+                                                              "... SSD Cluster Matcher (both side)",kFALSE},
+  {"spt"         ,"","","St_svt"       ,"StSsdPointMaker","StSsdPointMaker","... SSD Point Creator",kFALSE},
+  {"sce"         ,"","","St_tpc,St_svt"       ,"St_sce_Maker","StSsdEvalMaker", "... SSD Evaluator",kFALSE},
     
   {"emcDY2"   ,"emcRaw","emcY2",
      "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
@@ -573,19 +592,6 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
   {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
-  {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
-  {"ssd_daq"     ,"","","ssddb"               ,"StSsdDaqMaker","St_svt,StSsdDaqMaker","... SSD Daq",kFALSE},
-  {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
-  {"sls"         ,"","","tls,Simu,SvtCL","St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker",
-                                                                           "... SSD slow simulator",kFALSE},
-  {"spa"         ,"","","tls,Simu,SvtCL","St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker",
-                                                                     "... SSD Pedestal Annihilator",kFALSE},
-  {"scf"       ,"","","" ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","... SSD cluster finder",kFALSE},
-  {"scm"         ,"","","" ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker",
-                                                              "... SSD Cluster Matcher (both side)",kFALSE},
-  {"spt"         ,"","",""      ,"StSsdPointMaker","St_svt,StSsdPointMaker","... SSD Point Creator",kFALSE},
-  {"sce"         ,"","",""      ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker", "... SSD Evaluator",kFALSE},
-
 #ifdef __BFC2__
   //  Reminder: You are within the ITTF chain definitions
 #endif /* __BFC2__ */
