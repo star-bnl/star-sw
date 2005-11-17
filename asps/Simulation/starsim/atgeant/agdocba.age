@@ -1,5 +1,5 @@
 *
-* $Id: agdocba.age,v 1.1.1.1 2004/01/12 23:49:37 potekhin Exp $
+* $Id: agdocba.age,v 1.2 2005/11/17 20:01:03 potekhin Exp $
 *
 * $Name:  $
 *
@@ -20,7 +20,7 @@
 #include "commons/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gcunit.inc"
-Character*(*) Bank,Tit,au,ve,io,Cvar(*),Comment(*),NN*20,Cv*8,Cbuf*80;
+Character*(*) Bank,Tit,au,ve,io,Cvar(*),Comment(*),NN*40,Cv*8,Cbuf*80;
 Integer       AgDocRd,AgDocWr,Lenocc,Link,NL,ND(3),Lb,key(2),
               i,j,k,L,Lk,N,N0,ioff,M,ok,p,r,DATE(4);
 Parameter      (ok=0);
@@ -74,7 +74,7 @@ do k=NL+1,NL+abs(ND(1))              " same data record can be repeated   "
      { p=0;  write(NN,*) 1+N0
        if ND(1)<-1 & ND(2)>0 & ND(3)>1      " fix length 1 or 2 dim array "
        {  write(NN,*) 1+mod(N0,ND(2)),',',1+N0/ND(2) }
-       do r=1,20 { if NN(r:r)!=' ' { p+=1; NN(p:p)=NN(r:r); } }
+       do r=1,40 { if NN(r:r)!=' ' { p+=1; NN(p:p)=NN(r:r); } }
        NN(p+1:)=' ';  N0+=1;
      }
 
