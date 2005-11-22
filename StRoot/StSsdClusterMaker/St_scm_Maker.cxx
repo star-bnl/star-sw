@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.10 2005/06/14 12:20:25 bouchet Exp $
+ * $Id: St_scm_Maker.cxx,v 1.11 2005/11/22 03:57:05 bouchet Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.11  2005/11/22 03:57:05  bouchet
+ * id_mctrack is using for setIdTruth
+ *
  * Revision 1.10  2005/06/14 12:20:25  bouchet
  * cleaner version
  *
@@ -120,6 +123,7 @@ void St_scm_Maker::DeclareNtuple()
   pFile = new TFile("Hits.root","RECREATE");
   string varlist1 = "ladder:wafer:pulseP:pulseN:kind:xg:yg:zg";
   pHitNtuple     = new TNtuple("hitNtuple","hits Ntuple",varlist1.c_str());
+  //11/22 : jb *** The NTuple is not written by defaults***
 }
 //_____________________________________________________________________________
 Int_t St_scm_Maker::Make()
@@ -170,14 +174,16 @@ Int_t St_scm_Maker::Make()
   mySsd->convertDigitToAnalog(sls_ctrl);
   mySsd->convertUFrameToOther(geom_par);
     //  int nSptWritten = mySsd->writePointToTable(scm_spt);
-  int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+  //int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+  int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
   cout<< "# SSD hits:       "
       << (mCurrentEvent->ssdHitCollection() ? mCurrentEvent->ssdHitCollection()->numberOfHits() : 0) 
       << endl;
   cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
+  //PrintIdMctrack(scm_spt,7802);
   if(mSsdHitColl) 
 	cout<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endl;
-  else 
+ else 
     cout<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endl;
   
   scm_spt->Purge();
@@ -228,6 +234,7 @@ void St_scm_Maker::makeScmCtrlHistograms()
 	hitNtuple[5]=dSpt->x[0];
 	hitNtuple[6]=dSpt->x[1];
 	hitNtuple[7]=dSpt->x[2];
+
 	for(int k=0;k<=11;k++)
 	  {
 	    if(dSpt->id_match==conversion[k])
@@ -253,7 +260,22 @@ void St_scm_Maker::makeScmCtrlHistograms()
 //     matchisto->Draw();
   }
 }
-
+//_____________________________________________________________________________
+void St_scm_Maker::PrintIdMctrack(St_scm_spt *scm_spt,int mywafer)
+{
+  scm_spt_st *spt = scm_spt->GetTable();
+  for(int j = 0 ; j < scm_spt->GetNRows(); j++){
+    //if (spt[j].id_cluster == mywafer)
+      {
+	cout<<"spt id = "<<spt[j].id<<" spt Ncluster = "<<spt[j].id_cluster<<"spt Matched ="<<spt[j].id_match<< endl;
+    for (int i =0 ;i < 5 ;i++)
+      {
+	cout<<" spt.id_mchit["<<i<<"] = "<<spt[j].id_mchit[i]<<" spt;id_mctrack["<<i<<"] = "<<spt[j].id_mctrack[i]<<endl;
+      }
+    // }
+      }
+  }
+}
 
 //_____________________________________________________________________________
 void St_scm_Maker::PrintInfo()
@@ -265,7 +287,7 @@ void St_scm_Maker::PrintInfo()
 Int_t St_scm_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_scm_Maker::Finish() ... "
 				 << GetName() << endm; 
-  pFile->Write();
-  pFile->Close();
+  //pFile->Write();
+  //pFile->Close();
   return kStOK;
 }

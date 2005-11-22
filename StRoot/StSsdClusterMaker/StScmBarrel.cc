@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.cc,v 1.3 2005/05/17 14:57:20 lmartin Exp $
+// $Id: StScmBarrel.cc,v 1.4 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: StScmBarrel.cc,v $
+// Revision 1.4  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.3  2005/05/17 14:57:20  lmartin
 // saving SSD hits into StEvent
 //
@@ -340,6 +343,102 @@ int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
     }
   return currRecord;
 }
+
+int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl ,St_scf_cluster *scf_cluster )
+{
+  scm_spt_st spt;
+  scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
+  StSsdHit *currentSsdHit; 
+  // table size is 148 bytes
+  int currRecord   = 0;
+  int i            = 0;
+  int inContainer =0;
+  StThreeVectorF gPos; StThreeVectorF gPosError; 
+  int hw; float q; unsigned char c;
+
+  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
+    {
+     int idCurrentWaf = waferNumbToIdWafer(iWaf);
+     StScmListPoint *sptList = mWafers[iWaf]->getPoint();
+     StScmPoint *pSpt = sptList->first();
+     
+     while (pSpt)
+       {
+	 /*if (ssdHitColl){ // If Available, Fill the StEvent Container
+	   for (i = 0 ; i < 3 ; i++){
+	     gPos[i]      =  pSpt->getXg(i);
+	     gPosError[i] =  0.0; 
+	   }
+	   hw = idCurrentWaf;
+	   q =  pSpt->getDe(0);
+	   
+	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
+	   currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
+	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+	   
+	   inContainer += ssdHitColl->addHit(currentSsdHit);
+	   }*/
+	 //jb : we fill StEvent after getting the IdMctrack
+	 //jb : as it was done too for the strip and clusters --> see StSpaBarrel.cc and StScfBarrel.cc
+	 spt.flag          = pSpt->getFlag();
+	 spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
+	 spt.id_cluster    = pSpt->getNCluster();
+	 spt.id_globtrk    = 0;
+	 spt.id_match      = pSpt->getNMatched();
+	 for (i = 0 ; i < 5 ; i++)
+	   {	  
+	     spt.id_mchit[i]   = pSpt->getNMchit(i);
+	     spt.id_mctrack[i] = 0;
+	     spt.id_track[i]   = 0;
+	     //we look on the clusters table to get the IdMctrack info
+	     if (spt.id_mchit[i] == 0) spt.id_mctrack[i]=0;
+	     else {
+	       for(int j = 0 ; j < scf_cluster->GetNRows(); j++){
+		 if(spt.id_mchit[i] == on_cluster[j].id_mchit[i]){
+		   spt.id_mctrack[i] = on_cluster[j].id_mctrack[i];
+		 }
+	       }
+	     }
+	   }
+	 //now we fill StEvent and get the correct IdTruth 
+	 if (ssdHitColl){ // If Available, Fill the StEvent Container
+	   for (i = 0 ; i < 3 ; i++){
+	     gPos[i]      =  pSpt->getXg(i);
+	     gPosError[i] =  0.0; 
+	   }
+	   hw = idCurrentWaf;
+	   q =  pSpt->getDe(0);
+	   
+	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
+	   currentSsdHit->setIdTruth(spt.id_mctrack[0]);// need to check first = most probable!
+	   //cout <<"***in StScmBarrel  test --> IdTruth =" <<currentSsdHit->getIdTruth()<< endl;
+	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+	   
+	   inContainer += ssdHitColl->addHit(currentSsdHit);
+	 }
+     spt.id_wafer      = idCurrentWaf;
+     for (i = 0 ; i < 3 ; i++)
+       {	  
+	 spt.cov[i]        = 0;
+	 spt.res[i]        = 0;
+	 spt.x[i]          = pSpt->getXg(i);
+	 spt.xl[i]         = pSpt->getXl(i);
+       }
+     for (i = 0 ; i < 2 ; i++)
+       {
+	 spt.mom2[i]       = 0;
+	 spt.de[i]         = pSpt->getDe(i);
+       }
+     scm_spt->AddAt(&spt);
+     currRecord++;
+     pSpt    = sptList->next(pSpt);
+    }
+    }
+return currRecord;
+}
+
+
+
 
 // StScmBarrel::StScmBarrel(const StScmBarrel & originalBarrel)
 // {

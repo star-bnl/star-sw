@@ -1,6 +1,9 @@
-// $Id: StSpaBarrel.cc,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+// $Id: StSpaBarrel.cc,v 1.3 2005/11/22 03:56:44 bouchet Exp $
 //
 // $Log: StSpaBarrel.cc,v $
+// Revision 1.3  2005/11/22 03:56:44  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.2  2005/05/13 08:39:32  lmartin
 // CVS tags added
 //
@@ -73,12 +76,16 @@ int StSpaBarrel::readStripFromTable(St_sls_strip *sls_strip)
   int i = 0;
   //  int *idMcHit = new int[5];
   int idMcHit[5] = {0,0,0,0,0};
-  int e = 0;
+  int e  = 0;
+  int my_counterP =0;
+  int my_counterN =0;
   for (i = 0 ; i < sls_strip->GetNRows(); i++)
     {
       nStrip  = (int)(strip[i].id_strip/100000.);
       idWaf   = strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
       iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
+      if(iSide==0) my_counterP++;
+      if(iSide==1) my_counterN++;
       for (e = 0 ; e < 5;e++) idMcHit[e] = strip[i].id_mchit[e];
       StSpaStrip *newStrip = new StSpaStrip(nStrip, i, strip[i].adc_count, strip[i].de, idMcHit);
       mWafers[idWaferToWaferNumb(idWaf)]->addStrip(newStrip, iSide);
@@ -131,8 +138,6 @@ int  StSpaBarrel::readConditionDbFromTable(St_sdm_condition_db *sdm_condition)
     }
   return sdm_condition->GetNRows();
 }
-
-
 int  StSpaBarrel::writeStripToTable(St_spa_strip *spa_strip)
 {
   spa_strip_st out_strip;
@@ -179,6 +184,68 @@ int  StSpaBarrel::writeStripToTable(St_spa_strip *spa_strip)
 	}      
       
     }      
+  return currRecord;
+}
+int  StSpaBarrel::writeStripToTable(St_spa_strip *spa_strip,St_sls_strip *sls_strip )
+{
+  spa_strip_st out_strip;
+  sls_strip_st *strip = sls_strip->GetTable();
+  int my_counterP =0;
+  int my_counterN =0;
+  int currRecord   = 0;
+  int iWaf = 0;
+  for (iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
+    {
+      int idCurrentWaf = waferNumbToIdWafer(iWaf);
+      
+      StSpaListStrip *stripP = mWafers[iWaf]->getStripP();
+      StSpaListStrip *stripN = mWafers[iWaf]->getStripN();
+      StSpaStrip *pStripP = stripP->first();
+      while (pStripP)
+	{ 
+ 	  out_strip.id          = currRecord + 1;
+	  out_strip.adc_count   = pStripP->getDigitSig();
+	  out_strip.id_strip    = 10000*(10*pStripP->getNStrip() + 0)+idCurrentWaf;
+	  for (int i = 0 ; i < 5 ; i++)
+	    {
+	      out_strip.id_mchit[i] = pStripP->getIdMcHit(i);
+	      if(out_strip.id_mchit[i]==0) {
+		out_strip.id_mctrack[i]=0;}
+	      else {
+		for(int j = 0 ; j < sls_strip->GetNRows(); j++){
+		    if(out_strip.id_mchit[i] == strip[j].id_mchit[i]) 
+		      out_strip.id_mctrack[i] = strip[j].id_mctrack[i];
+		  }
+		}
+	      }
+	  spa_strip->AddAt(&out_strip);
+	  currRecord++;
+	  pStripP    = stripP->next(pStripP);
+	}
+      
+      StSpaStrip *pStripN = stripN->first();
+      while (pStripN)
+	{ 
+ 	  out_strip.id          = currRecord + 1;
+	  out_strip.adc_count   = pStripN->getDigitSig();
+	  out_strip.id_strip    = 10000*(10*pStripN->getNStrip() + 1)+idCurrentWaf;
+	  for (int i = 0 ; i < 5 ; i++)
+	    {
+	      out_strip.id_mchit[i]   = pStripN->getIdMcHit(i);
+	      if(out_strip.id_mchit[i]==0)  {
+		out_strip.id_mctrack[i]=0;}
+	      else {
+		for(int j = 0 ; j < sls_strip->GetNRows(); j++){
+		    if(out_strip.id_mchit[i] == strip[j].id_mchit[i]) 
+		      out_strip.id_mctrack[i] = strip[j].id_mctrack[i];
+		}
+	      }
+	    }
+	  spa_strip->AddAt(&out_strip);
+	  currRecord++;
+	  pStripN    = stripN->next(pStripN);
+	}
+    }
   return currRecord;
 }
 

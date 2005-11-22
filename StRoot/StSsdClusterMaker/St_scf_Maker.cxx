@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scf_maker.cxx
  **************************************************************************
- * $Id: St_scf_Maker.cxx,v 1.9 2005/06/14 12:20:25 bouchet Exp $
+ * $Id: St_scf_Maker.cxx,v 1.10 2005/11/22 03:57:05 bouchet Exp $
  *
  * $Log: St_scf_Maker.cxx,v $
+ * Revision 1.10  2005/11/22 03:57:05  bouchet
+ * id_mctrack is using for setIdTruth
+ *
  * Revision 1.9  2005/06/14 12:20:25  bouchet
  * cleaner version
  *
@@ -116,7 +119,7 @@ void St_scf_Maker::DeclareNtuple()
   qFile = new TFile("Clusters.root","RECREATE");
   string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:adc_count";
   qHitNtuple     = new TNtuple("ClusTuple","Clusters Ntuple",varlist3.c_str());
-
+  //11/22 : jb : ***the NTuple is not written by defaults*** 
  }
 //_____________________________________________________________________________
 Int_t St_scf_Maker::Make()
@@ -154,9 +157,11 @@ Int_t St_scf_Maker::Make()
   cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
   cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
   barrel->sortListCluster();
-  int nClusterWritten = barrel->writeClusterToTable(scf_cluster);
+  int nClusterWritten = barrel->writeClusterToTable(scf_cluster,spa_strip);
+  //int nClusterWritten = barrel->writeClusterToTable(scf_cluster);
   cout<<"####      NUMBER OF CLUSTER SAVED  "<<nClusterWritten<<"      ####"<<endl;
-  PrintClusterDetails(barrel,7702);
+  PrintClusterDetails(barrel,7802);
+  //PrintIdMctrack(scf_cluster,7802);
   //scf_cluster->Purge(); //remove all unused rows 
   delete barrel;
   cout<<"#################################################"<<endl;
@@ -252,7 +257,7 @@ void St_scf_Maker::PrintClusterDetails(StScfBarrel *barrel,int mywafer)
       else {
 	gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - "
 			<<barrel->mWafers[j]->getClusterP()->getSize()<<" cluster(s) on the P-side of this wafer "<< endm;  
-	gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
+	gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]"<< endm;  
 	StScfCluster *pClusterP = barrel->mWafers[j]->getClusterP()->first();
 	while (pClusterP){
 	  gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - "
@@ -265,12 +270,17 @@ void St_scf_Maker::PrintClusterDetails(StScfBarrel *barrel,int mywafer)
 			  <<pClusterP->getFirstAdc()<<" "
 			  <<pClusterP->getLastAdc()<<" "
 			  <<pClusterP->getTotNoise()<<" "
-			  <<endm;  
+			  <<pClusterP->getIdMcHit(0)<<" "
+			  <<pClusterP->getIdMcHit(1)<<" "
+			  <<pClusterP->getIdMcHit(2)<<" "
+			  <<pClusterP->getIdMcHit(3)<<" "
+			  <<pClusterP->getIdMcHit(4)<<" "
+			  <<endm;
 	  pClusterP    = barrel->mWafers[j]->getClusterP()->next(pClusterP);
 	}
 	gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - "
 			<<barrel->mWafers[j]->getClusterN()->getSize()<<" cluster(s) on the N-side of this wafer "<< endm;  
-	gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
+	gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]"<< endm;  
 	StScfCluster *pClusterN = barrel->mWafers[j]->getClusterN()->first();
 	while (pClusterN){
 	  gMessMgr->Info()<<"St_scf_Maker::PrintClusterDetails() - "
@@ -283,15 +293,34 @@ void St_scf_Maker::PrintClusterDetails(StScfBarrel *barrel,int mywafer)
 			  <<pClusterN->getFirstAdc()<<" "
 			  <<pClusterN->getLastAdc()<<" "
 			  <<pClusterN->getTotNoise()<<" "
-			  <<endm;  
+			  <<pClusterN->getIdMcHit(0)<<" "
+			  <<pClusterN->getIdMcHit(1)<<" "
+			  <<pClusterN->getIdMcHit(2)<<" "
+			  <<pClusterN->getIdMcHit(3)<<" "
+			  <<pClusterN->getIdMcHit(4)<<" "
+			  <<endm;
 	  pClusterN    = barrel->mWafers[j]->getClusterN()->next(pClusterN);
 	}     
       }
     }
   }
 }
-
 //_____________________________________________________________________________
+void St_scf_Maker::PrintIdMctrack(St_scf_cluster *scf_cluster,int mywafer)
+{
+  scf_cluster_st *cluster = scf_cluster->GetTable();
+  for(int j = 0 ; j < scf_cluster->GetNRows(); j++){
+    if (cluster[j].id_cluster == mywafer)
+      {
+	cout<<"cluster id = "<<cluster[j].id<<" id_cluster = "<<cluster[j].id_cluster<<" first strip = "<<cluster[j].first_strip<<endl;
+    for (int i =0 ;i < 5 ;i++)
+      {
+	cout<<" cluster.id_mchit["<<i<<"] = "<<cluster[j].id_mchit[i]<<" cluster.id_mctrack["<<i<<"] = "<<cluster[j].id_mctrack[i]<<endl;
+      }
+      }
+  }
+}
+    //_____________________________________________________________________________
 void St_scf_Maker::PrintInfo()
 {
   if (Debug()) StMaker::PrintInfo();
@@ -300,8 +329,8 @@ void St_scf_Maker::PrintInfo()
 Int_t St_scf_Maker::Finish() {
   if (Debug()) gMessMgr->Debug() << "In St_scf_Maker::Finish() ... "
                                << GetName() << endm; 
-  qFile->Write();
-  qFile->Close();
+  //qFile->Write();
+  //qFile->Close();
   return kStOK;
 }
 

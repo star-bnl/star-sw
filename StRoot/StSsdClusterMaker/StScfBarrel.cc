@@ -1,6 +1,9 @@
-// $Id: StScfBarrel.cc,v 1.4 2005/06/14 12:20:24 bouchet Exp $
+// $Id: StScfBarrel.cc,v 1.5 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: StScfBarrel.cc,v $
+// Revision 1.5  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.4  2005/06/14 12:20:24  bouchet
 // cleaner version
 //
@@ -166,14 +169,11 @@ void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster,St_sls_ctrl *my_
 }
 
 
-
-
 int  StScfBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 {
   scf_cluster_st cluster;
   int currRecord  = 0;
   int i           = 0;
-
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
     {
       int idCurrentWaf = waferNumbToIdWafer(iWaf);
@@ -224,6 +224,82 @@ int  StScfBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	  pClusterN    = clusterN->next(pClusterN);
 	}
 
+    }
+  return currRecord;
+}
+int  StScfBarrel::writeClusterToTable(St_scf_cluster *scf_cluster,St_spa_strip *spa_strip)
+{
+  scf_cluster_st cluster;
+  spa_strip_st *on_strip = spa_strip->GetTable(); 
+  int currRecord  = 0;
+  int i           = 0;
+  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
+    {
+      int idCurrentWaf = waferNumbToIdWafer(iWaf);
+      StScfListCluster *clusterP = mWafers[iWaf]->getClusterP();
+      StScfListCluster *clusterN = mWafers[iWaf]->getClusterN();
+      StScfCluster *pClusterP = clusterP->first();
+
+      while (pClusterP)
+	{
+	  cluster.id              = currRecord + 1;
+	  cluster.id_cluster      = 10000*(10*pClusterP->getNCluster() + 0)+idCurrentWaf;
+	  cluster.first_strip     = 10000*(10*pClusterP->getFirstStrip()+ 0)+idCurrentWaf;
+	  cluster.n_strip         = pClusterP->getClusterSize();
+	  cluster.adc_count       = pClusterP->getTotAdc();
+	  cluster.first_adc_count = pClusterP->getFirstAdc();
+	  cluster.last_adc_count  = pClusterP->getLastAdc();
+	  cluster.noise_count     = pClusterP->getTotNoise();
+	  cluster.flag            = pClusterP->getFlag();
+	  cluster.strip_mean      = pClusterP->getStripMean();
+	  for (i = 0 ; i < 5 ; i++)
+	    {
+	      cluster.id_mchit[i] = pClusterP->getIdMcHit(i);
+	      if(cluster.id_mchit[i] == 0){
+	      cluster.id_mctrack[i]=0;
+	      }
+	      else{
+		for(int j = 0 ; j < spa_strip->GetNRows(); j++){
+		  if(cluster.id_mchit[i] == on_strip[j].id_mchit[i]){
+		    cluster.id_mctrack[i] = on_strip[j].id_mctrack[i];
+		  }
+		}
+	      }
+	    }
+	  scf_cluster->AddAt(&cluster);
+	  currRecord++;
+	  pClusterP    = clusterP->next(pClusterP);
+	}
+
+      StScfCluster *pClusterN = clusterN->first();
+      while (pClusterN)
+	{
+	  cluster.id              = currRecord + 1;
+	  cluster.id_cluster      = 10000*(10*pClusterN->getNCluster() + 1)+idCurrentWaf;
+	  cluster.first_strip     = 10000*(10*pClusterN->getFirstStrip() + 1)+idCurrentWaf;
+	  cluster.n_strip         = pClusterN->getClusterSize();
+	  cluster.adc_count       = pClusterN->getTotAdc();
+	  cluster.first_adc_count = pClusterN->getFirstAdc();
+	  cluster.last_adc_count  = pClusterN->getLastAdc();
+	  cluster.noise_count     = pClusterN->getTotNoise();
+	  cluster.flag            = pClusterN->getFlag();
+	  cluster.strip_mean      = pClusterN->getStripMean();
+	  for (i = 0 ; i < 5 ; i++)
+	    {
+	      cluster.id_mchit[i] = pClusterN->getIdMcHit(i);
+	      if(cluster.id_mchit[i] == 0)cluster.id_mctrack[i]=0;
+	      else{
+		for(int j = 0 ; j < spa_strip->GetNRows(); j++){
+		  if(cluster.id_mchit[i] == on_strip[j].id_mchit[i]){
+		    cluster.id_mctrack[i] = on_strip[j].id_mctrack[i];
+		  }
+		}
+	      }
+	    }
+	  scf_cluster->AddAt(&cluster);
+	  currRecord++;
+	  pClusterN    = clusterN->next(pClusterN);
+	}
     }
   return currRecord;
 }

@@ -1,6 +1,9 @@
-// $Id: StScfBarrel.hh,v 1.4 2005/06/14 12:20:25 bouchet Exp $
+// $Id: StScfBarrel.hh,v 1.5 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: StScfBarrel.hh,v $
+// Revision 1.5  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.4  2005/06/14 12:20:25  bouchet
 // cleaner version
 //
@@ -35,6 +38,7 @@ class StScfBarrel
   void  setSsdParameters(sdm_geom_par_st  *geom_par);
   int   readStripFromTable(St_spa_strip *spa_strip);
   int   readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sls_ctrl);
+  int   writeClusterToTable(St_scf_cluster *cluster,St_spa_strip *spa_strip);
   int   writeClusterToTable(St_scf_cluster *cluster);
   void  doSideClusterisation(int *numberOfCluster,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl);
   void  sortListCluster();

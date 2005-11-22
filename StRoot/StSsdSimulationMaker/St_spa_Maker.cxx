@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.6 2005/05/13 08:39:33 lmartin Exp $
+ * $Id: St_spa_Maker.cxx,v 1.7 2005/11/22 03:56:46 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.7  2005/11/22 03:56:46  bouchet
+ * id_mctrack is using for setIdTruth
+ *
  * Revision 1.6  2005/05/13 08:39:33  lmartin
  * CVS tags added
  *
@@ -107,7 +110,8 @@ Int_t St_spa_Maker::Make()
   mySsd->addNoiseToStrip(ctrl);
   cout<<"####           DO DAQ SIMULATION             ####"<<endl;
   mySsd->doDaqSimulation(ctrl);
-  int nSsdStrips = mySsd->writeStripToTable(spa_strip);
+  int nSsdStrips = mySsd->writeStripToTable(spa_strip,sls_strip);
+  //int nSsdStrips = mySsd->writeStripToTable(spa_strip);
   spa_strip->Purge();
   cout<<"####       NUMBER OF SPA STRIP "<<nSsdStrips<<"          ####"<<endl;
   delete mySsd;
