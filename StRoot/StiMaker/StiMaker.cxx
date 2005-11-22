@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.156  2005/11/22 23:15:27  fisyak
+// Clean up parameters setting
+//
 // Revision 1.155  2005/10/26 21:54:10  fisyak
 // Remove dead classes, gid rid off dependencies from StMcEvent and StiGui
 //
@@ -298,29 +301,6 @@ Int_t StiMaker::Init()
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
   
   _loaderHitFilter = 0; // not using this yet.
-#if 0
-  _loaderTrackFilter = new StiDefaultTrackFilter("LoaderTrackFilter","MC Tracks Filter"); 
-  _loaderTrackFilter->add(new EditableParameter("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi));
-  _loaderTrackFilter->add(new EditableParameter("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi));
-  _loaderTrackFilter->add(new EditableParameter("PhiMax",   "Maximum Phi", 6.3, 6.3, 0., 6.3,2,Parameter::Double, StiTrack::kPhi));
-  _loaderTrackFilter->add(new EditableParameter("PtUsed",   "Use Pt",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPt));
-  _loaderTrackFilter->add(new EditableParameter("PtMin",    "Minimum Pt", 0., 0.1, 0., 100.,2,Parameter::Double, StiTrack::kPt));
-  _loaderTrackFilter->add(new EditableParameter("PtMax",    "Maximum Pt", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kPt));
-  _loaderTrackFilter->add(new EditableParameter("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP));
-  _loaderTrackFilter->add(new EditableParameter("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP));
-  _loaderTrackFilter->add(new EditableParameter("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP));
-  _loaderTrackFilter->add(new EditableParameter("EtaUsed",  "Use Eta",   true, true, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity));
-  _loaderTrackFilter->add(new EditableParameter("EtaMin",   "Min Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity));
-  _loaderTrackFilter->add(new EditableParameter("EtaMax",   "Max Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity));
-  _loaderTrackFilter->add(new EditableParameter("nPtsUsed", "Use nPts",     true , true, 0,1,1,Parameter::Boolean, StiTrack::kPointCount));
-  _loaderTrackFilter->add(new EditableParameter("nPtsMin",  "Minimum nPts", 10., 10., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
-  _loaderTrackFilter->add(new EditableParameter("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
-  _loaderTrackFilter->add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
-  _loaderTrackFilter->add(new EditableParameter("chargeMin", "Min Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
-  _loaderTrackFilter->add(new EditableParameter("chargeMax", "Max Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
-  _toolkit->setLoaderHitFilter(_loaderHitFilter);
-  _toolkit->setLoaderTrackFilter(_loaderTrackFilter);
-#endif
   InitDetectors();
   return kStOk;
 }
@@ -472,7 +452,7 @@ Int_t StiMaker::Make()
       if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
   cout<< "StiMaker::Make() -I- Done"<<endl;
-
+  StMaker::Make();
   if (1 || m_Mode)
     {
 //    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
