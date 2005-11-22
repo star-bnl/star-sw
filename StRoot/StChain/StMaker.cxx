@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.170 2005/10/06 18:55:45 fisyak Exp $
+// $Id: StMaker.cxx,v 1.171 2005/11/22 21:37:04 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -136,16 +136,19 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2003x",      20021115,     1, "y2003x", ""},   // 	     {"y2003x",      20021115,     0}
   {"y2003a",      20021115,     2, "y2003a", ""},   // 	     {"y2003a",      20021115,     0}
   {"y2003b",      20021115,     3, "y2003b", ""},   // 	     {"y2003b",      20021115,     0}
+  {"y2003c",      20021115,     4, "y2003c", "new SVT"}, 
   {"y2004",       20031120,     0, "y2004",  ""},   // 	     {"y2004",       20031120,     0}
   {"y2004x",      20031120,     1, "y2004x", ""},   // 	     {"y2004x",      20031120,     0}
   {"y2004y",      20031120,     2, "y2004y", ""},  
   {"y2004a",      20031120,     3, "y2004a", ""},   // 	     {"y2004a",      20031120,     0}
   {"y2004b",      20031120,     4, "y2004b", ""},   // 	     {"y2004b",      20031120,     0}
   {"y2004c",      20031125,     0, "y2004c", ""},   // 	     {"y2004c",      20031125,     0}
+  {"y2004d",      20031125,     1, "y2004d", "new SVT"},
   {"y2005x",      20041030,     0, "y2005x", ""},   //	     {"y2005x",      20041030,     0}
   {"y2005",       20041030,     0, "y2005", ""},    // 	     {"y2005",       20041030,     0}
   {"y2005b",      20041101,     0, "y2005b", ""},   //       {"y2005b",      20041101,     0}
   {"y2005c",      20041201,     0, "y2005c", ""},   //       {"y2005c",      20041201,     0}
+  {"y2005d",      20041201,     1, "y2005d", "new SVT"},   //       {"y2005c",      20041201,     0}
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   {"complete",    20190101,     1, "complete", "non-production"},
   {"ist1",        20190101,     2, "ist1", "non-production"},
@@ -164,15 +167,12 @@ ClassImp(StMaker)
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLogger(0),fLoggerHold(0)
+StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),
+						m_Mode(0), m_Number(0), m_LastRun(-3),
+						m_DebugLevel(0),m_MakeReturn(0),fStatus(0),
+						fLogger(0),fLoggerHold(0)
 {
-   SetActive();
-   SetMode();
    m_Attr.SetOwner();
-   m_DebugLevel=0;
-   m_MakeReturn=0;
-   m_Number=0;        	
-   m_LastRun=-3;        	
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -191,7 +191,6 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fLogger(
    fMemStatMake  = 0;
    fMemStatClear = 0;
    memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
-   fStatus = 0;
    SetActive();
    StMkDeb::Register(this);
 }
@@ -1688,6 +1687,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.171  2005/11/22 21:37:04  fisyak
+// add more Simu time stamps (reflecting new SVT), and clean up
+//
 // Revision 1.170  2005/10/06 18:55:45  fisyak
 // Add all used simulation time stamps and geometries
 //

@@ -57,7 +57,7 @@ public:
    enum EMakerStatus {kInitBeg = 1, kInitEnd = 2,
 		      kMakeBeg = 3, kCleaBeg = 4,
 		      kFiniBeg = 5, kFiniEnd = 6,
-		       kActive  = 7};
+		      kActive  = 7};
 protected:
 
    TDataSet     *m_DataSet;             //!  
@@ -180,7 +180,7 @@ public:
    /// Maker Status Bits 
    virtual void         SetBIT(EMakerStatus k)   {SETBIT(fStatus,k);}
    virtual void         ResetBIT(EMakerStatus k) {CLRBIT(fStatus,k);}
-   virtual Bool_t       TestBIT(EMakerStatus k)  {return (Bool_t) ((fStatus & BIT(k)) != 0); }
+   virtual Bool_t       TestBIT(EMakerStatus k)  {return TESTBIT(fStatus,k);}
    /// Setters for flags and switches
    virtual void         SetActive(Bool_t k=kTRUE) {if(k) SetBIT(kActive); else ResetBIT(kActive);} 
    virtual void         SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
@@ -223,7 +223,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.74 2005/10/06 18:55:45 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.75 2005/11/22 21:37:04 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -281,8 +281,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.74 2005/10/06 18:55:45 fisyak Exp $
+// $Id: StMaker.h,v 1.75 2005/11/22 21:37:04 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.75  2005/11/22 21:37:04  fisyak
+// add more Simu time stamps (reflecting new SVT), and clean up
+//
 // Revision 1.74  2005/10/06 18:55:45  fisyak
 // Add all used simulation time stamps and geometries
 //
