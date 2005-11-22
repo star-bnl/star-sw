@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.3 2005/09/14 17:08:35 msd Exp $
+ * $Id: StEStructMuDstReader.h,v 1.4 2005/11/22 14:40:04 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -45,7 +45,7 @@ public:
                        StEStructEventCuts* ecuts,
                        StEStructTrackCuts* tcuts,
                        bool inChain = true,
-                       bool useAllTracks = false,
+                       bool useAllTracks = true,
                        int  centBin = 0);
   virtual ~StEStructMuDstReader();
 
@@ -86,6 +86,9 @@ inline int StEStructMuDstReader::setCentBin(int centBin) {
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.4  2005/11/22 14:40:04  msd
+ * Changed default of useAllTracks
+ *
  * Revision 1.3  2005/09/14 17:08:35  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *
