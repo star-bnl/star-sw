@@ -1,6 +1,9 @@
-// $Id: StSpaStrip.cc,v 1.3 2005/11/22 03:56:45 bouchet Exp $
+// $Id: StSpaStrip.cc,v 1.4 2005/11/22 22:51:02 fisyak Exp $
 //
 // $Log: StSpaStrip.cc,v $
+// Revision 1.4  2005/11/22 22:51:02  fisyak
+// Add new for mIdMcTrack[5] in the first ctor
+//
 // Revision 1.3  2005/11/22 03:56:45  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -17,7 +20,9 @@ StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, int rDigitSig, float rAnalogSi
    mDigitSig      = rDigitSig;  
    mAnalogSig     = rAnalogSig;
    mIdMcHit       = new int[5];
+   mIdMcTrack     = new int[5];
    for(int e=0;e<5;e++)  mIdMcHit[e] = rIdMcHit[e];
+   for(int ee=0;ee<5;ee++)  mIdMcTrack[ee] = 0;
    mPrevStrip     = 0;
    mNextStrip     = 0;
  }
