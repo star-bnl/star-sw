@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.106 2005/10/12 22:58:56 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.107 2005/11/22 23:13:24 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.107  2005/11/22 23:13:24  fisyak
+// Add default kinematics if there is no input fiels and if maker is active
+//
 // Revision 1.106  2005/10/12 22:58:56  fisyak
 // SetDateTime from fz-file if it was not set before
 //
@@ -698,6 +701,41 @@ Int_t St_geant_Maker::Init(){
       }
     }
   }
+  // Kinematics
+  if (fInputFile == "" && IsActive()) {// default
+      Do("subevent 0;");
+      // gkine #particles partid ptrange yrange phirange vertexrange
+      Do("gkine        80      6    1. 1. -4. 4. 0 6.28      0. 0.;");
+      Do("mode g2tm prin 1;");
+      //  Do("next;");
+      //  Do("dcut cave z 1 10 10 0.03 0.03;");
+      if ((m_Mode/1000)%10 == 1) {// phys_off
+	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+	Do("DCAY 0");
+	Do("ANNI 0");
+	Do("BREM 0");
+	Do("COMP 0");
+	Do("HADR 0");
+	Do("MUNU 0");
+	Do("PAIR 0");
+	Do("PFIS 0");
+	Do("PHOT 0");
+	Do("RAYL 0");
+	Do("LOSS 4"); // no fluctuations 
+	//  Do("LOSS 1"); // with delta electron above dcute
+	Do("DRAY 0");
+	Do("MULS 0");
+	Do("STRA 0");
+	//                                              CUTS   CUTGAM CUTELE CUTHAD CUTNEU CUTMUO BCUTE BCUTM DCUTE DCUTM PPCUTM TOFMAX GCUTS[5]
+	Do("CUTS     1e-3   1e-3   .001   .001   .001  .001  .001  1e-3  .001   .001 50.e-6");
+	Do("gclose all");
+	Do("physi");
+      }	
+      if (Debug() > 1) {
+	Do("debug on;");
+	Do("swit 2 3;");
+      }
+  }
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -1048,7 +1086,7 @@ Int_t St_geant_Maker::Make()
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_geant_Maker::LoadGeometry(Char_t *option){
+void St_geant_Maker::LoadGeometry(const Char_t *option){
 #if 0
   if (strlen(option)) Do (option); 
   Geometry();
