@@ -342,8 +342,10 @@ CC:  Fill Foreign Key to dst_track table>>>
 
                dst_point(dst_point_h.nok).id_track = 
      1            scs_spt(i).id_globtrk
-               dst_point(dst_point_h.nok).id_simtrk = 0
+               dst_point(dst_point_h.nok).id_simtrk = scs_spt(i).id_mctrack
                dst_point(dst_point_h.nok).id_quality = 0
+               if (dst_point(dst_point_h.nok).id_simtrk .gt. 0)
+     1          dst_point(dst_point_h.nok).id_quality = 100
             else if (dst_point_h.nok .ge. dst_point_h.maxlen) then
                write(6,10) dst_point_h.nok
                DST_POINT_FILLER = STAFCV_BAD
