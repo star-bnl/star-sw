@@ -15,7 +15,8 @@
      float  strip_mean;      /* middle of the cluster   */
      long   flag;            /* flag (splitted cluster) */
      long   id_mchit[5];     /* EVALUATION: key to monte carlo hit  */
+     long   id_mctrack[5]; /* id of montecarlo track                  */
    };
 
-/*  Last modified  $Date: 2000/07/21 14:57:52 $*/
+/*  Last modified  $Date: 2005/11/22 04:06:13 $*/
 
