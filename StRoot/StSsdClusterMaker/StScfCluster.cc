@@ -1,6 +1,9 @@
-// $Id: StScfCluster.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
+// $Id: StScfCluster.cc,v 1.4 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: StScfCluster.cc,v $
+// Revision 1.4  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.3  2005/06/13 16:01:00  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -64,6 +67,8 @@ void  StScfCluster::setStripMean(float rStripMean)
 void  StScfCluster::setIdMcHit(int rIdMcHit, int iR)
 {  this->mIdMcHit[iR] = rIdMcHit; }
 
+void  StScfCluster::setIdMcTrack(int rIdMcTrack, int iR)
+{  this->mIdMcTrack[iR] = rIdMcTrack; }
 
 int StScfCluster::getNCluster()
 {  return this->mNCluster;}
@@ -94,6 +99,10 @@ float StScfCluster::getStripMean()
 
 int StScfCluster::getIdMcHit(int iR)
 {  return this->mIdMcHit[iR]; }
+
+int StScfCluster::getIdMcTrack(int iR)
+{  return this->mIdMcTrack[iR]; }
+
 
 StScfCluster* StScfCluster::getPrevCluster()
 {  return this->mPrevCluster;}

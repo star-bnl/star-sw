@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.hh,v 1.3 2005/05/17 14:57:28 lmartin Exp $
+// $Id: StScmBarrel.hh,v 1.4 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: StScmBarrel.hh,v $
+// Revision 1.4  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.3  2005/05/17 14:57:28  lmartin
 // saving SSD hits into StEvent
 //
@@ -32,7 +35,8 @@ class StScmBarrel
   int   doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl);
   void  convertDigitToAnalog(sls_ctrl_st *sls_ctrl);
   void  convertUFrameToOther(sdm_geom_par_st *geom_par);
-  int   writePointToTable(St_scm_spt *scm_spt);   
+  int   writePointToTable(St_scm_spt *scm_spt);
+  int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl , St_scf_cluster *scf_cluster );  
   int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);   
 
   StScmWafer** mWafers;

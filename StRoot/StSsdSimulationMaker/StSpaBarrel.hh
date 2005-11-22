@@ -1,6 +1,9 @@
-// $Id: StSpaBarrel.hh,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+// $Id: StSpaBarrel.hh,v 1.3 2005/11/22 03:56:45 bouchet Exp $
 //
 // $Log: StSpaBarrel.hh,v $
+// Revision 1.3  2005/11/22 03:56:45  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.2  2005/05/13 08:39:32  lmartin
 // CVS tags added
 //
@@ -34,6 +37,7 @@ class StSpaBarrel
   int   readNoiseFromTable(St_sdm_calib_db *sdm_noise);
   int   readConditionDbFromTable(St_sdm_condition_db *sdm_condition);
   int   writeStripToTable(St_spa_strip *spa_strip);
+  int   writeStripToTable(St_spa_strip *spa_strip,St_sls_strip *sls_strip);
   void  addNoiseToStrip(sls_ctrl_st *ctrl);
   void  doDaqSimulation(sls_ctrl_st *ctrl);
 

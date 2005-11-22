@@ -1,6 +1,9 @@
-// $Id: St_scm_Maker.h,v 1.12 2005/06/14 12:20:25 bouchet Exp $
+// $Id: St_scm_Maker.h,v 1.13 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: St_scm_Maker.h,v $
+// Revision 1.13  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.12  2005/06/14 12:20:25  bouchet
 // cleaner version
 //
@@ -51,6 +54,9 @@ class StSsdHitCollection;
 
 class StTpcHitCollection;
 
+class St_scm_spt;
+
+
 class St_scm_Maker : public StMaker {
  private:
   St_sdm_geom_par      *m_geom_par;//!
@@ -63,7 +69,8 @@ class St_scm_Maker : public StMaker {
   TFile *pFile;
   TNtuple* pHitNtuple;
   void makeScmCtrlHistograms(); //!
-  void DeclareNtuple(); //! 
+  void DeclareNtuple(); //!
+  void PrintIdMctrack(St_scm_spt *scm_spt,int mywafer); 
   
  protected:
 
@@ -91,7 +98,7 @@ class St_scm_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.12 2005/06/14 12:20:25 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.13 2005/11/22 03:57:05 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
@@ -101,6 +108,9 @@ class St_scm_Maker : public StMaker {
 /***************************************************************************
  *
  * $Log: St_scm_Maker.h,v $
+ * Revision 1.13  2005/11/22 03:57:05  bouchet
+ * id_mctrack is using for setIdTruth
+ *
  * Revision 1.12  2005/06/14 12:20:25  bouchet
  * cleaner version
  *

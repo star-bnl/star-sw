@@ -1,6 +1,9 @@
-// $Id: StScfCluster.hh,v 1.3 2005/06/13 16:01:00 reinnart Exp $
+// $Id: StScfCluster.hh,v 1.4 2005/11/22 03:57:05 bouchet Exp $
 //
 // $Log: StScfCluster.hh,v $
+// Revision 1.4  2005/11/22 03:57:05  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.3  2005/06/13 16:01:00  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -29,6 +32,7 @@ class StScfCluster
   int           getTotNoise();
   float         getStripMean();
   int           getIdMcHit(int iR);
+  int           getIdMcTrack(int iR);
   StScfCluster* getPrevCluster();
   StScfCluster* getNextCluster();  
 
@@ -44,6 +48,7 @@ class StScfCluster
   void          setTotNoise(int rTotNoise);
   void          setStripMean(float rStripMean);
   void          setIdMcHit(int rIdMcHit, int iR);
+  void          setIdMcTrack(int rIdMcTrack, int iR);
   void          update(StScfStrip *ptr,float rWeight,int iSide);
   void          copyTo(StScfCluster *ptrClone);
   
@@ -58,6 +63,7 @@ private:
   int           mTotNoise;
   float         mStripMean;
   int          *mIdMcHit;
+  int          *mIdMcTrack;
   StScfCluster *mPrevCluster;
   StScfCluster *mNextCluster;
 };

@@ -1,6 +1,9 @@
-// $Id: StSpaStrip.cc,v 1.2 2005/05/13 08:39:33 lmartin Exp $
+// $Id: StSpaStrip.cc,v 1.3 2005/11/22 03:56:45 bouchet Exp $
 //
 // $Log: StSpaStrip.cc,v $
+// Revision 1.3  2005/11/22 03:56:45  bouchet
+// id_mctrack is using for setIdTruth
+//
 // Revision 1.2  2005/05/13 08:39:33  lmartin
 // CVS tags added
 //
@@ -9,15 +12,15 @@
 
 StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, int rDigitSig, float rAnalogSig, int *rIdMcHit)
 {
-  mNStrip        = rNStrip;
-  mMcStrip       = rMcStrip;
-  mDigitSig      = rDigitSig;  
-  mAnalogSig     = rAnalogSig;
-  mIdMcHit       = new int[5];
-  for(int e=0;e<5;e++)  mIdMcHit[e] = rIdMcHit[e];
-  mPrevStrip     = 0;
-  mNextStrip     = 0;
-}
+   mNStrip        = rNStrip;
+   mMcStrip       = rMcStrip;
+   mDigitSig      = rDigitSig;  
+   mAnalogSig     = rAnalogSig;
+   mIdMcHit       = new int[5];
+   for(int e=0;e<5;e++)  mIdMcHit[e] = rIdMcHit[e];
+   mPrevStrip     = 0;
+   mNextStrip     = 0;
+ }
 StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, float rAnalogSig)
 {
   mNStrip        = rNStrip;
@@ -25,7 +28,9 @@ StSpaStrip::StSpaStrip(int rNStrip, int rMcStrip, float rAnalogSig)
   mDigitSig      = 0;  
   mAnalogSig     = rAnalogSig;
   mIdMcHit       = new int[5];
+  mIdMcTrack     = new int[5];
   for(int e=0;e<5;e++)  mIdMcHit[e] = 0;
+  for(int ee=0;ee<5;ee++)  mIdMcTrack[ee] = 0;
   mPrevStrip     = 0;
   mNextStrip     = 0;
 }
@@ -37,13 +42,16 @@ StSpaStrip::StSpaStrip(int rNStrip, int rDigitSig)
   mDigitSig      = rDigitSig;  
   mAnalogSig     = 0.;
   mIdMcHit       = new int[5];
+  mIdMcTrack     = new int[5];
   for(int e=0;e<5;e++)  mIdMcHit[e] = 0;
+  for(int ee=0;ee<5;ee++)  mIdMcTrack[ee] = 0;
   mPrevStrip     = 0;
   mNextStrip     = 0;
 }
 
 StSpaStrip::~StSpaStrip()
-{  delete [] mIdMcHit; }
+{  delete [] mIdMcHit;
+   delete [] mIdMcTrack;}
 
 void StSpaStrip::setNStrip(int rNStrip)
 {  this->mNStrip = rNStrip; }
