@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.29 2005/09/28 22:52:52 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.30 2005/11/22 21:51:53 fisyak Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.30  2005/11/22 21:51:53  fisyak
+ * Add NTuple for svt and ssd hit
+ *
  * Revision 1.29  2005/09/28 22:52:52  calderon
  * Changed access to StMcEvent to use GetDataSet to be consistent with persistent StMcEvent.
  *
@@ -143,6 +146,10 @@
 
 #include "StMessMgr.h"
 
+#include "StBFChain.h"
+#include "St_DataSet.h"
+#include "St_DataSetIter.h"
+
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 
@@ -152,8 +159,7 @@
 
 #include "StMcEventTypes.hh"
 
-#include "StEventMaker/StEventMaker.h"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEvent.hh"
 
 // Define data Members for the histograms
 const Int_t   StMcAnalysisMaker::mNumDeltaX = 50;
@@ -163,12 +169,26 @@ const Float_t StMcAnalysisMaker::mMaxDeltaX =  0.52;
 const Float_t StMcAnalysisMaker::mMinDeltaZ = -0.52;
 const Float_t StMcAnalysisMaker::mMaxDeltaZ =  0.52;
 struct TpcHitMRPair_t {
-  Float_t sector, row, 
+  Float_t sector, row, isDet,
     xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
     xR, yR, zR, dER, IdM, IdR, qR, nR;
 };
-static Char_t *vTpcHitMRPair = "sector:row:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static Char_t *vTpcHitMRPair = "sector:row:isDet:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
 static TpcHitMRPair_t TpcHitMRPair;
+struct SvtHitMRPair_t {
+  Float_t barrel, layer, ladder, wafer,  hybrid, index,
+    xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
+    xR, yR, zR, dER, IdM, IdR, qR, nR;
+};
+static Char_t *vSvtHitMRPair = "barrel:layer:ladder:wafer:hybrid:index:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static SvtHitMRPair_t SvtHitMRPair;
+struct SsdHitMRPair_t {
+  Float_t ladder, wafer,
+    xM, yM, zM, pxM, pyM, pzM, dEM, dSM, nM,
+    xR, yR, zR, dER, IdM, IdR, qR, nR;
+};
+static Char_t *vSsdHitMRPair = "ladder:wafer:xM:yM:zM:pxM:pyM:pzM:dEM:dSM:nM:xR:yR:zR:dER:IdM:IdR:qR:nR";
+static SsdHitMRPair_t SsdHitMRPair;
 ClassImp(StMcAnalysisMaker)
 
 //_________________________________________________
@@ -180,10 +200,14 @@ StMcAnalysisMaker::StMcAnalysisMaker(const char *name, const char *title):
     mAssociationCanvas = 0;
     mMomResolution  = 0;
     mHitResolution  = 0;   
+    mSvtHitResolution  = 0;   
+    mSsdHitResolution  = 0;   
     coordRec        = 0;  
     coordMcPartner  = 0;
     mTrackNtuple    = 0;
     mTpcHitNtuple   = 0;
+    mSvtHitNtuple   = 0;
+    mSsdHitNtuple   = 0;
 }
 
 //_________________________________________________
@@ -228,13 +252,24 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-	//}
-    cout << "Now booking histograms" << endl;
+    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    if (chain) mNtupleFile = chain->GetTFile();
+    if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
+    else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
     mHitResolution->SetXTitle("Delta X (cm)");
     mHitResolution->SetYTitle("Delta Z (cm)");
+    mSvtHitResolution = new TH2F("SvtHitRes","Delta Z Vs Delta X for SvtHits",
+			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
+    mSvtHitResolution->SetXTitle("Delta X (cm)");
+    mSvtHitResolution->SetYTitle("Delta Z (cm)");
+
+    mSsdHitResolution = new TH2F("SsdHitRes","Delta Z Vs Delta X for SsdHits",
+			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
+    mSsdHitResolution->SetXTitle("Delta X (cm)");
+    mSsdHitResolution->SetYTitle("Delta Z (cm)");
 
     mMomResolution = new TH1F("momRes","(|p| - |pmc|)/|pmc|",100,-1.,1.);
     mMomResolution->SetXTitle("Resolution (%)");
@@ -246,7 +281,7 @@ Int_t StMcAnalysisMaker::Init()
     coordMcPartner = new TH2F("coordMc","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
     coordMcPartner->SetXTitle("X (cm)");
     coordMcPartner->SetYTitle("Y (cm)");
-
+#if 0
     // Define the file for the Ntuple, otherwise it won't be available later.
     // one must define the file _after_ the histograms are booked, otherwise they are
     // not owned by the maker, but are stored in the file, breaking the code in StAssociator.
@@ -264,11 +299,13 @@ Int_t StMcAnalysisMaker::Init()
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ:mcTrkId:mostCommIdTruth:nHitsIdTruth:nMcHits:nFitPts:nDetPts:quality";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
     mTrackNtuple->SetAutoSave(100000000);
+#endif
     mTpcHitNtuple = new TNtuple("TpcHitNtuple","the TPC hit pairs Info",vTpcHitMRPair);
     mTpcHitNtuple->SetAutoSave(100000000);
-    //cout << "Defined Momentum Res. Histogram & Ntuple" << endl;
-
-
+    mSvtHitNtuple = new TNtuple("SvtHitNtuple","the SVT hit pairs Info",vSvtHitMRPair);
+    mSvtHitNtuple->SetAutoSave(100000000);
+    mSsdHitNtuple = new TNtuple("SsdHitNtuple","the SSD hit pairs Info",vSsdHitMRPair);
+    mSsdHitNtuple->SetAutoSave(100000000);
     return StMaker::Init();
 }
 //_________________________________________________
@@ -290,6 +327,10 @@ Int_t StMcAnalysisMaker::Make()
   // the Multimaps...
   rcTpcHitMapType* theHitMap   = assoc->rcTpcHitMap();
   mcTpcHitMapType* theMcHitMap = assoc->mcTpcHitMap();
+  rcSvtHitMapType* svtHitMap   = assoc->rcSvtHitMap();
+  mcSvtHitMapType* svtMcHitMap = assoc->mcSvtHitMap();
+  rcSsdHitMapType* ssdHitMap   = assoc->rcSsdHitMap();
+  mcSsdHitMapType* ssdMcHitMap = assoc->mcSsdHitMap();
   rcTrackMapType*  theTrackMap = assoc->rcTrackMap();
   mcV0MapType* theMcV0Map      = assoc->mcV0Map(); 
   
@@ -355,34 +396,62 @@ Int_t StMcAnalysisMaker::Make()
   
   float DeltaX;
   float DeltaZ;
-  
-  StTpcHitCollection* recHits = rEvent->tpcHitCollection();
-  StMcTpcHitCollection* mcHits = mEvent->tpcHitCollection();
-  assert (recHits || mcHits);
-  cout << "Making Hit Resolution Histogram..." << endl;
-  // Loop over Rec Hits
-  
-  for (unsigned int iSector=0; iSector< recHits->numberOfSectors(); iSector++) {
-    for (unsigned int iPadrow=0; iPadrow<recHits->sector(iSector)->numberOfPadrows();
-	 iPadrow++) {
-      for (StTpcHitIterator iter = recHits->sector(iSector)->padrow(iPadrow)->hits().begin();
-	   iter != recHits->sector(iSector)->padrow(iPadrow)->hits().end();
-	   iter++) {
-	const StTpcHit   *rhit = dynamic_cast<const StTpcHit   *> (*iter);
-	assert(rhit);
-	if (rhit->TestBit(StMcHit::kMatched)) {
-	  pair<rcTpcHitMapIter,rcTpcHitMapIter>
-	    recBounds = theHitMap->equal_range(rhit);
-	  
-	  for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
+  if (theHitMap) {// TPC
+    StTpcHitCollection* recHits = rEvent->tpcHitCollection();
+    StMcTpcHitCollection* mcHits = mEvent->tpcHitCollection();
+    assert (recHits || mcHits);
+    cout << "Making Hit Resolution Histogram..." << endl;
+    // Loop over Rec Hits
+    
+    for (unsigned int iSector=0; iSector< recHits->numberOfSectors(); iSector++) {
+      for (unsigned int iPadrow=0; iPadrow<recHits->sector(iSector)->numberOfPadrows();
+	   iPadrow++) {
+	for (StTpcHitIterator iter = recHits->sector(iSector)->padrow(iPadrow)->hits().begin();
+	     iter != recHits->sector(iSector)->padrow(iPadrow)->hits().end();
+	     iter++) {
+	  const StTpcHit   *rhit = dynamic_cast<const StTpcHit   *> (*iter);
+	  assert(rhit);
+	  if (rhit->TestBit(StMcHit::kMatched)) 
+	  {
+	    pair<rcTpcHitMapIter,rcTpcHitMapIter>
+	      recBounds = theHitMap->equal_range(rhit);
 	    
-	    const StMcTpcHit *mhit = dynamic_cast<const StMcTpcHit *> ((*it2).second);
-	    assert ( mhit);
-	    DeltaX = rhit->position().x() - mhit->position().x();
-	    DeltaZ = rhit->position().z() - mhit->position().z();
-	    
-	    mHitResolution->Fill(DeltaX,DeltaZ);
-	    
+	    for (rcTpcHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
+	      
+	      const StMcTpcHit *mhit = dynamic_cast<const StMcTpcHit *> ((*it2).second);
+	      assert ( mhit);
+	      DeltaX = rhit->position().x() - mhit->position().x();
+	      DeltaZ = rhit->position().z() - mhit->position().z();
+	      
+	      mHitResolution->Fill(DeltaX,DeltaZ);
+	      
+	      memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
+	      TpcHitMRPair.sector   = rhit->sector();
+	      TpcHitMRPair.row      = rhit->padrow();
+	      TpcHitMRPair.xR       = rhit->position().x();
+	      TpcHitMRPair.yR       = rhit->position().y();
+	      TpcHitMRPair.zR       = rhit->position().z();
+	      TpcHitMRPair.dER      = rhit->charge();
+	      TpcHitMRPair.IdR      = rhit->idTruth();
+	      TpcHitMRPair.qR       = rhit->qaTruth();
+	      TpcHitMRPair.nR       = theHitMap->count(rhit);
+	      TpcHitMRPair.isDet    = mhit->isDet();
+	      TpcHitMRPair.xM       = mhit->position().x();
+	      TpcHitMRPair.yM       = mhit->position().y();
+	      TpcHitMRPair.zM       = mhit->position().z();
+	      TpcHitMRPair.pxM      = mhit->localMomentum().x();
+	      TpcHitMRPair.pyM      = mhit->localMomentum().y();
+	      TpcHitMRPair.pzM      = mhit->localMomentum().z();
+	      TpcHitMRPair.dEM      = mhit->dE();
+	      TpcHitMRPair.dSM      = mhit->dS();
+	      StMcTrack *mTrack     = mhit->parentTrack();
+	      if (mTrack) TpcHitMRPair.IdM = mTrack->key();
+	      else        TpcHitMRPair.IdM = 0;
+	      TpcHitMRPair.nM     = theMcHitMap->count(mhit);
+	      mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
+	    }
+	  }
+	  else {
 	    memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
 	    TpcHitMRPair.sector   = rhit->sector();
 	    TpcHitMRPair.row      = rhit->padrow();
@@ -393,67 +462,240 @@ Int_t StMcAnalysisMaker::Make()
 	    TpcHitMRPair.IdR      = rhit->idTruth();
 	    TpcHitMRPair.qR       = rhit->qaTruth();
 	    TpcHitMRPair.nR       = theHitMap->count(rhit);
-	    TpcHitMRPair.xM       = mhit->position().x();
-	    TpcHitMRPair.yM       = mhit->position().y();
-	    TpcHitMRPair.zM       = mhit->position().z();
-	    TpcHitMRPair.pxM      = mhit->localMomentum().x();
-	    TpcHitMRPair.pyM      = mhit->localMomentum().y();
-	    TpcHitMRPair.pzM      = mhit->localMomentum().z();
-	    TpcHitMRPair.dEM      = mhit->dE();
-	    TpcHitMRPair.dSM      = mhit->dS();
-	    StMcTrack *mTrack     = mhit->parentTrack();
-	    if (mTrack) TpcHitMRPair.IdM = mTrack->key();
-	    else        TpcHitMRPair.IdM = 0;
-	    TpcHitMRPair.nM     = theMcHitMap->count(mhit);
 	    mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
 	  }
 	}
-	else {
+      }
+    }
+    for (unsigned int iSector=0;
+	 iSector<mcHits->numberOfSectors(); iSector++) {
+      
+      if (Debug()) {cout << iSector + 1 << " "; flush(cout);}
+      StMcTpcSectorHitCollection* tpcSectHitColl = mcHits->sector(iSector);
+      for (unsigned int iPadrow=0;
+	   iPadrow<tpcSectHitColl->numberOfPadrows();
+	   iPadrow++) {
+	StMcTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
+	for (unsigned int iHit=0;
+	     iHit<tpcPadRowHitColl->hits().size();
+	     iHit++){
+	  const StMcTpcHit *mhit = dynamic_cast<const StMcTpcHit *> (tpcPadRowHitColl->hits()[iHit]);
+	  assert (mhit);
+	  if (mhit->TestBit(StMcHit::kMatched)) continue;
 	  memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
-	  TpcHitMRPair.sector   = rhit->sector();
-	  TpcHitMRPair.row      = rhit->padrow();
-	  TpcHitMRPair.xR       = rhit->position().x();
-	  TpcHitMRPair.yR       = rhit->position().y();
-	  TpcHitMRPair.zR       = rhit->position().z();
-	  TpcHitMRPair.dER      = rhit->charge();
-	  TpcHitMRPair.IdR      = rhit->idTruth();
-	  TpcHitMRPair.qR       = rhit->qaTruth();
-	  TpcHitMRPair.nR       = theHitMap->count(rhit);
+	  TpcHitMRPair.sector   = mhit->sector();
+	  TpcHitMRPair.row      = mhit->padrow();
+	  TpcHitMRPair.isDet    = mhit->isDet();
+	  TpcHitMRPair.xM       = mhit->position().x();
+	  TpcHitMRPair.yM       = mhit->position().y();
+	  TpcHitMRPair.zM       = mhit->position().z();
+	  TpcHitMRPair.pxM      = mhit->localMomentum().x();
+	  TpcHitMRPair.pyM      = mhit->localMomentum().y();
+	  TpcHitMRPair.pzM      = mhit->localMomentum().z();
+	  TpcHitMRPair.dEM      = mhit->dE();
+	  TpcHitMRPair.dSM      = mhit->dS();
+	  StMcTrack *mTrack     = mhit->parentTrack();
+	  if (mTrack) TpcHitMRPair.IdM = mTrack->key();
+	  else        TpcHitMRPair.IdM = 0;
 	  mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
 	}
       }
     }
   }
-  for (unsigned int iSector=0;
-       iSector<mcHits->numberOfSectors(); iSector++) {
-    
-    if (Debug()) {cout << iSector + 1 << " "; flush(cout);}
-    StMcTpcSectorHitCollection* tpcSectHitColl = mcHits->sector(iSector);
-    for (unsigned int iPadrow=0;
-	 iPadrow<tpcSectHitColl->numberOfPadrows();
-	 iPadrow++) {
-      StMcTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
-      for (unsigned int iHit=0;
-	   iHit<tpcPadRowHitColl->hits().size();
-	   iHit++){
-	const StMcTpcHit *mhit = dynamic_cast<const StMcTpcHit *> (tpcPadRowHitColl->hits()[iHit]);
-	assert (mhit);
-	if (mhit->TestBit(StMcHit::kMatched)) continue;
-	memset (&TpcHitMRPair, 0, sizeof(TpcHitMRPair));
-	TpcHitMRPair.sector   = mhit->sector();
-	TpcHitMRPair.row      = mhit->padrow();
-	TpcHitMRPair.xM       = mhit->position().x();
-	TpcHitMRPair.yM       = mhit->position().y();
-	TpcHitMRPair.zM       = mhit->position().z();
-	TpcHitMRPair.pxM      = mhit->localMomentum().x();
-	TpcHitMRPair.pyM      = mhit->localMomentum().y();
-	TpcHitMRPair.pzM      = mhit->localMomentum().z();
-	TpcHitMRPair.dEM      = mhit->dE();
-	TpcHitMRPair.dSM      = mhit->dS();
-	StMcTrack *mTrack     = mhit->parentTrack();
-	if (mTrack) TpcHitMRPair.IdM = mTrack->key();
-	else        TpcHitMRPair.IdM = 0;
-	mTpcHitNtuple->Fill(&TpcHitMRPair.sector);
+  if (svtHitMap && svtMcHitMap) {  // svt hits
+    StSvtHitCollection* recHits = rEvent->svtHitCollection();
+    StMcSvtHitCollection* mcHits = mEvent->svtHitCollection();
+    if (recHits && mcHits) {
+      for (unsigned int iBarrel=0; iBarrel< recHits->numberOfBarrels(); iBarrel++) {
+	for (unsigned int iLadder=0; iLadder<recHits->barrel(iBarrel)->numberOfLadders(); iLadder++) {
+	  for (unsigned int iWafer = 0; iWafer < recHits->barrel(iBarrel)->ladder(iLadder)->numberOfWafers(); iWafer++) {
+	    for (StSvtHitIterator iter = recHits->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().begin();
+	       iter != recHits->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().end();
+		 iter++) {
+	      const StSvtHit   *rhit = dynamic_cast<const StSvtHit   *> (*iter);
+	      assert(rhit);
+	      if (rhit->TestBit(StMcHit::kMatched)) 
+	      {
+		pair<rcSvtHitMapIter,rcSvtHitMapIter> recBounds = svtHitMap->equal_range(rhit);
+		for (rcSvtHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
+		  const StMcSvtHit *mhit = dynamic_cast<const StMcSvtHit *> ((*it2).second);
+		  assert ( mhit);
+		  DeltaX = rhit->position().x() - mhit->position().x();
+		  DeltaZ = rhit->position().z() - mhit->position().z();
+		  mSvtHitResolution->Fill(DeltaX,DeltaZ);
+		  memset (&SvtHitMRPair, 0, sizeof(SvtHitMRPair));
+		  SvtHitMRPair.barrel   = rhit->barrel();
+		  SvtHitMRPair.ladder   = rhit->ladder();
+		  SvtHitMRPair.layer    = rhit->layer();
+		  SvtHitMRPair.wafer    = rhit->wafer();
+		  SvtHitMRPair.hybrid   = rhit->hybrid();
+		  SvtHitMRPair.index    = rhit->index();
+		  SvtHitMRPair.xR       = rhit->position().x();
+		  SvtHitMRPair.yR       = rhit->position().y();
+		  SvtHitMRPair.zR       = rhit->position().z();
+		  SvtHitMRPair.dER      = rhit->charge();
+		  SvtHitMRPair.IdR      = rhit->idTruth();
+		  SvtHitMRPair.qR       = rhit->qaTruth();
+		  SvtHitMRPair.nR       = svtHitMap->count(rhit);
+		  SvtHitMRPair.xM       = mhit->position().x();
+		  SvtHitMRPair.yM       = mhit->position().y();
+		  SvtHitMRPair.zM       = mhit->position().z();
+		  SvtHitMRPair.pxM      = mhit->localMomentum().x();
+		  SvtHitMRPair.pyM      = mhit->localMomentum().y();
+		  SvtHitMRPair.pzM      = mhit->localMomentum().z();
+		  SvtHitMRPair.dEM      = mhit->dE();
+		  SvtHitMRPair.dSM      = mhit->dS();
+		  StMcTrack *mTrack     = mhit->parentTrack();
+		  if (mTrack) SvtHitMRPair.IdM = mTrack->key();
+		  else        SvtHitMRPair.IdM = 0;
+		  SvtHitMRPair.nM     = svtMcHitMap->count(mhit);
+		  mSvtHitNtuple->Fill(&SvtHitMRPair.barrel);
+		}
+	      }
+	      else {
+		memset (&SvtHitMRPair, 0, sizeof(SvtHitMRPair));
+		SvtHitMRPair.barrel   = rhit->barrel();
+		SvtHitMRPair.ladder   = rhit->ladder();
+		SvtHitMRPair.layer    = rhit->layer();
+		SvtHitMRPair.wafer    = rhit->wafer();
+		SvtHitMRPair.hybrid   = rhit->hybrid();
+		SvtHitMRPair.index    = rhit->index();
+		SvtHitMRPair.xR       = rhit->position().x();
+		SvtHitMRPair.yR       = rhit->position().y();
+		SvtHitMRPair.zR       = rhit->position().z();
+		SvtHitMRPair.dER      = rhit->charge();
+		SvtHitMRPair.IdR      = rhit->idTruth();
+		SvtHitMRPair.qR       = rhit->qaTruth();
+		SvtHitMRPair.nR       = svtHitMap->count(rhit);
+		mSvtHitNtuple->Fill(&SvtHitMRPair.barrel);
+	      }
+	    }
+	  }
+	}
+      }
+      for (unsigned int iBarrel=0; iBarrel< mcHits->numberOfBarrels(); iBarrel++) {
+	for (unsigned int iLadder=0; iLadder<mcHits->barrel(iBarrel)->numberOfLadders(); iLadder++) {
+	  for (unsigned int iWafer = 0; iWafer < mcHits->barrel(iBarrel)->ladder(iLadder)->numberOfWafers(); iWafer++) {
+	    for (StMcSvtHitIterator iter = mcHits->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().begin();
+	       iter != mcHits->barrel(iBarrel)->ladder(iLadder)->wafer(iWafer)->hits().end();
+		 iter++) {
+	      const StMcSvtHit   *mhit = dynamic_cast<const StMcSvtHit   *> (*iter);
+	      assert (mhit);
+	      if (mhit->TestBit(StMcHit::kMatched)) continue;
+	      memset (&SvtHitMRPair, 0, sizeof(SvtHitMRPair));
+	      SvtHitMRPair.barrel   = mhit->barrel();
+	      SvtHitMRPair.ladder   = mhit->ladder();
+	      SvtHitMRPair.layer    = mhit->layer();
+	      SvtHitMRPair.wafer    = mhit->wafer();
+	      SvtHitMRPair.hybrid   = mhit->hybrid();
+	      SvtHitMRPair.index    = -1;
+	      SvtHitMRPair.barrel   = mhit->barrel();
+	      SvtHitMRPair.ladder   = mhit->ladder();
+	      SvtHitMRPair.xM       = mhit->position().x();
+	      SvtHitMRPair.yM       = mhit->position().y();
+	      SvtHitMRPair.zM       = mhit->position().z();
+	      SvtHitMRPair.pxM      = mhit->localMomentum().x();
+	      SvtHitMRPair.pyM      = mhit->localMomentum().y();
+	      SvtHitMRPair.pzM      = mhit->localMomentum().z();
+	      SvtHitMRPair.dEM      = mhit->dE();
+	      SvtHitMRPair.dSM      = mhit->dS();
+	      StMcTrack *mTrack     = mhit->parentTrack();
+	      if (mTrack) SvtHitMRPair.IdM = mTrack->key();
+	      else        SvtHitMRPair.IdM = 0;
+	      mSvtHitNtuple->Fill(&SvtHitMRPair.barrel);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  if (ssdHitMap && ssdMcHitMap) {  // ssd hits
+    StSsdHitCollection* recHits = rEvent->ssdHitCollection();
+    StMcSsdHitCollection* mcHits = mEvent->ssdHitCollection();
+    if (recHits && mcHits) {
+      for (unsigned int iLadder=0; iLadder<recHits->numberOfLadders(); iLadder++) {
+	for (unsigned int iWafer = 0; iWafer < recHits->ladder(iLadder)->numberOfWafers(); iWafer++) {
+	  for (StSsdHitIterator iter = recHits->ladder(iLadder)->wafer(iWafer)->hits().begin();
+	       iter != recHits->ladder(iLadder)->wafer(iWafer)->hits().end();
+	       iter++) {
+	    const StSsdHit   *rhit = dynamic_cast<const StSsdHit   *> (*iter);
+	    assert(rhit);
+	    if (rhit->TestBit(StMcHit::kMatched)) 
+	      {
+		pair<rcSsdHitMapIter,rcSsdHitMapIter> recBounds = ssdHitMap->equal_range(rhit);
+		for (rcSsdHitMapIter it2=recBounds.first; it2!=recBounds.second; ++it2){
+		  const StMcSsdHit *mhit = dynamic_cast<const StMcSsdHit *> ((*it2).second);
+		  assert ( mhit);
+		  DeltaX = rhit->position().x() - mhit->position().x();
+		  DeltaZ = rhit->position().z() - mhit->position().z();
+		  mSsdHitResolution->Fill(DeltaX,DeltaZ);
+		  memset (&SsdHitMRPair, 0, sizeof(SsdHitMRPair));
+		  SsdHitMRPair.ladder   = rhit->ladder();
+		  SsdHitMRPair.wafer    = rhit->wafer();
+		  SsdHitMRPair.xR       = rhit->position().x();
+		  SsdHitMRPair.yR       = rhit->position().y();
+		  SsdHitMRPair.zR       = rhit->position().z();
+		  SsdHitMRPair.dER      = rhit->charge();
+		  SsdHitMRPair.IdR      = rhit->idTruth();
+		  SsdHitMRPair.qR       = rhit->qaTruth();
+		  SsdHitMRPair.nR       = ssdHitMap->count(rhit);
+		  SsdHitMRPair.xM       = mhit->position().x();
+		  SsdHitMRPair.yM       = mhit->position().y();
+		  SsdHitMRPair.zM       = mhit->position().z();
+		  SsdHitMRPair.pxM      = mhit->localMomentum().x();
+		  SsdHitMRPair.pyM      = mhit->localMomentum().y();
+		  SsdHitMRPair.pzM      = mhit->localMomentum().z();
+		  SsdHitMRPair.dEM      = mhit->dE();
+		  SsdHitMRPair.dSM      = mhit->dS();
+		  StMcTrack *mTrack     = mhit->parentTrack();
+		  if (mTrack) SsdHitMRPair.IdM = mTrack->key();
+		  else        SsdHitMRPair.IdM = 0;
+		  SsdHitMRPair.nM     = ssdMcHitMap->count(mhit);
+		  mSsdHitNtuple->Fill(&SsdHitMRPair.ladder);
+		}
+	      }
+	    else {
+	      memset (&SsdHitMRPair, 0, sizeof(SsdHitMRPair));
+	      SsdHitMRPair.ladder   = rhit->ladder();
+	      SsdHitMRPair.wafer    = rhit->wafer();
+	      SsdHitMRPair.xR       = rhit->position().x();
+	      SsdHitMRPair.yR       = rhit->position().y();
+	      SsdHitMRPair.zR       = rhit->position().z();
+	      SsdHitMRPair.dER      = rhit->charge();
+	      SsdHitMRPair.IdR      = rhit->idTruth();
+	      SsdHitMRPair.qR       = rhit->qaTruth();
+	      SsdHitMRPair.nR       = ssdHitMap->count(rhit);
+	      mSsdHitNtuple->Fill(&SsdHitMRPair.ladder);
+	    }
+	  }
+	}
+      }
+      for (unsigned int iLadder=0; iLadder<mcHits->numberOfLadders(); iLadder++) {
+	for (unsigned int iWafer = 0; iWafer < mcHits->ladder(iLadder)->numberOfWafers(); iWafer++) {
+	  for (StMcSsdHitIterator iter = mcHits->ladder(iLadder)->wafer(iWafer)->hits().begin();
+	       iter != mcHits->ladder(iLadder)->wafer(iWafer)->hits().end();
+	       iter++) {
+	    const StMcSsdHit   *mhit = dynamic_cast<const StMcSsdHit   *> (*iter);
+	    assert (mhit);
+	    if (mhit->TestBit(StMcHit::kMatched)) continue;
+	    memset (&SsdHitMRPair, 0, sizeof(SsdHitMRPair));
+	    SsdHitMRPair.ladder   = mhit->ladder();
+	    SsdHitMRPair.wafer    = mhit->wafer();
+	    SsdHitMRPair.ladder   = mhit->ladder();
+	    SsdHitMRPair.xM       = mhit->position().x();
+	    SsdHitMRPair.yM       = mhit->position().y();
+	    SsdHitMRPair.zM       = mhit->position().z();
+	    SsdHitMRPair.pxM      = mhit->localMomentum().x();
+	    SsdHitMRPair.pyM      = mhit->localMomentum().y();
+	    SsdHitMRPair.pzM      = mhit->localMomentum().z();
+	    SsdHitMRPair.dEM      = mhit->dE();
+	    SsdHitMRPair.dSM      = mhit->dS();
+	    StMcTrack *mTrack     = mhit->parentTrack();
+	    if (mTrack) SsdHitMRPair.IdM = mTrack->key();
+	    else        SsdHitMRPair.IdM = 0;
+	    mSsdHitNtuple->Fill(&SsdHitMRPair.ladder);
+	  }
+	}
       }
     }
   }
@@ -511,7 +753,6 @@ Int_t StMcAnalysisMaker::Make()
   // Example: Make a histogram of the momentum resolution of the event
   //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
   StGlobalTrack* recTrack;
-  StPrimaryTrack* primTrk;
   StMcTrack*     mcTrack;
   StThreeVectorD p(0,0,0);
   StThreeVectorD pmc(0,0,0);
@@ -523,22 +764,9 @@ Int_t StMcAnalysisMaker::Make()
        tIter!=theTrackMap->end(); ++tIter){
     
     recTrack = (*tIter).first;
-    if ((*tIter).second->commonTpcHits()<10) continue;
+    //yf    if ((*tIter).second->commonTpcHits()<10) continue;
     mcTrack = (*tIter).second->partnerMcTrack();
-    
     pmc = mcTrack->momentum();
-    for (int k=0; k<3; k++) values[k] = pmc[k];
-    values[3]=pmc.mag();
-    
-    primTrk = dynamic_cast<StPrimaryTrack*>(recTrack->node()->track(primary));
-    if (primTrk)
-      p = primTrk->geometry()->momentum();
-    else
-      p = recTrack->geometry()->momentum();
-    
-    for (int j=0; j<3; j++) values[j+4] = p[j];
-    values[7]=p.mag();
-    values[8]=(*tIter).second->commonTpcHits();
     // Fill 1d Mom. resolution Histogram
     
     diff = (p.mag() - pmc.mag())/pmc.mag();
@@ -570,6 +798,7 @@ Int_t StMcAnalysisMaker::Make()
     rHitPos /=(float) (*tIter).second->commonTpcHits();
     mHitPos /=(float) (*tIter).second->commonTpcHits();
     for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
+#if 0
     values[12] = mcTrack->key();
     // Figure out the most common IdTruth; the dominatrix track!
     int mostCommonIdTruth = -9; 
@@ -599,6 +828,7 @@ Int_t StMcAnalysisMaker::Make()
     values[17] = recTpcHits.size();
     values[18] = idQuality;
     mTrackNtuple->Fill(values);
+#endif
   } // Tracks in Map Loop
   cout << "Finished Track Loop, Made Ntuple" << endl;
   //delete vars;
@@ -674,6 +904,6 @@ Int_t StMcAnalysisMaker::Make()
   
   
   //mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
-  cout << "List of histograms size " << Histograms()->GetSize() << endl;
+  
   return kStOK;
 }
