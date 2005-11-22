@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.7 2005/10/06 20:01:58 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.8 2005/11/22 23:05:14 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.8  2005/11/22 23:05:14  fisyak
+ * Correct print out for no. of bad Ftpc hits
+ *
  * Revision 2.7  2005/10/06 20:01:58  fisyak
  * add information about ftpc tracks, adjust hit.flag cut to >3
  *
@@ -43,7 +46,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.7 2005/10/06 20:01:58 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.8 2005/11/22 23:05:14 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -193,14 +196,14 @@ summarizeEvent(StEvent& event, const int &nevents)
 	    hit = static_cast<StFtpcHit*>(*it);
 	    if (!hit) continue;
 	    TotalNoOfFtpcHits++;
-	    if (hit->flag() > 3) noBadFtpcHits++;
+	    if (hit->flag() && (1 << 7)) noBadFtpcHits++;
 	    if (hit->usedInFit()) noFtpcHitsUsedInFit++;
 	  }
 	}
       }
     }
     gMessMgr->QAInfo() << "# FTPC hits:         " << TotalNoOfFtpcHits 
-		       << ":\tBad ones(flag>3): " << noBadFtpcHits 
+		       << ":\tBad ones(bit7): " << noBadFtpcHits 
 		       << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
     
 }
