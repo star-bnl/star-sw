@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.37 2005/10/06 19:23:07 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.38 2005/11/22 23:13:24 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.38  2005/11/22 23:13:24  fisyak
+// Add default kinematics if there is no input fiels and if maker is active
+//
 // Revision 1.37  2005/10/06 19:23:07  fisyak
 // Add set date/time from fz-file
 //
@@ -101,7 +104,7 @@ public:
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
    virtual void   Draw(const char* opt="IN");
    virtual Int_t  Make();
-   virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
+   virtual void   LoadGeometry (const Char_t *option = "detp geometry field_only");  // *MENU
    virtual void   SetNwGEANT (Int_t n=2) {fNwGeant = n;}
    virtual void   SetNwPAW   (Int_t n=0) {fNwPaw   = n;}
    virtual void   SetIwtype  (Int_t n=0) {fIwType  = n;}
@@ -169,7 +172,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.37 2005/10/06 19:23:07 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.38 2005/11/22 23:13:24 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
