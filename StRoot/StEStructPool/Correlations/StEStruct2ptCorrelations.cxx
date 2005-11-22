@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.8 2005/10/10 16:22:51 msd Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.9 2005/11/22 14:41:08 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -127,7 +127,7 @@ void StEStruct2ptCorrelations::init(){
   }
 
   /* Event Mixing Parameters */
-  mHmix = new TH2F("EventMixing","Event Mixing: delta-Z vs delta-N",50,0,10, 50,0,200);  // deltaZ vs deltaN
+  mHmix = new TH2F("EventMixing","Event Mixing: delta-Z vs delta-N",20,0,10, 200,0,200);  // deltaZ vs deltaN
 
   mInit=true;
 }
@@ -1254,6 +1254,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.9  2005/11/22 14:41:08  msd
+ * Tweaked event mixing histogram
+ *
  * Revision 1.8  2005/10/10 16:22:51  msd
  * fixing bug in buffer initialization
  *
