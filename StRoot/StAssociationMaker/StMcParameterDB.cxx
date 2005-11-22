@@ -1,11 +1,14 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.cxx,v 1.8 2004/03/30 03:02:02 calderon Exp $
+ * $Id: StMcParameterDB.cxx,v 1.9 2005/11/22 21:44:16 fisyak Exp $
  *
  * Changed extension to .cxx so that it
  * would be accessible from Root macro
  *
  * $Log: StMcParameterDB.cxx,v $
+ * Revision 1.9  2005/11/22 21:44:16  fisyak
+ * Add Ssd to Associator, add IdTruth options for Svt and Ssd
+ *
  * Revision 1.8  2004/03/30 03:02:02  calderon
  * -Changed default value of the z cut to 5 mm.
  *
@@ -29,6 +32,7 @@
  * -Includes maps using reconstructed and monte carlo objects as keys for:
  *   TPC Hits
  *   SVT Hits
+ *   SSD Hits
  *   FTPC Hits
  *   Tracks (using all 3 hit multimaps)
  *
@@ -63,6 +67,7 @@ StMcParameterDB* StMcParameterDB::instance()
 StMcParameterDB::StMcParameterDB()
     :mXCutTpc(5.*millimeter),mYCutTpc(5.*millimeter),mZCutTpc(5.*millimeter),mReqCommonHitsTpc(3),
      mXCutSvt(1.*millimeter),mYCutSvt(1.*millimeter),mZCutSvt(1.*millimeter),mReqCommonHitsSvt(1),
+     mXCutSsd(1.*millimeter),mYCutSsd(1.*millimeter),mZCutSsd(1.*millimeter),mReqCommonHitsSsd(1),
      mRCutFtpc(3.*millimeter),mPhiCutFtpc(5.*degree),mReqCommonHitsFtpc(2)
 { /*noop*/ }
 
@@ -75,6 +80,11 @@ void StMcParameterDB::setXCutSvt(float val) { mXCutSvt = val ;}
 void StMcParameterDB::setYCutSvt(float val) { mYCutSvt = val ;}
 void StMcParameterDB::setZCutSvt(float val) { mZCutSvt = val ;}
 void StMcParameterDB::setReqCommonHitsSvt(unsigned int val) { mReqCommonHitsSvt = val;}
+
+void StMcParameterDB::setXCutSsd(float val) { mXCutSsd = val ;}
+void StMcParameterDB::setYCutSsd(float val) { mYCutSsd = val ;}
+void StMcParameterDB::setZCutSsd(float val) { mZCutSsd = val ;}
+void StMcParameterDB::setReqCommonHitsSsd(unsigned int val) { mReqCommonHitsSsd = val;}
 
 void StMcParameterDB::setRCutFtpc(float val)   { mRCutFtpc   = val ;}
 void StMcParameterDB::setPhiCutFtpc(float val) { mPhiCutFtpc = val ;}
@@ -98,6 +108,11 @@ ostream& operator<<(ostream &os, const StMcParameterDB& mcDb)
     os << " Y Cut   : " << mcDb.yCutSvt()/millimeter << " mm" << endl; 
     os << " Z Cut   : " << mcDb.zCutSvt()/millimeter << " mm" << endl; 
     os << " Required Hits for Associating Tracks: " << mcDb.reqCommonHitsSvt() << endl;
+    os << " SSD Cuts " << endl;
+    os << " X Cut   : " << mcDb.xCutSsd()/millimeter << " mm" << endl; 
+    os << " Y Cut   : " << mcDb.yCutSsd()/millimeter << " mm" << endl; 
+    os << " Z Cut   : " << mcDb.zCutSsd()/millimeter << " mm" << endl; 
+    os << " Required Hits for Associating Tracks: " << mcDb.reqCommonHitsSsd() << endl;
     os << " FTPC Cuts " << endl;
     os << " R Cut   : " << mcDb.rCutFtpc()/millimeter << " mm" << endl; 
     os << " Phi Cut : " << mcDb.phiCutFtpc()/degree << " degrees" << endl; 

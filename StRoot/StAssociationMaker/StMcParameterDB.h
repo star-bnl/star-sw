@@ -1,7 +1,10 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.h,v 1.6 2003/06/27 03:01:19 calderon Exp $
+ * $Id: StMcParameterDB.h,v 1.7 2005/11/22 21:44:16 fisyak Exp $
  * $Log: StMcParameterDB.h,v $
+ * Revision 1.7  2005/11/22 21:44:16  fisyak
+ * Add Ssd to Associator, add IdTruth options for Svt and Ssd
+ *
  * Revision 1.6  2003/06/27 03:01:19  calderon
  * The z cut now depends on z_mc.
  * The parameterization is done in the parameter DB
@@ -19,6 +22,7 @@
  * -Includes maps using reconstructed and monte carlo objects as keys for:
  *   TPC Hits
  *   SVT Hits
+ *   SSD Hits
  *   FTPC Hits
  *   Tracks (using all 3 hit multimaps)
  *
@@ -59,7 +63,13 @@ public:
     float xCutSvt() const; // *MENU*
     float yCutSvt() const; // *MENU*
     float zCutSvt() const; // *MENU*
+
     unsigned int reqCommonHitsSvt() const; // *MENU*
+
+    float xCutSsd() const; // *MENU*
+    float yCutSsd() const; // *MENU*
+    float zCutSsd() const; // *MENU*
+    unsigned int reqCommonHitsSsd() const; // *MENU*
 
     float rCutFtpc() const; // *MENU*
     float phiCutFtpc() const; // *MENU*
@@ -74,6 +84,11 @@ public:
     void setYCutSvt(float); // *MENU*
     void setZCutSvt(float); // *MENU*
     void setReqCommonHitsSvt(unsigned int); // *MENU*
+    
+    void setXCutSsd(float); // *MENU*
+    void setYCutSsd(float); // *MENU*
+    void setZCutSsd(float); // *MENU*
+    void setReqCommonHitsSsd(unsigned int); // *MENU*
     
     void setRCutFtpc(float); // *MENU*
     void setPhiCutFtpc(float); // *MENU*
@@ -94,6 +109,11 @@ private:
     float mYCutSvt;
     float mZCutSvt;
     unsigned int mReqCommonHitsSvt;
+
+    float mXCutSsd;
+    float mYCutSsd;
+    float mZCutSsd;
+    unsigned int mReqCommonHitsSsd;
 
     float mRCutFtpc;
     float mPhiCutFtpc;
@@ -119,6 +139,14 @@ inline float StMcParameterDB::yCutSvt() const { return mYCutSvt; }
 inline float StMcParameterDB::zCutSvt() const { return mZCutSvt; }
 
 inline unsigned int StMcParameterDB::reqCommonHitsSvt() const { return mReqCommonHitsSvt; }
+
+inline float StMcParameterDB::xCutSsd() const { return mXCutSsd; }
+
+inline float StMcParameterDB::yCutSsd() const { return mYCutSsd; }
+
+inline float StMcParameterDB::zCutSsd() const { return mZCutSsd; }
+
+inline unsigned int StMcParameterDB::reqCommonHitsSsd() const { return mReqCommonHitsSsd; }
 
 inline float StMcParameterDB::rCutFtpc() const { return mRCutFtpc; }
 
