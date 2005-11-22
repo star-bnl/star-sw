@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcPixelHit.cc,v 2.7 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.7  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.6  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -30,7 +33,7 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.7 2005/11/22 21:44:52 fisyak Exp $";
 
 #ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
@@ -104,4 +107,10 @@ StMcPixelHit::ladder() const
     }
 
   return iLadder;
+}
+//________________________________________________________________________________
+void StMcPixelHit::Print(Option_t *option) const {
+  cout << "PixelHit\t"; 
+  StMcHit::Print();
+  cout  << "\tLayer: " << layer();  
 }

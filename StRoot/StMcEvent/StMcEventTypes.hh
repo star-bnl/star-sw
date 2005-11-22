@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.9 2005/07/07 18:20:49 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.10 2005/11/22 21:44:51 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.10  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.9  2005/07/07 18:20:49  calderon
  * Added support for IGT detector.
  *
@@ -70,7 +73,7 @@
 #include "StMcSvtWaferHitCollection.hh"
 #include "StMcSsdHit.hh"
 #include "StMcSsdHitCollection.hh"
-#include "StMcSsdLayerHitCollection.hh"
+#include "StMcSsdLadderHitCollection.hh"
 #include "StMcTpcHit.hh"
 #include "StMcTpcHitCollection.hh"
 #include "StMcTpcPadrowHitCollection.hh"

@@ -1,6 +1,6 @@
 /**********************************************
  *
- * $Id: StMcHitComparisons.hh,v 2.4 2005/07/06 21:49:51 calderon Exp $
+ * $Id: StMcHitComparisons.hh,v 2.5 2005/11/22 21:44:52 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez
  ***********************************************
@@ -10,6 +10,9 @@
  *
  ***********************************************
  * $Log: StMcHitComparisons.hh,v $
+ * Revision 2.5  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.4  2005/07/06 21:49:51  calderon
  * StThreeVector.hh -> StThreeVectorF.hh
  *
@@ -34,12 +37,14 @@
 class StHit;
 class StTpcHit;
 class StSvtHit;
+class StSsdHit;
 class StFtpcHit;
 class StRichHit;
 
 class StMcHit;
 class StMcTpcHit;
 class StMcSvtHit;
+class StMcSsdHit;
 class StMcFtpcHit;
 class StMcRichHit;
 #include "StThreeVectorF.hh"

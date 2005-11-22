@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.20 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTrack.hh,v 2.21 2005/11/22 21:44:52 fisyak Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.21  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.20  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -222,6 +225,7 @@ public:
     void setKey(long);     
     void setEventGenLabel(long);     
     void setParent(StMcTrack*);     
+  void setPrimary(Bool_t val) {mIsPrimary = val;}
 
     void addTpcHit(StMcTpcHit*); 
     void addSvtHit(StMcSvtHit*); 
@@ -265,6 +269,7 @@ public:
     void removeFstHit(StMcFstHit*); 
     void removeFgtHit(StMcFgtHit*); 
   void Print(Option_t *option="") const;
+  Bool_t IsPrimary() const {return mIsPrimary;}
     //    void setTopologyMap(StTrackTopologyMap&); 
     
 protected:
@@ -299,6 +304,7 @@ protected:
     long                     mPdgId; 
     long                     mKey;     
     long                     mEventGenLabel; 
+  Bool_t                   mIsPrimary;
     ClassDef(StMcTrack,1)
 };
 #endif

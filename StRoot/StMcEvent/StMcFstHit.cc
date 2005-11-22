@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcFstHit.cc,v 2.7 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcFstHit.cc,v $
+ * Revision 2.7  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.6  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -31,7 +34,7 @@
 #include "StMcFstHit.hh"
 #include "tables/St_g2t_fst_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.6 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFstHit.cc,v 2.7 2005/11/22 21:44:51 fisyak Exp $";
 
 ClassImp(StMcFstHit)
     
@@ -106,4 +109,10 @@ unsigned long StMcFstHit::ladder() const {
 #endif  
 
   return iLadder;
+}
+//________________________________________________________________________________
+void StMcFstHit::Print(Option_t *option) const {
+  cout << "FstHit\t"; 
+  StMcHit::Print();
+  cout  << "\tLayer: " << layer();  
 }

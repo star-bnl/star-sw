@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.cc,v 2.4 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcSsdHit.cc,v 2.5 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcSsdHit.cc,v $
+ * Revision 2.5  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.4  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -30,7 +33,7 @@
 #include "StMcSsdHit.hh"
 #include "tables/St_g2t_ssd_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.4 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSsdHit.cc,v 2.5 2005/11/22 21:44:52 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcSsdHit::mPool(sizeof(StMcSsdHit));
 #endif
@@ -61,18 +64,16 @@ ostream&  operator<<(ostream& os, const StMcSsdHit& h)
 {
     os << "SsdHit" << endl;
     os << *((StMcHit *) &h);
-    os << "Layer           : " << h.layer() << endl;
+    os << "Ladder : " << h.ladder() 
+       << "\twafer : " << h.wafer() 
+       << endl;
   return os;
 }
 
-unsigned long
-StMcSsdHit::layer() const
-{
-  return 1; // Ssd consists of 1 layer
-}
-
-unsigned long
-StMcSsdHit::ladder() const
-{
-  return (mVolumeId)%100 ;
+//________________________________________________________________________________
+void StMcSsdHit::Print(Option_t *option) const {
+  cout << "SsdHit\t"; 
+  StMcHit::Print();
+  cout << "\tladder : " << ladder() 
+       << "\twafer : "  << wafer();
 }

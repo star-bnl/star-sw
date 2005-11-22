@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.9  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.8  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -41,6 +44,7 @@
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 #include "StMcTrack.hh"
+#include "StParticleDefinition.hh"
 #include "TObjectSet.h"
 #include "TDataSetIter.h"
 static const char rcsid[] = "$Id ";
@@ -166,4 +170,30 @@ ostream&  operator<<(ostream& os, const StMcEmcHitCollection &emcColl) {
     }
   }
   return os;
+}
+//________________________________________________________________________________
+void StMcEmcHitCollection::Print(Option_t *option) const {
+  TString Option(option);
+  if (Option.Contains("all",TString::kIgnoreCase)) {
+    cout<<"-----------\n"<<GetName()<<" has "<<numberOfHits()<<" hits in "
+	<<GetListSize()<<" modules. Deposit Energy "<<sum()<<" GeV \n-----------\n";
+    unsigned int i, m;
+    for (i=0; i<numberOfModules(); i++) {
+      m = i + 1;
+      const StSPtrVecMcCalorimeterHit& hits = thisModule(i).hits();
+      int nh = hits.size();
+      if (nh > 0) {
+	cout<<" " <<module(m)->GetName()<<" #hits "<<nh<<" Dep.Energy " << 
+	  module(m)->sum()<< endl;
+	for (int j = 0; j < nh; j++) {
+	  StMcCalorimeterHit *hit = module(m)->hits()[j];
+	  cout << *hit;
+	  if ( hit->parentTrack()) {
+	    cout << " key " << hit->parentTrack()->key();
+	  }
+	  cout << endl;
+	}
+      }
+    } 
+  } else cout << *this;
 }

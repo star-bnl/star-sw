@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.10 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcFtpcHit.hh,v 2.11 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.11  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.10  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -77,7 +80,8 @@ public:
 #endif
     unsigned long plane() const; // 1-20, where 1-10 = West and 11-20 = East
     unsigned long sector() const; // 1-6
-    
+  virtual void Print(Option_t *option="") const; // *MENU* 
+   
 private:
 #ifdef POOL
     static StMemoryPool mPool; 

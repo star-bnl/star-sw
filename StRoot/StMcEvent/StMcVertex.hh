@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.12 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcVertex.hh,v 2.13 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.13  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.12  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -64,11 +67,7 @@
 #include "StMcContainers.hh"
 #include "Stiostream.h"
 #include "StObject.h"
-#include <string>
-#ifndef ST_NO_NAMESPACES
-using std::string;
-#endif
-
+#include "TString.h"
 #include "StThreeVectorF.hh"
 
 class g2t_vertex_st;
@@ -92,7 +91,7 @@ public:
   StMcTrack*                  daughter(unsigned int i)  { return (i < mDaughters.size() ? mDaughters[i] : 0); }
   const StMcTrack*            daughter(unsigned int i) const { return (i < mDaughters.size() ? mDaughters[i] : 0); }
   const StMcTrack*            parent() const            { return mParent; }   
-  string const               &geantVolume() const       { return *&mGeantVolume; }
+  TString const               &geantVolume() const      { return *&mGeantVolume; }
   float tof() const { return mTof; }  
   long geantProcess() const { return mGeantProcess; }      
   long geantMedium() const { return mGeantMedium; }      
@@ -104,17 +103,17 @@ public:
     void setPosition(const StThreeVectorF&);
     void setParent(StMcTrack* );         
     void addDaughter(StMcTrack*);
-    void setGeantVolume(string);
+    void setGeantVolume(const Char_t *name);
     void setTof(float);
     void setGeantProcess(int); 
     void removeDaughter(StMcTrack*);
-    
+    virtual void Print(Option_t *option="") const; // *MENU* 
 protected:
     
     StThreeVectorF       mPosition;
     StPtrVecMcTrack      mDaughters;
     StMcTrack*           mParent;
-    string               mGeantVolume;
+    TString              mGeantVolume;
     float                mTof;
     long                 mGeantProcess;
     long                 mGeneratorProcess;

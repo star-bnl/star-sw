@@ -1,6 +1,6 @@
 /**********************************************
  *
- * $Id: StMcHitComparisons.cc,v 2.3 2000/06/09 19:52:07 calderon Exp $
+ * $Id: StMcHitComparisons.cc,v 2.4 2005/11/22 21:44:52 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez
  ***********************************************
@@ -10,6 +10,9 @@
  *
  ***********************************************
  * $Log: StMcHitComparisons.cc,v $
+ * Revision 2.4  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.3  2000/06/09 19:52:07  calderon
  * No longer use 2 different functions for SVT and TPC that do the same thing,
  * just use one function for the base class
@@ -27,11 +30,13 @@
  **********************************************/
 #include "StTpcHit.h"
 #include "StSvtHit.h"
+#include "StSsdHit.h"
 #include "StFtpcHit.h"
 #include "StRichHit.h"
 
 #include "StMcTpcHit.hh"
 #include "StMcSvtHit.hh"
+#include "StMcSsdHit.hh"
 #include "StMcFtpcHit.hh"
 #include "StMcRichHit.hh"
 #include "StMcHitComparisons.hh"

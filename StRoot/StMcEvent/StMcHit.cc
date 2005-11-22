@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.9 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcHit.cc,v 2.10 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.10  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.9  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -44,7 +47,7 @@
 #include "TString.h"
 #include "tables/St_g2t_hits_Table.h"
 #include "StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.9 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.10 2005/11/22 21:44:51 fisyak Exp $";
 ClassImp(StMcHit);
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
@@ -113,4 +116,14 @@ ostream& operator<<(ostream& os, const StMcHit& h)
     os << "dS              : "    << Form("%8.2f",h.dS()) << endl;
     os << "VolId           : " << h.volumeId() << endl;
     return os;
+}
+//________________________________________________________________________________
+void StMcHit::Print(Option_t *option) const {
+  if (parentTrack()) cout  << Form("%5i/%5i",key(),parentTrack()->key());
+  else               cout  << Form("%5i/undef",key());
+  cout    << "\txyz: "   << Form("%8.2f%8.2f%8.2f",position().x(), position().y(), position().z()) 
+	  << "\tpxyzL: " << Form("%8.2f%8.2f%8.2f",localMomentum().x()  ,localMomentum().y()  ,localMomentum().z())  
+	  << "\tdE: "    << Form("%8.2f",1e6*dE())  
+	  << "\tdS: "    << Form("%8.2f",dS()) 
+	  << "\tVolId: " << volumeId();
 }

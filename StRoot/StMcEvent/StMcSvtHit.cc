@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcSvtHit.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcSvtHit.cc,v $
+ * Revision 2.12  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.11  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -51,7 +54,7 @@
 #include "StMcSvtHit.hh"
 #include "tables/St_g2t_svt_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcSvtHit::mPool(sizeof(StMcSvtHit));
 #endif
@@ -87,4 +90,13 @@ ostream&  operator<<(ostream& os, const StMcSvtHit& h)
     os << "Wafer           : " << h.wafer() << endl;
     os << "Barrel          : " << h.barrel() << endl;
   return os;
+}
+//________________________________________________________________________________
+void StMcSvtHit::Print(Option_t *option) const {
+  cout << "SvtHit\t"; 
+  StMcHit::Print();
+  cout  << "\tLayer: " << layer()  
+	<< " Ladder: " << ladder() 
+	<< " Wafer: "  << wafer()  
+	<< " Barrel: " << barrel();
 }

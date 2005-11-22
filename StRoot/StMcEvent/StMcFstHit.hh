@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFstHit.hh,v 2.5 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcFstHit.hh,v 2.6 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcFstHit.hh,v $
+ * Revision 2.6  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.5  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -53,6 +56,7 @@ public:
     
     unsigned long plane() const; //
     unsigned long module() const;  //  
+  virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:
     

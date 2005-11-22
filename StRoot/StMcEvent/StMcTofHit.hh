@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.hh,v 2.4 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTofHit.hh,v 2.5 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcTofHit.hh,v $
+ * Revision 2.5  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.4  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -43,6 +46,7 @@ public:
   void* operator new(size_t)     { return mPool.alloc(); }
   void  operator delete(void* p) { mPool.free(p); }
 #endif
+  virtual void Print(Option_t *option="") const; // *MENU* 
 private:
 #ifdef POOL
   static StMemoryPool mPool; 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcVertex.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 2.12  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.11  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -63,7 +66,7 @@ using std::find;
 #include "StMcTrack.hh"
 #include "tables/St_g2t_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StMcVertex.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $";
 
 ClassImp(StMcVertex);
 
@@ -116,7 +119,7 @@ int StMcVertex::operator!=(const StMcVertex& v) const
 ostream&  operator<<(ostream& os, const StMcVertex& v)
 {
     os << "Position      : " << Form("%8.3f%8.3f%8.3f",v.position().x(),v.position().y(),v.position().z()) << endl;
-    os << "Geant Volume  : " << v.geantVolume().c_str() << endl;
+    os << "Geant Volume  : " << v.geantVolume() << endl;
     os << "Time of Flight: " << v.tof() << endl;
     os << "Geant Process : " << v.geantProcess() << endl;
     Int_t nDaughters = v.numberOfDaughters();
@@ -135,7 +138,7 @@ void StMcVertex::setParent(StMcTrack* val) {  mParent = val; }
 
 void StMcVertex::addDaughter(StMcTrack* val) { mDaughters.push_back(val); }  
 
-void StMcVertex::setGeantVolume(string val) { mGeantVolume = val; } 
+void StMcVertex::setGeantVolume(const Char_t *val) { mGeantVolume = val; } 
 
 void StMcVertex::setTof(float val) { mTof = val; }
 
@@ -144,4 +147,17 @@ void StMcVertex::setGeantProcess(int val) { mGeantProcess = val; }
 void StMcVertex::removeDaughter(StMcTrack* trk) {
     StMcTrackIterator iter = find(mDaughters.begin(), mDaughters.end(), trk);
   if (iter != mDaughters.end()) mDaughters.erase(iter);
+}
+//________________________________________________________________________________
+void StMcVertex::Print(Option_t *option) const {
+  cout << "StMcVertex: pos:"  << Form("%8.3f%8.3f%8.3f",position().x(),position().y(),position().z())
+       << " Volume: " << geantVolume()
+       << " Time of Flight(ns): " << 1.e9*tof()
+       << " Process: " << geantProcess();
+  Int_t nDaughters = numberOfDaughters();
+  cout << " N.Daughters: " << nDaughters;
+  for (int j = 0; j < nDaughters; j++) {
+    cout << "\t" << daughter(j)->key();
+  }
+  cout << endl;
 }

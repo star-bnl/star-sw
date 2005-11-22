@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.23 2005/10/03 16:58:17 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.24 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.24  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.23  2005/10/03 16:58:17  calderon
  * Fixed bug in logic of printing 2nd vertex.
  *
@@ -140,8 +143,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.23 2005/10/03 16:58:17 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.23 2005/10/03 16:58:17 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.24 2005/11/22 21:44:51 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.24 2005/11/22 21:44:51 fisyak Exp $";
 ClassImp(StMcEvent);
 #if 0
 template<class T> void
@@ -580,11 +583,13 @@ void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
       if (nh) {								\
 	if (! all) {nh = 1;  gotOneHit = kTRUE;}			\
 	for (i = 0; i < nh; i++) {                                      \
-	    cout << *(name ## Coll->hits()[i]) << endl;                 \
-            if (! all) {                                                \
-               cout << "Parent Track of this hit" << endl;              \
-               cout << *(name ## Coll->hits()[i]->parentTrack()) << endl; \
-            }                                                           \
+	  if (! all) cout << *(name ## Coll->hits()[i]);		\
+	  else (name ## Coll->hits()[i])->Print();			\
+	  cout << endl;							\
+	  if (! all) {							\
+	    cout << "Parent Track of this hit" << endl;			\
+	    cout << *(name ## Coll->hits()[i]->parentTrack()) << endl;	\
+	  }								\
         }                                                               \
       }									\
     }
@@ -599,16 +604,42 @@ void StMcEvent::setFgtHitCollection(StMcFgtHitCollection* val)
 	      if (nh) {							\
 		  if (! all) {nh = 1;  gotOneHit = kTRUE;}		\
 		  for (i = 0; i < nh; i++) {                            \
-                      cout << *(name ## Coll->layer(k)->hits()[i]) << endl; \
-                      if (! all) {                                          \
-                         cout << "Parent Track of this hit" << endl;        \
-                         cout << *(name ## Coll->layer(k)->hits()[i]->parentTrack()) << endl;  \
-                      }                                                     \
-                  }                                                         \
+		    if (! all) cout << *(name ## Coll->layer(k)->hits()[i]); \
+		    else   (name ## Coll->layer(k)->hits()[i])->Print(); \
+		    cout << endl;					\
+		    if (! all) {					\
+		      cout << "Parent Track of this hit" << endl;	\
+		      cout << *(name ## Coll->layer(k)->hits()[i]->parentTrack()) << endl; \
+		    }							\
+                  }							\
 	      }								\
 	    }								\
 	  }								\
     }
+#define PrintHitCollectionW(Name,name,ladder,Ladders,wafer,Wafers)	\
+  PrintHeader(Name,name);						\
+  if ( name ## Coll &&  nhits) {					\
+    gotOneHit = kFALSE;							\
+    for (k=0; !gotOneHit && k<name ## Coll->numberOf ## Ladders(); k++) \
+      if (name ## Coll->ladder(k))					\
+	{								\
+	  for (l = 0; gotOneHit && k<name ## Coll->ladder(k)->numberOf ## Wafers(); l++) \
+	    { nh = name ## Coll->ladder(k)->wafer(l)->hits().size();	\
+	      if (nh) {							\
+		if (! all) {nh = 1;  gotOneHit = kTRUE;}		\
+		for (i = 0; i < nh; i++) {				\
+		  if (! all) cout << *(name ## Coll->ladder(k)->wafer(l)->hits()[i]); \
+		  else   (name ## Coll->ladder(k)->wafer(l)->hits()[i])->Print(); \
+		  cout << endl;						\
+		  if (! all) {						\
+		    cout << "Parent Track of this hit" << endl;		\
+		    cout << *(name ## Coll->ladder(k)->wafer(l)->hits()[i]->parentTrack()) << endl; \
+		  }							\
+		}							\
+	      }								\
+	    }								\
+	}								\
+  }
 
 //________________________________________________________________________________
 void StMcEvent::Print(Option_t *option) const {
@@ -638,19 +669,17 @@ void StMcEvent::Print(Option_t *option) const {
       else { // Option for printing "all" tracks.
 	  tracks()[0]->Print("desc");
 	  for (int i = 0; i < Ntracks; i++) {
-	      cout << "---------------------------------------------------------" << endl;
-	      cout << "StMcTrack # " << i << endl;
-	      cout << "---------------------------------------------------------" << endl;
-	      cout << *(tracks()[i])                             << endl;
-	      //tracks()[i]->Print("short");
+	    (tracks()[i])->particleDefinition();
+	    (tracks()[i])->Print("all");
 	  }
       }
   }
   cout << "---------------------------------------------------------" << endl;
-  cout << "StMcVertex" << endl;
-  cout << "Dumping vertex info and first daughter track.            " << endl;
-  cout << "---------------------------------------------------------" << endl;
-  if (primaryVertex()) {
+  if (! all) {
+    cout << "StMcVertex" << endl;
+    cout << "Dumping vertex info and first daughter track.            " << endl;
+    cout << "---------------------------------------------------------" << endl;
+    if (primaryVertex()) {
       cout << "Primary Vertex at " << primaryVertex() << endl;
       cout << "---------------------------------------------------------" << endl;
       cout << *primaryVertex() << endl;
@@ -658,32 +687,41 @@ void StMcEvent::Print(Option_t *option) const {
       cout << "First Daughter of Primary Vertex" << endl;
       cout << *(primaryVertex()->daughter(0)) << endl;
       cout << "---------------------------------------------------------" << endl;
+    }
+    else cout << "No Primary Vertex " << endl;
   }
-  else cout << "No Primary Vertex " << endl;
-
+  Int_t i1 = 0;
   Int_t nVertices = vertices().size();
   cout << "StSPtrVecMcVertex"                                         << endl;
   cout << "# of Vertices    : " << nVertices << endl;
   cout << "---------------------------------------------------------" << endl;
   if (nVertices > 1) {
+    if (! all) {
       cout << "Daughters of second Vertex : " << vertices()[1]->numberOfDaughters() << endl;
       if (vertices()[1]->numberOfDaughters()) {
-	  cout << "First Daughter of this Vertex" << endl;
-	  cout << *(vertices()[1]->daughter(0)) << endl;
+	cout << "First Daughter of this Vertex" << endl;
+	cout << *(vertices()[1]->daughter(0)) << endl;
       }
-      if (! all) nVertices = 2;
+      i1 = 1; 
+      nVertices = 2;
       cout << "---------------------------------------------------------" << endl;
       cout << "Dumping vertices" << endl;
-      for (int i = 1; i < nVertices; i++) {
-	  cout << "---------------------------------------------------------" << endl;
-	  cout << "StMcVertex " << i+1 << " at " << vertices()[i]  << endl;
-	  cout << "---------------------------------------------------------" << endl;
-	  cout << *(vertices()[i]) << endl;
-	  cout << "---------------------------------------------------------" << endl;	  
+    }
+    for (int i = i1; i < nVertices; i++) {
+      if (! all) {
+	cout << "---------------------------------------------------------" << endl;
+	cout << "StMcVertex " << i+1 << " at " << vertices()[i]  << endl;
+	cout << "---------------------------------------------------------" << endl;
+	cout << *(vertices()[i]) << endl;
+	cout << "---------------------------------------------------------" << endl;	  
       }
-  
+      else {
+	cout << "StMcVertex " << i+1 << " at ";
+	(vertices()[i])->Print();
+      }
+    }
   }
-  UInt_t       i, j, k,ii, nhits, nh;
+  UInt_t       i, j, k, l, ii, nhits, nh;
   Bool_t             gotOneHit;
   PrintHeader(Tpc,tpc)
   if (tpcColl && nhits) {
@@ -706,7 +744,7 @@ void StMcEvent::Print(Option_t *option) const {
 		      cout << endl;
 		  }
 		  else for (i = 0; i < nh; i++) {
-		      cout << *hits[i] << endl;
+		    hits[i]->Print(); cout << endl;
 		  }
 	      } // check for nh
 	      
@@ -730,16 +768,16 @@ void StMcEvent::Print(Option_t *option) const {
 		if (nh) {
 		    if (! all) {nh = 1;  gotOneHit = kTRUE;}
 		    for (ii = 0; ii < nh; ii++) {
-			cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[ii]) << endl;
 			if (! all) {
-			    cout << "Parent track of this Hit" << endl;
-			    cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[ii]->parentTrack()) << endl;
-			}
+			  cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[ii]) << endl;
+			  cout << "Parent track of this Hit" << endl;
+			  cout << *(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[ii]->parentTrack()) << endl;
+			} else {(svtColl->barrel(k)->ladder(j)->wafer(i)->hits()[ii])->Print(); cout << endl;}
 		    }
 		}
 	    }
   }
-  PrintHitCollectionL(Ssd,ssd,layer,Layers);
+  PrintHitCollectionW(Ssd,ssd,ladder,Ladders,wafer,Wafers);
   PrintHitCollection(Tof,tof);
   PrintHitCollectionL(Pixel,pixel,layer,Layers);
   PrintHitCollectionL(Ist,ist,layer,Layers);
@@ -752,7 +790,7 @@ void StMcEvent::Print(Option_t *option) const {
   TDataSet *ds = 0;
   while( (ds = next())) {
     StMcEmcHitCollection *emcColl = dynamic_cast<StMcEmcHitCollection *>(ds);
-    if (emcColl) emcColl->print();
+    if (emcColl) emcColl->Print(option);
   }
 }  
 #undef  PrintHitCollection
