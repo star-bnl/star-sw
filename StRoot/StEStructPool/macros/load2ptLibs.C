@@ -12,7 +12,8 @@ void load2ptLibs(){
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     gSystem->Load("StEventUtilities");
-    gSystem->Load("StMagF");
+    //gSystem->Load("StMagF");
+    gSystem->Load("StarMagField");
     gSystem->Load("StEmcUtil");
     gSystem->Load("StStrangeMuDstMaker");
     gSystem->Load("StMuDSTMaker");
