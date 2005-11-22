@@ -13,4 +13,5 @@
      long      id_strip;    /* Strip identifier  strip(              */
      long      adc_count;  /* ADC count */
      long      id_mchit[5];   /* EVALUATION: key to monte carlo hit  */
+     long      id_mctrack[5]; /* id of montecarlo track                  */
     };
