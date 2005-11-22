@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- * $Id: StMcSsdLayerHitCollection.hh,v 2.2 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSsdLadderHitCollection.hh,v 2.1 2005/11/22 21:44:52 fisyak Exp $
  *
  * Author: Fabrice Retiere/Kai Schweda, Aug 2003
  ***************************************************************************
  *
- * Description: Monte Carlo Ssd Layer Hit Collection class from Kai
+ * Description: Monte Carlo Ssd Ladder Hit Collection class from Kai
  *
  * The ssd detector hits are stored here.
  *
  ***************************************************************************
  *
- * $Log: StMcSsdLayerHitCollection.hh,v $
+ * $Log: StMcSsdLadderHitCollection.hh,v $
+ * Revision 2.1  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.2  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -26,27 +29,29 @@
  *
  *
  **************************************************************************/
-#ifndef StMcSsdLayerHitCollection_hh
-#define StMcSsdLayerHitCollection_hh
+#ifndef StMcSsdLadderHitCollection_hh
+#define StMcSsdLadderHitCollection_hh
 
 #include "StMcContainers.hh"
 #include "StObject.h"
 
-class StMcSsdHit;
+#include "StMcSsdWaferHitCollection.hh"
 
-class StMcSsdLayerHitCollection : public StObject
+class StMcSsdLadderHitCollection : public StObject
 {
 public:
-    StMcSsdLayerHitCollection();
-    virtual ~StMcSsdLayerHitCollection();
-    
+  StMcSsdLadderHitCollection() {}
+  virtual ~StMcSsdLadderHitCollection() {}
+
     unsigned long numberOfHits() const;
-
-    StSPtrVecMcSsdHit&       hits();
-    const StSPtrVecMcSsdHit& hits() const; 
-
+  unsigned int  numberOfWafers() const {return mMaxNumberOfWafers;}
+    
+    StMcSsdWaferHitCollection*       wafer(unsigned int);
+    const StMcSsdWaferHitCollection* wafer(unsigned int) const;
+    
 private:
-    StSPtrVecMcSsdHit mHits;
-    ClassDef(StMcSsdLayerHitCollection,1)
+    enum { mMaxNumberOfWafers = 16 };
+    StMcSsdWaferHitCollection  mWafers[mMaxNumberOfWafers];
+    ClassDef(StMcSsdLadderHitCollection,1)
 };
 #endif

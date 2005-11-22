@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.5 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcIstHit.cc,v 2.6 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.6  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.5  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -34,7 +37,7 @@
 #include "StMcIstHit.hh"
 #include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.5 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.6 2005/11/22 21:44:52 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
@@ -116,4 +119,10 @@ StMcIstHit::ladder() const
     }
   
   return iLadder;
+}
+//________________________________________________________________________________
+void StMcIstHit::Print(Option_t *option) const {
+  cout << "IstHit\t"; 
+  StMcHit::Print();
+  cout  << "\tLayer: " << layer();  
 }

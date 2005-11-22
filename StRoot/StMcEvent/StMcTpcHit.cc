@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.12  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.11  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -50,7 +53,7 @@
 #include "StMcTpcHit.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.11 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.12 2005/11/22 21:44:52 fisyak Exp $";
 
 #ifdef POOL
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
@@ -85,6 +88,11 @@ ostream&  operator<<(ostream& os, const StMcTpcHit& h)
     os << "PadRow   :" << h.padrow() << endl;
   return os;
 }
-
-
+//________________________________________________________________________________
+void StMcTpcHit::Print(Option_t *option) const {
+  cout << "TpcHit\t"; 
+  StMcHit::Print();
+  cout << "\tSector:" << sector()    
+       << " PadRow:" << padrow();
+}
 

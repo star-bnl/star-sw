@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHitCollection.hh,v 2.2 2005/01/27 23:40:48 calderon Exp $
+ * $Id: StMcSsdHitCollection.hh,v 2.3 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcSsdHitCollection.hh,v $
+ * Revision 2.3  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.2  2005/01/27 23:40:48  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -18,7 +21,7 @@
 #ifndef StMcSsdHitCollection_hh
 #define StMcSsdHitCollection_hh
 
-#include "StMcSsdLayerHitCollection.hh"
+#include "StMcSsdLadderHitCollection.hh"
 
 class StMcSsdHit;
 
@@ -30,13 +33,13 @@ public:
     
     bool addHit(StMcSsdHit*);
     unsigned long numberOfHits() const;
-    unsigned int  numberOfLayers() const;
+    unsigned int  numberOfLadders() const;
     
-    StMcSsdLayerHitCollection*       layer(unsigned int);
-    const StMcSsdLayerHitCollection* layer(unsigned int) const;
+    StMcSsdLadderHitCollection*       ladder(unsigned int);
+    const StMcSsdLadderHitCollection* ladder(unsigned int) const;
 private:
-    enum { mNumberOfLayers = 1 };
-    StMcSsdLayerHitCollection mLayers[mNumberOfLayers];
+    enum { mNumberOfLadders = 20 };
+    StMcSsdLadderHitCollection mLadders[mNumberOfLadders];
     ClassDef(StMcSsdHitCollection,1)
 };
 #endif

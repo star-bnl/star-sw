@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.hh,v 2.6 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcIstHit.hh,v 2.7 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcIstHit.hh,v $
+ * Revision 2.7  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.6  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -63,6 +66,7 @@ public:
     // and side() to return ladder side (1=inner,2=outer)
     unsigned long wafer() {return ((mVolumeId/10000)%20);}
     unsigned long side() {return (((mVolumeId%200)/100)+1);} //1=inner; 2=outer;
+    virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:
     

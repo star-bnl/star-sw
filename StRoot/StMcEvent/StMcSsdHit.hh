@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHit.hh,v 2.4 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcSsdHit.hh,v 2.5 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcSsdHit.hh,v $
+ * Revision 2.5  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.4  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -34,8 +37,6 @@
 class StMcTrack;
 class g2t_ssd_hit_st;
 
-#if !defined(ST_NO_NAMESPACES)
-#endif
 
 class StMcSsdHit : public StMcHit {
 public:
@@ -49,8 +50,9 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 #endif
-    unsigned long layer() const;  // 1 SSD layer
-    unsigned long ladder() const; // 1-20 ladders
+  unsigned long ladder() const {return  mVolumeId%100;     }
+  unsigned long wafer()  const {return ((mVolumeId-7000)/100)%100;}
+  virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:
 #ifdef POOL

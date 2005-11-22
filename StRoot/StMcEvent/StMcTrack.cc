@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.22 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.23 2005/11/22 21:44:52 fisyak Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.23  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.22  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -50,8 +53,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.22 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.23 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.23  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.22  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -156,7 +162,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.22 2005/09/28 21:30:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.23 2005/11/22 21:44:52 fisyak Exp $";
 
 ClassImp(StMcTrack);
 
@@ -179,7 +185,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mKey     = trk->id;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
     mEventGenLabel = trk->eg_label;
-
+    mIsPrimary = kFALSE;
     // The information to fill the collections 
     // is not available directly from the tables.  
     // We need to decode from trk->hit_tpc_p, 
@@ -195,6 +201,7 @@ StMcTrack::StMcTrack(particle_st* trk) {
     mFourMomentum.setE(trk->phep[3]);
     mParticleDefinition = StParticleTable::instance()->findParticle(trk->idhep);
     mPdgId = trk->idhep;
+    mIsPrimary = kFALSE;
     // This constructor is used for particles coming from the
     // particle table.
 }
@@ -330,13 +337,17 @@ void StMcTrack::Print(Option_t *option) const {
   }
   TString Name("        ");
   if (particleDefinition()) Name = particleDefinition()->name().c_str();
+  Double_t eta = pseudoRapidity();
+  if (TMath::Abs(eta) > 999.999) eta = TMath::Sign(999.999, eta);
+  Double_t y = rapidity();
+  if (TMath::Abs(y) > 999.999) y = TMath::Sign(999.999, y);
     cout << 
       Form("%8s%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%8.3f%3i%6i%3i%3i%6i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i%3i",
 	   Name.Data(),
 	   fourMomentum().x(), fourMomentum().y(), fourMomentum().z(), fourMomentum().t(), 
 	   pt(),
-	   rapidity(),
-	   pseudoRapidity(),
+	   y,
+	   eta,
 	   geantId(),
 	   pdgId(),
 	   eventGenLabel(),

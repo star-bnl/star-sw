@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.11 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcSvtHit.hh,v 2.12 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.12  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.11  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -81,7 +84,7 @@ public:
     unsigned long wafer() const;      // wafer=[1-7] with SSD [1-16]
     unsigned long barrel() const;     // barrel=[1-3] with SSD [1-4]
     unsigned long hybrid() const;
-
+  virtual void Print(Option_t *option="") const; // *MENU* 
 protected:
 #ifdef POOL
     static StMemoryPool mPool;  

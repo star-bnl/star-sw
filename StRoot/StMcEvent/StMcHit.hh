@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.hh,v 2.9 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcHit.hh,v 2.10 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcHit.hh,v $
+ * Revision 2.10  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.9  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -91,6 +94,7 @@ public:
     virtual void setKey(long);
     virtual void setVolumeId(long);
     virtual void setParentTrack(StMcTrack*);
+    virtual void Print(Option_t *option="") const; // *MENU* 
     
 protected:
     StThreeVectorF       mPosition;

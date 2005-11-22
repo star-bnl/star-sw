@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTofHit.cc,v 2.5 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcTofHit.cc,v 2.6 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcTofHit.cc,v $
+ * Revision 2.6  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.5  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -23,7 +26,7 @@
  ***************************************************************************/
 #include "StMcTofHit.hh"
 #include "tables/St_g2t_ctf_hit_Table.h"
-static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.5 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTofHit.cc,v 2.6 2005/11/22 21:44:52 fisyak Exp $";
 #ifdef POOL
 StMemoryPool StMcTofHit::mPool(sizeof(StMcTofHit));
 #endif
@@ -57,4 +60,11 @@ ostream&  operator<<(ostream& os, const StMcTofHit& h) {
     os << "T. of Flight    : " << h.tof() << endl;
     os << "path length     : " << h.sTrack() << endl;
   return os;
+}
+//________________________________________________________________________________
+void StMcTofHit::Print(Option_t *option) const {
+  cout << "TofHit\t";
+  StMcHit::Print();
+  cout << "\tT. of Flight: " << tof()
+       << " path length: " << sTrack();
 }

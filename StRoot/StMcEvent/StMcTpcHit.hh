@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.10 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcTpcHit.hh,v 2.11 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.11  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.10  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -81,6 +84,8 @@ public:
 
     unsigned long isDet()      const {return mVolumeId/100000;}
     float         lgamma()     const {return mLgamma;}
+    virtual void Print(Option_t *option="") const; // *MENU* 
+  
 private:
 #ifdef POOL
     static StMemoryPool         mPool; 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.13 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.14 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.14  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.13  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -63,7 +66,7 @@
 #include "StMcFtpcHit.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.13 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.14 2005/11/22 21:44:51 fisyak Exp $";
 
 ClassImp(StMcFtpcHit);
 #ifdef POOL
@@ -117,4 +120,11 @@ StMcFtpcHit::sector() const
     //volume_id = 1??1 to 1??6 are the sectors in the first FTPC (1-6 in StEvent)
     //volume_id = 2??1 to 2??6 are the sectors in the second FTPC (1-6 in StEvent)
     return mVolumeId%10;
+}
+//________________________________________________________________________________
+void StMcFtpcHit::Print(Option_t *option) const {
+  cout << "FtpcHit\t"; 
+  StMcHit::Print();
+  cout << "\tPlane:"   << plane()
+       << " Sector:"  << sector();
 }

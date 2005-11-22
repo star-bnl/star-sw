@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.7 2005/09/28 21:30:14 fisyak Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.8 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.8  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.7  2005/09/28 21:30:14  fisyak
  * Persistent StMcEvent
  *
@@ -62,6 +65,8 @@ class StMcEmcHitCollection : public TDataSet {
   virtual Bool_t IsFolder() const {return kTRUE;} // It is a directory for modules 
   virtual void Browse(TBrowser *b);
   void    print();
+  virtual void Print(Option_t *option="") const; // *MENU* 
+  
  protected:
   void MakeHitCollection();
  private:

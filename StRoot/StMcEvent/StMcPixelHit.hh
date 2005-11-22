@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.hh,v 2.5 2005/09/28 21:30:15 fisyak Exp $
+ * $Id: StMcPixelHit.hh,v 2.6 2005/11/22 21:44:52 fisyak Exp $
  * $Log: StMcPixelHit.hh,v $
+ * Revision 2.6  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.5  2005/09/28 21:30:15  fisyak
  * Persistent StMcEvent
  *
@@ -49,6 +52,7 @@ public:
 
     unsigned long layer() const; // 1-2
     unsigned long ladder() const; // 1-6, 1-18
+  virtual void Print(Option_t *option="") const; // *MENU* 
     
 private:
 

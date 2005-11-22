@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFgtHit.cc,v 2.3 2005/09/29 01:01:10 calderon Exp $
+ * $Id: StMcFgtHit.cc,v 2.4 2005/11/22 21:44:51 fisyak Exp $
  * $Log: StMcFgtHit.cc,v $
+ * Revision 2.4  2005/11/22 21:44:51  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.3  2005/09/29 01:01:10  calderon
  * Fixed bugs in printing event and hit information.
  * Format operator<< for various classes.
@@ -20,7 +23,7 @@
 #include "StMcFgtHit.hh"
 #include "tables/St_g2t_fgt_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.3 2005/09/29 01:01:10 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFgtHit.cc,v 2.4 2005/11/22 21:44:51 fisyak Exp $";
 
 ClassImp(StMcFgtHit)
 
@@ -72,4 +75,10 @@ StMcFgtHit::ladder() const
   unsigned long iLadder = 1;
   
   return iLadder;
+}
+//________________________________________________________________________________
+void StMcFgtHit::Print(Option_t *option) const {
+  cout << "FgtHit\t"; 
+  StMcHit::Print();
+  cout  << "\tLayer: " << layer();  
 }

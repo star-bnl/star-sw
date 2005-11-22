@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSsdHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $
+ * $Id: StMcSsdHitCollection.cc,v 2.3 2005/11/22 21:44:52 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSsdHitCollection.cc,v $
+ * Revision 2.3  2005/11/22 21:44:52  fisyak
+ * Add compress Print for McEvent, add Ssd collections
+ *
  * Revision 2.2  2005/01/27 23:40:47  calderon
  * Adding persistency to StMcEvent as a step for Virtual MonteCarlo.
  *
@@ -32,7 +35,7 @@
 #include "StMcSsdHitCollection.hh"
 #include "StMcSsdHit.hh"
 
-static const char rcsid[] = "$Id: StMcSsdHitCollection.cc,v 2.2 2005/01/27 23:40:47 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSsdHitCollection.cc,v 2.3 2005/11/22 21:44:52 fisyak Exp $";
 
 ClassImp(StMcSsdHitCollection)
 
@@ -43,9 +46,11 @@ StMcSsdHitCollection::~StMcSsdHitCollection() { /* noop */ }
 bool
 StMcSsdHitCollection::addHit(StMcSsdHit* hit)
 {
-    unsigned int p;
-    if (hit && (p = hit->layer()-1) < mNumberOfLayers) {
-      mLayers[p].hits().push_back(hit);
+  unsigned int p, w;
+    if (hit && 
+	(p = hit->ladder()-1) < mNumberOfLadders && 
+	(w = hit->wafer()-1) < ladder(p)->numberOfWafers()) {
+      ladder(p)->wafer(w)->hits().push_back(hit);
       return true;
     }
     else
@@ -53,32 +58,32 @@ StMcSsdHitCollection::addHit(StMcSsdHit* hit)
 }
 
 unsigned int
-StMcSsdHitCollection::numberOfLayers() const { return mNumberOfLayers; }
+StMcSsdHitCollection::numberOfLadders() const { return mNumberOfLadders; }
 
 unsigned long
 StMcSsdHitCollection::numberOfHits() const
 {
     unsigned long sum = 0;
-    for (int i=0; i<mNumberOfLayers; i++)
-      sum += mLayers[i].numberOfHits();
+    for (int i=0; i<mNumberOfLadders; i++)
+      sum += mLadders[i].numberOfHits();
 
     return sum;
 }
 
-StMcSsdLayerHitCollection*
-StMcSsdHitCollection::layer(unsigned int i)
+StMcSsdLadderHitCollection*
+StMcSsdHitCollection::ladder(unsigned int i)
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfLadders)
+        return &(mLadders[i]);
     else
         return 0;
 }
 
-const StMcSsdLayerHitCollection*
-StMcSsdHitCollection::layer(unsigned int i) const
+const StMcSsdLadderHitCollection*
+StMcSsdHitCollection::ladder(unsigned int i) const
 {
-    if (i < mNumberOfLayers)
-        return &(mLayers[i]);
+    if (i < mNumberOfLadders)
+        return &(mLadders[i]);
     else
         return 0;
 }
