@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.cc,v 1.4 2005/11/22 03:57:05 bouchet Exp $
+// $Id: StScmBarrel.cc,v 1.5 2005/11/22 17:39:06 bouchet Exp $
 //
 // $Log: StScmBarrel.cc,v $
+// Revision 1.5  2005/11/22 17:39:06  bouchet
+// set quality = 100 for the IdTruth
+//
 // Revision 1.4  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -410,7 +413,7 @@ int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	   q =  pSpt->getDe(0);
 	   
 	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
-	   currentSsdHit->setIdTruth(spt.id_mctrack[0]);// need to check first = most probable!
+	   currentSsdHit->setIdTruth(spt.id_mctrack[0],100);// need to check first = most probable!
 	   //cout <<"***in StScmBarrel  test --> IdTruth =" <<currentSsdHit->getIdTruth()<< endl;
 	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
 	   
