@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTrackPairInfo.cc,v 1.5 1999/12/14 07:07:41 calderon Exp $
+ * $Id: StTrackPairInfo.cc,v 1.6 2005/11/22 21:44:16 fisyak Exp $
  * $Log: StTrackPairInfo.cc,v $
+ * Revision 1.6  2005/11/22 21:44:16  fisyak
+ * Add Ssd to Associator, add IdTruth options for Svt and Ssd
+ *
  * Revision 1.5  1999/12/14 07:07:41  calderon
  * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
  * each detector.
@@ -27,19 +30,20 @@
 #include "StMcTrack.hh"
 #include "StGlobalTrack.h"
 #include "StTrackDetectorInfo.h"
-
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.5 1999/12/14 07:07:41 calderon Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.6 2005/11/22 21:44:16 fisyak Exp $";
 
 StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
 				 StMcTrack*     mcTrk,
 				 unsigned int tpcPings,
 				 unsigned int svtPings,
+				 unsigned int ssdPings,
 				 unsigned int ftpcPings)
     :
     mPartnerTrack(rcTrk),
     mPartnerMcTrack(mcTrk),
     mCommonTpcHits(tpcPings),
     mCommonSvtHits(svtPings),
+    mCommonSsdHits(ssdPings),
     mCommonFtpcHits(ftpcPings)
 {
     // Percent of Svt Hits
@@ -47,11 +51,16 @@ StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
     mRatioCommonToTotalHitsSvt  =
 	(numPoints) ? static_cast<float>(mCommonSvtHits)/static_cast<float>(numPoints) : 0;
 
+    // Percent of Ssd Hits
+    numPoints = rcTrk->detectorInfo()->numberOfPoints(kSsdId);
+    mRatioCommonToTotalHitsSsd  =
+	(numPoints) ? static_cast<float>(mCommonSsdHits)/static_cast<float>(numPoints) : 0;
+
     // Percent of Tpc Hits
     numPoints = rcTrk->detectorInfo()->numberOfPoints(kTpcId);
     mRatioCommonToTotalHitsTpc  =
 	(numPoints) ? static_cast<float>(mCommonTpcHits)/static_cast<float>(numPoints) : 0;
-
+    mRatioCommonToTotalHitsFtpc = 0;
     if (!numPoints) {
 	// Percent of Ftpc West Hits in common
 	numPoints = rcTrk->detectorInfo()->numberOfPoints(kFtpcWestId);
@@ -76,6 +85,15 @@ void StTrackPairInfo::setPartnerTrack(StGlobalTrack* val) { mPartnerTrack = val;
 void StTrackPairInfo::setCommonTpcHits(unsigned int val) { mCommonTpcHits = val; }
 
 void StTrackPairInfo::setCommonSvtHits(unsigned int val) { mCommonSvtHits = val; }
+void StTrackPairInfo::setCommonSsdHits(unsigned int val) { mCommonSsdHits = val; }
 
 void StTrackPairInfo::setCommonFtpcHits(unsigned int val) { mCommonFtpcHits = val; }
 
+ostream&  operator<<(ostream& os, const StTrackPairInfo& v) {
+  return os << "Mc: " << v.partnerMcTrack() << " Rc: " << v.partnerTrack() 
+	    << " Common Hits in Tpc :" << v.commonTpcHits() << "/" << v.percentOfPairedTpcHits()
+	    << "  Svt :" << v.commonSvtHits() << "/" << v.percentOfPairedSvtHits()
+	    << "  Ssd :" << v.commonSsdHits() << "/" << v.percentOfPairedSsdHits()
+	    << "  Ftpc :" << v.commonFtpcHits() << "/" << v.percentOfPairedFtpcHits()
+	    << endl;
+}
