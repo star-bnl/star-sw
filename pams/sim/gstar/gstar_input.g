@@ -1,6 +1,12 @@
-* $Id: gstar_input.g,v 1.42 2005/11/10 20:13:50 potekhin Exp $
+* $Id: gstar_input.g,v 1.43 2005/11/23 20:44:16 potekhin Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.43  2005/11/23 20:44:16  potekhin
+* Following the changed packaging of data on the Herwig side
+* (changes checked in today), we correspondingly modify the
+* data transfer bit in the ntuple rading code, in order to comply.
+* Look for BJOR1 etc.
+*
 * Revision 1.42  2005/11/10 20:13:50  potekhin
 * Modified handling of the event header data,
 * harvesting more info from the herwig ntuple. Incompatible
@@ -428,14 +434,28 @@ c ---- Column-Wise-Ntuples ----
 	     Fill /EVNT/PASS/PYTH    ! Pythia and Herwig
         	Version=1            ! version
 	        SUBPR = Moth(2)      ! Herwig subprocess ID
-	        MANDS = Vxyz(1)      ! Mandelstam s of the hard subprocess
-	        MANDT = Vxyz(2)      ! Mandelstam t of the hard subprocess
-	        MANDU = 0            ! Mandelstam u of the hard subprocess
-	        HARDP = Vxyz(3)      ! pT of the hard  subprocess in partonic CM frame
-	        COSTH = Pxyz(3)      ! COS theta of hard subprocess in partonic CM frame
-	        BJOR1 = Pxyz(1)      ! Bjorken x of 1st parton in after initial radiation
-	        BJOR2 = Pxyz(2)      ! Bjorken x of 2nd particle after inital radiation
+*
+	        MANDS = Pxyz(1)      ! Mandelstam s of the hard subprocess
+	        MANDT = Pxyz(2)      ! Mandelstam t of the hard subprocess
+	        MANDU = Pxyz(3)      ! Mandelstam u of the hard subprocess
+*
+	        HARDP = Ener         ! pT of the hard  subprocess in partonic CM frame
+	        COSTH = Vxyz(3)      ! COS theta of hard subprocess in partonic CM frame
+	        BJOR1 = Vxyz(1)      ! Bjorken x of 1st parton in after initial radiation
+	        BJOR2 = Vxyz(2)      ! Bjorken x of 2nd particle after inital radiation
+
+* The version prior to Thanksgiving 2005:
+*	        SUBPR = Moth(2)      ! Herwig subprocess ID
+*	        MANDS = Vxyz(1)      ! Mandelstam s of the hard subprocess
+*	        MANDT = Vxyz(2)      ! Mandelstam t of the hard subprocess
+*	        MANDU = 0            ! Mandelstam u of the hard subprocess
+*	        HARDP = Vxyz(3)      ! pT of the hard  subprocess in partonic CM frame
+*	        COSTH = Pxyz(3)      ! COS theta of hard subprocess in partonic CM frame
+*	        BJOR1 = Pxyz(1)      ! Bjorken x of 1st parton in after initial radiation
+*	        BJOR2 = Pxyz(2)      ! Bjorken x of 2nd particle after inital radiation
+
 	     endfill
+	print *, Pxyz(1),Pxyz(2), Pxyz(3), Ener, Vxyz(1), Vxyz(2), Vxyz(3)
         }
         elseif ipdg.le.999994 {
              print *,' Yet unknown HEP header ', ipdg
