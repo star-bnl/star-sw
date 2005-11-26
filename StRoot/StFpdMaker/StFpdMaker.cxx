@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdMaker.cxx,v 1.3 2003/07/18 18:31:47 perev Exp $
+ * $Id: StFpdMaker.cxx,v 1.4 2005/11/26 01:27:00 perev Exp $
  *
  * Author: AKIO OGAWA
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFpdMaker.cxx,v $
+ * Revision 1.4  2005/11/26 01:27:00  perev
+ * created StEvent added to data. LeakOff
+ *
  * Revision 1.3  2003/07/18 18:31:47  perev
  * test for nonexistance of XXXReader added
  *
@@ -64,6 +67,7 @@ Int_t StFpdMaker::Make(){
     //create own StEvent
     cout << "StFpdMaker found no StEvent... Create local StEvent" << endl;
     mEvent = new StEvent;
+    AddData(mEvent);
   }
   //check fpdCollection in StEvent.
   //If not there, create it and set 
