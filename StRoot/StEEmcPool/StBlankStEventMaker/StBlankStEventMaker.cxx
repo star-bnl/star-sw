@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBlankStEventMaker.cxx,v 1.1 2004/06/06 18:28:13 balewski Exp $
+ * $Id: StBlankStEventMaker.cxx,v 1.2 2005/11/26 02:27:40 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StBlankStEventMaker.h"
@@ -24,23 +24,25 @@ StBlankStEventMaker::StBlankStEventMaker(const char* name) : StMaker(name) {
 }
 
 StBlankStEventMaker::~StBlankStEventMaker() { 
-    delete mStEvent;
+    
     /* no=op */
 }
     
  
 void StBlankStEventMaker::Clear(const char*) {
-    if ( mStEvent ) {
-	delete mStEvent;
-	mStEvent = 0;
-    }
+    mStEvent = 0;
+    StMaker::Clear();
 }
 
 int StBlankStEventMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
   static int run =3010006;
   run++;
-  mStEvent = new StEvent();
-  
+
+  mStEvent = (StEvent*)GetDataSet("StEvent");
+  if (!mStEvent) {
+    mStEvent = new StEvent();
+    AddData(mStEvent);     // add StEvent to the .data tree
+  }
   StEventInfo* info = new StEventInfo();
   mStEvent->setInfo( info );
   
@@ -56,7 +58,6 @@ int StBlankStEventMaker::Make(){  ///< create a StEvent from the muDst and put i
   if(!hd) { hd = new StEvtHddr();  AddData(hd); }
   hd->SetGMTime(mStEvent->time());
   hd->SetRunNumber(run);
-  AddData(mStEvent);     // add StEvent to the .data tree
  
   // now CREATE the EMC stuff and put it in the StEvent
   StEmcCollection *emc=new StEmcCollection();
