@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.8 2002/11/26 21:22:03 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.9 2005/11/26 02:10:52 perev Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.9  2005/11/26 02:10:52  perev
+ * Standard StEvent handling
+ *
  * Revision 1.8  2002/11/26 21:22:03  jml
  * pad width --> 11 for inner sector
  *
@@ -197,19 +200,10 @@ Int_t StDaqClfMaker::Make()
 {
   PrintInfo();
 
-  // Hack for now untill ittf is in more complete shape...
-  if(mCreate_stevent)
-  {
-    
-    if(mStEvent != NULL)
-    {
-      delete mStEvent;
-      mStEvent = NULL;
-    }
-
-    St_DataSetIter ods(m_DataSet);
+  mStEvent = (StEvent*)GetDataSet("StEvent");
+  if (!mStEvent) {
     mStEvent = new StEvent();
-    ods.Add(mStEvent);
+    AddData(mStEvent);
   }
 
   St_DataSet *rawData;
