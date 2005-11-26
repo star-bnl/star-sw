@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.14 2004/12/13 16:38:38 jeromel Exp $
+ * $Id: TMemStat.cxx,v 1.15 2005/11/26 01:01:00 perev Exp $
  *
  ***************************************************************************
  *
@@ -138,8 +138,31 @@ Double_t TMemStat::Free()
 //______________________________________________________________________________
 Double_t TMemStat::ProgSize()
 {
-  static char *ps = 0;
   Double_t    res=0;
+  int pid = ::getpid();
+  char line[100];
+  sprintf(line,"/proc/%d/status",pid);
+
+FILE *proc = fopen(line,"r");
+  if (proc) {//status file found
+    while (fgets(line,100,proc)) {
+      if (strncmp("VmSize:",line,7)==0) {
+	fclose(proc); 
+	char *aft=0;
+	res = (strtod(line+7,&aft));  
+	while ((++aft)[0]==' '){}
+	int b = 0;
+	if (strncmp("kB",aft,2)==0) b = 1024;
+	if (strncmp("mB",aft,2)==0) b = 1024*1024;
+	if (strncmp("gB",aft,2)==0) b = 1024*1024*1024;
+	res = (res*b)/(1024*1024);
+	return res;
+      }
+    }
+    fclose(proc);
+  }
+//    status file not found. Use ugly way via "ps"
+  static char *ps = 0;
   if (!ps) {
     int pid = ::getpid();
     ps = (char*)malloc(25);
