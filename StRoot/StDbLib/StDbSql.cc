@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.27 2005/11/07 14:45:44 deph Exp $
+ * $Id: StDbSql.cc,v 1.28 2005/11/28 19:09:55 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.28  2005/11/28 19:09:55  deph
+ * small bug fix for a rare condition.
+ *
  * Revision 1.27  2005/11/07 14:45:44  deph
  * Changed the SQL operator IN to one of the following: = if row =1 ; between if block of element IDs are contiguous; or IN if they are not
  *
@@ -1500,7 +1503,7 @@ StDbSql::checkTablePrepForQuery(StDbTable* table, bool checkIndexed){
   if(mretString){ 
      delete [] mretString; 
      mretString=new char[256];
-  }
+  }else{mretString=new char[256];}
 
   if(!QueryDescriptor(table))
      return strcpy(mretString," doesn't have a descriptor ");
