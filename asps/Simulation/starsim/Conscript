@@ -1,9 +1,12 @@
 #!/opt/star/bin/perl
 #use Env;
 ############################################################
-# $Id: Conscript,v 1.14 2005/09/12 14:40:34 fisyak Exp $
+# $Id: Conscript,v 1.15 2005/11/30 16:20:07 fisyak Exp $
 #
 # $Log: Conscript,v $
+# Revision 1.15  2005/11/30 16:20:07  fisyak
+# adjust for icc
+#
 # Revision 1.14  2005/09/12 14:40:34  fisyak
 # add missing ';'
 #
@@ -144,6 +147,7 @@ if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc' ) {
     if ( $LD eq 'gcc' or $LD eq 'g++' ) {$LIBS .= " " . $env->{LIBSTDC};}
   }
 }
+#if ($LD eq 'icc' ) {$LIBS .= " -lcprts";}
 $LIBS .= $env->{LDNONE};
 $LIBS .= " -lgeant321";
 $LIBS .= " -lgcalor";
