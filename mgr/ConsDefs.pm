@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.88 2005/10/26 21:41:29 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.89 2005/11/30 16:10:30 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -262,11 +262,16 @@
 	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; rm  /tmp/icc_version;`;
         $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; rm  /tmp/icc_version;`;
 	chomp($ICC_MAJOR); chomp($ICC_MINOR);
-#	$LIBFRTBEGIN   = `gcc -print-file-name=libfrtbegin.a | awk '{ if (\$1 != "libfrtbegin.a") print \$1}'`;
-#	chomp($LIBFRTBEGIN);
+	$LIBFRTBEGIN   = `gcc -print-file-name=libfrtbegin.a | awk '{ if (\$1 != "libfrtbegin.a") print \$1}'`;
+	chomp($LIBFRTBEGIN);
 	$NOOPT         = "-O0";
-	$LIBFRTBEGIN = "";
-	if ($ICC_MAJOR eq '8') {
+#	$LIBFRTBEGIN = `gcc -print-file-name=libfrtbegin.a | sed 's|/|-L/|`;
+	$CXXFLAGS      .= " -wd1476";
+	if ($ICC_MAJOR eq 8 and $ICC_MINOR ne 0 or $ICC_MAJOR eq 9) {
+	  $CXXFLAGS     .= " -wd1572";
+	  $CFLAGS       .= " -wd1572";
+	}
+	if ($ICC_MAJOR ge '8') {
 	  $FC            = "ifort";
 	  $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
 	  $F77LIBS       =  $LIBFRTBEGIN ." -L". $LIBIFCPATH ." -lifcore ";# . $LIBG2C;
@@ -285,7 +290,7 @@
 	$SYSLIBS       = "-lm -ldl";# -rdynamic";
 	$CLIBS         = "-lm -ldl";# -rdynamic";
 	$CRYPTLIBS     = "-lcrypt";
-	$LD            = $CXX;
+	$LD            = "icpc";
 	$LDFLAGS       = "";#--no-warn-mismatch";
 	$F77LD         = $LD;
 	$SO            = $CXX;
