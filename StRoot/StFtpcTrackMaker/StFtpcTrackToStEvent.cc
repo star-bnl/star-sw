@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.12 2005/10/27 19:56:39 fisyak Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.13 2005/12/01 23:28:43 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -98,7 +98,9 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
   
   int fillTrackCount1=0;
   int fillTrackCount2=0;
-  
+
+  int currentTrackKey = GetHighestTrackKey(trNodeVec);
+
   for (Int_t trackIt = 0; trackIt < mTrackStore->GetEntriesFast();++trackIt) {
     
     StFtpcTrack* kTrack = (StFtpcTrack*)mTrackStore->At(trackIt);
@@ -115,7 +117,7 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
       // filling successful, set up relationships between objects
       detInfoVec.push_back(detInfo);
       gTrack->setDetectorInfo(detInfo);	
-      gTrack->setKey((unsigned short)(trNodeVec.size()));
+      gTrack->setKey((unsigned short)(++currentTrackKey));
       trackNode->addTrack(gTrack);
       trNodeVec.push_back(trackNode);
       FillTopologyMap(gTrack, kTrack);
@@ -490,4 +492,26 @@ void StFtpcTrackToStEvent::FillTopologyMap(StTrack *gTrack, StFtpcTrack* ftpcTra
   gTrack->setTopologyMap(newmap);
   
   return;
+}
+
+
+int StFtpcTrackToStEvent::GetHighestTrackKey(StSPtrVecTrackNode& trNodeVec) {
+  // get the highest used track key
+  // This was necessary to introduce since the highest track key is not
+  // allways the same as the size of the StSPtrVecTrackNode (tpt leaves holes
+  // in there).
+
+  StTrack *globTrack;
+  Int_t highestKey = 0;
+  Int_t currentKey = 0;
+
+  for (unsigned int j = 0; j < trNodeVec.size(); j++) {
+    globTrack = trNodeVec[j]->track(global);
+      if (globTrack==0) continue;
+
+      currentKey = globTrack->key();
+      if (currentKey > highestKey) highestKey = currentKey;
+  }
+      
+  return highestKey;
 }
