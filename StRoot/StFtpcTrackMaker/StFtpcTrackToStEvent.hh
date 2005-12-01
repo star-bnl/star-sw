@@ -1,7 +1,7 @@
 //StFtpcTrackToStEvent.h
 /*******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.hh,v 1.5 2005/07/06 19:40:07 fisyak Exp $
+ * $Id: StFtpcTrackToStEvent.hh,v 1.6 2005/12/01 23:28:43 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -18,6 +18,7 @@ using std::map;
 #include "TObjArray.h"
 
 class StEvent;
+class StSPtrVecTrackNode;
 class StTrackNode;
 class StTrackDetectorInfo;
 class StTrack;
@@ -51,6 +52,7 @@ public:
   void FillTopologyMap(StTrack* track, StFtpcTrack* kTrack);
   unsigned short EncodedStEventFitPoints(StFtpcTrack* kTrack); 
   float ImpactParameter(StFtpcTrack* kTrack);
+  int GetHighestTrackKey(StSPtrVecTrackNode& trNodeVec);
 
 private:
   StEvent* mEvent;
