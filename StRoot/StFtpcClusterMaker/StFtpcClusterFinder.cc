@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.68 2005/07/12 15:18:01 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.69 2005/12/02 09:03:10 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.69  2005/12/02 09:03:10  jcs
+// Delete pradius,pdeflection before error exits to avoid memory leaks
+//
 // Revision 1.68  2005/07/12 15:18:01  jcs
 // save raw (not corrected) timeposition
 //
@@ -369,6 +372,8 @@ int StFtpcClusterFinder::search()
   if(pradius == 0 || pdeflection == 0)
     {
       gMessMgr->Message("", "E", "OS") << "Padtrans memory allocation failed, exiting!" << endm;
+      if (pradius != 0) delete[] pradius;        // release the pradius array
+      if (pdeflection != 0) delete[] pdeflection;   // release the pdeflection array
       return 0;
     }
 
@@ -395,6 +400,8 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   if(!calcpadtrans(pradius, pdeflection,deltaAirPressure))
     {
       gMessMgr->Message("", "E", "OS") << "Couldn't calculate padtrans table, exiting!" << endm;
+      delete[] pradius;        // release the pradius array
+      delete[] pdeflection;   // release the pdeflection array
       return 0;
     }
 
@@ -402,6 +409,8 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   if(!cucInit(CUCMemory, CUCMemoryArray, &CUCMemoryPtr))
     {
       gMessMgr->Message("", "E", "OS") << "Couldn't initialize CUC memory, exiting!" << endm;
+      delete[] pradius;        // release the pradius array
+      delete[] pdeflection;   // release the pdeflection array
       return 0;
     }
 
@@ -518,6 +527,8 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 				  &CUCMemoryPtr, DeleteCUC))
 			{
 			  gMessMgr->Message("", "E", "OS") << "Fatal memory management error."  << endm;
+                          delete[] pradius;        // release the pradius array
+                          delete[] pdeflection;   // release the pdeflection array
 			  return 0;
 			}
 		    }
@@ -722,7 +733,9 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 				  printf("Previous cluster is now lost.\n");
 #endif
 				  CurrentCUC=LastCUC;
-				  return 0;
+                                  delete[] pradius;        // release the pradius array
+                                  delete[] pdeflection;   // release the pdeflection array
+                                  return 0;
 				}
 			      else
 				{
@@ -848,6 +861,8 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 			  &CUCMemoryPtr, DeleteCUC))
 		{
 		  gMessMgr->Message("", "E", "OS") << "Fatal memory management error." << endm;
+                  delete[] pradius;        // release the pradius array
+                  delete[] pdeflection;   // release the pdeflection array
 		  return 0;
 		}
 	      LastCUC=CurrentCUC;
