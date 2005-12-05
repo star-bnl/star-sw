@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.11 2005/11/22 03:57:05 bouchet Exp $
+ * $Id: St_scm_Maker.cxx,v 1.12 2005/12/05 23:33:43 fisyak Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.12  2005/12/05 23:33:43  fisyak
+ * Fix bug 612, unnecessary request for StTpcHitCollection
+ *
  * Revision 1.11  2005/11/22 03:57:05  bouchet
  * id_mctrack is using for setIdTruth
  *
@@ -137,11 +140,11 @@ Int_t St_scm_Maker::Make()
 
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt);
-  
+#if 0  
   mCurrentEvent_tpc = (StEvent*) GetInputDS("StEvent");
   mTpcHitColl = mCurrentEvent_tpc->tpcHitCollection();
   cout<<"####   -> "<<mTpcHitColl->numberOfHits()<<" HITS WRITTEN INTO TPC   ####"<<endl;
-   
+#endif   
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if(mCurrentEvent) 
     {

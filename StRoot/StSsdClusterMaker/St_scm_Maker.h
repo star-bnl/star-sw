@@ -1,6 +1,9 @@
-// $Id: St_scm_Maker.h,v 1.13 2005/11/22 03:57:05 bouchet Exp $
+// $Id: St_scm_Maker.h,v 1.14 2005/12/05 23:33:43 fisyak Exp $
 //
 // $Log: St_scm_Maker.h,v $
+// Revision 1.14  2005/12/05 23:33:43  fisyak
+// Fix bug 612, unnecessary request for StTpcHitCollection
+//
 // Revision 1.13  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -76,10 +79,10 @@ class St_scm_Maker : public StMaker {
 
   StEvent                *mCurrentEvent;   //!
   StSsdHitCollection     *mSsdHitColl;     //!
- 
+#if 0 
   StEvent                *mCurrentEvent_tpc;
   StTpcHitCollection     *mTpcHitColl; 
-
+#endif
   TFile *ScmCtrlFile; //!
   TH2S *matchisto;    //! (1p-1n) packages control matching.
   TH1S *orthoproj;    //! orthonormal projection and perfect matching deviation.
@@ -98,7 +101,7 @@ class St_scm_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.13 2005/11/22 03:57:05 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.14 2005/12/05 23:33:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
@@ -108,6 +111,9 @@ class St_scm_Maker : public StMaker {
 /***************************************************************************
  *
  * $Log: St_scm_Maker.h,v $
+ * Revision 1.14  2005/12/05 23:33:43  fisyak
+ * Fix bug 612, unnecessary request for StTpcHitCollection
+ *
  * Revision 1.13  2005/11/22 03:57:05  bouchet
  * id_mctrack is using for setIdTruth
  *
