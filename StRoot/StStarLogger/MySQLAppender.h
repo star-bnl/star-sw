@@ -96,7 +96,9 @@ namespace log4cxx
 
 		</ul>
 		*/
-
+#ifndef SQLHDBC
+#define SQLHDBC MYSQL*
+#endif
 		class LOG4CXX_EXPORT MySQLAppender : public AppenderSkeleton
 		{
 		protected:
