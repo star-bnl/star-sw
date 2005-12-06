@@ -266,6 +266,8 @@ Int_t StKinkMaker::Make(){//called for each event
       dxc = tmp2V.Mod();//length =O1O2
       separation = dxc - (rad_1+rad_2);//O1O2-(r1+r2)           
      
+      distanceOne = 0;
+      dca_12 = -9999;
       dca_12tmp = -9999;
       if (dxc==0)continue;  
       if (separation < 0){

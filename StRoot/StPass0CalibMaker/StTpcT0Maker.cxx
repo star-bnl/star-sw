@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.10 2005/04/23 09:41:29 jeromel Exp $
+// $Id: StTpcT0Maker.cxx,v 1.11 2005/12/06 16:37:44 genevb Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.11  2005/12/06 16:37:44  genevb
+// Remove compiler warnings
+//
 // Revision 1.10  2005/04/23 09:41:29  jeromel
 // Minor change (wrap private root file)
 //
@@ -215,8 +218,8 @@ Int_t StTpcT0Maker::Make(){
     gMessMgr->Info() << "StTpcT0Maker: StTpcHitMover is not present! ExB correction will not be applied! " << endm; 
   }
 
-  St_tcl_Maker *tcl;
-  StRTSClientFCFMaker *fcf;
+  St_tcl_Maker *tcl = 0;
+  StRTSClientFCFMaker *fcf = 0;
   if(m_Mode&0x1){    
     fcf = (StRTSClientFCFMaker*)GetMaker("tpc_hits");
     fcf->InitRun(0);
@@ -403,7 +406,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.10 2005/04/23 09:41:29 jeromel Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.11 2005/12/06 16:37:44 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
