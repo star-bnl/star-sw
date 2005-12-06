@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.45 2004/07/14 18:46:51 perev Exp $
+ * $Id: StDbBroker.cxx,v 1.46 2005/12/06 21:35:43 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.46  2005/12/06 21:35:43  deph
+ * Cleaned up to remove warnings
+ *
  * Revision 1.45  2004/07/14 18:46:51  perev
  * UInt=>Int for new ROOT
  *
@@ -593,8 +596,8 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
   }
 
    char tmpName[128];
-   char* dbName;
-   StDbTable* table;
+   char* dbName =0;
+   StDbTable* table = 0;
    for(int i=icount;i>0;i--){
      if(i==icount){
        dbName=aword[i];
