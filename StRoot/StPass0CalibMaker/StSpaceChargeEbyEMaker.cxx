@@ -77,9 +77,10 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
   //DoQAmode(); // For testing
 
   schist = new TH1F("SpCh","Space Charge",80,SCL,SCH);
-  for (int i=0;i<HN;i++)
+  schist->SetDirectory(0);
+  for (int i=0;i<HN;i++){
     schists[i] = new TH1F(Form("SpCh%d",i),"Space Charge",80,SCL,SCH);
-
+    schists[i]->SetDirectory(0);}
 }
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::~StSpaceChargeEbyEMaker() {
@@ -797,8 +798,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.6 2005/04/21 19:38:20 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.7 2005/12/07 19:45:46 perev Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.7  2005/12/07 19:45:46  perev
+// Histos diconnected from directory. EndCrashFix
+//
 // Revision 1.6  2005/04/21 19:38:20  genevb
 // Additional code for studying SpaceCharge
 //
