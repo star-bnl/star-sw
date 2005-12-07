@@ -566,10 +566,10 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
 #ifdef __BFC2__
-  {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker",
-                                                                            "Generic Vertex Finder",kFALSE},
-  {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
-   "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",              "ITTF tracker",kFALSE},
+  {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
+  {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb,StMcEvent","StiMaker",
+   "Gui,StEventUtilities,StMcEventMaker,StiUtilities,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",
+   "ITTF tracker"                                                                                  ,kFALSE},
 #endif /* __BFC2__ */
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
