@@ -2,6 +2,8 @@
 #include "StiKalmanTrackFitter.h"
 #include "StiKalmanTrack.h"
 #include "StiKTNIterator.h"
+
+
 int StiKalmanTrackFitter::_debug = 0;
 
 StiKalmanTrackFitter::StiKalmanTrackFitter()
@@ -30,6 +32,7 @@ int StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Ex
    enum {kMaxNErr=333};
 static int nCall=0; nCall++;
 StiKalmanTrackNode::Break(nCall);
+
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
   assert(track); 
@@ -94,7 +97,7 @@ static int myKount=0;myKount++;
         targetNode->setChi2(1e52);
         if (tryNode.nudge(targetHit))	{nerr++; break;}
 	chi2 = tryNode.evaluateChi2(targetHit);
-        if ((chi2>_pars.getMaxChi2())){nerr++; break;}	//Chi2 is bad
+        if ((chi2>_pars.getMaxChi2()))	{nerr++; break;}	//Chi2 is bad
         status = tryNode.updateNode();
         if (status) 			{nerr++; break;}
         tryNode.setChi2(chi2);
@@ -107,10 +110,9 @@ static int myKount=0;myKount++;
       if (debug()) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
     }//end continue block
   }//end for of nodes
-
-
-
-  if (nerr>kMaxNErr) return nerr; else return 0;
+  nGoodNodes = track->getNNodes(3);
+  if (nGoodNodes<3) return 1;
+  return (nerr>kMaxNErr)? nerr:0;
 }
 
 void StiKalmanTrackFitter::setParameters(const StiKalmanTrackFitterParameters & pars)
