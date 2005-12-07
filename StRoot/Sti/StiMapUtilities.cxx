@@ -80,11 +80,10 @@ bool NameMapKey::operator<(const NameMapKey& key2) const{
 void SetHitUsed::operator()(StiTrackNode& node)
 {
     if (!node.isValid()) 	return;
-//VP    if ( node.getChi2()>1e3)	return;
     StiHit* hit = node.getHit();
     if(!hit) 			return;
-  //hit->setUsed(true);
-    hit->setTimesUsed(hit->timesUsed()+1);
+    if ( node.getChi2()>1e3)	{node.setHit(0);} 
+    else 			{hit->setTimesUsed(hit->timesUsed()+1);}
 }
 
 
