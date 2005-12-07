@@ -47,7 +47,12 @@ public:
   /// Find/extend the given track, in the given direction
           bool find(StiTrack *track, int direction, double rmin=0);
   /// Find the next track 
-  virtual StiTrack * findTrack(); 
+  virtual StiTrack * findTrack(double rMin); 
+  /// Extend seeds to tracks
+  void extendSeeds (double rMin);
+  void extendTracks(double rMin);
+  /// Extend track
+  int extendTrack(StiKalmanTrack *track,double rMin);
   /// Extent all tracks to the given vertex
           void extendTracksToVertex(StiHit* vertex);
           void extendTracksToVertices(const std::vector<StiHit*> &vertices);
