@@ -13,7 +13,7 @@ one for each detector and have basic QA histograms.
 #define STAR_StEmcVirtualFinder
 
 #include "TObject.h"
-#include "TList.h";
+#include "TList.h"
 #include "StEmcPreClusterCollection.h"
 #include "StEmcUtil/others/emcInternalDef.h"
 #include "StEmcRawMaker/defines.h"
