@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.14 2005/08/11 13:51:38 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.15 2005/12/07 20:41:54 perev Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.15  2005/12/07 20:41:54  perev
+// (int) added. WarnOff
+//
 // Revision 1.14  2005/08/11 13:51:38  lmartin
 // PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
 //
@@ -373,7 +376,7 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	    cluster.adc_count       = pClusterP->getTotAdc();
 	    cluster.first_adc_count = pClusterP->getFirstAdc();
 	    cluster.last_adc_count  = pClusterP->getLastAdc();
-	    cluster.noise_count     = pClusterP->getTotNoise();
+	    cluster.noise_count     = (int)pClusterP->getTotNoise();
 	    cluster.flag            = pClusterP->getFlag();
 	    cluster.strip_mean      = pClusterP->getStripMean();
 	    for (i = 0 ; i < 5 ; i++)
@@ -393,7 +396,7 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	    cluster.adc_count       = pClusterN->getTotAdc();
 	    cluster.first_adc_count = pClusterN->getFirstAdc();
 	    cluster.last_adc_count  = pClusterN->getLastAdc();
-	    cluster.noise_count     = pClusterN->getTotNoise();
+	    cluster.noise_count     = (int)pClusterN->getTotNoise();
 	    cluster.flag            = pClusterN->getFlag();
 	    cluster.strip_mean      = pClusterN->getStripMean();
 	    for (i = 0 ; i < 5 ; i++)
