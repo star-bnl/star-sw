@@ -4,10 +4,16 @@
 #include "TRegexp.h"
 #include "TDirIter.h"
 #include "TKey.h"
+#include "TError.h"
 
 #ifdef __RFIO__
 #include "TRFIOFile.h"
 #endif
+
+void DummyErrorHandlerFunc(int , Bool_t , const char *, const char *){;}
+
+
+
 
 const char* TFOPT[9] = {"0","READ","RECREATE","UPDATE",
                         "0","READ","RECREATE","UPDATE",0};
@@ -216,7 +222,14 @@ Int_t StIO::IfExi(const char *name)
   if (!gSystem->AccessPathName(file)) return 1;
   int l = file.Length();
   if (file(l-5,5)!=".root") return 0;
+
+// Supress error message
+  ErrorHandlerFunc_t dummy = &DummyErrorHandlerFunc;
+  ErrorHandlerFunc_t curre = SetErrorHandler(dummy);
   TFile *tf = TFile::Open(file);
+// return old error handler
+  SetErrorHandler(curre);
+
   int z = (!tf || tf->IsZombie());
   delete tf;   
   return !z;
