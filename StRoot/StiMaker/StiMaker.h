@@ -23,7 +23,6 @@ class StiKalmanTrackNode;
 class StiKalmanTrack;
 class StiTrackMerger;
 class StiToolkit;
-class StiMakerParameters;
 class StiVertexFinder;
 class EventDisplay;
 class StiResidualCalculator;
@@ -44,10 +43,8 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.18 2005/10/26 21:54:11 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.19 2005/12/07 23:55:08 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
-    void setParameters(StiMakerParameters * pars);
-    StiMakerParameters * getParameters();
 
     void setEventDisplay(EventDisplay* eventDisplay) 
       { _eventDisplay = eventDisplay;}
@@ -59,7 +56,6 @@ class StiMaker : public StMaker
 private:
 
 		double runField;
-    StiMakerParameters * _pars;
     bool                 eventIsFinished;
     bool                 _initialized;
     StiToolkit  *        _toolkit;
