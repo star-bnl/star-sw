@@ -1,6 +1,14 @@
+#include <stdlib.h>
+#include <assert.h>
 #include "StiToolkit.h"
 
 StiToolkit * StiToolkit::_instance = 0;
+
+StiToolkit::StiToolkit()
+{
+  assert(!_instance);
+  _instance = this;
+}
 
 void StiToolkit::setToolkit(StiToolkit * toolkit)
 {
