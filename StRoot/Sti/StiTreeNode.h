@@ -6,11 +6,11 @@
 #include "StiTreeNode.h"
 
 
-/*! \class StiDefaultMutableTreeNode
-  A <code>StiDefaultMutableTreeNode</code> is a general-purpose
+/*! \class StiTreeNode
+  A <code>StiTreeNode</code> is a general-purpose
   node in a tree data
   structure. A tree node may have at most one parent and 0 or more children.
-  <code>StiDefaultMutableTreeNode</code> provides operations for examining
+  <code>StiTreeNode</code> provides operations for examining
   and modifying a
   node's parent and children and also operations for examining the tree that
   the node is a part of.  A node's tree is the set of all nodes that can be
