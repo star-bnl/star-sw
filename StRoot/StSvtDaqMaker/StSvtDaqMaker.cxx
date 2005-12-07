@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.17 2005/08/04 04:07:27 perev Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.18 2005/12/07 20:48:50 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.18  2005/12/07 20:48:50  perev
+ * EndCrashFix
+ *
  * Revision 1.17  2005/08/04 04:07:27  perev
  * Cleanup
  *
@@ -95,8 +98,8 @@ ClassImp(StSvtDaqMaker)
 //_____________________________________________________________________________
 StSvtDaqMaker::~StSvtDaqMaker()
 {
-  delete fData;     
-  delete fSvtData;    
+  delete fData;  fData = 0;  
+  fSvtData = 0;    
 }
 
 //_____________________________________________________________________________
@@ -385,7 +388,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.17 2005/08/04 04:07:27 perev Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.18 2005/12/07 20:48:50 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
