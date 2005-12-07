@@ -27,7 +27,7 @@ StDAQMaker::~StDAQMaker()
 {
   delete fDAQReader;
   //delete fEvtHddr;	Better small leak than crash
-  delete fDAQReaderSet;
+  fDAQReaderSet=0;
 }
 //_____________________________________________________________________________
 Int_t StDAQMaker::Init()
