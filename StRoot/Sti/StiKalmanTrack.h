@@ -293,6 +293,7 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
+  int approx();
   
   void reduce();
 
@@ -301,6 +302,8 @@ class StiKalmanTrack : public StiTrack
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
 
+protected:
+  friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 protected:
     
   static StiKalmanTrackFinderParameters * pars;
@@ -316,12 +319,11 @@ protected:
 
   double  _dca;
   double  _gdca;
-  static int _debug; // Debug level
-  friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 
  public:
   double _vDca; // tempo dca 
   double _vChi2;//
+  static int _debug; // Debug level
 
 };
 
