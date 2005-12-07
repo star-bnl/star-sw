@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.157  2005/12/07 23:55:02  perev
+// control is changed using StMaker::SetAttr
+//
 // Revision 1.156  2005/11/22 23:15:27  fisyak
 // Clean up parameters setting
 //
@@ -220,11 +223,9 @@
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
-//#include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiVertexFinder.h"
 #include "Sti/StiResidualCalculator.h"
 #include "Sti/StiDetectorContainer.h"
-#include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiStEventFiller.h"
 #include "StiDefaultToolkit.h"
 #include "StiMaker.h"
@@ -248,13 +249,12 @@ ClassImp(StiMaker)
   
   StiMaker::StiMaker(const Char_t *name) : 
     StMaker(name),
-    _pars(0),
     _initialized(false),
-    _toolkit(StiToolkit::instance() ),
+    _toolkit(0),
     _hitLoader(0),
     _seedFinder(0),
     _tracker(0),
-		_fitter(0),
+    _fitter(0),
     _eventFiller(0),
     _trackContainer(0),
     _vertexFinder(0),
@@ -263,8 +263,13 @@ ClassImp(StiMaker)
     _loaderHitFilter(0)
 
 {
-    cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
-//??    _toolkit->setStiMaker(this);
+  cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
+  if (!StiToolkit::instance()) new StiDefaultToolkit;
+  _toolkit = StiToolkit::instance();
+  SetAttr("useTpc"		,kTRUE);
+  SetAttr("activeTpc"		,kTRUE);
+  SetAttr("useSvt"		,kTRUE); // SVT used in Sti but not active. ??
+  SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
 }
 
 StiMaker::~StiMaker() 
@@ -283,7 +288,7 @@ void StiMaker::Clear(const char*)
 
 Int_t StiMaker::Finish()
 {
-  if (_pars->doPlots)
+  if (IAttr("doPlots"))
     {
       if (_residualCalculator)
        _residualCalculator->write("StiHistograms.root", "UPDATE"); 
@@ -310,34 +315,34 @@ Int_t StiMaker::InitDetectors()
   StiDetectorGroup<StEvent> * group;
   cout<<"StiMaker::InitDetectors() -I- Adding detector group:Star"<<endl;
   _toolkit->add(new StiStarDetectorGroup(false,"none"));
-  if (_pars->useTpc)
+  if (IAttr("useTpc"))
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc,_pars->tpcInputFile));
+      _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
       group->setGroupId(kTpcId);
     }
-  if (_pars->useSvt)
+  if (IAttr("useSvt"))
     {
     cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-    _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt,_pars->svtInputFile));
+    _toolkit->add(group = new StiSvtDetectorGroup(IAttr("activeSvt"),SAttr("svtInputFile")));
     group->setGroupId(kSvtId);
     }
-  if (_pars->useSsd)
+  if (IAttr("useSsd"))
       {
 	  cout<<"StiMaker::Init() -I- Adding detector group:Ssd"<<endl;
-	  _toolkit->add(group = new StiSsdDetectorGroup(_pars->activeSsd,_pars->ssdInputFile));
+	  _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
 	  group->setGroupId(kSsdId);
       }
-  if (_pars->useFtpc)
+  if (IAttr("useFtpc"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
-      _toolkit->add(group = new StiFtpcDetectorGroup(_pars->activeFtpc,_pars->ftpcInputFile));
+      _toolkit->add(group = new StiFtpcDetectorGroup(IAttr("activeFtpc"),SAttr("ftpcInputFile")));
       group->setGroupId(kFtpcWestId);
     }
-  if (_pars->usePixel)
+  if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
-      _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel,_pars->pixelInputFile));
+      _toolkit->add(group = new StiPixelDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
       group->setGroupId(9999);
     }
   return kStOk;
@@ -356,7 +361,7 @@ Int_t StiMaker::InitRun(int run)
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
       detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
-			if (_pars->useResidualCalculator)
+			if (IAttr("useResidualCalculator"))
 				{
 					_residualCalculator = _toolkit->getResidualCalculator();
 					_residualCalculator->initialize(_toolkit->getDetectorBuilder());
@@ -369,6 +374,7 @@ Int_t StiMaker::InitRun(int run)
 			_tracker->load("trackFinderPars.dat",*this);
 			_fitter->load("trackFitterPars.dat",*this);
       _eventFiller =  new StiStEventFiller();
+      _eventFiller->setUseAux(IAttr("useAux"));
       _trackContainer = _toolkit->getTrackContainer();
       _vertexFinder   = _toolkit->getVertexFinder();
       if (!_tracker)
@@ -407,8 +413,8 @@ Int_t StiMaker::Make()
       return -1;
     }
 
-  
   _tracker->clear();
+//VP??  _hitLoader->loadEvent(event,0,_loaderTrackFilter,_loaderHitFilter);
   _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
   _seedFinder->reset();
     {
@@ -439,8 +445,7 @@ Int_t StiMaker::Make()
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
 	      try
 		{
-		  if (_eventFiller)
-		    _eventFiller->fillEventPrimaries(event, _trackContainer);
+		  if (_eventFiller) _eventFiller->fillEventPrimaries();
 		}  
 	      catch (runtime_error & rte)
 		{
@@ -448,7 +453,6 @@ Int_t StiMaker::Make()
 		}						
 	    }
 	}
-      cout << "StiMaker::Make() -I- Calling standard plots fillers" << endl;
       if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
   cout<< "StiMaker::Make() -I- Done"<<endl;
@@ -466,12 +470,3 @@ Int_t StiMaker::Make()
   return kStOK;
 }
 
- void StiMaker::setParameters(StiMakerParameters * pars)
-{
-  _pars = pars;
-}
-
-StiMakerParameters * StiMaker::getParameters()
-{
-  return _pars;
-}
