@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.19 2005/07/19 21:34:24 perev Exp $
+ * $Id: StHit.h,v 2.20 2005/12/07 19:03:23 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.20  2005/12/07 19:03:23  perev
+ * mId short ==> int
+ *
  * Revision 2.19  2005/07/19 21:34:24  perev
  * quality ==> qaTruth to avoid misleading
  *
@@ -112,7 +115,7 @@ public:
     int             usedInFit() const;
     int             idTruth() const;
     int             qaTruth() const { return mQuality; }
-    unsigned short  id()      const;
+    int  	    id()      const;
     const StHit*    nextHit() const;
     unsigned int    hardwarePosition() const;
     
@@ -123,8 +126,9 @@ public:
     void setTrackReferenceCount(unsigned char);
     void setHardwarePosition(unsigned int);
     void setPositionError(const StThreeVectorF&);
+    void setId(int id)			{mId = id;}
     void setIdTruth(Int_t idtru,Int_t qatru=0);
-    void SetNextHit(StHit *next = 0) {mNextHit = next;}
+    void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     virtual void                  Print(Option_t *option="") const;
     
@@ -132,16 +136,16 @@ protected:
     unsigned int bits(unsigned int, unsigned int) const;
     
     UInt_t         mHardwarePosition;
-    Float_t        mCharge;
-    UChar_t        mTrackRefCount;
     StThreeVectorF mPositionError;
-    UChar_t        mFlag;
-    UChar_t        mFitFlag;
+    Float_t        mCharge;
+    Int_t          mId;
     UShort_t       mIdTruth; // simulation track id 
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
-    UShort_t       mId;
+    UChar_t        mFitFlag;
+    UChar_t        mTrackRefCount;
+    UChar_t        mFlag;
     StHit*         mNextHit; //!
-    ClassDef(StHit,3)
+    ClassDef(StHit,4)
 };
 
 inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
@@ -149,7 +153,7 @@ inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
     return (mHardwarePosition>>bit) & ~(~0UL<<nbits);
 }
 
-inline unsigned short  StHit::id()      const {return mId;}
+inline int  	       StHit::id()       const {return mId;}
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
 inline const StHit*    StHit:: nextHit() const {return mNextHit;}
 
