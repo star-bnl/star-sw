@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.482 2005/10/26 21:51:47 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.483 2005/12/07 18:46:02 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -238,8 +238,6 @@ Int_t StBFChain::Instantiate()
     if (maker == "StTpcDbMaker" || 
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
-    if (maker == "StiMaker")     
-      ProcessLine("StiToolkit::setToolkit( new StiDefaultToolkit() );");
     // All Makers created here
     if (!mk) {
       if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
@@ -276,43 +274,21 @@ Int_t StBFChain::Instantiate()
 	if (fInFile != "")  ProcessLine(Form("((StVMCMaker *) %p)->SetInputFile(\"%s\")",mk,fInFile.Data()));
       }
     }
+//		Sti(ITTF) start
     if (maker == "StiMaker") {
-      TString cmd(Form("StiMaker *stiMk = (StiMaker*) %p;",mk));
-      cmd += "StiToolkit  * tk   = stiMk->getToolkit();";
-      cmd += "if (! tk)  { tk   = new StiDefaultToolkit();}";
-      //      cmd += "tk->setGuiEnabled(kFALSE);tk->setMcEnabled(kFALSE);}";
-      cmd += "StiMakerParameters * pars = stiMk->getParameters();";
-      cmd += "if ( ! pars ) {pars = new StiMakerParameters();stiMk->setParameters(pars);}";
-      //      cmd += "pars->useGui        = kFALSE;";
-      //      cmd += "pars->useMcAsRec    = kFALSE;";
-      //      cmd += "pars->doSimulation  = kFALSE;";
-      //      cmd += "pars->doAssociation = kFALSE;";
-      cmd += "pars->doPlots       = kFALSE;";
-      cmd += "pars->useTpc        = kTRUE;";
-      cmd += "pars->activeTpc     = kTRUE;";
-      //      cmd += "pars->doStEventInput= kTRUE;"; // We always want to have this I think?
-      //      cmd += "pars->doStEventOutput=kTRUE;";
-      cmd += "pars->useSvt=kTRUE;";         // SVT used in Sti but not active. ??
-      // Pre-2001 data, will build only 1 ladder?
-      //pars->useSsd=kTRUE;         // use SSD in Sti
-      
-      if (GetOption("SvtIT")) cmd += "pars->activeSvt=kTRUE;";
+      if (GetOption("SvtIT")) 	mk->SetAttr("activeSvt"	,kTRUE);
 
-      //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
       if (GetOption("SsdIT")){
-	cmd += "pars->useSsd=kTRUE;";
-	cmd += "pars->activeSsd=kTRUE;";
+				mk->SetAttr("useSsd"	,kTRUE);
+				mk->SetAttr("activeSsd"	,kTRUE);
       }
       if (GetOption("FtpcIT")){
-	cmd += "pars->useFtpc=kTRUE;";
-	cmd += "pars->activeFtpc=kTRUE;";
+				mk->SetAttr("useFtpc"	,kTRUE);
+				mk->SetAttr("activeFtpc",kTRUE);
       }
-      cmd += "cout << \"Sti Parameters (seen in bfc):\" << endl;";
-      cmd += "cout << *pars << endl;";
-      //if (GetOption("Simu")) cmd += "tk->setMcEnabled(kTRUE);";
-      ProcessLine(cmd);
-      if ( GetOption("clearmem") )  mk->SetMode(1);
+      mk->PrintAttr();
     }
+//		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       int                   VtxOpt = 0;
       // VertexFinder methods
