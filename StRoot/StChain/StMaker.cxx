@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.171 2005/11/22 21:37:04 fisyak Exp $
+// $Id: StMaker.cxx,v 1.172 2005/12/07 18:56:16 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -1474,23 +1474,37 @@ const char *StMaker::SAttr(const char *key) const
    TString tey(key);
    tey.ToLower(); tey.ReplaceAll(" ",""); tey.ReplaceAll("\t","");
    TObject *att = m_Attr.FindObject(tey.Data());
-   return (att)? att->GetTitle():0;
+   return (att)? att->GetTitle():"";
 }   
 //_____________________________________________________________________________
 int StMaker::IAttr(const char *key) const
 {
    const char *val = SAttr(key);
    if (!val) 	return 0;
-   if (!val[0]) return 1;
+   if (!val[0]) return 0;
    return atoi(val);
 }
 //_____________________________________________________________________________
 double StMaker::DAttr(const char *key) const
 {
    const char *val = SAttr(key);
-   if (!val) return 0;
-   if (!val[0]) return 1;
+   if (!val) 	return 0;
+   if (!val[0]) return 0;
    return atof(val);
+}
+//_____________________________________________________________________________
+void StMaker::PrintAttr() const
+{
+   if (!m_Attr.First()) return;
+   TIter next(&m_Attr);
+   printf("PrintAttr() for %s::%s\n",ClassName(),GetName());
+   TObject *object;
+   int n=0;
+   while ((object = next())) {
+      n++;
+      printf(" %2d - %s = %s\n",n,object->GetName(),object->GetTitle());
+   }
+   printf("PrintAttr() ==============================================\n");
 }
 
 //_____________________________________________________________________________
@@ -1687,6 +1701,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.172  2005/12/07 18:56:16  perev
+// PrintAttr() method added
+//
 // Revision 1.171  2005/11/22 21:37:04  fisyak
 // add more Simu time stamps (reflecting new SVT), and clean up
 //

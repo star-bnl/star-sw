@@ -223,7 +223,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.75 2005/11/22 21:37:04 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.76 2005/12/07 18:54:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -245,6 +245,7 @@ int         RemAttr(const char *key,                const char *to=".")
 int         IAttr(const char *key) const;
 double      DAttr(const char *key) const;
 const char *SAttr(const char *key) const;
+void        PrintAttr() const;
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
 
@@ -281,8 +282,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.75 2005/11/22 21:37:04 fisyak Exp $
+// $Id: StMaker.h,v 1.76 2005/12/07 18:54:12 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.76  2005/12/07 18:54:12  perev
+// PrintAttr() method added
+//
 // Revision 1.75  2005/11/22 21:37:04  fisyak
 // add more Simu time stamps (reflecting new SVT), and clean up
 //
