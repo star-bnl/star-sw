@@ -16,7 +16,7 @@ public:
   void initialize(){};
   void reset();
   void unset(){;}
-  StiTrack * findTrack();
+  StiTrack * findTrack(double rMin=0);
  protected:
   vector<StiTrackFinder*>::iterator _currentFinder;
  private:
