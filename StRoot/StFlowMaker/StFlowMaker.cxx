@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.105 2005/03/03 17:22:02 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.106 2005/12/07 19:41:29 perev Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -258,7 +258,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.105 2005/03/03 17:22:02 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.106 2005/12/07 19:41:29 perev Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -2176,19 +2176,19 @@ Int_t StFlowMaker::InitMuEventRead() {
 
 
 
-    TFile dummyFile(pMuFileList->GetFileName(0),"READ");
+    TFile* dummyFile = TFile::Open(pMuFileList->GetFileName(0),"READ");
 
-    if (!(dummyFile.IsOpen())) {
+    if (!dummyFile ||!(dummyFile->IsOpen())) {
       gMessMgr->Info() <<pMuFileList->GetFileName(0)<<" open failed ! not chained"<<endm;
       continue;   
     }
 
-    if (dummyFile.IsZombie()) {
+    if (dummyFile->IsZombie()) {
       gMessMgr->Info() <<"  sth. very wrong (overwritten, invalid) with "<<pMuFileList->GetFileName(0)<<", not chained "<<endm;
       continue;   
     }
 
-    if (dummyFile.TestBit(1024)) { 
+    if (dummyFile->TestBit(1024)) { 
       gMessMgr->Info() <<"  revocer procedure applied to "<<pMuFileList->GetFileName(0)<<", maybe useful but still not chained for flow analyses"<<endm;
       continue;   
     }
@@ -2271,6 +2271,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.106  2005/12/07 19:41:29  perev
+// new TFile ==> TFile::Open
+//
 // Revision 1.105  2005/03/03 17:22:02  posk
 // Initialized pFlowEvent in the constructors.
 //
