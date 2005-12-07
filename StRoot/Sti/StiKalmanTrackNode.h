@@ -25,35 +25,10 @@ typedef enum {
   kFailed = -1,         // could not find intersection
   kHit,                                
   kEdgePhiPlus, kEdgeZminus, kEdgePhiMinus, kEdgeZplus, 
-  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus
+  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus,
+  kEnded
 } StiIntersection;
   
-class StiNodePars {
-public:	
-void reset(){memset(this,0,sizeof(StiNodePars));}
-
-  /// sine and cosine of cross angle
-  double _cosCA;
-  double _sinCA;
-  double _x;   
-  /// local Y-coordinate of this track (reference plane)           
-  double _y; 
-  /// local Z-coordinate of this track (reference plane)
-  double _z;
-  /// (signed curvature)*(local Xc of helix axis - X current point on track)
-  double _eta;
-  /// signed curvature [sign = sign(-qB)]
-  double _curv;  
-  /// tangent of the track momentum dip angle
-  double _tanl;
-};
-class StiNodeMtx {
-public:	
-void reset(){memset(this,0,sizeof(StiNodeMtx));}
-  double A[kNPars][kNPars];
-};
-
-
 class StiNodeStat {
 public:	
   StiNodeStat(){reset();}
@@ -63,18 +38,6 @@ void reset(){memset(this,0,sizeof(StiNodeStat));}
   double x2,y2,cosCA2,sinCA2;
   double sumSin, sumCos;
 };
-
-class StiNodeErrs {
-public:	
-void reset(){memset(this,0,sizeof(StiNodeErrs));}
-
-union{double A[1];double _cXX;};
-  double _cYX,_cYY;                       
-  double _cZX,_cZY, _cZZ;                 
-  double _cEX,_cEY, _cEZ, _cEE;           
-  double _cCX,_cCY, _cCZ, _cCE, _cCC;     
-  double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
-};  
 
 class StiNodeExt {
 public:
@@ -110,7 +73,7 @@ public:
   virtual ~StiKalmanTrackNode(){reduce();_Kount=-1;};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
   
-  double mcs2(double relRadThickness, double beta2, double p2);
+  static double mcs2(double relRadThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
   void unset(){reduce();}
@@ -155,10 +118,12 @@ public:
   double x_g() const;
   double y_g() const;
   double z_g() const;
-    
+  void   setXYZg(double *xyz);    
+
   double getX() const 			{ return mFP._x ;}
   double getY() const 			{ return mFP._y;}  
   double getZ() const 			{ return mFP._z;}
+  void   setXYZl(double *xyz);    
   
   double getEta  () const 		{return mFP._eta;   }
   double getSin  () const 		{return mFP._sinCA;}
@@ -204,7 +169,7 @@ public:
   /// -3  : invalid eloss data for this node.
   double  evaluateDedx();
   
-  int  locate(StiPlacement*place,StiShape*sh);
+  int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
   void propagateError();
@@ -251,30 +216,35 @@ public:
 
   void   extend();
   void   reduce();
-  Int_t  debug() const {return _debug;}
+  Int_t  debug() const 				{return _debug;}
   void   setDebug(Int_t m) {_debug = m;}
   void   PrintpT(Char_t *opt="");
-  static void   ResetComment(Char_t *m = "") {comment = m; commentdEdx = "";}
-  static const Char_t *Comment() {return comment.Data();}
+  int    getFlipFlop() const 			{return mFlipFlop;}
+  static void   ResetComment(Char_t *m = "") 	{comment = m; commentdEdx = "";}
+  static const Char_t *Comment() 		{return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
-  void static saveStatics(double *sav);
-  void static backStatics(double *sav);
-  void   print(const char *opt) const;
-  static void setErrFactor(double ef)	{fgErrFactor=ef;}
+  int   print(const char *opt) const;
   
  private:   
+  void static saveStatics(double *sav);
+  void static backStatics(double *sav);
   static StiNodeExt *nodeExtInstance();
   void getHitErrors(const StiHit *hit,double ss[3]) const;
 
 //  Extended members 
  public:
  
+  const StiNodePars &fitPars() const                  {return mFP; } 
+        StiNodePars &fitPars()                        {return mFP; } 
+  const StiNodeErrs &fitErrs() const                  {return mFE; } 
+        StiNodeErrs &fitErrs()                        {return mFE; } 
   const StiNodePars &mPP() const                      {return _ext->mPP; } 
         StiNodePars &mPP()       {if (!_ext) extend(); return _ext->mPP; } 
   const StiNodeErrs &mPE() const                      {return _ext->mPE; } 
         StiNodeErrs &mPE()       {if (!_ext) extend(); return _ext->mPE; } 
-  const StiNodeMtx &mMtx() const                      {return _ext->mMtx;} 
-        StiNodeMtx &mMtx()       {if (!_ext) extend(); return _ext->mMtx;} 
+  const StiNodeMtx  &mMtx()const                      {return _ext->mMtx;} 
+        StiNodeMtx  &mMtx()      {if (!_ext) extend();return _ext->mMtx;} 
+  const StiNode2Pars &unTouched() const                 {return mUnTouch;} 
 
  protected:   
 
@@ -283,32 +253,19 @@ public:
   StiNodePars mFP; 
   /// covariance matrix of the track parameters
   StiNodeErrs mFE;
+  StiNode2Pars mUnTouch;
   float  eyy,ezz;
   char hitCount;
   char nullCount;
   char contiguousHitCount;
   char contiguousNullCount;
+  char mFlipFlop;
   char   _end[1];
   StiNodeExt *_ext;
   static StiKalmanTrackFinderParameters * pars;
 
-//??  static int counter;
-//??  static Messenger &  _messenger;
-
-//??  static int   shapeCode;
-//??  static const StiDetector * det;
-//??  static const StiPlanarShape * planarShape;
-//??  static const StiCylindricalShape * cylinderShape;
-//??  static StiMaterial * gas;
-//??  static StiMaterial * prevGas;
-//??  static StiMaterial * mat;
-//??  static StiMaterial * prevMat;
   static StiNodeStat  mgP;
-//??  static double radThickness, density;
-//??  static double gasDensity,matDensity,gasRL,matRL;
   static bool   useCalculatedHitError;
-  static double fgErrFactor;
-  static int fgRefit;
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[kNPars][kNPars];   
