@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.26 2005/05/31 16:32:21 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.27 2005/12/07 21:24:51 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.27  2005/12/07 21:24:51  perev
+ * Cleanup
+ *
  * Revision 2.26  2005/05/31 16:32:21  perev
  * Max & min errors changed to 1e-4,1.
  *
@@ -188,18 +191,22 @@ ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node
 		                       ,double &ecross, double &edip) const
 {  
+static const double tenMicrons = 1e-3;
+static const double min2Err = tenMicrons*tenMicrons;
+static const double max2Err = 1.;
+
   double dz = (210.-fabs(node->getZ()))/100.;
   double cosCA = node->getCos();
   double sinCA = node->getSin();
   if (cosCA<0.01) cosCA=0.01;
   double tanCA = sinCA/cosCA;
   ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
-  if (ecross< 1e-4) ecross = 1e-4;
-  if (ecross> 1   ) ecross = 1;
+  if (ecross< min2Err) ecross = min2Err;
+  if (ecross> max2Err) ecross = max2Err;
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
          edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
-  if (edip< 1e-4) edip = 1e-4;
-  if (edip> 1   ) edip = 1;
+  if (edip< min2Err) edip = min2Err;
+  if (edip> max2Err) edip = max2Err;
 }
 
