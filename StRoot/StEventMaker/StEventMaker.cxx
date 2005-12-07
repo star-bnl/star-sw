@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.74 2005/06/15 01:00:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.75 2005/12/07 19:38:19 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -190,9 +190,7 @@ StEventMaker::Make()
     //  Setup the event (StEvent and all subclasses)
     //
     status = makeEvent();
-    if (status == kStOK)
-        AddData(mCurrentEvent);
-    else
+    if (status != kStOK)
         gMessMgr->Warning() << "StEventMaker::Make(): error in makeEvent(), no StEvent object created." << endm;
     
     mEventManager->closeEvent();
@@ -223,8 +221,11 @@ StEventMaker::getStEventInstance()
         gMessMgr->Info() << "StEventMaker::getStEventInstance(): existing instance found, no new object created." << endm;
         return exist;
     }
-    else
-        return new StEvent;
+    else {
+        exist = new StEvent;
+	AddData(exist);
+        return exist;
+    }
 }
 
 void
@@ -1710,8 +1711,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.74 2005/06/15 01:00:53 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.75 2005/12/07 19:38:19 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.75  2005/12/07 19:38:19  perev
+ * simplified logic if StEvent already exists
+ *
  * Revision 2.74  2005/06/15 01:00:53  ullrich
  * Use abs() for SVT hit track ID
  *
