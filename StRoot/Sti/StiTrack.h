@@ -141,7 +141,7 @@ public:
   static StiTrackFitter * trackFitter;
 
   friend ostream& operator<<(ostream& os, const StiTrack& track);
-private:
+protected:
   int             mId;
 };
 
