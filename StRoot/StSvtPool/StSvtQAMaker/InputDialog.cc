@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: InputDialog.cc,v 1.1 2004/02/06 02:30:33 munhoz Exp $
+ * $Id: InputDialog.cc,v 1.2 2005/12/07 20:49:35 perev Exp $
  *
  * Author: Marcelo Munhoz (adapted from ROOT)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: InputDialog.cc,v $
+ * Revision 1.2  2005/12/07 20:49:35  perev
+ * WarnOff
+ *
  * Revision 1.1  2004/02/06 02:30:33  munhoz
  * inserting SVT online monitor
  *
@@ -40,7 +43,7 @@ InputDialog::InputDialog(const char *prompt, const char *defval, char *retstr)
  
    // command to be executed by buttons and text entry widget
    char cmd[128];
-   sprintf(cmd, "{long r__ptr=0x%x; ((InputDialog*)r__ptr)->ProcessMessage($MSG,$PARM1,$PARM2);}", this);
+   sprintf(cmd, "{long r__ptr=%p; ((InputDialog*)r__ptr)->ProcessMessage($MSG,$PARM1,$PARM2);}", (void*)this);
  
    // create prompt label and textentry widget
    TGLabel *label = new TGLabel(fDialog, prompt);

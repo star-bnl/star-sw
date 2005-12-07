@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: InputDialog2.cc,v 1.1 2004/02/06 02:30:33 munhoz Exp $
+ * $Id: InputDialog2.cc,v 1.2 2005/12/07 20:50:44 perev Exp $
  *
  * Author: Marcelo Munhoz (adapted from ROOT)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: InputDialog2.cc,v $
+ * Revision 1.2  2005/12/07 20:50:44  perev
+ * WarnOff
+ *
  * Revision 1.1  2004/02/06 02:30:33  munhoz
  * inserting SVT online monitor
  *
@@ -40,7 +43,7 @@ InputDialog2::InputDialog2(const char *prompt, const char *prompt2, const char *
  
    // command to be executed by buttons and text entry widget
    char cmd[128];
-   sprintf(cmd, "{long r__ptr=0x%x; ((InputDialog2*)r__ptr)->ProcessMessage($MSG,$PARM1,$PARM2);}", this);
+   sprintf(cmd, "{long r__ptr=%p; ((InputDialog2*)r__ptr)->ProcessMessage($MSG,$PARM1,$PARM2);}", (void*)this);
  
    // create prompt label and textentry widget
    TGLabel *label = new TGLabel(fDialog, prompt);
