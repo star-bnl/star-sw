@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.15 2005/09/22 20:09:20 fisyak Exp $
+ * $Id: StThreeVector.hh,v 1.16 2005/12/07 20:47:21 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.16  2005/12/07 20:47:21  perev
+ * uint<0 redundand. WarnOff
+ *
  * Revision 1.15  2005/09/22 20:09:20  fisyak
  * Make StLorentzVector persistent
  *
@@ -422,7 +425,7 @@ inline T StThreeVector<T>::operator[] (size_t i) const
 template<class T>
 inline T &StThreeVector<T>::operator[] (size_t i) 
 {
-    if (0 <=i && i <= 2)  return (&mX1)[i];
+    if (i <= 2)  return (&mX1)[i];
 #ifndef ST_NO_EXCEPTIONS
       throw out_of_range("StThreeVector<T>::operator[]: bad index"); 
 #else
