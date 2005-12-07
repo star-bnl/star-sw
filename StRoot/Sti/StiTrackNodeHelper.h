@@ -4,42 +4,119 @@
 
 #include "StiKalmanTrackNode.h"
 class StiDetector;
+class StiMcsErrs {
+public:
+void reset()		{memset(this,0,sizeof(*this));}
+public:
+double _cEE ;		//add err to <eta*eta> eta crossing angle
+double _cCC;    	//add err to <curv*curv>
+double _cTC;    	//add err to <tanL*curv>
+double _cTT;    	//add err to <tanL*tanL>
+double _curvCorr;	//curv correction factor -1
+};
 
+class StiHitErrs{
+public:
+void reset()			{memset(this,0,sizeof(*this));}
+StiHitErrs &operator*=(double f) {for (int i=0;i<6;i++){A[i]*=f;};return *this;}
+union{
+  double hXX;		double A[1];};
+  double hYX,hYY;                       
+  double hZX,hZY, hZZ;                 
+};
+
+class QaFit 
+{
+public:
+QaFit()					{reset();}
+void reset()				{memset(this,0,sizeof(*this));}
+void add(double val);
+void finish();
+int    getTally() const			{return mTally;}
+double getAccu(int kValCorr);
+double getMaxi(int kValCorr) 		{return mMaxi[kValCorr];}
+double getNStd(int kValCorr);
+double getNSgn(int kValCorr);
+void   getInfo(double *info);
+private:
+double mPrev;
+double mAver[2];
+double mErrr[2];
+double mMaxi[2];
+int    mNega[2];
+
+int mEnded;
+int mTally;
+};
 
 
 class StiTrackNodeHelper
 { 
 public:
 
-  StiTrackNodeHelper(double chi2max);    
-  void setNodes(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode)		
-       					{mPNode=pNode;mSNode=sNode;}
-  int propagate(StiNodePars *ipars);       
-  int propagateMtx();       
-  int propagateError(StiNodeErrs &lastFE);
-  int fake1Fit();
-  int fake2Fit();
-  int fit(){return 0;}       
+      StiTrackNodeHelper(){}    
+ void set(double chi2max,double errConfidence,int iter);    
+ void set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode);		
+  int makeFit(int smooth);
+  StiKalmanTrackNode *getWorst()    	const 	{return mWorstNode;}
+  StiKalmanTrackNode *getFlipFlop() 	const 	{return mFlipFlopNode;}
+  StiKalmanTrackNode *getVertexNode()	const 	{return mVertexNode;}
+  int                 getUsed()     	const	{return mUsed;}
+
+static int isCutStep()				{return mgCutStep;}
 private:
-  int join(StiNodeErrs &a,StiNodeErrs &b);
+  void reset();
+  int propagateBest();       
+  int propagateFitd();
+  int propagateMtx();       
+  int propagateError();
+  int setHitErrs();
+  int propagateMCS();
+  double evalChi2();
+  double joinChi2();
+  int updateNode();
+  void resetError(double fk=0.);
+  int nudge();
+  int join();
+  int save();
+  int cutStep(StiNodePars *pars,StiNodePars *base);
+  double pathIn(const StiDetector *det,StiNodePars *pars);
 private:
 double mChi2Max;
+double mErrConfidence;
+double mErrConfiDefault;
+int    mIter;				//current iter number
+StiKalmanTrackNode *mWorstNode;		//node with the worst Chi2
+StiKalmanTrackNode *mFlipFlopNode;	//node with the worst flip/flop ratio
+StiKalmanTrackNode *mVertexNode;	//vertex node
+char mBeg[1];
+StiKalmanTrackNode *mParentNode;		
+StiKalmanTrackNode *mTargetNode;		
+const StiDetector  *mDetector;
+const StiHit       *mHit;
+StiNodePars mBestParentPars; 	//Best parent params 
+StiNodePars mBestParentRotPars;	//Best rotated parent params into target node frame
+StiNodePars mBestPars; 		//Propagated  best parent params into target node frame
+double      mBestDelta;		//maximal step in x,y,z allowed
 
-StiKalmanTrackNode *mPNode;		
-StiKalmanTrackNode *mSNode;		
-StiNodePars mAP; 	//Best parent params 
-StiNodePars mBP;	//Best rotated parent params in son node frame
-StiNodePars mCP;        //Propagated  best parent params into son node frame
-StiNodePars mDP;	//Fitted parent params propagated into son node frame
-StiNodePars mXP; 	//Best son params
+StiNodePars mFitdParentPars;	//Fitted parent params in own coordianate frame node frame
+StiNodePars mPredPars;	//Fitted parent params propagated into target frame
+StiNodePars mFitdPars;	//Fitted target params 
+StiNodePars mJoinPars;	//Joined target params 
 
-StiNodeErrs mPE; 	
-StiNodeErrs mFE; 	
-StiNodeErrs mBigE; 	
-StiNodeErrs mLE; 	
-StiNodeErrs mJE; 	
+StiNodePars mSavdParentPars;	//Saved params from the previous fit
+double      mSavdDelta;         //Saved delta to select the best Best
+
+StiNodeErrs mFitdParentErrs;    //fitted parenterrors
+StiNodeErrs mPredErrs;    	//predicted errors
+StiNodeErrs mFitdErrs;    	//fitted target errors
+StiNodeErrs mJoinErrs;    	//joined target errors
+StiNodeErrs mBestParentErrs;    //best parent errors
 
 StiNodeMtx mMtx;
+StiMcsErrs mMcs;
+StiHitErrs mHrr;
+StiNode2Pars mUnTouch;
 // locals
   double alpha,ca,sa;
   double x1;
@@ -56,8 +133,16 @@ StiNodeMtx mMtx;
   double dl0;
   double sind;
   double dl;
-
-
+  
+  double mDetm;
+  double mChi2;
+  int    mState;
+  int    mUsed;
+  char   mEnd[1];
+public:
+  QaFit  mCurvQa;
+  QaFit  mTanlQa;
+  static int mgCutStep;
 };
 
 
