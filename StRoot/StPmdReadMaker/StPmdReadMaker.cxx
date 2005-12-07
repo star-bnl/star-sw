@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.14 2005/01/27 13:08:51 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.15 2005/12/07 19:46:39 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.15  2005/12/07 19:46:39  perev
+ *EndCrashFix
+ *
  *Revision 1.14  2005/01/27 13:08:51  subhasis
  *chaged to read 2005 data
  *
@@ -106,16 +109,16 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
 //-----------------------------------------------------------------
 
 StPmdReadMaker::~StPmdReadMaker() {
-  if(mPmdGeom){mPmdGeom=0; delete mPmdGeom;}
-  if(mPmdDBUtil){mPmdDBUtil=0; delete mPmdDBUtil;}
-  if(mThePmdReader)delete mThePmdReader;
-  if(mTheDataReader)delete mTheDataReader;
-  if(mThePmdData)delete mThePmdData;
-  if(mPmdEvent)delete mPmdEvent;
-  if(mCpvEvent)delete mCpvEvent;
-  if(mPmdCollection)delete mPmdCollection;
-  if(mDb)delete mDb;
-  if(m_PmdCalibConst)delete m_PmdCalibConst;
+  delete mPmdGeom;	mPmdGeom	=0;
+  delete mPmdDBUtil;	mPmdDBUtil	=0;
+  mThePmdReader	=0;
+  mTheDataReader=0;
+  mThePmdData	=0;
+  mPmdEvent	=0;
+  mCpvEvent	=0;
+  delete mPmdCollection; mPmdCollection	=0;
+  mDb=0;
+  m_PmdCalibConst=0;
 }
 
 //-----------------------------------------------------------------
