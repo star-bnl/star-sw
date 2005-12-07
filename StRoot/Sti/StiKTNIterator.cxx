@@ -2,4 +2,19 @@
 
 //Sti
 #include "StiKTNIterator.h"
-const StiKTNIterator StiKTNIterator::mgEnd;
+static const StiKTNIterator mgEnd;
+const StiKTNForwardIterator& StiKTNForwardIterator::end()
+{
+    return (StiKTNForwardIterator&)mgEnd;
+}
+
+const StiKTNIterator& StiKTNIterator::end()
+{
+    return mgEnd;
+}
+
+const StiKTNIterator& StiKTNIterator::rend()
+{
+    return mgEnd;
+}
+
