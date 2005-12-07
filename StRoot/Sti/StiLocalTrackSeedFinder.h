@@ -35,7 +35,7 @@ public:
 			  StiHitContainer         * hitContainer,
 			  StiDetectorContainer * detectorContainer);
   virtual ~StiLocalTrackSeedFinder();
-  StiTrack* findTrack();
+  StiTrack* findTrack(double rMin);
   virtual void clear(){reset();};
   virtual void initialize(){};
   virtual void print() const;
@@ -78,7 +78,7 @@ protected:
   StiHelixFitter         _helixFitter;
   StiDefaultTrackFilter  _trackFilter;
   StiLocalTrackSeedFinderParameters _pars;
-  
+  double fRxyMin;
  private:
   //The following are not implemented, as they are non-trivial
   //and the default compiler generated versions will be wrong.
