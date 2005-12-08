@@ -17,7 +17,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxNullCount	 =        13; // Maximum number of null hits on active detector layers;
     row.maxContigNullCount =       8; // Maximum number of contiguous null hits;
     row.minCountForReset   =       2; // Number of adjacent layers with hits before nullContiguous is reset to zero ;
-    row.maxChi2Vertex	   =     30.;    // max vertex incremental chi2 value acceptable;
+    row.maxChi2Vertex	   =     900;    // max vertex  chi2 value acceptable;
     row.massHypothesis	   =      0.139; // mass used in the tracking for mcs and eloss calculation purposes;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
