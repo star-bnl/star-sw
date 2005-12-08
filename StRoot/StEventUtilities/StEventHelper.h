@@ -20,7 +20,6 @@
 #include "StPhysicalHelixD.hh"
 #include "StPhysicalHelixD.hh"
 #include "StHelixD.hh"
-
 class StEvent;
 class StTrack;
 class StHit;
@@ -67,6 +66,7 @@ const StVertex *GetParent()	const;
       float     GetImpact()     const;
       float     GetCurv()       const;
       float     GetLength()     const;
+      int       numberOfFitPoints(int detid=0) const;
 const StThreeVectorF &GetFirstPoint() 	const;
 const StThreeVectorF &GetLastPoint()	const;
 const StThreeVectorF &GetMom() 	const;
@@ -79,7 +79,7 @@ const StPtrVecHit *GetHits() 	const;
       StPhysicalHelixD *GetHelix(int idx=0) 	const;
       THelixTrack *GetTHelix(int idx=0) 	const;
       Float_t  *GetPoints(int &npoints) 	const;
-StMCTruth GetTruth(int byNumb=0,double rXYMin=0.,double rXYMax=1000.) const; 
+StMCTruth GetTruth(int byCount=0,double rXYMin=0.,double rXYMax=1000.) const; 
 
 
 private:
@@ -106,6 +106,51 @@ private:
 const StHit *fHit;
 ClassDef(StHitHelper,0)
 };
+
+class StObject; 
+class StHitIter 
+{
+protected:
+    StHitIter();
+void      Reset();
+StHitIter &Next();
+virtual StObject *GetO(int lev,int idx)=0; 
+virtual int       GetN(int lev) const =0; 
+public:
+int    GetIdx(int i) const {return fI[i];}
+int    IHit()        const {return fI[0];}
+StHit *GetHit()      const {return (StHit*)fO[0];}
+protected:
+enum {kStHitIterDeep=5};
+StEvent  *fEvent;
+int       fI[kStHitIterDeep]; //Index  of hit,  Index  of container1, ...
+int       fN[kStHitIterDeep]; //Number of hits, Number of container1,...
+StObject *fO[kStHitIterDeep]; //StiHit,container1,container2,...
+};
+
+class StSvtHit;
+class StSvtHitCollection;
+class StSvtBarrelHitCollection;
+class StSvtLadderHitCollection;
+class StSvtWaferHitCollection;
+class StSvtHit;
+class StSvtHitIter : public StHitIter
+{
+public:
+    StSvtHitIter(StEvent *ev);
+StSvtHit *operator*() const 	{return (StSvtHit*)GetHit();}
+StSvtHitIter &operator++()      {return (StSvtHitIter&)Next();}
+
+int IBarrel() const 		{return GetIdx(3);}
+int ILadder() const 		{return GetIdx(2);}
+int IWafer () const 		{return GetIdx(1);}
+// Overloading
+protected:
+StObject *GetO(int lev,int idx); 
+int       GetN(int lev) const; 
+
+};
+  
 
 class TExMap;
 class TArrayI;
