@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.66 2005/08/18 22:31:47 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.67 2005/12/08 00:06:27 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.67  2005/12/08 00:06:27  perev
+ * BugFix, Instead of vertex, first hit was used
+ *
  * Revision 2.66  2005/08/18 22:31:47  perev
  * More tests
  *
@@ -397,6 +400,7 @@ using namespace std;
 #include "Sti/StiKalmanTrackFitterParameters.h"
 /////#include "Sti/StiGeometryTransform.h"
 #include "Sti/StiDedxCalculator.h"
+#include "StiUtilities/StiDebug.h"
 
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
@@ -404,7 +408,8 @@ using namespace std;
 //_____________________________________________________________________________
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 {
-
+   mUseAux = 0;
+   mAux    = 0;
   //temp, make sure we're not constructing extra copies...
   //cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
   dEdxTpcCalculator.setFractionUsed(.6);
@@ -518,16 +523,17 @@ struct StreamStHit
   
 */
 //_____________________________________________________________________________
-StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
+void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 {
   //cout << "StiStEventFiller::fillEvent() -I- Started"<<endl;
   if (e==0 || t==0) 
     {
       cout <<"StiStEventFiller::fillEvent(). ERROR:\t"
 	   <<"Null StEvent ("<<e<<") || StiTrackContainer ("<<t<<").  Exit"<<endl;
-      return 0;
+      return;
     }
   mEvent = e;
+  if (mUseAux) { mAux = new StiAux; e->Add(mAux);}
   mTrackStore = t;
   mTrkNodeMap.clear();  // need to reset for this event
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
@@ -603,26 +609,18 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   cout <<"StiStEventFiller::fillEvent() -I- Number of filled GOOD globals:"<< fillTrackCountG<<endl;
   errh.Print();
 
-  return mEvent;
+  return;
 }
 //_____________________________________________________________________________
-StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
+void StiStEventFiller::fillEventPrimaries() 
 {
   //cout <<"StiStEventFiller::fillEventPrimaries() -I- Started"<<endl;
   if (!mTrkNodeMap.size()) 
     {
       cout <<"StiStEventFiller::fillEventPrimaries(). ERROR:\t"
 	   << "Mapping between the StTrackNodes and the StiKalmanTracks is empty.  Exit." << endl;
-      return 0;
+      return;
     }
-  if (e==0 || t==0) 
-    {
-      cout <<"StiStEventFiller::fillEventPrimaries(). ERROR:\t"
-	   <<"Null StEvent ("<<e<<") || StiTrackContainer ("<<t<<").  Exit"<<endl;
-      return 0;
-    }
-  mEvent = e;
-  mTrackStore = t;
   //Added residual maker...aar
   StPrimaryVertex* vertex = 0;
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
@@ -706,7 +704,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   cout <<"StiStEventFiller::fillEventPrimaries() -I- Primaries (1):"<< fillTrackCount1<< " (2):"<< fillTrackCount2<< " no pipe node:"<<noPipe<<" with IFC:"<< ifcOK<<endl;
   cout <<"StiStEventFiller::fillEventPrimaries() -I- GOOD:"<< fillTrackCountG <<endl;
   errh.Print();
-  return mEvent;
+  return;
 }
 //_____________________________________________________________________________
 /// use the vector of StHits to fill the detector info
@@ -719,8 +717,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   StiKTNIterator tNode = track->rbegin();
   StiKTNIterator eNode = track->rend();
-  StHit *lastHit=0;
-  StiKalmanTrackNode *lastNode=0;
+  StiKalmanTrackNode *lastNode=0,*fistNode=0;
   for (;tNode!=eNode;++tNode) 
   {
       StiKalmanTrackNode *node = &(*tNode);
@@ -728,30 +725,32 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 
       StiHit *stiHit = node->getHit();
       if (!stiHit)		continue;
-      assert(node->getDetector()==stiHit->detector());
-      if (!stiHit->detector())	continue;
-      if (!lastHit) {
-        StThreeVectorF pos(node->x_g(),node->y_g(),node->z_g());
-        detInfo->setFirstPoint(pos);
-      }    
+
+      if(node->getChi2()>1000) 	continue;
+
+      const StiDetector *detector = node->getDetector();
+      assert(detector == stiHit->detector());
+      assert(!detector || stiHit->timesUsed());
+      if (!fistNode) fistNode = node;
+      lastNode = node;
+      if (!detector) 		continue;
       StHit *hh = (StHit*)stiHit->stHit();
       if (!hh) 			continue;
-      assert(node->getDetector()->getGroupId()==hh->detector());
-      lastNode = node;
-      lastHit=hh;
+      assert(detector->getGroupId()==hh->detector());
       detInfo->addHit(hh,refCountIncr);
-//      if (!refCountIncr) continue;
+      if (!refCountIncr) 	continue;
       hh->setFitFlag(0);
       if (node->isFitted()) hh->setFitFlag(1);
-#if 0
-//Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
+//Kind of HACK, save residials into StiHack (TEMPORARY ONLY)
       fillResHack(hh,stiHit,node);
-#endif
   }
-  if (lastHit) {
-    StThreeVectorF pos(lastNode->x_g(),lastNode->y_g(),lastNode->z_g());
-    detInfo->setLastPoint(pos);
-  }
+  assert(lastNode && fistNode && (lastNode != fistNode));
+
+  StThreeVectorF posL(lastNode->x_g(),lastNode->y_g(),lastNode->z_g());
+  detInfo->setLastPoint (posL);
+  StThreeVectorF posF(fistNode->x_g(),fistNode->y_g(),fistNode->z_g());
+  detInfo->setFirstPoint(posF);
+
   int dets[kMaxId][3];
   track->getAllPointCount(dets,kMaxId-1);
   for (int i=1;i<kMaxId;i++) {
@@ -782,7 +781,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
   if (dif>3.) {
     dif = node->z_g()-ihit->z_g();
     double nowChi2 = node->evaluateChi2(ihit);
-    printf("****** DIFF TOO BIG %g chi2 = %g %g\n",dif,node->getChi2(),nowChi2);
+    printf("***Track(%d) DIFF TOO BIG %g chi2 = %g %g\n",track->getId(),dif,node->getChi2(),nowChi2);
     printf("H=%g %g %g N =%g %g %g\n",ihit->x()   ,ihit->y()   ,ihit->z()
 		                     ,node->getX(),node->getY(),node->getZ());
     const StMeasuredPoint *mp = ihit->stHit();
@@ -855,8 +854,10 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   chi2[1] = -999; // change: here goes an actual probability, need to calculate?
   // December 04: The second element of the array will now hold the incremental chi2 of adding
   // the vertex for primary tracks
-  if (gTrack->type()==primary) chi2[1]=node->getChi2();
-
+  if (gTrack->type()==primary) {
+    assert(node->getDetector()==0);
+    chi2[1]=node->getChi2();
+  }
     
   // setFitTraits uses assignment operator of StTrackFitTraits, which is the default one,
   // which does a memberwise copy.  Therefore, constructing a local instance of 
@@ -1071,28 +1072,50 @@ double StiStEventFiller::impactParameter(StTrack* track, StThreeVectorD &vertex)
  void StiStEventFiller::fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node)
  {
  
+  if (!mAux) return;
  //Kind of HACK, save residials into never used errors(VP) (TEMPORARY ONLY)
-      float psi  = node->getEta();
-      float resY = node->getY()-stiHit->y();
-//    float eYY  = node->getEyy();
-      float cYY  = node->getCyy();
-      float resZ = node->getZ()-stiHit->z();
-//    float eZZ  = node->getEzz();
-      float cZZ  = node->getCzz();
-      int iresY = 4095;
-      if (fabs(resY) <4.095) iresY = (int)(fabs(resY)*1000); 
-      int iresZ = 4095;
-      if (fabs(resZ) <4.095) iresZ = (int)(fabs(resZ)*1000);
-      
-      int icY   = (int)(sqrt(cYY )*1000+0.5); if (icY > 2047) icY  =2047;
-      int icZ   = (int)(sqrt(cZZ )*1000+0.5); if (icZ > 2047) icZ  =2047;
-      float forY = iresY + 4096*icY;      if (resY<0)     forY = -forY;
-      float forZ = iresZ + 4096*icZ;      if (resZ<0)     forZ = -forZ;
+      StiAux_t aux;
+// local frame
+  aux.xnl[0] = node->getX();
+  aux.xnl[1] = node->getY();
+  aux.xnl[2] = node->getZ();
 
-      double chi2 = node->getChi2();   if (chi2>1000) chi2=1000;
-      int ic2 = (int)(sqrt(chi2)*100+0.5); if (ic2 > 2047) ic2  =2047;
-      int ips = (int)(fabs(psi)*1000+0.5); if (ips > 4095) ips  =4095;
-      float forX = ips + 4096*ic2;     if (psi<0) forX = -forX;
-      StThreeVectorF v3(forX,forY,forZ);
-      hh->setPositionError(v3);
+  aux.xhl[0] = stiHit->x();
+  aux.xhl[1] = stiHit->y();
+  aux.xhl[2] = stiHit->z();
+
+  aux.ca     = node->getEta();
+  aux.rho    = node->getCurvature();
+  aux.nYY    = node->getCyy();
+  aux.nZZ    = node->getCzz();
+  aux.hYY    = node->getEyy();
+  aux.hZZ    = node->getEzz();
+
+  aux.unl[0] = node->getX();
+  aux.unl[1] = node->unTouched().mPar[0];
+  aux.unl[2] = node->unTouched().mPar[1];
+  aux.uYY    = sqrt(node->unTouched().mErr[0]);
+  aux.uZZ    = sqrt(node->unTouched().mErr[2]);
+
+
+  // global frame
+  aux.xng[0] = node->x_g();
+  aux.xng[1] = node->y_g();
+  aux.xng[2] = node->z_g();
+
+  aux.xhg[0] = stiHit->x_g();
+  aux.xhg[1] = stiHit->y_g();
+  aux.xhg[2] = stiHit->z_g();
+  aux.psi    = node->getPsi();
+  aux.dip    = node->getDipAngle();
+  // invariant
+  double chi2 = node->getChi2();if (chi2>1000) chi2=1000;
+  aux.chi2   = chi2;
+  int id = mAux->AddIt(&aux);
+  assert(id);
+  hh->setId(id);
+  assert(hh->id());
+//mAux->PrintIt(id);
+  
+
 }
