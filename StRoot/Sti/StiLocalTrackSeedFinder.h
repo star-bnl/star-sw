@@ -35,7 +35,7 @@ public:
 			  StiHitContainer         * hitContainer,
 			  StiDetectorContainer * detectorContainer);
   virtual ~StiLocalTrackSeedFinder();
-  StiTrack* findTrack(double rMin);
+  StiTrack* findTrack(double rMin=0);
   virtual void clear(){reset();};
   virtual void initialize(){};
   virtual void print() const;
