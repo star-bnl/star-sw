@@ -9,7 +9,8 @@ KalmanTrackFitterParameters_st row;
 St_KalmanTrackFitterParameters *tableSet = new St_KalmanTrackFitterParameters("KalmanTrackFitterParameters",1);
 //
 memset(&row,0,tableSet->GetRowSize());
-    row.maxChi2	 =         10.0; // Maximum Chi2 ;
+    row.maxChi2	 	=         30.0; // Maximum Chi2 ;
+    row.maxChi2Vtx	=        100.0; // Maximum Chi2 for vertex ;
 tableSet->AddAt(&row);
 // ----------------- end of code ---------------
  return (TDataSet *)tableSet;
