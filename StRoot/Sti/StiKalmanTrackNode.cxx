@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.89 2005/12/07 22:29:27 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.90 2005/12/08 22:05:45 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.90  2005/12/08 22:05:45  perev
+ * nudge assert replaced by print. But very strangeStiKalmanTrackNode.cxx
+ *
  * Revision 2.89  2005/12/07 22:29:27  perev
  * Big Cleanup
  *
@@ -909,7 +912,12 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
   mgP.dl   += deltaL;
 
 
-  assert(fabs(mFP._sinCA) <  1.);
+//  assert(fabs(mFP._sinCA) <  1.);
+  if (fabs(mFP._sinCA)>=1) {
+    printf("StiKalmanTrackNode::nudge WRONG WRONG WRONG sinCA=%g\n",mFP._sinCA);
+    mFP.print();
+    return -13;
+  }
   assert(fabs(mFP._cosCA) <= 1.);
   mPP() = mFP;
   return 0;
