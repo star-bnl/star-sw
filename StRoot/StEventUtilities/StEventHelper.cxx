@@ -42,6 +42,11 @@
 #undef   __EVENTHELPER_ONLY__
 #include <map>
 
+#include "StSvtHitCollection.h"
+#include "StSvtBarrelHitCollection.h"
+#include "StSvtLadderHitCollection.h"
+#include "StSvtWaferHitCollection.h"
+
 void Break(){printf("InBreak\n");}
 
 std::map<long,long>  myMap;
@@ -1134,6 +1139,12 @@ const StHit *StTrackHelper::GetHit(int idx) const
   return fHits->at(idx);
 }
 //______________________________________________________________________________
+int StTrackHelper::numberOfFitPoints(int det) const
+{
+   const StTrackFitTraits& trait = fTrk->fitTraits();
+   return (det)? trait.numberOfFitPoints((StDetectorId)det): trait.numberOfFitPoints();
+}
+//______________________________________________________________________________
 StMCTruth StTrackHelper::GetTruth(int byNumb,double rXYMin,double rXYMax) const
 {
    StMCPivotTruth pivo(1);
@@ -1146,10 +1157,10 @@ StMCTruth StTrackHelper::GetTruth(int byNumb,double rXYMin,double rXYMax) const
      if (r>rXYMax) 		continue;	
      int idTruth=hit->idTruth();
      int wtTruth=hit->qaTruth();
-//     if (!wtTruth) wtTruth=1;
-     if (!idTruth || !wtTruth)	{
-       Warning("GetTruth","idTruth,wtTruth= %d %d",idTruth,wtTruth);
-       				continue;}
+     if (!wtTruth) wtTruth=1;
+//     if (!idTruth || !wtTruth)	{
+//       Warning("GetTruth","idTruth,wtTruth= %d %d",idTruth,wtTruth);
+//       				continue;}
      nUsed++; pivo.Add(idTruth,wtTruth);	
    }		
    if (!nUsed) return 0;
@@ -1355,9 +1366,83 @@ TString ts;
   ts="***Unknown***";
   return ts;
 }
+//________________________________________________________________________________
+//________________________________________________________________________________
+StHitIter::StHitIter()
+{
+  fEvent = 0;
+  Reset();
+}
+//________________________________________________________________________________
+void StHitIter::Reset()
+{
+  memset(fO,  0,sizeof(fO));
+  memset(fN,  0,sizeof(fN));
+  memset(fI ,-1,sizeof(fI));
+}
+//________________________________________________________________________________
+StHitIter &StHitIter::Next()
+{
+  int kase = 0;
+  fO[0]= 0;
 
+  while(2005) {
+    if (++fI[kase] >= fN[kase]) {kase++;continue;}
+    fO[kase] = GetO(kase+1,fI[kase]);
+    if (!fO[kase]) break;
+    if (!kase    ) break;
+    fN[kase-1] = GetN(kase);
+    fI[kase-1] = -1;
+    kase--; 
+  }
+  return *this;
+}
+//________________________________________________________________________________
+//________________________________________________________________________________
+//________________________________________________________________________________
+StSvtHitIter::StSvtHitIter(StEvent *ev):StHitIter()
+{
+  fEvent = ev;
+  fO[4] = fEvent->svtHitCollection();
+  fN[3] = 1;
+  ++(*this);
+}
+//________________________________________________________________________________
+StObject *StSvtHitIter::GetO(int lev,int idx)
+{
+  switch (lev) {
+    
+    case 1: //StSvtHit
+      return ((StSvtWaferHitCollection *)fO[1])->hits()[idx];
+    case 2: //Wafer
+      return ((StSvtLadderHitCollection*)fO[2])->wafer (idx);
+    case 3: //Ladder
+      return ((StSvtBarrelHitCollection*)fO[3])->ladder(idx);
+    case 4: //Ladder
+      return ((StSvtHitCollection      *)fO[4])->barrel(idx);
+    case 5: //SvtHitCollection
+      return fEvent->svtHitCollection();
+    default: return 0;
+  }
+}
 
-
+//________________________________________________________________________________
+int StSvtHitIter::GetN(int lev) const
+{
+  switch (lev) {
+    case 1: //N StSvtHits
+      return ((StSvtWaferHitCollection *)fO[1])->hits().size();
+    case 2: //N Wafers
+      return ((StSvtLadderHitCollection*)fO[2])->numberOfWafers();
+    case 3: //N Ladders
+      return ((StSvtBarrelHitCollection*)fO[3])->numberOfLadders();
+    case 4: //N Barrels
+      return ((StSvtHitCollection      *)fO[4])->numberOfBarrels();
+    case 5: //N SvtHitCollections
+      return 1;
+    default: return 0;
+  }
+}
 
 
 
