@@ -192,10 +192,6 @@ void StiHit::setGlobal(const StiDetector * detector,
       mposition = placement->getLayerRadius();
       mx =  detector->_cos*gx + detector->_sin*gy;
       my = -detector->_sin*gx + detector->_cos*gy;
-      if (strncmp(detector->getName().c_str(),"Svt",3)==0
-      &&  gSystem->Getenv("SVTFAKE")	      ) {
-        gz +=2*(gRandom->Rndm()-0.5);
-      }
     }
   else
     {
