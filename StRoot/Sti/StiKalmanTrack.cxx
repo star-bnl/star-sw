@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.74 2005/12/07 21:30:32 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.74 2005/12/07 21:30:32 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.75 2005/12/08 21:18:35 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.75 2005/12/08 21:18:35 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.75  2005/12/08 21:18:35  perev
+ * track id must < 2*16
+ *
  * Revision 2.74  2005/12/07 21:30:32  perev
  * new refit,refitL,approx etc...
  *
@@ -297,7 +300,8 @@ static double diff(const StiNodePars &p1,const StiNodeErrs &e1
 void StiKalmanTrack::reset()
 {
 static int mIdCount = 0;
-  mId = ++mIdCount;
+  if ((++mIdCount) >= 1<<16) mIdCount = 1;
+  mId = mIdCount; 
   firstNode = 0;
   lastNode  = 0;
   mSeedHitCount = 0;
