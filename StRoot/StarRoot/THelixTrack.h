@@ -2,6 +2,38 @@
 #define THELIXTRACK_H
 #include "TObject.h"
 
+class TCircle: public TObject
+{
+public:
+TCircle(double *x=0,double *dir=0,double rho=0);
+
+const double* Pos() const 	{return fX;  } 
+const double* Dir() const 	{return fD;  } 
+      double  Rho() const       {return fRho;}
+      void    Nor(double *norVec) const; 
+
+double Path(const double *pnt);
+double Move(double step);
+void   Rot(double angle);
+void   Backward();
+double Eval(double step,double *xy,double *dir=0) const;
+int    Approx(int nPts,const double *Pts                    ,int pstep=2);
+double Fit   (int nPts,const double *Pts,const double *Err=0,int pstep=2,int estep=3);
+double Resid (int npoints,const double *points,int pstep=2);
+void   FitZet(int npoints,const double *points
+                         ,const double *zets
+			 ,double *Z0TanL,int pstep=2,int zstep=1);
+void   Print(const char* chopt = "") const;
+//	static funs
+static void Test(int iTest=1);
+
+protected:
+double fX[2];
+double fD[2];
+double fRho;
+ClassDef(TCircle,0)
+};
+
 class THelixTrack : public TObject 
 {
 public:
