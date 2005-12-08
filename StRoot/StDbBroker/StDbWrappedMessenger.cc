@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.5 2003/09/12 01:48:06 porter Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.6 2005/12/08 18:13:27 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.6  2005/12/08 18:13:27  deph
+ * Made message length dynamic. We were bumping up against the 1024 limit in verbose mode.
+ *
  * Revision 1.5  2003/09/12 01:48:06  porter
  * removed all strstream objects in favor of stringstream+string directly
  *
@@ -88,9 +91,13 @@ StDbWrappedMessenger::printMessage(const char* message, const char* levelString,
   // which isn't available directly in StRoot 
   //
 
-  char str[1024];
+//  char str[1024];
+  int n = strlen(message)+1000;
+  char * str = new char[n];
+
   sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
   mMessenger->Message(str,levelString);
+  delete str;
 }
 
 
