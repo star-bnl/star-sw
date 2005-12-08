@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.27 2005/12/07 21:24:51 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.28 2005/12/08 04:14:49 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.28  2005/12/08 04:14:49  perev
+ * new place for StiDebug.h
+ *
  * Revision 2.27  2005/12/07 21:24:51  perev
  * Cleanup
  *
@@ -102,7 +105,7 @@
 #include "StiKalmanTrackNode.h"
 #include "StiHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
-#include "StiDebug.h"
+#include "StiUtilities/StiDebug.h"
 
 //_____________________________________________________________________________
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
