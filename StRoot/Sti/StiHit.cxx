@@ -6,6 +6,8 @@
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
+#include "TSystem.h"
+#include "TRandom.h"
 #ifdef Sti_DEBUG
 #include "TRMatrix.h"
 #include "TRVector.h"
@@ -190,6 +192,10 @@ void StiHit::setGlobal(const StiDetector * detector,
       mposition = placement->getLayerRadius();
       mx =  detector->_cos*gx + detector->_sin*gy;
       my = -detector->_sin*gx + detector->_cos*gy;
+      if (strncmp(detector->getName().c_str(),"Svt",3)==0
+      &&  gSystem->Getenv("SVTFAKE")	      ) {
+        gz +=2*(gRandom->Rndm()-0.5);
+      }
     }
   else
     {
@@ -212,9 +218,6 @@ void StiHit::setGlobal(const StiDetector * detector,
   mdetector = detector;  msthit = stHit;
   _energy = energy;
   if (!stHit   ) return;
-  assert( fabs(stHit->position().x()-_xg)< 1.e-6
-       && fabs(stHit->position().y()-_yg)< 1.e-6
-       && fabs(stHit->position().z()-_zg)< 1.e-6);
   if (!detector) return;
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
