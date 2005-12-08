@@ -8,12 +8,15 @@ TDataSet *CreateTable() {
 HitError_st row;
 St_HitError *tableSet = new St_HitError("svtHitError",1);
 //
+//double hitErr = 0.02;
+double hitErr = 0.0050;
+hitErr*=hitErr;
 memset(&row,0,tableSet->GetRowSize());
 //                                        hit errors are squared !
-    row.coeff[0]	 =   0.02*0.02; 	// u intrinsic;
+    row.coeff[0]	 =   hitErr; 	// u intrinsic;
     row.coeff[1]	 =   0.0;      		// u cross;
     row.coeff[2]	 =   0.0;      		// u drift;
-    row.coeff[3]	 =   0.02*0.02;     	// z intrinsic;
+    row.coeff[3]	 =   hitErr;     	// z intrinsic;
     row.coeff[4]	 =   0.0;      		// z dip;
     row.coeff[5]	 =   0.0;      		// z drift;
 tableSet->AddAt(&row);
