@@ -7,6 +7,10 @@
 #pragma link C++ class THack-;
 #pragma link C++ class TUnixTime;
 #pragma link C++ class TDirIter;
+//#pragma link C++ class TAssign;
+//#pragma link C++ class TAssMtx;
+//#pragma link C++ class TAssMtxSimple;
+//#pragma link C++ class TAssMtxObj;
 #pragma link C++ class TRArray+;
 #pragma link C++ class TRMatrix+;
 #pragma link C++ class TRSymMatrix+;
