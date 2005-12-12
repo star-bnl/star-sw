@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.39 2004/04/08 20:51:39 perev Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.40 2005/12/12 21:00:12 perev Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.40  2005/12/12 21:00:12  perev
+ * 3 random generators ==> 1
+ *
  * Revision 1.39  2004/04/08 20:51:39  perev
  * bug fix low limit must be -10, not 10.
  *
@@ -167,6 +170,7 @@ using std::random_shuffle;
 
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StTrsDeDx.hh"
+#include "StTrsRandom.hh"
 
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dislan_(float &x);
@@ -392,7 +396,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	theIonization.push_back(ionizationLeft);
 	 
 	//copy(theIonization.begin(),theIonization.end(), ostream_iterator<float>(cout,","));
-	random_shuffle(theIonization.begin(), theIonization.end());
+	random_shuffle(theIonization.begin(), theIonization.end(),StTrsRandom::inst());
 	//cout << endl;
 	//copy(theIonization.begin(), theIonization.end(), ostream_iterator<float>(cout,","));
      

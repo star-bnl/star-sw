@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.78 2005/09/09 22:12:48 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.79 2005/12/12 21:00:11 perev Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.79  2005/12/12 21:00:11  perev
+// 3 random generators ==> 1
+//
 // Revision 1.78  2005/09/09 22:12:48  perev
 // Bug fix + IdTruth added
 //
@@ -291,6 +294,9 @@
 #include "TDataSetIter.h"
 #include "TObjectSet.h"
 
+#define ST_TRS_RANDOM_SRC
+#include "StTrsRandom.hh"
+
 #include <Stiostream.h>
 #include <unistd.h>    // needed for access()/sleep()
 #include <math.h>
@@ -389,7 +395,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.78 2005/09/09 22:12:48 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.79 2005/12/12 21:00:11 perev Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -413,9 +419,13 @@ StTrsMaker::StTrsMaker(const char *name):StMaker(name)
 StTrsMaker::~StTrsMaker() { /* nopt */ }
 
 
-Int_t StTrsMaker::Init(){
+Int_t StTrsMaker::Init()
+{
   mAllTheData = 0;
-   return StMaker::Init();
+  int seed = IAttr("trsInitSeed");
+  if (!seed) seed = 19460510;
+  StTrsRandom::inst().SetSeed(seed);
+  return StMaker::Init();
 }
 
 Int_t StTrsMaker::InitRun(int runnumber)
@@ -692,7 +702,13 @@ Int_t StTrsMaker::Make(){
     cout << "\n -- Begin TRS Processing -- \n";
     time_t trsMakeBegin = time(0);
     cout << "Started at: " << ctime(&trsMakeBegin);    
-    cout << "========= driftVelocity used = " << mSlowControlDb->driftVelocity() << endl;
+    cout << "========= TRS driftVelocity used = " << mSlowControlDb->driftVelocity() << endl;
+    
+    int seed = IAttr("trsMakeSeed");
+    if (seed) StTrsRandom::inst().SetSeed(seed);
+    cout << "========= TRS Seed  used = " <<  StTrsRandom::inst().GetSeed()<< endl;
+
+
     int currentSectorProcessed = mFirstSectorToProcess;
 
     cout << "Processing sectors "

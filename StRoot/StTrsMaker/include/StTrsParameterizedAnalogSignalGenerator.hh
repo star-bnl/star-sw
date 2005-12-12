@@ -42,18 +42,19 @@ public:
     // sampling
     void   sampleAnalogSignal();
     double signalSampler(double, StTrsAnalogSignal&);
-    double addNoise(double );
-    void setNormalFactor(double FudgeFactor);
-  void addSignal(const int id, const double signal, SignalSum_t &sum);
-  int SignalId(SignalSum_t &sum);
+    double addNoise(double sigma);
+    void   addNoise(bool       l)	{StTrsAnalogSignalGenerator::addNoise(l);}
+    void   setNormalFactor(double FudgeFactor);
+    void   addSignal(const int id, const double signal, SignalSum_t &sum);
+    int    SignalId(SignalSum_t &sum);
 
 private:
     // sampling
     double realShaperResponse(double, StTrsAnalogSignal&);
   // error function table initialization
-    void    errorFunctionTableBuilder(); 
-    void    localArrayBuilder();
-    double  erf_fast(double) const;
+    void   errorFunctionTableBuilder(); 
+    void   localArrayBuilder();
+    double erf_fast(double) const;
 
 protected:
     StTrsParameterizedAnalogSignalGenerator(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*, StTrsSector*);
@@ -69,44 +70,37 @@ private:
   double         mFractionSampled;  
   double         mPadResponseFunctionSigma;
   double         normalFactor;
-const double         mPadResponseFunctionSigmaOuter;
-const double         mPadResponseFunctionSigmaInner;
+const double     mPadResponseFunctionSigmaOuter;
+const double     mPadResponseFunctionSigmaInner;
  
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
- 
-   vector<double> mChargeFractionOuter; 
-  vector<double> mChargeFractionInner;
-  vector<double> mErrorFunctionTable; 
-  vector<double> mYb;
-#else
 
   vector<double, allocator<double> > mChargeFractionOuter; 
   vector<double, allocator<double> > mChargeFractionInner;
   vector<double, allocator<double> > mErrorFunctionTable; 
   vector<double, allocator<double> > mYb;
-#endif
+
   double         mNumberOfEntriesInTable;
   double         mRangeOfTable ;
   int            mPadsAtRow[200];
-    //To avoid initialization, define the following data members.
-    StTpcPadCoordinate    mTpcRaw;
-    int            mCentralPad;
-    int            mCentralRow;
-    int            mNumberOfRows;
-    int            mNumberOfInnerRows;
-    double         mFrischGrid;
- 
-    double rowNormalization;
-    double padWidth, padLength;
-    double zoffset, wire_to_plane_coupling;
-    double xCentroid[100][500], yCentroid[100],SignalInTimeBin[1000],gain[100][500];
-    double delx, gridMinusZ, sigma_x, localXDirectionCoupling[500];
-    double dely, constant, localYDirectionCoupling;
-    double timeOfSignal, chargeOfSignal;
-    double t, tzero, K, sigmaLoverTau, lambda,lambdasqr;
-    double mAdcConversion;
-    double landauConstant,landauMean,landauSigma,expConstant,expSlope,landauCut,
-    GausConstant[6], GausMean[6], GausSigma2[6],ExpConstant[6],ExpSlope[6],cutT[6];
+    	//To avoid initialization, define the following data members.
+  StTpcPadCoordinate    mTpcRaw;
+  int            mCentralPad;
+  int            mCentralRow;
+  int            mNumberOfRows;
+  int            mNumberOfInnerRows;
+  double         mFrischGrid;
+
+  double rowNormalization;
+  double padWidth, padLength;
+  double zoffset, wire_to_plane_coupling;
+  double xCentroid[100][500], yCentroid[100],SignalInTimeBin[1000],gain[100][500];
+  double delx, gridMinusZ, sigma_x, localXDirectionCoupling[500];
+  double dely, constant, localYDirectionCoupling;
+  double timeOfSignal, chargeOfSignal;
+  double t, tzero, K, sigmaLoverTau, lambda,lambdasqr;
+  double mAdcConversion;
+  double landauConstant,landauMean,landauSigma,expConstant,expSlope,landauCut,
+  GausConstant[6], GausMean[6], GausSigma2[6],ExpConstant[6],ExpSlope[6],cutT[6];
     
 };
 

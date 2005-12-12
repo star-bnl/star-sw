@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.34 2005/09/09 22:12:49 perev Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.35 2005/12/12 21:00:12 perev Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.35  2005/12/12 21:00:12  perev
+ * 3 random generators ==> 1
+ *
  * Revision 1.34  2005/09/09 22:12:49  perev
  * Bug fix + IdTruth added
  *
@@ -168,7 +171,7 @@
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::sort;
 #endif
-
+#include "StTrsRandom.hh"
 
 static const double sigmaL = .037*centimeter/::sqrt(centimeter);
 //static const double sigmaT = .0633*centimeter/::sqrt(centimeter);
@@ -361,7 +364,7 @@ void StTrsParameterizedAnalogSignalGenerator::localArrayBuilder()
       yCentroid[row]=transformer.yFromRow(row+1);
       for(pad=0;pad<max_pads;pad++)
          { xCentroid[row][pad]=transformer.xFromPad(row+1,pad+1);     
-	 // gain[row][pad]=1.0+(drand48()-0.5)*0.20;
+	 // gain[row][pad]=1.0+(StTrsRandom::inst().Rndm()-0.5)*0.20;
               }
         
       
@@ -827,9 +830,9 @@ double StTrsParameterizedAnalogSignalGenerator::addNoise(double sigma)
  {
    float  x, y, z;
 
-   y = drand48();
-   if (!y) y = drand48();
-   z = drand48();
+   y = StTrsRandom::inst().Rndm();
+   if (!y) y = StTrsRandom::inst().Rndm();
+   z = StTrsRandom::inst().Rndm();
    x = z * 6.283185;
    
    return sigma*sin(x)*::sqrt(-2*::log(y));//Gaussian with mean=0
