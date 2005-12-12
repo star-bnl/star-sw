@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.19 2003/09/30 08:58:20 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.20 2005/12/12 14:43:53 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.20  2005/12/12 14:43:53  jcs
+// exit if error occurs while constructing StFtpcDbReader
+//
 // Revision 1.19  2003/09/30 08:58:20  jcs
 // StMagUtilities constructer was changed; for safety's sake call with mode = 0
 //
@@ -139,7 +142,11 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
                                                 m_ddeflectiondp,
                                                 m_gas,
                                                 m_driftfield);
-
+   if (dbReader->returnCode != 0) {
+     cout<<"Error constructing StFtpcDbReader"<<endl;
+     return;
+   }
+   
     ftpcEField_st *ftpcEField = m_efield->GetTable();
     ftpcVDrift_st *ftpcVDrift = m_vdrift->GetTable();
     ftpcDeflection_st *ftpcDeflection = m_deflection->GetTable();
