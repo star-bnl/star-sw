@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.81  2005/12/12 13:42:32  jcs
+// if StFtpcDbRead not constructed exit with kStWarn
+//
 // Revision 1.80  2005/10/26 14:01:09  jcs
 // Set gas temperature to default values when running fss so that database
 // values are printed out only once
@@ -538,6 +541,11 @@ Int_t StFtpcClusterMaker::Make()
                           m_electronics,
 			  m_cathode,
 			  m_clustergeo);	
+
+  if ( dbReader.returnCode != 0 ) {
+     gMessMgr->Warning() << "StFtpcClusterMaker::Error Constructing StFtpcDbReader "<<endm;
+     return kStWarn;
+  }
 
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
      dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
