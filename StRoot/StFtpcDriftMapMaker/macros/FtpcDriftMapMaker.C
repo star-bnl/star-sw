@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.1 2005/12/12 09:09:11 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.2 2005/12/12 09:30:52 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.2  2005/12/12 09:30:52  jcs
+// load StarMagField library
+//
 // Revision 1.1  2005/12/12 09:09:11  jcs
 // Macro used to run StFtpcDriftMapMakerZ
 //
@@ -32,6 +35,7 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
     gSystem->Load("StDbLib");
     gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
+    gSystem->Load("StarMagField");
     gSystem->Load("StMagF");
     gSystem->Load("libftpc_Tables");
     gSystem->Load("StFtpcDriftMapMaker");
