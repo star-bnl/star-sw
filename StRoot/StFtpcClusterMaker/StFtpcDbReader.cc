@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.32 2005/10/26 14:03:43 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.33 2005/12/12 13:40:12 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.33  2005/12/12 13:40:12  jcs
+// simplify StFtpcDbReader
+//
 // Revision 1.32  2005/10/26 14:03:43  jcs
 // Change setMicrosecondsPerTimebin
 //
@@ -129,184 +132,26 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
 			       St_ftpcClusterGeom *clustergeo)
 {
 
-  //  just copy dimensions table start to pointer
-  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
-  if(dimensionsTable){
-    mNumberOfPadrows            = dimensionsTable->totalNumberOfPadrows;
-    mNumberOfPadrowsPerSide     = dimensionsTable->numberOfPadrowsPerSide;
-    mFirstPadrowToSearch        = dimensionsTable->firstPadrowToSearch;
-    mLastPadrowToSearch         = dimensionsTable->lastPadrowToSearch;   
-    mNumberOfSectors            = dimensionsTable->numberOfSectorsPerPadrow;
-    mFirstSectorToSearch        = dimensionsTable->firstSectorToSearch;
-    mLastSectorToSearch         = dimensionsTable->lastSectorToSearch;
-    mPhiOrigin                  = dimensionsTable->phiOrigin;
-    mPhiPerSector               = dimensionsTable->phiPerSector;
-    mNumberOfPads               = dimensionsTable->numberOfPadsPerSector;
-    mPadLength                  = dimensionsTable->padLength;
-    mRadiansPerPad              = dimensionsTable->radiansPerPad;
-    mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
-    mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
-    mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
-    mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
-  }
+  returnCode = kStOK;
+  returnCode += FtpcDimensions(dimensions);
+  returnCode += FtpcPadrowZ(zrow);
+  returnCode += FtpcAsicMap(asicmap);
+  returnCode += FtpcEField(efield);
+  returnCode += FtpcVDrift(vdrift);
+  returnCode += FtpcDeflection(deflection);
+  returnCode += FtpcdVDriftdP(dvdriftdp);
+  returnCode += FtpcdDeflectiondP(ddeflectiondp);
+  returnCode += FtpcAmpSlope(ampslope);
+  returnCode += FtpcAmpOffset(ampoffset);
+  returnCode += FtpcTimeOffset(timeoffset);
+  returnCode += FtpcDriftField(driftfield);
+  returnCode += FtpcGas(gas);
+  returnCode += FtpcElectronics(electronics);
+  returnCode += FtpcInnerCathode(cathode);
+  returnCode += FtpcClusterGeom(clustergeo);
 
-  //  just copy zrow table start to pointer
-  ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
-  if(padrowzTable){
-   mPadrowZPosition = (Float_t *)padrowzTable->z;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
-  }
+  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcClusterMaker"  ,"I"); 
 
-  //  just copy asicmap table start to pointer
-  ftpcAsicMap_st* asicmapTable = (ftpcAsicMap_st*)asicmap->GetTable();
-  if(asicmapTable){
-	    mEastIsInverted = asicmapTable->EastIsInverted;
-            mAsic2EastNotInverted = asicmapTable->Asic2EastNotInverted;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
-  }
-
-  //  just copy EField table start to pointer
-  ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
-  if(efieldTable){
-   mMagboltzEField = (Float_t *)efieldTable->e;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcEField","E");
-  }
-
-  //  just copy VDrift table start to pointer
-  ftpcVDrift_st* vdriftTable = (ftpcVDrift_st*)vdrift->GetTable();
-  if(vdriftTable){
-   mMagboltzVDrift = (Float_t *)vdriftTable->v;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcVDrift","E");
-  }
-
-  //  just copy Deflection table start to pointer
-  ftpcDeflection_st* deflectionTable = (ftpcDeflection_st*)deflection->GetTable();
-  if(deflectionTable){
-   mMagboltzDeflection = (Float_t *)deflectionTable->psi;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDeflection","E");
-  }
-
-  //  just copy dVDriftdP table start to pointer
-  ftpcdVDriftdP_st* dvriftdpTable = (ftpcdVDriftdP_st*)dvdriftdp->GetTable();
-  if(dvriftdpTable){
-   mMagboltzdVDriftdP = (Float_t *)dvriftdpTable->dv_dp;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcdVDriftdP","E");
-  }
-
-  //  just copy dDeflectiondP table start to pointer
-  ftpcdDeflectiondP_st* ddeflectiondpTable = (ftpcdDeflectiondP_st*)ddeflectiondp->GetTable();
-  if(ddeflectiondpTable){
-   mMagboltzdDeflectiondP = (Float_t *)ddeflectiondpTable->dpsi_dp;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcdDeflectiondP","E");
-  }
-
-  //  just copy AmpSlope table start to pointer
-  ampslopeTable = (ftpcAmpSlope_st*)ampslope->GetTable();
-  if(!ampslopeTable){
-    gMessMgr->Message( " No data in table class St_ftpcAmpSlope","E");
-  }
-
-  //  just copy AmpOffset table start to pointer
-  ampoffsetTable = (ftpcAmpOffset_st*)ampoffset->GetTable();
-  if(!ampoffsetTable){
-    gMessMgr->Message( " No data in table class St_ftpcAmpOffset","E");
-  }
-
-  //  just copy TimeOffset table start to pointer
-  timeoffsetTable = (ftpcTimeOffset_st*)timeoffset->GetTable();
-  if(!timeoffsetTable){
-    gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
-  }
-
-  //  just copy driftfield table start to pointer
-  ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
-  if(driftfieldTable){
-    mNumberOfMagboltzBins = driftfieldTable->numberOfEFieldBinsUsed;
-    mMaximumNumberOfMagboltzBins = driftfieldTable->maximumNumberOfEFieldBins;
-    mDriftCathodeVoltage = driftfieldTable->driftCathodeVoltage;
-    mMinimumDriftField  = driftfieldTable->minimumDriftField;
-    mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
-    mRadiusTimesField   = driftfieldTable->radiusTimesField;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
-  }
-
-  //  just copy gas table start to pointer
-  ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
-  if(gasTable){
-   mPercentAr              = gasTable->percentAr;
-   mPercentCO2             = gasTable->percentCO2;
-   mPercentNe              = gasTable->percentNe;
-   mPercentHe              = gasTable->percentHe;
-   mGasGain                = gasTable->gasGain;
-   mGasAttenuation         = gasTable->gasAttenuation;
-   mGasIonizationPotential = gasTable->gasIonizationPotential;
-   mBaseTemperature        = gasTable->baseTemperature;
-   mBasePressure           = gasTable->basePressure;
-   mPressureOffset         = gasTable->pressureOffset;
-   mTemperatureDifference  = gasTable->temperatureDifference;
-   mDefaultTemperatureWest = gasTable->defaultTemperatureWest;
-   mDefaultTemperatureEast = gasTable->defaultTemperatureEast;
-   mMinPressure            = gasTable->minPressure;
-   mMaxPressure            = gasTable->maxPressure; 
-   mMinGasTemperature      = gasTable->minGasTemperature;
-   mMaxGasTemperature      = gasTable->maxGasTemperature; 
-   mAdjustAverageWest      = gasTable->adjustAverageWest;
-   mAdjustAverageEast      = gasTable->adjustAverageEast;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcGas","E");
-  }
-
-  //  just copy electronics table start to pointer
-  ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
-  if(electronicsTable){
-   mTZero = electronicsTable->tZero;
-   mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
-  }
-
-  //  just copy inner cathode table start to pointer
-  ftpcInnerCathode_st* cathodeTable = (ftpcInnerCathode_st*)cathode->GetTable();
-  if(cathodeTable){
-    mOffsetCathodeWest = cathodeTable->offsetCathodeWest;
-    mOffsetCathodeEast = cathodeTable->offsetCathodeEast;
-    mAngleOffsetWest   = cathodeTable->angleOffsetWest;
-    mAngleOffsetEast   = cathodeTable->angleOffsetEast;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcInnerCathode","E");
-  }    
-
-  //  just copy cluster geometry table start to pointer
-  ftpcClusterGeom_st* clustergeoTable = (ftpcClusterGeom_st*)clustergeo->GetTable();
-  if(clustergeoTable){
-    mMinTimeBin = clustergeoTable->minTimebin;
-    mMinTimeBinMed = clustergeoTable->minTimebinMed;
-    mMinTimeBinOut = clustergeoTable->minTimebinOut;
-    mMaxTimeLength = clustergeoTable->maxTimelength;
-    mMaxTimeLengthMed = clustergeoTable->maxTimelengthMed;
-    mMaxTimeLengthOut =  clustergeoTable->maxTimelengthOut;
-    mMaxPadLength  = clustergeoTable->maxPadlength;  
-    mMaxPadLengthMed  = clustergeoTable->maxPadlengthMed;
-    mMaxPadLengthOut  = clustergeoTable->maxPadlengthOut;
-    mDeltaTime = clustergeoTable->deltaTime;
-    mDeltaPad  = clustergeoTable->deltaPad;
-    mMinChargeWindow = clustergeoTable->minChargeWindow;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcClusterGeom","E");
-  }
-
-
-//   cout << "StFtpcDbReader constructed" << endl;  
 }
 
 // for StFtpcSlowSimMaker
@@ -326,80 +171,272 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
 			       St_ftpcInnerCathode  *cathode)
 {
 
+
+  returnCode = kStOK;
+  returnCode += FtpcDimensions(dimensions);
+  returnCode += FtpcAsicMap(asicmap);
+  returnCode += FtpcEField(efield);
+  returnCode += FtpcVDrift(vdrift);
+  returnCode += FtpcDeflection(deflection);
+  returnCode += FtpcdVDriftdP(dvdriftdp);
+  returnCode += FtpcdDeflectiondP(ddeflectiondp);
+  returnCode += FtpcGas(gas);
+  returnCode += FtpcDriftField(driftfield);
+  returnCode += FtpcElectronics(electronics);
+  returnCode += FtpcAmpSlope(ampslope);
+  returnCode += FtpcAmpOffset(ampoffset);
+  returnCode += FtpcTimeOffset(timeoffset);
+  returnCode += FtpcInnerCathode(cathode);
+
+  gMessMgr->Message("StFtpcDbReader constructed for StFtpcSlowSimMaker"  ,"I"); 
+}
+
+// for StFtpcDriftMapMaker
+StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                               St_ftpcPadrowZ       *zrow,
+                               St_ftpcEField        *efield,
+                               St_ftpcVDrift        *vdrift,
+                               St_ftpcDeflection    *deflection,
+                               St_ftpcdVDriftdP     *dvdriftdp,
+                               St_ftpcdDeflectiondP *ddeflectiondp,
+                               St_ftpcGas           *gas,
+                               St_ftpcDriftField    *driftfield)
+{
+
+
+  returnCode = kStOK;
+  returnCode += FtpcDimensions(dimensions);
+  returnCode += FtpcPadrowZ(zrow);
+  returnCode += FtpcEField(efield);
+  returnCode += FtpcVDrift(vdrift);
+  returnCode += FtpcDeflection(deflection);
+  returnCode += FtpcdVDriftdP(dvdriftdp);
+  returnCode += FtpcdDeflectiondP(ddeflectiondp);
+  returnCode += FtpcGas(gas);
+  returnCode += FtpcDriftField(driftfield);
+
+  gMessMgr->Message("StFtpcDbReader constructed for StFtpcDriftMapMaker"  ,"I"); 
+}
+///////////////////////////////////////////////////////////////////////////////////////
+// for Sti/StFtpcDetectorBuilder
+StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                               St_ftpcPadrowZ       *zrow         )
+{
+
+
+  returnCode = kStOK;
+  returnCode += FtpcDimensions(dimensions);
+  returnCode += FtpcPadrowZ(zrow);
+
+  gMessMgr->Message("StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder"  ,"I"); 
+ 
+}
+
+StFtpcDbReader::~StFtpcDbReader()
+{
+//   cout << "StFtpcDbReader destructed" << endl;
+}
+
+//===============================================================
+
+Int_t StFtpcDbReader::FtpcDimensions(St_ftpcDimensions *dimensions)
+{
+
   //  just copy dimensions table start to pointer
   ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
   if(dimensionsTable){
-    mNumberOfPadrows = dimensionsTable->totalNumberOfPadrows;
-    mNumberOfPadrowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
-    mFirstPadrowToSearch    = dimensionsTable->firstPadrowToSearch;
-    mLastPadrowToSearch     = dimensionsTable->lastPadrowToSearch;
-    mNumberOfSectors        = dimensionsTable->numberOfSectorsPerPadrow;
-    mFirstSectorToSearch    = dimensionsTable->firstSectorToSearch;
-    mLastSectorToSearch     = dimensionsTable->lastSectorToSearch;
+    mNumberOfPadrows            = dimensionsTable->totalNumberOfPadrows;
+    mNumberOfPadrowsPerSide     = dimensionsTable->numberOfPadrowsPerSide;
+    mFirstPadrowToSearch        = dimensionsTable->firstPadrowToSearch;
+    mLastPadrowToSearch         = dimensionsTable->lastPadrowToSearch;   
+    mNumberOfSectors            = dimensionsTable->numberOfSectorsPerPadrow;
+    mFirstSectorToSearch        = dimensionsTable->firstSectorToSearch;
+    mLastSectorToSearch         = dimensionsTable->lastSectorToSearch;
     mPhiOrigin                  = dimensionsTable->phiOrigin;
     mPhiPerSector               = dimensionsTable->phiPerSector;
-    mNumberOfPads           = dimensionsTable->numberOfPadsPerSector;
-    mPadLength              = dimensionsTable->padLength;
-    mPadPitch               = dimensionsTable->padPitch;
-    mRadiansPerPad          = dimensionsTable->radiansPerPad;
-    mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
-    mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
+    mNumberOfPads               = dimensionsTable->numberOfPadsPerSector;
+    mPadLength                  = dimensionsTable->padLength;
+    mRadiansPerPad              = dimensionsTable->radiansPerPad;
+    mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
+    mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
+   return kStOK;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
+    return kStWarn;
   }
+}
+
+//----------------------------------------------------------------------------
+
+Int_t StFtpcDbReader::FtpcPadrowZ(St_ftpcPadrowZ *zrow)
+{
+
+  //  just copy zrow table start to pointer
+  ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
+  if(padrowzTable){
+     mPadrowZPosition = (Float_t *)padrowzTable->z;
+     return kStOK;
+  } else {
+     gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
+     return kStWarn;
+  }
+}
+
+//----------------------------------------------------------------------------
+
+Int_t StFtpcDbReader::FtpcAsicMap(St_ftpcAsicMap *asicmap)
+{
 
   //  just copy asicmap table start to pointer
   ftpcAsicMap_st* asicmapTable = (ftpcAsicMap_st*)asicmap->GetTable();
   if(asicmapTable){
-	    mEastIsInverted = asicmapTable->EastIsInverted;
-            mAsic2EastNotInverted = asicmapTable->Asic2EastNotInverted;
+     mEastIsInverted = asicmapTable->EastIsInverted;
+     mAsic2EastNotInverted = asicmapTable->Asic2EastNotInverted;
+     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
+     gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
+     return kStWarn;
   }
+}
 
+//----------------------------------------------------------------------------
+
+Int_t StFtpcDbReader::FtpcEField(St_ftpcEField *efield)
+{
 
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
   if(efieldTable){
-   mMagboltzEField = (Float_t *)efieldTable->e;
+     mMagboltzEField = (Float_t *)efieldTable->e;
+     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcEField","E");
+     gMessMgr->Message( " No data in table class St_ftpcEField","E");
+     return kStWarn;
   }
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcVDrift(St_ftpcVDrift *vdrift)
+{
 
   //  just copy VDrift table start to pointer
   ftpcVDrift_st* vdriftTable = (ftpcVDrift_st*)vdrift->GetTable();
   if(vdriftTable){
-   mMagboltzVDrift = (Float_t *)vdriftTable->v;
+     mMagboltzVDrift = (Float_t *)vdriftTable->v;
+     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcVDrift","E");
+     gMessMgr->Message( " No data in table class St_ftpcVDrift","E");
+     return kStWarn;
   }
+}
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcDeflection(St_ftpcDeflection *deflection)
+{
 
   //  just copy Deflection table start to pointer
   ftpcDeflection_st* deflectionTable = (ftpcDeflection_st*)deflection->GetTable();
   if(deflectionTable){
-   mMagboltzDeflection = (Float_t *)deflectionTable->psi;
+     mMagboltzDeflection = (Float_t *)deflectionTable->psi;
+     return kStOK; 
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcDeflection","E");
+     gMessMgr->Message( " No data in table class St_ftpcDeflection","E");
+     return kStWarn;
   }
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcdVDriftdP(St_ftpcdVDriftdP *dvdriftdp)
+{
 
   //  just copy dVDriftdP table start to pointer
   ftpcdVDriftdP_st* dvriftdpTable = (ftpcdVDriftdP_st*)dvdriftdp->GetTable();
   if(dvriftdpTable){
-   mMagboltzdVDriftdP = (Float_t *)dvriftdpTable->dv_dp;
+     mMagboltzdVDriftdP = (Float_t *)dvriftdpTable->dv_dp;
+     return kStOK; 
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcdVDriftdP","E");
+     gMessMgr->Message( " No data in table class St_ftpcdVDriftdP","E");
+     return kStWarn;
   }
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcdDeflectiondP(St_ftpcdDeflectiondP *ddeflectiondp)
+{
 
   //  just copy dDeflectiondP table start to pointer
   ftpcdDeflectiondP_st* ddeflectiondpTable = (ftpcdDeflectiondP_st*)ddeflectiondp->GetTable();
   if(ddeflectiondpTable){
-   mMagboltzdDeflectiondP = (Float_t *)ddeflectiondpTable->dpsi_dp;
+     mMagboltzdDeflectiondP = (Float_t *)ddeflectiondpTable->dpsi_dp;
+     return kStOK; 
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcdDeflectiondP","E");
+     gMessMgr->Message( " No data in table class St_ftpcdDeflectiondP","E");
+     return kStWarn;
   }
+}
 
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcAmpSlope(St_ftpcAmpSlope *ampslope)
+{
+
+  //  just copy AmpSlope table start to pointer
+  ampslopeTable = (ftpcAmpSlope_st*)ampslope->GetTable();
+  if(!ampslopeTable){
+     gMessMgr->Message( " No data in table class St_ftpcAmpSlope","E");
+     return kStWarn;
+  }
+  return kStOK; 
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcAmpOffset(St_ftpcAmpOffset *ampoffset)
+{
+
+  //  just copy AmpOffset table start to pointer
+  ampoffsetTable = (ftpcAmpOffset_st*)ampoffset->GetTable();
+  if(!ampoffsetTable){
+     gMessMgr->Message( " No data in table class St_ftpcAmpOffset","E");
+     return kStWarn;
+  }
+  return kStOK;
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcTimeOffset(St_ftpcTimeOffset *timeoffset)
+{
+
+  //  just copy TimeOffset table start to pointer
+  timeoffsetTable = (ftpcTimeOffset_st*)timeoffset->GetTable();
+  if(!timeoffsetTable){
+    gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
+    return kStWarn;
+  }
+  return kStOK;
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcDriftField(St_ftpcDriftField *driftfield)
+{
+  //  just copy driftfield table start to pointer
+  ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
+  if(driftfieldTable){
+    mNumberOfMagboltzBins = driftfieldTable->numberOfEFieldBinsUsed;
+    mMaximumNumberOfMagboltzBins = driftfieldTable->maximumNumberOfEFieldBins;
+    mDriftCathodeVoltage = driftfieldTable->driftCathodeVoltage;
+    mMinimumDriftField  = driftfieldTable->minimumDriftField;
+    mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
+    mRadiusTimesField   = driftfieldTable->radiusTimesField;
+    return kStOK;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
+    return kStWarn;
+  }
+}
+
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcGas(St_ftpcGas *gas)
+{
   //  just copy gas table start to pointer
   ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
   if(gasTable){
@@ -422,231 +459,71 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mMaxGasTemperature      = gasTable->maxGasTemperature; 
    mAdjustAverageWest      = gasTable->adjustAverageWest;
    mAdjustAverageEast      = gasTable->adjustAverageEast;
+   return kStOK;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
+    return kStWarn;
   }
+}
 
-  //  just copy driftfield table start to pointer
-  ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
-  if(driftfieldTable){
-    mNumberOfMagboltzBins = driftfieldTable->numberOfEFieldBinsUsed;
-    mMaximumNumberOfMagboltzBins = driftfieldTable->maximumNumberOfEFieldBins;
-    mDriftCathodeVoltage = driftfieldTable->driftCathodeVoltage;
-    mMinimumDriftField  = driftfieldTable->minimumDriftField;
-    mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
-    mRadiusTimesField   = driftfieldTable->radiusTimesField;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
-  }
-
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcElectronics(St_ftpcElectronics *electronics)
+{
   //  just copy electronics table start to pointer
   ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
-   mTZero = electronicsTable->tZero;
-   mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
+     mTZero = electronicsTable->tZero;
+     mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
+     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
+     gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
+     return kStWarn;
   }
+}
 
-  //  just copy AmpSlope table start to pointer
-  ampslopeTable = (ftpcAmpSlope_st*)ampslope->GetTable();
-  if(!ampslopeTable){
-    gMessMgr->Message( " No data in table class St_ftpcAmpSlope","E");
-  }
-
-  //  just copy AmpOffset table start to pointer
-  ampoffsetTable = (ftpcAmpOffset_st*)ampoffset->GetTable();
-  if(!ampoffsetTable){
-    gMessMgr->Message( " No data in table class St_ftpcAmpOffset","E");
-  }
-
-  //  just copy TimeOffset table start to pointer
-  timeoffsetTable = (ftpcTimeOffset_st*)timeoffset->GetTable();
-  if(!timeoffsetTable){
-    gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
-  }
-
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcInnerCathode(St_ftpcInnerCathode *cathode)
+{
   //  just copy inner cathode table start to pointer
   ftpcInnerCathode_st* cathodeTable = (ftpcInnerCathode_st*)cathode->GetTable();
   if(cathodeTable){
-    mOffsetCathodeWest = cathodeTable->offsetCathodeWest;
-    mOffsetCathodeEast = cathodeTable->offsetCathodeEast;
-    mAngleOffsetWest   = cathodeTable->angleOffsetWest;
-    mAngleOffsetEast   = cathodeTable->angleOffsetEast;
+     mOffsetCathodeWest = cathodeTable->offsetCathodeWest;
+     mOffsetCathodeEast = cathodeTable->offsetCathodeEast;
+     mAngleOffsetWest   = cathodeTable->angleOffsetWest;
+     mAngleOffsetEast   = cathodeTable->angleOffsetEast;
+     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcInnerCathode","E");
-  }
-
-
-   gMessMgr->Message("StFtpcDbReader constructed for SlowSimulator"  ,"I"); 
+     gMessMgr->Message( " No data in table class St_ftpcInnerCathode","E");
+     return kStWarn;
+  }    
 }
 
-// for StFtpcDriftMapMaker
-StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
-                               St_ftpcPadrowZ       *zrow,
-                               St_ftpcEField        *efield,
-                               St_ftpcVDrift        *vdrift,
-                               St_ftpcDeflection    *deflection,
-                               St_ftpcdVDriftdP     *dvdriftdp,
-                               St_ftpcdDeflectiondP *ddeflectiondp,
-                               St_ftpcGas           *gas,
-                               St_ftpcDriftField    *driftfield)
+//----------------------------------------------------------------------------
+Int_t StFtpcDbReader::FtpcClusterGeom(St_ftpcClusterGeom *clustergeo)
 {
 
-  //  just copy dimensions table start to pointer
-  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
-  if(dimensionsTable){
-    mNumberOfPadrows = dimensionsTable->totalNumberOfPadrows;
-    mNumberOfPadrowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
-    mFirstPadrowToSearch    = dimensionsTable->firstPadrowToSearch;
-    mLastPadrowToSearch     = dimensionsTable->lastPadrowToSearch;
-    mNumberOfSectors        = dimensionsTable->numberOfSectorsPerPadrow;
-    mFirstSectorToSearch    = dimensionsTable->firstSectorToSearch;
-    mLastSectorToSearch     = dimensionsTable->lastSectorToSearch;
-    mPhiOrigin                  = dimensionsTable->phiOrigin;
-    mPhiPerSector               = dimensionsTable->phiPerSector;
-    mNumberOfPads           = dimensionsTable->numberOfPadsPerSector;
-    mPadLength              = dimensionsTable->padLength;
-    mPadPitch               = dimensionsTable->padPitch;
-    mRadiansPerPad          = dimensionsTable->radiansPerPad;
-    mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
-    mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
-    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
-    mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
-    mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
+  //  just copy cluster geometry table start to pointer
+  ftpcClusterGeom_st* clustergeoTable = (ftpcClusterGeom_st*)clustergeo->GetTable();
+  if(clustergeoTable){
+    mMinTimeBin = clustergeoTable->minTimebin;
+    mMinTimeBinMed = clustergeoTable->minTimebinMed;
+    mMinTimeBinOut = clustergeoTable->minTimebinOut;
+    mMaxTimeLength = clustergeoTable->maxTimelength;
+    mMaxTimeLengthMed = clustergeoTable->maxTimelengthMed;
+    mMaxTimeLengthOut =  clustergeoTable->maxTimelengthOut;
+    mMaxPadLength  = clustergeoTable->maxPadlength;  
+    mMaxPadLengthMed  = clustergeoTable->maxPadlengthMed;
+    mMaxPadLengthOut  = clustergeoTable->maxPadlengthOut;
+    mDeltaTime = clustergeoTable->deltaTime;
+    mDeltaPad  = clustergeoTable->deltaPad;
+    mMinChargeWindow = clustergeoTable->minChargeWindow;
+    return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
+    gMessMgr->Message( " No data in table class St_ftpcClusterGeom","E");
+    return kStWarn;
   }
-
-  //  just copy zrow table start to pointer
-  ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
-  if(padrowzTable){
-   mPadrowZPosition = (Float_t *)padrowzTable->z;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
-  }
-
-  //  just copy EField table start to pointer
-  ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
-  if(efieldTable){
-   mMagboltzEField = (Float_t *)efieldTable->e;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcEField","E");
-  }
-
-  //  just copy VDrift table start to pointer
-  ftpcVDrift_st* vdriftTable = (ftpcVDrift_st*)vdrift->GetTable();
-  if(vdriftTable){
-   mMagboltzVDrift = (Float_t *)vdriftTable->v;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcVDrift","E");
-  }
-
-  //  just copy Deflection table start to pointer
-  ftpcDeflection_st* deflectionTable = (ftpcDeflection_st*)deflection->GetTable();
-  if(deflectionTable){
-   mMagboltzDeflection = (Float_t *)deflectionTable->psi;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDeflection","E");
-  }
-
-  //  just copy dVDriftdP table start to pointer
-  ftpcdVDriftdP_st* dvriftdpTable = (ftpcdVDriftdP_st*)dvdriftdp->GetTable();
-  if(dvriftdpTable){
-   mMagboltzdVDriftdP = (Float_t *)dvriftdpTable->dv_dp;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcdVDriftdP","E");
-  }
-
-  //  just copy dDeflectiondP table start to pointer
-  ftpcdDeflectiondP_st* ddeflectiondpTable = (ftpcdDeflectiondP_st*)ddeflectiondp->GetTable();
-  if(ddeflectiondpTable){
-   mMagboltzdDeflectiondP = (Float_t *)ddeflectiondpTable->dpsi_dp;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcdDeflectiondP","E");
-  }
-
-  //  just copy gas table start to pointer
-  ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
-  if(gasTable){
-   mPercentAr              = gasTable->percentAr;
-   mPercentCO2             = gasTable->percentCO2;
-   mPercentNe              = gasTable->percentNe;
-   mPercentHe              = gasTable->percentHe;
-   mGasGain                = gasTable->gasGain;
-   mGasAttenuation         = gasTable->gasAttenuation;
-   mGasIonizationPotential = gasTable->gasIonizationPotential;
-   mBaseTemperature        = gasTable->baseTemperature;
-   mBasePressure           = gasTable->basePressure;
-   mPressureOffset         =gasTable->pressureOffset;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcGas","E");
-  }
-
-  //  just copy driftfield table start to pointer
-  ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
-  if(driftfieldTable){
-    mNumberOfMagboltzBins = driftfieldTable->numberOfEFieldBinsUsed;
-    mMaximumNumberOfMagboltzBins = driftfieldTable->maximumNumberOfEFieldBins;
-    mDriftCathodeVoltage = driftfieldTable->driftCathodeVoltage;
-    mMinimumDriftField  = driftfieldTable->minimumDriftField;
-    mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
-    mRadiusTimesField   = driftfieldTable->radiusTimesField;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
-  }
-
-//   cout << "StFtpcDbReader constructed" << endl;  
 }
-///////////////////////////////////////////////////////////////////////////////////////
-// for Sti/StFtpcDetectorBuilder
-StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
-                               St_ftpcPadrowZ       *zrow         )
-{
-
-  //  just copy dimensions table start to pointer
-  ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
-  if(dimensionsTable){
-    mNumberOfPadrows = dimensionsTable->totalNumberOfPadrows;
-    mNumberOfPadrowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
-    mFirstPadrowToSearch    = dimensionsTable->firstPadrowToSearch;
-    mLastPadrowToSearch     = dimensionsTable->lastPadrowToSearch;
-    mNumberOfSectors        = dimensionsTable->numberOfSectorsPerPadrow;
-    mFirstSectorToSearch    = dimensionsTable->firstSectorToSearch;
-    mLastSectorToSearch     = dimensionsTable->lastSectorToSearch;
-    mPhiOrigin                  = dimensionsTable->phiOrigin;
-    mPhiPerSector               = dimensionsTable->phiPerSector;
-    mNumberOfPads           = dimensionsTable->numberOfPadsPerSector;
-    mPadLength              = dimensionsTable->padLength;
-    mPadPitch               = dimensionsTable->padPitch;
-    mRadiansPerPad          = dimensionsTable->radiansPerPad;
-    mRadiansPerBoundary     = dimensionsTable->radiansPerGap;
-    mNumberOfTimebins       = dimensionsTable->numberOfTimebinsPerSector;
-    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
-    mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
-    mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
-  }
-
-  //  just copy zrow table start to pointer
-  ftpcPadrowZ_st* padrowzTable = (ftpcPadrowZ_st*)zrow->GetTable();
-  if(padrowzTable){
-   mPadrowZPosition = (Float_t *)padrowzTable->z;
-  } else {
-    gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
-  }
-
- 
-//   cout << "StFtpcDbReader constructed" << endl;  
-}
-
-StFtpcDbReader::~StFtpcDbReader()
-{
-//   cout << "StFtpcDbReader destructed" << endl;
-}
-
-
+//===============================================================
 
 Float_t StFtpcDbReader::padrowZPosition(Int_t i) 
 {
