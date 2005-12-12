@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.33 2005/12/12 13:40:12 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.34 2005/12/12 14:46:53 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.34  2005/12/12 14:46:53  jcs
+// comment out debug output
+//
 // Revision 1.33  2005/12/12 13:40:12  jcs
 // simplify StFtpcDbReader
 //
@@ -188,7 +191,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcTimeOffset(timeoffset);
   returnCode += FtpcInnerCathode(cathode);
 
-  gMessMgr->Message("StFtpcDbReader constructed for StFtpcSlowSimMaker"  ,"I"); 
+  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcSlowSimMaker"  ,"I"); 
 }
 
 // for StFtpcDriftMapMaker
@@ -215,7 +218,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
-  gMessMgr->Message("StFtpcDbReader constructed for StFtpcDriftMapMaker"  ,"I"); 
+  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcDriftMapMaker"  ,"I"); 
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 // for Sti/StFtpcDetectorBuilder
@@ -228,7 +231,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcPadrowZ(zrow);
 
-  gMessMgr->Message("StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder"  ,"I"); 
+  //gMessMgr->Message("StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder"  ,"I"); 
  
 }
 
