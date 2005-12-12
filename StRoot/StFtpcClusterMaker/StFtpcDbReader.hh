@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.23 2005/10/26 14:03:43 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.24 2005/12/12 13:40:12 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.24  2005/12/12 13:40:12  jcs
+// simplify StFtpcDbReader
+//
 // Revision 1.23  2005/10/26 14:03:43  jcs
 // Change setMicrosecondsPerTimebin
 //
@@ -82,8 +85,7 @@
 #ifndef STAR_StFtpcDbReader
 #define STAR_StFtpcDbReader
 
-#define TRUE 1
-#define FALSE 0
+#include "StMaker.h"
 
 #include "TObject.h"
 
@@ -195,6 +197,23 @@ protected:
   Float_t mPhiEnd;
 
 private:
+
+Int_t FtpcAmpOffset(St_ftpcAmpOffset *ampoffset);
+Int_t FtpcAmpSlope(St_ftpcAmpSlope *ampslope);
+Int_t FtpcAsicMap(St_ftpcAsicMap *asicmap);
+Int_t FtpcClusterGeom(St_ftpcClusterGeom *clustergeo);
+Int_t FtpcdDeflectiondP(St_ftpcdDeflectiondP *ddeflectiondp);
+Int_t FtpcDeflection(St_ftpcDeflection *deflection);
+Int_t FtpcDimensions(St_ftpcDimensions *dimensions);
+Int_t FtpcDriftField(St_ftpcDriftField *driftfield);
+Int_t FtpcdVDriftdP(St_ftpcdVDriftdP *dvdriftdp);
+Int_t FtpcEField(St_ftpcEField *efield);
+Int_t FtpcElectronics(St_ftpcElectronics *electronics);
+Int_t FtpcGas(St_ftpcGas *gas);
+Int_t FtpcInnerCathode(St_ftpcInnerCathode *cathode);
+Int_t FtpcPadrowZ(St_ftpcPadrowZ *zrow);
+Int_t FtpcTimeOffset(St_ftpcTimeOffset *timeoffset);
+Int_t FtpcVDrift(St_ftpcVDrift *vdrift);
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -245,6 +264,8 @@ public:
 
 
   ~StFtpcDbReader();
+
+  Int_t returnCode;
 
   Float_t padrowZPosition(Int_t i); 
   Float_t magboltzEField(Int_t i);
