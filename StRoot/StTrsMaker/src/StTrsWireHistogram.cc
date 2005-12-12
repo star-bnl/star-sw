@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.30 2004/04/07 18:57:25 perev Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.31 2005/12/12 21:00:12 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.31  2005/12/12 21:00:12  perev
+ * 3 random generators ==> 1
+ *
  * Revision 1.30  2004/04/07 18:57:25  perev
  * Improve memory usage
  *
@@ -157,6 +160,7 @@ using std::max;
 using namespace units;
 #endif
 #include "StTrsWireHistogram.hh"
+#include "StTrsRandom.hh"
 
 
 StTrsWireHistogram* StTrsWireHistogram::mInstance = 0; // static data member
@@ -179,8 +183,8 @@ StTrsWireHistogram::StTrsWireHistogram(StTpcGeometry* geoDb, StTpcSlowControl* s
       
 {
     mSectorWires.reserve(10000);    
-    srand48(19460510);
-    random=new TRandom(); 
+//VP    srand48(19460510);
+    random=&(StTrsRandom::inst()); 
     mNumberOfEntriesInTable=4000;
     mRangeOfTable=4.0;
     mNumberOfInnerSectorAnodeWires =
@@ -534,8 +538,8 @@ void StTrsWireHistogram::setGasGainOuterSector(double v)
 double StTrsWireHistogram::polya(){
   double x,y;
   do{
-    x=drand48()*8.0;
-    y=drand48();
+    x=StTrsRandom::inst().Rndm()*8.0;
+    y=StTrsRandom::inst().Rndm();
   }while(y>2.4395225*x*::sqrt(x)/exp(x));
   return x;
 }
