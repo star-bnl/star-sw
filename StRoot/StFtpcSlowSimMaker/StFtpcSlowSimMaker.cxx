@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.29 2005/10/26 14:07:32 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.30 2005/12/12 14:39:54 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.30  2005/12/12 14:39:54  jcs
+// exit with kStWarn if StFtpcDbReader not constructed
+//
 // Revision 1.29  2005/10/26 14:07:32  jcs
 // Calculate  microsecondsPerTimebin from RHIC clock frequency if available,
 // otherwise use default from database
@@ -364,6 +367,10 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                 m_timeoffset,
 						m_cathode);
 
+    if ( dbReader->returnCode != 0 ) {
+       gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Constructing StFtpcDbReader "<<endm;
+       return kStWarn;
+    }
 
     //cout << "create parameter reader\n";
     // create parameter reader
