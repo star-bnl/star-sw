@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.9 2005/05/23 19:46:20 mvl Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.10 2005/12/13 03:12:13 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -141,33 +141,43 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     DEBUGMESSAGE("Event accepted");
     addType( mArrays[muEvent], *(muDst->event()) );
 
-    //The tracks are the most difficult part, because the different typ of tracks are related via their ids.
-    //For all primary tracks that are accepted, I also want to right the global track
-    vector<int> ids; 
+    // Add first primary vertex by default
+    addType( mArrays[muPrimaryVertex], *(muDst->primaryVertex()) );
+
+    // The tracks are the most difficult part, because the primary tracks point
+    // to their global counterparts.
+    // For now, we are just keeping the global counterparts of all primary 
+    // tracks, so thta's  relatively easy to keep track off.
+
+    // Note that for some productions we cannot trust the uniqueness of 
+    // the track keys (StMuTrack::id()) anymore.
+
+    TArrayI globals_stored(muDst->globalTracks()->GetEntries());	  
     int numberOfTracks = 0;
     numberOfTracks = muDst->primaryTracks()->GetEntries();
     for ( int i=0; i<numberOfTracks; i++) {
-	StMuTrack* track = muDst->primaryTracks(i);
-	if ( filter( track )==true ) {
-	    ids.push_back( track->id() );
-	    addType( mArrays[muPrimary], *track );
-	}
+      StMuTrack* track = muDst->primaryTracks(i); // Note: this only works for a single primary vertex
+      if ( filter( track )==true ) {
+	Int_t global_idx=track->index2Global();
+	if (global_idx >= 0 && globals_stored[global_idx]==0) {
+	  
+	  Int_t nw_global_idx = addType( mArrays[muGlobal], *muDst->globalTracks(global_idx) );
+	  track->setIndex2Global(nw_global_idx);
+	  globals_stored[global_idx] = 1;
+	} 
+	addType( mArrays[muPrimary], *track );
+      }
     }
-    sort(ids.begin(),ids.end()); // sort so that we can use the fast binary search
+
     numberOfTracks = muDst->globalTracks()->GetEntries();
     for ( int i=0; i<numberOfTracks; i++) {
-	StMuTrack* track = muDst->globalTracks(i);
-	if ( binary_search(ids.begin(),ids.end(),track->id()) ) { // if the id is in the list
-	    addType( mArrays[muGlobal], *track );
-	}
-        else if (mFilterGlobals) {
-            if (filter(track)) {
-               addType( mArrays[muGlobal], *track);
-            } 
-        }
+      StMuTrack* track = muDst->globalTracks(i);
+      if (mFilterGlobals && globals_stored[i] == 0) {
+	if (filter(track)) {
+	  addType( mArrays[muGlobal], *track);
+	} 
+      }
     }
-    // primary tracks are pointing to the global tracks, we have to set the indecies right
-    StMuDst::fixTrackIndices( mArrays[muPrimary],mArrays[muGlobal] );
 
     // the emc collection
     StMuEmcCollection* emc = muDst->muEmcCollection();
@@ -298,6 +308,11 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.10  2005/12/13 03:12:13  mvl
+ * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
+ * to no longer rely on track keys for matching global and primary tracks.
+ * This was needed because track keys are not guaranteed to be unique anymore.
+ *
  * Revision 1.9  2005/05/23 19:46:20  mvl
  * Two incremental changes by Alex Suiade: A message is printed when a new output file is opened
  * and if StMuEvent does not pass the cut, the whole event is discarded
