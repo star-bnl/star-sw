@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.37 2005/08/19 19:46:05 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.38 2005/12/13 03:12:13 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -148,15 +148,26 @@ void StMuDst::fixTrackIndices() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
+  /// NOTE: this method does not work for productions with FTPC from SL04d
+  ///       up to SL05g, because StFtpcTrackToStEvent generates duplicate 
+  ///       track keys
+  ///
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
-  /// a track from the TClonesArrays
+  /// a track from the TClonesArrays)
 
   if ( !(global&&primary) ) return;
   DEBUGMESSAGE1("");
   StTimer timer;
   timer.start();
 
+  static int warningPrinted = 0;
+  if (!warningPrinted) {
+     cout << "WARNING: You are using " << __PRETTY_FUNCTION__ 
+          << " which does not work properly " 
+             " for productions with FTPC >= SL04d and <= SL05g" << endl;
+     warningPrinted = 1;
+  }
   int nGlobals = global->GetEntries();
   int nPrimaries = primary->GetEntries();
   // map to keep track of index numbers, key is track->id(), value is index of track in MuDst
@@ -166,7 +177,6 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
     StMuTrack *g = (StMuTrack*) global->UncheckedAt(i);
     if (g) {
       globalIndex[g->id()] = i;
-      globalIndex[ g->id() ] = i;
       globalTracks(i)->setIndex2Global(i);
     }
   }
@@ -200,8 +210,6 @@ void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 StEvent* StMuDst::createStEvent() {
-  static map<short, StTrackNode*> nodes;
-
   DEBUGMESSAGE1("");
   StTimer timer;
   timer.start();
@@ -241,36 +249,38 @@ StEvent* StMuDst::createStEvent() {
   vp->setPosition( mu->eventSummary().primaryVertexPosition() );
 
   int nGlobals = arrays[muGlobal]->GetEntries();
-  nodes.clear(); // tracknodes are owned by StEvent
+
+  StSPtrVecTrackNode &trackNodes = ev->trackNodes();
+  TArrayI global_indices(nGlobals); // Temporary array to keep track of index numbers on trackNodes
 
   // add global tracks to tracknodes
-  for (int i=0; i<nGlobals; i++) if(globalTracks(i)) {
-    short id = globalTracks(i)->id();
-    StMuTrack *mt = globalTracks(i);
-    if (!mt) 		continue;
-    if (mt->bad())	continue;
-    StTrack *st = createStTrack(mt);
-    if (!st)		continue;
-    nodes[id]=new StTrackNode;
-    nodes[id]->addTrack(st);
+  for (int i=0; i<nGlobals; i++) {
+    if(globalTracks(i)) {
+      StTrackNode *node = new StTrackNode();
+      node->addTrack(createStTrack(globalTracks(i)));
+      trackNodes.push_back(node);
+      global_indices[i]=trackNodes.size()-1;
+    }
+    else {
+      global_indices[i]=-1;
+    }
   }
 
   /// add primary tracks to tracknodes and primary vertex
   int nPrimaries = arrays[muPrimary]->GetEntries();
   for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
-    short id = primaryTracks(i)->id();
-    if (nodes[id]==0) {
-      nodes[id]=new StTrackNode();
-    }
     StTrack* t = createStTrack(primaryTracks(i));
-    nodes[id]->addTrack( t );
+    Int_t global_idx=primaryTracks(i)->index2Global();
+    if (global_idx >= 0 && global_indices[global_idx] >= 0) 
+      trackNodes[global_indices[global_idx]]->addTrack( t );
+    else {
+      StTrackNode *node=new StTrackNode();
+      node->addTrack(t);
+      trackNodes.push_back(node);
+    }
     vp->addDaughter( t );
   }
 
-  /// add all tracknodes to the event
-  for (map<short, StTrackNode*>::iterator i_pair = nodes.begin(); i_pair != nodes.end(); i_pair++) {
-    ev->trackNodes().push_back((*i_pair).second);
-  } 
   /// do the same excercise for the l3 tracks
   /// we do this later
   /// we do this later
@@ -425,6 +435,11 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.38  2005/12/13 03:12:13  mvl
+ * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
+ * to no longer rely on track keys for matching global and primary tracks.
+ * This was needed because track keys are not guaranteed to be unique anymore.
+ *
  * Revision 1.37  2005/08/19 19:46:05  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks

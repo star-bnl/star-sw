@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.16 2005/08/19 19:46:06 mvl Exp $
+ * $Id: StMuTrack.h,v 1.17 2005/12/13 03:12:13 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -146,6 +146,7 @@ protected:
   static double mProbabilityPidCentrality; ///< Centrality for Aihong's pid prob calculations. Will set when new StMuEvent is made from StEvent
 
   friend class StMuDst;
+  friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
   ClassDef(StMuTrack,6)
 };
@@ -196,6 +197,11 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.17  2005/12/13 03:12:13  mvl
+ * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
+ * to no longer rely on track keys for matching global and primary tracks.
+ * This was needed because track keys are not guaranteed to be unique anymore.
+ *
  * Revision 1.16  2005/08/19 19:46:06  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
