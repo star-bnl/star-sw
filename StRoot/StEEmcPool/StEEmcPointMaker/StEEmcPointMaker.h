@@ -51,6 +51,15 @@ class StEEmcPointMaker : public StMaker {
   /// Return a specified point
   StEEmcPoint point(Int_t ipoint); 
 
+  /// Return vector of smd only points found in endcap (all u,v crossings
+  /// beneath an active tower or a "failed" tower with signal in one 
+  /// other layer.)  
+  StEEmcPointVec_t smdPoints();
+  /// Return the total number of smd points
+  Int_t numberOfSmdPoints();
+  /// Return a specified smd point 
+  StEEmcPoint smdPoint(Int_t ip); 
+
   /// Total energy seen by the algorithm
   Float_t energySeen(){ return mEseen; }
 
@@ -157,7 +166,10 @@ inline void StEEmcPointMaker::analysis(const Char_t *n){ mNameAnalysis=n; }
 inline void StEEmcPointMaker::clusters(const Char_t *n){ mNameClusters=n; }
 
 inline StEEmcPointVec_t StEEmcPointMaker::points(){ return mPoints ; }
-
 inline Int_t StEEmcPointMaker::numberOfPoints(){ return mPoints.size(); } 
 inline StEEmcPoint StEEmcPointMaker::point(Int_t ip){ return mPoints[ip]; } 
+
+inline StEEmcPointVec_t StEEmcPointMaker::smdPoints(){ return mSmdPoints; }
+inline Int_t StEEmcPointMaker::numberOfSmdPoints(){ return mSmdPoints.size(); } 
+inline StEEmcPoint StEEmcPointMaker::smdPoint(Int_t ip){ return mSmdPoints[ip]; } 
 #endif

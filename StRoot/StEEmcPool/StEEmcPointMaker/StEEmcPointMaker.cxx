@@ -83,6 +83,8 @@ Int_t StEEmcPointMaker::Init()
 Int_t StEEmcPointMaker::Make()
 {
  
+  for ( Int_t i=0;i<10;i++ ) std::cout << std::endl;
+
   ///
   /// First phase of the game -- build smd points.  All pairs 
   /// of U & V clusters which cross beneath a struck (or dead)
@@ -142,6 +144,13 @@ Int_t StEEmcPointMaker::Make()
       verifyStEvent();
     }
 
+  /*
+  for ( UInt_t i=0;i<mPoints.size();i++ )
+    {
+      mPoints[i].print();
+    }
+  for ( Int_t i=0;i<10;i++ ) std::cout << std::endl;
+*/
     
   return kStOK;
 }
@@ -225,6 +234,9 @@ StEEmcPointVec_t StEEmcPointMaker::buildSmdPoints( Int_t sector,
 	    p.position(position);
 	    points.push_back(p);
 
+	    /// Add to list of smd only points 
+	    mSmdPoints.push_back(p);
+
 	  }
 	         	
 	}
@@ -232,6 +244,7 @@ StEEmcPointVec_t StEEmcPointMaker::buildSmdPoints( Int_t sector,
     }
   
   return points;
+
 }
 
 
@@ -498,6 +511,7 @@ void  StEEmcPointMaker::Clear( Option_t *opts )
 
   mEseen=0.;
   mPoints.clear(); 
+  mSmdPoints.clear(); 
 
 }
 
