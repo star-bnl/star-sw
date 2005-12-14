@@ -10,7 +10,7 @@ Pavlinov. It was ported to this new framework.
 #define STAR_StEmcOldFinder
 
 #include "StEmcVirtualFinder.h"
-#include "TList.h";
+#include "TList.h"
 #include "TArray.h"
 #include "StEmcPreClusterCollection.h"
 #include "StEmcUtil/others/emcInternalDef.h"
