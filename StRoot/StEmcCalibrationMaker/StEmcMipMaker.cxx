@@ -150,11 +150,11 @@ void StEmcMipMaker::fit(TH1F* h)
   int nb = h->FindBin(xmax);
   for(int i=h->FindBin(xmin);i<nb;i++)
   {
-    float x = h->GetBinCenter(i);
+    //float x = h->GetBinCenter(i);
     float y = h->GetBinContent(i);
     float stat = sqrt(y);
-    float binwidth = h->GetBinWidth(i);
-    float deriv  = (float) func->Derivative(x);
+    //float binwidth = h->GetBinWidth(i);
+    //float deriv  = (float) func->Derivative(x);
     float sigma = sqrt(stat*stat);//+(deriv*binwidth/2)*(deriv*binwidth/2));
     h->SetBinError(i,sigma);
   }
@@ -192,7 +192,7 @@ TH1F* StEmcMipMaker::findMip(int eta0,int eta1,StEmcEqualMaker* equal)
   float epeak  = func->GetParError(1);
   float w      = func->GetParameter(2);
   float ew     = func->GetParError(2);
-  float XMAX   = func->GetMaximumX(7,200);
+  //float XMAX   = func->GetMaximumX(7,200);
   //if(fabs(XMAX-peak)>2)  chi = 0;
   
   int m1 = 1;
@@ -330,7 +330,7 @@ void StEmcMipMaker::mipCalib()
 void StEmcMipMaker::mipCalib(int eta0, int eta1, int etabin, StEmcEqualMaker* equal, bool draw)
 {
   TCanvas *c1 = NULL; 
-  int ne = (eta1-eta0+1)/etabin;
+  //int ne = (eta1-eta0+1)/etabin;
   int pad = 1;
   for(int e = eta0; e<=eta1;e++)
   {
