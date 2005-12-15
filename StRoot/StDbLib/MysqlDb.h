@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.21 2004/01/15 00:02:24 fisyak Exp $
+ * $Id: MysqlDb.h,v 1.22 2005/12/15 03:14:27 jeromel Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.22  2005/12/15 03:14:27  jeromel
+ * Mem Leak fixes / Missing delete in new and stream context.
+ *
  * Revision 1.21  2004/01/15 00:02:24  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -313,7 +316,7 @@ inline MysqlDb &MysqlDb::operator<<( const double aq){
 }
 
 
-extern MysqlBin *Binary(const unsigned long int aLen,const float *aBin);
+extern const MysqlBin *Binary(const unsigned long int aLen,const float *aBin);
 //extern MysqlBin *Binary(const unsigned long int aLen,const char  *aBin);
 #endif
 

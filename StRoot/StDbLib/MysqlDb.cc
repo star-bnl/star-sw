@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.30 2004/04/28 20:28:40 deph Exp $
+ * $Id: MysqlDb.cc,v 1.31 2005/12/15 03:14:27 jeromel Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.31  2005/12/15 03:14:27  jeromel
+ * Mem Leak fixes / Missing delete in new and stream context.
+ *
  * Revision 1.30  2004/04/28 20:28:40  deph
  * added protection against empty string line 245
  *
@@ -820,11 +823,16 @@ return tOk;
   
 ////////////////////////////////////////////////////////////////////////
 
-MysqlBin *Binary(const unsigned long int aLen,const float *aBin){
-  
-  MysqlBin *tBin=new MysqlBin;
-  char *tString=new char[2*aLen+1];
-  unsigned long int tNewLen=mysql_escape_string(tString,(char*) aBin,aLen);
+const MysqlBin *Binary(const unsigned long int aLen,const float *aBin){
+  static MysqlBin   *tBin=0;
+  static char       *tString=0;
+  unsigned long int  tNewLen;
+
+  if (!tBin) tBin=new MysqlBin;
+  if (tString) delete [] tString;
+
+  tString = new char[2*aLen+1];
+  tNewLen = mysql_escape_string(tString,(char*) aBin,aLen);
   tBin->Input(tNewLen,tString);
   return tBin;
 }
