@@ -63,6 +63,16 @@ TObject** StObjArray::Erase(TObject** fst,TObject** lst,int del)
    return &(*(fV.erase(fV.begin()+ifst,fV.begin()+ilst)));		
 }		
 //______________________________________________________________________________
+TObject* StObjArray::find(const char *name) const
+{
+   int n  = fV.size();
+   for (int i=0;i<n;i++) { 
+     if (!fV[i]) continue;
+     if (!strcmp(name,fV[i]->GetName())) return (TObject*)fV[i];
+   }
+   return 0;
+}		
+//______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &b)
 {
 
