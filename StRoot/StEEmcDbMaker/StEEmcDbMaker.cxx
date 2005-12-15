@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.49 2005/08/17 22:08:45 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.50 2005/12/15 16:05:11 balewski Exp $
  
 
 #include <time.h>
@@ -292,7 +292,10 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
  //............  reload all lookup tables ...............
   int is;
   for(is=0; is< mNSector; is++) {
-    if (  mOptimizeMapping(is) ) goto end;// on fatal error
+    if (  mOptimizeMapping(is) ) {
+      gMessMgr->Message("","F")<<"\n\n" << GetName()<<"::InitRun("<<runNumber<<")\n  Total failure, no DB info for Endcap was retrived,\n all ETOW channels will be cleared for every event,\n fix the problem, JB\n\n "<<endm;
+      goto end;// on fatal error
+    }
     mOptimizeOthers(is); 
   }
 
@@ -305,9 +308,10 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
 
   // exportAscii(); //tmp
 
- gMessMgr->Message("","I") << GetName()<<"::InitRun()  Found "<< nFound<<" EEMC related tables "<<endm;
+  gMessMgr->Message("","I") << GetName()<<"::InitRun("<<runNumber<<")  Found "<< nFound<<" EEMC related tables "<<endm;
 
  end:
+
   return StMaker::InitRun(runNumber);
 }  
 
@@ -352,7 +356,7 @@ void  StEEmcDbMaker::mRequestDataBase(){
   for(ifl=0;ifl<2;ifl++) { // loop over flavors
     if(ifl==1) {
       if( dbFlavor.flavor[0]==0) continue; // drop flavor change
-      gMessMgr->Message("","I") << GetName()<<"::RequestDataBase()-->ifl=%d try flavor='"<<dbFlavor.flavor <<"' for  mask='"<< dbFlavor.nameMask<<"')" <<endm;
+      gMessMgr->Message("","I") << GetName()<<"::RequestDataBase()-->ifl="<<ifl<<" try flavor='"<<dbFlavor.flavor <<"' for  mask='"<< dbFlavor.nameMask<<"')" <<endm;
       
       SetFlavor(dbFlavor.flavor,dbFlavor.nameMask);
       mask=dbFlavor.nameMask;
@@ -1091,6 +1095,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.50  2005/12/15 16:05:11  balewski
+// printouts with more details
+//
 // Revision 1.49  2005/08/17 22:08:45  balewski
 // cleanup
 //
