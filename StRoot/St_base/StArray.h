@@ -107,6 +107,7 @@ virtual Bool_t IsFolder() const;
 
         TObject * const &back()  const { return fV.back();}
         TObject *       &back()        { return fV.back();}
+        TObject *        find(const char *name) const;
 
 #ifndef __CINT__
 	const_VecTObjIter begin() const {return fV.begin();}
