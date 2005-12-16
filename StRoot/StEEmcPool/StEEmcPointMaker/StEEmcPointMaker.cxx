@@ -83,8 +83,6 @@ Int_t StEEmcPointMaker::Init()
 Int_t StEEmcPointMaker::Make()
 {
  
-  for ( Int_t i=0;i<10;i++ ) std::cout << std::endl;
-
   ///
   /// First phase of the game -- build smd points.  All pairs 
   /// of U & V clusters which cross beneath a struck (or dead)
