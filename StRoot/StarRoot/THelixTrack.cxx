@@ -359,57 +359,61 @@ double THelixTrack::Step(double stmin,double stmax, const double *s, int nsurf,
                          double *xyz, double *dir) const
 {
   int ix,jx,nx,ip,jp;
-  double poly[4][3],tri[3]={0,0,0},sol[2],cos1t,f1,f2,step,ss;
+  double poly[4][3],tri[3],sol[2],cos1t,f1,f2,step,ss;
   const double *sp[4][4] = {{s+0,s+1,s+2,s+3}, {s+1,s+4,s+7,s+9}, 
                             {s+2,s+7,s+5,s+8}, {s+3,s+9,s+8,s+6}}; 
 
-  
+  THelixTrack th(fX,fP,fRho,fH);
   cos1t = 0.5*fRho*fCosL;
-  poly[0][0]=1.;poly[0][1]=0.;poly[0][2]=0.;
-  for(ix=1;ix<4;ix++) {
-    poly[ix][0] =fX  [ix-1]; 
-    poly[ix][1] =fP  [ix-1]; 
-    poly[ix][2] =fHXP[ix-1]*cos1t;
+  double totStep=0;
+  while (2005) {
+    poly[0][0]=1.;poly[0][1]=0.;poly[0][2]=0.;
+    tri[0]=tri[1]=tri[2]=0;
+    for(ix=1;ix<4;ix++) {
+      poly[ix][0] =th.fX  [ix-1]; 
+      poly[ix][1] =th.fP  [ix-1]; 
+      poly[ix][2] =th.fHXP[ix-1]*cos1t;
+    }
+
+    nx = (nsurf<=4) ? 1:4;
+    for(ix=0;ix<nx;ix++) {
+      for(jx=ix;jx<4;jx++) {  
+	ss = *sp[ix][jx]; if(!ss) 	continue;
+	for (ip=0;ip<3;ip++) {
+          f1 = poly[ix][ip]; if(!f1) 	continue;
+          f1 *=ss;
+          for (jp=0;jp+ip<3;jp++) {
+            f2 = poly[jx][jp]; if(!f2) 	continue;
+            tri[ip+jp] += f1*f2;
+    } } } }
+
+    int nsol = SqEqu(tri,sol);
+    step = 1.e+12;
+    if (nsol<0) 	return step;
+
+    if (nsol) step = sol[0];
+    if (step < stmin && nsol > 1) step = sol[1];
+    if (step < stmin)	{nsol = 0; step = stmax;}
+    if (step > stmax) 	{nsol = 0; step = stmax ; }   
+    if (!nsol && fabs(step) < 0.1*fMax) return 1.e+12;
+    if (fabs(step)>fMax) {step = (step<0)? -fMax:fMax; nsol=0;}
+
+    double x[3],d[3];
+    th.Step(step,x,d);
+    if (nsol) {//test it
+      ss = s[0]+s[1]*x[0]+s[2]*x[1]+s[3]*x[2];
+      if (nsurf > 4) ss += s[4]*x[0]*x[0]+s[5]*x[1]*x[1]+s[6]*x[2]*x[2];
+      if (nsurf > 7) ss += s[7]*x[0]*x[1]+s[8]*x[1]*x[2]+s[9]*x[2]*x[0];
+      if (fabs(ss)<1.e-7) {
+	if (xyz) memcpy(xyz,x,sizeof(*xyz)*3);
+	if (dir) memcpy(dir,d,sizeof(*dir)*3);
+	return totStep+step;
+    } }
+
+    stmax -=step; stmin -=step; if (stmin < -fMax) stmin = -fMax; 
+    th.Move(step);
+    totStep+=step;
   }
-  
-  nx = (nsurf<=4) ? 1:4;
-  for(ix=0;ix<nx;ix++) {
-    for(jx=ix;jx<4;jx++) {  
-      ss = *sp[ix][jx]; if(!ss) 	continue;
-      for (ip=0;ip<3;ip++) {
-        f1 = poly[ix][ip]; if(!f1) 	continue;
-        f1 *=ss;
-        for (jp=0;jp+ip<3;jp++) {
-          f2 = poly[jx][jp]; if(!f2) 	continue;
-          tri[ip+jp] += f1*f2;
-  } } } }
-
-  int nsol = SqEqu(tri,sol);
-  step = 1.e+12;
-  if (nsol<0) 	return step;
-
-  if (nsol) step = sol[0];
-  if (step < stmin && nsol > 1) step = sol[1];
-  if (step < stmin)	{nsol = 0; step = stmax;}
-  if (step > stmax) 	{nsol = 0; step = stmax ; }   
-  if (!nsol && fabs(step) < 0.1*fMax) return 1.e+12;
-  
-  double x[3],d[3];
-  Step(step,x,d);
-  if (nsol) {//test it
-    ss = s[0]+s[1]*x[0]+s[2]*x[1]+s[3]*x[2];
-    if (nsurf > 4) ss += s[4]*x[0]*x[0]+s[5]*x[1]*x[1]+s[6]*x[2]*x[2];
-    if (nsurf > 7) ss += s[7]*x[0]*x[1]+s[8]*x[1]*x[2]+s[9]*x[2]*x[0];
-    if (fabs(ss)<1.e-7) {
-      if (xyz) memcpy(xyz,x,sizeof(*xyz)*3);
-      if (dir) memcpy(dir,d,sizeof(*dir)*3);
-      return step;
-  } }
-
-  stmax -=step; stmin -=step; if (stmin < -fMax) stmin = -fMax; 
-  THelixTrack th(x,d,fRho,fH);
-  return th.Step(stmin,stmax,s,nsurf,xyz,dir)+step;
-
 
 }
 
@@ -880,7 +884,18 @@ double THelixTrack::Steb(double stmax,const  double *surf, int nsurf,
   if(fabs(tmp-1.)>0.1) {for(i=0;i<nsurf;i++) s[i]/=tmp;}
   return Steb(0.0,stmax,s,nsurf,xyz,dir);
 }
+//_____________________________________________________________________________
+void THelixTrack::Test1()
+{
+double surf[4] = {-11.32212856152224, 0.50109792630239824, -0.86539108263698283, 0.00078459561521909921};
+double xyz[3] = {-0.0206564,-0.0153429,0.0285582};
+double dir[3] = {0.450295,-0.596426,-0.664463};
+double Rho = 0.00678696;
+THelixTrack TH(xyz,dir,Rho);
 
+double s = TH.Step(100000,surf,4);
+printf("s=%g = 15.3589\n",s);
+}
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -973,134 +988,102 @@ void TCircle::Backward()
   fRho=-fRho;fD[0]=-fD[0];fD[1]=-fD[1];
 }
 //______________________________________________________________________________
-int TCircle::Approx(int npoints,const double *points,int istep)
+double TCircle::Approx(int npoints,const double *points,int istep)
 {
 	
-  double xmed[2]={0,0};
-  const double *p=points;
-  for (int i=0;i<npoints;i++,p+=istep) {xmed[0]+=p[0]; xmed[1]+=p[1];}
-  xmed[0]/=npoints; xmed[1]/=npoints;
-//  printf("XMED=%g %g\n",xmed[0],xmed[1]);
-  
-  double aver[7] = {0,0,0,0,0,0,0};
-  double &xx =aver[0],&yy =aver[1],&xy =aver[2]
-        ,&xxx=aver[3],&yyy=aver[4],&xxy=aver[5],&yyx=aver[6];
-//  printf("YYY=%g\n",yyy);
+  double xmed[12];memset(xmed,0,sizeof(xmed));
+  double &xx  =xmed[2],&yy  =xmed[ 3],&xy  =xmed[4 ]
+        ,&xxx =xmed[5],&yyy =xmed[ 6],&xxy =xmed[7 ],&xyy=xmed[8]
+        ,&xxxx=xmed[9],&yyyy=xmed[10],&xxyy=xmed[11];
 
-  p=points;
-  for (int i=0;i<npoints;i++,p+=istep) {
-    double x = p[0]-xmed[0], y = p[1]-xmed[1];
-//    printf("%d - X,Y=%g %g\n",i,x,y);
-  
-    xx  += x*x;   yy += y*y;   xy +=x*y; 
-    xxx += x*x*x; yyy+= y*y*y; 
-    xxy += x*x*y; yyx+= y*y*x;
+  double x, y,tmp;int i;
+  double const *p;
+  for (i=0,p=points;i<npoints;i++,p+=istep) {xmed[0]+=p[0]; xmed[1]+=p[1];}
+  for (i=0;i<2;i++)      {xmed[i]/=npoints;}  
+
+  for (i=0,p=points;i<npoints;i++,p+=istep){
+    x = p[0]-xmed[0], y = p[1]-xmed[1];
+    xx  += x*x;   yy += y*y;   xy +=x*y;   }
+  for (i=2;i<5;i++)      {xmed[i]/=npoints;}  
+
+  double Ei[2][2]={{1,0},{0,1}};
+  double lMin = 2*(xx*yy- xy*xy)/((xx+yy)+sqrt((xx-yy)*(xx-yy) + 4*xy*xy));
+  double lMax = xx+yy-lMin;
+  if (lMax-lMin > 0.1*lMax) {
+    if (fabs(xx-lMax)>fabs(yy-lMax)) {Ei[0][0]=- xy      ;Ei[0][1]=(xx-lMax);}
+    else                             {Ei[0][0]=-(yy-lMax);Ei[0][1]= xy      ;}
+    tmp = sqrt(Ei[0][0]*Ei[0][0]+Ei[0][1]*Ei[0][1]);
+    Ei[0][0]/=tmp       ;Ei[0][1]/=tmp;
+    Ei[1][0] = -Ei[0][1];Ei[1][1] = Ei[0][0];
+    xx = lMax; yy = lMin; xy = 0;
   }
-  
-  for (int i=0;i<7;i++) { aver[i]/=npoints;}  
+
+  for (i=0,p=points;i<npoints;i++,p+=istep){
+    double xt = p[0]-xmed[0], yt = p[1]-xmed[1];
+    x = Ei[0][0]*xt+Ei[0][1]*yt;
+    y = Ei[1][0]*xt+Ei[1][1]*yt;
+    xxx  += (x*x-xx)*x;       yyy  += (y*y-yy)*y; 
+    xxy  += (x*x-xx)*y;       xyy  += (y*y-yy)*x;   
+    xxxx += (x*x-xx)*(x*x-xx);yyyy += (y*y-yy)*(y*y-yy);
+    xxyy += (x*x-xx)*(y*y-yy);             }
+  for (i=5;i<12;i++)      {xmed[i]/=npoints;}  
+
+
   double det = xx*yy-xy*xy;
-  double Rho = 0;
-  double a = 0;
-  double b = 1;
-  double r = 0;
-  if (det <(xx+yy)*1e-6) {
-    det = 0; Rho=0; 
-    a = -xy; b = xx;
-  } else {
+  double Rho,a,b,c,r,r2 = 0;
+  double pars[2][6]; //contains qality,x0,y0,cos,sin,curv
+
+  pars[0][0] = 3e33;pars[1][0] = 3e33;
+  do {
+    if (det <= (xx+yy)*1e-6) break;
   
-    a =  0.5*( (xxx + yyx)*yy - (xxy + yyy)*xy);
-    b =  0.5*(-(xxx + yyx)*xy + (xxy + yyy)*xx);
-    double r2 = (a*a + b*b +det*det*(xx+yy));
+    a =  0.5*( (xxx + xyy)*yy - (xxy + yyy)*xy);
+    b =  0.5*(-(xxx + xyy)*xy + (xxy + yyy)*xx);
+    r2 = (a*a + b*b +det*det*(xx+yy));
     r  = sqrt(r2);
     Rho = det/r;
-  }
-  double ab = sqrt(a*a+b*b);
-
+    double ab = sqrt(a*a+b*b)+3e-33;
+    double aDir = (a+3e-33)/(ab);
+    double bDir = b/(ab);
 //  double xc = xmed[0]+a/det;
 //  double yc = xmed[1]+b/det;
 //  printf ("R=%g %g %g\n",1./Rho,xc,yc);
-  double x0 = xmed[0]-det*(xx+yy)/(ab+r)*(a/ab); 
-  double y0 = xmed[1]-det*(xx+yy)/(ab+r)*(b/ab);  
-//  printf ("X0,Y0=%g %g \n",x0,y0);
-  fX[0] = x0; fX[1] = y0;
-  fD[0]=b/ab; fD[1]=-a/ab; fRho=Rho;
-  double s = Path(points);
-  Move(s);
-  if (s>0) Backward();
-  return 0;
-}
-#if 0
-class TCircleAux
-{
-public:
- TCircleAux(){memset(this,0,sizeof(*this));}
- void Add1(const double *p){xm+=p[0]; ym+=p[1];}
- void Nor1(int n){xm/=n; ym/=n;}
- void Add2(const double *p){
-   double x = p[0]-xm, y = p[1]-ym;
-   xx  += x*x;   yy += y*y;   xy +=x*y; 
-   xxx += x*x*x; yyy+= y*y*y; 
-   xxy += x*x*y; yyx+= y*y*x;
- }
- void Nor2(int n){for (int i=0;i<7;i++){(&xx)[i]/=n;};}
- double Det() const {double det = xx*yy-xy*xy;
-                     if (det<= 1e-5*xx*yy) det=0;
-		     return det;                    }
-public:
-double xm;
-double ym;
-double xx;
-double yy;
-double xy;
-double xxx;
-double yyy;
-double xxy;
-double yyx;
-};
-//______________________________________________________________________________
-int TCircle::Approx(int npoints,const double *points,int istep)
-{
-	
-  TCircleAux Q;
-  const double *p=points;
-  for (int i=0;i<npoints;i++,p+=istep) {Q.Add1(p);}
-  Q.Nor1(npoints);
-  
-  p=points;
-  for (int i=0;i<npoints;i++,p+=istep) {Q.Add2(p);}
-  Q.Nor2(npoints);
+//	Evaluate quality
+    pars[0][0]  =(xxxx+yyyy)+2*(xxyy)
+     + (-4*((xxx+xyy)*a+(xxy+yyy)*b))/det
+     + ( 4*(xx*a*a +yy*b*b +2*xy*a*b))/det/det;
+    pars[0][0] *=(Rho*Rho)/4;
 
-  double det = Q.Det();
-  double Rho = 0;
-  double a = 0;
-  double b = 1;
-  double r = 0;
-  if (det <=0) {
-    a = -Q.xy/Q.xx*b;
-  } else {
-  
-    a =  0.5*( (Q.xxx + Q.yyx)*Q.yy - (Q.xxy + Q.yyy)*Q.xy);
-    b =  0.5*(-(Q.xxx + Q.yyx)*Q.xy + (Q.xxy + Q.yyy)*Q.xx);
-    double r2 = (a*a + b*b +det*det*(Q.xx+Q.yy));
-    r  = sqrt(r2);
-    Rho = det/r;
+    pars[0][1] = -det*(xx+yy)/(ab+r)*(aDir); 
+    pars[0][2] = -det*(xx+yy)/(ab+r)*(bDir);  
+    pars[0][3] = bDir; pars[0][4]=-aDir; pars[0][5]=Rho;
+//  printf ("UUUUUUUUUUUUUUUUUU qa=%g rad=%g\n",pars[0][0],pars[0][5]);
+  }while(0);// end of do 
+
+//	Stright track approx
+  {
+    c = (xxy*xx-xy*xxx)/(xxxx*xx-xxx*xxx);
+    b = (xy-c*xxx)/xx; a = -c*xx;
+    pars[1][0] = a*a+b*b*xx+c*c*(xxxx+xx*xx)+yy
+               +2*(a*c*xx+b*c*xxx-b*xy-c*xxy);
+    pars[1][1] = 0;pars[1][2] = a;
+    tmp = sqrt(1+b*b);
+    pars[1][3] = 1/tmp;pars[1][4] = b/tmp;
+    pars[1][5] = 2*c/((1+b*b)*tmp);
+/// printf ("LLLLLLLLLLLLLLLLLL qa=%g rad=%g\n",pars[1][0],pars[1][5]);
   }
-  double ab = sqrt(a*a+b*b);
 
-//  double xc = Q.xm+a/det;
-//  double yc = Q.ym+b/det;
-//  printf ("R=%g %g %g\n",1./Rho,xc,yc);
-  double x0 = Q.xm-det*(Q.xx+Q.yy)/(ab+r)*(a/ab); 
-  double y0 = Q.ym-det*(Q.xx+Q.yy)/(ab+r)*(b/ab);  
-//  printf ("X0,Y0=%g %g \n",x0,y0);
-  fX[0] = x0; fX[1] = y0;
-  fD[0]=b/ab; fD[1]=-a/ab; fRho=Rho;
+  i = (pars[0][0]<pars[1][0])? 0:1;
+  memcpy(fX,pars[i]+1,5*sizeof(fX[0]));
+  Rot( atan2(Ei[0][1],Ei[0][0]));
+  fX[0]+=xmed[0]; fX[1]+=xmed[1];
+
   double s = Path(points);
   Move(s);
   if (s>0) Backward();
-  return 0;
+  return pars[i][0];
 }
-#endif //0
+
 //______________________________________________________________________________
 double TCircle::Resid(int npoints,const double *points,int istep)
 {
@@ -1149,10 +1132,8 @@ double TCircle::Fit(int nPts,const double *Pts,const double *Err,int pstep,int e
 //  Dx,Dy direction of moving
 //  C = -Dy, S=Dx  for positve curvature
 
-  TArrayD CC(nPts); double *C = CC.GetArray();
-  TArrayD SS(nPts); double *S = SS.GetArray();
-  TArrayD RR(nPts); double *R = RR.GetArray();
-  TArrayD WT(nPts); double *W = WT.GetArray();
+  TArrayD ta(nPts*4); double *ar = ta.GetArray();
+  double *C = ar,*S = (ar+=nPts),*R = (ar+=nPts),*W = (ar+=nPts);
   enum {kC=0,kS,kR,kCC,kSS,kCS,kCR,kSR,kRR,kXX=0,kXY,kYY};
   double av[9];
   double mySize = sqrt(pow(Pts[0]-Pts[0+(nPts-1)*pstep],2)+
@@ -1259,7 +1240,7 @@ void TCircle::Test(int iTest)
   iTest = abs(iTest);
   double xy[20][3],er[20][3];
   double dang = 3.14/100;
-  double dR[2];
+  double dR[2],qa0,qa1;
   dR[0] = 0.01*R;
   dR[1] = 3*dR[0];
 //  dR = 1e-5;
@@ -1280,8 +1261,6 @@ void TCircle::Test(int iTest)
     er[i][1] = pow(dR[i&1],2)*C*S;
 
     xy[i][2]= 300 - R*ang*0.5 +eZ;
-    
-   
 
     } else {
     xy[i][0]= 100 + i*1;
@@ -1289,10 +1268,14 @@ void TCircle::Test(int iTest)
     xy[i][2]= 300 - i*3;
     }
   } 
-  helx.Approx(20,xy[0],3);
+  qa0=helx.Approx(20,xy[0],3);
   helx.Print();
-  helx.Fit(20,xy[0],0,3);
+  qa1 =helx.Resid(20,xy[0],3);
+  printf("Approx qa0 = %g qa1=%g\n",qa0,qa1);
+  qa0=helx.Fit(20,xy[0],0,3);
   helx.Print();
+  qa1 =helx.Resid(20,xy[0],3);
+  printf("Fit qa0 = %g qa1=%g\n",qa0,qa1);
 
   double z0tan[2];
   helx.FitZet(20,xy[0],&xy[0][2],z0tan,3,3);
@@ -1303,12 +1286,40 @@ void TCircle::Test(int iTest)
     s+=ds;
     helx.Move(ds);
 
-    printf("S=%g \tX: %g=%g \tY:%g=%g \tZ:%g=%g  Dx=%g dY=%g\n"
+    printf("S=%g \tX: %g=%g \tY:%g=%g \tZ:%g=%g  dirX=%g dirY=%g\n"
           ,s
           ,xy[i][0],helx.Pos()[0]
           ,xy[i][1],helx.Pos()[1]
           ,xy[i][2],z0tan[0]+z0tan[1]*s
           ,helx.Dir()[0],helx.Dir()[1]);
   }
+}
+//______________________________________________________________________________
+void TCircle::Test2() 
+{
+double xyz[4][3]= {{-39.530250549316406, -165.19537353515625, 184.05630493164062}
+                  ,{-37.718906402587891, -167.19537353515625, 186.41175842285156}
+		  ,{-35.468486785888672, -169.19537353515625, 189.05546569824219}
+                  ,{-33.657142639160156, -171.19537353515625, 191.347900390625}};
+double x[4],y[4];
+for (int i=0;i<4;i++) { x[i]=xyz[i][0];  y[i]=xyz[i][1]; }
+
+
+#if 0
+TCanvas *myCanvas = new TCanvas("C1","",600,800);
+TGraph  *myGraph  = new TGraph(4  , x, y);
+myGraph->Draw("AC*");
+myCanvas->Modified();
+myCanvas->Update();
+#endif //0
+//return;
+
+TCircle TC;
+double qa0 = TC.Approx(4,xyz[0],3);
+double qa1 = TC.Resid (4,xyz[0],3);
+printf("Approx qa0 = %g qa1=%g\n",qa0,qa1);
+TC.Print();
+
+
 }
 

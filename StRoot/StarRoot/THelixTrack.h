@@ -17,7 +17,7 @@ double Move(double step);
 void   Rot(double angle);
 void   Backward();
 double Eval(double step,double *xy,double *dir=0) const;
-int    Approx(int nPts,const double *Pts                    ,int pstep=2);
+double Approx(int nPts,const double *Pts                    ,int pstep=2);
 double Fit   (int nPts,const double *Pts,const double *Err=0,int pstep=2,int estep=3);
 double Resid (int npoints,const double *points,int pstep=2);
 void   FitZet(int npoints,const double *points
@@ -26,6 +26,7 @@ void   FitZet(int npoints,const double *points
 void   Print(const char* chopt = "") const;
 //	static funs
 static void Test(int iTest=1);
+static void Test2();
 
 protected:
 double fX[2];
@@ -68,6 +69,7 @@ public:
         double GetPeriod() const ;
 
         void Print(Option_t *opt="") const;
+ static void Test1();
 private:
 static  int  SqEqu(double *, double *);
 protected:
