@@ -62,6 +62,16 @@ union{double A[1];double _cXX;};
   double _cCX,_cCY, _cCZ, _cCE, _cCC;     
   double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
 };  
+class StiHitErrs{
+public:
+void reset()			 {memset(this,0,sizeof(*this));}
+StiHitErrs &operator*=(double f) {for (int i=0;i<6;i++){A[i]*=f;};return *this;}
+union{
+  double hXX;		double A[1];};
+  double hYX,hYY;                       
+  double hZX,hZY, hZZ;                 
+};
+
 /*! \class StiNode2pars
   Axiliary class for StiKalmanTrackNode only. 
   Contains only  Node_Y and Node_Z in local frame
