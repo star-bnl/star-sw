@@ -223,7 +223,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.76 2005/12/07 18:54:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.77 2005/12/18 23:17:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -239,10 +239,12 @@ private:
 public:
 int         SetAttr(const char *key,const char* val,const char *to=".");
 int         SetAttr(const char *key,int         val,const char *to=".");
+int         SetAttr(const char *key,UInt_t      val,const char *to=".");
 int         SetAttr(const char *key,double      val,const char *to=".");
 int         RemAttr(const char *key,                const char *to=".")
             {return SetAttr(key,".remove",to);}
 int         IAttr(const char *key) const;
+UInt_t      UAttr(const char *key) const;
 double      DAttr(const char *key) const;
 const char *SAttr(const char *key) const;
 void        PrintAttr() const;
@@ -282,8 +284,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.76 2005/12/07 18:54:12 perev Exp $
+// $Id: StMaker.h,v 1.77 2005/12/18 23:17:43 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.77  2005/12/18 23:17:43  perev
+// uint attributes fix
+//
 // Revision 1.76  2005/12/07 18:54:12  perev
 // PrintAttr() method added
 //

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.172 2005/12/07 18:56:16 perev Exp $
+// $Id: StMaker.cxx,v 1.173 2005/12/18 23:17:02 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -1463,6 +1463,11 @@ int StMaker::SetAttr(const char *key, int val, const char *to)
    TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
 }
 //_____________________________________________________________________________
+int StMaker::SetAttr(const char *key, UInt_t val, const char *to)
+{
+   TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
+}
+//_____________________________________________________________________________
 int StMaker::SetAttr(const char *key, double val, const char *to)
 {
    TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
@@ -1482,7 +1487,13 @@ int StMaker::IAttr(const char *key) const
    const char *val = SAttr(key);
    if (!val) 	return 0;
    if (!val[0]) return 0;
-   return atoi(val);
+   if (isdigit(*val)) return strtoul(val,0,0);
+   return strtol(val,0,0);
+}
+//_____________________________________________________________________________
+UInt_t StMaker::UAttr(const char *key) const
+{
+   return (UInt_t)IAttr(key);
 }
 //_____________________________________________________________________________
 double StMaker::DAttr(const char *key) const
@@ -1490,7 +1501,7 @@ double StMaker::DAttr(const char *key) const
    const char *val = SAttr(key);
    if (!val) 	return 0;
    if (!val[0]) return 0;
-   return atof(val);
+   return strtod(val,0);
 }
 //_____________________________________________________________________________
 void StMaker::PrintAttr() const
@@ -1701,6 +1712,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.173  2005/12/18 23:17:02  perev
+// uint attributes fix
+//
 // Revision 1.172  2005/12/07 18:56:16  perev
 // PrintAttr() method added
 //
