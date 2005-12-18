@@ -30,6 +30,8 @@ class StEEmcPointFitMaker : public StEEmcPointMaker
 	/// Print summary 
 	void print(); 
 
+	void limit(Int_t lim){ mLimitFits = lim; }
+
     private:
     protected:
 
@@ -39,6 +41,9 @@ class StEEmcPointFitMaker : public StEEmcPointMaker
 	Bool_t mPermutations;
 
 	Int_t mClusterId; 
+
+	/// Maximum number of points to fit per sector
+	Int_t mLimitFits;
 
 	/// Makes available to root
 	ClassDef(StEEmcPointFitMaker,1);
