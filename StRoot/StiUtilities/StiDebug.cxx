@@ -84,7 +84,7 @@ static TGraph  *graph[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
 	if (n) {
           float xh = X[0][ig][n]-X[0][ig][0];
           float yh = Y[0][ig][n]-Y[0][ig][0];
-	  float rh = xh*xh+yh*yh;
+	  float rh = xh*xh+yh*yh+1E-10;
 	  X[1][ig][n-1] = xh/rh;
 	  Y[1][ig][n-1] = yh/rh;
 	}
