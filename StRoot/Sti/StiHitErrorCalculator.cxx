@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.28 2005/12/08 04:14:49 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.29 2005/12/18 23:36:53 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.29  2005/12/18 23:36:53  perev
+ * Dependency from StiKalmanTrackNode removed
+ *
  * Revision 2.28  2005/12/08 04:14:49  perev
  * new place for StiDebug.h
  *
@@ -102,7 +105,7 @@
 
 
 //Sti inlcudes
-#include "StiKalmanTrackNode.h"
+#include "StiTrackNode.h"
 #include "StiHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
 #include "StiUtilities/StiDebug.h"
@@ -191,22 +194,22 @@ ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 }
 
 //_____________________________________________________________________________
-void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node
-		                       ,double &ecross, double &edip) const
+void StiDefaultHitErrorCalculator::calculateError(const StiNodePars *pars
+                                                 ,double &ecross,double &edip) const 
 {  
 static const double tenMicrons = 1e-3;
 static const double min2Err = tenMicrons*tenMicrons;
 static const double max2Err = 1.;
 
-  double dz = (210.-fabs(node->getZ()))/100.;
-  double cosCA = node->getCos();
-  double sinCA = node->getSin();
+  double dz = (210.-fabs(pars->_z))/100.;
+  double cosCA = pars->_cosCA;
+  double sinCA = pars->_sinCA;
   if (cosCA<0.01) cosCA=0.01;
   double tanCA = sinCA/cosCA;
   ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
   if (ecross< min2Err) ecross = min2Err;
   if (ecross> max2Err) ecross = max2Err;
-  double tanDip=node->getTanL();
+  double tanDip=pars->_tanl;
   double cosDipInv2=1+tanDip*tanDip;
          edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (edip< min2Err) edip = min2Err;
