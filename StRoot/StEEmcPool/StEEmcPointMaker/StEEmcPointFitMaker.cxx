@@ -70,6 +70,9 @@ StEEmcPointFitMaker::StEEmcPointFitMaker(const Char_t *n):StEEmcPointMaker(n)
     }
 
   mPermutations=true;
+
+  mLimitFits=10;
+
 }
 
 // ----------------------------------------------------------------------------
@@ -149,7 +152,7 @@ Int_t StEEmcPointFitMaker::FitSector(Int_t sector)
   Float_t nlast = 5.0;
   Int_t count = 0;
 
-  while ( nfit < 0.90 * nproject && nlast >= 4.0 && count < 10 ) {
+  while ( nfit < 0.90 * nproject && nlast >= 4.0 && count < mLimitFits ) {
     
     /// scan smd planes for maximum 5-strip residual
     Double_t res5umax=0.;
@@ -217,7 +220,7 @@ Int_t StEEmcPointFitMaker::FitSector(Int_t sector)
   }
 
 
-  std::cout << "found ncand=" << fitter->numberOfCandidates() << std::endl;
+  //$$$  std::cout << "found ncand=" << fitter->numberOfCandidates() << std::endl;
 
 
   /// array of flags telling us whether a given fit will be 
@@ -275,6 +278,10 @@ Int_t StEEmcPointFitMaker::FitSector(Int_t sector)
       StEEmcTower *tower = mEEanalysis->tower(position,0);
       if ( !tower ) continue; /// should examine other permutations
       point.tower( *tower );
+      /// residuals w/in +/- 30 cm
+      point.residueU( (Float_t)fitter -> Residual( (Int_t)u, 0, 60 ) * 1.3 / 1000.0 );
+      point.residueV( (Float_t)fitter -> Residual( (Int_t)v, 1, 60 ) * 1.3 / 1000.0 );
+		      
 
       /// U AND V clusters
       StEEmcSmdCluster uc;
