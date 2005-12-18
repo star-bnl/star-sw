@@ -204,7 +204,8 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double r3 = newLayer->getPlacement()->getNormalRadius();
   
   //Temp hack by Mike
-  if (r3<=60.) { return false; }
+//VP  if (r3<=60.) { return false; }
+  if (r3<=25.) { return false; } //VP avoid SVT from seed
     
   //First, r-y plane
   //double m_ry = dr/dy;
