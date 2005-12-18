@@ -79,6 +79,16 @@ class StEEmcPoint : public TObject {
   /// Sets mean U position
   void v(Float_t vv){ mV=vv; }
 
+  /// Get the residual in the U plane
+  Float_t residueU(){ return mResidueU; }
+  /// Set the residual in the U plane
+  void residueU(Float_t r){ mResidueU=r; }
+  /// Get the residual in the V plane
+  Float_t residueV(){ return mResidueV; }
+  /// Set the residual in the V plane
+  void residueV(Float_t r){ mResidueV=r; }
+  
+
   /// print
   void print();
   
@@ -105,6 +115,10 @@ class StEEmcPoint : public TObject {
   Float_t mU;
   /// Mean V
   Float_t mV;
+  /// Residual in U
+  Float_t mResidueU;
+  /// Residual in V
+  Float_t mResidueV;
  
   /// Smd clusters associated with this point
   StEEmcSmdCluster mSmdClusters[2];
