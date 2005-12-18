@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.75 2005/12/08 21:18:35 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.75 2005/12/08 21:18:35 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.76 2005/12/18 23:39:20 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.76 2005/12/18 23:39:20 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.76  2005/12/18 23:39:20  perev
+ * Cleanup
+ *
  * Revision 2.75  2005/12/08 21:18:35  perev
  * track id must < 2*16
  *
@@ -1260,7 +1263,7 @@ StiDebug::Break(nCall);
   int iter=0,igor=0;
   double qA;
   double errConfidence = 0.3;
-  while(1) {
+  for (int ITER=0;ITER<100;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
       sTNH.set(fitpars->getMaxChi2()*10,errConfidence,iter);
@@ -1300,8 +1303,18 @@ StiDebug::Break(nCall);
     if ( vertexNode->getChi2()>fitpars->getMaxChi2Vtx())fail =99;
     if (!vertexNode->isValid()) 			fail =13;
   }
-  if (!fail) return 0;
-
+  if (!fail) {
+  StiKalmanTrackNode *node;
+  StiKTNBidirectionalIterator it = begin();
+  for (;(node=it());it++){
+    if (node == vertexNode)				continue;
+    if (!node->isValid()) 				continue;
+    if(!node->getHit()) 				continue;
+    if (node->getChi2()>10000.)				continue;
+    assert(node->getChi2()<=fitpars->getMaxChi2());
+  }
+  return 0;
+  }
 static int VPDEBUG=0;
 if (VPDEBUG) {
   if (fail>0) 
@@ -1414,8 +1427,7 @@ static int nCall=0; nCall++;
   }  
   if (nNode<3) 				return 1; 
   TCircle circ,cirl;
-  circ.Approx(nNode,xyz[0],3);
-  double res = circ.Resid(nNode,xyz[0],3);
+  double res=circ.Approx(nNode,xyz[0],3);
   if (res>BAD_RESIDUAL) 		return 2;
   double Z0TanL[5];
   circ.FitZet(nNode,xyz[0],xyz[0]+2,Z0TanL,3,3);
@@ -1432,6 +1444,9 @@ static int nCall=0; nCall++;
     cirl = circ;
     double alfa = targetNode->getAlpha();
     cirl.Rot(-alfa);
+    
+
+
     StiNodePars P;
     P._x  =  cirl.Pos()[0];
     P._y  =  cirl.Pos()[1];

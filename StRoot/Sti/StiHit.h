@@ -91,6 +91,7 @@ public:
     float sxz() const;
     ///Return the (y,z) component of the error matrix.
     float syz() const;
+const float *errMtx() const   		{return &msxx;}
     ///Return the energy deposition associated with this point 
     float getEloss();
     ///Return the refAngle of the detector plane from which the hit arose.
@@ -152,25 +153,26 @@ public:
     double getValue(int key) const;
     double getPseudoRapidity() const;
     friend ostream& operator<<(ostream& os, const StiHit& h);
-    void Break(int i);
 private:
+    char  mBeg[1];
+    unsigned char mTimesUsed;
     float mrefangle;
     float mposition;
     float mx;
     float my;
     float mz; 
     float msxx;
-    float msyy;
-    float mszz;
     float msxy;
+    float msyy;
     float msxz;
     float msyz;
+    float mszz;
     // global position
     float _xg,_yg,_zg;
-    unsigned int mTimesUsed;
     const StiDetector* mdetector;
     const StMeasuredPoint * msthit;
     float _energy;
+    char  mEnd[1];
 public:
     int mCount;
 };
