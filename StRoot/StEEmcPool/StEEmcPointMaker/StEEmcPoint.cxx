@@ -22,6 +22,8 @@ StEEmcPoint::StEEmcPoint()
   mEmcPoint=0;
   mRelatives=999;
   for ( Int_t i=0;i<4;i++ ) mEnergy[i]=0.; 
+  mResidueU=0.;
+  mResidueV=0.;
 }
 
 // ----------------------------------------------------------------------------
@@ -43,6 +45,9 @@ StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
   mSigma  = p.mSigma;
   mU      = p.mU;
   mV      = p.mV;
+
+  mResidueU = p.mResidueU;
+  mResidueV = p.mResidueV;
 
 }
 
