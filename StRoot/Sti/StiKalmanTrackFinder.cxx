@@ -298,7 +298,7 @@ StiDebug::Break(nCall);
 #ifdef ASSIGNVP
           if (vpAssign!=1) status = track->refit();
 #else 
-          if (!rMin) status = track->refit();
+//        if (!rMin) status = track->refit();
 #endif// ASSIGNVP
 	  if(status) return -1;
       }	
@@ -314,15 +314,13 @@ StiDebug::Break(nCall);
   if (outerMostNode->getX()<185. )
     {
       trackExtendedOut= find(track,kInsideOut);
-      if (trackExtendedOut) { 
-         status = 0;
-//         if (!rMin) status = track->refit();
-         status = track->refit();
-	 if(status) return -1;
-      }
       if (debug()) cout << "StiKalmanTrackFinder::extendTrack (track,kInsideOut)" << *((StiTrack *) track);
     }
   trackExtended |=trackExtendedOut;
+  if (trackExtended) {
+    status = track->refit();
+    if (status) return -1;
+  }
   //cout << " find track done" << endl;
   return trackExtended;
 }
