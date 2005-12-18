@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.15 2005/03/24 18:06:42 perev Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.16 2005/12/18 23:44:11 perev Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.16  2005/12/18 23:44:11  perev
+ * Dependency from StiKalmanTrackNode removed
+ *
  * Revision 2.15  2005/03/24 18:06:42  perev
  * Do not allow to modify node anymore
  *
@@ -396,7 +399,7 @@ void StiResidualCalculator::NodeResidue(StiKalmanTrackNode iNode,
 
   double nodeZE = iNode.getEzz();
   double nodeYE = iNode.getEyy();
-  iNode.getDetector()->getHitErrorCalculator()->calculateError(&iNode,nodeYE,nodeZE);
+  iNode.getDetector()->getHitErrorCalculator()->calculateError(&(iNode.fitPars()),nodeYE,nodeZE);
   //cout <<" D: "<<nodeZE<<endl;
 
   nodeYE =(nodeYE>0)? ::sqrt(nodeYE):1.;

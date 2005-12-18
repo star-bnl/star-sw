@@ -129,8 +129,8 @@ public:
   double getSin  () const 		{return mFP._sinCA;}
   double getCos  () const 		{return mFP._cosCA;}
   double getAlpha() const 		{return _alpha;}
-  double getEyy()   const 		{return eyy;}
-  double getEzz()   const 		{return ezz;}
+  double getEyy()   const 		{return mHrr.hYY;}
+  double getEzz()   const 		{return mHrr.hZZ;}
   double getCyy()   const 		{return mFE._cYY;}
   double getCzz()   const 		{return mFE._cZZ;}
   double const *getPars()const          {return (&mFP._x);}
@@ -204,8 +204,7 @@ public:
   static double nice(double angle);
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
-  void setHitErrors(double yErr,double zErr);
-  void setHitErrors();
+  void setHitErrors(const StiHit *hit=0);
   static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
@@ -252,9 +251,9 @@ public:
   double _alpha;
   StiNodePars mFP; 
   /// covariance matrix of the track parameters
-  StiNodeErrs mFE;
+  StiNodeErrs  mFE;
   StiNode2Pars mUnTouch;
-  float  eyy,ezz;
+  StiHitErrs   mHrr;
   char hitCount;
   char nullCount;
   char contiguousHitCount;
@@ -349,11 +348,6 @@ inline double StiKalmanTrackNode::sinCrossAngle() const
 inline double StiKalmanTrackNode::crossAngle() const
 {
   return asin(mFP._sinCA);
-}
-
-inline void StiKalmanTrackNode::setHitErrors(double ey,double ez)
-{
-  eyy = ey; ezz = ez;
 }
 
 /*! Calculate/return the track transverse momentum

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.90 2005/12/08 22:05:45 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.91 2005/12/18 23:41:46 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.91  2005/12/18 23:41:46  perev
+ * Dependency from StiKalmanTrackNode removed
+ *
  * Revision 2.90  2005/12/08 22:05:45  perev
  * nudge assert replaced by print. But very strangeStiKalmanTrackNode.cxx
  *
@@ -280,6 +283,7 @@ using namespace std;
 #include "StiTrackingParameters.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
+#include "StiTrackNodeHelper.h"
 #include "StiFactory.h"
 #include "TString.h"
 #include "TRMatrix.h"
@@ -1018,7 +1022,7 @@ void StiKalmanTrackNode::propagateError()
 	   << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endl;
     }
 // now set hiterrors
-   setHitErrors();
+   if (_hit) setHitErrors();
 
 // set state node is ready
   mPE() = mFE;
@@ -1082,38 +1086,22 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double r00, r01,r11;
   //If required, recalculate the errors of the detector hits.
   //Do not attempt this calculation for the main vertex.
-  if (!hit)throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
   double dsin =mFP._curv*(hit->x()-mFP._x);
   if (fabs(mFP._sinCA+dsin)>0.99   )	return 1e41;
   if (fabs(mFP._eta)       >kMaxEta) 	return 1e41;
-  if (fabs(mFP._curv)      >kMaxCur)    	return 1e41;
+  if (fabs(mFP._curv)      >kMaxCur)    return 1e41;
 
-  const StiDetector * detector = hit->detector();
-  if (useCalculatedHitError && detector)
-    {
-      if (eyy <= 0) {
-	cout << "eyy " << eyy << " reject" << endl;
-	return 1e41;
-      }
-      r00=mFE._cYY+eyy; r01=mFE._cZY; r11=mFE._cZZ+ezz;
-    }
-  else
-    {
-      double ss[3];
-      getHitErrors(hit,ss);
+  setHitErrors(hit);
+  r00=mHrr.hYY+mFE._cYY;
+  r01=mHrr.hZY+mFE._cZY;  
+  r11=mHrr.hZZ+mFE._cZZ;
 
-      r00=ss[0]+mFE._cYY;
-      r01=ss[1]+mFE._cZY;  
-      r11=ss[2]+mFE._cZZ;
-    }
 #ifdef Sti_DEBUG
   TRSymMatrix R(2,
 		r00,
 		r01, r11);
 #endif
   _det=r00*r11 - r01*r01;
-  //if (mFE._cYY<=0 || mFE._cZZ<=0 || _det<=0)
-  //  cout << endl << "evalChi2 c00:"<<mFE._cYY<< " c10:"<<mFE._cZY<<" c11:"<<mFE._cZZ<<" _det:"<<_det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
   if (_det<r00*r11*1.e-5) {
     printf("StiKalmanTrackNode::evalChi2 *** zero determinant %g\n",_det);
     return 1e60;
@@ -1310,21 +1298,12 @@ static int nCall=0; nCall++;
 #endif //STI_ERROR_TEST
   assert(mFE._cXX<1e-8);
   double r00,r01,r11;
-  const StiDetector* detector = getDetector();
-  double v00 = eyy;
-  double v10 =  0.;
-  double v11 = ezz;
-  if (! (useCalculatedHitError && detector))
-    {
-      double ss[3];
-      getHitErrors(getHit(),ss);
-      v00 = ss[0]; v10 = ss[1]; v11 = ss[2];
-    }  
-  r00=v00+mFE._cYY;
-  r01=v10+mFE._cZY;  r11=v11+mFE._cZZ;
+  r00 = mHrr.hYY + mFE._cYY;
+  r01 = mHrr.hZY + mFE._cZY;
+  r11 = mHrr.hZZ + mFE._cZZ;
 #ifdef Sti_DEBUG
-  TRSymMatrix V(2,v00,
-		  v10, v11);  
+  TRSymMatrix V(2,mHrr.hYY,
+		  mHrr.hZY, mHrr.hZZ);  
   TRSymMatrix R1(2,r00,
 		   r01, r11);
   static const TRMatrix H(2,5, 1., 0., 0., 0., 0.,
@@ -1433,22 +1412,13 @@ static int nCall=0; nCall++;
   mFE._cCY-=k30*c00+k31*c10;mFE._cCZ-=k30*c10+k31*c11;mFE._cCE-=k30*c20+k31*c21;mFE._cCC-=k30*c30+k31*c31;
   mFE._cTY-=k40*c00+k41*c10;mFE._cTZ-=k40*c10+k41*c11;mFE._cTE-=k40*c20+k41*c21;mFE._cTC-=k40*c30+k41*c31;mFE._cTT-=k40*c40+k41*c41;
 
-  if (mFE._cYY >= v00 || mFE._cZZ >= v11) {
-    printf("StiKalmanTrackNode::updateNode *** _cYY >= v00 || _cZZ >= v11 %g %g %g %g \n"
-          ,mFE._cYY,v00,mFE._cZZ,v11);
+  if (mFE._cYY >= mHrr.hYY || mFE._cZZ >= mHrr.hZZ) {
+    printf("StiKalmanTrackNode::updateNode *** _cYY >= hYY || _cZZ >= hZZ %g %g %g %g \n"
+          ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ);
     return -14;
   }
-  if (!(mFE._cYY>0 && mFE._cZZ >0 && mFE._cEE>0 && mFE._cCC>0 && mFE._cTT>0)) {
-    printf("StiKalmanTrackNode::updateNode *** negative errors  %g %g %g %g %g\n"
-          ,mFE._cYY,mFE._cZZ,mFE._cEE,mFE._cCC,mFE._cTT);
-    return -14;
-  }
-  double tst = mFE._cYY*mFE._cZZ-mFE._cZY*mFE._cZY;
-  if (tst<=0) {
-    printf("StiKalmanTrackNode::updateNode *** YY*ZZ-YZ*YZ<0 %g %g %g %g \n"
-          ,mFE._cYY,mFE._cZZ,mFE._cZY,tst);
-    return -14;
-  }
+  if (mFE.check("StiKalmanTrackNode::updateNode")) return -14;
+
 #ifdef STI_ERROR_TEST
   testError(mFE.A,1);
 #endif // STI_ERROR_TEST
@@ -1585,15 +1555,10 @@ double StiKalmanTrackNode::getWindowY()
 
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
   double myEyy,myEzz;
-  calc->calculateError(this,myEyy,myEzz);
-
- 
-
-    double window = searchWindowScale*::sqrt(mFE._cYY+myEyy);
-  if (window<minSearchWindow)
-    window = minSearchWindow;
-  else if (window>maxSearchWindow)
-    window = maxSearchWindow;
+  calc->calculateError(&mFP,myEyy,myEzz);
+  double window = searchWindowScale*::sqrt(mFE._cYY+myEyy);
+  if      (window<minSearchWindow) window = minSearchWindow;
+  else if (window>maxSearchWindow) window = maxSearchWindow;
   return window;
 }
 
@@ -1608,14 +1573,11 @@ double StiKalmanTrackNode::getWindowZ()
 
   const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
   double myEyy,myEzz;
-  calc->calculateError(this,myEyy,myEzz);
-
+  calc->calculateError(&mFP,myEyy,myEzz);
   
   double window = searchWindowScale*::sqrt(mFE._cZZ+myEzz); 
-  if (window<minSearchWindow)
-    window = minSearchWindow;
-  else if (window>maxSearchWindow)
-    window = maxSearchWindow;
+  if      (window<minSearchWindow) window = minSearchWindow;
+  else if (window>maxSearchWindow) window = maxSearchWindow;
   return window;
 }
 
@@ -1751,42 +1713,12 @@ const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode
   return *this;
 }
 //______________________________________________________________________________
-void StiKalmanTrackNode::setHitErrors()
+void StiKalmanTrackNode::setHitErrors(const StiHit *hit)
 {
-  setHitErrors(0.,0.);
-  const StiDetector * detector = getDetector();
-  if (!detector) return;
-  const StiHitErrorCalculator * calc = detector->getHitErrorCalculator();
-  if (!calc) return;
-  double myEyy,myEzz;
-  calc->calculateError(this,myEyy,myEzz);
-  setHitErrors(myEyy,myEzz);
+  if (!hit) hit = _hit;
+  assert(hit);
+  StiTrackNodeHelper::getHitErrors(hit,&mFP,&mHrr);
 }
-//______________________________________________________________________________
-void StiKalmanTrackNode::getHitErrors(const StiHit *hit,double ss[3]) const
-{
-  ss[0]=1e-4;
-  ss[1]=0;
-  ss[2]=1e-4;
-
-#if 0
-  double syy = hit->syy();
-  double syz = hit->syz();
-  double szz = hit->szz();
-  double sxx = hit->sxx();
-  if (sxx < 1e-10) {// no X errors
-     ss[0] = syy; ss[1] = syz; ss[2] = szz;}
-  else             {//account uncertaincy in X for primary mainly
-    double sxy = hit->sxy();
-    double sxz = hit->sxy();
-    double kY = mFP._sinCA; 
-    double kZ = mFP._tanl*sqrt(1.+kY*kY);
-    ss[0] = syy + 2.*kY*sxy + kY*kY*sxx;
-    ss[1] = syz + kY*sxz    + kZ*sxy + kY*kZ*sxx;
-    ss[2] = szz + 2.*kZ*sxz + kZ*kZ*sxx;
-  }	
-#endif //0
-}	
 
 
 #if 1
@@ -1987,11 +1919,11 @@ static const char *HHH = "xyzXYZ";
     double val=0,err=0;
     switch(i) {
       case 0:val = hit->x(); 	break;
-      case 1:val = hit->y(); 	err = ::sqrt(eyy);break;
-      case 2:val = hit->z(); 	err = ::sqrt(ezz);break;
+      case 1:val = hit->y(); 	err = ::sqrt(getEyy());break;
+      case 2:val = hit->z(); 	err = ::sqrt(getEzz());break;
       case 3:val = hit->x_g(); 	break;
       case 4:val = hit->y_g(); 	break;
-      case 5:val = hit->z_g();	err = ::sqrt(ezz);break;
+      case 5:val = hit->z_g();	err = ::sqrt(getEzz());break;
     }
     printf("\th%c=%g",HHH[i],val);
     if (err) printf("(%6.1g)",err);
