@@ -260,7 +260,7 @@ int StiNodeErrs::check(const char *pri) const
 //______________________________________________________________________________
 int StiNodePars::check(const char *pri) const
 {
-static double MAXPARS[]={200,200,210,1.5,0.2,100};
+static double MAXPARS[]={250,250,250,1.5,0.2,100};
   int ierr=0;
   for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
   if(ierr) goto FAILED;

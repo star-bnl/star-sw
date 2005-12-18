@@ -46,7 +46,7 @@ bool StiTrackFinderFilter::accept(const StiTrack *track) const
 	  double y_g = node.y_g();
 	  double z_g = node.z_g();
 	  double rt_g = sqrt(x_g*x_g+y_g*y_g);
-	  if (rt_g>210. || fabs(z_g)>205. )
+	  if (rt_g>210. || fabs(z_g)>250. )
 	    bad++;
 	  if (bad>2) weird = true;
 	  ++it;
