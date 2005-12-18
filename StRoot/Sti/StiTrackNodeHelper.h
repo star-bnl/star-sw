@@ -15,15 +15,6 @@ double _cTT;    	//add err to <tanL*tanL>
 double _curvCorr;	//curv correction factor -1
 };
 
-class StiHitErrs{
-public:
-void reset()			{memset(this,0,sizeof(*this));}
-StiHitErrs &operator*=(double f) {for (int i=0;i<6;i++){A[i]*=f;};return *this;}
-union{
-  double hXX;		double A[1];};
-  double hYX,hYY;                       
-  double hZX,hZY, hZZ;                 
-};
 
 class QaFit 
 {
@@ -74,6 +65,7 @@ private:
   int propagateMCS();
   double evalChi2();
   double joinChi2();
+  double recvChi2(); 
   int updateNode();
   void resetError(double fk=0.);
   int nudge();
@@ -81,6 +73,17 @@ private:
   int save();
   int cutStep(StiNodePars *pars,StiNodePars *base);
   double pathIn(const StiDetector *det,StiNodePars *pars);
+//	Static methods
+public:
+static double joinTwo(int nP1,const double *P1  ,const double *E1
+                     ,int nP2,const double *P2  ,const double *E2
+		             ,      double *PJ=0,      double *EJ=0);
+
+static double joinVtx(        const double *P1  ,const double *E1
+                             ,const double *P2  ,const double *E2
+	                     ,      double *PJ=0,      double *EJ=0);
+static int getHitErrors(const StiHit *hit,const StiNodePars *pars, StiHitErrs *hrr);
+
 private:
 double mChi2Max;
 double mErrConfidence;
