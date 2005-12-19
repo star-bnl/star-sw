@@ -52,7 +52,7 @@ void exampleMuDstFilter(const char* in="/star/u/laue/afsWork/dAu200.lis", const 
     cout << endl;
     if (counter) cout << "time/event " << timer.elapsedTime()/counter <<endl;
     cout << " # of events:" << counter << endl;
-    
+    filter->Finish(); // Make sure that output file is written    
 }
 
 
