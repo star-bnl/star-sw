@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.cc,v 1.5 2005/11/22 17:39:06 bouchet Exp $
+// $Id: StScmBarrel.cc,v 1.6 2005/12/19 10:52:13 kisiel Exp $
 //
 // $Log: StScmBarrel.cc,v $
+// Revision 1.6  2005/12/19 10:52:13  kisiel
+// Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
+//
 // Revision 1.5  2005/11/22 17:39:06  bouchet
 // set quality = 100 for the IdTruth
 //
@@ -282,70 +285,80 @@ int StScmBarrel::writePointToTable(St_scm_spt *scm_spt)
   return currRecord;
 }
 
-int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl)
-{
-  scm_spt_st spt;
-  StSsdHit *currentSsdHit; 
-  // table size is 148 bytes
-  int currRecord   = 0;
-  int i            = 0;
-  int inContainer =0;
-  StThreeVectorF gPos; StThreeVectorF gPosError; 
-  int hw; float q; unsigned char c;
+// OBSOLETE ?
 
-  for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
-    {
-     int idCurrentWaf = waferNumbToIdWafer(iWaf);
-     StScmListPoint *sptList = mWafers[iWaf]->getPoint();
-     StScmPoint *pSpt = sptList->first();
+// int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl)
+// {
+//   scm_spt_st spt;
+//   StSsdHit *currentSsdHit; 
+//   // table size is 148 bytes
+//   int currRecord   = 0;
+//   int i            = 0;
+//   int inContainer =0;
+//   StThreeVectorF gPos; StThreeVectorF gPosError; 
+//   int hw; float q; unsigned char c;
+
+//   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
+//     {
+//      int idCurrentWaf = waferNumbToIdWafer(iWaf);
+//      StScmListPoint *sptList = mWafers[iWaf]->getPoint();
+//      StScmPoint *pSpt = sptList->first();
      
-     while (pSpt)
-       {
-	 if (ssdHitColl){ // If Available, Fill the StEvent Container
-	   for (i = 0 ; i < 3 ; i++){
-	     gPos[i]      =  pSpt->getXg(i);
-	     gPosError[i] =  0.0; 
-	   }
-	   hw = idCurrentWaf;
-	   q =  pSpt->getDe(0);
+//      while (pSpt)
+//        {
+// 	 if (ssdHitColl){ // If Available, Fill the StEvent Container
+// 	   for (i = 0 ; i < 3 ; i++){
+// 	     gPos[i]      =  pSpt->getXg(i);
+// 	     gPosError[i] =  0.0; 
+// 	   }
+// 	   hw = idCurrentWaf;
+// 	   q =  pSpt->getDe(0);
 	   
-	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
-	   currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
-	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
-	   
-	   inContainer += ssdHitColl->addHit(currentSsdHit);
-	 }
-	 spt.flag          = pSpt->getFlag();
-	 spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
-	 spt.id_cluster    = pSpt->getNCluster();
-	 spt.id_globtrk    = 0;
-	 spt.id_match      = pSpt->getNMatched();
-	 for (i = 0 ; i < 5 ; i++)
-	   {	  
-	     spt.id_mchit[i]   = pSpt->getNMchit(i);
-	     spt.id_mctrack[i] = 0;
-	     spt.id_track[i]   = 0;
-	   }	  
-	 spt.id_wafer      = idCurrentWaf;
-	 for (i = 0 ; i < 3 ; i++)
-	   {	  
-	     spt.cov[i]        = 0;
-	     spt.res[i]        = 0;
-	     spt.x[i]          = pSpt->getXg(i);
-	     spt.xl[i]         = pSpt->getXl(i);
-	   }
-	 for (i = 0 ; i < 2 ; i++)
-	   {
-	     spt.mom2[i]       = 0;
-	     spt.de[i]         = pSpt->getDe(i);
-	   }
-	 scm_spt->AddAt(&spt);
-	 currRecord++;
-	 pSpt    = sptList->next(pSpt);
-       }
-    }
-  return currRecord;
-}
+// 	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
+// 	   currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
+// 	   // Add proper hardware info with cluster size and mean strip
+// 	   hw  =         
+// 	                8                                                                             
+// 	     +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+// 	     +       8192 * (int)pSpt->getStripMeanN()                                          
+// 	     +    8388608 * ((int)pSpt->getStripMeanP() - (int)pSpt->getStripMeanN() +15)
+// 	     +  268435456 * (int)(((pSpt->getClusterSizeN()-1) > 3) ? 3 : (pSpt->getClusterSizeN()-1))
+// 	     + 1073741824 * (int)(((pSpt->getClusterSizeP()-1) > 3) ? 3 : (pSpt->getClusterSizeP()-1));
+
+// 	   currentSsdHit->setHardwarePosition(hw);
+// 	   inContainer += ssdHitColl->addHit(currentSsdHit);
+// 	 }
+// 	 spt.flag          = pSpt->getFlag();
+// 	 spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
+// 	 spt.id_cluster    = pSpt->getNCluster();
+// 	 spt.id_globtrk    = 0;
+// 	 spt.id_match      = pSpt->getNMatched();
+// 	 for (i = 0 ; i < 5 ; i++)
+// 	   {	  
+// 	     spt.id_mchit[i]   = pSpt->getNMchit(i);
+// 	     spt.id_mctrack[i] = 0;
+// 	     spt.id_track[i]   = 0;
+// 	   }	  
+// 	 spt.id_wafer      = idCurrentWaf;
+// 	 for (i = 0 ; i < 3 ; i++)
+// 	   {	  
+// 	     spt.cov[i]        = 0;
+// 	     spt.res[i]        = 0;
+// 	     spt.x[i]          = pSpt->getXg(i);
+// 	     spt.xl[i]         = pSpt->getXl(i);
+// 	   }
+// 	 for (i = 0 ; i < 2 ; i++)
+// 	   {
+// 	     spt.mom2[i]       = 0;
+// 	     spt.de[i]         = pSpt->getDe(i);
+// 	   }
+// 	 scm_spt->AddAt(&spt);
+// 	 currRecord++;
+// 	 pSpt    = sptList->next(pSpt);
+//        }
+//     }
+//   return currRecord;
+// }
 
 int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl ,St_scf_cluster *scf_cluster )
 {
@@ -415,7 +428,42 @@ int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	   currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
 	   currentSsdHit->setIdTruth(spt.id_mctrack[0],100);// need to check first = most probable!
 	   //cout <<"***in StScmBarrel  test --> IdTruth =" <<currentSsdHit->getIdTruth()<< endl;
-	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+
+	   //looking for the correct clusters...
+	   int Id_P_Side = pSpt->getIdClusterP();
+	   int Id_N_Side = pSpt->getIdClusterN();
+
+	   StScmListCluster *currentListP_j = mWafers[iWaf]->getClusterP();
+	   StScmCluster     *cluster_P_j   = currentListP_j->first();
+	   while(cluster_P_j)
+	     {
+	       if(cluster_P_j->getNCluster()==Id_P_Side) 
+		 break;
+	       cluster_P_j = currentListP_j->next(cluster_P_j);
+	     }
+
+
+	   StScmListCluster *currentListN_j = mWafers[iWaf]->getClusterN();
+	   StScmCluster *cluster_N_j       = currentListN_j->first();
+	   while(cluster_N_j)
+	     {
+	       if(cluster_N_j->getNCluster()==Id_N_Side) 
+		 break;
+	       cluster_N_j = currentListN_j->next(cluster_N_j);
+	     }
+	   
+	   
+	   // Add proper hardware info with cluster size and mean strip
+	   hw  =         
+	                8                                                                             
+	     +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+	     +       8192 * (int)cluster_N_j->getStripMean()                                          
+	     +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
+	     +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
+	     + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
+
+	    //	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+	   currentSsdHit->setHardwarePosition(hw);
 	   
 	   inContainer += ssdHitColl->addHit(currentSsdHit);
 	 }
