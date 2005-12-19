@@ -1,6 +1,9 @@
-// $Id: StScmWafer.cc,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+// $Id: StScmWafer.cc,v 1.3 2005/12/19 10:52:13 kisiel Exp $
 //
 // $Log: StScmWafer.cc,v $
+// Revision 1.3  2005/12/19 10:52:13  kisiel
+// Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
+//
 // Revision 1.2  2005/05/17 14:16:37  lmartin
 // CVS tags added
 //
@@ -355,8 +358,8 @@ int StScmWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
  	  mPoint->addNewPoint(newPointB);
 
  	  StScmPoint *newPointC = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(1));
- 	  newPointC->setEnergyLoss(Adc[3], Adc[1]-Adc[0]-Adc[2]);
+          setMatcheds(geom_par, newPointC, currentPackage->getMatched(4), currentPackage->getMatched(1)); // 
+ 	  newPointC->setEnergyLoss(Adc[4], Adc[1]-Adc[0]-Adc[2]);
           newPointC->setFlag(100);
  	  mPoint->addNewPoint(newPointC);
           nSolved++;
@@ -2101,6 +2104,8 @@ int StScmWafer::setMatcheds(sdm_geom_par_st *geom_par, StScmPoint *Point, StScmC
 {// strip(1) -> Upos(0)...
   Point->setPositionU((pMatched->getStripMean()-1)*geom_par[0].L_strip_pitch,0);
   Point->setPositionU((nMatched->getStripMean()-1)*geom_par[0].L_strip_pitch,1);
+  Point->setIdClusterP(pMatched->getNCluster());
+  Point->setIdClusterN(nMatched->getNCluster());
 
   // for evaluation only !!!
   int pHitIndex   = 0;
