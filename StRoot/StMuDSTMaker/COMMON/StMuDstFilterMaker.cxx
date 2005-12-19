@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.10 2005/12/13 03:12:13 mvl Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.11 2005/12/19 01:55:55 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -142,7 +142,9 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     addType( mArrays[muEvent], *(muDst->event()) );
 
     // Add first primary vertex by default
-    addType( mArrays[muPrimaryVertex], *(muDst->primaryVertex()) );
+    if (muDst->primaryVertex()) {
+      addType( mArrays[muPrimaryVertex], *(muDst->primaryVertex()) );
+    }
 
     // The tracks are the most difficult part, because the primary tracks point
     // to their global counterparts.
@@ -308,6 +310,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.11  2005/12/19 01:55:55  mvl
+ * Introduced check before copying primary vertex for backwards compatibility
+ *
  * Revision 1.10  2005/12/13 03:12:13  mvl
  * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
  * to no longer rely on track keys for matching global and primary tracks.
