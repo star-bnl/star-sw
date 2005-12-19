@@ -404,7 +404,7 @@ int StiTrackNodeHelper::join()
   mTargetNode->mUnTouch = mUnTouch;
   mTargetNode->_state = mState;
   if (mHit && ((mChi2<1000) != (mTargetNode->getChi2()<1000))) mTargetNode->mFlipFlop++;
-  assert(!mHit || mChi2>100 || fabs(mJoinPars._y-mHit->y())<4); //??
+//  assert(!mHit || mChi2>100 || fabs(mJoinPars._y-mHit->y())<4); //??
   mTargetNode->setChi2(mChi2);
 
 //	Sanity check
@@ -793,6 +793,7 @@ static int nCall=0; nCall++;
     r01=mHrr.hZY+mPredErrs._cZY;
     r11=mHrr.hZZ+mPredErrs._cZZ;
     mDetm=r00*r11 - r01*r01;
+    if (!(mDetm>(r00*r11)*1.e-5)) return 99;
     assert(mDetm>(r00*r11)*1.e-5);
 
     // inverse matrix
