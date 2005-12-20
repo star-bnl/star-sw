@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.91 2005/12/18 23:41:46 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.92 2005/12/20 00:41:21 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.92  2005/12/20 00:41:21  perev
+ * unassigned sind fixed(thanxYF)
+ *
  * Revision 2.91  2005/12/18 23:41:46  perev
  * Dependency from StiKalmanTrackNode removed
  *
@@ -892,6 +895,7 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
     if (cCA2<-1) cCA2=-1;
     deltaY = deltaX*(mFP._sinCA+sCA2)/(mFP._cosCA+cCA2);
     deltaL = deltaX*mFP._cosCA + deltaY*mFP._sinCA;
+    sind = deltaL*mFP._curv;
     deltaL = deltaL*(1.+sind*sind/6);
   } else {
     cCA2= sqrt((1.-sCA2)*(1.+sCA2));
