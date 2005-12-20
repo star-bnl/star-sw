@@ -136,6 +136,7 @@ protected:
    virtual       void MemoryOff();
    virtual        int AddType(const char* type, const char* text);
    virtual        int ListTypes();
+//   virtual const char *GetName();
 
 // Info Messages:
    virtual StMessMgr& Info(const char* mess="", const char* opt="O"
@@ -226,4 +227,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.4 2004/11/13 00:28:16 fine Exp $
+// $Id: StLoggerManager.h,v 1.5 2005/12/20 20:51:15 fine Exp $

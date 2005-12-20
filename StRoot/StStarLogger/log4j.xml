@@ -14,4 +14,4 @@
     <appender-ref ref="D1" />
   </root>
   
-<configuration>
+</configuration>

@@ -462,7 +462,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.17 2005/10/10 20:24:17 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.18 2005/12/20 20:51:15 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -777,15 +777,27 @@ int StLoggerManager::ListTypes()
 _NO_IMPLEMENTATION_;   return 5;
 //   return messTypeList->ListTypes();                           
 }
+#if 0
+//_____________________________________________________________________________
+const char *GetName() 
+{
+  // Returns the name of the current logger
+  CurrentMessager()
+}
+#endif
    
+//_____________________________________________________________________________
   // Instantiate the (singleton) class upon loading
   //
 // static StMessMgr* temp=StLoggerManager::Instance();
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.17 2005/10/10 20:24:17 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.18 2005/12/20 20:51:15 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.18  2005/12/20 20:51:15  fine
+// fix typo
+//
 // Revision 1.17  2005/10/10 20:24:17  fine
 // Bug fix: add the brackets around the if statements
 //
