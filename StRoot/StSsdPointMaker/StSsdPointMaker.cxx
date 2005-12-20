@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.23 2005/09/30 14:28:30 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.24 2005/12/20 09:23:35 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.24  2005/12/20 09:23:35  lmartin
+// ssdStripCalib table read from the mysql db
+//
 // Revision 1.23  2005/09/30 14:28:30  lmartin
 // add a 0 to myTime if GetTime()<100000
 //
@@ -331,9 +334,15 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 	  mClusterControl -> printParameters();
 	}      
 
-      St_DataSet *svtparams = GetInputDB("svt");
-      St_DataSetIter local(svtparams);
-      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
+      //      St_DataSet *svtparams = GetInputDB("svt");
+      //      St_DataSetIter local(svtparams);
+      //      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
+
+      St_DataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
+      if (!CalibDbConnector) gMessMgr->Error()<<"StSsdPointMaker::InitRun: Can not found the calibration db.."<<endm;
+      else
+	m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
+
       if (!m_noise2) 
         gMessMgr->Error() << "No  access to ssdStripCalib - will use the default noise and pedestal values" << endm;
       if(m_noise2){
