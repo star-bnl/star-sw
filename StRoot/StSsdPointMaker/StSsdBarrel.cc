@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.16 2005/12/20 10:53:17 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.17 2005/12/20 13:47:14 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.17  2005/12/20 13:47:14  lmartin
+// better hw position encoding in writePointToContainer (matching the new decoding in StEvent)
+//
 // Revision 1.16  2005/12/20 10:53:17  lmartin
 // ReadNoiseFromTable method modified to ignore rows with id=0
 //
@@ -467,16 +470,16 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	    // 2^23 23-27 strip of the p-side cluster relat. to n-side (-15,+16)
 	    // 2^28 28-29 n-side cluster size(1-4) 
 	    // 2^30 30-31 p-side cluster size(1-4)
-            hw  =         
-                         8                                                                             
-	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
-	      +       8192 * (int)cluster_P_j->getStripMean()                                          
-	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
-	      +  268435456 * (int)cluster_N_j->getClusterSize()                                       
-	      + 1073741824 * (int)cluster_P_j->getClusterSize();
-	    currentSsdHit->setHardwarePosition(hw);
+	    hw  =         
+	                 8                                                                             
+  	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+ 	      +       8192 * (int)cluster_N_j->getStripMean()                                          
+  	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
+ 	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
+ 	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
+  	    currentSsdHit->setHardwarePosition(hw);
 
-	    inContainer += ssdHitColl->addHit(currentSsdHit);
+  	    inContainer += ssdHitColl->addHit(currentSsdHit);
 	  }// Container condition
 
 	  if (1) {//Jerome is Happy, Fill the Table
