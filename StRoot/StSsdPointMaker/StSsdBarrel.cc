@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.15 2005/12/07 20:41:54 perev Exp $
+// $Id: StSsdBarrel.cc,v 1.16 2005/12/20 10:53:17 lmartin Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.16  2005/12/20 10:53:17  lmartin
+// ReadNoiseFromTable method modified to ignore rows with id=0
+//
 // Revision 1.15  2005/12/07 20:41:54  perev
 // (int) added. WarnOff
 //
@@ -282,22 +285,17 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
   int iSide  = 0;
   for (int i = 0 ; i < strip_calib->GetNRows(); i++)
     {
-      nStrip  = (int)(noise[i].id/100000.);
-      idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
-      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
-      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
-      iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
-      mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
-      //       if (iLad==11 && iWaf==8 && nStrip <10) 
-      //	cout<<"iLad,idWaf,nStrip,iSide,rms = "<<iLad
-      //	    <<" "<<idWaf
-      //	    <<" "<<nStrip
-      //	    <<" "<<iSide
-      //	    <<" "<<noise[i].rms<<endl;
+      if (noise[i].id>0 && noise[i].id<=76818620) {
+	nStrip  = (int)(noise[i].id/100000.);
+	idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+	iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
+	NumberOfNoise++;
+      }
     }
-  NumberOfNoise = strip_calib->GetNRows();
   return NumberOfNoise;
-//   return noise_h->nok;
 }
 
 
