@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.24 2005/12/20 09:23:35 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.25 2005/12/20 10:35:51 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.25  2005/12/20 10:35:51  lmartin
+// ReadStrip method updated and some cosmetic changes
+//
 // Revision 1.24  2005/12/20 09:23:35  lmartin
 // ssdStripCalib table read from the mysql db
 //
@@ -135,10 +138,7 @@ StSsdPointMaker::~StSsdPointMaker(){
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Init(){
-  gMessMgr->Info() << "In StSsdPointMaker::init() - " << endm;
-
-  // database readout 
-  gMessMgr->Info() << "Trying to access to databases " << endm;
+  gMessMgr->Info() << "Init() : Defining the histograms" << endm;
 
   if (IAttr(".histos")) {
     noisDisP = new TH1F("Noise_p","Noise Distribution",250,0,25);
@@ -294,11 +294,11 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 
   if (DbConnector) 
     {
-      gMessMgr->Info() << "SSD Databases respond " << endm;
+      gMessMgr->Info() << "InitRun : SSD Databases respond " << endm;
       St_slsCtrl* slsCtrlTable = (St_slsCtrl*) DbConnector->Find("slsCtrl");
       slsCtrl_st*      control      = (slsCtrl_st*) slsCtrlTable->GetTable();
       if (!control) 
-	gMessMgr->Error() << "No  access to slsCtrl table" << endm;
+	gMessMgr->Error() << "InitRun : No access to slsCtrl table" << endm;
       else
 	{
 	  mDynamicControl = new StSsdDynamicControl();
@@ -321,7 +321,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       St_clusterControl* clusterCtrlTable = (St_clusterControl*) DbConnector->Find("clusterControl");
       clusterControl_st *clusterCtrl  = (clusterControl_st*) clusterCtrlTable->GetTable() ;
       if (!clusterCtrl) 
-	gMessMgr->Error() << "No  access to clusterControl table" << endm;
+	gMessMgr->Error() << "InitRun : No access to clusterControl table" << endm;
       else 
 	{
 	  mClusterControl = new StSsdClusterControl();
@@ -339,45 +339,45 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       //      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
 
       St_DataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
-      if (!CalibDbConnector) gMessMgr->Error()<<"StSsdPointMaker::InitRun: Can not found the calibration db.."<<endm;
+      if (!CalibDbConnector) gMessMgr->Error()<<"InitRun: Can not found the calibration db.."<<endm;
       else
 	m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
 
       if (!m_noise2) 
-        gMessMgr->Error() << "No  access to ssdStripCalib - will use the default noise and pedestal values" << endm;
+        gMessMgr->Error() << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;
       if(m_noise2){
-      gMessMgr->Warning("StSsdPointMaker: looking for a pedestal/noise tables");
+      gMessMgr->Warning("InitRun : printing few pedestal/noise values");
       Read_Strip(m_noise2); 
       }
       // Get once the information for configuration, wafersposition and dimensions
       St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration");
       config  = (ssdConfiguration_st*) configTable->GetTable() ;
       if (!config) 
-        gMessMgr->Error() << "No  access to ssdConfiguration database" << endm;
+        gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
       //mConfig = new StSsdConfig();
   
       St_ssdWafersPosition* positionTable = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
       positionSize = 0;
       position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
       if (!position) 
-        gMessMgr->Error() << "No  access to ssdWafersPosition database" << endm;
+        gMessMgr->Error() << "InitRun : No access to ssdWafersPosition database" << endm;
       else
         positionSize= positionTable->GetNRows();
 
       St_ssdDimensions* dimensionsTable = (St_ssdDimensions*) DbConnector->Find("ssdDimensions");
       dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
       if (!dimensions) 
-        gMessMgr->Error() << "No  access to ssdDimensions database" << endm;
+        gMessMgr->Error() << "InitRun : No access to ssdDimensions database" << endm;
   
       if ((!dimensions)||(!config)){
-        gMessMgr->Error() << "No geometry or configuration parameters " << endm;
+        gMessMgr->Error() << "InitRun : No geometry or configuration parameters " << endm;
         return kStErr;
       }
 
     }
   else // No access to databases -> read tables
     {
-	gMessMgr->Error() << "No connection to the database in StSsdPointMaker" << endm;
+	gMessMgr->Error() << "InitRun : No connection to the database in StSsdPointMaker" << endm;
     }
 
 
@@ -400,7 +400,7 @@ void StSsdPointMaker::DeclareNtuple(int *flag){
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Make()
 {
-  if (Debug())  gMessMgr->Debug() << "In StSsdPointMaker::Make() ... "
+  if (Debug())  gMessMgr->Debug() << "Make : GetName = "
                                << GetName() << endm;
   // 		Create output tables
   Int_t res = 0; 
@@ -419,14 +419,14 @@ Int_t StSsdPointMaker::Make()
   St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
   St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");
   if (!spa_strip || spa_strip->GetNRows()==0){
-    gMessMgr->Warning("StSsdPointMaker: no input (fired strip for the SSD)");
-    gMessMgr->Warning("StSsdPointMaker: looking for a pedestal/noise tables");
+    gMessMgr->Warning("Make : no input (fired strip for the SSD)");
+    gMessMgr->Warning("Make : looking for a pedestal/noise tables");
     if (!spa_ped_strip || spa_ped_strip->GetNRows()==0) {
-      gMessMgr->Warning("StSsdPointMaker: no pedestal/noise data...");
+      gMessMgr->Warning("Make : no pedestal/noise data...");
       return kStWarn;
     }
     else 
-      gMessMgr->Warning()<<"StSsdPointMaker: pedestal/noise data found : "<<spa_ped_strip->GetNRows()<<endm;
+      gMessMgr->Warning()<<"Make : pedestal/noise data found : "<<spa_ped_strip->GetNRows()<<endm;
   }
 
   
@@ -439,7 +439,7 @@ Int_t StSsdPointMaker::Make()
     {
       mSsdHitColl = mCurrentEvent->ssdHitCollection();
       if (!mSsdHitColl) {
-	gMessMgr->Warning("StSsdPointMaker::Make : The SSD hit collection does not exist  - creating a new one");
+	gMessMgr->Warning("Make : The SSD hit collection does not exist  - creating a new one");
 	mSsdHitColl = new StSsdHitCollection;
 	mCurrentEvent->setSsdHitCollection(mSsdHitColl);
       }
@@ -462,7 +462,7 @@ Int_t StSsdPointMaker::Make()
       PrintStripSummary(mySsd);
       int noiseTableSize = 0;      
       if (!m_noise2) 
-	gMessMgr->Warning("StSsdPointMaker::Make : No pedestal and noise values (ssdStripCalib table missing), will use default values");
+	gMessMgr->Warning("Make : No pedestal and noise values (ssdStripCalib table missing), will use default values");
       else
 	noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
       cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
@@ -511,7 +511,7 @@ Int_t StSsdPointMaker::Make()
   delete mySsd;
  
   if(res!=kStOK){
-    gMessMgr->Warning("StSsdPointMaker: no output");
+    gMessMgr->Warning("Make : no output");
     return kStWarn;
   }
 
@@ -721,8 +721,8 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
       }
     }
   
-  gMessMgr->Info() <<"StSsdPointMaker::PrintStripSummary/Number of raw data in the SSD" << endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintStripSummary/Active Ladders : ";
+  gMessMgr->Info() <<"PrintStripSummary : Number of raw data in the SSD" << endm;
+  gMessMgr->Info() << "PrintStripSummary : Active Ladders : ";
   for (int i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
@@ -730,14 +730,14 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
     }
   
   *gMessMgr<<endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintStripSummary/Counts (p-side): ";
+  gMessMgr->Info() << "PrintStripSummary : Counts (p-side): ";
   for (int i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountP[i];
     }
   *gMessMgr<<endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintStripSummary/Counts (n-side): ";
+  gMessMgr->Info() << "PrintStripSummary : Counts (n-side): ";
   for (int i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
@@ -768,8 +768,8 @@ void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
       }
     }
   
-  gMessMgr->Info() <<"StSsdPointMaker::PrintClusterSummary/Number of clusters in the SSD" << endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintClusterSummary/Active Ladders : ";
+  gMessMgr->Info() <<"PrintClusterSummary : Number of clusters in the SSD" << endm;
+  gMessMgr->Info() << "PrintClusterSummary : Active Ladders : ";
   for (int i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
@@ -777,14 +777,14 @@ void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
     }
   
   *gMessMgr<<endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintClusterSummary/Counts (p-side): ";
+  gMessMgr->Info() << "PrintClusterSummary : Counts (p-side): ";
   for (int i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountP[i];
     }
   *gMessMgr<<endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintClusterSummary/Counts (n-side): ";
+  gMessMgr->Info() << "PrintClusterSummary : Counts (n-side): ";
   for (int i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
@@ -809,8 +809,8 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
       }
     }
   
-  gMessMgr->Info() <<"StSsdPointMaker::PrintPointSummary/Number of hits in the SSD" << endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintPointSummary/Active Ladders : ";
+  gMessMgr->Info() <<"PrintPointSummary : Number of hits in the SSD" << endm;
+  gMessMgr->Info() << "PrintPointSummary : Active Ladders : ";
   for (int i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
@@ -818,14 +818,14 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
     }
   
   *gMessMgr<<endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintPointSummary/Counts         : ";
+  gMessMgr->Info() << "PrintPointSummary : Counts         : ";
   for (int i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCount[i];
     }
   *gMessMgr<<endm;
-  gMessMgr->Info() << "StSsdPointMaker::PrintPointSummary/Counts  (11)   : ";
+  gMessMgr->Info() << "PrintPointSummary : Counts  (11)   : ";
   for (int i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
@@ -1140,22 +1140,42 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
   int iLad   = 0;
   int nStrip = 0;
   int iSide  = 0;
+  int iOver = 0;
+  int iZero = 0;
+  int iUnder = 0;
+  int iGood = 0;
   for (int i = 0 ; i < strip_calib->GetNRows(); i++)
     {
-      nStrip  = (int)(noise[i].id/100000.);
-      idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
-      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
-      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
-      iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
-      //mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
-             if (iLad==11 && iWaf==8 && nStrip <10) 
-      	cout<<"iLad,idWaf,nStrip,iSide,pedestal,rms = "<<iLad
-      	    <<" "<<idWaf
-      	    <<" "<<nStrip
-      	    <<" "<<iSide
-	    <<" "<<(float)(noise[i].pedestals)
-      	    <<" "<<(float)(noise[i].rms)<<endl;
+      if (noise[i].id>0 && noise[i].id<=76818620) {
+	nStrip  = (int)(noise[i].id/100000.);
+	idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+	iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+	if (iLad==11 && iWaf==8 && nStrip <10) 
+	  gMessMgr->Info()<<"ReadStrip: iLad,idWaf,nStrip,iSide,pedestal,rms = "<<iLad
+			  <<" "<<idWaf
+			  <<" "<<nStrip
+			  <<" "<<iSide
+			  <<" "<<(float)(noise[i].pedestals)
+			  <<" "<<(float)(noise[i].rms)<<endm;
+	iGood++;
+      }
+      else {
+	if (noise[i].id<0) iUnder++;
+	else {
+	  if (noise[i].id==0) iZero++;
+	  else iOver++;
+	}
+      }
     }
+  gMessMgr->Info()<<"ReadStrip: Number of rows in the table : "<<strip_calib->GetNRows()<<endm;
+  gMessMgr->Info()<<"ReadStrip: Number of good id : "<<iGood<<endm;
+  gMessMgr->Info()<<"ReadStrip: Number of id = 0  : "<<iZero<<endm;
+  if (iUnder>0)
+    gMessMgr->Warning()<<"ReadStrip: Number of underf  : "<<iUnder<<endm;
+  if (iOver>0)
+  gMessMgr->Warning()<<"ReadStrip: Number of overf   : "<<iOver<<endm;
 }
 
 //_____________________________________________________________________________
