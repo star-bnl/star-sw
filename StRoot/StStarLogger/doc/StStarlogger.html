@@ -574,10 +574,10 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 Pay your attention to some non-obvious properties of <a href="http://logging.apache.org/log4j/docs/manual.html">the logger objects</a>.
 <ul>
 <li> <b>Appender Additivity</b>
-<blockquota>
+<br><blockquota>
 <cite>
 The output of a log statement of logger C will go to all the appenders in C and its ancestors. 
-This is the meaning of the term <a href="https://www.qos.ch/ac2001/F11-100.html>"appender additivity"</a>. 
+This is the meaning of the term <a href="https://www.qos.ch/ac2001/F11-100.html">"appender additivity"</a>. 
 <br>
 However, if an ancestor of logger C, say P, has the additivity flag set to false, 
 then C's output will be directed to all the appenders in C and it's ancestors 
@@ -585,7 +585,7 @@ upto and including P but not the appenders in any of the ancestors of P.
 Loggers have their additivity flag set to true by default
 </cite>
 </blockquota>
-
+<br>
 The "additvity"  has some "side effect" that if one assignes the "appender" for the "root" logger and he/she does define 
 the same appender for the child logger explicitly then one may
 <a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have endded up with each program message 
@@ -596,6 +596,8 @@ printed more then one time</a>.
 <!---- ------------------------------------------------------------------------------ -->
 <a name="#deprecated"></a>
 <!---- ------------------------------------------------------------------------------ -->
+<h2> Deprecated methods </h2>
+
 Some redundant functions described by<br> 
 
 <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"><b>Section II. Advanced features</b></a>,
