@@ -132,7 +132,9 @@ the CPP macros as follows:
   <li> <b><code>LOG_WARN</code></a> </b>
   <li> <b><code>LOG_ERROR</code></a> </b>
   <li> <b><code>LOG_FATAL</code></a> </b>
+<!---- ------------------------------------------------------------------------------ -->
   <a name="#log_qa_macros"></a>
+<!---- ------------------------------------------------------------------------------ -->
   <li> <b><code>LOG_QA</code></a> </b>
 </ul>
 are followed by the C++ output "stream" elements  and ended up with the <b><code>"endm"</code></b> object.
@@ -142,7 +144,9 @@ For example, to direct the message to the "error" logger on needs:
    { LOG_ERROR << "My error message" << endm; }
 </pre>  </code> </b>
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#nologgermacros"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <b>Attention !!! </b> Keep in mind the <b><code>LOG_ERROR </code> </b> 
 is a CPP macro with <b><code>if</code> </b> C++ statement inside.
 This means you should surround it with the curly brackets if the macro is used inside 
@@ -279,7 +283,9 @@ the <a href="#examples">custom configuration</a> with the file
 in <a href="http://wiki.apache.org/logging-log4j/Log4jXmlFormat">XML format</a>, 
 <b><code>"log4j.xml"</code></b>,  in the current working directory.
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#env"></a>
+<!---- ------------------------------------------------------------------------------ -->
 The custom name and directory for the logger configuration file can be provided via ROOT resource file.
 One may add to his/her <b><code>".rootrc"</code></b> file the line:
 <b><code><pre>
@@ -547,6 +553,7 @@ alike within his/her <a href="#conf">custom <b><code>".rootrc"</code></b> file</
 <!---- ------------------------------------------------------------------------------ -->
 <!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
 <H2>Examples of the custom configuration files (under construction yet)</H2>
+
 The example of the configuration files below are available 
 to copy from <b><code>$STAR/StRoot/StStarLogger/docs</b></code> directory 
 or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/doc">STAR CVS repository</a>
@@ -563,6 +570,7 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 <a name="#stones"></a>
 <!---- ------------------------------------------------------------------------------ -->
 <h2>Underwater stones</h2>
+
 Pay your attention to some non-obvious properties of <a href="http://logging.apache.org/log4j/docs/manual.html">the logger objects</a>.
 <ul>
 <li> <b>Appender Additivity</b>
@@ -580,7 +588,7 @@ Loggers have their additivity flag set to true by default
 
 The "additvity"  has some "side effect" that if one assignes the "appender" for the "root" logger and he/she does define 
 the same appender for the child logger explicitly then one may
-<a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have endded up with each program messages 
+<a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have endded up with each program message 
 printed more then one time</a>. 
 </ul>
 
