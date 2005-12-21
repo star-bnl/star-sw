@@ -28,10 +28,13 @@ Table of Contents:
 <li><a href="#print">"Print statement" transition</a>
 <li><a href="#root">ROOT messages handling</a>
 <li><a href="#examples">"Examples (under construction yet)"</a>
+<li><a href="#stones">"Underwater stones"</a>
 <li><a href="#deprecated">"The deprecated<a> functionality 
                           of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">the old messager"</a>
 </ul>
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#logger"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2> Integration log4j package for STAR framework</h2>
 
 
@@ -73,7 +76,9 @@ Table of Contents:
   and provide an external XML <a href="#conf">configuration file</a> 
   for the logger as needed. 
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#makers"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2> "Loggers" for STAR Makers  </h2>
 
   With the new implementation, the STAR framework initiates two common loggers: <b><code>"BFC"</code></b> 
@@ -89,7 +94,9 @@ Table of Contents:
    The base StMaker class internally governs the logger selection to make sure the current
   logger  matches the logger of the current active StMaker instance.
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#global"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2>Global "Loggers": <b><code>"BFC"</code></b> and <b><code>"QA"</code></b></h2>
  The STAR software infrastructure provides two default global loggers. 
 <ul>
@@ -110,7 +117,9 @@ Table of Contents:
 Since both <b><code>"QA"</code></b> as well as <b><code>"BFC"</code></b> are the normal loggers 
 it can be provided with the dedicated filters, layouts, and appenders to <a href="#conf">customize</a> it output.
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#macros"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2> New macros </h2>
 
 The base STAR message manager abstract interface was improved to provide better performance.
@@ -207,7 +216,9 @@ Just add into your implementation the lines as follows:
 </ul>
 or something like this.
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#use"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2> How to use the manager </h2>
 
 To use the STAR message manager your code has to contain the STAR message manager 
@@ -255,10 +266,14 @@ To use the STAR message manager your code has to contain the STAR message manage
    It is enough to define the desirable messages and its level. 
    All other features can be ordered with the configuration 
    file at run-time without any needs to change and re-compile the code.
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#conf"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2>How to configure</h2>
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#file"></a>
+<!---- ------------------------------------------------------------------------------ -->
 To overwrite the STAR default output logger configuration one can provide 
 the <a href="#examples">custom configuration</a> with the file 
 in <a href="http://wiki.apache.org/logging-log4j/Log4jXmlFormat">XML format</a>, 
@@ -281,7 +296,9 @@ to do that.
 One can alternate the default configuration file name and its location via <b><code>STAR_LOGGER_PROPERTY</code></b>
 environment variable as well.
 <p>
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#fileExample"></a>
+<!---- ------------------------------------------------------------------------------ -->
 For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml</code></b></a> 
 defines the "Console output" for entire STAR production chain and the <b><code>"Debug"</code></b> level of the messages.
 
@@ -326,7 +343,9 @@ See: <a href="http://logging.apache.org/log4cxx/">http://logging.apache.org/log4
 The layout may be supplied with <a href="http://logging.apache.org/log4j/docs/api/org/apache/log4j/PatternLayout.html">
 the custom format string</a>.
 
+<!---- ------------------------------------------------------------------------------ -->
 <a name=#formats"></a>
+<!---- ------------------------------------------------------------------------------ -->
    <b><code>
    <pre>
   Formats:
@@ -395,7 +414,9 @@ Examples:
    </code></b>
 <p>
   
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#print"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h2> "Print statement" transition</h2>
  To enjoy the new logger feature one should replace the "regular" C++ I/O stream output statement 
  or C output function  with that calling the loggers.
@@ -409,7 +430,9 @@ Examples:
   </pre>
    </code></b>
 <p>
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#printCplus"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h3> "C++" output stream statements </h3>
  If you use the C++ output streams like <b><code>"cout"</code></b>, <b><code>"cerr"</code></b>  
  to get an access to the logger it is enough to 
@@ -437,7 +460,9 @@ with
    It is safe to add these macro to your code. You still will be able to use and compile your code with no logger with <a href="#nologgermacros">
 a simple addition</a>.
    
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#printCprintf"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <h3> "C"output subroutines</h3>
 
 Use the <a href="http://root.cern.ch/root/htmldoc/TString.html#TString:Form">"Form"</a> ROOT method 
@@ -487,7 +512,9 @@ can be replaced with
    </pre>
    </code></b>
 and versa verse.
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#root"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <H2>ROOT messages handling</H2>
 The messages generated by the ROOT system are handled by the messagger also. 
 ROOT distinguishes 6 levels of the messages.
@@ -515,7 +542,9 @@ Namely, one still can define it via "ROOT Environment" providing the line
     Root.ErrorIgnoreLevel   Info
  </pre></code></b>
 alike within his/her <a href="#conf">custom <b><code>".rootrc"</code></b> file</a>.  The ROOT rule is applied first.
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#examples"></a>
+<!---- ------------------------------------------------------------------------------ -->
 <!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
 <H2>Examples of the custom configuration files (under construction yet)</H2>
 The example of the configuration files below are available 
@@ -530,8 +559,35 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 <li><a href="QACustom.xml"> <b><code>QACustom.xml</code></b></a> - defines the custom level and format for QA messages
 </ul>
 
+<!---- ------------------------------------------------------------------------------ -->
+<a name="#stones"></a>
+<!---- ------------------------------------------------------------------------------ -->
+<h2>Underwater stones</h2>
+Pay your attention to some non-obvious properties of <a href="http://logging.apache.org/log4j/docs/manual.html">the logger objects</a>.
+<ul>
+<li> <b>Appender Additivity</b>
+<blockquota>
+<cite>
+The output of a log statement of logger C will go to all the appenders in C and its ancestors. 
+This is the meaning of the term <a href="https://www.qos.ch/ac2001/F11-100.html>"appender additivity"</a>. 
+<br>
+However, if an ancestor of logger C, say P, has the additivity flag set to false, 
+then C's output will be directed to all the appenders in C and it's ancestors 
+upto and including P but not the appenders in any of the ancestors of P. 
+Loggers have their additivity flag set to true by default
+</cite>
+</blockquota>
+
+The "additvity"  has some "side effect" that if one assignes the "appender" for the "root" logger and he/she does define 
+the same appender for the child logger explicitly then one may
+<a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have endded up with each program messages 
+printed more then one time</a>. 
+</ul>
+
+
+<!---- ------------------------------------------------------------------------------ -->
 <a name="#deprecated"></a>
-<h2>The deprecated functionality</h2>
+<!---- ------------------------------------------------------------------------------ -->
 Some redundant functions described by<br> 
 
 <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr"><b>Section II. Advanced features</b></a>,
