@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.17 2005/12/20 13:47:14 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.18 2005/12/23 21:33:17 perev Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.18  2005/12/23 21:33:17  perev
+// Some defence for 1/0 added
+//
 // Revision 1.17  2005/12/20 13:47:14  lmartin
 // better hw position encoding in writePointToContainer (matching the new decoding in StEvent)
 //
@@ -543,8 +546,9 @@ int StSsdBarrel::doClusterMatching(ssdDimensions_st *dimensions, StSsdClusterCon
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       { 
 	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(dimensions, clusterControl);
-	nPerfect  = mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(dimensions, clusterControl);
+	nPerfect  =  mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(dimensions, clusterControl);
 	nSolved  += nPerfect;
+	if (!nPerfect) continue;
 	            mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, clusterControl);
 	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(dimensions, clusterControl);
       }
