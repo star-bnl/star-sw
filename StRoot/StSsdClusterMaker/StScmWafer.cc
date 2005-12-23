@@ -1,6 +1,9 @@
-// $Id: StScmWafer.cc,v 1.3 2005/12/19 10:52:13 kisiel Exp $
+// $Id: StScmWafer.cc,v 1.4 2005/12/23 14:47:32 fisyak Exp $
 //
 // $Log: StScmWafer.cc,v $
+// Revision 1.4  2005/12/23 14:47:32  fisyak
+// DeclareNtuple only if m_Mode != 0
+//
 // Revision 1.3  2005/12/19 10:52:13  kisiel
 // Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
 //
@@ -255,6 +258,8 @@ void StScmWafer::doStatPerfect(int nPerfectPoint, scm_ctrl_st *scm_ctrl)
   float store = 0;
   StScmPoint *currentPerfect = 0;
   currentPerfect = mPoint->first();
+  mPerfectMean = mPerfectSigma = 0;
+  if (! currentPerfect) return;
   while(currentPerfect)
     {
       store += currentPerfect->getDe(1);

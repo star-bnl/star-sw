@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scf_maker.cxx
  **************************************************************************
- * $Id: St_scf_Maker.cxx,v 1.10 2005/11/22 03:57:05 bouchet Exp $
+ * $Id: St_scf_Maker.cxx,v 1.11 2005/12/23 14:47:32 fisyak Exp $
  *
  * $Log: St_scf_Maker.cxx,v $
+ * Revision 1.11  2005/12/23 14:47:32  fisyak
+ * DeclareNtuple only if m_Mode != 0
+ *
  * Revision 1.10  2005/11/22 03:57:05  bouchet
  * id_mctrack is using for setIdTruth
  *
@@ -98,7 +101,6 @@ Int_t St_scf_Maker::Init(){
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
 
-
   // 		Create SCF histograms
   noisDisP = new TH1F("Noise_p","Noise Distribution",25,0,25);
   snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
@@ -109,8 +111,7 @@ Int_t St_scf_Maker::Init(){
   stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
   totChrgN = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
 
-  DeclareNtuple();
- 
+  if (m_Mode) DeclareNtuple();
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -213,7 +214,7 @@ void St_scf_Maker::makeScfCtrlHistograms()
 	    ClusterNtuple[5]=dClus[iScf].noise_count;
 	    ClusterNtuple[6]= (int)(dClus[iScf].first_strip/100000.);
 	    ClusterNtuple[7]=dClus[iScf].adc_count*dClus[iScf].n_strip;
-	    qHitNtuple->Fill(ClusterNtuple);
+	    if (m_Mode) qHitNtuple->Fill(ClusterNtuple);
 	    noisDisP->Fill(dClus[iScf].noise_count/dClus[iScf].n_strip);
 	    snRatioP->Fill((dClus[iScf].adc_count*dClus[iScf].n_strip)/dClus[iScf].noise_count);
 	    stpClusP->Fill(dClus[iScf].n_strip);
@@ -234,7 +235,7 @@ void St_scf_Maker::makeScfCtrlHistograms()
 	    ClusterNtuple[5]=dClus[iScf].noise_count;
 	    ClusterNtuple[6]= (int)(dClus[iScf].first_strip/100000.);
 	    ClusterNtuple[7]=dClus[iScf].adc_count*dClus[iScf].n_strip;
-	    qHitNtuple->Fill(ClusterNtuple);
+	    if (m_Mode) qHitNtuple->Fill(ClusterNtuple);
 	  }
       }
   }
