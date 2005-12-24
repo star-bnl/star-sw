@@ -34,6 +34,9 @@
 			<HOST NAME="heston.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
 				<ACCESS USER="FC_user" PASS="FCatalog"/>
 			</HOST>
+			<HOST NAME="db09.star.bnl.gov" DBNAME="FileCatalog_BNL" PORT="3336">
+				<ACCESS USER="FC_user" PASS="FCatalog"/>
+			</HOST>
 		</SERVER>
 	</SITE>
 
