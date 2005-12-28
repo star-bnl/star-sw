@@ -1,0 +1,50 @@
+<HTML>
+<TITLE>  jobtracker-server RPM installation  $Id: INSTALL.html,v 1.1 2005/12/28 14:00:55 fine Exp $</TITLE>
+<BODY>
+<pre>
+From: Dmitry Arkhipkin [mailto:arkhipkin@gmail.com] 
+Sent: Wed 12/28/2005 4:18 AM 
+To: Fine, Valeri 
+Cc: Jerome LAURET 
+Subject: JobTracker server installation
+</pre>
+
+
+Please find the <a href="http://madison.star.bnl.gov/xmlrpc/rpm/star-jobtracker-server-0.1-1.noarch.rpm">
+jobtracker-server RPM</a> : 
+<code>
+<a href="http://madison.star.bnl.gov/xmlrpc/rpm/star-jobtracker-server-0.1-1.noarch.rpm">
+http://madison.star.bnl.gov/xmlrpc/rpm/star-jobtracker-server-0.1-1.noarch.rpm</a>
+</code>
+
+spec file to build your <a href="star-jobtracker-server.spec">own RPM</a>:
+<code>
+<a href="http://madison.star.bnl.gov/xmlrpc/rpm/star-jobtracker-server.spec">
+http://madison.star.bnl.gov/xmlrpc/rpm/star-jobtracker-server.spec</a>
+</code>
+
+This rpm automatically requires proper MySQL/Apache/php/xmlrpc
+versions. These can be obtained by using apt package (part of the
+Scientific Linux default installation) :
+<code><bold>
+<pre>
+  $> apt-get install mysql httpd php php-mysql php-xmlrpc;
+</pre>
+</code></bold>
+
+After rpm installation, please follow the
+<code><bold>
+<pre>
+  /usr/share/doc/star-jobtracker-server-0.1/INSTALL
+</pre>
+</code></bold>
+document to set proper configuration settings.
+
+Best Regards,
+--
+<a href="mailto:arkhipkin@gmail.com">Dmitry Arkhipkin</a>
+
+Particle Physics Laboratory<br>
+Joint Institute for Nuclear Research, Russia
+</BODY>
+</html>
