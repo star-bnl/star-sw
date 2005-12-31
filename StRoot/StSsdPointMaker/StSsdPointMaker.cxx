@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.25 2005/12/20 10:35:51 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.26 2005/12/31 01:43:22 perev Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.26  2005/12/31 01:43:22  perev
+// Mack/Upack simplified
+//
 // Revision 1.25  2005/12/20 10:35:51  lmartin
 // ReadStrip method updated and some cosmetic changes
 //
@@ -552,8 +555,8 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 	      {
 		stpClusN->Fill(pClusterN->getClusterSize());
 		totChrgN->Fill(convAdcToE*pClusterN->getTotAdc());
-		noisDisN->Fill(pClusterN->getTotNoise()/pClusterN->getClusterSize());
-		snRatioN->Fill((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());	
+		noisDisN->Fill(pClusterN->getTotNoise()/(3e-33+pClusterN->getClusterSize()));
+		snRatioN->Fill((pClusterN->getTotAdc()*pClusterN->getClusterSize())/(3e-33+pClusterN->getTotNoise()));	
 		pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
 	      }	  
 	  }
