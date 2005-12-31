@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.95 2005/10/06 18:46:30 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.96 2005/12/31 01:32:10 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.96  2005/12/31 01:32:10  perev
+// test for memory curruption added
+//
 // Revision 1.95  2005/10/06 18:46:30  fisyak
 // Add protection for validity date < 19950101
 //
@@ -443,6 +446,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
 {
 
   assert(fDBBroker);assert(dat);
+
   fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
   fTimer[1].Stop(); fTimer[3].Start(0);
@@ -492,6 +496,9 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   int nRows = fDBBroker->GetNRows();
   //		Adopt DB data in the new TTable
   dat->Adopt(nRows,dbstruct);
+//	check size.
+  if (!nRows || ((char*)dbstruct)[dat->GetRowSize()*nRows-1]) {}
+
   //  dat->Print(0,1);
 
   //  printf("BegVal=%s\n",val[0].AsString());
