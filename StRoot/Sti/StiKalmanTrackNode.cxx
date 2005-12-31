@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.92 2005/12/20 00:41:21 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.93 2005/12/31 01:37:12 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.93  2005/12/31 01:37:12  perev
+ * Primary node perpendicular to track
+ *
  * Revision 2.92  2005/12/20 00:41:21  perev
  * unassigned sind fixed(thanxYF)
  *
@@ -289,6 +292,7 @@ using namespace std;
 #include "StiTrackNodeHelper.h"
 #include "StiFactory.h"
 #include "TString.h"
+#include "THelixTrack.h"
 #include "TRMatrix.h"
 #include "TRVector.h"
 #define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
@@ -758,6 +762,12 @@ static int nCall=0; nCall++;
 Break(nCall);
   
   setState(parentNode);
+  TCircle tc(&mFP._x,&mFP._cosCA,mFP._curv);
+  double xy[2]; xy[0]=vertex->x(),xy[1]=vertex->y();
+  double s = tc.Path(xy); tc.Move(s);
+  double ang = atan2(tc.Dir()[1],tc.Dir()[0]);
+  vertex->rotate(ang);
+  rotate(ang);
   if (debug()) ResetComment(::Form("Vtx:%8.3f %8.3f %8.3f",vertex->x(),vertex->y(),vertex->z()));
   if (propagate(vertex->x(),kPlanar,dir))    return false; // track does not reach vertex "plane"
   propagateError();
