@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.158  2005/12/31 01:34:02  perev
+// Degug histos added
+//
 // Revision 1.157  2005/12/07 23:55:02  perev
 // control is changed using StMaker::SetAttr
 //
@@ -237,6 +240,7 @@
 #include "StiTpc/StiTpcDetectorBuilder.h"
 #include "StiSvt/StiSvtDetectorBuilder.h"
 #include "Sti/StiHitErrorCalculator.h"
+#include "StiUtilities/StiDebug.h"
 #include "TDataSet.h"
 #include "tables/St_TrackingParameters_Table.h"
 #include "tables/St_KalmanTrackFinderParameters_Table.h"
@@ -288,6 +292,7 @@ void StiMaker::Clear(const char*)
 
 Int_t StiMaker::Finish()
 {
+  StiDebug::Finish();
   if (IAttr("doPlots"))
     {
       if (_residualCalculator)
@@ -301,6 +306,7 @@ Int_t StiMaker::Finish()
 Int_t StiMaker::Init()
 {
 
+  StiDebug::Init();
   runField =0.;
   StiTimer::Init("StiTrackFinder::find() TIMING"
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
