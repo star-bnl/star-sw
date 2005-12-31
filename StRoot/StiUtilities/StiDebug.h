@@ -10,12 +10,18 @@
  * @class StiDebug
  */
 class StiKalmanTrack; 
+class TH1; 
 class StiDebug 
 {
 public:
 static void  Break(int kase);
 static void  showTh(StiKalmanTrack *kt);
 static void  show(StiKalmanTrack *kt);
+static void  Init();
+static void  Finish();
+static void  Hist(int ihist,double val);
+private:
+static TH1 *mgHist[100];
 
 };
 

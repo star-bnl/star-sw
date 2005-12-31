@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "StiDebug.h"
 #include "TMath.h"
+#include "TROOT.h"
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TSystem.h"
@@ -10,6 +11,39 @@
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 static int myReady=0;
+TH1 *StiDebug::mgHist[100];
+
+//______________________________________________________________________________
+void StiDebug::Init()
+{
+  memset(mgHist,0,sizeof(mgHist));
+  if (gROOT->IsBatch()) return;
+}
+//______________________________________________________________________________
+void StiDebug::Hist(int ihist,double val)
+{
+  TH1 *hist = mgHist[ihist];
+  if (!hist) return;
+  hist->Fill(val);
+}
+//______________________________________________________________________________
+void StiDebug::Finish()
+{
+  if (gROOT->IsBatch()) return;
+  int nH = sizeof(mgHist)/sizeof(void*);
+  int n = 0;
+  TCanvas *tc=0;
+  for (int iH=0;iH<nH;iH++) {
+    if (!mgHist[iH]) continue;
+    if((n%3)==0) {
+      tc = new TCanvas("C1","",600,800);
+      tc->Divide(1,3);
+    }
+    tc->cd((n%3)+1); mgHist[iH]->Draw();
+    tc->Modified() ;tc->Update();
+    n++;
+  }
+}
 //______________________________________________________________________________
 void StiDebug::Break(int kase)
 {
