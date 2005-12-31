@@ -46,7 +46,7 @@ class StiTrackNodeHelper
 public:
 
       StiTrackNodeHelper(){}    
- void set(double chi2max,double errConfidence,int iter);    
+ void set(double chi2max,double chi2vtx,double errConfidence,int iter);    
  void set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode);		
   int makeFit(int smooth);
   StiKalmanTrackNode *getWorst()    	const 	{return mWorstNode;}
@@ -86,6 +86,7 @@ static int getHitErrors(const StiHit *hit,const StiNodePars *pars, StiHitErrs *h
 
 private:
 double mChi2Max;
+double mChi2Vtx;
 double mErrConfidence;
 double mErrConfiDefault;
 int    mIter;				//current iter number

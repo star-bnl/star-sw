@@ -25,10 +25,11 @@ int errTest(StiNodePars &predP,StiNodeErrs &predE,
             StiNodePars &fitdP,StiNodeErrs &fitdE,double chi2);
 
 //______________________________________________________________________________
-void StiTrackNodeHelper::set(double chi2Max,double errConfidence,int iter)
+void StiTrackNodeHelper::set(double chi2Max,double chi2Vtx,double errConfidence,int iter)
 {
   reset();
   mChi2Max = chi2Max;
+  mChi2Vtx = chi2Vtx;
   mErrConfiDefault = errConfidence;
   mIter = iter;
   if (!mIter) mFlipFlopNode = 0;
@@ -289,22 +290,26 @@ StiDebug::Break(nCall);
   do {//technical (fake) loop
     if (!mHit) 		break;
     setHitErrs();
-    if (nudge())			  return 13;
+    if (nudge())			return 13;
     mChi2 = 3e33;
     double chi2 = evalChi2();
-    if (chi2>mChi2Max && mTargetNode != mVertexNode)	break;
+    if (mTargetNode == mVertexNode) {
+      if (chi2>mChi2Vtx) 		return 14;
+    } else {
+      if (chi2>mChi2Max)		break;
+    }
     mChi2 = chi2; if (mChi2>999) mChi2=999;
-
     ians = updateNode();
-
     if (!ians) 	break;
+    if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
     mFitdPars = mPredPars;
     mFitdErrs = mPredErrs;
     mChi2 = 3e33;
   }while(0);
+
   ierr  = (!smooth)? save():join();
-  if (ierr) return 13;
+  if (ierr) 				return 16;
 
 
   do { //fake loop
