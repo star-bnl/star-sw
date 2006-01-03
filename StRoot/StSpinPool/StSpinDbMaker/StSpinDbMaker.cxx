@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.8 2006/01/03 15:21:22 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.9 2006/01/03 22:12:51 balewski Exp $
  
 
 #include <time.h>
@@ -271,10 +271,30 @@ StSpinDbMaker:: spin4usingBX48(int bx48){
 //--------------------------------------------------
 //--------------------------------------------------
 int
+StSpinDbMaker:: spin4usingBX7(int bx7){
+  if(!isValid()) return -1;
+  if(bx7<0 || bx7>=SPINDbMaxBXings) return -1;
+  int bx=(bx7+mTabSpinStar->bXoff7)%SPINDbMaxBXings;
+  return spin4bits[bx];
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+int
 StSpinDbMaker::spin8usingBX48(int bx48){
   if(!isValid()) return -1;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return -1;
   int bx=(bx48+mTabSpinStar->bXoff48)%SPINDbMaxBXings;
+  return spin8bits[bx];
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+int
+StSpinDbMaker:: spin8usingBX7(int bx7){
+  if(!isValid()) return -1;
+  if(bx7<0 || bx7>=SPINDbMaxBXings) return -1;
+  int bx=(bx7+mTabSpinStar->bXoff7)%SPINDbMaxBXings;
   return spin8bits[bx];
 }
 
@@ -447,6 +467,9 @@ void StSpinDbMaker::print(int level) {
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.9  2006/01/03 22:12:51  balewski
+// 2 missing BX7 methods added
+//
 // Revision 1.8  2006/01/03 15:21:22  balewski
 // more printouts
 //
