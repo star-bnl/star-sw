@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.7 2005/12/16 17:40:08 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.8 2006/01/03 15:21:22 balewski Exp $
  
 
 #include <time.h>
@@ -66,7 +66,7 @@ StSpinDbMaker::clearTables(){
 //__________________________________________________
 Int_t  
 StSpinDbMaker::InitRun  (int runNumber){
-  LOG_DEBUG << GetName()<<"::InitRun=  " <<runNumber <<endm;
+  LOG_INFO << GetName()<<"::InitRun=  " <<runNumber <<endm;
   clearTables();
   requestDataBase();
  
@@ -447,6 +447,9 @@ void StSpinDbMaker::print(int level) {
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.8  2006/01/03 15:21:22  balewski
+// more printouts
+//
 // Revision 1.7  2005/12/16 17:40:08  balewski
 // more printout
 //
