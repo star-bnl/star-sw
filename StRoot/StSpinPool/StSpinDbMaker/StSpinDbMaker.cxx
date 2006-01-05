@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.9 2006/01/03 22:12:51 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.10 2006/01/05 18:21:24 balewski Exp $
  
 
 #include <time.h>
@@ -24,7 +24,7 @@ ClassImp(StSpinDbMaker)
 StSpinDbMaker::StSpinDbMaker(const char *name):StMaker(name){
   gMessMgr->Message("","D") <<GetName()<<endm;
   setDBname("Calibrations/rhic");
-  nFound=0;
+  mNFound=0;
 }
 
 
@@ -41,7 +41,6 @@ StSpinDbMaker::~StSpinDbMaker(){
 //________________________________________________________
 Int_t 
 StSpinDbMaker::Init(){
-  nFound=0; // just in case
   return StMaker::Init();
 }
 
@@ -50,7 +49,8 @@ StSpinDbMaker::Init(){
 //__________________________________________________
 void  
 StSpinDbMaker::clearTables(){
-  nFound=0;
+  mDbDate=19990000;  
+  mNFound=0;
   mTabSpinV124=0;
   mTabSpinStar=0;
   mTabSpinBXmask=0;
@@ -59,6 +59,9 @@ StSpinDbMaker::clearTables(){
     spin8bits[i]=-1;
     spin4bits[i]=-1;
   }
+
+  for(i=0;i<SPINDbMaxRing;i++) mNfilledBunches[i]=-2;
+  mCADpolPattern="noLabel";
 }
 
 //__________________________________________________
@@ -70,9 +73,12 @@ StSpinDbMaker::InitRun  (int runNumber){
   clearTables();
   requestDataBase();
  
-  if(mTabSpinV124) optimizeTables();
-  
-  LOG_DEBUG << GetName()<<"::InitRun()  Found "<< nFound<<" SPIN related tables "<<endm;
+  if(mTabSpinV124) { 
+    auxilairyVariables();
+    optimizeTables();
+  }
+
+  LOG_DEBUG << GetName()<<"::InitRun()  nFound "<< mNFound<<" SPIN related tables "<<endm;
 
   return StMaker::InitRun(runNumber);
 }  
@@ -87,18 +93,19 @@ void  StSpinDbMaker::requestDataBase(){
   
 
   St_db_Maker* stdb = (St_db_Maker*)GetMaker("StarDb");
-  if(stdb==0) stdb = (St_db_Maker*)GetMaker("db");
+  if(stdb==0) stdb = (St_db_Maker*)GetMaker("db");// try the other name
   assert(stdb);
-    
+  mDbDate = stdb->GetDateTime().GetDate();
+   
   StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
   
   LOG_INFO << GetName()<<"::RequestDataBase(),\n     event time stamp="<< (int)fEvtHddr->GetUTime()<< " , yyyy/mm/dd="<< fEvtHddr->GetDate()<<" hh/mm/ss="<<fEvtHddr->GetTime()<<endm;  
   
-  LOG_DEBUG << GetName()<<"::RequestDataBase(), access DB='"<<dbName<<"'  use timeStamp="<< stdb->GetDateTime().AsString()<<endm;
+  LOG_DEBUG << GetName()<<"::RequestDataBase(), access DB='"<<mDbName<<"'  use timeStamp="<< stdb->GetDateTime().AsString()<<endm;
   
-  TDataSet *spindb=GetDataBase(dbName );
+  TDataSet *spindb=GetDataBase(mDbName );
   if(spindb==0) {
-    LOG_ERROR << GetName()<<"::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
+    LOG_ERROR << GetName()<<"::RequestDataBase()  Could not find dbName ="<<mDbName <<endm;
     return ;
     // down-stream makers should check for presence of dataset
   }
@@ -145,7 +152,7 @@ void  StSpinDbMaker::optimizeTables  (){
     int bNib=mTabSpinV124->v124bits[bBucket]>>4;
 
     int spin8=(bNib<<4) + yNib;
-      spin8bits[bx]=spin8;
+    spin8bits[bx]=spin8;
     //...... map 8spin bits to 4spin bits 
     int spin4 =-1;
     if( (yNib==nibZ && bNib==nibZ) ||  (yNib==nibE && bNib==nibE) )
@@ -185,6 +192,7 @@ void  StSpinDbMaker::optimizeTables  (){
   if(isPolDirLong()) polDir="Longitudinal";
   
   LOG_INFO<< GetName()<<"::InitRun mOptimized() "<<
+    " nFillBunch blue="<<numberOfFilledBunchesBlue()<<" yellow="<<numberOfFilledBunchesYellow()<<",  CAD pol pattern="<<mCADpolPattern<<
      "\n        polDir="<<polDir<<
      "  bXing w/ pol2="<<nP2<<" pol1="<<nP1<<" unPol="<<nP0<<" errPol="<<nPer<<endm; 
   return;
@@ -236,7 +244,7 @@ StSpinDbMaker::getTable(TDataSet *mydb,  TString tabName,   T_st** outTab ){
     return  ;
   }
 
-  nFound++;
+  mNFound++;
   gMessMgr->Message("","I") << GetName()<<"::table '"<< name <<"': "<<(*outTab)->comment<<endm; 
 
   return ; // copy the whole s-struct to allow flavor change;
@@ -319,11 +327,22 @@ StSpinDbMaker::isBXfilledUsingBX48(int bx48){
 //--------------------------------------------------
 //--------------------------------------------------
 int
-StSpinDbMaker:: BXstarUsingBX48(int bx48){
+StSpinDbMaker::BXstarUsingBX48(int bx48){
+  LOG_WARN << GetName()<<"::BXstarUsingBX48() is deprecaited, use BXyellow.. instead,JB"<<endm;
+  return BXyellowUsingBX48(bx48);
+}
+
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+int
+StSpinDbMaker::BXyellowUsingBX48(int bx48){
   if(!isValid()) return -1;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return -1;
   return (bx48+mTabSpinStar->bXoff48)%SPINDbMaxBXings;
 }
+
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -331,7 +350,7 @@ bool
 StSpinDbMaker:: isMaskedUsingBX48(int bx48){
   if(!isValid()) return true;
   if(bx48<0 || bx48>=SPINDbMaxBXings) return true;
-  int bxStar= BXstarUsingBX48(bx48);
+  int bxStar= BXyellowUsingBX48(bx48);
   return mTabSpinBXmask->bXmask[bxStar];
 } 
 
@@ -341,18 +360,25 @@ StSpinDbMaker:: isMaskedUsingBX48(int bx48){
 int
 StSpinDbMaker::offsetBX48minusBX7(int bx48, int bx7){
   if(!isValid()) return -1;
-  int bxa=BXstarUsingBX48(bx48);
-  int bxb=BXstarUsingBX7(bx7);
+  int bxa=BXyellowUsingBX48(bx48);
+  int bxb=BXyellowUsingBX7(bx7);
   if(bxa<0 || bxb<0) return -1;
   int diff=bxa-bxb;
   if(diff<0) diff+=SPINDbMaxBXings;
   return diff;
 }
-
 //--------------------------------------------------
 //--------------------------------------------------
 bool
 StSpinDbMaker::isBXfilledUsingBXstar(int bxStar){
+  LOG_WARN << GetName()<<"::isBXfilledUsingBXyellow() is deprecaited, use BXyellow.. instead,JB"<<endm;
+  return isBXfilledUsingBXyellow(bxStar);
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+bool
+StSpinDbMaker::isBXfilledUsingBXyellow(int bxStar){
   if(!isValid()) return false;
   if(bxStar<0 || bxStar>=SPINDbMaxBXings) return false;
    return  ((spin8bits[bxStar] & 0x11)==0x11);
@@ -362,6 +388,14 @@ StSpinDbMaker::isBXfilledUsingBXstar(int bxStar){
 //--------------------------------------------------
 bool
 StSpinDbMaker::isBXmaskedUsingBXstar(int bxStar){
+  LOG_WARN << GetName()<<"::isBXmaskedUsingBXyellow() is deprecaited, use BXyellow.. instead,JB"<<endm;
+  return isBXmaskedUsingBXyellow(bxStar);
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+bool
+StSpinDbMaker::isBXmaskedUsingBXyellow(int bxStar){
   if(!isValid()) return true;
   if(bxStar<0 || bxStar>=SPINDbMaxBXings) return true;
    return mTabSpinBXmask->bXmask[bxStar];
@@ -408,8 +442,17 @@ StSpinDbMaker::BX7offset(){
 //--------------------------------------------------
 //--------------------------------------------------
 int
-StSpinDbMaker:: BXstarUsingBX7(int bx7){
-  if(!isValid()) return -1;
+StSpinDbMaker::BXstarUsingBX7(int bx7){
+ LOG_WARN << GetName()<<"::BXstarUsingBX7() is deprecaited, use BXyellow.. instead,JB"<<endm;
+  return BXyellowUsingBX7(bx7);
+}
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+int
+StSpinDbMaker::BXyellowUsingBX7(int bx7){
+  if(!isValid() ) return -1;
   if(bx7<0 || bx7>=SPINDbMaxBXings) return -1;
   return (bx7+mTabSpinStar->bXoff7)%SPINDbMaxBXings;
 }
@@ -420,15 +463,17 @@ StSpinDbMaker:: BXstarUsingBX7(int bx7){
 //--------------------------------------------------
 void StSpinDbMaker::print(int level) {
 
-  printf("SpinDb::print(level=%d) ...valid=%d \n",level,isValid());
+  printf("SpinDb::print(level=%d) ...isValid=%d \n",level,isValid());
   if(!isValid()) {
-    printf("       SpinDb not loaded or some tables not found, nFound=%d \n spinDB will not work if InitRun() was executed !!!\n\n",nFound);
+    printf("       SpinDb not loaded or some tables not found, nFound=%d \n spinDB will not work if InitRun() was executed !!!\n\n",mNFound);
     return;
   }
 
   printf("Dump spinDB: valid=%d polTrans=%d polLong=%d BX7off=%d BX48off=%d\n", isValid(), isPolDirTrans(), isPolDirLong(), BX7offset(), BX48offset());
 
   printf("     spinDB: timeBucket offset: Blue=%d Yell=%d\n",getBucketOffsets()[blueRing],getBucketOffsets()[yellRing]);
+  printf("     spinDB: bXing offset: off7=%d off48=%d\n",mTabSpinStar->bXoff7,mTabSpinStar->bXoff48);
+
   printf("DB records labels:\n V124: %s \n BXoffset: %s\n BXmask: %s\n\n",mTabSpinV124->comment,mTabSpinStar->comment,mTabSpinBXmask->comment); 
   printf("dump of spin bits  @ STAR IP, for 120 bXings, range [0,119]\n");
   int bx;
@@ -437,7 +482,7 @@ void StSpinDbMaker::print(int level) {
 
   for(bx=SPINDbMaxBXings-BX48offset();bx<2*SPINDbMaxBXings-BX48offset();bx++) {
     int bx48=bx%SPINDbMaxBXings;// this is dangerous, but works right
-    int bXstar=BXstarUsingBX48(bx48);
+    int bXstar=BXyellowUsingBX48(bx48);
     int blueBx=(bXstar+getBucketOffsets()[blueRing]/3)%SPINDbMaxBXings;
     int yellBx=(bXstar+getBucketOffsets()[yellRing]/3)%SPINDbMaxBXings;
     int spin8=spin8usingBX48(bx48);
@@ -460,13 +505,79 @@ void StSpinDbMaker::print(int level) {
   printf("dump raw bXing mask \n STAR bXing mask (0=use, none-0=drop)\n");
   for(j=0;j<SPINDbMaxBXings;j++) 
     printf("%3d  %d\n",j,mTabSpinBXmask->bXmask[j]);
+}
 
+//--------------------------------------------------
+//--------------------------------------------------
+int 
+StSpinDbMaker::numberOfFilledBunches(enum spinDbEnum iby) {
+  if(!isValid()) return -1;
+  return mNfilledBunches[iby];
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+void
+StSpinDbMaker::auxilairyVariables(){
+  int sumF[SPINDbMaxRing]={0,0};
+  TString patt[SPINDbMaxRing];
+
+  int iby;
+  int i;
+  for (i=0;i<SPINDbMaxBXings;i++ ) {// loop over all 120 potential bunches
+    int nib=0;
+    for(iby=0;iby<SPINDbMaxRing;iby++) {
+      switch(iby) {
+      case blueRing: nib=mTabSpinV124->v124bits[i*3]>>4;   break;
+      case yellRing: nib=mTabSpinV124->v124bits[i*3]&0x0f; break;
+      default: assert(1==2); // logical error
+      }
+      if (! nib&0x01) continue; // skip not filled bunch
+      sumF[iby]++;
+      
+      int bits=nib>>1; // drop the fill-bit
+      switch (bits) {
+      case 0x01: patt[iby]+="+"; break;
+      case 0x02: patt[iby]+="-"; break;
+      case 0x04: patt[iby]+="0"; break;
+      default:  patt[iby]+="?"; 
+      }
+    } // end of Blue/yell
+    
+  }// end of bunches
+ 
+
+  for(i=0;i<SPINDbMaxRing;i++) mNfilledBunches[i]=sumF[i];
+     
+  // assign poll pattern according to CAD convention
+  int year=mDbDate/10000;
+  mCADpolPattern=""; mCADpolPattern+=year;  mCADpolPattern+="_";
+
+  switch(year) {
+  case 2005: 
+    if(patt[blueRing].BeginsWith("+-+-") && patt[yellRing].BeginsWith("++--"))
+      { mCADpolPattern+="p1"; break; }
+    if(patt[blueRing].BeginsWith("-+-+") && patt[yellRing].BeginsWith("++--"))
+      { mCADpolPattern+="p2"; break; }
+    if(patt[blueRing].BeginsWith("+-+-") && patt[yellRing].BeginsWith("--++"))
+      { mCADpolPattern+="p3"; break; }
+    if(patt[blueRing].BeginsWith("-+-+") && patt[yellRing].BeginsWith("--++"))
+      { mCADpolPattern+="p4"; break; }
+  default:
+    mCADpolPattern+="noLabel";
+  }
+
+  LOG_DEBUG << GetName()<<"::auxilairyVariables()" <<
+  Form(" dbDate=%d, CADpattern=%s\n   Blue=%s\n   Yell=%s, \n", mDbDate,mCADpolPattern.Data(),  patt[blueRing].Data(),  patt[yellRing].Data())<<endm;
 
 }
 
 
-
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.10  2006/01/05 18:21:24  balewski
+// added get: cadPollPatt, nFillBunch
+// changed BXstar --> BXyellow
+//
 // Revision 1.9  2006/01/03 22:12:51  balewski
 // 2 missing BX7 methods added
 //

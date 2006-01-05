@@ -1,4 +1,4 @@
-// $Id: StSpinDbMaker.h,v 1.3 2005/10/05 13:41:47 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.4 2006/01/05 18:21:24 balewski Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
@@ -23,53 +23,67 @@ class StSpinDbMaker : public StMaker {
   spinDbV124_st   *mTabSpinV124;
   spinDbStar_st   *mTabSpinStar;
   spinDbBXmask_st *mTabSpinBXmask;
- public:
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.3 2005/10/05 13:41:47 balewski Exp $";
-  void clearTables();///< clear lookup tables
-  void requestDataBase(); ///< reads tables from STAR-DB
-  void optimizeTables(); ///< produces lookup tables
-  
-  // pointers to Db tables for each sector
-  int nFound;
-  TString dbName; //name of the DB used 
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.4 2006/01/05 18:21:24 balewski Exp $";
 
-  template <class St_T, class T_st> void getTable(TDataSet *mydb,  TString tabName,  T_st **outTab);
+  void clearTables(); /// clear local lookup tables
+  void requestDataBase(); /// reads tables from STAR-DB
+  void optimizeTables(); /// produces local lookup tables
+  void auxilairyVariables();
 
-  bool isPolDir(enum spinDbEnum);  
-  int  spin8bits[SPINDbMaxBXings]; // vs. STAR bXing
-  int  spin4bits[SPINDbMaxBXings]; // vs. STAR bXing
+  int mNFound; /// # of good tables found in DB
+  TString mDbName; ///name of the DB used
+  int mDbDate; /// yyyymmdd
+  int mNfilledBunches[SPINDbMaxRing]; /// calculated based on DB tables
+  TString mCADpolPattern; /// calculated based on DB tables (if defined by CAD)
+
+  template <class St_T, class T_st> void getTable(TDataSet *mydb,  TString tabName,  T_st **outTab); /// generic method for uploading any spinDb table from STAr DB
+
+  void setDBname(TString name){ mDbName=name;}
+  int  numberOfFilledBunches(enum spinDbEnum);
 
  public:  
-  //Note, -1 or false is returned if input is invalid.
-  void print(int level=0);// dump spinDb content for current time stamp
-  void setDBname(TString name){ dbName=name;}
+  bool isPolDir(enum spinDbEnum);  /// defined at cstructs/spinConstDB.hh
+  int  spin8bits[SPINDbMaxBXings]; /// vs. STAR==yellow bXing
+  int  spin4bits[SPINDbMaxBXings]; /// vs. STAR==yellow bXing
 
-  bool isValid(){ return nFound==3;} // true if all DB tables found
-  bool isPolDirTrans(){return isPolDir(polDirTrans);}
-  bool isPolDirLong(){return isPolDir(polDirLong);}
+  ///Note, <b> -1 or false </b> is returned if input is invalid.
+  void print(int level=0);/// dump spinDb content for current time stamp
 
-  int   spin8usingBX48(int bx48); // 8bit spin information
-  int   spin4usingBX48(int bx48); // 4bit spin information
-  int   BXstarUsingBX48(int bx48); // bXing at STAR IP, [0,119]
-  int   BX48offset(); // STAR bXing=(bx48+48off)%120
+  bool isValid(){ return mNFound==3;} /// true if all needed DB tables were found
+  bool isPolDirTrans(){return isPolDir(polDirTrans);} /// Returns true if beams are transversely polarized, false otherwise  
+  bool isPolDirLong(){return isPolDir(polDirLong);} /// Returns true if beams are longitudinally polarized, false otherwise 
+
+  int   spin8usingBX48(int bx48); /// 8bit spin information
+  int   spin4usingBX48(int bx48); /// 4bit spin information
+  int   BXstarUsingBX48(int bx48); /// depreciated, will go away in Feb'06
+  int   BXyellowUsingBX48(int bx48); /// bXing at STAR IP, [0,119]
+
+  int   BX48offset(); /// STAR==yellow bXing=(bx48+48off)%120
   bool  isBXfilledUsingBX48(int bx48);
   bool  isMaskedUsingBX48(int bx48); // returns true _also_ if DB is empty
 
-  int   spin8usingBX7(int bx7); // 8bit spin information
-  int   spin4usingBX7(int bx7); // 4bit spin information
-  int   BXstarUsingBX7(int bx7); // bXing at STAR IP, [0,119]
-  int   BX7offset(); // STAR bXing=(bx7+7off)%120
+  int   spin8usingBX7(int bx7); /// 8bit spin information
+  int   spin4usingBX7(int bx7); /// 4bit spin information
+  int   BXstarUsingBX7(int bx7); ///  depreciated, will go away in Feb'06
+  int   BXyellowUsingBX7(int bx7); /// bXing at STAR IP, [0,119]
+  int   BX7offset(); /// STAR==yellow bXing=(bx7+7off)%120
   bool  isBXfilledUsingBX7(int bx7);
 
-  int   offsetBX48minusBX7(int bx48, int bx7); //should be zero for every run
-  bool  isBXfilledUsingBXstar(int bxStar);
-  bool  isBXmaskedUsingBXstar(int bxStar);
-  
-  // expert only ....
-  const unsigned char *getRawV124bits();
-  const int *getBucketOffsets();
-  const int  *getSpin8bits();
+  int   offsetBX48minusBX7(int bx48, int bx7); ///should be zero for every run
+  bool  isBXfilledUsingBXyellow(int bxStar);
+  bool  isBXmaskedUsingBXyellow(int bxStar);
+  bool  isBXfilledUsingBXstar(int bxStar);/// depreciated, will go away in Feb'06
+  bool  isBXmaskedUsingBXstar(int bxStar);/// depreciated, will go away in Feb'06
+
+  int   numberOfFilledBunchesBlue() { return numberOfFilledBunches(blueRing); }
+
+  int   numberOfFilledBunchesYellow(){ return numberOfFilledBunches(yellRing);}
+  TString cadPolPattern() { return  mCADpolPattern; } /// defined only for 2005 run by CAD , based on first 4 filled bunches in both rings. Note, those pairs do NOT collide at STAR with each other.
+ 
+  const unsigned char *getRawV124bits();  /// experts only
+  const int  *getBucketOffsets();  /// experts only
+  const int  *getSpin8bits();  /// experts only
 
   StSpinDbMaker(const char *name="SpinDbMaker");
 
@@ -79,7 +93,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.3 2005/10/05 13:41:47 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.4 2006/01/05 18:21:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -90,6 +104,10 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.4  2006/01/05 18:21:24  balewski
+// added get: cadPollPatt, nFillBunch
+// changed BXstar --> BXyellow
+//
 // Revision 1.3  2005/10/05 13:41:47  balewski
 // more get-methods
 //
