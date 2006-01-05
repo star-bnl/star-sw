@@ -10,7 +10,7 @@ StMuDstMaker* muMk;
 StChain *chain=0;
 
 
-int rdMu2spinTest( char* Rrun    ="R6175007",
+int rdMu2spinTest( char* Rrun    ="R6172038",
 		   Int_t nFiles  = 20,
 		   char* inDir   = "./lis/",
 		   int nEve=10)
@@ -26,6 +26,11 @@ int rdMu2spinTest( char* Rrun    ="R6175007",
 
   TString fileL=Rrun; fileL+=".lis";
   int runNo=atoi(Rrun+1);
+
+  // tmp
+  //  inDir   = "/star/data05/scratch/balewski/2005-muDst/173/";
+  //fileL="st_physics_6173021_raw_2020006.MuDst.root";
+  // runNo=999; Rrun="R999";
 
 #ifdef USE_DB
   gSystem->Load("StDbLib");
@@ -56,10 +61,11 @@ int rdMu2spinTest( char* Rrun    ="R6175007",
 #endif
 
   hbx48=new TH1F("bX48","Rate vs. raw bx48; bXing= raw bx48",120,-0.5,119.5);
-  hbx7=new TH1F("bX7","Rate vs. raw bx48; bXing= raw bx48",120,-0.5,119.5);
+  hbx7=new TH1F("bX7","Rate vs. raw bx7; bXing= raw bx7",120,-0.5,119.5);
+  hbx748=new TH2F("bX748","BX ID correlation ;  raw bx7;  raw bx48",120,-0.5,119.5,120,-0.5,119.5);
 
-  hbx48c=new TH1F("bX48c","Rate vs. STAR IP bXing(bx48); bXing= bx48+offset",120,-0.5,119.5);
-  hbx7c=new TH1F("bX7c","Rate vs. STAR IP bXing(bx48); bXing= bx48+offset",120,-0.5,119.5);
+  hbx48c=new TH1F("bX48c","Rate vs. yellBX using bx48 ; bXing= bx48+offset",120,-0.5,119.5);
+  hbx7c=new TH1F("bX7c","Rate vs. yellBX using bx7; bXing= bx7+offset",120,-0.5,119.5);
 
   hbx48cm=new TH1F("bX48cm","Masking ON, Rate vs. STAR IP bXing(bx48) ; bXing= bx48+offset",120,-0.5,119.5);
 
@@ -81,6 +87,9 @@ int rdMu2spinTest( char* Rrun    ="R6175007",
     stat = chain->Make();
     if(stat) break; // end of events
     eventCounter++;
+    // dump spinDB only once:
+    // if(eventCounter==1)  spDb->print(0);  // 1-large printout, 0-smaler
+  
    // Access to muDst .......................
     StMuEvent* muEve = muMk->muDst()->event();
     int nPrim = muMk->muDst()->primaryTracks()->GetEntries();  // get number of primary tracks
@@ -88,14 +97,18 @@ int rdMu2spinTest( char* Rrun    ="R6175007",
 
     StL0Trigger *trig=&(muEve->l0Trigger());
     int bx48=trig->bunchCrossingId();
-    int bx7=trig->bunchCrossingId7bit(runNo);
+    int bx7=trig->bunchCrossingId7bit(muEve->runId());
     hbx48->Fill(bx48);
     hbx7->Fill(bx7);
+    hbx748->Fill(bx7,bx48);
+    //  printf("w/o DB bx7=%d  bx48=%d    del=%d \n", bx7, bx48,(bx7-bx48+120)%120);
 
 #ifdef USE_DB 
+    int bxStar48=spDb->BXyellowUsingBX48(bx48);
+    int bxStar7=spDb->BXyellowUsingBX7(bx7);
+
+    //printf("eveID=%d bx7=%d bx48=%d --> yellBX:=%d ? %d --> del=%d\n",info.id(),bx7,bx48, bxStar7,bxStar48, (bxStar7-bxStar48+120)%120);
     assert(spDb->offsetBX48minusBX7(bx48,bx7)==0);
-    int bxStar48= spDb->BXstarUsingBX48(bx48);
-    int bxStar7=spDb->BXstarUsingBX7(bx7);
     hbx48c->Fill(bxStar48);
     hbx7c->Fill(bxStar7);
     if(!spDb->isMaskedUsingBX48(bx48) ) hbx48cm->Fill(bxStar48);
@@ -116,6 +129,7 @@ int rdMu2spinTest( char* Rrun    ="R6175007",
   new TFile(fileH,"recreate");
   hbx48->Write();
   hbx7->Write();
+  hbx748->Write();
   hbx48c->Write();
   hbx7c->Write();
   hbx48cm->Write();
@@ -127,8 +141,8 @@ int rdMu2spinTest( char* Rrun    ="R6175007",
   for(int bx=0;bx<120;bx++){
     bool isFilled=(spin8bits[bx] & 0x11)==0x11;
     if(isFilled) hbxI->Fill(bx);
-    assert(isFilled==spDb->isBXfilledUsingBXstar(bx));
-    spDb->isBXmaskedUsingBXstar(bx);
+    assert(isFilled==spDb->isBXfilledUsingBXyellow(bx));
+    // spDb->isBXmaskedUsingBXyellow(bx);
     //    if(spDb->isBXfilledUsingBX48(bx48)) hbxI->Fill(bxStar);
     //printf("bxStar=%3d   bx48=%3d   fill=%d\n",bxStar,bx48,spDb->isBXfilledUsingBX48(bx48));
   }
