@@ -40,9 +40,10 @@ public:
           void   DoNtuple() { doNtuple = kTRUE; DoGaps(); }
           void   DoGaps() { doGaps = kTRUE; }
           void   DontReset() { doReset = kFALSE; }
+          void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.4 2005/07/06 22:51:40 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.5 2006/01/05 19:12:53 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -58,6 +59,7 @@ protected:
   int oldevt;
   StRunInfo* runinfo;
   Bool_t did_auto;
+  Bool_t Calibmode;
   Bool_t PrePassmode;
   Bool_t PrePassdone;
   Bool_t QAmode;
@@ -151,8 +153,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.4 2005/07/06 22:51:40 fisyak Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.5 2006/01/05 19:12:53 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.5  2006/01/05 19:12:53  genevb
+// Added calib mode
+//
 // Revision 1.4  2005/07/06 22:51:40  fisyak
 // use Templated StPhysicalHelixD
 //
