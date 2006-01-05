@@ -47,7 +47,7 @@ ClassImp(StSpaceChargeEbyEMaker)
   
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
-    event(0),
+    event(0), Calibmode(kFALSE),
     PrePassmode(kFALSE), PrePassdone(kFALSE), QAmode(kFALSE), doNtuple(kFALSE),
     doReset(kTRUE), doGaps(kFALSE),
     m_ExB(0), tpcDbMaker(0), tpcHitMoverMaker(0),
@@ -110,12 +110,15 @@ Int_t StSpaceChargeEbyEMaker::Init() {
     case (1) : DoQAmode(); break;
     case (2) : DoPrePassmode(); break;
     case (3) : DoPrePassmode(); DoQAmode();  break;
+    case (4) : DoCalib();  break;
     case (10): DoNtuple(); break;
     case (11): DoNtuple(); DontReset(); break;
     case (12): DoNtuple(); DoQAmode(); break;
     case (13): DoNtuple(); DontReset(); DoQAmode(); break;
     default  : {}
   }
+
+  if (Calibmode) doReset = kFALSE;
 
   evt=0;
   oldevt=1;
@@ -201,7 +204,8 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       gapZhistneg->Reset();
     }
   } else {
-    if (doNtuple) ntup->Reset();
+    // Do not reset ntuple in calib mode
+    if (doNtuple && !Calibmode) ntup->Reset();
   }
 
   // Keep time and event number
@@ -280,7 +284,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       } // loop over j tracks
   } // loop over i Nodes
 
-  
+
   ntrks[curhist] = schists[curhist]->Integral();
   ntrkssum += ntrks[curhist];
 
@@ -291,14 +295,22 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   if (doNtuple) {
       static float X[32];
       static float ntent = 0.0;
+      static float nttrk = 0.0;
 
       if (ntent == 0.0) for (i=0; i<32; i++) X[i] = 0.0;
-      ntent++;
-      float s1 = ( doReset ? 1.0 : 1.0/ntent );
+      ntent++;  // # entries since last reset, including this one
+      nttrk += ntrks[curhist];  // # tracks since last reset
+      float s1 = ntrks[curhist]/nttrk;
       float s0 = 1.0 - s1;
 
+      if (QAmode) {
+        gMessMgr->Info() << "StSpaceChargeEbyEMaker: reset = " << doReset << endm;
+        gMessMgr->Info() << "StSpaceChargeEbyEMaker: nevts = " << ntent << endm;
+        gMessMgr->Info() << "StSpaceChargeEbyEMaker: ntrks = " << nttrk << endm;
+      }
+
       float ee;
-      int fbin = ( doReset ? evt : 1 );
+      int fbin = evt + 1 - ((int) ntent);
 
       X[0]  = sc;
       X[1]  = FindPeak(dcehist->ProjectionY("_dy",fbin,evt),ee);
@@ -335,12 +347,16 @@ Int_t StSpaceChargeEbyEMaker::Make() {
       X[28] = gapZfitslopewest;
       X[29] = gapZdivslopewest;
       X[30] = s0*X[30] + s1*runinfo->spaceCharge();
-      X[31] = (float) (runinfo->spaceChargeCorrectionMode());
-      ntup->Fill(X);
+      X[31] = s0*X[31] + s1*((float) (runinfo->spaceChargeCorrectionMode()));
+      
+      // In calib mode, only fill when doReset (we found an sc)
+      if (doReset || !Calibmode) ntup->Fill(X);
+
+      if (doReset) {ntent = 0.0; nttrk = 0.0; }
   }
   
   lasttime = thistime;
-  
+
   return result;
 }
 //_____________________________________________________________________________
@@ -367,15 +383,19 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 
   // More than 30 seconds since last used event? Forget it...
   int timedif = time-lasttime;
-  if (QAout) gMessMgr->Info() <<
-    "StSpaceChargeEbyEMaker: time since last event = " <<
-    timedif << endm;
-  if ((lasttime==0) || (timedif < 30)) {
+  if (QAout) {
+    gMessMgr->Info() << "StSpaceChargeEbyEMaker: time since last event = "
+      << timedif << endm;
+    gMessMgr->Info() << "StSpaceChargeEbyEMaker: curhist = "
+      << curhist << endm;
+  }
+  if ((PrePassmode) || (Calibmode) || (lasttime==0) || (timedif < 30)) {
   
     int isc;
     float ntrkstot = 0; // running sum using oldness scale factor
     float dif=0; // difference from lastsc
-    for (isc=0; isc<HN; isc++) {
+    int iscMax = ( Calibmode ? 1 : HN ); // use only one hist for calib mode
+    for (isc=0; isc<iscMax; isc++) {
       int i = imodHN(curhist-isc);
       ntrkstot += ntrks[i] * oldness(i);
       if (QAout) {
@@ -395,6 +415,7 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
         large_err = (esc == 0) || (esc > SCALER_ERROR);
         if (!large_err) {
           if (PrePassmode) { do_auto=kFALSE; break; }
+	  // otherwise, check for big jumps
           dif = TMath::Abs(sc-lastsc);
           large_dif = dif > maxdiff;
           if (!large_dif) {
@@ -428,9 +449,14 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 
   did_auto = do_auto;
 
+  // In normal  mode, do_auto decides whether to use automatic SC from DB
+  // In PrePass mode, do_auto decides when we're ready to stop
+  // In Calib   mode, do_auto decides when to save entries and reset
+
   if (do_auto) {
     gMessMgr->Info("StSpaceChargeEbyEMaker: using auto SpaceCharge");
-    m_ExB->AutoSpaceChargeR2();
+    if (Calibmode) doReset = kFALSE;
+    else m_ExB->AutoSpaceChargeR2();
   } else {
     gMessMgr->Info() << "StSpaceChargeEbyEMaker: using SpaceCharge = "
       << sc << " +/- " << esc << " (" << time << ")" << endm;
@@ -440,7 +466,8 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
       PrePassdone = kTRUE;
       return kStStop; // We're happy! Let's stop!
     }
-    m_ExB->ManualSpaceChargeR2(sc);
+    if (Calibmode) doReset = kTRUE;
+    else m_ExB->ManualSpaceChargeR2(sc);
   }
   return kStOk;
 }
@@ -798,8 +825,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.7 2005/12/07 19:45:46 perev Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.8 2006/01/05 19:12:53 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.8  2006/01/05 19:12:53  genevb
+// Added calib mode
+//
 // Revision 1.7  2005/12/07 19:45:46  perev
 // Histos diconnected from directory. EndCrashFix
 //
