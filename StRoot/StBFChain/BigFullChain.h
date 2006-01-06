@@ -607,6 +607,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                               "Special: use estGlobal from StEvent",kFALSE},
   {"SCEbyE"      ,"scebye","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
                                                          "Determine EbyE SpaceCharge using StEvent",kFALSE},
+  {"SCScalerCal" ,"scscalercal","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
+                                                                    "Calibrate SpaceCharge scalers",kFALSE},
   {"PostEmc"     ,"PostChain","","emc_T,tpc_T,db,PreEcl,EmcUtil"            ,"StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","" ,"StPreEclMaker",  "StPreEclMaker","B-EMC Cluster finder",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil" ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},

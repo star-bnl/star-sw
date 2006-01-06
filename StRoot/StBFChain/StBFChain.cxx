@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.483 2005/12/07 18:46:02 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.484 2006/01/06 14:25:18 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -548,9 +548,8 @@ Int_t StBFChain::Instantiate()
     // // Default = Both
     //}
     if (maker == "StSpaceChargeEbyEMaker") {
-      if ( GetOption("SpcChgCal") ){
-	mk->SetMode(2);
-      }
+      if ( GetOption("SpcChgCal") )   mk->SetMode(2);
+      if ( GetOption("SCScalerCal") ) mk->SetMode(4);
     }
     if (maker == "StEventQAMaker" && GetOption("alltrigger") )
       ProcessLine(Form("((StEventQAMaker *) %p)->AllTriggers();",mk));
