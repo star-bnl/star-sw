@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.11 2005/09/22 20:09:20 fisyak Exp $
+ * $Id: StLorentzVector.hh,v 1.12 2006/01/09 23:47:27 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
+ * Revision 1.12  2006/01/09 23:47:27  fisyak
+ * Add missing methods (found by Zhangbu) to Cint dictionary
+ *
  * Revision 1.11  2005/09/22 20:09:20  fisyak
  * Make StLorentzVector persistent
  *
@@ -67,7 +70,7 @@ public:
     StLorentzVector(T = 0, T = 0, T = 0, T = 0);
     virtual ~StLorentzVector();
     
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X> StLorentzVector(const StThreeVector<X>&, T);
     template<class X> StLorentzVector(T, const StThreeVector<X>&);   
 
@@ -113,7 +116,7 @@ public:
     void setE(T);
     void setT(T);
     
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template <class X> void setVect(const StThreeVector<X>&);
 #else
     void setVect(const StThreeVector<float>&);
@@ -136,7 +139,7 @@ public:
     T mt2()                const;
     T rapidity()           const;
     
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X> StLorentzVector<T> boost(const StLorentzVector<X>&) const;
 #else
     StLorentzVector<T> boost(const StLorentzVector<float>&) const;
@@ -148,7 +151,7 @@ public:
     StLorentzVector<T>& operator*= (double);
     StLorentzVector<T>& operator/= (double);
 
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X> bool operator == (const StLorentzVector<X>&) const;
     template<class X> bool operator != (const StLorentzVector<X>&) const;
     template<class X> StLorentzVector<T>& operator+= (const StLorentzVector<X>&);
@@ -398,7 +401,7 @@ StLorentzVector<T>& StLorentzVector<T>::operator/= (double c)
     return *this;
 }
 
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
 
 template<class T>
 template<class X>
@@ -628,6 +631,19 @@ StLorentzVector<T>::operator-= (const StLorentzVector<double>& v)
 #endif // ST_NO_MEMBER_TEMPLATES
 #endif /* ! __CINT__ */
 #ifdef __CINT__
+template<> StLorentzVector<double>::StLorentzVector<double>(const StThreeVector<double>&, double);
+template<> StLorentzVector<double>::StLorentzVector<double>(const StThreeVector<double>&, float);
+template<> StLorentzVector<double>::StLorentzVector<double>(double,const StThreeVector<double>&);
+template<> StLorentzVector<double>::StLorentzVector<double>(float ,const StThreeVector<double>&);
+template<> StLorentzVector<float>::StLorentzVector<float>(const StThreeVector<float>&, double);
+template<> StLorentzVector<float>::StLorentzVector<float>(const StThreeVector<float>&, float);
+template<> StLorentzVector<float>::StLorentzVector<float>(double,const StThreeVector<float>&);
+template<> StLorentzVector<float>::StLorentzVector<float>(float ,const StThreeVector<float>&);
+
+template<> StLorentzVector<double> StLorentzVector<double>::boost(const StLorentzVector<double>& pframe) const;
+template<> StLorentzVector<double> StLorentzVector<double>::boost(const StLorentzVector<float>& pframe) const;
+template<> StLorentzVector<float>  StLorentzVector<float>::boost(const StLorentzVector<double>& pframe) const;
+template<> StLorentzVector<float>  StLorentzVector<float>::boost(const StLorentzVector<float>& pframe) const;
 template<> StLorentzVector<double> operator+ (const StLorentzVector<double>& v1, const StLorentzVector<double>& v2);
 template<> StLorentzVector<double> operator+ (const StLorentzVector<double>& v1, const StLorentzVector<float>& v2);
 template<> StLorentzVector<double> operator+ (const StLorentzVector<float>&  v1, const StLorentzVector<double>& v2);

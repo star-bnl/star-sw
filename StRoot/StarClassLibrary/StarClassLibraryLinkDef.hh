@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.9 2005/09/22 20:09:21 fisyak Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.10 2006/01/09 23:47:27 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
+ * Revision 1.10  2006/01/09 23:47:27  fisyak
+ * Add missing methods (found by Zhangbu) to Cint dictionary
+ *
  * Revision 1.9  2005/09/22 20:09:21  fisyak
  * Make StLorentzVector persistent
  *
@@ -102,7 +105,6 @@
 #pragma link C++ function operator* (const StThreeVector<double>&, double);                        
 #pragma link C++ function operator* (double, const StThreeVector<double>&);                        
 #pragma link C++ function operator/ (const StThreeVector<double>&, double);                        
-
 #pragma link C++ function operator<< (ostream&, const StLorentzVector<float>&);                 
 #pragma link C++ function operator+ (const StLorentzVector<float>&, const StLorentzVector<float>&);        
 #pragma link C++ function operator- (const StLorentzVector<float>&, const StLorentzVector<float>&);        
