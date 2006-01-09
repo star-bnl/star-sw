@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.17 2005/09/22 20:09:20 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.18 2006/01/09 23:47:27 fisyak Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.18  2006/01/09 23:47:27  fisyak
+ * Add missing methods (found by Zhangbu) to Cint dictionary
+ *
  * Revision 1.17  2005/09/22 20:09:20  fisyak
  * Make StLorentzVector persistent
  *
@@ -244,7 +247,7 @@ public:
     StMatrix(size_t p, size_t q, size_t init=0);
 
     // Copy constructor.
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X>
     StMatrix(const StMatrix<X>&);
     StMatrix(const StMatrix<DataType>&);
@@ -254,7 +257,7 @@ public:
 #endif
     
     // Assignment operators.
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X>
     StMatrix<DataType>& operator=(const StMatrix<X>&);
     StMatrix<DataType>& operator=(const StMatrix<DataType>&);
@@ -318,7 +321,7 @@ public:
     StMatrix<DataType>& operator/=(double t);
 
     // Matrix Operations
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
     template<class X> StMatrix<DataType>& operator+=(const StMatrix<X>&);
     template<class X> StMatrix<DataType>& operator-=(const StMatrix<X>&);
     template<class X> StMatrix<DataType>  dot(const StMatrix<X>&);
@@ -431,7 +434,7 @@ StMatrix<DataType>::StMatrix(size_t p,size_t q, size_t init)
     }
 }
 
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
 template<class DataType>
 template<class X>
 StMatrix<DataType>::StMatrix(const StMatrix<X>& m1)
@@ -479,7 +482,7 @@ StMatrix<DataType>::StMatrix(const StMatrix<double>& m1)
 
 #endif
 
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
 template<class DataType>
 template<class X>
 StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<X>& m1)
@@ -662,7 +665,7 @@ StMatrix<DataType> & StMatrix<DataType>::operator/=(double fact)
     return (*this);
 }
 
-#ifndef ST_NO_MEMBER_TEMPLATES
+#if !defined(ST_NO_MEMBER_TEMPLATES) && !defined(__CINT__)
 template<class DataType>
 template<class X>
 StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<X>& m2)
