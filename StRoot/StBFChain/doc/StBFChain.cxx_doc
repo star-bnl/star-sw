@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.6 2006/01/06 14:25:35 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.7 2006/01/11 02:29:47 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -547,6 +547,13 @@ Bfc_st BFC[] = {
   {"eemcD" ,"","","","","", STR_OBSOLETE,kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
 
+  {"emcY2" ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc" ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim" ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"EEfs" ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
+
 
 
 
@@ -568,11 +575,7 @@ Bfc_st BFC[] = {
   {"pmdClust" ,"pmdClust","","","StPmdClusterMaker", "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
   {"pmdDis" ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
                                                   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-  {"emcY2" ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc" ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim" ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"EEfs" ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
 
 
 
@@ -1222,6 +1225,13 @@ Bfc_st BFC2[] = {
   {"eemcD" ,"","","","","", STR_OBSOLETE,kFALSE},
   {"ZDCVtx" ,"","","db" ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
 
+  {"emcY2" ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc" ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim" ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"EEfs" ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
+
   {"genvtx" ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Sti" ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
    "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",
@@ -1243,11 +1253,7 @@ Bfc_st BFC2[] = {
   {"pmdClust" ,"pmdClust","","","StPmdClusterMaker", "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
   {"pmdDis" ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
                                                   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-  {"emcY2" ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc" ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim" ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"EEfs" ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
 
 
 
