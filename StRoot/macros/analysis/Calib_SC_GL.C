@@ -26,9 +26,9 @@
 //    histsSetB/* 4 1.7e-8 12.0
 //    histsSetC/* 4 1.7e-8 15.0
 // If this file is named input.dat, it could be analyzed with:
-//    root -l Calib_SC_GL.C("input.dat")
+//    root Calib_SC_GL.C("input.dat")
 // If you knew you wanted to use only bbce+bbcw:
-//    root -l Calib_SC_GL.C("input.dat","",4)
+//    root Calib_SC_GL.C("input.dat","",4)
 //
 /////////////////////////////////////////////////////////////////
 
@@ -208,11 +208,18 @@ if (allZeros) {
 
 // Otherwise, step through the following:
 // 1) Determine constraint on SpaceCharge rate * GridLeak
-// 2) Determine SpaceCharge rate
+// 2) Determine SpaceCharge rate dependence
 // 3) Determine SpaceCharge offset
 
 double p0,p1,p2;
 
+// Step 1) Determine constraint on SpaceCharge rate * GridLeak
+// --
+// We assume here that the observed leakage is directly proportional
+//   to the amount of correction:
+//     GLK(obs) = GLK(real) - C*(SC*GL)
+//     GLK(obs) = p0 + p1*(SC*GL)
+// GLK(obs) = 0  when  SC*GL = -p0/p1
 c1->cd(1);
 gr_lk->Fit("pol1","Q");
 gr_lk->Draw("AP");
@@ -222,6 +229,22 @@ p1 = lk_fit->GetParameter(1);
 double scXgl = -p0/p1;
 printf("* Constraint on SC x GL = %5.3g\n",scXgl);
 
+// Step 2) Determine SpaceCharge rate dependence
+// --
+// Here, we make a first guess on SC by finding the dependence of SC on GL
+//   to first order, inserting the constraint on SC*GL, and then finding
+//   the root of the equation:
+//     SC = p0 + p1*GL
+//     SC = p0 + p1*(SC*GL)/SC
+//      0 = -SC^2 + p0*SC + p1*(SC*GL)
+// =>  SC = (p0 + sqrt(p0^2 + 4*p1*(SC*GL)))*0.5
+// Next, we try to determine the dependence between SC and GL to 2nd order:
+//     SC = p0 + p1*GL + p2*GL^2
+//     SC = p0 + p1*(SC*GL)/SC + p2*(SC*GL)^2/SC^2
+//      0 = -SC^3 + p0*SC^2 + p1*(SC*GL)*SC + p2*(SC*GL)^2
+// We determine the roots of this cubic equation using TMath,
+//   and pick the root which is closest to the first order solution.
+//   GL then is given by the SC*GL constraint.
 c1->cd(2);
 gr_sc->Fit("pol1","Q");
 gr_sc->Draw("AP");
@@ -252,6 +275,13 @@ scp = (diff2 < TMath::Min(diff0,diff1) ? s2 : scp);
 double glp = scXgl/scp;
 
 
+// Step 3) Determine SpaceCharge offset
+// --
+// As before, determine SO dependence on GL to second order,
+//   and plug in the value of GL already determined.
+// Also, determine SO dependence on SC to second order,
+//   and plug in the value of SC already determined.
+// Take the average of the two guesses.
 c1->cd(4);
 gr_so->Fit("pol2","Q");
 gr_so->Draw("AP");
@@ -266,6 +296,8 @@ double s2p = -(s2_fit->Eval(scp))/scp;
 printf("* Guesses on SO = %5.3g , %5.3g\n",sop,s2p);
 sop = 0.5*(sop+s2p);
 
+
+// Done
 printf("\n*** FINAL CALIBRATION VALUES: ***\n");
 printf("SC = %5.3g * ((%s) - (%5.3g))",scp,detbest,sop);
 printf(" with GL = %4.1f\n\n",glp);
@@ -328,8 +360,11 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
 
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 3.1 2006/01/07 00:35:14 genevb Exp $
+// $Id: Calib_SC_GL.C,v 3.2 2006/01/11 19:02:35 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 3.2  2006/01/11 19:02:35  genevb
+// Better documentation
+//
 // Revision 3.1  2006/01/07 00:35:14  genevb
 // Introduce macro
 //
