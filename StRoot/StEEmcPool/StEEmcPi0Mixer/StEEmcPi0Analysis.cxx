@@ -452,7 +452,8 @@ Int_t StEEmcPi0Analysis::getSpinState( StMuDst *mudst, Int_t &bxStar )
   Int_t bx48 = trig->bunchCrossingId();
   Int_t bx7  = trig->bunchCrossingId7bit( mRunNumber );  
 
-  bxStar = mSpinDb->BXstarUsingBX48(bx48);
+  //bxStar = mSpinDb->BXstarUsingBX48(bx48);
+  bxStar = mSpinDb->BXyellowUsingBX48(bx48); 
 
   mRealEvent->bx48 = bx48;
   mRealEvent->bx7  = bx7;
