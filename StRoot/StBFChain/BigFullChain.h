@@ -565,6 +565,13 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
   {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
+
+  {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
 #ifdef __BFC2__
   {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
@@ -587,11 +594,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
   {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
                                                   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-  {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
 #ifdef __BFC2__
   //  Reminder: You are within the ITTF chain definitions
 #endif /* __BFC2__ */
