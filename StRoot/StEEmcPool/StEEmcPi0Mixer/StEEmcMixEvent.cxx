@@ -49,6 +49,14 @@ void StEEmcMixEvent::Clear(Option_t *o)
       mEnergy1[i]=0.;
       mEnergy2[i]=0.;
   } 
+
+  mTotalEnergyT=0.;
+  mTotalEnergyP=0.;
+  mTotalEnergyQ=0.;
+  mTotalEnergyR=0.;
+  mTotalEnergyU=0.;
+  mTotalEnergyV=0.; 
+
 }
 
 // ----------------------------------------------------------------------------
