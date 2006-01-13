@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.47 2005/12/19 15:47:37 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.48 2006/01/13 20:44:40 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.48  2006/01/13 20:44:40  deph
+ * Fixed small memory leak
+ *
  * Revision 1.47  2005/12/19 15:47:37  deph
  * Grabbing rowsize from St_db_maker and passing it on to StDbTableDescriptor (ssdPadding)
  *
@@ -498,7 +501,7 @@ void * StDbBroker::Use(int tabID, int parID)
   } else {
     SetZombie(true);
   }
-
+  delete TD;
 return pData;
 }
 
