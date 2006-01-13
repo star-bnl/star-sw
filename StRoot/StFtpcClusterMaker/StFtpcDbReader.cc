@@ -1,6 +1,11 @@
-// $Id: StFtpcDbReader.cc,v 1.34 2005/12/12 14:46:53 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.35 2006/01/13 12:36:41 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.35  2006/01/13 12:36:41  jcs
+// If no RHIC clock frequency value available, set mMicrosecondsPerTimebin to
+// dimensionsTable->sizeOfTimebin for DbV options earlier than 20051021
+// otherwise use electronicsTable->uSecondsPerTimebin as the default value for mMicrosecondsPerTimebin
+//
 // Revision 1.34  2005/12/12 14:46:53  jcs
 // comment out debug output
 //
@@ -262,6 +267,7 @@ Int_t StFtpcDbReader::FtpcDimensions(St_ftpcDimensions *dimensions)
     mRadiansPerPad              = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
     mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
+    mMicrosecondsPerTimebin = dimensionsTable->sizeOfTimebin;
     mSensitiveVolumeInnerRadius = dimensionsTable->innerRadiusSensitiveVolume;
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
    return kStOK;
@@ -476,7 +482,8 @@ Int_t StFtpcDbReader::FtpcElectronics(St_ftpcElectronics *electronics)
   ftpcElectronics_st *electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
      mTZero = electronicsTable->tZero;
-     mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
+     if (electronicsTable->uSecondsPerTimebin != 0 ) 
+       mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
      return kStOK;
   } else {
      gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
