@@ -7,8 +7,8 @@
  * as input. 
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:55:31 $
- * $Revision: 1.1 $
+ * $Date: 2006/01/13 18:59:18 $
+ * $Revision: 1.2 $
  *
  */
 
@@ -365,7 +365,7 @@ void StEEmcA2EMaker::addTowerHit( Int_t sec, Int_t sub, Int_t eta, Float_t adc, 
   /// Push back list of all hit towers, preshower, postshower
 
   mHitTowers[layer].push_back( mTowers[index][layer] );
-  mEnergy[sec][layer] += energy;
+  mEnergy[sec][layer] += mTowers[index][layer].energy(); 
 
 #if 0
   mTowers[index][layer].print();
