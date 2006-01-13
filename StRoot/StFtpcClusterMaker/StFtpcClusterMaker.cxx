@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.82  2006/01/13 12:35:40  jcs
+// Calculate mMicrosecondsPerTimebin from RHIC clock frequency for each event
+//
 // Revision 1.81  2005/12/12 13:42:32  jcs
 // if StFtpcDbRead not constructed exit with kStWarn
 //
@@ -397,13 +400,6 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
   }     
-
-  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
-  double freq = dbclock->getCurrentFrequency()/1000000.0;
-  if ( freq != 0) 
-      microsecondsPerTimebin = 1./(freq/2.);
-  else
-      microsecondsPerTimebin = 0.;
  
 
   return 0;
@@ -547,8 +543,18 @@ Int_t StFtpcClusterMaker::Make()
      return kStWarn;
   }
 
+  // calculate microsecondsPerTimebin from RHIC clock frequency for current event 
+  // if not available, use default values from offline database
+
+  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+  double freq = dbclock->getCurrentFrequency()/1000000.0;
+  if ( freq != 0) 
+      microsecondsPerTimebin = 1./(freq/2.);
+  else
+      microsecondsPerTimebin = 0.;
+  dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
+
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
-     dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
      cout<<"Using the following values from database:"<<endl;
      cout<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<endl;
      cout<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endl;
