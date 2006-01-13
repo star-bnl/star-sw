@@ -133,6 +133,14 @@ Int_t StEEmcPi0Analysis::Make()
   /// map spin decimal bits to histograms
   static Int_t mymap[]={0,0,0,0,0,1,2,0,0,3,4};
 
+  /// event energy sums
+  mRealEvent -> mTotalEnergyT = mEEanalysis -> energy(0); 
+  mRealEvent -> mTotalEnergyP = mEEanalysis -> energy(1); 
+  mRealEvent -> mTotalEnergyQ = mEEanalysis -> energy(2); 
+  mRealEvent -> mTotalEnergyR = mEEanalysis -> energy(3); 
+  mRealEvent -> mTotalEnergyU = mEEanalysis -> energy(4); 
+  mRealEvent -> mTotalEnergyV = mEEanalysis -> energy(5); 
+
   /// Loop over all candidate pairs
   for ( Int_t i=0;i<mEEmixer->numberOfCandidates();i++ )
     {

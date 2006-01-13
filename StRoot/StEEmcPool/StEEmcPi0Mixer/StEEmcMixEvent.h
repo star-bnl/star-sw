@@ -70,6 +70,13 @@ class StEEmcMixEvent : public TObject {
   Float_t       mEnergy1[MAX_PAIRS]; //[nPairs]
   Float_t       mEnergy2[MAX_PAIRS]; //[nPairs] 
 
+  Float_t       mTotalEnergyT;
+  Float_t       mTotalEnergyP;
+  Float_t       mTotalEnergyQ;
+  Float_t       mTotalEnergyR; 
+  Float_t       mTotalEnergyU;
+  Float_t       mTotalEnergyV; 
+
  private:
  protected:
   ClassDef(StEEmcMixEvent,1);
