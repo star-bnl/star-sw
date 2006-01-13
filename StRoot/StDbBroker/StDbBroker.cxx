@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.48 2006/01/13 20:44:40 deph Exp $
+ * $Id: StDbBroker.cxx,v 1.49 2006/01/13 21:09:41 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.49  2006/01/13 21:09:41  deph
+ * Fixed minor memory leak
+ *
  * Revision 1.48  2006/01/13 20:44:40  deph
  * Fixed small memory leak
  *
@@ -463,7 +466,7 @@ void * StDbBroker::Use(int tabID, int parID)
   //Store the the TTABLE padded size
     StDbTableDescriptor* TD = new StDbTableDescriptor();
     TD->storeRowSize(m_sizeOfStruct);
-
+    delete TD;
 
   StDbNode* anode = m_Nodes->getNode(tabID);
   m_node=dynamic_cast<StDbTable*>(anode);
@@ -501,7 +504,7 @@ void * StDbBroker::Use(int tabID, int parID)
   } else {
     SetZombie(true);
   }
-  delete TD;
+
 return pData;
 }
 
