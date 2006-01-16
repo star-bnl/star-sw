@@ -9,9 +9,10 @@
 Date and time should be in GMT
 to get the correct electronics configuration for towers and SMD
 */
-StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
+StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time, bool TowerMapBug)
 {
   //cout <<"TIME USED FOR DECODER = "<<date<<" "<<time<<endl;
+  fixTowerMap = TowerMapBug;
   Init(date,time);
   // reverse order for tower
   for(int i=0;i<30;i++) Crate_TDC[TDC_Crate[i]-1]=i;
@@ -20,15 +21,6 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
     int id=0;
     if(GetTowerIdFromDaqId(RDO,id)==1) if(id>0) ReverseOrder[id-1]=RDO;
   }
-	for(int BOX=1;BOX<=60;BOX++) for(int P=1;P<=80;P++)
-	{
-		int id=0;
-		if(GetTowerIdFromPMTBox(BOX,P,id)==1) if(id>0) 
-		{
-			ReversePMT_Box[id-1][0] = BOX;
-			ReversePMT_Box[id-1][1] = P;
-		}
-	}
   
   // reverse order for SMD
   int det,m,e,s;
@@ -75,13 +67,31 @@ StEmcDecoder::~StEmcDecoder()
 }
 //--------------------------------------------------------
 /*!
+fixTowerBugIndexes method - fixes the indexes for tower map
+correction
+*/
+void StEmcDecoder::fixTowerBugIndexes()
+{
+  for(int i=0;i<4800;i++)
+  {
+    int id = i+1;
+    if(TowerBugFixIndex[i]!=id)
+    {
+      int newId = TowerBugFixIndex[i];
+      TowerBugFixIndex[newId-1] = id;
+    }
+  }
+  //for(int i=0;i<4800;i++) if(TowerBugFixIndex[i]!=i+1)
+  //  cout <<"****** TOWER BUG - id_original = "<<i+1<<"   id_new = "<<TowerBugFixIndex[i]<<endl;
+}
+//--------------------------------------------------------
+/*!
 Init method - should be called from constructor
 this method initializes the variables used in decoder in agreement with the
 time stamp.
 */
 void StEmcDecoder::Init(unsigned int date,unsigned int time)
 {
-  
   ////////////////////////////////////////////////////////////////////////
   // these vectors are for tower decoding ////////////////////////////////
 
@@ -92,60 +102,73 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
                         1380,1220,1060,900,740,580,420,260,100,2340};
   for(int i=0;i<30;i++) Init_Crate[i]=Init_Crate_tmp[i];
                        
-  // this tells which crate each one of the PMT boxes are connected to
-  int PMT_tmp[] = {16,16,17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,
-                   1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15};
-	for(int i=0;i<60;i++) PMT_Box[i]=PMT_tmp[i];
-
   // which crate is connected to each TDC channel. See log book for details
   if(date <= 20011223)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];
-    goto SMD;
+    goto FIXBUG;
   }
   if(date == 20011224 && time <=163000)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];  
-    goto SMD;
+    goto FIXBUG;
   }
   if(date == 20011224 && time >163000)
   {
     int TDC_Crate_tmp[]= {18,17,16,29,30,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
-    goto SMD;
+    goto FIXBUG;
   }
   if(date == 20011225 && time <=073000)
   {
     int TDC_Crate_tmp[]= {18,17,16,29,30,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
-    goto SMD;
+    goto FIXBUG;
   }
   if(date == 20011225 && time >073000)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
-    goto SMD;
+    goto FIXBUG;
   }
   if(date >= 20011226 && date < 20030701) // year 2002/2003 pp and dAu runs
   {
-    int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+    int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,1,2,3,4,
+                          5,6,7,8,9,10,11,12,13,14,15};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
-    goto SMD;
+    goto FIXBUG;
   }
   if(date >= 20030701) // year 2004 AuAu and pp runs
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,27,26,25,24,23,22,21,20,19,
                           1,15,14,13,12,11,10,9,8,7,6,5,4,3,2};
     for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
-    goto SMD;
+    goto FIXBUG;
   }   
+  
+  ///////////////////////////////////////////////////////////////////////
+  // these tables fixes the tower cabling misconnection for some towers
+
+  FIXBUG:
+  for(int i=0;i<4800;i++) TowerBugFixIndex[i] = i+1;
+  if(date >= 20050101 && date < 20060101)
+  {
+    #include "TowerBug2005.txt"
+  }
+  if(date >= 20060101 )
+  {
+    #include "TowerBug2006.txt"
+    fixTowerMap = true; // map is always corrected for  2006 and above
+  }
+  fixTowerBugIndexes();
+
 
   ///////////////////////////////////////////////////////////////////////
   // these tables are for SMD decoding //////////////////////////////////
@@ -200,22 +223,6 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     goto FEE;
   }
   
-  /*if(date >=  20030701) // year 2004 AuAu and pp runs
-  {
-    int SmdModules_tmp[8][15]={
-                              {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 0
-                              {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},                         //RDO 1
-                              {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60},                //RDO 2
-                              {16,17,18,19,20,21,22,23,24,25,26,27,28,29,30},                //RDO 3
-                              {106,107,108,109,110,111,112,113,114,115,116,117,118,119,120}, //RDO 4
-                              {76,77,78,79,80,81,82,83,84,85,86,87,88,89,90},                //RDO 5
-                              {91,92,93,94,95,96,97,98,99,100,101,102,103,104,105},          //RDO 6
-                              {61,62,63,64,65,66,67,68,69,70,71,72,73,74,75}                 //RDO 7
-                              }; 
-    for(int i=0;i<8;i++) for(int j=0;j<15;j++) SmdModules[i][j]=SmdModules_tmp[i][j];
-    goto FEE;
-  }*///Steve Trentalange told this has not changed since last year
-
   FEE:
   int FEE1_tmp[4]={1,4,3,2};
   int FEE2_tmp[4]={2,1,4,3};
@@ -288,6 +295,19 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     for(int i=0;i<10;i++)    TriggerSequence[i] = TriggerSequence_tmp[i];                         
   }
   return;
+}
+//--------------------------------------------------------
+/*!
+GetTowerBugCorrectionShift method - returns the id shift with respect to
+the tower index (software) in the original map
+\param id_original is the soft_id in the original map
+\param id_shift is the shift that should be applied to the id. In this case, id_corrected = Id_original+id_shift
+*/
+int StEmcDecoder::GetTowerBugCorrectionShift(int id_original,int& id_shift)
+{
+  int id_new = TowerBugFixIndex[id_original - 1];
+  id_shift = id_new-id_original;
+  return 1;
 }
 //--------------------------------------------------------
 /*!
@@ -403,19 +423,7 @@ int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& TowerId)
   int Crate;
   int tdc;
   GetTowerCrateFromDaqId(RDO,Crate,crate_seq);
-  GetTowerTDCFromDaqId(RDO,tdc);
-  int start=Init_Crate[Crate-1];
-  if(Crate>15 && Crate<31)
-  {
-    TowerId=Getjose_towerWest(start,crate_seq);
-    return 1;
-  }
-  if(Crate>0 && Crate<16)
-  {
-    TowerId=Getjose_towerEast(start,crate_seq);
-    return 1;
-  }
-  return 0;
+  return GetTowerIdFromCrate(Crate,crate_seq,TowerId);
 }
 //--------------------------------------------------------
 /*!
@@ -432,39 +440,6 @@ int StEmcDecoder::GetDaqIdFromTowerId(int TowerId,int& RDO)
 }
 //--------------------------------------------------------
 /*!
-\param TowerId is the software id for towers
-\param PMT is the PMT box number (1-60)
-\param Position is the position inside the box (1-80)
-*/
-int StEmcDecoder::GetPMTBoxFromTowerId(int TowerId,int& PMT, int& Position)
-{
-  if(TowerId<1 || TowerId >4800) return 0; // 0 is bad
-  
-  PMT = ReversePMT_Box[TowerId-1][0];
-  Position = ReversePMT_Box[TowerId-1][1];
-  
-  return 1;
-}
-//--------------------------------------------------------
-/*!
-\param PMT is the PMT box number (1-60)
-\param Position is the position inside the box (1-80)
-\param TowerId is the software id for towers
-*/
-int StEmcDecoder::GetTowerIdFromPMTBox(int PMT, int Position, int& TowerId)
-{
-  if(PMT<1 || PMT >60) return 0; // 0 is bad
-  if(Position<1 || Position >80) return 0; // 0 is bad
-  
-//  int start = PMT_Box[PMT-1] ; 
-//  int row   = (Position-1)/20;
-	
-	
-  
-  return 1;
-}
-//--------------------------------------------------------
-/*!
 \param crate is the crate number
 \param crate_sequency is the position of the tower inside the crate
 \param TowerId is the software id for towers
@@ -475,12 +450,16 @@ int StEmcDecoder::GetTowerIdFromCrate(int crate,int crate_sequency, int& TowerId
   {
     int start=Init_Crate[crate-1];
     TowerId=Getjose_towerWest(start,crate_sequency);
+    // this is to fix the tower connection for some towers
+    if(fixTowerMap) TowerId=TowerBugFixIndex[TowerId-1];
     return 1;
   }
   if(crate>0 && crate<16)
   {
     int start=Init_Crate[crate-1];
     TowerId=Getjose_towerEast(start,crate_sequency);
+    // this is to fix the tower connection for some towers
+    if(fixTowerMap) TowerId=TowerBugFixIndex[TowerId-1];
     return 1;
   }
   return 0;
@@ -495,22 +474,9 @@ int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId)
 {
   
   int Crate;
-  int crate_sequency=tdc_sequency;
+  int crate_seq=tdc_sequency;
   if(GetTowerCrateFromTDC(TDC, Crate)==0) return 0;
-  
-  if(Crate>15 && Crate<31)
-  {
-    int start=Init_Crate[Crate-1];
-    TowerId=Getjose_towerWest(start,crate_sequency);
-    return 1;
-  }
-  if(Crate>0 && Crate<16)
-  {
-    int start=Init_Crate[Crate-1];
-    TowerId=Getjose_towerEast(start,crate_sequency);
-    return 1;
-  }
-  return 0;
+  return GetTowerIdFromCrate(Crate,crate_seq,TowerId);
 }
 //--------------------------------------------------------
 /*!
