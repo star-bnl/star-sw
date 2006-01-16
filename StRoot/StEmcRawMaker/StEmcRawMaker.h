@@ -1,12 +1,12 @@
-// $Id: StEmcRawMaker.h,v 1.4 2004/10/21 00:01:50 suaide Exp $
+// $Id: StEmcRawMaker.h,v 1.5 2006/01/16 11:12:00 suaide Exp $
 
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
-
+ 
 This class copies the BEMC raw data from DAQ file into StEvent.
 This make should run only in production or when reading DAQ
 files. The tasks performed by this maker are:
-
+ 
   1. Get EMC data from DAQ files
   2. Fills B+E emcRawData with the daq data
   3.a Check for BEMC corruption but does not remove BEMC sub-event.
@@ -35,38 +35,48 @@ class StEvent;
 class StEEmcDbMaker;
 class StEemcRaw;
 
-class StEmcRawMaker : public StMaker 
+class StEmcRawMaker : public StMaker
 {
- protected: 
-   StEvent*                 mEvent; 
-   StBemcRaw*               mBemcRaw;
-   StEemcRaw*               mEemcRaw;
-   StEEmcDbMaker*           eeStDb; ///< to assess EEMC DB
+protected:
+    StEvent*                 mEvent;
+    StBemcRaw*               mBemcRaw;
+    StEemcRaw*               mEemcRaw;
+    StEEmcDbMaker*           eeStDb; ///< to assess EEMC DB
 
-   void                     fillHistograms();///<Fill QA histograms  
-   Bool_t                   prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
-   Bool_t                   makeBemc(); ///< Make the Barrel-EMC detector
-   Bool_t                   makeEemc(); ///< Make the Endcap-EMC detector
-                      
- public:                  
-                            StEmcRawMaker(const char *name="EmcRaw"); ///< StEmcRawMaker constructor
-  virtual                   ~StEmcRawMaker(); ///< StEmcRawMaker destructor
-  virtual Int_t             Init(); ///< Init function. This method initializes the histograms
-  virtual Int_t             InitRun(Int_t runumber); ///< InitRun function
-  virtual Int_t             Make(); ///< Process each event
-  virtual Int_t             Finish(); ///< Finish function. 
+    void                     fillHistograms();///<Fill QA histograms
+    Bool_t                   prepareEnvironment();///< Prepare the StEvent environment to fill the EMC data
+    Bool_t                   makeBemc(); ///< Make the Barrel-EMC detector
+    Bool_t                   makeEemc(); ///< Make the Endcap-EMC detector
 
-  StBemcRaw*                getBemcRaw() { return mBemcRaw;} ///< Return the StBemcRaw pointer
-  void                      setPrint(Bool_t a);///< Set it to kFALSE if you do not want to print messages
-    
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.4 2004/10/21 00:01:50 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+public:
+    StEmcRawMaker(const char *name="EmcRaw"); ///< StEmcRawMaker constructor
+    virtual                   ~StEmcRawMaker(); ///< StEmcRawMaker destructor
+    virtual Int_t             Init(); ///< Init function. This method initializes the histograms
+    virtual Int_t             InitRun(Int_t runumber); ///< InitRun function
+    virtual Int_t             Make(); ///< Process each event
+    virtual Int_t             Finish(); ///< Finish function.
 
-  ClassDef(StEmcRawMaker, 1)  
+    StBemcRaw*                getBemcRaw()
+    {
+        return mBemcRaw;
+    } ///< Return the StBemcRaw pointer
+    void                      setPrint(Bool_t a);///< Set it to kFALSE if you do not want to print messages
+
+    virtual const char *      GetCVS() const
+    {
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.5 2006/01/16 11:12:00 suaide Exp $ built "__DATE__" "__TIME__ ;
+        return cvs;
+    }
+
+    ClassDef(StEmcRawMaker, 1)
 };
 
 #endif
 
 // $Log: StEmcRawMaker.h,v $
+// Revision 1.5  2006/01/16 11:12:00  suaide
+// tower map bug fixed and astyle run
+//
 // Revision 1.4  2004/10/21 00:01:50  suaide
 // small changes in histogramming and messages for BEMC
 // Complete version for EEMC done by Jan Balewski

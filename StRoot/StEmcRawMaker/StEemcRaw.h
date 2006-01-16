@@ -2,11 +2,11 @@
   \class StEEmcDataMaker
   \author Jan Balewski
   \date   2003,2004
-
+ 
   This maker reads the raw EEmc DAQ data and uses the StEmcRawHit
   class to save the hit information. Later handling of hits in 
   StEvent is made by the Emc classes (HitCollection etc ...)
-
+ 
 */
 
 #ifndef STAR_StEemcRaw
@@ -19,34 +19,41 @@ class StEEMCReader ;
 class TH1F;
 class StEvent;
 
-class StEemcRaw :  public TObject {
- private:
+class StEemcRaw :  public TObject
+{
+private:
 
-  StEEmcDbMaker *mDb;
-  TH1F *hs[8];
-  Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
-  Bool_t   headersAreSick( StEmcRawData *raw, int token, int runId);
-  Bool_t   towerDataAreSick(StEmcRawData* raw);
-  void     raw2pixels(StEvent* mEvent);
+    StEEmcDbMaker *mDb;
+    TH1F *hs[8];
+    Bool_t   copyRawData(StEEMCReader *eeReader, StEmcRawData *raw);
+    Bool_t   headersAreSick( StEmcRawData *raw, int token, int runId);
+    Bool_t   towerDataAreSick(StEmcRawData* raw);
+    void     raw2pixels(StEvent* mEvent);
 
- protected:
- public: 
-  StEemcRaw();
-  ~StEemcRaw();
-  Bool_t make(StEEMCReader *eeReader,StEvent* mEvent);
-  void initHisto();
+protected:
+public:
+    StEemcRaw();
+    ~StEemcRaw();
+    Bool_t make(StEEMCReader *eeReader,StEvent* mEvent);
+    void initHisto();
 
-  void setDb(StEEmcDbMaker *aa){mDb=aa;} ///< DB-reader must exist
-  
-  ClassDef(StEemcRaw,0) 
+    void setDb(StEEmcDbMaker *aa)
+    {
+        mDb=aa;
+    } ///< DB-reader must exist
+
+    ClassDef(StEemcRaw,0)
 };
 
 #endif
 
-// $Id: StEemcRaw.h,v 1.3 2005/02/03 02:35:11 balewski Exp $
+// $Id: StEemcRaw.h,v 1.4 2006/01/16 11:12:00 suaide Exp $
 
 /*
  * $Log: StEemcRaw.h,v $
+ * Revision 1.4  2006/01/16 11:12:00  suaide
+ * tower map bug fixed and astyle run
+ *
  * Revision 1.3  2005/02/03 02:35:11  balewski
  * accomodate MAPMT firmware change in 2005
  *
