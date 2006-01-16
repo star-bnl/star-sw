@@ -28,6 +28,7 @@ The current id's definitions are:<br>
 
 #ifndef StEmcDecoder_HH
 #define StEmcDecoder_HH
+
 class StEmcDecoder
 {
   protected:
@@ -36,10 +37,10 @@ class StEmcDecoder
     int       TDC_Crate[30];
     int       Crate_TDC[30];
     int       ReverseOrder[4800];
-		int       PMT_Box[60];
-		int       ReversePMT_Box[4800][2];
     int       TriggerPatch[30];
     int       TriggerSequence[10];
+    int       TowerBugFixIndex[4800];
+    bool      fixTowerMap;
     
     int       SmdModules[8][15];
     int       FEE1[4],FEE2[4],FEE3[4];
@@ -59,24 +60,24 @@ class StEmcDecoder
     int       checkDummy(int);///<Check dummy positions on SMD crate
     int       getSmdPin(int,int,int,int&);///<Get SMD pin number
     int       getSmdpStrip(int,int&,int&);///<Get SMDP strip
+    void      fixTowerBugIndexes();///<fixes the array in order to correct the tower bug
     
     void      Init(unsigned int,unsigned int);///< Init method
         
   public:
-              StEmcDecoder(unsigned int date=20300101,unsigned int time=000000);///< StEmcDecoder constructor
+              StEmcDecoder(unsigned int date=20300101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
     virtual   ~StEmcDecoder();///< StEmcDecoder destructor
-
+    
     int       GetTowerIdFromDaqId(int,int&);///<Get Sofwtare Id from Daq Id for towers
     int       GetDaqIdFromTowerId(int,int&);///< Get Daq Id from Software Id for towers
     int       GetTowerIdFromCrate(int,int,int&);///<Get Software Id from Crate number and position in crate for towers
     int       GetTowerIdFromTDC(int,int,int&);///<Get Software Id from TDC channel number and position in TDC for towers
-    int       GetTowerIdFromPMTBox(int,int,int&);///<Get Software Id from PMT Box number and position in the box for towers
     int       GetTowerCrateFromDaqId(int,int&,int&);///< Get crate number from Daq Id for towers
     int       GetTowerCrateFromTDC(int,int&);///<Get crate number from TDC channel for towers
     int       GetTowerTDCFromCrate(int,int&);///< Get TDC channel from crate number for towers
     int       GetTowerTDCFromDaqId(int,int&);///< Get TDC channel from Daq Id for towers
-		int       GetPMTBoxFromTowerId(int,int&,int&); ///<Get PMT box and position from tower Id
     int       GetTowerBin(int,int&,int&,int&);///<Transition from environment rid to m,e,s for towers
+    int       GetTowerBugCorrectionShift(int,int&);///<Returns the index shift for the tower in original map
     
     int       GetTriggerPatchFromCrate(int,int,int&); // returns the trigger patch from crate and sequence in the crate
     int       GetCrateAndSequenceFromTriggerPatch(int,int&,int&); // returns the crate number and start point for a given trigger patch
@@ -92,6 +93,7 @@ class StEmcDecoder
     void      PrintTowerMap(ofstream *);///<Print Tower MAP
     void      PrintSmdMap(ofstream *);///<Print SMD MAP
     void      PrintPsdMap(ofstream *);///<Print SMD MAP
+  
     
 };
 #endif
