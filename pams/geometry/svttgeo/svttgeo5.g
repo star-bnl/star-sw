@@ -1,6 +1,15 @@
-* $Id: svttgeo5.g,v 1.1 2005/10/06 17:57:05 potekhin Exp $
+* $Id: svttgeo5.g,v 1.2 2006/01/18 23:12:07 potekhin Exp $
 *
 * $Log: svttgeo5.g,v $
+* Revision 1.2  2006/01/18 23:12:07  potekhin
+* I have improved the "no svt" version of the SVT geometry by flushing out
+* extaneous support rings and such which aren't needed or can't be put
+* into the structures without the SVT in. THe cones and all are of course
+* still in the configuration.
+*
+* Again, there sill be structural and other elements added as the
+* tracking upgrade progresses.
+*
 * Revision 1.1  2005/10/06 17:57:05  potekhin
 * A new, stripped down version of the SVT that only includes the support cones
 * but no central barrel, needed for the detector development and material
@@ -25,10 +34,11 @@ Module  SVTTGEO5  is the SVT geometry for STAR: without the central part
 *                 - - - - - - separates sub-sub divisions                     *
 +cde,AGECOM,GCONST,GCUNIT.
 *     
-      Content          SVTT,SIRP,SIRT,SOER,SCON,SGRA,STAP,STAC,SHLA,
-                       SHLB,SBRG,SBRM,SBRI,SOES,SOSM,SCRW,SIES,SISM,
+      Content          SVTT,SCON,SGRA,STAP,STAC,SHLA,
+                       SHLB,SBRG,SOES,SOSM,SCRW,SIES,SISM,
                        SBSP,SAKM,SBMM,SMRD,SBMO,SBMI,SCKM,SBRL,SBRX,
-                       SBSR,SBCR,SROD,SCMY
+                       SBSR,SBCR,SCMY
+* SIRT, SBRM, SIRP, SROD, SBRI, SOER - left out of this cut
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
 		       ZsizeMax,  Angoff, SupportVer,   ConeVer,
@@ -500,17 +510,23 @@ Block SVTT is the mother of all SVT volumes
                       dz=svtg_ZsizeMax
 *  wrong, if in common run:  dz=ssup_Cone4zmx
 *
+
+
+
+*  Excluded from this version :
 * End rings to support the ladders:
 *
-      Create    SIRP  " inner end ring polygon piece "  
-      Position  SIRP  Z=serg_EndRngZm+serg_EndRngTh/2  AlphaZ=22.5
-      Position  SIRP  Z=-serg_EndRngZm-serg_EndRngTh/2 AlphaZ=22.5
-      Create    SIRT  " inner end ring tube piece "  
-      Position  SIRT  Z=serg_EndRngZm+serg_EndRngTh/2  AlphaZ=22.5
-      Position  SIRT  Z=-serg_EndRngZm-serg_EndRngTh/2 AlphaZ=22.5
-      Create    SOER  " outer end ring"  
-      Position  SOER  Z=serg_EndRngZm+serg_EndRngTh/2 
-      Position  SOER  Z=-serg_EndRngZm-serg_EndRngTh/2 
+*      Create    SIRP  " inner end ring polygon piece "  
+*      Position  SIRP  Z=serg_EndRngZm+serg_EndRngTh/2  AlphaZ=22.5
+*      Position  SIRP  Z=-serg_EndRngZm-serg_EndRngTh/2 AlphaZ=22.5
+*
+*      Create    SIRT  " inner end ring tube piece "  
+*      Position  SIRT  Z=serg_EndRngZm+serg_EndRngTh/2  AlphaZ=22.5
+*      Position  SIRT  Z=-serg_EndRngZm-serg_EndRngTh/2 AlphaZ=22.5
+*      Create    SOER  " outer end ring"  
+*      Position  SOER  Z=serg_EndRngZm+serg_EndRngTh/2 
+*      Position  SOER  Z=-serg_EndRngZm-serg_EndRngTh/2 
+***************************************************************************
 
 * Bracket joining the end rings 
 * (shape is very approximate guess)
@@ -544,52 +560,16 @@ Block SVTT is the mother of all SVT volumes
 
 * 
 * SVT support rods -- previously incorrectly described as Be,
-* carbon compound in reality
-      Create    SROD  "Support rod"
-      Position  SROD  y = ssup_rodDist+ssup_rodOD/2
-      Position  SROD  y =-ssup_rodDist-ssup_rodOD/2
+* carbon compound in reality -- we leave it out altogether is the future construction
+* isn't clear.
+*      Create    SROD  "Support rod"
+*      Position  SROD  y = ssup_rodDist+ssup_rodOD/2
+*      Position  SROD  y =-ssup_rodDist-ssup_rodOD/2
 *
 
 *
 EndBlock
 *
-* ****************************************************************************
-*
-Block SIRT is the SVT inner end ring tube
-*
-      Material  Berillium
-      Attribute SIRT  Seen=1  Colo=2
-      ir_rmin=serg_IrngPrMn*(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
-      Shape     TUBE  rmin=ir_rmin,
-                      rmax=serg_IrngTrMx,
-                      dz=serg_EndRngTh/2
-Endblock
-*
-* ****************************************************************************
-*
-Block SIRP is the SVT inner end ring polycone (overlaps tube)
-* The inner surface of the polycone is inscribed within the inner tube radius
-* The outer surface of the polycone is inscribed within the outer tube radius
-*
-      Material  Berillium
-      Attribute SIRP  Seen=1  Colo=2
-      rou=serg_IrngTrMx/(cos(pi/8.)+sqrt(tan(pi/8.)**2.-sin(pi/8.)**2.))
-      Shape     PGON  Phi1=0   Dphi=360  Nz=2,
-                      NpDiv=8,
-                      zi ={-serg_EndRngTh/2, +serg_EndRngTh/2},
-                      rmn={ serg_IrngPrMn, serg_IrngPrMn},
-                      rmx={ rou, rou}
-Endblock
-*
-* ****************************************************************************
-*
-Block SOER is the SVT outer end ring
-      Material  Berillium
-      Attribute SOER  Seen=1  Colo=2
-      Shape     TUBE   rmin=serg_OrngRmin,  
-                       rmax=serg_OrngRmax,  
-                       dz=serg_EndRngTh/2
-Endblock
 * ****************************************************************************
 *
 Block SCON is the Silicon tracker supporting cone mother volume
@@ -755,33 +735,9 @@ Block SBRG is the bracket joining the end rings
 		      Rmax=rou,
                       dz=ssup_ERJthk/2
 *     
-      Create    SBRM " Mother volume for a bracket joining the end rings"     
 Endblock
 *
 *
-* ----------------------------------------------------------------------------
-*
-Block SBRM is a the mother of a single bracket joining the end rings
-*     The rotation c0 is a guess
-      Attribute SBRM    seen=0    colo=1
-      Shape  Division   Iaxis=2   Ndiv=4  c0=45
-*
-      Create    SBRI
-      Position  SBRI x=ssup_ERJrad
-*
-EndBlock
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*
-Block SBRI is the bracket which joins the rings
-*     This is a major simplification of a complex shape
-      Attribute SBRI   Seen=1    Colo=2
-      Material Berillium
-      Shape    BOX  dx=ssup_ERJlen/2,
-                    dy=ssup_ERJwid/2,
-                    dz=ssup_ERJThk/2
-EndBlock
-*
-*******************************************************************************
 *
 Block SOES is the volume to hold outer endring screws
       Material  Air
@@ -804,7 +760,7 @@ Block SIES is the volume to hold inner endring screws
       Create    SISM " Mother volume for inner end ring screws"
 Endblock
 *
-*------------------------------------------------------------------------------
+*******************************************************************************
 *
 Block SISM is the mother volume division for the inner end ring screws
 *     The rotation c0 is a guess
@@ -1003,15 +959,6 @@ Block SBCR is the cutout in the beampipe support G10 ring
 		dz=ssub_SRingThk/2
 Endblock
 *
-* ****************************************************************************
-*
-Block SROD is the SVT Carbon composite support rod
-      Material  Carbon
-      Attribute SROD  Seen=1  Colo=2
-      Shape     TUBE   rmin=ssup_RodID/2,
-                       rmax=ssup_RodOD/2,
-                       dz=ssup_RodLen/2
-endblock
 *
 *------------------------------------------------------------------------------
 *
