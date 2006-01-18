@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.484 2006/01/06 14:25:18 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.485 2006/01/18 17:19:30 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -285,6 +285,14 @@ Int_t StBFChain::Instantiate()
       if (GetOption("FtpcIT")){
 				mk->SetAttr("useFtpc"	,kTRUE);
 				mk->SetAttr("activeFtpc",kTRUE);
+      }
+      if (GetOption("PixelIT")){
+                               mk->SetAttr("usePixel"  ,kTRUE);
+                               mk->SetAttr("activePixel",kTRUE);
+      }
+      if (GetOption("IstIT")){
+                               mk->SetAttr("useIst"  ,kTRUE);
+                               mk->SetAttr("activeIst",kTRUE);
       }
       mk->PrintAttr();
     }
