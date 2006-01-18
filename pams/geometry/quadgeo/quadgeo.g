@@ -1,6 +1,10 @@
-* $Id: quadgeo.g,v 1.1 2005/09/02 18:22:15 potekhin Exp $
+* $Id: quadgeo.g,v 1.2 2006/01/18 23:08:52 potekhin Exp $
 *
 * $Log: quadgeo.g,v $
+* Revision 1.2  2006/01/18 23:08:52  potekhin
+* Checking in additional work on the quad model, now temporarily
+* frozen, which we need for our beam background studies
+*
 * Revision 1.1  2005/09/02 18:22:15  potekhin
 * Need a new area for the description of the upstream
 * beam magnets
@@ -25,6 +29,9 @@ Module QUADGEO is the description of all the magnets upstream inclusive of D0
 
 *
 *    local variable for section positioning
+
+     Real zQuad
+
 *
 * -----------------------------------------------------------------------------
    Fill SHLQ    !  Quadrupole Geometry Data
@@ -60,9 +67,14 @@ Module QUADGEO is the description of all the magnets upstream inclusive of D0
 
       USE      SHLQ
 
-      Create MGMT
-      Position MGMT in CAVE x= shlq_Xoffset y=0 z=shlq_q0-shlq_DzeroL+shlq_MotherL/2.0 AlphaY= shlq_Angle
-      Position MGMT in CAVE x=-shlq_Xoffset y=0 z=shlq_q0-shlq_DzeroL+shlq_MotherL/2.0 AlphaY=-shlq_Angle
+      zQuad = shlq_q0-shlq_DzeroL+shlq_MotherL/2.0
+
+      Create   MGMT
+      Position MGMT in CAVE x= shlq_Xoffset y=0 z=zQuad  AlphaY= shlq_Angle
+      Position MGMT in CAVE x=-shlq_Xoffset y=0 z=zQUad  AlphaY=-shlq_Angle
+
+      Position MGMT in CAVE x= shlq_Xoffset y=0 z=-zQuad AlphaY= 180-shlq_Angle
+      Position MGMT in CAVE x=-shlq_Xoffset y=0 z=-zQuad AlphaY= 180+shlq_Angle
 
 
 *
