@@ -1,5 +1,21 @@
-* $Id: geometry.g,v 1.118 2005/10/20 20:17:47 potekhin Exp $
+* $Id: geometry.g,v 1.119 2006/01/18 23:06:13 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.119  2006/01/18 23:06:13  potekhin
+* Introducing the baseline year 2006 geometry, which is "the best"
+* Y2005 geo plus the bugfix in the TPC backplane (not too important).
+* Pending a better definition of the SSD from Lilian which we'll have
+* to version and maybe cut new tags of 2004-5 geometries if there is
+* a need.
+*
+* As agreed, created UPGR01 and UPGR02 (note cautious use of namespace),
+* which are basically SSD+HFT and IST+HFT. Note that NONE of engineering
+* detail is available in either case, and less so for the integration
+* structural elements. We expect to do a lot of development in this area
+* as new facts and engineering data are provided. This cut will allow us
+* to proceed  with tracking studies in the near term.
+*
+* Fixed a comment and added a couple more.
+*
 * Revision 1.118  2005/10/20 20:17:47  potekhin
 * a) added a few parameters to the "low_em" setting to
 * better simulate soft EM processes, if needed
@@ -567,7 +583,7 @@
 *             VpddConfig, ! VPDD
 *             FpdmConfig, ! Forfward Pion Mult detectoe
 *             SisdConfig, ! SSD
-*             PipeConfig, ! Beam Pipr
+*             PipeConfig, ! Beam Pipe
 *             CalbConfig, ! Barrel EMC
 *             PixlConfig, ! Inner Pixel detector
 *             IstbConfig, ! Integrated Silicon Tracker
@@ -800,7 +816,7 @@ If LL>1
                    pipeConfig=4;   " provisional"
                    pixl=on;        " put the pixel detector in"
                    PixlConfig=2;   " newer version decoupled from SVT"
-* Inner STAR tracker barrel (formerly MIT detector)
+* Inner STAR tracker barrel
                    istb=on;  "new pixel based inner tracker"
                    IstbConfig=1;
 * Inner STAR GEM barrel
@@ -1862,6 +1878,227 @@ If LL>1
                 }
 
 ****************************************************************************************
+  on Y2006    { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 24; "second version, full barrel with corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+
+                }
+****************************************************************************************
+  on UPGR01    { R and D geometry: TPC+SSD+HFT-SVT
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 5; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 24; "second version, full barrel with corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+* careful! Achtung!
+                   pipeConfig=5;   " thinner pipe "
+                   pixl=on;        " activate "
+                   PixlConfig=3;   " source version "
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+
+                }
+****************************************************************************************
+  on UPGR02    { R and D geometry: TPC+IST+HFT-SVT
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 5; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 0; "no ssd here"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=1;
+
+* careful! Achtung!
+                   pipeConfig=5;   " thinner pipe "
+                   pixl=on;        " activate "
+                   PixlConfig=3;   " source version "
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+
+                }
+****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
 
@@ -1937,11 +2174,12 @@ If LL>1
                      ftro=on;
                      FtroConfig = 1;
 
-                  "New version of the TPC backplane "
-                     TpceConfig = 2;
+                  "Newest version of the TPC backplane "
+                     TpceConfig = 3;
 
                 }
 
+****************************************************************************************
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
@@ -1965,11 +2203,15 @@ If LL>1
                 }
 
   on TPC_ONLY   { Minimal geometry - only TPC;
-                  {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
+                  {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,sisd,ftro}=off; }
+  on TPC_AND_SVTT  { Only TPC and SVT;
+                  {pipe,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,ftro}=off; }
   on SVTT_ON    { Optional SVTT added on top of the minimal geo;
                      svtt=on; }
   on SVTT_OFF   { Optionally remove the SVTT;
                      svtt=off; }
+  on ONLY_SVTT   { Only SVTT;
+                  {pipe,tpce,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,ftro}=off; }
 *
   on PIPE_ON    { Optional pipe added on top of the minimal geo;
                      pipe=on; }
@@ -2146,7 +2388,7 @@ If LL>1
          call sisdgeo
        endif
 
-       write(*,*) '*** Silicon Strip Detector Config and Code Level: ',SisdConfig, ' ',sisd_level
+*       write(*,*) '*** Silicon Strip Detector Config and Code Level: ',SisdConfig, ' ',sisd_level
 
   endif
 
@@ -2171,9 +2413,12 @@ If LL>1
 
    if(DensConfig>0) call AgDETP add ('tpcg.gasCorr=',2 ,1)
 
+   write(*,*) 'TPC'
    if (tpce.and.TpceConfig==1) Call tpcegeo
    if (tpce.and.TpceConfig==2) Call tpcegeo1
+   if (tpce.and.TpceConfig==3) Call tpcegeo2
 
+   write(*,*) 'FTPC'
    if (ftpc) then
 	if(FtpcConfig==0) Call ftpcgeo
 	if(FtpcConfig==1) Call ftpcgeo1
@@ -2185,6 +2430,7 @@ If LL>1
 * FTPC readout electronics barrel
    if (ftro) Call ftrogeo
 
+   write(*,*) 'BTOF'
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1 & btof) then
      call AgDETP new ('BTOF')
