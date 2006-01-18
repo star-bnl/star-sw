@@ -1,8 +1,8 @@
-// $Id: StSsdLadder.cc,v 1.6 2005/12/31 01:43:22 perev Exp $
+// $Id: StSsdLadder.cc,v 1.7 2006/01/18 22:49:22 jeromel Exp $
 //
 // $Log: StSsdLadder.cc,v $
-// Revision 1.6  2005/12/31 01:43:22  perev
-// Mack/Upack simplified
+// Revision 1.7  2006/01/18 22:49:22  jeromel
+// Removed latest change (no time to check new method)
 //
 // Revision 1.5  2005/03/18 14:06:30  lmartin
 // missing CVS header added
@@ -10,7 +10,6 @@
 
 #include "StSsdLadder.hh"
 #include "StSsdWafer.hh"
-#include "StSsdUtil/StSsdEnumerations.hh"
 #include <Stiostream.h>
 #include "tables/St_ssdWafersPosition_Table.h"
 
@@ -45,11 +44,16 @@ StSsdLadder::~StSsdLadder()
 void StSsdLadder::initWafers(St_ssdWafersPosition *wafpos)
 {
   ssdWafersPosition_st *wpos =  wafpos->GetTable();
+  int idWafer = 0;
+  int iWaf    = 0;
   for (int i = 0; i < wafpos->GetNRows(); i++)
     {
-      StSsdPack idWafer(wpos[i].id);
-      int iWaf = idWafer.getWaf();
-      if (iWaf>=0 && idWafer.getLad() == mLadderNumb)
+      idWafer = wpos[i].id;
+      iWaf = idWaferToWaferNumb(idWafer);
+      if (
+	  (idWafer > mSsdLayer*1000)&&
+	  (mLadderNumb == idWafer - mSsdLayer*1000 - (iWaf+1)*100 - 1)
+	  )
 	mWafers[iWaf]->init(idWafer, wpos[i].driftDirection, wpos[i].transverseDirection, wpos[i].normalDirection, wpos[i].centerPosition);
     }
 }
@@ -58,11 +62,16 @@ void StSsdLadder::initWafers(St_ssdWafersPosition *wafpos)
 
 void StSsdLadder::initWafers(ssdWafersPosition_st *position, int positionSize)
 {
+  int idWafer = 0;
+  int iWaf    = 0;
   for (int i = 0; i <positionSize ; i++)    // loop over the full table now.
     {
-      StSsdPack idWafer(position[i].id);
-      int iWaf = idWafer.getWaf();
-      if (iWaf>=0 && mLadderNumb == idWafer.getLad())
+      idWafer = position[i].id;
+      iWaf = idWaferToWaferNumb(idWafer);
+      if (
+	  (idWafer > mSsdLayer*1000)&&
+	  (mLadderNumb == idWafer - mSsdLayer*1000 - (iWaf+1)*100 - 1)
+	  )
 	mWafers[iWaf]->init(idWafer, position[i].driftDirection, position[i].transverseDirection, position[i].normalDirection, position[i].centerPosition);
     }
 }
@@ -71,12 +80,15 @@ void StSsdLadder::initWafers(ssdWafersPosition_st *position, int positionSize)
 
 int StSsdLadder::idWaferToWaferNumb(int idWafer)
 {
-   return StSsdPack::getWaf(idWafer);
+   int iW = (int)((idWafer - mSsdLayer*1000)/100);
+   return (iW-1);
 }
 
 int StSsdLadder::waferNumbToIdWafer(int waferNumb)
 {
-  return StSsdPack::pack(waferNumb,mLadderNumb);
+  int iL = mLadderNumb+1;                          // iL:1->20
+  int iW = waferNumb+1;                            // iW:1->16
+  return mSsdLayer*1000 + iW*100 + iL;
 }
 
 void StSsdLadder::debugUnPeu(int monwafer)
