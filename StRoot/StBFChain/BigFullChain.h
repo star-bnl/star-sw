@@ -385,6 +385,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"SvtIT"       ,""  ,"","",""                                    ,"","ITTF: track using SVT geom",kFALSE},
   {"SsdIT"       ,""  ,"","",""                                    ,"","ITTF: track using SSD geom",kFALSE},
   {"FtpcIT"      ,""  ,"","",""                                    ,"","ITTF: track with FTPC geom",kFALSE},
+  {"PixelIT"     ,""  ,"","StiPixel",""                          ,"","ITTF: track using Pixel geom",kFALSE},
+  {"IstIT"       ,""  ,"","StiPixel",""                          ,"","ITTF: track using Ist geom",kFALSE},
 #endif /* __BFC2__ */
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -406,11 +408,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-#if 0
-  {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel","" ,"StChain,StTpcDb,StEvent","Load StEvent",kFALSE},
-#else
-  {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel",""                 ,"StEvent","Load StEvent",kFALSE},
-#endif
+  {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel",""    ,"StiUtilities,StEvent","Load StEvent",kFALSE},
   {"SsdUtil"     ,""  ,"","",""                                        ,"StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
@@ -546,6 +544,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
+  {"GenericHit","","","StEvent","StGenericHitMaker","StGenericHitMaker","test GenericHitCollection",kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq"     ,"","","ssddb,St_svt"               ,"StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
@@ -573,10 +572,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
 #ifdef __BFC2__
-  {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
+  {"genvtx"   ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
+                                                                           ,"Generic Vertex Finder",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
-   "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",
-   "ITTF tracker"                                                                                  ,kFALSE},
+   "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
+  {"StiPixel" ,"","","Sti",                           "","StiPixel", "Load StiPixel shared library",kFALSE},
 #endif /* __BFC2__ */
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
@@ -672,6 +672,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"McQa"        ,"","McChain","McEvent",  "StMcQaMaker","StMcQaMaker","QA histogramms for McEvent",kFALSE},
   {"McTpcAna"    ,"","McAnaChain","McEvent,McAss",
                                     "StTpcMcAnalysisMaker","StTrsMiniMaker,StTpcMcAnalysisMaker","",kFALSE},
   {"MiniMcEvent" ,"","","","",                   "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
