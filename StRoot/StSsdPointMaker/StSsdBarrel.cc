@@ -1,8 +1,8 @@
-// $Id: StSsdBarrel.cc,v 1.19 2005/12/31 01:43:22 perev Exp $
+// $Id: StSsdBarrel.cc,v 1.20 2006/01/18 22:49:22 jeromel Exp $
 //
 // $Log: StSsdBarrel.cc,v $
-// Revision 1.19  2005/12/31 01:43:22  perev
-// Mack/Upack simplified
+// Revision 1.20  2006/01/18 22:49:22  jeromel
+// Removed latest change (no time to check new method)
 //
 // Revision 1.18  2005/12/23 21:33:17  perev
 // Some defence for 1/0 added
@@ -62,7 +62,6 @@
 #include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
 
-#include "StSsdUtil/StSsdEnumerations.hh"
 #include "StSsdLadder.hh"
 #include "StSsdWafer.hh"
 #include "StSsdClusterControl.h"
@@ -201,12 +200,11 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
   int e = 0;
   for (int i = 0 ; i < spa_strip->GetNRows(); i++)
     {
-      StSsdPack id_strip(strip[i].id_strip);
-      nStrip  = id_strip.getNStrip();
-      iSide   = id_strip.getSide();
-      idWaf   = id_strip.getIdWaf();
-      iWaf    = id_strip.getWaf();
-      iLad    = id_strip.getLad();
+      nStrip  = (int)(strip[i].id_strip/100000.);
+      idWaf   = strip[i].id_strip-10000*((int)(strip[i].id_strip/10000.));
+      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+      iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
       for (e = 0 ; e < 5;e++) idMcHit[e] = strip[i].id_mchit[e];
       StSsdStrip *newStrip = new StSsdStrip(nStrip, strip[i].adc_count, sigma, iPedestal, idMcHit);
       mLadders[iLad]->mWafers[iWaf]->addStrip(newStrip, iSide);
@@ -269,12 +267,11 @@ int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicCon
   int iSide  = 0;
   for (int i = 0 ; i < spa_noise->GetNRows(); i++)
     {
-      StSsdPack id_strip(noise[i].id_strip);
-      nStrip  = id_strip.getNStrip();
-      idWaf   = id_strip.getIdWaf();
-      iSide   = id_strip.getSide();
-      iWaf    = id_strip.getWaf();
-      iLad    = id_strip.getLad();
+      nStrip  = (int)(noise[i].id_strip/100000.);
+      idWaf   = noise[i].id_strip-10000*((int)(noise[i].id_strip/10000.));
+      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+      iSide   = (noise[i].id_strip - nStrip*100000 - idWaf)/10000;
       mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide,0, noise[i].n_sigma, dynamicControl);
     }
 
@@ -290,7 +287,7 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
   ssdStripCalib_st *noise = strip_calib->GetTable();
   
   int NumberOfNoise = 0;
-//int idWaf  = 0; //Not used
+  int idWaf  = 0;
   int iWaf   = 0;
   int iLad   = 0;
   int nStrip = 0;
@@ -298,11 +295,11 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
   for (int i = 0 ; i < strip_calib->GetNRows(); i++)
     {
       if (noise[i].id>0 && noise[i].id<=76818620) {
-      StSsdPack id(noise[i].id);
-        nStrip  = id.getNStrip();
-	iSide   = id.getSide();;
-        iWaf    = id.getWaf();
-        iLad    = id.getLad();
+	nStrip  = (int)(noise[i].id/100000.);
+	idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+	iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
 	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
 	NumberOfNoise++;
       }
@@ -337,13 +334,11 @@ int StSsdBarrel::readClusterFromTable(St_scf_cluster *scf_cluster)
 
   for (int i = 0 ; i < scf_cluster->GetNRows(); i++)
     {
-      StSsdPack id_cluster(cluster[i].id_cluster);
-      nCluster = id_cluster.getNClust();
-      iSide    = id_cluster.getSide();
-      idWaf    = id_cluster.getIdWaf();
-      iWaf     = id_cluster.getWaf();
-      iLad     = id_cluster.getLad();
-
+      nCluster    = (int)(cluster[i].id_cluster/100000.);
+      idWaf       = (cluster[i].id_cluster-10000*((int)(cluster[i].id_cluster/10000.)));
+      iSide       = (cluster[i].id_cluster-idWaf-nCluster*100000)/10000;
+      iWaf        = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+      iLad        = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       nFirstStrip = (int)(cluster[i].first_strip/100000.);
       nStrip      = cluster[i].n_strip;
       nFirstAdc   = cluster[i].first_adc_count;
@@ -382,10 +377,8 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	while (pClusterP)
 	  {
 	    cluster.id              = currRecord + 1;
-            StSsdPack  pk1(pClusterP->getNCluster(),0,idCurrentWaf);
-	    cluster.id_cluster      = pk1;
-            StSsdPack  pk2(pClusterP->getFirstStrip(),0,idCurrentWaf);
-	    cluster.first_strip     = pk2;
+	    cluster.id_cluster      = 10000*(10*pClusterP->getNCluster() + 0)+idCurrentWaf;
+	    cluster.first_strip     = 10000*(10*pClusterP->getFirstStrip()+ 0)+idCurrentWaf;
 	    cluster.n_strip         = pClusterP->getClusterSize();
 	    cluster.adc_count       = pClusterP->getTotAdc();
 	    cluster.first_adc_count = pClusterP->getFirstAdc();
@@ -404,10 +397,8 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	while (pClusterN)
 	  {
 	    cluster.id              = currRecord + 1;
-            StSsdPack pk1(pClusterN->getNCluster(),1,idCurrentWaf);
-	    cluster.id_cluster      = pk1;
-            StSsdPack pk2(pClusterN->getFirstStrip(),1,idCurrentWaf);
-	    cluster.first_strip     = pk2;
+	    cluster.id_cluster      = 10000*(10*pClusterN->getNCluster() + 1)+idCurrentWaf;
+	    cluster.first_strip     = 10000*(10*pClusterN->getFirstStrip() + 1)+idCurrentWaf;
 	    cluster.n_strip         = pClusterN->getClusterSize();
 	    cluster.adc_count       = pClusterN->getTotAdc();
 	    cluster.first_adc_count = pClusterN->getFirstAdc();
@@ -437,8 +428,7 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
   for (int iLad = 0; iLad < mNLadder; iLad++)
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       {
-        StSsdPack pk(iWaf,iLad);
-	int idCurrentWaf = pk;
+	int idCurrentWaf = mSsdLayer*1000 + (iWaf+1)*100 + (iLad+1);
 	StSsdPointList *sptList = mLadders[iLad]->mWafers[iWaf]->getPoint();
 	StSsdPoint *pSpt = sptList->first();
      
@@ -655,18 +645,15 @@ StSsdBarrel& StSsdBarrel::operator=(const StSsdBarrel  originalBarrel)
 int StSsdBarrel::idWaferToWaferNumb(int idWafer)
 {
   // idwafer = layer*1000+waf*100+ladder
-   StSsdPack idW(idWafer);
-   int iW = idW.getWaf();
-   int iL = idW.getLad();
-
+  int iW = (int)((idWafer - mSsdLayer*1000)/100);
+  int iL = idWafer - mSsdLayer*1000 - iW*100;
   return ((iL-1)*mNWaferPerLadder + iW -1);
 }
 
 int StSsdBarrel::waferNumbToIdWafer(int waferNumb)
 {
   int iL = 1+(int)((waferNumb)/mNWaferPerLadder);
-//VP  int iW = waferNumb-((iL-1)*mNWaferPerLadder)+1;
-  int iW = waferNumb%mNWaferPerLadder;
+  int iW = waferNumb-((iL-1)*mNWaferPerLadder)+1;
   return mSsdLayer*1000 + iW*100 + iL;
 }
 
