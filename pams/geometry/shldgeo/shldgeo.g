@@ -1,6 +1,10 @@
-* $Id: shldgeo.g,v 1.3 2005/09/02 18:23:21 potekhin Exp $
+* $Id: shldgeo.g,v 1.4 2006/01/18 23:17:59 potekhin Exp $
 *
 * $Log: shldgeo.g,v $
+* Revision 1.4  2006/01/18 23:17:59  potekhin
+* Flush out small changes in the beam shield geometry
+* (very simple at the moment) as we aren't doing further development right now.
+*
 * Revision 1.3  2005/09/02 18:23:21  potekhin
 * Separated magnets into a separate branch, quadgeo.
 *
@@ -72,10 +76,12 @@ Module SHLDGEO is the shielding
       ShieldHalfHeight=(shlg_baseDy+shlg_slabDy+shlg_fiDy)
 
       Create   SHLD
-      Position SHLD in CAVE x=0.0 y=shlg_baseLevel+ShieldHalfHeight z=shlg_Z
+      Position SHLD in CAVE x=0.0 y=shlg_baseLevel+ShieldHalfHeight z=+shlg_Z
+      Position SHLD in CAVE x=0.0 y=shlg_baseLevel+ShieldHalfHeight z=-shlg_Z thetaZ=180
 
       Create SFLR
-      Position SFLR in CAVE x=0 y=shlg_baseLevel-0.5*shlg_floorThk z=shlg_floorPos
+      Position SFLR in CAVE x=0 y=shlg_baseLevel-0.5*shlg_floorThk z=+shlg_floorPos
+      Position SFLR in CAVE x=0 y=shlg_baseLevel-0.5*shlg_floorThk z=-shlg_floorPos thetaZ=180
 
 *
 * -----------------------------------------------------------------------------
