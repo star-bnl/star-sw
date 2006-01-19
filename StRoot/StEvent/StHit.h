@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.20 2005/12/07 19:03:23 perev Exp $
+ * $Id: StHit.h,v 2.21 2006/01/19 21:50:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.21  2006/01/19 21:50:02  ullrich
+ * Made detector() virtual method.
+ *
  * Revision 2.20  2005/12/07 19:03:23  perev
  * mId short ==> int
  *
@@ -98,7 +101,7 @@ public:
     StHit(const StThreeVectorF&,
           const StThreeVectorF&,
           unsigned int, float, unsigned char = 0,
-	  UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
+	UShort_t idTruth=0, UShort_t quality=0, UShort_t id =0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
@@ -108,14 +111,13 @@ public:
     
     float           charge() const;
     unsigned int    trackReferenceCount() const;
-    StDetectorId    detector() const;
     unsigned int    flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
     int             usedInFit() const;
     int             idTruth() const;
     int             qaTruth() const { return mQuality; }
-    int  	    id()      const;
+    int  	          id()      const;
     const StHit*    nextHit() const;
     unsigned int    hardwarePosition() const;
     
@@ -129,8 +131,10 @@ public:
     void setId(int id)			{mId = id;}
     void setIdTruth(Int_t idtru,Int_t qatru=0);
     void SetNextHit(StHit *next = 0) 	{mNextHit = next;}
-    virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
-    virtual void                  Print(Option_t *option="") const;
+
+    virtual StDetectorId   detector() const;
+    virtual StPtrVecTrack  relatedTracks(const StSPtrVecTrackNode&, StTrackType);
+    virtual void           Print(Option_t *option="") const;
     
 protected:
     unsigned int bits(unsigned int, unsigned int) const;
@@ -153,9 +157,9 @@ inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
     return (mHardwarePosition>>bit) & ~(~0UL<<nbits);
 }
 
-inline int  	       StHit::id()       const {return mId;}
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
-inline const StHit*    StHit:: nextHit() const {return mNextHit;}
+inline int  	   StHit::id()      const {return mId;}
+inline const StHit*    StHit::nextHit() const {return mNextHit;}
 
 ostream&              operator<<(ostream& os, StHit const & v);
 #endif
