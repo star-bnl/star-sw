@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.17 2005/04/11 22:35:24 calderon Exp $
+ * $Id: StContainers.cxx,v 2.18 2006/01/19 21:50:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.18  2006/01/19 21:50:40  ullrich
+ * Added RnD containers.
+ *
  * Revision 2.17  2005/04/11 22:35:24  calderon
  * Tof Classes for Run 5.  Modifications and additions from Xin to
  * take care of new TOF daq and electronics.  Added StTofRawData and
@@ -97,6 +100,7 @@
 #include "StL3AlgorithmInfo.h"
 #include "StPhmdHit.h"
 #include "StPhmdCluster.h"
+#include "StRnDHit.h"
 
 StCollectionImp(Object)
 StCollectionImp(CalibrationVertex)
@@ -133,3 +137,4 @@ StCollectionImp(KinkVertex)
 StCollectionImp(L3AlgorithmInfo)
 StCollectionImp(PhmdHit)
 StCollectionImp(PhmdCluster)
+StCollectionImp(RnDHit)
