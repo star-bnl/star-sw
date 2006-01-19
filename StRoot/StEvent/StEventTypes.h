@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.28 2005/04/11 22:35:25 calderon Exp $
+ * $Id: StEventTypes.h,v 2.29 2006/01/19 21:52:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.29  2006/01/19 21:52:57  ullrich
+ * Added RnD hits and collection.
+ *
  * Revision 2.28  2005/04/11 22:35:25  calderon
  * Tof Classes for Run 5.  Modifications and additions from Xin to
  * take care of new TOF daq and electronics.  Added StTofRawData and
@@ -213,5 +216,7 @@
 #include "StVpdTriggerDetector.h"
 #include "StXiVertex.h"
 #include "StZdcTriggerDetector.h"
+#include "StRnDHit.h"
+#include "StRnDHitCollection.h"
  
 #endif
