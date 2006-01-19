@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.18 2005/07/19 21:34:10 perev Exp $
+ * $Id: StHit.cxx,v 2.19 2006/01/19 21:49:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.19  2006/01/19 21:49:41  ullrich
+ * Changed order of initializer in constructor.
+ *
  * Revision 2.18  2005/07/19 21:34:10  perev
  * quality ==> qaTruth to avoid misleading
  *
@@ -76,7 +79,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.18 2005/07/19 21:34:10 perev Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.19 2006/01/19 21:49:41 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -94,8 +97,8 @@ StHit::StHit()
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              unsigned int hp, float q, unsigned char c, UShort_t idTruth, UShort_t quality, UShort_t id)
-    : StMeasuredPoint(p), mHardwarePosition(hp),
-      mCharge(q), mTrackRefCount(c), mPositionError(e),
+    : StMeasuredPoint(p), mPositionError(e), mHardwarePosition(hp),
+      mCharge(q), mTrackRefCount(c), 
       mIdTruth(idTruth), mQuality(quality), mId(id), mNextHit(0)
 {
     mFlag = mFitFlag = 0;
