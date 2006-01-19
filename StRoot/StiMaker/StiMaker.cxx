@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.159  2006/01/19 20:21:52  perev
+// Ist added
+//
 // Revision 1.158  2005/12/31 01:34:02  perev
 // Degug histos added
 //
@@ -202,6 +205,7 @@
 #include <Stiostream.h>
 #include <math.h>
 #include <string>
+#include "TSystem.h"
 #include "StChain.h"
 #include "TDataSet.h"
 #include "TDataSetIter.h"
@@ -240,6 +244,7 @@
 #include "StiTpc/StiTpcDetectorBuilder.h"
 #include "StiSvt/StiSvtDetectorBuilder.h"
 #include "Sti/StiHitErrorCalculator.h"
+#include "StiPixel/StiIstDetectorGroup.h"
 #include "StiUtilities/StiDebug.h"
 #include "TDataSet.h"
 #include "tables/St_TrackingParameters_Table.h"
@@ -273,7 +278,9 @@ ClassImp(StiMaker)
   SetAttr("useTpc"		,kTRUE);
   SetAttr("activeTpc"		,kTRUE);
   SetAttr("useSvt"		,kTRUE); // SVT used in Sti but not active. ??
-  SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
+//SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
+  if (strstr(gSystem->Getenv("STAR"),".DEV"))
+     SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
 }
 
 StiMaker::~StiMaker() 
@@ -350,6 +357,12 @@ Int_t StiMaker::InitDetectors()
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
       _toolkit->add(group = new StiPixelDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
       group->setGroupId(9999);
+    }
+ if (IAttr("useIst"))
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:IST"<<endl;
+      _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
+      group->setGroupId(9998);
     }
   return kStOk;
 }
