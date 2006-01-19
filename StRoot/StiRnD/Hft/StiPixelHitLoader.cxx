@@ -31,11 +31,39 @@ void StiPixelHitLoader::loadHits(StEvent* source,
                                  Filter<StiTrack> * trackFilter,
                                  Filter<StiHit> * hitFilter)
 {
-  cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Started" << endl;
-  if (!_detector)
-    throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
-  if(!_hitContainer)
-    throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
-  cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Done" << endl;
+    cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Started" << endl;
+    if (!_detector)
+	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
+    if(!_hitContainer)
+	throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
+    cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Done" << endl;
+    
+    StRnDHitCollection *col = source->rndHitCollection();
+    StSPtrVecRnDHit& vec = col->hits();
+    
+    StiDetector *detector=0;
+    int nHit=0;
+    for(unsigned int j=0; j<vec.size(); j++)	{
+	StRnDHit *hftH = vec[j];
+	assert(hftH);
+
+	if (hftH->detector()!=kHftId) continue;
+	
+	detector= _detector->getDetector(hftH->layer()-1, hftH->ladder()-1);
+	assert(detector);
+	
+	StiHit *stiHit=_hitFactory->getInstance();
+	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
+	stiHit->reset();
+
+	stiHit->setGlobal(detector, hftH, hftH->position().x(), hftH->position().y(), hftH->position().z(), hftH->charge());
+	_hitContainer->add(stiHit);
+
+	//done loop over hits
+	nHit++;
+      }
+
+    cout <<"StiPixelHitLoader:loadHits -I- Loaded "<<nHit<<" pixel hits."<<endl;
+
 }
 

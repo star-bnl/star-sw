@@ -54,36 +54,43 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     const unsigned int nRows=3;
     setNRows(nRows);
     int nsectors[3];
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","nLadder1",nsectors[0]);
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","nLadder2",nsectors[1]);
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","nLadder3",nsectors[2]);
+    const char* detectorParamFile = "/star/institutions/mit/mmiller/hft/params.txt";
+    cout <<"get input values from file:\t"<<detectorParamFile<<endl;
+    StGetConfigValue(detectorParamFile,"nLadder1",nsectors[0]);
+    StGetConfigValue(detectorParamFile,"nLadder2",nsectors[1]);
+    StGetConfigValue(detectorParamFile,"nLadder3",nsectors[2]);
     setNSectors(0,nsectors[0]);
     setNSectors(1,nsectors[1]);
     setNSectors(2,nsectors[2]);
+
+    cout <<"create gasses"<<endl;
     //_gas is the gas that the ist detector lives in
     _gas            = add(new StiMaterial("IstAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
     //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
     _fcMaterial     = add(new StiMaterial("IstSi", 14.,      28.0855,   2.33,     21.82,           5.) );
 
     double radii[nRows];
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","r1",radii[0]);
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","r2",radii[1]);
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","r3",radii[2]);
+    StGetConfigValue(detectorParamFile,"r1",radii[0]);
+    StGetConfigValue(detectorParamFile,"r2",radii[1]);
+    StGetConfigValue(detectorParamFile,"r3",radii[2]);
     double dphi[nRows];
+
     for(int zzz=0;zzz<nRows;zzz++)
       dphi[zzz]=2.*M_PI/nsectors[zzz];
+    
     double tiltAngle;
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","aOffset",tiltAngle);
+    StGetConfigValue(detectorParamFile,"aOffset",tiltAngle);
     tiltAngle=M_PI*(90.-tiltAngle)/180.;
     double perOffset;
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","pPerOffset",perOffset);
+    StGetConfigValue(detectorParamFile,"pPerOffset",perOffset);
     double parOffset;
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","pParOffset",parOffset);
+    StGetConfigValue(detectorParamFile,"pParOffset",parOffset);
     double depth[nRows];
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","length1",depth[0]);
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","length2",depth[1]);
-    StGetConfigValue("/star/u/wleight/fromMike/params.txt","length3",depth[2]);
+    StGetConfigValue(detectorParamFile,"length1",depth[0]);
+    StGetConfigValue(detectorParamFile,"length2",depth[1]);
+    StGetConfigValue(detectorParamFile,"length3",depth[2]);
 
+    cout <<"begin loop on rows to build detectors"<<endl;
     StiPlanarShape *pShape;
     for (unsigned int row=0; row<nRows; row++)
 	{
@@ -92,11 +99,11 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 	    sprintf(name, "Ist/Layer_%d", row);
 	    pShape->setName(name);
 	    double Thickness;
-	    StGetConfigValue("/star/u/wleight/fromMike/params.txt","ladder thickness",Thickness);
+	    StGetConfigValue(detectorParamFile,"ladder thickness",Thickness);
 	    pShape->setThickness(Thickness); //cm
 	    pShape->setHalfDepth( depth[row]/2. ); //extent in z
 	    double sWidth;
-	    StGetConfigValue("/star/u/wleight/fromMike/params.txt","sensor width",sWidth);
+	    StGetConfigValue(detectorParamFile,"sensor width",sWidth);
 	    pShape->setHalfWidth(sWidth/2.); //length or a plane
 	    for(unsigned int sector = 0; sector<getNSectors(row); sector++)	
 		{      
@@ -115,7 +122,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 		    pPlacement->setLayerRadius(radii[row]);
 		    pPlacement->setRegion(StiPlacement::kMidRapidity);
 		    sprintf(name, "Ist/Layer_%d/Ladder_%d", row, sector);
-		    //cout<<"NAME: "<<name<<endl;
+		    cout<<"\tbuild detector with name:\t "<<name<<endl;
 		    StiDetector *pDetector = _detectorFactory->getInstance();
 		    pDetector->setName(name);
 		    pDetector->setIsOn(true);
