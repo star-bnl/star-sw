@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.24 2006/01/19 21:51:26 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.25 2006/01/19 22:30:05 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.25  2006/01/19 22:30:05  jeromel
+ * kMaxId -> kMaxDetectorId
+ *
  * Revision 2.24  2006/01/19 21:51:26  ullrich
  * Added new RnD detectors.
  *
@@ -152,7 +155,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 	         kIgtId = kIgtIdentifier,
 	         kFstId = kFstIdentifier,
 	         kFgtId = kFgtIdentifier,
-	         kMaxId};
+	         kMaxDetectorId};
 
 /*!
  * \enum StTrackType

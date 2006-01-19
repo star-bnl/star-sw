@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.67 2005/12/08 00:06:27 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.68 2006/01/19 22:29:57 jeromel Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.68  2006/01/19 22:29:57  jeromel
+ * kMaxId -> kMaxDetectorId
+ *
  * Revision 2.67  2005/12/08 00:06:27  perev
  * BugFix, Instead of vertex, first hit was used
  *
@@ -751,9 +754,9 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   StThreeVectorF posF(fistNode->x_g(),fistNode->y_g(),fistNode->z_g());
   detInfo->setFirstPoint(posF);
 
-  int dets[kMaxId][3];
-  track->getAllPointCount(dets,kMaxId-1);
-  for (int i=1;i<kMaxId;i++) {
+  int dets[kMaxDetectorId][3];
+  track->getAllPointCount(dets,kMaxDetectorId-1);
+  for (int i=1;i<kMaxDetectorId;i++) {
     if (!dets[i][1]) continue;
     detInfo->setNumberOfPoints(dets[i][1],static_cast<StDetectorId>(i));
   }
@@ -866,10 +869,10 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // Now we have to use the new setters that take a detector ID to fix
   // a bug.  There is no encoding anymore.
 
-  int dets[kMaxId][3]; 
-  track->getAllPointCount(dets,kMaxId-1);
+  int dets[kMaxDetectorId][3]; 
+  track->getAllPointCount(dets,kMaxDetectorId-1);
 
-  for (int i=1;i<kMaxId;i++) {
+  for (int i=1;i<kMaxDetectorId;i++) {
     if (!dets[i][2]) continue;
     fitTraits.setNumberOfFitPoints((unsigned char)dets[i][2],(StDetectorId)i);
   }
@@ -1006,9 +1009,9 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   // Follow the StDetectorId.h enumerations...
   // can't include them from here in order not to
   // create a package dependence...
-  int dets[kMaxId][3];
-  track->getAllPointCount(dets,kMaxId-1);
-  for (int i=1;i<kMaxId;i++) {
+  int dets[kMaxDetectorId][3];
+  track->getAllPointCount(dets,kMaxDetectorId-1);
+  for (int i=1;i<kMaxDetectorId;i++) {
     if(!dets[i][0]) continue;
     gTrack->setNumberOfPossiblePoints((unsigned char)dets[i][0],(StDetectorId)i);
   }
