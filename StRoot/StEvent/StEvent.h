@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.30 2003/04/16 17:48:32 ullrich Exp $
+ * $Id: StEvent.h,v 2.31 2006/01/19 21:48:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.31  2006/01/19 21:48:21  ullrich
+ * Add RnD collection.
+ *
  * Revision 2.30  2003/04/16 17:48:32  ullrich
  * Added StTriggerData and inherited classe(s).
  *
@@ -149,6 +152,7 @@ class StV0Vertex;
 class StXiVertex;
 class StKinkVertex;
 class StPsd;
+class StRnDHitCollection;
 
 class StEvent : public StXRefMain {
 public:
@@ -198,6 +202,8 @@ public:
     const StFpdCollection*              fpdCollection() const;
     StPhmdCollection*                   phmdCollection();
     const StPhmdCollection*             phmdCollection() const;
+    StRnDHitCollection*                 rndHitCollection();
+    const StRnDHitCollection*           rndHitCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -259,6 +265,7 @@ public:
     void setSummary(StEventSummary*);
     void setSoftwareMonitor(StSoftwareMonitor*);
     void setTpcHitCollection(StTpcHitCollection*);
+    void setRnDHitCollection(StRnDHitCollection*);
     void setFtpcHitCollection(StFtpcHitCollection*);
     void setSvtHitCollection(StSvtHitCollection*);
     void setSsdHitCollection(StSsdHitCollection*);
