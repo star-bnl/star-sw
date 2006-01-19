@@ -59,11 +59,25 @@
 #define kSsdSvtIdentifier             24
 #define kPhmdCpvIdentifier            25
 #define kPhmdIdentifier               26
+
+//
+//  The following are more or less virtual detectors.
+//  Depending on funding or policy this stuff might
+//  happen or not. tu
+//
+#define kHftIdentifier                27
+#define kIstIdentifier                28
+#define kIgtIdentifier                29
+#define kFstIdentifier                30
+#define kFgtIdentifier                31
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.1 2004/04/26 16:35:19 fisyak Exp $
+/* $Id: StDetectorDefinitions.h,v 2.2 2006/01/19 21:51:26 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.2  2006/01/19 21:51:26  ullrich
+** Added new RnD detectors.
+**
 ** Revision 2.1  2004/04/26 16:35:19  fisyak
 ** Move enumerations from pams/global/inc => StEvent
 **
