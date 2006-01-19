@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.37 2005/06/15 21:58:16 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.38 2006/01/19 21:48:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.38  2006/01/19 21:48:21  ullrich
+ * Add RnD collection.
+ *
  * Revision 2.37  2005/06/15 21:58:16  ullrich
  * Change sorting of primary tracks for PPV.
  *
@@ -142,6 +145,7 @@
 #include "StEventSummary.h"
 #include "StSoftwareMonitor.h"
 #include "StTpcHitCollection.h"
+#include "StRnDHitCollection.h"
 #include "StSvtHitCollection.h"
 #include "StSsdHitCollection.h"
 #include "StFtpcHitCollection.h"
@@ -170,8 +174,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.37 2005/06/15 21:58:16 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.37 2005/06/15 21:58:16 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.38 2006/01/19 21:48:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.38 2006/01/19 21:48:21 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -400,6 +404,22 @@ const StTpcHitCollection*
 StEvent::tpcHitCollection() const
 {
     StTpcHitCollection *hits = 0;
+    _lookup(hits, mContent);
+    return hits;
+}
+
+StRnDHitCollection*
+StEvent::rndHitCollection()
+{
+    StRnDHitCollection *hits = 0;
+    _lookup(hits, mContent);
+    return hits;
+}
+
+const StRnDHitCollection*
+StEvent::rndHitCollection() const
+{
+    StRnDHitCollection *hits = 0;
     _lookup(hits, mContent);
     return hits;
 }
@@ -934,6 +954,12 @@ StEvent::setTpcHitCollection(StTpcHitCollection* val)
 }
 
 void
+StEvent::setRnDHitCollection(StRnDHitCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
 StEvent::setFtpcHitCollection(StFtpcHitCollection* val)
 {
     _lookupAndSet(val, mContent);
@@ -1116,6 +1142,7 @@ void StEvent::statistics()
     cout << "\tStEventSummary:              " << static_cast<void*>(summary());
     cout << "\tStSoftwareMonitor:           " << static_cast<void*>(softwareMonitor());
     cout << "\tStTpcHitCollection:          " << static_cast<void*>(tpcHitCollection());
+    cout << "\tStRnDHitCollection:          " << static_cast<void*>(rndHitCollection());
     cout << "\tStFtpcHitCollection:         " << static_cast<void*>(ftpcHitCollection());
     cout << "\tStSvtHitCollection:          " << static_cast<void*>(svtHitCollection());
     cout << "\tStSsdHitCollection:          " << static_cast<void*>(ssdHitCollection());
