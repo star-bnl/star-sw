@@ -37,13 +37,41 @@ void StiIstHitLoader::loadHits(StEvent* source,
 			       Filter<StiTrack> * trackFilter,
 			       Filter<StiHit> * hitFilter)
 {
-  n=0;
-  //cout << "  n = " << n << endl;
+    n=0;
+    //cout << "  n = " << n << endl;
     cout << "StiIstHitLoader::loadHits(StEvent*) -I- Started" << endl;
     if (!_detector)
 	throw runtime_error("StiIstHitLoader::loadHits(StEvent*) - FATAL - _detector==0");
     if(!_hitContainer)
 	throw runtime_error("StiIstHitLoader::loadHits(StEvent*) - FATAL - _hitContainer==0");
+
+    //StSPtrVecHit* istHits = source->hitCollection("Ist");
+    StRnDHitCollection *col = source->rndHitCollection();
+    StSPtrVecRnDHit& vec = col->hits();
+
+    cout <<"StiIstHitLoader: Ist Hits: "<<vec.size()<<endl;
+    
+    for(unsigned int j=0; j<vec.size(); j++) {
+
+	//StRnDHit* hit = dynamic_cast<StRndHit*>((*istHits)[j]);
+	StRnDHit* hit = vec[j];
+	assert(hit);
+
+	if (hit->detector()!=kIstId) continue;
+	
+	cout <<"retrieve detector"<<endl;
+	StiDetector* detector = _detector->getDetector(hit->layer()-1, hit->ladder()-1);
+	if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
+	assert(detector);
+	cout <<"add hit to detector:\t"<<detector->getName()<<endl;
+	
+	StiHit * stiHit = _hitFactory->getInstance();
+	if(!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
+	stiHit->reset();
+	stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
+	_hitContainer->add( stiHit );
+    }
+    
     cout << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endl;
 }
 
