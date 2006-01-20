@@ -22,13 +22,13 @@
 ** Zero Degree Calo east = 18
 ** MWPC west       = 19
 ** MWPC east       = 20
-** TPC+SSD         = 21 
+** TPC+SSD         = 21
 ** TPC+SVT         = 22
 ** TPC+SSD+SVT     = 23
 ** SSD+SVT         = 24
 ** CPV(PMD)        = 25
 ** PMD             = 26    */
- 
+
 
 
 
@@ -73,9 +73,12 @@
 #define kFgtIdentifier                31
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.3 2006/01/20 15:11:26 jeromel Exp $
+/* $Id: StDetectorDefinitions.h,v 2.4 2006/01/20 15:11:59 jeromel Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.4  2006/01/20 15:11:59  jeromel
+** ... meant needs to be C style, not C++
+**
 ** Revision 2.3  2006/01/20 15:11:26  jeromel
 ** Comments need to be FORtran style
 **
