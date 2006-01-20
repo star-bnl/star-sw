@@ -291,7 +291,14 @@ for my $class (@classes) {	#loop over classes
   my $hh = " " . basename($h) . " "; 				#print "hh = $hh\n";
   if ($h_files !~ /$hh/ )  {$h_files .= $hh;}
 }#end loop over classes
-
+my @h_files = split ' ', $h_files;
+my $h_filesC = "";
+my $h_filesR = "";
+foreach my $h (@h_files) {
+  if ($h =~ /Collection/) {$h_filesC .= $h . " ";}
+  else                    {$h_filesR .= $h . " ";}
+}
+$h_files = $h_filesC . " " . $h_filesR;
 							#print "h_files= $h_files\n";
 my $hfile = $DirName . "/Stypes.h";
 if (-f $hfile) {$h_files .= " Stypes.h";}
