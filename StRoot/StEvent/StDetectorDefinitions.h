@@ -60,11 +60,12 @@
 #define kPhmdCpvIdentifier            25
 #define kPhmdIdentifier               26
 
-//
-//  The following are more or less virtual detectors.
-//  Depending on funding or policy this stuff might
-//  happen or not. tu
-//
+/*
+**  The following are more or less virtual detectors.
+**  Depending on funding or policy this stuff might
+**  happen or not. tu
+*/
+
 #define kHftIdentifier                27
 #define kIstIdentifier                28
 #define kIgtIdentifier                29
@@ -72,9 +73,12 @@
 #define kFgtIdentifier                31
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.2 2006/01/19 21:51:26 ullrich Exp $
+/* $Id: StDetectorDefinitions.h,v 2.3 2006/01/20 15:11:26 jeromel Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.3  2006/01/20 15:11:26  jeromel
+** Comments need to be FORtran style
+**
 ** Revision 2.2  2006/01/19 21:51:26  ullrich
 ** Added new RnD detectors.
 **
