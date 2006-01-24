@@ -1,5 +1,5 @@
 ///
-// $Id: StBemcTrigger.cxx,v 1.14 2005/09/01 19:00:20 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.15 2006/01/24 15:26:14 rfatemi Exp $
 //
 //
 
@@ -29,8 +29,7 @@ StBemcTrigger::~StBemcTrigger()
 {}
 
 //----------------------------------------------------
-void StBemcTrigger::resetConf()
-{
+void StBemcTrigger::resetConf(){
 
     PatchMap();
 
@@ -252,7 +251,7 @@ int StBemcTrigger::makeTrigger()
 
     for (int z=0;z<10;z++)
     {
-        printf("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d\n",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]);
+        printf("Make i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d\n",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]);
     }
 
     return kStOK;
@@ -829,7 +828,6 @@ int StBemcTrigger::get2005Trigger()
     }
 
     // making trigger patches and high towers
-
     TUnixTime unixTime(mEvent->time());
     Int_t dat=0,tim=0;
     unixTime.GetGTime(dat,tim);
@@ -845,8 +843,7 @@ int StBemcTrigger::get2005Trigger()
             int seq  = 0;
             mDecoder->GetCrateAndSequenceFromTriggerPatch(i,crate,seq);
             mTables->getTriggerPedestal(crate,seq,rped12bit);
-            if (rped12bit!=0)
-                cout<<"rped12bit="<<rped12bit<<endl;
+            //if (rped12bit!=0) cout<<"rped12bit="<<rped12bit<<endl;
             int HT = 0;
             int PA = 0;
             int HTID = -1;
@@ -865,7 +862,9 @@ int StBemcTrigger::get2005Trigger()
                     patchPed+= (ped10[id-1]>>2);
                     PA+=adc08[id-1];
                 }
-            }
+		
+		//printf("Patch %d Ped=%d PedSum=%d  ADC=%d ADCSum=%d\n",i,ped10[id-1]>>2,patchPed,adc08[id-1],PA);
+	    }
 
 
             // now HT=10 bits and patch=12 bits
@@ -874,12 +873,12 @@ int StBemcTrigger::get2005Trigger()
             // 0,0,0,...,0,1,2,3,...,63,63,63 -- total 4096 entries
             // <-- ped -->
             // the number of 0's is equal to patchPed_12bit
-            if(PA >= patchPed)
-            {
-                mTrigger.Patch[i] = PA - patchPed;
-                if(mTrigger.Patch[i] > 62)
-                    mTrigger.Patch[i] = 62;
+	    if(PA >= patchPed){
+
+                mTrigger.Patch[i] = PA - (patchPed-1);
+                if(mTrigger.Patch[i] > 62)  mTrigger.Patch[i] = 62;
             }
+	    if(PA<patchPed) mTrigger.Patch[i]=1;
 
             // for HT need to OR top 2 bits and take correct bit window
             int SHIFT = mTrigger.HTBits;
@@ -887,24 +886,23 @@ int StBemcTrigger::get2005Trigger()
             int HTL = HT & 0x1F;
             int HTH = HT >> 5;
             int B5  = 0;
-            if(HTH>0)
-                B5 = 1;
+            if(HTH>0) B5 = 1;
             mTrigger.HT[i] = HTL+(B5<<5);
             if(mPrint)
-                cout <<"Patch number "<<i
-                <<" Tower id = "<<HTID
-                <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
-                <<" adc08 = "<<adc08[HTID-1]
-                <<" HT10 = "<<HT<<" PA12 = "<<PA
-                <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endl;
-
+	      cout <<"Patch number "<<i
+		   <<" Tower id = "<<HTID
+		   <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
+		   <<" adc08 = "<<adc08[HTID-1]
+		   <<" HT10 = "<<HT<<" PA12 = "<<PA
+		   <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endl;
+	    
             if (mTrigger.HT[i]>HTmax)
-            {
+	      {
                 HTmax=mTrigger.HT[i];
                 HTmaxID=HTID;
-            }
+	      }
         }
-
+    
     if (HTmax>HT1_TH_2005)
     {
         mIs2005HT1=1;
