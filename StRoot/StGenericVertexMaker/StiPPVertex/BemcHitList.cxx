@@ -35,7 +35,7 @@ BemcHitList::BemcHitList() :
 //==========================================================
 //==========================================================
 void
-BemcHitList::initRun(bool isMC){
+BemcHitList::initRun(){
   gMessMgr->Message("","D") <<" BemcHitList::initRun()"<<endm;
   ScintHitList::initRun();
   // clear old lookup table
@@ -70,14 +70,13 @@ BemcHitList::initRun(bool isMC){
     assert( iEta>=0);
     assert( iPhi>=0);
     int iBin=iPhiEta2bin(iPhi,iEta);
+
     // if(id<41)
     //       printf("%d %d id=%d m,e,s=%d:%d:%d eta=%.4f phi/deg=%.2f bin %d:%d:%d\n",
     //		   eta<0 && phi>C_PI,  status, id,m,e,s,eta,phi/C_PI*180,iPhi,iEta,iBin);    
     assert(mes2bin[m-1][e-1][s-1]==-1); //tmp, to check BTOW code
     mes2bin[m-1][e-1][s-1]=iBin;
 
-    // Assume 2004x geom, tmp, do masking based on geomtery type
-    if(isMC) if(eta<0 && phi>C_PI) continue; // dropp lower East half, tmp solution
     nB++;
     if( status!= 1)  continue; // drop broken towers
 
@@ -146,7 +145,6 @@ BemcHitList::build ( StEmcDetector*det, float adcMin){
       geomB->getId(m,e,s,id); // to get the software id    
       Float_t ped,sig;
       myTable->getPedestal(BTOW, id, 0, ped,sig); 
-      
       float rawAdc = rawHit[k]->adc();
       if( rawAdc<ped+ kSigPed*sig ) continue;
       float adc= rawAdc -ped;
