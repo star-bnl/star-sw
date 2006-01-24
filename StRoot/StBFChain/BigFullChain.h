@@ -565,11 +565,18 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
   {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
+
+  {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
+                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
+  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
+                                                                           "New simulator for BEMC",kFALSE},
+  {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
 #ifdef __BFC2__
-  {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker",
-                                                                            "Generic Vertex Finder",kFALSE},
+  {"genvtx"     ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
-   "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",              "ITTF tracker",kFALSE},
+   "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc",
+   "ITTF tracker"                                                                                  ,kFALSE},
 #endif /* __BFC2__ */
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
@@ -587,11 +594,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"pmdClust"  ,"pmdClust","","","StPmdClusterMaker",    "StPmdClusterMaker","ClusterMaker for PMD",kFALSE},
   {"pmdDis"    ,"pmdDis","PmdClust","","StPmdDiscriminatorMaker",
                                                   "StPmdDiscriminatorMaker","Discriminator for PMD",kFALSE},
-  {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
-                            "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
-                                                                           "New simulator for BEMC",kFALSE},
-  {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+
 #ifdef __BFC2__
   //  Reminder: You are within the ITTF chain definitions
 #endif /* __BFC2__ */
@@ -607,6 +610,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                               "Special: use estGlobal from StEvent",kFALSE},
   {"SCEbyE"      ,"scebye","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
                                                          "Determine EbyE SpaceCharge using StEvent",kFALSE},
+  {"SCScalerCal" ,"scscalercal","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
+                                                                    "Calibrate SpaceCharge scalers",kFALSE},
   {"PostEmc"     ,"PostChain","","emc_T,tpc_T,db,PreEcl,EmcUtil"            ,"StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","" ,"StPreEclMaker",  "StPreEclMaker","B-EMC Cluster finder",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil" ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},

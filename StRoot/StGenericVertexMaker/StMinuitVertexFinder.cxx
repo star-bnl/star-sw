@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.17 2005/09/29 22:17:30 fisyak Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.18 2005/12/08 16:54:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.18  2005/12/08 16:54:13  fisyak
+ * Fix mRequireCTB, one more non initialized variable
+ *
  * Revision 1.17  2005/09/29 22:17:30  fisyak
  * more strict cut for failed vertex
  *
@@ -109,6 +112,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   mMinuit->SetMaxIterations(1000);
   mExternalSeedPresent = false;
   mVertexConstrain = false;
+  mRequireCTB = false;
   requireCTB = false;
   mUseITTF   = false;
 }
