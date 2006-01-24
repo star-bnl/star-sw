@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcTables.cxx,v 1.2 2006/01/24 16:32:20 suaide Exp $
+// $Id: StBemcTables.cxx,v 1.3 2006/01/24 17:15:51 suaide Exp $
 // $Log: StBemcTables.cxx,v $
+// Revision 1.3  2006/01/24 17:15:51  suaide
+// small bug fix
+//
 // Revision 1.2  2006/01/24 16:32:20  suaide
 // added method to correct database for bug in tower map
 //
@@ -200,7 +203,7 @@ Int_t StBemcTables::getOldId(Int_t newId)
 {
   Int_t  shift = 0;
   if(mDecoder) mDecoder->GetTowerBugCorrectionShift(newId, shift);
-  return newId - shift;
+  return newId + shift;
 }
 //_____________________________________________________________________________
 /*!
