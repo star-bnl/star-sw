@@ -1,6 +1,9 @@
 // 
-// $Id: StBemcTables.cxx,v 1.1 2004/12/21 12:54:30 suaide Exp $
+// $Id: StBemcTables.cxx,v 1.2 2006/01/24 16:32:20 suaide Exp $
 // $Log: StBemcTables.cxx,v $
+// Revision 1.2  2006/01/24 16:32:20  suaide
+// added method to correct database for bug in tower map
+//
 // Revision 1.1  2004/12/21 12:54:30  suaide
 // moved StBemcTables to StEmcUtil/database
 // added interface to trigger tables in offline DB
@@ -23,7 +26,7 @@ ClassImp(StBemcTables)
 /* 
    Default constructor. Set Initial values for some variables
 */
-StBemcTables::StBemcTables():TObject()
+StBemcTables::StBemcTables(Bool_t btowMapFix):TObject()
 {  
   mBtowP = NULL;
   mBprsP = NULL;
@@ -43,6 +46,8 @@ StBemcTables::StBemcTables():TObject()
   mSmdpG = NULL;
   mTrigS = NULL;
   mTrigP = NULL;
+  mBtowMapFix = btowMapFix;
+  mDecoder = NULL;
 }
 //_____________________________________________________________________________
 /*! 
@@ -157,6 +162,19 @@ void StBemcTables::loadTables(Int_t det, TDataSet *DB)
 */
 void StBemcTables::loadTables(StMaker* maker)
 {
+  Int_t date = maker->GetDate();
+  Int_t time = maker->GetTime();
+  if(mDecoder) delete mDecoder;
+  mDecoder = NULL;
+  
+  // the BTOW map fix should be used *ONLY* for runs before 2006
+  // For runs after 2006-01-01 the database is supposed to be fixed
+  if(mBtowMapFix && date < 20060101)
+  {
+    mDecoder = new StEmcDecoder(date, time);
+  }
+  else mBtowMapFix = kFALSE;
+    
   for(Int_t det = 1; det<=MAXDETBARREL;det++)
   {	  
     TString DbName = "Calibrations/emc/y3"+detname[det-1];
@@ -178,6 +196,12 @@ void StBemcTables::loadTables(StMaker* maker)
   }
   
 }  
+Int_t StBemcTables::getOldId(Int_t newId)
+{
+  Int_t  shift = 0;
+  if(mDecoder) mDecoder->GetTowerBugCorrectionShift(newId, shift);
+  return newId - shift;
+}
 //_____________________________________________________________________________
 /*!
   Get pedestal value  
@@ -188,8 +212,10 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
   R = 0;
   if(det==BTOW && mBtowP) 
   {
-    P = ((Float_t)mBtowP[0].AdcPedestal[id-1])/100;
-    R = ((Float_t)mBtowP[0].AdcPedestalRMS[id-1])/100;
+    Int_t id1 = id;
+    if(mBtowMapFix) id1 = getOldId(id);
+    P = ((Float_t)mBtowP[0].AdcPedestal[id1-1])/100;
+    R = ((Float_t)mBtowP[0].AdcPedestalRMS[id1-1])/100;
     return;
   }
   if(det==BPRS && mBprsP) 
@@ -225,7 +251,13 @@ void StBemcTables::getPedestal(Int_t det, Int_t id, Int_t CAP,Float_t& P, Float_
 void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S)
 {
   S = STATUS_OK;
-  if(det==BTOW && mBtowS) { S = (Int_t)mBtowS[0].Status[id-1];return;}
+  if(det==BTOW && mBtowS) 
+  {    
+    Int_t id1 = id;
+    if(mBtowMapFix) id1 = getOldId(id);
+    S = (Int_t)mBtowS[0].Status[id1-1];
+    return;
+  }
   if(det==BPRS && mBprsS) { S = (Int_t)mBprsS[0].Status[id-1];return;}
   if(det==BSMDE && mSmdeS) { S = (Int_t)mSmdeS[0].Status[id-1];return;}
   if(det==BSMDP && mSmdpS) { S = (Int_t)mSmdpS[0].Status[id-1];return;}
@@ -238,7 +270,13 @@ void StBemcTables::getStatus(Int_t det, Int_t id, Int_t& S)
 void StBemcTables::getGain(Int_t det, Int_t id, Float_t& G)
 {
   G = 1;
-  if(det==BTOW && mBtowG) { G = (Float_t)mBtowG[0].Gain[id-1];return;}
+  if(det==BTOW && mBtowG) 
+  { 
+    Int_t id1 = id;
+    if(mBtowMapFix) id1 = getOldId(id);
+    G = (Float_t)mBtowG[0].Gain[id1-1];
+    return;
+  }
   if(det==BPRS && mBprsG) { G = (Float_t)mBprsG[0].Gain[id-1];return;}
   if(det==BSMDE && mSmdeG) { G = (Float_t)mSmdeG[0].Gain[id-1];return;}
   if(det==BSMDP && mSmdpG) { G = (Float_t)mSmdpG[0].Gain[id-1];return;}
@@ -251,7 +289,13 @@ void StBemcTables::getGain(Int_t det, Int_t id, Float_t& G)
 void StBemcTables::getCalib(Int_t det, Int_t id, Int_t power, Float_t& C)
 {
   C = 0;
-  if(det==BTOW && mBtowC) { C = (Float_t)mBtowC[0].AdcToE[id-1][power];return;}
+  if(det==BTOW && mBtowC) 
+  { 
+    Int_t id1 = id;
+    if(mBtowMapFix) id1 = getOldId(id);
+    C = (Float_t)mBtowC[0].AdcToE[id1-1][power];
+    return;
+  }
   if(det==BPRS && mBprsC) { C = (Float_t)mBprsC[0].AdcToE[id-1][power];return;}
   if(det==BSMDE && mSmdeC) { C = (Float_t)mSmdeC[0].AdcToE[id-1][power];return;}
   if(det==BSMDP && mSmdpC) { C = (Float_t)mSmdpC[0].AdcToE[id-1][power];return;}

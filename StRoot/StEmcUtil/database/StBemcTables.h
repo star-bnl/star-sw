@@ -1,5 +1,8 @@
-// $Id: StBemcTables.h,v 1.1 2004/12/21 12:54:30 suaide Exp $
+// $Id: StBemcTables.h,v 1.2 2006/01/24 16:32:20 suaide Exp $
 // $Log: StBemcTables.h,v $
+// Revision 1.2  2006/01/24 16:32:20  suaide
+// added method to correct database for bug in tower map
+//
 // Revision 1.1  2004/12/21 12:54:30  suaide
 // moved StBemcTables to StEmcUtil/database
 // added interface to trigger tables in offline DB
@@ -34,6 +37,7 @@ This class handles all the BEMC database requests
 
 #include "StMaker.h"
 #include "StEmcRawMaker/defines.h"
+#include "StDaqLib/EMC/StEmcDecoder.h"
 
 
 class StBemcTables : public TObject 
@@ -59,12 +63,16 @@ class StBemcTables : public TObject
    emcTriggerStatus_st*    mTrigS;
    emcTriggerPed_st*       mTrigP;
    
+   StEmcDecoder*           mDecoder;
+   Bool_t                  mBtowMapFix;  
+   Int_t                   getOldId(Int_t);                  
+   
    
    void                    loadTables(Int_t,TDataSet*);
           
  public: 
                  
-                            StBemcTables(); ///< StBemcTables constructor
+                            StBemcTables(Bool_t btowMapFix = kFALSE); ///< StBemcTables constructor
   virtual                   ~StBemcTables(); ///< StBemcTables destructor
 
    void                    loadTables(StMaker*); ///< load tables.
