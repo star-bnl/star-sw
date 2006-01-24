@@ -545,6 +545,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
   {"GenericHit","","","StEvent","StGenericHitMaker","StGenericHitMaker","test GenericHitCollection",kFALSE},
+  {"pixFastSim","","","StMcEvent,StEvent",
+                                   "StPixelFastSimMaker","StPixelFastSimMaker","FastPixelSimulator",kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
   {"ssd_daq"     ,"","","ssddb,St_svt"               ,"StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
