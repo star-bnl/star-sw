@@ -64,7 +64,7 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
     mHistControl   = 1;  // Hist  on
     mCompare       = kFALSE;
     mDB            = 0;
-    mPrint         = kTRUE;
+    mPrint         = kFALSE;
     mEmcCollection = NULL;
     mC1            = NULL;
     m_nhit         = 0;
@@ -1234,8 +1234,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.31 2005/05/13 15:49:36 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.32 2006/01/24 16:31:47 suaide Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.32  2006/01/24 16:31:47  suaide
+// disabled printout
+//
 // Revision 1.31  2005/05/13 15:49:36  suaide
 // set correct StEmcRawHit::calibrationType() for simulated hits
 //
