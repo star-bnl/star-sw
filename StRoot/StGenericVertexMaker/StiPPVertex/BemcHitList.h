@@ -19,7 +19,7 @@ class BemcHitList : public ScintHitList {
  BemcHitList();
   virtual  ~BemcHitList();
   void clear();
-  void initRun(bool isMC);
+  void initRun();
   void build( StEmcDetector*det, float adcMin);
   virtual   int etaBin(float eta);
   virtual float bin2EtaLeft(int iEta);
