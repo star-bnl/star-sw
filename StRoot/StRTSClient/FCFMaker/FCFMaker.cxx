@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.28 2005/07/19 22:09:02 perev Exp $
+ * $Id: FCFMaker.cxx,v 1.29 2006/01/26 16:00:08 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.29  2006/01/26 16:00:08  jml
+ * Got rid of extraneous no daq reader error message
+ *
  * Revision 1.28  2005/07/19 22:09:02  perev
  * IdTruth
  *
@@ -1507,7 +1510,7 @@ int StRTSClientFCFMaker::anyClustersInFile()
 u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *len)
 {
   if(!daqReader) {
-    printf("FCFMaker: No daq reader\n");
+    //printf("FCFMaker: No daq reader\n");  // already printed in initrun!
     return NULL;
   }
   
