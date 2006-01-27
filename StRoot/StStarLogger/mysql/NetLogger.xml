@@ -57,7 +57,7 @@
 
   <appender name="MYSQL" class="org.apache.log4j.MySQLAppender">
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="INSERT INTO JobDescription VALUES (NULL, NULL,&quot;rcas6002&quot;, &quot;starlib&quot;, &quot;12345&quot;, &quot;6&quot;, &quot;TestJob&quot;,&quot;This is test&quot;, &quot;%-3c{2}&quot;, &quot;Start&quot;, &quot;Ok&quot;, NULL, &quot;=&quot;, &quot;%m&quot;);"/>
+      <param name="ConversionPattern" value="INSERT INTO JobDescription VALUES (NULL, NULL,&quot;rcas6002&quot;, &quot;$USER&quot;, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;, &quot;TestJob&quot;,&quot;This is test&quot;, &quot;%-3c{2}&quot;, &quot;Start&quot;, &quot;Ok&quot;, NULL, &quot;=&quot;, &quot;%m&quot;);"/>
     </layout>	    
   </appender>
 

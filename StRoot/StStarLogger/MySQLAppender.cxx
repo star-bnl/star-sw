@@ -22,6 +22,7 @@
 
 #include "MySQLAppender.h"
 #include "TSystem.h"
+#include "TString.h"
 
 #if 1
 // def HAVE_MySQL
@@ -272,7 +273,30 @@ void MySQLAppender::close()
    mysql_close(0);
 	this->closed = true;
 }
+//_________________________________________________________________________
+void ReplaceVariable(TString &string, const char *var)
+{
+// replace the $VAR with its value if any
+   TString spec;
+   const char *varValue = gSystem->Getenv(var);
+   if (!varValue) {
+   // Special cases
+      spec = var;
+      if (spec == "REQUESTID") {
+          spec.Form("%d",gSystem->GetPid());
+          varValue= spec.Data();
+      } else if (spec == "PROCESSID") {
+          spec.Form("%d",0);
+          varValue= spec.Data();
+      }
+   }
 
+   if (varValue) {
+      TString fullName = "$";  fullName += var;
+      fullName.ToUpper();
+      string.ReplaceAll(fullName,varValue);
+   }
+}
 //_________________________________________________________________________
 void MySQLAppender::flushBuffer()
 {
@@ -287,7 +311,19 @@ void MySQLAppender::flushBuffer()
 			const LoggingEventPtr& logEvent = *i;
 			String sql = getLogStatement(logEvent);
          TString expandCommand = sql.c_str();
-         gSystem->ExpandPathName(expandCommand);
+         
+// Edit meta symbnols
+//-----------------------
+//  $hostid        = $HOSTNAME            
+//  $JobUser       = $USER
+//  $SUMSJobId     = $REQUESTID 
+//  $SUMSProcessID = $PROCESSID
+
+         ReplaceVariable(expandCommand, "USER");
+         ReplaceVariable(expandCommand, "HOSTNAME");
+         ReplaceVariable(expandCommand, "REQUESTID");
+         ReplaceVariable(expandCommand, "PROCESSID");
+         
          sql = expandCommand.Data();
 			execute(sql);
 		}

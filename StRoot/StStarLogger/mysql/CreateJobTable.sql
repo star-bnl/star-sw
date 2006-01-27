@@ -1,4 +1,4 @@
-# $Id: CreateJobTable.sql,v 1.2 2006/01/27 00:55:35 fine Exp $
+# $Id: CreateJobTable.sql,v 1.3 2006/01/27 23:54:10 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -7,9 +7,9 @@ CREATE TABLE JobDescription (
                  id              MEDIUMINT NOT NULL AUTO_INCREMENT  KEY COMMENT 'Unique record id',
                  time            TIMESTAMP                          COMMENT 'current time'   ,
                  hostid          CHAR(20)                           COMMENT 'computer name'  ,  
-                 JobUser         CHAR(20)                           COMMENT 'user name'      ,
-                 SUMSJobId       BIGINT                             COMMENT 'SUMS Job id'    , 
-                 SUMSProcessID   SMALLINT                           COMMENT 'SUMS process ID',
+                 JobUser         CHAR(20)                           COMMENT 'user name $USER',
+                 SUMSJobId       CHAR(35)                           COMMENT 'SUMS $REQUESTID', 
+                 SUMSProcessID   SMALLINT                           COMMENT 'SUMS $PROCESSID',
                  JobName         CHAR(20)                           COMMENT 'Job name'       ,
                  JobDescription  CHAR(20)                           COMMENT 'Job descriptor' ,
                  StepName        CHAR(20)                           COMMENT 'Step name'      ,  
