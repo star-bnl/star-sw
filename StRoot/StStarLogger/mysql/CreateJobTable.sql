@@ -1,3 +1,7 @@
+# $Id: CreateJobTable.sql,v 1.2 2006/01/27 00:55:35 fine Exp $
+# Author: Valeri Fine (fine@bnl.gov) 26.01.2006
+# Create the job description table
+
 use logger;
 CREATE TABLE JobDescription (
                  id              MEDIUMINT NOT NULL AUTO_INCREMENT  KEY COMMENT 'Unique record id',
