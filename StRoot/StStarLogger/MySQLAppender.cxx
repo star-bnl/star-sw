@@ -21,6 +21,7 @@
 #endif
 
 #include "MySQLAppender.h"
+#include "TSystem.h"
 
 #if 1
 // def HAVE_MySQL
@@ -174,7 +175,7 @@ MYSQL *MySQLAppender::getConnection()
    const char *passwd = "logger";
    const char *db     = "logger";
    unsigned int port = 3306;
-   fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection\n\n");
+   // fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection\n\n");
    if (!mysql_real_connect(connection
                      , host
                      , user
@@ -285,6 +286,9 @@ void MySQLAppender::flushBuffer()
 		{
 			const LoggingEventPtr& logEvent = *i;
 			String sql = getLogStatement(logEvent);
+         TString expandCommand = sql.c_str();
+         gSystem->ExpandPathName(expandCommand);
+         sql = expandCommand.Data();
 			execute(sql);
 		}
 		catch (SQLException& e)
