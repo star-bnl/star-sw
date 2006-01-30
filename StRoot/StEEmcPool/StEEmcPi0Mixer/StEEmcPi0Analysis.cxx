@@ -70,8 +70,8 @@ Int_t StEEmcPi0Analysis::Init()
   hBx7          = new TH1F("hBx7","7-bit bunch crossing:bx7",120,0.,120.);
   hBx48         = new TH1F("hBx48","48-bit bunch crossing:bx48",120,0.,120.);
   hBx7diffBx48  = new TH2F("hBx7diffBx48","bx1=(bx7-off7)%120, bx2=(bx48-off48)%120;bx7;bx1-bx2",120,0.,120.,21,-10.5,10.5);
-  hBxStar       =new TH1F("hBxStar","Beam x-ing at STAR IP;star bunch x-ing",120,0.,120.); 
-  hBxStarPi0    =new TH1F("hBxStarPi0","Beam x-ing at STAR IP with pi0 detected;star bunch x-ing",120,0.,120.); 
+  hBxStar       = new TH1F("hBxStar","Beam x-ing at STAR IP;star bunch x-ing",120,0.,120.); 
+  hBxStarPi0    = new TH1F("hBxStarPi0","Beam x-ing at STAR IP with pi0 detected;star bunch x-ing",120,0.,120.); 
 
   hMassBx=new TH2F("hMassBx","Beam x-ing vs Mass;M [GeV];STAR bunch xing",120,0.,1.2,120,0.,120.); 
   hZvertBx=new TH2F("hZvertBx","Beam x-ing vs Z vertex [0.1,0.18]",150,-150.,150.,120,0.,120.); 
@@ -117,18 +117,23 @@ Int_t StEEmcPi0Analysis::Make()
   if ( mSpinDb -> isValid() && mSpinDb -> isPolDirLong() ) 
     spin4=getSpinState( mMuDst->muDst(), bxStar );
 
-
   hBxStar -> Fill( bxStar ); 
-
-  /// Check trigger 
-  if ( !accept( mMuDst->muDst() ) ) return kStOK; 
-
-  hPairCounter -> Fill( kEvent ); 
 
   mRealEvent -> setEvent( mMuDst->muDst()->event() ); 
   mRealEvent -> setSpin4( spin4 ); 
   mMixedEvent -> setEvent( mMuDst->muDst()->event() ); 
   mMixedEvent -> setSpin4( spin4 ); 
+
+  for ( Int_t ii=0;ii<720;ii++ ) {
+    StEEmcTower tower=mEEanalysis->tower(ii);
+    if ( tower.fail() ) continue;
+    mRealEvent->mADC[ii]=(60./4096.)*tower.adc();///meh
+    mRealEvent->mStat[ii]=tower.stat();
+  }
+
+  /// Check trigger 
+  if ( !accept( mMuDst->muDst() ) ) goto END_OF_MAKE;
+  hPairCounter -> Fill( kEvent ); 
 
   /// map spin decimal bits to histograms
   static Int_t mymap[]={0,0,0,0,0,1,2,0,0,3,4};
@@ -189,10 +194,9 @@ Int_t StEEmcPi0Analysis::Make()
 
     }
 
-  if ( mRealEvent->nPairs > 0 ) mRealTree->Fill();
-  if ( mMixedEvent->nPairs > 0 ) mMixedTree->Fill(); 
-
-
+ END_OF_MAKE:
+  mRealTree->Fill();
+  mMixedTree->Fill(); 
   return kStOK;
 }
 
