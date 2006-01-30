@@ -15,6 +15,7 @@
 #include "StEvent/StTriggerIdCollection.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StEvent/StBbcTriggerDetector.h"
+#include "StEvent/StEmcTriggerDetector.h"
 
 #define MAX_PAIRS 5 
 
@@ -37,13 +38,32 @@ class StEEmcMixEvent : public TObject {
   Int_t                   mEventNumber;
   Int_t                   mRunId;
   Int_t                   mRunNumber;
+
   StEventInfo             mEventInfo;
   StRunInfo               mRunInfo;  
   StL0Trigger             mL0trigger;
-  StMuTriggerIdCollection mMuTriggerIdCollection;
+  StMuTriggerIdCollection mMuTriggerIdCollection;  
   StBbcTriggerDetector    mBbcTrigger;
+  StEmcTriggerDetector    mEmcTrigger;
 
   Double_t                mMagneticField;
+
+  /// Ped subtracted ADC values from mEEanalysis.
+  /// Index is etawise
+  Float_t mADC[720];
+  UShort_t mStat[720];
+  Float_t sum3x3(Int_t index);
+  Float_t sum3x3();
+  Float_t htdsm();
+  Float_t tpdsm();
+  Int_t pedEEmcDSM_HT[90];
+  Int_t pedEEmcDSM_TP[90];
+  Int_t npi0();
+  Int_t deta(){ return deta(0); }
+  Int_t dphi(){ return dphi(0); }
+  Int_t deta(Int_t i);
+  Int_t dphi(Int_t i);
+
 
   Int_t mSpin4; 
   Int_t bx7;
@@ -64,6 +84,7 @@ class StEEmcMixEvent : public TObject {
   Float_t       mEsmdu[MAX_PAIRS];  //[nPairs]
   Float_t       mEsmdv[MAX_PAIRS];  //[nPairs]
   Float_t       mZvertex[MAX_PAIRS]; //[nPairs]
+  Float_t       mPhigg[MAX_PAIRS]; //[nPairs] 
 
   Int_t         mTower1[MAX_PAIRS]; //[nPairs]
   Int_t         mTower2[MAX_PAIRS]; //[nPairs] 
