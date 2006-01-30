@@ -47,6 +47,12 @@ void StiIstHitLoader::loadHits(StEvent* source,
 
     //StSPtrVecHit* istHits = source->hitCollection("Ist");
     StRnDHitCollection *col = source->rndHitCollection();
+    if (!col) {
+	cout <<"StiIstHitLoader::loadHits\tERROR:\tcol==0"<<endl;
+	cout <<"You must not have pixelFastSim in your chain"<<endl;
+	cout <<"will return with no action taken"<<endl;
+	return;
+    }
     StSPtrVecRnDHit& vec = col->hits();
 
     cout <<"StiIstHitLoader: Ist Hits: "<<vec.size()<<endl;
