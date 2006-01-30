@@ -39,6 +39,12 @@ void StiPixelHitLoader::loadHits(StEvent* source,
     cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Done" << endl;
     
     StRnDHitCollection *col = source->rndHitCollection();
+    if (!col) {
+	cout <<"StiPixelHitLoader::loadHits\tERROR:\tcol==0"<<endl;
+	cout <<"You must not have pixelFastSim in your chain"<<endl;
+	cout <<"will return with no action taken"<<endl;
+	return;
+    }
     StSPtrVecRnDHit& vec = col->hits();
     
     StiDetector *detector=0;
