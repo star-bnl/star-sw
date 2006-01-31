@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.173 2005/12/18 23:17:02 perev Exp $
+// $Id: StMaker.cxx,v 1.174 2006/01/31 21:11:01 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -149,10 +149,13 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005b",      20041101,     0, "y2005b", ""},   //       {"y2005b",      20041101,     0}
   {"y2005c",      20041201,     0, "y2005c", ""},   //       {"y2005c",      20041201,     0}
   {"y2005d",      20041201,     1, "y2005d", "new SVT"},   //       {"y2005c",      20041201,     0}
+  {"y2006",       20051201,     0, "y2006","base geometry for y2006"},
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
   {"complete",    20190101,     1, "complete", "non-production"},
   {"ist1",        20190101,     2, "ist1", "non-production"},
-  {"pix1",        20190101,     3, "pix1", "non-production"},
+  {"pix1",        20190101,     3, "pix1", "non-production, old is not in present starsim tags"},
+  {"upgr01",      20190101,     4, "upgr01"},
+  {"upgr02",      20190101,     5, "upgr02"},
   {0,                    0,     0}
 };
 
@@ -1712,6 +1715,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.174  2006/01/31 21:11:01  fisyak
+// Add y2006,upgr01 and upgr02
+//
 // Revision 1.173  2005/12/18 23:17:02  perev
 // uint attributes fix
 //
