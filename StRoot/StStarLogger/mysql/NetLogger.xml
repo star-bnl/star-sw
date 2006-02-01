@@ -63,9 +63,12 @@
 
 
   <root>
-    <priority value ="DEBUG" />
+    <priority value ="FATAL" />
     <appender-ref ref="stdout" />
-    <appender-ref ref="MYSQL" /> 
   </root>
+  <logger name="QA">
+    <priority value  ="DEBUG" />
+    <appender-ref ref="MYSQL" />   
+  </logger>
   
 </configuration>
