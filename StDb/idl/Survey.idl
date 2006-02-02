@@ -1,0 +1,20 @@
+//:Description: Survey data
+//:Synonyms::::
+//:Source:
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+//:Pointer to data:  Survey.time.C:
+//   Translation from local to Master
+//   m = R*l + t
+//             r00 r01 r02       t0
+//       R = ( r10 r11 r12 ) + ( t1 )
+//             r20 r21 r22       t2
+struct Survey {
+  long   Id;
+  double r00, r01, r02, r10, r11, r12, r20, r21, r22;
+  double t0, t1, t2;
+  char   comment[32];
+};
