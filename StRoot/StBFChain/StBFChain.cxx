@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.485 2006/01/18 17:19:30 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.486 2006/02/03 19:51:45 fine Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -16,6 +16,9 @@
 #include "StChallenger/StChallenger.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
+
+#define STAR_LOGGER 1
+
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
@@ -53,8 +56,13 @@ void StBFChain::Setup(Int_t mode) {
   TString chain("BFC.C");
   if (mode == 2) chain = "BFC2.C";
   Char_t *file = gSystem->Which(path,chain,kReadPermission);
+#ifdef STAR_LOGGER     
+  if (! file) { LOG_FATAL  << Form("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path) << endm; }
+  else        { LOG_WARN   << Form("StBFChain::Setup","File %s has been found as %s",chain.Data(),file) << endm; }
+#else
   if (! file)   Fatal("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path);
   else        Warning("StBFChain::Setup","File %s has been found as %s",chain.Data(),file);
+#endif  
 #if 1
   TString cmd(".L ");
   cmd += file;
@@ -126,15 +134,19 @@ Int_t StBFChain::Load()
 	    if (iok > 0) continue;
 	    iok = gSystem->Load(libL);
 	    if (iok < 0)  {
-	      gMessMgr->QAInfo() << "problem with loading of " << libL.Data() << endm
-				 << fBFC[i].Key << " is switched off \t!!!!" << endm;
+
+         LOG_QA  << "problem with loading of " << libL.Data() << endm;
+         LOG_QA  <<  fBFC[i].Key << " is switched off \t!!!!" << endm;        
+
 	      fBFC[i].Flag = kFALSE;
 	      status = kStErr;
 	      assert(iok >= 0);
 	      break;
 	    } else {
 	      if (Debug() > 1) {  TString ts("load "); ts += libL; TMemStat::PrintMem(ts.Data());}
-	      gMessMgr->QAInfo() << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;
+         
+         LOG_QA  << "Library " << Form("%-20s\t(%s)\tis loaded",libL.Data(),path) << endm;
+          
 	      LoadedLibs.Add(new TObjString(libN));
 	    }
 	  }
@@ -315,7 +327,9 @@ Int_t StBFChain::Instantiate()
       }
     }
     if (maker=="StAssociationMaker") {
-      gMessMgr->QAInfo() << "StBFChain::Instantiate Setting the Parameters for the Association Maker" << endm;
+    
+      LOG_QA << "StBFChain::Instantiate Setting the Parameters for the Association Maker" << endm;
+      
       TString cmd("");
       if (GetOption("ITTF")) cmd = Form ("((StAssociationMaker *) %p)->useInTracker();",mk);
       cmd += "StMcParameterDB* parameterDB = StMcParameterDB::instance();";
@@ -352,13 +366,13 @@ Int_t StBFChain::Instantiate()
 	  ProcessLine(Form("((StVertexMaker *) %p)->SetBeam4ppLMV();",mk));
 	
 	if( GetOption("fzin") || GetOption("ntin") ||GetOption("gstar") || GetOption("VMC")){// get CTB's from MC
-	  cout << "QAInfo: Simulation is used, setting CTB Mode to 1" << endl;
+	  LOG_QA << "QAInfo: Simulation is used, setting CTB Mode to 1" << endm;
 	  ProcessLine(Form("((StVertexMaker *) %p)->SetCTBMode(1);",mk));
 	} else if ( GetOption("clearDAQCTB") ){        // remove CTB from DAQ (embedding)
-	  cout << "QAInfo: clearDAQCTB used, will removed CTB hits from DAQ"  << endl;
+	  LOG_QA << "QAInfo: clearDAQCTB used, will removed CTB hits from DAQ"  << endm;
 	  ProcessLine(Form("((StVertexMaker *) %p)->SetCTBMode(2);",mk));
 	} else{
-	  cout << "QAInfo: Will get CTB from DAQ file" << endl;
+	  LOG_QA << "QAInfo: Will get CTB from DAQ file" << endm;
 	  ProcessLine(Form("((StVertexMaker *) %p)->SetCTBMode(0);",mk));
 	}
       }
@@ -371,7 +385,7 @@ Int_t StBFChain::Instantiate()
       // embedded logic.
       if ((maker == "StVertexMaker"  || maker == "StPreVertexMaker") &&
 	  GetOption("VtxOffSet")){
-	cout << "QAInfo: VtxOffSet is ON" << endl;
+	LOG_QA << "QAInfo: VtxOffSet is ON" << endm;
 	if ( GetOption("SvtMatchVtx") )  mk->SetMode(3);
 	else                             mk->SetMode(2);
       }
@@ -454,7 +468,7 @@ Int_t StBFChain::Instantiate()
       if( GetOption("OShortR")    ){    mask |=   (kShortedRing   << 1); }
       if( GetOption("OGridLeak")  ){    mask |=   (kGridLeak      << 1); }
       if( GetOption("OGridLeak3D")){    mask |=   (k3DGridLeak    << 1); }
-      gMessMgr->QAInfo() << "StBFChain::Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
+      LOG_QA << "StBFChain::Instantiate ExB The option passed will be " << Form("%d 0x%X\n",mask,mask) << endm;
       mk->SetMode(mask);
     }
     if (maker == "St_tpt_Maker" && GetOption("AlignSectors"))
@@ -505,7 +519,7 @@ Int_t StBFChain::Instantiate()
       }
       cmd += Form("tcpdaqMk->SetCorrection(%d);",Correction); // default Correction = 0x7
       cmd += Form("tcpdaqMk->SetSequenceMerging(%d);",SequenceMerging);
-      gMessMgr->QAInfo() << "StBFChain::Instantiate  maker==" << maker.Data() 
+      LOG_QA << "StBFChain::Instantiate  maker==" << maker.Data() 
 			 << Form(" SetDAQFlag(%d) SetMode(%d) SetCorrection(%d) SetSequenceMerging(%d)",
 				 DMode,mk->GetMode(),Correction,SequenceMerging) << endm;	 
       ProcessLine(cmd);
@@ -523,14 +537,14 @@ Int_t StBFChain::Instantiate()
       Int_t mask = 0;
       if ( GetOption("tcl") ) mask = mask | 0x0;
       if ( GetOption("fcf") ) mask = mask | 0x1;
-      gMessMgr->QAInfo() << "StBFChain::Instantiate For " << maker.Data() 
+      LOG_QA << "StBFChain::Instantiate For " << maker.Data() 
 			 << " tcl is ";
-      if (GetOption("tcl")) gMessMgr->QAInfo() << "on";
-      else                  gMessMgr->QAInfo() << "off";
-      gMessMgr->QAInfo() << ", fcf is ";
-      if (GetOption("fcf")) gMessMgr->QAInfo() << "on";
-      else                  gMessMgr->QAInfo() << "off";
-      gMessMgr->QAInfo() << " => mask = " << mask << endm;
+      if (GetOption("tcl")) { LOG_QA << "on";  }
+      else                  { LOG_QA << "off"; }
+      LOG_QA << ", fcf is ";
+      if (GetOption("fcf")) { LOG_QA << "on";  }
+      else                  { LOG_QA << "off"; }
+      LOG_QA << " => mask = " << mask << endm;
       mk->SetMode(mask);
     }
     
@@ -585,7 +599,7 @@ Int_t StBFChain::Instantiate()
 	if (GetOption("LaserTest")) mode += 2;
 	if (GetOption("PulserSvt")) mode += 4;
       } else {
-	gMessMgr->QAInfo() << "'alltrigger' option on. All others ignored" << endm;
+        LOG_QA << "'alltrigger' option on. All others ignored" << endm;
       }
       if (mode) mk->SetMode(mode);
     }
@@ -620,7 +634,7 @@ Int_t StBFChain::Instantiate()
     if (maker == "StHitFilterMaker") {
       if (GetOption("SvtHitFilt")){
 	// Filter out SVT bad hits, TPC hits not on tracks and all hits if fabs(ZVert)>30
-	gMessMgr->QAInfo() << "SVT hit filter is ON" << endm;
+	LOG_QA << "SVT hit filter is ON" << endm;
 	TString cmd(Form("StHitFilterMaker *Filtmk=(StHitFilterMaker*) %p;",mk));
 	cmd += "Filtmk->setPtLowerCut(-99.);";
 	cmd += "Filtmk->setPtUpperCut(-99.);";
@@ -628,7 +642,7 @@ Int_t StBFChain::Instantiate()
 	cmd += "Filtmk->setAbsZVertCut(30);";
 	ProcessLine(cmd);
       } else {
-	gMessMgr->QAInfo() << "Default hit filtering is ON" << endm;
+	LOG_QA << "Default hit filtering is ON" << endm;
       }
     }
     if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
@@ -646,7 +660,7 @@ Int_t StBFChain::Instantiate()
   Error:
     status = kStErr;
     if (i != iFail) {
-      gMessMgr->QAInfo()
+      LOG_QA
 	<< " ======================================\n"
 	<< " problem with Instantiation of "         << fBFC[i].Maker << "\n"
 	<< " ======================================" << endm;
@@ -686,7 +700,7 @@ Int_t StBFChain::Init() {
 	if (GetOption("Debug2")) ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"swit 2 3;\");",geantMk));
       } 
       if (GetOption("phys_off")) {
-	gMessMgr->Info() << "St_geant_Maker::Init switch off physics" << endm;
+	LOG_INFO << "St_geant_Maker::Init switch off physics" << endm;
 	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"DCAY 0\");",geantMk));
 	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"ANNI 0\");",geantMk));
 	ProcessLine(Form("((St_geant_Maker *) %p)->Do(\"BREM 0\");",geantMk));

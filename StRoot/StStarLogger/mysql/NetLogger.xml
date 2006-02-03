@@ -12,10 +12,8 @@
 
   <appender name="MYSQL" class="org.apache.log4j.MySQLAppender">
     <layout class="org.apache.log4j.PatternLayout">
-     <param name="ConversionPattern" value="REPLACE INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;$ID&quot;  ); " /> 
+     <param name="ConversionPattern" value="REPLACE INTO JobTracking SET id=NULL, StepName =&quot;%-3c{2}&quot;,dataId = (SELECT dataId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot;); " />
 <!--      <param name="ConversionPattern" value="INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;,&quot;$HOSTNAME&quot;,&quot;$USER&quot; ); INSERT INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;1&quot; ); " />  -->
-<!--       <param name="ConversionPattern" value="REPLACE DELAYED INTO JobDescription SET dataId=DEFAULT node=; JobUser=&quot;$USER&quot; JobName=&quot;TestJob&quot; JobDescription=&quot;This is test&quot;;" />  -->
-      <!-- REPLACE DELAYED INTO JobTracking ( id, StepName , jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;,SELECT dataId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot; -  &quot;Start&quot;, &quot;Ok&quot;, NULL, &quot;=&quot;, &quot;%m&quot;);"/> --> 
     </layout>	    
   </appender>
 

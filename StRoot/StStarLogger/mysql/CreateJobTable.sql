@@ -1,4 +1,4 @@
-# $Id: CreateJobTable.sql,v 1.5 2006/02/03 02:36:12 fine Exp $
+# $Id: CreateJobTable.sql,v 1.6 2006/02/03 19:51:53 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -16,7 +16,7 @@ CREATE TABLE JobDescription (
                  );
 CREATE TABLE JobTracking (
                  id              INT NOT NULL AUTO_INCREMENT   KEY  COMMENT 'Unique record id',
-                 jobDscrId       INT                                COMMENT 'LAST_INSERT_ID() from the JobDescription table',
+                 dataId          INT                                COMMENT 'LAST_INSERT_ID() from the JobDescription table',
                  time            TIMESTAMP                          COMMENT 'Current time'   ,
                  StepName        CHAR(20)                           COMMENT 'Step name'      ,  #STAR maker name
                  StepEventId     ENUM('Start','Finish') NULL        COMMENT 'Event Id'       ,
@@ -24,7 +24,7 @@ CREATE TABLE JobTracking (
                  StepContext     CHAR(10)                           COMMENT 'Event context'  ,  #Field name 
                  MessageId       ENUM('=')              NULL        COMMENT 'Extra message flag',
                  ProgrammMessage VARCHAR(120)                       COMMENT 'Extra Message'  ,
-                CONSTRAINT UNIQUE INDEX JobId (jobDscrId )
+                CONSTRAINT UNIQUE INDEX JobId (dataId)
                 );
 SHOW tables;
 DESCRIBE  JobDescription;

@@ -121,9 +121,10 @@ try
 		if (mysql_query(con,query.c_str())) {
          printf("QUERY: %s  \n",mysql_error(connection));
        }  else {
-         unsigned int last = mysql_insert_id(con);
-         if (last && !fLastId) fLastId = last;
-         fprintf(stderr," ID = %d\n",fLastId);
+//       
+//         unsigned int last = mysql_insert_id(con);
+//         if (last && !fLastId) fLastId = last;
+//         fprintf(stderr," ID = %d\n",fLastId);
        }
 
       
@@ -345,9 +346,11 @@ void MySQLAppender::flushBuffer()
 		{
 			const LoggingEventPtr& logEvent = *i;
 			String sql = getLogStatement(logEvent);
-         TString id; id.Form("%d",fLastId);
          expandCommand = sql.c_str();
-         expandCommand.ReplaceAll(TString("$ID"),id);
+         
+         ReplaceVariable(expandCommand, "REQUESTID");
+         ReplaceVariable(expandCommand, "PROCESSID");
+         
          sql = expandCommand.Data();
 			execute(sql);                  
 		}
