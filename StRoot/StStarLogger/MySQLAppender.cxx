@@ -41,7 +41,7 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________
 MySQLAppender::MySQLAppender()
-: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(1)
+: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(1),fLastId(0)
 {
    fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
@@ -118,11 +118,16 @@ try
 //       query += "\");";
 
       String query = sql; // 
-		if (mysql_query(con,query.c_str()))
+		if (mysql_query(con,query.c_str())) {
          printf("QUERY: %s  \n",mysql_error(connection));
+       }  else {
+         unsigned int last = mysql_insert_id(con);
+         if (last && !fLastId) fLastId = last;
+         fprintf(stderr," ID = %d\n",fLastId);
+       }
 
-
-      ret = 1;
+      
+      ret = 1;   
 
 //		ret = SQLAllocHandle(SQL_HANDLE_STMT, con, &stmt);
 		if (ret < 0)
@@ -150,6 +155,7 @@ try
 
 		throw e;
 	}
+ 
 	SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 	closeConnection(con);
 	
@@ -183,7 +189,7 @@ MYSQL *MySQLAppender::getConnection()
                      , passwd
                      , db
                      , port
-                     , 0,0 
+                     , 0,0
                      ))
                      printf("No connection: %s  \n",mysql_error(connection));
 
@@ -306,12 +312,13 @@ void MySQLAppender::flushBuffer()
 	std::list<spi::LoggingEventPtr>::iterator i;
 	for (i = buffer.begin(); i != buffer.end(); i++)
 	{
-		try
+	  TString expandCommand;
+ 	  try
 		{
 			const LoggingEventPtr& logEvent = *i;
-			String sql = getLogStatement(logEvent);
-         TString expandCommand = sql.c_str();
+			String sql;  
          
+         expandCommand ="INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, \"$REQUESTID\", \"$PROCESSID\",\"$HOSTNAME\",\"$USER\");";
 // Edit meta symbnols
 //-----------------------
 //  $hostid        = $HOSTNAME            
@@ -326,12 +333,30 @@ void MySQLAppender::flushBuffer()
          
          sql = expandCommand.Data();
 			execute(sql);
+         
 		}
 		catch (SQLException& e)
 		{
 			errorHandler->error(_T("Failed to excute sql"), e,
 				ErrorCode::FLUSH_FAILURE);
 		}
+      // -------------------
+  		try
+		{
+			const LoggingEventPtr& logEvent = *i;
+			String sql = getLogStatement(logEvent);
+         TString id; id.Form("%d",fLastId);
+         expandCommand = sql.c_str();
+         expandCommand.ReplaceAll(TString("$ID"),id);
+         sql = expandCommand.Data();
+			execute(sql);                  
+		}
+		catch (SQLException& e)
+		{
+			errorHandler->error(_T("Failed to excute sql"), e,
+				ErrorCode::FLUSH_FAILURE);
+		}
+
 	}
 	
 	// clear the buffer of reported events

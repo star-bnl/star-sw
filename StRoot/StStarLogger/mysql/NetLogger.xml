@@ -7,57 +7,15 @@
     <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n"/>
     </layout>	    
-    <filter class="StarOptionFilter">
-       <!--
-         - - - - - - - - - - - - - - 
-           RepeatMessageQuote
-         - - - - - - - - - - - - - - 
-           "name"   - "RepeatMessagesQuota" parameters to assign to number of messages to be repeated sequeintially
-           "value"  = -1  there is no limit (by default)
-                    >  0  the number of times the message can be printed out sequentially 
-                          (without any other message between each occurence)
-
-                          the value zero and one have one and the same meaning
-                          0 - the message can not be printed at all 
-                          1 - the message can be printed one time only, so "0" == "1"
-            Example:
-            - - - -   <param name="RepeatMessagesQuota" value="2"/>
-            Print each message no more then 2 times sequientialy at most.
-          - - - - - - - - - - - - - - 
-           TotalMessagesQuote
-          - - - - - - - - - - - - - - 
-           "name"   - "TotalMessagesQuota" parameters to assign to number of messages to be repeated sequeintially
-           "value"  = -1  there is no limit (by default)
-                    >  0  the number of times the message can printed out across the entire output                          
-                          the value zero and one have one and the same meaning
-                          0 - the message can not be printed at all
-                          1 - the message can be printed one time only, so "0" == "1"
-            Example:
-            - - - -    <param name="TotalMessagesQuota" value="200"/>
-            The output should contain the 200 lines at most.
-         - - - - - - - - - - - - - - 
-           StringToCount
-         - - - - - - - - - - - - - - 
-           "name"   - "StringToCount" parameters define the string pattern to apply the "counter" paramters above  
-           "value" =  "Some string" that the user message should contain to be counted 
-                       as "RepeatMessageQuote" and /or "TotalMessagesQuote" define
-                  >  0  the number of times the message can printed out across the entire output                          
-                          the value zero and one have one and the same meaning
-                          0 - there is no repeatition, the message can be printed at once
-                          1 - the message can be printed one times only, so "0" == "1"
-            Example:
-            - - - -   <param name="StringToCount" value="TPC"/>
-            Count only the messages with the string "TPC" in.
-        --> 
-        <param name="RepeatMessageQuote" value="2"/>
-        <!-- <param name="StringToCount" value="My string to filter out pattern"/>  -->
-    </filter>
-  </appender>
+ </appender>
   
 
   <appender name="MYSQL" class="org.apache.log4j.MySQLAppender">
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="INSERT INTO JobDescription VALUES (NULL, NULL,&quot;rcas6002&quot;, &quot;$USER&quot;, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;, &quot;TestJob&quot;,&quot;This is test&quot;, &quot;%-3c{2}&quot;, &quot;Start&quot;, &quot;Ok&quot;, NULL, &quot;=&quot;, &quot;%m&quot;);"/>
+     <param name="ConversionPattern" value="REPLACE INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;$ID&quot;  ); " /> 
+<!--      <param name="ConversionPattern" value="INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;,&quot;$HOSTNAME&quot;,&quot;$USER&quot; ); INSERT INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;1&quot; ); " />  -->
+<!--       <param name="ConversionPattern" value="REPLACE DELAYED INTO JobDescription SET dataId=DEFAULT node=; JobUser=&quot;$USER&quot; JobName=&quot;TestJob&quot; JobDescription=&quot;This is test&quot;;" />  -->
+      <!-- REPLACE DELAYED INTO JobTracking ( id, StepName , jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;,SELECT dataId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot; -  &quot;Start&quot;, &quot;Ok&quot;, NULL, &quot;=&quot;, &quot;%m&quot;);"/> --> 
     </layout>	    
   </appender>
 
