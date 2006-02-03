@@ -8,8 +8,7 @@ TDataSet *CreateTable() {
 HitError_st row;
 St_HitError *tableSet = new St_HitError("svtHitError",1);
 //
-//double hitErr = 0.02;
-double hitErr = 0.0050;
+double hitErr = 0.020; // 200 microns
 hitErr*=hitErr;
 memset(&row,0,tableSet->GetRowSize());
 //                                        hit errors are squared !
