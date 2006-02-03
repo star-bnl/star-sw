@@ -148,6 +148,7 @@ namespace log4cxx
 			* ArrayList holding the buffer of Logging Events.
 			*/
 			std::list<spi::LoggingEventPtr> buffer;
+         unsigned long fLastId;
 			
 		public:				
                         DECLARE_LOG4CXX_OBJECT(MySQLAppender)
