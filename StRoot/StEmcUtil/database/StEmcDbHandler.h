@@ -36,20 +36,24 @@ class StEmcDbHandler : public TObject
         TString    getTimeStamp() { return mTimeStamp; }
        TString*    getTimeStampList();
    unsigned int    getListSize() { return mListSize; }
-	   void    setTableName(char* name) { mTableName = name; }
-	   void    setTableName(char*, char* );
-	   void    setTableNode(char* node = "Calibrations_emc") { mTableNode = node; }
-	   void    setTimeStamp(char* stamp = "2030-01-01 00:00:00") { mTimeStamp = stamp; }
-	   void    setTimeStampLimits(char* stamp1 = "2000-01-01 00:00:00", char* stamp2 = "2030-01-01 00:00:00");
+	         void    setTableName(char* name) { mTableName = name; }
+	         void    setTableName(char*, char* );
+	         void    setTableNode(char* node = "Calibrations_emc") { mTableNode = node; }
+	         void    setTimeStamp(char* stamp = "2030-01-01 00:00:00") { mTimeStamp = stamp; }
+	         void    setMaxEntryTime(char* stamp = "2030-01-01 00:00:00") { mMaxTime = stamp; }
+	         void    setTimeStampLimits(char* stamp1 = "2000-01-01 00:00:00", char* stamp2 = "2030-01-01 00:00:00");
+	         void    setFlavor(char* flavor = "ofl") { mFlavor = flavor; }
 
   protected:
 
     unsigned int    mDet;
     unsigned int    mParam;
       StDbTable*    mTable;                  ///< EMC database table
+         TString    mFlavor;                 ///< flavor for BEMC tables
          TString    mTableNode;              ///< Database node for EMC tables
          TString    mTableName;              ///< EMC database table name, according to input
          TString    mTimeStamp;              ///< EMC database table time stamp
+         TString    mMaxTime;                ///< EMC database max entry time
          TString    mFstTimeStamp;           ///< First time stamp of list
          TString    mLstTimeStamp;           ///< Last time stamp of list
     unsigned int    mListSize;
