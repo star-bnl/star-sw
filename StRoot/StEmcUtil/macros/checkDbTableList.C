@@ -9,6 +9,12 @@
 |
 | Second argument is the output file name. The output file is a list of
 | the files with the results of the checking.
+| 
+| Third argument is the maximum entry time in the database. It means that the
+| table had to be *saved* before that time. Do not mistake this as the
+| timestamp
+| 
+| Fourth argument is the flavor the tables is save in the database
 |
 | It calls the macro with funtion checkDbTable. Argument is a file name. 
 | The file names for tables to be saved on DB include information about 
@@ -21,7 +27,8 @@
 |
 |-----------------------------------------------------------------------------*/
 
-checkDbTableList(char* listFile, char* outName)
+checkDbTableList(char* listFile="table.list", char* outName="out.txt",
+                 char* MAXENTRY = "2030-01-01 00:00:00", char* flavor = "ofl")
 {
   
   // Loading basic libraries
@@ -30,7 +37,7 @@ checkDbTableList(char* listFile, char* outName)
   
   // loading functions macros
   gROOT->LoadMacro("$STAR/StRoot/StEmcUtil/macros/checkDbTable.C");
-//  gROOT->LoadMacro("./StRoot/StEmcUtil/macros/checkDbTable.C");
+  //gROOT->LoadMacro("checkDbTable.C");
 
   // Getting file list to be checked
   ifstream inputFile(listFile); 
@@ -42,15 +49,15 @@ checkDbTableList(char* listFile, char* outName)
   {
     inputFile >> fileName;
     if (strcmp(fileName," "))
-      if (!checkDbTable(fileName)) 
+      if (!checkDbTable(fileName,MAXENTRY,flavor)) 
       {
-        outputFile << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
-        cout       << fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
+        outputFile <<"DBTIME = "<<DBTIME<<" FILE = "<< fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
+        cout       <<"DBTIME = "<<DBTIME<<" FILE = "<< fileName <<" - *** TABLES DON'T MATCH ***"<< endl;
       }
       else
       {
-         outputFile << fileName <<" - Tables match"<< endl;
-         cout       << fileName <<" - Tables match"<< endl;
+         outputFile <<"DBTIME = "<<DBTIME<<" FILE = "<< fileName <<" - Tables match"<< endl;
+         cout       <<"DBTIME = "<<DBTIME<<" FILE = "<< fileName <<" - Tables match"<< endl;
       }
   }
 
