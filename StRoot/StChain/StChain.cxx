@@ -132,6 +132,12 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
+#ifdef STAR_TRACKING     
+// Add a record to MySQL tracking Db     
+     LOG_QA << Form("Events=\"%i\", Failed=\"%i\", Cpu=\"%10.2f\", RealTime=\"%10.2f\",StepEventId=NULL"
+                , mNTotal,       mNFailed,      evnt.GetCpuTime("QAInfo:"), evnt.GetRealTime("QAInfo:") )
+                << endm; 
+#endif                
   }
 
   LOG_QA << Form
@@ -144,13 +150,22 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 	    t.GetDate(),t.GetTime(),mNTotal,mNFailed)
         << endm;
 
+#ifdef STAR_TRACKING     
+// Add a record to MySQL tracking Db     
+  LOG_QA << Form("Events=\"%i\", Failed=\"%i\", Cpu=\"%10.2f\", RealTime=\"%10.2f\",StepEventId=\"Finish\""
+                , mNTotal,       mNFailed,      evnt.GetCpuTime("QAInfo:"), evnt.GetRealTime("QAInfo:") )
+                << endm; 
+#endif                
   fflush(stdout);
   return iMake;
 }
 
 
-// $Id: StChain.cxx,v 1.52 2005/08/29 21:42:20 fisyak Exp $
+// $Id: StChain.cxx,v 1.53 2006/02/05 01:41:23 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.53  2006/02/05 01:41:23  fine
+// Add the tracking information from the STAR chain
+//
 // Revision 1.52  2005/08/29 21:42:20  fisyak
 // switch from fBits to fStatus for StMaker control bits
 //
