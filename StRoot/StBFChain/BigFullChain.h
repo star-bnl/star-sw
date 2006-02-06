@@ -280,7 +280,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
   {"OutTree"     ,""  ,"","Tree",""                                  ,"","bfcTree Output Tree name",kFALSE},
   {"DstOut"      ,""  ,"","Tree"                                       ,"","","Write dst to StTree",kFALSE},
-  {"McEvOut"     ,""  ,"","Tree"                                 ,"","","Write StMcEvent to StTree",kFALSE},
+  {"McEvOut"     ,""  ,"","StMcEvent,Tree"                       ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut"       ,""  ,"","Tree"                                   ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"Simu"        ,""  ,"",""                                                ,"","","Simulated Data",kFALSE},
@@ -382,6 +382,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"trg_T"       ,""  ,"","",""                                     ,"trg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T"       ,""  ,"","",""                                     ,"vpd_Tables","Load vpd_Tables",kFALSE},
 #ifdef __BFC2__
+  {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"SvtIT"       ,""  ,"","",""                                    ,"","ITTF: track using SVT geom",kFALSE},
   {"SsdIT"       ,""  ,"","",""                                    ,"","ITTF: track using SSD geom",kFALSE},
   {"FtpcIT"      ,""  ,"","",""                                    ,"","ITTF: track with FTPC geom",kFALSE},

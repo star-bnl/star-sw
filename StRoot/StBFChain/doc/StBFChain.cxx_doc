@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.9 2006/02/03 19:51:48 fine Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.10 2006/02/06 17:29:38 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -264,7 +264,7 @@ Bfc_st BFC[] = {
   {"InTree" ,"" ,"","in","" ,"","bfcTree Input Tree name",kFALSE},
   {"OutTree" ,"" ,"","Tree","" ,"","bfcTree Output Tree name",kFALSE},
   {"DstOut" ,"" ,"","Tree" ,"","","Write dst to StTree",kFALSE},
-  {"McEvOut" ,"" ,"","Tree" ,"","","Write StMcEvent to StTree",kFALSE},
+  {"McEvOut" ,"" ,"","StMcEvent,Tree" ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut" ,"" ,"","Tree" ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut" ,"" ,"","Tree" ,"","","Write g2t tables to StTree",kFALSE},
   {"Simu" ,"" ,"","" ,"","","Simulated Data",kFALSE},
@@ -365,13 +365,6 @@ Bfc_st BFC[] = {
   {"tpc_T" ,"" ,"","","" ,"tpc_Tables","Load tpc_Tables",kFALSE},
   {"trg_T" ,"" ,"","","" ,"trg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T" ,"" ,"","","" ,"vpd_Tables","Load vpd_Tables",kFALSE},
-
-
-
-
-
-
-
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -937,7 +930,7 @@ Bfc_st BFC2[] = {
   {"InTree" ,"" ,"","in","" ,"","bfcTree Input Tree name",kFALSE},
   {"OutTree" ,"" ,"","Tree","" ,"","bfcTree Output Tree name",kFALSE},
   {"DstOut" ,"" ,"","Tree" ,"","","Write dst to StTree",kFALSE},
-  {"McEvOut" ,"" ,"","Tree" ,"","","Write StMcEvent to StTree",kFALSE},
+  {"McEvOut" ,"" ,"","StMcEvent,Tree" ,"","","Write StMcEvent to StTree",kFALSE},
   {"EvOut" ,"" ,"","Tree" ,"","","Write StEvent to StTree",kFALSE},
   {"GeantOut" ,"" ,"","Tree" ,"","","Write g2t tables to StTree",kFALSE},
   {"Simu" ,"" ,"","" ,"","","Simulated Data",kFALSE},
@@ -1039,6 +1032,7 @@ Bfc_st BFC2[] = {
   {"trg_T" ,"" ,"","","" ,"trg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T" ,"" ,"","","" ,"vpd_Tables","Load vpd_Tables",kFALSE},
 
+  {"NoSvtIT" ,"" ,"","-SvtIT","" ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"SvtIT" ,"" ,"","","" ,"","ITTF: track using SVT geom",kFALSE},
   {"SsdIT" ,"" ,"","","" ,"","ITTF: track using SSD geom",kFALSE},
   {"FtpcIT" ,"" ,"","","" ,"","ITTF: track with FTPC geom",kFALSE},
@@ -1613,7 +1607,9 @@ Int_t StBFChain::Instantiate()
     }
 //		Sti(ITTF) start
     if (maker == "StiMaker") {
-      if (GetOption("SvtIT")) 	mk->SetAttr("activeSvt"	,kTRUE);
+      if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
+      else 
+	if (GetOption("SvtIT")) mk->SetAttr("activeSvt"	,kTRUE);
 
       if (GetOption("SsdIT")){
 				mk->SetAttr("useSsd"	,kTRUE);
@@ -1624,8 +1620,8 @@ Int_t StBFChain::Instantiate()
 				mk->SetAttr("activeFtpc",kTRUE);
       }
       if (GetOption("PixelIT")){
-                               mk->SetAttr("usePixel"  ,kTRUE);
-                               mk->SetAttr("activePixel",kTRUE);
+				mk->SetAttr("usePixel"	,kTRUE);
+				mk->SetAttr("activePixel",kTRUE);
       }
       if (GetOption("IstIT")){
                                mk->SetAttr("useIst"  ,kTRUE);
@@ -1674,6 +1670,10 @@ Int_t StBFChain::Instantiate()
       cmd += "parameterDB->setReqCommonHitsSvt(1);"; // Require 1 hits in common for tracks to be associated
       if (GetOption("IdTruth")) cmd += Form("((StAssociationMaker *) %p)->useIdAssoc();",mk);
       ProcessLine(cmd);
+    }
+    if (maker == "StMiniMcMaker" && GetOption("IdTruth")) {
+      mk->SetMode(1);
+      gMessMgr->QAInfo() << "StBFChain::Instantiate create simplified MiniMcTree in " << maker  << endm;
     }
     // usually, we do maker first and option second but the
     // logic is more readable with option first here (as it
@@ -1806,6 +1806,7 @@ Int_t StBFChain::Instantiate()
       if (GetOption("EastOff")) {cmd += "tclMk->EastOff();"; kopts++;}
       if (GetOption("WestOff")) {cmd += "tclMk->WestOff();"; kopts++;}
       if (GetOption("AllOn"))   {cmd += "tclMk->AllOn();"; kopts++;}
+      if (GetOption("ITTF"))    {cmd += "tclMk->SetMode(1);"; kopts++;}
       if (GetOption("Eval")) {
 	cmd += "tclMk->tclPixTransOn();";// Turn on flat adcxyz table
 	cmd += "tclMk->tclEvalOn();";    //Turn on the hit finder evaluation
@@ -1947,11 +1948,12 @@ Int_t StBFChain::Instantiate()
 	ProcessLine(cmd);
       }
     }
-    if (maker == "StSvtDbMaker"){
+    if (maker == "StSvtDbMaker" || maker == "StSsdDbMaker"){
       mk->SetMode(0);
       // If simulation running make sure pick up simu stuff from db
       if (GetOption("Simu")) mk->SetMode(1);
     }
+    if (maker == "St_srs_Maker" && GetOption("sfs")) mk->SetMode(1);
     
     
     // Hit filtering will be made from a single maker in
@@ -2124,7 +2126,15 @@ Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt, Bool_t Sort
   TObjArray *obj = tChain.Tokenize("[^ ;,]+");
   Int_t nParsed = obj->GetSize();
   Int_t k, N = 0;
-  for (k = 0; k < nParsed && obj->At(k); k++) N++;
+  if (fgStChain && fgStChain->Debug() > 2) {
+    cout << "StBFChain::ParseString " << tChain.Data() << endl;
+    for (k = 0; k < nParsed; k++) {
+      if (obj->At(k)) {
+	cout << k << "\t" << ((TObjString *) obj->At(k))->GetName() << endl;
+      }
+    }
+  }
+  for (k = 0; k < nParsed; k++) {if (obj->At(k)) {if (k != N) obj->AddAt(obj->At(k),N); N++;}}
   nParsed = N;
   // sort options
   StBFChain *chain = (StBFChain *) StMaker::GetChain();
@@ -2202,10 +2212,17 @@ void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
     //    printf ("SetOption: %s %i",fBFC[k].Key,k);
     if (strlen(fBFC[k].Opts) > 0) {
       TObjArray Opts;
-      ParseString(fBFC[k].Opts,Opts, kTRUE);
+      Int_t N =  ParseString(fBFC[k].Opts,Opts, kTRUE);
+      if (Debug() > 2) gMessMgr->QAInfo() << "parse Opts :" << N << "\t" <<  fBFC[k].Opts << endm;
       TIter next(&Opts);
       TObjString *Opt;
-      while ((Opt = (TObjString *) next())) SetOption(Opt->GetName(),fBFC[k].Key);
+      for (Int_t l = 0; l < N; l++) {
+	Opt = (TObjString *) Opts[l];
+	if (Debug() > 2) gMessMgr->QAInfo() << "\tto :" <<  Opt->GetName() << endm;
+	if (Opt) {
+	  SetOption(Opt->GetName(),fBFC[k].Key);
+	}
+      }
       Opts.Delete();
     }
     fBFC[k].Flag = kTRUE;
@@ -2521,8 +2538,8 @@ void StBFChain::SetInputFile (const Char_t *infile){
 void StBFChain::SetOutputFile (const Char_t *outfile){
   if (outfile)               fFileOut = outfile;
   else {
-    if (GetOption("gstar"))  fFileOut = "gtrack";
-    if (GetOption("VMC"))    fFileOut = "VMC";
+    if (GetOption("gstar"))  fFileOut = "gtrack.root";
+    if (GetOption("VMC"))    fFileOut = "VMC.root";
     if (fInFile != "") {
       if (GetOption("fzin") || GetOption("ntin")) {
 	TObjArray words;
