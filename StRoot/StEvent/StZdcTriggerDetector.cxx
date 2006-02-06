@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.11 2004/04/14 22:47:06 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.12 2006/02/06 18:52:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.12  2006/02/06 18:52:59  ullrich
+ * Fixed bug in constructor. mAdc[3] and mAdc[7] were wrong.
+ *
  * Revision 2.11  2004/04/14 22:47:06  ullrich
  * SMD problem fixed.
  *
@@ -53,7 +56,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.11 2004/04/14 22:47:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.12 2006/02/06 18:52:59 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -95,11 +98,11 @@ StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
     mAdc[0] = t.zdcUnAttenuated(west); 
     mAdc[1] = t.zdcADC(west, 3);
     mAdc[2] = t.zdcADC(west, 2);
-    mAdc[3] = t.zdcADC(west, 2);
+    mAdc[3] = t.zdcADC(west, 1);  // was 2 bug ?
     mAdc[4] = t.zdcUnAttenuated(east); 
     mAdc[5] = t.zdcADC(east, 3);
     mAdc[6] = t.zdcADC(east, 2);
-    mAdc[7] = t.zdcADC(east, 2);
+    mAdc[7] = t.zdcADC(east, 1);  // was 2 bug ?
     // TDC
     mAdc[8] = t.zdcTDC(east);
     mAdc[9] = t.zdcTDC(west);
