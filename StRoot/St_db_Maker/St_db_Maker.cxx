@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.96 2005/12/31 01:32:10 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.97 2006/02/06 20:07:48 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.97  2006/02/06 20:07:48  perev
+// Decrease level of aliases 2==>1 to avoid name clashes
+//
 // Revision 1.96  2005/12/31 01:32:10  perev
 // test for memory curruption added
 //
@@ -281,7 +284,7 @@ Int_t St_db_Maker::Init()
 
    if (fDataBase) {
      AddConst(fDataBase);
-     SetOutputAll(fDataBase,2); //  
+     SetOutputAll(fDataBase,1); // Only 1 level of aliases 
      
      if (Debug()>1) fDataBase->ls("*");
    }
