@@ -158,6 +158,10 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
 
   FIXBUG:
   for(int i=0;i<4800;i++) TowerBugFixIndex[i] = i+1;
+  if(date >= 20040101 && date < 20050101)
+  {
+    #include "TowerBug2004.txt"
+  }
   if(date >= 20050101 && date < 20060101)
   {
     #include "TowerBug2005.txt"
@@ -248,13 +252,23 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   // these tables are for PSD decoding //////////////////////////////////
 
   // which PMT Box is connected to each RDO and crate board
-  if(date >= 0) // year 2002/2003 pp and dAu runs
+  if(date >= 0 && date < 20060101) // year 2002/2003 pp and dAu runs
   {
     int PsdModules_tmp[4][15]={
-                              {11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},                //RDO 0
-                              {1,2,3,4,5,6,7,8,9,10,26,27,28,29,30},                         //RDO 1
-                              {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 2
-                              {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60}};               //RDO 3
+                              {11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},                //RDO 8
+                              {1,2,3,4,5,6,7,8,9,10,26,27,28,29,30},                         //RDO 9
+                              {31,32,33,34,35,36,37,38,39,40,41,42,43,44,45},                //RDO 10
+                              {46,47,48,49,50,51,52,53,54,55,56,57,58,59,60}};               //RDO 11
+    for(int i=0;i<4;i++) for(int j=0;j<15;j++) PsdModules[i][j]=PsdModules_tmp[i][j];
+    goto PSDTables;
+  }
+  if(date >= 20060101) // year 2006 
+  {
+    int PsdModules_tmp[4][15]={
+                              {11,12,13,14,15,16,17,18,19,20,21,22,23,24,25},                //RDO 8
+                              {26,27,28,29,30,1,2,3,4,5,6,7,8,9,10},                         //RDO 9
+                              {54,55,56,57,58,59,60,31,32,33,34,35,36,37,38},                //RDO 10
+                              {39,40,41,42,43,44,45,46,47,48,49,50,51,52,53}};               //RDO 11
     for(int i=0;i<4;i++) for(int j=0;j<15;j++) PsdModules[i][j]=PsdModules_tmp[i][j];
     goto PSDTables;
   }
