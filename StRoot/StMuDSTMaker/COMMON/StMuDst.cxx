@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.38 2005/12/13 03:12:13 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.39 2006/02/07 03:26:08 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -266,10 +266,16 @@ StEvent* StMuDst::createStEvent() {
     }
   }
 
-  /// add primary tracks to tracknodes and primary vertex
-  int nPrimaries = arrays[muPrimary]->GetEntries();
+  /// add primary tracks and primary vertex
+  ///
+  /// This only uses the deafult vertex and tracks in case 
+  /// of multiple primary vertixes.
+
+  TObjArray *prim_tracks=primaryTracks();
+
+  int nPrimaries = prim_tracks->GetEntries();
   for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
-    StTrack* t = createStTrack(primaryTracks(i));
+    StTrack* t = createStTrack((StMuTrack*)prim_tracks->At(i));
     Int_t global_idx=primaryTracks(i)->index2Global();
     if (global_idx >= 0 && global_indices[global_idx] >= 0) 
       trackNodes[global_indices[global_idx]]->addTrack( t );
@@ -435,6 +441,11 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.39  2006/02/07 03:26:08  mvl
+ * Changed createStEvent (use by MuDst2StEventmaker) to only copy primary tracks
+ * that belong to the first primary vertex. This prevents segvio for events with
+ * multiple primary vertices.
+ *
  * Revision 1.38  2005/12/13 03:12:13  mvl
  * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
  * to no longer rely on track keys for matching global and primary tracks.
