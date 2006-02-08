@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.1 2006/02/03 20:11:56 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.2 2006/02/08 20:57:33 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.2  2006/02/08 20:57:33  fisyak
+ * Set proper Detector Id
+ *
  * Revision 1.1  2006/02/03 20:11:56  fisyak
  * The initial revision
  *
@@ -72,6 +75,7 @@ Int_t StPixelFastSimMaker::Make()
 						   1, 1, id++, kHftId);
 		  cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
 		       <<*tempHit<<endl;
+		  tempHit->setDetectorId(kHftId);
 		  tempHit->setVolumeId(mcH->volumeId());                   
 		  tempHit->setKey(mcH->key());                             
 		  StMcPixelHit *mcP=dynamic_cast<StMcPixelHit*>(mcH);     
@@ -107,6 +111,7 @@ Int_t StPixelFastSimMaker::Make()
 		for (UInt_t i = 0; i < nh; i++) {
 		  StMcHit *mcH = istHitCol->layer(k)->hits()[i];
 		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
+		  tempHit->setDetectorId(kIstId); 
 		  tempHit->setVolumeId(mcH->volumeId());                   
 		  tempHit->setKey(mcH->key());                             
 		                                                 
