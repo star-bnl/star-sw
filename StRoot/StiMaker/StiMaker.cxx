@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.160  2006/02/08 20:56:39  fisyak
+// use kHftId and kIstId for StiDetector groups instead of hadr coded numbers 9999 and 9998
+//
 // Revision 1.159  2006/01/19 20:21:52  perev
 // Ist added
 //
@@ -356,13 +359,13 @@ Int_t StiMaker::InitDetectors()
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
       _toolkit->add(group = new StiPixelDetectorGroup(IAttr("activePixel"),SAttr("pixelInputFile")));
-      group->setGroupId(9999);
+      group->setGroupId(kHftId);
     }
  if (IAttr("useIst"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:IST"<<endl;
       _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
-      group->setGroupId(9998);
+      group->setGroupId(kIstId);
     }
   return kStOk;
 }
