@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.12 2004/11/30 19:19:12 ullrich Exp $
+ * $Id: StTriggerData2004.cxx,v 2.13 2006/02/08 16:29:46 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.13  2006/02/08 16:29:46  ullrich
+ * Fixed bug in zdcUnAttenuated.
+ *
  * Revision 2.12  2004/11/30 19:19:12  ullrich
  * Added new access function for EEMC data (Akio).
  *
@@ -560,7 +563,7 @@ unsigned short StTriggerData2004::zdcAtAddress(int address, int prepost) const
 
 unsigned short StTriggerData2004::zdcUnAttenuated(StBeamDirection eastwest, int prepost) const
 {
-    if(eastwest==east) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[3];}
+    if(eastwest==east) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[4];} // fixed bug: was 3
     if(eastwest==west) {return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[0];}
     return 0;
 }
