@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.41 2005/07/15 21:45:09 mvl Exp $
+ * $Id: StMuDstMaker.h,v 1.42 2006/02/08 23:35:36 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -134,6 +134,9 @@ class StMuDstMaker : public StIOInterFace {
   /// Returns pointer to the current TTree, the top level io structure that holds the event, track, v0, etc. information in branches of that tree.
   TTree* tree();
 
+  /// Returns name of current input or output file, depending on mode (GetFileName does the same, see StIOInterface
+  virtual const char *GetFile() const;
+
   /// Sets the split level for the file and all branches. Please refer to the ROOT manual (http://root.cern.ch) for more information.
   void setSplit(int=99);
   /// Sets the buffer size for all branches.
@@ -146,7 +149,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.41 2005/07/15 21:45:09 mvl Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.42 2006/02/08 23:35:36 mvl Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -330,6 +333,11 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.42  2006/02/08 23:35:36  mvl
+ * Added overloaded version for StIOInterface::GetFile() to return name
+ * of current input or output file (depending on read or write mode)
+ * StIOInterface::GetFileName() is an alias for this function.
+ *
  * Revision 1.41  2005/07/15 21:45:09  mvl
  * Added support for multiple primary vertices (StMuPrimaryVertex). Track Dcas are now calculated with repect to the first vertex in the list (highest rank), but another vertex number can be specified. Tarcks also store the index of the vertex they belong to (StMuTrack::vertexIndex())
  *
