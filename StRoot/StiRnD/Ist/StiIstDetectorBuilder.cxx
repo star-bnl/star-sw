@@ -12,6 +12,7 @@
 #include "StiIstDetectorBuilder.h" 
 #include "StiIstIsActiveFunctor.h"
 #include "StGetConfigValue.hh"
+#include "Sti/StiElossCalculator.h"
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFile)
     : StiDetectorBuilder("Ist",active,inputFile)
@@ -54,7 +55,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     const unsigned int nRows=3;
     setNRows(nRows);
     int nsectors[3];
-    const char* detectorParamFile = "/star/institutions/mit/mmiller/hft/params.txt";
+    const char* detectorParamFile = "/star/u/wleight/fromMike/params.txt";
     cout <<"get input values from file:\t"<<detectorParamFile<<endl;
     StGetConfigValue(detectorParamFile,"nLadder1",nsectors[0]);
     StGetConfigValue(detectorParamFile,"nLadder2",nsectors[1]);
@@ -68,6 +69,9 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     _gas            = add(new StiMaterial("IstAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
     //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
     _fcMaterial     = add(new StiMaterial("IstSi", 14.,      28.0855,   2.33,     21.82,           5.) );
+
+    double ionization=_fcMaterial->getIonization();
+    StiElossCalculator* fcMatElossCalculator=new StiElossCalculator(_fcMaterial->getZOverA(),ionization*ionization,_fcMaterial->getA(),_fcMaterial->getZ(),_fcMaterial->getDensity());
 
     double radii[nRows];
     StGetConfigValue(detectorParamFile,"r1",radii[0]);
@@ -134,6 +138,9 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 		    pDetector->setShape(pShape);
 		    pDetector->setPlacement(pPlacement);
 		    pDetector->setHitErrorCalculator(&_calculator);
+		    pDetector->setElossCalculator(fcMatElossCalculator);
+		    pDetector->setKey(1,row);
+		    pDetector->setKey(2,sector);
 
 		    //Put in container
 		    add(row, sector, pDetector);
