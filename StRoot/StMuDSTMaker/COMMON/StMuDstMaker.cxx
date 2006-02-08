@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.72 2005/10/18 17:55:43 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.73 2006/02/08 23:35:36 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -498,6 +498,12 @@ int StMuDstMaker::Finish() {
   return 0;
 }
 //-----------------------------------------------------------------------
+const char* StMuDstMaker::GetFile() const {
+  if (mIoMode== ioWrite ) return mCurrentFileName.c_str();
+  if (mIoMode== ioRead && mChain && mChain->GetFile())
+    return mChain->GetFile()->GetName();
+  return 0;
+} 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::setBranchAddresses() {
@@ -1257,6 +1263,11 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.73  2006/02/08 23:35:36  mvl
+ * Added overloaded version for StIOInterface::GetFile() to return name
+ * of current input or output file (depending on read or write mode)
+ * StIOInterface::GetFileName() is an alias for this function.
+ *
  * Revision 1.72  2005/10/18 17:55:43  mvl
  * Fixed initialisation problem of mCurrentFile, leading to potential segvio when creating MuDst
  *
