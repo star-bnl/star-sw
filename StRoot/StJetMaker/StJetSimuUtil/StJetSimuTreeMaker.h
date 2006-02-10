@@ -1,4 +1,3 @@
-
 //  StJetSimuTreeMaker.h
 
 #ifndef STAR_StJetSimuTreeMaker
@@ -52,34 +51,30 @@ class StJetSimuTreeMaker : public StMaker {
   int EJP[6];//EEMC ADC for each JP
   int bbc;   //bbc=true passes BBC cut
   int Badc[48];// holds bbc adcs
-
-
-
+  float TowHtEt[20];//holds Highest Et tower per eta ring in BEMC
+  float s,t,u,cos_th,hard_p,x1,x2;
+ 
+  //asymmetry
+  double partonic_all,df1,df2,f1,f2,Q2,weight;
+  int flavor1, flavor2, flavor3, flavor4;
+  //trigger 
+  float Alex_ht_Et;
+  int Alex_ht_id,Alex_ht_DSM;
+  int JP1_2004,JP1_2004_Patch,JP1_2004_DSM;
+  int HT1_2004,HT1_2004_Tow,HT1_2004_DSM;
   void setPrintOption(int p)
     { print = p;
     cout <<"Print option = "<<print<<endl;
     };
     
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StJetSimuTreeMaker.h,v 1.1 2004/10/12 18:49:12 mmiller Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StJetSimuTreeMaker.h,v 1.2 2006/02/10 18:08:32 mmiller Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
  private:
   bool print;
   TString m;
-  int Tcount; 
-  float SMDR; //radius of BSMD
-  float pi;
-  float Jtheta;
-  float JEMCtheta;
-  float JEMCeta;
-  float Radius;
-  float dPhi;
-  float dEta;
-
-  void BemcPoints();
-  void TpcTracks();
 
   ClassDef(StJetSimuTreeMaker,0)   //StAF chain virtual base class for Makers
 };
@@ -89,6 +84,9 @@ class StJetSimuTreeMaker : public StMaker {
 
 
 // $Log: StJetSimuTreeMaker.h,v $
+// Revision 1.2  2006/02/10 18:08:32  mmiller
+// Added Renee's modifications to incorporate 2005 Jet patch trigger.
+//
 // Revision 1.1  2004/10/12 18:49:12  mmiller
 // Added StJetSimuUtil (should have added before, not sure why it didn't)
 //

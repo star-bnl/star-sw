@@ -1,4 +1,4 @@
-// $Id: StJetSimuTrigMaker.h,v 1.1 2004/10/12 18:49:12 mmiller Exp $
+// $Id: StJetSimuTrigMaker.h,v 1.2 2006/02/10 18:08:32 mmiller Exp $
 
 #ifndef STAR_StJetSimuTrigMaker
 #define STAR_StJetSimuTrigMaker
@@ -22,6 +22,7 @@ class TH1F;
 class TH2F;
 class StMuDst;
 class StMuEmcCollection;
+class StEmcCollection;
 class StMuDstMaker;
 class StEmcGeom;
 class StEvent;
@@ -30,23 +31,36 @@ class StBbcTriggerDetector;
 class StMuEmcPoint;
 class StMuTrack;
 class StEventInfo;
-
+class StBemcTables;
+class StJetEmcTrigSim;
+//class StEmcTriggerMaker;
+//class StBemcTrigger;
 class StJetSimuTrigMaker : public StMaker {
 
  private:
- StMuDstMaker *muDstMaker;   
+ StMuDstMaker *muDstMaker;
  StMuEmcCollection *muEmcCol;
  StEmcGeom *emcGeom; 
  StMuEvent *muEvent;
- StMuEmcPoint *points;
- StMuTrack *primTrack;
+ StBemcTables *myTable;
+ StJetEmcTrigSim *htTrig;
+ //Uncomment once you cvs co StEmcTriggerMaker
+ //StEmcTriggerMaker *trgMaker;
+ //StBemcTrigger *bemcTrig;
 
- int pointArray;//number of values in array for point E,phi,eta,sinTheta
  int det;//detector number =1 for BTOW
+ int id;
  int Bmod;//BEMC module from 1-120
  int Bsub;//BEMC submodule 1- 2
  int Beta;//BEMC tower 1-20
- int BTowADC;//BEMC tower ADC
+ float Teta;//BEMC actual eta
+ float Tphi;//BEMC actual phi
+ int BTowADC;//BEMC tower ADC (not pedestal subtracted)
+ float Benergy;//BEMC tower Energy
+ float Bgain;//BEMC tower gain
+ float Bped;//BEMC tower ped
+ int Bstat;//BEMC tower status
+ float Brms;//BEMC tower ped rm
  int NumETow;//#Endcap towers
  int Esec;//EEMC sector 1-12
  int Esub;//EEMC subsector 1-5
@@ -61,6 +75,8 @@ class StJetSimuTrigMaker : public StMaker {
   virtual       ~StJetSimuTrigMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
+  void ReneeBEMC();
+  void ReneeEEMC();
   void Sum(int *,int *);
   void Max(int *,int *);
 
@@ -80,24 +96,20 @@ class StJetSimuTrigMaker : public StMaker {
   int jpB_hit_num[BemcJP];//Holds number of hits per JP
   int tpBsum[BemcTP];// Holds Trigger Patch energy sum
   int tpBmax[BemcTP];// Holds Trigger Patch HT 
+  float TowEt[20];//Holds max Et tower from each eta ring
 
   int jpEsum[EemcJP];//Endcap -Holds jet patch energy sum
   int jpEmax[EemcJP];//Holds jet patch HT max
   int jpE_hit_num[EemcJP];//Holds number of hits per JP
   int tpEsum[EemcTP];// Holds Trigger Patch energy sum
   int tpEmax[EemcTP];// Holds Trigger Patch HT 
-    
-  int numPoints; //number of points in barrel
-  float pointE[1000];//Energy of points
-  float pointPhi[1000];//Phi of points
-  float pointEta[1000];//Eta of points
-  float sinTheta[1000];//sin(theta)
+  
+  float Alex_ht_Et;//from StEmcTrigSimu hightower et
+  int Alex_ht_DSM;//from StEmcTrigSimu hightower 6bit DSM
+  int Alex_ht_id;//from StEmcTrigsimu hightower id
 
-  int nTracks;//number of tracks in the event
-  float ptTrack[100];//pT of each track
-  float phiTrack[100];//phi of each track
-  float etaTrack[100];//eta of each track
-  int qTrack[100];//charge of each track
+  int HT1_2004_dsm,HT1_2004_evt,HT1_2004_id;
+  int JP1_2004_dsm,JP1_2004_evt,JP1_2004_id;
  
   void setPrintOption(int p)
     { print = p;
@@ -105,7 +117,7 @@ class StJetSimuTrigMaker : public StMaker {
 
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StJetSimuTrigMaker.h,v 1.1 2004/10/12 18:49:12 mmiller Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StJetSimuTrigMaker.h,v 1.2 2006/02/10 18:08:32 mmiller Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -116,6 +128,9 @@ class StJetSimuTrigMaker : public StMaker {
 
 
 // $Log: StJetSimuTrigMaker.h,v $
+// Revision 1.2  2006/02/10 18:08:32  mmiller
+// Added Renee's modifications to incorporate 2005 Jet patch trigger.
+//
 // Revision 1.1  2004/10/12 18:49:12  mmiller
 // Added StJetSimuUtil (should have added before, not sure why it didn't)
 //
