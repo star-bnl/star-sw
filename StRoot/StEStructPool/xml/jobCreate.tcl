@@ -235,17 +235,25 @@ proc ::jobCreate::createWindow {} {
     if {[info exists ::jobCreate::interfaceWindow]} {
         destroy $::jobCreate::interfaceWindow
     }
-    set  ::jobCreate::interfaceWindow [toplevel .interfaceWindow -width 400 -height 566]
+    set  ::jobCreate::interfaceWindow [toplevel .interfaceWindow -width 600 -height 600]
     wm title $::jobCreate::interfaceWindow "STAR analyisis batch job submission interface"
 
     set m [menu $::jobCreate::interfaceWindow.menu]
     $::jobCreate::interfaceWindow configure -menu $m
     set file [menu $m.file]
+
+    set sw  [ScrolledWindow $::jobCreate::interfaceWindow.sw -relief sunken -borderwidth 2]
+    set sff [ScrollableFrame $::jobCreate::interfaceWindow.sw.f]
+    $sw setwidget $sff
+    set sf  [$sff getframe]
+    pack $sw -fill both -expand true
+
     $m add cascade -label File -menu $file
-    $file add command -label "New Schema File..." -command [namespace code getNewSchema]
-    $file add command -label "Create Job Files"   -command [namespace code createJobFiles]
-    $file add command -label "Submit Job"         -command [namespace code submitJob]
-    $file add command -label "Start jobMonitor"   -command [namespace code startJobMonitor]
+    $file add command -label "New Schema File..."      -command [namespace code getNewSchema]
+    $file add command -label "Read Job Description..." -command [namespace code [list getJobXmlFile $sf]]
+    $file add command -label "Create Job Files"        -command [namespace code createJobFiles]
+    $file add command -label "Submit Job"              -command [namespace code submitJob]
+    $file add command -label "Start jobMonitor"        -command [namespace code startJobMonitor]
     $file add command -label Exit -command [namespace code exit]
     set edit [menu $m.edit]
     $m add cascade -label Edit -menu $edit
@@ -253,9 +261,9 @@ proc ::jobCreate::createWindow {} {
     set help [menu $m.help]
     $m add cascade -label Help -menu $help
     $help add command -label Help -command [namespace code [list displayHelp ""]]
-    pack [frame $::jobCreate::interfaceWindow.all]
 
-    +JobDescriptionFrame $::jobCreate::interfaceWindow.all
+
+    +JobDescriptionFrame $sf
 }
 ################################################################################
 # Creates buttons for choices offered in jobDescription
@@ -274,12 +282,11 @@ proc ::jobCreate::+JobDescriptionFrame {t} {
 
     set f [frame $t.f]
     pack $f -fill x
-    button $f.newfDefault -pady 1 -text Browse \
-            -command [namespace code [list getJobXmlFile $t]]
-
     set ::jobCreate::jobXmlFile ""
+    set ::jobCreate::jobSelectComboBox $f.cSelectJobXml
     ComboBox::create $f.cSelectJobXml \
             -editable  false          \
+            -state     disabled       \
             -textvariable ::jobCreate::jobXmlFile  \
             -width     30             \
             -modifycmd "$f.bSelectJobXml configure -state normal"
@@ -287,12 +294,13 @@ proc ::jobCreate::+JobDescriptionFrame {t} {
             -text "Use selection"   \
             -state disabled         \
             -command [namespace code "+Type $t \[file join $::jobCreate::jobCreatePath jobFiles \[$f.cSelectJobXml get\]\]"]
-    pack $f.newfDefault $f.cSelectJobXml $f.bSelectJobXml -side left -anchor nw
+    pack $f.cSelectJobXml $f.bSelectJobXml -side left -anchor nw
 }
 ################################################################################
 # Extract list of default xml job description files for selected type of job.
 ################################################################################
 proc ::jobCreate::+listDefaultXml {type t c b} {
+puts "::jobCreate::+listDefaultXml set type $type; set t $t; set c $c; set b $b"
     set vals [list]
     switch $type {
         Data {
@@ -332,7 +340,7 @@ proc ::jobCreate::+listDefaultXml {type t c b} {
     set ::jobCreate::jobXmlFile ""
     $b configure -state disabled
     $c configure -values $vals
-    $c setvalue first
+    $c configure -state normal -text ">>Make, then Use Selection<<"
     if {[winfo exists $t.job]} {
         destroy $t.job
     }
@@ -370,7 +378,7 @@ proc ::jobCreate::+Type {t file} {
 ################################################################################
 proc ::jobCreate::getJobXmlFile {t} {
     set fileName [tk_getOpenFile -filetypes {{schema {.xml}} {any {.*}}}]
-    if {$fileName eq ""} {
+    if {$fileName ne ""} {
         if {[catch {validateFile $fileName $::jobCreate::schemaFileName}]} {
             set message "The file, $fileName, did not pass schema validation. \
                          You really should fix something, \
@@ -381,6 +389,7 @@ proc ::jobCreate::getJobXmlFile {t} {
                 return
             }
         }
+        $::jobCreate::jobSelectComboBox configure -values "" -state disabled
         set ::jobCreate::jobXmlFile $fileName
         +Type $t $fileName
     }
@@ -1314,20 +1323,45 @@ proc ::jobCreate::createJobFiles {} {
     # Allow abort or destroy/recreate.
     if {[file exists $path]} {
         if {[file isdir $path]} {
-            set title "Directory $path already exists"
-            set msg   "The directory, $path, already exists. \
-                     Do you want to brutally destroy it?"
-            set cont [tk_messageBox -message $msg -type yesno \
-                    -icon warning -title $title -default no]
-            if {!$cont} {
+            # Check that we have all the directories we expect and only
+            # those directories.
+            set dirs [list]
+            foreach dir [glob $path/*/] {
+                lappend dirs [file tail $dir]
+            }
+            set normal [list QA logs cuts data scripts txt stats]
+            set extra [lremove $dirs $normal]
+            set missing [lremove $normal $dirs]
+            if {[llength $extra] == 0 && [llength $missing] == 0} {
+                set title "Directory $path already exists"
+                set msg   "The directory, $path, already exists. \
+                         It has the right directories to have been \
+                         previously created by me. Do you want to \
+                         brutally destroy it and all its contents and \
+                         replace it with a fresh set of job files?"
+                set cont [tk_messageBox -message $msg -type yesno \
+                        -icon warning -title $title -default no]
+                if {!$cont} {
+                    return false
+                }
+                file delete -force $path
+            } else {
+                set title "Directory $path already exists"
+                set msg   "The directory, $path, already exists. \
+                         It has the wrong directories to have been \
+                         previously created by me. If you really want \
+                         to use this directory name please delete it from \
+                         outside this program and try again."
+                set cont [tk_messageBox -message $msg -type ok -title $title]
                 return false
             }
-            file delete -force $path
         }
         if {[file isfile $path]} {
             set title "A file $path exists"
             set msg   "A file, $path, exists. \
-                     Do you want to brutally destroy this \
+                     You may want to cancel this operation to \
+                     consider if this file is important to you. \
+                     If you proceed we will brutally destroy this \
                      file and replace it with a directory structure?"
             set cont [tk_messageBox -message $msg -type yesno \
                     -icon warning -title $title -default no]
@@ -1381,7 +1415,8 @@ proc ::jobCreate::createJobFiles {} {
     # First line of xml file should be <?xml ... ?> which I don't get from asXML
     set f [open $path/scripts/job.xml w]
     puts $f "<?xml version='1.0' encoding='utf-8' ?>"
-    puts $f [applyXsl job.xsl asXML]
+    set jobDesc [applyXsl job.xsl asXML]
+    puts $f $jobDesc
     close $f
 
     # Might have Hijing Parameters
@@ -1394,10 +1429,16 @@ proc ::jobCreate::createJobFiles {} {
 
     # Save the dom tree as an xml file
     # (use value of jobName for the file name.)
+    # We get linefeeds in the <command> section which cause problems when
+    # reading this file back in. For some reason jobDesc (above) does not
+    # have these linefeeds. Do a replacement here.
     set node [$::jobCreate::jobInfo selectNodes //jobName]
     set f [open $path/scripts/[$node text].xml w]
     puts $f "<?xml version='1.0' encoding='utf-8' ?>"
-    puts $f [$::jobCreate::jobInfo asXML]
+    set jobInfo [$::jobCreate::jobInfo asXML]
+    regexp {<command>.+</command>} $jobDesc cmdBlock
+    regsub {<command>.+</command>} $jobInfo $cmdBlock subInfo
+    puts $f $subInfo
     close $f
 
     # Also write the jobPurpose into a README file fur user convenience.
@@ -1611,6 +1652,9 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end " o File\n" bullet
     $w insert end "- New Schema File...\n" n
     $w insert end "  Primarily for debugging/developing.\n" n
+    $w insert end "- Read Job Description...\n" n
+    $w insert end "  Read in previously created xml description of a job. " n
+    $w insert end "  This file may have previously been created by this interface.\n" n
     $w insert end "- Create Job Files\n" n
     $w insert end "  Create output directory hierarchy and populate with files " n
     $w insert end "created by this interface. (Does not invoke the scheduler.)\n" n

@@ -264,10 +264,18 @@ hell is in this directory.
 <!-- The event cut name is restricted to valid cut names. -->
 <xs:simpleType name='eventCutNames'>
     <xs:restriction base='xs:string'>
-        <xs:enumeration value='triggerWord'    Comment='min, max trigger words'/>
-        <xs:enumeration value='primaryVertexZ' Comment='min, max Z vertex position'/>
-        <xs:enumeration value='centrality'     Comment='min, max reference multiplicity'/>
-        <xs:enumeration value='numTracks'      Comment='min max tracks passing quality cuts'/>
+        <xs:enumeration value='triggerWord'>
+            <xs:Comment>min, max trigger words</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='primaryVertexZ'>
+            <xs:Comment>min, max Z vertex position</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='centrality'>
+            <xs:Comment>min, max reference multiplicity</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='numTracks'>
+            <xs:Comment>min max tracks passing quality cuts</xs:Comment>
+        </xs:enumeration>
     </xs:restriction>
 </xs:simpleType>
 
