@@ -57,7 +57,7 @@
             <jobName widget='entry' id='jobName'>hijingTesting</jobName>
             <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Hijing/test</outputDir>
             <starLibVersion widget='entry' id='starLibVersion'>$env(STAR_VERSION)</starLibVersion>
-            <localDir widget='entry' id='localDir'>/afs/rhic/star/users/prindle/star/fluctuations</localDir>
+            <localDir widget='entry' id='localDir'>[pwd]</localDir>
             <eventsPerJob widget='entry' id='eventsPerJob'>1000</eventsPerJob>
             <jobPurpose widget='text'>You should replace this text with the reason for this job.
             </jobPurpose>

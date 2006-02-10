@@ -14,7 +14,7 @@
      output directory (which is part of the jobControl element) -->
 
 
-<xsl:template match='Pythia|jobControl|eventCuts|trackCuts|hijingParams|doEStructMacro'/>
+<xsl:template match='Pythia|jobControl|eventCuts|trackCuts|pairCuts|hijingParams|doEStructMacro'/>
 
 <xsl:template match='starSubmit'>
     <xsl:element name='job'>
@@ -36,9 +36,7 @@
 
 <xsl:template match='refer[@refersTo]'>
     <xsl:variable name='reference' select='@refersTo'/>
-    <xsl:for-each select='//*[@id=$reference]'>
-        <xsl:value-of select="."/>
-    </xsl:for-each>
+    <xsl:for-each select='//*[@id=$reference]'><xsl:value-of select="."/></xsl:for-each>
 </xsl:template>
 
 <xsl:template match='stdout|stderr|stdin|input|output'>
