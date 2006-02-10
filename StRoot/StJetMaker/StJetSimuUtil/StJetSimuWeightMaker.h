@@ -15,6 +15,14 @@
 
 #ifndef StMaker_H
 #include "StMaker.h"
+extern "C" void polar_(int*,double*,double*,double*,int*);
+extern "C" void parpol2_(int*, double*, double*, double* ,double* , double*, double*, double*, double*, double*, double*);
+extern "C" void grv98pa_(int*, double*, double*, double*, double*, double*, double*, double*, double*);
+extern "C" void grv98f2_(int*, double*, double*, double*, double*, double*, double*);
+extern "C" void unpolar_(int*, double*, double*, double*, int*);
+extern "C" void num_(double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
+extern "C" void denom_(double*,double*,double*,double*,double*,double*,double*,double*,double*,double*,double*);
+extern "C" Double_t ctq5pd_(int*,int*,double*,double*,int*);
 #endif
 
 class StJetSimuTrigMaker;
@@ -29,6 +37,8 @@ class StJetSimuWeightMaker : public StMaker
 
  private:
   bool print;
+  int polset;
+  int unpolset;
 
  protected:
 
@@ -37,7 +47,8 @@ class StJetSimuWeightMaker : public StMaker
   virtual  ~StJetSimuWeightMaker();
   virtual Int_t Init();
   virtual Int_t  Make();
-  
+  void Zero();
+
   //pointers to makers
   StMcEventMaker *mcEventMaker;
   StJetSimuTrigMaker *trigMaker;
@@ -49,17 +60,28 @@ class StJetSimuWeightMaker : public StMaker
   int geantID;//event number from GEANT table
   int evtid; //event number from MuDst
   int pid;   //subprocess id from StMcEvent
-  float weight;
-  float parton1[11];
-  float parton2[11];
+  float parton1[11],parton2[11];
+  int flavor1,flavor2,flavor3,flavor4;
   float s,t,u,hard_p,cos_th,x1,x2;
+  int polid, unpolid, pol_id_flag, unpol_id_flag;
+  double partonic_all,df1,df2,f1,f2,Q2,weight;
 
+  Double_t getPolPDF(int x1, double d1, double d2);
+  Double_t getUnPolPDF(int x1, double d1, double d2);
+  Double_t getPartonicALL(double a, double b, double c, int d, int e, int f, int g, int h);
   void setPrintOption(int p){
     print = p;
   } 
+  void setUnpolPDF(int p){
+    unpolset=p;
+  }
+  void setPolPDF(int p){
+    polset=p;
+  }
+
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StJetSimuWeightMaker.h,v 1.1 2004/10/12 18:49:12 mmiller Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StJetSimuWeightMaker.h,v 1.2 2006/02/10 18:08:32 mmiller Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -71,6 +93,9 @@ class StJetSimuWeightMaker : public StMaker
 
 
 // $Log: StJetSimuWeightMaker.h,v $
+// Revision 1.2  2006/02/10 18:08:32  mmiller
+// Added Renee's modifications to incorporate 2005 Jet patch trigger.
+//
 // Revision 1.1  2004/10/12 18:49:12  mmiller
 // Added StJetSimuUtil (should have added before, not sure why it didn't)
 //
