@@ -42,6 +42,11 @@ class StEmcDecoder
     int       TowerBugFixIndex[4800];
     bool      fixTowerMap;
     
+    int       JetPatchFromTriggerPatch[300];
+    int       JetPatchSeqFromTriggerPatch[300];
+    int       TriggerPatchFromJetPatchAndSeq[300];
+
+    
     int       SmdModules[8][15];
     int       FEE1[4],FEE2[4],FEE3[4];
     int       connector1[20],connector2[20],connector3[20];
@@ -79,8 +84,10 @@ class StEmcDecoder
     int       GetTowerBin(int,int&,int&,int&);///<Transition from environment rid to m,e,s for towers
     int       GetTowerBugCorrectionShift(int,int&);///<Returns the index shift for the tower in original map
     
-    int       GetTriggerPatchFromCrate(int,int,int&); // returns the trigger patch from crate and sequence in the crate
-    int       GetCrateAndSequenceFromTriggerPatch(int,int&,int&); // returns the crate number and start point for a given trigger patch
+    int       GetTriggerPatchFromCrate(int,int,int&); ///< returns the trigger patch from crate and sequence in the crate
+    int       GetCrateAndSequenceFromTriggerPatch(int,int&,int&); ///< returns the crate number and start point for a given trigger patch
+    int       GetTriggerPatchFromJetPatch(int, int, int&); ///< returns the trigger patch from big jet patch and the sequence in it
+    int       GetJetPatchAndSequenceFromTriggerPatch(int, int&, int&); ///< return the big jet patch and sequence number within it from the
     
     int       GetSmdCoord(int,int,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
     int       GetSmdCoord(int,int,int&,int&,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD. Also returns smd-wire and A_value
