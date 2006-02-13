@@ -55,7 +55,7 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time, bool TowerMapBug
 	  PsdIndex[id-1]=index;
 	} else {
 	  PsdRDO[id-1]  = -1;
-	  PsdIndex[id-1]= -1;
+	  PsdIndex[id-1]= -1; 
 	}
       }
     }
@@ -298,15 +298,49 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   
   if(date>=0)
   {
-    int TriggerPatch_tmp[30] = {150,160,170,180,190,
-                                200,210,220,230,240,
-                                250,260,270,280,290,
+    int TriggerPatch_tmp[30] = {180,170,160,150,290,
+                                280,270,260,250,240,
+                                230,220,210,200,190,
                                  30, 20, 10,  0,140,
                                 130,120,110,100, 90,
                                  80, 70, 60, 50, 40};
+//    int TriggerPatch_tmp[30] = {150,160,170,180,190,
+//                                200,210,220,230,240,
+//                                250,260,270,280,290,
+//                                 30, 20, 10,  0,140,
+//                                130,120,110,100, 90,
+//                                 80, 70, 60, 50, 40};
     int TriggerSequence_tmp[10] = {0,1,2,3,4,5,6,7,8,9};
-    for(int i=0;i<30;i++)    TriggerPatch[i] = TriggerPatch_tmp[i];                         
-    for(int i=0;i<10;i++)    TriggerSequence[i] = TriggerSequence_tmp[i];                         
+    for(int i=0;i<30;i++)    TriggerPatch[i] = TriggerPatch_tmp[i];
+    for(int i=0;i<10;i++)    TriggerSequence[i] = TriggerSequence_tmp[i];
+
+    int JPSTART[12] =           {0,30,50,80,100,130,150,180,200,230,250,280};
+    int JPEXTRA[12][5] =       {{21, 23, 25, 27, 29},
+                                {20, 22, 24, 26, 28},
+                                {71, 73, 75, 77, 79},
+                                {70, 72, 74, 76, 78},
+                                {121, 123, 125, 127, 129},
+                                {120, 122, 124, 126, 128},
+                                {171, 173, 175, 177, 179},
+                                {170, 172, 174, 176, 178},
+                                {221, 223, 225, 227, 229},
+                                {220, 222, 224, 226, 228},
+                                {271, 273, 275, 277, 279},
+                                {270, 272, 274, 276, 278}};
+    for(int jetPatch = 0;jetPatch < 12;jetPatch++) {
+        for(int seq = 0;seq < 25;seq++) {
+            int triggerPatch;
+            if ((jetPatch % 2) == 0) {
+                triggerPatch = (seq < 20) ? (JPSTART[jetPatch] + seq) : (JPEXTRA[jetPatch][seq - 20]);
+            } else {
+                triggerPatch = (seq < 5) ? (JPEXTRA[jetPatch][seq]) : (JPSTART[jetPatch] + seq - 5);
+            }
+            JetPatchFromTriggerPatch[triggerPatch] = jetPatch;
+            JetPatchSeqFromTriggerPatch[triggerPatch] = seq;
+            TriggerPatchFromJetPatchAndSeq[(jetPatch * 25) + seq] = triggerPatch;
+        }
+    }
+
   }
   return;
 }
@@ -522,6 +556,30 @@ int StEmcDecoder::GetCrateAndSequenceFromTriggerPatch(int PATCH,int& CRATE,int& 
   for(int i=0;i<10;i++) if(TriggerSequence[i]==S) { crate_seq = i*16; break;}
   return 1;
 }
+//--------------------------------------------------------
+/*!
+\param jetPatch is the jet patch id (0 <= jetPatch <= 11)
+\param jetPatch_seq is the trigger patch position within the jet patch (0 <= jetPatch_seq <= 24)
+\param triggerPatch is the trigger patch id (0 <= triggerPatch <=299)
+*/
+int StEmcDecoder::GetTriggerPatchFromJetPatch(int jetPatch, int jetPatch_seq, int &triggerPatch) {
+    if (jetPatch<0 || jetPatch>=12 || jetPatch_seq<0 || jetPatch_seq>=25) return 0;
+    triggerPatch = TriggerPatchFromJetPatchAndSeq[(jetPatch * 25) + jetPatch_seq];
+    return 1;
+}
+//--------------------------------------------------------
+/*!
+\param jetPatch is the jet patch id (0 <= jetPatch <= 11)
+\param jetPatch_seq is the trigger patch position within the jet patch (0 <= jetPatch_seq <= 24)
+\param triggerPatch is the trigger patch id (0 <= triggerPatch <=299)
+*/
+int StEmcDecoder::GetJetPatchAndSequenceFromTriggerPatch(int triggerPatch, int &jetPatch, int &jetPatch_seq) {
+    if (triggerPatch<0 || triggerPatch>=300) return 0;
+    jetPatch = JetPatchFromTriggerPatch[triggerPatch];
+    jetPatch_seq = JetPatchSeqFromTriggerPatch[triggerPatch];
+    return 1;
+}
+
 //--------------------------------------------------------
 /*!
 \param detector is detector number (3 = SMDE, 4 = SMDP)
