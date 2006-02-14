@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.161  2006/02/14 18:53:58  perev
+// Sub makerFunctionality added.
+//
 // Revision 1.160  2006/02/08 20:56:39  fisyak
 // use kHftId and kIstId for StiDetector groups instead of hadr coded numbers 9999 and 9998
 //
@@ -280,8 +283,13 @@ ClassImp(StiMaker)
   _toolkit = StiToolkit::instance();
   SetAttr("useTpc"		,kTRUE);
   SetAttr("activeTpc"		,kTRUE);
-  SetAttr("useSvt"		,kTRUE); // SVT used in Sti but not active. ??
+  SetAttr("useSvt"		,kTRUE); 
+//SetAttr("activeSvt"		,kTRUE);
 //SetAttr("useAux"		,kTRUE); // Auxiliary info added to output for evaluation
+  SetAttr("useEventFiller"      ,kTRUE);
+  SetAttr("useTracker"          ,kTRUE);
+  SetAttr("useVertexFinder"     ,kTRUE);
+
   if (strstr(gSystem->Getenv("STAR"),".DEV"))
      SetAttr("useAux",kTRUE); // Auxiliary info added to output for evaluation
 }
@@ -293,10 +301,7 @@ StiMaker::~StiMaker()
 
 void StiMaker::Clear(const char*)
 {
-  if (_initialized) 
-    {
-      _tracker->clear();
-    }
+  if (_tracker) _tracker->clear();
   StMaker::Clear();
 }
 
@@ -322,8 +327,23 @@ Int_t StiMaker::Init()
 	        ,StiTimer::fgFindTimer,StiTimer::fgFindTally);
   
   _loaderHitFilter = 0; // not using this yet.
+
+  if (IAttr("useSvtSelf")) {
+    SetAttr("useTpc"		,0);
+    SetAttr("activeTpc"		,0);
+    SetAttr("useSvt"		,kTRUE); 
+    SetAttr("activeSvt"		,kTRUE);
+//    SetAttr("useSsd"		,kTRUE); 
+//    SetAttr("activeSsd"		,kTRUE);
+    SetAttr("useEventFiller"    ,0);
+    SetAttr("useTracker"        ,0);
+    SetAttr("useVertexFinder"   ,0);
+    gSystem->Load("StSvtSelfMaker");
+    StMaker *selfMk = StMaker::New("StSvtSelfMaker",0,0);
+    AddMaker(selfMk);
+  }
   InitDetectors();
-  return kStOk;
+  return StMaker::Init();
 }
 
 Int_t StiMaker::InitDetectors()
@@ -383,26 +403,34 @@ Int_t StiMaker::InitRun(int run)
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
       detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
-			if (IAttr("useResidualCalculator"))
-				{
-					_residualCalculator = _toolkit->getResidualCalculator();
-					_residualCalculator->initialize(_toolkit->getDetectorBuilder());
-				}
-			_seedFinder = _toolkit->getTrackSeedFinder();
+       if (IAttr("useResidualCalculator"))
+       {
+	 _residualCalculator = _toolkit->getResidualCalculator();
+	 _residualCalculator->initialize(_toolkit->getDetectorBuilder());
+       }
+       _seedFinder = _toolkit->getTrackSeedFinder();
       _seedFinder->initialize();
       _hitLoader  = _toolkit->getHitLoader();
-      _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
+      _tracker=0;
+      if (IAttr("useTracker")) {
+        _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
       _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
 			_tracker->load("trackFinderPars.dat",*this);
 			_fitter->load("trackFitterPars.dat",*this);
-      _eventFiller =  new StiStEventFiller();
-      _eventFiller->setUseAux(IAttr("useAux"));
+      }
+      _eventFiller=0;
+      if (IAttr("useEventFiller")) {
+        _eventFiller =  new StiStEventFiller();
+        _eventFiller->setUseAux(IAttr("useAux"));
+      }
       _trackContainer = _toolkit->getTrackContainer();
+      _vertexFinder   = 0;
+      
       _vertexFinder   = _toolkit->getVertexFinder();
-      if (!_tracker)
-				throw runtime_error("StiMaker::Make() -F- tracker is not a StiKalmanTrackFinder");
-      _tracker->initialize();
-      _tracker->clear();
+      if (_tracker) {
+        _tracker->initialize();
+        _tracker->clear();
+      }
       _initialized=true;
       cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
@@ -417,8 +445,7 @@ Int_t StiMaker::Make()
   eventIsFinished = false;
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
 
-  if (!event)
-    throw runtime_error("StiMaker::Make() - ERROR - event == 0");
+  if (!event) return kStWarn;
 
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
@@ -427,19 +454,13 @@ Int_t StiMaker::Make()
   if (field==0 && field != runField) field=runField;
 
   cout << "StiMaker::Make() -I- Reading eventSummary()->magneticField() " << field << endl; 
-  if (fabs(field)<2.)
+  if (_tracker) {
     static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters()).setField(field);
-  else
-    {
-      cout <<"StiMaker::Make() -E- field:"<<field<<endl;
-      return -1;
-    }
-
   _tracker->clear();
-//VP??  _hitLoader->loadEvent(event,0,_loaderTrackFilter,_loaderHitFilter);
+  }
   _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
   _seedFinder->reset();
-    {
+  if (_tracker) {
       _tracker->findTracks();
       StiHit *vertex=0;
       const std::vector<StiHit*> *vertices=0;
@@ -479,7 +500,7 @@ Int_t StiMaker::Make()
     }
   cout<< "StiMaker::Make() -I- Done"<<endl;
   StMaker::Make();
-  if (1 || m_Mode)
+
     {
 //    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
 //      TMemStat::PrintMem("Before StiFactory clear()");
