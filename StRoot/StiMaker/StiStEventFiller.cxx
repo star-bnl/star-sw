@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.68 2006/01/19 22:29:57 jeromel Exp $
+ * $Id: StiStEventFiller.cxx,v 2.69 2006/02/14 18:56:18 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.69  2006/02/14 18:56:18  perev
+ * setGlobalDca==>setDca
+ *
  * Revision 2.68  2006/01/19 22:29:57  jeromel
  * kMaxId -> kMaxDetectorId
  *
@@ -698,7 +701,7 @@ void StiStEventFiller::fillEventPrimaries()
       fillTrackCountG++;
       break;
     } //end of verteces
-      kTrack->setGlobalDca(minDca);
+      kTrack->setDca(minDca);
       gTrack->setImpactParameter(minDca);
       if (pTrack) pTrack->setImpactParameter(minDca);
 
@@ -768,11 +771,8 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool outer)
 {
   //cout << "StiStEventFiller::fillGeometry() -I- Started"<<endl;
-  if (!gTrack)
-    throw runtime_error("StiStEventFiller::fillGeometry() -F- gTrack==0");
-  if (!track) 
-    throw runtime_error("StiStEventFiller::fillGeometry() -F- track==0");
-
+  assert(gTrack);
+  assert(track) ;
 
   StiKalmanTrackNode* node = track->getInnOutMostNode(outer,3);
   StiHit *ihit = node->getHit();
