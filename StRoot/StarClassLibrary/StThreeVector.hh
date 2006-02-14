@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.17 2006/01/09 23:47:27 fisyak Exp $
+ * $Id: StThreeVector.hh,v 1.18 2006/02/14 17:57:31 perev Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.18  2006/02/14 17:57:31  perev
+ * x(),y(),z() return references now
+ *
  * Revision 1.17  2006/01/09 23:47:27  fisyak
  * Add missing methods (found by Zhangbu) to Cint dictionary
  *
@@ -129,9 +132,9 @@ public:
     void setMag(T);
     void setMagnitude(T);
     
-    T   x()                        const;
-    T   y()                        const;
-    T   z()                        const;
+const T& x()                       const;
+const T& y()                       const;
+const T& z()                       const;
     T   theta()                    const;
     T   cosTheta()                 const;
     T   phi()                      const;
@@ -195,7 +198,7 @@ public:
     StThreeVector<T>& operator-= (const StThreeVector<double>&);
 #endif
   int             valid(double world = 1.e+5) const;
-    int               bad(double world = 1.e+5) const;
+  int               bad(double world = 1.e+5) const;
 protected:
     T    mX1, mX2, mX3;
 #ifdef __ROOT__
@@ -260,13 +263,13 @@ void StThreeVector<T>::setMag(T mag)
 }
 
 template<class T>
-inline T StThreeVector<T>::x() const {return mX1;}
+inline const T& StThreeVector<T>::x() const {return mX1;}
 
 template<class T>
-inline T StThreeVector<T>::y() const {return mX2;}
+inline const T& StThreeVector<T>::y() const {return mX2;}
 
 template<class T>
-inline T StThreeVector<T>::z() const {return mX3;}
+inline const T& StThreeVector<T>::z() const {return mX3;}
 
 template<class T>
 inline T StThreeVector<T>::theta() const
