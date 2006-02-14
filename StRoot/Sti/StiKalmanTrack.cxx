@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.77 2005/12/31 01:38:50 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.77 2005/12/31 01:38:50 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.78 2006/02/14 18:04:45 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.78 2006/02/14 18:04:45 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.78  2006/02/14 18:04:45  perev
+ * approx() accounts errors now
+ *
  * Revision 2.77  2005/12/31 01:38:50  perev
  * Primary track can loose few nodes
  *
@@ -303,6 +306,7 @@ static double diff(const StiNodePars &p1,const StiNodeErrs &e1
    i.e. does not represent any track and is thus ready for a new
    search and reconstruction.  
  */
+//_____________________________________________________________________________
 void StiKalmanTrack::reset()
 {
 static int mIdCount = 0;
@@ -314,24 +318,25 @@ static int mIdCount = 0;
   m      = -1.;
   mFlag  = 0;
   _dca   = 0;
-  _gdca  = 0;
-  _vDca=-1;
   _vChi2=-2;
   StiDebug::Break(mId);
 }
 
  
 
+//_____________________________________________________________________________
 /*! 
   Set the factory used for the creation of kalman track nodes.
   \see StiKalmanTrackNodeFactory
 */
+//_____________________________________________________________________________
 void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 {
   trackNodeFactory = val;
 }
 
 
+#if 0
 /*!
   Add a hit to this track.
   <p>
@@ -346,6 +351,7 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
   <li>Insert the given hit in a StiKalmanTrackNode instance.</li>
   </ol>
 */
+//_____________________________________________________________________________
 StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction)
 {
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Started"<<endl;
@@ -356,9 +362,10 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, dou
   TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Done"<<endl;
   return n;
 }
+#endif //0
 
 
-
+//_____________________________________________________________________________
 /*! Initialization of this kalman track from external parameters.
   <p>
   This track object is initialized on the basis of parameters determined externally. The
@@ -390,6 +397,7 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, dou
 <li>Throws a logic error exception if hits do not have a valid pointer to a detector object.</li>
 </OL>
 */
+#if 0 //VP obsolete, does not work for zero field
 void StiKalmanTrack::initialize(double curvature,
 				double tanl,
 				const StThreeVectorD& origin,
@@ -397,21 +405,18 @@ void StiKalmanTrack::initialize(double curvature,
 {
   //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
-  vector<StiHit*>::const_iterator it;
   //StiKalmanTrackNode * node  = 0;
   double eta   =-99999.;
   double alphaP=-99999.;
   double alpha;
   StThreeVectorD temp;
-  const StiDetector* detector;
-  for (it=hits.begin(); it!=hits.end(); ++it)
+  const StiDetector* detector=0;
+  int nhits = hits.size();
+  for (int ihit=0;ihit<nhits;ihit++)
     {
-      detector = (*it)->detector();
-      if (!detector) 
-	{
-	  cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
-	  throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
-	}
+      StiHit *hit = hits[ihit];
+      detector = hit->detector();
+      assert(!detector);
       // if alpha is same, avoid recalculating eta
       alpha = detector->getPlacement()->getNormalRefAngle();
       if (alphaP!=alpha)
@@ -421,12 +426,37 @@ void StiKalmanTrack::initialize(double curvature,
 	  eta = curvature*temp.x();
 	  alphaP=alpha;
 	}
-      add((*it),alpha,eta,curvature,tanl,kOutsideIn);
+      add(hit,alpha,eta,curvature,tanl,kOutsideIn);
     }
    //cout << "StiKalmanTrack::initialize() -I- Done"<<endl;
 }
+#endif //0
 
+//_____________________________________________________________________________
+int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
+{
+  //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
+  reset();
+  //StiKalmanTrackNode * node  = 0;
+  const StiDetector* detector=0;
+  int nhits = hits.size();
+  for (int ihit=0;ihit<nhits;ihit++)
+  {
+    StiHit *hit = hits[ihit];
+    detector = hit->detector();
+    assert(detector);
+    StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+    n->initialize(hit);
+    add(n,kOutsideIn);
+  }
 
+  int ierr = approx();
+  if (!ierr) return 0;
+  BFactory::Free(this);
+  return 1;  
+}
+
+//_____________________________________________________________________________
 StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
 {
   double px,py,pz;
@@ -437,19 +467,20 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
   inner->propagate(0.,0,kOutsideIn);
   double p[3];
-  double e[6];
-  inner->getMomentum(p,e);
+  inner->getMomentum(p,0);
   StThreeVector<double> p3(p[0],p[1],p[2]);
   p3.rotateZ(inner->getAlpha());
   return p3;
 }
 
+//_____________________________________________________________________________
 /*! Return the track sign
    <h3>Notes</h3> 
    <ol>
    <li>Use the last node and the field.</li>
    </ol>
 */
+//_____________________________________________________________________________
 int StiKalmanTrack::getCharge() const
 {
   StiKalmanTrackNode *node = getInnerMostNode();
@@ -457,6 +488,7 @@ int StiKalmanTrack::getCharge() const
   return  node->getCharge();
 }
 
+//_____________________________________________________________________________
 /// Return the track chi2 per dof
 /// <p>
 /// The track chi2 is calculated from the incremental chi2 of all nodes carrying a hit that contributed to the fit of the track. 
@@ -494,6 +526,7 @@ double  StiKalmanTrack::getChi2() const
    </ol>
 	 \return number of hits.
 */
+//_____________________________________________________________________________
 int StiKalmanTrack::getPointCount(int detectorId) const
 {
   const StiDetector *detector=0;   
@@ -522,6 +555,7 @@ int StiKalmanTrack::getPointCount(int detectorId) const
    </ol>
 	 \return maximum number of points
 */
+//_____________________________________________________________________________
 int StiKalmanTrack::getMaxPointCount(int detectorId) const
 {
   int nPts = 0;
@@ -593,6 +627,7 @@ int    StiKalmanTrack::getGapCount()    const
   \return number of hits on this track.
 */
 ///Get number of fit points in given detector
+//_____________________________________________________________________________
 int StiKalmanTrack::getFitPointCount(int detectorId)    const  
 {
   int fitPointCount  = 0;
@@ -701,6 +736,7 @@ double StiKalmanTrack::getTrackLength() const
 /*! Calculates the radiation length of material crossed by the track.
 
  */
+//_____________________________________________________________________________
 double StiKalmanTrack::getTrackRadLength() const
 {
   double x1, x2, x3;  //lengths in different media
@@ -802,6 +838,7 @@ double StiKalmanTrack::getNearBeam(StThreeVectorD *pnt,StThreeVectorD *dir) cons
 	 \return inner most hit node on this track
 	 \throws logic_error
 */
+//_____________________________________________________________________________
 StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
   if (firstNode==0 || lastNode==0)
@@ -823,12 +860,14 @@ StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
   //throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- No requested nodes");
   return 0;
 }
+//_____________________________________________________________________________
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode(int qua)  const
 {
   return getInnOutMostNode(1,qua|1);
 }
 
 
+//_____________________________________________________________________________
 /*! Return the inner most hit associated with this track.
    <h3>Notes</h3>
    <ol>
@@ -868,6 +907,7 @@ int StiKalmanTrack::getNNodes(int qua)  const
    </ol>
 	 \return true if "x" of inner most hit is less than 2 cm.
 */
+//_____________________________________________________________________________
 bool  StiKalmanTrack::isPrimary() const
 {
   StiKalmanTrackNode * node = getInnerMostHitNode(3);
@@ -917,6 +957,7 @@ vector<const StMeasuredPoint*> StiKalmanTrack::stHits() const
 
 
 
+//_____________________________________________________________________________
 /*! Declare hits associated with given track as used.
   <p>
   Declare hits on the track ending at "node" as used. 
@@ -924,6 +965,7 @@ vector<const StMeasuredPoint*> StiKalmanTrack::stHits() const
   parent of each node recursively. The hit associated with each
   node (when there is a hit) is set to "used".
 */	
+//_____________________________________________________________________________
 void StiKalmanTrack::reserveHits()
 {
   StiKTNForwardIterator it(lastNode);
@@ -951,6 +993,7 @@ void StiKalmanTrack::reserveHits()
   runtime_error exceptions which are NOT caught here...</li>
   </ul>
 */
+//_____________________________________________________________________________
 bool StiKalmanTrack::extendToVertex(StiHit *vertex, const StiDetector * alternate)
 {
   if (!alternate)
@@ -967,6 +1010,7 @@ bool StiKalmanTrack::extendToVertex(StiHit *vertex, const StiDetector * alternat
 }
 
 
+//_____________________________________________________________________________
 StiTrackNode *StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
 static int nCall=0; nCall++;
@@ -995,12 +1039,10 @@ static int nCall=0; nCall++;
       //cout << " on vertex plane:";
       tNode->setChi2(3e33);
       chi2 = tNode->evaluateChi2(&localVertex); 
-      double dx,dy,dz,d;
-      dx=tNode->getX()- localVertex.x();
+      double dy,dz,d;
       dy=tNode->getY()- localVertex.y();
       dz=tNode->getZ()- localVertex.z();
-      d= ::sqrt(dx*dx+dy*dy+dz*dz);
-	_dca = ::sqrt(dy*dy+dz*dz);
+      d = ::sqrt(dy*dy+dz*dz);
 #ifdef Sti_DEBUG      
 	int npoints[2] = {0,0};
 	vector<StMeasuredPoint*> hitVec = stHits();
@@ -1022,13 +1064,12 @@ static int nCall=0; nCall++;
 	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
 #endif
 
-      _vDca = d;
       _vChi2= chi2;
 //    if (chi2<pars->maxChi2Vertex  && d<4.)
 //    if (                             d<4.)
       if (chi2<pars->maxChi2Vertex)
 	{
-	  //_dca = ::sqrt(dy*dy+dz*dz);
+	  _dca = d;
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
 	  tNode->setHit(myHit);
@@ -1053,6 +1094,7 @@ if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << end
   return 0;
 }
 
+//_____________________________________________________________________________
 bool StiKalmanTrack::find(int direction)
 {
 static int nCall=0; nCall++;
@@ -1072,12 +1114,14 @@ StiDebug::Break(nCall);
       if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) this);
       double radSvt= 25.;
       if (trackFinder->find(this,kOutsideIn,radSvt)) {
-          status = refit(); if(status) return false;
+          status = approx(); if(status) return false;
+          status = refit() ; if(status) return false;
 	  trackExtended = getNNodes(3)>5;
       }	
 
       if (trackFinder->find(this,kOutsideIn,0.)) {
-          status = refit(); if(status) return false;
+          status = approx(); if(status) return false;
+          status = refit() ; if(status) return false;
 	  trackExtended = trackExtended || getNNodes(3)>5;
       }	
     }
@@ -1099,7 +1143,8 @@ StiDebug::Break(nCall);
 	  if (debug()) cout << "StiKalmanTrack::find swap " << *((StiTrack *) this);
 	  trackExtendedOut= trackFinder->find(this,kInsideOut);
           if (trackExtendedOut) { 
-             status = refit(); if(status) return false;
+             status = approx(); if(status) return false;
+             status = refit() ; if(status) return false;
 	     trackExtendedOut = getNNodes(3)>5;
           }
 	  if (debug()) cout << "StiKalmanTrack::find find(this,kInsideOut)" << *((StiTrack *) this);
@@ -1115,11 +1160,13 @@ StiDebug::Break(nCall);
   return trackExtended||trackExtendedOut;
 }
 
+//_____________________________________________________________________________
 void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)
 {
   pars = parameters;
 }
 
+//_____________________________________________________________________________
 void StiKalmanTrack::setFitParameters(StiKalmanTrackFitterParameters *parameters)
 {
   fitpars = parameters;
@@ -1127,6 +1174,7 @@ void StiKalmanTrack::setFitParameters(StiKalmanTrackFitterParameters *parameters
 
 ///Return all the hits associated with this track, including those with a large incremental
 ///chi2 that may not contribute to the fit.
+//_____________________________________________________________________________
 vector<StiHit*> StiKalmanTrack::getHits()
 {
   vector<StiHit*> hits;
@@ -1255,7 +1303,6 @@ static int nCall=0; nCall++;
 StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
 
-  approx();
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
   if (nNBeg<=3) return 1;
   StiKalmanTrackNode *inn= getInnerMostNode(3);
@@ -1280,7 +1327,8 @@ StiDebug::Break(nCall);
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1;continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
-      if (qA>0.05)	{fail=-2;continue;} 
+      if (qA <1) errConfidence = 0.1;
+      if (qA>0.01)	{fail=-2;continue;} 
       double info[2][8];
       sTNH.mCurvQa.getInfo(info[0]);
       sTNH.mTanlQa.getInfo(info[1]);
@@ -1420,16 +1468,19 @@ void StiKalmanTrack::print(const char *opt) const
 //_____________________________________________________________________________
 int StiKalmanTrack::approx()
 {
-  enum {BAD_RESIDUAL=3};
+  enum {BAD_RESIDUAL=5};
 static int nCall=0; nCall++;
-  double xyz[100][3];
+  double xyz[100][3],err[100][4],res;
+  StiHitErrs hr;
 //		Loop over nodes and collect global xyz
 
   StiKTNBidirectionalIterator source;
   StiKalmanTrackNode *targetNode;
   int nNode=0;
+  double hz=0; 
   for (source=rbegin();source!=rend();source++) {
     targetNode = &(*source);
+    if (!hz) hz = targetNode->getHz();
     if (!targetNode->isValid()) 	continue;
     StiHit * hit = targetNode->getHit();
     if (!hit) 				continue;
@@ -1437,16 +1488,34 @@ static int nCall=0; nCall++;
     xyz[nNode][0] = hit->x_g();
     xyz[nNode][1] = hit->y_g();
     xyz[nNode][2] = hit->z_g();
+    hr = targetNode->getGlobalHitErrs(hit);
+    TCL::ucopy(hr.A,err[nNode],3);
+    err[nNode][3] = hr.hZZ;
+
+
     nNode++;
   }  
-  if (nNode<3) 				return 1; 
+  if (!nNode) 				return 1; 
+  int nNodeIn = nNode;
+  int nPnts = nNode;
+  if (nPnts==2) {
+    nPnts=3;
+    memset(xyz[2],0,sizeof(double)*3);
+  }
+  
+  
   TCircle circ,cirl;
-  double res=circ.Approx(nNode,xyz[0],3);
-  if (res>BAD_RESIDUAL) 		return 2;
+  if (fabs(hz)<1e-6) circ.SetStrait();
+  res=circ.Approx(nPnts,xyz[0],3);
+  if (res>BAD_RESIDUAL*5) 		return 2;
+  res=circ.Fit(nPnts,xyz[0],3,err[0],4);
+  if (res>BAD_RESIDUAL) 		return 3;
   double Z0TanL[5];
-  circ.FitZet(nNode,xyz[0],xyz[0]+2,Z0TanL,3,3);
+  res=circ.FitZ(Z0TanL,nNode,xyz[0],3,xyz[0]+2,3,err[0]+3,4);
+  if (res>BAD_RESIDUAL) 		return 4;
 
   double s=0,xy[2]; 
+  double curv = circ.Rho();
   for (source=rbegin();source!=rend();source++) {
     targetNode = &(*source);
     if (!targetNode->isValid()) 	continue;
@@ -1458,22 +1527,22 @@ static int nCall=0; nCall++;
     cirl = circ;
     double alfa = targetNode->getAlpha();
     cirl.Rot(-alfa);
-    
-
-
-    StiNodePars P;
+    StiNodePars P = targetNode->fitPars();
     P._x  =  cirl.Pos()[0];
     P._y  =  cirl.Pos()[1];
     P._z  = Z0TanL[0]+Z0TanL[1]*s;
     P._eta  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
-    P._curv = cirl.Rho();
+    P._curv = curv;
+    double ptin = (fabs(P._hz)>1e-3)? curv/P._hz:1e-6;
+    P._ptin= ptin;
     P._tanl = Z0TanL[1];
     P._cosCA = cirl.Dir()[0];
     P._sinCA = cirl.Dir()[1];
     targetNode->fitPars() = P;
     if(targetNode->nudge()) {nNode--; targetNode->setInvalid();}
   }   
-  if (nNode<3)				return 3;
+  if (nNode==nNodeIn) 	return 0;
+  if (nNode<2)		return 3;
   return 0;
 }    
 //_____________________________________________________________________________
