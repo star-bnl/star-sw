@@ -43,6 +43,7 @@ public:
         int    IsValid(){ return fVtx!=0;}
         int    GetType();
         int    GetFlag();
+const float   *GetErrMtx();
 const StThreeVectorF &GetPoint();
 
         int    GetNTracks();            //excluding parent
@@ -50,6 +51,7 @@ const StTrack *GetTrack(int idx);       // -1=parent track
 const StTrack *GetParent() {return GetTrack(-1);}        
 private:  
 const StVertex *fVtx;
+float fErrMtx[6];
 ClassDef(StVertexHelper,0)
 };
 

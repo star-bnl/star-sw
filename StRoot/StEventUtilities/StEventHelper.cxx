@@ -1073,6 +1073,18 @@ const StTrack *StVertexHelper::GetTrack(int idx)  	// -1=parent track
   if (idx>= GetNTracks()) return 0;
   return fVtx->daughter((UInt_t)idx);
 }
+//______________________________________________________________________________   
+const float *StVertexHelper::GetErrMtx()  	
+{
+/// return error matrix in form xx,yx,yy,zx,zy,zz
+
+  StMatrixF mxF = fVtx->covariantMatrix();
+  int jj=0;
+  for (int i=0;i< 3;i++) {
+  for (int j=0;j<=i;j++) {
+    fErrMtx[jj++] = mxF(i,j);}}
+  return fErrMtx;
+}
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
@@ -1095,7 +1107,7 @@ int  StTrackHelper::GetType()  			const	{return fTrk->type();}
         int     StTrackHelper::GetCharge() 	const	{return fTrk->geometry()->charge();}
 const StVertex *StTrackHelper::GetParent() 	const  	{return fTrk->vertex();}	 
       float     StTrackHelper::GetImpact() 	const 	{return fTrk->impactParameter();}
-      float     StTrackHelper::GetCurv() 	const  	{return fTrk->geometry()->curvature();}
+      float     StTrackHelper::GetCurv() 	const  	{return GetTHelix(0)->GetRho() ;}
       float     StTrackHelper::GetLength() 	const 	{return fTrk->length();}
 const StThreeVectorF &StTrackHelper::GetFirstPoint() const {return fTrk->geometry()->origin();}
 const StThreeVectorF &StTrackHelper::GetLastPoint()  const {return fTrk->outerGeometry()->origin();}
