@@ -70,7 +70,7 @@ friend class StiTrackNodeHelper;
 public:
   StiKalmanTrackNode(){_ext=0; reset();}
   StiKalmanTrackNode(const StiKalmanTrackNode &node);
-  virtual ~StiKalmanTrackNode(){reduce();_Kount=-1;};
+  virtual ~StiKalmanTrackNode(){reduce();mId=-1;};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
   
   static double mcs2(double relRadThickness, double beta2, double p2);
@@ -80,7 +80,8 @@ public:
   /// Resets errors for refit
   void resetError(double fak=0);
   /// Initialize this node with the given hit information
-  void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
+  void initialize(StiHit*h);
+//void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
   /// Sets the Kalman state of this node equal to that of the given node. 
   void setState(const StiKalmanTrackNode * node);
@@ -114,16 +115,19 @@ public:
   double getP() const;
   /// Calculates and returns the transverse momentum of the track at this node.
   double getPt() const;
+  /// Calculates and returns the Z mag field in the current point.
+  double getHz() const;
     
   double x_g() const;
   double y_g() const;
   double z_g() const;
-  void   setXYZg(double *xyz);    
-
+  void   getXYZ_g(double *xyz) const;
   double getX() const 			{ return mFP._x ;}
   double getY() const 			{ return mFP._y;}  
   double getZ() const 			{ return mFP._z;}
-  void   setXYZl(double *xyz);    
+  double x() const 			{ return mFP._x ;}
+  double y() const 			{ return mFP._y;}  
+  double z() const 			{ return mFP._z;}
   
   double getEta  () const 		{return mFP._eta;   }
   double getSin  () const 		{return mFP._sinCA;}
@@ -205,7 +209,8 @@ public:
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
   void setHitErrors(const StiHit *hit=0);
-  static void   setParameters(StiKalmanTrackFinderParameters *parameters);
+  StiHitErrs getGlobalHitErrs(const StiHit *hit) const;
+ static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
   double getX0() const;
@@ -228,7 +233,7 @@ public:
   void static saveStatics(double *sav);
   void static backStatics(double *sav);
   static StiNodeExt *nodeExtInstance();
-  void getHitErrors(const StiHit *hit,double ss[3]) const;
+  void propagateCurv(const StiKalmanTrackNode *parent);
 
 //  Extended members 
  public:
@@ -249,6 +254,8 @@ public:
 
   char _beg[1];  
   double _alpha;
+///  Z mag field in units PGev = Hz*Rcm
+  mutable double mHz;
   StiNodePars mFP; 
   /// covariance matrix of the track parameters
   StiNodeErrs  mFE;
@@ -272,7 +279,7 @@ public:
   static TString comment;
   static TString commentdEdx;
 public:
-  int _Kount;  //for debug only 
+  int mId;  //for debug only 
 };
 
 
@@ -350,24 +357,6 @@ inline double StiKalmanTrackNode::crossAngle() const
   return asin(mFP._sinCA);
 }
 
-/*! Calculate/return the track transverse momentum
-  <p>
-  Calculate the track transverse momentum in GeV/c based on this node's track parameters.
-  <p>
-  The momentum is calculated based on the track curvature held by this node. A minimum
-  curvature of 1e-12 is allowed. 
-*/
-inline double StiKalmanTrackNode::getPt() const
-{
-  double curvature;
-  curvature = fabs(mFP._curv);
-  if (pars->field) {
-    if (curvature<1e-12) 
-      return 0.003e12*fabs(pars->field);
-    else
-      return 0.00299792458*fabs(pars->field/curvature);
-  } else return 1e3;
-}
 
 /*! Calculate/return the track momentum
   <p>
@@ -400,31 +389,6 @@ struct StreamX
     cout <<node.getX()<<endl;
   }
 };
-
-inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
-{
-  return StThreeVector<double>(mFP._x,mFP._y,mFP._z);
-}
-
-inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
-{
-  return StThreeVector<double>(cos(_alpha)*mFP._x-sin(_alpha)*mFP._y, sin(_alpha)*mFP._x+cos(_alpha)*mFP._y, mFP._z);
-}
-
-inline  double StiKalmanTrackNode::x_g() const
-{
-  return cos(_alpha)*mFP._x-sin(_alpha)*mFP._y;
-}
-
-inline  double StiKalmanTrackNode::y_g() const
-{
-  return sin(_alpha)*mFP._x+cos(_alpha)*mFP._y;
-}
-
-inline  double StiKalmanTrackNode::z_g() const
-{
-  return mFP._z;
-}
 
 ///Calculate and returns pathlength within detector volume
 ///associated with this node. Returns 0 if no detector is 
