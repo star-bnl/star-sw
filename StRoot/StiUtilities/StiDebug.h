@@ -11,17 +11,21 @@
  */
 class StiKalmanTrack; 
 class TH1; 
+class TObjArray;
+
 class StiDebug 
 {
 public:
 static void  Break(int kase);
-static void  showTh(StiKalmanTrack *kt);
 static void  show(StiKalmanTrack *kt);
 static void  Init();
 static void  Finish();
-static void  Hist(int ihist,double val);
+static void  hist (const char *name,double val);
+static int   tally(const char *name,int val=1);
 private:
-static TH1 *mgHist[100];
+
+static TObjArray *mgHist;
+static TObjArray *mgTally;
 
 };
 

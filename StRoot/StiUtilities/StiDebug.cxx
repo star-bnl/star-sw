@@ -7,42 +7,75 @@
 #include "TCanvas.h"
 #include "TGraph.h"
 #include "TSystem.h"
-#include "TThread.h"
+#include "TObjArray.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackNode.h"
 static int myReady=0;
-TH1 *StiDebug::mgHist[100];
+TObjArray *StiDebug::mgHist=0;
+TObjArray *StiDebug::mgTally=0;
 
 //______________________________________________________________________________
 void StiDebug::Init()
 {
-  memset(mgHist,0,sizeof(mgHist));
   if (gROOT->IsBatch()) return;
 }
 //______________________________________________________________________________
-void StiDebug::Hist(int ihist,double val)
+int  StiDebug::tally(const char *name,int val)
 {
-  TH1 *hist = mgHist[ihist];
+   if (!mgTally) mgTally = new TObjArray();
+   TObject *to = mgTally->FindObject(name);
+   if (!to) mgTally->Add((to=new TNamed(name,"")));
+   int tally = to->GetUniqueID();
+   tally +=val;
+   to->SetUniqueID(tally);
+   return tally;
+}
+//______________________________________________________________________________
+void StiDebug::hist(const char *name,double val)
+{
+  if (!mgHist) return;
+  TH1 *hist = (TH1*)mgHist->FindObject(name);
   if (!hist) return;
   hist->Fill(val);
 }
 //______________________________________________________________________________
 void StiDebug::Finish()
 {
-  if (gROOT->IsBatch()) return;
-  int nH = sizeof(mgHist)/sizeof(void*);
-  int n = 0;
-  TCanvas *tc=0;
-  for (int iH=0;iH<nH;iH++) {
-    if (!mgHist[iH]) continue;
-    if((n%3)==0) {
-      tc = new TCanvas("C1","",600,800);
-      tc->Divide(1,3);
-    }
-    tc->cd((n%3)+1); mgHist[iH]->Draw();
-    tc->Modified() ;tc->Update();
-    n++;
-  }
+  printf("\n");
+  for (int kase=0;kase<2;kase++) {
+    switch(kase) {
+      case 0:{		//Tally case
+      if (!mgTally) 	break; 
+      int nT = mgTally->GetLast()+1;
+      if (!nT) 		break;
+      for (int iT=0;iT<nT;iT++) {
+        TObject *to = mgTally->At(iT);
+        if (!to) 	continue;
+	printf("StiDebug::Tally %s=%d\n",to->GetName(),to->GetUniqueID());
+      }
+      break;}
+
+      case 1:{		//Hist case
+      if (gROOT->IsBatch()) break;
+      if (!mgHist) 	break;
+      int nH = mgHist->GetLast()+1;
+      if (!nH) 		break;
+      int n = 0;
+      TCanvas *tc=0;
+      for (int iH=0;iH<nH;iH++) {
+        TH1 *th = (TH1*)mgHist->At(iH);
+	if (!th)	continue;
+        if((n%3)==0) {
+          tc = new TCanvas("C1","",600,800);
+          tc->Divide(1,3);
+        }
+        tc->cd((n%3)+1); th->Draw();
+        tc->Modified() ; tc->Update();
+        n++;
+      }}
+    }//end case
+  }//end kase loop
+
 }
 //______________________________________________________________________________
 void StiDebug::Break(int kase)
@@ -51,17 +84,6 @@ static int myBreak=-2005;
 if (kase!=myBreak) return;
   printf("*** Break(%d) ***\n",kase);
 }		
-//______________________________________________________________________________
-void StiDebug::showTh(StiKalmanTrack* kt)
-{
-  static TThread *myThread=0;
-  delete myThread;
-  TThread::VoidRtnFunc_t fun = (TThread::VoidRtnFunc_t)&show;
-  myThread = new TThread(fun,kt);
-  myReady=0;
-  while(!gSystem->ProcessEvents() || myReady){}; 
-  
-}
 //______________________________________________________________________________
 void StiDebug::show(StiKalmanTrack *kt)
 {
@@ -89,6 +111,7 @@ static TGraph  *graph[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
       xPrev = 3e33;
       for (it=kt->begin();it!=kt->end();++it) {
 	StiKalmanTrackNode *node = &(*it);
+        if (!node->isValid()) 	continue;
 //	S calculation common based on node x,y for both hit and node
         double xNode = node->x_g();
         double yNode = node->y_g();
