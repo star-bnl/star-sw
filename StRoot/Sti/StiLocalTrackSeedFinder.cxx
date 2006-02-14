@@ -266,46 +266,19 @@ bool StiLocalTrackSeedFinder::extrapolate()
 /// 
 StiKalmanTrack* StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
 {
-
-//cout <<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*) -I- Started"<<endl;
-  if (_pars._doHelixFit && _seedHits.size()>=3) 
-    {
-      bool status = fit(track);
-      if (!status) track = 0;
-    }
-  else if (_pars._useOrigin==false && _seedHits.size()>=3) 
-    calculate(track);
-  else if (_seedHits.size()>=2) 
-    // Too few points for a stand alone calculation, 
-    // include and estimate of the origin of the track.
-    calculateWithOrigin(track);
-  else
-    // Not enough data to make a track
-    track = 0;
-  //cout<<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*) -I- Done."<<endl;
+  bool status = fit(track);
+  if (!status) track = 0;
   return track;
 }
 
 //______________________________________________________________________________
 bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
 {
-  //cout<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*) -I- Started"<<endl;
-  _helixFitter.reset();
-  _helixFitter.fit( _seedHits );
-  if (_helixFitter.valid()==false ) 
-    throw runtime_error("StiLocalTrackSeedFinder::fit(StiKalmanTrack* track) -W- bad data or fit");
-  /*
-    cout <<"origin: "<<_helixFitter.xCenter()<<" "<<_helixFitter.yCenter()<<" "
-    <<_helixFitter.z0()<<" "
-    <<" curvature: "<<_helixFitter.curvature()<<" "
-    <<" tanLambda: "<<_helixFitter.tanLambda()<<endl;
-  */
-  track->initialize( _helixFitter.curvature(), _helixFitter.tanLambda(),
-		     StThreeVectorD(_helixFitter.xCenter(), _helixFitter.yCenter(), 0.),
-		     _seedHits);
-  return true;
+  int ierr = track->initialize(_seedHits);
+  return (ierr==0);
 }
 
+#if 0
 //______________________________________________________________________________
 void StiLocalTrackSeedFinder::calculate(StiKalmanTrack* track)
 {
@@ -353,7 +326,7 @@ void StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack* track)
 		     StThreeVectorD(_helixCalculator.xCenter(), _helixCalculator.yCenter(), 0.),
 		     _seedHits);    
 }
-
+#endif
 //______________________________________________________________________________
 /*
 //sort in descending order in radius, and ascending order in phi
