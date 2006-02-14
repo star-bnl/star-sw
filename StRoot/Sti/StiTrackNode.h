@@ -10,8 +10,8 @@ class StiDetector;
 enum eTkPars {kNPars=6,kNErrs=21};
 class StiNodePars {
 public:	
-void reset(){memset(this,0,sizeof(StiNodePars));}
-void ready(){_cosCA=cos(_eta);_sinCA=sin(_eta);}
+void reset(){memset(this,0,sizeof(StiNodePars));_cosCA=1;}
+void ready(){_cosCA=cos(_eta);_sinCA=sin(_eta);_curv = _hz*_ptin;}
 StiNodePars &merge(double wt,StiNodePars &other);
 double  operator[](int idx) const {return P[idx];}
 double &operator[](int idx)       {return P[idx];}
@@ -29,10 +29,14 @@ void    print() const;
   double _z;
   /// (signed curvature)*(local Xc of helix axis - X current point on track)
   double _eta;
-  /// signed curvature [sign = sign(-qB)]
-  double _curv;  
+  /// signed invert pt [sign = sign(-qB)]
+  double _ptin;  
   /// tangent of the track momentum dip angle
   double _tanl;
+  /// signed curvature [sign = sign(-qB)]
+  double _curv;  
+  /// Z component magnetic field in units Pt(Gev) = Hz * RCurv(cm)
+  double _hz;  
 };
 class StiNodeMtx {
 public:	
@@ -49,9 +53,19 @@ double getDelta()  const 		{return sqrt(_cXX+_cYY+_cZZ);}
 double getDelta2() const 		{return     (_cXX+_cYY+_cZZ);}
 StiNodeErrs &operator*=(double f) 	{for (int i=0;i<kNErrs;i++){A[i]*=f;}; return *this;}
 StiNodeErrs &merge(double wt,StiNodeErrs &other);
-void recov(const double *maxerr=0); 
+
+void get00(      double *a) const;
+void set00(const double *a)      ;
+void get10(      double *a) const;
+void set10(const double *a)      ;
+void get11(      double *a) const;
+void set11(const double *a)      ;
+
+void recov(); 
 int  check(const char *pri=0) const; 
+double sign() const; 
 double operator()(int i,int j) const;
+void zeroX();
 void print() const;
 
 public:	
@@ -59,13 +73,14 @@ union{double A[1];double _cXX;};
   double _cYX,_cYY;                       
   double _cZX,_cZY, _cZZ;                 
   double _cEX,_cEY, _cEZ, _cEE;           
-  double _cCX,_cCY, _cCZ, _cCE, _cCC;     
-  double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
+  double _cPX,_cPY, _cPZ, _cPE, _cPP;     
+  double _cTX,_cTY, _cTZ, _cTE, _cTP, _cTT;
 };  
 class StiHitErrs{
 public:
 void reset()			 {memset(this,0,sizeof(*this));}
 StiHitErrs &operator*=(double f) {for (int i=0;i<6;i++){A[i]*=f;};return *this;}
+void rotate(double angle);
 union{
   double hXX;		double A[1];};
   double hYX,hYY;                       
@@ -134,6 +149,7 @@ enum eTrackNodeFlags {
 };
 
   virtual ~StiTrackNode(){};    
+  virtual double getPt() const=0;
   const StiTrackNode& operator=(const StiTrackNode& node);  
   void reset();
   void unset(){;}
