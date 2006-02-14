@@ -60,7 +60,7 @@
  *
  *    float range;           // range used in defining mass windows
  *
- * $Id: StStrangeTagsMaker.h,v 1.10 2004/07/28 07:47:45 lbarnby Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.11 2006/02/14 21:07:49 perev Exp $
  *
  */
 
@@ -100,16 +100,19 @@ private:
     Float_t         mMasska2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.10 2004/07/28 07:47:45 lbarnby Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.11 2006/02/14 21:07:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     ClassDef(StStrangeTagsMaker,0)   // macro for rootcint
 };
 
 #endif
-
+#if 0
 /***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.11  2006/02/14 21:07:49  perev
+ * WarnOff
+ *
  * Revision 1.10  2004/07/28 07:47:45  lbarnby
  * Corrected typo which prevented parsing of comments: '/ *' -> '/*'
  *
@@ -141,3 +144,4 @@ private:
  * Strangeness Tags Maker
  *
  **************************************************************************/
+#endif//0

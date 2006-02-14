@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.19 2006/01/19 21:49:41 ullrich Exp $
+ * $Id: StHit.cxx,v 2.20 2006/02/14 21:04:31 perev Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.20  2006/02/14 21:04:31  perev
+ * WarnOff
+ *
  * Revision 2.19  2006/01/19 21:49:41  ullrich
  * Changed order of initializer in constructor.
  *
@@ -79,29 +82,27 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.19 2006/01/19 21:49:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.20 2006/02/14 21:04:31 perev Exp $";
 
 ClassImp(StHit)
 
 StHit::StHit()
 {
-    mHardwarePosition = 0;
-    mCharge = 0;
-    mTrackRefCount = 0;
-    mFlag = mFitFlag = 0;
+    mHardwarePosition	= 0;
+    mCharge 		= 0;
+    mTrackRefCount 	= 0;
+    mFlag = mFitFlag 	= 0;
     mIdTruth = mQuality = 0;
-    mId = 0;
-    mNextHit = 0;
+    mId 		= 0;
+    mNextHit 		= 0;
 }
 
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
              unsigned int hp, float q, unsigned char c, UShort_t idTruth, UShort_t quality, UShort_t id)
-    : StMeasuredPoint(p), mPositionError(e), mHardwarePosition(hp),
-      mCharge(q), mTrackRefCount(c), 
-      mIdTruth(idTruth), mQuality(quality), mId(id), mNextHit(0)
+            :StMeasuredPoint(p),mHardwarePosition(hp),mPositionError(e),mCharge(q),
+             mId(id),mIdTruth(idTruth),mQuality(quality),mFitFlag(0),mTrackRefCount(c),mFlag(0),mNextHit(0)
 {
-    mFlag = mFitFlag = 0;
 }
 
 StHit::~StHit() { /* noop */ }
