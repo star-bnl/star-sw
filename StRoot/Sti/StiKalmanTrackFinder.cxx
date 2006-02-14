@@ -318,6 +318,8 @@ StiDebug::Break(nCall);
     }
   trackExtended |=trackExtendedOut;
   if (trackExtended) {
+    status = track->approx();
+    if (status) return -1;
     status = track->refit();
     if (status) return -1;
   }
@@ -378,7 +380,7 @@ static int myRefit=0;
 
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
 {
-  enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=3,RMAX=50,RMIN=5};
+  enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=4,RMAX=50,RMIN=5};
 
   StiKalmanTrackNode *extended=0;
   int goodCount= 0, plus=0, minus=0;
@@ -388,6 +390,8 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
 
   for (int iTrack=0;iTrack<nTracks;iTrack++)		{
     StiKalmanTrack * track = (StiKalmanTrack*)(*_trackContainer)[iTrack];  
+StiDebug::tally("Tracks");
+
     StiKalmanTrackNode *bestNode=0;  
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
@@ -400,10 +404,12 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
       StiHit *vertex = vertices[iVertex];
 //VP  if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX2d) 	continue;
       if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
+StiDebug::tally("PrimCandidates");
 
       extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
 
       if (!extended) 					continue;
+StiDebug::tally("PrimExtended");
       if (!bestNode) {bestNode=extended;		continue;}
       if (bestNode->getChi2()+log(bestNode->getDeterm())
          <extended->getChi2()+log(extended->getDeterm()))continue;
@@ -413,6 +419,7 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
     
     if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
+StiDebug::tally("PrimAdded");
     int         ifail = 0;
 static int REFIT=2005;
 if (REFIT) {
@@ -423,6 +430,7 @@ if (REFIT) {
 // something is wrong. It is not a primary
     if (ifail) { track->removeLastNode();continue;}
     goodCount++;
+StiDebug::tally("PrimRefited");
     if (track->getCharge()>0) plus++; else minus++;
 
   }//End track loop 
