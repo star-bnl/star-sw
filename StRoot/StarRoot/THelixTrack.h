@@ -17,17 +17,24 @@ double Move(double step);
 void   Rot(double angle);
 void   Backward();
 double Eval(double step,double *xy,double *dir=0) const;
-double Approx(int nPts,const double *Pts                    ,int pstep=2);
-double Fit   (int nPts,const double *Pts,const double *Err=0,int pstep=2,int estep=3);
-double Resid (int npoints,const double *points,int pstep=2);
-void   FitZet(int npoints,const double *points
-                         ,const double *zets
-			 ,double *Z0TanL,int pstep=2,int zstep=1);
+double Approx(int nPts,const double *Pts  ,int pstep=2);
+double Fit   (int nPts,const double *Pts  ,int pstep=2
+                      ,const double *Err=0,int estep=3);
+double Resid (int nPts,const double *Pts  ,int pstep=2
+                      ,const double *Err=0,int estep=3);
+double FitZ  (double *Z0TanL,int nPts
+                      ,const double *points,int pstep
+                      ,const double *zets  ,int zstep=1
+                      ,const double *errs=0,int estep=1);
+void   Show(int nPts,const double *Pts,int pstep=2);
 void   Print(const char* chopt = "") const;
+void   SetStrait(int strait=1) 		{SetBit(1,strait) ;}
+int    IsStrait()  			{return TestBit(1);}
+
 //	static funs
 static void Test(int iTest=1);
 static void Test2();
-
+static void Test3();
 protected:
 double fX[2];
 double fD[2];
