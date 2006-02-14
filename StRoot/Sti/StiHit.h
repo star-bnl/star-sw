@@ -68,11 +68,11 @@ public:
     ~StiHit();
 
     ///Return the local x value.
-    float x() const;
+    const float &x() const;
     ///Return the local y value.
-    float y() const;
+    const float &y() const;
     ///Return the local/global z value.
-    float z() const;
+    const float &z() const;
     ///Return the global x value.
     float x_g() const;
     ///Return the global y value.
@@ -176,9 +176,9 @@ private:
 public:
     int mCount;
 };
-inline float StiHit::x()   const {return mx;}
-inline float StiHit::y()   const {return my;}
-inline float StiHit::z()   const {return mz;}
+inline const float &StiHit::x()   const {return mx;}
+inline const float &StiHit::y()   const {return my;}
+inline const float &StiHit::z()   const {return mz;}
 inline float StiHit::x_g() const {return _xg;}
 inline float StiHit::y_g() const {return _yg;}
 inline float StiHit::z_g() const {return _zg;}
