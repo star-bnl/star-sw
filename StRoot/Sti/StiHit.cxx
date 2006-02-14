@@ -40,6 +40,8 @@ StiHit::~StiHit()
 /// along the z axis
 void StiHit::rotate(double alpha)
 {
+  assert(!mdetector);
+  mrefangle+=alpha;
   double ca = cos(alpha);
   double sa = sin(alpha);
   double rxx = ca; double rxy = sa;
