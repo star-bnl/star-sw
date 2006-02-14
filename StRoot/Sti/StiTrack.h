@@ -101,14 +101,10 @@ public:
   virtual double  getPseudoRapidity() const=0;   // pseudo rapidity
   virtual double  getPhi()            const=0;   // azimuthal angle
   virtual double  getTanL()           const=0;   // tan(lambda)
-  virtual double  getDca(const StiHit*)const;   // distance of closest approach to main vertex
+  virtual double  getDca(const StiHit*)const;    // distance of closest approach to main vertex
   virtual double  getDca()            const=0;   // distance of closest approach to main vertex
-  virtual double  getGlobalDca()      const
-    {
-      return 0;
-    }   // distance of closest approach to main vertex
-  virtual double  getDca2(StiTrack *t) const=0;   // distance of closest approach to given track - 2D calc
-  virtual double  getDca3(StiTrack *t) const=0;   // distance of closest approach to given track - 3D calc
+  virtual double  getDca2(StiTrack *t) const=0;  // distance of closest approach to given track - 2D calc
+  virtual double  getDca3(StiTrack *t) const=0;  // distance of closest approach to given track - 3D calc
   virtual int     getPointCount   (int detectorId=0) const=0;
   virtual int     getFitPointCount(int detectorId=0) const=0; 
   virtual int     getGapCount() const=0;
