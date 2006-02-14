@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.15 2004/07/31 00:50:22 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.16 2006/02/14 17:49:25 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.16  2006/02/14 17:49:25  perev
+ * Add initialization =0
+ *
  * Revision 1.15  2004/07/31 00:50:22  munhoz
  * adding anode drift veloc correction factor
  *
@@ -376,7 +379,7 @@ void StSvtDbMaker::setSvtGeometry()
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtGeometry()
 {
-  TObject* o;
+  TObject* o=0;
   if (mReader) o=(TObject*)mReader->getGeometry();
   else if (m_Reader)
     o=(TObject*)m_Reader->getGeometry();
