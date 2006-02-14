@@ -9,10 +9,10 @@ public:
 void reset()		{memset(this,0,sizeof(*this));}
 public:
 double _cEE ;		//add err to <eta*eta> eta crossing angle
-double _cCC;    	//add err to <curv*curv>
-double _cTC;    	//add err to <tanL*curv>
+double _cPP;    	//add err to <ptin*ptin>
+double _cTP;    	//add err to <tanL*ptin>
 double _cTT;    	//add err to <tanL*tanL>
-double _curvCorr;	//curv correction factor -1
+double _ptinCorr;	//ptin correction factor -1
 };
 
 
@@ -82,6 +82,10 @@ static double joinTwo(int nP1,const double *P1  ,const double *E1
 static double joinVtx(        const double *P1  ,const double *E1
                              ,const double *P2  ,const double *E2
 	                     ,      double *PJ=0,      double *EJ=0);
+double        joinVtx(const double      *Y,const StiHitErrs  &B
+                     ,const StiNodePars &X,const StiNodeErrs &A
+	             ,      StiNodePars *M=0,    StiNodeErrs *C=0);
+			    
 static int getHitErrors(const StiHit *hit,const StiNodePars *pars, StiHitErrs *hrr);
 
 private:
@@ -89,6 +93,8 @@ double mChi2Max;
 double mChi2Vtx;
 double mErrConfidence;
 double mErrConfiDefault;
+double mParentHz;
+double mTargetHz;
 int    mIter;				//current iter number
 StiKalmanTrackNode *mWorstNode;		//node with the worst Chi2
 StiKalmanTrackNode *mFlipFlopNode;	//node with the worst flip/flop ratio
