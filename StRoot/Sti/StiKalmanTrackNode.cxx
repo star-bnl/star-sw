@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.94 2006/02/14 18:10:41 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.95 2006/02/15 19:07:18 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.95  2006/02/15 19:07:18  perev
+ * assrt in nudge cos < 1
+ *
  * Revision 2.94  2006/02/14 18:10:41  perev
  * getGlobalHitErrors added+CleanUp
  *
@@ -973,7 +976,7 @@ int StiKalmanTrackNode::nudge(StiHit *hitp)
     mFP.print();
     return -13;
   }
-  assert(fabs(mFP._cosCA) <= 1.);
+  assert(fabs(mFP._cosCA) < 1.);
   mPP() = mFP;
   return 0;
 }
