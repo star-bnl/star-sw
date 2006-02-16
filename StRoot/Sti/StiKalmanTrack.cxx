@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.78 2006/02/14 18:04:45 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.78 2006/02/14 18:04:45 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.79 2006/02/16 01:58:43 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.79 2006/02/16 01:58:43 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.79  2006/02/16 01:58:43  perev
+ * StiOldRefit env added
+ *
  * Revision 2.78  2006/02/14 18:04:45  perev
  * approx() accounts errors now
  *
@@ -1327,8 +1330,13 @@ StiDebug::Break(nCall);
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1;continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
+static int oldRefit = StiDebug::flag("StiOldRefit");
+if (oldRefit) {
+      if (qA>0.5)	{fail=-2;continue;} 
+} else {
       if (qA <1) errConfidence = 0.1;
       if (qA>0.01)	{fail=-2;continue;} 
+}
       double info[2][8];
       sTNH.mCurvQa.getInfo(info[0]);
       sTNH.mTanlQa.getInfo(info[1]);
