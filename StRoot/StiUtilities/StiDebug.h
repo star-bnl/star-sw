@@ -22,6 +22,7 @@ static void  Init();
 static void  Finish();
 static void  hist (const char *name,double val);
 static int   tally(const char *name,int val=1);
+static int   flag(const char *flagName);
 private:
 
 static TObjArray *mgHist;
