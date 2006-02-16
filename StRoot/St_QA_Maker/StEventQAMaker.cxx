@@ -646,7 +646,7 @@ void StEventQAMaker::MakeHistGlob() {
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
+	  if (denom>0)hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
 				  Float_t(TMath::Tan(geom->dipAngle())));
 	}
         hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
@@ -763,11 +763,11 @@ void StEventQAMaker::MakeHistGlob() {
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  if (radf>40) {
+	  if (radf>40 && denom>0) {
 	    hists->m_tanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
 				    Float_t(TMath::Tan(geom->dipAngle())));
 	  }
-	  if (radf<40) {
+	  if (radf<40 && denom>0) {
 	    hists->m_tanl_zfTS->Fill((firstPoint.z()-pvert.z())/denom,
 				     Float_t(TMath::Tan(geom->dipAngle())));
 	  }
@@ -1207,7 +1207,7 @@ void StEventQAMaker::MakeHistPrim() {
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  hists->m_ptanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
+	  if (denom>0)hists->m_ptanl_zfT->Fill((firstPoint.z()-pvert.z())/denom,
 				   Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthT->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
@@ -1290,10 +1290,10 @@ void StEventQAMaker::MakeHistPrim() {
           qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
 	  Float_t denom = 2*rcircle*(::asin(qwe));
-	  if (radf>40) hists->m_ptanl_zfT->
+	  if (radf>40 && denom>0) hists->m_ptanl_zfT->
 	    Fill((firstPoint.z() - pvert.z())/denom,
 		 Float_t(TMath::Tan(geom->dipAngle())));
-	  if (radf<40) hists->m_ptanl_zfTS->
+	  if (radf<40 && denom>0) hists->m_ptanl_zfTS->
 	    Fill((firstPoint.z() - pvert.z())/denom,
 		 Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthTS->Fill(primtrk->length(),lmevmom);
@@ -2211,8 +2211,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.70 2005/09/27 20:32:22 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.71 2006/02/16 20:37:03 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.71  2006/02/16 20:37:03  perev
+// 1/0
+//
 // Revision 2.70  2005/09/27 20:32:22  genevb
 // New method for StMcEvent access
 //
