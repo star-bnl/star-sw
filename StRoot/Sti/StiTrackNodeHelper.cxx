@@ -29,7 +29,8 @@ void StiTrackNodeHelper::set(double chi2Max,double chi2Vtx,double errConfidence,
   reset();
   mChi2Max = chi2Max;
   mChi2Vtx = chi2Vtx;
-  mErrConfiDefault = errConfidence;
+  mNodeErrFactor = (1./(errConfidence));
+  mHitsErrFactor = (1./(1. - errConfidence));
   mIter = iter;
   if (!mIter) mFlipFlopNode = 0;
 }
@@ -62,8 +63,6 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
     assert(fabs(mTargetHz-mTargetNode->mFP._hz)<1e-10);
   }
 
-//??  mErrConfidence = (mParentNode)? 0:mErrConfiDefault;
-  mErrConfidence = mErrConfiDefault;
   mDetector   = mTargetNode->getDetector();
   if (!mDetector) mVertexNode = mTargetNode;
   mHit        = mTargetNode->getHit();
@@ -281,7 +280,7 @@ StiDebug::Break(nCall);
     mBestPars = mPredPars;
     mBestDelta = mPredErrs.getDelta();
     mJoinPars = mPredPars;
-    resetError(1./(mErrConfidence));
+    resetError(mNodeErrFactor);
   }
 // 		Set fitted pars to predicted for the absent hit case
   mFitdPars = mPredPars;
@@ -341,14 +340,19 @@ int StiTrackNodeHelper::join()
 {
   enum {kOLdValid=1,kNewFitd=2,kJoiUnFit=4};
 //  if (!mParentNode) return 0;
+
+
   int ierr = 0;
   double chi2;		
   
   int kase = mTargetNode->isValid();
   if (mState==StiTrackNode::kTNFitEnd) kase |=kNewFitd;
+static int oldJoinPrim = StiDebug::flag("StiOldJoinPrim");
+if (!oldJoinPrim) {
   if (mTargetNode==mVertexNode) kase = kNewFitd; //ignore old info for primVtx
 						 //Hack to accoont specific 
 						 //fit to primVtx
+}
   do {
     switch(kase) {
       case 0:					// Old invalid & New UnFitd
@@ -695,7 +699,7 @@ int StiTrackNodeHelper::propagateMCS()
   double beta2  = p2/e2;
   double theta2 = StiKalmanTrackNode::mcs2(relRadThickness,beta2,p2);
   double cos2Li = (1.+ tanl*tanl);  // 1/cos(lamda)**2
-  double f = 1./(1-mErrConfidence); 
+  double f = mHitsErrFactor; 
   mMcs._cEE = cos2Li 		*theta2*f;
   mMcs._cPP = tanl*tanl*pti*pti	*theta2*f;
   mMcs._cTP = pti*tanl*cos2Li	*theta2*f;
@@ -801,7 +805,7 @@ double StiTrackNodeHelper::recvChi2()
   StiHitErrs  myHrr = mHrr;
   StiNodeErrs recovErrs;
   StiNodePars recovPars;
-  double f = -(1.-mErrConfidence);
+  double f = -(1./mHitsErrFactor);
   myHrr*=f;
   double r11,r12,r22;
   if ((r11=myHrr.hYY+mJoinErrs._cYY) >=0) 	return 1e41;
@@ -824,8 +828,7 @@ double StiTrackNodeHelper::recvChi2()
 int StiTrackNodeHelper::setHitErrs() 
 {
   getHitErrors(mHit,&mFitdPars,&mHrr);
-  double hitErrorFactor = 1./(1.-mErrConfidence);
-  mHrr*=hitErrorFactor;
+  mHrr*=mHitsErrFactor;
   return 0;
 }
 //______________________________________________________________________________
