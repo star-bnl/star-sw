@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.15 2005/12/07 19:46:39 perev Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.16 2006/02/16 21:36:08 perev Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.16  2006/02/16 21:36:08  perev
+ *No delete pmdCollection. It is deleted in Clear()
+ *
  *Revision 1.15  2005/12/07 19:46:39  perev
  *EndCrashFix
  *
@@ -116,7 +119,7 @@ StPmdReadMaker::~StPmdReadMaker() {
   mThePmdData	=0;
   mPmdEvent	=0;
   mCpvEvent	=0;
-  delete mPmdCollection; mPmdCollection	=0;
+  mPmdCollection=0;
   mDb=0;
   m_PmdCalibConst=0;
 }
