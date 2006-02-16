@@ -966,6 +966,7 @@ double TCircle::Eval(double step,double *X, double *D) const
   X[0] = CXn.real();
   X[1] = CXn.imag();
   if (D) {
+    CPn/= std::abs(CPn);
     D[0] = CPn.real();
     D[1] = CPn.imag();
   }
@@ -982,9 +983,8 @@ void TCircle::Rot(double angle)
   Complex CX(fX[0],fX[1]),CP(fD[0],fD[1]);
   Complex A = std::exp(Im*angle);
   CX *=A; fX[0] = CX.real(); fX[1]=CX.imag();
-  CP *=A; fD[0] = CP.real(); fD[1]=CP.imag();
-  if (fabs(fD[0])>1) fD[0]=(fD[0]<0)? -1:1;
-  if (fabs(fD[1])>1) fD[1]=(fD[1]<0)? -1:1;
+  CP *=A; CP/=std::abs(CP);
+  fD[0] = CP.real(); fD[1]=CP.imag();
 }
 //______________________________________________________________________________
 void TCircle::Backward()
@@ -1080,8 +1080,8 @@ double TCircle::Approx(int nPts,const double *Pts,int istep)
 
   i = (pars[0][0]<pars[1][0])? 0:1;
   memcpy(fX,pars[i]+1,5*sizeof(fX[0]));
-  if (fabs(fD[0])>1) fD[0]=(fD[0]<0)? -1:1;
-  if (fabs(fD[1])>1) fD[1]=(fD[1]<0)? -1:1;
+  tmp = sqrt(fD[0]*fD[0]+fD[1]*fD[1]);
+  fD[0]/=tmp; fD[1]/=tmp;
   Rot( atan2(Ei[0][1],Ei[0][0]));
   fX[0]+=xmed[0]; fX[1]+=xmed[1];
 
@@ -1239,13 +1239,13 @@ double TCircle::Fit(int nPts,const double *Pts,int pstep
     
     double h = (av[kR]-av[kC]*dx-av[kS]*dy);
     double dRR   = h*rho - (begNor[0]*dx+begNor[1]*dy);
-//    double sinD  = (TCbeg.fD[0]*dx+TCbeg.fD[1]*dy)/sqrt(dx*dx+dy*dy);
     double sinD  = (TCbeg.fD[0]*dx+TCbeg.fD[1]*dy);
     double cosD  = sqrt(1-sinD)*(1+sinD);
     double newDx =  TCbeg.fD[0]*cosD + TCbeg.fD[1]*sinD;
     double newDy = -TCbeg.fD[0]*sinD + TCbeg.fD[1]*cosD;
-    TCbeg.fD[0]  = newDx;
-    TCbeg.fD[1]  = newDy;
+    double tmp = sqrt(newDx*newDx+newDy*newDy);
+    TCbeg.fD[0]  = newDx/tmp;
+    TCbeg.fD[1]  = newDy/tmp;
     TCbeg.fX[0] += h*begNor[0];
     if (fabs(TCbeg.fD[0])>1) TCbeg.fD[0]=(TCbeg.fD[0]<0)? -1:1;
     if (fabs(TCbeg.fD[1])>1) TCbeg.fD[1]=(TCbeg.fD[1]<0)? -1:1;
