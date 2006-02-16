@@ -1,11 +1,11 @@
 /*!\class StEmcDecoder
 \author Alexandre A. P. Suaide
-
+ 
 This class makes the decodification from EMC daq
 and electronics scheme to software scheme. This class
 has methods to decode the numbers in both directions and
 it works for SMD and towers.<br><br>
-
+ 
 The current id's definitions are:<br>
       - for Towers
             - 0 <= RDO (daq_id)            <= 4799
@@ -21,7 +21,7 @@ The current id's definitions are:<br>
             - 0 <= RDO             <= 7
             - 0 <= index           <= 4799
             
-*/ 
+*/
 #include <Stiostream.h>
 #include <Stiostream.h>
 #include "Stiostream.h"
@@ -31,8 +31,8 @@ The current id's definitions are:<br>
 
 class StEmcDecoder
 {
-  protected:
-    
+protected:
+
     int       Init_Crate[30];
     int       TDC_Crate[30];
     int       Crate_TDC[30];
@@ -41,24 +41,24 @@ class StEmcDecoder
     int       TriggerSequence[10];
     int       TowerBugFixIndex[4800];
     bool      fixTowerMap;
-    
+
     int       JetPatchFromTriggerPatch[300];
     int       JetPatchSeqFromTriggerPatch[300];
     int       TriggerPatchFromJetPatchAndSeq[300];
 
-    
+
     int       SmdModules[8][15];
     int       FEE1[4],FEE2[4],FEE3[4];
     int       connector1[20],connector2[20],connector3[20];
     int       SmdeRDO[120][150],SmdpRDO[120][10][15];
     int       SmdeIndex[120][150],SmdpIndex[120][10][15];
-    
+
     int       PsdModules[4][15];
     int       PsdOffset[40];
     int       PsdStart[60];
     int       PsdRDO[4800];
     int       PsdIndex[4800];
-    
+
     int       Getjose_towerWest(int,int);///<Get Software Id for West size for towers
     int       Getjose_towerEast(int,int);///<Get Software Id for East side for towers
     int       getSmdModule(int,int,int&);///<Get SMD module in a given position in RDO
@@ -66,13 +66,18 @@ class StEmcDecoder
     int       getSmdPin(int,int,int,int&);///<Get SMD pin number
     int       getSmdpStrip(int,int&,int&);///<Get SMDP strip
     void      fixTowerBugIndexes();///<fixes the array in order to correct the tower bug
-    
+
     void      Init(unsigned int,unsigned int);///< Init method
-        
-  public:
-              StEmcDecoder(unsigned int date=20300101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
+
+public:
+    StEmcDecoder(unsigned int date=20300101,unsigned int time=000000, bool TowerMapBug = false);///< StEmcDecoder constructor
     virtual   ~StEmcDecoder();///< StEmcDecoder destructor
-    
+
+    void      SetDateTime(unsigned int date, unsigned int time);///< Sets the timestamp to be used
+    bool      GetFixTowerMapBug(void);///< Shows if the tower map bug is being fixed on the fly
+    void      SetFixTowerMapBug(bool fix);///< Sets the tower map bug fix
+
+
     int       GetTowerIdFromDaqId(int,int&);///<Get Sofwtare Id from Daq Id for towers
     int       GetDaqIdFromTowerId(int,int&);///< Get Daq Id from Software Id for towers
     int       GetTowerIdFromCrate(int,int,int&);///<Get Software Id from Crate number and position in crate for towers
@@ -83,12 +88,12 @@ class StEmcDecoder
     int       GetTowerTDCFromDaqId(int,int&);///< Get TDC channel from Daq Id for towers
     int       GetTowerBin(int,int&,int&,int&);///<Transition from environment rid to m,e,s for towers
     int       GetTowerBugCorrectionShift(int,int&);///<Returns the index shift for the tower in original map
-    
+
     int       GetTriggerPatchFromCrate(int,int,int&); ///< returns the trigger patch from crate and sequence in the crate
     int       GetCrateAndSequenceFromTriggerPatch(int,int&,int&); ///< returns the crate number and start point for a given trigger patch
     int       GetTriggerPatchFromJetPatch(int, int, int&); ///< returns the trigger patch from big jet patch and the sequence in it
     int       GetJetPatchAndSequenceFromTriggerPatch(int, int&, int&); ///< return the big jet patch and sequence number within it from the
-    
+
     int       GetSmdCoord(int,int,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
     int       GetSmdCoord(int,int,int&,int&,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD. Also returns smd-wire and A_value
     int       GetSmdRDO(int,int,int,int,int&,int&);///<Get SMD fiber and position from detector number (3==SMDE, 4==SMDP), m, e, s
@@ -96,11 +101,11 @@ class StEmcDecoder
     int       GetPsdId(int,int,int&,bool=false);///<Get PSD id
     int       GetPsdId(int,int,int&,int&,int&,int&,bool=false);///<Get PSD id. Also returns PMTBox,  wire number and FEE value
     int       GetPsdRDO(int,int&,int&);///<Get PSD fiber and position from id
-    
+
     void      PrintTowerMap(ofstream *);///<Print Tower MAP
     void      PrintSmdMap(ofstream *);///<Print SMD MAP
     void      PrintPsdMap(ofstream *);///<Print SMD MAP
-  
-    
+
+
 };
 #endif
