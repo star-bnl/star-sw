@@ -91,8 +91,8 @@ static int getHitErrors(const StiHit *hit,const StiNodePars *pars, StiHitErrs *h
 private:
 double mChi2Max;
 double mChi2Vtx;
-double mErrConfidence;
-double mErrConfiDefault;
+double mNodeErrFactor;
+double mHitsErrFactor;
 double mParentHz;
 double mTargetHz;
 int    mIter;				//current iter number
