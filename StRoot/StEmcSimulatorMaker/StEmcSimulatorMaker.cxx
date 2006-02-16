@@ -249,10 +249,10 @@ Int_t StEmcSimulatorMaker::InitRun(Int_t run)
     {
         for(Int_t j = 0;j<18000;j++)
         {
-            if(controlTable->calibOffSet[i]==0)
-                mGain[i][j]=1;
-            else
-                mGain[i][j] = g.Gaus(controlTable->calibOffSet[i],controlTable->calibSpread[i]);
+            mGain[i][j] = 1 + controlTable->calibOffSet[i];
+            
+            if(controlTable->calibSpread[i]!=0)
+                mGain[i][j] += g.Gaus(0,controlTable->calibSpread[i]);
         }
     }
     return kStOk;
@@ -1234,8 +1234,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.32 2006/01/24 16:31:47 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.33 2006/02/16 16:11:41 suaide Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.33  2006/02/16 16:11:41  suaide
+// small modification in the way the calibration spread/offset is created
+//
 // Revision 1.32  2006/01/24 16:31:47  suaide
 // disabled printout
 //
