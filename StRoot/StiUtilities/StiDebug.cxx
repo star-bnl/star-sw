@@ -20,6 +20,14 @@ void StiDebug::Init()
   if (gROOT->IsBatch()) return;
 }
 //______________________________________________________________________________
+int  StiDebug::flag(const char *flagName)
+{
+  const char *val = gSystem->Getenv(flagName);
+  if (!val) return 0;
+  return atoi(val);
+}
+
+//______________________________________________________________________________
 int  StiDebug::tally(const char *name,int val)
 {
    if (!mgTally) mgTally = new TObjArray();
