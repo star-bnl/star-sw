@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.15 2004/11/15 23:35:47 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.16 2006/02/16 08:35:26 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.16  2006/02/16 08:35:26  subhasis
+ * fillstevent: mod-1 fixed for CPV
+ *
  * Revision 1.15  2004/11/15 23:35:47  subhasis
  * Refs in centroidCal initialised to solve valgrind error
  *
@@ -379,7 +382,8 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      Float_t ncell=spmcl2->NumofMems();
 	      // Filling PmdCluster for StEvent
 	      StPhmdCluster *pcls = new StPhmdCluster();
-	      pcls->setModule(mod);            //! Supermodule
+	      // supmod filled as 0-11, earlier it was 1-12 (earlier version it was a mistake, it was changed for pmd not for cpv)
+	      pcls->setModule(mod-1);            //! Supermodule
 	      pcls->setNumberOfCells(Int_t(ncell));  //! # of Cells( Integer type) in a cluster
 	      // Commented temporarily because of problem in StEvent
 	      //  pcls->setNumberOfCells(ncell);   //! # of Cells in a cluster
