@@ -24,6 +24,8 @@ int  StiDebug::flag(const char *flagName)
 {
   const char *val = gSystem->Getenv(flagName);
   if (!val) return 0;
+  printf("\nStiDebug::flag: %s = %s\n\n",flagName,flag);
+
   return atoi(val);
 }
 
