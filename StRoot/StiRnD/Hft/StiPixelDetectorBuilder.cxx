@@ -1,3 +1,13 @@
+/*
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.11 2006/02/17 21:39:32 andrewar Exp $
+ *
+ * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.11  2006/02/17 21:39:32  andrewar
+ * Added calls to StiDetector::setKey(key,val)
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <stdexcept>
 #include "Sti/StiPlanarShape.h"
@@ -13,7 +23,8 @@
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 
-StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active, const string & inputFile)
+StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
+						 const string & inputFile)
   : StiDetectorBuilder("Pixel",active,inputFile)
 {
 	//Parameterized hit error calculator.  Given a track (dip, cross, pt, etc) returns average error
@@ -22,13 +33,25 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active, const string & inp
 	//I also put no dependence on either crossing angle or dip angle of track
   _trackingParameters.setName("PixelTrackingParameters");
   _calculator.setName("PixelHitErrors");
-  //_calculator = new StiDefaultHitErrorCalculator();
-  _calculator.set(4e-6, 0., 0., 4e-6, 0., 0.);
-  //StiTrackingParameters * trackingPars = getTrackingParameters();
-  _trackingParameters.setMaxChi2ForSelection(10000.);
-  _trackingParameters.setMinSearchWindow(0.2);
-  _trackingParameters.setMaxSearchWindow(2.0);
-  _trackingParameters.setSearchWindowScaling(100000.);
+
+	//_calculator = new StiDefaultHitErrorCalculator();
+	_calculator.set(6e-5, 0., 0., 6e-5, 0., 0.);
+  
+    ifstream inF("IstBuilder_pars.txt");
+    if (inF)
+      {
+	_trackingParameters.loadFS(inF);
+	cout << "StiIstDetectorBuilder:: -I-  New tracking parameters from file" << endl;
+      }
+    else
+      {
+
+	//StiTrackingParameters * trackingPars = getTrackingParameters();
+	_trackingParameters.setMaxChi2ForSelection(100.);
+	_trackingParameters.setMinSearchWindow(0.01);
+	_trackingParameters.setMaxSearchWindow(.5);
+	_trackingParameters.setSearchWindowScaling(10.);
+      }
 }
 
 StiPixelDetectorBuilder::~StiPixelDetectorBuilder()
@@ -39,7 +62,6 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 {
   char name[50];
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
-  double pixRadius = 5.0; //cm
   unsigned int nRows=1;
   setNRows(2);
   setNSectors(0,6);
@@ -54,7 +76,11 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
   //Instantiate energy loss detector for si material  
   //const static double I2Ar = (15.8*18) * (15.8*18) * 1e-18; // GeV**2
   double ionization = material->getIonization();
-  StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(), ionization*ionization, material->getA(), material->getZ(), material->getDensity());
+  StiElossCalculator * siElossCalculator = new StiElossCalculator(material->getZOverA(),
+								  ionization*ionization,
+								  material->getA(),
+								  material->getZ(),
+								  material->getDensity());
   
   StiPlanarShape *pShape;
   for (unsigned int row=0; row<nRows; row++) 
@@ -63,8 +89,8 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
       if (!pShape) throw runtime_error("StiPixelDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
       sprintf(name, "Pixel/Layer_%d", row);
       pShape->setName(name);
-      pShape->setThickness(0.0020); //cm 
-      pShape->setHalfDepth( 16./2. );
+      pShape->setThickness(0.0280); //cm 
+      pShape->setHalfDepth( 20./2. );
       pShape->setHalfWidth(1.0);
       for(unsigned int sector = 0; sector<24; sector++)	
 	{      
@@ -90,14 +116,23 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 	  pDetector->setIsDiscreteScatterer(false);
 	  pDetector->setMaterial(material);
 	  pDetector->setGas(_gas);
+	  pDetector->setGroupId(998);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  pDetector->setHitErrorCalculator(&_calculator);
 	  pDetector->setElossCalculator(siElossCalculator);
 	  if (sector<18)
-	    add(1,sector,pDetector);
+	    {
+	      pDetector->setKey(1,1);
+	      pDetector->setKey(2,sector);
+	      add(1,sector,pDetector);
+	    }
 	  else
-	    add(0,(sector-18),pDetector);
+	    {
+	      pDetector->setKey(1,0);
+	      pDetector->setKey(2,sector-18);
+	      add(0,(sector-18),pDetector);
+	    }
 	}
     }
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Done" << endl;
