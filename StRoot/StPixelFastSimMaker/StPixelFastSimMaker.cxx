@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.2 2006/02/08 20:57:33 fisyak Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.3 2006/02/17 21:44:29 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.3  2006/02/17 21:44:29  andrewar
+ * Remover streaming of each Pixel hit.
+ *
  * Revision 1.2  2006/02/08 20:57:33  fisyak
  * Set proper Detector Id
  *
@@ -73,8 +76,8 @@ Int_t StPixelFastSimMaker::Make()
 		  StRnDHit* tempHit = new StRnDHit(mcH->position(), 
 						   mHitError, 1, 1., 0, 
 						   1, 1, id++, kHftId);
-		  cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
-		       <<*tempHit<<endl;
+		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
+		  //     <<*tempHit<<endl;
 		  tempHit->setDetectorId(kHftId);
 		  tempHit->setVolumeId(mcH->volumeId());                   
 		  tempHit->setKey(mcH->key());                             
