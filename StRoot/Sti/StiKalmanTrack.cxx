@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.79 2006/02/16 01:58:43 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.79 2006/02/16 01:58:43 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.80 2006/02/21 23:25:51 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.80 2006/02/21 23:25:51 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.80  2006/02/21 23:25:51  perev
+ * StiConfidence flag added
+ *
  * Revision 2.79  2006/02/16 01:58:43  perev
  * StiOldRefit env added
  *
@@ -1305,7 +1308,7 @@ int StiKalmanTrack::refit()
 static int nCall=0; nCall++;
 StiDebug::Break(nCall);
   enum {kMaxIter=30,kPctLoss=10,kHitLoss=3};
-
+static double defConfidence = StiDebug::dFlag("StiConfidence",0.3);
   int nNBeg = getNNodes(3), nNEnd = nNBeg;
   if (nNBeg<=3) return 1;
   StiKalmanTrackNode *inn= getInnerMostNode(3);
@@ -1315,7 +1318,7 @@ StiDebug::Break(nCall);
   StiNodeErrs ePrev;
   int iter=0,igor=0;
   double qA;
-  double errConfidence = 0.3;
+  double errConfidence = defConfidence;
   for (int ITER=0;ITER<100;ITER++) {
     for (iter=0;iter<kMaxIter;iter++) {
       fail = 0;
@@ -1330,11 +1333,11 @@ StiDebug::Break(nCall);
       if (!inn->isValid() || inn->getChi2()>1000) {
         inn = getInnerMostNode(3); fail=-1;continue;}	
       qA = diff(pPrev,ePrev,inn->fitPars(),inn->fitErrs(),igor);
-static int oldRefit = StiDebug::flag("StiOldRefit");
+static int oldRefit = StiDebug::iFlag("StiOldRefit");
 if (oldRefit) {
       if (qA>0.5)	{fail=-2;continue;} 
 } else {
-      if (qA <1) errConfidence = 0.1;
+      if (qA <1 && errConfidence>0.1) errConfidence = 0.1;
       if (qA>0.01)	{fail=-2;continue;} 
 }
       double info[2][8];
