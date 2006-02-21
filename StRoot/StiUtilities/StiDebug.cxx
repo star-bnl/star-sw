@@ -20,15 +20,24 @@ void StiDebug::Init()
   if (gROOT->IsBatch()) return;
 }
 //______________________________________________________________________________
-int  StiDebug::flag(const char *flagName)
+int  StiDebug::iFlag(const char *flagName,int dflt)
 {
   const char *val = gSystem->Getenv(flagName);
-  if (!val) return 0;
-  printf("\nStiDebug::flag: %s = %s\n\n",flagName,flag);
+  if (!val) return dflt;
+  printf("\nStiDebug::iFlag: %s = %s\n\n",flagName,val);
 
   return atoi(val);
 }
 
+//______________________________________________________________________________
+double StiDebug::dFlag(const char *flagName, double dflt)
+{
+  const char *val = gSystem->Getenv(flagName);
+  if (!val) return dflt;
+  printf("\nStiDebug::dFlag: %s = %s\n\n",flagName,val);
+
+  return atof(val);
+}
 //______________________________________________________________________________
 int  StiDebug::tally(const char *name,int val)
 {
