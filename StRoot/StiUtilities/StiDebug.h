@@ -16,13 +16,14 @@ class TObjArray;
 class StiDebug 
 {
 public:
-static void  Break(int kase);
-static void  show(StiKalmanTrack *kt);
-static void  Init();
-static void  Finish();
-static void  hist (const char *name,double val);
-static int   tally(const char *name,int val=1);
-static int   flag(const char *flagName);
+static void   Break(int kase);
+static void   show(StiKalmanTrack *kt);
+static void   Init();
+static void   Finish();
+static void   hist (const char *name,double val);
+static int    tally(const char *name,int val=1);
+static int    iFlag(const char *flagName, int    dflt=0);
+static double dFlag(const char *flagName, double dflt=0);
 private:
 
 static TObjArray *mgHist;

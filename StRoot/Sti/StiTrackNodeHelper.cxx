@@ -347,7 +347,7 @@ int StiTrackNodeHelper::join()
   
   int kase = mTargetNode->isValid();
   if (mState==StiTrackNode::kTNFitEnd) kase |=kNewFitd;
-static int oldJoinPrim = StiDebug::flag("StiOldJoinPrim");
+static int oldJoinPrim = StiDebug::iFlag("StiOldJoinPrim");
 if (!oldJoinPrim) {
   if (mTargetNode==mVertexNode) kase = kNewFitd; //ignore old info for primVtx
 						 //Hack to accoont specific 
