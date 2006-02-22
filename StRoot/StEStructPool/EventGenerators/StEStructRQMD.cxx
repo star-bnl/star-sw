@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructRQMD.cxx,v 1.1 2004/03/02 21:51:01 prindle Exp $
+ * $Id: StEStructRQMD.cxx,v 1.2 2006/02/22 22:05:42 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -60,7 +60,7 @@ StEStructEvent* StEStructRQMD::generateEvent() {
     retVal = new StEStructEvent();
 
     fillTracks(retVal);
-    if (!mECuts->goodNumberOfTracks(mrefMult)) {
+    if (!mECuts->goodCentrality((float)mnumTracks)) {
         delete retVal;
         retVal=NULL;
     } else {
@@ -102,7 +102,7 @@ void StEStructRQMD::fillTracks(StEStructEvent* estructEvent) {
     const int kAntiSigmaMinus = 29;
 
 
-    mrefMult=0;
+    mnumTracks=0;
     StEStructTrack* eTrack = new StEStructTrack();
 
     char tDum[50];
@@ -286,7 +286,7 @@ void StEStructRQMD::fillTracks(StEStructEvent* estructEvent) {
         useTrack = (mTCuts->goodYt(yt) && useTrack);
         mTCuts->fillHistograms(useTrack);
         if (!useTrack) continue;
-        mrefMult++;
+        mnumTracks++;
 
         eTrack->SetBx(0);
         eTrack->SetBy(0);
@@ -356,8 +356,12 @@ void StEStructRQMD::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructRQMD.cxx,v $
+ * Revision 1.2  2006/02/22 22:05:42  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.1  2004/03/02 21:51:01  prindle
- * I forgot to cvs add my EventGenerator readers.
+ *
+ *   I forgot to cvs add my EventGenerator readers.
  *
  * Revision 1.2  2003/11/25 22:45:14  prindle
  * Commiting changes so I can move code to rhic

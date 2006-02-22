@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.5 2005/09/14 17:21:19 msd Exp $
+ * $Id: StEStructTrack.cxx,v 1.6 2006/02/22 22:06:07 prindle Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -80,6 +80,7 @@ ClassImp(StEStructTrack)
 void StEStructTrack::FillTransientData(){
 
   evalPt();
+  evalPtot();
   evalYt();
   evalXt();
   evalFourMomentum();
@@ -88,15 +89,12 @@ void StEStructTrack::FillTransientData(){
 
 //----------------------------------------------------------
 void StEStructTrack::evalYt(){
-
-  float _r=mPt/mAssignedMass;
+  float _r=mPt/0.13957;
   mYt = log(sqrt(1+_r*_r)+_r);
 
   mytbin=(int) floor((mYt-1.0)/0.5);
-  if(mytbin>6)mytbin=6;
+  if(mytbin>6)mytbin=6;  // Why 6?
   if(mytbin<0)mytbin=0;
-
-
 };
 
 //----------------------------------------------------------
@@ -122,8 +120,7 @@ void StEStructTrack::evalXt(){
 void StEStructTrack::evalFourMomentum(const float mass){
 
   float lMass=mass;
-  // assume pion mass for now !
-  if(lMass<=0)lMass=mAssignedMass;
+  if(lMass<=0)lMass=0.13957;
 
   mFourMomentum.setPx(mPx);
   mFourMomentum.setPy(mPy);
@@ -170,6 +167,7 @@ void StEStructTrack::FillTpcReferencePoints(){
 //----------------------------------------------------------
 
 Float_t StEStructTrack::Pt() const { return mPt; };
+Float_t StEStructTrack::Ptot() const { return mPtot; };
 
 Float_t StEStructTrack::Mt(Float_t mass) const { 
   return sqrt((mPt*mPt)+(mass*mass)); 
@@ -177,6 +175,23 @@ Float_t StEStructTrack::Mt(Float_t mass) const {
 
 Float_t StEStructTrack::E(Float_t mass) const { 
   return sqrt((mPt*mPt)+(mPz*mPz)+(mass*mass)); 
+}
+
+Float_t StEStructTrack::Yt(Float_t mass) const { 
+  if (0 == mass) {
+      return mYt;
+  } else {
+      Float_t E = this->E(mass);
+      return 0.5*log((E+mPt)/(E-mPt));
+  }
+}
+
+Float_t StEStructTrack::Eta(Float_t mass) const {
+  if (0 == mass) {
+      return mEta;
+  } else {
+      return this->Rapidity(mass);
+  }
 }
 
 Float_t StEStructTrack::Rapidity(Float_t mass) const { 
@@ -207,6 +222,9 @@ Float_t StEStructTrack::PIDpiMinus() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.6  2006/02/22 22:06:07  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.5  2005/09/14 17:21:19  msd
  * Simplified helix fitting by taking helix from mudst instead of calculating from scratch
  *

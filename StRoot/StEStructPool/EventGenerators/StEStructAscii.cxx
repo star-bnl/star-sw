@@ -56,16 +56,16 @@ StEStructEvent* StEStructAscii::generateEvent(){
   retVal = new StEStructEvent();
 
   fillTracks(retVal);
-  bool useEvent=mECuts->goodNumberOfTracks(mrefMult);
+  bool useEvent=mECuts->goodCentrality((float)mnumTracks);
   if(!useEvent){
-    cout << "Cutting event with only " << mrefMult << " tracks." << endl; 
+    cout << "Cutting event with " << mnumTracks << " tracks." << endl; 
     delete retVal;
     retVal=NULL;
   } else {
     retVal->FillChargeCollections();
     meventCount++;
   }
-  mECuts->fillHistogram(mECuts->numTracksName(),(float)mrefMult,useEvent);
+  mECuts->fillHistogram(mECuts->centralityName(),(float)mnumTracks,useEvent);
 
   return retVal;
 }   
@@ -76,7 +76,7 @@ void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
   // See protected/estruct/msd/humanic for this file format
   // All we really read is momentum px,py,pz
 
-  mrefMult=0;
+  mnumTracks=0;
 
   // Quantities read from input file; most of them are ignored
   float x,y,z,t,mass,px,py,pz,tchem; 
@@ -136,7 +136,7 @@ void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
     float yt=log(sqrt(1+_r*_r)+_r);
     useTrack = (mTCuts->goodYt(yt) && useTrack);
 
-    if(useTrack)mrefMult++;  
+    if(useTrack)mnumTracks++;  
 
     mTCuts->fillHistograms(useTrack);
     
@@ -157,7 +157,7 @@ void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
     eTrack->SetPhi(phi);
 
     // We must assign charge randomly for this generator
-    temp = mrefMult%2;  // alternate between + and -
+    temp = mnumTracks%2;  // alternate between + and -
     if (temp==0) temp=-1;
     //cout << "Setting Charge " << temp << endl;  // ***TEST***
     eTrack->SetCharge(temp);
@@ -191,6 +191,9 @@ void StEStructAscii::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructAscii.cxx,v $
+ * Revision 1.3  2006/02/22 22:05:33  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.2  2005/09/14 17:18:38  msd
  * Setting numEvents to 0 now does all events in file
  *

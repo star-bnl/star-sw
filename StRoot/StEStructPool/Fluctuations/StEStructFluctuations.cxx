@@ -253,6 +253,22 @@ void StEStructFluct::fillPtHist( double Pt, int sign ) {
         ptMinus->Fill(Pt);
     }
 }
+void StEStructFluct::fillPhiHist( double Phi, int sign ) {
+    if (sign > 0) {
+        phiPlus->Fill(Phi);
+    }
+    if (sign < 0) {
+        phiMinus->Fill(Phi);
+    }
+}
+void StEStructFluct::fillEtaHist( double Eta, int sign ) {
+    if (sign > 0) {
+        etaPlus->Fill(Eta);
+    }
+    if (sign < 0) {
+        etaMinus->Fill(Eta);
+    }
+}
 //--------------------------------------------------------------------------
 //
 //------------ Below are init, delete, write functions -------///
@@ -378,6 +394,10 @@ void StEStructFluct::writeQAHistograms() {
     ptAll->Write();
     ptPlus->Write();
     ptMinus->Write();
+    phiPlus->Write();
+    phiMinus->Write();
+    etaPlus->Write();
+    etaMinus->Write();
 }
 
 //--------------------------------------------------------------------------
@@ -446,6 +466,14 @@ void StEStructFluct::initArrays() {
     ptPlus = new TH1F(line,line,100,mPtMin,mPtMax);
     sprintf( line, "ptMinus_%s", mKey );
     ptMinus = new TH1F(line,line,100,mPtMin,mPtMax);
+    sprintf( line, "phiPlus_%s", mKey );
+    phiPlus = new TH1F(line,line,100,-3.1415926,3.1415926);
+    sprintf( line, "phiMinus_%s", mKey );
+    phiMinus = new TH1F(line,line,100,-3.1415926,3.1415926);
+    sprintf( line, "etaPlus_%s", mKey );
+    etaPlus = new TH1F(line,line,100,mEtaMin,mEtaMax);
+    sprintf( line, "etaMinus_%s", mKey );
+    etaMinus = new TH1F(line,line,100,mEtaMin,mEtaMax);
 
     printf("Allocating arrays to store info.\n");
     for (int jStat=0;jStat<5;jStat++) {
@@ -524,6 +552,10 @@ void StEStructFluct::deleteArrays() {
     delete ptAll;
     delete ptPlus;
     delete ptMinus;
+    delete phiPlus;
+    delete phiMinus;
+    delete etaPlus;
+    delete etaMinus;
 
     printf("freeing Arrays.\n");
     for (int jStat=0;jStat<5;jStat++) {

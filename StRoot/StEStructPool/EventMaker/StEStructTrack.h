@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.5 2005/09/14 17:21:20 msd Exp $
+ * $Id: StEStructTrack.h,v 1.6 2006/02/22 22:06:09 prindle Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -66,6 +66,7 @@ private:
   Bool_t            mIsComplete; //!
   StPhysicalHelixD  mHelix;  //! Helix taken from MuDST
   Float_t           mPt; //!
+  Float_t           mPtot; //!
   Float_t           mYt; //!
   Float_t           mXt; //!
   Float_t           mAssignedMass; //!
@@ -85,6 +86,7 @@ public:
 
   void FillTransientData();
   void evalPt();
+  void evalPtot();
   void evalYt();
   void evalXt();
   void evalFourMomentum(float mass=0);
@@ -119,7 +121,7 @@ public:
 
   Float_t Dedx() const { return mDedx; }
   Float_t Chi2() const { return mChi2; }
-  Float_t AssignedMass() { return mAssignedMass; };
+  Float_t AssignedMass() const { return mAssignedMass; };
 
   Int_t NFitPoints() const { return mNFitPoints; }
   Int_t NFoundPoints() const { return mNFoundPoints; }
@@ -137,8 +139,10 @@ public:
   // functions which do some simple calculations
   //  using information contained in data members
   Float_t	Pt() const;
+  Float_t	Ptot() const;
   Float_t	Mt(Float_t mass) const;
   Float_t	E(Float_t mass) const;
+  Float_t	Eta(Float_t mass) const;
   Float_t	Rapidity(Float_t mass) const;
 
 
@@ -159,6 +163,7 @@ public:
 
   Float_t  Xt() const;
   Float_t  Yt() const;
+  Float_t  Yt(Float_t mass) const;
 
   // functions used to set data members
   void SetPx(Float_t px) { mPx = px; }
@@ -208,7 +213,8 @@ public:
   ClassDef(StEStructTrack, 2)   // macro for rootcint
 };
 
-inline void StEStructTrack::evalPt(){ mPt=sqrt((mPx*mPx)+(mPy*mPy)); }
+inline void  StEStructTrack::evalPt(){ mPt=sqrt((mPx*mPx)+(mPy*mPy)); }
+inline void  StEStructTrack::evalPtot(){ mPtot=sqrt((mPx*mPx)+(mPy*mPy)+(mPz*mPz)); }
 inline const StThreeVectorF& StEStructTrack::NominalTpcExitPoint() const { return mNominalTpcExitPoint; }
 inline const StThreeVectorF& StEStructTrack::NominalTpcEntrancePoint() const { return mNominalTpcEntrancePoint; };     
 inline const StThreeVectorF& StEStructTrack::MidTpcPoint() const{ return mMidTpcPoint; }; 
@@ -226,6 +232,9 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.6  2006/02/22 22:06:09  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.5  2005/09/14 17:21:20  msd
  * Simplified helix fitting by taking helix from mudst instead of calculating from scratch
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.5 2005/09/14 17:21:14 msd Exp $
+ * $Id: StEStructEvent.cxx,v 1.6 2006/02/22 22:06:05 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -31,8 +31,6 @@ StEStructEvent::StEStructEvent(StEStructEvent& e){
 
   mRunID      =e.RunID();
   mEventTime  =e.EventTime();
-  mOrigMult   =e.OrigMult();
-  mCentMult   =e.CentMult();
   mVx         =e.Vx();
   mVy         =e.Vy();
   mVz         =e.Vz();
@@ -129,6 +127,9 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.6  2006/02/22 22:06:05  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.5  2005/09/14 17:21:14  msd
  * Simplified helix fitting by taking helix from mudst instead of calculating from scratch
  *
