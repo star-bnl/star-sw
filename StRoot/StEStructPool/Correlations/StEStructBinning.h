@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.7 2005/09/14 17:14:21 msd Exp $
+ * $Id: StEStructBinning.h,v 1.8 2006/02/22 22:05:15 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -44,6 +44,14 @@
 
 #define ESTRUCT_Q_BINS 51
 #define ESTRUCT_TPCSEP_BINS 50
+
+#define ESTRUCT_DEDX_BINS 150
+#define ESTRUCT_PTOT_BINS 150
+
+// 100 + 1 over&under for QA
+#define ESTRUCT_QAPHI_BINS 101
+#define ESTRUCT_QAETA_BINS 101
+#define ESTRUCT_QAPT_BINS  101
 
 struct qBins {
   float q[ESTRUCT_Q_BINS];
@@ -103,6 +111,26 @@ struct TPCSepBins {
   float sep[ESTRUCT_TPCSEP_BINS];
 };
 
+struct dEdxBins {
+  float dEdx[ESTRUCT_DEDX_BINS];
+};
+
+struct PtotBins {
+  float Ptot[ESTRUCT_PTOT_BINS];
+};
+
+struct QAEtaBins {
+  float Eta[ESTRUCT_QAETA_BINS];
+};
+
+struct QAPhiBins {
+  float Phi[ESTRUCT_QAPHI_BINS];
+};
+
+struct QAPtBins {
+  float Pt[ESTRUCT_QAPT_BINS];
+};
+
 class StEStructBinning {
 
 protected:
@@ -134,7 +162,14 @@ protected:
   int i,j;
 
   float maxTPCSep, minTPCSep, dTPCSep; //! TPC separation dist
-  int   nTPCSep;
+  float maxdEdx, mindEdx, ddEdx;
+  float maxPtot, minPtot, dPtot;
+  int   nTPCSep, ndEdx, nPtot;
+
+  float maxQAEta, minQAEta, dQAEta;
+  float maxQAPhi, minQAPhi, dQAPhi;
+  float maxQAPt,  minQAPt,  dQAPt;
+  int   nQAEta, nQAPhi, nQAPt;
 
   StEStructBinning();
   StEStructBinning(StEStructBinning& me){};
@@ -152,6 +187,11 @@ public:
   int ipt(float pt);
   int iq(float q);
   int isep(float sep);
+  int idedx(float dedx);
+  int iptot(float ptot);
+  int iqaphi(float phi);
+  int iqaeta(float eta);
+  int iqapt(float pt);
 
   float phiVal(int iphi);
   float etaVal(int ieta);
@@ -160,6 +200,11 @@ public:
   float ptVal(int ipt);
   float qVal(int iq);
   float sepVal(int is);
+  float dedxVal(int idedx);
+  float ptotVal(int iptot);
+  float qaetaVal(int ieta);
+  float qaphiVal(int iphi);
+  float qaptVal(int ipt);
 
   int idphi(float phi);
   int ideta(float eta);
@@ -219,6 +264,16 @@ public:
   float getBinWidthPt()  { return dPt; }
   int   ptBins() { return nPt; }
 
+  float dEdxMax()   { return maxdEdx; }
+  float dEdxMin()   { return mindEdx; }
+  float getBinWidthdEdx() { return ddEdx; }
+  int   dEdxBins() { return ndEdx; }
+
+  float PtotMax()   { return maxPtot; }
+  float PtotMin()   { return minPtot; }
+  float getBinWidthPtot() { return dPtot; }
+  int   PtotBins() { return nPtot; }
+
   float dphiMax()   { return maxDPhi; }
   float dphiMin()   { return minDPhi; }
   float getBinWidthDPhi() { return dDPhi; }
@@ -263,6 +318,15 @@ public:
   float TPCSepMin()  { return minTPCSep; }
   int   TPCSepBins() { return nTPCSep;   }
 
+  int   QAEtaBins() { return nQAEta; }
+  int   QAPhiBins() { return nQAPhi; }
+  int   QAPtBins()  { return nQAPt; }
+  float QAEtaMax()   { return maxQAEta; }
+  float QAEtaMin()   { return minQAEta; }
+  float QAPhiMax()   { return maxQAPhi; }
+  float QAPhiMin()   { return minQAPhi; }
+  float QAPtMax()   { return maxQAPt; }
+  float QAPtMin()   { return minQAPt; }
 };
 
 inline StEStructBinning* StEStructBinning::Instance(){
@@ -431,11 +495,64 @@ inline float StEStructBinning::dptVal(int idpt){
   return minDPt+idpt*dDPt+dDPt/2;
 }
 
+
+inline int StEStructBinning::idedx(float dedx){
+  if( dedx < mindEdx ) return ESTRUCT_DEDX_BINS - 1;
+  int j = (int)((dedx-mindEdx)/ddEdx);
+  return (j > ESTRUCT_DEDX_BINS - 2) ? ESTRUCT_DEDX_BINS - 1 : j;
+}
+
+inline float StEStructBinning::dedxVal(int idedx){
+  return mindEdx+idedx*ddEdx+ddEdx/2;
+}
+
+inline int StEStructBinning::iptot(float ptot){
+  if( ptot < minPtot ) return ESTRUCT_PTOT_BINS - 1;
+  int j = (int)((ptot-minPtot)/dPtot);
+  return (j > ESTRUCT_PTOT_BINS - 2) ? ESTRUCT_PTOT_BINS - 1 : j;
+}
+
+inline float StEStructBinning::ptotVal(int iptot){
+  return minPtot+iptot*dPtot+dPtot/2;
+}
+
+inline int StEStructBinning::iqaeta(float eta){
+  if( eta < minQAEta ) return ESTRUCT_QAETA_BINS - 1;
+  int j = (int)((eta-minQAEta)/dQAEta);
+  return (j > ESTRUCT_QAETA_BINS - 2) ? ESTRUCT_QAETA_BINS - 1 : j;
+}
+inline int StEStructBinning::iqaphi(float phi){
+  if( phi < minQAPhi ) return ESTRUCT_QAPHI_BINS - 1;
+  int j = (int)((phi-minQAPhi)/dQAPhi);
+  return (j > ESTRUCT_QAPHI_BINS - 2) ? ESTRUCT_QAPHI_BINS - 1 : j;
+}
+inline int StEStructBinning::iqapt(float pt){
+  if( pt < minQAPt ) return ESTRUCT_QAPT_BINS - 1;
+  int j = (int)((pt-minQAPt)/dQAPt);
+  return (j > ESTRUCT_QAPT_BINS - 2) ? ESTRUCT_QAPT_BINS - 1 : j;
+}
+
+inline float StEStructBinning::qaetaVal(int ieta){
+  return minQAEta+ieta*dQAEta+dQAEta/2;
+}
+inline float StEStructBinning::qaphiVal(int iphi){
+  return minQAPhi+iphi*dQAPhi+dQAPhi/2;
+}
+inline float StEStructBinning::qaptVal(int ipt){
+  return minQAPt+ipt*dQAPt+dQAPt/2;
+}
+
+
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.8  2006/02/22 22:05:15  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
+ *
  * Revision 1.7  2005/09/14 17:14:21  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *

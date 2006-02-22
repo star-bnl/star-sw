@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.6 2005/09/14 17:14:25 msd Exp $
+ * $Id: StEStructPairCuts.h,v 1.7 2006/02/22 22:05:19 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -83,10 +83,10 @@ protected:
   void initCuts();
   void initNames();
 
+public:
+
   StEStructTrack* mTrack1;
   StEStructTrack* mTrack2;
-
-public:
 
   StEStructPairCuts();
   StEStructPairCuts(const char* cutFileName);
@@ -110,13 +110,17 @@ const  StEStructTrack*      Track2() const;
        float                 DeltaMt()   const;
        float                 DeltaXt()   const;
        float                 DeltaYt()   const;
+       float                 DeltaYt(float mass1,float mass2)   const;
        float                 DeltaEta()   const;
+       float                 DeltaEta(float mass1,float mass2)   const;
        float                 DeltaPhi()   const;
        float                 DeltaPt()   const;
        float                 SigmaMt()   const;
        float                 SigmaXt()   const;
        float                 SigmaYt()   const;
+       float                 SigmaYt(float mass1,float mass2)   const;
        float                 SigmaEta()   const;
+       float                 SigmaEta(float mass1,float mass2)   const;
        float                 SigmaPhi()   const;
        float                 SigmaPt()    const;
 
@@ -226,8 +230,14 @@ inline float StEStructPairCuts::SigmaXt() const {
 inline float StEStructPairCuts::SigmaYt() const {
   return mTrack1->Yt()+mTrack2->Yt();
 }
+inline float StEStructPairCuts::SigmaYt(float mass1, float mass2) const {
+  return mTrack1->Yt(mass1)+mTrack2->Yt(mass2);
+}
 inline float StEStructPairCuts::SigmaEta() const {
   return mTrack1->Eta()+mTrack2->Eta();
+}
+inline float StEStructPairCuts::SigmaEta(float mass1, float mass2) const {
+  return mTrack1->Eta(mass1)+mTrack2->Eta(mass2);
 }
 inline float StEStructPairCuts::SigmaPhi() const {
   return mTrack1->Phi()+mTrack2->Phi();
@@ -246,8 +256,14 @@ inline float StEStructPairCuts::DeltaXt() const {
 inline float StEStructPairCuts::DeltaYt() const {
   return fabs(mTrack1->Yt()-mTrack2->Yt());
 }
+inline float StEStructPairCuts::DeltaYt(float mass1, float mass2) const {
+  return fabs(mTrack1->Yt(mass1)-mTrack2->Yt(mass2));
+}
 inline float StEStructPairCuts::DeltaEta() const {
   return fabs(mTrack1->Eta()-mTrack2->Eta());
+}
+inline float StEStructPairCuts::DeltaEta(float mass1, float mass2) const {
+  return fabs(mTrack1->Eta(mass1)-mTrack2->Eta(mass2));
 }
 inline float StEStructPairCuts::DeltaPhi() const {
   float delphi=fabs(mTrack1->Phi()-mTrack2->Phi());
@@ -559,6 +575,11 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.7  2006/02/22 22:05:19  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
+ *
  * Revision 1.6  2005/09/14 17:14:25  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *

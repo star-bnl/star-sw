@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.4 2005/09/14 17:14:21 msd Exp $
+ * $Id: StEStructBinning.cxx,v 1.5 2006/02/22 22:05:14 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -60,8 +60,8 @@ StEStructBinning::StEStructBinning(){
 
   //--> yt ranges <--
   
-  minYt=0.9; //0.15;
-  maxYt=5.0;//4.5; // 0.925;
+  minYt=0.0; //0.9; //0.15;
+  maxYt=2.5; //5.0;//4.5; // 0.925;
   nYt = ESTRUCT_YT_BINS-1;
   dYt = (maxYt-minYt)/(float)nYt;
 
@@ -110,12 +110,47 @@ StEStructBinning::StEStructBinning(){
   nTPCSep = ESTRUCT_TPCSEP_BINS - 1;
   dTPCSep = (maxTPCSep-minTPCSep)/(float)nTPCSep;
 
+   //--> dEdx ranges <--
+  maxdEdx = 15.0e-6;  //ionization units?
+  mindEdx = 0;
+  ndEdx = ESTRUCT_DEDX_BINS - 1;
+  ddEdx = (maxdEdx-mindEdx)/(float)ndEdx;
+
+   //--> ptot ranges (for use with dEdx) <--
+  maxPtot = 1.5;  //GeV/c
+  minPtot = 0;
+  nPtot = ESTRUCT_PTOT_BINS - 1;
+  dPtot = (maxPtot-minPtot)/(float)nPtot;
+
+   //--> QAEta ranges <--
+  maxQAEta = +2.0;
+  minQAEta = -2.0;
+  nQAEta = ESTRUCT_QAETA_BINS - 1;
+  dQAEta = (maxQAEta-minQAEta)/(float)nQAEta;
+
+   //--> QAPhi ranges <--
+  maxQAPhi = +M_PI;
+  minQAPhi = -M_PI;
+  nQAPhi = ESTRUCT_QAPHI_BINS - 1;
+  dQAPhi = (maxQAPhi-minQAPhi)/(float)nQAPhi;
+
+   //--> QAPt ranges <--
+  maxQAPt = +6.0;
+  minQAPt =  0.0;
+  nQAPt = ESTRUCT_QAPT_BINS - 1;
+  dQAPt = (maxQAPt-minQAPt)/(float)nQAPt;
+
 };
 
 
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.5  2006/02/22 22:05:14  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
+ *
  * Revision 1.4  2005/09/14 17:14:21  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *

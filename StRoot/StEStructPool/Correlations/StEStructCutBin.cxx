@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.3 2005/09/14 17:14:23 msd Exp $
+ * $Id: StEStructCutBin.cxx,v 1.4 2006/02/22 22:05:16 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -39,7 +39,7 @@ void StEStructCutBin::setMode(int mode){
   if (!silent && mode!=mcutMode) cout<<" Changing cut mode from mode="<<mcutMode<<" to mode="<<mode<<endl;
  
   if(mcutModeName) delete [] mcutModeName; 
-  mcutModeName=new char[64];
+  mcutModeName=new char[128];
 
   switch(mode){
   case 0:
@@ -81,6 +81,13 @@ void StEStructCutBin::setMode(int mode){
       initPtBinMode4();
       break;
     }
+  case 5:
+    {
+      mnumBins=14;
+      strcpy(mcutModeName," same-side, away-side, identified particles, 14 bins");
+      initPtBinMode5();
+      break;
+    }
   default:
     {
       cout<<"Warning: cut bin mode="<<mode<<" not defined "<<endl;
@@ -90,6 +97,9 @@ void StEStructCutBin::setMode(int mode){
 
   mcutMode=mode;
   if (!silent) cout<<"  Cut Bin Mode = "<<printCutBinName()<<endl;
+}
+int StEStructCutBin::getMode() {
+    return mcutMode;
 }
 //------------------------- Mode=0 ----------------------------------------
 // no cut
@@ -413,9 +423,149 @@ void StEStructCutBin::initPtBinMode4(){
 };
 
 
+//------------------------ Mode=5 -------------------------------------------
+//
+// Mode 3 with additions for dE/dx identifications.
+//    Use dE/dx to identify pi, K, p within momentum ranges where this
+//    is possible. 
+// No yt cut for now. Having problem with memory usage (I think)
+// and cutting on Ptot (because of dEdx selection) at mid-rapidity
+// turns out to be a cut in yt space.
+//
+// First bit used for eta-phi cut.
+//     0 = away-side
+//     1 = same-side
+// Next three bits for dE/dx (shift by 1 for actual value)
+//   000 = pi-pi
+//   001 = pi-K
+//   010 = pi-p
+//   011 = K-K
+//   100 = K-p
+//   101 = p-p
+//   110 = rest
+//
+// So a bin of 9 (for example) would mean K-p in dE/dx space,
+// and same side in eta-phi space.
+// Number of bins required is 14.
+//
+// To check on charge symmetry we have split out the -+ from the +-
+// in the other parts of the Correlation code.
+// For identical particles use only +-, leave -+ histos empty.
+// For non-identical particls order by pi, K, p. So for example
+// histograms will store K+,p- or K-,p+. For some pairs we will
+// need to switch the order to accomplish this.
+
+int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
+
+  float dphi=fabs(pc->DeltaPhi());
+  int idedp = 0;
+  if(dphi<M_PI/2.0){
+    idedp=1;
+  }
+
+  int it1 = getdEdxPID( pc->Track1() );
+  int it2 = getdEdxPID( pc->Track2() );
+  int ipid = 6;
+  if (0 == it1 || 0 == it2) {
+      ipid = 6;
+      return idedp + 2*ipid;
+  }
+
+  if (1 == it1) {
+      if (1 == it2) {
+          ipid = 0;
+      } else if (2 == it2) {
+          ipid = 1;
+      } else if (3 == it2) {
+          ipid = 2;
+      } else {
+          ipid = 6;
+      }
+  } else if (2 == it1) {
+      if (1 == it2) {
+          ipid = 1;
+      } else if (2 == it2) {
+          ipid = 3;
+      } else if (3 == it2) {
+          ipid = 4;
+      } else {
+          ipid = 6;
+      }
+  } else if (3 == it1) {
+      if (1 == it2) {
+          ipid = 2;
+      } else if (2 == it2) {
+          ipid = 4;
+      } else if (3 == it2) {
+          ipid = 5;
+      } else {
+          ipid = 6;
+      }
+  }
+  return  idedp + 2*ipid;
+}
+int StEStructCutBin::switchYtBin5(StEStructPairCuts* pc){
+
+ /*
+   Want to keep track of different particle types.
+   This routine returns a 1 when the second particle of the
+   pair should be first in a 2D histogram.
+   pions come before Kaons which come before protons.
+   If one of the particles is not identified return 0.
+  */
+  int it1 = getdEdxPID( pc->Track1() );
+  int it2 = getdEdxPID( pc->Track2() );
+  if (0 == it1 || 0 == it2) {
+      return 0;
+  }
+  if ((it1 != 1) && (it2 == 1)) {
+      return 1;
+  } else if ((it1 == 3) && (it2 == 2)) {
+      return 1;
+  }
+  return 0;
+}
+
+void StEStructCutBin::initPtBinMode5(){
+    for (int ipid=0;ipid<7;ipid++) {
+        for (int idedp=0;idedp<2;idedp++) {
+            int ipt = idedp + 2*ipid;
+            mPtBinMin[ipt] = 0.;
+            mPtBinMax[ipt]= 999.;
+        }
+    }
+}
+
+// pi  -> 1
+// K   -> 2
+// p   -> 3
+// Everything else
+//     -> 0
+int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
+  float ptot = t->Ptot();
+  float pi = fabs(t->PIDpi());
+  float k  = fabs(t->PIDk());
+  float p  = fabs(t->PIDp());
+
+  if (ptot < 1.0 && pi < 2.0 && k > 2.0 && p > 2.0) {
+      return 1;
+  }
+  if (ptot < 1.0 && pi > 2.0 && k < 2.0 && p > 2.0) {
+      return 2;
+  }
+  if (ptot < 1.5 && pi > 2.0 && k > 2.0 && p < 2.0) {
+      return 3;
+  }
+  return 0;
+}
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.4  2006/02/22 22:05:16  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
+ *
  * Revision 1.3  2005/09/14 17:14:23  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *

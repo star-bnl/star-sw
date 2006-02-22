@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.2 2005/03/03 01:30:44 porter Exp $
+ * $Id: StEStructCutBin.h,v 1.3 2006/02/22 22:05:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -40,12 +40,15 @@ class StEStructCutBin : public TObject {
   int getCutBinMode2(StEStructPairCuts *pc);
   int getCutBinMode3(StEStructPairCuts *pc);
   int getCutBinMode4(StEStructPairCuts *pc);
+  int getCutBinMode5(StEStructPairCuts *pc);
+  int switchYtBin5(StEStructPairCuts *pc);
 
   void initPtBinMode0();
   void initPtBinMode1();
   void initPtBinMode2();
   void initPtBinMode3();
   void initPtBinMode4();
+  void initPtBinMode5();
 
  public:
 
@@ -55,9 +58,13 @@ class StEStructCutBin : public TObject {
   virtual ~StEStructCutBin();
 
   void setMode(int mode);
+  int  getMode();
   int  getNumBins();
   int  getCutBin(StEStructPairCuts *pc);
+  int  switchYtBins(StEStructPairCuts *pc);
+  int  symmetrizeYtBins(StEStructPairCuts *pc);
   int*  getPtBins(float pt);
+  int   getdEdxPID(const StEStructTrack *t);
   char* printCutBinName();
 
   ClassDef(StEStructCutBin,1)
@@ -97,6 +104,11 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
 	retVal=getCutBinMode4(pc);
 	break;
       }
+  case 5:
+      {
+	retVal=getCutBinMode5(pc);
+	break;
+      }
   default:
       {
     
@@ -104,6 +116,19 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
       }
  }
  return retVal;
+}
+inline int StEStructCutBin::switchYtBins(StEStructPairCuts *pc){
+  if (mcutMode != 5) {
+      return 1;
+  }
+  return switchYtBin5(pc);
+}
+inline int StEStructCutBin::symmetrizeYtBins(StEStructPairCuts *pc){
+  if (mcutMode != 5) {
+      return 1;
+  } else {
+      return 0;
+  }
 }
 
 //-----------------------------------------------------------
@@ -130,6 +155,11 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.3  2006/02/22 22:05:18  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
+ *
  * Revision 1.2  2005/03/03 01:30:44  porter
  * updated StEStruct2ptCorrelations to include pt-correlations and removed
  * old version of pt-correlations from chunhuih (StEStruct2ptPtNbar)
