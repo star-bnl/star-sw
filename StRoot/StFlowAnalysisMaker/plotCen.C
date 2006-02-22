@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.24 2005/08/26 19:00:26 posk Exp $
+// $Id: plotCen.C,v 1.25 2006/02/22 19:35:20 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -28,7 +28,7 @@ char   fileName[60];
 char   histTitle[30];
 TFile* histFile[nCens];
 char   tmp[10];
-TCanvas* c;
+TCanvas* can;
 
 TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   gInterpreter->ProcessLine(".O0");
@@ -36,9 +36,10 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
-  //gROOT->SetStyle("Pub");                              // set style
+  //gROOT->SetStyle("Pub");                               // set style
   gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
+  gStyle->SetLabelSize(.1,"X");
 
   int canvasWidth = 600, canvasHeight = 780;             // portrait
   int columns = 2;
@@ -47,9 +48,9 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   if (oddPads) {
     rows =  nCens/columns + 1;
   } else {
-    rows    = nCens/columns;
+    rows = nCens/columns;
   }
-  int pads    = nCens;
+  int pads = nCens;
 
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
@@ -57,6 +58,9 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Cos_Sel",
     "Flow_Res_Sel",
     "Flow_v_Sel",
+    "FlowLYZ_V_Sel",
+    "FlowLYZ_vr0_Sel",
+    "FlowLYZ_v_Sel",
     "Flow_v_ScalarProd_Sel",
     "Flow_Cumul_v_Order2_Sel",
     "Flow_Cumul_v_Order4_Sel",
@@ -85,9 +89,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_FitPts_Ftpc",
     "Flow_MaxPts_Ftpc",
     "Flow_FitOverMax_Ftpc",
-    //"Flow_EtaPtPhi3D",
-    //"Flow_EtaPtPhi2D.PhiEta",
-    //"Flow_EtaPtPhi2D.PhiPt",
     "Flow_YieldAll2D",
     "Flow_YieldAll.Eta",
     "Flow_YieldAll.Pt",
@@ -107,8 +108,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_PidElectronPart",
     "Flow_PidPositronPart",
     "Flow_PidMult",
-    //"Flow_Bin_Eta",
-    //"Flow_Bin_Pt",
     "Flow_CosPhiLab",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
@@ -116,16 +115,12 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Mul_Sel",
     "Flow_Phi_East_Sel",
     "Flow_Phi_Flat_East_Sel",
-    //"Flow_Phi_Weight_East_Sel",
     "Flow_Phi_West_Sel",
     "Flow_Phi_Flat_West_Sel",
-    //"Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
-    //"Flow_Phi_Weight_FtpcEast_Sel",
     "Flow_Phi_FtpcWest_Sel",
     "Flow_Phi_Flat_FtpcWest_Sel",
-    //"Flow_Phi_Weight_FtpcWest_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
     "Flow_Psi_Sub_Corr_Sel",
@@ -138,15 +133,22 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_vEta_Sel",
     "Flow_vPt_Sel",
     "Flow_q_Sel",
+    "FlowLYZ_r0theta_Sel",
+    "FlowLYZ_Vtheta_Sel",
+    "FlowLYZ_vEta_Sel",
+    "FlowLYZ_vPt_Sel",
+    "FlowLYZ_Gtheta0_Sel",
     "Flow_vObs2D_ScalarProd_Sel",
     "Flow_v2D_ScalarProd_Sel",
     "Flow_vEta_ScalarProd_Sel",
     "Flow_vPt_ScalarProd_Sel", 
     "Flow_Cumul_vEta_Order2_Sel",
-    "Flow_Cumul_vPt_Order2_Sel" 
+    "Flow_Cumul_vPt_Order2_Sel", 
+    "Flow_Cumul_vEta_Order4_Sel",
+    "Flow_Cumul_vPt_Order4_Sel" 
 };
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nDoubles = 6;
+  const int nDoubles = 9;
   const int nSingles = 45 + nDoubles;
 
   // construct array of short names
@@ -178,7 +180,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   while (pageNumber <= 0 || pageNumber > nNames) {
     if (pageNumber < 0) {                                // plot all
       plotCenAll(nNames, selN, harN, -pageNumber);
-      return c;
+      return can;
     }
     cout << "-1: \t All" << endl;                        // print menu
     for (int i = 0; i < nNames; i++) {
@@ -250,12 +252,12 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     histName->Append("_Har");
     histName->Append(*har);
   }
-  cout << " graph name= " << histName->Data() << endl;
+  cout << pageNumber+1 << ": graph name= " << histName->Data() << endl;
 
   // make the graph page
-  c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
+  can = new TCanvas(shortName[pageNumber], shortName[pageNumber],
 			   canvasWidth, canvasHeight);
-  c->ToggleEventStatus();
+  can->ToggleEventStatus();
   TPaveLabel* title = new TPaveLabel(0.1,0.96,0.9,0.99,histName->Data());
   title->Draw();
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
@@ -285,42 +287,42 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     if (histProjName) {
       if (strstr(temp,"3D")) {                      // 2D projection
 	twoD = kTRUE;
-	TH3* hist3D = dynamic_cast<TH3*>(histFile[fileN]->Get(histName->Data()));
+	TH3* hist3D = (TH3*)(histFile[fileN]->Get(histName->Data()));
 	if (!hist3D) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
-	  return c;
+	  return can;
 	}
 	hist3D->SetTitle(histTitle);
       } else {                                      // 1D projection
-	TH2* hist2D = dynamic_cast<TH2*>(histFile[fileN]->Get(histName->Data()));
+	TH2* hist2D = (TH2*)(histFile[fileN]->Get(histName->Data()));
 	if (!hist2D) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
-	  return c;
+	  return can;
 	}
 	hist2D->SetTitle(histTitle);
       }
     } else {
       if (strstr(shortName[pageNumber],"3D")!=0) {  // 3D
 	threeD = kTRUE;
-	TH3* hist3D = dynamic_cast<TH3*>(histFile[fileN]->Get(histName->Data()));
+	TH3* hist3D = (TH3*)(histFile[fileN]->Get(histName->Data()));
 	if (!hist3D) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
-	  return c;
+	  return can;
 	}
 	hist3D->SetTitle(histTitle);
       } else if (strstr(shortName[pageNumber],"2D")!=0) { // 2D
 	twoD = kTRUE;
-	TH2* hist2D = dynamic_cast<TH2*>(histFile[fileN]->Get(histName->Data()));
+	TH2* hist2D = (TH2*)(histFile[fileN]->Get(histName->Data()));
 	if (!hist2D) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
-	  return c;
+	  return can;
 	}
 	hist2D->SetTitle(histTitle);
       } else {                                            // 1D
-	TH1* hist = dynamic_cast<TH1*>(histFile[fileN]->Get(histName->Data()));
+	TH1* hist = (TH1*)(histFile[fileN]->Get(histName->Data()));
 	if (!hist) {
 	  cout << "### Can't find histogram " << histName->Data() << endl;
-	  return c;
+	  return can;
 	}
 	float ptMax = hist->GetXaxis()->GetXmax();
 	hist->SetTitle(histTitle);
@@ -372,7 +374,6 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       if (singleGraph) {
 	TH1D* projX = hist2D->ProjectionX(histName->Data(), 0, 9999);
       } else {
-	//TH1D* projX = hist2D->ProjectionX(histName->Data(), 0, 9999, "E");
 	TH1D* projX = hist2D->ProjectionX(histName->Data(), 0, 9999);
       }
       projX->SetName(histProjName->Data());
@@ -427,18 +428,18 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       histMulName->Append(*sel);
       histMulName->Append("_Har");
       histMulName->Append(*har);
-      TH1* histMult = dynamic_cast<TH1*>(histFile[fileN]->Get(histMulName->Data()));
+      TH1* histMult = (TH1*)(histFile[fileN]->Get(histMulName->Data()));
       if (!histMult) {
 	cout << "### Can't find histogram " << histMulName->Data() << endl;
-	return c;
+	return can;
       }
       delete histMulName;
       float mult = histMult->GetMean();
       TF1* fit_q = new TF1("qDist", qDist, 0., qMax, 4);
       fit_q->SetParNames("v", "mult", "area", "g");
       float qMean = hist->GetMean();
-      float vGuess = (qMean > 1.) ? sqrt(2.*(qMean - 1.) / mult) : 0.06;
-      // the 0.06 is a wild guess
+      float vGuess = (qMean > 1.) ? sqrt(2.*(qMean - 1.) / mult) : 0.03;
+      // the 0.03 is a wild guess
       vGuess *= 100.;
       cout << "vGuess = " << vGuess << endl;
       fit_q->SetParameters(vGuess, mult, area, 0.3); // initial values
@@ -501,6 +502,25 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       (TVirtualPad::Pad())->SetLogy();
       gStyle->SetOptStat(0);
       hist->Draw();
+    } else if (strstr(shortName[pageNumber],"LYZ_G")!=0) {  // LYZ G
+      (TVirtualPad::Pad())->SetLogy();
+      gStyle->SetOptStat(0);
+      TString hist_r0Name("FlowLYZ_r0theta_Sel"); // get r0
+      hist_r0Name += selN;
+      hist_r0Name += "_Har";
+      hist_r0Name += harN;
+      cout << hist_r0Name << endl;
+      TH1D* hist_r0 = (TH1D*)histFile[fileN]->Get(hist_r0Name);
+      float r0 = hist_r0->GetBinContent(1);
+      hist->SetAxisRange(0., 2*r0, "X");
+      hist->Draw();
+      TLine* r0Line = new TLine(r0, 0., r0, 1.);
+      r0Line->SetLineColor(kBlue);
+      r0Line->Draw("same");
+    } else if (strstr(shortName[pageNumber],"LYZ")!=0) {  // LYZ
+      hist->SetMinimum(0.);
+      gStyle->SetOptStat(0);
+      hist->Draw();
     } else if (strstr(shortName[pageNumber],"_v")!=0 ) {      // v 1D
       TLine* lineZeroHar = new TLine(0.5, 0., 4.5, 0.);
       hist->SetMaximum(10.);
@@ -517,9 +537,9 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 	  hist->SetBinError(n, 0.);
 	}
       }
-    } else if (strstr(shortName[pageNumber],"_Res")!=0 ) {      // v 1D
+    } else if (strstr(shortName[pageNumber],"_Res")!=0 ) {      // res
       for (int n=1; n < 4; n++) {
-	double res   = hist->GetBinContent(n);                       // output values
+	double res   = hist->GetBinContent(n);                       // output res values
 	err = hist->GetBinError(n);
 	if (n==2) cout << " res = " << setprecision(3) << res << " +/- " << 
 		    setprecision(2) << err << endl;
@@ -543,16 +563,16 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   }
   delete shortName[];
   
-  return c;
+  return can;
 }
 
 void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
-    c = plotCen(i, selN, harN);
-    c->Update();
+    can = plotCen(i, selN, harN);
+    can->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
-    if (strstr(tmp,"y")!=0) c->Print(".ps");
+    if (strstr(tmp,"y")!=0) can->Print(".ps");
     else if (strstr(tmp,"q")!=0) return;
   }
   cout << "  Done" << endl;
@@ -592,6 +612,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.25  2006/02/22 19:35:20  posk
+// Added graphs for the StFlowLeeYangZerosMaker
+//
 // Revision 1.24  2005/08/26 19:00:26  posk
 // plot style back to bold
 //
