@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.52 2005/02/10 21:04:57 aihong Exp $
+// $Id: StFlowEvent.h,v 1.53 2006/02/22 19:29:16 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,6 +21,7 @@
 #include "StEnumerations.h"
 #include "Rtypes.h"
 #include "TVector2.h"
+#include "TComplex.h"
 class StFlowSelection;
 
 class StFlowEvent  : public StObject {
@@ -51,9 +52,15 @@ public:
   UInt_t         Centrality() const;
   StThreeVectorF VertexPos() const;
   UInt_t         Mult(StFlowSelection*);
+  UInt_t         MultPart(StFlowSelection*);
   TVector2       Q(StFlowSelection*);
+  TVector2       NormQ(StFlowSelection* pFlowSelect);
+  TVector2       QPart(StFlowSelection*);
   Float_t        q(StFlowSelection*);
   Float_t        MeanPt(StFlowSelection*);
+  Float_t        Qtheta(StFlowSelection*, Float_t theta);
+  TComplex       Grtheta(StFlowSelection*, Float_t r, Float_t theta);
+  TComplex       Gder_r0theta(StFlowSelection*, Float_t r, Float_t theta);
   Float_t        Psi(StFlowSelection*);
   Float_t 	 ZDCSMD_PsiCorr();
   Float_t 	 ZDCSMD_PsiEst();
@@ -64,7 +71,6 @@ public:
   Double_t       SumWeightSquare(StFlowSelection* pFlowSelect);
   Double_t       PtAbsWgtValue(Double_t pt) const;
   Double_t       EtaAbsWgtValue(Double_t eta) const;
-  TVector2       NormQ(StFlowSelection* pFlowSelect);
   Float_t        CTB() const;
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
@@ -308,16 +314,12 @@ inline   Float_t StFlowEvent::V1FtpcEastDetctWgtG_Mix(Int_t selN) const {
 inline   Float_t StFlowEvent::V1FtpcWestDetctWgtG_Mix(Int_t selN) const {
   return mV1FtpcWestDetctWgtG_Mix[selN]; }
 
-
 inline   Float_t StFlowEvent::V2TPCDetctWgtG_Mix(Int_t selN) const {
   return mV2TPCDetctWgtG_Mix[selN]; }
 inline   Float_t StFlowEvent::V2FtpcEastDetctWgtG_Mix(Int_t selN) const {
   return mV2FtpcEastDetctWgtG_Mix[selN]; }
 inline   Float_t StFlowEvent::V2FtpcWestDetctWgtG_Mix(Int_t selN) const {
   return mV2FtpcWestDetctWgtG_Mix[selN]; }
-
-
-
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeightFarEast(const Flow::PhiWgt_t& pPhiWgtFarEast) {
@@ -344,13 +346,17 @@ inline void StFlowEvent::SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t& pPhiWgtF
 inline void StFlowEvent::SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcFarWest) {
   memcpy (mPhiWgtFtpcFarWest, pPhiWgtFtpcFarWest, sizeof(Flow::PhiWgtFtpc_t)); }
 
-inline void StFlowEvent::SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast) { memcpy (mZDCSMD_PsiWgtEast, ZDCSMD_PsiWgtEast, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
+inline void StFlowEvent::SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast) {
+  memcpy (mZDCSMD_PsiWgtEast, ZDCSMD_PsiWgtEast, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
 
-inline void StFlowEvent::SetZDCSMD_PsiWeightWest(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtWest) { memcpy (mZDCSMD_PsiWgtWest, ZDCSMD_PsiWgtWest, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
+inline void StFlowEvent::SetZDCSMD_PsiWeightWest(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtWest) {
+  memcpy (mZDCSMD_PsiWgtWest, ZDCSMD_PsiWgtWest, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
 
-inline void StFlowEvent::SetZDCSMD_PsiWeightFull(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtFull) { memcpy (mZDCSMD_PsiWgtFull, ZDCSMD_PsiWgtFull, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
+inline void StFlowEvent::SetZDCSMD_PsiWeightFull(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtFull) {
+  memcpy (mZDCSMD_PsiWgtFull, ZDCSMD_PsiWgtFull, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
  
-inline void StFlowEvent::SetZDCSMD_BeamCenter(Double_t ex,Double_t ey,Double_t wx,Double_t wy) {mZDCSMDCenterex = ex; mZDCSMDCenterey = ey; mZDCSMDCenterwx = wx; mZDCSMDCenterwy = wy;}
+inline void StFlowEvent::SetZDCSMD_BeamCenter(Double_t ex,Double_t ey,Double_t wx,Double_t wy) {
+  mZDCSMDCenterex = ex; mZDCSMDCenterey = ey; mZDCSMDCenterwx = wx; mZDCSMDCenterwy = wy;}
 #endif
 
 inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
@@ -440,7 +446,8 @@ inline void StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
 
 inline void StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
-inline void StFlowEvent::SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd) {mZDCSMD[eastwest][verthori][strip-1] = (zdcsmd >0.)? zdcsmd:0.;}
+inline void StFlowEvent::SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd) {
+  mZDCSMD[eastwest][verthori][strip-1] = (zdcsmd >0.)? zdcsmd:0.;}
 
 inline void StFlowEvent::SetPid(const Char_t* pid)  { 
   strncpy(mPid, pid, 9); mPid[9] = '\0'; }
@@ -484,6 +491,9 @@ inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.53  2006/02/22 19:29:16  posk
+// Additions needed for the StFlowLeeYangZerosMaker
+//
 // Revision 1.52  2005/02/10 21:04:57  aihong
 // test mProbPid of StFlowEvent before launch calculation pid on fly
 //
