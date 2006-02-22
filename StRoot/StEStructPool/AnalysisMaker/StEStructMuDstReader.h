@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.4 2005/11/22 14:40:04 msd Exp $
+ * $Id: StEStructMuDstReader.h,v 1.5 2006/02/22 22:03:24 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,7 +33,6 @@ public:
   StEStructTrackCuts* mTCuts; //!
   bool mInChain;
   bool mAmDone;
-  bool mUseAllTracks;
   int  mCentBin;
   int  mNumGoodTracks;//!
   int  mhasdEdxCuts;
@@ -45,14 +44,12 @@ public:
                        StEStructEventCuts* ecuts,
                        StEStructTrackCuts* tcuts,
                        bool inChain = true,
-                       bool useAllTracks = true,
                        int  centBin = 0);
   virtual ~StEStructMuDstReader();
 
   void setMuDstMaker(StMuDstMaker* MuDstMaker, bool inChain=true);
   void setEventCuts(StEStructEventCuts* cuts);
   void setTrackCuts(StEStructTrackCuts* cuts);
-  bool setUseAllTracks(bool useAllTracks);
   int  setCentBin(int centBin);
   bool hasMaker();
   bool hasEventCuts();
@@ -72,10 +69,6 @@ public:
 };
 
 inline bool StEStructMuDstReader::done(){ return mAmDone; };
-inline bool StEStructMuDstReader::setUseAllTracks(bool useAllTracks) {
-    mUseAllTracks = useAllTracks;
-    return mUseAllTracks;
-};
 inline int StEStructMuDstReader::setCentBin(int centBin) {
     mCentBin = centBin;
     return mCentBin;
@@ -86,6 +79,9 @@ inline int StEStructMuDstReader::setCentBin(int centBin) {
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.5  2006/02/22 22:03:24  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.4  2005/11/22 14:40:04  msd
  * Changed default of useAllTracks
  *
