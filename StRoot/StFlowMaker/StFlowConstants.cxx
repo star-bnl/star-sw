@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.16 2005/08/26 21:37:23 oldi Exp $
+// $Id: StFlowConstants.cxx,v 1.17 2006/02/22 19:22:01 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -21,6 +21,10 @@ ClassImp(Flow)
   Float_t Flow::ptMin     = 0.;
   Float_t Flow::ptMax     = 2.;
   Float_t Flow::ptMaxPart = 6.;
+
+  // LeeYangZeros
+  Float_t Flow::rMax = 1.5;
+  Float_t Flow::j01 = 2.405;
 
   Int_t Flow::cent200Full[nCents] = {14,30,56,94,146,217,312,431,510};
   Int_t Flow::cent200Half[nCents] = {14,32,59,98,149,216,302,409,474};
@@ -55,6 +59,9 @@ ClassImp(Flow)
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
+// Revision 1.17  2006/02/22 19:22:01  posk
+// Additions needed for the StFlowLeeYangZerosMaker
+//
 // Revision 1.16  2005/08/26 21:37:23  oldi
 // Year 4 centrlity bins corrected (see http://www.star.bnl.gov/protected/common/common2004/trigger2004/200gev/200gevFaq.html) for details).
 //
