@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.106 2005/12/07 19:41:29 perev Exp $
+// $Id: StFlowMaker.cxx,v 1.107 2006/02/22 19:25:35 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -66,7 +66,7 @@ StFlowMaker::StFlowMaker(const Char_t* name):
   SetPicoEventDir("./");
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
-  pFlowEvent = 0;
+  pFlowEvent = NULL;
 }
 
 StFlowMaker::StFlowMaker(const Char_t* name,
@@ -78,7 +78,7 @@ StFlowMaker::StFlowMaker(const Char_t* name,
   SetPicoEventDir("./");
   StMuTrack::Class()->IgnoreTObjectStreamer();
   StMuHelix::Class()->IgnoreTObjectStreamer();
-  pFlowEvent = 0;
+  pFlowEvent = NULL;
 }
 
 //-----------------------------------------------------------------------
@@ -127,7 +127,7 @@ Int_t StFlowMaker::Make() {
     if (mMuEventReadGC) { // StMuEvent Grid Collector
       pFlowEvent = new StFlowEvent;
       if (!pFlowEvent) return kStOK;
-      StMuDst* pMu = dynamic_cast<StMuDst*>(GetInputDS("MuDst"));
+      pMu = dynamic_cast<StMuDst*>(GetInputDS("MuDst"));
       pMuEvent = pMu->event();
       pMuTracks = pMu->primaryTracks();
       pMuGlobalTracks = pMu->globalTracks();
@@ -258,7 +258,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.106 2005/12/07 19:41:29 perev Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.107 2006/02/22 19:25:35 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -1141,6 +1141,7 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     return kTRUE;
   }
 
+//   PR(pPicoEvent->Version());
   switch (pPicoEvent->Version()) {
   case 7: FillFromPicoVersion7DST(pPicoEvent);
     break;
@@ -1196,7 +1197,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-  pFlowEvent->SetCentrality();
+  //pFlowEvent->SetCentrality(); // for mevSim data
   pFlowEvent->SetRunID(pPicoEvent->RunID());
   pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
 
@@ -1739,7 +1740,7 @@ Bool_t StFlowMaker::FillFromMuDST() {
   }
 
   // Check event cuts
-  if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
+  if (!StFlowCutEvent::CheckEvent(pMu)) {  
     Int_t eventID = pMuEvent->eventId();
     gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
                      << " cut" << endm;
@@ -1846,7 +1847,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
           pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
         }
   }
-  UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
+  UInt_t origMult = pMuTracks->GetEntries();
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
   
@@ -2271,6 +2272,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.107  2006/02/22 19:25:35  posk
+// Changes needed for the MuDst
+// Stopped using eventSummary()
+//
 // Revision 1.106  2005/12/07 19:41:29  perev
 // new TFile ==> TFile::Open
 //
