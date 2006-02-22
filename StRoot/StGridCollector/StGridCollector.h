@@ -1,20 +1,19 @@
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StGridCollector                                                      //
-//                                                                      //
-// Class enables the interface to the Grid Collector services.          //
-//                                                                      //
-// To isolate the implementation details from the STAR Analysis         //
-// Framework, it uses the factor pattern.  In keeping with the          //
-// convention, this class implements a static method called Create()    //
-// for constructing an object of StGridCollector type.  The function    //
-// Create() loads the appropriate shared libraries that implement the   //
-// real interface.                                                      //
-//                                                                      //
-// John Wu <John.Wu@nersc.gov>                                          //
-// Based on StChallenger by                                             //
-// Alexandre V. Vaniachine <AVVaniachine@lbl.gov>                       //
-//////////////////////////////////////////////////////////////////////////
+/*!
+ * \class StGridCollector 
+ *
+ * StGridCollector                                                      
+ *                                                                      
+ * Class enables the interface to the Grid Collector services.          
+ *                                                                      
+ * To isolate the implementation details from the STAR Analysis         
+ * Framework, it uses the factor pattern.  In keeping with the          
+ * convention, this class implements a static method called Create()    
+ * for constructing an object of StGridCollector type.  The function    
+ * Create() loads the appropriate shared libraries that implement the   
+ * real interface.                                                      
+ *                                                                      
+ * John Wu <John.Wu@nersc.gov>                                          
+ */
 
 #ifndef STAR_StGridCollector
 #define STAR_StGridCollector
