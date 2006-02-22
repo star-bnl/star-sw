@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.47 2004/12/17 22:33:33 aihong Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.48 2006/02/22 19:36:27 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -58,7 +58,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.47 2004/12/17 22:33:33 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.48 2006/02/22 19:36:27 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -88,7 +88,7 @@ private:
   TH1F*     mHistChargeFtpc;           //!
   TH1F*     mHistDcaGlobalTpc;         //!
   TH1F*     mHistDcaGlobalFtpc;        //!
-  TH1F*     mHistDcaTpc;                  //!
+  TH1F*     mHistDcaTpc;               //!
   TH1F*     mHistDcaFtpc;              //!
   TH1F*     mHistChi2Tpc;              //!
   TH1F*     mHistChi2Ftpc;             //!
@@ -256,6 +256,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.48  2006/02/22 19:36:27  posk
+// Minor updates.
+//
 // Revision 1.47  2004/12/17 22:33:33  aihong
 // add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
 //
