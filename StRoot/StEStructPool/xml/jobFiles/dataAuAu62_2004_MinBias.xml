@@ -26,7 +26,6 @@
         </eventCuts>
 
         <doEStructMacro>
-            <centralityInEtaOne id='centralityInEtaOne' widget='entry'>true</centralityInEtaOne>
             <centralities id='centralities' widget='entry'>0 9 23 45 79 127 193 279 392 541 635 825</centralities>
             <ptCentralities id='ptCentralities' widget='entry'>0 9 23 45 79 127 193 279 392 541 635 825</ptCentralities>
         </doEStructMacro>

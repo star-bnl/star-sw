@@ -1,14 +1,8 @@
-<!-- I am getting a cr when I resolve a variable which causes the
-     ending ;, " and/or } to be on the following line.
-     To deal with this I put these characters into the transformation.
-     Seems awkward. Also end up with ""; lines in cases where the
-     variable is empty. -->
 <jobDescription>
     <standardElements>
         <doEStructMacro>
             <analysisType id='analysisType' widget='combobox'>StEStructFluctuation</analysisType>
             <ptCuts id='ptCuts' widget='entry'>0.15 0.5 2.0</ptCuts>
-            <cutModeInit id='cutModeInit' widget='none'>;</cutModeInit>
             <declarePtDefHistograms id='declarePtDefHistograms' widget='text'>
     int numberOfAnalyses = 1;
     cent-&gt;setPts(ptCut,mbNPts,ptMultCut,mbNPtBins);
@@ -17,9 +11,9 @@
     for (int i=0;i&lt;mbNPts;i++) {
         ptRanges-&gt;Fill(i,ptCut[i]);
     }
-    TH1D *impactPtDefs = new TH1D("impactPtDefs","impactPtDefs",mbNPtBins,0.5,mbNPtBins+0.5);
+    TH1D *centralityPtDefs = new TH1D("centralityPtDefs","centralityPtDefs",mbNPtBins,0.5,mbNPtBins+0.5);
     for (int i=0;i&lt;mbNPtBins;i++) {
-        impactPtDefs-&gt;Fill(i,ptMultCut[i]);
+        centralityPtDefs-&gt;Fill(i,ptMultCut[i]);
     }
     StEStructFluctAnal** analysis = new StEStructFluctAnal*[numberOfAnalyses];
     StEStructFluctAnal* currentAnalysis;
@@ -34,14 +28,10 @@
             iPtCen = analysis[0]-&gt;mCurrentEvent-&gt;PtCentrality();
             ptCenClass-&gt;Fill(iPtCen);
             </fillPtDefHistograms>
-            <pairCutsWrite id='pairCutsWrite' widget='none'>;</pairCutsWrite>
             <savePtDefHistograms id='savePtDefHistograms' widget='text'>
-        analysis[0]-&gt;writeQAHists(tfq);
-        cenClass-&gt;Write();
-        ptCenClass-&gt;Write();
-        ptRanges-&gt;Write();
-        impactDefs-&gt;Write();
-        impactPtDefs-&gt;Write();
+    ptCenClass-&gt;Write();
+    ptRanges-&gt;Write();
+    centralityPtDefs-&gt;Write();
             </savePtDefHistograms>
         </doEStructMacro>
 

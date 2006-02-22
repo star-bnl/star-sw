@@ -30,8 +30,8 @@
             <stdout URL="file:OUTPUTDIR/logs/$JOBID.log"/>
             <output fromScratch="data/*.root" toURL="file:OUTPUTDIR/data/" />
             <output fromScratch="cuts/*.root" toURL="file:OUTPUTDIR/cuts/" />
-            <output fromScratch="QA/*.root"     toURL="file:OUTPUTDIR/QA/" />
-            <output fromScratch="stats/*.txt"   toURL="file:OUTPUTDIR/stats/" />
+            <output fromScratch="QA/*.root"   toURL="file:OUTPUTDIR/QA/" />
+            <output fromScratch="stats/*.txt" toURL="file:OUTPUTDIR/stats/" />
         </starSubmit>
 
         <!-- Need appropriate event cuts. -->
@@ -58,7 +58,7 @@
             <trackCut Comment = 'pt cut'>
                 <cutName>Pt</cutName>
                 <Value widget = 'entry'>0.15</Value>
-                <Value widget = 'entry'>2.0</Value>
+                <Value widget = 'entry'>20.0</Value>
             </trackCut>
             <trackCut Comment = 'phi cut'>
                 <cutName>Phi</cutName>
@@ -78,10 +78,8 @@
             <libraries id='libraries' widget='none'>
     gSystem-&gt;Load("StEStructPoolEventGenerators");
             </libraries>
-            <declareSimHistograms id='declareSimHistograms' widget='none'>;</declareSimHistograms>
             <centralities id='centralities' widget='entry'>0.0 2000.0</centralities>
             <ptCentralities id='ptCentralities' widget='entry'>0.0 2000.0</ptCentralities>
-            <centralityInEtaOne id='centralityInEtaOne' widget='entry'>false</centralityInEtaOne>
             <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     StEStructFlat** readers = new StEStructFlat*[numberOfAnalyses];
@@ -90,7 +88,7 @@
         if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
             mCent = -1;
         }
-        readers[i] = new StEStructFlat(ecuts[i],tcuts[i],skipMake[i],centralityInEtaOne,mCent,maxNumEvents);
+        readers[i] = new StEStructFlat(ecuts[i],tcuts[i],skipMake[i],mCent,maxNumEvents);
     }
     char* procID = gSystem->Getenv("PROCESSID");
     int rSeed;
@@ -101,8 +99,6 @@
     }
     readers[0]->setSeed(rSeed);
             </declareReader>
-            <fillSimHistograms id='fillSimHistograms' widget = 'none'>;</fillSimHistograms>
-            <saveSimHistograms id='saveSimHistograms' widget = 'none'>;</saveSimHistograms>
         </doEStructMacro>
     </standardElements>
 </jobDescription>

@@ -27,6 +27,7 @@
             <output fromScratch="data/*.root" toURL="file:OUTPUTDIR/data/" />
             <output fromScratch="cuts/*.root" toURL="file:OUTPUTDIR/cuts/" />
             <output fromScratch="QA/*.root"   toURL="file:OUTPUTDIR/QA/" />
+            <output fromScratch="stats/*.txt" toURL="file:OUTPUTDIR/stats/" />
         </starSubmit>
 
         <!-- Need appropriate event cuts. -->
@@ -78,7 +79,7 @@
             <trackCut Comment = 'pt cut'>
                 <cutName>Pt</cutName>
                 <Value widget = 'entry'>0.15</Value>
-                <Value widget = 'entry'>2.0</Value>
+                <Value widget = 'entry'>20.0</Value>
             </trackCut>
             <trackCut Comment = 'phi cut'>
                 <cutName>Phi</cutName>
@@ -101,9 +102,6 @@
              The main part is in a generic file. -->
         <doEStructMacro>
             <analysisType id='analysisType' widget='entry'>StEStructFluctuation</analysisType>
-            <libraries id='libraries' widget='none'>;</libraries>
-            <declareSimHistograms id='declareSimHistograms' widget='none'>;</declareSimHistograms>
-            <centralityInEtaOne id='centralityInEtaOne' widget='entry'>true</centralityInEtaOne>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     //  reader = reader interface + pointer to Data Maker + cut classes
@@ -116,11 +114,9 @@
         if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
             mCent = -1;
         }
-        readers[i] = new StEStructMuDstReader(mk,ecuts[i],tcuts[i],skipMake[i],centralityInEtaOne,mCent);
+        readers[i] = new StEStructMuDstReader(mk,ecuts[i],tcuts[i],skipMake[i],mCent);
     }
             </declareReader>
-            <fillSimHistograms id='fillSimHistograms' widget = 'none'>;</fillSimHistograms>
-            <saveSimHistograms id='saveSimHistograms' widget = 'none'>;</saveSimHistograms>
         </doEStructMacro>
 
     </standardElements>
