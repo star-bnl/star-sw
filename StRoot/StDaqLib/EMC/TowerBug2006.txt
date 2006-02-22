@@ -1,23 +1,23 @@
-TowerBugFixIndex[389 - 1] =	    412;	//rotation
-TowerBugFixIndex[390 - 1] =		  411;	
-TowerBugFixIndex[391 - 1] =		  410;
-TowerBugFixIndex[392 - 1] =		  409;
+TowerBugFixIndex[389 - 1] =			412;
+TowerBugFixIndex[390 - 1] =			411;	
+TowerBugFixIndex[391 - 1] =			410;
+TowerBugFixIndex[392 - 1] =			409;
 
-TowerBugFixIndex[633 - 1] =		  653;
-TowerBugFixIndex[634 - 1] =		  654;
-TowerBugFixIndex[635 - 1] =		  655;
-TowerBugFixIndex[636 - 1] =	  	656;
-TowerBugFixIndex[637 - 1] =		  657;
+TowerBugFixIndex[633 - 1] =			653;
+TowerBugFixIndex[634 - 1] =			654;
+TowerBugFixIndex[635 - 1] =			655;
+TowerBugFixIndex[636 - 1] =			656;
+TowerBugFixIndex[637 - 1] =			657;
 
-TowerBugFixIndex[760 - 1] =		  880;
-TowerBugFixIndex[780 - 1] =		  900;
+TowerBugFixIndex[760 - 1] =			780;
+TowerBugFixIndex[880 - 1] =			900;
 
-TowerBugFixIndex[837 - 1] =		  857;
-TowerBugFixIndex[838 - 1] =		  858;
-TowerBugFixIndex[839 - 1] =		  859;
-TowerBugFixIndex[840 - 1] =		  860;
+TowerBugFixIndex[837 - 1] =			857;
+TowerBugFixIndex[838 - 1] =			858;
+TowerBugFixIndex[839 - 1] =			859;
+TowerBugFixIndex[840 - 1] =			860;
 
-TowerBugFixIndex[883 - 1] =		  884;
+TowerBugFixIndex[883 - 1] =			884;
 
 TowerBugFixIndex[1021 - 1] =		1041;
 TowerBugFixIndex[1022 - 1] =		1042;
@@ -38,10 +38,10 @@ TowerBugFixIndex[1160 - 1] =		1180;
 
 TowerBugFixIndex[1167 - 1] =		1168;
 
-TowerBugFixIndex[1198 - 1] =		1238;	//this set is across crates
+TowerBugFixIndex[1198 - 1] =		1238;
 TowerBugFixIndex[1199 - 1] =		1239;
 
-TowerBugFixIndex[1218 - 1] =		1258;	//this set is across crates
+TowerBugFixIndex[1218 - 1] =		1258;
 TowerBugFixIndex[1219 - 1] =		1259;
 
 TowerBugFixIndex[1200 - 1] =		1260;
@@ -66,7 +66,7 @@ TowerBugFixIndex[1388 - 1] =		1408;
 
 TowerBugFixIndex[1395 - 1] =		1396;
 
-//TowerBugFixIndex[1397 - 1] =		1420;	   //Fixed (swapped sig. cables)
+//TowerBugFixIndex[1397 - 1] =		1420;	 //Fixed (swapped sig. cables)
 //TowerBugFixIndex[1398 - 1] =		1419;    //Fixed (swapped sig. cables)
 //TowerBugFixIndex[1399 - 1] =		1418;    //Fixed (swapped sig. cables)
 //TowerBugFixIndex[1400 - 1] =		1417;    //Fixed (swapped sig. cables)
@@ -102,6 +102,8 @@ TowerBugFixIndex[1878 - 1] =		1898;
 TowerBugFixIndex[1879 - 1] =		1899;
 TowerBugFixIndex[1880 - 1] =		1900;
 
+TowerBugFixIndex[2074 - 1] =		2094;
+TowerBugFixIndex[2075 - 1] =		2095;
 TowerBugFixIndex[2076 - 1] =		2096;
 
 TowerBugFixIndex[2521 - 1] =		2522;
@@ -132,3 +134,4 @@ TowerBugFixIndex[4545 - 1] =		4565;
 TowerBugFixIndex[4546 - 1] =		4566;
 TowerBugFixIndex[4547 - 1] =		4567;
 TowerBugFixIndex[4548 - 1] =		4568;
+
