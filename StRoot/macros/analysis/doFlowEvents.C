@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.59 2005/08/31 15:03:09 fisyak Exp $
+// $Id: doFlowEvents.C,v 1.60 2006/02/22 19:48:08 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -89,9 +89,9 @@ StChain  *chain = 0;
 TBrowser *b = 0;
 Int_t    RunType;
 Char_t*  OutPicoDir;
-class StFileI;
+class    StFileI;
 StFileI* setFiles = 0;
-TString mainBranch;
+TString  mainBranch;
 
 const char *dstFile = 0;
 const char *fileList[] = {dstFile, 0};
@@ -118,8 +118,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     ilist++; 
   }
 
-  Bool_t IO = kFALSE; // don't use the IOMaker for muDst, the default
-  //Bool_t IO = kTRUE; // use the IOMaker for muDst
+  //Bool_t IO = kFALSE; // don't use the IOMaker for old muDsts
+  Bool_t IO = kTRUE; // use the IOMaker for muDst; needed for new (P05) MuDsts
 
   if (phiWgtOnly) {
     cout << " doFlowEvents - phiWgtOnly = kTRUE" << endl;
@@ -143,9 +143,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   //
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
-  gSystem->Load("StarMagField");
-  gSystem->Load("StMagF");    // ?
-  //gSystem->Load("StMuDSTMaker");
+  gSystem->Load("StarMagField"); // ?
+  gSystem->Load("StMagF");       // ?
   
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowAnalysisMaker");
@@ -165,17 +164,18 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   // Make Selection objects
   //
   char makerName[30];
-//   StFlowSelection flowSelect;
+  StFlowSelection flowSelect;
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
 //   flowSelect.SetPidPart("pr-");               // for parts. wrt plane
-//   flowSelect.SetPtPart(0.15, 2.0);            // for parts. wrt plane
-//   flowSelect.SetPtBinsPart(256);              // for parts. wrt plane
+//   flowSelect.SetPtPart(0.15, 6.0);             // for parts. wrt plane
+//   flowSelect.SetPtBinsPart(60);               // for parts. wrt plane
 //   flowSelect.SetPPart(0.15, 5.);              // for parts. wrt plane
 //   flowSelect.SetEtaPart(-1.3, 1.3);           // for parts. wrt plane
 //   flowSelect.SetFitPtsPart(20, 50);           // for parts. wrt plane
 //   flowSelect.SetFitOverMaxPtsPart(0.52, 1.);  // for parts. wrt plane
 //   flowSelect.SetChiSqPart(0.1, 1.3);          // for parts. wrt plane
 //   flowSelect.SetDcaGlobalPart(0., 2.0);       // for parts. wrt plane
+//   flowSelect.SetDcaGlobalPart(0., 0.);        // for mevSim data
 //   flowSelect.SetYPart(-0.5, 0.5);             // for parts. wrt plane
 
   // Uncomment next line if you make a selection object
@@ -187,7 +187,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");	// deactivate all branches
     if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    IOMk->SetDebug(1);
+    //IOMk->SetDebug(1);
 
     // Maker to read events from file or database into StEvent
     printf("***GC mainBranch=%s ***\n",mainBranch.Data());
@@ -239,7 +239,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");	// deactivate all branches
     if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    IOMk->SetDebug(1);
+    //IOMk->SetDebug(1);
     
     // Maker to read events from file or database into StEvent
     if (!mainBranch.Contains("eventBranch")) {
@@ -257,31 +257,35 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   
   //////////////
   // Flow Makers
-  //   The AnalysisMaker, CumulantMaker, and ScalarProdMaker 
+  //   The AnalysisMaker, CumulantMaker, ScalarProdMaker, and LeeYangZerosMaker 
   //   may be used with a selection object.
   if (phiWgtOnly) {
     bool phiWgtMaker = kTRUE;
     bool anaMaker    = kFALSE;
     bool cumMaker    = kFALSE;
     bool spMaker     = kFALSE;
+    bool lyzMaker    = kFALSE;
   } else {
     bool phiWgtMaker = kFALSE;
     //bool anaMaker    = kFALSE;
-    bool anaMaker    = kTRUE;
+    bool anaMaker  = kTRUE;
     bool cumMaker    = kFALSE;
-    //bool cumMaker    = kTRUE;
+    //bool cumMaker  = kTRUE;
     bool spMaker     = kFALSE;
-    //bool spMaker     = kTRUE;
+    //bool spMaker   = kTRUE;
+    bool lyzMaker  = kFALSE;
+    //bool lyzMaker    = kTRUE;
   }
 
   Bool_t includeTpcTracks  = kTRUE;
-  //Float_t ptRange_for_vEta[2] = {0.15, 2.};
-  //Float_t etaRange_for_vPt[2] = {-1.2, 1.2}; // show only TPC particles in v(pt)
-  Float_t ptRange_for_vEta[2] = {0., 0.}; // integrate over the full pt range
-  Float_t etaRange_for_vPt[2] = {0., 0.}; // integrate over the full eta range
+// For LYZ and anaMaker
+  Float_t ptRange_for_vEta[2] = {0.15, 2.};
+  Float_t etaRange_for_vPt[2] = {0., 1.3}; // show only TPC particles in v(pt)
+//   Float_t ptRange_for_vEta[2] = {0., 0.}; // integrate over the full pt range
+//   Float_t etaRange_for_vPt[2] = {0., 0.}; // integrate over the full eta range
 
-  Bool_t includeFtpcTracks = kFALSE;
-//   Bool_t includeFtpcTracks = kTRUE;
+//   Bool_t includeFtpcTracks = kFALSE;
+  Bool_t includeFtpcTracks = kTRUE;
 //   Float_t ptRange_for_vEta[2] = {0., 2.};
 //   Float_t etaRange_for_vPt[2] = {2., 5.}; // show only FTPC particles in v(pt)
   
@@ -291,8 +295,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   // To make full use of it, the cuts for Har1 should allow for FTPC tracks only, 
   // while the cuts for Har2 should use TPC tracks only. This method works for 
   // FTPC eta subevents (SetEtaSubs(kTRUE)) and random subevents (SetEtaSubs(kFALSE)).
-  //Bool_t v1Ep1Ep2 = kTRUE;
-    Bool_t v1Ep1Ep2 = kFALSE;
+//  Bool_t v1Ep1Ep2 = kTRUE;
+  Bool_t v1Ep1Ep2 = kFALSE;
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) {
@@ -309,6 +313,10 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     if (spMaker) {
       StFlowScalarProdMaker* flowScalarProdMaker = new StFlowScalarProdMaker();
       flowScalarProdMaker->SetHistoRanges(includeFtpcTracks);
+    }
+    if (lyzMaker) {
+      StFlowLeeYangZerosMaker* flowLeeYangZerosMaker = new StFlowLeeYangZerosMaker();
+      flowLeeYangZerosMaker->SetHistoRanges(includeFtpcTracks);
     }
   } else {
     if (anaMaker) {
@@ -332,6 +340,14 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 	StFlowScalarProdMaker(makerName, flowSelect);
       flowScalarProdMaker->SetHistoRanges(includeFtpcTracks);
     }
+    if (lyzMaker) {
+      sprintf(makerName, "FlowLeeYangZeros");
+      StFlowLeeYangZerosMaker* flowLeeYangZerosMaker = new 
+	StFlowLeeYangZerosMaker(makerName, flowSelect);
+      flowLeeYangZerosMaker->SetHistoRanges(includeFtpcTracks);
+      flowLeeYangZerosMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
+      flowLeeYangZerosMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
+    }
   }
   if (phiWgtMaker) {
     StFlowPhiWgtMaker*  flowPhiWgtMaker = new StFlowPhiWgtMaker();
@@ -350,6 +366,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //  flowPhiWgtMaker->SetDebug();
 //  flowCumulantMaker->SetDebug();
 //  flowScalarProdMaker->SetDebug();
+//  flowLeeYangZerosMaker->SetDebug();
 //  chain->SetDebug();
 //  StMuDebug::setLevel(0);
 
@@ -375,34 +392,37 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   }
   
   // Set the event cuts
-//   StFlowCutEvent::SetCent(6, 6);
-//   StFlowCutEvent::SetMult(0, 0);
+//    StFlowCutEvent::SetCent(5, 5);
+//    StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
-//   StFlowCutEvent::SetVertexZ(-25., 25.);
-//   StFlowCutEvent::SetEtaSymTpc(0., 0.);
-//   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
-  StFlowCutEvent::SetTrigger(1); // necessary for year4, but default = 1
-  if (phiWgtOnly) { // all centralities
-    StFlowCutEvent::SetCent(0, 0);
-  }
+  StFlowCutEvent::SetVertexZ(-30., 30.);
+  StFlowCutEvent::SetEtaSymTpc(0., 0.);
+  StFlowCutEvent::SetEtaSymFtpc(0., 0.);
+//   StFlowCutEvent::SetTrigger(1); // necessary for year4, but default = 1
+//   StFlowCutEvent::SetTrigger(10); // necessary for mevSim data
+   if (phiWgtOnly) { // all centralities
+     StFlowCutEvent::SetCent(0, 0);
+   }
   
   // Set the track cuts
-    StFlowCutTrack::IncludeTpcTracks(includeTpcTracks);
+   StFlowCutTrack::IncludeTpcTracks(includeTpcTracks);
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
 //   StFlowCutTrack::SetPtTpc(0.15, 12.);
-//   StFlowCutTrack::SetEtaTpc(0., 0.);
+//   StFlowCutTrack::SetPtTpc(0., 0.); // open wide for mevSim data
+//   StFlowCutTrack::SetEtaTpc(-2.0, 2.0);
+//   StFlowCutTrack::SetEtaTpc(-5.0, 5.0); // open wide for mevSim data
 //   StFlowCutTrack::SetChgTpc(0., 0.);
   
-    StFlowCutTrack::IncludeFtpcTracks(includeFtpcTracks);
+   StFlowCutTrack::IncludeFtpcTracks(includeFtpcTracks);
 //   StFlowCutTrack::SetFitPtsFtpc(0, 0);
-//   StFlowCutTrack::SetChiSqFtpc(0., 0.);
-//   StFlowCutTrack::SetDcaFtpc(0., 0.);
+   StFlowCutTrack::SetChiSqFtpc(0., 4.);
+   StFlowCutTrack::SetDcaFtpc(0., 2.);
 //   StFlowCutTrack::SetDcaGlobalFtpc(0., 0.);
-//   StFlowCutTrack::SetPtFtpc(0., 0.);
-//   StFlowCutTrack::SetEtaFtpc(0., 0., 0., 0.);
+   StFlowCutTrack::SetPtFtpc(0.15, 6.);
+   StFlowCutTrack::SetEtaFtpc(-5.0, 0., 0., 5.0);
 //   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
@@ -438,8 +458,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 
   // Disable weights in the event plane calculation
 //   StFlowEvent::SetPtWgt(kFALSE);
-//   StFlowEvent::SetPtWgtSaturation(2.);
-//   StFlowEvent::SetEtaWgt(kFALSE);
+//   StFlowEvent::SetPtWgtSaturation(1.);
+   StFlowEvent::SetEtaWgt(kFALSE);
 
   // use ZDCSMD for the event plane
 //     StFlowEvent::SetUseZDCSMD(kTRUE);
@@ -465,8 +485,9 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   int istat = 0, iEvt = 1;
  EventLoop: if (iEvt <= nEvents && istat != 2) {
    
-   cout << endl << "============================ Event " << iEvt
-	<< " start ============================" << endl;
+//    cout << endl << "============================ Event " << iEvt
+// 	<< " start ============================" << endl;
+   cout << "===== Event " << iEvt << " start ===== " << endl;
    
    chain->Clear();
    istat = chain->Make(iEvt);
@@ -480,7 +501,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
  }
   
   iEvt--;
-  cout << endl << "============================ Event " << iEvt
+  cout << "============================ Event " << iEvt
        << " finish ============================" << endl;
 
   //
@@ -496,8 +517,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   TVectorD* cumulConstants = new TVectorD(30); // temporary fix for a root bug
   TObjString* cumulMethodTag = new TObjString( "cumulNew" );
 
-  // Move the flow.cumulant.root and flow.scalar.root files into the 
-  // flow.hist.root file.
+  // Move the flow.cumulant.root, flow.scalar.root, and flow.LeeYangZeros.root files
+  // into the flow.hist.root file.
   if (cumMaker) {
     TFile cumFile("flow.cumulant.root", "READ");
     if (cumFile.IsOpen()) { 
@@ -517,6 +538,24 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
       cout << "### Can't find file flow.scalar.root" << endl;
     }
   }
+  if (lyzMaker) {
+    // combine the first and second pass outputs
+    TFile lyzFirstPassFile("flow.firstPassLYZ.root", "READ");
+    if (lyzFirstPassFile.IsOpen()) { 
+      lyzFirstPassFile.ReadAll();
+      TFile lyzFile("flow.LeeYangZeros.root", "UPDATE");
+      if (lyzFile.IsOpen()) {
+	lyzFirstPassFile.GetList()->Write();
+	lyzFile.Close();
+      }
+    }
+    TFile lyzFile("flow.LeeYangZeros.root", "READ");
+    if (lyzFile.IsOpen()) {
+      lyzFile.ReadAll();
+    } else {
+      cout << "### Can't find file flow.LeeYangZeros.root" << endl;
+    }
+  }
   if (anaMaker) {
     TFile anaFile("flow.hist.root", "UPDATE");
   } else {
@@ -525,11 +564,12 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   if (anaFile.IsOpen()) {
     if (cumMaker) {
       cumFile.GetList()->Write();
-   cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
-   cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
+      cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
+      cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
     }    
-    if (spMaker) spFile.GetList()->Write();
-    //anaFile->ls();
+    if (spMaker) { spFile.GetList()->Write(); }
+    if (lyzMaker) { lyzFile.GetList()->Write(); }
+    //anaFile.ls();
     anaFile.Close();    
   } else {
     cout << "### Can't find file flow.hist.root" << endl;
@@ -548,7 +588,6 @@ void doFlowEvents(Int_t nEvents, const Char_t *path, const Char_t *file,
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-
   doFlowEvents(nEvents, fileListQQ, phiWgtOnly, GC);
 }
 
@@ -570,45 +609,25 @@ void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly, Bool_t GC) {
 //  Char_t* fileExt="*.event.root";
 //  Char_t* fileExt="*.MuDst.root";
 
-// PDSF pico files
-  // 200 GeV
-  // FTPC
-//   Char_t* filePath="/auto/pdsfdv36/starebye/oldi/ProductionMinBias/PicoDst/AllSectors/FullField";
+  // PDSF pico files
+  //Simulated events, v1=4%, v2=5% 
+//   Char_t* filePath="/auto/pdsfdv35/rhstar/aihong/simV1/simV1/V2_5Pct_V1Vary_New/dir9";
 //   if (nEvents < 250) {
-//     Char_t* fileExt="st_physics_2320013_raw_0008.flowpicoevent.root";
+//     Char_t* fileExt="evgen.1.nt.flowpicoevent.root";
 //    } else {
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
-  // MinBiasVertex P02ge
-//   Char_t* filePath="/auto/stardata/starspec/flow_pDST_production_removed_l3_trigged_events/reco/MinBiasVertex/ReversedFullField/P02ge/2001/2236006";
-//   if (nEvents < 250) {
-//     Char_t* fileExt="0001/st_physics_2236006_raw_0001.flowpicoevent.root";
-//    } else {
-//      Char_t* fileExt="*/*.flowpicoevent.root";
-//    }
+  // 200 GeV
 
-  // 130 GeV
-
-  // 22 GeV
-
-  // year 4
+  // run 4
   // muDST files
-  Char_t* filePath="/auto/pdsfdv60/starprod/reco/productionMinBias/FullField/P04ij/2004/029";
-  if (nEvents < 250) {
-    Char_t* fileExt="st_physics_5029004_raw_1010010.MuDst.root";
+  Char_t* filePath="/dante3/starprod/reco/productionMinBias/FullField/P05ia/2004/054";
+  if (nEvents < 450) {
+    Char_t* fileExt="st_physics_5054076_raw_1010001.MuDst.root";
    } else {
-     //     Char_t* fileExt="*.MuDst.root";
-     Char_t* fileExt="st_physics_5029004_raw_*.MuDst.root"; // 6 files
+     Char_t* fileExt="*.MuDst.root";
    }
-
-  // event.root files
-//   Char_t* filePath="/auto/pdsfdv37/starprod/reco/production62GeV/ReversedFullField/P04ie/2004/088";
-//   if (nEvents < 250) {
-//     Char_t* fileExt="st_physics_5088010_raw_2010010.event.root";
-//    } else {
-//      Char_t* fileExt="*.event.root";
-//    }
 
   doFlowEvents(nEvents, filePath, fileExt, phiWgtOnly, GC);
 }
@@ -717,6 +736,10 @@ int gcInit(const char *request)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.60  2006/02/22 19:48:08  posk
+// Added StFlowLeeYangZerosMaker
+// For MuDsts, the IOMaker is now the default
+//
 // Revision 1.59  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
