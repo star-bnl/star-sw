@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.94 2005/08/26 19:00:15 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.95 2006/02/22 19:36:21 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1180,7 +1180,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.94 2005/08/26 19:00:15 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.95 2006/02/22 19:36:21 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1227,7 +1227,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   unsigned int triggers =  StFlowCutEvent::TriggersFound();
   mHistTrigger->Fill(triggers);
 
-  // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
+  // no selections: OrigMult, MultEta, Centrality, TotalMult, PartMult, MultOverOrig, VertexZ, VertexXY
   int origMult  = pFlowEvent->OrigMult();
   mHistOrigMult ->Fill((float)origMult);
   mHistMultEta  ->Fill((float)pFlowEvent->MultEta());
@@ -1235,6 +1235,8 @@ void StFlowAnalysisMaker::FillEventHistograms() {
   mHistCent     ->Fill((float)cent);
   int totalMult = pFlowEvent->TrackCollection()->size();
   mHistMult     ->Fill((float)totalMult);
+  UInt_t partMult = pFlowEvent->MultPart(pFlowSelect);
+  mHistMultPart ->Fill((float)partMult);
   if (origMult) mHistMultOverOrig->Fill((float)totalMult / (float)origMult);
 
   StThreeVectorF vertex = pFlowEvent->VertexPos();
@@ -1358,7 +1360,6 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 void StFlowAnalysisMaker::FillParticleHistograms() {
   // Fill histograms from the particles
 
-  float corrMultN      = 0.;
   float etaSymPosTpcN  = 0.;
   float etaSymNegTpcN  = 0.;
   float etaSymPosFtpcN = 0.;
@@ -1739,7 +1740,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 
        	// Calculate v for all particles selected for correlation analysis
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
-	  corrMultN++;
 	  float v;
 	if (pFlowEvent->UseZDCSMD()) {
 	  v = cos(order *(phi-mQ[k][1].Phi()))/perCent;
@@ -1858,10 +1858,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
   mHistPidMult->Fill(11., dbarN);
   mHistPidMult->Fill(12., electronN);
   mHistPidMult->Fill(13., positronN);
-
-  // Multiplicity of particles correlated with the event planes
-  corrMultN = corrMultN / (float)(Flow::nHars * Flow::nSels);
-  mHistMultPart->Fill(corrMultN);
 
 }
 
@@ -2320,6 +2316,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.95  2006/02/22 19:36:21  posk
+// Minor updates.
+//
 // Revision 1.94  2005/08/26 19:00:15  posk
 // plot style back to bold
 //
