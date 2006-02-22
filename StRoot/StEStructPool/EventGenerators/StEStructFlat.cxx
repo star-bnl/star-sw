@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.cxx,v 1.4 2005/09/23 23:37:18 prindle Exp $
+ * $Id: StEStructFlat.cxx,v 1.5 2006/02/22 22:05:35 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -22,7 +22,6 @@ StEStructFlat::StEStructFlat() {
     mTCuts        = 0;
     mInChain      = false;
     mEventsToDo   = 0;
-    mUseAllTracks = false;
     mCentBin      = 0;
     mEventCount   = 0;
     mAmDone       = false;
@@ -31,7 +30,6 @@ StEStructFlat::StEStructFlat() {
 StEStructFlat::StEStructFlat( StEStructEventCuts* ecuts,
                               StEStructTrackCuts* tcuts,
                               bool inChain,
-                              bool useAllTracks,
                               int  centBin,
                               int  eventsToDo) {
     mFlatEvent    = 0;
@@ -39,7 +37,6 @@ StEStructFlat::StEStructFlat( StEStructEventCuts* ecuts,
     mTCuts        = tcuts;
     mInChain      = inChain;
     mEventsToDo   = eventsToDo;
-    mUseAllTracks = useAllTracks;
     mCentBin      = centBin;
     mEventCount   = 0;
     mAmDone       = false;
@@ -72,25 +69,18 @@ StEStructEvent* StEStructFlat::next() {
 
     float z = mFlatEvent->Vz();
     int nTracks = countGoodTracks();
-    if (mUseAllTracks) {
-        mFlatEvent->SetCentrality( (double) nTracks );
-    } else {
-        mFlatEvent->SetCentrality( (double) mRefMult );
-    }
+    mFlatEvent->SetCentrality( (double) nTracks );
     int jCent = mFlatEvent->Centrality();
     if (((mCentBin >= 0) && (jCent != mCentBin)) ||
         !mECuts->goodPrimaryVertexZ(z)           ||
-        !mECuts->goodNumberOfTracks(mRefMult)) {
-        mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,false);
+        !mECuts->goodCentrality((float)nTracks)) {
+        mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,false);
         mECuts->fillHistogram(mECuts->primaryVertexZName(),z,false);
         return (StEStructEvent*) NULL;
     } else {
-        mFlatEvent->SetNtrack(mRefMult);
-        mFlatEvent->SetOrigMult(mRefMult);
-        mFlatEvent->SetCentMult(mRefMult);
         mFlatEvent->FillChargeCollections();
-        mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,true);
-    mECuts->fillHistogram(mECuts->primaryVertexZName(),z,true);
+        mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,true);
+        mECuts->fillHistogram(mECuts->primaryVertexZName(),z,true);
         return mFlatEvent;
     }
 }
@@ -108,7 +98,7 @@ void StEStructFlat::generateEvent() {
 //--------------------------------------------------------------------------
 void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
 
-    mRefMult = 0;
+    mnumTracks = 0;
     StEStructTrack* eTrack = new StEStructTrack();
     int pid, sign;
 
@@ -178,7 +168,7 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
         mTCuts->fillHistograms(true);
         if (pt<0.15) continue;
 
-        mRefMult++;
+        mnumTracks++;
 
         float *gdca = globalDCA(p,v);
         eTrack->SetBx(gdca[0]);
@@ -214,7 +204,7 @@ void StEStructFlat::fillTracks(StEStructEvent* estructEvent) {
         estructEvent->AddTrack(eTrack);
     }
 
-    estructEvent->SetCentrality( (double) mRefMult );
+    estructEvent->SetCentrality( (double) mnumTracks );
     delete eTrack;
     return;
 }
@@ -265,7 +255,7 @@ bool StEStructFlat::isTrackGood(float *v, float *p, float eta) {
     return useTrack;
 }
 int StEStructFlat::countGoodTracks() {
-    return mRefMult;
+    return mnumTracks;
 }
 //--------------------------------------------------------------------------
 void StEStructFlat::setEventCuts(StEStructEventCuts* cuts) {
@@ -302,8 +292,12 @@ double StEStructFlat::gRand48() {
 /**********************************************************************
  *
  * $Log: StEStructFlat.cxx,v $
+ * Revision 1.5  2006/02/22 22:05:35  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.4  2005/09/23 23:37:18  prindle
- * Starting to add vertex distribution and track acceptance dependance on
+ *
+ *   Starting to add vertex distribution and track acceptance dependance on
  * number of possible hits.
  *   Make Pythia interface look like Hijing interface so it now works within
  * my Fluctuation and Correlation framework.

@@ -54,7 +54,7 @@ StEStructFluctAnal::~StEStructFluctAnal() {
 void StEStructFluctAnal::setCutFile(const char* cutFileName, StEStructCentrality *cent) {
 // Want to expand range of eta cuts beyond range used in analysis so that we
 // can add a vertex dependent offset.
-//    setEtaLimits(cutFileName);
+    setEtaLimits(cutFileName);
     setPtLimits(cutFileName);
 
     mCentralities = dynamic_cast<StEStructCentrality*>(cent);
@@ -316,11 +316,15 @@ void StEStructFluctAnal::fillMultStruct() {
         mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
                                  t->NFoundPoints(), t->NFitPoints(), iF, iL );
         mFluct[jCent]->fillPtHist( t->Pt(), +1 );
+        mFluct[jCent]->fillPhiHist( t->Phi(), +1 );
+        mFluct[jCent]->fillEtaHist( t->Eta(), +1 );
         int index = jPt + jPtCent*mnPts;
         if ((-1 < index) && (index < mnPtCents*mnPts)) {
             mPtFluct[index]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
                                        t->NFoundPoints(), t->NFitPoints(), iF, iL );
             mPtFluct[index]->fillPtHist( t->Pt(), +1 );
+            mPtFluct[index]->fillPtHist( t->Phi(), +1 );
+            mPtFluct[index]->fillPtHist( t->Eta(), +1 );
         }
         delete map;  map = 0;
     }
@@ -361,17 +365,20 @@ void StEStructFluctAnal::fillMultStruct() {
         mFluct[jCent]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
                                  t->NFoundPoints(), t->NFitPoints(), iF, iL );
         mFluct[jCent]->fillPtHist( t->Pt(), -1 );
+        mFluct[jCent]->fillPhiHist( t->Phi(), -1 );
+        mFluct[jCent]->fillEtaHist( t->Eta(), -1 );
         int index = jPt + jPtCent*mnPts;
         if ((-1 < index) && (index < mnPtCents*mnPts)) {
             mPtFluct[index]->fillEtaZ( mCurrentEvent->Vz(), t->Eta(), t->NMaxPoints(),
                                        t->NFoundPoints(), t->NFitPoints(), iF, iL );
             mPtFluct[index]->fillPtHist( t->Pt(), -1 );
+            mPtFluct[index]->fillPtHist( t->Phi(), -1 );
+            mPtFluct[index]->fillPtHist( t->Eta(), -1 );
         }
         delete map;
     }
 
     AddEvent();
-    hRefMultiplicity->Fill(mCurrentEvent->CentMult());
     hMultiplicity->Fill(totMult);
     hMultiplicityBinned->Fill(pow((double)totMult,0.25));
     hPt->Fill(totPt);
@@ -680,7 +687,6 @@ void StEStructFluctAnal::writeHistograms(){
     hEtaLimits->SetBinContent(2,mEtaMax);
     hEtaLimits->Write();
     delete hEtaLimits;  hEtaLimits = 0;
-    hRefMultiplicity->Write();
     hMultiplicity->Write();
     hMultiplicityBinned->Write();
     hPt->Write();
@@ -742,7 +748,6 @@ void StEStructFluctAnal::writeQAHists(TFile* qatf) {
 //--------------------------------------------------------------------------
 void StEStructFluctAnal::initHistograms(){
 
-    hRefMultiplicity = new TH1F("RefMultiplicity","RefMultiplicity",2000,1,2000);
     hMultiplicity = new TH1F("Multiplicity","Multiplicity",2000,1,2000);
     hMultiplicityBinned = new TH1F("MultiplicityBinned","MultiplicityBinned",120,1.0,7.0);
     hPt = new TH1F("Pt","Pt",2000,1,2000);
@@ -793,9 +798,6 @@ cout << "Creating histograms for bins, uniqueness etc. " << endl;
 }
 
 void StEStructFluctAnal::deleteHistograms() {
-    if (hRefMultiplicity) {
-        delete hRefMultiplicity;  hRefMultiplicity = 0;
-    }
     if (hMultiplicity) {
         delete hMultiplicity;     hMultiplicity = 0;
     }

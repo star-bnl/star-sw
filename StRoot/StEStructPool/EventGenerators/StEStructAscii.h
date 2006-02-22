@@ -26,7 +26,7 @@ class StEStructAscii : public StEStructEventReader {
   int meventCount;
   int meventsToDo;
   bool mAmDone;
-  int mrefMult;
+  int mnumTracks;
   int mlineNumber;  // line number of input file 
 
   StEStructEventCuts* mECuts;

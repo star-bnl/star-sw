@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.7 2005/09/23 23:37:23 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.8 2006/02/22 22:05:37 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -22,7 +22,6 @@ StEStructPythia::StEStructPythia() {
     mTCuts        = 0;
     mInChain      = false;
     mEventsToDo   = 100;
-    mUseAllTracks = false;
     mCentBin      = 0;
     mEventCount   = 0;
     mAmDone       = false;
@@ -32,7 +31,6 @@ StEStructPythia::StEStructPythia(TPythia6* pythia,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
                                  bool inChain,
-                                 bool useAllTracks,
                                  int  multBin,
                                  int  eventsToDo) {
     mPythia       = pythia;
@@ -40,7 +38,6 @@ StEStructPythia::StEStructPythia(TPythia6* pythia,
     mTCuts        = tcuts;
     mInChain      = inChain;
     mEventsToDo   = eventsToDo;
-    mUseAllTracks = useAllTracks;
     mCentBin      = multBin;
     mEventCount   = 0;
     mAmDone       = false;
@@ -73,24 +70,17 @@ StEStructEvent* StEStructPythia::next() {
     retVal->SetBField(0.5);
 
     int nTracks = countGoodTracks();
-    if (mUseAllTracks) {
-        retVal->SetCentrality( (double) nTracks );
-    } else {
-        // Should have an option to use tracks with |\eta| < 0.5 ??
-        retVal->SetCentrality( (double) nTracks );
-    }
+    retVal->SetCentrality( (double) nTracks );
     int jCent = retVal->Centrality();
     if (((mCentBin >= 0) && (jCent != mCentBin)) ||
-        !mECuts->goodNumberOfTracks(mRefMult)) {
+        !mECuts->goodCentrality((float)nTracks)) {
         delete retVal;
         retVal=NULL;
-        mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,false);
+        mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,false);
     } else {
         fillTracks(retVal);
-        retVal->SetOrigMult(mRefMult);
-        retVal->SetCentMult(mRefMult);
         retVal->FillChargeCollections();
-        mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,true);
+        mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,true);
     }
     return retVal;
 }   
@@ -98,7 +88,7 @@ StEStructEvent* StEStructPythia::next() {
 //--------------------------------------------------------------------------
 void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
 
-    mRefMult=0;
+    mnumTracks=0;
     Pyjets_t* pstr= mPythia->GetPyjets();
     int numParticles=mPythia->GetN();
 
@@ -255,14 +245,14 @@ bool StEStructPythia::isTrackGood(int i) {
 // This method counts all good track.
 // No histogramming or copying data around.
 int StEStructPythia::countGoodTracks() {
-    mRefMult = 0;
+    mnumTracks = 0;
     int numParticles = mPythia->GetN();
     for (int i=2;i<numParticles;i++) { // 0 & 1 for incoming protons 
         if (isTrackGood(i)) {
-            mRefMult++;
+            mnumTracks++;
         }
     }
-    return mRefMult;
+    return mnumTracks;
 }
 //--------------------------------------------------------------------------
 void StEStructPythia::setEventCuts(StEStructEventCuts* cuts) {
@@ -282,8 +272,12 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.8  2006/02/22 22:05:37  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.7  2005/09/23 23:37:23  prindle
- * Starting to add vertex distribution and track acceptance dependance on
+ *
+ *   Starting to add vertex distribution and track acceptance dependance on
  * number of possible hits.
  *   Make Pythia interface look like Hijing interface so it now works within
  * my Fluctuation and Correlation framework.

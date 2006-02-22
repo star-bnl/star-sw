@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.h,v 1.3 2005/09/23 23:37:22 prindle Exp $
+ * $Id: StEStructFlat.h,v 1.4 2006/02/22 22:05:36 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -28,9 +28,8 @@ class StEStructFlat : public StEStructEventReader {
   StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
-  bool mUseAllTracks;
   int  mCentBin;
-  int  mRefMult;
+  int  mnumTracks;
   int  mEventsToDo;
 
   void   fillTracks(StEStructEvent* estructEvent);
@@ -48,7 +47,6 @@ class StEStructFlat : public StEStructEventReader {
   StEStructFlat( StEStructEventCuts* ecuts,
                  StEStructTrackCuts* tcuts,
                  bool inChain,
-                 bool useAllTracks,
                  int  centBin,
                  int  eventsToDo);
 
@@ -141,8 +139,12 @@ inline float* StEStructFlat::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructFlat.h,v $
+ * Revision 1.4  2006/02/22 22:05:36  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.3  2005/09/23 23:37:22  prindle
- * Starting to add vertex distribution and track acceptance dependance on
+ *
+ *   Starting to add vertex distribution and track acceptance dependance on
  * number of possible hits.
  *   Make Pythia interface look like Hijing interface so it now works within
  * my Fluctuation and Correlation framework.

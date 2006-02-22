@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.3 2004/06/09 22:39:10 prindle Exp $
+ * $Id: StEStructEvent.h,v 1.4 2006/02/22 22:06:06 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -28,9 +28,6 @@ class StEStructEvent : public TObject {
   Int_t mEventID;                    // event ID
   Int_t mRunID;                      // run ID
   Int_t mEventTime;                  // event (unix) timestamp
-  Int_t mOrigMult;                   // number of StEvent tracks
-  Int_t mCentMult;                   // refMult used to determine centrality
-
   Float_t mVx;                       // primary vertex position
   Float_t mVy;
   Float_t mVz;
@@ -62,8 +59,6 @@ class StEStructEvent : public TObject {
   Int_t EventID() const { return mEventID; }; 
   Int_t RunID() const { return mRunID; };
   Int_t EventTime() const { return mEventTime; }
-  Int_t OrigMult() const { return mOrigMult; };
-  Int_t CentMult() const { return mCentMult; };
 
   Int_t Centrality() const { return mCentrality; };
   Int_t PtCentrality() const { return mPtCentrality; };
@@ -79,11 +74,8 @@ class StEStructEvent : public TObject {
   
   void AddTrack(StEStructTrack* pEStructTrack);
 
-  void SetNtrack(const Int_t ntrk) { mNtrack = ntrk; }
   void SetEventID(const Int_t id) { mEventID = id; }
   void SetRunID(const Int_t id) { mRunID = id; }
-  void SetOrigMult(const Int_t tracks) { mOrigMult = tracks; }
-  void SetCentMult(const Int_t tracks) { mCentMult = tracks; }
 
   void SetVx(const Float_t vx) { mVx = vx; }
   void SetVy(const Float_t vy) { mVy = vy; }
@@ -116,6 +108,9 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.4  2006/02/22 22:06:06  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.3  2004/06/09 22:39:10  prindle
  * Expanded centrality class.
  * Call to set centrality from event reader.

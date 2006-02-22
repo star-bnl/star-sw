@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQJ.cxx,v 1.1 2004/03/02 21:50:58 prindle Exp $
+ * $Id: StEStructQJ.cxx,v 1.2 2006/02/22 22:05:39 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -63,7 +63,7 @@ StEStructEvent* StEStructQJ::generateEvent() {
     retVal = new StEStructEvent();
 
     fillTracks(retVal);
-    if (!mECuts->goodNumberOfTracks(mrefMult)) {
+    if (!mECuts->goodCentrality((float)mnumTracks)) {
         delete retVal;
         retVal=NULL;
     } else {
@@ -76,17 +76,17 @@ StEStructEvent* StEStructQJ::generateEvent() {
 //--------------------------------------------------------------------------
 void StEStructQJ::fillTracks(StEStructEvent* estructEvent) {
 
-    mrefMult=0;
+    mnumTracks=0;
     StEStructTrack* eTrack = new StEStructTrack();
-    int pid, numTracks;
+    int pid, totTracks;
     double px, py, eta;
 
-    if ((numTracks = getNumTracks()) < 0) {
+    if ((totTracks = getNumTracks()) < 0) {
         mAmDone=true;
         return;
     }
     int it = 0;
-    for(int i=0;i<numTracks;i++) {
+    for(int i=0;i<totTracks;i++) {
         it ++;
         eTrack->SetInComplete();
         *inFile >> px >> py >> eta >> pid;
@@ -106,7 +106,7 @@ void StEStructQJ::fillTracks(StEStructEvent* estructEvent) {
 
         if (pt<0.15) continue;
 
-        mrefMult++;
+        mnumTracks++;
         useTrack = (mTCuts->goodPt(pt) && useTrack);
         float _r=pt/0.139;
         float yt=log(sqrt(1+_r*_r)+_r);
@@ -191,8 +191,12 @@ void StEStructQJ::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructQJ.cxx,v $
+ * Revision 1.2  2006/02/22 22:05:39  prindle
+ * Removed all references to multRef (?)
+ *
  * Revision 1.1  2004/03/02 21:50:58  prindle
- * I forgot to cvs add my EventGenerator readers.
+ *
+ *   I forgot to cvs add my EventGenerator readers.
  *
  * Revision 1.2  2003/11/25 22:45:14  prindle
  * Commiting changes so I can move code to rhic

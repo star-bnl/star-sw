@@ -82,7 +82,6 @@ class StEStructFluctAnal: public StEStructAnalysis {
   // These will be summed over all events for all jobs.
   // We run followup jobs to calculate \delta\sigma^2 and plot
   // reference histograms.
-    TH1F *hRefMultiplicity;
     TH1F *hMultiplicity;
     TH1F *hMultiplicityBinned;
     TH1F *hPt;

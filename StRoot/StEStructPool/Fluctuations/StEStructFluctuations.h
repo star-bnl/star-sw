@@ -41,6 +41,8 @@ class StEStructFluct {
                    int maxFitPoints, int foundPoints, int nFitPoints,
                    int iF, int iL );
     void fillPtHist( double pt, int sign );
+    void fillPhiHist( double phi, int sign );
+    void fillEtaHist( double eta, int sign );
 
   // For ease of I/O I put info into histograms.
   // Accumulating into histograms is very slow, so I
@@ -103,6 +105,10 @@ class StEStructFluct {
     TH1F *ptAll;
     TH1F *ptPlus;
     TH1F *ptMinus;
+    TH1F *phiPlus;
+    TH1F *phiMinus;
+    TH1F *etaPlus;
+    TH1F *etaMinus;
 
   // mKey is a unique string which we use to identify histograms that
   // belong to this object. Important when reading histograms produced
