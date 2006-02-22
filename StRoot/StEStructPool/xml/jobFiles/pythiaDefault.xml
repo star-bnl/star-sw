@@ -5,10 +5,10 @@
     <jobType>
         <Pythia>
             <pythiaInit>
-                <pyFrame  Comment=' Reference frame' widget='combobox'>CMS</pyFrame>
-                <pyBeam   Comment=' Beam type      ' widget='combobox'>p</pyBeam>
-                <pyTarget Comment=' Target type    ' widget='combobox'>p</pyTarget>
-                <pyEnergy Comment=' Beam Energy    ' widget='entry'>200.0</pyEnergy>
+                <pyFrame  id='pyFrame'  Comment=' Reference frame' typedef='char *kinematics = ' widget='combobox'>CMS</pyFrame>
+                <pyBeam   id='pyBeam'   Comment=' Beam type      ' typedef='char *beam = ' widget='combobox'>p</pyBeam>
+                <pyTarget id='pyTarget' Comment=' Target type    ' typedef='char *target = ' widget='combobox'>p</pyTarget>
+                <pyEnergy id='pyEnergy' Comment=' Beam Energy    ' typedef='float energy = ' widget='entry'>200.0</pyEnergy>
             </pythiaInit>
         </Pythia>
     </jobType>
@@ -34,6 +34,7 @@
             <output fromScratch="data/*.root" toURL="file:OUTPUTDIR/data/" />
             <output fromScratch="cuts/*.root" toURL="file:OUTPUTDIR/cuts/" />
             <output fromScratch="QA/*.root"   toURL="file:OUTPUTDIR/QA/" />
+            <output fromScratch="stats/*.txt" toURL="file:OUTPUTDIR/stats/" />
         </starSubmit>
 
         <!-- Need appropriate event cuts. -->
@@ -60,7 +61,7 @@
             <trackCut Comment = 'pt cut'>
                 <cutName>Pt</cutName>
                 <Value widget = 'entry'>0.15</Value>
-                <Value widget = 'entry'>2.0</Value>
+                <Value widget = 'entry'>20.0</Value>
             </trackCut>
             <trackCut Comment = 'phi cut'>
                 <cutName>Phi</cutName>
@@ -87,8 +88,6 @@
             </libraries>
             <centralities id='centralities' widget='entry'>1 4 7 10 14 25</centralities>
             <ptCentralities id='ptCentralities' widget='entry'>1 4 7 10 14 25</ptCentralities>
-            <declareSimHistograms id='declareSimHistograms' widget='none'>;</declareSimHistograms>
-            <centralityInEtaOne id='centralityInEtaOne' widget='entry'>true</centralityInEtaOne>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     char* jobid = gSystem->Getenv("JOBID");
@@ -103,13 +102,7 @@
         jobId = 2;
     }
     TPythia6* pythia = new TPythia6();
-<!--    char *kinematics = <variable refersTo='pyFrame'/>
-    char *beam = <variable stringInLine='pyBeam'/>
-    char *target = <variable stringInLine='pyTarget'/>
-    char *energy = <variable stringInLine='pyEnergy'/>
-    pythia-&gt;Initialize(kinematics,beam,target,energy);
- -->
-    pythia-&gt;Initialize("CMS","p","p",200);
+    pythia-&gt;Initialize(kinematics,beam,target,ebergy);
 
     int timestamp = time(NULL);
     int iseed = (int)((float)timestamp/(float)jobId);
@@ -126,11 +119,9 @@
         if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
             mCent = -1;
         }
-        readers[i] = new StEStructPythia(pythia,ecuts[i],tcuts[i],skipMake[i],centralityInEtaOne,mCent,-1);
+        readers[i] = new StEStructPythia(pythia,ecuts[i],tcuts[i],skipMake[i],mCent,-1);
     }
             </declareReader>
-            <fillSimHistograms id='fillSimHistograms' widget = 'none'>;</fillSimHistograms>
-            <saveSimHistograms id='saveSimHistograms' widget = 'none'>;</saveSimHistograms>
         </doEStructMacro>
 
     </standardElements>
