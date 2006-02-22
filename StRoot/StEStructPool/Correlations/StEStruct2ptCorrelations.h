@@ -1,6 +1,6 @@
-/**********************************************************************
+ /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.6 2005/09/14 17:14:20 msd Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.7 2006/02/22 22:05:13 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -9,14 +9,19 @@
  * Description:  Analysis code for 2pt-analysis. 
  *    The analysis runs as follows:
  *       1D and 2D arrays (in yt,eta,phi) are setup
- *       and filled for each of the 6 pair types:
- *       Sibling (++,+- & -+, --)
- *       Mixed   (++,+- & -+, --)
- *       The 2D versions are additionally divided into yt1,yt2 slices
- *       and (via the StEStructBuffer) z-vertex
+ *       and filled for each of the 8 pair types:
+ *       Sibling (++, +-, -+, --)
+ *       Mixed   (++, +-, -+, --)
+ *       Particle id is done via dEdx and introduced into the analysis via cut-bins.
+ *       Order particles so pi always come before K before p and plus comes before
+ *       minus. 2D histograms will not be guaranteed to be symmetric.
+ *       The 2D versions are additionally divided into z-vertex (via the StEStructBuffer)
  *       After arrays are filled (looped over all events/job), Histograms are 
  *       created, filled, and written out to the data file for further
  *       processing.
+ *
+ *       Note that if we find charge symmetry we can form LS, US, CD and CI
+ *       combinations using these histograms.
  *
  *
  ***********************************************************************/
@@ -48,111 +53,119 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TH2F*  mHmix;
 
   // HBT parameters
-  qBins *mQinv[6]; //!  1D
-  TH1F ** mHQinv[6];//!  1D hist
+  qBins *mQinv[8]; //!  1D
+  TH1F ** mHQinv[8];//!  1D hist
+
+  QAEtaBins mQAEta[2][4];
+  QAPhiBins mQAPhi[2][4];
+  QAPtBins  mQAPt[2][4];
+  PtotBins  *mdEdxPtot[2][4];
 
   //-> X vs X 
-  ytBins **mYtYt[6]; //!
-  xtBins **mXtXt[6]; //! Xt, legacy quantity
-  ptBins **mPtPt[6]; //!
-  etaBins **mEtaEta[6]; //!
-  phiBins **mPhiPhi[6]; //!
+  ytBins **mYtYt[8]; //!
+  xtBins **mXtXt[8]; //! Xt, legacy quantity
+  ptBins **mPtPt[8]; //!
+  etaBins **mEtaEta[8]; //!
+  phiBins **mPhiPhi[8]; //!
 
-  etaBins **mPrEtaEta[6]; //! weight = pt1*pt2
-  phiBins **mPrPhiPhi[6]; //!  "
+  etaBins **mPrEtaEta[8]; //! weight = pt1*pt2
+  phiBins **mPrPhiPhi[8]; //!  "
 
-  etaBins **mSuEtaEta[6]; //! weight = pt1+pt2
-  phiBins **mSuPhiPhi[6]; //!  "
+  etaBins **mSuEtaEta[8]; //! weight = pt1+pt2
+  phiBins **mSuPhiPhi[8]; //!  "
 
 
-  TH2F ** mHYtYt[6]; //!
-  TH2F ** mHXtXt[6]; //!
-  TH2F ** mHPtPt[6]; //!
-  TH2F ** mHEtaEta[6]; //!
-  TH2F ** mHPhiPhi[6]; //!
+  TH1F  * mHQAEta[2][4]; //!
+  TH1F  * mHQAPhi[2][4]; //!
+  TH1F  * mHQAPt[2][4]; //!
+  TH2F  * mHdEdxPtot[2][4]; //!
+  TH2F ** mHYtYt[8]; //!
+  TH2F ** mHXtXt[8]; //!
+  TH2F ** mHPtPt[8]; //!
+  TH2F ** mHEtaEta[8]; //!
+  TH2F ** mHPhiPhi[8]; //!
 
-  TH2F ** mHPrEtaEta[6]; //!
-  TH2F ** mHPrPhiPhi[6]; //!
-  TH2F ** mHSuEtaEta[6]; //!
-  TH2F ** mHSuPhiPhi[6]; //!
+  TH2F ** mHPrEtaEta[8]; //!
+  TH2F ** mHPrPhiPhi[8]; //!
+  TH2F ** mHSuEtaEta[8]; //!
+  TH2F ** mHSuPhiPhi[8]; //!
 
   // Delta Y vs Delta X
-  dphiBins **mJtDYtDPhi[6]; //!
-  detaBins **mJtDYtDEta[6]; //!
-  dphiBins **mJtDEtaDPhi[6]; //!
-  dphiBins **mPrJtDEtaDPhi[6]; //!
-  dphiBins **mSuJtDEtaDPhi[6]; //!
+  dphiBins **mJtDYtDPhi[8]; //!
+  detaBins **mJtDYtDEta[8]; //!
+  dphiBins **mJtDEtaDPhi[8]; //!
+  dphiBins **mPrJtDEtaDPhi[8]; //!
+  dphiBins **mSuJtDEtaDPhi[8]; //!
 
-  TH2F ** mHJtDYtDPhi[6];
-  TH2F ** mHJtDYtDEta[6];
-  TH2F ** mHJtDEtaDPhi[6];
-  TH2F ** mHPrJtDEtaDPhi[6];
-  TH2F ** mHSuJtDEtaDPhi[6];
+  TH2F ** mHJtDYtDPhi[8];
+  TH2F ** mHJtDYtDEta[8];
+  TH2F ** mHJtDEtaDPhi[8];
+  TH2F ** mHPrJtDEtaDPhi[8];
+  TH2F ** mHSuJtDEtaDPhi[8];
 
   // Sum Y vs Delta X
-  dytBins  **mAtSYtDYt[6];     //! smt array of dmt bins
-  dptBins  **mAtSPtDPt[6];     //! smt array of dmt bins
-  dphiBins **mJtSEtaDPhi[6];//! 
-  dphiBins **mPrJtSEtaDPhi[6];//! 
-  dphiBins **mSuJtSEtaDPhi[6];//! 
+  dytBins  **mAtSYtDYt[8];     //! smt array of dmt bins
+  dptBins  **mAtSPtDPt[8];     //! smt array of dmt bins
+  dphiBins **mJtSEtaDPhi[8];//! 
+  dphiBins **mPrJtSEtaDPhi[8];//! 
+  dphiBins **mSuJtSEtaDPhi[8];//! 
 
-  TH2F ** mHAtSYtDYt[6];
-  TH2F ** mHAtSPtDPt[6];
-  TH2F ** mHJtSEtaDPhi[6];//!
-  TH2F ** mHPrJtSEtaDPhi[6];//!
-  TH2F ** mHSuJtSEtaDPhi[6];//!
+  TH2F ** mHAtSYtDYt[8];
+  TH2F ** mHAtSPtDPt[8];
+  TH2F ** mHJtSEtaDPhi[8];//!
+  TH2F ** mHPrJtSEtaDPhi[8];//!
+  TH2F ** mHSuJtSEtaDPhi[8];//!
 
   // TPC Separation
-  TPCSepBins *mTPCAvgTSep[6];  //1D
-  TPCSepBins *mTPCAvgZSep[6];  
-  TPCSepBins *mTPCEntTSep[6];  
-  TPCSepBins *mTPCEntZSep[6];  
-  TPCSepBins *mTPCMidTSep[6];  
-  TPCSepBins *mTPCMidZSep[6];  
-  TPCSepBins *mTPCExitTSep[6];  
-  TPCSepBins *mTPCExitZSep[6];  
+  TPCSepBins *mTPCAvgTSep[8];  //1D
+  TPCSepBins *mTPCAvgZSep[8];  
+  TPCSepBins *mTPCEntTSep[8];  
+  TPCSepBins *mTPCEntZSep[8];  
+  TPCSepBins *mTPCMidTSep[8];  
+  TPCSepBins *mTPCMidZSep[8];  
+  TPCSepBins *mTPCExitTSep[8];  
+  TPCSepBins *mTPCExitZSep[8];  
 
-  TPCSepBins *mTPCMidTdptP[6]; //! needed to differentiate by sign of deltaPt   
-  TPCSepBins *mTPCMidTdptN[6]; //! to evaluate pair crossing cut   
-  TPCSepBins *mTPCMidZdptP[6];  
-  TPCSepBins *mTPCMidZdptN[6];  
+  TPCSepBins *mTPCMidTdptP[8]; //! needed to differentiate by sign of deltaPt   
+  TPCSepBins *mTPCMidTdptN[8]; //! to evaluate pair crossing cut   
+  TPCSepBins *mTPCMidZdptP[8];  
+  TPCSepBins *mTPCMidZdptN[8];  
 
-  TH1F **  mHTPCAvgTSep[6]; 
-  TH1F **  mHTPCAvgZSep[6];  
-  TH1F **  mHTPCEntTSep[6]; 
-  TH1F **  mHTPCEntZSep[6];  
-  TH1F **  mHTPCMidTSep[6]; 
-  TH1F **  mHTPCMidZSep[6];  
-  TH1F **  mHTPCExitTSep[6]; 
-  TH1F **  mHTPCExitZSep[6];  
+  TH1F **  mHTPCAvgTSep[8]; 
+  TH1F **  mHTPCAvgZSep[8];  
+  TH1F **  mHTPCEntTSep[8]; 
+  TH1F **  mHTPCEntZSep[8];  
+  TH1F **  mHTPCMidTSep[8]; 
+  TH1F **  mHTPCMidZSep[8];  
+  TH1F **  mHTPCExitTSep[8]; 
+  TH1F **  mHTPCExitZSep[8];  
 
-  TH1F **  mHTPCMidTdptP[6];  
-  TH1F **  mHTPCMidTdptN[6];  
-  TH1F **  mHTPCMidZdptP[6];  
-  TH1F **  mHTPCMidZdptN[6];
+  TH1F **  mHTPCMidTdptP[8];  
+  TH1F **  mHTPCMidTdptN[8];  
+  TH1F **  mHTPCMidZdptP[8];  
+  TH1F **  mHTPCMidZdptN[8];
 
-  TPCSepBins **mTPCAvgTZ[6];  //2D
-  TPCSepBins **mTPCEntTZ[6];  
-  TPCSepBins **mTPCMidTZ[6];  
-  TPCSepBins **mTPCExitTZ[6];  
-  dptBins **mTPCEntTdpt[6];  // T vs delta-Pt; for joint hists, use bin type of y axis
-  dptBins **mTPCMidTdpt[6];
-  dptBins **mTPCExitTdpt[6];   
+  TPCSepBins **mTPCAvgTZ[8];  //2D
+  TPCSepBins **mTPCEntTZ[8];  
+  TPCSepBins **mTPCMidTZ[8];  
+  TPCSepBins **mTPCExitTZ[8];  
+  dptBins **mTPCEntTdpt[8];  // T vs delta-Pt; for joint hists, use bin type of y axis
+  dptBins **mTPCMidTdpt[8];
+  dptBins **mTPCExitTdpt[8];   
 
-  TH2F **  mHTPCAvgTZ[6];  
-  TH2F **  mHTPCEntTZ[6];  
-  TH2F **  mHTPCMidTZ[6];  
-  TH2F **  mHTPCExitTZ[6];  
-  TH2F **  mHTPCEntTdpt[6];
-  TH2F **  mHTPCMidTdpt[6];
-  TH2F **  mHTPCExitTdpt[6];
+  TH2F **  mHTPCAvgTZ[8];  
+  TH2F **  mHTPCEntTZ[8];  
+  TH2F **  mHTPCMidTZ[8];  
+  TH2F **  mHTPCExitTZ[8];  
+  TH2F **  mHTPCEntTdpt[8];
+  TH2F **  mHTPCMidTdpt[8];
+  TH2F **  mHTPCExitTdpt[8];
 
+  char* bName[8];
+  char* bTitle[8];
 
   // generic histogram create functions to simplify the code
   //
-
-  char* bName[6];
-  char* bTitle[6];
 
   void createHist2D(TH2F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
   void createHist1D(TH1F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
@@ -167,35 +180,32 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   bool mdoPairDensityHistograms; 
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
+  bool mHistosWritten;//! "     " ...
 
   StEStructEvent*        mCurrentEvent;  //!  pointer to EStruct2pt data 
   StEStructPairCuts      mPair; //! for pairs (1 at a time) and all pair cuts
 
   char*     moutFileName; //!
+  char*     mqaoutFileName; //!
   StTimer*  mtimer;       //!
 
   StEStructEvent*     mMixingEvent;  //! dummy      //  Previous Event Stored 
 
   // *** had a problem using constants here (dyn. libs wouldn't load), doing this for now...
-  //int kNumBuffers = 20;  // number of z-vertex bins 
-  //const static int kBuffRange = 50;   // max |Vz| 
-  //const static int kBuffWidth = 2*kBuffRange / kNumBuffers;
   int kNumBuffers;
-  int kBuffRange;
-  int kBuffWidth;
-  //StEStructBuffer      mbuffer[kNumBuffers];  // kNumBuffers slices in z-vertex from -kBuffRange to +kBuffRange
-  //int             mbuffCounter[kNumBuffers];
-  StEStructBuffer      mbuffer[30];  // kNumBuffers slices in z-vertex from -kBuffRange to +kBuffRange
+  float kZBuffMin, kZBuffMax; // Read from Cuts file. Default +/- 75cm if not found.
+  float kBuffWidth;           // Set to 5 cm in Initr().
+  StEStructBuffer mbuffer[30];  // kNumBuffers slices in z-vertex from kZBuffMin to +kZBuffMax
   int             mbuffCounter[30];
 
   //-> (pre) histograms & histograms for analysis.
-  // All are arrays of 6 for 6 charged sign and combinatoric types;
-  // 0,1,2 for Sibling (++,+-,--)
-  // 3,4,5, for Mixed  (++,+-,--)
+  // All are arrays of 8 for 8 charged sign and combinatoric types;
+  // 0,1,2,3 for Sibling (++,+-,-+,--)
+  // 4,5,6,7 for Mixed   (++,+-,-+,--)
   
-  int numPairs[6];
-  int numPairsProcessed[6];
-  int mpossiblePairs[6];
+  int numPairs[8];
+  int numPairsProcessed[8];
+  int mpossiblePairs[8];
 
   StEStruct2ptCorrelations(int mode=0);
   StEStruct2ptCorrelations(const char* cutFileName, int mode=0);
@@ -204,9 +214,11 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   StEStructPairCuts& getPairCuts();
   void  setAnalysisMode(int mode);
   void  setCutFile(const char* cutFileName, StEStructCentrality *cent);  
+  void  setZBuffLimits( const char* cutFileName );
 
   //---> support of interface  
   void  setOutputFileName(const char* outFileName);
+  void  setQAOutputFileName(const char* qaoutFileName);
   bool  doEvent(StEStructEvent* p);
 
   void  init();
@@ -215,6 +227,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   virtual void  fillHistograms();
   virtual void  writeHistograms();
+    void   writeQAHists();
+
     void  initArrays();
     void  deleteArrays();
     void  initHistograms();
@@ -238,6 +252,7 @@ inline void StEStruct2ptCorrelations::setAnalysisMode(int mode){ manalysisMode=m
 
 inline void StEStruct2ptCorrelations::setCutFile(const char* cutFileName,
                                                  StEStructCentrality *cent){
+  setZBuffLimits(cutFileName);
   mPair.setCutFile(cutFileName);
   mPair.loadCuts();
 }
@@ -247,14 +262,19 @@ inline void StEStruct2ptCorrelations::setOutputFileName(const char* fName){
   moutFileName=new char[strlen(fName)+1];
   strcpy(moutFileName,fName);
 }
+inline void StEStruct2ptCorrelations::setQAOutputFileName(const char* fName){
+  if(!fName) return;
+  mqaoutFileName=new char[strlen(fName)+1];
+  strcpy(mqaoutFileName,fName);
+}
 
 inline StEStructPairCuts& StEStruct2ptCorrelations::getPairCuts() {
   return mPair;
 }
 
 inline void StEStruct2ptCorrelations::logStats(ostream& os){
-  char* htp[]={"SibPP","SibPM","SibMM","MixPP","MixPM","MixMM"};
-  for(int i=0;i<6;i++){
+  char* htp[]={"SibPP","SibPM","SibMP","SibMM","MixPP","MixPM","MixMP","MixMM"};
+  for(int i=0;i<8;i++){
     os<<"<pairType>"<<htp[i]<<" "<<endl;;
    os<<"   <processStat \"possiblePairs\">"<<getPossiblePairs(i);
    os<<"</processStat> "<<endl;;
@@ -274,6 +294,11 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.7  2006/02/22 22:05:13  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
+ *
  * Revision 1.6  2005/09/14 17:14:20  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *

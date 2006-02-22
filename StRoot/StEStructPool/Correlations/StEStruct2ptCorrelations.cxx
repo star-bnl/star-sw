@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.9 2005/11/22 14:41:08 msd Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.10 2006/02/22 22:05:10 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -9,14 +9,19 @@
  * Description:  Analysis code for 2pt-analysis. 
  *    The analysis runs as follows:
  *       1D and 2D arrays (in yt,eta,phi) are setup
- *       and filled for each of the 6 pair types:
- *       Sibling (++,+- & -+, --)
- *       Mixed   (++,+- & -+, --)
- *       The 2D versions are additionally divided into yt1,yt2 slices
- *       and (via the StEStructBuffer) z-vertex
+ *       and filled for each of the 8 pair types:
+ *       Sibling (++, +-, -+, --)
+ *       Mixed   (++, +-, -+, --)
+ *       Particle id is done via dEdx and introduced into the analysis via cut-bins.
+ *       Order particles so pi always come before K before p and plus comes before
+ *       minus. 2D histograms will not be guaranteed to be symmetric.
+ *       The 2D versions are additionally divided into z-vertex (via the StEStructBuffer)
  *       After arrays are filled (looped over all events/job), Histograms are 
  *       created, filled, and written out to the data file for further
  *       processing.
+ *
+ *       Note that if we find charge symmetry we can form LS, US, CD and CI
+ *       combinations using these histograms.
  *
  *
  ***********************************************************************/
@@ -51,6 +56,13 @@ StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode) {
   mdoPairDensityHistograms=false; 
   mInit=false; 
   mDeleted=false;
+  mHistosWritten = false;
+
+  kZBuffMin   = -75.0;
+  kZBuffMax   = +75.0;
+  kBuffWidth  = 5.0;
+  kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth );  // Better be 30.
+  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
 }
 
 
@@ -63,7 +75,14 @@ StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int 
   mdoPairDensityHistograms=false;
   mInit=false;
   mDeleted=false;
+  mHistosWritten = false;
   //mPair(cutFileName);
+
+  kZBuffMin   = -75.0;
+  kZBuffMax   = +75.0;
+  kBuffWidth  = 5.0;
+  kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth );  // Better be 30.
+  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
 }
 
 
@@ -79,15 +98,16 @@ void StEStruct2ptCorrelations::init(){
   mCurrentEvent=NULL;
   mtimer=NULL;
 
-  //--> code to simplify hist-creation via class held name defs
-  char* _tmpName[]={"Sibpp","Sibpm","Sibmm","Mixpp","Mixpm","Mixmm"};
-  char* _tmpTitle[]={"Sibling : +.+","Sibling : +.- + -.+","Sibling : -.-","Mixed : +.+","Mixed : +.- + -.+","Mixed : -.-"};
-  for(int i=0;i<6;i++){
-    bName[i]=new char[6];
-    strcpy(bName[i],_tmpName[i]);
-    bTitle[i]=new char[20];
-    strcpy(bTitle[i],_tmpTitle[i]);
-  }
+   //--> code to simplify hist-creation via class held name defs
+   char* _tmpName[]={"Sibpp","Sibpm","Sibmp","Sibmm","Mixpp","Mixpm","Mixmp","Mixmm"};
+   char* _tmpTitle[]={"Sibling : +.+","Sibling : +.-","Sibling : -.+","Sibling : -.-",
+                      "Mixed : +.+","Mixed : +.-","Mixed : -.+","Mixed : -.-"};
+   for(int i=0;i<8;i++){
+     bName[i]=new char[6];
+     strcpy(bName[i],_tmpName[i]);
+     bTitle[i]=new char[20];
+     strcpy(bTitle[i],_tmpTitle[i]);
+   }
 
   if(manalysisMode & 1) {
      mskipPairCuts=true;
@@ -102,15 +122,14 @@ void StEStruct2ptCorrelations::init(){
   cout << "  Do Pair Cut Hists = " << mdoPairCutHistograms << endl;
   cout << "  Do Pair Density Hists = " << mdoPairDensityHistograms << endl;
 
-  for(int i=0;i<6;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
-  kNumBuffers = 30;
-  kBuffRange = 75;
-  kBuffWidth = 2*kBuffRange / kNumBuffers;
-  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
-  cout << "  Mixing events with deltaZ = " << kBuffWidth << " and deltaN = " << DELTANMAX;
-  cout << ", " << _MAXEBYEBUFFER_ << " mixed events for each event." << endl;
+  for(int i=0;i<8;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
 
   initArrays();
+// Try allocating histograms at start of job.
+// If we don't add histograms to directory we don't get the obnoxious
+//   Potential memory leak error.
+  TH1::AddDirectory(kFALSE);
+  initHistograms();
 
   /* Event count via Nch distribution */
   mHNEvents[0]=new TH1F("NEventsSame","NEventsSame",1000,0.,2000.);
@@ -127,7 +146,8 @@ void StEStruct2ptCorrelations::init(){
   }
 
   /* Event Mixing Parameters */
-  mHmix = new TH2F("EventMixing","Event Mixing: delta-Z vs delta-N",20,0,10, 200,0,200);  // deltaZ vs deltaN
+  mHmix = new TH2F("EventMixing","Event Mixing: delta-Z vs delta-N",50,0,10, 50,0,200);  // deltaZ vs deltaN
+  TH1::AddDirectory(kTRUE);
 
   mInit=true;
 }
@@ -145,22 +165,102 @@ void StEStruct2ptCorrelations::finish(){
     return;
   }
 
-  initHistograms();
+  // We call finish explicitly in doEStruct, but it also gets called when
+  // we tell root to quit. I don't know the details of why. If we have
+  // already written histograms don't bother a second time.
+  // (Also I think finish() will invoke cleanUp() so second time here
+  //  all the arrays will be gone and we get a core dump if we try
+  //  touching them.)
+  if (mHistosWritten) {
+      return;
+  }
+//  initHistograms();
   fillHistograms();
   TFile * tf=new TFile(moutFileName,"RECREATE");
   tf->cd();
   writeHistograms();
   tf->Close();
-  deleteHistograms();
+  mHistosWritten = true;
 }
 
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::cleanUp(){ 
   if(mDeleted) return;
+  deleteHistograms();
   deleteArrays(); 
   mDeleted=true;
 }
 
+//--------------------------------------------------------------------------
+// Parse cuts file for limits on vertex position.
+// Want 5cm wide buffers.
+void StEStruct2ptCorrelations::setZBuffLimits( const char* cutFileName ) {
+    ifstream from(cutFileName);
+
+    if(!from){ 
+        cout<<" Cut file Not Found while looking for Z vertex limits in StEStruct2ptCorrelations::setZBuffLimits"<<endl; 
+    }
+
+    char line[256], lineRead[256];
+    char* puteol;
+    char** val = new char*[100];
+    int ival = 0;
+
+    bool done = false;
+    while(!done) {
+        if(from.eof()){
+            cout<<" Did not find Z vertex limits in StEStruct2ptCorrelations::setZBuffLimits, file "<< cutFileName <<endl; 
+            done=true;
+        } else {
+            from.getline(lineRead,256);
+            strcpy(line,lineRead);
+            if ( (line[0]=='#') ) {
+                continue;
+            }
+            if ( !strstr(line,"primaryVertexZ") ) {
+                continue;
+            }
+            if ((puteol=strstr(line,"#"))) {
+                *puteol='\0';
+            }
+            ival=0;
+            val[ival]=line;
+            char* fcomma;
+            while ((fcomma=strstr(val[ival],","))) {
+                *fcomma='\0';
+                fcomma++;
+                ival++;
+                val[ival]=fcomma;
+            }
+            if (ival==2) {
+                done=true;
+                break;
+            }
+        }
+    }
+    if (ival != 2) {
+        cout << " Did not find a line containing primaryVertexZ and two numbers in file " << cutFileName <<endl; 
+        cout<<" Using default limits kZBuffMin = " << kZBuffMin << ", kZBuffMax = " << kZBuffMax <<endl; 
+    } else {
+        kZBuffMin = strtof(val[1],0);
+        kZBuffMax = strtof(val[2],0);
+        kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth );  // Need to check this is 30 or less.
+        if (kNumBuffers > 30) {
+            kNumBuffers = 30;
+            kBuffWidth = (kZBuffMax - kZBuffMin) / kNumBuffers;
+            cout << "   Too many buffers needed to cover vertex range." << endl;
+            cout << "   Increasing width of z slice to " << kBuffWidth << endl;
+            if (kBuffWidth > 7) {
+              cout << "**WARNING**: Jeff Porter says z-slice bins larger than about 6.5cm causes systematice effects on correlations**" << endl;
+            }
+        }
+        for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
+        cout << "  Mixing events with deltaZ = " << kBuffWidth << " and deltaN = " << DELTANMAX;
+        cout << ", " << _MAXEBYEBUFFER_ << " mixed events for each event." << endl;
+    }
+    from.close();
+    delete [] val;  val = 0;
+}
 
 
 //
@@ -185,10 +285,23 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
   mHNEvents[0]->Fill(event->Ntrack());
 
   // inclusive pt distribution
+  // Note that cuts are done in yt-yt space and bins are
+  // set up before pid is done (so assume pion mass.)
+  // I think these are just diagnostic histograms. Even so
+  // I am uncomfortable with this pt histogramming.
+  // (dEdx histogramming is ok though.)
+  // Assign mass according to dEdx pid here.
+  // djp 11/28/2005
+  float Mass[] = {0.1396, 0.1396, 0.497, 0.9383};
+  StEStructBinning* b = StEStructBinning::Instance();
   StEStructCutBin* cb = StEStructCutBin::Instance();
   int ncutbins=cb->getNumBins();
   StEStructTrackCollection *tp = mCurrentEvent->TrackCollectionP();
   float ptval;
+  QAEtaBins *eta;
+  QAPhiBins *phi;
+  QAPtBins  *pt;
+  PtotBins  *dedx;
   for(StEStructTrackIterator iter = tp->begin(); iter != tp->end(); iter++) {
     int* index_ids=cb->getPtBins(ptval=(*iter)->Pt());
     int j=0;
@@ -197,6 +310,36 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
       j++;
       if(j==ncutbins)break;
     }
+    int iptot = b->iptot((*iter)->Ptot());
+    int idedx = b->idedx((*iter)->Dedx());
+    int i = cb->getdEdxPID((*iter));
+    dedx = mdEdxPtot[0][i];
+    dedx[idedx].Ptot[iptot] += 1;
+
+    int ieta = b->iqaeta((*iter)->Eta());
+    eta = &mQAEta[0][i];
+    eta->Eta[ieta] += 1;
+    int iphi = b->iqaphi((*iter)->Phi());
+    phi = &mQAPhi[0][i];
+    phi->Phi[iphi] += 1;
+    int ipt = b->iqapt((*iter)->Pt());
+    pt = &mQAPt[0][i];
+    pt->Pt[ipt] += 1;
+    // Choose mass according to dEdx (in which case transverse and longitudinal
+    // rapidities will be calculated as actual rapidities) or set mass to 0
+    // in which case we will use the quantity Jeff was using for transverse rapidity
+    // (a mid-rapidity approximation for pions) and eta for logitudinal rapidity.
+    // Sould really have a switch accessible from macro level instead of
+    // using cutMode.
+    if (cb->getMode() == 5) {
+        (*iter)->SetMassAssignment(Mass[i]);
+    } else {
+        // 0 should be default, but just to be explicit here/
+        (*iter)->SetMassAssignment(0);
+    }
+    // Always use psuedo-rapidity for now.
+    // We are used to looking at the eta-phi plots (more or less.)
+    (*iter)->SetMassAssignment(0);
   }
 
   StEStructTrackCollection *tm = mCurrentEvent->TrackCollectionM();
@@ -208,8 +351,31 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
       j++;
       if(j==ncutbins)break;
     }
-  }
+    int iptot = b->iptot((*iter)->Ptot());
+    int idedx = b->idedx((*iter)->Dedx());
+    int i = cb->getdEdxPID((*iter));
+    dedx = mdEdxPtot[1][i];
+    dedx[idedx].Ptot[iptot] += 1;
 
+    int ieta = b->iqaeta((*iter)->Eta());
+    eta = &mQAEta[1][i];
+    eta->Eta[ieta] += 1;
+    int iphi = b->iqaphi((*iter)->Phi());
+    phi = &mQAPhi[1][i];
+    phi->Phi[iphi] += 1;
+    int ipt = b->iqapt((*iter)->Pt());
+    pt = &mQAPt[1][i];
+    pt->Pt[ipt] += 1;
+    if (cb->getMode() == 5) {
+        (*iter)->SetMassAssignment(Mass[i]);
+    } else {
+        // 0 should be default, but just to be explicit here/
+        (*iter)->SetMassAssignment(0);
+    }
+    // Always use psuedo-rapidity for now.
+    // We are used to looking at the eta-phi plots (more or less.)
+    (*iter)->SetMassAssignment(0);
+  }
 
   return makeSiblingAndMixedPairs();
 }
@@ -218,7 +384,10 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
 void StEStruct2ptCorrelations::moveEvents(){
 
   if(!mCurrentEvent) return;
-  int i=(int) floor((mCurrentEvent->VertexZ()+kBuffRange)/kBuffWidth); // eventually this should be moved up to the buffer class...
+  if (mCurrentEvent->VertexZ() > kZBuffMax) {
+      return;
+  }
+  int i=(int) floor((mCurrentEvent->VertexZ()-kZBuffMin)/kBuffWidth); // eventually this should be moved up to the buffer class...
   if(i<0 || i>kNumBuffers-1) return;                              
   mbuffer[i].addEvent(mCurrentEvent);
   mbuffCounter[i]++;
@@ -229,12 +398,16 @@ void StEStruct2ptCorrelations::moveEvents(){
 bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
 
   if(!mCurrentEvent) return false; // logic problem!
-  int i=(int) floor((mCurrentEvent->VertexZ()+kBuffRange)/kBuffWidth);
+  if (mCurrentEvent->VertexZ() > kZBuffMax) {
+      return false;
+  }
+  int i=(int) floor((mCurrentEvent->VertexZ()-kZBuffMin)/kBuffWidth);
   if(i<0 || i>kNumBuffers-1) return false;
 
   makePairs(mCurrentEvent,mCurrentEvent,0);
   makePairs(mCurrentEvent,mCurrentEvent,1);
   makePairs(mCurrentEvent,mCurrentEvent,2);
+  makePairs(mCurrentEvent,mCurrentEvent,3);
 
   mbuffer[i].resetCounter();
   int mult = mCurrentEvent->Ntrack();
@@ -248,10 +421,12 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
     float deltaZ = abs(mCurrentEvent->VertexZ() - mMixingEvent->VertexZ());
     float deltaN = abs(mCurrentEvent->Ntrack() -  mMixingEvent->Ntrack());
     mHmix->Fill(deltaZ,deltaN);
-    makePairs(mCurrentEvent,mMixingEvent,3);
     makePairs(mCurrentEvent,mMixingEvent,4);
-    makePairs(mMixingEvent,mCurrentEvent,4);
     makePairs(mCurrentEvent,mMixingEvent,5);
+    makePairs(mCurrentEvent,mMixingEvent,6);
+    makePairs(mMixingEvent,mCurrentEvent,5);
+    makePairs(mMixingEvent,mCurrentEvent,6);
+    makePairs(mCurrentEvent,mMixingEvent,7);
   }
 
   return true;
@@ -260,7 +435,7 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2, int j){
 
-  if(j>=6) return;
+  if(j>=8) return;
   StEStructTrackCollection* t1;
   StEStructTrackCollection* t2;
 
@@ -336,12 +511,20 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   case 2:
     {
         t1=e1->TrackCollectionM();
+        t2=e2->TrackCollectionP();
+        mPair.setPairType(1);
+        mpossiblePairs[j]+=(int)(t1->getEntries()*t2->getEntries());
+        break;
+    }       
+  case 3:
+    {
+        t1=e1->TrackCollectionM();
         t2=e2->TrackCollectionM();
         mPair.setPairType(0);
         mpossiblePairs[j]+=(int)floor(0.5*(t1->getEntries()*(t2->getEntries()-1)));
         break;
     }
-  case 3:
+  case 4:
     {
         t1=e1->TrackCollectionP();
         t2=e2->TrackCollectionP();
@@ -349,7 +532,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         mpossiblePairs[j]+=(int)(t1->getEntries()*t2->getEntries());
         break;
     }
-  case 4:
+  case 5:
     {
         t1=e1->TrackCollectionP();
         t2=e2->TrackCollectionM();
@@ -357,7 +540,15 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         mpossiblePairs[j]+=(int)(t1->getEntries()*t2->getEntries());
         break;
     }
-  case 5:
+  case 6:
+    {
+        t1=e1->TrackCollectionM();
+        t2=e2->TrackCollectionP();
+        mPair.setPairType(3);
+        mpossiblePairs[j]+=(int)(t1->getEntries()*t2->getEntries());
+        break;
+    }
+  case 7:
     {
         t1=e1->TrackCollectionM();
         t2=e2->TrackCollectionM();
@@ -368,7 +559,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   }
 
   // for pair cut analysis, in mixed events you need to correct for the offset from different primary vertex Z values 
-  if(j>=3 && mdoPairDensityHistograms) mPair.SetZoffset(e2->VertexZ() - e1->VertexZ());
+  if(j>=4 && mdoPairDensityHistograms) mPair.SetZoffset(e2->VertexZ() - e1->VertexZ());
   else mPair.SetZoffset(0);
 
   StEStructTrackIterator Iter1;
@@ -384,156 +575,194 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   float pt1, pt2;
 
   float nwgt=1.0;//mPair.SigmaPt();
+  int symmetrizeYt;
 
   if(mtimer)mtimer->start();
 
+  float mass1, mass2;
   for(Iter1=t1->begin(); Iter1!=t1->end();++Iter1){
 
     mPair.SetTrack1(*Iter1);
-    iyt1  = b->iyt(mPair.Track1()->Yt());
-    ixt1  = b->ixt(mPair.Track1()->Xt());
-    ipt1  = b->ipt(pt1=mPair.Track1()->Pt());
-    ieta1 = b->ieta(mPair.Track1()->Eta());
-    iphi1 = b->iphi(mPair.Track1()->Phi());
-  
-    if(j==0 || j==2) { 
-       Iter2=Iter1+1; 
+    if(j==0 || j==3) { 
+      Iter2=Iter1+1; 
     } else { 
-       Iter2=t2->begin(); 
+      Iter2=t2->begin(); 
     }
 
     for(; Iter2!=t2->end(); ++Iter2){
-
       numPairs[j]++;
       mPair.SetTrack2(*Iter2);
       if( mskipPairCuts || mPair.cutPair(mdoPairCutHistograms)==0){
-	numPairsProcessed[j]++;
+        numPairsProcessed[j]++;
         int iy=cb->getCutBin(&mPair);
-	
-	iyt2  = b->iyt(mPair.Track2()->Yt());
-	ixt2  = b->ixt(mPair.Track2()->Xt());
-	ipt2  = b->ipt(pt2=mPair.Track2()->Pt());
-	ieta2 = b->ieta(mPair.Track2()->Eta());
-	iphi2 = b->iphi(mPair.Track2()->Phi());
-	
-	float pwgt=pt1*pt2;
-	float swgt=pt1+pt2;
-	
-	//-> X vs X
-	ytyt[iy][iyt1].yt[iyt2]+=nwgt; 
-	xtxt[iy][ixt1].xt[ixt2]+=nwgt; 
-	ptpt[iy][ipt1].pt[ipt2]+=nwgt; 
-	etaeta[iy][ieta1].eta[ieta2]+=nwgt; 
-	phiphi[iy][iphi1].phi[iphi2]+=nwgt;
 
-	pretaeta[iy][ieta1].eta[ieta2]+=pwgt; 
-	prphiphi[iy][iphi1].phi[iphi2]+=pwgt;
-	suetaeta[iy][ieta1].eta[ieta2]+=swgt; 
-	suphiphi[iy][iphi1].phi[iphi2]+=swgt;
-	
-	//-> X vs X (symmetry)
-	ytyt[iy][iyt2].yt[iyt1]+=nwgt; 
-	xtxt[iy][ixt2].xt[ixt1]+=nwgt; 
-	ptpt[iy][ipt2].pt[ipt1]+=nwgt; 
-	etaeta[iy][ieta2].eta[ieta1]+=nwgt; 
-	phiphi[iy][iphi2].phi[iphi1]+=nwgt;
-	
-	pretaeta[iy][ieta2].eta[ieta1]+=pwgt; 
-	prphiphi[iy][iphi2].phi[iphi1]+=pwgt;
-	suetaeta[iy][ieta2].eta[ieta1]+=swgt; 
-	suphiphi[iy][iphi2].phi[iphi1]+=swgt;
-	
-	//-> delta y vs delta x          
-	jtdetadphi[iy][ideta1=b->ideta(mPair.DeltaEta())].dphi[idphi1=b->idphi(mPair.DeltaPhi())]+=nwgt; 
-	
-	//--- symmetry ---
-	
-	jtdetadphi[iy][ideta2=b->ideta(-1.*mPair.DeltaEta())].dphi[idphi1]+=nwgt;
-	jtdetadphi[iy][ideta1].dphi[idphi2=b->idphi(-1.*mPair.DeltaPhi())]+=nwgt;
-	jtdetadphi[iy][ideta2].dphi[idphi2]+=nwgt; 
-       
-	/*yt1=b->idyt(mPair.Track1()->Yt()-mPair.Track2()->Yt()); //TEST
-	  jtdytdphi[iy][idyt1].dphi[b->idphi(mPair.Track1()->Phi()-mPair.Track2()->Phi())]+=nwgt; 
-	  idyt2=b->idyt(-1.*mPair.DeltaYt());
-	  jtdytdphi[iy][idyt2].dphi[b->idphi(mPair.Track2()->Phi()-mPair.Track1()->Phi())]+=nwgt; */
-	
-	jtdytdphi[iy][idyt1=b->idyt(mPair.DeltaYt())].dphi[idphi1]+=nwgt;
-	jtdytdphi[iy][idyt2=b->idyt(-1.*mPair.DeltaYt())].dphi[idphi1]+=nwgt;
-	jtdytdphi[iy][idyt1].dphi[idphi2]+=nwgt;
-	jtdytdphi[iy][idyt2].dphi[idphi2]+=nwgt;
-	
-	jtdytdeta[iy][idyt1].deta[ideta1]+=nwgt;
-	jtdytdeta[iy][idyt2].deta[ideta1]+=nwgt;
-	jtdytdeta[iy][idyt1].deta[ideta2]+=nwgt;
-	jtdytdeta[iy][idyt2].deta[ideta2]+=nwgt;
-	
-	prjtdetadphi[iy][ideta1].dphi[idphi1]  += pwgt;
-	prjtdetadphi[iy][ideta2].dphi[idphi1] += pwgt;
-	prjtdetadphi[iy][ideta1].dphi[idphi2] += pwgt;
-	prjtdetadphi[iy][ideta2].dphi[idphi2]+= pwgt;
-	
-	sujtdetadphi[iy][ideta1].dphi[idphi1]  += swgt;
-	sujtdetadphi[iy][ideta2].dphi[idphi1] += swgt;
-	sujtdetadphi[iy][ideta1].dphi[idphi2] += swgt;
-	sujtdetadphi[iy][ideta2].dphi[idphi2]+= swgt;
-	
-	//-> Sum y vs delta x
-	atytyt[iy][isyt=b->isyt(mPair.SigmaYt())].dyt[idyt1]+=nwgt; 
-	atytyt[iy][isyt].dyt[idyt2]+=nwgt; 
-	atptpt[iy][ispt=b->ispt(mPair.SigmaPt())].dpt[idpt1=b->idpt(mPair.DeltaPt())]+=nwgt; 
-	atptpt[iy][ispt].dpt[idpt2=b->idpt(-1.*mPair.DeltaPt())]+=nwgt; 
-	
-	jtsetadphi[iy][iseta=b->iseta(mPair.SigmaEta())].dphi[idphi1]+=nwgt; 
-	jtsetadphi[iy][iseta].dphi[idphi2]+=nwgt; 
-	prjtsetadphi[iy][iseta].dphi[idphi1] += pwgt; 
-	prjtsetadphi[iy][iseta].dphi[idphi2]+= pwgt; 
-	sujtsetadphi[iy][iseta].dphi[idphi1] += swgt; 
-	sujtsetadphi[iy][iseta].dphi[idphi2]+= swgt; 
-	
-	qinv[iy].q[b->iq(mPair.qInv())]+=nwgt;
-	
-	if(mdoPairDensityHistograms) {
-	  avgtsep[iy].sep[isavgt=b->isep(mPair.NominalTpcAvgXYSeparation())]+=nwgt;
-	  avgzsep[iy].sep[isavgz=b->isep(mPair.NominalTpcAvgZSeparation())]+=nwgt;
-	  enttsep[iy].sep[isentt=b->isep(mPair.NominalTpcXYEntranceSeparation())]+=nwgt;
-	  entzsep[iy].sep[isentz=b->isep(mPair.NominalTpcZEntranceSeparation())]+=nwgt;
-	  midtsep[iy].sep[ismidt=b->isep(mPair.MidTpcXYSeparation())]+=nwgt;
-	  midzsep[iy].sep[ismidz=b->isep(mPair.MidTpcZSeparation())]+=nwgt;
-	  exittsep[iy].sep[isexitt=b->isep(mPair.NominalTpcXYExitSeparation())]+=nwgt;
-	  exitzsep[iy].sep[isexitz=b->isep(mPair.NominalTpcZExitSeparation())]+=nwgt;
+        if (cb->switchYtBins(&mPair)) {
+          mass1 = mPair.Track2()->AssignedMass();
+          iyt1  = b->iyt(mPair.Track2()->Yt(mass1));
+          ixt1  = b->ixt(mPair.Track2()->Xt());
+          pt1   = mPair.Track2()->Pt();
+          ipt1  = b->ipt(pt1);
+          ieta1 = b->ieta(mPair.Track2()->Eta(mass1));
+          iphi1 = b->iphi(mPair.Track2()->Phi());
+          mass2 = mPair.Track1()->AssignedMass();
+          iyt2  = b->iyt(mPair.Track1()->Yt(mass2));
+          ixt2  = b->ixt(mPair.Track1()->Xt());
+          pt2   = mPair.Track1()->Pt();
+          ipt2  = b->ipt(pt2);
+          ieta2 = b->ieta(mPair.Track1()->Eta(mass2));
+          iphi2 = b->iphi(mPair.Track1()->Phi());
+        } else {
+          mass1 = mPair.Track1()->AssignedMass();
+          iyt1  = b->iyt(mPair.Track1()->Yt(mass1));
+          ixt1  = b->ixt(mPair.Track1()->Xt());
+          pt1   = mPair.Track1()->Pt();
+          ipt1  = b->ipt(pt1);
+          ieta1 = b->ieta(mPair.Track1()->Eta(mass1));
+          iphi1 = b->iphi(mPair.Track1()->Phi());
+          mass2 = mPair.Track2()->AssignedMass();
+          iyt2  = b->iyt(mPair.Track2()->Yt(mass2));
+          ixt2  = b->ixt(mPair.Track2()->Xt());
+          pt2   = mPair.Track2()->Pt();
+          ipt2  = b->ipt(pt2);
+          ieta2 = b->ieta(mPair.Track2()->Eta(mass2));
+          iphi2 = b->iphi(mPair.Track2()->Phi());
+        }
+        symmetrizeYt = cb->symmetrizeYtBins(&mPair);
 
-	  avgtz[iy][isavgt].sep[isavgz]+=nwgt;
-	  enttz[iy][isentt].sep[isentz]+=nwgt;
-	  midtz[iy][ismidt].sep[ismidz]+=nwgt;
-	  exittz[iy][isexitt].sep[isexitz]+=nwgt;	 
+        float pwgt=pt1*pt2;
+        float swgt=pt1+pt2;
 
-	  // need to rearrange pair so that deltaPhi>0
-	  float delpt; // my delta pt 
-	  int idelpt;  // bin index
-	  if (mPair.Track1()->Phi() - mPair.Track2()->Phi() >= 0) { 
-	    delpt = mPair.DeltaPt();  // here delta=1-2, can use standard defs
-	    idelpt = idpt1;
-	  } else {  // redefine delta=2-1
-	    delpt = -1.*mPair.DeltaPt();
-	    idelpt = idpt2; 
-	  }
-	  enttd[iy][isentt].dpt[idelpt]+=nwgt;  
-	  midtd[iy][ismidt].dpt[idelpt]+=nwgt;
-	  exittd[iy][isexitt].dpt[idelpt]+=nwgt;
-	  if (delpt>=0) {                                     
-	    midtp[iy].sep[b->isep(mPair.MidTpcXYSeparation())]+=nwgt;  
-	    midzp[iy].sep[b->isep(mPair.MidTpcZSeparation()) ]+=nwgt;
-	  } else {
-	    midtn[iy].sep[b->isep(mPair.MidTpcXYSeparation())]+=nwgt;
-	    midzn[iy].sep[b->isep(mPair.MidTpcZSeparation()) ]+=nwgt;
-	  }
+        //-> X vs X
+        ytyt[iy][iyt1].yt[iyt2]+=nwgt; 
+        xtxt[iy][ixt1].xt[ixt2]+=nwgt; 
+        ptpt[iy][ipt1].pt[ipt2]+=nwgt; 
+        etaeta[iy][ieta1].eta[ieta2]+=nwgt; 
+        phiphi[iy][iphi1].phi[iphi2]+=nwgt;
 
-	} // pair density
-	
+        pretaeta[iy][ieta1].eta[ieta2]+=pwgt; 
+        prphiphi[iy][iphi1].phi[iphi2]+=pwgt;
+        suetaeta[iy][ieta1].eta[ieta2]+=swgt; 
+        suphiphi[iy][iphi1].phi[iphi2]+=swgt;
+
+        //-> X vs X (symmetry)
+        if (symmetrizeYt) {
+          ytyt[iy][iyt2].yt[iyt1]+=nwgt;
+          xtxt[iy][ixt2].xt[ixt1]+=nwgt; 
+          ptpt[iy][ipt2].pt[ipt1]+=nwgt; 
+          etaeta[iy][ieta2].eta[ieta1]+=nwgt; 
+          phiphi[iy][iphi2].phi[iphi1]+=nwgt;
+
+          pretaeta[iy][ieta2].eta[ieta1]+=pwgt; 
+          prphiphi[iy][iphi2].phi[iphi1]+=pwgt;
+          suetaeta[iy][ieta2].eta[ieta1]+=swgt; 
+          suphiphi[iy][iphi2].phi[iphi1]+=swgt;
+        }
+
+        //-> delta y vs delta x
+        idyt1 = b->idyt(mPair.DeltaYt(mass1,mass2));
+        idpt1 = b->idpt(mPair.DeltaPt());
+        ideta1= b->ideta(mPair.DeltaEta(mass1,mass2));
+        idphi1= b->idphi(mPair.DeltaPhi());
+
+        idyt2 = b->idyt(-1.*mPair.DeltaYt(mass1,mass2));
+        idpt2 = b->idpt(-1.*mPair.DeltaPt());
+        ideta2= b->ideta(-1.*mPair.DeltaEta(mass1,mass2));
+        idphi2= b->idphi(-1.*mPair.DeltaPhi());
+
+        isyt = b->isyt(mPair.SigmaYt(mass1,mass2));
+        ispt = b->ispt(mPair.SigmaPt());
+        iseta= b->iseta(mPair.SigmaEta(mass1,mass2));
+        
+
+        //--- symmetry ---
+        // Note that the differences, dyt, dpt, deta and dphi,
+        // actually fill different parts of the histograms.
+
+        jtdetadphi[iy][ideta1].dphi[idphi1] +=nwgt; 
+        jtdetadphi[iy][ideta2].dphi[idphi1] +=nwgt;
+        jtdetadphi[iy][ideta1].dphi[idphi2] +=nwgt;
+        jtdetadphi[iy][ideta2].dphi[idphi2] +=nwgt; 
+
+        jtdytdphi[iy][idyt1].dphi[idphi1] +=nwgt;
+        jtdytdphi[iy][idyt1].dphi[idphi2] +=nwgt;
+        jtdytdphi[iy][idyt2].dphi[idphi1] +=nwgt;
+        jtdytdphi[iy][idyt2].dphi[idphi2] +=nwgt;
+
+        jtdytdeta[iy][idyt1].deta[ideta1] +=nwgt;
+        jtdytdeta[iy][idyt1].deta[ideta2] +=nwgt;
+        jtdytdeta[iy][idyt2].deta[ideta1] +=nwgt;
+        jtdytdeta[iy][idyt2].deta[ideta2] +=nwgt;
+
+        prjtdetadphi[iy][ideta1].dphi[idphi1] += pwgt;
+        prjtdetadphi[iy][ideta2].dphi[idphi1] += pwgt;
+        prjtdetadphi[iy][ideta1].dphi[idphi2] += pwgt;
+        prjtdetadphi[iy][ideta2].dphi[idphi2] += pwgt;
+
+        sujtdetadphi[iy][ideta1].dphi[idphi1] += swgt;
+        sujtdetadphi[iy][ideta2].dphi[idphi1] += swgt;
+        sujtdetadphi[iy][ideta1].dphi[idphi2] += swgt;
+        sujtdetadphi[iy][ideta2].dphi[idphi2] += swgt;
+
+        //-> Sum y vs delta x
+        // For symmetry only reflect around the delta axis.
+        atytyt[iy][isyt].dyt[idyt1] +=nwgt;
+        atytyt[iy][isyt].dyt[idyt2] +=nwgt;
+
+        atptpt[iy][ispt].dpt[idpt1] +=nwgt;
+        atptpt[iy][ispt].dpt[idpt2] +=nwgt;
+
+        jtsetadphi[iy][iseta].dphi[idphi1]+=nwgt;
+        jtsetadphi[iy][iseta].dphi[idphi2]+=nwgt;
+
+        prjtsetadphi[iy][iseta].dphi[idphi1] += pwgt;
+        prjtsetadphi[iy][iseta].dphi[idphi2]+= pwgt;
+
+        sujtsetadphi[iy][iseta].dphi[idphi1] += swgt;
+        sujtsetadphi[iy][iseta].dphi[idphi2]+= swgt;
+
+        qinv[iy].q[b->iq(mPair.qInv())]+=nwgt;
+    
+        if(mdoPairDensityHistograms) {
+          avgtsep[iy].sep[isavgt=b->isep(mPair.NominalTpcAvgXYSeparation())]+=nwgt;
+          avgzsep[iy].sep[isavgz=b->isep(mPair.NominalTpcAvgZSeparation())]+=nwgt;
+          enttsep[iy].sep[isentt=b->isep(mPair.NominalTpcXYEntranceSeparation())]+=nwgt;
+          entzsep[iy].sep[isentz=b->isep(mPair.NominalTpcZEntranceSeparation())]+=nwgt;
+          midtsep[iy].sep[ismidt=b->isep(mPair.MidTpcXYSeparation())]+=nwgt;
+          midzsep[iy].sep[ismidz=b->isep(mPair.MidTpcZSeparation())]+=nwgt;
+          exittsep[iy].sep[isexitt=b->isep(mPair.NominalTpcXYExitSeparation())]+=nwgt;
+          exitzsep[iy].sep[isexitz=b->isep(mPair.NominalTpcZExitSeparation())]+=nwgt;
+
+          avgtz[iy][isavgt].sep[isavgz]+=nwgt;
+          enttz[iy][isentt].sep[isentz]+=nwgt;
+          midtz[iy][ismidt].sep[ismidz]+=nwgt;
+          exittz[iy][isexitt].sep[isexitz]+=nwgt;     
+
+          // need to rearrange pair so that deltaPhi>0
+          float delpt; // my delta pt 
+          int idelpt;  // bin index
+          if (mPair.Track1()->Phi() - mPair.Track2()->Phi() >= 0) { 
+            delpt = mPair.DeltaPt();  // here delta=1-2, can use standard defs
+            idelpt = idpt1;
+          } else {  // redefine delta=2-1
+            delpt = -1.*mPair.DeltaPt();
+            idelpt = idpt2; 
+          }
+          enttd[iy][isentt].dpt[idelpt]+=nwgt;  
+          midtd[iy][ismidt].dpt[idelpt]+=nwgt;
+          exittd[iy][isexitt].dpt[idelpt]+=nwgt;
+          if (delpt>=0) {                                     
+            midtp[iy].sep[b->isep(mPair.MidTpcXYSeparation())]+=nwgt;  
+            midzp[iy].sep[b->isep(mPair.MidTpcZSeparation()) ]+=nwgt;
+          } else {
+            midtn[iy].sep[b->isep(mPair.MidTpcXYSeparation())]+=nwgt;
+            midzn[iy].sep[b->isep(mPair.MidTpcZSeparation()) ]+=nwgt;
+          }
+
+        } // pair density
       };// pair cut
     };// iter2 loop
   };// iter 1 loop
-  
+
   if(mtimer)mtimer->stop();
 }
 
@@ -544,12 +773,11 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
 
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::fillHistograms(){
+
   float xv,yv;
-  
   StEStructBinning* b=StEStructBinning::Instance();
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
-
-  for(int i=0; i<6; i++){
+  for(int i=0; i<8; i++){
 
     ytBins**  ytyt   = mYtYt[i];
     xtBins**  xtxt   = mXtXt[i];
@@ -647,53 +875,53 @@ void StEStruct2ptCorrelations::fillHistograms(){
   } // for i
   
   if(mdoPairDensityHistograms) {
-    for(int i=0; i<6; i++){
+    for(int i=0; i<8; i++){
       for(int y=0;y<numCutBins;y++){
-	TPCSepBins* avgtsep = mTPCAvgTSep[i];
-	TPCSepBins* avgzsep = mTPCAvgZSep[i];
-	TPCSepBins* enttsep = mTPCEntTSep[i];
-	TPCSepBins* entzsep = mTPCEntZSep[i];
-	TPCSepBins* midtsep = mTPCMidTSep[i];
-	TPCSepBins* midzsep = mTPCMidZSep[i];
-	TPCSepBins* exittsep= mTPCExitTSep[i];
-	TPCSepBins* exitzsep= mTPCExitZSep[i];
-	TPCSepBins* midtp =   mTPCMidTdptP[i];
-	TPCSepBins* midtn =   mTPCMidTdptN[i];
-	TPCSepBins* midzp =   mTPCMidZdptP[i];
-	TPCSepBins* midzn =   mTPCMidZdptN[i];
-	TPCSepBins** avgtz =  mTPCAvgTZ[i];
-	TPCSepBins** enttz =  mTPCEntTZ[i];
-	TPCSepBins** midtz =  mTPCMidTZ[i];
-	TPCSepBins** exittz = mTPCExitTZ[i];
-	dptBins** enttd =  mTPCEntTdpt[i];
-	dptBins** midtd =  mTPCMidTdpt[i];
-	dptBins** exittd = mTPCExitTdpt[i];
+        TPCSepBins* avgtsep = mTPCAvgTSep[i];
+        TPCSepBins* avgzsep = mTPCAvgZSep[i];
+        TPCSepBins* enttsep = mTPCEntTSep[i];
+        TPCSepBins* entzsep = mTPCEntZSep[i];
+        TPCSepBins* midtsep = mTPCMidTSep[i];
+        TPCSepBins* midzsep = mTPCMidZSep[i];
+        TPCSepBins* exittsep= mTPCExitTSep[i];
+        TPCSepBins* exitzsep= mTPCExitZSep[i];
+        TPCSepBins* midtp =   mTPCMidTdptP[i];
+        TPCSepBins* midtn =   mTPCMidTdptN[i];
+        TPCSepBins* midzp =   mTPCMidZdptP[i];
+        TPCSepBins* midzn =   mTPCMidZdptN[i];
+        TPCSepBins** avgtz =  mTPCAvgTZ[i];
+        TPCSepBins** enttz =  mTPCEntTZ[i];
+        TPCSepBins** midtz =  mTPCMidTZ[i];
+        TPCSepBins** exittz = mTPCExitTZ[i];
+        dptBins** enttd =  mTPCEntTdpt[i];
+        dptBins** midtd =  mTPCMidTdpt[i];
+        dptBins** exittd = mTPCExitTdpt[i];
 
-	for(int k=0;k<b->TPCSepBins();k++) {
-	  mHTPCAvgTSep[i][y]->Fill(xv=b->sepVal(k),avgtsep[y].sep[k]);
-	  mHTPCAvgZSep[i][y]->Fill(xv,avgzsep[y].sep[k]);
-	  mHTPCEntTSep[i][y]->Fill(xv,enttsep[y].sep[k]);
-	  mHTPCEntZSep[i][y]->Fill(xv,entzsep[y].sep[k]);
-	  mHTPCMidTSep[i][y]->Fill(xv,midtsep[y].sep[k]);
-	  mHTPCMidZSep[i][y]->Fill(xv,midzsep[y].sep[k]);
-	  mHTPCExitTSep[i][y]->Fill(xv,exittsep[y].sep[k]);
-	  mHTPCExitZSep[i][y]->Fill(xv,exitzsep[y].sep[k]);
-	  mHTPCMidTdptP[i][y]->Fill(xv,midtp[y].sep[k]);
-	  mHTPCMidTdptN[i][y]->Fill(xv,midtn[y].sep[k]);
-	  mHTPCMidZdptP[i][y]->Fill(xv,midzp[y].sep[k]);
-	  mHTPCMidZdptN[i][y]->Fill(xv,midzn[y].sep[k]);
-	  for(int j=0;j<b->TPCSepBins();j++) {
-	    mHTPCAvgTZ[i][y]->Fill(xv,yv=b->sepVal(j),avgtz[y][k].sep[j]);
-	    mHTPCEntTZ[i][y]->Fill(xv,yv,enttz[y][k].sep[j]);
-	    mHTPCMidTZ[i][y]->Fill(xv,yv,midtz[y][k].sep[j]);
-	    mHTPCExitTZ[i][y]->Fill(xv,yv,exittz[y][k].sep[j]);
-	  }
-	  for(int j=0;j<b->dptBins();j++) {
-	    mHTPCEntTdpt[i][y]->Fill(xv,yv=b->dptVal(j),enttd[y][k].dpt[j]);
-	    mHTPCMidTdpt[i][y]->Fill(xv,yv,midtd[y][k].dpt[j]);
-	    mHTPCExitTdpt[i][y]->Fill(xv,yv,exittd[y][k].dpt[j]);	    
-	  }
-	}
+        for(int k=0;k<b->TPCSepBins();k++) {
+          mHTPCAvgTSep[i][y]->Fill(xv=b->sepVal(k),avgtsep[y].sep[k]);
+          mHTPCAvgZSep[i][y]->Fill(xv,avgzsep[y].sep[k]);
+          mHTPCEntTSep[i][y]->Fill(xv,enttsep[y].sep[k]);
+          mHTPCEntZSep[i][y]->Fill(xv,entzsep[y].sep[k]);
+          mHTPCMidTSep[i][y]->Fill(xv,midtsep[y].sep[k]);
+          mHTPCMidZSep[i][y]->Fill(xv,midzsep[y].sep[k]);
+          mHTPCExitTSep[i][y]->Fill(xv,exittsep[y].sep[k]);
+          mHTPCExitZSep[i][y]->Fill(xv,exitzsep[y].sep[k]);
+          mHTPCMidTdptP[i][y]->Fill(xv,midtp[y].sep[k]);
+          mHTPCMidTdptN[i][y]->Fill(xv,midtn[y].sep[k]);
+          mHTPCMidZdptP[i][y]->Fill(xv,midzp[y].sep[k]);
+          mHTPCMidZdptN[i][y]->Fill(xv,midzn[y].sep[k]);
+          for(int j=0;j<b->TPCSepBins();j++) {
+            mHTPCAvgTZ[i][y]->Fill(xv,yv=b->sepVal(j),avgtz[y][k].sep[j]);
+            mHTPCEntTZ[i][y]->Fill(xv,yv,enttz[y][k].sep[j]);
+            mHTPCMidTZ[i][y]->Fill(xv,yv,midtz[y][k].sep[j]);
+            mHTPCExitTZ[i][y]->Fill(xv,yv,exittz[y][k].sep[j]);
+          }
+          for(int j=0;j<b->dptBins();j++) {
+            mHTPCEntTdpt[i][y]->Fill(xv,yv=b->dptVal(j),enttd[y][k].dpt[j]);
+            mHTPCMidTdpt[i][y]->Fill(xv,yv,midtd[y][k].dpt[j]);
+            mHTPCExitTdpt[i][y]->Fill(xv,yv,exittd[y][k].dpt[j]);    
+          }
+        }
       } 
     } 
   } // if pair density
@@ -710,7 +938,7 @@ void StEStruct2ptCorrelations::writeHistograms() {
 
   for(int j=0;j<numCutBins;j++){
     mHpt[j]->Write();
-   for(int i=0;i<6;i++){
+   for(int i=0;i<8;i++){
 
      mHYtYt[i][j]->Write();
      mHXtXt[i][j]->Write();
@@ -768,12 +996,72 @@ void StEStruct2ptCorrelations::writeHistograms() {
 }
 
 //--------------------------------------------------------------------------
+void StEStruct2ptCorrelations::writeQAHists() {
+  if(!mqaoutFileName){
+    cout<<" NO QA OUTPUTFILE TO WRITE TO ..... giving up ...."<<endl;
+    return;
+  }
+
+  StEStructBinning* b=StEStructBinning::Instance();
+  for(int j=0; j<2; j++) {
+    for(int i=0; i<4; i++) {
+      PtotBins*  dedx   = mdEdxPtot[j][i];
+      for(int k=0;k<b->dEdxBins();k++) {
+        for(int l=0;l<b->PtotBins();l++) {
+          mHdEdxPtot[j][i]->Fill(b->ptotVal(l),b->dedxVal(k),dedx[k].Ptot[l]);
+        }
+      }
+      QAEtaBins  *eta   = &mQAEta[j][i];
+      for(int k=0;k<b->QAEtaBins();k++) {
+        mHQAEta[j][i]->Fill(b->qaetaVal(k),eta->Eta[k]);
+      }
+      QAPhiBins  *phi   = &mQAPhi[j][i];
+      for(int k=0;k<b->QAPhiBins();k++) {
+        mHQAPhi[j][i]->Fill(b->qaphiVal(k),phi->Phi[k]);
+      }
+      QAPtBins  *pt   = &mQAPt[j][i];
+      for(int k=0;k<b->QAPtBins();k++) {
+        mHQAPt[j][i]->Fill(b->qaptVal(k),pt->Pt[k]);
+      }
+    }
+  }
+
+  TFile * tf=new TFile(mqaoutFileName,"RECREATE");
+  tf->cd();
+  for(int j=0;j<2;j++) {
+      for(int i=0;i<4;i++){
+          mHdEdxPtot[j][i]->Write();
+          mHQAEta[j][i]->Write();
+          mHQAPhi[j][i]->Write();
+          mHQAPt[j][i]->Write();
+      }
+  }
+  tf->Close();
+}
+
+//--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::initArrays(){
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
 
   // storage arrays
-  for(int i=0;i<6;i++){
+  QAPhiBins *phi;
+  QAEtaBins *eta;
+  QAPtBins  *pt;
+  for (int j=0;j<2;j++) {
+      for (int i=0;i<4;i++) {
+          mdEdxPtot[j][i] = new PtotBins[ESTRUCT_DEDX_BINS];
+          memset(mdEdxPtot[j][i],0,ESTRUCT_DEDX_BINS*sizeof(PtotBins));
+          phi = &mQAPhi[j][i];
+          memset(phi,0,ESTRUCT_QAPHI_BINS*sizeof(float));
+          eta = &mQAEta[j][i];
+          memset(eta,0,ESTRUCT_QAETA_BINS*sizeof(float));
+          pt  = &mQAPt[j][i];
+          memset(pt,0,ESTRUCT_QAPT_BINS*sizeof(float));
+      }
+  }
+
+  for(int i=0;i<8;i++){
 
      mYtYt[i]=new ytBins*[numCutBins];
      mAtSYtDYt[i]=new dytBins*[numCutBins];
@@ -845,7 +1133,7 @@ void StEStruct2ptCorrelations::initArrays(){
   }
 
   for(int j=0;j<numCutBins;j++){
-   for(int i=0;i<6;i++){
+   for(int i=0;i<8;i++){
 
      mYtYt[i][j]=new ytBins[ESTRUCT_YT_BINS];
      memset(mYtYt[i][j],0,ESTRUCT_YT_BINS*sizeof(ytBins));
@@ -915,8 +1203,14 @@ void StEStruct2ptCorrelations::initArrays(){
 void StEStruct2ptCorrelations::deleteArrays(){
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
-  
-  for(int i=0;i<6;i++){
+
+  for(int j=0;j<2;j++) {
+      for(int i=0;i<4;i++){
+          delete []  mdEdxPtot[j][i];
+      }
+  }
+
+  for(int i=0;i<8;i++){
     
     for(int j=0;j<numCutBins;j++){
       
@@ -1014,7 +1308,56 @@ void StEStruct2ptCorrelations::initHistograms(){
 
   // histograms second
 
-  for(int i=0; i<6; i++){
+  int nx = b->PtotBins();
+  int ny = b->dEdxBins();
+  float xmin = b->PtotMin();
+  float xmax = b->PtotMax();
+  float ymin = b->dEdxMin();
+  float ymax = b->dEdxMax();
+  mHdEdxPtot[0][0] = new TH2F("unidentified+_dEdx","unidentified+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[0][1] = new TH2F("pion+_dEdx","pion+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[0][2] = new TH2F("Kaon+_dEdx","Kaon+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[0][3] = new TH2F("proton+_dEdx","proton+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[1][0] = new TH2F("unidentified-_dEdx","unidentified-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[1][1] = new TH2F("pion-_dEdx","pion-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[1][2] = new TH2F("Kaon-_dEdx","Kaon-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  mHdEdxPtot[1][3] = new TH2F("proton-_dEdx","proton-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
+  nx = b->QAEtaBins();
+  xmin = b->QAEtaMin();
+  xmax = b->QAEtaMax();
+  mHQAEta[0][0] = new TH1F("unidentified+_Eta","unidentified+_Eta",nx,xmin,xmax);
+  mHQAEta[0][1] = new TH1F("pion+_Eta","pion+_Eta",nx,xmin,xmax);
+  mHQAEta[0][2] = new TH1F("Kaon+_Eta","Kaon+_Eta",nx,xmin,xmax);
+  mHQAEta[0][3] = new TH1F("proton+_Eta","proton+_Eta",nx,xmin,xmax);
+  mHQAEta[1][0] = new TH1F("unidentified-_Eta","unidentified-_Eta",nx,xmin,xmax);
+  mHQAEta[1][1] = new TH1F("pion-_Eta","pion-_Eta",nx,xmin,xmax);
+  mHQAEta[1][2] = new TH1F("Kaon-_Eta","Kaon-_Eta",nx,xmin,xmax);
+  mHQAEta[1][3] = new TH1F("proton-_Eta","proton-_Eta",nx,xmin,xmax);
+  nx = b->QAPhiBins();
+  xmin = b->QAPhiMin();
+  xmax = b->QAPhiMax();
+  mHQAPhi[0][0] = new TH1F("unidentified+_Phi","unidentified+_Phi",nx,xmin,xmax);
+  mHQAPhi[0][1] = new TH1F("pion+_Phi","pion+_Phi",nx,xmin,xmax);
+  mHQAPhi[0][2] = new TH1F("Kaon+_Phi","Kaon+_Phi",nx,xmin,xmax);
+  mHQAPhi[0][3] = new TH1F("proton+_Phi","proton+_Phi",nx,xmin,xmax);
+  mHQAPhi[1][0] = new TH1F("unidentified-_Phi","unidentified-_Phi",nx,xmin,xmax);
+  mHQAPhi[1][1] = new TH1F("pion-_Phi","pion-_Phi",nx,xmin,xmax);
+  mHQAPhi[1][2] = new TH1F("Kaon-_Phi","Kaon-_Phi",nx,xmin,xmax);
+  mHQAPhi[1][3] = new TH1F("proton-_Phi","proton-_Phi",nx,xmin,xmax);
+  nx = b->QAPtBins();
+  xmin = b->QAPtMin();
+  xmax = b->QAPtMax();
+  mHQAPt[0][0] = new TH1F("unidentified+_Pt","unidentified+_Pt",nx,xmin,xmax);
+  mHQAPt[0][1] = new TH1F("pion+_Pt","pion+_Pt",nx,xmin,xmax);
+  mHQAPt[0][2] = new TH1F("Kaon+_Pt","Kaon+_Pt",nx,xmin,xmax);
+  mHQAPt[0][3] = new TH1F("proton+_Pt","proton+_Pt",nx,xmin,xmax);
+  mHQAPt[1][0] = new TH1F("unidentified-_Pt","unidentified-_Pt",nx,xmin,xmax);
+  mHQAPt[1][1] = new TH1F("pion-_Pt","pion-_Pt",nx,xmin,xmax);
+  mHQAPt[1][2] = new TH1F("Kaon-_Pt","Kaon-_Pt",nx,xmin,xmax);
+  mHQAPt[1][3] = new TH1F("proton-_Pt","proton-_Pt",nx,xmin,xmax);
+
+
+  for(int i=0; i<8; i++){
 
     mHYtYt[i]=new TH2F*[numCutBins];
     mHAtSYtDYt[i]=new TH2F*[numCutBins];
@@ -1123,9 +1466,17 @@ void StEStruct2ptCorrelations::initHistograms(){
 void StEStruct2ptCorrelations::deleteHistograms(){
   
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
-  
-  for(int i=0;i<6;i++){
-    
+
+  for(int j=0;j<2;j++){
+      for(int i=0;i<4;i++){
+          delete mHdEdxPtot[j][i];
+          delete mHQAEta[j][i];
+          delete mHQAPhi[j][i];
+          delete mHQAPt[j][i];
+      }
+  }
+
+  for(int i=0;i<8;i++){
     for(int j=0;j<numCutBins;j++){
       delete mHYtYt[i][j];
       delete mHXtXt[i][j];
@@ -1254,8 +1605,10 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
- * Revision 1.9  2005/11/22 14:41:08  msd
- * Tweaked event mixing histogram
+ * Revision 1.10  2006/02/22 22:05:10  prindle
+ * Removed all references to multRef (?)
+ * Added cut mode 5 for particle identified correlations.
+ * Other cut modes should be same as before
  *
  * Revision 1.8  2005/10/10 16:22:51  msd
  * fixing bug in buffer initialization
