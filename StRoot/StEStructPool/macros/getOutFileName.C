@@ -43,6 +43,7 @@ char* getOutFileName(const char* baseDir, const char* jobName,
       outputFileFile+=centTag;
     } else if(strstr(type,"QA")){
       outputFileFile+="QA";
+      outputFileFile+=centTag;
     } else if(strstr(type,"stats")){
       outputFileFile+="stats";
       iext=2;
