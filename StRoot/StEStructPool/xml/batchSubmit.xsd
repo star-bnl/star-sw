@@ -428,22 +428,22 @@ hell is in this directory.
     <xs:complexType>
         <xs:all>
             <xs:element ref='analysisType'/>
-            <xs:element ref='libraries'/>
+            <xs:element ref='libraries' minOccurs='0'/>
             <xs:element ref='centralities'/>
-            <xs:element ref='ptCuts'/>
-            <xs:element ref='ptCentralities'/>
-            <xs:element ref='cutModeInit'/>
-            <xs:element ref='declarePtDefHistograms'/>
-            <xs:element ref='declareSimHistograms'/>
-            <xs:element ref='centralityInEtaOne'/>
+            <xs:element ref='useImpactParameter' minOccurs='0'/>
+            <xs:element ref='ptCuts' minOccurs='0'/>
+            <xs:element ref='ptCentralities' minOccurs='0'/>
+            <xs:element ref='cutModeInit' minOccurs='0'/>
+            <xs:element ref='declarePtDefHistograms' minOccurs='0'/>
+            <xs:element ref='declareSimHistograms' minOccurs='0'/>
             <xs:element ref='declareReader'/>
             <xs:element ref='declareAnalysis'/>
             <xs:element ref='getCurrentAnalysis'/>
-            <xs:element ref='fillPtDefHistograms'/>
-            <xs:element ref='fillSimHistograms'/>
-            <xs:element ref='pairCutsWrite'/>
-            <xs:element ref='savePtDefHistograms'/>
-            <xs:element ref='saveSimHistograms'/>
+            <xs:element ref='fillPtDefHistograms' minOccurs='0'/>
+            <xs:element ref='fillSimHistograms' minOccurs='0'/>
+            <xs:element ref='pairCutsWrite' minOccurs='0'/>
+            <xs:element ref='savePtDefHistograms' minOccurs='0'/>
+            <xs:element ref='saveSimHistograms' minOccurs='0'/>
             <xs:element ref='main'/>
         </xs:all>
     </xs:complexType>
@@ -481,6 +481,15 @@ hell is in this directory.
         <xs:attribute name='Comment' type='xs:string'>Centrality cuts. (normally cut on number of track)</xs:attribute>
     </xs:complexType>
 </xs:element>
+<xs:element name='useImpactParameter'>
+    <xs:complexType>
+        <xs:restriction base='xs:boolean'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='text'/>
+        <xs:attribute name='Comment' type='xs:string'>true to use impact parameter for centrality determination</xs:attribute>
+    </xs:complexType>
+</xs:element>
 <xs:element name='ptCuts'>
     <xs:complexType>
         <xs:restriction base='xs:decimalList'>
@@ -504,6 +513,7 @@ hell is in this directory.
 <xs:element name='cutModeInit'>
     <xs:complexType>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Initialize cut mode for corr, pt histograms for fluct.</xs:attribute>
     </xs:complexType>
@@ -512,6 +522,7 @@ hell is in this directory.
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Code for declaring extra histograms in macro</xs:attribute>
     </xs:complexType>
@@ -520,27 +531,14 @@ hell is in this directory.
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Code for declaring extra histograms in macro</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='centralityInEtaOne'>
-    <xs:complexType>
-        <xs:restriction base='xs:boolean'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>true to use all tracks in acceptance, false to use reference multiplicity</xs:attribute>
     </xs:complexType>
 </xs:element>
 <xs:element name='declareReader'>
     <xs:complexType mixed='true'>
         <xs:attribute name='id' use='required'/>
-        <xs:all>
-            <xs:element ref='pyFrameValue'  minOccurs='0'/>
-            <xs:element ref='pyBeamValue'   minOccurs='0'/>
-            <xs:element ref='pyTargetValue' minOccurs='0'/>
-            <xs:element ref='pyEnergyValue' minOccurs='0'/>
-        </xs:all>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Reader depends on type of analysis</xs:attribute>
     </xs:complexType>
@@ -565,6 +563,7 @@ hell is in this directory.
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Write fluct. QA histograms.</xs:attribute>
     </xs:complexType>
@@ -573,14 +572,15 @@ hell is in this directory.
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Fill extra histograms in event processing loop</xs:attribute>
     </xs:complexType>
 </xs:element>
 <xs:element name='pairCutsWrite'>
     <xs:complexType>
-        <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Write pair cut information.</xs:attribute>
     </xs:complexType>
@@ -589,6 +589,7 @@ hell is in this directory.
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Write fluct. QA histograms.</xs:attribute>
     </xs:complexType>
@@ -597,6 +598,7 @@ hell is in this directory.
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Save extra histograms into QA file</xs:attribute>
     </xs:complexType>
@@ -620,34 +622,6 @@ hell is in this directory.
     </xs:complexType>
 </xs:element>
 
-<xs:element name='pyFrameValue'>
-    <xs:complexType>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='widget' type='widgetTypes' default='none'/>
-        <xs:attribute name='Comment' type='xs:string'>Kinematic frame for Pythia</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='pyBeamValue'>
-    <xs:complexType>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='widget' type='widgetTypes' default='none'/>
-        <xs:attribute name='Comment' type='xs:string'>Beam specification for Pythia</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='pyTargetValue'>
-    <xs:complexType>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='widget' type='widgetTypes' default='none'/>
-        <xs:attribute name='Comment' type='xs:string'>Target specification for Pythia</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='pyEnergyValue'>
-    <xs:complexType>
-        <xs:attribute name='id' type='xs:decimal' use='required'/>
-        <xs:attribute name='widget' type='widgetTypes' default='none'/>
-        <xs:attribute name='Comment' type='xs:string'>Energy specification for Pythia</xs:attribute>
-    </xs:complexType>
-</xs:element>
 <xs:simpleType name='integerList'>
     <xs:list itemType='xs:integer'/>
 </xs:simpleType>
@@ -811,6 +785,8 @@ hell is in this directory.
 <xs:element name='pyFrame'>
     <xs:complexType>
         <xs:restriction base='pyKinematicFrame'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes'/>
         <xs:attribute name='Comment' type='xs:string' use='required'>Kinematic reference frame of interaction</xs:attribute>
     </xs:complexType>
@@ -830,11 +806,15 @@ hell is in this directory.
      Pythia knows about.. -->
 <xs:element name='pyBeam'>
     <xs:restriction base='particleType'/>
+    <xs:attribute name='id' type='xs:string' use='required'/>
+    <xs:attribute name='typedef' type='xs:string' default=''/>
     <xs:attribute name='widget' type='widgetTypes'/>
     <xs:attribute name='Comment' type='xs:string' use='required'>Particle type of beam</xs:attribute>
 </xs:element>
 <xs:element name='pyTarget'>
     <xs:restriction base='particleType'/>
+    <xs:attribute name='id' type='xs:string' use='required'/>
+    <xs:attribute name='typedef' type='xs:string' default=''/>
     <xs:attribute name='widget' type='widgetTypes'/>
     <xs:attribute name='Comment' type='xs:string' use='required'>Particle type of target</xs:attribute>
 </xs:element>
@@ -843,6 +823,8 @@ hell is in this directory.
 <xs:element name='pyEnergy'>
     <xs:complexType>
         <xs:restriction base='xs:decimal'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes'/>
         <xs:attribute name='Comment' type='xs:string' use='required'>Center of mass or beam energy</xs:attribute>
     </xs:complexType>
