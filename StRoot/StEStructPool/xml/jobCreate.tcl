@@ -11,6 +11,8 @@ namespace eval ::jobCreate:: {
     variable jobInfo
     variable interfaceWindow
     variable jobXmlFile
+    variable jobLisFile
+    variable jobAnalysisType
     variable showingXML
     variable showingMain
     variable undone
@@ -100,6 +102,11 @@ proc ::jobCreate::parseJobInfo {fileName} {
         close $fDom
         set ::jobCreate::jobInfo [$domInfo documentElement]
         while {[gets $fh mFile] >= 0} {
+            if {$mFile eq "StEStructCorrelation.xml"} {
+                set ::jobCreate::jobAnalysisType "StEStructCorrelation"
+            } elseif {$mFile eq "StEStructFluctuation.xml"} {
+                set ::jobCreate::jobAnalysisType "StEStructFluctuation"
+            }
             set mDom [open [file join $dir $mFile]]
             set mDomInfo [dom parse [read $mDom]]
             close $mDom
@@ -282,12 +289,12 @@ proc ::jobCreate::+JobDescriptionFrame {t} {
 
     set f [frame $t.f]
     pack $f -fill x
-    set ::jobCreate::jobXmlFile ""
+    set ::jobCreate::jobLisFile ""
     set ::jobCreate::jobSelectComboBox $f.cSelectJobXml
     ComboBox::create $f.cSelectJobXml \
             -editable  false          \
             -state     disabled       \
-            -textvariable ::jobCreate::jobXmlFile  \
+            -textvariable ::jobCreate::jobLisFile  \
             -width     30             \
             -modifycmd "$f.bSelectJobXml configure -state normal"
     button $f.bSelectJobXml -pady 1 \
@@ -300,7 +307,6 @@ proc ::jobCreate::+JobDescriptionFrame {t} {
 # Extract list of default xml job description files for selected type of job.
 ################################################################################
 proc ::jobCreate::+listDefaultXml {type t c b} {
-puts "::jobCreate::+listDefaultXml set type $type; set t $t; set c $c; set b $b"
     set vals [list]
     switch $type {
         Data {
@@ -337,7 +343,7 @@ puts "::jobCreate::+listDefaultXml set type $type; set t $t; set c $c; set b $b"
                            pythia2.lis]
         }
     }
-    set ::jobCreate::jobXmlFile ""
+    set ::jobCreate::jobLisFile ""
     $b configure -state disabled
     $c configure -values $vals
     $c configure -state normal -text ">>Make, then Use Selection<<"
@@ -391,6 +397,7 @@ proc ::jobCreate::getJobXmlFile {t} {
         }
         $::jobCreate::jobSelectComboBox configure -values "" -state disabled
         set ::jobCreate::jobXmlFile $fileName
+        set ::jobCreate::jobLisFile ""
         +Type $t $fileName
     }
 }
@@ -505,7 +512,8 @@ proc ::jobCreate::+doEStructMacro {f} {
         if {[lsearch [$node attributes] widget] >= 0} {
             set wType [$node getAttribute widget]
         }
-        if {$wType eq "combobox"} {
+        if {$wType eq "combobox" && $::jobCreate::jobLisFile ne ""} {
+            # Only allow analysis type choice when encountering combobox in doEStruct?????
             m+AnalysisType $f $name [$node text]
         } elseif {$wType eq "entry"} {
             label $f.$name -text $name
@@ -638,15 +646,31 @@ proc ::jobCreate::m+AnalysisType {f el val} {
     grid $f.l$el $f.combo$el -sticky w
 }
 ################################################################################
+# Fluctuations and Correlations have some independent elements.
+# For now we only allow switching between fluctuations and correlations if we
+# have defined the job through a .lis file. Strategy is to delete current doEStruct
+# node and recreate it by merging from files in .lis file, only replacing
+# StEStructCorrelation.xml or StEStructFluctuation.xml with $type.xml
+# Not really a satisfying way of doing it.
+################################################################################
 proc ::jobCreate::setAnalysisType {f type} {
-    # Open xml file for specific analysis type and merge with current tree.
-    set mFile [file join $::jobCreate::jobCreatePath jobFiles $type.xml]
-    set mDom [open $mFile]
-    set mDomInfo [dom parse [read $mDom]]
-    close $mDom
-    set doc2 [$mDomInfo documentElement]
-    ::jobCreate::merge $doc2 $::jobCreate::jobInfo
-
+    set jNode [$::jobCreate::jobInfo getElementsByTagName doEStructMacro]
+    $jNode delete
+    set ::jobCreate::jobAnalysisType $type
+    set lisFile [file join $::jobCreate::jobCreatePath jobFiles $::jobCreate::jobLisFile]
+    set lfh [open $lisFile]
+    while {[gets $lfh xmlFile] >= 0} {
+        if {$xmlFile eq "StEStructCorrelation.xml" || $xmlFile eq "StEStructFluctuation.xml"} {
+            set xmlFile $::jobCreate::jobAnalysisType.xml
+        }
+        set mDom [open [file join $::jobCreate::jobCreatePath jobFiles $xmlFile]]
+        set mDomInfo [dom parse [read $mDom]]
+        close $mDom
+        set doc2 [$mDomInfo getElementsByTagName doEStructMacro]
+        if {$doc2 ne ""} {
+            ::jobCreate::merge $doc2 $::jobCreate::jobInfo
+        }
+    }
     # Need to validate the merged jobInfo
     set doc [$::jobCreate::jobInfo asList]
     foreach {name atts -} $doc break
@@ -1772,11 +1796,11 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "Common in both analysisType choices are:\n\n" n
 
     $w insert end " o centralities\n" bullet
-    $w insert end "- Space separated list of numbers. If 'centralityInEtaOne' is true " n
-    $w insert end "these numbers refer to the number of tracks passing cuts. For Hjing " n
-    $w insert end "if 'centralityInEtaOne' is false these refer to impact parameter.\n\n" n
+    $w insert end "- Space separated list of numbers. If 'useImpactParameter' is true " n
+    $w insert end "and we are generating Hjing data then these numbers refer to impact parameter. " n
+    $w insert end "Otherwise these numbers refer to the total number of tracks passing cuts..\n\n" n
 
-    $w insert end " o centralityInEtaOne\n" bullet
+    $w insert end " o useImpactParameter\n" bullet
     $w insert end "- true or false. See 'centralities' for more information.\n\n" n
 
     $w insert end " o declareReader\n" bullet
