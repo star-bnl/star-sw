@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.22 2005/02/08 20:57:36 psoren Exp $
+// $Id: StFlowConstants.h,v 1.23 2006/02/22 19:22:02 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////
 //
 // Description: constants for the flow makers
-//.
+//
 //////////////////////////////////////////////////////////////////////
 
 #ifndef StFlowConstants_h
@@ -21,21 +21,23 @@ class Flow{
  public:
 
   enum {
-    nHars             = 4, 
-    nSels             = 2,
+    nHars             = 4, // 4
+    nSels             = 2, // 2
     nSubs             = 2,
+    nTheta            = 5, // 5
+    nRBins            = 150,
     nPhiBins          = 120,
     nPhiBinsFtpc      = 120,
-    nEtaBins          = 90,
+    nEtaBins          = 90, // 90
     nEtaBinsTpcOnly   = 30,
     nPtBins           = 40,
-    nPtBinsPart       = 40,
+    nPtBinsPart       = 60,
     nCumulIntegOrders = 3, 
     nCumulInteg_qMax  = 8,
     nCumulDiffOrders  = 2,
     nCumulDiff_qMax   = 8,
     nCumulMixHar_pMax = 8, // for directed flow. Eq.(29) in Borghini v1 paper
-    nCumulMixHar_qMax = 4,  // for directed flow
+    nCumulMixHar_qMax = 4, // for directed flow
     nCents            = 9,
     zdcsmd_nPsiBins   = 64
   };
@@ -48,6 +50,8 @@ class Flow{
   static Float_t etaMax;
   static Float_t etaMinTpcOnly;
   static Float_t etaMaxTpcOnly;
+  static Float_t rMax;
+  static Float_t j01;
   static Float_t ptMin;
   static Float_t ptMax;
   static Float_t ptMaxPart;
@@ -73,6 +77,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.23  2006/02/22 19:22:02  posk
+// Additions needed for the StFlowLeeYangZerosMaker
+//
 // Revision 1.22  2005/02/08 20:57:36  psoren
 // trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
 //
