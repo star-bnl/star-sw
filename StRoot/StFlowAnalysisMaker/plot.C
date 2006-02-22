@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.64 2005/08/26 19:00:25 posk Exp $
+// $Id: plot.C,v 1.65 2006/02/22 19:35:18 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -20,10 +20,10 @@
 #include <math.h> 
 #include "TMath.h" 
 #include <iostream.h>
+#include <iomanip.h>
 
-//const    Int_t nHars    = 4;
-const    Int_t nHars    = 2;
-const    Int_t nSels    = 2;
+const    Int_t nHars    = 2; // 4
+const    Int_t nSels    = 2; // 2
 const    Int_t nSubs    = 2;
 Int_t    runNumber      = 0;
 char     runName[6];
@@ -96,41 +96,33 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_CosPhiLab",
     "Flow_MeanDedxPos2D",
     "Flow_MeanDedxNeg2D",
-    "Flow_PidPiPlusPart",
-    "Flow_PidPiMinusPart",
-    "Flow_PidProtonPart",
-    "Flow_PidAntiProtonPart",
-    "Flow_PidKplusPart",
-    "Flow_PidKminusPart",
-    "Flow_PidDeuteronPart",
-    "Flow_PidAntiDeuteronPart",
-    "Flow_PidElectronPart",
-    "Flow_PidPositronPart",
+//     "Flow_PidPiPlusPart",
+//     "Flow_PidPiMinusPart",
+//     "Flow_PidProtonPart",
+//     "Flow_PidAntiProtonPart",
+//     "Flow_PidKplusPart",
+//     "Flow_PidKminusPart",
+//     "Flow_PidDeuteronPart",
+//     "Flow_PidAntiDeuteronPart",
+//     "Flow_PidElectronPart",
+//     "Flow_PidPositronPart",
     "Flow_PidMult",
     "Flow_Phi_FarEast_Sel",                      // first multi graph hist
     "Flow_Phi_Flat_FarEast_Sel",
-    //"Flow_Phi_Weight_FarEast_Sel",
     "Flow_Phi_East_Sel",
     "Flow_Phi_Flat_East_Sel",
-    //"Flow_Phi_Weight_East_Sel",
     "Flow_Phi_West_Sel",
     "Flow_Phi_Flat_West_Sel",
-    //"Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FarWest_Sel",
     "Flow_Phi_Flat_FarWest_Sel",
-    //"Flow_Phi_Weight_FarWest_Sel",
     "Flow_Phi_FtpcFarEast_Sel",
     "Flow_Phi_Flat_FtpcFarEast_Sel",
-    //"Flow_Phi_Weight_FtpcFarEast_Sel",
     "Flow_Phi_FtpcEast_Sel",
     "Flow_Phi_Flat_FtpcEast_Sel",
-    //"Flow_Phi_Weight_FtpcEast_Sel",
     "Flow_Phi_FtpcWest_Sel",
     "Flow_Phi_Flat_FtpcWest_Sel",
-    //"Flow_Phi_Weight_FtpcWest_Sel",
     "Flow_Phi_FtpcFarWest_Sel",
     "Flow_Phi_Flat_FtpcFarWest_Sel",
-    //"Flow_Phi_Weight_FtpcFarWest_Sel",
     "Flow_Mul_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
@@ -148,6 +140,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vEta_Sel",
     "Flow_vPt_Sel",
     "Flow_q_Sel",
+    "FlowLYZ_vEta_Sel",
+    "FlowLYZ_vPt_Sel",
     "Flow_vObs2D_ScalarProd_Sel",
     "Flow_v2D_ScalarProd_Sel",
     "Flow_vEta_ScalarProd_Sel",
@@ -186,8 +180,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     //"Flow_Bin_Eta",
     //"Flow_Bin_Pt",
     "Flow_CosPhiLab",
-    "Flow_MeanDedxPos2D",
-    "Flow_MeanDedxNeg2D",
+//     "Flow_MeanDedxPos2D",
+//     "Flow_MeanDedxNeg2D",
 //     "Flow_PidPiPlusPart",
 //     "Flow_PidPiMinusPart",
 //     "Flow_PidProtonPart",
@@ -201,23 +195,19 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_PidMult",
     "Flow_Phi_FarEast_Sel",                      // first multi graph hist
     "Flow_Phi_Flat_FarEast_Sel",
-    //"Flow_Phi_Weight_FarEast_Sel",
     "Flow_Phi_East_Sel",
     "Flow_Phi_Flat_East_Sel",
-    //"Flow_Phi_Weight_East_Sel",
     "Flow_Phi_West_Sel",
     "Flow_Phi_Flat_West_Sel",
-    //"Flow_Phi_Weight_West_Sel",
     "Flow_Phi_FarWest_Sel",
     "Flow_Phi_Flat_FarWest_Sel",
-    //"Flow_Phi_Weight_FarWest_Sel",
     "Flow_Mul_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Eta_Sel",
     "Flow_Yield.Pt_Sel",
     "Flow_Psi_Subs",
     "Flow_Psi_Sel",
-//     "Flow_Psi_Diff_Sel",
+    "Flow_Psi_Diff_Sel",
     "Flow_Psi_Sub_Corr_Sel",
     "Flow_Psi_Sub_Corr_Diff_Sel",
     "Flow_Phi_Corr_Sel",
@@ -228,6 +218,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_vEta_Sel",
     "Flow_vPt_Sel",
     "Flow_q_Sel",
+    "FlowLYZ_vEta_Sel",
+    "FlowLYZ_vPt_Sel",
     "Flow_vObs2D_ScalarProd_Sel",
     "Flow_v2D_ScalarProd_Sel",
     "Flow_vEta_ScalarProd_Sel",
@@ -237,10 +229,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   int nSingles;
   if (includeFtpc) {
     const int nNames = sizeof(baseName1) / sizeof(char*);
-    nSingles = 49 + 1;
+    nSingles = 39 + 1;
   } else {
     const int nNames = sizeof(baseName2) / sizeof(char*);
-    nSingles = 49 + 1 - 19;
+    nSingles = 28 + 1;
   }
 
   // construct arrays of base and short names
@@ -318,7 +310,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   // set row and column numbers
   char* cp = strstr(shortName[pageNumber],"Subs");
-  int columns = (cp) ? nSubs + nSels : nSels;
+  int columns = (cp) ? nSubs * nSels : nSels;
   int rows;
   rows = (strstr(shortName[pageNumber],"Phi_")) ? 2 : nHars;
   if (strcmp(shortName[pageNumber],"Flow_Phi_Corr")==0) rows = nHars;
@@ -520,7 +512,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
-	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
+	float norm = (hist->Integral()) ? ((float)(hist->GetNbinsX()) / hist->Integral()) : 1.; 
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm);                           // normalize height to one
 	if (strstr(shortName[pageNumber],"Diff")!=0) { 
@@ -557,6 +549,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(110);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
+// 	int bins = hist->GetNbinsX();
+// 	cout << "bins= " << bins << endl;
+// 	for (int n=1; n<bins; n++) {
+// 	  float y = hist->GetBinContent(n);
+// 	  cout << n << ": " << y << endl;
+// 	}
 	float n_qBins = (float)hist->GetNbinsX();
 	double area = hist->Integral() * max / n_qBins; 
 	TString* histName = new TString("Flow_Mul_Sel");
@@ -573,14 +571,15 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TF1* fit_q = new TF1("qDist", qDist, 0., max, 4);
 	fit_q->SetParNames("v", "mult", "area", "g");
 	float qMean = hist->GetMean();
-	float vGuess = (qMean > 1.) ? sqrt(2.*(qMean - 1.) / mult) : 0.06;
-	// the 0.06 is a wild guess
+	float vGuess = (qMean > 1.) ? sqrt(2.*(qMean - 1.) / mult) : 0.03;
+	// the 0.03 is a wild guess
 	vGuess *= 100.;
 	cout << "vGuess = " << vGuess << endl;
 	fit_q->SetParameters(vGuess, mult, area, 0.3); // initial values
 	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
 	fit_q->SetParLimits(2, 1, 1);             // area is fixed
 	hist->Fit("qDist", "Q");
+	//hist->Fit("qDist");
 	fit_q->Draw();
  	fit_q->FixParameter(3, 0.);               // g is fixed
 	fit_q->SetLineStyle(kDotted);
@@ -666,14 +665,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 }
 
 // macro for the resolution plot
-TCanvas* plotResolution(){
+TCanvas* plotResolution() {
   char* resName[] = {
     "Flow_Cos_Sel",
     "Flow_Res_Sel",
-    "Flow_v_Sel",
-    "Flow_v_ScalarProd_Sel",
-    "Flow_Cumul_v_Order2_Sel",
-    "Flow_Cumul_v_Order4_Sel"
+    "Flow_v_Sel"
+//     "Flow_v_ScalarProd_Sel",
+//     "Flow_Cumul_v_Order2_Sel",
+//     "Flow_Cumul_v_Order4_Sel"
   };
   int columns = nSels;
   int rows = sizeof(resName) / sizeof(char*);
@@ -718,7 +717,7 @@ TCanvas* plotResolution(){
 	for (int n=1; n < nHars+1; n++) {
 	  v   = hist->GetBinContent(n);                       // output v values
 	  err = hist->GetBinError(n);
-	  if (k==1) cout << " v" << n << "= " << v << " +/- " << err << endl;
+	  cout << " v" << n << "= " << setprecision(3) << v << " +/- " << err << endl;
 	  if (TMath::IsNaN(v)) {
 	    hist->SetBinContent(n, 0.);
 	    hist->SetBinError(n, 0.);
@@ -782,6 +781,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.65  2006/02/22 19:35:18  posk
+// Added graphs for the StFlowLeeYangZerosMaker
+//
 // Revision 1.64  2005/08/26 19:00:25  posk
 // plot style back to bold
 //
