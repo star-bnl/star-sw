@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.48 2005/08/23 20:29:43 oldi Exp $
+//  $Id: StFlowMaker.h,v 1.49 2006/02/22 19:25:39 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -29,6 +29,7 @@ class StParticleDefinition;
 class StFlowEvent;
 class StFlowPicoTrack;
 class StFlowPicoEvent;
+class StMuDst;
 class StMuEvent;
 class StFlowSelection;
 class StIOMaker;
@@ -67,7 +68,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.48 2005/08/23 20:29:43 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.49 2006/02/22 19:25:39 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -130,6 +131,7 @@ private:
   TTree*           pMuFlowTree;               // pointer to mu-DST Tree
   TFile*           pMuDST;                    //! pointer to mu-DST File
   TChain*          pMuChain;                  //! pointer to chain of mu-DST files
+  StMuDst*         pMu;                       //! pointer to Mu-DST class
   StMuEvent*       pMuEvent;                  //! pointer to Mu-DST Event
   TClonesArray*    pMuEvents;                 //! pointer to Mu-DST Event array
   TObjArray*       pMuTracks;                 //! Mu-DST Primary Tracks
@@ -179,6 +181,10 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.49  2006/02/22 19:25:39  posk
+//  Changes needed for the MuDst
+//  Stopped using eventSummary()
+//
 //  Revision 1.48  2005/08/23 20:29:43  oldi
 //  Latest fix to comply with MuDst changes.
 //

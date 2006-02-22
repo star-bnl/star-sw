@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.39 2005/03/03 17:22:01 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.40 2006/02/22 19:27:03 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -22,6 +22,7 @@
 #include "StThreeVectorF.hh"
 #include "StFlowConstants.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #define PR(x) cout << "##### FlowCutEvent: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowCutEvent)
@@ -294,9 +295,11 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
 
 //-----------------------------------------------------------------------
 
-Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
+Bool_t StFlowCutEvent::CheckEvent(StMuDst* pMu) {
   // Returns kTRUE if muevent survives all the cuts
   
+  StMuEvent* pMuEvent  = pMu->event();
+  TObjArray* pMuTracks = pMu->primaryTracks();
   if (!pMuEvent) return kFALSE;
 
   // Primary vertex
@@ -314,7 +317,7 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   }
   
   // Multiplicity 
-  Int_t mult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
+  Int_t mult = pMuTracks->GetEntries();
   if (mMultCuts[1] > mMultCuts[0] && 
       (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
     mMultCut++;
@@ -419,7 +422,7 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
 
   }
   
-  Int_t tracks =  pMuEvent->refMultNeg() + pMuEvent->refMultPos();
+  Int_t tracks =  pMuEvent->refMult();
 
   if      (tracks < cent[0])  { centrality = 0; }
   else if (tracks < cent[1])  { centrality = 1; }
@@ -670,6 +673,10 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.40  2006/02/22 19:27:03  posk
+// Changes needed for the MuDst
+// Stopped using eventSummary()
+//
 // Revision 1.39  2005/03/03 17:22:01  posk
 // Initialized pFlowEvent in the constructors.
 //

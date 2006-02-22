@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.13 2005/02/11 23:22:12 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.14 2006/02/22 19:27:04 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -22,6 +22,7 @@
 class StEvent;
 class StFlowPicoEvent;
 class StMuEvent;
+class StMuDst;
 
 class StFlowCutEvent {
 
@@ -32,7 +33,7 @@ class StFlowCutEvent {
 
   static Bool_t CheckEvent(StEvent* pEvent);
   static Bool_t CheckEvent(StFlowPicoEvent* pPicoEvent);
-  static Bool_t CheckEvent(StMuEvent* pMuEvent);
+  static Bool_t CheckEvent(StMuDst* pMu);
   static Bool_t CheckEtaSymmetry(StEvent* pEvent);
   static Bool_t CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent);
   static Bool_t CheckEtaSymmetry(StMuEvent* pMuEvent);
@@ -118,6 +119,10 @@ inline UInt_t StFlowCutEvent::GetFlowTriggerBitMap() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.14  2006/02/22 19:27:04  posk
+// Changes needed for the MuDst
+// Stopped using eventSummary()
+//
 // Revision 1.13  2005/02/11 23:22:12  posk
 // Made TriggersFound() work for pico files.
 //
