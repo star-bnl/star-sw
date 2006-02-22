@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.4 2005/09/14 17:08:33 msd Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.5 2006/02/22 22:03:17 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -34,7 +34,6 @@ void StEStructEventCuts::initCuts(){
   mtWord[0]=mtWord[1]=0;
   mpVertexZ[0]=mpVertexZ[1]=0;
   mcentrality[0]=mcentrality[1]=0;
-  mnumTracks[0]=mnumTracks[1]=0;
 
 }
 
@@ -42,8 +41,7 @@ void StEStructEventCuts::initNames(){
 
   strcpy(mtWordName.name,"triggerWord");
   strcpy(mpVertexZName.name,"primaryVertexZ");
-  strcpy(mcentralityName.name,"centrality");
-  strcpy(mnumTracksName.name,"numTracks");  
+  strcpy(mcentralityName.name,"centrality");  
 }
 
 bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int nvals){
@@ -110,16 +108,9 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
   }    
     
   if(!strcmp(name,mcentralityName.name)){
-    mcentrality[0]=(unsigned int)atoi(vals[0]);
-    mcentrality[1]=(unsigned int)atoi(vals[1]);
+    mcentrality[0]=atoi(vals[0]); 
+    mcentrality[1]=atoi(vals[1]);
     mcentralityName.idx=createCutHists(name,mcentrality);
-    return true;
-  }    
-
-  if(!strcmp(name,mnumTracksName.name)){
-    mnumTracks[0]=atoi(vals[0]); 
-    mnumTracks[1]=atoi(vals[1]);
-    mnumTracksName.idx=createCutHists(name,mnumTracks);
     return true;
   }    
     
@@ -138,8 +129,7 @@ void StEStructEventCuts::printCuts(ostream& ofs){
   ofs<<endl;
   ofs<<mtWordName.name<<","<<mtWord[0]<<","<<mtWord[1]<<"\t\t\t"<<" # triggerWord cut"<<endl;
   ofs<<mpVertexZName.name<<","<<mpVertexZ[0]<<","<<mpVertexZ[1]<<"\t\t"<<" # primary vertex cut"<<endl;
-  ofs<<mcentralityName.name<<","<<mcentrality[0]<<","<<mcentrality[1]<<"\t\t\t"<<" # centrality cut"<<endl;
-  ofs<<mnumTracksName.name<<","<<mnumTracks[0]<<","<<mnumTracks[1]<<"\t\t\t"<<" # number of tracks per event passing track cuts"<<endl;
+  ofs<<mcentralityName.name<<","<<mcentrality[0]<<","<<mcentrality[1]<<"\t\t\t"<<" # number events passing centrality cuts"<<endl;
   ofs<<"# ******************************************** "<<endl<<endl;
 
 }
@@ -147,6 +137,9 @@ void StEStructEventCuts::printCuts(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.5  2006/02/22 22:03:17  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.4  2005/09/14 17:08:33  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *

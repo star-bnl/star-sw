@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *  $Id: StEStructMCReader.h,v 1.4 2004/03/18 18:35:17 chunhuih Exp $
+ *  $Id: StEStructMCReader.h,v 1.5 2006/02/22 22:03:21 prindle Exp $
  *
  *  Author: Chunhui Han
  *
@@ -15,7 +15,11 @@
  ********************************************************************
  *
  *  $Log: StEStructMCReader.h,v $
+ *  Revision 1.5  2006/02/22 22:03:21  prindle
+ *  Removed all references to multRef
+ *
  *  Revision 1.4  2004/03/18 18:35:17  chunhuih
+ *
  *  use const char * instead of char * for the constructor argument filelistfile.
  *
  *  Revision 1.3  2004/03/03 23:17:10  chunhuih
@@ -89,7 +93,7 @@ class StEStructMCReader : public StEStructEventReader {
   int meventCount;
   int mloopIndex;
   bool mAmDone;
-  int mrefMult;
+  int mnumTracks;
   int mNentries;
 
   StEStructEventCuts *mECuts;

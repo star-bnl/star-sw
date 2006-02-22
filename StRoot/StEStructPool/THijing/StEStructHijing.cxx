@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.2 2005/09/23 23:42:34 prindle Exp $
+ * $Id: StEStructHijing.cxx,v 1.3 2006/02/22 22:06:53 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -17,33 +17,33 @@
 #include "StEStructPool/EventMaker/StEStructTrack.h"
 
 StEStructHijing::StEStructHijing() {
-    mHijing       = 0;
-    mECuts        = 0;
-    mTCuts        = 0;
-    mInChain      = false;
-    mEventsToDo   = 100;
-    mUseAllTracks = false;
-    mCentBin      = 0;
-    mEventCount   = 0;
-    mAmDone       = false;
+    mHijing             = 0;
+    mECuts              = 0;
+    mTCuts              = 0;
+    mInChain            = false;
+    mEventsToDo         = 100;
+    museImpactParameter = true;
+    mCentBin            = 0;
+    mEventCount         = 0;
+    mAmDone             = false;
 };
 
 StEStructHijing::StEStructHijing(THijing* hijing,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
                                  bool inChain,
-                                 bool useAllTracks,
+                                 bool useImpactParameter,
                                  int  centBin,
                                  int  eventsToDo) {
-    mHijing       = hijing;
-    mECuts        = ecuts;
-    mTCuts        = tcuts;
-    mInChain      = inChain;
-    mEventsToDo   = eventsToDo;
-    mUseAllTracks = useAllTracks;
-    mCentBin      = centBin;
-    mEventCount   = 0;
-    mAmDone       = false;
+    mHijing             = hijing;
+    mECuts              = ecuts;
+    mTCuts              = tcuts;
+    mInChain            = inChain;
+    mEventsToDo         = eventsToDo;
+    museImpactParameter = useImpactParameter;
+    mCentBin            = centBin;
+    mEventCount         = 0;
+    mAmDone             = false;
 };
 
 bool StEStructHijing::hasGenerator() { return (mHijing) ? true : false; }
@@ -70,24 +70,25 @@ StEStructEvent* StEStructHijing::next() {
     retVal->SetVz(0);
     retVal->SetBField(0.5);
 
-    int nTracks = countGoodTracks();
-    if (mUseAllTracks) {
-        retVal->SetCentrality( (double) nTracks );
+    int   nTracks = countGoodTracks();
+    float centMeasure;
+    mImpact = mHijing->GetImpactParameter();
+    if (museImpactParameter) {
+        centMeasure = mImpact;
     } else {
-        retVal->SetCentrality(mHijing->GetImpactParameter());
+        centMeasure = nTracks;
     }
+    retVal->SetCentrality(centMeasure);
     int jCent = retVal->Centrality();
     if (((mCentBin >= 0) && (jCent != mCentBin)) ||
-        !mECuts->goodNumberOfTracks(mRefMult)) {
+         !mECuts->goodCentrality(centMeasure)) {
         delete retVal;
         retVal=NULL;
-        mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,false);
+        mECuts->fillHistogram(mECuts->centralityName(),centMeasure,false);
     } else {
         fillTracks(retVal);
-        retVal->SetOrigMult(mRefMult);
-        retVal->SetCentMult(mRefMult);
         retVal->FillChargeCollections();
-        mECuts->fillHistogram(mECuts->numTracksName(),(float)mRefMult,true);
+        mECuts->fillHistogram(mECuts->centralityName(),centMeasure,true);
     }
     return retVal;
 }
@@ -223,14 +224,14 @@ bool StEStructHijing::isTrackGood(int i) {
 // This method counts all good track.
 // No histogramming or copying data around.
 int StEStructHijing::countGoodTracks() {
-    mRefMult = 0;
+    mnumTracks = 0;
     int numParticles = mHijing->GetNParticles();
     for (int i=0;i<numParticles;i++) {
         if (isTrackGood(i)) {
-            mRefMult++;
+            mnumTracks++;
         }
     }
-    return mRefMult;
+    return mnumTracks;
 }
 //--------------------------------------------------------------------------
 void StEStructHijing::setHijingReader(THijing* hijing){

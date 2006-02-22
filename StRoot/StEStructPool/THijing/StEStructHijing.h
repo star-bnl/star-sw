@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.2 2005/09/23 23:42:38 prindle Exp $
+ * $Id: StEStructHijing.h,v 1.3 2006/02/22 22:06:54 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -27,10 +27,11 @@ class StEStructHijing : public StEStructEventReader {
   StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
-  bool mUseAllTracks;
-  int mCentBin;
-  int mRefMult;
-  int mEventsToDo;
+  bool museImpactParameter;
+  int   mCentBin;
+  float mImpact;
+  int   mnumTracks;
+  int   mEventsToDo;
 
   void fillTracks(StEStructEvent* estructEvent);
   bool isTrackGood(int i);
@@ -45,7 +46,7 @@ class StEStructHijing : public StEStructEventReader {
                   StEStructEventCuts* ecuts,
                   StEStructTrackCuts* tcuts,
                   bool inChain = true,
-                  bool useAllTracks = false,
+                  bool useImpactParameter = true,
                   int  centBin = 0,
                   int  eventsToDo = 100);
 

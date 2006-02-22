@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.4 2005/09/14 17:08:34 msd Exp $
+ * $Id: StEStructEventCuts.h,v 1.5 2006/02/22 22:03:18 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,15 +25,13 @@ protected:
 
    CutName mtWordName;
    CutName mpVertexZName;
-   CutName mcentralityName;
-   CutName mnumTracksName;  
+   CutName mcentralityName;  
 
 
   char         mRunPeriod[1024];
   unsigned int mtWord[2];  
   float        mpVertexZ[2]; 
-  unsigned int mcentrality[2];
-  unsigned int mnumTracks[2];
+  float        mcentrality[2];
   
   void init();
   void initCuts();
@@ -53,13 +51,11 @@ public:
 
   bool goodTrigger(StMuEvent* muEvent);
   bool goodPrimaryVertexZ( float z );
-  bool goodCentrality(unsigned int c);
-  bool goodNumberOfTracks(unsigned int n);
+  bool goodCentrality( float n);
 
   char* triggerWordName(){ return (char*)mtWordName.name; };
   char* primaryVertexZName() { return (char*) mpVertexZName.name; };
   char* centralityName() { return (char*) mcentralityName.name; };
-  char* numTracksName() { return (char*) mnumTracksName.name; };
 
 
   ClassDef(StEStructEventCuts,1)
@@ -119,16 +115,10 @@ inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
   return (z>=mpVertexZ[0] && z<=mpVertexZ[1]);
 }
 
-inline bool StEStructEventCuts::goodCentrality(unsigned int c){
-  mvalues[mcentralityName.idx] = (float)c;
+inline bool StEStructEventCuts::goodCentrality(float c){
+  mvalues[mcentralityName.idx] = c;
   return (  (mcentrality[0]==mcentrality[1] && mcentrality[0]==0) ||
-            (c>=mcentrality[0] && c<=mcentrality[1])  );
-}
-
-inline bool StEStructEventCuts::goodNumberOfTracks(unsigned int n){
-  mvalues[mnumTracksName.idx] = (float)n;
-  return (  (mnumTracks[0]==mnumTracks[1] && mnumTracks[0]==0) ||
-            (n>=mnumTracks[0] && n<=mnumTracks[1]) );
+            (c>=mcentrality[0] && c<=mcentrality[1]) );
 }
 
 #endif
@@ -136,6 +126,9 @@ inline bool StEStructEventCuts::goodNumberOfTracks(unsigned int n){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.5  2006/02/22 22:03:18  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.4  2005/09/14 17:08:34  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *

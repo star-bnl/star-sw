@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.6 2004/03/19 21:42:48 chunhuih Exp $
+ * $Id: StEStructMCReader.cxx,v 1.7 2006/02/22 22:03:19 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,6 +13,9 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.7  2006/02/22 22:03:19  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.6  2004/03/19 21:42:48  chunhuih
  * calculate pseudorapidity instead of rapidity for eta used in track cuts
  *
@@ -263,7 +266,7 @@ StEStructEvent* StEStructMCReader::next() {
 
   fillTracks(retVal);
 
-  bool useEvent = mECuts->goodNumberOfTracks(mrefMult);
+  bool useEvent = mECuts->goodCentrality((float)mnumTracks);
   if(!useEvent) {
     delete retVal;
     retVal = NULL;
@@ -271,14 +274,14 @@ StEStructEvent* StEStructMCReader::next() {
   else {
     retVal->FillChargeCollections();
   }
-  mECuts->fillHistogram(mECuts->numTracksName(), (float)mrefMult, useEvent);
+  mECuts->fillHistogram(mECuts->centralityName(), (float)mnumTracks, useEvent);
   return retVal;
 }
 
 //--------------------------------------------------------------------------
 void StEStructMCReader::fillTracks(StEStructEvent* estructEvent) {
 
-  mrefMult=0;
+  mnumTracks=0;
   StEStructTrack* eTrack= new StEStructTrack();
 
   Int_t nbytes = 0, nb = 0;
@@ -323,7 +326,7 @@ void StEStructMCReader::fillTracks(StEStructEvent* estructEvent) {
     useTrack = (mTCuts->goodEta(eta) && useTrack);
     float phi=atan2((double)Pxyz[1], (double)Pxyz[0]);
     useTrack=(mTCuts->goodPhi(phi) && useTrack);
-    if(useTrack)mrefMult++;
+    if(useTrack)mnumTracks++;
 
     useTrack=(mTCuts->goodPt(pt) && useTrack);
 

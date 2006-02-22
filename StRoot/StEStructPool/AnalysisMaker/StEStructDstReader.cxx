@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructDstReader.cxx,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructDstReader.cxx,v 1.2 2006/02/22 22:03:13 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -78,14 +78,10 @@ bool StEStructDstReader::checkEvent(StEStructEvent* e){
   bool useEvent=true;
 
   if(!mECuts->goodPrimaryVertexZ(e->Vz()) ||
-     !mECuts->goodCentrality(e->CentMult())) useEvent=false;
-
-  mrefMult=getNumberOfTracks(e);
-  if(!mECuts->goodNumberOfTracks(mrefMult))useEvent=false;
+     !mECuts->goodCentrality((float)e->Centrality())) useEvent=false;
 
   mECuts->fillHistogram(mECuts->primaryVertexZName(),e->Vz(),useEvent);
-  mECuts->fillHistogram(mECuts->centralityName(),e->CentMult(),useEvent);
-  mECuts->fillHistogram(mECuts->numTracksName(),(float)mrefMult,useEvent);
+  mECuts->fillHistogram(mECuts->centralityName(),(float)e->Centrality(),useEvent);
 
   return useEvent;
 }
@@ -130,6 +126,9 @@ int StEStructDstReader::getNumberOfTracks(StEStructEvent* e){
 /***********************************************************************
  *
  * $Log: StEStructDstReader.cxx,v $
+ * Revision 1.2  2006/02/22 22:03:13  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.5 2005/09/14 17:08:34 msd Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.6 2006/02/22 22:03:23 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -31,14 +31,12 @@ StEStructMuDstReader::StEStructMuDstReader() {
     mTCuts        = 0;
     mInChain      = false;
     mAmDone       = false;
-    mUseAllTracks = false;
     mCentBin      = 0;
 };
 StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
                                            StEStructEventCuts* ecuts,
                                            StEStructTrackCuts* tcuts,
                                            bool inChain,
-                                           bool useAllTracks,
                                            int  centBin) {
     mhasdEdxCuts  = 0;
     mMaker        = maker;
@@ -46,7 +44,6 @@ StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
     setTrackCuts(tcuts);
     mInChain      = inChain;
     mAmDone       = false;
-    mUseAllTracks = useAllTracks;
     mCentBin      = centBin;
 };
 
@@ -91,6 +88,11 @@ StEStructEvent* StEStructMuDstReader::next() {
 }
      
 //-------------------------------------------------------------------------
+// Feb 14, 2006 djp Expunging all references to refMult that is stored in
+//                  the MuDst. centrality cut will now always be on total
+//                  number of tracks passing track cuts for MuDst. For
+//                  Hijing this cut can be on number of tracks passing cuts
+//                  or impact parameter.
 // Apr 12, 2005 djp Jeff put centrality cuts into the event cuts and
 //                  cut on refMult. I am changing this to use the
 //                  centrality bin returned by the centrality object.
@@ -111,7 +113,6 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     }
  
     unsigned int tword=muEvent->l0Trigger().triggerWord();
-    int refMult=muEvent->refMult();
     mNumGoodTracks = 0;
 
     float x=muEvent->eventSummary().primaryVertexPosition().x();
@@ -123,25 +124,21 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
     if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
         useEvent = false;
     } else if (!mECuts->goodTrigger(muEvent)  ||
-               !mECuts->goodPrimaryVertexZ(z) ||
-               !mECuts->goodCentrality(refMult)) {
+               !mECuts->goodPrimaryVertexZ(z)) {
         useEvent=false;
     }
     int nTracks = countGoodTracks();
-    if (mUseAllTracks) {
-        retVal->SetCentrality( (double) nTracks );
-    } else {
-        retVal->SetCentrality( (double) muEvent->refMult());
+    if (!mECuts->goodCentrality(nTracks)) {
+        useEvent=false;
     }
+    retVal->SetCentrality( (double) nTracks );
     int jCent = retVal->Centrality();
     if ((mCentBin >= 0) && (jCent != mCentBin)) {
         useEvent = false;
     } else {
         retVal->SetEventID(muEvent->eventNumber());
         retVal->SetRunID(muEvent->runNumber());
-        retVal->SetOrigMult(muEvent->eventSummary().numberOfTracks());
         retVal->SetVertex(x,y,z);
-        retVal->SetCentMult((int)muEvent->refMult());
         retVal->SetZDCe((float)muEvent->zdcAdcAttentuatedSumEast());
         retVal->SetZDCw((float)muEvent->zdcAdcAttentuatedSumWest());
         retVal->SetBField((float)muEvent->magneticField());
@@ -149,14 +146,10 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
         if (!fillTracks(retVal)) {
             useEvent=false; 
         }
-        if (!mECuts->goodNumberOfTracks(mNumGoodTracks)) {
-            useEvent=false;
-        }
     }
     mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
-    mECuts->fillHistogram(mECuts->centralityName(),(float)refMult,useEvent);
-    mECuts->fillHistogram(mECuts->numTracksName(),(float)mNumGoodTracks,useEvent);
+    mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
 
     if (!useEvent) {
         delete retVal;
@@ -322,6 +315,9 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.6  2006/02/22 22:03:23  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.5  2005/09/14 17:08:34  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *

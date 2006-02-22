@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructDstReader.h,v 1.1 2003/10/15 18:20:32 porter Exp $
+ * $Id: StEStructDstReader.h,v 1.2 2006/02/22 22:03:15 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,7 +26,7 @@ class StEStructDstReader : public StEStructEventReader {
 
   bool  mInChain;
   bool  mAmDone; 
-  int   mrefMult;
+  int   mnumTracks;
 
   bool  checkEvent(StEStructEvent* e);
   int  getNumberOfTracks(StEStructEvent* e);
@@ -59,6 +59,9 @@ inline bool StEStructDstReader::done(){ return mAmDone; };
 /***********************************************************************
  *
  * $Log: StEStructDstReader.h,v $
+ * Revision 1.2  2006/02/22 22:03:15  prindle
+ * Removed all references to multRef
+ *
  * Revision 1.1  2003/10/15 18:20:32  porter
  * initial check in of Estruct Analysis maker codes.
  *
