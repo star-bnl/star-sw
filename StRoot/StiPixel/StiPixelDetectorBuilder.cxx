@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.11 2006/02/17 21:39:32 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.12 2006/02/23 00:22:54 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.12  2006/02/23 00:22:54  andrewar
+ * Set Detector Id to kHftId, corrected Ist*pars -> Pixel*pars
+ *
  * Revision 1.11  2006/02/17 21:39:32  andrewar
  * Added calls to StiDetector::setKey(key,val)
  *
@@ -23,6 +26,9 @@
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 
+#include "StEvent.h"
+#include "StEventTypes.h"
+
 StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
 						 const string & inputFile)
   : StiDetectorBuilder("Pixel",active,inputFile)
@@ -31,17 +37,17 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
 	//once you actually want to do tracking, the results depend strongly on the numbers below.
 	//here I plug in 4micron resolution in both local x and y coordinates
 	//I also put no dependence on either crossing angle or dip angle of track
-  _trackingParameters.setName("PixelTrackingParameters");
-  _calculator.setName("PixelHitErrors");
+    _trackingParameters.setName("PixelTrackingParameters");
+    _calculator.setName("PixelHitErrors");
 
-	//_calculator = new StiDefaultHitErrorCalculator();
-	_calculator.set(6e-5, 0., 0., 6e-5, 0., 0.);
+    //_calculator = new StiDefaultHitErrorCalculator();
+    _calculator.set(6e-5, 0., 0., 6e-5, 0., 0.);
   
-    ifstream inF("IstBuilder_pars.txt");
+    ifstream inF("PixelBuilder_pars.txt");
     if (inF)
       {
 	_trackingParameters.loadFS(inF);
-	cout << "StiIstDetectorBuilder:: -I-  New tracking parameters from file" << endl;
+	cout << "StiPixelDetectorBuilder:: -I-  New tracking parameters from file" << endl;
       }
     else
       {
@@ -116,7 +122,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
 	  pDetector->setIsDiscreteScatterer(false);
 	  pDetector->setMaterial(material);
 	  pDetector->setGas(_gas);
-	  pDetector->setGroupId(998);
+	  pDetector->setGroupId(kHftId);
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  pDetector->setHitErrorCalculator(&_calculator);
