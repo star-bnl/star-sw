@@ -288,9 +288,9 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 
     StEmcDecoder *decoder = new StEmcDecoder();
     
-    int towerData[4800][6];
+    int towerData[4800][7];
     for (int i = 0;i < 4800;i++) {
-	for (int j = 0;j < 6;j++) {
+	for (int j = 0;j < 7;j++) {
 	    towerData[i][j] = 0;
 	}
     }
@@ -303,8 +303,8 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 		towerData[softId - 1][4] = crate;
 		towerData[softId - 1][5] = tower;
 		int triggerPatch;
-		int crateSeq;
 		if (decoder->GetTriggerPatchFromCrate(crate, tower, triggerPatch)) {
+		    towerData[softId - 1][6] = triggerPatch;
 		    int _crate, crateSeq;
 		    if (decoder->GetCrateAndSequenceFromTriggerPatch(triggerPatch, _crate, crateSeq)) {
 			towerData[softId - 1][1] = ((HT[triggerPatch]) >> (tower - crateSeq)) & 0x1;
@@ -315,9 +315,9 @@ void StOnlineTriggerMonitoring::saveTrigger(char* TS, bool status, bool pedestal
 	}
     }
     bemcStatusStream << "#" << endl;
-    bemcStatusStream << "# SoftId\tCrate\tCrate seq\tTower unmasked?\tPatch masked in HT?\tPatch masked in sum?\tPedestal" << endl;
+    bemcStatusStream << "# SoftId\tCrate\tCrate seq\tTower unmasked?\tPatch masked in HT?\tPatch masked in sum?\tPedestal\ttriggerPatch" << endl;
     for (int i = 0;i < 4800;i++) {
-	bemcStatusStream << "SoftId " << (i + 1) << "\t" << towerData[i][4] << "\t" << towerData[i][5] << "\t" << towerData[i][0] << "\t" << towerData[i][1] << "\t" << towerData[i][2] << "\t" << (Float_t(towerData[i][3]) / 100.0) << endl;
+	bemcStatusStream << "SoftId " << (i + 1) << "\t" << towerData[i][4] << "\t" << towerData[i][5] << "\t" << towerData[i][0] << "\t" << towerData[i][1] << "\t" << towerData[i][2] << "\t" << (Float_t(towerData[i][3]) / 100.0) << "\t" << towerData[i][6] << endl;
     }
     bemcStatusStream << "#" << endl;
 
