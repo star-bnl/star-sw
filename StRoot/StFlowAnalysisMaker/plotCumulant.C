@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.9 2004/12/09 23:47:12 posk Exp $
+// $Id: plotCumulant.C,v 1.10 2006/02/24 18:13:39 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -16,9 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h> 
-//const Int_t nHars    = 4;
-const  Int_t nHars    = 2;
-const  Int_t nSels    = 2;
+const  Int_t nHars    = 4; // 2
 const  Int_t nOrders  = 2;
 Int_t  runNumber      = 0;
 char   runName[6];
@@ -41,19 +39,14 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
 
   // names of histograms made by StFlowCumulantMaker
   const char* baseName[] = {
-    "Flow_Cumul_Order2",
     "Flow_Cumul_v_Order2",
-    "Flow_Cumul_Order4",
     "Flow_Cumul_v_Order4",
-    "Flow_CumulEta_Order",
-    "Flow_CumulPt_Order",
     "Flow_Cumul_vEta_Order",
     "Flow_Cumul_vPt_Order"
-    //"Flow_Cumul2D_Order",
     //"Flow_Cumul_v2D_Order"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles =  4;
+  const int nSingles =  2;
   float Ycm = 0.0;
 
   // construct array of short names
@@ -221,6 +214,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
 	  TLine* lineZeroPt = new TLine(0., 0., xMax, 0.);
 	  lineZeroPt->Draw();
 	} else {
+	  hist->SetMinimum(0.);
 	  TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
 	  lineZeroHar->Draw();
 	}
@@ -251,6 +245,9 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.10  2006/02/24 18:13:39  posk
+// Reduced number of histograms.
+//
 // Revision 1.9  2004/12/09 23:47:12  posk
 // Minor changes in code formatting.
 // Added hist for TPC primary dca to AnalysisMaker.
