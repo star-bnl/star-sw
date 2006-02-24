@@ -121,7 +121,8 @@ void RunJetSimuFinder(
   stree->setPrintOption(0);
   
   //test Mike's new 4p maker:
-  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker);
+  bool doTowerSwapFix = false;
+  StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, doTowerSwapFix);
   
   //Pythia4pMaker
   StPythiaFourPMaker* pythiaFourPMaker = new StPythiaFourPMaker("StPythiaFourPMaker",weight, mcEventMaker);
@@ -136,7 +137,7 @@ void RunJetSimuFinder(
   //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
   StppAnaPars* anapars = new StppAnaPars();
   anapars->setFlagMin(0); //track->flag() > 0
-  anapars->setNhits(15); //track->nHitsFit()>20
+  anapars->setNhits(20); //track->nHitsFit()>20 (changed in cvs by MLM, 2/24/06)
   anapars->setCutPtMin(0.2); //track->pt() > 0.2
   anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
   anapars->setJetPtMin(3.0);

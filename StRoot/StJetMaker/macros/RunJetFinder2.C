@@ -6,7 +6,8 @@ StChain *chain;
 int total=0;
 
 void RunJetFinder2(int nevents=100,
-		   const char* file="/star/data45/reco/productionPP/ReversedFullField/P04ik/2004/117/st_physics_adc_5117052_raw_2060003.MuDst.root",
+		   const char* file="/star/data24/reco/productionPP/ReversedFullField/P04ik/2004/118/st_physics_adc_5118006_raw_2080001.MuDst.root",
+		   //const char* file="/star/data45/reco/productionPP/ReversedFullField/P04ik/2004/117/st_physics_adc_5117052_raw_2060003.MuDst.root",
 		   //const char* file="/dante/starprod/reco/productionPP/ReversedFullField/P04ik/2004/118/st_physics_5118056_raw_2020003.MuDst.root",
 		   const char* outfile="blah.root",
 		   const char* dir = "",
@@ -72,7 +73,9 @@ void RunJetFinder2(int nevents=100,
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
     //test Mike's new 4p maker:
-    StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker);
+    //here we also tag whether or not to do the swap:
+    bool doTowerSwapFix = true;
+    StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, doTowerSwapFix);
 
     /*
     //test Mike's new 4p maker with Endcap (defualts to noEndcap)
