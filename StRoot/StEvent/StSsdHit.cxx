@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.9 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.10 2005/12/19 19:24:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.10  2005/12/19 19:24:10  ullrich
+ * Applied patch by A. Kiesel to fix tp correct decoding of hardware info.
+ *
  * Revision 2.9  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -43,7 +46,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.9 2004/07/15 16:36:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.10 2005/12/19 19:24:10 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -124,17 +127,17 @@ StSsdHit::centralStripNSide() const
 unsigned int
 StSsdHit::centralStripPSide() const
 {
-  return bits(23, 5);      // bits 23-27
+  return (bits(23, 5)+bits(13,10)-15);      // bits 23-27
 }
 
 unsigned int
 StSsdHit::clusterSizeNSide() const
 {
-    return bits(28, 2);    // bits 28-29
+    return bits(28, 2)+1;    // bits 28-29
 }
 
 unsigned int
 StSsdHit::clusterSizePSide() const
 {
-    return bits(30, 2);    // bits 30-31
+    return bits(30, 2)+1;    // bits 30-31
 }

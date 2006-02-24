@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.12 2005/04/25 14:13:24 bouchet Exp $
+// $Id: StSsdWafer.cc,v 1.13 2005/12/23 21:33:17 perev Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.13  2005/12/23 21:33:17  perev
+// Some defence for 1/0 added
+//
 // Revision 1.12  2005/04/25 14:13:24  bouchet
 // new method makeScfCtrlHistograms and makeScmCtrlHistograms and Clusternoise is coded as a float
 //
@@ -727,8 +730,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setD[1] = matchDistr(clusterControl, setD[0]);
 	  if ((setA[1]*setD[1])||(setB[1]*setC[1]))
 	    {
-	      probAD = (setA[1]*setD[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
-	      probBC = (setB[1]*setC[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
+	      double tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
+	      probAD = (setA[1]*setD[1])/tmp;
+	      probBC = (setB[1]*setC[1])/tmp;
 	    }
 	  else
 	    {
@@ -778,8 +782,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setCD[1] = matchDistr(clusterControl, setCD[0]);
           setD[0]  = (Adc[3] - Adc[5])/sqrt(2.0);
           setD[1]  = matchDistr(clusterControl, setD[0]);
-	  probABD  = (setAB[1]*setD[1])/(setAB[1]*setD[1]+setA[1]*setCD[1]);
-	  probACD  = (setA[1]*setCD[1])/(setAB[1]*setD[1]+setA[1]*setCD[1]);
+	  double tmp  = 3e-33+(setAB[1]*setD[1]+setA[1]*setCD[1]+1e-10);
+	  probABD  = (setAB[1]*setD[1])/tmp;
+	  probACD  = (setA[1]*setCD[1])/tmp;
 	  newPointB->setFlag(int(100*probABD));
 	  newPointC->setFlag(int(100*probACD));
 	  if (probABD > probACD)
@@ -830,8 +835,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setCD[1] = matchDistr(clusterControl, setCD[0]);
           setD[0]  = (Adc[5] - Adc[4])/sqrt(2.0);
           setD[1]  = matchDistr(clusterControl, setD[0]);
-	  probABD  = (setAB[1]*setD[1])/(setAB[1]*setD[1]+setA[1]*setCD[1]);
-	  probACD  = (setA[1]*setCD[1])/(setAB[1]*setD[1]+setA[1]*setCD[1]);
+	  double tmp = 3e-33+(setAB[1]*setD[1]+setA[1]*setCD[1]);
+	  probABD  = (setAB[1]*setD[1])/tmp;
+	  probACD  = (setA[1]*setCD[1])/tmp;
 	  newPointB->setFlag(int(100*probABD));
 	  newPointC->setFlag(int(100*probACD));
 	  if (probABD > probACD)
@@ -889,9 +895,10 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setD[1]  = matchDistr(clusterControl, setD[0]);
           setE[0]  = (Adc[4] - Adc[3])/sqrt(2.0);
           setE[1]  = matchDistr(clusterControl, setE[0]);
-	  probABE  = (setAB[1]*setE[1])/(setAB[1]*setE[1]+setAC[1]*setD[1]+setA[1]*setDE[1]);
-	  probACD  = (setAC[1]*setD[1])/(setAB[1]*setE[1]+setAC[1]*setD[1]+setA[1]*setDE[1]);
-	  probADE  = (setA[1]*setDE[1])/(setAB[1]*setE[1]+setAC[1]*setD[1]+setA[1]*setDE[1]);
+	  double tmp = 3e-33+(setAB[1]*setE[1]+setAC[1]*setD[1]+setA[1]*setDE[1]);
+	  probABE  = (setAB[1]*setE[1])/tmp;
+	  probACD  = (setAC[1]*setD[1])/tmp;
+	  probADE  = (setA[1]*setDE[1])/tmp;
 	  newPointB->setFlag(int(100*probABE));
 	  newPointC->setFlag(int(100*probACD));
 	  newPointD->setFlag(int(100*(probACD+probADE)));
@@ -957,9 +964,10 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setC[1]  = matchDistr(clusterControl, setC[0]);
           setE[0]  = (Adc[5] - Adc[4])/sqrt(2.0);
           setE[1]  = matchDistr(clusterControl, setE[0]);
-	  probABE  = (setAB[1]*setE[1])/(setAB[1]*setE[1]+setAD[1]*setC[1]+setA[1]*setCE[1]);
-	  probACD  = (setAD[1]*setC[1])/(setAB[1]*setE[1]+setAD[1]*setC[1]+setA[1]*setCE[1]);
-	  probACE  = (setA[1]*setCE[1])/(setAB[1]*setE[1]+setAD[1]*setC[1]+setA[1]*setCE[1]);
+	  double tmp = 3e-33+(setAB[1]*setE[1]+setAD[1]*setC[1]+setA[1]*setCE[1]);
+	  probABE  = (setAB[1]*setE[1])/tmp;
+	  probACD  = (setAD[1]*setC[1])/tmp;
+	  probACE  = (setA[1]*setCE[1])/tmp;
 	  newPointB->setFlag(int(100*probABE));
 	  newPointC->setFlag(int(100*(probACD+probACE)));
 	  newPointD->setFlag(int(100*probACD));
@@ -1025,9 +1033,10 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setDE[1] = matchDistr(clusterControl, setDE[0]);
           setE[0]  = (Adc[3] - Adc[6])/sqrt(2.0);
           setE[1]  = matchDistr(clusterControl, setE[0]);
-	  probABE  = (setAB[1]*setE[1])/(setAB[1]*setE[1]+setA[1]*setDE[1]+setB[1]*setCE[1]);
-	  probADE  = (setA[1]*setDE[1])/(setAB[1]*setE[1]+setA[1]*setDE[1]+setB[1]*setCE[1]);
-	  probBCE  = (setB[1]*setCE[1])/(setAB[1]*setE[1]+setA[1]*setDE[1]+setB[1]*setCE[1]);
+	  double tmp = 3e-33+(setAB[1]*setE[1]+setA[1]*setDE[1]+setB[1]*setCE[1]);
+	  probABE  = (setAB[1]*setE[1])/tmp;
+	  probADE  = (setA[1]*setDE[1])/tmp;
+	  probBCE  = (setB[1]*setCE[1])/tmp;
 	  newPointA->setFlag(int(100*(probABE+probADE)));
 	  newPointB->setFlag(int(100*(probABE+probBCE)));
 	  newPointC->setFlag(int(100*probBCE));
@@ -1093,9 +1102,10 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setDE[1] = matchDistr(clusterControl, setDE[0]);
           setE[0]  = (Adc[6] - Adc[2])/sqrt(2.0);
           setE[1]  = matchDistr(clusterControl, setE[0]);
-	  probACE  = (setAC[1]*setE[1])/(setAC[1]*setE[1]+setA[1]*setDE[1]+setBE[1]*setC[1]);
-	  probADE  = (setA[1]*setDE[1])/(setAC[1]*setE[1]+setA[1]*setDE[1]+setBE[1]*setC[1]);
-	  probBCE  = (setBE[1]*setC[1])/(setAC[1]*setE[1]+setA[1]*setDE[1]+setBE[1]*setC[1]);
+	  double tmp = 3e-33+(setAC[1]*setE[1]+setA[1]*setDE[1]+setBE[1]*setC[1]);
+	  probACE  = (setAC[1]*setE[1])/tmp;
+	  probADE  = (setA[1]*setDE[1])/tmp;
+	  probBCE  = (setBE[1]*setC[1])/tmp;
 	  newPointA->setFlag(int(100*(probACE+probADE)));
 	  newPointB->setFlag(int(100*probBCE));
 	  newPointC->setFlag(int(100*(probACE+probBCE)));
@@ -1266,12 +1276,13 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setDF[1] = matchDistr(clusterControl, setDF[0]);
           setEF[0] = (Adc[4] - Adc[2] - Adc[3])/sqrt(2.0);
           setEF[1] = matchDistr(clusterControl, setEF[0]);
-	  prob[0]  = (setAC[1]*setE[1]+setAB[1]*setF[1]+setEF[1]*setA[1])/(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
-	  prob[1]  = (setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1])/(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
-	  prob[2]  = (setAC[1]*setE[1]+setBC[1]*setD[1]+setDE[1]*setC[1])/(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
-	  prob[3]  = (setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1])/(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
-	  prob[4]  = (setAC[1]*setE[1]+setDE[1]*setC[1]+setEF[1]*setA[1])/(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
-	  prob[5]  = (setAB[1]*setF[1]+setDF[1]*setB[1]+setEF[1]*setA[1])/(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
+	  double tmp = 3e-33+(setAC[1]*setE[1]+setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1]+setEF[1]*setA[1]);
+	  prob[0]  = (setAC[1]*setE[1]+setAB[1]*setF[1]+setEF[1]*setA[1])/tmp;
+	  prob[1]  = (setAB[1]*setF[1]+setBC[1]*setD[1]+setDF[1]*setB[1])/tmp;
+	  prob[2]  = (setAC[1]*setE[1]+setBC[1]*setD[1]+setDE[1]*setC[1])/tmp;
+	  prob[3]  = (setBC[1]*setD[1]+setDF[1]*setB[1]+setDE[1]*setC[1])/tmp;
+	  prob[4]  = (setAC[1]*setE[1]+setDE[1]*setC[1]+setEF[1]*setA[1])/tmp;
+	  prob[5]  = (setAB[1]*setF[1]+setDF[1]*setB[1]+setEF[1]*setA[1])/tmp;
 	  newPointA->setFlag(int(100*prob[0]));
 	  newPointB->setFlag(int(100*prob[1]));
 	  newPointC->setFlag(int(100*prob[2]));
@@ -1336,12 +1347,13 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setCE[1] = matchDistr(clusterControl, setCE[0]);
           setDF[0] = (Adc[3] + Adc[6] - Adc[2])/sqrt(2.0);
           setDF[1] = matchDistr(clusterControl, setDF[0]);
-	  prob[0]  = (setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1])/(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
-	  prob[1]  = (setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1])/(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
-	  prob[2]  = (setAC[1]*setF[1]+setCE[1]*setB[1]+setBF[1]*setC[1])/(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
-	  prob[3]  = (setAE[1]*setD[1]+setCE[1]*setB[1]+setBD[1]*setE[1])/(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
-	  prob[4]  = (setAE[1]*setD[1]+setDF[1]*setA[1]+setBD[1]*setE[1])/(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
-	  prob[5]  = (setAC[1]*setF[1]+setDF[1]*setA[1]+setBF[1]*setC[1])/(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
+	  double tmp = 3e-33+(setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1]+setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1]);
+	  prob[0]  = (setAC[1]*setF[1]+setAE[1]*setD[1]+setDF[1]*setA[1])/tmp;
+	  prob[1]  = (setCE[1]*setB[1]+setBD[1]*setE[1]+setBF[1]*setC[1])/tmp;
+	  prob[2]  = (setAC[1]*setF[1]+setCE[1]*setB[1]+setBF[1]*setC[1])/tmp;
+	  prob[3]  = (setAE[1]*setD[1]+setCE[1]*setB[1]+setBD[1]*setE[1])/tmp;
+	  prob[4]  = (setAE[1]*setD[1]+setDF[1]*setA[1]+setBD[1]*setE[1])/tmp;
+	  prob[5]  = (setAC[1]*setF[1]+setDF[1]*setA[1]+setBF[1]*setC[1])/tmp;
 	  newPointA->setFlag(int(100*prob[0]));
 	  newPointB->setFlag(int(100*prob[1]));
 	  newPointC->setFlag(int(100*prob[2]));
@@ -1535,8 +1547,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setC[1] = matchDistr(clusterControl, setC[0]);
           setD[0] = (Adc[3] - Adc[2])/sqrt(2.0);
           setD[1] = matchDistr(clusterControl, setD[0]);
-	  probADF = (setA[1]*setD[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
-	  probBCF = (setB[1]*setC[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
+	  double tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
+	  probADF = (setA[1]*setD[1])/tmp;
+	  probBCF = (setB[1]*setC[1])/tmp;
 	  newPointA->setFlag(int(100*probADF));
 	  newPointB->setFlag(int(100*probBCF));
 	  newPointC->setFlag(int(100*probBCF));
@@ -1585,8 +1598,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setC[1] = matchDistr(clusterControl, setC[0]);
           setD[0] = (Adc[3] - Adc[2])/sqrt(2.0);
           setD[1] = matchDistr(clusterControl, setD[0]);
-	  probADF = (setA[1]*setD[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
-	  probBCF = (setB[1]*setC[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
+	  double tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
+	  probADF = (setA[1]*setD[1])/tmp;
+	  probBCF = (setB[1]*setC[1])/tmp;
 	  newPointA->setFlag(int(100*probADF));
 	  newPointB->setFlag(int(100*probBCF));
 	  newPointC->setFlag(int(100*probBCF));
@@ -1682,8 +1696,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setF[1] = matchDistr(clusterControl, setF[0]);
           setG[0] = (Adc[7] - Adc[3])/sqrt(2.0);
           setG[1] = matchDistr(clusterControl, setG[0]);
-	  probADG = (setD[1]*setG[1])/(setD[1]*setG[1]+setE[1]*setF[1]);
-	  probAEF = (setE[1]*setF[1])/(setD[1]*setG[1]+setE[1]*setF[1]);
+	  double tmp = 3e-33+(setD[1]*setG[1]+setE[1]*setF[1]);
+	  probADG = (setD[1]*setG[1])/tmp;
+	  probAEF = (setE[1]*setF[1])/tmp;
 	  newPointD->setFlag(int(100*probADG));
 	  newPointE->setFlag(int(100*probAEF));
 	  newPointF->setFlag(int(100*probAEF));
@@ -1732,8 +1747,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setF[1] = matchDistr(clusterControl, setF[0]);
           setG[0] = (Adc[6] - Adc[5])/sqrt(2.0);
           setG[1] = matchDistr(clusterControl, setG[0]);
-	  probACG = (setC[1]*setG[1])/(setC[1]*setG[1]+setD[1]*setF[1]);
-	  probADF = (setD[1]*setF[1])/(setC[1]*setG[1]+setD[1]*setF[1]);
+	  double tmp = 3e-33+(setC[1]*setG[1]+setD[1]*setF[1]);
+	  probACG = (setC[1]*setG[1])/tmp;
+	  probADF = (setD[1]*setF[1])/tmp;
 	  newPointC->setFlag(int(100*probACG));
 	  newPointD->setFlag(int(100*probADF));
 	  newPointF->setFlag(int(100*probADF));
@@ -1782,8 +1798,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setC[1] = matchDistr(clusterControl, setC[0]);
           setD[0] = (Adc[3] - Adc[2])/sqrt(2.0);
           setD[1] = matchDistr(clusterControl, setD[0]);
-	  probADG = (setA[1]*setD[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
-	  probBCG = (setB[1]*setC[1])/(setA[1]*setD[1]+setB[1]*setC[1]);
+	  double tmp = 3e-33+(setA[1]*setD[1]+setB[1]*setC[1]);
+	  probADG = (setA[1]*setD[1])/tmp;
+	  probBCG = (setB[1]*setC[1])/tmp;
 	  newPointA->setFlag(int(100*probADG));
 	  newPointB->setFlag(int(100*probBCG));
 	  newPointC->setFlag(int(100*probBCG));
@@ -1832,8 +1849,9 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setD[1] = matchDistr(clusterControl, setD[0]);
           setE[0] = (Adc[4] - Adc[1])/sqrt(2.0);
           setE[1] = matchDistr(clusterControl, setE[0]);
-	  probAEG = (setA[1]*setE[1])/(setA[1]*setE[1]+setB[1]*setD[1]);
-	  probBDG = (setB[1]*setD[1])/(setA[1]*setE[1]+setB[1]*setD[1]);
+	  double tmp = 3e-33+(setA[1]*setE[1]+setB[1]*setD[1]);
+	  probAEG = (setA[1]*setE[1])/tmp;
+	  probBDG = (setB[1]*setD[1])/tmp;
 	  newPointA->setFlag(int(100*probAEG));
 	  newPointB->setFlag(int(100*probBDG));
 	  newPointD->setFlag(int(100*probBDG));
@@ -1943,9 +1961,10 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setF[1] = matchDistr(clusterControl, setF[0]);
           setG[0] = (Adc[7] - Adc[6])/sqrt(2.0);
           setG[1] = matchDistr(clusterControl, setG[0]);
-	  probADG = (setA[1]*setD[1]*setG[1])/(setA[1]*setD[1]*setG[1]+setA[1]*setE[1]*setF[1]+setB[1]*setC[1]*setG[1]);
-	  probAEF = (setA[1]*setE[1]*setF[1])/(setA[1]*setD[1]*setG[1]+setA[1]*setE[1]*setF[1]+setB[1]*setC[1]*setG[1]);
-	  probBCG = (setB[1]*setC[1]*setG[1])/(setA[1]*setD[1]*setG[1]+setA[1]*setE[1]*setF[1]+setB[1]*setC[1]*setG[1]);
+	  double tmp  = 3e-33+(setA[1]*setD[1]*setG[1]+setA[1]*setE[1]*setF[1]+setB[1]*setC[1]*setG[1]);
+	  probADG = (setA[1]*setD[1]*setG[1])/tmp;
+	  probAEF = (setA[1]*setE[1]*setF[1])/tmp;
+	  probBCG = (setB[1]*setC[1]*setG[1])/tmp;
 	  newPointA->setFlag(int(100*(probADG+probAEF)));
 	  newPointB->setFlag(int(100*probBCG));
 	  newPointC->setFlag(int(100*probBCG));
@@ -2019,10 +2038,11 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setG[1] = matchDistr(clusterControl, setG[0]);
           setH[0] = (Adc[8] - Adc[3])/sqrt(2.0);
           setH[1] = matchDistr(clusterControl, setH[0]);
-	  probAEH = (setA[1]*setE[1]*setH[1])/(setA[1]*setE[1]*setH[1]+setA[1]*setF[1]*setG[1]+setB[1]*setD[1]*setH[1]+setC[1]*setD[1]*setG[1]);
-	  probAFG = (setA[1]*setF[1]*setG[1])/(setA[1]*setE[1]*setH[1]+setA[1]*setF[1]*setG[1]+setB[1]*setD[1]*setH[1]+setC[1]*setD[1]*setG[1]);
-	  probBDH = (setB[1]*setD[1]*setH[1])/(setA[1]*setE[1]*setH[1]+setA[1]*setF[1]*setG[1]+setB[1]*setD[1]*setH[1]+setC[1]*setD[1]*setG[1]);
-	  probCDG = (setC[1]*setD[1]*setG[1])/(setA[1]*setE[1]*setH[1]+setA[1]*setF[1]*setG[1]+setB[1]*setD[1]*setH[1]+setC[1]*setD[1]*setG[1]);
+	  double tmp = 3e-33+(setA[1]*setE[1]*setH[1]+setA[1]*setF[1]*setG[1]+setB[1]*setD[1]*setH[1]+setC[1]*setD[1]*setG[1]);
+	  probAEH = (setA[1]*setE[1]*setH[1])/tmp;
+	  probAFG = (setA[1]*setF[1]*setG[1])/tmp;
+	  probBDH = (setB[1]*setD[1]*setH[1])/tmp;
+	  probCDG = (setC[1]*setD[1]*setG[1])/tmp;
 	  newPointA->setFlag(int(100*(probAEH+probAFG)));
 	  newPointB->setFlag(int(100*probBDH));
 	  newPointC->setFlag(int(100*probCDG));
@@ -2097,10 +2117,11 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setG[1] = matchDistr(clusterControl, setG[0]);
           setH[0] = (Adc[7] - Adc[6])/sqrt(2.0);
           setH[1] = matchDistr(clusterControl, setH[0]);
-	  probADH = (setA[1]*setD[1]*setH[1])/(setA[1]*setD[1]*setH[1]+setA[1]*setE[1]*setG[1]+setB[1]*setC[1]*setH[1]+setB[1]*setE[1]*setF[1]);
-	  probAEG = (setA[1]*setE[1]*setG[1])/(setA[1]*setD[1]*setH[1]+setA[1]*setE[1]*setG[1]+setB[1]*setC[1]*setH[1]+setB[1]*setE[1]*setF[1]);
-	  probBCH = (setB[1]*setC[1]*setH[1])/(setA[1]*setD[1]*setH[1]+setA[1]*setE[1]*setG[1]+setB[1]*setC[1]*setH[1]+setB[1]*setE[1]*setF[1]);
-	  probBEF = (setB[1]*setE[1]*setF[1])/(setA[1]*setD[1]*setH[1]+setA[1]*setE[1]*setG[1]+setB[1]*setC[1]*setH[1]+setB[1]*setE[1]*setF[1]);
+          double tmp = 3e-33+(setA[1]*setD[1]*setH[1]+setA[1]*setE[1]*setG[1]+setB[1]*setC[1]*setH[1]+setB[1]*setE[1]*setF[1]);
+	  probADH = (setA[1]*setD[1]*setH[1])/tmp;
+	  probAEG = (setA[1]*setE[1]*setG[1])/tmp;
+	  probBCH = (setB[1]*setC[1]*setH[1])/tmp;
+	  probBEF = (setB[1]*setE[1]*setF[1])/tmp;
 	  newPointA->setFlag(int(100*(probADH+probAEG)));
 	  newPointB->setFlag(int(100*(probBCH+probBEF)));
 	  newPointC->setFlag(int(100*probBCH));
@@ -2182,12 +2203,13 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
           setH[1] = matchDistr(clusterControl, setH[0]);
           setI[0] = (Adc[8] - Adc[3])/sqrt(2.0);
           setI[1] = matchDistr(clusterControl, setI[0]);
-	  probAEI = (setA[1]*setE[1]*setI[1])/(setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
-	  probCEG = (setC[1]*setE[1]*setG[1])/(setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
-	  probAFH = (setA[1]*setF[1]*setH[1])/(setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
-	  probBDI = (setB[1]*setD[1]*setI[1])/(setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
-	  probCDH = (setC[1]*setD[1]*setH[1])/(setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
-	  probBFG = (setB[1]*setF[1]*setG[1])/(setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
+          double tmp = (3e-33+setA[1]*setE[1]*setI[1]+setC[1]*setE[1]*setG[1]+setA[1]*setF[1]*setH[1]+setB[1]*setD[1]*setI[1]+setC[1]*setD[1]*setH[1]+setB[1]*setF[1]*setG[1]);
+	  probAEI = (setA[1]*setE[1]*setI[1])/(tmp);
+	  probCEG = (setC[1]*setE[1]*setG[1])/(tmp);
+	  probAFH = (setA[1]*setF[1]*setH[1])/(tmp);
+	  probBDI = (setB[1]*setD[1]*setI[1])/(tmp);
+	  probCDH = (setC[1]*setD[1]*setH[1])/(tmp);
+	  probBFG = (setB[1]*setF[1]*setG[1])/(tmp);
 	  newPointA->setFlag(int(100*(probAEI+probAFH)));
 	  newPointB->setFlag(int(100*(probBDI+probBFG)));
 	  newPointC->setFlag(int(100*(probCEG+probCDH)));

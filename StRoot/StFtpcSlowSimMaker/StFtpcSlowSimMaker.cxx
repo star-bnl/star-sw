@@ -1,5 +1,11 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.29 2005/10/26 14:07:32 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.31 2006/01/16 09:40:52 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.31  2006/01/16 09:40:52  jcs
+// Calculate mMicrosecondsPerTimebin from RHIC clock frequency for each event
+//
+// Revision 1.30  2005/12/12 14:39:54  jcs
+// exit with kStWarn if StFtpcDbReader not constructed
+//
 // Revision 1.29  2005/10/26 14:07:32  jcs
 // Calculate  microsecondsPerTimebin from RHIC clock frequency if available,
 // otherwise use default from database
@@ -224,13 +230,6 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
      gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to ffn10kv"<<endm;
   }    
 
-  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
-  double freq = dbclock->getCurrentFrequency()/1000000.0;
-  if ( freq != 0)
-     microsecondsPerTimebin = 1./(freq/2.);
-  else
-     microsecondsPerTimebin = 0.;
-
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
      gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC database: Geometry"<<endm;
@@ -364,6 +363,21 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                 m_timeoffset,
 						m_cathode);
 
+    if ( dbReader->returnCode != 0 ) {
+       gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Constructing StFtpcDbReader "<<endm;
+       return kStWarn;
+    }
+
+  // calculate microsecondsPerTimebin from RHIC clock frequency for current event 
+  // if not available, use default values from offline database
+
+  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+  double freq = dbclock->getCurrentFrequency()/1000000.0;
+  if ( freq != 0)
+     microsecondsPerTimebin = 1./(freq/2.);
+  else
+     microsecondsPerTimebin = 0.;
+  dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
 
     //cout << "create parameter reader\n";
     // create parameter reader
@@ -375,7 +389,6 @@ Int_t StFtpcSlowSimMaker::Make(){
 //  cout<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endl;
 
     if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
-       dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
        cout<<"Using the following values from database:"<<endl;
        cout<<"          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<endl;
        cout<<"          EastIsInverted            = "<<dbReader->EastIsInverted()<<endl;

@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.hh,v 1.4 2005/11/22 03:57:05 bouchet Exp $
+// $Id: StScmBarrel.hh,v 1.5 2005/12/19 10:52:13 kisiel Exp $
 //
 // $Log: StScmBarrel.hh,v $
+// Revision 1.5  2005/12/19 10:52:13  kisiel
+// Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
+//
 // Revision 1.4  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -37,7 +40,8 @@ class StScmBarrel
   void  convertUFrameToOther(sdm_geom_par_st *geom_par);
   int   writePointToTable(St_scm_spt *scm_spt);
   int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl , St_scf_cluster *scf_cluster );  
-  int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);   
+  // OBSOLETE ?
+  //  int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);   
 
   StScmWafer** mWafers;
 //   int** mDeadStripP;

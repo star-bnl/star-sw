@@ -1,6 +1,9 @@
-// $Id: StScmPoint.hh,v 1.2 2005/05/17 14:16:36 lmartin Exp $
+// $Id: StScmPoint.hh,v 1.3 2005/12/19 10:52:13 kisiel Exp $
 //
 // $Log: StScmPoint.hh,v $
+// Revision 1.3  2005/12/19 10:52:13  kisiel
+// Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
+//
 // Revision 1.2  2005/05/17 14:16:36  lmartin
 // CVS tags added
 //
@@ -28,6 +31,8 @@ class StScmPoint
   void        setPositionU(float rPositionU, int iR);
   void        setXg(float rXg, int iR);
   void        setXl(float rXl, int iR);
+  void        setIdClusterP(int iIdClusterP);
+  void        setIdClusterN(int iIdClusterN);
 
   void        setPrevPoint(StScmPoint *rPrevPoint);
   void        setNextPoint(StScmPoint *rNextPoint);
@@ -42,6 +47,8 @@ class StScmPoint
   float       getPositionU(int iR);
   float       getXg(int iR);
   float       getXl(int iR);
+  int         getIdClusterP();
+  int         getIdClusterN();
 
   StScmPoint* getPrevPoint();
   StScmPoint* getNextPoint();  
@@ -60,6 +67,8 @@ class StScmPoint
   float      *mPositionU;
   float      *mXg;
   float      *mXl;
+  int         mIdClusterP;
+  int         mIdClusterN;
 
   StScmPoint *mPrevPoint;
   StScmPoint *mNextPoint;

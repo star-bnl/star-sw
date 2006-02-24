@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.45 2004/07/14 18:46:51 perev Exp $
+ * $Id: StDbBroker.cxx,v 1.49 2006/01/13 21:09:41 deph Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,18 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.49  2006/01/13 21:09:41  deph
+ * Fixed minor memory leak
+ *
+ * Revision 1.48  2006/01/13 20:44:40  deph
+ * Fixed small memory leak
+ *
+ * Revision 1.47  2005/12/19 15:47:37  deph
+ * Grabbing rowsize from St_db_maker and passing it on to StDbTableDescriptor (ssdPadding)
+ *
+ * Revision 1.46  2005/12/06 21:35:43  deph
+ * Cleaned up to remove warnings
+ *
  * Revision 1.45  2004/07/14 18:46:51  perev
  * UInt=>Int for new ROOT
  *
@@ -450,6 +462,11 @@ void * StDbBroker::Use(int tabID, int parID)
   SetEndTimeStamp(2145916799);
   SetEndTime(0);
   SetZombie(false);
+  
+  //Store the the TTABLE padded size
+    StDbTableDescriptor* TD = new StDbTableDescriptor();
+    TD->storeRowSize(m_sizeOfStruct);
+    delete TD;
 
   StDbNode* anode = m_Nodes->getNode(tabID);
   m_node=dynamic_cast<StDbTable*>(anode);
@@ -593,8 +610,8 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
   }
 
    char tmpName[128];
-   char* dbName;
-   StDbTable* table;
+   char* dbName =0;
+   StDbTable* table = 0;
    for(int i=icount;i>0;i--){
      if(i==icount){
        dbName=aword[i];

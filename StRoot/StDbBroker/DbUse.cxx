@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbUse.cxx,v 1.10 2003/09/02 17:55:35 perev Exp $
+ * $Id: DbUse.cxx,v 1.11 2005/12/06 21:33:03 deph Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: DbUse.cxx,v $
+ * Revision 1.11  2005/12/06 21:33:03  deph
+ * clean up to remove warnings
+ *
  * Revision 1.10  2003/09/02 17:55:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -57,7 +60,6 @@
 #include "Stsstream.h"
 #include "mysql.h"
 #include "mysql_com.h"
-
 #include "DbEndian.h"
 
 #include "StDbBroker.h"
@@ -77,7 +79,7 @@ extern "C" void * DbUse(uint *nRows,
 //   cout << "DbUse, structure: "<<structName<<", table: "<<tableName<< endl;
 //   cout << " nVar"<<nVar<<", sizeOfStruct "<<sizeOfStruct<< endl;
 
-uint j;
+  uint j;
 uint count;
 
 MYSQL mysql;
@@ -235,11 +237,11 @@ Query.seekp(0);
 
 //cout << "database query: " << Query.str() << endl;
 
-uint num_instances;
-int latestDirID;
-int latestStrID;
-uint sizeOfDbStruct;
-uint nDbVar;
+uint num_instances=99999;
+int latestDirID=99999;
+int latestStrID=99999;
+uint sizeOfDbStruct=99999;
+uint nDbVar=99999;
 
 if (mysql_real_query(&mysql,Query.str(),Query.pcount()-1))
   {
@@ -315,11 +317,12 @@ if(nVar!=nDbVar)
   }
 
 //to compare header file info in db and descriptor fetch db header info
-char **types;
-char **names;
-int *offset;
-int *nDims;
-int *firstDim;
+char **types =0;
+char **names =0;
+int *offset=0;
+int *nDims=0;
+int *firstDim=0;
+
 
 Query.seekp(0);
 Query<<"SELECT name, type, offset, nDims, firstDim FROM headers WHERE strID="

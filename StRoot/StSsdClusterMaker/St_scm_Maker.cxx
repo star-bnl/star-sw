@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.12 2005/12/05 23:33:43 fisyak Exp $
+ * $Id: St_scm_Maker.cxx,v 1.13 2005/12/23 14:47:32 fisyak Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.13  2005/12/23 14:47:32  fisyak
+ * DeclareNtuple only if m_Mode != 0
+ *
  * Revision 1.12  2005/12/05 23:33:43  fisyak
  * Fix bug 612, unnecessary request for StTpcHitCollection
  *
@@ -91,6 +94,7 @@ Int_t St_scm_Maker::Init(){
   if ((!m_sls_ctrl)||(!m_sls_ctrl)) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
+  if (m_Mode) {
 // 		Create SCM histograms
 
   matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",50,0,1000,50,0,1000);
@@ -118,7 +122,7 @@ Int_t St_scm_Maker::Init(){
   ladderId = new TH1F("ladderId","ladder Id",20,0,20);
  
   DeclareNtuple();
-
+  }
   return StMaker::Init();
 }//_____________________________________________________________________________
 void St_scm_Maker::DeclareNtuple()
@@ -200,7 +204,7 @@ Int_t St_scm_Maker::Make()
      return kStWarn;
    }
 
-  makeScmCtrlHistograms();
+   if (m_Mode) makeScmCtrlHistograms();
 
   return kStOK;
 }

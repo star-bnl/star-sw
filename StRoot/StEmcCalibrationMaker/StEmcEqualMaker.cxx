@@ -326,7 +326,7 @@ void StEmcEqualMaker::equalizeToFunction(int channel,TF1 *func)
 	
   if(channel<=2400)
 	{
-		float I2 = h2->Integral(h2->FindBin(MIN),h2->FindBin(MAX));
+//		float I2 = h2->Integral(h2->FindBin(MIN),h2->FindBin(MAX));
 		h2->Fit(f,"RQN");
 		m2 = f->GetParameter(1);
 		A2 = f->GetParameter(0);

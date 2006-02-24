@@ -1,5 +1,5 @@
-// 
-// $Id: StEmcRawMaker.cxx,v 1.8 2004/12/14 11:32:11 suaide Exp $
+//
+// $Id: StEmcRawMaker.cxx,v 1.9 2006/01/16 11:12:00 suaide Exp $
 
 #include <math.h>
 
@@ -28,58 +28,63 @@
 ClassImp(StEmcRawMaker)
 
 //_____________________________________________________________________________
-/* 
+/*
    Default constructor. Set Initial values for some variables
 */
 StEmcRawMaker::StEmcRawMaker(const char *name):StMaker(name)
 {
-  m_Mode = 0;
-  mEvent = 0;
-  mBemcRaw = new StBemcRaw();  
-  mEemcRaw = new StEemcRaw();  
-  eeStDb=0;
+    m_Mode = 0;
+    mEvent = 0;
+    mBemcRaw = new StBemcRaw();
+    // does not correct for tower map bug at production level by default
+    // this assures consistency between the muDst/StEvent files and database
+    mBemcRaw->towerMapBug(kFALSE);
+
+    mEemcRaw = new StEemcRaw();
+    eeStDb=0;
 }
 
 //_____________________________________________________________________________
-/*! 
+/*!
    Default destructor
 */
 StEmcRawMaker::~StEmcRawMaker()
-{
-}
+{}
 
 //_____________________________________________________________________________
-/*! 
+/*!
    Init function. Initializes the histograms and all other variables 
 */
 Int_t StEmcRawMaker::Init()
-{     
-  //................BEMC stuff ..............
-  mBemcRaw->initHisto();
-  mBemcRaw->printConf();
-  if(m_Mode&0x1==1) 
-  {
-    gMessMgr->Info()<<"Setting BEMC debug Mode -> save all hits into StEvent"<<endm;
-    mBemcRaw->saveAllStEvent(kTRUE);
-    mBemcRaw->initQAHisto();
-  }
-  //................EEMC stuff ..............
-  eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
-  
-  if(eeStDb==0){
-    gMessMgr->Message("","W") <<  GetName()<<"::Init(),  FATAL !!! \n   did not found \"eeDb-maker\", all EEMC data will be ignored\n fix it, JB\n" <<endm;
-  }
+{
+    //................BEMC stuff ..............
+    mBemcRaw->initHisto();
+    mBemcRaw->printConf();
+    if(m_Mode&0x1==1)
+    {
+        gMessMgr->Info()<<"Setting BEMC debug Mode -> save all hits into StEvent"<<endm;
+        mBemcRaw->saveAllStEvent(kTRUE);
+        mBemcRaw->initQAHisto();
+    }
+    //................EEMC stuff ..............
+    eeStDb= (StEEmcDbMaker*) GetMaker("eeDb");
 
-  mEemcRaw->initHisto(); // EEMC histos to monitor corruption
+    if(eeStDb==0)
+    {
+        gMessMgr->Message("","W") <<  GetName()<<"::Init(),  FATAL !!! \n   did not found \"eeDb-maker\", all EEMC data will be ignored\n fix it, JB\n" <<endm;
+    }
 
-  if (IAttr(".histos")) {
-    /* EEMC and BEMC  has no unneeded histos to skip during production,
-       all monitor corruption, 
-       require  ~1000 float bins in total, JB
-    */
-  }
-  
-  return StMaker::Init();
+    mEemcRaw->initHisto(); // EEMC histos to monitor corruption
+
+    if (IAttr(".histos"))
+    {
+        /* EEMC and BEMC  has no unneeded histos to skip during production,
+           all monitor corruption, 
+           require  ~1000 float bins in total, JB
+        */
+    }
+
+    return StMaker::Init();
 }
 
 //____________________________________________________
@@ -88,35 +93,42 @@ Int_t StEmcRawMaker::Init()
   Refresh DB info for new run
 */
 Int_t StEmcRawMaker::InitRun(Int_t runNumber)
-{         
-  // Load DB and create decoder for the BEMC
-  gMessMgr->Info() <<"Getting database tables for the BEMC detector "<<endm;
-  mBemcRaw->createDecoder(GetDate(),GetTime());  	
-  mBemcRaw->getTables()->loadTables((StMaker*)this);
+{
+    // Load DB and create decoder for the BEMC
+    gMessMgr->Info() <<"Getting database tables for the BEMC detector "<<endm;
+    mBemcRaw->createDecoder(GetDate(),GetTime());
+    mBemcRaw->getTables()->loadTables((StMaker*)this);
 
-  //................EEMC stuff ..............
+    //................EEMC stuff ..............
 
-  gMessMgr->Message("","I") << GetName()<<"::InitRun("<< runNumber<<")" <<endm;
-  if(eeStDb==0){
-    gMessMgr->Message("","W") << GetName()<<"::InitRun() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n"<<endm;
-  } else if ( eeStDb->valid()==0 ) {
-    gMessMgr->Message("","W") << GetName()<<"::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n"<<endm;
-    eeStDb=0;
-  } else {// all is OK, no warning
-    //eeStDb->exportAscii();
-  }
-  mEemcRaw->setDb(eeStDb);
-  
-  if(eeStDb)
-  {
-    int icr;
-    for(icr=0;icr<eeStDb->getNFiber();icr++) {
-      const EEmcDbCrate *fiber=eeStDb-> getFiber(icr);
-      printf(" eemcDB : ");fiber->print();
+    gMessMgr->Message("","I") << GetName()<<"::InitRun("<< runNumber<<")" <<endm;
+    if(eeStDb==0)
+    {
+        gMessMgr->Message("","W") << GetName()<<"::InitRun() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n"<<endm;
     }
-  }
+    else if ( eeStDb->valid()==0 )
+    {
+        gMessMgr->Message("","W") << GetName()<<"::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n"<<endm;
+        eeStDb=0;
+    }
+    else
+    {// all is OK, no warning
+        //eeStDb->exportAscii();
+    }
+    mEemcRaw->setDb(eeStDb);
 
-  return StMaker::InitRun(runNumber);
+    if(eeStDb)
+    {
+        int icr;
+        for(icr=0;icr<eeStDb->getNFiber();icr++)
+        {
+            const EEmcDbCrate *fiber=eeStDb-> getFiber(icr);
+            printf(" eemcDB : ");
+            fiber->print();
+        }
+    }
+
+    return StMaker::InitRun(runNumber);
 }
 
 //_____________________________________________________________________________
@@ -125,47 +137,50 @@ Int_t StEmcRawMaker::InitRun(Int_t runNumber)
 */
 Int_t StEmcRawMaker::Finish()
 {
-  return kStOk;
+    return kStOk;
 }
 //____________________________________
-void StEmcRawMaker::setPrint(Bool_t a) 
+void StEmcRawMaker::setPrint(Bool_t a)
 {
-  if(a)
-  {
-     gMessMgr->SwitchOn("D");
-     gMessMgr->SwitchOn("I");
-     gMessMgr->SwitchOn("W");
-     gMessMgr->SwitchOn("E");
-  }    
-  else
-  {
-     gMessMgr->SwitchOff("D");
-     gMessMgr->SwitchOff("I");
-     gMessMgr->SwitchOff("W");
-     gMessMgr->SwitchOff("E");
-  }
-} 
+    if(a)
+    {
+        gMessMgr->SwitchOn("D");
+        gMessMgr->SwitchOn("I");
+        gMessMgr->SwitchOn("W");
+        gMessMgr->SwitchOn("E");
+    }
+    else
+    {
+        gMessMgr->SwitchOff("D");
+        gMessMgr->SwitchOff("I");
+        gMessMgr->SwitchOff("W");
+        gMessMgr->SwitchOff("E");
+    }
+}
 //_____________________________________________________________________________
 /*!
   Process the event. 
 */
 Int_t StEmcRawMaker::Make()
-{    
-  TStopwatch clock;
-  clock.Start();
-  gMessMgr->Info() <<"StEmcRawMaker::Make()******************************************************************"<<endm;  
-  if(!prepareEnvironment())  gMessMgr->Warning()<<"Could not prepare the environment to process the event "<<endm;    
-  
-  if(!makeBemc())  gMessMgr->Warning()<<"Could not process BEMC information properly "<<endm;
+{
+    TStopwatch clock;
+    clock.Start();
+    gMessMgr->Info() <<"StEmcRawMaker::Make()******************************************************************"<<endm;
+    if(!prepareEnvironment())
+        gMessMgr->Warning()<<"Could not prepare the environment to process the event "<<endm;
 
-  if(!makeEemc())  gMessMgr->Warning()<<"Could not process EEMC information properly "<<endm;
+    if(!makeBemc())
+        gMessMgr->Warning()<<"Could not process BEMC information properly "<<endm;
 
-  fillHistograms();
-  clock.Stop();
-  gMessMgr->Info() <<"Time to run StEmcRawMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<endm;
-  gMessMgr->Info() <<"*******************************************************************************************"<<endm;
+    if(!makeEemc())
+        gMessMgr->Warning()<<"Could not process EEMC information properly "<<endm;
 
-  return kStOK;
+    fillHistograms();
+    clock.Stop();
+    gMessMgr->Info() <<"Time to run StEmcRawMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<endm;
+    gMessMgr->Info() <<"*******************************************************************************************"<<endm;
+
+    return kStOK;
 }
 //_____________________________________________________________________________
 /*!
@@ -173,52 +188,56 @@ Int_t StEmcRawMaker::Make()
 */
 Bool_t StEmcRawMaker::prepareEnvironment()
 {
-  mEvent = 0;
+    mEvent = 0;
 
-  gMessMgr->Info() <<"Get StEvent pointer and make it ready for filling"<<endm;
-  ////////////////////////////////////////////////////////////
-  // Get StEvent pointer and make it ready for filling
-  //
-  mEvent = (StEvent*)GetInputDS("StEvent");
-  StEmcCollection *emc = NULL;
+    gMessMgr->Info() <<"Get StEvent pointer and make it ready for filling"<<endm;
+    ////////////////////////////////////////////////////////////
+    // Get StEvent pointer and make it ready for filling
+    //
+    mEvent = (StEvent*)GetInputDS("StEvent");
+    StEmcCollection *emc = NULL;
 
-  if(mEvent) {
-    emc = mEvent->emcCollection();
-  } else  {
-    mEvent = new StEvent();
-    AddData(mEvent);
-    emc = mEvent->emcCollection();
-  }
+    if(mEvent)
+    {
+        emc = mEvent->emcCollection();
+    }
+    else
+    {
+        mEvent = new StEvent();
+        AddData(mEvent);
+        emc = mEvent->emcCollection();
+    }
 
-  if(!emc) 
-  {
-    emc = new StEmcCollection();
-    mEvent->setEmcCollection(emc);
-    gMessMgr->Message("","D") << GetName()<<"::prepareEnvironment() has added a non existing StEmcCollection()"<<endm;
-  }
+    if(!emc)
+    {
+        emc = new StEmcCollection();
+        mEvent->setEmcCollection(emc);
+        gMessMgr->Message("","D") << GetName()<<"::prepareEnvironment() has added a non existing StEmcCollection()"<<endm;
+    }
 
-  StEmcRawData *bemcRaw = emc->bemcRawData();
-  if(bemcRaw)
-  {
-    gMessMgr->Message("","W") << GetName()<<"::prepareEnvironment() found old StEmcRawData *bemcRaw. Will delete it and create a new one"<<endm;
-    delete bemcRaw;
-  }
-  bemcRaw = new StEmcRawData();
-  emc->setBemcRawData(bemcRaw);
+    StEmcRawData *bemcRaw = emc->bemcRawData();
+    if(bemcRaw)
+    {
+        gMessMgr->Message("","W") << GetName()<<"::prepareEnvironment() found old StEmcRawData *bemcRaw. Will delete it and create a new one"<<endm;
+        delete bemcRaw;
+    }
+    bemcRaw = new StEmcRawData();
+    emc->setBemcRawData(bemcRaw);
 
-  StEmcRawData *eemcRaw = emc->eemcRawData();
-  if(eemcRaw)  {
-    gMessMgr->Message("","W") << GetName()<<"::prepareEnvironment() found old StEmcRawData *eemcRaw, TOTAL failure,\n STOP this chain, JB"<<endm;
-    delete eemcRaw;
-  }
-  eemcRaw = new StEmcRawData(); // always create new collection for EEMC
-  emc->setEemcRawData(eemcRaw);
-  
+    StEmcRawData *eemcRaw = emc->eemcRawData();
+    if(eemcRaw)
+    {
+        gMessMgr->Message("","W") << GetName()<<"::prepareEnvironment() found old StEmcRawData *eemcRaw, TOTAL failure,\n STOP this chain, JB"<<endm;
+        delete eemcRaw;
+    }
+    eemcRaw = new StEmcRawData(); // always create new collection for EEMC
+    emc->setEemcRawData(eemcRaw);
 
-  //
-  ////////////////////////////////////////////////////////////
-  
-  return kTRUE;  
+
+    //
+    ////////////////////////////////////////////////////////////
+
+    return kTRUE;
 }
 
 //_____________________________________________________________________________
@@ -227,16 +246,16 @@ Bool_t StEmcRawMaker::prepareEnvironment()
 */
 Bool_t StEmcRawMaker::makeBemc()
 {
-  gMessMgr->Info() <<"Copying BEMC information from DAQ structure "<<endm;
-  TDataSet* TheData   = GetDataSet("StDAQReader");
-  if(!TheData)
-  {
-    gMessMgr->Warning() <<"Could not find DAQ Reader "<<endm;
-    return kFALSE;
-  }    
-  mBemcRaw->setDate(GetDate());
-  mBemcRaw->getTables()->loadTables((StMaker*)this);
-  return mBemcRaw->make(TheData,mEvent);
+    gMessMgr->Info() <<"Copying BEMC information from DAQ structure "<<endm;
+    TDataSet* TheData   = GetDataSet("StDAQReader");
+    if(!TheData)
+    {
+        gMessMgr->Warning() <<"Could not find DAQ Reader "<<endm;
+        return kFALSE;
+    }
+    mBemcRaw->setDate(GetDate());
+    mBemcRaw->getTables()->loadTables((StMaker*)this);
+    return mBemcRaw->make(TheData,mEvent);
 }
 
 //_____________________________________________________________________________
@@ -245,30 +264,34 @@ Bool_t StEmcRawMaker::makeBemc()
 */
 Bool_t StEmcRawMaker::makeEemc()
 {
-  gMessMgr->Info() <<"Copying EEMC information from daqReader->StEvent "<<endm;
-  St_DataSet *daq = GetDataSet("StDAQReader");
+    gMessMgr->Info() <<"Copying EEMC information from daqReader->StEvent "<<endm;
+    St_DataSet *daq = GetDataSet("StDAQReader");
 
-  if (! daq) {
-    gMessMgr->Message("","W") << GetName()<<"::makeEemc() , StDAQReader not  available" << endm;
-    return false;
-  }
+    if (! daq)
+    {
+        gMessMgr->Message("","W") << GetName()<<"::makeEemc() , StDAQReader not  available" << endm;
+        return false;
+    }
 
-  StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject());
+    StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject());
 
-  if (!fromVictor ) {
-    gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , daq->GetObject() failed" << endm;
-    return false;
-  }
+    if (!fromVictor )
+    {
+        gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , daq->GetObject() failed" << endm;
+        return false;
+    }
 
-  StEEMCReader *eeReader  = fromVictor->getEEMCReader();
-  if(!eeReader) return false ;
+    StEEMCReader *eeReader  = fromVictor->getEEMCReader();
+    if(!eeReader)
+        return false ;
 
-  if (! eeReader) {
-    gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , fromVictor->getEEMCReader() failed" << endm;
-    return false;
-  }
+    if (! eeReader)
+    {
+        gMessMgr->Message("","W") <<  GetName()<<"::makeEemc() , fromVictor->getEEMCReader() failed" << endm;
+        return false;
+    }
 
-  return mEemcRaw->make( eeReader,mEvent ); //eeReader,eemcRaw, token);
+    return mEemcRaw->make( eeReader,mEvent ); //eeReader,eemcRaw, token);
 }
 
 //_____________________________________________________________________________
@@ -277,10 +300,14 @@ Bool_t StEmcRawMaker::makeEemc()
 */
 void StEmcRawMaker::fillHistograms()
 {
-  if(mBemcRaw) mBemcRaw->fillHisto();
+    if(mBemcRaw)
+        mBemcRaw->fillHisto();
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.9  2006/01/16 11:12:00  suaide
+// tower map bug fixed and astyle run
+//
 // Revision 1.8  2004/12/14 11:32:11  suaide
 // added histograms for status tables creation
 //

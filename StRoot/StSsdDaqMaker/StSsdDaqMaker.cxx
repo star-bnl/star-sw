@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.9 2005/06/16 14:27:00 bouchet Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.10 2005/12/07 20:40:06 perev Exp $
 //
 // $log$
 //
@@ -170,7 +170,7 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
   gMessMgr->Info() << "______________________________________________" << endm;
 
   gMessMgr->Info() << " StSsdDaqMaker::InitRun(int runumber) - Done " << endm;
-
+  return 0;
 
 }
 //_____________________________________________________________________________

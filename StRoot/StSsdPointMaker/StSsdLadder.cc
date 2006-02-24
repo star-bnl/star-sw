@@ -1,6 +1,9 @@
-// $Id: StSsdLadder.cc,v 1.5 2005/03/18 14:06:30 lmartin Exp $
+// $Id: StSsdLadder.cc,v 1.7 2006/01/18 22:49:22 jeromel Exp $
 //
 // $Log: StSsdLadder.cc,v $
+// Revision 1.7  2006/01/18 22:49:22  jeromel
+// Removed latest change (no time to check new method)
+//
 // Revision 1.5  2005/03/18 14:06:30  lmartin
 // missing CVS header added
 //

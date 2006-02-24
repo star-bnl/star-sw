@@ -1,6 +1,21 @@
-// $Id: StSsdBarrel.cc,v 1.14 2005/08/11 13:51:38 lmartin Exp $
+// $Id: StSsdBarrel.cc,v 1.20 2006/01/18 22:49:22 jeromel Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.20  2006/01/18 22:49:22  jeromel
+// Removed latest change (no time to check new method)
+//
+// Revision 1.18  2005/12/23 21:33:17  perev
+// Some defence for 1/0 added
+//
+// Revision 1.17  2005/12/20 13:47:14  lmartin
+// better hw position encoding in writePointToContainer (matching the new decoding in StEvent)
+//
+// Revision 1.16  2005/12/20 10:53:17  lmartin
+// ReadNoiseFromTable method modified to ignore rows with id=0
+//
+// Revision 1.15  2005/12/07 20:41:54  perev
+// (int) added. WarnOff
+//
 // Revision 1.14  2005/08/11 13:51:38  lmartin
 // PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
 //
@@ -279,22 +294,17 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
   int iSide  = 0;
   for (int i = 0 ; i < strip_calib->GetNRows(); i++)
     {
-      nStrip  = (int)(noise[i].id/100000.);
-      idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
-      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
-      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
-      iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
-      mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
-      //       if (iLad==11 && iWaf==8 && nStrip <10) 
-      //	cout<<"iLad,idWaf,nStrip,iSide,rms = "<<iLad
-      //	    <<" "<<idWaf
-      //	    <<" "<<nStrip
-      //	    <<" "<<iSide
-      //	    <<" "<<noise[i].rms<<endl;
+      if (noise[i].id>0 && noise[i].id<=76818620) {
+	nStrip  = (int)(noise[i].id/100000.);
+	idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+	iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
+	NumberOfNoise++;
+      }
     }
-  NumberOfNoise = strip_calib->GetNRows();
   return NumberOfNoise;
-//   return noise_h->nok;
 }
 
 
@@ -373,7 +383,7 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	    cluster.adc_count       = pClusterP->getTotAdc();
 	    cluster.first_adc_count = pClusterP->getFirstAdc();
 	    cluster.last_adc_count  = pClusterP->getLastAdc();
-	    cluster.noise_count     = pClusterP->getTotNoise();
+	    cluster.noise_count     = (int)pClusterP->getTotNoise();
 	    cluster.flag            = pClusterP->getFlag();
 	    cluster.strip_mean      = pClusterP->getStripMean();
 	    for (i = 0 ; i < 5 ; i++)
@@ -393,7 +403,7 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
 	    cluster.adc_count       = pClusterN->getTotAdc();
 	    cluster.first_adc_count = pClusterN->getFirstAdc();
 	    cluster.last_adc_count  = pClusterN->getLastAdc();
-	    cluster.noise_count     = pClusterN->getTotNoise();
+	    cluster.noise_count     = (int)pClusterN->getTotNoise();
 	    cluster.flag            = pClusterN->getFlag();
 	    cluster.strip_mean      = pClusterN->getStripMean();
 	    for (i = 0 ; i < 5 ; i++)
@@ -466,16 +476,16 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	    // 2^23 23-27 strip of the p-side cluster relat. to n-side (-15,+16)
 	    // 2^28 28-29 n-side cluster size(1-4) 
 	    // 2^30 30-31 p-side cluster size(1-4)
-            hw  =         
-                         8                                                                             
-	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
-	      +       8192 * (int)cluster_P_j->getStripMean()                                          
-	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
-	      +  268435456 * (int)cluster_N_j->getClusterSize()                                       
-	      + 1073741824 * (int)cluster_P_j->getClusterSize();
-	    currentSsdHit->setHardwarePosition(hw);
+	    hw  =         
+	                 8                                                                             
+  	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+ 	      +       8192 * (int)cluster_N_j->getStripMean()                                          
+  	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
+ 	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
+ 	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
+  	    currentSsdHit->setHardwarePosition(hw);
 
-	    inContainer += ssdHitColl->addHit(currentSsdHit);
+  	    inContainer += ssdHitColl->addHit(currentSsdHit);
 	  }// Container condition
 
 	  if (1) {//Jerome is Happy, Fill the Table
@@ -539,8 +549,9 @@ int StSsdBarrel::doClusterMatching(ssdDimensions_st *dimensions, StSsdClusterCon
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       { 
 	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(dimensions, clusterControl);
-	nPerfect  = mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(dimensions, clusterControl);
+	nPerfect  =  mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(dimensions, clusterControl);
 	nSolved  += nPerfect;
+	if (!nPerfect) continue;
 	            mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, clusterControl);
 	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(dimensions, clusterControl);
       }

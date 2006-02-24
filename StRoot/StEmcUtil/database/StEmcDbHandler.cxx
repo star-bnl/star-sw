@@ -20,6 +20,8 @@ StEmcDbHandler::StEmcDbHandler()
   setTableNode();
   setTimeStampLimits();  
   setTimeStamp();
+  setMaxEntryTime();
+  setFlavor();
 }
 //------------------------------------------------------------------------------
 /*! Class destructor */
@@ -34,7 +36,18 @@ StDbTable* StEmcDbHandler::getDbTable()
   StDbConfigNode* node = dbMngr->initConfig(mTableNode.Data());
   StDbTable* table = node->addDbTable(mTableName.Data());
   dbMngr->setRequestTime(mTimeStamp.Data());
-  dbMngr->fetchDbTable(table);
+  
+  const char *entryTime, *begin;
+  char whereClause[256];  
+  entryTime = mMaxTime;
+  begin = mTimeStamp;
+  sprintf(whereClause, " where flavor='%s' and beginTime<='%s' and entryTime<='%s'  Order by beginTime desc limit 1",
+          mFlavor.Data(),begin,entryTime);   
+  char query[256];
+  ostrstream qs(query,256);
+  qs<<whereClause<<ends;  
+  dbMngr->fetchDbTable(table,whereClause);
+  //dbMngr->fetchDbTable(table);
   TString time=timeToSqlTime(table->getBeginDateTime()); 
   setTimeStamp((char*) time.Data());
   mTable = table;
@@ -45,24 +58,27 @@ StDbTable* StEmcDbHandler::getDbTable()
 TString* StEmcDbHandler::getTimeStampList()
 {
   
-  for (UInt_t i=0; i< 1000; i++) mTimeStampList[i]="NULL";
+  for (UInt_t i=0; i< 1000; i++) mTimeStampList[i]="";
   
   StDbManager* dbMngr = StDbManager::Instance();
   StDbConfigNode* node = dbMngr->initConfig(mTableNode);
   StDbTable* table = node->addDbTable(mTableName.Data());
+  dbMngr->setStoreTime(mMaxTime.Data());
   
   StDataBaseI* db=dbMngr->findDb(mTableNode.Data());
   
-  const char *lStamp, *fStamp;
+  const char *lStamp, *fStamp, *entryTime;
   char whereClause[256];
   
   fStamp = mFstTimeStamp;
   lStamp = mLstTimeStamp;
-  sprintf(whereClause, " where beginTime<='%s' and beginTime>='%s' ", lStamp, fStamp); 
+  entryTime = mMaxTime;
+  sprintf(whereClause, " where flavor='%s' and beginTime<='%s' and beginTime>='%s' and entryTime<='%s' ", mFlavor.Data(), lStamp, fStamp, entryTime); 
   
   char query[256];
   ostrstream qs(query,256);
   qs<<whereClause<<ends;
+  cout<<"\n QUERY = "<<whereClause<<endl;
   
   UInt_t* timeStampList;
   timeStampList = db->QueryDbTimes(table,query,1);  // opt=1 means don't get any data!
