@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.11 2004/03/01 22:43:42 posk Exp $
+// $Id: minBias.C,v 1.12 2006/02/24 18:36:04 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
@@ -24,21 +24,31 @@
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
-  const  int nCens = 9;
-  int    nSels = 2;
-  const  int nHars = 4;
-  char   fileName[80];
-  TFile* histFile[nCens+1];
-  TH1*   hist[nCens+1];
-  TH2*   yieldPartHist[nCens];
+  const   int nCens = 9;
+  int     nSels = 2;
+  const   int nHars = 4;
+  char    fileName[80];
+  TFile*  histFile[nCens+1];
+  TH1*    hist[nCens+1];
+  TH2*    yieldPartHist[nCens];
+  TH1*    yieldPartHistPt[nCens];
+  TH1*    yieldPartHistEta[nCens];
+  Float_t yieldTotal[nCens];
   
   // names of histograms to be added with weighting
   const char* baseName[] = { 
     "Flow_Res_",
-    "Flow_v2D_",   // must be first
+    "Flow_v2D_",   // must be before vEta and vPt
     "Flow_vEta_",
     "Flow_vPt_",
     "Flow_v_",
+    "FlowLYZ_r0theta_",
+    "FlowLYZ_Vtheta_",
+    "FlowLYZ_V_",
+    "FlowLYZ_vr0_",
+    "FlowLYZ_vEta_",
+    "FlowLYZ_vPt_",
+    "FlowLYZ_v_",
     "Flow_v2D_ScalarProd_",
     "Flow_vEta_ScalarProd_",
     "Flow_vPt_ScalarProd_",
@@ -94,11 +104,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
   cout<<endl;
   for (int n = 0; n < nCens; n++) {
     yieldPartHist[n] = dynamic_cast<TH2*>(histFile[n]->Get("Flow_YieldPart2D"));
-    if (!yieldPartHist[n]) {
-      cout << "### Can't find yield part histogram Flow_YieldPart2D"
-	   << endl;
-      return;
-    }
+    yieldPartHistPt[n] = dynamic_cast<TH1*>(histFile[n]->Get("FlowLYZ_YieldPartPt"));
+    yieldPartHistEta[n] = dynamic_cast<TH1*>(histFile[n]->Get("FlowLYZ_YieldPartEta"));
+    if (yieldPartHistPt[n]) { yieldTotal[n] = yieldPartHistPt[n]->Integral(); }
   }
 
   for (int pageNumber = 0; pageNumber < nNames; pageNumber++ ) {
@@ -111,33 +119,27 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
       bool noHars = kFALSE;
       int nHar = nHars;
       if (strstr(baseName[pageNumber],"_v_")!=0 ||
-	  strstr(baseName[pageNumber],"Res")!=0) {
+	  strstr(baseName[pageNumber],"Res")!=0 ||
+	  strstr(baseName[pageNumber],"_V_")!=0 ||
+	  strstr(baseName[pageNumber],"_vr0_")!=0) {
 	noHars = kTRUE;
 	nHar = 1;
       } 
       for (int harN = 0; harN < nHar; harN++) {	
 	
 	// construct histName
-	char sel[2];
-	sprintf(sel,"%d",selN+1);
-	char har[2];
-	sprintf(har,"%d",harN+1);
 	TString* histName = new TString(baseName[pageNumber]);
-	histName->Append("Sel");
-	histName->Append(*sel);
+	*histName += "Sel";
+	*histName += selN+1;
 	if (!noHars) {	
-	  histName->Append("_Har");
-	  histName->Append(*har);
+	  *histName += "_Har";
+	  *histName += harN+1;
 	}
 	cout << "hist name= " << histName->Data() << endl;
 		
 	// get the histograms
 	for (int n = 0; n < nCens+1; n++) {
 	  hist[n] = dynamic_cast<TH1*>(histFile[n]->Get(histName->Data()));
-	  if (!hist[n]) {
-	    cout << "### Can't find histogram " << histName->Data() << endl;
-	    //return;
-	  }
 	}
 
 	const int lastHist = 3;
@@ -163,14 +165,10 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	}
 	
 	// loop over the bins
-	if (strstr(baseName[pageNumber],"Res")) { // with error weighting
-	  cout<<"  With error weighting"<<endl;
-	  float content;
-	  float error;
-	  float errorSq;
-	  float meanContent;
-	  float meanError;
-	  float weight;
+	if (strstr(baseName[pageNumber],"Res") ||
+	    strstr(baseName[pageNumber],"Cumul")) { // with error weighting
+	  cout << "  With error weighting" << endl;
+	  float content, error, errorSq, meanContent, meanError, weight;
 	  for (int bin = 0; bin < nBins; bin++) {
 	    meanContent = 0.;
 	    meanError   = 0.;
@@ -194,33 +192,19 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	    }
 	  }
 	} else {                                   // with yield weighting
-	  cout<<"  With yield weighting"<<endl;
-	  float v;
-	  float verr;
-	  float vSum;
-	  double vSum2;
-	  float content;
-	  float error;
-	  float error2sum;
-	  float yield;
-	  float yieldSum;
-	  float y;
-	  float pt;
-	  double vRms;
-	  double verrRms;
-	  double vSumRms;
-	  double yieldSumRms;
-	  double vSumRms2;
+	  cout << "  With yield weighting" << endl;
+	  float v, verr, content, error, yield, y, pt;
+	  double vSum, vSum2, error2sum, yieldSum, vRms, verrRms, vSumRms, yieldSumRms, vSumRms2;
 	  for (int bin = 0; bin < nBins; bin++) {
-	    v         = 0.;
-	    verr      = 0.;
-	    vSum      = 0.;
-	    vSum2     = 0.;
-	    content   = 0.;
-	    error     = 0.;
-	    error2sum = 0.;
-	    yield     = 0.;
-	    yieldSum  = 0.;
+	    v           = 0.;
+	    verr        = 0.;
+	    vSum        = 0.;
+	    vSum2       = 0.;
+	    content     = 0.;
+	    error       = 0.;
+	    error2sum   = 0.;
+	    yield       = 0.;
+	    yieldSum    = 0.;
 	    vRms        = 0.;
 	    verrRms     = 0.;
 	    vSumRms     = 0.;
@@ -228,25 +212,35 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	    vSumRms2    = 0.;
 	    for (int n = 0; n < nCens; n++) {
 	      if (hist[n]) {
-		if (strstr(histName->Data(),"v2D")) {
-		  yield = yieldPartHist[n]->GetBinContent(bin);
-		} else if (strstr(histName->Data(),"vEta")) {
-		  yield = yieldPartHist[n]->Integral(bin, bin, 1, yBins);
-		  if (selN==0 && harN==0) {
-		    y = yieldPartHist[n]->GetXaxis()->GetBinCenter(bin);
-		    yieldY->Fill(y, yield);
+		if (strstr(baseName[pageNumber],"LYZ")) {
+		  if (strstr(histName->Data(), "vEta")) {
+		    yield = yieldPartHistEta[n]->GetBinContent(bin);
+		  } else if (strstr(histName->Data(), "vPt")) {
+		    yield = yieldPartHistPt[n]->GetBinContent(bin);
+		  } else {                               // r0theta, Vtheta, _V_, vr0, _v_, Gtheta
+		    yield = yieldTotal[n];
 		  }
-		} else if (strstr(histName->Data(),"vPt")) {
-		  yield = yieldPartHist[n]->Integral(1, xBins, bin, bin);
-		  if (selN==0 && harN==0) {
-		    pt = yieldPartHist[n]->GetYaxis()->GetBinCenter(bin);
-		    yieldPt->Fill(pt, yield);
+		} else {	
+		  if (strstr(histName->Data(),"v2D")) {
+		    yield = yieldPartHist[n]->GetBinContent(bin);
+		  } else if (strstr(histName->Data(),"vEta")) {
+		    yield = yieldPartHist[n]->Integral(bin, bin, 1, yBins);
+		    if (selN==0 && harN==0) {
+		      y = yieldPartHist[n]->GetXaxis()->GetBinCenter(bin);
+		      yieldY->Fill(y, yield);
+		    }
+		  } else if (strstr(histName->Data(),"vPt")) {
+		    yield = yieldPartHist[n]->Integral(1, xBins, bin, bin);
+		    if (selN==0 && harN==0) {
+		      pt = yieldPartHist[n]->GetYaxis()->GetBinCenter(bin);
+		      yieldPt->Fill(pt, yield);
+		    }
+		  } else {                                        // _v
+		    yield = yieldPartHist[n]->Integral();
 		  }
-		} else {                                        // _v
-		  yield = yieldPartHist[n]->Integral();
 		}
 		v = hist[n]->GetBinContent(bin);
-		if(yield==1) { // special case to calculate the correct error
+		if (yield==1) { // special case to calculate the correct error
 		  vSumRms     += v;
 		  yieldSumRms += yield;
 		  vSumRms2    += v*v;
@@ -262,8 +256,8 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	      }
 	    }
 	    
-	    if(yieldSumRms) vRms = vSumRms / yieldSumRms;
-	    if(yieldSumRms>1) {
+	    if (yieldSumRms) vRms = vSumRms / yieldSumRms;
+	    if (yieldSumRms>1) {
 	      verrRms    = sqrt(vSumRms2 - vSumRms*vSumRms / yieldSumRms)
 		/ yieldSumRms;
 	      yieldSum  += yieldSumRms;
@@ -301,6 +295,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.12  2006/02/24 18:36:04  posk
+// Updated for LeeYangZerosMaker histograms.
+//
 // Revision 1.11  2004/03/01 22:43:42  posk
 // Changed some "->" to ".".
 //
