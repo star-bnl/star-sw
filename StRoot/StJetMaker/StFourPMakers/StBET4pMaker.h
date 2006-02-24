@@ -30,7 +30,7 @@ public:
     
     ///Require StMuDstMaker pointer at instantiation
     //StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e);
-    StBET4pMaker(const char* name, StMuDstMaker* uDstMaker);
+    StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix=true);
     
     ///Default destructor
     virtual ~StBET4pMaker() {};

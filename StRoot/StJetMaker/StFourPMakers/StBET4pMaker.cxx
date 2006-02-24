@@ -57,8 +57,8 @@ ClassImp(StBET4pMaker)
 //StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e)
 //: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mAdc2E(adc2e), mTables(new StBemcTables()
     
-    StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker)
-	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables())
+    StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
+	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables(doTowerSwapFix))
 {
     cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
     mCorrupt = false;
