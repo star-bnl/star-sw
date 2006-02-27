@@ -317,7 +317,7 @@ void eeFreq(FileType *fd, TPad *c, EemcTwMask *m) {
       m->phiG.Draw("P");
     }
   }
-  if(h[0]) addJPphiLimits(h[0]);
+  if(h[0]) addJPphiLimits(h[0]); 
  
 }
 
@@ -795,6 +795,7 @@ void addJPphiLimits(TH1 *h){
     TLine *ln=new TLine(x1,-0.2,x1,12.5); 
     Lx->Add(ln);
     int jpid=i+2;
+    if(jpid==7)jpid=1;
     TString aa="Jet Patch "; aa+=jpid;
     TText *tt=new TText(x1+1,12.6,aa);
     tt->SetTextSize(0.08);
