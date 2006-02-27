@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.35 2005/03/30 17:56:59 fisyak Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.36 2006/02/27 19:20:53 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.36  2006/02/27 19:20:53  fisyak
+ * Set simu flag for tpcISTimeOffsets and tpcOSTimeOffsets tables
+ *
  * Revision 1.35  2005/03/30 17:56:59  fisyak
  * Fix a bug with flavor handling, StTpcDb has to be instantiated after setting flavor
  *
@@ -430,9 +433,11 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
 
   // Set Table Flavors
    if (m_Mode==1){
-     gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for database " << endm;
-     SetFlavor("sim","tpcGlobalPosition");
-     SetFlavor("sim","tpcSectorPosition");
+     const Char_t *tabNames[4] = {"tpcGlobalPosition","tpcSectorPosition", "tpcISTimeOffsets", "tpcOSTimeOffsets"};
+     for (Int_t i = 0; i < 4; i++) {
+       SetFlavor("sim",tabNames[i]); 
+       gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for table " << "\t" << tabNames[i] << endm;
+     }
    }
    if (m_dvtype==0) {
    SetFlavor("ofl+laserDV","tpcDriftVelocity");
