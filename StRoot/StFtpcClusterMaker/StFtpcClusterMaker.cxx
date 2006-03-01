@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.83  2006/03/01 17:24:47  jcs
+// move all database initialization to InitRun
+//
 // Revision 1.82  2006/01/13 12:35:40  jcs
 // Calculate mMicrosecondsPerTimebin from RHIC clock frequency for each event
 //
@@ -400,7 +403,55 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
   }     
+
+  // calculate microsecondsPerTimebin from RHIC clock frequency for current run 
+  // if not available, use default values from offline database
+
+  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+  double freq = dbclock->getCurrentFrequency()/1000000.0;
+  if ( freq != 0) 
+      microsecondsPerTimebin = 1./(freq/2.);
+  else
+      microsecondsPerTimebin = 0.;
+
+  // Geometry/ftpc offline database tables
+
+  St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
+  if ( !ftpc_geometry_db ){
+     gMessMgr->Warning() << "StFtpcClusterMaker::InitRun Error Getting FTPC offline database Geometry/ftpc"<<endm;
+     return kStWarn;
+  }
+
+  St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
+
+  m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
+  m_padrow_z   = (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ");
+  m_asicmap    = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
+  m_clustergeo = (St_ftpcClusterGeom *)dblocal_geometry("ftpcClusterGeom");
+  m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
  
+  // Calibrations/ftpc offline database tables
+  
+  St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
+  if ( !ftpc_calibrations_db ){
+     gMessMgr->Warning() << "StFtpcClusterMaker::InitRun Error getting FTPC offline database Calibrations/ftpc"<<endm;
+     return kStWarn;
+  }
+
+  St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
+
+  m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
+  m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
+  m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
+  m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
+  m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
+  m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
+  m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
+  m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
+  m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+  m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
+  m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+  m_temps = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
 
   return 0;
 }
@@ -476,44 +527,6 @@ Int_t StFtpcClusterMaker::Make()
      }
   }      
 
-  St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
-  if ( !ftpc_geometry_db ){
-     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Geometry"<<endm;
-     return kStWarn;
-  }
-  St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
- 
-  m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
-  m_padrow_z   = (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ");
-  m_asicmap    = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
-  m_clustergeo = (St_ftpcClusterGeom *)dblocal_geometry("ftpcClusterGeom");
-  m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
-
-  if (!(m_dimensions && m_padrow_z && m_asicmap && m_clustergeo && m_cathode)) {
-     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting content of FTPC database: Geometry"<<endm;
-     return kStWarn;
-  }
-  
-  St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
-  if ( !ftpc_calibrations_db ){
-     gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC database: Calibrations"<<endm;
-     return kStWarn;
-  }
-  St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
-
-  m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
-  m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
-  m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
-  m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
-  m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
-  m_ampslope = (St_ftpcAmpSlope *)dblocal_calibrations("ftpcAmpSlope" );
-  m_ampoffset = (St_ftpcAmpOffset *)dblocal_calibrations("ftpcAmpOffset");
-  m_timeoffset = (St_ftpcTimeOffset *)dblocal_calibrations("ftpcTimeOffset");
-  m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
-  m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
-  m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
-  m_temps = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
-
   // create parameter reader
   StFtpcParamReader paramReader(m_clusterpars,m_fastsimgas,m_fastsimpars);
   
@@ -543,18 +556,9 @@ Int_t StFtpcClusterMaker::Make()
      return kStWarn;
   }
 
-  // calculate microsecondsPerTimebin from RHIC clock frequency for current event 
-  // if not available, use default values from offline database
-
-  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
-  double freq = dbclock->getCurrentFrequency()/1000000.0;
-  if ( freq != 0) 
-      microsecondsPerTimebin = 1./(freq/2.);
-  else
-      microsecondsPerTimebin = 0.;
-  dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
 
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
+     dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
      cout<<"Using the following values from database:"<<endl;
      cout<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<endl;
      cout<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endl;

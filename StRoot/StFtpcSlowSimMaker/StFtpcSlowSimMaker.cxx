@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.31 2006/01/16 09:40:52 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.32 2006/03/01 17:25:40 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.32  2006/03/01 17:25:40  jcs
+// move all database initialization to InitRun
+//
 // Revision 1.31  2006/01/16 09:40:52  jcs
 // Calculate mMicrosecondsPerTimebin from RHIC clock frequency for each event
 //
@@ -189,7 +192,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
    Int_t dbDate = mDbMaker->GetDateTime().GetDate();
    cout<<"StFtpcSlowSimMaker: dbDate = "<<dbDate<<endl;
 
-  gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: gFactor is "<<gFactor<<endm;
+  gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
 
   // Load the correct FTPC drift maps depending on magnetic field
 
@@ -229,6 +232,16 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
      gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to ffn10kv"<<endm;
   }    
+
+  // calculate microsecondsPerTimebin from RHIC clock frequency for current run
+  // if not available, use default values from offline database
+                                                                                    
+  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+  double freq = dbclock->getCurrentFrequency()/1000000.0;
+  if ( freq != 0)
+     microsecondsPerTimebin = 1./(freq/2.);
+  else
+     microsecondsPerTimebin = 0.;
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -309,7 +322,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
  
 
 
- 
+
   return 0;
 }
 //_____________________________________________________________________________
@@ -368,17 +381,6 @@ Int_t StFtpcSlowSimMaker::Make(){
        return kStWarn;
     }
 
-  // calculate microsecondsPerTimebin from RHIC clock frequency for current event 
-  // if not available, use default values from offline database
-
-  StDetectorDbClock* dbclock = StDetectorDbClock::instance();
-  double freq = dbclock->getCurrentFrequency()/1000000.0;
-  if ( freq != 0)
-     microsecondsPerTimebin = 1./(freq/2.);
-  else
-     microsecondsPerTimebin = 0.;
-  dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
-
     //cout << "create parameter reader\n";
     // create parameter reader
     StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
@@ -389,6 +391,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 //  cout<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endl;
 
     if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
+       dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
        cout<<"Using the following values from database:"<<endl;
        cout<<"          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<endl;
        cout<<"          EastIsInverted            = "<<dbReader->EastIsInverted()<<endl;
