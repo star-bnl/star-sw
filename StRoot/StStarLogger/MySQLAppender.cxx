@@ -319,7 +319,7 @@ void MySQLAppender::flushBuffer()
 			const LoggingEventPtr& logEvent = *i;
 			String sql;  
          
-         expandCommand ="INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, \"$REQUESTID\", \"$PROCESSID\",\"$HOSTNAME\",\"$USER\");";
+         expandCommand ="INSERT DELAYED IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, \"$REQUESTID\", \"$PROCESSID\",\"$HOSTNAME\",\"$USER\");";
 // Edit meta symbnols
 //-----------------------
 //  $hostid        = $HOSTNAME            
