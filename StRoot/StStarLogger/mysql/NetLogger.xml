@@ -12,7 +12,7 @@
 
   <appender name="MYSQL" class="org.apache.log4j.MySQLAppender">
     <layout class="org.apache.log4j.PatternLayout">
-     <param name="ConversionPattern" value="REPLACE INTO JobTracking SET id=NULL, StepName =&quot;%-3c{2}&quot;,dataId = (SELECT dataId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot;), %m; " />
+     <param name="ConversionPattern" value="REPLACE DELAYED INTO JobTracking SET id=NULL, StepName =&quot;%-3c{2}&quot;,dataId = (SELECT dataId FROM JobDescription WHERE  jobID_MD5=&quot;$REQUESTID&quot; AND processID=&quot;$PROCESSID&quot;), %m; " />
 <!--      <param name="ConversionPattern" value="INSERT IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, &quot;$REQUESTID&quot;, &quot;$PROCESSID&quot;,&quot;$HOSTNAME&quot;,&quot;$USER&quot; ); INSERT INTO JobTracking ( id, StepName, jobDscrId) VALUES ( DEFAULT, &quot;%-3c{2}&quot;, &quot;1&quot; ); " />  -->
     </layout>	    
      <!--  Define the pattern  -->
