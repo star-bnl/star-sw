@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.7 2005/01/27 18:39:03 mmiller Exp $
+// $Id: StJets.h,v 1.8 2006/03/06 20:03:06 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.8  2006/03/06 20:03:06  mmiller
+// Added extra protection agains events with SumEmcEnergy>200 GeV (flag as corrupt, return w/o jet finding).  Also added nDylanPoints() and sumEmcE() methods to StJets.
+//
 // Revision 1.7  2005/01/27 18:39:03  mmiller
 // Added some extra accessors to StJet object to keep track of Et from TPC, BTOW, ETOW, etc.
 //
@@ -201,6 +204,14 @@ public:
     ///A double check, used to synchronize with StMuDstMaker for simultaneous reading
     bool isSameEvent(const StMuDst*);
 
+    ///Number of towers with e>0.4 GeV (after status check)
+    int nDylanPoints() const {return mDylanPoints;}
+    void setDylanPoints(int v) {mDylanPoints = v;}
+
+    ///Summed energy of towers with e>0.4 (after status check)
+    double sumEmcE() const {return mSumEmcE;}
+    void setSumEmcE(double v) {mSumEmcE = v;}
+
 public:
     ///User Interface as per Thomas H's request.  Access jet kinematics based on index:
     
@@ -214,7 +225,9 @@ public:
     int charge(int) ;
 
 private:
-    
+
+    int mDylanPoints;
+    double mSumEmcE;
     int mEventId;
     int mEventNumber;
     int mRunId;

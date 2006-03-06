@@ -50,6 +50,7 @@ public:
     void setUse2003Cuts(bool v) {mUse2003Cuts=v;}
 
     int nDylanPoints() const {return mDylanPoints;}
+    double sumEmcEt() const {return mSumEmcEt;}
     
 protected:
     void fillBarrelHits();
@@ -72,8 +73,8 @@ protected:
     StBemcTables* mTables;//!
 
     bool mUse2003Cuts; //!
-    int mDylanPoints; 
-
+    int mDylanPoints; //!
+    double mSumEmcEt; //!
         
     EEmcGeomSimple* mEeGeom;
     StEEmcDbMaker* mEeDb;

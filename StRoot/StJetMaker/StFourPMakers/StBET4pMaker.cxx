@@ -121,6 +121,7 @@ void StBET4pMaker::Clear(Option_t* opt)
     cout <<"void StBET4pMaker::Clear(Option_t* opt)";
     mCorrupt = false;
     mDylanPoints = 0;
+    mSumEmcEt = 0.;
     mField = 0.;
     
     for (BET4Vec::iterator it=mVec.begin(); it!=mVec.end(); ++it) {
@@ -165,6 +166,12 @@ Int_t StBET4pMaker::Make()
     if (mCorrupt==true) {
 	tracks.clear();
 	cout <<"StEmcTpcFourPMaker::Maker():\tFlag this as a corrupt event.  Clear 4-p container and return"<<endl;
+	return kStOk;
+    }
+
+    if (mSumEmcEt>200.) {
+	tracks.clear();
+	cout <<"StEmcTpcFourPMaker::Maker():\ttoo much energy:\t"<<mSumEmcEt<<"\tflag as corrupt. Clear 4-p container and return"<<endl;
 	return kStOk;
     }
     
@@ -520,12 +527,23 @@ void StBET4pMaker::fillBarrelHits()
 		 && accept2003Tower(id) ) { //it's good)
 
 		mBTowHits[id] = tempRawHit;
+
+		double energy = tempRawHit->energy();
+		if (energy>0.4) {
+		    mDylanPoints++;
+		    mSumEmcEt += energy;
+		}
+
 	    }
 	    //if the status is good, add it to the array, otherwise add a null pointer
 	    else if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) { //it's good
 		mBTowHits[id] = tempRawHit;
 
-		//fill ADC and energy hists:
+		double energy = tempRawHit->energy();
+		if (energy>0.4) {
+		    mDylanPoints++;
+		    mSumEmcEt += energy;
+		}
 		
 	    }
 	    else { //marked as bad:
@@ -533,6 +551,7 @@ void StBET4pMaker::fillBarrelHits()
 	    }
 	}
     }
+    cout <<"StBET4pMaker::fillBarrelHits\tnDylanPoints:\t"<<mDylanPoints<<"\tsumET:\t"<<mSumEmcEt<<endl;
 }
 
 bool accept2003Tower(int id)
