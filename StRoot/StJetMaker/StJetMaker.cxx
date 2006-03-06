@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.10 2005/01/27 18:39:03 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.11 2006/03/06 20:03:06 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -54,6 +54,7 @@
 #include "StJetMaker/StJetMaker.h"
 #include "StJetMaker/StJet.h"
 #include "StJetMaker/StFourPMakers/StFourPMaker.h"
+#include "StJetMaker/StFourPMakers/StBET4pMaker.h"
 
 //temp, MLM
 void dumpProtojetToStream(int event, int jet, ostream& os, StProtoJet& pj);
@@ -165,6 +166,14 @@ Int_t StJetMaker::Make()
 	muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
 	muDstJets->setMuDst(mudst);
+
+	//Addd some info from StBet4pMaker
+	StBET4pMaker* bet4p = dynamic_cast<StBET4pMaker*>(fourPMaker);
+	if (bet4p) {
+	    cout <<"StJetMaker::Make()\tfound 4pmaker in chain"<<endl;
+	    muDstJets->setDylanPoints( bet4p->nDylanPoints() );
+	    muDstJets->setSumEmcE( bet4p->sumEmcEt() );
+	}
 	
 	if (cJets.size() > 0) hadJets = true;
 

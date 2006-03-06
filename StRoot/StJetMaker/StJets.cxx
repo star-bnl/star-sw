@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.8 2005/08/19 21:34:14 jeromel Exp $
+// $Id: StJets.cxx,v 1.9 2006/03/06 20:03:06 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.9  2006/03/06 20:03:06  mmiller
+// Added extra protection agains events with SumEmcEnergy>200 GeV (flag as corrupt, return w/o jet finding).  Also added nDylanPoints() and sumEmcE() methods to StJets.
+//
 // Revision 1.8  2005/08/19 21:34:14  jeromel
 // TClonesArray to TObjArray safe change
 //
@@ -115,6 +118,9 @@ StJets::StJets()
     : mJets( new TClonesArray("StJet",100)), mTrackToJetIndices( new TClonesArray("TrackToJetIndex",200)) 
 {
     mEventId = mEventNumber = mRunId = mRunNumber = 0;
+    mDylanPoints = 0;
+    mSumEmcE = 0.;
+
 }
 
 StJets::~StJets()
@@ -132,6 +138,8 @@ void StJets::Clear(bool clearAll)
 {
     mJets->Clear();
     mTrackToJetIndices->Clear();
+    mDylanPoints = 0;
+    mSumEmcE = 0.;
     cout << "Cleared the Jets" <<endl;
 }
 
