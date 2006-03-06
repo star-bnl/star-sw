@@ -75,7 +75,9 @@ void RunJetFinder2(int nevents=100,
     //test Mike's new 4p maker:
     //here we also tag whether or not to do the swap:
     bool doTowerSwapFix = true;
+    bool use2003TowerCuts = false;
     StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker, doTowerSwapFix);
+    bet4pMaker->setUse2003Cuts(use2003TowerCuts);
 
     /*
     //test Mike's new 4p maker with Endcap (defualts to noEndcap)

@@ -47,6 +47,9 @@ public:
 
 
     void setUseEndcap(bool v) {mUseEndcap=v;}
+    void setUse2003Cuts(bool v) {mUse2003Cuts=v;}
+
+    int nDylanPoints() const {return mDylanPoints;}
     
 protected:
     void fillBarrelHits();
@@ -68,13 +71,14 @@ protected:
     //StEmcADCtoEMaker* mAdc2E; //!
     StBemcTables* mTables;//!
 
+    bool mUse2003Cuts; //!
+    int mDylanPoints; 
 
         
     EEmcGeomSimple* mEeGeom;
     StEEmcDbMaker* mEeDb;
 
 
-    
     ClassDef(StBET4pMaker,1)
 	};
 
