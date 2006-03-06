@@ -52,13 +52,15 @@ using namespace std;
 #include "StMuEmcPosition.h"
 #include "StBET4pMaker.h"
 
+bool accept2003Tower(int id);
+
 ClassImp(StBET4pMaker)
     
 //StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, StEmcADCtoEMaker* adc2e)
 //: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mAdc2E(adc2e), mTables(new StBemcTables()
     
     StBET4pMaker::StBET4pMaker(const char* name, StMuDstMaker* uDstMaker, bool doTowerSwapFix)
-	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables(doTowerSwapFix))
+	: StFourPMaker(name, 0), mMuDstMaker(uDstMaker), mTables(new StBemcTables(doTowerSwapFix)), mUse2003Cuts(false)
 {
     cout <<"StBET4pMaker::StBET4pMaker()"<<endl;
     mCorrupt = false;
@@ -118,6 +120,7 @@ void StBET4pMaker::Clear(Option_t* opt)
 {
     cout <<"void StBET4pMaker::Clear(Option_t* opt)";
     mCorrupt = false;
+    mDylanPoints = 0;
     mField = 0.;
     
     for (BET4Vec::iterator it=mVec.begin(); it!=mVec.end(); ++it) {
@@ -468,6 +471,19 @@ void StBET4pMaker::fillBarrelHits()
 	}
     }
 
+    //And now we can implement Alex's new StEmcAdc2EMaker test (thank god, this takes care of pre-P04k production)
+    StEmcADCtoEMaker* adc2e = (StEmcADCtoEMaker*)GetMaker("Eread");
+    if (!adc2e) {
+	cout <<"StBET4pMaker::fillBarrelHits()\tno adc2e in chain"<<endl;
+    }
+    else {
+	cout <<"StBET4pMaker::fillBarrelHits()\tfound adc2e in chain"<<endl;
+	mCorrupt = adc2e->isCorrupted();
+	if (mCorrupt==true) {
+	    return;
+	}
+    }
+    
     //now gather hits into pointer array:
     
     for(int m = 1; m<=120;m++) { //loop on modules...
@@ -495,9 +511,18 @@ void StBET4pMaker::fillBarrelHits()
 	    int CAP=0; //this arument matters only for SMD
 	    tables->getPedestal(BTOW, id, CAP, pedestal, rms);
 
-	    
+
+	    //modified (MLM 3/06/2006) to account for Dylan/Steve 2003 cuts:
+	    if ( mUse2003Cuts==true
+		 && ADC-pedestal>0
+		 && (ADC-pedestal)>2.*rms
+		 && status==1
+		 && accept2003Tower(id) ) { //it's good)
+
+		mBTowHits[id] = tempRawHit;
+	    }
 	    //if the status is good, add it to the array, otherwise add a null pointer
-	    if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) { //it's good
+	    else if ( ADC-pedestal>0 && (ADC-pedestal)>2.*rms && status==1) { //it's good
 		mBTowHits[id] = tempRawHit;
 
 		//fill ADC and energy hists:
@@ -507,5 +532,50 @@ void StBET4pMaker::fillBarrelHits()
 		mBTowHits[id] = 0;
 	    }
 	}
+    }
+}
+
+bool accept2003Tower(int id)
+{
+    if( id==555
+	|| id==615
+	|| id==656
+	|| id==772
+	|| id==1046
+	|| id==1048
+	|| id==1408
+	|| id==1555
+	|| id==1750
+	|| id==1773
+	|| id==2073
+	|| id==2093
+	|| id==2096
+	|| (id>=1866 && id<=1894)
+	|| id==511
+	|| id==1614
+	|| id==1615
+	|| id==1616
+	|| id==1636
+	|| id==1899
+	|| id==2127
+	|| id==953
+	|| id==1418
+	|| id==1419
+	|| id==1878
+	|| id==1879
+	|| id==1881
+	|| (id>=1042 && id<=1045)
+	|| (id>=1385 && id<=1387)
+	|| (id>=1705 && id<=1708)
+	|| (id>=1725 && id<=1728)
+	|| (id>=1745 && id<=1748)
+	|| (id>=1765 && id<=1768)
+	|| (id>=1785 && id<=1788))
+	{
+	    cout <<"rejecting tower:\t"<<id<<endl;
+	    return false;
+	}
+    else {
+	return true;
     }
 }
