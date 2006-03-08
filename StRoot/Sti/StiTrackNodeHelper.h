@@ -57,7 +57,9 @@ public:
 static int isCutStep()				{return mgCutStep;}
 private:
   void reset();
-  int propagateBest();       
+  int propagatePars(const StiNodePars &parPars
+                   ,      StiNodePars &rotPars
+		   ,      StiNodePars &proPars);       
   int propagateFitd();
   int propagateMtx();       
   int propagateError();

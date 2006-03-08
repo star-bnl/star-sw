@@ -69,70 +69,72 @@ void StiTrackNodeHelper::set(StiKalmanTrackNode *pNode,StiKalmanTrackNode *sNode
   if (!mIter) mTargetNode->mFlipFlop=0;
 }
 //______________________________________________________________________________
-int StiTrackNodeHelper::propagateBest()
+int StiTrackNodeHelper::propagatePars(const StiNodePars &parPars
+                                     ,      StiNodePars &rotPars
+			             ,      StiNodePars &proPars)
 {
   int ierr = 0;
   alpha = mTargetNode->_alpha - mParentNode->_alpha;
   ca=1;sa=0;
-  mBestParentPars.check("1propagateBest");
-  mBestParentRotPars = mBestParentPars;
+  parPars.check("1propagatePars");
+  rotPars = parPars;
   if (fabs(alpha) > 1.e-6) { //rotation part
 
-    double xt1=mBestParentPars._x; 
-    double yt1=mBestParentPars._y; 
-    double cosCA0 = mBestParentPars._cosCA;
-    double sinCA0 = mBestParentPars._sinCA;
+    double xt1=parPars._x; 
+    double yt1=parPars._y; 
+    double cosCA0 = parPars._cosCA;
+    double sinCA0 = parPars._sinCA;
 
     ca = cos(alpha);
     sa = sin(alpha);
 
-    mBestParentRotPars._x = xt1*ca + yt1*sa;
-    mBestParentRotPars._y= -xt1*sa + yt1*ca;
-    mBestParentRotPars._cosCA =  cosCA0*ca+sinCA0*sa;
-    mBestParentRotPars._sinCA = -cosCA0*sa+sinCA0*ca;
-    double nor = 0.5*(mBestParentRotPars._sinCA*mBestParentRotPars._sinCA+mBestParentRotPars._cosCA*mBestParentRotPars._cosCA +1);
-    mBestParentRotPars._cosCA /= nor;
-    mBestParentRotPars._sinCA /= nor;
-    mBestParentRotPars._eta= NICE(mBestParentPars._eta-alpha); 
+    rotPars._x = xt1*ca + yt1*sa;
+    rotPars._y= -xt1*sa + yt1*ca;
+    rotPars._cosCA =  cosCA0*ca+sinCA0*sa;
+    rotPars._sinCA = -cosCA0*sa+sinCA0*ca;
+    double nor = 0.5*(rotPars._sinCA*rotPars._sinCA+rotPars._cosCA*rotPars._cosCA +1);
+    rotPars._cosCA /= nor;
+    rotPars._sinCA /= nor;
+    rotPars._eta= NICE(parPars._eta-alpha); 
   }// end of rotation part
-  ierr = mBestParentRotPars.check();
+  ierr = rotPars.check();
   if (ierr) return 1;
   
 //  	Propagation 
-  x1 = mBestParentRotPars._x;
+  x1 = rotPars._x;
   x2 = (mDetector)? mDetector->getPlacement()->getNormalRadius():mHit->x();
   dx = x2-x1;
-  rho = 0.5*(mTargetHz*mBestParentRotPars._ptin+mBestParentRotPars._curv);
+  rho = 0.5*(mTargetHz*rotPars._ptin+rotPars._curv);
   dsin = rho*dx;
-  sinCA2=mBestParentRotPars._sinCA + dsin; 
+  sinCA2=rotPars._sinCA + dsin; 
   if (sinCA2> 0.95) sinCA2= 0.95;
   if (sinCA2<-0.95) sinCA2=-0.95;
   cosCA2 = ::sqrt((1.-sinCA2)*(1.+sinCA2));
-  sumSin   = mBestParentRotPars._sinCA+sinCA2;
-  sumCos   = mBestParentRotPars._cosCA+cosCA2;
+  sumSin   = rotPars._sinCA+sinCA2;
+  sumCos   = rotPars._cosCA+cosCA2;
   dy = dx*(sumSin/sumCos);
-  y2 = mBestParentRotPars._y+dy;
-  dl0 = mBestParentRotPars._cosCA*dx+mBestParentRotPars._sinCA*dy;
+  y2 = rotPars._y+dy;
+  dl0 = rotPars._cosCA*dx+rotPars._sinCA*dy;
   sind = dl0*rho;
-  if (fabs(dsin) < 0.02 && mBestParentRotPars._cosCA >0) { //tiny angle
+  if (fabs(dsin) < 0.02 && rotPars._cosCA >0) { //tiny angle
     dl = dl0*(1.+sind*sind/6);
   } else {
-    double cosd = cosCA2*mBestParentRotPars._cosCA+sinCA2*mBestParentRotPars._sinCA;
+    double cosd = cosCA2*rotPars._cosCA+sinCA2*rotPars._sinCA;
     dl = atan2(sind,cosd)/rho;
   }
 
-  mBestPars._x = x2;
-  mBestPars._y = y2;
-  mBestPars._z= mBestParentRotPars._z + dl*mBestParentRotPars._tanl;
-  mBestPars._eta = (mBestParentRotPars._eta+rho*dl);  					
-  mBestPars._eta = NICE(mBestPars._eta);  					
-  mBestPars._ptin = mBestParentRotPars._ptin;
-  mBestPars._hz   = mTargetHz;
-  mBestPars._curv = mBestPars._ptin*mTargetHz;
-  mBestPars._tanl = mBestParentRotPars._tanl;
-  mBestPars._sinCA   = sinCA2;
-  mBestPars._cosCA   = cosCA2;
-  ierr = mBestPars.check();
+  proPars._x = x2;
+  proPars._y = y2;
+  proPars._z= rotPars._z + dl*rotPars._tanl;
+  proPars._eta = (rotPars._eta+rho*dl);  					
+  proPars._eta = NICE(proPars._eta);  					
+  proPars._ptin = rotPars._ptin;
+  proPars._hz   = mTargetHz;
+  proPars._curv = proPars._ptin*mTargetHz;
+  proPars._tanl = rotPars._tanl;
+  proPars._sinCA   = sinCA2;
+  proPars._cosCA   = cosCA2;
+  ierr = proPars.check();
   if (ierr) return 2;
   return 0;
 } 
@@ -147,22 +149,16 @@ int StiTrackNodeHelper::propagateFitd()
    mBestPars._curv *= (1+mMcs._ptinCorr);
    mMtx.A[4][4] = (mMtx.A[4][4]+1)*(1+mMcs._ptinCorr) -1;
 
-   double diff[kNPars];
-   for (int j=0;j<kNPars;j++) {diff[j]=mFitdParentPars.P[j]-mBestParentPars.P[j];}
-   
-   for (int i=0;i<kNPars;i++) {
-     double s = 0;
-     for (int j=0;j<kNPars;j++) {
-       if(!mMtx.A[i][j]) continue;
-       s += mMtx.A[i][j]*diff[j];
-     }
-     mPredPars.P[i] = mBestPars.P[i]+s;
-   }
-   cutStep(&mBestPars,&mPredPars);
+   StiNodePars rotPars;
+   ierr = propagatePars(mFitdParentPars,rotPars,mPredPars);
+   if (ierr) return 1;
+//   cutStep(&mBestPars,&mPredPars);
    mPredPars._hz = mTargetHz;
+   mPredPars._ptin *= (1+mMcs._ptinCorr);
+   mPredPars._curv *= (1+mMcs._ptinCorr);
    mPredPars.ready();
    ierr = mPredPars.check();
-   if (ierr) return 1;
+   if (ierr) return 2;
    return 0;
 }
 
@@ -257,7 +253,8 @@ StiDebug::Break(nCall);
     mFitdParentPars.check("2makeFit");
     mFitdParentErrs.check("3makeFit");
 
-    ierr = propagateBest();	if(ierr) return 1;
+    ierr = propagatePars(mBestParentPars,mBestParentRotPars,mBestPars);
+    if(ierr) return 1;
     ierr = propagateMtx();	if(ierr) return 2;
     ierr = propagateMCS();	if(ierr) return 3;
     ierr = propagateFitd();	if(ierr) return 4;
@@ -272,7 +269,7 @@ StiDebug::Break(nCall);
   mSavdDelta = (mTargetNode->isValid())? mTargetNode->mFE.getDelta():3e33;
 
   if (!mParentNode) {
-    mgCutStep = 0;
+    if (!smooth) mgCutStep = 0;
     mPredErrs = mTargetNode->mFE;
     ierr = mPredErrs.check(); 	if (ierr) return 11;
     mPredPars = mTargetNode->mFP;
