@@ -10,7 +10,6 @@ template<class Filtered>class Filter;
 class StiTrackFinder 
 {
 public:
-   StiTrackFinder(){mComb=0;}
   /// Initialize the finder
   virtual void initialize()=0;
   /// Find all tracks of the currently loaded event
@@ -18,7 +17,7 @@ public:
   /// Find/extend the given track, in the given direction
   virtual bool find(StiTrack *track, int direction, double rmin=0) = 0;
   /// Find the next track 
-  virtual StiTrack * findTrack(double rMin=0)=0;
+  virtual StiTrack * findTrack()=0;
   /// Extent all tracks to the given vertex
   virtual void extendTracksToVertex(StiHit* vertex)=0;
   virtual void extendTracksToVertices(const std::vector<StiHit*> &vertices){};
@@ -34,15 +33,6 @@ public:
   /// Set the vertex finder used by this tracker
   virtual void setVertexFinder(StiVertexFinder *)=0;
   virtual EditableParameters & getParameters()=0;
-  
-  void setComb(int comb=1)		{mComb = comb;}
-  int  useComb() const			{return mComb;}
-  
-
-protected:
-  int mComb; //0=no combinatoric
-
-
 };
 
 #endif

@@ -19,12 +19,12 @@ StiCompositeFinder::~StiCompositeFinder()
   cout <<"StiCompositeFinder::~StiCompositeFinder() -I- Started/Done"<<endl;
 }
 
-StiTrack * StiCompositeFinder::findTrack(double rMin)
+StiTrack * StiCompositeFinder::findTrack()
 {
   StiTrack* track=0;
   while (track==0 && _currentFinder!=end() )
     {
-      track = (*_currentFinder)->findTrack(rMin);
+      track = (*_currentFinder)->findTrack();
       if (track) 
 	break;
       else
