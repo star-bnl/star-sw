@@ -8,7 +8,6 @@
 using namespace std;
 
 #include "StiTrack.h"
-#include "StiKalmanTrack.h"
 #include "StiTrackContainer.h"
 #include "Sti/Base/Filter.h"
 
@@ -28,16 +27,9 @@ StiTrackContainer::~StiTrackContainer()
 
 bool StiTrackLessThan::operator()(const StiTrack* lhs, const StiTrack* rhs) const
 {
-#if 0
   double lhsCurv = lhs->getCurvature();
   double rhsCurv = rhs->getCurvature();
   return fabs(lhsCurv) < fabs(rhsCurv);
-#endif //0
-  int lN = ((StiKalmanTrack*)lhs)->getNNodes(3);
-  int rN = ((StiKalmanTrack*)rhs)->getNNodes(3);
-  return lN >= rN;
-
-
 }
 
 /*! Get the number of tracks held by this container that satisfies the given track filter.

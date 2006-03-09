@@ -60,7 +60,6 @@ class   StiResidualCalculator;
 class StiToolkit 
 {
 public:
-  StiToolkit(); 
   virtual Factory<StiHit> * getHitFactory()=0;
   virtual Factory<StiKalmanTrack> * getTrackFactory()=0;
   virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;

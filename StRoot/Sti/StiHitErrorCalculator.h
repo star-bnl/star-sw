@@ -17,14 +17,14 @@
 */
 
 class HitError_st;
-class StiNodePars;
+
 
 class StiHitErrorCalculator : public EditableParameters
 {
  public:
   StiHitErrorCalculator(){/*noop*/};
   virtual ~StiHitErrorCalculator(){/*noop*/};
-  virtual void calculateError(const StiNodePars *,double&,double&) const=0; 
+  virtual void calculateError(StiKalmanTrackNode *,double&,double&)const = 0; 
 };
 
 class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
@@ -35,7 +35,7 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 const StiDefaultHitErrorCalculator & operator=(const StiDefaultHitErrorCalculator & calc);
 	 const StiDefaultHitErrorCalculator & operator=(const HitError_st & error);
    ~StiDefaultHitErrorCalculator();
-   virtual void calculateError(const StiNodePars*,double&,double&) const; 
+   void calculateError(StiKalmanTrackNode *,double&,double&)const; 
    void set(double intrinsicZ, double driftZ, double crossZ
 	   ,double intrinsicX, double driftX, double crossX);
 

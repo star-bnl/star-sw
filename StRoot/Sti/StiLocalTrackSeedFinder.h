@@ -7,8 +7,8 @@ using std::ostream;
 #include <vector>
 using std::vector;
 #include "Sti/Base/EditableParameters.h"
-//VP#include "Sti/StiHelixCalculator.h"
-//VP#include "Sti/StiHelixFitter.h"
+#include "Sti/StiHelixCalculator.h"
+#include "Sti/StiHelixFitter.h"
 #include "Sti/StiTrackFinder.h"
 #include "Sti/StiSortedHitIterator.h"
 #include "Sti/StiMasterDetectorBuilder.h"
@@ -35,7 +35,7 @@ public:
 			  StiHitContainer         * hitContainer,
 			  StiDetectorContainer * detectorContainer);
   virtual ~StiLocalTrackSeedFinder();
-  StiTrack* findTrack(double rMin=0);
+  StiTrack* findTrack();
   virtual void clear(){reset();};
   virtual void initialize(){};
   virtual void print() const;
@@ -62,8 +62,8 @@ protected:
   ///Extrapolate to next layer using straight line, add hit closest in z
   bool extrapolate();
   StiKalmanTrack* initializeTrack(StiKalmanTrack*);
-//   void calculate(StiKalmanTrack*);
-//   void calculateWithOrigin(StiKalmanTrack*);
+  void calculate(StiKalmanTrack*);
+  void calculateWithOrigin(StiKalmanTrack*);
   //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
   bool fit(StiKalmanTrack*);
 
@@ -74,11 +74,11 @@ protected:
 
   StiSortedHitIterator _hitIter;
   vector<StiHit*>        _seedHits;
-//VP  StiHelixCalculator     _helixCalculator;
-//VP  StiHelixFitter         _helixFitter;
+  StiHelixCalculator     _helixCalculator;
+  StiHelixFitter         _helixFitter;
   StiDefaultTrackFilter  _trackFilter;
   StiLocalTrackSeedFinderParameters _pars;
-  double fRxyMin;
+  
  private:
   //The following are not implemented, as they are non-trivial
   //and the default compiler generated versions will be wrong.

@@ -17,7 +17,6 @@
 
 ostream& operator<<(ostream&, const StiDetector&);
 
-//______________________________________________________________________________
 StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
 						 const string& description, 
 						 Factory<StiKalmanTrack> * trackFactory,
@@ -29,25 +28,20 @@ StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
     _hitContainer(hitContainer),
     _detectorContainer(detectorContainer)
 {
-  fRxyMin=0;
   cout <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
 
-//______________________________________________________________________________
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
   cout <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder() -I- Started/Done"<<endl;
 }
 
-//______________________________________________________________________________
 /// Produce the next track seed 
 /// Loop through available hits and attempt to form a track seed
 /// Only use hits that have not been already used in fully formed
 /// tracks. 
-//______________________________________________________________________________
-StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
+StiTrack* StiLocalTrackSeedFinder::findTrack()
 {
-  fRxyMin = rMin;
   StiKalmanTrack* track = 0;  
   if (isReset())
     { 
@@ -55,26 +49,22 @@ StiTrack* StiLocalTrackSeedFinder::findTrack(double rMin)
 
       _hitIter = StiSortedHitIterator(_hitContainer,_detectorContainer->begin(),_detectorContainer->end());
     }
-  for (;_hitIter!=StiSortedHitIterator() && track==0;++_hitIter)
+  while (_hitIter!=StiSortedHitIterator() && track==0)
     {
       try 
 	{
-          StiHit *hit = &(*_hitIter);
-	  if (hit->timesUsed()) continue;
-	  if (fRxyMin && pow(hit->x(),2)+pow(hit->y(),2)<fRxyMin*fRxyMin) continue;
-	  track = makeTrack(&*_hitIter);
+	  if ( (*_hitIter).timesUsed()==0 ) track = makeTrack(&*_hitIter);
 	}
       catch(runtime_error & rte )
 	{
 	  //	  cout<< "StiLocalTrackSeedFinder::findTrack() -W- Run Time Error :" << rte.what() << endl;
 	}
+      ++_hitIter;
     }
   //cout <<"StiLocalTrackSeedFinder::findTrack() -I- Done"<<endl;
-  fRxyMin = 0;
   return track;
 }
 
-//______________________________________________________________________________
 /// Extend the track seed starting from the given hit.
 /// The extension proceeds from the outside-in. It stops
 /// whenever the inner most detector hits have been used.
@@ -86,17 +76,21 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit& hit)
   if ( _detectorContainer->moveIn()==false ) return false;
   const StiDetector* d = _detectorContainer->getCurrentDetector(); //**_detectorContainer;
   StiPlacement *     p = d->getPlacement();
-  if (p->getLayerRadius() < fRxyMin) return false;
   StiHit* closestHit = _hitContainer->getNearestHit(p->getLayerRadius(),
 						    p->getLayerAngle(),
 						    hit.y(), hit.z(),_pars._deltaY, _pars._deltaZ);
-  
-  if (!closestHit ) return false;
-  _seedHits.push_back(closestHit);
-   return true;
+  bool returnValue;
+  if (closestHit ) 
+    {
+      _seedHits.push_back(closestHit);
+      returnValue = true;
+    }
+  else
+    returnValue = false;
+  //cout <<"StiLocalTrackSeedFinder::extendHit(StiHit* hit) -I- Done; Extended:"<<returnValue<<endl;
+  return returnValue;
 }
 
-//______________________________________________________________________________
 /// Make a track seed starting at the given hit.
 /// The track is extended iteratively with the "extendHit" method.
 StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
@@ -137,7 +131,6 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   return track;
 }
 
-//______________________________________________________________________________
 /* We define the following picture
    r
    ^
@@ -165,7 +158,6 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
    y3 = (r3 - b) / m, which is our prediction, since we know r3
    
 */
-//______________________________________________________________________________
 bool StiLocalTrackSeedFinder::extrapolate()
 {
   //This is a little ugly, but it's faster than manipulating 3-vectors
@@ -204,8 +196,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   double r3 = newLayer->getPlacement()->getNormalRadius();
   
   //Temp hack by Mike
-//VP  if (r3<=60.) { return false; }
-  if (r3<=25.) { return false; } //VP avoid SVT from seed
+  if (r3<=60.) { return false; }
     
   //First, r-y plane
   //double m_ry = dr/dy;
@@ -261,25 +252,49 @@ bool StiLocalTrackSeedFinder::extrapolate()
 }
 
 
-//______________________________________________________________________________
 /// Initialize a kalman track on the basis of hits held in _seedHits
 /// 
 StiKalmanTrack* StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
 {
-  bool status = fit(track);
-  if (!status) track = 0;
+
+//cout <<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*) -I- Started"<<endl;
+  if (_pars._doHelixFit && _seedHits.size()>=3) 
+    {
+      bool status = fit(track);
+      if (!status) track = 0;
+    }
+  else if (_pars._useOrigin==false && _seedHits.size()>=3) 
+    calculate(track);
+  else if (_seedHits.size()>=2) 
+    // Too few points for a stand alone calculation, 
+    // include and estimate of the origin of the track.
+    calculateWithOrigin(track);
+  else
+    // Not enough data to make a track
+    track = 0;
+  //cout<<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*) -I- Done."<<endl;
   return track;
 }
 
-//______________________________________________________________________________
 bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
 {
-  int ierr = track->initialize(_seedHits);
-  return (ierr==0);
+  //cout<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*) -I- Started"<<endl;
+  _helixFitter.reset();
+  _helixFitter.fit( _seedHits );
+  if (_helixFitter.valid()==false ) 
+    throw runtime_error("StiLocalTrackSeedFinder::fit(StiKalmanTrack* track) -W- bad data or fit");
+  /*
+    cout <<"origin: "<<_helixFitter.xCenter()<<" "<<_helixFitter.yCenter()<<" "
+    <<_helixFitter.z0()<<" "
+    <<" curvature: "<<_helixFitter.curvature()<<" "
+    <<" tanLambda: "<<_helixFitter.tanLambda()<<endl;
+  */
+  track->initialize( _helixFitter.curvature(), _helixFitter.tanLambda(),
+		     StThreeVectorD(_helixFitter.xCenter(), _helixFitter.yCenter(), 0.),
+		     _seedHits);
+  return true;
 }
 
-#if 0
-//______________________________________________________________________________
 void StiLocalTrackSeedFinder::calculate(StiKalmanTrack* track)
 {
   //cout<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*) -I- Started"<<endl;
@@ -303,7 +318,6 @@ void StiLocalTrackSeedFinder::calculate(StiKalmanTrack* track)
   //cout<<"StiLocalTrackSeedFinder::calculate(StiKalmanTrack*) -I- Done"<<endl;
 }
 
-//______________________________________________________________________________
 void StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack* track)
 {
   //cout<<"StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack*)"<<endl;
@@ -326,8 +340,7 @@ void StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack* track)
 		     StThreeVectorD(_helixCalculator.xCenter(), _helixCalculator.yCenter(), 0.),
 		     _seedHits);    
 }
-#endif
-//______________________________________________________________________________
+
 /*
 //sort in descending order in radius, and ascending order in phi
 bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
@@ -344,7 +357,6 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
 }
 */
 
-//______________________________________________________________________________
 void StiLocalTrackSeedFinder::print() const
 {
   cout <<"StiLocalTrackSeedFinder::print() -I- ";
@@ -365,7 +377,6 @@ void StiLocalTrackSeedFinder::loadDS(TDataSet&ds)
   cout << "StiLocalTrackSeedFinder::loadDS(TDataSet&) -I- Done" << endl;
 }
 
-//______________________________________________________________________________
 void StiLocalTrackSeedFinder::loadFS(ifstream& inFile)
 {
   cout << "StiLocalTrackSeedFinder::loadFS(ifstream& inFile) -I- Started" << endl;
@@ -373,7 +384,6 @@ void StiLocalTrackSeedFinder::loadFS(ifstream& inFile)
   cout << "StiLocalTrackSeedFinder::loadFS(ifstream& inFile) -I- Done" << endl;
 }
 
-//______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f)
 {
   return os << " StiLocalTrackSeedFinder " << endl << f._pars << endl;

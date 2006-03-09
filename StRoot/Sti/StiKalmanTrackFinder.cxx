@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <math.h>
 #include "TMath.h"
-#include "StEnumerations.h"
 using namespace std;
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/EditableParameter.h"
@@ -35,27 +34,15 @@ using namespace std;
 #include "StiVertexFinder.h"
 #include "StiDefaultTrackFilter.h"
 #include "StiTrackFinderFilter.h"
-#include "StiUtilities/StiDebug.h"
+
 #define TIME_StiKalmanTrackFinder
 #ifdef TIME_StiKalmanTrackFinder
 #include "Sti/StiTimer.h"
 #endif
-//#define ASSIGNVP
-#ifdef ASSIGNVP
-#include "TAssign.h"
-static int vpAssign = 0;
-static TAssign *gTAssign = 0;
-static TAssMtx *gTAssMtx = 0;
-static double vpLayer=0;
-static const StiDetector *vpDetector=0;
-static StiHit *vpHit = 0;
-
-#endif //ASSIGNVP
-
 
 int StiKalmanTrackFinder::_debug = 0;
 ostream& operator<<(ostream&, const StiTrack&);
-int gLevelOfFind = 0;
+
 //______________________________________________________________________________
 void StiKalmanTrackFinder::initialize()
 {
@@ -168,164 +155,56 @@ filter is set or if they satisfy the track filter requirements.
 //______________________________________________________________________________
 void StiKalmanTrackFinder::findTracks()
 {
-  assert(_trackContainer );
-  assert(_trackSeedFinder);
+  if (!_trackContainer)   throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackContainer==0");
+  if (!_trackSeedFinder)  throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackSeedFinder==0");
+  StiTrack * track;
   _trackSeedFinder->reset();
   _trackContainer->clear();
   if (_trackFilter) _trackFilter->reset();
-
-#ifdef ASSIGNVP
-  vpAssign = 1;
-  if (!gTAssign) { gTAssign = new TAssign(); gTAssMtx = new TAssMtxObj();}
-  gTAssMtx->Clear();
-  extendSeeds (0.); 
-  gTAssign->SetMatrix(gTAssMtx);
-  double s = gTAssign->Assign();
-  int nKeys = gTAssMtx->GetNKeys();
-
-  printf ("findTracks:: nTracks=%d aver Chi2=%g\n",nKeys,s/nKeys);
-  vpAssign = 2;
-  long token = 0,lKey=0,lVal=0;
-  while ( gTAssign->Iter(token,lKey,lVal)) {
-     if(!lVal) continue;
-     StiHit *stiHit = (StiHit*)lVal;
-     stiHit->setTimesUsed(1);
-  }
-
-  extendTracks( 0.);
-  return;
-#endif// ASSIGNVP
-  
-  
-//  extendSeeds (0.);
-
-
-  extendSeeds (0.);
-//  _trackContainer->sort();
-//  extendTracks( 0.);
-}
-
-
-//______________________________________________________________________________
-void StiKalmanTrackFinder::extendSeeds(double rMin)
-{
+  try
+    {
+      while (true)
+        {
+        try
+        {
+          // obtain track seed from seed finder
 static int nCall=0;nCall++;
-  StiKalmanTrack *track;
-  int nTTot=0,nTSeed=0,nTAdd=0,nTFail=0,nTFilt=0,extend=0,status;
-  int nTpcHits=0,nSvtHits=0;
+          track = _trackSeedFinder->findTrack();
+          if (!track) break; // no more seeds
+          track->find();
+	  //cout << " find completed" << endl;
+          track->reduce();
+	  if (track->getFlag()<1) { BFactory::Free(track); continue;}
+	  //cout << " apply filter" << endl;
+          if (!_trackFilter || _trackFilter->filter(track))
+            {
+	      //cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
+            _trackContainer->push_back(track);
+            static_cast<StiKalmanTrack*>(track)->reserveHits();
+	    //cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
+	    if (track->getChi2()<0) track->setFlag(2);
 
-  while (true ){
-// 		obtain track seed from seed finder
-    track = (StiKalmanTrack*)_trackSeedFinder->findTrack(rMin);
-    if (!track) break; // no more seeds
-      nTTot++;
-      int iBreak=1;
-      do { //technical do
-        track->setFlag(-1);
-        status = track->approx(); 
-        if (status ) 	{nTSeed++; break;}
-        status = track->fit(kOutsideIn);
-        if (status ) 	{nTSeed++; break;}
-        extend = extendTrack(track,rMin);
-        if (extend<=0)	{nTFail++; break;}
-        if (_trackFilter && (!_trackFilter->filter(track))) {nTFilt++;break;}
-	//cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
-        track->reduce();
-        nTAdd++;
-        track->setFlag(1);
-        _trackContainer->push_back(track);
-        track->reserveHits();
-        nTpcHits+=track->getFitPointCount(kTpcId);
-        nSvtHits+=track->getFitPointCount(kSvtId);
-	//cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
-      }while((iBreak=0));
-      if (!iBreak) continue;
-      BFactory::Free(track);
+            }
+           else {BFactory::Free(track);}
+
+        }
+        catch (runtime_error & rte)
+        {
+          cout<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
+        }
+        }
     }
-   printf("***extendSeeds***:nTTot=%d nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d\n", 
-     nTTot,nTSeed,nTFail,nTFilt,nTAdd);
-   printf("***extendSeeds***:nTpcHits=%d nSvtHits=%d\n",nTpcHits,nSvtHits);
-}
-//______________________________________________________________________________
-void StiKalmanTrackFinder::extendTracks(double rMin)
-{
-static int nCall=0;nCall++;
-
-  int nTKeep=0;
-  int ntr = _trackContainer->size();
-  int nTpcHits=0,nSvtHits=0,extended=0;
-  
-  for ( int itr=0;itr < ntr;itr++) {
-    StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
-    if (track->getFlag()<=0) 	continue;
-#ifdef ASSIGNVP
-    if (vpAssign==2) {
-      vpHit = (StiHit*)gTAssign->GetVal((long)track);
-      vpDetector=0;vpLayer=0;
-      if (vpHit) {
-        vpDetector = vpHit->detector();
-        vpLayer = vpDetector->getPlacement()->getLayerRadius();
-    }}
-#endif// ASSIGNVP
-
-    extended = extendTrack(track,rMin);
-    track->reduce();
-    if (extended<0) 		continue;
-    if (track->getFlag()<=0) 	continue;
-    nTKeep++;
-    nTpcHits+=track->getFitPointCount(kTpcId);
-    nSvtHits+=track->getFitPointCount(kSvtId);
-    track->reserveHits();
-  }
-   printf("***extendTracks***: nTKeep=%d \n", nTKeep);
-   printf("***extendTracks***: nTpcHits=%d nSvtHits=%d\n",nTpcHits,nSvtHits);
-}
-//______________________________________________________________________________
-int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
-{
-static int nCall=0; nCall++;
-StiDebug::Break(nCall);
-  int trackExtended   =0;  
-  int trackExtendedOut=0;
-  int status = 0;
-  // invoke tracker to find or extend this track
-  //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
+  catch (runtime_error & rte)
     {
-      if (debug()) cout << "StiKalmanTrack::find seed " << *((StiTrack *) track);
-      trackExtended = find(track,kOutsideIn,rMin);
-      if (trackExtended) {
-          status = 0;
-#ifdef ASSIGNVP
-          if (vpAssign!=1) status = track->refit();
-#else 
-//        if (!rMin) status = track->refit();
-#endif// ASSIGNVP
-	  if(status) return -1;
-      }	
-
+    cout << "StiKalmanTrackFinder::findTracks() - Run Time Error (2) :" << rte.what() << endl;
     }
-  // decide if an outward pass is needed.
-  const StiKalmanTrackNode * outerMostNode = track->getOuterMostNode(2);
-  if (!outerMostNode)
-    {
-      track->setFlag(-1);
-      return 0;
-    }
-  if (outerMostNode->getX()<185. )
-    {
-      trackExtendedOut= find(track,kInsideOut);
-      if (debug()) cout << "StiKalmanTrackFinder::extendTrack (track,kInsideOut)" << *((StiTrack *) track);
-    }
-  trackExtended |=trackExtendedOut;
-  if (trackExtended) {
-    status = track->approx();
-    if (status) return -1;
-    status = track->refit();
-    if (status) return -1;
-  }
-  //cout << " find track done" << endl;
-  return trackExtended;
+  //if (_trackFilter)
+  //cout << "  Tracks Analyzed:"<< _trackFilter->getAnalyzedCount() << endl
+  //			 << "         Accepted:"<< _trackFilter->getAcceptedCount() << endl;
+  //else
+  //  cout << "SKTF::findTracks() -I- Done"<<endl;
 }
+
 //______________________________________________________________________________
 /*
  Extend all known tracks to primary vertex
@@ -354,23 +233,36 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   int goodCount= 0;
   int plus=0;
   int minus=0;
-  int ntr = _trackContainer->size();
-  for (int itr=0;itr<ntr;itr++) {
-      StiKalmanTrack* track = (StiKalmanTrack*)(*_trackContainer)[itr];
-      rawCount++;
-      StiTrackNode *extended = track->extendToVertex(vertex);
-      if (extended) {
-        track->add(extended,kOutsideIn);
-static int myRefit=0;
-        if (myRefit && track->refit()) 			extended=0;
-        if (extended && !extended->isValid()) 		extended=0;
-        if (extended && extended->getChi2()>1000) 	extended=0;
-      }
-      track->reduce();
-      // simple diagnostics
-      if (extended) goodCount++;
-      if (track->getCharge()>0) plus++;else minus++;
-   }
+  for (vector<StiTrack*>::const_iterator it=_trackContainer->begin();
+       it!=_trackContainer->end();
+       ++it)
+    {
+      try
+	{
+	  rawCount++;
+	  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>(*it);
+	  if (!track) continue;
+	  StiKalmanTrackNode * inner = track->getInnerMostNode();
+	  //yf	  double r = inner->getRefPosition();
+//VP	  if (r>4.1 && r<50) find(track,kOutsideIn);
+	  StiTrackNode *extended = track->extendToVertex(vertex);
+          if (extended) track->add(extended,kOutsideIn);
+          track->reduce();
+	  // simple diagnostics
+	  if (extended) goodCount++;
+	  if (track->getCharge()>0)
+	    plus++;
+	  else
+	    minus++;
+	}
+      catch (runtime_error & rte)
+	{
+	  cout << "SKTF::extendTracksToVertex()"
+	       << "-W- Run Time Error while extending a track to main vertex."<<endl
+	       << "Error Message:" << endl
+	       << rte.what() << endl;
+	}
+    }
   cout << "SKTF::extendTracksToVertex(StiHit* vertex) -I- rawCount:"<<rawCount<<endl
        << "                                          extendedCount:"<<goodCount<<endl
        << "                                                   plus:"<<plus<<endl
@@ -380,7 +272,7 @@ static int myRefit=0;
 
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
 {
-  enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=4,RMAX=50,RMIN=5};
+  enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=3,RMAX=50,RMIN=5};
 
   StiKalmanTrackNode *extended=0;
   int goodCount= 0, plus=0, minus=0;
@@ -390,8 +282,6 @@ void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &ve
 
   for (int iTrack=0;iTrack<nTracks;iTrack++)		{
     StiKalmanTrack * track = (StiKalmanTrack*)(*_trackContainer)[iTrack];  
-StiDebug::tally("Tracks");
-
     StiKalmanTrackNode *bestNode=0;  
     StThreeVectorD nearBeam;
     track->getNearBeam(&nearBeam);
@@ -399,17 +289,15 @@ StiDebug::tally("Tracks");
     StiKalmanTrackNode * inner = track->getInnerMostNode();
     double r = inner->getRefPosition();
     if (r>RMAX) 					continue;	
-//VP    if (r>RMIN) find(track,kOutsideIn);
+    if (r>RMIN) find(track,kOutsideIn);
     for (int iVertex=0;iVertex<nVertex;iVertex++) {
       StiHit *vertex = vertices[iVertex];
 //VP  if (fabs(vertex->z_g()-nearBeam.z()) > ZMAX2d) 	continue;
       if (fabs(track->getDca(vertex)) > DMAX3d)    	continue;
-StiDebug::tally("PrimCandidates");
 
       extended = (StiKalmanTrackNode*)track->extendToVertex(vertex);
 
       if (!extended) 					continue;
-StiDebug::tally("PrimExtended");
       if (!bestNode) {bestNode=extended;		continue;}
       if (bestNode->getChi2()+log(bestNode->getDeterm())
          <extended->getChi2()+log(extended->getDeterm()))continue;
@@ -419,18 +307,17 @@ StiDebug::tally("PrimExtended");
     
     if(!bestNode) 			continue;
     track->add(bestNode,kOutsideIn);
-StiDebug::tally("PrimAdded");
     int         ifail = 0;
-static int REFIT=2005;
-if (REFIT) {
-    ifail = track->refit();
-    ifail |= (track->getInnerMostHitNode(3)!=bestNode);
+static int REFIT=0;
+    if (REFIT) {
+                ifail = track->refit();
+    if (!ifail) ifail = track->refitL();
+    if (!ifail) ifail = track->getInnerMostHitNode()!=bestNode;
 }
     track->reduce();
 // something is wrong. It is not a primary
     if (ifail) { track->removeLastNode();continue;}
     goodCount++;
-StiDebug::tally("PrimRefited");
     if (track->getCharge()>0) plus++; else minus++;
 
   }//End track loop 
@@ -457,7 +344,6 @@ public:
 		//   qa = -1 == hit expected but not found
 		//   qa = -2 == close to beam, stop processing of it
 		//   qa = -3 == fake track, stop processing of it
-		//   qa = -4 == track can not be continued, stop processing of it
 
   	QAFind()		{reset();                  }
 void 	reset()			{rmin=0; sum=0; hits =0; nits=0; qa=0;}
@@ -468,27 +354,20 @@ void operator+=(const QAFind &q){sum+=q.sum; hits+=q.hits; nits+=q.nits;}
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction,double rmin) // throws runtime_error, logic_error
 {
 static int nCall=0; nCall++;
-  gLevelOfFind = 0;
 StiKalmanTrackNode::Break(nCall);
-  int nnBef,nnAft;
-  double lnBef,lnAft;
   
   if(direction) rmin=0; //no limitation to outside
   track = dynamic_cast<StiKalmanTrack *> (t);
-  nnBef = track->getNNodes(3);
-  lnBef = track->getTrackLength();
-
   StiKalmanTrackNode *leadNode = track->getInnOutMostNode(direction,2);
-  if (!leadNode) return 0;
+  if (!leadNode) throw runtime_error("SKTF::find() -E- track leadNode ==0");
   leadNode->cutTail(direction);
   assert(leadNode->isValid());
   QAFind qa; qa.rmin = rmin;
   find(track,direction,leadNode,qa);
   track->setFirstLastNode(leadNode);
-  nnAft = track->getNNodes(3);
-  lnAft = track->getTrackLength();
-  return (nnAft>nnBef || lnAft>(lnBef+0.5));
+  return qa.hits>0;
 }
+
 //______________________________________________________________________________
 void StiKalmanTrackFinder::find(StiKalmanTrack * track, int direction
                               ,StiKalmanTrackNode *leadNode,QAFind &qa) 
@@ -502,7 +381,7 @@ static const double ref1  = 50.*degToRad;
 //static  const double ref2  = 2.*3.1415927-ref1;
 static  const double ref1a  = 110.*degToRad;
   //  const double ref2a  = 2.*3.1415927-ref1a;
-  gLevelOfFind++;
+
   int status;
   StiKalmanTrackNode testNode;
   int position;
@@ -510,11 +389,10 @@ static  const double ref1a  = 110.*degToRad;
   double  leadAngle,leadRadius;
 
   assert(leadNode->isValid());
-  const StiDetector *leadDet = leadNode->getDetector();
+  const StiDetector *leadDet    = leadNode->getDetector();
   if (!leadDet)  throw runtime_error("SKTF::find() -E- leadDet==0");
   leadRadius = leadDet->getPlacement()->getNormalRadius();
-  assert(leadRadius>0 && leadRadius<1000);
-  if (leadRadius < qa.rmin) {gLevelOfFind--;return;}
+  if (leadRadius < qa.rmin) return;
   leadAngle  = leadDet->getPlacement()->getNormalRefAngle();
 
 
@@ -541,37 +419,20 @@ static  const double ref1a  = 110.*degToRad;
 
   if (debug() > 2) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;
 
-#ifdef ASSIGNVP
-  int vpSelected=0;
-#endif// ASSIGNVP
-  
   while (((!direction)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial()))
   {do{//technical do
     vector<StiDetectorNode*>::const_iterator sector;
     vector<StiDetector*> detectors;
     if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
 
-//#define PEREV
 
       //find all relevant detectors to visit.
     sector = (!direction)? _detectorContainer->beginPhi(rlayer):_detectorContainer->beginPhi(layer);
-    for ( ; (!direction)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer); ++sector)
+    while ( (!direction)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer) )
     {
        StiDetector * detector = (*sector)->getData();
        double angle  = detector->getPlacement()->getNormalRefAngle();
        double radius = detector->getPlacement()->getNormalRadius();
-       assert(radius>0 && radius<1000);
-#ifdef ASSIGNVP
-       double ladius = detector->getPlacement()->getLayerRadius();
-       if (!direction && vpAssign==2 && vpHit && fabs(ladius-vpLayer)<1e-5) {
-         if (detector!=vpDetector) continue;
-         detectors.clear();
-         detectors.push_back(detector);
-         vpSelected = 2005;
-         break;
-       }
-#endif// ASSIGNVP
-       if (radius < qa.rmin) {gLevelOfFind--;return;}
        double diff = radius-leadRadius;if (!direction) diff = -diff;
        if (diff<-1e-6 && debug()>3) {
           printf("TrackFinder: Wrong order: (%s).(%g) and (%s).(%g)\n"
@@ -590,16 +451,14 @@ static  const double ref1a  = 110.*degToRad;
        diff = projAngle-angle;
        if (diff >  M_PI) diff -= 2*M_PI;
        if (diff < -M_PI) diff += 2*M_PI;
-       if (fabs(diff) > OpenAngle)	continue;
-       detectors.push_back(detector);
+       if (fabs(diff) <= OpenAngle) { detectors.push_back(detector);}
+       ++sector;
     }
-
     int nDets = detectors.size(); 
     if (debug() > 2 && nDets==0) cout << "no detector of interest on this layer"<<endl;
     if (!nDets) continue;
     if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
-    for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d)
-    {
+    for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d){
       tDet = *d;
       if (debug() > 2) {
 	cout << endl<< "target det:"<< *tDet;
@@ -610,7 +469,9 @@ static  const double ref1a  = 110.*degToRad;
       testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
-      if (position == kEnded) { gLevelOfFind--; return;}
+
+      // CP Nov 2 Try doubling the chi2 in the SVT
+      //if (testNode.getX()<40.) maxChi2 = 2* maxChi2;
       if (debug() > 2)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
       if (debug() >= 1) StiKalmanTrackNode::PrintStep();
       if (position<0 || position>kEdgeZplus) { 
@@ -619,6 +480,7 @@ static  const double ref1a  = 110.*degToRad;
 	continue; // will try the next available volume on this layer
       }
 
+      if (testNode.isEnded()) { qa.qa= -4; return;}
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
@@ -648,7 +510,7 @@ static  const double ref1a  = 110.*degToRad;
 	  chi2 = testNode.evaluateChi2(stiHit);
 	  if (debug() > 2)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
 	  if (chi2>maxChi2) 	continue;
-	  hitCont.add(stiHit,chi2,testNode.getDeterm());
+	  hitCont.add(stiHit,chi2);
 	  if (debug() > 2) cout << " hit selected"<<endl;
 	}// for (hitIter)
       }//if(active)
@@ -660,38 +522,6 @@ static  const double ref1a  = 110.*degToRad;
         nHits=hitCont.getNHits();
         if (testNode.getX()< 20 || !nHits) nHits++;
       }
-#ifdef ASSIGNVP
-      do {
-        if (!active) 		break;
-        if (direction) 		break;
-	if (testNode.getX()>16) break;
-	if (testNode.getX()<14) break;
-	
-        switch (vpAssign) {
-      
-          case 1:
-          for (int jHit=0;jHit<nHits; jHit++){
-            stiHit = hitCont.getHit(jHit);
-            if (!stiHit) continue;
-            chi2 = hitCont.getChi2(jHit);
-            double detr = hitCont.getDetr(jHit);
-	    gTAssMtx->SetChi2((long)track,(long)stiHit,chi2+log(detr));
-	  } 
-	  return;  
-
-          case 2:
-          if (!vpSelected) break;
-	  hitCont.reset();
-	  stiHit= vpHit;
-          nHits=1;
-          if (stiHit) { 
-            chi2 = testNode.evaluateChi2(stiHit);
-            hitCont.add(stiHit,chi2);
-            assert(tDet==stiHit->detector());
-	  }
-	}
-      }while(0);
-#endif //ASSIGNVP
       QAFind qaBest,qaTry;
       for (int jHit=0;jHit<nHits; jHit++)
       {//Loop over Hits
@@ -718,14 +548,15 @@ static  const double ref1a  = 110.*degToRad;
         if (igor<0)  { leadNode->remove(0);}
         else         { leadNode->remove(1);qaBest=qaTry;}
       }
-      qa += qaBest; gLevelOfFind--; return;
+      qa += qaBest;
+      return;
     }//End Detectors
-  }while(0);
-  if(!direction){++rlayer;}else{++layer;}}
+  }while(0);if(!direction){++rlayer;}else{++layer;}}
 //end layers
-  gLevelOfFind--;
   return;
 }
+
+
 //______________________________________________________________________________
 void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
                                  ,int active,QAFind &qa)
@@ -767,25 +598,30 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
 int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
 
-   if ( qaTry.qa   <=         -2)  	return -1;
-   if (qaBest.qa   <=         -2)  	return  1;
+   if ( qaTry.qa   ==         -3)  	return -1;
+   if (qaBest.qa   ==         -3)  	return  1;
+   int n = qaBest.hits; if (n<qaTry.hits) n = qaTry.hits;
+   double estBest = qaBest.sum +(n-qaBest.hits)*maxChi2;
+   double estTry  = qaTry.sum  +(n-qaTry.hits )*maxChi2;
+   if (estBest<estTry) {return -1;} else {return 1;}
+#if 0
    if (qaBest.hits >  qaTry.hits) 	return -1;
    if (qaBest.hits <  qaTry.hits) 	return  1;
    if (qaBest.nits <  qaTry.nits) 	return -1;
    if (qaBest.nits >  qaTry.nits) 	return  1;
    if (qaBest.sum  <= qaTry.sum ) 	return -1;
    					return  1;
+#endif //0
 }
 
 //______________________________________________________________________________
-StiTrack * StiKalmanTrackFinder::findTrack(double rMin)
+StiTrack * StiKalmanTrackFinder::findTrack()
 {
-assert(0);
   StiTrack * track = 0;
   try
     {
       if (!_trackSeedFinder) throw runtime_error("StiKalmanTrackFinder::findTrack() -E- No Track seed finder instance available");
-      track = _trackSeedFinder->findTrack(rMin);
+      track = _trackSeedFinder->findTrack();
       if (track)
         {
         track->find();
@@ -886,3 +722,21 @@ bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
   return lhsda<rhsda;
 }
 
+
+/*if (inner->getX() < 4.5) 
+  else
+  {
+  //xxxxxxxxxxxxxxxxx
+  cout << " SPECIAL extend to vertex attempted" << endl;
+  _detectorContainer->setToDetector(inner->getDetector());
+  StiDetector * currentDet = **_detectorContainer;
+  _detectorContainer->moveIn();
+  StiDetector * tDet = **_detectorContainer;   
+  if (!tDet || currentDet==tDet)
+  {
+  cout << "no more detectors to go to..."<<endl;
+  }
+  cout << *tDet<<endl;
+  track->extendToVertex(vertex,tDet);
+  cout << " SPECIAL extend to vertex - end" << endl;
+  }*/

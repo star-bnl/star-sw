@@ -1,14 +1,14 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.17 2005/12/08 00:03:07 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.18 2006/03/09 22:45:49 didenko Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
- * Revision 2.17  2005/12/08 00:03:07  perev
- * StiAux* mAux added
+ * Revision 2.18  2006/03/09 22:45:49  didenko
+ * get back previuos version
  *
  * Revision 2.16  2005/08/17 22:04:42  perev
  * PoinCount cleanup
@@ -152,15 +152,13 @@ class StHelixModel;
 
     \author Manuel Calderon de la Barca Sanchez (Yale Software)
  */
-class StiAux;
 class StiStEventFiller
 {
 public:
     StiStEventFiller();
-    void setUseAux(int aux=1)		{mUseAux=aux;}
     virtual ~StiStEventFiller();
-    void fillEvent(StEvent* e, StiTrackContainer* t);
-    void fillEventPrimaries();
+    StEvent* fillEvent(StEvent*, StiTrackContainer*);
+    StEvent* fillEventPrimaries(StEvent*, StiTrackContainer*);
     void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* kTrack,bool refCountIncr);
     void fillGeometry(StTrack* track, StiKalmanTrack* kTrack, bool outer);
     //void fillTopologyMap(StTrack* track, StiKalmanTrack* kTrack);
@@ -177,8 +175,6 @@ private:
 		    bool accept(StiKalmanTrack* kTrack);
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
-    StiAux* mAux;
-    int mUseAux;
     map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
 
     StiDedxCalculator dEdxTpcCalculator;

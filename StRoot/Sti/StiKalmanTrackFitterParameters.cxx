@@ -6,14 +6,14 @@
 
 StiKalmanTrackFitterParameters::StiKalmanTrackFitterParameters() 
   : EditableParameters("KalmanTrackFitterParameters","KalmanTrackFitterParameters"),
-    _maxChi2(10.),_maxChi2Vtx(99.)
+    _maxChi2(3.)
 { 
   initialize(); 
 } 
 
 StiKalmanTrackFitterParameters::StiKalmanTrackFitterParameters(const string & name, const string & description)
   : EditableParameters(name,description),
-    _maxChi2(10.),_maxChi2Vtx(100.)
+    _maxChi2(3.)
 {
   initialize(); 
 } 
@@ -37,8 +37,7 @@ void StiKalmanTrackFitterParameters::initialize()
 { 
   _enabled  = true; 
   _editable = true; 
-  add( new EditableParameter("maxChi2"   , "Maximum Chi2"       , &_maxChi2   , _maxChi2   , 0., 1000., 0.1, 0) );
-  add( new EditableParameter("maxChi2Vtx", "Maximum Chi2 Vertex", &_maxChi2Vtx, _maxChi2Vtx, 0., 1000., 0.1, 0) );
+  add( new EditableParameter("maxChi2", "Maximum Chi2", &_maxChi2, _maxChi2, 0., 1000., 0.1, 0) );
 } 
 
 
@@ -66,7 +65,6 @@ ostream& operator<<(ostream& os, const StiKalmanTrackFitterParameters& p)
 {
   return os << "StiKalmanTrackFitterParameters" 
 	    << "    " <<  p.getName() << endl
-	    << "   _maxChi2: "    << p._maxChi2    << endl 
-	    << "   _maxChi2Vtx: " << p._maxChi2Vtx << endl << endl;
+	    << "   _maxChi2: " << p._maxChi2 << endl << endl;
 }
 
