@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.10 2006/02/06 17:29:38 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.11 2006/03/10 02:58:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -33,6 +33,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
   {"SD97" ,"","","db,detDb" ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98" ,"","","db,detDb" ,"","","Turn on 1998 test parameters",kFALSE},
   {"Y1a" ,"","","db,detDb" ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
@@ -66,7 +67,6 @@ Bfc_st BFC[] = {
   {"RY2004Y","","","db,detDb" ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb" ,"","","Year4 geometry fixed",kFALSE},
   {"RY2004d","","","db,detDb" ,"","","Year4 geometry with ne wSVT",kFALSE},
-
   {"RY2005" ,"","","db,detDb" ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb" ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005b","","","db,detDb" ,"","","Real data with Year5 study geometry",kFALSE},
@@ -103,8 +103,12 @@ Bfc_st BFC[] = {
   {"Y2005c" ,"","","db,detDb","","", "Year5 geometry + more corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005d" ,"","","db,detDb","","", "y2005c + new SVT", kFALSE},
 
+
   {"Complete","","","db,detDb" ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1" ,"","","db,detDb" ,"","","Development geometry STAR",kFALSE},
+
+
+
   {"NoDb" ,"" ,"","-db,-tpcDb,-magF" ,"","","Take out Db from Chain",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
@@ -385,7 +389,7 @@ Bfc_st BFC[] = {
   {"TRGDef" ,"" ,"","","" ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"TofUtil" ,"" ,"","","" ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StBichsel" ,"" ,"","","" ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-  {"StEvent" ,"" ,"","globT,SCL,TRGDef,StBichsel","" ,"StiUtilities,StEvent","Load StEvent",kFALSE},
+  {"StEvent" ,"" ,"","globT,SCL,TRGDef,StBichsel","" ,"StEvent","Load StEvent",kFALSE},
   {"SsdUtil" ,"" ,"","","" ,"StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil" ,"" ,"","emc_T,geomT,StDbT","" ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil" ,"" ,"","","" ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
@@ -680,6 +684,7 @@ Bfc_st BFC2[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+
   {"SD97" ,"","","db,detDb" ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98" ,"","","db,detDb" ,"","","Turn on 1998 test parameters",kFALSE},
   {"Y1a" ,"","","db,detDb" ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
@@ -713,7 +718,6 @@ Bfc_st BFC2[] = {
   {"RY2004Y","","","db,detDb" ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb" ,"","","Year4 geometry fixed",kFALSE},
   {"RY2004d","","","db,detDb" ,"","","Year4 geometry with ne wSVT",kFALSE},
-
   {"RY2005" ,"","","db,detDb" ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb" ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005b","","","db,detDb" ,"","","Real data with Year5 study geometry",kFALSE},
@@ -750,8 +754,12 @@ Bfc_st BFC2[] = {
   {"Y2005c" ,"","","db,detDb","","", "Year5 geometry + more corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005d" ,"","","db,detDb","","", "y2005c + new SVT", kFALSE},
 
+
   {"Complete","","","db,detDb" ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1" ,"","","db,detDb" ,"","","Development geometry STAR",kFALSE},
+
+
+
   {"NoDb" ,"" ,"","-db,-tpcDb,-magF" ,"","","Take out Db from Chain",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
@@ -881,6 +889,20 @@ Bfc_st BFC2[] = {
   {"pp2005a" ,"" ,"",
    "B2005a,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+
+  {"B2006" ,"" ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                              ,"Base chain for 2006 ITTF (tpc+svt)",kFALSE},
+  {"B2006a" ,"" ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
+                                                             ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
+
+
+
+  {"pp2006a" ,"" ,"",
+   "B2006a,fcf,ppOpt,VFppLMV5,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+
 
 
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
@@ -1059,7 +1081,7 @@ Bfc_st BFC2[] = {
   {"TRGDef" ,"" ,"","","" ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"TofUtil" ,"" ,"","","" ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StBichsel" ,"" ,"","","" ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-  {"StEvent" ,"" ,"","globT,SCL,TRGDef,StBichsel","" ,"StiUtilities,StEvent","Load StEvent",kFALSE},
+  {"StEvent" ,"" ,"","globT,SCL,TRGDef,StBichsel","" ,"StEvent","Load StEvent",kFALSE},
   {"SsdUtil" ,"" ,"","","" ,"StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil" ,"" ,"","emc_T,geomT,StDbT","" ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil" ,"" ,"","","" ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
@@ -1228,7 +1250,7 @@ Bfc_st BFC2[] = {
   {"genvtx" ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"Sti" ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
-   "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
+                "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
   {"StiPixel" ,"","","Sti", "","StiPixel", "Load StiPixel shared library",kFALSE},
 
   {"dEdxY2" ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
@@ -1609,7 +1631,10 @@ Int_t StBFChain::Instantiate()
     if (maker == "StiMaker") {
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
       else 
-	if (GetOption("SvtIT")) mk->SetAttr("activeSvt"	,kTRUE);
+	if (GetOption("SvtIT")){
+	                        mk->SetAttr("useSvt"	,kTRUE);
+	                        mk->SetAttr("activeSvt"	,kTRUE);
+	}
 
       if (GetOption("SsdIT")){
 				mk->SetAttr("useSsd"	,kTRUE);
@@ -2287,6 +2312,9 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
   want to decouple Geant geometry and database calibration constants.
   This may also be used to get database values when you do not run over
   a raw data file.
+  - The geometry options are now dynamic. This includes BOTH Y geometries
+  and RY geometry options. They are defined now in StMaker as a static
+  map.
 */
 void StBFChain::SetFlags(const Char_t *Chain)
 {
