@@ -2,7 +2,11 @@
 /// \File StiMaker.cxx
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
+//
 // $Log: StiMaker.cxx,v $
+// Revision 1.163  2006/03/10 19:32:56  jeromel
+// Ident and kHftId / still to find kIstId
+//
 // Revision 1.162  2006/03/09 22:45:49  didenko
 // get back previuos version
 //
@@ -257,7 +261,7 @@ ClassImp(StiMaker)
     _hitLoader(0),
     _seedFinder(0),
     _tracker(0),
-		_fitter(0),
+    _fitter(0),
     _eventFiller(0),
     _trackContainer(0),
     _vertexFinder(0),
@@ -267,6 +271,9 @@ ClassImp(StiMaker)
 
 {
     cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
+    if ( ! _toolkit){
+      cout << "StiMaker::StiMaker() -F- toolkit was not initialized" << endl;
+    }
 //??    _toolkit->setStiMaker(this);
 }
 
@@ -341,8 +348,15 @@ Int_t StiMaker::InitDetectors()
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
       _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel,_pars->pixelInputFile));
-      group->setGroupId(9999);
+      group->setGroupId(kHftId);
     }
+  // if (_pars->useIst)
+  //  {
+  //    cout<<"StiMaker::Init() -I- Adding detector group:IST"<<endl;
+  //    _toolkit->add(group = new StiIstDetectorGroup(_pars->activeIst,_pars->istInputFile));
+  //    group->setGroupId(kIstId);
+  //  }
+
   return kStOk;
 }
 
@@ -353,18 +367,18 @@ Int_t StiMaker::InitRun(int run)
       cout <<"StiMaker::InitRun() -I- Initialization Segment Started"<<endl;
 
 
-			// Load Detector related parameters
-			StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
-			masterBuilder->build(*this);
+      // Load Detector related parameters
+      StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
+      masterBuilder->build(*this);
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
       detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
-			if (_pars->useResidualCalculator)
-				{
-					_residualCalculator = _toolkit->getResidualCalculator();
-					_residualCalculator->initialize(_toolkit->getDetectorBuilder());
-				}
-			_seedFinder = _toolkit->getTrackSeedFinder();
+      if (_pars->useResidualCalculator)
+	{
+	  _residualCalculator = _toolkit->getResidualCalculator();
+	  _residualCalculator->initialize(_toolkit->getDetectorBuilder());
+	}
+      _seedFinder = _toolkit->getTrackSeedFinder();
       _seedFinder->initialize();
       _hitLoader  = _toolkit->getHitLoader();
       _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
