@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.488 2006/03/10 00:11:35 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.489 2006/03/10 21:18:11 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -251,7 +251,9 @@ Int_t StBFChain::Instantiate()
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
     // All Makers created here
-    if (!mk) {
+    if (maker == "StiMaker")     
+      ProcessLine("StiToolkit::setToolkit( new StiDefaultToolkit() );");
+      if (!mk) {
       if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
       else                          mk = New(fBFC[i].Maker);
       if (mk) {
@@ -287,6 +289,8 @@ Int_t StBFChain::Instantiate()
       }
     }
 //		Sti(ITTF) start
+#define StiOLD_INTERFACE
+#ifndef StiOLD_INTERFACE
     if (maker == "StiMaker") {
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
       else 
@@ -313,6 +317,46 @@ Int_t StBFChain::Instantiate()
       }
       mk->PrintAttr();
     }
+#endif
+#ifdef StiOLD_INTERFACE
+   if (maker == "StiMaker") {
+//      ProcessLine("StiToolkit::setToolkit( new StiDefaultToolkit() );");
+      TString cmd(Form("StiMaker *stiMk = (StiMaker*) %p;",mk));
+      cmd += "StiToolkit  * tk   = stiMk->getToolkit();";
+      cmd += "if (! tk)  { tk   = new StiDefaultToolkit();}";
+      cmd += "StiMakerParameters * pars = stiMk->getParameters();";
+      cmd += "if ( ! pars ) {pars = new StiMakerParameters();stiMk->setParameters(pars);}";
+      //      cmd += "pars->useGui        = kFALSE;";
+      //      cmd += "pars->useMcAsRec    = kFALSE;";
+      //      cmd += "pars->doSimulation  = kFALSE;";
+      //      cmd += "pars->doAssociation = kFALSE;";
+      cmd += "pars->doPlots       = kFALSE;";
+      cmd += "pars->useTpc        = kTRUE;";
+      cmd += "pars->activeTpc     = kTRUE;";
+      //      cmd += "pars->doStEventInput= kTRUE;"; // We always want to have this I think?
+      //      cmd += "pars->doStEventOutput=kTRUE;";
+      cmd += "pars->useSvt=kTRUE;";         // SVT used in Sti but not active. ??
+      // Pre-2001 data, will build only 1 ladder?
+      //pars->useSsd=kTRUE;         // use SSD in Sti
+      
+      if (GetOption("SvtIT")) cmd += "pars->activeSvt=kTRUE;";
+
+      //if (GetOption("SsdIT")) pars->activeSsd=kTRUE;
+      if (GetOption("SsdIT")){
+	cmd += "pars->useSsd=kTRUE;";
+	cmd += "pars->activeSsd=kTRUE;";
+      }
+      if (GetOption("FtpcIT")){
+	cmd += "pars->useFtpc=kTRUE;";
+	cmd += "pars->activeFtpc=kTRUE;";
+      }
+      cmd += "cout << \"Sti Parameters (seen in bfc):\" << endl;";
+      cmd += "cout << *pars << endl;";
+      //if (GetOption("Simu")) cmd += "tk->setMcEnabled(kTRUE);";
+      ProcessLine(cmd);
+      if ( GetOption("clearmem") )  mk->SetMode(1);
+    }
+#endif // end of StiOLD_INTERFACE
 //		Sti(ITTF) end
     if (maker=="StGenericVertexMaker") {
       int                   VtxOpt = 0;
