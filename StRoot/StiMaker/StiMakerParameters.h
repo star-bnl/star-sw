@@ -18,6 +18,7 @@ class StiMakerParameters : public TObject
   bool useTpc;
   bool useFtpc;
   bool usePixel;
+  bool useIst;
 
   // Hit loading 
   bool activeEmc;
@@ -27,6 +28,7 @@ class StiMakerParameters : public TObject
   bool activeTpc;
   bool activeFtpc;
   bool activePixel;
+  bool activeIst;
   bool useResidualCalculator;
 
   bool doPlots;
@@ -40,6 +42,7 @@ class StiMakerParameters : public TObject
   char* tpcInputFile;
   char* ftpcInputFile;
   char* pixelInputFile;
+  char* istInputFile;
 
   friend ostream& operator<<(ostream& os, const StiMakerParameters&pars);
   

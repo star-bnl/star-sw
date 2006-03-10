@@ -4,8 +4,8 @@
 /// \author C Pruneau 3/02
 //
 // $Log: StiMaker.cxx,v $
-// Revision 1.163  2006/03/10 19:32:56  jeromel
-// Ident and kHftId / still to find kIstId
+// Revision 1.164  2006/03/10 20:48:28  jeromel
+// Ist added back (needed params)
 //
 // Revision 1.162  2006/03/09 22:45:49  didenko
 // get back previuos version
@@ -224,6 +224,7 @@
 #include "StiSsd/StiSsdDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
 #include "StiPixel/StiPixelDetectorGroup.h"
+#include "StiPixel/StiIstDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
@@ -350,12 +351,12 @@ Int_t StiMaker::InitDetectors()
       _toolkit->add(group = new StiPixelDetectorGroup(_pars->activePixel,_pars->pixelInputFile));
       group->setGroupId(kHftId);
     }
-  // if (_pars->useIst)
-  //  {
-  //    cout<<"StiMaker::Init() -I- Adding detector group:IST"<<endl;
-  //    _toolkit->add(group = new StiIstDetectorGroup(_pars->activeIst,_pars->istInputFile));
-  //    group->setGroupId(kIstId);
-  //  }
+  if (_pars->useIst)
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:IST"<<endl;
+      _toolkit->add(group = new StiIstDetectorGroup(_pars->activeIst,_pars->istInputFile));
+      group->setGroupId(kIstId);
+    }
 
   return kStOk;
 }
