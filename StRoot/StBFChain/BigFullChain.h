@@ -7,6 +7,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  // geometry timestamps are now dynamic. Please see StChain/StMaker    
   {"SD97"  ,"","","db,detDb"                                  ,"","","Turn on 1997 test parameters",kFALSE},
   {"SD98"  ,"","","db,detDb"                                  ,"","","Turn on 1998 test parameters",kFALSE},
   {"Y1a"   ,"","","db,detDb"                 ,"","","YEAR_1A  approximation to year1: TPC+CTB+FTPC",kFALSE},
@@ -40,13 +41,12 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RY2004Y","","","db,detDb"  ,"","","Year4 full Barrel+TPC backplane+rad length+SVT copper cable",kFALSE},
   {"RY2004c","","","db,detDb"                                         ,"","","Year4 geometry fixed",kFALSE},
   {"RY2004d","","","db,detDb"                                  ,"","","Year4 geometry with ne wSVT",kFALSE},
-    
   {"RY2005" ,"","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005x","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005b","","","db,detDb"                          ,"","","Real data with Year5 study geometry",kFALSE},
   {"RY2005c","","","db,detDb"                                      ,"","","the best Year5 geometry",kFALSE},
   {"RY2005d","","","db,detDb"                                             ,"","","y2005c + new SVT",kFALSE},
-    
+
   {"Y2a"   ,"","","db,detDb"                                  ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,detDb"       ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,detDb"      ,"","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -77,8 +77,12 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Y2005c" ,"","","db,detDb","","",   "Year5 geometry + more corrections SVT, FTPC gas + SSD y4c", kFALSE},
   {"Y2005d" ,"","","db,detDb","","",                                            "y2005c + new SVT", kFALSE},
 
+  // geometry timestamps are now dynamic. Please see StChain/StMaker    
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"Ist1"    ,"","","db,detDb"                                   ,"","","Development geometry STAR",kFALSE},
+
+  // geometry timestamps are now dynamic. Please see StChain/StMaker
+
   {"NoDb"  ,""  ,"","-db,-tpcDb,-magF"                              ,"","","Take out Db from Chain",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
@@ -231,6 +235,20 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"pp2005a"      ,"" ,"",
    "B2005a,fcf,ppOpt,VFPPV,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+  // Year 6 chains - Geometry 2006 not yet ready, starting with y2005d
+  {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
+                                                              ,"Base chain for 2006 ITTF (tpc+svt)",kFALSE},
+  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
+                                                             ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
+
+  // we can start with VFPPV as Jan's wisdom as added many asserts
+  // In fact, we can NEVER start with VFPPV ...
+  {"pp2006a"      ,"" ,"",
+   "B2006a,fcf,ppOpt,VFppLMV5,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+                "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
+
+
 #endif /* __BFC2__ */
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
@@ -409,7 +427,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"TRGDef"      ,""  ,"","",""                          ,"StTriggerDataMaker","Load StTriggerData",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StBichsel"   ,""  ,"","",""                         ,"StBichsel","Load Bichsel model for dE/dx",kFALSE},
-  {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel",""    ,"StiUtilities,StEvent","Load StEvent",kFALSE},
+  {"StEvent"     ,""  ,"","globT,SCL,TRGDef,StBichsel",""                 ,"StEvent","Load StEvent",kFALSE},
   {"SsdUtil"     ,""  ,"","",""                                        ,"StSsdUtil","Load SSD Util",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T,geomT,StDbT",""                      ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
@@ -578,7 +596,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"genvtx"   ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
-   "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
+                "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
   {"StiPixel" ,"","","Sti",                           "","StiPixel", "Load StiPixel shared library",kFALSE},
 #endif /* __BFC2__ */
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
