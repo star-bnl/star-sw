@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.487 2006/02/06 17:29:38 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.488 2006/03/10 00:11:35 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -290,7 +290,10 @@ Int_t StBFChain::Instantiate()
     if (maker == "StiMaker") {
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
       else 
-	if (GetOption("SvtIT")) mk->SetAttr("activeSvt"	,kTRUE);
+	if (GetOption("SvtIT")){
+	                        mk->SetAttr("useSvt"	,kTRUE);
+	                        mk->SetAttr("activeSvt"	,kTRUE);
+	}
 
       if (GetOption("SsdIT")){
 				mk->SetAttr("useSsd"	,kTRUE);
@@ -968,6 +971,9 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
   want to decouple Geant geometry and database calibration constants.
   This may also be used to get database values when you do not run over
   a raw data file.
+  - The geometry options are now dynamic. This includes BOTH Y geometries
+  and RY geometry options. They are defined now in StMaker as a static
+  map.
 */
 void StBFChain::SetFlags(const Char_t *Chain)
 {
