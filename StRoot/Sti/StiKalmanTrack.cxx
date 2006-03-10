@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.81 2006/03/09 22:45:12 didenko Exp $
- * $Id: StiKalmanTrack.cxx,v 2.81 2006/03/09 22:45:12 didenko Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.82 2006/03/10 23:41:43 jeromel Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.82 2006/03/10 23:41:43 jeromel Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.82  2006/03/10 23:41:43  jeromel
+ * Comment out StiDebug
+ *
  * Revision 2.81  2006/03/09 22:45:12  didenko
  * get back previuos version
  *
@@ -264,7 +267,7 @@
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitContainer.h"
 #include "StiTrackNodeHelper.h"
-#include "StiDebug.h"
+//#include "StiDebug.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -1026,7 +1029,7 @@ if (debug()) cout << "extendToVertex:: " << StiKalmanTrackNode::Comment() << end
 bool StiKalmanTrack::find(int direction)
 {
 static int nCall=0; nCall++;
-StiDebug::Break(nCall);
+//StiDebug::Break(nCall);
   bool trackExtended=false;  
   bool trackExtendedOut=false;
   int status = 0;
@@ -1287,7 +1290,7 @@ static double convFactor=1.;
 int StiKalmanTrack::refitL() 
 {
 static int nCall=0;nCall++;
-  StiDebug::Break(nCall);
+// StiDebug::Break(nCall);
 
   StiKTNBidirectionalIterator source;
   StiKalmanTrackNode *pNode = 0,*targetNode;
