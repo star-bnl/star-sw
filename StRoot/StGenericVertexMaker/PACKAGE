@@ -1,5 +1,0 @@
-# $Id $
-# package StGenericVertexMaker
-# author: 
-Library:libStGenericVertexMaker.so:LIBS += -lsim_Tables  -lStChain  -lSt_ctf  -lStDb_Tables -l_StEEmcUtil -l_StEvent -l_Sti -lMinuit
-#Library:libStGenericVertexMaker.so:LIBS +=   -lctf  -lsim_Tables  -lStChain  -lSt_ctf  -lStDb_Tables  -lStEEmcDbMaker  -lStEEmcUtil  -lStEmcUtil  -lStEvent  -lStiMaker  -lSti  -lMinuit  -lPhysics
