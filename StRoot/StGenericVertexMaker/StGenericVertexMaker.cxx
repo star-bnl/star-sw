@@ -86,10 +86,8 @@ StGenericVertexMaker::~StGenericVertexMaker()
 Int_t StGenericVertexMaker::Init()
 {
   // setup params
-  EtaCut=1.4; // Sensible default cut
 
   gMessMgr->Info() << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
-  
   bool isMinuit=false;
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
@@ -101,9 +99,10 @@ Int_t StGenericVertexMaker::Init()
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
-  } else if ( m_Mode & 0x8){ // Jan's testing area
+  } else if ( m_Mode & 0x8 ||  m_Mode & 0x10){ // 2 version of PPV w/ & w/o CTB
     gMessMgr->Info() << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
     theFinder= new StPPVertexFinder();
+    if ( m_Mode & 0x10) ((StPPVertexFinder*) theFinder)->useCTB(false);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(true);
     }
