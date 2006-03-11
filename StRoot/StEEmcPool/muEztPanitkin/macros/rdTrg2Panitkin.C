@@ -1,7 +1,7 @@
-int rdTrg2Panitkin(int nEve=10000,
-		   char* file="run6111059.1",
-		   char *pathIn="/star/u/balewski/4akio/",
-		   char *pathOut="./"
+int rdTrg2Panitkin(int nEve=1000,
+		   char* file="run7067154.1",
+		   char *pathIn="",
+		   char *pathOut="./wrk/hist/"
 		   ){ 
   
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -17,6 +17,7 @@ int rdTrg2Panitkin(int nEve=10000,
   
   TString iFile=file; iFile+=".dat";
   iFile=pathIn+iFile;
+
   trgRd = new StTriggerDataReader("TRGRD");
   if (trgRd->OpenFile(iFile.Data())==kStErr){
     printf("Error opening data file %s\n",file);

@@ -6,7 +6,7 @@ EemcTwMask *mm;
 
 //==========================
 //==========================
-void plPanitkin(TString fname="eemcQA.hist.root", int flag=0) {
+void plPanitkin(TString fname="./wrk/hist/run7067154.1.hist.root", int flag=0) {
   gROOT -> LoadMacro("StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.h");
   gROOT -> LoadMacro("StRoot/StEEmcPool/muEztPanitkin/EEqaPresenter.cxx");
  
