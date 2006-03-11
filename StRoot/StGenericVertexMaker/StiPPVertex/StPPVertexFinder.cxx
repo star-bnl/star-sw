@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.17 2006/01/24 17:53:39 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.18 2006/03/11 04:12:49 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -71,6 +71,7 @@ StPPVertexFinder::StPPVertexFinder() {
   //x mVertexData=new vector<VertexData>;
 
   setMC(false); // default = real Data
+  useCTB(true); // default CTB is in the data stream
   mTestMode=0; // expert only flag
 
   // special histogram for finding the vertex, not to be saved
@@ -104,7 +105,6 @@ StPPVertexFinder::Init() {
   mMaxZradius   = 3.0;  //+sigTrack, to match tracks to Zvertex
   mMaxZrange    = 200;  // to accept Z_DCA of a track           
   mMinMatchTr   = 2;    // required to accept vertex              
-  mMinAdcBemc   = 15;   // chan, 2004 data, make it timeStamp dependent
   mMinAdcEemc   = 5;    // chan, MIP @ 6-18 ADC depending on eta
 
   if(isMC) {
@@ -147,6 +147,36 @@ StPPVertexFinder::Init() {
   bemcList->initHisto( HList);
   eemcList->initHisto( HList);
 
+}
+
+//==========================================================
+//==========================================================
+void 
+StPPVertexFinder::InitRun(int runnumber){
+  gMessMgr->Info() << "PPV InitRun() runNo="<<runnumber<<endm;
+  St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
+  int dateY=mydb->GetDateTime().GetYear();
+  
+  if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
+  assert(dateY<2007); // who knows what 2007 setup will be,  crash it just in case
+  if(isMC) {
+    gMessMgr->Info() << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
+    if(dateY>2006)  gMessMgr->Warning() <<
+	  "PPV InitRun() , M-C time stamp differs from 2005,\n BTOW status tables questionable,\n PPV results qauestionable, \n\n  F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!  \n \n chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n"<<endm; 
+  }
+
+  if(dateY<2006) {
+    mMinAdcBemc   = 15;   // BTOW used calibration of maxt Et @ ~27Gev 
+  } else {
+    mMinAdcBemc   = 8;   // BTOW used calibration of maxt Et @ ~60Gev 
+  }
+    
+  if(mTestMode==3)  ctbList->initRun(1.5); //expert only
+  else  ctbList->initRun(); // defult
+
+  bemcList->initRun();
+  eemcList->initRun();
+
   gMessMgr->Message("","I") 
     << "PPV::cuts"
     <<"\n MinFitPfrac=nFit/nPos  ="<< mMinFitPfrac 
@@ -158,34 +188,9 @@ StPPVertexFinder::Init() {
     <<"\n MinAdcBemc for MIP ="<<mMinAdcBemc
     <<"\n MinAdcEemc for MIP ="<<mMinAdcEemc
     <<"\n flag isMC ="<<isMC
+    <<"\n flag useCtb ="<<mUseCtb
     //			    <<"\n  ="<<
     <<endm; 
-}
-
-//==========================================================
-//==========================================================
-void 
-StPPVertexFinder::InitRun(int runnumber){
-  gMessMgr->Info() << "PPV InitRun() runNo="<<runnumber<<endm;
-
-  if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
-  assert(runnumber<7000000); // real BTOW HV not known for 2006+,crash it, JB
-  if(isMC) {
-     St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
-
-    int dateY=mydb->GetDateTime().GetYear();
-    gMessMgr->Info() << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
-    if(dateY!=2005)  gMessMgr->Warning() <<
-     "PPV InitRun() , M-C time stamp differs from 2005,\n BTOW status tables questionable,\n PPV results qauestionable, \n\n  F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!  \n \n chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n"<<endm; 
-  }
-
- //aa  mMappB = new StEmcDecoder(GetDate(),GetTime(), mTowerMapBug);
-
-  if(mTestMode==3)  ctbList->initRun(1.5); //expert only
-  else  ctbList->initRun(); // defult
-
-  bemcList->initRun();
-  eemcList->initRun();
 
 }
 
@@ -337,12 +342,6 @@ StPPVertexFinder::fit(StEvent* event) {
   gMessMgr->Info() << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
 
   hA[0]->Fill(1);
-  // tmp
-#if 0
-  if( ! event->triggerIdCollection()->nominal()->isTrigger(45010)
-      || ! event->triggerIdCollection()->nominal()->isTrigger(10)) return 0;
-  hA[0]->Fill(2);
-#endif  
 
   if(mToolkit==0) {    
    gMessMgr->Warning() <<"no Sti tool kit,  PPV is OFF"<<endm;
@@ -350,12 +349,14 @@ StPPVertexFinder::fit(StEvent* event) {
   }
 
   // get CTB info, does not  work for embeding 
-  if(isMC){
-    St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
-    ctbList->buildFromMC(gds);  // use M-C
-  }  else {
-    StTriggerData *trgD=event->triggerData ();
-    ctbList->buildFromData(trgD); // use real data
+  if(mUseCtb) {// CTB could be off since 2006 
+    if(isMC){
+      St_DataSet *gds=StMaker::GetChain()->GetDataSet("geant");
+      ctbList->buildFromMC(gds);  // use M-C
+    }  else {
+      StTriggerData *trgD=event->triggerData ();
+      ctbList->buildFromData(trgD); // use real data
+    }
   }
 
   hA[0]->Fill(3);
@@ -421,7 +422,7 @@ StPPVertexFinder::fit(StEvent* event) {
     //  dumpKalmanNodes(track);
     
     // ......... matcho various detectors ....................
-    matchTrack2CTB(track,t);
+    if(mUseCtb)  matchTrack2CTB(track,t);
     matchTrack2BEMC(track,t,242); // middle of tower in Rxy
     matchTrack2EEMC(track,t,288); // middle of tower in Z
     //.... all test done on this track .........
@@ -438,12 +439,15 @@ StPPVertexFinder::fit(StEvent* event) {
     //  t.print();
   }
 
-  ctbList ->print();
+  if(mUseCtb) {
+    ctbList ->print();
+    ctbList ->doHisto();
+  }
+
   bemcList->print();
   eemcList->print();
   printf("\nTpcList size=%d nMatched=%d\n\n",mTrackData.size(),kTpc);
 
-  ctbList ->doHisto();
   bemcList->doHisto();
   eemcList->doHisto();
 
@@ -681,7 +685,8 @@ StPPVertexFinder::exportVertices(){
     StPrimaryVertex primV;
     primV.setPosition(r);
     primV.setCovariantMatrix(cov); 
-    primV.setVertexFinderId(ppvVertexFinder);
+    if(mUseCtb)  primV.setVertexFinderId(ppvVertexFinder);
+    else primV.setVertexFinderId(StVertexFinderId(ppvVertexFinder+10)); // Jerome, change it to new enum, Jan
     primV.setNumTracksUsedInFinder(V->nUsedTrack);
     primV.setNumMatchesWithCTB(V->nCtb);
     primV.setNumMatchesWithBEMC(V->nBemc);
@@ -872,11 +877,11 @@ StPPVertexFinder::matchTrack2CTB(const StiKalmanTrack* track,TrackData &t){
   if(fabs(eta)<1) hA[10]->Fill(posCTB.z());
 
   int iBin=ctbList->addTrack(eta,phi);
-
+  
   bool  ctbMatch=ctbList->isMatched(iBin);
   bool  ctbVeto =ctbList->isVetoed(iBin);
   float ctbW    =ctbList->getWeight(iBin);
-
+  
   t.updateAnyMatch(ctbMatch,ctbVeto,t.mCtb);
   t.weight*=ctbW;
   t.ctbBin=iBin;
@@ -1056,6 +1061,15 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.18  2006/03/11 04:12:49  balewski
+ * 2 changes in preparation for 2006 data processing:
+ * - CTB matching  ON/OFF switch activated by m_Mode 0x8 or 0x10
+ * - vertex enum extension depending on CTB usage - hack in the moment, Jerome needs to proviade actual new enum
+ * - BTOW calibration wil change for 2006+ from maxt eT of ~27 --> 60 GeV
+ * NOTE : this new code was NOT executed - it is late, I want to get it in CVS
+ * Tomorrow I'll do some tests
+ * Jan
+ *
  * Revision 1.17  2006/01/24 17:53:39  balewski
  * small fix
  *

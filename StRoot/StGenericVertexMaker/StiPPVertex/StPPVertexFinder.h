@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.5 2005/08/30 22:08:43 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.6 2006/03/11 04:12:50 balewski Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -40,7 +40,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   void saveHisto(TString fname);
   int  mTotEve;
   int  eveID;
-  int mTestMode; // internal  param to play with cuts
+  int  mTestMode; // internal  param to play with cuts
 
   // params
   double mMinTrkPt;       //~ pT=0.16(GeV/c) == R=2 (m )in 2001
@@ -51,7 +51,8 @@ class StPPVertexFinder: public StGenericVertexFinder {
   float  mMinAdcBemc; // BEMC towers with MIP response
   float  mMinAdcEemc; // EEMC towers with MIP response
   float  mMinFitPfrac; // nFit/nPossible
-  bool isMC; // flag minor differences between Data & M-C
+  bool   isMC; // flag minor differences between Data & M-C
+  bool   mUseCtb; // disable CTB from matching/vetoing of tracks
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -75,6 +76,7 @@ class StPPVertexFinder: public StGenericVertexFinder {
   
 public:
   void setMC(bool x=true){isMC=x;}
+  void useCTB(bool x=true){mUseCtb=x;}
   void Finish();
 
   TH1F *hA[mxH];
@@ -98,6 +100,15 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.6  2006/03/11 04:12:50  balewski
+ * 2 changes in preparation for 2006 data processing:
+ * - CTB matching  ON/OFF switch activated by m_Mode 0x8 or 0x10
+ * - vertex enum extension depending on CTB usage - hack in the moment, Jerome needs to proviade actual new enum
+ * - BTOW calibration wil change for 2006+ from maxt eT of ~27 --> 60 GeV
+ * NOTE : this new code was NOT executed - it is late, I want to get it in CVS
+ * Tomorrow I'll do some tests
+ * Jan
+ *
  * Revision 1.5  2005/08/30 22:08:43  balewski
  * drop '*' from declaration of   mTrackData &  mVertexData
  *
