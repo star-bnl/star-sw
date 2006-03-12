@@ -244,7 +244,7 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
   {"pp2006a"      ,"" ,"",
-   "B2006a,fcf,ppOpt,VFPPVnoCTB,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+   "B2006a,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
