@@ -37,7 +37,7 @@ CtbHitList::CtbHitList() :
 void
 CtbHitList::initRun(float fac){
   const float  mCtbEtaSeg=0.5,  mCtbPhiSeg=C_PI/30; // NEVER chang this two , JB
-  gMessMgr->Message("","I") <<" CtbHitList::initRun(), fac="<<fac<<endm;
+  gMessMgr->Message("","I") <<"  CtbHitList::initRun(), gain change factor="<<fac<<endm;
   mCtbThres_mev*=fac; // tmp to test cuts
   mCtbThres_ch=(int) (fac*mCtbThres_ch);  // tmp to test cuts
 
