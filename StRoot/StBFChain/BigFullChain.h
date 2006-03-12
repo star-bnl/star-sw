@@ -242,9 +242,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
 
-  // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
-  {"pp2006a"      ,"" ,"",
-   "B2006a,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+  {"pp2006a"      ,"" ,"",   // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
+   "B2006a,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
@@ -438,7 +437,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                               "Load MuDST misc. dependencies (all)",kFALSE},
   {"MuDST"       ,"" ,"","MuDSTDeps,EmcUtil,TofUtil,PmdUtil","","StMuDSTMaker","Load MuDST library",kFALSE},
   {"geantL","","","geomT,gen_T,sim_T,StarMagField,geomNoField","","Geom,St_g2t,St_geant_Maker"
-                                                                                       ,"GeantLibs",kFALSE},
+                                                                                  ,"Load GeantLibs",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -680,7 +679,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"HighPtTags"  ,"","TagsChain","StEVent"              ,"StHighPtTagsMaker","StHighPtTagsMaker","",kFALSE},
 //{"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
-  {"tags"        ,"","TagsChain","TagsChain,globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag,HighPtTags"
+  {"tags"        ,"","TagsChain",         "globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag,HighPtTags"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
     
   {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
