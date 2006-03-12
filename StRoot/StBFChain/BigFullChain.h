@@ -242,10 +242,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
 
-  // we can start with VFPPV as Jan's wisdom as added many asserts
-  // In fact, we can NEVER start with VFPPV ...
+  // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
   {"pp2006a"      ,"" ,"",
-   "B2006a,fcf,ppOpt,VFppLMV5,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
+   "B2006a,fcf,ppOpt,VFPPVnoCTB,beamline,CtbMatchVtx,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr4",
                 "","","Production chain for 2005 pp data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
 
@@ -365,7 +364,8 @@ Bfc_st BFC2[] = { // ITTF Chains
     // this option will not be enabled in non-ITTF mode
   {"VFPPV"         ,""  ,"","VFppLMV5",""             ,"","... WARNING VFPPV is NOT valid with TPT",kFALSE},
 #else
-  {"VFPPV"      ,""  ,"","",""                                  ,"","... Pilup proof vertex finder",kFALSE},
+  {"VFPPV"      ,""  ,"","",""                                ,"","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPVnoCTB"      ,""  ,"","",""                    ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
 #endif /* __BFC2__ */
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
