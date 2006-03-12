@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.25 2006/01/19 22:30:05 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.26 2006/03/12 17:00:15 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.26  2006/03/12 17:00:15  jeromel
+ * Added ppvNoCtbVertexFinder to hopefully clarify analysis
+ *
  * Revision 2.25  2006/01/19 22:30:05  jeromel
  * kMaxId -> kMaxDetectorId
  *
@@ -294,6 +297,8 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         pplmvVertexFinder,
                         egrVertexFinder,
                         minuitVertexFinder,
-                        ppvVertexFinder};
+                        ppvVertexFinder,
+			ppvNoCtbVertexFinder
+                       };
 
 #endif
