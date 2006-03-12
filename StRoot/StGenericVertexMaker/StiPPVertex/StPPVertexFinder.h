@@ -3,7 +3,7 @@
  * \author Jan Balewski, July 2004
  *
  *  StGenericVertexFinder implementation of PPV
- * $Id: StPPVertexFinder.h,v 1.6 2006/03/11 04:12:50 balewski Exp $
+ * $Id: StPPVertexFinder.h,v 1.7 2006/03/12 17:01:01 jeromel Exp $
  *
  */
 #include "StGenericVertexMaker/StGenericVertexFinder.h"
@@ -45,14 +45,14 @@ class StPPVertexFinder: public StGenericVertexFinder {
   // params
   double mMinTrkPt;       //~ pT=0.16(GeV/c) == R=2 (m )in 2001
   double mMaxTrkDcaRxy;   //DCA to nominal beam line for each track
-  float  mMaxZradius;  // used in matching: tracks to zVertex
-  int    mMinMatchTr; // for valid vertex
-  float  mMaxZrange; // cut off for tracks Z_DCA
-  float  mMinAdcBemc; // BEMC towers with MIP response
-  float  mMinAdcEemc; // EEMC towers with MIP response
-  float  mMinFitPfrac; // nFit/nPossible
-  bool   isMC; // flag minor differences between Data & M-C
-  bool   mUseCtb; // disable CTB from matching/vetoing of tracks
+  float  mMaxZradius;     // used in matching: tracks to zVertex
+  int    mMinMatchTr;     // for valid vertex
+  float  mMaxZrange;      // cut off for tracks Z_DCA
+  float  mMinAdcBemc;     // BEMC towers with MIP response
+  float  mMinAdcEemc;     // EEMC towers with MIP response
+  float  mMinFitPfrac;    // nFit/nPossible
+  bool   isMC;            // flag minor differences between Data & M-C
+  bool   mUseCtb;         // disable CTB from matching/vetoing of tracks
 
   // beam line
   double          mX0  ;     // starting point of beam parameterization
@@ -80,7 +80,7 @@ public:
   void Finish();
 
   TH1F *hA[mxH];
-  TH1D *hL ; // likelyhood distribution
+  TH1D *hL ;      // likelyhood distribution
   TH1D *hM, *hW ; // cumulative track mult & weight distribution, for better errZ calculation
   TObjArray * HList;
   StPPVertexFinder();
@@ -100,6 +100,9 @@ public:
 /***************************************************************************
  *
  * $Log: StPPVertexFinder.h,v $
+ * Revision 1.7  2006/03/12 17:01:01  jeromel
+ * Minor change + use ppvNoCtbVertexFinder
+ *
  * Revision 1.6  2006/03/11 04:12:50  balewski
  * 2 changes in preparation for 2006 data processing:
  * - CTB matching  ON/OFF switch activated by m_Mode 0x8 or 0x10
