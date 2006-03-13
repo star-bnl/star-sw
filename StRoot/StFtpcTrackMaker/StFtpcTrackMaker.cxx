@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.73 2005/06/30 09:21:48 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.74 2006/03/13 19:46:35 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.74  2006/03/13 19:46:35  jcs
+// make changes necessary fot DoT0Calib
+//
 // Revision 1.73  2005/06/30 09:21:48  jcs
 // extend histogram limits to make gasGain determination easier
 //
@@ -623,16 +626,19 @@ Int_t StFtpcTrackMaker::Make()
   }
 
 #ifdef DEBUGFILE
-  Double_t vertexPos[6] = {0.,0.,0.,0.,0.,0.};
-  
+#ifdef LASERTRACKING
+  Double_t vertexPos[3] = {0.,0.,0.};
   cout<<"LASER : No FTPC to global transformation !!!"<<endl;
-  {  
+#endif
+#ifdef TWOCYCLETRACKING
+  Double_t vertexPos[3] = {vertex.GetX(),vertex.GetY(),vertex.GetZ()};
+cout<<"TWOCYCLETRACKING: vertexPos[0] = "<<vertexPos[0]<<" vertexPos[1] = "<<vertexPos[1]<<" vertexPos[2] = "<<vertexPos[2]<<endl;
+#endif
     StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
     //cout<<"Debug fill tracktree"<<endl;
     cldebug.filltracktree(tracker.GetTracks(),vertexPos);
     //if (cldebug.drawvertexhisto!=0)
-    //   cldebug.drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
-  }
+       //cldebug.drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
 #endif  
   
   /*
@@ -862,7 +868,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.73 2005/06/30 09:21:48 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.74 2006/03/13 19:46:35 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
