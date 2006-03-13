@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.h,v 1.2 2006/03/13 20:17:56 jcs Exp $
+// $Id: StFtpcCalibMaker.h,v 1.3 2006/03/13 20:40:44 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.h,v $
+// Revision 1.3  2006/03/13 20:40:44  jcs
+// correct doxygen comment
+//
 // Revision 1.2  2006/03/13 20:17:56  jcs
 // add forgotten doxygen comment terminator
 //
@@ -17,8 +20,11 @@
  *
  * This class is used to do the FTPC laser and t0 calibration
  * It processes the data in the special root file which is
- *  produced by running StFtpcCluster Maker and StFtpcTrackMaker with
- * the "fdbg" BFC option
+ * produced by running StFtpcCluster Maker and StFtpcTrackMaker with
+ * DEBUGFILE and LASERTRACKING defined for laser calibration 
+ * DEBUGFILE and TWOCYCLETRACKING defined for t0 calibration
+ * (the define statements will soon be replaced with the BCF options
+ *  'flaser' and 'fdbg')
  *
  * \author Joern Putschke, Janet Seyboth, Terry Tarnowsky
  *
@@ -115,7 +121,7 @@ class StFtpcCalibMaker : public StMaker
    Int_t Time() {return time;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.2 2006/03/13 20:17:56 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.3 2006/03/13 20:40:44 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(StFtpcCalibMaker,1)   //StAF chain virtual base class for Makers
