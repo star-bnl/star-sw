@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.24 2005/12/12 13:40:12 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.25 2006/03/13 19:26:59 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.25  2006/03/13 19:26:59  jcs
+// add constructor StFtpcCalibMaker
+//
 // Revision 1.24  2005/12/12 13:40:12  jcs
 // simplify StFtpcDbReader
 //
@@ -256,6 +259,17 @@ public:
                  St_ftpcDeflection    *deflection,
                  St_ftpcdVDriftdP     *dvdriftdp,
                  St_ftpcdDeflectiondP *ddeflectiondp,
+                 St_ftpcGas           *gas,
+                 St_ftpcDriftField    *driftfield);
+  // constructor used by StFtpcCalibMaker:
+  StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                 St_ftpcPadrowZ       *zrow,
+                 St_ftpcEField        *efield,
+                 St_ftpcVDrift        *vdrift,
+                 St_ftpcDeflection    *deflection,
+                 St_ftpcdVDriftdP     *dvdriftdp,
+                 St_ftpcdDeflectiondP *ddeflectiondp,
+                 St_ftpcElectronics   *electronics,
                  St_ftpcGas           *gas,
                  St_ftpcDriftField    *driftfield);
   // constructor used by Sti/StFtpcDetectorBuilder and StFtpcMixerMaker:

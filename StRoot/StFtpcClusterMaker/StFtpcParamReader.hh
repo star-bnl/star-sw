@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.26 2003/10/10 12:37:14 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.27 2006/03/13 19:26:59 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.27  2006/03/13 19:26:59  jcs
+// add constructor StFtpcCalibMaker
+//
 // Revision 1.26  2003/10/10 12:37:14  jcs
 // remove parameters used to calculate the FTPC geant volume id using the obsolete method
 //
@@ -184,7 +187,11 @@ public:
   StFtpcParamReader(St_ftpcClusterPars *det,
                     St_ftpcSlowSimGas  *gas,
                     St_ftpcSlowSimPars *param);
+  // constructor used by StFtpcCalibMaker:
+  StFtpcParamReader(St_ftpcClusterPars *det);
+
   ~StFtpcParamReader();
+
   Float_t padDiffusionErrors(Int_t i); 
   Float_t timeDiffusionErrors(Int_t i); 
   Float_t vDriftEstimates(Int_t i); 
