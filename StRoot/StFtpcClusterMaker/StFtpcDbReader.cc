@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.35 2006/01/13 12:36:41 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.36 2006/03/13 19:26:58 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.36  2006/03/13 19:26:58  jcs
+// add constructor StFtpcCalibMaker
+//
 // Revision 1.35  2006/01/13 12:36:41  jcs
 // If no RHIC clock frequency value available, set mMicrosecondsPerTimebin to
 // dimensionsTable->sizeOfTimebin for DbV options earlier than 20051021
@@ -224,6 +227,35 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcDriftField(driftfield);
 
   //gMessMgr->Message("StFtpcDbReader constructed for StFtpcDriftMapMaker"  ,"I"); 
+}
+
+// for StFtpcCalibMaker
+StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
+                               St_ftpcPadrowZ       *zrow,
+                               St_ftpcEField        *efield,
+                               St_ftpcVDrift        *vdrift,
+                               St_ftpcDeflection    *deflection,
+                               St_ftpcdVDriftdP     *dvdriftdp,
+                               St_ftpcdDeflectiondP *ddeflectiondp,
+                               St_ftpcElectronics   *electronics,
+                               St_ftpcGas           *gas,
+                               St_ftpcDriftField    *driftfield)
+{
+
+
+  returnCode = kStOK;
+  returnCode += FtpcDimensions(dimensions);
+  returnCode += FtpcPadrowZ(zrow);
+  returnCode += FtpcEField(efield);
+  returnCode += FtpcVDrift(vdrift);
+  returnCode += FtpcDeflection(deflection);
+  returnCode += FtpcdVDriftdP(dvdriftdp);
+  returnCode += FtpcdDeflectiondP(ddeflectiondp);
+  returnCode += FtpcElectronics(electronics);
+  returnCode += FtpcGas(gas);
+  returnCode += FtpcDriftField(driftfield);
+
+  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcCalibMaker"  ,"I"); 
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 // for Sti/StFtpcDetectorBuilder

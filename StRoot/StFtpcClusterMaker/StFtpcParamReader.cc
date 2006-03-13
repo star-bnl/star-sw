@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.27 2004/01/28 01:41:15 jeromel Exp $
+// $Id: StFtpcParamReader.cc,v 1.28 2006/03/13 19:26:59 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.28  2006/03/13 19:26:59  jcs
+// add constructor StFtpcCalibMaker
+//
 // Revision 1.27  2004/01/28 01:41:15  jeromel
 // Change OST to OS everywhere since defaultoption is now not to print
 // the date.
@@ -275,6 +278,65 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
 //   cout << "StFtpcParamReader constructed from StFtpcSlowSimMaker tables" << endl;  
 }
 
+// For StFtpcCalibMaker
+
+StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det)
+{
+
+  // ftpcClusterPars table exists only once, just copy
+  ftpcClusterPars_st *detTable = det->GetTable();
+  if(detTable){
+    mClusterParsTable = detTable; // copy to data member to write parameters back
+    mGaussFittingFlags = detTable->gaussFittingFlags;
+    mMinimumClusterMaxADC = detTable->minimumClusterMaxADC;
+    mNumberOfDriftSteps = detTable->numberOfDriftSteps;
+    mOrderOfDiffusionErrors = detTable->orderOfDiffusionErrors;
+    mPadDiffusionErrors = (Float_t *) detTable->padDiffusionErrors;
+    mTimeDiffusionErrors = (Float_t *) detTable->timeDiffusionErrors;
+    mLorentzAngleFactor = detTable->lorentzAngleFactor;
+    mPadBadFitError = detTable->padBadFitError;
+    mTimeBadFitError = detTable->timeBadFitError;
+    mPadUnfoldError = detTable->padUnfoldError;
+    mTimeUnfoldError = detTable->timeUnfoldError;
+    mPadFailedFitError = detTable->padFailedFitError;
+    mTimeFailedFitError = detTable->timeFailedFitError;
+    mPadCutoffClusterError = detTable->padCutoffClusterError;
+    mTimeCutoffClusterError = detTable->timeCutoffClusterError;
+    mPadSaturatedClusterError = detTable->padSaturatedClusterError;
+    mTimeSaturatedClusterError = detTable->timeSaturatedClusterError;
+    m2PadWeightedError = detTable->twoPadWeightedError;
+    m2PadGaussError = detTable->twoPadGaussError;
+    m3PadWeightedError = detTable->threePadWeightedError;
+    m3PadGaussError = detTable->threePadGaussError;
+    mZDirectionError = detTable->zDirectionError;
+    mNormalizedNowPressure = detTable->normalizedNowPressure;
+    mAdjustedAirPressureWest = detTable->adjustedAirPressureWest;
+    mAdjustedAirPressureEast = detTable->adjustedAirPressureEast;
+    mGasTemperatureWest = detTable->gasTemperatureWest;
+    mGasTemperatureEast = detTable->gasTemperatureEast;
+    mMaxNumSequences = detTable->maxNumSequences ; 
+    mMaxNumSeqPeaks = detTable->maxNumSeqPeaks;
+    mMaxNumPeaks = detTable->maxNumPeaks;          
+    mMaxNumCUC = detTable->maxNumCUC;           
+    mMaxLoops = detTable->maxLoops;         
+    mMaxFastLoops = detTable->maxFastLoops;    
+    mUnfoldLimit = detTable->unfoldLimit;      
+    mUnfoldFailedLimit = detTable->unfoldFailedLimit;
+    
+
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
+  }
+
+  // create empty dummy of fss gas table, to keep destructor uniform
+  mNumberOfFssGasValues = 0;
+  mFssGasEField = new Float_t[1];
+  mFssGasVDrift = new Float_t[1];
+  mFssGasDiffusionX = new Float_t[1];
+  mFssGasDiffusionY = new Float_t[1];
+  mFssGasDiffusionZ = new Float_t[1];
+  mFssGasLorentzAngle = new Float_t[1];
+}
 
 
 StFtpcParamReader::~StFtpcParamReader()
