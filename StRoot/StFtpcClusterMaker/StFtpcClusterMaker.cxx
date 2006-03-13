@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.84  2006/03/13 19:40:32  jcs
+// save microsecondsPerTimebin and temperature/pressure corrections in DEBUGFILE run tree
+//
 // Revision 1.83  2006/03/01 17:24:47  jcs
 // move all database initialization to InitRun
 //
@@ -361,7 +364,8 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 
   mDbMaker     = (St_db_Maker*)GetMaker("db");
   Int_t dbDate = mDbMaker->GetDateTime().GetDate();
-  cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<" Run Number = "<<GetRunNumber()<<endl;
+  Int_t dbTime = mDbMaker->GetDateTime().GetTime();
+  cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<" dbTime = "<<dbTime<<" Run Number = "<<GetRunNumber()<<endl;
   
   gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
   
@@ -717,6 +721,7 @@ Int_t StFtpcClusterMaker::Make()
 #endif
 #ifdef DEBUGFILE
     StFtpcClusterDebug cldebug                        ((int) GetRunNumber(),(int) GetEventNumber());
+    cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), microsecondsPerTimebin, paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
 
     StFtpcClusterFinder fcl(                           ftpcReader, 
 						       &paramReader, 
