@@ -13,6 +13,16 @@
 
 #include "StFtpcTrackMaker/StFtpcConfMapper.hh"
 
+
+struct RUN
+{
+  Int_t run;
+  Int_t date;
+  Int_t time;
+  Float_t micropertimebin;
+  Float_t deltapW,deltapE;
+};
+
 struct HIT 
 {
   Float_t x,y,z;
@@ -33,14 +43,13 @@ struct CLUSTER
 
 struct EVENT
 {
-  Float_t run;
+  Int_t run;
   Int_t nevent;
-  Float_t temperature,pressure;
 };
 
 struct TEVENT
 {
-  Float_t run;
+  Int_t run;
   Int_t nevent;
 };
 
@@ -64,7 +73,7 @@ struct THIT
 
 struct TREVENT
 {
-  Float_t run;
+  Int_t run;
   Int_t nevent;
 };
 
@@ -92,6 +101,7 @@ struct RAW
 
 // so nur vor Klasse !? genauer !!!
 
+static RUN Run;
 static CLUSTER cluster;
 static HIT hit;
 static TCLUSTER tcluster;
@@ -103,6 +113,7 @@ static TREVENT trevent;
 static MVERTEX mvertex;
 static RAW raw;
 
+
 StFtpcClusterDebug::StFtpcClusterDebug()
 {
   // default constructor
@@ -112,6 +123,7 @@ StFtpcClusterDebug::StFtpcClusterDebug()
 
 StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
 {
+
   // initialize filename and open file
   
   TFile *test;
@@ -147,18 +159,21 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       cout<<"DEBUG : Create histograms for seeing clusters in Root-file..."<<endl;
       cout<<"DEBUG : Create Tree..."<<endl;
 
+        drtree=new TTree("rinfo","Run calibration information");
+        drtree->Branch("Run",&Run,"run/I:date/I:time/I:micropertimebin/F:deltapW/F:deltapE/F");
+
       dtree=new TTree("cl","Cluster calibration informations");
       dtree->Branch("hit",&hit,"x/F:y/F:z/F:rad/F:phi/F:raderror/F:phierror/F");
       dtree->Branch("cluster",&cluster,"timepos/F:padpos/F:timesigma/F:padsigma/F:peakheight/F:charge/F:timebin/I:pad/I:padlength/I:timelength/I:row/I:sec/I:flag/I:numpeaks/I");
-      dtree->Branch("event",&event,"run/F:nevent/I:temperature/F:pressure/F");
+      dtree->Branch("event",&event,"run/I:nevent/I");
 
       dttree=new TTree("clot","Cluster on tracks calibration information");
       dttree->Branch("cluster",&tcluster,"row/I:sec/I:padlength/I:timelength/I:peakheight/F:charge/F:ntracks/I:padpos/F:timepos/F:padsigma/F:timesigma/F");
       dttree->Branch("hit",&thit,"x/F:y/F:z/F:ex/F:ey/F:ez/F:globResX/F:globResY/F:globResR/F:globResPhi/F:primResX/F:primResY/F:primResR/F:primResPhi/F");
-      dttree->Branch("event",&tevent,"run/F:nevent/I");
+      dttree->Branch("event",&tevent,"run/I:nevent/I");
 
       dtrtree=new TTree("tr","Track calibration information");
-      dtrtree->Branch("event",&trevent,"run/F:nevent/I");
+      dtrtree->Branch("event",&trevent,"run/I:nevent/I");
       dtrtree->Branch("track",&track,"px/F:py/F:pz/F:eta/F:p/F:pt/F:npoints/I:charge/I:type/I:sec/I");//:chi2/D");
       dtrtree->Branch("vertex",&mvertex,"x/F:y/F:z/F");
 
@@ -174,6 +189,10 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       cout<<"DEBUG : Update histograms for seeing clusters in Root-file..."<<endl;
       cout<<"DEBUG : Update Tree..."<<endl;
 
+         drtree=(TTree*) histofile->Get("rinfo");
+         bRun=drtree->GetBranch("Run");
+         bRun->SetAddress(&Run);
+ 
       dtree=(TTree*) histofile->Get("cl");
       bhit=dtree->GetBranch("hit");
       bhit->SetAddress(&hit);
@@ -204,6 +223,7 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       bclusterraw->SetAddress(&raw);
 
       //cout<<"nach trtree"<<endl;
+      histofile->Delete("rinfo;1");
       histofile->Delete("cl;1");
       histofile->Delete("clot;1");
       histofile->Delete("tr;1");
@@ -327,6 +347,17 @@ void StFtpcClusterDebug::drawhisto(int hardsec, int hardrow, int iPad, TPCSequen
     }
 }
 
+void StFtpcClusterDebug::fillRun(Int_t grun, Int_t gdate, Int_t gtime, Float_t micropertimebin, Float_t deltapW, Float_t deltapE)
+{
+   Run.run = grun;
+   Run.date = gdate;
+   Run.time = gtime;
+   Run.micropertimebin = micropertimebin;
+   Run.deltapW = deltapW;
+   Run.deltapE = deltapE;
+   drtree->Fill();
+}
+
 void StFtpcClusterDebug::fillraw(int hardsec, int hardrow, int iPad, TPCSequence HSequence)
 {
   for(int iIndex=0; iIndex<HSequence.Length; iIndex++)
@@ -393,7 +424,6 @@ void StFtpcClusterDebug::fillclustertree(TPeak *Peak,TClusterUC *cl,Float_t char
   //cluster.timelength=cl->NumSequences;
   event.run=run;
   event.nevent=nevent;
-  event.pressure=getpressure;
   dtree->Fill();
 }
 
@@ -423,7 +453,6 @@ void StFtpcClusterDebug::fillclustertree(TPeak Peak,TClusterUC *cl,Float_t charg
   //cluster.timelength=cl->NumSequences;
   event.run=run;
   event.nevent=nevent;
-  event.pressure=getpressure;
   dtree->Fill();
 }
 

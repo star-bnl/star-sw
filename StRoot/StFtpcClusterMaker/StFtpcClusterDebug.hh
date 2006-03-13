@@ -30,6 +30,7 @@ class StFtpcClusterDebug
   TH1F *vertex_east,*vertex_west,*vertex_both;
   bool fileopen;
   bool dir,dir2;
+  TBranch *bRun;
   TBranch *bhit, *bevent, *bcluster;
   TBranch *bthit, *btcluster, *btevent;
   TBranch *btrevent, *btrack,*btrvertex;
@@ -42,6 +43,7 @@ class StFtpcClusterDebug
 
  public:
   
+  TTree *drtree;
   TTree *dtree;
   TTree *dttree;
   TTree *dtrtree;
@@ -56,6 +58,7 @@ class StFtpcClusterDebug
   void fillraw(int hardsec, int hardrow, int iPad, TPCSequence HSequence);
   void drawgainhisto(int hardsec, int hardrow,int iPad,float gainfac,TPCSequence HSequence);
   void drawvertex(TH1F *veast,TH1F *vwest, TH1F *v);
+  void fillRun(Int_t run, Int_t date, Int_t time, Float_t micropertimebin, Float_t deltapW, Float_t deltapE);
   void fillclustertree(TPeak *Peak,TClusterUC *cl,Float_t charge,Int_t hsec, Int_t hrow, Float_t raderror, Float_t phierror,Int_t flag,float getpressure, int getnumpeaks);
   void fillclustertree(TPeak Peak,TClusterUC *cl,Float_t charge,Int_t hsec, Int_t hrow, Float_t raderror, Float_t phierror,Int_t flag,float getpressure, int getnumpeaks);
   void clusteranalyse();
