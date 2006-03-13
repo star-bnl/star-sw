@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.h,v 1.1 2006/03/13 19:59:56 jcs Exp $
+// $Id: StFtpcCalibMaker.h,v 1.2 2006/03/13 20:17:56 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.h,v $
+// Revision 1.2  2006/03/13 20:17:56  jcs
+// add forgotten doxygen comment terminator
+//
 // Revision 1.1  2006/03/13 19:59:56  jcs
 // commit initial version of the FTPC calibration maker
 //
@@ -19,6 +22,7 @@
  *
  * \author Joern Putschke, Janet Seyboth, Terry Tarnowsky
  *
+ */
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -111,7 +115,7 @@ class StFtpcCalibMaker : public StMaker
    Int_t Time() {return time;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.1 2006/03/13 19:59:56 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.2 2006/03/13 20:17:56 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(StFtpcCalibMaker,1)   //StAF chain virtual base class for Makers
