@@ -12,31 +12,50 @@ VLINK="#088888" ALINK="#08DEB5" TYPE="FADEIN">
 
 <h1><center>  StFtpcCalibMaker </center></h1>
 
-StFtpcCalibMaker programs and macros analyze the data in a special root file which is produced by StFtpcClusterMaker/StFtpcClusterDebug.cc. 
+<h2>
+StFtpcCalibMaker programs and macros analyze the data in a special root file which is produced by 
+StFtpcClusterMaker/StFtpcClusterDebug.cc.  
+
 To produce this file
 
-      - check out StRoot/StFtpcClusterMaker and StRoot/StFtpcTrackMaker in your working directory. For laser runs make the following changes:
+     - check out StRoot/StFtpcClusterMaker and StRoot/StFtpcTrackMaker in your working directory. 
 
-        StRoot/StFtpcClusterMaker/StFtpcClusterFinder.hh  - activate line 65    (//#define DEBUGFILE -> #define DEBUGFILE)
-        StRoot/StFtpcTrackMaker/StFtpcTrackMaker.cxx      - activate line 293   (//#define DEBUGFILE -> #define DEBUGFILE)
-                                                            deactivate line 296 (#define TWOCYCLETRACKING -> //#define TWOCYCLETRACKING)
-                                                            activate line 297   (//#define LASERTRACKING -> #define LASERTRACKING)
+     - For laser runs make the following changes:
 
-      - create an input file named <font color="#FF0000">debug.ini</font> with one line containing 3 options:
+       StRoot/StFtpcClusterMaker/StFtpcClusterFinder.hh  - 
+           activate line ~65    (//#define DEBUGFILE -> #define DEBUGFILE)
+       StRoot/StFtpcTrackMaker/StFtpcTrackMaker.cxx      - 
+           activate line ~293   (//#define DEBUGFILE -> #define DEBUGFILE)
+           deactivate line ~296 (#define TWOCYCLETRACKING -> //#define TWOCYCLETRACKING)
+           activate line ~297   (//#define LASERTRACKING -> #define LASERTRACKING)
+
+     - create an input file named <font color="#FF0000">debug.ini</font> with one line 
+       containing 3 options:
                fname drawclhisto drawvertexhisto
-         fname is a string which is used to create the name of the output root file ("run_%d_%s.root",run,fname). For example when checking the laser we usually set fname  to laser_test           
-         if drawclhisto and/or drawvertexhisto are non-zero the cluster and/or vertex histograms are filled and output to the root file 
+         fname is a string which is used to create the name of the output root file 
+         "run_%d_%s.root",run,fname 
+         For example when checking the laser we usually set fname  to laser_test           
+         if drawclhisto and/or drawvertexhisto are non-zero the cluster and/or vertex 
+         histograms are filled and output to the root file 
        
-         There is an example debug.ini in the StRoot/StFtpcCalibMaker/examples sub-directory.
+         There is an example debug.ini in the StRoot/StFtpcCalibMaker/examples sub-directory 
+         which you can copy into your working directory with
 
-now, using run laser run 6082062 as an example
+           cp StRoot/StFtpcCalibMaker/examples/debug.ini .
+
+Then, using run laser run 6082062 as an example
       - reconstruct a minimum of 200 laser events with the following chain 
 
-             bfc.C(200,"ftpc db globT detDb tpcDb dbutil in dst event","/star/data03/daq/ftpc/st_laser_6082062_raw_1090001.daq")
+         bfc.C(200,"ftpc db globT detDb tpcDb dbutil in dst event",
+               "/star/data03/daq/ftpc/st_laser_6082062_raw_1090001.daq")
 
-This will produce a root file named <font color="#FF0000">run_6082062_laser_test.root</font> which can then be analyzed using the StFtpcCalibMaker macros:
+This will produce a root file named <font color="#FF0000">run_6082062_laser_test.root</font> 
+which can then be analyzed using the StFtpcCalibMaker macros:
 
-<font color="#FF0000">lasertest_single.C</font>(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad,char* t0, char* gas, float mbfield)
+<font color="#FF0000">lasertest_single.C</font>(TString filename,int ftpc, int lsec, 
+int straight, int gfit, int minz, int maxz, int minrad, int maxrad,char* t0, char* gas, 
+float mbfield)
+
         filename    = "run_6082062_laser_test"                         
         ftpc        = 1           FTPC West                            
                       2           FTPC East
@@ -83,7 +102,9 @@ range of delta t0 and delta gas values
    
 For example:
  lasertest.C("run_6082062_laser_test",1,2,1,1,0,300,0,30,"0.000001","0",1)
- produces 156 sets of the 6 files listed for lasertest_single.C; one set for each delta t0 from -0.50<=deltat0<=0.60 with each deltaGas from  -0.50<=deltaGas<=0.70  (12 deltat0 * 13 deltaGas)
+produces 156 sets of the 6 files listed for lasertest_single.C; one set for each delta t0 
+from -0.50<=deltat0<=0.60 with each deltaGas from  -0.50<=deltaGas<=0.70  
+(12 deltat0 * 13 deltaGas)
 
 The following macros analyze the *_res.log files produced by lasertest.C 
 Copy the *_res.log files into one file with
@@ -121,7 +142,8 @@ fit_laser.C  ?????
 For a more detailed explanation of the FTPC laser analysis and sample output
 consult the <a href="http://www.star.bnl.gov/protected/ftpc/tjt/ftpc_calibration_list.pdf"> FTPC Software and Calibration Overview </a> writeup (pgs. 8-16).  
 
-If the drawclhisto option was set to non-zero in the debug.ini file when you created the special FTPC root.file,
+If the drawclhisto option was set to non-zero in the debug.ini file when you created the 
+special FTPC root.file,
 you can analyze the cluster histograms with the following 2 macros:
 
 hits2cluster_laser.C(TString eingabe,int evt,int laser_sec)
@@ -137,8 +159,9 @@ hits2cluster-2.C(TString eingabe,int evt)
 res_laser.C    ??????
 laser_2d_opt.C ??????
 
-You can also study t0 on physics data. In this case activate "#define TWOCYCLETRACKING" and deactivate "#define LASERTRACKING" in StFtpcTrackMaker. Use the
-same bfc chain as for studying laser runs.
+You can also study t0 on physics data. In this case activate "#define TWOCYCLETRACKING" 
+and deactivate "#define LASERTRACKING" in StFtpcTrackMaker. Use the same bfc chain as 
+for studying laser runs.
 
 The following macros are used for t0 calibration:
 t0_single.C(TString filename, char* t0, char* gas,float mbfield)
@@ -156,6 +179,7 @@ t0_ana.C
 t0_opt.C
 
 
+</h2>
 </pre>
 
 <p> 
