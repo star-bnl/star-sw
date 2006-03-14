@@ -130,7 +130,7 @@ BEMCPlots::BEMCPlots(TObjArray *list)
 	ADDHIST(mHistHighTowerSpectrum[i])
 	name = Form("%s_%u", HistPatchSumSpectrumName, i);
 	title = Form("JetPatch %u - PatchSum spectrum;PatchSum", i);	
-	this->mHistPatchSumSpectrum[i] = new TH1F(name.Data(), title.Data(), 64 * 25, -0.5, (64 * 25)-0.5);    	
+	this->mHistPatchSumSpectrum[i] = new TH1F(name.Data(), title.Data(), 200, -0.5, 200-0.5);    	
 	ADDHIST(mHistPatchSumSpectrum[i])
     }
     
