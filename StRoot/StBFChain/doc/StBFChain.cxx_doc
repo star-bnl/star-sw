@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.14 2006/03/12 21:58:07 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.15 2006/03/14 03:25:38 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -250,6 +250,7 @@ Bfc_st BFC[] = {
   {"HalfField" ,"" ,"","MagF" ,"","","Half Field option",kFALSE},
   {"ReverseField","" ,"","MagF" ,"","","Reverse Field option",kFALSE},
   {"NoCintDb" ,"" ,"","" ,"","","Switch off standard Cint Db",kFALSE},
+  {"NoCintCalDb" ,"" ,"","" ,"","","Switch off local Cint Db",kFALSE},
   {"NoMySQLDb" ,"" ,"","" ,"","","Switch off MySQL Db",kFALSE},
   {"NoEvent" ,"" ,"","-event,-analysis" ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc" ,"" ,"","" ,"","","Make HTML documentation for the given Chain",kFALSE},
@@ -933,6 +934,7 @@ Bfc_st BFC2[] = {
   {"HalfField" ,"" ,"","MagF" ,"","","Half Field option",kFALSE},
   {"ReverseField","" ,"","MagF" ,"","","Reverse Field option",kFALSE},
   {"NoCintDb" ,"" ,"","" ,"","","Switch off standard Cint Db",kFALSE},
+  {"NoCintCalDb" ,"" ,"","" ,"","","Switch off local Cint Db",kFALSE},
   {"NoMySQLDb" ,"" ,"","" ,"","","Switch off MySQL Db",kFALSE},
   {"NoEvent" ,"" ,"","-event,-analysis" ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc" ,"" ,"","" ,"","","Make HTML documentation for the given Chain",kFALSE},
@@ -1534,8 +1536,10 @@ Int_t StBFChain::Instantiate()
 	TString MySQLDb("MySQL:StarDb");
 	TString MainCintDb("$STAR/StarDb");
 	TString MyCintDb("$PWD/StarDb");
-	if (GetOption("NoMySQLDb")) MySQLDb = "";
-	if (GetOption("NoCintDb")) {MainCintDb = ""; MyCintDb = "";}
+	if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
+	if (GetOption("NoCintCalDb")) {MyCintDb = "";}
+	if (GetOption("NoCintDb"))    {MainCintDb = ""; MyCintDb = "";}
+
 	TString Dirs[3];
 	Int_t j;
 	for (j = 0; j < 3; j++) Dirs[j] = "";

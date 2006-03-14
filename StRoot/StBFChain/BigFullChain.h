@@ -278,6 +278,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"HalfField"   ,""  ,"","MagF"                                         ,"","","Half Field option",kFALSE},
   {"ReverseField",""  ,"","MagF"                                      ,"","","Reverse Field option",kFALSE},
   {"NoCintDb"    ,""  ,"",""                                   ,"","","Switch off standard Cint Db",kFALSE},
+  {"NoCintCalDb" ,""  ,"",""                                      ,"","","Switch off local Cint Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
   {"NoEvent"     ,""  ,"","-event,-analysis"      ,"","","Switch Off StEvent and StAnalysis Makers",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},

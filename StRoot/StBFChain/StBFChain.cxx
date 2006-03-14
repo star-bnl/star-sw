@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.490 2006/03/12 18:42:56 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.491 2006/03/14 03:25:38 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -166,7 +166,7 @@ Int_t StBFChain::Load()
   precedence to parameter setting depending on option etc ... Other thing done
   here which deserves attention
   - The maker's SetMode() mechanism is treated here.
-  - Calibration options like NoMySQLDb or NoCintDb and path are set
+  - Calibration options like NoMySQLDb, NoCintCalDb or NoCintDb and path are set
   - SetFlavor() sim+ofl or sim is made
   
   If a maker is added along with some flag options, this is the place to
@@ -193,8 +193,13 @@ Int_t StBFChain::Instantiate()
 	TString MySQLDb("MySQL:StarDb");
 	TString MainCintDb("$STAR/StarDb");
 	TString MyCintDb("$PWD/StarDb");
-	if (GetOption("NoMySQLDb")) MySQLDb = "";
-	if (GetOption("NoCintDb")) {MainCintDb = ""; MyCintDb = "";}
+
+	if (GetOption("NoMySQLDb"))   {MySQLDb = "";}
+	// Removed twice already and put back (start to be a bit boring) 
+	// DO NOT REMOVE THE NEXT OPTION - Used in AutoCalibration 
+	if (GetOption("NoCintCalDb")) {MyCintDb = "";} 
+	if (GetOption("NoCintDb"))    {MainCintDb = ""; MyCintDb = "";}
+
 	TString Dirs[3];
 	Int_t j;
 	for (j = 0; j < 3; j++) Dirs[j] = "";
