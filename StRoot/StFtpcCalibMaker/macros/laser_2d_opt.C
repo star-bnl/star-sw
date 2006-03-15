@@ -1,3 +1,10 @@
+// $Id: laser_2d_opt.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+//
+// $Log: laser_2d_opt.C,v $
+// Revision 1.2  2006/03/15 15:14:06  jcs
+// add lines for listing CVS update info
+//
+
 //======================================================================
 //
 //   laser_2d_opt reads the file produced in StFtpcLaserCalib::MakePs()

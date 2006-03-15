@@ -1,3 +1,10 @@
+// $Id: StFtpcLaser.cc,v 1.2 2006/03/15 15:13:56 jcs Exp $
+//
+// $Log: StFtpcLaser.cc,v $
+// Revision 1.2  2006/03/15 15:13:56  jcs
+// add lines for listing CVS update info
+//
+
 #include "StFtpcLaser.hh"
 
 //---------------------------------------------------------------

@@ -1,3 +1,10 @@
+// $Id: t0_ana.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+//
+// $Log: t0_ana.C,v $
+// Revision 1.2  2006/03/15 15:14:06  jcs
+// add lines for listing CVS update info
+//
+
 void t0_ana(TString input)
 {
   

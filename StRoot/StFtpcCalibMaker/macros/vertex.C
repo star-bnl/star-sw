@@ -1,3 +1,10 @@
+// $Id: vertex.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+//
+// $Log: vertex.C,v $
+// Revision 1.2  2006/03/15 15:14:06  jcs
+// add lines for listing CVS update info
+//
+
 // vertex-extrapolation (d.h. plot - program for new Tree-Structure !!!)
 
 struct HIT 

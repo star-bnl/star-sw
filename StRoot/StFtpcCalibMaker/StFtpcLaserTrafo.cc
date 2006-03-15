@@ -1,3 +1,10 @@
+// $Id: StFtpcLaserTrafo.cc,v 1.2 2006/03/15 15:13:57 jcs Exp $
+//
+// $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.2  2006/03/15 15:13:57  jcs
+// add lines for listing CVS update info
+//
+
 #include "StFtpcLaserTrafo.hh"
 #include "TSystem.h"
 #include "StMessMgr.h"

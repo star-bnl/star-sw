@@ -1,3 +1,10 @@
+// $Id: fit_laser.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+//
+// $Log: fit_laser.C,v $
+// Revision 1.2  2006/03/15 15:14:06  jcs
+// add lines for listing CVS update info
+//
+
 // fit laser mit Minuit (test)
 
 Float_t x[5],y[5],z[5]; 
