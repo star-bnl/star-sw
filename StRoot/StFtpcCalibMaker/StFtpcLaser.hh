@@ -1,3 +1,10 @@
+// $Id: StFtpcLaser.hh,v 1.2 2006/03/15 15:13:56 jcs Exp $
+//
+// $Log: StFtpcLaser.hh,v $
+// Revision 1.2  2006/03/15 15:13:56  jcs
+// add lines for listing CVS update info
+//
+
 #ifndef STAR_StFtpcLaser
 #define STAR_StFtpcLaser
 

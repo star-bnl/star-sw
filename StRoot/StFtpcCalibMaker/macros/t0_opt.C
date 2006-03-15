@@ -1,3 +1,10 @@
+// $Id: t0_opt.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+//
+// $Log: t0_opt.C,v $
+// Revision 1.2  2006/03/15 15:14:06  jcs
+// add lines for listing CVS update info
+//
+
 float calc_min(float b1,float b2)
 {
   return -b1/(2*b2);

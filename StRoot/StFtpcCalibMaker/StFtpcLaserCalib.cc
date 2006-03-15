@@ -1,3 +1,10 @@
+// $Id: StFtpcLaserCalib.cc,v 1.2 2006/03/15 15:13:56 jcs Exp $
+//
+// $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.2  2006/03/15 15:13:56  jcs
+// add lines for listing CVS update info
+//
+
 #include "StFtpcLaserCalib.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcTrackMaker/StFtpcTrack.hh"

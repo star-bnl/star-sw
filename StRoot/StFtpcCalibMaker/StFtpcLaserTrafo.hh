@@ -1,3 +1,10 @@
+// $Id: StFtpcLaserTrafo.hh,v 1.2 2006/03/15 15:13:57 jcs Exp $
+//
+// $Log: StFtpcLaserTrafo.hh,v $
+// Revision 1.2  2006/03/15 15:13:57  jcs
+// add lines for listing CVS update info
+//
+
 #ifndef STAR_StFtpcLaserTrafo
 #define STAR_StFtpcLaserTrafo
 

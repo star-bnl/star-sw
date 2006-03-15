@@ -1,3 +1,10 @@
+// $Id: hits2cluster-2.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+//
+// $Log: hits2cluster-2.C,v $
+// Revision 1.2  2006/03/15 15:14:06  jcs
+// add lines for listing CVS update info
+//
+
 // will only work if drawclhisto and/or drawvertexhisto activated in debug.ini file used to produce run*_laser_test.root file
 
 struct HIT 

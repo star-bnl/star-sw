@@ -1,3 +1,10 @@
+// $Id: StFtpcLaserCalib.hh,v 1.2 2006/03/15 15:13:57 jcs Exp $
+//
+// $Log: StFtpcLaserCalib.hh,v $
+// Revision 1.2  2006/03/15 15:13:57  jcs
+// add lines for listing CVS update info
+//
+
 #ifndef STAR_StFtpcLaserCalib
 #define STAR_StFtpcLaserCalib
 
