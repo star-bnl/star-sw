@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.34 2004/05/03 23:34:16 perev Exp $
+//$Id: St_srs_Maker.cxx,v 1.35 2006/03/16 18:27:40 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.35  2006/03/16 18:27:40  caines
+//Add t0 shift when checking timebucket of hit against largest possible timebucket for flagging hits as bad
+//
 //Revision 1.34  2004/05/03 23:34:16  perev
 //Possible non init WarnOff
 //
@@ -293,7 +296,7 @@ Int_t St_srs_Maker::Make()
 	if( index <0) continue;
 	MaxTimeBucket = (int)(3.*T0->getFsca()/
 			      ((StSvtHybridDriftVelocity*)
-			       DriftVel->at(index))->getV3(1));
+			       DriftVel->at(index))->getV3(1)+T0->getT0());
 	
 	
 	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
