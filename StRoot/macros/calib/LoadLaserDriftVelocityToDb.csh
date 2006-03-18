@@ -17,6 +17,7 @@ if( "$1" == "") then
 else
     set  DIR=$1
     set WDIR=/star/u/starreco/scripts
+#    set WDIR=/star/u/hjort/tpcwrk2
 endif
 if ( ! -d $DIR ) then
     echo "Sure !! $DIR not a directory ..."
@@ -81,8 +82,10 @@ $MKDIR $DIR/Check/VarOth || exit
 #.x LoadLaserDriftVelocityToDb.C("$DIR","listOfLaserMacros$DATE.list",$nLines,"tpcDriftVelocity")
 
 cd $WDIR
+echo `pwd`
 source ${GROUP_DIR}/.stardev
 
+echo "$DIR listOfLaserMacros$DATE.list"
 $LS LoadLaserDriftVelocityToDb.C && ${STAR_BIN}/root4star -b <<EOF 
 .x LoadLaserDriftVelocityToDb.C("$DIR","listOfLaserMacros$DATE.list","tpcDriftVelocity")
 .q
