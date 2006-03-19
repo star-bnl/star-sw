@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.69 2005/12/02 09:03:10 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.70 2006/03/19 19:29:44 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.70  2006/03/19 19:29:44  jcs
+// Move cluster struct definitions to StFtpcClustersStructures.hh
+// Create DEBUGFILE with bfc option 'fdbg'
+//
 // Revision 1.69  2005/12/02 09:03:10  jcs
 // Delete pradius,pdeflection before error exits to avoid memory leaks
 //
@@ -230,7 +234,7 @@
 #include "asic_map_correction.h"
 
 
-#ifndef  DEBUGFILE
+// Constructor used for production
 
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
@@ -242,25 +246,8 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH2F *histo,
                                          TH1F *histoW,
                                          TH1F *histoE)
-#endif
-#ifdef DEBUGFILE
-
-int iHardSec, iHardRow;
-
-StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
-					 StFtpcParamReader *paramReader,
-                                         StFtpcDbReader *dbReader,
-					 StFtpcSoftwareMonitor *ftpcMon,
-					 TObjArray *pointarray,
-					 TH2F *hpad,
-					 TH2F *htime,
-                                         TH2F *histo,
-                                         TH1F *histoW,
-                                         TH1F *histoE,
-					 StFtpcClusterDebug *cldebug)
-#endif
 {
-//   cout << "StFtpcClusterFinder constructed" << endl;  
+   cout << "StFtpcClusterFinder constructed for production" << endl;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
@@ -270,9 +257,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mHistoW=histoW;
   mHistoE=histoE;
 
-#ifdef DEBUGFILE
-  mcldebug = cldebug;
-#endif  
+  mcldebug = NULL;
 
   MAXSEQPEAKS = mParam->maxNumSeqPeaks();
   MAXPEAKS = mParam->maxNumPeaks();
@@ -302,7 +287,65 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mAngleOffsetWest = mDb->angleOffsetWest();
   mAngleOffsetEast = mDb->angleOffsetEast();
 
-#ifdef DEBUGFILE 
+  mhpad = hpad;
+  mhtime = htime;
+}
+
+// Constructor used to produce the FTPC special root file used for FTPC
+// laser, t0 and cluster calibration
+
+StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
+					 StFtpcParamReader *paramReader,
+                                         StFtpcDbReader *dbReader,
+					 StFtpcSoftwareMonitor *ftpcMon,
+					 TObjArray *pointarray,
+					 TH2F *hpad,
+					 TH2F *htime,
+                                         TH2F *histo,
+                                         TH1F *histoW,
+                                         TH1F *histoE,
+					 StFtpcClusterDebug *cldebug)
+{
+   cout << "StFtpcClusterFinder constructed for calibration" << endl;  
+  mReader = reader;
+  mParam = paramReader; 
+  mDb    = dbReader;
+  mFtpcMon = ftpcMon;
+  mPoint = pointarray;
+  mHisto=histo;
+  mHistoW=histoW;
+  mHistoE=histoE;
+
+  mcldebug = cldebug;
+
+  MAXSEQPEAKS = mParam->maxNumSeqPeaks();
+  MAXPEAKS = mParam->maxNumPeaks();
+  MAXLOOPS = mParam->maxLoops();
+  MAXFASTLOOPS = mParam->maxFastLoops();
+  UNFOLDLIMIT = mParam->unfoldLimit();
+  UNFOLDFAILEDLIMIT = mParam->unfoldFailedLimit();
+
+  mMinTimeBin = mDb->minTimeBin();
+  mMinTimeBinMed = mDb->minTimeBinMed();
+  mMinTimeBinOut = mDb->minTimeBinOut();
+
+  mMaxPadlength = mDb->maxPadLength();
+  mMaxTimelength = mDb->maxTimeLength();
+  mMaxPadlengthMed = mDb->maxPadLengthMed();
+  mMaxTimelengthMed = mDb->maxTimeLengthMed();
+  mMaxPadlengthOut = mDb->maxPadLengthOut();
+  mMaxTimelengthOut = mDb->maxTimeLengthOut();
+
+  DeltaTime = mDb->deltaTime();
+  DeltaPad = mDb->deltaPad();
+
+  mMinChargeWindow = mDb->minChargeWindow();
+
+  mOffsetCathodeWest = mDb->offsetCathodeWest();
+  mOffsetCathodeEast = mDb->offsetCathodeEast();
+  mAngleOffsetWest = mDb->angleOffsetWest();
+  mAngleOffsetEast = mDb->angleOffsetEast();
+
 // Set ftpcClusterPars
   MAXPEAKS = 160;  
 
@@ -316,7 +359,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mOffsetCathodeEast = 0.0;
   mAngleOffsetWest =   0.0;
   mAngleOffsetEast =   0.0;
-#endif  
 
   mhpad = hpad;
   mhtime = htime;
@@ -333,12 +375,7 @@ int StFtpcClusterFinder::search()
 
   Double_t  *pradius = 0;
   Double_t  *pdeflection = 0;
-#ifndef DEBUGFILE  
-  int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
-#endif  
-#ifdef DEBUGFILE
   int iRow, iSec, iPad, iPadBuf;
-#endif
   int iRowBuf, iSecBuf;
   int firstPadrowToSearch;
   int bNewSec;
@@ -361,6 +398,7 @@ int StFtpcClusterFinder::search()
   int CUCMemoryArray[MAXNUMCUC];
   int CUCMemoryPtr;
 
+cout<<"JCS DEBUG: mcldebug = "<<mcldebug<<endl;
   /* allocate memory for padtrans table */
   pradius = new Double_t[mParam->numberOfDriftSteps()
                            *mDb->numberOfPadrowsPerSide()];
@@ -562,12 +600,15 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      for(iNewSeqIndex=0; iNewSeqIndex < iNewSeqNumber; 
 		  iNewSeqIndex++)
 		{
-#ifdef DEBUGFILE			
+if (mcldebug){
+//#ifdef DEBUGFILE			
 		  if (mcldebug->drawclhisto!=0)
 		  {
 		     mcldebug->drawhisto(iHardSec,iHardRow,iPad,NewSequences[iNewSeqIndex]);
-	             mcldebug->drawgainhisto(iHardSec,iHardRow,iPad,((float)(mDb->amplitudeSlope((iSec*mDb->numberOfPads()+iPad),iRow))),NewSequences[iNewSeqIndex]);              }
-#endif	   	     
+	             mcldebug->drawgainhisto(iHardSec,iHardRow,iPad,((float)(mDb->amplitudeSlope((iSec*mDb->numberOfPads()+iPad),iRow))),NewSequences[iNewSeqIndex]);
+                  }
+//#endif	   	     
+}
 //+++++++++++++++++++ fill charge step histograms +++++++++++++++
 		  // This loop is running already, but the running variable is called iNewSeqIndex instead of iSeqIndex .
 		  //int iSeqIndex;
@@ -916,7 +957,12 @@ bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
 	}
     }
 
-#ifndef DEBUGFILE  
+if (mcldebug)  {
+   if (abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
+      return true;
+   else
+      return false;
+}
   if (minTimebin>mMinTimeBin) return true;
   else if ((minTimebin>mMinTimeBinMed && minTimebin<=mMinTimeBin) && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthMed && seqlength<mMaxTimelengthMed)
     return true;
@@ -924,13 +970,6 @@ bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
     return true;
   else
     return false;
-#endif  
-#ifdef DEBUGFILE
-   if (abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
-      return true;
-   else
-      return false;
-#endif
 
 }
 
@@ -1369,9 +1408,11 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 	    / (pRadius[10]-pRadius[20]);
 
-#ifdef DEBUGFILE
+if (mcldebug){
+//#ifdef DEBUGFILE
           mcldebug->fillclustertree(Peak,Cluster,ChargeSum,iHardSec,iHardRow,fRadError,fPhiError,0,0,iNumPeaks);
-#endif	  
+//#endif	  
+}
 
 	  thispoint->SetXerr(::sqrt(fRadError*cos(Peak->Phi)
 				  *fRadError*cos(Peak->Phi) 
@@ -1847,9 +1888,11 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 		/ (pRadius[10]-pRadius[20]);
 
-#ifdef DEBUGFILE
+if (mcldebug){
+//#ifdef DEBUGFILE
               mcldebug->fillclustertree(Peak[iPeakIndex],Cluster,ChargeSum*Peak[iPeakIndex].PeakHeight/PeakHeightSum,iHardSec,iHardRow,fRadError,fPhiError,10,0,iNumPeaks);
-#endif	      
+//#endif
+}	      
 
 	      thispoint->SetXerr(::sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
 				      *fRadError*cos(Peak[iPeakIndex].Phi) 

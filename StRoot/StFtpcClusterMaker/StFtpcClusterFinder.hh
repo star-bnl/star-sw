@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.hh,v 1.20 2004/06/18 12:04:57 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.21 2006/03/19 19:29:45 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.21  2006/03/19 19:29:45  jcs
+// Move cluster struct definitions to StFtpcClustersStructures.hh
+// Create DEBUGFILE with bfc option 'fdbg'
+//
 // Revision 1.20  2004/06/18 12:04:57  jcs
 // replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
 //
@@ -61,8 +65,6 @@
 #ifndef STAR_StFtpcClusterFinder
 #define STAR_StFtpcClusterFinder
 // #define DEBUG 1
-// For cluster and laser run analysis
-//#define DEBUGFILE
 
 
 #include <sys/types.h>
@@ -78,52 +80,11 @@
 #include "TH1.h"
 #include "TH2.h"
 
-#ifdef DEBUGFILE
 #include "StFtpcClusterDebug.hh"
-#endif
 
 #define TRUE 1
 #define FALSE 0
 #define sqr(x) ((x)*(x))
-
-#ifndef DEBUGFILE
-#define MAXNUMSEQUENCES 160
-#define MAXNUMCUC 128
-
-typedef struct tagClusterUC
-{
-  int                  StartPad;
-  int                  EndPad;
-  int                  NumSequences;
-    int                  CutOff;
-  TPCSequence          Sequence[MAXNUMSEQUENCES];
-  int                  SequencePad[MAXNUMSEQUENCES];
-  struct tagClusterUC* NextClusterUC;
-  int                  MemoryPtr;
-} TClusterUC;
-
-typedef struct
-{
-  int pad;
-  int Timebin;
-  int pad_saved;
-  int Timebin_saved;
-  TPCSequence Sequence;
-  float TimePosition;
-  float PadPosition;
-  float PeakHeight;
-  float OldTimePosition;
-  float OldPadPosition;
-  float OldPeakHeight;
-  float TimeSigma;
-  float PadSigma;
-  float Rad;
-  float Phi;
-  float x;
-  float y;
-  float z;
-} TPeak;
-#endif
 
 
 class StFtpcClusterFinder
@@ -141,9 +102,7 @@ class StFtpcClusterFinder
   TH2F *mHisto;
   TH2F *mhpad, *mhtime;
 
-#ifdef DEBUGFILE
   StFtpcClusterDebug *mcldebug;
-#endif  
 
   int MAXSEQPEAKS;
   int MAXPEAKS;
@@ -166,6 +125,9 @@ class StFtpcClusterFinder
 
   int DeltaTime;
   int DeltaPad;
+ 
+  int iHardRow;
+  int iHardSec;
 
   float mOffsetCathodeWest;
   float mOffsetCathodeEast;
@@ -176,7 +138,6 @@ class StFtpcClusterFinder
   float mMinChargeWindow;
 
  public:
-#ifndef DEBUGFILE  
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
@@ -187,8 +148,7 @@ class StFtpcClusterFinder
                       TH2F *histo,
                       TH1F *histoW,
                       TH1F *histoE);
-#endif
-#ifdef DEBUGFILE
+// For cluster and laser run analysis
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
@@ -200,7 +160,6 @@ class StFtpcClusterFinder
                       TH1F *histoW,
                       TH1F *histoE,
 		      StFtpcClusterDebug *cldebug);
-#endif  
 
   ~StFtpcClusterFinder();
   int search();
