@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.74 2006/03/13 19:46:35 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.75 2006/03/19 19:25:06 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.75  2006/03/19 19:25:06  jcs
+// Select LASERTRACKING with bfc option 'flaser' (otherwise TWOCYCLETRACKING is used)
+// Create DEBUGFILE with bfc option 'fdbg'
+//
 // Revision 1.74  2006/03/13 19:46:35  jcs
 // make changes necessary fot DoT0Calib
 //
@@ -292,13 +296,6 @@
 //----------Last Modified: 10.11.2000
 //----------Copyright:     &copy MDO Production 1999
 
-// Uncomment the following line for cluster and/or laser analysis
-//#define DEBUGFILE
-
-// Select tracking method
-#define TWOCYCLETRACKING
-//#define LASERTRACKING
-
 #include "StFtpcTrackMaker.h"
 #include "StFtpcVertex.hh"
 #include "StFtpcConfMapper.hh"
@@ -307,9 +304,7 @@
 #include "StFormulary.hh"
 #include "StFtpcTrackingParams.hh"
 #include "StFtpcTrackToStEvent.hh"
-#ifdef DEBUGFILE
 #include "StFtpcClusterMaker/StFtpcClusterDebug.hh"
-#endif
 
 #include "TObjArray.h"
 #include "TObjectSet.h"
@@ -412,9 +407,10 @@ Int_t StFtpcTrackMaker::Init()
 
   // Create Histograms
 
-#ifdef DEBUGFILE
+if (m_Mode%2 == 1) {
+   gMessMgr->Warning() << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
-#endif
+}
 
   m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", 
 			      "FTPC east vertex xy estimation with resp. to TPC vertex", 
@@ -480,6 +476,8 @@ Int_t StFtpcTrackMaker::Init()
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Make()
 {
+cout<<"StFtpcTrackMaker::Make m_Mode =  "<<m_Mode<<endl;
+cout<<"StFtpcTrackMaker::Make m_Mode%2 =  "<<m_Mode%2<<endl;
   // Setup and tracking.
   
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) started..." << endm;
@@ -545,15 +543,13 @@ Int_t StFtpcTrackMaker::Make()
     tracker.NoFieldTracking();
   }
   
-  else {
-#ifdef TWOCYCLETRACKING
+  else if (m_Mode%2 == 0) {
     tracker.TwoCycleTracking();
     gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
-#endif    
-#ifdef LASERTRACKING
+  }
+  else if (m_Mode%2 == 1) {
     tracker.LaserTracking();
     gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
-#endif    
   }
   
   // for the line above you have these possibilities
@@ -625,21 +621,26 @@ Int_t StFtpcTrackMaker::Make()
     tracker.TrackingInfo();
   }
 
-#ifdef DEBUGFILE
-#ifdef LASERTRACKING
-  Double_t vertexPos[3] = {0.,0.,0.};
-  cout<<"LASER : No FTPC to global transformation !!!"<<endl;
-#endif
-#ifdef TWOCYCLETRACKING
-  Double_t vertexPos[3] = {vertex.GetX(),vertex.GetY(),vertex.GetZ()};
-cout<<"TWOCYCLETRACKING: vertexPos[0] = "<<vertexPos[0]<<" vertexPos[1] = "<<vertexPos[1]<<" vertexPos[2] = "<<vertexPos[2]<<endl;
-#endif
+if (m_Mode%2 == 1) {
+  Double_t vertexPos[3];
+  if (m_Mode%2 == 0) {
+     vertexPos[0] = vertex.GetX();
+     vertexPos[1] = vertex.GetY();
+     vertexPos[2] = vertex.GetZ();
+     cout<<"TWOCYCLETRACKING: vertexPos[0] = "<<vertexPos[0]<<" vertexPos[1] = "<<vertexPos[1]<<" vertexPos[2] = "<<vertexPos[2]<<endl;
+  }
+  if (m_Mode%2 == 1) {
+     vertexPos[0] = 0.;
+     vertexPos[1] = 0.;
+     vertexPos[2] = 0.;
+     cout<<"LASER : No FTPC to global transformation !!!"<<endl;
+  }
     StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
     //cout<<"Debug fill tracktree"<<endl;
     cldebug.filltracktree(tracker.GetTracks(),vertexPos);
     //if (cldebug.drawvertexhisto!=0)
        //cldebug.drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
-#endif  
+}
   
   /*
   // Track Display
@@ -868,7 +869,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.74 2006/03/13 19:46:35 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.75 2006/03/19 19:25:06 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
