@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.85  2006/03/19 19:29:45  jcs
+// Move cluster struct definitions to StFtpcClustersStructures.hh
+// Create DEBUGFILE with bfc option 'fdbg'
+//
 // Revision 1.84  2006/03/13 19:40:32  jcs
 // save microsecondsPerTimebin and temperature/pressure corrections in DEBUGFILE run tree
 //
@@ -462,9 +466,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
-#ifdef DEBUGFILE
-  gMessMgr->Info() << "StFtpcClusterMaker running with cluster/laser analysis turned on"<<endm;
-#endif  
+  if (m_Mode == 2) gMessMgr->Info() << "StFtpcClusterMaker running with cluster/laser analysis turned on"<<endm;
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
@@ -706,24 +708,14 @@ Int_t StFtpcClusterMaker::Make()
 
 
     if(Debug()) gMessMgr->Message("", "I", "OS") << "start running StFtpcClusterFinder" << endm;
-    
-#ifndef DEBUGFILE    
-    StFtpcClusterFinder fcl(                           ftpcReader, 
-						       &paramReader, 
-                                                       &dbReader,
-						       ftpcMon,
-						       mHitArray,
-						       m_hitsvspad,
-						       m_hitsvstime,
-                                                       m_csteps,
-                                                       m_chargestep_West,
-                                                       m_chargestep_East);
-#endif
-#ifdef DEBUGFILE
-    StFtpcClusterDebug cldebug                        ((int) GetRunNumber(),(int) GetEventNumber());
-    cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), microsecondsPerTimebin, paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
+      
+    int searchresult;
 
-    StFtpcClusterFinder fcl(                           ftpcReader, 
+    if (m_Mode == 2) {
+       StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
+       cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), microsecondsPerTimebin, paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
+
+       StFtpcClusterFinder fcl(                        ftpcReader, 
 						       &paramReader, 
                                                        &dbReader,
 						       ftpcMon,
@@ -734,9 +726,23 @@ Int_t StFtpcClusterMaker::Make()
                                                        m_chargestep_West,
                                                        m_chargestep_East,
 						       &cldebug);
-#endif    
+          searchresult=fcl.search();
+    }
+
+    else {
+          StFtpcClusterFinder fcl(          ftpcReader, 
+	 				    &paramReader, 
+                                            &dbReader,
+					    ftpcMon,
+					    mHitArray,
+					    m_hitsvspad,
+					    m_hitsvstime,
+                                            m_csteps,
+                                            m_chargestep_West,
+                                            m_chargestep_East);
+          searchresult=fcl.search();
+    }
     
-    int searchresult=fcl.search();
     
     if (searchresult == 0)
       {

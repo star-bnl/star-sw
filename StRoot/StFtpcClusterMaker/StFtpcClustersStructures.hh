@@ -1,46 +1,27 @@
+// $Id: StFtpcClustersStructures.hh,v 1.2 2006/03/19 19:29:45 jcs Exp $
+//
+// $Log: StFtpcClustersStructures.hh,v $
+// Revision 1.2  2006/03/19 19:29:45  jcs
+// Move cluster struct definitions to StFtpcClustersStructures.hh
+// Create DEBUGFILE with bfc option 'fdbg'
+//
+
 #define MAXNUMSEQUENCES 160
-//#define MAXSEQPEAKS 160
-//#define MAXPEAKS 160
 #define MAXNUMCUC 128
-//#define MAXLOOPS 100
-//#define MAXFASTLOOPS 30
-//#define UNFOLDLIMIT 0.01
-//#define UNFOLDFAILEDLIMIT 0.5
 
-
-struct TClusterUC
+typedef struct tagClusterUC
 {
   int                  StartPad;
   int                  EndPad;
   int                  NumSequences;
-  int                  CutOff;
-  TPCSequence            Sequence[MAXNUMSEQUENCES];
+    int                  CutOff;
+  TPCSequence          Sequence[MAXNUMSEQUENCES];
   int                  SequencePad[MAXNUMSEQUENCES];
-  struct TClusterUC* NextClusterUC;
+  struct tagClusterUC* NextClusterUC;
   int                  MemoryPtr;
-};
+} TClusterUC;
 
-struct TPadPeak
-{
-  int Timebin;
-  //int pad;
-  TPCSequence Sequence;
-  //int height;
-  float height;
-  int slope;
-  int width;
-};
-
-struct TClusterMaxima 
-{
-  int nTimeMaxima;
-  int SeqFirst;
-  int SeqLength;
-  int pad;
-  TPadPeak TimeMax[MAXNUMSEQUENCES]; // genauer wie gross usw.
-};
-
-struct TPeak
+typedef struct
 {
   int pad;
   int Timebin;
@@ -60,4 +41,4 @@ struct TPeak
   float x;
   float y;
   float z;
-};
+} TPeak;
