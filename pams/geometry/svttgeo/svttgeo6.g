@@ -1,6 +1,11 @@
-* $Id: svttgeo6.g,v 1.2 2005/10/21 18:53:10 potekhin Exp $
+* $Id: svttgeo6.g,v 1.3 2006/03/21 23:46:27 potekhin Exp $
 *
 * $Log: svttgeo6.g,v $
+* Revision 1.3  2006/03/21 23:46:27  potekhin
+* Add a new version of the shielding geom,
+* which only differs by the outer radius of 31.8
+* This is done according to observation by Lilian
+*
 * Revision 1.2  2005/10/21 18:53:10  potekhin
 * Change orientation of the non-sensitive trapezoids by 90
 * to account for the way the wafer is positioned in the assembly
@@ -346,8 +351,10 @@ Module  SVTTGEO6  is the SVT: corrected wafers and sensitive volumes
       SSepRInn = 22         ! separation shield cylinder, inner radius
       SSepROut = 22.018     ! separation shield cylinder, outer radius
       SSepLen  = 55.4       ! separation shield cylinder, half length
+
       SOutRInn = 29.5       ! outer shield cylinder, inner radius
       SOutROut = 29.52      ! outer shield cylinder, outer radius
+
       SOutLen  = 65.4       ! outer shield cylinder, half length
       AlMeshId  = 9.7       ! Aluminum shield mesh inner diameter
       AlMeshOd  = 44        ! Aluminum shield mesh outer diameter
@@ -361,6 +368,24 @@ Module  SVTTGEO6  is the SVT: corrected wafers and sensitive volumes
       version  = 2          ! geometry version
       SInRInn  = 5.9        ! inner shield cylinder, inner radius
       SInROut  = 5.908      ! inner shield cylinder, outer radius
+   EndFill
+   Fill SSLD ! shielding parameters
+      version  = 3          ! geometry version
+      SInRInn  = 5          ! inner shield cylinder, inner radius
+      SInROut  = 5.008      ! inner shield cylinder, outer radius
+      SInLen   = 53.5       ! inner shield cylinder, half length
+      SSepRInn = 22         ! separation shield cylinder, inner radius
+      SSepROut = 22.018     ! separation shield cylinder, outer radius
+      SSepLen  = 55.4       ! separation shield cylinder, half length
+
+      SOutRInn = 31.80       ! outer shield cylinder, inner radius
+      SOutROut = 31.82      ! outer shield cylinder, outer radius
+
+      SOutLen  = 65.4       ! outer shield cylinder, half length
+      AlMeshId  = 9.7       ! Aluminum shield mesh inner diameter
+      AlMeshOd  = 44        ! Aluminum shield mesh outer diameter
+      AlMshThk  = 0.03      ! Aluminum shield mesh effective thickness
+      AlMshPos  = 53.5      ! Aluminum shield mesh z position
    EndFill
 *
    do i=1,4
