@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.119 2006/01/18 23:06:13 potekhin Exp $
+* $Id: geometry.g,v 1.120 2006/03/21 23:51:41 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.120  2006/03/21 23:51:41  potekhin
+* Fairly significant additions:
+* (a) add steering for the muon trigger system, "mutd"
+* (b) specify a complete barrel calorimeter for Y2006
+* (c) add steering for the corrected SSD (sisdgeo3)
+* (d) add steering for a small modifications in the SVT shield in Y2006
+*
 * Revision 1.119  2006/01/18 23:06:13  potekhin
 * Introducing the baseline year 2006 geometry, which is "the best"
 * Y2005 geo plus the bugfix in the TPC backplane (not too important).
@@ -545,7 +552,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad
+              shld,quad,mutd
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -575,7 +582,7 @@
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
-              ShldConfig, QuadConfig
+              ShldConfig, QuadConfig, MutdConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -599,6 +606,7 @@
 *             FtpcConfig  ! FTPC
 *             ShldConfig  ! Beam shield
 *             QuadConfig  ! All magnets from D0 and up
+*             MutdConfig  ! Muon Trigger System
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -635,7 +643,7 @@ replace[;ON#{#;] with [
 
    BtofConfig  = 1 ! ctb only
    CalbConfig  = 0 ! really make use of it starting in y2004
-   CaveConfig  = 1 ! can have a modified cave for shielding studies
+   CaveConfig  = 1 ! also -  a modified cave for shielding studies (2), or wider cave for muon detector (3)
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
    FgtdConfig  = 0 ! 0=no, >1=version
@@ -645,6 +653,7 @@ replace[;ON#{#;] with [
    FtpcConfig  = 0 ! 0  version, 1=gas correction
    IstbConfig  = 0 ! 0=no, >1=version
    GembConfig  = 0 ! 0=no, >1=version
+   MutdConfig  = 0 ! same
    PhmdConfig  = 0 ! No Photon multiplicity detectorby default
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE, 3=with pipe support
@@ -666,7 +675,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -1895,14 +1904,11 @@ If LL>1
 * NEW CONFIG!
                      BtofConfig=8;
 
+* Full barrel in 2006
                   "calb" 
-                     ems=on
-                     CalbConfig = 1
-* remember that with this config, the following parameters have
-* a different meaning because we have to (unfortunately) switch
-* from divisions to copies and introduce a map, which DOES
-* control the configuration
-                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
 
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
@@ -1926,6 +1932,7 @@ If LL>1
 
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      FtpcConfig = 1; "ftpc configuration"
 
@@ -1935,7 +1942,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 24; "second version, full barrel with corrected radii"
+                     SisdConfig = 35; "third version, full barrel newly corrected radii"
 
 
                   "FTPC Readout barrel "
@@ -1944,7 +1951,11 @@ If LL>1
 
                   "New version of the TPC backplane "
                      TpceConfig = 3;
-
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need a bigger Cave"
+                     CaveConfig = 3;
                 }
 ****************************************************************************************
   on UPGR01    { R and D geometry: TPC+SSD+HFT-SVT
@@ -2279,6 +2290,7 @@ If LL>1
    write(*,*) '                 FtpcConfig: ',FtpcConfig
    write(*,*) '                 FtroConfig: ',FtroConfig
    write(*,*) '                 IstbConfig: ',IstbConfig
+   write(*,*) '                 MutdConfig: ',MutdConfig
    write(*,*) '                 GembConfig: ',GembConfig
    write(*,*) '                 PhmdConfig: ',PhmdConfig
    write(*,*) '                 PipeConfig: ',PipeConfig
@@ -2339,6 +2351,8 @@ If LL>1
 
 * Optionally, switch to a larger inner shield, AND smaller beampipe support 
     if(SvshConfig==1) call AgDETP add ('svtg.SupportVer=',2 ,1)
+* Or, pick a shield that is slighly bigger outside according to Lilian's observation
+    if(SvshConfig==2) call AgDETP add ('svtg.SupportVer=',3 ,1)
 
 * Ugly, but I don't want to hash function pointers in Fortran:
     if(SvttConfig==0) call svttgeo
@@ -2377,6 +2391,8 @@ If LL>1
             call sisdgeo1
          elseif (sisd_level.eq.2) then
             call sisdgeo2
+         elseif (sisd_level.eq.3) then
+            call sisdgeo3
          else ! Unimplemented level
             write(*,*) '******************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ******************'
             if (IPRIN==0) stop 'You better stop here to avoid problems'     
@@ -2507,6 +2523,8 @@ If LL>1
 
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
+
+   if (mutd.and.MutdConfig==1) Call mutdgeo
 
    if (pixl.and.PixlConfig==1) Call pixlgeo
    if (pixl.and.PixlConfig==2) Call pixlgeo1
