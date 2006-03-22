@@ -81,6 +81,13 @@
 //#define BBC_DATA_OFFSET     1600
 //#define RAW_BBC_LEN          176              /* Number of bytes in BBC and ZDC raw data structures */
 
+#define L2RESULTS_OFFSET_TRG         0
+#define L2RESULTS_OFFSET_EMC_CHECK   1
+#define L2RESULTS_OFFSET_JPSI        2
+#define L2RESULTS_OFFSET_UPS         8
+#define L2RESULTS_OFFSET_DIJET       14
+#define L2RESULTS_OFFSET_EMC_PED     19
+#define L2RESULTS_OFFSET_PIG         20
 
 #define y5ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
 #define y5ADD_BIT_FORCE          5              /* Force store of this event */
