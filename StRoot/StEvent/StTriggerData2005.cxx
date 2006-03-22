@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.cxx,v 2.4 2006/02/08 16:29:46 ullrich Exp $
+ * $Id: StTriggerData2005.cxx,v 2.5 2006/03/22 20:58:21 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.cxx,v $
+ * Revision 2.5  2006/03/22 20:58:21  ullrich
+ * Added interface to L2 results (offsets).
+ *
  * Revision 2.4  2006/02/08 16:29:46  ullrich
  * Fixed bug in zdcUnAttenuated.
  *
@@ -801,4 +804,20 @@ unsigned short int  * StTriggerData2005::getDsm2_EMC() const{
 
 unsigned short int  * StTriggerData2005::getDsm3() const{
   return   mData->TrgSum.DSMdata.lastDSM;
+}
+
+int StTriggerData2005::L2ResultsOffset(StL2AlgorithmId id, int run) const
+{
+    if(run<7000000) return -1;
+    
+    switch(id) {
+    case l2Diagnostic:  return L2RESULTS_OFFSET_TRG;
+    case l2EmcCheck:    return L2RESULTS_OFFSET_EMC_CHECK;
+    case l2Jpsi:        return L2RESULTS_OFFSET_JPSI;
+    case l2Upsilon:     return L2RESULTS_OFFSET_UPS;
+    case l2Dijet:       return L2RESULTS_OFFSET_DIJET;
+    case l2EmcPedestal: return L2RESULTS_OFFSET_EMC_PED;
+    case l2Pi0Gamma:    return L2RESULTS_OFFSET_PIG;
+    default: return -1;
+    }
 }
