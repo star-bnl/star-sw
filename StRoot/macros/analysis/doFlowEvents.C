@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.60 2006/02/22 19:48:08 posk Exp $
+// $Id: doFlowEvents.C,v 1.61 2006/03/22 22:15:26 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -118,8 +118,11 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     ilist++; 
   }
 
-  //Bool_t IO = kFALSE; // don't use the IOMaker for old muDsts
+  //Bool_t IO = kFALSE; // don't use the IOMaker for old muDsts, needed for mevSim
   Bool_t IO = kTRUE; // use the IOMaker for muDst; needed for new (P05) MuDsts
+
+  Int_t maxTheta = 5;
+  Int_t nSels    = 2;
 
   if (phiWgtOnly) {
     cout << " doFlowEvents - phiWgtOnly = kTRUE" << endl;
@@ -456,7 +459,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //     StFlowEvent::SetEtaSubs();
 //     StFlowEvent::SetRanSubs();
 
-  // Disable weights in the event plane calculation
+  // Disable weights for the event plane and integrated flow
 //   StFlowEvent::SetPtWgt(kFALSE);
 //   StFlowEvent::SetPtWgtSaturation(1.);
    StFlowEvent::SetEtaWgt(kFALSE);
@@ -543,9 +546,37 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     TFile lyzFirstPassFile("flow.firstPassLYZ.root", "READ");
     if (lyzFirstPassFile.IsOpen()) { 
       lyzFirstPassFile.ReadAll();
+      TList* firstPassList = lyzFirstPassFile.GetList();
+      //firstPassList->ls();
+      TString* histTitle; // remove ReG and ImG
+      for (int k = 0; k < nSels; k++) {
+	for (int j = 0; j < 2; j++) { // only 2 harmonics in the first pass file
+	  for (int Ntheta = 0; Ntheta < maxTheta; Ntheta++) {
+	    histTitle = new TString("FlowImGtheta");
+	    *histTitle += Ntheta;
+	    *histTitle += "_Sel";
+	    *histTitle += k+1;
+	    *histTitle += "_Har";
+	    *histTitle += j+1;
+	    hist = firstPassList->FindObject(histTitle->Data());
+	    firstPassList->Remove(hist);
+	    delete histTitle;
+	    histTitle = new TString("FlowReGtheta");
+	    *histTitle += Ntheta;
+	    *histTitle += "_Sel";
+	    *histTitle += k+1;
+	    *histTitle += "_Har";
+	    *histTitle += j+1;
+	    hist = firstPassList->FindObject(histTitle->Data());
+	    firstPassList->Remove(hist);
+	    delete histTitle;
+	  }
+	}
+      }
+      //firstPassList->ls();
       TFile lyzFile("flow.LeeYangZeros.root", "UPDATE");
       if (lyzFile.IsOpen()) {
-	lyzFirstPassFile.GetList()->Write();
+	firstPassList->Write();
 	lyzFile.Close();
       }
     }
@@ -736,6 +767,9 @@ int gcInit(const char *request)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.61  2006/03/22 22:15:26  posk
+// Updated to read the flow.firstPassLYZ.root files.
+//
 // Revision 1.60  2006/02/22 19:48:08  posk
 // Added StFlowLeeYangZerosMaker
 // For MuDsts, the IOMaker is now the default
