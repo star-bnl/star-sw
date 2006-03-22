@@ -1,6 +1,9 @@
-//////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Id: plotLYZ.C,v 1.2 2006/03/22 22:02:14 posk Exp $
 //
 // Plot histograms from flow.LeeYang.Zeros.root
+//
 // by Markus Oldenberg and Art Poskanzer
 //
 ///////////////////////////////////////////////
@@ -8,13 +11,16 @@
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TLine.h"
+#include "TMath.h"
 #include <iostream.h>
 #include <iomanip.h>
 
 void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
 
-  Bool_t mevSim = kFALSE;
+  Bool_t mevSim, firstPass, FTPC = kFALSE;
   //Bool_t mevSim = kTRUE;
+  //Bool_t firstPass = kTRUE;
+  Bool_t FTPC = kTRUE;
 
   gROOT->SetStyle("Pub");                              // set style
   gStyle->SetFrameLineWidth(2);
@@ -32,7 +38,7 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   Int_t maxSel = 2;
   Int_t maxHar = 4; // 4
   Int_t maxHarPlot = 2;
-  float ptMax = 3.; // 6.
+  float ptMax = 6.; // 6.
   float v1 = 4.0; // 4. for dir9 mevSim
 
   Float_t max, min, r0;
@@ -63,7 +69,7 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   TCanvas *canGtheta = new TCanvas("Gtheta", "Gtheta", 700, 900);
   canGtheta->Divide(maxHarPlot*maxSel, maxTheta);
 
-  TCanvas *canGthetaZoom = new TCanvas("Gtheta(Zoom)", "Gtheta (Zoom)", 700, 900);
+  TCanvas *canGthetaZoom = new TCanvas("Gtheta_Zoom", "Gtheta_Zoom", 700, 900);
   canGthetaZoom->Divide(maxHarPlot*maxSel, maxTheta);
 
   TCanvas *can_r0theta = new TCanvas("r0", "r0");
@@ -97,7 +103,8 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   TLine *ptZeroLine = new TLine(0., 0., ptMax, 0.);
   TLine *pt5Line = new TLine(0., 5., 2., 5.);
   TLine *ptV1Line = new TLine(0., v1, 2., v1);
-  TLine *etaZeroLine = new TLine(-4.5, 0., 4.5, 0.);
+  TLine *etaZeroLine = new TLine(-1.5, 0., 1.5, 0.);
+  TLine *etaZeroLineFTPC = new TLine(-4.5, 0., 4.5, 0.);
   TLine *GZeroLine = new TLine(0., 0., 0.35, 0.);
   TLine *eta5Line = new TLine(-4.5, 5., 4.5, 5.);
   TLine *etaV1LinePos = new TLine(0., v1, 4.5, v1);
@@ -110,24 +117,27 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   graphPad->cd();
   histMult = (TH1D*)file->Get(histName);
   if (!mevSim) { histMult->Fit("gaus"); }
+  histMult->SetStats(); // ?
   histMult->Draw();
 
   float _v, vErr;  
   for (Int_t sel = 0; sel < maxSel; sel++) {
 
-    TString histName("FlowLYZ_v_Sel");
-    histName += sel+1;
-    cout << histName << endl;
-    hist_v[sel] = (TH1F*)file->Get(histName);
-    can_v->cd(sel+1); 
-    hist_v[sel]->SetMinimum(0.);
-    hist_v[sel]->Draw();
-    vLine->Draw();
-    for (int j=1; j<=maxHar; j++) {
-      _v = hist_v[sel]->GetBinContent(j);
-      vErr = hist_v[sel]->GetBinError(j);
-      cout << setprecision(3) << "Sel = " << sel+1 << ": v" << j << " from pt = (" << _v <<
-	" +/- " << vErr << ") %" << endl;
+    if (!firstPass) {
+      TString histName("FlowLYZ_v_Sel");
+      histName += sel+1;
+      cout << histName << endl;
+      hist_v[sel] = (TH1F*)file->Get(histName);
+      can_v->cd(sel+1); 
+      hist_v[sel]->SetMinimum(0.);
+      hist_v[sel]->Draw();
+      vLine->Draw();
+      for (int j=1; j<=maxHar; j++) {
+	_v = hist_v[sel]->GetBinContent(j);
+	vErr = hist_v[sel]->GetBinError(j);
+	cout << setprecision(3) << "Sel = " << sel+1 << ": v" << j << " from pt = (" << _v <<
+	  " +/- " << vErr << ") %" << endl;
+      }
     }
 
     TString histName("FlowLYZ_vr0_Sel");
@@ -140,9 +150,10 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
     for (int j=1; j<=maxHar; j++) {
       _v = hist_vr0[sel]->GetBinContent(j);
       vErr = hist_vr0[sel]->GetBinError(j);
-      cout << setprecision(3) << "Sel = " << sel+1 << ": v" << j << " from r0 = (" << _v <<
+      cout << setprecision(3) << "Sel= " << sel+1 << ": v" << j << " from r0 = (" << _v <<
 	" +/- " << vErr << ") %" << endl;
     }
+    
 
     for (Int_t har = 0; har < maxHarPlot; har++) {
       int n = sel + har;
@@ -157,6 +168,16 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
       //hist_r0th[n]->Fit("pol0");
       hist_r0th[n]->SetMinimum(0.);
       hist_r0th[n]->Draw();
+      for (int th=1; th<=maxTheta; th++) {
+	_v = hist_r0th[n]->GetBinContent(th);
+	vErr = hist_r0th[n]->GetBinError(th);
+	if (TMath::IsNaN(vErr)) {
+	  vErr = 0.;
+	  hist_r0th[n]->SetBinError(th, 0.);
+	}
+	cout << setprecision(3) << "Sel=" << sel+1 << ", Har=" << har+1 <<": r0" << th << " = "
+	     << _v << " +/- " << vErr << endl;
+      }
 
       min = 0.00001;
       float expan = 1.2;
@@ -192,50 +213,53 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
       }
     }
 
-    for (Int_t har = 0; har < maxHar; har++) {
-      int n = sel + har;
+    if (!firstPass) {
+      for (Int_t har = 0; har < maxHar; har++) {
+	int n = sel + har;
 
-      TString histName("FlowLYZ_vEta_Sel");
-      histName += sel+1;
-      histName += "_Har";
-      histName += har+1;
-      cout << histName << endl;
-      hist_vEta[n] = (TH1D*)file->Get(histName);
-      can_vEta->cd(sel+1+har*maxSel);
-      hist_vEta[n]->SetMaximum(10.);
-      hist_vEta[n]->SetMinimum(-10.);
-      hist_vEta[n]->Draw("E");
-      etaZeroLine->Draw();
-      if (mevSim) {
-	if (har==1) {
-	  eta5Line->Draw();
-	} else if (har==0) {
-	  etaV1LinePos->Draw();
-	  etaV1LineNeg->Draw();
+	TString histName("FlowLYZ_vEta_Sel");
+	histName += sel+1;
+	histName += "_Har";
+	histName += har+1;
+	cout << histName << endl;
+	hist_vEta[n] = (TH1D*)file->Get(histName);
+	can_vEta->cd(sel+1+har*maxSel);
+	hist_vEta[n]->SetMaximum(10.);
+	hist_vEta[n]->SetMinimum(-10.);
+	hist_vEta[n]->Draw("E");
+	if (FTPC) { etaZeroLineFTPC->Draw(); }
+	else { etaZeroLine->Draw(); }
+	if (mevSim) {
+	  if (har==1) {
+	    eta5Line->Draw();
+	  } else if (har==0) {
+	    etaV1LinePos->Draw();
+	    etaV1LineNeg->Draw();
+	  }
 	}
-      }
-
-      TString histName("FlowLYZ_vPt_Sel");
-      histName += sel+1;
-      histName += "_Har";
-      histName += har+1;
-      cout << histName << endl;
-      hist_vPt[n] = (TH1D*)file->Get(histName);
-      can_vPt->cd(sel+1+har*maxSel);
-      if (mevSim) {
-	hist_vPt[n]->SetMaximum(10.);
-	hist_vPt[n]->SetMinimum(-10.);
-      } else {
-	hist_vPt[n]->SetMaximum(20.);
-	hist_vPt[n]->SetMinimum(-20.);
-      }
-      hist_vPt[n]->Draw("E");
-      ptZeroLine->Draw();
-      if (mevSim) {
-	if (har==1) {
-	  pt5Line->Draw();
-	} else if (har==0) {
-	  ptV1Line->Draw();
+	
+	TString histName("FlowLYZ_vPt_Sel");
+	histName += sel+1;
+	histName += "_Har";
+	histName += har+1;
+	cout << histName << endl;
+	hist_vPt[n] = (TH1D*)file->Get(histName);
+	can_vPt->cd(sel+1+har*maxSel);
+	if (mevSim) {
+	  hist_vPt[n]->SetMaximum(10.);
+	  hist_vPt[n]->SetMinimum(-10.);
+	} else {
+	  hist_vPt[n]->SetMaximum(20.);
+	  hist_vPt[n]->SetMinimum(-20.);
+	}
+	hist_vPt[n]->Draw("E");
+	ptZeroLine->Draw();
+	if (mevSim) {
+	  if (har==1) {
+	    pt5Line->Draw();
+	  } else if (har==0) {
+	    ptV1Line->Draw();
+	  }
 	}
       }
     }
@@ -263,3 +287,12 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
 
   return;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: plotLYZ.C,v $
+// Revision 1.2  2006/03/22 22:02:14  posk
+// Updates to macros.
+//
+//
+///////////////////////////////////////////////////////////////////////////////
