@@ -1,6 +1,11 @@
-* $Id: cavegeo.g,v 1.4 2005/08/16 01:00:12 potekhin Exp $
+* $Id: cavegeo.g,v 1.5 2006/03/22 00:17:00 potekhin Exp $
 *
 * $Log: cavegeo.g,v $
+* Revision 1.5  2006/03/22 00:17:00  potekhin
+* Need to expand the radius of the "CAVE" (which is an artificial
+* number in the first place) to accomodate teh mupn trigger system.
+* This is properly versioned for steering.
+*
 * Revision 1.4  2005/08/16 01:00:12  potekhin
 * Shielding study: we need a bigger cave (tm).
 * Created a version of the cave, steered from geometry.g,
@@ -38,6 +43,15 @@ real      D1,D2,Z1
          Rmin    = 0             ! inner radius
          Rmax    = {400,213}          ! outer radius
          Dz      = {800,5000}         ! half length
+         Dconc   = 50                 ! concrete thickness
+      EndFill 
+
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Fill CAVE              !  STAR CAVE GEOMETRY
+         version = 3             ! geometry version
+         Rmin    = 0             ! inner radius
+         Rmax    = {450,100}          ! outer radius
+         Dz      = {800,2000}         ! half length
          Dconc   = 50                 ! concrete thickness
       EndFill 
 
