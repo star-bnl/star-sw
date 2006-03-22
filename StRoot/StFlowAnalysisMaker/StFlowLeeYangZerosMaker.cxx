@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.cxx,v 1.1 2006/02/22 19:09:28 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.cxx,v 1.2 2006/03/22 21:55:28 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //          with advice from Jean-Yves Ollitrault and Nicolas Borghini
@@ -161,6 +161,8 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   mHistMult->SetXTitle("Multiplicity");
   mHistMult->SetYTitle("Counts");
 
+  mNEvents = 0;
+
   // for each selection
   for (int k = 0; k < Flow::nSels; k++) {
 
@@ -193,7 +195,6 @@ Int_t StFlowLeeYangZerosMaker::Init() {
     
     // for each harmonic
     for (int j = 0; j < Flow::nHars; j++) {
-      mNEvents[k][j] = 0;
       mQ[k][j].Set(0.,0.);
       mQ2[k][j] = 0.;
 
@@ -228,7 +229,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 	*histTitle += k+1;
 	*histTitle += "_Har";
 	*histTitle += j+1;
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta = new TH1F(histTitle->Data(),
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta = new TH1D(histTitle->Data(),
 	  histTitle->Data(), Flow::nRBins, rBinArray);
 	histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->SetXTitle("r");
 	histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->SetYTitle("|G^{#theta}(ir)|^{2}");
@@ -241,10 +242,10 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 	*histTitle += k+1;
 	*histTitle += "_Har";
 	*histTitle += j+1;
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta = new TProfile(histTitle->Data(),
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistProReGtheta = new TProfile(histTitle->Data(),
 	  histTitle->Data(), Flow::nRBins, rBinArray);
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->SetXTitle("r");
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->SetYTitle("Re(G^{#theta}(ir))");
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistProReGtheta->SetXTitle("r");
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistProReGtheta->SetYTitle("Re(G^{#theta}(ir))");
 	delete histTitle;
 
 	// Im(Gtheta)
@@ -254,10 +255,10 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 	*histTitle += k+1;
 	*histTitle += "_Har";
 	*histTitle += j+1;
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta = new TProfile(histTitle->Data(),
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta = new TProfile(histTitle->Data(),
 	  histTitle->Data(), Flow::nRBins, rBinArray);
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->SetXTitle("r");
-	histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->SetYTitle("Im(G^{#theta}(ir))");
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta->SetXTitle("r");
+	histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta->SetYTitle("Im(G^{#theta}(ir))");
 	delete histTitle;
 
 	// Re(Numerator) 2D
@@ -360,6 +361,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       histFull[k].histFullHar[j].mHistPro_r0theta->SetYTitle("r_{0}^{#theta}");
       delete histTitle;
 
+      if (j > 1) continue; // only for first two harmonics
       TString *histTitleForReadIn;
       histTitleForReadIn = new TString("FlowLYZ_r0theta_Sel");
       *histTitle += k+1;
@@ -369,18 +371,20 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       // Read the hists from the first pass file
       TFile fileFirstPass("flow.firstPassLYZ.root","R");
       if (fileFirstPass.IsOpen()) { // second pass
+	gMessMgr->Info("##### FlowLeeYangZero: Second Pass");
+	//fileFirstPass.ls();
 	TH1D* tempHist = 
 	  dynamic_cast<TH1D*>(fileFirstPass.Get(histTitleForReadIn->Data()));
 	if (!tempHist) {
-	  cout << "##### FlowLeeYangZeros: can't find " <<
+	  cout << "##### FlowLeeYangZeros: dynamic cast can't find " <<
 	    histTitleForReadIn->Data() << endl;
 	  return kFALSE;
 	}   
 	delete  histTitleForReadIn;
-	gMessMgr->Info("##### FlowLeeYangZero: Second Pass");
 	
 	for (Int_t Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
 	  mr0theta[k][j][Ntheta] = tempHist->GetBinContent(Ntheta+1);
+	  mr0theta[k][j+2][Ntheta] = tempHist->GetBinContent(Ntheta+1); // for higher harmonics
 	  //cout << k << " " << j << " " << Ntheta << " " << mr0theta[k][j][Ntheta] << endl;
 	}
 	fileFirstPass.Close();
@@ -392,7 +396,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   } // k
 
   gMessMgr->SetLimit("##### FlowLeeYangZero", 5);
-  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.1 2006/02/22 19:09:28 posk Exp $");
+  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.2 2006/03/22 21:55:28 posk Exp $");
 
   return StMaker::Init();
 }
@@ -406,6 +410,8 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
   // multiplicity
   mMult = (int)pFlowEvent->MultPart(pFlowSelect);
   mHistMult->Fill((float)mMult);
+
+  mNEvents++; // increment number of events
 
   TVector2 Q;
   Float_t theta, order, r0;
@@ -433,8 +439,6 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
       if (Q.Mod() == 0.) return kFALSE; // to eliminate Q=0
       mQ[k][j]  += Q;                   // for chi calculation
       mQ2[k][j] += Q.Mod2();
-
-      mNEvents[k][j]++; // increment number of events
      
       // for each theta
       for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
@@ -446,7 +450,7 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
 	}
 	Qtheta = mQtheta[k][j][Ntheta];
 
-	if (mFirstPass) {
+	if (mFirstPass && j<=1) {
 	  // G for "integrated v"
 	  for (int rBin = 1; rBin < Flow::nRBins; rBin++) {
 	    Float_t r = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinCenter(rBin);
@@ -455,12 +459,12 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
 	      Gtheta = TComplex::Exp(expo); // BP Eq. 6
 	    } else {  // Product G
 	      Gtheta = pFlowEvent->Grtheta(pFlowSelect, r, theta);  // PG Eq. 3
-	      if (Gtheta.Rho2() > 10000.) { break; } // stop when G gets too big
+	      if (Gtheta.Rho2() > 1000.) { break; } // stop when G gets too big
 	    }
-	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->Fill(r, Gtheta.Re());
-	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->Fill(r, Gtheta.Im());
+	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistProReGtheta->Fill(r, Gtheta.Re());
+	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta->Fill(r, Gtheta.Im());
 	  }
-	} else {
+	} else if (!mFirstPass) {
 	  // denominator for differential v
 	  r0 = mr0theta[k][j][Ntheta];
 	  if (!k) {
@@ -589,8 +593,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
   // In the second pass calculate V(theta), average over theta, and then calculate v 
   //timeFinish.start();
 
-  TOrdCollection* savedHistNames          = new TOrdCollection(Flow::nSels*Flow::nHars);
-  TOrdCollection* savedHistFirstPassNames = new TOrdCollection(Flow::nSels*Flow::nHars);
+  TOrdCollection* savedHistNames          = new TOrdCollection(Flow::nSels * Flow::nHars);
+  TOrdCollection* savedHistFirstPassNames = new TOrdCollection(Flow::nSels * 2 * Flow::nTheta);
   TString* histTitle;
 
   cout << endl << "##### LeeYangZeros Maker:" << endl;
@@ -600,8 +604,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
   TComplex Gtheta, denom, numer, div;
   Float_t mult = mHistMult->GetMean();
   Float_t _v, vErr, Vtheta, V, yield, eta, pt;
-  Double_t r0, yieldSum, vSum, err2Sum;
-  Float_t Glast, G0, Gnext, GnextNext, Xlast, X0, Xnext, sigma2, chi;
+  Double_t r0, yieldSum, vSum, err2Sum, Glast, G0, Gnext, GnextNext;
+  Float_t Xlast, X0, Xnext, sigma2, chi;
   Float_t BesselRatio[3] = {1., 1.202, 2.69}; // is 2.69 correct?
   Int_t m;
   Bool_t etaPtNoCut;
@@ -621,13 +625,13 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
       if (j==2) { m = 3; }
       else if (j==3) { m = 2; }
       for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
-	if (mFirstPass) {
+	if (mFirstPass && j<=1) {
 	  for (int rBin = 1; rBin <= rBins; rBin++) {
 	    
 	    // "Integrated flow"
 	    // G, the generating function, as a function of r for each theta
-	    reG = histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->GetBinContent(rBin);
-	    imG = histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->GetBinContent(rBin);
+	    reG = histFull[k].histFullHar[j].histTheta[Ntheta].mHistProReGtheta->GetBinContent(rBin);
+	    imG = histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta->GetBinContent(rBin);
 	    Gtheta(reG, imG); // BP Eqs. 6 & A1
 	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->SetBinContent(rBin, Gtheta.Rho2());
 	  } // rBin
@@ -653,18 +657,44 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	  } // N
 	  histFull[k].histFullHar[j].mHistPro_r0theta->Fill(Ntheta, r0); // for first pass output
 	  Vtheta = Flow::j01 / r0; // BP Eq. 9
-	  histFull[k].mHistPro_V->Fill(j+1, Vtheta);
+	  histFull[k].histFullHar[j].mHistPro_Vtheta->Fill(Ntheta, Vtheta);
+	  //histFull[k].mHistPro_V->Fill(j+1, Vtheta);
 
 	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta);
 
-	  // Should really save TComplex G, not just r0
-// 	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta);
-// 	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta);
+	  // Project the profile hists to 1D hists
 
-	} else { // second pass
+	  histTitle = new TString("FlowReGtheta");
+	  *histTitle += Ntheta;
+	  *histTitle += "_Sel";
+	  *histTitle += k+1;
+	  *histTitle += "_Har";
+	  *histTitle += j+1;
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta =
+	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistProReGtheta->ProjectionX(histTitle->Data());
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->SetTitle(histTitle->Data());
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->SetXTitle("r");
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta->SetYTitle("Re(G^{#theta}(ir))");
+	  delete histTitle;
+	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistReGtheta);
+
+	  histTitle = new TString("FlowImGtheta");
+	  *histTitle += Ntheta;
+	  *histTitle += "_Sel";
+	  *histTitle += k+1;
+	  *histTitle += "_Har";
+	  *histTitle += j+1;
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta =
+	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta->ProjectionX(histTitle->Data());
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->SetTitle(histTitle->Data());
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->SetXTitle("r");
+	  histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta->SetYTitle("Im(G^{#theta}(ir))");
+	  delete histTitle;
+	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta);
+
+	} else if (!mFirstPass) { // second pass
 
 	  Vtheta = Flow::j01 / mr0theta[k][j][Ntheta]; // BP Eq. 9
-	  histFull[k].histFullHar[j].mHistPro_Vtheta->Fill(Ntheta, Vtheta);
 	  histFull[k].mHistPro_V->Fill(j+1, Vtheta);
 
 	  // Differential flow
@@ -732,23 +762,25 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
       } // Ntheta
       
       // sigma2 and chi
-      mQ[k][j]  /= (float)mNEvents[k][j];
-      mQ2[k][j] /= (float)mNEvents[k][j];
-      V = histFull[k].mHistPro_V->GetBinContent(j+1);
-      sigma2 = mQ2[k][j] - TMath::Power(mQ[k][j].X(), 2.) - TMath::Power(mQ[k][j].Y(), 2.)
-	- TMath::Power(V, 2.); // BP Eq. 62
-      //cout << mQ2[k][j] << ", " << mQ[k][j].X() << ", " << mQ[k][j].Y() << ", " << V << endl;
-      chi = V / TMath::Sqrt(sigma2); // BP Eq. 59
-
-      // output v from r0, and chi
-      _v = histFull[k].mHistPro_vr0->GetBinContent(j+1);
-      vErr = histFull[k].mHistPro_vr0->GetBinError(j+1); // from the spread with theta
-      cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
-	" +/- " << vErr << ") %  chiJYO = " << chi << endl;
+      if (j <=1) {
+	mQ[k][j]  /= (float)mNEvents;
+	mQ2[k][j] /= (float)mNEvents;
+	V = histFull[k].mHistPro_V->GetBinContent(j+1);
+	sigma2 = mQ2[k][j] - TMath::Power(mQ[k][j].X(), 2.) - TMath::Power(mQ[k][j].Y(), 2.)
+	  - TMath::Power(V, 2.); // BP Eq. 62
+	//cout << mQ2[k][j] << ", " << mQ[k][j].X() << ", " << mQ[k][j].Y() << ", " << V << endl;
+	chi = V / TMath::Sqrt(sigma2); // BP Eq. 59
+	
+	// output v from r0, and chi
+	_v = histFull[k].mHistPro_vr0->GetBinContent(j+1);
+	vErr = histFull[k].mHistPro_vr0->GetBinError(j+1); // from the spread with theta
+	cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	  " +/- " << vErr << ") %  chiJYO = " << chi << endl;
+      }
 
       // Project the profile hists to 1D hists
 
-      if (mFirstPass) {
+      if (mFirstPass && j<=1) {
 
 	histTitle = new TString("FlowLYZ_r0theta_Sel");
 	*histTitle += k+1;
@@ -760,11 +792,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_r0theta->SetXTitle("#theta");
 	histFull[k].histFullHar[j].mHist_r0theta->SetYTitle("r_{0}^{#theta}");
 	delete histTitle;
-
 	savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].mHist_r0theta);
 
-      } else { // second pass
-		
 	histTitle = new TString("FlowLYZ_Vtheta_Sel");
 	*histTitle += k+1;
 	*histTitle += "_Har";
@@ -775,7 +804,10 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_Vtheta->SetXTitle("#theta");
 	histFull[k].histFullHar[j].mHist_Vtheta->SetYTitle("V_{n}^{#theta}");
 	delete histTitle;
-	
+	savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].mHist_Vtheta);
+
+      } else if (!mFirstPass) { // second pass
+			
 	histTitle = new TString("FlowLYZ_vEta_Sel");
 	*histTitle += k+1;
 	*histTitle += "_Har";
@@ -786,7 +818,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vEta->SetXTitle((char*)xLabel.Data());
 	histFull[k].histFullHar[j].mHist_vEta->SetYTitle("v (%)");
 	delete histTitle;
-	
+	savedHistNames->AddLast(histFull[k].histFullHar[j].mHist_vEta);
+
 	histTitle = new TString("FlowLYZ_vPt_Sel");
 	*histTitle += k+1;
 	*histTitle += "_Har";
@@ -797,7 +830,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV/c)");
 	histFull[k].histFullHar[j].mHist_vPt->SetYTitle("v (%)");
 	delete histTitle;
-	
+	savedHistNames->AddLast(histFull[k].histFullHar[j].mHist_vPt);
+
 	// Doubly integrated v with cuts
 	
 	// from v(eta)
@@ -858,9 +892,6 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	    " +/- " << vErr << ") %" << endl;
 	}
 	
-	savedHistNames->AddLast(histFull[k].histFullHar[j].mHist_Vtheta);
-	savedHistNames->AddLast(histFull[k].histFullHar[j].mHist_vEta);
-	savedHistNames->AddLast(histFull[k].histFullHar[j].mHist_vPt);
       } // second pass
 
     } // j
@@ -873,7 +904,7 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
     histFull[k].mHist_vr0->SetXTitle("Harmonic");
     histFull[k].mHist_vr0->SetYTitle("v from r_{0} (%)");
     delete histTitle;
-
+    savedHistFirstPassNames->AddLast(histFull[k].mHist_vr0);
     savedHistNames->AddLast(histFull[k].mHist_vr0);
 
     if (!mFirstPass) {
@@ -887,8 +918,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
       histFull[k].mHist_V->SetXTitle("Harmonic");
       histFull[k].mHist_V->SetYTitle("mean V_{n}");
       delete histTitle;
-
       savedHistNames->AddLast(histFull[k].mHist_V);
+
       savedHistNames->AddLast(histFull[k].mHist_v);
     }
 
@@ -899,18 +930,19 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
   TFile fileFirstPassNew("flow.firstPassLYZNew.root", "RECREATE");
   TFile histFile("flow.LeeYangZeros.root", "RECREATE");
   if (mFirstPass) {
+    savedHistFirstPassNames->AddLast(mHistMult);
     fileFirstPassNew.cd();
     savedHistFirstPassNames->Write();
     histFile.cd();
     savedHistFirstPassNames->Write();
   } else {
     histFile.cd();
+    savedHistNames->AddLast(mHistMult);
     savedHistNames->AddLast(mHistYieldPartPt);
     savedHistNames->AddLast(mHistYieldPartEta);
-    savedHistNames->AddLast(mHistMult);
     savedHistNames->Write();
   }
-  fileFirstPassNew.Close();
+  fileFirstPassNew.Close(); // on second pass it is empty
   histFile.Close();
   
   delete savedHistNames;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.h,v 1.1 2006/02/22 19:09:30 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.h,v 1.2 2006/03/22 21:55:32 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //
@@ -67,13 +67,13 @@ private:
 #ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Double_t mQ2[Flow::nSels][Flow::nHars];                    //! flow vector modulus square
-  Int_t    mNEvents[Flow::nSels][Flow::nHars];               //! number of events
-  Int_t    mPtBinsPart;                                      //! pt bins
   Float_t  mQtheta[Flow::nSels][Flow::nHars][Flow::nTheta];  //! Q^{\theta}
   Float_t  mr0theta[Flow::nSels][Flow::nHars][Flow::nTheta]; //! r_0^{\theta} from first pass
   TComplex mGr0theta[Flow::nSels][Flow::nHars][Flow::nTheta];//! G(r_0)^{\theta}
 #endif /*__CINT__*/
-  Int_t            mMult;                                    //! multiplicity
+  Int_t            mNEvents;    //! number of events
+  Int_t            mMult;       //! multiplicity
+  Int_t            mPtBinsPart; //! pt bins
   TString          xLabel;      //! label axis with rapidity or pseudorapidity 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   StFlowSelection* pFlowSelect; //! selection object
@@ -85,9 +85,11 @@ private:
 
   // for each harmonic, each selection, and each theta
   struct histThetas {
-    TH1F*       mHistGtheta;
-    TProfile*   mHistReGtheta;
-    TProfile*   mHistImGtheta;    
+    TH1D*       mHistGtheta;
+    TProfile*   mHistProReGtheta;
+    TProfile*   mHistProImGtheta;    
+    TH1D*       mHistReGtheta;
+    TH1D*       mHistImGtheta;    
     TProfile2D* mHistReNumer2D;
     TProfile*   mHistReNumerEta;
     TProfile2D* mHistImNumer2D;
