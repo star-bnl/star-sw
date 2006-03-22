@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.10 2004/11/30 19:19:11 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.11 2006/03/22 20:58:21 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.11  2006/03/22 20:58:21  ullrich
+ * Added interface to L2 results (offsets).
+ *
  * Revision 2.10  2004/11/30 19:19:11  ullrich
  * Added new access function for EEMC data (Akio).
  *
@@ -77,6 +80,9 @@ public:
     virtual unsigned short mAddBits() const;
     virtual unsigned short bcData(int channel) const;
 
+    //L2 results offsets 
+    virtual int L2ResultsOffset(StL2AlgorithmId id, int run) const;  
+  
     // bunch and spin bits
     virtual unsigned int bunchCounterHigh() const;
     virtual unsigned int bunchCounterLow() const;
@@ -234,6 +240,7 @@ inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, in
 inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
-  
-#endif
+inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id, int run) const {return -1;}  
 
+#endif
+  

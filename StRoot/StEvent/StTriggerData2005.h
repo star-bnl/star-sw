@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.h,v 2.2 2004/11/30 19:19:12 ullrich Exp $
+ * $Id: StTriggerData2005.h,v 2.3 2006/03/22 20:58:21 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.h,v $
+ * Revision 2.3  2006/03/22 20:58:21  ullrich
+ * Added interface to L2 results (offsets).
+ *
  * Revision 2.2  2004/11/30 19:19:12  ullrich
  * Added new access function for EEMC data (Akio).
  *
@@ -49,6 +52,9 @@ public:
     unsigned short mAddBits() const;
     unsigned short bcData(int channel) const;
 
+    //L2 offsets
+    int L2ResultsOffset(StL2AlgorithmId id, int run) const;  
+  
     // bunch and spin bits
     unsigned int bunchCounterHigh() const;
     unsigned int bunchCounterLow() const;
@@ -132,8 +138,3 @@ protected:
 };
 
 #endif
-
-
-
-
-
