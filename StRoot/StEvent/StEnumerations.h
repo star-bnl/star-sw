@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.26 2006/03/12 17:00:15 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.27 2006/03/22 20:57:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.27  2006/03/22 20:57:19  ullrich
+ * Added StL2AlgorithmId enumeration.
+ *
  * Revision 2.26  2006/03/12 17:00:15  jeromel
  * Added ppvNoCtbVertexFinder to hopefully clarify analysis
  *
@@ -298,7 +301,18 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         egrVertexFinder,
                         minuitVertexFinder,
                         ppvVertexFinder,
-			ppvNoCtbVertexFinder
-                       };
+                        ppvNoCtbVertexFinder};
+
+
+/*!
+ * \enum StL2AlgorithmId
+ */
+enum StL2AlgorithmId { l2Diagnostic = 0,
+                       l2EmcCheck,
+                       l2Jpsi,
+                       l2Upsilon,
+                       l2Dijet,
+                       l2EmcPedestal,
+                       l2Pi0Gamma};
 
 #endif
