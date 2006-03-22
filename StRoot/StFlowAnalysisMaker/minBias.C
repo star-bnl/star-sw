@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.12 2006/02/24 18:36:04 posk Exp $
+// $Id: minBias.C,v 1.13 2006/03/22 22:02:07 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
@@ -135,12 +135,12 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	  *histName += "_Har";
 	  *histName += harN+1;
 	}
-	cout << "hist name= " << histName->Data() << endl;
 		
 	// get the histograms
 	for (int n = 0; n < nCens+1; n++) {
 	  hist[n] = dynamic_cast<TH1*>(histFile[n]->Get(histName->Data()));
 	}
+	if (hist[0]) { cout << "hist name= " << histName->Data() << endl; }
 
 	const int lastHist = 3;
 	int nBins;      // set by 2D of centrality lastHist
@@ -295,6 +295,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.13  2006/03/22 22:02:07  posk
+// Updates to macros.
+//
 // Revision 1.12  2006/02/24 18:36:04  posk
 // Updated for LeeYangZerosMaker histograms.
 //

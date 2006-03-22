@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.25 2006/02/22 19:35:20 posk Exp $
+// $Id: plotCen.C,v 1.26 2006/03/22 22:02:12 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -74,6 +74,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
     "Flow_Cent",
     "Flow_OrigMult",
     "Flow_Mult",
+    "FlowLYZ_Mult",
     "Flow_MultOverOrig",
     "Flow_MultEta",
     "Flow_MultPart",
@@ -149,7 +150,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 };
   const int nNames = sizeof(baseName) / sizeof(char*);
   const int nDoubles = 9;
-  const int nSingles = 45 + nDoubles;
+  const int nSingles = 46 + nDoubles;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -612,6 +613,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.26  2006/03/22 22:02:12  posk
+// Updates to macros.
+//
 // Revision 1.25  2006/02/22 19:35:20  posk
 // Added graphs for the StFlowLeeYangZerosMaker
 //
