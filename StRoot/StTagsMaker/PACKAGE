@@ -1,0 +1,5 @@
+# $Id $
+# package StTagsMaker
+# author: 
+Library:libStTagsMaker.so:LIBS +=   -lStChain  -l_StEvent
+#Library:libStTagsMaker.so:LIBS +=   -lStChain  -lStEvent

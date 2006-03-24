@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.15 2004/11/24 04:05:26 jeromel Exp $
+// $Id: StTagsMaker.cxx,v 1.16 2006/03/24 14:34:50 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.16  2006/03/24 14:34:50  fisyak
+// Remove new TClass(name.Data(),1,StEvtHddr.h,StEvtHddr.h);This new forces to call Notify which cleans up all ROOT interanl pointer and prevent to write into TTRe more than 1 event. This bug found by Victor and Valery
+//
 // Revision 1.15  2004/11/24 04:05:26  jeromel
 // Small leak of one newds fixed
 //
@@ -172,14 +175,12 @@ Int_t StTagsMaker::Make(){
 //_____________________________________________________________________________
 EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
 {
-  TDataSet *newds = 0;
   TString name, leaflist, branchName;
   TClass *cl = 0;
   Int_t bufsize= 64000;
   void *address = 0;
 
   const char *Name=ds->GetName();
-  newds = new TDataSet(Name);
 
   if (!tabClass) tabClass  = gROOT->GetClass("TTable"); 
   if (ds->InheritsFrom(tabClass) && strstr(Name,"Tag")) {
@@ -189,11 +190,7 @@ EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
 
   } else if (strstr(Name,"EvtHddr")){   
     name = TString("EvtHddr_st");
-    cl = new TClass(name.Data(),1,"StEvtHddr.h","StEvtHddr.h");
-    if (cl) address = cl->New();
-
   } else {
-    SafeDelete(newds);
     return kContinue;
   }
 
@@ -265,10 +262,10 @@ EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
       fTree->Branch(branchName.Data(),(char*)address+member->GetOffset(),
 		    leaflist.Data(),bufsize);
     }
+    TDataSet *newds = new TDataSet(Name);
     newds->SetTitle(ds->Path());
     fTagsList->Add(newds); 
   }
-  else SafeDelete(newds);
   return kContinue; 
 }
 //_____________________________________________________________________________
