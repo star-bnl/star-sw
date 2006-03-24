@@ -1,8 +1,8 @@
-* $Id: mutdgeo.g,v 1.2 2006/03/24 21:35:15 potekhin Exp $
+* $Id: mutdgeo.g,v 1.3 2006/03/24 22:54:24 potekhin Exp $
 * $Log: mutdgeo.g,v $
-* Revision 1.2  2006/03/24 21:35:15  potekhin
-* Added the necessary elements to get same sensitive volumes
-* as in TOFp trays, with omission of less important details
+* Revision 1.3  2006/03/24 22:54:24  potekhin
+* After a discussion with Hank, the TOF slats seem to be
+* unnecessary in this simulation, hence I simplify the geo.
 *
 * Revision 1.1  2006/03/21 23:49:01  potekhin
 * We MUST add this geom to our system in order to account
@@ -19,7 +19,9 @@ Module  MUTDGEO is the geometry of the STAR muon trigger system
    Author    Maxim Potekhin
    Created   21 March 2006
 
-   Content   MUTD,MUSC,MTRA,MXTR,MMTC,MXSA,MMAA,MMTD,MASS,MCSB
+   Content   MUTD,MUSC,MTRA,MXTR,MMTC,MXSA
+
+*MMAA,MMTD,MASS,MCSB
 
    Structure MTDG { version,Rmin, Rmax, dz, Length, Radii(2) }
    Structure MTRY { Height, Width, Length, WallThk, SupFullH, SupFullW,
@@ -154,6 +156,7 @@ Module  MUTDGEO is the geometry of the STAR muon trigger system
        Use    MTDG
        Use    MTRY
        Use    MTBB
+       Use    MOFF
 
        create and position MUTD in Cave
 
@@ -220,17 +223,6 @@ Block MMTC  is  the Main Tray Cavity filled with the details for CTB
                           dz=MTRY_Length/2-MTRY_WallThk
 
 
-*---- the 4wide mother box...
-      sublen             = ((MOFF_Slat02z+15.5)-(MOFF_Slat10z-15.5))
-      subcen             = (MOFF_Slat02z+15.5)-sublen/2.
-
-      iwid=4
-      Create and Position MMAA  X=0   Z=subcen konly='MANY'
-*---- the 5wide mother box...
-      iwid=5
-      Create and Position MMAA  X=0.0 Z=MOFF_Slat01z konly='MANY'
-
-
 *
 *---- inner slab + readout
       zpos  =  (MTRY_length-MTBB_Slab1Len)/2-MTRY_WallThk-MTBB_Wrap
@@ -260,68 +252,6 @@ Block MXSA  is  the active trigger scintillator SLAB for ctb
       HITS    MXSA   X:.01:S   Y:.01:   Z:.01:,
                      Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
                      Sleng:.1:(0,500)   ToF:16:(0,1.e-6) Step:.01:,      
-                     Eloss:16:(0,0.01) 
-EndBlock
-*------------------------------------------------------------------------------
-Block MMAA is a b1ox for a 4wide AND 5wide phi column of TOF Scintillators
-      Attribute MMAA  seen=0   colo=2
-      if (iwid==4) then
-*  ----  the 4wide mother box...
-         Shape  BOX    dx=MTRY_height/2-MTRY_WallThk,  
-                       dy=0.8*MOFF_BoxWidth/2,
-                       dz=sublen/2. 
-      else
-*---- the 5wide mother box...
-         Shape  BOX    dx=MTRY_height/2-MTRY_WallThk,  
-                       dy=MOFF_BoxWidth/2,
-                       dz=15.5 
-      endif
-      Create    MMTD  " dont need to positition it, because this is division" 
-EndBlock
-*------------------------------------------------------------------------------
-Block MMTD is a 5wide phi column of TOF Scintillators
-      Attribute MMTD      seen=1   colo=1
-      Shape     division  Iaxis=2  Ndiv=iwid  
-
-      Create MASS
-      if (iwid==5) then
-        Position MASS X=-1.7                       alphay=5.0 konly='MANY'
-      else
-        Position MASS X=-0.4 Z=MOFF_Slat02z-subcen alphay=10.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat03z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat04z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat05z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat06z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat07z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat08z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat09z-subcen alphay=11.0 konly='MANY'
-        Position MASS X=-0.2 Z=MOFF_Slat10z-subcen alphay=11.0 konly='MANY'
-     endif
-EndBlock
-*------------------------------------------------------------------------------
-Block MASS is a single TOF Slat Assembly (slat+PMT+base)
-      Attribute MASS seen=0 colo=6
-      totlen = MOFF_SlatLen+MOFF_PmtLen+MOFF_BaseLen
-      Shape BOX dx=MOFF_PmtMaxR, 
-                dy=(MTRY_Width/2-MTRY_WallThk)/5.,
-                dz=totlen/2.
-      zpos = -(totlen-MOFF_SlatLen)/2
-
-      Create and Position MCSB  Z=zpos
-EndBlock
-*------------------------------------------------------------------------------
-Block MCSB  is  the active trigger scintillator SLAB for tof
-      Attribute MCSB      seen=1   colo=7
-      Material polystyren
-      Medium   sensitive    IsVol=1
-      Shape   BOX    dx=MOFF_SlatThck/2  dy=MOFF_SlatWid/2  dz=MOFF_SlatLen/2 
-*
-*   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
-*                S - Single step
-*
-      HITS    MCSB   X:.01:S   Y:.01:   Z:.01:,
-                     Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
-                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6)  Step:.01:,
                      Eloss:16:(0,0.01) 
 EndBlock
 *------------------------------------------------------------------------------
