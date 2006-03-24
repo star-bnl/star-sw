@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.24  2006/03/24 19:31:15  suaide
+// fixed break segmentation error.
+//
 // Revision 1.23  2005/05/23 12:35:14  suaide
 // New Point maker code
 //
@@ -390,10 +393,11 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
     Float_t totAvg = 0;
     Int_t idw =Epc::nMaxNoOfClinBin;
     Int_t ida =Epc::nMaxNoOfClinBin;
-
     Float_t ep[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
     Int_t   iw[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
     Int_t   k[Epc::nMaxNoOfClinBin];
+    
+    
     for (Int_t iF=0;iF<Epc::nMaxNoOfClinBin;iF++)
     {
         k[iF]=0;

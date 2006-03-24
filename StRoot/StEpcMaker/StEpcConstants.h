@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEpcConstants.h,v 1.3 2005/05/23 12:35:14 suaide Exp $
+// $Id: StEpcConstants.h,v 1.4 2006/03/24 19:31:15 suaide Exp $
 //
 // Author: Subhasis Chattopadhyay
 //////////////////////////////////////////////////////////////////////
@@ -20,8 +20,8 @@ public:
     {
         nModule =120,
         nPhiBin=10,
-        nMaxNoOfClinBin=10,
-        nMaxNoOfTrinBin=10
+        nMaxNoOfClinBin=15,
+        nMaxNoOfTrinBin=15
     };
 
     ClassDef(Epc,1)  // macro for rootCint
