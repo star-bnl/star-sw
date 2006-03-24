@@ -312,7 +312,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   myRm += tmpLines;
   gSystem->Exec(myRm.Data()); 
 
-  cout << "mycount: " << mycount << endl;
+  cout << "mycount: " << myCount << endl;
 
   cout << "Number of macros in list: " << nMacros << endl;
   nMacros = TMath::Min(nMacros,nMacrosMax);
