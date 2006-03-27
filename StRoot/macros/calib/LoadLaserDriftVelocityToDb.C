@@ -279,7 +279,7 @@ int getDriftVelocityDB(unsigned int funixTime, unsigned int& uitimedb, double& l
 //void LoadLaserDriftVelocityToDb(){
 //void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, int nMacros, const char* baseName){
 
-void LoadLaserDriftVelocityToDbTest(const char* dirName, const char* listOfMacros, const char* baseName){
+void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, const char* baseName){
   // 
   // Define some used values.
   // 
