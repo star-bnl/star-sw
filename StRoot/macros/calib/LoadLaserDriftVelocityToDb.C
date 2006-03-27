@@ -636,8 +636,8 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 //   TString CheckVarOth(dirName); CheckVarOth+="/Check/VarOth/";
 
     // Change XML config
-    //TString StDbServerEnv("/star/u/starreco/dbServers_robinson.xml");
-    //gSystem->Setenv("STDB_SERVERS",StDbServerEnv.Data());
+    TString StDbServerEnv("/star/u/starreco/dbServers_robinson.xml");
+    gSystem->Setenv("STDB_SERVERS",StDbServerEnv.Data());
 
     // --> create a modifier object and set up table definitions  
     StDbModifier *dm = new StDbModifier();
