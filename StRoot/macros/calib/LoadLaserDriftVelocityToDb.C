@@ -279,25 +279,21 @@ int getDriftVelocityDB(unsigned int funixTime, unsigned int& uitimedb, double& l
 //void LoadLaserDriftVelocityToDb(){
 //void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, int nMacros, const char* baseName){
 
-void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, const char* baseName){
+void LoadLaserDriftVelocityToDbTest(const char* dirName, const char* listOfMacros, const char* baseName){
   // 
   // Define some used values.
   // 
 
   //  const char* listOfMacros = "listOfLaserMacrosForTest.list";
   //   const int nMacros = 109; 
-  //  const char* baseName = "tpcDriftVelocity";
+  //  const char* baesseName = "tpcDriftVelocity";
   //  const char* dirName = "dataLaserDVTestAuto";
   const int nMacrosMax = 800;
   int nMacros = 0;    
 
-  cout << "dirName: " << dirName << endl;
-  cout << "listOfMacros: " << listOfMacros << endl;
-  cout << "baseName: " << baseName << endl;
-
-  TString fullListName(listOfMacros);
-  //fullListName +="/";
-  //fullListName +=listOfMacros;
+  TString fullListName(dirName);
+  fullListName +="/";
+  fullListName +=listOfMacros;
 
   const char* tmpLines = "/tmp/nLines.txt";
   TString myCount("/usr/bin/wc -l ");
@@ -311,8 +307,6 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   TString myRm("/bin/rm ");
   myRm += tmpLines;
   gSystem->Exec(myRm.Data()); 
-
-  cout << "mycount: " << myCount << endl;
 
   cout << "Number of macros in list: " << nMacros << endl;
   nMacros = TMath::Min(nMacros,nMacrosMax);
@@ -380,6 +374,15 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	printf("Reading macro: %s\n",fullNameMacro.Data());
 	
 	char* sdatetime=strstr(nameMacro,".");  sdatetime++;
+	TString tsdatetime(sdatetime);
+	tsdatetime = tsdatetime.ReplaceAll(".C","");
+	tsdatetime = tsdatetime.ReplaceAll("."," ");
+	tsdatetime = tsdatetime.Insert(4,"-");
+	tsdatetime = tsdatetime.Insert(7,"-");
+	tsdatetime = tsdatetime.Insert(13,":");
+	tsdatetime = tsdatetime.Insert(16,":");
+	sdatetime = tsdatetime.Data();
+
 	mgr->setRequestTime(sdatetime);
 	uidatetime = mgr->getUnixRequestTime();
 	cout << sdatetime << " " << uidatetime << endl;
@@ -531,6 +534,14 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	    printf("Reading macro: %s\n",fullNameMacro.Data());
 	  
 	    char* sdatetime=strstr(nameMacro,".");  sdatetime++;
+	    TString tsdatetime(sdatetime);
+	    tsdatetime = tsdatetime.ReplaceAll(".C","");
+	    tsdatetime = tsdatetime.ReplaceAll("."," ");
+	    tsdatetime = tsdatetime.Insert(4,"-");
+	    tsdatetime = tsdatetime.Insert(7,"-");
+	    tsdatetime = tsdatetime.Insert(13,":");
+	    tsdatetime = tsdatetime.Insert(16,":");
+	    sdatetime = tsdatetime.Data();
 	    mgr->setRequestTime(sdatetime);
 	    uidatetime = mgr->getUnixRequestTime();
 	    cout << "sdatetime=" << sdatetime << " uidatetime=" << uidatetime << endl;
@@ -642,6 +653,14 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	  case 0:
 	    dm->SetInputFileName(fullNameMacro.Data());
 	    char* sdatetime=strstr(nameMacro,".");  sdatetime++;
+	    TString tsdatetime(sdatetime);
+	    tsdatetime = tsdatetime.ReplaceAll(".C","");
+	    tsdatetime = tsdatetime.ReplaceAll("."," ");
+	    tsdatetime = tsdatetime.Insert(4,"-");
+	    tsdatetime = tsdatetime.Insert(7,"-");
+	    tsdatetime = tsdatetime.Insert(13,":");
+	    tsdatetime = tsdatetime.Insert(16,":");
+	    sdatetime = tsdatetime.Data();
 	    dm->SetDateTime(sdatetime);
 	    cout << "Loading " << fullNameMacro.Data() << " ... ";	  
 	    if(dm->WriteDataToDB()==1){
