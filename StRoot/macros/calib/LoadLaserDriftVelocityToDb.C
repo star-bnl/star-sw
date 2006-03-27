@@ -301,6 +301,8 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   myCount += " > "; 
   myCount += tmpLines;
 
+  cout << "Executing: " << myCount.Data() << endl;
+
   gSystem->Exec(myCount.Data());
   ifstream dvc(tmpLines);
   dvc >> nMacros;
@@ -348,7 +350,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   StDbManager* mgr=StDbManager::Instance();
   
   
-  const int maxDeltaT=120;  // Time 2 separate 2 runs
+  const int maxDeltaT=120;     // Time 2 separate 2 runs
   const int maxFilesInRun=30;  // Maximum number of files in run
   const int minFilesInRun=5;   // Minimum number of files in run 
 
@@ -364,7 +366,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   // Loop over macros
   for(int iMacro=0; iMacro<nMacros; iMacro++){
     if (!feof(theList)){
-      cout << "iMacro = " << iMacro << endl;
+      cout << "\n" << "iMacro = " << iMacro << endl;
       macroStatus[iMacro]=6; // Base status
       fscanf(theList,"%s",&nameMacro);
       if(strstr(nameMacro,baseName)){
@@ -385,9 +387,9 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 
 	mgr->setRequestTime(sdatetime);
 	uidatetime = mgr->getUnixRequestTime();
-	cout << sdatetime << " " << uidatetime << endl;
+	cout << " " << sdatetime << " " << uidatetime << endl;
 	if (uidatetime == 0){
-	  cout << "Macro error " << endl;
+	  cout << " Macro error " << endl;
 	  return;
 	}
 
@@ -395,7 +397,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	gROOT->LoadMacro(fullNameMacro.Data());
 	tpcDV = (St_tpcDriftVelocity*)CreateTable();
 	if(tpcDV && tpcDV->HasData()) {
-	  cout << "Macro succesfully loaded" << endl;
+	  cout << " Macro succesfully loaded" << endl;
 	  
 	  tpcDVs = (tpcDriftVelocity_st*)tpcDV->At(0);
 	  
@@ -405,7 +407,7 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	  xLaserDVW[iMacro]=uidatetime;
 	  yLaserDVW[iMacro]=tpcDVs->laserDriftVelocityWest;
 	  
-	  cout << "Laser Drift Velocity East: " <<tpcDVs->laserDriftVelocityEast << endl;
+	  cout << " Laser Drift Velocity East: " <<tpcDVs->laserDriftVelocityEast << endl;
 	  
 	  //
 	  // Good DV selection starts here
@@ -413,19 +415,21 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 
 	  // Need to select all macros in one laser run
 	  // First macro in run
-	  if (nInRun==0){
-	    lastTime = uidatetime;
-	  }
-	  if ((uidatetime-lastTime)<maxDeltaT && nInRun<maxFilesInRun ){ // A macro of the current run
-	    
+	  if (nInRun==0){   lastTime = uidatetime;}
+
+	  if ((uidatetime-lastTime)<maxDeltaT && nInRun<maxFilesInRun ){ 
+	    // A macro of the current run
+	    cout << " Delta time passed & not enough count " 
+		 << nInRun << " <=> " << maxFilesInRun << " yet" << endl;
 	    runMacro[nInRun]=iMacro;
 	    runTime[nInRun]=uidatetime;
 	    runDVE[nInRun]=tpcDVs->laserDriftVelocityEast;
 	    
 	    nInRun++;
 	    lastTime = uidatetime;
-	  }
-	  else if (nInRun>=minFilesInRun-1){ // Have all macros for run, check if enough
+
+	  } else if (nInRun>=minFilesInRun-1){ 
+	    // Have all macros for run, check if enough
 	    nTryToKeep++;
 	    int keepIt = getDVInRun(nInRun,runMacro,runTime,runDVE);
 	    if (keepIt!=-1) {
@@ -447,9 +451,10 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	    runDVE[nInRun]=tpcDVs->laserDriftVelocityEast;
 	    nInRun++;
 	    lastTime = uidatetime;	  
-	  }
-	  else { // not enough
-	    cout << "Not Enough macros!" << endl;
+
+	  } else { 
+	    // not enough
+	    cout << " Not Enough macros!" << nInRun << " " << minFilesInRun << endl;
 	    for (int iInRun=0; iInRun<nInRun; iInRun++){
 	      macroStatus[runMacro[iInRun]]=1; // Not Enough Macros in Run
 	      runMacro[nInRun]=0;
@@ -469,6 +474,9 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
       }
     }
   } // End loop over macros
+
+
+  cout << "\n" << "Processing information" << endl;
   if (nInRun>=minFilesInRun-1){ // Have all macros for run, check if enough
     nTryToKeep++;
     int keepIt = getDVInRun(nInRun,runMacro,runTime,runDVE);
@@ -483,15 +491,16 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 	macroStatus[runMacro[iInRun]]=2; // No good macro to keep found
       }
     }
-  }
-  else {
-    cout << "Not Enough macros!" << endl;
+
+  } else {
+    cout << "We concluded we do not have Enough macros at this stage" << endl;
     for (int iInRun=0; iInRun<nInRun; iInRun++){
       macroStatus[runMacro[iInRun]]=1; // Not Enough Macros in Run
     }
   }
 
-  cout << "Selected " << nMacroToKeep << " out of " << nTryToKeep << " runs with enough macros." << endl;
+  cout << "Selected " << nMacroToKeep << " out of " << nTryToKeep 
+       << " runs with enough macros." << endl;
 
   TString LoadDone(dirName);    LoadDone   +="/Load/Done/";
   TString LoadFailed(dirName);  LoadFailed +="/Load/Failed/";
