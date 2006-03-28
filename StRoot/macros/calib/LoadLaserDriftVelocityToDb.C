@@ -301,6 +301,12 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
   myCount += " > "; 
   myCount += tmpLines;
 
+
+  // Change XML config ahead
+  TString StDbServerEnv("/star/u/starreco/dbServers_robinson.xml");
+  gSystem->Setenv("STDB_SERVERS",StDbServerEnv.Data());
+
+
   cout << "Executing: " << myCount.Data() << endl;
 
   gSystem->Exec(myCount.Data());
@@ -635,9 +641,6 @@ void LoadLaserDriftVelocityToDb(const char* dirName, const char* listOfMacros, c
 //   TString CheckVarSel(dirName); CheckVarSel+="/Check/VarSel/";
 //   TString CheckVarOth(dirName); CheckVarOth+="/Check/VarOth/";
 
-    // Change XML config
-    TString StDbServerEnv("/star/u/starreco/dbServers_robinson.xml");
-    gSystem->Setenv("STDB_SERVERS",StDbServerEnv.Data());
 
     // --> create a modifier object and set up table definitions  
     StDbModifier *dm = new StDbModifier();
