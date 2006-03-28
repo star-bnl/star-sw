@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.27 2002/01/29 20:03:08 genevb Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.28 2006/03/28 02:04:42 genevb Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.28  2006/03/28 02:04:42  genevb
+// Allow non-PostScript output
+//
 // Revision 1.27  2002/01/29 20:03:08  genevb
 // Switched default dir from QA to EventQA
 //
@@ -202,7 +205,7 @@ void bfcread_hist_to_ps(
 //    gStyle->SetOptStat(111111);
 
     HU->SetHistsNamesDraw("*","*");
-    HU->SetPostScriptFile(psFile);
+    HU->SetOutFile(psFile);
     HU->SetZones(ZoneH,ZoneV);
     HU->SetPaperSize();
     HU->SetDefaultLogXList(MakerHistDir);
