@@ -319,7 +319,8 @@ void MySQLAppender::flushBuffer()
 			const LoggingEventPtr& logEvent = *i;
 			String sql;  
          
-         expandCommand ="INSERT DELAYED IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser) VALUES  ( DEFAULT, \"$REQUESTID\", \"$PROCESSID\",\"$HOSTNAME\",\"$USER\");";
+         expandCommand ="INSERT DELAYED IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser,JobName,MetaJobCreator,MetaJobUser)"
+         " VALUES  ( DEFAULT, \"$REQUESTID\", \"$PROCESSID\",\"$HOSTNAME\",\"$USER\",\"$SUMS_JOBNAME\",\"$SUMS_USER\",\"$SUMS_AUTHENTICATED_USER\");";
 // Edit meta symbnols
 //-----------------------
 //  $hostid        = $HOSTNAME            
@@ -332,6 +333,9 @@ void MySQLAppender::flushBuffer()
          ReplaceVariable(expandCommand, "REQUESTID");
          ReplaceVariable(expandCommand, "PROCESSID");
          
+         ReplaceVariable(expandCommand, "SUMS_JOBNAME");
+         ReplaceVariable(expandCommand, "SUMS_USER");
+         ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
          sql = expandCommand.Data();
 			execute(sql);
          
