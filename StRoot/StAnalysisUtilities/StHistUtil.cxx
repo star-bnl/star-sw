@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.25 2005/04/19 15:14:17 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.26 2006/03/28 01:58:38 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.26  2006/03/28 01:58:38  genevb
+// Allow PDF (and other) output formats (was only PostScript)
+//
 // Revision 2.25  2005/04/19 15:14:17  genevb
 // Slight reordering of some FTPC code on user ranges in radial hists
 //
@@ -94,7 +97,6 @@
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "TObjString.h"
-#include "TPostScript.h"
 #include "TMath.h"
 #include "TString.h"
 #include "TPaveLabel.h"
@@ -145,6 +147,7 @@ StHistUtil::StHistUtil(){
   m_HistCanvas = 0;
   debug = kFALSE;
   m_CurPrefix = -1;
+  m_OutType = "ps"; // postscript output by default
 
   maxHistCopy = 512;
   newHist = new TH1ptr[maxHistCopy];
@@ -174,7 +177,28 @@ StHistUtil::~StHistUtil(){
 //   }
 }
 //_____________________________________________________________________________
-Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
+void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
+  m_OutFileName = fileName;
+  if (type) {
+    m_OutType = type;
+  } else {
+    if (m_OutFileName.EndsWith(".ps")) m_OutType="ps";
+    else if (m_OutFileName.EndsWith(".pdf")) m_OutType="pdf";
+  }
+}
+//_____________________________________________________________________________
+void StHistUtil::CloseOutFile() {
+  m_HistCanvas->Modified();
+  m_HistCanvas->Update();
+  if (!m_CurFileName.IsNull()) {
+    m_HistCanvas->Print(m_CurFileName.Append(")").Data(),
+      m_OutType.Data());
+  } else {
+    cout << "StHistUtil::CloseOutFile(): No output file" << endl;
+  }
+}
+//_____________________________________________________________________________
+Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
 // Method to determine appropriate PostScript file for output
 
   // Figure out appropriate prefix index
@@ -188,20 +212,20 @@ Bool_t StHistUtil::CheckPSFile(const Char_t *histName) {
   }
 
   if (newPrefix != m_CurPrefix) {
+    CloseOutFile();
     m_CurPrefix = newPrefix;
-    m_CurFileName = m_PsFileName;
-    Ssiz_t insertPos = m_CurFileName.Index(".ps");
-    if (insertPos < 0) {          // No .ps suffix in file name
+    m_CurFileName = m_OutFileName;
+    TString suffix = m_OutType.Data();
+    suffix.Prepend(".");
+    Ssiz_t insertPos = m_CurFileName.Index(suffix);
+    if (insertPos < 0) {          // No type suffix in file name
       m_CurFileName.Append(possiblePrefixes[m_CurPrefix]);
-      m_CurFileName.Append(".ps");
+      m_CurFileName.Append(suffix);
     } else {
       m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
     }
-    if (!m_PsFileName.IsNull()) {
-      if (psf) psf->Close();
-      else psf = new TPostScript();
-      psf->Open(m_CurFileName.Data());
-    }
+    m_CurFileName.Append("(");
+
     Ldesc->Clear();
     Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
     Ldesc->AddText("Hists");
@@ -215,10 +239,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 // Plot the selected  histograms and generate the postscript file as well 
   
   cout << " **** Now in StHistUtil::DrawHists  **** " << endl;
-
-
-  // set output ps file name
-  psf = 0;
 
 
   //set Style of Plots
@@ -235,8 +255,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 
   // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
   //                                        (600 x 780                US      )
-  //  TCanvas *HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
-  TCanvas *HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",600,780);
+  //  TCanvas *m_HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
+  m_HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",600,780);
 
   // write title at top of canvas - first page
   Ltitle = new TPaveLabel(0.08,0.96,0.88,1.0,m_GlobalTitle.Data(),"br");
@@ -323,23 +343,31 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    histCounter,obj->ClassName(),oname, obj->GetTitle());
 
           // Switch to a new page...............................
-	  if (CheckPSFile(oname)) {
+	  if (CheckOutFile(oname)) {
 	    padCount = numPads;
 	    Ipagenum = 0;
 	  }
           if (padCount == numPads) {
-            if (psf) psf->NewPage();
+            // must redraw the histcanvas for each new page!
+            m_HistCanvas->Modified();
+            m_HistCanvas->Update();
+	    if (Ipagenum>0 && !m_CurFileName.IsNull()) {
+	      m_HistCanvas->Print(m_CurFileName.Data(),
+	        m_OutType.Data());
+	      m_CurFileName.ReplaceAll("(",0);
+            } else {
+	      m_HistCanvas->Draw();
+	    }
+
+	    while (padCount > 0) graphPad->GetPad(padCount--)->Clear();
 
             // update the page number
             Ipagenum++;
             sprintf(Ctmp,"%d",Ipagenum);
             Lpage->SetLabel(Ctmp);
 
-            // must redraw the histcanvas for each new page!
-            HistCanvas->Modified();
-            HistCanvas->Update();
-            padCount=0;
           }
+
           // go to next pad 
           graphPad->cd(++padCount);
 //NOTE! (13jan00,kt) -->  this cd is really acting on gPad!!!
@@ -483,11 +511,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
     }
   }
 
-  if (psf) {
-    psf->Close();
-    delete psf;
-    psf = 0;
-  } else cout << "StHistUtil::Draw(): No PostScript output" << endl;
+  CloseOutFile();
   return histCounter;
 }
  

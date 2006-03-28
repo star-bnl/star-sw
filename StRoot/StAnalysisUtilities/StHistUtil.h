@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.2 2002/09/06 02:51:34 genevb Exp $
+// $Id: StHistUtil.h,v 2.3 2006/03/28 01:58:39 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.3  2006/03/28 01:58:39  genevb
+// Allow PDF (and other) output formats (was only PostScript)
+//
 // Revision 2.2  2002/09/06 02:51:34  genevb
 // Remove limit on maximum number of histograms that can be copied
 //
@@ -37,7 +40,6 @@ class StMaker;
 class TPaveLabel;
 class TPaveText;
 class TDatime;
-class TPostScript;
 
 class StHistUtil {
 
@@ -50,9 +52,9 @@ class StHistUtil {
   Int_t   m_PaperHeight; // Paper size in cm
   TString m_FirstHistName;
   TString m_LastHistName;
-  TString m_PsFileName;  // Name of the PostScipt file to plot hist's out
-  TString m_CurFileName; // Name of the current PostScript file
-  TPostScript* psf;      //! Pointer to the current PostScript file
+  TString m_OutFileName; // Base name of the output file to plot hists out
+  TString m_CurFileName; // Name of the current output file
+  TString m_OutType;    // Output file type ("ps","pdf",...)
   Int_t   m_CurPrefix;
   TString m_GlobalTitle; // Title at top of each page of output
   TPaveLabel* Ltitle;   //! PaveLabel with title for pages
@@ -67,7 +69,8 @@ class StHistUtil {
 
 
  protected:
-  virtual Bool_t  CheckPSFile(const Char_t* histName);
+  virtual void    CloseOutFile();
+  virtual Bool_t  CheckOutFile(const Char_t* histName);
 
 
  public: 
@@ -106,6 +109,8 @@ class StHistUtil {
   // SetPaperSize -->  A4 is 20,26  US letter is 20,24
   void SetPaperSize(Int_t width=20, Int_t height=24); 
   void SetPostScriptFile(const Char_t *psFileName="");
+  void SetPDFFile(const Char_t *pdfFileName="");
+  void SetOutFile(const Char_t *fileName="", const Char_t* type=0);//"ps","pdf"
   void SetPntrToMaker(StMaker *m1);
   void SetGlobalTitle(const Char_t *globalTitle="");
   TH1** getNewHist();
@@ -113,7 +118,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.2 2002/09/06 02:51:34 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.3 2006/03/28 01:58:39 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
@@ -128,7 +133,10 @@ inline void StHistUtil::SetPaperSize(Int_t width, Int_t height)
   { m_PaperWidth = width; m_PaperHeight = height;}
 
 inline void StHistUtil::SetPostScriptFile(const Char_t *psFileName)
-  { m_PsFileName = psFileName;}
+  { SetOutFile(psFileName,"ps"); }
+
+inline void StHistUtil::SetPDFFile(const Char_t *pdfFileName)
+  { SetOutFile(pdfFileName,"pdf"); }
 
 inline void StHistUtil::SetPntrToMaker(StMaker *m1) 
   {m_PntrToMaker = m1;}
