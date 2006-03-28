@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.26 2006/03/28 01:58:38 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.27 2006/03/28 21:35:31 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.27  2006/03/28 21:35:31  genevb
+// Single page output capability for eps,jpg,png,gif,tiff,etc. [see TPad::Print()]
+//
 // Revision 2.26  2006/03/28 01:58:38  genevb
 // Allow PDF (and other) output formats (was only PostScript)
 //
@@ -148,6 +151,7 @@ StHistUtil::StHistUtil(){
   debug = kFALSE;
   m_CurPrefix = -1;
   m_OutType = "ps"; // postscript output by default
+  m_OutMultiPage = kTRUE;
 
   maxHistCopy = 512;
   newHist = new TH1ptr[maxHistCopy];
@@ -183,16 +187,39 @@ void StHistUtil::SetOutFile(const Char_t *fileName, const Char_t* type) {
     m_OutType = type;
   } else {
     if (m_OutFileName.EndsWith(".ps")) m_OutType="ps";
+    else if (m_OutFileName.EndsWith(".eps")) m_OutType="eps";
+    else if (m_OutFileName.EndsWith(".epsf")) m_OutType="Preview";
     else if (m_OutFileName.EndsWith(".pdf")) m_OutType="pdf";
+    else if (m_OutFileName.EndsWith(".jpg")) m_OutType="jpg";
+    else if (m_OutFileName.EndsWith(".jpeg")) m_OutType="jpg";
+    else if (m_OutFileName.EndsWith(".gif")) m_OutType="gif";
+    else if (m_OutFileName.EndsWith(".tif")) m_OutType="tiff";
+    else if (m_OutFileName.EndsWith(".tiff")) m_OutType="tiff";
+    else if (m_OutFileName.EndsWith(".svg")) m_OutType="svg";
+    else if (m_OutFileName.EndsWith(".xpm")) m_OutType="xpm";
+    else if (m_OutFileName.EndsWith(".png")) m_OutType="png";
+    else {
+      cout << "SetHistUtil::SetOutFile(): unknown type, assuming ps" << endl;
+      m_OutType = "ps";
+      m_OutFileName.Append(".ps");
+    }
   }
+
+  // Multipage output for ps,pdf
+  m_OutMultiPage = !(m_OutType.CompareTo("ps")
+                  && m_OutType.CompareTo("pdf") );
+  if (m_OutMultiPage)
+    cout << "StHistUtil::SetOutFile(): Multipage output" << endl;
+  else
+    cout << "StHistUtil::SetOutFile(): Single page output" << endl;
 }
 //_____________________________________________________________________________
 void StHistUtil::CloseOutFile() {
   m_HistCanvas->Modified();
   m_HistCanvas->Update();
   if (!m_CurFileName.IsNull()) {
-    m_HistCanvas->Print(m_CurFileName.Append(")").Data(),
-      m_OutType.Data());
+    if (m_OutMultiPage) m_CurFileName.Append(")");
+    m_HistCanvas->Print(m_CurFileName.Data(),m_OutType.Data());
   } else {
     cout << "StHistUtil::CloseOutFile(): No output file" << endl;
   }
@@ -215,16 +242,11 @@ Bool_t StHistUtil::CheckOutFile(const Char_t *histName) {
     CloseOutFile();
     m_CurPrefix = newPrefix;
     m_CurFileName = m_OutFileName;
-    TString suffix = m_OutType.Data();
-    suffix.Prepend(".");
-    Ssiz_t insertPos = m_CurFileName.Index(suffix);
-    if (insertPos < 0) {          // No type suffix in file name
-      m_CurFileName.Append(possiblePrefixes[m_CurPrefix]);
-      m_CurFileName.Append(suffix);
-    } else {
-      m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
-    }
-    m_CurFileName.Append("(");
+    Ssiz_t insertPos = m_CurFileName.Last('.');
+    if (insertPos<0) insertPos = m_CurFileName.Length();
+    if (m_OutMultiPage) m_CurFileName.Append("(");
+    else m_CurFileName.Insert(insertPos,"_");
+    m_CurFileName.Insert(insertPos,possiblePrefixes[m_CurPrefix]);
 
     Ldesc->Clear();
     Ldesc->AddText(possibleSuffixes[m_CurPrefix]);
@@ -354,7 +376,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    if (Ipagenum>0 && !m_CurFileName.IsNull()) {
 	      m_HistCanvas->Print(m_CurFileName.Data(),
 	        m_OutType.Data());
-	      m_CurFileName.ReplaceAll("(",0);
+	      m_CurFileName.ReplaceAll("(",0); // doesn't hurt to do > once
             } else {
 	      m_HistCanvas->Draw();
 	    }
@@ -366,6 +388,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             sprintf(Ctmp,"%d",Ipagenum);
             Lpage->SetLabel(Ctmp);
 
+	    if (!m_OutMultiPage && !m_CurFileName.IsNull()) {
+              Ssiz_t last_us = m_CurFileName.Last('_') + 1;
+              Ssiz_t lastdot = m_CurFileName.Last('.') - last_us;
+              m_CurFileName.Replace(last_us,lastdot,Form("%d",Ipagenum));
+	    }
           }
 
           // go to next pad 
