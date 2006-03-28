@@ -1,6 +1,10 @@
-* $Id: svttgeo7.g,v 1.1 2006/03/28 16:58:13 potekhin Exp $
+* $Id: svttgeo7.g,v 1.2 2006/03/28 20:25:33 potekhin Exp $
 *
 * $Log: svttgeo7.g,v $
+* Revision 1.2  2006/03/28 20:25:33  potekhin
+* Added a printout of ladder numbering as per volume_id,
+* and zeroed out the theta in the second shell
+*
 * Revision 1.1  2006/03/28 16:58:13  potekhin
 * We will experiment with SVT alignment going forward,
 * and to properly steer it from geometry.g without too
@@ -104,7 +108,7 @@ Module  SVTTGEO7  is extension of the SVTTGEO6: clamshells and distortions
 
       Real           xDisp, yDisp, aDisp
 
-      Integer        i_phi
+      Integer        i_phi, checkRez, foo, lsub
 
 *******************************************************************************
 * Turns out it's more convenient to store these here:
@@ -813,7 +817,7 @@ Block SLYD is a single SVT layer
           if(iPos.le.(svtl_Nladder/2)) then
               xDisp=0.023
               yDisp=0.010
-              aDisp=0.200
+              aDisp=0.000
           endif
 
           if(iPos.gt.(svtl_Nladder/2)) then
@@ -821,6 +825,15 @@ Block SLYD is a single SVT layer
               yDisp=-0.015
               aDisp=0.000
           endif
+
+          lsub    = mod(iLayer-1,2)
+
+          checkRez =  svtl_Nladder*2.0-(iPos-1)*2-lsub
+
+          foo =  svtl_Nladder
+
+          write(*,*) ' SVT Positioning: iPos',iPos,'  lsub: ', _
+          lsub,' svtl_Nladder: ',foo,' result: ',  checkRez
 
           Position SLSD X=xDisp, _
                         Y=yDisp, _
