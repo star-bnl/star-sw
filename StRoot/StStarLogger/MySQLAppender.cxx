@@ -300,7 +300,7 @@ void ReplaceVariable(TString &string, const char *var)
 
    if (varValue) {
       TString fullName = "$";  fullName += var;
-      fullName.ToUpper();
+      // fullName.ToUpper();
       string.ReplaceAll(fullName,varValue);
    }
 }
@@ -309,42 +309,87 @@ void MySQLAppender::flushBuffer()
 {
 	//Do the actual logging
 	//removes.ensureCapacity(buffer.size());
-
+   static bool TaskEntryDone = false;
 	std::list<spi::LoggingEventPtr>::iterator i;
 	for (i = buffer.begin(); i != buffer.end(); i++)
 	{
 	  TString expandCommand;
- 	  try
-		{
-			const LoggingEventPtr& logEvent = *i;
-			String sql;  
+     if (!TaskEntryDone) {
+   	  try
+	  	  {
+			  const LoggingEventPtr& logEvent = *i;
+			  String sql;  
          
-         expandCommand ="INSERT DELAYED IGNORE  JobDescription (dataId, jobID_MD5, processID, node, JobUser,JobName,MetaJobCreator,MetaJobUser)"
-         " VALUES  ( DEFAULT, \"$REQUESTID\", \"$PROCESSID\",\"$HOSTNAME\",\"$USER\",\"$SUMS_JOBNAME\",\"$SUMS_USER\",\"$SUMS_AUTHENTICATED_USER\");";
-// Edit meta symbnols
+///--- Task description         
+         
+         expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
+         " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"Test Task\",\"$SUMS_AUTHENTICATED_USER\");";
+// Edit meta symbols
 //-----------------------
 //  $hostid        = $HOSTNAME            
 //  $JobUser       = $USER
 //  $SUMSJobId     = $REQUESTID 
 //  $SUMSProcessID = $PROCESSID
 
-         ReplaceVariable(expandCommand, "USER");
-         ReplaceVariable(expandCommand, "HOSTNAME");
-         ReplaceVariable(expandCommand, "REQUESTID");
-         ReplaceVariable(expandCommand, "PROCESSID");
+           ReplaceVariable(expandCommand, "REQUESTID");
+           ReplaceVariable(expandCommand, "SUMS_nProcesses");
+           ReplaceVariable(expandCommand, "SUBMIT_TIME");
+           
+           ReplaceVariable(expandCommand, "SUMS_name");
+           ReplaceVariable(expandCommand, "SUMS_USER");
+           ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
+           sql = expandCommand.Data();
+           TaskEntryDone = true;
+		  	  execute(sql);
+        }
          
-         ReplaceVariable(expandCommand, "SUMS_JOBNAME");
-         ReplaceVariable(expandCommand, "SUMS_USER");
-         ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
-         sql = expandCommand.Data();
-			execute(sql);
-         
-		}
-		catch (SQLException& e)
-		{
-			errorHandler->error(_T("Failed to excute sql"), e,
-				ErrorCode::FLUSH_FAILURE);
-		}
+		  catch (SQLException& e)
+		  {
+	        TaskEntryDone = false;
+			  errorHandler->error(_T("Failed to execute TaskDescription sql"), e,
+				  ErrorCode::FLUSH_FAILURE);
+		  }
+   	  try
+	  	  {
+			  const LoggingEventPtr& logEvent = *i;
+			  String sql;  
+//--- Job description         
+
+         expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
+
+         expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
+                           expandCommand += ", ";                  
+         expandCommand += "jobID_MD5=\"$REQUESTID\"";
+                           expandCommand += ", ";
+         expandCommand += "processID=\"$PROCESSID\"";
+                           expandCommand += ", ";
+         expandCommand +=  "node=\"$HOSTNAME\"";
+                           expandCommand += ", ";
+         expandCommand +=  "JobUser=\"$USER\"";
+                           expandCommand += "; ";
+// Edit meta symbols
+//-----------------------
+//  $hostid        = $HOSTNAME            
+//  $JobUser       = $USER
+//  $SUMSJobId     = $REQUESTID 
+//  $SUMSProcessID = $PROCESSID
+
+           ReplaceVariable(expandCommand, "USER");
+           ReplaceVariable(expandCommand, "HOSTNAME");
+           ReplaceVariable(expandCommand, "REQUESTID");
+           ReplaceVariable(expandCommand, "PROCESSID");
+           sql = expandCommand.Data();
+           TaskEntryDone = true;
+			  execute(sql);
+ 		  }
+		  catch (SQLException& e)
+		  {
+	        TaskEntryDone = false;
+  		       errorHandler->error(_T("Failed to execute JobDescription sql"), e,
+				  ErrorCode::FLUSH_FAILURE);
+		  }
+
+      }
       // -------------------
   		try
 		{
