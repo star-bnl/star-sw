@@ -29,6 +29,7 @@
  of the StChain object to create a Root Tree (not yet implemented).   
                                                                       
 */
+#define   STAR_TRACKING 1
 
 
 #include <stdlib.h>
@@ -161,8 +162,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.53 2006/02/05 01:41:23 fine Exp $
+// $Id: StChain.cxx,v 1.54 2006/03/28 02:09:19 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.54  2006/03/28 02:09:19  fine
+// Add SIMS_USER SUMS_AUTHENTICATED_USER SUMS_JOBNAME
+//
 // Revision 1.53  2006/02/05 01:41:23  fine
 // Add the tracking information from the STAR chain
 //

@@ -1,4 +1,4 @@
-# $Id: CreateJobTable.sql,v 1.7 2006/02/05 01:41:24 fine Exp $
+# $Id: CreateJobTable.sql,v 1.8 2006/03/28 02:09:19 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -10,8 +10,10 @@ CREATE TABLE JobDescription (
                  time            TIMESTAMP                                 COMMENT 'Current time'   ,
                  node            VARCHAR(32)                               COMMENT 'Computer name'  ,  
                  JobUser         CHAR(20)                                  COMMENT 'User name $USER',
-                 JobName         CHAR(20)                                  COMMENT 'Job name'       ,
+                 JobName         CHAR(20)                                  COMMENT 'Job name SUMS_JOBNAME' ,
                  JobDescription  CHAR(20)                                  COMMENT 'Job descriptor',
+                 MetaJobCreator  CHAR(20)                                  COMMENT 'user name, from SUMS_USER'  ,
+                 MetaJobUser     CHAR(20)                                  COMMENT 'user name (from GRID certificate), from SUMS_AUTHENTICATED_USER',
                  CONSTRAINT UNIQUE INDEX JobId (jobID_MD5, processID )
                  );
 CREATE TABLE JobTracking (
@@ -28,7 +30,7 @@ CREATE TABLE JobTracking (
                  StepContext     CHAR(10)                           COMMENT 'Event context'  ,  #Field name 
                  MessageId       ENUM('=')              NULL        COMMENT 'Extra message flag',
                  ProgrammMessage VARCHAR(120)                       COMMENT 'Extra Message'  ,
-                CONSTRAINT UNIQUE INDEX JobId (dataId)
+                 CONSTRAINT UNIQUE INDEX JobId (dataId)
                 );
 SHOW tables;
 DESCRIBE  JobDescription;
