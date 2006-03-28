@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.3 2006/03/28 01:58:39 genevb Exp $
+// $Id: StHistUtil.h,v 2.4 2006/03/28 21:35:32 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.4  2006/03/28 21:35:32  genevb
+// Single page output capability for eps,jpg,png,gif,tiff,etc. [see TPad::Print()]
+//
 // Revision 2.3  2006/03/28 01:58:39  genevb
 // Allow PDF (and other) output formats (was only PostScript)
 //
@@ -54,7 +57,8 @@ class StHistUtil {
   TString m_LastHistName;
   TString m_OutFileName; // Base name of the output file to plot hists out
   TString m_CurFileName; // Name of the current output file
-  TString m_OutType;    // Output file type ("ps","pdf",...)
+  TString m_OutType;    // Output file type
+  Bool_t  m_OutMultiPage; // Output file is multipage
   Int_t   m_CurPrefix;
   TString m_GlobalTitle; // Title at top of each page of output
   TPaveLabel* Ltitle;   //! PaveLabel with title for pages
@@ -107,10 +111,13 @@ class StHistUtil {
   void SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
   void SetZones(Int_t columns=2, Int_t rows=3);   
   // SetPaperSize -->  A4 is 20,26  US letter is 20,24
-  void SetPaperSize(Int_t width=20, Int_t height=24); 
+  void SetPaperSize(Int_t width=20, Int_t height=24);
+
+  // SetOutFile -->  type="ps","pdf","jpg",etc...see TPad::Print()
+  void SetOutFile(const Char_t *fileName="", const Char_t* type=0);
   void SetPostScriptFile(const Char_t *psFileName="");
   void SetPDFFile(const Char_t *pdfFileName="");
-  void SetOutFile(const Char_t *fileName="", const Char_t* type=0);//"ps","pdf"
+
   void SetPntrToMaker(StMaker *m1);
   void SetGlobalTitle(const Char_t *globalTitle="");
   TH1** getNewHist();
@@ -118,7 +125,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.3 2006/03/28 01:58:39 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.4 2006/03/28 21:35:32 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
