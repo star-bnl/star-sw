@@ -57,6 +57,11 @@ public:
     // it will work only if the algorithm used is kEmcClOld
     void SetClusterConditions(char*,Int_t, Float_t, Float_t, Float_t, Bool_t = kFALSE); ///< this is for background compatibility with the old finder
 
+    virtual const char *GetCVS() const {
+      static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.19 2006/03/29 03:20:50 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+      return cvs;
+    }
+
     ClassDef(StPreEclMaker,1)
 };
 
