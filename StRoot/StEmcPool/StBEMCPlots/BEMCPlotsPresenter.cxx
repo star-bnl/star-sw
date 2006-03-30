@@ -248,6 +248,7 @@ void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, int mDebug
 	    HistHighTowerSpectrum[jetPatch]->SetStats(0);
 	    HistHighTowerSpectrum[jetPatch]->Draw();
 	}
+	gPad->SetLogy();
     }
 }
 //-------------------------------------------------------------------
@@ -276,6 +277,7 @@ void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, int mDebu
 	    HistPatchSumSpectrum[jetPatch]->SetStats(0);
 	    HistPatchSumSpectrum[jetPatch]->Draw();
 	}
+	gPad->SetLogy();
     }
 }
 //-------------------------------------------------------------------
@@ -831,6 +833,80 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, int mDebug)
     }
 }	
 //-------------------------------------------------------------------
+void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, int mDebug) {
+    if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
+
+    TH2F *HistPsdFeeSum = (TH2F*)GetHisto(file, HistPsdFeeSumName);
+    if (!HistPsdFeeSum || (mDebug >= 2)) cout << "HistPsdFeeSum = " << HistPsdFeeSum << endl;
+    if (!pad) return;
+    pad->Clear();
+    pad->cd(0);
+    
+    // 12-19 are the grey shades dark-light
+    int linesColor = 16;
+    TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
+    c->Draw();
+    c->cd();
+    if (HistPsdFeeSum) {
+	HistPsdFeeSum->SetStats(0);
+	HistPsdFeeSum->Draw("COLZ");
+	int pmtRdo[60];
+	for (int box = 0;box < 60;box++) pmtRdo[box] = -1;
+        if(BEMCDecoderPresenter) {
+            for (int rdo = 0;rdo < 4;rdo++) {
+        	for (int index = 0;index < 4800;index++) {
+	    	    int id, box, wire, Avalue;
+		    if (BEMCDecoderPresenter->GetPsdId(rdo, index, id, box, wire, Avalue)) {
+			if ((box >= 1) && (box <= 60)) {
+			    pmtRdo[box - 1] = rdo + 8;
+			}
+		    }
+	        }
+	    }
+	}
+	int curmod = 1;
+	int currdo = -1;
+	int beginrdo = -1;
+	int endrdo = -1;
+	while (curmod <= 61) {
+//cout << "curmod = " << curmod << ", currdo = " << currdo << ", beginrdo = " << beginrdo << ", endrdo = " << endrdo << endl;
+	    if (((curmod <= 60) && (pmtRdo[curmod - 1] != currdo)) || (curmod == 61)) {
+		if ((currdo == -1) && (curmod <= 60)) {
+		    beginrdo = curmod;
+		    currdo = pmtRdo[curmod - 1];
+		    curmod++;
+		} else {
+		    endrdo = curmod - 1;
+    		    TLine *lRdoBegin = new TLine(beginrdo - 0.5, HistPsdFeeSum->GetYaxis()->GetBinLowEdge(1), beginrdo - 0.5, HistPsdFeeSum->GetYaxis()->GetBinUpEdge(HistPsdFeeSum->GetYaxis()->GetNbins()));
+    		    if (lRdoBegin) {
+	    		lRdoBegin->SetLineColor(linesColor);
+    		        lRdoBegin->SetLineWidth(1);
+			lRdoBegin->Draw();
+		    }
+    		    TLine *lRdoEnd = new TLine(endrdo + 0.5, HistPsdFeeSum->GetYaxis()->GetBinLowEdge(1), endrdo + 0.5, HistPsdFeeSum->GetYaxis()->GetBinUpEdge(HistPsdFeeSum->GetYaxis()->GetNbins()));
+    		    if (lRdoEnd) {
+	    		lRdoEnd->SetLineColor(linesColor);
+    		        lRdoEnd->SetLineWidth(1);
+			lRdoEnd->Draw();
+		    }
+    		    TString label;
+    		    label = Form("RDO %i", currdo);
+		    TLatex *text = new TLatex(beginrdo + 0.5 -0.5, 0.8 * HistPsdFeeSum->GetYaxis()->GetBinUpEdge(HistPsdFeeSum->GetYaxis()->GetNbins()), label.Data());
+		    if (text) {
+			text->SetTextColor(linesColor);
+    			text->SetTextSize(0.03);
+			text->Draw();
+		    }
+		    currdo = -1;
+		    if (curmod > 60) curmod++;
+		}
+	    } else {
+		curmod++;
+	    }
+	}
+    }
+}	
+//-------------------------------------------------------------------
 void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, int mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
@@ -906,6 +982,8 @@ void BEMCPlotsPresenter::displayTab(int tab, int panel, FileType *file, TPad *pa
 	    displaySmdFeeSum(file, pad, mDebug);
 	} else if (panel == 7) {
 	    displayTriggerCorruption(file, pad, mDebug);
+	} else if (panel == 8) {
+	    displayPsdFeeSum(file, pad, mDebug);
 	}
     }
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
