@@ -27,6 +27,8 @@ public:
     // panel=4 "DSM Level-1 Input"
     // panel=5 "DSM level-2 Input"
     // panel=6 "SMD FEE Sum"
+    // panel=7 "Trigger corruption"
+    // panel=8 "PSD FEE Sum"
     static void displayTab(int tab, int panel, FileType *file, TPad *pad, int mDebug);
     static void displayRawAdc(FileType *file, TPad *pad, int mDebug);
     static void displayJetPatchHT(FileType *file, TPad *pad, int mDebug);
@@ -36,6 +38,7 @@ public:
     static void displayL2Input(FileType *file, TPad *pad, int mDebug);
     static void displayL3Input(FileType *file, TPad *pad, int mDebug);
     static void displaySmdFeeSum(FileType *file, TPad *pad, int mDebug);
+    static void displayPsdFeeSum(FileType *file, TPad *pad, int mDebug);
     static void displayTriggerCorruption(FileType *file, TPad *pad, int mDebug);
 };
 
