@@ -1,4 +1,4 @@
-# $Id: CreateJobTable.sql,v 1.9 2006/03/28 20:17:43 fine Exp $
+# $Id: CreateJobTable.sql,v 1.10 2006/03/30 00:15:47 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -8,7 +8,7 @@ CREATE TABLE TaskDescription (
                  taskId          INT         NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Task #id',
                  jobID_MD5       VARCHAR(32) NOT NULL                      COMMENT 'SUMS $REQUESTID',
                  nProcesses      INT                                       COMMENT 'SUMS $nProcesses - the total number of the process for the task',
-                 submissionTime  TIMESTAMP                                 COMMENT 'SUMS time stampt - the time the task was created by the user with SUMS',
+                 submissionTime  DATETIME                                  COMMENT 'SUMS time stampt - the time the task was created by the user with SUMS',
                  time            TIMESTAMP                                 COMMENT 'Submission time'   ,
                  submissionNode  VARCHAR(32)                               COMMENT 'The computer node the job was submitted from'  ,  
                  TaskUser        CHAR(20)                                  COMMENT 'User name from $SUMS_USER',
