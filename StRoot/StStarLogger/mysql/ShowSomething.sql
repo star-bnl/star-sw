@@ -1,4 +1,4 @@
-# $Id: ShowSomething.sql,v 1.2 2006/03/30 19:40:17 fine Exp $
+# $Id: ShowSomething.sql,v 1.3 2006/03/30 19:47:01 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
  use logger;
@@ -49,12 +49,17 @@ SELECT  JobDescription.taskId, COUNT(*) AS completed_jobs
  
  # --- Print the number of the completed tasks
 
-SELECT TaskDescription.TaskUser, TaskDescription.jobID_MD5,TaskDescription.nProcesses,tbl.completed_jobs
+SELECT TaskDescription.TaskUser AS 'Task Owner'
+     , TaskDescription.jobID_MD5  ' Task ID'
+     , TaskDescription.nProcesses AS 'Ordered jobs'
+     , TaskDescription.submissionTime AS Submitted
+     , tbl.FinishedTime AS 'Completed by'
+     , tbl.completed_jobs ' Total Jobs'
 FROM  TaskDescription, 
-   ( SELECT  JobDescription.taskId, COUNT(*) AS completed_jobs
+   ( SELECT  JobDescription.taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
-  WHERE  completed_jobs =  TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
+  WHERE  completed_jobs = TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
  
  # --- Print the number of the uncompleted tasks
 
@@ -62,9 +67,10 @@ SELECT TaskDescription.TaskUser
      , TaskDescription.jobID_MD5
      , TaskDescription.nProcesses
      , TaskDescription.submissionTime As Submitted
-     , tbl.completed_jobs
+     , tbl.completed_jobs as 'Done'
+     , TaskDescription.nProcesses-tbl.completed_jobs as 'to be done yet'
 FROM  TaskDescription, 
-   ( SELECT  JobDescription.taskId, JobTracking.time as FinishedTime COUNT(*) AS completed_jobs
+   ( SELECT  JobDescription.taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE  completed_jobs <> TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
