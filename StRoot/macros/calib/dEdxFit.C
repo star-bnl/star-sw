@@ -427,7 +427,7 @@ TH2D *GetRelYZError(TH3 *hist, const Char_t *Name="_yz") {
   for (int iybin=0;iybin<ny;iybin++){
     for (int izbin=0;izbin<nz;izbin++){
       Double_t cont = 0, err = 0;
-      for (int ixbin=1;ixbin<nx;ixbin++){
+      for (int ixbin=1;ixbin<=nx;ixbin++){
 	bin = hist->GetBin(ixbin,iybin,izbin);
 	cont += hist->GetBinContent(bin);
 	err  += hist->GetBinError(bin)*hist->GetBinError(bin);
