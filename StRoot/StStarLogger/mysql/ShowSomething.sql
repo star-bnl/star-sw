@@ -1,4 +1,4 @@
-# $Id: ShowSomething.sql,v 1.1 2006/03/30 19:37:55 fine Exp $
+# $Id: ShowSomething.sql,v 1.2 2006/03/30 19:40:17 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
  use logger;
@@ -56,11 +56,15 @@ FROM  TaskDescription,
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE  completed_jobs =  TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
  
-  # --- Print the number of the uncompleted tasks
+ # --- Print the number of the uncompleted tasks
 
-SELECT TaskDescription.TaskUser, TaskDescription.jobID_MD5,TaskDescription.nProcesses,tbl.completed_jobs
+SELECT TaskDescription.TaskUser
+     , TaskDescription.jobID_MD5
+     , TaskDescription.nProcesses
+     , TaskDescription.submissionTime As Submitted
+     , tbl.completed_jobs
 FROM  TaskDescription, 
-   ( SELECT  JobDescription.taskId, COUNT(*) AS completed_jobs
+   ( SELECT  JobDescription.taskId, JobTracking.time as FinishedTime COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE  completed_jobs <> TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
