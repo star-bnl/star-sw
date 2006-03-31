@@ -1,4 +1,6 @@
 #############################################################################
+#            Removed references to STAF 20060331 --maxim--                  #
+#############################################################################
 #  This makefile describes rules to create a chared library for a modules   #
 #############################################################################
 #.SILENT:
@@ -297,7 +299,7 @@ INC_ALL   := -I$(INC_DIR2)
 INC_ALL   += -I$(INC_DIR1)
 
 ifdef STAR  # stic has its own inc_all   (STAR+STAF)
-  INC_ALL += -I$(STAF)/inc
+#               obsoleted:   INC_ALL += -I$(STAF)/inc
   INC_ALL += -I$(STAR)/.$(STAR_HOST_SYS)/include
   INC_ALL += -I$(STAR)/include
   INCLOC  := inc
@@ -400,9 +402,9 @@ $(LIB_DIR)/$(NAME).$(SL): $(LIST_o) $(LIST_co) $(LIST_go)
 #------------------------- idm  conversion rules ----------------------------
 $(LIST_cc):  $(WRK_DIR)/%_i.cc: %.idl
 	ls $+;  cp -p $+ $(WRK_DIR)/.;  cd $(WRK_DIR); stic -q \
-	-I$(CWD)/$(INC_DIR1) -I$(STAF)/inc -I$(STAR)/include \
+	-I$(CWD)/$(INC_DIR1) -I$(STAR)/include \
 	-I$(dir $+) -I$(dir $(subst / ,,$(dir $+) )) $*.idl || rm $*_i.cc
-#------------------------- STAF module interface ----------------------------
+#------------------------- module interface ----------------------------
 $(INIT_cc): $(FILES_MOD)
 	@if [ -f $(TAGS) ]; then  rm $(TAGS) ; fi
 	@echo '/* '$(NAME)' package interface  */'          >  $(TAGS)
