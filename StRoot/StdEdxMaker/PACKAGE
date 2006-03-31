@@ -1,4 +1,0 @@
-# $Id $
-# package StdEdxMaker
-# author: 
-Library:libStdEdxMaker.so:LIBS +=   -lglobal_Tables  -lStBFChain  -lStChain  -lStDb_Tables  -lStDbUtilities  -lStSvtClassLibrary  -lStTableUtilities  -lStTpcDb  -lsvt_Tables  -lMinuit
