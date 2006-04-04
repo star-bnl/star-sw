@@ -16,6 +16,7 @@ class TH2F;
 class StEStructEvent;
 class StEStructTrack;
 class StTimer;
+class StEStructQAHists;
 
 class StEStructFluctAnal: public StEStructAnalysis {
 
@@ -25,10 +26,12 @@ class StEStructFluctAnal: public StEStructAnalysis {
     StEStructFluctAnal( int mode=0, int etaSumMode=1, int phiSumMode=1 );
     virtual ~StEStructFluctAnal();
 
-    StEStructPairCuts& getPairCuts();
-    void  setCutFile(   const char* cutFileName, StEStructCentrality *cent );
-    void  setEtaLimits( const char* cutFileName );
-    void  setPtLimits(  const char* cutFileName );
+    StEStructPairCuts* getPairCuts();
+    void  initStructures( StEStructCuts* tcut );
+    void  setEtaLimits( StEStructCuts* tcut );
+    void  setPtLimits( StEStructCuts* tcut );
+    void  setQAHists( StEStructQAHists* qaHists );
+    void  setPairCuts( StEStructPairCuts* cuts );
 
   //---> support of interface  
     virtual void setOutputFileName(const char* outFileName);
@@ -59,7 +62,9 @@ class StEStructFluctAnal: public StEStructAnalysis {
     StEStructEvent      *mCurrentEvent;  //!  pointer to EStruct2pt data 
     StEStructCentrality *mCentralities;
 
-    StEStructPairCuts    mPair; //! Simply so I can support getPairCuts and doEstruct macro doesn't barf.
+    StEStructPairCuts*     mPairCuts;      //! for pairs kine + all paircuts
+    StEStructQAHists*      mQAHists;       //! for QA histogramming
+    bool                   mlocalQAHists;  //! toggle needed for who writes out
 
     float mEtaMin, mEtaMax;
     float mPtMin,  mPtMax;
@@ -101,14 +106,21 @@ inline void StEStructFluctAnal::setOutputFileName(const char* outFileName) {
     moutFileName=new char[strlen(outFileName)+1];
     strcpy(moutFileName,outFileName);
 }
+inline void StEStructFluctAnal::setQAHists(StEStructQAHists* qahists){
+  mQAHists = qahists;
+}
+
+inline void StEStructFluctAnal::setPairCuts(StEStructPairCuts* pcuts){
+  mPairCuts=pcuts;
+}
 inline void StEStructFluctAnal::finish() {
     TFile * tf=new TFile(moutFileName,"RECREATE");
     tf->cd();
     writeHistograms();
     tf->Close();
 };
-inline StEStructPairCuts& StEStructFluctAnal::getPairCuts() {
-  return mPair;
+inline StEStructPairCuts* StEStructFluctAnal::getPairCuts() {
+  return mPairCuts;
 }
 
 #endif
