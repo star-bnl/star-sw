@@ -1,6 +1,9 @@
-// $Id: lasertest.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: lasertest.C,v 1.3 2006/04/04 12:02:30 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.3  2006/04/04 12:02:30  jcs
+// simplify macro
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -70,15 +73,8 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
       cout<<"dbDate = "<<dbMk->GetDateTime().GetDate()<<endl;
       cout<<"After Database init !!!"<<endl;
       cout<<endl;
-    }
-
-  cout<<"Starting StFtpcCalibMaker ..."<<endl;
-  cout<<endl;
-
-  if (atof(t0)!=0 || atof(gas)!=0)
-  {
-    laser->DbInit( mbfield);
-  }
+    
+      laser->DbInit( mbfield);
   for (int i=-5;i<7;i++)
   //for (int i=0;i<10;i++)
     {
@@ -105,4 +101,8 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
     //cout<<"deltat0 = "<<"0"<<" und deltaGas = "<<"0"<<endl;
   laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",mbfield);
   delete laser;
+    } 
+    else {
+      cout<<"Macro will not work if both t0 and gas exactly = 0"<<endl;     
+    }
 }
