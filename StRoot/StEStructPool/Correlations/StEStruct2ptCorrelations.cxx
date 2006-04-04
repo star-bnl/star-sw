@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.10 2006/02/22 22:05:10 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.11 2006/04/04 22:10:07 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -41,48 +41,55 @@
 
 #include "Stiostream.h"
 
+#include "StMessMgr.h"
+
 #include <iostream>
 using namespace std;
 
 ClassImp(StEStruct2ptCorrelations);
 
 //--------------------------------------------------------------------------
-//StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mdoPairDensityHistograms(false), mInit(false), mDeleted(false) {   }
-
 StEStruct2ptCorrelations::StEStruct2ptCorrelations(int mode) {
-  manalysisMode=mode; 
-  mskipPairCuts=false; 
-  mdoPairCutHistograms=false; 
-  mdoPairDensityHistograms=false; 
-  mInit=false; 
-  mDeleted=false;
-  mHistosWritten = false;
-
-  kZBuffMin   = -75.0;
-  kZBuffMax   = +75.0;
-  kBuffWidth  = 5.0;
-  kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth );  // Better be 30.
-  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
+  initInternalData();
+  manalysisMode=mode;
+  mPairCuts = new StEStructPairCuts; 
 }
 
 
 //--------------------------------------------------------------------------
-//StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int mode): manalysisMode(mode), mskipPairCuts(false), mdoPairCutHistograms(false), mdoPairDensityHistograms(false), mInit(false), mDeleted(false), mPair(cutFileName) {  }
-StEStruct2ptCorrelations::StEStruct2ptCorrelations(const char* cutFileName, int mode):  mPair(cutFileName) {
+StEStruct2ptCorrelations::StEStruct2ptCorrelations(StEStructPairCuts* pcuts, int mode) {
+  initInternalData();
   manalysisMode=mode;
-  mskipPairCuts=false;
-  mdoPairCutHistograms=false;
-  mdoPairDensityHistograms=false;
+  mPairCuts=pcuts;
+
+}
+
+//----------------------------------------------------------
+void  StEStruct2ptCorrelations::initInternalData(){
+
+  mPairCuts=NULL;
+  mQAHists = NULL;
+  mCurrentEvent = NULL;
+  mMixingEvent = NULL;
+  moutFileName = NULL;
+  mqaoutFileName = NULL;
+
+  mskipPairCuts            = false;
+  mdoPairCutHistograms     = false;
+  mdoPairDensityHistograms = false;
+  mskipEtaDeltaWeight      = false;
+
   mInit=false;
   mDeleted=false;
   mHistosWritten = false;
-  //mPair(cutFileName);
+  mlocalQAHists = false;
+  manalysisIndex = -1;
 
   kZBuffMin   = -75.0;
   kZBuffMax   = +75.0;
   kBuffWidth  = 5.0;
   kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth );  // Better be 30.
-  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
+  //  for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
 }
 
 
@@ -102,6 +109,7 @@ void StEStruct2ptCorrelations::init(){
    char* _tmpName[]={"Sibpp","Sibpm","Sibmp","Sibmm","Mixpp","Mixpm","Mixmp","Mixmm"};
    char* _tmpTitle[]={"Sibling : +.+","Sibling : +.-","Sibling : -.+","Sibling : -.-",
                       "Mixed : +.+","Mixed : +.-","Mixed : -.+","Mixed : -.-"};
+
    for(int i=0;i<8;i++){
      bName[i]=new char[6];
      strcpy(bName[i],_tmpName[i]);
@@ -118,12 +126,18 @@ void StEStruct2ptCorrelations::init(){
   if(manalysisMode & 4){
     mdoPairDensityHistograms=true;
   }
+  if(manalysisMode & 8){
+    mskipEtaDeltaWeight = true;
+  }
+
   cout << "  Skip Pair Cuts = " << mskipPairCuts << endl;
   cout << "  Do Pair Cut Hists = " << mdoPairCutHistograms << endl;
   cout << "  Do Pair Density Hists = " << mdoPairDensityHistograms << endl;
+  cout << "  Skip EtaDelta weights = " << mskipEtaDeltaWeight << endl;
 
   for(int i=0;i<8;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
 
+//
   initArrays();
 // Try allocating histograms at start of job.
 // If we don't add histograms to directory we don't get the obnoxious
@@ -135,9 +149,23 @@ void StEStruct2ptCorrelations::init(){
   mHNEvents[0]=new TH1F("NEventsSame","NEventsSame",1000,0.,2000.);
   mHNEvents[1]=new TH1F("NEventsMixed","NEventsMixed",1000,0.,2000.);
   
-  /* Inclusive pt distribution (per cutbin) */
+
   StEStructCutBin* cb = StEStructCutBin::Instance();
   int ncutbins=cb->getNumBins();
+
+
+  /* QA histograms */
+  if(!mQAHists) {
+    mlocalQAHists = true;
+    cout<<"createing qa hists"<<endl;
+    mQAHists = new StEStructQAHists(); // if not set .. assume data
+    mQAHists->initTrackHistograms(ncutbins,analysisIndex());
+  } else {
+    cout<<"init QA Hists"<<endl;
+    mQAHists->initTrackHistograms(ncutbins);  // will do it for only 1 analysis
+  }
+
+  /* Inclusive pt distribution (per cutbin) */
   mHpt = new TH1F*[ncutbins];  
   for(int i=0;i<ncutbins;i++){
     TString hname("pt");
@@ -194,74 +222,33 @@ void StEStruct2ptCorrelations::cleanUp(){
 //--------------------------------------------------------------------------
 // Parse cuts file for limits on vertex position.
 // Want 5cm wide buffers.
-void StEStruct2ptCorrelations::setZBuffLimits( const char* cutFileName ) {
-    ifstream from(cutFileName);
+void StEStruct2ptCorrelations::setZBuffLimits(StEStructCuts* ecut) {
 
-    if(!from){ 
-        cout<<" Cut file Not Found while looking for Z vertex limits in StEStruct2ptCorrelations::setZBuffLimits"<<endl; 
-    }
+  kZBuffMin = ecut->minVal("primaryVertexZ");
+  kZBuffMax = ecut->maxVal("primaryVertexZ");
+  kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth ); 
 
-    char line[256], lineRead[256];
-    char* puteol;
-    char** val = new char*[100];
-    int ival = 0;
+  cout<<"Setting ZBuffers:  Max="<<kZBuffMax<<" Min="<<kZBuffMin<<" NumBuff="<<kNumBuffers<<endl;
+  if(kNumBuffers<=_MAX_ZVBINS_) return; // we're good to go
 
-    bool done = false;
-    while(!done) {
-        if(from.eof()){
-            cout<<" Did not find Z vertex limits in StEStruct2ptCorrelations::setZBuffLimits, file "<< cutFileName <<endl; 
-            done=true;
-        } else {
-            from.getline(lineRead,256);
-            strcpy(line,lineRead);
-            if ( (line[0]=='#') ) {
-                continue;
-            }
-            if ( !strstr(line,"primaryVertexZ") ) {
-                continue;
-            }
-            if ((puteol=strstr(line,"#"))) {
-                *puteol='\0';
-            }
-            ival=0;
-            val[ival]=line;
-            char* fcomma;
-            while ((fcomma=strstr(val[ival],","))) {
-                *fcomma='\0';
-                fcomma++;
-                ival++;
-                val[ival]=fcomma;
-            }
-            if (ival==2) {
-                done=true;
-                break;
-            }
-        }
-    }
-    if (ival != 2) {
-        cout << " Did not find a line containing primaryVertexZ and two numbers in file " << cutFileName <<endl; 
-        cout<<" Using default limits kZBuffMin = " << kZBuffMin << ", kZBuffMax = " << kZBuffMax <<endl; 
-    } else {
-        kZBuffMin = strtof(val[1],0);
-        kZBuffMax = strtof(val[2],0);
-        kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth );  // Need to check this is 30 or less.
-        if (kNumBuffers > 30) {
-            kNumBuffers = 30;
-            kBuffWidth = (kZBuffMax - kZBuffMin) / kNumBuffers;
-            cout << "   Too many buffers needed to cover vertex range." << endl;
-            cout << "   Increasing width of z slice to " << kBuffWidth << endl;
-            if (kBuffWidth > 7) {
-              cout << "**WARNING**: Jeff Porter says z-slice bins larger than about 6.5cm causes systematice effects on correlations**" << endl;
-            }
-        }
-        for(int i=0;i<kNumBuffers;i++)mbuffCounter[i]=0;
-        cout << "  Mixing events with deltaZ = " << kBuffWidth << " and deltaN = " << DELTANMAX;
-        cout << ", " << _MAXEBYEBUFFER_ << " mixed events for each event." << endl;
-    }
-    from.close();
-    delete [] val;  val = 0;
+  kNumBuffers=_MAX_ZVBINS_;  
+  kBuffWidth= (kZBuffMax - kZBuffMin) / kNumBuffers; // adjust widths
+  if(kBuffWidth>6.5) { 
+     gMessMgr->Warning()<<" Zvertex Width ="<<kBuffWidth<<" gt 6.5 cm"<<endm;
+  }
 }
+//---------------------------------------------------------------------
+void StEStruct2ptCorrelations::writeDiagnostics(){
 
+  int nIn=0;
+  int nOut=0;
+  for(int i=0;i<kNumBuffers;i++){
+    nIn  += mbuffer[i].numEventsIn();
+    nOut += mbuffer[i].numEventsDeleted();
+  }
+  cout<<" Analysis["<<analysisIndex()<<"] recieved "<<nIn<<" useful events, deleted "<<nOut<<" of them"<<endl;
+
+}
 
 //
 //-------  Analysis Function ------//
@@ -269,7 +256,10 @@ void StEStruct2ptCorrelations::setZBuffLimits( const char* cutFileName ) {
 //--------------------------------------------------------------------------
 bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
 
-  if(!event) return false;
+  if(!event) {
+   mCurrentEvent=NULL;
+   return false;
+  }
 
   if(mInit == false) init();
 
@@ -292,39 +282,34 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
   // (dEdx histogramming is ok though.)
   // Assign mass according to dEdx pid here.
   // djp 11/28/2005
+
   float Mass[] = {0.1396, 0.1396, 0.497, 0.9383};
-  StEStructBinning* b = StEStructBinning::Instance();
+
   StEStructCutBin* cb = StEStructCutBin::Instance();
   int ncutbins=cb->getNumBins();
-  StEStructTrackCollection *tp = mCurrentEvent->TrackCollectionP();
   float ptval;
-  QAEtaBins *eta;
-  QAPhiBins *phi;
-  QAPtBins  *pt;
-  PtotBins  *dedx;
-  for(StEStructTrackIterator iter = tp->begin(); iter != tp->end(); iter++) {
-    int* index_ids=cb->getPtBins(ptval=(*iter)->Pt());
-    int j=0;
-    while(index_ids[j]>=0){
-      mHpt[index_ids[j]]->Fill(ptval);
-      j++;
-      if(j==ncutbins)break;
-    }
-    int iptot = b->iptot((*iter)->Ptot());
-    int idedx = b->idedx((*iter)->Dedx());
-    int i = cb->getdEdxPID((*iter));
-    dedx = mdEdxPtot[0][i];
-    dedx[idedx].Ptot[iptot] += 1;
 
-    int ieta = b->iqaeta((*iter)->Eta());
-    eta = &mQAEta[0][i];
-    eta->Eta[ieta] += 1;
-    int iphi = b->iqaphi((*iter)->Phi());
-    phi = &mQAPhi[0][i];
-    phi->Phi[iphi] += 1;
-    int ipt = b->iqapt((*iter)->Pt());
-    pt = &mQAPt[0][i];
-    pt->Pt[ipt] += 1;
+  StEStructTrackCollection *tc;
+  for(int ich=0;ich<2;ich++){
+    if(ich==0){
+       tc=mCurrentEvent->TrackCollectionP();
+    } else {
+       tc=mCurrentEvent->TrackCollectionM();
+    }
+
+    for(StEStructTrackIterator iter = tc->begin(); iter != tc->end(); iter++) {
+     // find all 2-part cut bins that include this 1-part pt value ... rjp
+     int* index_ids=cb->getPtBins(ptval=(*iter)->Pt());
+     int j=0;
+     while(index_ids[j]>=0){
+       mHpt[index_ids[j]]->Fill(ptval); // fill pt histograms ... rjp
+       j++;
+       if(j==ncutbins)break;
+     }
+
+     int i = cb->getdEdxPID((*iter));
+     mQAHists->fillTrackHistograms(*iter,i);
+
     // Choose mass according to dEdx (in which case transverse and longitudinal
     // rapidities will be calculated as actual rapidities) or set mass to 0
     // in which case we will use the quantity Jeff was using for transverse rapidity
@@ -339,45 +324,20 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
     }
     // Always use psuedo-rapidity for now.
     // We are used to looking at the eta-phi plots (more or less.)
-    (*iter)->SetMassAssignment(0);
-  }
-
-  StEStructTrackCollection *tm = mCurrentEvent->TrackCollectionM();
-  for(StEStructTrackIterator iter = tm->begin(); iter != tm->end(); iter++) {
-    int* index_ids=cb->getPtBins(ptval=(*iter)->Pt());
-    int j=0;
-    while(index_ids[j]>=0){
-      mHpt[index_ids[j]]->Fill(ptval);
-      j++;
-      if(j==ncutbins)break;
+         (*iter)->SetMassAssignment(0);
     }
-    int iptot = b->iptot((*iter)->Ptot());
-    int idedx = b->idedx((*iter)->Dedx());
-    int i = cb->getdEdxPID((*iter));
-    dedx = mdEdxPtot[1][i];
-    dedx[idedx].Ptot[iptot] += 1;
-
-    int ieta = b->iqaeta((*iter)->Eta());
-    eta = &mQAEta[1][i];
-    eta->Eta[ieta] += 1;
-    int iphi = b->iqaphi((*iter)->Phi());
-    phi = &mQAPhi[1][i];
-    phi->Phi[iphi] += 1;
-    int ipt = b->iqapt((*iter)->Pt());
-    pt = &mQAPt[1][i];
-    pt->Pt[ipt] += 1;
-    if (cb->getMode() == 5) {
-        (*iter)->SetMassAssignment(Mass[i]);
-    } else {
-        // 0 should be default, but just to be explicit here/
-        (*iter)->SetMassAssignment(0);
-    }
-    // Always use psuedo-rapidity for now.
-    // We are used to looking at the eta-phi plots (more or less.)
-    (*iter)->SetMassAssignment(0);
   }
 
   return makeSiblingAndMixedPairs();
+}
+
+
+//-----------------------------------------------------------------------
+int StEStruct2ptCorrelations::bufferIndex(){
+  if(!mCurrentEvent || kBuffWidth==0.) return -1;
+
+  // this should only be in 1 place 
+  return (int) floor((mCurrentEvent->VertexZ()-kZBuffMin)/kBuffWidth); 
 }
 
 //--------------------------------------------------------------------------
@@ -387,10 +347,12 @@ void StEStruct2ptCorrelations::moveEvents(){
   if (mCurrentEvent->VertexZ() > kZBuffMax) {
       return;
   }
-  int i=(int) floor((mCurrentEvent->VertexZ()-kZBuffMin)/kBuffWidth); // eventually this should be moved up to the buffer class...
+
+  int i=bufferIndex();
+
   if(i<0 || i>kNumBuffers-1) return;                              
   mbuffer[i].addEvent(mCurrentEvent);
-  mbuffCounter[i]++;
+  //  mbuffCounter[i]++;
 
 }
 
@@ -401,7 +363,9 @@ bool StEStruct2ptCorrelations::makeSiblingAndMixedPairs(){
   if (mCurrentEvent->VertexZ() > kZBuffMax) {
       return false;
   }
-  int i=(int) floor((mCurrentEvent->VertexZ()-kZBuffMin)/kBuffWidth);
+
+  int i=bufferIndex();
+
   if(i<0 || i>kNumBuffers-1) return false;
 
   makePairs(mCurrentEvent,mCurrentEvent,0);
@@ -438,6 +402,8 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   if(j>=8) return;
   StEStructTrackCollection* t1;
   StEStructTrackCollection* t2;
+
+  StEStructPairCuts& mPair = *mPairCuts;
 
   StEStructBinning* b = StEStructBinning::Instance();
   StEStructCutBin* cb = StEStructCutBin::Instance();
@@ -575,7 +541,7 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
   float pt1, pt2;
 
   float nwgt=1.0;//mPair.SigmaPt();
-  int symmetrizeYt;
+  int symmetrizeYt = cb->symmetrizeYtBins(&mPair);
 
   if(mtimer)mtimer->start();
 
@@ -627,10 +593,18 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           ieta2 = b->ieta(mPair.Track2()->Eta(mass2));
           iphi2 = b->iphi(mPair.Track2()->Phi());
         }
-        symmetrizeYt = cb->symmetrizeYtBins(&mPair);
+	//        symmetrizeYt = cb->symmetrizeYtBins(&mPair);
 
         float pwgt=pt1*pt2;
         float swgt=pt1+pt2;
+        float wgt = 1.0;
+        nwgt = wgt;
+        float deta=mPair.DeltaEta(); 
+        if( !mskipEtaDeltaWeight && deta<1.9999 ) {
+           nwgt = 2.0/(2.0-deta);
+           pwgt*=nwgt;
+           swgt*=nwgt;
+	}
 
         //-> X vs X
         ytyt[iy][iyt1].yt[iyt2]+=nwgt; 
@@ -804,21 +778,35 @@ void StEStruct2ptCorrelations::fillHistograms(){
     dphiBins** prjtsetadphi = mPrJtSEtaDPhi[i];
     dphiBins** sujtdetadphi = mSuJtDEtaDPhi[i];
     dphiBins** sujtsetadphi = mSuJtSEtaDPhi[i];
-
+  
+    int ncb=numCutBins;
+    TH1::AddDirectory(kFALSE);
     for(int y=0;y<numCutBins;y++){
 
+    createHist2D(mHYtYt,"YtYt",i,y,ncb,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
     for(int k=0;k<b->ytBins();k++)
       for(int j=0;j<b->ytBins();j++)
         mHYtYt[i][y]->Fill(b->ytVal(k),b->ytVal(j),ytyt[y][k].yt[j]);
 
+    delete [] ytyt[y];
+
+    createHist2D(mHXtXt,"XtXt",i,y,ncb,b->xtBins(),b->xtMin(),b->xtMax(),b->xtBins(),b->xtMin(),b->xtMax());
     for(int k=0;k<b->xtBins();k++)
       for(int j=0;j<b->xtBins();j++)
         mHXtXt[i][y]->Fill(b->xtVal(k),b->xtVal(j),xtxt[y][k].xt[j]);
 
+    delete [] xtxt[y];
+
+    createHist2D(mHPtPt,"PtPt",i,y,ncb,b->ptBins(),b->ptMin(),b->ptMax(),b->ptBins(),b->ptMin(),b->ptMax());
     for(int k=0;k<b->ptBins();k++)
       for(int j=0;j<b->ptBins();j++)
         mHPtPt[i][y]->Fill(b->ptVal(k),b->ptVal(j),ptpt[y][k].pt[j]);
 
+    delete [] ptpt[y];
+
+    createHist2D(mHPhiPhi,"PhiPhi",i,y,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+    createHist2D(mHPrPhiPhi,"PrPhiPhi",i,y,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+    createHist2D(mHSuPhiPhi,"SuPhiPhi",i,y,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
     for(int k=0;k<b->phiBins();k++){
       for(int j=0;j<b->phiBins();j++){
         mHPhiPhi[i][y]->Fill(xv=b->phiVal(k),yv=b->phiVal(j),phiphi[y][k].phi[j]);
@@ -827,6 +815,13 @@ void StEStruct2ptCorrelations::fillHistograms(){
       }
     }
 
+    delete [] phiphi[y];
+    delete [] prphiphi[y];
+    delete [] suphiphi[y];
+
+    createHist2D(mHEtaEta,"EtaEta",i,y,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+    createHist2D(mHPrEtaEta,"PrEtaEta",i,y,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+    createHist2D(mHSuEtaEta,"SuEtaEta",i,y,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
     for(int k=0;k<b->etaBins();k++){
       for(int j=0;j<b->etaBins();j++){
         mHEtaEta[i][y]->Fill(xv=b->etaVal(k),yv=b->etaVal(j),etaeta[y][k].eta[j]);
@@ -835,7 +830,13 @@ void StEStruct2ptCorrelations::fillHistograms(){
       }
     }
 
+    delete [] etaeta[y];
+    delete [] pretaeta[y];
+    delete [] suetaeta[y];
 
+    createHist2D(mHJtDEtaDPhi,"DEtaDPhi",i,y,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+    createHist2D(mHPrJtDEtaDPhi,"PrDEtaDPhi",i,y,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+    createHist2D(mHSuJtDEtaDPhi,"SuDEtaDPhi",i,y,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
     for(int k=0;k<b->detaBins();k++){
       for(int j=0;j<b->dphiBins();j++){
         mHJtDEtaDPhi[i][y]->Fill(xv=b->detaVal(k),yv=b->dphiVal(j),jtdetadphi[y][k].dphi[j]);
@@ -844,14 +845,27 @@ void StEStruct2ptCorrelations::fillHistograms(){
       }
     }
 
+    delete [] jtdetadphi[y];
+    delete [] prjtdetadphi[y];
+    delete [] sujtdetadphi[y];
+
+    createHist2D(mHAtSYtDYt,"SYtDYt",i,y,ncb,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
     for(int k=0;k<b->sytBins();k++)
       for(int j=0;j<b->dytBins();j++)
         mHAtSYtDYt[i][y]->Fill(b->sytVal(k),b->dytVal(j),atytyt[y][k].dyt[j]);
 
-    for(int k=0;k<b->sptBins();k++)
+   delete [] atytyt[y];
+
+   createHist2D(mHAtSPtDPt,"SPtDPt",i,y,ncb,b->sptBins(),b->sptMin(),b->sptMax(),b->dptBins(),b->dptMin(),b->dptMax());
+   for(int k=0;k<b->sptBins();k++)
       for(int j=0;j<b->dptBins();j++)
         mHAtSPtDPt[i][y]->Fill(b->sptVal(k),b->dptVal(j),atptpt[y][k].dpt[j]);
+ 
+   delete [] atptpt[y];
 
+    createHist2D(mHJtSEtaDPhi,"SEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+    createHist2D(mHPrJtSEtaDPhi,"PrSEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+    createHist2D(mHSuJtSEtaDPhi,"SuSEtaDPhi",i,y,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
     for(int k=0;k<b->setaBins();k++){
       for(int j=0;j<b->dphiBins();j++){
         mHJtSEtaDPhi[i][y]->Fill(xv=b->setaVal(k),yv=b->dphiVal(j),jtsetadphi[y][k].dphi[j]);
@@ -860,6 +874,13 @@ void StEStruct2ptCorrelations::fillHistograms(){
       }
     }
 
+    delete [] jtsetadphi[y];
+    delete [] prjtsetadphi[y];
+    delete [] sujtsetadphi[y];   
+
+
+    createHist2D(mHJtDYtDPhi,"DYtDPhi",i,y,ncb,b->dytBins(),b->dytMin(),b->dytMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+    createHist2D(mHJtDYtDEta,"DYtDEta",i,y,ncb,b->dytBins(),b->dytMin(),b->dytMax(),b->detaBins(),b->detaMin(),b->detaMax());
     for(int k=0;k<b->dytBins();k++){
       for(int j=0;j<b->dphiBins();j++){
         mHJtDYtDPhi[i][y]->Fill(xv=b->dytVal(k),yv=b->dphiVal(j),jtdytdphi[y][k].dphi[j]);
@@ -869,7 +890,12 @@ void StEStruct2ptCorrelations::fillHistograms(){
       }      
     }
 
+    delete [] jtdytdphi[y];
+    delete [] jtdytdeta[y];
+
+    createHist1D(mHQinv,"Qinv",i,y,ncb,b->qBins(),b->qMin(),b->qMax());
     for(int k=0;k<b->qBins();k++)mHQinv[i][y]->Fill(b->qVal(k),qinv[y].q[k]);
+    //    delete [] qinv[y];
 
     } // for y
   } // for i
@@ -996,70 +1022,24 @@ void StEStruct2ptCorrelations::writeHistograms() {
 }
 
 //--------------------------------------------------------------------------
-void StEStruct2ptCorrelations::writeQAHists() {
-  if(!mqaoutFileName){
-    cout<<" NO QA OUTPUTFILE TO WRITE TO ..... giving up ...."<<endl;
+void StEStruct2ptCorrelations::writeQAHists(TFile *qtf) {
+
+  if(!mlocalQAHists) return;
+
+  if(!qtf){
+    cout<<" NO QA OUTPUT TFile TO WRITE TO ... giving up ..."<<endl;
     return;
   }
 
-  StEStructBinning* b=StEStructBinning::Instance();
-  for(int j=0; j<2; j++) {
-    for(int i=0; i<4; i++) {
-      PtotBins*  dedx   = mdEdxPtot[j][i];
-      for(int k=0;k<b->dEdxBins();k++) {
-        for(int l=0;l<b->PtotBins();l++) {
-          mHdEdxPtot[j][i]->Fill(b->ptotVal(l),b->dedxVal(k),dedx[k].Ptot[l]);
-        }
-      }
-      QAEtaBins  *eta   = &mQAEta[j][i];
-      for(int k=0;k<b->QAEtaBins();k++) {
-        mHQAEta[j][i]->Fill(b->qaetaVal(k),eta->Eta[k]);
-      }
-      QAPhiBins  *phi   = &mQAPhi[j][i];
-      for(int k=0;k<b->QAPhiBins();k++) {
-        mHQAPhi[j][i]->Fill(b->qaphiVal(k),phi->Phi[k]);
-      }
-      QAPtBins  *pt   = &mQAPt[j][i];
-      for(int k=0;k<b->QAPtBins();k++) {
-        mHQAPt[j][i]->Fill(b->qaptVal(k),pt->Pt[k]);
-      }
-    }
-  }
+  mQAHists->writeTrackHistograms(qtf);
 
-  TFile * tf=new TFile(mqaoutFileName,"RECREATE");
-  tf->cd();
-  for(int j=0;j<2;j++) {
-      for(int i=0;i<4;i++){
-          mHdEdxPtot[j][i]->Write();
-          mHQAEta[j][i]->Write();
-          mHQAPhi[j][i]->Write();
-          mHQAPt[j][i]->Write();
-      }
-  }
-  tf->Close();
+
 }
 
 //--------------------------------------------------------------------------
 void StEStruct2ptCorrelations::initArrays(){
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
-
-  // storage arrays
-  QAPhiBins *phi;
-  QAEtaBins *eta;
-  QAPtBins  *pt;
-  for (int j=0;j<2;j++) {
-      for (int i=0;i<4;i++) {
-          mdEdxPtot[j][i] = new PtotBins[ESTRUCT_DEDX_BINS];
-          memset(mdEdxPtot[j][i],0,ESTRUCT_DEDX_BINS*sizeof(PtotBins));
-          phi = &mQAPhi[j][i];
-          memset(phi,0,ESTRUCT_QAPHI_BINS*sizeof(float));
-          eta = &mQAEta[j][i];
-          memset(eta,0,ESTRUCT_QAETA_BINS*sizeof(float));
-          pt  = &mQAPt[j][i];
-          memset(pt,0,ESTRUCT_QAPT_BINS*sizeof(float));
-      }
-  }
 
   for(int i=0;i<8;i++){
 
@@ -1204,39 +1184,33 @@ void StEStruct2ptCorrelations::deleteArrays(){
 
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
 
-  for(int j=0;j<2;j++) {
-      for(int i=0;i<4;i++){
-          delete []  mdEdxPtot[j][i];
-      }
-  }
-
   for(int i=0;i<8;i++){
     
     for(int j=0;j<numCutBins;j++){
       
-      delete []  mYtYt[i][j];
-      delete []  mXtXt[i][j];
-      delete []  mPtPt[i][j];
+      //      delete []  mYtYt[i][j];
+      //      delete []  mXtXt[i][j];
+      //      delete []  mPtPt[i][j];
       
-      delete []  mEtaEta[i][j];
-      delete []  mPhiPhi[i][j];
-      delete []  mPrEtaEta[i][j];
-      delete []  mPrPhiPhi[i][j];
-      delete []  mSuEtaEta[i][j];
-      delete []  mSuPhiPhi[i][j];
+      //      delete []  mEtaEta[i][j];
+      //      delete []  mPhiPhi[i][j];
+      //      delete []  mPrEtaEta[i][j];
+      //      delete []  mPrPhiPhi[i][j];
+      //      delete []  mSuEtaEta[i][j];
+      //      delete []  mSuPhiPhi[i][j];
       
-      delete []  mAtSYtDYt[i][j];
-      delete []  mAtSPtDPt[i][j];
+      //      delete []  mAtSYtDYt[i][j];
+      //      delete []  mAtSPtDPt[i][j];
       
-      delete []  mJtDYtDPhi[i][j];
-      delete []  mJtDYtDEta[i][j];
-      delete []  mJtDEtaDPhi[i][j];
-      delete []  mJtSEtaDPhi[i][j];
+      //      delete []  mJtDYtDPhi[i][j];
+      //      delete []  mJtDYtDEta[i][j];
+      //      delete []  mJtDEtaDPhi[i][j];
+      //      delete []  mJtSEtaDPhi[i][j];
       
-      delete []  mPrJtDEtaDPhi[i][j];
-      delete []  mPrJtSEtaDPhi[i][j];
-      delete []  mSuJtDEtaDPhi[i][j];
-      delete []  mSuJtSEtaDPhi[i][j];
+      //      delete []  mPrJtDEtaDPhi[i][j];
+      //      delete []  mPrJtSEtaDPhi[i][j];
+      //      delete []  mSuJtDEtaDPhi[i][j];
+      //      delete []  mSuJtSEtaDPhi[i][j];
       
       if(mdoPairDensityHistograms)  {
 	delete []  mTPCAvgTZ[i][j];
@@ -1306,56 +1280,6 @@ void StEStruct2ptCorrelations::initHistograms(){
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
   StEStructBinning* b=StEStructBinning::Instance();
 
-  // histograms second
-
-  int nx = b->PtotBins();
-  int ny = b->dEdxBins();
-  float xmin = b->PtotMin();
-  float xmax = b->PtotMax();
-  float ymin = b->dEdxMin();
-  float ymax = b->dEdxMax();
-  mHdEdxPtot[0][0] = new TH2F("unidentified+_dEdx","unidentified+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[0][1] = new TH2F("pion+_dEdx","pion+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[0][2] = new TH2F("Kaon+_dEdx","Kaon+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[0][3] = new TH2F("proton+_dEdx","proton+_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[1][0] = new TH2F("unidentified-_dEdx","unidentified-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[1][1] = new TH2F("pion-_dEdx","pion-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[1][2] = new TH2F("Kaon-_dEdx","Kaon-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  mHdEdxPtot[1][3] = new TH2F("proton-_dEdx","proton-_dEdx",nx,xmin,xmax,ny,ymin,ymax);
-  nx = b->QAEtaBins();
-  xmin = b->QAEtaMin();
-  xmax = b->QAEtaMax();
-  mHQAEta[0][0] = new TH1F("unidentified+_Eta","unidentified+_Eta",nx,xmin,xmax);
-  mHQAEta[0][1] = new TH1F("pion+_Eta","pion+_Eta",nx,xmin,xmax);
-  mHQAEta[0][2] = new TH1F("Kaon+_Eta","Kaon+_Eta",nx,xmin,xmax);
-  mHQAEta[0][3] = new TH1F("proton+_Eta","proton+_Eta",nx,xmin,xmax);
-  mHQAEta[1][0] = new TH1F("unidentified-_Eta","unidentified-_Eta",nx,xmin,xmax);
-  mHQAEta[1][1] = new TH1F("pion-_Eta","pion-_Eta",nx,xmin,xmax);
-  mHQAEta[1][2] = new TH1F("Kaon-_Eta","Kaon-_Eta",nx,xmin,xmax);
-  mHQAEta[1][3] = new TH1F("proton-_Eta","proton-_Eta",nx,xmin,xmax);
-  nx = b->QAPhiBins();
-  xmin = b->QAPhiMin();
-  xmax = b->QAPhiMax();
-  mHQAPhi[0][0] = new TH1F("unidentified+_Phi","unidentified+_Phi",nx,xmin,xmax);
-  mHQAPhi[0][1] = new TH1F("pion+_Phi","pion+_Phi",nx,xmin,xmax);
-  mHQAPhi[0][2] = new TH1F("Kaon+_Phi","Kaon+_Phi",nx,xmin,xmax);
-  mHQAPhi[0][3] = new TH1F("proton+_Phi","proton+_Phi",nx,xmin,xmax);
-  mHQAPhi[1][0] = new TH1F("unidentified-_Phi","unidentified-_Phi",nx,xmin,xmax);
-  mHQAPhi[1][1] = new TH1F("pion-_Phi","pion-_Phi",nx,xmin,xmax);
-  mHQAPhi[1][2] = new TH1F("Kaon-_Phi","Kaon-_Phi",nx,xmin,xmax);
-  mHQAPhi[1][3] = new TH1F("proton-_Phi","proton-_Phi",nx,xmin,xmax);
-  nx = b->QAPtBins();
-  xmin = b->QAPtMin();
-  xmax = b->QAPtMax();
-  mHQAPt[0][0] = new TH1F("unidentified+_Pt","unidentified+_Pt",nx,xmin,xmax);
-  mHQAPt[0][1] = new TH1F("pion+_Pt","pion+_Pt",nx,xmin,xmax);
-  mHQAPt[0][2] = new TH1F("Kaon+_Pt","Kaon+_Pt",nx,xmin,xmax);
-  mHQAPt[0][3] = new TH1F("proton+_Pt","proton+_Pt",nx,xmin,xmax);
-  mHQAPt[1][0] = new TH1F("unidentified-_Pt","unidentified-_Pt",nx,xmin,xmax);
-  mHQAPt[1][1] = new TH1F("pion-_Pt","pion-_Pt",nx,xmin,xmax);
-  mHQAPt[1][2] = new TH1F("Kaon-_Pt","Kaon-_Pt",nx,xmin,xmax);
-  mHQAPt[1][3] = new TH1F("proton-_Pt","proton-_Pt",nx,xmin,xmax);
-
 
   for(int i=0; i<8; i++){
 
@@ -1409,32 +1333,32 @@ void StEStruct2ptCorrelations::initHistograms(){
 
     for(int j=0;j<numCutBins;j++){
 
-      createHist2D(mHYtYt,"YtYt",i,j,ncb,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
-      createHist2D(mHAtSYtDYt,"SYtDYt",i,j,ncb,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
+      //      createHist2D(mHYtYt,"YtYt",i,j,ncb,b->ytBins(),b->ytMin(),b->ytMax(),b->ytBins(),b->ytMin(),b->ytMax());
+      //      createHist2D(mHAtSYtDYt,"SYtDYt",i,j,ncb,b->sytBins(),b->sytMin(),b->sytMax(),b->dytBins(),b->dytMin(),b->dytMax());
 
-      createHist2D(mHXtXt,"XtXt",i,j,ncb,b->xtBins(),b->xtMin(),b->xtMax(),b->xtBins(),b->xtMin(),b->xtMax());
+      //      createHist2D(mHXtXt,"XtXt",i,j,ncb,b->xtBins(),b->xtMin(),b->xtMax(),b->xtBins(),b->xtMin(),b->xtMax());
 
-      createHist2D(mHPtPt,"PtPt",i,j,ncb,b->ptBins(),b->ptMin(),b->ptMax(),b->ptBins(),b->ptMin(),b->ptMax());
-      createHist2D(mHAtSPtDPt,"SPtDPt",i,j,ncb,b->sptBins(),b->sptMin(),b->sptMax(),b->dptBins(),b->dptMin(),b->dptMax());
+      //      createHist2D(mHPtPt,"PtPt",i,j,ncb,b->ptBins(),b->ptMin(),b->ptMax(),b->ptBins(),b->ptMin(),b->ptMax());
+      //      createHist2D(mHAtSPtDPt,"SPtDPt",i,j,ncb,b->sptBins(),b->sptMin(),b->sptMax(),b->dptBins(),b->dptMin(),b->dptMax());
 
-      createHist2D(mHEtaEta,"EtaEta",i,j,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-      createHist2D(mHPhiPhi,"PhiPhi",i,j,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-      createHist2D(mHJtDYtDPhi,"DYtDPhi",i,j,ncb,b->dytBins(),b->dytMin(),b->dytMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
-      createHist2D(mHJtDYtDEta,"DYtDEta",i,j,ncb,b->dytBins(),b->dytMin(),b->dytMax(),b->detaBins(),b->detaMin(),b->detaMax());
-      createHist2D(mHJtDEtaDPhi,"DEtaDPhi",i,j,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
-      createHist2D(mHJtSEtaDPhi,"SEtaDPhi",i,j,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHEtaEta,"EtaEta",i,j,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+      //      createHist2D(mHPhiPhi,"PhiPhi",i,j,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+      //      createHist2D(mHJtDYtDPhi,"DYtDPhi",i,j,ncb,b->dytBins(),b->dytMin(),b->dytMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHJtDYtDEta,"DYtDEta",i,j,ncb,b->dytBins(),b->dytMin(),b->dytMax(),b->detaBins(),b->detaMin(),b->detaMax());
+      //      createHist2D(mHJtDEtaDPhi,"DEtaDPhi",i,j,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHJtSEtaDPhi,"SEtaDPhi",i,j,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
 
-      createHist2D(mHPrEtaEta,"PrEtaEta",i,j,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-      createHist2D(mHPrPhiPhi,"PrPhiPhi",i,j,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-      createHist2D(mHPrJtDEtaDPhi,"PrDEtaDPhi",i,j,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
-      createHist2D(mHPrJtSEtaDPhi,"PrSEtaDPhi",i,j,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHPrEtaEta,"PrEtaEta",i,j,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+      //      createHist2D(mHPrPhiPhi,"PrPhiPhi",i,j,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+      //      createHist2D(mHPrJtDEtaDPhi,"PrDEtaDPhi",i,j,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHPrJtSEtaDPhi,"PrSEtaDPhi",i,j,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
 
-      createHist2D(mHSuEtaEta,"SuEtaEta",i,j,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
-      createHist2D(mHSuPhiPhi,"SuPhiPhi",i,j,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
-      createHist2D(mHSuJtDEtaDPhi,"SuDEtaDPhi",i,j,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
-      createHist2D(mHSuJtSEtaDPhi,"SuSEtaDPhi",i,j,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHSuEtaEta,"SuEtaEta",i,j,ncb,b->etaBins(),b->etaMin(),b->etaMax(),b->etaBins(),b->etaMin(),b->etaMax());
+      //      createHist2D(mHSuPhiPhi,"SuPhiPhi",i,j,ncb,b->phiBins(),b->phiMin(),b->phiMax(),b->phiBins(),b->phiMin(),b->phiMax());
+      //      createHist2D(mHSuJtDEtaDPhi,"SuDEtaDPhi",i,j,ncb,b->detaBins(),b->detaMin(),b->detaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
+      //      createHist2D(mHSuJtSEtaDPhi,"SuSEtaDPhi",i,j,ncb,b->setaBins(),b->setaMin(),b->setaMax(),b->dphiBins(),b->dphiMin(),b->dphiMax());
 
-      createHist1D(mHQinv,"Qinv",i,j,ncb,b->qBins(),b->qMin(),b->qMax());
+      //      createHist1D(mHQinv,"Qinv",i,j,ncb,b->qBins(),b->qMin(),b->qMax());
       
       if(mdoPairDensityHistograms) {
 	createHist1D(mHTPCAvgTSep,"TPCAvgTSep",i,j,ncb,b->TPCSepBins(),b->TPCSepMin(),b->TPCSepMax());
@@ -1466,15 +1390,6 @@ void StEStruct2ptCorrelations::initHistograms(){
 void StEStruct2ptCorrelations::deleteHistograms(){
   
   int numCutBins=StEStructCutBin::Instance()->getNumBins();
-
-  for(int j=0;j<2;j++){
-      for(int i=0;i<4;i++){
-          delete mHdEdxPtot[j][i];
-          delete mHQAEta[j][i];
-          delete mHQAPhi[j][i];
-          delete mHQAPt[j][i];
-      }
-  }
 
   for(int i=0;i<8;i++){
     for(int j=0;j<numCutBins;j++){
@@ -1605,6 +1520,16 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.11  2006/04/04 22:10:07  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.10  2006/02/22 22:05:10  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.

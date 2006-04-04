@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.8 2006/02/22 22:05:15 prindle Exp $
+ * $Id: StEStructBinning.h,v 1.9 2006/04/04 22:10:11 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,13 +29,13 @@
 #define ESTRUCT_ETA_BINS 26
 #define ESTRUCT_YT_BINS 26
 //#define ESTRUCT_DELTAYT_BINS 26  //use dyt instead
-#define ESTRUCT_PT_BINS 41
+#define ESTRUCT_PT_BINS 31
 #define ESTRUCT_XT_BINS 26
 
 #define ESTRUCT_DPHI_BINS 29
 #define ESTRUCT_DETA_BINS 29
 #define ESTRUCT_DYT_BINS 26
-#define ESTRUCT_DPT_BINS 41
+#define ESTRUCT_DPT_BINS 31
 
 #define ESTRUCT_SPHI_BINS 26
 #define ESTRUCT_SETA_BINS 26
@@ -362,6 +362,7 @@ inline int StEStructBinning::iphi(float phi){
 
 inline int StEStructBinning::idphi(float phi){
   if(phi<minDPhi)phi+=2*M_PI;
+  if(phi>maxDPhi)phi-=2*M_PI;
   if( phi < minDPhi ) return ESTRUCT_DPHI_BINS - 1;
   int j = (int)((phi-minDPhi)/dDPhi);
   return (j > ESTRUCT_DPHI_BINS - 2) ? ESTRUCT_DPHI_BINS - 1 : j;
@@ -548,6 +549,16 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.9  2006/04/04 22:10:11  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.8  2006/02/22 22:05:15  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.

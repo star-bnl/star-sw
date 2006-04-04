@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.5 2006/02/22 22:05:14 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.6 2006/04/04 22:10:10 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -60,8 +60,8 @@ StEStructBinning::StEStructBinning(){
 
   //--> yt ranges <--
   
-  minYt=0.0; //0.9; //0.15;
-  maxYt=2.5; //5.0;//4.5; // 0.925;
+  minYt=0.9; //0.9; //0.15;
+  maxYt=5.0; //5.0;//4.5; // 0.925;
   nYt = ESTRUCT_YT_BINS-1;
   dYt = (maxYt-minYt)/(float)nYt;
 
@@ -70,7 +70,7 @@ StEStructBinning::StEStructBinning(){
   nDYt= ESTRUCT_DYT_BINS-1;
   dDYt=(maxDYt-minDYt)/(float)nDYt; 
 
-  maxSYt=9.; //2 * maxYt + 1.0;
+  maxSYt=10.; //2 * maxYt + 1.0;
   minSYt=0.9; //2 * minYt;
   nSYt = ESTRUCT_SYT_BINS-1;
   dSYt=(maxSYt-minSYt)/(float)nSYt;
@@ -146,6 +146,16 @@ StEStructBinning::StEStructBinning(){
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.6  2006/04/04 22:10:10  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.5  2006/02/22 22:05:14  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.3 2006/02/22 22:05:18 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.4 2006/04/04 22:10:12 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -123,6 +123,7 @@ inline int StEStructCutBin::switchYtBins(StEStructPairCuts *pc){
   }
   return switchYtBin5(pc);
 }
+
 inline int StEStructCutBin::symmetrizeYtBins(StEStructPairCuts *pc){
   if (mcutMode != 5) {
       return 1;
@@ -155,6 +156,16 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.4  2006/04/04 22:10:12  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.3  2006/02/22 22:05:18  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.
