@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.5 2006/02/22 22:03:17 prindle Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.6 2006/04/04 22:05:05 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,6 +23,8 @@ StEStructEventCuts::~StEStructEventCuts() {};
 
 void StEStructEventCuts::init(){ 
 
+  mtrgByRunPeriod=false;
+  strcpy(mcutTypeName,"Event");
   initCuts();
   initNames();
   if(isLoaded())loadCuts();
@@ -83,7 +85,10 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 76020;
 	validRun = 1; 
       }
-      if (validRun) mtWordName.idx=createCutHists(name,mtWord);
+      if (validRun) {
+         mtWordName.idx=createCutHists(name,mtWord);
+         mtrgByRunPeriod=true;
+      }
       else cout << "  Warning: unknown run period " << name << endl;      
     } else {
       mtWord[0]=(unsigned int)atoi(vals[0]); 
@@ -96,14 +101,16 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
       } else {
 	mtWordName.idx=createCutHists(name,mtWord);
       }
-      return true;
     }
+    setRange(mtWordName.name,mtWord[0],mtWord[1]);
+    return true;
   }
     
   if(!strcmp(name,mpVertexZName.name)){
     mpVertexZ[0]=atof(vals[0]); 
     mpVertexZ[1]=atof(vals[1]);
     mpVertexZName.idx=createCutHists(name,mpVertexZ);
+    setRange(mpVertexZName.name,mpVertexZ[0],mpVertexZ[1]);
     return true;
   }    
     
@@ -111,6 +118,7 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
     mcentrality[0]=atoi(vals[0]); 
     mcentrality[1]=atoi(vals[1]);
     mcentralityName.idx=createCutHists(name,mcentrality);
+    setRange(mcentralityName.name,mcentrality[0],mcentrality[1]);
     return true;
   }    
     
@@ -120,23 +128,30 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 };
 
 
-void StEStructEventCuts::printCuts(ostream& ofs){
+void StEStructEventCuts::printCutStats(ostream& ofs){
 
-  ofs<<"# ******************************************** "<<endl;
-  ofs<<"# *************** Event Cuts ***************** "<<endl;
-  ofs<<"# *** format = variable,minvalue,maxvalue  *** "<<endl;
-  ofs<<"# ******************************************** "<<endl;
+  //  ofs<<"# ******************************************** "<<endl;
+  //  ofs<<"# *************** Event Cuts ***************** "<<endl;
+  //  ofs<<"# *** format = variable,minvalue,maxvalue  *** "<<endl;
+  //  ofs<<"# ******************************************** "<<endl;
   ofs<<endl;
   ofs<<mtWordName.name<<","<<mtWord[0]<<","<<mtWord[1]<<"\t\t\t"<<" # triggerWord cut"<<endl;
   ofs<<mpVertexZName.name<<","<<mpVertexZ[0]<<","<<mpVertexZ[1]<<"\t\t"<<" # primary vertex cut"<<endl;
   ofs<<mcentralityName.name<<","<<mcentrality[0]<<","<<mcentrality[1]<<"\t\t\t"<<" # number events passing centrality cuts"<<endl;
-  ofs<<"# ******************************************** "<<endl<<endl;
+  //  ofs<<"# ******************************************** "<<endl<<endl;
 
 }
 
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.6  2006/04/04 22:05:05  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.5  2006/02/22 22:03:17  prindle
  * Removed all references to multRef
  *

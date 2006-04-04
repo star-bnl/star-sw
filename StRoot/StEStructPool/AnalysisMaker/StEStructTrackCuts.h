@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.h,v 1.3 2005/09/14 17:08:37 msd Exp $
+ * $Id: StEStructTrackCuts.h,v 1.4 2006/04/04 22:05:07 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -64,8 +64,7 @@ public:
 
   virtual bool loadBaseCuts(const char* name, const char** vals, int nvals);
   virtual void loadUserCuts(const char* name, const char** vals, int nvals);
-  virtual void printCuts(ostream& ofs);
-  virtual void printCuts(const char* fname) { StEStructCuts::printCuts(fname); };
+  virtual void printCutStats(ostream& ofs);
 
   bool goodFlag(int f);
   bool goodCharge(int c);
@@ -214,6 +213,13 @@ inline bool StEStructTrackCuts::goodProton(float c){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.h,v $
+ * Revision 1.4  2006/04/04 22:05:07  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.3  2005/09/14 17:08:37  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.6 2006/02/22 22:03:23 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.7 2006/04/04 22:05:06 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,6 +16,8 @@
 #include "StEStructTrackCuts.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/EventMaker/StEStructCentrality.h"
+
 
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
@@ -76,7 +78,7 @@ StEStructEvent* StEStructMuDstReader::next() {
 
   StEStructEvent* retVal=NULL;
   if(!mMaker) return retVal;
-  if(!mInChain){
+  if(!mInChain){            // no chain to call Make() 
      int iret=mMaker->Make();
      if(iret){
         mAmDone=true;
@@ -103,15 +105,13 @@ StEStructEvent* StEStructMuDstReader::next() {
 //  small compared to rest of analysis.
 StEStructEvent* StEStructMuDstReader::fillEvent(){
 
-    StEStructEvent* retVal = new StEStructEvent();
+    StEStructEvent* retVal = NULL;
     StMuDst* muDst=mMaker->muDst();
     StMuEvent* muEvent=muDst->event();
-    if (!muEvent) {
-        delete retVal;
-        retVal=NULL;
-        return retVal;
-    }
- 
+    if(!muEvent) return retVal;
+
+    retVal=new StEStructEvent();
+       
     unsigned int tword=muEvent->l0Trigger().triggerWord();
     mNumGoodTracks = 0;
 
@@ -123,30 +123,39 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
 
     if ((fabs(x) < 1e-5) && (fabs(y) < 1e-5) && (fabs(z) < 1e-5)) {
         useEvent = false;
-    } else if (!mECuts->goodTrigger(muEvent)  ||
-               !mECuts->goodPrimaryVertexZ(z)) {
+    } else if ( !mECuts->goodTrigger(muEvent)  ||
+                !mECuts->goodPrimaryVertexZ(z) ) {
         useEvent=false;
     }
-    int nTracks = countGoodTracks();
-    if (!mECuts->goodCentrality(nTracks)) {
-        useEvent=false;
-    }
-    retVal->SetCentrality( (double) nTracks );
-    int jCent = retVal->Centrality();
-    if ((mCentBin >= 0) && (jCent != mCentBin)) {
-        useEvent = false;
-    } else {
-        retVal->SetEventID(muEvent->eventNumber());
-        retVal->SetRunID(muEvent->runNumber());
-        retVal->SetVertex(x,y,z);
-        retVal->SetZDCe((float)muEvent->zdcAdcAttentuatedSumEast());
-        retVal->SetZDCw((float)muEvent->zdcAdcAttentuatedSumWest());
-        retVal->SetBField((float)muEvent->magneticField());
 
-        if (!fillTracks(retVal)) {
-            useEvent=false; 
-        }
+    int nTracks = countGoodTracks();
+
+//    Feb2006 rjp ........
+//      currently for MuDst's all we have for centrality is NTracks 
+//      if/when this changes and for EventGenerator readers, we will
+//      wrap these via .... if(cent->getCentType()==ESNTracks){....
+//
+
+    StEStructCentrality* cent=StEStructCentrality::Instance(); 
+ 
+    retVal->SetCentralityIndex(cent->centrality((float)nTracks));
+    retVal->SetPtCentralityIndex(cent->ptCentrality((float)nTracks));
+
+    if(!mECuts->goodCentrality((int)retVal->Centrality())) useEvent=false;
+
+    if(useEvent){
+
+      retVal->SetEventID(muEvent->eventNumber());
+      retVal->SetRunID(muEvent->runNumber());
+      retVal->SetVertex(x,y,z);
+      retVal->SetZDCe((float)muEvent->zdcAdcAttentuatedSumEast());
+      retVal->SetZDCw((float)muEvent->zdcAdcAttentuatedSumWest());
+      retVal->SetBField((float)muEvent->magneticField());
+
+      if (!fillTracks(retVal)) useEvent=false; 
+        
     }
+
     mECuts->fillHistogram(mECuts->triggerWordName(),(float)tword,useEvent);
     mECuts->fillHistogram(mECuts->primaryVertexZName(),z,useEvent);
     mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,useEvent);
@@ -156,9 +165,8 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
         retVal=NULL;
     }
 
-    if (retVal) {
-        retVal->FillChargeCollections();
-    }
+    if (retVal) retVal->FillChargeCollections(); //creates track list by charge
+    
     return retVal;
 } 
  
@@ -188,7 +196,7 @@ bool StEStructMuDstReader::fillTracks(StEStructEvent* estructEvent) {
             dEdxBefore->Fill((track->p()).mag(),track->dEdx());
         }
 
-        useTrack = isTrackGood( track );
+        useTrack = isTrackGoodToUse( track ); //this includes track kine cuts
         mTCuts->fillHistograms(useTrack);
 
         if (useTrack) {
@@ -229,6 +237,15 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
     }
     //--> end of electron pid
 
+    return useTrack;
+};
+
+//----includes call to isTrackGood ... and adds some more ....
+bool StEStructMuDstReader::isTrackGoodToUse(StMuTrack* track){
+
+  bool useTrack=isTrackGood(track);
+  if(useTrack){
+
     float pt = track->pt();
     useTrack = (mTCuts->goodPt(pt) && useTrack);
     float _r=pt/0.139;
@@ -238,8 +255,9 @@ bool StEStructMuDstReader::isTrackGood(StMuTrack* track) {
     float xt = 1 - exp( -1*(mt-0.139)/0.4 );
     useTrack = (mTCuts->goodXt(xt) && useTrack);
 
+  }
     return useTrack;
-}
+};
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------
@@ -315,6 +333,13 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.7  2006/04/04 22:05:06  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.6  2006/02/22 22:03:23  prindle
  * Removed all references to multRef
  *

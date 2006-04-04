@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.cxx,v 1.6 2005/10/14 13:51:05 msd Exp $
+ * $Id: StEStructEmptyAnalysis.cxx,v 1.7 2006/04/04 22:05:04 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -65,6 +65,17 @@ StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
   for(int i=1; i<1200; i++) varxbins[i]=pow(i,0.25)-0.00001;
   hvar = new TH1F("hvar","var bin",1199,varxbins);
 
+  float binx[35]={ .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.6, 2.8, 3.0, 3.35, 3.8, 4.4, 5.1, 6, 7, 8, 9, 10.}; 
+
+  for(int i=0;i<14;i++){
+    TString hn1("PtNch_"); hn1+=(i+1);
+    //    TString hn2("PtNch_trig_"); hn2+=(i+1);
+    ptdist[i]=new TH1F(hn1.Data(),hn1.Data(),34,binx);
+    //    ptdistTrg[i]=new TH1F(hn2.Data(),hn2.Data(),34,binx);
+  }
+  ptdist[14]=new TH1F("PtNch_all","PtNch_all",34,binx);
+
+
 };
 
 bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
@@ -89,8 +100,10 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
 
     float npart[2],etaSum[2],phiSum[2],ytSum[2];
     StEStructTrackCollection* tcol;
+    int inch=0;
 
     for(int i=0;i<2;i++){
+
 
       npart[i]=etaSum[i]=phiSum[i]=ytSum[i]=0.;
 
@@ -103,7 +116,8 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
 	  etaSum[i]+=(*Iter)->Eta();
 	  phiSum[i]+=(*Iter)->Phi();
 	  ytSum[i]+=(*Iter)->Yt();
-	}
+          if(fabs((*Iter)->Eta())<0.5)inch++;
+	}        
       }
       if(npart[i]>0.){
 	etaMean[i][id]->Fill(etaSum[i]/npart[i]);
@@ -111,6 +125,21 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
 	ytMean[i][id]->Fill(ytSum[i]/npart[i]);
       }
 
+    }
+
+    if(inch>0 && inch<15){
+      inch-=1;
+     for(int i=0;i<2;i++){
+       if(i==0)tcol=event->TrackCollectionP();
+       if(i==1)tcol=event->TrackCollectionM();
+       StEStructTrackIterator Iter;
+       for(Iter=tcol->begin(); Iter!=tcol->end();++Iter){
+	 if(*Iter) {
+           ptdist[inch]->Fill((*Iter)->Pt());
+           ptdist[14]->Fill((*Iter)->Pt());
+	 }
+       }
+     }
     }
 
     if( (npart[0]+npart[1])>0.){
@@ -145,8 +174,9 @@ void StEStructEmptyAnalysis::finish(){
       ytMean[i][j]->Write();
     }
   }
-  
 
+  for(int i=0;i<15;i++)ptdist[i]->Write();
+  
   // Centrality plots
   hNEvent->Write();
   
@@ -160,6 +190,13 @@ void StEStructEmptyAnalysis::finish(){
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.cxx,v $
+ * Revision 1.7  2006/04/04 22:05:04  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.6  2005/10/14 13:51:05  msd
  * Yet another fix of code I'm not using
  *
