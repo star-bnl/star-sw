@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.3 2006/02/22 22:06:54 prindle Exp $
+ * $Id: StEStructHijing.h,v 1.4 2006/04/04 22:14:39 porter Exp $
  *
  * Author: Chunhui Han
  *
@@ -27,7 +27,6 @@ class StEStructHijing : public StEStructEventReader {
   StEStructTrackCuts* mTCuts;
   bool mInChain;
   bool mAmDone;
-  bool museImpactParameter;
   int   mCentBin;
   float mImpact;
   int   mnumTracks;
@@ -46,7 +45,6 @@ class StEStructHijing : public StEStructEventReader {
                   StEStructEventCuts* ecuts,
                   StEStructTrackCuts* tcuts,
                   bool inChain = true,
-                  bool useImpactParameter = true,
                   int  centBin = 0,
                   int  eventsToDo = 100);
 
@@ -63,10 +61,20 @@ class StEStructHijing : public StEStructEventReader {
   virtual StEStructEvent* next();
   virtual bool         done();
 
+  virtual double getImpact();       // impact parameter
+  virtual double getBinary();       // N binary collisions
+  virtual double getParticipants(); // N participants
+
+
   ClassDef(StEStructHijing,1)
 };
 
 inline bool StEStructHijing::done(){ return mAmDone; };
+
+inline double StEStructHijing::getImpact(){ return mHijing->GetImpactParameter(); };
+inline double StEStructHijing::getBinary(){ return mHijing->GetBinaryCollisions(); };
+inline double StEStructHijing::getParticipants(){ return mHijing->GetParticipants(); };
+
 
 inline bool StEStructHijing::measureable(int pid){
   bool retVal=false;

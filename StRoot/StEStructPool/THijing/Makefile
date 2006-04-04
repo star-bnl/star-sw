@@ -6,6 +6,7 @@ ROOTLIBS   = $(shell root-config --libs)
 ROOTGLIBS  = $(shell root-config --glibs)
 ROOTINCDIR = $(shell root-config --incdir)
 
+
 # -fno-automatic: treat local variables and common blocks as if they are
 # in the SAVE statement
 # When the compiler option '-fPIC' is added to compile fortran code,
@@ -14,7 +15,7 @@ ROOTINCDIR = $(shell root-config --incdir)
 CERNLIBS = -L$(CERN_ROOT)/lib -lpacklib -lkernlib -lmathlib -lpawlib -lgraflib
 CCFLAGS  = -g -Wall -O -fno-second-underscore -fno-automatic
 FORFLAGS = -g -Wall -O -fno-second-underscore -fno-automatic
-CXXFLAGS = -g -Wall -O -fno-automatic
+CXXFLAGS = -g -Wall -O -fno-automatic 
 SOFLAGS  = -fPIC -shared
 CXXLDFLAGS = -lg2c
 CXX      = g++
