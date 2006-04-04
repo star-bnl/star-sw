@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCuts.cxx,v 1.4 2005/09/14 17:08:31 msd Exp $
+ * $Id: StEStructCuts.cxx,v 1.5 2006/04/04 22:05:03 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -18,10 +18,7 @@
 #include "TFile.h"
 #include "TH1.h"
 
-
 ClassImp(StEStructCuts)
-
-
 
 //-------------------------------------------------------------------
 StEStructCuts::StEStructCuts(): mcutFileName(0), mMaxStore(100) { initVars();};
@@ -40,11 +37,23 @@ StEStructCuts::~StEStructCuts(){ if(mcutFileName) delete [] mcutFileName ;
 
 }
 
+//--------------------------------------------
+
+void StEStructCuts::printCuts(ostream& os, int i){
+  os<<"<CutType=\""<<mcutTypeName<<"\">"<<endl;
+  if(i>=0)os<<"<index>"<<i<<"</index>"<<endl;
+  printCutStats(os);
+  os<<"</CutType>"<<endl;
+}
+
+
 //-------------------------------------------------------------------
 void StEStructCuts::initVars(){
 
   mvarName = new char*[mMaxStore];
   mvalues  = new float[mMaxStore];
+  mminVal  = new float[mMaxStore];
+  mmaxVal  = new float[mMaxStore];
   mvarHistsNoCut = new TH1*[mMaxStore];
   mvarHistsCut   = new TH1*[mMaxStore];
   mnumVars=0;
@@ -63,6 +72,8 @@ void StEStructCuts::deleteVars() {
 
   delete [] mvarName; 
   delete [] mvalues;
+  delete [] mminVal;
+  delete [] mmaxVal;
   delete [] mvarHistsNoCut;
   delete [] mvarHistsCut;
 
@@ -398,6 +409,13 @@ void StEStructCuts::printCuts(const char* fileName){
 /***********************************************************************
  *
  * $Log: StEStructCuts.cxx,v $
+ * Revision 1.5  2006/04/04 22:05:03  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.4  2005/09/14 17:08:31  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrackCuts.cxx,v 1.2 2005/09/14 17:08:36 msd Exp $
+ * $Id: StEStructTrackCuts.cxx,v 1.3 2006/04/04 22:05:07 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,6 +23,7 @@ StEStructTrackCuts::~StEStructTrackCuts() {};
 
 void StEStructTrackCuts::init(){ 
 
+  strcpy(mcutTypeName,"Track");
   initCuts();
   initNames();
   if(isLoaded())loadCuts();
@@ -86,6 +87,7 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
   if(!strcmp(name,mnfitpointsName.name)){ 
     mnfitpoints[0]=atoi(vals[0]); mnfitpoints[1]=atoi(vals[1]);
     mnfitpointsName.idx = createCutHists(name,mnfitpoints);
+    setRange(mnfitpointsName.name,mnfitpoints[0],mnfitpoints[1]);
     return true;
   }
 
@@ -110,30 +112,35 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
   if(!strcmp(name,mptName.name)){ 
     mpt[0]=atof(vals[0]); mpt[1]=atof(vals[1]);
     mptName.idx = createCutHists(name,mpt);
+    setRange(mptName.name,mpt[0],mpt[1]);
     return true;
   }
 
   if(!strcmp(name,mytName.name)){ 
     myt[0]=atof(vals[0]); myt[1]=atof(vals[1]);
     mytName.idx = createCutHists(name,myt);
+    setRange(mytName.name,myt[0],myt[1]);
     return true;
   }
 
   if(!strcmp(name,mxtName.name)){
     mxt[0]=atof(vals[0]); mxt[1]=atof(vals[1]);
     mxtName.idx = createCutHists(name,mxt);
+    setRange(mxtName.name,mxt[0],mxt[1]);
     return true;
   }
 
   if(!strcmp(name,mphiName.name)){ 
     mphi[0]=(float)(M_PI*atof(vals[0])); mphi[1]=(float)(M_PI*atof(vals[1]));
     mphiName.idx = createCutHists(name,mphi);
+    setRange(mphiName.name,mphi[0],mphi[1]);
     return true;
   }
 
   if(!strcmp(name,metaName.name)){ 
     meta[0]=atof(vals[0]); meta[1]=atof(vals[1]);
     metaName.idx = createCutHists(name,meta);
+    setRange(metaName.name,meta[0],meta[1]);
     return true;
   }
 
@@ -167,12 +174,12 @@ bool StEStructTrackCuts::loadBaseCuts(const char* name, const char** vals, int n
 }
 
 
-void StEStructTrackCuts::printCuts(ostream& ofs){
+void StEStructTrackCuts::printCutStats(ostream& ofs){
 
-  ofs<<"# ******************************************** "<<endl;
-  ofs<<"# *************** Track Cuts ***************** "<<endl;
-  ofs<<"# *** format = variable,minvalue,maxvalue  *** "<<endl;
-  ofs<<"# ******************************************** "<<endl;
+  //  ofs<<"# ******************************************** "<<endl;
+  //  ofs<<"# *************** Track Cuts ***************** "<<endl;
+  //  ofs<<"# *** format = variable,minvalue,maxvalue  *** "<<endl;
+  //  ofs<<"# ******************************************** "<<endl;
   ofs<<endl;
   ofs<<mflagName.name<<","<<mflag[0]<<","<<mflag[1]<<"\t\t\t"<<" # track flag cut"<<endl;
   ofs<<mchargeName.name<<","<<mcharge[0]<<","<<mcharge[1]<<"\t\t\t"<<" # charge cut"<<endl;
@@ -188,7 +195,7 @@ void StEStructTrackCuts::printCuts(ostream& ofs){
   ofs<<mnsigmaPiName.name<<","<<mnsigmaPi[0]<<","<<mnsigmaPi[1]<<"\t\t\t"<<" # num sigma Pion cut"<<endl;
   ofs<<mnsigmaKName.name<<","<<mnsigmaK[0]<<","<<mnsigmaK[1]<<"\t\t\t"<<" # num sigma Kaon cut"<<endl;
   ofs<<mnsigmaPName.name<<","<<mnsigmaP[0]<<","<<mnsigmaP[1]<<"\t\t"<<" # num sigma proton cut"<<endl;
-  ofs<<"# ******************************************** "<<endl<<endl;
+  //  ofs<<"# ******************************************** "<<endl<<endl;
 
 }
 
@@ -196,6 +203,13 @@ void StEStructTrackCuts::printCuts(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructTrackCuts.cxx,v $
+ * Revision 1.3  2006/04/04 22:05:07  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.2  2005/09/14 17:08:36  msd
  * Fixed compiler warnings, a few tweaks and upgrades
  *

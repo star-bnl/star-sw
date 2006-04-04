@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.5 2006/02/22 22:03:24 prindle Exp $
+ * $Id: StEStructMuDstReader.h,v 1.6 2006/04/04 22:05:06 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -61,6 +61,7 @@ public:
   StEStructEvent* fillEvent();
   bool fillTracks(StEStructEvent* estructEvent);
   bool isTrackGood(StMuTrack* track);
+  bool isTrackGoodToUse(StMuTrack* track);
   int  countGoodTracks();
   void fillEStructTrack(StEStructTrack* eTrack, StMuTrack* mTrack);
   
@@ -79,6 +80,13 @@ inline int StEStructMuDstReader::setCentBin(int centBin) {
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.6  2006/04/04 22:05:06  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.5  2006/02/22 22:03:24  prindle
  * Removed all references to multRef
  *

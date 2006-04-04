@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.5 2006/02/22 22:03:18 prindle Exp $
+ * $Id: StEStructEventCuts.h,v 1.6 2006/04/04 22:05:05 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,6 +29,7 @@ protected:
 
 
   char         mRunPeriod[1024];
+  bool         mtrgByRunPeriod;
   unsigned int mtWord[2];  
   float        mpVertexZ[2]; 
   float        mcentrality[2];
@@ -45,8 +46,7 @@ public:
 
   virtual bool loadBaseCuts(const char* name, const char** vals, int nvals);
   virtual void loadUserCuts(const char* name, const char** vals, int nvals);
-  virtual void printCuts(ostream& ofs);
-  virtual void printCuts(const char* fname) { StEStructCuts::printCuts(fname); };
+  virtual void printCutStats(ostream& ofs);
 
 
   bool goodTrigger(StMuEvent* muEvent);
@@ -65,6 +65,9 @@ public:
 inline void StEStructEventCuts::loadUserCuts(const char* name, const char** vals, int nvals){}
 
 inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
+
+  if(mtrgByRunPeriod){
+
     if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
         if (muEvent->triggerIdCollection().nominal().isTrigger(76007) ||
             muEvent->triggerIdCollection().nominal().isTrigger(76011)) {
@@ -98,12 +101,17 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
         if ( 0x1000 == t ) {
             return true;
         }
-    } else {
+    } else if(!strcmp("ppMinBias",mRunPeriod)){
+      if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) return true;
+    }
+
+  } else {
         unsigned int t = muEvent->l0Trigger().triggerWord();
         mvalues[mtWordName.idx] = (float)t;
         return ( (mtWord[0]==mtWord[1] && mtWord[0]==0) ||
                  (t>=mtWord[0] && t<=mtWord[1])  ) ;
-    }
+  }
+
     return false;
 }
 
@@ -126,6 +134,13 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.6  2006/04/04 22:05:05  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.5  2006/02/22 22:03:18  prindle
  * Removed all references to multRef
  *

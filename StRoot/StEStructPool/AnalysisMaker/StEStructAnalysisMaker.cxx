@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.2 2005/09/07 20:18:35 prindle Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.3 2006/04/04 22:05:03 porter Exp $
  *
  *************************************************************************
  *
@@ -34,35 +34,38 @@ ClassImp(StEStructAnalysisMaker)
 StEStructAnalysisMaker::StEStructAnalysisMaker(const Char_t *name) : StMaker(name) {
     mtimer=NULL;
     mEventLoopCounter=0;
-    mreader[0]=0;
+    mreader=0;
     manalysis[0]=0;
     mEventProcessedCounter=0;
-    numReaders=numAnalysis=0;
+    numAnalysis=0;
     doPrintMemoryInfo=false;
     mEventProcessedPerType=0;
+    mQAHists = NULL;
 }
 
 //--------------------------------------------------------------
 StEStructAnalysisMaker::~StEStructAnalysisMaker() { 
 
-  for(int i=0;i<numReaders;i++) delete mreader[i];
   for(int i=0;i<numAnalysis;i++) delete manalysis[i];
-  if(mtimer) delete mtimer;
-}
+  if(mtimer)   delete mtimer;
 
+}
 
 //--------------------------------------------------------------
 Int_t StEStructAnalysisMaker::Init()
 {
-  gMessMgr->Info() << "StEStructAnalysisMaker: Init()" << endm;    
+  //  gMessMgr->Info() << "StEStructAnalysisMaker: Init()" << endm;    
   startTimer();
-  if(!numReaders || !numAnalysis || (numReaders != numAnalysis)){
-    gMessMgr->Info()<<" StEStructAnalysisMaker::Init() numReaders!=numAnalysis"<<endm;
+
+  if(!mreader || !numAnalysis){
+    gMessMgr->Error()<<" StEStructAnalysisMaker::Init() no reader ";
+    gMessMgr->Error()<<" Or no analysis object: Will Abort "<<endm;
     assert(0);
   }
 
-      mEventProcessedPerType=new int[numAnalysis];
-      for(int i=0;i<numAnalysis;i++) mEventProcessedPerType[i]=0;
+  mEventProcessedPerType=new int[numAnalysis];
+  for(int i=0;i<numAnalysis;i++) mEventProcessedPerType[i]=0;
+
   return kStOK;
 }
 
@@ -80,9 +83,12 @@ StEStructAnalysisMaker::Finish()
       }     
       for(int i=0;i<numAnalysis;i++) manalysis[i]->finish();
       mtimer->stop();
- 
- return StMaker::Finish();
+
+      // Do Not Delete This  -->  if(mQAHists) delete mQAHists;
+
+      return kStOk; // remove this ....  StMaker::Finish();
 }
+
 
 //-----------------------------------------------------
 Int_t
@@ -91,32 +97,42 @@ StEStructAnalysisMaker::Make(){
 
   if (doPrintMemoryInfo)StMemoryInfo::instance()->snapshot();
 
-  if(!mreader[0] || !manalysis[0] ){ 
+  if(!mreader || !manalysis[0] ){ 
      gMessMgr->Error()<<" No Reader in StEStructAnalysisMaker::Make() "<<endm;
      return kStFatal;
    }
   
    mEventLoopCounter++;
    //
+
+   /////    <<<<    below is now gone, kaput, obsolete   >>>>>
    // model: each reader has a different cut file for event selection.
    //        if event doesn't pass a reader's cut, there is a check 
    //        for EOF and, if not, it goes to the next reader. If the event
    //        passes, then the analysis is run and the loop is broken
    //        Thus, an event can only be sent to 1 of the analysis modules.
    //
-   //
+
    mCurrentAnalysis = 0;
-   for(int i=0;i<numReaders;i++){
-     if(!(pEStructEvent=mreader[i]->next())){
-       if(mreader[i]->done()) return kStEOF;
-     } else {
-       manalysis[i]->doEvent(pEStructEvent);
+
+   if(!(pEStructEvent=mreader->next())){
+
+     if(mreader->done()) return kStEOF;
+
+   } else {
+
+     int ia = getAnalysisIndex();         // 0 if numAnalysis = 1
+     if(ia>=0 && ia < numAnalysis) {
+
+       manalysis[ia]->doEvent(pEStructEvent);
        mEventProcessedCounter++;
-       mEventProcessedPerType[i]++;
-       mCurrentAnalysis = manalysis[i];
-       break;
+       mEventProcessedPerType[ia]++;
+       if(mQAHists)mQAHists->fillHistograms(pEStructEvent,mreader);
+       mCurrentAnalysis = manalysis[ia];
+
      }
-   }
+   }   
+
 
    if (doPrintMemoryInfo) {
      StMemoryInfo::instance()->snapshot();
@@ -124,6 +140,39 @@ StEStructAnalysisMaker::Make(){
    }   
 
    return kStOK;   
+}
+
+int StEStructAnalysisMaker::getAnalysisIndex(){
+
+  if(numAnalysis==1) return 0;
+
+//   currently all we index on is centrality, 
+//   but this method could be a switch statement
+//   over some flag known to the maker
+
+  return pEStructEvent->Centrality();
+}
+
+//-----------------------------------------------------------------
+void StEStructAnalysisMaker::writeQAHists(const char* fileName){
+
+  TFile * tfq=new TFile(fileName,"RECREATE");
+  if(!tfq){
+    gMessMgr->Warning()<<" QAfile = "<<fileName<<" NOT OPENED!!"<<endm;
+    return;
+  }
+
+  if(mQAHists)mQAHists->writeHistograms(tfq);
+  for(int i=0;i<numAnalysis;i++)manalysis[i]->writeQAHists(tfq);
+
+};
+
+
+//-----------------------------------------------------------------
+void StEStructAnalysisMaker::writeDiagnostics(int opt){
+
+  for(int i=0;i<numAnalysis;i++)manalysis[i]->writeDiagnostics();
+  
 }
 
 void StEStructAnalysisMaker::startTimer(){ 
@@ -148,8 +197,15 @@ void StEStructAnalysisMaker::compiledLoop(){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.3  2006/04/04 22:05:03  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.2  2005/09/07 20:18:35  prindle
- * AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
+ *   AnalysisMaker: Keep track of currentAnalysis (for use in doEStruct macro)
  *   EventCuts.h:   Added trigger cuts including cucu and year 4.
  *   MuDstReader:   Added dE/dx histograms. Re-arranged code to count tracks
  *                    before making centrality cut.

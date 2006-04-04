@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.5 2005/09/29 17:40:25 msd Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.6 2006/04/04 22:05:03 porter Exp $
  *   
  *
  *
@@ -21,16 +21,20 @@
 //-> include pure virtual interface
 #include "StEStructEventReader.h"
 #include "StEStructAnalysis.h"
+#include "StEStructCuts.h"
 
+#include "StEStructQAHists.h"
 class StEStructEvent;
 #include "StMuDSTMaker/COMMON/StMuTimer.h"
 //class StMuTimer;
+
 
 
 class StEStructAnalysisMaker : public StMaker {
 
 public:
                    StEStructAnalysisMaker(const Char_t *name="ESTRUCT 2pt");
+
     virtual       ~StEStructAnalysisMaker();
     
     void          Clear(Option_t *option="");
@@ -41,6 +45,12 @@ public:
     void          SetReaderAnalysisPair(StEStructEventReader* reader, StEStructAnalysis * analysis);
     void          SetEventReader(StEStructEventReader* reader);
     void          SetAnalysis(StEStructAnalysis * analysis);
+    void          SetAnalyses(StEStructAnalysis ** analyses, int n);
+    void          SetQAHists(StEStructQAHists* qa);
+    int           getAnalysisIndex();          
+    void          writeQAHists(const char* fileName);
+
+    void          writeDiagnostics(int opt=0); // a holder for diagnostic info
     void          toggleMemoryInfo();
     int           getNumberOfEventsLooped();
     int           getNumberOfEventsProcessed();
@@ -48,6 +58,10 @@ public:
     StMuTimer*    getTimer();
     void          startTimer();
     void          stopTimer();
+
+    void          logAllStats(ostream& os);
+    void          logCutStats(StEStructCuts* cuts, ostream& os, int index);   
+
     void          logAnalysisTime(ostream& os);
     void          logInputEvents(ostream& os);
     void          logOutputEvents(ostream& os);
@@ -59,7 +73,7 @@ public:
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.5 2005/09/29 17:40:25 msd Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.6 2006/04/04 22:05:03 porter Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -70,15 +84,16 @@ private:
     UInt_t              mEventLoopCounter; //!        //  mNeventsLooped
     UInt_t              mEventProcessedCounter; //!   //  mNeventsProcessed
     int*                mEventProcessedPerType; //!
-    int                 numReaders;
     int                 numAnalysis;
     // --> new pointers for data I/O, cuts, and analysis
 
-    StEStructEventReader* mreader[100]; //! base class for reading an event
+    StEStructEventReader* mreader; //! base class for reading an event
     StEStructAnalysis* manalysis[100];  //!
 
     //pointers to an event ... don't need this now but may be useful
-    StEStructEvent*        pEStructEvent;               //  pointer to uEvent data
+    StEStructEvent*        pEStructEvent;  //  pointer to uEvent data
+
+    StEStructQAHists*      mQAHists;
  
  public:
 
@@ -94,12 +109,23 @@ inline void StEStructAnalysisMaker::SetReaderAnalysisPair(StEStructEventReader* 
 }
 
 inline void StEStructAnalysisMaker::SetEventReader(StEStructEventReader* reader){ 
-  mreader[numReaders]=reader; numReaders++;
+  mreader = reader;
 }
 
 inline void StEStructAnalysisMaker::SetAnalysis(StEStructAnalysis* analysis){ 
   manalysis[numAnalysis]=analysis; numAnalysis++;
 };
+
+inline void StEStructAnalysisMaker::SetAnalyses(StEStructAnalysis ** analyses, int n){
+  for(int i=0;i<n;i++)manalysis[i]=analyses[i];
+  numAnalysis=n;
+};
+
+inline void StEStructAnalysisMaker::SetQAHists(StEStructQAHists* qa){
+  if(!qa) return;
+  if(mQAHists)delete mQAHists; 
+  mQAHists = qa;
+}
 
 inline void StEStructAnalysisMaker::toggleMemoryInfo(){
   if(doPrintMemoryInfo){ 
@@ -112,6 +138,20 @@ inline void StEStructAnalysisMaker::toggleMemoryInfo(){
 
 inline int StEStructAnalysisMaker::getNumberOfEventsLooped(){ return mEventLoopCounter; }
 inline int StEStructAnalysisMaker::getNumberOfEventsProcessed(){ return mEventProcessedCounter; }
+
+inline void StEStructAnalysisMaker::logCutStats(StEStructCuts* cuts, ostream& os, int index){
+  cuts->printCuts(os,index);
+}
+
+
+//-------------------------------------------------------------------
+inline void StEStructAnalysisMaker::logAllStats(ostream& os){
+   logAnalysisTime(os);
+   logInputEvents(os);
+   logOutputEvents(os);
+   logOutputRate(os);
+   logAnalysisStats(os);
+}
 
 inline void StEStructAnalysisMaker::logAnalysisTime(ostream& os){
   if(!mtimer) return;
@@ -145,6 +185,13 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.6  2006/04/04 22:05:03  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.5  2005/09/29 17:40:25  msd
  * Changed empty analysis to create plots for determining centrality bins
  *

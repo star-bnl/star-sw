@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.h,v 1.5 2005/10/10 16:22:31 msd Exp $
+ * $Id: StEStructEmptyAnalysis.h,v 1.6 2006/04/04 22:05:05 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -30,6 +30,7 @@ class StEStructEmptyAnalysis : public StEStructAnalysis {
   TH1F** etaMean[3];
   TH1F** phiMean[3];
   TH1F** ytMean[3];
+  TH1F*  ptdist[15];
   
   // Make some plots for determining centrality bins
   TH1F* hNEvent;  // dNevent/dNch
@@ -62,6 +63,13 @@ inline void StEStructEmptyAnalysis::setCutFile(const char* cutFileName, StEStruc
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.h,v $
+ * Revision 1.6  2006/04/04 22:05:05  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
  * Revision 1.5  2005/10/10 16:22:31  msd
  * stability fixes, yet another tweak of output hists
  *
