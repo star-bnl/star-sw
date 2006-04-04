@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.hh,v 1.2 2006/03/15 15:13:57 jcs Exp $
+// $Id: StFtpcLaserCalib.hh,v 1.3 2006/04/04 10:57:05 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.hh,v $
+// Revision 1.3  2006/04/04 10:57:05  jcs
+// Fix memory leak
+//
 // Revision 1.2  2006/03/15 15:13:57  jcs
 // add lines for listing CVS update info
 //
@@ -122,7 +125,6 @@ class StFtpcLaserCalib : public StFtpcLaser
   void MakePs();
   bool cut(int i);
   void Fill(int l);
-  void GetTreeEntry(int k);
   void minuit_init();
   void minuit_set_par();
   void minuit_print();
