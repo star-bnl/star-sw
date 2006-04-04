@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.h,v 1.5 2004/09/24 01:46:45 prindle Exp $
+ * $Id: StEStructCentrality.h,v 1.6 2006/04/04 22:12:29 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,15 +15,20 @@
 
 #include "TROOT.h"
 
+enum StEStructCentType { ESNTracks=0, ESGenImpact }; // may be others from generators...
+
 class StEStructCentrality {
 
   double *mcentralities;
   int  mnumCentralities;
   double *mpts, *mptcents;
   int  mnumpts, mnumptcents;
+  int warningCount;
+
+  StEStructCentType  mCentType;
 
   static StEStructCentrality* mInstance;
-  StEStructCentrality(): mcentralities(0), mnumCentralities(0), mpts(0), mptcents(0),mnumpts(0), mnumptcents(0) {};
+  StEStructCentrality(): mcentralities(0), mnumCentralities(0), mpts(0), mptcents(0),mnumpts(0), mnumptcents(0), warningCount(0), mCentType(ESNTracks) {};
 
  public:
 
@@ -50,6 +55,11 @@ class StEStructCentrality {
   double ptLimit( const int ptIndex );
   double ptCentralityLimit( const int ptCent );
 
+  void setCentTypeNTracks();
+  void setCentTypeImpact();
+
+  StEStructCentType getCentType();
+
   ClassDef(StEStructCentrality,1)
 };
 
@@ -65,11 +75,19 @@ inline double StEStructCentrality::maxCentrality(int id){
   return -1;
 }
 
+
+inline void StEStructCentrality::setCentTypeNTracks() { mCentType=ESNTracks ;};
+inline void StEStructCentrality::setCentTypeImpact() { mCentType=ESGenImpact;};
+inline StEStructCentType StEStructCentrality::getCentType(){ return mCentType;};
+
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructCentrality.h,v $
+ * Revision 1.6  2006/04/04 22:12:29  porter
+ * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
+ *
  * Revision 1.5  2004/09/24 01:46:45  prindle
  * Added call for setPtLimit. I use this in fluctuations which prevented
  * a fresh CVS checkout from compiling

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.6 2006/02/22 22:06:05 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.7 2006/04/04 22:12:30 porter Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -58,6 +58,8 @@ StEStructEvent::~StEStructEvent(){
 
   Clear();
   delete fTracks;
+  //  delete mTrackCollectionM;
+  //  delete mTrackCollectionP;
 
 };  
 
@@ -79,6 +81,9 @@ void StEStructEvent::AddTrack(StEStructTrack* inputTrack) {
 
 //-------------------------------------------------------
 void StEStructEvent::Clear(Option_t *option) {
+
+  mTrackCollectionP->Clear();
+  mTrackCollectionM->Clear();
   fTracks->Clear(option);
   mNtrack=0;
 }
@@ -127,6 +132,9 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.7  2006/04/04 22:12:30  porter
+ * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
+ *
  * Revision 1.6  2006/02/22 22:06:05  prindle
  * Removed all references to multRef (?)
  *

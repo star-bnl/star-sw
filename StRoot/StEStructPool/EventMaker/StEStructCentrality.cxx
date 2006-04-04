@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.cxx,v 1.5 2005/09/29 17:41:50 msd Exp $
+ * $Id: StEStructCentrality.cxx,v 1.6 2006/04/04 22:12:29 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -44,7 +44,10 @@ StEStructCentrality::~StEStructCentrality(){
 //                  input is within range covered by definition.
 int StEStructCentrality::centrality(const double impact) {
     if(!mcentralities) {
-        cout<<" Error:: centrality requested without initialization "<<endl;
+         if(warningCount<10){
+          warningCount++;
+	  cout<<" Error:: centrality requested without initialization (warning #"<<warningCount<<")"<<endl;
+	}
         return -1;
     }
 
@@ -64,7 +67,10 @@ int StEStructCentrality::centrality(const double impact) {
 
 int StEStructCentrality::ptIndex(const double pt) {
     if(!mpts) {
-        cout<<" Error:: Pt index requested without initialization "<<endl;
+        if(warningCount<10){
+          warningCount++;
+	  cout<<" Error:: Pt index requested without initialization (warning #"<<warningCount<<")"<<endl;
+	}
         return -1;
     }
 
@@ -84,7 +90,10 @@ int StEStructCentrality::ptIndex(const double pt) {
 
 int StEStructCentrality::ptCentrality(const double cent) {
     if(!mptcents) {
-        cout<<" Error:: Pt centrality index requested without initialization "<<endl;
+        if(warningCount<10){
+          warningCount++;
+	  cout<<" Error:: Pt centrality index requested without initialization (warning #"<<warningCount<<")"<<endl;
+	}
         return -1;
     }
 
@@ -120,7 +129,10 @@ void StEStructCentrality::setCentralities(const double* centralities, const int 
 
 int StEStructCentrality::numCentralities() {
   if(!mcentralities) {  // this is set with mnumCentralities in setCentralities
-    cout<<" Error:: numCentralities requested without initialization "<<endl;
+        if(warningCount<10){
+          warningCount++;
+	  cout<<" Error:: numCentralities requested without initialization (warning #"<<warningCount<<")"<<endl;
+	}
     return -1;
   }
 
@@ -185,6 +197,9 @@ double StEStructCentrality::ptCentralityLimit( const int index ) {
 /***********************************************************************
  *
  * $Log: StEStructCentrality.cxx,v $
+ * Revision 1.6  2006/04/04 22:12:29  porter
+ * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
+ *
  * Revision 1.5  2005/09/29 17:41:50  msd
  * Added initialization check to numCentralities
  *
