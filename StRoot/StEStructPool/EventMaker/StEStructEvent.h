@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.4 2006/02/22 22:06:06 prindle Exp $
+ * $Id: StEStructEvent.h,v 1.5 2006/04/04 22:12:30 porter Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -94,6 +94,8 @@ class StEStructEvent : public TObject {
   virtual StEStructTrackCollection * TrackCollectionM() const; 
   virtual StEStructTrackCollection * TrackCollectionP() const;
   void SetCentrality(const Double_t N);
+  void SetCentralityIndex(const Int_t N) { mCentrality = N; };
+  void SetPtCentralityIndex(const Int_t N) { mPtCentrality = N; };
 
   virtual void FillChargeCollections();
   
@@ -108,6 +110,9 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.5  2006/04/04 22:12:30  porter
+ * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
+ *
  * Revision 1.4  2006/02/22 22:06:06  prindle
  * Removed all references to multRef (?)
  *
