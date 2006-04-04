@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.3 2006/02/22 22:06:53 prindle Exp $
+ * $Id: StEStructHijing.cxx,v 1.4 2006/04/04 22:14:39 porter Exp $
  *
  * Author: Chunhui Han
  *
@@ -15,6 +15,7 @@
 #include "StEStructPool/AnalysisMaker/StEStructTrackCuts.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/EventMaker/StEStructCentrality.h"
 
 StEStructHijing::StEStructHijing() {
     mHijing             = 0;
@@ -22,7 +23,6 @@ StEStructHijing::StEStructHijing() {
     mTCuts              = 0;
     mInChain            = false;
     mEventsToDo         = 100;
-    museImpactParameter = true;
     mCentBin            = 0;
     mEventCount         = 0;
     mAmDone             = false;
@@ -32,7 +32,6 @@ StEStructHijing::StEStructHijing(THijing* hijing,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
                                  bool inChain,
-                                 bool useImpactParameter,
                                  int  centBin,
                                  int  eventsToDo) {
     mHijing             = hijing;
@@ -40,7 +39,6 @@ StEStructHijing::StEStructHijing(THijing* hijing,
     mTCuts              = tcuts;
     mInChain            = inChain;
     mEventsToDo         = eventsToDo;
-    museImpactParameter = useImpactParameter;
     mCentBin            = centBin;
     mEventCount         = 0;
     mAmDone             = false;
@@ -73,15 +71,16 @@ StEStructEvent* StEStructHijing::next() {
     int   nTracks = countGoodTracks();
     float centMeasure;
     mImpact = mHijing->GetImpactParameter();
-    if (museImpactParameter) {
-        centMeasure = mImpact;
+
+    StEStructCentrality* cent=StEStructCentrality::Instance(); 
+    if(cent->getCentType() == ESGenImpact){
+      centMeasure = mImpact;
     } else {
-        centMeasure = nTracks;
+      centMeasure = nTracks;
     }
-    retVal->SetCentrality(centMeasure);
-    int jCent = retVal->Centrality();
-    if (((mCentBin >= 0) && (jCent != mCentBin)) ||
-         !mECuts->goodCentrality(centMeasure)) {
+    retVal->SetCentrality(cent->centrality(centMeasure));
+    retVal->SetPtCentralityIndex(cent->ptCentrality((float)centMeasure));
+    if(!mECuts->goodCentrality((int)retVal->Centrality())){ //|| !mstarTrigger){
         delete retVal;
         retVal=NULL;
         mECuts->fillHistogram(mECuts->centralityName(),centMeasure,false);
