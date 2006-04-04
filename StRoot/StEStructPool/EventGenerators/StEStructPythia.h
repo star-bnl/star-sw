@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.6 2006/02/22 22:05:38 prindle Exp $
+ * $Id: StEStructPythia.h,v 1.7 2006/04/04 22:11:27 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -32,6 +32,7 @@ class StEStructPythia : public StEStructEventReader {
   int mCentBin;
   int mnumTracks;
   int mEventsToDo;
+  bool mstarTrigger;
 
 
   void fillTracks(StEStructEvent* estructEvent);
@@ -61,6 +62,9 @@ class StEStructPythia : public StEStructEventReader {
 
   virtual StEStructEvent* next();
   virtual bool         done();
+
+  virtual double getNPartonic();
+
 
   ClassDef(StEStructPythia,1)
 };
@@ -180,6 +184,9 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.7  2006/04/04 22:11:27  porter
+ * StEStructPythia now uses StEtructCentrality for selection
+ *
  * Revision 1.6  2006/02/22 22:05:38  prindle
  * Removed all references to multRef (?)
  *
