@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.7 2005/09/14 17:25:37 msd Exp $
+ * $Id: StEStructSupport.cxx,v 1.8 2006/04/04 22:14:10 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -85,6 +85,8 @@ StEStructSupport::StEStructSupport(TFile* tf, int bgmode, float* npairs, float n
   // ytyt slices and wants to compare the amplitudes, the generic normalization
   // of sum of rho = 1. isn't sufficient
   //
+
+  mapplyDEtaFix=false; // must set explicitly now
 
   if(npairs){
     mnpairs = new float[6];
@@ -609,6 +611,8 @@ void StEStructSupport::scaleBackGround(TH1* sib, TH1* mix, float sf){
 //----------------------------------------------------------------
 void StEStructSupport::fixDEta(TH2** h, int numHists){
 
+  if(!mapplyDEtaFix) return;
+
   TH1D* atmp=h[0]->ProjectionX();
 
   double dx=(double)(atmp->GetBinLowEdge(2)-atmp->GetBinLowEdge(1));
@@ -720,6 +724,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.8  2006/04/04 22:14:10  porter
+ * fixdeta is now NOT default but included in StEStruct2ptCorrelations
+ *
  * Revision 1.7  2005/09/14 17:25:37  msd
  * minor tweak
  *

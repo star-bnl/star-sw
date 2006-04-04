@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.4 2005/09/07 20:26:18 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.5 2006/04/04 22:14:10 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -30,6 +30,7 @@ class StEStructSupport : public TObject {
   float* mnpairs; //! for normalization comparing different cuts 
   int   mbgMode;
   char* mtmpString;
+  bool  mapplyDEtaFix;
 
   bool  goodName(const char* name); // test if name is one of ours
   char* getFrontName(int itype); 
@@ -47,6 +48,9 @@ public:
   void setTFile(TFile* tf);
   void setNBar(float nbar);
   void setBGMode( int mode);
+  void setApplyDEtaFix();
+  void unsetApplyDEtaFix(); // default
+  bool applyDEtaFix();
 
   TH1** getHists(const char* name);
   float* getNorms(TH1** histArray);
@@ -83,6 +87,9 @@ public:
 inline void StEStructSupport::setTFile(TFile* tf){ mtf=tf; };
 inline void StEStructSupport::setNBar(float nbar){ mNbar=nbar;};
 inline void StEStructSupport::setBGMode(int mode){ mbgMode=mode; };
+inline void StEStructSupport::setApplyDEtaFix()  { mapplyDEtaFix=true; };
+inline void StEStructSupport::unsetApplyDEtaFix(){ mapplyDEtaFix=false; };
+inline bool StEStructSupport::applyDEtaFix()     { return mapplyDEtaFix; };
 
 
 #endif
@@ -90,8 +97,13 @@ inline void StEStructSupport::setBGMode(int mode){ mbgMode=mode; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.5  2006/04/04 22:14:10  porter
+ * fixdeta is now NOT default but included in StEStruct2ptCorrelations
+ *
  * Revision 1.4  2005/09/07 20:26:18  prindle
- * Support: Fixed some meory leaks.
+ *
+ *
+ *     Support: Fixed some meory leaks.
  *
  * Revision 1.3  2005/03/08 21:56:42  porter
  * fixed bug in StEStructHAdd.cxx and added diagnostic option in ptcorrelations to
