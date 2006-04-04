@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.2 2006/04/04 10:57:03 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.3 2006/04/04 14:34:39 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.3  2006/04/04 14:34:39  jcs
+// replace assert with a warning message and return kStWarn
+//
 // Revision 1.2  2006/04/04 10:57:03  jcs
 // Fix memory leak
 //
@@ -77,9 +80,9 @@ void StFtpcCalibMaker::GetRunInfo(TString filename){
  *
  */
 
-void StFtpcCalibMaker::DbInit(float mbfield)
+Int_t StFtpcCalibMaker::DbInit(float mbfield)
 {
-  St_DataSet *ftpc_db;
+  St_DataSet *ftpc_db = NULL;
 
   if ( mbfield > 0.8 ) {
      SetFlavor("ffp10kv","ftpcVDrift");
@@ -118,7 +121,10 @@ void StFtpcCalibMaker::DbInit(float mbfield)
   }
   
   ftpc_db  = GetDataBase("ftpc");
-  assert(ftpc_db);
+  if (!ftpc_db) {
+     gMessMgr->Warning() << "StFtpcCalibMaker::DbInit  run parameter database StarDb/ftpc not found"<<endm;
+     return kStWarn;
+  }
   St_DataSetIter local(ftpc_db);
 
   m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
@@ -159,6 +165,8 @@ void StFtpcCalibMaker::DbInit(float mbfield)
 				m_driftfield);
 
   //cout<<"Nach db reader"<<endl;
+ 
+  return kStOK;
 
 }
 //_____________________________________________________________________________

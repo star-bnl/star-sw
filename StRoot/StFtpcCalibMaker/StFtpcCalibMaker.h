@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.h,v 1.3 2006/03/13 20:40:44 jcs Exp $
+// $Id: StFtpcCalibMaker.h,v 1.4 2006/04/04 14:34:39 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.h,v $
+// Revision 1.4  2006/04/04 14:34:39  jcs
+// replace assert with a warning message and return kStWarn
+//
 // Revision 1.3  2006/03/13 20:40:44  jcs
 // correct doxygen comment
 //
@@ -109,7 +112,7 @@ class StFtpcCalibMaker : public StMaker
    void GetRunInfo(TString filename);
    void DoLaserCalib(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, char* t0, char* gas,float mbfield);
    void DoT0Calib(TString filename,char* t0, char* gas, float mbfield);
-   void DbInit(float mbfield);
+   virtual Int_t DbInit(float mbfield);
    void HistInit(int nradbins,TString fname, char* t0, char* gas);
    void MakeT0Ps(int nradbins,TString psname, char* t0, char* gas);
    virtual ~StFtpcCalibMaker();
@@ -121,7 +124,7 @@ class StFtpcCalibMaker : public StMaker
    Int_t Time() {return time;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.3 2006/03/13 20:40:44 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcCalibMaker.h,v 1.4 2006/04/04 14:34:39 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(StFtpcCalibMaker,1)   //StAF chain virtual base class for Makers
