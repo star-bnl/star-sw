@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.7 2006/02/22 22:05:19 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.8 2006/04/04 22:10:13 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -94,9 +94,8 @@ public:
 
   virtual bool loadBaseCuts(const char* name, const char** vals, int nvals);
   virtual void loadUserCuts(const char* name, const char** vals, int nvals);
-  virtual void printCuts(ostream& ofs);
-  virtual void printCuts(const char* fname) { StEStructCuts::printCuts(fname); };
-  virtual void printCuts(ostream& ofs, char* cutType,int c1, int c2);
+  virtual void printCutStats(ostream& ofs);
+  virtual void printCutCounts(ostream& ofs, char* cutType,int c1, int c2);
 
   // StEStructPairCuts stuff
 
@@ -266,10 +265,7 @@ inline float StEStructPairCuts::DeltaEta(float mass1, float mass2) const {
   return fabs(mTrack1->Eta(mass1)-mTrack2->Eta(mass2));
 }
 inline float StEStructPairCuts::DeltaPhi() const {
-  float delphi=fabs(mTrack1->Phi()-mTrack2->Phi());
-  //  float retVal= (delphi<M_PI) ? delphi : (2*M_PI)-delphi;
-  //  return (retVal>-0.5*M_PI) ? retVal : retVal+2*M_PI;
-  return (delphi<M_PI) ? delphi : (2*M_PI)-delphi;
+  return mTrack1->Phi()-mTrack2->Phi();
 }
 
 inline float StEStructPairCuts::DeltaPt() const {
@@ -575,6 +571,16 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.8  2006/04/04 22:10:13  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.7  2006/02/22 22:05:19  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.3 2005/09/14 17:14:25 msd Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.4 2006/04/04 22:10:13 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -23,6 +23,7 @@ StEStructPairCuts::~StEStructPairCuts() {};
 
 void StEStructPairCuts::init(){ 
 
+  strcpy(mcutTypeName,"Pair");
   initCuts();
   initNames();
   if(isLoaded())loadCuts();
@@ -184,99 +185,99 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
   return false;
 };
 
-void StEStructPairCuts::printCuts(ostream& ofs, char* cutName,int c1,int c2){
+void StEStructPairCuts::printCutCounts(ostream& ofs, char* cutName,int c1,int c2){
   ofs<<cutName<<c1<<" + "<<c2<<"  =  "<<c1+c2<<endl;
 }
   
 
-void StEStructPairCuts::printCuts(ostream& ofs){
+void StEStructPairCuts::printCutStats(ostream& ofs){
 
-  ofs<<"# ******************************************** "<<endl;
-  ofs<<"# *************** Pair Cuts ****************** "<<endl;
-  ofs<<"# *** format = Cut, minvalue, maxvalue     *** "<<endl;
-  ofs<<"# ***      Sib LS + US = Total             *** "<<endl;
-  ofs<<"# ***      Mix LS + US = Total             *** "<<endl;
-  ofs<<"# ******************************************** "<<endl;
+  //  ofs<<"# ******************************************** "<<endl;
+  //  ofs<<"# *************** Pair Cuts ****************** "<<endl;
+  //  ofs<<"# *** format = Cut, minvalue, maxvalue     *** "<<endl;
+  // ofs<<"# ***      Sib LS + US = Total             *** "<<endl;
+  // ofs<<"# ***      Mix LS + US = Total             *** "<<endl;
+  //  ofs<<"# ******************************************** "<<endl;
   ofs<<endl;
   char* cutTypes[]={"#---  Sibling Pairs : LS + US = ",
                     "#---  Mixed   Pairs : LS + US = "};
   if(mdeltaPhiCut){
     ofs<<mdphiName.name<<","<<mdphi[0]/M_PI<<","<<mdphi[1]/M_PI<<"\t\t\t"<<" # pair dphi cut"<<endl;
-    printCuts(ofs,cutTypes[0],mdphiCounter[0],mdphiCounter[1]);
-    printCuts(ofs,cutTypes[1],mdphiCounter[2],mdphiCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mdphiCounter[0],mdphiCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mdphiCounter[2],mdphiCounter[3]);
   }
   if(mdeltaEtaCut){
      ofs<<mdetaName.name<<","<<mdeta[0]<<","<<mdeta[1]<<"\t\t\t"<<" # pair deta cut"<<endl;
-    printCuts(ofs,cutTypes[0],mdetaCounter[0],mdetaCounter[1]);
-    printCuts(ofs,cutTypes[1],mdetaCounter[2],mdetaCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mdetaCounter[0],mdetaCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mdetaCounter[2],mdetaCounter[3]);
   }
 
   if(mdeltaMtCut){
      ofs<<mdmtName.name<<","<<mdmt[0]<<","<<mdmt[1]<<"\t\t\t"<<" # pair dmt cut"<<endl;
-    printCuts(ofs,cutTypes[0],mdmtCounter[0],mdmtCounter[1]);
-    printCuts(ofs,cutTypes[1],mdmtCounter[2],mdmtCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mdmtCounter[0],mdmtCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mdmtCounter[2],mdmtCounter[3]);
   }
 
   if(mqInvCut){
      ofs<<mqInvName.name<<","<<mqInv[0]<<","<<mqInv[1]<<"\t\t\t"<<" # pair qInv cut"<<endl;
-    printCuts(ofs,cutTypes[0],mqInvCounter[0],mqInvCounter[1]);
-    printCuts(ofs,cutTypes[1],mqInvCounter[2],mqInvCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mqInvCounter[0],mqInvCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mqInvCounter[2],mqInvCounter[3]);
   }
 
   if(mEntSepCut){
     ofs<<mEntSepName.name<<","<<mEntSep[0]<<","<<mEntSep[1]<<"\t\t\t"<<" # pair EntSep cut"<<endl;
-    printCuts(ofs,cutTypes[0],mEntSepCounter[0],mEntSepCounter[1]);
-    printCuts(ofs,cutTypes[1],mEntSepCounter[2],mEntSepCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mEntSepCounter[0],mEntSepCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mEntSepCounter[2],mEntSepCounter[3]);
   }
 
   if(mExitSepCut){
     ofs<<mExitSepName.name<<","<<mExitSep[0]<<","<<mExitSep[1]<<"\t\t\t"<<" # pair ExitSep cut"<<endl;
-    printCuts(ofs,cutTypes[0],mExitSepCounter[0],mExitSepCounter[1]);
-    printCuts(ofs,cutTypes[1],mExitSepCounter[2],mExitSepCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mExitSepCounter[0],mExitSepCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mExitSepCounter[2],mExitSepCounter[3]);
   }
 
   if(mQualityCut){
      ofs<<mQualityName.name<<","<<mQuality[0]<<","<<mQuality[1]<<"\t\t\t"<<" # pair Quality cut"<<endl;
-    printCuts(ofs,cutTypes[0],mQualityCounter[0],mQualityCounter[1]);
-    printCuts(ofs,cutTypes[1],mQualityCounter[2],mQualityCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mQualityCounter[0],mQualityCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mQualityCounter[2],mQualityCounter[3]);
   }
 
   if(mMidTpcSepLSCut){
      ofs<<mMidTpcSepLSName.name<<","<<mMidTpcSepLS[0]<<","<<mMidTpcSepLS[1]<<"\t\t\t"<<" # pair MidTpcSepLS cut"<<endl;
-    printCuts(ofs,cutTypes[0],msplitLSCounter[0],msplitLSCounter[1]);
-    printCuts(ofs,cutTypes[1],msplitLSCounter[2],msplitLSCounter[3]);
+    printCutCounts(ofs,cutTypes[0],msplitLSCounter[0],msplitLSCounter[1]);
+    printCutCounts(ofs,cutTypes[1],msplitLSCounter[2],msplitLSCounter[3]);
   }
 
   if(mMidTpcSepUSCut){
      ofs<<mMidTpcSepUSName.name<<","<<mMidTpcSepUS[0]<<","<<mMidTpcSepUS[1]<<"\t\t\t"<<" # pair MidTpcSepUS cut"<<endl;
-    printCuts(ofs,cutTypes[0],msplitUSCounter[0],msplitUSCounter[1]);
-    printCuts(ofs,cutTypes[1],msplitUSCounter[2],msplitUSCounter[3]);
+    printCutCounts(ofs,cutTypes[0],msplitUSCounter[0],msplitUSCounter[1]);
+    printCutCounts(ofs,cutTypes[1],msplitUSCounter[2],msplitUSCounter[3]);
   }
 
   if(mHBTCut){
     ofs<<mHBTName.name<<","<<mHBT[0]<<","<<mHBT[1]<<","<<mHBT[2]<<","<<mHBT[3]<<"\t\t"<<" # pair HBT cut"<<endl;
-    printCuts(ofs,cutTypes[0],mHBTCounter[0],mHBTCounter[1]);
-    printCuts(ofs,cutTypes[1],mHBTCounter[2],mHBTCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mHBTCounter[0],mHBTCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mHBTCounter[2],mHBTCounter[3]);
   }
   if(mCoulombCut){
     ofs<<mCoulombName.name<<","<<mCoulomb[0]<<","<<mCoulomb[1]<<","<<mCoulomb[2]<<","<<mCoulomb[3]<<"\t"<<" # pair Coulomb cut"<<endl;
-    printCuts(ofs,cutTypes[0],mCoulombCounter[0],mCoulombCounter[1]);
-    printCuts(ofs,cutTypes[1],mCoulombCounter[2],mCoulombCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mCoulombCounter[0],mCoulombCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mCoulombCounter[2],mCoulombCounter[3]);
   }
   if(mMergingCut){
     ofs<<mMergingName.name<<","<<mMerging[0]<<","<<mMerging[1]<<"\t\t\t"<<" # pair Merging cut"<<endl;
-    printCuts(ofs,cutTypes[0],mMergingCounter[0],mMergingCounter[1]);
-    printCuts(ofs,cutTypes[1],mMergingCounter[2],mMergingCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mMergingCounter[0],mMergingCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mMergingCounter[2],mMergingCounter[3]);
   }
   if(mCrossingCut){
     ofs<<mCrossingName.name<<","<<mCrossing[0]<<","<<mCrossing[1]<<","<<mCrossing[2]<<"\t\t"<<" # pair Crossing cut"<<endl;
-    printCuts(ofs,cutTypes[0],mCrossingCounter[0],mCrossingCounter[1]);
-    printCuts(ofs,cutTypes[1],mCrossingCounter[2],mCrossingCounter[3]);
+    printCutCounts(ofs,cutTypes[0],mCrossingCounter[0],mCrossingCounter[1]);
+    printCutCounts(ofs,cutTypes[1],mCrossingCounter[2],mCrossingCounter[3]);
   }
 
 
 
-  ofs<<"# ******************************************** "<<endl<<endl;
+  //  ofs<<"# ******************************************** "<<endl<<endl;
 
 }
 
@@ -284,8 +285,8 @@ void StEStructPairCuts::printCuts(ostream& ofs){
 int StEStructPairCuts::cutPair(){
   // return 0 to use pair, return 1 to cut pair 
 
-  if(cutDeltaPhi() || cutDeltaEta() || cutDeltaMt()) return 1;
-  //if(goodDeltaPhi() && goodDeltaEta() && goodDeltaMt()) return 0;
+  //  if(cutDeltaPhi() || cutDeltaEta() || cutDeltaMt()) return 1;
+  if(goodDeltaPhi() && goodDeltaEta() && goodDeltaMt()) return 0;
   
   // *** new test ***
   /*  cout.precision(3);     
@@ -311,7 +312,7 @@ int StEStructPairCuts::cutPair(){
 
 
 
-  if( cutMerging() || cutCrossing() || cutCoulomb() || cutHBT() ) return 1;
+  //  if( cutMerging() || cutCrossing() || cutCoulomb() || cutHBT() ) return 1;
 
   if(!mdeltaEta) mdeltaEta=DeltaEta();  // may have been set above
   
@@ -545,6 +546,16 @@ StEStructPairCuts::MidTpcZSeparation() const {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.4  2006/04/04 22:10:13  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.3  2005/09/14 17:14:25  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *

@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.7 2006/02/22 22:05:13 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.8 2006/04/04 22:10:09 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -31,6 +31,7 @@
 
 #include "TROOT.h"
 #include "StEStructPool/AnalysisMaker/StEStructAnalysis.h"
+#include "StEStructPool/AnalysisMaker/StEStructQAHists.h"
 #include "StEStructPool/EventMaker/StEStructCentrality.h"
 #include "StEStructPairCuts.h"
 #include "StEStructBinning.h"
@@ -41,7 +42,7 @@ class TH1F;
 class TH2F;
 class StEStructEvent;
 class StTimer;
-
+#define _MAX_ZVBINS_ 30
 
 class StEStruct2ptCorrelations: public StEStructAnalysis {
 
@@ -56,10 +57,10 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   qBins *mQinv[8]; //!  1D
   TH1F ** mHQinv[8];//!  1D hist
 
-  QAEtaBins mQAEta[2][4];
-  QAPhiBins mQAPhi[2][4];
-  QAPtBins  mQAPt[2][4];
-  PtotBins  *mdEdxPtot[2][4];
+  // QAEtaBins mQAEta[2][4];
+  // QAPhiBins mQAPhi[2][4];
+  // QAPtBins  mQAPt[2][4];
+  // PtotBins  *mdEdxPtot[2][4];
 
   //-> X vs X 
   ytBins **mYtYt[8]; //!
@@ -75,10 +76,10 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   phiBins **mSuPhiPhi[8]; //!  "
 
 
-  TH1F  * mHQAEta[2][4]; //!
-  TH1F  * mHQAPhi[2][4]; //!
-  TH1F  * mHQAPt[2][4]; //!
-  TH2F  * mHdEdxPtot[2][4]; //!
+  //  TH1F  * mHQAEta[2][4]; //!
+  //  TH1F  * mHQAPhi[2][4]; //!
+  //  TH1F  * mHQAPt[2][4]; //!
+  //  TH2F  * mHdEdxPtot[2][4]; //!
   TH2F ** mHYtYt[8]; //!
   TH2F ** mHXtXt[8]; //!
   TH2F ** mHPtPt[8]; //!
@@ -170,6 +171,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   void createHist2D(TH2F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
   void createHist1D(TH1F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
   void  moveEvents();
+  void  initInternalData();
+  int   bufferIndex();
 
 
  public:
@@ -178,25 +181,26 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   bool mskipPairCuts; //!
   bool mdoPairCutHistograms; //!
   bool mdoPairDensityHistograms; 
+  bool mskipEtaDeltaWeight; //!
   bool mInit;  //! found need when overridding this class
   bool mDeleted;//! "     " ...
   bool mHistosWritten;//! "     " ...
 
-  StEStructEvent*        mCurrentEvent;  //!  pointer to EStruct2pt data 
-  StEStructPairCuts      mPair; //! for pairs (1 at a time) and all pair cuts
-
-  char*     moutFileName; //!
+  StEStructEvent*        mCurrentEvent;  //! pointer to EStruct2pt data 
+  StEStructPairCuts*     mPairCuts;      //! for pairs kine + all paircuts
+  StEStructQAHists*      mQAHists;       //! for QA histogramming
+  bool                   mlocalQAHists;  //! toggle needed for who writes output
+  char*     moutFileName;   //!
   char*     mqaoutFileName; //!
-  StTimer*  mtimer;       //!
-
+  StTimer*  mtimer;         //!
   StEStructEvent*     mMixingEvent;  //! dummy      //  Previous Event Stored 
 
   // *** had a problem using constants here (dyn. libs wouldn't load), doing this for now...
   int kNumBuffers;
   float kZBuffMin, kZBuffMax; // Read from Cuts file. Default +/- 75cm if not found.
   float kBuffWidth;           // Set to 5 cm in Initr().
-  StEStructBuffer mbuffer[30];  // kNumBuffers slices in z-vertex from kZBuffMin to +kZBuffMax
-  int             mbuffCounter[30];
+  StEStructBuffer mbuffer[_MAX_ZVBINS_];  // kNumBuffers slices in z-vertex from kZBuffMin to +kZBuffMax
+  //  int             mbuffCounter[_MAX_ZVBINS_];
 
   //-> (pre) histograms & histograms for analysis.
   // All are arrays of 8 for 8 charged sign and combinatoric types;
@@ -208,13 +212,15 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   int mpossiblePairs[8];
 
   StEStruct2ptCorrelations(int mode=0);
-  StEStruct2ptCorrelations(const char* cutFileName, int mode=0);
+  StEStruct2ptCorrelations(StEStructPairCuts* pcuts, int mode=0);
   virtual ~StEStruct2ptCorrelations();
 
-  StEStructPairCuts& getPairCuts();
+  StEStructPairCuts* getPairCuts();
   void  setAnalysisMode(int mode);
-  void  setCutFile(const char* cutFileName, StEStructCentrality *cent);  
-  void  setZBuffLimits( const char* cutFileName );
+  void  setCutFile(const char* cutFileName);  
+  void  setZBuffLimits(StEStructCuts* cuts);// const char* cutFileName );
+  void  setQAHists(StEStructQAHists* qaHists);
+  void  setPairCuts(StEStructPairCuts* cuts);
 
   //---> support of interface  
   void  setOutputFileName(const char* outFileName);
@@ -227,7 +233,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   virtual void  fillHistograms();
   virtual void  writeHistograms();
-    void   writeQAHists();
+    void   writeQAHists(TFile * tf);
+    void   writeDiagnostics();
 
     void  initArrays();
     void  deleteArrays();
@@ -250,11 +257,10 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
 inline void StEStruct2ptCorrelations::setAnalysisMode(int mode){ manalysisMode=mode;};
 
-inline void StEStruct2ptCorrelations::setCutFile(const char* cutFileName,
-                                                 StEStructCentrality *cent){
-  setZBuffLimits(cutFileName);
-  mPair.setCutFile(cutFileName);
-  mPair.loadCuts();
+inline void StEStruct2ptCorrelations::setCutFile(const char* cutFileName){
+  if(!mPairCuts) mPairCuts=new StEStructPairCuts;
+  mPairCuts->setCutFile(cutFileName);
+  mPairCuts->loadCuts();
 }
 
 inline void StEStruct2ptCorrelations::setOutputFileName(const char* fName){
@@ -262,15 +268,25 @@ inline void StEStruct2ptCorrelations::setOutputFileName(const char* fName){
   moutFileName=new char[strlen(fName)+1];
   strcpy(moutFileName,fName);
 }
+
+inline void StEStruct2ptCorrelations::setQAHists(StEStructQAHists* qahists){
+  mQAHists = qahists;
+}
+
+inline void StEStruct2ptCorrelations::setPairCuts(StEStructPairCuts* pcuts){
+  mPairCuts=pcuts;
+}
+
 inline void StEStruct2ptCorrelations::setQAOutputFileName(const char* fName){
   if(!fName) return;
   mqaoutFileName=new char[strlen(fName)+1];
   strcpy(mqaoutFileName,fName);
 }
 
-inline StEStructPairCuts& StEStruct2ptCorrelations::getPairCuts() {
-  return mPair;
+inline StEStructPairCuts* StEStruct2ptCorrelations::getPairCuts() {
+  return mPairCuts;
 }
+
 
 inline void StEStruct2ptCorrelations::logStats(ostream& os){
   char* htp[]={"SibPP","SibPM","SibMP","SibMM","MixPP","MixPM","MixMP","MixMM"};
@@ -294,6 +310,16 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.8  2006/04/04 22:10:09  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.7  2006/02/22 22:05:13  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.

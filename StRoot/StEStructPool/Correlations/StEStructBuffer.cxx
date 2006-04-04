@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBuffer.cxx,v 1.4 2005/09/14 17:14:22 msd Exp $
+ * $Id: StEStructBuffer.cxx,v 1.5 2006/04/04 22:10:11 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -30,7 +30,7 @@
 
 StEStructBuffer::StEStructBuffer(){
 
-  mnumEvents=0;
+  mnumEvents=mnumDeleted=mnumInput=0;
   mEvent=new StEStructEvent*[MAXBUFFERSIZE+1];
   for(int i=0;i<=MAXBUFFERSIZE;i++)mEvent[i]=NULL;
   resetCounter();
@@ -52,6 +52,7 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
     if(mEvent[mnumEvents]){ 
       delete mEvent[mnumEvents];
       mEvent[mnumEvents]=NULL;
+      mnumDeleted++;
     }
   } else {
     mnumEvents++;
@@ -59,6 +60,7 @@ void StEStructBuffer::addEvent(StEStructEvent* event){
   //for(int i=mnumEvents-1;i>0;i--)mEvent[i]=mEvent[i-1];
   for(int i=mnumEvents;i>0;i--)mEvent[i]=mEvent[i-1];
   mEvent[0]=event;
+  mnumInput++;
 
 }
 
@@ -91,6 +93,16 @@ void StEStructBuffer::Print(){
 /***********************************************************************
  *
  * $Log: StEStructBuffer.cxx,v $
+ * Revision 1.5  2006/04/04 22:10:11  porter
+ * a handful of changes (specific to correlations)
+ *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
+ *  - used ability to get any max,min val from the cut class - or z-vertex binning
+ *  - put z-vertex binning into 1 place
+ *  - switched back 1st line of pair cut method to keep pair if good, not to reject if bad.
+ *  - Pair cut object is now pointer in correlations
+ *  - some diagnostic printouts available from macro
+ *  - Duncan's delta-phi binning change
+ *
  * Revision 1.4  2005/09/14 17:14:22  msd
  * Large update, added new pair-cut system, added pair density plots for new analysis mode (4), added event mixing cuts (rewrote buffer for this)
  *
