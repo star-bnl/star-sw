@@ -1,6 +1,9 @@
-// $Id: StFtpcLaser.hh,v 1.2 2006/03/15 15:13:56 jcs Exp $
+// $Id: StFtpcLaser.hh,v 1.3 2006/04/04 10:57:05 jcs Exp $
 //
 // $Log: StFtpcLaser.hh,v $
+// Revision 1.3  2006/04/04 10:57:05  jcs
+// Fix memory leak
+//
 // Revision 1.2  2006/03/15 15:13:56  jcs
 // add lines for listing CVS update info
 //
@@ -149,6 +152,7 @@ class StFtpcLaser
   virtual bool laser_sector(int whichftpc,int whichsec,int sec);
   virtual int laser_straight(float *rad,int max);
   virtual void readtree(TFile *f);
+  virtual void GetTreeEntry(int k);
   virtual void GetClusterTreeEntry(int k);
 
 };

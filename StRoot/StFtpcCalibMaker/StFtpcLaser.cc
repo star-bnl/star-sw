@@ -1,6 +1,9 @@
-// $Id: StFtpcLaser.cc,v 1.2 2006/03/15 15:13:56 jcs Exp $
+// $Id: StFtpcLaser.cc,v 1.3 2006/04/04 10:57:04 jcs Exp $
 //
 // $Log: StFtpcLaser.cc,v $
+// Revision 1.3  2006/04/04 10:57:04  jcs
+// Fix memory leak
+//
 // Revision 1.2  2006/03/15 15:13:56  jcs
 // add lines for listing CVS update info
 //
@@ -46,6 +49,16 @@ void StFtpcLaser::Init(TString filename)
   cout<<endl;
   cout<<"Read file   : "<<filename<<".root"<<endl; //" done !"<<endl;
   cout<<"--------------"<<endl;
+}
+
+//______________________________________________________________________________                                                                                
+void StFtpcLaser::GetTreeEntry(int k)
+{
+   btcluster->GetEntry(k);
+   bthit->GetEntry(k);
+   btevent->GetEntry(k);
+                                                                                
+   bRun->GetEntry(k);    //JCS
 }
 
 //---------------------------------------------------------------

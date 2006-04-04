@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.1 2006/03/13 19:59:56 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.2 2006/04/04 10:57:03 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.2  2006/04/04 10:57:03  jcs
+// Fix memory leak
+//
 // Revision 1.1  2006/03/13 19:59:56  jcs
 // commit initial version of the FTPC calibration maker
 //
@@ -51,7 +54,7 @@ StFtpcCalibMaker::~StFtpcCalibMaker(){
 
 void StFtpcCalibMaker::GetRunInfo(TString filename){
 
-  StFtpcLaserCalib *j = new StFtpcLaserCalib();
+  StFtpcLaser *j = new StFtpcLaser();
  
   j->Init(filename);
   j->GetTreeEntry(0);
@@ -61,7 +64,7 @@ void StFtpcCalibMaker::GetRunInfo(TString filename){
   micropertime = j->Run.micropertimebin;
   deltapW      = j->Run.deltapW;
   deltapE      = j->Run.deltapE;
-  //delete j;  // destructor matches second constructor only
+  delete j;  // destructor matches second constructor only
   return;
   
 }

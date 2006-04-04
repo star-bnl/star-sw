@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.2 2006/03/15 15:13:56 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.3 2006/04/04 10:57:05 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.3  2006/04/04 10:57:05  jcs
+// Fix memory leak
+//
 // Revision 1.2  2006/03/15 15:13:56  jcs
 // add lines for listing CVS update info
 //
@@ -659,17 +662,6 @@ void StFtpcLaserCalib::fillarray(float tx,float ty,float tz,float tex,float tey,
   maxadc[n]=getmaxadc;
 
   //cout<<radius[n]<<" "<<maxadc[n]<<endl;
-}
-
-//______________________________________________________________________________
-
-void StFtpcLaserCalib::GetTreeEntry(int k)
-{
-   btcluster->GetEntry(k);
-   bthit->GetEntry(k);
-   btevent->GetEntry(k);
-
-   bRun->GetEntry(k);    //JCS
 }
 
 //______________________________________________________________________________
