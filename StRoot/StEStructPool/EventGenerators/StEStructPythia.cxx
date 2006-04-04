@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.8 2006/02/22 22:05:37 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.9 2006/04/04 22:11:27 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,6 +15,8 @@
 #include "StEStructPool/AnalysisMaker/StEStructTrackCuts.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/EventMaker/StEStructCentrality.h"
 
 StEStructPythia::StEStructPythia() {
     mPythia       = 0;
@@ -58,8 +60,8 @@ StEStructEvent* StEStructPythia::next() {
     StEStructEvent* retVal = NULL;
 
     if (!mInChain ) {
-          mPythia->GenerateEvent();
-          mEventCount++;
+         mPythia->GenerateEvent();
+         mEventCount++;
     }
 
     retVal = new StEStructEvent();
@@ -68,22 +70,32 @@ StEStructEvent* StEStructPythia::next() {
     retVal->SetVy(0);
     retVal->SetVz(0);
     retVal->SetBField(0.5);
-
+    
+    mstarTrigger=false;
     int nTracks = countGoodTracks();
-    retVal->SetCentrality( (double) nTracks );
-    int jCent = retVal->Centrality();
-    if (((mCentBin >= 0) && (jCent != mCentBin)) ||
-        !mECuts->goodCentrality((float)nTracks)) {
+
+    StEStructCentrality* cent=StEStructCentrality::Instance(); 
+    retVal->SetCentrality( cent->centrality((float) nTracks) );
+    retVal->SetPtCentralityIndex(cent->ptCentrality((float)nTracks));
+
+    if(!mECuts->goodCentrality((int)retVal->Centrality()) || !mstarTrigger){
         delete retVal;
         retVal=NULL;
         mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,false);
-    } else {
-        fillTracks(retVal);
-        retVal->FillChargeCollections();
-        mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,true);
+    } else { 
+         fillTracks(retVal);
+         retVal->FillChargeCollections();
+         mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,true);
     }
+
     return retVal;
 }   
+
+//--------------------------------------------------------------------------
+double StEStructPythia::getNPartonic(){ 
+  if(!mPythia) return 0.;
+  return (double)mPythia->GetN();
+}
 
 //--------------------------------------------------------------------------
 void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
@@ -171,8 +183,10 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
 
         // I don't know what this next block of code does. Jeff must have put this in.
         // djp: Sept. 13, 2005
-        // now add fragmentation history (up to 4 lines back) in the tpcmap area
 
+	// rjp: Feb 2006, Ok, I'll tell you...
+	//   ip array is the parent history 
+        // now add fragmentation history (up to 4 lines back) in the tpcmap area
         int ip[4] = {0,0,0,0};
         ip[0] = pstr->K[2][i];
         for (int k=1;k<4;k++) {
@@ -237,6 +251,9 @@ bool StEStructPythia::isTrackGood(int i) {
     useTrack = (mTCuts->goodYt(yt) && useTrack);
     delete [] gdca;
 
+    if(eta<-3.5 && eta>-5.0) mstarTrigger=true;
+    if(eta>3.5 && eta<5.0)   mstarTrigger=true;
+
     return useTrack;
 }
 
@@ -272,6 +289,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.9  2006/04/04 22:11:27  porter
+ * StEStructPythia now uses StEtructCentrality for selection
+ *
  * Revision 1.8  2006/02/22 22:05:37  prindle
  * Removed all references to multRef (?)
  *
