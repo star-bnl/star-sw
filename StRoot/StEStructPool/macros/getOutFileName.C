@@ -1,5 +1,5 @@
 char* getOutFileName(const char* baseDir, const char* jobName,
-                     const char* type,    const char* centTag){
+                     const char* type,    int icent = -1){
 
     char* jobid=gSystem->Getenv("JOBID");
 
@@ -33,17 +33,22 @@ char* getOutFileName(const char* baseDir, const char* jobName,
  
     char* exten[]={".root",".root",".txt"};
     int iext = 0;
+
+    const char* centTag=NULL;
+    TString TcentTag;
+    if(icent>=0){
+      TcentTag+="_M";
+      TcentTag+=icent;
+      centTag=TcentTag.Data();
+    }
        
     TString outputFileFile(outArea.Data());
     if(strstr(type,"cut")){
       outputFileFile+="cutHists";
-      outputFileFile+=centTag;
     } else if(strstr(type,"data")){
       outputFileFile+="dataHists";
-      outputFileFile+=centTag;
     } else if(strstr(type,"QA")){
       outputFileFile+="QA";
-      outputFileFile+=centTag;
     } else if(strstr(type,"stats")){
       outputFileFile+="stats";
       iext=2;
@@ -52,6 +57,7 @@ char* getOutFileName(const char* baseDir, const char* jobName,
       iext=1;
     }
 
+    if(centTag)outputFileFile+=centTag;
     outputFileFile+="_";
     if(ptr)outputFileFile+=ptr;
     outputFileFile+=exten[iext];

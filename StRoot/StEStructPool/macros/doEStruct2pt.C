@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2pt.C,v 1.7 2005/03/03 01:33:36 porter Exp $
+ * $Id: doEStruct2pt.C,v 1.8 2006/04/04 22:15:56 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,130 +12,128 @@
  *               This example (from PP) contains 3 selections on event mult
  *
  *************************************************************************/
-void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* cutFile, const char* jobName=0, int cutBinMode=0, int maxNumEvents=0){
+//void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* cutFile, const char* jobName=0, int cutBinMode=0, int maxNumEvents=0){
 
-  // libraries required and helper macros in $STAR/StRoot/StEStructPool/macros
+void doEStruct2pt( const char* filelist,
+                   const char* outputDir,
+                   const char* scriptDir,
+                   int maxNumEvents = 0 ) {
+
+
   gROOT->LoadMacro("load2ptLibs.C");
   load2ptLibs();
-  gROOT->LoadMacro("getOutFileName.C");
-  gROOT->LoadMacro("support.C");
 
-  /* *******************************************************************
-     changed the use model of the cut file. I found that I always keep 
-     the cuts for a given pass the same except for the centrality cut. 
-     Now I add this cut directly and I use only 1 cut file, PPCutsAll.txt, 
-     and with the centrality cut set below
-  ************************************************************************/
+  char cutFile[1024];
+  sprintf(cutFile,"%s/CutsFile.txt",scriptDir);
 
-  // in this example, all cuts (event, track, pair) are in same file
-  // cutFile can also refer to an entry in the cut DB 
-  //    (see StEStructPool/AnalysisMaker/StEStructCuts.cxx for pre-compiled cuts)
-  const char* evtCutFile=cutFile;
+  gROOT->LoadMacro("getOutFileName.C"); // for laying out file names
+  const char* scratchDir = "PPData_01";
 
-  const char* trackCutFile=evtCutFile;
-  const char* pairCutFile =evtCutFile;
-
-  
-  // simple (global) centrality definition ...not persistant to event file.. 
-  // and not used in this particular example
+  // define centrality
   StEStructCentrality* cent=StEStructCentrality::Instance();
-  const double temp[4]={2,5,9,99}; //=3 centralies
-  cent->setCentralities(temp,4);
-  int nset=cent->numCentralities()-1;
-
-  char** datadirs=getDirNames("data",nset);
-  char** cutdirs=getDirNames("cuts",nset);
+  const double mbBins[]={2,3,4,6,8,11,14,99}; 
+  int mbNBins=1+1+1+1+1+1+1+1;
+  cent->setCentralities(mbBins,mbNBins);
+  int numberOfAnalyses=mbNBins-1;
 
   // choose the mode for the binning
+  int cutBinMode = 4;
   StEStructCutBin* cb=StEStructCutBin::Instance();
   cb->setMode(cutBinMode);
-
+  int mbNCutBins = cb->getNumBins();
+ 
   // create the low-level reader (here for MuDst)
-  StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",5000);   
+  //  reader = reader interface + pointer to Data Maker + cut classes
+
+  //***** depends on PDSF vs RCF .... below is RCF version of scheduler
+  //  char fileListFile[1024];
+  //  sprintf(fileListFile,"%s/%s",scriptDir,filelist);
+  StMuDstMaker* mk = new StMuDstMaker(0,0,"",filelist,".",5000);
 
   // create the generic EStructAnalysisMaker
   StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2pt");
 
-  // Set up the EStruct data Readers and Writer codes
-  char** outputFile                    = new char*[nset];
-  StEStructEventCuts** ecuts           = new StEStructEventCuts*[nset];
-  StEStructTrackCuts** tcuts           = new StEStructTrackCuts*[nset];
-  StEStruct2ptCorrelations**  analysis = new StEStruct2ptCorrelations*[nset];
-  StEStructMuDstReader** readers       = new StEStructMuDstReader*[nset];
+  // Set up the reader with event/track cuts
+  StEStructEventCuts*    ecuts = new StEStructEventCuts(cutFile);
+  StEStructTrackCuts*    tcuts = new StEStructTrackCuts(cutFile);
+  StEStructMuDstReader* reader = new StEStructMuDstReader(mk,ecuts,tcuts,false);
+  estructMaker->SetEventReader(reader);
 
-  // only 1 reader actually reads the event, the others just pull from mem.
-  // this 'skipMake' ensures this to be the case
-  bool* skipMake=new bool[nset];
-  skipMake[0]=false;
-  for(int i=1;i<nset;i++)skipMake[i]=true;
+  // create the QAHist object (must come after centrality and cutbin objects)
+  int EventType = 0; // real data
+  StEStructQAHists* qaHists = new StEStructQAHists(EventType);
+  qaHists->initHistograms();
+  estructMaker->SetQAHists(qaHists);
 
-  //  build the NSET readers & NSET analysis objects
-  //  analysis = analysis interface & contains pair-cut object (needs file)
-  //  reader = reader interface + pointer to StMuDstMaker + cut classes
-  for(int i=0;i<nset;i++){
+  StEStruct2ptCorrelations** analysis = new StEStruct2ptCorrelations*[mbNBins];
+  StEStructPairCuts* pcuts = new StEStructPairCuts(cutFile);
 
-     outputFile[i]=getOutFileName(outputDir,jobName,datadirs[i]);
-     analysis[i]=new StEStruct2ptCorrelations();
-     analysis[i]->setCutFile(pairCutFile);
-     analysis[i]->setOutputFileName(outputFile[i]);
+  int analysisMode = 0; // 2pt correlations mode selection
 
-     /* here's the new way to set the numTracks cut */
-      ecuts[i]=new StEStructEventCuts(evtCutFile);
-      int min=floor(cent->minCentrality(i));
-      int max=floor(cent->maxCentrality(i));
-      char** tmp=getNumTracksStrings(min,max);  // find in support.C
-      ecuts[i]->loadBaseCuts("numTracks",tmp,2);
- 
-     tcuts[i]=new StEStructTrackCuts(trackCutFile);
-     readers[i]=new StEStructMuDstReader(mk,ecuts[i],tcuts[i],skipMake[i]);
-     estructMaker->SetReaderAnalysisPair(readers[i],analysis[i]);
+  for(int i=0;i<numberOfAnalyses;i++){
+   int ic=i;
+   if(numberOfAnalyses==1)ic=-1;
+   analysis[i]=new StEStruct2ptCorrelations(pcuts,analysisMode);
+   analysis[i]->setOutputFileName(getOutFileName(outputDir,scratchDir,"data",ic));
+   analysis[i]->setQAHists(qaHists); // only 1 QA Object in this case
+   analysis[i]->setZBuffLimits(ecuts); // common to all
+   analysis[i]->setAnalysisIndex(i);
   }
- 
+  estructMaker->SetAnalyses(analysis,numberOfAnalyses);
+
   // --- now do the work ---
-  doTheWork(estructMaker,maxNumEvents);
+
+    estructMaker->Init();
+    estructMaker->startTimer();
+
+    int counter=0, istat=0, i=0;
+
+    while (istat!=2) {
+
+      istat=estructMaker->Make(); // now includes filling qa histograms
+
+      i++; counter++;
+      if (counter==200) {
+          cout<<"doing event ="<<i<<endl;
+          counter=0;
+          estructMaker->writeDiagnostics(0);
+      }
+      if ( maxNumEvents!=0 && i>=maxNumEvents ) {
+          istat=2;
+      }
+    }
+    estructMaker->stopTimer();
 
   //--- now write out stats and cuts ---
-  char* statsFileName=getOutFileName(outputDir,jobName,"stats");
-  ofstream ofs(statsFileName);
+   ofstream ofs(getOutFileName(outputDir,scratchDir,"stats"));
+    estructMaker->logAllStats(ofs);
+    ecuts->printCuts(ofs);
+    tcuts->printCuts(ofs);
+    pcuts->printCuts(ofs);
+   ofs<<endl;
+   ofs.close();
+   
+   // --> root cut file 
+   TFile* tf=new TFile(getOutFileName(outputDir,scratchDir,"cuts"),"RECREATE");
+   ecuts->writeCutHists(tf);
+   tcuts->writeCutHists(tf);
+   tf->Close();
 
-  ofs<<endl;
-  estructMaker->logAnalysisTime(ofs);
-  estructMaker->logInputEvents(ofs);
-  estructMaker->logOutputEvents(ofs);
-  estructMaker->logOutputRate(ofs);
-  estructMaker->logAnalysisStats(ofs);
+   // --> root qa histogram file 
+   estructMaker->writeQAHists(getOutFileName(outputDir,scratchDir,"QA"));
 
-  for(int i=0;i<nset;i++){
-    ofs<<"  *************** ";
-    ofs<<" Cut Stats for Analysis Number = "<<i;
-    ofs<<"  *************** "<<endl;
-     ecuts[i]->printCuts(ofs);
-     tcuts[i]->printCuts(ofs);
-
-     StEStructPairCuts* pcuts=NULL;
-     if(analysis){
-        pcuts=&analysis[i]->getPairCuts();
-        pcuts->printCuts(ofs);
-     }
-
-     // --> root cut file 
-     char* rootCutFile=getOutFileName(outputDir,jobName,cutdirs[i]);
-     TFile* tf=new TFile(rootCutFile,"RECREATE");
-     ecuts[i]->writeCutHists(tf);
-     tcuts[i]->writeCutHists(tf);
-     if(pcuts)pcuts->writeCutHists(tf);
-     tf->Close();
-
-  }
-  ofs.close();
-
-  // --- write out the data 
-  estructMaker->Finish();
+   // --- write out the data 
+   estructMaker->Finish();
 }
 
 /**********************************************************************
  *
  * $Log: doEStruct2pt.C,v $
+ * Revision 1.8  2006/04/04 22:15:56  porter
+ * a large number of changes were done to simplify the doEStruct macros
+ * in the sense that these are now more similar and should be easier
+ * for Duncan's GUI to build.  Here are some examples.
+ *
  * Revision 1.7  2005/03/03 01:33:36  porter
  * modified macros
  *
