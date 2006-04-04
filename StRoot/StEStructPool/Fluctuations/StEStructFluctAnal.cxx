@@ -7,6 +7,7 @@
 
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/AnalysisMaker/StEStructQAHists.h"
 #include "StTimer.hh"
 
 #include <stdlib.h>
@@ -41,6 +42,10 @@ StEStructFluctAnal::StEStructFluctAnal(int mode, int etaSumMode, int phiSumMode)
     mptpplus  = 0;
     mptpminus = 0;
 
+    mQAHists=NULL;
+    mlocalQAHists = false;
+    mPairCuts = new StEStructPairCuts; 
+
     initHistograms();
 }
 
@@ -51,20 +56,23 @@ StEStructFluctAnal::~StEStructFluctAnal() {
     deleteCentralityObjects();
 }
 
-void StEStructFluctAnal::setCutFile(const char* cutFileName, StEStructCentrality *cent) {
+void StEStructFluctAnal::initStructures(StEStructCuts *tcut){
+  //(const char* cutFileName) {
 // Want to expand range of eta cuts beyond range used in analysis so that we
 // can add a vertex dependent offset.
-    setEtaLimits(cutFileName);
-    setPtLimits(cutFileName);
+//    setEtaLimits(cutFileName);
+//    setPtLimits(cutFileName);
+  setEtaLimits(tcut);
+  setPtLimits(tcut);
 
-    mCentralities = dynamic_cast<StEStructCentrality*>(cent);
+    mCentralities = StEStructCentrality::Instance(); // dynamic_cast<StEStructCentrality*>(cent);
     if (!mCentralities) {
         printf("Invalid centrality object passed into StEStructFluctAnal::setCutFile!!!!!\n");
     }
     createCentralityObjects();
     ms = new multStruct(mCentralities->numPts());
-    mPair.setCutFile(cutFileName);
-    mPair.loadCuts();
+    //    mPairCuts->setCutFile(cutFileName);
+    //    mPairCuts->loadCuts();
 };
 void StEStructFluctAnal::createCentralityObjects() {
     deleteCentralityObjects();
@@ -127,113 +135,28 @@ void StEStructFluctAnal::deleteCentralityObjects() {
     }
 }
 
-// Parse cuts file for limits on eta.
-void StEStructFluctAnal::setEtaLimits( const char* cutFileName ) {
-    ifstream from(cutFileName);
+void StEStructFluctAnal::setEtaLimits( StEStructCuts* tcut){
 
-    if(!from){ 
-        cout<<" Cut file Not Found while looking for eta limits in StEStructFluctAnal::setEtaLimits"<<endl; 
-    }
+  if(!tcut){
+    cout<<"Error Track Cuts Not found to get eta range "<<endl;
+    assert(tcut);
+  } 
 
-    char line[256], lineRead[256];
-    char* puteol;
-    char** val = new char*[100];
-    int ival;
+  mEtaMin=tcut->minVal("Eta");
+  mEtaMax=tcut->maxVal("Eta");
+    
+};
 
-    bool done = false;
-    while(!done) {
-        if(from.eof()){
-            cout<<" Did not find eta limits in StEStructFluctAnal::setEtaLimits, file "<< cutFileName <<endl; 
-            done=true;
-        } else {
-            from.getline(lineRead,256);
-            strcpy(line,lineRead);
-            if ( (line[0]=='#') ) {
-                continue;
-            }
-            if ( !strstr(line,"Eta") ) {
-                continue;
-            }
-            if ((puteol=strstr(line,"#"))) {
-                *puteol='\0';
-            }
-            ival=0;
-            val[ival]=line;
-            char* fcomma;
-            while ((fcomma=strstr(val[ival],","))) {
-                *fcomma='\0';
-                fcomma++;
-                ival++;
-                val[ival]=fcomma;
-            }
-            if (ival==2) {
-                done=true;
-                break;
-            }
-        }
-    }
-    if (ival != 2) {
-        cout << " Did not find a line containing Eta and two numbers in file " << cutFileName <<endl; 
-    } else {
-        mEtaMin = strtof(val[1],0);
-        mEtaMax = strtof(val[2],0);
-    }
-    from.close();
-    delete [] val;  val = 0;
-}
-// Parse cuts file for limits on pt.
-void StEStructFluctAnal::setPtLimits( const char* cutFileName ) {
-    ifstream from(cutFileName);
+void StEStructFluctAnal::setPtLimits( StEStructCuts* tcut){
 
-    if(!from){ 
-        cout<<" Cut file Not Found while looking for pt limits in StEStructFluctAnal::setPtLimits"<<endl; 
-    }
+  if(!tcut){
+    cout<<"Error Track Cuts Not found to get eta range "<<endl;
+    assert(tcut);
+  } 
 
-    char line[256], lineRead[256];
-    char* puteol;
-    char** val = new char*[100];
-    int ival;
-
-    bool done = false;
-    while(!done) {
-        if(from.eof()){
-            cout<<" Did not find pt limits in StEStructFluctAnal::setPtLimits, file "<< cutFileName <<endl; 
-            done=true;
-        } else {
-            from.getline(lineRead,256);
-            strcpy(line,lineRead);
-            if ( (line[0]=='#') ) {
-                continue;
-            }
-            if ( !strstr(line,"Pt") ) {
-                continue;
-            }
-            if ((puteol=strstr(line,"#"))) {
-                *puteol='\0';
-            }
-            ival=0;
-            val[ival]=line;
-            char* fcomma;
-            while ((fcomma=strstr(val[ival],","))) {
-                *fcomma='\0';
-                fcomma++;
-                ival++;
-                val[ival]=fcomma;
-            }
-            if (ival==2) {
-                done=true;
-                break;
-            }
-        }
-    }
-    if (ival != 2) {
-        cout << " Did not find a line containing Pt and two numbers in file " << cutFileName <<endl; 
-    } else {
-        mPtMin = strtof(val[1],0);
-        mPtMax = strtof(val[2],0);
-    }
-    from.close();
-    delete [] val;  val = 0;
+  mPtMin=tcut->minVal("Pt");
+  mPtMax=tcut->maxVal("Pt");
+    
 }
 
 //
@@ -731,7 +654,15 @@ void StEStructFluctAnal::writeHistograms(){
     cout << endl;
 }
 void StEStructFluctAnal::writeQAHists(TFile* qatf) {
+
     qatf->cd();
+
+    // next line is currently never satisfied... must build structure
+    // so that local mQAHists are created per analysis object as in 
+    // correlations.  .... leave this here as a reminder only and for 
+    // symmetry in correlations code reflected in doEStruct...
+
+    if(mlocalQAHists) mQAHists->writeTrackHistograms(qatf);
 
     for (int i=0;i<mnCents;i++) {
         mFluct[i]->writeQAHistograms();
