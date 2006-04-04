@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStructPythia.C,v 1.3 2004/06/25 03:14:56 porter Exp $
+ * $Id: doEStructPythia.C,v 1.4 2006/04/04 22:15:57 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,159 +12,128 @@
  *               This example (from PP) contains 3 selections on event mult
  *
  *************************************************************************/
-void doEStructPythia(const char* fileListFile, const char* outputDir, const char* jobName=0, int nset=3, int maxNumEvents=0){
+void doEStructPythia( const char* filelist,
+                const char* outputDir,
+                const char* scriptDir,
+                int maxNumEvents = 0 ) {
 
-
-  char* evtCutFile[10];
-  char* datadirs[10];
-  char* cutdirs[10];
-
-  if(nset>9)nset=9;
-  for(int i=0;i<nset;i++){
-    TString cf("PythiaCuts0");
-    cf+=i+1;
-    cf+=".txt";
-    evtCutFile[i]=new char[strlen(cf.Data())+1];
-    strcpy(evtCutFile[i],cf.Data());
-    TString dd("data/0");
-    dd+=i+1;
-    datadirs[i]=new char[strlen(dd.Data())+1];
-    strcpy(datadirs[i],dd.Data());
-    TString cd("cuts/0");
-    cd+=i+1;
-    cutdirs[i]=new char[strlen(cd.Data())+1];
-    strcpy(cutdirs[i],cd.Data());
-  }
- 
-
-  // in this example, all cuts (event, track, pair) are in same file
-  char* trackCutFile=evtCutFile[0];
-  char* pairCutFile =evtCutFile[0];
-
-  // libraries required and helper macros in $STAR/StRoot/StEStructPool/macros
   gROOT->LoadMacro("load2ptLibs.C");
   load2ptLibs();
-  // pythia stuff
-  gSystem->Load("libEG");
-  gSystem->Load("libEGPythia6");
-  gSystem->Load("libPythia6");    
-  gSystem->Load("StEStructPoolEventGenerators.so");
 
-  gROOT->LoadMacro("getOutFileName.C");
+  gROOT->LoadMacro("loadPythiaLibs.C");
+  loadPythiaLibs();
   gROOT->LoadMacro("getPythia.C");
 
-  char* jobid=gSystem->Getenv("JOBID");
-  int jobId=1;
-  if(!jobid){
-    jobId=2;
-  } else {
-    char* ptr=strstr(jobid,"_");
-    if(ptr){
-       ptr++;
-       jobId=atoi(ptr);
-    }  
-  }
-  TPythia6* pythia=getPythia(jobId);
-  
-  // simple (global) centrality definition ...not persistant to event file.. 
-  // and not used in this particular example
-  StEStructCentrality* cent=StEStructCentrality::Instance();
-  const double temp[4]={0,4,7,50};
-  cent->setCentralities(temp,4);
+  char* jobid=gSystem->Getenv("JOBID"); 
+  const char* rframe="CMS";
+  const char* cproj ="p";
+  const char* ctarg ="p";
+  float rts = 200.0;
+  int pythiaTune = 0; // 1=TuneA, 2=TuneB, all else = minbias standard
 
-  // create the low-level reader (here for MuDst)
-  //  StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",500); 
+  TPythia6* pythia=getPythia(rframe,cproj,ctarg,rts,pythiaTune,jobid); 
+
+  char cutFile[1024];
+  sprintf(cutFile,"%s/CutsFile.txt",scriptDir);
+
+  gROOT->LoadMacro("getOutFileName.C"); // for laying out file names
+  const char* scratchDir = "PPPythia";
+
+  // define centrality
+  StEStructCentrality* cent=StEStructCentrality::Instance();
+  const double temp[2]={0,2000};
+  cent->setCentralities(temp,2);
+  int mbNBins=cent->numCentralities()-1;
+
+  // choose the mode for the binning
+  int cutBinMode = 1;
+  StEStructCutBin* cb=StEStructCutBin::Instance();
+  cb->setMode(cutBinMode);
+  int mbNCutBins = cb->getNumBins();
   
   // create the generic EStructAnalysisMaker
   StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2Pythia");
 
-  // Set up the EStruct data Readers and Writer codes
-  char* outputFile[10];
-  StEStructEventCuts* ecuts[10];
-  StEStructTrackCuts* tcuts[10];
-  StPythiaTest*  analysis[10];
-  StEStructPythia* readers[10];
-
-
-  // only 1 reader actually reads the event, the others just pull from mem.
-  // this 'skipMake' ensures this to be the case
-  bool skipMake[10];
-  skipMake[0]=false;
-  for(int i=1;i<10;i++)skipMake[i]=true;
+  // create the QAHist object (must come after centrality and cutbin objects)
+  int EventType = 2; // pythia from generator
+  StEStructQAHists* qaHists = new StEStructQAHists(EventType);
+  qaHists->initHistograms();
+  estructMaker->SetQAHists(qaHists);
  
+  // Set up the reader with event/track cuts
+  StEStructEventCuts*    ecuts = new StEStructEventCuts(cutFile);
+  StEStructTrackCuts*    tcuts = new StEStructTrackCuts(cutFile);
+  StEStructPythia*      reader = new StEStructPythia(pythia,ecuts,tcuts,false,0,maxNumEvents);
 
-  //  build the 3 readers & 3 analysis objects
-  //  analysis = analysis interface & contains pair-cut object (needs file)
-  //  reader = reader interface + pointer to StMuDstMaker + cut classes
+  estructMaker->SetEventReader(reader);
 
-  for(int i=0;i<nset;i++){
+  StEStruct2ptCorrelations** analysis = new StEStructEmptyAnalysis*[mbNBins];
+  //  StEStructPairCuts* pcuts = new StEStructPairCuts(cutFile);
 
-     outputFile[i]=getOutFileName(outputDir,jobName,datadirs[i]);
-     analysis[i]=new StPythiaTest();
-     //     analysis[i]->setCutFile(pairCutFile);
-     analysis[i]->setOutputFileName(outputFile[i]);
+  int analysisMode = 0; // 2pt correlations mode selection
 
-     ecuts[i]=new StEStructEventCuts(evtCutFile[i]);
-     tcuts[i]=new StEStructTrackCuts(trackCutFile);
-     readers[i]=new StEStructPythia(1000,pythia,ecuts[i],tcuts[i]);
-     estructMaker->SetReaderAnalysisPair(readers[i],analysis[i]);
+  for(int i=0;i<mbNBins;i++){
+   int ic=i;
+   if(mbNBins==1)ic=-1;
+   analysis[i]=new StEStructEmptyAnalysis;
+   analysis[i]->setOutputFileName(getOutFileName(outputDir,scratchDir,"data",ic));
+   analysis[i]->setQAHists(qaHists); // only 1 QA Object in this case
+   analysis[i]->setZBuffLimits(ecuts); // common to all
   }
+  estructMaker->SetAnalyses(analysis,mbNBins);
  
-  //
-  // --- now do the work ---
-  //
 
-    int istat=0,i=1;
+  // --- now do the work ---
     estructMaker->Init();
     estructMaker->startTimer();
 
-    int counter=0;
-  while(istat!=2){
+    int counter=0, istat=0, i=0;
 
-      istat=estructMaker->Make();
+    while (istat!=2) {
+
+      istat=estructMaker->Make(); // now includes filling qa histograms
+
       i++; counter++;
-      if(counter==200){ 
-        cout<<"doing event ="<<i<<endl;
-        counter=0;
+      if (counter==100) {
+          cout<<"doing event ="<<i<<endl;
+          counter=0;
       }
-      if( maxNumEvents!=0 && i>=maxNumEvents )istat=2;
-   }
-  estructMaker->stopTimer();
+      if ( maxNumEvents!=0 && i>=maxNumEvents ) {
+          istat=2;
+      }
+    }
+    estructMaker->stopTimer();
 
-  // write event-stats to log file 
-  cout<<endl;
-  estructMaker->logAnalysisTime(cout);
-  estructMaker->logInputEvents(cout);
-  estructMaker->logOutputEvents(cout);
-  estructMaker->logOutputRate(cout);
+  //--- now write out stats and cuts ---
+   ofstream ofs(getOutFileName(outputDir,scratchDir,"stats"));
+    estructMaker->logAllStats(ofs);
+    ecuts->printCuts(ofs);
+    tcuts->printCuts(ofs);
+    pcuts->printCuts(ofs);
+   ofs<<endl;
+   ofs.close();
+  
+   // --> root cut file 
+   TFile* tf=new TFile(getOutFileName(outputDir,scratchDir,"cuts"),"RECREATE");
+   ecuts->writeCutHists(tf);
+   tcuts->writeCutHists(tf);
+   tf->Close();
 
-  // 
-  // --> cuts stats streamed to stdout (logfile)
-  //
-  for(int i=0;i<nset;i++){
-     ecuts[i]->printCuts(cout);
-     tcuts[i]->printCuts(cout);
-     //     StEStructPairCuts& pcuts=analysis[i]->getPairCuts();
-     //     pcuts.printCuts(cout);
+   // --> root qa histogram file 
+   estructMaker->writeQAHists(getOutFileName(outputDir,scratchDir,"QA"));
 
-     // 
-     // --> root cut file 
-     // 
-     char* rootCutFile=getOutFileName(outputDir,jobName,cutdirs[i]);
-     TFile* tf=new TFile(rootCutFile,"RECREATE");
-     ecuts[i]->writeCutHists(tf);
-     tcuts[i]->writeCutHists(tf);
-     //     pcuts.writeCutHists(tf);
-     tf->Close();
-  }
-
-
-  estructMaker->Finish();
+   // --- write out the data 
+   estructMaker->Finish();
 }
 
 /**********************************************************************
  *
  * $Log: doEStructPythia.C,v $
+ * Revision 1.4  2006/04/04 22:15:57  porter
+ * a large number of changes were done to simplify the doEStruct macros
+ * in the sense that these are now more similar and should be easier
+ * for Duncan's GUI to build.  Here are some examples.
+ *
  * Revision 1.3  2004/06/25 03:14:56  porter
  * modified basic macro to take only 1 cutfile and moved some common
  * features into a new macro=support.C.....   this cleaned up the
