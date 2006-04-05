@@ -1,5 +1,5 @@
 ///
-// $Id: StBemcTrigger.cxx,v 1.15 2006/01/24 15:26:14 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.16 2006/04/05 18:37:42 rfatemi Exp $
 //
 //
 
@@ -170,22 +170,23 @@ void StBemcTrigger::PatchMap()
     /****************************************************************************
        http://www.nikhef.nl/~ogrebeny/emc/files/Towers%20Layout.xls documents
        the tower->TP->JP correpsondence. Using StEmcDecoder,StEmcGeom and 
-       the above spreadsheet I defined JP#s and assigned correct TP's above.
+       the above spreadsheet I defined my own JP#s and assigned correct TP's above.
+       Unfortunately this was done before code was written to assoicate JP -> TP -> TOW
 
-       JP      TOWERS               Clock Pos. looking from W -> vertex
+       JP      TOWERS                STAR PHI
        ---     --------          -----------------------------------------
-       0        1-100,2101-2400           12
-       1        101-500                   10
-       2        501-900                   08
-       3        901-1300                  06
-       4        1301-1700                 04
-       5        1701-2100                 02
-       6        2401-2500,4501-4800       12
-       7        2501-2900                 02
-       8        2901-3300                 04
-       9        3301-3700                 06
-       10       3701-4100                 08
-       11       4101-4500                 10                            
+       0        1-100,2101-2400           90
+       1        101-500                   30
+       2        501-900                  -30
+       3        901-1300                 -90
+       4        1301-1700               -150
+       5        1701-2100                150
+       6        2401-2500,4501-4800       
+       7        2501-2900                 
+       8        2901-3300                 
+       9        3301-3700                 
+       10       3701-4100                 
+       11       4101-4500                                             
     **************************************************************************/
 
 }
