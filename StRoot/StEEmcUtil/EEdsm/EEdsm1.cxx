@@ -13,6 +13,7 @@
 EEdsm1 ::  EEdsm1() {
   type=0;
   clear();
+  mYear=2005;
 }
 
 //--------------------------------------------------
@@ -38,6 +39,29 @@ ushort EEdsm1::getHTthr(int ch) {
   assert(ch>=0 && ch<nc);
   ushort val=(data[ch]& 0xfff) >>10;
   return val;
+}
+
+/* 2006 change in tier1 file:
+a) selected TP threshold passed?:  extract bits 12-13; .
+b) HTxTP bits for highest threshold passed:  repeat (a), but now for bits 14-15 
+*/
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort EEdsm1::getTPthr(int ch) { 
+  assert(ch>=0 && ch<nc);
+  assert(mYear>=2006);
+  ushort val=data[ch] >>12;
+  return val&3;
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+ushort EEdsm1::getHTTPthr(int ch) { 
+  assert(ch>=0 && ch<nc);
+  assert(mYear>=2006);
+  ushort val=data[ch] >>14;
+  return val&3;
 }
 
 //--------------------------------------------------
@@ -90,7 +114,7 @@ ushort EEdsm1::getTPsum(int ch) {
 //--------------------------------------------------
 //--------------------------------------------------
 void EEdsm1 :: print( int k ) {
-  printf("EEdsm1:: print()  \n");
+  printf("EEdsm1:: print() INPUTS,  year=%d  \n",mYear);
   int i;
 
   printf("\nch    = ");
@@ -103,12 +127,25 @@ void EEdsm1 :: print( int k ) {
 
   printf("\nHTthr = ");
   for(i=nc-1;i>=0;i--) printf("  %4d ", getHTthr(i));
+  
+  if(mYear>=2006) {
+    printf("\nTPthr = ");
+    for(i=nc-1;i>=0;i--) printf("  %4d ", getTPthr(i));
+    
+    printf("\nHTTPthr=");
+    for(i=nc-1;i>=0;i--) printf("  %4d ", getHTTPthr(i));
+  }
 
   printf("\n");
 
 }
  
 // $Log: EEdsm1.cxx,v $
+// Revision 1.3  2006/04/05 18:34:10  balewski
+// new DSM bit assignment in 2006,
+// possibly lost backward compatibility
+// use tagged 2005 version if needed
+//
 // Revision 1.2  2005/02/01 22:13:39  perev
 // Compatibility to redhat
 //

@@ -1,7 +1,7 @@
 #ifndef EEdsm1_h
 #define EEdsm1_h
 /**************************************************************
- * $Id: EEdsm1.h,v 1.2 2005/02/01 22:13:40 perev Exp $
+ * $Id: EEdsm1.h,v 1.3 2006/04/05 18:34:10 balewski Exp $
  **************************************************************/
 #include <stdlib.h>
 
@@ -9,7 +9,8 @@ class EEdsm1  {
   static const int nc=6;
   ushort data[nc];
   int type;
-  
+  int mYear;// unpacking changed in 2006
+
  private:
  public:
   
@@ -18,9 +19,12 @@ class EEdsm1  {
   void  print(int k=0);
   void  clear();
   void setWord(int ch, ushort val);
+  void setYear(int y) { mYear=y;}
   int getNc(){return nc;}
   ushort getTPsum(int ch);
   ushort getHTthr(int ch);
+  ushort getHTTPthr(int ch);// year2006+
+  ushort getTPthr(int ch);  // year2006+
   void setType(int t) {type=t;}
   
 };
@@ -29,6 +33,11 @@ class EEdsm1  {
 
 /* container for STAR trigger data
  * $Log: EEdsm1.h,v $
+ * Revision 1.3  2006/04/05 18:34:10  balewski
+ * new DSM bit assignment in 2006,
+ * possibly lost backward compatibility
+ * use tagged 2005 version if needed
+ *
  * Revision 1.2  2005/02/01 22:13:40  perev
  * Compatibility to redhat
  *
