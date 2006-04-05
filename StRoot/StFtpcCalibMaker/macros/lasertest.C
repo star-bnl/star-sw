@@ -1,6 +1,9 @@
-// $Id: lasertest.C,v 1.3 2006/04/04 12:02:30 jcs Exp $
+// $Id: lasertest.C,v 1.4 2006/04/05 08:50:36 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.4  2006/04/05 08:50:36  jcs
+// set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
+//
 // Revision 1.3  2006/04/04 12:02:30  jcs
 // simplify macro
 //
@@ -21,6 +24,11 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
   cout<<"                            maxz     = "<<maxz<<endl;
   cout<<"                            minrad   = "<<minrad<<endl;
   cout<<"                            maxrad   = "<<maxrad<<endl;
+// if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
+  if (atof(t0)==0 && atof(gas)==0) {
+     t0 = ".000001";
+     cout<<"     changed t0=0 to        t0       = "<<t0<<" to avoid seg fault"<<endl;
+  } else
   cout<<"                            t0       = "<<t0<<endl;
   cout<<"                            gas      = "<<gas<<endl;
   cout<<"                            mbfield  = "<<mbfield<<endl;
@@ -51,8 +59,6 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
   gSystem->Load("StFtpcClusterMaker");
   gSystem->Load("StFtpcTrackMaker");
 
-  if (atof(t0)!=0 || atof(gas)!=0)
-    {
       //  Create the makers to be called by the current chain
       const char *mysqlDB =  "MySQL:StarDb";
       const char *paramsDB = "$STAR/StarDb";
@@ -74,7 +80,11 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
       cout<<"After Database init !!!"<<endl;
       cout<<endl;
     
-      laser->DbInit( mbfield);
+      if (laser->DbInit(mbfield) == kStWarn) {
+         delete laser;
+         break;
+      }
+
   for (int i=-5;i<7;i++)
   //for (int i=0;i<10;i++)
     {
@@ -98,11 +108,7 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
 	}
     }
 
-    //cout<<"deltat0 = "<<"0"<<" und deltaGas = "<<"0"<<endl;
   laser->DoLaserCalib(filename,ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,"0.000001","0",mbfield);
+
   delete laser;
-    } 
-    else {
-      cout<<"Macro will not work if both t0 and gas exactly = 0"<<endl;     
-    }
 }
