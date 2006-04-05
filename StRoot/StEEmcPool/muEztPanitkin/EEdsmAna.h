@@ -1,7 +1,7 @@
 #ifndef EEdsmAna_h
 #define EEdsmAna_h
 /**************************************************************
- * $Id: EEdsmAna.h,v 1.1 2005/04/28 20:54:46 balewski Exp $
+ * $Id: EEdsmAna.h,v 1.2 2006/04/05 18:33:02 balewski Exp $
  **************************************************************/
 #include <TObject.h>
 #include <TString.h>
@@ -22,37 +22,44 @@ class EEdsmAna  {
 #define  EEnTPinJP 15 // numbers trigger patches in JetPatch
 #define  EEnHalfJetPatch 12 // numbers .3 and .6 Jet patches
 #define  EEnHalf 2 // 3x1 3-JP
-#define  EEnThresh 4 //number of thresholds, below thr0, exceeds th0 th1 and th2
-#define  EEjpTh0def 54 //Default lowest jet patch threshold, ped=45+9=>2.2 GeV
-#define  EEjpTh1def 60 //Default middle jet patch threshold, 
-#define  EEjpTh2def 70 //Default highest jet patch threshold, ped=45+=>6.0 GeV
 
+ 
+#define  EEnThresh 4 //number of thresholds, below thr0, exceeds th0 th1 and th2
+  int mJPthr[EEnThresh];
+  //2005--: 54--> ped=45+9=>2.2 GeV
 
   TString myName;
   int nTot;
   
-  int Nee0; // # of Level-0 inputs
-  EEdsm0 * ee0; //  Level-0 inputs
+  //ENDCAP
+  int Nee0; // # of Level-0 boards
+  EEdsm0 * ee0; //  Level-0 boards, nine
+  //BARREL-not implemented
+
   int **ped0; // pedestals for  Level-0 inputs 
   int Nee0out;  //# of Level-0 emuated outputs
   int *ee0outTPadc; // Level-0 emulated values of TP sums
   int *ee0outHTadc; // Level-0 emulated values of HT adc
+  int mYear; // unpacking changed in 2006
 
-
-  int Nee1; // # of Level-1 inputs
-  EEdsm1 * ee1; // Level-1 input 
-  int *ee1out3JPadc; // Level-1 emulated values of 3x1 JP sums
-
+  //ENDCAP:
+  int Nee1; // # of Level-1 boards
+  EEdsm1 * ee1; // Level-1 boards , two
+  int *ee1out3JPadc; // Level-1 emulated values of 3x1 JP energy sums
+  //BARREL-not implemented
 
   int ee1outJPadc[EEnJetPatch]; // Level-1 emulated values of JP energy
   int ee1outHT[EEnJetPatch]; // Level-1 emulated values of HT 2bit thresholds
-
-  int JPtrig[EEnJetPatch];   //word for each patch describing thresh passed
+  int ee1outTPthrMax  [EEnHalf]; // Level-1 emulated max TPthres (2bits)
+  int ee1outHTTPthrMax[EEnHalf]; // Level-1 emulated max HTTPthres (2bits)
   int AdjJPsum[EEnJetPatch]; //Adjacent jet patch sums
 
-  EEdsm2 * ee2; // Level-2 input 
+  enum BrdCnt{Nbe2=3};
+  //ENDCAP:
+  EEdsm2 * ee2; // Level-2 board, just one
   int ee2outHT; // Level-2 emulated values of HT 2bit threshold
-
+  //BARREL
+  EEdsm2 *be2; // Level-2 boards
 
   EEdsm3 * ee3; // Trigger DSM input 
 
@@ -99,11 +106,10 @@ class EEdsmAna  {
   TH2F *H1inTPvEmu[EEnHalfJetPatch]; //  TP sum level-1 input vs. emulation
  
 
-  TH2F *H2inHTvEmu[EEnHalf]; 
-  TH2F *H2inTPvEmu[EEnJetPatch]; //  TP sum level-1 input vs. emulation
+  TH2F *H2inHTTP[EEnHalf]; // matrix of HT & HTTP
+  TH1F *H1inEtot[EEnHalf]; // Etot for each half, input to level2
 
-
-  TH2F *H3inHTvEmu;
+  TH2F *H3inHTTP;
 
   /*
     Histos for debugging the jet patch trigger.  The first array of 6 are the summed jet
@@ -130,6 +136,12 @@ class EEdsmAna  {
   TH1F *H5jpFreq; //  
   TH1F *H5jpHot; // 
 
+  //Total energy histos
+  enum {mxEtotBit=2};
+  TH1F *HEetot[mxEtotBit]; //label: EEMC ETOT BIT
+  TH1F *HBetot[mxEtotBit]; //label: BEMC ETOT BIT
+  TH1F *HBEetot[mxEtotBit]; //label: B+EEMC ETOT BIT
+
   TObjArray *HList;
 
  public:
@@ -137,8 +149,8 @@ class EEdsmAna  {
  void  printDsm0map();
 
  virtual ~EEdsmAna();
- void  print(int k=0);
- void  print2(int k=0); // for Renee to compare w/ muDst
+ void  printAllEndcap(int k=0);
+ void  printAllBarrel(int k=0);
  void  initHisto();
  void  clear();
  void  sort(const unsigned char * dsm0inp, 
@@ -157,6 +169,10 @@ class EEdsmAna  {
 
 /*
  * $Log: EEdsmAna.h,v $
+ * Revision 1.2  2006/04/05 18:33:02  balewski
+ * new DSM bits allocation in 2006, possibly lost backward compatibility
+ * use tagged 2005 version if needed
+ *
  * Revision 1.1  2005/04/28 20:54:46  balewski
  * start
  *

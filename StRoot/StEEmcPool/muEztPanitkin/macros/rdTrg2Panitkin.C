@@ -1,19 +1,19 @@
-int rdTrg2Panitkin(int nEve=1000,
-		   char* file="run7067154.1",
-		   char *pathIn="",
+int rdTrg2Panitkin(int nEve=1000000,
+		   char* file="R7072002",
+		   char *pathIn="//star/data05/scratch/balewski/2006-L2algo-events/2006-data/072/",
 		   char *pathOut="./wrk/hist/"
 		   ){ 
   
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
   cout << " loading done " << endl;
-  assert( !gSystem->Load("StEEmcPoolmuEztPanitkin")); 
+  // assert( !gSystem->Load("StEEmcPoolmuEztPanitkin")); // DEV version
+  assert( !gSystem->Load(".sl305_gcc323/obj/StRoot/StEEmcPool/muEztPanitkin/StEEmcPoolmuEztPanitkin.so")); // local version
   assert( !gSystem->Load("StEEmcUtil")); 
   assert( !gSystem->Load("StEEmcPoolHanksTriggerDataReader")); 
   
   // create chain    
   chain = new StChain("StChain"); 
-  int nEntries=0;
   
   TString iFile=file; iFile+=".dat";
   iFile=pathIn+iFile;
@@ -50,13 +50,13 @@ int rdTrg2Panitkin(int nEve=1000,
     printf("\n\n ====================%d  processing  ==============\n", eventCounter);
     
   }
-
-  printf("sorting done, nEve=%d of %d\n",nEve, nEntries);
+ 
+  printf("sorting done, nEve=%d \n",nEve);
   int t2=time(0);
   if(t1==t2) t2++;
   float rate=1.*eventCounter/(t2-t1);
   float nMnts=(t2-t1)/60.;
-  printf("sorting done %d of   nEve=%d, elapsed rate=%.1f Hz, tot %.1f minutes\n",eventCounter,nEntries,rate,nMnts);
+  printf("sorting done nEve=%d , elapsed rate=%.1f Hz, tot %.1f minutes\n",eventCounter,rate,nMnts);
   
   if (eventCounter) {
     cout << "CPU time/event= " << timer.elapsedTime()/eventCounter << " sec  "
