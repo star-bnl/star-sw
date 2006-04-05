@@ -92,14 +92,6 @@ public:
     }
 
 
-    //********************************************************
-    //The 2005 access functions are commented out because the
-    //algorithm in StBemcTrigger.cxx does not yet incorporate
-    //the correct online LUTa/PEDa/DSM_MASKs/TRIG_MASKs. The
-    //2005 has not been verified against data so user BEWARE and
-    //test the 2005 algos before using them. (RHF)
-    //********************************************************
-
     int               is2003HT1()
     {
         return mIs2003HT1;
@@ -120,11 +112,11 @@ public:
     {
         return mIs2004JP2;
     }
-    //int               is2005HT1() {return mIs2005HT1;}
-    //int               is2005HT2() {return mIs2005HT2;}
-    //int               is2005JP1() {return mIs2005JP1;}
-    //int               is2005JP2() {return mIs2005JP2;}
-    //int               is2005ADJ() {return mIs2005ADJ;}
+    int               is2005HT1() {return mIs2005HT1;}
+    int               is2005HT2() {return mIs2005HT2;}
+    int               is2005JP1() {return mIs2005JP1;}
+    int               is2005JP2() {return mIs2005JP2;}
+    int               is2005ADJ() {return mIs2005ADJ;}
 
     int               get2003HT1_ID()
     {
@@ -146,11 +138,11 @@ public:
     {
         return JP2_ID_2004;
     }
-    //int               get2005HT1_ID() {return HT1_ID_2005;}
-    //int               get2005HT2_ID() {return HT2_ID_2005;}
-    //int               get2005JP1_ID() {return JP1_ID_2005;}
-    //int               get2005JP2_ID() {return JP2_ID_2005;}
-    //int               get2005ADJ_ID() {return ADJ_ID_2005;}
+    int               get2005HT1_ID() {return HT1_ID_2005;}
+    int               get2005HT2_ID() {return HT2_ID_2005;}
+    int               get2005JP1_ID() {return JP1_ID_2005;}
+    int               get2005JP2_ID() {return JP2_ID_2005;}
+    int               get2005ADJ_ID() {return ADJ_ID_2005;}
 
     int               get2003HT1_ADC()
     {
@@ -172,11 +164,11 @@ public:
     {
         return JP2_DSM_2004;
     }
-    //int               get2005HT1_ADC() {return HT1_DSM_2005;}
-    //int               get2005HT2_ADC() {return HT2_DSM_2005;}
-    //int               get2005JP1_ADC() {return JP1_DSM_2005;}
-    //int               get2005JP2_ADC() {return JP2_DSM_2005;}
-    //int               get2005ADJ_ADC() {return ADJ_DSM_2005;}
+    int               get2005HT1_ADC() {return HT1_DSM_2005;}
+    int               get2005HT2_ADC() {return HT2_DSM_2005;}
+    int               get2005JP1_ADC() {return JP1_DSM_2005;}
+    int               get2005JP2_ADC() {return JP2_DSM_2005;}
+    int               get2005ADJ_ADC() {return ADJ_DSM_2005;}
 
     StBemcTrigger*    getTrigger()
     {
