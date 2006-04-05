@@ -58,29 +58,32 @@ void GetHisto(FileType *fd,char *name, int i) {
 void 
 eePlot(int page, int panel,FileType *fd, TPad *cc){
   static int first=1;
-  static EemcTwMask twMask; 
+  static EemcTwMask *twMask=0;
   if(first) { 
-    eePlotInit(); 
+  bool twMaskFound=false;
+  twMask =new EemcTwMask;
+  eePlotInit(); 
 #ifdef IN_PANITKIN 
-    useTwMask("/home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat", &twMask); 
+  twMaskFound=useTwMask("/home_local/eemc/defaultPanitkinSetup/eemcTwMask.dat", twMask); 
 #else
-    useTwMask("eemcTwMask.dat", &twMask);
+  twMaskFound=useTwMask("eemcTwMask.dat", twMask);
 #endif
-    
-    first=0;
-  }
-
+  
+  first=0;
+  if(!twMaskFound) { delete twMask; twMask=0;}
+  }  
+  
   ee1Style->cd(); // use my default style
   hCleanUp->Delete();
   cc->Clear();
-
+  
   if(page==10) {
     switch(panel) {
-    case 1: eeJpQa(fd, cc, &twMask); break;
+    case 1: eeJpQa(fd, cc, twMask); break;
     case 2: eeDaqCorr(fd, cc,1); break;
-    case 3: eeFreq(fd, cc, &twMask); break;
-    case 4: eeDaqTwCr(fd, cc, &twMask); break;
-    case 5: eeDaqTwHot(fd, cc, &twMask); break;
+    case 3: eeFreq(fd, cc, twMask); break;
+    case 4: eeDaqTwCr(fd, cc, twMask); break;
+    case 5: eeDaqTwHot(fd, cc, twMask); break;
     case 6: eeDaqTwHit(fd, cc); break;
     default:  plNone(cc); break;
     } 
@@ -108,11 +111,11 @@ eePlot(int page, int panel,FileType *fd, TPad *cc){
     case 4: eeTrigDsm1(fd, cc,"HT"); break;
     case 5: eeTrigDsm1(fd, cc,"TP"); break;
     case 6: eeTrigDsm2HT(fd, cc); break;
-    case 7: eeTrigDsm2TP(fd, cc,"TP"); break;
-    case 8: eeTrigJPsum(fd, cc,"_sum"); break;
-    case 9: eeTrigJPfreq(fd, cc); break;
-    case 10: eeTrigAdjJPsum(fd, cc,"_sum"); break;
-    case 11: eeTrigAdjJPcor(fd, cc,"_cor"); break;
+    case 7: eeTrigJPsum(fd, cc,"_sum"); break;
+    case 8: eeTrigJPfreq(fd, cc); break;
+    case 9: eeTrigAdjJPsum(fd, cc,"_sum"); break;
+    case 10: eeTrigAdjJPcor(fd, cc,"_cor"); break;
+    case 11: eeTrigEtot(fd, cc); break;
     default:  plNone(cc); break;
     }
     
@@ -144,7 +147,7 @@ void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
   c->Divide(2,2);
   char *name1[]={"JPpedZoom","JPtotCor","JPtotFreq","JPpedHot"};
   char *name2[]={"JPpedZoom","JPsumTh3","JPtotFreq","xx"}; 
-  // printf("m=%p\n",m);
+  //printf("m=%p\n",m);
   char **name=name1;
   if(m==0) name=name2; // dirty trick, JB
   int i;
@@ -157,7 +160,7 @@ void eeJpQa(FileType *fd, TPad *c0, EemcTwMask *m) { // out
       h[i]->Draw("colz");
     else
       h[i]->Draw("b");
-    //if(i==2) gPad->SetGridy();
+    if(i==0) gPad->SetLogz();
   }
   // extra steps
   if(h[2]) {
@@ -495,6 +498,7 @@ void eeTrigHanks(FileType *fd, TPad *c ) {
   int i;
   for(i=0;i<2;i++) {
     GetHisto(fd,name[i],i);
+    // printf("aaa%d %s %p\n",i,name[i],h[i]);
     c->cd(1+i);
     gPad->SetLogz(0);
 
@@ -569,8 +573,8 @@ void eeTrigDsm1(FileType *fd, TPad *c, char *mode ) {
 //--------------------------------------
 void eeTrigDsm2HT(FileType *fd, TPad *c ) {
 
-  char *name[3]={"dsm2Half1_HT","dsm2Half2_HT","dsm3_HT"};
-  c->Divide(2,3);
+  char *name[3]={"dsm2Half1_HTTP","dsm2Half2_HTTP","dsm3_HTTP"};
+  c->Divide(2,2);
  
   int i;
   for(i=0;i<3;i++) {
@@ -583,29 +587,7 @@ void eeTrigDsm2HT(FileType *fd, TPad *c ) {
   }
 
 }
-
-
-//--------------------------------------
-//--------------------------------------
-void eeTrigDsm2TP(FileType *fd, TPad *c, char *mode ) {
-  char tit[100];
- 
-  c->Divide(2,3);
-
-  char *core="dsm2JP";
-  int j;
-  for(j=0;j<6;j++) { 
-    sprintf(tit,"%s%d_%s",core,j+1,mode);
-    GetHisto(fd,tit,j);
-    c->cd(j+1);
-    h[j]->Draw("colz");
-    gPad->SetLogz(0);
-
-    if ( h[j]->Integral()>0) gPad->SetLogz();
-    if(mode[0]=='H') gPad->SetGridx();
- }
   
-}
 
 
 //--------------------------------------
@@ -655,11 +637,22 @@ void eeTrigJPfreq(FileType *fd, TPad *c) {
     //printf("h=%p\n",h[j]);
     c->cd(j+1);
     h[j]->Draw();
+    h[j]->SetMinimum(0.);
   }
 
+
+  for(j=0;j<2;j++) { 
+    sprintf(tit,"dsm2Half%d_Etot",j+1);
+    GetHisto(fd,tit,j); 
+    c->cd(j+5);
+    h[j]->Draw();
+  }
+
+#if 0 // out 2006+
   GetHisto(fd,"JPadjTh",5); 
   c->cd(5);
   h[5]->Draw();
+#endif
   
 }
 
@@ -689,6 +682,49 @@ void  eeTrigAdjJPsum(FileType *fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
+void eeTrigEtot(FileType *fd, TPad *c ) {
+
+  char *nameA[3]={"dsm2E_etot","dsm2B_etot","dsm2BE_etot"};
+  c->Divide(1,3);
+ 
+  int i;
+  int k=0;
+  char name[20];
+  for(i=0;i<3;i++) {
+    c->cd(1+i);
+    gPad->SetLogy(0);
+    int ii;
+    for(ii=0;ii<=1;ii++) {  
+      sprintf(name,"%s%d",nameA[i],ii);
+      GetHisto(fd,name,k);
+      if(ii==0 ) {
+	h[k]->Draw();
+	TString tt=h[k]->GetTitle();
+	tt+="  COLORS:   bit=0 BLUE , bit=1 RED";
+	h[k]->SetTitle(tt);
+      } else h[k]->Draw("same");
+      if( ii==0&&h[k]->Integral()>0 ) gPad->SetLogy();
+      k++;
+    }
+  }
+  //  return;
+
+  // lock maxY
+  float ymax=0;
+  int j;
+  for(j=0;j<6;j++) {
+    if(h[j]==0) continue;
+    if(ymax< h[j]->GetMaximum() ) ymax= h[j]->GetMaximum();
+  }
+  
+  for(j=0;j<6;j++) {
+    if(h[j]==0) continue;
+    h[j]->SetMaximum(ymax*1.1);
+  }
+}
+  
+//--------------------------------------
+//--------------------------------------
 void  eeTrigAdjJPcor(FileType *fd, TPad *c, char *mode ) {
 
   char tit[100];
@@ -711,7 +747,7 @@ void  eeTrigAdjJPcor(FileType *fd, TPad *c, char *mode ) {
 
 //--------------------------------------
 //--------------------------------------
-void  useTwMask(char *fname, EemcTwMask *m) {
+bool  useTwMask(char *fname, EemcTwMask *m) {
   const int mx=1000;
   char buf[mx];
   
@@ -775,12 +811,12 @@ void  useTwMask(char *fname, EemcTwMask *m) {
   
   m->phiG.SetMarkerStyle(24);
  
-  return ;
+  return 1;
  abandon: // any error has happened (this is a new approach for me, JB)
   m->clear();
   m->txtH->AddText("List of ETOW hot towers not found");  m->txtH->AddText("--");
   printf(" EEqaPresenter::useTwMask() FAILED\n");
-  return ;
+  return 0;
 }
 
 

@@ -52,14 +52,14 @@ void eeTrigHanks(FileType *fd, TPad *c);
 void eeTrigDsm0(FileType *fd, TPad *c,char *);
 void eeTrigDsm1(FileType *fd, TPad *c, char *);
 void eeTrigDsm2HT(FileType *fd, TPad *c);
-void eeTrigDsm2TP(FileType *fd, TPad *c, char *);
 
 void eeTrigJPsum(FileType *fd, TPad *c, char *);
 void eeTrigJPfreq(FileType *fd, TPad *c);
 void eeTrigAdjJPsum(FileType *fd, TPad *c, char *);
 void eeTrigAdjJPcor(FileType *fd, TPad *c, char *);
+void eeTrigEtot(FileType *fd, TPad *c);
 
-void useTwMask(char *fname, EemcTwMask *m);
+bool useTwMask(char *fname, EemcTwMask *m);
 
 //utility
 void addJPphiLimits(TH1 *h);
