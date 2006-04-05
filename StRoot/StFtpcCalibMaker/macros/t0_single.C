@@ -1,6 +1,9 @@
-// $Id: t0_single.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: t0_single.C,v 1.3 2006/04/05 08:50:36 jcs Exp $
 //
 // $Log: t0_single.C,v $
+// Revision 1.3  2006/04/05 08:50:36  jcs
+// set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -11,6 +14,11 @@ void t0_single(TString filename, char* t0, char* gas,float mbfield)
 
   cout<<"Starting t0_single.C:"<<endl;
   cout<<"               filename = "<<filename<<".root"<<endl;
+  // if both t0 and gas = "0", set t0=".000001" otherwise program will seg fault
+  if (atof(t0)==0 && atof(gas)==0) {
+     t0 = ".000001";
+     cout<<"  changed t0=0 to   t0  = "<<t0<<" to avoid seg fault"<<endl;
+  } else
   cout<<"               t0       = "<<t0<<endl;
   cout<<"               gas      = "<<gas<<endl;
   cout<<"               mbfield  = "<<mbfield<<endl;
@@ -33,33 +41,29 @@ void t0_single(TString filename, char* t0, char* gas,float mbfield)
   gSystem->Load("StFtpcClusterMaker");
   gSystem->Load("StMagF");
 
-  if (atof(t0)!=0 || atof(gas)!=0)
-    {
-      //  Create the makers to be called by the current chain
-      const char *mysqlDB =  "MySQL:StarDb";
-      const char *paramsDB = "$STAR/StarDb";
-      //const char *paramsDB = "$PWD/StarDb";
+  //  Create the makers to be called by the current chain
+  const char *mysqlDB =  "MySQL:StarDb";
+  const char *paramsDB = "$STAR/StarDb";
+  //const char *paramsDB = "$PWD/StarDb";
       
-      StChain *chain =  new StChain();
-
-      StFtpcCalibMaker *laser=new StFtpcCalibMaker();
-      laser->GetRunInfo(filename);
+  StFtpcCalibMaker *laser=new StFtpcCalibMaker();
+  laser->GetRunInfo(filename);
+  cout<<" date = "<<laser->Date()<<" time = "<<laser->Time()<<endl;
       
-      St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
-      dbMk->SetDateTime(laser->Date(),laser->Time());
+  St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
+  dbMk->SetDateTime(laser->Date(),laser->Time());
       
-      dbMk->Init();
-      dbMk->Make();
-      
-      cout<<"After Database init !!!"<<endl;
-    }
-  
-  cout<<endl;
-  cout<<"Starting StFtpcCalibMaker ..."<<endl;
+  dbMk->Init();
+  dbMk->Make();
+ 
+  cout<<"dbDate = "<<dbMk->GetDateTime().GetDate()<<endl;
+  cout<<"After Database init !!!"<<endl;
   cout<<endl;
 
-  if (atof(t0)!=0 || atof(gas)!=0)
-    laser->DbInit(mbfield);
+    if (laser->DbInit(mbfield) == kStWarn) {
+     delete laser;
+     break;
+  }
   
   laser->DoT0Calib(filename,t0,gas,mbfield);
 
