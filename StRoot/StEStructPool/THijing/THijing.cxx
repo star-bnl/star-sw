@@ -26,6 +26,12 @@ void THijing::init() {
 THijing::~THijing() {
 }
 
+void THijing::SetRandomSeed(int iseed) {
+  int lux = 2;
+  int k1 = 0;
+  int k2 = 0;
+  rluxgox_(&lux,&iseed,&k1,&k2);
+}
 void THijing::GenerateEvent() {
   // Comment out the following line, so that THijing always
   // generate an event when called by this method.

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.4 2006/04/04 22:14:39 porter Exp $
+ * $Id: StEStructHijing.cxx,v 1.5 2006/04/06 01:21:03 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -23,6 +23,7 @@ StEStructHijing::StEStructHijing() {
     mTCuts              = 0;
     mInChain            = false;
     mEventsToDo         = 100;
+    museImpactParameter = true;
     mCentBin            = 0;
     mEventCount         = 0;
     mAmDone             = false;
@@ -32,6 +33,7 @@ StEStructHijing::StEStructHijing(THijing* hijing,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
                                  bool inChain,
+                                 bool useImpactParameter,
                                  int  centBin,
                                  int  eventsToDo) {
     mHijing             = hijing;
@@ -39,6 +41,7 @@ StEStructHijing::StEStructHijing(THijing* hijing,
     mTCuts              = tcuts;
     mInChain            = inChain;
     mEventsToDo         = eventsToDo;
+    museImpactParameter = useImpactParameter;
     mCentBin            = centBin;
     mEventCount         = 0;
     mAmDone             = false;
@@ -71,16 +74,16 @@ StEStructEvent* StEStructHijing::next() {
     int   nTracks = countGoodTracks();
     float centMeasure;
     mImpact = mHijing->GetImpactParameter();
-
-    StEStructCentrality* cent=StEStructCentrality::Instance(); 
-    if(cent->getCentType() == ESGenImpact){
+    if (museImpactParameter) {
       centMeasure = mImpact;
     } else {
       centMeasure = nTracks;
     }
-    retVal->SetCentrality(cent->centrality(centMeasure));
-    retVal->SetPtCentralityIndex(cent->ptCentrality((float)centMeasure));
-    if(!mECuts->goodCentrality((int)retVal->Centrality())){ //|| !mstarTrigger){
+    retVal->SetCentrality(centMeasure);
+    StEStructCentrality* cent=StEStructCentrality::Instance();
+    int jCent = cent->centrality(retVal->Centrality());
+    if (((mCentBin >= 0) && (jCent != mCentBin)) ||
+         !mECuts->goodCentrality(centMeasure)) {
         delete retVal;
         retVal=NULL;
         mECuts->fillHistogram(mECuts->centralityName(),centMeasure,false);
@@ -134,22 +137,22 @@ void StEStructHijing::fillTracks(StEStructEvent* estructEvent) {
         eTrack->SetBzGlobal(gdca[2]);
         delete [] gdca;
 
-        eTrack->SetPIDe(0);
-        eTrack->SetPIDpi(0);
-        eTrack->SetPIDk(0);
-        eTrack->SetPIDp(0);
-        eTrack->SetPIDd(0);
+        eTrack->SetPIDe(10);
+        eTrack->SetPIDpi(10);
+        eTrack->SetPIDk(10);
+        eTrack->SetPIDp(10);
+        eTrack->SetPIDd(10);
         if ((pid == 7) || (pid == 8)) {
-            eTrack->SetPIDe(1);
+            eTrack->SetPIDe(0);
         } else if ((pid == -211) || (pid == 211)) {
-            eTrack->SetPIDpi(1);
+            eTrack->SetPIDpi(0);
         } else if ((pid == -321) || (pid == 321)) {
-            eTrack->SetPIDk(1);
+            eTrack->SetPIDk(0);
         } else if ((pid == -2212) || (pid == 2212)) {
-            eTrack->SetPIDp(1);
+            eTrack->SetPIDp(0);
         } else if ((pid == -2213) || (pid == 2213)) {
             // These numbers aren't right, but I don't care about dueterons right now.
-            eTrack->SetPIDd(1);
+            eTrack->SetPIDd(0);
         }
 
         eTrack->SetPx(p[0]);

@@ -6,6 +6,7 @@
 extern "C" {
   void hijset_(float *efrm, char *frame, char *proj, char *targ, int *iap, int *izp, int *iat, int *izt);
   void hijing_(char *frame, float *bmin, float *bmax);
+  void rluxgox_(int *lux,int *iseed, int *k1, int *k2);
   void hijev_();
   // definition for the common blocks in Hijing
   extern struct {
@@ -76,6 +77,7 @@ class THijing {
  public:
   THijing( const char *paramFile );
   ~THijing();
+  void SetRandomSeed(int iseed);
   void GenerateEvent();
   int EventsToDo()      const { return int(headpss_.vsshep[3]); }
   int EventsGenerated() const { return mNevent; }
