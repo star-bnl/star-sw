@@ -21,38 +21,28 @@ void selectAllM5(const char* dirName, const char* inFile){
   };
 
   //--> do all of the following
-  const char* oname[]={"all",
-                       "pi+_pi+","pi+_pi-","pi-_pi-",
-                       "pi+_K+", "pi+_K-", "pi-_K+", "pi-_K-",
-                       "pi+_p+", "pi+_p-", "pi-_p+", "pi-_p-",
-                       "K+_K+",  "K+_K-",  "K-_K-",
-                       "K+_p+",  "K+_p-",  "K-_p+",  "K-_p-",
-                       "p+_p+",  "p+_p-",  "p-_p-",
-                       "other"};
+  const char* oname[]={"pi_pi", "pi_K", "pi_p", "K_K", "K_p", "p_p", "o_o",};
 
-  int nList[22];
-  for (int i=0;i<22;i++) {
+  int nList[14];
+  for (int i=0;i<14;i++) {
       nList[i] = i;
   }
   TString fname(dirName);
   fname+="/";
   fname+=inFile;
-  fname+=oname[0];
+  fname+="all";
   fname+=".root";
   adder.addCuts(fname.Data(),tf,nList,14);
 
-  int offSet = 0;
-  for(int k=0;k<22;k++){
-    for (int i=0;i<2;i++) {
-        nList[i] = i + offSet;
-    }
+  for(int k=0;k<7;k++){
+    nList[0] = 2*k;
+    nList[1] = 2*k + 1;
     TString fname(dirName);
     fname+="/";
     fname+=inFile;
-    fname+=oname[k+1];
+    fname+=oname[k];
     fname+=".root";
     adder.addCuts(fname.Data(),tf,nList,2);
-    offSet += 2;
   }
 
 };

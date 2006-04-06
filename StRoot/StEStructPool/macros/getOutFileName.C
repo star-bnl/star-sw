@@ -25,7 +25,12 @@ char* getOutFileName(const char* baseDir, const char* jobName,
       outArea+=jobName;
     }
     outArea+="/";
-    outArea+=type; outArea+="/";
+    if (strstr(type,"centralityDefs")) {
+      outArea+="cuts";
+    } else {
+      outArea+=type;
+    }
+    outArea+="/";
 
     TString createDir("mkdir -p ");
     createDir+=outArea.Data();
@@ -43,7 +48,7 @@ char* getOutFileName(const char* baseDir, const char* jobName,
     }
        
     TString outputFileFile(outArea.Data());
-    if(strstr(type,"cut")){
+    if(strstr(type,"cuts")){
       outputFileFile+="cutHists";
     } else if(strstr(type,"data")){
       outputFileFile+="dataHists";
@@ -52,6 +57,8 @@ char* getOutFileName(const char* baseDir, const char* jobName,
     } else if(strstr(type,"stats")){
       outputFileFile+="stats";
       iext=2;
+    } else if(strstr(type,"centralityDefs")){
+      outputFileFile+="centralityDefs";
     } else {
       outputFileFile+="events";
       iext=1;
