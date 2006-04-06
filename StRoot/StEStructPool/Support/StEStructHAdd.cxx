@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.4 2005/09/29 17:42:14 msd Exp $
+ * $Id: StEStructHAdd.cxx,v 1.5 2006/04/06 01:09:46 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -20,27 +20,31 @@
 ClassImp(StEStructHAdd)
 
   //------------------------------------------------------------------------
-void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot){
+void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
+                            int* nlist, int ntot, int all ){
 
   const char* base[]={"Sib","Mix"};
-  const char* tpe[]={"pp","pm","mm"};
+  const char* tpe[]={"pp","pm","mp","mm"};
   const char* knd[]={"YtYt","PtPt", "XtXt",
-                     "EtaEta","PhiPhi",
-                     "PrEtaEta","PrPhiPhi",
-                     "SuEtaEta","SuPhiPhi",
-                     "SYtDYt","SPtDPt",
-                     "DEtaDPhi","SEtaDPhi",
+                     "EtaEta",    "PhiPhi",
+                     "PrEtaEta",  "PrPhiPhi",
+                     "PaEtaEta",  "PaPhiPhi",
+                     "PbEtaEta",  "PbPhiPhi",
+                     "SYtDYt",    "SPtDPt",
+                     "DEtaDPhi",  "SEtaDPhi",
+                     "DYtDEta",   "DYtDPhi",
                      "PrDEtaDPhi","PrSEtaDPhi",
-                     "SuDEtaDPhi","SuSEtaDPhi",
-                     "Qinv","pt"};
+                     "PaDEtaDPhi","PaSEtaDPhi",
+                     "PbDEtaDPhi","PbSEtaDPhi",
+                     "Qinv","pta","ptb"};
 
-  TFile* tfout=new TFile(outfile,"RECREATE");
+  TFile* outFile = new TFile(outfile,"RECREATE");
 
   for(int i=0;i<2;i++){
-    for(int j=0;j<3;j++){
-      for(int k=0;k<19;k++){
+    for(int j=0;j<4;j++){
+      for(int k=0;k<26;k++){
         TString htype;
-        if(k<18){
+        if (k<24) {
          htype+=base[i];htype+=tpe[j];
 	} else if(i>0 || j>0){
           continue;
@@ -48,23 +52,29 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
         htype+=knd[k];        
 	  
         TH1* outhist=0;
-          for(int n=0;n<ntot;n++){
-            TString fullName(htype.Data()); fullName+=nlist[n];
-            tf->cd();
-            TH1* tmp=(TH1*)tf->Get(fullName.Data());
-            if(!tmp){
-              cout<<"Cannot find "<<fullName.Data()<<endl;
-              break;
-            }
-            if(n==0){
-              outhist=(TH1*)tmp->Clone();
-              outhist->SetName(htype.Data());
-              outhist->SetTitle(tmp->GetTitle());
-            } else {
-              outhist->Add(tmp);
-            }
+        for(int n=0;n<ntot;n++){
+          TString fullName(htype.Data()); fullName+=nlist[n];
+          inFile->cd();
+          TH1* tmp=(TH1*)inFile->Get(fullName.Data());
+          if(!tmp){
+            cout<<"Cannot find "<<fullName.Data()<<endl;
+            break;
           }
-          tfout->cd();
+          if(n==0){
+            outhist=(TH1*)tmp->Clone();
+            outhist->SetName(htype.Data());
+            outhist->SetTitle(tmp->GetTitle());
+          } else {
+            outhist->Add(tmp);
+          }
+        }
+        if ((k>=24)  && all) {
+            TH1* tmp=(TH1*)inFile->Get("ptAll");
+            if (tmp) {
+                outhist = (TH1*)tmp->Clone();
+            }
+        }
+        outFile->cd();
           if(outhist){
             outhist->Write();
             delete outhist;
@@ -73,36 +83,35 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* tf, int* nlist, int ntot
     }
   }
 
-  tf->cd();
-  TH1* tmp=(TH1*)tf->Get("NEventsSame");
-  tfout->cd();
+  inFile->cd();
+  TH1* tmp=(TH1*)inFile->Get("NEventsSame");
+  outFile->cd();
   tmp->Write();
 
-  tf->cd();
-  tmp=(TH1*)tf->Get("NEventsMixed");
-  tfout->cd();
+  inFile->cd();
+  tmp=(TH1*)inFile->Get("NEventsMixed");
+  outFile->cd();
   tmp->Write();
 
-  /*
-  tf->cd();
-  tmp=(TH1*)tf->Get("pt");
-  tfout->cd();
-  tmp->Write();
-  */
-  tfout->Close();
+  outFile->Close();
 };
 
 //--------------------------------------------------------------------------
-void StEStructHAdd::addCuts(const char* outfile, const char* infile, int* nlist, int ntot){
+void StEStructHAdd::addCuts(const char* outfile, const char* infile,
+                            int* nlist, int ntot, int all){
 
   TFile* tf=new TFile(infile);
-  if(tf) addCuts(outfile,tf,nlist,ntot);
+  if(tf) addCuts(outfile,tf,nlist,ntot,all);
   return;
 };
 
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.5  2006/04/06 01:09:46  prindle
+ * Calculating pt for each cut bin caused changes in HAdd.
+ * The splitting of +- into +- and -+ caused changes in Support.
+ *
  * Revision 1.4  2005/09/29 17:42:14  msd
  * Added Xt to hadd
  *

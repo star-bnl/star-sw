@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.5 2006/04/04 22:14:10 porter Exp $
+ * $Id: StEStructSupport.h,v 1.6 2006/04/06 01:09:50 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -58,11 +58,14 @@ public:
   TH1** getPtHists(const char* name);
   TH1** getPtClones(const char* name);
 
-  // ++, +-, --, ++ - --
+  // ++, +-, -+, --
   TH1** buildCommonRatios(const char* name);
   TH1** buildCommonCFunctions(const char* name);
   TH1** buildCommonRFunctions(const char* name);
   TH1** buildCommon(const char* name, int opt=0);
+
+  TH1** buildPtCommon(const char* name, int opt=0);
+  TH1** buildPtMixCommon(const char* name, int opt=0);
 
   // LS, US, CD, CI
   TH1** buildChargeTypeRatios(const char* name);
@@ -97,6 +100,10 @@ inline bool StEStructSupport::applyDEtaFix()     { return mapplyDEtaFix; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.6  2006/04/06 01:09:50  prindle
+ * Calculating pt for each cut bin caused changes in HAdd.
+ * The splitting of +- into +- and -+ caused changes in Support.
+ *
  * Revision 1.5  2006/04/04 22:14:10  porter
  * fixdeta is now NOT default but included in StEStruct2ptCorrelations
  *
