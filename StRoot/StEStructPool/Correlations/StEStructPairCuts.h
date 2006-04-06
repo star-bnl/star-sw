@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.8 2006/04/04 22:10:13 porter Exp $
+ * $Id: StEStructPairCuts.h,v 1.9 2006/04/06 01:01:22 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -247,22 +247,22 @@ inline float StEStructPairCuts::SigmaPt() const {
 }
 
 inline float StEStructPairCuts::DeltaMt() const {
-  return fabs(mTrack1->FourMomentum().mt()-mTrack2->FourMomentum().mt());
+  return mTrack1->FourMomentum().mt()-mTrack2->FourMomentum().mt();
 }
 inline float StEStructPairCuts::DeltaXt() const {
-  return fabs(mTrack1->Xt()-mTrack2->Xt());
+  return mTrack1->Xt()-mTrack2->Xt();
 }
 inline float StEStructPairCuts::DeltaYt() const {
-  return fabs(mTrack1->Yt()-mTrack2->Yt());
+  return mTrack1->Yt()-mTrack2->Yt();
 }
 inline float StEStructPairCuts::DeltaYt(float mass1, float mass2) const {
-  return fabs(mTrack1->Yt(mass1)-mTrack2->Yt(mass2));
+  return mTrack1->Yt(mass1)-mTrack2->Yt(mass2);
 }
 inline float StEStructPairCuts::DeltaEta() const {
-  return fabs(mTrack1->Eta()-mTrack2->Eta());
+  return mTrack1->Eta()-mTrack2->Eta();
 }
 inline float StEStructPairCuts::DeltaEta(float mass1, float mass2) const {
-  return fabs(mTrack1->Eta(mass1)-mTrack2->Eta(mass2));
+  return mTrack1->Eta(mass1)-mTrack2->Eta(mass2);
 }
 inline float StEStructPairCuts::DeltaPhi() const {
   return mTrack1->Phi()-mTrack2->Phi();
@@ -571,6 +571,16 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.9  2006/04/06 01:01:22  prindle
+ * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ * of how to set the pt ranges allowed for the different particle types.
+ * For data we probably want to restrict p to below 1GeV for pi and K, but
+ * for Hijing and Pythia we can have perfect pid. Currently cuts are type
+ * into the code (so you have to re-compile to change them.)
+ *
+ *   In the Correlations code I split -+ from +- and am keeping track of
+ * pt for each cut bin. These required changes in the Support code.
+ *
  * Revision 1.8  2006/04/04 22:10:13  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own

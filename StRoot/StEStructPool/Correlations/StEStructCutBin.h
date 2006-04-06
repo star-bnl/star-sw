@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.4 2006/04/04 22:10:12 porter Exp $
+ * $Id: StEStructCutBin.h,v 1.5 2006/04/06 01:01:20 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,8 +16,8 @@
 
 #include "Stiostream.h"
 #include "TObject.h"
+#include "StEStructPairCuts.h"
 
-class StEStructPairCuts;
 class StEStructTrack;
 
 class StEStructCutBin : public TObject {
@@ -41,7 +41,8 @@ class StEStructCutBin : public TObject {
   int getCutBinMode3(StEStructPairCuts *pc);
   int getCutBinMode4(StEStructPairCuts *pc);
   int getCutBinMode5(StEStructPairCuts *pc);
-  int switchYtBin5(StEStructPairCuts *pc);
+  int switchBins5(StEStructPairCuts *pc);
+  int symmetrizeBins5(StEStructPairCuts *pc);
 
   void initPtBinMode0();
   void initPtBinMode1();
@@ -60,9 +61,10 @@ class StEStructCutBin : public TObject {
   void setMode(int mode);
   int  getMode();
   int  getNumBins();
+  int  getNumQABins();
   int  getCutBin(StEStructPairCuts *pc);
-  int  switchYtBins(StEStructPairCuts *pc);
-  int  symmetrizeYtBins(StEStructPairCuts *pc);
+  int  switchBins(StEStructPairCuts *pc);
+  int  symmetrizeBins(StEStructPairCuts *pc);
   int*  getPtBins(float pt);
   int   getdEdxPID(const StEStructTrack *t);
   char* printCutBinName();
@@ -74,6 +76,13 @@ class StEStructCutBin : public TObject {
 inline char* StEStructCutBin::printCutBinName(){ return mcutModeName; }
 
 inline int StEStructCutBin::getNumBins(){ return mnumBins; }
+inline int StEStructCutBin::getNumQABins(){
+    if (5 == mcutMode) {
+        return 4;
+    } else {
+        return mnumBins;
+    }
+}
 
 inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
   int retVal=0;
@@ -117,18 +126,21 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
  }
  return retVal;
 }
-inline int StEStructCutBin::switchYtBins(StEStructPairCuts *pc){
+inline int StEStructCutBin::switchBins(StEStructPairCuts *pc){
   if (mcutMode != 5) {
       return 1;
   }
-  return switchYtBin5(pc);
+  return switchBins5(pc);
 }
-
-inline int StEStructCutBin::symmetrizeYtBins(StEStructPairCuts *pc){
+inline int StEStructCutBin::symmetrizeBins(StEStructPairCuts *pc){
   if (mcutMode != 5) {
-      return 1;
+      if (pc->Track1()->Charge() == pc->Track2()->Charge()) {
+          return 1;
+      } else {
+          return 0;
+      }
   } else {
-      return 0;
+      return symmetrizeBins5(pc);
   }
 }
 
@@ -156,6 +168,16 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.5  2006/04/06 01:01:20  prindle
+ * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ * of how to set the pt ranges allowed for the different particle types.
+ * For data we probably want to restrict p to below 1GeV for pi and K, but
+ * for Hijing and Pythia we can have perfect pid. Currently cuts are type
+ * into the code (so you have to re-compile to change them.)
+ *
+ *   In the Correlations code I split -+ from +- and am keeping track of
+ * pt for each cut bin. These required changes in the Support code.
+ *
  * Revision 1.4  2006/04/04 22:10:12  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.4 2006/02/22 22:05:16 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.5 2006/04/06 01:01:19 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -457,10 +457,10 @@ void StEStructCutBin::initPtBinMode4(){
 
 int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
 
-  float dphi=fabs(pc->DeltaPhi());
-  int idedp = 0;
-  if(dphi<M_PI/2.0){
-    idedp=1;
+  float dphi = fabs(pc->DeltaPhi());
+  int idedp = 1;
+  if((M_PI/2<dphi) && (dphi<3*M_PI/2.0)) {
+    idedp=0;
   }
 
   int it1 = getdEdxPID( pc->Track1() );
@@ -504,7 +504,7 @@ int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
   }
   return  idedp + 2*ipid;
 }
-int StEStructCutBin::switchYtBin5(StEStructPairCuts* pc){
+int StEStructCutBin::switchBins5(StEStructPairCuts* pc){
 
  /*
    Want to keep track of different particle types.
@@ -525,15 +525,56 @@ int StEStructCutBin::switchYtBin5(StEStructPairCuts* pc){
   }
   return 0;
 }
+int StEStructCutBin::symmetrizeBins5(StEStructPairCuts* pc){
 
-void StEStructCutBin::initPtBinMode5(){
-    for (int ipid=0;ipid<7;ipid++) {
-        for (int idedp=0;idedp<2;idedp++) {
-            int ipt = idedp + 2*ipid;
-            mPtBinMin[ipt] = 0.;
-            mPtBinMax[ipt]= 999.;
+ /*
+   Same type and same sign particles need to be entered into
+   etaeta, phiphi, deta and dphi arrays twice.
+  */
+  if ( pc->Track1()->Charge() != pc->Track2()->Charge() ) {
+      return 0;
         }
+  int it1 = getdEdxPID( pc->Track1() );
+  int it2 = getdEdxPID( pc->Track2() );
+  if (0 == it1 || 0 == it2) {
+      return 1;
+  } else if (it1 == it2) {
+      return 1;
+  } else {
+      return 0;
     }
+}
+
+/*
+  Use mPtMin and mPtMax as limits of where we trust pid.
+  Index 1 for pi
+        2 for K
+        3 for p
+  Would be nice to initialize these in some way we didn't have to
+  recompile to change them.
+ */
+void StEStructCutBin::initPtBinMode5(){
+  // For Hijing we have perfect pid at all pts.
+  mPtBinMin[0]=0.;
+  mPtBinMax[0]=9999.;
+  mPtBinMin[1]=0.;
+  mPtBinMax[1]=9999.;
+  mPtBinMin[2]=0.;
+  mPtBinMax[2]=9999.;
+  mPtBinMin[3]=0.;
+  mPtBinMax[3]=9999.;
+  // For data we want to exclude relativistic rise region which
+  // might possibly give us a few tracks.
+/*
+  mPtBinMin[0] =    0.;
+  mPtBinMax[0] = 9999.;
+  mPtBinMin[1] =    0.;
+  mPtBinMax[1] =    1.;
+  mPtBinMin[2] =    0.;
+  mPtBinMax[2] =    1.;
+  mPtBinMin[3] =    0.;
+  mPtBinMax[3] =    1.5;
+ */
 }
 
 // pi  -> 1
@@ -547,13 +588,13 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
   float k  = fabs(t->PIDk());
   float p  = fabs(t->PIDp());
 
-  if (ptot < 1.0 && pi < 2.0 && k > 2.0 && p > 2.0) {
+  if ((mPtBinMin[1]<ptot) && (ptot<mPtBinMax[1]) && (pi<2.0) && (k>2.0) && (p>2.0)) {
       return 1;
   }
-  if (ptot < 1.0 && pi > 2.0 && k < 2.0 && p > 2.0) {
+  if ((mPtBinMin[2]<ptot) && (ptot<mPtBinMax[2]) && (pi>2.0) && (k<2.0) && (p>2.0)) {
       return 2;
   }
-  if (ptot < 1.5 && pi > 2.0 && k > 2.0 && p < 2.0) {
+  if ((mPtBinMin[3]<ptot) && (ptot<mPtBinMax[3]) && (pi>2.0) && (k>2.0) && (p<2.0)) {
       return 3;
   }
   return 0;
@@ -561,6 +602,16 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.5  2006/04/06 01:01:19  prindle
+ * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ * of how to set the pt ranges allowed for the different particle types.
+ * For data we probably want to restrict p to below 1GeV for pi and K, but
+ * for Hijing and Pythia we can have perfect pid. Currently cuts are type
+ * into the code (so you have to re-compile to change them.)
+ *
+ *   In the Correlations code I split -+ from +- and am keeping track of
+ * pt for each cut bin. These required changes in the Support code.
+ *
  * Revision 1.4  2006/02/22 22:05:16  prindle
  * Removed all references to multRef (?)
  * Added cut mode 5 for particle identified correlations.
