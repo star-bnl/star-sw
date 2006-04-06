@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.7 2006/04/04 22:12:30 porter Exp $
+ * $Id: StEStructEvent.cxx,v 1.8 2006/04/06 01:06:18 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -22,8 +22,8 @@ StEStructEvent::StEStructEvent() {
   fTracks = new TClonesArray("StEStructTrack", 1200);  // 1200 is not the max size, just an initial suggestion for ROOT
   mNtrack = 0;
 
-  mTrackCollectionM=new StEStructTrackCollection();
-  mTrackCollectionP=new StEStructTrackCollection();
+  mTrackCollectionM = new StEStructTrackCollection();
+  mTrackCollectionP = new StEStructTrackCollection();
 }
 
 //-------------------------------------------------------
@@ -45,9 +45,8 @@ StEStructEvent::StEStructEvent(StEStructEvent& e){
     AddTrack(t);
   }
 
-  mTrackCollectionM=new StEStructTrackCollection();
-  mTrackCollectionP=new StEStructTrackCollection();
-  
+  mTrackCollectionM = new StEStructTrackCollection();
+  mTrackCollectionP = new StEStructTrackCollection();
   FillChargeCollections();
 
 };
@@ -88,15 +87,6 @@ void StEStructEvent::Clear(Option_t *option) {
   mNtrack=0;
 }
 
-//-------------------------------------------------------
-// Feb 26, 2004 djp Change from UInt_t to Double_t so we can use
-//                  impact parameter in case data comes from an event generator.
-void StEStructEvent::SetCentrality(Double_t impact) {
-  if(StEStructCentrality::Instance()->numCentralities()>0)
-     mCentrality=StEStructCentrality::Instance()->centrality(impact);
-  if(StEStructCentrality::Instance()->numPtCentralities()>0)
-     mPtCentrality=StEStructCentrality::Instance()->ptCentrality(impact);
-}
 
 //-------------------------------------------------------
 void StEStructEvent::FillChargeCollections(){
@@ -132,6 +122,9 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.8  2006/04/06 01:06:18  prindle
+ * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
  * Revision 1.7  2006/04/04 22:12:30  porter
  * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
  *

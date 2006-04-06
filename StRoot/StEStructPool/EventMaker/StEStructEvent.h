@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.5 2006/04/04 22:12:30 porter Exp $
+ * $Id: StEStructEvent.h,v 1.6 2006/04/06 01:06:20 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -42,10 +42,9 @@ class StEStructEvent : public TObject {
 
   // non-persistent data to merge old event and 2ptevent classes
 
-  Int_t mCentrality;               //! centrality measure (depends on analysis)
-  Int_t mPtCentrality;             //! centrality measure (depends on analysis)
-  StEStructTrackCollection * mTrackCollectionM; //! negative charge list
-  StEStructTrackCollection * mTrackCollectionP; //! positive charge list
+  Double_t mCentrality;               //! centrality measure (depends on analysis)
+  StEStructTrackCollection *mTrackCollectionM; //! negative charge list
+  StEStructTrackCollection *mTrackCollectionP; //! positive charge list
 
     
  public:
@@ -60,8 +59,7 @@ class StEStructEvent : public TObject {
   Int_t RunID() const { return mRunID; };
   Int_t EventTime() const { return mEventTime; }
 
-  Int_t Centrality() const { return mCentrality; };
-  Int_t PtCentrality() const { return mPtCentrality; };
+  Double_t Centrality() const { return mCentrality; };
 
   Float_t Vx() const { return mVx; }
   Float_t Vy() const { return mVy; }
@@ -93,9 +91,7 @@ class StEStructEvent : public TObject {
 
   virtual StEStructTrackCollection * TrackCollectionM() const; 
   virtual StEStructTrackCollection * TrackCollectionP() const;
-  void SetCentrality(const Double_t N);
-  void SetCentralityIndex(const Int_t N) { mCentrality = N; };
-  void SetPtCentralityIndex(const Int_t N) { mPtCentrality = N; };
+  void SetCentrality(const Double_t N) { mCentrality = N; }
 
   virtual void FillChargeCollections();
   
@@ -110,6 +106,9 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.6  2006/04/06 01:06:20  prindle
+ * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
  * Revision 1.5  2006/04/04 22:12:30  porter
  * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
  *
