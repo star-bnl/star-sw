@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.7 2006/02/22 22:03:19 prindle Exp $
+ * $Id: StEStructMCReader.cxx,v 1.8 2006/04/06 00:53:59 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,6 +13,12 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.8  2006/04/06 00:53:59  prindle
+ * Tried to rationalize the way centrality is defined.
+ *   Now the reader gives a float to StEStructEvent and this float is
+ * what is being used to define centrality. When we need a centrality
+ * bin index we pass this number into the centrality singleton object.
+ *
  * Revision 1.7  2006/02/22 22:03:19  prindle
  * Removed all references to multRef
  *
@@ -266,7 +272,7 @@ StEStructEvent* StEStructMCReader::next() {
 
   fillTracks(retVal);
 
-  bool useEvent = mECuts->goodCentrality((float)mnumTracks);
+  bool useEvent = mECuts->goodCentrality(retVal->Centrality());
   if(!useEvent) {
     delete retVal;
     retVal = NULL;
@@ -274,7 +280,7 @@ StEStructEvent* StEStructMCReader::next() {
   else {
     retVal->FillChargeCollections();
   }
-  mECuts->fillHistogram(mECuts->centralityName(), (float)mnumTracks, useEvent);
+  mECuts->fillHistogram(mECuts->centralityName(), retVal->Centrality(), useEvent);
   return retVal;
 }
 
