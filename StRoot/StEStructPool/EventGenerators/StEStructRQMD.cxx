@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructRQMD.cxx,v 1.2 2006/02/22 22:05:42 prindle Exp $
+ * $Id: StEStructRQMD.cxx,v 1.3 2006/04/06 01:03:35 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -60,7 +60,8 @@ StEStructEvent* StEStructRQMD::generateEvent() {
     retVal = new StEStructEvent();
 
     fillTracks(retVal);
-    if (!mECuts->goodCentrality((float)mnumTracks)) {
+    retVal->SetCentrality( (float) mnumTracks );
+    if (!mECuts->goodCentrality(retVal->Centrality())) {
         delete retVal;
         retVal=NULL;
     } else {
@@ -356,6 +357,9 @@ void StEStructRQMD::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructRQMD.cxx,v $
+ * Revision 1.3  2006/04/06 01:03:35  prindle
+ * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
  * Revision 1.2  2006/02/22 22:05:42  prindle
  * Removed all references to multRef (?)
  *

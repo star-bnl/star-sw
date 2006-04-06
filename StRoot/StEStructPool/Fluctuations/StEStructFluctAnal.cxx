@@ -194,11 +194,11 @@ void StEStructFluctAnal::fillMultStruct() {
     float totPt = 0;
 
     ms->NewEvent(mCurrentEvent->Vx(), mCurrentEvent->Vy(), mCurrentEvent->Vz() );
-    jCent   = mCurrentEvent->Centrality();
+    jCent = mCentralities->centrality( mCurrentEvent->Centrality() );
     if ((jCent < 0) || (mnCents <= jCent)) {
         return;
     }
-    jPtCent = mCurrentEvent->PtCentrality();
+    jPtCent = mCentralities->ptCentrality( mCurrentEvent->Centrality() );
     double etaOff = etaOffset( mCurrentEvent->Vz() );
 
     tc = mCurrentEvent->TrackCollectionP();
@@ -313,12 +313,12 @@ void StEStructFluctAnal::AddEvent() {
 
     mnTotEvents++;
 
-    jCent = mCurrentEvent->Centrality();
+    jCent = mCentralities->centrality( mCurrentEvent->Centrality() );
     if ((jCent < 0) || (mnCents <= jCent)) {
         return;
     }
     mnCentEvents[jCent]++;
-    jPtCent = mCurrentEvent->PtCentrality();
+    jPtCent = mCentralities->ptCentrality( mCurrentEvent->Centrality() );
 
     // First two loops define the scale.
     //    To try getting better performance I move all variable declarations

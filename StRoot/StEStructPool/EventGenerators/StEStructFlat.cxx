@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructFlat.cxx,v 1.5 2006/02/22 22:05:35 prindle Exp $
+ * $Id: StEStructFlat.cxx,v 1.6 2006/04/06 01:03:30 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,6 +15,7 @@
 #include "StEStructPool/AnalysisMaker/StEStructTrackCuts.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/EventMaker/StEStructCentrality.h"
 
 StEStructFlat::StEStructFlat() {
     mFlatEvent    = 0;
@@ -70,10 +71,11 @@ StEStructEvent* StEStructFlat::next() {
     float z = mFlatEvent->Vz();
     int nTracks = countGoodTracks();
     mFlatEvent->SetCentrality( (double) nTracks );
-    int jCent = mFlatEvent->Centrality();
+    StEStructCentrality* cent=StEStructCentrality::Instance();
+    int jCent = cent->centrality( mFlatEvent->Centrality() );
     if (((mCentBin >= 0) && (jCent != mCentBin)) ||
         !mECuts->goodPrimaryVertexZ(z)           ||
-        !mECuts->goodCentrality((float)nTracks)) {
+        !mECuts->goodCentrality(mFlatEvent->Centrality())) {
         mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,false);
         mECuts->fillHistogram(mECuts->primaryVertexZName(),z,false);
         return (StEStructEvent*) NULL;
@@ -292,6 +294,9 @@ double StEStructFlat::gRand48() {
 /**********************************************************************
  *
  * $Log: StEStructFlat.cxx,v $
+ * Revision 1.6  2006/04/06 01:03:30  prindle
+ * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
  * Revision 1.5  2006/02/22 22:05:35  prindle
  * Removed all references to multRef (?)
  *

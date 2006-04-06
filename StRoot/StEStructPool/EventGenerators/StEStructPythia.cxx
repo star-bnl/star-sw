@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.9 2006/04/04 22:11:27 porter Exp $
+ * $Id: StEStructPythia.cxx,v 1.10 2006/04/06 01:03:32 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -74,11 +74,8 @@ StEStructEvent* StEStructPythia::next() {
     mstarTrigger=false;
     int nTracks = countGoodTracks();
 
-    StEStructCentrality* cent=StEStructCentrality::Instance(); 
-    retVal->SetCentrality( cent->centrality((float) nTracks) );
-    retVal->SetPtCentralityIndex(cent->ptCentrality((float)nTracks));
-
-    if(!mECuts->goodCentrality((int)retVal->Centrality()) || !mstarTrigger){
+    retVal->SetCentrality( (float) nTracks );
+    if(!mECuts->goodCentrality(retVal->Centrality()) || !mstarTrigger){
         delete retVal;
         retVal=NULL;
         mECuts->fillHistogram(mECuts->centralityName(),(float)nTracks,false);
@@ -289,6 +286,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.10  2006/04/06 01:03:32  prindle
+ * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
  * Revision 1.9  2006/04/04 22:11:27  porter
  * StEStructPythia now uses StEtructCentrality for selection
  *
