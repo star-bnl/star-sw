@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.7 2006/04/04 22:05:06 porter Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.8 2006/04/06 00:54:01 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -136,12 +136,8 @@ StEStructEvent* StEStructMuDstReader::fillEvent(){
 //      wrap these via .... if(cent->getCentType()==ESNTracks){....
 //
 
-    StEStructCentrality* cent=StEStructCentrality::Instance(); 
- 
-    retVal->SetCentralityIndex(cent->centrality((float)nTracks));
-    retVal->SetPtCentralityIndex(cent->ptCentrality((float)nTracks));
-
-    if(!mECuts->goodCentrality((int)retVal->Centrality())) useEvent=false;
+    retVal->SetCentrality((double)nTracks);
+    if(!mECuts->goodCentrality(retVal->Centrality())) useEvent=false;
 
     if(useEvent){
 
@@ -333,6 +329,12 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.8  2006/04/06 00:54:01  prindle
+ * Tried to rationalize the way centrality is defined.
+ *   Now the reader gives a float to StEStructEvent and this float is
+ * what is being used to define centrality. When we need a centrality
+ * bin index we pass this number into the centrality singleton object.
+ *
  * Revision 1.7  2006/04/04 22:05:06  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.3 2006/04/04 22:05:03 porter Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.4 2006/04/06 00:53:52 prindle Exp $
  *
  *************************************************************************
  *
@@ -18,6 +18,7 @@
 
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StEStructPool/EventMaker/StEStructCentrality.h"
 
 //for memory mangement
 #include "StMemoryInfo.hh"
@@ -150,7 +151,8 @@ int StEStructAnalysisMaker::getAnalysisIndex(){
 //   but this method could be a switch statement
 //   over some flag known to the maker
 
-  return pEStructEvent->Centrality();
+  StEStructCentrality* cent=StEStructCentrality::Instance();
+  return cent->centrality( pEStructEvent->Centrality() );
 }
 
 //-----------------------------------------------------------------
@@ -197,6 +199,12 @@ void StEStructAnalysisMaker::compiledLoop(){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.4  2006/04/06 00:53:52  prindle
+ * Tried to rationalize the way centrality is defined.
+ *   Now the reader gives a float to StEStructEvent and this float is
+ * what is being used to define centrality. When we need a centrality
+ * bin index we pass this number into the centrality singleton object.
+ *
  * Revision 1.3  2006/04/04 22:05:03  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers

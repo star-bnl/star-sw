@@ -1,3 +1,14 @@
+/**********************************************************************
+ *
+ * $Id: StEStructQAHists.cxx,v 1.2 2006/04/06 00:54:03 prindle Exp $
+ *
+ * Author: Jeff Porter 
+ *
+ **********************************************************************
+ *
+ * Description:  base class for QA histogramming
+ *
+ ***********************************************************************/
 #include "StEStructQAHists.h"
 
 #include "StEStructPool/EventMaker/StEStructEvent.h"
@@ -60,8 +71,8 @@ void StEStructQAHists::initBaseHistograms(){
   
   int mbNBins= cent->numCentralities();
   if(mbNBins>0){
-     mCents[0] = new TH1D("cenClass","cenClass",mbNBins,-1.5,mbNBins-0.5);
-     mCents[1] = new TH1D("impactDefs","impactDefs",mbNBins,0.5,mbNBins+0.5);
+     mCents[0] = new TH1D("cenClass","cenClass",mbNBins,-0.5,mbNBins-0.5);
+     mCents[1] = new TH1D("centralityDefs","centralityDefs",mbNBins,0.5,mbNBins+0.5);
   }
 
   // fill the centrality mapping
@@ -69,8 +80,8 @@ void StEStructQAHists::initBaseHistograms(){
 
   int mbNPtBins = cent->numPtCentralities();
   if(mbNPtBins>0){
-    mptCents[0]= new TH1D("ptCenClass","ptCenClass",mbNPtBins,-1.5,mbNPtBins-0.5);  
-    mptCents[1]= new TH1D("impactPtDefs","impactPtDefs",mbNPtBins,0.5,mbNPtBins+0.5);
+    mptCents[0]= new TH1D("ptCenClass","ptCenClass",mbNPtBins,-0.5,mbNPtBins-0.5);
+    mptCents[1]= new TH1D("centralityPtDefs","centralityPtDefs",mbNPtBins,0.5,mbNPtBins+0.5);
   }
   for (int i=0;i<mbNPtBins;i++) mptCents[1]->Fill(i,cent->ptCentralityLimit(i));
 
@@ -121,20 +132,20 @@ void StEStructQAHists::fillBaseHistograms(StEStructEvent* event, StEStructEventR
   if(!event) return;
 
   
-  mCents[0]->Fill(event->Centrality());
-  if(mptCents[0])mptCents[0]->Fill(event->PtCentrality());
+  StEStructCentrality* cent = StEStructCentrality::Instance();
+  int ic = cent->centrality(event->Centrality());
+  mCents[0]->Fill(ic);
+  if(mptCents[0])mptCents[0]->Fill(ic);
 
   if(mEType==1){
     if(aaGen[0])aaGen[0]->Fill(reader->getImpact());
     if(aaGen[1])aaGen[1]->Fill(reader->getBinary());
     if(aaGen[2])aaGen[2]->Fill(reader->getParticipants());
-    int ic = event->Centrality();
     if(ic>=0){
       if(aaGenBin[ic]) aaGenBin[ic]->Fill(reader->getBinary());
       if(aaGenPart[ic])aaGenPart[ic]->Fill(reader->getParticipants());
     }
   } else if(mEType==2){
-    int ic = event->Centrality();
     if(ic>0){
       ppELines[ic]->Fill(reader->getNPartonic());
       ppALines[ic]->Fill(reader->getNPartonic());
@@ -279,3 +290,23 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
   }
 
 }
+/**********************************************************************
+ *
+ * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.2  2006/04/06 00:54:03  prindle
+ * Tried to rationalize the way centrality is defined.
+ *   Now the reader gives a float to StEStructEvent and this float is
+ * what is being used to define centrality. When we need a centrality
+ * bin index we pass this number into the centrality singleton object.
+ *
+ *
+ *
+ * Revision 1.1  2006/04/04 22:05:06  porter
+ * a handful of changes:
+ *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
+ *  - added StEStructQAHists object to contain histograms that did exist in macros or elsewhere
+ *  - made centrality event cut taken from StEStructCentrality singleton
+ *  - put in  ability to get any max,min val from the cut class - one must call setRange in class
+ *
+ *
+ *********************************************************************/

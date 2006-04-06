@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructDstReader.cxx,v 1.2 2006/02/22 22:03:13 prindle Exp $
+ * $Id: StEStructDstReader.cxx,v 1.3 2006/04/06 00:53:57 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -78,10 +78,10 @@ bool StEStructDstReader::checkEvent(StEStructEvent* e){
   bool useEvent=true;
 
   if(!mECuts->goodPrimaryVertexZ(e->Vz()) ||
-     !mECuts->goodCentrality((float)e->Centrality())) useEvent=false;
+     !mECuts->goodCentrality(e->Centrality())) useEvent=false;
 
   mECuts->fillHistogram(mECuts->primaryVertexZName(),e->Vz(),useEvent);
-  mECuts->fillHistogram(mECuts->centralityName(),(float)e->Centrality(),useEvent);
+  mECuts->fillHistogram(mECuts->centralityName(),e->Centrality(),useEvent);
 
   return useEvent;
 }
@@ -126,6 +126,12 @@ int StEStructDstReader::getNumberOfTracks(StEStructEvent* e){
 /***********************************************************************
  *
  * $Log: StEStructDstReader.cxx,v $
+ * Revision 1.3  2006/04/06 00:53:57  prindle
+ * Tried to rationalize the way centrality is defined.
+ *   Now the reader gives a float to StEStructEvent and this float is
+ * what is being used to define centrality. When we need a centrality
+ * bin index we pass this number into the centrality singleton object.
+ *
  * Revision 1.2  2006/02/22 22:03:13  prindle
  * Removed all references to multRef
  *
