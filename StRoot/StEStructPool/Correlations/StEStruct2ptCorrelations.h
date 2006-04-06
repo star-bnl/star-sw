@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.8 2006/04/04 22:10:09 porter Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.9 2006/04/06 01:01:17 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -50,7 +50,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   // Event-level hists
   TH1F*  mHNEvents[2];
-  TH1F** mHpt;
+  TH1F*  mHptAll;
+  TH1F** mHpt[2];
   TH2F*  mHmix;
 
   // HBT parameters
@@ -72,8 +73,10 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   etaBins **mPrEtaEta[8]; //! weight = pt1*pt2
   phiBins **mPrPhiPhi[8]; //!  "
 
-  etaBins **mSuEtaEta[8]; //! weight = pt1+pt2
-  phiBins **mSuPhiPhi[8]; //!  "
+  etaBins **mPaEtaEta[8]; //! weight = pt1
+  phiBins **mPaPhiPhi[8]; //!  "
+  etaBins **mPbEtaEta[8]; //! weight = pt2
+  phiBins **mPbPhiPhi[8]; //!  "
 
 
   //  TH1F  * mHQAEta[2][4]; //!
@@ -88,34 +91,40 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
   TH2F ** mHPrEtaEta[8]; //!
   TH2F ** mHPrPhiPhi[8]; //!
-  TH2F ** mHSuEtaEta[8]; //!
-  TH2F ** mHSuPhiPhi[8]; //!
+  TH2F ** mHPaEtaEta[8]; //!
+  TH2F ** mHPaPhiPhi[8]; //!
+  TH2F ** mHPbEtaEta[8]; //!
+  TH2F ** mHPbPhiPhi[8]; //!
 
   // Delta Y vs Delta X
   dphiBins **mJtDYtDPhi[8]; //!
   detaBins **mJtDYtDEta[8]; //!
   dphiBins **mJtDEtaDPhi[8]; //!
   dphiBins **mPrJtDEtaDPhi[8]; //!
-  dphiBins **mSuJtDEtaDPhi[8]; //!
+  dphiBins **mPaJtDEtaDPhi[8]; //!
+  dphiBins **mPbJtDEtaDPhi[8]; //!
 
   TH2F ** mHJtDYtDPhi[8];
   TH2F ** mHJtDYtDEta[8];
   TH2F ** mHJtDEtaDPhi[8];
   TH2F ** mHPrJtDEtaDPhi[8];
-  TH2F ** mHSuJtDEtaDPhi[8];
+  TH2F ** mHPaJtDEtaDPhi[8];
+  TH2F ** mHPbJtDEtaDPhi[8];
 
   // Sum Y vs Delta X
   dytBins  **mAtSYtDYt[8];     //! smt array of dmt bins
   dptBins  **mAtSPtDPt[8];     //! smt array of dmt bins
   dphiBins **mJtSEtaDPhi[8];//! 
   dphiBins **mPrJtSEtaDPhi[8];//! 
-  dphiBins **mSuJtSEtaDPhi[8];//! 
+  dphiBins **mPaJtSEtaDPhi[8];//! 
+  dphiBins **mPbJtSEtaDPhi[8];//! 
 
   TH2F ** mHAtSYtDYt[8];
   TH2F ** mHAtSPtDPt[8];
   TH2F ** mHJtSEtaDPhi[8];//!
   TH2F ** mHPrJtSEtaDPhi[8];//!
-  TH2F ** mHSuJtSEtaDPhi[8];//!
+  TH2F ** mHPaJtSEtaDPhi[8];//!
+  TH2F ** mHPbJtSEtaDPhi[8];//!
 
   // TPC Separation
   TPCSepBins *mTPCAvgTSep[8];  //1D
@@ -287,7 +296,6 @@ inline StEStructPairCuts* StEStruct2ptCorrelations::getPairCuts() {
   return mPairCuts;
 }
 
-
 inline void StEStruct2ptCorrelations::logStats(ostream& os){
   char* htp[]={"SibPP","SibPM","SibMP","SibMM","MixPP","MixPM","MixMP","MixMM"};
   for(int i=0;i<8;i++){
@@ -310,6 +318,16 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.9  2006/04/06 01:01:17  prindle
+ * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ * of how to set the pt ranges allowed for the different particle types.
+ * For data we probably want to restrict p to below 1GeV for pi and K, but
+ * for Hijing and Pythia we can have perfect pid. Currently cuts are type
+ * into the code (so you have to re-compile to change them.)
+ *
+ *   In the Correlations code I split -+ from +- and am keeping track of
+ * pt for each cut bin. These required changes in the Support code.
+ *
  * Revision 1.8  2006/04/04 22:10:09  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
