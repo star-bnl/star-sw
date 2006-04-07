@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.11 2005/07/15 20:17:35 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.12 2006/04/07 18:21:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.12  2006/04/07 18:21:28  ullrich
+ * Added data member mMeanDip incl. access functions (Marco).
+ *
  * Revision 2.11  2005/07/15 20:17:35  ullrich
  * Corrected spelling in membrane
  *
@@ -86,6 +89,7 @@ public:
     unsigned short  numMatchesWithBEMC() const; 
     unsigned short  numMatchesWithEEMC() const; 
     unsigned short  numTracksCrossingCentralMembrane() const;  
+    float           meanDip() const;  
     float           sumOfTrackPt() const; 
     float           ranking() const;
     
@@ -95,6 +99,7 @@ public:
     void setNumMatchesWithBEMC(unsigned short);
     void setNumMatchesWithEEMC(unsigned short);
     void setNumTracksCrossingCentralMembrane(unsigned short);
+    void setMeanDip(float);
     void setSumOfTrackPt(float);
     void setRanking(float);
 
@@ -112,10 +117,11 @@ private:
     UShort_t         mNumMatchesWithBEMC;
     UShort_t         mNumMatchesWithEEMC;
     UShort_t         mNumTracksCrossingCentralMembrane; 
+    Float_t          mMeanDip;
     Float_t          mSumOfTrackPt;
     Float_t          mRanking;    
 
-    ClassDef(StPrimaryVertex,3)
+    ClassDef(StPrimaryVertex,4)
 };
 
 inline StVertexFinderId StPrimaryVertex::vertexFinderId() const {return mVertexFinderId;}
@@ -124,6 +130,7 @@ inline unsigned short StPrimaryVertex::numMatchesWithCTB() const {return mNumMat
 inline unsigned short StPrimaryVertex::numMatchesWithBEMC() const {return mNumMatchesWithBEMC;} 
 inline unsigned short StPrimaryVertex::numMatchesWithEEMC() const {return mNumMatchesWithEEMC;} 
 inline unsigned short StPrimaryVertex::numTracksCrossingCentralMembrane() const {return mNumTracksCrossingCentralMembrane;} 
+inline float StPrimaryVertex::meanDip() const {return mMeanDip;}
 inline float StPrimaryVertex::sumOfTrackPt() const {return mSumOfTrackPt;}
 inline float StPrimaryVertex::ranking() const {return mRanking;}
 inline void StPrimaryVertex::setVertexFinderId(StVertexFinderId val) {mVertexFinderId = val;}
@@ -132,6 +139,7 @@ inline void StPrimaryVertex::setNumMatchesWithCTB(unsigned short val) {mNumMatch
 inline void StPrimaryVertex::setNumMatchesWithBEMC(unsigned short val) {mNumMatchesWithBEMC = val;}
 inline void StPrimaryVertex::setNumMatchesWithEEMC(unsigned short val) {mNumMatchesWithEEMC = val;}
 inline void StPrimaryVertex::setNumTracksCrossingCentralMembrane(unsigned short val) {mNumTracksCrossingCentralMembrane = val;}
+inline void StPrimaryVertex::setMeanDip(float val) {mMeanDip = val;}
 inline void StPrimaryVertex::setSumOfTrackPt(float val) {mSumOfTrackPt = val;}
 inline void StPrimaryVertex::setRanking(float val) {mRanking = val;}
 
