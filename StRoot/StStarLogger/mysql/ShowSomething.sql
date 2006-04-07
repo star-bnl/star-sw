@@ -1,4 +1,4 @@
-# $Id: ShowSomething.sql,v 1.4 2006/03/30 19:58:47 fine Exp $
+# $Id: ShowSomething.sql,v 1.5 2006/04/07 13:59:55 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
  use logger;
@@ -46,10 +46,12 @@ SELECT TaskDescription.TaskUser       AS 'Task Owner'
      , tbl.FinishedTime               AS 'Completed by'
      , tbl.completed_jobs             AS 'Total Jobs'
 FROM  TaskDescription, 
-   ( SELECT  JobDescription.taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
+   ( SELECT  JobDescription.taskId as taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
-  WHERE  completed_jobs = TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
+  WHERE  completed_jobs = TaskDescription.nProcesses 
+          AND TaskDescription.TaskUser='fine' 
+          AND TaskDescription.taskId = tbl.taskId ;  
  
  # --- Print the number of the uncompleted tasks
 
@@ -61,7 +63,9 @@ SELECT TaskDescription.TaskUser       AS 'Task Owner'
      , tbl.completed_jobs             AS 'Done'
      , TaskDescription.nProcesses-tbl.completed_jobs AS 'To be done yet'
 FROM  TaskDescription, 
-   ( SELECT  JobDescription.taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
+   ( SELECT  JobDescription.taskId as taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
-  WHERE  completed_jobs <> TaskDescription.nProcesses AND TaskDescription.TaskUser='fine';  
+  WHERE     completed_jobs <> TaskDescription.nProcesses 
+         AND TaskDescription.TaskUser='fine' 
+         AND TaskDescription.taskId = tbl.taskId ;  
