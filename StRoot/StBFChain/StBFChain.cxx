@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.492 2006/03/17 19:22:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.493 2006/04/07 17:09:51 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -355,6 +355,15 @@ Int_t StBFChain::Instantiate()
 	cmd += "pars->useFtpc=kTRUE;";
 	cmd += "pars->activeFtpc=kTRUE;";
       }
+      if (GetOption("PixelIT")){
+	cmd += "pars->usePixel=kTRUE;"; 
+	cmd += "pars->activePixel=kTRUE;";
+      }
+      if (GetOption("IstIT")){
+	cmd += "pars->useIst=kTRUE;";
+	cmd += "pars->activeIst=kTRUE;";
+      }
+
       cmd += "cout << \"Sti Parameters (seen in bfc):\" << endl;";
       cmd += "cout << *pars << endl;";
       //if (GetOption("Simu")) cmd += "tk->setMcEnabled(kTRUE);";
