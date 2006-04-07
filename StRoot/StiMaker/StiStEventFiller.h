@@ -1,14 +1,17 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.18 2006/03/09 22:45:49 didenko Exp $
+ * $Id: StiStEventFiller.h,v 2.19 2006/04/07 18:00:30 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
- * Revision 2.18  2006/03/09 22:45:49  didenko
- * get back previuos version
+ * Revision 2.19  2006/04/07 18:00:30  perev
+ * Back to the latest Sti
+ *
+ * Revision 2.17  2005/12/08 00:03:07  perev
+ * StiAux* mAux added
  *
  * Revision 2.16  2005/08/17 22:04:42  perev
  * PoinCount cleanup
@@ -152,13 +155,16 @@ class StHelixModel;
 
     \author Manuel Calderon de la Barca Sanchez (Yale Software)
  */
+class StiAux;
+class StiPullEvent;
 class StiStEventFiller
 {
 public:
     StiStEventFiller();
+    void setUseAux(int aux=1)		{mUseAux=aux;}
     virtual ~StiStEventFiller();
-    StEvent* fillEvent(StEvent*, StiTrackContainer*);
-    StEvent* fillEventPrimaries(StEvent*, StiTrackContainer*);
+    void fillEvent(StEvent* e, StiTrackContainer* t);
+    void fillEventPrimaries();
     void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* kTrack,bool refCountIncr);
     void fillGeometry(StTrack* track, StiKalmanTrack* kTrack, bool outer);
     //void fillTopologyMap(StTrack* track, StiKalmanTrack* kTrack);
@@ -169,12 +175,22 @@ public:
     void fillFlags(StTrack* track);
     double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
     double impactParameter(StTrack* strack, StThreeVectorD &vertexPosition);
+    void setPullEvent(StiPullEvent *pe) 		{mPullEvent=pe;}
 private:
  void fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node);
-
-		    bool accept(StiKalmanTrack* kTrack);
+ void fillPull   (StHit *hh,const StiHit *stiHit
+                 ,const StiKalmanTrackNode *node
+		 ,const StiKalmanTrack     *track
+		 ,int dets[1][3]);
+ bool accept(StiKalmanTrack* kTrack);
+private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
+    StiAux* mAux;
+    StiPullEvent *mPullEvent;
+    int mUseAux;
+    int mGloPri;		//0=filing global,1=filing primary
+    int mTrackNumber;
     map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
 
     StiDedxCalculator dEdxTpcCalculator;

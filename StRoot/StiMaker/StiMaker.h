@@ -11,6 +11,9 @@ using std::string;
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiKalmanTrackFitter.h"
 
+class TFile;
+class TTree;
+class StiPullEvent;
 class StEvent;
 class StiHit;
 class StiTrack;
@@ -23,7 +26,6 @@ class StiKalmanTrackNode;
 class StiKalmanTrack;
 class StiTrackMerger;
 class StiToolkit;
-class StiMakerParameters;
 class StiVertexFinder;
 class EventDisplay;
 class StiResidualCalculator;
@@ -38,16 +40,16 @@ class StiMaker : public StMaker
     virtual ~StiMaker();
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
-    virtual Int_t InitDetectors();
+            Int_t InitDetectors();
+            Int_t InitPulls();
+            Int_t FillPulls();
     virtual Int_t InitRun(int);
     virtual Int_t Make();
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.20 2006/03/09 22:45:49 didenko Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.21 2006/04/07 18:00:30 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
-    void setParameters(StiMakerParameters * pars);
-    StiMakerParameters * getParameters();
 
     void setEventDisplay(EventDisplay* eventDisplay) 
       { _eventDisplay = eventDisplay;}
@@ -59,7 +61,6 @@ class StiMaker : public StMaker
 private:
 
 		double runField;
-    StiMakerParameters * _pars;
     bool                 eventIsFinished;
     bool                 _initialized;
     StiToolkit  *        _toolkit;
@@ -74,6 +75,10 @@ private:
     EventDisplay *        _eventDisplay;
     EditableFilter<StiTrack> * _loaderTrackFilter;
     EditableFilter<StiHit>   * _loaderHitFilter;
+
+    TFile 		*mPullFile;
+    StiPullEvent 	*mPullEvent;
+    TTree 	        *mPullTTree;
     
     ClassDef(StiMaker,0)
 };

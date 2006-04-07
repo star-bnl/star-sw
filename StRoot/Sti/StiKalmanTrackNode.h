@@ -25,35 +25,10 @@ typedef enum {
   kFailed = -1,         // could not find intersection
   kHit,                                
   kEdgePhiPlus, kEdgeZminus, kEdgePhiMinus, kEdgeZplus, 
-  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus
+  kMissPhiPlus, kMissZminus, kMissPhiMinus, kMissZplus,
+  kEnded
 } StiIntersection;
   
-class StiNodePars {
-public:	
-void reset(){memset(this,0,sizeof(StiNodePars));}
-
-  /// sine and cosine of cross angle
-  double _cosCA;
-  double _sinCA;
-  double _x;   
-  /// local Y-coordinate of this track (reference plane)           
-  double _y; 
-  /// local Z-coordinate of this track (reference plane)
-  double _z;
-  /// (signed curvature)*(local Xc of helix axis - X current point on track)
-  double _eta;
-  /// signed curvature [sign = sign(-qB)]
-  double _curv;  
-  /// tangent of the track momentum dip angle
-  double _tanl;
-};
-class StiNodeMtx {
-public:	
-void reset(){memset(this,0,sizeof(StiNodeMtx));}
-  double A[kNPars][kNPars];
-};
-
-
 class StiNodeStat {
 public:	
   StiNodeStat(){reset();}
@@ -63,18 +38,6 @@ void reset(){memset(this,0,sizeof(StiNodeStat));}
   double x2,y2,cosCA2,sinCA2;
   double sumSin, sumCos;
 };
-
-class StiNodeErrs {
-public:	
-void reset(){memset(this,0,sizeof(StiNodeErrs));}
-
-union{double A[1];double _cXX;};
-  double _cYX,_cYY;                       
-  double _cZX,_cZY, _cZZ;                 
-  double _cEX,_cEY, _cEZ, _cEE;           
-  double _cCX,_cCY, _cCZ, _cCE, _cCC;     
-  double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
-};  
 
 class StiNodeExt {
 public:
@@ -107,17 +70,18 @@ friend class StiTrackNodeHelper;
 public:
   StiKalmanTrackNode(){_ext=0; reset();}
   StiKalmanTrackNode(const StiKalmanTrackNode &node);
-  virtual ~StiKalmanTrackNode(){reduce();_Kount=-1;};
+  virtual ~StiKalmanTrackNode(){reduce();mId=-1;};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
   
-  double mcs2(double relRadThickness, double beta2, double p2);
+  static double mcs2(double relRadThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
   void unset(){reduce();}
   /// Resets errors for refit
   void resetError(double fak=0);
   /// Initialize this node with the given hit information
-  void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
+  void initialize(StiHit*h);
+//void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
   /// Sets the Kalman state of this node equal to that of the given node. 
   void setState(const StiKalmanTrackNode * node);
@@ -151,21 +115,27 @@ public:
   double getP() const;
   /// Calculates and returns the transverse momentum of the track at this node.
   double getPt() const;
+  /// Calculates and returns the Z mag field in the current point.
+  double getHz() const;
     
   double x_g() const;
   double y_g() const;
   double z_g() const;
-    
-  double getX() const 			{ return mFP._x ;}
+  void   getXYZ_g(double *xyz) const;
+  double getX() const 			{ return mFP._x;}
   double getY() const 			{ return mFP._y;}  
   double getZ() const 			{ return mFP._z;}
+  double x() const 			{ return mFP._x;}
+  double y() const 			{ return mFP._y;}  
+  double z() const 			{ return mFP._z;}
   
-  double getEta  () const 		{return mFP._eta;   }
+  double getEta  () const 		{return mFP._eta;  }
   double getSin  () const 		{return mFP._sinCA;}
   double getCos  () const 		{return mFP._cosCA;}
-  double getAlpha() const 		{return _alpha;}
-  double getEyy()   const 		{return eyy;}
-  double getEzz()   const 		{return ezz;}
+  double getAlpha() const 		{return _alpha;  }
+  const double *hitErrs() const         {return mHrr.A;  }
+  double getEyy()   const 		{return mHrr.hYY;}
+  double getEzz()   const 		{return mHrr.hZZ;}
   double getCyy()   const 		{return mFE._cYY;}
   double getCzz()   const 		{return mFE._cZZ;}
   double const *getPars()const          {return (&mFP._x);}
@@ -204,7 +174,7 @@ public:
   /// -3  : invalid eloss data for this node.
   double  evaluateDedx();
   
-  int  locate(StiPlacement*place,StiShape*sh);
+  int  locate();
   int  propagate(double x,int option,int dir);
   void propagateMtx();
   void propagateError();
@@ -239,9 +209,9 @@ public:
   static double nice(double angle);
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
-  void setHitErrors(double yErr,double zErr);
-  void setHitErrors();
-  static void   setParameters(StiKalmanTrackFinderParameters *parameters);
+  void setHitErrors(const StiHit *hit=0);
+  StiHitErrs getGlobalHitErrs(const StiHit *hit) const;
+ static void   setParameters(StiKalmanTrackFinderParameters *parameters);
   friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
   double getX0() const;
@@ -251,64 +221,58 @@ public:
 
   void   extend();
   void   reduce();
-  Int_t  debug() const {return _debug;}
+  Int_t  debug() const 				{return _debug;}
   void   setDebug(Int_t m) {_debug = m;}
   void   PrintpT(Char_t *opt="");
-  static void   ResetComment(Char_t *m = "") {comment = m; commentdEdx = "";}
-  static const Char_t *Comment() {return comment.Data();}
+  int    getFlipFlop() const 			{return mFlipFlop;}
+  static void   ResetComment(Char_t *m = "") 	{comment = m; commentdEdx = "";}
+  static const Char_t *Comment() 		{return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
-  void static saveStatics(double *sav);
-  void static backStatics(double *sav);
-  void   print(const char *opt) const;
-  static void setErrFactor(double ef)	{fgErrFactor=ef;}
+  int   print(const char *opt) const;
   
  private:   
+  void static saveStatics(double *sav);
+  void static backStatics(double *sav);
   static StiNodeExt *nodeExtInstance();
-  void getHitErrors(const StiHit *hit,double ss[3]) const;
+  void propagateCurv(const StiKalmanTrackNode *parent);
 
 //  Extended members 
  public:
  
+  const StiNodePars &fitPars() const                  {return mFP; } 
+        StiNodePars &fitPars()                        {return mFP; } 
+  const StiNodeErrs &fitErrs() const                  {return mFE; } 
+        StiNodeErrs &fitErrs()                        {return mFE; } 
   const StiNodePars &mPP() const                      {return _ext->mPP; } 
         StiNodePars &mPP()       {if (!_ext) extend(); return _ext->mPP; } 
   const StiNodeErrs &mPE() const                      {return _ext->mPE; } 
         StiNodeErrs &mPE()       {if (!_ext) extend(); return _ext->mPE; } 
-  const StiNodeMtx &mMtx() const                      {return _ext->mMtx;} 
-        StiNodeMtx &mMtx()       {if (!_ext) extend(); return _ext->mMtx;} 
-
+  const StiNodeMtx  &mMtx()const                      {return _ext->mMtx;} 
+        StiNodeMtx  &mMtx()      {if (!_ext) extend();return _ext->mMtx;} 
+  const StiNode2Pars &unTouched() const               {return  mUnTouch;} 
+        void         setUntouched();
  protected:   
 
   char _beg[1];  
   double _alpha;
+///  Z mag field in units PGev = Hz*Rcm
+  mutable double mHz;
   StiNodePars mFP; 
   /// covariance matrix of the track parameters
-  StiNodeErrs mFE;
-  float  eyy,ezz;
+  StiNodeErrs  mFE;
+  StiNode2Pars mUnTouch;
+  StiHitErrs   mHrr;
   char hitCount;
   char nullCount;
   char contiguousHitCount;
   char contiguousNullCount;
+  char mFlipFlop;
   char   _end[1];
   StiNodeExt *_ext;
   static StiKalmanTrackFinderParameters * pars;
 
-//??  static int counter;
-//??  static Messenger &  _messenger;
-
-//??  static int   shapeCode;
-//??  static const StiDetector * det;
-//??  static const StiPlanarShape * planarShape;
-//??  static const StiCylindricalShape * cylinderShape;
-//??  static StiMaterial * gas;
-//??  static StiMaterial * prevGas;
-//??  static StiMaterial * mat;
-//??  static StiMaterial * prevMat;
   static StiNodeStat  mgP;
-//??  static double radThickness, density;
-//??  static double gasDensity,matDensity,gasRL,matRL;
   static bool   useCalculatedHitError;
-  static double fgErrFactor;
-  static int fgRefit;
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[kNPars][kNPars];   
@@ -316,7 +280,7 @@ public:
   static TString comment;
   static TString commentdEdx;
 public:
-  int _Kount;  //for debug only 
+  int mId;  //for debug only 
 };
 
 
@@ -394,29 +358,6 @@ inline double StiKalmanTrackNode::crossAngle() const
   return asin(mFP._sinCA);
 }
 
-inline void StiKalmanTrackNode::setHitErrors(double ey,double ez)
-{
-  eyy = ey; ezz = ez;
-}
-
-/*! Calculate/return the track transverse momentum
-  <p>
-  Calculate the track transverse momentum in GeV/c based on this node's track parameters.
-  <p>
-  The momentum is calculated based on the track curvature held by this node. A minimum
-  curvature of 1e-12 is allowed. 
-*/
-inline double StiKalmanTrackNode::getPt() const
-{
-  double curvature;
-  curvature = fabs(mFP._curv);
-  if (pars->field) {
-    if (curvature<1e-12) 
-      return 0.003e12*fabs(pars->field);
-    else
-      return 0.00299792458*fabs(pars->field/curvature);
-  } else return 1e3;
-}
 
 /*! Calculate/return the track momentum
   <p>
@@ -449,31 +390,6 @@ struct StreamX
     cout <<node.getX()<<endl;
   }
 };
-
-inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
-{
-  return StThreeVector<double>(mFP._x,mFP._y,mFP._z);
-}
-
-inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
-{
-  return StThreeVector<double>(cos(_alpha)*mFP._x-sin(_alpha)*mFP._y, sin(_alpha)*mFP._x+cos(_alpha)*mFP._y, mFP._z);
-}
-
-inline  double StiKalmanTrackNode::x_g() const
-{
-  return cos(_alpha)*mFP._x-sin(_alpha)*mFP._y;
-}
-
-inline  double StiKalmanTrackNode::y_g() const
-{
-  return sin(_alpha)*mFP._x+cos(_alpha)*mFP._y;
-}
-
-inline  double StiKalmanTrackNode::z_g() const
-{
-  return mFP._z;
-}
 
 ///Calculate and returns pathlength within detector volume
 ///associated with this node. Returns 0 if no detector is 

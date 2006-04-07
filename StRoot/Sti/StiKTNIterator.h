@@ -62,9 +62,6 @@ static    StiKTNIterator   begin(KTN_t* fist);
 static    StiKTNIterator  rbegin(KTN_t* last);
 
 
-static const StiKTNIterator mgEnd;
-
-
 private:
     int mDir;
     KTN_t* mNode;
@@ -74,7 +71,7 @@ class StiKTNForwardIterator: public StiKTNIterator{
 public:
     StiKTNForwardIterator(KTN_t* leaf=0) : StiKTNIterator(leaf,1){};
     StiKTNForwardIterator(KTN_t& leaf  ) : StiKTNIterator(leaf,1){};
-static const StiKTNForwardIterator& end(){return (StiKTNForwardIterator&)mgEnd;}
+static const StiKTNForwardIterator& end();
 };
 
 //inlines --
@@ -152,14 +149,6 @@ inline StiKTNIterator StiKTNIterator::operator--(int)
     return temp;
 }
 
-inline const StiKTNIterator& StiKTNIterator::end()
-{
-    return mgEnd;
-}
-inline const StiKTNIterator& StiKTNIterator::rend()
-{
-    return mgEnd;
-}
 
 inline StiKTNIterator  StiKTNIterator::begin(KTN_t* fist)
 {

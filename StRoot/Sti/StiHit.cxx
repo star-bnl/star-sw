@@ -6,70 +6,31 @@
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
+#include "TSystem.h"
+#include "TRandom.h"
 #ifdef Sti_DEBUG
 #include "TRMatrix.h"
 #include "TRVector.h"
 #define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
 #define PrPP(A,B) cout << "=== StiHit::" << (#A); PrP((B)); cout << endl;
 #endif
-static int gCount=1946;
-static int myCase = -1;
-void StiHit::Break(int i) 
-{ printf("StiHit::Break(%d)\n",i);}
 
 
 StiHit::StiHit()
 {
    reset();
-   mCount = gCount++;if (mCount == myCase) Break(1);
-   reset();
 }
 
 
-StiHit::StiHit(const StiHit & h) 
-:  mrefangle(h.mrefangle),
-   mposition(h.mposition),
-   mx(h.mx),
-   my(h.my),
-   mz(h.mz), 
-   msxx(h.msxx),
-   msyy(h.msyy),
-   mszz(h.mszz),
-   msxy(h.msxy),
-   msxz(h.msxz),
-   msyz(h.msyz),
-   _xg(h._xg),
-   _yg(h._yg),
-   _zg(h._zg),
-   mTimesUsed(h.mTimesUsed),
-   mdetector(h.mdetector),
-   msthit(h.msthit),
-   _energy(h._energy)
+StiHit::StiHit(const StiHit &h) 
 {
-   mCount = gCount++;if (mCount == myCase) Break(2);
+  memcpy(mBeg,h.mBeg,mEnd-mBeg+1);
 }
 
 const StiHit& StiHit::operator=(const StiHit & h)
 {
-	mrefangle = h.mrefangle;
-	mposition = h.mposition;
-	mx = h.mx;
-	my = h.my;
-	mz = h.mz; 
-	msxx = h.msxx;
-	msyy = h.msyy;
-	mszz = h.mszz;
-	msxy = h.msxy;
-	msxz = h.msxz;
-	msyz = h.msyz; 
-	_xg  = h._xg; 
-	_yg  = h._yg;
-	_zg  = h._zg;
-	mTimesUsed = h.mTimesUsed;
-	mdetector = h.mdetector;
-	msthit = h.msthit;
-	_energy = h._energy;
-	return *this;
+  memcpy(mBeg,h.mBeg,mEnd-mBeg+1);
+  return *this;
 }
 
 StiHit::~StiHit()
@@ -79,27 +40,14 @@ StiHit::~StiHit()
 /// along the z axis
 void StiHit::rotate(double alpha)
 {
+  assert(!mdetector);
+  mrefangle+=alpha;
   double ca = cos(alpha);
   double sa = sin(alpha);
   double rxx = ca; double rxy = sa;
   double ryx =-sa; double ryy = ca;
-#ifdef Sti_DEBUG
-  TRMatrix R(2,2,
-	     ca, sa,
-	     -sa, ca); PrPP(rotate,R);
-  TRVector X(2, mx, my); PrPP(rotate,X);
-  X = TRVector(R,TRArray::kAxB,X); PrPP(rotate,X);
-#endif   
   double x = rxx*mx + rxy*my;
   double y = ryx*mx + ryy*my;
-#ifdef Sti_DEBUG
-  TRVector X1(2, x, y); PrPP(rotate,X1);
-  X1.Verify(X);
-  TRSymMatrix S(2,
-		msxx,
-		msxy, msyy);  PrPP(rotate,S);
-  S = TRSymMatrix(R,TRArray::kAxSxAT,S); PrPP(rotate,S);
-#endif
   mx = x;
   my = y;
   // A=R*S
@@ -110,14 +58,7 @@ void StiHit::rotate(double alpha)
   // S=A*Rt
   msxx = axx*rxx + axy*rxy;
   msxy = axx*ryx + axy*ryy;
-  //msyx = ayx*rxx + ayy*rxy;
   msyy = ayx*ryx + ayy*ryy;
-#ifdef Sti_DEBUG
-  TRSymMatrix S1(2,
-		msxx,
-		msxy, msyy);  PrPP(rotate,S1);
-  S1.Verify(S);
-#endif
 }
 
 void StiHit::setError(const StMatrixF& matrix)
@@ -170,11 +111,9 @@ double StiHit::getPseudoRapidity() const
 }
 void StiHit::reset()
 {
-  mrefangle = mposition = 0;
-  mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = _xg = _yg = _zg = _energy= 0.;
-  mTimesUsed=0;
-  mdetector = 0;
-  msthit = 0;
+  memset(mBeg,0,mEnd-mBeg+1);
+static unsigned int myCount=0;  
+  mCount = ++myCount;
 }
 
 
@@ -212,9 +151,6 @@ void StiHit::setGlobal(const StiDetector * detector,
   mdetector = detector;  msthit = stHit;
   _energy = energy;
   if (!stHit   ) return;
-  assert( fabs(stHit->position().x()-_xg)< 1.e-6
-       && fabs(stHit->position().y()-_yg)< 1.e-6
-       && fabs(stHit->position().z()-_zg)< 1.e-6);
   if (!detector) return;
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
@@ -274,7 +210,7 @@ void StiHit::setGlobal(const StiDetector * detector,
 
  void StiHit::setTimesUsed(unsigned int val)
 {
-    mTimesUsed=val;
+    mTimesUsed=(unsigned char)val;
 }
 
  float StiHit::getEloss()
@@ -289,16 +225,12 @@ void StiHit::setGlobal(const StiDetector * detector,
 
 void StiHit::set(float position,  float angle, float y, float z)
 {
+  memset(mBeg,0,mEnd-mBeg+1);
   mrefangle = angle;
   mposition = position;
   mx = position;
   my = y;
   mz = z;
-  msxx = msyy = mszz = msxy = msxz = msyz = 0.;
-  mTimesUsed=0;
-  mdetector = 0;
-  msthit = 0;
-  _energy = 0;
 //   add crazy values
   _xg = 100000.;
   _yg = 100000.;
