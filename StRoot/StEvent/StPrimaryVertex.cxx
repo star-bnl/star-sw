@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.12 2005/07/15 20:17:35 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.13 2006/04/07 18:21:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.13  2006/04/07 18:21:28  ullrich
+ * Added data member mMeanDip incl. access functions (Marco).
+ *
  * Revision 2.12  2005/07/15 20:17:35  ullrich
  * Corrected spelling in membrane
  *
@@ -57,7 +60,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.12 2005/07/15 20:17:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.13 2006/04/07 18:21:28 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 {init();}
@@ -74,6 +77,7 @@ void StPrimaryVertex::init()
     mNumMatchesWithBEMC = 0;
     mNumMatchesWithEEMC = 0;
     mNumTracksCrossingCentralMembrane = 0; 
+    mMeanDip = 0;
     mSumOfTrackPt = 0;
     mRanking = 0;    
 }
