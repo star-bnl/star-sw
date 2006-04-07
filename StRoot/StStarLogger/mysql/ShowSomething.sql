@@ -1,4 +1,4 @@
-# $Id: ShowSomething.sql,v 1.5 2006/04/07 13:59:55 fine Exp $
+# $Id: ShowSomething.sql,v 1.6 2006/04/07 14:46:54 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
  use logger;
@@ -30,13 +30,13 @@
                    AND            StepEventId = 'Finish' 
       GROUP BY JobDescription.taskId,JobTracking.jobId ;
                    
-#  -- print the number of the comlleted jobs
+#  -- print the number of the completed jobs
 
 SELECT  JobDescription.taskId, COUNT(*) AS completed_jobs
  FROM   JobDescription, JobTracking 
  WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId;
  
- # --- Print the number of the completed tasks
+ # --- Print the number and time of the completed tasks
 
 SELECT TaskDescription.TaskUser       AS 'Task Owner'
      , TaskDescription.JobName        AS 'Defined by SUMS' 
@@ -44,6 +44,8 @@ SELECT TaskDescription.TaskUser       AS 'Task Owner'
      , TaskDescription.nProcesses     AS 'Ordered jobs'
      , TaskDescription.submissionTime AS 'Submitted'
      , tbl.FinishedTime               AS 'Completed by'
+     , TIMEDIFF(tbl.FinishedTime, TaskDescription.submissionTime) AS 'Process Time'
+     , TIME_TO_SEC(TIMEDIFF(tbl.FinishedTime, TaskDescription.submissionTime))/(60*tbl.completed_jobs) AS 'Avr min/job'
      , tbl.completed_jobs             AS 'Total Jobs'
 FROM  TaskDescription, 
    ( SELECT  JobDescription.taskId as taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
@@ -51,7 +53,7 @@ FROM  TaskDescription,
      WHERE  JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE  completed_jobs = TaskDescription.nProcesses 
           AND TaskDescription.TaskUser='fine' 
-          AND TaskDescription.taskId = tbl.taskId ;  
+          AND TaskDescription.taskId = tbl.taskId;
  
  # --- Print the number of the uncompleted tasks
 
