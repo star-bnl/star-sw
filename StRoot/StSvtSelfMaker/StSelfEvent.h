@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSelfEvent.h,v 1.1 2006/02/14 19:02:09 perev Exp $
+ * $Id: StSelfEvent.h,v 1.2 2006/04/07 17:33:30 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSelfEvent.h,v $
+ * Revision 1.2  2006/04/07 17:33:30  perev
+ * Too big Chi2 of VTX fit fixed
+ *
  * Revision 1.1  2006/02/14 19:02:09  perev
  * Svt self alignment maker
  *
@@ -63,6 +66,8 @@ void Clear(const char *opt = "")	{mHits.Clear();}
 public:
    int   mRun;
    int   mEvt;
+   int   mNTrk;
+   int   mNPrk;
    TDatime mDate;	//DAQ time (GMT)
 
    float mVtx[3];	//Primary vertex position in global frame

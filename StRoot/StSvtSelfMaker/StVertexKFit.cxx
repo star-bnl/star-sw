@@ -1,13 +1,26 @@
 #include "StVertexKFit.h"
 #include "TCL.h"
 #include "TArrayD.h"
+#include "TArrayI.h"
+#include "TMath.h"
 #include "THelixTrack.h"
 #include "StThreeVectorD.hh"
 static const double DEF_ERR = 0.1*0.1;
+static const double DIST_MAX = 1.;
+static const double CHI2_MAX = 33.;
+
 static double joinTwo(int nP1,const double *P1,const double *E1
                      ,int nP2,const double *P2,const double *E2
 	             ,              double *PJ,      double *EJ);
 
+class StVertexKFitAux {
+public:
+double x[3];
+double d[3];
+double rho;
+double erk[9];  
+double dca2;
+};               
 
 
 ClassImp(StVertexKFit)
@@ -23,7 +36,7 @@ void StVertexKFit::SetVtx(const double *vtx,const double *etx)
   memset(mBeg,0,mEnd-mBeg+1);
   TCL::ucopy(vtx,mVtx,3);
   TCL::vzero(mEtx,6);
-  mEtx[0] = DEF_ERR*3; mEtx[2]= DEF_ERR*3; mEtx[5]= DEF_ERR*3;
+  mEtx[0] = DEF_ERR*9; mEtx[2]= DEF_ERR*9; mEtx[5]= DEF_ERR*9;
   if (etx) TCL::ucopy(etx,mEtx,6);
 }
 //______________________________________________________________________________
@@ -36,79 +49,108 @@ void StVertexKFit::SetVtx(const float *vtx,const float *etx)
  SetVtx(t,et);
 }
 //______________________________________________________________________________
-void StVertexKFit::SetTrk(const double *xyz,const double *dir,double curv)
+void StVertexKFit::AddTrk(const double *xyz,const double *dir,double curv
+                         ,const double *erk)
 { 
-  mChi2[1]=0;
-  TCL::ucopy(xyz,mXTk,3);
-  TCL::ucopy(dir,mDTk,3);
-  mCurv = curv;
+  enum {szAux = sizeof(StVertexKFitAux)/sizeof(double)};
+  mNAux++;
+  int n = mNAux*szAux;
+  if (mArr.GetSize()<n) {mArr.Set(n*2);mAux=0;}
+  mAux = (StVertexKFitAux*)mArr.GetArray();
+  n = mNAux-1;
+  TCL::ucopy(xyz,mAux[n].x,3);
+  TCL::ucopy(dir,mAux[n].d,3);
+  mAux[n].rho = curv;
+  mAux[n].erk[0]=0;
+  if (erk) TCL::ucopy(erk,mAux[n].erk,9);
 }  
 //______________________________________________________________________________
-void StVertexKFit::SetTrk(const float *xyz,const float *dir,float curv)
+void StVertexKFit::AddTrk(const float *xyz,const float *dir,float curv
+                         ,const float *erk)
 { 
-  mChi2[1]=0;
-  TCL::ucopy(xyz,mXTk,3);
-  TCL::ucopy(dir,mDTk,3);
-  mCurv = curv;
+  double d[20];
+  TCL::ucopy(xyz,d+0,3);
+  TCL::ucopy(dir,d+3,3);
+  d[6]= curv;
+  d[7]=0;
+  if (erk) TCL::ucopy(erk,d+7,9);
+  AddTrk(d,d+3,d[6],d+7);
 } 
 //______________________________________________________________________________
-double StVertexKFit::Update()
+double StVertexKFit::Fit()
 {
-  THelixTrack ht(mXTk,mDTk,mCurv);
-  ht.Backward();
-  double dca2 = ht.GetDCA(0.,0.);
-
-  double xNear[3],dNear[3],s;
-  s = ht.Step(mVtx,xNear,dNear);
-  if (fabs(s)>1000) return 1;
-
-  StThreeVectorD nZZ(dNear);
-  StThreeVectorD vNear(xNear);
-  StThreeVectorD vVert(mVtx );
-  StThreeVectorD nXX= vNear-vVert;
-  double dist2 = nXX.mag2();
-  double dist = sqrt(dist2);
-  if (dist<1e-4) {//almost coinside
-    int imin=0;
-    if (fabs(dNear[imin])>fabs(dNear[1])) imin=1;
-    if (fabs(dNear[imin])>fabs(dNear[2])) imin=2;
-    double tmp[3]={0,0,0}; tmp[imin]=1;
-    nXX = StThreeVectorD(tmp);
+  TArrayD aDca(mNAux); double *dca2 = aDca.GetArray();
+  TArrayI iDca(mNAux); int    *idx  = iDca.GetArray();
+  for (int i=0;i<mNAux;i++) {
+    THelixTrack ht(mAux[i].x,mAux[i].d,mAux[i].rho);
+    ht.Backward();
+    dca2[i] = fabs(ht.GetDCA(0.,0.));
   }
-  nXX -= nZZ*nZZ.dot(nXX); //nXX and nZZ exactly orthogonal
-  nXX = nXX.unit();
-  
-  StThreeVectorD nYY = nZZ.cross(nXX);
+  TMath::Sort(mNAux,dca2,idx,1);
+  mNTk = 0;
+  for (int j=0;j<mNAux;j++) {
+    int i = idx[j];
+    if (dca2[i] >DIST_MAX) 	break;
+    THelixTrack ht(mAux[i].x,mAux[i].d,mAux[i].rho);
+    ht.Backward();
+    double xNear[3],dNear[3],s;
+    s = ht.Step(mVtx,xNear,dNear);
+    if (fabs(s)>100) 		continue;
 
-  double T[3][3];
-  TCL::ucopy(&(nXX.x()),T[0],3);
-  TCL::ucopy(&(nYY.x()),T[1],3);
-  TCL::ucopy(&(nZZ.x()),T[2],3);
+    StThreeVectorD nZZ(dNear);
+    StThreeVectorD vNear(xNear);
+    StThreeVectorD vVert(mVtx );
+    StThreeVectorD nXX= vNear-vVert;
+    double dist2 = nXX.mag2();
+    double dist = sqrt(dist2);
+    if (dist<1e-4) {//almost coinside
+      int imin=0;
+      if (fabs(dNear[imin])>fabs(dNear[1])) imin=1;
+      if (fabs(dNear[imin])>fabs(dNear[2])) imin=2;
+      double tmp[3]={0,0,0}; tmp[imin]=1;
+      nXX = StThreeVectorD(tmp);
+    }
+    nXX -= nZZ*nZZ.dot(nXX); //nXX and nZZ exactly orthogonal
+    nXX = nXX.unit();
 
-  double etxL[6],vtxL[3];
-  TCL::vzero(vtxL,3);
-  TCL::trasat(T[0],mEtx,etxL,3,3);
-  assert((etxL[0]>0) && (etxL[2]>0) && (etxL[5]>0));
+    StThreeVectorD nYY = nZZ.cross(nXX);
 
-  double etkL[3],vtkL[2];
-  etkL[0] = DEF_ERR;etkL[1] = 0;etkL[2] = DEF_ERR;
-  etkL[0] = dca2*dca2; etkL[2]=etkL[0];
-  vtkL[0] = dist; vtkL[1]=0;
+    double T[3][3];
+    TCL::ucopy(&(nXX.x()),T[0],3);
+    TCL::ucopy(&(nYY.x()),T[1],3);
+    TCL::ucopy(&(nZZ.x()),T[2],3);
 
-  double ejL[6],vjL[3];
-  mChi2[1] = joinTwo(2,vtkL,etkL, 3,vtxL,etxL,  vjL, ejL );
-  assert((ejL[0]>0) && (ejL[2]>0) && (ejL[5]>0));
+    double etxL[6],vtxL[3];
+    TCL::vzero(vtxL,3);
+    TCL::trasat(T[0],mEtx,etxL,3,3);
+    assert((etxL[0]>0) && (etxL[2]>0) && (etxL[5]>0));
+
+    double etkL[3],vtkL[2];
+    etkL[0] = DEF_ERR;etkL[1] = 0;etkL[2] = DEF_ERR;
+    vtkL[0] = dist; vtkL[1]=0;
+
+    double ejL[6],vjL[3];
+    mChi2[1] = joinTwo(2,vtkL,etkL, 3,vtxL,etxL,  vjL, ejL );
+    if (mChi2[1]>CHI2_MAX) 	continue;
+    assert((ejL[0]>0) && (ejL[2]>0) && (ejL[5]>0));
 
 
-// 	back to global
-  double vtxG[3];
-  TCL::tratsa(T[0],ejL,mEtx,3,3);
-  assert((mEtx[0]>0) && (mEtx[2]>0) && (mEtx[5]>0));
-  TCL::mxmpy2(T[0], vjL, vtxG, 3, 3, 1);
-  TCL::vadd(mVtx,vtxG,mVtx,3);
-  
-  mChi2[0]  += mChi2[1];
-  mNTk++;
+  // 	back to global
+    double vtxG[3],etxG[6];
+    TCL::tratsa(T[0],ejL,etxG,3,3);
+    assert((etxG[0]>0) && (etxG[2]>0) && (etxG[5]>0));
+    TCL::mxmpy2(T[0], vjL, vtxG, 3, 3, 1);
+    TCL::vadd(mVtx,vtxG,vtxG,3);
+    if (fabs(vtxG[0]) >1) 	continue;
+    if (fabs(vtxG[1]) >1) 	continue;
+    if (fabs(vtxG[2]) >100) 	continue;
+    TCL::ucopy(vtxG,mVtx,3);
+    TCL::ucopy(etxG,mEtx,6);
+
+    mChi2[0]  = (mChi2[0]*mNTk + mChi2[1])/(mNTk+1);
+    mNTk++;
+  }
+
   return mChi2[1];
   
 }

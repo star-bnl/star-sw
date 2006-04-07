@@ -2,6 +2,9 @@
 /// \File StSvtSelfMaker.cxx
 /// \author Victor Perev Jan2006
 // $Log: StSvtSelfMaker.cxx,v $
+// Revision 1.2  2006/04/07 17:33:30  perev
+// Too big Chi2 of VTX fit fixed
+//
 // Revision 1.1  2006/02/14 19:02:09  perev
 // Svt self alignment maker
 //
@@ -108,14 +111,16 @@ int StSvtSelfMaker::Init()
 {
   mTreeFile = "test.self.root";
   StBFChain *bfc = dynamic_cast<StBFChain*>(GetChain());
-  if (bfc) { //invent TTree file name 
-    mTreeFile = bfc->GetFileIn();
-    mTreeFile = gSystem->BaseName(mTreeFile);
-    int ext = mTreeFile.Index(".");
-    if (ext>0) mTreeFile.Replace(ext,999,"");
-    mTreeFile +=".self.root";
-  }
-  mTFile = new TFile(mTreeFile,"RECREATE","TTree SVT Self align ROOT file");
+//  if (bfc) { //invent TTree file name 
+//     mTreeFile = bfc->GetFileIn();
+//     mTreeFile = gSystem->BaseName(mTreeFile);
+//     int ext = mTreeFile.Index(".");
+//     if (ext>0) mTreeFile.Replace(ext,999,"");
+//     mTreeFile +=".self.root";
+//   }
+//   mTFile = new TFile(mTreeFile,"RECREATE","TTree SVT Self align ROOT file");
+  mTFile = bfc->GetTFile();
+  mTFile->cd();
   mTTree = new TTree("SvtSelf","TTree SVT Self align");
   mTTree->SetAutoSave(100000000);  // autosave when 0.1 Gbyte written
   mSelfEvent = new StSelfEvent;
@@ -164,7 +169,7 @@ int StSvtSelfMaker::SelectTracks()
 
   StSPtrVecTrackNode& trackNode = mEvent->trackNodes();
   int nTracks = trackNode.size();
-  int nTSel=0;
+  int nTSel=0,nTPri=0;
   for (int i=0; i < nTracks; i++) {
     StTrackNode *node = trackNode[i]; if (!node) 	continue;
     StPrimaryTrack *pTrack = (StPrimaryTrack*)(node->track(primary));
@@ -172,10 +177,12 @@ int StSvtSelfMaker::SelectTracks()
     if (!pTrack->numberOfPossiblePoints(kTpcId)) 	continue;
     StTrackHelper th(pTrack);
     if (th.numberOfFitPoints(      ) <20) 		continue;
+    nTPri++;
     if (th.numberOfFitPoints(kSvtId) < 3) 		continue;
     nTSel++;
     mStTrackList->Add(pTrack);
   }
+  mSelfEvent->mNPrk = nTPri;
   return nTSel;
 }
 //______________________________________________________________________________
@@ -282,15 +289,15 @@ int StSvtSelfMaker::MakeVertex()
   int nTrk=mSelfTrackList->GetLast()+1;
   for (int iTrk=0;iTrk<nTrk;iTrk++) {
     StSelfTrack *selfTrack = (StSelfTrack*)mSelfTrackList->At(iTrk);
-    vkf.SetTrk(selfTrack->mX,selfTrack->mD,selfTrack->mCurv);
-    vkf.Update();
+    vkf.AddTrk(selfTrack->mX,selfTrack->mD,selfTrack->mCurv);
 //    vkf.Print();
   }
+  mChi2 = vkf.Fit();
+  if (vkf.GetNFit() <5) return 1;
   vkf.Print("Ended");
   TCL::ucopy(vkf.GetVtx(),mVtx,3);
   TCL::ucopy(vkf.GetEtx(),mEtx,6);
-  mChi2 = vkf.GetChi2();
-  if (mChi2>10) return 1;
+  if (mChi2>33) 	return 1;
   return 0;
 }
 //______________________________________________________________________________
@@ -327,6 +334,7 @@ int StSvtSelfMaker::FillEvent()
   TCL::ucopy(mVtxOld,mSelfEvent->mVtxOld,3);
   TCL::ucopy(mEtxOld,mSelfEvent->mEtxOld,6);
   int nTrk=mSelfTrackList->GetLast()+1;
+  mSelfEvent->mNTrk = nTrk;	
   assert(nTrk>1);
   int iHit=0;
   for (int iTrk=0;iTrk<nTrk;iTrk++) {
@@ -369,9 +377,9 @@ int StSvtSelfMaker::TestVtx()
     StTrackHelper th(pTrack);
     if (th.numberOfFitPoints(      ) <20) 		continue;
     nTSel++;
-    vkf.SetTrk(&(th.GetFirstPoint().x()),&(th.GetMom().unit().x()),th.GetCurv());
-    vkf.Update();
+    vkf.AddTrk(&(th.GetFirstPoint().x()),&(th.GetMom().unit().x()),th.GetCurv());
   }
+  vkf.Fit();
   vkf.Print("Ended");
   return nTSel;
 }
