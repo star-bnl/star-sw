@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.30 2006/03/09 22:45:12 didenko Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.31 2006/04/07 18:01:55 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,8 +12,17 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
- * Revision 2.30  2006/03/09 22:45:12  didenko
- * get back previuos version
+ * Revision 2.31  2006/04/07 18:01:55  perev
+ * Back to the latest Sti
+ *
+ * Revision 2.29  2005/12/18 23:36:53  perev
+ * Dependency from StiKalmanTrackNode removed
+ *
+ * Revision 2.28  2005/12/08 04:14:49  perev
+ * new place for StiDebug.h
+ *
+ * Revision 2.27  2005/12/07 21:24:51  perev
+ * Cleanup
  *
  * Revision 2.26  2005/05/31 16:32:21  perev
  * Max & min errors changed to 1e-4,1.
@@ -99,10 +108,10 @@
 
 
 //Sti inlcudes
-#include "StiKalmanTrackNode.h"
+#include "StiTrackNode.h"
 #include "StiHitErrorCalculator.h"
 #include "tables/St_HitError_Table.h"
-#include "StiDebug.h"
+#include "StiUtilities/StiDebug.h"
 
 //_____________________________________________________________________________
 StiDefaultHitErrorCalculator::StiDefaultHitErrorCalculator()
@@ -188,21 +197,25 @@ ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 }
 
 //_____________________________________________________________________________
-void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node
-		                       ,double &ecross, double &edip) const
+void StiDefaultHitErrorCalculator::calculateError(const StiNodePars *pars
+                                                 ,double &ecross,double &edip) const 
 {  
-  double dz = (210.-fabs(node->getZ()))/100.;
-  double cosCA = node->getCos();
-  double sinCA = node->getSin();
+static const double tenMicrons = 1e-3;
+static const double min2Err = tenMicrons*tenMicrons;
+static const double max2Err = 1.;
+
+  double dz = (210.-fabs(pars->_z))/100.;
+  double cosCA = pars->_cosCA;
+  double sinCA = pars->_sinCA;
   if (cosCA<0.01) cosCA=0.01;
   double tanCA = sinCA/cosCA;
   ecross=coeff[0]+coeff[1]*dz/(cosCA*cosCA) +coeff[2]*tanCA*tanCA;
-  if (ecross< 1e-4) ecross = 1e-4;
-  if (ecross> 1   ) ecross = 1;
-  double tanDip=node->getTanL();
+  if (ecross< min2Err) ecross = min2Err;
+  if (ecross> max2Err) ecross = max2Err;
+  double tanDip=pars->_tanl;
   double cosDipInv2=1+tanDip*tanDip;
          edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
-  if (edip< 1e-4) edip = 1e-4;
-  if (edip> 1   ) edip = 1;
+  if (edip< min2Err) edip = min2Err;
+  if (edip> max2Err) edip = max2Err;
 }
 

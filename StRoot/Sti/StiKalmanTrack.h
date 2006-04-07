@@ -146,11 +146,9 @@ class StiKalmanTrack : public StiTrack
    * @return dca in cm.
    */
    double  getDca()    const;
-   double  getGlobalDca()    const;
    virtual double  getDca(const StiHit * vertex)    const;
 
    void setDca(double dca);
-   void setGlobalDca(double dca);
    
   /*!
    * Returns the distance of closest approach of this track to the give track.
@@ -252,18 +250,21 @@ class StiKalmanTrack : public StiTrack
    void  setFirstLastNode(StiKalmanTrackNode *n);   
    
    
+#if 0
    /// Method used to add a hit to this track
    virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction);
-   
+#endif   
    /// Add a kalman track node to this track as a child to the last node of the track
    /// Return the added node 
    virtual void add(StiTrackNode * node,int direction);
   /// Convenience method to initialize a track based on seed information 
+#if 0
   void initialize(double curvature,
 		  double tanl,
 		  const StThreeVectorD& origin,
 		  const vector<StiHit*> &);
-  
+#endif  
+  int initialize(const vector<StiHit*> &);
 
     /// Method to return the pointer to the fitter parameters.
     StiKalmanTrackFitterParameters* fitPars() const {return fitpars;}
@@ -293,6 +294,7 @@ class StiKalmanTrack : public StiTrack
 
   StiKalmanTrackNode * extrapolateToBeam();
   StiKalmanTrackNode * extrapolateToRadius(double radius);
+  int approx();
   
   void reduce();
 
@@ -301,6 +303,8 @@ class StiKalmanTrack : public StiTrack
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
 
+protected:
+  friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 protected:
     
   static StiKalmanTrackFinderParameters * pars;
@@ -315,13 +319,10 @@ protected:
   double  m;             // mass hypothesis
 
   double  _dca;
-  double  _gdca;
-  static int _debug; // Debug level
-  friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
 
  public:
-  double _vDca; // tempo dca 
   double _vChi2;//
+  static int _debug; // Debug level
 
 };
 
@@ -493,18 +494,10 @@ inline double  StiKalmanTrack::getDca()    const
 {
   return _dca;
 }
-inline double  StiKalmanTrack::getGlobalDca()    const
-{
-  return _gdca;
-}
 
 inline void  StiKalmanTrack::setDca(double dca)  
 {
   _dca = dca;
-}
-inline void  StiKalmanTrack::setGlobalDca(double dca)  
-{
-  _gdca = dca;
 }
 
 

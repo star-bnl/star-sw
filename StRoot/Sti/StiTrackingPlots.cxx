@@ -1,10 +1,13 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.26 2006/03/09 22:45:14 didenko Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.27 2006/04/07 18:01:57 perev Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
- * Revision 2.26  2006/03/09 22:45:14  didenko
- * get back previuos version
+ * Revision 2.27  2006/04/07 18:01:57  perev
+ * Back to the latest Sti
+ *
+ * Revision 2.25  2006/02/14 18:18:45  perev
+ * getGlobalDca ==> getDca
  *
  * Revision 2.24  2005/02/07 18:33:43  fisyak
  * Add VMC dead material
@@ -326,7 +329,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
       double phi    = track->getPhi();
       double eta    = track->getPseudoRapidity();
       double pt     = track->getPt();
-      double gdca   = track->getGlobalDca();
+      double gdca   = track->getDca();
       double dca    = track->getDca();
 #if 0
       double charge = track->getCharge();
@@ -524,7 +527,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore, StiHit * vertex)
       double phi    = track->getPhi();
       double eta    = track->getPseudoRapidity();
       double pt     = track->getPt();
-      double gdca   = track->getGlobalDca();
+      double gdca   = track->getDca();
       double dca    = track->getDca();
 #if 0
       double charge = track->getCharge();
