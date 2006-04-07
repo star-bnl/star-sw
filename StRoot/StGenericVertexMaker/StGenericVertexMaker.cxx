@@ -22,12 +22,14 @@
 #include "StMessMgr.h"
 
 #include "StGenericVertexFinder.h"
-#include "StMinuitVertexFinder.h"
 #include "StppLMVVertexFinder.h"
 
-#include "StGenericVertexMaker/StiPPVertex/StPPVertexFinder.h"
-
 #include "StTreeMaker/StTreeMaker.h"
+
+// Vertex finder implemtations
+#include "Minuit/StMinuitVertexFinder.h"
+#include "StiPPVertex/StPPVertexFinder.h"
+
 
 #include "tables/St_g2t_vertex_Table.h" // tmp for Dz(vertex)
 #include "tables/St_vertexSeed_Table.h" //
