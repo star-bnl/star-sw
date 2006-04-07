@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.32 2006/03/09 22:45:49 didenko Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.33 2006/04/07 17:39:49 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,8 +19,11 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
- * Revision 2.32  2006/03/09 22:45:49  didenko
- * get back previuos version
+ * Revision 2.33  2006/04/07 17:39:49  perev
+ * Cleanup: redundant comments removed
+ *
+ * Revision 2.31  2005/12/07 23:13:31  perev
+ * last traces of StiMaker and associated maker removed
  *
  * Revision 2.30  2005/10/26 21:54:10  fisyak
  * Remove dead classes, gid rid off dependencies from StMcEvent and StiGui
@@ -161,8 +164,6 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackMerger(0),
   _vertexFinder(0),
   _hitLoader(0),
-//??  _associationMaker(0),
-//??  _stiMaker(0),
   _residualCalculator(0),
   _loaderHitFilter(0),
   _loaderTrackFilter(0),
