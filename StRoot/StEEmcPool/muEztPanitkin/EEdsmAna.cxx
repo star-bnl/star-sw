@@ -386,7 +386,6 @@ void EEdsmAna ::sort( const unsigned char * dsm0inp,
 
   return;
 
- dump:
   printf("==================================\n");
   printf("==================================\n");
   printAllEndcap();
