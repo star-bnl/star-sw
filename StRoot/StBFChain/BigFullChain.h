@@ -607,7 +607,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"genvtx"   ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb","StiMaker",
-                "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
+                "StEventUtilities,StiUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
   {"StiPixel" ,"","","Sti",                           "","StiPixel", "Load StiPixel shared library",kFALSE},
 #endif /* __BFC2__ */
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",

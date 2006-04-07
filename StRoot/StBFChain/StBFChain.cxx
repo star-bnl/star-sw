@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.493 2006/04/07 17:09:51 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.494 2006/04/07 17:29:52 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -256,8 +256,8 @@ Int_t StBFChain::Instantiate()
 	maker == "St_geant_Maker" ||
 	maker == "StVMCMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
     // All Makers created here
-    if (maker == "StiMaker")
-      ProcessLine("StiToolkit::setToolkit( new StiDefaultToolkit() );");
+//VP    if (maker == "StiMaker")
+//VP      ProcessLine("StiToolkit::setToolkit( new StiDefaultToolkit() );");
       if (!mk) {
       if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
       else                          mk = New(fBFC[i].Maker);
@@ -294,7 +294,7 @@ Int_t StBFChain::Instantiate()
       }
     }
 //		Sti(ITTF) start
-#define StiOLD_INTERFACE
+//VP#define StiOLD_INTERFACE
 #ifndef StiOLD_INTERFACE
     if (maker == "StiMaker") {
       if (GetOption("NoSvtIT")) mk->SetAttr("useSvt"	,kFALSE);
@@ -844,13 +844,12 @@ Int_t StBFChain::Skip(int nskip)
 /// Really the destructor (close files, delete pointers etc ...)
 Int_t StBFChain::Finish()
 {
-  if (fBFC) {
-    SafeDelete(chainOpt);
-    fBFC = 0;
-    if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
-    return StMaker::Finish();
-  }
-  else return kStOK;
+  if (!fBFC) return kStOK;
+  int ians = StMaker::Finish();
+  SafeDelete(chainOpt);
+  fBFC = 0;
+  if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
+  return ians;
 }
 
 
@@ -1272,7 +1271,7 @@ void StBFChain::SetInputFile (const Char_t *infile){
       TObjString *File;
       while ((File = (TObjString *) next())) {
 	TString string = File->GetString();
-	if (!strstr(string.Data(),"*") &&
+	if (!strstr(string.Data(),"*") && string[0]!='@' &&
 	    gSystem->AccessPathName(string.Data())) {// file does not exist
 	  gMessMgr->Error() << "StBFChain::SetInputFile  *** NO FILE: " << string.Data() << ", exit!" << endm;
 	  gSystem->Exit(1);
