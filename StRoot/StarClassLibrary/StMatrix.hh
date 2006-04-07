@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.18 2006/01/09 23:47:27 fisyak Exp $
+ * $Id: StMatrix.hh,v 1.19 2006/04/07 22:02:34 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,10 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.19  2006/04/07 22:02:34  ullrich
+ * Fixed bug in dfinv and dfact that were affecting
+ * determinant(), invert(), and inverse().
+ *
  * Revision 1.18  2006/01/09 23:47:27  fisyak
  * Add missing methods (found by Zhangbu) to Cint dictionary
  *
@@ -223,6 +227,7 @@
 #include <Stiostream.h>
 #include <math.h>
 #include <vector>
+#include <float.h>
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif
@@ -371,10 +376,10 @@ private:
     // If successful, the return code is 0.
     // On return, det is the determinant and ir[] is row-unsigned interchange
     // matrix. See CERNLIB's DFACT routine.
-    unsigned int dfact(DataType &det, size_t *ir); // factorize the matrix. 
+    int dfact(DataType &det, int *ir); // factorize the matrix. 
 
     // invert the matrix. See CERNLIB DFINV.
-    unsigned int dfinv(size_t *ir);
+    int dfinv(int *ir);
 
 protected:
     DataType *mElement;
@@ -992,16 +997,16 @@ void StMatrix<DataType>::invert(size_t &ierr) {
 #endif
     }
     static unsigned int max_array = 20;
-    static size_t *ir = new size_t [max_array+1];
+    static int *ir = new int [max_array+1];
     
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new size_t [max_array+1];
+	ir = new int [max_array+1];
     }
     DataType t1, t2, t3;
     DataType det, temp, s;
-    unsigned int ifail;
+    int ifail;
     switch(mRow) {
     case 3:
 	{
@@ -1091,7 +1096,7 @@ void StMatrix<DataType>::invert(size_t &ierr) {
 template<class DataType>
 DataType StMatrix<DataType>::determinant() const {
     static unsigned int max_array = 20;
-    static size_t *ir = new size_t [max_array+1];
+    static int *ir = new int [max_array+1];
     if(mCol != mRow) {
 #ifndef ST_NO_EXCEPTIONS
 		throw out_of_range("StMatrix<DataType>::determinant(): not a NxN matrix");
@@ -1102,11 +1107,11 @@ DataType StMatrix<DataType>::determinant() const {
     if (mCol > max_array) {
 	delete [] ir;
 	max_array = mRow;
-	ir = new size_t [max_array+1];
+	ir = new int [max_array+1];
     }
     DataType det;
     StMatrix<DataType> mt(*this);
-    unsigned int i = mt.dfact(det, ir);
+    int i = mt.dfact(det, ir);
     if(i==0) return det;
     return 0;
 }
@@ -1205,8 +1210,10 @@ void swap(StMatrix<DataType>& m1, StMatrix<DataType>& m2) {
 //     StMatrix<DataType>::swap(m1.mSize,    m2.mSize);
 // }
 
+
 template<class DataType>
-unsigned int StMatrix<DataType>::dfact(DataType& det, size_t *ir) {
+int StMatrix<DataType>::dfact(DataType &det, int *ir)
+{
     if (mCol!=mRow) {
 #ifndef ST_NO_EXCEPTIONS
 	throw domain_error("StMatrix<DataType>::dfact(): Matrix not NxN");
@@ -1214,98 +1221,113 @@ unsigned int StMatrix<DataType>::dfact(DataType& det, size_t *ir) {
 	cerr << "StMatrix<DataType>::dfact(): Matrix not NxN" << endl;
 #endif
     }
-    unsigned int ifail, jfail;
-    register unsigned int n = mCol;
-    
+ 
+    int ifail, jfail;
+    register int n = mCol;
+ 
     DataType tf;
-    DataType g1 = 1.0e-19, g2 = 1.0e19;
-    
+    DataType g1 = 1.0e-19;
+    DataType g2 = 1.0e19;
+ 
     DataType p, q, t;
     DataType s11, s12;
+
     
-    unsigned int normal = 0, imposs = (unsigned int)-1;
-    unsigned int jrange = 0, jover = 1, junder = (unsigned int)-1;
+    DataType epsilon;
+    if (sizeof(DataType) == sizeof(double))
+        epsilon = 8*DBL_EPSILON;
+    else
+        epsilon = 8*FLT_EPSILON;
+    // could be set to zero (like it was before)
+    // but then the algorithm often doesn't detect
+    // that a matrix is singular
+    
+    int normal = 0, imposs = -1;
+    int jrange = 0, jover = 1, junder = -1;
     ifail = normal;
     jfail = jrange;
-    unsigned int nxch = 0;
+    int nxch = 0;
     det = 1.0;
     DataType *mj = mElement;
     DataType *mjj = mj;
-    for (unsigned int j=1; j<=n; j++) {
-	unsigned int k = j;
-	p = (fabs(*mjj));
-	if (j!=n) {
-	    DataType *mij = mj + n + j - 1; 
-	    for (unsigned int i=j+1; i<=n; i++) {
-		q = (fabs(*(mij)));
-		if (q > p) {
-		    k = i;
-		    p = q;
-		}
-		mij += n;
-	    }
-	    if (k==j) {
-		if (p <=0) {
-		    det = 0;
-		    ifail = imposs;
-		    jfail = jrange;
-		    return ifail;
-		}
-	    }
-	    DataType *mjl = mj;
-	    DataType *mkl = mElement + (k-1)*n;
-	    for (unsigned int l=1; l<=n; l++) {
-		tf = *mjl;
-		*(mjl++) = *mkl;
-		*(mkl++) = tf;
-	    }
-	    nxch = nxch + 1;
-	    ir[nxch] = (((j)<<12)+(k));
-	} else {
-	    if (p <=0) {
-		det = 0.0;
-		ifail = imposs;
-		jfail = jrange;
-		return ifail;
-	    }
-	}
-	det *= *mjj;
-	*mjj = 1.0 / *mjj;
-	t = (fabs(det));
-	if (t < g1) {
-	    det = 0.0;
-	    if (jfail == jrange) jfail = junder;
-	} else if (t > g2) {
-	    det = 1.0;
-	    if (jfail==jrange) jfail = jover;
-	}
-	if (j!=n) {
-	    DataType *mk = mj + n;
-	    DataType *mkjp = mk + j;
-	    DataType *mjk = mj + j;
-	    for (unsigned int k=j+1; k<=n; k++) {
-		s11 = - (*mjk);
-		s12 = - (*mkjp);
-		if (j!=1) {
-		    DataType *mik = mElement + k - 1;
-		    DataType *mijp = mElement + j;
-		    DataType *mki = mk;
-		    DataType *mji = mj;
-		    for (unsigned int i=1; i<j; i++) {
-			s11 += (*mik) * (*(mji++));
-			s12 += (*mijp) * (*(mki++));
-			mik += n;
-			mijp += n;
-		    }
-		}
-		*(mjk++) = -s11 * (*mjj);
-		*(mkjp) = -(((*(mjj+1)))*((*(mkjp-1)))+(s12));
-		mk += n;
-		mkjp += n;
-	    }
-	}
-	mj += n;
-	mjj += (n+1);
+    for (int j=1;j<=n;j++) {
+        int k = j;
+        p = (fabs(*mjj));
+        if (j!=n) {
+            DataType *mij = mj + n + j - 1;
+            for (int i=j+1;i<=n;i++) {
+                q = (fabs(*(mij)));
+                if (q > p) {
+                    k = i;
+                    p = q;
+                }
+                mij += n;
+            }
+            if (k==j) {
+                if (p <= epsilon) {
+                    det = 0;
+                    ifail = imposs;
+                    jfail = jrange;
+                    return ifail;
+                }
+                det = -det; // in this case the sign of the determinant
+                // must not change. So I change it twice.
+            }
+            DataType *mjl = mj;
+            DataType *mkl = mElement + (k-1)*n;
+            for (int l=1;l<=n;l++) {
+                tf = *mjl;
+                *(mjl++) = *mkl;
+                *(mkl++) = tf;
+            }
+            nxch = nxch + 1;  // this makes the determinant change its sign
+            ir[nxch] = (((j)<<12)+(k));
+        } else {
+            if (p <= epsilon) {
+                det = 0.0;
+                ifail = imposs;
+                jfail = jrange;
+                return ifail;
+            }
+        }
+        det *= *mjj;
+        *mjj = 1.0 / *mjj;
+        t = (fabs(det));
+        if (t < g1) {
+            det = 0.0;
+            if (jfail == jrange) jfail = junder;
+        }
+        else if (t > g2) {
+            det = 1.0;
+            if (jfail==jrange) jfail = jover;
+        }
+        if (j!=n) {
+            DataType *mk = mj + n;
+            DataType *mkjp = mk + j;
+            DataType *mjk = mj + j;
+            for (k=j+1;k<=n;k++) {
+                s11 = - (*mjk);
+                s12 = - (*mkjp);
+                if (j!=1) {
+                    DataType *mik = mElement + k - 1;
+                    DataType *mijp = mElement + j;
+                    DataType *mki = mk;
+                    DataType *mji = mj;
+                    for (int i=1;i<j;i++) {
+                        s11 += (*mik) * (*(mji++));
+                        s12 += (*mijp) * (*(mki++));
+                        mik += n;
+                        mijp += n;
+                    }
+                }
+                *(mjk++) = -s11 * (*mjj);
+                *(mkjp) = -(((*(mjj+1)))*((*(mkjp-1)))+(s12));
+                mk += n;
+                mkjp += n;
+            }
+        }
+        mj += n;
+        mjj += (n+1);
     }
     if (nxch%2==1) det = -det;
     if (jfail !=jrange) det = 0.0;
@@ -1314,7 +1336,8 @@ unsigned int StMatrix<DataType>::dfact(DataType& det, size_t *ir) {
 }
 
 template<class DataType>
-unsigned int StMatrix<DataType>::dfinv(size_t *ir) {
+int StMatrix<DataType>::dfinv(int *ir)
+{
     if (mCol != mRow) {
 #ifndef ST_NO_EXCEPTIONS
 	throw domain_error("StMatrix<DataType>::dfinv(): Matrix not NxN");
@@ -1322,7 +1345,8 @@ unsigned int StMatrix<DataType>::dfinv(size_t *ir) {
 	cerr << "StMatrix<DataType>::dfinv(): Matrix not NxN" << endl;
 #endif
     }
-    register unsigned int n = mCol;
+    
+    register int n = mCol;
     if (n==1) return 0;
     
     DataType s31, s32;
@@ -1335,88 +1359,91 @@ unsigned int StMatrix<DataType>::dfinv(size_t *ir) {
     *m21 = -(*m22) * (*m11) * (*m21);
     *m12 = -(*m12);
     if (n>2) {
-	DataType *mi = mElement + 2 * n;
-	DataType *mii= mElement + 2 * n + 2;
-	DataType *mimim = mElement + n + 1;
-	for (unsigned int i=3; i<=n; i++) {
-	    unsigned int im2 = i - 2;
-	    DataType *mj = mElement;
-	    DataType *mji = mj + i - 1;
-	    DataType *mij = mi;
-	    for (unsigned int j=1; j<=im2; j++) { 
-		s31 = 0.0;
-		s32 = *mji;
-		DataType *mkj = mj + j - 1;
-		DataType *mik = mi + j - 1;
-		DataType *mjkp = mj + j;
-		DataType *mkpi = mj + n + i - 1;
-		for (unsigned int k=j; k<=im2; k++) {
-		    s31 += (*mkj) * (*(mik++));
-		    s32 += (*(mjkp++)) * (*mkpi);
-		    mkj += n;
-		    mkpi += n;
-		}
-		*mij = -(*mii) * (((*(mij-n)))*( (*(mii-1)))+(s31));
-		*mji = -s32;
-		mj += n;
-		mji += n;
-		mij++;
-	    }
-	    *(mii-1) = -(*mii) * (*mimim) * (*(mii-1));
-	    *(mimim+1) = -(*(mimim+1));
-	    mi += n;
-	    mimim += (n+1);
-	    mii += (n+1);
-	}
+        DataType *mi = mElement + 2 * n;
+        DataType *mii= mElement + 2 * n + 2;
+        DataType *mimim = mElement + n + 1;
+        for (int i=3;i<=n;i++) {
+            int im2 = i - 2;
+            DataType *mj = mElement;
+            DataType *mji = mj + i - 1;
+            DataType *mij = mi;
+            for (int j=1;j<=im2;j++) {
+                s31 = 0.0;
+                s32 = *mji;
+                DataType *mkj = mj + j - 1;
+                DataType *mik = mi + j - 1;
+                DataType *mjkp = mj + j;
+                DataType *mkpi = mj + n + i - 1;
+                for (int k=j;k<=im2;k++) {
+                    s31 += (*mkj) * (*(mik++));
+                    s32 += (*(mjkp++)) * (*mkpi);
+                    mkj += n;
+                    mkpi += n;
+                }
+                *mij = -(*mii) * (((*(mij-n)))*( (*(mii-1)))+(s31));
+                *mji = -s32;
+                mj += n;
+                mji += n;
+                mij++;
+            }
+            *(mii-1) = -(*mii) * (*mimim) * (*(mii-1));
+            *(mimim+1) = -(*(mimim+1));
+            mi += n;
+            mimim += (n+1);
+            mii += (n+1);
+        }
     }
     DataType *mi = mElement;
     DataType *mii = mElement;
-    for (unsigned int i=1; i<n; i++) {
-	unsigned int ni = n - i;
-	DataType *mij = mi;
-	for (unsigned int j=1; j<=i; j++) {
-	    s33 = *mij;
-	    register DataType *mikj = mi + n + j - 1;
-	    register DataType *miik = mii + 1;
-	    DataType *min_end = mi + n;
-	    for ( ; miik<min_end; ) {
-		s33 += (*mikj) * (*(miik++));
-		mikj += n;
-	    }
-	    *(mij++) = s33;
-	}
-	for (unsigned int jn=1; jn<=ni; jn++) {
-	    s34 = 0.0;
-	    DataType *miik = mii + jn;
-	    DataType *mikij = mii + jn * n + jn;
-	    for (unsigned int k=jn; k<=ni; k++) {
-		s34 += *mikij * (*(miik++));
-		mikij += n;
-	    }
-	    *(mii+jn) = s34;
-	}
-	mi += n;
-	mii += (n+1);
+    for (int i=1;i<n;i++) {
+        int ni = n - i;
+        DataType *mij = mi;
+        int j;
+        for (j=1; j<=i;j++) {
+            s33 = *mij;
+            register DataType *mikj = mi + n + j - 1;
+            register DataType *miik = mii + 1;
+            DataType *min_end = mi + n;
+            for (;miik<min_end;) {
+                s33 += (*mikj) * (*(miik++));
+                mikj += n;
+            }
+            *(mij++) = s33;
+        }
+        for (j=1;j<=ni;j++) {
+            s34 = 0.0;
+            DataType *miik = mii + j;
+            DataType *mikij = mii + j * n + j;
+            for (int k=j;k<=ni;k++) {
+                s34 += *mikij * (*(miik++));
+                mikij += n;
+            }
+            *(mii+j) = s34;
+        }
+        mi += n;
+        mii += (n+1);
     }
-    unsigned int nxch = ir[n];
+    int nxch = ir[n];
     if (nxch==0) return 0;
-    for (unsigned int cnt=1; cnt<=nxch; cnt++) {
-	unsigned int k = nxch - cnt + 1;
-	unsigned int ij = ir[k];
-	unsigned int i = ij >> 12;
-	unsigned int j = ij%4096;
-	DataType *mki = mElement + i - 1;
-	DataType *mkj = mElement + j - 1;
-	for (k=1; k<=n; k++) {
-	    register DataType ti = *mki;
-	    *mki = *mkj;
-	    *mkj = ti;
-	    mki += n;
-	    mkj += n;
-	}
+    for (int mm=1;mm<=nxch;mm++) {
+        int k = nxch - mm + 1;
+        int ij = ir[k];
+        int i = ij >> 12;
+        int j = ij%4096;
+        DataType *mki = mElement + i - 1;
+        DataType *mkj =mElement + j - 1;
+        for (k=1; k<=n;k++) {
+            DataType ti = *mki;
+            *mki = *mkj;
+            *mkj = ti;
+            mki += n;
+            mkj += n;
+        }
     }
     return 0;
 }
+ 
+
 
 template<class DataType>
 StMatrix<DataType> operator/(const StMatrix<DataType>& m1, double fact)
