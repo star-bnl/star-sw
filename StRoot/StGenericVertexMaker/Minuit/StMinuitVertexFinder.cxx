@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.2 2006/04/08 19:06:29 mvl Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.3 2006/04/08 23:21:15 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.3  2006/04/08 23:21:15  fisyak
+ * Add protection for  bemcDet==0
+ *
  * Revision 1.2  2006/04/08 19:06:29  mvl
  * Update for multiple vertex finding and rank calculation for identifying the
  * triggered vertex. Ranks are based on mean dip angle of tracks, BEMC matches
@@ -224,6 +227,7 @@ void StMinuitVertexFinder::fillBemcHits(StEmcDetector *bemcDet){
 	mBemcHit[m][e][s]=0;
 
   int n_emc_hit=0;
+  if (bemcDet) {
   for (int iMod=0; iMod < nMod; iMod++) {
     if (!bemcDet->module(iMod)) 
       continue;
@@ -236,6 +240,7 @@ void StMinuitVertexFinder::fillBemcHits(StEmcDetector *bemcDet){
 	n_emc_hit++; 
       }
     }
+  }
   }
   if (mDebugLevel) 
     cout << "Found " << n_emc_hit << " emc hits" << endl;
