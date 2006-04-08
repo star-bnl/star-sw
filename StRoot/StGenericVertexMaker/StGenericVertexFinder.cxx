@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.9 2005/07/19 21:45:07 perev Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.10 2006/04/08 00:18:09 mvl Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -13,7 +13,7 @@
 
 //______________________________________________________________________________
 StGenericVertexFinder::StGenericVertexFinder() : 
-  mVertexConstrain(false), mMode(0)
+  mVertexConstrain(false), mMode(0), mDebugLevel(0)
 {
 }
 //______________________________________________________________________________
@@ -56,7 +56,6 @@ StPrimaryVertex* StGenericVertexFinder::getVertex(int idx) const
 void
 StGenericVertexFinder::Clear()
 {
-  printf(" StGenericVertexFinder::Clear()\n"); 
   mVertexList.clear();
 }
 
@@ -71,6 +70,9 @@ void StGenericVertexFinder::NoVertexConstraint()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.10  2006/04/08 00:18:09  mvl
+// Added member for debuglevel
+//
 // Revision 1.9  2005/07/19 21:45:07  perev
 // MultiVertex
 //
