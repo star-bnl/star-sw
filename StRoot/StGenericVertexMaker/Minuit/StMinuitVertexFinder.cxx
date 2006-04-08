@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.1 2006/04/07 15:38:06 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.2 2006/04/08 19:06:29 mvl Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,8 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
- * Revision 1.1  2006/04/07 15:38:06  jeromel
- * Moved to sub-dir (see history inline at next commit)
+ * Revision 1.2  2006/04/08 19:06:29  mvl
+ * Update for multiple vertex finding and rank calculation for identifying the
+ * triggered vertex. Ranks are based on mean dip angle of tracks, BEMC matches
+ * and tracks crossing the central membrane and optimised for Cu+Cu.
+ * The track cuts are now bit tighter (dca<2 in transverse direction and
+ * nfitpoints > 15) to suppress 'fake' vertices.
+ * In addition, a lower multiplicity cut of 5 tracks is implemented.
  *
  * Revision 1.18  2005/12/08 16:54:13  fisyak
  * Fix mRequireCTB, one more non initialized variable
@@ -74,14 +79,15 @@
 #include "TMinuit.h"
 #include "StGlobals.hh"
 #include "SystemOfUnits.h"
+#include "StCtbMatcher.h"
 #include "StMessMgr.h"
 #include <math.h>
-
-#include "StCtbMatcher.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 vector<StPhysicalHelixD> StMinuitVertexFinder::mHelices;
+vector<unsigned short>   StMinuitVertexFinder::mHelixFlags;
 vector<double>           StMinuitVertexFinder::mSigma;
-vector<bool>             StMinuitVertexFinder::mCTB;
+vector<double>           StMinuitVertexFinder::mZImpact;
 double                   StMinuitVertexFinder::mWidthScale = 1;
 double                   StMinuitVertexFinder::mX0;
 double                   StMinuitVertexFinder::mY0;
@@ -95,6 +101,7 @@ int                      StMinuitVertexFinder::nCTBHits;
 void StMinuitVertexFinder::Clear(){
   StGenericVertexFinder::Clear();
   mStatusMin    = 0;
+  mNSeed = 0;
 }
 
 void
@@ -109,10 +116,14 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   gMessMgr->Info() << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
 
-  mMinNumberOfFitPointsOnTrack = 10; 
+  mMinNumberOfFitPointsOnTrack = 15; 
+  mDcaZMax = 3;     // Note: best to use integer numbers
+  mMinTrack = 5;
+  mRImpactMax = 2;
+
   mMinuit = new TMinuit(3);         
   mMinuit->SetFCN(&StMinuitVertexFinder::fcn);
-  mMinuit->SetPrintLevel(1);
+  mMinuit->SetPrintLevel(-1);
   mMinuit->SetMaxIterations(1000);
   mExternalSeedPresent = false;
   mVertexConstrain = false;
@@ -124,12 +135,13 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
 
  StMinuitVertexFinder::~StMinuitVertexFinder()
  {
-     delete mBeamHelix;mBeamHelix=0;
-     gMessMgr->Warning() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
+   delete mBeamHelix; mBeamHelix=0;
+   gMessMgr->Warning() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
-    mHelices.clear();
-    mSigma.clear();
-    mCTB.clear();
+   mHelices.clear();
+   mHelixFlags.clear();
+   mZImpact.clear();
+   mSigma.clear();
  }
 
 
@@ -142,85 +154,350 @@ StMinuitVertexFinder::setFlagBase(){
   }
 }
 
+int StMinuitVertexFinder::findSeeds(int n_step, float min_z, float max_z) {
+  mNSeed = 0;
+
+  int zImpactArr[200]; // simple array to 'histogram' zImpacts
+  for (int i=0; i < 200; i++)
+    zImpactArr[i]=0;
+
+  Int_t nTrk = mZImpact.size();
+  for (int iTrk=0; iTrk < nTrk; iTrk++) {
+    if (fabs(mZImpact[iTrk]) < 100)
+      zImpactArr[int(mZImpact[iTrk]+100)]++;
+  }
+
+  // Search for maxima using sliding 3-bin window
+  Int_t nOldBin = 0;
+  int slope = 0;
+  int nBinZ = 3;
+  for (int iBin=0; iBin < 200 - nBinZ; iBin++) {
+    int nTrkBin = 0;
+    for (int iBin2=0; iBin2 < nBinZ; iBin2++) {
+      nTrkBin += zImpactArr[iBin + iBin2];
+    }
+    if (nTrkBin > nOldBin)
+      slope = 1;
+    else if (nTrkBin < nOldBin) {
+      if (slope == 1) {
+	if (mNSeed < maxSeed) {
+	  float seed_z = -100 + iBin + (Float_t)nBinZ / 2 - 1;
+	  Double_t meanZ = 0;
+	  int nTrkZ = 0;
+	  for (int iTrk = 0; iTrk < nTrk; iTrk ++ ) {
+	    if ( fabs(mZImpact[iTrk] - seed_z ) < mDcaZMax ) {
+	      meanZ += mZImpact[iTrk];
+	      nTrkZ++;
+	    }
+	  }
+	  if (nTrkZ > mMinTrack) {
+	    if (mDebugLevel) 
+	      cout << "Seed " << mNSeed << ", z " << seed_z << " nTrk " << nTrkZ << " meanZ/nTrkZ " << meanZ/nTrkZ << endl;
+	    seed_z = meanZ/nTrkZ;
+	    mSeedZ[mNSeed] = seed_z;
+	    mNSeed ++;
+	  }
+	}
+	else {
+	  gMessMgr->Warning() << "Too many vertex seeds, limit=" << maxSeed << endm;
+	}	
+      }
+      slope = -1;
+    }
+    if (mDebugLevel > 1) 
+      cout << "iBin " << iBin << " nTrkBin " << nTrkBin << " nOldBin " << nOldBin << ", slope " << slope << " mNSeed " << mNSeed << endl; 
+    nOldBin = nTrkBin;
+  }
+
+  gMessMgr->Info() << "Found " << mNSeed << " seeds" << endm;
+  return mNSeed;
+}
+
+void StMinuitVertexFinder::fillBemcHits(StEmcDetector *bemcDet){
+  static int nMod = 120;
+  static int nEta = 20;
+  static int nSub = 2;
+  static float mEmcThres = 0.15;
+  for (int m=0; m < nMod; m++) 
+    for (int e=0; e < nEta; e++) 
+      for (int s=0; s < nSub; s++) 
+	mBemcHit[m][e][s]=0;
+
+  int n_emc_hit=0;
+  for (int iMod=0; iMod < nMod; iMod++) {
+    if (!bemcDet->module(iMod)) 
+      continue;
+    StEmcModule *mod = bemcDet->module(iMod);
+    StSPtrVecEmcRawHit&  hits = mod->hits();
+    for (StEmcRawHitIterator hitIter = hits.begin(); hitIter != hits.end(); hitIter++) {
+      StEmcRawHit *hit = *hitIter;
+      if (hit->energy() > mEmcThres) {
+	mBemcHit[hit->module()-1][hit->eta()-1][hit->sub()-1]=1;
+	n_emc_hit++; 
+      }
+    }
+  }
+  if (mDebugLevel) 
+    cout << "Found " << n_emc_hit << " emc hits" << endl;
+}
+
+int  
+StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
+  static const double rBemc = 242; // middle of tower
+  static StEmcGeom *bemcGeom = StEmcGeom::getEmcGeom("bemc");
+  //static double rBemc = bemcGeom->Radius(); // front face??
+  //cout << "rBemc: " << rBemc << endl;
+
+  if (track->outerGeometry()==0) {
+    if (mDebugLevel) // Happens only rarely
+      cout << "No outer track geom" << endl;
+    return 0;
+  }
+
+  StPhysicalHelixD helix = track->outerGeometry()->helix();
+
+  if (!helix.valid()) {
+    if (mDebugLevel) // Happens only rarely
+      cout << "Invalid helix" << endl;
+    return 0;
+  }
+     
+  pairD  d2;
+  d2 = helix.pathLength(rBemc);
+  if (d2.first > 99999999 && d2.second > 99999999)
+    return 0;
+  double path=d2.second;
+  if (d2.first >= 0 && d2.first < d2.second)
+    path = d2.first;
+  else if(d2.first>=0 || d2.second<=0) {
+    gMessMgr->Warning() << "Unexpected solution for track crossing Cyl:" 
+			<< " track mom = " 
+			<< track->geometry()->momentum().mag() 
+			<< ", d2.first=" << d2.first 
+			<< ", second=" << d2.second <<", trying first" << endm;
+    path=d2.first;
+  }
+  StThreeVectorD posCyl = helix.at(path);
+
+  float phi=posCyl.phi();
+  float eta=posCyl.pseudoRapidity();
+
+  if (fabs(eta) < 1) {
+    int mod, ieta, sub;
+    if (bemcGeom->getBin(phi, eta, mod, ieta, sub) == 0) {
+      // There is some edge effect leading to sub=-1. 
+      // Strange, but leave in for now// HOW CAN IT be: sub == -1????
+      if (sub > 0 && mBemcHit[mod-1][ieta-1][sub-1]) {
+	return 1;
+      }
+    }
+  }
+  return 0;
+}
+
+int StMinuitVertexFinder::checkCrossMembrane(const StTrack *track) {
+  int n_pnt_neg=0, n_pnt_pos=0;
+  
+  StPtrVecHit hits = track->detectorInfo()->hits(kTpcId);
+  for (StHitIterator hitIter = hits.begin(); hitIter != hits.end(); hitIter++) {
+    if ((*hitIter)->position().z() < 0)
+      n_pnt_neg++;
+    if ((*hitIter)->position().z() > 0)
+      n_pnt_pos++;
+  }
+  return (n_pnt_pos > 5 && n_pnt_neg > 5);
+}
+
+void StMinuitVertexFinder::calculateRanks() {    
+  
+  // Calculation of veretx ranks to select 'best' (i.e. triggered)
+  // vertex
+  // Three ranks are used, based on average dip, number of BEMC matches 
+  // and tarcks crossing central membrane
+  // Each rank is normalised to be 0 for 'average' valid vertices and
+  // has a sigma of 1. 
+  //
+  // Values are limited to [-5,1] for each rank
+  //
+  // Note that the average dip angle ranking is naturally peaked to 1,
+  // while the others are peaked at 1 (intentionally) due to rounding.
+
+  // A fancier way would be to calculate something more like 
+  // a likelihood based on the expected distributions. 
+  // That's left as an excercise to the reader.
+
+
+  int nBemcMatchTot = 0;
+  int nVtxTrackTot = 0;
+  for (int iVertex=0; iVertex < size(); iVertex++) {
+    StPrimaryVertex *primV = getVertex(iVertex);
+    nVtxTrackTot += primV->numTracksUsedInFinder();
+    nBemcMatchTot += primV->numMatchesWithBEMC();
+  }
+
+  mBestRank = -999;
+  mBestVtx  = 0;
+  for (int iVertex=0; iVertex < size(); iVertex++) {
+    StPrimaryVertex *primV = getVertex(iVertex);
+    // expected values based on Cu+Cu data
+    float avg_dip_expected = -0.0033*primV->position().z();
+    float n_bemc_expected = 0;
+    if (nVtxTrackTot) 
+      n_bemc_expected = (1-0.25*(1-(float)primV->numTracksUsedInFinder()/nVtxTrackTot))*nBemcMatchTot; 
+
+    float n_cross_expected = abs(primV->position().z())*0.0020*primV->numTracksUsedInFinder(); // old coeff 0.0016 with dca 3 and 10 points on track
+
+    if (mDebugLevel)
+      cout << "vertex z " << primV->position().z() << " dip expected " << avg_dip_expected << " bemc " << n_bemc_expected << " cross " << n_cross_expected << endl;
+    float rank_avg_dip = 1 - fabs(primV->meanDip() - avg_dip_expected)*sqrt((float)primV->numTracksUsedInFinder())/0.67;  // Sigma was 0.8 for old cuts
+    if (rank_avg_dip < -5)
+      rank_avg_dip = -5;
+
+    float rank_bemc = 0;
+    if (n_bemc_expected >= 1) { 
+      //float sigma = 0.12*n_bemc_match_tot;
+      float sigma = 0.5*sqrt(n_bemc_expected);
+      if ( sigma < 0.75 ) { // limit sigma to avoid large weights 
+	// at small multiplicity
+	sigma = 0.75;
+      }
+      rank_bemc = (primV->numMatchesWithBEMC() - n_bemc_expected)/sigma+0.5; // distribution is asymmetric; add 0.5 
+    }
+    if (rank_bemc < -5)
+      rank_bemc = -5;
+    if (rank_bemc > 1)
+      rank_bemc = 1;
+    
+    float rank_cross = 0;
+    if ( n_cross_expected >= 1 ) {
+      float sigma=1.1*sqrt(n_cross_expected);
+      rank_cross = (primV->numTracksCrossingCentralMembrane() - n_cross_expected)/sigma;
+    }
+    if (rank_cross < -5)
+      rank_cross = -5;
+    if (rank_cross > 1)
+      rank_cross = 1;
+    
+    if (mDebugLevel)
+      cout << "rankings: " << rank_avg_dip << " " << rank_bemc << " " << rank_cross << endl;
+    primV->setRanking(rank_cross+rank_bemc+rank_avg_dip);
+    if (primV->ranking() > mBestRank) {
+      mBestRank = primV->ranking();
+      mBestVtx = primV;
+    }
+  }
+}
 
 int
 StMinuitVertexFinder::fit(StEvent* event)
 {
     double arglist[4];
 
-    //
-    //  Reset vertex
-    //
-    //    mFitError = mFitResult = StThreeVectorD(0,0,0);, not needed, Clear() resets verted list,Jan
-
     setFlagBase();
 
     // get CTB info
     StCtbTriggerDetector* ctbDet = 0;
-    vector<ctbHit>* ctbHits = new vector<ctbHit>();
+    vector<ctbHit> ctbHits;
 
-	StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
-	if(trigCol){
-	    ctbDet = &(trigCol->ctb());
+    StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
+    if(trigCol){
+      ctbDet = &(trigCol->ctb());
 
-	    float ctbSum = 0;
+      float ctbSum = 0;
 	    	    
-	    for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
-		for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
-		    ctbHit curHit;
-		    curHit.adc = ctbDet->mips(tray,slat,0);
-		    if(curHit.adc > 0){
-			ctbSum += curHit.adc;
-			ctb_get_slat_from_data(slat, tray, curHit.phi, curHit.eta);
-			ctbHits->push_back(curHit);
-			//			ctbHits_eta->push_back(ctb_eta);
-			//cout << "CTB Hit at: eta = " << ctb_eta << " phi= " << ctb_phi << endl;
-		    }
-		}
-	    }
+      for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
+	for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
+	  ctbHit curHit;
+	  curHit.adc = ctbDet->mips(tray,slat,0);
+	  if(curHit.adc > 0){
+	    ctbSum += curHit.adc;
+	    ctb_get_slat_from_data(slat, tray, curHit.phi, curHit.eta);
+	    ctbHits.push_back(curHit);
+	  }
 	}
-
-
+      }
+    }
 
     //
     //  Loop all global tracks (TPC) and store the
     //  refering helices and their estimated DCA
-    //  resolution in  vectors.
+    //  resolution in vectors.
     //  Quality cuts are applied (see accept()).
     //  The helices and the sigma are used in
     //  fcn to calculate the fit potential which
     //  gets minimized by Minuit.
     //
     mHelices.clear();
+    mHelixFlags.clear();
     mSigma.clear();
-    mCTB.clear();
+    mZImpact.clear();
+
+    fillBemcHits(event->emcCollection()->detector(kBarrelEmcTowerId));
+
     double sigma;
     bool ctb_match;
 
+    int n_ctb_match_tot = 0;
+    int n_bemc_match_tot = 0;
+    int n_cross_tot = 0;
+
     StSPtrVecTrackNode& nodes = event->trackNodes();
     for (unsigned int k=0; k<nodes.size(); k++) {
-	StTrack* g = nodes[k]->track(global);
-	if (accept(g)&&
-	    ((mUseITTF&&g->fittingMethod()==kITKalmanFitId)||
-	     (!mUseITTF&&g->fittingMethod()!=kITKalmanFitId))) 
-	  {
-	    ///LSB This should not be necessary and could be removed in future
+      StTrack* g = nodes[k]->track(global);
+      if (accept(g)&&
+	  ((mUseITTF&&g->fittingMethod()==kITKalmanFitId)||
+	   (!mUseITTF&&g->fittingMethod()!=kITKalmanFitId))) {	
+	///LSB This should not be necessary and could be removed in future
 #ifndef __alpha__
-	    if (!finite(g->geometry()->helix().curvature()) ){
-	      gMessMgr->Warning() << "NON-FINITE curvature in track !!" << endm;
-	      continue;
-	    }
-#endif
-	    mHelices.push_back(g->geometry()->helix());
-	    // sigma = 0.45+0.0093*::sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
-	    sigma = 0.6+0.0086*::sqrt(g->length())/abs(g->geometry()->momentum());
-	    mSigma.push_back(sigma);         
-            bool shouldHitCTB = false;
-            double etaInCTBFrame = -999;
-            ctb_match =  EtaAndPhiToOrriginAtCTB(g,ctbHits,shouldHitCTB,etaInCTBFrame);
-	    mCTB.push_back(ctb_match);				
+	if (!finite(g->geometry()->helix().curvature()) ){
+	  gMessMgr->Warning() << "NON-FINITE curvature in track !!" << endm;
+	  continue;
 	}
+#endif
+	const StPhysicalHelixD &helix = g->geometry()->helix(); 
+	Double_t r_c = sqrt(helix.xcenter()*helix.xcenter()+helix.ycenter()*helix.ycenter());
+	if (fabs(r_c - 1./helix.curvature()) > mRImpactMax)
+	  continue;
+	    
+	mHelices.push_back(g->geometry()->helix());
+	mHelixFlags.push_back(1);
+
+	Double_t path=(TMath::ATan2(-helix.ycenter(),-helix.xcenter())-helix.phase())/2/TMath::Pi();
+	path *= helix.h()*helix.period();
+	StThreeVectorD tmp_pos = helix.at(path);
+
+	Double_t z_lin=tmp_pos.z();
+	if (r_c - 1./helix.curvature() > 0) 
+	  z_lin -= tmp_pos.perp()*tan(helix.dipAngle());
+	else
+	  z_lin += tmp_pos.perp()*tan(helix.dipAngle());
+
+	mZImpact.push_back(z_lin);
+
+	// sigma = 0.45+0.0093*::sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
+	sigma = 0.6+0.0086*::sqrt(g->length())/abs(g->geometry()->momentum());
+	mSigma.push_back(sigma);         
+	bool shouldHitCTB = false;
+	double etaInCTBFrame = -999;
+	ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
+	if (ctb_match) {
+	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCTBMatch;
+	  n_ctb_match_tot++;
+	}
+
+	if (matchTrack2BEMC(g)) {
+	  mHelixFlags[mHelixFlags.size()-1] |= kFlagBEMCMatch;
+	  n_bemc_match_tot++;
+	}
+
+	if (checkCrossMembrane(g)) {
+	  mHelixFlags[mHelixFlags.size()-1] |= kFlagCrossMembrane;
+	  n_cross_tot++;
+	}
+      }
     }
+    if (mDebugLevel)
+      cout << "Found " << n_ctb_match_tot << " ctb matches, " << n_bemc_match_tot << " bemc matches, " << n_cross_tot << " tracks crossing central membrane" << endl; 
     //
     //  In case there are no tracks left we better quit
     //
@@ -231,10 +508,13 @@ StMinuitVertexFinder::fit(StEvent* event)
     }
     gMessMgr->Info() << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
-
+    // Set some global pars
+    mWidthScale = 1;
+    if (mRequireCTB) requireCTB = true;
+    
     //
     //  Reset and clear Minuit parameters
-    //mStatusMin
+    // mStatusMin
     mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
     
     //
@@ -245,35 +525,8 @@ StMinuitVertexFinder::fit(StEvent* event)
     // Initialize the seed with a z value which is not one of the discrete 
     // values which it can tend to, implies zero not allowed.
     // Also need different initialization when vertex constraint.
-    static double seed[3] = {0.0, 0.0, 0.01};
-    if (mVertexConstrain){
-      seed[1] = 0.01; //other two not used
-    }
+
     static double step[3] = {0.03, 0.03, 0.03};
-    if(mExternalSeedPresent) {
-	seed[0] = mExternalSeed.x();
-	seed[1] = mExternalSeed.y();
-	seed[2] = mExternalSeed.z();
-    }
-    if (!mVertexConstrain){ 
-     mMinuit->mnparm(0, "x", seed[0], step[0], 0, 0, mStatusMin);
-     mMinuit->mnparm(1, "y", seed[1], step[1], 0, 0, mStatusMin);
-     mMinuit->mnparm(2, "z", seed[2], step[2], 0, 0, mStatusMin);
-    }
-    else {
-     mMinuit->mnparm(0, "z", seed[0], step[0], 0, 0, mStatusMin);
-    }
-    //
-    //  In case of one usable track only we set x = y = 0;
-    //  Note that in calls to mnexcm() we need to follow
-    //  F77 syntax, i.e. the first variable is 1 not 0 as
-    //  in mnparm() above. This is pretty confusing.
-    //
-    if (mHelices.size() == 1) {
-	arglist[0] = 1; 
-	arglist[1] = 2;
-        if (!mVertexConstrain) 	mMinuit->mnexcm("FIX", arglist, 2, mStatusMin);
-    }
 
     //
     //  Scan z to find best seed for the actual fit.
@@ -286,120 +539,216 @@ StMinuitVertexFinder::fit(StEvent* event)
       else {
         arglist[0]=1;
       }
-	arglist[1] = 100;
-	arglist[2] = -200;
-	arglist[3] = 200;
-	mWidthScale = 2;
-        if (mRequireCTB) requireCTB = true;
-	gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting initial SCAN (no external z seed)" << endm;
-	mMinuit->mnexcm("SCAn", arglist, 4, mStatusMin);
-	gMessMgr->Info() << "StMinuitVertexFinder::fit : Done with initial SCAN (no external z seed)" << endm;
+      findSeeds(200,-100,100);
     }
-    
-    //
-    //  Final scan with smaller steps, performed in any case
-    //  Note: GetParameter() uses C++ syntax, i.e. parameter
-    //  2 means the third variable z.
-    //
-    double z, foo;
-    if (!mVertexConstrain) {
-     mMinuit->GetParameter(2, z, foo); 
+    else {
+      mNSeed = 1;
     }
-    else{ 
-     mMinuit->GetParameter(0, z, foo); 
-    }
-    gMessMgr->Info() << "Vertex seed = " << z << endm;
 
-    /// Give up when bad seed
-    // LSB We used to check whether seed still zero. Wrong! Also throws out
-      /// cases where seed really is zero. Now check best value of fn value
-      Double_t fedm,errdef; //dummies
-      Int_t npari,nparx,istat; // more dummies
-      Double_t fmin; // Used for the test - function value chi-sq.
-      mMinuit->mnstat(fmin,fedm,errdef,npari,nparx,istat);
-      if(fmin > -1e-5){
-	gMessMgr->Warning() << "Vertex seed not found ?? " << endm;
-	mStatusMin=-1;
-	return 0;
-      }
+    Float_t old_vtx_z = -999;
+    Double_t seed_z = -999;
+    Double_t chisquare = 0;
+    for (Int_t iSeed = 0; iSeed < mNSeed; iSeed++) {
+      //
+      //  Reset and clear Minuit parameters
+      //  mStatusMin
+      mMinuit->mnexcm("CLEar", 0, 0, mStatusMin);
+
+      seed_z= mSeedZ[iSeed]; 
+
+      if (mExternalSeedPresent)
+	seed_z = mExternalSeed.z();
+      if (mDebugLevel)
+	gMessMgr->Info() << "Vertex seed = " << seed_z << endm;
       
+      if (!mVertexConstrain){ 
+	mMinuit->mnparm(0, "x", 0, step[0], 0, 0, mStatusMin);
+	mMinuit->mnparm(1, "y", 0, step[1], 0, 0, mStatusMin);
+	mMinuit->mnparm(2, "z", seed_z, step[2], 0, 0, mStatusMin);
+      }
+      else {
+	mMinuit->mnparm(0, "z", seed_z, step[2], 0, 0, mStatusMin);
+      }
+
       if (!mVertexConstrain){ 
 	arglist[0] = 3;
       }
       else {
-        arglist[0]=1;
+	arglist[0] = 1;
       }
-      arglist[1] = 10;
-      arglist[2] = z-5;
-    arglist[3] = z+5;
-    mWidthScale = 1;
-    if (mRequireCTB) requireCTB = true;
-    gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting second SCAN" << endm;
-    mMinuit->mnexcm("SCAn", arglist, 4, mStatusMin);
-    gMessMgr->Info() << "StMinuitVertexFinder::fit : Done with second SCAN" << endm;
 
-    //
+      int done = 0;
+      int iter = 0;
+
+      int n_trk_vtx = 0;
+      Int_t n_helix = mHelices.size();
+      do {  
+	// For most vertices one pass is fine, but multiple passes 
+	// can be done
+	n_trk_vtx = 0;
+	for (int i=0; i < n_helix; i++) {
+	  if (fabs(mZImpact[i]-seed_z) < mDcaZMax) {
+	    mHelixFlags[i] |= kFlagDcaz;
+	    n_trk_vtx++;
+	  }
+	  else
+	    mHelixFlags[i] &= ~kFlagDcaz;
+	}
+      	
+	if (mDebugLevel) 
+	  cout << n_trk_vtx << " tracks within dcaZ cut (iter " << iter <<" )" << endl;
+	if (n_trk_vtx < mMinTrack) {
+	  if (mDebugLevel) 
+	    cout << "Less than mMinTrack (=" << mMinTrack << ") tracks, skipping vtx" << endl;
+	  continue;
+	}
+	mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
+	done = 1;
+
+	//
+	//  Check fit result
+	//
+
+	if (mStatusMin) {
+	  gMessMgr->Warning() << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
+	  done = 0; // refit
+	}
+
+	Double_t fedm, errdef;
+	Int_t npari, nparx;
+
+	mMinuit->mnstat(chisquare, fedm, errdef, npari, nparx, mStatusMin);
+
+	if (mStatusMin != 3) {
+	  cout << "Warning: Minuit Status: " << mStatusMin << ", func val " << chisquare<< endl;
+	  done = 0;  // refit
+	}
+
+	double new_z, zerr;
+	if (!mVertexConstrain) {
+	  mMinuit->GetParameter(2, new_z, zerr); 
+	}
+	else {
+	  mMinuit->GetParameter(0, new_z, zerr); 
+	}
+
+	if (fabs(new_z - seed_z) > 1) // refit if vertex shifted
+	  done = 0;
+
+	int n_trk = 0;
+	for (int i=0; i < n_helix; i++) {
+	  if ( fabs(mZImpact[i] - new_z) < mDcaZMax ) {
+	    n_trk++;
+	  }
+	}
+	if ( 10 * abs(n_trk - n_trk_vtx) >= n_trk_vtx ) // refit if number of track changed by more than 10%
+	  done = 0;
+
+	iter++;
+	seed_z = new_z; // seed for next iteration
+      } while (!done && iter < 5 && n_trk_vtx >= mMinTrack);
+
+      if (n_trk_vtx < mMinTrack)
+	continue;
+
+      if (!done) { 
+	gMessMgr->Warning() << "Vertex unstable: no convergence after " << iter << " iterations. Skipping vertex " << endm;
+	continue;
+      }
+
+      if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax)
+	gMessMgr->Warning() << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endl;
+
+      if (fabs(seed_z - old_vtx_z) < 0.1) {
+	if (mDebugLevel) 
+	  cout << "Vertices too close (<0.1). Skipping" << endl;
+	continue;
+      }
+
+      // Store vertex
+      StThreeVectorD XVertex;
+      Float_t cov[6];
+      memset(cov,0,sizeof(cov));
+    
+      Double_t val, verr;
+      if (!mVertexConstrain) {
+	mMinuit->GetParameter(0, val, verr); 
+	XVertex.setX(val);  cov[0]=verr;
+	
+	mMinuit->GetParameter(1, val, verr); 
+	XVertex.setY(val);  cov[2]=verr;
+
+	mMinuit->GetParameter(2, val, verr); 
+	XVertex.setZ(val);  cov[5]=verr;
+      
+      }
+      else {
+	mMinuit->GetParameter(0, val, verr); 
+	XVertex.setZ(val);  cov[5]=verr;
+      
+	// LSB Really error in x and y should come from error on constraint
+	// At least this way it is clear that those were fixed paramters
+	XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
+	XVertex.setY(beamY(val));  cov[2]=0.1;
+      }
+
+      StPrimaryVertex primV;
+      primV.setPosition(XVertex);
+      primV.setChiSquared(chisquare);  // this is not really a chisquare, but anyways
+      primV.setCovariantMatrix(cov); 
+      primV.setVertexFinderId(minuitVertexFinder);
+      primV.setFlag(1); // was not set earlier by this vertex finder ?? Jan
+      primV.setRanking(333);
+      primV.setNumTracksUsedInFinder(n_trk_vtx);
+
+      int n_ctb_match = 0;
+      int n_bemc_match = 0;
+      int n_cross = 0;
+      n_trk_vtx = 0;
+
+      double mean_dip = 0;
+      double sum_pt = 0;
+      for (unsigned int i=0; i < mHelixFlags.size(); i++) {
+	if (!(mHelixFlags[i] & kFlagDcaz))
+	  continue;
+	n_trk_vtx++;
+	if (mHelixFlags[i] & kFlagCTBMatch)
+	  n_ctb_match++;
+	if (mHelixFlags[i] & kFlagBEMCMatch)
+	  n_bemc_match++;
+	if (mHelixFlags[i] & kFlagCrossMembrane)
+	  n_cross++;
+	mean_dip += mHelices[i].dipAngle();
+	sum_pt += mHelices[i].momentum(0).perp();
+      }
+      
+      mean_dip /= n_trk_vtx;
+
+      if (mDebugLevel) {
+	cout << "check n_trk_vtx " << n_trk_vtx << ", found " << n_ctb_match << " ctb matches, " << n_bemc_match << " bemc matches, " << n_cross << " tracks crossing central membrane" << endl; 
+	cout << "mean dip " << mean_dip << endl;
+      }
+      primV.setNumMatchesWithCTB(n_ctb_match);      
+      primV.setNumMatchesWithBEMC(n_bemc_match);
+      primV.setNumTracksCrossingCentralMembrane(n_cross);
+      primV.setMeanDip(mean_dip);
+      primV.setSumOfTrackPt(sum_pt);
+
+      //..... add vertex to the list
+      addVertex(&primV);
+
+      old_vtx_z = XVertex.z();
+    }
+
+    calculateRanks();
+
     //  Reset the flag which tells us about external
-    //  seeds. This needs to be provided for every fit.
-    //
+    //  seeds. This needs to be provided for every event.
     mExternalSeedPresent = false;
     
-    //
-    //  Perform the actual fit (MINI = MIGRAD + SIMPLEX)
-    //
     mWidthScale = 1;
     requireCTB = false;
-    gMessMgr->Info() << "StMinuitVertexFinder::fit : Starting minimization" << endm;
-    mMinuit->mnexcm("MINImize", 0, 0, mStatusMin);
-    gMessMgr->Info() << "StMinuitVertexFinder::fit : Done minimization" << endm;
-    if (mStatusMin) {
-	gMessMgr->Warning() << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag." << endm;
-	return 0;
-    }
 
-    //
-    //  Save and check fit result
-    //
-    double val, verr;
-    mMinuit->mnstat(mFmin, mFedm, mErrdef, mNpari, mNparx, mStatusMin);
-
-    StThreeVectorD XVertex;
-    Float_t cov[6];
-    memset(cov,0,sizeof(cov));
-    
-    if (!mVertexConstrain) {
-      mMinuit->GetParameter(0, val, verr); 
-      XVertex.setX(val);  cov[0]=verr;
-      
-      mMinuit->GetParameter(1, val, verr); 
-      XVertex.setY(val);  cov[2]=verr;
-
-      mMinuit->GetParameter(2, val, verr); 
-      XVertex.setZ(val);  cov[5]=verr;
-      
-    }
-    else {
-      mMinuit->GetParameter(0, val, verr); 
-      XVertex.setZ(val);  cov[5]=verr;
-      
-      // LSB Really error in x and y should come from error on constraint
-      // At least this way it is clear that those were fixed paramters
-      XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
-      XVertex.setY(beamY(val));  cov[2]=0.1;
-    }
-
-    StPrimaryVertex primV;
-    primV.setPosition(XVertex);
-    primV.setCovariantMatrix(cov); 
-    primV.setVertexFinderId(minuitVertexFinder);
-    primV.setFlag(1); // was not set earlier by this vertex finder ?? Jan
-    primV.setRanking(333);
-
-    //..... add vertex to the list
-    addVertex(&primV);
-
-    delete ctbHits;
-    ctbHits = 0;
     return 1;
 } 
 
@@ -414,11 +763,11 @@ void StMinuitVertexFinder::fcn1D(int& npar, double* gin, double& f, double* par,
     double y = beamY(z);
     StThreeVectorD vtx(x,y,z);
     for (unsigned int i=0; i<mHelices.size(); i++) {
-      if (!requireCTB||mCTB[i]) {
+      if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB || (mHelixFlags[i] & kFlagCTBMatch))) {
 	s = mWidthScale*mSigma[i];
-	e = mHelices[i].distance(vtx);
+	e = mHelices[i].distance(vtx, false); // false: don't do multiple loops
 	f -= exp(-(e*e)/(2*s*s));  // robust potential
-        if(mCTB[i]&&e<3.0) nCTBHits++;
+        if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
 //          if (abs(s)>0.01) {
 //    	f -= exp(-(e*e)/(2*s*s));  // robust potential
 //          }
@@ -435,9 +784,9 @@ void StMinuitVertexFinder::fcn(int& npar, double* gin, double& f, double* par, i
   double e, s;
   StThreeVectorD vtx(par);
   for (unsigned int i=0; i<mHelices.size(); i++) {
-    if (!requireCTB||mCTB[i]) {
+    if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
       s = mWidthScale*mSigma[i];
-      e = mHelices[i].distance(vtx);
+      e = mHelices[i].distance(vtx, false);  // false: don't do multiple loops
       f -= exp(-(e*e)/(2*s*s));  // robust potential
       //          if (abs(s)>0.01) {
       //    	f -= exp(-(e*e)/(2*s*s));  // robust potential
@@ -457,11 +806,13 @@ StMinuitVertexFinder::accept(StTrack* track) const
     //   Accept only tracks which fulfill certain
     //   quality criteria.
     //
+
     return (track &&
 	    track->flag() >= 0 &&
 	    track->fitTraits().numberOfFitPoints() >= mMinNumberOfFitPointsOnTrack &&
 	    !track->topologyMap().trackFtpc() &&
-            finite(track->length()) ); //LSB another temporary check
+	    finite(track->length()) &&  //LSB another temporary check
+	    track->geometry()->helix().valid());
 }
 
 
@@ -475,21 +826,19 @@ StMinuitVertexFinder::setPrintLevel(int level)
 void
 StMinuitVertexFinder::printInfo(ostream& os) const
 {
-  const StPrimaryVertex* primV = getVertex(0);
-    os << "StMinuitVertexFinder - Fit Statistics:" << endl;
-    if(primV) {
-      os << "fitted vertex ........................ " << primV->position() << endl;
-      os << "position errors ...................... " << primV->positionError()<< endl;
-    } 
-    os << "# of used tracks ..................... " << mHelices.size() << endl;
-    os << "minimum found (FMIN) ................. " << mFmin << endl;
-    os << "estimated distance to minimum (FEDM) . " << mFedm << endl;
-    os << "parameter uncertainties (ERRDEF) ..... " << mErrdef << endl;
-    os << "# of parameters (NPARI) .............. " << mNpari << endl;
-    os << "# of max parameters (NPARX) .......... " << mNparx << endl;
-    os << "goodness of covariance matrix (ISTAT)  " << mStatusMin << endl;
-    os << "min # of fit points for tracks ....... " << mMinNumberOfFitPointsOnTrack << endl;
-    os << "final potential width scale .......... " << mWidthScale << endl;
+
+    os << "StMinuitVertexFinder - Statistics:" << endl;
+    os << "Number of vertices found ......." << size() << endl;
+    os << "Rank of best vertex ............" << mBestRank << endl;
+    if(mBestVtx) {
+      os << "Properties of best vertex:" << endl;
+      os << "position ..................... " << mBestVtx->position() << endl;
+      os << "position errors .............. " << mBestVtx->positionError()<< endl;
+      os << "# of used tracks ............. " << mBestVtx->numTracksUsedInFinder() << endl;
+      os << "Chisquare .................... " << mBestVtx->chiSquared() << endl;
+    }
+    os << "min # of fit points for tracks . " << mMinNumberOfFitPointsOnTrack << endl;
+    os << "final potential width scale .... " << mWidthScale << endl;
 }
 
 void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight) {

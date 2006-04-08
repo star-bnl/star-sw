@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.1 2006/04/07 15:38:06 jeromel Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.2 2006/04/08 19:06:29 mvl Exp $
  *
  */
 
@@ -80,10 +80,10 @@
 #include "StPhysicalHelixD.hh"
 #include "StGenericVertexFinder.h"
 
-
 class StEvent;
 class StTrack;
 class TMinuit;
+class StEmcDetector;
 
 class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
@@ -95,6 +95,7 @@ public:
     void            printInfo(ostream& = cout) const;
     void            UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
     void           Clear();
+
 
     // Added, not part of base-class  and used by the Minuit vertex finder
     int            NCtbMatches();    // returns the number of tracks matched to CTB                                                               
@@ -111,7 +112,15 @@ public:
     void                   SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;}
 
 private:
+    enum {kFlagDcaz = 1, kFlagCTBMatch = 2, kFlagBEMCMatch = 4, kFlagCrossMembrane = 8};
+
     bool accept(StTrack*) const;   // track filter
+    void  fillBemcHits(StEmcDetector *);
+    int   matchTrack2BEMC(const StTrack *);
+    int   checkCrossMembrane(const StTrack *);
+    void  calculateRanks();
+    int   findSeeds(int, float, float);
+
     static void fcn(int&, double*, double&, double*, int); // fit function
     static void fcn1D(int&, double*, double&, double*, int); // fit function
     
@@ -119,12 +128,22 @@ private:
     UInt_t                 mFlagBase;         // ITTF track flag
     bool                   mRequireCTB;       // Set maker to use CTB
     unsigned int           mMinNumberOfFitPointsOnTrack;
+    float                  mDcaZMax;
     double                 mWeight ;          // Weight in fit for vertex contraint
-    StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
+    double                 mRImpactMax;       // Max distance between helix and nominal beamline (0,0,z)
+    int                    mMinTrack;         // Min number of tracks
 
+    StPhysicalHelixD*      mBeamHelix;        // Beam Line helix
+    
+    enum                   {maxSeed=20};
+    Int_t                  mNSeed;
+    Float_t                mSeedZ[maxSeed];
+    Int_t                  mBemcHit[120][20][2];  // modules, eta, sub
     static vector<StPhysicalHelixD> mHelices;
+    static vector<unsigned short>   mHelixFlags;
     static vector<double>           mSigma;
-    static vector<bool>             mCTB;
+    static vector<double>           mZImpact;
+    //static vector<bool>             mCTB;
     static bool                     requireCTB;
     static int                      nCTBHits;
     static double                   mWidthScale;
@@ -139,13 +158,10 @@ private:
     StThreeVectorD         mExternalSeed;
     bool                   mExternalSeedPresent;
 
-    
-    TMinuit*                 mMinuit;
-    double                   mFmin;       // best function value found
-    double                   mFedm;       // estimated vertical distance remaining to minimum
-    double                   mErrdef;     // value of UP defining parameter uncertainty
-    int                      mNpari;      // number of variable parameters
-    int                      mNparx;      // highest parameter number defined
+    StPrimaryVertex       *mBestVtx;    // pointer to best vertex of this event
+    float                  mBestRank;   // store rank of best vertex
+
+    TMinuit*               mMinuit;
 };
 
 
@@ -154,8 +170,13 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
- * Revision 1.1  2006/04/07 15:38:06  jeromel
- * Moved to sub-dir (see history inline at next commit)
+ * Revision 1.2  2006/04/08 19:06:29  mvl
+ * Update for multiple vertex finding and rank calculation for identifying the
+ * triggered vertex. Ranks are based on mean dip angle of tracks, BEMC matches
+ * and tracks crossing the central membrane and optimised for Cu+Cu.
+ * The track cuts are now bit tighter (dca<2 in transverse direction and
+ * nfitpoints > 15) to suppress 'fake' vertices.
+ * In addition, a lower multiplicity cut of 5 tracks is implemented.
  *
  * Revision 1.9  2005/07/19 21:53:27  perev
  * MultiVertex
