@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.14 2005/07/19 21:45:53 perev Exp $
+ * $Id: StGenericVertexFinder.h,v 1.15 2006/04/08 00:18:10 mvl Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -35,6 +35,7 @@ class StGenericVertexFinder {
   // General (default)
   virtual void           SetMode(Int_t mode=0 ) {mMode = mode;}
   virtual int            GetMode() const 	{return mMode;}
+          void           SetDebugLevel(Int_t level) {mDebugLevel=level;}
   virtual void           Init(){ /* noop */;}
   virtual void           Finish(){ /* noop */;}
   virtual void           InitRun  (int runumber){ /* noop */;}
@@ -52,12 +53,16 @@ class StGenericVertexFinder {
 
   bool                   mVertexConstrain;  // Use vertex constraint from db
   int                    mMode;             // used for any Finder behavior change
+  int                    mDebugLevel;
 
 };
 
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.15  2006/04/08 00:18:10  mvl
+// Added member for debuglevel
+//
 // Revision 1.14  2005/07/19 21:45:53  perev
 // MultiVertex
 //
