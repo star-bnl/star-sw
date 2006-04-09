@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.494 2006/04/07 17:29:52 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.495 2006/04/09 18:49:19 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1309,12 +1309,15 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
       else fFileOut = gSystem->BaseName(fInFile.Data());
       if (  fFileOut != "") {
 	fFileOut.ReplaceAll("*","");
+	fFileOut.ReplaceAll("@","");
 	fFileOut.ReplaceAll("..",".");
 	fFileOut.ReplaceAll(".daq","");
 	fFileOut.ReplaceAll(".fzd","");
 	fFileOut.ReplaceAll(".fz","");
 	fFileOut.ReplaceAll(".nt","");
 	fFileOut.ReplaceAll(".root","");
+	fFileOut.ReplaceAll(".list","");
+	fFileOut.ReplaceAll(".lis","");
 	fFileOut.Strip();
 	fFileOut.Append(".root");
       }
