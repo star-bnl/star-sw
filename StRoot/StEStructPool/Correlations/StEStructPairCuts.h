@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.9 2006/04/06 01:01:22 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.10 2006/04/10 23:42:32 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -122,6 +122,9 @@ const  StEStructTrack*      Track2() const;
        float                 SigmaEta(float mass1,float mass2)   const;
        float                 SigmaPhi()   const;
        float                 SigmaPt()    const;
+//--- For Cut Bin Definitions (found these in more than 1 place ...)
+       bool                  awaySide();
+       bool                  sameSide();
 
 
 //-----For HBT Study
@@ -281,6 +284,18 @@ inline float StEStructPairCuts::kT() const {
 
 inline float StEStructPairCuts::qInv() const {
   return -1.0*(mTrack1->FourMomentum()-mTrack2->FourMomentum()).m();
+}
+
+inline bool StEStructPairCuts::awaySide() {
+    mdeltaPhi=fabs(DeltaPhi());   
+    if((mdeltaPhi>M_PI/2.0) && (mdeltaPhi<1.5*M_PI)) return true;
+    return false;
+}
+
+inline bool StEStructPairCuts::sameSide() {
+    mdeltaPhi=fabs(DeltaPhi());   
+    if((mdeltaPhi < M_PI/2.0) || (mdeltaPhi> (1.5*M_PI))) return true;
+    return false;
 }
 
 inline int StEStructPairCuts::goodDeltaPhi(){
@@ -571,8 +586,14 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.10  2006/04/10 23:42:32  porter
+ * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
+ * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
+ * the StEStructBinning object
+ *
  * Revision 1.9  2006/04/06 01:01:22  prindle
- * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ *
+ *   New mode in CutBin, 5, to do pid correlations. There is still an issue
  * of how to set the pt ranges allowed for the different particle types.
  * For data we probably want to restrict p to below 1GeV for pi and K, but
  * for Hijing and Pythia we can have perfect pid. Currently cuts are type
