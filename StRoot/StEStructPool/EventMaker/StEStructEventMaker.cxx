@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventMaker.cxx,v 1.1 2003/10/15 18:20:51 porter Exp $
+ * $Id: StEStructEventMaker.cxx,v 1.2 2006/04/10 23:43:10 porter Exp $
  *
  * Author: Jeff Porter rework of Jeff Reid's code
  *
@@ -164,6 +164,7 @@ void StEStructEventMaker::Clear(Option_t *opt) {
 
 //-----------------------------------------------------------------------
 Int_t StEStructEventMaker::Finish() {
+  if(!mEStructEventFile) return kStOk;
   mEStructEventFile->cd();
   mEStructTree->Write();
   mEStructEventFile->Close();
@@ -174,6 +175,9 @@ Int_t StEStructEventMaker::Finish() {
 /***********************************************************************
  *
  * $Log: StEStructEventMaker.cxx,v $
+ * Revision 1.2  2006/04/10 23:43:10  porter
+ * Protected our pico-dst writer from multiple calls to "Finish()"
+ *
  * Revision 1.1  2003/10/15 18:20:51  porter
  * initial check in of Estruct Analysis maker codes.
  *
