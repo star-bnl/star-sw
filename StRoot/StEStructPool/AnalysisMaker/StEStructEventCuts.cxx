@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.6 2006/04/04 22:05:05 porter Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.7 2006/04/10 23:40:40 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -75,8 +75,8 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
       }
       else if (!strcmp("CuCu200GeVProductionMinBias2005",mRunPeriod)) {
 	// ...
-	mtWord[0] = 86000;  // untested
-	mtWord[1] = 86020;
+	mtWord[0] = 66000;  // untested
+	mtWord[1] = 66020;
 	validRun = 1; 
       }	
       else if (!strcmp("CuCu62GeVProductionMinBias2005",mRunPeriod)) {
@@ -145,6 +145,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.7  2006/04/10 23:40:40  porter
+ * Fixed the minbias trigger definition for the CuCu 200 2005 run
+ *
  * Revision 1.6  2006/04/04 22:05:05  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers

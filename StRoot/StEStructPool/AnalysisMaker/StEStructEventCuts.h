@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.6 2006/04/04 22:05:05 porter Exp $
+ * $Id: StEStructEventCuts.h,v 1.7 2006/04/10 23:40:40 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -74,7 +74,7 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
             return true;
         }
     } else if (!strcmp("CuCu200GeVProductionMinBias2005",mRunPeriod)) {
-        if (muEvent->triggerIdCollection().nominal().isTrigger(86007)) {
+        if (muEvent->triggerIdCollection().nominal().isTrigger(66007)) {
             return true;
         }
     } else if (!strcmp("AuAu200GeVMinBias2004",mRunPeriod)) {
@@ -134,6 +134,9 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.7  2006/04/10 23:40:40  porter
+ * Fixed the minbias trigger definition for the CuCu 200 2005 run
+ *
  * Revision 1.6  2006/04/04 22:05:05  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
