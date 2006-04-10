@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.29 2006/01/26 16:00:08 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.30 2006/04/10 15:38:52 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.30  2006/04/10 15:38:52  fisyak
+ * Fix case when no hit coming from g2t_tpc_hit table in simu mode (found by Tonko)
+ *
  * Revision 1.29  2006/01/26 16:00:08  jml
  * Got rid of extraneous no daq reader error message
  *
@@ -1420,6 +1423,9 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     if(hasSim) {
       fcf->simIn = (short *)croat_trk;
       fcf->simOut = simu_res_ptr;
+    } else {
+      fcf->simIn = 0;
+      fcf->simOut = 0;
     }
 
     u_int words = fcf->finder((u_char *)croat_adc, 
