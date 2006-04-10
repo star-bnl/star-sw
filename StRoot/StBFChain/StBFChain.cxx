@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.495 2006/04/09 18:49:19 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.496 2006/04/10 18:58:24 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -320,6 +320,8 @@ Int_t StBFChain::Instantiate()
                                mk->SetAttr("useIst"  ,kTRUE);
                                mk->SetAttr("activeIst",kTRUE);
       }
+      if (GetOption("StiPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
+
       mk->PrintAttr();
     }
 #endif
@@ -557,6 +559,17 @@ Int_t StBFChain::Instantiate()
       }
       if (kopts) ProcessLine(cmd);
     }
+    if (maker == "StTrsMiniMaker" && ! GetOption("TrsToF")) {
+      Int_t mode = mk->GetMode();
+      SETBIT(mode,10); // kNoToflight   //10 don't account for particle time of flight
+      mk->SetMode(mode);
+    }
+    if (maker == "StTrsMaker") {
+      Int_t mode = 0;
+      if (GetOption("TrsPileUp")) mode += 1; // Pile-up correction
+      if (GetOption("TrsToF"))    mode += 2; // accoutn for particle time of flight
+      if (mode) mk->SetMode(mode);
+    }
     if (maker == "St_tpcdaq_Maker") {
       Int_t DMode=0;
       TString cmd(Form("St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) %p;",mk));
@@ -696,7 +709,6 @@ Int_t StBFChain::Instantiate()
       // If simulation running make sure pick up simu stuff from db
       if (GetOption("Simu")) mk->SetMode(1);
     }
-    if (maker == "St_srs_Maker" && GetOption("sfs")) mk->SetMode(1);
 
     // FTPC
     if ((maker == "StFtpcClusterMaker" ||
@@ -730,6 +742,14 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StMiniMcMaker" && fFileOut != "") {
       ProcessLine(Form("((StMiniMcMaker *) %p)->setFileName(\"%s\");", mk, fFileOut.Data()));
+    }
+    if (maker == "StMcAnalysisMaker") {
+      Int_t mode = 0;
+      if (GetOption("McAnaTpc")) mode += 0x1;
+      if (GetOption("McAnaSvt")) mode += 0x2;
+      if (GetOption("McAnaSsd")) mode += 0x4;
+      if (mode) 
+	ProcessLine(Form("((StMaker *) %p)->SetMode(%i);", mk, mode));
     }
   Add2Chain:
     if (myChain) myChain->AddMaker(mk);
@@ -1355,7 +1375,7 @@ void StBFChain::SetGeantOptions(){
   if (geantMk) {
     SetInput("geant",".make/geant/.data");
     TString GeomVersion("");
-    if (!GetOption("fzin")) {
+    if (!GetOption("fzin") || GetOption("ForceGeometry")) {
       GeomVersion = "y2004x";
       const DbAlias_t *DbAlias = GetDbAliases();
       Int_t found = 0;
