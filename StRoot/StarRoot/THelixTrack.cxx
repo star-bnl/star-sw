@@ -979,7 +979,7 @@ double TCircle::Path(const double *pnt) const
   Complex CXP = Im*CX1/CP;
   Complex CXPRho = CXP*fRho;
   double s;
-  if (std::abs(CXPRho)>0.01) {
+  if (std::abs(CXPRho)>0.001) {
     s = std::log(1.+CXPRho).imag()/fRho;
   } else {
     s = (CXP*(1.-CXPRho*(0.5-CXPRho*(1/3.-CXPRho*0.25)))).imag();
@@ -1550,7 +1550,7 @@ void  TCircleFitter::AddZ(double z,double ez)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.18 2006/04/07 17:31:42 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.19 2006/04/10 19:58:17 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -1566,8 +1566,8 @@ void  TCircleFitter::AddZ(double z,double ez)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
- * Revision 1.18  2006/04/07 17:31:42  perev
- * TCircle +errs now.
+ * Revision 1.19  2006/04/10 19:58:17  perev
+ * Check for small curv in TCircle::Path 0.01=>0.001
  *
  * Revision 1.2  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
