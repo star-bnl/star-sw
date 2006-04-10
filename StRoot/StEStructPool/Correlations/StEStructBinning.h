@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.9 2006/04/04 22:10:11 porter Exp $
+ * $Id: StEStructBinning.h,v 1.10 2006/04/10 23:42:32 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,7 +14,7 @@
 #define __STESTRUCTBINNING__H
 
 #include <math.h>
-
+#include "TROOT.h"
 /*
  *  I made these c-structs as floats in order to able to have them contain
  *  more than just the counts. If wts are added I need another word
@@ -33,7 +33,7 @@
 #define ESTRUCT_XT_BINS 26
 
 #define ESTRUCT_DPHI_BINS 29
-#define ESTRUCT_DETA_BINS 29
+#define ESTRUCT_DETA_BINS 26
 #define ESTRUCT_DYT_BINS 26
 #define ESTRUCT_DPT_BINS 31
 
@@ -73,6 +73,7 @@ struct etaBins {
 struct detaBins {
   double deta[ESTRUCT_DETA_BINS];
 };
+
 struct setaBins {
   double seta[ESTRUCT_SETA_BINS];
 };
@@ -103,10 +104,6 @@ struct xtBins {
 };
 
 
-/*struct deltaYtBins {  //use dyt
-  double dyt[ESTRUCT_DELTAYT_BINS];
-  };*/
-
 struct TPCSepBins {
   float sep[ESTRUCT_TPCSEP_BINS];
 };
@@ -131,7 +128,17 @@ struct QAPtBins {
   float Pt[ESTRUCT_QAPT_BINS];
 };
 
-class StEStructBinning {
+
+// oh-boy... I made c-struct and methods with same names so cannot
+// use the c-structs directly in the StEStructBinning class.
+// rather I have to wrap it!
+
+class EtaDeltaWeights {
+ public:
+  detaBins x;
+};
+
+class StEStructBinning : public TObject {
 
 protected:
 
@@ -171,6 +178,8 @@ protected:
   float maxQAPt,  minQAPt,  dQAPt;
   int   nQAEta, nQAPhi, nQAPt;
 
+  EtaDeltaWeights mdetaWeights;
+
   StEStructBinning();
   StEStructBinning(StEStructBinning& me){};
   static StEStructBinning* mInstance;
@@ -180,6 +189,11 @@ public:
   ~StEStructBinning(){};
   static StEStructBinning* Instance();
 
+  void  calculateDEtaWeights();
+  double getDEtaWeight(float deta);
+
+  void setEtaRange(float etamin, float etamax);
+    
   int iphi(float phi);
   int ieta(float eta);
   int iyt(float yt);
@@ -226,13 +240,6 @@ public:
   float sytVal(int isyt);
   float sptVal(int ispt);
     
-  /*int   iDeltaYt(float yt);  //use dyt
-  float deltaYtMax()    { return maxDeltaYt; }
-  float deltaYtMin()    { return minDeltaYt; }
-  float getBinWidthDeltaYt()  { return dDeltaYt; }
-  int   deltaYtBins() { return nDeltaYt; }
-  float deltaYtVal(int ideltaYt);*/
-
   float qMax()   { return maxQ; }
   float qMin()   { return minQ; }
   float getBinWidthQ() { return dQ; }
@@ -327,11 +334,18 @@ public:
   float QAPhiMin()   { return minQAPhi; }
   float QAPtMax()   { return maxQAPt; }
   float QAPtMin()   { return minQAPt; }
+
+ClassDef(StEStructBinning,1)
+
 };
 
 inline StEStructBinning* StEStructBinning::Instance(){
   if(!mInstance) mInstance=new StEStructBinning;
   return mInstance;
+}
+
+inline double StEStructBinning::getDEtaWeight(float deta){
+  return mdetaWeights.x.deta[ideta(deta)];
 }
 
 inline float StEStructBinning::qVal(int iq){
@@ -549,6 +563,11 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.10  2006/04/10 23:42:32  porter
+ * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
+ * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
+ * the StEStructBinning object
+ *
  * Revision 1.9  2006/04/04 22:10:11  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.5 2006/04/06 01:01:19 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.6 2006/04/10 23:42:32 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -274,21 +274,21 @@ int StEStructCutBin::getCutBinMode3(StEStructPairCuts* pc){
   }
 
   float deta=fabs(pc->DeltaEta());
-  float dphi=fabs(pc->DeltaPhi());
+  //  float dphi=fabs(pc->DeltaPhi());
 
   int idedp;
 
-  if(deta<1.0) {
-    if(dphi<M_PI/2.0){
+  if(deta<1.0) { 
+    if(pc->sameSide()){ // dphi<M_PI/2.0 || dphi> 1.5*M_PI){
       idedp=2;
     } else {
       idedp=1;
     }
   } else {    
-    if(dphi>M_PI/2.){
-      idedp=0;
-    } else {
+    if(pc->sameSide()){  // dphi<M_PI/2. || dphi> 1.5*M_PI){
       idedp=3;
+    } else {
+      idedp=0;
     }
   }   
 
@@ -328,10 +328,10 @@ int StEStructCutBin::getCutBinMode4(StEStructPairCuts* pc){
   float yt1=((StEStructTrack*)pc->Track1())->Yt();
   float yt2=((StEStructTrack*)pc->Track2())->Yt();
 
-  float dphi=fabs(pc->DeltaPhi());
+  //  float dphi=fabs(pc->DeltaPhi());
   int iside=0;
-  if((M_PI-dphi)<M_PI/2.) iside+=16; // away-side
 
+  if( !pc->sameSide() ) iside+=16; // away-side
   if(yt1<=1.8 && yt2<=1.8) return iside;    
 
   float ytsum=yt1+yt2;
@@ -457,9 +457,9 @@ void StEStructCutBin::initPtBinMode4(){
 
 int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
 
-  float dphi = fabs(pc->DeltaPhi());
+  //  float dphi = fabs(pc->DeltaPhi());
   int idedp = 1;
-  if((M_PI/2<dphi) && (dphi<3*M_PI/2.0)) {
+  if(!pc->sameSide()) {
     idedp=0;
   }
 
@@ -602,8 +602,14 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.6  2006/04/10 23:42:32  porter
+ * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
+ * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
+ * the StEStructBinning object
+ *
  * Revision 1.5  2006/04/06 01:01:19  prindle
- * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ *
+ *   New mode in CutBin, 5, to do pid correlations. There is still an issue
  * of how to set the pt ranges allowed for the different particle types.
  * For data we probably want to restrict p to below 1GeV for pi and K, but
  * for Hijing and Pythia we can have perfect pid. Currently cuts are type

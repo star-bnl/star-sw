@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.12 2006/04/06 01:01:11 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.13 2006/04/10 23:42:32 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -672,8 +672,8 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         float wgt = 1.0;
         nwgt = wgt;
         float deta=mPair.DeltaEta(); 
-        if( !mskipEtaDeltaWeight && deta<1.9999 ) {
-           nwgt = 2.0/(2.0-deta);
+        if( !mskipEtaDeltaWeight ) {
+           nwgt = b->getDEtaWeight(mPair.DeltaEta());
            pwgt*=nwgt;
            spt1*=nwgt;
            spt2*=nwgt;
@@ -683,16 +683,16 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         ytyt[icb][iyt1].yt[iyt2]+=nwgt;
         xtxt[icb][ixt1].xt[ixt2]+=nwgt;
         ptpt[icb][ipt1].pt[ipt2]+=nwgt;
-        etaeta[icb][ieta1].eta[ieta2]+=nwgt;
+        etaeta[icb][ieta1].eta[ieta2]+=1; // nwgt;
         phiphi[icb][iphi1].phi[iphi2]+=nwgt;
 
-        pretaeta[icb][ieta1].eta[ieta2]+=pwgt;
+        pretaeta[icb][ieta1].eta[ieta2]+=pwgt/nwgt;
         prphiphi[icb][iphi1].phi[iphi2]+=pwgt;
 
-        paetaeta[icb][ieta1].eta[ieta2]+=spt1;
+        paetaeta[icb][ieta1].eta[ieta2]+=spt1/nwgt;
         paphiphi[icb][iphi1].phi[iphi2]+=spt1;
 
-        pbetaeta[icb][ieta1].eta[ieta2]+=spt2;
+        pbetaeta[icb][ieta1].eta[ieta2]+=spt2/nwgt;
         pbphiphi[icb][iphi1].phi[iphi2]+=spt2;
 
         //-> X vs X (symmetry)
@@ -700,16 +700,16 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           ytyt[icb][iyt2].yt[iyt1]+=nwgt;
           xtxt[icb][ixt2].xt[ixt1]+=nwgt;
           ptpt[icb][ipt2].pt[ipt1]+=nwgt;
-          etaeta[icb][ieta2].eta[ieta1]+=nwgt;
+          etaeta[icb][ieta2].eta[ieta1]+=1; // nwgt;
           phiphi[icb][iphi2].phi[iphi1]+=nwgt;
 
-          pretaeta[icb][ieta2].eta[ieta1]+=pwgt;
+          pretaeta[icb][ieta2].eta[ieta1]+=pwgt/nwgt;
           prphiphi[icb][iphi2].phi[iphi1]+=pwgt;
 
-          paetaeta[icb][ieta2].eta[ieta1]+=spt1;
+          paetaeta[icb][ieta2].eta[ieta1]+=spt1/nwgt;
           paphiphi[icb][iphi2].phi[iphi1]+=spt1;
 
-          pbetaeta[icb][ieta2].eta[ieta1]+=spt2;
+          pbetaeta[icb][ieta2].eta[ieta1]+=spt2/nwgt;
           pbphiphi[icb][iphi2].phi[iphi1]+=spt2;
         }
 
@@ -1694,8 +1694,14 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.13  2006/04/10 23:42:32  porter
+ * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
+ * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
+ * the StEStructBinning object
+ *
  * Revision 1.12  2006/04/06 01:01:11  prindle
- * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ *
+ *   New mode in CutBin, 5, to do pid correlations. There is still an issue
  * of how to set the pt ranges allowed for the different particle types.
  * For data we probably want to restrict p to below 1GeV for pi and K, but
  * for Hijing and Pythia we can have perfect pid. Currently cuts are type

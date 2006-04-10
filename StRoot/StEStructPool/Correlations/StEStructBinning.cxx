@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.6 2006/04/04 22:10:10 porter Exp $
+ * $Id: StEStructBinning.cxx,v 1.7 2006/04/10 23:42:32 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -13,6 +13,7 @@
 #include "StEStructBinning.h"
 #include <math.h>
 
+ClassImp(StEStructBinning)
 
 StEStructBinning* StEStructBinning::mInstance = 0;
 
@@ -42,21 +43,7 @@ StEStructBinning::StEStructBinning(){
   dSPhi=(maxSPhi-minSPhi)/(float)nSPhi;
 
   //--> eta ranges <--
-
-  minEta=-1.0;
-  maxEta=1.0;
-  nEta = ESTRUCT_ETA_BINS-1;
-  dEta= (maxEta-minEta)/(float)nEta;
-
-  maxDEta=2*maxEta;//2*maxEta;
-  minDEta=2*minEta;//0; //2*minEta;
-  nDEta=ESTRUCT_DETA_BINS-1;
-  dDEta=(maxDEta-minDEta)/(float)nDEta;
-
-  maxSEta=2*maxEta;
-  minSEta=2*minEta;
-  nSEta = ESTRUCT_SETA_BINS-1;
-  dSEta=(maxSEta-minSEta)/(float)nSEta;
+  setEtaRange(-1.0,1.0);
 
   //--> yt ranges <--
   
@@ -75,11 +62,7 @@ StEStructBinning::StEStructBinning(){
   nSYt = ESTRUCT_SYT_BINS-1;
   dSYt=(maxSYt-minSYt)/(float)nSYt;
   
-  /*maxDeltaYt=5.;//3.0;
-    minDeltaYt=0.;//0; //-3.0;
-    nDeltaYt = ESTRUCT_DELTAYT_BINS-1;
-    dDeltaYt=(maxDeltaYt-minDeltaYt)/(float)nDeltaYt; */
-  
+ 
   //--> xt ranges <--
   
   minXt= 1 - exp(-(sqrt(0.15*0.15+0.139*0.139)-0.139)/0.4);  // from Aya's code
@@ -142,10 +125,61 @@ StEStructBinning::StEStructBinning(){
 
 };
 
+//-----------------------------------------------------------
+void StEStructBinning::setEtaRange(float xmin, float xmax){
+
+  //--> eta ranges <--
+
+  minEta=xmin;
+  maxEta=xmax;
+  nEta = ESTRUCT_ETA_BINS-1;
+  dEta= (maxEta-minEta)/(float)nEta;
+
+  maxDEta=2*maxEta;//2*maxEta;
+  minDEta=2*minEta;//0; //2*minEta;
+  nDEta=ESTRUCT_DETA_BINS-1;
+  dDEta=(maxDEta-minDEta)/(float)nDEta;
+
+  calculateDEtaWeights(); // --> MUST do whenever setEtaRange is called!!!!
+
+  maxSEta=2*maxEta;
+  minSEta=2*minEta;
+  nSEta = ESTRUCT_SETA_BINS-1;
+  dSEta=(maxSEta-minSEta)/(float)nSEta;
+
+}
+
+
+//------------------------------------------------------------
+void StEStructBinning::calculateDEtaWeights(){
+
+  // init to 0
+  for(int i=0;i<ESTRUCT_DETA_BINS;i++) {
+    mdetaWeights.x.deta[i]=0.;
+  }
+
+  // check if even or odd (0 if even 1 if odd)
+  int ic=(ESTRUCT_DETA_BINS-1)%2; 
+
+  // calculate weight at cent of bin unless it is a center bin
+  // then use 1/4 shift ...
+  for(int i=0;i<ESTRUCT_DETA_BINS-1;i++){
+    double fdeta0 = fabs(detaVal(i));
+    if(ic==1 && i==((ESTRUCT_DETA_BINS/2)-1)) fdeta0=dDEta/4.0;
+    mdetaWeights.x.deta[i]  = 1.0/(1.0 - (fdeta0/maxDEta));
+  }
+
+}	
+   
 
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.7  2006/04/10 23:42:32  porter
+ * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
+ * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
+ * the StEStructBinning object
+ *
  * Revision 1.6  2006/04/04 22:10:10  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own
