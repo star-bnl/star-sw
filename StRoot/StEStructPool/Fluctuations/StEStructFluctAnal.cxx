@@ -42,6 +42,7 @@ StEStructFluctAnal::StEStructFluctAnal(int mode, int etaSumMode, int phiSumMode)
     mptpplus  = 0;
     mptpminus = 0;
 
+    mAmDone = false;
     mQAHists=NULL;
     mlocalQAHists = false;
     mPairCuts = new StEStructPairCuts; 

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.8 2006/04/06 00:54:01 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.9 2006/04/11 17:50:45 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,20 +33,16 @@ StEStructMuDstReader::StEStructMuDstReader() {
     mTCuts        = 0;
     mInChain      = false;
     mAmDone       = false;
-    mCentBin      = 0;
 };
 StEStructMuDstReader::StEStructMuDstReader(StMuDstMaker* maker,
                                            StEStructEventCuts* ecuts,
-                                           StEStructTrackCuts* tcuts,
-                                           bool inChain,
-                                           int  centBin) {
+                                           StEStructTrackCuts* tcuts) {
     mhasdEdxCuts  = 0;
     mMaker        = maker;
     setEventCuts(ecuts);
     setTrackCuts(tcuts);
-    mInChain      = inChain;
+    mInChain      = false;
     mAmDone       = false;
-    mCentBin      = centBin;
 };
 
 //-------------------------------------------------------------------------
@@ -68,6 +64,11 @@ void StEStructMuDstReader::setTrackCuts(StEStructTrackCuts* tcuts) {
     }
 };
 
+inline bool StEStructMuDstReader::setInChain(bool inChain) {
+    mInChain = inChain;
+    return mInChain;
+};
+inline bool StEStructMuDstReader::InChain(){ return mInChain; };
 bool StEStructMuDstReader::hasMaker() { return (mMaker) ? true : false ; }
 bool StEStructMuDstReader::hasEventCuts() { return (mECuts) ? true : false ; }
 bool StEStructMuDstReader::hasTrackCuts() { return (mTCuts) ? true : false ; }
@@ -329,8 +330,11 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.9  2006/04/11 17:50:45  prindle
+ * Remove inChain from constructor arguments (no longer used in macro)
+ *
  * Revision 1.8  2006/04/06 00:54:01  prindle
- * Tried to rationalize the way centrality is defined.
+ *   Tried to rationalize the way centrality is defined.
  *   Now the reader gives a float to StEStructEvent and this float is
  * what is being used to define centrality. When we need a centrality
  * bin index we pass this number into the centrality singleton object.

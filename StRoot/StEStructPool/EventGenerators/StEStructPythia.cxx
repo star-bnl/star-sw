@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.10 2006/04/06 01:03:32 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.11 2006/04/11 17:51:39 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -24,7 +24,6 @@ StEStructPythia::StEStructPythia() {
     mTCuts        = 0;
     mInChain      = false;
     mEventsToDo   = 100;
-    mCentBin      = 0;
     mEventCount   = 0;
     mAmDone       = false;
 };
@@ -32,15 +31,12 @@ StEStructPythia::StEStructPythia() {
 StEStructPythia::StEStructPythia(TPythia6* pythia,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
-                                 bool inChain,
-                                 int  multBin,
                                  int  eventsToDo) {
     mPythia       = pythia;
     mECuts        = ecuts;
     mTCuts        = tcuts;
-    mInChain      = inChain;
+    mInChain      = false;
     mEventsToDo   = eventsToDo;
-    mCentBin      = multBin;
     mEventCount   = 0;
     mAmDone       = false;
 };
@@ -286,8 +282,12 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.11  2006/04/11 17:51:39  prindle
+ * Remove inChain from constructor arguments (no longer used in macro)
+ *
  * Revision 1.10  2006/04/06 01:03:32  prindle
- * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
+ *   Rationalization of centrality binning, as described in AnalysisMaker checkin.
  *
  * Revision 1.9  2006/04/04 22:11:27  porter
  * StEStructPythia now uses StEtructCentrality for selection

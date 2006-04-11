@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.h,v 1.7 2006/04/04 22:11:27 porter Exp $
+ * $Id: StEStructPythia.h,v 1.8 2006/04/11 17:51:41 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,7 +29,6 @@ class StEStructPythia : public StEStructEventReader {
   bool mInChain;
   bool mAmDone;
   bool mUseAllTracks;
-  int mCentBin;
   int mnumTracks;
   int mEventsToDo;
   bool mstarTrigger;
@@ -47,8 +46,6 @@ class StEStructPythia : public StEStructEventReader {
   StEStructPythia(TPythia6* pythia,
                   StEStructEventCuts* ecuts,
                   StEStructTrackCuts* tcuts,
-                  bool inChain,
-                  int  multBin,
                   int  eventsToDo);
 
   virtual ~StEStructPythia(){};
@@ -57,6 +54,8 @@ class StEStructPythia : public StEStructEventReader {
   bool hasGenerator();
   bool hasEventCuts();
   bool hasTrackCuts();
+  bool setInChain(bool inChain);
+  bool InChain();
   bool measureable(int pid);
   float* globalDCA(float* p, float* v);
 
@@ -71,6 +70,11 @@ class StEStructPythia : public StEStructEventReader {
 
 
 inline bool StEStructPythia::done(){ return mAmDone; };
+inline bool StEStructPythia::setInChain(bool inChain) {
+    mInChain = inChain;
+    return mInChain;
+};
+inline bool StEStructPythia::InChain(){ return mInChain; };
 
 inline bool StEStructPythia::measureable(int pid){
   bool retVal=false;
@@ -184,6 +188,9 @@ inline float* StEStructPythia::globalDCA(float* p, float* v){
 /**********************************************************************
  *
  * $Log: StEStructPythia.h,v $
+ * Revision 1.8  2006/04/11 17:51:41  prindle
+ * Remove inChain from constructor arguments (no longer used in macro)
+ *
  * Revision 1.7  2006/04/04 22:11:27  porter
  * StEStructPythia now uses StEtructCentrality for selection
  *

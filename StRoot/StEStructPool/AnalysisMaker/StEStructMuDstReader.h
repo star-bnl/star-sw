@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.h,v 1.6 2006/04/04 22:05:06 porter Exp $
+ * $Id: StEStructMuDstReader.h,v 1.7 2006/04/11 17:50:48 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -33,7 +33,6 @@ public:
   StEStructTrackCuts* mTCuts; //!
   bool mInChain;
   bool mAmDone;
-  int  mCentBin;
   int  mNumGoodTracks;//!
   int  mhasdEdxCuts;
   TH2F*  dEdxBefore;
@@ -42,15 +41,14 @@ public:
   StEStructMuDstReader();
   StEStructMuDstReader(StMuDstMaker* maker,
                        StEStructEventCuts* ecuts,
-                       StEStructTrackCuts* tcuts,
-                       bool inChain = true,
-                       int  centBin = 0);
+                       StEStructTrackCuts* tcuts);
   virtual ~StEStructMuDstReader();
 
   void setMuDstMaker(StMuDstMaker* MuDstMaker, bool inChain=true);
   void setEventCuts(StEStructEventCuts* cuts);
   void setTrackCuts(StEStructTrackCuts* cuts);
-  int  setCentBin(int centBin);
+  bool setInChain(bool inChain);
+  bool InChain();
   bool hasMaker();
   bool hasEventCuts();
   bool hasTrackCuts();
@@ -70,16 +68,15 @@ public:
 };
 
 inline bool StEStructMuDstReader::done(){ return mAmDone; };
-inline int StEStructMuDstReader::setCentBin(int centBin) {
-    mCentBin = centBin;
-    return mCentBin;
-};
 
 #endif  
 
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.h,v $
+ * Revision 1.7  2006/04/11 17:50:48  prindle
+ * Remove inChain from constructor arguments (no longer used in macro)
+ *
  * Revision 1.6  2006/04/04 22:05:06  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
