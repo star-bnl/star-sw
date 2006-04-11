@@ -61,28 +61,10 @@ TPythia6* getPythia(const char* rframe,
                     const char* cproj, 
                     const char* ctarg, 
                     float rts, 
-                    int itune, 
-                    const char* jobid=NULL){
-  
-
-  float fjobid=0.9999;
-  if(jobid){ // reset fjobid from job number after _ in the envvar JOBID
-    char* ptr=strstr(jobid,"_");
-    if(ptr){
-       ptr++;
-       fjobid=atof(ptr);
-    }  
-  }
-
+                    int itune){
   TPythia6* retVal=new TPythia6();
   retVal->Initialize(rframe,cproj,ctarg,rts);
 
-  // get the seed value from current time and jobid,  print it out
-  int timestamp=time(NULL); 
-  int iseed = (int)((float)timestamp/fjobid);
-  cout<<"<seedValue>"<<iseed<<"</seedValue>"<<endl;
-
-  retVal->SetMRPY(1,iseed);
   retVal->SetMRPY(2,0); 
 
   pythiaTunes(retVal,itune);
