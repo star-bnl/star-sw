@@ -1,5 +1,8 @@
-// $Id: create_ftpc_QA_refhists.C,v 1.1 2006/04/11 09:30:17 jcs Exp $
+// $Id: create_ftpc_QA_refhists.C,v 1.2 2006/04/11 09:32:49 jcs Exp $
 // $Log: create_ftpc_QA_refhists.C,v $
+// Revision 1.2  2006/04/11 09:32:49  jcs
+// improve comments
+//
 // Revision 1.1  2006/04/11 09:30:17  jcs
 // sample macro to create one *.gif file for each FTPC Offline QA reference histogram
 //
@@ -83,9 +86,8 @@ void create_ftpc_QA_refhists(
   chain->Clear();
   istat = chain->Make(i);
 
-// Get Ftpc Reference Histogram list
+//  Ftpc Reference Histogram list for Y2006
   cout<<"sizeOfCharPtr = "<<sizeOfCharPtr<<endl;
-           //#include "QAhlist_ftpc_refHists.h"
   Char_t* sdefList[] = {
     "StEQaEvsumTotChgF",
     "fcl_chargestepW",
