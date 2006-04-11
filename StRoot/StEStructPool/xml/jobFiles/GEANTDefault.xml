@@ -37,11 +37,6 @@
                 <Value widget = 'entry'>1</Value>
                 <Value widget = 'entry'>2000</Value>
             </eventCut>
-            <eventCut Comment = 'number of tracks passing track cuts'>
-                <cutName>numTracks</cutName>
-                <Value widget = 'entry'>1</Value>
-                <Value widget = 'entry'>2000</Value>
-            </eventCut>
         </eventCuts>
 
         <!-- And appropriate track cuts. -->

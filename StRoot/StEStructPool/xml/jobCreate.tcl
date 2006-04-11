@@ -512,7 +512,9 @@ proc ::jobCreate::+doEStructMacro {f} {
         if {[lsearch [$node attributes] widget] >= 0} {
             set wType [$node getAttribute widget]
         }
-        if {$wType eq "combobox" && $::jobCreate::jobLisFile ne ""} {
+        if {$wType eq "combobox" && $name ne "analysisType"} {
+            m+MacroCombo $f $name $node
+        } elseif {$wType eq "combobox" && $::jobCreate::jobLisFile ne ""} {
             # Only allow analysis type choice when encountering combobox in doEStruct?????
             m+AnalysisType $f $name [$node text]
         } elseif {$wType eq "entry"} {
@@ -619,6 +621,30 @@ proc ::jobCreate::m+PythiaParameter {f el node} {
     grid $f.l$el $f.combo$el -sticky w
 }
 
+################################################################################
+# Adapted from m+AnalysisType.
+# Give user choice of any of the enumerated types in doEStructMacro section.
+################################################################################
+proc ::jobCreate::m+MacroCombo {f el node} {
+    set val [$node text]
+    set sNode [$::jobCreate::schemaInfo selectNodes //*\[@name='$el'\]]
+    set sR    [$sNode getElementsByTagName xs:restriction]
+    set type  [$sR getAttribute base]
+    set sR2   [$::jobCreate::schemaInfo selectNodes //*\[@name='$type'\]]
+    set vals [list]
+    foreach sN [$sR2 getElementsByTagName xs:enumeration] {
+        lappend vals [$sN getAttribute value]
+    }
+
+    label $f.l$el -text $el
+    variable cVal${f}$el $val
+    ComboBox::create $f.combo$el \
+            -editable     false  \
+            -values       $vals  \
+            -textvariable ::jobCreate::cVal${f}$el \
+            -modifycmd   [namespace code "modifyMacroNode $node \[$f.combo$el get\] $f.combo$el %V"]
+    grid $f.l$el $f.combo$el -sticky w
+}
 ################################################################################
 # Adapted from m+XmlAtts.
 # Want to give user the choice between analysis types (allowable are defined

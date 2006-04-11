@@ -79,15 +79,10 @@
 
         <!-- Need appropriate event cuts. -->
         <eventCuts>
-            <eventCut Comment = 'centrality cut, number of tracks in |eta| &lt; 0.5'>
+            <eventCut Comment = 'centrality requirement, impact parameter or ntracks'>
                 <cutName>centrality</cutName>
-                <Value widget = 'entry'>1</Value>
-                <Value widget = 'entry'>2000</Value>
-            </eventCut>
-            <eventCut Comment = 'number of tracks passing track cuts'>
-                <cutName>numTracks</cutName>
-                <Value widget = 'entry'>1</Value>
-                <Value widget = 'entry'>2000</Value>
+                <Value widget = 'entry'>0</Value>
+                <Value widget = 'entry'>20</Value>
             </eventCut>
         </eventCuts>
 
@@ -119,60 +114,26 @@
         <doEStructMacro>
             <analysisType id='analysisType' widget='combobox'>StEStructFluctuation</analysisType>
             <libraries id='libraries' widget='none'>
+    gROOT->LoadMacro("getRandomSeed.C");
     gSystem-&gt;Load("THijing");
+    char buffer[1024];
     sprintf(buffer,"%s/hijev.inp",scriptDir);
     THijing *hijingGenerator = new THijing(buffer);
             </libraries>
             <centralities id='centralities' widget='entry'>0.0 6.0 8.6 10.6 12.4 14.0 20.0</centralities>
-            <ptCentralities id='ptCentralities' widget='entry'>0.0 6.0 8.6 10.6 12.4 14.0 20.0</ptCentralities>
+            <ptCentralities id='ptCentralities'>0.0 6.0 8.6 10.6 12.4 14.0 20.0</ptCentralities>
             <!-- A few Hijing specific histogram declarations. -->
-            <declareSimHistograms id='declareSimHistograms' widget='text'>
-        TH1D *impact   = new TH1D("impact","impact",100,0.0,20.0);
-        TH1D *binary   = new TH1D("binary","binary",2000,0.5,2000.5);
-        TH1D *participant = new TH1D("participant","participant",500,0.5,500.5);
-
-        TH1D **bin = new TH1D*[mbNBins-1];
-        TH1D **part = new TH1D*[mbNBins-1];
-        for (int i=0;i&lt;mbNBins-1;i++) {
-            sprintf(buffer,"binary_%i",i);
-            bin[i]  = new TH1D(buffer,buffer,2000,0.5,2000.5);
-            sprintf(buffer,"participant_%i",i);
-            part[i] = new TH1D(buffer,buffer,500,0.5,500.5);
-        }
-            </declareSimHistograms>
             <useImpactParameter id='useImpactParameter' typedef='bool useImpactParameter = ' widget='entry'>true</useImpactParameter>
             <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
-    StEStructHijing** readers = new StEStructHijing*[numberOfAnalyses];
-    for (int i=0;i&lt;numberOfAnalyses;i++) {
-        int mCent = i;
-        if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
-            mCent = -1;
-        }
-        readers[i] = new StEStructHijing(hijingGenerator,ecuts[i],tcuts[i],skipMake[i],useImpactParameter,mCent,-1);
-    }
+    int iseed = getRandomSeed();
+    hijingGenerator-&gt;SetRandomSeed(iseed);
+    cout&lt;&lt;"&lt;seedValue&gt;"&lt;&lt;iseed&lt;&lt;"&lt;/seedValue&gt;"&lt;&lt;endl;
+    StEStructHijing* reader = new StEStructHijing(hijingGenerator,ecuts,tcuts,useImpactParameter,-1);
+
+    // EventType is for qaHistograms. Depends on type of reader though.
+    int EventType = 1;
             </declareReader>
-            <fillSimHistograms id='fillSimHistograms' widget = 'text'>
-        if (currentAnalysis &amp;&amp; currentAnalysis-&gt;mCurrentEvent) {
-            impact-&gt;Fill(hijingGenerator-&gt;GetImpactParameter());
-            binary-&gt;Fill(hijingGenerator-&gt;GetBinaryCollisions());
-            participant-&gt;Fill(hijingGenerator-&gt;GetParticipants());
-            iCen = currentAnalysis-&gt;mCurrentEvent-&gt;Centrality();
-            if (iCen >= 0) {
-                bin[iCen]-&gt;Fill(hijingGenerator-&gt;GetBinaryCollisions());
-                part[iCen]-&gt;Fill(hijingGenerator-&gt;GetParticipants());
-            }
-        }
-            </fillSimHistograms>
-            <saveSimHistograms id='saveSimHistograms' widget = 'text'>
-    impact-&gt;Write();
-    binary-&gt;Write();
-    participant-&gt;Write();
-    for (int i=0;i&lt;mbNBins-1;i++) {
-        bin[i]-&gt;Write();
-        part[i]-&gt;Write();
-    }
-            </saveSimHistograms>
         </doEStructMacro>
     </standardElements>
 </jobDescription>
