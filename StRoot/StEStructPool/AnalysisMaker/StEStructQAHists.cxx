@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.2 2006/04/06 00:54:03 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.3 2006/04/11 17:50:50 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -178,7 +178,7 @@ void StEStructQAHists::writeBaseHistograms(TFile* tf){
 void StEStructQAHists::initTrackHistograms(int numBins, int aIndex){
 
   if(mntBins>0)return; // already been here in init
-  cout<<"Realling creating QA histograms "<<endl;
+  cout<<"Really creating QA histograms "<<endl;
 
   mntBins = numBins;
   int qbins = 2*numBins;
@@ -293,8 +293,11 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.3  2006/04/11 17:50:50  prindle
+ * Remove inChain from constructor arguments (no longer used in macro)
+ *
  * Revision 1.2  2006/04/06 00:54:03  prindle
- * Tried to rationalize the way centrality is defined.
+ *   Tried to rationalize the way centrality is defined.
  *   Now the reader gives a float to StEStructEvent and this float is
  * what is being used to define centrality. When we need a centrality
  * bin index we pass this number into the centrality singleton object.

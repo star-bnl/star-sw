@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.h,v 1.5 2006/04/06 01:21:05 prindle Exp $
+ * $Id: StEStructHijing.h,v 1.6 2006/04/11 17:51:58 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -28,7 +28,6 @@ class StEStructHijing : public StEStructEventReader {
   bool mInChain;
   bool mAmDone;
   bool museImpactParameter;
-  int   mCentBin;
   float mImpact;
   int   mnumTracks;
   int   mEventsToDo;
@@ -45,9 +44,7 @@ class StEStructHijing : public StEStructEventReader {
   StEStructHijing(THijing* hijing,
                   StEStructEventCuts* ecuts,
                   StEStructTrackCuts* tcuts,
-                  bool inChain = true,
                   bool useImpactParameter = true,
-                  int  centBin = 0,
                   int  eventsToDo = 100);
 
   virtual ~StEStructHijing(){};
@@ -57,6 +54,8 @@ class StEStructHijing : public StEStructEventReader {
   bool hasGenerator();
   bool hasEventCuts();
   bool hasTrackCuts();
+  bool setInChain(bool inChain);
+  bool InChain();
   bool measureable(int pid);
   float* globalDCA(float* p, float* v);
 
@@ -72,6 +71,11 @@ class StEStructHijing : public StEStructEventReader {
 };
 
 inline bool StEStructHijing::done(){ return mAmDone; };
+inline bool StEStructHijing::setInChain(bool inChain) {
+    mInChain = inChain;
+    return mInChain;
+};
+inline bool StEStructHijing::InChain(){ return mInChain; };
 
 inline double StEStructHijing::getImpact(){ return mHijing->GetImpactParameter(); };
 inline double StEStructHijing::getBinary(){ return mHijing->GetBinaryCollisions(); };

@@ -55,6 +55,7 @@ class StEStructFluctAnal: public StEStructAnalysis {
 
 
    // Member declarations.
+    bool mAmDone;
     int  manalysisMode;                  //! simple enumeration of analyses ...
     char *moutFileName;
     int  mEtaSumMode, mPhiSumMode;
@@ -114,10 +115,15 @@ inline void StEStructFluctAnal::setPairCuts(StEStructPairCuts* pcuts){
   mPairCuts=pcuts;
 }
 inline void StEStructFluctAnal::finish() {
+    if (mAmDone) {
+        cout << "StEStructFluctAnal::finish() has already been called." << endl;
+        return;
+    }
     TFile * tf=new TFile(moutFileName,"RECREATE");
     tf->cd();
     writeHistograms();
     tf->Close();
+    mAmDone = true;
 };
 inline StEStructPairCuts* StEStructFluctAnal::getPairCuts() {
   return mPairCuts;

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.5 2006/04/06 01:21:03 prindle Exp $
+ * $Id: StEStructHijing.cxx,v 1.6 2006/04/11 17:51:56 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -24,7 +24,6 @@ StEStructHijing::StEStructHijing() {
     mInChain            = false;
     mEventsToDo         = 100;
     museImpactParameter = true;
-    mCentBin            = 0;
     mEventCount         = 0;
     mAmDone             = false;
 };
@@ -32,17 +31,14 @@ StEStructHijing::StEStructHijing() {
 StEStructHijing::StEStructHijing(THijing* hijing,
                                  StEStructEventCuts* ecuts,
                                  StEStructTrackCuts* tcuts,
-                                 bool inChain,
                                  bool useImpactParameter,
-                                 int  centBin,
                                  int  eventsToDo) {
     mHijing             = hijing;
     mECuts              = ecuts;
     mTCuts              = tcuts;
-    mInChain            = inChain;
+    mInChain            = false;
     mEventsToDo         = eventsToDo;
     museImpactParameter = useImpactParameter;
-    mCentBin            = centBin;
     mEventCount         = 0;
     mAmDone             = false;
 };
@@ -82,8 +78,7 @@ StEStructEvent* StEStructHijing::next() {
     retVal->SetCentrality(centMeasure);
     StEStructCentrality* cent=StEStructCentrality::Instance();
     int jCent = cent->centrality(retVal->Centrality());
-    if (((mCentBin >= 0) && (jCent != mCentBin)) ||
-         !mECuts->goodCentrality(centMeasure)) {
+    if (!mECuts->goodCentrality(centMeasure)) {
         delete retVal;
         retVal=NULL;
         mECuts->fillHistogram(mECuts->centralityName(),centMeasure,false);
