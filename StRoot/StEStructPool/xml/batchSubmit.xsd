@@ -273,9 +273,6 @@ hell is in this directory.
         <xs:enumeration value='centrality'>
             <xs:Comment>min, max reference multiplicity</xs:Comment>
         </xs:enumeration>
-        <xs:enumeration value='numTracks'>
-            <xs:Comment>min max tracks passing quality cuts</xs:Comment>
-        </xs:enumeration>
     </xs:restriction>
 </xs:simpleType>
 
@@ -433,17 +430,12 @@ hell is in this directory.
             <xs:element ref='useImpactParameter' minOccurs='0'/>
             <xs:element ref='ptCuts' minOccurs='0'/>
             <xs:element ref='ptCentralities' minOccurs='0'/>
-            <xs:element ref='cutModeInit' minOccurs='0'/>
-            <xs:element ref='declarePtDefHistograms' minOccurs='0'/>
-            <xs:element ref='declareSimHistograms' minOccurs='0'/>
-            <xs:element ref='declareReader'/>
+            <xs:element ref='cutMode' minOccurs='0'/>
+            <xs:element ref='analysisMode' minOccurs='0'/>
             <xs:element ref='declareAnalysis'/>
-            <xs:element ref='getCurrentAnalysis'/>
-            <xs:element ref='fillPtDefHistograms' minOccurs='0'/>
-            <xs:element ref='fillSimHistograms' minOccurs='0'/>
+            <xs:element ref='declareReader'/>
+            <xs:element ref='allocateAnalysis'/>
             <xs:element ref='pairCutsWrite' minOccurs='0'/>
-            <xs:element ref='savePtDefHistograms' minOccurs='0'/>
-            <xs:element ref='saveSimHistograms' minOccurs='0'/>
             <xs:element ref='main'/>
         </xs:all>
     </xs:complexType>
@@ -496,6 +488,8 @@ hell is in this directory.
             <xs:minLength value='2'/>
         </xs:restriction>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='typedef2' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='entry'/>
         <xs:attribute name='Comment' type='xs:string'>pt slices</xs:attribute>
     </xs:complexType>
@@ -506,34 +500,48 @@ hell is in this directory.
             <xs:minLength value='2'/>
         </xs:restriction>
         <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='typedef2' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='entry'/>
         <xs:attribute name='Comment' type='xs:string'>Centrality cuts for each pt slice</xs:attribute>
     </xs:complexType>
 </xs:element>
-<xs:element name='cutModeInit'>
+<xs:element name='cutMode'>
     <xs:complexType>
+        <xs:restriction base='cutModeDef'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
         <xs:attribute name='typedef' type='xs:string' default=''/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Initialize cut mode for corr, pt histograms for fluct.</xs:attribute>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code to define its cut space</xs:attribute>
     </xs:complexType>
 </xs:element>
-<xs:element name='declarePtDefHistograms'>
+<xs:simpleType name='cutModeDef'>
     <xs:complexType>
-        <xs:restriction base='xs:string'/>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='0' Comment='Alternate mode. (should put purpose of mode here)'/>
+            <xs:enumeration value='1' Comment='Alternate mode (should put purpose of mode here)'/>
+            <xs:enumeration value='2' Comment='Alternate mode (should put purpose of mode here)'/>
+            <xs:enumeration value='3' Comment='Cuts in Yt-Yt and eta_Delta phi_Delta space. Default mode'/>
+            <xs:enumeration value='4' Comment='Alternate mode (should put purpose of mode here)'/>
+            <xs:enumeration value='5' Comment='Cuts in dEdx and phi_Delta spaces.'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+<xs:element name='analysisMode'>
+    <xs:complexType>
+        <xs:restriction base='xs:integer'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
         <xs:attribute name='typedef' type='xs:string' default=''/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Code for declaring extra histograms in macro</xs:attribute>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>Used by 2pt correlation code as flag for switching options</xs:attribute>
     </xs:complexType>
 </xs:element>
-<xs:element name='declareSimHistograms'>
+<xs:element name='declareAnalysis'>
     <xs:complexType>
-        <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
         <xs:attribute name='typedef' type='xs:string' default=''/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Code for declaring extra histograms in macro</xs:attribute>
+        <xs:attribute name='Comment' type='xs:string'>Declare analysis object</xs:attribute>
     </xs:complexType>
 </xs:element>
 <xs:element name='declareReader'>
@@ -543,38 +551,12 @@ hell is in this directory.
         <xs:attribute name='Comment' type='xs:string'>Reader depends on type of analysis</xs:attribute>
     </xs:complexType>
 </xs:element>
-<xs:element name='declareAnalysis'>
+<xs:element name='allocateAnalysis'>
     <xs:complexType>
         <xs:restriction base='xs:string'/>
         <xs:attribute name='id' type='xs:string' use='required'/>
         <xs:attribute name='widget' type='widgetTypes' default='text'/>
         <xs:attribute name='Comment' type='xs:string'>Declare FluctAnal or 2ptCorrelation</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='getCurrentAnalysis'>
-    <xs:complexType>
-        <xs:restriction base='xs:string'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Write fluct. QA histograms.</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='fillPtDefHistograms'>
-    <xs:complexType>
-        <xs:restriction base='xs:string'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='typedef' type='xs:string' default=''/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Write fluct. QA histograms.</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='fillSimHistograms'>
-    <xs:complexType>
-        <xs:restriction base='xs:string'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='typedef' type='xs:string' default=''/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Fill extra histograms in event processing loop</xs:attribute>
     </xs:complexType>
 </xs:element>
 <xs:element name='pairCutsWrite'>
@@ -585,24 +567,6 @@ hell is in this directory.
         <xs:attribute name='Comment' type='xs:string'>Write pair cut information.</xs:attribute>
     </xs:complexType>
 </xs:element>
-<xs:element name='savePtDefHistograms'>
-    <xs:complexType>
-        <xs:restriction base='xs:string'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='typedef' type='xs:string' default=''/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Write fluct. QA histograms.</xs:attribute>
-    </xs:complexType>
-</xs:element>
-<xs:element name='saveSimHistograms'>
-    <xs:complexType>
-        <xs:restriction base='xs:string'/>
-        <xs:attribute name='id' type='xs:string' use='required'/>
-        <xs:attribute name='typedef' type='xs:string' default=''/>
-        <xs:attribute name='widget' type='widgetTypes' default='text'/>
-        <xs:attribute name='Comment' type='xs:string'>Save extra histograms into QA file</xs:attribute>
-    </xs:complexType>
-</xs:element>
 <xs:element name='main'>
     <xs:complexType mixed='true'>
         <xs:sequence>
@@ -610,8 +574,7 @@ hell is in this directory.
                 <xs:complexType>
                     <xs:attribute name='refersTo' type='xs:string'/>
                     <xs:attribute name='stringInLine' type='xs:string'/>
-                    <xs:attribute name='boolInLine' type='xs:string'/>
-                    <xs:attribute name='intInLine' type='xs:string'/>
+                    <xs:attribute name='inLine' type='xs:string'/>
                     <xs:attribute name='listOf' type='xs:string'/>
                     <xs:attribute name='sumOf' type='xs:string'/>
                 </xs:complexType>
@@ -774,6 +737,7 @@ hell is in this directory.
             <xs:element ref='pyBeam'/>
             <xs:element ref='pyTarget'/>
             <xs:element ref='pyEnergy'/>
+            <xs:element ref='pyTune'/>
         </xs:all>
     </xs:complexType>
 </xs:element>
@@ -871,6 +835,29 @@ hell is in this directory.
             <xs:enumeration value='Xi-'       Comment='negative cascade'/>
             <xs:enumeration value='Xi0'       Comment='neutral cascade'/>
             <xs:enumeration value='Omega-'    Comment='Omega baryon'/>
+        </xs:restriction>
+    </xs:complexType>
+</xs:simpleType>
+
+<!-- We only allow tune to be 1, 2 or 3.
+     Doing this as enumeration instead of restricted integer will cause
+     a combobox to appear in the gui. -->
+<xs:element name='pyTune'>
+    <xs:complexType>
+        <xs:restriction base='pyTuneDef'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes'/>
+        <xs:attribute name='Comment' type='xs:string' use='required'>Way of selecting group of pythia parameters</xs:attribute>
+    </xs:complexType>
+</xs:element>
+
+<xs:simpleType name='pyTuneDef'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'>
+            <xs:enumeration value='0' Comment='Default tune. (should put purpose of tune here)'/>
+            <xs:enumeration value='1' Comment='Alternate tune 1 (should put purpose of tune here)'/>
+            <xs:enumeration value='2' Comment='Alternate tune 2 (should put purpose of tune here)'/>
         </xs:restriction>
     </xs:complexType>
 </xs:simpleType>

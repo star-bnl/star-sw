@@ -26,7 +26,7 @@
 
         <doEStructMacro>
             <centralities id='centralities' widget='entry'>1 12 26 48 81 133 171 300</centralities>
-            <ptCentralities id='ptCentralities' widget='entry'>1 12 26 48 81 133 171 300</ptCentralities>
+            <ptCentralities id='ptCentralities'>1 12 26 48 81 133 171 300</ptCentralities>
         </doEStructMacro>
     </standardElements>
 </jobDescription>

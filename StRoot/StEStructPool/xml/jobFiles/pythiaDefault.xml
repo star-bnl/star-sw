@@ -9,6 +9,7 @@
                 <pyBeam   id='pyBeam'   Comment=' Beam type      ' typedef='char *beam = ' widget='combobox'>p</pyBeam>
                 <pyTarget id='pyTarget' Comment=' Target type    ' typedef='char *target = ' widget='combobox'>p</pyTarget>
                 <pyEnergy id='pyEnergy' Comment=' Beam Energy    ' typedef='float energy = ' widget='entry'>200.0</pyEnergy>
+                <pyTune   id='pyTune'   Comment=' Pythia tune    ' typedef='int pythiaTune = ' widget='combobox'>0</pyTune>
             </pythiaInit>
         </Pythia>
     </jobType>
@@ -41,11 +42,6 @@
         <eventCuts>
             <eventCut Comment = 'centrality cut, number of tracks in |eta| &lt; 0.5'>
                 <cutName>centrality</cutName>
-                <Value widget = 'entry'>1</Value>
-                <Value widget = 'entry'>50</Value>
-            </eventCut>
-            <eventCut Comment = 'number of tracks passing track cuts'>
-                <cutName>numTracks</cutName>
                 <Value widget = 'entry'>1</Value>
                 <Value widget = 'entry'>50</Value>
             </eventCut>
@@ -85,42 +81,24 @@
     gSystem->Load("libEG");
     gSystem->Load("libEGPythia6");
     gSystem->Load("libPythia6");
+    gROOT->LoadMacro("getPythia.C");
+    gROOT->LoadMacro("getRandomSeed.C");
             </libraries>
             <centralities id='centralities' widget='entry'>1 4 7 10 14 25</centralities>
-            <ptCentralities id='ptCentralities' widget='entry'>1 4 7 10 14 25</ptCentralities>
+            <ptCentralities id='ptCentralities'>1 4 7 10 14 25</ptCentralities>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
-    char* jobid = gSystem->Getenv("JOBID");
-    int jobId = 1;
-    if (jobid) {
-        char* ptr = strstr(jobid,"_");
-        if (ptr) {
-            ptr++;
-            jobId = atoi(ptr)+1;
-        }
-    } else {
-        jobId = 2;
-    }
-    TPythia6* pythia = new TPythia6();
-    pythia-&gt;Initialize(kinematics,beam,target,ebergy);
-
-    int timestamp = time(NULL);
-    int iseed = (int)((float)timestamp/(float)jobId);
-
+    TPythia6* pythia=getPythia(kinematics,beam,target,energy,pythiaTune);
+    int iseed = getRandomSeed();
     pythia-&gt;SetMRPY(1,iseed);
-    pythia-&gt;SetMRPY(2,0); 
     cout&lt;&lt;"&lt;seedValue&gt;"&lt;&lt;iseed&lt;&lt;"&lt;/seedValue&gt;"&lt;&lt;endl;
 
     //  reader = reader interface + pointer to Data Maker + cut classes
 
-    StEStructPythia** readers = new StEStructPythia*[numberOfAnalyses];
-    for (int i=0;i&lt;numberOfAnalyses;i++) {
-        int mCent = i;
-        if (!strcmp(analysisType,"StEStructFluctuation") &amp;&amp; numberOfAnalyses == 1) {
-            mCent = -1;
-        }
-        readers[i] = new StEStructPythia(pythia,ecuts[i],tcuts[i],skipMake[i],mCent,-1);
-    }
+    StEStructPythia** reader = new StEStructPythia(pythia,ecuts,tcuts,-1);
+
+    // EventType is for qaHistograms. Depends on type of reader though.
+    int EventType = 2;
             </declareReader>
         </doEStructMacro>
 

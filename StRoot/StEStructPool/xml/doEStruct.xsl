@@ -28,27 +28,27 @@
         <xsl:variable name='reference' select='@refersTo'/>
         <xsl:for-each select='//*[@id=$reference]'><xsl:value-of select='@typedef'/><xsl:value-of select='.'/></xsl:for-each>
     </xsl:if>
-    <xsl:if test='@intInLine'>
-        <xsl:variable name='intInLine' select='@intInLine'/>
-        <xsl:for-each select='//*[@id=$intInLine]'><xsl:value-of select='.'/>;</xsl:for-each>
-    </xsl:if>
-    <xsl:if test='@boolInLine'>
+    <xsl:if test='@inLine'>
         <xsl:value-of select='@typedef'/>
         <xsl:value-of select='.'/>
-        <xsl:variable name='boolInLine' select='@boolInLine'/>
-        <xsl:for-each select='//*[@id=$boolInLine]'><xsl:value-of select='@typedef'/><xsl:value-of select='.'/>;</xsl:for-each>
+        <xsl:variable name='inLine' select='@inLine'/>
+        <xsl:for-each select='//*[@id=$inLine]'><xsl:value-of select='@typedef'/><xsl:value-of select='.'/>;
+    </xsl:for-each>
     </xsl:if>
     <xsl:if test='@stringInLine'>
         <xsl:variable name='stringInLine' select='@stringInLine'/>
-        <xsl:for-each select='//*[@id=$stringInLine]'><xsl:value-of select='@typedef'/>"<xsl:value-of select='.'/>";</xsl:for-each>
+        <xsl:for-each select='//*[@id=$stringInLine]'><xsl:value-of select='@typedef'/>"<xsl:value-of select='.'/>";
+    </xsl:for-each>
     </xsl:if>
     <xsl:if test='@listOf'>
         <xsl:variable name='numList' select='@listOf'/>
-        <xsl:for-each select='//*[@id=$numList]'>{<xsl:call-template name='commaList'/>};</xsl:for-each>
+        <xsl:for-each select='//*[@id=$numList]'><xsl:value-of select='@typedef'/>{<xsl:call-template name='commaList'/>};
+    </xsl:for-each>
     </xsl:if>
     <xsl:if test='@sumOf'>
         <xsl:variable name='summand' select='@sumOf'/>
-        <xsl:for-each select='//*[@id=$summand]'><xsl:call-template name='listLength'/>;</xsl:for-each>
+        <xsl:for-each select='//*[@id=$summand]'><xsl:value-of select='@typedef2'/><xsl:call-template name='listLength'/>;
+    </xsl:for-each>
     </xsl:if>
     </xsl:template>
 
