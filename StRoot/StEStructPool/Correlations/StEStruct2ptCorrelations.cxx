@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.13 2006/04/10 23:42:32 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.14 2006/04/12 19:09:07 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -247,6 +247,13 @@ void StEStruct2ptCorrelations::setZBuffLimits(StEStructCuts* ecut) {
   kZBuffMin = ecut->minVal("primaryVertexZ");
   kZBuffMax = ecut->maxVal("primaryVertexZ");
   kNumBuffers = int( (kZBuffMax-kZBuffMin)/kBuffWidth ); 
+
+  if(kZBuffMin==kZBuffMax){  // no z vertex cut ...
+    kZBuffMin=-100.;
+    kZBuffMax=100.;
+    kNumBuffers = 1;
+    kBuffWidth= (kZBuffMax - kZBuffMin) / kNumBuffers; // adjust widths
+  }
 
   cout<<"Setting ZBuffers:  Max="<<kZBuffMax<<" Min="<<kZBuffMin<<" NumBuff="<<kNumBuffers<<endl;
   if(kNumBuffers<=_MAX_ZVBINS_) return; // we're good to go
@@ -1694,6 +1701,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.14  2006/04/12 19:09:07  porter
+ * added logic should z-vertex cut be ommitted (i.e. analysis of event generators)
+ *
  * Revision 1.13  2006/04/10 23:42:32  porter
  * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
  * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
