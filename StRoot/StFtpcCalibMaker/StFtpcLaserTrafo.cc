@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserTrafo.cc,v 1.2 2006/03/15 15:13:57 jcs Exp $
+// $Id: StFtpcLaserTrafo.cc,v 1.3 2006/04/12 08:46:01 jcs Exp $
 //
 // $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.3  2006/04/12 08:46:01  jcs
+// initialize p0,p1,p2
+//
 // Revision 1.2  2006/03/15 15:13:57  jcs
 // add lines for listing CVS update info
 //
@@ -75,7 +78,10 @@ double StFtpcLaserTrafo::vd_gas(float rad)
 
 double StFtpcLaserTrafo::vd_gas_slope(float rad)
 {
-  double p0, p1, p2;
+  double p0 = 0.0;
+  double p1 = 0.0;
+  double p2 = 0.0;
+
   if ( mBField == 0) {
      p0=0.8327;
      p1=1.613;
@@ -120,7 +126,10 @@ double StFtpcLaserTrafo::lor_gas(float rad)
 
 double StFtpcLaserTrafo::lor_gas_slope(float rad)
 {
-  double p0, p1, p2;
+  double p0 = 0.0;
+  double p1 = 0.0;
+  double p2 = 0.0;
+
   if ( mBField == 0 ) {
      p0=0.0001995;
      p1=0.1211;
