@@ -121,7 +121,7 @@
     THijing *hijingGenerator = new THijing(buffer);
             </libraries>
             <centralities id='centralities' widget='entry'>0.0 6.0 8.6 10.6 12.4 14.0 20.0</centralities>
-            <ptCentralities id='ptCentralities'>0.0 6.0 8.6 10.6 12.4 14.0 20.0</ptCentralities>
+            <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>0.0 6.0 8.6 10.6 12.4 14.0 20.0</ptCentralities>
             <!-- A few Hijing specific histogram declarations. -->
             <useImpactParameter id='useImpactParameter' typedef='bool useImpactParameter = ' widget='entry'>true</useImpactParameter>
             <!-- Reader depends on type of data. -->
