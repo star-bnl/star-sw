@@ -2,7 +2,7 @@
 <SandBox>
   <Package >
     <File>file:log4j.xml</File>
-    <! -- <File>file:.sl305_gcc323</File>  -->
+    <!-- <File>file:.sl305_gcc323</File>  -->
   </Package>
 </SandBox>
  <command>       
