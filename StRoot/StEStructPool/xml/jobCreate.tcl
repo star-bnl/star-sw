@@ -1379,7 +1379,7 @@ proc ::jobCreate::createJobFiles {} {
             foreach dir [glob $path/*/] {
                 lappend dirs [file tail $dir]
             }
-            set normal [list QA logs cuts data scripts txt stats]
+            set normal [list QA logs cuts data scripts txt stats StRoot]
             set extra [lremove $dirs $normal]
             set missing [lremove $normal $dirs]
             if {[llength $extra] == 0 && [llength $missing] == 0} {
@@ -1421,7 +1421,18 @@ proc ::jobCreate::createJobFiles {} {
             file delete $path
         }
     }
-        
+
+    # Check if we have an un-saved change from the currently edited node.
+    if {[winfo exists .fileText] && [.fileText.t edit modified]} {
+        set title "Save edits for [$::jobCreate::lastNode nodeName]"
+        set msg   "Do you want to save edits for [$::jobCreate::lastNode nodeName] before submitting job?" 
+        set save [tk_messageBox -message $msg -type yesno \
+                -icon question -title $title]
+        if {$save} {
+            save .fileText.menu.file $::jobCreate::lastNode .fileText.t
+        }
+    }
+    
     # Make directory structure for job files and output.
     set d [list /]
     foreach dir [split $path /] {
@@ -1450,6 +1461,9 @@ proc ::jobCreate::createJobFiles {} {
     }
     if {![file exists $path/stats]} {
         file mkdir $path/stats
+    }
+    if {![file exists $path/StRoot]} {
+        file mkdir $path/StRoot
     }
 
     # Create CutsFile with event and track cuts.
@@ -1491,6 +1505,12 @@ proc ::jobCreate::createJobFiles {} {
     puts $f $subInfo
     close $f
 
+    # Make copy of source code. This also picks up object files.
+    # If this is a problem we should modify how copy is done.
+    set node [$::jobCreate::jobInfo getElementsByTagName localDir]
+    set srcDir [$node text]
+    file copy $srcDir/StRoot/StEStructPool $path/StRoot
+
     # Also write the jobPurpose into a README file fur user convenience.
     set node [$::jobCreate::jobInfo selectNodes //jobPurpose]
     set f [open $path/README w]
@@ -1526,12 +1546,13 @@ proc ::jobCreate::submitJob {} {
     set currCurs [.star-submit.t cget -cursor]
     .star-submit.t configure -cursor watch
 
-    # Wait for the file events to finish
+    # Wait for the fileevents (i.e. scheduler) to finish.
     vwait ::DONE
 
     # Close the pipe
     close $fid
 
+    # Check if user should start jobMonitor to complete job submission
     set sNode [$::jobCreate::jobInfo getElementsByTagName starSubmit]
     if {[$sNode hasAttribute simulateSubmission]} {
         if {[$sNode getAttribute simulateSubmission]} {
@@ -1738,17 +1759,11 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end " o Pythia:\n" bullet
     $w insert end "- This allows the selection of from a set of 'standard' " n
     $w insert end "Pythia jobs. The user will be able to modify the parameters " n
-    $w insert end "that are used in the pythia initialization call. " n
-    $w insert end "(CURRENTLY THIS EDITING HAS NO EFFECT. I NEED TO FIX SOME XML ISSUES.)\n" n
+    $w insert end "that are used in the pythia initialization call.\n\n " n
 
-    $w insert end " o Browse:\n" bullet
-    $w insert end "- This invokes a file browser allowing selection of a pre-existing " n
-    $w insert end "xml file that contains a job description. This can be used to load " n
-    $w insert end "a file from a previously submitted job.\n\n" n
-
-    $w insert end "After selecting one of the analysis types, selecting one " n
+    $w insert end "After selecting one of the analysis types, select one " n
     $w insert end "of the specific jobs via the drop-down box and hitting " n
-    $w insert end "'Use selection' (or bypassing this with the 'Broswe' button) " n
+    $w insert end "'Use selection' (or bypass this part by using the 'Read Job Description' menu)) " n
     $w insert end "you will will see a set of frames each of which can be expanded/contracted. " n
     $w insert end "The actual frames depend on the type of analysis job.\n\n\n" n
 
@@ -1814,7 +1829,9 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "doEStructMacro\n\n" header
 
     $w insert end "- The doEStruct macro is made up from parts that depend on what " n
-    $w insert end "type of job is required. Some of these can be modified.\n\n" n
+    $w insert end "type of job is required. The actual widgets that show up here " n
+    $w insert end "depending on whether you want to do a 2pt correlation or a fluctuation " n
+    $w insert end "analysis.\n\n" n
 
     $w insert end " o analysisType\n" bullet
     $w insert end "- Choice of StEStructFluctuation or StEStructCorrelation.\n\n" n
@@ -1822,18 +1839,23 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "Common in both analysisType choices are:\n\n" n
 
     $w insert end " o centralities\n" bullet
-    $w insert end "- Space separated list of numbers. If 'useImpactParameter' is true " n
-    $w insert end "and we are generating Hjing data then these numbers refer to impact parameter. " n
-    $w insert end "Otherwise these numbers refer to the total number of tracks passing cuts..\n\n" n
+    $w insert end "- Space separated list of numbers. By default these numbers refer to the " n
+    $w insert end "total multiplicity passing track cuts. In the case of Hijing this list " n
+    $w insert end "can refer to impact parameter, depending on value of useImpactParameter flag. " n
+    $w insert end "In principle this list could refer to any property of the event, as long as " n
+    $w insert end "the reader supports that selection.\n\n" n
 
-    $w insert end " o useImpactParameter\n" bullet
-    $w insert end "- true or false. See 'centralities' for more information.\n\n" n
+    $w insert end " o analysisMode\n" bullet
+    $w insert end "- Bit pattern passed to constructor of analsis object.\n\n" n
+
+    $w insert end " o declareAnalysis\n" bullet
+    $w insert end "- Code to declare the analysis. \n\n" n
 
     $w insert end " o declareReader\n" bullet
     $w insert end "- Code to declare the reader. \n\n" n
 
-    $w insert end " o declareAnalysis\n" bullet
-    $w insert end "- Code to declare the analysis. \n\n" n
+    $w insert end " o allocateAnalysis\n" bullet
+    $w insert end "- Code to allocate the analysis object. \n\n" n
 
     $w insert end " o main\n" bullet
     $w insert end "- This is the doEStruct macro that will be used. " n
@@ -1850,25 +1872,17 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "- All pt bins have same centrality selection but this is " n
     $w insert end "different than the cuts for the entire pt range. \n\n" n
 
-    $w insert end " o declarePtDefHistograms\n" bullet
-    $w insert end "- Code to store pt cut information in histograms in order to " n
-    $w insert end "save information with output of job. (These pt histograms really should not " n
-    $w insert end "show up in this gui, should they?)\n\n" n
-
-    $w insert end " o fillPtDefHistograms\n" bullet
-    $w insert end "- Code to fill pt cut histogram (in event loop). \n\n" n
-
-    $w insert end " o savePtDefHistograms\n" bullet
-    $w insert end "- Code to writeout pt cut histograms with rest of output. \n\n" n
-
 
     $w insert end "Only in StEStructCorrelation:\n\n" n
 
-    $w insert end " o cutModeInit\n" bullet
-    $w insert end "- Initialize cut mode. \n\n" n
+    $w insert end " o cutMode\n" bullet
+    $w insert end "- Flag that chooses actual cut binning mode. \n\n" n
 
-    $w insert end " o paitCutsWrite\n" bullet
-    $w insert end "- Write out pair cuts. (Probably should not show up in gui.) \n\n" n
+
+    $w insert end "Only when we are using Hijing as input:\n\n" n
+
+    $w insert end " o useImpactParameter\n" bullet
+    $w insert end "- true or false. See 'centralities' for more information.\n\n" n
 
 
 
@@ -1879,19 +1893,17 @@ proc ::jobCreate::displayHelp {w} {
 
     $w insert end "pythiaInit\n" header
 
-    $w insert end " o Currently this section does not modify actual doEStruct macro.\n" bullet
-    $w insert end "- As a work around part of the doEStruct macro can be edited directly " n
-    $w insert end "within the doEStructMacro frame." n
-
-    $w insert end "- This shows (and makes editable) parameters passed into the pythia " n
+    $w insert end " o This shows (and makes editable) parameters passed into pythia.\n " bullet
     $w insert end "Some of the options for pyFrame are not avaliable. In particular, " n
     $w insert end "in order for '3MOM', '4MOM', and '5MOM' to work properly values in a " n
     $w insert end "common block have to be set. We can add an interface to these in principle.\n\n" n
 
-
     $w insert end "- Not all values for pyBeam and pyTarget are available. " n
     $w insert end "In particular gammas from bremstrahlung of e, mu and tau " n
     $w insert end "require values in a common block to be set. " n
+
+    $w insert end " o pyTune chooses a group of options used to tune Pythia\n " bullet
+    $w insert end "for a particular physics case.\n\n " n
 
     $w config -state disabled
 }
