@@ -25,7 +25,7 @@
 
         <doEStructMacro>
             <centralities id='centralities' widget='entry'>1 47 123 350 600</centralities>
-            <ptCentralities id='ptCentralities'>1 47 123 350 600</ptCentralities>
+            <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>1 47 123 350 600</ptCentralities>
         </doEStructMacro>
     </standardElements>
 </jobDescription>

@@ -78,14 +78,13 @@
             <libraries id='libraries' widget='none'>
     gSystem->Load("StEStructPoolEventGenerators");
     // pythia stuff
-    gSystem->Load("libEG");
-    gSystem->Load("libEGPythia6");
-    gSystem->Load("libPythia6");
+    gROOT->LoadMacro("loadPythiaLibs.C");
+    loadPythiaLibs();
     gROOT->LoadMacro("getPythia.C");
     gROOT->LoadMacro("getRandomSeed.C");
             </libraries>
             <centralities id='centralities' widget='entry'>1 4 7 10 14 25</centralities>
-            <ptCentralities id='ptCentralities'>1 4 7 10 14 25</ptCentralities>
+            <ptCentralities id='ptCentralities' typedef='const  double ptMultCut[] = ' typedef2='int mbNPtBins = '>1 4 7 10 14 25</ptCentralities>
     <!-- Reader depends on type of data. -->
             <declareReader id='declareReader' widget = 'text'>
     TPythia6* pythia=getPythia(kinematics,beam,target,energy,pythiaTune);
