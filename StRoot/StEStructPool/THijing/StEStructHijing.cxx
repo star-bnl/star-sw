@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHijing.cxx,v 1.6 2006/04/11 17:51:56 prindle Exp $
+ * $Id: StEStructHijing.cxx,v 1.7 2006/04/13 23:04:22 prindle Exp $
  *
  * Author: Chunhui Han
  *
@@ -76,8 +76,6 @@ StEStructEvent* StEStructHijing::next() {
       centMeasure = nTracks;
     }
     retVal->SetCentrality(centMeasure);
-    StEStructCentrality* cent=StEStructCentrality::Instance();
-    int jCent = cent->centrality(retVal->Centrality());
     if (!mECuts->goodCentrality(centMeasure)) {
         delete retVal;
         retVal=NULL;
@@ -193,11 +191,9 @@ bool StEStructHijing::isTrackGood(int i) {
     v[1] = mHijing->GetVy(i);
     v[2] = mHijing->GetVz(i);
 
+    int q;
+    pid < 0 ? q=-1 : q=+1;
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
-    if (pt < 0.15) {
-        return false;
-    }
-
     float theta = acos(p[2]/ TMath::Sqrt(pt * pt + p[2] * p[2]) );
     float eta   = -1.0*log(tan(theta/2.0));
     float phi = atan2((double)p[1], (double)p[0]);
@@ -207,9 +203,10 @@ bool StEStructHijing::isTrackGood(int i) {
 
     bool useTrack = true;
     useTrack = (mTCuts->goodGlobalDCA(gdca[3]) && useTrack);
+    useTrack = (mTCuts->goodCharge(q) && useTrack);
+    useTrack = (mTCuts->goodPt(pt) && useTrack);
     useTrack = (mTCuts->goodEta(eta) && useTrack);
     useTrack = (mTCuts->goodPhi(phi) && useTrack);
-    useTrack = (mTCuts->goodPt(pt) && useTrack);
     useTrack = (mTCuts->goodYt(yt) && useTrack);
     delete [] gdca;
 
