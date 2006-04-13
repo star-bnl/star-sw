@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.14 2006/04/12 19:09:07 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.15 2006/04/13 23:02:35 prindle Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -214,6 +214,8 @@ void StEStruct2ptCorrelations::finish(){
   tf->cd();
   writeHistograms();
   tf->Close();
+  // When we don't delete tf it gets reported as a memory leak
+  // (which it is, but we are quitting anyway so why bother with it?)
   mHistosWritten = true;
 }
 
@@ -678,7 +680,6 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         float spt2=pt2;
         float wgt = 1.0;
         nwgt = wgt;
-        float deta=mPair.DeltaEta(); 
         if( !mskipEtaDeltaWeight ) {
            nwgt = b->getDEtaWeight(mPair.DeltaEta());
            pwgt*=nwgt;
@@ -1701,6 +1702,10 @@ void StEStruct2ptCorrelations::createHist1D(TH1F*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.15  2006/04/13 23:02:35  prindle
+ * Added comment about not deleting output root file (which gets reported
+ * as a memory leak but this is just before the program quits anayway.)
+ *
  * Revision 1.14  2006/04/12 19:09:07  porter
  * added logic should z-vertex cut be ommitted (i.e. analysis of event generators)
  *
