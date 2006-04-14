@@ -3,8 +3,8 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
-// Revision 1.165  2006/04/07 18:00:30  perev
-// Back to the latest Sti
+// Revision 1.166  2006/04/14 22:51:26  perev
+// Option useFakeVertex added
 //
 // Revision 1.161  2006/02/14 18:53:58  perev
 // Sub makerFunctionality added.
@@ -482,6 +482,19 @@ Int_t StiMaker::Make()
 
   if (!event) return kStWarn;
 
+
+// Temporary fake hit to create fake vertex if needed;
+// Used only if SetAttr("useFakeVertex",1) is set
+  StiHit fakeHit;
+  std::vector<StiHit*> fakeVertexes;
+  fakeVertexes.push_back(&fakeHit);
+  {
+     StMatrixF fakeErr(3,3);
+     fakeErr(1,1) = 1;fakeErr(2,2) = 1;fakeErr(3,3) = 1;
+     fakeHit.setError(fakeErr);
+  }
+
+
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
 
@@ -497,8 +510,7 @@ Int_t StiMaker::Make()
   _seedFinder->reset();
   if (_tracker) {
       _tracker->findTracks();
-      StiHit *vertex=0;
-      const std::vector<StiHit*> *vertices=0;
+      const std::vector<StiHit*> *vertexes=0;
       try
 	{
 	  if (_eventFiller)
@@ -512,14 +524,16 @@ Int_t StiMaker::Make()
 	{
 	  //cout << "StiMaker::Maker() -I- Will Find Vertex"<<endl;
 	  _vertexFinder->fit(event);
-	  vertices = _vertexFinder->result();
-          vertex   = _vertexFinder->getVertex(0);
-	  if (vertices && vertices->size())
-//	  if (vertex)
+	  vertexes = _vertexFinder->result();
+
+	  if ((!vertexes || !vertexes->size()) && IAttr("useFakeVertex")) {
+            vertexes = &fakeVertexes;
+          }
+
+	  if (vertexes && vertexes->size())
 	    {
 	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
-	      _tracker->extendTracksToVertices(*vertices);
-//	      _tracker->extendTracksToVertex(vertex);
+	      _tracker->extendTracksToVertices(*vertexes);
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
 		  if (_eventFiller) _eventFiller->fillEventPrimaries();
 	    }
