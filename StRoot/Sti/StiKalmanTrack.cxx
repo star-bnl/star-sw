@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.83 2006/04/07 18:01:55 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.83 2006/04/07 18:01:55 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.84 2006/04/15 23:11:18 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.84 2006/04/15 23:11:18 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.84  2006/04/15 23:11:18  perev
+ * For zero field min curvature 1/1km
+ *
  * Revision 2.83  2006/04/07 18:01:55  perev
  * Back to the latest Sti
  *
@@ -1520,7 +1523,7 @@ static int nCall=0; nCall++;
   
   
   TCircle circ,cirl;
-  if (fabs(hz)<1e-6) circ.SetStrait();
+  if (fabs(hz)<1e-5) circ.SetStrait();
   res=circ.Approx(nPnts,xyz[0],3);
   if (res>BAD_RESIDUAL*5) 		return 2;
   res=circ.Fit(nPnts,xyz[0],3,err[0],4);
@@ -1548,7 +1551,7 @@ static int nCall=0; nCall++;
     P._z  = Z0TanL[0]+Z0TanL[1]*s;
     P._eta  = atan2(cirl.Dir()[1],cirl.Dir()[0]);
     P._curv = curv;
-    double ptin = (fabs(P._hz)>1e-3)? curv/P._hz:1e-6;
+    double ptin = (fabs(P._hz)>1e-5)? curv/P._hz:1e-6;
     P._ptin= ptin;
     P._tanl = Z0TanL[1];
     P._cosCA = cirl.Dir()[0];

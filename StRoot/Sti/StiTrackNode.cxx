@@ -429,7 +429,8 @@ int StiNodePars::check(const char *pri) const
 
 //?? temp test
   double tmp = _curv - _ptin* _hz;
-  assert(fabs(_hz)<1e-10 || fabs(tmp)<= 1e-3*fabs(_curv));
+//		1km for 1GeV is a zero field
+  assert(fabs(_hz)<1e-5 || fabs(tmp)<= 1e-3*fabs(_curv));
 //??
   int ierr=0;
   for (int i=0;i<kNPars;i++) {if (fabs(P[i]) > MAXPARS[i]) {ierr = i+1 ; break;}} 
