@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.98 2006/04/07 18:01:56 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.99 2006/04/15 23:12:10 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.99  2006/04/15 23:12:10  perev
+ * Supress printout
+ *
  * Revision 2.98  2006/04/07 18:01:56  perev
  * Back to the latest Sti
  *
@@ -1473,7 +1476,7 @@ static int nCall=0; nCall++;
           ,mFE._cYY,mHrr.hYY,mFE._cZZ,mHrr.hZZ);
     return -14;
   }
-  if (mFE.check("StiKalmanTrackNode::updateNode")) return -14;
+  if (mFE.check()) return -14;
 
 #ifdef Sti_DEBUG
   TRSymMatrix W(H,TRArray::kATxSxA,G); 
