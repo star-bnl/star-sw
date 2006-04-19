@@ -126,7 +126,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 		    pPlacement->setNormalRep(anglepos-tiltAngle,
 					     radii[row]*cos(tiltAngle),
 					     radii[row]*sin(tiltAngle)) ;
-		    pPlacement->setLayerRadius(radii[row]*cos(tilitAngle));
+		    pPlacement->setLayerRadius(radii[row]*cos(tiltAngle));
 		    
 		    pPlacement->setRegion(StiPlacement::kMidRapidity);
       		    pPlacement->setLayerAngle(anglepos);
