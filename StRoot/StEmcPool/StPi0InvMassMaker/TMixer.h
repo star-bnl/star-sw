@@ -3,7 +3,11 @@
 
 /*
 $Log: TMixer.h,v $
+Revision 1.2  2006/04/20 13:47:15  amischke
+bug fixed.
+
 Revision 1.1  2006/04/20 11:42:26  amischke
+
 automatically CVS:  CVS: Committing in . CVS:  CVS: Added Files: CVS:  StPi0InvMassMaker.cxx StPi0InvMassMaker.h TEventMixer.cxx CVS:
 TEventMixer.h TMixer.cxx TMixer.h CVS: ----------------------------------------------------------------------
 
@@ -89,8 +93,8 @@ public:
     
   void GetEvent(Int_t Evt1=-1, Int_t Evt2=-1);
 
-  TObjArray* TMixer::GetPart1List();  
-  TObjArray* TMixer::GetPart2List();
+  TObjArray* GetPart1List();  
+  TObjArray* GetPart2List();
 
   ClassDef(TMixer,1)   // Event mixer for list of T49ParticleRoot
 
