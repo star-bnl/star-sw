@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.7 2006/04/10 23:40:40 porter Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.8 2006/04/25 21:02:50 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -60,6 +60,12 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 4500;
 	validRun = 1;
       }
+      else if (!strcmp("AuAu200GeVCentral2001",mRunPeriod)) {
+        // For use with trgsetupname=productionCentral; productions P02gc,P02gd,P02ge; recommended |Vz|<25
+        mtWord[0] = 4000;
+        mtWord[1] = 4500;
+        validRun = 1;
+      }
       else if (!strcmp("AuAu200GeVMinBias2004",mRunPeriod)) {
 	// trgsetupname=productionMinBias; production P05ia; recommended |Vz|<30 (15007), -10<Vz<50 (15003)
 	//mtWord[0] = 15000;  mtWord[1] = 15010;  
@@ -85,9 +91,15 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
 	mtWord[1] = 76020;
 	validRun = 1; 
       }
+      else if (!strcmp("dAu200GeVMinBias2003",mRunPeriod)) {
+        // ...
+        mtWord[0] = 2000; // untested  
+        mtWord[1] = 2010;
+        validRun = 1;
+      }
       if (validRun) {
-         mtWordName.idx=createCutHists(name,mtWord);
-         mtrgByRunPeriod=true;
+	mtWordName.idx=createCutHists(name,mtWord);
+	mtrgByRunPeriod=true;
       }
       else cout << "  Warning: unknown run period " << name << endl;      
     } else {
@@ -105,7 +117,7 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
     setRange(mtWordName.name,mtWord[0],mtWord[1]);
     return true;
   }
-    
+  
   if(!strcmp(name,mpVertexZName.name)){
     mpVertexZ[0]=atof(vals[0]); 
     mpVertexZ[1]=atof(vals[1]);
@@ -113,7 +125,7 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
     setRange(mpVertexZName.name,mpVertexZ[0],mpVertexZ[1]);
     return true;
   }    
-    
+  
   if(!strcmp(name,mcentralityName.name)){
     mcentrality[0]=atoi(vals[0]); 
     mcentrality[1]=atoi(vals[1]);
@@ -121,10 +133,10 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
     setRange(mcentralityName.name,mcentrality[0],mcentrality[1]);
     return true;
   }    
-    
-    
+  
+  
   return false;
-    
+  
 };
 
 
@@ -145,6 +157,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.8  2006/04/25 21:02:50  msd
+ * Added AuAu200GeVCentral2001 and dAu200GeVMinBias2003
+ *
  * Revision 1.7  2006/04/10 23:40:40  porter
  * Fixed the minbias trigger definition for the CuCu 200 2005 run
  *
