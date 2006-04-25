@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.2 2006/04/08 19:06:29 mvl Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.3 2006/04/25 13:06:44 mvl Exp $
  *
  */
 
@@ -119,7 +119,7 @@ private:
     int   matchTrack2BEMC(const StTrack *);
     int   checkCrossMembrane(const StTrack *);
     void  calculateRanks();
-    int   findSeeds(int, float, float);
+    int   findSeeds();
 
     static void fcn(int&, double*, double&, double*, int); // fit function
     static void fcn1D(int&, double*, double&, double*, int); // fit function
@@ -170,6 +170,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.3  2006/04/25 13:06:44  mvl
+ * Seed-finding range extended to -200<vtx_z<200
+ *
  * Revision 1.2  2006/04/08 19:06:29  mvl
  * Update for multiple vertex finding and rank calculation for identifying the
  * triggered vertex. Ranks are based on mean dip angle of tracks, BEMC matches
