@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.9 2006/04/06 01:09:49 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.10 2006/04/25 21:04:39 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -105,20 +105,56 @@ StEStructSupport::~StEStructSupport(){
 //---------------------------------------------------------
 TH1** StEStructSupport::getHists(const char* name){
 
+  /*
+  TH1** retVal=NULL;
+  if(!goodName(name)) return retVal;
+  retVal=new TH1*[8];
+  for(int i=0;i<_pair_totalmax;i++){
+  TString hname(getFrontName(i));
+  hname+=name;
+  retVal[i] = (TH1*)mtf->Get(hname.Data());
+  }
+  
+  return retVal;
+  }
+  */
+
   TH1** retVal=NULL;
   if(!goodName(name)) return retVal;
   
   retVal=new TH1*[8];
-
+  
   for(int i=0;i<_pair_totalmax;i++){
     TString hname(getFrontName(i));
     hname+=name;
-    retVal[i] = (TH1*)mtf->Get(hname.Data());
+    
+    TH1* tmpF=(TH1*)mtf->Get(hname.Data());
+    TAxis * xa=tmpF->GetXaxis();
+    TAxis * ya=tmpF->GetYaxis();
+    
+    TH1::AddDirectory(kFALSE);
+    if(ya->GetNbins()==1){
+      retVal[i]=(TH1*)new TH1D(tmpF->GetName(),tmpF->GetTitle(),
+			       xa->GetNbins(),xa->GetXmin(),xa->GetXmax());
+    } else {
+      retVal[i]=(TH1*)new TH2D(tmpF->GetName(),tmpF->GetTitle(),
+			       xa->GetNbins(),xa->GetXmin(),xa->GetXmax(),
+			       ya->GetNbins(),ya->GetXmin(),ya->GetXmax());
+    }
+    
+    for(int ix=1;ix<=xa->GetNbins();ix++){
+      for(int iy=1;iy<=ya->GetNbins();iy++){
+	retVal[i]->SetBinContent(ix,iy,tmpF->GetBinContent(ix,iy));
+	retVal[i]->SetBinError(ix,iy,tmpF->GetBinError(ix,iy));
+      }
+    }
   }
+  
+  //   retVal[i] = (TH1*)mtf->Get(hname.Data());
+  
 
   return retVal;
 }
-
 //-----------------------------------------------------
 float* StEStructSupport::getNorms(TH1** histArray){
 
@@ -932,8 +968,11 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.10  2006/04/25 21:04:39  msd
+ * Added Jeff's patch for getHists to create doubles instead of floats
+ *
  * Revision 1.9  2006/04/06 01:09:49  prindle
- * Calculating pt for each cut bin caused changes in HAdd.
+ *   Calculating pt for each cut bin caused changes in HAdd.
  * The splitting of +- into +- and -+ caused changes in Support.
  *
  * Revision 1.8  2006/04/04 22:14:10  porter
