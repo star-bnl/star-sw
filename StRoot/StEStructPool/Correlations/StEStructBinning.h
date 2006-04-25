@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.10 2006/04/10 23:42:32 porter Exp $
+ * $Id: StEStructBinning.h,v 1.11 2006/04/25 21:03:57 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -407,13 +407,13 @@ inline int StEStructBinning::ieta(float eta){
 }
 
 inline int StEStructBinning::ideta(float eta){
-  if( eta < minDEta ) return ESTRUCT_ETA_BINS - 1;
+  if( eta < minDEta ) return ESTRUCT_DETA_BINS - 1;
   int j = (int)( (eta-minDEta)/dDEta );
   return (j > ESTRUCT_DETA_BINS - 2) ? ESTRUCT_DETA_BINS - 1 : j;
 }
 
 inline int StEStructBinning::iseta(float eta){
-  if( eta < minSEta ) return ESTRUCT_ETA_BINS - 1;
+  if( eta < minSEta ) return ESTRUCT_SETA_BINS - 1;
   int j = (int)( (eta-minSEta)/dSEta );
   return (j > ESTRUCT_SETA_BINS - 2) ? ESTRUCT_SETA_BINS - 1 : j;
 }
@@ -563,6 +563,9 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.11  2006/04/25 21:03:57  msd
+ * Fixed bugs in ideta and iseta
+ *
  * Revision 1.10  2006/04/10 23:42:32  porter
  * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
  * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
