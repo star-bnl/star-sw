@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.27 2006/03/22 20:57:19 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.28 2006/04/25 23:20:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.28  2006/04/25 23:20:31  ullrich
+ * Added StPrimaryVertexOrder.
+ *
  * Revision 2.27  2006/03/22 20:57:19  ullrich
  * Added StL2AlgorithmId enumeration.
  *
@@ -314,5 +317,11 @@ enum StL2AlgorithmId { l2Diagnostic = 0,
                        l2Dijet,
                        l2EmcPedestal,
                        l2Pi0Gamma};
+
+/*!
+ * \enum StPrimaryVertexOrder
+ */
+enum StPrimaryVertexOrder { orderByNumberOfDaughters = 0,
+		        orderByRanking};
 
 #endif
