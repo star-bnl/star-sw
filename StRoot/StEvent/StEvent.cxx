@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.38 2006/01/19 21:48:21 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.39 2006/04/25 23:21:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.39  2006/04/25 23:21:25  ullrich
+ * Modified addPrimaryVertex(). New 2nd arg: StPrimaryVertexOrder.
+ *
  * Revision 2.38  2006/01/19 21:48:21  ullrich
  * Add RnD collection.
  *
@@ -174,8 +177,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.38 2006/01/19 21:48:21 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.38 2006/01/19 21:48:21 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.39 2006/04/25 23:21:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.39 2006/04/25 23:21:25 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -1045,38 +1048,44 @@ StEvent::setL3Trigger(StL3Trigger* val)
 }
 
 void
-StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
+StEvent::addPrimaryVertex(StPrimaryVertex* vertex, StPrimaryVertexOrder order)
 {
-    if (vertex) {
-        StSPtrVecPrimaryVertex* vertexVector = 0;
-        _lookupOrCreate(vertexVector, mContent);
-        vertexVector->push_back(vertex);
-        
-        //
-        //  Sort new entry.
-        //  Vertices are ordered according to number
-        //  of daughter tracks in descending order except
-        //  for ppvf where the tracks are ordered according
-        //  to their ranking values.
-        //
-        for (int i=vertexVector->size()-1; i>0; i--) {
-	  // ppvf 
-	  if (vertex->vertexFinderId() == ppvVertexFinder) {
-	      if ((*vertexVector)[i]->ranking() >
-		(*vertexVector)[i-1]->ranking())
-		swap((*vertexVector)[i], (*vertexVector)[i-1]);
-	      else
-		break;
-	  }
-	  // all other single vertex finder
-	  else {
-	      if ((*vertexVector)[i]->numberOfDaughters() >
-		(*vertexVector)[i-1]->numberOfDaughters())
-		swap((*vertexVector)[i], (*vertexVector)[i-1]);
-	      else
-		break;
-	  }
+    if (!vertex) return;  // not a valid vertex, do nothing
+
+    //
+    //  Add the vertex
+    //
+    StSPtrVecPrimaryVertex* vertexVector = 0;
+    _lookupOrCreate(vertexVector, mContent);
+    vertexVector->push_back(vertex);
+
+    //
+    //  Sort vertices.
+    //  New vertex is last entry. We simply toggle through
+    //  the container starting at the back until the new entry
+    //  sits in place. Sorting strategy is given by
+    //  enumeration StPrimaryVertexOrder.
+    //
+    int i;
+    switch (order) {
+    case(orderByNumberOfDaughters):   
+        for (i=vertexVector->size()-1; i>0; i--) {
+	  if ((*vertexVector)[i]->numberOfDaughters() > (*vertexVector)[i-1]->numberOfDaughters())
+	      swap((*vertexVector)[i], (*vertexVector)[i-1]);
+	  else
+	      break;
         }
+        break;
+        
+    case(orderByRanking):
+    default:
+        for (i=vertexVector->size()-1; i>0; i--) {
+	  if ((*vertexVector)[i]->ranking() > (*vertexVector)[i-1]->ranking())
+	      swap((*vertexVector)[i], (*vertexVector)[i-1]);
+	  else
+	      break;
+        }
+        break;
     }
 }
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.31 2006/01/19 21:48:21 ullrich Exp $
+ * $Id: StEvent.h,v 2.32 2006/04/25 23:21:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.32  2006/04/25 23:21:25  ullrich
+ * Modified addPrimaryVertex(). New 2nd arg: StPrimaryVertexOrder.
+ *
  * Revision 2.31  2006/01/19 21:48:21  ullrich
  * Add RnD collection.
  *
@@ -280,7 +283,7 @@ public:
     void setL0Trigger(StL0Trigger*);
     void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
-    void addPrimaryVertex(StPrimaryVertex*);
+    void addPrimaryVertex(StPrimaryVertex*, StPrimaryVertexOrder = orderByNumberOfDaughters);
     void addCalibrationVertex(StCalibrationVertex*);
     void addDetectorState(StDetectorState*);
     void addPsd(StPsd*);
