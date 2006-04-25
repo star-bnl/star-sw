@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.7 2006/04/10 23:40:40 porter Exp $
+ * $Id: StEStructEventCuts.h,v 1.8 2006/04/25 21:02:51 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -101,18 +101,31 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
         if ( 0x1000 == t ) {
             return true;
         }
+    } else if (!strcmp("AuAu200GeVCentral2001",mRunPeriod)) {
+      StMuL3EventSummary l3 = muEvent->l3EventSummary();
+      if (!(l3.unbiasedTrigger())) {
+	return false;
+      }
+      unsigned int t = muEvent->l0Trigger().triggerWord();
+      if ( 0x1100 == t ) {
+	return true;
+      }
+    } else if (!strcmp("dAu200GeVMinBias2003",mRunPeriod)) {
+      if (muEvent->triggerIdCollection().nominal().isTrigger(2001) ||
+	  muEvent->triggerIdCollection().nominal().isTrigger(2003)) {
+	return true;
+      }      
     } else if(!strcmp("ppMinBias",mRunPeriod)){
       if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) return true;
     }
-
   } else {
         unsigned int t = muEvent->l0Trigger().triggerWord();
         mvalues[mtWordName.idx] = (float)t;
         return ( (mtWord[0]==mtWord[1] && mtWord[0]==0) ||
                  (t>=mtWord[0] && t<=mtWord[1])  ) ;
   }
-
-    return false;
+  return false;
+ 
 }
 
 inline bool StEStructEventCuts::goodPrimaryVertexZ(float z) {
@@ -134,6 +147,9 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.8  2006/04/25 21:02:51  msd
+ * Added AuAu200GeVCentral2001 and dAu200GeVMinBias2003
+ *
  * Revision 1.7  2006/04/10 23:40:40  porter
  * Fixed the minbias trigger definition for the CuCu 200 2005 run
  *
