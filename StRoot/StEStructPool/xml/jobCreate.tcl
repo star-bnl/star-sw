@@ -106,6 +106,8 @@ proc ::jobCreate::parseJobInfo {fileName} {
                 set ::jobCreate::jobAnalysisType "StEStructCorrelation"
             } elseif {$mFile eq "StEStructFluctuation.xml"} {
                 set ::jobCreate::jobAnalysisType "StEStructFluctuation"
+            } elseif {$mFile eq "StEStructPhiWeight.xml"} {
+                set ::jobCreate::jobAnalysisType "StEStructPhiWeight"
             }
             set mDom [open [file join $dir $mFile]]
             set mDomInfo [dom parse [read $mDom]]
@@ -686,7 +688,7 @@ proc ::jobCreate::setAnalysisType {f type} {
     set lisFile [file join $::jobCreate::jobCreatePath jobFiles $::jobCreate::jobLisFile]
     set lfh [open $lisFile]
     while {[gets $lfh xmlFile] >= 0} {
-        if {$xmlFile eq "StEStructCorrelation.xml" || $xmlFile eq "StEStructFluctuation.xml"} {
+        if {$xmlFile eq "StEStructCorrelation.xml" || $xmlFile eq "StEStructFluctuation.xml" || $xmlFile eq "StEStructPhiWeight.xml"} {
             set xmlFile $::jobCreate::jobAnalysisType.xml
         }
         set mDom [open [file join $::jobCreate::jobCreatePath jobFiles $xmlFile]]
