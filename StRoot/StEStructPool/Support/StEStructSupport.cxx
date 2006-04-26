@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.10 2006/04/25 21:04:39 msd Exp $
+ * $Id: StEStructSupport.cxx,v 1.11 2006/04/26 18:52:12 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -669,6 +669,16 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt){
 	    z = ( n*ptHatB*ptHatA ) / sqrt(double(mixn));
             break;
 	   } 
+	 case 3:
+	   {
+	    //z = (b * ptHat) / sqrt(double(mixn));
+	    break;
+	   }
+	 case 4:
+	   {
+	    z = a/sqrt(double(mixn));
+	    break;
+	   }
 	 default:
 	   {
 	    z = (a - (ba*ptHatB+bb*ptHatA) + n*ptHatA*ptHatB ) / sqrt(double(mixn));
@@ -968,6 +978,13 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.11  2006/04/26 18:52:12  dkettler
+ * Added reaction plane determination for the analysis
+ *
+ * Added reaction plane angle calculation
+ *
+ * Case 3 in buildPtChargeTypes needs to be corrected
+ *
  * Revision 1.10  2006/04/25 21:04:39  msd
  * Added Jeff's patch for getHists to create doubles instead of floats
  *
