@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.4 2006/04/06 00:53:52 prindle Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.5 2006/04/26 18:48:57 dkettler Exp $
  *
  *************************************************************************
  *
@@ -41,6 +41,7 @@ StEStructAnalysisMaker::StEStructAnalysisMaker(const Char_t *name) : StMaker(nam
     numAnalysis=0;
     doPrintMemoryInfo=false;
     mEventProcessedPerType=0;
+    doReactionPlaneAnalysis=false;
     mQAHists = NULL;
 }
 
@@ -115,25 +116,24 @@ StEStructAnalysisMaker::Make(){
    //
 
    mCurrentAnalysis = 0;
-
    if(!(pEStructEvent=mreader->next())){
-
      if(mreader->done()) return kStEOF;
-
    } else {
-
      int ia = getAnalysisIndex();         // 0 if numAnalysis = 1
      if(ia>=0 && ia < numAnalysis) {
+       if(doReactionPlaneAnalysis) {
+         pEStructEvent->SetPhiWgt(mWeightFile);
+         //pEStructEvent->SetPhiWgt();
+         pEStructEvent->ShiftPhi();  // This step modifies all Phi values to be w.r.t. the reaction plane
+       }
 
        manalysis[ia]->doEvent(pEStructEvent);
        mEventProcessedCounter++;
        mEventProcessedPerType[ia]++;
        if(mQAHists)mQAHists->fillHistograms(pEStructEvent,mreader);
        mCurrentAnalysis = manalysis[ia];
-
      }
-   }   
-
+   }
 
    if (doPrintMemoryInfo) {
      StMemoryInfo::instance()->snapshot();
@@ -190,6 +190,11 @@ void StEStructAnalysisMaker::compiledLoop(){
   */
 };
 
+void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
+  doReactionPlaneAnalysis = true;
+  mWeightFile = weightFile;
+}
+
 //-----------------------------------------
 //-----------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -199,8 +204,11 @@ void StEStructAnalysisMaker::compiledLoop(){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.5  2006/04/26 18:48:57  dkettler
+ * Added reaction plane determination for the analysis
+ *
  * Revision 1.4  2006/04/06 00:53:52  prindle
- * Tried to rationalize the way centrality is defined.
+ *   Tried to rationalize the way centrality is defined.
  *   Now the reader gives a float to StEStructEvent and this float is
  * what is being used to define centrality. When we need a centrality
  * bin index we pass this number into the centrality singleton object.
