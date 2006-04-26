@@ -205,6 +205,7 @@ StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
   {
     sto = a[i];       
     if (sto) sto = ((StObject*)sto)->clone(); 
+    sto->ResetBit(kBelongs);
     put_at(sto,i);
   }
 } 
