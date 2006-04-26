@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *$Id: StEStructAnalysisMaker.h,v 1.6 2006/04/04 22:05:03 porter Exp $
+ *$Id: StEStructAnalysisMaker.h,v 1.7 2006/04/26 18:48:58 dkettler Exp $
  *   
  *
  *
@@ -68,12 +68,15 @@ public:
     void          logOutputRate(ostream& os);
     void          logAnalysisStats(ostream& os);
 
+    void	  SetReactionPlaneAnalysis(char* weightFile);	// Sets the flag to do a reaction plane analysis
+//    void	  SetPhiWgtAnalysis();				// Sets the flag to do PhiWgt calculation
+
     void          compiledLoop();
     StEStructAnalysis* mCurrentAnalysis;
 
 
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.6 2006/04/04 22:05:03 porter Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEStructAnalysisMaker.h,v 1.7 2006/04/26 18:48:58 dkettler Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 //-------------------------------------------------
 
 
@@ -85,6 +88,9 @@ private:
     UInt_t              mEventProcessedCounter; //!   //  mNeventsProcessed
     int*                mEventProcessedPerType; //!
     int                 numAnalysis;
+    Bool_t		doReactionPlaneAnalysis; 	//Flag to indicate whether or not to find the reaction plane
+    char*		mWeightFile;			//File that contains phi weights
+//    Bool_t		doPhiWgtAnalysis;		//Flag to indicate whether to calculate PhiWgts this pass
     // --> new pointers for data I/O, cuts, and analysis
 
     StEStructEventReader* mreader; //! base class for reading an event
@@ -102,6 +108,7 @@ private:
 
 
 inline StMuTimer* StEStructAnalysisMaker::getTimer(){ return mtimer; };
+//inline void SetReactionPlaneAnalysis() { doReactionPlaneAnalysis = true; };
 
 inline void StEStructAnalysisMaker::SetReaderAnalysisPair(StEStructEventReader* reader, StEStructAnalysis* analysis){
   SetEventReader(reader);
@@ -185,6 +192,9 @@ inline void StEStructAnalysisMaker::logAnalysisStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.h,v $
+ * Revision 1.7  2006/04/26 18:48:58  dkettler
+ * Added reaction plane determination for the analysis
+ *
  * Revision 1.6  2006/04/04 22:05:03  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
