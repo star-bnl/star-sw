@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2ptAuAu.C,v 1.1 2005/03/03 18:30:59 porter Exp $
+ * $Id: doEStruct2ptAuAu.C,v 1.2 2006/04/26 18:52:50 dkettler Exp $
  *
  * Author: Jeff Porter 
  *
@@ -92,6 +92,7 @@ void doEStruct2ptAuAu(const char* fileListFile, const char* outputDir, const cha
   }
  
   // --- now do the work ---
+  //estructMaker->SetReactionPlaneAnalysis("/home/dkettler/working/weights/PhiWgt.root");
   doTheWork(estructMaker,maxNumEvents);
 
   //--- now write out stats and cuts ---
@@ -136,6 +137,15 @@ void doEStruct2ptAuAu(const char* fileListFile, const char* outputDir, const cha
 /**********************************************************************
  *
  * $Log: doEStruct2ptAuAu.C,v $
+ * Revision 1.2  2006/04/26 18:52:50  dkettler
+ * Added reaction plane determination for the analysis
+ *
+ * Added reaction plane angle calculation
+ *
+ * Case 3 in buildPtChargeTypes needs to be corrected
+ *
+ * Flag added for enabling reaction plane analysis
+ *
  * Revision 1.1  2005/03/03 18:30:59  porter
  * example correlations macro and scheduler xml
  *
