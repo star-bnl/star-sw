@@ -127,6 +127,7 @@ public:
   virtual double  getValue(int key) const;
   virtual bool isPrimary() const=0;
           int    getId() const {return mId;}
+          void   setId(int id)  {mId=id;}
   virtual StiTrackNode *extendToVertex(StiHit* vertex)=0;
   //	virtual bool extendToVertex(StiHit* vertex, const StiDetector * alternate)=0;
   virtual int  refit()=0;
@@ -139,6 +140,7 @@ public:
   friend ostream& operator<<(ostream& os, const StiTrack& track);
 protected:
   int             mId;
+  int             mIdDb;
 };
 
 //Dummy get global dca method always returns zero
