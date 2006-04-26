@@ -453,6 +453,7 @@ hell is in this directory.
     <xs:restriction base='xs:string'>
         <xs:enumeration value='StEStructFluctuation' Comment='Fill histograms for fluctuation analysis.'/>
         <xs:enumeration value='StEStructCorrelation' Comment='Fill histograms for correlation analysis.'/>
+        <xs:enumeration value='StEStructPhiWeight' Comment='Fill histograms for phi weighting analysis.'/>
     </xs:restriction>
 </xs:simpleType>
 <xs:element name='libraries'>
