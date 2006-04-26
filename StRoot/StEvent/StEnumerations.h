@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.28 2006/04/25 23:20:31 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.29 2006/04/26 14:41:22 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.29  2006/04/26 14:41:22  jeromel
+ * doxygenized
+ *
  * Revision 2.28  2006/04/25 23:20:31  ullrich
  * Added StPrimaryVertexOrder.
  *
@@ -321,7 +324,9 @@ enum StL2AlgorithmId { l2Diagnostic = 0,
 /*!
  * \enum StPrimaryVertexOrder
  */
-enum StPrimaryVertexOrder { orderByNumberOfDaughters = 0,
-		        orderByRanking};
+enum StPrimaryVertexOrder { 
+  orderByNumberOfDaughters = 0, /**< enum value for sorting based on NumberOfDaughters (default)  */
+  orderByRanking                /**< enum value to switch ordering based on assigned rank         */
+};
 
 #endif
