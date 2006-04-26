@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.84 2006/04/15 23:11:18 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.84 2006/04/15 23:11:18 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.85 2006/04/26 19:17:05 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.85 2006/04/26 19:17:05 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.85  2006/04/26 19:17:05  perev
+ * mIdDb for debug instead of mId
+ *
  * Revision 2.84  2006/04/15 23:11:18  perev
  * For zero field min curvature 1/1km
  *
@@ -323,7 +326,7 @@ void StiKalmanTrack::reset()
 {
 static int mIdCount = 0;
   if ((++mIdCount) >= 1<<16) mIdCount = 1;
-  mId = mIdCount; 
+  mIdDb = mIdCount; 
   firstNode = 0;
   lastNode  = 0;
   mSeedHitCount = 0;
