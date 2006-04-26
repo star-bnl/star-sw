@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.20 2006/03/12 18:47:29 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.21 2006/04/26 15:37:04 jeromel Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -70,9 +70,10 @@ StPPVertexFinder::StPPVertexFinder() {
   //x mTrackData=new vector<TrackData>;
   //x mVertexData=new vector<VertexData>;
 
-  setMC(false); // default = real Data
-  useCTB(true); // default CTB is in the data stream
-  mTestMode=0; // expert only flag
+  setMC(false);                      // default = real Data
+  useCTB(true);                      // default CTB is in the data stream
+  mTestMode=0;                       // expert only flag
+  mVertexOrderMethod = orderByRanking; // change ordering by ranking
 
   // special histogram for finding the vertex, not to be saved
   int nb=5000;
@@ -270,7 +271,8 @@ StPPVertexFinder::printInfo(ostream& os) const
     hA[14]->Fill(t->ezDca);
     if(t->vertexID<=0) continue; // skip not used or pileup vertex 
     k++;
-    printf("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",k,t->zDca,t->ezDca,t->gPt,t->vertexID);
+    printf("%d track@z0=%.2f +/- %.2f gPt=%.3f vertID=%d match:  bin,Fired,Track:\n",
+	   k,t->zDca,t->ezDca,t->gPt,t->vertexID);
     printf("    CTB  %3d,%d,%d",t->ctbBin,ctbList->getFired(t->ctbBin),ctbList->getTrack(t->ctbBin));
     printf("    Bemc %3d,%d,%d",t->bemcBin,bemcList->getFired(t->bemcBin),bemcList->getTrack(t->bemcBin));
     printf("    Eemc %3d,%d,%d",t->eemcBin,eemcList->getFired(t->eemcBin),bemcList->getTrack(t->bemcBin));
@@ -312,6 +314,7 @@ StPPVertexFinder::printInfo(ostream& os) const
    
   printf("\n---- end of PPVertex Info\n\n");
 }
+
 
 
 //======================================================
@@ -1063,6 +1066,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.21  2006/04/26 15:37:04  jeromel
+ * mVertexOrderMethod (To be tested)
+ *
  * Revision 1.20  2006/03/12 18:47:29  balewski
  * small corrections of histograms and printouts
  *
