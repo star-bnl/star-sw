@@ -6,7 +6,7 @@
  * (pseudo) Base class for vertex finders
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.15 2006/04/08 00:18:10 mvl Exp $
+ * $Id: StGenericVertexFinder.h,v 1.16 2006/04/26 15:37:04 jeromel Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -49,10 +49,11 @@ class StGenericVertexFinder {
   StGenericVertexFinder();
  private:
   vector<StPrimaryVertex> mVertexList;      // Holds all found prim veritcess
- protected: //................................
 
-  bool                   mVertexConstrain;  // Use vertex constraint from db
-  int                    mMode;             // used for any Finder behavior change
+ protected: //................................
+  StPrimaryVertexOrder   mVertexOrderMethod; // will default to 0 i.e. orderByNumberOfDaughters
+  bool                   mVertexConstrain;   // Use vertex constraint from db
+  int                    mMode;              // used for any Finder behavior change
   int                    mDebugLevel;
 
 };
@@ -60,6 +61,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.16  2006/04/26 15:37:04  jeromel
+// mVertexOrderMethod (To be tested)
+//
 // Revision 1.15  2006/04/08 00:18:10  mvl
 // Added member for debuglevel
 //

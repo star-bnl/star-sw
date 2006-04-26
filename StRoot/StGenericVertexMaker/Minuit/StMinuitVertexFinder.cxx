@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.4 2006/04/25 13:06:44 mvl Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.5 2006/04/26 15:37:04 jeromel Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.5  2006/04/26 15:37:04  jeromel
+ * mVertexOrderMethod (To be tested)
+ *
  * Revision 1.4  2006/04/25 13:06:44  mvl
  * Seed-finding range extended to -200<vtx_z<200
  *
@@ -136,6 +139,8 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   mRequireCTB = false;
   requireCTB = false;
   mUseITTF   = false;
+
+  mVertexOrderMethod = orderByRanking; // change ordering by ranking
 }
  
 
