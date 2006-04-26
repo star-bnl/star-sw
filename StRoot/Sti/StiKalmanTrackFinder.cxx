@@ -234,6 +234,7 @@ static int nCall=0;nCall++;
         nTAdd++;
         track->setFlag(1);
         _trackContainer->push_back(track);
+        track->setId(_trackContainer->size());
         track->reserveHits();
         nTpcHits+=track->getFitPointCount(kTpcId);
         nSvtHits+=track->getFitPointCount(kSvtId);
