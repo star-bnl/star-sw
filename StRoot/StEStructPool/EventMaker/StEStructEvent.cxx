@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.8 2006/04/06 01:06:18 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.9 2006/04/26 18:49:55 dkettler Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -13,6 +13,10 @@
 #include "StEStructEvent.h"
 #include "StEStructTrack.h"
 #include "StEStructCentrality.h"
+#include <math.h>
+#include "PhysicalConstants.h"
+#include "TVector2.h"
+#include "TH1.h"
 
 ClassImp(StEStructEvent)
 
@@ -24,6 +28,8 @@ StEStructEvent::StEStructEvent() {
 
   mTrackCollectionM = new StEStructTrackCollection();
   mTrackCollectionP = new StEStructTrackCollection();
+
+  mPsi = 0.;			// Initialize event plane angle
 }
 
 //-------------------------------------------------------
@@ -49,6 +55,7 @@ StEStructEvent::StEStructEvent(StEStructEvent& e){
   mTrackCollectionP = new StEStructTrackCollection();
   FillChargeCollections();
 
+  mPsi = 0.;			// Initialize event plane angle
 };
 
 
@@ -118,12 +125,142 @@ void StEStructEvent::FillChargeCollections(){
 StEStructTrackCollection * StEStructEvent::TrackCollectionM() const { return mTrackCollectionM;}; 
 StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTrackCollectionP;};
 
+//-------------------------------------------------------
+TVector2 StEStructEvent::Q() {
+  // Event plane vector
+
+  TVector2 mQ;
+  Float_t mQx=0., mQy=0.;
+
+/*  if (mUseZDCSMD) { // pFlowSelect is disabled; only 1st order Q generated
+    Float_t eXsum=0., eYsum=0., wXsum=0., wYsum=0.;
+    Float_t eXWgt=0., eYWgt=0., wXWgt=0., wYWgt=0.;
+    for (int v=1; v<8; v++) {
+      eXsum += ZDCSMD_GetPosition(0,0,v)*ZDCSMD(0,0,v);
+      wXsum += ZDCSMD_GetPosition(1,0,v)*ZDCSMD(1,0,v);
+      eXWgt += ZDCSMD(0,0,v);
+      wXWgt += ZDCSMD(1,0,v);
+    } //v
+    for (int h=1;h<9;h++) {
+      eYsum += ZDCSMD_GetPosition(0,1,h)*ZDCSMD(0,1,h);
+      wYsum += ZDCSMD_GetPosition(1,1,h)*ZDCSMD(1,1,h);
+      eYWgt += ZDCSMD(0,1,h);
+      wYWgt += ZDCSMD(1,1,h);
+    }
+    mQx= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ?
+      eXsum/eXWgt - wXsum/wXWgt:0.;
+    mQy= (eXWgt>0. && wXWgt>0. && eYWgt>0. && wYWgt>0.) ?
+      eYsum/eYWgt - wYsum/wYWgt:0.;
+  } //if
+  else { */
+    //int    selN  = pFlowSelect->Sel();
+    //int    harN  = pFlowSelect->Har();
+    int selN = -1;
+    int harN = 1;
+    double order = (double)(harN + 1);
+
+    StEStructTrackIterator itr;
+    for (itr = TrackCollectionM()->begin();
+         itr != TrackCollectionM()->end(); itr++) {
+      StEStructTrack* pFlowTrack = *itr;
+      //if (pFlowSelect->Select(pFlowTrack)) {
+        //double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+        double phiWgt = 1.;
+        Float_t phi = pFlowTrack->Phi();
+        //Float_t phiWgt = mPhiWgt->GetBinContent(mPhiWgt->FindBin(phi));
+        mQx += phiWgt * cos(phi * order);
+        mQy += phiWgt * sin(phi * order);
+      //}
+    }
+    for (itr = TrackCollectionP()->begin();
+         itr != TrackCollectionP()->end(); itr++) {
+      StEStructTrack* pFlowTrack = *itr;
+      double phiWgt = 1.;
+      Float_t phi = pFlowTrack->Phi();
+      //Float_t phiWgt = mPhiWgt->GetBinContent(mPhiWgt->FindBin(phi));
+      mQx += phiWgt * cos(phi * order);
+      mQy += phiWgt * sin(phi * order);
+    }
+    itr.~StEStructTrackIterator();
+//  } //else
+
+  mQ.Set(mQx, mQy);
+  return mQ;
+}
+
+//-------------------------------------------------------
+void StEStructEvent::CalculatePsi() {
+  // Event plane angle
+
+  //int    harN = pFlowSelect->Har();
+  int harN = 1;
+  float order = (float)(harN + 1);
+  Float_t psi = 0.;
+
+  TVector2 mQ = Q();
+
+  if (mQ.Mod()) {
+    psi= mQ.Phi() / order;
+    if (psi < 0.) { psi += twopi / order; }
+  }
+
+//  return psi;
+  mPsi = psi;
+  mQ.~TVector2();
+}
+
+//-------------------------------------------------------
+Float_t StEStructEvent::Psi() {
+	return mPsi;
+}
+
+//-------------------------------------------------------
+void StEStructEvent::ShiftPhi() {
+    // First, need to calculate the event plane angle
+    CalculatePsi();
+
+    StEStructTrackIterator itr;
+    for (itr = TrackCollectionM()->begin();
+         itr != TrackCollectionM()->end(); itr++) {
+      StEStructTrack* pTrack = *itr;
+      Float_t phi = pTrack->Phi();
+      phi -= mPsi;
+      if(phi<-pi) {phi += twopi;}
+      pTrack->SetPhi(phi);
+    }
+    for (itr = TrackCollectionP()->begin();
+         itr != TrackCollectionP()->end(); itr++) {
+      StEStructTrack* pTrack = *itr;
+      Float_t phi = pTrack->Phi();
+      phi -= mPsi;
+      if(phi<-pi) {phi += twopi;}
+      pTrack->SetPhi(phi);
+    }
+    itr.~StEStructTrackIterator();
+}
+
+//-------------------------------------------------------
+void StEStructEvent::SetPhiWgt(const char* weightFile) {
+  TFile* tf=new TFile(weightFile);
+  TString hname("PhiWgt");
+  mPhiWgt = tf->Get(hname.Data());
+
+  // delete phiWgt;
+  hname.~TString();
+  tf->~TFile();
+}
 
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.9  2006/04/26 18:49:55  dkettler
+ * Added reaction plane determination for the analysis
+ *
+ * Added reaction plane angle calculation
+ *
  * Revision 1.8  2006/04/06 01:06:18  prindle
- * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
+ *   Rationalization of centrality binning, as described in AnalysisMaker checkin.
  *
  * Revision 1.7  2006/04/04 22:12:30  porter
  * Set up StEtructCentrality for use in event cut selection - includes impact para for generators

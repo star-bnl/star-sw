@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.h,v 1.6 2006/04/06 01:06:20 prindle Exp $
+ * $Id: StEStructEvent.h,v 1.7 2006/04/26 18:49:56 dkettler Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -17,7 +17,9 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StEStructTrackCollection.h"
+#include "TVector2.h"
 
+class TH1F;
 
 class StEStructEvent : public TObject {
 
@@ -46,7 +48,9 @@ class StEStructEvent : public TObject {
   StEStructTrackCollection *mTrackCollectionM; //! negative charge list
   StEStructTrackCollection *mTrackCollectionP; //! positive charge list
 
-    
+  Float_t mPsi;				// Event plane angle
+  TH1F* mPhiWgt;			// Phi weights
+     
  public:
   StEStructEvent();
   StEStructEvent(StEStructEvent& e);
@@ -69,6 +73,13 @@ class StEStructEvent : public TObject {
 
   Float_t ZDCe() const { return mZDCe; }
   Float_t ZDCw() const { return mZDCw; }
+  
+  // Reaction-plane related functions
+  TVector2 Q();			// Calculates Q and returns it
+  void CalculatePsi();		// Calculates Psi and stores it in mPsi
+  Float_t Psi();		// Returns mPsi
+  void ShiftPhi();		// Loops over tracks, modifies Phi values by Psi
+  void SetPhiWgt(const char* weightFile);	// Sets the phi weights
   
   void AddTrack(StEStructTrack* pEStructTrack);
 
@@ -94,7 +105,7 @@ class StEStructEvent : public TObject {
   void SetCentrality(const Double_t N) { mCentrality = N; }
 
   virtual void FillChargeCollections();
-  
+
   ClassDef(StEStructEvent,1)
 };
 
@@ -106,8 +117,14 @@ class StEStructEvent : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructEvent.h,v $
+ * Revision 1.7  2006/04/26 18:49:56  dkettler
+ * Added reaction plane determination for the analysis
+ *
+ * Added reaction plane angle calculation
+ *
  * Revision 1.6  2006/04/06 01:06:20  prindle
- * Rationalization of centrality binning, as described in AnalysisMaker checkin.
+ *
+ *   Rationalization of centrality binning, as described in AnalysisMaker checkin.
  *
  * Revision 1.5  2006/04/04 22:12:30  porter
  * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
