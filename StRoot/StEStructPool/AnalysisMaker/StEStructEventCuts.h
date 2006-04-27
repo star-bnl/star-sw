@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.h,v 1.8 2006/04/25 21:02:51 msd Exp $
+ * $Id: StEStructEventCuts.h,v 1.9 2006/04/27 22:20:07 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -114,9 +114,12 @@ inline bool StEStructEventCuts::goodTrigger(StMuEvent* muEvent){
       if (muEvent->triggerIdCollection().nominal().isTrigger(2001) ||
 	  muEvent->triggerIdCollection().nominal().isTrigger(2003)) {
 	return true;
-      }      
+      }
     } else if(!strcmp("ppMinBias",mRunPeriod)){
       if(muEvent->triggerIdCollection().nominal().isTrigger(8192)) return true;
+    } else if(!strcmp("ppMinBiasYear5",mRunPeriod)){
+      if(muEvent->triggerIdCollection().nominal().isTrigger(96011) ||
+         muEvent->triggerIdCollection().nominal().isTrigger(106011)) return true;
     }
   } else {
         unsigned int t = muEvent->l0Trigger().triggerWord();
@@ -147,6 +150,10 @@ inline bool StEStructEventCuts::goodCentrality(float c){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.h,v $
+ * Revision 1.9  2006/04/27 22:20:07  prindle
+ * Some changes in trigger names for run periods.
+ * Changed a couple of the Hijing QA histograms.
+ *
  * Revision 1.8  2006/04/25 21:02:51  msd
  * Added AuAu200GeVCentral2001 and dAu200GeVMinBias2003
  *
