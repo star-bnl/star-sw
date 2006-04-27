@@ -14,6 +14,7 @@
         analysis[i]-&gt;initStructures(tcuts);  // cuts define min and max vals
         analysis[i]-&gt;setOutputFileName(getOutFileName(outputDir,jobName,"data"));
             </allocateAnalysis>
+            <weightsFile id='weightsFile' widget='entry' Comment='weights file for reaction plane analysis' typedef='char *weightsFile = '>none</weightsFile>
         </doEStructMacro>
 
     </standardElements>
