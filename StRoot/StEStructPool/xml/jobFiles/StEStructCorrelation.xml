@@ -28,6 +28,7 @@
             <pairCutsWrite id='pairCutsWrite' widget='none'>
     pcuts-&gt;printCuts(ofs);
             </pairCutsWrite>
+            <weightsFile id='weightsFile' widget='entry' Comment='weights file for reaction plane analysis' typedef='char *weightsFile = '>none</weightsFile>
         </doEStructMacro>
 
     </standardElements>

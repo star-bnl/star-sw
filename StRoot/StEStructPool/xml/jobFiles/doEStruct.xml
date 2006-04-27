@@ -66,7 +66,6 @@ void doEStruct( const char* filelist,
     estructMaker-&gt;SetEventReader(reader);
                                                                                                                        
     // create the QAHist object (must come after centrality and cutbin objects)
-    int EventType = 0; // real data
     StEStructQAHists* qaHists = new StEStructQAHists(EventType);
     estructMaker-&gt;SetQAHists(qaHists);
 
@@ -80,6 +79,10 @@ void doEStruct( const char* filelist,
 
 
     estructMaker-&gt;Init();
+    <variable stringInLine='weightsFile'/>
+    if (strcmp(weightsFile,"none")) {
+        estructMaker->SetReactionPlaneAnalysis(weightsFile);
+    }
 
     int counter=0, istat=0, i=0;
     while (istat!=2) {
