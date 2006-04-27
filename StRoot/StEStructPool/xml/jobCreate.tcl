@@ -18,6 +18,7 @@ namespace eval ::jobCreate:: {
     variable undone
     variable lastNode
     variable numberOfInstances
+    variable slaveInterpCount
 }
 
 ################################################################################
@@ -106,8 +107,6 @@ proc ::jobCreate::parseJobInfo {fileName} {
                 set ::jobCreate::jobAnalysisType "StEStructCorrelation"
             } elseif {$mFile eq "StEStructFluctuation.xml"} {
                 set ::jobCreate::jobAnalysisType "StEStructFluctuation"
-            } elseif {$mFile eq "StEStructPhiWeight.xml"} {
-                set ::jobCreate::jobAnalysisType "StEStructPhiWeight"
             }
             set mDom [open [file join $dir $mFile]]
             set mDomInfo [dom parse [read $mDom]]
@@ -688,7 +687,7 @@ proc ::jobCreate::setAnalysisType {f type} {
     set lisFile [file join $::jobCreate::jobCreatePath jobFiles $::jobCreate::jobLisFile]
     set lfh [open $lisFile]
     while {[gets $lfh xmlFile] >= 0} {
-        if {$xmlFile eq "StEStructCorrelation.xml" || $xmlFile eq "StEStructFluctuation.xml" || $xmlFile eq "StEStructPhiWeight.xml"} {
+        if {$xmlFile eq "StEStructCorrelation.xml" || $xmlFile eq "StEStructFluctuation.xml"} {
             set xmlFile $::jobCreate::jobAnalysisType.xml
         }
         set mDom [open [file join $::jobCreate::jobCreatePath jobFiles $xmlFile]]
@@ -1000,6 +999,7 @@ proc ::jobCreate::displayCode {node title} {
         $m add cascade -label Edit -menu $edit
         $edit add command -label Undo -command [namespace code "undo $m.edit .fileText.t"]
         $edit add command -label Redo -command [namespace code "redo $m.edit .fileText.t"]
+        $edit add command -label Find -command [namespace code findDialog]
 
         text .fileText.t -yscrollcommand {.fileText.y set} \
                          -xscrollcommand {.fileText.x set} -wrap none \
@@ -1055,6 +1055,39 @@ proc ::jobCreate::displayCode {node title} {
     .fileText.menu.edit entryconfigure Redo -state disabled
     set ::jobCreate::undone 0
     set ::jobCreate::lastNode $node
+}
+################################################################################
+# popupSearch will pop up a box allowing user to enter a search string and
+# search text currently displayed in .fileText.t
+################################################################################
+proc ::jobCreate::findDialog {} {
+    set w [toplevel .findDialog]
+    wm resizable $w 0 0
+    wm title $w "Find"
+    entry  $w.e -textvar ::jobCreate::findString -bg white
+    bind $w.e <KeyRelease> "::jobCreate::highlightString \$::jobCreate::findString"
+    button $w.ok     -text Find   -command "::jobCreate::highlightString \$::jobCreate::findString"
+    button $w.cancel -text Cancel -command "::jobCreate::highlightString {}
+                                            destroy $w"
+    grid $w.e  -        -sticky news
+    grid $w.ok $w.cancel
+}
+################################################################################
+# highlightString is used by search to make string obvious to users.
+################################################################################
+proc ::jobCreate::highlightString {string} {
+    if {![winfo exists .fileText]} {
+        return
+    }
+    set t .fileText.t
+    $t tag delete found
+    $t tag configure found -foreground green -background blue
+    set posM 0.0
+    set pat mbBins
+    while {[set pos [$t search -count length -regexp -- $string $posM end]] > 0} {
+        $t tag add found $pos $pos+${length}c
+        set posM $pos+1c
+    }
 }
 ################################################################################
 # checkFile is invoked when Edit menu is posted.
@@ -1496,14 +1529,17 @@ proc ::jobCreate::createJobFiles {} {
     # Save the dom tree as an xml file
     # (use value of jobName for the file name.)
     # We get linefeeds in the <command> section which cause problems when
-    # reading this file back in. For some reason jobDesc (above) does not
-    # have these linefeeds. Do a replacement here.
+    # reading this file back in. Strip out all line feeds between
+    # "root4star" and the first ")" following it.
     set node [$::jobCreate::jobInfo selectNodes //jobName]
     set f [open $path/scripts/[$node text].xml w]
     puts $f "<?xml version='1.0' encoding='utf-8' ?>"
     set jobInfo [$::jobCreate::jobInfo asXML]
-    regexp {<command>.+</command>} $jobDesc cmdBlock
-    regsub {<command>.+</command>} $jobInfo $cmdBlock subInfo
+    set start [string first root4star $jobInfo]
+    set stop  [string first ) $jobInfo $start]
+    set cmdOld [string range $jobInfo $start $stop]
+    set cmdNew [string map {\n ""} $cmdOld]
+    set subInfo [string replace $jobInfo $start $stop $cmdNew]
     puts $f $subInfo
     close $f
 
@@ -1511,7 +1547,11 @@ proc ::jobCreate::createJobFiles {} {
     # If this is a problem we should modify how copy is done.
     set node [$::jobCreate::jobInfo getElementsByTagName localDir]
     set srcDir [$node text]
-    file copy $srcDir/StRoot/StEStructPool $path/StRoot
+    if {[catch {file copy $srcDir/StRoot/StEStructPool $path/StRoot}]} {
+        tk_messageBox -message "Problem copying StRoot subdir in $srcDir" \
+                -type ok \
+                -icon question -title "Skipping copying source code"
+    }
 
     # Also write the jobPurpose into a README file fur user convenience.
     set node [$::jobCreate::jobInfo selectNodes //jobPurpose]
@@ -1635,13 +1675,26 @@ proc ::jobCreate::isReadable { fid fLog } {
 # startJobMonitor sources and start a program that monitors running and
 # output of batch jobs. We assume it is in the same directory as jobCreate.
 ################################################################################
+#>>>>> Can we put jobMonitors into slave interpreters?
+#      Would like to have more than one, and they coul
 proc ::jobCreate::startJobMonitor {} {
-    source [file join $::jobCreate::jobCreatePath jobMonitor.tcl]
-    ::jobMonitor::createWindow
     set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
     set path [$node text]
-    set ::jobMonitor::scriptDir [file join $path scripts]
-    set ::jobMonitor::logDir    [file join $path logs]
+
+    if {![info exists ::jobCreate::slaveInterpCount]} {
+        set ::jobCreate::slaveInterpCount 1
+    } else {
+        incr ::jobCreate::slaveInterpCount
+    }
+    interp create slave$::jobCreate::slaveInterpCount
+    interp eval slave$::jobCreate::slaveInterpCount "
+        source [file join $::jobCreate::jobCreatePath jobMonitor.tcl]
+        ::jobMonitor::createWindow
+        wm withdraw .
+        interp eval slave2 {wm title \$::jobMonitor::bWindow "jobMonitor $::jobCreate::slaveInterpCount"}
+        set ::jobMonitor::scriptDir [file join $path scripts]
+        set ::jobMonitor::logDir    [file join $path logs]
+    "
 }
 ################################################################################
 # exit deletes the jobCreate main window and destroys the namespace.
