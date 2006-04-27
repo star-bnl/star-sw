@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.13 2005/07/19 21:37:56 perev Exp $
+ * $Id: StSvtHit.cxx,v 2.14 2006/04/27 21:59:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.14  2006/04/27 21:59:00  ullrich
+ * Added data member and methods to deal with local positions.
+ *
  * Revision 2.13  2005/07/19 21:37:56  perev
  * Cleanup
  *
@@ -57,19 +60,32 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.13 2005/07/19 21:37:56 perev Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.14 2006/04/27 21:59:00 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
 StMemoryPool StSvtHit::mPool(sizeof(StSvtHit));
 
-StSvtHit::StSvtHit() { /* noop */ }
+StSvtHit::StSvtHit()
+{
+    mPeak = 0;
+    mAnode = 0;
+    mTimebucket = 0;
+    mLocalPosition[0] = 0;
+    mLocalPosition[1] = 0;
+}
 
 StSvtHit::StSvtHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
                    unsigned int hw, float q, unsigned char c)
     : StHit(p, e, hw, q, c)
-{ mPeak=0; }
+{
+    mPeak = 0;
+    mAnode = 0;
+    mTimebucket = 0;
+    mLocalPosition[0] = 0;
+    mLocalPosition[1] = 0;
+}
 
 StSvtHit::StSvtHit(const dst_point_st& pt)
 {
@@ -117,6 +133,20 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
     mHardwarePosition = pt.hw_position;
     mId               = pt.cluster;
     setIdTruth(pt.id_simtrk,pt.id_quality);
+
+    //
+    // Unpack anode and time bin
+    //
+    mAnode = (mHardwarePosition >> 22)/4.;  // anode packed in quarters
+    float t = mHardwarePosition >> 13;
+    t = t-(mAnode*4*(1L<<9));
+    mTimebucket = t/4;                      // timebucket packed in quarters
+
+    //
+    // Local positions (to be filled later, not in dst_point)
+    //
+    mLocalPosition[0] = 0;
+    mLocalPosition[1] = 0;
 }
 
 StSvtHit::~StSvtHit() {/* noop */}
@@ -233,17 +263,18 @@ StSvtHit::wafer() const
 unsigned int
 StSvtHit::hybrid() const { return ((index()%2)+1); }
 
-
 float
-StSvtHit::anode() const {
-  float anode = mHardwarePosition >> 22;
-  return (anode/4.); }  // Anode packed in quarters
+StSvtHit::localPosition(unsigned int i) const
+{
+    if (i<2)
+        return mLocalPosition[i];
+    else
+        return 0;
+}
 
-
-float
-StSvtHit::timebucket() const {
-  float t = mHardwarePosition >> 13;
-    t = t-(anode()*4*(1L<<9));
-    t /=4.; // timebucket packed in quarters
-  return t;    
+void
+StSvtHit::setLocalPosition(float u, float v)
+{
+    mLocalPosition[0] = u;
+    mLocalPosition[1] = v;
 }
