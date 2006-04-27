@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.12 2005/07/19 21:38:56 perev Exp $
+ * $Id: StSvtHit.h,v 2.13 2006/04/27 21:59:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.13  2006/04/27 21:59:00  ullrich
+ * Added data member and methods to deal with local positions.
+ *
  * Revision 2.12  2005/07/19 21:38:56  perev
  * Cleanup
  *
@@ -86,14 +89,23 @@ public:
     float anode() const;  // anode of hit in 1/4 slices
     float timebucket() const; // timebucket of hit in 1/4 slices
     float peakADC() const; // Peak ADC value of hit
+    float localPosition(unsigned int) const;
+    
+    void setPeak(float);
+    void setAnode(float);
+    void setTimebucket(float);
+    void setLocalPosition(float, float);
 
 protected:
     static StMemoryPool mPool;  //!
-    float mPeak;
+    Float_t mPeak;
+    Float_t mAnode;
+    Float_t mTimebucket;
+    Float_t mLocalPosition[2];    
     
 private:
     enum {mNBarrel=3};
-    ClassDef(StSvtHit,1)
+    ClassDef(StSvtHit,2)
 };
 
 inline unsigned int
@@ -103,9 +115,11 @@ StSvtHit::index() const
     return (mHardwarePosition>>4)&((1L<<9)-1);
 }
 
-inline float
-StSvtHit::peakADC() const
-{
-  return mPeak;
-}
+inline float StSvtHit::peakADC() const { return mPeak; }
+inline float StSvtHit::anode() const { return mAnode; } 
+inline float StSvtHit::timebucket() const { return mTimebucket; }
+inline void StSvtHit::setPeak(float val) { mPeak = val; }
+inline void StSvtHit::setAnode(float val) { mAnode = val; }
+inline void StSvtHit::setTimebucket(float val) { mTimebucket = val; }
+
 #endif

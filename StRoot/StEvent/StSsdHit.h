@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.9 2004/07/15 16:36:25 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.10 2006/04/27 21:58:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.10  2006/04/27 21:58:53  ullrich
+ * Added data member and methods to deal with local positions.
+ *
  * Revision 2.9  2004/07/15 16:36:25  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -72,12 +75,16 @@ public:
     unsigned int centralStripPSide() const;  
     unsigned int clusterSizeNSide() const;   
     unsigned int clusterSizePSide() const;
+    float localPosition(unsigned int) const;
+
+    void setLocalPosition(float, float);
 
 protected:
     static StMemoryPool mPool;  //!
+    Float_t mLocalPosition[2];
     
 private:
     enum {mWaferPerLadder=16};
-    ClassDef(StSsdHit,1)
+    ClassDef(StSsdHit,2)
 };
 #endif

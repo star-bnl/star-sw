@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.10 2005/12/19 19:24:10 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.11 2006/04/27 21:58:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.11  2006/04/27 21:58:53  ullrich
+ * Added data member and methods to deal with local positions.
+ *
  * Revision 2.10  2005/12/19 19:24:10  ullrich
  * Applied patch by A. Kiesel to fix tp correct decoding of hardware info.
  *
@@ -46,19 +49,27 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.10 2005/12/19 19:24:10 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.11 2006/04/27 21:58:53 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
 ClassImp(StSsdHit)
 
-StSsdHit::StSsdHit() { /* noop */ }
+StSsdHit::StSsdHit()
+{
+    mLocalPosition[0] = 0;
+    mLocalPosition[1] = 0;
+}
+
 
 StSsdHit::StSsdHit(const StThreeVectorF& p,
                    const StThreeVectorF& e,
                    unsigned int hw, float q, unsigned char c)
     : StHit(p, e, hw, q, c)
-{ /* noop */ }
+{
+    mLocalPosition[0] = 0;
+    mLocalPosition[1] = 0;
+}
 
 StSsdHit::StSsdHit(const dst_point_st& pt)
 {
@@ -100,6 +111,12 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
     // The hardware position stays at it is
     //
     mHardwarePosition = pt.hw_position;
+
+    //
+    // Local positions (to be filled later, not in dst_point)
+    //
+    mLocalPosition[0] = 0;
+    mLocalPosition[1] = 0;
 }
 
 StSsdHit::~StSsdHit() {/* noop */}
@@ -140,4 +157,20 @@ unsigned int
 StSsdHit::clusterSizePSide() const
 {
     return bits(30, 2)+1;    // bits 30-31
+}
+
+float
+StSsdHit::localPosition(unsigned int i) const
+{
+    if (i<2)
+        return mLocalPosition[i];
+    else
+        return 0;
+}
+
+void
+StSsdHit::setLocalPosition(float u, float v)
+{
+    mLocalPosition[0] = u;
+    mLocalPosition[1] = v;
 }
