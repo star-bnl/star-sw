@@ -239,11 +239,15 @@ hell is in this directory.
 <xs:element name='triggerTag'>
     <xs:complexType>
         <xs:restriction base='xs:string'>
-            <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
-            <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
-            <xs:enumeration value='AuAu200GeVMinBias2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
             <xs:enumeration value='CuCu62GeVProductionMinBias2005'  Comment='tag for 2005, 62GeV CuCu minimum bias trigger'/>
             <xs:enumeration value='CuCu200GeVProductionMinBias2005' Comment='tag for 2005, 200GeV CuCu minimum bias trigger'/>
+            <xs:enumeration value='AuAu200GeVMinBias2004' Comment='tag for 2004, 200GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu62GeVMinBias2004'  Comment='tag for 2004, 62GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu200GeVMinBias2001' Comment='tag for 2001, 200GeV AuAu minimum bias trigger'/>
+            <xs:enumeration value='AuAu200GeVCentral2001' Comment='tag for 2001, 200GeV AuAu central trigger'/>
+            <xs:enumeration value='dAu200GeVMinBias2003' Comment='tag for 2003, 200GeV dAu minimum bias trigger'/>
+            <xs:enumeration value='ppMinBias' Comment='tag for 2001, 200GeV pp minimum bias trigger'/>
+            <xs:enumeration value='ppMinBiasYear5' Comment='tag for 2004, 200GeV pp minimum bias trigger'/>
         </xs:restriction>
         <xs:attribute name='Comment' type='xs:string' use='required'/>
     </xs:complexType>
@@ -435,6 +439,7 @@ hell is in this directory.
             <xs:element ref='declareAnalysis'/>
             <xs:element ref='declareReader'/>
             <xs:element ref='allocateAnalysis'/>
+            <xs:element ref='weightsFile' minOccurs='0'/>
             <xs:element ref='pairCutsWrite' minOccurs='0'/>
             <xs:element ref='main'/>
         </xs:all>
@@ -453,7 +458,6 @@ hell is in this directory.
     <xs:restriction base='xs:string'>
         <xs:enumeration value='StEStructFluctuation' Comment='Fill histograms for fluctuation analysis.'/>
         <xs:enumeration value='StEStructCorrelation' Comment='Fill histograms for correlation analysis.'/>
-        <xs:enumeration value='StEStructPhiWeight' Comment='Fill histograms for phi weighting analysis.'/>
     </xs:restriction>
 </xs:simpleType>
 <xs:element name='libraries'>
@@ -560,6 +564,15 @@ hell is in this directory.
         <xs:attribute name='Comment' type='xs:string'>Declare FluctAnal or 2ptCorrelation</xs:attribute>
     </xs:complexType>
 </xs:element>
+<xs:element name='weightsFile'>
+    <xs:complexType>
+        <xs:restriction base='xs:string'/>
+        <xs:attribute name='id' type='xs:string' use='required'/>
+        <xs:attribute name='typedef' type='xs:string' default=''/>
+        <xs:attribute name='widget' type='widgetTypes' default='entry'/>
+        <xs:attribute name='Comment' type='xs:string'>If a file is given we do a reaction plane analysis</xs:attribute>
+    </xs:complexType>
+</xs:element>
 <xs:element name='pairCutsWrite'>
     <xs:complexType>
         <xs:attribute name='id' type='xs:string' use='required'/>
@@ -575,6 +588,7 @@ hell is in this directory.
                 <xs:complexType>
                     <xs:attribute name='refersTo' type='xs:string'/>
                     <xs:attribute name='stringInLine' type='xs:string'/>
+                    <xs:attribute name='procInLine' type='xs:string'/>
                     <xs:attribute name='inLine' type='xs:string'/>
                     <xs:attribute name='listOf' type='xs:string'/>
                     <xs:attribute name='sumOf' type='xs:string'/>
