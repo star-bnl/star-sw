@@ -1,6 +1,6 @@
  /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.h,v 1.9 2006/04/06 01:01:17 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.h,v 1.10 2006/04/27 22:40:36 porter Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -38,8 +38,12 @@
 #include "StEStructBuffer.h"
 
 class TFile;
+class TH1;
+class TH2;
 class TH1F;
 class TH2F;
+class TH1D;
+class TH2D;
 class StEStructEvent;
 class StTimer;
 #define _MAX_ZVBINS_ 30
@@ -48,27 +52,26 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
 
  protected:
 
-  // Event-level hists
-  TH1F*  mHNEvents[2];
-  TH1F*  mHptAll;
-  TH1F** mHpt[2];
-  TH2F*  mHmix;
+  // Event-level hists needed for normalization and pt-correlations
+  TH1D*  mHNEvents[2];
+  TH1D*  mHptAll;
+  TH1D** mHpt[2];
+  TH2D*  mHmix;
 
   // HBT parameters
-  qBins *mQinv[8]; //!  1D
-  TH1F ** mHQinv[8];//!  1D hist
-
-  // QAEtaBins mQAEta[2][4];
-  // QAPhiBins mQAPhi[2][4];
-  // QAPtBins  mQAPt[2][4];
-  // PtotBins  *mdEdxPtot[2][4];
+  qBins * mQinv[8]; //!  1D
+  TH1D ** mHQinv[8];//!  1D hist
+  qBins * mNQinv[8]; //!  1D
+  TH1D ** mHNQinv[8];//!  1D hist
 
   //-> X vs X 
   ytBins **mYtYt[8]; //!
-  xtBins **mXtXt[8]; //! Xt, legacy quantity
+  ytBins **mNYtYt[8]; //! Npair for eta_delta weight errors
+  xtBins **mXtXt[8]; //! Xt, legacy quantity -- currently off
   ptBins **mPtPt[8]; //!
   etaBins **mEtaEta[8]; //!
   phiBins **mPhiPhi[8]; //!
+  phiBins **mNPhiPhi[8]; //! Npair for eta_delta weight errors
 
   etaBins **mPrEtaEta[8]; //! weight = pt1*pt2
   phiBins **mPrPhiPhi[8]; //!  "
@@ -78,53 +81,56 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   etaBins **mPbEtaEta[8]; //! weight = pt2
   phiBins **mPbPhiPhi[8]; //!  "
 
+  TH2D ** mHYtYt[8]; //!
+  TH2D ** mHNYtYt[8]; //! Npair for eta_delta weight errors
+  TH2D ** mHXtXt[8]; //!  <--- currently off
+  TH2D ** mHPtPt[8]; //!
+  TH2D ** mHEtaEta[8]; //!
+  TH2D ** mHPhiPhi[8]; //!
+  TH2D ** mHNPhiPhi[8]; //! Npair for eta_delta weight errors
 
-  //  TH1F  * mHQAEta[2][4]; //!
-  //  TH1F  * mHQAPhi[2][4]; //!
-  //  TH1F  * mHQAPt[2][4]; //!
-  //  TH2F  * mHdEdxPtot[2][4]; //!
-  TH2F ** mHYtYt[8]; //!
-  TH2F ** mHXtXt[8]; //!
-  TH2F ** mHPtPt[8]; //!
-  TH2F ** mHEtaEta[8]; //!
-  TH2F ** mHPhiPhi[8]; //!
-
-  TH2F ** mHPrEtaEta[8]; //!
-  TH2F ** mHPrPhiPhi[8]; //!
-  TH2F ** mHPaEtaEta[8]; //!
-  TH2F ** mHPaPhiPhi[8]; //!
-  TH2F ** mHPbEtaEta[8]; //!
-  TH2F ** mHPbPhiPhi[8]; //!
+  TH2D ** mHPrEtaEta[8]; //!
+  TH2D ** mHPrPhiPhi[8]; //!
+  TH2D ** mHPaEtaEta[8]; //!
+  TH2D ** mHPaPhiPhi[8]; //!
+  TH2D ** mHPbEtaEta[8]; //!
+  TH2D ** mHPbPhiPhi[8]; //!
 
   // Delta Y vs Delta X
-  dphiBins **mJtDYtDPhi[8]; //!
-  detaBins **mJtDYtDEta[8]; //!
+  dphiBins **mJtDYtDPhi[8]; //!  currently off
+  detaBins **mJtDYtDEta[8]; //!  currently off
   dphiBins **mJtDEtaDPhi[8]; //!
+  dphiBins **mJtNDEtaDPhi[8]; //! Npair for eta_delta weight errors
   dphiBins **mPrJtDEtaDPhi[8]; //!
   dphiBins **mPaJtDEtaDPhi[8]; //!
   dphiBins **mPbJtDEtaDPhi[8]; //!
 
-  TH2F ** mHJtDYtDPhi[8];
-  TH2F ** mHJtDYtDEta[8];
-  TH2F ** mHJtDEtaDPhi[8];
-  TH2F ** mHPrJtDEtaDPhi[8];
-  TH2F ** mHPaJtDEtaDPhi[8];
-  TH2F ** mHPbJtDEtaDPhi[8];
+  TH2D ** mHJtDYtDPhi[8];//! currently off
+  TH2D ** mHJtDYtDEta[8];//! currently off
+  TH2D ** mHJtDEtaDPhi[8];
+  TH2D ** mHJtNDEtaDPhi[8];//! Npair for eta_delta weight errors
+  TH2D ** mHPrJtDEtaDPhi[8];
+  TH2D ** mHPaJtDEtaDPhi[8];
+  TH2D ** mHPbJtDEtaDPhi[8];
 
   // Sum Y vs Delta X
   dytBins  **mAtSYtDYt[8];     //! smt array of dmt bins
-  dptBins  **mAtSPtDPt[8];     //! smt array of dmt bins
+  dytBins  **mAtNSYtDYt[8];     //! Npair for eta_delta weight errors
+  dptBins  **mAtSPtDPt[8];     //! smt array of dmt bins -- currently off
   dphiBins **mJtSEtaDPhi[8];//! 
+  dphiBins **mJtNSEtaDPhi[8];//!  Npair for eta_delta weight errors
   dphiBins **mPrJtSEtaDPhi[8];//! 
   dphiBins **mPaJtSEtaDPhi[8];//! 
   dphiBins **mPbJtSEtaDPhi[8];//! 
 
-  TH2F ** mHAtSYtDYt[8];
-  TH2F ** mHAtSPtDPt[8];
-  TH2F ** mHJtSEtaDPhi[8];//!
-  TH2F ** mHPrJtSEtaDPhi[8];//!
-  TH2F ** mHPaJtSEtaDPhi[8];//!
-  TH2F ** mHPbJtSEtaDPhi[8];//!
+  TH2D ** mHAtSYtDYt[8];
+  TH2D ** mHAtNSYtDYt[8];//! Npair for eta_delta weight errors
+  TH2D ** mHAtSPtDPt[8];//! currently off
+  TH2D ** mHJtSEtaDPhi[8];//!
+  TH2D ** mHJtNSEtaDPhi[8];//! Npair for eta_delta weight errors
+  TH2D ** mHPrJtSEtaDPhi[8];//!
+  TH2D ** mHPaJtSEtaDPhi[8];//!
+  TH2D ** mHPbJtSEtaDPhi[8];//!
 
   // TPC Separation
   TPCSepBins *mTPCAvgTSep[8];  //1D
@@ -141,19 +147,19 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   TPCSepBins *mTPCMidZdptP[8];  
   TPCSepBins *mTPCMidZdptN[8];  
 
-  TH1F **  mHTPCAvgTSep[8]; 
-  TH1F **  mHTPCAvgZSep[8];  
-  TH1F **  mHTPCEntTSep[8]; 
-  TH1F **  mHTPCEntZSep[8];  
-  TH1F **  mHTPCMidTSep[8]; 
-  TH1F **  mHTPCMidZSep[8];  
-  TH1F **  mHTPCExitTSep[8]; 
-  TH1F **  mHTPCExitZSep[8];  
+  TH1D **  mHTPCAvgTSep[8]; 
+  TH1D **  mHTPCAvgZSep[8];  
+  TH1D **  mHTPCEntTSep[8]; 
+  TH1D **  mHTPCEntZSep[8];  
+  TH1D **  mHTPCMidTSep[8]; 
+  TH1D **  mHTPCMidZSep[8];  
+  TH1D **  mHTPCExitTSep[8]; 
+  TH1D **  mHTPCExitZSep[8];  
 
-  TH1F **  mHTPCMidTdptP[8];  
-  TH1F **  mHTPCMidTdptN[8];  
-  TH1F **  mHTPCMidZdptP[8];  
-  TH1F **  mHTPCMidZdptN[8];
+  TH1D **  mHTPCMidTdptP[8];  
+  TH1D **  mHTPCMidTdptN[8];  
+  TH1D **  mHTPCMidZdptP[8];  
+  TH1D **  mHTPCMidZdptN[8];
 
   TPCSepBins **mTPCAvgTZ[8];  //2D
   TPCSepBins **mTPCEntTZ[8];  
@@ -163,13 +169,13 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   dptBins **mTPCMidTdpt[8];
   dptBins **mTPCExitTdpt[8];   
 
-  TH2F **  mHTPCAvgTZ[8];  
-  TH2F **  mHTPCEntTZ[8];  
-  TH2F **  mHTPCMidTZ[8];  
-  TH2F **  mHTPCExitTZ[8];  
-  TH2F **  mHTPCEntTdpt[8];
-  TH2F **  mHTPCMidTdpt[8];
-  TH2F **  mHTPCExitTdpt[8];
+  TH2D **  mHTPCAvgTZ[8];  
+  TH2D **  mHTPCEntTZ[8];  
+  TH2D **  mHTPCMidTZ[8];  
+  TH2D **  mHTPCExitTZ[8];  
+  TH2D **  mHTPCEntTdpt[8];
+  TH2D **  mHTPCMidTdpt[8];
+  TH2D **  mHTPCExitTdpt[8];
 
   char* bName[8];
   char* bTitle[8];
@@ -177,8 +183,8 @@ class StEStruct2ptCorrelations: public StEStructAnalysis {
   // generic histogram create functions to simplify the code
   //
 
-  void createHist2D(TH2F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
-  void createHist1D(TH1F*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
+  void createHist2D(TH2D*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax, int ny, float ymin, float ymax);
+  void createHist1D(TH1D*** h, const char* name, int iknd, int icut,int numCuts, int nx, float xmin, float xmax);
   void  moveEvents();
   void  initInternalData();
   int   bufferIndex();
@@ -318,8 +324,14 @@ inline void StEStruct2ptCorrelations::logStats(ostream& os){
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.h,v $
+ * Revision 1.10  2006/04/27 22:40:36  porter
+ * 3 changes: 1) added npair hists for errors needed with eta_delta weighting
+ * 2) commented out a few histograms to trim memory usage
+ * 3) changed all hists to double precision (reflected in createHists member functions)
+ *
  * Revision 1.9  2006/04/06 01:01:17  prindle
- * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ *
+ *   New mode in CutBin, 5, to do pid correlations. There is still an issue
  * of how to set the pt ranges allowed for the different particle types.
  * For data we probably want to restrict p to below 1GeV for pi and K, but
  * for Hijing and Pythia we can have perfect pid. Currently cuts are type
