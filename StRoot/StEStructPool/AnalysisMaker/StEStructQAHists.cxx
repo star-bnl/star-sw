@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.cxx,v 1.3 2006/04/11 17:50:50 prindle Exp $
+ * $Id: StEStructQAHists.cxx,v 1.4 2006/04/27 22:20:10 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -94,9 +94,9 @@ void StEStructQAHists::initBaseHistograms(){
 
   if(mEType==1) {  // AA monte carlo generator
      
-     aaGen[0] = new TH1D("impact","impact",100,0.0,20.0);
-     aaGen[1] = new TH1D("binary","binary",2000,0.5,2000.5);
-     aaGen[2] = new TH1D("participant","participant",500,0.5,500.5);
+     aaGenImpact = new TH1D("impact","impact",100,0.0,20.0);
+     aaGen[0] = new TH2F("binary","binary",500,0.5,2000.5,50,0.0,20.0);
+     aaGen[1] = new TH2F("participant","participant",500,0.5,500.5,50,0.0,20.0);
 
      aaGenBin  = new TH1D*[mbNBins-1];
      aaGenPart = new TH1D*[mbNBins-1];
@@ -138,9 +138,9 @@ void StEStructQAHists::fillBaseHistograms(StEStructEvent* event, StEStructEventR
   if(mptCents[0])mptCents[0]->Fill(ic);
 
   if(mEType==1){
-    if(aaGen[0])aaGen[0]->Fill(reader->getImpact());
-    if(aaGen[1])aaGen[1]->Fill(reader->getBinary());
-    if(aaGen[2])aaGen[2]->Fill(reader->getParticipants());
+    if(aaGenImpact)aaGenImpact->Fill(reader->getImpact());
+    if(aaGen[0])aaGen[0]->Fill(reader->getBinary(),reader->getImpact());
+    if(aaGen[1])aaGen[1]->Fill(reader->getParticipants(),reader->getImpact());
     if(ic>=0){
       if(aaGenBin[ic]) aaGenBin[ic]->Fill(reader->getBinary());
       if(aaGenPart[ic])aaGenPart[ic]->Fill(reader->getParticipants());
@@ -161,7 +161,8 @@ void StEStructQAHists::writeBaseHistograms(TFile* tf){
   for(int i=0;i<2;i++)if(mCents[i])mCents[i]->Write();
   for(int i=0;i<3;i++)if(mptCents[i])mptCents[i]->Write();
   if(mEType==1){
-    for(int i=0;i<3;i++)if(aaGen[i])aaGen[i]->Write();
+    if(aaGenImpact)aaGenImpact->Write();
+    for(int i=0;i<2;i++)if(aaGen[i])aaGen[i]->Write();
     for(int i=0;i<StEStructCentrality::Instance()->numCentralities()-1;i++){
       if(aaGenBin[i])aaGenBin[i]->Write();
       if(aaGenBin[i])aaGenPart[i]->Write();
@@ -293,8 +294,12 @@ void StEStructQAHists::writeTrackHistograms(TFile* tf){
 /**********************************************************************
  *
  * $Log: StEStructQAHists.cxx,v $
+ * Revision 1.4  2006/04/27 22:20:10  prindle
+ * Some changes in trigger names for run periods.
+ * Changed a couple of the Hijing QA histograms.
+ *
  * Revision 1.3  2006/04/11 17:50:50  prindle
- * Remove inChain from constructor arguments (no longer used in macro)
+ *   Remove inChain from constructor arguments (no longer used in macro)
  *
  * Revision 1.2  2006/04/06 00:54:03  prindle
  *   Tried to rationalize the way centrality is defined.

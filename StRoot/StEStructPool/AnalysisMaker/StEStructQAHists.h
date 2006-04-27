@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructQAHists.h,v 1.1 2006/04/04 22:05:06 porter Exp $
+ * $Id: StEStructQAHists.h,v 1.2 2006/04/27 22:20:12 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -31,7 +31,8 @@ class StEStructQAHists : public TObject {
 
   // --- a base set for aa event generators (e.g. hijing)
 
-  TH1D * aaGen[3];
+  TH1D * aaGenImpact;
+  TH2F * aaGen[2];
   TH1D ** aaGenBin;
   TH1D ** aaGenPart;
 
@@ -75,6 +76,10 @@ class StEStructQAHists : public TObject {
 /**********************************************************************
  *
  * $Log: StEStructQAHists.h,v $
+ * Revision 1.2  2006/04/27 22:20:12  prindle
+ * Some changes in trigger names for run periods.
+ * Changed a couple of the Hijing QA histograms.
+ *
  * Revision 1.1  2006/04/04 22:05:06  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
