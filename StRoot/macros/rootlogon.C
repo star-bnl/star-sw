@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.45 2004/11/14 17:01:38 fisyak Exp $
+// $Id: rootlogon.C,v 1.46 2006/04/30 21:55:02 jeromel Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -9,9 +9,10 @@
 
   // #pragma optimize 0 <-- removed BuTracking 247
   //  set FloatPointException trap
-namespace rootlogon {
-  int fpe=0;const char *env=0;
-}
+  namespace rootlogon {
+    int fpe=0;const char *env=0;
+  }
+
   rootlogon::fpe = TString(gSystem->Getenv("STAR_VERSION")) == ".DEV";
   rootlogon::env = gSystem->Getenv("STARFPE");
   if (rootlogon::env) {
@@ -25,10 +26,13 @@ namespace rootlogon {
     printf("*** Float Point Exception is OFF ***\n");
   }
 
+  
+  // Redefine prompt
   TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
   gPrompt += " [%d] ";
-  ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
+  ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); 
     
+
   // 	Load StarRoot lib.
   gSystem->Load("StarClassLibrary");
   //  if (gPrompt.Index("root4star")>=0 && !strstr(gSystem->GetLibraries(),"libTable")) {
@@ -57,9 +61,6 @@ namespace rootlogon {
     gInterpreter->ProcessLine("typedef TTableSorter     St_TableSorter;");    
     gInterpreter->ProcessLine("typedef TTableDescriptor St_tableDescriptor;");
   }
-//  printf("\nWelcome to the ROOT tutorials\n\n");
-//  printf("\nType \".x demos.C\" to get a toolbar from which to execute the demos\n");
-//  printf("\nType \".x demoshelp.C\" to see the help window\n\n");
   printf(" *** Start at Date : %s\n",TDatime().AsString());
 
 
@@ -68,8 +69,8 @@ namespace rootlogon {
   
   gROOT->SetStyle("Plain");// Default white background for all plots
    
-  // 	The modes below are provided by Nick van Eijndhoven <Nick@phys.uu.nl>
-  // 	from Alice.
+  // The modes below are provided by Nick van Eijndhoven <Nick@phys.uu.nl>
+  // from Alice.
   gStyle->SetCanvasColor(10);
   gStyle->SetStatColor(10);
   gStyle->SetTitleFillColor(10);
@@ -87,15 +88,22 @@ namespace rootlogon {
   // grid
   gStyle->SetPadGridX(1);
   gStyle->SetPadGridY(1);
-   //  Set date/time for plot
-   gStyle->SetOptDate(1);
-   // 	Assign bif size of hashtable for STAR I/O
-   TBuffer::SetGlobalWriteParam(2003);
+
+  //  Set date/time for plot
+  gStyle->SetOptDate(1);
+  // 	Assign bif size of hashtable for STAR I/O
+  TBuffer::SetGlobalWriteParam(2003);
 
 
+
+  // ROOT and XROOTD
   // some rootd default dummy stuff
   TAuthenticate::SetGlobalUser("starlib");
   TAuthenticate::SetGlobalPasswd("ROOT4STAR");
+
+  // This is already implied in system.rootrc although one could use
+  // this to switch to a beta version of the client library.
+  //ROOT->GetPluginManager()->AddHandler("TFile","^root:","TXNetFile", "Netx", "TXNetFile(const char*,Option_t*,const char*,Int_t,Int_t)"); 
 
 
 
@@ -109,7 +117,7 @@ namespace rootlogon {
 		      STAR_LEVEL.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
   }
   // note that the above bacward support the old mode for include whenever
-  // it was not in .$STAR_HOST_SYS but one level up. The bacward compatibility
+  // it was not in .$STAR_HOST_SYS but one level up. The backward compatibility
   // can be removed only at the net root release ...
   gSystem->SetIncludePath("-I. -I./.$STAR_HOST_SYS/include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/StRoot -I/usr/include/mysql");
    
