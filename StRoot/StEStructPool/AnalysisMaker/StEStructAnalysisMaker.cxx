@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.5 2006/04/26 18:48:57 dkettler Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.6 2006/05/01 17:49:57 msd Exp $
  *
  *************************************************************************
  *
@@ -167,7 +167,8 @@ void StEStructAnalysisMaker::writeQAHists(const char* fileName){
   if(mQAHists)mQAHists->writeHistograms(tfq);
   for(int i=0;i<numAnalysis;i++)manalysis[i]->writeQAHists(tfq);
 
-};
+  tfq->Close();
+}
 
 
 //-----------------------------------------------------------------
@@ -188,7 +189,7 @@ void StEStructAnalysisMaker::compiledLoop(){
   /* no-op here but one could put the event loop of a macro here 
      for some speed increase
   */
-};
+}
 
 void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
   doReactionPlaneAnalysis = true;
@@ -204,7 +205,11 @@ void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.6  2006/05/01 17:49:57  msd
+ * Closed QA tfile
+ *
  * Revision 1.5  2006/04/26 18:48:57  dkettler
+ *
  * Added reaction plane determination for the analysis
  *
  * Revision 1.4  2006/04/06 00:53:52  prindle
