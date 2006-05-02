@@ -66,13 +66,8 @@ proc ::jobMonitor::lremove {args} {
 #
 # Wanted to allow multiple windows to exist (which I can do easily)
 # but I also need to put each incarnation into a separate namespace.
-proc ::jobMonitor::createWindow {} {
+proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     set window .jobMonitor
-    set num 0
-#    while {[winfo exists .jobMonitor$num]} {
-#        incr num
-#    }
-    set window .jobMonitor$num
 
     set ::jobMonitor::bWindow [toplevel $window]
     set m [menu $::jobMonitor::bWindow.menu]
@@ -174,7 +169,19 @@ proc ::jobMonitor::createWindow {} {
     # Minimize possible confusion by disabling edits of text widget.
     $::jobMonitor::bWindow.f2.text config -state disabled
 
-    wm title $::jobMonitor::bWindow "jobMonitor $num"
+    # If scriptDir is passed in but not logDir assume scriptDir is parent
+    # of script and logs directories.
+    set title jobMonitor
+    if {$scriptDir ne ""} {
+        set title $scriptDir
+        if {$logDir eq ""} {
+            set logDir $scriptDir/logs
+            set scriptDir $scriptDir/scripts
+        }
+    }
+   set ::jobMonitor::scriptDir $scriptDir
+   set ::jobMonitor::logDir    $logDir
+    wm title $::jobMonitor::bWindow $title
 }
 # searchFiles --
 #    Search for files in the current directory that match the given
