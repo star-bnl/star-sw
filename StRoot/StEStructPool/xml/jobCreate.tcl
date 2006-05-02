@@ -18,7 +18,8 @@ namespace eval ::jobCreate:: {
     variable undone
     variable lastNode
     variable numberOfInstances
-    variable slaveInterpCount
+    variable slaveInterpCount 0
+    variable findString ""
 }
 
 ################################################################################
@@ -107,6 +108,8 @@ proc ::jobCreate::parseJobInfo {fileName} {
                 set ::jobCreate::jobAnalysisType "StEStructCorrelation"
             } elseif {$mFile eq "StEStructFluctuation.xml"} {
                 set ::jobCreate::jobAnalysisType "StEStructFluctuation"
+            } elseif {$mFile eq "StEStructEmpty.xml"} {
+                set ::jobCreate::jobAnalysisType "StEStructEmpty"
             }
             set mDom [open [file join $dir $mFile]]
             set mDomInfo [dom parse [read $mDom]]
@@ -674,10 +677,11 @@ proc ::jobCreate::m+AnalysisType {f el val} {
 }
 ################################################################################
 # Fluctuations and Correlations have some independent elements.
-# For now we only allow switching between fluctuations and correlations if we
+# For now we only allow switching between fluctuations, correlations and empty if we
 # have defined the job through a .lis file. Strategy is to delete current doEStruct
 # node and recreate it by merging from files in .lis file, only replacing
-# StEStructCorrelation.xml or StEStructFluctuation.xml with $type.xml
+# StEStructCorrelation.xml, StEStructFluctuation.xml or StEStructEmpty.xml
+# with $type.xml
 # Not really a satisfying way of doing it.
 ################################################################################
 proc ::jobCreate::setAnalysisType {f type} {
@@ -687,7 +691,9 @@ proc ::jobCreate::setAnalysisType {f type} {
     set lisFile [file join $::jobCreate::jobCreatePath jobFiles $::jobCreate::jobLisFile]
     set lfh [open $lisFile]
     while {[gets $lfh xmlFile] >= 0} {
-        if {$xmlFile eq "StEStructCorrelation.xml" || $xmlFile eq "StEStructFluctuation.xml"} {
+        if {$xmlFile eq "StEStructCorrelation.xml" ||
+            $xmlFile eq "StEStructFluctuation.xml" ||
+            $xmlFile eq "StEStructEmpty.xml"} {
             set xmlFile $::jobCreate::jobAnalysisType.xml
         }
         set mDom [open [file join $::jobCreate::jobCreatePath jobFiles $xmlFile]]
@@ -719,6 +725,11 @@ proc ::jobCreate::recreateDoEStrcutMacro {f} {
 # This routine checks that the new value is valid.
 ################################################################################
 proc ::jobCreate::modifyNode {node val e cond} {
+    # Sometimes we are passed a non-existant node??
+    # Probably a problem somewhere else but for now ignore it.
+    if {[info command $node] ne $node} {
+        return true
+    }
     set nChild [$node childNodes]
     set curr [$nChild nodeValue]
     $nChild nodeValue $val
@@ -1029,11 +1040,16 @@ proc ::jobCreate::displayCode {node title} {
     set ::jobCreate::showingXML  false
     .fileText.t configure -state normal
     if {[$node nodeName] eq "main"} {
+        # Try to keep current position visible in file when minor changes
+        # are made. This seems to assume that all other things we might
+        # view in this window are small enough users won't scroll them.
+        set yPos [.fileText.t yview]
         wm title .fileText "doEStruct.C: After current substitutions."
         .fileText.t delete 0.0 end
         .fileText.t insert end [applyXsl doEStruct.xsl asText]
         set ::jobCreate::showingMain true
         .fileText.t configure -state disabled
+        .fileText.t yview moveto [lindex $yPos 0]
     } elseif {[$node nodeName] eq "starSubmit"} {
         wm title .fileText "xml for star-submit: After current substitutions."
         .fileText.t delete 0.0 end
@@ -1055,22 +1071,29 @@ proc ::jobCreate::displayCode {node title} {
     .fileText.menu.edit entryconfigure Redo -state disabled
     set ::jobCreate::undone 0
     set ::jobCreate::lastNode $node
+    ::jobCreate::highlightString $::jobCreate::findString
 }
 ################################################################################
 # popupSearch will pop up a box allowing user to enter a search string and
 # search text currently displayed in .fileText.t
 ################################################################################
 proc ::jobCreate::findDialog {} {
-    set w [toplevel .findDialog]
-    wm resizable $w 0 0
-    wm title $w "Find"
-    entry  $w.e -textvar ::jobCreate::findString -bg white
-    bind $w.e <KeyRelease> "::jobCreate::highlightString \$::jobCreate::findString"
-    button $w.ok     -text Find   -command "::jobCreate::highlightString \$::jobCreate::findString"
-    button $w.cancel -text Cancel -command "::jobCreate::highlightString {}
-                                            destroy $w"
-    grid $w.e  -        -sticky news
-    grid $w.ok $w.cancel
+    if {[winfo exists .findDialog]} {
+        raise .findDialog
+    } else {
+        set w [toplevel .findDialog]
+        wm resizable $w 0 0
+        wm title $w "Find"
+        entry  $w.e -textvar ::jobCreate::findString -bg white
+        bind $w.e <KeyRelease> "::jobCreate::highlightString \$::jobCreate::findString"
+        button $w.ok     -text Find   -command "::jobCreate::highlightString \$::jobCreate::findString"
+        button $w.cancel -text Cancel -command "::jobCreate::highlightString {}
+                                                destroy $w"
+        grid $w.e  -        -sticky news
+        grid $w.ok $w.cancel
+    }
+    focus $w.e
+    $w.e icursor end
 }
 ################################################################################
 # highlightString is used by search to make string obvious to users.
@@ -1681,19 +1704,17 @@ proc ::jobCreate::startJobMonitor {} {
     set node [$::jobCreate::jobInfo getElementsByTagName outputDir]
     set path [$node text]
 
-    if {![info exists ::jobCreate::slaveInterpCount]} {
-        set ::jobCreate::slaveInterpCount 1
-    } else {
+#    if {![info exists ::jobCreate::slaveInterpCount]} {
+#        set ::jobCreate::slaveInterpCount 1
+#    } else {
+#        incr ::jobCreate::slaveInterpCount
+#    }
         incr ::jobCreate::slaveInterpCount
-    }
     interp create slave$::jobCreate::slaveInterpCount
     interp eval slave$::jobCreate::slaveInterpCount "
         source [file join $::jobCreate::jobCreatePath jobMonitor.tcl]
-        ::jobMonitor::createWindow
+        ::jobMonitor::createWindow $path
         wm withdraw .
-        interp eval slave2 {wm title \$::jobMonitor::bWindow "jobMonitor $::jobCreate::slaveInterpCount"}
-        set ::jobMonitor::scriptDir [file join $path scripts]
-        set ::jobMonitor::logDir    [file join $path logs]
     "
 }
 ################################################################################
@@ -1889,7 +1910,7 @@ proc ::jobCreate::displayHelp {w} {
     $w insert end "analysis.\n\n" n
 
     $w insert end " o analysisType\n" bullet
-    $w insert end "- Choice of StEStructFluctuation or StEStructCorrelation.\n\n" n
+    $w insert end "- Choice of StEStructEmpty, StEStructFluctuation or StEStructCorrelation.\n\n" n
 
     $w insert end "Common in both analysisType choices are:\n\n" n
 

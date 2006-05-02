@@ -80,7 +80,7 @@ void doEStruct( const char* filelist,
 
     estructMaker-&gt;Init();
     <variable stringInLine='weightsFile'/>
-    if (strcmp(weightsFile,"none")) {
+    if (strcmp(weightsFile,"") &amp;&amp; strcmp(weightsFile,"none")) {
         estructMaker->SetReactionPlaneAnalysis(weightsFile);
     }
 

@@ -456,6 +456,7 @@ hell is in this directory.
 </xs:element>
 <xs:simpleType name='analysisTypeNames'>
     <xs:restriction base='xs:string'>
+        <xs:enumeration value='StEStructEmpty' Comment='Template for setting up event loop in EStruct context.'/>
         <xs:enumeration value='StEStructFluctuation' Comment='Fill histograms for fluctuation analysis.'/>
         <xs:enumeration value='StEStructCorrelation' Comment='Fill histograms for correlation analysis.'/>
     </xs:restriction>
