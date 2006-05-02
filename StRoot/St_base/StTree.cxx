@@ -205,6 +205,8 @@ TString StIO::RFIOName(const char *name)
 //_______________________________________________________________________________
 TFile *StIO::Open(const char *name, Option_t *option,const char *title,Int_t compress)
 {
+  //printf("DEBUG:: StIO::Open(%s)\n",name);
+
   TString file = RFIOName(name);
   if(strcmp("READ",option)==0 && !IfExi(name)) return 0;
   if(strcmp("read",option)==0 && !IfExi(name)) return 0;
@@ -218,21 +220,38 @@ TFile *StIO::Open(const char *name, Option_t *option,const char *title,Int_t com
 Int_t StIO::IfExi(const char *name)
 {
   TString file = (name);
-  gSystem->ExpandPathName(file); 
-  if (!gSystem->AccessPathName(file)) return 1;
-  int l = file.Length();
-  if (file(l-5,5)!=".root") return 0;
 
-// Supress error message
+  //printf("DEBUG:: StIO::IfExi Expanding(%s)\n",name);
+  gSystem->ExpandPathName(file); 
+
+  // Supress error message
   ErrorHandlerFunc_t dummy = &DummyErrorHandlerFunc;
   ErrorHandlerFunc_t curre = SetErrorHandler(dummy);
-  TFile *tf = TFile::Open(file);
-// return old error handler
-  SetErrorHandler(curre);
 
-  int z = (!tf || tf->IsZombie());
-  delete tf;   
-  return !z;
+  //printf("DEBUG:: StIO::IfExi AccessingPathName(%s)\n",file.Data());
+  // JL - This attempts to do a root auth even if xroot
+  if (!gSystem->AccessPathName(file)){ 
+    SetErrorHandler(curre); 
+    return 1;
+
+  } else {
+    int l = file.Length();
+    if (file(l-5,5)!=".root"){
+      SetErrorHandler(curre); 
+      return 0;
+
+    } else {
+      //printf("DEBUG:: Opening %s\n",name);
+      TFile *tf = TFile::Open(file);
+      // return old error handler
+      SetErrorHandler(curre);
+      //printf("DEBUG:: Done with %s\n",name);
+
+      int z = (!tf || tf->IsZombie());
+      delete tf;   
+      return !z;
+    }
+  }
 }
 //===============================================================================
 
@@ -733,7 +752,7 @@ ClassImp(StFile)
   fDS = new TDataSet();
   fIter = -1; fKeyIter = 0;
   SetTitle(" nbranches=1 ");
-  AddFile(fileList);
+  if (fileList) AddFile(fileList);
 }
 //_____________________________________________________________________________
  StFile::~StFile()
@@ -795,12 +814,17 @@ Int_t StFile::AddFile(const char **fileList)
 {
   const char *file;
   if (!fileList) return 0;
-  for(int i=0; (file = fileList[i]);i++) AddFile(file);
+  for(int i=0; (file = fileList[i]);i++){
+    if (file) AddFile(file);
+  }
   return 0;
 }
 //_____________________________________________________________________________
 Int_t StFile::AddFile(const char *file,const char *opt)
 {
+
+  //printf("DEBUG:: StFile::AddFile\n");
+
   TString tfile,tit,base,famy;
   if (strpbrk(file,"*\\[]#@")) return AddWild(file,opt);
   int remove = 0;
@@ -810,8 +834,10 @@ Int_t StFile::AddFile(const char *file,const char *opt)
     if (ts.Contains("EXCLUDE",TString::kIgnoreCase)) remove=1;   
   }	  
 	  
-	    
+  //printf("DEBUG:: StFile::AddFile - ExpandPathName\n");	    
   tfile = file; gSystem->ExpandPathName(tfile);
+
+  //printf("DEBUG:: StFile::AddFile - testing IfExi\n");	    
 
   if (!StIO::IfExi(tfile)) {// file does not exist
     Warning("AddFile","*** IGNORED *** File %s does NOT exist \n",
