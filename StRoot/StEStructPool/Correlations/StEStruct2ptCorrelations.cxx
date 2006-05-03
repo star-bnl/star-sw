@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.17 2006/05/03 17:52:11 msd Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.18 2006/05/03 18:14:43 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -847,17 +847,14 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
           midtz[icb][ismidt].sep[ismidz]+=nwgt;
           exittz[icb][isexitt].sep[isexitz]+=nwgt;     
 
-          // need to rearrange pair so that deltaPhi>0
+          // need to rearrange pair so that deltaPhi>0, avoiding iSwitch and symmetrize for simplicity
           float delpt; // my delta pt 
           int idelpt;  // bin index
-          if (mPair.Track1()->Phi() - mPair.Track2()->Phi() >= 0) { 
-            delpt = mPair.DeltaPt();  // here delta=1-2, can use standard defs
-            idelpt = idpt1;
-          } else {  // redefine delta=2-1
-            delpt = -1.*mPair.DeltaPt();
-            if (symmetrize) idelpt = idpt2; 
-	    else  idelpt = b->idpt(-1.*iSwitch*mPair.DeltaPt()); // idpt2 undefined 
-          }
+          if (mPair.Track1()->Phi() - mPair.Track2()->Phi() >= 0)  
+            delpt = mPair.Track1()->Pt() - mPair.Track2()->Pt();
+	  else   // redefine delta as 2-1
+            delpt = mPair.Track2()->Pt() - mPair.Track1()->Pt();
+	  idelpt = b->idpt(delpt);
           enttd[icb][isentt].dpt[idelpt]+=nwgt;  
           midtd[icb][ismidt].dpt[idelpt]+=nwgt;
           exittd[icb][isexitt].dpt[idelpt]+=nwgt;
@@ -1808,6 +1805,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1D*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.18  2006/05/03 18:14:43  msd
+ * Fixed pair density again, removed references to iSwitch and symmetrize for simplicity
+ *
  * Revision 1.17  2006/05/03 17:52:11  msd
  * Fixed pair density plots broken by recent symmetry changes
  *
