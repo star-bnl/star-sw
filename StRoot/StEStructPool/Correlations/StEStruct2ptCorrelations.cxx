@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.16 2006/04/27 22:40:35 porter Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.17 2006/05/03 17:52:11 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -855,7 +855,8 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
             idelpt = idpt1;
           } else {  // redefine delta=2-1
             delpt = -1.*mPair.DeltaPt();
-            idelpt = idpt2; 
+            if (symmetrize) idelpt = idpt2; 
+	    else  idelpt = b->idpt(-1.*iSwitch*mPair.DeltaPt()); // idpt2 undefined 
           }
           enttd[icb][isentt].dpt[idelpt]+=nwgt;  
           midtd[icb][ismidt].dpt[idelpt]+=nwgt;
@@ -1807,6 +1808,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1D*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.17  2006/05/03 17:52:11  msd
+ * Fixed pair density plots broken by recent symmetry changes
+ *
  * Revision 1.16  2006/04/27 22:40:35  porter
  * 3 changes: 1) added npair hists for errors needed with eta_delta weighting
  * 2) commented out a few histograms to trim memory usage
