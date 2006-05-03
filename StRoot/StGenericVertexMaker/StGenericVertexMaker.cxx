@@ -23,6 +23,7 @@
 
 #include "StGenericVertexFinder.h"
 #include "StppLMVVertexFinder.h"
+#include "StFixedVertexFinder.h"
 
 #include "StTreeMaker/StTreeMaker.h"
 
@@ -76,7 +77,10 @@ StGenericVertexMaker::~StGenericVertexMaker()
   m_Mode = 0x1     Minuit
   m_Mode = 0x2     ppLMV4  This will not be able to run in parrallele of ppLMV5
   m_Mode = 0x4     ppLMV5  This will not be able to run in parrallele of ppLMV4
-
+  m_Mode = 0x8     PPV with CTB matching
+  m_Mode = 0x10    PPV without CTB matching
+  m_Mode = 0x20    Fixed vertex finder
+ 
   Default          Minuit  (to preserver backward compatibility)
 
   All VertexFinder-s need to have the same methods (like DoUseITTF()
@@ -108,6 +112,9 @@ Int_t StGenericVertexMaker::Init()
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(true);
     }
+  } else if ( m_Mode & 0x20) {
+      LOG_INFO << "StGenericVertexMaker::Init: fixed vertex 'finder' selected" << endm;
+      theFinder = new StFixedVertexFinder();
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
@@ -172,7 +179,7 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StGenericVertexMaker::Finish()
 {
-  //LSB TODO change over to using message manager
+
   gMessMgr->Info() << "StGenericVertexMaker::Finish " <<GetName() <<endm;
   gMessMgr->Info() << " Total events: " << nEvTotal << endm;
   gMessMgr->Info() << " Good events:  " << nEvGood  << endm;
@@ -292,33 +299,3 @@ void StGenericVertexMaker::MakeEvalNtuple(){ // only for Minuit vertex finder
 }
 
 //____________________________________________________________________________
-// LSB Commented out since moved to finder
-// void const StGenericVertexMaker::FillStEvent(){
-//   //Adds the vertex to StEvent (currently as a primary)
-//   // Here we invent our own flag and other data to put in
-//   // In real life we have to get it from somewhere (as done for position)
-//   UInt_t minuitFlag=1000;
-//   Float_t cov[6] = {0.1,0.2,0.3,0.4,0.5,0.6};
-//   Float_t xSq = 5.43;
-//   Float_t probXSq = 0.2468;
-
-//   StPrimaryVertex* primV = new StPrimaryVertex();
-//   primV->setPosition(theFinder->result());    //requires StThreeVectorF
-//   primV->setFlag(minuitFlag+theFinder->status());       //requires unsigned int
-//   primV->setCovariantMatrix(cov);      //requires float[6]
-//   primV->setChiSquared(xSq);           //requires float
-//   primV->setProbChiSquared(probXSq);       //requires float
-//   //primV->setParent();  //requires StTrack* but we won't use this, also
-//   //addDaughter(StTrack*) and removeDaughter(StTrack*) not used here
-//   //addDaughter would be used when filling primary tracks in later maker
-
-//   mEvent->addPrimaryVertex(primV);
-//   gMessMgr->Debug()
-//     << "StGenericVertexMaker::FillStEvent: Added new primary vertex" << endm;
-
-// }
-
-//------------  N O T   U S E D   -------------------------------
-
-
-
