@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.h,v 2.3 2006/03/22 20:58:21 ullrich Exp $
+ * $Id: StTriggerData2005.h,v 2.4 2006/05/04 19:05:51 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.h,v $
+ * Revision 2.4  2006/05/04 19:05:51  ullrich
+ * Added stuff to handle L2 results data.
+ *
  * Revision 2.3  2006/03/22 20:58:21  ullrich
  * Added interface to L2 results (offsets).
  *
@@ -54,6 +57,7 @@ public:
 
     //L2 offsets
     int L2ResultsOffset(StL2AlgorithmId id, int run) const;  
+    bool isL2Triggered(StL2TriggerResultType id, int run) const;
   
     // bunch and spin bits
     unsigned int bunchCounterHigh() const;

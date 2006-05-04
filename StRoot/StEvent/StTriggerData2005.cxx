@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.cxx,v 2.5 2006/03/22 20:58:21 ullrich Exp $
+ * $Id: StTriggerData2005.cxx,v 2.6 2006/05/04 19:05:51 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.cxx,v $
+ * Revision 2.6  2006/05/04 19:05:51  ullrich
+ * Added stuff to handle L2 results data.
+ *
  * Revision 2.5  2006/03/22 20:58:21  ullrich
  * Added interface to L2 results (offsets).
  *
@@ -32,6 +35,9 @@
 #include <iostream>
 #include "StTriggerData2005.h"
 #include "StDaqLib/TRG/trgStructures2005.h"
+#include "StDaqLib/TRG/L2jetResults2006.h"
+#include "StDaqLib/TRG/L2pedResults2006.h"
+#include "StDaqLib/TRG/L2gammaResult2006.h"
 
 ClassImp(StTriggerData2005)
 
@@ -821,3 +827,44 @@ int StTriggerData2005::L2ResultsOffset(StL2AlgorithmId id, int run) const
     default: return -1;
     }
 }
+
+bool StTriggerData2005::isL2Triggered(StL2TriggerResultType id, int run) const
+{
+  if(run<7000000) return false;
+  if(run>7270000) return false;
+
+  int offset;
+  offset=L2ResultsOffset(l2Dijet,run);
+  L2jetResults2006 *jet = (L2jetResults2006 *) &(mData->TrgSum.L2Result[offset]);
+  offset=L2ResultsOffset(l2Pi0Gamma,run);
+  L2gammaResult *gam_bemc = (L2gammaResult *) &(mData->TrgSum.L2Result[offset]);
+  L2gammaResult *gam_eemc = (L2gammaResult *) &(mData->TrgSum.L2Result[offset+2]);
+
+  switch(id) {
+  case l2Trg2006BEMCGammaPi:    
+    return (gam_bemc->trigger & 0x3)==0x3;
+    break;
+  case l2Trg2006BEMCGammaPiRandom:    
+    return gam_bemc->trigger & 0x4;
+    break;
+  case l2Trg2006EEMCGammaPi:    
+    return (gam_eemc->trigger & 0x3)==0x3;
+    break;
+  case l2Trg2006EEMCGammaPiRandom:    
+    return gam_eemc->trigger & 0x4;
+    break;
+  case l2Trg2006MonoJet:
+    return jet->int0.decision & 0x40;
+    break;
+  case l2Trg2006DiJet:
+    return jet->int0.decision & 0x80;
+    break;
+  case l2Trg2006RandomJet:    
+    return jet->int0.decision & 0x20;
+    break;
+  default: 
+    return false;
+  }
+}    
+
+
