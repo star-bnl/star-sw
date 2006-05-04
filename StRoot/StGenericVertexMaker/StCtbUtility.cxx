@@ -77,8 +77,8 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
   //access the CTB data  from GEANT
   St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) gds->Find("g2t_ctb_hit");
   if(g2t_ctb_hit == 0){
-    gMessMgr->Debug() << "No CTB Hits in MC table for this event" << endm;
-    gMessMgr->Debug() << "g2t_ctb_hit = " << g2t_ctb_hit << endm;
+    LOG_DEBUG << "No CTB Hits in MC table for this event" << endm;
+    LOG_DEBUG << "g2t_ctb_hit = " << g2t_ctb_hit << endm;
     return ;
   }
   
@@ -92,7 +92,7 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
 
   //assert(ctb_hit);
   if (! ctb_hit){
-    gMessMgr->Warning() << "StCtbUtility::collectCTBhitsMC: no CTB hits" << endm;
+    LOG_WARN << "StCtbUtility::collectCTBhitsMC: no CTB hits" << endm;
     return ;
   }
 
@@ -129,12 +129,12 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
 //==========================================================
 void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
   // returns true if one or more valid CTB hits are found.  
-  gMessMgr->Info() << "StCtbUtility scans real CTB hits" << endm;
+  LOG_INFO << "StCtbUtility scans real CTB hits" << endm;
 
   // access CTB from Akio's Maker
   
   if(!trgD){
-    gMessMgr->Warning() << "StCtbUtility scans: no trigData in real data" << endm;
+    LOG_WARN << "StCtbUtility scans: no trigData in real data" << endm;
     return ;
   }
 
@@ -154,7 +154,7 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
 
   StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
   if(!trigCol){
-    gMessMgr->Warning() << "StCtbUtility scans: no trigCol in Data" << endm;
+    LOG_WARN << "StCtbUtility scans: no trigCol in Data" << endm;
     return ;
   }
 

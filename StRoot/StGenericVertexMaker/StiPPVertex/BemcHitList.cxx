@@ -84,7 +84,7 @@ BemcHitList::initRun(){
     nA++;
   }
 
-  gMessMgr->Info() <<" BemcHitList::initRun() done,  active="<<nA<<" of "<<nB<<" BTOW towers" <<endm;
+  LOG_INFO <<" BemcHitList::initRun() done,  active="<<nA<<" of "<<nB<<" BTOW towers" <<endm;
 
 }
 

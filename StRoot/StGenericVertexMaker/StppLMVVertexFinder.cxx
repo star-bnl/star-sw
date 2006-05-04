@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.21 2006/05/02 13:49:21 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.22 2006/05/04 20:01:30 jeromel Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -26,7 +26,7 @@
 //==========================================================
 //==========================================================
 StppLMVVertexFinder::StppLMVVertexFinder() {
-  gMessMgr->Info() << "StppLMVVertexFinder::StppLMVVertexFinder is in use." << endm;
+  LOG_INFO << "StppLMVVertexFinder::StppLMVVertexFinder is in use." << endm;
   mBeamHelix           = 0;
   mVertexConstrain     = false;
   mTotEve              = 0;
@@ -41,7 +41,7 @@ StppLMVVertexFinder::Init() {
 
   //jan default cuts
   if (mMode==0){
-    gMessMgr->Info() << "The  ppLMV4 cuts have been activated" << endm; 
+    LOG_INFO << "The  ppLMV4 cuts have been activated" << endm; 
     mMaxTrkDcaRxy    = 3.9;
     mMinTrkPt        = 0.2;
     mMinNumberOfFitPointsOnTrack = 15; // a typo (=10) was here before , JB
@@ -52,7 +52,7 @@ StppLMVVertexFinder::Init() {
     mMatchCtbMax_eta = mCtbEtaSeg/2.+0.02;
     mMatchCtbMax_phi = mCtbPhiSeg/2.+C_PI*1./180.;
   } else {
-    gMessMgr->Info() << "The  ppLMV5 cuts have been activated" << endm; 
+    LOG_INFO << "The  ppLMV5 cuts have been activated" << endm; 
     mMaxTrkDcaRxy    = 2.0;            
     mMinTrkPt        = 0.2;            
     mMinNumberOfFitPointsOnTrack = 15; 
@@ -72,7 +72,7 @@ StppLMVVertexFinder::Clear(){  //  Reset vertex
   StGenericVertexFinder::Clear();
   mCtbHits.clear();
   mPrimCand.clear();
-  gMessMgr->Info() << "StppLMVVertexFinder::Clear() ..." << endm;
+  LOG_INFO << "StppLMVVertexFinder::Clear() ..." << endm;
 }
 
 //==========================================================
@@ -101,7 +101,7 @@ StppLMVVertexFinder::~StppLMVVertexFinder() {
 //==========================================================
 int 
 StppLMVVertexFinder::fit(StEvent* event) {
-  gMessMgr->Info() << "StppLMVVertexFinder::fit() START ..." << endm;
+  LOG_INFO << "StppLMVVertexFinder::fit() START ..." << endm;
  //
 
   n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
@@ -142,7 +142,7 @@ StppLMVVertexFinder::fit(StEvent* event) {
   // printCtb(); //4ppv
 
   if(mCtbHits.size()<=0){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() no valid CTB hits found, quit" << endm;
+    LOG_WARN << "StppLMVVertexFinder::fit() no valid CTB hits found, quit" << endm;
     return 0;
   }   
    
@@ -164,17 +164,17 @@ StppLMVVertexFinder::fit(StEvent* event) {
   } // end of track selection
 
   //  printf(", now n1=%d n2=%d n3=%d n4=%d  n6=%d\n",n1,n2,n3,n4,n6); //tmp
-  gMessMgr->Debug() << ", now n1=" << n1 << " n2=" << n2 << " n3=" << n3 << " n4=" << n4 << "n6=" << n6 << endm;
+  LOG_DEBUG << ", now n1=" << n1 << " n2=" << n2 << " n3=" << n3 << " n4=" << n4 << "n6=" << n6 << endm;
 
 
   //
   //  In case there are no tracks left we better quit
   //
   if (mPrimCand.size() < mMinMatchTr){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() only "<< mPrimCand.size() << "tracks to fit - too few, quit ppLMV" << endm;
+    LOG_WARN << "StppLMVVertexFinder::fit() only "<< mPrimCand.size() << "tracks to fit - too few, quit ppLMV" << endm;
     return 0;
   }
-  gMessMgr->Info() << "StppLMVVertexFinder::fit() size of helix vector: " << mPrimCand.size() << endm;
+  LOG_INFO << "StppLMVVertexFinder::fit() size of helix vector: " << mPrimCand.size() << endm;
  
   // use beam line constraint or not
   if(mVertexConstrain ) {
@@ -190,14 +190,14 @@ StppLMVVertexFinder::fit(StEvent* event) {
     x.sigma=sigma;
     mPrimCand.push_back(x);
     //printf("WARN ppLMV: nominal beam line added with sigma=%f, now nTrack=%d \n",sigma, mPrimCand.size());
-    gMessMgr->Warning() << "ppLMV: nominal beam line added with sigma=" << sigma 
+    LOG_WARN << "ppLMV: nominal beam line added with sigma=" << sigma 
 			<< ", now nTrack=" << mPrimCand.size() << endm;
 
   } // end of beamLine
 
 
   //printf("PrimCand  before ppLMV for eveID=%d tracks at first point\n",eveID);
-  gMessMgr->Debug() << "PrimCand  before ppLMV for eveID=" << eveID << "tracks at first point" << endm;
+  LOG_DEBUG << "PrimCand  before ppLMV for eveID=" << eveID << "tracks at first point" << endm;
 
   //tmp - lits all matched tracks
   for( uint j=0;j<mPrimCand.size();j++) {
@@ -208,12 +208,12 @@ StppLMVVertexFinder::fit(StEvent* event) {
   //  ----------  D O   F I N D    V E R T E X
   int ret=ppLMV5();
   if(ret==false) {
-    gMessMgr->Debug() << "ppLMV did not found vertex"<< endm;
+    LOG_DEBUG << "ppLMV did not found vertex"<< endm;
     return 0;
   }
   
 
-  gMessMgr->Info() << "Prim tr used by ppLMV for eveID=" << eveID 
+  LOG_INFO << "Prim tr used by ppLMV for eveID=" << eveID 
 		   << ", tracks at vertex=" << mPrimCand.size()<<endm;
 
   assert(size());
@@ -250,17 +250,17 @@ StppLMVVertexFinder::UseVertexConstraint(double x0, double y0,
   mdxdz = dxdz;
   mdydz = dydz;
   mWeight = weight;
-  gMessMgr->Info() << "StppLMVVertexFinder::Using Constrained Vertex" << endm;
-  gMessMgr->Info() << "x origin = " << mX0 << endm;
-  gMessMgr->Info() << "y origin = " << mY0 << endm;
-  gMessMgr->Info() << "slope dxdz = " << mdxdz << endm;
-  gMessMgr->Info() << "slope dydz = " << mdydz << endm;
-  gMessMgr->Info() << "NOT used (JB) weight in fit = " << weight <<  endm;
+  LOG_INFO << "StppLMVVertexFinder::Using Constrained Vertex" << endm;
+  LOG_INFO << "x origin = " << mX0 << endm;
+  LOG_INFO << "y origin = " << mY0 << endm;
+  LOG_INFO << "slope dxdz = " << mdxdz << endm;
+  LOG_INFO << "slope dydz = " << mdydz << endm;
+  LOG_INFO << "NOT used (JB) weight in fit = " << weight <<  endm;
   StThreeVectorD origin(mX0,mY0,0.0);
   double pt  = 88889999;   
   double nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
   if(nxy<1.e-5){ // beam line _MUST_ be tilted
-    gMessMgr->Warning() << "StppLMVVertexFinder:: Beam line must be tilted!" << endm;
+    LOG_WARN << "StppLMVVertexFinder:: Beam line must be tilted!" << endm;
     nxy=mdxdz=1.e-5; 
   }
   double p0=pt/nxy;  
@@ -292,7 +292,7 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 
   if (!track) return false; // it should never happen
   if(!finite(track->geometry()->helix().curvature())){
-    gMessMgr->Warning() << "StppLMVVertexFinder::matchTrack2CTB: helix.curvature not finite, fix tracker, ppLMV aborting" << endm;
+    LOG_WARN << "StppLMVVertexFinder::matchTrack2CTB: helix.curvature not finite, fix tracker, ppLMV aborting" << endm;
     mCtbHits.clear();
     mPrimCand.clear();    
     return false;
@@ -413,13 +413,13 @@ StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
 bool  
 StppLMVVertexFinder::ppLMV5() { 
   //  ----------  D O   F I N D    V E R T E X
-  if(mMode == 0) gMessMgr->Warning()<<"ppLMV4 cuts have been activated"<<endm; 
+  if(mMode == 0) LOG_WARN<<"ppLMV4 cuts have been activated"<<endm; 
 
   int totTr=mPrimCand.size();
   uint minTr=mMinMatchTr;
   if(mVertexConstrain) minTr++;
   //printf("passed %d tracks match to CTB,  BeamLine=%d\n",totTr,mVertexConstrain );
-  gMessMgr->Debug() << "passed " << totTr << " tracks match to CTB,  BeamLine=" << mVertexConstrain << endm;
+  LOG_DEBUG << "passed " << totTr << " tracks match to CTB,  BeamLine=" << mVertexConstrain << endm;
    
   double xo=0.0,yo=0.0;
   xo=mX0;
@@ -438,7 +438,7 @@ StppLMVVertexFinder::ppLMV5() {
     vertIter++;
     // Check that there at least are 2 tracks
     if( mPrimCand.size() < minTr ){
-      gMessMgr->Warning()  << "ppLMV5: below  "<<minTr<<" track remains. No vertex found." << endm;
+      LOG_WARN  << "ppLMV5: below  "<<minTr<<" track remains. No vertex found." << endm;
       return false;
     }
   
@@ -491,8 +491,8 @@ StppLMVVertexFinder::ppLMV5() {
     double Yv = C21*b1 + C22*b2 + C23*b3;
     double Zv = C31*b1 + C32*b2 + C33*b3;
     XVertex.setX(Xv); XVertex.setY(Yv); XVertex.setZ(Zv);
-    gMessMgr->Debug() <<vertIter<<"  Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endm;
-    gMessMgr->Debug() <<"Error in Position : "<<::sqrt(C11)<<" "<<::sqrt(C22)<<" "<<::sqrt(C33)<<endm;
+    LOG_DEBUG <<vertIter<<"  Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endm;
+    LOG_DEBUG <<"Error in Position : "<<::sqrt(C11)<<" "<<::sqrt(C22)<<" "<<::sqrt(C33)<<endm;
     
 
     // Check if the fit is any good
@@ -522,7 +522,7 @@ StppLMVVertexFinder::ppLMV5() {
     } 
 
     if( dmax > mDVtxMax ){
-      gMessMgr->Info() << "Removing a track! dmax=" << dmax << endm;
+      LOG_INFO << "Removing a track! dmax=" << dmax << endm;
       mPrimCand.erase(ikeep);
       done=0;
     }
@@ -559,7 +559,7 @@ StppLMVVertexFinder::ppLMV5() {
 #endif
 
 
-  gMessMgr->Debug() <<"ppLMV5: Primary Vertex found!\nVert position: "<<XVertex<<", accepted tracks "<<mPrimCand.size()<<" of "<<totTr<<" eveID="<<eveID<<endm;
+  LOG_DEBUG <<"ppLMV5: Primary Vertex found!\nVert position: "<<XVertex<<", accepted tracks "<<mPrimCand.size()<<" of "<<totTr<<" eveID="<<eveID<<endm;
   printf("##V %6d %d %f %f %f    %d %d %d\n",eveID,mTotEve,XVertex.x(),XVertex.y(),XVertex.z(),mCtbHits.size(),n1,NCtbMatches());
 
 
@@ -580,7 +580,7 @@ StppLMVVertexFinder::ppLMV5() {
     }
   }
   
-  gMessMgr->Debug() << "StppLMVVertexFinder::ppLMV5() ends" << endm;
+  LOG_DEBUG << "StppLMVVertexFinder::ppLMV5() ends" << endm;
   return true;
 }
 
@@ -600,7 +600,7 @@ StppLMVVertexFinder::changeCuts(){
   StGenericVertexMaker *mk=(StGenericVertexMaker *)StMaker::GetChain()->GetMaker("GenericVertex");
   int mode2=mk->GetMode2();
 
-  gMessMgr->Info()<< "ccc m_mode2=" << mode2 << endm;
+  LOG_INFO<< "ccc m_mode2=" << mode2 << endm;
   switch(mode2) {
   case 'a': mMaxTrkDcaRxy=1.5; break;
   case 'b': mMaxTrkDcaRxy=2.5; break;
@@ -621,6 +621,9 @@ StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.22  2006/05/04 20:01:30  jeromel
+ * Switched to logger
+ *
  * Revision 1.21  2006/05/02 13:49:21  balewski
  * replace gufld() with  mBfield = event->runInfo()->magneticField();
  *

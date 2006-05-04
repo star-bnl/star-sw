@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.21 2006/04/26 15:37:04 jeromel Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.22 2006/05/04 20:01:31 jeromel Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -60,7 +60,7 @@
 //==========================================================
 
 StPPVertexFinder::StPPVertexFinder() {
-  gMessMgr->Info() << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
+  LOG_INFO << "StPPVertexFinder::StPPVertexFinder is in use" << endm;
 
   mdxdz=mdydz=mX0=mY0  = 0; // beam line params
   mTotEve              = 0;
@@ -86,7 +86,7 @@ StPPVertexFinder::StPPVertexFinder() {
   FILE *fd=fopen("ppvMode.dat","r");
   if(fd) {
     fscanf(fd,"%d ",&mTestMode);
-    gMessMgr->Warning() << "PPV cuts have been changed to mTestMode=" << mTestMode<<endm;
+    LOG_WARN << "PPV cuts have been changed to mTestMode=" << mTestMode<<endm;
     fclose(fd);
   }
 
@@ -98,7 +98,7 @@ StPPVertexFinder::StPPVertexFinder() {
 void 
 StPPVertexFinder::Init() {
   assert(mTotEve==0); // can't be called twice
-  gMessMgr->Info() << "PPV-2 cuts have been activated, mTestMode=" << mTestMode<<endm;
+  LOG_INFO << "PPV-2 cuts have been activated, mTestMode=" << mTestMode<<endm;
   //.. set various params 
   mMaxTrkDcaRxy = 3.0;  // cm 
   mMinTrkPt     = 0.20; // GeV/c           
@@ -124,7 +124,7 @@ StPPVertexFinder::Init() {
   //get a pointer to StiMaker:
   StiMaker* sti = (StiMaker*)StMaker::GetChain()->GetMaker("Sti");
   if(sti==0) {
-    gMessMgr->Warning() <<"no STi Maker,  PPV will be OFF"<<endm;
+    LOG_WARN <<"no STi Maker,  PPV will be OFF"<<endm;
     return ;
   }
   //get pointer to Sti toolkit
@@ -154,15 +154,15 @@ StPPVertexFinder::Init() {
 //==========================================================
 void 
 StPPVertexFinder::InitRun(int runnumber){
-  gMessMgr->Info() << "PPV InitRun() runNo="<<runnumber<<endm;
+  LOG_INFO << "PPV InitRun() runNo="<<runnumber<<endm;
   St_db_Maker* mydb = (St_db_Maker*) StMaker::GetChain()->GetMaker("db");
   int dateY=mydb->GetDateTime().GetYear();
   
   if(isMC) assert(runnumber <1000000); // probably embeding job ,crash it, JB
   assert(dateY<2007); // who knows what 2007 setup will be,  crash it just in case
   if(isMC) {
-    gMessMgr->Info() << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
-    if(dateY>2006)  gMessMgr->Warning() <<
+    LOG_INFO << "PPV InitRun() M-C, Db_date="<<mydb->GetDateTime().AsString()<<endm;
+    if(dateY>2006)  LOG_WARN <<
 	  "PPV InitRun() , M-C time stamp differs from 2005,\n BTOW status tables questionable,\n PPV results qauestionable, \n\n  F I X    B T O W    S T A T U S     T A B L E S     B E F O R E     U S E  !!!  \n \n chain will continue taking whatever is loaded in to DB\n  Jan Balewski, January 2006\n"<<endm; 
   }
 
@@ -231,7 +231,7 @@ StPPVertexFinder::initHisto() {
 //==========================================================
 void 
 StPPVertexFinder::Clear(){
-  gMessMgr->Info() << "PPVertex::Clear nEve="<<mTotEve<<  endm;
+  LOG_INFO << "PPVertex::Clear nEve="<<mTotEve<<  endm;
   StGenericVertexFinder::Clear();
   ctbList->clear();
   bemcList->clear();
@@ -327,11 +327,11 @@ StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double 
   mdxdz = dxdz;
   mdydz = dydz;
   // weight - not used ;
-  gMessMgr->Info() << "StPPVertexFinder::Using Constrained Vertex" << endm;
-  gMessMgr->Info() << "x origin = " << mX0 << endm;
-  gMessMgr->Info() << "y origin = " << mY0 << endm;
-  gMessMgr->Info() << "slope dxdz = " << mdxdz << endm;
-  gMessMgr->Info() << "slope dydz = " << mdydz << endm;
+  LOG_INFO << "StPPVertexFinder::Using Constrained Vertex" << endm;
+  LOG_INFO << "x origin = " << mX0 << endm;
+  LOG_INFO << "y origin = " << mY0 << endm;
+  LOG_INFO << "slope dxdz = " << mdxdz << endm;
+  LOG_INFO << "slope dydz = " << mdydz << endm;
 
 }
 
@@ -342,12 +342,12 @@ int
 StPPVertexFinder::fit(StEvent* event) {
   mTotEve++;
   eveID=event->id();
-  gMessMgr->Info() << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
+  LOG_INFO << "\n   @@@@@@   PPVertex::Fit START nEve="<<mTotEve<<"  eveID="<<eveID<<  endm;
 
   hA[0]->Fill(1);
 
   if(mToolkit==0) {    
-   gMessMgr->Warning() <<"no Sti tool kit,  PPV is OFF"<<endm;
+   LOG_WARN <<"no Sti tool kit,  PPV is OFF"<<endm;
    return 0;
   }
 
@@ -367,12 +367,12 @@ StPPVertexFinder::fit(StEvent* event) {
   StEvent*  mEvent = (StEvent*) StMaker::GetChain()->GetInputDS("StEvent");  assert(mEvent);
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); 
   if(emcC==0) {
-    gMessMgr->Warning() <<"no emcCollection , continue THE SAME eve"<<endm;
+    LOG_WARN <<"no emcCollection , continue THE SAME eve"<<endm;
   } else {
     assert(emcC);
     StEmcDetector* btow = emcC->detector( kBarrelEmcTowerId); 
     if(btow==0) {
-      gMessMgr->Warning() <<"no BEMC in emcColl , continue THE SAME eve"<<endm;
+      LOG_WARN <<"no BEMC in emcColl , continue THE SAME eve"<<endm;
     } else {
       assert(btow);
       bemcList->build(btow, mMinAdcBemc);
@@ -380,7 +380,7 @@ StPPVertexFinder::fit(StEvent* event) {
     
     StEmcDetector* etow = emcC->detector(kEndcapEmcTowerId); 
     if(etow==0) {
-      gMessMgr->Warning() <<"no EEMC in emcColl , continue THE SAME eve"<<endm;
+      LOG_WARN <<"no EEMC in emcColl , continue THE SAME eve"<<endm;
     } else {
       assert(etow);
       eemcList->build(etow, mMinAdcEemc);
@@ -395,7 +395,7 @@ StPPVertexFinder::fit(StEvent* event) {
   //get the Sti track container...
   StiTrackContainer* tracks = mToolkit->getTrackContainer();
    if(tracks==0) {
-     gMessMgr->Warning() <<"no STi tracks , skip eve"<<endm;
+     LOG_WARN <<"no STi tracks , skip eve"<<endm;
      printInfo();  
      return 0 ;				       
    }
@@ -454,10 +454,10 @@ StPPVertexFinder::fit(StEvent* event) {
   bemcList->doHisto();
   eemcList->doHisto();
 
-  gMessMgr->Info() << "StPPVertexFinder::fit() nEve="<<mTotEve<<" , "<<nmAny<<" tracks with good DCA,survived matching CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
+  LOG_INFO << "StPPVertexFinder::fit() nEve="<<mTotEve<<" , "<<nmAny<<" tracks with good DCA,survived matching CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
 
   if(nmAny<mMinMatchTr){
-    gMessMgr->Info() << "StPPVertexFinder::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
+    LOG_INFO << "StPPVertexFinder::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
     printInfo();
     return 0;
   }
@@ -481,7 +481,7 @@ StPPVertexFinder::fit(StEvent* event) {
     mVertexData.push_back(V);
   }
 
-  gMessMgr->Info() << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found\n" << endm;
+  LOG_INFO << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData.size()<<" vertices found\n" << endm;
   
   if(mVertexData.size()>0)  hA[0]->Fill(7);
   
@@ -618,7 +618,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   // returns true if accepted
 
   int nt=mTrackData.size();
-  gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<endm;
+  LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<endm;
   int n1=0;
   int i;
   
@@ -656,7 +656,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   if(!validVerex) { // discrad vertex
     //no trigTracks in this vertex, discard tracks
     //V.print(cout);
-    gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
+    LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
     for(i=0;i<nt;i++) {
       TrackData *t=&mTrackData[i];
       if(t->vertexID!=V.id) continue;
@@ -665,7 +665,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
     return false;
   }
   
-  gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<" accepted, nAnyMatch="<<V.nAnyMatch<<" nAnyVeto="<<V.nAnyVeto<<endm;
+  LOG_INFO << "StPPVertexFinder::evalVertex Vid="<<V.id<<" accepted, nAnyMatch="<<V.nAnyMatch<<" nAnyVeto="<<V.nAnyVeto<<endm;
   return true;
 }
 
@@ -704,17 +704,17 @@ StPPVertexFinder::exportVertices(){
     //..... add vertex to the list
     addVertex(&primV);
   }
-  gMessMgr->Info() << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
+  LOG_INFO << "StPPVertexFinder::exportVertices(), size="<<size()<<endm;
 }
 
 //-------------------------------------------------
 //-------------------------------------------------
 void 
 StPPVertexFinder::Finish() {
-  gMessMgr->Info() << "StPPVertexFinder::Finish() ...." << endm;
+  LOG_INFO << "StPPVertexFinder::Finish() ...." << endm;
   
   //  saveHisto("ppv");
-  gMessMgr->Info() << "StPPVertexFinder::Finish() done" << endm;
+  LOG_INFO << "StPPVertexFinder::Finish() done" << endm;
   //StIOMaker::GetFilename() -- which looks like it should return 
   //the "current" file being processed.  YMMV.  
 }
@@ -1026,7 +1026,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     if(fabs(z)>zMax) continue;
     // .........node is within TPC fiducial volume
     if(lastRxy<=rxy){
-      gMessMgr->Warning() << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack below is out of order and is ignorred in (some) of vertex finder analysis"<<"\n  Z="<<z<<" rXY="<<rxy<<" last_rxy="<<lastRxy<<endm;
+      LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack below is out of order and is ignorred in (some) of vertex finder analysis"<<"\n  Z="<<z<<" rXY="<<rxy<<" last_rxy="<<lastRxy<<endm;
       dumpKalmanNodes(track);
       continue;
     }
@@ -1035,7 +1035,7 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     in++;
     if(lastZ*z<0. && fabsf(z)>zMembraneDepth) { // track just crossed Z=0 plane
       if(jz0>0) {
-	gMessMgr->Warning() << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack crosses Z=0 for the 2nd time, this track has a strange list of nodes - continue"<<endm;
+	LOG_WARN << "StPPVertexFinder::matchTrack2Membrane() \n the "<<in<<" node of the kalmanTrack crosses Z=0 for the 2nd time, this track has a strange list of nodes - continue"<<endm;
 	dumpKalmanNodes(track);
       }
       //assert(jz0==0); // only one crosss point is expected
@@ -1066,6 +1066,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.22  2006/05/04 20:01:31  jeromel
+ * Switched to logger
+ *
  * Revision 1.21  2006/04/26 15:37:04  jeromel
  * mVertexOrderMethod (To be tested)
  *

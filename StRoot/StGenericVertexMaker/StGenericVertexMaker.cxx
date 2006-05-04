@@ -93,7 +93,7 @@ Int_t StGenericVertexMaker::Init()
 {
   // setup params
 
-  gMessMgr->Info() << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
+  LOG_INFO << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
   bool isMinuit=false;
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
@@ -106,7 +106,7 @@ Int_t StGenericVertexMaker::Init()
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
 
   } else if ( m_Mode & 0x8 ||  m_Mode & 0x10){ // 2 version of PPV w/ & w/o CTB
-    gMessMgr->Info() << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
+    LOG_INFO << "StGenericVertexMaker::Init: uses PPVertex finder"<<  endm;
     theFinder= new StPPVertexFinder();
     if ( m_Mode & 0x10) ((StPPVertexFinder*) theFinder)->useCTB(false);	
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
@@ -165,11 +165,11 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
      dydz = vSeed->dydz;
      }
      else {
-       gMessMgr->Info() << "StGenericVertexMaker -- No Database for beamline" << endm;
+       LOG_INFO << "StGenericVertexMaker -- No Database for beamline" << endm;
      }
-     gMessMgr->Info() << "BeamLine Constraint: " << endm;
-     gMessMgr->Info() << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
-     gMessMgr->Info() << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
+     LOG_INFO << "BeamLine Constraint: " << endm;
+     LOG_INFO << "x(z) = " << x0 << " + " << dxdz << " * z" << endm;
+     LOG_INFO << "y(z) = " << y0 << " + " << dydz << " * z" << endm;
      theFinder->UseVertexConstraint(x0,y0,dxdz,dydz,0.0001);
   }
   return StMaker::InitRun(runnumber);
@@ -180,9 +180,9 @@ Int_t StGenericVertexMaker::InitRun(int runnumber){
 Int_t StGenericVertexMaker::Finish()
 {
 
-  gMessMgr->Info() << "StGenericVertexMaker::Finish " <<GetName() <<endm;
-  gMessMgr->Info() << " Total events: " << nEvTotal << endm;
-  gMessMgr->Info() << " Good events:  " << nEvGood  << endm;
+  LOG_INFO << "StGenericVertexMaker::Finish " <<GetName() <<endm;
+  LOG_INFO << " Total events: " << nEvTotal << endm;
+  LOG_INFO << " Good events:  " << nEvGood  << endm;
 
 
   //LSB TODO Leave this for now. Should really be using STAR/ROOT I/O scheme?
@@ -208,7 +208,7 @@ Bool_t StGenericVertexMaker::DoFit(){
   if (theFinder->fit(event)) {
     theFinder->printInfo();
   }  else {
-    gMessMgr->Error() << "StGenericVertexMaker::DoFit: vertex fit failed, no vertex." << endm;
+    LOG_ERROR << "StGenericVertexMaker::DoFit: vertex fit failed, no vertex." << endm;
     return kFALSE;
   }
 
@@ -227,8 +227,8 @@ Int_t StGenericVertexMaker::Make()
   primV  = NULL;
   mEvent = NULL;
   mEvent = (StEvent *)GetInputDS("StEvent");
-  gMessMgr->Debug() << "StGenericVertexMaker::Make: StEvent pointer " << mEvent << endm;
-  gMessMgr->Debug() << "StGenericVertexMaker::Make: external find use " << externalFindUse << endm;
+  LOG_DEBUG << "StGenericVertexMaker::Make: StEvent pointer " << mEvent << endm;
+  LOG_DEBUG << "StGenericVertexMaker::Make: external find use " << externalFindUse << endm;
 
   if(!externalFindUse){
     DoFit();
