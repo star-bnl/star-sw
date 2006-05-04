@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTriggerIdCollection.cxx,v 1.2 2003/03/19 18:58:04 laue Exp $
+ * $Id: StMuTriggerIdCollection.cxx,v 1.3 2006/05/04 21:04:35 mvl Exp $
  *
  * Author: Frank Laue
  ***************************************************************************
@@ -23,6 +23,7 @@ void StMuTriggerIdCollection::fill(const StTriggerIdCollection* c) {
   if ( c->l1() ) setL1( *(c->l1()) );
   if ( c->l2() ) setL2( *(c->l2()) );
   if ( c->l3() ) setL3( *(c->l3()) );
+  if ( c->l3Expanded() ) setL3Expanded( *(c->l3Expanded()) );
   if ( c->nominal() ) setNominal( *(c->nominal()) );
 }
 
@@ -43,6 +44,9 @@ StMuTriggerIdCollection::l2() const {return mL2TriggerId;}
 const StTriggerId&
 StMuTriggerIdCollection::l3() const {return mL3TriggerId;}
 
+const StTriggerId&
+StMuTriggerIdCollection::l3Expanded() const {return mLETriggerId;}
+
 void
 StMuTriggerIdCollection::setL1(const StTriggerId val) {mL1TriggerId = val;}
 
@@ -53,12 +57,18 @@ void
 StMuTriggerIdCollection::setL3(const StTriggerId val) {mL3TriggerId = val;}
 
 void
+StMuTriggerIdCollection::setL3Expanded(const StTriggerId val) {mLETriggerId = val;}
+
+void
 StMuTriggerIdCollection::setNominal(const StTriggerId val) {mNTriggerId = val;}
     
 
 /**************************************************************************
  *
  * $Log: StMuTriggerIdCollection.cxx,v $
+ * Revision 1.3  2006/05/04 21:04:35  mvl
+ * Additions for extra L3 information (from Jamie)
+ *
  * Revision 1.2  2003/03/19 18:58:04  laue
  * StMuChainMaker: updates for moved file catalog
  * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
