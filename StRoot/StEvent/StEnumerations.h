@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.29 2006/04/26 14:41:22 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.30 2006/05/04 19:05:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.30  2006/05/04 19:05:05  ullrich
+ * Added StL2TriggerResultType.
+ *
  * Revision 2.29  2006/04/26 14:41:22  jeromel
  * doxygenized
  *
@@ -328,5 +331,13 @@ enum StPrimaryVertexOrder {
   orderByNumberOfDaughters = 0, /**< enum value for sorting based on NumberOfDaughters (default)  */
   orderByRanking                /**< enum value to switch ordering based on assigned rank         */
 };
+
+enum StL2TriggerResultType { l2Trg2006BEMCGammaPi = 0,
+		         l2Trg2006BEMCGammaPiRandom,
+		         l2Trg2006EEMCGammaPi,
+		         l2Trg2006EEMCGammaPiRandom,
+		         l2Trg2006MonoJet,
+		         l2Trg2006DiJet,
+		         l2Trg2006RandomJet};
 
 #endif
