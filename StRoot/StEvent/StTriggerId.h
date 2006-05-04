@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.5 2004/10/11 23:00:20 ullrich Exp $
+ * $Id: StTriggerId.h,v 2.6 2006/05/04 19:07:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.6  2006/05/04 19:07:02  ullrich
+ * Extended mMaxTriggerIds to 42.
+ *
  * Revision 2.5  2004/10/11 23:00:20  ullrich
  * Add copy constructor and assign. op., implement ostream op., define to enum.
  *
@@ -42,7 +45,7 @@ public:
     unsigned int mask() const;
     
     unsigned int maxTriggerIds() const;
-    bool isTrigger(unsigned int id) const;
+    bool         isTrigger(unsigned int id) const;
     
     unsigned int version(unsigned int id) const;
     unsigned int nameVersion(unsigned int id) const;
@@ -63,7 +66,7 @@ private:
     unsigned int index(unsigned int) const;
     
 protected:
-    enum {mMaxTriggerIds = 32};
+    enum {mMaxTriggerIds = 42};
 
 private:
     UInt_t       mIdx;    //!
@@ -74,7 +77,7 @@ private:
     UInt_t       mThresholdVersion[mMaxTriggerIds];
     UInt_t       mPrescaleVersion[mMaxTriggerIds];
     
-    ClassDef(StTriggerId,3)
+    ClassDef(StTriggerId,4)
 };
 
 inline unsigned int
