@@ -31,11 +31,13 @@
 #include "StPrompt.hh"
 #include "StMath.hh"
 #include <typeinfo>
+#include <map>
 
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 using std::max;
 using std::pair;
+using std::map;
 #endif
 
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
@@ -44,7 +46,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.75 2005/12/07 19:38:19 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.76 2006/05/04 19:15:40 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -401,39 +403,100 @@ StEventMaker::makeEvent()
         if (!dbTriggerId) gMessMgr->Warning("StEventMaker: No StDetectorDbTriggerID found");
         
         if (trigSummary && dbTriggerId) {
-	  
-	  // The nominal is a pointer to one of the above. 
-	  trigId[0]->setMask(trigSummary->L1summary[0]);
-	  trigId[1]->setMask(trigSummary->L2summary[0]);
-	  trigId[2]->setMask(trigSummary->L3summary[0]);
-	  
-	  
-	  // Loop over trigger level
-	  for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
-	      StTriggerId* whichTrig =  trigId[trglevel];
-	      
-	      // Loop over the triggers within this level
-	      for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
-		// Shift the mask by daqTrigId bits to examine that bit
-		if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
-		    whichTrig->addTrigger(
-				      dbTriggerId->getOfflineTrgId(iTrg),
-				      dbTriggerId->getTrgVersion(iTrg),
-				      dbTriggerId->getTrgNameVersion(iTrg),
-				      dbTriggerId->getThreashVersion(iTrg),
-				      dbTriggerId->getPsVersion(iTrg)
-				      );
+	    
+	    // The nominal is a pointer to one of the above. 
+	    trigId[0]->setMask(trigSummary->L1summary[0]);
+	    trigId[1]->setMask(trigSummary->L2summary[0]);
+	    trigId[2]->setMask(trigSummary->L3summary[0]);
+	    
+	    
+	    // Loop over trigger level
+	    for(unsigned int trglevel=0 ; trglevel < 3 ; trglevel++){
+		StTriggerId* whichTrig =  trigId[trglevel];
+		
+		// Loop over the triggers within this level
+		for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++){
+		    // Shift the mask by daqTrigId bits to examine that bit
+		    if ( whichTrig->mask() &  (1 << (dbTriggerId->getDaqTrgId(iTrg)) )  ) {
+			whichTrig->addTrigger(
+			    dbTriggerId->getOfflineTrgId(iTrg),
+			    dbTriggerId->getTrgVersion(iTrg),
+			    dbTriggerId->getTrgNameVersion(iTrg),
+			    dbTriggerId->getThreashVersion(iTrg),
+			    dbTriggerId->getPsVersion(iTrg)
+			    );
+		    }
 		}
-	      }
-	  }	    
-	  if ( (idx=dbTriggerId->getDefaultTriggerLevel() ) != kDbTriggerBadID ){
-	      triggerIdColl->setNominal(new StTriggerId(*(trigId[idx-1])));
-	  }
-        }
+	    }
+	    
+	    // This just puts the pointer, not a deep copy
+	    if ( (idx=dbTriggerId->getDefaultTriggerLevel() ) != kDbTriggerBadID ){
+		triggerIdColl->setNominal(trigId[idx-1]);
+	    }
+	    // Now hack up the offline trigger ids for year 2006
+	    
+	   
+	    if (mCurrentEvent->triggerData() && mCurrentEvent->runId()>7000000 && mCurrentEvent->runId()<8000000) {
+		gMessMgr->Info("StEventMaker::Run 6, expanding L3 trigger id");
+		
+		// Hack for mapping of StDetectorDb to StL2TriggerResultType
+		map<string,StL2TriggerResultType> mapDbToStL2TriggerResultType;
+		
+		mapDbToStL2TriggerResultType["l2Trg2006BEMCGammaPi"] = l2Trg2006BEMCGammaPi;
+		mapDbToStL2TriggerResultType["l2Trg2006BEMCGammaPiRandom"] = l2Trg2006BEMCGammaPiRandom;
+		mapDbToStL2TriggerResultType["l2Trg2006EEMCGammaPi"] = l2Trg2006EEMCGammaPi;
+		mapDbToStL2TriggerResultType["l2Trg2006EEMCGammaPiRandom"] = l2Trg2006EEMCGammaPiRandom;
+		mapDbToStL2TriggerResultType["l2Trg2006MonoJet"] = l2Trg2006MonoJet;
+		mapDbToStL2TriggerResultType["l2Trg2006DiJet"] = l2Trg2006DiJet;
+		mapDbToStL2TriggerResultType["l2Trg2006RandomJet"] = l2Trg2006RandomJet;
+
+	
+		// Do a deep copy of the l3 into l3Expanded
+		StTriggerId *whichTrig = new StTriggerId(*triggerIdColl->l3());
+		
+		triggerIdColl->setL3Expanded(whichTrig);
+		// Reset the nominal pointer
+		triggerIdColl->setNominal(whichTrig);
+		// Expand up the l3Expanded.
+		for (unsigned int irow=0; irow<dbTriggerId->getTrigL3ExpandedNumRows(); ++irow) {
+		    unsigned int oldtid = dbTriggerId->getTrigL3ExpandedL3TrgId(irow);
+		    unsigned int newtid = dbTriggerId->getTrigL3ExpandedL3ExpandedTrgId(irow);
+		   
+		    
+		    string testString = string(dbTriggerId->getTrigL3ExpandedL2TriggerResultType(irow));
+
+		    
+		    map<string,StL2TriggerResultType>::const_iterator p =
+			mapDbToStL2TriggerResultType.find(
+			    testString);
+		    
+		    if (p != mapDbToStL2TriggerResultType.end()) {
+			StL2TriggerResultType l2Test = (*p).second;
+			if (whichTrig->isTrigger(oldtid) &&
+			    mCurrentEvent->triggerData()->isL2Triggered(l2Test,mCurrentEvent->runId())) {
+			    
+			    whichTrig->addTrigger(newtid,
+						  whichTrig->version(oldtid),
+						  whichTrig->nameVersion(oldtid),
+						  whichTrig->thresholdVersion(oldtid),
+						  whichTrig->prescaleVersion(oldtid)
+				);
+			}
+		    }
+		}
+	    }
+// We need to make a copy of the nominal to avoid problems in delete??
+	    if (triggerIdColl->nominal()) triggerIdColl->setNominal(new StTriggerId(*(triggerIdColl->nominal())));
+	}
     }
+    
+    
     else {
         gMessMgr->Warning("StEventMaker: No StDAQReader found");
     }
+    
+    
+    
     
     //
     //  Some variables we need in the following
@@ -1711,8 +1774,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.75 2005/12/07 19:38:19 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.76 2006/05/04 19:15:40 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.76  2006/05/04 19:15:40  ullrich
+ * Added L3 expanded (Jamie).
+ *
  * Revision 2.75  2005/12/07 19:38:19  perev
  * simplified logic if StEvent already exists
  *
