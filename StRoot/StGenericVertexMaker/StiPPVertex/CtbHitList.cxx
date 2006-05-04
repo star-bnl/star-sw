@@ -146,8 +146,8 @@ CtbHitList::buildFromMC(St_DataSet *gds) {
   //access the CTB data  from GEANT
   St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) gds->Find("g2t_ctb_hit");
   if(g2t_ctb_hit == 0){
-    gMessMgr->Debug() << "CtbHitList::buildMC() No CTB Hits in MC table for this event" << endm;
-    gMessMgr->Debug() << "g2t_ctb_hit = " << g2t_ctb_hit << endm;
+    LOG_DEBUG << "CtbHitList::buildMC() No CTB Hits in MC table for this event" << endm;
+    LOG_DEBUG << "g2t_ctb_hit = " << g2t_ctb_hit << endm;
     return ;
   }
 
@@ -161,7 +161,7 @@ CtbHitList::buildFromMC(St_DataSet *gds) {
 
   //assert(ctb_hit);
   if (! ctb_hit){
-    gMessMgr->Warning() << "CtbHitList::buildMC() no CTB hits" << endm;
+    LOG_WARN << "CtbHitList::buildMC() no CTB hits" << endm;
     return ;
   }
   
@@ -193,12 +193,12 @@ CtbHitList::buildFromMC(St_DataSet *gds) {
 void  
 CtbHitList::buildFromData(StTriggerData *trgD){
   
-  gMessMgr->Info() << " CtbHitList::buildFromData CtbThres_Ch thres="<<mCtbThres_ch << endm;
+  LOG_INFO << " CtbHitList::buildFromData CtbThres_Ch thres="<<mCtbThres_ch << endm;
 
   // access CTB from Akio's Maker
   
   if(!trgD){
-    gMessMgr->Warning() << "CtbHitList::buildFromData: no trigData in real data" << endm;
+    LOG_WARN << "CtbHitList::buildFromData: no trigData in real data" << endm;
     return ;
   }
   int slat, tray;
@@ -216,7 +216,7 @@ CtbHitList::buildFromData(StTriggerData *trgD){
   
   StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
   if(!trigCol){
-    gMessMgr->Warning() << "StCtbUtility scans: no trigCol in Data" << endm;
+    LOG_WARN << "StCtbUtility scans: no trigCol in Data" << endm;
     return ;
   }
 

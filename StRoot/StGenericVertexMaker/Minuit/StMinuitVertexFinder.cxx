@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.5 2006/04/26 15:37:04 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.6 2006/05/04 20:01:31 jeromel Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.6  2006/05/04 20:01:31  jeromel
+ * Switched to logger
+ *
  * Revision 1.5  2006/04/26 15:37:04  jeromel
  * mVertexOrderMethod (To be tested)
  *
@@ -122,7 +125,7 @@ StMinuitVertexFinder::setExternalSeed(const StThreeVectorD& s)
 
 
 StMinuitVertexFinder::StMinuitVertexFinder() {
-  gMessMgr->Info() << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
+  LOG_INFO << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
 
   mMinNumberOfFitPointsOnTrack = 15; 
@@ -147,7 +150,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
  StMinuitVertexFinder::~StMinuitVertexFinder()
  {
    delete mBeamHelix; mBeamHelix=0;
-   gMessMgr->Warning() << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
+   LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
    mHelices.clear();
    mHelixFlags.clear();
@@ -210,7 +213,7 @@ int StMinuitVertexFinder::findSeeds() {
 	  }
 	}
 	else {
-	  gMessMgr->Warning() << "Too many vertex seeds, limit=" << maxSeed << endm;
+	  LOG_WARN << "Too many vertex seeds, limit=" << maxSeed << endm;
 	}	
       }
       slope = -1;
@@ -220,7 +223,7 @@ int StMinuitVertexFinder::findSeeds() {
     nOldBin = nTrkBin;
   }
 
-  gMessMgr->Info() << "Found " << mNSeed << " seeds" << endm;
+  LOG_INFO << "Found " << mNSeed << " seeds" << endm;
   return mNSeed;
 }
 
@@ -283,7 +286,7 @@ StMinuitVertexFinder::matchTrack2BEMC(const StTrack *track){
   if (d2.first >= 0 && d2.first < d2.second)
     path = d2.first;
   else if(d2.first>=0 || d2.second<=0) {
-    gMessMgr->Warning() << "Unexpected solution for track crossing Cyl:" 
+    LOG_WARN << "Unexpected solution for track crossing Cyl:" 
 			<< " track mom = " 
 			<< track->geometry()->momentum().mag() 
 			<< ", d2.first=" << d2.first 
@@ -463,7 +466,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	///LSB This should not be necessary and could be removed in future
 #ifndef __alpha__
 	if (!finite(g->geometry()->helix().curvature()) ){
-	  gMessMgr->Warning() << "NON-FINITE curvature in track !!" << endm;
+	  LOG_WARN << "NON-FINITE curvature in track !!" << endm;
 	  continue;
 	}
 #endif
@@ -515,11 +518,11 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  In case there are no tracks left we better quit
     //
     if (mHelices.empty()) {
-	gMessMgr->Warning() << "StMinuitVertexFinder::fit: no tracks to fit." << endm;
+	LOG_WARN << "StMinuitVertexFinder::fit: no tracks to fit." << endm;
 	mStatusMin = -1;
 	return 0;
     }
-    gMessMgr->Info() << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
+    LOG_INFO << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
     // Set some global pars
     mWidthScale = 1;
@@ -572,7 +575,7 @@ StMinuitVertexFinder::fit(StEvent* event)
       if (mExternalSeedPresent)
 	seed_z = mExternalSeed.z();
       if (mDebugLevel)
-	gMessMgr->Info() << "Vertex seed = " << seed_z << endm;
+	LOG_INFO << "Vertex seed = " << seed_z << endm;
       
       if (!mVertexConstrain){ 
 	mMinuit->mnparm(0, "x", 0, step[0], 0, 0, mStatusMin);
@@ -623,7 +626,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	//
 
 	if (mStatusMin) {
-	  gMessMgr->Warning() << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
+	  LOG_WARN << "StMinuitVertexFinder::fit: error in Minuit::mnexcm(), check status flag. ( iter=" << iter << ")" << endm;
 	  done = 0; // refit
 	}
 
@@ -665,12 +668,12 @@ StMinuitVertexFinder::fit(StEvent* event)
 	continue;
 
       if (!done) { 
-	gMessMgr->Warning() << "Vertex unstable: no convergence after " << iter << " iterations. Skipping vertex " << endm;
+	LOG_WARN << "Vertex unstable: no convergence after " << iter << " iterations. Skipping vertex " << endm;
 	continue;
       }
 
       if (!mExternalSeedPresent && fabs(seed_z-mSeedZ[iSeed]) > mDcaZMax)
-	gMessMgr->Warning() << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endl;
+	LOG_WARN << "Vertex walks during fits: seed was " << mSeedZ[iSeed] << ", vertex at " << seed_z << endl;
 
       if (fabs(seed_z - old_vtx_z) < 0.1) {
 	if (mDebugLevel) 
@@ -861,17 +864,17 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
   mdxdz = dxdz;
   mdydz = dydz;
   mWeight = weight;
-  gMessMgr->Info() << "StMinuitVertexFinder::Using Constrained Vertex" << endm;
-  gMessMgr->Info() << "x origin = " << mX0 << endm;
-  gMessMgr->Info() << "y origin = " << mY0 << endm;
-  gMessMgr->Info() << "slope dxdz = " << mdxdz << endm;
-  gMessMgr->Info() << "slope dydz = " << mdydz << endm;
-  gMessMgr->Info() << "weight in fit = " << weight <<  endm;
+  LOG_INFO << "StMinuitVertexFinder::Using Constrained Vertex" << endm;
+  LOG_INFO << "x origin = " << mX0 << endm;
+  LOG_INFO << "y origin = " << mY0 << endm;
+  LOG_INFO << "slope dxdz = " << mdxdz << endm;
+  LOG_INFO << "slope dydz = " << mdydz << endm;
+  LOG_INFO << "weight in fit = " << weight <<  endm;
   StThreeVectorD origin(mX0,mY0,0.0);
   double pt  = 88889999;   
   double nxy=::sqrt(mdxdz*mdxdz +  mdydz*mdydz);
     if(nxy<1.e-5){ // beam line _MUST_ be tilted
-      gMessMgr->Warning() << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
+      LOG_WARN << "StMinuitVertexFinder:: Beam line must be tilted!" << endm;
       nxy=mdxdz=1.e-5; 
     }
     double p0=pt/nxy;  
