@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.70 2006/03/19 19:29:44 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.71 2006/05/04 06:18:48 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.71  2006/05/04 06:18:48  jcs
+// remove old debug statement
+//
 // Revision 1.70  2006/03/19 19:29:44  jcs
 // Move cluster struct definitions to StFtpcClustersStructures.hh
 // Create DEBUGFILE with bfc option 'fdbg'
@@ -398,7 +401,6 @@ int StFtpcClusterFinder::search()
   int CUCMemoryArray[MAXNUMCUC];
   int CUCMemoryPtr;
 
-cout<<"JCS DEBUG: mcldebug = "<<mcldebug<<endl;
   /* allocate memory for padtrans table */
   pradius = new Double_t[mParam->numberOfDriftSteps()
                            *mDb->numberOfPadrowsPerSide()];
