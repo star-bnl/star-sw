@@ -1,5 +1,13 @@
-// $Id: StDetectorDbTriggerID.h,v 1.10 2006/05/04 17:39:57 dunlop Exp $
+// $Id: StDetectorDbTriggerID.h,v 1.11 2006/05/04 17:44:34 dunlop Exp $
 //
+// $Log: StDetectorDbTriggerID.h,v $
+// Revision 1.11  2006/05/04 17:44:34  dunlop
+// moved $LOG
+//
+// Revision 1.10  2006/05/04 17:39:57  dunlop
+// Doxygenized and cvs commented
+//
+
 /*!
  * \class StDetectorDbTriggerID
  * \author Jon Gans
@@ -154,7 +162,3 @@ private:
 };
 
 #endif
-// $Log: StDetectorDbTriggerID.h,v $
-// Revision 1.10  2006/05/04 17:39:57  dunlop
-// Doxygenized and cvs commented
-//
