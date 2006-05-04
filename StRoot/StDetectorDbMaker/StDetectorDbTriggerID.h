@@ -1,3 +1,15 @@
+// $Id: StDetectorDbTriggerID.h,v 1.10 2006/05/04 17:39:57 dunlop Exp $
+//
+/*!
+ * \class StDetectorDbTriggerID
+ * \author Jon Gans
+ * \brief  Accessor to the database for trigger id information
+ 
+ * This class provides access to the database for various pieces
+ * of information about trigger ids.  Importantly, it also provides
+ * a method to grab prescales f'or trigger ids from the database.
+ * Used by StEventMaker to fill StEvent::StTriggerIdCollection
+ */
 #ifndef StDetectorDbTriggerID_h
 #define StDetectorDbTriggerID_h
 
@@ -142,3 +154,7 @@ private:
 };
 
 #endif
+// $Log: StDetectorDbTriggerID.h,v $
+// Revision 1.10  2006/05/04 17:39:57  dunlop
+// Doxygenized and cvs commented
+//
