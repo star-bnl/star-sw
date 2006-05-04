@@ -4,6 +4,9 @@
 #include "tables/St_trigPrescales_Table.h"
 #include "tables/St_L0TriggerInfo_Table.h"
 #include "tables/St_defaultTrgLvl_Table.h"
+#include "tables/St_trigL3Expanded_Table.h"
+#include "tables/St_dsmPrescales_Table.h"
+
 #include "TUnixTime.h"
 
 /*!
@@ -31,6 +34,10 @@ StDetectorDbTriggerID* StDetectorDbTriggerID::instance()
 	sInstance->mL0TriggerInfo = (L0TriggerInfo_st*)(sInstance->mL0Table->GetArray());
     if(sInstance->mDefTrgLvlTable)
 	sInstance->mDefaultTriggerLevel = (defaultTrgLvl_st*)(sInstance->mDefTrgLvlTable->GetArray());
+    if(sInstance->mTrigL3ExpandedTable)
+	sInstance->mTrigL3Expanded = (trigL3Expanded_st*)(sInstance->mTrigL3ExpandedTable->GetArray());
+    if(sInstance->mDsmPrescalesTable)
+	sInstance->mDsmPrescales = (dsmPrescales_st*)(sInstance->mDsmPrescalesTable->GetArray());
     
     return sInstance;
 };
@@ -68,6 +75,24 @@ void StDetectorDbTriggerID::update(StMaker* maker){
 		mL0TriggerInfo = (L0TriggerInfo_st*)(mL0Table->GetArray());
             }
 
+	    // TTable of trigL3Expanded	
+	    mTrigL3ExpandedTable = dynamic_cast<TTable*>(dataSet->Find("trigL3Expanded"));
+	    
+	    if(mTrigL3ExpandedTable){
+		mTrigL3ExpandedNumRows = mTrigL3ExpandedTable->GetNRows();
+		mTrigL3Expanded = (trigL3Expanded_st*)(mTrigL3ExpandedTable->GetArray());
+            }
+
+	    // TTable of dsmPrescales	
+	    mDsmPrescalesTable = dynamic_cast<TTable*>(dataSet->Find("dsmPrescales"));
+	    
+	    if(mDsmPrescalesTable){
+		mDsmPrescalesNumRows = mDsmPrescalesTable->GetNRows();
+		mDsmPrescales = (dsmPrescales_st*)(mDsmPrescalesTable->GetArray());
+            }
+
+
+
 	}
 
 	dataSet = 0;
@@ -102,6 +127,14 @@ StDetectorDbTriggerID::StDetectorDbTriggerID(){
 
     mDefaultTriggerLevel = 0;
     mDefTrgLvlTable = 0;
+
+    mTrigL3Expanded = 0;
+    mTrigL3ExpandedTable = 0;
+    mTrigL3ExpandedNumRows = 0;
+
+    mDsmPrescales = 0;
+    mDsmPrescalesTable = 0;
+    mDsmPrescalesNumRows = 0;
     
 };
 
@@ -306,6 +339,172 @@ unsigned int StDetectorDbTriggerID::getDefaultTriggerLevel(){
     return value;
 };
 
+/// trigL3Expanded members
+/// Returns Number of Entries in database
+unsigned int StDetectorDbTriggerID::getTrigL3ExpandedNumRows(){
+    return mTrigL3ExpandedNumRows;
+};
+
+/// Returns Run Number
+int StDetectorDbTriggerID::getTrigL3ExpandedRunNumber(){
+    int value = 0;
+    if(mTrigL3Expanded)
+	value = mTrigL3Expanded[0].runNumber;
+    return value;
+};
+
+/// Returns l2TriggerResultType
+char* StDetectorDbTriggerID::getTrigL3ExpandedL2TriggerResultType(unsigned int entry){
+    char* value = 0;
+    if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
+	value = mTrigL3Expanded[entry].l2TriggerResultType;
+    return value;
+};
+
+/// Returns name 
+char* StDetectorDbTriggerID::getTrigL3ExpandedName(unsigned int entry){
+    char* value = 0;
+    if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
+	value = mTrigL3Expanded[entry].name;
+    return value;
+};
+
+/// Returns l3TrgId
+int StDetectorDbTriggerID::getTrigL3ExpandedL3TrgId(unsigned int entry){
+    int value = 0;
+    if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
+	value = mTrigL3Expanded[entry].l3TrgId;
+    return value;
+};
+
+/// Returns l3ExpandedTrgId 
+int StDetectorDbTriggerID::getTrigL3ExpandedL3ExpandedTrgId(unsigned int entry){
+    int value = 0;
+    if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
+	value = mTrigL3Expanded[entry].l3ExpandedTrgId;
+    return value;
+};
+
+/// Returns l2Algo 
+int StDetectorDbTriggerID::getTrigL3ExpandedL2Algo(unsigned int entry){
+    int value = 0;
+    if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
+	value = mTrigL3Expanded[entry].l2Algo;
+    return value;
+};
+
+/// Returns l2Ps 
+float StDetectorDbTriggerID::getTrigL3ExpandedL2Ps(unsigned int entry){
+    float value = 0;
+    if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
+	value = mTrigL3Expanded[entry].l2Ps;
+    return value;
+};
+
+/// dsmPrescale members
+/// Returns Number of Entries in database
+unsigned int StDetectorDbTriggerID::getDsmPrescalesNumRows(){
+    return mDsmPrescalesNumRows;
+};
+
+/// Returns Run Number
+int StDetectorDbTriggerID::getDsmPrescalesRunNumber(){
+    int value = 0;
+    if(mDsmPrescales)
+	value = mDsmPrescales[0].runNumber;
+    return value;
+};
+
+/// Returns trgId 
+int StDetectorDbTriggerID::getDsmPrescalesTrgId(unsigned int entry){
+    int value = 0;
+    if(mDsmPrescales && entry < this->getDsmPrescalesNumRows() )
+	value = mDsmPrescales[entry].trgId;
+    return value;
+};
+
+/// Returns dsmPrescale 
+int StDetectorDbTriggerID::getDsmPrescalesDsmPrescale(unsigned int entry){
+    int value = 0;
+    if(mDsmPrescales && entry < this->getDsmPrescalesNumRows() )
+	value = mDsmPrescales[entry].dsmPrescale;
+    return value;
+};
+
+map<int,float> StDetectorDbTriggerID::getTotalPrescales() 
+{
+    map<int,float> value;
+    // First walk forward through the multiple levels of prescales
+    for (unsigned int irow=0;irow<this->getDsmPrescalesNumRows(); ++irow) {
+	int trgId = this->getDsmPrescalesTrgId(irow);
+	value[trgId] = float(this->getDsmPrescalesDsmPrescale(irow));
+    }
+
+    for (unsigned int irow=0; irow<this->getL0NumRows(); ++irow) {
+	int trgId = this->getL0OfflineTrgId(irow);
+	map<int,float>::iterator p=value.find(trgId);
+	if (p != value.end()) {
+	    (*p).second *= float(getPsL0(irow));
+	}
+	else {
+	    value[trgId] = float(getPsL0(irow));
+	}
+    }
+    // For completeness: this one is always unity as far as I can tell
+    for (unsigned int irow=0; irow<this->getSNumRows(); ++irow) {
+	unsigned int idxTrigger = this->getIdxTrigger(irow);
+	int trgId = 0;
+	for (unsigned int jrow=0; jrow<this->getIDNumRows(); ++jrow) {
+	    if (idxTrigger == this->getIdxTrg(jrow)) {
+		trgId = this->getOfflineTrgId(jrow);
+		break;
+	    }
+	}
+	map<int,float>::iterator p=value.find(trgId);
+	
+	if (p != value.end()) {
+	    (*p).second *= float(getPs(irow));
+	}
+	else {
+	    value[trgId] = float(getPs(irow));
+	}
+    }
+    
+    // Now deal with L3Expanded
+    for (unsigned int irow=0; irow<this->getTrigL3ExpandedNumRows(); ++irow) {
+	int oldtid = this->getTrigL3ExpandedL3TrgId(irow);
+	int newtid = this->getTrigL3ExpandedL3ExpandedTrgId(irow);
+	float l2ps = this->getTrigL3ExpandedL2Ps(irow);
+	
+	map<int,float>::iterator p = value.find(oldtid);
+	if (p!= value.end()) {
+	    value[newtid] = ((*p).second)*l2ps;
+	}
+	else {
+	    value[newtid] = l2ps;
+	}
+	
+    }
+    return value;
+}
+
+    
+
+float StDetectorDbTriggerID::getTotalPrescaleByTrgId(int trgId) 
+{
+    map<int,float> theMap = this->getTotalPrescales();
+    map<int,float>::const_iterator p = theMap.find(trgId);
+    if (p != theMap.end()) {
+	return (*p).second;
+    }
+    else {
+	return 0;
+    }
+}
+
+
+
+
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
     os << endl << "Run shown in triggerID: " << v.getIDRunNumber() << endl;
@@ -341,6 +540,22 @@ ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
     }
 
     os << "Default Trigger Level: " << v.getDefaultTriggerLevel() << endl;
+
+    os << endl << "Run shown in trigL3Expanded: " << v.getTrigL3ExpandedRunNumber() << endl;
+    for (unsigned int i=0; i< v.getTrigL3ExpandedNumRows(); ++i) {
+	os << "L2TriggerResultType: "<< v.getTrigL3ExpandedL2TriggerResultType(i) 
+	   << " name: " << v.getTrigL3ExpandedName(i) 
+	   << " L3TrgId: " << v.getTrigL3ExpandedL3TrgId(i) 
+	   << " L3ExpandedTrgId: " << v.getTrigL3ExpandedL3ExpandedTrgId(i) 
+	   << " L2Algo: " << v.getTrigL3ExpandedL2Algo(i) 
+           << " L2Ps: " << v.getTrigL3ExpandedL2Ps(i) << endl;
+    }
+    
+    os << endl << "Run shown in dsmPrescales: " << v.getDsmPrescalesRunNumber() << endl;
+    for (unsigned int i=0; i<v.getDsmPrescalesNumRows(); ++i) {
+	os << "trgId: " << v.getDsmPrescalesTrgId(i) 
+	   << " dsmPrescale: " << v.getDsmPrescalesDsmPrescale(i) << endl;
+    }
     
     return os;
 };
