@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.18 2006/05/02 20:10:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.19 2006/05/04 21:57:11 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -316,31 +316,21 @@ Bfc_st BFC[] = {
   {"TrsPileUp" ,"" ,"","","","", "Trs pile up mode",kFALSE},
   {"TrsToF" ,"" ,"","","","", "Trs account for particle time of flight",kFALSE},
 
+
   {"SvtMatchVtx" ,"" ,"","","" ,"","Use SVT matched tracks to find  Primary Vertex",kFALSE},
 
 
   {"VtxOffSet" ,"" ,"","","" ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,"" ,"","","" ,"","Calibration mode",kFALSE},
-
-
-
   {"beamLine" ,"" ,"","","" ,"","LMV Beam line constrain",kFALSE},
 
 
 
 
 
-
-
+  {"VFPPV" ,"" ,"","VFppLMV5","" ,"","... WARNING VFPPV is NOT valid with TPT",kFALSE},
   {"VFppLMV" ,"" ,"","","" ,"","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5" ,"" ,"","","" ,"","...VertexMaker will use ppLMV method (tuned)",kFALSE},
-
-
-  {"VFPPV" ,"" ,"","VFppLMV5","" ,"","... WARNING VFPPV is NOT valid with TPT",kFALSE},
-
-
-
-
 
   {"onlcl" ,"" ,"","","" ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,"" ,"","","" ,"","Read/use TPC raw hits",kFALSE},
@@ -1029,28 +1019,26 @@ Bfc_st BFC2[] = {
 
 
 
+
   {"VtxOffSet" ,"" ,"","","" ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,"" ,"","","" ,"","Calibration mode",kFALSE},
-
-
-
   {"beamLine" ,"" ,"","","" ,"","LMV Beam line constrain",kFALSE},
 
 
 
 
+
+
+
   {"CtbMatchVtx" ,"" ,"","","" ,"","... CTB Matching ON in Vertex Finding",kFALSE},
+  {"VFPPV" ,"" ,"","","" ,"","... Pile-up proof vertex finder",kFALSE},
+  {"VFPPVnoCTB" ,"" ,"","","" ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
   {"VFMinuit" ,"" ,"","","" ,"","... Generic VF will use Minuit method",kFALSE},
+  {"VFFV" ,"" ,"","","" ,"","... Fixed dummy VF method",kFALSE},
+
 
   {"VFppLMV" ,"" ,"","","" ,"","...VertexMaker will use ppLMV method",kFALSE},
   {"VFppLMV5" ,"" ,"","","" ,"","...VertexMaker will use ppLMV method (tuned)",kFALSE},
-
-
-
-
-  {"VFPPV" ,"" ,"","","" ,"","... Pile-up proof vertex finder",kFALSE},
-  {"VFPPVnoCTB" ,"" ,"","","" ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
-
 
   {"onlcl" ,"" ,"","","" ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,"" ,"","","" ,"","Read/use TPC raw hits",kFALSE},
@@ -1759,6 +1747,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} //  4 0x04
       if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} //  8 0x08
       if ( GetOption("VFPPVnoCTB") ){VtxOpt |= (0x1 << 4);} // 16 0x10
+      if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
       mk->SetMode(VtxOpt);
 
       // All VertexFinders implement those (or not)
