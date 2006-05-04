@@ -1,4 +1,11 @@
-// $Id: StDetectorDbTriggerID.cxx,v 1.10 2006/05/04 17:39:57 dunlop Exp $
+// $Id: StDetectorDbTriggerID.cxx,v 1.11 2006/05/04 17:44:34 dunlop Exp $
+//
+// $Log: StDetectorDbTriggerID.cxx,v $
+// Revision 1.11  2006/05/04 17:44:34  dunlop
+// moved $LOG
+//
+// Revision 1.10  2006/05/04 17:39:57  dunlop
+// Doxygenized and cvs commented
 //
 
 #include "StMessMgr.h"
@@ -562,7 +569,3 @@ ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
     
     return os;
 };
-// $Log: StDetectorDbTriggerID.cxx,v $
-// Revision 1.10  2006/05/04 17:39:57  dunlop
-// Doxygenized and cvs commented
-//
