@@ -3,7 +3,7 @@ TDataSet *CreateTable() {
 // 
 // These are simple matrices that bring the SVT Clamshells
 // into their final position in the STAR Global Coordinate system.
-// 
+// This is Geometry for PASS -1 (using average numbers from Marcelo's alignment)
 //
 // ------  Test whether this table share library was loaded ------
   if (!gROOT->GetClass("St_Survey")) return 0;
