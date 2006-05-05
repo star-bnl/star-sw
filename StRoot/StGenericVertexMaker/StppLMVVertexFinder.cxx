@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.22 2006/05/04 20:01:30 jeromel Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.23 2006/05/05 18:35:39 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -551,7 +551,18 @@ StppLMVVertexFinder::ppLMV5() {
 
   //..... add vertex to the list
   addVertex(&primV);
- if(eveID%2) addFakeVerex(XVertex.z()+20);
+
+#if 0
+  /*
+    The fake vertex will never take precedence over the real one in 
+    the muDst analysi since its rank is lower (if default ranking is used).
+    But may pick a random match if luminosity (i.e. pileup is high).
+    Unless the true vertex is not found. Then we would have a fake 
+    vertex w/o prim tracks.
+   Jan B.
+  */
+  if(eveID%2) addFakeVerex(XVertex.z()+20);
+#endif
 
 #if 0  ///old
   mFitResult=XVertex;
@@ -621,6 +632,9 @@ StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.23  2006/05/05 18:35:39  balewski
+ * block the fake second prim vertex
+ *
  * Revision 1.22  2006/05/04 20:01:30  jeromel
  * Switched to logger
  *
