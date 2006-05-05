@@ -67,6 +67,7 @@ void doEStruct( const char* filelist,
                                                                                                                        
     // create the QAHist object (must come after centrality and cutbin objects)
     StEStructQAHists* qaHists = new StEStructQAHists(EventType);
+    qaHists-&gt;initHistograms();
     estructMaker-&gt;SetQAHists(qaHists);
 
     //  build the numberOfAnalyses readers and numberOfAnalyses analysis objects
