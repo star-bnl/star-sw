@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.121 2006/05/05 17:24:58 potekhin Exp $
+* $Id: geometry.g,v 1.122 2006/05/05 17:38:41 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.122  2006/05/05 17:38:41  potekhin
+* Just rename the IST2 to UPGR03 to stivk with
+* previously chosen naming convention.
+*
 * Revision 1.121  2006/05/05 17:24:58  potekhin
 * Need a new R&D tag, IST2, to properly manage
 * the configuration of an alternative tracking upgrade project.
@@ -844,62 +848,6 @@ If LL>1
                    fgtd=on;  "GEM forward tracker"
                    FgtdConfig=1;
                 }
-
-*************************************************************************************************************
-  on IST2   { New Tracking: TPC+CTB+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+ISTB+FSTD+FGTD+IGT;
-
-                     svtt=off; "no SVT  at all in this configuration"
-                     ftpc=off; "no FTPC at all in this configuration"
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
-                  "calb" 
-                     ems=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
-                     ecal_config=1   " west wheel "
-                     ecal_fill=3     " all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-*                    -- Obsoleted: CorrNum = 4;
-                     SvshConfig = 1; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 4;
-
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdConfig = 1;
-                  "Silicon Strip Detector Version "
-                     sisd=on;
-                     SisdConfig = 23;
-* careful! Achtung!
-                   pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
-                   PixlConfig=2;   " newer version decoupled from SVT"
-* Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
-                   IstbConfig=1;
-* Inner STAR GEM barrel
-                   gemb=off;  
-                   GembConfig=0;
-* Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
-                   FstdConfig=1;
-* Forward STAR tracker disk
-                   fgtd=off;  "GEM forward tracker"
-                   FgtdConfig=0;
-* the forward GEM disks
-                   igtd=on;
-                }
-
 *************************************************************************************************************
   on PIX1   { Modified PIX Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
                   "svt: 3 layers ";
@@ -2170,6 +2118,61 @@ If LL>1
                      TpceConfig = 3;
 
                 }
+*************************************************************************************************************
+  on UPGR03   { New Tracking: IST+IGT+HFT-SVT
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+*                    -- Obsoleted: CorrNum = 4;
+                     SvshConfig = 1; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 23;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=2;   " newer version decoupled from SVT"
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=1;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=1;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* the forward GEM disks
+                   igtd=on;
+                }
+
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
