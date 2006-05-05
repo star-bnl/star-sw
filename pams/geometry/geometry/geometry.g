@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.120 2006/03/21 23:51:41 potekhin Exp $
+* $Id: geometry.g,v 1.121 2006/05/05 17:24:58 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.121  2006/05/05 17:24:58  potekhin
+* Need a new R&D tag, IST2, to properly manage
+* the configuration of an alternative tracking upgrade project.
+* Other changes -- in DEV2005 -- are due to the SVT study, and
+* since this is not a production tag, are immaterial.
+*
 * Revision 1.120  2006/03/21 23:51:41  potekhin
 * Fairly significant additions:
 * (a) add steering for the muon trigger system, "mutd"
@@ -552,7 +558,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad,mutd
+              shld,quad,mutd,igtd
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -675,7 +681,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -837,6 +843,61 @@ If LL>1
 * Forward STAR tracker disk
                    fgtd=on;  "GEM forward tracker"
                    FgtdConfig=1;
+                }
+
+*************************************************************************************************************
+  on IST2   { New Tracking: TPC+CTB+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+ISTB+FSTD+FGTD+IGT;
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+*                    -- Obsoleted: CorrNum = 4;
+                     SvshConfig = 1; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 23;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=2;   " newer version decoupled from SVT"
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=1;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=1;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* the forward GEM disks
+                   igtd=on;
                 }
 
 *************************************************************************************************************
@@ -2112,17 +2173,6 @@ If LL>1
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
-
-                     CaveConfig = 2; " longer cave with shielding "
-
-                     ShldConfig = 1; " shield configuration "
-                     shld=on;
-
-                     QuadConfig = 1; " magnets configuration "
-                     quad=on;
-
-                     zcal=off;
-
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
@@ -2141,10 +2191,10 @@ If LL>1
                   "calb" 
                      ems=on
                      CalbConfig = 1
-*                    remember that with this config, the following parameters have
-*                    a different meaning because we have to (unfortunately) switch
-*                    from divisions to copies and introduce a map, which DOES
-*                    control the configuration
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
                   "ecal"
@@ -2168,7 +2218,7 @@ If LL>1
 * important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
 
                      SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 6; "SVTT version"
+                     SvttConfig = 7; "SVTT version"
                      DensConfig = 1; "gas density correction"
                      FtpcConfig = 1; "ftpc configuration"
 
@@ -2185,9 +2235,8 @@ If LL>1
                      ftro=on;
                      FtroConfig = 1;
 
-                  "Newest version of the TPC backplane "
-                     TpceConfig = 3;
-
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
                 }
 
 ****************************************************************************************
@@ -2355,6 +2404,7 @@ If LL>1
     if(SvshConfig==2) call AgDETP add ('svtg.SupportVer=',3 ,1)
 
 * Ugly, but I don't want to hash function pointers in Fortran:
+
     if(SvttConfig==0) call svttgeo
     if(SvttConfig==1) call svttgeo1
     if(SvttConfig==2) call svttgeo2
@@ -2362,8 +2412,7 @@ If LL>1
     if(SvttConfig==4) call svttgeo4
     if(SvttConfig==5) call svttgeo5
     if(SvttConfig==6) call svttgeo6
-
-*    elseif(CorrNum==4) then call svttgeo3 ! +silicon strip detector separated into its own geo file
+    if(SvttConfig==7) call svttgeo7
 
   endif
 
@@ -2534,6 +2583,7 @@ If LL>1
    if (gemb.and.GembConfig>0)  Call gembgeo
    if (fstd.and.FstdConfig>0)  Call fstdgeo
    if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
+   if (igtd)                   Call igtdgeo
 
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
