@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.cc,v 1.6 2005/12/19 10:52:13 kisiel Exp $
+// $Id: StScmBarrel.cc,v 1.7 2006/05/06 00:56:26 fisyak Exp $
 //
 // $Log: StScmBarrel.cc,v $
+// Revision 1.7  2006/05/06 00:56:26  fisyak
+// Add local coordinate
+//
 // Revision 1.6  2005/12/19 10:52:13  kisiel
 // Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
 //
@@ -454,17 +457,19 @@ int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	   
 	   
 	   // Add proper hardware info with cluster size and mean strip
-	   hw  =         
-	                8                                                                             
-	     +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
-	     +       8192 * (int)cluster_N_j->getStripMean()                                          
-	     +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
-	     +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
-	     + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
+	   hw  =        8                                                                             
+	     +         16 * idWaferToWaferNumb(idCurrentWaf);                                          
+	   if (cluster_N_j)
+	     hw +=       8192 * (int)cluster_N_j->getStripMean()
+	       +    268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1);
+	   if (cluster_P_j)
+	     hw += 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1); 
+	   if (cluster_P_j && cluster_N_j)
+	     hw +=    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15);
 
 	    //	   currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
 	   currentSsdHit->setHardwarePosition(hw);
-	   
+	   currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
 	   inContainer += ssdHitColl->addHit(currentSsdHit);
 	 }
      spt.id_wafer      = idCurrentWaf;

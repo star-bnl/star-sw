@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.2 2005/05/17 14:16:41 lmartin Exp $
+// $Id: StSsdWafer.hh,v 1.3 2006/05/06 00:56:27 fisyak Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.3  2006/05/06 00:56:27  fisyak
+// Add local coordinate
+//
 // Revision 1.2  2005/05/17 14:16:41  lmartin
 // CVS tags added
 //
@@ -14,8 +17,8 @@
 #include "StSsdClusterList.hh"
 #include "StSsdPackage.hh"
 #include "StSsdPackageList.hh"
-#include "StSsdPoint.hh"
-#include "StSsdPointList.hh"
+#include "StSsdPointMaker/StSsdPoint.hh"
+#include "StSsdPointMaker/StSsdPointList.hh"
 
 #include "tables/St_sdm_geom_par_Table.h"
 #include "tables/St_scf_ctrl_Table.h"
