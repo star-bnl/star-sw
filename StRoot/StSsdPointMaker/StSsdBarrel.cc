@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.20 2006/01/18 22:49:22 jeromel Exp $
+// $Id: StSsdBarrel.cc,v 1.21 2006/05/06 00:53:06 fisyak Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.21  2006/05/06 00:53:06  fisyak
+// Add local coordinate to StEvent
+//
 // Revision 1.20  2006/01/18 22:49:22  jeromel
 // Removed latest change (no time to check new method)
 //
@@ -445,7 +448,7 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
 	    currentSsdHit->setIdTruth(pSpt->getNMchit(0));// need to check first = most probable!
 
 	    currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
-
+	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
 	    //looking for the correct clusters...
 	    int Id_P_Side = pSpt->getIdClusterP();
 	    int Id_N_Side = pSpt->getIdClusterN();
