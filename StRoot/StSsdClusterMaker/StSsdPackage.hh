@@ -1,6 +1,9 @@
-// $Id: StSsdPackage.hh,v 1.2 2005/05/17 14:16:39 lmartin Exp $
+// $Id: StSsdPackage.hh,v 1.3 2006/05/06 00:56:26 fisyak Exp $
 //
 // $Log: StSsdPackage.hh,v $
+// Revision 1.3  2006/05/06 00:56:26  fisyak
+// Add local coordinate
+//
 // Revision 1.2  2005/05/17 14:16:39  lmartin
 // CVS tags added
 //
@@ -10,7 +13,7 @@
 # include <string.h>
 # include <math.h>
 # include "StSsdCluster.hh"
-# include "StSsdPoint.hh"
+# include "StSsdPointMaker/StSsdPoint.hh"
 #include "tables/St_scm_ctrl_Table.h"
 
 class StSsdPackage
