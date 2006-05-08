@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.9 2005/07/23 03:37:33 perev Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.10 2006/05/08 13:52:10 fisyak Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.10  2006/05/08 13:52:10  fisyak
+ * Fill StSvtHits directly into StEvent (if it exists), add local coordinate, add handle for drift velocity hack correction
+ *
  * Revision 1.9  2005/07/23 03:37:33  perev
  * IdTruth + Cleanup
  *
@@ -65,6 +68,9 @@ typedef struct StSvtHitData
  int numOfAnodesInClu;
  int numOfPixelsInClu;
  double mom2[2];
+  float uv[2];
+  float anode;
+  float timeb;
  StSvtHitData(){memset(this,0,sizeof(StSvtHitData));}
 } StSvtHitData;
 

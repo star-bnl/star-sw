@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.36 2005/07/23 03:37:33 perev Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.37 2006/05/08 13:52:11 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.37  2006/05/08 13:52:11  fisyak
+ * Fill StSvtHits directly into StEvent (if it exists), add local coordinate, add handle for drift velocity hack correction
+ *
  * Revision 1.36  2005/07/23 03:37:33  perev
  * IdTruth + Cleanup
  *
@@ -143,7 +146,9 @@
 #include "StSvtClassLibrary/StSvtT0.hh"
 #include "StSvtAnalysedHybridClusters.hh"
 #include "StSvtSimulationMaker/StSvtGeantHits.hh"
-
+#include "StEvent.h"
+#include "StEventTypes.h"
+#include "StDbUtilities/St_svtCorrectionC.h"
 
 ClassImp(StSvtHitMaker)
 //___________________________________________________________________________
@@ -195,8 +200,8 @@ Int_t StSvtHitMaker::Init()
   if (dataSet2)
     mSvtGeantHitColl = (StSvtHybridCollection*)(dataSet2->GetObject());
 
- // 		Create tables
-  St_DataSetIter       local(GetInputDB("svt"));
+  // 		Create tables
+  //  St_DataSetIter       local(GetInputDB("svt"));
 
 
  // 		geometry parameters
@@ -451,12 +456,18 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   StSvtCoordinateTransform SvtGeomTrans;
   //SvtGeomTrans.setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
   //   if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
- 
-  if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_driftCurve, m_t0);
+  St_svtCorrectionC *driftVelocityCor = 0;
+  TDataSet *svt_calib  = StMaker::GetChain()->GetDataBase("Calibrations/svt");
+  if (svt_calib) {
+    St_svtCorrection *corr = ( St_svtCorrection*) svt_calib->Find("svtDriftCorrection");
+    if (corr) driftVelocityCor = new St_svtCorrectionC(corr);
+  }
+  if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_driftCurve, m_t0,driftVelocityCor );
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
   StThreeVectorF mPos(0,0,0);
+  StEvent *pEvent = (StEvent*) GetInputDS("StEvent");
 
   //here is applied laser correction for temperature variations;
 
@@ -465,7 +476,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   svt_drift_mon->SetNRows(1);
   SvtGeomTrans.setVelocityScale(drift_vel->res_drf_svt);
 
-
+  Int_t index2 = -1;
   for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
 
     for (int ladder = 1;ladder <= mSvtData->getNumberOfLadders(barrel);ladder++) {
@@ -473,7 +484,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
       for (int wafer = 1;wafer <= mSvtData->getNumberOfWafers(barrel);wafer++) {
 
 	for (int hybrid = 1;hybrid <=mSvtData->getNumberOfHybrids();hybrid++){
-
+	  index2++;
 	  
 	  index = mSvtData->getHybridIndex(barrel,ladder,wafer,hybrid);
 	  if(index < 0) continue;
@@ -515,16 +526,57 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    mPos.setY(globalCoord.position().y());
 	    mPos.setZ(globalCoord.position().z());
 	    mSvtBigHit->svtHit()[clu].setPosition(mPos);
-	 
+	    mSvtBigHit->svtHitData()[clu].uv[0] = localCoord.position().x();
+	    mSvtBigHit->svtHitData()[clu].uv[1] = localCoord.position().y();
+	    mSvtBigHit->svtHitData()[clu].anode = waferCoord.anode();
+	    mSvtBigHit->svtHitData()[clu].timeb = waferCoord.timebucket();
 	    //	    cout << "local x = " << localCoord.position().x() <<  ", local y = " << localCoord.position().y() <<  ", local z = " << localCoord.position().z() << endl; 
 	    //cout << "global x = " << globalCoord.position().x() <<  ", global y = " << globalCoord.position().y() <<  ", global z = " << globalCoord.position().z() << endl; 
 
 	    if(mSvtBigHit->svtHit()[clu].flag() < 4) GoodHit++; 
-	  }
-	  
-	  if( mSvtBigHit->numOfHits() > 0){
-	    SaveIntoTable(mSvtBigHit->numOfHits(), index);
-
+	    if (pEvent) {
+	      Int_t hw_position, svtx, svty;
+	      Float_t covx, covy, covz;
+	      StSvtHit *svtHit = 0;
+	      StSvtHitCollection *svtHitColl = pEvent->svtHitCollection();
+	      if (! svtHitColl) {
+		svtHitColl = new StSvtHitCollection;
+		pEvent->setSvtHitCollection(svtHitColl);
+	      }
+	      svtHit = new StSvtHit();
+	      StSvtHitData          *dat = mSvtBigHit->svtHitData()   +clu;
+	      StThreeVector<double> *waf = mSvtBigHit->WaferPosition()+clu;
+	      StSvtHit              *hit= mSvtBigHit->svtHit()        +clu;
+	      
+	      hw_position = 2;
+	      hw_position += (1L<<4)*(index2);
+	      svtx = int(waf->x()*4);
+	      hw_position += (1L<<13)*(svtx);
+	      svty = int(waf->y()*4);
+	      hw_position += (1L<<22)*svty;
+	      svtHit->setHardwarePosition(hw_position);
+	      svtHit->setIdTruth(hit->idTruth(),hit->qaTruth());
+	      
+	      svtHit->setPeak(dat->peakAdc);
+	      svtHit->setCharge(hit->charge());
+	      svtHit->setFlag(hit->flag()); 
+	      svtHit->setFitFlag(0);
+	      svtHit->setPosition(mSvtBigHit->svtHit()[clu].position());
+	      
+	      covx = covy = covz = 999.;
+	      if (dat->numOfAnodesInClu > 0) covx = 1./(100*(float)dat->numOfAnodesInClu);
+	      if (dat->numOfPixelsInClu > 0) 	covy = 1./(100*(float)dat->numOfPixelsInClu);
+	      covz =  hit->positionError().z()*hit->positionError().z();
+	      svtHit->setPositionError(StThreeVectorF(covx,covy,covz));
+	      svtHit->setId(dat->id);
+	      svtHit->setLocalPosition(dat->uv[0],dat->uv[1]);
+	      svtHit->setAnode(dat->anode);
+	      svtHit->setTimebucket(dat->timeb);
+	      svtHitColl->addHit(svtHit);
+	    }
+	    
+	    if (! pEvent) SaveIntoTable(mSvtBigHit->numOfHits(), index);
+	    
 	    if( iWrite > 0){
 	      SaveIntoNtuple(mSvtBigHit->numOfHits(),index);
 	    }
@@ -535,7 +587,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
     
   }
 
-
+  SafeDelete(driftVelocityCor);
   gMessMgr->Info() << "Found " << GoodHit << " good hits " << endm;
 }
 
@@ -546,8 +598,7 @@ void StSvtHitMaker::SaveIntoTable(int numOfClusters,  int index)
   
   //            Create an iterator
   St_DataSetIter svt_spt(m_DataSet);
-  St_scs_spt  *scs_spt=0  ;
-  scs_spt  = (St_scs_spt *) svt_spt.Find("scs_spt");
+  St_scs_spt  *scs_spt = (St_scs_spt *) svt_spt.Find("scs_spt");
   
   
   if( scs_spt){
@@ -557,9 +608,12 @@ void StSvtHitMaker::SaveIntoTable(int numOfClusters,  int index)
       scs_spt->ReAllocate(nRows+numOfClusters);
     }
     
-    scs_spt_st *spt= scs_spt->GetTable();
-    spt +=nRows;
-    for( int i=0; i<numOfClusters; i++,spt++){
+    //    scs_spt_st *spt= scs_spt->GetTable();
+    //    spt +=nRows;
+    scs_spt_st Spt;
+    scs_spt_st *spt = &Spt;
+    for( int i=0; i<numOfClusters; i++){
+      memset (spt, 0, sizeof(scs_spt_st)); 
       spt->id = mSvtBigHit->svtHitData()[i].id;
       spt->id_wafer = 1000*mSvtBigHit->svtHit()[i].layer()+100*mSvtBigHit->svtHit()[i].wafer()+mSvtBigHit->svtHit()[i].ladder();
       spt->x[0] = mSvtBigHit->svtHit()[i].position().x();
@@ -591,12 +645,13 @@ void StSvtHitMaker::SaveIntoTable(int numOfClusters,  int index)
       }  
       spt->de[0]= mSvtBigHit->svtHit()[i].charge();
       spt->de[1]= mSvtBigHit->svtHitData()[i].peakAdc;
-      
+      scs_spt->AddAt(spt);
     }
-    scs_spt->SetNRows(nRows+numOfClusters);
+    //    scs_spt->SetNRows(nRows+numOfClusters);
   }
   
 }
+
 
 //_____________________________________________________________________________
 Int_t StSvtHitMaker::FillHistograms(){
