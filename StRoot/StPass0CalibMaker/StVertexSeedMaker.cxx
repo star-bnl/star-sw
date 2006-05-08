@@ -284,6 +284,9 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	//case (20)   :   // Jpsi(-tran)
 	//case (22)   :   // upsilon(-tran)
 
+// 2006 pp data
+	case (117221) :    // bemc-jp1-mb
+
             valid = kTRUE;
 
 // test triggers (id < 1000)
@@ -400,7 +403,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.26 2005/07/16 21:24:03 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.27 2006/05/08 02:38:21 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -695,8 +698,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.26 2005/07/16 21:24:03 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.27 2006/05/08 02:38:21 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.27  2006/05/08 02:38:21  genevb
+// Added 2006 triggers
+//
 // Revision 1.26  2005/07/16 21:24:03  genevb
 // Fixed bug with pp400 data from 2005
 //
