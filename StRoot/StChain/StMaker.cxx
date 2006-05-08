@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.175 2006/03/10 00:09:01 jeromel Exp $
+// $Id: StMaker.cxx,v 1.176 2006/05/08 15:15:37 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -160,6 +160,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"pix1",        20190101,     3, "pix1",     "non-production, old is not in present starsim tags"},
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
+  {"upgr03",      20190101,     6, "upgr03",   ""},
 
   {0,                    0,     0,        0,    0}
 };
@@ -1720,6 +1721,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.176  2006/05/08 15:15:37  jeromel
+// upgr03
+//
 // Revision 1.175  2006/03/10 00:09:01  jeromel
 // 2 options did not have the proper number of elements (unlikely worked / no-one used upgr02 for sure) + minor cosmetics
 //
