@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.14 2004/09/16 02:16:22 perev Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.15 2006/05/08 13:49:48 fisyak Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -48,6 +48,7 @@ class svg_geom_st;
 class svg_shape_st;
 class srs_srspar_st;
 class StTpcDb;
+class St_svtCorrectionC;
 class StSvtCoordinateTransform {
 public:
 
@@ -72,6 +73,7 @@ public:
   void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtHybridCollection* driftCurve=NULL, StSvtT0* T0=NULL);
   void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtT0* T0=NULL);
   void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtHybridCollection* driftCurve=NULL, StSvtT0* T0=NULL);
+  void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc, StSvtHybridCollection* driftCurve, StSvtT0* T0, St_svtCorrectionC*  driftVelCorr);
   void setVelocityScale( double deltaV);
   int  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x, int Index);
   int  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int HardWarePos, int Index );
@@ -93,6 +95,7 @@ private:
   StSvtHybridCollection* mDriftCurve;
   StSvtT0* mT0;
   TF1* mPoly9;
+  St_svtCorrectionC*  mdriftVelCorr;
 };
 
 #endif

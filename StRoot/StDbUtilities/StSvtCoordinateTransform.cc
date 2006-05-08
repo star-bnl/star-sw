@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.36 2005/09/09 21:34:36 perev Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.37 2006/05/08 13:49:48 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -31,6 +31,7 @@
 #include "TF1.h"
 #include "TString.h"
 #include "TMath.h"
+#include "St_svtCorrectionC.h"
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using namespace units;
 #endif
@@ -41,7 +42,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
   mFlag=0;
   mDeltaDriftVelocity = 1;
-  /*  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);*/
+  mPoly9 = new TF1("mPoly9","pol9(0)",0.0,6.0);
 }
 
 //_____________________________________________________________________________
@@ -54,7 +55,7 @@ StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
 
 StSvtCoordinateTransform::~StSvtCoordinateTransform()
 {
-  /* delete mPoly9; mPoly9=0;*/
+  SafeDelete(mPoly9);
  if (mFlag&1) delete mgeom; mgeom=0;
 }
 
@@ -72,6 +73,7 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mDriftVelocity = driftVeloc;
   mDriftCurve = NULL;
   mT0 = T0;
+  mdriftVelCorr = 0; 
 }
 //_____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
@@ -90,6 +92,7 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mDriftVelocity = driftVeloc;
   mDriftCurve = driftCurve;
   mT0 = T0;
+  mdriftVelCorr = 0; 
 }
 //_____________________________________________________________________________
 void StSvtCoordinateTransform::setVelocityScale( double deltaV){
@@ -106,6 +109,7 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
   mDriftVelocity = driftVeloc;
   mDriftCurve = NULL;
   mT0 = T0;
+  mdriftVelCorr = 0; 
 
 }
 //____________________________________________________________________________
@@ -113,12 +117,14 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 StSvtConfig* config,
 						 StSvtHybridCollection* driftVeloc,
 						 StSvtHybridCollection* driftCurve,
-						 StSvtT0* T0){
+						 StSvtT0* T0, 
+						 St_svtCorrectionC*  driftVelCorr){
   mgeom = geom;
   mconfig = config;
   mDriftVelocity = driftVeloc;
   mDriftCurve = driftCurve;
   mT0 = T0;
+  mdriftVelCorr = driftVelCorr; 
 
 }
 
@@ -197,7 +203,13 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
     b.position().setX( mgeom->getWaferLength() - b.position().x());
     b.position().setY( mgeom->getWaferWidth() - b.position().y());
   }
-  
+
+  if (mdriftVelCorr) {
+    Double_t u = b.position().x();
+    Double_t du = mdriftVelCorr->CalcCorrection(b.layer(),b.ladder(),b.wafer(),b.hybrid(),u);
+    b.position().setX(u - du);
+  }
+
   return;
 }
 //_____________________________________________________________________________
@@ -621,11 +633,10 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   float vd = -1;
   int index;
 
-  /*
+#if 1
   int anode;
   float td = -1;
   double Ratio = 1;
-
   if (mDriftVelocity && mDriftCurve) 
     {
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
@@ -668,10 +679,9 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	  
 	}
     }
-  else if (mDriftVelocity) 
-  */
-  
-  if (mDriftVelocity)
+  else 
+#endif
+    if (mDriftVelocity) 
    {
       //       gMessMgr->Warning() << "mDriftCurve is NULL: " << x << endm;
       index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
