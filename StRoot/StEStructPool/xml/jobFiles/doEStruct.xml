@@ -74,7 +74,6 @@ void doEStruct( const char* filelist,
     //  analysis = analysis interface and contains pair-cut object (needs file)
     for(int i=0;i&lt;numberOfAnalyses;i++) {
         <variable refersTo='allocateAnalysis'/>
-        analysis[i]-&gt;setQAHists(qaHists);
     }
     estructMaker-&gt;SetAnalyses(analysis,numberOfAnalyses);
 
