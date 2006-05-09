@@ -34,8 +34,11 @@ Int_t AggregateVtxSeed(char* dir) {
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.3 2005/07/01 23:57:40 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.1 2006/05/09 21:48:45 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.1  2006/05/09 21:48:45  genevb
+// move macro to calib directory
+//
 // Revision 1.3  2005/07/01 23:57:40  genevb
 // Allow use of StEvent/MuDst in finding vertex seed
 //
