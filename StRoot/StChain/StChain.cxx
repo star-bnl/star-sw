@@ -135,7 +135,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      << endm;
 #ifdef STAR_TRACKING     
 // Add a record to MySQL tracking Db     
-     LOG_QA << Form("Events=\"%i\", Failed=\"%i\", Cpu=\"%10.2f\", RealTime=\"%10.2f\",StepEventId=NULL"
+     LOG_QA << Form("Events=\"%i\", Failed=\"%i\", Cpu=\"%10.2f\", RealTime=\"%10.2f\",StepEventId='EventFinish'"
                 , mNTotal,       mNFailed,      evnt.GetCpuTime("QAInfo:"), evnt.GetRealTime("QAInfo:") )
                 << endm; 
 #endif                
@@ -162,8 +162,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.54 2006/03/28 02:09:19 fine Exp $
+// $Id: StChain.cxx,v 1.55 2006/05/09 23:31:20 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.55  2006/05/09 23:31:20  fine
+// Reshape the job tracking Db tables and add a few LOQ_QA message to record it with the Job tracking Db
+//
 // Revision 1.54  2006/03/28 02:09:19  fine
 // Add SIMS_USER SUMS_AUTHENTICATED_USER SUMS_JOBNAME
 //
