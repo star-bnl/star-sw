@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.37 2006/05/08 13:49:48 fisyak Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.38 2006/05/09 16:17:41 fisyak Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -112,6 +112,21 @@ void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
   mdriftVelCorr = 0; 
 
 }
+//____________________________________________________________________________
+void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
+						 StSvtConfig* config,
+						 StSvtHybridCollection* driftVeloc,
+						 StSvtHybridCollection* driftCurve,
+						 StSvtT0* T0){
+  mgeom = geom;
+  mconfig = config;
+  mDriftVelocity = driftVeloc;
+  mDriftCurve = driftCurve;
+  mT0 = T0;
+  mdriftVelCorr = 0; 
+
+}
+
 //____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 StSvtConfig* config,
