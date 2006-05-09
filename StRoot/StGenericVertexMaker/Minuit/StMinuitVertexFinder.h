@@ -70,7 +70,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.3 2006/04/25 13:06:44 mvl Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.4 2006/05/09 17:51:05 mvl Exp $
  *
  */
 
@@ -83,7 +83,6 @@
 class StEvent;
 class StTrack;
 class TMinuit;
-class StEmcDetector;
 
 class StMinuitVertexFinder: public StGenericVertexFinder {
 public:
@@ -115,7 +114,7 @@ private:
     enum {kFlagDcaz = 1, kFlagCTBMatch = 2, kFlagBEMCMatch = 4, kFlagCrossMembrane = 8};
 
     bool accept(StTrack*) const;   // track filter
-    void  fillBemcHits(StEmcDetector *);
+    void  fillBemcHits(StEvent *);
     int   matchTrack2BEMC(const StTrack *);
     int   checkCrossMembrane(const StTrack *);
     void  calculateRanks();
@@ -170,6 +169,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.4  2006/05/09 17:51:05  mvl
+ * Added protection against event->emcCollection()==0
+ *
  * Revision 1.3  2006/04/25 13:06:44  mvl
  * Seed-finding range extended to -200<vtx_z<200
  *
