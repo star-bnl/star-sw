@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.6 2006/05/04 20:01:31 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.7 2006/05/09 17:51:05 mvl Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.7  2006/05/09 17:51:05  mvl
+ * Added protection against event->emcCollection()==0
+ *
  * Revision 1.6  2006/05/04 20:01:31  jeromel
  * Switched to logger
  *
@@ -227,7 +230,7 @@ int StMinuitVertexFinder::findSeeds() {
   return mNSeed;
 }
 
-void StMinuitVertexFinder::fillBemcHits(StEmcDetector *bemcDet){
+void StMinuitVertexFinder::fillBemcHits(StEvent *event){
   static int nMod = 120;
   static int nEta = 20;
   static int nSub = 2;
@@ -238,20 +241,21 @@ void StMinuitVertexFinder::fillBemcHits(StEmcDetector *bemcDet){
 	mBemcHit[m][e][s]=0;
 
   int n_emc_hit=0;
-  if (bemcDet) {
-  for (int iMod=0; iMod < nMod; iMod++) {
-    if (!bemcDet->module(iMod)) 
-      continue;
-    StEmcModule *mod = bemcDet->module(iMod);
-    StSPtrVecEmcRawHit&  hits = mod->hits();
-    for (StEmcRawHitIterator hitIter = hits.begin(); hitIter != hits.end(); hitIter++) {
-      StEmcRawHit *hit = *hitIter;
-      if (hit->energy() > mEmcThres) {
-	mBemcHit[hit->module()-1][hit->eta()-1][hit->sub()-1]=1;
-	n_emc_hit++; 
+  if (event->emcCollection() && event->emcCollection()->detector(kBarrelEmcTowerId)) {
+    StEmcDetector* bemcDet = event->emcCollection()->detector(kBarrelEmcTowerId);
+    for (int iMod=0; iMod < nMod; iMod++) {
+      if (!bemcDet->module(iMod)) 
+        continue;
+      StEmcModule *mod = bemcDet->module(iMod);
+      StSPtrVecEmcRawHit&  hits = mod->hits();
+      for (StEmcRawHitIterator hitIter = hits.begin(); hitIter != hits.end(); hitIter++) {
+        StEmcRawHit *hit = *hitIter;
+        if (hit->energy() > mEmcThres) {
+          mBemcHit[hit->module()-1][hit->eta()-1][hit->sub()-1]=1;
+          n_emc_hit++; 
+        }
       }
     }
-  }
   }
   if (mDebugLevel) 
     cout << "Found " << n_emc_hit << " emc hits" << endl;
@@ -448,7 +452,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     mSigma.clear();
     mZImpact.clear();
 
-    fillBemcHits(event->emcCollection()->detector(kBarrelEmcTowerId));
+    fillBemcHits(event);
 
     double sigma;
     bool ctb_match;
