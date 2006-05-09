@@ -24,6 +24,7 @@
         analysis[i]-&gt;setZBuffLimits(ecuts);
         analysis[i]-&gt;setAnalysisIndex(i);
         analysis[i]-&gt;setOutputFileName(getOutFileName(outputDir,jobName,"data",i));
+        analysis[i]-&gt;setQAHists(qaHists);
             </allocateAnalysis>
             <pairCutsWrite id='pairCutsWrite' widget='none'>
     pcuts-&gt;printCuts(ofs);
