@@ -12,6 +12,24 @@
  *  http://root.cern.ch/root/html/TMinuit.html
  *  http://www-glast.slac.stanford.edu/software/root/GRUG/docs/Feature/GRUGminuit.pdf
  *
+ *  Modified for multiple veretx finding by Marco van Leeuwen April/May 2006
+ *
+ *  Vertexfinding process has been split into two stages: a seedfinding and a 
+ *  fitting stage. Multiple vertices can be found for each event and are 
+ *  sorted by 'ranking'. The highets ranked vertex is most likely the 
+ *  triggered vertex.
+ *
+ *  Vertex rank calculation is done in calculateRanks(). Three ranks are
+ *  calculated, based on mean-dip, number of tracks crossing central membrane
+ *  and number of tracks matched to BEMC. The ranks are normalised to have
+ *  mean value close to 0 for triggered vertices and a sigma of about 1 
+ *  (independent of multiplicity). Each individual rank is bounded to [-5,1].
+ *  For data analysis, a quality cut on the rank of the best vertex is 
+ *  recommended. This needs to be refined, but requiring rank > -3 seems to
+ *  work OK.
+ *
+ *  for more info, see: http://www.star.bnl.gov/protected/highpt/mvl/multi_vertex/
+ *
  * Member Functions:
  * -----------------
  * StMinuitVertexFinder::fit(StEvent* evt)
@@ -70,7 +88,7 @@
  *  myvertex.UseVertexConstraint(x0,y0,dzdy,dydz,weight)
  *
  *
- *  $Id: StMinuitVertexFinder.h,v 1.4 2006/05/09 17:51:05 mvl Exp $
+ *  $Id: StMinuitVertexFinder.h,v 1.5 2006/05/10 17:16:21 mvl Exp $
  *
  */
 
@@ -169,6 +187,9 @@ private:
 /***************************************************************************
  *
  * $Log: StMinuitVertexFinder.h,v $
+ * Revision 1.5  2006/05/10 17:16:21  mvl
+ * Added some comments to describe changes for multiple veretx finding (most importantly: ranking system)
+ *
  * Revision 1.4  2006/05/09 17:51:05  mvl
  * Added protection against event->emcCollection()==0
  *
