@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.497 2006/05/04 21:57:10 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.498 2006/05/10 13:50:45 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -383,6 +383,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("VFPPV") ){     VtxOpt |= (0x1 << 3);} //  8 0x08
       if ( GetOption("VFPPVnoCTB") ){VtxOpt |= (0x1 << 4);} // 16 0x10
       if ( GetOption("VFFV") ){      VtxOpt |= (0x1 << 5);} // 32 0x20
+      if ( GetOption("VFMCE") ){     VtxOpt |= (0x1 << 6);} // 64 0x40
       mk->SetMode(VtxOpt);
 
       // All VertexFinders implement those (or not)
