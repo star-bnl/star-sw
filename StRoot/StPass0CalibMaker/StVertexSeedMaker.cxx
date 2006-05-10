@@ -286,6 +286,7 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 
 // 2006 pp data
 	case (117221) :    // bemc-jp1-mb
+	case (127221) :    // bemc-jp1-mb
 
             valid = kTRUE;
 
@@ -403,7 +404,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.27 2006/05/08 02:38:21 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.28 2006/05/10 03:57:08 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -698,8 +699,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.27 2006/05/08 02:38:21 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.28 2006/05/10 03:57:08 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.28  2006/05/10 03:57:08  genevb
+// ppProductionTrans trigger for 2006
+//
 // Revision 1.27  2006/05/08 02:38:21  genevb
 // Added 2006 triggers
 //
