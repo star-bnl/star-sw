@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.10 2006/05/09 23:31:20 fine Exp $
+ * $Id: summarizeEvent.cc,v 2.11 2006/05/10 17:05:35 fine Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.11  2006/05/10 17:05:35  fine
+ * separate the node/track information
+ *
  * Revision 2.10  2006/05/09 23:31:20  fine
  * Reshape the job tracking Db tables and add a few LOQ_QA message to record it with the Job tracking Db
  *
@@ -52,7 +55,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.10 2006/05/09 23:31:20 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.11 2006/05/10 17:05:35 fine Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -84,8 +87,14 @@ summarizeEvent(StEvent& event, const int &nevents)
     // Report for jobTracking Db        
     LOG_QA << "Events=" << nevents 
            << ",StepEventId='EventFinish'"
-           << ",StepContext=" << "'track nodes',"  << "MessageId='='"
-           << ",ProgrammMessage='" <<  nTracks << ":globals with NFitP>="<< NoFitPointCutForGoodTrack << ":" << nGoodTracks 
+           << ",StepContext=" << "'nodes all',"  << "MessageId='='"
+           << ",ProgrammMessage='" <<  nTracks 
+           << "'" << endm;
+
+    LOG_QA << "Events=" << nevents 
+           << ",StepEventId='EventFinish'"
+           << ",StepContext=" << "'nodes good',"  << "MessageId='='"
+           << ",ProgrammMessage='" << nGoodTracks 
            << "'" << endm;
 
     StPrimaryVertex *pVertex=0;
@@ -108,8 +117,14 @@ summarizeEvent(StEvent& event, const int &nevents)
      // Report for jobTracking Db        
      LOG_QA << "Events=" << nevents
             << ",StepEventId='EventFinish'"
-            << ",StepContext=" << "'primary tracks',"  << "MessageId='='"
-            << ",ProgrammMessage='" <<  nDaughters << ":ones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):" << nGoodTracks
+            << ",StepContext=" << "'primary all',"  << "MessageId='='"
+            << ",ProgrammMessage='" <<  nDaughters
+            << "'" << endm;
+
+     LOG_QA << "Events=" << nevents
+            << ",StepEventId='EventFinish'"
+            << ",StepContext=" << "'primary good',"  << "MessageId='='"
+            << ",ProgrammMessage='" << nGoodTracks
             << "'" << endm;
 
      LOG_QA << "# primary TPC tracks:\t"
