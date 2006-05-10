@@ -80,6 +80,7 @@ StGenericVertexMaker::~StGenericVertexMaker()
   m_Mode = 0x8     PPV with CTB matching
   m_Mode = 0x10    PPV without CTB matching
   m_Mode = 0x20    Fixed vertex finder
+  m_Mode = 0x40    Fixed vertex finder, read from MC event
  
   Default          Minuit  (to preserver backward compatibility)
 
@@ -95,12 +96,15 @@ Int_t StGenericVertexMaker::Init()
 
   LOG_INFO << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<" m_Mode2=" <<  m_Mode2 <<  endm;
   bool isMinuit=false;
+
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
     isMinuit=true;
+
   } else if ( m_Mode & 0x2){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(0);                 // this mode is an internal to ppLMV option switch
+
   } else if ( m_Mode & 0x4){
     theFinder= new StppLMVVertexFinder();
     theFinder->SetMode(1);                 // this mode is an internal to ppLMV option switch
@@ -112,14 +116,22 @@ Int_t StGenericVertexMaker::Init()
     if(GetMaker("emcY2")) {//very dirty, but detects if it is M-C or real data
       ((StPPVertexFinder*) theFinder)->setMC(true);
     }
-  } else if ( m_Mode & 0x20) {
-      LOG_INFO << "StGenericVertexMaker::Init: fixed vertex 'finder' selected" << endm;
+
+  } else if ( m_Mode & 0x20 || m_Mode & 0x40) {
       theFinder = new StFixedVertexFinder();
+      if (m_Mode & 0x40){
+	LOG_INFO << "StGenericVertexMaker::Init: fixed vertex using MC vertex" << endm;
+	theFinder->SetMode(1);
+      } else {
+	LOG_INFO << "StGenericVertexMaker::Init: fixed vertex 'finder' selected" << endm;
+      }
+
   } else {
     // Later, this would NEVER make multiple possible vertex
     // finder unlike for option 0x1 .
     theFinder= new StMinuitVertexFinder();
     isMinuit=true;
+
   }
   
   if(isMinuit) { // this is ugly, one should abort at 'else' above, Jan
