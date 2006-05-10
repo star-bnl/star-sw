@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.30 2006/05/04 19:05:05 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.31 2006/05/10 15:13:17 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.31  2006/05/10 15:13:17  jeromel
+ * Additional enum
+ *
  * Revision 2.30  2006/05/04 19:05:05  ullrich
  * Added StL2TriggerResultType.
  *
@@ -310,7 +313,8 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         egrVertexFinder,
                         minuitVertexFinder,
                         ppvVertexFinder,
-                        ppvNoCtbVertexFinder};
+                        ppvNoCtbVertexFinder,
+			mcEventVertexFFinder};
 
 
 /*!
