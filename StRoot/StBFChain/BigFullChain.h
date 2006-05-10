@@ -373,6 +373,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"VFPPVnoCTB"      ,""  ,"","",""                    ,"","... Pile-up proof vertex finder, noCTB",kFALSE},
   {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE},
   {"VFFV"      ,""  ,"","",""                                       ,"","... Fixed dummy VF method",kFALSE},
+  {"VFMCE"     ,""  ,"","",""                                   ,"","... Fixed vertex from MCEvent",kFALSE},
 #endif /* __BFC2__ */
 
   {"VFppLMV"       ,""  ,"","",""                        ,"","...VertexMaker will use ppLMV method",kFALSE},
