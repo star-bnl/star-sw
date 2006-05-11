@@ -285,8 +285,21 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	//case (22)   :   // upsilon(-tran)
 
 // 2006 pp data
+	case (117001) :    // mb
 	case (117221) :    // bemc-jp1-mb
-	case (127221) :    // bemc-jp1-mb
+	case (117501) :    // bemc-jp0-mb
+	case (117213) :    // bemc-ht2-mb-emul
+	case (117171) :    // eemc-jp1-mb
+	case (117551) :    // eemc-jp0-mb
+	case (117262) :    // eemc-ht2-mb-emul
+	case (127221) :    // bemc-jp1-mb (tran)
+	case (127501) :    // bemc-jp0-mb (tran)
+	case (127213) :    // bemc-ht2-mb-emul (tran)
+	case (127271) :    // eemc-jp1-mb (tran)
+	case (127551) :    // eemc-jp0-mb (tran)
+	case (127262) :    // eemc-ht2-mb-emul (tran)
+	case (117705) :    // jpsi-mb
+	case (117602) :    // upsilon
 
             valid = kTRUE;
 
@@ -404,7 +417,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.28 2006/05/10 03:57:08 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.29 2006/05/11 18:09:44 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -682,9 +695,15 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
     for (Int_t entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEvent(entryn);
       vals = curNtuple->GetArgs();
-      resNtuple->Fill(vals);
-      addVert(vals[1],vals[2],vals[3],vals[4]);
-      weight += vals[4];
+      unsigned int tid = (unsigned int) vals[5];
+      if (ValidTrigger(tid)) {
+        resNtuple->Fill(vals);
+        addVert(vals[1],vals[2],vals[3],vals[4]);
+        weight += vals[4];
+      } else {
+        gMessMgr->Info() << "StVertexSeedMaker: Invalid trigger: "
+          << tid << endm;
+      }
     }
     gMessMgr->Info() << "StVertexSeedMaker: Current statistics: "
       << nverts << endm;
@@ -699,8 +718,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.28 2006/05/10 03:57:08 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.29 2006/05/11 18:09:44 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.29  2006/05/11 18:09:44  genevb
+// More pp2006 triggers
+//
 // Revision 1.28  2006/05/10 03:57:08  genevb
 // ppProductionTrans trigger for 2006
 //
