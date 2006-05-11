@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.107 2006/02/22 19:25:35 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.108 2006/05/11 20:14:36 fine Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -258,7 +258,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.107 2006/02/22 19:25:35 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.108 2006/05/11 20:14:36 fine Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -2175,8 +2175,7 @@ Int_t StFlowMaker::InitMuEventRead() {
   for (Int_t ilist = 0;  ilist < pMuFileList->GetNBundles(); ilist++) {
     pMuFileList->GetNextBundle();
 
-
-
+#if 0
     TFile* dummyFile = TFile::Open(pMuFileList->GetFileName(0),"READ");
 
     if (!dummyFile ||!(dummyFile->IsOpen())) {
@@ -2188,12 +2187,15 @@ Int_t StFlowMaker::InitMuEventRead() {
       gMessMgr->Info() <<"  sth. very wrong (overwritten, invalid) with "<<pMuFileList->GetFileName(0)<<", not chained "<<endm;
       continue;   
     }
-
+    // this shoudl fix the memory leak and the code crash
+    delete dummyFile;
+    
+    // this produced the misleading statement, because the file was open to READ and it can not be recovered.
     if (dummyFile->TestBit(1024)) { 
       gMessMgr->Info() <<"  revocer procedure applied to "<<pMuFileList->GetFileName(0)<<", maybe useful but still not chained for flow analyses"<<endm;
       continue;   
     }
-
+#endif
 
 
     //**************  this block is to remove files with # evts < 5
@@ -2272,6 +2274,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.108  2006/05/11 20:14:36  fine
+// Eliminate the memeory leak and code crash
+//
 // Revision 1.107  2006/02/22 19:25:35  posk
 // Changes needed for the MuDst
 // Stopped using eventSummary()
