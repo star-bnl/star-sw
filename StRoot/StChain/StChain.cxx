@@ -41,6 +41,7 @@
 #include "StChain.h"
 #include "StEvtHddr.h"
 #include "StMessMgr.h"
+#include "TMemStat.h"
 
 ClassImp(StChain)
 
@@ -117,6 +118,25 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 {
   TBenchmark evnt;
   int jCur=0,iMake=0;
+#ifdef STAR_TRACKING     
+// Add a record to MySQL tracking Db     
+
+  LOG_QA << "Events="       << mNTotal
+         << ",Failed="      << mNFailed
+         << ",StepEventId=" << "'Start'"
+         << ",Cpu="         << evnt.GetCpuTime("QAInfo:")
+         << ",RealTime="    << evnt.GetRealTime("QAInfo:")
+         << ",StepContext=" << "'MemUsed',"  << "MessageId='='"
+         << ",ProgrammMessage='" << int(TMemStat::Used())
+         << "'" << endm;
+         
+  LOG_QA << "Events="       << mNTotal
+         << ",Failed="      << mNFailed
+         << ",StepEventId=" << "'Start'"
+         << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
+         << ",ProgrammMessage='" << int(TMemStat::ProgSize())
+         << "'" << endm;
+#endif                
   for (jCur=jBeg; jCur<=jEnd; jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
 
@@ -153,17 +173,34 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 
 #ifdef STAR_TRACKING     
 // Add a record to MySQL tracking Db     
-  LOG_QA << Form("Events=\"%i\", Failed=\"%i\", Cpu=\"%10.2f\", RealTime=\"%10.2f\",StepEventId=\"Finish\""
-                , mNTotal,       mNFailed,      evnt.GetCpuTime("QAInfo:"), evnt.GetRealTime("QAInfo:") )
-                << endm; 
+
+  LOG_QA << "Events="       << mNTotal
+         << ",Failed="      << mNFailed
+         << ",StepEventId=" << "'Finish'"
+         << ",Cpu="         << evnt.GetCpuTime("QAInfo:")
+         << ",RealTime="    << evnt.GetRealTime("QAInfo:")            
+         << ",StepContext=" << "'MemUsed',"  << "MessageId='='"
+         << ",ProgrammMessage='" << int(TMemStat::Used())
+         << "'" << endm;
+
+  LOG_QA << "Events="       << mNTotal
+         << ",Failed="      << mNFailed
+         << ",StepEventId=" << "'Finish'"
+         << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
+         << ",ProgrammMessage='" << int(TMemStat::ProgSize())
+         << "'" << endm;
+
 #endif                
   fflush(stdout);
   return iMake;
 }
 
 
-// $Id: StChain.cxx,v 1.55 2006/05/09 23:31:20 fine Exp $
+// $Id: StChain.cxx,v 1.56 2006/05/12 18:08:14 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.56  2006/05/12 18:08:14  fine
+// fix the MySQLAppender problem and re-shape the trakDb messages
+//
 // Revision 1.55  2006/05/09 23:31:20  fine
 // Reshape the job tracking Db tables and add a few LOQ_QA message to record it with the Job tracking Db
 //

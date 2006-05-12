@@ -41,15 +41,16 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________
 MySQLAppender::MySQLAppender()
-: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(1),fLastId(0)
-{
+: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
+{ 
    fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
 
 //_________________________________________________________________________
 MySQLAppender::~MySQLAppender()
 {
-	finalize();
+	 fprintf(stderr,"MySQLAppender::~MySQLAppender()\n" );
+    finalize();
 }
 
 //_________________________________________________________________________
@@ -109,7 +110,9 @@ void MySQLAppender::execute(const String& sql)
 	SQLHSTMT stmt = SQL_NULL_HSTMT;
 
 
+#ifdef TRY
 try
+#endif
 	{
 		con = getConnection();
       fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
@@ -133,7 +136,9 @@ try
 //		ret = SQLAllocHandle(SQL_HANDLE_STMT, con, &stmt);
 		if (ret < 0)
 		{
-			throw SQLException(ret);
+			SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+	      closeConnection(con);
+	      throw SQLException(ret);
 		}
 
 #if defined(HAVE_MS_MySQL)
@@ -144,18 +149,23 @@ try
 #endif
 		if (ret < 0)
 		{
+			SQLFreeHandle(SQL_HANDLE_STMT, stmt);
+	      closeConnection(con);
 			throw SQLException(ret);
 		}
 	} 
+#ifdef TRY   
 	catch (SQLException& e)
 	{
 		if (stmt != SQL_NULL_HSTMT)
 		{
 			SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 		}
-
+      fprintf(stderr," Catching the execute exceptions: %s\n",(const char*)sql.c_str());
+	   closeConnection(con);
 		throw e;
 	}
+#endif   
  
 	SQLFreeHandle(SQL_HANDLE_STMT, stmt);
 	closeConnection(con);
@@ -168,6 +178,11 @@ try
 is closed (typically when garbage collected).*/
 void MySQLAppender::closeConnection(SQLHDBC con)
 {
+  if (fIsConnectionOpen ) {
+     fprintf(stderr,"\n ++++++++ ----> closing the connection\n");
+     mysql_close(connection); connection = 0;
+     fIsConnectionOpen = false;
+  }
 }
 
 //_________________________________________________________________________
@@ -175,24 +190,34 @@ MYSQL *MySQLAppender::getConnection()
 {
 	SQLRETURN ret;
    
-   if ( !(connection= mysql_init(connection)) ) 
-      printf("No init connection \n");
+   if (!fIsConnectionOpen) {
+   
+     if ( !(connection= mysql_init(connection)) ) 
+         printf("No init connection \n");
+     else {    
 
-   const char *host   =  "heston.star.bnl.gov";
-   const char *user   = "StarLogger";
-   const char *passwd = "logger";
-   const char *db     = "logger";
-   unsigned int port = 3306;
-   // fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection\n\n");
-   if (!mysql_real_connect(connection
+         const char *host   =  "heston.star.bnl.gov";
+         const char *user   = "StarLogger";
+         const char *passwd = "logger";
+         const char *db     = "logger";
+         unsigned int port  = 3306;
+          fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n\n", fIsConnectionOpen);
+         if (!(connection = mysql_real_connect(connection
                      , host
                      , user
                      , passwd
                      , db
                      , port
                      , 0,0
-                     ))
+                     )))
+         {
                      printf("No connection: %s  \n",mysql_error(connection));
+                     
+         } else {
+            fIsConnectionOpen = true;
+         }
+      }
+   }
 
 
 #if 0
@@ -277,7 +302,7 @@ void MySQLAppender::close()
 		SQLFreeHandle(SQL_HANDLE_ENV, env);
 	}
 #endif
-   mysql_close(0);
+   closeConnection(connection);
 	this->closed = true;
 }
 //_________________________________________________________________________
