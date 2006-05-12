@@ -230,13 +230,11 @@ Int_t StIO::IfExi(const char *name)
 
   //printf("DEBUG:: StIO::IfExi AccessingPathName(%s)\n",file.Data());
   // JL - This attempts to do a root auth even if xroot
-#if 0
   if (!gSystem->AccessPathName(file)){ 
     SetErrorHandler(curre); 
     return 1;
 
   } else 
-#endif  
   {
     int l = file.Length();
     if (file(l-5,5)!=".root"){
