@@ -155,9 +155,21 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
      << endm;
 #ifdef STAR_TRACKING     
 // Add a record to MySQL tracking Db     
-     LOG_QA << Form("Events=\"%i\", Failed=\"%i\", Cpu=\"%10.2f\", RealTime=\"%10.2f\",StepEventId='EventFinish'"
-                , mNTotal,       mNFailed,      evnt.GetCpuTime("QAInfo:"), evnt.GetRealTime("QAInfo:") )
-                << endm; 
+  LOG_QA << "Events="       << mNTotal
+         << ",Failed="      << mNFailed
+         << ",StepEventId=" << "'Finish'"
+         << ",RealTime="    << evnt.GetRealTime("QAInfo:")            
+         << ",StepContext=" << "'Cpu',"  << "MessageId='='"
+         << ",ProgrammMessage='" << evnt.GetCpuTime("QAInfo:")
+         << "'" << endm;
+
+  LOG_QA << "Events="       << mNTotal
+         << ",Failed="      << mNFailed
+         << ",StepEventId=" << "'Finish'"
+         << ",RealTime="    << evnt.GetRealTime("QAInfo:")            
+         << ",StepContext=" << "'RealTime',"  << "MessageId='='"
+         << ",ProgrammMessage='" << evnt.GetRealTime("QAInfo:")
+         << "'" << endm;
 #endif                
   }
 
@@ -196,8 +208,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.56 2006/05/12 18:08:14 fine Exp $
+// $Id: StChain.cxx,v 1.57 2006/05/12 18:48:48 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.57  2006/05/12 18:48:48  fine
+// reshape jobn tracking. remove the redundand table columns
+//
 // Revision 1.56  2006/05/12 18:08:14  fine
 // fix the MySQLAppender problem and re-shape the trakDb messages
 //
