@@ -196,7 +196,7 @@ MYSQL *MySQLAppender::getConnection()
          printf("No init connection \n");
      else {    
 
-         const char *host   =  "heston.star.bnl.gov";
+         const char *host   = "heston.star.bnl.gov";
          const char *user   = "StarLogger";
          const char *passwd = "logger";
          const char *db     = "logger";
