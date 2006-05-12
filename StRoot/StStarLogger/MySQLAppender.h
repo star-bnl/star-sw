@@ -149,7 +149,8 @@ namespace log4cxx
 			*/
 			std::list<spi::LoggingEventPtr> buffer;
          unsigned long fLastId;
-			
+         bool fIsConnectionOpen;
+ 			
 		public:				
                         DECLARE_LOG4CXX_OBJECT(MySQLAppender)
 			BEGIN_LOG4CXX_CAST_MAP()

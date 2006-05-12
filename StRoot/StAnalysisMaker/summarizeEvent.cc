@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.11 2006/05/10 17:05:35 fine Exp $
+ * $Id: summarizeEvent.cc,v 2.12 2006/05/12 18:08:14 fine Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.12  2006/05/12 18:08:14  fine
+ * fix the MySQLAppender problem and re-shape the trakDb messages
+ *
  * Revision 2.11  2006/05/10 17:05:35  fine
  * separate the node/track information
  *
@@ -55,7 +58,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.11 2006/05/10 17:05:35 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.12 2006/05/12 18:08:14 fine Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -85,17 +88,21 @@ summarizeEvent(StEvent& event, const int &nevents)
 		       << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
              
     // Report for jobTracking Db        
-    LOG_QA << "Events=" << nevents 
-           << ",StepEventId='EventFinish'"
-           << ",StepContext=" << "'nodes all',"  << "MessageId='='"
-           << ",ProgrammMessage='" <<  nTracks 
-           << "'" << endm;
+    if (nTracks) {
+       LOG_QA << "Events=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",StepContext=" << "'nodes all',"  << "MessageId='='"
+              << ",ProgrammMessage='" <<  nTracks 
+              << "'" << endm;
+    }
 
-    LOG_QA << "Events=" << nevents 
-           << ",StepEventId='EventFinish'"
-           << ",StepContext=" << "'nodes good',"  << "MessageId='='"
-           << ",ProgrammMessage='" << nGoodTracks 
-           << "'" << endm;
+    if (nGoodTracks) { 
+       LOG_QA << "Events=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",StepContext=" << "'nodes good',"  << "MessageId='='"
+              << ",ProgrammMessage='" << nGoodTracks 
+              << "'" << endm;
+    }
 
     StPrimaryVertex *pVertex=0;
     for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
@@ -114,18 +121,21 @@ summarizeEvent(StEvent& event, const int &nevents)
 
       LOG_QA << "# primary tracks:\t"
 		         << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
-     // Report for jobTracking Db        
-     LOG_QA << "Events=" << nevents
-            << ",StepEventId='EventFinish'"
-            << ",StepContext=" << "'primary all',"  << "MessageId='='"
-            << ",ProgrammMessage='" <<  nDaughters
-            << "'" << endm;
-
-     LOG_QA << "Events=" << nevents
-            << ",StepEventId='EventFinish'"
-            << ",StepContext=" << "'primary good',"  << "MessageId='='"
-            << ",ProgrammMessage='" << nGoodTracks
-            << "'" << endm;
+     // Report for jobTracking Db   (non-zero entry only)      
+     if (nDaughters) {
+        LOG_QA << "Events=" << nevents
+               << ",StepEventId='EventFinish'"
+               << ",StepContext=" << "'primary all',"  << "MessageId='='"
+               << ",ProgrammMessage='" <<  nDaughters
+               << "'" << endm;
+      }
+     if (nGoodTracks) {
+        LOG_QA << "Events=" << nevents
+               << ",StepEventId='EventFinish'"
+               << ",StepContext=" << "'primary good',"  << "MessageId='='"
+               << ",ProgrammMessage='" << nGoodTracks
+               << "'" << endm;
+     }
 
      LOG_QA << "# primary TPC tracks:\t"
 		         << nTpcTracks << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTpcTracks << endm;
@@ -139,18 +149,23 @@ summarizeEvent(StEvent& event, const int &nevents)
     
     LOG_QA << "# Kink vertices:       "
 		       << event.kinkVertices().size() << endm;
-    // Report for jobTracking Db        
-    LOG_QA << "Events=" << nevents 
-           << ",StepEventId='EventFinish'"
-           << ",StepContext=" << "'V0Vertices', " << "MessageId='='," << "ProgrammMessage=" << event.v0Vertices()  .size() << endm;
-           
-    LOG_QA << "Events=" << nevents 
-           << ",StepEventId='EventFinish'"
-           << ",StepContext=" << "'XiVertices', " << "MessageId='='," << "ProgrammMessage="<< event.xiVertices()  .size()  << endm;
-           
-    LOG_QA << "Events=" << nevents 
-           << ",StepEventId='EventFinish'"
-           << ",StepContext=" << "'KinkVertices'," << "MessageId='='," << "ProgrammMessage="<< event.kinkVertices().size() << endm;
+     // Report for jobTracking Db   (non-zero entry only)      
+    if (event.v0Vertices()  .size()) {
+       LOG_QA << "Events=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",StepContext=" << "'V0Vertices', " << "MessageId='='," << "ProgrammMessage=" << event.v0Vertices()  .size() << endm;
+    }
+    if (event.xiVertices()  .size()) {
+       LOG_QA << "Events=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",StepContext=" << "'XiVertices', " << "MessageId='='," << "ProgrammMessage="<< event.xiVertices()  .size()  << endm;
+    }
+    
+    if (event.kinkVertices().size()) {
+       LOG_QA << "Events=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",StepContext=" << "'KinkVertices'," << "MessageId='='," << "ProgrammMessage="<< event.kinkVertices().size() << endm;
+    }
     
     UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
     StTpcHitCollection* TpcHitCollection = event.tpcHitCollection();
