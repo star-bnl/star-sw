@@ -230,19 +230,24 @@ Int_t StIO::IfExi(const char *name)
 
   //printf("DEBUG:: StIO::IfExi AccessingPathName(%s)\n",file.Data());
   // JL - This attempts to do a root auth even if xroot
+#if 0  
   if (!gSystem->AccessPathName(file)){ 
     SetErrorHandler(curre); 
     return 1;
 
   } else 
+#endif  
   {
     int l = file.Length();
     if (file(l-5,5)!=".root"){
       SetErrorHandler(curre); 
-      return 0;
-
+      return !gSystem->AccessPathName(file);
     } else {
       //printf("DEBUG:: Opening %s\n",name);
+      // Workaround:
+      //  Due the ROOT (4.04.02) TSystem::FindHelper bug one can not 
+      //  use TSystem::AccessPathName method to test files on 
+      //  the "rootd" servers
       TFile *tf = TFile::Open(file);
       // return old error handler
       SetErrorHandler(curre);
