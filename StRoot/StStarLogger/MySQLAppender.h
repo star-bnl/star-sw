@@ -191,7 +191,7 @@ namespace log4cxx
 			* end.  I use a connection pool outside of MySQLAppender which is
 			* accessed in an override of this method.
 			* */
-			void execute(const String& sql) /*throw(SQLException)*/;
+			unsigned int execute(const String& sql) /*throw(SQLException)*/;
 			
 			/**
 			* Override this to return the connection to a pool, or to clean up the
@@ -200,7 +200,7 @@ namespace log4cxx
 			* The default behavior holds a single connection open until the appender
 			* is closed (typically when garbage collected).
 			*/
-			virtual void closeConnection(SQLHDBC con);
+			virtual void closeConnection();
 			
 			/**
 			* Override this to link with your connection pooling system.
