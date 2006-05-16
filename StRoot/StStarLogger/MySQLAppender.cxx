@@ -108,7 +108,7 @@ unsigned int  MySQLAppender::execute(const String& sql)
 	SQLRETURN ret=1;
 	SQLHDBC con = SQL_NULL_HDBC;
 	SQLHSTMT stmt = SQL_NULL_HSTMT;
-   if (getConnection() ) {
+   if (getConnection()) {
       fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
 //          String query = "INSERT INTO StarLogger VALUES (\"";
 //          query += sql;
@@ -116,16 +116,16 @@ unsigned int  MySQLAppender::execute(const String& sql)
 
       String query = sql; // 
       if (( ret = mysql_query(connection,query.c_str()) )) {
-          printf("QUERY: %s  \n",mysql_error(connection));
+          fprintf(stderr, "MYSQL QUERY: %s  \n",mysql_error(connection));
       }  else {
 //       
 //         unsigned int last = mysql_insert_id(connection);
 //         if (last && !fLastId) fLastId = last;
 //         fprintf(stderr," ID = %d\n",fLastId);
       }
-      closeConnection();
-   }
-	return ret;
+    }
+    fprintf(stderr,"MYSQL:  ---- >  return=%d \n",ret);
+	 return ret;
 	//tcout << _T("Execute: ") << sql << std::endl;
 }
 
@@ -136,7 +136,7 @@ void MySQLAppender::closeConnection()
   if (fIsConnectionOpen) {
      fprintf(stderr," ++++++++ ----> closing the connection %p\n", (void *)connection);
      mysql_close(connection); 
-     if (mysql_errno(connection))   printf("MYSQL close ERROR %s  \n",mysql_error(connection));
+     if (mysql_errno(connection))   fprintf(stderr,"MYSQL close ERROR %s  \n",mysql_error(connection));
      connection = 0;
      fIsConnectionOpen = false;
   }
@@ -150,7 +150,7 @@ MYSQL *MySQLAppender::getConnection()
    if (!fIsConnectionOpen) {
    
      if ( !(connection= mysql_init(connection)) ) {
-         printf("MYSQL: No init connection \n");
+         fprintf(stderr,"MYSQL:  ---- > No init connection \n");
      } else {    
 
          const char *host   = "heston.star.bnl.gov";
@@ -158,7 +158,7 @@ MYSQL *MySQLAppender::getConnection()
          const char *passwd = "logger";
          const char *db     = "logger";
          unsigned int port  = 3306;
-          fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n\n", fIsConnectionOpen);
+         fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
          if (!(mysql_real_connect(connection
                      , host
                      , user
@@ -168,7 +168,7 @@ MYSQL *MySQLAppender::getConnection()
                      , 0,0
                      )))
          {
-             printf("No connection: %s  \n",mysql_error(connection));
+             fprintf(stderr, "MYSQL:  ---- > No connection: %s  \n",mysql_error(connection));
              connection = 0;
              fIsConnectionOpen = false;
          } else {
@@ -176,6 +176,7 @@ MYSQL *MySQLAppender::getConnection()
          }
       }
    }
+   fprintf(stderr,"MYSQL:  ---- > MySQL Connection open %d %p\n", fIsConnectionOpen,connection);
 	return connection;
 }
 
@@ -217,16 +218,16 @@ void MySQLAppender::flushBuffer()
 	//removes.ensureCapacity(buffer.size());
    static bool TaskEntryDone = false;
 	std::list<spi::LoggingEventPtr>::iterator i;
-	for (i = buffer.begin(); i != buffer.end(); i++)
-	{
-	  TString expandCommand;
-     if (!TaskEntryDone) {
-			  const LoggingEventPtr& logEvent = *i;
-			  String sql;  
+   if ( getConnection()) {
+      for (i = buffer.begin(); i != buffer.end(); i++)
+	   {
+	     TString expandCommand;
+        String sql;  
+        if (!TaskEntryDone) {
          
 ///--- Task description         
          
-         expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
+           expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
          " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"Test Task\",\"$SUMS_AUTHENTICATED_USER\");";
 // Edit meta symbols
 //-----------------------
@@ -235,34 +236,32 @@ void MySQLAppender::flushBuffer()
 //  $SUMSJobId     = $REQUESTID 
 //  $SUMSProcessID = $PROCESSID
 
-           ReplaceVariable(expandCommand, "REQUESTID");
-           ReplaceVariable(expandCommand, "SUMS_nProcesses");
-           ReplaceVariable(expandCommand, "SUBMIT_TIME");
+             ReplaceVariable(expandCommand, "REQUESTID");
+             ReplaceVariable(expandCommand, "SUMS_nProcesses");
+             ReplaceVariable(expandCommand, "SUBMIT_TIME");
            
-           ReplaceVariable(expandCommand, "SUMS_name");
-           ReplaceVariable(expandCommand, "SUMS_USER");
-           ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
-           sql = expandCommand.Data();
-		  	  if (!execute(sql))  TaskEntryDone = true;
-     }
+             ReplaceVariable(expandCommand, "SUMS_name");
+             ReplaceVariable(expandCommand, "SUMS_USER");
+             ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
+             sql = expandCommand.Data();
+		       if (!execute(sql))  TaskEntryDone = true;
+       }
 // -- TaksDescription block 
-     if (TaskEntryDone) {
-			  const LoggingEventPtr& logEvent = *i;
-			  String sql;  
+       if (TaskEntryDone) {
 //--- Job description         
 
-         expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
+           expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
 
-         expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
-                           expandCommand += ", ";                  
-         expandCommand += "jobID_MD5=\"$REQUESTID\"";
-                           expandCommand += ", ";
-         expandCommand += "processID=\"$PROCESSID\"";
-                           expandCommand += ", ";
-         expandCommand +=  "node=\"$HOSTNAME\"";
-                           expandCommand += ", ";
-         expandCommand +=  "JobUser=\"$USER\"";
-                           expandCommand += "; ";
+           expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
+                             expandCommand += ", ";                  
+           expandCommand += "jobID_MD5=\"$REQUESTID\"";
+                             expandCommand += ", ";
+           expandCommand += "processID=\"$PROCESSID\"";
+                             expandCommand += ", ";
+           expandCommand +=  "node=\"$HOSTNAME\"";
+                             expandCommand += ", ";
+           expandCommand +=  "JobUser=\"$USER\"";
+                             expandCommand += "; ";
 // Edit meta symbols
 //-----------------------
 //  $hostid        = $HOSTNAME            
@@ -270,30 +269,33 @@ void MySQLAppender::flushBuffer()
 //  $SUMSJobId     = $REQUESTID 
 //  $SUMSProcessID = $PROCESSID
 
-           ReplaceVariable(expandCommand, "USER");
-           ReplaceVariable(expandCommand, "HOSTNAME");
-           ReplaceVariable(expandCommand, "REQUESTID");
-           ReplaceVariable(expandCommand, "PROCESSID");
-           sql = expandCommand.Data();
-           if (!execute(sql) ) {
+             ReplaceVariable(expandCommand, "USER");
+             ReplaceVariable(expandCommand, "HOSTNAME");
+             ReplaceVariable(expandCommand, "REQUESTID");
+             ReplaceVariable(expandCommand, "PROCESSID");
+             sql = expandCommand.Data();
+             if (!execute(sql) ) {
  		  
         
 // Job tracking block
-			      const LoggingEventPtr& logEvent = *i;
-			      String sql = getLogStatement(logEvent);
-               expandCommand = sql.c_str();
+			       const LoggingEventPtr& logEvent = *i;
+                if ( ((LoggingEvent *)logEvent)  ==  (void *)0xffffffff) break;
+			       String sql = getLogStatement(logEvent);
+                expandCommand = sql.c_str();
          
-               ReplaceVariable(expandCommand, "REQUESTID");
-               ReplaceVariable(expandCommand, "PROCESSID");
+                ReplaceVariable(expandCommand, "REQUESTID");
+                ReplaceVariable(expandCommand, "PROCESSID");
          
-               sql = expandCommand.Data();
-			      if (!execute(sql)) {
-                  // clear the buffer of reported events
-     	            buffer.clear();
-              }
-           }
-       }
-   }	
+                sql = expandCommand.Data();
+			       if (!execute(sql)) {
+                   // clear the buffer of reported events
+     	             buffer.clear();
+               }
+            }
+         }
+      }
+   } 
+   closeConnection();	
 }
 
 //_________________________________________________________________________
