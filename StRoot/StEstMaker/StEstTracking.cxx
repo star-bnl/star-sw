@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.8 2002/11/21 23:02:48 caines Exp $
+ * $Id: StEstTracking.cxx,v 1.9 2006/05/16 19:01:31 fisyak Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.9  2006/05/16 19:01:31  fisyak
+ * Add protection that mProjOut.hit[k] is not set
+ *
  * Revision 1.8  2002/11/21 23:02:48  caines
  * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
  *
@@ -123,7 +126,7 @@ int StEstTracker::Tracking(int slay) {
 	  gMessMgr->Info()<<"    mProjOut.dist= "<<mProjOut.dist[k]<<endm;
 	}
 
-	if (mProjOut.hit[k]->CheckAvailability()) {
+	if (mProjOut.hit[k] && mProjOut.hit[k]->CheckAvailability()) {
 	  hitbra[kk] = mProjOut.hit[k];
 	  distbra[kk] = mProjOut.dist[k];
 	  kk++;
