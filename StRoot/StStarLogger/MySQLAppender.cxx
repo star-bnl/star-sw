@@ -105,7 +105,7 @@ String MySQLAppender::getLogStatement(const spi::LoggingEventPtr& event)
 //_________________________________________________________________________
 unsigned int  MySQLAppender::execute(const String& sql)
 {
-	SQLRETURN ret;
+	SQLRETURN ret=1;
 	SQLHDBC con = SQL_NULL_HDBC;
 	SQLHSTMT stmt = SQL_NULL_HSTMT;
    if (getConnection() ) {
@@ -221,7 +221,6 @@ void MySQLAppender::flushBuffer()
 	{
 	  TString expandCommand;
      if (!TaskEntryDone) {
-	  	  {
 			  const LoggingEventPtr& logEvent = *i;
 			  String sql;  
          
@@ -245,11 +244,9 @@ void MySQLAppender::flushBuffer()
            ReplaceVariable(expandCommand, "SUMS_AUTHENTICATED_USER");
            sql = expandCommand.Data();
 		  	  if (!execute(sql))  TaskEntryDone = true;
-        }
      }
 // -- TaksDescription block 
      if (TaskEntryDone) {
-	  	  {
 			  const LoggingEventPtr& logEvent = *i;
 			  String sql;  
 //--- Job description         
@@ -278,26 +275,25 @@ void MySQLAppender::flushBuffer()
            ReplaceVariable(expandCommand, "REQUESTID");
            ReplaceVariable(expandCommand, "PROCESSID");
            sql = expandCommand.Data();
-           TaskEntryDone = true;
-			  execute(sql);
- 		  }
+           if (!execute(sql) ) {
+ 		  
         
 // Job tracking block
-        {
-			   const LoggingEventPtr& logEvent = *i;
-			   String sql = getLogStatement(logEvent);
-            expandCommand = sql.c_str();
+			      const LoggingEventPtr& logEvent = *i;
+			      String sql = getLogStatement(logEvent);
+               expandCommand = sql.c_str();
          
-            ReplaceVariable(expandCommand, "REQUESTID");
-            ReplaceVariable(expandCommand, "PROCESSID");
+               ReplaceVariable(expandCommand, "REQUESTID");
+               ReplaceVariable(expandCommand, "PROCESSID");
          
-            sql = expandCommand.Data();
-			   execute(sql);                  
-		  }
-      }
-	}	
-	// clear the buffer of reported events
-	buffer.clear();
+               sql = expandCommand.Data();
+			      if (!execute(sql)) {
+                  // clear the buffer of reported events
+     	            buffer.clear();
+              }
+           }
+       }
+   }	
 }
 
 //_________________________________________________________________________
