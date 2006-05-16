@@ -108,25 +108,22 @@ unsigned int  MySQLAppender::execute(const String& sql)
 	SQLRETURN ret;
 	SQLHDBC con = SQL_NULL_HDBC;
 	SQLHSTMT stmt = SQL_NULL_HSTMT;
-	{
-		con = getConnection();
-      if (con) {
-         fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
+   if (getConnection() ) {
+      fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
 //          String query = "INSERT INTO StarLogger VALUES (\"";
 //          query += sql;
 //          query += "\");";
 
-         String query = sql; // 
-         if (( ret = mysql_query(con,query.c_str()) )) {
-            printf("QUERY: %s  \n",mysql_error(connection));
-         }  else {
+      String query = sql; // 
+      if (( ret = mysql_query(connection,query.c_str()) )) {
+          printf("QUERY: %s  \n",mysql_error(connection));
+      }  else {
 //       
-//         unsigned int last = mysql_insert_id(con);
+//         unsigned int last = mysql_insert_id(connection);
 //         if (last && !fLastId) fLastId = last;
 //         fprintf(stderr," ID = %d\n",fLastId);
-         }
-         closeConnection();
       }
+      closeConnection();
    }
 	return ret;
 	//tcout << _T("Execute: ") << sql << std::endl;
@@ -136,9 +133,11 @@ unsigned int  MySQLAppender::execute(const String& sql)
 /* The default behavior holds a single connection open until the appender is closed (typically when garbage collected). */
 void MySQLAppender::closeConnection()
 {
-  if (fIsConnectionOpen ) {
-     fprintf(stderr,"\n ++++++++ ----> closing the connection\n");
-     mysql_close(connection); connection = 0;
+  if (fIsConnectionOpen) {
+     fprintf(stderr," ++++++++ ----> closing the connection %p\n", (void *)connection);
+     mysql_close(connection); 
+     if (mysql_errno(connection))   printf("MYSQL close ERROR %s  \n",mysql_error(connection));
+     connection = 0;
      fIsConnectionOpen = false;
   }
 }
@@ -150,9 +149,9 @@ MYSQL *MySQLAppender::getConnection()
    
    if (!fIsConnectionOpen) {
    
-     if ( !(connection= mysql_init(connection)) ) 
-         printf("No init connection \n");
-     else {    
+     if ( !(connection= mysql_init(connection)) ) {
+         printf("MYSQL: No init connection \n");
+     } else {    
 
          const char *host   = "heston.star.bnl.gov";
          const char *user   = "StarLogger";
@@ -160,7 +159,7 @@ MYSQL *MySQLAppender::getConnection()
          const char *db     = "logger";
          unsigned int port  = 3306;
           fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n\n", fIsConnectionOpen);
-         if (!(connection = mysql_real_connect(connection
+         if (!(mysql_real_connect(connection
                      , host
                      , user
                      , passwd
@@ -169,8 +168,9 @@ MYSQL *MySQLAppender::getConnection()
                      , 0,0
                      )))
          {
-                     printf("No connection: %s  \n",mysql_error(connection));
-                     
+             printf("No connection: %s  \n",mysql_error(connection));
+             connection = 0;
+             fIsConnectionOpen = false;
          } else {
             fIsConnectionOpen = true;
          }
