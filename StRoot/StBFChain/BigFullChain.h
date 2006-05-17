@@ -619,7 +619,8 @@ Bfc_st BFC2[] = { // ITTF Chains
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim"   ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"EEfs"   ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+  {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
+                                     "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
   {"genvtx"   ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
