@@ -1,7 +1,10 @@
 //*-- Author : James Dunlop
 // 
-// $Id: StHitFilterMaker.cxx,v 1.4 2004/09/02 19:13:44 fisyak Exp $
+// $Id: StHitFilterMaker.cxx,v 1.5 2006/05/17 23:42:42 fisyak Exp $
 // $Log: StHitFilterMaker.cxx,v $
+// Revision 1.5  2006/05/17 23:42:42  fisyak
+// Use option KeepTpcHit and KeepSvtHit for StHitFilterMaker to keep corresponing hits regardless of track selection
+//
 // Revision 1.4  2004/09/02 19:13:44  fisyak
 // Keep Tpc hits for tracks with Tof Pid Traits
 //
@@ -115,11 +118,12 @@ Int_t StHitFilterMaker::Make(){
     
     gMessMgr->Info() << "StHitFilterMaker::Make(): keeping TPC hits on " <<
       keptTrackNodes.size() << "track nodes " << endm;
-    
+    if (! TESTBIT(m_Mode, kTpcId)) 
     this->removeTpcHitsNotOnTracks(event,keptTrackNodes);
-    this->removeSvtHitsNotOnTracks(event,keptTrackNodes);
-    this->removeBadSvtHits(event);
-    
+    if (! TESTBIT(m_Mode, kSvtId)) {
+      this->removeSvtHitsNotOnTracks(event,keptTrackNodes);
+      this->removeBadSvtHits(event);
+    }
     return kStOK;
 }
 
