@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.500 2006/05/17 22:37:34 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.501 2006/05/17 23:41:50 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -16,7 +16,7 @@
 #include "StChallenger/StChallenger.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
-
+#include "StEnumerations.h"
 #define STAR_LOGGER 1
 
 //_____________________________________________________________________
@@ -736,6 +736,10 @@ Int_t StBFChain::Instantiate()
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;
       }
+      Int_t mode = 0;
+      if (GetOption("KeepTpcHit")) SETBIT(mode, kTpcId);
+      if (GetOption("KeepSvtHit")) SETBIT(mode, kSvtId);
+      mk->SetMode(mode);
     }
     if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
       ProcessLine(Form("((StEventMaker *) %p)->doLoadTpcHits  = kFALSE;", mk));
