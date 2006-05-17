@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.499 2006/05/16 22:47:07 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.500 2006/05/17 22:37:34 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -760,10 +760,9 @@ Int_t StBFChain::Instantiate()
   Error:
     status = kStErr;
     if (i != iFail) {
-      LOG_QA
-	<< " ======================================\n"
-	<< " problem with Instantiation of "         << fBFC[i].Maker << "\n"
-	<< " ======================================" << endm;
+      LOG_QA	<< " ======================================"          << endm;
+	LOG_QA	<< " problem with Instantiation of " << fBFC[i].Maker << endm;
+	LOG_QA	<< " ======================================"          << endm;
       iFail = i;
     }
   }
