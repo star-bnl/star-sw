@@ -744,7 +744,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"MiniMcEvent" ,"","","","",                   "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
   {"MiniMcMk"    ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker",
                                                                  "Creates tree in minimc.root file",kFALSE},
-  {"SvtMatTree"  ,"","","",      "SvtMatchedTree","StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
+  {"SvtMatTree","","","","SvtMatchedTree",
+                                  "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"LAna"        ,"","","in,RY1h,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -758,6 +759,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
+  {"KeepTpcHit"  ,"", "","",                          "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
+  {"KeepSvtHit"  ,"", "","",                          "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"logger"      ,""  ,"",""            ,"","","Use log4cxx package to manage the program messages",kFALSE},
 #ifndef __BFC2__
