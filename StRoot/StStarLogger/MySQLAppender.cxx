@@ -279,7 +279,7 @@ void MySQLAppender::flushBuffer()
         
 // Job tracking block
 			       const LoggingEventPtr& logEvent = *i;
-                if ( ((LoggingEvent *)logEvent)  ==  (void *)0xffffffff) break;
+//                if ( ((LoggingEvent *)logEvent)  ==  (void *)0xffffffff) break;
 			       String sql = getLogStatement(logEvent);
                 expandCommand = sql.c_str();
          
@@ -287,13 +287,14 @@ void MySQLAppender::flushBuffer()
                 ReplaceVariable(expandCommand, "PROCESSID");
          
                 sql = expandCommand.Data();
-			       if (!execute(sql)) {
+			       if (execute(sql)) {
                    // clear the buffer of reported events
-     	             buffer.clear();
+     	             fprintf(stderr," MYSQL ----> skip and lose event \n");
                }
             }
          }
       }
+      buffer.clear();
    } 
    closeConnection();	
 }
