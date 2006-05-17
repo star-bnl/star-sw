@@ -118,7 +118,7 @@ unsigned int  MySQLAppender::execute(const String& sql)
       if (( ret = mysql_query(connection,query.c_str()) )) {
           fprintf(stderr, "MYSQL QUERY: %s  \n",mysql_error(connection));
       }  else {
-//       
+//        
 //         unsigned int last = mysql_insert_id(connection);
 //         if (last && !fLastId) fLastId = last;
 //         fprintf(stderr," ID = %d\n",fLastId);
@@ -279,7 +279,6 @@ void MySQLAppender::flushBuffer()
         
 // Job tracking block
 			       const LoggingEventPtr& logEvent = *i;
-//                if ( ((LoggingEvent *)logEvent)  ==  (void *)0xffffffff) break;
 			       String sql = getLogStatement(logEvent);
                 expandCommand = sql.c_str();
          
