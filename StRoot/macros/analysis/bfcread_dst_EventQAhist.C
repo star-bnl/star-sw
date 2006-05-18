@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.30 2001/05/24 20:10:36 lansdell Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.31 2006/05/18 16:38:04 genevb Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.31  2006/05/18 16:38:04  genevb
+// Introduce StHistUtil::GetRunYear()
+//
 // Revision 1.30  2001/05/24 20:10:36  lansdell
 // changed DB maker SetDateTime option to year_2b
 //
@@ -245,6 +248,7 @@ void bfcread_dst_EventQAhist(
 //    gStyle->SetOptStat(111111);
 
   HU->SetHistsNamesDraw("*","*");
+  HU->GetRunYear(MainFile);
   HU->SetPostScriptFile(psFile);
   HU->SetZones(2,3);
   HU->SetPaperSize();

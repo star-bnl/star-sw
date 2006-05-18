@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.38 2001/04/28 21:45:19 genevb Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.39 2006/05/18 16:38:04 genevb Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.39  2006/05/18 16:38:04  genevb
+// Introduce StHistUtil::GetRunYear()
+//
 // Revision 1.38  2001/04/28 21:45:19  genevb
 // include libs for EMC
 //
@@ -270,6 +273,7 @@ void bfcread_dst_QAhist(
 //    gStyle->SetOptStat(111111);
 
     HU->SetHistsNamesDraw("*","*");
+    HU->GetRunYear(MainFile);
     HU->SetPostScriptFile(psFile);
     HU->SetZones(2,3);
     HU->SetPaperSize();

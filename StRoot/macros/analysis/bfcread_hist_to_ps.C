@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.28 2006/03/28 02:04:42 genevb Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.29 2006/05/18 16:38:04 genevb Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.29  2006/05/18 16:38:04  genevb
+// Introduce StHistUtil::GetRunYear()
+//
 // Revision 1.28  2006/03/28 02:04:42  genevb
 // Allow non-PostScript output
 //
@@ -205,6 +208,7 @@ void bfcread_hist_to_ps(
 //    gStyle->SetOptStat(111111);
 
     HU->SetHistsNamesDraw("*","*");
+    HU->GetRunYear(MainFile);
     HU->SetOutFile(psFile);
     HU->SetZones(ZoneH,ZoneV);
     HU->SetPaperSize();

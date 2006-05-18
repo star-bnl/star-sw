@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.28 2006/04/24 21:23:13 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.29 2006/05/18 16:38:03 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.29  2006/05/18 16:38:03  genevb
+// Introduce StHistUtil::GetRunYear()
+//
 // Revision 2.28  2006/04/24 21:23:13  genevb
 // Fix problem with overlayed hists, and Patch for missing titles
 //
@@ -155,6 +158,7 @@ StHistUtil::StHistUtil(){
   m_CurPrefix = -1;
   m_OutType = "ps"; // postscript output by default
   m_OutMultiPage = kTRUE;
+  m_RunYear = 0;
 
   maxHistCopy = 512;
   newHist = new TH1ptr[maxHistCopy];
@@ -465,6 +469,13 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             hobj->SetAxisRange(lo,hi,"X");
             hobj->SetAxisRange(lo,hi,"Y");
           }
+
+// Limit both x & y ranges for QaVtxFtpcE/WTpcXY histograms for non-year 7 runs
+          if (oName.Contains("VtxFtpc")&&oName.Contains("TpcXY")&&m_RunYear!=7){
+            hobj->GetXaxis()->SetRangeUser(-2.0,2.0);
+            hobj->GetYaxis()->SetRangeUser(-2.0,2.0);
+          }
+
 
           // check dimension of histogram
           chkdim = hobj->GetDimension();
@@ -1621,3 +1632,31 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
 }
 
 //_____________________________________________________________________________
+
+// Method GetRunYear
+//    - determines the run year from the filename
+//    - assumes runnumber is first all digit token after 2 "_" delimiters
+//    - assumes runyear is all but the last 6 digits of runnumber
+
+Int_t StHistUtil::GetRunYear(const Char_t *filename) {
+
+  m_RunYear = 0;
+  TString FileName = filename;
+  TString delim = "_";
+  TObjArray* tokens = FileName.Tokenize(delim);
+  for (int tk=2; tk<tokens->GetEntries(); tk++) {
+    TString& tok = ((TObjString*) (tokens->At(tk)))->String(); 
+    if (tok.IsDigit()) {
+      Ssiz_t loc = tok.Length()-6;
+      if (loc>0) m_RunYear = atoi(tok.Remove(loc).Data());
+      break;
+    }
+  }
+  return m_RunYear;
+
+}
+
+//_____________________________________________________________________________
+
+//_____________________________________________________________________________
+
