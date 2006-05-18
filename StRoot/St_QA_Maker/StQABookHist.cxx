@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.50 2005/02/22 19:38:39 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.51 2006/05/18 16:37:11 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.51  2006/05/18 16:37:11  genevb
+// Change FTPC hist ranges
+//
 // Revision 2.50  2005/02/22 19:38:39  genevb
 // Do PMD hists only for year 4 and later (real data)
 //
@@ -1740,13 +1743,13 @@ void StQABookHist::BookHistVertex(){
 
   m_vtx_FtpcEastTpc_xy = QAH::H2F("QaVtxFtpcETpcXY",
 				  " vertex,prim: x(ftpcE)-x(tpc) vs y(ftpcE)-y(tpc)",
-				  80, -2., 2., 80, -2., 2.);
+				  800, -20., 20., 800, -20., 20.);
   m_vtx_FtpcEastTpc_z  = QAH::H1F("QaVtxFtpcETpcZ",
 				  " vertex,prim: z(ftpcE)-z(tpc)",
 				  100, -10., 10.);
   m_vtx_FtpcWestTpc_xy = QAH::H2F("QaVtxFtpcWTpcXY",
 				  " vertex,prim: x(ftpcW)-x(tpc) vs y(ftpcW)-y(tpc)",
-				  80, -2., 2., 80, -2., 2.);
+				  800, -20., 20., 800, -20., 20.);
   m_vtx_FtpcWestTpc_z  = QAH::H1F("QaVtxFtpcWTpcZ",
 				  " vertex,prim: z(ftpcW)-z(tpc)",
 				  100, -10., 10.);
