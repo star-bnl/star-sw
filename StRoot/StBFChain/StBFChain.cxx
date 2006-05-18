@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.501 2006/05/17 23:41:50 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.502 2006/05/18 13:35:17 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -563,7 +563,7 @@ Int_t StBFChain::Instantiate()
     }
     if (maker == "StTrsMiniMaker" && ! GetOption("TrsToF")) {
       Int_t mode = mk->GetMode();
-      SETBIT(mode,10); // kNoToflight   //10 don't account for particle time of flight
+      mode |= (1 << 10); // kNoToflight   //10 don't account for particle time of flight
       mk->SetMode(mode);
     }
     if (maker == "StTrsMaker") {
@@ -737,8 +737,8 @@ Int_t StBFChain::Instantiate()
 	LOG_QA << "Default hit filtering is ON" << endm;
       }
       Int_t mode = 0;
-      if (GetOption("KeepTpcHit")) SETBIT(mode, kTpcId);
-      if (GetOption("KeepSvtHit")) SETBIT(mode, kSvtId);
+      if (GetOption("KeepTpcHit")) mode |= (1 << kTpcId);
+      if (GetOption("KeepSvtHit")) mode |= (1 << kSvtId);
       mk->SetMode(mode);
     }
     if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
