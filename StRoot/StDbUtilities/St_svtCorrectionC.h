@@ -9,6 +9,7 @@ class St_svtCorrectionC : public TChair {
   virtual ~St_svtCorrectionC() {}
   static Double_t STcheb(Int_t N, Double_t *par, Double_t x);
   Double_t CalcCorrection(Int_t layer, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t u);
+  svtCorrection_st *pCorrection(Int_t layer, Int_t ladder, Int_t wafer, Int_t hybrid);
  private:
   ClassDefChair(St_svtCorrection, svtCorrection_st )
   ClassDef(St_svtCorrectionC,1) //C++ TChair for svtCorrection table class
