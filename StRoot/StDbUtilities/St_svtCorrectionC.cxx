@@ -22,7 +22,7 @@ Double_t St_svtCorrectionC::STcheb(Int_t N, Double_t *par, Double_t x) {// N pol
   return Sum;
 }
 //________________________________________________________________________________
-Double_t St_svtCorrectionC::CalcCorrection(Int_t layer, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t u) {
+svtCorrection_st *St_svtCorrectionC::pCorrection(Int_t layer, Int_t ladder, Int_t wafer, Int_t hybrid) {
   St_svtCorrection *Table =  (St_svtCorrection *) GetThisTable();
   if (! Table) return 0;
   svtCorrection_st *Data =  Table->GetTable();
@@ -43,11 +43,18 @@ Double_t St_svtCorrectionC::CalcCorrection(Int_t layer, Int_t ladder, Int_t wafe
 	  Data[i].ladder == ladder && 
 	  Data[i].wafer  == wafer && 
 	  Data[i].hybrid == hybrid) {
-	p = Data + i;
-	pointers[layer-1][ladder-1][wafer-1][hybrid-1] = p;
+	if (Data[i].Npar > -1) {
+	  p = Data + i;
+	  pointers[layer-1][ladder-1][wafer-1][hybrid-1] = p;
+	}
 	break;
       }
     }
   }
+  return p;
+}
+//________________________________________________________________________________
+Double_t St_svtCorrectionC::CalcCorrection(Int_t layer, Int_t ladder, Int_t wafer, Int_t hybrid, Double_t u) {
+  svtCorrection_st *p = pCorrection(layer, ladder, wafer, hybrid);
   return p ? STcheb(p->Npar, p->param, TMath::Abs(u/3.)) : 0;
 }
