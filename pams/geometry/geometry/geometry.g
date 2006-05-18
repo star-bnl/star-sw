@@ -1,13 +1,5 @@
-* $Id: geometry.g,v 1.114 2005/08/16 00:56:13 potekhin Exp $
+* $Id: geometry.g,v 1.113 2005/07/14 22:13:32 potekhin Exp $
 * $Log: geometry.g,v $
-* Revision 1.114  2005/08/16 00:56:13  potekhin
-* Modified the development tag DEV2005 to configure the
-* geometry for the shielding studies. Added steering for
-* the shield and renamed a variable to avoid naming clash.
-* Also, removed ZCAL from this tag, because it would take
-* time to reconsile its geometry with the shield, and it's
-* not too important for teh shielding study.
-*
 * Revision 1.113  2005/07/14 22:13:32  potekhin
 * In the tag PIX1:
 * Need to actuate a thinner pipe as well as an updated
@@ -506,8 +498,7 @@
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
-              pixl,istb,gemb,fstd,ftro,fgtd,
-              shld
+              pixl,istb,gemb,fstd,ftro,fgtd
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -536,8 +527,7 @@
 
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
-              FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
-              ShldConfig
+              FgtdConfig, TpceConfig, PhmdConfig, ShldConfig, SupoConfig, FtpcConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -556,10 +546,10 @@
 *             FgtdConfig, ! Forward GEM tracker
 *             TpceConfig, ! TPC
 *             PhmdConfig  ! Photon Multiplicity Detector
-*             SvshConfig  ! SVT Shield
+*             ShldConfig  ! SVT Shield
 *             SupoConfig  ! FTPC support
 *             FtpcConfig  ! FTPC
-*             ShldConfig  ! Beam shield
+
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -596,7 +586,6 @@ replace[;ON#{#;] with [
 
    BtofConfig  = 1 ! ctb only
    CalbConfig  = 0 ! really make use of it starting in y2004
-   CaveConfig  = 1 ! can have a modified cave for shielding studies
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
    FgtdConfig  = 0 ! 0=no, >1=version
@@ -609,10 +598,9 @@ replace[;ON#{#;] with [
    PhmdConfig  = 0 ! No Photon multiplicity detectorby default
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE, 3=with pipe support
-   ShldConfig  = 0 ! No Beam Shield by default
+   ShldConfig  = 0 ! SVTT shield version
    SisdConfig  = 0 ! No Silicon strip by default
    SupoConfig  = 0 ! 0 (def) old buggy version, 1=correction
-   SvshConfig  = 0 ! SVTT shield version
    SvttConfig  = 0 ! SVTT version
    TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
    VpddConfig  = 1 ! vpd...
@@ -626,7 +614,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -720,7 +708,7 @@ If LL>1
                      Mf=4;      "tabulated field, with correction "
 
 *                    -- obsoleted 20050324 maxim -- CorrNum = 4;
-                     SvshConfig = 1; "SVT shield"
+                     ShldConfig = 1; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4;
@@ -761,7 +749,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 *                    -- Obsoleted: CorrNum = 4;
-                     SvshConfig = 1; "SVT shield"
+                     ShldConfig = 1; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4;
@@ -817,7 +805,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 *                    -- Obsoleted CorrNum = 4;
-                     SvshConfig = 1; "SVT shield"
+                     ShldConfig = 1; "SVT shield"
                      DensConfig = 1; "gas density correction"
                      SupoConfig = 1; "FTPC Support"
                      SvttConfig = 4;
@@ -1673,12 +1661,6 @@ If LL>1
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
-
-                     CaveConfig = 2; " longer cave with shielding "
-                     ShldConfig = 1; " shield configuration "
-                     shld=on;
-                     zcal=off;
-
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
@@ -1816,7 +1798,6 @@ If LL>1
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
    write(*,*) '******* THESE FLAGS ARE USED TO GENERATE THE GEOMETRY *******'
    write(*,*) '                 BtofConfig: ',BtofConfig
-   write(*,*) '                 CaveConfig: ',CaveConfig
    write(*,*) '                 CalbConfig: ',CalbConfig
    write(*,*) '                 ConeConfig: ',ConeConfig
    write(*,*) '                 DensConfig: ',DensConfig
@@ -1830,7 +1811,7 @@ If LL>1
    write(*,*) '                 PhmdConfig: ',PhmdConfig
    write(*,*) '                 PipeConfig: ',PipeConfig
    write(*,*) '                 PixlConfig: ',PixlConfig
-   write(*,*) '                 SvshConfig: ',SvshConfig
+   write(*,*) '                 ShldConfig: ',ShldConfig
    write(*,*) '                 SisdConfig: ',SisdConfig
    write(*,*) '                 SupoConfig: ',SupoConfig
    write(*,*) '                 SvttConfig: ',SvttConfig
@@ -1840,23 +1821,15 @@ If LL>1
 
 
    if (rich) ItCKOV = 1
-
-   if (cave) then
-      call AgDETP new ('CAVE')
-      call AgDETP add ('CVCF.config=',CaveConfig,1)
-      call cavegeo
-   endif
+   if (cave)        Call cavegeo
 
 * Pipe:
    If (LL>1)        call AgDETP new ('PIPE')
    call AgDETP add ('pipv.pipeConfig=',pipeConfig,2);
    if (pipe)        Call pipegeo
 
-* Upstream and shield
    if (upst)        Call upstgeo
-   if (shld)        Call shldgeo
 
-* --- 
    Call AGSFLAG('SIMU',2)
 
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
@@ -1884,7 +1857,7 @@ If LL>1
     call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
 
 * Optionally, switch to a larger inner shield, AND smaller beampipe support 
-    if(SvshConfig==1) call AgDETP add ('svtg.SupportVer=',2 ,1)
+    if(ShldConfig==1) call AgDETP add ('svtg.SupportVer=',2 ,1)
 
     if(SvttConfig==0) call svttgeo
     if(SvttConfig==1) call svttgeo1

@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.13 2005/08/17 15:07:39 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.12 2005/08/15 13:04:08 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -309,7 +309,7 @@ StPPVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double 
   mdxdz = dxdz;
   mdydz = dydz;
   // weight - not used ;
-  gMessMgr->Info() << "StPPVertexFinder::Using Constrained Vertex" << endm;
+  gMessMgr->Info() << "StPPVertexFinder1::Using Constrained Vertex" << endm;
   gMessMgr->Info() << "x origin = " << mX0 << endm;
   gMessMgr->Info() << "y origin = " << mY0 << endm;
   gMessMgr->Info() << "slope dxdz = " << mdxdz << endm;
@@ -437,10 +437,10 @@ StPPVertexFinder::fit(StEvent* event) {
   bemcList->doHisto();
   eemcList->doHisto();
 
-  gMessMgr->Info() << "StPPVertexFinder::fit() nEve="<<mTotEve<<" , "<<nmAny<<" tracks with good DCA,survived matching CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
+  gMessMgr->Info() << "StPPVertexFinder1::fit() nEve="<<mTotEve<<" , "<<nmAny<<" tracks with good DCA,survived matching CTB="<<kCtb<<" BEMC="<<kBemc<<" EEMC="<<kEemc<<endm;
 
   if(nmAny<mMinMatchTr){
-    gMessMgr->Info() << "StPPVertexFinder::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
+    gMessMgr->Info() << "StPPVertexFinder1::fit() nEve="<<mTotEve<<" Quit, to few matched tracks"<<endm;
     printInfo();
     return 0;
   }
@@ -464,7 +464,7 @@ StPPVertexFinder::fit(StEvent* event) {
     mVertexData->push_back(V);
   }
 
-  gMessMgr->Info() << "StPPVertexFinder::fit(totEve="<<mTotEve<<") "<<mVertexData->size()<<" vertices found\n" << endm;
+  gMessMgr->Info() << "StPPVertexFinder1::fit(totEve="<<mTotEve<<") "<<mVertexData->size()<<" vertices found\n" << endm;
   
   if(mVertexData->size()>0)  hA[0]->Fill(7);
   
@@ -497,7 +497,7 @@ StPPVertexFinder::buildLikelihood(){
   float dzMax2=mMaxZradius*mMaxZradius;
 
   int nt=mTrackData->size();
-  printf("StPPVertexFinder::buildLikelihood() pool of nTracks=%d\n",nt);
+  printf("StPPVertexFinder1::buildLikelihood() pool of nTracks=%d\n",nt);
   if(nt<=0) return false;
 
   int n1=0;
@@ -601,7 +601,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   // returns true if accepted
 
   int nt=mTrackData->size();
-  gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<endm;
+  gMessMgr->Info() << "StPPVertexFinder1::evalVertex Vid="<<V.id<<endm;
   int n1=0;
   int i;
   
@@ -639,7 +639,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
   if(!validVerex) { // discrad vertex
     //no trigTracks in this vertex, discard tracks
     //V.print(cout);
-    gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<" rejected"<<endm;
+    gMessMgr->Info() << "StPPVertexFinder1::evalVertex Vid="<<V.id<<" rejected"<<endm;
     for(i=0;i<nt;i++) {
       TrackData *t=&mTrackData->at(i);
       if(t->vertexID!=V.id) continue;
@@ -648,7 +648,7 @@ StPPVertexFinder::evalVertex(VertexData &V) { // and tag used tracks
     return false;
   }
   
-  gMessMgr->Info() << "StPPVertexFinder::evalVertex Vid="<<V.id<<" accepted, nAnyMatch="<<V.nAnyMatch<<" nAnyVeto="<<V.nAnyVeto<<endm;
+  gMessMgr->Info() << "StPPVertexFinder1::evalVertex Vid="<<V.id<<" accepted, nAnyMatch="<<V.nAnyMatch<<" nAnyVeto="<<V.nAnyVeto<<endm;
   return true;
 }
 
@@ -1046,9 +1046,6 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
- * Revision 1.13  2005/08/17 15:07:39  balewski
- * cleanup, irrelevant for pp200 production
- *
  * Revision 1.12  2005/08/15 13:04:08  balewski
  * Z-range +/- 250 cm
  *

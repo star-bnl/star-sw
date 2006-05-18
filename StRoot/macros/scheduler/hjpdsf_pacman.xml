@@ -64,7 +64,7 @@
     cd pacman-3.13-pre-release-Jul06
     source setup.csh
     cd ..
-    pacman  -allow unsupported-platforms -trust-all-caches -get gsiftp://stargrid04.rcf.bnl.gov//afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES
+    pacman -trust-all-caches -get gsiftp://stargrid04.rcf.bnl.gov//afs/rhic.bnl.gov/star/doc/www/comp/ofl/pacman/caches:STARGRIDCACHES
     pacman -trust-all-caches -get STARGRID:hijing
     pacman -trust-all-caches -get STARGRID:starlib
     pacman -trust-all-caches -get STARGRID:starsim
@@ -182,7 +182,6 @@ STAFKUMAC
    ]]>
    </command>
     <stdout URL="file:./$JOBID.out" />
-    <stderr URL="file:./$JOBID.err" />
 <!---
     <output fromScratch="$ZEBRAOUTPUT" >
        <copy ref="pyResult" URI="file:$packageDirectory/testpyth.$PROCESSID.fz" />
