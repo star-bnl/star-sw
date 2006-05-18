@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.23 2005/08/17 21:57:29 perev Exp $
+ * $Id: StEnumerations.h,v 2.31 2006/05/10 15:13:17 jeromel Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,30 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.31  2006/05/10 15:13:17  jeromel
+ * Additional enum
+ *
+ * Revision 2.30  2006/05/04 19:05:05  ullrich
+ * Added StL2TriggerResultType.
+ *
+ * Revision 2.29  2006/04/26 14:41:22  jeromel
+ * doxygenized
+ *
+ * Revision 2.28  2006/04/25 23:20:31  ullrich
+ * Added StPrimaryVertexOrder.
+ *
+ * Revision 2.27  2006/03/22 20:57:19  ullrich
+ * Added StL2AlgorithmId enumeration.
+ *
+ * Revision 2.26  2006/03/12 17:00:15  jeromel
+ * Added ppvNoCtbVertexFinder to hopefully clarify analysis
+ *
+ * Revision 2.25  2006/01/19 22:30:05  jeromel
+ * kMaxId -> kMaxDetectorId
+ *
+ * Revision 2.24  2006/01/19 21:51:26  ullrich
+ * Added new RnD detectors.
+ *
  * Revision 2.23  2005/08/17 21:57:29  perev
  * kMaxId == max number of detectors+1
  *
@@ -144,7 +168,12 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
                    kSsdSvtId    = kSsdSvtIdentifier,
                    kPhmdCpvId   = kPhmdCpvIdentifier,
                    kPhmdId      = kPhmdIdentifier,
-		   kMaxId};
+	         kHftId = kHftIdentifier,
+	         kIstId = kIstIdentifier,
+	         kIgtId = kIgtIdentifier,
+	         kFstId = kFstIdentifier,
+	         kFgtId = kFgtIdentifier,
+	         kMaxDetectorId};
 
 /*!
  * \enum StTrackType
@@ -283,6 +312,36 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         pplmvVertexFinder,
                         egrVertexFinder,
                         minuitVertexFinder,
-                        ppvVertexFinder};
+                        ppvVertexFinder,
+                        ppvNoCtbVertexFinder,
+			mcEventVertexFFinder};
+
+
+/*!
+ * \enum StL2AlgorithmId
+ */
+enum StL2AlgorithmId { l2Diagnostic = 0,
+                       l2EmcCheck,
+                       l2Jpsi,
+                       l2Upsilon,
+                       l2Dijet,
+                       l2EmcPedestal,
+                       l2Pi0Gamma};
+
+/*!
+ * \enum StPrimaryVertexOrder
+ */
+enum StPrimaryVertexOrder { 
+  orderByNumberOfDaughters = 0, /**< enum value for sorting based on NumberOfDaughters (default)  */
+  orderByRanking                /**< enum value to switch ordering based on assigned rank         */
+};
+
+enum StL2TriggerResultType { l2Trg2006BEMCGammaPi = 0,
+		         l2Trg2006BEMCGammaPiRandom,
+		         l2Trg2006EEMCGammaPi,
+		         l2Trg2006EEMCGammaPiRandom,
+		         l2Trg2006MonoJet,
+		         l2Trg2006DiJet,
+		         l2Trg2006RandomJet};
 
 #endif

@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.14 2005/08/11 13:51:39 lmartin Exp $
+// $Id: StSsdPointMaker.h,v 1.15 2005/09/26 15:49:55 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.15  2005/09/26 15:49:55  bouchet
+// adding a method to the point maker to check which ssdStripCalib is picked
+//
 // Revision 1.14  2005/08/11 13:51:39  lmartin
 // PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
 //
@@ -109,6 +112,7 @@ class ssdConfiguration_st;
 class StRunInfo;
 class StEventInfo;
 
+
 class StSsdPointMaker : public StMaker {
  private:
   StDbManager* mDbMgr;           //!
@@ -148,6 +152,8 @@ class StSsdPointMaker : public StMaker {
   void PrintClusterDetails(StSsdBarrel *mySsd, int mywafer); //!
   void PrintPointDetails(StSsdBarrel *mySsd, int mywafer); //!
   void PrintPackageDetails(StSsdBarrel *mySsd, int mywafer); //!
+  void Read_Strip(St_ssdStripCalib *strip_calib);
+  
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -202,7 +208,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.14 2005/08/11 13:51:39 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.15 2005/09/26 15:49:55 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

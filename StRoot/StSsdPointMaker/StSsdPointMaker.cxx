@@ -1,6 +1,12 @@
-// $Id: StSsdPointMaker.cxx,v 1.21 2005/08/11 13:51:39 lmartin Exp $
+// $Id: StSsdPointMaker.cxx,v 1.23 2005/09/30 14:28:30 lmartin Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.23  2005/09/30 14:28:30  lmartin
+// add a 0 to myTime if GetTime()<100000
+//
+// Revision 1.22  2005/09/26 15:49:54  bouchet
+// adding a method to the point maker to check which ssdStripCalib is picked
+//
 // Revision 1.21  2005/08/11 13:51:39  lmartin
 // PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
 //
@@ -102,6 +108,8 @@
 #include "tables/St_ssdLaddersPosition_Table.h"
 #include "tables/St_ssdSectorsPosition_Table.h"
 #include "tables/St_ssdBarrelPosition_Table.h"
+
+#include "tables/St_ssdStripCalib_Table.h"
 
 ClassImp(StSsdPointMaker)
 //_____________________________________________________________________________
@@ -328,8 +336,10 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
       if (!m_noise2) 
         gMessMgr->Error() << "No  access to ssdStripCalib - will use the default noise and pedestal values" << endm;
-
-
+      if(m_noise2){
+      gMessMgr->Warning("StSsdPointMaker: looking for a pedestal/noise tables");
+      Read_Strip(m_noise2); 
+      }
       // Get once the information for configuration, wafersposition and dimensions
       St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration");
       config  = (ssdConfiguration_st*) configTable->GetTable() ;
@@ -388,11 +398,14 @@ Int_t StSsdPointMaker::Make()
   char* myLabel  = new char[100];
   char* myTime = new char[100]; 
   char* myDate = new char[100];
-
-  sprintf(myTime,"%d",GetTime());
+  
+  if (GetTime()>99999)
+    sprintf(myTime,"%d",GetTime());
+  else
+    sprintf(myTime,"0%d",GetTime());
   sprintf(myDate,"%d%s",GetDate(),".");
   sprintf(myLabel,"%s%s",myDate,myTime);
-  
+
  // two different tables can exist (physics data or pedestal data)
   St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
   St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");
@@ -453,7 +466,7 @@ Int_t StSsdPointMaker::Make()
       mySsd->sortListCluster();
       PrintClusterSummary(mySsd);
       //      PrintStripDetails(mySsd,7406);
-      //      PrintClusterDetails(mySsd,7406);
+      //      PrintClusterDetails(mySsd,7406); 
       makeScfCtrlHistograms(mySsd);
       //debugUnPeu(mySsd);
       int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
@@ -1106,6 +1119,36 @@ void StSsdPointMaker::PrintInfo()
 {
   if (Debug()) StMaker::PrintInfo();
 }
+//_____________________________________________________________________________
+void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
+{
+    ssdStripCalib_st *noise = strip_calib->GetTable();
+
+  int  mSsdLayer = 7;
+
+  int idWaf  = 0;
+  int iWaf   = 0;
+  int iLad   = 0;
+  int nStrip = 0;
+  int iSide  = 0;
+  for (int i = 0 ; i < strip_calib->GetNRows(); i++)
+    {
+      nStrip  = (int)(noise[i].id/100000.);
+      idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+      iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+      //mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
+             if (iLad==11 && iWaf==8 && nStrip <10) 
+      	cout<<"iLad,idWaf,nStrip,iSide,pedestal,rms = "<<iLad
+      	    <<" "<<idWaf
+      	    <<" "<<nStrip
+      	    <<" "<<iSide
+	    <<" "<<(float)(noise[i].pedestals)
+      	    <<" "<<(float)(noise[i].rms)<<endl;
+    }
+}
+
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Finish() {
     if (Debug()) gMessMgr->Debug() << "In StSsdPointMaker::Finish() ... "

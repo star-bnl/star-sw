@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.28 2005/08/09 15:22:41 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.29 2005/10/06 19:36:38 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.29  2005/10/06 19:36:38  fisyak
+ * Clean up
+ *
  * Revision 2.28  2005/08/09 15:22:41  perev
  * Add new factory for Node extention
  *
@@ -198,7 +201,7 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _trackFinder;
   delete _trackFitter;
   delete _trackMerger;
-};
+}
 
 Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
 {

@@ -3,6 +3,12 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.154  2005/10/06 20:38:46  fisyak
+// Clean up
+//
+// Revision 1.153  2005/09/28 21:46:36  fisyak
+// Persistent StMcEvent
+//
 // Revision 1.152  2005/08/09 15:23:18  perev
 // Add new factory for Node extention
 //
@@ -193,7 +199,7 @@
 #include "PhysicalConstants.h"
 #include "StDetectorId.h"
 #include "StEventTypes.h"
-#include "StMcEventMaker/StMcEventMaker.h"
+#include "StMcEvent.hh"
 #include "Sti/Base/EditableFilter.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackContainer.h"
@@ -220,8 +226,6 @@
 #include "StiMaker.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "Sti/StiTrackingPlots.h"
-#include "Sti/RadLengthPlots.h"
 #include "Sti/StiTrackingParameters.h"
 #include "Sti/StiKalmanTrackFinderParameters.h"
 #include "Sti/StiKalmanTrackFitterParameters.h"
@@ -250,11 +254,6 @@ ClassImp(StiMaker)
     _eventFiller(0),
     _trackContainer(0),
     _vertexFinder(0),
-    mMcEventMaker(0),
-    mAssociationMaker(0),
-    _recPlotter(0),
-    _mcPlotter(0),
-    _radLength(0),
     _residualCalculator(0),
     _loaderTrackFilter(0),
     _loaderHitFilter(0)
@@ -282,28 +281,8 @@ Int_t StiMaker::Finish()
 {
   if (_pars->doPlots)
     {
-      //TCanvas * canvas = new TCanvas();
-      if (_radLength)
-	{
-	  _radLength->write("StiHistograms.root");
-	  //HistoDocument histoDocumentRec("html/radLength","RadLength","Radiation Length Plots",canvas);
-	  //histoDocumentRec.generateWebPage(_radLength);
-	}
-      if (_recPlotter) 
-	{
-	  _recPlotter->write("StiHistograms.root","UPDATE");
-	  //HistoDocument histoDocumentRec("html/rec","ReconstructedData","Reconstructed Data",canvas);
-	  //histoDocumentRec.generateWebPage(_recPlotter);
-	}
-      if (_mcPlotter)
-	{
-	  _mcPlotter->write("StiHistograms.root","UPDATE");
-	  //HistoDocument histoDocumentMc("html/mc","McData","McData",canvas);
-	  //histoDocumentMc.generateWebPage(_mcPlotter);
-	}
       if (_residualCalculator)
-	_residualCalculator->write("StiHistograms.root", "UPDATE"); 
-      //delete canvas;
+       _residualCalculator->write("StiHistograms.root", "UPDATE"); 
     }
   StiTimer::Print();
   StiTimer::Clear();
@@ -419,16 +398,10 @@ Int_t StiMaker::InitRun(int run)
 					_eventDisplay->initialize();
 					_eventDisplay->draw();
 				}
-      _pars->doPlots = false;
-      if (_pars->doPlots)
-	{
-	  _recPlotter = new StiTrackingPlots("R","Reconstructed");
-	  if (_pars->doSimulation) _mcPlotter = new StiTrackingPlots("MC","MC");
-	  _radLength = new RadLengthPlots("R","Radiation Length Plots");
-	}
       _initialized=true;
       cout <<"StiMaker::InitRun() -I- Initialization Segment Completed"<<endl;
     }
+  
   return StMaker::InitRun(run);
 }
 
@@ -460,16 +433,9 @@ Int_t StiMaker::Make()
 
   if (_toolkit->isMcEnabled() )
     {
-      if (!mMcEventMaker)
-	mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("StMcEvent"));
-      if (mMcEventMaker)
-	{
-	  mcEvent= mMcEventMaker->currentMcEvent();
-	  if (!mcEvent) 
-	    throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
-	}
-      else
-	throw runtime_error("StiMaker::Make() -E- mMcEventMaker == 0");
+      mcEvent= (StMcEvent *) GetDataSet("StMcEvent");
+      if (!mcEvent) 
+	throw runtime_error("StiMaker::Make() -E- mcEvent == 0");
     }
   else 
     mcEvent = 0;
@@ -518,9 +484,6 @@ Int_t StiMaker::Make()
 	    }
 	}
       cout << "StiMaker::Make() -I- Calling standard plots fillers" << endl;
-      if (_recPlotter) _recPlotter->fill(_toolkit->getTrackContainer(),vertex);
-      if (_mcPlotter ) _mcPlotter->fill(_toolkit->getMcTrackContainer(),vertex);  
-      if (_radLength)  _radLength->fill(_toolkit->getTrackContainer());
       if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
   cout<< "StiMaker::Make() -I- Done"<<endl;
