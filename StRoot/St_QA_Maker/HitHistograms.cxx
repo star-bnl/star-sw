@@ -9,6 +9,7 @@
 #include "StMultiH1F.h"
 #include "HitHistograms.h"
 #include "StMaker.h"
+#include "StMessMgr.h"
 
 // StEvent
 #include "StEventTypes.h"
@@ -67,6 +68,7 @@ void HitHistograms::buildHistMaps()
 //_____________________________________________________________________________
 void HitHistograms::fillHistograms()
 {
+    static int first_hundred=100;
     for (vector<StTpcHit*>::const_iterator it=m_tpcHitVec.begin(); it!=m_tpcHitVec.end(); it++) {
 	double ds = dx(*it);
 	//Keep only hit.flag()==0 points
@@ -79,6 +81,8 @@ void HitHistograms::fillHistograms()
 		m_outerSectorDeDxHist->Fill( (*it)->charge()/ds );
 		m_allSectorsDeDxHist->Fill((*it)->charge()/ds,0.);
 	    }
+            if (first_hundred-- > 0)
+              gMessMgr->Info(Form("HitHist %d %f %f\n",(*it)->padrow(),(*it)->charge(),ds));
 	}
     }
     return;
@@ -93,8 +97,11 @@ TH1F* HitHistograms::outerSectorDeDxHist() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.7 2003/09/19 22:58:10 genevb Exp $
+// $Id: HitHistograms.cxx,v 1.8 2006/05/18 03:27:41 genevb Exp $
 // $Log: HitHistograms.cxx,v $
+// Revision 1.8  2006/05/18 03:27:41  genevb
+// Patch to observe fast offline issues
+//
 // Revision 1.7  2003/09/19 22:58:10  genevb
 // Initialize pointers to zero, some doxygenization
 //
