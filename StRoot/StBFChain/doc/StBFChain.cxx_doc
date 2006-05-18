@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.22 2006/05/17 13:59:20 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx_doc,v 1.23 2006/05/18 13:36:13 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -16,7 +16,7 @@
 #include "StChallenger/StChallenger.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
-
+#include "StEnumerations.h"
 #define STAR_LOGGER 1
 
 //_____________________________________________________________________
@@ -556,7 +556,8 @@ Bfc_st BFC[] = {
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim" ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"EEfs" ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+  {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
+                                     "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
   {"genvtx" ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
@@ -680,7 +681,8 @@ Bfc_st BFC[] = {
   {"MiniMcEvent" ,"","","","", "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
   {"MiniMcMk" ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker",
                                                                  "Creates tree in minimc.root file",kFALSE},
-  {"SvtMatTree" ,"","","", "SvtMatchedTree","StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
+  {"SvtMatTree","","","","SvtMatchedTree",
+                                  "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"LAna" ,"","","in,RY1h,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -694,6 +696,8 @@ Bfc_st BFC[] = {
   {"EventQA","EventQA","","QUtils,Event","StEventQAMaker" ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC" ,"CosmicsQA","globT","" ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"HitFilt" ,"", "","", "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
+  {"KeepTpcHit" ,"", "","", "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
+  {"KeepSvtHit" ,"", "","", "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"Tree" ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"logger" ,"" ,"","" ,"","","Use log4cxx package to manage the program messages",kFALSE},
 
@@ -1281,7 +1285,8 @@ Bfc_st BFC2[] = {
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
   {"emcSim" ,"","emcY2","emc_T,EmcUtil,StMcEvent","StEmcSimulatorMaker","StEmcSimulatorMaker",
                                                                            "New simulator for BEMC",kFALSE},
-  {"EEfs" ,"eefs","","db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
+  {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
+                                     "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
   {"genvtx" ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
@@ -1405,7 +1410,8 @@ Bfc_st BFC2[] = {
   {"MiniMcEvent" ,"","","","", "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
   {"MiniMcMk" ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker",
                                                                  "Creates tree in minimc.root file",kFALSE},
-  {"SvtMatTree" ,"","","", "SvtMatchedTree","StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
+  {"SvtMatTree","","","","SvtMatchedTree",
+                                  "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"LAna" ,"","","in,RY1h,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -1419,6 +1425,8 @@ Bfc_st BFC2[] = {
   {"EventQA","EventQA","","QUtils,Event","StEventQAMaker" ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC" ,"CosmicsQA","globT","" ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
   {"HitFilt" ,"", "","", "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
+  {"KeepTpcHit" ,"", "","", "","","Keep all TPC hits in StHitFilterMaker",kFALSE},
+  {"KeepSvtHit" ,"", "","", "","","Keep all SVT hits in StHitFilterMaker",kFALSE},
   {"Tree" ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"logger" ,"" ,"","" ,"","","Use log4cxx package to manage the program messages",kFALSE},
 
@@ -2130,6 +2138,10 @@ Int_t StBFChain::Instantiate()
       } else {
 	LOG_QA << "Default hit filtering is ON" << endm;
       }
+      Int_t mode = 0;
+      if (GetOption("KeepTpcHit")) SETBIT(mode, kTpcId);
+      if (GetOption("KeepSvtHit")) SETBIT(mode, kSvtId);
+      mk->SetMode(mode);
     }
     if (GetOption("dst") && GetOption("NoHits") && maker == "StEventMaker") {
       ProcessLine(Form("((StEventMaker *) %p)->doLoadTpcHits  = kFALSE;", mk));
@@ -2154,10 +2166,9 @@ Int_t StBFChain::Instantiate()
   Error:
     status = kStErr;
     if (i != iFail) {
-      LOG_QA
-	<< " ======================================\n"
-	<< " problem with Instantiation of "         << fBFC[i].Maker << "\n"
-	<< " ======================================" << endm;
+      LOG_QA	<< " ======================================"          << endm;
+	LOG_QA	<< " problem with Instantiation of " << fBFC[i].Maker << endm;
+	LOG_QA	<< " ======================================"          << endm;
       iFail = i;
     }
   }
