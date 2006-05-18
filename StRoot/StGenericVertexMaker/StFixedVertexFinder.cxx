@@ -1,9 +1,8 @@
 /*
  *  StFixedVertexFinder.cxx
- *  
+ *  $Id: StFixedVertexFinder.cxx,v 1.4 2006/05/18 19:14:24 lbarnby Exp $
  *
- *  Created by Lee Barnby on 02/05/2006.
- *  Copyright 2006 Univerity of Birmingham. All rights reserved.
+ *  Author Lee Barnby (University of Birmingham) May 2006.
  *
  */
 
@@ -30,7 +29,7 @@ int StFixedVertexFinder::fit(StEvent* event)
   Float_t cov[6] = {0.0,0.0,0.0,0.0,0.0,0.0}; // All errors are zero
 
   if (mMode == 0){
-    // Really the default whihc takes the SetPos() TBI
+    // Really the default which takes the SetPos() TBI
     LOG_DEBUG << "StFixedVertexFinder::fit() fixing a vertex" << endm;
     StThreeVectorD pos(mFixedX,mFixedY,mFixedZ);
     prim.setPosition(pos);
@@ -61,7 +60,7 @@ int StFixedVertexFinder::fit(StEvent* event)
   prim.setCovariantMatrix(cov);
   prim.setFlag(1);                    // So that we know its the primary vertex
   prim.setRanking(-5);                // Have to have something
-  prim.setVertexFinderId(VFId);       // Unless/until this 'finder' gets its own id
+  prim.setVertexFinderId(VFId);       // Id depends on MC or fixed position used
   addVertex(&prim);
 
   return size();
@@ -74,4 +73,18 @@ void StFixedVertexFinder::printInfo(ostream& os)const{
 
 void StFixedVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight){
     LOG_WARN << "StFixedVertexFinder::UseVertexConstraint() - vertex beam constraint NOT implemented in context of fixed vertex finder" << endm;
+
 }
+
+void StFixedVertexFinder::SetVertexPosition(double x, double y, double z){
+    mFixedX=x;
+    mFixedY=y;
+    mFixedZ=z;
+}
+
+/*
+ * $Log: StFixedVertexFinder.cxx,v $
+ * Revision 1.4  2006/05/18 19:14:24  lbarnby
+ * Added SetVertexPosition function. Tidied up comments/docs
+ *
+ */

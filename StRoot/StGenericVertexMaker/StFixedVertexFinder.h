@@ -3,7 +3,7 @@
  *  \author Lee Barnby (University of Birmingham) May 2006.
  *  \brief StGenericVertexFinder implementation for fixing vertex.
  *
- *  $Id: StFixedVertexFinder.h,v 1.2 2006/05/10 14:35:00 jeromel Exp $
+ *  $Id: StFixedVertexFinder.h,v 1.3 2006/05/18 19:14:24 lbarnby Exp $
  *
  *  Modified J.Lauret for MC vertex
  *
@@ -36,18 +36,29 @@ public:
     // mandatory implementations
     int fit(StEvent*);
     void printInfo(ostream& = cout)const;
+    /**
+     * Vertex constraint not useful for this VF but is part of base class so implementation just
+     * displays warning to this effect
+     */
     void UseVertexConstraint(double x0, double y0, double dxdz, double dydz, double weight);
+
+    
+    // member not from base class
+    void SetVertexPosition(double x, double y, double z);
     
 private:
-    Double_t mFixedX;
-    Double_t mFixedY;
-    Double_t mFixedZ;
+    Double_t mFixedX; //!< X co-ordinate of vertex
+    Double_t mFixedY; //!< Y co-ordinate of vertex
+    Double_t mFixedZ; //!< Z co-ordinate of vertex
 
 };
 
 /***************************************************************************
 *
 * $Log: StFixedVertexFinder.h,v $
+* Revision 1.3  2006/05/18 19:14:24  lbarnby
+* Added SetVertexPosition function. Tidied up comments/docs
+*
 * Revision 1.2  2006/05/10 14:35:00  jeromel
 * Changed VertexId to new enum, added doxygen doc
 *
