@@ -1,5 +1,8 @@
-// $Id: StHistUtil.h,v 2.4 2006/03/28 21:35:32 genevb Exp $
+// $Id: StHistUtil.h,v 2.5 2006/05/18 16:38:03 genevb Exp $
 // $Log: StHistUtil.h,v $
+// Revision 2.5  2006/05/18 16:38:03  genevb
+// Introduce StHistUtil::GetRunYear()
+//
 // Revision 2.4  2006/03/28 21:35:32  genevb
 // Single page output capability for eps,jpg,png,gif,tiff,etc. [see TPad::Print()]
 //
@@ -70,6 +73,7 @@ class StHistUtil {
   Int_t   maxHistCopy;  //! size of array of new histograms
   TH1**   newHist;      //! array of new histograms that other will be copied into
   Bool_t  debug;
+  Int_t   m_RunYear;    // Run year
 
 
  protected:
@@ -107,6 +111,8 @@ class StHistUtil {
   virtual Int_t   Overlay1D(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
   virtual Int_t   Overlay2D(Char_t *dirName,Char_t *inHist1,Char_t *inHist2);
 
+  virtual Int_t   GetRunYear(const Char_t *filename);
+
 // Inline methods
   void SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
   void SetZones(Int_t columns=2, Int_t rows=3);   
@@ -125,7 +131,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.4 2006/03/28 21:35:32 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 2.5 2006/05/18 16:38:03 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };

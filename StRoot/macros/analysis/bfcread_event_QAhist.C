@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.13 2005/08/31 15:03:09 fisyak Exp $
+// $Id: bfcread_event_QAhist.C,v 1.14 2006/05/18 16:38:04 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.14  2006/05/18 16:38:04  genevb
+// Introduce StHistUtil::GetRunYear()
+//
 // Revision 1.13  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -204,6 +207,7 @@ void bfcread_event_QAhist(
 //    gStyle->SetOptStat(111111);
 
   HU->SetHistsNamesDraw("*","*");
+  HU->GetRunYear(MainFile);
   HU->SetPostScriptFile(psFile);
   HU->SetZones(ZoneH,ZoneV);
   HU->SetPaperSize();
