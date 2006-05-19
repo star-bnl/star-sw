@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.22 2005/12/15 03:14:27 jeromel Exp $
+ * $Id: MysqlDb.h,v 1.23 2006/05/19 23:03:48 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.23  2006/05/19 23:03:48  deph
+ * Adding basic load balancing.  Two separate pools; db and dbx; within each pool the node with least processes (mysql-threads) wins.
+ * This now by-passes DNS Round Robin and connects directely to the "winning" node.
+ *
  * Revision 1.22  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
  *
@@ -129,6 +133,9 @@ typedef  int MYSQL_FIELD;
 #include "StDbBuffer.h"
 #include "StDbLogger.hh"
 
+#include <vector.h>
+#include <string.h>
+
 #ifdef HPUX
 #define freeze(i) str()
 #endif
@@ -144,7 +151,7 @@ private:
   MYSQL_RES * mRes;
   MYSQL_ROW mRow;
   char mSep;
-  
+
 public: 
   MysqlResult() {mRes=0;};
   //  virtual char float* NextRowBin();
@@ -204,6 +211,11 @@ private:
   bool  isBlob[200];
   bool  isBinary[200];
   bool  isSpecialType[200];
+
+  std::vector<std::string>::iterator RecommendedServer(std::vector<std::string>* ListToUse, char* socket, int port);
+  std::vector<std::string> ServerList_db;
+  std::vector<std::string> ServerList_dbx;
+  void initServerLists();
 
 
 public:
