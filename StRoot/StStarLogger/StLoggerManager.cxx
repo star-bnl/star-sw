@@ -56,7 +56,7 @@ const char *StLoggerManager::fgLevels = "FEWIDQ";
 //______________________________________________________________________________
 static void Log4cxx4RootErrorHandler(Int_t level, Bool_t abort, const char *location, const char *msg)
 {
-   // This is derived fron  the ROO "default rror handler function" TError.cxx
+   // This is derived from  the ROOT "default error handler function" TError.cxx
    // The default error handler function. It prints the message on stderr and
    // if abort is set it aborts the application.
 
@@ -462,7 +462,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.18 2005/12/20 20:51:15 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.19 2006/05/19 21:42:30 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -793,8 +793,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.18 2005/12/20 20:51:15 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.19 2006/05/19 21:42:30 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.19  2006/05/19 21:42:30  fine
+// remove the debug print outs
+//
 // Revision 1.18  2005/12/20 20:51:15  fine
 // fix typo
 //
