@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.32 2006/04/26 20:08:39 deph Exp $
+ * $Id: MysqlDb.cc,v 1.33 2006/05/19 23:03:48 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.32  2006/04/26 20:08:39  deph
- * Added assert for no db connection.
+ * Revision 1.33  2006/05/19 23:03:48  deph
+ * Adding basic load balancing.  Two separate pools; db and dbx; within each pool the node with least processes (mysql-threads) wins.
+ * This now by-passes DNS Round Robin and connects directely to the "winning" node.
  *
  * Revision 1.31  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
@@ -196,6 +197,8 @@
 
 
 static const char* binaryMessage = {"Cannot Print Query with Binary data"};
+static MYSQL *conn;
+
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -210,6 +213,7 @@ mQueryLast=0;
 mRes= new MysqlResult;
  for(int i=0;i<200;i++)cnames[i]=0;
 
+ initServerLists();
 }
 //////////////////////////////////////////////////////////////////////
 
@@ -226,8 +230,66 @@ if(mdbName)  delete [] mdbName;
  if(mdbServerVersion) delete [] mdbServerVersion;
 
 }
-
 //////////////////////////////////////////////////////////////////////// 
+void MysqlDb::initServerLists()
+{
+  ServerList_db.push_back("db02.star.bnl.gov");
+  ServerList_db.push_back("db03.star.bnl.gov");
+  ServerList_db.push_back("db04.star.bnl.gov");
+  ServerList_db.push_back("db05.star.bnl.gov");
+
+  ServerList_dbx.push_back("db06.star.bnl.gov");
+  ServerList_dbx.push_back("db07.star.bnl.gov");
+  ServerList_dbx.push_back("db08.star.bnl.gov");
+}
+//////////////////////////////////////////////////////////////////////// 
+vector<string>::iterator MysqlDb::RecommendedServer(vector<string>* MyServerList, char* sock, int port)
+{
+  vector<string>::iterator rtrn = MyServerList->begin();
+  
+  std::vector<std::string>::iterator I = MyServerList->begin();
+  
+  unsigned long nproc_min = ULONG_MAX;
+  while (I!=MyServerList->end())
+    {
+      conn = mysql_init(0);
+      
+      if (conn==0)
+	{
+	  cout << "StDbManagerImpl::RecommendedServer() mysql_init(0) failed \n";
+	  return rtrn;
+	}
+      
+      if (mysql_real_connect(conn,(*I).c_str(), "loadbalancer","lbdb","test",port,sock,0)==NULL)
+	{
+	  cout << "StDbManagerImpl::RecommendedServer() mysql_real_connect "<< conn << " "<<(*I).c_str()<<
+	    " "<<port<<" "<<sock<<" failed\n";
+	  mysql_close(conn);
+	  return rtrn;
+	}
+      
+      if (mysql_query(conn, "show processlist") != 0 )
+	{
+	  cout <<"StDbManagerImpl::RecommendedServer() show processlist failed\n";
+	  return rtrn;
+	}
+      
+      MYSQL_RES *res_set = mysql_store_result(conn);
+      unsigned long nproc = mysql_num_rows(res_set);
+      //cout <<" Server "<<(*I).c_str()<< " "<< nproc << " processes \n";
+      mysql_close(conn);
+
+      if (nproc<nproc_min) 
+	{
+	  nproc_min = nproc;
+	  rtrn = I;
+	}
+      ++I;
+    }
+
+  return rtrn;
+}
+////////////////////////////////////////////////////////////////
 bool MysqlDb::reConnect(){
 #define __METHOD__ "reConnect()"
 
@@ -245,13 +307,6 @@ bool MysqlDb::reConnect(){
       wm<<mysql_error(&mData)<<".  Will re-try with timeout set at \n==> ";
       wm<<timeOutConnect<<" seconds <==";
       StDbManager::Instance()->printInfo((wm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); 
-      if (timeOutConnect > 128)
-	{
-	  StString tmm;
-	  tmm << " Can't get a database connection, please email sofi hypernews ";
-	  StDbManager::Instance()->printInfo((tmm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
-	  assert(connected);
-	}
     }
   }      
 
@@ -280,7 +335,9 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 #define __METHOD__ "Connect(host,user,pw,database,port)"
 
   if(mdbhost) delete [] mdbhost;
-  mdbhost  = new char[strlen(aHost)+1];   strcpy(mdbhost,aHost);
+  mdbhost  = new char[strlen(aHost)+1];   
+strcpy(mdbhost,aHost);
+
   if(aUser){
    if(mdbuser) delete [] mdbuser;
    mdbuser  = new char[strlen(aUser)+1];   strcpy(mdbuser,aUser);
@@ -290,6 +347,34 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
     mdbpw    = new char[strlen(aPasswd)+1]; strcpy(mdbpw,aPasswd);
   }
   mdbPort  = aPort;
+
+  //cout << " Calling load balancer\n";
+  clock_t start,finish;
+  double time;
+  start = clock();
+  const char* hostname = mdbhost;
+  char* ptr = strstr(hostname,"dbx.star");
+  
+  if (ptr != 0)
+    {
+      std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbx, NULL, mdbPort);
+      mdbhost = (*myserver).c_str();
+    }
+  else
+    {
+      ptr = strstr(hostname,"db.star");
+      if (ptr != 0)
+	{
+	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_db, NULL, mdbPort);
+	  mdbhost = (*myserver).c_str();
+	}
+    }
+  finish = clock();
+  time = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
+  cout << " Load balancer took "<<time<<" ms, will use "<<mdbhost<<" \n";
+
+
+
 
   if(mdbName) {
     delete [] mdbName;
@@ -312,7 +397,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
     //  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
        cs<< "Server Connecting:"; if(mdbName)cs<<" DB=" << mdbName ;
-       cs<< "  Host=" << aHost <<":"<<aPort <<stendl;
+       cs<< "  Host=" << mdbhost <<":"<<aPort <<stendl;
        cs<< " --> Connection Time="<<t0<<" sec   ";
        if(mdbServerVersion)cs<<" MysqlVersion="<<mdbServerVersion;
       
@@ -320,7 +405,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
       tRetVal=true;
   } else {
       cs << "Making Connection to DataBase = " << aDb;
-      cs << " On Host = " << aHost <<":"<<aPort;
+      cs << " On Host = " << mdbhost <<":"<<aPort;
       cs << " MySQL returned error " << mysql_error(&mData);
       StDbManager::Instance()->printInfo((cs.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
   }
@@ -332,6 +417,8 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
 }
 
 ////////////////////////////////////////////////////////////////////////
+
+
 
 char* MysqlDb::printQuery(){ return mQueryLast; };
 
@@ -378,7 +465,8 @@ bool MysqlDb::ExecQuery(){
 
 mqueryState=false;
 
-//cout<<mQuery<<endl;
+// cout<<"MysqlDb::ExecQuery() ";
+// cout<<mQuery<<endl;
 
 if(mlogTime)mqueryLog.start();
 
