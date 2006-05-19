@@ -43,13 +43,13 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 MySQLAppender::MySQLAppender()
 : connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
 { 
-   fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
+  // fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
 
 //_________________________________________________________________________
 MySQLAppender::~MySQLAppender()
 {
-	 fprintf(stderr,"MySQLAppender::~MySQLAppender()\n" );
+	 // fprintf(stderr,"MySQLAppender::~MySQLAppender()\n" );
     finalize();
 }
 
@@ -109,7 +109,7 @@ unsigned int  MySQLAppender::execute(const String& sql)
 	SQLHDBC con = SQL_NULL_HDBC;
 	SQLHSTMT stmt = SQL_NULL_HSTMT;
    if (getConnection()) {
-      fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
+//      fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
 //          String query = "INSERT INTO StarLogger VALUES (\"";
 //          query += sql;
 //          query += "\");";
@@ -124,7 +124,7 @@ unsigned int  MySQLAppender::execute(const String& sql)
 //         fprintf(stderr," ID = %d\n",fLastId);
       }
     }
-    fprintf(stderr,"MYSQL:  ---- >  return=%d \n",ret);
+//    fprintf(stderr,"MYSQL:  ---- >  return=%d \n",ret);
 	 return ret;
 	//tcout << _T("Execute: ") << sql << std::endl;
 }
@@ -134,7 +134,7 @@ unsigned int  MySQLAppender::execute(const String& sql)
 void MySQLAppender::closeConnection()
 {
   if (fIsConnectionOpen) {
-     fprintf(stderr," ++++++++ ----> closing the connection %p\n", (void *)connection);
+  //   fprintf(stderr," ++++++++ ----> closing the connection %p\n", (void *)connection);
      mysql_close(connection); 
      if (mysql_errno(connection))   fprintf(stderr,"MYSQL close ERROR %s  \n",mysql_error(connection));
      connection = 0;
@@ -158,7 +158,7 @@ MYSQL *MySQLAppender::getConnection()
          const char *passwd = "logger";
          const char *db     = "logger";
          unsigned int port  = 3306;
-         fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
+//         fprintf(stderr,"MYSQL:  ---- >  Establishing MySQL connection open %d \n", fIsConnectionOpen);
          if (!(mysql_real_connect(connection
                      , host
                      , user
@@ -176,7 +176,6 @@ MYSQL *MySQLAppender::getConnection()
          }
       }
    }
-   fprintf(stderr,"MYSQL:  ---- > MySQL Connection open %d %p\n", fIsConnectionOpen,connection);
 	return connection;
 }
 
