@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcMapUtilities.h,v 1.1 2000/08/09 18:57:44 lansdell Exp $
+// $Id: TpcMapUtilities.h,v 1.2 2006/05/20 03:17:21 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcMapUtilities.h,v $
+// Revision 1.2  2006/05/20 03:17:21  genevb
+// Changed MapKey to MapQAKey to make it unique for QA
+//
 // Revision 1.1  2000/08/09 18:57:44  lansdell
 // improvements in TPC gains code reduces CPU time per event by factor of 2
 //
@@ -22,15 +25,15 @@
 #include "StThreeVectorD.hh"
 
 //Structure for map key
-struct HitMapKey {
-    bool operator==(const HitMapKey&) const;
+struct HitMapQAKey {
+    bool operator==(const HitMapQAKey&) const;
     int sector;
     int padrow;
 };
 
 //Structure for ordering map key
-struct MapKeyLessThan{
-    bool operator() (const HitMapKey&, const HitMapKey&) const;
+struct MapQAKeyLessThan{
+    bool operator() (const HitMapQAKey&, const HitMapQAKey&) const;
 };
 
 //Structure to hold 3d global points in a plane of each padrow
