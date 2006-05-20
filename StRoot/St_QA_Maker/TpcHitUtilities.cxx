@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.6 2006/05/18 03:27:41 genevb Exp $
+// $Id: TpcHitUtilities.cxx,v 1.7 2006/05/20 03:17:21 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.7  2006/05/20 03:17:21  genevb
+// Changed MapKey to MapQAKey to make it unique for QA
+//
 // Revision 1.6  2006/05/18 03:27:41  genevb
 // Patch to observe fast offline issues
 //
@@ -125,7 +128,7 @@ double TpcHitUtilities::dx(StTpcHit* tpcHit)
 {
     static int first_hundred=100;
     double ds=0.;
-    HitMapKey mykey;    //Build a key to the map (sector, padrow)
+    HitMapQAKey mykey;    //Build a key to the map (sector, padrow)
     mykey.sector = tpcHit->sector();
     mykey.padrow = tpcHit->padrow();
     PadrowLocation padLoc = m_PadrowMap[mykey];
@@ -192,7 +195,7 @@ void TpcHitUtilities::buildMaps()
 
 	    //Store in this form
 	    PadrowLocation padLocation(gTopPosD, gMidPosD, gBotPosD);
-	    HitMapKey myKey;
+	    HitMapQAKey myKey;
 	    myKey.sector = sector;
 	    myKey.padrow = padrow;
 	    m_PadrowMap.insert(padrowMapValType(myKey,padLocation));
