@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcMapUtilities.h,v 1.2 2006/05/20 03:17:21 genevb Exp $
+// $Id: TpcMapUtilities.h,v 1.3 2006/05/20 14:52:43 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcMapUtilities.h,v $
+// Revision 1.3  2006/05/20 14:52:43  genevb
+// Make define variable unique for QA too
+//
 // Revision 1.2  2006/05/20 03:17:21  genevb
 // Changed MapKey to MapQAKey to make it unique for QA
 //
@@ -19,8 +22,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef TpcMapUtilities_h
-#define TpcMapUtilities_h
+#ifndef TpcMapQAUtilities_h
+#define TpcMapQAUtilities_h
 
 #include "StThreeVectorD.hh"
 
