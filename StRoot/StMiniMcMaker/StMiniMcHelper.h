@@ -1,11 +1,18 @@
 /**
- * $Id $
+ * $Id: StMiniMcHelper.h,v 1.1 2006/05/22 18:55:15 calderon Exp $
  * \file  Helper.h
  * \brief Various helper functions using StPhysicalHelix and StThreeVectors
  * 
  *
  * \author Bum Choi
  * \date   March 2001
+ * $Log: StMiniMcHelper.h,v $
+ * Revision 1.1  2006/05/22 18:55:15  calderon
+ * Changes from the original code by Bum to comply with STAR coding standards.
+ * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
+ * This does not fully solve all possible hiccups, because all the functions
+ * in the "helper" file are defined in global scope.
+ *
  *  
  */
 #ifndef Helper_HH

@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.19 2005/09/29 15:53:08 fisyak Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.20 2006/05/22 18:55:16 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,12 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.20  2006/05/22 18:55:16  calderon
+ * Changes from the original code by Bum to comply with STAR coding standards.
+ * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
+ * This does not fully solve all possible hiccups, because all the functions
+ * in the "helper" file are defined in global scope.
+ *
  * Revision 1.19  2005/09/29 15:53:08  fisyak
  * Persistent StMcEvent
  *
@@ -99,6 +105,12 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.20  2006/05/22 18:55:16  calderon
+ * Changes from the original code by Bum to comply with STAR coding standards.
+ * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
+ * This does not fully solve all possible hiccups, because all the functions
+ * in the "helper" file are defined in global scope.
+ *
  * Revision 1.19  2005/09/29 15:53:08  fisyak
  * Persistent StMcEvent
  *
@@ -187,7 +199,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.19 2005/09/29 15:53:08 fisyak Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.20 2006/05/22 18:55:16 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -236,7 +248,7 @@
 #include "StTpcDedxPidAlgorithm.h"
 #include "StuProbabilityPidAlgorithm.h"
 
-#include "Helper.h"
+#include "StMiniMcHelper.h"
 
 
 static int StMiniMcMakerErrorCount=0;

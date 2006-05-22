@@ -1,15 +1,22 @@
 /**
- * $Id $
+ * $Id: StMiniMcHelper.cxx,v 1.1 2006/05/22 18:55:14 calderon Exp $
  * \file  Helper.cxx
  * \brief Assorted utility functions.  Helix DCA's(2D, 3D, signed), crossing angles, padrow propagation.
  * 
  *
  * \author Bum Choi
  * \date   March 2001
+ * $Log: StMiniMcHelper.cxx,v $
+ * Revision 1.1  2006/05/22 18:55:14  calderon
+ * Changes from the original code by Bum to comply with STAR coding standards.
+ * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
+ * This does not fully solve all possible hiccups, because all the functions
+ * in the "helper" file are defined in global scope.
+ *
  *  
  */
 
-#include "Helper.h"
+#include "StMiniMcHelper.h"
 #include <cmath>
 
 
