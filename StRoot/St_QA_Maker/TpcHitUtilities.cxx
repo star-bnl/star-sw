@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.7 2006/05/20 03:17:21 genevb Exp $
+// $Id: TpcHitUtilities.cxx,v 1.8 2006/05/22 18:27:34 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.8  2006/05/22 18:27:34  genevb
+// Remove patch to observe fast offline issues
+//
 // Revision 1.7  2006/05/20 03:17:21  genevb
 // Changed MapKey to MapQAKey to make it unique for QA
 //
@@ -43,7 +46,6 @@
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
-#include "StMessMgr.h"
 
 #ifndef ST_NO_NAMESPACES
 using std::sort;
@@ -126,7 +128,6 @@ const StThreeVectorD TpcHitUtilities::sectorNormal(int sector)
 //Caluclate Pathlength using StHelixD
 double TpcHitUtilities::dx(StTpcHit* tpcHit)
 {
-    static int first_hundred=100;
     double ds=0.;
     HitMapQAKey mykey;    //Build a key to the map (sector, padrow)
     mykey.sector = tpcHit->sector();
@@ -136,12 +137,6 @@ double TpcHitUtilities::dx(StTpcHit* tpcHit)
     double s_out = m_StTrack->geometry()->helix().pathLength(padLoc.outsidePoint(), normal);
     double s_in  = m_StTrack->geometry()->helix().pathLength(padLoc.insidePoint(), normal);
     ds = s_out-s_in;
-    if (first_hundred-- > 0)
-      gMessMgr->Info(Form("TpcHitUtil %d %d %f %f %f %f %f %f %f\n",
-      tpcHit->sector(),tpcHit->padrow(),
-      padLoc.outsidePoint().x(),padLoc.outsidePoint().y(),padLoc.outsidePoint().z(),
-      padLoc.insidePoint().x(),padLoc.insidePoint().y(),padLoc.insidePoint().z(),ds));
-
     if (ds < 0.) {ds = -1.*ds;}
     if (s_out==DBL_MAX || s_in==DBL_MAX) {ds = 0.;}
     return ds;
