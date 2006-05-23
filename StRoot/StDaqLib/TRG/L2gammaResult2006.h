@@ -26,7 +26,7 @@ struct L2gammaResult {
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
-void print_L2gammaResult( const L2gammaResult &result )
+inline void print_L2gammaResult( const L2gammaResult &result )
 {
   printf("----------------------------------------------------------------\n");
   printf("L2gammaResult version %d\n",          /* print header version */
@@ -57,6 +57,9 @@ void print_L2gammaResult( const L2gammaResult &result )
 #endif
 
 // $Log: L2gammaResult2006.h,v $
+// Revision 1.2  2006/05/23 17:44:56  akio
+// inline functions in L2*.h
+//
 // Revision 1.1  2006/04/14 17:56:15  akio
 // Adding L2 Result Structs
 //
