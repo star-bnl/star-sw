@@ -360,8 +360,11 @@ int FitLine(TTree* SC, const char* v0, const char* v1, double window,
 
 
 /////////////////////////////////////////////////////////////////
-// $Id: Calib_SC_GL.C,v 3.2 2006/01/11 19:02:35 genevb Exp $
+// $Id: Calib_SC_GL.C,v 1.1 2006/05/23 16:14:42 genevb Exp $
 // $Log: Calib_SC_GL.C,v $
+// Revision 1.1  2006/05/23 16:14:42  genevb
+// Moved macro to calib directory
+//
 // Revision 3.2  2006/01/11 19:02:35  genevb
 // Better documentation
 //
