@@ -156,7 +156,6 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
-         << ",RealTime="    << evnt.GetRealTime("QAInfo:")            
          << ",StepContext=" << "'Cpu',"  << "MessageId='='"
          << ",ProgrammMessage='" << evnt.GetCpuTime("QAInfo:")
          << "'" << endm;
@@ -164,7 +163,6 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
-         << ",RealTime="    << evnt.GetRealTime("QAInfo:")            
          << ",StepContext=" << "'RealTime',"  << "MessageId='='"
          << ",ProgrammMessage='" << evnt.GetRealTime("QAInfo:")
          << "'" << endm;
@@ -187,8 +185,6 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
-         << ",Cpu="         << evnt.GetCpuTime("QAInfo:")
-         << ",RealTime="    << evnt.GetRealTime("QAInfo:")            
          << ",StepContext=" << "'MemUsed',"  << "MessageId='='"
          << ",ProgrammMessage='" << int(TMemStat::Used())
          << "'" << endm;
@@ -206,8 +202,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.58 2006/05/16 18:54:23 fine Exp $
+// $Id: StChain.cxx,v 1.59 2006/05/24 17:33:43 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.59  2006/05/24 17:33:43  fine
+// remove the redundant Db fields
+//
 // Revision 1.58  2006/05/16 18:54:23  fine
 // fix StChain and MySql
 //
