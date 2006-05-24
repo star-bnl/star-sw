@@ -106,8 +106,6 @@ String MySQLAppender::getLogStatement(const spi::LoggingEventPtr& event)
 unsigned int  MySQLAppender::execute(const String& sql)
 {
 	SQLRETURN ret=1;
-	SQLHDBC con = SQL_NULL_HDBC;
-	SQLHSTMT stmt = SQL_NULL_HSTMT;
    if (getConnection()) {
 //      fprintf(stderr,"MYSQL:  ---- >  execute the MySQL query <%s> \n\n",sql.c_str());
 //          String query = "INSERT INTO StarLogger VALUES (\"";
@@ -144,9 +142,7 @@ void MySQLAppender::closeConnection()
 
 //_________________________________________________________________________
 MYSQL *MySQLAppender::getConnection()
-{
-	SQLRETURN ret;
-   
+{   
    if (!fIsConnectionOpen) {
    
      if ( !(connection= mysql_init(connection)) ) {
