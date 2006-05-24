@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 2.4 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StGlobalTrack.h,v 2.5 2006/05/24 17:28:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
+ * Revision 2.5  2006/05/24 17:28:19  ullrich
+ * Added track-at-DCA geometry.
+ *
  * Revision 2.4  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -36,6 +39,8 @@
 
 #include "StTrack.h"
 
+class StDcaGeometry;
+
 class StGlobalTrack : public StTrack {
 public:
     StGlobalTrack();
@@ -47,7 +52,14 @@ public:
     StTrackType     type() const;
     const StVertex* vertex() const;
 
+    const StDcaGeometry* dcaGeometry() const;
+    StDcaGeometry* dcaGeometry();
+    void setDcaGeometry(StDcaGeometry*);
+
 protected:
-    ClassDef(StGlobalTrack,1)
+    StDcaGeometry *mDcaGeometry;
+    
+    ClassDef(StGlobalTrack,2)
 };
+
 #endif
