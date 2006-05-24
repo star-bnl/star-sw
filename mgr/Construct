@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.154 2005/10/26 21:41:30 fisyak Exp $
+# $Id: Construct,v 1.155 2006/05/24 21:34:00 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -197,6 +197,7 @@ my  $items = "(";
 if ( defined($SKIP_DIRS) ){ $items .= join("|",split(" ",$SKIP_DIRS));}
 if ($STAR_LEVEL =~ /\.dev/ or $STAR_LEVEL =~ /\.DEV/) {
   if ($items ne "(") { $items .= "|";}
+#  $items .= "SpinPool|StEStructPool|StEmcPool|StL2Emulator|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp";
   $items .= "SpinPool|StEStructPool|StEmcPool|StEEmcMixerMaker|StJetMaker|^Tpc|^ecal\$|^star\$|^interfaces\$|^vmcApp";
 #  
 }
@@ -210,7 +211,7 @@ else               {$items  = "";}
 # list of targets
 #
 
-foreach my $dir( "pams", "StRoot" ,"StPiD", "StarVMC" ) {
+foreach my $dir( "pams", "StRoot", "StDb" ,"StPiD", "StarVMC" ) {
   next if !-d $dir;
   opendir( DIR, $dir ) or die "Can't open $dir\n";
   my @subdirS = readdir DIR;
