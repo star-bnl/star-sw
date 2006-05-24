@@ -41,7 +41,7 @@ IMPLEMENT_LOG4CXX_OBJECT(MySQLAppender)
 
 //_________________________________________________________________________
 MySQLAppender::MySQLAppender()
-: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(1),fLastId(0),fIsConnectionOpen(false)
+: connection(SQL_NULL_HDBC), env(SQL_NULL_HENV), bufferSize(10),fLastId(0),fIsConnectionOpen(false)
 { 
   // fprintf(stderr,"MySQLAppender::MySQLAppender() \n");
 }
@@ -226,8 +226,8 @@ void MySQLAppender::flushBuffer()
          
 ///--- Task description         
          
-//           expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
-           expandCommand ="INSERT IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
+//         expandCommand ="INSERT         IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
+           expandCommand ="INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
          " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"Test Task\",\"$SUMS_AUTHENTICATED_USER\");";
 // Edit meta symbols
 //-----------------------
@@ -250,8 +250,8 @@ void MySQLAppender::flushBuffer()
        if (TaskEntryDone) {
 //--- Job description         
 
-           expandCommand ="INSERT IGNORE INTO JobDescription SET ";
-//           expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
+//         expandCommand ="INSERT         IGNORE INTO JobDescription SET ";
+           expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
 
            expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
                              expandCommand += ", ";                  
