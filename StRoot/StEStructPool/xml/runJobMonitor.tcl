@@ -33,6 +33,6 @@ set ::jobMonitor::LOGTYPE    .log
 set ::jobMonitor::IOwnProcess true
 
 wm withdraw .
-::jobMonitor::createWindow
+::jobMonitor::createWindow $originalPath
 
 bind $::jobMonitor::bWindow <Control-q> ::jobMonitor::exit
