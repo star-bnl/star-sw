@@ -1079,7 +1079,8 @@ proc ::jobCreate::displayCode {node title} {
 ################################################################################
 proc ::jobCreate::findDialog {} {
     if {[winfo exists .findDialog]} {
-        raise .findDialog
+        set w .findDialog
+        raise $w
     } else {
         set w [toplevel .findDialog]
         wm resizable $w 0 0
@@ -1100,6 +1101,9 @@ proc ::jobCreate::findDialog {} {
 ################################################################################
 proc ::jobCreate::highlightString {string} {
     if {![winfo exists .fileText]} {
+        return
+    }
+    if {$string eq ""} {
         return
     }
     set t .fileText.t
