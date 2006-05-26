@@ -1,4 +1,4 @@
-# $Id: CreateJobTable.sql,v 1.13 2006/05/15 17:47:10 fine Exp $
+# $Id: CreateJobTable.sql,v 1.14 2006/05/26 20:11:01 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -35,7 +35,7 @@ CREATE TABLE JobTracking (
                  Events          INT                                COMMENT 'Total # events processed' ,
                  Failed          INT                                COMMENT 'Total # events failed' ,
                  StepName        CHAR(20)                           COMMENT 'Step name'      ,  #STAR maker name
-                 StepEventId     ENUM('Start','Finish','EventFinish','Run') NULL  COMMENT 'Event Id'       ,
+                 StepEventId     ENUM('Start','Finish','EventFinish','Run','JobStart','JobFinish')  NULL  COMMENT 'Event Id'       ,
                  StepEventValue  ENUM('Ok','Failed')    NULL        COMMENT 'Event outcome'  ,  #STAR Event return code
                  StepContext     CHAR(10)                           COMMENT 'Event context'  ,  #Field name 
                  MessageId       ENUM('=')              NULL        COMMENT 'Extra message flag',
