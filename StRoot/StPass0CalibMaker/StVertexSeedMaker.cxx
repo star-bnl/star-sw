@@ -298,8 +298,15 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	case (127271) :    // eemc-jp1-mb (tran)
 	case (127551) :    // eemc-jp0-mb (tran)
 	case (127262) :    // eemc-ht2-mb-emul (tran)
-	case (117705) :    // jpsi-mb
+	case (137222) :    // bemc-jp1-mb (long)
+	case (137501) :    // bemc-jp0-mb (long)
+	case (137213) :    // bemc-ht2-mb-emul (long)
+	case (137273) :    // eemc-jp1-mb (long)
+	case (137551) :    // eemc-jp0-mb (long)
+	case (137262) :    // eemc-ht2-mb-emul (long)
 	case (117602) :    // upsilon
+	case (137603) :    // upsilon (long)
+	case (117705) :    // jpsi-mb
 
             valid = kTRUE;
 
@@ -417,7 +424,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.29 2006/05/11 18:09:44 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.30 2006/05/27 19:54:03 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -718,8 +725,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.29 2006/05/11 18:09:44 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.30 2006/05/27 19:54:03 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.30  2006/05/27 19:54:03  genevb
+// Yet more 2006 triggers
+//
 // Revision 1.29  2006/05/11 18:09:44  genevb
 // More pp2006 triggers
 //
