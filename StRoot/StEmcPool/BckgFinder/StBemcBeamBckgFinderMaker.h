@@ -1,9 +1,9 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.h,v 1.1 2006/05/30 20:08:03 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.h,v 1.2 2006/05/30 22:21:41 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
- * Descripion:
- * ????
+ * Description:
+ * Pattern recognition of the Barrel Beam Background on an event-by-event basis.
  *********************************************************************
  */
 
@@ -46,34 +46,34 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   Int_t CheckPatternType3(int &etaBegin, int &phiBegin, int &etaEnd, int &patternLength, float &sumAdc);
   void PlotOneEvent();
 
-  float mdb_btowPed[mxSoftId];
-  int mdb_btowStat[mxSoftId];
+  float mdb_btowPed[mxSoftId]; //array of pedestals
+  int mdb_btowStat[mxSoftId];  //array of towers status (1 or 0 in values)
 
-  int mdb_btowetaBin[mxSoftId];
-  int mdb_btowphiBin[mxSoftId];
+  int mdb_btowetaBin[mxSoftId];  //array of towers phi bins
+  int mdb_btowphiBin[mxSoftId];  //array of towers eta bins
    
-  int mdb_btowRdo[mxSoftId];
-  int mdb_btowSoftId[mxSoftId];
+  int mdb_btowRdo[mxSoftId];    //array of towers rdo
+  int mdb_btowSoftId[mxSoftId]; //array of towers softId
 
-  float mAdcArray[mxPhi][mxEta];
+  float mAdcArray[mxPhi][mxEta]; //array of adc values passing adc threshold
 
-  int mInpEve;// input events counter
-  int mAccEve;// accepted events counter
-  int mTrigId;
-  int mRunNumber;
-  int mDecision;
-  char mLocation[xmlocate];
-  int metaBegin;
-  int metaEnd;
-  int mphiBegin;
-  int mpatternLength;
-  float msumAdc;
+  int mInpEve;     //input events counter
+  int mAccEve;     //accepted events counter
+  int mTrigId;     //Trigger Id
+  int mRunNumber;  //run number
+  int mDecision;   //Decision whether a background==1 or not ==0.
+  char mLocation[xmlocate]; //location of background (east, central, west) based on eta range.
+  int metaBegin;            //value of beginning eta bin in the background pattern
+  int metaEnd;              //value of ending eta bin in the background pattern
+  int mphiBegin;            //value of beginning phi bin in the background pattern
+  int mpatternLength;       //background pattern length 
+  float msumAdc;            //background pattern adc sum
 
-  int mAdcThreshold;      //used to set adc threshold
-  float mAdcSumThreshold; //used to set adc sum threshold
-  int mpattern;           //used to set pattern length needed
-  int mMaxYesPlots;    //Maximum number of postscript files to produce (file/event) when event is background.
-  int mMaxNoPlots;     //Maximum number of postscript files to produce (file/event) when event is not background.
+  int mAdcThreshold;      //value used to set adc threshold
+  float mAdcSumThreshold; //value used to set adc sum threshold
+  int mpattern;           //value used to set pattern length needed
+  int mMaxYesPlots;    //value of Maximum number of postscript files to produce (file/event) when event is background.
+  int mMaxNoPlots;     //value of Maximum number of postscript files to produce (file/event) when event is not background.
   bool mSearchDone;
  
  public: 
@@ -106,7 +106,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
   // Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.1 2006/05/30 20:08:03 qattan Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.2 2006/05/30 22:21:41 qattan Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -117,6 +117,9 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.h,v $
+  Revision 1.2  2006/05/30 22:21:41  qattan
+  *** empty log message ***
+
   Revision 1.1  2006/05/30 20:08:03  qattan
   start1
 

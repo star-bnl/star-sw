@@ -1,9 +1,9 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.2 2006/05/30 20:12:56 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.3 2006/05/30 22:21:41 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
- * Descripion:
- * xxx????
+ * Description:
+ * Pattern recognition of the Barrel Beam Background on an event-by-event basis.
  *********************************************************************
  */
 
@@ -109,7 +109,7 @@ void StBemcBeamBckgFinderMaker::Clear(const Option_t* option){
 /*=============================================================================*/
 /*=============================================================================*/
 
-// ***** Make - this method is called in loop for each event
+// ***** Make: this method is called in loop for each event
 
 Int_t StBemcBeamBckgFinderMaker::Make(){
 
@@ -122,7 +122,7 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
 
   StMuEmcCollection *emc = muMk->muDst()->muEmcCollection();
 
-  // process 7-bit Bunch-Crossing (bx7)
+  //========process 7-bit Bunch-Crossing (bx7)==================
   StMuDst *dst = muMk->muDst();
   StMuEvent *muEve = dst->event();
   StL0Trigger &trig = muEve->l0Trigger();
@@ -134,7 +134,7 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
   //printf("eve=%d bx7=%d\n",mInpEve,bx7);
 
   
-  // process trigger info
+  //========process trigger info==================================
  
   assert(muEve);
   StMuTriggerIdCollection ticB = muEve -> triggerIdCollection();
@@ -409,7 +409,7 @@ void  StBemcBeamBckgFinderMaker::PlotOneEvent(){
 
   char Decision[10];
   char HistoTitle_Out[2000]; //title of the histogram. Replacing the original
-  char FileTitle_Out[1000]; // mevtH[0] histograms will be saved for each accepted event in a ps/gif file.
+  char FileTitle_Out[1000]; // mevtH[0] histograms will be saved for each accepted event in a ps and/or gif files.
 
 
   if(mDecision==1){
@@ -424,7 +424,7 @@ void  StBemcBeamBckgFinderMaker::PlotOneEvent(){
 
 
   sprintf(FileTitle_Out,"event%05d_%s.ps",mInpEve,Decision); // name of ps file
-  //sprintf(FileTitle_Out,"event%05d_%s.gif",mInpEve,Decision); // name of gif file
+  //sprintf(FileTitle_Out,"event%05d_%s.gif",mInpEve,Decision); // name of gif file if needed
   TCanvas mycanvas("aa","aa",600,800); //create a canvas
   mevtH[0]->SetTitle(HistoTitle_Out);
   mevtH[0]->GetXaxis()->CenterTitle();
@@ -453,12 +453,12 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
   //printf("**********************************************************************************\n");
   //printf("In ::CheckPatternType3(): These towers are used in pattern searched\n");
     
-  for(i=0; i<mxPhi; i++){        //over phi
+  for(i=0; i<mxPhi; i++){        //loop over phi
     float *adc = mAdcArray[i];
     n = 0;                      //counter over adjacent towers
     maxLength = 0;  
 
-    for(j=0; j<mxEta; j++){    //over eta
+    for(j=0; j<mxEta; j++){    //loop over eta
       if(adc[j]<=0) continue;  
 
       n = 1;  
@@ -544,6 +544,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.3  2006/05/30 22:21:41  qattan
+  *** empty log message ***
+
   Revision 1.2  2006/05/30 20:12:56  qattan
   fix 1
 
