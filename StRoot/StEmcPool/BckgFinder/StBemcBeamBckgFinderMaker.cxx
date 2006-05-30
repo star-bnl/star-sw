@@ -1,10 +1,10 @@
-/*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.3 2006/05/30 22:21:41 qattan Exp $
+/******************************************************************************
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.4 2006/05/30 22:40:29 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
- *********************************************************************
+ ******************************************************************************
  * Description:
  * Pattern recognition of the Barrel Beam Background on an event-by-event basis.
- *********************************************************************
+ *******************************************************************************
  */
 
 #include <TH2.h>
@@ -544,6 +544,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.4  2006/05/30 22:40:29  qattan
+  check4
+
   Revision 1.3  2006/05/30 22:21:41  qattan
   *** empty log message ***
 

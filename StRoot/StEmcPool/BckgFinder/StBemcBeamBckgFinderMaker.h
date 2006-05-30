@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.h,v 1.2 2006/05/30 22:21:41 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.h,v 1.3 2006/05/30 22:38:23 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
  * Description:
@@ -46,14 +46,14 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   Int_t CheckPatternType3(int &etaBegin, int &phiBegin, int &etaEnd, int &patternLength, float &sumAdc);
   void PlotOneEvent();
 
-  float mdb_btowPed[mxSoftId]; //array of pedestals
-  int mdb_btowStat[mxSoftId];  //array of towers status (1 or 0 in values)
+  float mdb_btowPed[mxSoftId];   //array of pedestals
+  int mdb_btowStat[mxSoftId];    //array of towers status (1 or 0 in values)
 
-  int mdb_btowetaBin[mxSoftId];  //array of towers phi bins
-  int mdb_btowphiBin[mxSoftId];  //array of towers eta bins
+  int mdb_btowetaBin[mxSoftId];  //array of towers eta bins
+  int mdb_btowphiBin[mxSoftId];  //array of towers phi bins
    
-  int mdb_btowRdo[mxSoftId];    //array of towers rdo
-  int mdb_btowSoftId[mxSoftId]; //array of towers softId
+  int mdb_btowRdo[mxSoftId];     //array of towers rdos
+  int mdb_btowSoftId[mxSoftId];  //array of towers softIds
 
   float mAdcArray[mxPhi][mxEta]; //array of adc values passing adc threshold
 
@@ -106,7 +106,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
   // Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.2 2006/05/30 22:21:41 qattan Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.3 2006/05/30 22:38:23 qattan Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -117,6 +117,9 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.h,v $
+  Revision 1.3  2006/05/30 22:38:23  qattan
+  check4
+
   Revision 1.2  2006/05/30 22:21:41  qattan
   *** empty log message ***
 
