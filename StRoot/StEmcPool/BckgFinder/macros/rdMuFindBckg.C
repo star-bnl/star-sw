@@ -5,9 +5,9 @@ void rdMuFindBckg(int nevents=100 , char* outDir="./") {
 
  char *muDstFile;
 
- /*******************************************/
- // use single or list of muDsts: year 2006
- /*******************************************/
+ /*************************************************************/
+ // use single or list of muDsts: Example below form year 2006
+ /*************************************************************/
 
 #if 1  // barrelBckg run
   muDstFile="/star/data07/EEMC/qattan/myruns_R7137034/*.MuDst.root";
