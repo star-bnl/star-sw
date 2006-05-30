@@ -1,9 +1,9 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.1 2006/05/30 20:08:03 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.2 2006/05/30 20:12:56 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
  * Descripion:
- * ????
+ * xxx????
  *********************************************************************
  */
 
@@ -544,6 +544,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.2  2006/05/30 20:12:56  qattan
+  fix 1
+
   Revision 1.1  2006/05/30 20:08:03  qattan
   start1
 
