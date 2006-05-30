@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.48 2005/11/22 21:44:16 fisyak Exp $
+ * $Id: StAssociationMaker.cxx,v 1.49 2006/05/30 22:56:20 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.49  2006/05/30 22:56:20  calderon
+ * The check for null StEvent pointer had been moved down, move it back up
+ * near the beginning of the Make() call, otherwise the pointer is used
+ * without a check.
+ *
  * Revision 1.48  2005/11/22 21:44:16  fisyak
  * Add Ssd to Associator, add IdTruth options for Svt and Ssd
  *
@@ -725,7 +730,13 @@ Int_t StAssociationMaker::Make()
   //
   // Get StEvent
   //
-  
+  StEvent* rEvent = 0;
+  rEvent = (StEvent*) GetInputDS("StEvent");
+  if (!rEvent) {
+    gMessMgr->Warning() << "No StEvent!!! " << endm;
+    gMessMgr->Warning() << "Bailing out ..." << endm;
+    return kStWarn;
+  }
   // Make the pointers to collections.
   // Tpc
   StTpcHitCollection*   rcTpcHitColl; 
@@ -740,41 +751,37 @@ Int_t StAssociationMaker::Make()
   StFtpcHitCollection*   rcFtpcHitColl;
   StMcFtpcHitCollection* mcFtpcHitColl;
   
-  
-  StEvent* rEvent = 0;
+
+  // In order to make associations with the reconstructed L3 EVENT
+  // we use the L3 hit collections, the switch below selects
+  // the appropriate pointers.
   StL3Trigger* rL3Event = 0;
   if (!mL3TriggerOn) {
-    rEvent = (StEvent*) GetInputDS("StEvent");
-    
-    rcTpcHitColl = rEvent->tpcHitCollection();   
-    rcSvtHitColl = rEvent->svtHitCollection();   
-    rcSsdHitColl = rEvent->ssdHitCollection();   
-    rcFtpcHitColl = rEvent->ftpcHitCollection();
+      // This case is for normal case, use hit collections from StEvent
+      rcTpcHitColl = rEvent->tpcHitCollection();   
+      rcSvtHitColl = rEvent->svtHitCollection();   
+      rcSsdHitColl = rEvent->ssdHitCollection();   
+      rcFtpcHitColl = rEvent->ftpcHitCollection();
   }
   else {
-    rEvent = (StEvent*) GetInputDS("StEvent");
-    if (rEvent){ rL3Event = rEvent->l3Trigger(); } ;
-    
-    if (rL3Event)
-      {
-	rcTpcHitColl = rL3Event->tpcHitCollection();
+      // This case is for using the L3 Event
+      if (rEvent){
+	  rL3Event = rEvent->l3Trigger();
       }
-    else
-      {
+    
+      if (rL3Event) {
+	  rcTpcHitColl = rL3Event->tpcHitCollection();
+      }
+      else {
 	return kStWarn ;
       }
     
-    rcSvtHitColl = 0;
-    rcSsdHitColl = 0;
-    rcFtpcHitColl = 0;
-    
+      rcSvtHitColl = 0;
+      rcSsdHitColl = 0;
+      rcFtpcHitColl = 0;
+      
   }
   
-  if (!rEvent) {
-    gMessMgr->Warning() << "No StEvent!!! " << endm;
-    gMessMgr->Warning() << "Bailing out ..." << endm;
-    return kStWarn;
-  }
   
   StSPtrVecTrackNode& rcTrackNodes = (!mL3TriggerOn) ? rEvent->trackNodes() : rL3Event->trackNodes();
   
