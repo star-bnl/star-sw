@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.33 2006/05/19 23:03:48 deph Exp $
+ * $Id: MysqlDb.cc,v 1.34 2006/05/30 15:33:38 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.33  2006/05/19 23:03:48  deph
- * Adding basic load balancing.  Two separate pools; db and dbx; within each pool the node with least processes (mysql-threads) wins.
- * This now by-passes DNS Round Robin and connects directely to the "winning" node.
+ * Revision 1.34  2006/05/30 15:33:38  deph
+ * Small fix to allow for connection from load balancer to online alias "onldb"
  *
  * Revision 1.31  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
@@ -276,7 +275,7 @@ vector<string>::iterator MysqlDb::RecommendedServer(vector<string>* MyServerList
       
       MYSQL_RES *res_set = mysql_store_result(conn);
       unsigned long nproc = mysql_num_rows(res_set);
-      //cout <<" Server "<<(*I).c_str()<< " "<< nproc << " processes \n";
+      // cout <<" Server "<<(*I).c_str()<< " "<< nproc << " processes \n";
       mysql_close(conn);
 
       if (nproc<nproc_min) 
@@ -347,13 +346,13 @@ strcpy(mdbhost,aHost);
     mdbpw    = new char[strlen(aPasswd)+1]; strcpy(mdbpw,aPasswd);
   }
   mdbPort  = aPort;
-
+  //  cout << "aHost = "<<mdbhost<<endl; 
   //cout << " Calling load balancer\n";
   clock_t start,finish;
   double time;
   start = clock();
   const char* hostname = mdbhost;
-  char* ptr = strstr(hostname,"dbx.star");
+  char* ptr = strstr(hostname,"dbx.star.bnl");
   
   if (ptr != 0)
     {
@@ -362,12 +361,13 @@ strcpy(mdbhost,aHost);
     }
   else
     {
-      ptr = strstr(hostname,"db.star");
+      ptr = strstr(hostname,"db.star.bnl");
       if (ptr != 0)
 	{
 	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_db, NULL, mdbPort);
 	  mdbhost = (*myserver).c_str();
 	}
+	 
     }
   finish = clock();
   time = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
