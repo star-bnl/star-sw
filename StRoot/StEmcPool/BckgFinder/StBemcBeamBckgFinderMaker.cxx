@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.4 2006/05/30 22:40:29 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.5 2006/05/30 23:05:23 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -433,7 +433,6 @@ void  StBemcBeamBckgFinderMaker::PlotOneEvent(){
   gStyle->SetOptStat(0);
   gStyle->SetTitleFontSize(0.08);
   mevtH[0]->Draw("colz");
-  printf("tetetetetetetetetetetetet\n");
   mycanvas.Print(FileTitle_Out);
   //printf("Out of ::PlotOneEvent(), just finished printing to a file=%s\n",FileTitle_Out);
 }
@@ -544,6 +543,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.5  2006/05/30 23:05:23  qattan
+  check5
+
   Revision 1.4  2006/05/30 22:40:29  qattan
   check4
 
