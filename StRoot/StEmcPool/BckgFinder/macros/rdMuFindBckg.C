@@ -1,12 +1,12 @@
 class  StChain;
 StChain *chain;
 
-void rdMuFindBckg(int nevents=100 , char* outDir="./" ) {
+void rdMuFindBckg(int nevents=100 , char* outDir="./") { 
 
  char *muDstFile;
 
  /*******************************************/
- // use single muDst: year 2006
+ // use single or list of muDsts: year 2006
  /*******************************************/
 
 #if 1  // barrelBckg run
