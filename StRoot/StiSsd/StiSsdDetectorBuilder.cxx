@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.21 2005/06/21 16:35:01 lmartin Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.22 2006/05/31 04:00:02 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.22  2006/05/31 04:00:02  fisyak
+// remove SSD ladder mother volume
+//
 // Revision 1.21  2005/06/21 16:35:01  lmartin
 // DetectorBuilder updated with the correct methods from StSsdUtil
 //
@@ -293,9 +296,9 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
   {"SSSS","Side parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSSS_1-4","",""},
   {"SSST","Top parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSST_1-4","",""},
   //  {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""}, 
-  {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""},
-  {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""}
-  //  {"SFSD","the strip detector",      "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// <+++
+  {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""}
+  //  {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""}
+  //  {"SFSD","the strip detector",                  "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// <+++
   };
   Int_t NoSsdVols = sizeof(SsdVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1/SVTT_1/SFMO_1");
