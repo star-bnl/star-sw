@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.7 2006/05/09 17:51:05 mvl Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.8 2006/05/31 04:09:52 fisyak Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.8  2006/05/31 04:09:52  fisyak
+ * Use dca track parameters for primary vertex fit
+ *
  * Revision 1.7  2006/05/09 17:51:05  mvl
  * Added protection against event->emcCollection()==0
  *
@@ -98,7 +101,8 @@
 #include "StMessMgr.h"
 #include <math.h>
 #include "StEmcUtil/geometry/StEmcGeom.h"
-
+#include "StDcaGeometry.h"
+vector<StDcaGeometry*>   StMinuitVertexFinder::mDCAs;
 vector<StPhysicalHelixD> StMinuitVertexFinder::mHelices;
 vector<unsigned short>   StMinuitVertexFinder::mHelixFlags;
 vector<double>           StMinuitVertexFinder::mSigma;
@@ -110,7 +114,7 @@ double                   StMinuitVertexFinder::mdxdz;
 double                   StMinuitVertexFinder::mdydz;
 bool                     StMinuitVertexFinder::requireCTB;
 int                      StMinuitVertexFinder::nCTBHits;
-
+bool                     StMinuitVertexFinder::mUseDCA;
 //==========================================================
 //==========================================================
 void StMinuitVertexFinder::Clear(){
@@ -145,7 +149,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
   mRequireCTB = false;
   requireCTB = false;
   mUseITTF   = false;
-
+  mUseDCA    = false;
   mVertexOrderMethod = orderByRanking; // change ordering by ranking
 }
  
@@ -155,6 +159,7 @@ StMinuitVertexFinder::StMinuitVertexFinder() {
    delete mBeamHelix; mBeamHelix=0;
    LOG_WARN << "Skipping delete Minuit in StMinuitVertexFinder::~StMinuitVertexFinder()" << endm;
    //delete mMinuit;
+   mDCAs.clear();
    mHelices.clear();
    mHelixFlags.clear();
    mZImpact.clear();
@@ -447,6 +452,7 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  fcn to calculate the fit potential which
     //  gets minimized by Minuit.
     //
+    mDCAs.clear();
     mHelices.clear();
     mHelixFlags.clear();
     mSigma.clear();
@@ -462,8 +468,14 @@ StMinuitVertexFinder::fit(StEvent* event)
     int n_cross_tot = 0;
 
     StSPtrVecTrackNode& nodes = event->trackNodes();
+    mUseDCA = kFALSE;
     for (unsigned int k=0; k<nodes.size(); k++) {
-      StTrack* g = nodes[k]->track(global);
+      StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
+      if (g && g->dcaGeometry()) {mUseDCA = kTRUE; break;}
+    }
+    LOG_QA << "QAInfo: StMinuitVertexFinder::fit use DCA track parameters" <<  endm;
+    for (unsigned int k=0; k<nodes.size(); k++) {
+      StGlobalTrack* g = ( StGlobalTrack*) nodes[k]->track(global);
       if (accept(g)&&
 	  ((mUseITTF&&g->fittingMethod()==kITKalmanFitId)||
 	   (!mUseITTF&&g->fittingMethod()!=kITKalmanFitId))) {	
@@ -474,29 +486,46 @@ StMinuitVertexFinder::fit(StEvent* event)
 	  continue;
 	}
 #endif
-	const StPhysicalHelixD &helix = g->geometry()->helix(); 
-	Double_t r_c = sqrt(helix.xcenter()*helix.xcenter()+helix.ycenter()*helix.ycenter());
-	if (fabs(r_c - 1./helix.curvature()) > mRImpactMax)
-	  continue;
-	    
-	mHelices.push_back(g->geometry()->helix());
-	mHelixFlags.push_back(1);
+	if (! mUseDCA ) {
+	  mWidthScale = 1;
+	  const StPhysicalHelixD helix = g->geometry()->helix(); 
+	  Double_t r_c = sqrt(helix.xcenter()*helix.xcenter()+helix.ycenter()*helix.ycenter());
+	  if (fabs(r_c - 1./helix.curvature()) > mRImpactMax)
+	    continue;
+	  
+	  mHelices.push_back(g->geometry()->helix());
+	  mHelixFlags.push_back(1);
+	  
+	  Double_t path=(TMath::ATan2(-helix.ycenter(),-helix.xcenter())-helix.phase())/2/TMath::Pi();
+	  path *= helix.h()*helix.period();
+	  StThreeVectorD tmp_pos = helix.at(path);
+	  
+	  Double_t z_lin=tmp_pos.z();
+	  if (r_c - 1./helix.curvature() > 0) 
+	    z_lin -= tmp_pos.perp()*tan(helix.dipAngle());
+	  else
+	    z_lin += tmp_pos.perp()*tan(helix.dipAngle());
+	  
+	  mZImpact.push_back(z_lin);
 
-	Double_t path=(TMath::ATan2(-helix.ycenter(),-helix.xcenter())-helix.phase())/2/TMath::Pi();
-	path *= helix.h()*helix.period();
-	StThreeVectorD tmp_pos = helix.at(path);
-
-	Double_t z_lin=tmp_pos.z();
-	if (r_c - 1./helix.curvature() > 0) 
-	  z_lin -= tmp_pos.perp()*tan(helix.dipAngle());
-	else
-	  z_lin += tmp_pos.perp()*tan(helix.dipAngle());
-
-	mZImpact.push_back(z_lin);
-
-	// sigma = 0.45+0.0093*::sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
-	sigma = 0.6+0.0086*::sqrt(g->length())/abs(g->geometry()->momentum());
-	mSigma.push_back(sigma);         
+	  // sigma = 0.45+0.0093*::sqrt(g->length())/abs(g->geometry()->momentum()); HIJING + TRS
+	  sigma = 0.6+0.0086*::sqrt(g->length())/abs(g->geometry()->momentum());
+	  mSigma.push_back(sigma);
+	} else { // use DCA parameters
+	  mWidthScale = 0.1;// 1./TMath::Sqrt(5.);
+	  StDcaGeometry* gDCA = g->dcaGeometry();
+	  if (! gDCA) continue;
+	  if (gDCA->impact() >  mRImpactMax) continue;
+	  mDCAs.push_back(gDCA);
+// 	  StPhysicalHelixD helix = gDCA->helix(); 
+// 	  mHelices.push_back(helix);
+	  mHelices.push_back(g->geometry()->helix());
+	  mHelixFlags.push_back(1);
+	  Double_t z_lin = gDCA->z();
+	  mZImpact.push_back(z_lin);
+	  mSigma.push_back(-1);
+	  
+	}
 	bool shouldHitCTB = false;
 	double etaInCTBFrame = -999;
 	ctb_match =  EtaAndPhiToOrriginAtCTB(g,&ctbHits,shouldHitCTB,etaInCTBFrame);
@@ -529,7 +558,6 @@ StMinuitVertexFinder::fit(StEvent* event)
     LOG_INFO << "StMinuitVertexFinder::fit size of helix vector: " << mHelices.size() << endm;
 
     // Set some global pars
-    mWidthScale = 1;
     if (mRequireCTB) requireCTB = true;
     
     //
@@ -643,6 +671,7 @@ StMinuitVertexFinder::fit(StEvent* event)
 	  cout << "Warning: Minuit Status: " << mStatusMin << ", func val " << chisquare<< endl;
 	  done = 0;  // refit
 	}
+	mMinuit->mnhess();
 
 	double new_z, zerr;
 	if (!mVertexConstrain) {
@@ -691,26 +720,52 @@ StMinuitVertexFinder::fit(StEvent* event)
       memset(cov,0,sizeof(cov));
     
       Double_t val, verr;
+#if 1
+      if (!mVertexConstrain) {
+	XVertex = StThreeVectorD(mMinuit->fU[0],mMinuit->fU[1],mMinuit->fU[2]);
+	Double_t emat[9];
+	/* 0 1 2
+	   3 4 5
+           6 7 8 */
+	mMinuit->mnemat(emat,3);
+	cov[0] = emat[0];
+	cov[1] = emat[3];
+	cov[2] = emat[4];
+	cov[3] = emat[6];
+	cov[4] = emat[7];
+	cov[5] = emat[8];
+      }
+      else {
+	mMinuit->GetParameter(0, val, verr); 
+	XVertex.setZ(val);  cov[5]=verr*verr;
+	
+	// LSB Really error in x and y should come from error on constraint
+	// At least this way it is clear that those were fixed paramters
+	XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
+	XVertex.setY(beamY(val));  cov[2]=0.1;
+      }
+#else
       if (!mVertexConstrain) {
 	mMinuit->GetParameter(0, val, verr); 
-	XVertex.setX(val);  cov[0]=verr;
+	XVertex.setX(val);  cov[0]=verr*verr;
 	
 	mMinuit->GetParameter(1, val, verr); 
-	XVertex.setY(val);  cov[2]=verr;
+	XVertex.setY(val);  cov[2]=verr*verr;
 
 	mMinuit->GetParameter(2, val, verr); 
-	XVertex.setZ(val);  cov[5]=verr;
+	XVertex.setZ(val);  cov[5]=verr*verr;
       
       }
       else {
 	mMinuit->GetParameter(0, val, verr); 
-	XVertex.setZ(val);  cov[5]=verr;
+	XVertex.setZ(val);  cov[5]=verr*verr;
       
 	// LSB Really error in x and y should come from error on constraint
 	// At least this way it is clear that those were fixed paramters
 	XVertex.setX(beamX(val));  cov[0]=0.1; // non-zero error values needed for Sti
 	XVertex.setY(beamY(val));  cov[2]=0.1;
       }
+#endif
 
       StPrimaryVertex primV;
       primV.setPosition(XVertex);
@@ -766,56 +821,82 @@ StMinuitVertexFinder::fit(StEvent* event)
     //  seeds. This needs to be provided for every event.
     mExternalSeedPresent = false;
     
-    mWidthScale = 1;
     requireCTB = false;
 
     return 1;
 } 
+//________________________________________________________________________________
+Double_t StMinuitVertexFinder::Chi2atVertex(StThreeVectorD &vtx) {
+  Double_t f = 0;
+  Double_t e, s;
+  nCTBHits = 0;
+  if (! mUseDCA) {
+    for (unsigned int i=0; i<mHelices.size(); i++) {
+      if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
+	s = mWidthScale*mSigma[i];
+	e = mHelices[i].distance(vtx, false);  // false: don't do multiple loops
+	f -= exp(-(e*e)/(2*s*s));  // robust potential
+	if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
+      }
+    }
+  } else {// UseDCA
+    for (unsigned int i=0; i<mDCAs.size(); i++) {
+      if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
+	const StDcaGeometry* gDCA = mDCAs[i];
+	if (! gDCA) continue;
+	const StPhysicalHelixD helix = gDCA->helix();
+	e = helix.distance(vtx, false);  // false: don't do multiple loops
+#if 0
+	StPhysicalHelixD helixA = mHelices[i];
+        Double_t eA = helixA.distance(vtx, false);
+	// linear approximation, ignore error in angles
+	StThreeVectorD dcaP = helix.at(e) - vtx;
+	StThreeVectorD dcaPA = helixA.at(eA) - vtx;
+	Double_t impact = gDCA->impact();
+	if (impact);
+	Double_t x = dcaP.x();
+	Double_t y = dcaP.y();
+	StThreeVectorF mom = gDCA->momentum();
+	Double_t px = mom.x();
+	Double_t py = mom.y();
+	Double_t Imp = TMath::Sqrt(x*x + y*y);
+	Double_t sgn = x*py-y*px;
+	Double_t sgnA = helixA.curvatureSignedDistance(dcaPA);
+        if (sgnA);
+	if (sgn < 0) Imp = - Imp;
+	Double_t Z  = dcaP.z();
+#endif
+	const Float_t *errMatrix = gDCA->errMatrix();
+#if 0
+	Double_t d = errMatrix[0]*errMatrix[2] - errMatrix[1]*errMatrix[1];
+	if (TMath::Abs(d) < 1e-7) continue;
+	Double_t a[3] = {errMatrix[2]/d, -errMatrix[1]/d, errMatrix[0]/d};
+// 	Double_t chi2     = a[0]*Imp*Imp + 2*a[1]*Imp*Z + a[2]*Z*Z; 
+#endif
+	Double_t chi2     = e*e/(errMatrix[0] + errMatrix[2]);
+	Double_t scale = 1./(mWidthScale*mWidthScale);
+	f += scale*(1. - TMath::Exp(-chi2/scale)); // robust potential
+	//	f -= scale*TMath::Exp(-chi2/scale); // robust potential
+	if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
+      }
+    }
+  }
+  return f;
+}
+//________________________________________________________________________________
 
 void StMinuitVertexFinder::fcn1D(int& npar, double* gin, double& f, double* par, int iflag)
 {
-    nCTBHits = 0;
-    f = 0;
-    double e, s;
-    //    StThreeVectorD vtx(par);
     double z = par[0];
     double x = beamX(z);
     double y = beamY(z);
     StThreeVectorD vtx(x,y,z);
-    for (unsigned int i=0; i<mHelices.size(); i++) {
-      if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB || (mHelixFlags[i] & kFlagCTBMatch))) {
-	s = mWidthScale*mSigma[i];
-	e = mHelices[i].distance(vtx, false); // false: don't do multiple loops
-	f -= exp(-(e*e)/(2*s*s));  // robust potential
-        if((mHelixFlags[i] & kFlagCTBMatch) && e<3.0) nCTBHits++;
-//          if (abs(s)>0.01) {
-//    	f -= exp(-(e*e)/(2*s*s));  // robust potential
-//          }
-//          else {
-//  	  f += (e*e)/(2*s*s);
-//          }
-      }
-    }
+    f = Chi2atVertex(vtx);
 }
-
 void StMinuitVertexFinder::fcn(int& npar, double* gin, double& f, double* par, int iflag)
 {
-  f = 0;
-  double e, s;
   StThreeVectorD vtx(par);
-  for (unsigned int i=0; i<mHelices.size(); i++) {
-    if ((mHelixFlags[i] & kFlagDcaz) && (!requireCTB||(mHelixFlags[i] & kFlagCTBMatch))) {
-      s = mWidthScale*mSigma[i];
-      e = mHelices[i].distance(vtx, false);  // false: don't do multiple loops
-      f -= exp(-(e*e)/(2*s*s));  // robust potential
-      //          if (abs(s)>0.01) {
-      //    	f -= exp(-(e*e)/(2*s*s));  // robust potential
-      //          }
-      //          else {
-      //  	  f += (e*e)/(2*s*s);
-      //          }
-    }
-  }
+  f = Chi2atVertex(vtx);
 }
 
 
