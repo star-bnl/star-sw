@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.97 2006/02/06 20:07:48 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.98 2006/05/31 03:55:52 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.98  2006/05/31 03:55:52  fisyak
+// Set default fMaxEntryTime='now'
+//
 // Revision 1.97  2006/02/06 20:07:48  perev
 // Decrease level of aliases 2==>1 to avoid name clashes
 //
@@ -230,7 +233,8 @@ St_db_Maker::St_db_Maker(const char *name
      
    fDataBase = 0;
    fUpdateMode = 0;
-   fMaxEntryTime = 0;
+   TUnixTime ut;
+   fMaxEntryTime = ut.GetUTime();
 }
 //_____________________________________________________________________________
 St_db_Maker::~St_db_Maker()
