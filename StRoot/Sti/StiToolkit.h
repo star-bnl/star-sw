@@ -51,7 +51,6 @@ class 	StiTrackMerger;
 class   StiVertexFinder;
 //??class   StAssociationMaker;
 class   EditableParameter;
-class   StiResidualCalculator;
 
 /** 
  * @class StiToolkit
@@ -86,7 +85,6 @@ public:
   virtual StiVertexFinder       * getVertexFinder()=0;
 //??  virtual StAssociationMaker    * getAssociationMaker()=0;
 //??  virtual StiMaker              * getStiMaker()=0;
-  virtual StiResidualCalculator * getResidualCalculator()=0;
   virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader()=0;
 
 //??  virtual void setAssociationMaker(StAssociationMaker * a)=0;

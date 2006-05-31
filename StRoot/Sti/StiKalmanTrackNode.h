@@ -156,6 +156,7 @@ public:
   /// Calculates and returns the momentum and error of the track at this node in global coordinates.
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   int  isEnded() const;	
+  int  isDca()   const;	
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);

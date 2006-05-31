@@ -155,16 +155,24 @@ enum eTrackNodeFlags {
   const StiTrackNode& operator=(const StiTrackNode& node);  
   void reset();
   void unset(){;}
+
+virtual double x_g()  const	=0;
+virtual double y_g()  const	=0;
+virtual double z_g()  const	=0;
+virtual double x()    const	=0;			
+virtual double y()    const	=0;			 
+virtual double z()    const	=0;			
+  
   StiHit * getHit() const 		{return _hit;}
-  void setHit(StiHit* hit)		{_hit   =hit;}
+  void  setHit(StiHit* hit)		{_hit   =hit;}
   const StiDetector *getDetector() const; 
   void  setDetector(const StiDetector *detector);
   double getChi2 ()  const		{return _chi2;} 		
   double getDeterm() const		{return _det ;} 		
-  void setChi2(double chi2)		{_chi2  =chi2;}
-  int getState() const 			{return _state;}
- void setInvalid()  			{ _state=0;}
- void setReady()  			{ _state=kTNReady;}
+  void  setChi2(double chi2)		{_chi2  =chi2;}
+  int   getState() const 		{return _state;}
+  void  setInvalid()  			{ _state=0;}
+  void  setReady()  			{ _state=kTNReady;}
   int isValid()  const 			{return _state>=kTNReady;}
   int isFitted() const 			{return (_hit && _chi2<1e3);}
   double getRefPosition() const;

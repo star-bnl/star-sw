@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.85 2006/04/26 19:17:05 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.85 2006/04/26 19:17:05 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.86 2006/05/31 03:58:06 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.86 2006/05/31 03:58:06 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.86  2006/05/31 03:58:06  fisyak
+ * Add Victor's dca track parameters, clean up
+ *
  * Revision 2.85  2006/04/26 19:17:05  perev
  * mIdDb for debug instead of mId
  *
@@ -1030,6 +1033,7 @@ StiTrackNode *StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
 static int nCall=0; nCall++;
   double chi2;
+  int dcaHit = vertex->isDca();
   StiKalmanTrackNode * sNode=0;
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
@@ -1041,6 +1045,11 @@ static int nCall=0; nCall++;
 		
   StiHit localVertex = *vertex;
   sNode = getInnerMostNode();
+  if (sNode->isDca()) {//it is fake node. Remove it
+    removeLastNode();
+    sNode = getInnerMostNode();
+  }
+
 
   localVertex.rotate(sNode->getAlpha());
   tNode = trackNodeFactory->getInstance();
@@ -1052,12 +1061,21 @@ static int nCall=0; nCall++;
   if (tNode->propagate(sNode, &localVertex,kOutsideIn))
     { 
       //cout << " on vertex plane:";
-      tNode->setChi2(3e33);
-      chi2 = tNode->evaluateChi2(&localVertex); 
-      double dy,dz,d;
-      dy=tNode->getY()- localVertex.y();
-      dz=tNode->getZ()- localVertex.z();
-      d = ::sqrt(dy*dy+dz*dz);
+      double dy=0,dz=0,d=0;
+      if (dcaHit) {		//Fake DCA vertex
+        tNode->setChi2(0); 
+	tNode->setHit(0);
+	tNode->setDetector(0);
+        return tNode;
+      } else {			//Normal vertex 
+	tNode->setChi2(3e33);
+	chi2 = tNode->evaluateChi2(&localVertex); 
+	dy=tNode->getY()- localVertex.y();
+	dz=tNode->getZ()- localVertex.z();
+	d = ::sqrt(dy*dy+dz*dz);
+	_vChi2= chi2; _dca = d;
+      }
+
 #ifdef Sti_DEBUG      
 	int npoints[2] = {0,0};
 	vector<StMeasuredPoint*> hitVec = stHits();
@@ -1079,12 +1097,10 @@ static int nCall=0; nCall++;
 	cout << "StiKalmanTrack::extendToVertex: TrackBefore:" << *this << endl;
 #endif
 
-      _vChi2= chi2;
 //    if (chi2<pars->maxChi2Vertex  && d<4.)
 //    if (                             d<4.)
       if (chi2<pars->maxChi2Vertex)
 	{
-	  _dca = d;
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
 	  tNode->setHit(myHit);

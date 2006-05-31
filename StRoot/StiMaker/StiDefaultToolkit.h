@@ -49,7 +49,6 @@ public:
   virtual StiTrackFitter         *getTrackFitter();
   virtual StiTrackMerger         *getTrackMerger();
   virtual StiVertexFinder        *getVertexFinder();
-  virtual StiResidualCalculator  *getResidualCalculator();
   virtual StiHitLoader<StEvent,StiDetectorBuilder> *getHitLoader();
 
   virtual void add(StiDetectorGroup<StEvent>* detectorGroup);
@@ -97,7 +96,6 @@ public:
   StiTrackMerger          *_trackMerger;
   StiVertexFinder         *_vertexFinder;
   StiHitLoader<StEvent,StiDetectorBuilder> *_hitLoader;
-  StiResidualCalculator    *_residualCalculator;
 
   EditableFilter<StiHit>   *_loaderHitFilter;
   EditableFilter<StiTrack> *_loaderTrackFilter;

@@ -16,26 +16,31 @@
 #endif
 
 
+//_____________________________________________________________________________
 StiHit::StiHit()
 {
    reset();
 }
 
 
+//_____________________________________________________________________________
 StiHit::StiHit(const StiHit &h) 
 {
   memcpy(mBeg,h.mBeg,mEnd-mBeg+1);
 }
 
+//_____________________________________________________________________________
 const StiHit& StiHit::operator=(const StiHit & h)
 {
   memcpy(mBeg,h.mBeg,mEnd-mBeg+1);
   return *this;
 }
 
+//_____________________________________________________________________________
 StiHit::~StiHit()
 {}
 
+//_____________________________________________________________________________
 /// Convenience method to perform a rotation
 /// along the z axis
 void StiHit::rotate(double alpha)
@@ -61,6 +66,7 @@ void StiHit::rotate(double alpha)
   msyy = ayx*ryx + ayy*ryy;
 }
 
+//_____________________________________________________________________________
 void StiHit::setError(const StMatrixF& matrix)
 {
   enum Labels {x=1, y=2, z=3};
@@ -77,6 +83,7 @@ void StiHit::setError(const StMatrixF& matrix)
 }
 
 
+//_____________________________________________________________________________
 /*! Streamer for StiHit objects. */
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
@@ -86,6 +93,7 @@ ostream& operator<<(ostream& os, const StiHit& hit)
 }
 
 
+//_____________________________________________________________________________
 double StiHit::getValue(int key) const
 {
   double value;
@@ -100,6 +108,7 @@ double StiHit::getValue(int key) const
   return value;  
 }
   
+//_____________________________________________________________________________
 double StiHit::getPseudoRapidity() const
 {
   double r=::sqrt(_xg*_xg+_yg*_yg);
@@ -109,6 +118,7 @@ double StiHit::getPseudoRapidity() const
   else
     return 1.e10;
 }
+//_____________________________________________________________________________
 void StiHit::reset()
 {
   memset(mBeg,0,mEnd-mBeg+1);
@@ -117,6 +127,7 @@ static unsigned int myCount=0;
 }
 
 
+//_____________________________________________________________________________
 void StiHit::setGlobal(const StiDetector * detector,
 			      const StMeasuredPoint * stHit,
 			      float gx, float gy, float gz,
@@ -208,21 +219,25 @@ void StiHit::setGlobal(const StiDetector * detector,
         ,detector->getName().c_str(),mx,pos,dif);
 }
 
+//_____________________________________________________________________________
  void StiHit::setTimesUsed(unsigned int val)
 {
     mTimesUsed=(unsigned char)val;
 }
 
+//_____________________________________________________________________________
  float StiHit::getEloss()
 {
   return _energy;
 }
 
+//_____________________________________________________________________________
  const StThreeVectorF StiHit::globalPosition() const
 {
   return StThreeVectorF(_xg,_yg,_zg); ////msthit->position();
 }
 
+//_____________________________________________________________________________
 void StiHit::set(float position,  float angle, float y, float z)
 {
   memset(mBeg,0,mEnd-mBeg+1);
@@ -236,3 +251,25 @@ void StiHit::set(float position,  float angle, float y, float z)
   _yg = 100000.;
   _zg = 100000.;
 }
+//_____________________________________________________________________________
+void StiHit::makeDca()
+{
+  memset(mBeg,0,mEnd-mBeg+1);
+  mszz = 1e12;
+}
+//_____________________________________________________________________________
+int StiHit::isDca() const
+{
+  if (mdetector) 	return 0;
+  if (mx || my || mz)	return 0;
+  if (mszz<1000)	return 0;
+  return 1;
+}
+
+
+
+
+
+
+
+

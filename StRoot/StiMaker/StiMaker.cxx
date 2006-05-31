@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.167  2006/05/31 03:59:04  fisyak
+// Add Victor's dca track parameters, clean up
+//
 // Revision 1.166  2006/04/14 22:51:26  perev
 // Option useFakeVertex added
 //
@@ -243,7 +246,6 @@
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiHitLoader.h"
 #include "Sti/StiVertexFinder.h"
-#include "Sti/StiResidualCalculator.h"
 #include "Sti/StiDetectorContainer.h"
 #include "StiMaker/StiStEventFiller.h"
 #include "StiDefaultToolkit.h"
@@ -281,7 +283,6 @@ StiMaker::StiMaker(const Char_t *name) :
     _eventFiller(0),
     _trackContainer(0),
     _vertexFinder(0),
-    _residualCalculator(0),
     _loaderTrackFilter(0),
     _loaderHitFilter(0)
 
@@ -322,23 +323,17 @@ void StiMaker::Clear(const char*)
 Int_t StiMaker::Finish()
 {
   StiDebug::Finish();
-  if (IAttr("doPlots"))
-    {
-      if (_residualCalculator)
-       _residualCalculator->write("StiHistograms.root", "UPDATE"); 
-    }
 //	Finish Pull
   if (mPullTTree) {
-    TFile *tfile = mPullTTree->GetCurrentFile(); //just in case we switched to a new file
-    if (!tfile) tfile=mPullFile;
-    tfile->cd();
-//    mPullTTree->Write("",TObject::kOverwrite);
-    tfile->Write();
-    mPullTTree->Print();
-    tfile->Close();
-    mPullTTree=0;
+    if  (Debug()) mPullTTree->Print();
+    if (mPullFile) {
+      TFile *tfile = mPullTTree->GetCurrentFile(); //just in case we switched to a new file
+      tfile->Write();
+      tfile->Close();
+      mPullFile  = 0;
+      mPullTTree = 0;
+    }
   }
-
   StiTimer::Print();
   StiTimer::Clear();
 
@@ -436,11 +431,6 @@ Int_t StiMaker::InitRun(int run)
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
       detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
-       if (IAttr("useResidualCalculator"))
-       {
-	 _residualCalculator = _toolkit->getResidualCalculator();
-	 _residualCalculator->initialize(_toolkit->getDetectorBuilder());
-       }
        _seedFinder = _toolkit->getTrackSeedFinder();
       _seedFinder->initialize();
       _hitLoader  = _toolkit->getHitLoader();
@@ -481,20 +471,6 @@ Int_t StiMaker::Make()
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
 
   if (!event) return kStWarn;
-
-
-// Temporary fake hit to create fake vertex if needed;
-// Used only if SetAttr("useFakeVertex",1) is set
-  StiHit fakeHit;
-  std::vector<StiHit*> fakeVertexes;
-  fakeVertexes.push_back(&fakeHit);
-  {
-     StMatrixF fakeErr(3,3);
-     fakeErr(1,1) = 1;fakeErr(2,2) = 1;fakeErr(3,3) = 1;
-     fakeHit.setError(fakeErr);
-  }
-
-
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
 
@@ -526,9 +502,6 @@ Int_t StiMaker::Make()
 	  _vertexFinder->fit(event);
 	  vertexes = _vertexFinder->result();
 
-	  if ((!vertexes || !vertexes->size()) && IAttr("useFakeVertex")) {
-            vertexes = &fakeVertexes;
-          }
 
 	  if (vertexes && vertexes->size())
 	    {
@@ -538,7 +511,6 @@ Int_t StiMaker::Make()
 		  if (_eventFiller) _eventFiller->fillEventPrimaries();
 	    }
 	}
-      if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
   if (mPullTTree) FillPulls();
   cout<< "StiMaker::Make() -I- Done"<<endl;
@@ -562,16 +534,16 @@ Int_t StiMaker::InitPulls()
   
   StBFChain *bfc = dynamic_cast<StBFChain*>(GetChain());
   assert(bfc);
-  mPullFile = bfc->GetTFile();
-  if (!mPullFile) {
-     TString ts  = bfc->GetFileIn();
-     ts= gSystem->BaseName(ts);
-     int ext = ts.Index(".");
-     if (ext>0) ts.Replace(ext,999,"");
-     ts +=".stipull.root";
-     mPullFile = new TFile(ts,"RECREATE","TTree Sti Pulls ROOT file");
+  TFile *tfile  = bfc->GetTFile();
+  if (!tfile) {
+    TString ts  = bfc->GetFileIn();
+    ts= gSystem->BaseName(ts);
+    int ext = ts.Index(".");
+    if (ext>0) ts.Replace(ext,999,"");
+    ts +=".stipull.root";
+    tfile = mPullFile = new TFile(ts,"RECREATE","TTree Sti Pulls ROOT file");
   }
-  mPullFile->cd();
+  tfile->cd();
   mPullTTree = new TTree("StiPulls","TTree Sti pulls");
   mPullTTree->SetAutoSave(100000000);  // autosave when 0.1 Gbyte written
   mPullEvent = new StiPullEvent;

@@ -101,7 +101,10 @@ const float *errMtx() const   		{return &msxx;}
     ///Return a const pointer to the StiDetector object from which the hit
     ///arose.
     const StiDetector* detector() const;
-
+    ///Test for DCA.  Fake hit for dca calculation
+    int isDca() const;
+    ///Make fake hit for dca calculation
+    void makeDca();
     ///Return a const pointer to the StHit object corresponding to this StiHit
     ///instance
     //const StHit* stHit() const;
