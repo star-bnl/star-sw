@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.19 2006/04/07 18:00:30 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.20 2006/05/31 03:59:04 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.20  2006/05/31 03:59:04  fisyak
+ * Add Victor's dca track parameters, clean up
+ *
  * Revision 2.19  2006/04/07 18:00:30  perev
  * Back to the latest Sti
  *
@@ -172,6 +175,7 @@ public:
     void fillPidTraits(StTrack* track, StiKalmanTrack* kTrack);
     void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
+    void fillDca(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
     double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
     double impactParameter(StTrack* strack, StThreeVectorD &vertexPosition);

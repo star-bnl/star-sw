@@ -27,7 +27,6 @@
 #pragma link C++ class StiDetectorTreeBuilder;
 #pragma link C++ class StiDiskShape;
 #pragma link C++ class StiDrawableTrack;
-#pragma link C++ class StiDummyVertexFinder;
 #pragma link C++ class StiElossCalculator;
 #pragma link C++ class StiFilter;
 //#pragma link C++ class StiFtpcHitLoader;
@@ -61,8 +60,6 @@
 #pragma link C++ class StiNeverActiveFunctor;
 #pragma link C++ class StiPlacement;
 #pragma link C++ class StiPlanarShape;
-#pragma link C++ class StiResidualCalculator;
-#pragma link C++ class StiResiduals;
 #pragma link C++ class StiShape;
 #pragma link C++ class StiSortedHitIterator;
 #pragma link C++ class StiStarVertexFinder;
@@ -85,5 +82,6 @@
 #pragma link C++ class StiTreeNode;
 #pragma link C++ class StiVertexFinder;
 //#pragma link C++ class StlUtilities;
+#pragma link C++ class StiTrackNodeHelper;
 #pragma link C++ namespace StiVMCToolKit;
 #endif

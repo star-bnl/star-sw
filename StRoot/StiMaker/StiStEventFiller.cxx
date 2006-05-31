@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.72 2006/04/07 18:00:30 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.73 2006/05/31 03:59:04 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.73  2006/05/31 03:59:04  fisyak
+ * Add Victor's dca track parameters, clean up
+ *
  * Revision 2.72  2006/04/07 18:00:30  perev
  * Back to the latest Sti
  *
@@ -400,6 +403,7 @@ using namespace std;
 #include "StEventTypes.h"
 #include "StDetectorId.h"
 #include "StHelix.hh"
+#include "StDcaGeometry.h"
 
 
 #include "StEventUtilities/StEventHelper.h"
@@ -1037,6 +1041,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
   fillFlags(gTrack);
+  if (!track->isPrimary()) fillDca(gTrack,track);
   return;
 }
 //_____________________________________________________________________________
@@ -1264,5 +1269,26 @@ double StiStEventFiller::impactParameter(StTrack* track, StThreeVectorD &vertex)
 
   mPullEvent->Add(aux,mGloPri);
   
+
+}
+//_____________________________________________________________________________
+void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
+{
+  StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(stTrack);
+  assert(gTrack);
+
+  StiKalmanTrackNode *tNode = track->getInnerMostNode();
+  if (!tNode->isDca()) return;
+  const StiNodePars &pars = tNode->fitPars(); 
+  const StiNodeErrs &errs = tNode->fitErrs();
+  float alfa = tNode->getAlpha();
+  float setp[7],sete[15];
+  TCL::ucopy(&pars._y,setp,7);
+  setp[2]+= alfa;  
+  for (int i=1,li=1,jj=0;i< kNPars;li+=++i) {
+    for (int j=1;j<=i;j++) {sete[jj++]=errs.A[li+j];}}
+  StDcaGeometry *dca = new StDcaGeometry;
+  gTrack->setDcaGeometry(dca);
+  dca->set(setp,sete);
 
 }

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "StiTrackNode.h"
 #include "TCL.h"
+#include "TRMatrix.h"
+#include "TRVector.h"
 int StiTrackNode::mgFlag=0;
   static const int idx66[6][6] =
   {{ 0, 1, 3, 6,10,15},{ 1, 2, 4, 7,11,16},{ 3, 4, 5, 8,12,17}
@@ -36,7 +38,14 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
 //   for (int i=0;i<NP;i++) {myF[i][i]+=1.;}
 //   double myG[NE];
 //   TCL::trasat(myF[0],G,myG,NP,NP);
-
+//#define TEST_errPropag6
+#ifdef TEST_errPropag6
+  TRSymMatrix rG(nF,G);    cout << "rG\t" << rG << endl;
+  TRMatrix    rU(TRArray::kUnit,nF);
+  TRMatrix    rF(nF,nF,&F[0][0]); 
+  rF += rU;   cout << "rF\t" << rF << endl;
+  TRSymMatrix rFGFT(rF,TRArray::kAxSxAT,rG); cout << "rFGFT\t" << rFGFT << endl;
+#endif
   for (int i=0;i<nF;i++) {
   for (int j=0;j<nF;j++) {
     if (!F[i][j]) 	continue;
@@ -57,7 +66,10 @@ void StiTrackNode::errPropag6( double G[21],const double F[6][6],int nF )
     G[ik] += (s + fg[i][k] + fg[k][i]);
   }}
 //  for (int i=0;i<NE;i++) {assert(fabs(G[i]-myG[i]) <= 1e-6*fabs(G[i]+myG[i]));}
-
+#ifdef TEST_errPropag6
+  TRSymMatrix rGnew(nF,G); cout << "rGnew\t" << rGnew << endl;
+#undef TEST_errPropag6
+#endif
 
 }       
 
@@ -182,12 +194,12 @@ void StiTrackNode::mult6(double Rot[kNPars][kNPars],const double Pro[kNPars][kNP
 double StiTrackNode::getRefPosition() const
 {
   if(!_detector) {
-    assert(_hit);
-    return _hit->x();
+    return x();
+  } else {
+    StiPlacement * place = _detector->getPlacement();
+    assert(place);
+    return place->getLayerRadius();
   }
-  StiPlacement * place = _detector->getPlacement();
-  assert(place);
-  return place->getLayerRadius();
 }
 //______________________________________________________________________________
   double StiTrackNode::getLayerAngle()  const

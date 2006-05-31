@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.99 2006/04/15 23:12:10 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.100 2006/05/31 03:58:06 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.100  2006/05/31 03:58:06  fisyak
+ * Add Victor's dca track parameters, clean up
+ *
  * Revision 2.99  2006/04/15 23:12:10  perev
  * Supress printout
  *
@@ -1047,11 +1050,11 @@ void StiKalmanTrackNode::propagateError()
   if (debug() & 1) 
     {
       cout << "Prior Error:"
-	   << "c00:"<<mFE._cYY<<endl
-	   << "c10:"<<mFE._cZY<<" c11:"<<mFE._cZZ<<endl
-	   << "c20:"<<mFE._cEY<<" c21:"<<mFE._cEZ<<endl
-	   << "c30:"<<mFE._cPY<<" c31:"<<mFE._cPZ<<endl
-	   << "c40:"<<mFE._cTY<<" c41:"<<mFE._cTZ<<endl;
+	   << "cYY:"<<mFE._cYY<<endl
+	   << "cZY:"<<mFE._cZY<<" cZZ:"<<mFE._cZZ<<endl
+	   << "cEY:"<<mFE._cEY<<" cEZ:"<<mFE._cEZ<<endl
+	   << "cPY:"<<mFE._cPY<<" cPZ:"<<mFE._cPZ<<endl
+	   << "cTY:"<<mFE._cTY<<" cTZ:"<<mFE._cTZ<<endl;
     }
   propagateMtx();
   errPropag6(mFE.A,mMtx().A,kNPars);
@@ -1192,8 +1195,8 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       cout << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endl;
     }
   }
-  if (debug() & 8) {comment += Form(" chi2 = %6.2f",cc);}
 #endif
+  if (debug() & 8) {comment += Form(" chi2 = %6.2f",cc);}
   return cc;
 }
 //______________________________________________________________________________
@@ -1202,6 +1205,11 @@ int StiKalmanTrackNode::isEnded() const
 
    if(fabs(mFP._eta )<=kMaxEta) return 0;
    return 1;   
+}		
+//______________________________________________________________________________
+int StiKalmanTrackNode::isDca() const
+{
+   return (fabs(mFP._x)<=0);   
 }		
 		
 //______________________________________________________________________________
@@ -1315,9 +1323,11 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   StiElossCalculator * calculator = tDet->getElossCalculator();
   double eloss = calculator->calculate(1.,m, beta2);
   dE = sign*dxEloss*eloss;
-  if (fabs(dE)>0)
+  if (TMath::Abs(dE)>0)
     {
-      if (debug()) commentdEdx = Form("%6.3g cm %6.3g keV %6.3f GeV ",mgP.dx,1e6*dE,TMath::Sqrt(e2)-m); 
+      if (debug()) {
+	commentdEdx  = Form("%6.3g cm(%5.2f) %6.3g keV %6.3f GeV",mgP.dx,100*relRadThickness,1e6*dE,TMath::Sqrt(e2)-m); 
+      }
       double correction =1. + ::sqrt(e2)*dE/p2;
       if (correction>1.1) correction = 1.1;
       else if (correction<0.9) correction = 0.9;
@@ -1504,12 +1514,7 @@ static int nCall=0; nCall++;
     C2.Verify(C1);
   }
 #endif
-  if (debug() & 8) {
-    Double_t dpTOverpT = 100*TMath::Sqrt(mFE._cPP/(mFP._ptin*mFP._ptin));
-    if (dpTOverpT > 9999.999) dpTOverpT = 9999.999;
-    if (debug() & 8) PrintpT("U");
-    //    cout << "StiKalmanTrackNode::updateNode pT " << getPt() << "+-" << dpTOverpT << endl;
-  } 
+  if (debug() & 8) PrintpT("U");
   _state = kTNFitEnd;
   return 0; 
 }
@@ -1715,7 +1720,6 @@ int StiKalmanTrackNode::locate()
   else
     // positive or negative z edge
     position = zOff>0 ? kEdgeZplus : kEdgeZminus;
-
   if (debug()&8) {
     comment += ::Form("R %8.3f y/z %8.3f/%8.3f", 
 		      mFP._x, mFP._y, mFP._z);
@@ -1951,9 +1955,20 @@ void StiKalmanTrackNode::backStatics(double *sav)
 }
 //________________________________________________________________________________
 void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
-  Double_t dpTOverpT = 100*TMath::Sqrt(mFE._cPP/(mFP._curv*mFP._curv));
+  // opt = "E" extapolation
+  //       "M" Multiple scattering
+  //       "V" at Vertex
+  //       "B" at beam
+  //       "R" at Radius
+  //       "U" Updated
+  //       mFP fit parameters
+  //       mFE fit errors
+  //       _ext->mPP 
+  //       _ext->mPE
+  //       _ext->mMtx
+  Double_t dpTOverpT = 100*TMath::Sqrt(mFE._cPP/(mFP._ptin*mFP._ptin));
   if (dpTOverpT > 9999.9) dpTOverpT = 9999.9;
-  comment += ::Form(" %s pT %8.3f+-%6.1f",opt,getPt(),dpTOverpT);
+  comment += ::Form(" %s pT %8.3f+-%6.1f sy %6.4f",opt,getPt(),dpTOverpT,TMath::Sqrt(mFE._cYY));
 }
 //________________________________________________________________________________
 void StiKalmanTrackNode::PrintStep() {

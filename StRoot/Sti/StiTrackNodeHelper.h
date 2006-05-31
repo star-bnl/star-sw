@@ -81,14 +81,17 @@ static double joinTwo(int nP1,const double *P1  ,const double *E1
                      ,int nP2,const double *P2  ,const double *E2
 		             ,      double *PJ=0,      double *EJ=0);
 
+#if 0
 static double joinVtx(        const double *P1  ,const double *E1
                              ,const double *P2  ,const double *E2
 	                     ,      double *PJ=0,      double *EJ=0);
+#endif			    
 double        joinVtx(const double      *Y,const StiHitErrs  &B
                      ,const StiNodePars &X,const StiNodeErrs &A
 	             ,      StiNodePars *M=0,    StiNodeErrs *C=0);
-			    
 static int getHitErrors(const StiHit *hit,const StiNodePars *pars, StiHitErrs *hrr);
+ Int_t  debug() const 				{return _debug;}
+ void   setDebug(Int_t m) {_debug = m;}
 
 private:
 double mChi2Max;
@@ -151,6 +154,7 @@ StiNode2Pars mUnTouch;
   int    mState;
   int    mUsed;
   char   mEnd[1];
+  static int  _debug;
 public:
   QaFit  mCurvQa;
   QaFit  mTanlQa;

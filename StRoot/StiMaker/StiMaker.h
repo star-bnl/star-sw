@@ -27,8 +27,6 @@ class StiKalmanTrack;
 class StiTrackMerger;
 class StiToolkit;
 class StiVertexFinder;
-class EventDisplay;
-class StiResidualCalculator;
 template<class FILTERED> class EditableFilter;
 
 
@@ -48,13 +46,9 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.21 2006/04/07 18:00:30 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.22 2006/05/31 03:59:04 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 
-    void setEventDisplay(EventDisplay* eventDisplay) 
-      { _eventDisplay = eventDisplay;}
-    EventDisplay* getEventDisplay() 
-      { return _eventDisplay; }
     StiToolkit * getToolkit();
 		void load(TDataSet *);
 
@@ -71,8 +65,6 @@ private:
     StiStEventFiller *    _eventFiller;
     StiTrackContainer *   _trackContainer;
     StiVertexFinder*      _vertexFinder;
-    StiResidualCalculator * _residualCalculator;
-    EventDisplay *        _eventDisplay;
     EditableFilter<StiTrack> * _loaderTrackFilter;
     EditableFilter<StiHit>   * _loaderHitFilter;
 

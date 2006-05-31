@@ -16,7 +16,7 @@ static const double kMaxCur = 0.2;
 static const double DY=0.9,DZ=0.9,DEta=0.1,DPti=3,DTan=0.1;
 static const double MAXSTEP[]={0,DY,DZ,DEta,DPti,DTan};
 static const double ERROR_FACTOR = 2.;
-
+int StiTrackNodeHelper::_debug = 0;
 int StiTrackNodeHelper::mgCutStep=0;
 //______________________________________________________________________________
 int errTest(StiNodePars &predP,StiNodeErrs &predE,
@@ -303,6 +303,7 @@ StiDebug::Break(nCall);
     mChi2 = chi2; if (mChi2>999) mChi2=999;
     ians = updateNode();
     if (!ians) 	break;
+    if (debug() & 8) {cout << Form("%5d ",ians); StiKalmanTrackNode::PrintStep();}
     if (mTargetNode == mVertexNode)	return 15;
     mState = StiTrackNode::kTNReady;
     mFitdPars = mPredPars;
@@ -956,7 +957,7 @@ if(ERRTEST) errTest(mPredPars,mPredErrs,mHit,mHrr,mFitdPars,mFitdErrs,mChi2);
       return -14;
     }  
   } //EndIf Not a primary	  
-  
+  if (mTargetNode && debug() & 8) mTargetNode->PrintpT("U");
   mState = StiTrackNode::kTNFitEnd;
   return 0; 
 }

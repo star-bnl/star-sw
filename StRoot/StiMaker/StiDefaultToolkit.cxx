@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.33 2006/04/07 17:39:49 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.34 2006/05/31 03:59:04 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.34  2006/05/31 03:59:04  fisyak
+ * Add Victor's dca track parameters, clean up
+ *
  * Revision 2.33  2006/04/07 17:39:49  perev
  * Cleanup: redundant comments removed
  *
@@ -124,7 +127,6 @@
 #include "Sti/StiKalmanTrackFitter.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiTrackMerger.h"
-#include "Sti/StiDummyVertexFinder.h"
 #include "Sti/StiStarVertexFinder.h"
 //#include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiLocalTrackMerger.h"
@@ -132,7 +134,6 @@
 #include "Sti/StiDetectorGroup.h"
 #include "Sti/StiDetectorGroups.h"
 #include "Sti/StiHitErrorCalculator.h"
-#include "Sti/StiResidualCalculator.h"
 #include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtHitLoader.h"
 #include "Sti/StiHitErrorCalculator.h"
@@ -164,7 +165,6 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackMerger(0),
   _vertexFinder(0),
   _hitLoader(0),
-  _residualCalculator(0),
   _loaderHitFilter(0),
   _loaderTrackFilter(0),
   _finderTrackFilter(0)
@@ -397,13 +397,6 @@ StiVertexFinder * StiDefaultToolkit::getVertexFinder()
   return _vertexFinder;
 }
 
-StiResidualCalculator  * StiDefaultToolkit::getResidualCalculator()
-{
-  if (_residualCalculator)
-    return _residualCalculator;
-  _residualCalculator = new StiResidualCalculator(getHitContainer());
-  return _residualCalculator;
-}
 
 StiHitLoader<StEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
 {

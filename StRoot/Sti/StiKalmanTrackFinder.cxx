@@ -230,6 +230,11 @@ static int nCall=0;nCall++;
         if (extend<=0)	{nTFail++; break;}
         if (_trackFilter && (!_trackFilter->filter(track))) {nTFilt++;break;}
 	//cout << "  ++++++++++++++++++++++++++++++ Adding Track"<<endl;
+//		Add DCA node
+        StiHit dcaHit; dcaHit.makeDca();
+        StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
+        if (extenDca) track->add(extenDca,kOutsideIn);
+//		End DCA node
         track->reduce();
         nTAdd++;
         track->setFlag(1);
@@ -256,7 +261,7 @@ static int nCall=0;nCall++;
   int ntr = _trackContainer->size();
   int nTpcHits=0,nSvtHits=0,extended=0;
   
-  for ( int itr=0;itr < ntr;itr++) {
+  for ( int itr=0;itr < ntr;itr++) {	//Track loop
     StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
     if (track->getFlag()<=0) 	continue;
 #ifdef ASSIGNVP
@@ -271,13 +276,20 @@ static int nCall=0;nCall++;
 
     extended = extendTrack(track,rMin);
     track->reduce();
-    if (extended<0) 		continue;
-    if (track->getFlag()<=0) 	continue;
+    if (extended<0 || track->getFlag()<=0) {
+      track->reduce(); continue;
+    } else {
+      StiHit dcaHit; dcaHit.makeDca();
+      StiTrackNode *extenDca = track->extendToVertex(&dcaHit);
+      if (extenDca) track->add(extenDca,kOutsideIn);
+      track->reduce();
+    }
     nTKeep++;
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
     track->reserveHits();
-  }
+
+  }// end track loop
    printf("***extendTracks***: nTKeep=%d \n", nTKeep);
    printf("***extendTracks***: nTpcHits=%d nSvtHits=%d\n",nTpcHits,nSvtHits);
 }
@@ -378,7 +390,6 @@ static int myRefit=0;
        << "                                                  minus:"<<minus<<endl;
 }
 //______________________________________________________________________________
-
 void StiKalmanTrackFinder::extendTracksToVertices(const std::vector<StiHit*> &vertices)
 {
   enum vertexLimits {ZMAX2d=6,RMAX2d=6,DMAX3d=4,RMAX=50,RMIN=5};
@@ -707,6 +718,7 @@ static  const double ref1a  = 110.*degToRad;
           status = node->updateNode();
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
+	  if (debug() & 8) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 

@@ -101,14 +101,14 @@ static int myKount=0;myKount++;
         status = tryNode.updateNode();
         if (status) 			{nerr++; break;}
         tryNode.setChi2(chi2);
+	{ //continue block
+	  if (debug()) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
+	}//end continue block
 
         *targetNode=tryNode;
       }while(0);//end fit block
       pNode = targetNode;
     } while(0);//end refit block
-    { //continue block
-      if (debug()) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
-    }//end continue block
   }//end for of nodes
   nGoodNodes = track->getNNodes(3);
   if (nGoodNodes<3) return 1;
