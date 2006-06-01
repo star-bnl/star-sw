@@ -17,7 +17,11 @@ ClassImp(TMixer)
  
 /*
  $Log: TMixer.cxx,v $
+ Revision 1.2  2006/06/01 13:21:12  kocolosk
+ fixed minor warnings
+
  Revision 1.1  2006/04/20 11:42:26  amischke
+
  automatically CVS:  CVS: Committing in . CVS:  CVS: Added Files: CVS:  StPi0InvMassMaker.cxx StPi0InvMassMaker.h TEventMixer.cxx CVS:
  TEventMixer.h TMixer.cxx TMixer.h CVS: ----------------------------------------------------------------------
 
@@ -81,7 +85,8 @@ void TMixer::AddEvent(TObjArray *P1list, TObjArray *P2list)
   
 
   Int_t I;
-  StEmcPoint *Part;
+	StEmcPoint *Part;
+	Part = 0;
   StEmcPoint *PartHelp;
  
 // delete first part lists
@@ -132,7 +137,7 @@ void TMixer::AddEvent(TObjArray *P1list, TObjArray *P2list)
       else{
 	Part   =   new StEmcPoint(*PartHelp);	  
       }
-      a->Add((TObject*)Part);
+      if(Part) a->Add((TObject*)Part);
     }
   fPart1Pool->Add(a);  
   if (fNumList==2) 

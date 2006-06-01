@@ -1,6 +1,6 @@
 /*******************************************************************************
  * 
- * $Id: StPi0InvMassMaker.cxx,v 1.1 2006/04/20 11:42:26 amischke Exp $
+ * $Id: StPi0InvMassMaker.cxx,v 1.2 2006/06/01 13:21:12 kocolosk Exp $
  *
  * Author: Andre Mischke, Utrecht, Jan 2005 (a.mischke@phys.uu.nl)
  *******************************************************************************
@@ -728,7 +728,7 @@ Int_t StPi0InvMassMaker::associateTracksWithEmcPoints(StMaker* anyMaker)
   // this is NOT a structural container, so the tracks don't get deleted
 
 
-  Double_t bFld;
+  Double_t bFld = 0.;
   StEventSummary* summary = event->summary();
   if (summary)
   {
