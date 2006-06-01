@@ -1532,6 +1532,7 @@ proc ::jobCreate::createJobFiles {} {
     set f [open $path/scripts/CutsFile.txt w]
     puts $f [applyXsl eventCuts.xsl asText]
     puts $f [applyXsl trackCuts.xsl asText]
+    puts $f [applyXsl pairCuts.xsl asText]
     close $f
     # Create doEStructMacro
     set f [open $path/scripts/doEStruct.C w]
@@ -1557,12 +1558,12 @@ proc ::jobCreate::createJobFiles {} {
     # (use value of jobName for the file name.)
     # We get linefeeds in the <command> section which cause problems when
     # reading this file back in. Strip out all line feeds between
-    # "root4star" and the first ")" following it.
+    # "root.exe" and the first ")" following it.
     set node [$::jobCreate::jobInfo selectNodes //jobName]
     set f [open $path/scripts/[$node text].xml w]
     puts $f "<?xml version='1.0' encoding='utf-8' ?>"
     set jobInfo [$::jobCreate::jobInfo asXML]
-    set start [string first root4star $jobInfo]
+    set start [string first root.exe $jobInfo]
     set stop  [string first ) $jobInfo $start]
     set cmdOld [string range $jobInfo $start $stop]
     set cmdNew [string map {\n ""} $cmdOld]

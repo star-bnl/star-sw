@@ -409,14 +409,26 @@ hell is in this directory.
         <xs:enumeration value='ExitSep'>
             <xs:Comment>min, max: Cut on separation distance at exit of the TPC</xs:Comment>
         </xs:enumeration>
+        <xs:enumeration value='Quality'>
+            <xs:Comment>min, max: HBT group split track cut</xs:Comment>
+        </xs:enumeration>
         <xs:enumeration value='MidTpcSepLikeSign'>
             <xs:Comment>min, max: Cut on separation distance at middle the TPC</xs:Comment>
         </xs:enumeration>
         <xs:enumeration value='MidTpcSepUnlikeSign'>
             <xs:Comment>min, max: Cut on separation distance at middle of the TPC</xs:Comment>
         </xs:enumeration>
-        <xs:enumeration value='Quality'>
-            <xs:Comment>min, max: HBT group split track cut</xs:Comment>
+        <xs:enumeration value='HBT'>
+            <xs:Comment>min, max: Minimize HBT effect? (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Coulomb'>
+            <xs:Comment>min, max: Minimize Coulomb effect? (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Merging'>
+            <xs:Comment>max avg XY sep, max avg Z sep  (Michaels cut)</xs:Comment>
+        </xs:enumeration>
+        <xs:enumeration value='Crossing'>
+            <xs:Comment>Look in StEStructPairCuts.h for details (Michaels cut)</xs:Comment>
         </xs:enumeration>
     </xs:restriction>
 </xs:simpleType>
