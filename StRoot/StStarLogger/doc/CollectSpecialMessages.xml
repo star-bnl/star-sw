@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration>
-<!-- $Name:  $Id: CollectSpecialMessages.xml,v 1.2 2006/06/01 14:42:59 fine Exp $  ->
+<!-- $Name:  $Id: CollectSpecialMessages.xml,v 1.3 2006/06/01 14:48:16 fine Exp $  ->
 
 <configuration xmlns='http://logging.apache.org/'>
 
-<!-- This configuration instructs the STAR logger to collect all special messages to the dedicated "qa.log" file -->
-<!-- Concurently it instructs the logger to dirrect all messages to the stdout as well  -->
+<!-- This configuration instructs the STAR logger to collect all special messages to the dedicated "qa.log" file
+     Concurently it instructs the logger to dirrect all messages to the stdout as well 
+-->     
 
   <!--  Print all messages to the console   -->
   <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
