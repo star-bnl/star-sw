@@ -564,6 +564,7 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 <li><a href="HardQuota.xml"> HardQuota.xml</code></b></a> - allows at most  400 non-Info  messages
 <li><a href="RollingQuota.xml"> <b><code>RollingQuota.xml</code></b></a> - allows 100 MGb log file at most   
 <li><a href="QACustom.xml"> <b><code>QACustom.xml</code></b></a> - defines the custom level and format for QA messages
+<li><a href="CollectSpecialMessages.xml"> <b><code>CollectSpecialMessages.xml</code></b></a> - redirects some messages defined by the custom patterns to the dedicated log file 
 </ul>
 
 <!---- ------------------------------------------------------------------------------ -->
@@ -588,7 +589,7 @@ Loggers have their additivity flag set to true by default
 <P>
 The "additvity"  has some "side effect" that if one assignes the "appender" for the "root" logger and he/she does define 
 the same appender for the child logger explicitly then one may
-<a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have endded up with each program message 
+<a href="http://www.star.bnl.gov/rt2/Ticket/Display.html?id=621">have ended up with each program message 
 printed more then one time</a>. 
 </ul>
 

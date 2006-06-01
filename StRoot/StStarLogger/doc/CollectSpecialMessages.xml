@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration>
-<!-- $Name:  $Id: CollectSpecialMessages.xml,v 1.1 2006/06/01 14:42:15 fine Exp $  ->
+<!-- $Name:  $Id: CollectSpecialMessages.xml,v 1.2 2006/06/01 14:42:59 fine Exp $  ->
 
 <configuration xmlns='http://logging.apache.org/'>
 
@@ -22,7 +22,7 @@
          <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n" /> 
      </layout>
 
- <!--  Define the pattern  to select the following STAR QA messages:
+ <!--  Define the pattern to select the following STAR QA messages:
        -------------------------------------------------------------
 QA :INFO  - StAnalysisMaker,  Reading Event: 4  Type: NONE  Run: 6080011
 QA :INFO  - # track nodes:      454:    globals with NFitP>=15: 249:    Ftpc tracks :   86
