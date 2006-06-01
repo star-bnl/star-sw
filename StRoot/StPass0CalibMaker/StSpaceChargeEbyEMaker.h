@@ -43,7 +43,7 @@ public:
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.5 2006/01/05 19:12:53 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.6 2006/06/01 17:27:11 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -124,15 +124,21 @@ protected:
 
   float gapZfitslope;
   float egapZfitslope;
+  float gapZfitintercept;
+  float egapZfitintercept;
   float gapZdivslope;
   float egapZdivslope;
   float gapZfitslopeneg;
+  float gapZfitinterceptneg;
   float gapZdivslopeneg;
   float gapZfitslopepos;
+  float gapZfitinterceptpos;
   float gapZdivslopepos;
   float gapZfitslopeeast;
+  float gapZfitintercepteast;
   float gapZdivslopeeast;
   float gapZfitslopewest;
+  float gapZfitinterceptwest;
   float gapZdivslopewest;
 
 
@@ -144,7 +150,7 @@ protected:
   void FillQAHists(float,float,int,StPhysicalHelixD&,int);
   void FillGapHists(StTrack*,StPhysicalHelixD&,int,int);
   void DetermineGaps();
-  void DetermineGapHelper(TH2F*,float&,float&);
+  void DetermineGapHelper(TH2F*,float&,float&,float&);
 
 
   ClassDef(StSpaceChargeEbyEMaker, 0)
@@ -153,8 +159,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.5 2006/01/05 19:12:53 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.6 2006/06/01 17:27:11 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.6  2006/06/01 17:27:11  genevb
+// Bug fix: gapd and gapf backwards; Improvements: gap fit intercepts, hist and fit ranges
+//
 // Revision 1.5  2006/01/05 19:12:53  genevb
 // Added calib mode
 //
