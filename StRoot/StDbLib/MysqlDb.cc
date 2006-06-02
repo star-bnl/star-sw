@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.34 2006/05/30 15:33:38 deph Exp $
+ * $Id: MysqlDb.cc,v 1.35 2006/06/02 18:23:23 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.34  2006/05/30 15:33:38  deph
- * Small fix to allow for connection from load balancer to online alias "onldb"
+ * Revision 1.35  2006/06/02 18:23:23  deph
+ * Added an extra machine (db01) for analysis between 11pm and 7am
  *
  * Revision 1.31  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
@@ -163,6 +163,7 @@
 #include "StDbManager.hh" // for now & only for getting the message service
 #include "stdb_streams.h"
 
+
 //#include "errmsg.h"
 
 #ifdef HPUX
@@ -240,6 +241,11 @@ void MysqlDb::initServerLists()
   ServerList_dbx.push_back("db06.star.bnl.gov");
   ServerList_dbx.push_back("db07.star.bnl.gov");
   ServerList_dbx.push_back("db08.star.bnl.gov");
+
+  ServerList_dbp.push_back("db06.star.bnl.gov");
+  ServerList_dbp.push_back("db07.star.bnl.gov");
+  ServerList_dbp.push_back("db08.star.bnl.gov");
+  ServerList_dbp.push_back("db01.star.bnl.gov");
 }
 //////////////////////////////////////////////////////////////////////// 
 vector<string>::iterator MysqlDb::RecommendedServer(vector<string>* MyServerList, char* sock, int port)
@@ -349,15 +355,33 @@ strcpy(mdbhost,aHost);
   //  cout << "aHost = "<<mdbhost<<endl; 
   //cout << " Calling load balancer\n";
   clock_t start,finish;
-  double time;
+ double lbtime;
   start = clock();
   const char* hostname = mdbhost;
   char* ptr = strstr(hostname,"dbx.star.bnl");
   
+  //get time of day hours
+  
+
+  struct tm *tp;  
+  time_t timeNow;
+  timeNow = time(NULL);
+  tp = localtime(&timeNow);
+    
+  
+  
+
   if (ptr != 0)
     {
-      std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbx, NULL, mdbPort);
-      mdbhost = (*myserver).c_str();
+      if (tp->tm_hour > 22 || tp->tm_hour < 8)
+	{
+	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbp, NULL, mdbPort);
+	  mdbhost = (*myserver).c_str();
+	}else{
+	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbx, NULL, mdbPort);
+	  mdbhost = (*myserver).c_str();
+	  cout<< "*****"<<tp->tm_hour<<"*****"<<endl;
+	}
     }
   else
     {
@@ -370,8 +394,8 @@ strcpy(mdbhost,aHost);
 	 
     }
   finish = clock();
-  time = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
-  cout << " Load balancer took "<<time<<" ms, will use "<<mdbhost<<" \n";
+  lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
+  cout << " Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
 
 
 
