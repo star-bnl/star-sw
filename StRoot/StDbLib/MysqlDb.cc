@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.35 2006/06/02 18:23:23 deph Exp $
+ * $Id: MysqlDb.cc,v 1.36 2006/06/02 18:24:22 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
- * Revision 1.35  2006/06/02 18:23:23  deph
- * Added an extra machine (db01) for analysis between 11pm and 7am
+ * Revision 1.36  2006/06/02 18:24:22  deph
+ * removed debug output from previous checkin
  *
  * Revision 1.31  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
@@ -380,7 +380,7 @@ strcpy(mdbhost,aHost);
 	}else{
 	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbx, NULL, mdbPort);
 	  mdbhost = (*myserver).c_str();
-	  cout<< "*****"<<tp->tm_hour<<"*****"<<endl;
+	  //  cout<< "*****"<<tp->tm_hour<<"*****"<<endl;
 	}
     }
   else
