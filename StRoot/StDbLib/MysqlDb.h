@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.23 2006/05/19 23:03:48 deph Exp $
+ * $Id: MysqlDb.h,v 1.24 2006/06/02 18:23:23 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
- * Revision 1.23  2006/05/19 23:03:48  deph
- * Adding basic load balancing.  Two separate pools; db and dbx; within each pool the node with least processes (mysql-threads) wins.
- * This now by-passes DNS Round Robin and connects directely to the "winning" node.
+ * Revision 1.24  2006/06/02 18:23:23  deph
+ * Added an extra machine (db01) for analysis between 11pm and 7am
  *
  * Revision 1.22  2005/12/15 03:14:27  jeromel
  * Mem Leak fixes / Missing delete in new and stream context.
@@ -215,6 +214,7 @@ private:
   std::vector<std::string>::iterator RecommendedServer(std::vector<std::string>* ListToUse, char* socket, int port);
   std::vector<std::string> ServerList_db;
   std::vector<std::string> ServerList_dbx;
+  std::vector<std::string> ServerList_dbp;
   void initServerLists();
 
 
