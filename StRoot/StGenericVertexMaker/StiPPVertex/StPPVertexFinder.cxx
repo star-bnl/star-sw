@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.22 2006/05/04 20:01:31 jeromel Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.23 2006/06/02 20:46:55 perev Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -746,10 +746,10 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
     if(!ktn.isValid()) continue; // from Victor
     if(ktn.getHit() && ktn.getChi2() >1000) continue; // from Victor
     const StiDetector * det=ktn.getDetector();
-    assert(det);
+    assert(!(ktn.x()) || det);
     float rxy=ktn.getX();
-    bool actv=ktn.getDetector()->isActive(ktn.getY(), ktn.getZ());
-    if(rxy>58 && rxy < 190){
+    bool actv= !det || det->isActive(ktn.getY(), ktn.getZ());
+    if(!det || (rxy>58 && rxy < 190)){
       float z=ktn.z_g();
       if(zL>z) zL=z;
       if(zH<z) zH=z;
@@ -783,12 +783,12 @@ StPPVertexFinder::dumpKalmanNodes(const StiKalmanTrack*track){
     float sy=sqrt(ktn.getCyy());
     float sz=sqrt(ktn.getCzz());
     const StiDetector * det=ktn.getDetector();
-    assert(det);
+    assert(!(ktn.x()) || det);
     cout<<"#e in="<<in<<" |P|="<<ktn.getP()<<" Local: x="<<ktn.getX()<<" y="<<ktn.getY()<<" +/- "<<sy<<" z="<<ktn.getZ()<<" +/- "<<sz;
     if(ktn.getHit()) cout <<" hit=1";
     else cout <<" hit=0";
     if(det==0)  cout<<" noDet ";
-    else cout<<" detActv="<<ktn.getDetector()->isActive(ktn.getY(), ktn.getZ());
+    else cout<<" detActv="<<(!det || det->isActive(ktn.getY(), ktn.getZ()));
     cout <<endl;
     //    break; // tmp
   }
@@ -1043,8 +1043,8 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
     }
     lastZ=z;
     const StiDetector * det=ktnp->getDetector();
-    assert(det);
-    bool active=ktnp->getDetector()->isActive(yL(ktnp), zL(ktnp));
+    assert(!(ktnp->x()) || det);
+    bool active=!det || det->isActive(yL(ktnp), zL(ktnp));
     int hit=ktnp->getHit()?1:0;
     if(active) {
       hitPatt.push_back(hit);
@@ -1066,6 +1066,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.23  2006/06/02 20:46:55  perev
+ * Accoun DCA node added
+ *
  * Revision 1.22  2006/05/04 20:01:31  jeromel
  * Switched to logger
  *
