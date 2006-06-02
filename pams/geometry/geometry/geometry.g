@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.122 2006/05/05 17:38:41 potekhin Exp $
+* $Id: geometry.g,v 1.123 2006/06/02 17:34:37 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.123  2006/06/02 17:34:37  potekhin
+* a) removed the PIX1 tag that was reliably
+* confirmed as obsolete
+* b) added the SISD_OFF flag that facilitates
+* creation of test geometries in which both the SVT
+* and the SSD are taken out. Needed for R&D.
+*
 * Revision 1.122  2006/05/05 17:38:41  potekhin
 * Just rename the IST2 to UPGR03 to stivk with
 * previously chosen naming convention.
@@ -848,82 +855,6 @@ If LL>1
                    fgtd=on;  "GEM forward tracker"
                    FgtdConfig=1;
                 }
-*************************************************************************************************************
-  on PIX1   { Modified PIX Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
-                  "svt: 3 layers ";
-                     nsi=7    " 3 bi-plane layers + ssd ";
-                     wfr=0    " numbering is in the code   ";
-                     wdm=0    " width is in the code       ";
-                     NsiMin=3 " skip the innermost layer   ";
-
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
-                  "calb" 
-                     ems=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
-                     ecal_config=3   "both wheels"
-                     ecal_fill=3     "all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
-*                    -- Obsoleted CorrNum = 4;
-                     SvshConfig = 1; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 4;
-
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdConfig = 1;
-                  "Silicon Strip Detector Version "
-                     sisd=off;
-                     SisdConfig = 1;
-
-* careful! Achtung!
-                   pipeConfig=5;   " thinner pipe "
-                   pixl=on;        " activate "
-                   PixlConfig=3;   " source version "
-* The new inner tracker is not active here
-                   istb=off;  "new pixel based inner tracker"
-                   IstbConfig=0;
-                }
-
-
-
-* corrected: MWC readout, RICH reconstructed position, no TOF 
-  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
-                  {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5; 
-                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
-
-  on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
-
-* 02/09/2004  Jerome signed off on changing, retroactively, the
-* position of the wafers in year2001, which was incorrectly offset
-* by 250 um insterad of 150 um.
-
-*                    -- Obsoleted CorrNum = 1;
-                     SvttConfig = 1; "SVTT version"
-                     SupoConfig = 1; "FTPC Support"
-
-                  BtofConfig=4;
-                  {rich,ems}=on;
-
-* a newer way to steer ecal:
-                  ecal_config=1   " one ecal patch, west "
-
-* this was put here in recent versions (as of 1.50) and I believe this is wrong as
-* it destroys compatibility with earlier code: --max--
-*    ecal=off;  
-                  nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
-                
 ****************************************************************************************
   on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
                   "svt: 3 layers ";
@@ -2273,6 +2204,8 @@ If LL>1
                      svtt=on; }
   on SVTT_OFF   { Optionally remove the SVTT;
                      svtt=off; }
+  on SISD_OFF   { Optionally remove the SISD ssd;
+                     sisd=off; }
   on ONLY_SVTT   { Only SVTT;
                   {pipe,tpce,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm,ftro}=off; }
 *
