@@ -155,14 +155,14 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 // Add a record to MySQL tracking Db     
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
-         << ",StepEventId=" << "'Finish'"
+         << ",StepEventId=" << "'EventFinish'"
          << ",StepContext=" << "'Cpu',"  << "MessageId='='"
          << ",ProgrammMessage='" << evnt.GetCpuTime("QAInfo:")
          << "'" << endm;
 
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
-         << ",StepEventId=" << "'Finish'"
+         << ",StepEventId=" << "'EventFinish'"
          << ",StepContext=" << "'RealTime',"  << "MessageId='='"
          << ",ProgrammMessage='" << evnt.GetRealTime("QAInfo:")
          << "'" << endm;
@@ -202,8 +202,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.59 2006/05/24 17:33:43 fine Exp $
+// $Id: StChain.cxx,v 1.60 2006/06/04 22:59:00 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.60  2006/06/04 22:59:00  fine
+// Change the wonr event tracking code : Finish with the proper EventFinish
+//
 // Revision 1.59  2006/05/24 17:33:43  fine
 // remove the redundant Db fields
 //
