@@ -1,5 +1,5 @@
 #!/usr/local/bin/tcsh
-# $Id: ShowSomething.csh,v 1.1 2006/06/05 03:09:36 fine Exp $
+# $Id: ShowSomething.csh,v 1.2 2006/06/05 18:52:04 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
 echo Total number of the tasks:
@@ -59,15 +59,28 @@ echo The list of the completed tasks
 echo -------------------------------
 mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
  use logger;
-SELECT JobDescription.JobUser, JobTracking.time, JobDescription.taskId,  COUNT(*) AS completed_jobs
+SELECT JobDescription.JobUser, JobTracking.time, JobDescription.taskId,  JobTracking.jobId, COUNT(*) AS completed_jobs
  FROM   JobDescription, JobTracking 
- WHERE     JobTracking.StepEventId = "EventFinish" 
-         AND JobTracking.Events = 100
-         AND JobTracking.StepContext = "nodes all"
+ WHERE     JobTracking.StepEventId = "Finish" 
+         AND JobTracking.StepContext = "ProgSize"
          AND JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId;
  
 # --- Print the number and time of the completed tasks
 
+MYSQLCODE
+echo ""
+echo The list of the uncompleted tasks
+echo ---------------------------------
+mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
+ use logger;
+SELECT JobDescription.JobUser, current_jobs.time, JobDescription.taskId,  current_jobs.jobId, COUNT(*) AS uncompleted_jobs
+  FROM   JobDescription, 
+         (SELECT  JobTracking.time as time, JobTracking.jobId as jobId     
+            FROM JobDescription, JobTracking 
+            WHERE JobTracking.jobId = JobDescription.jobId 
+         ) as current_jobs
+  WHERE  "Finish" NOT IN ( SELECT current_jobs.StepEventId FROM current_jobs )
+         GROUP BY JobDescription.taskId
 MYSQLCODE
 echo ""
 echo The list of the started jobs
@@ -84,7 +97,7 @@ SELECT JobDescription.JobUser, JobTracking.time, JobDescription.taskId,  COUNT(*
 
 MYSQLCODE
 echo "---"
-#echo The sorted List of the tasks
+echo The  List of the completed tasks
 echo ----------------------------
 mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
  use logger;
@@ -101,13 +114,20 @@ FROM  TaskDescription,
    ( SELECT  JobDescription.taskId as taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE     JobTracking.StepEventId = "Finish" 
+           AND JobTracking.StepContext = "ProgSize"
            AND JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE  completed_jobs = TaskDescription.nProcesses 
-          AND TaskDescription.TaskUser='fine' 
+#          AND TaskDescription.TaskUser='fine' 
           AND TaskDescription.taskId = tbl.taskId;
  
 # --- Print the number of the uncompleted tasks
 
+MYSQLCODE
+echo "---"
+echo The  List of the uncompleted tasks
+echo ------------------------------------
+mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
+ use logger;
 SELECT TaskDescription.TaskUser       AS 'Task Owner'
      , TaskDescription.JobName        AS 'Defined by SUMS'
      , TaskDescription.jobID_MD5
@@ -119,8 +139,9 @@ FROM  TaskDescription,
    ( SELECT  JobDescription.taskId as taskId, JobTracking.time AS FinishedTime, COUNT(*) AS completed_jobs
      FROM   JobDescription, JobTracking 
      WHERE     JobTracking.StepEventId = "Finish" 
-           AND JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
+          AND JobTracking.StepContext = "ProgSize"
+          AND JobTracking.jobId = JobDescription.jobId GROUP BY JobDescription.taskId) as tbl
   WHERE     completed_jobs <> TaskDescription.nProcesses 
-         AND TaskDescription.TaskUser='fine' 
+#         AND TaskDescription.TaskUser='fine' 
          AND TaskDescription.taskId = tbl.taskId ;  
 MYSQLCODE
