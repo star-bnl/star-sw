@@ -149,6 +149,7 @@ class StMessMgr : public ostrstream {
    virtual       void MemoryOff() =0;
    virtual        int AddType(const char* type, const char* text) =0;
    virtual        int ListTypes() =0;
+   virtual       void Close() {} // Close the messenger streams
 //Optimization
        /*
         *  <p>If you are worried about speed, then you should write
@@ -313,4 +314,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.7 2005/08/19 21:26:52 fine Exp $
+// $Id: StMessMgr.h,v 1.8 2006/06/05 00:20:18 fine Exp $
