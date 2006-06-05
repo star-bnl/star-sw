@@ -136,6 +136,7 @@ protected:
    virtual       void MemoryOff();
    virtual        int AddType(const char* type, const char* text);
    virtual        int ListTypes();
+   virtual       void Close(); // Close the messenger streams
 //   virtual const char *GetName();
 
 // Info Messages:
@@ -227,4 +228,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.5 2005/12/20 20:51:15 fine Exp $
+// $Id: StLoggerManager.h,v 1.6 2006/06/05 00:21:40 fine Exp $
