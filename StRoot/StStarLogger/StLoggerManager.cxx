@@ -462,7 +462,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.19 2006/05/19 21:42:30 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.20 2006/06/05 00:21:40 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -742,6 +742,13 @@ _NO_IMPLEMENTATION_;
 // messCounter->ListLimits();                                  
 }
 //_____________________________________________________________________________
+void StLoggerManager::Close()
+{
+ // Close the messenger streams
+ // Close the appenders to flush its buffers
+   if (fgQALogger) fgQALogger->closeNestedAppenders();
+}
+//_____________________________________________________________________________
 void StLoggerManager::RemoveLimit(const char* str) 
 {  SetLimit(str,-1);                                           }
 //_____________________________________________________________________________
@@ -793,8 +800,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.19 2006/05/19 21:42:30 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.20 2006/06/05 00:21:40 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.20  2006/06/05 00:21:40  fine
+// class the new StMessMgr method to flush the logger buffers
+//
 // Revision 1.19  2006/05/19 21:42:30  fine
 // remove the debug print outs
 //

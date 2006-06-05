@@ -1,4 +1,4 @@
-/*!
+ /*!
   StChain                                                              
 
  Main class to control the StChain program.                           
@@ -195,6 +195,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
          << ",ProgrammMessage='" << int(TMemStat::ProgSize())
          << "'" << endm;
+   if (GetLogger()) GetLogger()->Close();
 
 #endif                
   fflush(stdout);
@@ -202,8 +203,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.60 2006/06/04 22:59:00 fine Exp $
+// $Id: StChain.cxx,v 1.61 2006/06/05 00:20:59 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.61  2006/06/05 00:20:59  fine
+// class the new StMessMgr method to flush the logger buffers
+//
 // Revision 1.60  2006/06/04 22:59:00  fine
 // Change the wonr event tracking code : Finish with the proper EventFinish
 //
