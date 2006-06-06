@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.502 2006/05/18 13:35:17 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.503 2006/06/06 18:58:16 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -60,16 +60,13 @@ void StBFChain::Setup(Int_t mode) {
   if (! file) { LOG_FATAL  << Form("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path) << endm; }
   else        { LOG_WARN   << Form("StBFChain::Setup","File %s has been found as %s",chain.Data(),file) << endm; }
 #else
+
   if (! file)   Fatal("StBFChain::Setup","File %s has not been found in path %s",chain.Data(),path);
   else        Warning("StBFChain::Setup","File %s has been found as %s",chain.Data(),file);
 #endif
-#if 1
   TString cmd(".L ");
   cmd += file;
   gInterpreter->ProcessLine(cmd);
-#else
-  gROOT->LoadMacro(file);
-#endif
   chainOpt  = (St_Bfc *) gInterpreter->Calc("CreateTable()");
   cmd = ".U ";
   cmd += file;
@@ -228,7 +225,14 @@ Int_t StBFChain::Instantiate()
       if (inpMk) {
 	strcpy (fBFC[i].Name,(Char_t *) inpMk->GetName());
 	SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
-	if (GetOption("ReadAll")) inpMk->SetBranch("*",0,"r");	//activate all branches
+	if (GetOption("ReadAll")) {	//activate all branches
+	  // inpMk->SetBranch("*",0,"r");
+	  const Char_t *allBranches[] = {
+	    "dstBranch","dstHitsBranch","emc_rawBranch","eventBranch","ftpc_rawBranch",
+	    "geantBranch","globalBranch","McEventBranch","svt_hitsBranch","svt_tracksBranch",
+	    "tpc_hitsBranch","tpc_rawBranch","tpc_tracksBranch","trgBranch",0};
+	  for (Int_t i = 0; allBranches[i]; i++) inpMk->SetBranch(allBranches[i],0,"r");
+	}
 	goto Add2Chain;
       }
       goto Error;
