@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.h,v 1.5 2005/09/01 19:00:20 suaide Exp $
+// $Id: StBemcTrigger.h,v 1.6 2006/06/08 14:53:45 rfatemi Exp $
 //
 //
 
@@ -62,6 +62,13 @@ private:
     int mIsTrig[10];//1==true,0==false
     int mTowJetId[10];//JP_ID/HT_ID of trigger
     int mDsmAdc[10];//DSM ADC of trigger
+    int mnumHT[5];//#towers in trigger
+    int mnumJP[5];//#patches in trigger
+    int mHT12005array[kNTowers];//array of towers which pass trigger
+    int mJP12005array[kNJet];//array of JP's which pass trigger
+    int mHT22005array[kNTowers];//array of towers which pass trigger
+    int mJP22005array[kNJet];//array of JP's which pass trigger
+
 
     int mIs2003HT1;
     int mIs2004HT1;
@@ -97,6 +104,16 @@ private:
     int ADJ_DSM_2005;
     int JP_TP[12][25];
 
+    int numHT1_2005;
+    int numHT2_2005;
+    int numJP1_2005;
+    int numJP2_2005;
+    int numADJ_2005;
+
+    int HT1_2005_array[kNTowers];
+    int HT2_2005_array[kNTowers];
+    int JP1_2005_array[kNJet];
+    int JP2_2005_array[kNJet];
 public:
     StBemcTrigger();
     virtual        ~StBemcTrigger();
@@ -123,19 +140,43 @@ public:
 
     //1==true, 0==false, -1==problems
     int*          isTrigEvent()
-    {
+      {
         return mIsTrig;
-    }
+      }
     //return JPID/towID -1==problems
     int*           getTowPatchId()
-    {
+      {
         return mTowJetId;
-    }
+      }
     //DSM 6bit ADC
     int*           getTowPatchDSM()
-    {
+      {
         return mDsmAdc;
-    }
+      }
+    int*          getNHT()
+      {
+	return mnumHT;
+      }
+    int*         getNJP()
+      {
+	return mnumJP;
+      }
+    int*          getHT12005array()
+      {
+	return mHT12005array;
+      }
+   int*          getHT22005array()
+      {
+	return mHT12005array;
+      }
+    int*         getJP12005array()
+      {
+	return mJP12005array;
+      }
+    int*         getJP22005array()
+      {
+	return mJP22005array;
+      }
 
 
     emcTrigger     getTrigger()
