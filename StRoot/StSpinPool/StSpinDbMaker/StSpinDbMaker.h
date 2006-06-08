@@ -1,11 +1,11 @@
-// $Id: StSpinDbMaker.h,v 1.4 2006/01/05 18:21:24 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.5 2006/06/08 00:37:02 balewski Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
 */  
 
-#ifndef STAR_SteemcDbMaker
-#define STAR_SteemcDbMaker
+#ifndef STAR_StspinDbMaker
+#define STAR_StspinDbMaker
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -24,7 +24,7 @@ class StSpinDbMaker : public StMaker {
   spinDbStar_st   *mTabSpinStar;
   spinDbBXmask_st *mTabSpinBXmask;
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.4 2006/01/05 18:21:24 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.5 2006/06/08 00:37:02 balewski Exp $";
 
   void clearTables(); /// clear local lookup tables
   void requestDataBase(); /// reads tables from STAR-DB
@@ -93,7 +93,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.4 2006/01/05 18:21:24 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.5 2006/06/08 00:37:02 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -104,6 +104,9 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.5  2006/06/08 00:37:02  balewski
+// wrong  ifdef was used
+//
 // Revision 1.4  2006/01/05 18:21:24  balewski
 // added get: cadPollPatt, nFillBunch
 // changed BXstar --> BXyellow
