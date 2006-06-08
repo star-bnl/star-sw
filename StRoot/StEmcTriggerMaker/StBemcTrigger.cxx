@@ -1,5 +1,5 @@
 ///
-// $Id: StBemcTrigger.cxx,v 1.16 2006/04/05 18:37:42 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.17 2006/06/08 14:53:45 rfatemi Exp $
 //
 //
 
@@ -91,6 +91,19 @@ void StBemcTrigger::resetConf(){
     {
         mDsmAdc[i] = -1;
     }
+    
+    for(int i=0;i<kNTowers;i++){
+      mHT12005array[i]=-1;
+      mHT22005array[i]=-1;
+    }
+    for (int i=0;i<kNJet;i++){
+      mJP12005array[i]=-1;
+      mJP22005array[i]=-1;
+    }
+    for (int i=0;i<5;i++){
+      mnumHT[i]=0;
+      mnumJP[i]=0;
+    }
 
 }
 
@@ -109,7 +122,7 @@ void StBemcTrigger::zero()
     }
 
     mTrigger.Et = 0;
-
+     
 }
 
 
@@ -229,32 +242,45 @@ int StBemcTrigger::makeTrigger()
     mIsTrig[5]  =mIs2005HT1;
     mTowJetId[5]=HT1_ID_2005;
     mDsmAdc[5]  =HT1_DSM_2005;
+    mnumHT[3] =numHT1_2005;
+    for (int i=0;i<numHT1_2005;i++){
+      mHT12005array[i]=HT1_2005_array[i];
+    }
 
     //2005 HT2 == 96211
     mIsTrig[6]  =mIs2005HT2;
     mTowJetId[6]=HT2_ID_2005;
     mDsmAdc[6]  =HT2_DSM_2005;
+    mnumHT[4] =numHT2_2005;
+    for (int i=0;i<numHT2_2005;i++){
+      mHT22005array[i]=HT2_2005_array[i];
+    }
 
     //2005 JP1 == 96221
     mIsTrig[7]  =mIs2005JP1;
     mTowJetId[7]=JP1_ID_2005;
     mDsmAdc[7]  =JP1_DSM_2005;
+    mnumJP[2]  =numJP1_2005;
+    for (int i=0;i<numJP1_2005;i++){
+      mJP12005array[i]=JP1_2005_array[i];
+    }
 
     //2005 JP2 == 96233
     mIsTrig[8]  =mIs2005JP2;
     mTowJetId[8]=JP2_ID_2005;
     mDsmAdc[8]  =JP2_DSM_2005;
+    mnumJP[3]   =numJP2_2005;
+    for (int i=0;i<numJP2_2005;i++){
+      mJP22005array[i]=JP2_2005_array[i];
+    }
 
     //2005 AJP == 96241
     mIsTrig[9]  =mIs2005ADJ;
     mTowJetId[9]=ADJ_ID_2005;
     mDsmAdc[9]  =ADJ_DSM_2005;
 
-    for (int z=0;z<10;z++)
-    {
-        printf("Make i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d\n",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]);
-    }
-
+    //for (int z=0;z<10;z++) printf("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d\n",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]);
+ 
     return kStOK;
 }
 
@@ -297,11 +323,11 @@ int StBemcTrigger::get2003Trigger()
     StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
     if(detector)
     {
-        for(Int_t m=1;m<=120;m++)
+        for(Int_t m=1;m<=60;m++)
         {
             StEmcModule* module = detector->module(m);
             if(module)
-            {
+            { 
                 StSPtrVecEmcRawHit& rawHit=module->hits();
                 for(UInt_t k=0;k<rawHit.size();k++)
                     if(rawHit[k])
@@ -456,7 +482,7 @@ int StBemcTrigger::get2004Trigger()
     StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
     if(detector)
     {
-        for(Int_t m=1;m<=120;m++)
+        for(Int_t m=1;m<=60;m++)
         {
             StEmcModule* module = detector->module(m);
             if(module)
@@ -748,13 +774,37 @@ int StBemcTrigger::get2005Trigger()
     int adc10[kNTowers];
     int adc08[kNTowers];
     int ped10[kNTowers];
-    for(int i=0;i<kNTowers;i++)
-    {
+    for(int i=0;i<kNTowers;i++){
         adc12[i] = 0;
         adc10[i] = 0;
         adc08[i] = 0;
         ped10[i] = 0;
+	HT1_2005_array[i]=-1;
+	HT2_2005_array[i]=-1;
+        mHT12005array[i]=-1;
+        mHT22005array[i]=-1;
     }
+
+    mnumHT[3]=0;
+    mnumHT[4]=0;
+    mnumJP[2]=0;
+    mnumJP[3]=0;
+    mnumJP[4]=0;
+    
+    for (int i=0;i<kNJet;i++){
+      JP1_2005_array[i]=-1;
+      JP2_2005_array[i]=-1;
+      mJP12005array[i]=-1;
+      mJP22005array[i]=-1;
+     }
+
+    numHT1_2005=0;
+    numHT2_2005=0;
+    numJP1_2005=0;
+    numJP2_2005=0;
+    numADJ_2005=0;
+    
+    
 
     int ped12bit, val12bit;
     int operation; // operation bit for pedestal subtraction
@@ -764,7 +814,7 @@ int StBemcTrigger::get2005Trigger()
     StEmcDetector* detector=emc->detector(kBarrelEmcTowerId);
     if(detector)
     {
-        for(Int_t m=1;m<=120;m++)
+        for(Int_t m=1;m<=60;m++)
         {
             StEmcModule* module = detector->module(m);
             if(module)
@@ -902,6 +952,19 @@ int StBemcTrigger::get2005Trigger()
                 HTmax=mTrigger.HT[i];
                 HTmaxID=HTID;
 	      }
+
+	    if (mTrigger.HT[i]>HT1_TH_2005){
+	      HT1_2005_array[numHT1_2005]=HTID;
+	      numHT1_2005++;
+	      cout<<HTID<<" Passed HT1 threshold="<<numHT1_2005<<"  "<<HT1_2005_array[numHT1_2005-1]<<endl;
+	    }
+
+	    if (mTrigger.HT[i]>HT2_TH_2005){
+	      HT2_2005_array[numHT2_2005]=HTID;
+	      numHT2_2005++;
+	      cout<<HTID<<" Passed HT2 threshold="<<numHT2_2005<<"  "<<HT2_2005_array[numHT2_2005-1]<<endl;
+	    }
+
         }
     
     if (HTmax>HT1_TH_2005)
@@ -951,6 +1014,22 @@ int StBemcTrigger::get2005Trigger()
             JPmax=mTrigger.Jet[i];
             JPid=i;
         }
+
+
+        if (mTrigger.Jet[i]>JP1_TH_2005)
+        {
+	  JP1_2005_array[numJP1_2005]=i;
+          numJP1_2005++;
+        }
+
+       if (mTrigger.Jet[i]>JP2_TH_2005)
+        {
+	  JP2_2005_array[numJP2_2005]=i;
+          numJP2_2005++;
+        }
+
+
+
     }
 
     if (JPmax>JP1_TH_2005)
