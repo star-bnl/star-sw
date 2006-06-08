@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.123 2006/06/02 17:34:37 potekhin Exp $
+* $Id: geometry.g,v 1.124 2006/06/08 19:36:36 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.124  2006/06/08 19:36:36  potekhin
+* By an unfortunate slip of the wrist, I deleted year2000
+* and year2001 during the previous check-in. Now they are restored.
+*
 * Revision 1.123  2006/06/02 17:34:37  potekhin
 * a) removed the PIX1 tag that was reliably
 * confirmed as obsolete
@@ -855,6 +859,34 @@ If LL>1
                    fgtd=on;  "GEM forward tracker"
                    FgtdConfig=1;
                 }
+
+
+* corrected: MWC readout, RICH reconstructed position, no TOF 
+  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
+                  {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5; 
+                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
+
+  on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
+
+* 02/09/2004  Jerome signed off on changing, retroactively, the
+* position of the wafers in year2001, which was incorrectly offset
+* by 250 um insterad of 150 um.
+
+*                    -- Obsoleted CorrNum = 1;
+                     SvttConfig = 1; "SVTT version"
+                     SupoConfig = 1; "FTPC Support"
+
+                  BtofConfig=4;
+                  {rich,ems}=on;
+
+* a newer way to steer ecal:
+                  ecal_config=1   " one ecal patch, west "
+
+* this was put here in recent versions (as of 1.50) and I believe this is wrong as
+* it destroys compatibility with earlier code: --max--
+*    ecal=off;  
+                  nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
+                
 ****************************************************************************************
   on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
                   "svt: 3 layers ";
