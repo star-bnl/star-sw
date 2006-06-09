@@ -53,7 +53,11 @@ const double *GetX(int i=0) const;
 double Fit();   
 void   MakeErrs();
 double Chi2() const 			{return fChi2;}
-int    Ndf()  const 			{return fNdf;}
+int    Ndf()  const 			{return fNdf ;}
+double Wtot() const                     {return fWtot;}
+const double *CoeOrt() const		{return fC   ;}
+double EvalOrt(int idx,double x) const;
+
 double EvalChi2();
 void   Clear(const char *opt ="");
 void   Print(const char* chopt = "") const;
