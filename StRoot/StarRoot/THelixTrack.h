@@ -169,7 +169,9 @@ public:
         double Step(const double *point,double *xyz=0, double *dir=0) const;
         double Path(const double *point,double *xyz=0, double *dir=0) const 
 	           {return Step(point,xyz,dir);}
+        double Dca(const double *point,double *dcaErr=0) const;
         double Path(double x,double y) const ;
+        double Dca(double x,double y,double *dcaErr=0) const ;
         double GetDCA  () const;
         double GetDCAz () const;
         double GetDCAxy() const;
@@ -227,7 +229,7 @@ void   FixAt(const double vals[5],int flag);
 void   SetCase(int kase=0) 		{fCircleFitter.SetCase(kase);}
 int    GetCase() const			{return fCircleFitter.GetCase();}
 double Chi2() const 			{return fChi2;}
-int    Ndf()  const			{return fNdf ;}
+int    Ndf()  const			{return fCircleFitter.Ndf()+fPoli1Fitter.Ndf();}
 double Chi2XY () const 			{return fCircleFitter.Chi2();}
 double Chi2SZ () const 			{return fPoli1Fitter.Chi2() ;}
 int    NdfXY ()  const 			{return fCircleFitter.Ndf();}
@@ -245,7 +247,6 @@ private:
 TCircleFitter fCircleFitter;
 TPoliFitter   fPoli1Fitter;
 double fChi2;
-int    fNdf;
 ClassDef(THelixFitter,0)
 };
 #endif // THELIXTRACK_H
