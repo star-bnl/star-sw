@@ -202,8 +202,11 @@ void TPoliFitter::Add(double x, double y,double err2)
 //_____________________________________________________________________________
 void TPoliFitter::Skip(int idx)
 {
-   fWtot -=fArr[idx*kXYW+kW]*fWtot;
+   fWtot -= fArr[idx*kXYW+kW]*fWtot;
    fArr[idx*kXYW+kW]=0;
+   double norm=0;
+   for (int l=0;l<fN;l+=kXYW) {norm+=fArr[l+kW];}
+   for (int l=0;l<fN;l+=kXYW) {fArr[l+kW]/=norm;}
    fNuse--;
    fNdf--;
 }
@@ -357,7 +360,14 @@ void TPoliFitter::DCoeDy(int iy,double *dcoe)
     TCL::vlinco(dcoe,1.,fP+lp,c[np],dcoe,np+1);
   }
 }
-    
+//_____________________________________________________________________________
+double TPoliFitter::EvalOrt(int idx,double x) const
+{
+  int lp = (idx*(idx+1))/2;
+  return Eval(x,idx,fP+lp);
+}  
+//_____________________________________________________________________________
+//_____________________________________________________________________________
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TSystem.h"
