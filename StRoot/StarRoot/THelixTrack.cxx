@@ -647,6 +647,28 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
     return (xyz) ? Step(step[0],xyz,dir) : step[0];
 }
 //_____________________________________________________________________________
+double THelixTrack::Dca(const double *point,double *dcaErr) const
+{
+   double x[3],T[3][3],emx[3];
+   double s = Path(point,x,T[2]);
+   for (int i=0;i<3;i++) {T[0][i]=point[i]-x[i];}
+   double dca = sqrt(T[0][0]*T[0][0]+T[0][1]*T[0][1]+T[0][2]*T[0][2]);
+   if (!dcaErr) return dca;
+
+   for (int i=0;i<3;i++) {T[0][i]/=dca;}
+   T[1][0]=T[0][1]*T[2][2]-T[2][1]*T[0][2];
+   T[1][1]=T[0][2]*T[2][0]-T[2][2]*T[0][0];
+   T[1][2]=T[0][0]*T[2][1]-T[2][0]*T[0][1];
+   
+   THelixTrack th(*this);
+   th.Move(s);
+   th.GetSpot(T,emx);
+   *dcaErr=emx[0];
+   return dca;
+}
+
+
+//_____________________________________________________________________________
 double THelixTrack::GetDCAxy() const
 {
   return fDCA[0];
@@ -1430,7 +1452,7 @@ void  TCircleFitter::AddZ(double z,double ez)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.20 2006/05/24 17:32:50 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.21 2006/06/09 19:53:51 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -1446,8 +1468,8 @@ void  TCircleFitter::AddZ(double z,double ez)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
- * Revision 1.20  2006/05/24 17:32:50  perev
- * THelixFitter and error handling added
+ * Revision 1.21  2006/06/09 19:53:51  perev
+ * double Dca(double x,double y,double *dcaErr=0) added
  *
  * Revision 1.2  2003/09/02 17:59:34  perev
  * gcc 3.2 updates + WarnOff
@@ -2273,7 +2295,6 @@ void THelixFitter::Clear(const char*)
   fPoli1Fitter.Clear();
   fPoli1Fitter.SetCoefs(1);
   fChi2=0;
-  fNdf=0;
 }
 //______________________________________________________________________________
 void THelixFitter::Print(const char*) const
@@ -2297,7 +2318,6 @@ void  THelixFitter::Skip(int idx)
 {
    fCircleFitter.Skip(idx);
    fPoli1Fitter.Skip(idx);
-   fNdf-=2;
 }
 //______________________________________________________________________________
 double THelixFitter::Fit()
@@ -2337,9 +2357,9 @@ double THelixFitter::Fit()
 //	Now set THelixTrack
   int ndfSz = fPoli1Fitter.Ndf();
   Update(1);
-  fNdf = ndfSz+ndfXY;
+  int ndf = ndfSz+ndfXY;
   fChi2 = Xi2xy*ndfXY+Xi2z*ndfSz;
-  if (fNdf) fChi2/=fNdf;
+  if (ndf) fChi2/=ndf;
   return fChi2;
    
 }  
@@ -2368,9 +2388,9 @@ void THelixFitter::FixAt(const double val[5],int flag)
   int ndfc = fCircleFitter.Ndf();
   int ndfz = fPoli1Fitter.Ndf();
   
-  fNdf = ndfc+ndfz;
+  int ndf = ndfc+ndfz;
   fChi2 = Xi2c*ndfc+Xi2z*ndfz;
-  if (fNdf) fChi2/=fNdf;
+  if (ndf) fChi2/=ndf;
 }
 //______________________________________________________________________________
 void THelixFitter::Update(int kase)
@@ -2405,7 +2425,7 @@ double THelixFitter::EvalChi2()
   double Xi2c = fCircleFitter.EvalChi2();
   double Xi2z = fPoli1Fitter.EvalChi2();
   fChi2 = Xi2c*fCircleFitter.Ndf()+Xi2z*fPoli1Fitter.Ndf();
-  if (fNdf>0) fChi2/=fNdf;
+  fChi2/=(fCircleFitter.Ndf()+fPoli1Fitter.Ndf()+1e-3);
   return fChi2;
 }
 //______________________________________________________________________________
