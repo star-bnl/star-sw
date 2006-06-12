@@ -721,13 +721,14 @@ Int_t StV0FinderMaker::Make() {
       keepTrack |=((long)1 << 4); // c++ v0 finder ran
       if (useSVT)
          {keepTrack |=((long)1 << 3);  //sets to one the fourth digit if SVT was used
-          if (detId[i]==2 || detId[i]==3){
-             keepTrack |=((long)1 << 2); //sets 3rd bit to 1 if + track came from SVT  
-             }
-          if(detId[j]==2 || detId[j]==3){
-             keepTrack |=((long)1 << 1); //sets 2nd bit to 1 if - track came from SVT
-             }
-          }
+	 }
+      if (detId[i]==2 || detId[i]==3){
+	keepTrack |=((long)1 << 2); //sets 3rd bit to 1 if + track came from SVT  
+      }
+      if(detId[j]==2 || detId[j]==3){
+	keepTrack |=((long)1 << 1); //sets 2nd bit to 1 if - track came from SVT
+      }
+    
       keepTrack *= -1; //sets to negative the last digit 
       v0Vertex->setChiSquared((float)keepTrack);
       ///End Betty
@@ -848,8 +849,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.30 2005/02/10 02:51:09 jeromel Exp $
+// $Id: StV0FinderMaker.cxx,v 1.31 2006/06/12 15:17:48 caines Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.31  2006/06/12 15:17:48  caines
+// Fix chisq flagging so chisq set for SVT even when sti and v02 flags are used
+//
 // Revision 1.30  2005/02/10 02:51:09  jeromel
 // Correct Zero field protection (broke V0/kink)
 //
