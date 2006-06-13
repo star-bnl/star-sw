@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.6 2006/06/13 21:26:25 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.7 2006/06/13 21:42:42 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -123,7 +123,7 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
 
   StMuEmcCollection *emc = muMk->muDst()->muEmcCollection();
 
-  //========process 7-bit Bunch-Crossing (bx7)==================
+  //========process 7-bit Bunch-Crossing (bx7)==================================
   StMuDst *dst = muMk->muDst();
   StMuEvent *muEve = dst->event();
   StL0Trigger &trig = muEve->l0Trigger();
@@ -135,7 +135,7 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
   //printf("eve=%d bx7=%d\n",mInpEve,bx7);
   
   
-  //========process trigger info==================================
+  //========process trigger info==================================================
  
   assert(muEve);
   StMuTriggerIdCollection ticB = muEve -> triggerIdCollection();
@@ -156,10 +156,10 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
   mAccEve++;
  
   
-  //..........................................................//
-  //.........................  B T O W   ....................//
+  //...........................................................................//
+  //.........................  B T O W   ......................................//
 
-  int id;                                 // id== this is soft ID
+  int id;                        // id = this is soft ID
 
   for (id=0; id<mxSoftId; id++) {
     
@@ -551,6 +551,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.7  2006/06/13 21:42:42  qattan
+  *** empty log message ***
+
   Revision 1.6  2006/06/13 21:26:25  qattan
   *** empty log message ***
 
