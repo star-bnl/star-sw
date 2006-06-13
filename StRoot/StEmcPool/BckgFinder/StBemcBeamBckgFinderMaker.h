@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.h,v 1.5 2006/06/13 21:42:42 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.h,v 1.6 2006/06/13 21:50:36 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
  * Description:
@@ -69,13 +69,13 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   int mphiBegin;            //value of beginning phi bin in the background pattern
   int mpatternLength;       //background pattern length 
   float msumAdc;            //background pattern adc sum
-  int mPattSoftId[mxSoftId];  //list of soft ID's of towers from identified pattern
+  int mPattSoftId[mxSoftId]; //list of soft ID's of towers from identified pattern
 
-  int mAdcThreshold;      //value used to set adc threshold
-  float mAdcSumThreshold; //value used to set adc sum threshold
-  int mpattern;           //value used to set pattern length needed
-  int mMaxYesPlots;    //value of Maximum number of postscript files to produce (file/event) when event is background.
-  int mMaxNoPlots;     //value of Maximum number of postscript files to produce (file/event) when event is not background.
+  int mAdcThreshold;       //value used to set adc threshold
+  float mAdcSumThreshold;  //value used to set adc sum threshold
+  int mpattern;            //value used to set pattern length needed
+  int mMaxYesPlots;       //value of Maximum number of postscript files to produce (file/event) when event is background.
+  int mMaxNoPlots;        //value of Maximum number of postscript files to produce (file/event) when event is not background.
   bool mSearchDone;
  
  public: 
@@ -109,7 +109,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
   // Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.5 2006/06/13 21:42:42 qattan Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.6 2006/06/13 21:50:36 qattan Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -120,6 +120,9 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.h,v $
+  Revision 1.6  2006/06/13 21:50:36  qattan
+  *** empty log message ***
+
   Revision 1.5  2006/06/13 21:42:42  qattan
   *** empty log message ***
 

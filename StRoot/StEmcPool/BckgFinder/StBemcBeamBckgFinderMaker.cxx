@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.7 2006/06/13 21:42:42 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.8 2006/06/13 21:50:36 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -92,9 +92,9 @@ Int_t StBemcBeamBckgFinderMaker::Init(){
 
 void StBemcBeamBckgFinderMaker::Clear(const Option_t* option){
 
-  mevtH[0]->Reset();    //keep only eta-phi-adc histogram for the last event we processed.
-  memset(mAdcArray,   0,sizeof(mAdcArray));   //clear for each event
-  memset(mPattSoftId, 0,sizeof(mPattSoftId)); //clear for each event
+  mevtH[0]->Reset();    //keep only eta-phi-adc histogram for the last event processed.
+  memset(mAdcArray,   0,sizeof(mAdcArray));   //array cleared for each event
+  memset(mPattSoftId, 0,sizeof(mPattSoftId)); //array cleared for each event
   
   mDecision=0;
   metaBegin=0;
@@ -551,6 +551,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.8  2006/06/13 21:50:36  qattan
+  *** empty log message ***
+
   Revision 1.7  2006/06/13 21:42:42  qattan
   *** empty log message ***
 
