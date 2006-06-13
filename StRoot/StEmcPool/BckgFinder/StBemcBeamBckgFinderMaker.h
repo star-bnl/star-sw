@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.h,v 1.3 2006/05/30 22:38:23 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.h,v 1.4 2006/06/13 21:26:25 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
  * Description:
@@ -56,6 +56,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   int mdb_btowSoftId[mxSoftId];  //array of towers softIds
 
   float mAdcArray[mxPhi][mxEta]; //array of adc values passing adc threshold
+  int mSoftId[mxPhi][mxEta];     //array of towers soft ID for a given eta and phi
 
   int mInpEve;     //input events counter
   int mAccEve;     //accepted events counter
@@ -68,6 +69,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   int mphiBegin;            //value of beginning phi bin in the background pattern
   int mpatternLength;       //background pattern length 
   float msumAdc;            //background pattern adc sum
+  int mPattSoftId[mxSoftId];  //list of soft ID's of towers from identified pattern
 
   int mAdcThreshold;      //value used to set adc threshold
   float mAdcSumThreshold; //value used to set adc sum threshold
@@ -96,6 +98,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   void SetMaxYesPlots(int setyesplots) {mMaxYesPlots=setyesplots;}
   void SetMaxNoPlots(int setnoplots) {mMaxNoPlots=setnoplots;}
   void GetDecision(int &fDecision,int &eta1, int &phi1, int &eta2, int &patternleng, float &Adcsum);
+  const int *GetSoftIdList(){return mPattSoftId;} // 0 is the terminator
 
   /* Note fDecision =  1  when trigger is of type set and background found.
    *      fDecision =  0  when trigger is of type set and no background found.
@@ -106,7 +109,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
   // Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.3 2006/05/30 22:38:23 qattan Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.4 2006/06/13 21:26:25 qattan Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -117,6 +120,9 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.h,v $
+  Revision 1.4  2006/06/13 21:26:25  qattan
+  *** empty log message ***
+
   Revision 1.3  2006/05/30 22:38:23  qattan
   check4
 
