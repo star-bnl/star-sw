@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StBemcBeamBckgFinderMaker.h,v 1.4 2006/06/13 21:26:25 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.h,v 1.5 2006/06/13 21:42:42 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  *********************************************************************
  * Description:
@@ -56,7 +56,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
   int mdb_btowSoftId[mxSoftId];  //array of towers softIds
 
   float mAdcArray[mxPhi][mxEta]; //array of adc values passing adc threshold
-  int mSoftId[mxPhi][mxEta];     //array of towers soft ID for a given eta and phi
+  int mSoftId[mxPhi][mxEta];     //array of towers softIDs for a given eta and phi
 
   int mInpEve;     //input events counter
   int mAccEve;     //accepted events counter
@@ -109,7 +109,7 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
   // Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.4 2006/06/13 21:26:25 qattan Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StBemcBeamBckgFinderMaker.h,v 1.5 2006/06/13 21:42:42 qattan Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
@@ -120,6 +120,9 @@ class StBemcBeamBckgFinderMaker : public StMaker {
 
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.h,v $
+  Revision 1.5  2006/06/13 21:42:42  qattan
+  *** empty log message ***
+
   Revision 1.4  2006/06/13 21:26:25  qattan
   *** empty log message ***
 
