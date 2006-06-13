@@ -157,7 +157,7 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
       } else {
  
 	printf("===============================================================================\n");
-	printf("EventDecision = NOT SEARCHED.....NOT OF TRIGGER TYPE.\n");
+	printf("EventDecision = NOT SEARCHED ..... NOT OF TRIGGER TYPE.\n");
 	printf("===============================================================================\n");
       } 
     }
