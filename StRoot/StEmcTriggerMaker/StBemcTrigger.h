@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.h,v 1.6 2006/06/08 14:53:45 rfatemi Exp $
+// $Id: StBemcTrigger.h,v 1.7 2006/06/14 03:16:01 rfatemi Exp $
 //
 //
 
@@ -167,7 +167,7 @@ public:
       }
    int*          getHT22005array()
       {
-	return mHT12005array;
+	return mHT22005array;
       }
     int*         getJP12005array()
       {
