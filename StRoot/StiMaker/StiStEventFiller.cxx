@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.73 2006/05/31 03:59:04 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.74 2006/06/16 21:28:57 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.74  2006/06/16 21:28:57  perev
+ * FillStHitErr method added and called
+ *
  * Revision 2.73  2006/05/31 03:59:04  fisyak
  * Add Victor's dca track parameters, clean up
  *
@@ -404,6 +407,7 @@ using namespace std;
 #include "StDetectorId.h"
 #include "StHelix.hh"
 #include "StDcaGeometry.h"
+#include "StHit.h"
 
 
 #include "StEventUtilities/StEventHelper.h"
@@ -767,10 +771,14 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
       if (!fistNode) fistNode = node;
       lastNode = node;
       StHit *hh = (StHit*)stiHit->stHit();
+// 	Fill StHit errors for Gene
+      FillStHitErr(hh,node);
+
       fillPull   (hh,stiHit,node,track,dets);
       if (!detector) 		continue;
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
+      
       detInfo->addHit(hh,refCountIncr);
       if (!refCountIncr) 	continue;
       hh->setFitFlag(1);
@@ -1291,4 +1299,20 @@ void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
   gTrack->setDcaGeometry(dca);
   dca->set(setp,sete);
 
+}
+//_____________________________________________________________________________
+void StiStEventFiller::FillStHitErr(StHit *hh,const StiKalmanTrackNode *node)
+{
+  double stiErr[6],stErr[6];
+  memcpy(stiErr,node->hitErrs(),sizeof(stiErr));
+  double alfa = node->getAlpha();
+  double c = cos(alfa);
+  double s = sin(alfa);
+  double T[3][3]={{c,-s, 0}
+                 ,{s, c, 0}
+		 ,{0, 0, 1}};
+  
+  TCL::trasat(T[0],stiErr,stErr,3,3);
+  StThreeVectorF f3(sqrt(stErr[0]),sqrt(stErr[2]),sqrt(stErr[5]));
+  hh->setPositionError(f3);
 }
