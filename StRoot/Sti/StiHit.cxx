@@ -81,7 +81,11 @@ void StiHit::setError(const StMatrixF& matrix)
   msyz = matrix(y,z);
   return;
 }
-
+//_____________________________________________________________________________
+void StiHit::setError(const float matrix[6])
+{
+  memcpy(&msxx,matrix,6*sizeof(msxx));
+}  
 
 //_____________________________________________________________________________
 /*! Streamer for StiHit objects. */
