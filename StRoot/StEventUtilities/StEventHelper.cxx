@@ -1082,7 +1082,7 @@ const float *StVertexHelper::GetErrMtx()
   int jj=0;
   for (int i=0;i< 3;i++) {
   for (int j=0;j<=i;j++) {
-    fErrMtx[jj++] = mxF(i,j);}}
+    fErrMtx[jj++] = mxF(i+1,j+1);}}
   return fErrMtx;
 }
 //______________________________________________________________________________
