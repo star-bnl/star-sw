@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.168  2006/06/16 21:27:52  perev
+// Minimal errors of vertex 1 micron
+//
 // Revision 1.167  2006/05/31 03:59:04  fisyak
 // Add Victor's dca track parameters, clean up
 //
@@ -269,6 +272,12 @@
 
 #include "Sti/StiTimer.h"
 
+/// Definion of minimal primary vertex errors.
+/// Typical case,vertex got from simulations with zero errors.
+/// But zero errors could to unpredicted problems
+/// Now minimal possible error is 1 micron
+static const float MIN_VTX_ERR2 = 1e-4*1e-4;
+
 ClassImp(StiMaker)
   
 //_____________________________________________________________________________
@@ -471,6 +480,7 @@ Int_t StiMaker::Make()
   StEvent   * event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
 
   if (!event) return kStWarn;
+
   // Retrieve bfield in Tesla
   double field = event->summary()->magneticField()/10.;
 
@@ -505,6 +515,21 @@ Int_t StiMaker::Make()
 
 	  if (vertexes && vertexes->size())
 	    {
+
+              //Set minimal errors
+	      for (size_t i=0;i<vertexes->size();i++) {
+	        StiHit *vtx=(*vertexes)[i];
+                float vtxErr[6];
+		memcpy(vtxErr,vtx->errMtx(),sizeof(vtxErr));
+                if (vtxErr[0]>MIN_VTX_ERR2
+                &&  vtxErr[2]>MIN_VTX_ERR2
+                &&  vtxErr[5]>MIN_VTX_ERR2) continue;
+                memset(vtxErr,0,sizeof(vtxErr));
+                vtxErr[0]=MIN_VTX_ERR2;
+                vtxErr[2]=MIN_VTX_ERR2;
+                vtxErr[5]=MIN_VTX_ERR2;
+                vtx->setError(vtxErr);
+              }
 	      //cout << "StiMaker::Make() -I- Got Vertex; extend Tracks"<<endl;
 	      _tracker->extendTracksToVertices(*vertexes);
 	      //cout << "StiMaker::Make() -I- Primary Filling"<<endl; 
