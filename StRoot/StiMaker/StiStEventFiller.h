@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.20 2006/05/31 03:59:04 fisyak Exp $
+ * $Id: StiStEventFiller.h,v 2.21 2006/06/16 21:29:17 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.21  2006/06/16 21:29:17  perev
+ * FillStHitErr method added and called
+ *
  * Revision 2.20  2006/05/31 03:59:04  fisyak
  * Add Victor's dca track parameters, clean up
  *
@@ -187,6 +190,7 @@ private:
 		 ,const StiKalmanTrack     *track
 		 ,int dets[1][3]);
  bool accept(StiKalmanTrack* kTrack);
+ void FillStHitErr(StHit *hh,const StiKalmanTrackNode *node);
 private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
