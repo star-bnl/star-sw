@@ -144,6 +144,9 @@ const float *errMtx() const   		{return &msxx;}
     ///Set the position error matrix for the measurement from an StMatrixF
     ///object.
     void setError(const StMatrixF&);
+    ///Set the position error matrix for the measurement from an float array
+    ///object.
+    void setError(const float errMx[6]);
     ///Set the pointer to the StiDetector from which the hit arose.
     void setDetector(const StiDetector*det) {mdetector=det;};
     ///Set the pointer to the corresponding StHit object.
