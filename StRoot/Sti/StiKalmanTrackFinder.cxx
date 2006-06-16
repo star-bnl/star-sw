@@ -464,6 +464,7 @@ public:
   double sum; 	//summ of chi2
   int    hits;  //total number of hits
   int    nits;  //total number of no hits
+  int    pits;  //total number of precision hits
   int    qa;	// quality flag for current level
 		//   qa =  1 == new hit accepted
 		//   qa =  0 == no hits was expected. dead material or edge
@@ -473,8 +474,7 @@ public:
 		//   qa = -4 == track can not be continued, stop processing of it
 
   	QAFind()		{reset();                  }
-void 	reset()			{rmin=0; sum=0; hits =0; nits=0; qa=0;}
-void operator+=(const QAFind &q){sum+=q.sum; hits+=q.hits; nits+=q.nits;}
+void 	reset()			{rmin=0; sum=0; hits =0; nits=0; qa=0;pits=0;}
 };
 
 //______________________________________________________________________________
@@ -722,9 +722,9 @@ static  const double ref1a  = 110.*degToRad;
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
 
+        qaTry = qa;
         nodeQA(node,position,active,qaTry);
 	leadNode->add(node,direction);
-        qaTry.rmin = qa.rmin;
         if (qaTry.qa>-2) find(track,direction,node,qaTry);
         
         if (jHit==0) { qaBest=qaTry; continue;}
@@ -732,7 +732,7 @@ static  const double ref1a  = 110.*degToRad;
         if (igor<0)  { leadNode->remove(0);}
         else         { leadNode->remove(1);qaBest=qaTry;}
       }
-      qa += qaBest; gLevelOfFind--; return;
+      qa = qaBest; gLevelOfFind--; return;
     }//End Detectors
   }while(0);
   if(!direction){++rlayer;}else{++layer;}}
@@ -744,16 +744,17 @@ static  const double ref1a  = 110.*degToRad;
 void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
                                  ,int active,QAFind &qa)
 {
-
-  qa.reset();
+static const double HiPrec=200.*200.*1e-8;
 
   int maxNullCount           = _pars.maxNullCount+3;
   int maxContiguousNullCount = _pars.maxContiguousNullCount+3;
 //		Check and count node
-  if (node->getHit()) {
+  StiHit *hit = node->getHit();
+  if (hit) {
     if (debug() > 2)cout << " got Hit! "<<endl ;
-    qa.sum = node->getChi2() + log(node->getDeterm());
-    qa.hits=1; qa.qa=1;
+    qa.sum += node->getChi2() + log(node->getDeterm());
+    qa.hits++; qa.qa=1;
+    if (node->hitErrs()[2]<HiPrec) qa.pits++;
     node->getHitCount()++;
     node->getContigHitCount()++;
     if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset)
@@ -767,28 +768,27 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
       node->getNullCount()++; 
       node->getContigNullCount()++;
       node->getContigHitCount() = 0;
-      qa.nits=1; qa.qa=-1;
+      qa.nits++; qa.qa=-1;
       if (node->getNullCount()>maxNullCount) 			qa.qa= -3;
       if (node->getContigNullCount()>maxContiguousNullCount)	qa.qa= -3;
   }//node->getHit()
 
   double xg = node->x_g();
   double yg = node->y_g();
-  if (sqrt(xg*xg + yg*yg) < 4.2) qa.qa= -2;
+  if ((xg*xg + yg*yg) < 4.2*4.2) qa.qa= -2;
 
 }
 //______________________________________________________________________________
 int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
-
-   if ( qaTry.qa   <=         -2)  	return -1;
-   if (qaBest.qa   <=         -2)  	return  1;
-   if (qaBest.hits >  qaTry.hits) 	return -1;
-   if (qaBest.hits <  qaTry.hits) 	return  1;
-   if (qaBest.nits <  qaTry.nits) 	return -1;
-   if (qaBest.nits >  qaTry.nits) 	return  1;
-   if (qaBest.sum  <= qaTry.sum ) 	return -1;
-   					return  1;
+   int ians;
+   ians = qaBest.pits-qaTry.pits;
+   if (qaBest.pits+qaTry.pits==1) 			return ians;
+   ians =-ians;				if (ians)	return ians;
+   ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
+   ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
+   if (qaBest.sum  <= qaTry.sum ) 			return -1;
+   							return  1;
 }
 
 //______________________________________________________________________________
