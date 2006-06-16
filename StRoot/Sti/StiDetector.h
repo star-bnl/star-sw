@@ -35,17 +35,17 @@ public:
     void unset(){;}
     
     // accessors
-    bool isOn() const {return on;}
+    bool isOn() const 			{ return on;}
     inline bool isActive(double dYlocal, double dZlocal) const;
     inline bool isActive() const;
-    bool isContinuousMedium() const { return continuousMedium; }
-    bool isDiscreteScatterer() const { return discreteScatterer; }
+    bool isContinuousMedium() const 	{ return continuousMedium; }
+    bool isDiscreteScatterer() const 	{ return discreteScatterer; }
 
-    StiMaterial* getGas() const { return gas; }
-    StiMaterial* getMaterial() const { return material; }
+    StiMaterial* getGas() const 	{ return gas; }
+    StiMaterial* getMaterial() const 	{ return material; }
 
     StiShape* getShape() const { return shape; }
-    StiPlacement* getPlacement() const { return placement; }
+    StiPlacement* getPlacement() const 	{ return placement; }
 
     StiIsActiveFunctor* getIsActiveFunctor();
 
@@ -118,7 +118,8 @@ public:
 
  protected:
     
-     char mBeg[1];
+    char mBeg[1];
+
     /// Toggle switch determining whether this detector is to be added to the detector tree.
     /// The detector is added if the switch is "true"
     bool on;    
