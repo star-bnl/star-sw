@@ -79,7 +79,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     StGetConfigValue(detectorParamFile,"r3",radii[2]);
     double dphi[nRows];
 
-    for(int zzz=0;zzz<nRows;zzz++)
+    for(size_t zzz=0;zzz<nRows;zzz++)
       dphi[zzz]=2.*M_PI/nsectors[zzz];
     
     double tiltAngle;
