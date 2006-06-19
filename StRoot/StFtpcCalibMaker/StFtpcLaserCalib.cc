@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.3 2006/04/04 10:57:05 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.4 2006/06/19 12:37:58 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.4  2006/06/19 12:37:58  jcs
+// Use negative value of zfieldcage for FTPC east
+//
 // Revision 1.3  2006/04/04 10:57:05  jcs
 // Fix memory leak
 //
@@ -208,7 +211,10 @@ void StFtpcLaserCalib::calc_res()
       resx[i]=(x[i]-fxz->Eval(z[i]));
       resy[i]=(y[i]-fyz->Eval(z[i]));
       calcrad[i]=sqrt(fxz->Eval(z[i])*fxz->Eval(z[i])+fyz->Eval(z[i])*fyz->Eval(z[i]));
-      rpol[i]=sqrt(fxz->Eval(zfieldcage)*fxz->Eval(zfieldcage)+fyz->Eval(zfieldcage)*fyz->Eval(zfieldcage));
+      if (FTPC==1)
+         rpol[i]=sqrt(fxz->Eval(zfieldcage)*fxz->Eval(zfieldcage)+fyz->Eval(zfieldcage)*fyz->Eval(zfieldcage));
+      if (FTPC==2)
+         rpol[i]=sqrt(fxz->Eval(-zfieldcage)*fxz->Eval(-zfieldcage)+fyz->Eval(-zfieldcage)*fyz->Eval(-zfieldcage));
       calcphi[i]=zyltrafo(fxz->Eval(z[i]),fyz->Eval(z[i]),z[i]);
       resrad[i]=radius[i]-calcrad[i];
       resphi[i]=(phi[i]-calcphi[i])*Rad2Grad;
