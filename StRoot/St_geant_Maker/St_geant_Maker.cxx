@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.107 2005/11/22 23:13:24 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.108 2006/06/19 23:26:03 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.108  2006/06/19 23:26:03  potekhin
+// Need the correct handle on the IDT hits,
+// the previous tags were obsolete
+//
 // Revision 1.107  2005/11/22 23:13:24  fisyak
 // Add default kinematics if there is no input fiels and if maker is active
 //
@@ -889,7 +893,7 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
 
-  geant3->Gfnhit("GEMH","GMDI", nhits);
+  geant3->Gfnhit("IGTH","IGAL", nhits);
   
   if (nhits>0) { 
     St_g2t_igt_hit *g2t_igt_hit = new St_g2t_igt_hit("g2t_igt_hit",nhits);
