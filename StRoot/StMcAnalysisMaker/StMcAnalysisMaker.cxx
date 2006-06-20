@@ -1,7 +1,16 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.30 2005/11/22 21:51:53 fisyak Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.31 2006/06/20 02:39:38 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.31  2006/06/20 02:39:38  calderon
+ * Fixed several changes from the last version which made this package not
+ * executable using the default StAssociator.C macro.
+ * Removed dependence on StBFChain, so the default StAssociator.C macro can work.
+ * Removed #if 0  commands which had taken out the track ntuple.
+ * Added back the missing code to produce the first 8 entries of the ntuple.
+ * Reverted to the file handling as was done before so that StAssociator.C can work.
+ * Kept the ntuples added by Yuri (but did not check them).
+ *
  * Revision 1.30  2005/11/22 21:51:53  fisyak
  * Add NTuple for svt and ssd hit
  *
@@ -146,9 +155,9 @@
 
 #include "StMessMgr.h"
 
-#include "StBFChain.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
+//#include "StBFChain.h"
+//#include "St_DataSet.h"
+//#include "St_DataSetIter.h"
 
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StAssociationMaker/StTrackPairInfo.hh"
@@ -252,10 +261,10 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    if (chain) mNtupleFile = chain->GetTFile();
-    if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
-    else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
+    //    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    //if (chain) mNtupleFile = chain->GetTFile();
+    //if (mNtupleFile) {mNtupleFile->cd(); mNtupleFile = 0;}
+    //else {mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");}
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
@@ -281,25 +290,17 @@ Int_t StMcAnalysisMaker::Init()
     coordMcPartner = new TH2F("coordMc","X vs Y pos. of Hits", 100, -200, 200, 100, -200, 200);
     coordMcPartner->SetXTitle("X (cm)");
     coordMcPartner->SetYTitle("Y (cm)");
-#if 0
+
     // Define the file for the Ntuple, otherwise it won't be available later.
     // one must define the file _after_ the histograms are booked, otherwise they are
     // not owned by the maker, but are stored in the file, breaking the code in StAssociator.
-//     StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
-    
-//     if (chain) mNtupleFile = chain->GetTFile();
-//     if (mNtupleFile) {
-// 	mNtupleFile->cd();
-// 	mNtupleFile = 0;
-//     }
-//     else {
-	mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
-//     }
+
+    mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
     
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ:mcTrkId:mostCommIdTruth:nHitsIdTruth:nMcHits:nFitPts:nDetPts:quality";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
     mTrackNtuple->SetAutoSave(100000000);
-#endif
+
     mTpcHitNtuple = new TNtuple("TpcHitNtuple","the TPC hit pairs Info",vTpcHitMRPair);
     mTpcHitNtuple->SetAutoSave(100000000);
     mSvtHitNtuple = new TNtuple("SvtHitNtuple","the SVT hit pairs Info",vSvtHitMRPair);
@@ -753,6 +754,7 @@ Int_t StMcAnalysisMaker::Make()
   // Example: Make a histogram of the momentum resolution of the event
   //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
   StGlobalTrack* recTrack;
+  StPrimaryTrack* primTrk;
   StMcTrack*     mcTrack;
   StThreeVectorD p(0,0,0);
   StThreeVectorD pmc(0,0,0);
@@ -767,6 +769,18 @@ Int_t StMcAnalysisMaker::Make()
     //yf    if ((*tIter).second->commonTpcHits()<10) continue;
     mcTrack = (*tIter).second->partnerMcTrack();
     pmc = mcTrack->momentum();
+    for (int k=0; k<3; k++) values[k] = pmc[k];  	 
+    values[3]=pmc.mag(); 	 
+    
+    primTrk = dynamic_cast<StPrimaryTrack*>(recTrack->node()->track(primary)); 	 
+    if (primTrk) 	 
+	p = primTrk->geometry()->momentum(); 	 
+    else 	 
+	p = recTrack->geometry()->momentum(); 	 
+    
+    for (int j=0; j<3; j++) values[j+4] = p[j]; 	 
+    values[7]=p.mag(); 	 
+    values[8]=(*tIter).second->commonTpcHits();
     // Fill 1d Mom. resolution Histogram
     
     diff = (p.mag() - pmc.mag())/pmc.mag();
@@ -798,7 +812,6 @@ Int_t StMcAnalysisMaker::Make()
     rHitPos /=(float) (*tIter).second->commonTpcHits();
     mHitPos /=(float) (*tIter).second->commonTpcHits();
     for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
-#if 0
     values[12] = mcTrack->key();
     // Figure out the most common IdTruth; the dominatrix track!
     int mostCommonIdTruth = -9; 
@@ -828,7 +841,6 @@ Int_t StMcAnalysisMaker::Make()
     values[17] = recTpcHits.size();
     values[18] = idQuality;
     mTrackNtuple->Fill(values);
-#endif
   } // Tracks in Map Loop
   cout << "Finished Track Loop, Made Ntuple" << endl;
   //delete vars;
