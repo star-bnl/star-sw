@@ -12,9 +12,9 @@
  */
 
 struct ctbDbMaskGain {
-  oct tray[240]; /* values: 0,1  */
-  oct slat[240]; /* values: 0,119  */
-  oct mask[240]; /* values: 0-good, 1-broken */
+  octet tray[240]; /* values: 0,1  */
+  octet slat[240]; /* values: 0,119  */
+  octet mask[240]; /* values: 0-good, 1-broken */
   float gain[240]; /* units: (ADC/MIP) */
   char comment[160]; /* commemnts */
 };
