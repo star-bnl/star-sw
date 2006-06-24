@@ -14,15 +14,14 @@
 */
 class BFactory : public Named
 {
-public:
+protected:
   
-  BFactory(const string& name): Named(name)
-    {fCurCount=0; fMaxCount = 1000000;fUseCount=0;fFastDel=0;
-     fInstCount=0;fFreeCount=0;}
+  BFactory(const string& name);
 
   virtual ~BFactory()
     {;}
 
+public:
   ///Clear/delete all objects owned by this factory
   virtual void clear()=0;
 
