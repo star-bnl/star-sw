@@ -16,7 +16,7 @@ static const double MAX2ERR[]={MAX1ERR[0]*MAX1ERR[0]
                               ,MAX1ERR[4]*MAX1ERR[4]
                               ,MAX1ERR[5]*MAX1ERR[5]};
 
-static const double MIN1ERR[]={1e-4,1e-4,1e-4,1e-6,1e-6,1e-6};
+static const double MIN1ERR[]={1e-5,1e-5,1e-5,1e-7,1e-7,1e-7};
 static const double MIN2ERR[]={MIN1ERR[0]*MIN1ERR[0]
                               ,MIN1ERR[1]*MIN1ERR[1]
                               ,MIN1ERR[2]*MIN1ERR[2]
