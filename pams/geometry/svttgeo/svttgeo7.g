@@ -1,6 +1,10 @@
-* $Id: svttgeo7.g,v 1.2 2006/03/28 20:25:33 potekhin Exp $
+* $Id: svttgeo7.g,v 1.3 2006/06/26 17:29:52 potekhin Exp $
 *
 * $Log: svttgeo7.g,v $
+* Revision 1.3  2006/06/26 17:29:52  potekhin
+* Capturing the last version of the "Distorted" SVT
+* geometry used in our alignment studies
+*
 * Revision 1.2  2006/03/28 20:25:33  potekhin
 * Added a printout of ladder numbering as per volume_id,
 * and zeroed out the theta in the second shell
@@ -106,9 +110,62 @@ Module  SVTTGEO7  is extension of the SVTTGEO6: clamshells and distortions
 
       Real           trapY,ssidX,ssirY
 
-      Real           xDisp, yDisp, aDisp
+      Real           xDisp, yDisp, aDisp, cS
 
       Integer        i_phi, checkRez, foo, lsub
+
+      Real           xD(6,16), yD(6,16), aD(6,16)
+
+      data xD / 0.020,-0.010, 0.010, 0.010, 0.020, 0.000,
+                0.000, 0.000,-0.010, 0.000,-0.010, 0.000,
+               -0.013, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.010, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000,-0.010, 0.000,
+                0.000, 0.000,-0.010, 0.000, 0.000,-0.025,
+                0.000, 0.000, 0.000, 0.000,-0.010, 0.000,
+                0.010, 0.000, 0.000, 0.000, 0.000, 0.000,
+               -0.010, 0.000, 0.000, 0.000, 0.000, 0.000,
+               -0.020, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000,-0.020, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000,-0.010, 0.000,
+                0.000, 0.000,-0.010, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000,-0.010, 0.000, 0.000/
+
+      data yD / 0.000, 0.010, 0.005, 0.005, 0.000, 0.000,
+                0.020, 0.000, 0.000, 0.000, 0.005, 0.000,
+               -0.010, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.020, 0.010,-0.020, 0.020, 0.000, 0.000,
+                0.000, 0.000,-0.010, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000,-0.010, 0.000,-0.011,
+                0.000, 0.000,-0.010, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+               -0.020, 0.000, 0.000, 0.020, 0.000, 0.000,
+               -0.010, 0.000,-0.010, 0.000, 0.000, 0.000,
+               -0.010, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000,-0.010, 0.000, 0.000, 0.000,
+               -0.005, 0.000,-0.010, 0.000, 0.000,-0.010,
+                0.000, 0.000,-0.010, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.010, 0.010, 0.030/
+
+      data aD / 0.200, 0.000, 0.100, 0.200,-0.200, 0.300,
+                0.000, 0.300, 0.000, 0.300, 0.000, 0.200,
+                0.200, 0.000, 0.000,-0.100, 0.000, 0.100,
+                0.000, 0.300,-0.200, 0.000, 0.000, 0.000,
+                0.000, 0.000,-0.200, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.300, 0.000, 0.000,
+                0.000, 0.000, 0.000,-0.200, 0.000,-0.200,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000,
+                0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
 
 *******************************************************************************
 * Turns out it's more convenient to store these here:
@@ -804,27 +861,13 @@ Block SLYD is a single SVT layer
                                 ilayer,rmin,rmax
       Shape    TUBE rmin=rmin  rmax=rmax  dz=swca_Length/2
 
-      Create   SLSD
-
       c0=90-deg*mod(ilayer,2)
       write(*,*) 'nladder ',svtl_Nladder,' c0:',c0
 
       do iPos=1,svtl_Nladder
-          xDisp=0.0
-          yDisp=0.0
-          aDisp=0.0
-
-          if(iPos.le.(svtl_Nladder/2)) then
-              xDisp=0.023
-              yDisp=0.010
-              aDisp=0.000
-          endif
-
-          if(iPos.gt.(svtl_Nladder/2)) then
-              xDisp=-0.017
-              yDisp=-0.015
-              aDisp=0.000
-          endif
+          xDisp=0.0 ! xD(iLayer,iPos)
+          yDisp=0.0 ! yD(iLayer,iPos)
+          aDisp=aD(iLayer,iPos)
 
           lsub    = mod(iLayer-1,2)
 
@@ -832,13 +875,8 @@ Block SLYD is a single SVT layer
 
           foo =  svtl_Nladder
 
-          write(*,*) ' SVT Positioning: iPos',iPos,'  lsub: ', _
-          lsub,' svtl_Nladder: ',foo,' result: ',  checkRez
-
-          Position SLSD X=xDisp, _
-                        Y=yDisp, _
-                        ThetaZ=aDisp, _
-                        AlphaZ=0.3+c0+(360/svtl_Nladder)*(iPos-1)+(180/svtl_Nladder) kOnly='MANY'
+          Create and Position SLSD X=xDisp, Y=yDisp, _
+                        AlphaZ=c0+(360/svtl_Nladder)*(iPos-1)+(180/svtl_Nladder) kOnly='MANY'
       enddo
 
 EndBlock
@@ -846,7 +884,9 @@ EndBlock
 * ----------------------------------------------------------------------------
 *
 Block SLSD is a single ladder mother (sector of tube) 
-      Attribute SLSD    seen=1    colo=1
+      Attribute SLSD    seen=1    colo=1  
+      Attribute SLSD    Serial=iLayer*10+iPos
+
 *>>>
       if (svtg_Nlayer<0) then
         Shape  Division   Iaxis=2   Ndiv=1    c0=-90
@@ -862,10 +902,17 @@ Block SLSD is a single ladder mother (sector of tube)
         Shape TUBS Rmin=rmin, Rmax=rmax, DZ=swca_Length/2, Phi1=-180/svtl_Nladder, Phi2=180/svtl_Nladder
 
       endif
+
+      Attribute SLSD  Serial=0    " do not inherit "
 *>>>
 *
-      Create and Position SLDI x=svtl_radius                ORT=YZX
-*
+* LADDER LADDER LADDER LADDER LADDER LADDER LADDER LADDER LADDER
+
+      write(*,*) ' Ladder Positioning: iPos',iPos,'  lsub: ', _
+      lsub,' svtl_Nladder: ',foo,' result: ',  checkRez,' ',xDisp,' ',yDisp,' ',aDisp
+
+      Create SLDI
+      Position SLDI x=svtl_radius  AlphaZ=aDisp      ORT=YZX
 *     Electronics go on both sides of the ladder
       Create   SELE
 
@@ -877,7 +924,8 @@ Block SLSD is a single ladder mother (sector of tube)
       ypos=cos(rad)*selc_ElcaWid/2+sin(rad)*elethk/2
 
       do s=-1,1,2
-	  Position SELE ORT=YZX AlphaZ=s*deg, x=svtl_radius-ladthk-xpos, y=s*(swca_WaferWid/2+ypos), AlphaX=-90*(1-s)
+          cS=(s*deg+aDisp)
+	  Position SELE ORT=YZX AlphaZ=cS, x=svtl_radius-ladthk-xpos, y=s*(swca_WaferWid/2+ypos), AlphaX=-90*(1-s)
       EndDo
 EndBlock
 *
@@ -891,7 +939,7 @@ Block SLDI is a ladder volume
       tabLen=swca_Length/2-7*(swca_WaferWid/2+swca_WaferGap)
 
       Material  Air
-      Attribute SLDI   seen=0    colo=1     serial=svtl_Nwafer
+      Attribute SLDI   seen=0    colo=1
 
 * - Volume created here
       Shape     BOX    dx=swca_WaferWid/2 dy=swca_Length/2  dz=ladthk
