@@ -1,3 +1,8 @@
+* $Id: g2t_ist.F,v 1.3 2006/06/26 17:56:21 potekhin Exp $
+* $Log: g2t_ist.F,v $
+* Revision 1.3  2006/06/26 17:56:21  potekhin
+* Added CVS tags
+*
       FUNCTION  G2T_IST (g2t_track_h,   g2t_track , 
      >                   g2t_ist_hit_h, g2t_ist_hit )
       IMPLICIT  NONE
