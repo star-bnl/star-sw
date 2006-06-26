@@ -1,3 +1,8 @@
+* $Id: g2t_igt.F,v 1.2 2006/06/26 17:57:15 potekhin Exp $
+* $Log: g2t_igt.F,v $
+* Revision 1.2  2006/06/26 17:57:15  potekhin
+* Added cvs tags
+*
       FUNCTION  G2T_IGT (g2t_track_h,   g2t_track , 
      >                   g2t_igt_hit_h, g2t_igt_hit ) 
       IMPLICIT  NONE
@@ -13,7 +18,7 @@
       g2t_igt_hit_h.nok = 0
 
 
-      call G2R_GET_SYS ('GEMB','GMDI',Iprin,Idigi)
+      call G2R_GET_SYS ('IGTD','IGAL',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
        Local  = Idigi.ge.2
 
