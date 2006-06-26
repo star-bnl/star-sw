@@ -1,5 +1,10 @@
-* $Id: igtdgeo.g,v 1.1 2006/05/05 17:22:12 potekhin Exp $
+* $Id: igtdgeo.g,v 1.2 2006/06/26 17:51:33 potekhin Exp $
 * $Log: igtdgeo.g,v $
+* Revision 1.2  2006/06/26 17:51:33  potekhin
+* Added a comment to clarify the configuration of the detector:
+* there are currently a fwe GEM devices described, so we need
+* to add some clarity to their denomination
+*
 * Revision 1.1  2006/05/05 17:22:12  potekhin
 * The first cut of the forward GEM disks ("smaller
 * aperture design as compared to fgt") by Doug Hasell.
@@ -10,6 +15,8 @@
 * IGTDGEO - Inner GEM Tracking Detector Geometry
 *
 * Describes four disks of triple GEM detectors for a possible STAR upgrade
+* Distinct from, and alternative to, the previosuly proposed
+* LAGRGE GEM surfaces
 *
 * Inner and outer radii as well as position along the Z axis are variable
 * parameters as well as the geometry, foil thicknesses, and spacing of the 
