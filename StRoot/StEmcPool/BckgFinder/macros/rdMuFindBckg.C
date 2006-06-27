@@ -1,7 +1,7 @@
 class  StChain;
 StChain *chain;
 
-void rdMuFindBckg(int nevents=100, char* outDir="./") { 
+void rdMuFindBckg(int nevents=200000, char* outDir="./") { 
 
  char *muDstFile;
 
@@ -10,10 +10,9 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
  /*************************************************************/
 
 #if 1  // barrelBckg run
-  muDstFile="/star/data07/EEMC/qattan/myruns_R7137034/*.MuDst.root";
-  int RunNumber=7137034;
+  muDstFile="/star/data07/EEMC/qattan/myruns_R7138017/*.MuDst.root";
+  int RunNumber=7138017;
 #endif
-
 
   /******************************************************/
 
@@ -76,11 +75,11 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
   //myMk->SetTrigger(-1);      //accept any & print all
   //myMk->SetTrigger(0);       //accept any 
   
-  //myMk->SetTrigger(127221);  //accept bemc-jp1-mb (day 122/run037)
-  //myMk->SetTrigger(137222);  //accept bemc-jp1-mb (day 137/run035)
+  //myMk->SetTrigger(127221);  //accept bemc-jp1-mb (year 2006 day122/run035 day122/run037)
+  myMk->SetTrigger(137222);  //accept bemc-jp1-mb (year 2006 day137/run035 day138/run017)
   //myMk->SetTrigger(137622);    //accept bemc-jp0-etot-mb-L2jet (day 137/run035)
 
-  myMk->SetTrigger(1);     //accept bemc-jp1
+  //myMk->SetTrigger(1);     //accept bemc-jp1
 
   //myMk->SetTrigger(96233); //bemc-jp2-mb-b (year 2005)
   //myMk->SetTrigger(96221); //bemc-jp1-mb (year 2005)
@@ -96,10 +95,10 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
   myMk->SetPatternLength(5);
 
   //********* SET MAXIMUM NUMBER OF PLOTS (POSTSCRIPT) TO PRODUCE WHEN EVENT=BACKGROUND *****************//
-  myMk->SetMaxYesPlots(50);
+  myMk->SetMaxYesPlots(0);
 
   //********* SET MAXIMUM NUMBER OF PLOTS (POSTSCRIPT) TO PRODUCE WHEN EVENT= NOT BACKGROUND ************//
-  myMk->SetMaxNoPlots(50);
+  myMk->SetMaxNoPlots(0);
 
   //*****************************************************************************************************//
   chain->ls(3);
@@ -186,6 +185,7 @@ void rdMuFindBckg(int nevents=100, char* outDir="./") {
   // mHList->ls();
   mHList->Write(); 
   printf("\n Histo saved -->%s<\n",outF.Data());
+
 }
 
 void LoadLogger() {
