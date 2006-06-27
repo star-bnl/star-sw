@@ -10,7 +10,7 @@ void rdMuFindBckg(int nevents=200000, char* outDir="./") {
  /*************************************************************/
 
 #if 1  // barrelBckg run
-  muDstFile="/star/data07/EEMC/qattan/myruns_R7138017/*.MuDst.root";
+  muDstFile="/star/data05/scratch/qattan/myruns_R7138017/*.MuDst.root";
   int RunNumber=7138017;
 #endif
 

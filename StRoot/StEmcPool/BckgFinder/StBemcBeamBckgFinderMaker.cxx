@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.8 2006/06/13 21:50:36 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.9 2006/06/27 15:41:30 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -70,7 +70,7 @@ Int_t StBemcBeamBckgFinderMaker::Init(){
 
   mevtH[0]= new TH2F("BtowphiVseta","Barrel Towers: ADC-PED; #eta Bin; #phi Bin",mxEta,-0.5,mxEta-0.5,mxPhi,-0.5,mxPhi-0.5);
   mevtH[1]= new TH2F("StartingphiVseta","Pattern Starting #phi Vs. Pattern Starting #eta; #eta; #phi(deg)",10,-1,1,30,0.5,360.5);
-
+  mevtH[2]= new TH2F("AvgWeightedPhiVsEta","Pattern #phi Vs. Pattern Average Weighted #eta; <#eta> (bin); #phi (bin)",20,-1,1,60,0.5,360.5);
  
   for(int i=0; i<mMaxH; i++){
     if(mhisto[i])
@@ -102,6 +102,7 @@ void StBemcBeamBckgFinderMaker::Clear(const Option_t* option){
   mphiBegin=0;
   mpatternLength=0;
   msumAdc=0;
+  mAvgEtaAdc=0;
   mSearchDone=0;
 
   StMaker::Clear(option);
@@ -190,10 +191,10 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
   mhisto[6]->Fill(bx7);  //fill 7bit bunch crossing for every event we accepted (satisfied trigger condition).
  
   int myetapattern,myphipattern,myetaendpattern,mypatternlength;
-  float myadcsum;
+  float myadcsum,myavgetaadc;
 
   
-  bool IsItBackGround = CheckPatternType3(myetapattern,myphipattern,myetaendpattern,mypatternlength,myadcsum);
+  bool IsItBackGround = CheckPatternType3(myetapattern,myphipattern,myetaendpattern,mypatternlength,myadcsum,myavgetaadc);
 
   mSearchDone=true; //set to true when search for background is done.
 
@@ -204,10 +205,12 @@ Int_t StBemcBeamBckgFinderMaker::Make(){
     metaEnd=myetaendpattern;
     mpatternLength=mypatternlength;
     msumAdc=myadcsum;
+    mAvgEtaAdc=myavgetaadc;
     
     //printf("Yes: Event=%d IS a Background\n",mInpEve);
     mhisto[2]->Fill(7);  //bin=7 gets filled for every background event we processed. 
     mevtH[1]->Fill((myetapattern-20.)/20.,myphipattern*3);
+    mevtH[2]->Fill((myavgetaadc-20.)/20.,myphipattern*3);
     mhisto[3]->Fill(myphipattern*3,mypatternlength);
     mhisto[4]->Fill(myphipattern*3,myadcsum); 
     mhisto[7]->Fill(bx7); //gets filled for every background event we processed.
@@ -442,13 +445,14 @@ void  StBemcBeamBckgFinderMaker::PlotOneEvent(){
 /*=============================================================================*/
 
 
-Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin, int &etaEnd, int &patternLength, float &sumAdc){
+Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin, int &etaEnd, int &patternLength, float &sumAdc, float &AverageWeightedEta){
 
   int maxLength = 0;   // initial value for number of adjacent towers found (in eta direction).
   int i,j,k,n; 
   
   int FirstEtaFound;
   float FirstEtaAdc,sum=0.;
+  float sumEtaAdc=0.;    
 
   //printf("**********************************************************************************\n");
   //printf("In ::CheckPatternType3(): These towers are used in pattern searched\n");
@@ -466,7 +470,8 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
       n = 1;  
       FirstEtaFound=j;
       FirstEtaAdc = adc[j];
-      sum = FirstEtaAdc;                  
+      sum = FirstEtaAdc;
+      sumEtaAdc=(FirstEtaFound*sum);  
       mPattSoftId[n-1] = mSoftId[i][j]; //[n-1] to make sure array starts from zero 
 
       //printf("start mPattSoftId[%d]=%d\n",n,mPattSoftId[n-1]);
@@ -480,6 +485,7 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
 	} 
 	
 	sum = sum + adc[k];
+        sumEtaAdc=sumEtaAdc+(k*adc[k]); 
 	n++;
 	mPattSoftId[n-1] = mSoftId[i][k];
 
@@ -508,6 +514,8 @@ Int_t StBemcBeamBckgFinderMaker::CheckPatternType3(int &etaBegin, int &phiBegin,
 	patternLength=maxLength;
         etaEnd=(etaBegin + (patternLength-1));
         sumAdc=sum;
+        AverageWeightedEta=(sumEtaAdc/sum); 
+        //printf("my average weighted eta for this pattern=%f\n",AverageWeightedEta);
 	return(true);
 	break;
       }
@@ -551,6 +559,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.9  2006/06/27 15:41:30  qattan
+  *** empty log message ***
+
   Revision 1.8  2006/06/13 21:50:36  qattan
   *** empty log message ***
 
