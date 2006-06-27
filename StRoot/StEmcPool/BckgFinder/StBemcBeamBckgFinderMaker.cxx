@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.9 2006/06/27 15:41:30 qattan Exp $
+ * $Id: StBemcBeamBckgFinderMaker.cxx,v 1.10 2006/06/27 16:54:47 qattan Exp $
  * \author Issam Qattan , IUCF, 2006 
  ******************************************************************************
  * Description:
@@ -70,7 +70,7 @@ Int_t StBemcBeamBckgFinderMaker::Init(){
 
   mevtH[0]= new TH2F("BtowphiVseta","Barrel Towers: ADC-PED; #eta Bin; #phi Bin",mxEta,-0.5,mxEta-0.5,mxPhi,-0.5,mxPhi-0.5);
   mevtH[1]= new TH2F("StartingphiVseta","Pattern Starting #phi Vs. Pattern Starting #eta; #eta; #phi(deg)",10,-1,1,30,0.5,360.5);
-  mevtH[2]= new TH2F("AvgWeightedPhiVsEta","Pattern #phi Vs. Pattern Average Weighted #eta; <#eta> (bin); #phi (bin)",20,-1,1,60,0.5,360.5);
+  mevtH[2]= new TH2F("AvgWeightedPhiVsEta","Pattern #phi Vs. Pattern Weighted Average #eta; <#eta>; #phi(deg)",20,-1,1,60,0.5,360.5);
  
   for(int i=0; i<mMaxH; i++){
     if(mhisto[i])
@@ -559,6 +559,9 @@ void StBemcBeamBckgFinderMaker::GetDecision(int &fDecision, int &eta1, int &phi1
     
 /**********************************************************************
   $Log: StBemcBeamBckgFinderMaker.cxx,v $
+  Revision 1.10  2006/06/27 16:54:47  qattan
+  *** empty log message ***
+
   Revision 1.9  2006/06/27 15:41:30  qattan
   *** empty log message ***
 
