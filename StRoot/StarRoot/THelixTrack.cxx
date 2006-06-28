@@ -341,13 +341,21 @@ void THelixTrack::GetSpot(const double axis[3][3],double emx[3]) const
 /// axis[2]    - normal vector of plane
 /// emx[3] error matrix of coordinates according vectors in plane.
 
-
+//   transformation matrix from "helix" coordinate to global
    double my[3][3] = {{-fP[1]/fCosL, 0,fP[0]}
                      ,{ fP[0]/fCosL, 0,fP[1]}
                      ,{           0, 1,fP[2]}};
 
-   double T[3][3],t[2][2];
+   double T[3][3],tmp[3][3],g[6],t[2][2];
    TCL::mxmpy (axis[0],my[0],T[0],3,3,3);
+//   	now account that matrix axis may be non orthogonal
+   TCL::traat(axis[0],g,3,3);
+   if (fabs(g[0]-1)+fabs(g[1])+fabs(g[2]-1)
+      +fabs(g[3])+fabs(g[4])+fabs(g[5]-1)>1e-10) {//non orthogonal case
+     TCL::trsinv(g,g,3);
+     memcpy(tmp[0],T[0],sizeof(T));
+     TCL::trsa  (g,tmp[0],T[0],3,3);
+   }
    TCL::vlinco(T[0],1.,T[2],-T[0][2]/T[2][2],t[0],2);
    TCL::vlinco(T[1],1.,T[2],-T[1][2]/T[2][2],t[1],2);
    double myerr[3]={fEmxXY[0],0,fEmxSZ[0]};
@@ -677,7 +685,6 @@ double THelixTrack::Dca(const double point[3]
 /// return distance to dca point
 {
    double dif[3];
-   double T[3][3]={{0,0,0},{0,0,1},{0,0,0}};
    double s = Path(point);
    THelixTrack th(*this);
    th.Move(s);
@@ -686,12 +693,18 @@ double THelixTrack::Dca(const double point[3]
 
    for (int i=0;i<3;i++) {dif[i]=x[i]-point[i];}
    double nor = th.GetCos();
-   T[2][0]=  d[0]/nor; T[2][1]= d[1]/nor;
-   T[0][0]= -T[2][1] ; T[0][1]= T[2][0];
+   double T[3][3]={{-d[1]/nor, d[0]/nor,    0}
+                  ,{        0,        0,    1}
+		  ,{ d[0]/nor, d[1]/nor,    0}};
 
    dcaXY = T[0][0]*dif[0]+T[0][1]*dif[1];
    dcaZ  = dif[2];
-   th.GetSpot(T,dcaEmx);
+   double emxXY[6],emxSZ[3];
+   th.GetEmx(emxXY,emxSZ);
+   dcaEmx[0] = emxXY[0];
+   dcaEmx[1] = 0;
+//	cos(Lambda) **4 to account that we are in the nearest point
+   dcaEmx[2] = emxSZ[0]*pow(th.GetCos(),4);
    return s;
 }
 
@@ -1480,7 +1493,7 @@ void  TCircleFitter::AddZ(double z,double ez)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.22 2006/06/26 19:09:21 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.23 2006/06/28 18:39:07 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -1496,6 +1509,9 @@ void  TCircleFitter::AddZ(double z,double ez)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.23  2006/06/28 18:39:07  perev
+ * cos(dip)**4 added to Dca(...) to account z err in the nearest point
+ *
  * Revision 1.22  2006/06/26 19:09:21  perev
  * DcaXY & DcaZ with errors added
  *
