@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.h,v 1.9 2005/06/21 16:35:01 lmartin Exp $
+// $Id: StiSsdDetectorBuilder.h,v 1.10 2006/06/28 18:51:46 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.h,v $
+// Revision 1.10  2006/06/28 18:51:46  fisyak
+// Add loading of tracking and hit error parameters from DB
+//
 // Revision 1.9  2005/06/21 16:35:01  lmartin
 // DetectorBuilder updated with the correct methods from StSsdUtil
 //
@@ -35,6 +38,7 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
         StiSsdDetectorBuilder(bool active,const string & inputFile);
 	virtual ~StiSsdDetectorBuilder(); 
 	virtual void buildDetectors(StMaker& source);
+	virtual void loadDS(TDataSet&);
 	virtual void setDefaults();
 	virtual void useVMCGeometry();		
 	void    setSiMat(StiMaterial     *m) {_siMat = m;}

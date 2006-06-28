@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.22 2006/05/31 04:00:02 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.23 2006/06/28 18:51:46 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.23  2006/06/28 18:51:46  fisyak
+// Add loading of tracking and hit error parameters from DB
+//
 // Revision 1.22  2006/05/31 04:00:02  fisyak
 // remove SSD ladder mother volume
 //
@@ -47,8 +50,8 @@ StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active, const string & inputFi
     : StiDetectorBuilder("Ssd",active,inputFile), _siMat(0), _hybridMat(0)
 {
     // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
-    _trackingParameters.setName("SsdTrackingParameters");
-    _hitCalculator.setName("SsdHitErrors");
+    _trackingParameters.setName("ssdTrackingParameters");
+    _hitCalculator.setName("ssdHitError");
     _hitCalculator.set(0.002, 0., 0., 0.002, 0., 0.);
 }
 
@@ -61,8 +64,9 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 #ifdef __SsdInChain__
     char name[50];  
     int nRows = 1 ;
-    //gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
-
+    gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
+    load(_inputFile, source);
+    
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
 
@@ -245,6 +249,14 @@ float StiSsdDetectorBuilder::radiusForSsdLadder(unsigned int ladder) const
 	};
     return  radius;
 } 
+
+void StiSsdDetectorBuilder::loadDS(TDataSet& ds)
+{
+	cout << "StiSsdDetectorBuilder::loadDS(TDataSet* ds) -I- Started" << endl;
+	_trackingParameters.loadDS(ds);
+	_hitCalculator.loadDS(ds);
+	cout << "StiSsdDetectorBuilder::loadDS(TDataSet* ds) -I- Done" << endl;
+}
 
 void StiSsdDetectorBuilder::setDefaults()
 {
