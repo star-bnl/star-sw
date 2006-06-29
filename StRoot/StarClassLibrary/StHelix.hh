@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.11 2005/10/13 22:23:27 genevb Exp $
+ * $Id: StHelix.hh,v 1.12 2006/06/29 15:53:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
+ * Revision 1.12  2006/06/29 15:53:22  ullrich
+ * Added direction vector at given pathlength (written by Yuri).
+ *
  * Revision 1.11  2005/10/13 22:23:27  genevb
  * NoSolution is public
  *
@@ -72,12 +75,20 @@ public:
     const StThreeVector<double>& origin() const;	/// starting point
 
     void setParameters(double c, double dip, double phase, const StThreeVector<double>& o, int h);
-    
+
+    /// coordinates of helix at point s
     double       x(double s)  const;
     double       y(double s)  const;
     double       z(double s)  const;
 
     StThreeVector<double>  at(double s) const;
+
+    /// pointing vector of helix at point s
+    double       cx(double s)  const;
+    double       cy(double s)  const;
+    double       cz(double s)  const;
+    
+    StThreeVector<double>  cat(double s) const;
 
     /// returns period length of helix
     double       period()       const;
@@ -179,11 +190,37 @@ inline double StHelix::z(double s) const
     return mOrigin.z() + s*mSinDipAngle;
 }
 
+inline double StHelix::cx(double s)  const
+{
+    if (mSingularity)
+	return -mCosDipAngle*mSinPhase;
+    else
+	return -sin(mPhase + s*mH*mCurvature*mCosDipAngle)*mH*mCosDipAngle;
+}
+
+inline double StHelix::cy(double s)  const
+{
+    if (mSingularity)
+	return mCosDipAngle*mCosPhase;
+    else
+	return cos(mPhase + s*mH*mCurvature*mCosDipAngle)*mH*mCosDipAngle;
+}
+
+inline double StHelix::cz(double s)  const
+{
+    return mSinDipAngle;
+}    
+
 inline const StThreeVector<double>& StHelix::origin() const {return mOrigin;}
 
 inline StThreeVector<double> StHelix::at(double s) const
 {
     return StThreeVector<double>(x(s), y(s), z(s));
+}
+
+inline StThreeVector<double> StHelix::cat(double s) const
+{
+    return StThreeVector<double>(cx(s), cy(s), cz(s));
 }
 
 inline double StHelix::pathLength(double x, double y) const
