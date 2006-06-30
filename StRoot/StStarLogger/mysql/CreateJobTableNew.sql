@@ -1,16 +1,16 @@
-# $Id: CreateJobTableNew.sql,v 1.1 2006/06/30 20:39:10 fine Exp $
+# $Id: CreateJobTableNew.sql,v 1.2 2006/06/30 22:18:05 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
 use logger;
-CREATE TABLE  BrokerDescriptionDictionaryN (
+CREATE TABLE  IF NOT EXISTS BrokerDescriptionDictionaryN   (
                  BrokerID        ENUM('SUMS')    KEY                    COMMENT 'The ID of the broker, in our case it is SUMS',
                  BrokerName      VARCHAR(120)                           COMMENT 'The broker name - star-submit',
                  BrokerAlias     VARCHAR(32)                            COMMENT 'SUMS',
                  BrokerLOcation  VARCHAR(128)                           COMMENT 'The broker location  - I have no idea what this lcaotion stands for'
 );
 
-CREATE TABLE TaskDescriptionN (
+CREATE TABLE  IF NOT EXISTS TaskDescriptionN (
                  TaskDescriptionID  INT     NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Task #id'                                                        ,
                  TaskRequestID_MD5  VARCHAR(40) NOT NULL                  COMMENT 'SUMS $REQUESTID'                                                 ,
                  TaskSize           INT                                   COMMENT 'SUMS $nProcesses - the total number of the process for the task' ,
@@ -26,7 +26,7 @@ CREATE TABLE TaskDescriptionN (
                  CONSTRAINT UNIQUE INDEX TaskDescriptionID (TaskRequestID_MD5)
                  );
                  
-CREATE TABLE JobDescriptionN (
+CREATE TABLE  IF NOT EXISTS JobDescriptionN (
                  JobDescriptionID        INT         NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Job #id'                ,
                  TaskDescriptionID       INT                               COMMENT 'Task #id from TaskDescription'  ,
                  TaskRequestID_MD5       VARCHAR(40) NOT NULL              COMMENT 'SUMS $REQUESTID'                ,
@@ -38,19 +38,19 @@ CREATE TABLE JobDescriptionN (
                  CONSTRAINT UNIQUE INDEX TaskJobID (TaskDescriptionID, BrokerProcessID )
                  );
                  
-CREATE TABLE JobDescriptionFinishN (
+CREATE TABLE  IF NOT EXISTS JobDescriptionFinishN (
                  JobDescriptionID  INT         NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Job #id'        ,
                  EntryTime         TIMESTAMP                                 COMMENT 'Entry time'     ,
                  SequenceID        ENUM('Finish')                            COMMENT 'Sequience definition entry',
                  SequenceValue     INT                                       COMMENT 'job exit code '
                  );
                  
-CREATE TABLE SequenceDictionaryN (
+CREATE TABLE  IF NOT EXISTS SequenceDictionaryN (
                  SequenceID    ENUM('Event')  NOT NULL  KEY  COMMENT 'Record #id',
                  Description   VARCHAR(120)
 );
 
-CREATE TABLE JobTrackingN (
+CREATE TABLE  IF NOT EXISTS JobTrackingN (
                  JobTrackingID   INT NOT NULL AUTO_INCREMENT   KEY  COMMENT 'Record #id'                                    ,
                  JobDescriptionID INT                               COMMENT 'LAST_INSERT_ID() from the JobDescription table',
                  EntryTime       TIMESTAMP                          COMMENT 'Entry time'                                    ,
