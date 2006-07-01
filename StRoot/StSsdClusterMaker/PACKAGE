@@ -1,5 +1,0 @@
-# $Id $
-# package StSsdClusterMaker
-# author: 
-Library:libStSsdClusterMaker.so:LIBS +=   -lStChain  -l_StEvent  -lsvt_Tables
-#Library:libStSsdClusterMaker.so:LIBS +=   -lStChain  -lStEvent  -lsvt_Tables

@@ -1,5 +1,0 @@
-SRCS_F= \ @@\
-	 blank.F consts.F curpar.F errcom.F event.F masind.F masses.F \ @@\
-	 mat.F result.F
-
-SubdirLibraryTarget(NullParameter,NullParameter)
