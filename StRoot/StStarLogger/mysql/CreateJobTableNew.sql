@@ -1,4 +1,4 @@
-# $Id: CreateJobTableNew.sql,v 1.2 2006/06/30 22:18:05 fine Exp $
+# $Id: CreateJobTableNew.sql,v 1.3 2006/07/01 01:19:18 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the job description table
 
@@ -14,7 +14,7 @@ CREATE TABLE  IF NOT EXISTS TaskDescriptionN (
                  TaskDescriptionID  INT     NOT NULL AUTO_INCREMENT  KEY  COMMENT 'Task #id'                                                        ,
                  TaskRequestID_MD5  VARCHAR(40) NOT NULL                  COMMENT 'SUMS $REQUESTID'                                                 ,
                  TaskSize           INT                                   COMMENT 'SUMS $nProcesses - the total number of the process for the task' ,
-                 TaskCloseSize      INT                                   COMMENT 'The muber of task reported its finish'                           ,
+                 TaskRemainSize     INT                                   COMMENT 'The number of task to be finished yet. 0 = means the task has been completed',
                  EntryTime          DATETIME                              COMMENT 'SUMS time stampt - the time the task was created by the user with SUMS',
                  UpdateTime         TIMESTAMP                             COMMENT 'Last update time'                                                ,
                  LocationURL        VARCHAR(32)                           COMMENT 'URL where the Task description (SUMS session file) is originated and kept'  ,  
@@ -23,7 +23,7 @@ CREATE TABLE  IF NOT EXISTS TaskDescriptionN (
                  TaskCredential     VARCHAR(20)                           COMMENT 'user name (from GRID certificate), from $SUMS_AUTHENTICATED_USER', 
                  TaskDescription    VARCHAR(20)                           COMMENT 'Task descriptor'                                                 ,
                  BrokerID           INT                                   COMMENT 'The ID of the broker, in our case it is SUMS'                    ,
-                 CONSTRAINT UNIQUE INDEX TaskDescriptionID (TaskRequestID_MD5)
+                 CONSTRAINT UNIQUE  INDEX TaskDescriptionID (TaskRequestID_MD5)
                  );
                  
 CREATE TABLE  IF NOT EXISTS JobDescriptionN (
@@ -58,7 +58,7 @@ CREATE TABLE  IF NOT EXISTS JobTrackingN (
                  SequenceValue   INT                                COMMENT 'The current event # processed. for example '   ,
                  MessageContext  CHAR(20)                           COMMENT 'could represent StFtpcMaker, StMake'           ,  #STAR maker name
                  StepEventID     ENUM('Start','Finish','EventFinish','Run','JobStart','JobFinish') NOT NULL  COMMENT 'Event ID' ,
-                 MessageSeverity ENUM('Fatal','Error','Warning','Info') NOT NULL  COMMENT 'Event outcome'                    ,  #STAR Event return code
+                 MessageSeverity ENUM('Fatal','Error','Warning','Info') NOT NULL  COMMENT 'Event outcome'                   ,  #STAR Event return code
                  MessagType      CHAR(10)                           COMMENT 'Event context'                                 ,  #Field name 
                  MessageClass    ENUM('=')              NULL        COMMENT 'Extra message flag'                            ,
                  Message         VARCHAR(120)                       COMMENT 'Body core of the message' 

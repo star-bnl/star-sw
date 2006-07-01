@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.12 2006/05/12 18:08:14 fine Exp $
+ * $Id: summarizeEvent.cc,v 2.13 2006/07/01 01:19:15 fine Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.13  2006/07/01 01:19:15  fine
+ * Add new jiob tracking option code
+ *
  * Revision 2.12  2006/05/12 18:08:14  fine
  * fix the MySQLAppender problem and re-shape the trakDb messages
  *
@@ -58,7 +61,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.12 2006/05/12 18:08:14 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.13 2006/07/01 01:19:15 fine Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -149,7 +152,8 @@ summarizeEvent(StEvent& event, const int &nevents)
     
     LOG_QA << "# Kink vertices:       "
 		       << event.kinkVertices().size() << endm;
-     // Report for jobTracking Db   (non-zero entry only)      
+#ifndef NEWTRACKING             
+    // Report for jobTracking Db   (non-zero entry only)      
     if (event.v0Vertices()  .size()) {
        LOG_QA << "Events=" << nevents 
               << ",StepEventId='EventFinish'"
@@ -166,6 +170,25 @@ summarizeEvent(StEvent& event, const int &nevents)
               << ",StepEventId='EventFinish'"
               << ",StepContext=" << "'KinkVertices'," << "MessageId='='," << "ProgrammMessage="<< event.kinkVertices().size() << endm;
     }
+#else
+    // Report for jobTracking Db   (non-zero entry only)      
+    if (event.v0Vertices()  .size()) {
+       LOG_QA << "SequenceValue=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",MessageType=" << "'V0Vertices', " << "MessageClass='='," << "Message=" << event.v0Vertices()  .size() << endm;
+    }
+    if (event.xiVertices()  .size()) {
+       LOG_QA << "SequenceValue=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",MessageType=" << "'XiVertices', " << "MessageClass='='," << "Message="<< event.xiVertices()  .size()  << endm;
+    }
+    
+    if (event.kinkVertices().size()) {
+       LOG_QA << "SequenceValue=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",MessageType=" << "'KinkVertices'," << "MessageClass='='," << "Message="<< event.kinkVertices().size() << endm;
+    }
+#endif    
     
     UInt_t TotalNoOfTpcHits = 0, noBadTpcHits = 0, noTpcHitsUsedInFit = 0;
     StTpcHitCollection* TpcHitCollection = event.tpcHitCollection();
