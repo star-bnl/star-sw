@@ -118,9 +118,9 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 {
   TBenchmark evnt;
   int jCur=0,iMake=0;
-#ifdef STAR_TRACKING     
+#ifdef STAR_TRACKING 
+#ifndef NEWTRACKING    
 // Add a record to MySQL tracking Db     
-
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Start'"
@@ -134,6 +134,20 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
          << ",ProgrammMessage='" << int(TMemStat::ProgSize())
          << "'" << endm;
+#else
+// Add a record to MySQL tracking Db     
+  LOG_QA << "SequenceValue="<< mNTotal
+         << ",StepEventId=" << "'Start'"
+         << ",MessageType=" << "'MemUsed',"  << "MessageClass='='"
+         << ",Message='" << int(TMemStat::Used())
+         << "'" << endm;
+         
+  LOG_QA << "SequenceValue="<<mNTotal 
+         << ",StepEventId=" << "'Start'"
+         << ",MessageType=" << "'ProgSize',"  << "MessageClass='='"
+         << ",Message='" << int(TMemStat::ProgSize())
+         << "'" << endm;
+#endif         
 #endif                
   for (jCur=jBeg; jCur<=jEnd; jCur++) {
      evnt.Reset(); evnt.Start("QAInfo:");
@@ -151,7 +165,8 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 	jCur,GetRunNumber(),GetEventNumber(),GetDate(), GetTime(),
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
-#ifdef STAR_TRACKING     
+#ifdef STAR_TRACKING 
+#ifndef NEWTRACKING    
 // Add a record to MySQL tracking Db     
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
@@ -166,6 +181,20 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << ",StepContext=" << "'RealTime',"  << "MessageId='='"
          << ",ProgrammMessage='" << evnt.GetRealTime("QAInfo:")
          << "'" << endm;
+#else
+// Add a record to MySQL tracking Db     
+  LOG_QA << "SequenceValue="       << mNTotal
+         << ",StepEventId=" << "'EventFinish'"
+         << ",MessageType=" << "'Cpu',"  << "MessageClass='='"
+         << ",Message='" << evnt.GetCpuTime("QAInfo:")
+         << "'" << endm;
+
+  LOG_QA << "SequenceValue="       << mNFailed
+         << ",StepEventId=" << "'EventFinish'"
+         << ",MessageType=" << "'RealTime',"  << "MessageClass='='"
+         << ",Message='" << evnt.GetRealTime("QAInfo:")
+         << "'" << endm;
+#endif
 #endif                
   }
 
@@ -181,7 +210,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 
 #ifdef STAR_TRACKING     
 // Add a record to MySQL tracking Db     
-
+#ifndef NEWTRACKING
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
@@ -195,6 +224,21 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
          << ",StepContext=" << "'ProgSize',"  << "MessageId='='"
          << ",ProgrammMessage='" << int(TMemStat::ProgSize())
          << "'" << endm;
+#else
+// Add a record to MySQL tracking Db     
+
+  LOG_QA << "SequenceValue="       << mNTotal
+         << ",StepEventId=" << "'Finish'"
+         << ",essageType=" << "'MemUsed',"  << "MessageClass='='"
+         << ",Message='" << int(TMemStat::Used())
+         << "'" << endm;
+
+  LOG_QA << "SequenceValue="       << mNFailed
+         << ",StepEventId=" << "'Finish'"
+         << ",essageType=" << "'ProgSize',"  << "MessageClass='='"
+         << ",Message='" << int(TMemStat::ProgSize())
+         << "'" << endm;
+#endif         
    if (GetLogger()) GetLogger()->Close();
 
 #endif                
@@ -203,8 +247,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.61 2006/06/05 00:20:59 fine Exp $
+// $Id: StChain.cxx,v 1.62 2006/07/01 01:19:16 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.62  2006/07/01 01:19:16  fine
+// Add new jiob tracking option code
+//
 // Revision 1.61  2006/06/05 00:20:59  fine
 // class the new StMessMgr method to flush the logger buffers
 //
