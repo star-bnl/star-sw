@@ -15,6 +15,7 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "tables/St_spaceChargeCor_Table.h"
+#include "StEvent/StDcaGeometry.h"
 
 #include "TFile.h"
 #include "TH2.h"
@@ -180,7 +181,14 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: no StEvent; skipping event.");
     return kStWarn;
   }
-  StPrimaryVertex* pvtx = event->primaryVertex();
+  // Select the highest ranked vertex
+  StPrimaryVertex* pvtx = 0; float rank = -1e6;
+  for (unsigned int l=0; l<event->numberOfPrimaryVertices(); l++) {
+    if (!pvtx || event->primaryVertex(l)->ranking() > rank) {
+      pvtx = event->primaryVertex(l);
+      rank = pvtx->ranking();
+    }
+  }
   if (!pvtx) return kStOk;
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
@@ -245,7 +253,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   runinfo->setSpaceChargeCorrectionMode(m_ExB->GetSpaceChargeMode());
 
   // Track loop
-  unsigned int i,j;
+  unsigned int i,j,k;
   StThreeVectorD ooo = pvtx->position();
 
   for (i=0; i<nnodes; i++) {
@@ -274,11 +282,46 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
           Float_t eta=pvec.pseudoRapidity();
           //Float_t DCA=hh.geometricSignedDistance(0,0); // for testing only
-          Float_t DCA=hh.geometricSignedDistance(ooo.x(),ooo.y());
+          Float_t DCA=0;
+          StDcaGeometry* triDcaGeom = ((StGlobalTrack*) tri)->dcaGeometry();
+          if (triDcaGeom) {
+            StPhysicalHelixD dcahh = triDcaGeom->helix();
+            DCA=dcahh.geometricSignedDistance(ooo.x(),ooo.y());
+          } else {
+            DCA=hh.geometricSignedDistance(ooo.x(),ooo.y());
+          }
           Int_t ch = (int) triGeom->charge();
+
+          Float_t rerrors[64];
+          Float_t rphierrors[64];
+          memset(rerrors,64*sizeof(Float_t),0);
+          memset(rphierrors,64*sizeof(Float_t),0);
+          StPtrVecHit& hits = tri->detectorInfo()->hits();
+          for (k=0;k<hits.size();k++) {
+            StHit* hit = hits[k];
+            unsigned int maskpos = 0;
+            switch (hit->detector()) {
+              case (kTpcId) :
+                maskpos = 7 + ((StTpcHit*) hit)->padrow(); break;
+              case (kSvtId) :
+                maskpos = ((StSvtHit*) hit)->layer(); break;
+              case (kSsdId) :
+                maskpos = 7; break;
+              default :
+                maskpos = 0;
+            }
+            if (maskpos) {
+              StThreeVectorF herrVec = hit->positionError();
+              Float_t herr = herrVec.perp();
+              rerrors[maskpos] = herr;
+              rphierrors[maskpos] = herr;
+            }
+          }
+          
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
-	     eta,DCA,map.data(0),map.data(1),space))) continue;
+	  //   eta,DCA,map.data(0),map.data(1),space))) continue;
+	     eta,DCA,map.data(0),map.data(1),rerrors,rphierrors,space))) continue;
 
 	  space += lastsc;  // Assumes additive linearity of space charge!
 	  schists[curhist]->Fill(space);
@@ -853,8 +896,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.9 2006/06/01 17:27:11 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.10 2006/07/02 23:22:36 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.10  2006/07/02 23:22:36  genevb
+// Allow for SVT/SSD hits on tracks (necessary for ITTF)
+//
 // Revision 1.9  2006/06/01 17:27:11  genevb
 // Bug fix: gapd and gapf backwards; Improvements: gap fit intercepts, hist and fit ranges
 //
