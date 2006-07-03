@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.13 2006/07/01 01:19:15 fine Exp $
+ * $Id: summarizeEvent.cc,v 2.14 2006/07/03 04:13:37 fine Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.14  2006/07/03 04:13:37  fine
+ * new Job tracking Db activated
+ *
  * Revision 2.13  2006/07/01 01:19:15  fine
  * Add new jiob tracking option code
  *
@@ -61,7 +64,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.13 2006/07/01 01:19:15 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.14 2006/07/03 04:13:37 fine Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -91,6 +94,7 @@ summarizeEvent(StEvent& event, const int &nevents)
 		       << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
              
     // Report for jobTracking Db        
+#ifdef OLDTRACKING    
     if (nTracks) {
        LOG_QA << "Events=" << nevents 
               << ",StepEventId='EventFinish'"
@@ -106,6 +110,23 @@ summarizeEvent(StEvent& event, const int &nevents)
               << ",ProgrammMessage='" << nGoodTracks 
               << "'" << endm;
     }
+#else
+    if (nTracks) {
+       LOG_QA << "SequenceValue=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",MessageType=" << "'nodes all',"  << "MessageClass='='"
+              << ",Message='" <<  nTracks 
+              << "'" << endm;
+    }
+
+    if (nGoodTracks) { 
+       LOG_QA << "SequenceValue=" << nevents 
+              << ",StepEventId='EventFinish'"
+              << ",MessageType=" << "'nodes good',"  << "MessageClass='='"
+              << ",Message='" << nGoodTracks 
+              << "'" << endm;
+    }
+#endif    
 
     StPrimaryVertex *pVertex=0;
     for (int ipr=0;(pVertex=event.primaryVertex(ipr));ipr++) {
@@ -124,7 +145,8 @@ summarizeEvent(StEvent& event, const int &nevents)
 
       LOG_QA << "# primary tracks:\t"
 		         << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
-     // Report for jobTracking Db   (non-zero entry only)      
+     // Report for jobTracking Db   (non-zero entry only)    
+#ifdef OLDTRACKING       
      if (nDaughters) {
         LOG_QA << "Events=" << nevents
                << ",StepEventId='EventFinish'"
@@ -139,8 +161,23 @@ summarizeEvent(StEvent& event, const int &nevents)
                << ",ProgrammMessage='" << nGoodTracks
                << "'" << endm;
      }
-
-     LOG_QA << "# primary TPC tracks:\t"
+#else
+      if (nDaughters) {
+        LOG_QA << "SequenceValue=" << nevents
+               << ",StepEventId='EventFinish'"
+               << ",MessageType=" << "'primary all',"  << "MessageClass='='"
+               << ",Message='" <<  nDaughters
+               << "'" << endm;
+      }
+     if (nGoodTracks) {
+        LOG_QA << "SequenceValue=" << nevents
+               << ",StepEventId='EventFinish'"
+               << ",MessageType=" << "'primary good',"  << "MessageClass='='"
+               << ",Message='" << nGoodTracks
+               << "'" << endm;
+     }
+#endif     
+    LOG_QA << "# primary TPC tracks:\t"
 		         << nTpcTracks << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTpcTracks << endm;
     }// end prim vtx    
     
@@ -152,7 +189,7 @@ summarizeEvent(StEvent& event, const int &nevents)
     
     LOG_QA << "# Kink vertices:       "
 		       << event.kinkVertices().size() << endm;
-#ifndef NEWTRACKING             
+#ifdef OLDTRACKING             
     // Report for jobTracking Db   (non-zero entry only)      
     if (event.v0Vertices()  .size()) {
        LOG_QA << "Events=" << nevents 

@@ -1,7 +1,18 @@
 #!/usr/local/bin/tcsh
-# $Id: ShowSomething.csh,v 1.3 2006/06/12 18:37:48 fine Exp $
+# $Id: ShowSomething.csh,v 1.4 2006/07/03 04:13:38 fine Exp $
 # Author: Valeri Fine (fine@bnl.gov) 26.01.2006
 # Create the procedure to work with  logger Db
+echo "---"
+echo The  List of the new Tables
+echo ------------------------------------
+mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
+ use logger;
+ #-  new tables         
+ SELECT * FROM  logger.TaskDescriptionN;
+MYSQLCODE
+
+exit
+
 echo Total number of the tasks:
 echo --------------------------
 mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
@@ -145,4 +156,13 @@ FROM  TaskDescription,
 #      completed_jobs <> TaskDescription.nProcesses AND
 #          TaskDescription.TaskUser='fine' AND
          TaskDescription.taskId = tbl.taskId ;  
+MYSQLCODE
+
+echo "---"
+echo The  List of the new Tables
+echo ------------------------------------
+mysql  -h heston.star.bnl.gov -u StarLogger -plogger <<MYSQLCODE
+ use logger;
+ #-  new tables         
+ SELECT COUNT(*)  FROM  logger.TaskDescriptionN;
 MYSQLCODE
