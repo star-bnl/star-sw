@@ -119,7 +119,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
   TBenchmark evnt;
   int jCur=0,iMake=0;
 #ifdef STAR_TRACKING 
-#ifndef NEWTRACKING    
+#ifdef OLDTRACKING    
 // Add a record to MySQL tracking Db     
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
@@ -166,7 +166,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 	     iMake,evnt.GetRealTime("QAInfo:"),evnt.GetCpuTime("QAInfo:")) 
      << endm;
 #ifdef STAR_TRACKING 
-#ifndef NEWTRACKING    
+#ifdef OLDTRACKING    
 // Add a record to MySQL tracking Db     
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
@@ -210,7 +210,7 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 
 #ifdef STAR_TRACKING     
 // Add a record to MySQL tracking Db     
-#ifndef NEWTRACKING
+#ifdef OLDTRACKING
   LOG_QA << "Events="       << mNTotal
          << ",Failed="      << mNFailed
          << ",StepEventId=" << "'Finish'"
@@ -247,8 +247,11 @@ Int_t StChain::EventLoop(Int_t jBeg,Int_t jEnd, StMaker *outMk)
 }
 
 
-// $Id: StChain.cxx,v 1.62 2006/07/01 01:19:16 fine Exp $
+// $Id: StChain.cxx,v 1.63 2006/07/03 04:13:38 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.63  2006/07/03 04:13:38  fine
+// new Job tracking Db activated
+//
 // Revision 1.62  2006/07/01 01:19:16  fine
 // Add new jiob tracking option code
 //
