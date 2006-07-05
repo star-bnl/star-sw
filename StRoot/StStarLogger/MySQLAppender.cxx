@@ -223,13 +223,8 @@ void MySQLAppender::flushBuffer()
 ///--- Task description         
            expandCommand =         
 //         expandCommand ="INSERT         IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
-#ifdef OLDTRACKING
-           "INSERT DELAYED IGNORE  TaskDescription (taskId, jobID_MD5, nProcesses, submissionTime, time, TaskUser,JobName,JobDescription,TaskJobUser)"
-           " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"Test Task\",\"$SUMS_AUTHENTICATED_USER\");";
-#else           
-           "INSERT DELAYED IGNORE  TaskDescriptionN (TaskDescriptionID, TaskRequestID_MD5, TaskSize, TaskRemainSize, EntryTime, UpdateTime, TaskUser,TaskDescription,TaskCredential,BrokerID)"
+           "INSERT DELAYED IGNORE  TaskDescription (TaskDescriptionID, TaskRequestID_MD5, TaskSize, TaskRemainSize, EntryTime, UpdateTime, TaskUser,TaskDescription,TaskCredential,BrokerID)"
            " VALUES  ( DEFAULT, \"$REQUESTID\", \"$SUMS_nProcesses\",\"$SUMS_nProcesses\",\"$SUBMIT_TIME\",DEFAULT,\"$SUMS_USER\",\"$SUMS_name\",\"$SUMS_AUTHENTICATED_USER\",\"SUMS\");";
-#endif         
 // Edit meta symbols
 //-----------------------
 //  $hostid        = $HOSTNAME            
@@ -252,22 +247,9 @@ void MySQLAppender::flushBuffer()
 //--- Job description         
 
 //         expandCommand ="INSERT         IGNORE INTO JobDescription SET ";
-#ifdef OLDTRACKING
            expandCommand ="INSERT DELAYED IGNORE INTO JobDescription SET ";
 
-           expandCommand +=  "taskId = (SELECT taskId FROM TaskDescription WHERE  jobID_MD5=\"$REQUESTID\")";
-                             expandCommand += ", ";                  
-           expandCommand += "jobID_MD5=\"$REQUESTID\"";
-                             expandCommand += ", ";
-           expandCommand += "processID=\"$PROCESSID\"";
-                             expandCommand += ", ";
-           expandCommand +=  "node=\"$HOSTNAME\"";
-                             expandCommand += ", ";
-           expandCommand +=  "JobUser=\"$USER\"";
-#else
-           expandCommand ="INSERT DELAYED IGNORE INTO JobDescriptionN SET ";
-
-           expandCommand +=  "TaskDescriptionID = (SELECT TaskDescriptionID FROM TaskDescriptionN WHERE  TaskRequestID_MD5=\"$REQUESTID\")";
+           expandCommand +=  "TaskDescriptionID = (SELECT TaskDescriptionID FROM TaskDescription WHERE  TaskRequestID_MD5=\"$REQUESTID\")";
                              expandCommand += ", ";                  
            expandCommand += "TaskRequestID_MD5=\"$REQUESTID\"";
                              expandCommand += ", ";
@@ -276,7 +258,6 @@ void MySQLAppender::flushBuffer()
            expandCommand +=  "JobLocationURL=\"$HOSTNAME\"";
                              expandCommand += ", ";
            expandCommand +=  "JobUser=\"$USER\"";
-#endif           
                              expandCommand += "; ";
 // Edit meta symbols
 //-----------------------
