@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.61 2006/03/22 22:15:26 posk Exp $
+// $Id: doFlowEvents.C,v 1.62 2006/07/06 17:03:53 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -270,14 +270,14 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     bool lyzMaker    = kFALSE;
   } else {
     bool phiWgtMaker = kFALSE;
-    //bool anaMaker    = kFALSE;
-    bool anaMaker  = kTRUE;
+    //bool anaMaker  = kFALSE;
+    bool anaMaker    = kTRUE;
     bool cumMaker    = kFALSE;
     //bool cumMaker  = kTRUE;
     bool spMaker     = kFALSE;
     //bool spMaker   = kTRUE;
-    bool lyzMaker  = kFALSE;
-    //bool lyzMaker    = kTRUE;
+    bool lyzMaker    = kFALSE;
+    //bool lyzMaker  = kTRUE;
   }
 
   Bool_t includeTpcTracks  = kTRUE;
@@ -290,7 +290,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   Bool_t includeFtpcTracks = kFALSE;
   Bool_t includeFtpcTracks = kTRUE;
 //   Float_t ptRange_for_vEta[2] = {0., 2.};
-//   Float_t etaRange_for_vPt[2] = {2., 5.}; // show only FTPC particles in v(pt)
+//   Float_t etaRange_for_vPt[2] = {2.5, 4.}; // show only FTPC particles in v(pt)
   
   // To calculate v1{EP1,EP2} use the following switch.
   // Since v1{EP1} doesn't work very well at RHIC energies, v1{EP1,EP2} is set to be 
@@ -320,6 +320,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     if (lyzMaker) {
       StFlowLeeYangZerosMaker* flowLeeYangZerosMaker = new StFlowLeeYangZerosMaker();
       flowLeeYangZerosMaker->SetHistoRanges(includeFtpcTracks);
+      flowLeeYangZerosMaker->SetPtRange_for_vEta(ptRange_for_vEta[0], ptRange_for_vEta[1]);
+      flowLeeYangZerosMaker->SetEtaRange_for_vPt(etaRange_for_vPt[0], etaRange_for_vPt[1]);
     }
   } else {
     if (anaMaker) {
@@ -469,6 +471,9 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 
   // Use Aihong's probability PID method
 //     StFlowEvent::SetProbPid();
+
+   // In LeeYangZeros do not use mixed harmonics for v1
+//    StFlowLeeYangZerosMaker::SetV1Mixed(kFALSE);
 
   // Set the PID deviant windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
@@ -767,6 +772,9 @@ int gcInit(const char *request)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.62  2006/07/06 17:03:53  posk
+// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+//
 // Revision 1.61  2006/03/22 22:15:26  posk
 // Updated to read the flow.firstPassLYZ.root files.
 //
