@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.41 2006/05/02 21:47:47 jeromel Exp $
+// $Id: StFlowCutEvent.cxx,v 1.42 2006/07/06 16:50:12 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -64,7 +64,7 @@ StFlowCutEvent::~StFlowCutEvent() {
 
 Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Returns kTRUE if StEvent survives all the cuts
-  if (!pEvent) return kFALSE;
+  //if (!pEvent) return kFALSE;
 
   // Primary vertex
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
@@ -298,7 +298,7 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
 
 Bool_t StFlowCutEvent::CheckEvent(StMuDst* pMu) {
   // Returns kTRUE if muevent survives all the cuts
-  if (!pMu) return kFALSE;
+  //if (!pMu) return kFALSE;
 
   StMuEvent* pMuEvent  = pMu->event();
   TObjArray* pMuTracks = pMu->primaryTracks();
@@ -675,6 +675,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.42  2006/07/06 16:50:12  posk
+// Commented out lines added in version 1.41.
+//
 // Revision 1.41  2006/05/02 21:47:47  jeromel
 // Bug fix: un-protected call to method
 //
