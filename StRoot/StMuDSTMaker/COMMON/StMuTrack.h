@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.18 2006/06/30 17:06:52 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.19 2006/07/06 22:17:10 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -162,7 +162,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,6)
+  ClassDef(StMuTrack,7)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -211,6 +211,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.19  2006/07/06 22:17:10  mvl
+ * Update version number in ClassDef, to account for additional data members for SVT review.
+ *
  * Revision 1.18  2006/06/30 17:06:52  fisyak
  * Add 2D dca (DcaD), Z dca (DcaZ) and their cov. matrix as corresponing sigma and correlaton coef. from dcaGeometry to StMuTrack
  *
