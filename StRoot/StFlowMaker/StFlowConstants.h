@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.23 2006/02/22 19:22:02 posk Exp $
+// $Id: StFlowConstants.h,v 1.24 2006/07/06 16:55:59 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -25,6 +25,7 @@ class Flow{
     nSels             = 2, // 2
     nSubs             = 2,
     nTheta            = 5, // 5
+    nTheta1           = 5, // 5
     nRBins            = 150,
     nPhiBins          = 120,
     nPhiBinsFtpc      = 120,
@@ -52,6 +53,7 @@ class Flow{
   static Float_t etaMaxTpcOnly;
   static Float_t rMax;
   static Float_t j01;
+  static Float_t epsV1;
   static Float_t ptMin;
   static Float_t ptMax;
   static Float_t ptMaxPart;
@@ -77,6 +79,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.24  2006/07/06 16:55:59  posk
+// Calculation of v1 for selection=2 is done with mixed harmonics.
+//
 // Revision 1.23  2006/02/22 19:22:02  posk
 // Additions needed for the StFlowLeeYangZerosMaker
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.53 2006/02/22 19:29:16 posk Exp $
+// $Id: StFlowEvent.h,v 1.54 2006/07/06 16:56:01 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -60,6 +60,7 @@ public:
   Float_t        MeanPt(StFlowSelection*);
   Float_t        Qtheta(StFlowSelection*, Float_t theta);
   TComplex       Grtheta(StFlowSelection*, Float_t r, Float_t theta);
+  TComplex       GV1r0theta(StFlowSelection*, Float_t r, Float_t theta1, Float_t theta);
   TComplex       Gder_r0theta(StFlowSelection*, Float_t r, Float_t theta);
   Float_t        Psi(StFlowSelection*);
   Float_t 	 ZDCSMD_PsiCorr();
@@ -491,6 +492,9 @@ inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.54  2006/07/06 16:56:01  posk
+// Calculation of v1 for selection=2 is done with mixed harmonics.
+//
 // Revision 1.53  2006/02/22 19:29:16  posk
 // Additions needed for the StFlowLeeYangZerosMaker
 //

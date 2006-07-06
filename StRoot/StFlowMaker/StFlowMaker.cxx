@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.108 2006/05/11 20:14:36 fine Exp $
+// $Id: StFlowMaker.cxx,v 1.109 2006/07/06 16:56:02 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -203,7 +203,7 @@ Int_t StFlowMaker::Make() {
       double magneticField = pFlowEvent->MagneticField();
       short beamMassE   = pFlowEvent->BeamMassNumberEast();
       short beamMassW   = pFlowEvent->BeamMassNumberWest();
-      gMessMgr->Info() << "##### FlowMaker: " << runID << ", " <<
+      if (Debug()) gMessMgr->Info() << "##### FlowMaker: " << runID << ", " <<
 	beamEnergy << " GeV/A " << beamMassE << "+" << beamMassW << 
 	", B= " << magneticField << endm;
       mRunID = runID;
@@ -258,7 +258,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.108 2006/05/11 20:14:36 fine Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.109 2006/07/06 16:56:02 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -2274,6 +2274,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.109  2006/07/06 16:56:02  posk
+// Calculation of v1 for selection=2 is done with mixed harmonics.
+//
 // Revision 1.108  2006/05/11 20:14:36  fine
 // Eliminate the memeory leak and code crash
 //
