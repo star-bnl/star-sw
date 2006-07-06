@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.109 2006/07/06 16:56:02 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.110 2006/07/06 20:29:48 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -127,7 +127,8 @@ Int_t StFlowMaker::Make() {
     if (mMuEventReadGC) { // StMuEvent Grid Collector
       pFlowEvent = new StFlowEvent;
       if (!pFlowEvent) return kStOK;
-      pMu = dynamic_cast<StMuDst*>(GetInputDS("MuDst"));
+      //pMu = dynamic_cast<StMuDst*>(GetInputDS("MuDst"));
+      pMu = (StMuDst*)GetInputDS("MuDst");
       pMuEvent = pMu->event();
       pMuTracks = pMu->primaryTracks();
       pMuGlobalTracks = pMu->globalTracks();
@@ -258,7 +259,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.109 2006/07/06 16:56:02 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.110 2006/07/06 20:29:48 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -2274,6 +2275,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.110  2006/07/06 20:29:48  posk
+// Changed the dynamic_cast of GetInputDS("MuDst") to a const cast.
+//
 // Revision 1.109  2006/07/06 16:56:02  posk
 // Calculation of v1 for selection=2 is done with mixed harmonics.
 //
