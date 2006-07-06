@@ -1,13 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.13 2006/03/22 22:02:07 posk Exp $
+// $Id: minBias.C,v 1.14 2006/07/06 16:58:38 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
 // Description:  Macro to add histograms together.
 //               The v histograms will be added with yield weighting.
 //               First file anaXX.root given by first run number XX.
+//               Last file anaXX.root given by last run number XX.
 //               Output file given by output run number.
+//               For 10-50% centrality: minBias(X4,X7,X0)
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,9 +24,9 @@
 #include "TObject.h"
 #endif
 
-void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
+void minBias(Int_t firstRunNo, Int_t lastRunNo, Int_t outputRunNo=99) {
 
-  const   int nCens = 9;
+  const   int nCens = lastRunNo - firstRunNo + 1;
   int     nSels = 2;
   const   int nHars = 4;
   char    fileName[80];
@@ -295,6 +297,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.14  2006/07/06 16:58:38  posk
+// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+//
 // Revision 1.13  2006/03/22 22:02:07  posk
 // Updates to macros.
 //

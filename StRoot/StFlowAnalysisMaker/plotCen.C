@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.26 2006/03/22 22:02:12 posk Exp $
+// $Id: plotCen.C,v 1.27 2006/07/06 16:58:39 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -518,9 +518,19 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       TLine* r0Line = new TLine(r0, 0., r0, 1.);
       r0Line->SetLineColor(kBlue);
       r0Line->Draw("same");
-    } else if (strstr(shortName[pageNumber],"LYZ")!=0) {  // LYZ
+    } else if (strstr(shortName[pageNumber],"LYZ_M")!=0) {  // LYZ mult
       hist->SetMinimum(0.);
       gStyle->SetOptStat(0);
+      hist->Draw();
+      Float_t mult = hist->GetMean();
+      TString* multChar = new TString("mult= ");
+      *multChar += (int)mult;
+      TLatex l;
+      l.SetNDC();
+      l.SetTextSize(0.1);
+      l.DrawLatex(0.65,0.8,multChar->Data());
+    } else if (strstr(shortName[pageNumber],"LYZ")!=0) {  // LYZ
+      hist->SetMinimum(0.);
       hist->Draw();
     } else if (strstr(shortName[pageNumber],"_v")!=0 ) {      // v 1D
       TLine* lineZeroHar = new TLine(0.5, 0., 4.5, 0.);
@@ -613,6 +623,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.27  2006/07/06 16:58:39  posk
+// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+//
 // Revision 1.26  2006/03/22 22:02:12  posk
 // Updates to macros.
 //

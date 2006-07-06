@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotLYZ.C,v 1.2 2006/03/22 22:02:14 posk Exp $
+// $Id: plotLYZ.C,v 1.3 2006/07/06 16:58:39 posk Exp $
 //
 // Plot histograms from flow.LeeYang.Zeros.root
 //
@@ -38,7 +38,7 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   Int_t maxSel = 2;
   Int_t maxHar = 4; // 4
   Int_t maxHarPlot = 2;
-  float ptMax = 6.; // 6.
+  float ptMax = mevSim ? 2. : 6.;
   float v1 = 4.0; // 4. for dir9 mevSim
 
   Float_t max, min, r0;
@@ -117,8 +117,14 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   graphPad->cd();
   histMult = (TH1D*)file->Get(histName);
   if (!mevSim) { histMult->Fit("gaus"); }
-  histMult->SetStats(); // ?
   histMult->Draw();
+  Double_t entries = histMult->GetEntries();
+  TString* entriesChar = new TString("entries= ");
+  *entriesChar += (int)entries;
+  TLatex l;
+  l.SetNDC();
+  l.SetTextSize(0.05);
+  l.DrawLatex(0.65,0.8,entriesChar->Data());
 
   float _v, vErr;  
   for (Int_t sel = 0; sel < maxSel; sel++) {
@@ -153,7 +159,6 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
       cout << setprecision(3) << "Sel= " << sel+1 << ": v" << j << " from r0 = (" << _v <<
 	" +/- " << vErr << ") %" << endl;
     }
-    
 
     for (Int_t har = 0; har < maxHarPlot; har++) {
       int n = sel + har;
@@ -291,6 +296,9 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotLYZ.C,v $
+// Revision 1.3  2006/07/06 16:58:39  posk
+// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+//
 // Revision 1.2  2006/03/22 22:02:14  posk
 // Updates to macros.
 //
