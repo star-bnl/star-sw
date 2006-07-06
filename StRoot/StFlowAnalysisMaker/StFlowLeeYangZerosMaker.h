@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.h,v 1.2 2006/03/22 21:55:32 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.h,v 1.3 2006/07/06 16:58:36 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //
@@ -16,9 +16,9 @@
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
-#include "TString.h"
-#include "StTimer.hh"
 #include "TComplex.h"
+#include "TString.h"
+//#include "StTimer.hh"
 class StFlowEvent;
 class StFlowSelection;
 class TH1F;
@@ -55,6 +55,7 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
   void     SetPtRange_for_vEta(Float_t lo, Float_t hi);
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
+  static   void SetV1Mixed(Bool_t);
   virtual  const char *GetCVS() const {static const char cvs[]=
     "Tag $Name:  $  StFlowLeeYangZerosMaker.h, "__DATE__" "__TIME__ ;
     return cvs;}
@@ -64,12 +65,15 @@ private:
   Bool_t   FillFromFlowEvent();
   void     FillParticleHistograms();
   Bool_t   mFirstPass;
+  static   Bool_t   mV1Mixed;        // flag for v1 mixed harmonic
 #ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
   Double_t mQ2[Flow::nSels][Flow::nHars];                    //! flow vector modulus square
   Float_t  mQtheta[Flow::nSels][Flow::nHars][Flow::nTheta];  //! Q^{\theta}
   Float_t  mr0theta[Flow::nSels][Flow::nHars][Flow::nTheta]; //! r_0^{\theta} from first pass
   TComplex mGr0theta[Flow::nSels][Flow::nHars][Flow::nTheta];//! G(r_0)^{\theta}
+  TComplex mV1neum[Flow::nTheta];                            //! neumerator for v1 mixed harmonic
+  TComplex mGV1r0theta[Flow::nTheta1][Flow::nTheta];         //! generating function for v1 mixed harmonic
 #endif /*__CINT__*/
   Int_t            mNEvents;    //! number of events
   Int_t            mMult;       //! multiplicity
@@ -140,5 +144,7 @@ private:
 
   ClassDef(StFlowLeeYangZerosMaker,0)              // macro for rootcint
 };
+
+inline void StFlowLeeYangZerosMaker::SetV1Mixed(Bool_t V1Mixed) { mV1Mixed = V1Mixed; }
 
 #endif

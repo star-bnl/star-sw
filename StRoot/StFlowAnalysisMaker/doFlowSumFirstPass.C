@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowSumFirstPass.C,v 1.1 2006/03/22 21:57:46 posk Exp $
+// $Id: doFlowSumFirstPass.C,v 1.2 2006/07/06 16:58:37 posk Exp $
 //
 // Makes temporary root.files.<cenNo> containing lists of flow.firstPassLYZNew.root files
 //   in all subdirectories of outDir.
@@ -27,9 +27,7 @@
 void doFlowSumFirstPass(char*  link, int firstCenNo) {
 
   int    nCens = 9; // 9
-  Bool_t fromGmod, fromG = kFALSE;
-  //fromGmod = kTRUE;
-  fromG    = kTRUE; // the prefered option
+  Bool_t fromG = kTRUE; // the prefered setting
 
   char    rootFileName[80];
   char    rootDirName[80];
@@ -134,7 +132,7 @@ void doFlowSumFirstPass(char*  link, int firstCenNo) {
     TH1D*    histReG[nSels][nHars][thetas];
     TH1D*    histG[nSels][nHars][thetas];
 
-    //if (fromGmod || fromG) { cout << "r0:\t\t\t from V \t from G \t change" << endl; }
+    //if (fromG) { cout << "r0:\t\t\t from V \t from G \t change" << endl; }
     float r0V[nSels][nHars][thetas];
     float Xlast, X0, Xnext;
     double reG, imG, Glast, G0, Gnext, GnextNext;
@@ -258,15 +256,11 @@ void doFlowSumFirstPass(char*  link, int firstCenNo) {
 	    } // bin
 	    if (!strstr(histName.Data(), "G")) { break; } // only once if no thetas
 
-	    if (fromGmod && strstr(histName.Data(), "_Gtheta")) {
-	      histG[selN][harN][thetaN] = (TH1D*)hist[nFiles]->Clone();
-	    }
-
 	    if (fromG && strstr(histName.Data(), "ReGtheta")) {
 	      histReG[selN][harN][thetaN] = (TH1D*)hist[nFiles]->Clone();
 	    }
 
-	    if ((fromG || fromGmod) && pageNumber == nNames-1) { // calculate r0theta from Gtheta
+	    if ((fromG) && pageNumber == nNames-1) { // calculate r0theta from Gtheta
 	      // Find first minimum of the square of the modulus of G for each theta
 	      r0 = hist[nFiles]->GetBinCenter(nBins-1); // default value if no minimum
 	      for (int N = 2; N < nBins-2; N++) {
@@ -332,6 +326,9 @@ void doFlowSumFirstPass(char*  link, int firstCenNo) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowSumFirstPass.C,v $
+// Revision 1.2  2006/07/06 16:58:37  posk
+// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+//
 // Revision 1.1  2006/03/22 21:57:46  posk
 // Macro to sum the Generating Functions between the two passes.
 //

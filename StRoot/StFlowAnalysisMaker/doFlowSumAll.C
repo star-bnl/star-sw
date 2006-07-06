@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowSumAll.C,v 1.1 2006/03/22 21:59:51 posk Exp $
+// $Id: doFlowSumAll.C,v 1.2 2006/07/06 16:58:37 posk Exp $
 //
 // Makes root.files.<cenNo> files containing lists of flow.hist.root files
 // in all subdirectories of outDir, which is a link in this directory.
@@ -25,11 +25,11 @@
 #include "TKey.h"
 #include "TChain.h"
 
-void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, Int_t outputRunNo=99) {
+void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t outputRunNo=99) {
 
   const  int nSels = 2;
   const  int nHars = 4; // 4
-  char*  dirName = "b6";
+  //char*  dirName = "b8";
 
   char   rootFileName[80];
   char   logFileName[80];
@@ -414,6 +414,9 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowSumAll.C,v $
+// Revision 1.2  2006/07/06 16:58:37  posk
+// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+//
 // Revision 1.1  2006/03/22 21:59:51  posk
 // Macro and shell script to sum the outputs of the second pass.
 //

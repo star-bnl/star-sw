@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.cxx,v 1.2 2006/03/22 21:55:28 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.cxx,v 1.3 2006/07/06 16:58:35 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //          with advice from Jean-Yves Ollitrault and Nicolas Borghini
@@ -12,7 +12,7 @@
 //               Selection 2 (k=1) uses the Product Generating Function
 //               Equation numbers are from Big Paper (BP) Nucl. Phys. A 727, 373 (2003)
 //               Practical Guide (PG) J. Phys. G: Nucl. Part. Phys. 30, S1213 (2004)
-//               Directed Flow (DF) Nucl. Phys. A 742, 130  (nucl-th/0404087)
+//               Directed Flow (DF) Nucl. Phys. A 742, 130 (2004)
 //               The errors come from the variations with theta and batch job variations
 //               This treats the acceptance variations with theta as statistical
 //               Particles which would normally be correlated with the event plane are analyzed
@@ -42,10 +42,12 @@
 #include "StMessMgr.h"
 #include "TMath.h"
 #include "TComplex.h"
-#include "StTimer.hh"
+//#include "StTimer.hh"
 #define PR(x) cout << "##### FlowLYZ: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowLeeYangZerosMaker)
+
+Bool_t  StFlowLeeYangZerosMaker::mV1Mixed = kTRUE;
 
 //-----------------------------------------------------------------------
 
@@ -126,6 +128,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 
   TString* histTitle;
   mFirstPass = kFALSE;
+  mV1Mixed = kTRUE;
   
   // Make array of G(r) bins
   // Initial bin width is smaller than the mean bin width by the factor F
@@ -162,6 +165,11 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   mHistMult->SetYTitle("Counts");
 
   mNEvents = 0;
+
+  // neumerator for v1 mixed harmonics: DF Eq. 7
+  for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
+    mV1neum[Ntheta](0., 0.);
+  }
 
   // for each selection
   for (int k = 0; k < Flow::nSels; k++) {
@@ -379,6 +387,12 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 	  cout << "##### FlowLeeYangZeros: dynamic cast can't find " <<
 	    histTitleForReadIn->Data() << endl;
 	  return kFALSE;
+	} else if (tempHist->GetNbinsX() != Flow::nTheta) {
+	  cout << "##### FlowLeeYangZeros: nTheta of 1st pass not equal to 2nd pass" <<
+	    endl;
+	  PR(tempHist->GetNbinsX());
+	  PR(Flow::nTheta);
+	  return kStFatal;
 	}   
 	delete  histTitleForReadIn;
 	
@@ -396,7 +410,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   } // k
 
   gMessMgr->SetLimit("##### FlowLeeYangZero", 5);
-  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.2 2006/03/22 21:55:28 posk Exp $");
+  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.3 2006/07/06 16:58:35 posk Exp $");
 
   return StMaker::Init();
 }
@@ -405,7 +419,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
 
 Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
   // Get event quantities from StFlowEvent for all particles
-  //timeEvent.start();
+//   timeEvent.start();
 
   // multiplicity
   mMult = (int)pFlowEvent->MultPart(pFlowSelect);
@@ -414,16 +428,15 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
   mNEvents++; // increment number of events
 
   TVector2 Q;
-  Float_t theta, order, r0;
+  Float_t theta, theta1, order, r0;
   TComplex expo, denom, Gtheta;
-  TComplex i = TComplex::I();
-  Double_t Qtheta;
+  Double_t Qtheta, cosTheta12;
   Int_t m;
 
   for (int k = 0; k < Flow::nSels; k++) {
     pFlowSelect->SetSelection(k);
     for (int j = 0; j < Flow::nHars; j++) {
-      m = 1; // int for i^(m-1)
+      m = 1;
       pFlowSelect->SetHarmonic(j); // for integrated flow and denominator
       if (j==2) {
 	m = 3;
@@ -457,7 +470,7 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
 	    if (!k) { // Sum G
 	      expo(0., r * Qtheta);
 	      Gtheta = TComplex::Exp(expo); // BP Eq. 6
-	    } else {  // Product G
+	    } else if (!mV1Mixed || j) {  // Product G, skip for v1 mixed
 	      Gtheta = pFlowEvent->Grtheta(pFlowSelect, r, theta);  // PG Eq. 3
 	      if (Gtheta.Rho2() > 1000.) { break; } // stop when G gets too big
 	    }
@@ -465,15 +478,15 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
 	    histFull[k].histFullHar[j].histTheta[Ntheta].mHistProImGtheta->Fill(r, Gtheta.Im());
 	  }
 	} else if (!mFirstPass) {
-	  // denominator for differential v
+	  // denominator for differential v, and "integrated" v1 mixed
 	  r0 = mr0theta[k][j][Ntheta];
 	  if (!k) {
 	    expo(0., r0 * Qtheta);
-	    denom = TComplex::Power(i, m-1) * Qtheta * TComplex::Exp(expo); // BP Eq. 12
+	    denom = Qtheta * TComplex::Exp(expo); // BP Eq. 12
 	  } else {
 	    mGr0theta[k][j][Ntheta] = pFlowEvent->Grtheta(pFlowSelect, r0, theta);
-	    denom = TComplex::Power(i, m-1) * mGr0theta[k][j][Ntheta] *
-	      pFlowEvent->Gder_r0theta(pFlowSelect, r0, theta);  // PG Eq. 9
+	    denom = mGr0theta[k][j][Ntheta] *
+	      pFlowEvent->Gder_r0theta(pFlowSelect, r0, theta);  // PG Eq. 9 & DF Eq. 5
 	  }
 	  histFull[k].histFullHar[j].mHistReDenom->Fill(Ntheta, denom.Re());
 	  histFull[k].histFullHar[j].mHistImDenom->Fill(Ntheta, denom.Im());
@@ -482,7 +495,26 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
     } // j
   } // k
   
-  //timeEvent.stop();
+  // for v1 mixed harmonics: neumerator of DF Eq. 7
+  // also stores G for use in DF Eq. 8
+  if (!mFirstPass && mV1Mixed) {
+    for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
+      theta = ((float)Ntheta / (float)Flow::nTheta) * TMath::Pi()/2.; // theta = theta2
+      r0 = mr0theta[1][1][Ntheta];  // selection 2, harmonic 2
+      TComplex theta1Term(0.,0.);
+      for (int Ntheta1 = 0; Ntheta1 < Flow::nTheta1; Ntheta1++) {
+	theta1 = ((float)Ntheta1 / (float)Flow::nTheta1) * 2. * TMath::Pi();
+	cosTheta12 = cos(2.*(theta1 - theta));
+	mGV1r0theta[Ntheta1][Ntheta] = pFlowEvent->GV1r0theta(pFlowSelect, r0, theta1, theta);
+	theta1Term += (cosTheta12 * mGV1r0theta[Ntheta1][Ntheta]);
+	//cout << Ntheta << ", " << Ntheta1 << ": " << cosTheta12 << " * " << mGV1r0theta[Ntheta1][Ntheta] << endl;
+      }
+      mV1neum[Ntheta] += (theta1Term / (double)Flow::nTheta1); // averaged over theta1
+      //cout << Ntheta << " :" << mV1neum[Ntheta] << endl;
+    }
+  }
+
+//   timeEvent.stop();
   return kTRUE;
 }
 
@@ -490,15 +522,15 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
 
 void StFlowLeeYangZerosMaker::FillParticleHistograms() {
   // Fill histograms from the particles on 2nd pass
-  //timePart.start();
+//   timePart.start();
 
   // Initialize Iterator
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
   StFlowTrackIterator itr;
   
-  Float_t theta, phi, eta, pt, m, r0;
-  Double_t order, wgt;
-  TComplex expo, numer, cosTerm, cosTermComp;
+  Float_t theta, theta1, phi, eta, pt, m, r0;
+  Double_t order, wgt, wgt2, cosTerm;
+  TComplex expo, numer, cosTermComp;
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
 
@@ -549,10 +581,30 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
 	      expo(0., r0 * mQtheta[k][j][Ntheta]);
 	      numer = cos(m*order*(phi - theta)) * TComplex::Exp(expo); // BP Eq. 12
 	    } else {
-	      cosTerm(cos(m*order*(phi - theta)), 0.);
 	      wgt = pFlowEvent->Weight(k, j, pFlowTrack);
-	      cosTermComp(1., r0*wgt*cos(order*(phi - theta)));
-	      numer = mGr0theta[k][j][Ntheta] * cosTerm / cosTermComp;  // PG Eq. 9
+	      if (!j && mV1Mixed) { // for v1 mixed harmonic differential flow
+		theta = ((float)Ntheta / (float)Flow::nTheta) * TMath::Pi()/2.; // goes only to pi/2
+		r0 = mr0theta[k][1][Ntheta]; // use r0 for 2nd harmonic
+		wgt2 = pFlowEvent->Weight(k, 1, pFlowTrack); // weight for 2nd harmonic
+		double Gim2 = r0 * wgt2 * cos(2*(phi - theta));
+		TComplex theta1Term(0.,0.);
+		for (int Ntheta1 = 0; Ntheta1 < Flow::nTheta1; Ntheta1++) { // loop over theta1
+		  theta1 = ((float)Ntheta1 / (float)Flow::nTheta1) * 2. * TMath::Pi();
+		  double Gim1 = r0 * Flow::epsV1 * wgt * cos(phi - theta1);
+		  TComplex Gr0denom(1., Gim1+Gim2);
+		  TComplex Gr0neum(0., r0 * Flow::epsV1 * cos(phi - theta1));
+		  TComplex Gder_r0theta = mGV1r0theta[Ntheta1][Ntheta] * Gr0neum / Gr0denom; // DF Eq. 8
+		  Double_t cosTheta12 = cos(2.*(theta1 - theta));
+		  theta1Term += (cosTheta12 * Gder_r0theta);
+		}
+		numer = theta1Term / (double)Flow::nTheta1; // DF Eq. 9 neumerator averaged over theta1
+	      } else if (j==2 && mV1Mixed) { // 3rd harmonic not defined for mixed
+	      	numer = 0.;
+	      } else {
+		cosTerm = cos(m*order*(phi - theta));
+		cosTermComp(1., r0*cosTerm);
+		numer = mGr0theta[k][j][Ntheta] * cosTerm / cosTermComp;  // PG Eq. 9
+	      }
 	    }
 	    	    
 	    if (mPtRange_for_vEta[1] > mPtRange_for_vEta[0]) { // cut is used
@@ -583,7 +635,7 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
     } // k  
   } // track
 
-  //timePart.stop();
+//   timePart.stop();
 }
 
 //-----------------------------------------------------------------------
@@ -591,7 +643,7 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
 Int_t StFlowLeeYangZerosMaker::Finish() {
   // In the first pass, from Gtheta find the first minimum to get r0(theta).
   // In the second pass calculate V(theta), average over theta, and then calculate v 
-  //timeFinish.start();
+//   timeFinish.start();
 
   TOrdCollection* savedHistNames          = new TOrdCollection(Flow::nSels * Flow::nHars);
   TOrdCollection* savedHistFirstPassNames = new TOrdCollection(Flow::nSels * 2 * Flow::nTheta);
@@ -602,12 +654,13 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 
   Float_t reG, imG, reNumer, imNumer, reDenom, imDenom, reDiv;
   TComplex Gtheta, denom, numer, div;
+  TComplex i = TComplex::I();
   Float_t mult = mHistMult->GetMean();
-  Float_t _v, vErr, Vtheta, V, yield, eta, pt;
-  Double_t r0, yieldSum, vSum, err2Sum, Glast, G0, Gnext, GnextNext;
+  Float_t _v, vErr, Vtheta, V, V1SqTheta, V1Sq, yield, eta, pt;
+  Double_t r0, yieldSum, vSum, err2Sum, Glast, G0, Gnext, GnextNext, v1DiffConst;
   Float_t Xlast, X0, Xnext, sigma2, chi;
   Float_t BesselRatio[3] = {1., 1.202, 2.69}; // is 2.69 correct?
-  Int_t m;
+  Int_t m, v2Sign;
   Bool_t etaPtNoCut;
   Double_t T, B, F;
   if (!mFirstPass) {
@@ -617,15 +670,16 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
     F = mHistYieldPartEta->Integral(etaBins/2+1, etaBins+1);
     //cout << "bins= " << etaBins << ", B= " << B << ", F= " << F << ", T= " << T << endl;
   }
+
   int rBins = Flow::nRBins;
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       bool oddHar = (j+1) % 2;
-      m = 1; // int for index of BesselRatio
+      m = 1; // int for index of BesselRatio and i^^(m-1)
       if (j==2) { m = 3; }
       else if (j==3) { m = 2; }
-      for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
-	if (mFirstPass && j<=1) {
+      if (mFirstPass && j<=1) {
+	for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
 	  for (int rBin = 1; rBin <= rBins; rBin++) {
 	    
 	    // "Integrated flow"
@@ -643,11 +697,12 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	    Gnext     = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinContent(N+1);
 	    GnextNext = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinContent(N+2);
 	    
-	    if (Gnext > G0 && GnextNext > G0) { // lowest point, footnote 3
+	    if (Gnext > G0 && GnextNext > G0) { // next two points are higher (footnote 3)
 	      Glast     = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinContent(N-1);
 	      Xlast     = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinCenter(N-1);
 	      X0        = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinCenter(N);
 	      Xnext     = histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta->GetBinCenter(N+1);
+	      if (X0 < 0.005) break; // treat like no minimum
 	      r0 = X0;
 	      r0 -= ((X0 - Xlast)*(X0 - Xlast)*(G0 - Gnext) - (X0 - Xnext)*(X0 - Xnext)*(G0 - Glast)) /
 		(2.*((X0 - Xlast)*(G0 - Gnext) - (X0 - Xnext)*(G0 - Glast))); // intopolated minimum
@@ -658,7 +713,8 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	  histFull[k].histFullHar[j].mHistPro_r0theta->Fill(Ntheta, r0); // for first pass output
 	  Vtheta = Flow::j01 / r0; // BP Eq. 9
 	  histFull[k].histFullHar[j].mHistPro_Vtheta->Fill(Ntheta, Vtheta);
-	  //histFull[k].mHistPro_V->Fill(j+1, Vtheta);
+	  _v = (m==1) ? Vtheta / mult : 0.; // BP Eq. 5, v from r0 for each theta
+	  histFull[k].mHistPro_vr0->Fill(j+1, _v/perCent);	  
 
 	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistGtheta);
 
@@ -692,15 +748,62 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	  delete histTitle;
 	  savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].histTheta[Ntheta].mHistImGtheta);
 
-	} else if (!mFirstPass) { // second pass
+	} // Ntheta
 
-	  Vtheta = Flow::j01 / mr0theta[k][j][Ntheta]; // BP Eq. 9
+      } else if (!mFirstPass) { // second pass
+
+	V1Sq = 0.;
+	for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
+	  
+	  if (k && !j && mV1Mixed) { // v1 "integrated" from mixed harmonics: selection 2, harmonic 1
+	    mV1neum[Ntheta] /= mNEvents; // averaged over events
+	    //PR(mV1neum[Ntheta]);
+	    r0 = mr0theta[1][1][Ntheta];  // selection 2, harmonic 2
+	    reDenom = histFull[k].histFullHar[1].mHistReDenom->GetBinContent(Ntheta+1);
+	    imDenom = histFull[k].histFullHar[1].mHistImDenom->GetBinContent(Ntheta+1);
+	    denom(reDenom,imDenom); // selection 2, harmonic 2
+	    div = mV1neum[Ntheta] / denom;
+	    reDiv = div.Re();
+	    V1SqTheta = -8. * Flow::j01 / (Flow::epsV1*Flow::epsV1) / TMath::Power(r0,3.) * reDiv; // DF Eq. 7 for each theta2
+	    V1Sq += V1SqTheta;
+	    if (!isnan(V1SqTheta) && V1SqTheta != 0.) {
+	      Vtheta = TMath::Sqrt(fabs(V1SqTheta)); // absolute values of negatives
+	    }
+	  } else {
+	    Vtheta = Flow::j01 / mr0theta[k][j][Ntheta]; // BP Eq. 9
+	  }
 	  histFull[k].mHistPro_V->Fill(j+1, Vtheta);
+	  _v = (m==1) ? Vtheta / mult : 0.; // BP Eq. 5, v from r0 for each theta
+	  histFull[k].mHistPro_vr0->Fill(j+1, _v/perCent); // gives error for vr0
 
-	  // Differential flow
-	  reDenom = histFull[k].histFullHar[j].mHistReDenom->GetBinContent(Ntheta+1);
-	  imDenom = histFull[k].histFullHar[j].mHistImDenom->GetBinContent(Ntheta+1);
-	  denom(reDenom,imDenom); 
+	} // Ntheta
+
+	if (k && !j && mV1Mixed) { // v1 from mixed harmonics: selection 2, harmonic 1
+	  V1Sq /= Flow::nTheta;	  
+	  v2Sign = (int)(V1Sq / fabs(V1Sq));
+	  cout << "The sign of v2 is " << v2Sign << endl;
+	  //float Vhist = histFull[k].mHistPro_V->GetBinContent(j+1);
+	  V = TMath::Sqrt(fabs(V1Sq));
+	  //cout << "pro hist, V1Sq: " << Vhist << ", " << V << endl;
+	  v1DiffConst = -4. * Flow::j01 * (double)v2Sign / V / (Flow::epsV1*Flow::epsV1) /
+	    TMath::Power(r0,3.);
+	}
+
+	// Differential flow
+
+	for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
+
+	  if (k && !j && mV1Mixed) { // v1 mixed harmonics, use denom for 2nd harmonic
+	    reDenom = histFull[k].histFullHar[1].mHistReDenom->GetBinContent(Ntheta+1);
+	    imDenom = histFull[k].histFullHar[1].mHistImDenom->GetBinContent(Ntheta+1);
+	    denom(reDenom,imDenom);
+	  } else {
+	    reDenom = histFull[k].histFullHar[j].mHistReDenom->GetBinContent(Ntheta+1);
+	    imDenom = histFull[k].histFullHar[j].mHistImDenom->GetBinContent(Ntheta+1);
+	    denom(reDenom,imDenom);
+	    denom *= TComplex::Power(i, m-1);
+	    Vtheta = Flow::j01 / mr0theta[k][j][Ntheta]; // BP Eq. 9
+	  }
 	  
 	  // v(eta)
 	  int etaMax = histFull[k].histFullHar[j].histTheta[Ntheta].mHistReNumerEta->GetNbinsX();
@@ -714,15 +817,18 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	      GetBinContent(binEta);
 	    numer(reNumer,imNumer); 
 	    
-	    div = numer / denom;
-	    reDiv = BesselRatio[m-1] * div.Re();
+	    reDiv = (numer / denom).Re();
 	    if (!isnan(reDiv) && reDiv != 0.) {
-	      _v = reDiv * Vtheta /perCent; // BP Eq. 12
+	      if (k && !j && mV1Mixed) { // v1 from mixed harmonics: selection 2, harmonic 1
+		_v = v1DiffConst * reDiv /perCent; // DF Eq. 9
+	      } else {
+		_v = BesselRatio[m-1] * reDiv * Vtheta /perCent; // BP Eq. 12
+	      }
 	      histFull[k].histFullHar[j].mHistPro_vEta->Fill(eta, _v);   
 	      //cout << k << " " << j << " " << Ntheta << " " << binEta << " " << eta << " " << _v << endl;
 	    }
 	  }	
-	  
+
 	  // v(pt)
 	  Float_t v[2];
 	  int etaMax2D = histFull[k].histFullHar[j].histTheta[Ntheta].mHistReNumer2D->
@@ -740,9 +846,12 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 		GetBinContent(binEta, binPt);
 	      numer(reNumer,imNumer); 
 	      
-	      div = numer / denom;
-	      reDiv = BesselRatio[m-1] * div.Re();
-	      v[binEta-1] = reDiv * Vtheta /perCent; // BP Eq. 12
+	      reDiv = (numer / denom).Re();
+	      if (k && !j && mV1Mixed) { // v1 from mixed harmonics: selection 2, harmonic 1
+		v[binEta-1] = v1DiffConst * reDiv /perCent; // DF Eq. 9
+	      } else {
+		v[binEta-1] = BesselRatio[m-1] * reDiv * Vtheta /perCent; // BP Eq. 12
+	      }
 	    }
 	    if (!isnan(reDiv) && reDiv != 0.) {
 	      if (oddHar) {
@@ -753,16 +862,13 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	      histFull[k].histFullHar[j].mHistPro_vPt->Fill(pt, _v);
 	    }   
 	  }
-	} // second pass
 
-	// v from r0 for each theta
-	_v = (m==1) ? Vtheta / mult : 0.; // BP Eq. 5
-	histFull[k].mHistPro_vr0->Fill(j+1, _v/perCent);
-	
-      } // Ntheta
+	} // Ntheta
+
+      } // second pass
       
-      // sigma2 and chi
       if (j <=1) {
+	// sigma2 and chi
 	mQ[k][j]  /= (float)mNEvents;
 	mQ2[k][j] /= (float)mNEvents;
 	V = histFull[k].mHistPro_V->GetBinContent(j+1);
@@ -774,8 +880,18 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	// output v from r0, and chi
 	_v = histFull[k].mHistPro_vr0->GetBinContent(j+1);
 	vErr = histFull[k].mHistPro_vr0->GetBinError(j+1); // from the spread with theta
-	cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
-	  " +/- " << vErr << ") %  chiJYO = " << chi << endl;
+	if (k && !j && mV1Mixed) {
+	  if (!mFirstPass) {
+	    cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	      " +/- " << vErr << ") %"<< " from mixed harmonics" << endl;
+	  }
+	} else if (mFirstPass) {
+	  cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	    " +/- " << vErr << ") %" << endl;
+	} else {
+	  cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	    " +/- " << vErr << ") %  chiJYO = " << chi << endl;
+	}
       }
 
       // Project the profile hists to 1D hists
