@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.58 2006/02/22 19:29:14 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.59 2006/07/06 16:56:00 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -486,7 +486,8 @@ Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
 
 Float_t StFlowEvent::Qtheta(StFlowSelection* pFlowSelect, Float_t theta) {
   // Q^{\theta} for LeeYangZeros method for all particles that could be correlated with the event plane
- 
+  // BP Eq. 3 (Nucl. Phys. A 727, 373 (2003))
+
   Float_t Qtheta = 0.;
   int    selN  = pFlowSelect->Sel();
   int    harN  = pFlowSelect->Har();
@@ -499,7 +500,7 @@ Float_t StFlowEvent::Qtheta(StFlowSelection* pFlowSelect, Float_t theta) {
     if (pFlowSelect->SelectPart(pFlowTrack)) {
       double wgt = Weight(selN, harN, pFlowTrack);
       float phi = pFlowTrack->Phi();
-      Qtheta += wgt * cos(order * (phi - theta)); // BP Eq. 3 (Nucl. Phys. A 727, 373 (2003))
+      Qtheta += wgt * cos(order * (phi - theta));
     }
   }
 
@@ -510,6 +511,7 @@ Float_t StFlowEvent::Qtheta(StFlowSelection* pFlowSelect, Float_t theta) {
 
 TComplex StFlowEvent::Grtheta(StFlowSelection* pFlowSelect, Float_t r, Float_t theta) {
   // Product Generating Function for LeeYangZeros method
+  // PG Eq. 3 (J. Phys. G Nucl. Part. Phys 30 S1213 (2004))
  
   TComplex G   = TComplex::One();
   int    selN  = pFlowSelect->Sel();
@@ -525,7 +527,7 @@ TComplex StFlowEvent::Grtheta(StFlowSelection* pFlowSelect, Float_t r, Float_t t
       float phi  = pFlowTrack->Phi();
       double Gim = r * wgt * cos(order * (phi - theta));
       TComplex G_i(1., Gim);
-      G *= G_i;         // PG Eq. 3 (J. Phys. G Nucl. Part. Phys 30 S1213 (2004))
+      G *= G_i;
     }
   }
 
@@ -534,9 +536,37 @@ TComplex StFlowEvent::Grtheta(StFlowSelection* pFlowSelect, Float_t r, Float_t t
 
 //-------------------------------------------------------------
 
+
+TComplex StFlowEvent::GV1r0theta(StFlowSelection* pFlowSelect, Float_t r0, Float_t theta1, Float_t theta) {
+  // Product Generating Function for LeeYangZeros method for v1 mixed harmonics
+  // DF Eq. 1
+ 
+  TComplex G = TComplex::One();
+
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->SelectPart(pFlowTrack)) {
+      double wgt1 = Weight(1, 0, pFlowTrack); // selection 2, harmonic 1
+      double wgt2 = Weight(1, 1, pFlowTrack); // selection 2, harmonic 2
+      float phi  = pFlowTrack->Phi();
+      double Gim1 = r0 * Flow::epsV1 * wgt1 * cos(phi - theta1);
+      double Gim2 = r0 * wgt2 * cos(2*(phi - theta));
+      TComplex G_i(1., Gim1+Gim2);
+      G *= G_i; 
+    }
+  }
+
+  return G;
+}
+
+//-------------------------------------------------------------
 TComplex StFlowEvent::Gder_r0theta(StFlowSelection* pFlowSelect, Float_t r0, Float_t theta) {
   // Sum for the denominator for diff. flow for the Product Generating Function for LeeYangZeros method
-  // It is the deriverative of Grtheta at r0
+  // PG Eq. 9 (J. Phys. G Nucl. Part. Phys 30 S1213 (2004))
+  // Also for v1 mixed harmonics: DF Eq. 5
+  // It is the deriverative of Grtheta at r0 divided by Grtheta at r0
  
   TComplex Gder(0.,0.);
   int    selN  = pFlowSelect->Sel();
@@ -551,10 +581,8 @@ TComplex StFlowEvent::Gder_r0theta(StFlowSelection* pFlowSelect, Float_t r0, Flo
       double wgt = Weight(selN, harN, pFlowTrack);
       float phi  = pFlowTrack->Phi();
       double cosTerm = wgt * cos(order * (phi - theta));
-      TComplex numer(cosTerm, 0.);
       TComplex denom(1., r0*cosTerm);
-      TComplex Gder_i = numer / denom;
-      Gder += Gder_i;         // PG Eq. 9 (J. Phys. G Nucl. Part. Phys 30 S1213 (2004))
+      Gder += (cosTerm / denom);
     }
   }
 
@@ -1219,6 +1247,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.59  2006/07/06 16:56:00  posk
+// Calculation of v1 for selection=2 is done with mixed harmonics.
+//
 // Revision 1.58  2006/02/22 19:29:14  posk
 // Additions needed for the StFlowLeeYangZerosMaker
 //
