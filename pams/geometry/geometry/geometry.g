@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.125 2006/06/12 18:34:28 potekhin Exp $
+* $Id: geometry.g,v 1.126 2006/07/07 17:41:28 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.126  2006/07/07 17:41:28  potekhin
+* Fixing a very old and inconsequential typo in the
+* assignment of a variable for the "minimum Si layer"
+* (which I doubt was previously used)
+*
 * Revision 1.125  2006/06/12 18:34:28  potekhin
 * Created the tag Y2006A, which will allow for the all-new
 * FPD to be properly included, as well as otherpotential changes
@@ -2423,7 +2428,7 @@ If LL>1
    If (LL>1 & svtt) then
      call AgDETP new ('SVTT')
      if (Nsi < 7)           call AgDETP add ('svtg.nlayer=',   Nsi,1)
-     if (NsiMin > 1)        call AgDETP add ('svtg.nsimin=',   NsiMin,1)
+     if (NsiMin > 1)        call AgDETP add ('svtg.nmin=',   NsiMin,1)
      if (pipeConfig >= 4)   call AgDETP add ('svtg.ifMany=',     1,1)
      if (Wfr > 0)           call AgDETP add ('svtl(3).nwafer=',wfr,1)
      if (wdm > 0)           call AgDETP add ('swca.WaferWid=', wdm,1)
