@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.cxx,v 1.3 2006/07/06 16:58:35 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.cxx,v 1.4 2006/07/10 21:03:57 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //          with advice from Jean-Yves Ollitrault and Nicolas Borghini
@@ -212,7 +212,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       *histTitle += "_Har";
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHistPro_vEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, -100., 100.);
+        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, -1000., 1000.);
       histFull[k].histFullHar[j].mHistPro_vEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHistPro_vEta->SetYTitle("v (%)");
       delete histTitle;
@@ -222,7 +222,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       *histTitle += "_Har";
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHistPro_vPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), mPtBinsPart, Flow::ptMin, ptMaxPart, -100., 100.);
+        histTitle->Data(), mPtBinsPart, Flow::ptMin, ptMaxPart, -1000., 1000.);
       histFull[k].histFullHar[j].mHistPro_vPt->SetXTitle("Pt (GeV/c)");
       histFull[k].histFullHar[j].mHistPro_vPt->SetYTitle("v (%)");
       delete histTitle;
@@ -410,7 +410,7 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   } // k
 
   gMessMgr->SetLimit("##### FlowLeeYangZero", 5);
-  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.3 2006/07/06 16:58:35 posk Exp $");
+  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.4 2006/07/10 21:03:57 posk Exp $");
 
   return StMaker::Init();
 }
