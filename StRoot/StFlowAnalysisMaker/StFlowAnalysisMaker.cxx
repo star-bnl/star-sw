@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.95 2006/02/22 19:36:21 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.96 2006/07/10 21:03:48 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -702,7 +702,7 @@ Int_t StFlowAnalysisMaker::Init() {
     histTitle = new TString("Flow_vObs_Sel");
     *histTitle += k+1;
     histFull[k].mHist_vObs = new TProfile(histTitle->Data(), histTitle->Data(),
-      Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -100., 100., "");
+      Flow::nHars, 0.5, (float)(Flow::nHars) + 0.5, -1000., 1000., "");
     histFull[k].mHist_vObs->SetXTitle("Harmonic");
     histFull[k].mHist_vObs->SetYTitle("vObs (%)");
     delete histTitle;
@@ -845,7 +845,7 @@ Int_t StFlowAnalysisMaker::Init() {
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
         histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, nPtBinsPart, 
-		 Flow::ptMin, ptMaxPart, -100., 100., "");
+		 Flow::ptMin, ptMaxPart, -1000., 1000., "");
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV/c)");
       delete histTitle;
@@ -856,8 +856,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, 
-							      -100., 100., "");
+        histTitle->Data(), mNEtaBins, mEtaMin, mEtaMax, -1000., 1000., "");
       histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
       delete histTitle;
@@ -867,7 +866,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -100., 100., "");
+        histTitle->Data(), nPtBinsPart, Flow::ptMin, ptMaxPart, -1000., 1000., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV/c)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("v (%)");
       delete histTitle;
@@ -1180,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.95 2006/02/22 19:36:21 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.96 2006/07/10 21:03:48 posk Exp $");
 
   return StMaker::Init();
 }
@@ -2316,6 +2315,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.96  2006/07/10 21:03:48  posk
+// For profile histograms of v, changed the limits to -1000, 1000.
+//
 // Revision 1.95  2006/02/22 19:36:21  posk
 // Minor updates.
 //
