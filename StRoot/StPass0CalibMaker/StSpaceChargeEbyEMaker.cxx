@@ -264,6 +264,9 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           const StTrackTopologyMap& map = tri->topologyMap();
           //if (! map.trackTpcOnly()) continue;
           if (! map.hasHitInDetector(kTpcId)) continue;
+          // Multiple silicon hits destroy sDCA <-> SpaceCharge correlation,
+          // and single hit in SVT is unreliable. Only good config is NO SVT!
+          if (map.hasHitInDetector(kSvtId)) continue;
           if (map.numberOfHits(kTpcId) < 25) continue;
           StTrackGeometry* triGeom = tri->geometry();
 
@@ -896,8 +899,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.10 2006/07/02 23:22:36 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.11 2006/07/17 20:13:08 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.11  2006/07/17 20:13:08  genevb
+// Disallow SVT points on tracks
+//
 // Revision 1.10  2006/07/02 23:22:36  genevb
 // Allow for SVT/SSD hits on tracks (necessary for ITTF)
 //
