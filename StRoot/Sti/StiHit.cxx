@@ -142,6 +142,25 @@ void StiHit::setGlobal(const StiDetector * detector,
       StiPlacement * placement = detector->getPlacement();
       mrefangle = placement->getLayerAngle();
       mposition = placement->getLayerRadius();
+      double togra = 180./M_PI;
+      double centerAngle = placement->getCenterRefAngle()*togra;
+      double myAngle = atan2(gy,gx)*togra;
+      double dif = myAngle-centerAngle;
+      if (dif > 180) dif-=360;
+      if (dif <-180) dif+=360;
+      if (fabs(dif) > 1.1*15) {
+printf("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****\n"
+      ,detector->getName().c_str(),myAngle,centerAngle,dif);
+      }
+      double normalAngle = placement->getNormalRefAngle()*togra;
+      dif = myAngle-normalAngle;
+      if (dif > 180) dif-=360;
+      if (dif <-180) dif+=360;
+      if (fabs(dif) > 1.1*30) {
+printf("**** StiHit.%s wrong angle: hitAng=%f norAng=%g dif=%g ****\n"
+      ,detector->getName().c_str(),myAngle,normalAngle,dif);
+      }
+
       mx =  detector->_cos*gx + detector->_sin*gy;
       my = -detector->_sin*gx + detector->_cos*gy;
     }
@@ -169,9 +188,10 @@ void StiHit::setGlobal(const StiDetector * detector,
   if (!detector) return;
   double pos = detector->getPlacement()->getNormalRadius();
   double dif = mx-pos;
-  if (fabs(dif)<2.) return;
+  if (fabs(dif)<0.01*pos) return;
   printf("**** StiHit.%s too far: x=%f pos=%g dif=%g ****\n"
         ,detector->getName().c_str(),mx,pos,dif);
+  assert(fabs(dif)<0.30*pos);
 }
 
 
