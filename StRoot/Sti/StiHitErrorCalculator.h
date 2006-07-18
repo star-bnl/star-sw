@@ -36,8 +36,8 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 const StiDefaultHitErrorCalculator & operator=(const HitError_st & error);
    ~StiDefaultHitErrorCalculator();
    virtual void calculateError(const StiNodePars*,double&,double&) const; 
-   void set(double intrinsicZ, double driftZ, double crossZ
-	   ,double intrinsicX, double driftX, double crossX);
+   void set(double intrinsicX, double driftX, double crossX
+           ,double intrinsicZ, double driftZ, double crossZ);
 
    	 virtual void loadDS(TDataSet&ds);
 	 virtual void loadFS(ifstream& inFile);

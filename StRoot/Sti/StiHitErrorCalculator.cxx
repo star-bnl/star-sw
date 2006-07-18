@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.31 2006/04/07 18:01:55 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.32 2006/07/18 19:09:42 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.32  2006/07/18 19:09:42  perev
+ * Remove the mess in xy and z errs
+ *
  * Revision 2.31  2006/04/07 18:01:55  perev
  * Back to the latest Sti
  *
@@ -144,15 +147,15 @@ StiDefaultHitErrorCalculator::~StiDefaultHitErrorCalculator()
 {}
 
 //_____________________________________________________________________________
-void StiDefaultHitErrorCalculator::set(double intrinsicZ,double driftZ,double crossZ
-                                      ,double intrinsicX,double driftX,double crossX)
+void StiDefaultHitErrorCalculator::set(double intrinsicX,double driftX,double crossX
+                                      ,double intrinsicZ,double driftZ,double crossZ)
 {
-  coeff[0]= intrinsicZ;
-  coeff[1]= driftZ;
-  coeff[2]= crossZ;
-  coeff[3]= intrinsicX;
-  coeff[4]= driftX;
-  coeff[5]= crossX;
+  coeff[0]= intrinsicX;
+  coeff[1]= driftX;
+  coeff[2]= crossX;
+  coeff[3]= intrinsicZ;
+  coeff[4]= driftZ;
+  coeff[5]= crossZ;
   if (coeff[0]<=0) return;
   cout << *this << endl;
 }
