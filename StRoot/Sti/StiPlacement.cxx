@@ -28,18 +28,18 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   while(orientation_ >= M_PI){ orientation_ -= 2*M_PI; }
   centerOrientation = orientation_;
 
-  normalRefAngle = centerRefAngle + centerOrientation;
+  normalRefAngle = centerRefAngle - centerOrientation;
   while(normalRefAngle <  -M_PI){ normalRefAngle += 2.*M_PI; }
   while(normalRefAngle >=  M_PI){ normalRefAngle -= 2.*M_PI; }
   normalRadius = centerRadius*cos(centerOrientation);
   normalYoffset = centerRadius*sin(centerOrientation);
   if (!radius_) return;
+#if 0
   double trig[4];
   trig[0] = cos(normalRefAngle);
   trig[1] = sin(normalRefAngle);
   trig[2] = cos(centerRefAngle);
   trig[3] = sin(centerRefAngle);
-#if 0
   double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
   if (dif >1e-3) {
     printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
@@ -61,16 +61,16 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
   // the checking above makes these values within bounds, also
   centerRadius = ::sqrt(normalRadius*normalRadius + normalYoffset*normalYoffset);
   centerOrientation = atan2(normalYoffset,normalRadius);
-  centerRefAngle = normalRefAngle - centerOrientation;
+  centerRefAngle = normalRefAngle + centerOrientation;
   while(centerRefAngle <  -M_PI){ centerRefAngle += 2.*M_PI; }
   while(centerRefAngle >=  M_PI){ centerRefAngle -= 2.*M_PI; }
 
+#if 0
   double trig[4];
   trig[0] = cos(normalRefAngle);
   trig[1] = sin(normalRefAngle);
   trig[2] = cos(centerRefAngle);
   trig[3] = sin(centerRefAngle);
-#if 0
   double dif = fabs(trig[0]-trig[2])+fabs(trig[1]-trig[3]);
   if (dif >1e-3) {
     printf("**** centerRefAngle=%g normalAngle=%g diff=%g ****\n"
