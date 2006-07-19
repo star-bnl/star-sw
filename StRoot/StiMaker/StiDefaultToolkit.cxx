@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.34 2006/05/31 03:59:04 fisyak Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.35 2006/07/19 18:39:22 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.35  2006/07/19 18:39:22  perev
+ * Max NHits=2000000
+ *
  * Revision 2.34  2006/05/31 03:59:04  fisyak
  * Add Victor's dca track parameters, clean up
  *
@@ -219,6 +222,7 @@ Factory<StiHit>* StiDefaultToolkit::getHitFactory()
   if (_hitFactory) return _hitFactory;
   _hitFactory = StiFactory<StiHit,StiHit>::myInstance();
   _hitFactory->setFastDelete();
+  _hitFactory->setMaxIncrementCount(2000000);
   return _hitFactory;
 }
 
