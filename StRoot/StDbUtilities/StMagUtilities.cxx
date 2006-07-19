@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.65 2006/06/27 18:18:24 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.66 2006/07/19 22:27:36 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.66  2006/07/19 22:27:36  jhthomas
+ * Update PredictSpaceCharge
+ *
  * Revision 1.65  2006/06/27 18:18:24  jhthomas
  * ADD new PredictSpaceCharge() function so that it includes fit errors in the prediction
  * It is now capable of including the SSD and SVT hits in the predictor/corrector loop
@@ -504,8 +507,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
       for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Resistor[i] = 0 ;
       // JT Test of shorted ring repair
       // ShortTableRows = 1 ;
-      // Ring[0] = 20.5 ; Ring[1] = 182.5 ; Ring[2] = 182.5 ;
-      // MissingResistance[0] = 1.0 ; MissingResistance[1] = 0.0 ; MissingResistance[2] = 0.0 ;
+      // Ring[0] = 182.5 ; Ring[1] = 0.0 ; Ring[2] = 0.0 ;
+      // MissingResistance[0] = 2.0 ; MissingResistance[1] = 0.0 ; MissingResistance[2] = 0.0 ;
       // Resistor[0] = 0.0 ;  Resistor[1] = 0.0 ; Resistor[2] = 0.0 ;
       // End JT Test 
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ;
@@ -3468,8 +3471,8 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    for ( Int_t i = 0 ; i < BITS ; i++ )
      {
 
-       Xtrack[i] = R[i] ;
-       Ytrack[i] = -1 * ChargeB * ( R0 - TMath::Sqrt(R0*R0-R[i]*R[i]) ) ;
+       Ytrack[i] = -1 * ChargeB * ( R[i]*R[i]/(2*R0) ) ;
+       Xtrack[i] = TMath::Sqrt( R[i]*R[i] - Ytrack[i]*Ytrack[i] ) ;
        DeltaTheta  =  TMath::ATan2(-1*Y0,-1*X0) - TMath::ATan2(Ytrack[i]-Y0,Xtrack[i]-X0) ;
        while ( DeltaTheta < -1*TMath::Pi() ) DeltaTheta += TMath::TwoPi() ;
        while ( DeltaTheta >=   TMath::Pi() ) DeltaTheta -= TMath::TwoPi() ;
@@ -3516,7 +3519,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        Index++ ;   if ( i >= TPCOFFSET ) TPCIndex++ ;
        Xprime[Index] = Xtrack[i] ;        Yprime[Index] = Ytrack[i] ;         Zprime[Index] = Ztrack[i] ;
        dX[Index]     = RowMaskErrorR[i] ;     dY[Index] = RowMaskErrorRPhi[i] ;   
-       printf("%9.2f  %9.2f  %9.2f  %9.2f  %9.2f \n", Xprime[Index], Yprime[Index], Zprime[Index], dX[Index], dY[Index] ) ;
+       // printf("%9.2f  %9.2f  %9.2f  %9.2f  %9.2f \n", Xprime[Index], Yprime[Index], Zprime[Index], dX[Index], dY[Index] ) ; // JT Test
      }
 
    TGraphErrors gre(Index+1,Xprime,Yprime,dX,dY) ;  
