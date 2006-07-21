@@ -8,37 +8,19 @@
     <table border="0" width ="100%" cellpadding="10">
       <tr bgcolor="darkblue">
 	<td align="center" valign="top">
-	  <h1>
+					<h1>
 	    <font color="lightgreen">StAssociationMaker</h1>
-	  </h1>
-	</td>
+				</td>
     </table>
     <center>
       <h1>A Class for <font color="red">StMcEvent-StEvent</font> Object Association</h1>
     </center>
     <p>
-    <h2> New Version </h2>
+    <h2></h2>
 
-    <p>
-      The new version of <b>StAssociationMaker</b> is ready for testing. 
-      The current <b>StAssociationMaker</b>
-      User's Guide & Reference Manual
-      is now outdated. Gene made a nice page where the PS documentation
-      can be obtained.  Right now it is the outdated version.  Since more people
-      look at the web page firts, I've put more work in updating this page than
-      on updating the LaTeX manual.  I'll do this soon.  
-      Click
-      <a href="http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html">here</a>
-      to get to Gene's page.
-    <p>
-      The overall idea has remained the same, but more associations
-      have been added and the names of the relevant multimaps have changed because of
-      this new diversity.  For help regarding
-      multimaps, which are the crux of <b>StAssociationMaker</b>, I have
-      added a more detailed description in the <a href="#QuickGlance">Quick Glance</a>
-      section.
-      There are now maps for 
-      <a href="#Tracks">Tracks</a>, <a href="#Vertices">Vertices</a> and
+    <p>Since more people look at the web page first, I've put more work in updating this page than on updating the LaTeX manual.  Please contact me with suggestions or corrections.
+		<p>The current <b>StAssociationMaker</b> User's Guide &amp; Reference Manual is somewhat outdated (although still contains useful information). Gene made a nice page where the PS documentation can be obtained. Click <a href="http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html">here</a> to get to Gene's page. The overall idea has remained the same, but more associations have been added and the names of the relevant multimaps have changed because of this new diversity. For help regarding multimaps, which are the crux of <b>StAssociationMaker</b>, I have
+      added a more detailed description in the <a href="#QuickGlance">Quick Glance</a> section. There are maps for <a href="#Tracks">Tracks</a>, <a href="#Vertices">Vertices</a> and
       <a href="#Hits">Hits</a>. For quick reference, look at the brief
       <a href="#classDescription">class description</a> below.  This gives a list of
       the most relevant multimap type definitions (or "What was the name of the map
@@ -49,8 +31,10 @@
       once I have a pointer to the Association Maker?").
 
     </p>
-    <h2> Description </h2>
-    <p>
+		<h3>Maybe you only need StMiniMcMaker?</h3>
+		<p>For many analyses, specially those that need only single particle matches, the <b>StMiniMcEvent</b> and <b>StMiniMcMaker</b> packages are probably what you need.  This has been developed for analyses of single particle spectra by the Spectra and High-pt working groups (Bum Choi and Manuel Calderon de la Barca as code developers).  This package is run after StAssociationMaker to store the information of the matched tracks into a TTree for later analysis of efficiency, acceptance, weak decay backgrounds, ghost tracks, split tracks and merged tracks.  It has primary and global track matches for efficiency calculations.  The documentation for <b>StMiniMcMaker</b> is <a href="http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StMiniMcMaker/doc/">here</a>. StMiniMcMaker runs in all standard simulation productions, the output is stored in xxx.minimc.root files, and are indexed by the File Catalog, so using them is the easiest way to get started doing efficiency calculations.</p>
+		<h2> Description </h2>
+		<p>
       The <b>StAssociationMaker</b> package provides the functionality to
       analyze Monte Carlo
       data contained in <b>StMcEvent</b> and reconstructed data contained
@@ -589,7 +573,7 @@
     // StMcHit (which StTpcHit and StMcTpcHit inherit from, respectively)
     // have a "position()" member function that returns an StThreeVectorF&.
     // We can write the StThreeVector directly to standard output because it has
-    // an "operator<<" defined.
+    // an &quot;operator&lt;&lt;&quot; defined.
 
 	cout << "[" << (*it).first->position() << ", " << (*it).second->position() << "]" << endl;
     }
@@ -903,12 +887,8 @@
     <b>StAssociationMaker</b>.
     <hr>
     <b>StAssociationMaker</b> is a work in progress.  For questions, contact
-    <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calder&oacute;n de la Barca S&aacute;nchez</a></address>
-    or
-    <address><a href="mailto:lisa@mps.ohio-state.edu">Michael A. Lisa</a></address>
-<!-- Created: Mon Sep 27 15:18:56 EDT 1999 -->
-<!-- hhmts start -->
-Last modified: Mon Feb 14 15:51:05 EST 2000
-<!-- hhmts end -->
-  </body>
+    
+		<address>Manuel Calder&oacute;n de la Barca S&aacute;nchez, mcalderon at ucdavis.edu</address>
+		<address>Last Modified: <csobj format="LongDate" h="20" locale="00000409" region="0" t="DateTime" w="137">Friday, July 21, 2006</csobj><csobj format="LongTime" h="20" locale="00000409" region="0" t="DateTime" w="77">3:31:10 PM</csobj></address>
+	</body>
 </html>
