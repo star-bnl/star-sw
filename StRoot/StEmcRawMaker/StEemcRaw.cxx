@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.9 2006/01/16 11:12:00 suaide Exp $
+// $Id: StEemcRaw.cxx,v 1.10 2006/07/21 14:15:09 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -171,7 +171,8 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId)
             if (hs[3])
                 hs[3]->Fill(k);
         }
-        gMessMgr->Message("","I") << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
+       LOG_DEBUG  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
+       if(sanity) LOG_WARN  << GetName()<<"::checkHeader("<<fiber->name<<"), errorCode="<<sanity<<endm;
     }
 
     if (hs[4])
@@ -378,6 +379,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.10  2006/07/21 14:15:09  balewski
+// less printouts
+//
 // Revision 1.9  2006/01/16 11:12:00  suaide
 // tower map bug fixed and astyle run
 //
