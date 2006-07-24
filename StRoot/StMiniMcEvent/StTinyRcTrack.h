@@ -5,7 +5,7 @@
  * \brief   Persistent RC track class.
  * 
  *
- * \author Bum Choi
+ * \author Bum Choi, Manuel Calderon de la Barca
  * \date   March 2001
  *
  * These will be entered into the Matched and Contamination (split, merged, background)
@@ -62,6 +62,7 @@ class StTinyRcTrack {
   void setFirstFitPadrow(Short_t val){ mFirstFitPadrow=val; }
   void setLastFitPadrow(Short_t val) { mLastFitPadrow=val; }
 
+  void setRecoKey(Short_t val) { mRecoKey=val; }
   void setFirstSector(Short_t val) { mFirstSector=val; }
   void setLastSector(Short_t val) { mLastSector=val; }
   void setFitPts(Short_t val) { mFitPts=val; }
@@ -116,7 +117,8 @@ class StTinyRcTrack {
   short lastPadrow() const { return mLastPadrow; }
   short firstFitPadrow()const { return mFirstFitPadrow; }
   short fastFitPadrow() const { return mLastFitPadrow; }
-	
+
+  short recoKey() const { return mRecoKey; }
   short firstSector() const { return mFirstSector; }
   short lastSector() const { return mLastSector; }
   short fitPts()     const { return mFitPts; }
@@ -186,7 +188,8 @@ private:
   Short_t    mLastFitPadrow;
   Short_t    mFirstSector;
   Short_t    mLastSector;
-
+  Short_t    mRecoKey;
+    
   Short_t      mFitPts;
   Short_t      mFitSvt;
   Short_t      mFitFtpc;
@@ -197,12 +200,16 @@ private:
   Short_t      mNAssocMc;
   Short_t      mNPossible;
 
-  ClassDef(StTinyRcTrack,4)
+  ClassDef(StTinyRcTrack,5)
 };
 
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.6  2006/07/24 19:03:16  calderon
+// Added parent key data member to StTinyMcTrack.
+// Added reco key data member to StTinyRcTrack.
+//
 // Revision 1.5  2003/09/02 17:58:43  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -222,6 +229,10 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.6  2006/07/24 19:03:16  calderon
+// Added Added parent key data member to StTinyMcTrack.
+// Added Added reco key data member to StTinyRcTrack.
+// Added
 // Added Revision 1.5  2003/09/02 17:58:43  perev
 // Added gcc 3.2 updates + WarnOff
 // Added
