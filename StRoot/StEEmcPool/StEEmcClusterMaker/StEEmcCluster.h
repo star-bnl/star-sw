@@ -59,6 +59,8 @@ class StEEmcCluster : public TObject {
 
   /// Prints cluster data
   void print();
+
+  Bool_t isNeighbor( StEEmcTower t );
   
  private:
  protected:

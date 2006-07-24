@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:58:45 $
- * $Revision: 1.1 $
+ * $Date: 2006/07/24 21:49:50 $
+ * $Revision: 1.2 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -85,6 +85,7 @@ StEmcCluster *StEEmcCluster::stemc()
   return mEmcCluster;
 }
 
+// ----------------------------------------------------------------------------
 void StEEmcCluster::print()
 {
   
@@ -100,4 +101,18 @@ void StEEmcCluster::print()
       mTowers[i].printLine(); std::cout << " W=" << mWeights[i] << std::endl;
     }
 
+}
+
+// ----------------------------------------------------------------------------
+Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower ) 
+{
+  
+  for ( UInt_t i=0;i<mTowers.size();i++ )
+    {
+      StEEmcTower myTower=mTowers[i];
+      if ( myTower.isNeighbor(tower) ) return true;
+    }
+  
+  return false;
+  
 }
