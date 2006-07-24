@@ -98,6 +98,11 @@ class StEEmcMixEvent : public TObject {
   Float_t       mTotalEnergyU;
   Float_t       mTotalEnergyV; 
 
+  Int_t mNumberT[MAX_PAIRS];
+  Int_t mNumberR[MAX_PAIRS];
+  Int_t mNumberU[MAX_PAIRS];
+  Int_t mNumberV[MAX_PAIRS];
+
  private:
  protected:
   ClassDef(StEEmcMixEvent,1);

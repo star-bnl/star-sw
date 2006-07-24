@@ -56,6 +56,9 @@ Int_t StEEmcPi0Analysis::Init()
   mHistograms[3]=new SpinHistos("NP","Pi0 spectra, NP, spin4=dec9");
   mHistograms[4]=new SpinHistos("NN","Pi0 spectra, NN, spin4=dec10");
 
+  mHistograms[5]=new SpinHistos("Upper","Pi0 spectra, upper sectors 1-2, 8-12");
+  mHistograms[6]=new SpinHistos("Lower","Pi0 spectra, lower sectors 3-7");
+
   hEventCounter=new TH1F("hEventCounter","Event counts",10,0.,10.);
   hEventCounter -> GetXaxis() -> SetBinLabel(1,"raw");
   hEventCounter -> GetXaxis() -> SetBinLabel(2,"minb");
@@ -159,6 +162,75 @@ Int_t StEEmcPi0Analysis::Make()
       std::cout << "spin4=" << spin4 << " ";
       pair.print();
       mHistograms[ kAny ] -> Fill( pair );
+
+      StEEmcPoint p1=pair.point(0);
+      StEEmcPoint p2=pair.point(1);
+      p1=(p1.energy()>p2.energy())?p1:p2;
+      if ( p1.sector() >= 2 && p1.sector() < 7 ) 
+	mHistograms[5]->Fill( pair );
+      else
+	mHistograms[6]->Fill( pair );
+
+      mRealEvent->mNumberU[i] = mEEanalysis->numberOfHitStrips( p1.sector(), 0 );
+      mRealEvent->mNumberV[i] = mEEanalysis->numberOfHitStrips( p1.sector(), 1 );
+
+#if 1
+
+      // count up the number of active towers which can form a 
+      // "megacluster"
+      Float_t mSeedEnergy = 0.8;
+      Float_t mMinEnergy  = 0.1;
+      Bool_t used[720];
+      for ( Int_t j=0;j<720;j++ ) used[j]=false;
+      StEEmcTower tow=p1.tower(0);
+      StEEmcCluster c;
+      if (!tow.fail() )
+	{
+	  c.add(tow);
+	  used[tow.index()]=true;
+	  StEEmcTowerVec_t hits=mEEanalysis->towers(0);
+	  for ( UInt_t j=0;j<hits.size();j++ )
+	    {
+	      tow=hits[j];
+	      if ( used[ tow.index() ] ) continue; // next hit
+	      if ( tow.energy() < mMinEnergy ) continue;
+	      if ( c.isNeighbor( tow ) ) {
+		c.add(tow);
+		used[tow.index()]=true;
+	      }
+	    }
+	}
+      mRealEvent->mNumberT[i]=c.numberOfTowers();
+
+#endif 
+#if 1
+      // repeat for postshower
+      mMinEnergy=0.1/1000.0;
+      for ( Int_t j=0;j<720;j++ ) used[j]=false;
+      Int_t ind=p1.tower(0).index();
+      tow=mEEanalysis->tower(ind,3);      
+      StEEmcCluster b;
+       if (!tow.fail() )
+	{
+	  b.add(tow);
+	  used[tow.index()]=true;
+	  StEEmcTowerVec_t hits=mEEanalysis->towers(3);
+	  for ( UInt_t j=0;j<hits.size();j++ )
+	    {
+	      tow=hits[j];
+	      if ( used[ tow.index() ] ) continue; // next hit
+	      if ( tow.energy() < mMinEnergy ) continue;
+	      if ( b.isNeighbor( tow ) ) {
+		b.add(tow);
+		used[tow.index()]=true;
+	      }
+	    }
+	}
+      mRealEvent->mNumberR[i]=b.numberOfTowers();
+#endif
+
+
+
 
       /// If spin sorting has been disabled
       if ( !mSpinSort ) {
