@@ -1,12 +1,19 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.20 2006/05/22 18:55:16 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.21 2006/07/24 19:04:11 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
  *
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
+ *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.21  2006/07/24 19:04:11  calderon
+ * Added parent key data member to StTinyMcTrack.
+ * Added reco key data member to StTinyRcTrack.
+ * Added code to fill in those data members to StMiniMcMaker.  Parent key for
+ * MC tracks is only filled when track has a valid parent().
+ *
  * Revision 1.20  2006/05/22 18:55:16  calderon
  * Changes from the original code by Bum to comply with STAR coding standards.
  * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
@@ -105,6 +112,12 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.21  2006/07/24 19:04:11  calderon
+ * Added parent key data member to StTinyMcTrack.
+ * Added reco key data member to StTinyRcTrack.
+ * Added code to fill in those data members to StMiniMcMaker.  Parent key for
+ * MC tracks is only filled when track has a valid parent().
+ *
  * Revision 1.20  2006/05/22 18:55:16  calderon
  * Changes from the original code by Bum to comply with STAR coding standards.
  * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
@@ -199,7 +212,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.20 2006/05/22 18:55:16 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.21 2006/07/24 19:04:11 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -1314,11 +1327,12 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
 			       const StTrack* glTrack,
 			       Int_t nAssocMc)
 {
-
+    
   if (!glTrack) {
       cout << "Error StMiniMcMaker::fillRcTrackInfo, glTrack pointer is zero " << glTrack << endl;
       return;
   }
+  tinyRcTrack->setRecoKey(glTrack->key());
   const StThreeVectorF& glMom = glTrack->geometry()->momentum();
   
   const StPhysicalHelixD& glHelix = glTrack->geometry()->helix();
@@ -1443,6 +1457,7 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
   const StThreeVectorF& mcMom = mcTrack->momentum();
     
   tinyMcTrack->setKey(mcTrack->key());
+  if (mcTrack->parent()!=0) tinyMcTrack->setParentKey(mcTrack->parent()->key());
   tinyMcTrack->setPtMc(mcMom.perp());
   tinyMcTrack->setPzMc(mcMom.z());
   tinyMcTrack->setEtaMc(mcMom.pseudoRapidity());
