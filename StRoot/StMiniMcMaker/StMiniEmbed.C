@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniEmbed.C,v 1.7 2004/03/30 03:16:14 calderon Exp $
+// $Id: StMiniEmbed.C,v 1.8 2006/07/24 19:25:26 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from emedding data, produces minimc.root file 
@@ -10,6 +10,9 @@
 //       so if one needs to run elsewhere, and the output directory doesn't have the same
 //       lower level directory structure, no output files will be done.
 // $Log: StMiniEmbed.C,v $
+// Revision 1.8  2006/07/24 19:25:26  calderon
+// Load EEmcUtil, needed by StMcEvent.
+//
 // Revision 1.7  2004/03/30 03:16:14  calderon
 // Modifications for running in bfc.
 //  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -89,6 +92,7 @@ void StMiniEmbed(Int_t nevents=2,
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker"); 
   gSystem->Load("StEmcUtil"); 
+  gSystem->Load("StEEmcUtil");
 
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");

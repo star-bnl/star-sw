@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniHijing.C,v 1.6 2004/03/30 03:16:15 calderon Exp $
+// $Id: StMiniHijing.C,v 1.7 2006/07/24 19:25:26 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from hijing data, produces minimc.root file 
@@ -7,6 +7,9 @@
 //                 StMcEventMaker,StAssociationMaker,
 //                 StMiniMcEventMaker
 // $Log: StMiniHijing.C,v $
+// Revision 1.7  2006/07/24 19:25:26  calderon
+// Load EEmcUtil, needed by StMcEvent.
+//
 // Revision 1.6  2004/03/30 03:16:15  calderon
 // Modifications for running in bfc.
 //  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -50,6 +53,9 @@
 // Revision 1.3  2002/06/07 02:21:59  calderon
 // Protection against empty vector in findFirstLastHit
 // $Log: StMiniHijing.C,v $
+// Revision 1.7  2006/07/24 19:25:26  calderon
+// Load EEmcUtil, needed by StMcEvent.
+//
 // Revision 1.6  2004/03/30 03:16:15  calderon
 // Modifications for running in bfc.
 //  - Changed to use StiIOInterface (IOMaker in normal mode, TreeMaker in bfc)
@@ -98,7 +104,7 @@ void StMiniHijing(Int_t nevents=3,
   gSystem->Load("StEvent");
   gSystem->Load("StEventMaker"); 
   gSystem->Load("StEmcUtil"); 
-
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StMcEvent");
   gSystem->Load("StMcEventMaker");
   gSystem->Load("StAssociationMaker");
