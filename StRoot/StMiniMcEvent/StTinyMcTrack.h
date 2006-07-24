@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.5 2004/03/31 23:42:46 calderon Exp $
+ * $Id: StTinyMcTrack.h,v 1.6 2006/07/24 19:03:16 calderon Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -34,6 +34,7 @@ class StTinyMcTrack : public TObject {
   void setNAssocPr(Short_t val) { mNAssocPr=val; }
   void setStopR(Float_t val) { mStopR=val; }
   void setKey(Short_t val) { mKey=val; }
+  void setParentKey(Short_t val) { mParentKey=val; }
     
   float ptMc() const { return mPtMc; }
   float pxMc() const { return mPtMc*cos(mPhiMc); }
@@ -51,6 +52,7 @@ class StTinyMcTrack : public TObject {
   short nAssocPr() const { return mNAssocPr; }
   float stopR() const { return mStopR; }
   short key() const { return mKey; }
+  short parentKey() const { return mParentKey; }
     
 private:
   // mc stuff
@@ -66,17 +68,22 @@ private:
   Short_t    mChargeMc;
   Float_t    mStopR;
   Short_t    mKey;
+  Short_t    mParentKey;
     
   // assoc stuff
   Short_t      mNAssocGl;
   Short_t      mNAssocPr;
 
-  ClassDef(StTinyMcTrack,3)
+  ClassDef(StTinyMcTrack,4)
 };
 
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.6  2006/07/24 19:03:16  calderon
+// Added parent key data member to StTinyMcTrack.
+// Added reco key data member to StTinyRcTrack.
+//
 // Revision 1.5  2004/03/31 23:42:46  calderon
 // Adding info to evaluate idTruth information.
 // -Add key to StTinyMcTrack.h
