@@ -95,8 +95,8 @@ class StEEmcPi0Analysis : public StMaker
   enum SpinStates { kAny=0, kUpUp, kUpDn, kDnUp, kDnDn };
 
   /// Spin-sorted pi0 histograms
-  SpinHistos *mHistograms[5];
-  SpinHistos *mBackgrounds[5];
+  SpinHistos *mHistograms[100];
+  SpinHistos *mBackgrounds[100];
   SpinCuts   *mCuts; 
   TH1F       *hFillPatternI;    /**<-- intended fill pattern */
   TH1F       *hSpin4;           /**<-- number of times code sees spin state*/

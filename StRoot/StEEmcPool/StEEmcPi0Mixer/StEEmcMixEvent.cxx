@@ -65,6 +65,11 @@ void StEEmcMixEvent::Clear(Option_t *o)
       mTower2[i]=0;
       mEnergy1[i]=0.;
       mEnergy2[i]=0.;
+
+      mNumberT[i]=0;
+      mNumberR[i]=0;
+      mNumberU[i]=0;
+      mNumberV[i]=0;
   } 
   for ( Int_t ii=0;ii<720;ii++ ) {
     mADC[ii]=0.;
@@ -84,6 +89,7 @@ void StEEmcMixEvent::Clear(Option_t *o)
 
 // ----------------------------------------------------------------------------
 void StEEmcMixEvent::addPair ( StEEmcPair  p ) { 
+
     if ( nPairs >= MAX_PAIRS ) return;  
     mMass[nPairs]   = p.mass();
     mPT[nPairs]     = p.pt();
@@ -122,6 +128,7 @@ void StEEmcMixEvent::addPair ( StEEmcPair  p ) {
 
     mTower2[nPairs] = p.point(1).tower(0).index();
     mEnergy2[nPairs] = p.point(1).energy(); 
+
 
     nPairs++; 
 
