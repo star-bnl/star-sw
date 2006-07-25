@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.1 2006/07/25 21:45:59 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.2 2006/07/25 22:18:19 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -14,10 +14,9 @@
 #else
 #  include "TDirIter.h"
 #  include "TFileIter.h"
-#  include <string.h>
-#  include "TChain.h"
 #  include "TFile.h"
 #  include "TH1.h"
+#  include "TStopwatch.h"
 #endif
    
 void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPattern=0) 
@@ -56,6 +55,7 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
            }
         }           
      }
+     printf("\n Finishing  . . . \n");
      outFile->ls();
      outFile->Write();
      outFile->Close();     
