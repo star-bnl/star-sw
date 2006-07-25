@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.2 2006/07/25 22:18:19 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.3 2006/07/25 22:42:02 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -29,11 +29,10 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
      TFile *outFile = TFile::Open(TargetName,"RECREATE");     
      TDirIter listOfFiles(inputFilesPattern);
      const char *fileName = 0;
-     while (fileName =  listOfFiles.NextFile() ) {
+     while ( (fileName =  listOfFiles.NextFile() ) ) {
         printf(".");
         fileCounter++;
         TFileIter file(fileName);
-//        file.GetTFile()->ls();
         TObject *obj = 0;
         while ( (obj = *file) ) {
            if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
@@ -42,9 +41,10 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
               TH1 *h1 = (TH1*)obj;
               TH1 *dstHistogram = 0;
               // Check whether we found the new histogram
-              if (dstHistogram = (TH1 *)outFile->FindObject(h1->GetName())) {
+              if ( (dstHistogram = (TH1 *)outFile->FindObject(h1->GetName()))) {
                  // Accumulate  the  histogram
                   dstHistogram->Add(h1);
+                  printf("+");
               } else {
                 // First time - move the histogram
                 h1->SetDirectory(outFile);
@@ -53,7 +53,7 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
               }
               ++file;
            }
-        }           
+        }
      }
      printf("\n Finishing  . . . \n");
      outFile->ls();
