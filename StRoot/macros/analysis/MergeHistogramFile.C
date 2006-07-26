@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.3 2006/07/25 22:42:02 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.4 2006/07/26 01:34:12 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -44,6 +44,7 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
               if ( (dstHistogram = (TH1 *)outFile->FindObject(h1->GetName()))) {
                  // Accumulate  the  histogram
                   dstHistogram->Add(h1);
+                  delete h1;  // Optional, to reduce the memory consumption
                   printf("+");
               } else {
                 // First time - move the histogram
