@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.111 2005/07/20 21:26:44 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.112 2006/07/26 00:17:40 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -170,7 +170,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_ShortView     =  0; 
   m_Sensible      =  0; 
   m_EventsNode    =  0;
-
+  m_EventsView    =  0;
+  
   m_HitCollector  = new TList;
   m_TrackCollector= new TList;
   m_TableCollector= new TList;
@@ -1164,6 +1165,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.112  2006/07/26 00:17:40  fine
+// fix the non-initialized data-member. Thank Manuel
+//
 // Revision 1.111  2005/07/20 21:26:44  perev
 // qqqqq
 //
