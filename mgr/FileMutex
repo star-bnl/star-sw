@@ -1,5 +1,5 @@
 #!/bin/csh
-# * $Id: FileMutex,v 1.1 2006/07/26 21:19:09 fine Exp $
+# * $Id: FileMutex,v 1.2 2006/07/26 21:36:02 fine Exp $
 # Author: Valeri Fine fine@bnl.gov
 # Date:   25.06.2006
 #
@@ -96,8 +96,8 @@ switch ( $SEMAPHORE_TYPE )
    endif
    breaksw
 default:
-  echo 'Usage: FileMutex ["Lock" | "Unlock" | "Init"]  [$REQUESTID] [$MUTEXDIR] [$PROCESSID]'
-  echo '-----  default parameteres:  FileMutex Init $REQUESTID [$HOME/Mutex  $PROCESSID'
+  echo 'Usage: FileMutex ["Lock" | "Unlock" | "Init"] [$REQUESTID] [$MUTEXDIR] [$PROCESSID]'
+  echo '-----  default parameteres:  FileMutex Init $REQUESTID $HOME/Mutex  $PROCESSID'
   breaksw
   
 endsw
