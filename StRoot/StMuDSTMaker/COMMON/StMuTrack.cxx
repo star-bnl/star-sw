@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.25 2006/06/30 17:06:52 fisyak Exp $
+ * $Id: StMuTrack.cxx,v 1.26 2006/07/27 18:55:41 fisyak Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -25,9 +25,9 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.), mDcaD(0), mSigmaOfDcaD(-1), mDcaZ(0), mSigmaOfDcaZ(-1), mCorrelationDZ(0) {
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.) {
 
-  const StGlobalTrack* globalTrack = (StGlobalTrack*) track->node()->track(global);
+  const StTrack* globalTrack = track->node()->track(global);
 
   mId = track->key();
   mType = track->type();
@@ -140,42 +140,8 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
         mDCAGlobal = StThreeVectorF(-999,-999,-999);
       }
       mDCA = dca(track, vertex);
-      if ( globalTrack ) {
-	mDCAGlobal = dca(globalTrack, vertex);
-	const StDcaGeometry *dcaGeometry = globalTrack->dcaGeometry();
-	if (dcaGeometry) {
-	  const StPrimaryTrack * primaryTrack = dynamic_cast<const StPrimaryTrack*> (track);
-	  if (! primaryTrack) { // Global
-	    mDcaD = dcaGeometry->impact();
-	    mDcaZ = dcaGeometry->z();
-	    const Float_t *errMatrix = dcaGeometry->errMatrix();
-	    if (errMatrix[0] > 0)  mSigmaOfDcaD = TMath::Sqrt(errMatrix[0]);
-	    if (errMatrix[2] > 0)  mSigmaOfDcaZ = TMath::Sqrt(errMatrix[2]);
-	    if (mSigmaOfDcaD > 0 && mSigmaOfDcaZ > 0 ) mCorrelationDZ = errMatrix[1]/(mSigmaOfDcaD*mSigmaOfDcaZ);
-	  } else                { // Primary
-	    //	  mDcaGeometry = *dcaGeometry;
-	    const StPrimaryTrack * primaryTrack = (StPrimaryTrack*) track->node()->track(primary);
-	    if (primaryTrack) {
-	      const StVertex *PV = primaryTrack->vertex();
-	      mSigmaOfDcaD = mSigmaOfDcaZ = -1;
-	      mCorrelationDZ = 0;
-	      if (PV) {
-		const StThreeVectorF &pvert = PV->position();
-		Double_t        vtx[3] = {pvert[0],pvert[1],pvert[2]};
-		THelixTrack     thelix =  dcaGeometry->thelix();
-		Double_t        dcaXY, dcaZ;
-		Double_t        dcaEmx[3];
-		thelix.Dca(vtx,dcaXY,dcaZ,dcaEmx);
-		mDcaD  = dcaXY;
-		if (dcaEmx[0] > 0) mSigmaOfDcaD = TMath::Sqrt(dcaEmx[0]);
-		mDcaZ  = dcaZ;
-		if (dcaEmx[2] > 0) mSigmaOfDcaZ = TMath::Sqrt(dcaEmx[2]);
-		if (mSigmaOfDcaD > 0 && mSigmaOfDcaZ > 0 ) mCorrelationDZ = dcaEmx[1]/(mSigmaOfDcaD*mSigmaOfDcaZ);
-	      }
-	    }
-	  }
-	}
-      }
+      if ( globalTrack ) mDCAGlobal = dca(globalTrack, vertex);
+
       if (!l3) { // L3TRACKS seem to break pid    
 	int charge = track->geometry()->charge();
 	//	StParticleDefinition* pc = (*mProbabilityPidAlgorithm)( *track, track->pidTraits() );
@@ -376,8 +342,8 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
- * Revision 1.25  2006/06/30 17:06:52  fisyak
- * Add 2D dca (DcaD), Z dca (DcaZ) and their cov. matrix as corresponing sigma and correlaton coef. from dcaGeometry to StMuTrack
+ * Revision 1.26  2006/07/27 18:55:41  fisyak
+ * Remove DCA hack used in SSD+SVT test production (P06id)
  *
  * Revision 1.24  2005/08/19 19:46:06  mvl
  * Further updates for multiple vertices. The main changes are:
