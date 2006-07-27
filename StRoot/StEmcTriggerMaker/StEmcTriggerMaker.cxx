@@ -34,6 +34,7 @@
 #include "StEvent/StEventTypes.h"
 #include "TFile.h"
 #include "StEmcUtil/database/StBemcTables.h"
+#include "StMessMgr.h"
 
 ClassImp(StEmcTriggerMaker)
 
@@ -120,7 +121,7 @@ Int_t StEmcTriggerMaker::Init()
 {
     tables=new StBemcTables();
 
-    cout <<"StEmcTriggerMaker::Init()"<<endl;
+    LOG_INFO <<"StEmcTriggerMaker::Init()"<<endm;
     if (IAttr(".histos"))
     {
         mHTBefore = new TH2F("HighTower_DSM","High Tower trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
@@ -136,7 +137,7 @@ Int_t StEmcTriggerMaker::Init()
 Int_t StEmcTriggerMaker::Make()
 {
 
-    cout<<"StEmcTriggerMaker::Make()"<<endl;
+    LOG_DEBUG<<"StEmcTriggerMaker::Make()"<<endm;
 
     tables->loadTables(this);
     setTableMaker(tables);
@@ -149,7 +150,7 @@ Int_t StEmcTriggerMaker::Make()
     mBemcTrigger->setEvent(event);
     if(mBemcTrigger->makeTrigger() != kStOK)
     {
-        cout << "StEmcTriggerMaker::Make() -- trigger information is not filled! Something is wrong!" << endl;
+        LOG_WARN << "StEmcTriggerMaker::Make() -- trigger information is not filled! Something is wrong!" << endm;
     }
 
     int* isTrig = mBemcTrigger->isTrigEvent();

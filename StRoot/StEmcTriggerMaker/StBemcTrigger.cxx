@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.18 2006/06/09 19:55:26 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.19 2006/07/27 15:22:13 kocolosk Exp $
 //
 //
 
@@ -13,6 +13,8 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_emcPed_Table.h"
 #include "StEmcUtil/database/StBemcTables.h"
+#include "StMessMgr.h"
+
 ClassImp(StBemcTrigger);
 
 //-------------------------------------------------------------------
@@ -169,14 +171,19 @@ void StBemcTrigger::PatchMap()
 
     for (int i=0;i<12;i++)
     {
-        cout<<"JP"<<i<<" is Sum of TP = ";
+		TString line("JP");
+		line += i;
+		line += " is sum of TP = ";
         for (int j=0;j<25;j++)
         {
-            if (j!=24)
-                cout<<JP_TP[i][j]<<"+";
+            if (j!=24){
+				line += JP_TP[i][j];
+				line += "+";
+			}
             if (j==24)
-                cout<<JP_TP[i][j]<<endl;
+				line += JP_TP[i][j];
         }
+		LOG_INFO << line << endm;
     }
 
 
@@ -278,7 +285,9 @@ int StBemcTrigger::makeTrigger()
     mTowJetId[9]=ADJ_ID_2005;
     mDsmAdc[9]  =ADJ_DSM_2005;
 
-    for (int z=0;z<10;z++) printf("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d\n",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]);
+    for (int z=0;z<10;z++){
+		LOG_INFO << Form("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]) << endm;
+	}
  
     return kStOK;
 }
@@ -302,10 +311,8 @@ int StBemcTrigger::get2003Trigger()
         db = mDbMaker->GetDataBase("Calibrations/emc/y3bemc");
     else
     {
-        if(mPrint)
-            cout << "You *MUST* provide a pointer to St_db_Maker!" << endl
-            << "In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);"
-            << endl;
+		LOG_WARN << "You *MUST* provide a pointer to St_db_Maker!" << endm;
+        LOG_WARN << "In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);" << endm;
         return kStWarn;
     }
 
@@ -395,9 +402,11 @@ int StBemcTrigger::get2003Trigger()
                 B5 = 1; // IF top bits !=0 B5=1
             mTrigger.HT[i] = HTL+(B5<<5); // Or top bits
             if(mPrint)
-                cout <<"Patch number "<<i<<" Tower id = "<<HTID
+			{
+                LOG_INFO <<"Patch number "<<i<<" Tower id = "<<HTID
                 <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
-                <<" HT = "<<mTrigger.HT[i]<<endl;
+                <<" HT = "<<mTrigger.HT[i]<<endm;
+			}
 
             if (mTrigger.HT[i]>HTmax)
             {
@@ -450,10 +459,8 @@ int StBemcTrigger::get2004Trigger()
         db = mDbMaker->GetDataBase("Calibrations/emc/y3bemc");
     else
     {
-        if(mPrint)
-            cout << "You *MUST* provide a pointer to St_db_Maker!" << endl
-            << "In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);"
-            << endl;
+        LOG_WARN << "You *MUST* provide a pointer to St_db_Maker!" << endm;
+        LOG_WARN << "In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);" << endm;
         return kStWarn;
     }
 
@@ -551,8 +558,7 @@ int StBemcTrigger::get2004Trigger()
     }
     else
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2004Trigger() -- pointer to StEmcDetector is zero!" << endl;
+        LOG_WARN << "StBemcTrigger::make2004Trigger() -- pointer to StEmcDetector is zero!" << endm;
         return kStWarn;
     }
 
@@ -619,13 +625,14 @@ int StBemcTrigger::get2004Trigger()
                 B5 = 1;
             mTrigger.HT[i] = HTL+(B5<<5);
             if(mPrint)
-                cout <<"Patch number "<<i
+			{
+                LOG_INFO <<"Patch number "<<i
                 <<" Tower id = "<<HTID
                 <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
                 <<" adc08 = "<<adc08[HTID-1]
                 <<" HT10 = "<<HT<<" PA12 = "<<PA
-                <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endl;
-
+                <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm;
+			}
             if (mTrigger.HT[i]>HTmax)
             {
                 HTmax=mTrigger.HT[i];
@@ -737,15 +744,13 @@ int StBemcTrigger::get2005Trigger()
 
     if(!mEvent)
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2005Trigger() -- no StEvent!" << endl;
+        LOG_WARN << "StBemcTrigger::make2005Trigger() -- no StEvent!" << endm;
         return kStWarn;
     }
     StEmcCollection *emc = mEvent->emcCollection();
     if(!emc)
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2005Trigger() -- no StEmcCollection!" << endl;
+        LOG_WARN << "StBemcTrigger::make2005Trigger() -- no StEmcCollection!" << endm;
         return kStWarn;
     }
 
@@ -755,10 +760,8 @@ int StBemcTrigger::get2005Trigger()
         db = mDbMaker->GetDataBase("Calibrations/emc/y3bemc");
     else
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2005Trigger() -- You *MUST* provide a pointer to St_db_Maker!" << endl
-            << "    In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);"
-            << endl;
+        LOG_WARN << "StBemcTrigger::make2005Trigger() -- You *MUST* provide a pointer to St_db_Maker!" << endm;
+        LOG_WARN << "    In your macro say something like: myTrgMaker->setDbMaker(myDbMaker);" << endm;
         return kStWarn;
     }
 
@@ -766,16 +769,14 @@ int StBemcTrigger::get2005Trigger()
     St_emcPed *emcPedestals = (St_emcPed*) db->Find("bemcPed");
     if(!emcPedestals)
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2005Trigger() -- can't find BEMC pedestal table!" << endl;
+		LOG_WARN << "StBemcTrigger::make2005Trigger() -- can't find BEMC pedestal table!" << endm;
         return kStWarn;
     }
 
     emcPed_st *pedestalTable = emcPedestals->GetTable();
     if(!pedestalTable)
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2005Trigger() -- can't find BEMC pedestal table!" << endl;
+        LOG_WARN << "StBemcTrigger::make2005Trigger() -- can't find BEMC pedestal table!" << endm;
         return kStWarn;
     }
 
@@ -889,8 +890,7 @@ int StBemcTrigger::get2005Trigger()
     }
     else
     {
-        if(mPrint)
-            cout << "StBemcTrigger::make2005Trigger() -- pointer to StEmcDetector is zero!" << endl;
+        LOG_WARN << "StBemcTrigger::make2005Trigger() -- pointer to StEmcDetector is zero!" << endm;
         return kStWarn;
     }
 
@@ -957,12 +957,14 @@ int StBemcTrigger::get2005Trigger()
             if(HTH>0) B5 = 1;
             mTrigger.HT[i] = HTL+(B5<<5);
             if(mPrint)
-	      cout <<"Patch number "<<i
+			{
+	      LOG_INFO <<"Patch number "<<i
 		   <<" Tower id = "<<HTID
 		   <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
 		   <<" adc08 = "<<adc08[HTID-1]
 		   <<" HT10 = "<<HT<<" PA12 = "<<PA
-		   <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endl;
+		   <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm;
+			}
 	    
             if (mTrigger.HT[i]>HTmax){
 	      HTmax=mTrigger.HT[i];
@@ -972,13 +974,13 @@ int StBemcTrigger::get2005Trigger()
 	    if (mTrigger.HT[i]>HT1_TH_2005){
 	      HT1_2005_array[numHT1_2005]=HTID;
 	      numHT1_2005++;
-	      cout<<HTID<<" Passed HT1 threshold="<<numHT1_2005<<"  "<<HT1_2005_array[numHT1_2005-1]<<endl;
+	      LOG_INFO<<HTID<<" Passed HT1 threshold="<<numHT1_2005<<"  "<<HT1_2005_array[numHT1_2005-1]<<endm;
 	    }
 	    
 	    if (mTrigger.HT[i]>HT2_TH_2005){
 	      HT2_2005_array[numHT2_2005]=HTID;
 	      numHT2_2005++;
-	      cout<<HTID<<" Passed HT2 threshold="<<numHT2_2005<<"  "<<HT2_2005_array[numHT2_2005-1]<<endl;
+	      LOG_INFO<<HTID<<" Passed HT2 threshold="<<numHT2_2005<<"  "<<HT2_2005_array[numHT2_2005-1]<<endm;
 	    }
 
         }
