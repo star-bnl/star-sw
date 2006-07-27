@@ -1,9 +1,0 @@
-/*   tcl_sector_index                              */
-/* current sector being processed                  */
-/*                                                 */
-   struct tcl_sector_index {
-       long      CurrentSector;      /* Current sector for processing */
-   };
-/*  Last mod. for tclpar:  $Date: 1998/05/21 01:09:30 $ */
-
-
