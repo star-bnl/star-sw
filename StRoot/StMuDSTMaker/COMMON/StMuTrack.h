@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.19 2006/07/06 22:17:10 mvl Exp $
+ * $Id: StMuTrack.h,v 1.20 2006/07/27 18:55:42 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -25,7 +25,6 @@
 
 #include "StEvent/StTrackTopologyMap.h"
 #include "StEvent/StRunInfo.h"
-#include "StEvent/StDcaGeometry.h"
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StThreeVectorD.hh"
 #include "StarClassLibrary/StThreeVectorF.hh"
@@ -95,16 +94,8 @@ class StMuTrack : public TObject {
     StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
     StPhysicalHelixD outerHelix() const; ///< Returns outer helix (last measured point)
     StMuProbPidTraits probPidTraits() const; ///< Returns Yuri Fisyak new pid probabilities. 
-    Float_t        dcaD() const {return mDcaD;}
-    Float_t        sigmaOfDcaD() const {return mSigmaOfDcaD;}
-    Float_t        dcaZ() const {return mDcaZ;}
-    Float_t        sigmaOfDcaZ() const {return mSigmaOfDcaZ;}
     static void setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm*); ///< Sets the StuProbabilityPidAlgorithm. Important in order to calculate Aihong's pids.
     static void setProbabilityPidCentrality(double cent); ///< Sets the centrality for calculating Aihong's pid.
-    void           setDcaD(Float_t p) {mDcaD = p;}
-    void           setSigmaOfDcaD(Float_t p) {mSigmaOfDcaD = p;}
-    void           setDcaZ(Float_t p) {mDcaZ = p;}
-    void           setSigmaOfDcaZ(Float_t p) {mSigmaOfDcaZ = p;}
 protected:
   Short_t mId;
   Short_t mType;
@@ -143,11 +134,6 @@ protected:
   StMuHelix mHelix;
   StMuHelix mOuterHelix;
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
-  Float_t   mDcaD;
-  Float_t   mSigmaOfDcaD;
-  Float_t   mDcaZ;
-  Float_t   mSigmaOfDcaZ;
-  Float_t   mCorrelationDZ;
 
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
@@ -162,7 +148,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,7)
+  ClassDef(StMuTrack,8)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -211,11 +197,8 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
- * Revision 1.19  2006/07/06 22:17:10  mvl
- * Update version number in ClassDef, to account for additional data members for SVT review.
- *
- * Revision 1.18  2006/06/30 17:06:52  fisyak
- * Add 2D dca (DcaD), Z dca (DcaZ) and their cov. matrix as corresponing sigma and correlaton coef. from dcaGeometry to StMuTrack
+ * Revision 1.20  2006/07/27 18:55:42  fisyak
+ * Remove DCA hack used in SSD+SVT test production (P06id)
  *
  * Revision 1.17  2005/12/13 03:12:13  mvl
  * Changes to StMuDst2StEventMaker (code in StMuDst) and StMuDstFilterMaker
