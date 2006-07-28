@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.33 2006/06/27 18:17:47 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.34 2006/07/28 04:58:32 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.34  2006/07/28 04:58:32  jhthomas
+ * Add code by GeneVB to update the ShortedRing tables every time the DB changes.
+ *
  * Revision 1.33  2006/06/27 18:17:47  jhthomas
  * ADD new PredictSpaceCharge() function so that it includes fit errors in the prediction
  * It is now capable of including the SSD and SVT hits in the predictor/corrector loop
@@ -320,6 +323,7 @@ class StMagUtilities {
   virtual void     AutoSpaceChargeR2() {GetSpaceChargeR2(); } // use DB
   virtual Double_t CurrentSpaceCharge()   {return SpaceCharge  ;}
   virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
+  virtual Bool_t   UpdateShortedRing();
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
