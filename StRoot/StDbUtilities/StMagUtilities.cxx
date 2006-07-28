@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.66 2006/07/19 22:27:36 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.67 2006/07/28 04:59:04 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.67  2006/07/28 04:59:04  jhthomas
+ * Add code by GeneVB to update the ShortedRing tables every time the DB changes.
+ *
  * Revision 1.66  2006/07/19 22:27:36  jhthomas
  * Update PredictSpaceCharge
  *
@@ -407,6 +410,17 @@ void StMagUtilities::GetShortedRing ()
       MissingResistance[i] =  (Float_t) shortTable->MissingResistance ;   // Amount of Missing Resistance due to this short (MOhm)
       Resistor[i]          =  (Float_t) shortTable->resistor          ;   // Amount of compensating resistance added for this short
     }
+}
+
+Bool_t StMagUtilities::UpdateShortedRing ()
+{
+  static tpcFieldCageShort_st* shortsTable = 0;
+
+  St_tpcFieldCageShort* shortedRingsTable = (St_tpcFieldCageShort*) ( thedb->FindTable("tpcFieldCageShort",1) ) ;
+  tpcFieldCageShort_st* new_shortsTable = shortedRingsTable->GetTable();
+  Bool_t update = (new_shortsTable != shortsTable);
+  if (update) { GetShortedRing(); shortsTable = new_shortsTable; }
+  return update;
 }
 
 void StMagUtilities::GetOmegaTau ()
@@ -1702,14 +1716,14 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   const   Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
   const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
 
-  static  Int_t DoOnce = 0 ;
   static  Int_t NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
 
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  if ( DoOnce == 0 )
+  if ( UpdateShortedRing() )
     {
+      NumberOfEastInnerShorts = 0; NumberOfEastOuterShorts = 0 ; NumberOfWestInnerShorts = 0; NumberOfWestOuterShorts = 0 ;
 
       // Parse the Table and separate out the four different resistor chains
       // Definition: A "missing" resistor is a shorted resistor, an "extra" resistor is a compensating resistor added at the end of the string
@@ -1741,7 +1755,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       
       // Don't fill the tables if there aren't any shorts
       if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
-	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; DoOnce = 1 ; return ; }
+	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ;  return ; }
 
       Float_t Rtot   =  R0 + 181*RStep + R182     ;    // Total resistance of the (normal) resistor chain
       Float_t Rfrac  =  RStep*TPC_Z0/(Rtot*Pitch) ;    // Fraction of full resistor chain inside TPC drift volume (~1.0)
@@ -1810,7 +1824,6 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 	      shortEr[i][j] = IntegralOverZ ;
  	    }
 	}
-     DoOnce = 1 ;
     }
   
   if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
