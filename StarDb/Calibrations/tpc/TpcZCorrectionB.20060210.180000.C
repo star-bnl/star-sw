@@ -24,7 +24,7 @@ TDataSet *CreateTable() {
   memset(&row,0,tableSet->GetRowSize()); 
   row.idx	 =          2; // ;  Phi3GFHist009P05id
   row.nrows	 =          2; // ;
-  row.npar	 =        102; // Cut
+  row.npar	 =        103; // Cut
   row.min        =         20;
   row.max        =        210;
   row.a[0]	 =    8.85759e-02;//
