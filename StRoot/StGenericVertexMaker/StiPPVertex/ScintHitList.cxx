@@ -42,7 +42,7 @@ ScintHitList::initRun(){
   memset(active,0,nBin*sizeof(int));
   nActive=0;
   clear();
-  gMessMgr->Message("","I") 
+  gMessMgr->Message("","D") 
     <<"Clear ScintHitList for "<<myName<<endm;
 }
 
@@ -126,16 +126,6 @@ ScintHitList:: getWeight(int iBin){
   if(isVetoed(iBin)) return Wveto;
   return Wdunno;
 
-#if 0 // fancy weighting w/ occupancy
-  float w=1;
-  float busy=1.*nFired/nActive;
-  assert(busy>=0 && busy<=1.);
-  if(isMatched(iBin)) {
-    w= 1.+ (Wmatch-1)*(1.- busy);
-  } else if(isVetoed(iBin)) {
-    w= 1.- (Wveto-1)*(1.- busy);
-  }
-#endif
 }
 
 //==========================================================
@@ -173,7 +163,7 @@ ScintHitList::setFired(int iBin){
 //==========================================================
 int
 ScintHitList::phiBin(float phi){// phi is [0,2Pi]
- 
+  
   int iPhi=(int)((phi-phi0)/dPhi);
   if(iPhi<0) iPhi+=nPhi; // I'm a bit forgiving here,JB
   if(iPhi>=nPhi) iPhi-=nPhi;// I'm a bit forgiving here,JB
@@ -198,7 +188,7 @@ ScintHitList:: addTrack(float eta, float phi){
   if( fired[iBin]>0) { 
     nMatch++;
     if(h[6]) {// drop if histos not initialized
-      float eps=eta - (eta0+iEta*dEta);
+      float eps=eta - (eta0+iEta*dEta); //<<-use bin2EtaLeft(int iEta), should work for endcap
       // printf(" addTrack() eta=%.3f iEta=%d eps=%.3f \n",eta,iEta,eps);
       h[6]->Fill(eps);
       eps=phi - (phi0+iPhi*dPhi);
@@ -215,8 +205,8 @@ ScintHitList:: addTrack(float eta, float phi){
 void
 ScintHitList::print(int k){
 
-  printf("\n%sHitList: nActive=%d nFired=%d nTrack=%d nMatch=%d\n",myName.Data(),nActive, nFired,nTrack,nMatch);
-  printf("iBin iEta iPhi active:fired:track  (LEFT: phi/deg, eta)\n");
+  LOG_INFO<< Form("%sHitList: nActive=%d nFired=%d nTrack=%d nMatch=%d",myName.Data(),nActive, nFired,nTrack,nMatch)<<endm;
+  LOG_DEBUG << Form("iBin iEta iPhi active:fired:track  (LEFT: phi/deg, eta)")<<endm;
   int i;
   int nb=0;
   for(i=0;i<nBin;i++){
@@ -227,9 +217,9 @@ ScintHitList::print(int k){
     char mm=' ';
     if(fired[i] && track[i]) mm='*';
     float etaF=bin2EtaLeft(iEta);
-    printf("%3d %3d %3d   %d:%d:%d %c  (%.1f, %.3f)\n",i,iEta,iPhi,active[i],fired[i],track[i],mm,phi0+iPhi*dPhi/3.1416*180., etaF );
+    LOG_DEBUG << Form("%3d %3d %3d   %d:%d:%d %c  (%.1f, %.3f)",i,iEta,iPhi,active[i],fired[i],track[i],mm,phi0+iPhi*dPhi/3.1416*180., etaF )<<endm;
   }
-  printf("--- %d printed bins\n",nb);
+  LOG_DEBUG << Form("--- %d printed bins",nb)<<endm;
 }
 
 //==========================================================
@@ -262,7 +252,7 @@ ScintHitList:: initHisto (TObjArray*HList){
   for(it=0;it<3;it++){
     sprintf(tt1,"n%s%c",core,type[it][0]);
     sprintf(tt2,"%s hits n%s / eve",core,type[it]);
-    int nb=50;
+    int nb=70;
     if(it==1) nb=300;
     h[2*it]=new TH1F(tt1,tt2,nb,-0.5,nb-0.5);
     HList->Add(h[2*it]);
@@ -270,7 +260,7 @@ ScintHitList:: initHisto (TObjArray*HList){
 
   for(it=0;it<3;it++){
     sprintf(tt1,"%s%c",core,type[it][0]);
-    sprintf(tt2,"%s no. of %s / bin",core,type[it]);
+    sprintf(tt2,"%s : frequency  of %s / element",core,type[it]);
     h[2*it+1]=new TH1F(tt1,tt2,nBin,0.5,nBin+0.5);
     HList->Add(h[2*it+1]);
   }
@@ -285,6 +275,9 @@ ScintHitList:: initHisto (TObjArray*HList){
   float xx=2*dPhi/3.1416*180;
   h[7]=new TH1F(tt1,tt2,200,-xx,xx); // scint dependent
   HList->Add(h[7]);
+
+  // note, delEta monitoring histo is not working properly for Endcap,but decisions are fine 
+
 
 }
 

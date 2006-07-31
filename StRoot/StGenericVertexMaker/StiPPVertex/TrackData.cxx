@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cmath>
+#include <StMessMgr.h>
 
 #include "TrackData.h"
 #include "VertexData.h"
@@ -26,7 +27,7 @@ TrackData::matchVertex(VertexData &V, float dzMax) {
 
   float dz=zDca-V.r.z();
   bool ret= fabs(dz) < dzMax+ezDca;
-  if(ret)  printf("TrackData::match_Vid=%d  weight=%.2f anyM=%d anyV=%d  m: ctb=%d  bemc=%d eemc=%d tpc=%d dz=%.2f +/- %.2f\n",V.id,weight,anyMatch,anyVeto,mCtb,mBemc,mEemc,mTpc,dz,ezDca);
+  if(ret)   LOG_DEBUG<< Form("PPV::matchTr2Ver VerID=%d  weight=%.2f anyM=%d anyV=%d  m: ctb=%d  bemc=%d eemc=%d tpc=%d dz=%.2f +/- %.2f\n",V.id,weight,anyMatch,anyVeto,mCtb,mBemc,mEemc,mTpc,dz,ezDca)<<endm;
   return ret;
 }
 

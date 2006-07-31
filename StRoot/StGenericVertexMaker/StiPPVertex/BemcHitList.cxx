@@ -35,8 +35,8 @@ BemcHitList::BemcHitList() :
 //==========================================================
 //==========================================================
 void
-BemcHitList::initRun(){
-  gMessMgr->Message("","D") <<" BemcHitList::initRun()"<<endm;
+BemcHitList::initRun() {
+  LOG_DEBUG <<Form("BemcHitList::initRun() start")<<endm;
   ScintHitList::initRun();
   // clear old lookup table
   int i,j,k;
