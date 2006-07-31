@@ -5,43 +5,49 @@ StChain *chain=0;
 
 int rdMuDst2print(
 	  char* file    = "R50530.MuDst.root",
+	  int nEve=100000,
 	  Int_t nFiles  = 1, 
-	  char* inDir   = "./",
-	  int nEve=10)
+	  char* inDir   = "./")
 { 
 
-  inDir="./"; 
   
-  inDir="/star/data09/reco/ppProduction/FullField/DEV_ittf.ppv/2005/169/";
-  file="st_physics_6169107_raw_2010010.MuDst.root";
+  inDir="/star/institutions/iucf/balewski/2006-ppv-eval/test7/";
+  // inDir="/star/data05/scratch/balewski/bug1/";
 
-  // inDir="/star/u/mvl/mudst_dev/quick_fix/data/";
-  // file="st_physics_5109030_raw_1020001.MuDst.root";
+  //file="st_zerobias_7118050_raw_1110001.MuDst.root";
+ file    = "st_physics_adc_7118049_raw_1070001.MuDst.root",
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
+
   cout << " loading done " << endl;
 
- 
-// create chain    
+  
+  // create chain    
   chain = new StChain("StChain"); 
   
-// Now we add Makers to the chain...   
+  // Now we add Makers to the chain...   
   muMk = new StMuDstMaker(0,0,inDir,file,"MuDst.root",nFiles);
-  
+  TChain* tree=muMk->chain(); assert(tree);
+  int nEntries=(int) tree->GetEntries();
+  printf("total eve in muDst chain =%d\n",nEntries);  // return ;
+  if(nEntries<0) return;
+
+
   chain->Init();
   chain->ls(3);
 
-  int eventCounter=0;
-  int stat=0;
-
+  h1=new TH1F("nP","# of prim tracks per vertex",100,0,200);
   //---------------------------------------------------
-  while ( stat==0 ) {// loop over events
+  int eventCounter=0;
+  int t1=time(0);
+  
+  for (Int_t iev=0;iev<nEntries; iev++) {
     if(eventCounter>=nEve) break;
     chain->Clear();
-    stat = chain->Make();
+    int stat = chain->Make();
     if(stat) break; // EOF or input error
-    printf("stat=%d\n", stat);
+    //printf("stat=%d\n", stat);
     eventCounter++;
     // if(eventCounter<17) continue;
 
@@ -55,31 +61,38 @@ int rdMuDst2print(
     int trigID=96211;
     bool fired=tic.nominal().isTrigger(trigID);
   
-    Int_t nPrimTrAll=muMk->muDst()->GetNPrimaryTrack();
     Int_t nGlobTrAll=muMk->muDst()->GetNGlobalTrack();
+  
+    //assert(tic.nominal().isTrigger(127271)==0);
     
-    printf("\n\n ====================%d  processing eventID %d nPrimV=%d nPrimTr=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nPrimTrAll,nGlobTrAll);
-    printf("TrigID=%d fired=%d\n",trigID,fired);
-    
-    if(nPrimV>1) printf("######\n");
+    if(eventCounter%1==0) {
+      printf("ieve=%d  eventID %d nPrimV=%d  nGlobTrAll=%d =============\n", eventCounter,info.id(),nPrimV,nGlobTrAll);
+      // printf("TrigID=%d fired=%d\n",trigID,fired);
+      
+      if(nPrimV>1) printf("######\n");
+    }
     int iv;
     for(iv=0;iv<nPrimV;iv++) {
       StMuPrimaryVertex* V= muMk->muDst()->primaryVertex(iv);
       assert(V);
+      muMk->muDst()->setVertexIndex(iv);
       StThreeVectorF &r=V->position();
       StThreeVectorF &er=V->posError();
-      printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
+      //  printf("iv=%d   Vz=%.2f +/-%.2f \n",iv,r.z(),er.z()  );
       // count prim tracks for this vert
       int nPrimTr =0;
       int itr; 
+      Int_t nPrimTrAll=muMk->muDst()->GetNPrimaryTrack();
       for(itr=0;itr<nPrimTrAll;itr++) {
 	StMuTrack *pr_track=muMk->muDst()->primaryTracks(itr);
-	if(pr_track->vertexIndex()!=iv) continue;
 	if(pr_track->flag()<=0) continue;
 	nPrimTr ++;
       }
-      printf("  nPrimTr=%d , VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
-	     ,nPrimTr, V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
+      if(nPrimV>0)h1->Fill(nPrimTr);
+
+      if(1)printf("  nPrimTr=%d , Z=%.1f VFid=%d:: ntrVF=%d nCtb=%d nBemc=%d nEEmc=%d nTpc=%d sumPt=%.1f rank=%g\n"
+		  ,nPrimTr,r.z(), V->vertexFinderId() ,V->nTracksUsed()  ,V->nCTBMatch()  ,V-> nBEMCMatch() ,V->nEEMCMatch()  ,V->nCrossCentralMembrane()  ,V->sumTrackPt()  ,V->ranking());
+
     } 
 
     continue;   // do NOT print prim tracks for each vertex  
@@ -113,8 +126,19 @@ int rdMuDst2print(
     // printEEsmd(emc);
     
   }
+  printf("****************************************** \n");
+  //  return;
+  int t2=time(0);
+  if(t2==t1) t2=t1+1;
+  float tMnt=(t2-t1)/60.;
+  float rate=1.*eventCounter/(t2-t1);
+  printf("sorting done %d of   nEve=%d, CPU rate=%.1f Hz, total time %.1f minute(s) \n\n",eventCounter,nEntries,rate,tMnt);
+  h1->Draw();
+
+  return;
   
 }
+
 
 //===========================================
 //===========================================
@@ -179,3 +203,51 @@ printEEsmd( StMuEmcCollection* emc ) {
     }
   }
 }
+
+//=====================================================
+// PPV Evaluation code excerpts
+
+#if 0
+//Run 7118049
+char *ctrigB[]={"bjp1","bjp0L2","bht2","bhttp1"};
+int    trigB[]={127221, 127622, 127213, 127611,0};
+
+char *ctrigE[]={"ejp1","ejp0L2","eht2","ehttp1"};
+int    trigE[]={127271, 127652, 127262, 127641,0};
+
+char *ctrigM[]={"mb"  ,"zb"  ,"jpsi","upsilon","muon","fpd2"};
+int    trigM[]={117001,117300,117705,   117602,117402,117470,0};
+
+
+.........................
+
+  // create output summary file w/ vertex info
+  TString outF="ppvOut4/"; outF+=file;
+  outF.ReplaceAll("MuDst.root","ppv");
+  FILE *fd=fopen(outF.Data(),"w");
+  assert(fd);
+............................
+
+    fprintf(fd,"%d %d %d ", eventCounter,info.id(),nPrimV);
+    int i=0;
+    char trgS[9];
+    //..... BTOW trigs
+    sprintf(trgS,"00000000"); i=0;
+    while(trigB[i]>0){if(tic.nominal().isTrigger(trigB[i])) trgS[i]='1' ; i++;}
+    fprintf(fd,"%s ",trgS);
+    //.... Etow trigs
+    sprintf(trgS,"00000000"); i=0;
+    while(trigE[i]>0){if(tic.nominal().isTrigger(trigE[i])) trgS[i]='1' ; i++;}
+    fprintf(fd,"%s ",trgS);
+    //.... Other trigs
+    sprintf(trgS,"00000000"); i=0;
+    while(trigM[i]>0){if(tic.nominal().isTrigger(trigM[i])) trgS[i]='1' ; i++;}
+    fprintf(fd,"%s ",trgS);
+    fprintf(fd,"\n");
+...............
+      fprintf(fd,"  %.2f %d %g\n",r.z(),V->nTracksUsed(),V->ranking());
+
+...............
+  fclose(fd);
+
+#endif

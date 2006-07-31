@@ -1,7 +1,7 @@
 // *****************************************************************************
 class StEmcDetector;
 class StChain;
-class  StEmcRawData;
+class StEmcRawData;
 class EEfeeDataBlock;
 class Collection;
 class StSPtrVecTrackNodeIterator ;
@@ -15,16 +15,18 @@ int trigZ[2]={96300,0};  // zerobias
 int trigM[2]={96011,0}; // minBias
 int trigJ[2]={20,0}; // J/Psi
 
-void rdSt2print(char * fname="aa.event.root", Int_t nevents=20){
+void rdSt2print(char * fname="aa.event.root", Int_t nevents=10){
 
   fname="outPPV-G/st_physics_6151011_raw_2020001.event.root";// daq1
-  //char * fname="outPPV-Z/st_zerobias_6151011_raw_2110001.event.root";// daq2
+  char * fname="/star/institutions/iucf/balewski/2006-ppv-eval/test10/st_physics_adc_7118049_raw_1070001.event.root";
 
   char *outF="res.dat";
   FILE *fd=fopen(outF,"w"); assert(fd);
 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
+  assert( !gSystem->Load("StEEmcUtil.so"));
+
   cout << " loading done " << endl;
      
   // Load my makers
@@ -123,16 +125,16 @@ void rdSt2print(char * fname="aa.event.root", Int_t nevents=20){
 	printf("  counted nPrimTr=%d \n",nPrTr);
       } // end of loop over vertices
       fprintf(fd,"\n");
-    //      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
+      StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection(); assert(emcC);
     // print Endcap hits in StEvent
     //   printETOW(emcC->detector(13));
     //    printEPRE(emcC->detector(14));
     //printESMD(emcC->detector(15));
     //     printESMD(emcC->detector(16));
     
-    // printRaw(emcC->eemcRawData());
+     printRaw(emcC->eemcRawData());
     
-    // printRawBEMC(emcC->bemcRawData());
+    printRawBEMC(emcC->bemcRawData());
     
     //  if(iev<=2) 
   
@@ -165,7 +167,8 @@ data banks
  for(int i = 0; i<NBANK;i++) {
    if(raw->header(i))  {
      int size = raw->sizeHeader(i);
-     printf("\n======\nBANK=%d header size=%d\n",i,size);
+     printf("======BTOW BANK=%d size: head=%d, data=%d\n",i,size,raw->sizeData(i));
+     continue;
      for(int j = 0;j<size;j++)  {
        if(j%16==0) printf("\n");
        printf("0x%04x ",raw->header(i,j));
@@ -181,7 +184,7 @@ data banks
        tot++;
      }
    } 
-   printf("\n tot=%d\n",tot);
+   printf("\n bank=%d tot=%d\n",i,tot);
  }
 }
 
@@ -211,6 +214,7 @@ printRaw(  StEmcRawData* raw) {
       block.clear();
       block.setHead(raw->header(icr));
       block.setDataArray(raw->data(icr),raw->sizeData(icr));
+      continue;
       if(icr>=6) continue; // just towers
       block.print(0);
       
