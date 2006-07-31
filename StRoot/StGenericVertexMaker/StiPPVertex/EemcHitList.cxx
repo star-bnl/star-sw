@@ -100,7 +100,7 @@ EemcHitList::initRun(){
 	nA++;
       }
   
-  LOG_INFO <<" EemcHitList::initRun() done,  active="<<nA<<" of "<<nB<<" ETOW  towers (only 8 upper eta rings is used) " <<endm; 
+  LOG_INFO <<" EemcHitList::initRun() done,  active="<<nA<<" of "<<nB<<" ETOW  towers (only 8 upper eta rings are used) " <<endm; 
   
 }
 
@@ -175,6 +175,5 @@ EemcHitList::build ( StEmcDetector*det, float adcMin){
     } // end of sector
     //  printf("sect=%d so far: nActive=%d nHit=%d\n",sec,nAct,nHit);
   }
-
 };
  
