@@ -114,6 +114,9 @@ Abstract *StiFactory<Concrete,Abstract>::getInstance()
 {
   enum {FENCE = sizeof(double)+2*sizeof(long)+1};
   if (!fHTop)  {
+    if (fCurCount >= fMaxCount) {
+    throw runtime_error("StiFactory::getInstance() - Too many instances");
+    }
     assert(fCurCount < fMaxCount);  
     if (fFastDel)    {
        int   nBuf = sizeof(StiBlock<Concrete>) + FENCE;
