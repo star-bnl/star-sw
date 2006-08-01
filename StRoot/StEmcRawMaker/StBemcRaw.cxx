@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.15 2006/01/16 11:12:00 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.16 2006/08/01 17:07:07 kocolosk Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.16  2006/08/01 17:07:07  kocolosk
+// save all preshower hits for 2006 productions
+//
 // Revision 1.15  2006/01/16 11:12:00  suaide
 // tower map bug fixed and astyle run
 //
@@ -83,8 +86,8 @@ StBemcRaw::StBemcRaw():TObject()
     mControlADCtoE = new controlADCtoE_st();
     Int_t   calib[]      = {1, 1, 1, 1, 0, 0, 0, 0};
     Int_t   pedSub[]     = {1, 1, 1, 1, 0, 0, 0, 0};
-    Float_t cut[]        = {-1, 1.5, 1.5, 1.5, -1, -1, -1, -1};
-    Int_t   cutType[]    = {0, 1, 1, 1, 0, 0, 0, 0};
+    Float_t cut[]        = {-1, -1, 1.5, 1.5, -1, -1, -1, -1};
+    Int_t   cutType[]    = {0, 0, 1, 1, 0, 0, 0, 0};
     Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   status[]     = {0, 0, 0, 0, 0, 0, 0, 0};
     Int_t   crate[]      = {1, 1, 1, 1, 0, 0, 0, 0};
