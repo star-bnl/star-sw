@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.169  2006/08/01 03:51:00  perev
+// Return from Make() for too many hits
+//
 // Revision 1.168  2006/06/16 21:27:52  perev
 // Minimal errors of vertex 1 micron
 //
@@ -492,7 +495,16 @@ Int_t StiMaker::Make()
     static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters()).setField(field);
   _tracker->clear();
   }
-  _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+  try {
+    _hitLoader->loadEvent(event,_loaderTrackFilter,_loaderHitFilter);
+  }
+  catch (runtime_error &rte)
+  {
+    cout << "StiMaker::Make() - loadEvent(..) failed :" << rte.what() << endl;
+    MyClear();
+    return kStWarn;
+  }
+
   _seedFinder->reset();
   if (_tracker) {
       _tracker->findTracks();
@@ -541,7 +553,12 @@ Int_t StiMaker::Make()
   cout<< "StiMaker::Make() -I- Done"<<endl;
   StMaker::Make();
 
-    {
+  MyClear();
+  return kStOK;
+}
+//_____________________________________________________________________________
+void StiMaker::MyClear()
+{
 //    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
 //      TMemStat::PrintMem("Before StiFactory clear()");
       _toolkit->getHitFactory()->clear();
@@ -549,8 +566,6 @@ Int_t StiMaker::Make()
       _toolkit->getTrackNodeExtFactory()->clear();
       _toolkit->getTrackFactory()->clear();
 //      TMemStat::PrintMem("After  StiFactory clear()");
-    }
-  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t StiMaker::InitPulls()
