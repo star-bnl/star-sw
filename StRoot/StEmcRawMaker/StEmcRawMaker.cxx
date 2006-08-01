@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.9 2006/01/16 11:12:00 suaide Exp $
+// $Id: StEmcRawMaker.cxx,v 1.10 2006/08/01 14:45:31 balewski Exp $
 
 #include <math.h>
 
@@ -180,6 +180,16 @@ Int_t StEmcRawMaker::Make()
     gMessMgr->Info() <<"Time to run StEmcRawMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<endm;
     gMessMgr->Info() <<"*******************************************************************************************"<<endm;
 
+    //cleanup B+EmcRawCollection
+    if(mEvent->id()%555 ) {// clear raw data from StEvent for most of events
+      int i;
+      StEmcRawData *eemcRaw = mEvent->emcCollection()->eemcRawData();
+      for (i=0; i<eemcRaw->getNBlocks();i++) eemcRaw->deleteBank(i);
+      StEmcRawData *bemcRaw = mEvent->emcCollection()->bemcRawData();
+      for (i=0; i<bemcRaw->getNBlocks();i++) bemcRaw->deleteBank(i);
+    }  else {
+      LOG_INFO<< Form("B+EmcRawData are retained for eve=%d\n",mEvent->id())<endm;
+    }		      
     return kStOK;
 }
 //_____________________________________________________________________________
@@ -305,6 +315,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.10  2006/08/01 14:45:31  balewski
+// clear EmcRawData for eveID%555!=0 to reduce footprint of StEvent, for B+E-EMC
+//
 // Revision 1.9  2006/01/16 11:12:00  suaide
 // tower map bug fixed and astyle run
 //
