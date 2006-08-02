@@ -1,6 +1,10 @@
-// $Id: lasertest.C,v 1.4 2006/04/05 08:50:36 jcs Exp $
+// $Id: lasertest.C,v 1.5 2006/08/02 11:02:34 jcs Exp $
 //
 // $Log: lasertest.C,v $
+// Revision 1.5  2006/08/02 11:02:34  jcs
+// add comments
+// remove commented out old code
+//
 // Revision 1.4  2006/04/05 08:50:36  jcs
 // set t0 = ".000001" if t0 = "0" and gas = "0" to avoid seg fault
 //
@@ -85,20 +89,19 @@ void lasertest(TString filename,int ftpc, int lsec, int straight, int gfit, int 
          break;
       }
 
+  // Interation over tzero
   for (int i=-5;i<7;i++)
-  //for (int i=0;i<10;i++)
     {
-      //float step=i/10.0;
-      //float step=0;int i=0;
       float step=i/10.0;
+      
+      // Interation over gas composition
       for (int k=-5;k<8;k++)
 	{
 	  float step2=k/10.0;
-	  //float step2=-0.0;int k=0.0;
 	  char t[3];char g[3];
 	  
-	  sprintf(g,"%.2f",step2);
 	  sprintf(t,"%.2f",step);
+	  sprintf(g,"%.2f",step2);
 	  cout<<endl;
           cout<<"laser->DoLaserCalib: deltat0 = "<<t<<" und deltaGas = "<<g<<endl;
 	  if (k==0 && i==0)
