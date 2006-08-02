@@ -100,9 +100,12 @@ Copy the *_res.log files into one file with
      touch res.log
      cat *_res.log >> res.log
 
-laser_2d_pos.C(TString a,char *opt)
+laser_2d_pos(int ftpc, int lsec,TString a,char *opt)
    laser_2d_pos reads res.log file and draws the reconstructed position histograms
    Inputs to macro:
+     ftpc   - 1 Ftpc West
+              2 Ftpc East
+     lsec   - laser sector
         a    - select value(s) to be histogrammed
                "a"  Laser I - straight track at lpos1
                "b"  Laser II - straight track at lpos2
