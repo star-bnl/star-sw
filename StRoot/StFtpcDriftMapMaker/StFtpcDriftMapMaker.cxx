@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.20 2005/12/12 14:43:53 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.21 2006/08/02 13:57:57 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.21  2006/08/02 13:57:57  jcs
+// add deltaAr argument to allow user to change gas compostion (default: deltaAr=0)
+//
 // Revision 1.20  2005/12/12 14:43:53  jcs
 // exit if error occurs while constructing StFtpcDbReader
 //
@@ -69,6 +72,7 @@
 
 #include <Stiostream.h>
 #include <stdlib.h>
+#include "St_db_Maker/St_db_Maker.h"
 #include "StFtpcDriftMapMaker.h"
 #include "StFtpcMagboltz1.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
@@ -85,7 +89,7 @@ ClassImp(StFtpcDriftMapMaker)
 StFtpcDriftMapMaker::~StFtpcDriftMapMaker(){
 }
 //_____________________________________________________________________________
-StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor):
+StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor,const Float_t deltaAr):
     m_dimensions(0),
     m_padrow_z(0),
     m_efield(0),
@@ -96,6 +100,10 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
     m_gas(0),
     m_driftfield(0)
 {
+// Set Date,Time for offline database access so that the latest table entries are used
+    mDbMaker     = (St_db_Maker*)GetMaker("db");
+    mDbMaker->SetDateTime(20330101,0);
+
 // Create tables
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
@@ -219,11 +227,13 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 	  upAngle=0;
  	  printf("loop %d of %d\n", i, dbReader->numberOfMagboltzBins()); 
        	  printf("calling magboltz with field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);
-	  float gas1=dbReader->percentAr();
-	  float gas2=dbReader->percentCO2();
+cout<<"dbReader->percentAr() = "<<dbReader->percentAr()<<" deltaAr = "<<deltaAr<<endl;
+	  float gas1=dbReader->percentAr() + deltaAr;
+	  float gas2=dbReader->percentCO2() - deltaAr;;
 	  float gas3=dbReader->percentNe();
 	  float gas4=dbReader->percentHe();
 	  float temperature=dbReader->baseTemperature();
+          cout<<"calling magboltz with "<<gas1<<"% Ar and "<<gas2<<"% CO2"<<endl;
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &pressure, &gas1, &gas2, &gas3, &gas4, &temperature, &vDrift, &psiAngle, &eFinal); 
      	  printf("called magboltz got field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);  
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &upPressure, &gas1, &gas2, &gas3, &gas4, &temperature, &upDrift, &upAngle, &eFinal); 
