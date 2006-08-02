@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.9 2003/09/10 19:47:16 perev Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.10 2006/08/02 13:57:57 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.10  2006/08/02 13:57:57  jcs
+// add deltaAr argument to allow user to change gas compostion (default: deltaAr=0)
+//
 // Revision 1.9  2003/09/10 19:47:16  perev
 // ansi corrs
 //
@@ -42,6 +45,7 @@
 
 #include "StDbUtilities/StMagUtilities.h"
 
+class St_db_Maker;
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
@@ -60,8 +64,9 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.9 2003/09/10 19:47:16 perev Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.10 2006/08/02 13:57:57 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
+   St_db_Maker *mDbMaker;                         //!
    St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
    St_ftpcEField        *m_efield;        //!
@@ -76,12 +81,12 @@ class StFtpcDriftMapMaker : public StMaker {
   
  protected:
  public: 
-  StFtpcDriftMapMaker(const EBField map, const Float_t factor);
+  StFtpcDriftMapMaker(const EBField map, const Float_t factor,const Float_t deltaAr);
   virtual       ~StFtpcDriftMapMaker();
 
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.9 2003/09/10 19:47:16 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.10 2006/08/02 13:57:57 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker,0)  
 };

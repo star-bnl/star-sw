@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.2 2005/12/12 09:30:52 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.3 2006/08/02 13:59:16 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.3  2006/08/02 13:59:16  jcs
+// add deltaAr argument to allow user to change gas compostion (default: deltaAr=0)
+//
 // Revision 1.2  2005/12/12 09:30:52  jcs
 // load StarMagField library
 //
@@ -17,14 +20,22 @@
 //                    factor   > 0           normal field
 //                    factor   < 0           reversed field
 //                                           factor is the field scaling factor
+//    const Float_t   deltaAr                change gas composition: 
+//                                                   % Ar + deltaAr
+//                                                   % CO2 - deltaAr
 //
 //    Default:  const Int_t   map    = 2
 //              const Float_t factor = 1.0
+//              const Float_t deltaAr = 0.0
 //   
 //======================================================================
 
-void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
+void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0, const Float_t deltaAr = 0.0)
 {
+    cout<<"FtpcDriftMapMaker.C called with:"<<endl;
+    cout<<"                                  map     = "<<map<<endl;
+    cout<<"                                  factor  = "<<factor<<endl;
+    cout<<"                                  deltaAr = "<<deltaAr<<endl;
     if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
@@ -91,5 +102,5 @@ void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
     
     //b=new TBrowser();
     
-    StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(map,factor);
+    StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(map,factor,deltaAr);
 }
