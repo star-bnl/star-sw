@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.36 2006/06/02 18:24:22 deph Exp $
+ * $Id: MysqlDb.cc,v 1.37 2006/08/04 15:07:43 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.37  2006/08/04 15:07:43  deph
+ * Corrected const char / char inconsistancy with the vectors for standalone version
+ *
  * Revision 1.36  2006/06/02 18:24:22  deph
  * removed debug output from previous checkin
  *
@@ -368,6 +371,7 @@ strcpy(mdbhost,aHost);
   timeNow = time(NULL);
   tp = localtime(&timeNow);
     
+	char buffer[256];
   
   
 
@@ -376,10 +380,14 @@ strcpy(mdbhost,aHost);
       if (tp->tm_hour > 22 || tp->tm_hour < 8)
 	{
 	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbp, NULL, mdbPort);
-	  mdbhost = (*myserver).c_str();
+        strcpy(buffer,(*myserver).c_str());
+	//mdbhost = (*myserver).c_str();
+	mdbhost = buffer;
 	}else{
 	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbx, NULL, mdbPort);
-	  mdbhost = (*myserver).c_str();
+        strcpy(buffer,(*myserver).c_str());
+	//  mdbhost = (*myserver).c_str();
+	mdbhost = buffer;
 	  //  cout<< "*****"<<tp->tm_hour<<"*****"<<endl;
 	}
     }
@@ -389,7 +397,9 @@ strcpy(mdbhost,aHost);
       if (ptr != 0)
 	{
 	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_db, NULL, mdbPort);
-	  mdbhost = (*myserver).c_str();
+        strcpy(buffer,(*myserver).c_str());
+	//  mdbhost = (*myserver).c_str();
+	mdbhost = buffer;
 	}
 	 
     }
