@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDcaGeometry.h,v 2.1 2006/05/24 17:27:43 ullrich Exp $
+ * $Id: StDcaGeometry.h,v 2.2 2006/08/04 19:08:43 perev Exp $
  *
  * Author: Victor Perevoztchikov, Thomas Ullrich, May 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDcaGeometry.h,v $
+ * Revision 2.2  2006/08/04 19:08:43  perev
+ * CleanUpOnly
+ *
  * Revision 2.1  2006/05/24 17:27:43  ullrich
  * Initial Revision.
  *
@@ -80,15 +83,15 @@ private:
     ClassDef(StDcaGeometry,1)
 };
 
-inline int     StDcaGeometry::charge() const {return (mCurv*mHz>0)? -1:1;}
-inline double  StDcaGeometry::impact() const {return mImp;}
-inline double  StDcaGeometry::curvature() const {return mCurv;}
-inline double  StDcaGeometry::psi() const {return mPsi ;}
-inline double  StDcaGeometry::dipAngle() const {return atan(mTan);}
-inline double  StDcaGeometry::tanDip() const {return mTan ;}
-inline double  StDcaGeometry::pt() const {return 1./fabs(mPti);}
-inline double  StDcaGeometry::z() const {return mZ   ;}
-inline double  StDcaGeometry::hz() const {return mHz  ;}
-inline const float* StDcaGeometry::errMatrix() const {return &mImpImp;}
+inline int     StDcaGeometry::charge() const 		{return (mCurv*mHz>0)? -1:1;}
+inline double  StDcaGeometry::impact() const 		{return mImp;}
+inline double  StDcaGeometry::curvature() const 	{return mCurv;}
+inline double  StDcaGeometry::psi()       const 	{return mPsi ;}
+inline double  StDcaGeometry::dipAngle()  const 	{return atan(mTan);}
+inline double  StDcaGeometry::tanDip() const 		{return mTan ;}
+inline double  StDcaGeometry::pt()     const 		{return 1./fabs(mPti);}
+inline double  StDcaGeometry::z()      const 		{return mZ   ;}
+inline double  StDcaGeometry::hz()     const 		{return mHz  ;}
+inline const float* StDcaGeometry::errMatrix() const 	{return &mImpImp;}
 
 #endif
