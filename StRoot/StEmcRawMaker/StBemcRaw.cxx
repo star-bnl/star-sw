@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.16 2006/08/01 17:07:07 kocolosk Exp $
+// $Id: StBemcRaw.cxx,v 1.17 2006/08/04 12:54:10 kocolosk Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.17  2006/08/04 12:54:10  kocolosk
+// don't throw away CAP==127||128 PRS and SMD hits this year
+//
 // Revision 1.16  2006/08/01 17:07:07  kocolosk
 // save all preshower hits for 2006 productions
 //
@@ -605,15 +608,16 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
     }
 
     Float_t PEDESTAL = 0,RMS = 0;
-    if(mControlADCtoE->DeductPedestal[det-1]>0)
-    {
-        mTables->getPedestal(det,id,CAP,PEDESTAL,RMS);
-        // do not consider hits wih capacitor number CAP1 and CAP2 for
-        // PSD and SMD as valid hits
-        if(det>=BPRS && !mSaveAllStEvent)
-            if(CAP==CAP1 || CAP==CAP2)
-                return kPed;
-    }
+//save all PRS, SMD hits regardless of capacitor; now we have 3 peds to handle this - APK, 4 Aug 2006
+    //if(mControlADCtoE->DeductPedestal[det-1]>0)
+    //{
+    //    mTables->getPedestal(det,id,CAP,PEDESTAL,RMS);
+    //    // do not consider hits wih capacitor number CAP1 and CAP2 for
+    //    // PSD and SMD as valid hits
+    //    if(det>=BPRS && !mSaveAllStEvent)
+    //        if(CAP==CAP1 || CAP==CAP2)
+    //            return kPed;
+    //}
 
     if(mControlADCtoE->CutOffType[det-1]==1 && !mSaveAllStEvent) // pedestal cut
     {
