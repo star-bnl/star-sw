@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.21 2006/07/24 19:04:11 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.22 2006/08/05 01:07:45 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,9 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.22  2006/08/05 01:07:45  calderon
+ * Modified some debugging printouts.
+ *
  * Revision 1.21  2006/07/24 19:04:11  calderon
  * Added parent key data member to StTinyMcTrack.
  * Added reco key data member to StTinyRcTrack.
@@ -112,6 +115,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.22  2006/08/05 01:07:45  calderon
+ * Modified some debugging printouts.
+ *
  * Revision 1.21  2006/07/24 19:04:11  calderon
  * Added parent key data member to StTinyMcTrack.
  * Added reco key data member to StTinyRcTrack.
@@ -212,7 +218,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.21 2006/07/24 19:04:11 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.22 2006/08/05 01:07:45 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -579,6 +585,8 @@ StMiniMcMaker::initVertex()
     cout
       << "Position of primary vertex from StMcEvent: "<<endl
       << *mMcVertexPos << endl;
+    cout << "N daughters, StEvent   : " << mRcEvent->primaryVertex(0)->daughters().size() << endl;
+    cout << "N daughters, StMcEvent : " << mMcEvent->primaryVertex()->daughters().size() << endl;
   }
   //
   // if there was no primary vertex before embedding,
@@ -1384,17 +1392,24 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
     tinyRcTrack->setFirstSector(hits.first->sector());
     tinyRcTrack->setLastSector(hits.second->sector());
   }
-  else{
+  else if ( glTrack->detectorInfo()->numberOfPoints()==0) {
+      // could be an FTPC track, for which firstLastHit won't work
     cout << "Error: no hits?" << endl;
-    cout << "tpc points : " << glTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
+    cout << "Tpc points   : " << glTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
+    cout << "Svt points   : " << glTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
+    cout << "Ftpc points E: " << glTrack->detectorInfo()->numberOfPoints(kFtpcEastId) << endl;
+    cout << "Ftpc points W: " << glTrack->detectorInfo()->numberOfPoints(kFtpcWestId) << endl;
   }
   if (fitHits.first) {
     tinyRcTrack->setFirstFitPadrow(fitHits.first->padrow());
     tinyRcTrack->setLastFitPadrow(fitHits.second->padrow());
   }
-  else {
+  else if ( glTrack->fitTraits().numberOfFitPoints()==0) {
     cout << "Error: no hit with usedInFit()>0" << endl;
-    cout << "fit pts :" << glTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
+    cout << "Tpc fit pts   :" << glTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
+    cout << "Svt fit pts   :" << glTrack->fitTraits().numberOfFitPoints(kSvtId) << endl;
+    cout << "Ftpc fit pts E:" << glTrack->fitTraits().numberOfFitPoints(kFtpcEastId) << endl;
+    cout << "Ftpc fit pts C:" << glTrack->fitTraits().numberOfFitPoints(kFtpcWestId) << endl;
   }
   
   tinyRcTrack->setFitPts(glTrack->fitTraits().numberOfFitPoints(kTpcId));
