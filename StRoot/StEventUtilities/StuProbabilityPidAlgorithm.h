@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.16 2004/04/09 15:46:21 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.17 2006/08/06 23:30:15 perev Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.17  2006/08/06 23:30:15  perev
+ * ROOT5 corrs
+ *
  * Revision 1.16  2004/04/09 15:46:21  aihong
  * add isPIDTableRead()
  *
@@ -62,7 +65,6 @@
 
 class StEvent;
 class TString;
-class TVectorD;
 class TObjString;
 class TF1;
 
