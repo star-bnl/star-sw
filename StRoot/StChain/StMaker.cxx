@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.176 2006/05/08 15:15:37 jeromel Exp $
+// $Id: StMaker.cxx,v 1.177 2006/08/07 22:44:38 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -571,7 +571,11 @@ void StMaker::Clear(Option_t *option)
    StMaker *maker;
    int curr = StMkDeb::GetCurrent();
    while ((maker = (StMaker* )next())) {
+#ifdef R__ASSERT
+      R__ASSERT(maker->TestBIT(kCleaBeg)==0);
+#else
       Assert(maker->TestBIT(kCleaBeg)==0);
+#endif
       StMkDeb::SetCurrent(maker,3);
       maker->SetBIT(kCleaBeg);
       maker->StartTimer();
@@ -612,7 +616,11 @@ Int_t StMaker::Init()
 
       // Initialise maker
 
+#ifdef R__ASSERT
+      R__ASSERT(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
+#else
       Assert(maker->TestBIT(kInitBeg)|maker->TestBIT(kInitEnd)==0);
+#endif
       StMkDeb::SetCurrent(maker,1);
       maker->SetBIT(kInitBeg);
       maker->StartTimer();
@@ -860,7 +868,11 @@ Int_t StMaker::Make()
    while ((maker = (StMaker* )nextMaker())) {
      if (!maker->IsActive()) continue;
      TURN_LOGGER(maker);
+#ifdef R__ASSERT
+     R__ASSERT(maker->TestBIT(kMakeBeg)==0);
+#else
      Assert(maker->TestBIT(kMakeBeg)==0);
+#endif
      maker->SetBIT(kMakeBeg);
      StMkDeb::SetCurrent(maker,2);
      oldrun = maker->m_LastRun;
@@ -1721,6 +1733,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.177  2006/08/07 22:44:38  fisyak
+// Assert => R__ASSERT for ROOT 5.12
+//
 // Revision 1.176  2006/05/08 15:15:37  jeromel
 // upgr03
 //
