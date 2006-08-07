@@ -4,23 +4,34 @@ class StMuEmcCollection;
 class StEEmcDbMaker;
 class StMuDstMaker;
 class TChain;
-class   TObjArray;
+class TObjArray;
 
 
-StEEmcDbMaker  *myDb;
+StEEmcDbMaker *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
-TObjArray * HList;
+TObjArray *HList;
 
+// Comment out the line below to read EEMC data from StEvent (default is MuDst)
+#define useMuDst
 
-int runEEmcSlowMaker( int nEve=2000 ){
+int runEEmcSlowMaker( int nEve=5000 ){
 
-  int firstSec=5;
-  int lastSec=5;
- 
-  Int_t nFiles  = 10; 
-  char* file="rcf1210_164_4219evts.MuDst.root";
-  char* inDir   = "/star/data19/reco/pp200/pythia6_203/default/minbias/y2004a/gheisha_on/trs_ij/";
+  int firstSec=1;
+  int lastSec=12;
+
+  Int_t nFiles=10; 
+
+#ifdef useMuDst
+  //char* file="rcf1210_164_4219evts.MuDst.root";
+  char* file="mcgamma_svtin_nominalvtx_5000evts.MuDst.root";
+#else
+  //char* file="rcf1210_164_4219evts.event.root";
+  char* file="mcgamma_svtin_nominalvtx_5000evts.event.root";
+#endif
+
+  //char* inDir="/star/data19/reco/pp200/pythia6_203/default/minbias/y2004a/gheisha_on/trs_ij/";
+  char* inDir="/star/data04/sim/jwebb/2006/";
   char *outname="jan";
   TString fullName=file;
 
@@ -31,26 +42,29 @@ int runEEmcSlowMaker( int nEve=2000 ){
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("StEEmcDbMaker");
-  gSystem->Load("StEEmcUtil");  
-  //  return;
+  gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcSimulatorMaker");
 
   // create chain    
   chain = new StChain("StChain"); 
 
-  printf("adding muDst from run '%s' ....\n",fullName.Data());
+  printf("adding MuDst/StEvent from run '%s' ....\n",fullName.Data());
 
-  // Now we add Makers to the chain...   
-  muMk = new StMuDstMaker(0,0,inDir,fullName,".MuDst.root",nFiles);
+  // Now we add Makers to the chain...
+#ifdef useMuDst
+  StMuDstMaker* muMk = new StMuDstMaker(0,0,inDir,fullName,".MuDst.root",nFiles);
   TChain* tree=muMk->chain(); assert(tree); 
   int nEntries=tree->GetEntries();
   printf("total eve in chain =%d\n",nEntries);
+#else
+  StIOMaker* ioMaker = new StIOMaker;
+  ioMaker->SetFile(gSystem->ConcatFileName(inDir, file));
+  ioMaker->SetBranch("*", 0, "0");
+  ioMaker->SetBranch("eventBranch", 0, "r");
+  ioMaker->SetBranch("geantBranch", 0, "r");
+#endif
 
   St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
-  StEEmcDbMaker* myDb=new StEEmcDbMaker("eemcDb");
-  myDb->setSectors(firstSec, lastSec);
- 
-#if 1  // flags for M-C events
   stDb->SetDateTime(20031120,0);
   stDb->SetFlavor("sim","eemcPMTcal");
   stDb->SetFlavor("sim","eemcPIXcal");
@@ -58,7 +72,9 @@ int runEEmcSlowMaker( int nEve=2000 ){
   stDb->SetFlavor("sim","eemcPMTstat");
   stDb->SetFlavor("sim","eemcPMTname");
   stDb->SetFlavor("sim","eemcADCconf");
-#endif
+
+  StEEmcDbMaker* myDb=new StEEmcDbMaker("eemcDb");
+  myDb->setSectors(firstSec, lastSec);
 
 
   gMessMgr->SwitchOn("D");
@@ -66,19 +82,6 @@ int runEEmcSlowMaker( int nEve=2000 ){
   gMessMgr->SwitchOn("W");
 
   HList=new TObjArray;
-
-  StEEmcSlowMaker *slowSim=new StEEmcSlowMaker();
-  
-  // Put your analysis maker here
-  // StMyAnaMaker *bhla =new  StMyAnaMaker;
-
-  /// Uncomment the following line to save debuging histograms
-  //$$$  slowSim->SetHList(HList);
-
-  slowSim->setDropBad(0);   // 0=no action, 1=drop chn marked bad in db
-  slowSim->setAddPed(0);    // 0=no action, 1=ped offset from db
-  slowSim->setSmearPed(0);  // 0=no action, 1=gaussian ped, width from db
-  slowSim->setOverwrite(1); // 0=no action, 1=overwrite muDst values
 
   /*  
    * The slow simulator is setup by default with the best
@@ -89,7 +92,24 @@ int runEEmcSlowMaker( int nEve=2000 ){
    * in the header file.
    *
    */
+  StEEmcSlowMaker *slowSim=new StEEmcSlowMaker();
+  slowSim->setDropBad(0);   // 0=no action, 1=drop chn marked bad in db
+  slowSim->setAddPed(0);    // 0=no action, 1=ped offset from db
+  slowSim->setSmearPed(0);  // 0=no action, 1=gaussian ped, width from db
+  slowSim->setOverwrite(1); // 0=no action, 1=overwrite muDst values
+
+#ifdef useMuDst
+  slowSim->setSource("MuDst");
+#else
+  slowSim->setSource("StEvent");
+#endif
+
+  /// Uncomment the following line to save debuging histograms
+  //$$$  slowSim->SetHList(HList);
   
+  // Put your analysis maker here
+  // StMyAnaMaker *bhla =new  StMyAnaMaker;
+
   chain->ls(3);
   chain->Init();
 
@@ -131,8 +151,4 @@ int runEEmcSlowMaker( int nEve=2000 ){
   HList->Write();
   f.Close();
 #endif  
-
-
-
 }
-

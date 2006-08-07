@@ -1,4 +1,4 @@
-// $Id: StEEmcSlowMaker.h,v 1.2 2005/09/23 01:30:11 jwebb Exp $
+// $Id: StEEmcSlowMaker.h,v 1.3 2006/08/07 18:50:11 balewski Exp $
 
 #ifndef STAR_StEEmcSlowMaker
 #define STAR_StEEmcSlowMaker
@@ -66,12 +66,15 @@ class TObjArray;
 class StMuDstMaker;
 class StEEmcDbMaker;
 class StMuEmcCollection;
+class StEmcCollection;
 
 #include "SlowSimUtil.h"
 
 class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
  private: 
+  enum Source_t { kMuDst, kStEvent };
+  Source_t mSource;
 
   enum {mxH=32};
   StMuDstMaker* mMuDstMaker;  
@@ -80,19 +83,32 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
 
   int   nInpEve; // private event counter
 
-  TH1F *hA[mxH]; // some global (test) histograms  
+  TH1 *hA[mxH]; // some global (test) histograms  
   void InitHisto();
 
   /// Process endcap tower and overwrite ADC values with
   /// new values computed by the slow simulator.
-  void MakeTow( StMuEmcCollection *emc );
+  void MakeTower( StMuEmcCollection *emc );
 
   /// Process endcap preshower and overwrite ADC values with
   /// new values computed by the slow simulator
-  void MakePre( StMuEmcCollection *emc );
+  void MakePrePost( StMuEmcCollection *emc );
+
   /// Process endcap smd strips [UV] and overwrite ADC values 
   /// with new values computed by the slow simulator
   void MakeSMD   ( StMuEmcCollection *emc );
+
+  /// Process endcap tower and overwrite ADC values with
+  /// new values computed by the slow simulator (StEvent version)
+  void MakeTower(StEmcCollection* emc);
+
+  /// Process endcap preshower and overwrite ADC values with
+  /// new values computed by the slow simulator (StEvent version)
+  void MakePrePost(StEmcCollection* emc);
+
+  /// Process endcap smd strips [UV] and overwrite ADC values 
+  /// with new values computed by the slow simulator (StEvent version)
+  void MakeSMD   (StEmcCollection* emc);
 
   /// Offset by pedestal (default false)
   Bool_t mAddPed;
@@ -157,9 +173,12 @@ class StEEmcSlowMaker : public StMaker , public SlowSimUtil{
   /// peak for the MAPMT's
   void setSinglePeResolution( Float_t r );
 
+  /// Set the source of ADC. Can be "MuDst" (default) or "StEvent"
+  void setSource(const Char_t* name);
+
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 1.2 2005/09/23 01:30:11 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcSlowMaker.h,v 1.3 2006/08/07 18:50:11 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -182,6 +201,9 @@ inline void StEEmcSlowMaker::setNpePerMipPre( Float_t npe ) { Pmip2pe = npe; }
 
 
 // $Log: StEEmcSlowMaker.h,v $
+// Revision 1.3  2006/08/07 18:50:11  balewski
+// added capabilty to run on StEvent, use se-method, see macros/ for example
+//
 // Revision 1.2  2005/09/23 01:30:11  jwebb
 // Tower peds now added  if option is set.
 //
