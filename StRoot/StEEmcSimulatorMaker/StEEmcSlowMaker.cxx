@@ -1,22 +1,18 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 1.3 2005/09/23 17:23:01 balewski Exp $
+// $Id: StEEmcSlowMaker.cxx,v 1.4 2006/08/07 18:50:11 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
 #include <TRandom.h>
 
-#include "StEEmcSlowMaker.h"
-
-#include "StMuDSTMaker/COMMON/StMuEvent.h"
-#include "StMuDSTMaker/COMMON/StMuDst.h"
-#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
-
-#include <StMessMgr.h>
+#include "StEventTypes.h"
+#include "StMuDSTMaker/COMMON/StMuTypes.hh"
 
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 
+#include "StEEmcSlowMaker.h"
 
 ClassImp(StEEmcSlowMaker)
 
@@ -24,11 +20,9 @@ ClassImp(StEEmcSlowMaker)
 //________________________________________________
 StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) : StMaker(self){
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
-  assert(mMuDstMaker);
   eeDb=0;
   mHList=0;
   nInpEve=0; 
-  //  printf("constr of calib =%s=\n",GetName());
   memset(hA,0,sizeof(hA));
 
   /// By default, we do not add a pedestal offset
@@ -40,6 +34,8 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) 
   /// By default, overwrite ADC in muDst
   mOverwrite = true;
 
+  /// By default, source is MuDst
+  mSource = kMuDst;
 }
 
 
@@ -69,36 +65,27 @@ Int_t StEEmcSlowMaker::Init(){
 void StEEmcSlowMaker::InitHisto(){
 
   char tt1[100], tt2[500];
-  TH1F *h;
-  TH2F *h2;
-
   int sectID=5;
 
   sprintf(tt1,"mm");
   sprintf(tt2,"freq vs. sector ID; sector ID");
-  h=new TH1F(tt1,tt2,20,-0.5,19.5);
-  hA[12]=h;
+  hA[12]=new TH1F(tt1,tt2,20,-0.5,19.5);
   
   sprintf(tt1,"PreADC");
   sprintf(tt2,"Revised ADC for Pre/Post Scint.");
-  h=new TH1F(tt1,tt2,100,0,200.);
-  hA[0]=h;
+  hA[0]=new TH1F(tt1,tt2,100,0,200.);
   
   sprintf(tt1,"Pre2ADC");
   sprintf(tt2,"Initial ADC for Pre/Post Scint.");
-  h=new TH1F(tt1,tt2,100,0,200.);
-  hA[1]=h;
+  hA[1]=new TH1F(tt1,tt2,100,0,200.);
   
   sprintf(tt1,"SMDADC");
   sprintf(tt2,"Revised ADC for SMD Strips");
-  h=new TH1F(tt1,tt2,100,0,200.);
-  hA[2]=h;
+  hA[2]=new TH1F(tt1,tt2,100,0,200.);
 
   sprintf(tt1,"SMD2ADC");
   sprintf(tt2,"Initial ADC for SMD Strips");
-  h=new TH1F(tt1,tt2,100,0,200.);
-  hA[3]=h;
-
+  hA[3]=new TH1F(tt1,tt2,100,0,200.);
 
   hA[4]=new TH1F("hADCtow","Initial ADC for towers",512+32,-32.,512.);
   hA[5]=new TH1F("hADCtow2","Finial ADC fot towers",512+32,-32.,512.);
@@ -106,19 +93,16 @@ void StEEmcSlowMaker::InitHisto(){
   //..................
   sprintf(tt1,"adc%02d",sectID);
   sprintf(tt2," Adc vs, strip ID, sector=%02d; strip ID; ADC ",sectID);
-  h2=new TH2F(tt1,tt2,30,0,300,100,0,200.);
-  hA[20]=(TH1F*)h2;
+  hA[20]=new TH2F(tt1,tt2,30,0,300,100,0,200.);
 
   sprintf(tt1,"ADCvsstr");
   sprintf(tt2," Adc vs, strip ID; strip ID; ADC ");
-  h2=new TH2F(tt1,tt2,60,0,300,100,0,200.);
-  hA[19]=(TH1F*)h2;
+  hA[19]=new TH2F(tt1,tt2,60,0,300,100,0,200.);
 
   // add histos to the list (if provided)
-  int i;
-  if(mHList) {
-    for(i=0;i<mxH;i++) {
-      if(hA[i]==0) continue;
+  if (mHList) {
+    for (int i = 0; i < mxH; ++i) {
+      if (hA[i] == 0) continue;
       mHList->Add(hA[i]);
     }
   }
@@ -148,29 +132,74 @@ Int_t StEEmcSlowMaker::Finish(){
 Int_t StEEmcSlowMaker::Make(){
   nInpEve++;
 
-  gMessMgr->Message("","D") <<GetName()<<"::Make() is called , iEve"<<nInpEve<<endm;
-  
-  /// Access to muDst .......................
-  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
-  if (!emc) { 
-    gMessMgr->Message("","D") <<"No EMC data for this event"<<endm;    
-    return kStOK;
-  }
+  gMessMgr->Debug() << GetName() << "::Make() is called , iEve" << nInpEve << endm;
   
   mKSigma = eeDb -> KsigOverPed;
 
-  /// Run slow simulator on towers
-  MakeTow(emc);
-  /// Run slow simulator on pre/postshower
-  MakePre(emc);
-  /// Run slow simulator on smd
-  MakeSMD(emc);
- 
+  switch (mSource) {
+  case kMuDst:
+    /// Access to muDst .......................
+    {
+      if (!GetInputDS("MuDst")) {
+	gMessMgr->Debug("No MuDst");
+	return kStOk;
+      }
+
+      StMuEmcCollection* emc = StMuDst::muEmcCollection();
+      if (!emc) {
+	gMessMgr->Debug("No StMuEmcCollection");
+	return kStOk;
+      }
+
+      /// Run slow simulator on towers
+      MakeTower(emc);
+
+      /// Run slow simulator on pre/postshower
+      MakePrePost(emc);
+
+      /// Run slow simulator on smd
+      MakeSMD(emc);
+    }
+    break;
+
+  case kStEvent:
+    /// Acces to StEvent .......................
+    {
+      StEvent* event = (StEvent*)GetInputDS("StEvent");
+
+      if (!event) {
+	gMessMgr->Debug("No StEvent");
+	return kStOk;
+      }
+
+      StEmcCollection* emc = event->emcCollection();
+
+      if (!emc) {
+	gMessMgr->Debug("No StEmcCollection");
+	return kStOk;
+      }
+
+      /// Run slow simulator on towers
+      MakeTower(emc);
+
+      /// Run slow simulator on pre/postshower
+      MakePrePost(emc);
+
+      /// Run slow simulator on smd
+      MakeSMD(emc);
+    }
+    break;
+
+  default:
+    gMessMgr->Debug() << "Unknown source type " << mSource << " for this event" << endm;
+    break;
+  }
+
   return  kStOK;
 
 }
 // ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakeTow( StMuEmcCollection *emc )
+void StEEmcSlowMaker::MakeTower( StMuEmcCollection *emc )
 {
 
   if ( !mAddPed && !mSmearPed ) return;
@@ -208,7 +237,7 @@ void StEEmcSlowMaker::MakeTow( StMuEmcCollection *emc )
 }
 
 // ----------------------------------------------------------------------------
-void StEEmcSlowMaker::MakePre( StMuEmcCollection *emc ){
+void StEEmcSlowMaker::MakePrePost( StMuEmcCollection *emc ){
 
   for ( Int_t i = 0; i < emc->getNEndcapPrsHits(); i++ ) {
 
@@ -298,7 +327,7 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
 
         if ( mHList ) { 
           hA[12]->Fill(x->sec);
-          if(x->sec==5) ((TH2F*) hA[20])->Fill(x->strip,adc); 
+          if(x->sec==5) hA[20]->Fill(x->strip,adc); 
           hA[3]->Fill(adc);
         }
 
@@ -328,7 +357,7 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
       Int_t   NUadc     = (Int_t)(newadc + 0.5 + ped );
       
       if (adc>0 && mHList ) {
-        ((TH2F*) hA[19]) ->Fill(x->strip,NUadc);
+        hA[19]->Fill(x->strip,NUadc);
         hA[2]->Fill(NUadc);
       }
       
@@ -342,7 +371,202 @@ void StEEmcSlowMaker::MakeSMD( StMuEmcCollection *emc ) {
  
 }
 
+void StEEmcSlowMaker::setSource(const Char_t* name)
+{
+  if (strcmp(name, "MuDst") == 0)
+    mSource = kMuDst;
+  else if (strcmp(name, "StEvent") == 0)
+    mSource = kStEvent;
+  else {
+    gMessMgr->Warning("Source must be \"MuDst\" or \"StEvent\"");
+  }
+}
+
+void StEEmcSlowMaker::MakeTower(StEmcCollection* emc)
+{
+  StEmcDetector* det = emc->detector(kEndcapEmcTowerId);
+  if (!det) {
+    gMessMgr->Debug("No kEndcapEmcTowerId");
+    return;
+  }
+
+  // StEvent ranges: sector=1-12, sub=1-5, eta=1-12
+  for(UInt_t sector = 1; sector <= det->numberOfModules(); ++sector) {
+    StSPtrVecEmcRawHit& hits = det->module(sector)->hits();
+    for (UInt_t i = 0; i < hits.size(); ++i) {
+      StEmcRawHit* hit = hits[i];
+      if (mHList) hA[4]->Fill(hit->adc());
+      // Database ranges: sector=1-12, sub=A-E, eta=1-12, type=T,P-R; Slow method
+      const EEmcDbItem* x = eeDb->getTile(sector, 'A'+hit->sub()-1, hit->eta(), 'T');
+      if (!x) continue;
+      Float_t adc = hit->adc();
+      if (mAddPed) adc += x->ped;
+      if (mSmearPed) adc += gRandom->Gaus(0, x->sigPed);
+      if (adc < 0) adc = 0;
+      if (adc > 4095) adc = 4095;
+      hit->setAdc(UInt_t(adc));
+      if (mHList) hA[5]->Fill(adc);
+    }
+  }
+}
+
+void StEEmcSlowMaker::MakePrePost(StEmcCollection* emc)
+{
+  StEmcDetector* det = emc->detector(kEndcapEmcPreShowerId);
+  if (!det) {
+    gMessMgr->Debug("No kEndcapEmcPreShowerId");
+    return;
+  }
+
+  for (UInt_t sector =1; sector <= det->numberOfModules(); ++sector) {
+    StSPtrVecEmcRawHit& hits = det->module(sector)->hits();
+    for(UInt_t i = 0; i < hits.size(); ++i) {
+      StEmcRawHit* hit = hits[i];
+      Char_t sub = 'A'+(hit->sub()-1)%5;
+
+      // Layer: 'P'=preshower1, 'Q'=preshower2, 'R'=postshower
+      Char_t layer = 'P'+(hit->sub()-1)/5;
+
+      // Database ranges: sector=1-12, sub=A-E, eta=1-12, type=T,P-R; Slow method
+      const EEmcDbItem* x = eeDb->getTile(sector, sub, hit->eta(), layer);
+      if (!x) continue;
+
+      // Drop broken channels
+      if (mDropBad && x->fail) continue;
+      Float_t adc = hit->adc();
+      Float_t energy = adc / x->gain; // GEANT energy deposit (GeV)
+      Float_t newadc = adc;
+      if(adc > 0) {
+	if (mHList) hA[1]->Fill(adc);
+
+	/// Addition of Poisson fluctuations and Gaussian 
+	/// 1 p.e. resolution
+	Float_t mipval = energy / Pmip2ene;
+	Float_t avgpe  = mipval * Pmip2pe;
+	Float_t Npe    = gRandom->Poisson(avgpe);
+
+	if (Npe > 0) {
+	  /// Determine number of photoelectrons
+	  Float_t sigmape   = sqrt(Npe) * sig1pe;
+	  Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
+
+	  /// Determine new ADC value
+	  newadc = smearedpe * mip2ene * x->gain / Pmip2pe;
+	}
+      } // non-zero ADC on input
+
+      /// Lookup pedestal in database (possibly zero)
+      Float_t ped = mAddPed ? x->ped : 0;
+
+      /// Smear the pedestal
+      if (mSmearPed) ped = gRandom->Gaus(ped, x->sigPed);
+
+      /// add signal & pedestal back
+      Int_t NUadc = Int_t(newadc + 0.5 + ped);
+
+      if (adc > 0 && mHList) hA[0]->Fill(NUadc); //??
+
+      // printf("out: NUadc=%d \n",NUadc);
+      ///
+      /// If we've made it here, overwrite the muDst
+      ///
+      if (mOverwrite) hit->setAdc(NUadc);
+    }
+  }
+}
+
+void StEEmcSlowMaker::MakeSMD(StEmcCollection* emc)
+{
+  for (Char_t plane = 'U'; plane <= 'V'; ++plane) {
+    StEmcDetector* det = 0;
+    switch (plane) {
+    case 'U':
+      det = emc->detector(kEndcapSmdUStripId);
+      if (!det) {
+	gMessMgr->Debug("No kEndcapSmdUStripId");
+	continue;
+      }
+      break;
+    case 'V':
+      det = emc->detector(kEndcapSmdVStripId);
+      if (!det) {
+	gMessMgr->Debug("No kEndcapSmdVStripId");
+	continue;
+      }
+      break;
+    }
+
+    assert(det);
+
+    for (UInt_t sector = 1; sector <= det->numberOfModules();++sector) {
+      StSPtrVecEmcRawHit& hits = det->module(sector)->hits();
+      for (UInt_t i = 0; i < hits.size(); ++i) {
+	StEmcRawHit* hit = hits[i];
+	Int_t strip = hit->eta();
+	// Database ranges: sector=1-12, plane=U-V, strip=1-288
+	const EEmcDbItem* x = eeDb->getByStrip(sector, plane, strip);
+	if (!x) continue;
+
+	/// Drop broken channels
+	if (mDropBad && x->fail) continue;
+
+	Float_t adc    = hit->adc();
+	Float_t energy = adc / x->gain; // (GeV) Geant energy deposit 
+	Float_t newadc = adc;
+
+	if(adc > 0) {
+
+	  if (mHList) { 
+	    hA[12]->Fill(x->sec);
+	    if (x->sec == 5) hA[20]->Fill(x->strip, adc); 
+	    hA[3]->Fill(adc);
+	  }
+
+	  // Addition of Poisson fluctuations and 
+	  // Gaussian 1 p.e. resolution
+	  Float_t mipval = energy / mip2ene;
+	  Float_t avgpe  = mipval * mip2pe[strip];
+	  Float_t Npe    = gRandom->Poisson(avgpe);
+
+	  if (Npe > 0) {
+
+	    /// Determine number of photoelectrons
+	    Float_t sigmape   = sqrt(Npe) * sig1pe;
+	    Float_t smearedpe = gRandom->Gaus(Npe, sigmape);
+
+	    /// Determine new ADC value
+	    newadc = smearedpe * mip2ene * x->gain / mip2pe[strip];
+	  }
+	}
+
+	/// Lookup pedestal in database (possibly zero)
+	Float_t ped = mAddPed ? x->ped : 0;
+
+	/// Smear the pedestal
+	if (mSmearPed) ped = gRandom->Gaus(ped, x->sigPed);
+
+	/// Add signal & pedestal back
+	Int_t NUadc = Int_t(newadc + 0.5 + ped);
+
+	if (adc > 0 && mHList) {
+	  hA[19]->Fill(x->strip, NUadc);
+	  hA[2]->Fill(NUadc);
+	}
+
+	///
+	/// If we've made it here, overwrite the muDst
+	///
+	if (mOverwrite) hit->setAdc(NUadc);
+
+      } // Loop over 1 plane
+    }
+  }
+}
+
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 1.4  2006/08/07 18:50:11  balewski
+// added capabilty to run on StEvent, use se-method, see macros/ for example
+//
 // Revision 1.3  2005/09/23 17:23:01  balewski
 // now peds are added also to ADC of zero
 // fixed bug in ETOW ped smearing
