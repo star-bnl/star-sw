@@ -443,7 +443,11 @@ Int_t TTreeIter::Next(Int_t entry)
        ans +=b->GetEntry(ientry); 
      }
 #endif //0
+#ifdef R__ASSERT
+  R__ASSERT(!IsCorrupted());
+#else
   Assert(!IsCorrupted());
+#endif
   if (ans) return ans;
   fEntry=0;
   return 0;
@@ -455,7 +459,11 @@ Bool_t TTreeIter::Notify()
   const char *tyName;
   Int_t units,brType;
   void  *add;
+#ifdef R__ASSERT
+  R__ASSERT(!IsCorrupted());
+#else
   Assert(!IsCorrupted());
+#endif
   fTree->SetBranchStatus("*",0);
   fBraList.Clear();
   int n = fMemList.GetEntriesFast();
@@ -463,7 +471,11 @@ Bool_t TTreeIter::Notify()
     TTreeIterMem *t = (TTreeIterMem*)fMemList.UncheckedAt(i);
     fTree->SetBranchStatus(t->GetName(),1);
     TBranch *b = fTree->GetBranch(t->GetName());
+#ifdef R__ASSERT
+    R__ASSERT(b);
+#else
     Assert(b);
+#endif
     GetInfo(b,tyName,units,add,brType);
     void **pddr = t->GetMem();
       if (units > t->fUnits) {
@@ -507,7 +519,11 @@ Bool_t TTreeIter::Notify()
   for (int i=0;i<n;i++) {
     TTreeIterMem *t = (TTreeIterMem*)fMemList.UncheckedAt(i);
     TBranch *b = fTree->GetBranch(t->GetName());
+#ifdef R__ASSERT
+    R__ASSERT(b);
+#else
     Assert(b);
+#endif
     fBraList.Add(b);
   }
   return 0;
@@ -517,13 +533,22 @@ const char *TTreeIter::IsCorrupted() const
 {
 
   int n = fMemList.GetEntriesFast();
-  Assert(n>=0 && n<10000);
+#ifdef R__ASSERT
+    R__ASSERT(n>=0 && n<10000);
+#else
+    Assert(n>=0 && n<10000);
+#endif
   for (int i=0;i<n;i++) {
     TTreeIterMem *t = (TTreeIterMem*)fMemList.UncheckedAt(i);
+#ifdef R__ASSERT
+    R__ASSERT(t);
+    R__ASSERT(t->fMem);
+    R__ASSERT(t->fSize>0);
+#else
     Assert(t);
     Assert(t->fMem);
     Assert(t->fSize>0);
-
+#endif
     char *perev = t->fMem+t->fSize;
     if (strcmp(perev,"Perev") ==0 ) continue;
     Error("IsCorrupted","Branch=%s Units=%d Mem=%p ***\n",t->GetName(),fUnits,perev);
@@ -614,7 +639,13 @@ Int_t  TTreeIter::TypeCode(const char *typeName)
    return 0;
 } 
 //______________________________________________________________________________
-void TTreeIter::Streamer(TBuffer &) {Assert(0);}
+void TTreeIter::Streamer(TBuffer &) {
+#ifdef R__ASSERT
+  R__ASSERT(0);
+#else
+  Assert(0);
+#endif
+}
 //_____________________________________________________________________________
 Int_t TTreeIter::AddFile(const Char_t *file)
 {

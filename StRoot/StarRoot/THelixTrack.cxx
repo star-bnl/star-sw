@@ -647,7 +647,11 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       }
       ss += dstep; 
     }
+#ifdef R__ASSERT
+    R__ASSERT(iter);
+#else
     Assert(iter);
+#endif
     step[0]+=ss;
     fDCA[0] = ((point[0]-xnear[0])*(-pnear[1]) +(point[1]-xnear[1])*(pnear[0]))/fCosL;
     if (fRho<0) fDCA[0] = - fDCA[0];
@@ -1493,7 +1497,7 @@ void  TCircleFitter::AddZ(double z,double ez)
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.23 2006/06/28 18:39:07 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.24 2006/08/07 20:39:48 fisyak Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -1509,6 +1513,9 @@ void  TCircleFitter::AddZ(double z,double ez)
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.24  2006/08/07 20:39:48  fisyak
+ * Assert => R__ASSERT
+ *
  * Revision 1.23  2006/06/28 18:39:07  perev
  * cos(dip)**4 added to Dca(...) to account z err in the nearest point
  *
