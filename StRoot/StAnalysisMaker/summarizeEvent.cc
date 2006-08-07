@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.14 2006/07/03 04:13:37 fine Exp $
+ * $Id: summarizeEvent.cc,v 2.15 2006/08/07 20:49:57 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.15  2006/08/07 20:49:57  fisyak
+ * Add Event Id, correct Ftpc bad hit
+ *
  * Revision 2.14  2006/07/03 04:13:37  fine
  * new Job tracking Db activated
  *
@@ -64,15 +67,16 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.14 2006/07/03 04:13:37 fine Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.15 2006/08/07 20:49:57 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
 {
   static const UInt_t NoFitPointCutForGoodTrack = 15;
     LOG_QA << "StAnalysisMaker,  Reading Event: " << nevents
-		       << "  Type: " << event.type()
-		       << "  Run: " << event.runId() << endm;
+	   << "  Type: " << event.type()
+	   << "  Run: " << event.runId() 
+	   << "  EventId: " << event.id() <<   endm;
     
     StSPtrVecTrackNode& trackNode = event.trackNodes();
     UInt_t nTracks = trackNode.size();
@@ -281,58 +285,74 @@ summarizeEvent(StEvent& event, const int &nevents)
              }
 	       }
       }
-  }
-  LOG_QA << "# SVT hits:           " << TotalNoOfSvtHits 
-	      << ":\tBad ones(flag >3): " << noBadSvtHits 
-	      << ":\tUsed in Fit:       " << noSvtHitsUsedInFit << endm;
+    }
+    LOG_QA << "# SVT hits:          " << TotalNoOfSvtHits 
+		       << ":\tBad ones(flag >3): " << noBadSvtHits 
+		       << ":\tUsed in Fit:      " << noSvtHitsUsedInFit << endm;
     
-  UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
-  StSsdHitCollection* ssdhits = event.ssdHitCollection();
-  if (ssdhits) {
-     StSsdHit* hit;
-     for (unsigned int ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
-        StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
-        if (!ladderhits) continue;
-        for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
-           StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
-           if (!waferhits) continue;
-           const StSPtrVecSsdHit& hits = waferhits->hits();
-           for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
-              hit = static_cast<StSsdHit*>(*it);
-              if (!hit) continue;
-              TotalNoOfSsdHits++;
-              if (hit->flag() >3) noBadSsdHits++;
-             if (hit->usedInFit()) noSsdHitsUsedInFit++;
-           }
-        }
-     }
-  }
-  LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
-	      << ":\tBad ones(flag>3): " << noBadSsdHits 
-	      << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
+    UInt_t TotalNoOfSsdHits = 0, noBadSsdHits = 0, noSsdHitsUsedInFit = 0;
+    StSsdHitCollection* ssdhits = event.ssdHitCollection();
+    if (ssdhits) {
+      StSsdHit* hit;
+      for (unsigned int ladder=0; ladder<ssdhits->numberOfLadders(); ++ladder) {
+	StSsdLadderHitCollection* ladderhits = ssdhits->ladder(ladder);
+	if (!ladderhits) continue;
+	for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	  StSsdWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+	  if (!waferhits) continue;
+	  const StSPtrVecSsdHit& hits = waferhits->hits();
+	  for (const_StSsdHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	    hit = static_cast<StSsdHit*>(*it);
+	    if (!hit) continue;
+	    TotalNoOfSsdHits++;
+	    if (hit->flag() >3) noBadSsdHits++;
+	    if (hit->usedInFit()) noSsdHitsUsedInFit++;
+	  }
+	}
+      }
+    }
+    LOG_QA << "# SSD hits:          " << TotalNoOfSsdHits 
+		       << ":\tBad ones(flag>3): " << noBadSsdHits 
+		       << ":\tUsed in Fit:      " << noSsdHitsUsedInFit << endm;
     
-  UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
-  StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
-  if (ftpchits) {
-     StFtpcHit* hit;
-     for (unsigned int plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
-        StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
-        if (!planehits) continue;
-        for (unsigned int sector=0; sector<planehits->numberOfSectors(); ++sector) {
-           StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
-           if (!sectorhits) continue;
-           const StSPtrVecFtpcHit& hits = sectorhits->hits();
-           for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
-              hit = static_cast<StFtpcHit*>(*it);
-              if (!hit) continue;
-              TotalNoOfFtpcHits++;
-              if (hit->flag() && (1 << 7)) noBadFtpcHits++;
-              if (hit->usedInFit()) noFtpcHitsUsedInFit++;
-           }
-        }
-     }
-  }
-  LOG_QA << "# FTPC hits:       " << TotalNoOfFtpcHits 
-         << ":\tBad ones(bit7): " << noBadFtpcHits 
-	      << ":\tUsed in Fit:    " << noFtpcHitsUsedInFit << endm;    
+    UInt_t TotalNoOfFtpcHits = 0, noBadFtpcHits = 0, noFtpcHitsUsedInFit = 0;
+    StFtpcHitCollection* ftpchits = event.ftpcHitCollection();
+    if (ftpchits) {
+      StFtpcHit* hit;
+      for (unsigned int plane=0; plane<ftpchits->numberOfPlanes(); ++plane) {
+	StFtpcPlaneHitCollection* planehits = ftpchits->plane(plane);
+	if (!planehits) continue;
+	for (unsigned int sector=0; sector<planehits->numberOfSectors(); ++sector) {
+	  StFtpcSectorHitCollection* sectorhits = planehits->sector(sector);
+	  if (!sectorhits) continue;
+	  const StSPtrVecFtpcHit& hits = sectorhits->hits();
+	  for (const_StFtpcHitIterator it=hits.begin(); it!=hits.end(); ++it) {
+	    hit = static_cast<StFtpcHit*>(*it);
+	    if (!hit) continue;
+	    TotalNoOfFtpcHits++;
+	    /*
+	      bit0:unfolded
+	      bit1:unfold failed
+	      bit2:saturated
+	      bit3:bad shape
+	      bit4:cut off
+	      bit5:tracked
+	      bit6:global coords
+	      bit7:don't use for tracking
+	      
+	      I assume good hits have bit 0 and 5 (if included on a track) on
+	      
+	      Joern and Marcus - is this correct?
+	      
+	      Janet
+	     */
+	    if (! ( hit->flag() & 1 || hit->flag() & (1 << 5))) noBadFtpcHits++;
+	    else if (hit->flag() & (1 << 5))  noFtpcHitsUsedInFit++;
+	  }
+	}
+      }
+    }
+    LOG_QA << "# FTPC hits:         " << TotalNoOfFtpcHits 
+		       << ":\tBad ones(!bit0): " << noBadFtpcHits 
+		       << ":\tUsed in Fit:      " << noFtpcHitsUsedInFit << endm;
 }
