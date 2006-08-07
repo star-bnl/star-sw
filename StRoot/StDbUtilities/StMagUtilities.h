@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.34 2006/07/28 04:58:32 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.35 2006/08/07 20:38:13 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.35  2006/08/07 20:38:13  fisyak
+ * TMatrix is typedef to TMatrixT<Float_t> now, with ROOT 5,12
+ *
  * Revision 1.34  2006/07/28 04:58:32  jhthomas
  * Add code by GeneVB to update the ShortedRing tables every time the DB changes.
  *
@@ -105,7 +108,7 @@
 
 #include "TSystem.h"
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
-
+#include "TMatrix.h"
 #define  nZ               57            // Standard STAR B field Map. Number of Z points in table
 #define  nR               28            // Number of R points in table
 #define  nPhi             37            // Number of Phi points in table
@@ -149,7 +152,7 @@ class StDetectorDbTpcVoltages ;
 class StDetectorDbTpcOmegaTau ;
 class StDetectorDbGridLeak    ;
 
-class TMatrix ;
+//class TMatrix ;
 
 class StMagUtilities {
 

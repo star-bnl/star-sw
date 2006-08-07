@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.67 2006/07/28 04:59:04 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.68 2006/08/07 20:38:13 fisyak Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.68  2006/08/07 20:38:13  fisyak
+ * TMatrix is typedef to TMatrixT<Float_t> now, with ROOT 5,12
+ *
  * Revision 1.67  2006/07/28 04:59:04  jhthomas
  * Add code by GeneVB to update the ShortedRing tables every time the DB changes.
  *
@@ -284,7 +287,6 @@ To do:  <br>
 #include "StMagUtilities.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "TMatrix.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TF1.h"
