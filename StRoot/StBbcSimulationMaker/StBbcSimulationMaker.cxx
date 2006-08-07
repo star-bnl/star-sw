@@ -322,9 +322,17 @@ Int_t StBbcSimulationMaker::Make()
 /// Make - this method is called in loop for each event
 
  TDataSet* ds= GetInputDS("geant");
- Assert(ds);
+#ifdef  R__ASSERT
+ R__ASSERT(ds);
+#else
+ Assert(ds):
+#endif
  StEvent* event = (StEvent*)GetInputDS("StEvent");
- Assert(event);
+#ifdef  R__ASSERT
+ R__ASSERT(event);
+#else
+ Assert(event):
+#endif
  St_g2t_ctf_hit* g2t_bbc_hit = (St_g2t_ctf_hit*)ds->Find("g2t_bbc_hit");
 
  if (g2t_bbc_hit) 
