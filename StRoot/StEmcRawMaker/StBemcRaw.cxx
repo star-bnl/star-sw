@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.18 2006/08/07 01:58:06 kocolosk Exp $
+// $Id: StBemcRaw.cxx,v 1.19 2006/08/07 02:29:16 kocolosk Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.19  2006/08/07 02:29:16  kocolosk
+// one more change to allow saving CAP==127||128 via control table
+//
 // Revision 1.18  2006/08/07 01:58:06  kocolosk
 // save hits from other CAPs using control table, can't comment out code b/c ADCtoEMaker needed it
 //
@@ -91,7 +94,7 @@ StBemcRaw::StBemcRaw():TObject()
     mTables = new StBemcTables();
     mControlADCtoE = new controlADCtoE_st();
     Int_t   calib[]      = {1, 1, 1, 1, 0, 0, 0, 0};
-    Int_t   pedSub[]     = {1, 0, 0, 0, 0, 0, 0, 0};
+    Int_t   pedSub[]     = {1, 2, 2, 2, 0, 0, 0, 0};
     Float_t cut[]        = {-1, -1, 1.5, 1.5, -1, -1, -1, -1};
     Int_t   cutType[]    = {0, 0, 1, 1, 0, 0, 0, 0};
     Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -616,8 +619,10 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
         mTables->getPedestal(det,id,CAP,PEDESTAL,RMS);
         // do not consider hits wih capacitor number CAP1 and CAP2 for
         // PSD and SMD as valid hits
-        if(det>=BPRS && !mSaveAllStEvent)
-            if(CAP==CAP1 || CAP==CAP2)
+	// for 2006 keep these hits by setting DeductPedestal == 2
+        if(mControlADCtoE->DeductPedestal[det-1]==1)
+		if(det>=BPRS && !mSaveAllStEvent)
+	            if(CAP==CAP1 || CAP==CAP2)
                 return kPed;
     }
 
