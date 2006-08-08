@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.503 2006/06/06 18:58:16 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.504 2006/08/08 19:06:44 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -35,8 +35,6 @@
 #endif
 
 // NoChainOptions -> Number of chain options auto-calculated
-Int_t NoChainOptions = 0;
-St_Bfc *chainOpt = 0;
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
@@ -67,13 +65,13 @@ void StBFChain::Setup(Int_t mode) {
   TString cmd(".L ");
   cmd += file;
   gInterpreter->ProcessLine(cmd);
-  chainOpt  = (St_Bfc *) gInterpreter->Calc("CreateTable()");
+  fchainOpt  = (St_Bfc *) gInterpreter->Calc("CreateTable()");
   cmd = ".U ";
   cmd += file;
   gInterpreter->ProcessLine(cmd);
-  assert(chainOpt);
-  NoChainOptions = chainOpt->GetNRows();
-  fBFC = chainOpt->GetTable();
+  assert(fchainOpt);
+  fNoChainOptions = fchainOpt->GetNRows();
+  fBFC = fchainOpt->GetTable();
   FDate  = FTime  = 0;
   FDateS = FTimeS = 0;
 }
@@ -102,7 +100,7 @@ Int_t StBFChain::Load()
     if (Base.BeginsWith("lib"))  Base.ReplaceAll("lib","");
     LoadedLib->SetString(Base);
   }
-  for (i = 1; i< NoChainOptions; i++) { // Load Libraries if any
+  for (i = 1; i< fNoChainOptions; i++) { // Load Libraries if any
     if (fBFC[i].Flag) {
       if (strlen(fBFC[i].Libs) > 0) {
 	TObjArray Libs;
@@ -173,7 +171,7 @@ Int_t StBFChain::Instantiate()
 {
   Int_t status = kStOk;
   Int_t i, iFail=0;
-  for (i = 1; i< NoChainOptions; i++) {// Instantiate Makers if any
+  for (i = 1; i< fNoChainOptions; i++) {// Instantiate Makers if any
     if (! fBFC[i].Flag) continue;
     if (strlen(fBFC[i].Maker) == 0) continue;
     TString maker(fBFC[i].Maker);
@@ -403,7 +401,8 @@ Int_t StBFChain::Instantiate()
       LOG_QA << "StBFChain::Instantiate Setting the Parameters for the Association Maker" << endm;
 
       TString cmd("");
-      if (GetOption("ITTF")) cmd = Form ("((StAssociationMaker *) %p)->useInTracker();",mk);
+      if (GetOption("ITTF") || GetOption("useInTracker")) 
+	cmd = Form ("((StAssociationMaker *) %p)->useInTracker();",mk);
       cmd += "StMcParameterDB* parameterDB = StMcParameterDB::instance();";
       // TPC
       cmd += "parameterDB->setXCutTpc(.5);"; // 5 mm
@@ -680,7 +679,7 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
-
+#ifdef YF_CLeanUp
     if (maker == "St_trg_Maker") {
       Int_t mode = 0;
       if (! GetOption("alltrigger")){
@@ -692,6 +691,7 @@ Int_t StBFChain::Instantiate()
       }
       if (mode) mk->SetMode(mode);
     }
+#endif
     if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) &&
 	GetOption("Simu"))  mk->SetMode(-10);
     if (maker == "StTpcDbMaker"){
@@ -876,7 +876,7 @@ Int_t StBFChain::Finish()
 {
   if (!fBFC) return kStOK;
   int ians = StMaker::Finish();
-  SafeDelete(chainOpt);
+  SafeDelete(fchainOpt);
   fBFC = 0;
   if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
   return ians;
@@ -960,7 +960,7 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
   TString Tag = *tag;
   Tag.ToLower();
   TString opt, nopt;
-  for (Int_t i = 1; i< NoChainOptions; i++) {
+  for (Int_t i = 1; i< fNoChainOptions; i++) {
     opt = TString(fBFC[i].Key); //check nick name
     opt.ToLower();
     nopt = TString("-");
@@ -1019,7 +1019,7 @@ void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
 /// Returns chain-option state (on/off)
 Bool_t StBFChain::GetOption(const Int_t k) const
 {
-  return (k>0 && k <NoChainOptions) ? fBFC[k].Flag : kFALSE;
+  return (k>0 && k <fNoChainOptions) ? fBFC[k].Flag : kFALSE;
 }
 
 /// Returns the comment string associated to an option
@@ -1080,7 +1080,7 @@ void StBFChain::SetFlags(const Char_t *Chain)
   Int_t k=0;
   if (tChain == "") {
     gMessMgr->QAInfo() << "\tPossible Chain Options are:" << endm;
-    for (k=0;k<NoChainOptions;k++)
+    for (k=0;k<fNoChainOptions;k++)
     gMessMgr->QAInfo()
       << Form(" %3d:[-]%-13s:%-12s:%-12s:%-12s :%s :%s :%s"
 	      ,k,fBFC[k].Key,fBFC[k].Name,fBFC[k].Chain,fBFC[k].Opts,fBFC[k].Maker,fBFC[k].Libs,fBFC[k].Comment)
@@ -1138,9 +1138,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	    if (! Tag.CompareTo(DbAlias[i].tag,TString::kIgnoreCase)) {
 	      found = i;
 	      memcpy (&row.Key, Tag.Data(), strlen(Tag.Data()));
-	      chainOpt->AddAt(&row);
-	      NoChainOptions = chainOpt->GetNRows();
-	      fBFC = chainOpt->GetTable();
+	      fchainOpt->AddAt(&row);
+	      fNoChainOptions = fchainOpt->GetNRows();
+	      fBFC = fchainOpt->GetTable();
 	      break;
 	    }
 	    TString dbTag("r");
@@ -1148,9 +1148,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	    if (! Tag.CompareTo(dbTag,TString::kIgnoreCase)) {
 	      found = i;
 	      memcpy (&row.Key, Tag.Data(), strlen(Tag.Data()));
-	      chainOpt->AddAt(&row);
-	      NoChainOptions = chainOpt->GetNRows();
-	      fBFC = chainOpt->GetTable();
+	      fchainOpt->AddAt(&row);
+	      fNoChainOptions = fchainOpt->GetNRows();
+	      fBFC = fchainOpt->GetTable();
 	      break;
 	    }
 	  }
@@ -1168,9 +1168,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	      memcpy (&row.Key, Tag.Data(), strlen(Tag.Data()));
 	      if (Tag.Contains("Maker")) memcpy (&row.Maker, Tag.Data(), strlen(Tag.Data()));
 	      memcpy (&row.Libs, Tag.Data(), strlen(Tag.Data()));
-	      chainOpt->AddAt(&row);
-	      NoChainOptions = chainOpt->GetNRows();
-	      fBFC = chainOpt->GetTable();
+	      fchainOpt->AddAt(&row);
+	      fNoChainOptions = fchainOpt->GetNRows();
+	      fBFC = fchainOpt->GetTable();
 	    }
 	    kgo = kOpt(Tag.Data(),kFALSE);
 	    if (kgo != 0) {
@@ -1221,9 +1221,9 @@ void StBFChain::SetFlags(const Char_t *Chain)
   }
   if (!GetOption("Eval") && GetOption("AllEvent"))  SetOption("Eval","-Eval,AllEvent");
   // Print set values
-  St_Bfc *Bfc = new St_Bfc("BFChain",NoChainOptions);
+  St_Bfc *Bfc = new St_Bfc("BFChain",fNoChainOptions);
   AddRunco(Bfc);
-  for (k = 1; k<NoChainOptions;k++) {
+  for (k = 1; k<fNoChainOptions;k++) {
     if (GetOption(k)) {
       gMessMgr->QAInfo() << Form("================== %4d %15s\tis ON \t: %s",
 				 k, (char *) fBFC[k].Key, (char *) fBFC[k].Comment) << endm;
@@ -1435,7 +1435,7 @@ void StBFChain::SetGeantOptions(){
 void StBFChain::SetDbOptions(){
   Int_t i;
   Int_t Idate=0,Itime=0;
-  for (i = 1; i < NoChainOptions; i++) {
+  for (i = 1; i < fNoChainOptions; i++) {
     if (fBFC[i].Flag && !strncmp(fBFC[i].Key ,"DbV",3)){
       gMessMgr->QAInfo() << "StBFChain::SetDbOptions  Found time-stamp " << fBFC[i].Key << " [" << fBFC[i].Comment << "]" << endm;
       (void) sscanf(fBFC[i].Comment,"%d/%d",&Idate,&Itime);
