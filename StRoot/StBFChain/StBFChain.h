@@ -37,12 +37,13 @@ class StBFChain : public StChain {
   Int_t               FTime;      // floating timestamp time (unused)
   Int_t               FDateS;     // floating timestamp date (DateTime)
   Int_t               FTimeS;     // floating timestamp time (DateTime)
-
+  Int_t               fNoChainOptions;
+  St_Bfc             *fchainOpt;
  public:
   StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE) :
-    StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut("") {}
+  StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0)  {}
   StBFChain(Int_t mode, const char *name="bfc",const Bool_t UseOwnHeader = kFALSE) :
-    StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut("") {}
+    StChain(name,UseOwnHeader),fTFile(0),fSetFiles(0),fInFile(""),fFileOut(""),fNoChainOptions(0), fchainOpt(0) {}
   void Setup(Int_t mode=1);
    virtual            ~StBFChain();
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
@@ -86,7 +87,7 @@ class StBFChain : public StChain {
    virtual const TString &GetFileOut() const {return *(&fFileOut);}
    virtual Long_t      ProcessLine(const char *line);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.35 2005/10/06 18:58:31 fisyak Exp $ built "__DATE__" "__TIME__ ;
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.36 2006/08/08 19:06:45 fisyak Exp $ built "__DATE__" "__TIME__ ;
        return cvs;
    }
    /// StBFChain control class
