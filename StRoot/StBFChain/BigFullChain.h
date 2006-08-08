@@ -310,6 +310,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"IdTruth"     ,""  ,"",""              ,"","","Enable IdTruth association in StAssociationMaker",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
+  {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
