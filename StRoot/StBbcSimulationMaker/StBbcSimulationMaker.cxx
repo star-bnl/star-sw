@@ -325,13 +325,13 @@ Int_t StBbcSimulationMaker::Make()
 #ifdef  R__ASSERT
  R__ASSERT(ds);
 #else
- Assert(ds):
+ Assert(ds);
 #endif
  StEvent* event = (StEvent*)GetInputDS("StEvent");
 #ifdef  R__ASSERT
  R__ASSERT(event);
 #else
- Assert(event):
+ Assert(event);
 #endif
  St_g2t_ctf_hit* g2t_bbc_hit = (St_g2t_ctf_hit*)ds->Find("g2t_bbc_hit");
 
