@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.6 2005/12/08 18:13:27 deph Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.7 2006/08/08 14:28:09 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.7  2006/08/08 14:28:09  deph
+ * fixed delete to delete allocated array
+ *
  * Revision 1.6  2005/12/08 18:13:27  deph
  * Made message length dynamic. We were bumping up against the 1024 limit in verbose mode.
  *
@@ -97,7 +100,7 @@ StDbWrappedMessenger::printMessage(const char* message, const char* levelString,
 
   sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
   mMessenger->Message(str,levelString);
-  delete str;
+  delete [] str;
 }
 
 
