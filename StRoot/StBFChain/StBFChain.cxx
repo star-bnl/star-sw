@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.504 2006/08/08 19:06:44 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.505 2006/08/08 19:11:25 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -679,7 +679,7 @@ Int_t StBFChain::Instantiate()
       cmd += "Ximk->SetXiLanguageUsage(5);";
       ProcessLine(cmd);
     }
-#ifdef YF_CLeanUp
+#ifndef YF_CLeanUp
     if (maker == "St_trg_Maker") {
       Int_t mode = 0;
       if (! GetOption("alltrigger")){
