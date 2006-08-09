@@ -64,18 +64,19 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	assert(hit);
 
 	if (hit->detector()!=kIstId) continue;
+	if(hit->extraByte0()==1){
+	  cout <<"retrieve detector"<<endl;
+	  StiDetector* detector = _detector->getDetector(hit->layer()-1, hit->ladder()-1);
+	  if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
+	  assert(detector);
+	  cout <<"add hit to detector:\t"<<detector->getName()<<endl;
 	
-	cout <<"retrieve detector"<<endl;
-	StiDetector* detector = _detector->getDetector(hit->layer()-1, hit->ladder()-1);
-	if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
-	assert(detector);
-	cout <<"add hit to detector:\t"<<detector->getName()<<endl;
-	
-	StiHit * stiHit = _hitFactory->getInstance();
-	if(!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
-	stiHit->reset();
-	stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
-	_hitContainer->add( stiHit );
+	  StiHit * stiHit = _hitFactory->getInstance();
+	  if(!stiHit) throw runtime_error("StiIstHitLoader::loadHits(StEvent*) -E- stiHit==0");
+	  stiHit->reset();
+	  stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
+	  _hitContainer->add( stiHit );
+	}
     }
     
     cout << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endl;
