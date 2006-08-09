@@ -55,7 +55,8 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     const unsigned int nRows=3;
     setNRows(nRows);
     int nsectors[3];
-    const char* detectorParamFile = "/star/u/wleight/fromMike/params.txt";
+    //const char* detectorParamFile = "/star/u/wleight/fromMike/params.txt";
+    const char* detectorParamFile = "$STAR/StRoot/StiPixel/IstGeomParams.txt";
     cout <<"get input values from file:\t"<<detectorParamFile<<endl;
     StGetConfigValue(detectorParamFile,"nLadder1",nsectors[0]);
     StGetConfigValue(detectorParamFile,"nLadder2",nsectors[1]);
