@@ -318,6 +318,27 @@ void THelixTrack::GetEmx(double err2xy[6],double err2sz[3]) const
    if(err2sz) memcpy(err2sz,fEmxSZ,sizeof(fEmxSZ));
 }
 //_____________________________________________________________________________
+void THelixTrack::StiEmx(double err[21]) const
+{
+enum {kXX
+     ,kYX,kYY                       
+     ,kZX,kZY,kZZ                 
+     ,kEX,kEY,kEZ,kEE           
+     ,kPX,kPY,kPZ,kPE,kPP     
+     ,kTX,kTY,kTZ,kTE,kTP,kTT};
+   memset(err,0,sizeof(err[0])*21);
+   double cosCA = fP[0]/fCosL;
+   err[kYY] = fEmxXY[0]/(cosCA*cosCA);
+   err[kZZ] = fEmxSZ[0];
+   err[kEY] = fEmxXY[1]/cosCA;
+   err[kEE] = fEmxXY[2];
+   err[kPY] = fEmxXY[3]/cosCA;
+   err[kPE] = fEmxXY[4];
+   err[kPP] = fEmxXY[5];
+   err[kTZ] = fEmxSZ[1];
+   err[kTT] = fEmxSZ[2];
+}
+//_____________________________________________________________________________
 void THelixTrack::Set(double rho,double drho)
 {
    fRho = rho; fDRho=drho; fMax = 1./(fabs(fRho*fCosL)+1.e-10);
@@ -647,11 +668,7 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       }
       ss += dstep; 
     }
-#ifdef R__ASSERT
-    R__ASSERT(iter);
-#else
-    Assert(iter);
-#endif
+    assert(iter);
     step[0]+=ss;
     fDCA[0] = ((point[0]-xnear[0])*(-pnear[1]) +(point[1]-xnear[1])*(pnear[0]))/fCosL;
     if (fRho<0) fDCA[0] = - fDCA[0];
@@ -1495,43 +1512,6 @@ void  TCircleFitter::AddZ(double z,double ez)
   fAux[fN-1].ezz=ez;
 }
 //______________________________________________________________________________
-/***************************************************************************
- *
- * $Id: THelixTrack.cxx,v 1.24 2006/08/07 20:39:48 fisyak Exp $
- *
- * Author: Victor Perev, Mar 2006
- * Rewritten Thomas version. Error hangling added
- * Author: Thomas Ullrich, Dec 1999
- ***************************************************************************
- *
- * Description:
- *
- * Fast fitting routine using a iterational linear regression 
- * method (ILRM). Reference: N.Chernov, G.A.Ososkov, Computer  
- * Physics Communication 33 (1984) 329-333.                   
- *
- ***************************************************************************
- *
- * $Log: THelixTrack.cxx,v $
- * Revision 1.24  2006/08/07 20:39:48  fisyak
- * Assert => R__ASSERT
- *
- * Revision 1.23  2006/06/28 18:39:07  perev
- * cos(dip)**4 added to Dca(...) to account z err in the nearest point
- *
- * Revision 1.22  2006/06/26 19:09:21  perev
- * DcaXY & DcaZ with errors added
- *
- * Revision 1.21  2006/06/09 19:53:51  perev
- * double Dca(double x,double y,double *dcaErr=0) added
- *
- * Revision 1.2  2003/09/02 17:59:34  perev
- * gcc 3.2 updates + WarnOff
- *
- * Revision 1.1  1999/12/21 16:28:48  ullrich
- * Initial Revision
- *
- **************************************************************************/
 double TCircleFitter::Fit() 
 {
 static const int nAVERs = &fRr-&fXx;
@@ -2020,7 +2000,7 @@ static TH1F *hh[6]={0,0,0,0,0,0};
 static const char *hNams[]={"dH","pH","dA","pA","dC","pC",0};
 static const char *hTits[]=
 {"delta H","pull H","delta Psi","pull Psi","delta Curv","pull Curv",0};
-  if(!myCanvas)  myCanvas=new TCanvas("C1","",600,800);
+  if(!myCanvas)  myCanvas=new TCanvas("TCircleFitter_Test","",600,800);
   myCanvas->Clear();
   myCanvas->Divide(1,6);
 
@@ -2207,7 +2187,7 @@ TRandom ran;
 static TCanvas* myCanvas=0;
 static TH1F *hh[6]={0,0,0,0,0,0};
 static const char *hNams[]={"HA","HA-","HC","HC-","AC","AC-",0};
-  if(!myCanvas)  myCanvas=new TCanvas("C1","",600,800);
+  if(!myCanvas)  myCanvas=new TCanvas("TCircleFitter_TestCorr","",600,800);
   myCanvas->Clear();
   myCanvas->Divide(1,6);
 
@@ -2309,7 +2289,7 @@ static TGraph  *ciGraph  = 0;
   for (int i=0;i<nPts;i++) { x[i]=Pts[i*pstep+0];  y[i]=Pts[i*pstep+1]; }
 
 
-  if(!myCanvas) myCanvas = new TCanvas("C1","",600,800);
+  if(!myCanvas) myCanvas = new TCanvas("TCircle_Show","",600,800);
   myCanvas->Clear();
   delete ptGraph; delete ciGraph;
 
@@ -2509,7 +2489,7 @@ TRandom ran;
 static TCanvas* myCanvas[9]={0,0,0,0,0,0,0,0,0};
 static TH1F *hh[nHH]={0,0,0,0,0,0,0};
 static const char *hNams[]={"pH","pA","pC","pZ","pD","Xi2","Xi2E",0};
-  if(!myCanvas[0])  myCanvas[0]=new TCanvas("C1","",600,800);
+  if(!myCanvas[0])  myCanvas[0]=new TCanvas("THelixFitter_TestC1","",600,800);
   myCanvas[0]->Clear();
   myCanvas[0]->Divide(1,nHH);
 
@@ -2524,7 +2504,7 @@ static const char *hNams[]={"pH","pA","pC","pZ","pD","Xi2","Xi2E",0};
 static TH1F *h2h[4]={0,0,0,0};
 static const char *h2Nams[]={"targYY","targZZ","targYZ","calcYZ",0};
   int n2h=4;
-  if(!myCanvas[1])  myCanvas[1]=new TCanvas("C2","",600,800);
+  if(!myCanvas[1])  myCanvas[1]=new TCanvas("THelixFitter_TestC2","",600,800);
   myCanvas[1]->Clear();
   myCanvas[1]->Divide(1,n2h);
   for (int i=0;i<n2h;i++) { 
@@ -2537,7 +2517,7 @@ static const char *h2Nams[]={"targYY","targZZ","targYZ","calcYZ",0};
 static TH1F *h3h[4]={0,0,0,0};
 static const char *h3Nams[]={"dcaXY","dcaXYNor","dcaZ","dcaZNor",0};
   int n3h=4;
-  if(!myCanvas[2])  myCanvas[2]=new TCanvas("C3","",600,800);
+  if(!myCanvas[2])  myCanvas[2]=new TCanvas("THelixFitter_TestC3","",600,800);
   myCanvas[2]->Clear();
   myCanvas[2]->Divide(1,n3h);
   for (int i=0;i<n3h;i++) { 
@@ -2727,7 +2707,7 @@ static TGraph  *ciGraph[2]  = {0,0};
   }
 
 
-  if(!myCanvas) myCanvas = new TCanvas("C1","",600,800);
+  if(!myCanvas) myCanvas = new TCanvas("THelixFitter_Show","",600,800);
   myCanvas->Clear();
   myCanvas->Divide(1,2);
 
@@ -2768,4 +2748,42 @@ static TGraph  *ciGraph[2]  = {0,0};
   while(!gSystem->ProcessEvents()){}; 
 
 }
+//______________________________________________________________________________
+/***************************************************************************
+ *
+ * $Id: THelixTrack.cxx,v 1.25 2006/08/10 04:09:50 perev Exp $
+ *
+ * Author: Victor Perev, Mar 2006
+ * Rewritten Thomas version. Error hangling added
+ * Author: Thomas Ullrich, Dec 1999
+ ***************************************************************************
+ *
+ * Description:
+ *
+ * Fast fitting routine using a iterational linear regression 
+ * method (ILRM). Reference: N.Chernov, G.A.Ososkov, Computer  
+ * Physics Communication 33 (1984) 329-333.                   
+ *
+ ***************************************************************************
+ *
+ * $Log: THelixTrack.cxx,v $
+ * Revision 1.25  2006/08/10 04:09:50  perev
+ * Test cleanup
+ *
+ * Revision 1.23  2006/06/28 18:39:07  perev
+ * cos(dip)**4 added to Dca(...) to account z err in the nearest point
+ *
+ * Revision 1.22  2006/06/26 19:09:21  perev
+ * DcaXY & DcaZ with errors added
+ *
+ * Revision 1.21  2006/06/09 19:53:51  perev
+ * double Dca(double x,double y,double *dcaErr=0) added
+ *
+ * Revision 1.2  2003/09/02 17:59:34  perev
+ * gcc 3.2 updates + WarnOff
+ *
+ * Revision 1.1  1999/12/21 16:28:48  ullrich
+ * Initial Revision
+ *
+ **************************************************************************/
  
