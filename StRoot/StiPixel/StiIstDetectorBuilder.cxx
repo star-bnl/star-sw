@@ -13,6 +13,7 @@
 #include "StiIstIsActiveFunctor.h"
 #include "StGetConfigValue.hh"
 #include "Sti/StiElossCalculator.h"
+#include "TMath.h"
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFile)
     : StiDetectorBuilder("Ist",active,inputFile)
@@ -56,14 +57,17 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     setNRows(nRows);
     int nsectors[3];
     //const char* detectorParamFile = "/star/u/wleight/fromMike/params.txt";
-    const char* detectorParamFile = "$STAR/StRoot/StiPixel/IstGeomParams.txt";
+    /*const char* detectorParamFile = "$STAR/StRoot/StiPixel/IstGeomParams.txt";
     cout <<"get input values from file:\t"<<detectorParamFile<<endl;
     StGetConfigValue(detectorParamFile,"nLadder1",nsectors[0]);
     StGetConfigValue(detectorParamFile,"nLadder2",nsectors[1]);
     StGetConfigValue(detectorParamFile,"nLadder3",nsectors[2]);
     setNSectors(0,nsectors[0]);
     setNSectors(1,nsectors[1]);
-    setNSectors(2,nsectors[2]);
+    setNSectors(2,nsectors[2]);*/
+    setNSectors(0,11);
+    setNSectors(1,19);
+    setNSectors(2,27);
 
     cout <<"create gasses"<<endl;
     //_gas is the gas that the ist detector lives in
@@ -75,25 +79,34 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
     StiElossCalculator* fcMatElossCalculator=new StiElossCalculator(_fcMaterial->getZOverA(),ionization*ionization,_fcMaterial->getA(),_fcMaterial->getZ(),_fcMaterial->getDensity());
 
     double radii[nRows];
-    StGetConfigValue(detectorParamFile,"r1",radii[0]);
+    /*StGetConfigValue(detectorParamFile,"r1",radii[0]);
     StGetConfigValue(detectorParamFile,"r2",radii[1]);
-    StGetConfigValue(detectorParamFile,"r3",radii[2]);
+    StGetConfigValue(detectorParamFile,"r3",radii[2]);*/
+    radii[0]=7.0;
+    radii[1]=12.0;
+    radii[2]=17.0;
     double dphi[nRows];
 
-    for(size_t zzz=0;zzz<nRows;zzz++)
-      dphi[zzz]=2.*M_PI/nsectors[zzz];
+    for(int zzz=0;zzz<nRows;zzz++)
+      dphi[zzz]=2.*TMath::Pi()/getNSectors(zzz);
     
     double tiltAngle;
-    StGetConfigValue(detectorParamFile,"aOffset",tiltAngle);
+    //StGetConfigValue(detectorParamFile,"aOffset",tiltAngle);
+    tiltAngle=81.0;
     tiltAngle=M_PI*(90.-tiltAngle)/180.;
     double perOffset;
-    StGetConfigValue(detectorParamFile,"pPerOffset",perOffset);
+    //StGetConfigValue(detectorParamFile,"pPerOffset",perOffset);
+    perOffset=.238;
     double parOffset;
-    StGetConfigValue(detectorParamFile,"pParOffset",parOffset);
+    //StGetConfigValue(detectorParamFile,"pParOffset",parOffset);
+    parOffset=1.5;
     double depth[nRows];
-    StGetConfigValue(detectorParamFile,"length1",depth[0]);
+    /*StGetConfigValue(detectorParamFile,"length1",depth[0]);
     StGetConfigValue(detectorParamFile,"length2",depth[1]);
-    StGetConfigValue(detectorParamFile,"length3",depth[2]);
+    StGetConfigValue(detectorParamFile,"length3",depth[2]);*/
+    depth[0]=28.0;
+    depth[1]=40.0;
+    depth[2]=52.0;
 
     cout <<"begin loop on rows to build detectors"<<endl;
     StiPlanarShape *pShape;
@@ -103,13 +116,15 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 	    if (!pShape) throw runtime_error("StiIstDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
 	    sprintf(name, "Ist/Layer_%d", row);
 	    pShape->setName(name);
-	    double Thickness;
-	    StGetConfigValue(detectorParamFile,"ladder thickness",Thickness);
-	    pShape->setThickness(Thickness); //cm
+	    //double Thickness;
+	    //StGetConfigValue(detectorParamFile,"ladder thickness",Thickness);
+	    //pShape->setThickness(Thickness); //cm
+	    pShape->setThickness(.3686);
 	    pShape->setHalfDepth( depth[row]/2. ); //extent in z
-	    double sWidth;
-	    StGetConfigValue(detectorParamFile,"sensor width",sWidth);
-	    pShape->setHalfWidth(sWidth/2.); //length or a plane
+	    //double sWidth;
+	    //StGetConfigValue(detectorParamFile,"sensor width",sWidth);
+	    //pShape->setHalfWidth(sWidth/2.); //length or a plane
+	    pShape->setHalfWidth(2.0);
 	    for(unsigned int sector = 0; sector<getNSectors(row); sector++)	
 		{      
 		    StiPlacement *pPlacement = new StiPlacement;
@@ -140,7 +155,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker&source)
 		    pDetector->setIsActive(new StiIstIsActiveFunctor);
 		    pDetector->setIsContinuousMedium(true);
 		    pDetector->setIsDiscreteScatterer(true);
-		    pDetector->setMaterial(_gas);
+		    pDetector->setMaterial(_fcMaterial);
 		    pDetector->setGas(_gas);
 		    pDetector->setShape(pShape);
 		    pDetector->setPlacement(pPlacement);
