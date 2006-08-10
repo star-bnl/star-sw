@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.76 2006/05/04 19:15:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.77 2006/08/10 03:32:47 perev Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -345,8 +345,8 @@ StEventMaker::makeEvent()
         TObjectSet *os = (TObjectSet*)GetDataSet("StTriggerData");
         if (os) {
 	  StTriggerData* pTrg = (StTriggerData*)os->GetObject();
-	  Assert(pTrg); 		// wrong, empty data
-	  Assert(os->IsOwner()); 	// wrong, data allready taken
+	  assert(pTrg); 		// wrong, empty data
+	  assert(os->IsOwner()); 	// wrong, data allready taken
 	  os->DoOwner(0); 	        //change ownership
 	  mCurrentEvent->setTriggerData(pTrg);
         }
@@ -1774,8 +1774,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.76 2006/05/04 19:15:40 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.77 2006/08/10 03:32:47 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.77  2006/08/10 03:32:47  perev
+ * Assert==>assert
+ *
  * Revision 2.76  2006/05/04 19:15:40  ullrich
  * Added L3 expanded (Jamie).
  *

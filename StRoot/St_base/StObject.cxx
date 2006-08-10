@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.20 2005/10/21 21:13:52 perev Exp $
+// $Id: StObject.cxx,v 1.21 2006/08/10 03:34:38 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.21  2006/08/10 03:34:38  perev
+// Assert==>assert
+//
 // Revision 1.20  2005/10/21 21:13:52  perev
 // test added to avoid copy to itself. Make walgrin happy
 //
@@ -204,7 +207,7 @@ void StXRef::Streamer(TBuffer &R__b)
 
    } else {
 
-      Assert(!fUUId.IsNull());
+      assert(!fUUId.IsNull());
       Synchro(0);
       R__c = R__b.WriteVersion(Class(),kTRUE);
       fUUId.Streamer(R__b);
@@ -232,7 +235,7 @@ void StXRef::Add(TDataSet *ds)
    TDataSet *os = FindByName(ds->GetName());
    if (os == ds) 		return;
    if (os){
-     Assert(os->IsA()==ds->IsA());
+     assert(os->IsA()==ds->IsA());
      TDataSetIter   Next(this);
      StXRef *xr;
      while((xr = (StXRef*)Next())) {
@@ -242,7 +245,7 @@ void StXRef::Add(TDataSet *ds)
      }
    }  
    if (ds->InheritsFrom(Class())) 
-      Assert(!fUUId.Compare(((StXRef*)ds)->GetUUId()));
+      assert(!fUUId.Compare(((StXRef*)ds)->GetUUId()));
    ds->Shunt(0); TDataSet::Add(ds);
 }
 
