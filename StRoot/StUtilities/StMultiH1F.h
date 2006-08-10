@@ -32,6 +32,8 @@ class StMultiH1F : public TH2F {
   // Overload the Rebin() function to allow naming of y bins with TH2F pointer
   virtual        TH1* Rebin(Int_t ngroup, const char* newname)
                               { SetNames(ngroup, newname); return 0; }
+  virtual        TH1* Rebin(Int_t ngroup, const char* newname, const Double_t* xbins)
+                              { SetNames(ngroup, newname); return 0; }
   // Overload the SetBarOffset() function to allow offsetting of y bins vertically
   virtual        void SetBarOffset(Float_t offset);
   virtual    Double_t GetNonZeroMinimum() const;
@@ -45,8 +47,11 @@ class StMultiH1F : public TH2F {
 
 #endif
 
-// $Id: StMultiH1F.h,v 1.5 2002/04/23 01:59:16 genevb Exp $
+// $Id: StMultiH1F.h,v 1.6 2006/08/10 20:46:24 genevb Exp $
 // $Log: StMultiH1F.h,v $
+// Revision 1.6  2006/08/10 20:46:24  genevb
+// additional Rebin() interface for TH1.h vers. 1.79, ROOT 5.13
+//
 // Revision 1.5  2002/04/23 01:59:16  genevb
 // New offset abilities
 //
