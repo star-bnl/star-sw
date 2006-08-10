@@ -151,6 +151,7 @@ public:
 	void Set   (double rho,double drho=0);
 	void SetEmx(const double*  err2xy,const double*  err2z);
 	void GetEmx(double err2xy[6],double err2z[3]) const;
+	void StiEmx(double emx[21]) const;
         void GetSpot(const double axis[3][3],double emx[3]) const;
 	void Fill  (TCircle &circ) const;
 	void Backward();
@@ -166,8 +167,8 @@ public:
         void   Get (double *xyz, double *dir=0) const {Step(0.,xyz,dir);}
         double Step(double stmax, const double *surf, int nsurf
 	           ,double *x=0, double *dir=0, int nearest=0) const;
-        double Step(const double *point,double *xyz=0, double *dir=0) const;
-        double Path(const double *point,double *xyz=0, double *dir=0) const 
+        double Step(const double point[3],double *xyz=0, double *dir=0) const;
+        double Path(const double point[3],double *xyz=0, double *dir=0) const 
 	           {return Step(point,xyz,dir);}
         double Dca(const double point[3],double *dcaErr=0) const;
         double Path(double x,double y) const ;
