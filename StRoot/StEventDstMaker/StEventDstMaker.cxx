@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StEventDstMaker.cxx,v 1.1 2001/05/30 17:48:30 perev Exp $
+// $Id: StEventDstMaker.cxx,v 1.2 2006/08/10 03:31:46 perev Exp $
 // $Log: StEventDstMaker.cxx,v $
+// Revision 1.2  2006/08/10 03:31:46  perev
+// Assert==>assert
+//
 // Revision 1.1  2001/05/30 17:48:30  perev
 // StEvent branching
 //
@@ -61,7 +64,7 @@ static const char *EVT = "StEvent";
   if (!evt) return kStWarn;
    
   StEventClusteringHints *clu= evt->clusteringHints();
-  Assert(clu);
+  assert(clu);
   if (m_Mode==1) clu->setMiniDstMode();
   if (m_Mode==0) clu->setDstMode();
   return kStOK;
