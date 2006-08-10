@@ -70,7 +70,7 @@ void TPolinom::Print(const char*) const
   if (!fCoe) return;
   double *e = fEmx;
   for (int i=0,n=1;i<=fNP;i++,e+=n++) {
-    double err = (fEmx)? sqrt(e[0]):0; 
+    double err = (fEmx)? sqrt(e[i]):0; 
     Info("Print","Coef[%d] = %g +- %g",i,fCoe[i],err);
   }
 }
@@ -193,7 +193,7 @@ TPoliFitter::TPoliFitter(const TPoliFitter &fr):TPolinom(fr),fArr(fr.fArr)
 //_____________________________________________________________________________
 void TPoliFitter::Add(double x, double y,double err2)
 {
-  if (fArr.GetSize()<=fN) { fArr.Set(fN*2); fDat = fArr.GetArray();}
+  if (fArr.GetSize()<=fN+kXYW) { fArr.Set(fN*2+kXYW); fDat = fArr.GetArray();}
   fArr[fN+kX]=x;
   fArr[fN+kY]=y;
   fArr[fN+kW]=1./err2;
@@ -229,9 +229,14 @@ void TPoliFitter::Clear(const char *)
   fDat = fArr.GetArray();
 }
 //_____________________________________________________________________________
-void TPoliFitter::Print(const char*) const
+void TPoliFitter::Print(const char* tit) const
 {
-  Info("Print","NPoints %d ",fN/kXYW);
+  if (!tit || !*tit) tit = "Print";
+
+  Info(tit,"NPoints %d Wtot=%g",fN/kXYW,fWtot);
+  for (int l=0;l<fN;l+=kXYW) {
+    printf("%d - \tX=%g \tY=%g \tW=%g\n",l/kXYW,fDat[l+kX],fDat[l+kY],fDat[l+kW]);
+  }
   TPolinom::Print();
 }
 //_____________________________________________________________________________
@@ -370,8 +375,47 @@ double TPoliFitter::EvalOrt(int idx,double x) const
 //_____________________________________________________________________________
 #include "TCanvas.h"
 #include "TH1F.h"
+#include "TGraph.h"
 #include "TSystem.h"
 #include "TRandom.h"
+//_____________________________________________________________________________
+//______________________________________________________________________________
+void TPoliFitter::Show() const
+{
+static TCanvas *myCanvas = 0;
+static TGraph  *ptGraph  = 0;
+static TGraph  *ciGraph  = 0;
+  double x[100],y[100];
+  int nPts = Size();
+  if (nPts>100) nPts=100;
+  for (int i=0;i<nPts;i++) {
+    x[i]=fDat[i*3+0];  y[i]=fDat[i*3+1];
+  }
+
+
+  if(!myCanvas) myCanvas = new TCanvas("TPoliFitter","",600,800);
+  myCanvas->Clear();
+
+  delete ptGraph; delete ciGraph;
+  ptGraph  = new TGraph(nPts  , x, y);
+  ptGraph->SetMarkerColor(kRed);
+  ptGraph->Draw("A*");
+
+  double x0=x[0];
+  double dx = (x[nPts-1]-x[0])/99;
+  for (int i=0;i<100;i++) {
+    x[i]=x0+dx*i;
+    y[i]=Eval(x[i]);
+  }
+  
+  ciGraph  = new TGraph(100  , x, y);
+  ciGraph->Draw("Same CP");
+
+  myCanvas->Modified();
+  myCanvas->Update();
+  while(!gSystem->ProcessEvents()){}; 
+
+}
 //_____________________________________________________________________________
 void TPoliFitter::Test(int kase)   
 {
@@ -532,6 +576,73 @@ static const char *hNams[]={"Der0","Der1","Der2",0};
   myCanvas->Modified();
   myCanvas->Update();
   while(!gSystem->ProcessEvents()){}; 
+}
+//_____________________________________________________________________________
+void TPoliFitter::Test2()   
+{
+  enum {nPts=10};
+  double A[3]={1,2,3};
+  double G[nPts][nPts],Y[nPts],D[nPts];
+  int np = 2;
+  int once = 0;
+  for (int ievt=0;ievt <10; ievt++) {
+  
+    TPoliFitter pf(np);
+    for (int ix=0;ix<nPts;ix++) {
+      double x = ix;
+      double y = A[0]+x*(A[1]+x*A[2]);
+      double err = 0.1*sqrt(ix+1.);
+      double dy = gRandom->Gaus(0,err);
+      Y[ix]=y+dy;
+      pf.Add(x,y+dy,err*err);
+    }
+    double Xi2 = pf.Fit();
+    pf.MakeErrs();
+    if (!once) {
+printf("Make g[][] matrix\n");
+    once = 1;
+    double wtot = pf.Wtot();
+    double Xk,Wk,Xj,Wj,Fik,Fij;
+    memset(G,0,sizeof(G));
+    for (int khit=0;khit<nPts;khit++) {
+      Xk = pf.GetX(khit)[0];
+      Wk = pf.GetX(khit)[2];
+      G[khit][khit] = wtot*Wk;
+      for (int jhit=0;jhit<nPts;jhit++) {
+        Xj = pf.GetX(jhit)[0];
+        Wj = pf.GetX(jhit)[2];
+        double Fkj=0;
+        for (int i=0;i<=np;i++) {//loop over ort polinoms       
+          Fik = pf.EvalOrt(i,Xk);
+          Fij = pf.EvalOrt(i,Xj);
+          Fkj+= Fik*Fij;
+        }//end i
+        G[khit][jhit]-= wtot*Fkj*Wk*Wj;
+      }//end jhit
+    }//end khit
+    }
+    double myXi2=0;
+    TCL::mxmlrt(Y,G[0],&myXi2,1,nPts);
+    myXi2/=pf.Ndf();
+    printf("Xi2=%g myXi2=%g\n",Xi2,myXi2);
+    double delta =0.001;
+    double Xi2m = 0;
+    int ider = 9;
+    int kase=0;
+    if (kase==0) {
+      pf.GetX(ider)[1]+=delta;
+      Xi2m = pf.Fit();
+    } else {
+      Y[ider]+=delta;
+      TCL::mxmlrt(Y,G[0],&Xi2m,1,nPts);
+      Xi2m/=pf.Ndf();
+    }
+    TCL::mxmpy(G[0],Y,D,nPts,nPts,1);
+    double der = (Xi2m-Xi2)/delta;
+    printf ("Xi2= %g %g Deriv = %g %g\n",Xi2,Xi2m,der,2*D[ider]/pf.Ndf());
+
+  }
+
 }
 
 
