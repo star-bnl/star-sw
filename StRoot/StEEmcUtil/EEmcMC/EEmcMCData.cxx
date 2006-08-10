@@ -1,4 +1,4 @@
-// $Id: EEmcMCData.cxx,v 1.12 2005/06/03 19:19:48 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.13 2006/08/10 03:20:00 perev Exp $
 
 #include "StEventTypes.h"
 
@@ -336,7 +336,7 @@ EEmcMCData::expandMemory()
 {
   Int_t      newSize =  mSize + kEEmcDefaultMCHitSize;
   EEmcMCHit* newHit  =  new EEmcMCHit[newSize];
-  Assert(newHit);
+  assert(newHit);
 
   if(mHit) {
     memcpy(newHit,mHit,mSize*sizeof(EEmcMCHit));
@@ -422,6 +422,9 @@ Int_t EEmcMCData::write(EEeventDst *EEeve) {
 }
 
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.13  2006/08/10 03:20:00  perev
+// Assert==>assert
+//
 // Revision 1.12  2005/06/03 19:19:48  balewski
 // for embedding, GEANT unpcker was split on 2 parts
 //

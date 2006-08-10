@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.112 2006/07/26 00:17:40 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.113 2006/08/10 03:21:38 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -827,7 +827,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
      Error("MakeEvent","Wrong case %o %s\n",kase,pos[1]);
      for (int i=1;(word=EHKindN[i]);i++){if (kase&EHKindS[i]) printf("|%s",word);}
      printf("\n");  
-     Assert(0);
+     assert(0);
   }
 
 
@@ -1165,6 +1165,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.113  2006/08/10 03:21:38  perev
+// Assert==>assert
+//
 // Revision 1.112  2006/07/26 00:17:40  fine
 // fix the non-initialized data-member. Thank Manuel
 //
