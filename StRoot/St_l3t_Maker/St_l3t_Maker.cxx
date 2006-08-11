@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.46 2004/05/03 23:33:22 perev Exp $
+// $Id: St_l3t_Maker.cxx,v 1.47 2006/08/11 19:14:02 fisyak Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -80,7 +80,7 @@
 #include "St_l3t_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+//#include "St_XDFFile.h"
 #include "StDedxDefinitions.h"
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_dst_dedx_Table.h"
