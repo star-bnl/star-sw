@@ -1,18 +1,14 @@
-// $Id: Load.C,v 1.17 2003/04/30 20:40:02 perev Exp $
+// $Id: Load.C,v 1.18 2006/08/11 19:44:52 fisyak Exp $
 //=======================================================================
 // owner: Yuri Fisyak
 // what it does: 
 //=======================================================================
 
-void Load(){
-    if (gClassTable->GetID("TTable") < 0) gSystem->Load("libTable");
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("StUtilities");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StTriggerDataMaker");
-    gSystem->Load("StEvent");
-    gSystem->Load("StBFChain");
-    gSystem->Load("xdf2root");
-    gSystem->Load("St_Tables");
+void Load(Char_t *loadList="St_base,StChain,StUtilities,StTriggerDataMaker,StEvent,StEventUtilities,StBFChain"){
+  TString opt(loadList);
+  TString separator = "[^ ;,]+";
+  TObjArray *array = opt.Tokenize(separator);
+  TIter next(array);
+  while ((objs = (TObjString *) next())) {gSystem->Load(objs->GetString());}
+  delete array;
 }
