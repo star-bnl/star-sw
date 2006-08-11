@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.73 2004/06/05 23:39:44 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.74 2006/08/11 19:42:32 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.74  2006/08/11 19:42:32  fisyak
+// Comment #include St_XDFFile.h
+//
 // Revision 1.73  2004/06/05 23:39:44  fisyak
 // Add (sector,row) for TpcCoordinate transformations
 //
@@ -69,7 +72,7 @@
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+//#include "St_XDFFile.h"
 #include "StMessMgr.h"
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tcl_tpcluster_Table.h"
@@ -484,7 +487,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.73 2004/06/05 23:39:44 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.74 2006/08/11 19:42:32 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

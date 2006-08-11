@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.cxx,v 1.5 2003/09/02 17:59:33 perev Exp $
+// $Id: St_tptsts_Maker.cxx,v 1.6 2006/08/11 19:43:41 fisyak Exp $
 // $Log: St_tptsts_Maker.cxx,v $
+// Revision 1.6  2006/08/11 19:43:41  fisyak
+// Comment #include St_XDFFile.h
+//
 // Revision 1.5  2003/09/02 17:59:33  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -26,7 +29,7 @@
 #include "St_tptsts_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+//#include "St_XDFFile.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_sts_Module.h"
