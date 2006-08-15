@@ -50,8 +50,8 @@ foreach $int ( $mon,$mday ) {
   $output_string .= $int;
 }
 
-$outfile_all = "/afs/rhic/star/doc/www/comp/prod/" . $output_string . "\.all\.html";
-$outfile_error = "/afs/rhic/star/doc/www/comp/prod/" . $output_string . "\.error\.html";
+$outfile_all = "/afs/rhic.bnl.gov/star/doc/www/comp/prod/" . $output_string . "\.all\.html";
+$outfile_error = "/afs/rhic.bnl.gov/star/doc/www/comp/prod/" . $output_string . "\.error\.html";
 
 &beginAlHtml();
 

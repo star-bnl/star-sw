@@ -15,7 +15,7 @@
 
 
 
-  set DOCOPY = /afs/rhic/star/packages/.eta3/StRoot/macros
+  set DOCOPY = /afs/rhic.bnl.gov/star/packages/.eta3/StRoot/macros
   set file = $1
   echo "doCopy:InputFile = $file"
 # set file = /star/rcf/data03/reco/minbias/P00hm/2000/08/st_physics_1231015_raw_0064.event.root
