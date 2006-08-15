@@ -71,11 +71,15 @@
 #define kIgtIdentifier                29
 #define kFstIdentifier                30
 #define kFgtIdentifier                31
+#define kHpdIdentifier                32
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 2.4 2006/01/20 15:11:59 jeromel Exp $
+/* $Id: StDetectorDefinitions.h,v 2.5 2006/08/15 14:34:02 ullrich Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.5  2006/08/15 14:34:02  ullrich
+** Added kHpdIdentifier.
+**
 ** Revision 2.4  2006/01/20 15:11:59  jeromel
 ** ... meant needs to be C style, not C++
 **
