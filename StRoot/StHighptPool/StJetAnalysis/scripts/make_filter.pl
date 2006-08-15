@@ -83,7 +83,7 @@ for my $centrality (qw(central minbias ppMinBias)) {
 	select OUT2;
 	print <<EOF;
 #!/bin/tcsh
-setenv GROUP_DIR /afs/rhic/rhstar/group
+setenv GROUP_DIR /afs/rhic.bnl.gov/rhstar/group
 
 if ( -r  \$\{GROUP_DIR\}/star_login.csh ) then
             source \$\{GROUP_DIR\}/star_login.csh 

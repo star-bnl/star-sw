@@ -5,9 +5,9 @@ use File::Copy;
 print STDOUT "executing make_runs.pl \n";
 
 #take a snapshot of the macros on afs, copy them to nfs so that we don't have token issues
-copy("/afs/rhic/star/users/mmiller/code/highpt/StRoot/JetFinder/macros/TestFilter.C",
+copy("/afs/rhic.bnl.gov/star/users/mmiller/code/highpt/StRoot/JetFinder/macros/TestFilter.C",
      "/star/data22/MuDST/upsilon/jets/macros/TestFilter.C");
-copy("/afs/rhic/star/users/mmiller/code/highpt/StRoot/JetFinder/macros/RunChainMerger.C",
+copy("/afs/rhic.bnl.gov/star/users/mmiller/code/highpt/StRoot/JetFinder/macros/RunChainMerger.C",
      "/star/data22/MuDST/upsilon/jets/macros/RunChainMerger.C");
 
 #for my $centrality (qw(central minbias)) {

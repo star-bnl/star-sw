@@ -1,5 +1,8 @@
-// $Id: Example_plot_Btot.C,v 1.1 2000/01/24 21:29:21 love Exp $
+// $Id: Example_plot_Btot.C,v 1.2 2006/08/15 21:42:52 jeromel Exp $
 // $Log: Example_plot_Btot.C,v $
+// Revision 1.2  2006/08/15 21:42:52  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.1  2000/01/24 21:29:21  love
 // Installed example of POISSON field calculation plotting macro
 //
@@ -13,7 +16,7 @@
 {
  gROOT->Reset();
 // Open the root file with bz, br, bt versus r and z in 10 cm steps.
- TFile f("/afs/rhic/star/data/samples/POIzto6m.root");
+ TFile f("/afs/rhic.bnl.gov/star/data/samples/POIzto6m.root");
 // Set a small circle plotting symbol and plot total field vs z at r = 90.
  ntb->SetMarkerStyle(24);
  ntb->SetMarkerSize(.6);

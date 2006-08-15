@@ -1,5 +1,8 @@
-// $Id: xdf2C.C,v 1.3 1999/05/21 15:34:02 kathy Exp $
+// $Id: xdf2C.C,v 1.4 2006/08/15 21:43:22 jeromel Exp $
 // $Log: xdf2C.C,v $
+// Revision 1.4  2006/08/15 21:43:22  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.3  1999/05/21 15:34:02  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -27,13 +30,13 @@ void xdf2C(const char *Input="$STAR/params",const char *Output="qweDB")
   gSystem->ExpandPathName(TSOut);
 
 
-//  const char *Ipref = "/afs/rhic/star/packages/SL99c/";
+//  const char *Ipref = "/afs/rhic.bnl.gov/star/packages/SL99c/";
   TString Ipref = gSystem->DirName((const char*)TSInp);Ipref +="/";
   const char *params =  "params" ;
   const char *params = gSystem->BaseName((const char*)TSInp);
 
 //  const char *Ipref = "$ww/";
-//  const char *Opref = "/afs/rhic/star/packages/SL99d/StDB/";
+//  const char *Opref = "/afs/rhic.bnl.gov/star/packages/SL99d/StDB/";
   TString Opref = TSOut; Opref +="/";
   gSystem->MakeDirectory((const char*)TSOut);
 

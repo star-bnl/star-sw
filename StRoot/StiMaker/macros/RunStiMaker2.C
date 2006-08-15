@@ -147,7 +147,7 @@ void RunStiMaker2(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, 
 	const char *Argv[]= {
 	    "-s","daq",                           // list of components needed
 	    "-q","mRunNumber=1228023",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
 	Int_t Argc=sizeof(Argv)/4;
 	setFiles->Init(Argc,Argv);

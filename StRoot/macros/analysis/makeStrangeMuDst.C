@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 2.6 2005/08/31 15:03:09 fisyak Exp $
+// $Id: makeStrangeMuDst.C,v 2.7 2006/08/15 21:42:48 jeromel Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 2.7  2006/08/15 21:42:48  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 2.6  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -75,7 +78,7 @@ void load() {
 
 void run() {
   // Open input file
-  const Char_t *file = "/afs/rhic/star/data/samples/hc_standard.40_evts.dst.root";
+  const Char_t *file = "/afs/rhic.bnl.gov/star/data/samples/hc_standard.40_evts.dst.root";
 
   StFile *files = new StFile();
   files->AddFile(file);

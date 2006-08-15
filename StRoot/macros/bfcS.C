@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfcS.C,v 1.6 2003/04/30 20:40:04 perev Exp $
+// $Id: bfcS.C,v 1.7 2006/08/15 21:42:29 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -267,7 +267,7 @@ void Usage() {
   printf (" root4star 'bfc.C(2,40,\"Cy1b fzin -l3t\")'//the as above but remove L3T from chain\n");
   printf (" root4star 'bfc.C(40,\"Cy2a fzin\",\"/star/rcf/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n");
   printf (" root4star 'bfc.C(40,\"Cy2a fzin\")'\t// the same as  above\n");
-  printf (" root4star 'bfc.C(5,10,\"Cy1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
+  printf (" root4star 'bfc.C(5,10,\"Cy1b in xout\",\"/afs/rhic.bnl.gov/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n");
   printf ("                                    \t// skipping the 4 events and processing the remaining 6 events\n");
   printf (" root4star 'bfc.C(1,\"off in tpc FieldOff sd97 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
   printf (" root4star 'bfc.C(1,\"gstar Cy1a tfs allevent\")' \t// run gstar and write all event into file branches\n");

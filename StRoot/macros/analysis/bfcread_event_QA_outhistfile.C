@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.11 2005/01/27 05:28:58 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.12 2006/08/15 21:42:36 jeromel Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.12  2006/08/15 21:42:36  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.11  2005/01/27 05:28:58  genevb
 // open runcoBranch
 //
@@ -73,7 +76,7 @@ StChain *chain;
 void bfcread_event_QA_outhistfile(
      Int_t nevents=2, 
      const Char_t *MainFile=
-     //"/afs/rhic/star/data/samples/gstar.dst.root",
+     //"/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
 "/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_standard/hc_standard.40_evts.event.root",
      const Char_t *outHistFile="StEQAMaker",
      const Char_t *TopDirTree="StEQAtree",

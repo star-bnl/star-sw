@@ -1,6 +1,6 @@
 // NOTE - chain needs to be declared global so for StHbtEventReader
 //==========================================================================================
-#include "/afs/rhic/star/packages/DEV/StRoot/StarClassLibrary/StTimer.hh"
+#include "/afs/rhic.bnl.gov/star/packages/DEV/StRoot/StarClassLibrary/StTimer.hh"
 
 class StMuDstMaker;
 

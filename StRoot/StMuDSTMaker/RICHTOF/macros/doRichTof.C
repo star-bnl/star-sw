@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doRichTof.C,v 1.2 2002/03/17 02:11:40 dunlop Exp $
+// $Id: doRichTof.C,v 1.3 2006/08/15 21:42:04 jeromel Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -70,11 +70,11 @@ void doRichTof(Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0)
 void doRichTof(Int_t startEvent, Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 
 void doRichTof(Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const Char_t *qaflag = 0); 
 
 void doRichTof(Int_t startEvent,Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const Char_t *qaflag = 0);
 
 void doRichTof(const Int_t nEvents, 
@@ -164,7 +164,7 @@ void doRichTof(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const
       const char *Argv[]= {
 	    "-s","dst runco",                           // list of components needed
 	    "-q","numberOfPrimaryTracks>1500",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
       Int_t Argc=sizeof(Argv)/4;
       setFiles->Init(Argc,Argv);
@@ -345,6 +345,9 @@ void doRichTof(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doRichTof.C,v $
+// Revision 1.3  2006/08/15 21:42:04  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.2  2002/03/17 02:11:40  dunlop
 // Changed the branch to richtof branch.  Loaded right library
 //

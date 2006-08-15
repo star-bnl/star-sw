@@ -2,7 +2,7 @@ STROOT        := ../StRoot
 
 STARCLASSPATH := $(STROOT)/StarClassLibrary
 HBTPATH       := $(STROOT)/StHbtMaker
-ROOTPATH      := /afs/rhic/star/ROOT/2.25.00/include
+ROOTPATH      := /afs/rhic.bnl.gov/star/ROOT/2.25.00/include
 HBTSUBS       := -I$(ROOTPATH) \
                  -I$(STROOT) -I$(HBTPATH) -I$(HBTPATH)/Base -I$(HBTPATH)/Cut \
                  -I$(HBTPATH)/Infrastructure/ -I$(HBTPATH)/CorrFctn \
@@ -193,7 +193,7 @@ endif
 
 ifeq ($(findstring sun4x, $(STAR_SYS)),sun4x)
 	CXX          := CC
-	STDHOME      := /afs/rhic/star/packages/ObjectSpace/2.0m
+	STDHOME      := /afs/rhic.bnl.gov/star/packages/ObjectSpace/2.0m
 	CPPFLAGS     += -I$(STDHOME) -I$(STDHOME)/ospace/std 
 	CPPFLAGS     += -DST_NO_MEMBER_TEMPLATES -DST_NO_NUMERIC_LIMITS
 	CPPFLAGS     += -DST_NO_EXCEPTIONS -DST_NO_TEMPLATE_DEF_ARGS

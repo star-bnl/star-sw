@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.104 2005/08/31 15:03:09 fisyak Exp $
+// $Id: doEvents.C,v 1.105 2006/08/15 21:42:43 jeromel Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -93,11 +93,11 @@ void doEvents(Int_t nEvents, const char ** fileList, const char *qaflag =0);
 void doEvents(Int_t startEvent, Int_t nEvents, const char ** fileList, const char *qaflag =0);
 
 void doEvents(Int_t nEvents, 
-              const char *file="/afs/rhic/star/data/samples/example.event.root",
+              const char *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const char *qaflag = 0); 
 
 void doEvents(Int_t startEvent,Int_t nEvents, 
-              const char *file="/afs/rhic/star/data/samples/example.event.root",
+              const char *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const char *qaflag = 0);
 
 void doEvents(Int_t nEvents, 
@@ -468,6 +468,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.105  2006/08/15 21:42:43  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.104  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //

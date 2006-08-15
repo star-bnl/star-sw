@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.31 2006/05/18 16:38:04 genevb Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.32 2006/08/15 21:42:33 jeromel Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.32  2006/08/15 21:42:33  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.31  2006/05/18 16:38:04  genevb
 // Introduce StHistUtil::GetRunYear()
 //
@@ -55,7 +58,7 @@
 // put in call to method SetDefaultLogXList
 //
 // Revision 1.13  2000/01/19 16:29:50  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.12  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
@@ -136,7 +139,7 @@ StChain *chain;
 void bfcread_dst_EventQAhist(
      Int_t nevents=2,
      const Char_t *MainFile=
-      "/afs/rhic/star/data/samples/gstar.dst.root",
+      "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
     const Char_t *psFile="Event_QA_hist.ps",
     const Char_t *PageTitle="",
     const Char_t *PrintList="",

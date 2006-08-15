@@ -1,7 +1,10 @@
-// $Id: Example_read_dst_print_tables.C,v 1.8 2000/06/05 16:35:35 kathy Exp $
+// $Id: Example_read_dst_print_tables.C,v 1.9 2006/08/15 21:42:55 jeromel Exp $
 // $Log: Example_read_dst_print_tables.C,v $
+// Revision 1.9  2006/08/15 21:42:55  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.8  2000/06/05 16:35:35  kathy
-// remove use of member function GetHeader since it is no longer available - now use memb functions of TTable
+//  remove use of member function GetHeader since it is no longer available - now use memb functions of TTable
 //
 // Revision 1.7  2000/04/18 20:37:25  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
@@ -13,7 +16,7 @@
 // have changed so that macro loads only table libraries needed instead of all table libraries
 //
 // Revision 1.4  2000/01/19 15:46:04  kathy
-// change default input files to point to ones in /afs/rhic/star/data/samples
+// change default input files to point to ones in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.3  1999/11/30 20:04:17  kathy
 // fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables
@@ -42,7 +45,7 @@ TDataSet *Event;
 void Example_read_dst_print_tables(
  Int_t nevents=1, 
  const char *MainFile=
-"/afs/rhic/star/data/samples/gstar.dst.root")
+"/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");

@@ -1,8 +1,11 @@
 //
-// $Id: TestEvalIT.C,v 1.14 2002/10/04 01:55:03 pruneau Exp $
+// $Id: TestEvalIT.C,v 1.15 2006/08/15 21:42:27 jeromel Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.15  2006/08/15 21:42:27  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.14  2002/10/04 01:55:03  pruneau
 // DefaultToolkit now uses the StiHitLoader scheme rahter than the StiHitFiller.
 //
@@ -240,7 +243,7 @@ void TestEvalIT(Int_t firstEvtIndex,
 	const char *Argv[]= {
 	    "-s","daq",                           // list of components needed
 	    "-q","mRunNumber=1228023",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
 	};
 	Int_t Argc=sizeof(Argv)/4;
 	setFiles->Init(Argc,Argv);

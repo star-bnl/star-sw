@@ -1,4 +1,4 @@
-// $Id: DstStruct.C,v 3.8 2003/04/30 20:40:06 perev Exp $
+// $Id: DstStruct.C,v 3.9 2006/08/15 21:42:30 jeromel Exp $
 
 #include <iomanip.h>
 class StChain;
@@ -179,12 +179,15 @@ void DstStruct(Int_t firstEvent, const char *MainFile)
 {   DstStruct(firstEvent,1,MainFile);  }
 
 //__________________________________________________________________________
-void DstStruct(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root")
+void DstStruct(const char *MainFile="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root")
 {   DstStruct(1,1,MainFile); }
 
 //__________________________________________________________________________
 //__________________________________________________________________________
 // $Log: DstStruct.C,v $
+// Revision 3.9  2006/08/15 21:42:30  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 3.8  2003/04/30 20:40:06  perev
 // Warnings cleanup. Modified lines marked VP
 //

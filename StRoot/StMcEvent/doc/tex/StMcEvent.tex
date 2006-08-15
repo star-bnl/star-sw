@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.9 2003/12/02 16:42:10 calderon Exp $
+% $Id: StMcEvent.tex,v 2.10 2006/08/15 21:41:59 jeromel Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.10  2006/08/15 21:41:59  jeromel
+% Fix rhic -> rhic.bnl.gov
+%
 % Revision 2.9  2003/12/02 16:42:10  calderon
 % fix a verb statement extending over two lines
 %
@@ -273,7 +276,7 @@ be accessed via \name{afs}: \index{afs} \index{CVS} \index{CVSROOT}
 \begin{enumerate}
   \item Obtain an \name{afs} token: \name{klog -cell rhic}.
   \item Make sure \name{\$CVSROOT} is set properly:\\ %%$
-    (i.e.~\name{CVSROOT = /afs/rhic/star/packages/repository})
+    (i.e.~\name{CVSROOT = /afs/rhic.bnl.gov/star/packages/repository})
   \item Check-out package into your current working directory:\\
     \name{cvs checkout StRoot/StMcEvent}
 \end{enumerate}

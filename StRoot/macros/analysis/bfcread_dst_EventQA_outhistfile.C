@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.17 2001/05/24 20:10:36 lansdell Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.18 2006/08/15 21:42:32 jeromel Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.18  2006/08/15 21:42:32  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.17  2001/05/24 20:10:36  lansdell
 // changed DB maker SetDateTime option to year_2b
 //
@@ -34,7 +37,7 @@
 // removing unneeded macros; updating documentation in bfcread macros
 //
 // Revision 1.6  2000/01/19 16:29:50  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.5  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
@@ -95,7 +98,7 @@ StChain *chain;
 void bfcread_dst_EventQA_outhistfile(
      Int_t nevents=2, 
      const Char_t *MainFile=
-     "/afs/rhic/star/data/samples/gstar.dst.root",
+     "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
      const Char_t *outHistFile="StEQAMaker",
      const Char_t *TopDirTree="StEQAtree",
      const Char_t *MakerHistDir="StEQA")

@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.22 2001/04/28 21:45:19 genevb Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.23 2006/08/15 21:42:34 jeromel Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.23  2006/08/15 21:42:34  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.22  2001/04/28 21:45:19  genevb
 // include libs for EMC
 //
@@ -43,7 +46,7 @@
 // add read from geant Branch so that geant table histograms can be filled in St_QA_Maker
 //
 // Revision 1.8  2000/01/19 16:29:50  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.7  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
@@ -115,7 +118,7 @@ StChain *chain;
 void bfcread_dst_QA_outhistfile(
      Int_t nevents=2, 
      const Char_t *MainFile=
-     "/afs/rhic/star/data/samples/gstar.dst.root",
+     "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
      const Char_t *outHistFile="QAMaker",
      const Char_t *TopDirTree="QAtree",
      const Char_t *MakerHistDir="QA")

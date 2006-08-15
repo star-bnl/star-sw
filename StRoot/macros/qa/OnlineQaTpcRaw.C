@@ -1,5 +1,8 @@
-// $Id: OnlineQaTpcRaw.C,v 1.7 2000/06/20 19:57:38 kathy Exp $
+// $Id: OnlineQaTpcRaw.C,v 1.8 2006/08/15 21:43:24 jeromel Exp $
 // $Log: OnlineQaTpcRaw.C,v $
+// Revision 1.8  2006/08/15 21:43:24  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.7  2000/06/20 19:57:38  kathy
 // minor updates & cleanup
 //
@@ -40,7 +43,7 @@ StChain *chain;
 void OnlineQaTpcRaw(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/june_2000_st_physics_1164058_raw_0001.daq",
+ "/afs/rhic.bnl.gov/star/data/samples/june_2000_st_physics_1164058_raw_0001.daq",
  Int_t nevHistOut=0)
 {
 //

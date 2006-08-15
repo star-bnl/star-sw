@@ -20,11 +20,11 @@ void trigCtb(Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 void trigCtb(Int_t startEvent, Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 
 void trigCtb(Int_t nEvents=2, 
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
               const Char_t *qaflag = 0); 
 
 void trigCtb(Int_t startEvent=1,Int_t nEvents=2, 
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
               const Char_t *qaflag = 0);
 
 void trigCtb(const Int_t nEvents=2, 
@@ -82,7 +82,7 @@ void trigCtb(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Cha
       const char *Argv[]= {
 	    "-s","dst runco",                           // list of components needed
 	    "-q","numberOfPrimaryTracks>1500",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
       Int_t Argc=sizeof(Argv)/4;
       setFiles->Init(Argc,Argv);

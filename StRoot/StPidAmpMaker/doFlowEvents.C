@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.2 2002/09/30 20:29:39 aihong Exp $
+// $Id: doFlowEvents.C,v 1.3 2006/08/15 21:42:07 jeromel Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -118,7 +118,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     const char *Argv[]= {
       "-s","dst runco",                           // list of components needed
       "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",   // example of user query
-      "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // GC servers for daq
+      "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // GC servers for daq
     };
     Int_t Argc=sizeof(Argv)/4;
     setFiles->Init(Argc,Argv);
@@ -423,7 +423,7 @@ void doFlowEvents(const Int_t nevents)
 {
   // Commit to cvs with these defaults:
   const Char_t *filePath="-";
-  const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
+  const Char_t *fileExt="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root";
   
   // BNL
   //Char_t* filePath="/star/rcf/scratch/posk/P00hg3";
@@ -450,6 +450,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.3  2006/08/15 21:42:07  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.2  2002/09/30 20:29:39  aihong
 // to make it read in MuDst
 //

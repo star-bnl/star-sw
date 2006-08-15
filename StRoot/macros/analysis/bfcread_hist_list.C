@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.21 2002/01/29 20:03:08 genevb Exp $ 
+// $Id: bfcread_hist_list.C,v 1.22 2006/08/15 21:42:39 jeromel Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.22  2006/08/15 21:42:39  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.21  2002/01/29 20:03:08  genevb
 // Switched default dir from QA to EventQA
 //
@@ -19,7 +22,7 @@
 // removing unneeded macros; updating documentation in bfcread macros
 //
 // Revision 1.15  2000/01/19 16:29:51  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.14  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
@@ -102,7 +105,7 @@ StIOMaker *IOMk=0;
 
 void bfcread_hist_list(
   const Char_t *MainFile=
-    "/afs/rhic/star/data/samples/gstar.hist.root",
+    "/afs/rhic.bnl.gov/star/data/samples/gstar.hist.root",
   const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree")
 {

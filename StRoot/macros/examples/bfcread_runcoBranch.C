@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.11 2000/06/22 21:24:07 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.12 2006/08/15 21:43:13 jeromel Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.12  2006/08/15 21:43:13  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.11  2000/06/22 21:24:07  kathy
 // force only 1 event to be processed in runco Branch
 //
@@ -25,7 +28,7 @@
 // putting in example macro to show how to read and navigate through each type of bfc DST production output files - still working on tags.root
 //
 // Revision 1.2  2000/01/19 15:46:05  kathy
-// change default input files to point to ones in /afs/rhic/star/data/samples
+// change default input files to point to ones in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.1  2000/01/07 19:22:52  kathy
 // add bfcread_dstBranch,bfcread_runcoBranch macros to show how to read dst produced from bfc.C and navigate through different branches of the file and find and list table information
@@ -57,7 +60,7 @@ StChain *chain;
 void bfcread_runcoBranch(
  Int_t nevents=1, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root",
+ "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
   const char *fname="qa_runco.out")
 {
 //

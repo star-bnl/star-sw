@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.5 1999/02/28 20:11:23 lasiuk Exp $
+# $Id: GNUmakefile,v 1.6 2006/08/15 21:42:18 jeromel Exp $
 #
 # Author: Brian, October 1998
 # --------------------------------------------------------------------------
@@ -8,6 +8,9 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
+# Revision 1.6  2006/08/15 21:42:18  jeromel
+# Fix rhic -> rhic.bnl.gov
+#
 # Revision 1.5  1999/02/28 20:11:23  lasiuk
 # add programs
 #
@@ -63,7 +66,7 @@ endif
 # --------            SUN/Solaris              ---------
 ifeq ($(findstring sun4x,$(STAR_SYS)),sun4x)
 	LD_FLAGS  := -PPPP
-	LIB_PATH  += -L/cern/pro/lib -L$(STDHOME)/lib -L/afs/rhic/star/packages/ObjectSpace/2.0m/lib
+	LIB_PATH  += -L/cern/pro/lib -L$(STDHOME)/lib -L/afs/rhic.bnl.gov/star/packages/ObjectSpace/2.0m/lib
 	LIBS      += -lospace -lF77 -lM77 -lsocket -lnsl -lsunmath
 endif
 

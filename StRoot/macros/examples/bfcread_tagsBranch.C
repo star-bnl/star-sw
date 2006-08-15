@@ -1,5 +1,8 @@
-// $Id: bfcread_tagsBranch.C,v 1.15 2000/06/15 21:32:56 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.16 2006/08/15 21:43:14 jeromel Exp $
 // $Log: bfcread_tagsBranch.C,v $
+// Revision 1.16  2006/08/15 21:43:14  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.15  2000/06/15 21:32:56  kathy
 // copied all integers to floats before writing out to file using fout --- otherwise CINT doesn't like it on Solaris
 //
@@ -39,7 +42,7 @@
 //=======================================================================
 
 void bfcread_tagsBranch( 
-  const char *MainFile="/afs/rhic/star/data/samples/gstar.tags.root",
+  const char *MainFile="/afs/rhic.bnl.gov/star/data/samples/gstar.tags.root",
   Int_t printEvent=1,
   const char *fname="qa_tags.out",
   Int_t fullPrint=0) 

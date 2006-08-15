@@ -1,10 +1,13 @@
-// $Id: MakeHists.cxx,v 1.13 2003/09/02 18:00:19 perev Exp $
+// $Id: MakeHists.cxx,v 1.14 2006/08/15 21:42:59 jeromel Exp $
 // $Log: MakeHists.cxx,v $
+// Revision 1.14  2006/08/15 21:42:59  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.13  2003/09/02 18:00:19  perev
 // gcc 3.2 updates + WarnOff
 //
 // Revision 1.12  2000/01/19 21:00:40  kathy
-// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+// update macros to use standard default xdf files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.11  1999/10/11 17:18:00  kathy
 // changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
@@ -22,7 +25,7 @@
 //*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
 void MakeHists(Char_t *xdffilename=
-  "/afs/rhic/star/data/samples/gstar.dst.xdf")
+  "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.xdf")
 {
 
   gROOT->Reset();
@@ -148,6 +151,6 @@ void MakeHists(Char_t *xdffilename=
      gBenchmark->Show("hsum");
   }
   printf(" This is a finish \n");
-  printf(" You may pick up this example from /afs/rhic/star/packages/dev/StRoot/macros/MakeHists.cxx\n");
+  printf(" You may pick up this example from /afs/rhic.bnl.gov/star/packages/dev/StRoot/macros/MakeHists.cxx\n");
 }
 

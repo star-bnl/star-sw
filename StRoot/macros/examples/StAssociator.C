@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.36 2005/07/07 21:19:18 calderon Exp $
+// $Id: StAssociator.C,v 1.37 2006/08/15 21:43:01 jeromel Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.37  2006/08/15 21:43:01  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.36  2005/07/07 21:19:18  calderon
 // Load EEmcUtil.
 //
@@ -69,7 +72,7 @@
 // change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
 //
 // Revision 1.14  2000/01/19 21:00:40  kathy
-// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+// update macros to use standard default xdf files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.13  2000/01/19 19:38:12  calderon
 // activate runco branch
@@ -140,7 +143,7 @@ class StChain;
 StChain *chain=0;
 
 void StAssociator(Int_t nevents=1,
-const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
+const char *MainFile="/afs/rhic.bnl.gov/star/data/samples/*.geant.root")
 {
 
   // Dynamically link needed shared libs

@@ -1,5 +1,8 @@
-// $Id: SavePrimitive.C,v 1.4 1999/05/21 15:33:53 kathy Exp $
+// $Id: SavePrimitive.C,v 1.5 2006/08/15 21:43:00 jeromel Exp $
 // $Log: SavePrimitive.C,v $
+// Revision 1.5  2006/08/15 21:43:00  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.4  1999/05/21 15:33:53  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -77,7 +80,7 @@
   gSystem->Load("St_Tables");
   gSystem->Load("St_params_Maker");
   //  StChain chain("bfc");
-  const Char_t *Path="/afs/rhic/star/packages/dev/StDb/";
+  const Char_t *Path="/afs/rhic.bnl.gov/star/packages/dev/StDb/";
   StChain chain("bfc");
 
 //  Create the makers to be called by the current chain
@@ -101,7 +104,7 @@
     if (t->HasData()){ // Table
       path += ".C";
       dirname = gSystem->DirName(path.Data());
-      //      if (strcmp("/afs/rhic/star/packages/dev/StDb/svt/stkpars",dirname.Data()) == 0) {go = kTRUE;}
+      //      if (strcmp("/afs/rhic.bnl.gov/star/packages/dev/StDb/svt/stkpars",dirname.Data()) == 0) {go = kTRUE;}
       //      if (! go) continue;
       if (!gSystem->OpenDirectory(dirname.Data())) { 
         if (gSystem->mkdir(dirname.Data())) {

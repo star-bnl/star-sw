@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.10 2005/08/31 15:05:08 fisyak Exp $
+// $Id: StHbtExample.C,v 1.11 2006/08/15 21:43:03 jeromel Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.11  2006/08/15 21:43:03  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.10  2005/08/31 15:05:08  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -13,7 +16,7 @@
 // fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
 //
 // Revision 1.6  2000/01/19 15:52:46  kathy
-// change default input file to be the one in /afs/rhic/star/data/samples
+// change default input file to be the one in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.5  1999/09/24 00:00:34  lisa
 // HBT example macro updated to use TrackCuts not ParticleCuts
@@ -50,7 +53,7 @@ MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
 		  const char *MainFile=
-"/afs/rhic/star/data/samples/gstar.dst.root")
+"/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root")
 {
 
     // Dynamically link needed shared libs

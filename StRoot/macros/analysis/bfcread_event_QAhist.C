@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.14 2006/05/18 16:38:04 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.15 2006/08/15 21:42:37 jeromel Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.15  2006/08/15 21:42:37  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.14  2006/05/18 16:38:04  genevb
 // Introduce StHistUtil::GetRunYear()
 //
@@ -85,7 +88,7 @@ StChain *chain;
 void bfcread_event_QAhist(
      Int_t nevents=2,
      const Char_t *MainFile=
-     //"/afs/rhic/star/data/samples/gstar.dst.root",
+     //"/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
 "/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_standard/hc_standard.40_evts.event.root",
     const Char_t *psFile="EventQAhist.ps",
     const Char_t *PageTitle="",

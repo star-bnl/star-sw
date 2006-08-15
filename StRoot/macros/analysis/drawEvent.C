@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.12 2005/08/31 15:03:09 fisyak Exp $
+// $Id: drawEvent.C,v 1.13 2006/08/15 21:42:45 jeromel Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.13  2006/08/15 21:42:45  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.12  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -14,10 +17,10 @@
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
 // Revision 1.8  2000/01/19 21:00:32  kathy
-// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+// update macros to use standard default xdf files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.7  2000/01/19 16:29:51  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.6  1999/08/20 22:49:33  fine
 // StChain::Finish() has been removed to keep the last picture on the screen
@@ -78,13 +81,13 @@ StEventDisplayMaker *disp=0;
 
 TBrowser *b=0;
 const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
-const char *xdfFile ="/afs/rhic/star/data/samples/gstar.dst.xdf";
+const char *xdfFile ="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
-  // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
+  // const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/psc0016_05_35evts.root")
   // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
-  // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+  // const Char_t *file="/afs/rhic.bnl.gov/star/strange/genevb/year1a_90evts_dst.xdf")
   // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
   // const Char_t *path="-/disk00000/star/auau200/hijing135/",
 
@@ -98,7 +101,7 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // to be processed.
 //
 // example invocation:
-// .x doEvents.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+// .x doEvents.C(10,"-","/afs/rhic.bnl.gov/star/strange/genevb/year1a_90evts_dst.xdf")
 //
 // example ROOT file invocation:
 // .x doEvents.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.root")
@@ -184,7 +187,7 @@ void doEventsQQ(const Int_t nevents=999,
 }
 void drawEvent(const Int_t nevents=2,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.xdf")
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.xdf")
 {
   const char *fileListQQ[]={0,0};
   if (path[0]=='-') {

@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_extract.C,v 3.1 2004/07/01 18:33:50 genevb Exp $ 
+// $Id: bfcread_hist_extract.C,v 3.2 2006/08/15 21:42:38 jeromel Exp $ 
 // $Log: bfcread_hist_extract.C,v $
+// Revision 3.2  2006/08/15 21:42:38  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 3.1  2004/07/01 18:33:50  genevb
 // Macro to extract hists from BFC output hist.root files
 //
@@ -49,7 +52,7 @@ StIOMaker *IOMk=0;
 
 void bfcread_hist_extract(
   const Char_t *MainFile=
-    "/afs/rhic/star/data/samples/gstar.hist.root",
+    "/afs/rhic.bnl.gov/star/data/samples/gstar.hist.root",
   const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree",
   Char_t *OutFile=0)

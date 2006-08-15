@@ -1,5 +1,8 @@
-// $Id: bfcread_geantBranch.C,v 1.12 2000/06/20 19:07:23 lansdell Exp $
+// $Id: bfcread_geantBranch.C,v 1.13 2006/08/15 21:43:11 jeromel Exp $
 // $Log: bfcread_geantBranch.C,v $
+// Revision 1.13  2006/08/15 21:43:11  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.12  2000/06/20 19:07:23  lansdell
 // had to load libglobal_Tables to prevent crashes
 //
@@ -32,7 +35,7 @@ StChain *chain;
 void bfcread_geantBranch(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.geant.root",
+ "/afs/rhic.bnl.gov/star/data/samples/gstar.geant.root",
  const char *fname="qa_geant.out") 
 {
 //

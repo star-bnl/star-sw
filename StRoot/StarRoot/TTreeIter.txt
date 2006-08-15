@@ -54,7 +54,7 @@ while (iter.Next())
 
 For those who is interested, all codes and Makefile is attached.
 Those users who have AFS can get it
-from /afs/rhic/star/packages/.DEV/StRoot/StarRoot/*
+from /afs/rhic.bnl.gov/star/packages/.DEV/StRoot/StarRoot/*
 
 FILEs:
 TTreeIter.txt - this message

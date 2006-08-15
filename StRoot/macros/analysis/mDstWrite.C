@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: mDstWrite.C,v 3.3 2005/08/31 15:03:09 fisyak Exp $
+// $Id: mDstWrite.C,v 3.4 2006/08/15 21:42:47 jeromel Exp $
 // Author: Thomas Ullrich, Oct 2000
 //
 //////////////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //
 // $Log: mDstWrite.C,v $
+// Revision 3.4  2006/08/15 21:42:47  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 3.3  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -81,7 +84,7 @@ void mDstWrite(Int_t nevents, const Char_t **fileList, const Char_t *outfile)
 	const char *Argv[]= {
 	    "-s","dst runco",                    // list of components needed
 	    "-q","numberOfPrimaryTracks>1500",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
 	};
 	Int_t Argc=sizeof(Argv)/4;
 	setFiles->Init(Argc,Argv);

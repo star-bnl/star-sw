@@ -1,10 +1,13 @@
-// $Id: TestSorter.C,v 1.9 2000/06/05 18:14:13 fine Exp $
+// $Id: TestSorter.C,v 1.10 2006/08/15 21:43:05 jeromel Exp $
 // $Log: TestSorter.C,v $
+// Revision 1.10  2006/08/15 21:43:05  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.9  2000/06/05 18:14:13  fine
 // Adjuested to ROOT 2.24
 //
 // Revision 1.8  2000/01/19 21:00:40  kathy
-// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+// update macros to use standard default xdf files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.7  2000/01/12 02:20:19  fine
 // test check new St_TableSorter ctors
@@ -27,7 +30,7 @@ void Load() {
     if (gSystem.Load("xdf2root"))     printf(" Loading DLL \"xdf2root\" failed \n");
     if (gSystem.Load("St_Tables"))    printf(" Loading DLL \"St_Tables\" failed \n");
 }
-void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const Char_t *col="phep[3]")
+void TestSorter(Char_t *xdffilename="/afs/rhic.bnl.gov/star/data/samples/test.xdf",const Char_t *col="phep[3]")
 {
  //   Read XDF file
     Load();
@@ -74,9 +77,9 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
 //      cout << " Key: " << key2Count << " found " << sorter->CountKey(&key2Count) << " times" << endl;
     }
   //  second sample:
-  //   /afs/rhic/star/data/samples/set0027_03_49evts_dst.xdf
+  //   /afs/rhic.bnl.gov/star/data/samples/set0027_03_49evts_dst.xdf
     cout << " Second pass " << endl;
-    St_XDFFile  xd("/afs/rhic/star/data/samples/gstar.dst.xdf");
+    St_XDFFile  xd("/afs/rhic.bnl.gov/star/data/samples/gstar.dst.xdf");
     event = xd.NextEventGet();
     if (event) {
       St_dst_vertex *table=0;
