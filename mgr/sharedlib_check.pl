@@ -40,7 +40,7 @@ foreach $int ( $mon,$mday ){
   $output_string .= $int;
 }
 
-$outfile = "/afs/rhic/star/doc/www/comp/prod/$output_string\.html";
+$outfile = "/afs/rhic.bnl.gov/star/doc/www/comp/prod/$output_string\.html";
 
 #print "STAR_SYS = ",$star_sys, "\n";
  

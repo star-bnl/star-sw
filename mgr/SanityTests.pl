@@ -17,7 +17,7 @@
 # script so we are only a few steps away from being able 
 # to submit the tests in batch ...
 #
-use lib "/afs/rhic/star/packages/scripts";
+use lib "/afs/rhic.bnl.gov/star/packages/scripts";
 use ABUtils;
 
 
