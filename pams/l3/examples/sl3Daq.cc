@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	tracker.reset();  
 
 	char* bufferC; 
-	char* fileName = "/afs/rhic/star/users/yepes/try/cos_B1.dta";
+	char* fileName = "/afs/rhic.bnl.gov/star/users/yepes/try/cos_B1.dta";
 
 
 
