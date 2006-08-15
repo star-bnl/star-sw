@@ -16,7 +16,7 @@ canonical TPC sector for time tests.
 sl3Daq.cc is an example of reading a binary file with the cluster
 DAQ format. The executable "sl3Daq" is generated with
 "make sl3Daq". By default it reads the file
-"/afs/rhic/star/users/yepes/try/cos_B1.dta".
+"/afs/rhic.bnl.gov/star/users/yepes/try/cos_B1.dta".
 
 To generate these two executables the compilation flag -D SL3ROOT
 should NOT be used. See inside the Makefile file.
