@@ -3,7 +3,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.31 2006/05/10 15:13:17 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.32 2006/08/15 14:32:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.32  2006/08/15 14:32:58  ullrich
+ * Added kHpdId.
+ *
  * Revision 2.31  2006/05/10 15:13:17  jeromel
  * Additional enum
  *
@@ -173,6 +176,7 @@ enum StDetectorId {kUnknownId   = kUnknownIdentifier,
 	         kIgtId = kIgtIdentifier,
 	         kFstId = kFstIdentifier,
 	         kFgtId = kFgtIdentifier,
+	         kHpdId = kHpdIdentifier,
 	         kMaxDetectorId};
 
 /*!
@@ -314,7 +318,7 @@ enum StVertexFinderId { undefinedVertexFinder = 0,
                         minuitVertexFinder,
                         ppvVertexFinder,
                         ppvNoCtbVertexFinder,
-			mcEventVertexFFinder};
+		    mcEventVertexFFinder};
 
 
 /*!
