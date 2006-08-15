@@ -1,10 +1,13 @@
-// $Id: MakeHtmlTables.cxx,v 1.11 2001/09/02 00:03:22 fine Exp $
+// $Id: MakeHtmlTables.cxx,v 1.12 2006/08/15 21:43:16 jeromel Exp $
 // $Log: MakeHtmlTables.cxx,v $
+// Revision 1.12  2006/08/15 21:43:16  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.11  2001/09/02 00:03:22  fine
 // type fixed
 //
 // Revision 1.10  1999/11/19 21:20:23  fine
-// Extra path to /afs/rhic/star/packages/SL99i include dirictory was added
+// Extra path to /afs/rhic.bnl.gov/star/packages/SL99i include dirictory was added
 //
 // Revision 1.9  1999/09/14 15:30:39  fine
 // makedocs adjusted to the new source tree

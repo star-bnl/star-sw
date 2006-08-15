@@ -1,5 +1,8 @@
-// $Id: StTpcEval.C,v 1.4 2000/08/07 03:25:13 snelling Exp $
+// $Id: StTpcEval.C,v 1.5 2006/08/15 21:42:14 jeromel Exp $
 // $Log: StTpcEval.C,v $
+// Revision 1.5  2006/08/15 21:42:14  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.4  2000/08/07 03:25:13  snelling
 // Added selection on tracks
 //
@@ -29,7 +32,7 @@ class StChain;
 StChain *chain=0;
 
 void StTpcEval(Int_t nevents=1,
-const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
+const char *MainFile="/afs/rhic.bnl.gov/star/data/samples/*.geant.root")
 {
 
     // Dynamically link needed shared libs

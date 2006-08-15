@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: DoSt2feeTTree.C,v 1.6 2003/08/22 20:53:08 balewski Exp $
+// $Id: DoSt2feeTTree.C,v 1.7 2006/08/15 21:41:39 jeromel Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -74,7 +74,7 @@ void doEvents(Int_t nEvents,
               const Char_t *qaflag = "dbon"); 
 
 void doEvents(Int_t startEvent,Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const Char_t *qaflag = 0);
 
 void doEvents(const Int_t nEvents, 
@@ -157,7 +157,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
       const char *Argv[]= {
 	    "-s","dst runco",                           // list of components needed
 	    "-q","numberOfPrimaryTracks>1500",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
       Int_t Argc=sizeof(Argv)/4;
       setFiles->Init(Argc,Argv);

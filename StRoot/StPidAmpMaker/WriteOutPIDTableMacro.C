@@ -2,7 +2,7 @@
 
 #include <fstream.h>
 
-#include "/afs/rhic/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
+#include "/afs/rhic.bnl.gov/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
 #include "/star/data05/scratch/aihong/pidamp_dAu/StRoot/StPidAmpMaker/StPidProbabilityConst.hh"
 

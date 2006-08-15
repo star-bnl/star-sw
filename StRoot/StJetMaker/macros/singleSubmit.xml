@@ -5,7 +5,7 @@
             cd /auto/pdsfdv35/rhstar/mmiller/cvs/;
             stardev
             pwd;
-            root4star -q -b /afs/rhic/star/users/mmiller/cvs/StRoot/StJetMaker/macros/RunJetFinder2.C\(1e9,\"./$FILELIST\"\,\"./$FILELIST.jet.root\"\)
+            root4star -q -b /afs/rhic.bnl.gov/star/users/mmiller/cvs/StRoot/StJetMaker/macros/RunJetFinder2.C\(1e9,\"./$FILELIST\"\,\"./$FILELIST.jet.root\"\)
   </command>
    <!-- please change the output paths to valid folders where you have write permission -->
 

@@ -24,7 +24,7 @@ proc findMuDst {run} {
     set runX [string trim $run "R"]
     #    puts "output=$run"
 
-    set perlJob "/afs/rhic/star/packages/scripts/get_file_list.pl -keys 'path,filename' -cond 'filetype=daq_reco_MuDst,runnumber=$runX,production=P02ge,storage=local,sanity=1' -delim '/' -limit 1000 "; # was storage=NSF
+    set perlJob "/afs/rhic.bnl.gov/star/packages/scripts/get_file_list.pl -keys 'path,filename' -cond 'filetype=daq_reco_MuDst,runnumber=$runX,production=P02ge,storage=local,sanity=1' -delim '/' -limit 1000 "; # was storage=NSF
 
     set muDstList $my(wrkDir)/muDst$run.lis
     set fd [open $my(perlExec) "w"]

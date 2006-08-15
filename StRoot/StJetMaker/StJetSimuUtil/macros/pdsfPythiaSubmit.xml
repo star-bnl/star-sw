@@ -6,8 +6,8 @@
             stardev;
             echo $STAR;
             pwd;
-            ls -l -h /afs/rhic/star/users/mmiller/code/pythia/StRoot/StJetMaker/StJetSimuUtil/macros/RunPythia.C
-            root4star -q -b /afs/rhic/star/users/mmiller/code/pythia/StRoot/StJetMaker/StJetSimuUtil/macros/RunPythia.C\(1e9,\"$FILELIST\"\,\"./processed/$FILELIST.root\"\)
+            ls -l -h /afs/rhic.bnl.gov/star/users/mmiller/code/pythia/StRoot/StJetMaker/StJetSimuUtil/macros/RunPythia.C
+            root4star -q -b /afs/rhic.bnl.gov/star/users/mmiller/code/pythia/StRoot/StJetMaker/StJetSimuUtil/macros/RunPythia.C\(1e9,\"$FILELIST\"\,\"./processed/$FILELIST.root\"\)
   </command>
    <!-- please change the output paths to valid folders where you have write permission -->
    <output fromScratch="*" toURL="file:/auto/pdsfdv34/starspin/sge/processed/" />

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doShift.C,v 1.2 2002/11/19 22:38:29 dunlop Exp $
+// $Id: doShift.C,v 1.3 2006/08/15 21:42:09 jeromel Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -70,11 +70,11 @@ void doShift(Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 void doShift(Int_t startEvent, Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 
 void doShift(Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const Char_t *qaflag = 0); 
 
 void doShift(Int_t startEvent,Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/example.event.root",
               const Char_t *qaflag = 0);
 
 void doShift(const Int_t nEvents, 
@@ -175,7 +175,7 @@ void doShift(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const C
       const char *Argv[]= {
 	    "-s","dst runco",                           // list of components needed
 	    "-q","numberOfPrimaryTracks>1500",   // example of user query
-	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
+	    "-c","/afs/rhic.bnl.gov/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
       Int_t Argc=sizeof(Argv)/4;
       setFiles->Init(Argc,Argv);
@@ -355,6 +355,9 @@ void doShift(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doShift.C,v $
+// Revision 1.3  2006/08/15 21:42:09  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.2  2002/11/19 22:38:29  dunlop
 // Reverting loading to the subdirectory-named .so
 //

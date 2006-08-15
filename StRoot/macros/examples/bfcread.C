@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.25 2000/04/18 20:37:25 kathy Exp $
+// $Id: bfcread.C,v 1.26 2006/08/15 21:43:07 jeromel Exp $
 // $Log: bfcread.C,v $
+// Revision 1.26  2006/08/15 21:43:07  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.25  2000/04/18 20:37:25  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -13,7 +16,7 @@
 // fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
 //
 // Revision 1.21  2000/01/19 15:46:05  kathy
-// change default input files to point to ones in /afs/rhic/star/data/samples
+// change default input files to point to ones in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.20  2000/01/05 22:11:57  kathy
 // changed input file to current one
@@ -81,7 +84,7 @@ TBrowser *brow=0;
 void bfcread(
  Int_t nevents=1, 
  const char *MainFile=
-"/afs/rhic/star/data/samples/gstar.dst.root")
+"/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");

@@ -1,4 +1,4 @@
-// $Id: bfcread_histBranch.C,v 1.6 2000/06/13 01:41:50 lansdell Exp $
+// $Id: bfcread_histBranch.C,v 1.7 2006/08/15 21:43:12 jeromel Exp $
 // $Log $
 
 //======================================================================
@@ -26,7 +26,7 @@ StChain *chain;
 void bfcread_histBranch(
  Int_t nevents=1, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root",
+ "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
   const char *fname="qa_hist.out")
 {
 //

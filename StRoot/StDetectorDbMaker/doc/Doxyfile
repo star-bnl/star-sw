@@ -50,13 +50,13 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = /afs/rhic/star/users/gans/zdctest/StRoot/StDetectorDbMaker/
+INPUT                  = /afs/rhic.bnl.gov/star/users/gans/zdctest/StRoot/StDetectorDbMaker/
 FILE_PATTERNS          = *.cxx \
                          *.h
 RECURSIVE              = NO
 EXCLUDE                = 
 EXCLUDE_PATTERNS       = 
-EXAMPLE_PATH           = /afs/rhic/star/users/gans/zdctest/StRoot/StDetectorDbMaker/doc/examples/
+EXAMPLE_PATH           = /afs/rhic.bnl.gov/star/users/gans/zdctest/StRoot/StDetectorDbMaker/doc/examples/
 EXAMPLE_PATTERNS       = *.cxx
 IMAGE_PATH             = 
 INPUT_FILTER           = 

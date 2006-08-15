@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.9 2004/01/23 15:06:23 fisyak Exp $
+// $Id: bfcread_eventBranch.C,v 1.10 2006/08/15 21:43:10 jeromel Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.10  2006/08/15 21:43:10  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.9  2004/01/23 15:06:23  fisyak
 // Add gSystem->Load(StBichsel) by Lee request
 //
@@ -47,7 +50,7 @@ StChain *chain;
 void bfcread_eventBranch(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.event.root",
+ "/afs/rhic.bnl.gov/star/data/samples/gstar.event.root",
   const char *fname="qa_event.out")
 {
 //

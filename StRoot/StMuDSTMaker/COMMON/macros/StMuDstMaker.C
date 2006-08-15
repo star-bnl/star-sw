@@ -33,7 +33,7 @@ void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* 
   gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
 
   //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
-  //  gSystem->Load("/afs/rhic/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
+  //  gSystem->Load("/afs/rhic.bnl.gov/star/packages/DEV/.i386_redhat61/lib/libJprof"); 
   cout << " loading done " << endl;
 
   chain = new StChain("StChain"); 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StResidualMaker.cxx,v 1.4 2003/09/02 17:59:13 perev Exp $
+ * $Id: StResidualMaker.cxx,v 1.5 2006/08/15 21:42:15 jeromel Exp $
  *
  * Author: malisa
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StResidualMaker.cxx,v $
+ * Revision 1.5  2006/08/15 21:42:15  jeromel
+ * Fix rhic -> rhic.bnl.gov
+ *
  * Revision 1.4  2003/09/02 17:59:13  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -117,7 +120,7 @@ Int_t StResidualMaker::Init()
   // define the PadRowPlanes...
 
   // padrow radii stolen from Pavel Nevski's file
-  // /afs/rhic/star/packages/DEV/pams/geometry/tpcegeo/tpcegeo.g
+  // /afs/rhic.bnl.gov/star/packages/DEV/pams/geometry/tpcegeo/tpcegeo.g
   // note numbering starts at ONE ("waste" zeroth position)
   double rPadRows[46] = {0.0, 60.0, 64.8, 69.6, 74.4, 79.2, 84.0, 88.8, 93.6, 98.8, 
 			   104.0,109.2,114.4,119.6,                     // done inner sector

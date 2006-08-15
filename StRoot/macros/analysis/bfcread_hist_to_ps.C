@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.29 2006/05/18 16:38:04 genevb Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.30 2006/08/15 21:42:42 jeromel Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.30  2006/08/15 21:42:42  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.29  2006/05/18 16:38:04  genevb
 // Introduce StHistUtil::GetRunYear()
 //
@@ -34,7 +37,7 @@
 // put in call to method SetDefaultLogXList
 //
 // Revision 1.18  2000/01/19 16:29:51  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.17  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
@@ -136,7 +139,7 @@ StIOMaker *IOMk=0;
 
 void bfcread_hist_to_ps(
   const Char_t *MainFile=
-     "/afs/rhic/star/data/samples/gstar.hist.root",
+     "/afs/rhic.bnl.gov/star/data/samples/gstar.hist.root",
   const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree",
   const Char_t *psFile="QA_hist.ps",

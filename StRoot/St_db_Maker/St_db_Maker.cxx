@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.98 2006/05/31 03:55:52 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.99 2006/08/15 21:42:20 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.99  2006/08/15 21:42:20  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.98  2006/05/31 03:55:52  fisyak
 // Set default fMaxEntryTime='now'
 //
@@ -1092,6 +1095,6 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
 //                                                                      //
 // St_db_Maker class for Makers                                      //
 //                                                                      //
-// This class is C++ implementation of the Begin_html <a href="http://www.rhic.bnl.gov/afs/rhic/star/doc/www/packages_l/pro/pams/db/sdb/doc/index.html">Simple Database Manager</a> End_html    //
+// This class is C++ implementation of the Begin_html <a href="http://www.rhic.bnl.gov/afs/rhic.bnl.gov/star/doc/www/packages_l/pro/pams/db/sdb/doc/index.html">Simple Database Manager</a> End_html    //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////

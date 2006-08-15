@@ -1,5 +1,8 @@
-// $Id: MakeTableClasses.cxx,v 1.2 1999/05/21 15:33:51 kathy Exp $
+// $Id: MakeTableClasses.cxx,v 1.3 2006/08/15 21:43:17 jeromel Exp $
 // $Log: MakeTableClasses.cxx,v $
+// Revision 1.3  2006/08/15 21:43:17  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.2  1999/05/21 15:33:51  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -41,7 +44,7 @@ void MakeTableClasses(){
   if (NT) 
     sourcedir = "//sol/afs_rhic/star/packages/dev/.share/tables";
   else
-    sourcedir = "/afs/rhic/star/packages/dev/.share/tables";
+    sourcedir = "/afs/rhic.bnl.gov/star/packages/dev/.share/tables";
   NT = kFALSE;
   dirhandle = gSystem->OpenDirectory(sourcedir);
   if (dirhandle) {

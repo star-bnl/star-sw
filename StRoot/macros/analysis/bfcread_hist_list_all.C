@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.14 2000/07/26 19:53:45 lansdell Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.15 2006/08/15 21:42:40 jeromel Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.15  2006/08/15 21:42:40  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.14  2000/07/26 19:53:45  lansdell
 // made changes for creating new QA histograms
 //
@@ -13,7 +16,7 @@
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
 // Revision 1.10  2000/01/19 16:29:51  kathy
-// update macros to use default input files in /afs/rhic/star/data/samples
+// update macros to use default input files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.9  2000/01/05 22:12:03  kathy
 // changed input file to current one
@@ -65,7 +68,7 @@ TDataSet *Event;
 
 void bfcread_hist_list_all(
   const Char_t *MainFile=
-     "/afs/rhic/star/data/samples/gstar.hist.root",
+     "/afs/rhic.bnl.gov/star/data/samples/gstar.hist.root",
   const Char_t *TopDirTree="bfcTree")
 {
   cout << "bfcread_hist_list_all.C, input hist file = " 

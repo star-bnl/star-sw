@@ -1,5 +1,8 @@
-//$Id: MemoryUsage.C,v 1.7 2000/03/10 16:05:23 kathy Exp $
+//$Id: MemoryUsage.C,v 1.8 2006/08/15 21:42:31 jeromel Exp $
 //$Log: MemoryUsage.C,v $
+//Revision 1.8  2006/08/15 21:42:31  jeromel
+//Fix rhic -> rhic.bnl.gov
+//
 //Revision 1.7  2000/03/10 16:05:23  kathy
 //change Mbyte scale explanation so it's correct
 //
@@ -37,7 +40,7 @@
 
 void MemoryUsage(    
        const Char_t *InFile=
-       "/afs/rhic/star/data/samples/mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.txt",
+       "/afs/rhic.bnl.gov/star/data/samples/mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.txt",
        const Char_t *OutFile=
          "mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.ps")
 {

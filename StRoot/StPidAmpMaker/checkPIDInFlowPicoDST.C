@@ -1,4 +1,4 @@
-#include "/afs/rhic/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
+#include "/afs/rhic.bnl.gov/star/replicas/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
 void checkPIDInFlowPicoDST(){
 

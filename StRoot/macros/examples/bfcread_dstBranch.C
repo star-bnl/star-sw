@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.17 2000/06/20 14:03:04 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.18 2006/08/15 21:43:08 jeromel Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.18  2006/08/15 21:43:08  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.17  2000/06/20 14:03:04  kathy
 // now unpack and print out BfcStatus table, if it exists, from .event.root file
 //
@@ -46,7 +49,7 @@ StChain *chain;
 void bfcread_dstBranch(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root",
+ "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
   const char *fname="qa_dst.out")
 {
 //

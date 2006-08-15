@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.1 2004/10/12 18:53:48 mmiller Exp $
+// $Id: StMcEventReadMacro.C,v 1.2 2006/08/15 21:41:50 jeromel Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.2  2006/08/15 21:41:50  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.1  2004/10/12 18:53:48  mmiller
 // Added simu macros and some scripts.
 //
@@ -31,7 +34,7 @@
 // change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
 //
 // Revision 1.11  2000/01/19 21:00:40  kathy
-// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+// update macros to use standard default xdf files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.10  2000/01/12 20:29:15  calderon
 // Changed default file to the one produced weekly by Lidia in

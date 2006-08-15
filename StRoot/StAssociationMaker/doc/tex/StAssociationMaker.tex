@@ -2,7 +2,7 @@
 %
 % StAssociationMaker - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StAssociationMaker.tex,v 1.4 2000/02/15 01:28:25 calderon Exp $
+% $Id: StAssociationMaker.tex,v 1.5 2006/08/15 21:41:32 jeromel Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StAssociationMaker.tex,v $
+% Revision 1.5  2006/08/15 21:41:32  jeromel
+% Fix rhic -> rhic.bnl.gov
+%
 % Revision 1.4  2000/02/15 01:28:25  calderon
 % Updated first half of documentation,
 % still more to do...
@@ -206,7 +209,7 @@ To obtain the SCL documentation perform the following steps:
 \begin{enumerate}
   \item Obtain an \name{afs} token: \name{klog -cell rhic}.
   \item Make sure \name{\$CVSROOT} is set properly: \\ %%$
-	(i.e.~\name{CVSROOT = /afs/rhic/star/packages/repository})
+	(i.e.~\name{CVSROOT = /afs/rhic.bnl.gov/star/packages/repository})
   \item Check-out the SCL into your current working directory:\\
     \name{cvs checkout StRoot/StarClassLibrary}
   \item Go to the directory containing the documentation:\\
@@ -227,7 +230,7 @@ be accessed via \name{afs}: \index{afs} \index{CVS} \index{CVSROOT}
 \begin{enumerate}
   \item Obtain an \name{afs} token: \name{klog -cell rhic}.
   \item Make sure \name{\$CVSROOT} is set properly:\\ %%$
-    (i.e.~\name{CVSROOT = /afs/rhic/star/packages/repository})
+    (i.e.~\name{CVSROOT = /afs/rhic.bnl.gov/star/packages/repository})
   \item Check-out package into your current working directory:\\
     \name{cvs checkout StRoot/StAssociationMaker}
   \item Check-out the examples

@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_geant_Branch.C,v 1.5 2000/05/09 20:15:44 kathy Exp $
+// $Id: bfcread_dst_geant_Branch.C,v 1.6 2006/08/15 21:43:09 jeromel Exp $
 // $Log: bfcread_dst_geant_Branch.C,v $
+// Revision 1.6  2006/08/15 21:43:09  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.5  2000/05/09 20:15:44  kathy
 // transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
 //
@@ -31,7 +34,7 @@ StChain *chain;
 void bfcread_dst_geant_Branch(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root",
+ "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
  const char *fname="qa_dst_geant.out")
 {
 //

@@ -1,5 +1,8 @@
-// $Id: par_anal.cxx,v 1.9 1999/06/03 16:40:37 kathy Exp $
+// $Id: par_anal.cxx,v 1.10 2006/08/15 21:43:21 jeromel Exp $
 // $Log: par_anal.cxx,v $
+// Revision 1.10  2006/08/15 21:43:21  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.9  1999/06/03 16:40:37  kathy
 // put back old dedx.C and restore original macros that use non-existent input file
 //
@@ -11,7 +14,7 @@
 // what it does: 
 //=======================================================================
 
-void par_anal(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf") 
+void par_anal(Char_t *xdffilename="/afs/rhic.bnl.gov/star/packages/dev/StRoot/macros/data/test.xdf") 
 {
   //  gROOT->Reset();
 
@@ -143,6 +146,6 @@ void par_anal(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/dat
   printf("\n");
   gBenchmark->Show("hsum");
   printf(" This is a finish \n");
-  printf(" You may pick up this example from /afs/rhic/star/packages/dev/StRoot/macros/par_anal.cxx\n");
+  printf(" You may pick up this example from /afs/rhic.bnl.gov/star/packages/dev/StRoot/macros/par_anal.cxx\n");
 }
 

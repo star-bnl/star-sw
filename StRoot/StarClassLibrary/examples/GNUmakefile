@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.7 2000/04/06 22:26:36 ullrich Exp $
+# $Id: GNUmakefile,v 1.8 2006/08/15 21:42:23 jeromel Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,6 +10,9 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
+# Revision 1.8  2006/08/15 21:42:23  jeromel
+# Fix rhic -> rhic.bnl.gov
+#
 # Revision 1.7  2000/04/06 22:26:36  ullrich
 # Added new particle classes to particleTest.
 #
@@ -75,7 +78,7 @@ ifeq ($(findstring sun4x, $(STAR_SYS)),sun4x)
 		LDFLAGS      += -L/opt/WS5.0/SC5.0/lib -lCstd -lF77 -lM77 -lsocket -lnsl -lsunmath -lmalloc
         else
 		CXX 	     := CC
-		STDHOME      := /afs/rhic/star/packages/ObjectSpace/2.0m
+		STDHOME      := /afs/rhic.bnl.gov/star/packages/ObjectSpace/2.0m
 		CPPFLAGS     += -I$(STDHOME) -I$(STDHOME)/ospace/std 
 		CPPFLAGS     += -DST_NO_MEMBER_TEMPLATES -DST_NO_NUMERIC_LIMITS
 		CPPFLAGS     += -DST_NO_EXCEPTIONS -DST_NO_TEMPLATE_DEF_ARGS

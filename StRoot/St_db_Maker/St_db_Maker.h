@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.25 2005/07/20 17:41:44 perev Exp $
+// $Id: St_db_Maker.h,v 1.26 2006/08/15 21:42:21 jeromel Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.26  2006/08/15 21:42:21  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.25  2005/07/20 17:41:44  perev
 // Cleanup
 //
@@ -56,7 +59,7 @@
 //                                                                      //
 // St_db_Maker virtual base class for Maker                          //
 //                                                                      //
-// This class is C++ implementation of the Begin_html <a href="http://www.rhic.bnl.gov/afs/rhic/star/doc/www/packages_l/pro/pams/db/sdb/doc/index.html">Simple Database Manager</a> End_html    //
+// This class is C++ implementation of the Begin_html <a href="http://www.rhic.bnl.gov/afs/rhic.bnl.gov/star/doc/www/packages_l/pro/pams/db/sdb/doc/index.html">Simple Database Manager</a> End_html    //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
@@ -86,7 +89,7 @@ private:
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
   TStopwatch  fTimer[4];        //!Timer object 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.25 2005/07/20 17:41:44 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.26 2006/08/15 21:42:21 jeromel Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -127,7 +130,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.25 2005/07/20 17:41:44 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.26 2006/08/15 21:42:21 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   
 };

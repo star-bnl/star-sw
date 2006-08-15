@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.4 2003/09/02 17:58:56 perev Exp $
+ * $Id: StRrsMaker.cxx,v 2.5 2006/08/15 21:42:11 jeromel Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 2.5  2006/08/15 21:42:11  jeromel
+ * Fix rhic -> rhic.bnl.gov
+ *
  * Revision 2.4  2003/09/02 17:58:56  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -360,7 +363,7 @@ Int_t StRrsMaker::Make()
     //cout << "Done clear" << endl;
 
 #ifdef RICH_DIAGNOSTIC
-    ofstream raw("/afs/rhic/star/users/lasiuk/data/rings.txt");
+    ofstream raw("/afs/rhic.bnl.gov/star/users/lasiuk/data/rings.txt");
 #endif
 
     StRichGHit hit;

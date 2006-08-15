@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.8 2005/08/31 15:03:09 fisyak Exp $
+// $Id: runPeCMaker.C,v 1.9 2006/08/15 21:42:49 jeromel Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.9  2006/08/15 21:42:49  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.8  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -84,7 +87,7 @@ void runPeCMaker(Int_t,const Char_t **,const char *qaflag = "");
 
 void runPeCMaker(Int_t nevents=2, 
               const Char_t *path="-",
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 
 

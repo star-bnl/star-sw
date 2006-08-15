@@ -1,5 +1,8 @@
-// $Id: Example_plotTable.C,v 1.10 2000/05/09 20:15:42 kathy Exp $
+// $Id: Example_plotTable.C,v 1.11 2006/08/15 21:42:51 jeromel Exp $
 // $Log: Example_plotTable.C,v $
+// Revision 1.11  2006/08/15 21:42:51  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.10  2000/05/09 20:15:42  kathy
 // transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
 //
@@ -39,7 +42,7 @@ gSystem->Load("xdf2root");
 gSystem->Load("StUtilities");
 gSystem->Load("StAnalysisUtilities");
 St_TableNtuple myNtuple((TTable&) St_dst_v0_vertex());
-myNtuple.AddXDFFile("/afs/rhic/star/data/samples/gstar.dst.root",
+myNtuple.AddXDFFile("/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
 "dst","dst_v0_vertex");
 myNtuple.Draw("pos_py:pos_px");
 }

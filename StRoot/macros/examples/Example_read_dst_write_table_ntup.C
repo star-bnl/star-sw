@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_write_table_ntup.C,v 1.5 2000/05/09 20:15:43 kathy Exp $
+// $Id: Example_read_dst_write_table_ntup.C,v 1.6 2006/08/15 21:42:56 jeromel Exp $
 // $Log: Example_read_dst_write_table_ntup.C,v $
+// Revision 1.6  2006/08/15 21:42:56  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.5  2000/05/09 20:15:43  kathy
 // transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
 //
@@ -30,7 +33,7 @@
 void Example_read_dst_write_table_ntup(
   Int_t nevents=2, 
   const Char_t *MainFile=
-     "/afs/rhic/star/data/samples/gstar.dst.root",
+     "/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
   const Char_t *NtupFile="globtrk_ntup.root")
 {
  

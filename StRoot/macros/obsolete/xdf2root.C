@@ -1,5 +1,8 @@
-// $Id: xdf2root.C,v 1.3 2000/01/25 16:06:38 fisyak Exp $
+// $Id: xdf2root.C,v 1.4 2006/08/15 21:43:23 jeromel Exp $
 // $Log: xdf2root.C,v $
+// Revision 1.4  2006/08/15 21:43:23  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.3  2000/01/25 16:06:38  fisyak
 // g2r -> g2t
 //
@@ -43,8 +46,8 @@ void Load(){
     gSystem->Load("St_TLA_Maker");
 }
 xdf2root(const Int_t   Nevents=10,
-    const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
-    const Char_t *FileOut = "/afs/rhic/star/data/samples/hijet-g2t.root")
+    const Char_t *fileinp = "/afs/rhic.bnl.gov/star/data/samples/hijet-g2t.xdf",
+    const Char_t *FileOut = "/afs/rhic.bnl.gov/star/data/samples/hijet-g2t.root")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();

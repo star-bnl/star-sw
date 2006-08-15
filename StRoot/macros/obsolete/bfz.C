@@ -108,7 +108,7 @@ void bfz(const Int_t Nevents=1,const Char_t *inputFile ="/disk1/star/test/muons.
 ///  paMk->SetDebug();  
 
 
-//  const char *inputFile="/afs/rhic/star/data/samples/hijet-g2t.xdf";
+//  const char *inputFile="/afs/rhic.bnl.gov/star/data/samples/hijet-g2t.xdf";
 //  const char *inputFile="/disk1/star/fisyak/gsrun.xdf";
 //		xdfin
 // St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin",inputFile);

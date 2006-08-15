@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_overlay.C,v 1.6 2002/01/29 20:03:08 genevb Exp $
+// $Id: bfcread_hist_overlay.C,v 1.7 2006/08/15 21:42:41 jeromel Exp $
 // $Log: bfcread_hist_overlay.C,v $
+// Revision 1.7  2006/08/15 21:42:41  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.6  2002/01/29 20:03:08  genevb
 // Switched default dir from QA to EventQA
 //
@@ -56,7 +59,7 @@ StIOMaker *IOMk=0;
 
 void bfcread_hist_overlay(
   const Char_t *MainFile=
-     "/afs/rhic/star/data/samples/gstar.hist.root",
+     "/afs/rhic.bnl.gov/star/data/samples/gstar.hist.root",
   const Char_t *MakerHistDir="EventQA",
   const Char_t *TopDirTree="bfcTree",
   const Char_t *PageTitle="")

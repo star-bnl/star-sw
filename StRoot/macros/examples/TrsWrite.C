@@ -1,7 +1,10 @@
 //
-// $Id: TrsWrite.C,v 1.5 2000/01/25 16:06:37 fisyak Exp $
+// $Id: TrsWrite.C,v 1.6 2006/08/15 21:43:06 jeromel Exp $
 //
 // $Log: TrsWrite.C,v $
+// Revision 1.6  2006/08/15 21:43:06  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.5  2000/01/25 16:06:37  fisyak
 // g2r -> g2t
 //
@@ -91,7 +94,7 @@ void TrsWrite(const Int_t Nevents=1)
   geant->SetNwGEANT(10 000 000);
   geant->SetDebug();
   geant->SetIwtype(1);
-  TString InFile("/afs/rhic/star/tpc/trstest/trs_muon_10cmdrift_good.fzd");
+  TString InFile("/afs/rhic.bnl.gov/star/tpc/trstest/trs_muon_10cmdrift_good.fzd");
   geant->SetInputFile(InFile.Data());
   chain->SetInput("geom","geant:geom");
 

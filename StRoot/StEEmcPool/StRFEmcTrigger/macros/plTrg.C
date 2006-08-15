@@ -8,7 +8,7 @@ void plTrg( int page=1, int keve=1)
   ifile="aa2.hist.root"; // ifile="save."+ifile;
    gROOT->Reset();
    gSystem->Load("St_base");
-   gROOT->LoadMacro("/afs/rhic/star/spin/balewski/root_macros/JBRoot.C");
+   gROOT->LoadMacro("/afs/rhic.bnl.gov/star/spin/balewski/root_macros/JBRoot.C");
 
 // Connect the input file and get the  histogram
    TList *top = Johf(ifile.Data());

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCoulomb.cxx,v 1.17 2003/09/02 17:58:32 perev Exp $
+ * $Id: StHbtCoulomb.cxx,v 1.18 2006/08/15 21:41:41 jeromel Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCoulomb.cxx,v $
+ * Revision 1.18  2006/08/15 21:41:41  jeromel
+ * Fix rhic -> rhic.bnl.gov
+ *
  * Revision 1.17  2003/09/02 17:58:32  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -51,7 +54,7 @@ ClassImp(StHbtCoulomb)
 #endif
 
 StHbtCoulomb::StHbtCoulomb() {
-  mFile = "/afs/rhic/star/hbt/coul/StHbtCorrectionFiles/correctionpp.dat";
+  mFile = "/afs/rhic.bnl.gov/star/hbt/coul/StHbtCorrectionFiles/correctionpp.dat";
   if (!mFile) {
     cout << " No file, dummy!" << endl;
     assert(0);
@@ -97,10 +100,10 @@ void StHbtCoulomb::SetChargeProduct(const double& charge) {
   if ( mZ1Z2!=charge ) { 
     mZ1Z2 = charge;
     if ( mZ1Z2>0 ) {
-      mFile = "/afs/rhic/star/hbt/coul/StHbtCorrectionFiles/correctionpp.dat";
+      mFile = "/afs/rhic.bnl.gov/star/hbt/coul/StHbtCorrectionFiles/correctionpp.dat";
     }
     else {
-      mFile = "/afs/rhic/star/hbt/coul/StHbtCorrectionFiles/correctionpm.dat";
+      mFile = "/afs/rhic.bnl.gov/star/hbt/coul/StHbtCorrectionFiles/correctionpm.dat";
     }
     CreateLookupTable(mRadius);
   }

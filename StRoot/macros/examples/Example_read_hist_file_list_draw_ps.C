@@ -1,7 +1,10 @@
-// $Id: Example_read_hist_file_list_draw_ps.C,v 1.5 2000/01/19 15:46:05 kathy Exp $
+// $Id: Example_read_hist_file_list_draw_ps.C,v 1.6 2006/08/15 21:42:57 jeromel Exp $
 // $Log: Example_read_hist_file_list_draw_ps.C,v $
+// Revision 1.6  2006/08/15 21:42:57  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.5  2000/01/19 15:46:05  kathy
-// change default input files to point to ones in /afs/rhic/star/data/samples
+// change default input files to point to ones in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.4  1999/11/30 20:04:17  kathy
 // fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables

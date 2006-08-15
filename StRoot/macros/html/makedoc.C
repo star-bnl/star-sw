@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.59 2003/04/30 20:40:17 perev Exp $
+// $Id: makedoc.C,v 1.60 2006/08/15 21:43:19 jeromel Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -223,13 +223,13 @@
     // Create "gif" subdirectory for the first time
       printf(" Image directiry is created: <%s>\n", giffile.Data());
       gSystem->MakeDirectory(giffile.Data());
-      gSystem->Exec("cp /afs/rhic/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic/star/packages/adev/StRoot/html/src/gif");
+      gSystem->Exec("cp /afs/rhic.bnl.gov/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic.bnl.gov/star/packages/adev/StRoot/html/src/gif");
     }
       // Create links 
-    gSystem->Symlink("../src/gif","/afs/rhic/star/packages/adev/StRoot/html/examples/gif");
-    gSystem->Symlink("src/gif","/afs/rhic/star/packages/adev/StRoot/html/gif");
+    gSystem->Symlink("../src/gif","/afs/rhic.bnl.gov/star/packages/adev/StRoot/html/examples/gif");
+    gSystem->Symlink("src/gif","/afs/rhic.bnl.gov/star/packages/adev/StRoot/html/gif");
       // Copy the old images into a new directrory
-//      gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/adev/StRoot/html/src/gif")
+//      gSystem->Exec("cp /afs/rhic.bnl.gov/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic.bnl.gov/star/packages/adev/StRoot/html/src/gif")
   }
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
@@ -307,6 +307,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.60  2006/08/15 21:43:19  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.59  2003/04/30 20:40:17  perev
 // Warnings cleanup. Modified lines marked VP
 //

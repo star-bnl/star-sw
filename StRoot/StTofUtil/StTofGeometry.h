@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.7 2005/07/06 19:25:55 fisyak Exp $
+ * $Id: StTofGeometry.h,v 1.8 2006/08/15 21:42:13 jeromel Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.8  2006/08/15 21:42:13  jeromel
+ * Fix rhic -> rhic.bnl.gov
+ *
  * Revision 1.7  2005/07/06 19:25:55  fisyak
  * Use templated StThreeVector and StPhysicalHelix
  *
@@ -142,7 +145,7 @@ class StTofGeometry{
   void init();         // init the dbase and get the data from it
   void init(StMaker*); // init the dbase and get the data from it
   void initGeomFromXdf(const Char_t* = 
-		       "/afs/rhic/star/users/geurts/public/dbase/ctg_pars.xdf");
+		       "/afs/rhic.bnl.gov/star/users/geurts/public/dbase/ctg_pars.xdf");
   void initGeomFromDbase(StMaker*);
   void initDaqMap();
   StructTofParam tofParam() const; // geometry access member

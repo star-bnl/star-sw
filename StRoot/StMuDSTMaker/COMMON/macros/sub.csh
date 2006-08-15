@@ -1,4 +1,4 @@
-#! /afs/rhic/star/users/laue/public/tcsh -f
+#! /afs/rhic.bnl.gov/star/users/laue/public/tcsh -f
 
 # StRoot/StMuDstMaker/macros/sub.csh MuDst/centra/ReversedFullField/runs
 

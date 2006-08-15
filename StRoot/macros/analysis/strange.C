@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.14 2005/08/31 15:03:09 fisyak Exp $
+// $Id: strange.C,v 1.15 2006/08/15 21:42:50 jeromel Exp $
 // $Log: strange.C,v $
+// Revision 1.15  2006/08/15 21:42:50  jeromel
+// Fix rhic -> rhic.bnl.gov
+//
 // Revision 1.14  2005/08/31 15:03:09  fisyak
 // Add dependence StMagF vs StarMagField
 //
@@ -16,7 +19,7 @@
 // setbranches in all macros so that they will work with softlinks - for StIOMaker
 //
 // Revision 1.9  2000/01/19 21:00:33  kathy
-// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+// update macros to use standard default xdf files in /afs/rhic.bnl.gov/star/data/samples
 //
 // Revision 1.8  2000/01/19 16:58:32  genevb
 // New input file
@@ -67,8 +70,8 @@ StChain *chain=0;
 
 TBrowser *b=0;
 
-const char *dstFile ="/afs/rhic/star/data/samples/gstar.dst.root";
-const char *xdfFile ="/afs/rhic/star/data/samples/gstar.dst.xdf";
+const char *dstFile ="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root";
+const char *xdfFile ="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
@@ -85,7 +88,7 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // to be processed.
 //
 // example invocation:
-// .x strange.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+// .x strange.C(10,"-","/afs/rhic.bnl.gov/star/strange/genevb/year1a_90evts_dst.xdf")
 //
 // example ROOT file invocation:
 // .x strange.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.dst.root")
@@ -99,7 +102,7 @@ void strange(Int_t,const Char_t **,const char *qaflag = "");
 
 void strange(Int_t nevents=2,
               const Char_t *path="-"
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *file="/afs/rhic.bnl.gov/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 
 
