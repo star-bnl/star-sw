@@ -136,7 +136,6 @@ Int_t StSpaceChargeEbyEMaker::Init() {
   lastsc=0.;
   curhist=0;
   lasttime=0;
-  ntrkssum=0;
   did_auto=kTRUE;
   InitQAHists();
   if (QAmode) gMessMgr->Info("StSpaceChargeEbyEMaker: Initializing");
@@ -209,7 +208,6 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     timehist->SetBinContent(evt,thistime-lasttime);
   } else {
     runid = event->runId();
-    ntrkssum -= ntrks[curhist];
   }
   if (doReset) {
     curhist = imodHN(curhist+1);
@@ -342,7 +340,6 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
 
   ntrks[curhist] = schists[curhist]->Integral();
-  ntrkssum += ntrks[curhist];
 
   // Wrap it up and make a decision
   int result = DecideSpaceCharge(thistime);
@@ -355,9 +352,10 @@ Int_t StSpaceChargeEbyEMaker::Make() {
 
       if (ntent == 0.0) for (i=0; i<37; i++) X[i] = 0.0;
       ntent++;  // # entries since last reset, including this one
-      nttrk += ntrks[curhist];  // # tracks since last reset
-      float s1 = ntrks[curhist]/nttrk;
-      float s0 = 1.0 - s1;
+      float last_nttrk = nttrk;
+      nttrk = ntrks[curhist];  // # tracks since last reset, including these
+      float s0 = ( nttrk ? last_nttrk / nttrk : 0 );
+      float s1 = 1.0 - s0; // fraction of tracks from current event
 
       if (QAmode) {
         gMessMgr->Info() << "StSpaceChargeEbyEMaker: reset = " << doReset << endm;
@@ -899,8 +897,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.11 2006/07/17 20:13:08 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.12 2006/08/15 23:40:59 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.12  2006/08/15 23:40:59  genevb
+// Averaging was done improperly in DontReset mode
+//
 // Revision 1.11  2006/07/17 20:13:08  genevb
 // Disallow SVT points on tracks
 //

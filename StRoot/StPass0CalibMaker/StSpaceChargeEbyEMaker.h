@@ -43,7 +43,7 @@ public:
           void   DoCalib() { Calibmode = kTRUE; DoQAmode(); DoNtuple(); }
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.6 2006/06/01 17:27:11 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.7 2006/08/15 23:40:59 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -87,7 +87,6 @@ protected:
   TH1F* schists[96];
   int times[96];
   float ntrks[96];
-  float ntrkssum;
   int evts[96];
   float evtstbin[96];
   float evtsnow;
@@ -159,8 +158,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.6 2006/06/01 17:27:11 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.7 2006/08/15 23:40:59 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.7  2006/08/15 23:40:59  genevb
+// Averaging was done improperly in DontReset mode
+//
 // Revision 1.6  2006/06/01 17:27:11  genevb
 // Bug fix: gapd and gapf backwards; Improvements: gap fit intercepts, hist and fit ranges
 //
