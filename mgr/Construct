@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.155 2006/05/24 21:34:00 fisyak Exp $
+# $Id: Construct,v 1.156 2006/08/16 20:14:30 fisyak Exp $
 use Env;
 use lib qw(./mgr $STAR/mgr);#$ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -345,10 +345,10 @@ foreach $dir(@sysdirlist , @subdirs ) {
 }
 #print "Packages $#packages : @packages\n";
 @packages = sortu(@packages);
-my $qtRoot = "qtRoot";
-if ($param::include and $qtRoot =~ /$param::include/) {
-  push @packages, $qtRoot if ( -d $qtRoot );
-}
+my $qtRoot = "QtRoot";
+#if ($param::include and $qtRoot =~ /$param::include/) {
+push @packages, $qtRoot if ( -d $qtRoot );
+#}
 #print "packages after $#packages : @packages\n";
 print "BUILD  = $BUILD OBJ = $OBJ\n" unless ($param::quiet);
 @Targets = map($OBJ . "/" . $_ . "/Conscript", @packages);
