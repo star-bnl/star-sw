@@ -236,6 +236,7 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
       Bool_t run4 = (date>20040000) && (date<20040700);
       Bool_t run5 = (date>20050000) && (date<20050700);
       Bool_t run5_400 = (date==20050602) || (date==20050603);
+      Bool_t run6_62 = (date>20060606) && (date<20060700);
 
       Bool_t valid = kFALSE;
 
@@ -307,6 +308,14 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
 	case (117602) :    // upsilon
 	case (137603) :    // upsilon (long)
 	case (117705) :    // jpsi-mb
+	case (147001) :    // mb (62GeV)
+	case (147570) :    // bemc-jp0 (62GeV)
+	case (147621) :    // bemc-jp0-mb-L2jet (62GeV)
+	case (147611) :    // bemc-http-mb-l2gamma (62GeV)
+	case (147575) :    // eemc-jp0 (62GeV)
+	case (147651) :    // eemc-jp0-mb-L2jet (62GeV)
+	case (147641) :    // eemc-http-mb-L2gamma (62GeV)
+	case (147705) :    // jpsi-mb (62GeV)
 
             valid = kTRUE;
 
@@ -322,19 +331,30 @@ Bool_t StVertexSeedMaker::ValidTrigger(unsigned int tid) {
         case (3)     : if (
                          run4   // p2004 p eht-1-slow test
 	              || run5_400    // 2005 pp eemc-ht2-mb
+	              || run6_62    // 2006 pp bemc-jp0
                           ) valid = kTRUE; break;
         case (4)     : if (
                          run4   // 2004 pp eht-2-slow test
 	              || run5_400    // 2005 pp eemc-jp2-mb-a
+	              || run6_62    // 2006 pp eemc-jp0
+                          ) valid = kTRUE; break;
+        case (5)     : if (
+	                 run6_62    // 2006 pp bemc-http-mb-l2gamma
+                          ) valid = kTRUE; break;
+        case (6)     : if (
+	                 run6_62    // 2006 pp eemc-http-mb-l2gamma
                           ) valid = kTRUE; break;
         case (7)     : if (
 	                 run5_400    // 2005 pp bemc-ht1-mb
+	              || run6_62    // 2006 pp eemc-jp0-mb-L2jet
                           ) valid = kTRUE; break;
         case (8)     : if (
 	                 run5_400    // 2005 pp bemc-jp1-mb
+	              || run6_62    // 2006 pp bemc-jp0-mb-L2jet
                           ) valid = kTRUE; break;
         case (9)     : if (
 	                 run5_400    // 2005 pp eemc-ht1-mb
+	              || run6_62    // 2006 pp jpsi-mb
                           ) valid = kTRUE; break;
         case (10)    : if (
                          run4   // 2004 pp minbias test
@@ -424,7 +444,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.30 2006/05/27 19:54:03 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.31 2006/08/16 21:58:01 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -725,8 +745,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.30 2006/05/27 19:54:03 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.31 2006/08/16 21:58:01 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.31  2006/08/16 21:58:01  genevb
+// Added 2006 pp62 triggers
+//
 // Revision 1.30  2006/05/27 19:54:03  genevb
 // Yet more 2006 triggers
 //
