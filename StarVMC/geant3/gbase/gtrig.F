@@ -1,9 +1,12 @@
 *
-* $Id: gtrig.F,v 1.1.1.1 2005/05/25 22:37:25 fisyak Exp $
+* $Id: gtrig.F,v 1.2 2006/08/17 13:38:52 fisyak Exp $
 *
 * $Log: gtrig.F,v $
-* Revision 1.1.1.1  2005/05/25 22:37:25  fisyak
-* Alice version of geant3 (-minicern)
+* Revision 1.2  2006/08/17 13:38:52  fisyak
+* Clean up
+*
+* Revision 1.3  2006/03/17 15:11:36  brun
+* Comment call to GDKINE in gtrig
 *
 * Revision 1.2  2003/11/28 11:23:55  brun
 * New version of geant321 with all geant3 routines renamed from G to G3
@@ -51,8 +54,8 @@ C.
 #if defined(CERNLIB_USRJMP)
        CALL JUMPT0(JUKINE)
 #endif
-      ELSE
-       CALL GDKINE
+*      ELSE
+*       CALL GDKINE
       ENDIF
       IF (IEOTRI.NE.0)  GO TO  99
 C.
