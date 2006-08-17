@@ -39,18 +39,24 @@
             ROOT resource file in his/her working (or home) directory:
          <OL>
             <LI>
-               Copy the the custom version of <a href="rootrc">".rootrc"</a> file into your working directory <small><code>
-                     <pre>
+               Copy the the custom version of <a href="rootrc">".rootrc"</a> file into your working directory 
+                <small><code><pre>
       Gui.Backend:                qt
       Gui.Factory:                qtgui
       Plugin.TGuiFactory: qtgui   TQtGUIFactory  QtGui  "TQtGUIFactory()"
                         </pre></small>
             </CODE>
+       or create a symbolic link
+                <small><code><pre>
+      ln -s $STAR/StRoot.StEventDispplayMaker/.rootrc .
+                        </pre></small>
+            </CODE>
+            
             <LI>
                run <A href="readme1.html">doEvents.C</A>
                <p>
                   <small>
-                     <bold><code><pre>
+                     <bold><code><pre>                     
  .x doEvents.C(1,"026/st_physics_4026006_raw_0040047.event.root","display")
                </pre>
                   </code></BOLD></SMALL>
