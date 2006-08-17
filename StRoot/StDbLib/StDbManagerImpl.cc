@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.20 2005/01/25 22:05:48 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.21 2006/08/17 02:58:57 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.21  2006/08/17 02:58:57  deph
+ * updated load balancer - removing hard-coded nodes from API to xml
+ *
  * Revision 1.20  2005/01/25 22:05:48  deph
  * Reset precedence for connecting to db. From Low to High: star,home,envVar
  *
@@ -202,6 +205,7 @@
 #include "dbCollection.h"
 #include "StDbMessenger.hh"
 #include "stdb_streams.h"
+//#include "StDbDefs.hh"
 #include <string.h>
 
 #ifdef HPUX
@@ -439,6 +443,7 @@ void StDbManagerImpl::lookUpServers(){
 // dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
  dbFindServerMode mode[3]={serverEnvVar,userHome,starDefault};
 
+
  StString cos;
  cos<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
 
@@ -448,9 +453,14 @@ void StDbManagerImpl::lookUpServers(){
    if(xmlFile[i]){
      ifstream is(xmlFile[i]);
      if(is){
+
+       cout << " looking at "<<xmlFile[i]<<"\n";
        cos<<"  "<<i+1<<". "<< xmlFile[i] <<stendl;
        findServersXml(is);
        is.close();
+
+       xmlInputSource = mode[i];
+       break;
      }
      delete [] xmlFile[i];
      xmlFile[i]=NULL;
@@ -471,9 +481,24 @@ void StDbManagerImpl::findServersXml(ifstream& is){
 
   char* stardatabase=NULL;
 
+  /* Take only the relevant server names from the XML file.
+What determines the relevance:
+1) whether the user belongs to the group authorized to use either production or analysis class of service
+2) whether the time of the day allows a particular server to be used
+  */
+
+  struct tm *tp;  
+  time_t timeNow;
+  timeNow = time(NULL);
+  tp = localtime(&timeNow);
+  /*
+  char* whoami = getenv("USER");
+  if (!whoami) whoami = getenv("LOGNAME");
+  */
   while(!is.eof()){
 
   stardatabase = findServerString(is); 
+
   if(!stardatabase) continue;
 
   // local DTD ...
@@ -482,16 +507,72 @@ void StDbManagerImpl::findServersXml(ifstream& is){
   char bsock[32]="<socket>"; char esock[32]="</socket>";
   char bport[32]="<port>"; char eport[32]="</port>";
   char bdb[32]="<databases>"; char edb[32]="</databases>";
-  int portNum = 3306;
+  //  int portNum = 3306;
+  int portNum = 3316;
 
   char* servName = mparser.getString(stardatabase,(char*)bserver,(char*)eserver);
   char* hostName = mparser.getString(stardatabase,(char*)bhost,(char*)ehost);
   char* uSocket = mparser.getString(stardatabase,(char*)bsock,(char*)esock);
   char* portNumber = mparser.getString(stardatabase,(char*)bport,(char*)eport);
 
+ char* bcos = "<cos>"; char* ecos = "</cos>";
+ char* bfrom = "<from_time>"; char* efrom = "</from_time>";
+ char* bto = "<to_time>"; char* eto = "</to_time>";
+ char* buser = "<user>"; char* euser = "</user>";
+ char* production_cos = "production";
+ char* analysis_cos = "analysis";
+
+ /*
+ char* user = mparser.getString(stardatabase,buser,euser);
+ if (user)
+   {
+     if (strcmp(user,whoami)!=0) continue;
+   }
+ */
+
+ char* cos = mparser.getString(stardatabase,bcos,ecos);
+ char* from_time = mparser.getString(cos,bfrom,efrom);
+ char* to_time = mparser.getString(cos,bto,eto);
+
+ if (from_time==NULL) from_time = "0";
+ if (to_time==NULL) to_time = "0";
+
+ int from_time_i = atoi(from_time);
+ int to_time_i = atoi(to_time);
+
+ bool unknown_cos = true;
+
+
+ if (cos) // support pre-"cos" XML format
+   {
+     if (xmlInputSource == userHome)  
+       {
+	 if (!strstr(cos,analysis_cos)) continue;
+       }
+     else
+       {
+	 if (!strstr(cos,production_cos)) continue;
+       }
+   }
+
+
+ if (from_time_i!=0 || to_time_i!=0)
+   {
+     if (tp->tm_hour < from_time_i && tp->tm_hour > to_time_i)
+       {
+	 continue;
+       }
+   }
+
+
+ xmlServerList.push_back(hostName);
+
   if(portNumber)portNum = atoi(portNumber);
 
-  StDbServer* server = new StDbServerImpl(servName,hostName,uSocket,portNum);
+  StDbServerImpl* myserver = new StDbServerImpl(servName,hostName,uSocket,portNum);
+  myserver->PointMysqlDb(this);
+  StDbServer* server = myserver; 
+
   if(muserName) server->setUser(muserName,mpWord);
   delete [] servName; 
   delete [] hostName; 

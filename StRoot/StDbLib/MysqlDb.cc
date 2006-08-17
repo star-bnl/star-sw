@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.37 2006/08/04 15:07:43 deph Exp $
+ * $Id: MysqlDb.cc,v 1.38 2006/08/17 02:58:56 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.38  2006/08/17 02:58:56  deph
+ * updated load balancer - removing hard-coded nodes from API to xml
+ *
  * Revision 1.37  2006/08/04 15:07:43  deph
  * Corrected const char / char inconsistancy with the vectors for standalone version
  *
@@ -165,7 +168,8 @@
 #include "MysqlDb.h"
 #include "StDbManager.hh" // for now & only for getting the message service
 #include "stdb_streams.h"
-
+#include "StDbDefaults.hh"
+#include "StDbManagerImpl.hh"
 
 //#include "errmsg.h"
 
@@ -215,8 +219,6 @@ mQuery=0;
 mQueryLast=0;
 mRes= new MysqlResult;
  for(int i=0;i<200;i++)cnames[i]=0;
-
- initServerLists();
 }
 //////////////////////////////////////////////////////////////////////
 
@@ -234,23 +236,7 @@ if(mdbName)  delete [] mdbName;
 
 }
 //////////////////////////////////////////////////////////////////////// 
-void MysqlDb::initServerLists()
-{
-  ServerList_db.push_back("db02.star.bnl.gov");
-  ServerList_db.push_back("db03.star.bnl.gov");
-  ServerList_db.push_back("db04.star.bnl.gov");
-  ServerList_db.push_back("db05.star.bnl.gov");
 
-  ServerList_dbx.push_back("db06.star.bnl.gov");
-  ServerList_dbx.push_back("db07.star.bnl.gov");
-  ServerList_dbx.push_back("db08.star.bnl.gov");
-
-  ServerList_dbp.push_back("db06.star.bnl.gov");
-  ServerList_dbp.push_back("db07.star.bnl.gov");
-  ServerList_dbp.push_back("db08.star.bnl.gov");
-  ServerList_dbp.push_back("db01.star.bnl.gov");
-}
-//////////////////////////////////////////////////////////////////////// 
 vector<string>::iterator MysqlDb::RecommendedServer(vector<string>* MyServerList, char* sock, int port)
 {
   vector<string>::iterator rtrn = MyServerList->begin();
@@ -284,7 +270,7 @@ vector<string>::iterator MysqlDb::RecommendedServer(vector<string>* MyServerList
       
       MYSQL_RES *res_set = mysql_store_result(conn);
       unsigned long nproc = mysql_num_rows(res_set);
-      // cout <<" Server "<<(*I).c_str()<< " "<< nproc << " processes \n";
+       cout <<" Server "<<(*I).c_str()<< " "<< nproc << " processes \n";
       mysql_close(conn);
 
       if (nproc<nproc_min) 
@@ -360,55 +346,13 @@ strcpy(mdbhost,aHost);
   clock_t start,finish;
  double lbtime;
   start = clock();
-  const char* hostname = mdbhost;
-  char* ptr = strstr(hostname,"dbx.star.bnl");
-  
-  //get time of day hours
-  
 
-  struct tm *tp;  
-  time_t timeNow;
-  timeNow = time(NULL);
-  tp = localtime(&timeNow);
-    
-	char buffer[256];
-  
-  
+  std::vector<std::string>::iterator  myserver = RecommendedServer(&(my_manager->xmlServerList), NULL, mdbPort);
+  strcpy(mdbhost,(*myserver).c_str());
 
-  if (ptr != 0)
-    {
-      if (tp->tm_hour > 22 || tp->tm_hour < 8)
-	{
-	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbp, NULL, mdbPort);
-        strcpy(buffer,(*myserver).c_str());
-	//mdbhost = (*myserver).c_str();
-	mdbhost = buffer;
-	}else{
-	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_dbx, NULL, mdbPort);
-        strcpy(buffer,(*myserver).c_str());
-	//  mdbhost = (*myserver).c_str();
-	mdbhost = buffer;
-	  //  cout<< "*****"<<tp->tm_hour<<"*****"<<endl;
-	}
-    }
-  else
-    {
-      ptr = strstr(hostname,"db.star.bnl");
-      if (ptr != 0)
-	{
-	  std::vector<std::string>::iterator  myserver = RecommendedServer(&ServerList_db, NULL, mdbPort);
-        strcpy(buffer,(*myserver).c_str());
-	//  mdbhost = (*myserver).c_str();
-	mdbhost = buffer;
-	}
-	 
-    }
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
   cout << " Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
-
-
-
 
   if(mdbName) {
     delete [] mdbName;
