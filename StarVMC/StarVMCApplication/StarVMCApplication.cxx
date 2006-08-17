@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.cxx,v 1.6 2005/09/13 21:37:05 fisyak Exp $
+// $Id: StarVMCApplication.cxx,v 1.7 2006/08/17 13:37:12 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -23,7 +23,8 @@ StarVMCApplication::StarVMCApplication(const char *name, const char *title) :
   fPrimaryGenerator(0),
   fMagField(0),
   fMcHits(0),
-  fFieldB(0) 
+  fFieldB(0),
+  fDebug(0)
 {
   // Standard constructor
   TString program(gSystem->BaseName(gROOT->GetApplication()->Argv(0)));

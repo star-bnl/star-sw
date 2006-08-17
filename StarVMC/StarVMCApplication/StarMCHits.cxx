@@ -15,6 +15,7 @@
 #include "TROOT.h"
 #include "TRandom.h"
 #include "TLorentzVector.h"
+#include "TFile.h"
 #ifdef __ROOT__
 #include "StMaker.h"
 #endif
