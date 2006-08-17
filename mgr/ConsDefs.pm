@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.89 2005/11/30 16:10:30 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.90 2006/08/17 17:01:30 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -688,7 +688,8 @@
 		      'STAR_SYS'        => $STAR_HOST_SYS,
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
-		      'OPTSTAR'         => $OPTSTAR
+		      'OPTSTAR'         => $OPTSTAR,
+		      'QTDIR'           => $QTDIR
 		      },
 		  'Packages' => {
           		'ROOT' => {
