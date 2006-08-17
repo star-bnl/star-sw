@@ -1,4 +1,4 @@
-// $Id: StarVMCApplication.h,v 1.2 2005/09/13 21:37:05 fisyak Exp $
+// $Id: StarVMCApplication.h,v 1.3 2006/08/17 13:37:12 fisyak Exp $
 // Class StarVMCApplication
 // ----------------------- 
 // Implementation of the TVirtualMCApplication
@@ -49,6 +49,8 @@ class StarVMCApplication : public TVirtualMCApplication {
     
   virtual Double_t TrackingRmax() const { return 1.e4; }
   virtual Double_t TrackingZmax() const { return 1.e5; } 
+  virtual void     SetDebug(Int_t m) {fDebug = m;}
+  virtual Int_t    Debug() {return fDebug;}
   
  private:
   // methods
@@ -59,6 +61,7 @@ class StarVMCApplication : public TVirtualMCApplication {
   StarMagField*            fMagField;
   StarMCHits*              fMcHits;
   Double_t*                fFieldB;
+  Int_t                    fDebug;
   ClassDef(StarVMCApplication,1)  //Interface to MonteCarlo application
 };
 
