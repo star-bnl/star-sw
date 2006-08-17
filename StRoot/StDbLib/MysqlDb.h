@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.24 2006/06/02 18:23:23 deph Exp $
+ * $Id: MysqlDb.h,v 1.25 2006/08/17 02:58:56 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.25  2006/08/17 02:58:56  deph
+ * updated load balancer - removing hard-coded nodes from API to xml
+ *
  * Revision 1.24  2006/06/02 18:23:23  deph
  * Added an extra machine (db01) for analysis between 11pm and 7am
  *
@@ -131,7 +134,8 @@ typedef  int MYSQL_FIELD;
 #include "stdb_streams.h"
 #include "StDbBuffer.h"
 #include "StDbLogger.hh"
-
+#include "parseXmlString.hh"
+#include "StDbManagerImpl.hh"
 #include <vector.h>
 #include <string.h>
 
@@ -212,11 +216,6 @@ private:
   bool  isSpecialType[200];
 
   std::vector<std::string>::iterator RecommendedServer(std::vector<std::string>* ListToUse, char* socket, int port);
-  std::vector<std::string> ServerList_db;
-  std::vector<std::string> ServerList_dbx;
-  std::vector<std::string> ServerList_dbp;
-  void initServerLists();
-
 
 public:
 
@@ -269,6 +268,7 @@ public:
   virtual bool IsConnected() { return mhasConnected; }
   virtual bool setDefaultDb(const char* dbName);
 
+  StDbManagerImpl* my_manager; // need access to the list of servers and their properties for load balancing
 
 protected:
   virtual void RazQuery() ;

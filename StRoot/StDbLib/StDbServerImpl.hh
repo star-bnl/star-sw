@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServerImpl.hh,v 1.1 2001/01/22 18:37:59 porter Exp $
+ * $Id: StDbServerImpl.hh,v 1.2 2006/08/17 02:58:58 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StDbServerImpl.hh,v $
+ * Revision 1.2  2006/08/17 02:58:58  deph
+ * updated load balancer - removing hard-coded nodes from API to xml
+ *
  * Revision 1.1  2001/01/22 18:37:59  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -63,6 +66,7 @@ protected:
  
   void  deleteDataBases();
 
+
 public:
 
   StDbServerImpl();
@@ -82,6 +86,9 @@ public:
   virtual double       getQueryTimes();
   virtual double       getSocketTimes();
   virtual double       getConnectTimes();
+
+  void PointMysqlDb(StDbManagerImpl* m) {Db.my_manager = m;}
+
 };
 
 #endif

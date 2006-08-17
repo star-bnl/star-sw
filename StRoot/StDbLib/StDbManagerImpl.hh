@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.3 2003/09/16 22:44:17 porter Exp $
+ * $Id: StDbManagerImpl.hh,v 1.4 2006/08/17 02:58:57 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.4  2006/08/17 02:58:57  deph
+ * updated load balancer - removing hard-coded nodes from API to xml
+ *
  * Revision 1.3  2003/09/16 22:44:17  porter
  * got rid of all ostrstream objects; replaced with ostringstream+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
@@ -208,6 +211,12 @@ public:
   virtual void closeConnection(StDbNode* node);
 
   virtual void printTimeStats();
+
+  // MLK added for load balancing:
+
+  std::vector<std::string> xmlServerList;
+
+  short xmlInputSource;
 
 protected:
   // initializers for standard types & domains
