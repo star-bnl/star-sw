@@ -2,6 +2,7 @@
 #include "StDetectorDbMaker.h"
 #include "StDetectorDbFTPCGas.h"
 #include "StDetectorDbFTPCVoltage.h"
+#include "StDetectorDbFTPCVoltageStatus.h"
 #include "StDetectorDbRichScalers.h"
 #include "StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMagnet.h"
@@ -75,6 +76,11 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     ftpcVolt->update(this);
 //    ~(*gMessMgr) << *ftpcVolt;
 
+    // Update the ftpc voltage Status
+    StDetectorDbFTPCVoltageStatus* ftpcVoltStatus = StDetectorDbFTPCVoltageStatus::instance();
+    ftpcVoltStatus->update(this);
+//    ~(*gMessMgr) << *ftpcVoltStatus;
+
     return StMaker::InitRun(runNumber);
 }
 //_____________________________________________________________________________
@@ -89,6 +95,10 @@ Int_t StDetectorDbMaker::Make(){
     StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
     ftpcVolt->update(this);
 //    ~(*gMessMgr) << *ftpcVolt;
+    // Update the ftpc voltage
+    StDetectorDbFTPCVoltageStatus* ftpcVoltStatus = StDetectorDbFTPCVoltageStatus::instance();
+    ftpcVoltStatus->update(this);
+//    ~(*gMessMgr) << *ftpcVoltStatus;
 
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
