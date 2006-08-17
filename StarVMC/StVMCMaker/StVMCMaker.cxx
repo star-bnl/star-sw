@@ -1,7 +1,10 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.4 2005/09/13 21:34:29 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.5 2006/08/17 13:38:50 fisyak Exp $
 // $Log: StVMCMaker.cxx,v $
+// Revision 1.5  2006/08/17 13:38:50  fisyak
+// Clean up
+//
 // Revision 1.4  2005/09/13 21:34:29  fisyak
 // Move initialization from Init to InitRun, add conversion TGeoVolume to TVolume for StEventDisplayMaker and TofMatchers
 //
@@ -135,9 +138,9 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
     if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
     //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
     //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
-    else                  generator = new StarMCSimplePrimaryGenerator(80, 5,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
+    else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
     assert(generator);
-    if (Debug()) generator->SetDebug(1);
+    if (Debug()) generator->SetDebug(Debug());
     fgStarVMCApplication->SetPrimaryGenerator(generator);
     StarMCHits *hits = StarMCHits::instance();
     hits->SetHitHolder(m_DataSet);
@@ -177,6 +180,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   }
   
   fgStarVMCApplication->InitMC();
+  fgStarVMCApplication->SetDebug(Debug());
   if (Debug() > 1) {
     fgGeant3->SetDEBU(1,1,100);
     fgGeant3->SetSWIT(1,2);
