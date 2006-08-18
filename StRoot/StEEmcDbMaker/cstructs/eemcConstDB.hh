@@ -55,7 +55,8 @@ analysis make a different choice.
 #define EEMCSTAT_HOTJP    0x0008 // masked for JP trigger
 #define EEMCSTAT_HIGPED   0x0010 // ped is very high but channel seems to work
 #define EEMCSTAT_HOTSTR   0x0020 // hot esmd strip
-#define EEMCSTAT_JUMPED   0x0040 // jumpy/wide ped over several chan
+#define EEMCSTAT_JUMPED   0x0040 // jumpy  ped over several chan over days
+#define EEMCSTAT_WIDPED   0x0080 // wide ped over:2.5 ch  towers, 1.5 ch MAPMT's
 
 //The remaing  bits of 'stat' are free.
 
