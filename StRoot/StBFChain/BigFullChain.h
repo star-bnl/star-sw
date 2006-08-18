@@ -732,7 +732,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST",         "StMuDstMaker","","Writes Common MuDST",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
-                       "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
+               "StEventDisplayMaker","StEvent,StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAnaTpc"    ,"","","McAna"                                         "","","Mc Analysis for Tpc",kFALSE},
