@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.74 2006/07/28 18:25:11 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.75 2006/08/18 20:09:51 fine Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -518,9 +518,31 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   Int_t emc_oldformat=0;
   Int_t pmd_oldformat=0;
   for ( int i=0; i<__NALLARRAYS__; i++) {
+    TBranch *tb = 0;
     if (mStatusArrays[i]==0) continue;
     const char *bname=StMuArrays::arrayNames[i];
-    TBranch *tb = chain->GetBranch(bname);
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,12,0)
+    ts = bname; ts +="*";
+    chain->SetBranchStatus (ts,1);
+    chain->SetBranchAddress(bname,mAArrays+i,&tb);
+    if(!tb) {
+      if (i >= __NARRAYS__+__NSTRANGEARRAYS__ &&
+	       i < __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__) {
+	       emc_oldformat=1;
+          continue;
+      }
+
+      if (i >= __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__ &&
+          i < __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__) 
+      {
+         pmd_oldformat=1;
+        continue;
+      } 
+      Warning("setBranchAddresses","Branch name %s does not exist",bname);
+      continue;
+    }
+#else
+    tb = chain->GetBranch(bname);
     if(!tb) {
       if (i >= __NARRAYS__+__NSTRANGEARRAYS__ &&
 	  i < __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__) {
@@ -539,13 +561,22 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     ts = bname; ts +="*";
     chain->SetBranchStatus (ts,1);
     chain->SetBranchAddress(bname,mAArrays+i);
+#endif    
     assert(tb->GetAddress() == (char*)(mAArrays+i));
   }
   if (emc_oldformat) {
-    TBranch *branch=chain->GetBranch("EmcCollection");
+    TBranch *branch=0;
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,12,0)
+    branch=chain->GetBranch("EmcCollection");
+#else    
+    chain->SetBranchStatus("EmcCollection*",1);
+    chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray,&branch);
+#endif    
     if (branch) {
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,12,0)
       chain->SetBranchStatus("EmcCollection*",1);
       chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray);
+#endif    
       Warning("setBranchAddresses","Using backward compatibility mode for EMC");
       if (!mEmcCollectionArray) {
          mEmcCollectionArray=new TClonesArray("StMuEmcCollection",1);
@@ -561,14 +592,22 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   }
 
   if (pmd_oldformat) {
-    TBranch *branch=chain->GetBranch("PmdCollection");
+    TBranch *branch=0;
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,12,0)
+    branch=chain->GetBranch("PmdCollection");
+#else
+    chain->SetBranchStatus("PmdCollection*",1);
+    chain->SetBranchAddress("PmdCollection",&mPmdCollectionArray,&branch);
+#endif    
     if (branch) {
       Warning("setBranchAddresses","Using backward compatibility mode for PMD");
       if (!mPmdCollectionArray) {
         mPmdCollectionArray=new TClonesArray("StMuPmdCollection",1);
       }
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,12,0)
       chain->SetBranchStatus("PmdCollection*",1);
       chain->SetBranchAddress("PmdCollection",&mPmdCollectionArray);
+#endif      
       StMuPmdCluster::Class()->IgnoreTObjectStreamer(0);
       mStMuDst->set(this);
     }
@@ -1264,6 +1303,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.75  2006/08/18 20:09:51  fine
+ * ROOT 5.12 bug workaround See: STAR Bug 741
+ *
  * Revision 1.74  2006/07/28 18:25:11  mvl
  * Added call to StMuDst::setVertexIndex(0) to StMuDstMaker::read() to reset the current vertex index to 0 for every event
  *
