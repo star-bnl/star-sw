@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.h,v 2.7 2004/11/30 19:19:12 ullrich Exp $
+ * $Id: StTriggerData2004.h,v 2.8 2006/08/21 19:41:51 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.h,v $
+ * Revision 2.8  2006/08/21 19:41:51  ullrich
+ * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
+ *
  * Revision 2.7  2004/11/30 19:19:12  ullrich
  * Added new access function for EEMC data (Akio).
  *
@@ -93,8 +96,8 @@ public:
     
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
-    unsigned short ctb(int pmt, int prepost=0) const;
-    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
+    unsigned short ctb(int pmt, int run, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;    
     unsigned short ctbSum(int prepost=0) const;
 
     // MWC
@@ -122,7 +125,7 @@ public:
     unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
-    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
+    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost=0) const;
 
     // EMC
     unsigned char bemcHighTower(int patch_id, int prepost=0) const;
