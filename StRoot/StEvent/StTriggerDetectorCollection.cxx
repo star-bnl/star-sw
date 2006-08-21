@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.7 2004/08/03 17:21:15 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.8 2006/08/21 19:43:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.8  2006/08/21 19:43:35  ullrich
+ * Run number becomes constructor argument. Needed for ZDC. (Akio)
+ *
  * Revision 2.7  2004/08/03 17:21:15  ullrich
  * Fpd as trigger detector added.
  *
@@ -39,7 +42,7 @@
 #include "StTriggerData.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.7 2004/08/03 17:21:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.8 2006/08/21 19:43:35 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
@@ -49,8 +52,8 @@ StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t)
     mCtb(t), mMwc(t), mVpd(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
 
 // Note: VPD and MWC are purposely not filled here. tu 2/10/2004
-StTriggerDetectorCollection::StTriggerDetectorCollection(const StTriggerData& t) :
-    mCtb(t), mZdc(t), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
+StTriggerDetectorCollection::StTriggerDetectorCollection(const StTriggerData& t, const int run) :
+    mCtb(t), mZdc(t,run), mBbc(t), mEmc(t), mFpd(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.6 2005/10/10 22:27:42 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.7 2006/08/21 19:43:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *`
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.7  2006/08/21 19:43:35  ullrich
+ * Run number becomes constructor argument. Needed for ZDC. (Akio)
+ *
  * Revision 2.6  2005/10/10 22:27:42  ullrich
  * Added setXXX functions.
  *
@@ -55,7 +58,7 @@ class StTriggerDetectorCollection : public StObject {
 public:
     StTriggerDetectorCollection();
     StTriggerDetectorCollection(const dst_TrgDet_st&);
-    StTriggerDetectorCollection(const StTriggerData&);
+    StTriggerDetectorCollection(const StTriggerData&, const int);
     // StTriggerDetectorCollection(const StTriggerDetectorCollection&);            use default
     // StTriggerDetectorCollection& operator=(const StTriggerDetectorCollection&); use default
     virtual ~StTriggerDetectorCollection();
