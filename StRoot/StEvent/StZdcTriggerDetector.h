@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.9 2004/04/06 19:39:44 ullrich Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.10 2006/08/21 19:43:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.10  2006/08/21 19:43:35  ullrich
+ * Run number becomes constructor argument. Needed for ZDC. (Akio)
+ *
  * Revision 2.9  2004/04/06 19:39:44  ullrich
  * Added ZDC SMD support.
  *
@@ -55,7 +58,7 @@ class StZdcTriggerDetector : public StObject {
 public:
     StZdcTriggerDetector();
     StZdcTriggerDetector(const dst_TrgDet_st&);
-    StZdcTriggerDetector(const StTriggerData&);
+    StZdcTriggerDetector(const StTriggerData&, const int);
     // StZdcTriggerDetector(const StZdcTriggerDetector&);            use default
     // StZdcTriggerDetector& operator=(const StZdcTriggerDetector&); use default
     virtual ~StZdcTriggerDetector();

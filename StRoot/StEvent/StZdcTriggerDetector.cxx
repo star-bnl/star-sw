@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.12 2006/02/06 18:52:59 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.13 2006/08/21 19:43:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.13  2006/08/21 19:43:35  ullrich
+ * Run number becomes constructor argument. Needed for ZDC. (Akio)
+ *
  * Revision 2.12  2006/02/06 18:52:59  ullrich
  * Fixed bug in constructor. mAdc[3] and mAdc[7] were wrong.
  *
@@ -56,7 +59,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.12 2006/02/06 18:52:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.13 2006/08/21 19:43:35 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -83,7 +86,7 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
     mVertexZ      = t.ZDCvertexZ;
 }
 
-StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
+StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t, const int run)
 {
     //
     //  This is a temporary fix only. In future this
@@ -120,9 +123,9 @@ StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
     mSum          = t.zdcAtAddress(14);
 
     for (int i=0; i<mMaxZdcWords; i++) 
-	mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)));
+	mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)), run);
     for (int i=0; i<mMaxZdcWords; i++) 
-	mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)));
+	mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)), run);
     
     fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0); // always 0
 }
