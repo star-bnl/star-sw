@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.9 2004/11/30 19:19:12 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.10 2006/08/21 19:41:51 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.10  2006/08/21 19:41:51  ullrich
+ * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
+ *
  * Revision 2.9  2004/11/30 19:19:12  ullrich
  * Added new access function for EEMC data (Akio).
  *
@@ -98,8 +101,8 @@ public:
 
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
-    unsigned short ctb(int pmt, int prepost=0) const;
-    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
+    unsigned short ctb(int pmt, int run, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;
     unsigned short ctbSum(int prepost=0) const;
 
     // MWC

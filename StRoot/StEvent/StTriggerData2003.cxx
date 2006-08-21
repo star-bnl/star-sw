@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.13 2006/02/08 16:29:46 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.14 2006/08/21 19:41:51 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.14  2006/08/21 19:41:51  ullrich
+ * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
+ *
  * Revision 2.13  2006/02/08 16:29:46  ullrich
  * Fixed bug in zdcUnAttenuated.
  *
@@ -237,7 +240,7 @@ unsigned short  StTriggerData2003::ctbRaw(int address, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[address];
 }
 
-unsigned short  StTriggerData2003::ctb(int pmt, int prepost) const
+unsigned short  StTriggerData2003::ctb(int pmt, int run, int prepost) const
 {
     static const unsigned char ctbMap[240] = {
 	7,  6,  5,  4,  3, 23, 22, 21, 20, 19,
@@ -268,7 +271,7 @@ unsigned short  StTriggerData2003::ctb(int pmt, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[pmt]];
 }
 
-unsigned short StTriggerData2003::ctbTraySlat(int tray, int slat, int prepost) const{
+unsigned short StTriggerData2003::ctbTraySlat(int tray, int slat, int run, int prepost) const{
     static const unsigned char ctbMap[2][120] = {
 	{ 109, 108, 107, 106, 105,   7,   6,   5,   4,   3,
 	  2,   1,   0,  15,  14,  13,  12,  11,  10,   9,

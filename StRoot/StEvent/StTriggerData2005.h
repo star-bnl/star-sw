@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.h,v 2.4 2006/05/04 19:05:51 ullrich Exp $
+ * $Id: StTriggerData2005.h,v 2.5 2006/08/21 19:41:51 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.h,v $
+ * Revision 2.5  2006/08/21 19:41:51  ullrich
+ * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
+ *
  * Revision 2.4  2006/05/04 19:05:51  ullrich
  * Added stuff to handle L2 results data.
  *
@@ -87,8 +90,8 @@ public:
     
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
-    unsigned short ctb(int pmt, int prepost=0) const;
-    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
+    unsigned short ctb(int pmt, int run, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;    
     unsigned short ctbSum(int prepost=0) const;
 
     // MWC
@@ -116,7 +119,7 @@ public:
     unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
-    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
+    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost=0) const;
 
     // EMC
     unsigned char bemcHighTower(int patch_id, int prepost=0) const;
