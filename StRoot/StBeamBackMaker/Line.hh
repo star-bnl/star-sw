@@ -4,8 +4,8 @@
  * 23 September 2005
  */
 
-#ifndef StLine_hh
-#define StLine_hh
+#ifndef Line_hh
+#define Line_hh
 /**
  * @brief C++ STL includes
  */
@@ -20,10 +20,10 @@ using std::pair;
 /**
  * @brief 3D lines
  */
-class StLine {
+class Line {
 public:
-  StLine() {}
-  StLine(const StThreeVectorD& o, const StThreeVectorD& d);
+  Line() {}
+  Line(const StThreeVectorD& o, const StThreeVectorD& d);
 
   /**
    * @brief Origin of the line
@@ -54,7 +54,7 @@ public:
    * @param Any line
    * @return 3D-vector of the closest distance between the two lines
    */
-  StThreeVectorD dca(const StLine& line) const;
+  StThreeVectorD dca(const Line& line) const;
 
   /**
    * @brief Pathlength of a given point from the origin of the line
@@ -71,7 +71,7 @@ public:
    *         value is the pathlength on that lineof the point of closest to
    *         this line.
    */
-  pair<double, double> pathlengths(const StLine& line) const;
+  pair<double, double> pathlengths(const Line& line) const;
 
   /**
    * @brief Set the origin of the line to a given point
@@ -91,9 +91,9 @@ private:
   StThreeVectorD mDirection;
 };
 
-inline StThreeVectorD StLine::origin() const { return mOrigin; }
-inline StThreeVectorD StLine::direction() const { return mDirection; }
-inline void StLine::setOrigin(const StThreeVectorD& o) { mOrigin = o; }
-inline void StLine::setDirection(const StThreeVectorD& d) { mDirection = d.unit(); }
+inline StThreeVectorD Line::origin() const { return mOrigin; }
+inline StThreeVectorD Line::direction() const { return mDirection; }
+inline void Line::setOrigin(const StThreeVectorD& o) { mOrigin = o; }
+inline void Line::setDirection(const StThreeVectorD& d) { mDirection = d.unit(); }
 
 #endif

@@ -8,10 +8,8 @@
 #include "StThreeVectorD.hh"
 
 // Local
-#include "StLine.hh"
+#include "Line.hh"
 #include "Track.hh"
-
-StMemoryPool Track::mPool(sizeof(Track));
 
 const double Track::MAX_SLOPE = 0.1;
 
@@ -34,20 +32,21 @@ bool Track::fit()
   //
   // Fit lines to track projections in zx- and zy-plane
   //
-  mXfitter.Clear();
-  mYfitter.Clear();
+  mXfitter.ClearPoints();
+  mYfitter.ClearPoints();
   for (iterator i = begin(); i != end(); ++i) {
     StHit* hit = *i;
-    mXfitter.AddPoint(&static_cast<double>(hit->position().z()),
-		      static_cast<double>(hit->position().x()));
-    mYfitter.AddPoint(&static_cast<double>(hit->position().z()),
-		      static_cast<double>(hit->position().y()));
+    double x = hit->position().x();
+    double y = hit->position().y();
+    double z = hit->position().z();
+    mXfitter.AddPoint(&z, x);
+    mYfitter.AddPoint(&z, y);
   }
   mXfitter.Eval();
   mYfitter.Eval();
   StThreeVectorD origin(x0(), y0(), 0);
   StThreeVectorD direction(dxdz(), dydz(), 1);
-  StLine line(origin, direction);
+  Line line(origin, direction);
   mLength = abs(line.perigee(lastHit()->position()) - line.perigee(firstHit()->position()));
 
   return true;

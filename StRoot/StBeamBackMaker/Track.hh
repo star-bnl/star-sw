@@ -20,7 +20,6 @@
 /**
  * @brief STAR includes
  */
-#include "StMemoryPool.hh"
 #include "StHit.h"
 
 /**
@@ -51,12 +50,6 @@ public:
    * @brief Constructor initializes the two linear fitters.
    */
   Track();
-
-  /**
-   * @brief Memory management functions
-   */
-  void* operator new(size_t) { return mPool.alloc(); }
-  void  operator delete(void* p) { mPool.free(p); }
 
   typedef HitSet::iterator iterator;
   typedef HitSet::reverse_iterator reverse_iterator;
@@ -210,12 +203,9 @@ public:
   double dydzError() const;
 
 private:
-  // Memory management data structure
-  static StMemoryPool mPool;
-
   static const double MAX_SLOPE;
 
-  // Pool of available hits
+  // Track hits
   HitSet mHits;
 
   // Linear fitters in zx- and zy-plane
