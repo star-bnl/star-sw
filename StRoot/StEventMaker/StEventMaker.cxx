@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.77 2006/08/10 03:32:47 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.78 2006/08/21 20:58:20 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -360,7 +360,7 @@ StEventMaker::makeEvent()
     //
     if (!mCurrentEvent->triggerDetectorCollection()) {
         if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003) 
-	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*(mCurrentEvent->triggerData())));
+	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*(mCurrentEvent->triggerData()),mCurrentEvent->runId()));
         else if (dstTriggerDetectors) 
 	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
     }
@@ -1774,8 +1774,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.77 2006/08/10 03:32:47 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.78 2006/08/21 20:58:20 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.78  2006/08/21 20:58:20  ullrich
+ * Pass run number to constructor of StTriggerDetectorCollection (Akio).
+ *
  * Revision 2.77  2006/08/10 03:32:47  perev
  * Assert==>assert
  *
