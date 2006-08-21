@@ -5,30 +5,30 @@
 //
 
 // Local
-#include "StLine.hh"
+#include "Line.hh"
 
-StLine::StLine(const StThreeVectorD& o, const StThreeVectorD& d)
+Line::Line(const StThreeVectorD& o, const StThreeVectorD& d)
 {
   mOrigin = o;
   mDirection = d.unit();
 }
 
-StThreeVectorD StLine::at(double pathlength) const
+StThreeVectorD Line::at(double pathlength) const
 {
   return mOrigin + pathlength * mDirection;
 }
 
-double StLine::pathlength(const StThreeVectorD& point) const
+double Line::pathlength(const StThreeVectorD& point) const
 {
   return mDirection.dot(point - mOrigin);
 }
 
-StThreeVectorD StLine::perigee(const StThreeVectorD& point) const
+StThreeVectorD Line::perigee(const StThreeVectorD& point) const
 {
   return at(pathlength(point));
 }
 
-StThreeVectorD StLine::dca(const StLine& line) const
+StThreeVectorD Line::dca(const Line& line) const
 {
   double cosAngle = mDirection.dot(line.direction());
   double delta = cosAngle * cosAngle - 1;
@@ -38,7 +38,7 @@ StThreeVectorD StLine::dca(const StLine& line) const
   return at(pathlength) - line.at(pathlength2);
 }
 
-pair<double, double> StLine::pathlengths(const StLine& line) const
+pair<double, double> Line::pathlengths(const Line& line) const
 {
   double cosAngle = mDirection.dot(line.direction());
   double delta = cosAngle * cosAngle - 1;

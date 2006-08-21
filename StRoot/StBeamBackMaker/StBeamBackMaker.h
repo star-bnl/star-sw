@@ -112,17 +112,7 @@ public:
   Int_t Make();
 
 private:
-  TH1* fEventTime;
-  TH1* fHitMapBuildTime;
-  TH1* fTrackSeedBuildTime;
-  TH1* fTrackSeedFilterTime;
-  TH1* fTrackExtendTime;
-  TH1* fTrackMergeTime;
-  TH1* fTrackRefitTime;
-  TH1* fTrackConvertTime;
-  TH2* fViewXY;
-  TH2* fViewZX;
-  TH2* fViewZY;
+  TH1* hEventTime;
 
   /**
    * @brief Main body of the tracker
@@ -143,6 +133,12 @@ private:
    * @return Converted StTrack
    */
   StTrack* createStTrack(Track* track);
+
+  /**
+   * @brief StMessMgr helper functions
+   */
+  ostream& info(const Char_t* message = 0);
+  ostream& warning(const Char_t* message = 0);
 
   ClassDef(StBeamBackMaker, 1)
 };
