@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.86  2006/08/22 11:42:21  jcs
+// Set StDetectorState for Ftpc West/East depending on ftpcVoltageStatus
+//
 // Revision 1.85  2006/03/19 19:29:45  jcs
 // Move cluster struct definitions to StFtpcClustersStructures.hh
 // Create DEBUGFILE with bfc option 'fdbg'
@@ -313,16 +316,19 @@ extern "C" void gufld(float *, float *);
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
 
+#include "StDetectorDbMaker/StDetectorDbClock.h"
 #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
+#include "StDetectorDbMaker/StDetectorDbFTPCVoltageStatus.h"
+
 #include "St_db_Maker/St_db_Maker.h"
 
 #include "StEvent.h"
 #include "StFtpcHitCollection.h"
+#include "StDetectorState.h"
 
 #include "StSoftwareMonitor.h"
 #include "StFtpcSoftwareMonitor.h"
 
-#include "StDetectorDbMaker/StDetectorDbClock.h"
 
 ClassImp(StFtpcClusterMaker)
 
@@ -777,13 +783,24 @@ Int_t StFtpcClusterMaker::Make()
 
   Int_t num_points = mHitArray->GetEntriesFast();
   if(num_points>0 && mFtpcHitColl) { // points found and hitCollection exists
-    // Write hits to StEvent (not tested yet).
+    // Write hits to StEvent 
     StFtpcPoint *point;
     
     for (Int_t i=0; i<num_points; i++) {
       point = (StFtpcPoint *)mHitArray->At(i);
       point->ToStEvent(mFtpcHitColl); 
     }	
+  }
+
+       
+  StDetectorDbFTPCVoltageStatus *voltageStatus = StDetectorDbFTPCVoltageStatus::instance();
+  if ( !voltageStatus) {
+            gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
+   }
+  // if mVoltageStatus  and StEvent exists, set StDetectorState
+  if (voltageStatus && mCurrentEvent) {
+      mCurrentEvent->addDetectorState(new StDetectorState(kFtpcEastId,voltageStatus->getStatusFTPCEast()));
+      mCurrentEvent->addDetectorState(new StDetectorState(kFtpcWestId,voltageStatus->getStatusFTPCWest()));
   }
 
 
