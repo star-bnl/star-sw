@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.87  2006/08/23 09:25:36  jcs
+// Return with kStWarn if error occurs accessing Calibrations_ftpc/ftpcVoltageStatus
+// StDetectorState is set only for events with FTPC data
+//
 // Revision 1.86  2006/08/22 11:42:21  jcs
 // Set StDetectorState for Ftpc West/East depending on ftpcVoltageStatus
 //
@@ -795,9 +799,11 @@ Int_t StFtpcClusterMaker::Make()
        
   StDetectorDbFTPCVoltageStatus *voltageStatus = StDetectorDbFTPCVoltageStatus::instance();
   if ( !voltageStatus) {
-            gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
+      gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
+      return kStWarn;
    }
   // if mVoltageStatus  and StEvent exists, set StDetectorState
+  // (StDetectorState only set for events with FTPC data)
   if (voltageStatus && mCurrentEvent) {
       mCurrentEvent->addDetectorState(new StDetectorState(kFtpcEastId,voltageStatus->getStatusFTPCEast()));
       mCurrentEvent->addDetectorState(new StDetectorState(kFtpcWestId,voltageStatus->getStatusFTPCWest()));
