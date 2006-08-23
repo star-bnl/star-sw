@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer_v4_noFTPC.C,v 1.1 2006/08/23 20:53:25 fisyak Exp $
+// $Id: bfcMixer_v4_noFTPC.C,v 1.2 2006/08/23 22:30:06 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +57,7 @@ void bfcMixer_v4_noFTPC(const Int_t Nevents=10,
   chain = new StBFChain("Embedding");
   
   StMaker *saveMk = 0;
-  chain->SetFlags("NoDefault");
+  chain->SetFlags("-ittf,NoDefault");
   // Create chain1 object
   chain1 = new StBFChain("One");
   
