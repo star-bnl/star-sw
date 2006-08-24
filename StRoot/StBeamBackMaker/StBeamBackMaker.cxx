@@ -17,6 +17,7 @@
 #include "StEventTypes.h"
 
 // Local
+#include "Line.hh"
 #include "Track.hh"
 #include "TopologyMap.hh"
 #include "StBeamBackMaker.h"
@@ -304,22 +305,25 @@ StTrack* StBeamBackMaker::createStTrack(Track* track)
   // Inner geometry
   StThreeVectorF origin(track->x0(), track->y0(), 0);
   StThreeVectorF momentum(track->dxdz(), track->dydz(), 1);
-  momentum.setMagnitude(999);	// 999 GeV/c, arbitrary
-  //double dipAngle = atan2(1, hypot(track->dxdz(), track->dydz()));
-  gTrack->setGeometry(new StHelixModel(-1,             // Charge
-				       M_PI_2,         // Psi
-				       0,              // Curvature
-				       M_PI_2 - 1.e-4, // Dip angle
-				       origin,         // Origin
-				       momentum,       // Momentum
-				       1));            // Helicity
+  Line line(origin, momentum);
+  double dipAngle = atan2(1, hypot(track->dxdz(), track->dydz()));
+  gTrack->setGeometry(new StHelixModel(-1, // Charge
+				       M_PI_2, // Psi
+				       0, // Curvature
+				       dipAngle, // Dip angle
+				       line.perigee(track->firstHit()->position()), // Origin
+				       momentum, // Momentum
+				       1)); // Helicity
   // Outer geometry
-  gTrack->setOuterGeometry(gTrack->geometry()->copy());
+  StTrackGeometry* outerGeometry = gTrack->geometry()->copy();
+  outerGeometry->setOrigin(line.perigee(track->lastHit()->position()));
+  gTrack->setOuterGeometry(outerGeometry);
+  
   // Detector info
   StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-  detInfo->setFirstPoint(track->lastHit()->position());
-  detInfo->setLastPoint(track->firstHit()->position());
-  for (Track::reverse_iterator i = track->rbegin(); i != track->rend(); ++i)
+  detInfo->setFirstPoint(track->firstHit()->position());
+  detInfo->setLastPoint(track->lastHit()->position());
+  for (Track::iterator i = track->begin(); i != track->end(); ++i)
     detInfo->addHit(*i);
   detInfo->setNumberOfPoints(track->numberOfHits(), kTpcId);
   gTrack->setDetectorInfo(detInfo);
@@ -340,20 +344,14 @@ inline bool StBeamBackMaker::pileup(Track* track) const
 
 inline ostream& StBeamBackMaker::info(const Char_t* message)
 {
-//   if (message)
-//     return gMessMgr->Info(Form("%s: %s", GetName(), message));
-//   return gMessMgr->Info() << GetName() << ": ";
   if (message)
-    return cout << Form("%s: %s", GetName(), message) << endl;
-  return cout << GetName() << ": ";
+    return gMessMgr->Info(Form("%s: %s", GetName(), message));
+  return gMessMgr->Info() << GetName() << ": ";
 }
 
 inline ostream& StBeamBackMaker::warning(const Char_t* message)
 {
-//   if (message)
-//     return gMessMgr->Warning(Form("%s: %s", GetName(), message));
-//   return gMessMgr->Warning() << GetName() << ": ";
   if (message)
-    return cout << Form("%s: %s", GetName(), message) << endl;
-  return cout << GetName() << ": ";
+    return gMessMgr->Warning(Form("%s: %s", GetName(), message));
+  return gMessMgr->Warning() << GetName() << ": ";
 }
