@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.113 2006/08/10 03:21:38 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.114 2006/08/24 19:03:43 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -93,6 +93,8 @@
 #include "TTableSorter.h"
 #include "tables/St_tpt_track_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
+#include "TEmcTower.h"
+#include "TDataProvider.h"
 
 #include "StEventControlPanel.h"
 #include "StPadControlPanel.h"
@@ -633,6 +635,133 @@ Int_t StEventDisplayMaker::Make()
    gSystem->DispatchOneEvent(1);
    return kStOK;
 }
+//_____________________________________________________________________________
+void  StEventDisplayMaker::MakeEmcTowers()
+{
+   // Create Emc towers geometry
+   TEmcTowers *towers = new TEmcTowers("emchits","emchits",251,  292.1,    20,   60);
+   TVolumeView *towersview = new TVolumeView(*towers);
+   towersview->SetName("emchitsView");
+   AddConst(towers);
+   AddConst(towersview);
+   // add the fake propvides to test
+//_____________________________________________________________________________
+class TEmcSizeProvider : public TDataProvider {
+protected :
+     UInt_t   fScale;     // The normalization factor;
+     Int_t    fIndex;     // current index;
+     UShort_t fThreshold; // Min reported value  
+     
+     inline Int_t ReportValue(UShort_t val) 
+     {
+        return val;
+//        return (val - fThreshold > 0 ? 0: Int_t((val - fThreshold)/fScale));
+     }
+public:
+    //________________________________________________________________
+    TEmcSizeProvider(UShort_t *src=0,unsigned char *available=0,UShort_t *len=0) : TDataProvider(src,available, len)
+     , fScale(4095), fThreshold(200) { 
+        fScale /= 100;
+     }
+    //________________________________________________________________
+    virtual ~TEmcSizeProvider() {}
+    //________________________________________________________________
+    virtual Int_t Attribute(Int_t nSegments,Int_t nSectors) {
+       if (fDataSource) {
+          return  ReportValue (fDataSource[nSegments*120 + nSectors]);
+      } else 
+        return 0;
+    }
+    //________________________________________________________________
+    virtual void ComputerScale() 
+    {
+      // Find the maximum
+      fScale = 1; // 4095/10; /* Web page value */
+    }
+    //________________________________________________________________
+    virtual Int_t NextAttribute() { 
+       Int_t  daqId = 0;
+       Int_t  tdc = -1;
+       Int_t report = 0;
+       int towerId = fIndex+1;fIndex++;
+       if ( towerId > 61*40 && towerId <=  62*40)  return 2; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 72*40 && towerId <=  73*40)  return 31; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 103*40 && towerId <= 104*40) return 44; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 116*40 && towerId <= 117*40) return 49; // STAR has no East-end emc tower yet !!!
+
+       if ( towerId > 1*40 && towerId <=   2*40)  return 2; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 28*40 && towerId <=  29*40) return 31; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 43*40 && towerId <=  44*40) return 44; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 58*40 && towerId <=  59*40) return 49; // STAR has no East-end emc tower yet !!!
+
+       return 99;
+       if (  towerId <= 1200)                        return  100; // 0  
+       if ( (towerId > 2400) && ( towerId < 3600) )  return  100; // 0
+       if ( (towerId >= 1200) && (towerId < 2400) )  return 20;
+       else return 80;
+       return report;
+    }
+    //________________________________________________________________
+    virtual void ResetCounter()
+    { 
+      fIndex = 0;       
+    }
+    //________________________________________________________________
+    inline  void SetScale( UInt_t  scale)  { fScale=scale;    }
+    //________________________________________________________________
+    inline  void SetThreshold( UInt_t  cut){ fThreshold =cut; }
+    //________________________________________________________________
+    inline  UInt_t GetScale()              { return fScale;   }
+};
+
+
+//_____________________________________________________________________________
+class TEmcColorProvider  : public TEmcSizeProvider {
+public:
+    //________________________________________________________________
+    TEmcColorProvider(UShort_t *src=0,unsigned char *available=0,UShort_t *len=0) 
+    : TEmcSizeProvider (src,available,len)
+    { }
+    //________________________________________________________________
+    virtual Int_t Attribute(Int_t nSegments,Int_t nSectors) {
+       if (fDataSource) {
+          return ReportValue( fDataSource[nSegments*120 + nSectors]);
+      } else 
+        return 0;
+    }
+    //________________________________________________________________
+    virtual void ComputerScale() 
+    {
+      // Find the maximum
+      fScale = 4095/1000;
+    }
+    //________________________________________________________________
+    virtual Int_t NextAttribute() { 
+       Int_t  daqId = 0;
+       Int_t colorResponce = 0;
+       int towerId = fIndex+1;fIndex++;
+       UInt_t colorCode = ReportValue((fDataSource[daqId])) ;
+       if ( towerId >  1*40 && towerId <=   2*40)  return kBlue;    // STAR has no East-end emc tower yet !!!
+       if ( towerId > 28*40 && towerId <=  29*40) return kGreen;   // STAR has no East-end emc tower yet !!!
+       if ( towerId > 43*40 && towerId <=  44*40) return kYellow;  // STAR has no East-end emc tower yet !!!
+       if ( towerId > 58*40 && towerId <=  59*40) return kRed;     // STAR has no East-end emc tower yet !!!
+
+       if ( towerId >  61*40 && towerId <=  62*40)  return kBlue;  // STAR has no East-end emc tower yet !!!
+       if ( towerId >  72*40 && towerId <=  73*40)  return kGreen; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 103*40 && towerId <= 104*40) return kYellow; // STAR has no East-end emc tower yet !!!
+       if ( towerId > 116*40 && towerId <= 117*40) return kRed;    // STAR has no East-end emc tower yet !!!
+       return kCyan; //0
+    }
+};
+// -------------------
+    if (towers) {
+         TEmcSizeProvider *fSizeProvider = new TEmcSizeProvider();
+         towers->SetSizeProvider( fSizeProvider  );
+         TEmcColorProvider *fColorProvider = new TEmcColorProvider ();
+         towers->SetColorProvider( fColorProvider );
+    }
+ 
+}
 
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::ParseName(char *inName, char *positions[])
@@ -1165,6 +1294,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.114  2006/08/24 19:03:43  fine
+// Add the fake the Emc tower dataprovider to test
+//
 // Revision 1.113  2006/08/10 03:21:38  perev
 // Assert==>assert
 //
