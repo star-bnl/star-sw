@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.36 2004/11/16 04:33:05 perev Exp $
+// $Id: StEventDisplayMaker.h,v 1.37 2006/08/24 19:03:43 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.37  2006/08/24 19:03:43  fine
+// Add the fake the Emc tower dataprovider to test
+//
 // Revision 1.36  2004/11/16 04:33:05  perev
 // Bug fix. Check for same value of StEvent pointer removed
 //
@@ -94,7 +97,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.36 2004/11/16 04:33:05 perev Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.37 2006/08/24 19:03:43 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -131,6 +134,7 @@ static StEventDisplayInfo *fgInfo;
 
     Int_t         MakeTable(const char   **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const char   *keyColumn,const char   *keyPositions[]);
+    void          MakeEmcTowers();
     static Int_t  ParseName(char   *inName, char   *position[]);
  
  public: 
@@ -200,7 +204,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.36 2004/11/16 04:33:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.37 2006/08/24 19:03:43 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
