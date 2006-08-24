@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.114 2006/08/24 19:03:43 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.115 2006/08/24 23:38:21 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -304,6 +304,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   m_ShortView = new TVolumeView(*m_Hall,2); 
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
+  MakeEmcTowers();
   return 0;
 }
 //______________________________________________________________________________
@@ -479,6 +480,8 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
 
    if (!m_ShortView) BuildGeometry();
    if (m_ShortView) m_ShortView->Draw();
+   TDataSet *ds = GetDataSet("emchitsView");
+   if (ds) ds->Draw();
    m_PadBrowserCanvas->Modified();
    m_PadBrowserCanvas->Update();
    return m_PadBrowserCanvas;
@@ -639,11 +642,14 @@ Int_t StEventDisplayMaker::Make()
 void  StEventDisplayMaker::MakeEmcTowers()
 {
    // Create Emc towers geometry
-   TEmcTowers *towers = new TEmcTowers("emchits","emchits",251,  292.1,    20,   60);
+   TEmcTowers *towers = 0;
+#ifdef EMCTOWER   
+   towers = new TEmcTowers("emchits","emchits",251,  292.1,    20,   60);
    TVolumeView *towersview = new TVolumeView(*towers);
    towersview->SetName("emchitsView");
    AddConst(towers);
-   AddConst(towersview);
+   AddConst(towersview); 
+#endif   
    // add the fake propvides to test
 //_____________________________________________________________________________
 class TEmcSizeProvider : public TDataProvider {
@@ -740,7 +746,7 @@ public:
        Int_t  daqId = 0;
        Int_t colorResponce = 0;
        int towerId = fIndex+1;fIndex++;
-       UInt_t colorCode = ReportValue((fDataSource[daqId])) ;
+       // UInt_t colorCode = ReportValue((fDataSource[daqId])) ;
        if ( towerId >  1*40 && towerId <=   2*40)  return kBlue;    // STAR has no East-end emc tower yet !!!
        if ( towerId > 28*40 && towerId <=  29*40) return kGreen;   // STAR has no East-end emc tower yet !!!
        if ( towerId > 43*40 && towerId <=  44*40) return kYellow;  // STAR has no East-end emc tower yet !!!
@@ -1294,6 +1300,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.115  2006/08/24 23:38:21  fine
+// Add the EmsTowers a component of the Detector Geometry (still disabled
+//
 // Revision 1.114  2006/08/24 19:03:43  fine
 // Add the fake the Emc tower dataprovider to test
 //

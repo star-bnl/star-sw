@@ -6,5 +6,5 @@ Plugin.TPaletteEditor:      *  TQtPaletteEditor  QtImage  "TQtPaletteEditor(TAtt
 Gui.Style:                  platinum
 Gui.Backend:                qt
 Gui.Factory:                qtgui
-Plugin.TGuiFactory: qtgui   TQtGUIFactory       QtRootGui    "TQtGUIFactory()"
+Plugin.TGuiFactory: qtgui   TQtGUIFactory       QtGui    "TQtGUIFactory()"
 Plugin.TVirtualViewer3D:   ogl TQtRootViewer3D  RQTGL    "TQtRootViewer3D(TVirtualPad*)"
