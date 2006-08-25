@@ -37,9 +37,9 @@ typedef multiset<StHit*, LessHit> HitSet;
 typedef HitSet::iterator HitSetIter;
 
 struct LessTrack {
-  bool operator()(const Track* track, const Track* track2) const
+  bool operator()(const Track* track1, const Track* track2) const
   {
-    return track->numberOfHits() < track2->numberOfHits();
+    return track1->size() < track2->size();
   }
 };
 
@@ -65,7 +65,7 @@ Int_t StBeamBackMaker::Make()
 Int_t StBeamBackMaker::makeHelper()
 {
   info() << "Processing run=" << GetRunNumber()
-	 << ", event=" << GetEventNumber() << endl;
+	 << ", event=" << GetEventNumber() << endm;
 
   StEvent* event = (StEvent*)GetInputDS("StEvent");
   if (!event) {
@@ -79,7 +79,7 @@ Int_t StBeamBackMaker::makeHelper()
     return kStOk;
   }
 
-  info() << tpc->numberOfHits() << " TPC hits in event" << endl;
+  info() << tpc->numberOfHits() << " TPC hits in event" << endm;
 
   //
   // Collect all unused TPC hits, i.e. those that were not assigned to
@@ -98,7 +98,7 @@ Int_t StBeamBackMaker::makeHelper()
       }
     }
   }
-  info() << hits.size() << " unused TPC hits in event" << endl;
+  info() << hits.size() << " unused TPC hits in event" << endm;
 
   //
   // Find track seeds
@@ -112,7 +112,7 @@ Int_t StBeamBackMaker::makeHelper()
     Track* track = bufEnd++;
     new (track) Track;
     StHit* hit = *hits.begin();
-    track->addHit(hit);
+    track->push_back(hit);
     hits.erase(hits.begin());
     // Compute initial centroid
     double sumX = hit->position().x();
@@ -128,7 +128,7 @@ Int_t StBeamBackMaker::makeHelper()
       double dy = meanY - hit->position().y();
       double dr = hypot(dx, dy);
       if (dr < MAX_R_DISTANCE) {
-	track->addHit(hit);
+	track->push_back(hit);
 	HitSetIter next = i;
 	++next;
 	hits.erase(i);
@@ -136,8 +136,8 @@ Int_t StBeamBackMaker::makeHelper()
 	// Update centroid
 	sumX += hit->position().x();
 	sumY += hit->position().y();
-	meanX = sumX / track->numberOfHits();
-	meanY = sumY / track->numberOfHits();
+	meanX = sumX / track->size();
+	meanY = sumY / track->size();
       }
       else {
 	++i;
@@ -145,17 +145,17 @@ Int_t StBeamBackMaker::makeHelper()
     }
     tracks.insert(track);
   }
-  info() << tracks.size() << " track seeds found" << endl;
+  info() << tracks.size() << " track seeds found" << endm;
 
   //
   // Pick only track seeds with at least MIN_TRACK_SEED_HITS hits.
   // The others are put back in the set of available hits.
   //
   info() << "Removing track seeds with less than "
-	 << MIN_TRACK_SEED_HITS << " hits" << endl;
+	 << MIN_TRACK_SEED_HITS << " hits" << endm;
   for (TrackSetIter i = tracks.begin(); i != tracks.end();) {
     Track* track = *i;
-    if (track->numberOfHits() < MIN_TRACK_SEED_HITS) {
+    if (track->size() < MIN_TRACK_SEED_HITS) {
       for (Track::iterator j = track->begin(); j != track->end(); ++j) {
 	StHit* hit = *j;
 	hits.insert(hit);
@@ -170,7 +170,7 @@ Int_t StBeamBackMaker::makeHelper()
     }
   }
   info() << tracks.size() << " track seeds left with "
-	 << MIN_TRACK_SEED_HITS << " hits or more" << endl;
+	 << MIN_TRACK_SEED_HITS << " hits or more" << endm;
 
   //
   // Try to fit track seeds to straight tracks by doing
@@ -189,7 +189,7 @@ Int_t StBeamBackMaker::makeHelper()
       for (HitSetIter j = hits.begin(); j != hits.end();) {
 	StHit* hit = *j;
 	if (track->accept(hit)) {
-	  track->addHit(hit);
+	  track->push_back(hit);
 	  HitSetIter next = j;
 	  ++next;
 	  hits.erase(j);
@@ -202,7 +202,7 @@ Int_t StBeamBackMaker::makeHelper()
       linearTracks.push_back(track);
     }
   }
-  info() << linearTracks.size() << " linear tracks found" << endl;
+  info() << linearTracks.size() << " linear tracks found" << endm;
 
   //
   // Merge linear tracks if both end points of the first track
@@ -226,7 +226,7 @@ Int_t StBeamBackMaker::makeHelper()
   //
   linearTracks.erase(remove(linearTracks.begin(), linearTracks.end(),
 			    (Track*)0), linearTracks.end());
-  info() << linearTracks.size() << " merged tracks" << endl;
+  info() << linearTracks.size() << " merged tracks" << endm;
 
   //
   // Refit and remove outliers.
@@ -241,24 +241,21 @@ Int_t StBeamBackMaker::makeHelper()
 	  ++j;
 	}
 	else {
-	  Track::iterator next = j;
-	  ++next;
-	  track->removeHit(j);
-	  j = next;
+	  j = track->erase(j);
 	  hits.insert(hit);
 	}
       }
     }
   }
-  info() << hits.size() << " unused TPC hits" << endl;
+  info() << hits.size() << " unused TPC hits" << endm;
 
   //
   // Number of hits in linear tracks
   //
   int nHits = 0;
   for (unsigned int i = 0; i < linearTracks.size(); ++i)
-    nHits += linearTracks[i]->numberOfHits();
-  info() << nHits << " TPC hits in linear tracks" << endl;
+    nHits += linearTracks[i]->size();
+  info() << nHits << " TPC hits in linear tracks" << endm;
 
   //
   // Track to StTrack conversion.
@@ -284,7 +281,7 @@ Int_t StBeamBackMaker::makeHelper()
     event->trackDetectorInfo().push_back(track->detectorInfo());
     ++nStTrack;
   }
-  info() << nStTrack << " StTrack saved" << endl;
+  info() << nStTrack << " StTrack saved" << endm;
 
   //
   // Clean up
@@ -325,11 +322,11 @@ StTrack* StBeamBackMaker::createStTrack(Track* track)
   detInfo->setLastPoint(track->lastHit()->position());
   for (Track::iterator i = track->begin(); i != track->end(); ++i)
     detInfo->addHit(*i);
-  detInfo->setNumberOfPoints(track->numberOfHits(), kTpcId);
+  detInfo->setNumberOfPoints(track->size(), kTpcId);
   gTrack->setDetectorInfo(detInfo);
   // Fit traits
   StTrackFitTraits fitTraits;
-  fitTraits.setNumberOfFitPoints(track->numberOfHits(), kTpcId);
+  fitTraits.setNumberOfFitPoints(track->size(), kTpcId);
   gTrack->setFitTraits(fitTraits);
 
   return gTrack;

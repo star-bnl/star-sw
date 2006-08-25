@@ -11,20 +11,12 @@
 #include "Line.hh"
 #include "Track.hh"
 
-const double Track::MAX_SLOPE = 0.1;
-
-void Track::removeHit(StHit* hit)
-{
-  pair<iterator, iterator> p = mHits.equal_range(hit);
-  for (iterator i = p.first; i != p.second; ++i)
-    if (*i == hit)
-      mHits.erase(i);
-}
+#define MAX_SLOPE 0.1
 
 void Track::merge(Track* track)
 {
-  copy(track->begin(), track->end(),
-       insert_iterator<HitSet>(mHits, mHits.begin()));
+  copy(track->begin(), track->end(), back_inserter(*this));
+  sort(begin(), end(), LessHit());
 }
 
 bool Track::fit()
@@ -67,7 +59,7 @@ bool Track::accept(StHit* hit) const
 
 ostream& operator<<(ostream& os, Track& track)
 {
-  os << "Track " << &track << " has " << track.numberOfHits() << " hits:\n";
+  os << "Track " << &track << " has " << track.size() << " hits:\n";
   for (Track::iterator i = track.begin(); i != track.end(); ++i) {
     StHit* hit = *i;
     os << hit->position() << '\n';

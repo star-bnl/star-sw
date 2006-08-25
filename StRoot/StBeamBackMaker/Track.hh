@@ -10,7 +10,7 @@
 /**
  * @brief C++ STL includes
  */
-#include <set>
+#include <vector>
 
 /**
  * @brief ROOT includes
@@ -29,7 +29,7 @@
  * a Track contains all the hits associated with it and two linear fitters
  * used to fit the track to lines in the zx- and zy-plane.
  */
-class Track {
+class Track : public vector<StHit*> {
 private:
   /**
    * @brief Comparison between hits using z-coordinate
@@ -43,7 +43,6 @@ private:
       return hit1->position().z() < hit2->position().z();
     }
   };
-  typedef multiset<StHit*, LessHit> HitSet;
 
 public:
   /**
@@ -51,58 +50,10 @@ public:
    */
   Track();
 
-  typedef HitSet::iterator iterator;
-  typedef HitSet::reverse_iterator reverse_iterator;
-
   /**
-   * @brief Number of hits
-   */
-  int numberOfHits() const;
-
-  /**
-   * @brief Forward iterator to first hit
-   */
-  iterator begin() const;
-
-  /**
-   * @brief Forward iterator past last hit
-   */
-  iterator end() const;
-
-  /**
-   * @brief Reverse iterator to last hit
-   */
-  reverse_iterator rbegin() const;
-
-  /**
-   * @brief Reverse iterator past first hit
-   */
-  reverse_iterator rend() const;
-
-  /**
-   * @brief Add hit to track
-   * @param Hit to be added
-   */
-  void addHit(StHit* hit);
-
-  /**
-   * @brief Remove hit from track
-   * @param Hit iterator
-   */
-  void removeHit(iterator i);
-
-  /**
-   * @brief Remove hit from track
-   * @param Hit pointer
+   * @brief Remove hit
    */
   void removeHit(StHit* hit);
-
-  /**
-   * @brief Remove hit subsequence from track
-   * @param first -- Iterator to first  hit to be removed
-   * @param last  -- Iterator past last hit to be removed
-   */
-  void removeHits(iterator first, iterator last);
 
   /**
    * @brief First hit
@@ -203,11 +154,6 @@ public:
   double dydzError() const;
 
 private:
-  static const double MAX_SLOPE;
-
-  // Track hits
-  HitSet mHits;
-
   // Linear fitters in zx- and zy-plane
   TLinearFitter mXfitter;
   TLinearFitter mYfitter;
@@ -217,16 +163,9 @@ private:
 };
 
 inline Track::Track() { mXfitter.SetFormula("pol1"); mYfitter.SetFormula("pol1"); }
-inline int Track::numberOfHits() const { return mHits.size(); }
-inline Track::iterator Track::begin() const { return mHits.begin(); }
-inline Track::iterator Track::end() const { return mHits.end(); }
-inline Track::reverse_iterator Track::rbegin() const { return mHits.rbegin(); }
-inline Track::reverse_iterator Track::rend() const { return mHits.rend(); }
-inline void Track::addHit(StHit* hit) { mHits.insert(hit); }
-inline void Track::removeHit(iterator i) { mHits.erase(i); }
-inline void Track::removeHits(iterator first, iterator last) { mHits.erase(first, last); }
-inline StHit* Track::firstHit() const { return *mHits.begin(); }
-inline StHit* Track::lastHit() const { return *mHits.rbegin(); }
+inline void Track::removeHit(StHit* hit) { erase(remove(begin(), end(), hit)); }
+inline StHit* Track::firstHit() const { return front(); }
+inline StHit* Track::lastHit() const { return back(); }
 inline double Track::length() const { return mLength; }
 inline double Track::chi2zx() { return mXfitter.GetChisquare(); }
 inline double Track::chi2zy() { return mYfitter.GetChisquare(); }
