@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.75 2006/03/19 19:25:06 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.76 2006/08/25 07:57:33 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.76  2006/08/25 07:57:33  jcs
+// remove debug printout
+//
 // Revision 1.75  2006/03/19 19:25:06  jcs
 // Select LASERTRACKING with bfc option 'flaser' (otherwise TWOCYCLETRACKING is used)
 // Create DEBUGFILE with bfc option 'fdbg'
@@ -476,8 +479,6 @@ if (m_Mode%2 == 1) {
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Make()
 {
-cout<<"StFtpcTrackMaker::Make m_Mode =  "<<m_Mode<<endl;
-cout<<"StFtpcTrackMaker::Make m_Mode%2 =  "<<m_Mode%2<<endl;
   // Setup and tracking.
   
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) started..." << endm;
@@ -869,7 +870,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.75 2006/03/19 19:25:06 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.76 2006/08/25 07:57:33 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
