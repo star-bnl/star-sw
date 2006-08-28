@@ -311,6 +311,7 @@ StTrack* StBeamBackMaker::createStTrack(Track* track)
 				       line.perigee(track->firstHit()->position()), // Origin
 				       momentum, // Momentum
 				       1)); // Helicity
+  gTrack->setEncodedMethod(kLine2StepId);
   // Outer geometry
   StTrackGeometry* outerGeometry = gTrack->geometry()->copy();
   outerGeometry->setOrigin(line.perigee(track->lastHit()->position()));
