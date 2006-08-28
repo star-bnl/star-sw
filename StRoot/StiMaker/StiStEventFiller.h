@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.21 2006/06/16 21:29:17 perev Exp $
+ * $Id: StiStEventFiller.h,v 2.22 2006/08/28 17:02:23 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.22  2006/08/28 17:02:23  fisyak
+ * Add +x11 short tracks pointing to EEMC, clean up StiDedxCalculator
+ *
  * Revision 2.21  2006/06/16 21:29:17  perev
  * FillStHitErr method added and called
  *
@@ -142,7 +145,6 @@
 #include <map>
 using std::map;
 #include "StDetectorId.h"
-#include "Sti/StiDedxCalculator.h"
 class StEvent;
 class StTrackNode;
 class StTrackDetectorInfo;
@@ -175,8 +177,6 @@ public:
     void fillGeometry(StTrack* track, StiKalmanTrack* kTrack, bool outer);
     //void fillTopologyMap(StTrack* track, StiKalmanTrack* kTrack);
     void fillFitTraits(StTrack* track, StiKalmanTrack* kTrack);
-    void fillPidTraits(StTrack* track, StiKalmanTrack* kTrack);
-    void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
     void fillDca(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
@@ -200,9 +200,6 @@ private:
     int mGloPri;		//0=filing global,1=filing primary
     int mTrackNumber;
     map<StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
-
-    StiDedxCalculator dEdxTpcCalculator;
-    StiDedxCalculator dEdxSvtCalculator;
 
     unsigned short mStiEncoded;
     //helix parameters
