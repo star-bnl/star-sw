@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.74 2006/06/16 21:28:57 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.75 2006/08/28 17:02:23 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.75  2006/08/28 17:02:23  fisyak
+ * Add +x11 short tracks pointing to EEMC, clean up StiDedxCalculator
+ *
  * Revision 2.74  2006/06/16 21:28:57  perev
  * FillStHitErr method added and called
  *
@@ -417,13 +420,13 @@ using namespace std;
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackFitterParameters.h"
 /////#include "Sti/StiGeometryTransform.h"
-#include "Sti/StiDedxCalculator.h"
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"
 
 //StiMaker
 #include "StiMaker/StiStEventFiller.h"
 
+#include "TMath.h"
 #define NICE(angle) StiKalmanTrackNode::nice((angle))
 
 //_____________________________________________________________________________
@@ -433,12 +436,6 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
    mAux    = 0;
    mGloPri = 0;
    mPullEvent=0;
-  //temp, make sure we're not constructing extra copies...
-  //cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
-  dEdxTpcCalculator.setFractionUsed(.6);
-  dEdxSvtCalculator.setFractionUsed(.6);
-  dEdxTpcCalculator.setDetectorFilter(kTpcId);
-  dEdxSvtCalculator.setDetectorFilter(kSvtId);
   
   originD = new StThreeVectorD(0,0,0);
   physicalHelix = new StPhysicalHelixD(0.,0.,0.,*originD,-1);
@@ -599,7 +596,8 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
 	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	  if (trackNode->entries(global)<1)
-	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;
+	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;  
+	  fillFlags(gTrack);
           int ibad = gTrack->bad();
 	  errh.Add(ibad);
           if (ibad) {
@@ -713,6 +711,7 @@ void StiStEventFiller::fillEventPrimaries()
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       vertex->addDaughter(pTrack);
       StuFixTopoMap(pTrack);
+      fillFlags(pTrack);
       fillTrackCount2++;
       int ibad = pTrack->bad();
       errh.Add(ibad);
@@ -912,69 +911,36 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   return;
 }
 
-#if 0
-//_____________________________________________________________________________
-void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* gTrack, StiKalmanTrack* track){
-  double dEdx, errordEdx, nPoints;
-  dEdx = errordEdx = nPoints = 9999;
-  if (track) {
-    dEdxCalculator.getDedx(track, dEdx, errordEdx, nPoints);
-  }
-
-  if(!finite(dEdx) || dEdx>9999)
-    {
-      dEdx = 9999;
-      errordEdx= dEdx;
-      nPoints=0;
-      cout <<"StiStEventFiller::Error: dEdx non-finite."<<endl;
-    }
-  else if(!finite(errordEdx))
-    {
-      dEdx = 9999;
-      errordEdx= dEdx;
-      nPoints=0;
-      cout <<"StiStEventFiller::Error: errordEdx non-finite."<<endl;
-    }
-
-  StTrackPidTraits* pidTrait = new StDedxPidTraits(dEdxCalculator.whichDetId(),
-						   static_cast<short>(kTruncatedMeanId),
-						   static_cast<unsigned short>(nPoints),
-						   static_cast<float>(1.5*dEdx),
-						   static_cast<float>(errordEdx));
-  gTrack->addPidTraits(pidTrait);
-  return;
-}
-//_____________________________________________________________________________
-void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiKalmanTrack* track){
-
-  // TPC
-  filldEdxInfo(dEdxTpcCalculator,gTrack,track);
-
-  // SVT
-  //filldEdxInfo(dEdxSvtCalculator,gTrack,track);
-
-  return;
-}
-#endif
-//_____________________________________________________________________________
-/// data members from StTrack
-/// flags http://www.star.bnl.gov/html/all_l/html/dst_track_flags.html
-/// x=1 -> TPC only
-/// x=2 -> SVT only
-/// x=3 -> TPC + primary vertex
-/// x=4 -> SVT + primary vertex
-/// x=5 -> SVT+TPC
-/// x=6 -> SVT+TPC+primary vertex
-/// x=7 -> FTPC only
-/// x=8 -> FTPC+primary
-/// The last two digits indicate the status of the refit:
-/// = +x01 -> good track
-/// = -x01 -> Bad fit, outlier removal eliminated too many points
-/// = -x02 -> Bad fit, not enough points to fit
-/// = -x03 -> Bad fit, too many fit iterations
-/// = -x04 -> Bad Fit, too many outlier removal iterations
-/// = -x06 -> Bad fit, outlier could not be identified
-/// = -x10 -> Bad fit, not enough points to start
+///_____________________________________________________________________________
+/// data members from StEvent/StTrack.h
+///  The track flag (mFlag accessed via flag() method) definitions with ITTF 
+///(flag definition in EGR era can be found at  http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
+///
+///  mFlag=xyy, where x  indicates the detectors included in the fit and 
+///                   yy indicates the status of the fit. 
+///  Positive mFlag values are good fits, negative values are bad fits. 
+///
+///  The first digit indicates which detectors were used in the refit: 
+///
+///      x=1 -> TPC only 
+///      x=3 -> TPC       + primary vertex 
+///      x=5 -> SVT + TPC 
+///      x=6 -> SVT + TPC + primary vertex 
+///      x=7 -> FTPC only 
+///      x=8 -> FTPC      + primary 
+///      x=9 -> TPC beam background tracks            
+///
+///  The last two digits indicate the status of the refit: 
+///       = +x01 -> good track 
+///
+///       = -x01 -> Bad fit, outlier removal eliminated too many points 
+///       = -x02 -> Bad fit, not enough points to fit 
+///       = -x03 -> Bad fit, too many fit iterations 
+///       = -x04 -> Bad Fit, too many outlier removal iterations 
+///       = -x06 -> Bad fit, outlier could not be identified 
+///       = -x10 -> Bad fit, not enough points to start 
+///
+///       = -x11 -> Short track pointing to EEMC
 
 void StiStEventFiller::fillFlags(StTrack* gTrack) {
   if (gTrack->type()==global) {
@@ -1004,12 +970,28 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
 	  gTrack->setFlag(601); //svt+tpc+primary
       }
   }
-  if (totFitPoints<5) {
-//??      int flag = gTrack->flag();
-      //keep most sig. digit, set last digit to 2, and flip sign
-//??      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
+  if (totFitPoints < 11) { // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
+    int flag = TMath::Abs(gTrack->flag());
+    //keep most sig. digit, set last digit to 2, and set negative sign
+    gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
+    if (gTrack->geometry()) {
+      const StThreeVectorF &momentum = gTrack->geometry()->momentum();
+      if (momentum.pseudoRapidity() > 0.5) {
+	const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
+	if (dinfo) {
+	  const StPtrVecHit& hits = dinfo->hits();
+	  Int_t Nhits = hits.size();
+	  for (Int_t i = 0; i < Nhits; i++) {
+	    const StHit *hit = hits[i];
+	    if (hit->position().z() > 150.0) {
+	      gTrack->setFlag((((flag/100)*100)+11)); // +x11 
+	      return;
+	    }
+	  }
+	}
+      }
+    }
   }
-
 }
 //_____________________________________________________________________________
 void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
@@ -1048,7 +1030,6 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
-  fillFlags(gTrack);
   if (!track->isPrimary()) fillDca(gTrack,track);
   return;
 }
