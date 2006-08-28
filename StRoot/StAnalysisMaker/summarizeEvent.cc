@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.15 2006/08/07 20:49:57 fisyak Exp $
+ * $Id: summarizeEvent.cc,v 2.16 2006/08/28 16:57:09 fisyak Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
+ * Revision 2.16  2006/08/28 16:57:09  fisyak
+ * Add print out for Beam Background tracks and short track pointing to EEMC
+ *
  * Revision 2.15  2006/08/07 20:49:57  fisyak
  * Add Event Id, correct Ftpc bad hit
  *
@@ -66,8 +69,9 @@
 #include "StContainers.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
+#include "TMath.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.15 2006/08/07 20:49:57 fisyak Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.16 2006/08/28 16:57:09 fisyak Exp $";
 
 void
 summarizeEvent(StEvent& event, const int &nevents)
@@ -85,18 +89,29 @@ summarizeEvent(StEvent& event, const int &nevents)
     UInt_t nTpcTracks = 0;
     UInt_t nGoodTpcTracks = 0;
     UInt_t nGoodFtpcTracks = 0;
+    UInt_t nBeamBackTracks = 0;
+    UInt_t nGoodBeamBackTracks = 0;
+    UInt_t nShortTrackForEEmc = 0;
     for (unsigned int i=0; i < nTracks; i++) {
-       node = trackNode[i]; if (!node) continue;
-       StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
-       if (! gTrack) continue;
-       if (gTrack->flag() >= 700) nGoodFtpcTracks++;
-       if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
-       nGoodTracks++;
+      node = trackNode[i]; if (!node) continue;
+      StGlobalTrack* gTrack = static_cast<StGlobalTrack*>(node->track(global));
+      if (! gTrack) continue;
+      if (TMath::Abs(gTrack->flag())%100 == 11) nShortTrackForEEmc++;
+      if (gTrack->flag()/100 == 9) {
+	nBeamBackTracks++;
+	if (! gTrack->bad()) nGoodBeamBackTracks++;
+      }
+      if (gTrack->flag() >= 700 && gTrack->flag() < 900) nGoodFtpcTracks++;
+      if (gTrack->fitTraits().numberOfFitPoints() <  NoFitPointCutForGoodTrack) continue;
+      nGoodTracks++;
     }
     LOG_QA << "# track nodes:   \t"
-		       <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
-		       << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
-             
+	   <<  nTracks << ":\tglobals with NFitP>="<< NoFitPointCutForGoodTrack << ":\t" << nGoodTracks 
+	   << ":\tFtpc tracks :\t" << nGoodFtpcTracks << endm;
+    if (nBeamBackTracks || nShortTrackForEEmc) 
+      LOG_QA  << "BeamBack tracks:\t" << nBeamBackTracks << ":\tgood ones:\t" << nGoodBeamBackTracks
+	      << ":\tShort tracks pointing to EEMC :\t" << nShortTrackForEEmc
+	      << endm;
     // Report for jobTracking Db        
 #ifdef OLDTRACKING    
     if (nTracks) {
@@ -144,11 +159,11 @@ summarizeEvent(StEvent& event, const int &nevents)
           if (pTrack->fitTraits().numberOfFitPoints(kTpcId)) {
              nTpcTracks++; nGoodTpcTracks+=good;
           } 
-      }
-      LOG_QA << "# primary vertex("<<ipr<<"): \t"<<primPos<<endm;
-
-      LOG_QA << "# primary tracks:\t"
-		         << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
+       }
+       LOG_QA << "# primary vertex("<<ipr<<"): \t"<<primPos<<endm;
+       
+       LOG_QA << "# primary tracks:\t"
+	      << nDaughters << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTracks << endm;
      // Report for jobTracking Db   (non-zero entry only)    
 #ifdef OLDTRACKING       
      if (nDaughters) {
@@ -181,7 +196,8 @@ summarizeEvent(StEvent& event, const int &nevents)
                << "'" << endm;
      }
 #endif     
-    LOG_QA << "# primary TPC tracks:\t"
+     if (NoFitPointCutForGoodTrack && nGoodTpcTracks) 
+       LOG_QA << "# primary TPC tracks:\t"
 		         << nTpcTracks << ":\tones    with NFitP(>="<< NoFitPointCutForGoodTrack << "):\t" << nGoodTpcTracks << endm;
     }// end prim vtx    
     
