@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.29 2005/07/06 19:00:52 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.30 2006/08/28 17:04:46 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.30  2006/08/28 17:04:46  fisyak
+ * Don't check StPhysicalHelixD quality for Beam Background tracks (flag() == 901)
+ *
  * Revision 2.29  2005/07/06 19:00:52  fisyak
  * Add include of StThreeVectorD.hh
  *
@@ -116,7 +119,7 @@
 #include "StThreeVectorD.hh"
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.29 2005/07/06 19:00:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.30 2006/08/28 17:04:46 fisyak Exp $";
 
 StTrack::StTrack()
 {
@@ -493,6 +496,7 @@ int StTrack::bad() const
     if (!di                              )   	return   26;
     ierr = di->bad();
     if (ierr                             )   	return    6+100*ierr;
+    if (flag() == 901) return 0; // don't check Hilix for Beam Background tracks
     StPhysicalHelixD hlx1 = mGeometry->helix();
     StThreeVectorD   ori2 = mOuterGeometry->origin();
     double len12 = hlx1.pathLength(ori2);
