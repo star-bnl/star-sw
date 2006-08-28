@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.cxx,v 1.4 2002/09/11 21:02:41 laue Exp $
+ * $Id: StMuFilter.cxx,v 1.5 2006/08/28 17:07:15 fisyak Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -11,7 +11,7 @@
 #include "StEvent/StTrackDetectorInfo.h"
 #include "StEvent/StContainers.h"
 #include "StEvent/StDedxPidTraits.h"
-
+#include "TMath.h"
 #define __MIN_HITS_TPC__ 11
 #define __MIN_HITS_FTPC__ 5
 
@@ -43,6 +43,7 @@ bool StMuFilter::accept(const StTrack* track) {
   } 
 
   if ( !track->detectorInfo() ) return false;
+  if ( TMath::Abs(track->flag())%100 == 11) return true;
   if ( track->detectorInfo()->numberOfPoints(kTpcId)<__MIN_HITS_TPC__ &&
        track->detectorInfo()->numberOfPoints(kFtpcWestId)<__MIN_HITS_FTPC__ && 
        track->detectorInfo()->numberOfPoints(kFtpcEastId)<__MIN_HITS_FTPC__ 
@@ -55,6 +56,9 @@ bool StMuFilter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuFilter.cxx,v $
+ * Revision 1.5  2006/08/28 17:07:15  fisyak
+ * Don't applay no. fit points cut for short tracks pointing to EEMC (+x11)
+ *
  * Revision 1.4  2002/09/11 21:02:41  laue
  * added cut on track encoded method for ITTF
  *
