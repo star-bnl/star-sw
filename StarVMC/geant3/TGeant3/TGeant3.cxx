@@ -16,6 +16,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.3  2006/08/28 21:59:00  fisyak
+Force to complain with ROOT 4.04
+
 Revision 1.2  2006/08/17 13:38:51  fisyak
 Clean up
 
@@ -3201,7 +3204,7 @@ void  TGeant3::SetCerenkov(Int_t itmed, Int_t npckov, Double_t *ppckov,
   delete [] feffic;
   delete [] frindex;
 }
-
+#if ROOT_VERSION_CODE >= 328192
 //______________________________________________________________________
 void  TGeant3::DefineOpSurface(const char* /*name*/,
                 EMCOpSurfaceModel /*model*/, EMCOpSurfaceType /*surfaceType*/,
@@ -3211,7 +3214,7 @@ void  TGeant3::DefineOpSurface(const char* /*name*/,
    Warning("DefineOpSurface", 
            "Not applicable in Geant3 - setting is ignored.");
 }   
-                
+#endif                
 //______________________________________________________________________
 void  TGeant3::SetBorderSurface(const char* /*name*/,
                 const char* /*vol1Name*/, int /*vol1CopyNo*/,
@@ -5996,7 +5999,9 @@ Bool_t TGeant3::GetTransformation(const TString &volumePath,TGeoHMatrix &mat){
     for(i=0;i<3;i++) t[i] = (Double_t) (this->Gcvolu()->gtran[n][i]);
     mat.SetTranslation(t);
     return kTRUE;
-}/*
+}
+#if ROOT_VERSION_CODE >= 328192
+/*
 //______________________________________________________________________
 Bool_t TGeant3::GetShape(const TString &volumeName,TString &shapeType,
                          TArrayD &par){
@@ -6086,6 +6091,7 @@ Bool_t TGeant3::GetShape(const TString &volumePath,TString &shapeType,
     shapeType = shapeType.Strip();
     return kTRUE;
 }
+#endif
 //______________________________________________________________________
 Bool_t TGeant3::GetMaterial(const TString &volumeName,
                             TString &name,Int_t &imat,
