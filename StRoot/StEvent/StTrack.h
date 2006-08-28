@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.19 2004/08/05 22:24:51 ullrich Exp $
+ * $Id: StTrack.h,v 2.20 2006/08/28 17:03:54 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.20  2006/08/28 17:03:54  fisyak
+ * Add track flag definitions from EGR (we suppose that this will be primary information from now)
+ *
  * Revision 2.19  2004/08/05 22:24:51  ullrich
  * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
  *
@@ -92,6 +95,35 @@
  * Revision 2.0  1999/10/12 18:42:56  ullrich
  * Completely Revised for New Version
  *
+ * 
+  The track flag (mFlag accessed via flag() method) definitions with ITTF 
+(flag definition in EGR era can be found at  http://www.star.bnl.gov/STAR/html/all_l/html/dst_track_flags.html)
+
+  mFlag=xyy, where x  indicates the detectors included in the fit and 
+                   yy indicates the status of the fit. 
+  Positive mFlag values are good fits, negative values are bad fits. 
+
+  The first digit indicates which detectors were used in the refit: 
+
+      x=1 -> TPC only 
+      x=3 -> TPC       + primary vertex 
+      x=5 -> SVT + TPC 
+      x=6 -> SVT + TPC + primary vertex 
+      x=7 -> FTPC only 
+      x=8 -> FTPC      + primary 
+      x=9 -> TPC beam background tracks            
+
+  The last two digits indicate the status of the refit: 
+       = +x01 -> good track 
+
+       = -x01 -> Bad fit, outlier removal eliminated too many points 
+       = -x02 -> Bad fit, not enough points to fit 
+       = -x03 -> Bad fit, too many fit iterations 
+       = -x04 -> Bad Fit, too many outlier removal iterations 
+       = -x06 -> Bad fit, outlier could not be identified 
+       = -x10 -> Bad fit, not enough points to start 
+
+       = +x11 -> Short track pointing to EEMC
  **************************************************************************/
 #ifndef StTrack_hh
 #define StTrack_hh
