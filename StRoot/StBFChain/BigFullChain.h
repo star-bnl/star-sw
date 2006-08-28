@@ -1,3 +1,4 @@
+//#define __CLEANUP__ not yet ready
 #ifndef __BFC2__
 Bfc_st BFC[] = { // standard chains
 #else /* __BFC2__ */
@@ -103,10 +104,17 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+#ifndef __CLEANUP__
   {"Physics"     ,"","","trg"                                        ,"","","Select Physics events",kFALSE},
   {"LaserTest"   ,"","","trg"                                          ,"","","Select Laser events",kFALSE},
   {"PulserSvt"   ,"","","trg"                                     ,"","","Select SVT Pulser events",kFALSE},
   {"alltrigger"  ,"","","trg"                              ,"","","Select all events (no trig sel)",kFALSE},
+#else
+  {"Physics"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
+  {"LaserTest"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
+  {"PulserSvt"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
+  {"alltrigger"  ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
+#endif
   {"phys_off"    ,"","",""                                  ,"","","Turn off physics in simulation",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -139,10 +147,14 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
+#ifndef __CLEANUP__  
   {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,mwc,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
+#endif
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","",""    ,"Chain for d+Au",kFALSE},
+#ifndef __CLEANUP__
   {"dAuMDCa"     ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut,est","","","Chain for d+Au",kFALSE},
+#endif
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   // Detector combined-chains
   {"SvtD"       ,"","","SvtDb,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit",       "","","SVT chain for Data",kFALSE},
@@ -179,9 +191,13 @@ Bfc_st BFC2[] = { // ITTF Chains
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 #ifdef __BFC2__
   {"Idst"        ,""  ,"",              "dst,event,compend,EventQA"   ,"","","Turn on DST for ITTF",kFALSE},
+#ifndef __CLEANUP__
   {"IAna"        ,""  ,"",   
               "dEdxY2,Kink2,xi2,svtdEdx,CMuDst,analysis","","","Turn on User Maker, dEdx and MuDst",kFALSE},
-            
+
+#else
+  {"IAna"    ,""  ,"","dEdxY2,Kink2,xi2,CMuDst,analysis","","","Turn on User Maker, dEdx and MuDst",kFALSE},
+#endif            
 
   {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,l0,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
@@ -202,8 +218,13 @@ Bfc_st BFC2[] = { // ITTF Chains
                     "","","Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   {"B2005"       ,""  ,"","ry2005b,in,tpc_daq,tpc,svt_daq,SvtD,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                    ,"Base chain for 2005 (tpc+svt)",kFALSE},
+#ifndef __CLEANUP__
   {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,-SvtDedx,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2005 (tpc only)",kFALSE},
+#else
+  {"B2005a"      ,""  ,"","ry2005b,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
+                                                                  ,"Base chain for 2005 (tpc only)",kFALSE},
+#endif
   {"P2005"       ,""     ,"","B2005,l3onl,fcf,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3","",""
                      ,"Production chain for winter 2004/2005 data (+ l3, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   {"pp2005"     ,""   ,"",
@@ -228,8 +249,13 @@ Bfc_st BFC2[] = { // ITTF Chains
   // Year 5 Chains
   {"B2005"       ,""       ,"","ry2005b,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2005 ITTF (tpc+svt)",kFALSE},
+#ifndef __CLEANUP__
   {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
+#else
+  {"B2005a"      ,""       ,"","ry2005b,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
+                                                             ,"Base chain for 2005 ITTF (tpc only)",kFALSE},
+#endif
   {"P2005"       ,"" ,"",
      "B2005,IAna,fcf,VFMinuit,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr3",
               "","","Production chain for 2004/2005 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
@@ -243,10 +269,17 @@ Bfc_st BFC2[] = { // ITTF Chains
   // Year 6 chains - Geometry 2006 not yet ready, starting with y2005d
   {"B2006"       ,""       ,"","ry2005d,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                               ,"Base chain for 2006 ITTF (tpc+svt)",kFALSE},
+#ifndef __CLEANUP__
   {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                              ,"Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
   {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Physics,Idst,-SvtDedx,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
+#else
+  {"B2006a"      ,""       ,"","ry2005d,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
+                                             ,"Base chain for 2006 with 2005d geom ITTF (tpc only)",kFALSE},
+  {"B2006b"      ,""       ,"","ry2006,in,tpc_daq,tpcI,Physics,Idst,l0,tags,Tree,evout","",""
+                                                             ,"Base chain for 2006 ITTF (tpc only)",kFALSE},
+#endif
 
   {"pp2006a"      ,"" ,"",   // We cannot start with VFPPV as there are many asserts. ppLMV5 is safe until adjustment
    "B2006a,IAna,fcf,ppOpt,VFPPVnoCTB,beamline,l3onl,emcDY2,fpd,ftpc,trgd,ZDCvtx,Corr3",
@@ -309,6 +342,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
   {"IdTruth"     ,""  ,"",""              ,"","","Enable IdTruth association in StAssociationMaker",kFALSE},
+  {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
   {"useInTracker",""  ,"","","",""    ,"switch from EGR to Sti global tracks in StAssociationMaker",kFALSE},
   {"noHistos"    ,""  ,"",""                                    ,"","","Disables Attributes histos",kFALSE},
@@ -361,8 +395,8 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
-    
-  {"pp"          ,""  ,"","ppOpt,SpinTag,ppLPfind1,SpinSortA,ppLPprojectA",      "","",STR_OBSOLETE,kFALSE},
+
+  {"pp"          ,""  ,"","",                            "","","WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ppOpt"       ,""  ,"","TrsPileUp","","",             "pp option without enabling special cases",kFALSE},
   {"TrsPileUp"   ,""  ,"","","","",                                              "Trs pile up mode",kFALSE},
   {"TrsToF"      ,""  ,"","","","",                       "Trs account for particle time of flight",kFALSE},
@@ -410,9 +444,13 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+#ifndef __CLEANUP__
   {"tables"      ,""  ,"",
      "StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,mwc_T,sim_T,svt_T,tpc_T,trg_T,vpd_T",
                                                                                            "","","",kFALSE},
+#else
+  {"tables","","","StDbT,ctf_T,ebyeT,emc_T,ftpcT,gen_T,geomT,globT,l3_T,sim_T,svt_T,tpc_T","","","",kFALSE},
+#endif
   {"StDbT"       ,""  ,"","",""                                   ,"StDb_Tables","Load StDb_Tables",kFALSE},
   {"ctf_T"       ,""  ,"","",""                                     ,"ctf_Tables","Load ctf_Tables",kFALSE},
   {"ebyeT"       ,""  ,"","",""                                   ,"ebye_Tables","Load ebye_Tables",kFALSE},
@@ -422,12 +460,21 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"geomT"       ,""  ,"","",""                           ,"geometry_Tables","Load geometry_Tables",kFALSE},
   {"globT"       ,""  ,"","",""                               ,"global_Tables","Load global_Tables",kFALSE},
   {"l3_T"        ,"",  "","",""                                       ,"l3_Tables","Load l3_Tables",kFALSE},
+#ifndef __CLEANUP__
   {"mwc_T"       ,""  ,"","",""                                     ,"mwc_Tables","Load mwc_Tables",kFALSE},
+#else
+  {"mwc_T"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"sim_T"       ,""  ,"","",""                                     ,"sim_Tables","Load sim_Tables",kFALSE},
   {"svt_T"       ,""  ,"","",""                                     ,"svt_Tables","Load svt_Tables",kFALSE},
   {"tpc_T"       ,""  ,"","",""                                     ,"tpc_Tables","Load tpc_Tables",kFALSE},
+#ifndef __CLEANUP__
   {"trg_T"       ,""  ,"","",""                                     ,"trg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T"       ,""  ,"","",""                                     ,"vpd_Tables","Load vpd_Tables",kFALSE},
+#else
+  {"trg_T"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"vpd_T"       ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
 #ifdef __BFC2__
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"SvtIT"       ,""  ,"","",""                                    ,"","ITTF: track using SVT geom",kFALSE},
@@ -447,7 +494,11 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"StarMagField","", "","magF"                              ,"","StarMagField","Load StarMagField",kFALSE},
   {"geomNoField" ,"" ,"","-geometry,StarMagField"        ,"","geometryNoField","geometry-Mag.Field",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+#ifndef __CLEANUP__
   {"vpd"         ,""  ,"","vpd_T",""                                                   ,"St_vpd","",kFALSE},
+#else
+  {"vpd"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                            ,"StDaqLib,StDAQMaker","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
@@ -473,20 +524,20 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"gstar"       ,"geant"  ,"","-fzin,-ntin,-geant,Simu,geantL","St_geant_Maker", 
                                       "","gstar for 80 muon tracks with pT = 1GeV in |eta|<4",kFALSE},
-  {"tdaq"        ,""  ,"","in,tpc_daq"                                                    ,"","","",kFALSE},
-  {"miniDAQ"     ,"tpc_raw","tpc","in,FieldOff,SD97,Eval"     ,"StMinidaqMaker","StMinidaqMaker","",kFALSE},
+  {"tdaq"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"miniDAQ"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
   {"fzin"        ,"geant","","Simu,-gstar,-ntin,-geant,geantL","St_geant_Maker","",
                                                                                "read gstar fz-file",kFALSE},
   {"in"         ,""  ,"",""              ,     "StIOMaker","StIOMaker","Read [DAQ|ROOT] input file",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Db makers   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"dbutil"      ,""     ,"","StDbT"                       ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"db"          ,"db"   ,"","StDbT"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"MagField","","StDbT,db","StMagFMaker","StarMagField,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"svtDb"       ,"svtDb","","SvtCL,db" ,   "StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
+  {"svtDb"    ,"svtDb","","SvtCL,dbutil,db","StSvtDbMaker","StSvtDbMaker","Load and run SvtDbMaker",kFALSE},
   {"ssdDb"       ,"ssdDb","","SsdUtil,db","StSsdDbMaker","StSsdDbMaker","Load and run StSsdDbMaker",kFALSE},
-  {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"detDb"       ,"","","","StDetectorDbMaker","StDetectorDbMaker","Load and run StDetectorDbMaker",kFALSE},
   {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
@@ -495,7 +546,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"MAKERS      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
 //{"Event","","",",StEvent,tpcDB,detDb","StEventMaker",",StEventMaker","<StEvent creation/filling>",kFALSE},
-//{"MakeEvent","","","Event",""                                                    ,"",STR_OBSOLETE,kFALSE},
+//{"MakeEvent","","","Event",""                             ,"","WARNING *** Option is OBSOLETE ***"kFALSE},
 // for simulation on fly Event time stamp is set outside of the simulation makers
   {"ntin"        ,"geant"  ,"","paw,-fzin,-geant,-gstar,Simu,geantL,paw","St_geant_Maker",
                                                        "gstar","read event generated Hbook nt-file",kFALSE},
@@ -509,13 +560,23 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"McEvent"     ,"","","StEvent,EEmcUtil,EmcUtil,StMcEvent","StMcEventMaker"  ,"StMcEventMaker","",kFALSE},
   {"MakeEvent","0Event","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker",
                                                                          "<Early StEvent creation>",kFALSE},
-    
+
+#ifndef __CLEANUP__ 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
+#else
+  {"l0"          ,"l0Chain","","globT,ctf,trg"                              ,"StMaker","StChain","",kFALSE},
+#endif
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
+#ifndef __CLEANUP__
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE},
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
   {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
+#else
+  {"mwc"         ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"trg"         ,"trg","l0Chain","globT,db"               ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"ppMCTrig"    ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
     
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"tpcI" ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,TpcHitMover","StMaker","StChain","tpc with ITTF",kFALSE},
@@ -533,19 +594,27 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"fcf"         ,"","tpcChain","daq,-tcl",      "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker",
                                                                        "Offline FCF Cluster finder",kFALSE},
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
+#ifndef __CLEANUP__  
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
+#endif
   {"TpcHitMover" ,"tpc_hit_mover","tpcChain","StEvent",
                       "StTpcHitMover","StTpcHitMoverMaker","TPC hits coord transform + corrections",kFALSE},
   {"tpt"   ,"tpc_tracks","tpcChain","tls,St_tpc,TpcHitMover",      "St_tpt_Maker","St_tpt_Maker","",kFALSE},
   {"tpt_old"     ,"tpc_tracks","tpcChain","St_tpc,tls",            "St_tpt_Maker","St_tpt_Maker","",kFALSE},
   {"TpcT0"  ,"TpcT0","","ctf_T,ftpcT,tls,St_tpc,St_svt,tpc_daq,kalman,StEvent","StTpcT0Maker",
                             "St_tcl_Maker,St_tpt_Maker,St_global,St_dst_Maker,StPass0CalibMaker","",kFALSE},
+#ifndef __CLEANUP__ 
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
+#endif
   {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tdaq,tpc,-tpt,-PreVtx"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},
   {"PreVtx"      ,"","tpcChain","tpt,SCL,sim_T,St_tpc,St_svt,ftpcT,ctf_T",
                                                      "StPreVertexMaker","St_global,St_dst_Maker","",kFALSE},
+#ifndef __CLEANUP__ 
   {"svt"         ,"svtChain","","svt_T,SvtCL,Est"                           ,"StMaker","StChain","",kFALSE},
+#else
+  {"svt"         ,"svtChain","","svt_T,SvtCL"                               ,"StMaker","StChain","",kFALSE},
+#endif
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
   {"SvtSlowSim"  ,"","","SvtSSim,SvtOnlSeq"         ,"","","Short cut for SvtSlowSim and SvtOnlSeq",kFALSE},
   {"SvtSSim","SvtSSimu","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
@@ -564,10 +633,12 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"SvtClu"   ,"SvtClu","svtChain","svt_T,StEvent,SvtCL","StSvtClusterMaker","StSvtClusterMaker","",kFALSE},
   {"SvtCluAnal" ,"SvtCluAnal","svtChain","SvtCL","StSvtClusterAnalysisMaker","StSvtClusterMaker","",kFALSE},
   {"SvtHit"      ,"svt_hits","svtChain","SvtCL"             ,"StSvtHitMaker","StSvtClusterMaker","",kFALSE},
+#ifndef __CLEANUP__  
   {"SvtVtx"      ,"SvtVtx","SvtChain",""           ,"StSvtVertexFinderMaker","StSvtClusterMaker","",kFALSE},
 
   {"stk"        ,"svt_tracks","svtChain","tls,St_tpc,St_svt,SvtCL","St_stk_Maker","St_stk_Maker","",kFALSE},
   {"Est"         ,"","svtChain","St_svt"                    ,"StEstMaker","St_global,StEstMaker","",kFALSE},
+#endif
   {"global"      ,"globalChain","","globT,St_tpc,St_svt,Match,vertex,primary,dst,SCL,dEdxY2"
                                                                             ,"StMaker","StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,St_svt,tls"
@@ -580,17 +651,22 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"Xi"         ,"xi","globalChain","SCL,St_svt,tls"        ,"StXiMaker","St_global,St_dst_Maker","",kFALSE},
   {"Kink","kink","globalChain"     ,"SCL,tls,St_svt"  ,"StOldKinkMaker" ,"St_global,St_dst_Maker","",kFALSE},
     
-  {"Fglobal"     ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
-  {"Fprimary"    ,"","","","",""                                                      ,STR_OBSOLETE,kFALSE},
+  {"Fglobal"     ,"","","","",""                               ,"WARNING *** Option is OBSOLETE ***",kFALSE},
+  {"Fprimary"    ,"","","","",""                               ,"WARNING *** Option is OBSOLETE ***",kFALSE},
     
   {"dst"         ,"dst","globalChain","St_svt,dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT"
                                                         ,"St_dst_Maker","St_global,St_dst_Maker","",kFALSE},
 
   // StEvent,St_global,St_dst_Maker,
 
+#ifndef __CLEANUP__
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+#else
+  {"dEdx"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
+  {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
 
   {"GenericHit","","","StEvent","StGenericHitMaker","StGenericHitMaker","test GenericHitCollection",kFALSE},
@@ -613,7 +689,7 @@ Bfc_st BFC2[] = { // ITTF Chains
      "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
                                                                         "B/E EMC data common maker",kFALSE},
   {"emcAtoE"  ,"","" ,"db,emcDY2","StEmcADCtoEMaker","StEmcADCtoEMaker", "B-EMC ADC to E converter",kFALSE},
-  {"eemcD"       ,"","","","","",                                                      STR_OBSOLETE,kFALSE},
+  {"eemcD"       ,"","","","","",                              "WARNING *** Option is OBSOLETE ***",kFALSE},
   {"ZDCVtx"      ,"","","db"                              ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
 
   {"emcY2"    ,"emcY2","","emc_T,tpc_T,db,emcSim,PreEcl,epc"      ,"StMaker","StChain",
@@ -623,13 +699,15 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"EEfs" ,"eefs","","db,EEmcUtil,MuDst",
                                      "StEEmcFastMaker","StEEmcSimulatorMaker","EEMC fast simulator",kFALSE},
 
-  {"genvtx"   ,"","","EEmcUtil","StGenericVertexMaker","Sti,StGenericVertexMaker"
+  {"genvtx"   ,"","","EEmcUtil","StGenericVertexMaker","Minuit,Sti,StGenericVertexMaker"
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
   {"Sti"      ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb,StiUtil","StiMaker",
                 "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
   {"StiPixel" ,"","","Sti",                           "","StiPixel", "Load StiPixel shared library",kFALSE},
   {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
+  {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker"
+                                                              ,"Beam background tracker in the TPC",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -668,10 +746,12 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                             "Find V0s from StEvent",kFALSE},
   {"Xi2"         ,"xi2","","db,MuDST,-V02,-Xi","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
+#ifndef __CLEANUP__ 
   {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
   {"Xisvt"       ,"xisvt","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
+#endif
   {"SCEbyE"      ,"scebye","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
                                                          "Determine EbyE SpaceCharge using StEvent",kFALSE},
   {"SCScalerCal" ,"scscalercal","","","StSpaceChargeEbyEMaker","StEvent,StPass0CalibMaker",
@@ -679,7 +759,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"PostEmc"     ,"PostChain","","emc_T,tpc_T,db,PreEcl,EmcUtil"            ,"StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","" ,"StPreEclMaker",  "StPreEclMaker","B-EMC Cluster finder",kFALSE},
   {"Epc"         ,"epc","PostChain","PreEcl,EmcUtil" ,"StEpcMaker","StEpcMaker","B-EMC point maker",kFALSE},
-  {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
+  {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE}, // yf
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
@@ -713,15 +793,21 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"RichSpectra" ,"","",""                            ,"StRichSpectraMaker","StRichSpectraMaker","",kFALSE},
     
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
+#ifndef __CLEANUP__  
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
+#endif
   {"Flow"        ,"","TagsChain","StEvent"         ,"StFlowMaker","StEventUtilities,StFlowMaker","",kFALSE},
+#ifndef __CLEANUP__ 
   {"FlowTag"     ,"","TagsChain","StEvent,Flow"               ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
+#endif
   {"FlowAnalysis","","TagsChain","StEvent,Flow"     ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","StEvent"            ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"SpectraTag"  ,"","TagsChain","StEvent"              ,"StSpectraTagMaker","StSpectraTagMaker","",kFALSE},
   {"HeavyTags"   ,"","TagsChain","StEVent"                  ,"StHeavyTagMaker","StHeavyTagMaker","",kFALSE},
   {"HighPtTags"  ,"","TagsChain","StEVent"              ,"StHighPtTagsMaker","StHighPtTagsMaker","",kFALSE},
-//{"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
+#ifndef __CLEANUP__
+//  {"EbyeScaTags" ,"","TagsChain","StEvent"            ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
+#endif
   {"PCollTag"    ,"","TagsChain","StEvent"                  ,"StPCollTagMaker","StPCollTagMaker","",kFALSE},
   {"tags"        ,"","TagsChain",         "globT,Event,StrangeTags,SpectraTag,HeavyTags,PCollTag,HighPtTags"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
@@ -749,6 +835,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                   "StSvtPoolEventT,StSvtPoolSvtMatchedTree","Create SvtMatchedTree",kFALSE},
   {"LAna"        ,"","","in,RY1h,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
+#ifndef __CLEANUP__
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
   {"ppLPfind1"   ,"ppLPfind1"  ,"",""  ,"StppLPfindMaker","StppSpin","Find leading particle for pp",kFALSE},
   {"SpinSortA"   ,"SpinSortA"  ,"",""               ,"StSpinSortMaker","StppSpin","Spin sort event",kFALSE},
@@ -756,6 +843,14 @@ Bfc_st BFC2[] = { // ITTF Chains
                       ,"StppLPprojectMaker","StppSpin","project LP to the spin dependent phi-histo",kFALSE},
   {"ppLPeval1"   ,"ppLPeval1"  ,"",""  ,"StppLPevalMaker","StppSpin","Evaluation of LP algo for pp",kFALSE},
   {"ppDAQfilter1","ppDAQfilter1"  ,"",""  ,"StDAQfilterMaker","StppSpin","DAQ filter (used for pp)",kFALSE},
+#else
+  {"SpinTag"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"ppLPfind1"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"SpinSortA"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"ppLPprojectA","","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"ppDAQfilter1","","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE}, 
+  {"ppLPeval1"   ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
+#endif
   {"QA"     ,"QA","","QUtils,globT,SCL,global","St_QA_Maker","St_QA_Maker","Filling Y1/Y2 Qa histo",kFALSE},
   {"EventQA","EventQA","","QUtils,Event","StEventQAMaker"   ,"St_QA_Maker","Filling Y2/Y3 Qa histo",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
