@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.2 2006/08/17 13:38:51 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.3 2006/08/28 21:59:00 fisyak Exp $ */
 
 ////////////////////////////////////////////////
 //  C++ interface to Geant3 basic routines    //
@@ -666,9 +666,11 @@ public:
   // Returns the Transformation maxtrix between the volume specified by
   // the path volumePath and the Top or master volume.
   Bool_t GetTransformation(const TString &volumePath,TGeoHMatrix &mat);
+#if ROOT_VERSION_CODE >= 328192
   // Returns the name of the shape and its parameters for the volume
   // specified by the volumePath and the Top or master volume.
   Bool_t GetShape(const TString &volumePath,TString &shapeType,TArrayD &par);
+#endif
   // Returns the material parameters for the volume specified by
   // the volume name.
   Bool_t GetMaterial(const TString &volumeName,
@@ -784,11 +786,13 @@ public:
     
    // functions for definition of surfaces
    // and material properties for optical physics
+#if ROOT_VERSION_CODE >= 328192
    virtual void  DefineOpSurface(const char* name,
                          EMCOpSurfaceModel model,
                          EMCOpSurfaceType surfaceType,
                          EMCOpSurfaceFinish surfaceFinish,
                          Double_t sigmaAlpha);
+#endif
    virtual void  SetBorderSurface(const char* name,
                          const char* vol1Name, int vol1CopyNo,
                          const char* vol2Name, int vol2CopyNo,

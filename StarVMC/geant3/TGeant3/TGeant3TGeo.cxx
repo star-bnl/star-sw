@@ -16,6 +16,9 @@
 
 /*
 $Log: TGeant3TGeo.cxx,v $
+Revision 1.3  2006/08/28 21:59:00  fisyak
+Force to complain with ROOT 4.04
+
 Revision 1.2  2006/08/17 13:38:51  fisyak
 Clean up
 
@@ -922,7 +925,7 @@ const char *TGeant3TGeo::GetNodeName()
    if (gGeoManager->IsOutside()) return "";
    return gGeoManager->GetCurrentNode()->GetName();
 }
-
+#if ROOT_VERSION_CODE >= 328192   
 //______________________________________________________________________
 Bool_t TGeant3TGeo::GetTransformation(const TString &volumePath,TGeoHMatrix &mat)
 {
@@ -948,7 +951,7 @@ Bool_t TGeant3TGeo::GetTransformation(const TString &volumePath,TGeoHMatrix &mat
    // We have to preserve the modeler state
    return fMCGeo->GetTransformation(volumePath, mat);
 }   
-   
+
 //______________________________________________________________________
 Bool_t TGeant3TGeo::GetShape(const TString &volumePath,TString &shapeType,
                          TArrayD &par)
@@ -966,7 +969,7 @@ Bool_t TGeant3TGeo::GetShape(const TString &volumePath,TString &shapeType,
     //   information
    return fMCGeo->GetShape(volumePath, shapeType, par);
 }
-   
+#endif   
 //______________________________________________________________________
 Bool_t TGeant3TGeo::GetMaterial(const TString &volumeName,
                             TString &name,Int_t &imat,
