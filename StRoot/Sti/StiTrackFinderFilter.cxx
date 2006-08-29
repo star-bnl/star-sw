@@ -4,14 +4,14 @@
 #include "StiKTNIterator.h"
 
 StiTrackFinderFilter::StiTrackFinderFilter()
-	: _minPtsCount(8),
-		_minFitPtsCount(2),
+	: _minPtsCount(4),
+		_minFitPtsCount(4),
 		_minFitToPtsRatio(0.5)
 {}
  
 StiTrackFinderFilter::StiTrackFinderFilter(const string & name, const string & description)	
-	: _minPtsCount(8),
-		_minFitPtsCount(2),
+	: _minPtsCount(4),
+		_minFitPtsCount(4),
 		_minFitToPtsRatio(0.3)
 {}
 
