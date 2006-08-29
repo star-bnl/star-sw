@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.75 2006/08/28 17:02:23 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.76 2006/08/29 22:18:37 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.76  2006/08/29 22:18:37  fisyak
+ * move filling of StTrackDetectorInfo into fillTrack
+ *
  * Revision 2.75  2006/08/28 17:02:23  fisyak
  * Add +x11 short tracks pointing to EEMC, clean up StiDedxCalculator
  *
@@ -580,10 +583,9 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
       try 
 	{
 	  fillTrackCount1++;
-	  fillTrack(gTrack,kTrack);
+	  fillTrack(gTrack,kTrack,detInfo);
 	  // filling successful, set up relationships between objects
 	  detInfoVec.push_back(detInfo);
-	  gTrack->setDetectorInfo(detInfo);
 	  //cout <<"Setting key: "<<(unsigned short)(trNodeVec.size())<<endl;
 	  gTrack->setKey((unsigned short)kTrack->getId());
 	  trackNode->addTrack(gTrack);
@@ -592,12 +594,10 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  // this has to be done at the end as it relies on
 	  // having the proper track->detectorInfo() relationship
 	  // and a valid StDetectorInfo object.
-	  StuFixTopoMap(gTrack);
 	  //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
 	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;  
-	  fillFlags(gTrack);
           int ibad = gTrack->bad();
 	  errh.Add(ibad);
           if (ibad) {
@@ -703,15 +703,12 @@ void StiStEventFiller::fillEventPrimaries()
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
 
-      fillTrack(pTrack,kTrack);
+      fillTrack(pTrack,kTrack, detInfo);
       // set up relationships between objects
       detInfoVec.push_back(detInfo);
-      pTrack->setDetectorInfo(detInfo);
 
       nTRack->addTrack(pTrack);  // StTrackNode::addTrack() calls track->setNode(this);
       vertex->addDaughter(pTrack);
-      StuFixTopoMap(pTrack);
-      fillFlags(pTrack);
       fillTrackCount2++;
       int ibad = pTrack->bad();
       errh.Add(ibad);
@@ -994,7 +991,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   }
 }
 //_____________________________________________________________________________
-void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
+void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track,StTrackDetectorInfo* detInfo )
 {
 
   //cout << "StiStEventFiller::fillTrack()" << endl;
@@ -1030,6 +1027,9 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   fillGeometry(gTrack, track, false); // inner geometry
   fillGeometry(gTrack, track, true ); // outer geometry
   fillFitTraits(gTrack, track);
+  gTrack->setDetectorInfo(detInfo);
+  StuFixTopoMap(gTrack);
+  fillFlags(gTrack);
   if (!track->isPrimary()) fillDca(gTrack,track);
   return;
 }

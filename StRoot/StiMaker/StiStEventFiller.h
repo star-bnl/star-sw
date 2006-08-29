@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.22 2006/08/28 17:02:23 fisyak Exp $
+ * $Id: StiStEventFiller.h,v 2.23 2006/08/29 22:18:37 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.23  2006/08/29 22:18:37  fisyak
+ * move filling of StTrackDetectorInfo into fillTrack
+ *
  * Revision 2.22  2006/08/28 17:02:23  fisyak
  * Add +x11 short tracks pointing to EEMC, clean up StiDedxCalculator
  *
@@ -177,7 +180,7 @@ public:
     void fillGeometry(StTrack* track, StiKalmanTrack* kTrack, bool outer);
     //void fillTopologyMap(StTrack* track, StiKalmanTrack* kTrack);
     void fillFitTraits(StTrack* track, StiKalmanTrack* kTrack);
-    void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
+    void fillTrack(StTrack* track, StiKalmanTrack* kTrack,StTrackDetectorInfo* detInfo );
     void fillDca(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
     double impactParameter(StiKalmanTrack* kTrack, StThreeVectorD &vertexPosition);
