@@ -178,7 +178,7 @@ Int_t StEEmcPi0Analysis::Make()
 
       // count up the number of active towers which can form a 
       // "megacluster"
-      Float_t mSeedEnergy = 0.8;
+      //jb -not used Float_t mSeedEnergy = 0.8;
       Float_t mMinEnergy  = 0.1;
       Bool_t used[720];
       for ( Int_t j=0;j<720;j++ ) used[j]=false;
