@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.76 2006/08/29 22:18:37 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.77 2006/08/31 03:25:58 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.77  2006/08/31 03:25:58  fisyak
+ * Make cut for EEMC pointing track based on StTrackDetectorInfo instead of StTrackFitTraits
+ *
  * Revision 2.76  2006/08/29 22:18:37  fisyak
  * move filling of StTrackDetectorInfo into fillTrack
  *
@@ -949,7 +952,7 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
   StTrackFitTraits& fitTrait = gTrack->fitTraits();
   //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
   int svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
-  int totFitPoints = fitTrait.numberOfFitPoints();
+  //  int totFitPoints = fitTrait.numberOfFitPoints();
   /// In the flagging scheme, I will put in the cases for
   /// TPC only, and TPC+SVT (plus their respective cases with vertex)
   /// Ftpc case has their own code and SSD doesn't have a flag...
@@ -967,15 +970,20 @@ void StiStEventFiller::fillFlags(StTrack* gTrack) {
 	  gTrack->setFlag(601); //svt+tpc+primary
       }
   }
-  if (totFitPoints < 11) { // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
-    int flag = TMath::Abs(gTrack->flag());
-    //keep most sig. digit, set last digit to 2, and set negative sign
-    gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
-    if (gTrack->geometry()) {
-      const StThreeVectorF &momentum = gTrack->geometry()->momentum();
-      if (momentum.pseudoRapidity() > 0.5) {
-	const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
-	if (dinfo) {
+  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
+  if (dinfo) {
+    Int_t NoTpcFitPoints = dinfo->numberOfPoints(kTpcId);
+    Int_t NoFtpcWestId   = dinfo->numberOfPoints(kFtpcWestId);
+    Int_t NoFtpcEastId   = dinfo->numberOfPoints(kFtpcEastId);
+    if (NoTpcFitPoints < 11 && NoFtpcWestId < 5 && NoFtpcEastId < 5) { 
+      // hadrcoded number correspondant to  __MIN_HITS_TPC__ 11 in StMuFilter.cxx
+      int flag = TMath::Abs(gTrack->flag());
+      //keep most sig. digit, set last digit to 2, and set negative sign
+      gTrack->setFlag(-(((flag/100)*100)+2)); // -x02 
+      if (gTrack->geometry()) {
+	const StThreeVectorF &momentum = gTrack->geometry()->momentum();
+	if (momentum.pseudoRapidity() > 0.5) {
+	  const StTrackDetectorInfo *dinfo = gTrack->detectorInfo();
 	  const StPtrVecHit& hits = dinfo->hits();
 	  Int_t Nhits = hits.size();
 	  for (Int_t i = 0; i < Nhits; i++) {
