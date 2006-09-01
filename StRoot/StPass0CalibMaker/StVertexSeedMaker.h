@@ -1,7 +1,7 @@
 /*!
  * \class StVertexSeedMaker 
  * \author G. Van Buren, BNL
- * \version $Id: StVertexSeedMaker.h,v 1.6 2005/07/01 21:46:01 genevb Exp $
+ * \version $Id: StVertexSeedMaker.h,v 1.7 2006/09/01 22:27:16 genevb Exp $
  *
  * calculates mean primary vertex positions from
  * suitable events to use as seeds in finding better       
@@ -51,7 +51,7 @@ class StVertexSeedMaker : public StMaker {
    virtual void SetVertexR2max(float r2max);  //Set max r^2 vertex for seed calculation
    virtual void SetDefDir(const char* dir) {defDir = dir;}
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.6 2005/07/01 21:46:01 genevb Exp $ built "__DATE__" "__TIME__ ;
+     static const char cvs[]="Tag $Name:  $ $Id: StVertexSeedMaker.h,v 1.7 2006/09/01 22:27:16 genevb Exp $ built "__DATE__" "__TIME__ ;
      return cvs;
    }
 
@@ -87,6 +87,11 @@ class StVertexSeedMaker : public StMaker {
   int    fill;
   int    date;
   int    time;
+  int    run;
+  float  zdc; // ZDC sum rate
+  int    itpc; // inner tpc track mask
+  int    otpc; // inner tpc track mask
+  float  rank;
   int    minEntries;
   float    maxX0Err;
   float    maxY0Err;
@@ -118,8 +123,11 @@ inline void StVertexSeedMaker::SetVertexR2max(float r2max){r2VertexMax = r2max;}
 
 #endif
 
-// $Id: StVertexSeedMaker.h,v 1.6 2005/07/01 21:46:01 genevb Exp $
+// $Id: StVertexSeedMaker.h,v 1.7 2006/09/01 22:27:16 genevb Exp $
 // $Log: StVertexSeedMaker.h,v $
+// Revision 1.7  2006/09/01 22:27:16  genevb
+// More detailed info in ntuple
+//
 // Revision 1.6  2005/07/01 21:46:01  genevb
 // Specify output directory
 //

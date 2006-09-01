@@ -14,6 +14,7 @@
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
 #include "StMessMgr.h"
 
 
@@ -40,7 +41,13 @@ Int_t StMuDstVtxSeedMaker::Make() {
     return kStErr;
   }
  
-  return StVertexSeedMaker::Make();
+  Int_t result = kStOk;
+  for (pvn=0; pvn<mudst->numberOfPrimaryVertices(); pvn++) {
+    result = StVertexSeedMaker::Make();
+    if (result != kStOk) break;
+  }
+
+  return result;
 }
 //_____________________________________________________________________________
 Bool_t StMuDstVtxSeedMaker::CheckTriggers() {
@@ -59,33 +66,43 @@ Bool_t StMuDstVtxSeedMaker::CheckTriggers() {
 //_____________________________________________________________________________
 Int_t StMuDstVtxSeedMaker::GetEventData() {
   // Get primary vertex from MuEvent
-  StThreeVectorF pvert = event->primaryVertexPosition();
+  StMuPrimaryVertex* primVtx = mudst->primaryVertex(pvn);
+  if (!primVtx) {
+    gMessMgr->Error("StMuDstVtxSeedMaker: No primary vertex from StMuDst!");
+    return kStErr;
+  }
+  StRunInfo& runInfo = event->runInfo();
+  zdc = (float) (runInfo.zdcWestRate() + runInfo.zdcEastRate());
+  fill = (int) (runInfo.beamFillNumber(blue));
+  run = runInfo.runId();
+
+  StThreeVectorF pvert = primVtx->position();
   zvertex = pvert.z();
   yvertex = pvert.y();
   xvertex = pvert.x();
 
-/*
-  Ideally, we would get this from "numberOfGoodPrimaryTracks", but
-  this has been dysfunctional since somewhere between P03ih and P04if
+  mult = (float) (primVtx->nTracksUsed());
+  rank = primVtx->ranking();
 
-  StEventSummary& summ = event->eventSummary();
-  mult = (float)(summ.numberOfGoodPrimaryTracks());
-*/
-  mult = (float) (mudst->primaryTracks()->GetEntries());
+  // hits not saved in MuDst
+  itpc = 0; otpc = 0;
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StMuDstVtxSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.3 2005/07/01 21:46:59 genevb Exp $\n");
+  printf("* $Id: StMuDstVtxSeedMaker.cxx,v 1.4 2006/09/01 22:27:16 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StMuDstVtxSeedMaker.cxx,v 1.3 2005/07/01 21:46:59 genevb Exp $
+// $Id: StMuDstVtxSeedMaker.cxx,v 1.4 2006/09/01 22:27:16 genevb Exp $
 // $Log: StMuDstVtxSeedMaker.cxx,v $
+// Revision 1.4  2006/09/01 22:27:16  genevb
+// More detailed info in ntuple
+//
 // Revision 1.3  2005/07/01 21:46:59  genevb
 // Remove extraneous print statement
 //
