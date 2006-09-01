@@ -28,7 +28,13 @@ Int_t StEvtVtxSeedMaker::Make() {
     return kStErr;
   }
  
-  return StVertexSeedMaker::Make();
+  Int_t result = kStOk;
+  for (pvn=0; pvn<event->numberOfPrimaryVertices(); pvn++) {
+    result = StVertexSeedMaker::Make();
+    if (result != kStOk) break;
+  }
+
+  return result;
 }
 //_____________________________________________________________________________
 Bool_t StEvtVtxSeedMaker::CheckTriggers() {
@@ -51,10 +57,16 @@ Bool_t StEvtVtxSeedMaker::CheckTriggers() {
 //_____________________________________________________________________________
 Int_t StEvtVtxSeedMaker::GetEventData() {
   // Get primary vertex from StEvent
-  StPrimaryVertex* primVtx = event->primaryVertex();
+  StPrimaryVertex* primVtx = event->primaryVertex(pvn);
   if (!primVtx) {
     gMessMgr->Error("StEvtVtxSeedMaker: No primary vertex from StEvent!");
     return kStErr;
+  }
+  StRunInfo* runInfo = event->runInfo();
+  if (runInfo) {
+    zdc = (float) (runInfo->zdcWestRate() + runInfo->zdcEastRate());
+    fill = (int) (runInfo->beamFillNumber(blue));
+    run = runInfo->runId();
   }
 
   StThreeVectorF pvert = primVtx->position();
@@ -62,20 +74,45 @@ Int_t StEvtVtxSeedMaker::GetEventData() {
   yvertex = pvert.y();
   xvertex = pvert.x();
   mult = (float)(primVtx->numberOfDaughters());
+  rank = primVtx->ranking();
+
+  // Determine sub-sectors of tracks associated with this vertex
+  itpc = 0;
+  otpc = 0;
+  bool ibits[24];
+  bool obits[24];
+  unsigned int hitn,trkn;
+  for (trkn=0; trkn<24; trkn++) { ibits[trkn] = false; obits[trkn] = false; }
+  for (trkn=0; trkn<primVtx->numberOfDaughters(); trkn++) {
+    StTrack* trk = primVtx->daughter(trkn);
+    StPtrVecHit hits = trk->detectorInfo()->hits(kTpcId);
+    for (hitn=0; hitn<hits.size(); hitn++) {
+      StTpcHit* hit = (StTpcHit*) (hits[hitn]);
+      if (hit->padrow() < 14) ibits[hit->sector()-1] = true;
+      else obits[hit->sector()-1] = true;
+    }
+  }
+  for (trkn=0; trkn<24; trkn++) {
+    if (ibits[trkn]) itpc += (int) (::pow(2,trkn));
+    if (obits[trkn]) otpc += (int) (::pow(2,trkn));
+  }
 
   return kStOk;
 }
 //_____________________________________________________________________________
 void StEvtVtxSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StEvtVtxSeedMaker.cxx,v 1.1 2005/06/14 18:52:04 genevb Exp $\n");
+  printf("* $Id: StEvtVtxSeedMaker.cxx,v 1.2 2006/09/01 22:27:16 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StVertexSeedMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-// $Id: StEvtVtxSeedMaker.cxx,v 1.1 2005/06/14 18:52:04 genevb Exp $
+// $Id: StEvtVtxSeedMaker.cxx,v 1.2 2006/09/01 22:27:16 genevb Exp $
 // $Log: StEvtVtxSeedMaker.cxx,v $
+// Revision 1.2  2006/09/01 22:27:16  genevb
+// More detailed info in ntuple
+//
 // Revision 1.1  2005/06/14 18:52:04  genevb
 // Introduction of code to use StEvent for beamline constraint
 //

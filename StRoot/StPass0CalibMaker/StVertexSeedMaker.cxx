@@ -120,10 +120,15 @@ void StVertexSeedMaker::Reset() {
   xerr->Reset();
   yerr->Reset();
   if (resNtuple) delete resNtuple;
-  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig");
+  resNtuple = new TNtuple("resNtuple","resNtuple","event:x:y:z:mult:trig:run:fill:zdc:rank:itpc:otpc");
   date = 0;
   time = 0;
   fill = -1;
+  run = -1;
+  zdc = -1;
+  rank = 0;
+  itpc = 0;
+  otpc = 0;
   a[0]   = -888.0;
   //a[0]   = 0.0;
   a[1] = 0.0;
@@ -190,7 +195,8 @@ Int_t StVertexSeedMaker::Make(){
     ydist->Fill(yvertex);
     yerr ->Fill(yvertex-yguess);
     eventNumber = (float)GetEventNumber();
-    resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult,trig);
+    resNtuple->Fill(eventNumber,xvertex,yvertex,zvertex,mult,trig,
+                    (float) run,(float) fill,zdc,rank,(float) itpc,(float) otpc);
     addVert(xvertex,yvertex,zvertex,mult);
     weight += mult; // Fixed at 50
   }
@@ -444,7 +450,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.31 2006/08/16 21:58:01 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.32 2006/09/01 22:27:16 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -591,9 +597,9 @@ void StVertexSeedMaker::GetFillDateTime() {
 
   if (ts) {
     // Find earliest entry for this fill
-    int thisRun = *(int*) (tab->getDataValue("runNumber",0));
+    run = *(int*) (tab->getDataValue("runNumber",0));
     gMessMgr->Info() << "StVertexSeedMaker: " << tdstr << " is from run "
-      << thisRun << endm;
+      << run << endm;
     float thisFill = *(float*) (tab->getDataValue("blueFillNumber",0));
     sprintf(queryStr,
       " where blueFillNumber=%f and deactive=0 order by beginTime asc limit 1",
@@ -745,8 +751,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.31 2006/08/16 21:58:01 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.32 2006/09/01 22:27:16 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.32  2006/09/01 22:27:16  genevb
+// More detailed info in ntuple
+//
 // Revision 1.31  2006/08/16 21:58:01  genevb
 // Added 2006 pp62 triggers
 //
