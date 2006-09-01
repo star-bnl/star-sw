@@ -15,8 +15,9 @@
 
 void Track::merge(Track* track)
 {
+  unsigned int oldSize = size();
   copy(track->begin(), track->end(), back_inserter(*this));
-  sort(begin(), end(), LessHit());
+  inplace_merge(begin(), begin()+oldSize, end(), LessHit());
 }
 
 bool Track::fit()
