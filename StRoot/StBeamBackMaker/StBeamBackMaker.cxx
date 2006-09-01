@@ -169,8 +169,7 @@ Int_t StBeamBackMaker::makeHelper()
       ++i;
     }
   }
-  info() << tracks.size() << " track seeds left with "
-	 << MIN_TRACK_SEED_HITS << " hits or more" << endm;
+  info() << tracks.size() << " track seeds left with " << MIN_TRACK_SEED_HITS << " hits or more" << endm;
 
   //
   // Try to fit track seeds to straight tracks by doing
@@ -190,6 +189,9 @@ Int_t StBeamBackMaker::makeHelper()
 	StHit* hit = *j;
 	if (track->accept(hit)) {
 	  track->push_back(hit);
+	  // Move added hit to its proper place
+	  nth_element(track->begin(), track->rbegin().base(), track->end(), LessHit());
+	  track->fit();
 	  HitSetIter next = j;
 	  ++next;
 	  hits.erase(j);
@@ -298,11 +300,11 @@ StTrack* StBeamBackMaker::createStTrack(Track* track)
   StTrack* gTrack = new StGlobalTrack;
   gTrack->setLength(track->length());
   gTrack->setFlag(901);
-  gTrack->setEncodedMethod(kLine3DId);
   // Inner geometry
   StThreeVectorF origin(track->x0(), track->y0(), 0);
   StThreeVectorF momentum(track->dxdz(), track->dydz(), 1);
   Line line(origin, momentum);
+  momentum.setMag(999);		// Bogus
   double dipAngle = atan2(1, hypot(track->dxdz(), track->dydz()));
   gTrack->setGeometry(new StHelixModel(-1, // Charge
 				       M_PI_2, // Psi
@@ -323,11 +325,13 @@ StTrack* StBeamBackMaker::createStTrack(Track* track)
   detInfo->setLastPoint(track->lastHit()->position());
   for (Track::iterator i = track->begin(); i != track->end(); ++i)
     detInfo->addHit(*i);
-  detInfo->setNumberOfPoints(track->size(), kTpcId);
+  // Number of points cannot be larger than 255 (unsigned char)
+  detInfo->setNumberOfPoints(track->size() < 256 ? track->size() : 255, kTpcId);
   gTrack->setDetectorInfo(detInfo);
   // Fit traits
   StTrackFitTraits fitTraits;
-  fitTraits.setNumberOfFitPoints(track->size(), kTpcId);
+  // Number of fit points cannot be larger than 255 (unsigned char)
+  fitTraits.setNumberOfFitPoints(track->size() < 256 ? track->size() : 255, kTpcId);
   gTrack->setFitTraits(fitTraits);
 
   return gTrack;
