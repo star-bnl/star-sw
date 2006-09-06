@@ -25,5 +25,11 @@ cd $originalPath
 source [file join $::jobCreate::jobCreatePath jobCreate.tcl]
 source [file join $::jobCreate::jobCreatePath xsdValidator.tcl]
 ::jobCreate::getNewSchema [file join $::jobCreate::jobCreatePath batchSubmit.xsd]
+if {[llength $argv] == 1} {
+    ::jobCreate::getJobXmlFile $argv
+    set ::jobCreate::jobLisFile $argv
+    $::jobCreate::jobSelectComboBox configure -state normal
+    $::jobCreate::jobSelectButton configure -text "Using file"
+}
 bind $::jobCreate::interfaceWindow <Control-q> exit
 
