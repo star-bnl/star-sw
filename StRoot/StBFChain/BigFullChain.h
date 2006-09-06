@@ -1,4 +1,4 @@
-#define __CLEANUP__ not yet ready
+//#define __CLEANUP__ not yet ready
 #ifndef __BFC2__
 Bfc_st BFC[] = { // standard chains
 #else /* __BFC2__ */
