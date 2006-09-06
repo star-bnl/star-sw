@@ -31,8 +31,13 @@ set ::jobMonitor::ignoreCase 1
 set ::jobMonitor::tagColor   [list #ffff00 #ffcc00 #ccff00 #ff6600 #ff2200]
 set ::jobMonitor::LOGTYPE    .log
 set ::jobMonitor::IOwnProcess true
+if {[llength $argv] == 1} {
+    set projectDir $argv
+} else {
+    set projectDir $originalPath
+}
 
 wm withdraw .
-::jobMonitor::createWindow $originalPath
+::jobMonitor::createWindow $projectDir
 
 bind $::jobMonitor::bWindow <Control-q> ::jobMonitor::exit

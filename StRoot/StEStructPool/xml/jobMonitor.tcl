@@ -1,5 +1,6 @@
 
 package require Tk
+package require BWidget
 
 # agrep.tcl --
 #    Script to emulate the UNIX grep command with a small GUI
@@ -11,6 +12,7 @@ namespace eval ::jobMonitor:: {
     variable logDir
     variable pattern {}
     variable matchResults
+    variable matchFrame
     variable ignoreCase yes
 
     variable patternCount
@@ -23,6 +25,7 @@ namespace eval ::jobMonitor:: {
     variable viewMenu
     variable selectedJob ""
     variable IOwnProcess false
+    variable types [list all UNKN SUBM PEND RUN DONE Eqw t qw r]
 }
 
 ################################################################################
@@ -75,7 +78,23 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
 
     set file [menu $m.file]
     $m add cascade -label File -menu $file
-    $file add command -label "Select all jobs"           -command [namespace code selectAll]
+#    $file add command -label "Select all jobs"           -command [namespace code selectAll]
+    set d [menu $file.select -postcommand [namespace code [list countTypes $file.select]]]
+    $file add cascade -label "Select jobs" -menu $d
+    foreach el $::jobMonitor::types {
+        $d add command -label $el -command [namespace code [list selectJobs $el]]
+    }
+    set d [menu $file.deselect -postcommand [namespace code [list countTypes $file.deselect]]]
+    $file add cascade -label "Deselect jobs" -menu $d
+    foreach el $::jobMonitor::types {
+        $d add command -label $el -command [namespace code [list deselectJobs $el]]
+    }
+    set d [menu $file.toggle -postcommand [namespace code [list countTypes $file.toggle]]]
+    $file add cascade -label "Toggle select" -menu $d
+    foreach el $::jobMonitor::types {
+        $d add command -label $el -command [namespace code [list toggleSelect $el]]
+    }
+
     $file add command -label "Submit selected jobs"      -command [namespace code submitSelected]
     $file add command -label "Kill selected jobs"        -command [namespace code killSelected]
     $file add command -label "Clear selected job errors" -command [namespace code clearErrors]
@@ -143,11 +162,11 @@ proc ::jobMonitor::createWindow {{scriptDir ""} {logDir ""}} {
     #
     # add labels to display the number of matches.
     #
-    set ::jobMonitor::matchResults "Files:  Matches:"
-    frame $::jobMonitor::bWindow.f3
+    set ::jobMonitor::matchResults "Files:"
+    set ::jobMonitor::matchFrame [frame $::jobMonitor::bWindow.f3]
     label $::jobMonitor::bWindow.f3.matches -textvariable ::jobMonitor::matchResults -anchor w
-    pack $::jobMonitor::bWindow.f3.matches
-    pack $::jobMonitor::bWindow.f3 -side top -fill x -anchor w
+    pack $::jobMonitor::bWindow.f3.matches -side left
+    pack $::jobMonitor::bWindow.f3 -side left
 
     #
     # Just for the fun of it: define the styles for the "matched",
@@ -260,9 +279,17 @@ proc ::jobMonitor::searchFiles {} {
     foreach job $::jobMonitor::jobList  file $fileList {
         searchPattern $job $file $::jobMonitor::pattern $::jobMonitor::ignoreCase
     }
-    set ::jobMonitor::matchResults "Files $nFiles:  Matches"
+    set ::jobMonitor::matchResults "Files: $nFiles"
+    foreach w [winfo children $::jobMonitor::matchFrame] {
+        if {"$w" ne "$::jobMonitor::matchFrame.matches"} {
+            destroy $w
+        }
+    }
+    set iCol 0
+    $::jobMonitor::bWindow.f2.text mark set insert 1.0
     foreach pat $::jobMonitor::pattern {
-        set ::jobMonitor::matchResults "$::jobMonitor::matchResults: $pat = $::jobMonitor::patternCount($pat)"
+        ::jobMonitor::addMatchWidgets $pat $::jobMonitor::patternCount($pat) $iCol
+        incr iCol
     }
     $::jobMonitor::bWindow.f2.text config -state disabled
 }
@@ -280,7 +307,7 @@ proc ::jobMonitor::searchFiles {} {
 #    Creates a line with a checkbutton, text widget and filename.
 #    Matches in the file are inserted on subsequent lines.
 #    The checkbutton indicates including this job in an action.
-#    The text widget is to indicate lsf status
+#    The text widget is to indicate lsf (or sge) status
 #
 #
 proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
@@ -297,6 +324,7 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
                 -textvariable ::jobMonitor::var$jobName -width 5 -anchor w \
                 -padx 0 -pady 0 \
                 -command [namespace code "updateStatusIndicators $jobName"]]
+        colorStatusIndicator $stat [set var$jobName]
 
         $::jobMonitor::bWindow.f2.text window create end -window $cb
         $::jobMonitor::bWindow.f2.text window create end -window $stat
@@ -344,32 +372,167 @@ proc ::jobMonitor::searchPattern {jobName filename pattern ignoreCase} {
     }
     $::jobMonitor::bWindow.f2.text insert end "\n"
 }
-
-# selectAll --
-#    Invoked via menubutton
+# addMatchWidgets --
+#    For each search patter we add widgets to move to the previsou match,
+#    indicate the number of matches or move to the next match.
 #
 # Arguments:
+#    pattern      Regular expresion that was searched for
+#    count        Number of times this expression matched.
+#    iCol         Color index to assign to the match.
+# Result:
+#    None
+# Side effects:
+#    Creates a frame with a couple of arrowbuttons and a label
+#
+#
+proc ::jobMonitor::addMatchWidgets {pattern count iCol} {
+    if {$iCol > [llength $::jobMonitor::tagColor]} {
+        set fgCol [lindex $::jobMonitor::tagColor end]
+    } else {
+        set fgCol [lindex $::jobMonitor::tagColor $iCol]
+    }
+    
+    set f    [frame $::jobMonitor::matchFrame.f$pattern]
+    set up   [ArrowButton $f.up -dir top -command [namespace code "findPrev {$pattern}"]]
+    set lab  [label $f.count -text "$pattern: $count" -background $fgCol]
+    set down [ArrowButton $f.down -dir bottom -command [namespace code "findNext {$pattern}"]]
+    pack $up $lab $down -side left
+    pack $f -side left
+}
+# findPrev --
+#    Move text widget to previous match.
+#
+# Arguments:
+#    pattern      Regular expresion that was searched for
+# Result:
+#    None
+# Side effects:
+#    Moves where we see in the text widget
+#
+#
+proc ::jobMonitor::findPrev {pattern} {
+    set t $::jobMonitor::bWindow.f2.text
+    set prev [$t tag prevrange $::jobMonitor::tagName($pattern) insert]
+    if {$prev eq ""} {
+        $::jobMonitor::matchFrame.f$pattern.up configure -state disabled
+    } else {
+        $t mark set insert [lindex $prev 0]
+        $t see [lindex $prev 0]
+        $::jobMonitor::matchFrame.f$pattern.down configure -state normal
+    }
+}
+# findNext --
+#    Move text widget to next match.
+#
+# Arguments:
+#    pattern      Regular expresion that was searched for
+# Result:
+#    None
+# Side effects:
+#    Moves where we see in the text widget
+#
+#
+proc ::jobMonitor::findNext {pattern} {
+    set t $::jobMonitor::bWindow.f2.text
+    set next [$t tag nextrange $::jobMonitor::tagName($pattern) insert]
+    if {$next eq ""} {
+        $::jobMonitor::matchFrame.f$pattern.down configure -state disabled
+    } else {
+        $t mark set insert [lindex $next 1]
+        $t see [lindex $next 0]
+        $::jobMonitor::matchFrame.f$pattern.up configure -state normal
+    }
+}
+
+# countTypes --
+#    Invoked just before showing meny
+#
+# Arguments: menu
 # Result:
 # Side effects:
-#    Toggle menu between select and deselect.
-#    Either select all jobs or deselect all.
-#    Modify indicator buttons to reflact state.
+#    Set selection indicators of all jobs that have a label matching
+#    type in their indicator buttons.
 #
-proc ::jobMonitor::selectAll {} {
-    if {![catch {$::jobMonitor::bWindow.menu.file index "Select all jobs"} index]} {
-        $::jobMonitor::bWindow.menu.file entryconfigure $index -label "Deselect all jobs"
-        set ::jobMonitor::actionList $::jobMonitor::jobList
-        foreach job $::jobMonitor::jobList {
+proc ::jobMonitor::countTypes {m} {
+    set count() 0
+    foreach t $::jobMonitor::types {
+        set count($t) 0
+    }
+    foreach job $::jobMonitor::jobList {
+        set val [set ::jobMonitor::var$job]
+        incr count($val)
+        incr count(all)
+    }
+    set i 1
+    foreach t $::jobMonitor::types {
+        if {$count($t) > 0} {
+            set label "$t ($count($t))"
+        } else {
+            set label $t
+        }
+        $m entryconfigure $i -label $label
+        incr i
+    }
+}
+
+# selectJobs --
+#    Invoked via menubutton
+#
+# Arguments: type
+# Result:
+# Side effects:
+#    Set selection indicators of all jobs that have a label matching
+#    type in their indicator buttons.
+#
+proc ::jobMonitor::selectJobs {type} {
+    foreach job $::jobMonitor::jobList {
+        set val [set ::jobMonitor::var$job]
+        if {($type eq "all") || ($type eq $val)} {
             set ::jobMonitor::cbVar$job 1
+            lappend ::jobMonitor::actionList $job
         }
-    } elseif {![catch {$::jobMonitor::bWindow.menu.file index "Deselect all jobs"} index]} {
-        $::jobMonitor::bWindow.menu.file entryconfigure $index -label "Select all jobs"
-        set ::jobMonitor::actionList [list]
-        foreach job $::jobMonitor::jobList {
+    }
+}
+# deselectJobs --
+#    Invoked via menubutton
+#
+# Arguments: type
+# Result:
+# Side effects:
+#    Unset selection indicators of all jobs that have a label matching
+#    type in their indicator buttons.
+#
+proc ::jobMonitor::deselectJobs {type} {
+    foreach job $::jobMonitor::jobList {
+        set val [set ::jobMonitor::var$job]
+        if {($type eq "all") || ($type eq $val)} {
             set ::jobMonitor::cbVar$job 0
+            set ::jobMonitor::actionList [lremove $::jobMonitor::actionList $job]
         }
-    } else {
-        error "I can't find menu for selecting/deselecting all jobs."
+    }
+}
+# toggleSelect --
+#    Invoked via menubutton
+#
+# Arguments: type
+# Result:
+# Side effects:
+#    Toggle the selection indicators of all jobs that have a label matching
+#    type in their indicator buttons.
+#
+proc ::jobMonitor::toggleSelect {type} {
+    foreach job $::jobMonitor::jobList {
+        set val [set ::jobMonitor::var$job]
+        if {($type eq "all") || ($type eq $val)} {
+            if {[set ::jobMonitor::cbVar$job]} {
+                set ::jobMonitor::cbVar$job 0
+                set ::jobMonitor::actionList [lremove $::jobMonitor::actionList $job]
+            } else {
+                set ::jobMonitor::cbVar$job 1
+                lappend ::jobMonitor::actionList $job
+            }
+        }
     }
 }
 
@@ -401,9 +564,9 @@ proc ::jobMonitor::getFileName {} {
     set line [lindex [$::jobMonitor::bWindow.f2.text index current] 0]
     set line [lindex [split $line .] 0]
     set fileName [$::jobMonitor::bWindow.f2.text get $line.0 $line.end]
-    if {[string equal [file extension $fileName] ".log"]} {
+    if {[file extension $fileName] eq ".log"} {
         return [file join $::jobMonitor::logDir $fileName]
-    } elseif {[string equal [file extension $fileName] ".csh"]} {
+    } elseif {[file extension $fileName] eq ".csh"} {
         return [file join $::jobMonitor::scriptDir $fileName]
     }
 }
@@ -567,7 +730,7 @@ proc ::jobMonitor::editType {type} {
 proc ::jobMonitor::checkPeek {} {
     set job $::jobMonitor::selectedJob
     set status [set ::jobMonitor::var$job]
-    if {[string equal $status RUN]} {
+    if {($status eq "RUN") || ($status eq "SSUS")} {
         if {[catch {$::jobMonitor::viewMenu index bpeek} err]} {
             $::jobMonitor::viewMenu add command -label "bpeek" -command [namespace code peekAtJob]
         }
@@ -590,8 +753,8 @@ proc ::jobMonitor::peekAtJob {} {
     set jobName [getJobName [file join $::jobMonitor::scriptDir $job]]
     catch {eval exec bjobs -waJ $jobName} bResult
     set lines [split $bResult \n]
-    foreach def [lindex $lines end-1] val [lindex $lines end] {
-        if {[string equal $def "JOBID"]} {
+    foreach def [lindex $lines 0] val [lindex $lines 1] {
+        if {$def eq "JOBID"} {
             set jobID $val
         }
     }
@@ -692,8 +855,8 @@ proc ::jobMonitor::killSelected {} {
         set jobName [getJobName [file join $::jobMonitor::scriptDir sched$job.csh]]
         if {![catch {eval exec bjobs -waJ $jobName} bResult]} {
             set lines [split $bResult \n]
-            foreach def [lindex $lines end-1] val [lindex $lines end] {
-                if {[string equal $def "JOBID"]} {
+            foreach def [lindex $lines 0] val [lindex $lines 1] {
+                if {$def eq "JOBID"} {
                     catch {eval exec bkill $val}
                 }
             }
@@ -749,10 +912,10 @@ proc ::jobMonitor::clearErrors {} {
 #    Check all jobs to see if they are in the batch system.
 #    If so extract the status and display that in the status box.
 #
-proc ::jobMonitor::updateStatusIndicators {{job {}}} {
+proc ::jobMonitor::updateStatusIndicators {{job ""}} {
     global env
 
-    if {[string compare $job {}]} {
+    if {$job ne ""} {
         set jobs $job
     } else {
         set jobs $::jobMonitor::jobList
@@ -767,17 +930,16 @@ proc ::jobMonitor::updateStatusIndicators {{job {}}} {
         if {![catch {eval exec bjobs -waJ $jobName} bResult]} {
             set lines [split $bResult \n]
             set ::jobMonitor::var$job UNKN
-            foreach def [lindex $lines end-1] val [lindex $lines end] {
-                if {[string equal $def "STAT"]} {
+            # For some reason I had been taking the last two lines and parsing them.
+            # When the same job has been re-run it appears multiple times, but it
+            # appears the labelling information is always on the first line and
+            # the job info is sorted by most recent first. May be some reason I did it
+            # the wrong way though (like it used to be the right way?? Or I screwed up??)
+            foreach def [lindex $lines 0] val [lindex $lines 1] {
+                if {$def eq "STAT"} {
                     set ::jobMonitor::var$job $val
-                    switch $val {
-                        UNKN {$::jobMonitor::bWindow.f2.text.stat$job configure -fg yellow}
-                        SUBM {$::jobMonitor::bWindow.f2.text.stat$job configure -fg orange}
-                        PEND {$::jobMonitor::bWindow.f2.text.stat$job configure -fg blue}
-                        RUN  {$::jobMonitor::bWindow.f2.text.stat$job configure -fg red}
-                        DONE {$::jobMonitor::bWindow.f2.text.stat$job configure -fg green}
-                        default {$::jobMonitor::bWindow.f2.text.stat$job configure -fg gray}
-                    }
+                    colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $val
+                    break
                 }
             }
         } else {
@@ -790,17 +952,39 @@ proc ::jobMonitor::updateStatusIndicators {{job {}}} {
                     incr ind 2
                     set val [lindex $ql $ind]
                     set ::jobMonitor::var$job $val
-                    switch $val {
-                        Eqw  {$::jobMonitor::bWindow.f2.text.stat$job configure -fg yellow}
-                        t    {$::jobMonitor::bWindow.f2.text.stat$job configure -fg orange}
-                        qw   {$::jobMonitor::bWindow.f2.text.stat$job configure -fg blue}
-                        r    {$::jobMonitor::bWindow.f2.text.stat$job configure -fg red}
-                        DONE {$::jobMonitor::bWindow.f2.text.stat$job configure -fg green}
-                        default {$::jobMonitor::bWindow.f2.text.stat$job configure -fg gray}
-                    }
+                    colorStatusIndicator $::jobMonitor::bWindow.f2.text.stat$job $val
                 }
             }
         }
+    }
+}
+# colorStatusIndicator --
+#    Invoked from updateStatusIndicators and searchPattern
+#    At the moment there is no overlap between indicator text labels as
+#    far as LSF and SGE go. If a conflict should arise plan is to use a
+#    namespace variable, setting it in some routine where we had to make
+#    the distinction. Not sure if we should allow every job to be 
+#    handled by a different batch system. This tool should make the least
+#    retrictions possible.
+#
+# Arguments:
+# Result:
+# Side effects:
+#    Depending on button text we color the button for easier
+#    identification of state.
+#
+proc ::jobMonitor::colorStatusIndicator {b v} {
+    switch $v {
+        UNKN {$b configure -fg yellow}
+        SUBM {$b configure -fg orange}
+        PEND {$b configure -fg blue}
+        RUN  {$b configure -fg red}
+        DONE {$b configure -fg green}
+        Eqw  {$b configure -fg yellow}
+        t    {$b configure -fg orange}
+        qw   {$b configure -fg blue}
+        r    {$b configure -fg red}
+        default {$b configure -fg gray}
     }
 }
 
@@ -941,7 +1125,7 @@ proc ::jobMonitor::setFileType {} {
 #    May create a new toplevel widget.
 #
 proc ::jobMonitor::displayHelp {w} {
-    if {[string equal $w ""]} {
+    if {$w eq ""} {
         catch {destroy .help}
         toplevel .help
         wm transient .help $::jobMonitor::bWindow
@@ -982,7 +1166,10 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "in the script directory and/or the log files in " n
     $w insert end "the logs directory. These are not displayed in " n
     $w insert end "this browser until a Search is made. The search " n
-    $w insert end "can be an empty string.\n\n" n
+    $w insert end "can be an empty string.\n" n
+
+    $w insert end " o New: You can give a directory containing scripts and logs " n
+    $w insert end "subdirectories on the command line.\n\n\n" n
 
     $w insert end "jobMonitor Window\n\n" header
 
@@ -1029,6 +1216,14 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "- Right clicking on the file name invokes a popup menu " n
     $w insert end "(which is described below.)\n\n" n
 
+    $w insert end " o Status area:\n" bullet
+    $w insert end "- The bottom of the main window contains a summary of searches. " n
+    $w insert end "For each search item there is the string, the number of matches and " n
+    $w insert end "buttons to bring up to the next/previous matching batch job. " n
+    $w insert end "The search always starts at the location of the previous matching " n
+    $w insert end "batch job (on the first line if no button has been clicked yet.)\n\n" n
+
+
     $w insert end "File Viewing Window\n\n" header
 
     $w insert end " o Log/csh file contents\n" bullet
@@ -1045,8 +1240,13 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "Menus\n\n" header
 
     $w insert end " o File\n" bullet
-    $w insert end "- Select all jobs: " n
-    $w insert end "  Toggles between selecting and de-selecting all jobs.\n" n
+    $w insert end "- Select jobs: \n" n
+    $w insert end "- Deselect jobs: \n" n
+    $w insert end "- Toggle select: " n
+    $w insert end "  These manipulate the selection status according to " n
+    $w insert end "the values in the status indicator buttons. There is also an 'all' option. " n
+    $w insert end "After each status option there is a number indicating how many " n
+    $w insert end "batch jobs are in this category. \n" n
     $w insert end "- Submit selected jobs: " n
     $w insert end "  Scans the csh script for a jobs submission command and " n
     $w insert end "invokes it. For each line we look for an lsf command then " n
@@ -1056,7 +1256,7 @@ proc ::jobMonitor::displayHelp {w} {
     $w insert end "- Clear selected job errors: " n
     $w insert end " When an SGE job encounters certain types of errors " n
     $w insert end "(can't create ouput file for example (I think)) " n
-    $w insert end "it suspends the job and won't restart it until" n
+    $w insert end "it suspends the job and won't restart it until " n
     $w insert end "the error is cleared.\n" n
     $w insert end "- Update status: " n
     $w insert end " Asks the batch system for the current job status and " n

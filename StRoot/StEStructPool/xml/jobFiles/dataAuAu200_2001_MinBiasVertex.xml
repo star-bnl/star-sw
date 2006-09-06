@@ -6,7 +6,7 @@
     <standardElements>
         <jobControl>
             <jobName widget='entry' id='jobName'>AuAu200_2001_MinBiasVertex</jobName>
-            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/standardElements/auau200/2001/MinBiasVertex</outputDir>
+            <outputDir widget='entry' id='outputDir'>$env(MYDATA)/Data/auau200/2001/MinBiasVertex</outputDir>
             <jobPurpose widget='text'>Test run over year 2, 200GeV AuAu minimum bias data.
                                       This data set was triggered using the MinBias Vertex trigger.
             </jobPurpose>

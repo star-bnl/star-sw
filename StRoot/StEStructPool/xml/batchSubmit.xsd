@@ -135,7 +135,7 @@ hell is in this directory.
         <xs:attribute name='filesPerHour' type='xs:integer'
                 Comment='Used to determine batch queue'/>
         <xs:attribute name='fileListSyntax' default='paths' type='pathType'
-                Comment='paths or rootd'/>
+                Comment='paths, rootd or xrootd'/>
         <xs:attribute name='minStorageSpace' type='xs:integer'
                 Comment='Used when deciding if node has sufficient resources to run job'/>
         <xs:attribute name='maxStorageSpace' type='xs:integer'
@@ -217,6 +217,7 @@ hell is in this directory.
     <xs:restriction base='xs:string'>
         <xs:enumeration value='paths'/>
         <xs:enumeration value='rootd'/>
+        <xs:enumeration value='xrootd'/>
     </xs:restriction>
 </xs:simpleType>
 
