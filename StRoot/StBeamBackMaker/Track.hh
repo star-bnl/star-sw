@@ -46,16 +46,6 @@ private:
 
 public:
   /**
-   * @brief Constructor initializes the two linear fitters.
-   */
-  Track();
-
-  /**
-   * @brief Remove hit
-   */
-  void removeHit(StHit* hit);
-
-  /**
    * @brief First hit
    */
   StHit* firstHit() const;
@@ -154,30 +144,37 @@ public:
   double dydzError() const;
 
 private:
-  // Linear fitters in zx- and zy-plane
-  TLinearFitter mXfitter;
-  TLinearFitter mYfitter;
+  static TLinearFitter mXfitter;
+  static TLinearFitter mYfitter;
 
-  // Track length
   double mLength;
+  double mChiSquareX;
+  double mChiSquareY;
+  int    mNumberFreeParameters;
+  double mX0;
+  double mY0;
+  double mdxdz;
+  double mdydz;
+  double mX0error;
+  double mY0error;
+  double mdxdzError;
+  double mdydzError;
 };
 
-inline Track::Track() { mXfitter.SetFormula("pol1"); mYfitter.SetFormula("pol1"); }
-inline void Track::removeHit(StHit* hit) { erase(remove(begin(), end(), hit)); }
 inline StHit* Track::firstHit() const { return front(); }
 inline StHit* Track::lastHit() const { return back(); }
 inline double Track::length() const { return mLength; }
-inline double Track::chi2zx() { return mXfitter.GetChisquare(); }
-inline double Track::chi2zy() { return mYfitter.GetChisquare(); }
-inline int Track::ndf() const { return mXfitter.GetNumberFreeParameters(); }
-inline double Track::x0() const { return mXfitter.GetParameter(0); }
-inline double Track::y0() const { return mYfitter.GetParameter(0); }
-inline double Track::dxdz() const { return mXfitter.GetParameter(1); }
-inline double Track::dydz() const { return mYfitter.GetParameter(1); }
-inline double Track::x0error() const { return mXfitter.GetParError(0); }
-inline double Track::y0error() const { return mYfitter.GetParError(0); }
-inline double Track::dxdzError() const { return mXfitter.GetParError(1); }
-inline double Track::dydzError() const { return mYfitter.GetParError(1); }
+inline double Track::chi2zx() { return mChiSquareX; }
+inline double Track::chi2zy() { return mChiSquareY; }
+inline int    Track::ndf() const { return mNumberFreeParameters; }
+inline double Track::x0() const { return mX0; }
+inline double Track::y0() const { return mY0; }
+inline double Track::dxdz() const { return mdxdz; }
+inline double Track::dydz() const { return mdydz; }
+inline double Track::x0error() const { return mX0error; }
+inline double Track::y0error() const { return mY0error; }
+inline double Track::dxdzError() const { return mdxdzError; }
+inline double Track::dydzError() const { return mdydzError; }
 
 ostream& operator<<(ostream&, const Track&);
 

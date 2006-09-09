@@ -5,13 +5,8 @@
 //
 
 // C++ STL
-#include <memory>
 #include <vector>
 #include <set>
-
-// ROOT
-#include "TH1.h"
-#include "TH2.h"
 
 // STAR
 #include "StEventTypes.h"
@@ -27,9 +22,9 @@
 #define MIN_TRACK_SEED_HITS 60
 
 struct LessHit {
-  bool operator()(const StHit* hit, const StHit* hit2) const
+  bool operator()(const StHit* hit1, const StHit* hit2) const
   {
-    return hit->position().z() < hit2->position().z();
+    return hit1->position().z() < hit2->position().z();
   }
 };
 
@@ -48,21 +43,7 @@ typedef TrackSet::iterator TrackSetIter;
 
 ClassImp(StBeamBackMaker)
 
-Int_t StBeamBackMaker::Init()
-{
-  hEventTime = new TH1F("hEventTime", ";Time [seconds]", 100, 0, 20);
-  return StMaker::Init();
-}
-
 Int_t StBeamBackMaker::Make()
-{
-  TStopwatch timer;
-  Int_t status = makeHelper();
-  hEventTime->Fill(timer.RealTime());
-  return status;
-}
-
-Int_t StBeamBackMaker::makeHelper()
 {
   info() << "Processing run=" << GetRunNumber()
 	 << ", event=" << GetEventNumber() << endm;
@@ -105,7 +86,7 @@ Int_t StBeamBackMaker::makeHelper()
   //
   info("Find track seeds");
   // Allocate storage, but don't initialize
-  Track* bufBeg = get_temporary_buffer<Track>(hits.size()).first;
+  Track* bufBeg = (Track*)malloc(sizeof(Track)*hits.size());
   Track* bufEnd = bufBeg;
   TrackSet tracks;
   while (!hits.empty()) {
@@ -288,9 +269,8 @@ Int_t StBeamBackMaker::makeHelper()
   //
   // Clean up
   //
-  for (Track* track = bufBeg; track != bufEnd; ++track)
-    track->~Track();
-  return_temporary_buffer(bufBeg);
+  for (Track* track = bufBeg; track != bufEnd; ++track) track->~Track();
+  free(bufBeg);
 
   return kStOk;
 }
