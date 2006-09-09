@@ -13,6 +13,9 @@
 
 #define MAX_SLOPE 0.1
 
+TLinearFitter Track::mXfitter(1, "pol1", "");
+TLinearFitter Track::mYfitter(1, "pol1", "");
+
 void Track::merge(Track* track)
 {
   unsigned int oldSize = size();
@@ -37,8 +40,19 @@ bool Track::fit()
   }
   mXfitter.Eval();
   mYfitter.Eval();
-  StThreeVectorD origin(x0(), y0(), 0);
-  StThreeVectorD direction(dxdz(), dydz(), 1);
+  mChiSquareX = mXfitter.GetChisquare();
+  mChiSquareY = mYfitter.GetChisquare();
+  mNumberFreeParameters = mXfitter.GetNumberFreeParameters();
+  mX0 = mXfitter.GetParameter(0);
+  mY0 = mYfitter.GetParameter(0);
+  mdxdz = mXfitter.GetParameter(1);
+  mdydz = mYfitter.GetParameter(1);
+  mX0error = mXfitter.GetParError(0);
+  mY0error = mYfitter.GetParError(0);
+  mdxdzError = mXfitter.GetParError(1);
+  mdydzError = mYfitter.GetParError(1);
+  StThreeVectorD origin(mX0, mY0, 0);
+  StThreeVectorD direction(mdxdz, mdydz, 1);
   Line line(origin, direction);
   mLength = abs(line.perigee(lastHit()->position()) - line.perigee(firstHit()->position()));
 

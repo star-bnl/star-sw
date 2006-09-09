@@ -102,24 +102,11 @@ public:
   StBeamBackMaker(const char* name = "StBeamBackMaker") : StMaker(name) {}
 
   /**
-   * @brief Create histograms
-   */
-  Int_t Init();
-
-  /**
    * @brief Run the tracker on the current event
    */
   Int_t Make();
 
 private:
-  TH1* hEventTime;
-
-  /**
-   * @brief Main body of the tracker
-   * @return Status of running the tracker on the current event
-   */
-  Int_t makeHelper();
-
   /**
    * @brief Check for pileup
    * @param Track to check for pileup
