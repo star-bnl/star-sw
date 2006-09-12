@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.17 2006/08/10 04:14:03 perev Exp $
+ * $Id: TMemStat.cxx,v 1.18 2006/09/12 19:32:37 perev Exp $
  *
  ***************************************************************************
  *
@@ -156,15 +156,14 @@ FILE *proc = fopen(line,"r");
 	if (strncmp("mB",aft,2)==0) b = 1024*1024;
 	if (strncmp("gB",aft,2)==0) b = 1024*1024*1024;
 	res = (res*b)/(1024*1024);
-	return res;
       }
     }
     fclose(proc);
+    if (res) return res;
   }
 //    status file not found. Use ugly way via "ps"
   static char *ps = 0;
   if (!ps) {
-    int pid = ::getpid();
     ps = (char*)malloc(25);
     sprintf(ps,"/bin/ps -l -p %d",pid);
   }
