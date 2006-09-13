@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.18 2006/09/12 19:32:37 perev Exp $
+ * $Id: TMemStat.cxx,v 1.19 2006/09/13 18:49:06 perev Exp $
  *
  ***************************************************************************
  *
@@ -156,10 +156,10 @@ FILE *proc = fopen(line,"r");
 	if (strncmp("mB",aft,2)==0) b = 1024*1024;
 	if (strncmp("gB",aft,2)==0) b = 1024*1024*1024;
 	res = (res*b)/(1024*1024);
+        return res;
       }
     }
     fclose(proc);
-    if (res) return res;
   }
 //    status file not found. Use ugly way via "ps"
   static char *ps = 0;
