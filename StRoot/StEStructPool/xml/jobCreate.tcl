@@ -249,7 +249,7 @@ proc ::jobCreate::createWindow {} {
         destroy $::jobCreate::interfaceWindow
     }
     set  ::jobCreate::interfaceWindow [toplevel .interfaceWindow -width 600 -height 600]
-    wm title $::jobCreate::interfaceWindow "STAR analyisis batch job submission interface"
+    wm title $::jobCreate::interfaceWindow "A Dynamic Dispatch System"
 
     set m [menu $::jobCreate::interfaceWindow.menu]
     $::jobCreate::interfaceWindow configure -menu $m
@@ -2270,7 +2270,7 @@ proc ::jobCreate::displayHelp {w} {
     $w tag config bullet -font "[font actual [$w cget -font]] -weight bold"
     $w tag config n -lmargin1 $margin -lmargin2 $margin2
 
-    $w insert end "STAR analysis batch job submission interface" header "\nby Duncan Prindle\n\n" header2
+    $w insert end "A Dynamic Dispatch System" header "\nby Duncan Prindle\n\n" header2
 
 
     $w insert end " o What does this do?\n" bullet
