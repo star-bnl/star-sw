@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.cxx,v 2.14 2006/08/21 19:41:51 ullrich Exp $
+ * $Id: StTriggerData2004.cxx,v 2.15 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.cxx,v $
+ * Revision 2.15  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.14  2006/08/21 19:41:51  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -68,9 +71,10 @@ StTriggerData2004::StTriggerData2004()
     mData=0;
 }
 
-StTriggerData2004::StTriggerData2004(const TrgDataType2004* data)
+StTriggerData2004::StTriggerData2004(const TrgDataType2004* data, int run)
 {
     mYear=2004;
+    mRun = run;
     mData= new TrgDataType2004;
     int npre  = data->EvtDesc.npre;
     int npost = data->EvtDesc.npost;
@@ -239,7 +243,7 @@ unsigned short  StTriggerData2004::ctbRaw(int address, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[address];
 }
 
-unsigned short  StTriggerData2004::ctb(int pmt, int run, int prepost) const
+unsigned short  StTriggerData2004::ctb(int pmt, int prepost) const
 {
     static const unsigned char ctbMap[240] = {
 	7,  6,  5,  4,  3, 23, 22, 21, 20, 19,
@@ -270,7 +274,7 @@ unsigned short  StTriggerData2004::ctb(int pmt, int run, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[pmt]];
 }
 
-unsigned short StTriggerData2004::ctbTraySlat(int tray, int slat, int run, int prepost) const{
+unsigned short StTriggerData2004::ctbTraySlat(int tray, int slat, int prepost) const{
     static const unsigned char ctbMap[2][120] = {
 	{ 109, 108, 107, 106, 105,   7,   6,   5,   4,   3,
 	  2,   1,   0,  15,  14,  13,  12,  11,  10,   9,
@@ -602,7 +606,7 @@ unsigned short StTriggerData2004::zdcHardwareSum(int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[14];
 }
 
-unsigned short StTriggerData2004::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost) const
+unsigned short StTriggerData2004::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
     static const int zdcsmd_map[2][2][8] ={
 	// wrong mapping

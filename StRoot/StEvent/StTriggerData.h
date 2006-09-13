@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.13 2006/08/21 19:41:50 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.14 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.14  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.13  2006/08/21 19:41:50  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -87,8 +90,8 @@ public:
     virtual unsigned short bcData(int channel) const;
 
     //L2 results offsets 
-    virtual int L2ResultsOffset(StL2AlgorithmId id, int run) const;  
-    bool isL2Triggered(StL2TriggerResultType id, int run) const;
+    virtual int L2ResultsOffset(StL2AlgorithmId id) const;  
+    bool isL2Triggered(StL2TriggerResultType id) const;
   
     // bunch and spin bits
     virtual unsigned int bunchCounterHigh() const;
@@ -121,8 +124,8 @@ public:
 
     // CTB
     virtual unsigned short ctbRaw(int address, int prepost=0) const;
-    virtual unsigned short ctb(int pmt, int run, int prepost=0) const;
-    virtual unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;
+    virtual unsigned short ctb(int pmt, int prepost=0) const;
+    virtual unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
     virtual unsigned short ctbSum(int prepost=0) const;
 
     // MWC
@@ -138,7 +141,7 @@ public:
     virtual unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
-    virtual unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost=0) const;
+    virtual unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
   
     // EMC
     virtual unsigned char bemcHighTower(int patch_id, int prepost=0) const;
@@ -173,14 +176,17 @@ public:
     virtual unsigned short int * getDsm3()      const =0;
 
 protected:
-    int   mYear;
-    float mZdcVertexZ;
     int prepostAddress(int prepost) const; //get pre&post xsing addess, return negative if bad.
         
     // Service routine to decode EMC layer0 DSM info into 12bit input values
     unsigned short decodeEmc12bit(const int dsm, const int channel, const unsigned char *raw) const;
 
-    ClassDef(StTriggerData,2) 
+protected:
+    int   mYear;
+    float mZdcVertexZ;    
+    int   mRun;
+
+    ClassDef(StTriggerData,3) 
 };
 
 //
@@ -221,8 +227,8 @@ inline unsigned short StTriggerData::fpdLayer1DSM(StBeamDirection eastwest, int 
 inline unsigned short StTriggerData::fpdLayer2DSMRaw(int channel) const {return 0;}
 inline unsigned short StTriggerData::fpdLayer2DSM(StBeamDirection eastwest, int module) const {return 0;}
 inline unsigned short StTriggerData::ctbRaw(int address, int prepost) const {return 0;}
-inline unsigned short StTriggerData::ctb(int pmt, int run, int prepost) const {return 0;}
-inline unsigned short StTriggerData::ctbTraySlat(int tray, int slat, int run, int prepost) const {return 0;}
+inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
+inline unsigned short StTriggerData::ctbTraySlat(int tray, int slat, int prepost) const {return 0;}
 inline unsigned short StTriggerData::ctbSum(int prepost) const {return 0;}
 inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
@@ -232,7 +238,7 @@ inline unsigned short StTriggerData::zdcAttenuated(StBeamDirection eastwest, int
 inline unsigned short StTriggerData::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcTDC(StBeamDirection eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcHardwareSum(int prepost) const {return 0;}
-inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
 inline unsigned char  StTriggerData::bemcHighTower(int patch_id, int prepost) const {return 0;}
 inline unsigned char  StTriggerData::bemcJetPatch (int patch_id, int prepost) const {return 0;}
 inline unsigned char  StTriggerData::eemcHighTower(int patch_id, int prepost) const {return 0;}
@@ -247,8 +253,8 @@ inline unsigned short StTriggerData::bbcEarliestTDC(StBeamDirection eastwest, in
 inline unsigned short StTriggerData::bbcTimeDifference() const {return 0;}
 inline unsigned short StTriggerData::fpd(StBeamDirection eastwest, int module, int pmt, int prepost) const {return 0;} 
 inline unsigned short StTriggerData::fpdSum(StBeamDirection eastwest, int module) const {return 0;}
-inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id, int run) const {return -1;}  
-inline bool StTriggerData::isL2Triggered(StL2TriggerResultType id, int run) const {return false;}  
+inline int StTriggerData::L2ResultsOffset(StL2AlgorithmId id) const {return -1;}  
+inline bool StTriggerData::isL2Triggered(StL2TriggerResultType id) const {return false;}  
 
 #endif
   

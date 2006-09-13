@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.14 2006/08/21 19:41:51 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.15 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.15  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.14  2006/08/21 19:41:51  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -68,9 +71,10 @@ StTriggerData2003::StTriggerData2003()
     mData=0;
 }
 
-StTriggerData2003::StTriggerData2003(const TrgDataType2003* data)
+StTriggerData2003::StTriggerData2003(const TrgDataType2003* data, int run)
 {
     mYear=2003;
+    mRun = run;
     mData= new TrgDataType2003;
     int npre  = data->EvtDesc.npre;
     int npost = data->EvtDesc.npost;
@@ -240,7 +244,7 @@ unsigned short  StTriggerData2003::ctbRaw(int address, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[address];
 }
 
-unsigned short  StTriggerData2003::ctb(int pmt, int run, int prepost) const
+unsigned short  StTriggerData2003::ctb(int pmt, int prepost) const
 {
     static const unsigned char ctbMap[240] = {
 	7,  6,  5,  4,  3, 23, 22, 21, 20, 19,
@@ -271,7 +275,7 @@ unsigned short  StTriggerData2003::ctb(int pmt, int run, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[ctbMap[pmt]];
 }
 
-unsigned short StTriggerData2003::ctbTraySlat(int tray, int slat, int run, int prepost) const{
+unsigned short StTriggerData2003::ctbTraySlat(int tray, int slat, int prepost) const{
     static const unsigned char ctbMap[2][120] = {
 	{ 109, 108, 107, 106, 105,   7,   6,   5,   4,   3,
 	  2,   1,   0,  15,  14,  13,  12,  11,  10,   9,

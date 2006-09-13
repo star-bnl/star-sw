@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.10 2006/08/21 19:41:51 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.11 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.11  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.10  2006/08/21 19:41:51  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -52,7 +55,7 @@ struct TrgDataType2003;
 class StTriggerData2003 : public StTriggerData {
 public:
     StTriggerData2003();
-    StTriggerData2003(const TrgDataType2003*);
+    StTriggerData2003(const TrgDataType2003*, int run);
     ~StTriggerData2003();
   
     void dump() const;  //dump data into text
@@ -101,8 +104,8 @@ public:
 
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
-    unsigned short ctb(int pmt, int run, int prepost=0) const;
-    unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;
+    unsigned short ctb(int pmt, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
     unsigned short ctbSum(int prepost=0) const;
 
     // MWC

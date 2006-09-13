@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.cxx,v 2.3 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StTriggerData.cxx,v 2.4 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.cxx,v $
+ * Revision 2.4  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.3  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -22,11 +25,11 @@
  **************************************************************************/
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.3 2004/08/03 17:22:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerData.cxx,v 2.4 2006/09/13 23:59:55 ullrich Exp $";
 
 ClassImp(StTriggerData)
 
-StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999) { /* noop */ }
+    StTriggerData::StTriggerData() : mYear(0), mZdcVertexZ(-999), mRun(0) { /* noop */ }
 
 StTriggerData::~StTriggerData() { /* noop */}
 

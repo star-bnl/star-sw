@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.h,v 2.5 2006/08/21 19:41:51 ullrich Exp $
+ * $Id: StTriggerData2005.h,v 2.6 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.h,v $
+ * Revision 2.6  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.5  2006/08/21 19:41:51  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -37,7 +40,7 @@ struct TrgDataType2005;
 class StTriggerData2005 : public StTriggerData {
 public:
     StTriggerData2005();
-    StTriggerData2005(const TrgDataType2005*);
+    StTriggerData2005(const TrgDataType2005*, int run);
     ~StTriggerData2005();
   
     void dump() const;  //dump data into text
@@ -59,8 +62,8 @@ public:
     unsigned short bcData(int channel) const;
 
     //L2 offsets
-    int L2ResultsOffset(StL2AlgorithmId id, int run) const;  
-    bool isL2Triggered(StL2TriggerResultType id, int run) const;
+    int L2ResultsOffset(StL2AlgorithmId id) const;  
+    bool isL2Triggered(StL2TriggerResultType id) const;
   
     // bunch and spin bits
     unsigned int bunchCounterHigh() const;
@@ -90,8 +93,8 @@ public:
     
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
-    unsigned short ctb(int pmt, int run, int prepost=0) const;
-    unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;    
+    unsigned short ctb(int pmt, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
     unsigned short ctbSum(int prepost=0) const;
 
     // MWC
@@ -119,7 +122,7 @@ public:
     unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
-    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost=0) const;
+    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
 
     // EMC
     unsigned char bemcHighTower(int patch_id, int prepost=0) const;
