@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.h,v 2.8 2006/08/21 19:41:51 ullrich Exp $
+ * $Id: StTriggerData2004.h,v 2.9 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.h,v $
+ * Revision 2.9  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.8  2006/08/21 19:41:51  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -47,7 +50,7 @@ struct TrgDataType2004;
 class StTriggerData2004 : public StTriggerData {
 public:
     StTriggerData2004();
-    StTriggerData2004(const TrgDataType2004*);
+    StTriggerData2004(const TrgDataType2004*, int run);
     ~StTriggerData2004();
   
     void dump() const;  //dump data into text
@@ -96,8 +99,8 @@ public:
     
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
-    unsigned short ctb(int pmt, int run, int prepost=0) const;
-    unsigned short ctbTraySlat(int tray, int slat, int run, int prepost=0) const;    
+    unsigned short ctb(int pmt, int prepost=0) const;
+    unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;    
     unsigned short ctbSum(int prepost=0) const;
 
     // MWC
@@ -125,7 +128,7 @@ public:
     unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
-    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost=0) const;
+    unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
 
     // EMC
     unsigned char bemcHighTower(int patch_id, int prepost=0) const;

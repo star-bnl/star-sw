@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.cxx,v 2.7 2006/08/21 19:41:51 ullrich Exp $
+ * $Id: StTriggerData2005.cxx,v 2.8 2006/09/13 23:59:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.cxx,v $
+ * Revision 2.8  2006/09/13 23:59:55  ullrich
+ * Added new data member mRun. Removed arg run from ctb(), ctbTraySlat(), zdcSMD()
+ *
  * Revision 2.7  2006/08/21 19:41:51  ullrich
  * Add run number as argument to ctb(), ctbTray(), and zdcSMD(). Used 2005 only. (Akio)
  *
@@ -50,9 +53,10 @@ StTriggerData2005::StTriggerData2005()
     mData=0;
 }
 
-StTriggerData2005::StTriggerData2005(const TrgDataType2005* data)
+StTriggerData2005::StTriggerData2005(const TrgDataType2005* data, int run)
 {
     mYear=2005;
+    mRun = run;
     mData= new TrgDataType2005;
     int npre  = data->EvtDesc.npre;
     int npost = data->EvtDesc.npost;
@@ -221,7 +225,7 @@ unsigned short  StTriggerData2005::ctbRaw(int address, int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].CTB[address];
 }
 
-unsigned short  StTriggerData2005::ctb(int pmt, int run, int prepost) const
+unsigned short  StTriggerData2005::ctb(int pmt, int prepost) const
 {
     static const unsigned char ctbMap[240] = {
 	7,  6,  5,  4,  3, 23, 22, 21, 20, 19,
@@ -252,7 +256,7 @@ unsigned short  StTriggerData2005::ctb(int pmt, int run, int prepost) const
     int v=0;
     int add=prepostAddress(prepost);
     if(add>=0) v=mData->rawTriggerDet[add].CTB[ctbMap[pmt]];
-    if(run>7000000 && run<7151026){
+    if(mRun>7000000 && mRun<7151026){
       if     (add== 76){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
       else if(add== 75){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
       else if(add== 74){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
@@ -260,7 +264,7 @@ unsigned short  StTriggerData2005::ctb(int pmt, int run, int prepost) const
       else if(add==165){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[3];} 
       else if(add==164){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[2];} 
     }
-    else if(run>=7151026){
+    else if(mRun>=7151026){
       if     (add==  4){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
       else if(add==  3){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
       else if(add==  2){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
@@ -271,7 +275,7 @@ unsigned short  StTriggerData2005::ctb(int pmt, int run, int prepost) const
     return v;
 }
 
-unsigned short StTriggerData2005::ctbTraySlat(int tray, int slat, int run, int prepost) const{
+unsigned short StTriggerData2005::ctbTraySlat(int tray, int slat, int prepost) const{
     static const unsigned char ctbMap[2][120] = {
 	{ 109, 108, 107, 106, 105,   7,   6,   5,   4,   3,
 	  2,   1,   0,  15,  14,  13,  12,  11,  10,   9,
@@ -301,7 +305,7 @@ unsigned short StTriggerData2005::ctbTraySlat(int tray, int slat, int run, int p
     int v=0;
     int add=prepostAddress(prepost);    
     if(add>=0) v=mData->rawTriggerDet[add].CTB[ctbMap[slat][tray]];
-    if(run>7000000 && run<7151026){
+    if(mRun>7000000 && mRun<7151026){
       if     (tray== 46 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
       else if(tray== 47 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
       else if(tray== 48 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
@@ -309,7 +313,7 @@ unsigned short StTriggerData2005::ctbTraySlat(int tray, int slat, int run, int p
       else if(tray== 67 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[3];} 
       else if(tray== 68 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[2];} 
     }
-    else if(run>=7151026){
+    else if(mRun>=7151026){
       if     (tray==  8 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[7];} 
       else if(tray==  9 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[6];} 
       else if(tray== 10 && slat==0){v=mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[5];} 
@@ -626,7 +630,7 @@ unsigned short StTriggerData2005::zdcHardwareSum(int prepost) const
     return mData->rawTriggerDet[prepostAddress(prepost)].ZDC[14];
 }
 
-unsigned short StTriggerData2005::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int run, int prepost) const
+unsigned short StTriggerData2005::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const
 {
     static const int zdcsmd_map[2][2][8] ={
 	// wrong mapping
@@ -649,7 +653,7 @@ unsigned short StTriggerData2005::zdcSMD(StBeamDirection eastwest, int verthori,
     if (verthori<0 || verthori>1) return 0;
     if (strip<1 || strip>8) return 0;  //the last one in vertical strips is for LED. Could be used for Forward counter later. T.A.H.
     int add=-1;    
-    if(run<7000000) {add=zdcsmd_map[eastwest][verthori][strip-1];}
+    if(mRun<7000000) {add=zdcsmd_map[eastwest][verthori][strip-1];}
     else            {add=zdcsmd_map2006[eastwest][verthori][strip-1];}
     if(add>=0) return mData->rawTriggerDet[prepostAddress(prepost)].ZDCSMD[add];
     else return 0;
@@ -860,9 +864,9 @@ unsigned short int  * StTriggerData2005::getDsm3() const{
   return   mData->TrgSum.DSMdata.lastDSM;
 }
 
-int StTriggerData2005::L2ResultsOffset(StL2AlgorithmId id, int run) const
+int StTriggerData2005::L2ResultsOffset(StL2AlgorithmId id) const
 {
-    if(run<7000000) return -1;
+    if(mRun<7000000) return -1;
     
     switch(id) {
     case l2Diagnostic:  return L2RESULTS_OFFSET_TRG;
@@ -876,15 +880,15 @@ int StTriggerData2005::L2ResultsOffset(StL2AlgorithmId id, int run) const
     }
 }
 
-bool StTriggerData2005::isL2Triggered(StL2TriggerResultType id, int run) const
+bool StTriggerData2005::isL2Triggered(StL2TriggerResultType id) const
 {
-  if(run<7000000) return false;
-  if(run>7270000) return false;
+  if(mRun<7000000) return false;
+  if(mRun>7270000) return false;
 
   int offset;
-  offset=L2ResultsOffset(l2Dijet,run);
+  offset=L2ResultsOffset(l2Dijet);
   L2jetResults2006 *jet = (L2jetResults2006 *) &(mData->TrgSum.L2Result[offset]);
-  offset=L2ResultsOffset(l2Pi0Gamma,run);
+  offset=L2ResultsOffset(l2Pi0Gamma);
   L2gammaResult *gam_bemc = (L2gammaResult *) &(mData->TrgSum.L2Result[offset]);
   L2gammaResult *gam_eemc = (L2gammaResult *) &(mData->TrgSum.L2Result[offset+2]);
 
