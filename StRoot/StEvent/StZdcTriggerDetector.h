@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.10 2006/08/21 19:43:35 ullrich Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.11 2006/09/14 00:02:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.11  2006/09/14 00:02:53  ullrich
+ * Removed argument (run) in constructor. Not needed anymore.
+ *
  * Revision 2.10  2006/08/21 19:43:35  ullrich
  * Run number becomes constructor argument. Needed for ZDC. (Akio)
  *
@@ -58,7 +61,7 @@ class StZdcTriggerDetector : public StObject {
 public:
     StZdcTriggerDetector();
     StZdcTriggerDetector(const dst_TrgDet_st&);
-    StZdcTriggerDetector(const StTriggerData&, const int);
+    StZdcTriggerDetector(const StTriggerData&);
     // StZdcTriggerDetector(const StZdcTriggerDetector&);            use default
     // StZdcTriggerDetector& operator=(const StZdcTriggerDetector&); use default
     virtual ~StZdcTriggerDetector();

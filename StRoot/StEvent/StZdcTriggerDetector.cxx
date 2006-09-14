@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.13 2006/08/21 19:43:35 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.14 2006/09/14 00:02:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
+ * Revision 2.14  2006/09/14 00:02:53  ullrich
+ * Removed argument (run) in constructor. Not needed anymore.
+ *
  * Revision 2.13  2006/08/21 19:43:35  ullrich
  * Run number becomes constructor argument. Needed for ZDC. (Akio)
  *
@@ -59,7 +62,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.13 2006/08/21 19:43:35 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.14 2006/09/14 00:02:53 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 
@@ -86,7 +89,7 @@ StZdcTriggerDetector::StZdcTriggerDetector(const dst_TrgDet_st& t)
     mVertexZ      = t.ZDCvertexZ;
 }
 
-StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t, const int run)
+StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t)
 {
     //
     //  This is a temporary fix only. In future this
@@ -123,9 +126,9 @@ StZdcTriggerDetector::StZdcTriggerDetector(const StTriggerData& t, const int run
     mSum          = t.zdcAtAddress(14);
 
     for (int i=0; i<mMaxZdcWords; i++) 
-	mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)), run);
+	mZdcSmdEast[i] = t.zdcSMD(east, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)));
     for (int i=0; i<mMaxZdcWords; i++) 
-	mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)), run);
+	mZdcSmdWest[i] = t.zdcSMD(west, ((i>7) ? 1 : 0), ((i>7) ? (i-7) : (i+1)));
     
     fill_n(mTdc, static_cast<int>(mMaxZdcWords), 0); // always 0
 }
