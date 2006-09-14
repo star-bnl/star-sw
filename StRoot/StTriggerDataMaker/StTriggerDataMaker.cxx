@@ -26,15 +26,16 @@ StTriggerDataMaker::StTriggerDataMaker(const char *name):StMaker(name)
 Int_t StTriggerDataMaker::Make(){
 
   cout << "StTriggerDataMaker Make() starting..................................."  << endl;
-  int year=0;
+  int year=0, run=0;
   St_DataSet* daqReaderDS = GetDataSet("StDAQReader");
   if (!daqReaderDS)				return kStWarn;
   StDAQReader* daqReader = (StDAQReader*)(daqReaderDS->GetObject());
-  if (!daqReader  ) 				return kStWarn;
-//VP  if (!(daqReader->TRGDetectorsPresent()))	return kStWarn;
+  if (!daqReader) 				return kStWarn;
+  //VP  if (!(daqReader->TRGDetectorsPresent()))	return kStWarn;
   StTRGReader* trgReader = daqReader->getTRGReader();
   if (!trgReader) 				return kStWarn;
   year = trgReader->getYear();
+  run = daqReader->getRunNumber();
   const TrgDataType2003 *trgdata2003=0;
   const TrgDataType2004 *trgdata2004=0;
   const TrgDataType2005 *trgdata2005=0;
@@ -42,17 +43,17 @@ Int_t StTriggerDataMaker::Make(){
   case 2003:
     trgdata2003=trgReader->getDataType2003();
     if (!trgdata2003) return kStWarn;
-    AddData(new TObjectSet("StTriggerData",new StTriggerData2003(trgdata2003),kTRUE));
+    AddData(new TObjectSet("StTriggerData",new StTriggerData2003(trgdata2003,run),kTRUE));
     break;
   case 2004:
     trgdata2004=trgReader->getDataType2004();
     if (!trgdata2004) return kStWarn;
-    AddData(new TObjectSet("StTriggerData",new StTriggerData2004(trgdata2004),kTRUE));
+    AddData(new TObjectSet("StTriggerData",new StTriggerData2004(trgdata2004,run),kTRUE));
     break;
   case 2005:
     trgdata2005=trgReader->getDataType2005();
     if (!trgdata2005) return kStWarn;
-    AddData(new TObjectSet("StTriggerData",new StTriggerData2005(trgdata2005),kTRUE));
+    AddData(new TObjectSet("StTriggerData",new StTriggerData2005(trgdata2005,run),kTRUE));
     break;
   }	      
 
