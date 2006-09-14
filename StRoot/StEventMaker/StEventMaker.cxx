@@ -46,7 +46,7 @@ using std::map;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.78 2006/08/21 20:58:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.79 2006/09/14 00:08:04 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -360,7 +360,7 @@ StEventMaker::makeEvent()
     //
     if (!mCurrentEvent->triggerDetectorCollection()) {
         if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003) 
-	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*(mCurrentEvent->triggerData()),mCurrentEvent->runId()));
+	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*(mCurrentEvent->triggerData())));
         else if (dstTriggerDetectors) 
 	  mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
     }
@@ -473,7 +473,7 @@ StEventMaker::makeEvent()
 		    if (p != mapDbToStL2TriggerResultType.end()) {
 			StL2TriggerResultType l2Test = (*p).second;
 			if (whichTrig->isTrigger(oldtid) &&
-			    mCurrentEvent->triggerData()->isL2Triggered(l2Test,mCurrentEvent->runId())) {
+			    mCurrentEvent->triggerData()->isL2Triggered(l2Test)) {
 			    
 			    whichTrig->addTrigger(newtid,
 						  whichTrig->version(oldtid),
@@ -1774,8 +1774,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.78 2006/08/21 20:58:20 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.79 2006/09/14 00:08:04 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.79  2006/09/14 00:08:04  ullrich
+ * StTriggerDetectorCollection constructor changed and L2 \ninterface in StTriggerData (no run number needed.
+ *
  * Revision 2.78  2006/08/21 20:58:20  ullrich
  * Pass run number to constructor of StTriggerDetectorCollection (Akio).
  *
