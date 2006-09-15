@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.cc,v 1.7 2006/05/06 00:56:26 fisyak Exp $
+// $Id: StScmBarrel.cc,v 1.8 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScmBarrel.cc,v $
+// Revision 1.8  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.7  2006/05/06 00:56:26  fisyak
 // Add local coordinate
 //
@@ -24,11 +27,11 @@
 #include "StSsdHit.h"
 #include "StSsdHitCollection.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 
-StScmBarrel::StScmBarrel(sdm_geom_par_st  *geom_par) // okay in ClusterBarrel
+StScmBarrel::StScmBarrel(ssdDimensions_st  *geom_par) // okay in ClusterBarrel
 {
   this->setSsdParameters(geom_par);
 
@@ -57,23 +60,23 @@ StScmBarrel::~StScmBarrel() // okay in ClusterBarrel
     }
 }
 
-void StScmBarrel::setSsdParameters(sdm_geom_par_st  *geom_par) // okay in ClusterBarrel
+void StScmBarrel::setSsdParameters(ssdDimensions_st  *geom_par) // okay in ClusterBarrel
 {
-  mSsdLayer             = geom_par[0].N_layer;
-  mNLadder              = geom_par[0].N_ladder;
-  mNWaferPerLadder      = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide        = geom_par[0].N_strip_per_side;
+  mSsdLayer             = 7;
+  mNLadder              = 20;
+  mNWaferPerLadder      = geom_par[0].wafersPerLadder;
+  mNStripPerSide        = geom_par[0].stripPerSide;
 }
 
-void StScmBarrel::initWafers(St_svg_geom *geom_class) // okay in ClusterBarrel
+void StScmBarrel::initWafers(St_ssdWafersPosition *geom_class) // okay in ClusterBarrel
 {
-  svg_geom_st *geom =  geom_class->GetTable();
+  ssdWafersPosition_st *geom =  geom_class->GetTable();
 
   for (int i = 0; i < geom_class->GetNRows(); i++)
     {
       if (geom[i].id > mSsdLayer*1000)
  	{
-  	  mWafers[idWaferToWaferNumb(geom[i].id)]->init(geom[i].id, geom[i].d, geom[i].t, geom[i].n, geom[i].x);
+  	  mWafers[idWaferToWaferNumb(geom[i].id)]->init(geom[i].id, geom[i].driftDirection, geom[i].transverseDirection, geom[i].normalDirection,geom[i].centerPosition);
  	}
     }
 }
@@ -202,7 +205,7 @@ void StScmBarrel::sortListCluster() // okay in ClusterBarrel
     }
 }
 
-int StScmBarrel::doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
+int StScmBarrel::doClusterMatching(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl)
 {
   int  NumberOfPackage = 0;
   int nSolved = 0;
@@ -219,20 +222,20 @@ int StScmBarrel::doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_c
   return NumberOfPackage;
 }
 
-void StScmBarrel::convertDigitToAnalog(sls_ctrl_st *sls_ctrl)
+void StScmBarrel::convertDigitToAnalog(slsCtrl_st *slsCtrl)
 {
-  long   NElectronInAMip    = sls_ctrl[0].NElectronInAMip;
-  long   ADCDynamic         = sls_ctrl[0].ADCDynamic;
-  int    NBitEncoding       = sls_ctrl[0].NBitEncoding;
-  double PairCreationEnergy = sls_ctrl[0].PairCreationEnergy;
+  long   nElectronInAMip    = slsCtrl[0].nElectronInAMip;
+  long   adcDynamic         = slsCtrl[0].adcDynamic;
+  int    nbitEncoding       = slsCtrl[0].nbitEncoding;
+  double pairCreationEnergy = slsCtrl[0].pairCreationEnergy;
 
-  const int NAdcChannel     = (int)pow(2.0,NBitEncoding);
-  const double convFactor   = (PairCreationEnergy*ADCDynamic*NElectronInAMip)/NAdcChannel;
+  const int NAdcChannel     = (int)pow(2.0,nbitEncoding);
+  const double convFactor   = (pairCreationEnergy*adcDynamic*nElectronInAMip)/NAdcChannel;
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
     mWafers[iWaf]->convertDigitToAnalog(convFactor);
 }
 
-void StScmBarrel::convertUFrameToOther(sdm_geom_par_st *geom_par)
+void StScmBarrel::convertUFrameToOther(ssdDimensions_st *geom_par)
 {
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
    {
@@ -373,7 +376,7 @@ int StScmBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
   int i            = 0;
   int inContainer =0;
   StThreeVectorF gPos; StThreeVectorF gPosError; 
-  int hw; float q; unsigned char c;
+  int hw; float q; unsigned char c = 0;
 
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
     {

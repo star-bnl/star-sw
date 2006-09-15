@@ -1,6 +1,9 @@
-// $Id: StScfStrip.hh,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+// $Id: StScfStrip.hh,v 1.3 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfStrip.hh,v $
+// Revision 1.3  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:34  lmartin
 // CVS tags added
 //
@@ -13,18 +16,18 @@
 class StScfStrip
 {
  public:
-  StScfStrip(int rNStrip, int rDigitSig, int rSigma);
-  StScfStrip(int rNStrip, int rDigitSig, int rSigma, int *rMcHit);
+  StScfStrip(int rNStrip, int rDigitSig, float rSigma);
+  StScfStrip(int rNStrip, int rDigitSig, float rSigma, int *rMcHit);
   ~StScfStrip();
   void        setPrevStrip(StScfStrip *rPrevStrip);
   void        setNextStrip(StScfStrip *rNextStrip);
-  void        setSigma(int rSigma);
+  void        setSigma(float rSigma);
   void        setNStrip(int rNStrip);
   void        setDigitSig(int rDigitSig);
   void        setIdMcHit(int rIdMcHit, int iR);
   int         getNStrip();
   int         getDigitSig();
-  int         getSigma();
+  float       getSigma();
   int         getIdMcHit(int iR);
   StScfStrip* getPrevStrip();
   StScfStrip* getNextStrip();
@@ -33,7 +36,7 @@ class StScfStrip
 private:
   int        mNStrip;
   int        mDigitSig;
-  int        mSigma;
+  float      mSigma;
   int        *mIdMcHit;
   StScfStrip *mPrevStrip;
   StScfStrip *mNextStrip;

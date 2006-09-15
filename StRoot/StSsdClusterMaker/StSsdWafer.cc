@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
+// $Id: StSsdWafer.cc,v 1.4 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.4  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.3  2005/06/13 16:01:00  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -13,10 +16,10 @@
 StSsdWafer::StSsdWafer(int nid)
 {
   mId       = nid;
-  mD        = new float[3];
-  mT        = new float[3];
-  mN        = new float[3];
-  mX        = new float[3];
+  mD        = new Double_t[3];
+  mT        = new Double_t[3];
+  mN        = new Double_t[3];
+  mX        = new Double_t[3];
 //   mDeadStripP = nDeadStripP;
 //   mDeadStripN = nDeadStripN;
 
@@ -53,7 +56,7 @@ StSsdWafer::~StSsdWafer()
   delete    mPoint;
 }
 
-void StSsdWafer::init(int rId, float *rD, float *rT, float *rN, float *rX)
+void StSsdWafer::init(int rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX)
 {
   if (rId != mId)
     {
@@ -114,12 +117,12 @@ void StSsdWafer::addPackage(StSsdPackage *ptr)
 void StSsdWafer::addPoint(StSsdPoint *ptr)
 {  mPoint->addNewPoint(ptr); }
 
-void StSsdWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, sls_ctrl_st *sls_ctrl)
+void StSsdWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, slsCtrl_st *slsCtrl)
 {
   if (iSide)
-    { mStripN->setSigma(iStrip, iSigma, sls_ctrl); }
+    { mStripN->setSigma(iStrip, iSigma, slsCtrl); }
   else
-    { mStripP->setSigma(iStrip, iSigma, sls_ctrl); }
+    { mStripP->setSigma(iStrip, iSigma, slsCtrl); }
 }
 
 void StSsdWafer::sortStrip()
@@ -138,29 +141,29 @@ void StSsdWafer::sortPoint()
 {  mPoint->sortPoint(); }
 
 
-void StSsdWafer::doClusterisation(int *NClusterPerSide, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl)
+void StSsdWafer::doClusterisation(int *NClusterPerSide, slsCtrl_st *slsCtrl, scf_ctrl_st *scf_ctrl)
 {
   int iSide = 0;
-  doFindCluster(sls_ctrl, scf_ctrl, iSide);
+  doFindCluster(slsCtrl, scf_ctrl, iSide);
   NClusterPerSide[0] = doClusterSplitting(scf_ctrl, iSide); 
   iSide = 1;
-  doFindCluster(sls_ctrl, scf_ctrl, iSide); 
+  doFindCluster(slsCtrl, scf_ctrl, iSide); 
   NClusterPerSide[1] = doClusterSplitting(scf_ctrl, iSide);
 }
-// void StSsdWafer::doClusterisation(int *NClusterPerSide,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl);
+// void StSsdWafer::doClusterisation(int *NClusterPerSide,St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl);
 // {
 //   int iSide = 0;
-//   doFindCluster(my_sls_ctrl, my_scf_ctrl, iSide);
+//   doFindCluster(my_slsCtrl, my_scf_ctrl, iSide);
 //   NClusterPerSide[0] = doClusterSplitting(my_scf_ctrl, iSide); 
 //   iSide = 1;
-//   doFindCluster(sls_ctrl, my_cf_ctrl, iSide); 
+//   doFindCluster(slsCtrl, my_cf_ctrl, iSide); 
 //   NClusterPerSide[1] = doClusterSplitting(my_scf_ctrl, iSide);
 // }
 
 
 
 
-int StSsdWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int iSide)
+int StSsdWafer::doFindCluster(slsCtrl_st *slsCtrl, scf_ctrl_st *scf_ctrl, int iSide)
 {
   StSsdStripList   *CurrentStripList   =  0;
   StSsdClusterList *CurrentClusterList =  0;
@@ -287,7 +290,7 @@ int StSsdWafer::doClusterSplitting(scf_ctrl_st *scf_ctrl, int iSide)
   return CurrentClusterList->getSize();
 }
 
-int StSsdWafer::doFindPackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
+int StSsdWafer::doFindPackage(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl)
 {
   StSsdPackageList *currentPackageList = 0;
   StSsdCluster     *currentClusterP    = 0;
@@ -403,7 +406,7 @@ int StSsdWafer::doFindPackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
   return numPackage;
 }
 
-int StSsdWafer::doSolvePerfect(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
+int StSsdWafer::doSolvePerfect(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl)
 {
   int nPerfect = 0;
   StSsdPackage *currentPackage = 0;
@@ -413,7 +416,7 @@ int StSsdWafer::doSolvePerfect(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
     {
       currentKind    = currentPackage->getKind();
       int numMatched = strlen(currentKind)/2;
-      float *Adc     = new float[numMatched];
+      Double_t *Adc     = new Double_t[numMatched];
       for(int i=0;i<numMatched;i++) 
 	Adc[i]=(currentPackage->getMatched(i))->getTotAdc();
 // 1 *********************************************************************
@@ -435,7 +438,7 @@ int StSsdWafer::doSolvePerfect(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
 
 void StSsdWafer::doStatPerfect(int nPerfectPoint, scm_ctrl_st *scm_ctrl)
 {
-  float store = 0;
+  Double_t store = 0;
   StSsdPoint *currentPerfect = 0;
   currentPerfect = mPoint->first();
   while(currentPerfect)
@@ -455,7 +458,7 @@ void StSsdWafer::doStatPerfect(int nPerfectPoint, scm_ctrl_st *scm_ctrl)
   mPerfectSigma = store/nPerfectPoint;
 }
 
-int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
+int StSsdWafer::doSolvePackage(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl)
 {
   int nSolved = 0;
   StSsdPackage *currentPackage = 0;
@@ -465,7 +468,7 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
     {
       currentKind    = currentPackage->getKind();
       int numMatched = strlen(currentKind)/2;
-      float *Adc     = new float[numMatched];
+      Double_t *Adc     = new Double_t[numMatched];
       for(int i=0;i<numMatched;i++) Adc[i]=(currentPackage->getMatched(i))->getTotAdc();
 // 1 ********************************************************************
       if(!strcmp(currentKind,"1p1n"))//  case (1-1) done in doSolvePerfect 
@@ -2096,26 +2099,26 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
   return nSolved;
 }
 
-int StSsdWafer::convertDigitToAnalog(double PairCreationEnergy)
+int StSsdWafer::convertDigitToAnalog(double pairCreationEnergy)
 {
   StSsdPoint *currentPoint = mPoint->first();
   while(currentPoint)
     {
-      currentPoint->setDe(currentPoint->getDe(0)*PairCreationEnergy,0);
-      currentPoint->setDe(currentPoint->getDe(1)*PairCreationEnergy,1);
+      currentPoint->setDe(currentPoint->getDe(0)*pairCreationEnergy,0);
+      currentPoint->setDe(currentPoint->getDe(1)*pairCreationEnergy,1);
       currentPoint = mPoint->next(currentPoint);
     }
   return 1;
 }
 
 
-int StSsdWafer::convertUFrameToLocal(sdm_geom_par_st *geom_par)
+int StSsdWafer::convertUFrameToLocal(ssdDimensions_st *geom_par)
 {
   StSsdPoint *currentPoint = mPoint->first();
   while(currentPoint)
     {
-      currentPoint->setXl(currentPoint->getPositionU(0)/2.+currentPoint->getPositionU(1)/2.-geom_par[0].L_wafer_act_l+geom_par[0].L_wafer_act_w*tan(geom_par[0].L_stereo_angle),0);
-      currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(geom_par[0].L_stereo_angle)),1);
+      currentPoint->setXl(currentPoint->getPositionU(0)/2.+currentPoint->getPositionU(1)/2.-geom_par[0].waferHalfActLength+geom_par[0].waferHalfActWidth*tan(geom_par[0].stereoAngle),0);
+      currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(geom_par[0].stereoAngle)),1);
       currentPoint = mPoint->next(currentPoint);
     }
   return 1;
@@ -2124,8 +2127,8 @@ int StSsdWafer::convertUFrameToLocal(sdm_geom_par_st *geom_par)
 int StSsdWafer::convertLocalToGlobal()
 {
   StSsdPoint *currentPoint = mPoint->first();
-  float B[3],wD[3],wT[3],wN[3],tempXl[3];
-  float delta = 0;
+  Double_t B[3],wD[3],wT[3],wN[3],tempXl[3];
+  Double_t delta = 0;
   while(currentPoint)
     {
       B[0]=currentPoint->getXl(0)+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
@@ -2170,14 +2173,14 @@ int StSsdWafer::printborder()
 {
   if (mId==7101){
     printf("Wafer = %d \n",mId);
-    float activeXs[4],BXs[4],tempXls[4];
-    float activeYs[4],BYs[4],tempYls[4];
-    float activeZs[4],BZs[4],tempZls[4];
-    float activeXe[4],BXe[4],tempXle[4];
-    float activeYe[4],BYe[4],tempYle[4];
-    float activeZe[4],BZe[4],tempZle[4];
-    float wD[3],wT[3],wN[3];
-    float delta = 0;
+    Double_t activeXs[4],BXs[4],tempXls[4];
+    Double_t activeYs[4],BYs[4],tempYls[4];
+    Double_t activeZs[4],BZs[4],tempZls[4];
+    Double_t activeXe[4],BXe[4],tempXle[4];
+    Double_t activeYe[4],BYe[4],tempYle[4];
+    Double_t activeZe[4],BZe[4],tempZle[4];
+    Double_t wD[3],wT[3],wN[3];
+    Double_t delta = 0;
 
     activeXs[0]=-3.65,activeXs[1]= 3.65,activeXs[2]= 3.65,activeXs[3]=-3.65;
     activeYs[0]= 2.00,activeYs[1]= 2.00,activeYs[2]=-2.00,activeYs[3]=-2.00;
@@ -2233,10 +2236,10 @@ int StSsdWafer::printborder()
 StSsdWafer::StSsdWafer(const StSsdWafer & originalWafer)
 {
   mId         = originalWafer.mId;
-  mD          = new float[3];
-  mT          = new float[3];
-  mN          = new float[3];
-  mX          = new float[3];
+  mD          = new Double_t[3];
+  mT          = new Double_t[3];
+  mN          = new Double_t[3];
+  mX          = new Double_t[3];
 //   mDeadStripP = originalWafer.mDeadStripP;
 //   mDeadStripN = originalWafer.mDeadStripN;
 
@@ -2271,10 +2274,10 @@ StSsdWafer& StSsdWafer::operator=(const StSsdWafer originalWafer)
 }
 
 
-int StSsdWafer::geoMatched(sdm_geom_par_st *geom_par, StSsdCluster *ptr1, StSsdCluster *ptr2)
+int StSsdWafer::geoMatched(ssdDimensions_st *geom_par, StSsdCluster *ptr1, StSsdCluster *ptr2)
 {
   int geomatched = 0;
-  int numStrip = int((2*geom_par[0].L_wafer_act_w*tan(geom_par[0].L_stereo_angle)/geom_par[0].L_strip_pitch)+1);
+  int numStrip = int((2*geom_par[0].waferHalfActWidth*tan(geom_par[0].stereoAngle)/geom_par[0].stripPitch)+1);
   if ( (!ptr1) || (!ptr2) )
     geomatched = 0;
   else if((ptr2->getStripMean() > ( ptr1->getStripMean() - numStrip))
@@ -2283,10 +2286,10 @@ int StSsdWafer::geoMatched(sdm_geom_par_st *geom_par, StSsdCluster *ptr1, StSsdC
   return geomatched;
 }
 
-int StSsdWafer::setMatcheds(sdm_geom_par_st *geom_par, StSsdPoint *Point, StSsdCluster *pMatched, StSsdCluster *nMatched)
+int StSsdWafer::setMatcheds(ssdDimensions_st *geom_par, StSsdPoint *Point, StSsdCluster *pMatched, StSsdCluster *nMatched)
 {// strip(1) -> Upos(0)...
-  Point->setPositionU((pMatched->getStripMean()-1)*geom_par[0].L_strip_pitch,0);
-  Point->setPositionU((nMatched->getStripMean()-1)*geom_par[0].L_strip_pitch,1);
+  Point->setPositionU((pMatched->getStripMean()-1)*geom_par[0].stripPitch,0);
+  Point->setPositionU((nMatched->getStripMean()-1)*geom_par[0].stripPitch,1);
 
   // for evaluation only !!!
   int pHitIndex   = 0;
@@ -2306,9 +2309,9 @@ int StSsdWafer::setMatcheds(sdm_geom_par_st *geom_par, StSsdPoint *Point, StSsdC
   return 1;
 }
 
-float StSsdWafer::matchDistr(scm_ctrl_st *scm_ctrl, float x)
+Double_t StSsdWafer::matchDistr(scm_ctrl_st *scm_ctrl, Double_t x)
 {
-  float mean = scm_ctrl[0].matchMean;
-  float sigm = scm_ctrl[0].matchSigma;
+  Double_t mean = scm_ctrl[0].matchMean;
+  Double_t sigm = scm_ctrl[0].matchSigma;
   return (1/(sigm*sqrt(2*M_PI)))*exp(-0.5*((x-mean)*(x-mean))/(sigm*sigm));
 }

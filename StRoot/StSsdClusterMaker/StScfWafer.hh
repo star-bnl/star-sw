@@ -1,6 +1,9 @@
-// $Id: StScfWafer.hh,v 1.4 2005/06/14 12:20:25 bouchet Exp $
+// $Id: StScfWafer.hh,v 1.5 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfWafer.hh,v $
+// Revision 1.5  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.4  2005/06/14 12:20:25  bouchet
 // cleaner version
 //
@@ -19,7 +22,7 @@
 #include "StScfCluster.hh"
 #include "StScfStrip.hh"
 
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 #include "tables/St_scf_ctrl_Table.h"
 
 class StScfWafer
@@ -34,17 +37,18 @@ class StScfWafer
   StScfListStrip*   getStripP();
   StScfListStrip*   getStripN();
   void              addStrip(StScfStrip *ptr, int iSide);
-  void              setSigmaStrip(int iStrip, int iSide, int iSigma, sls_ctrl_st *sls_ctrl);
+  void              setSigmaStrip(int iStrip, int iSide, int iSigma, slsCtrl_st *slsCtrl);
+  void              setSigmaStrip(int iStrip, int iSide, float iSigma, slsCtrl_st *slsCtrl);
   void              sortCluster();
   void              sortStrip();
-  void              doClusterisation(int *numberOfCluster,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl);
+  void              doClusterisation(int *numberOfCluster,St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl);
 private:
   int               mId;
   StScfListStrip    *mStripP;
   StScfListStrip    *mStripN;
   StScfListCluster  *mClusterP;
   StScfListCluster  *mClusterN;
-  int               doFindCluster(St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl,int iSide);
+  int               doFindCluster(St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl,int iSide);
   int               doClusterSplitting(St_scf_ctrl *my_scf_ctrl,int iSide);
 };
   

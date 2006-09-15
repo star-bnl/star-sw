@@ -1,6 +1,9 @@
-// $Id: St_ssd_Maker.h,v 1.4 2005/05/17 14:16:42 lmartin Exp $
+// $Id: St_ssd_Maker.h,v 1.5 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: St_ssd_Maker.h,v $
+// Revision 1.5  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.4  2005/05/17 14:16:42  lmartin
 // CVS tags added
 //
@@ -46,23 +49,23 @@ class TH1F;
 class TH1S;
 class TH2S;
 
-class St_sdm_geom_par;
+class St_ssdDimensions;
 class St_sdm_calib_db;
 class St_sdm_condition_db;
-class St_svg_geom;
+class St_ssdWafersPosition;
 class StSsdClusterControl;
 class St_scf_ctrl;
-class St_sls_ctrl;
+class St_slsCtrl;
 class St_scm_ctrl;
 
 class St_ssd_Maker : public StMaker {
  private:
-  St_sdm_geom_par      *m_geom_par;//!
+  St_ssdDimensions      *m_geom_par;//!
   St_sdm_calib_db      *m_noise;//!
   St_sdm_condition_db  *m_condition_db;//!
-  St_svg_geom          *m_geom;//!
+  St_ssdWafersPosition          *m_geom;//!
   St_scf_ctrl          *m_scf_ctrl;//!
-  St_sls_ctrl          *m_sls_ctrl;//!
+  St_slsCtrl          *m_slsCtrl;//!
   St_scm_ctrl          *m_scm_ctrl;//!
   void makeScfCtrlHistograms(); //!
   void makeScmCtrlHistograms(); //!
@@ -93,7 +96,7 @@ class St_ssd_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_ssd_Maker.h,v 1.4 2005/05/17 14:16:42 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_ssd_Maker.h,v 1.5 2006/09/15 21:04:50 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_ssd_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -102,6 +105,9 @@ class St_ssd_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_ssd_Maker.h,v $
+ *  Revision 1.5  2006/09/15 21:04:50  bouchet
+ *  noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+ *
  *  Revision 1.4  2005/05/17 14:16:42  lmartin
  *  CVS tags added
  *

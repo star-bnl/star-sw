@@ -1,6 +1,9 @@
-// $Id: StScmBarrel.hh,v 1.5 2005/12/19 10:52:13 kisiel Exp $
+// $Id: StScmBarrel.hh,v 1.6 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScmBarrel.hh,v $
+// Revision 1.6  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.5  2005/12/19 10:52:13  kisiel
 // Properly encode Cluster Size and Mean strip into the hardware information for the SSDHit
 //
@@ -16,10 +19,10 @@
 #ifndef STSCMBARREL_HH
 #define STSCMBARREL_HH
 #include "StScmWafer.hh"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 
 
-class St_svg_geom;
+class St_ssdWafersPosition;
 class St_scf_cluster;
 class St_scm_spt;
 class StSsdHitCollection;
@@ -27,17 +30,17 @@ class StSsdHitCollection;
 class StScmBarrel
 {
  public:
-  StScmBarrel(sdm_geom_par_st  *geom_par);
+  StScmBarrel(ssdDimensions_st  *geom_par);
   ~StScmBarrel();
 
-  void  setSsdParameters(sdm_geom_par_st  *geom_par);
-  void  initWafers(St_svg_geom *geom_class);
+  void  setSsdParameters(ssdDimensions_st  *geom_par);
+  void  initWafers(St_ssdWafersPosition *geom_class);
 //   int   readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db); 
   int   readClusterFromTable(St_scf_cluster *scf_cluster);
   void  sortListCluster();
-  int   doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl);
-  void  convertDigitToAnalog(sls_ctrl_st *sls_ctrl);
-  void  convertUFrameToOther(sdm_geom_par_st *geom_par);
+  int   doClusterMatching(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl);
+  void  convertDigitToAnalog(slsCtrl_st *slsCtrl);
+  void  convertUFrameToOther(ssdDimensions_st *geom_par);
   int   writePointToTable(St_scm_spt *scm_spt);
   int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl , St_scf_cluster *scf_cluster );  
   // OBSOLETE ?

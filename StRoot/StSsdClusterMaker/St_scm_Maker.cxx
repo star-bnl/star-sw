@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scm_maker.cxx
  **************************************************************************
- * $Id: St_scm_Maker.cxx,v 1.13 2005/12/23 14:47:32 fisyak Exp $
+ * $Id: St_scm_Maker.cxx,v 1.14 2006/09/15 21:04:50 bouchet Exp $
  *
  * $Log: St_scm_Maker.cxx,v $
+ * Revision 1.14  2006/09/15 21:04:50  bouchet
+ * noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+ *
  * Revision 1.13  2005/12/23 14:47:32  fisyak
  * DeclareNtuple only if m_Mode != 0
  *
@@ -39,7 +42,7 @@
 #include <stdlib.h>
 #include "St_scm_Maker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -52,8 +55,8 @@
 #include "StScmBarrel.hh"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
-#include "tables/St_sdm_geom_par_Table.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 #include "tables/St_scm_ctrl_Table.h"
 
 
@@ -64,7 +67,7 @@ StMaker(name),
 m_geom_par(0),
 m_condition_db(0),
 m_geom(0),
-m_sls_ctrl(0),
+m_slsCtrl(0),
 m_scm_ctrl(0)
 
 {
@@ -76,24 +79,14 @@ St_scm_Maker::~St_scm_Maker(){
 Int_t St_scm_Maker::Init(){
   
   // 		Create tables
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
+  TDataSet *svtparams = GetInputDB("svt");
+  TDataSetIter       local(svtparams);
   
-  m_geom_par     = (St_sdm_geom_par      *)local("ssd/sdm_geom_par");
   m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_geom         = (St_svg_geom          *)local("ssd/geom");
-  m_sls_ctrl     = (St_sls_ctrl          *)local("ssd/sls_ctrl");
   m_scm_ctrl     = (St_scm_ctrl          *)local("ssd/scm_ctrl");
-
-  if ((!m_geom_par)||(!m_geom)) {
-    gMessMgr->Error() << "No  access to geometry parameters" << endm;
-  }   
   if (!m_condition_db) {
     gMessMgr->Error() << "No  access to condition database" << endm;
   }   
-  if ((!m_sls_ctrl)||(!m_sls_ctrl)) {
-    gMessMgr->Error() << "No  access to control parameters" << endm;
-  } 
   if (m_Mode) {
 // 		Create SCM histograms
 
@@ -124,7 +117,30 @@ Int_t St_scm_Maker::Init(){
   DeclareNtuple();
   }
   return StMaker::Init();
-}//_____________________________________________________________________________
+}
+//_____________________________________________________________________________
+Int_t  St_scm_Maker::InitRun(Int_t runNumber) {
+// 		geometry parameters
+  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
+  if (! ssdparams) {
+    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
+    return kStErr;
+  }
+  TDataSetIter    local(ssdparams);
+  m_slsCtrl        = (St_slsCtrl           *)local("slsCtrl");
+  m_geom_par    = (St_ssdDimensions     *)local("ssdDimensions");
+  m_geom        = (St_ssdWafersPosition *)local("ssdWafersPosition");
+  if (!m_slsCtrl) {
+    gMessMgr->Error() << "No  access to control parameters" << endm;
+    return kStErr;
+  }   
+  if ((!m_geom_par)||(!m_geom)) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+    return kStErr;
+  }   
+  return kStOK;
+}
+//_____________________________________________________________________________
 void St_scm_Maker::DeclareNtuple()
 {
   pFile = new TFile("Hits.root","RECREATE");
@@ -161,8 +177,8 @@ Int_t St_scm_Maker::Make()
     }
   else              
     mSsdHitColl = 0;
-  sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
-  sls_ctrl_st      *sls_ctrl = m_sls_ctrl->GetTable();
+  ssdDimensions_st  *geom_par = m_geom_par->GetTable();
+  slsCtrl_st      *slsCtrl = m_slsCtrl->GetTable();
   scm_ctrl_st      *scm_ctrl = m_scm_ctrl->GetTable();
     
   cout<<"#################################################"<<endl;
@@ -178,7 +194,7 @@ Int_t St_scm_Maker::Make()
   mySsd->sortListCluster();
   int nPackage = mySsd->doClusterMatching(geom_par, scm_ctrl);
   cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
-  mySsd->convertDigitToAnalog(sls_ctrl);
+  mySsd->convertDigitToAnalog(slsCtrl);
   mySsd->convertUFrameToOther(geom_par);
     //  int nSptWritten = mySsd->writePointToTable(scm_spt);
   //int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
@@ -204,7 +220,7 @@ Int_t St_scm_Maker::Make()
      return kStWarn;
    }
 
-   if (m_Mode) makeScmCtrlHistograms();
+   if (m_Mode)makeScmCtrlHistograms();
 
   return kStOK;
 }
@@ -216,15 +232,15 @@ void St_scm_Maker::makeScmCtrlHistograms()
   int iLad=0;
   int i=0;
   int conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
-  St_DataSetIter scm_iter(m_DataSet);
+  TDataSetIter scm_iter(m_DataSet);
   St_scm_spt *scm_spt = 0;
   scm_spt = (St_scm_spt *) scm_iter.Find("scm_spt"); 
 
 // 		Fill histograms 
   if (scm_spt->GetNRows()){
     scm_spt_st *dSpt = scm_spt->GetTable();
-    sls_ctrl_st *sls_ctrl_t = m_sls_ctrl->GetTable();
-    Float_t convMeVToAdc = (int)pow(2.0,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
+    slsCtrl_st *slsCtrl_t = m_slsCtrl->GetTable();
+    Float_t convMeVToAdc = (int)pow(2.0,slsCtrl_t[0].nbitEncoding)/(slsCtrl_t[0].pairCreationEnergy*slsCtrl_t[0].adcDynamic*slsCtrl_t[0].nElectronInAMip);
     for (Int_t iScm = 0; iScm < scm_spt->GetNRows(); iScm++, dSpt++)
       {
 	idWaf=dSpt[i].id_wafer;

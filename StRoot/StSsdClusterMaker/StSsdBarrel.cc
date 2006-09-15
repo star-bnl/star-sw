@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.3 2005/06/13 16:01:00 reinnart Exp $
+// $Id: StSsdBarrel.cc,v 1.4 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.4  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.3  2005/06/13 16:01:00  reinnart
 // Jonathan and Joerg changed the update function
 //
@@ -8,18 +11,18 @@
 // CVS tags added
 //
 #include "StSsdBarrel.hh"
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sdm_calib_db_Table.h"
 
-StSsdBarrel::StSsdBarrel(sdm_geom_par_st  *geom_par)
+StSsdBarrel::StSsdBarrel(ssdDimensions_st  *geom_par)
 {
-  mSsdLayer        = geom_par[0].N_layer; // all layers : 1->7
-  mNLadder         = geom_par[0].N_ladder;
-  mNWaferPerLadder = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide   = geom_par[0].N_strip_per_side;
+  mSsdLayer        = 7; // all layers : 1->7
+  mNLadder         = 20;
+  mNWaferPerLadder = geom_par[0].wafersPerLadder;
+  mNStripPerSide   = geom_par[0].stripPerSide;
 
   mLadders = new StSsdLadder*[mNLadder];
   for (int iLad=0; iLad < mNLadder; iLad++)
@@ -32,7 +35,7 @@ StSsdBarrel::~StSsdBarrel()
       delete mLadders[iLad];
 }
 
-void StSsdBarrel::initLadders(St_svg_geom *geom_class) // checked !
+void StSsdBarrel::initLadders(St_ssdWafersPosition *geom_class) // checked !
 {
   for (int iLad = 0; iLad < mNLadder; iLad++)
     {
@@ -128,7 +131,7 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
   return NumberOfStrip;
 }
 
-int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sls_ctrl)
+int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, slsCtrl_st *slsCtrl)
 {
   sdm_calib_db_st *noise = spa_noise->GetTable();
   
@@ -145,7 +148,7 @@ int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sl
       iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
       iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
       iSide   = (noise[i].id_strip - nStrip*100000 - idWaf)/10000;
-      mLadders[iLad]->mWafers[iWaf]->setSigmaStrip(nStrip, iSide, noise[i].n_sigma, sls_ctrl);
+      mLadders[iLad]->mWafers[iWaf]->setSigmaStrip(nStrip, iSide, noise[i].n_sigma, slsCtrl);
     }
 
   NumberOfNoise = spa_noise->GetNRows();
@@ -309,7 +312,7 @@ int StSsdBarrel::writePointToTable(St_scm_spt *scm_spt)
   return currRecord;
 }
 
-void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl,int parameter)
+void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, slsCtrl_st *slsCtrl, scf_ctrl_st *scf_ctrl,int parameter)
 {
   int *wafNumbOfCluster = new int[2];
   wafNumbOfCluster[0] = 0;
@@ -318,7 +321,7 @@ void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, sls_ctrl_st *sl
   for (int iLad = 0 ; iLad < mNLadder; iLad++)
     for (int iWaf = 0 ; iWaf < mNWaferPerLadder; iWaf++)
       {
-	mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, sls_ctrl, scf_ctrl);
+	mLadders[iLad]->mWafers[iWaf]->doClusterisation(wafNumbOfCluster, slsCtrl, scf_ctrl);
 	barrelNumbOfCluster[0] += wafNumbOfCluster[0];
 	barrelNumbOfCluster[1] += wafNumbOfCluster[1];
       }
@@ -326,7 +329,7 @@ void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, sls_ctrl_st *sl
 }
 
 
-int StSsdBarrel::doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
+int StSsdBarrel::doClusterMatching(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl)
 {
   int NumberOfPackage = 0;
   int nSolved = 0;
@@ -344,21 +347,21 @@ int StSsdBarrel::doClusterMatching(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_c
   return NumberOfPackage;
 }
 
-void StSsdBarrel::convertDigitToAnalog(sls_ctrl_st *sls_ctrl)
+void StSsdBarrel::convertDigitToAnalog(slsCtrl_st *slsCtrl)
 {
-  long   NElectronInAMip    = sls_ctrl[0].NElectronInAMip;
-  long   ADCDynamic         = sls_ctrl[0].ADCDynamic;
-  int    NBitEncoding       = sls_ctrl[0].NBitEncoding;
-  double PairCreationEnergy = sls_ctrl[0].PairCreationEnergy;
+  long   nElectronInAMip    = slsCtrl[0].nElectronInAMip;
+  long   adcDynamic         = slsCtrl[0].adcDynamic;
+  int    nbitEncoding       = slsCtrl[0].nbitEncoding;
+  double pairCreationEnergy = slsCtrl[0].pairCreationEnergy;
 
-  const int NAdcChannel     = (int)pow(2.0,NBitEncoding);
-  const double convFactor   = (PairCreationEnergy*ADCDynamic*NElectronInAMip)/NAdcChannel;
+  const int NAdcChannel     = (int)pow(2.0,nbitEncoding);
+  const double convFactor   = (pairCreationEnergy*adcDynamic*nElectronInAMip)/NAdcChannel;
   for (int iLad = 0; iLad < mNLadder; iLad++)
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       mLadders[iLad]->mWafers[iWaf]->convertDigitToAnalog(convFactor);
 }
 
-void StSsdBarrel::convertUFrameToOther(sdm_geom_par_st *geom_par)
+void StSsdBarrel::convertUFrameToOther(ssdDimensions_st *geom_par)
 {
   for (int iLad = 0; iLad < mNLadder; iLad++)
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)

@@ -1,6 +1,9 @@
-// $Id: StSsdStripList.hh,v 1.2 2005/05/17 14:16:40 lmartin Exp $
+// $Id: StSsdStripList.hh,v 1.3 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: StSsdStripList.hh,v $
+// Revision 1.3  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:40  lmartin
 // CVS tags added
 //
@@ -10,7 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "StSsdStrip.hh"
-#include "sls_ctrl.h"
+#include "slsCtrl.h"
 
 class StSsdStripList
 {
@@ -26,7 +29,7 @@ class StSsdStripList
   int        addNewStrip(StSsdStrip *ptr);
   void       exchangeTwoStrips(StSsdStrip *ptr1, StSsdStrip *ptr2);
   void       sortStrip();
-  void       setSigma(int iStrip, int iSigma, sls_ctrl_st *sls_ctrl);
+  void       setSigma(int iStrip, int iSigma, slsCtrl_st *slsCtrl);
   int        removeStrip(StSsdStrip *ptr);
   int        getSize();
   int*       getListAdc(int idStrip, int SizeCluster);

@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_ssd_Maker.cxx
  **************************************************************************
- * $Id: St_ssd_Maker.cxx,v 1.4 2005/06/13 16:01:01 reinnart Exp $
+ * $Id: St_ssd_Maker.cxx,v 1.5 2006/09/15 21:04:50 bouchet Exp $
  *
  * $Log: St_ssd_Maker.cxx,v $
+ * Revision 1.5  2006/09/15 21:04:50  bouchet
+ * noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+ *
  * Revision 1.4  2005/06/13 16:01:01  reinnart
  * Jonathan and Joerg changed the update function
  *
@@ -24,7 +27,7 @@
 #include <stdlib.h>
 #include "St_ssd_Maker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -35,9 +38,9 @@
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 
-#include "tables/St_sdm_geom_par_Table.h" //needed to call StTable->GetTable()
+#include "tables/St_ssdDimensions_Table.h" //needed to call StTable->GetTable()
 #include "StSsdClusterControl.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 #include "tables/St_scf_ctrl_Table.h"
 #include "tables/St_scm_ctrl_Table.h"
 
@@ -50,7 +53,7 @@ m_noise(0),
 m_condition_db(0),
 m_geom(0),
 m_scf_ctrl(0),
-m_sls_ctrl(0),
+m_slsCtrl(0),
 m_scm_ctrl(0)
 
 {
@@ -63,8 +66,8 @@ Int_t St_ssd_Maker::Init(){
   if (Debug())  gMessMgr->Debug() << "In St_ssd_Maker::Make() ... "
                                << GetName() << endm;
   // 		Create tables
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
+  TDataSet *svtparams = GetInputDB("svt");
+  TDataSetIter       local(svtparams);
 
   // Replace tables for control parameters
   StSsdClusterControl *control = new StSsdClusterControl();
@@ -80,12 +83,12 @@ Int_t St_ssd_Maker::Init(){
   control->printParameters();
   // End of Setting control parameters
 
-  m_geom_par     = (St_sdm_geom_par      *)local("ssd/sdm_geom_par");
+  m_geom_par     = (St_ssdDimensions      *)local("ssd/ssdDimensions");
   m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_geom         = (St_svg_geom          *)local("ssd/geom");
+  m_geom         = (St_ssdWafersPosition          *)local("ssd/geom");
   m_noise        = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
   m_scf_ctrl     = (St_scf_ctrl          *)local("ssd/scf_ctrl");
-  m_sls_ctrl     = (St_sls_ctrl          *)local("ssd/sls_ctrl");
+  m_slsCtrl     = (St_slsCtrl          *)local("ssd/slsCtrl");
   m_scm_ctrl     = (St_scm_ctrl          *)local("ssd/scm_ctrl");
 
   if ((!m_geom_par)||(!m_geom)) {
@@ -97,7 +100,7 @@ Int_t St_ssd_Maker::Init(){
   if (!m_noise) {
     gMessMgr->Error() << "No  access to noise condition" << endm;
   }
-  if ((!m_sls_ctrl)||(!m_scf_ctrl)||(!m_scm_ctrl)) {
+  if ((!m_slsCtrl)||(!m_scf_ctrl)||(!m_scm_ctrl)) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
 
@@ -146,8 +149,8 @@ Int_t St_ssd_Maker::Make()
   St_scf_cluster *scf_cluster = new St_scf_cluster("scf_cluster",10000);
   m_DataSet->Add(scf_cluster);
   
-  sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
-  sls_ctrl_st      *sls_ctrl = m_sls_ctrl->GetTable();
+  ssdDimensions_st  *geom_par = m_geom_par->GetTable();
+  slsCtrl_st      *slsCtrl = m_slsCtrl->GetTable();
   scf_ctrl_st      *scf_ctrl = m_scf_ctrl->GetTable();
   
   cout<<"#################################################"<<endl;
@@ -157,13 +160,13 @@ Int_t St_ssd_Maker::Make()
   int stripTableSize = barrel->readStripFromTable(spa_strip);
   cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
   barrel->sortListStrip();
-  int noiseTableSize = barrel->readNoiseFromTable(m_noise,sls_ctrl);
+  int noiseTableSize = barrel->readNoiseFromTable(m_noise,slsCtrl);
   cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
   int nClusterPerSide[2];
   nClusterPerSide[0] = 0;
   nClusterPerSide[1] = 0;
   int parameter = 5 ;
-  barrel->doSideClusterisation(nClusterPerSide, sls_ctrl,scf_ctrl,parameter);
+  barrel->doSideClusterisation(nClusterPerSide, slsCtrl,scf_ctrl,parameter);
   cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
   cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
   barrel->sortListCluster();
@@ -184,7 +187,7 @@ Int_t St_ssd_Maker::Make()
   // Next there is a change of scf_cluster to scm_cluster
   // St_scf_cluster *scf_cluster = (St_scf_cluster *)GetDataSet("scf_cluster/.data/scf_cluster");
   // To:
-  St_DataSetIter scm_iter(m_DataSet);
+  TDataSetIter scm_iter(m_DataSet);
   St_scf_cluster *scm_cluster = 0;
   scm_cluster = (St_scf_cluster *) scm_iter.Find("scf_cluster"); 
   // Then no modification except the name.
@@ -207,7 +210,7 @@ Int_t St_ssd_Maker::Make()
   mySsd->sortListCluster();
   int nPackage = mySsd->doClusterMatching(geom_par, scm_ctrl);
   cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
-  mySsd->convertDigitToAnalog(sls_ctrl);
+  mySsd->convertDigitToAnalog(slsCtrl);
   mySsd->convertUFrameToOther(geom_par);
   int nSptWritten = mySsd->writePointToTable(scm_spt);
   cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
@@ -232,7 +235,7 @@ Int_t St_ssd_Maker::Make()
 //_____________________________________________________________________________
 void St_ssd_Maker::makeScfCtrlHistograms()
 {
-  St_DataSetIter scf_iter(m_DataSet);
+  TDataSetIter scf_iter(m_DataSet);
   St_scf_cluster *scf_cluster = 0;
   scf_cluster = (St_scf_cluster *) scf_iter.Find("scf_cluster"); 
 
@@ -240,8 +243,8 @@ void St_ssd_Maker::makeScfCtrlHistograms()
   if (scf_cluster->GetNRows()){
     Int_t clustSide   = 0;  // pside = 0 et nside = 1 
     scf_cluster_st *dClus = scf_cluster->GetTable();
-    sls_ctrl_st *sls_ctrl_t = m_sls_ctrl->GetTable();
-    Float_t convAdcToE = (sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip)/(pow(2.0,sls_ctrl_t[0].NBitEncoding));
+    slsCtrl_st *slsCtrl_t = m_slsCtrl->GetTable();
+    Float_t convAdcToE = (slsCtrl_t[0].adcDynamic*slsCtrl_t[0].nElectronInAMip)/(pow(2.0,slsCtrl_t[0].nbitEncoding));
     for (Int_t iScf = 0; iScf < scf_cluster->GetNRows(); iScf++, dClus++)
       {
 	clustSide = ((dClus->id_cluster/10000)-(dClus->id_cluster/100000)*10);
@@ -266,15 +269,15 @@ void St_ssd_Maker::makeScfCtrlHistograms()
 //_____________________________________________________________________________
 void St_ssd_Maker::makeScmCtrlHistograms()
 {
-  St_DataSetIter scm_iter(m_DataSet);
+  TDataSetIter scm_iter(m_DataSet);
   St_scm_spt *scm_spt = 0;
   scm_spt = (St_scm_spt *) scm_iter.Find("scm_spt"); 
 
 // 		Fill histograms 
   if (scm_spt->GetNRows()){
     scm_spt_st *dSpt = scm_spt->GetTable();
-    sls_ctrl_st *sls_ctrl_t = m_sls_ctrl->GetTable();
-    Float_t convMeVToAdc = (int)pow(2.0,sls_ctrl_t[0].NBitEncoding)/(sls_ctrl_t[0].PairCreationEnergy*sls_ctrl_t[0].ADCDynamic*sls_ctrl_t[0].NElectronInAMip);
+    slsCtrl_st *slsCtrl_t = m_slsCtrl->GetTable();
+    Float_t convMeVToAdc = (int)pow(2.0,slsCtrl_t[0].nbitEncoding)/(slsCtrl_t[0].pairCreationEnergy*slsCtrl_t[0].adcDynamic*slsCtrl_t[0].nElectronInAMip);
     for (Int_t iScm = 0; iScm < scm_spt->GetNRows(); iScm++, dSpt++)
       {
 	if (dSpt->id_match == 11)// case 11  		    

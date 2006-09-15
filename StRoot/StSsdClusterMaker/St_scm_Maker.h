@@ -1,6 +1,9 @@
-// $Id: St_scm_Maker.h,v 1.14 2005/12/05 23:33:43 fisyak Exp $
+// $Id: St_scm_Maker.h,v 1.15 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: St_scm_Maker.h,v $
+// Revision 1.15  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.14  2005/12/05 23:33:43  fisyak
 // Fix bug 612, unnecessary request for StTpcHitCollection
 //
@@ -46,10 +49,10 @@ class TH2S;
 class TH2F;
 class TNtuple;
 
-class St_sdm_geom_par;
+class St_ssdDimensions;
 class St_sdm_condition_db;
-class St_svg_geom;
-class St_sls_ctrl;
+class St_ssdWafersPosition;
+class St_slsCtrl;
 class St_scm_ctrl;
 
 class StEvent;
@@ -62,10 +65,10 @@ class St_scm_spt;
 
 class St_scm_Maker : public StMaker {
  private:
-  St_sdm_geom_par      *m_geom_par;//!
+  St_ssdDimensions      *m_geom_par;//!
   St_sdm_condition_db  *m_condition_db;//!
-  St_svg_geom          *m_geom;//!
-  St_sls_ctrl          *m_sls_ctrl;//!
+  St_ssdWafersPosition          *m_geom;//!
+  St_slsCtrl          *m_slsCtrl;//!
   St_scm_ctrl          *m_scm_ctrl;//!
 
   float hitNtuple[9]; 
@@ -96,12 +99,13 @@ class St_scm_Maker : public StMaker {
                   St_scm_Maker(const char *name="scm_spt");
    virtual       ~St_scm_Maker();
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.14 2005/12/05 23:33:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.15 2006/09/15 21:04:50 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
@@ -111,6 +115,9 @@ class St_scm_Maker : public StMaker {
 /***************************************************************************
  *
  * $Log: St_scm_Maker.h,v $
+ * Revision 1.15  2006/09/15 21:04:50  bouchet
+ * noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+ *
  * Revision 1.14  2005/12/05 23:33:43  fisyak
  * Fix bug 612, unnecessary request for StTpcHitCollection
  *
