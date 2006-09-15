@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.126 2006/07/07 17:41:28 potekhin Exp $
+* $Id: geometry.g,v 1.127 2006/09/15 19:56:31 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.127  2006/09/15 19:56:31  potekhin
+* Due to ongoing development, we need to create a new tag,
+* UPGR04, and steering logic for the new detector HPDT
+*
 * Revision 1.126  2006/07/07 17:41:28  potekhin
 * Fixing a very old and inconsequential typo in the
 * assignment of a variable for the "minimum Si layer"
@@ -583,7 +587,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad,mutd,igtd
+              shld,quad,mutd,igtd,hpdt
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -613,7 +617,7 @@
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
-              ShldConfig, QuadConfig, MutdConfig
+              ShldConfig, QuadConfig, MutdConfig, HpdtConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -624,6 +628,7 @@
 *             PipeConfig, ! Beam Pipe
 *             CalbConfig, ! Barrel EMC
 *             PixlConfig, ! Inner Pixel detector
+*             HpdtConfig, ! Heavy Flavor Tracker
 *             IstbConfig, ! Integrated Silicon Tracker
 *             GembConfig, ! Inner GEM barrel tracker 
 *             FstdConfig, ! Forward Silicon tracker Disks
@@ -682,6 +687,7 @@ replace[;ON#{#;] with [
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
    FtpcConfig  = 0 ! 0  version, 1=gas correction
+   HpdtConfig  = 0 ! 0=no, >1=version
    IstbConfig  = 0 ! 0=no, >1=version
    GembConfig  = 0 ! 0=no, >1=version
    MutdConfig  = 0 ! same
@@ -706,7 +712,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -2216,6 +2222,46 @@ If LL>1
 * the forward GEM disks
                    igtd=on;
                 }
+*************************************************************************************************************
+  on UPGR04   { New Tracking: HPD
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+*                    -- Obsoleted: CorrNum = 4;
+                     SvshConfig = 1; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 23;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   hpdt=on;        " put the detector in"
+                   HpdtConfig=1;   " base version"
+                }
 
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
@@ -2387,6 +2433,7 @@ If LL>1
    write(*,*) '                 FstdConfig: ',FstdConfig
    write(*,*) '                 FtpcConfig: ',FtpcConfig
    write(*,*) '                 FtroConfig: ',FtroConfig
+   write(*,*) '                 HpdtConfig: ',HpdtConfig
    write(*,*) '                 IstbConfig: ',IstbConfig
    write(*,*) '                 MutdConfig: ',MutdConfig
    write(*,*) '                 GembConfig: ',GembConfig
@@ -2635,6 +2682,7 @@ If LL>1
    if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
    if (igtd)                   Call igtdgeo
 
+   if (hpdt.and.HpdtConfig>0)  Call hpdtgeo
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
