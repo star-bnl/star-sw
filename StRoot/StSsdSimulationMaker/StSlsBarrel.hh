@@ -1,6 +1,9 @@
-// $Id: StSlsBarrel.hh,v 1.3 2005/05/13 09:28:24 lmartin Exp $
+// $Id: StSlsBarrel.hh,v 1.4 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSlsBarrel.hh,v $
+// Revision 1.4  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.3  2005/05/13 09:28:24  lmartin
 // geant information read from g2t_ssd_hit table
 //
@@ -13,10 +16,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include "StSlsWafer.hh"
-#include "tables/St_sdm_geom_par_Table.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 
-class St_svg_geom;
+class St_ssdWafersPosition;
 class St_g2t_svt_hit;
 class St_g2t_ssd_hit;
 class St_sls_strip;  
@@ -24,18 +27,18 @@ class St_sls_strip;
 class StSlsBarrel
 {
  public:
-  StSlsBarrel(sdm_geom_par_st  *geom_par);
+  StSlsBarrel(ssdDimensions_st  *geom_par);
   ~StSlsBarrel();
 
-  void setSsdParameters(sdm_geom_par_st  *geom_par);
-  void initWafers(St_svg_geom *geom_class);
+  void setSsdParameters(ssdDimensions_st  *geom_par);
+  void initWafers(St_ssdWafersPosition *geom_class);
   int  readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit);
   int  readPointFromTable(St_g2t_svt_hit *g2t_svt_hit);
   void convertGlobalFrameToOther();
   int  removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit);
   int  removeInactiveHitInTable(St_g2t_svt_hit *g2t_svt_hit);
   void renumHitAfterRemove();
-  void chargeSharingOverStrip(sls_ctrl_st  *ctrl);
+  void chargeSharingOverStrip(slsCtrl_st  *ctrl);
   int  writeStripToTable(St_sls_strip *sls_strip);
 
 

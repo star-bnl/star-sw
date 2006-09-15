@@ -1,6 +1,9 @@
-// $Id: StSpaBarrel.cc,v 1.3 2005/11/22 03:56:44 bouchet Exp $
+// $Id: StSpaBarrel.cc,v 1.4 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSpaBarrel.cc,v $
+// Revision 1.4  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.3  2005/11/22 03:56:44  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -15,7 +18,9 @@
 #include "tables/St_sdm_condition_db_Table.h"
 #include "tables/St_spa_strip_Table.h"
 
-StSpaBarrel::StSpaBarrel(sdm_geom_par_st  *geom_par, sdm_calib_par_st *cal_par)
+#include "tables/St_ssdStripCalib_Table.h"
+
+StSpaBarrel::StSpaBarrel(ssdDimensions_st  *geom_par, sdm_calib_par_st *cal_par)
 {
   double       lSigma = 1.;
   double       lMean  = 0.;
@@ -43,12 +48,12 @@ StSpaBarrel::~StSpaBarrel()
     { delete mWafers[i]; }
 }
 
-void StSpaBarrel::setSpaParameters(sdm_geom_par_st  *geom_par)
+void StSpaBarrel::setSpaParameters(ssdDimensions_st  *geom_par)
 {
-  mSsdLayer        = geom_par[0].N_layer; // all layers : 1->7
-  mNLadder         = geom_par[0].N_ladder;
-  mNWaferPerLadder = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide   = geom_par[0].N_strip_per_side;
+  mSsdLayer        = 7; // all layers : 1->7
+  mNLadder         = 20;
+  mNWaferPerLadder = geom_par[0].wafersPerLadder;
+  mNStripPerSide   = geom_par[0].stripPerSide;
 }
 
 int StSpaBarrel::idWaferToWaferNumb(int idWafer)
@@ -94,27 +99,36 @@ int StSpaBarrel::readStripFromTable(St_sls_strip *sls_strip)
   return sls_strip->GetNRows(); 
 }
 
-int  StSpaBarrel::readNoiseFromTable(St_sdm_calib_db *sdm_noise)
+int  StSpaBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib)
 {
-  sdm_calib_db_st *noise = sdm_noise->GetTable();
-
+  ssdStripCalib_st *noise = strip_calib->GetTable();
+  int NAdcChannel          = (int)pow(2.0,10.0*1.0);
+  int nElectronInAMip      = 22500;
+  int adcDynamic           = 20;
+  const float   AdctoE     =  (adcDynamic*nElectronInAMip)/(float)(NAdcChannel);
+  printf("AdctoE = %f\n",AdctoE);
+  
   int idWaf  = 0;
   int nStrip = 0;
   int iSide  = 0;
-  int i = 0;
-  for (i = 0 ; i < sdm_noise->GetNRows(); i++)
+  int i      = 0;
+  int ent    = 0 ;
+  for (i = 0 ; i < strip_calib->GetNRows(); i++)
     {
-      nStrip  = (int)(noise[i].id_strip/100000.);
-      idWaf   = noise[i].id_strip-10000*((int)(noise[i].id_strip/10000.));
-      iSide   = (noise[i].id_strip - nStrip*100000 - idWaf)/10000;
-      
-      StSpaNoise *newStrip = new StSpaNoise(nStrip ,noise[i].n_pedestal, noise[i].n_sigma);
-
-      newStrip->setNoiseValue((int)((this->mGaussDistribution)->getValue()*(double)newStrip->getSigma()));
-      
-      mWafers[idWaferToWaferNumb(idWaf)]->addNoise(newStrip, iSide);
+      if (noise[i].id>0 && noise[i].id<=76818620) {
+	nStrip  = (int)(noise[i].id/100000.);
+	idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+	int my_noise    = (int)((noise[i].rms*AdctoE)/16);
+	int my_pedestal = (int)(noise[i].pedestals*AdctoE); 
+	//if((idWaf==7101)&&(iSide==0))printf("id=%d stripId=%d  side=%d  waferId=%d  pedestal=%d  noise=%d\n",noise[i].id,nStrip,iSide,idWaf,noise[i].pedestals,noise[i].rms);
+	StSpaNoise *newStrip = new StSpaNoise(nStrip ,(int)(noise[i].pedestals*AdctoE),(int)((noise[i].rms*AdctoE)/16.));
+	mWafers[idWaferToWaferNumb(idWaf)]->addNoise(newStrip,iSide);
+	ent++;
+      }
     }
-  return sdm_noise->GetNRows();
+  printf("Entries = %d\n",ent);
+  return ent;
 }
 
 int  StSpaBarrel::readConditionDbFromTable(St_sdm_condition_db *sdm_condition)
@@ -249,26 +263,26 @@ int  StSpaBarrel::writeStripToTable(St_spa_strip *spa_strip,St_sls_strip *sls_st
   return currRecord;
 }
 
-void  StSpaBarrel::addNoiseToStrip(sls_ctrl_st *ctrl)
+void  StSpaBarrel::addNoiseToStrip(slsCtrl_st *ctrl)
 {
   int iWaf = 0;
   for (iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
     {
       mWafers[iWaf]->sortNoise();
       mWafers[iWaf]->sortStrip();
-      mWafers[iWaf]->addNoiseToStripSignal(ctrl[0].NElectronInAMip,ctrl[0].A128Dynamic);
+      mWafers[iWaf]->addNoiseToStripSignal(ctrl[0].nElectronInAMip,ctrl[0].a128Dynamic);
     }
 }
 
-void  StSpaBarrel::doDaqSimulation(sls_ctrl_st *ctrl)
+void  StSpaBarrel::doDaqSimulation(slsCtrl_st *ctrl)
 {
   int iWaf = 0;
   for (iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
     {
-      mWafers[iWaf]->convertAnalogToDigit(ctrl[0].NElectronInAMip,
-					  ctrl[0].ADCDynamic,
-					  ctrl[0].NBitEncoding,
-					  ctrl[0].DAQCutValue);
+      mWafers[iWaf]->convertAnalogToDigit(ctrl[0].nElectronInAMip,
+					  ctrl[0].adcDynamic,
+					  ctrl[0].nbitEncoding,
+					  ctrl[0].daqCutValue);
       mWafers[iWaf]->pedestalSubstraction();
       mWafers[iWaf]->zeroSubstraction();
       mWafers[iWaf]->updateListStrip();

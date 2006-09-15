@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.hh,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+// $Id: StSpaListNoise.hh,v 1.3 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSpaListNoise.hh,v $
+// Revision 1.3  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.2  2005/05/13 08:39:32  lmartin
 // CVS tags added
 //
@@ -30,12 +33,12 @@ class StSpaListNoise
   int             removeNoise(StSpaNoise *ptr);
   int             getSize();
   void            addSignal(StSpaListStrip *ptr,
-			    long NElectronInAMip,long A128Dynamic);
+			    long nElectronInAMip,long a128Dynamic);
   void            substractPedestal();
-  void            convertAnalogToDigit(long NElectronInAMip,long ADCDynamic,
-				       long NBitEncoding,float DAQCutValue);
+  void            convertAnalogToDigit(long nElectronInAMip,long adcDynamic,
+				       long nbitEncoding,float daqCutValue);
   void            zeroSubstraction();
-
+  
 private:
   int         mListLength;
   StSpaNoise *mFirstS;

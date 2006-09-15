@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.7 2005/11/22 03:56:46 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.8 2006/09/15 21:09:52 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.8  2006/09/15 21:09:52  bouchet
+ * read the noise and pedestal from ssdStripCalib
+ *
  * Revision 1.7  2005/11/22 03:56:46  bouchet
  * id_mctrack is using for setIdTruth
  *
@@ -22,7 +25,7 @@
 #include <stdlib.h>
 #include "St_spa_Maker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 //#include "svt/St_spa_am_Module.h"
 #include "TFile.h"
 #include "StMessMgr.h"
@@ -30,11 +33,11 @@
 #include "StSpaBarrel.hh"
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_sls_strip_Table.h"
-#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
 #include "tables/St_sdm_calib_par_Table.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 #include "tables/St_sdm_calib_db_Table.h"
-
+#include "tables/St_ssdStripCalib_Table.h"
 ClassImp(St_spa_Maker)
   
 //_____________________________________________________________________________
@@ -56,29 +59,49 @@ St_spa_Maker::~St_spa_Maker(){
 Int_t St_spa_Maker::Init(){
   
   // 		Create tables
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
+  TDataSet *ssdparams = GetInputDB("svt/ssd");
+  TDataSetIter       local(ssdparams);
   
-  m_cond_par  = (St_sdm_condition_par *)local("ssd/sdm_condition_par");
-  m_geom_par  = (St_sdm_geom_par      *)local("ssd/sdm_geom_par");
-  m_cal_par   = (St_sdm_calib_par     *)local("ssd/sdm_calib_par");
-  m_noise     = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
-  m_condition = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_ctrl      = (St_sls_ctrl          *)local("ssd/sls_ctrl");
-
-  if (!m_geom_par) {
-    gMessMgr->Error() << "No  access to geometry parameters" << endm;
-  }   
+  m_cond_par  = (St_sdm_condition_par *)local("sdm_condition_par");
+  m_cal_par   = (St_sdm_calib_par     *)local("sdm_calib_par");
+  //m_noise     = (St_sdm_calib_db      *)local("sdm_calib_db");
+  m_condition = (St_sdm_condition_db  *)local("sdm_condition_db");
+  
   if (!m_cond_par) {
     gMessMgr->Error() << "No  access to condition parameters" << endm;
   }   
   if (!m_cal_par) {
     gMessMgr->Error() << "No  access to calibration parameters" << endm;
   }   
+  return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t St_spa_Maker::InitRun(Int_t runnumber){
+  TDataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
+  if (!CalibDbConnector) {
+    gMessMgr->Error()<<"InitRun: Can not found the calibration db.."<<endm;
+    return kStFATAL;
+  }
+  else{
+    m_noise = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
+    if (! m_noise) return kStFATAL;
+  }
+  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
+  if (! ssdparams) {
+    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
+    return kStErr;
+  }
+  TDataSetIter    local(ssdparams);
+  m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
   if (!m_ctrl) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
-  return StMaker::Init();
+  m_geom_par    = (St_ssdDimensions     *)local("ssdDimensions");
+  if (!m_geom_par) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+  }   
+
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_spa_Maker::Make()
@@ -93,9 +116,9 @@ Int_t St_spa_Maker::Make()
   St_spa_strip *spa_strip = new St_spa_strip("spa_strip",40000);
   m_DataSet->Add(spa_strip);
   
-  sdm_geom_par_st  *geom_par =  m_geom_par->GetTable();
+  ssdDimensions_st  *geom_par =  m_geom_par->GetTable();
   sdm_calib_par_st *cal_par  =  m_cal_par->GetTable();
-  sls_ctrl_st      *ctrl     =  m_ctrl->GetTable(); 
+  slsCtrl_st      *ctrl     =  m_ctrl->GetTable(); 
 
   cout<<"#################################################"<<endl;
   cout<<"####    START OF SSD PEDESTAL ANNIHILATOR    ####"<<endl;

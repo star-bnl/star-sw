@@ -20,25 +20,26 @@
 #include "StMaker.h"
 #endif
 
-class St_sdm_geom_par;
-class St_svg_geom;
-class St_sls_ctrl;
+class St_ssdDimensions;
+class St_ssdWafersPosition;
+class St_slsCtrl;
 
 class St_sls_Maker : public StMaker {
  private:
-  St_sdm_geom_par *m_geom_par;//!
-  St_svg_geom     *m_geom;//!
-  St_sls_ctrl     *m_ctrl;//!
+  St_ssdDimensions *m_geom_par;//!
+  St_ssdWafersPosition     *m_geom;//!
+  St_slsCtrl     *m_ctrl;//!
  public: 
 	          St_sls_Maker(const char *name="sls_strip");
    virtual       ~St_sls_Maker();
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.7 2005/05/13 08:39:33 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.8 2006/09/15 21:09:52 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 
@@ -47,9 +48,12 @@ class St_sls_Maker : public StMaker {
 #endif
 
  /**************************************************************************
- * $Id: St_sls_Maker.h,v 1.7 2005/05/13 08:39:33 lmartin Exp $
+ * $Id: St_sls_Maker.h,v 1.8 2006/09/15 21:09:52 bouchet Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.8  2006/09/15 21:09:52  bouchet
+ * read the noise and pedestal from ssdStripCalib
+ *
  * Revision 1.7  2005/05/13 08:39:33  lmartin
  * CVS tags added
  *
