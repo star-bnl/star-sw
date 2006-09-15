@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSoloPi0Maker.cxx,v 1.3 2005/03/11 15:39:49 balewski Exp $
+// $Id: MuEzSoloPi0Maker.cxx,v 1.4 2006/09/15 01:45:31 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -138,9 +138,14 @@ MuEzSoloPi0Maker::Make(){
   // eESmd->print();
   //  eHead->print();
   
+  StMuEvent *muEve = mMuDstMaker -> muDst() -> event();
+  assert(muEve);
+  StEventInfo &info=muEve->eventInfo();
+  int runId=info.runId();
+
   // .... process adata ......
   void *blob=eTrig->trgd->GetArray();
-  StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob);
+  StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob,runId);
 
   if(eETow->doTowerHeadCorruptionTest(trgAkio5.token())) {
     nCorrEve++;
@@ -206,6 +211,9 @@ MuEzSoloPi0Maker::unpackMuEzTowers(int token){
 
 //---------------------------------------------------
 // $Log: MuEzSoloPi0Maker.cxx,v $
+// Revision 1.4  2006/09/15 01:45:31  balewski
+// add run# to trg-data unpaker
+//
 // Revision 1.3  2005/03/11 15:39:49  balewski
 // use corruption method from muEzt
 //
