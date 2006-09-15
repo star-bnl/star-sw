@@ -1,6 +1,9 @@
-// $Id: StScfListStrip.cc,v 1.2 2005/05/17 14:16:33 lmartin Exp $
+// $Id: StScfListStrip.cc,v 1.3 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfListStrip.cc,v $
+// Revision 1.3  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:33  lmartin
 // CVS tags added
 //
@@ -182,16 +185,16 @@ int* StScfListStrip::getListAdc(int idStrip, int sizeCluster)
 }
 
 
-void StScfListStrip::setSigma(int iStrip, int iSigma, sls_ctrl_st *sls_ctrl)
+void StScfListStrip::setSigma(int iStrip, float iSigma, slsCtrl_st *slsCtrl)
 {
-  const int     NAdcChannel             = (int) pow(2.0,sls_ctrl[0].NBitEncoding);
-  const float   conversionFactor = (float)(NAdcChannel)/(sls_ctrl[0].ADCDynamic*sls_ctrl[0].NElectronInAMip);
+  const int     NAdcChannel             = (int) pow(2.0,slsCtrl[0].nbitEncoding);
+  const float   conversionFactor = (float)(NAdcChannel)/(slsCtrl[0].adcDynamic*slsCtrl[0].nElectronInAMip);
   
   StScfStrip *currentStrip=this->first(); 
   while((currentStrip) && (currentStrip->getNStrip()!=iStrip)) currentStrip=this->next(currentStrip);
   if(currentStrip) 
     {
-      int sigmaAdc = (int)(iSigma*conversionFactor);
+      float sigmaAdc = (iSigma*conversionFactor);
       if (sigmaAdc<NAdcChannel)
 	{
 	  currentStrip->setSigma(sigmaAdc);

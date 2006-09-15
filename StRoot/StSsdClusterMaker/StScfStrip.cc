@@ -1,12 +1,15 @@
-// $Id: StScfStrip.cc,v 1.2 2005/05/17 14:16:34 lmartin Exp $
+// $Id: StScfStrip.cc,v 1.3 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfStrip.cc,v $
+// Revision 1.3  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:34  lmartin
 // CVS tags added
 //
 #include "StScfStrip.hh"
 
-StScfStrip::StScfStrip(int rNStrip, int rDigitSig, int rSigma, int *rIdMcHit)
+StScfStrip::StScfStrip(int rNStrip, int rDigitSig, float rSigma, int *rIdMcHit)
 {
   mIdMcHit   = new int[5];
 
@@ -18,7 +21,7 @@ StScfStrip::StScfStrip(int rNStrip, int rDigitSig, int rSigma, int *rIdMcHit)
   mNextStrip = 0;
 }
 
-StScfStrip::StScfStrip(int rNStrip, int rDigitSig, int rSigma)
+StScfStrip::StScfStrip(int rNStrip, int rDigitSig, float rSigma)
 {
   mIdMcHit   = new int[5];
 
@@ -29,6 +32,7 @@ StScfStrip::StScfStrip(int rNStrip, int rDigitSig, int rSigma)
   mPrevStrip = 0;
   mNextStrip = 0;
 }
+
 
 StScfStrip::~StScfStrip()
 {
@@ -41,7 +45,7 @@ void StScfStrip::setPrevStrip(StScfStrip *rPrevStrip)
 void StScfStrip::setNextStrip(StScfStrip *rNextStrip)
 {  this->mNextStrip = rNextStrip; }
 
-void StScfStrip::setSigma(int rSigma)
+void StScfStrip::setSigma(float rSigma)
 {  this->mSigma = rSigma; }
 
 void StScfStrip::setNStrip(int rNStrip)
@@ -65,7 +69,7 @@ StScfStrip* StScfStrip::getPrevStrip()
 StScfStrip* StScfStrip::getNextStrip()
 {  return this->mNextStrip; }
 
-int StScfStrip::getSigma()
+float StScfStrip::getSigma()
 {  return this->mSigma; }
 
 int StScfStrip::getIdMcHit(int iR)

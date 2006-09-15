@@ -1,6 +1,9 @@
-// $Id: StScfBarrel.hh,v 1.5 2005/11/22 03:57:05 bouchet Exp $
+// $Id: StScfBarrel.hh,v 1.6 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfBarrel.hh,v $
+// Revision 1.6  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.5  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -19,28 +22,31 @@
 #include <math.h>
 #include "StScfWafer.hh"
 
-#include "tables/St_sdm_geom_par_Table.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 #include "tables/St_scf_ctrl_Table.h"
+#include "tables/St_ssdStripCalib_Table.h"
 
 class St_spa_strip;
 class St_scf_cluster;
 class St_sdm_calib_db;
+class St_ssdStripCalib;
 //class St_scf_ctrl;
-//class St_sls_ctrl;
+//class St_slsCtrl;
 
 class StScfBarrel
 {
  public:
-  StScfBarrel(sdm_geom_par_st  *geom_par);
+  StScfBarrel(ssdDimensions_st  *geom_par);
   ~StScfBarrel();
 
-  void  setSsdParameters(sdm_geom_par_st  *geom_par);
+  void  setSsdParameters(ssdDimensions_st  *geom_par);
   int   readStripFromTable(St_spa_strip *spa_strip);
-  int   readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sls_ctrl);
+  int   readNoiseFromTable(St_sdm_calib_db *spa_noise, slsCtrl_st *slsCtrl);
+  int   readNoiseFromTable(St_ssdStripCalib *strip_calib, slsCtrl_st *slsCtrl);
   int   writeClusterToTable(St_scf_cluster *cluster,St_spa_strip *spa_strip);
   int   writeClusterToTable(St_scf_cluster *cluster);
-  void  doSideClusterisation(int *numberOfCluster,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl);
+  void  doSideClusterisation(int *numberOfCluster,St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl);
   void  sortListCluster();
   void  sortListStrip();
 

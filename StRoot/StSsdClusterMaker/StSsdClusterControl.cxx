@@ -1,13 +1,16 @@
-// $Id: StSsdClusterControl.cxx,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+// $Id: StSsdClusterControl.cxx,v 1.3 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: StSsdClusterControl.cxx,v $
+// Revision 1.3  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:38  lmartin
 // CVS tags added
 //
 #include <Stiostream.h>
 #include <stdlib.h>
 #include "StSsdClusterControl.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 #include "tables/St_scm_ctrl_Table.h"
 
 StSsdClusterControl::StSsdClusterControl()

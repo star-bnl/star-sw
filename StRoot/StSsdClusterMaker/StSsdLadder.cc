@@ -1,11 +1,14 @@
-// $Id: StSsdLadder.cc,v 1.2 2005/05/17 14:16:38 lmartin Exp $
+// $Id: StSsdLadder.cc,v 1.3 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: StSsdLadder.cc,v $
+// Revision 1.3  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:38  lmartin
 // CVS tags added
 //
 #include "StSsdLadder.hh"
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
@@ -39,9 +42,9 @@ StSsdLadder::~StSsdLadder() // checked !
     delete mWafers[iWaf];
 }
 
-void StSsdLadder::initWafers(St_svg_geom *geom_class) // checked !
+void StSsdLadder::initWafers(St_ssdWafersPosition *geom_class) // checked !
 {
-  svg_geom_st *geom =  geom_class->GetTable();
+  ssdWafersPosition_st *geom =  geom_class->GetTable();
   int idWafer = 0;
   int iWaf    = 0;
   for (int i = 0; i < geom_class->GetNRows(); i++)
@@ -53,7 +56,7 @@ void StSsdLadder::initWafers(St_svg_geom *geom_class) // checked !
 	  (mLadderNumb == idWafer - mSsdLayer*1000 - (iWaf+1)*100 - 1) // just added -1
 	  )
  	{
-  	  mWafers[iWaf]->init(idWafer, geom[i].d, geom[i].t, geom[i].n, geom[i].x);
+  	  mWafers[iWaf]->init(idWafer, geom[i].driftDirection, geom[i].transverseDirection, geom[i].normalDirection,geom[i].centerPosition);
  	}
     }
 //   printf("####  END OF SSD WAFERS FOR LADDER %d INITIALIZATION   ####\n",mLadderNumb);

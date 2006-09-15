@@ -1,6 +1,9 @@
-// $Id: StScfBarrel.cc,v 1.5 2005/11/22 03:57:05 bouchet Exp $
+// $Id: StScfBarrel.cc,v 1.6 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfBarrel.cc,v $
+// Revision 1.6  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.5  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -17,9 +20,10 @@
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_sdm_calib_db_Table.h"
-#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_ssdStripCalib_Table.h"
 
-StScfBarrel::StScfBarrel(sdm_geom_par_st  *geom_par)
+StScfBarrel::StScfBarrel(ssdDimensions_st  *geom_par)
 {
   this->setSsdParameters(geom_par);
 
@@ -44,12 +48,12 @@ StScfBarrel::~StScfBarrel()
 }
 
 
-void StScfBarrel::setSsdParameters(sdm_geom_par_st *geom_par)
+void StScfBarrel::setSsdParameters(ssdDimensions_st *geom_par)
 {
-  mSsdLayer        = geom_par[0].N_layer; // all layers : 1->7
-  mNLadder         = geom_par[0].N_ladder;
-  mNWaferPerLadder = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide   = geom_par[0].N_strip_per_side;//;
+  mSsdLayer        = 7;//7; // all layers : 1->7
+  mNLadder         = 20; //20;
+  mNWaferPerLadder = geom_par[0].wafersPerLadder;
+  mNStripPerSide   = geom_par[0].stripPerSide;//;
 }
 
 int StScfBarrel::idWaferToWaferNumb(int idWafer)
@@ -76,7 +80,8 @@ int StScfBarrel::readStripFromTable(St_spa_strip *spa_strip)
   int idWaf = 0;
   int nStrip = 0;
   int iSide = 0;
-  int sigma = 0;
+  //int sigma = 0;
+  float sigma = 0;
 //   int *idMcHit = new int[5];
   int idMcHit[5]      = {0,0,0,0,0};
   int e = 0;
@@ -87,8 +92,11 @@ int StScfBarrel::readStripFromTable(St_spa_strip *spa_strip)
       iSide   = (strip[i].id_strip - nStrip*100000 - idWaf)/10000;
       for (e = 0 ; e < 5;e++) idMcHit[e] = strip[i].id_mchit[e];
       StScfStrip *newStrip = new StScfStrip(nStrip, strip[i].adc_count, sigma, idMcHit);
+      //if(idWaf==7201)printf("id=%d  stripId=%d  side=%d  waferId=%d  adc_count=%d  sigma=%f\n",strip[i].id_strip,nStrip,iSide,idWaf,strip[i].adc_count,sigma);
+      //if(idWaf==7601)printf("id=%d  stripId=%d  side=%d  waferId=%d  adc_count=%d  sigma=%f\n",strip[i].id_strip,nStrip,iSide,idWaf,strip[i].adc_count,sigma);
       mWafers[idWaferToWaferNumb(idWaf)]->addStrip(newStrip, iSide);
     }
+  cout << "Fired strips = "<<spa_strip->GetNRows()<< endl;
   NumberOfStrip = spa_strip->GetNRows();  
   //  delete [] idMcHit;
   return NumberOfStrip;
@@ -131,7 +139,7 @@ void StScfBarrel::sortListCluster()
 }
 
 
-int  StScfBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sls_ctrl)
+int  StScfBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, slsCtrl_st *slsCtrl)
 {
   sdm_calib_db_st *noise = spa_noise->GetTable();
   
@@ -145,7 +153,7 @@ int  StScfBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sl
       idWaf   = noise[i].id_strip-10000*((int)(noise[i].id_strip/10000.));
       iSide   = (noise[i].id_strip - nStrip*100000 - idWaf)/10000;
 
-      mWafers[idWaferToWaferNumb(idWaf)]->setSigmaStrip(nStrip, iSide, noise[i].n_sigma, sls_ctrl);
+      mWafers[idWaferToWaferNumb(idWaf)]->setSigmaStrip(nStrip, iSide, noise[i].n_sigma, slsCtrl);
     }
 
   NumberOfNoise = spa_noise->GetNRows();
@@ -153,7 +161,42 @@ int  StScfBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, sls_ctrl_st *sl
 //   return noise_h->nok;
 }
 
-void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl)
+int  StScfBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, slsCtrl_st *slsCtrl)
+{
+  //read and uses only ssdStripCalib for the noise, so the conversion adc-->electrons is only for the noise
+  ssdStripCalib_st *noise = strip_calib->GetTable();
+  int NAdcChannel          = (int)pow(2.0,10.0*1.0);
+  int NElectronInAMip      = 22500;
+  int ADCDynamic           = 20;
+  //  const float   conversionFactor = (float)(NAdcChannel)/(ADCDynamic*NElectronInAMip);
+  const float   AdctoE =  (ADCDynamic*NElectronInAMip)/(float)(NAdcChannel);
+    
+  int idWaf      = 0;
+  int iLad       = 0;
+  int nStrip     = 0;
+  int iSide      = 0;
+  int i          = 0;
+  int ent        = 0;
+  float my_noise = 0;
+  for (i = 0 ; i < strip_calib->GetNRows(); i++)
+    {
+      if (noise[i].id>0 && noise[i].id<=76818620) {
+	nStrip  = (int)(noise[i].id/100000.);
+	idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+	iLad    = (int)(idWaf - 7*1000 - (idWaferToWaferNumb(idWaf)+1)*100 - 1);
+	my_noise = (noise[i].rms*AdctoE)/16.;
+	//if(idWaf==7101)printf("id=%d stripId=%d  side=%d  waferId=%d  pedestal=%d  noise=%f\n",noise[i].id,nStrip,iSide,idWaf,noise[i].pedestals,my_noise);
+	mWafers[idWaferToWaferNumb(idWaf)]->setSigmaStrip(nStrip, iSide, my_noise,slsCtrl);
+	ent++;
+      }
+    }
+  //printf("Entries = %d\n",ent);
+  return ent;
+  //   return noise_h->nok;
+}
+
+void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster,St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl)
 {
   int *wafNumbOfCluster = new int[2];
   int iWafer = 0;
@@ -161,7 +204,7 @@ void StScfBarrel::doSideClusterisation(int *barrelNumbOfCluster,St_sls_ctrl *my_
   wafNumbOfCluster[1] = 0;
   for (iWafer = 0 ; iWafer < mNWaferPerLadder*mNLadder; iWafer++)
     {
-      mWafers[iWafer]->doClusterisation(wafNumbOfCluster, my_sls_ctrl, my_scf_ctrl);
+      mWafers[iWafer]->doClusterisation(wafNumbOfCluster, my_slsCtrl, my_scf_ctrl);
       barrelNumbOfCluster[0] += wafNumbOfCluster[0];
       barrelNumbOfCluster[1] += wafNumbOfCluster[1]; 
     }

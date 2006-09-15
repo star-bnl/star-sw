@@ -1,6 +1,9 @@
-// $Id: StScmWafer.hh,v 1.2 2005/05/17 14:16:37 lmartin Exp $
+// $Id: StScmWafer.hh,v 1.3 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: StScmWafer.hh,v $
+// Revision 1.3  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.2  2005/05/17 14:16:37  lmartin
 // CVS tags added
 //
@@ -15,7 +18,7 @@
 #include "StScmPackage.hh"
 #include "StScmPoint.hh"
 
-#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
 
 class StScmWafer
 {
@@ -24,7 +27,7 @@ class StScmWafer
                   StScmWafer(int id);
                   ~StScmWafer();
 
-  void            init(int rId, float *rD, float *rT, float *rN, float *rX);
+  void            init(int rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX);
 
   StScmListCluster* getClusterP();
   StScmListCluster* getClusterN();
@@ -38,12 +41,12 @@ class StScmWafer
   void            sortCluster();
   void            sortPoint();
 
-  int             doFindPackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl); 
-  int             doSolvePerfect(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl);
+  int             doFindPackage(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl); 
+  int             doSolvePerfect(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl);
   void            doStatPerfect(int nPerfectPoint, scm_ctrl_st *scm_ctrl);
-  int             doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl);
-  int             convertDigitToAnalog(double PairCreationEnergy);
-  int             convertUFrameToLocal(sdm_geom_par_st *geom_par);
+  int             doSolvePackage(ssdDimensions_st *geom_par, scm_ctrl_st *scm_ctrl);
+  int             convertDigitToAnalog(double pairCreationEnergy);
+  int             convertUFrameToLocal(ssdDimensions_st *geom_par);
   int             convertLocalToGlobal();
   int             printborder();
  
@@ -52,12 +55,12 @@ class StScmWafer
   StScmWafer& operator=(const StScmWafer originalWafer);
 
   int                      mId;
-  float                   *mD;
-  float                   *mT;
-  float                   *mN;
-  float                   *mX;
-  float                    mPerfectMean;
-  float                    mPerfectSigma;
+  Double_t                   *mD;
+  Double_t                   *mT;
+  Double_t                   *mN;
+  Double_t                   *mX;
+  Double_t                    mPerfectMean;
+  Double_t                    mPerfectSigma;
 //   int                     *mDeadStripP;
 //   int                     *mDeadStripN;
   StScmListCluster        *mClusterP;
@@ -65,8 +68,8 @@ class StScmWafer
   StScmListPackage        *mPackage;
   StScmListPoint          *mPoint;
 
-  int             geoMatched(sdm_geom_par_st *geom_par, StScmCluster *ptr1, StScmCluster *ptr2);
-  int             setMatcheds(sdm_geom_par_st *geom_par, StScmPoint *Spt, StScmCluster *pMatched, StScmCluster *nMatched);
-  float           matchDistr(scm_ctrl_st *scm_ctrl, float x);
+  int             geoMatched(ssdDimensions_st *geom_par, StScmCluster *ptr1, StScmCluster *ptr2);
+  int             setMatcheds(ssdDimensions_st *geom_par, StScmPoint *Spt, StScmCluster *pMatched, StScmCluster *nMatched);
+  Double_t           matchDistr(scm_ctrl_st *scm_ctrl, Double_t x);
 };  
 #endif

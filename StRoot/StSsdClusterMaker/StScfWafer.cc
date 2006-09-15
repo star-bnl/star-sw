@@ -1,6 +1,9 @@
-// $Id: StScfWafer.cc,v 1.4 2005/06/14 12:20:25 bouchet Exp $
+// $Id: StScfWafer.cc,v 1.5 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfWafer.cc,v $
+// Revision 1.5  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.4  2005/06/14 12:20:25  bouchet
 // cleaner version
 //
@@ -50,12 +53,20 @@ void StScfWafer::addStrip(StScfStrip *ptr, int iSide)
     { (this->mStripP)->addNewStrip(ptr); }
 }
 
-void StScfWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, sls_ctrl_st *sls_ctrl)
+void StScfWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, slsCtrl_st *slsCtrl)
 {
   if (iSide)
-    { (this->mStripN)->setSigma(iStrip, iSigma, sls_ctrl); }
+    { (this->mStripN)->setSigma(iStrip, iSigma, slsCtrl); }
   else
-    { (this->mStripP)->setSigma(iStrip, iSigma, sls_ctrl); }
+    { (this->mStripP)->setSigma(iStrip, iSigma, slsCtrl); }
+}
+
+void StScfWafer::setSigmaStrip(int iStrip, int iSide, float iSigma, slsCtrl_st *slsCtrl)
+{
+  if (iSide)
+    { (this->mStripN)->setSigma(iStrip, iSigma, slsCtrl); }
+  else
+    { (this->mStripP)->setSigma(iStrip, iSigma, slsCtrl); }
 }
 
  
@@ -71,16 +82,16 @@ void StScfWafer::sortStrip()
   (this->mStripN)->sortStrip();
 }
 
-void StScfWafer::doClusterisation(int *NClusterPerSide,St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl)
+void StScfWafer::doClusterisation(int *NClusterPerSide,St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl)
 {
   int iSide = 0;
-  this->doFindCluster(my_sls_ctrl, my_scf_ctrl, iSide);
+  this->doFindCluster(my_slsCtrl, my_scf_ctrl, iSide);
   NClusterPerSide[0] = this->doClusterSplitting(my_scf_ctrl, iSide); 
   iSide = 1;
-  this->doFindCluster(my_sls_ctrl, my_scf_ctrl, iSide); 
+  this->doFindCluster(my_slsCtrl, my_scf_ctrl, iSide); 
   NClusterPerSide[1] = this->doClusterSplitting(my_scf_ctrl, iSide);
 }
-int StScfWafer::doFindCluster(St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl, int iSide)
+int StScfWafer::doFindCluster(St_slsCtrl *my_slsCtrl,St_scf_ctrl *my_scf_ctrl, int iSide)
 {
   StScfListStrip   *CurrentListStrip   =  0;
   StScfListCluster *CurrentListCluster =  0;
@@ -114,8 +125,9 @@ int StScfWafer::doFindCluster(St_sls_ctrl *my_sls_ctrl,St_scf_ctrl *my_scf_ctrl,
     {
       scf_ctrl_st *ctrl = my_scf_ctrl->GetTable();
       // if(CurrentStrip->getDigitSig()>(scf_ctrl[0].high_cut*CurrentStrip->getSigma()))
-// 	{
-	if(CurrentStrip->getDigitSig()>(ctrl->high_cut*CurrentStrip->getSigma()))
+      // 	{
+      //same as in StSsdPointMaker
+      if((CurrentStrip->getDigitSig()>(ctrl->high_cut*CurrentStrip->getSigma()))&&(CurrentStrip->getSigma()>0))
 	{ 
       LastScanStrip = 0;
 	  StScfCluster *newCluster = new StScfCluster(CurrentListCluster->getSize());

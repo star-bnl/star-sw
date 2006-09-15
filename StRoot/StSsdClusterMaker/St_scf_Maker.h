@@ -1,6 +1,9 @@
-// $Id: St_scf_Maker.h,v 1.12 2005/11/22 03:57:05 bouchet Exp $
+// $Id: St_scf_Maker.h,v 1.13 2006/09/15 21:04:50 bouchet Exp $
 //
 // $Log: St_scf_Maker.h,v $
+// Revision 1.13  2006/09/15 21:04:50  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.12  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -40,11 +43,11 @@ class TFile;
 class TH1F;
 class TNtuple;
 
-class St_sdm_geom_par;
+class St_ssdDimensions;
 class St_sdm_calib_db;
 class StSsdClusterControl;
 class St_scf_ctrl;
-class St_sls_ctrl;
+class St_slsCtrl;
 
 class StScfBarrel;
 class StScfCluster;
@@ -52,19 +55,21 @@ class StScfWafer;
 class StScfListCluster;
 
 class St_scf_cluster;
+class St_ssdStripCalib;
 
 class St_scf_Maker : public StMaker {
  private:
-  St_sdm_geom_par      *m_geom_par;//!
-  St_sdm_calib_db      *m_noise;//!
-  St_scf_ctrl          *m_scf_ctrl;//!
-  St_sls_ctrl          *m_sls_ctrl;//!
-  
+  St_ssdDimensions   *m_geom_par;//!
+  St_ssdStripCalib     *m_noise;//
+  St_scf_ctrl        *m_scf_ctrl;//!
+  St_slsCtrl         *m_slsCtrl;//!
+  //St_sdm_calib_db      *m_noise;//!
   float ClusterNtuple[12];
   TFile *qFile;
   TNtuple* qHitNtuple;
  
   void makeScfCtrlHistograms(); //!
+  void makeNewScfCtrlHistograms(StScfBarrel *barrel); //!
   void PrintClusterDetails(StScfBarrel *barrel,int id_wafer);//!
   void PrintIdMctrack(St_scf_cluster *scf_cluster,int mywafer);
   void DeclareNtuple(); //!
@@ -85,12 +90,13 @@ class St_scf_Maker : public StMaker {
                   St_scf_Maker(const char *name="scf_cluster");
    virtual       ~St_scf_Maker();
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t runNumber);
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.12 2005/11/22 03:57:05 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scf_Maker.h,v 1.13 2006/09/15 21:04:50 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_scf_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -99,6 +105,9 @@ class St_scf_Maker : public StMaker {
  /**************************************************************************
  * 
  *  $Log: St_scf_Maker.h,v $
+ *  Revision 1.13  2006/09/15 21:04:50  bouchet
+ *  noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+ *
  *  Revision 1.12  2005/11/22 03:57:05  bouchet
  *  id_mctrack is using for setIdTruth
  *

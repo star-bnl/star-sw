@@ -1,6 +1,9 @@
-// $Id: StScfCluster.hh,v 1.4 2005/11/22 03:57:05 bouchet Exp $
+// $Id: StScfCluster.hh,v 1.5 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfCluster.hh,v $
+// Revision 1.5  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.4  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -29,7 +32,7 @@ class StScfCluster
   int           getTotAdc();
   int           getFirstAdc();
   int           getLastAdc();
-  int           getTotNoise();
+  float         getTotNoise();
   float         getStripMean();
   int           getIdMcHit(int iR);
   int           getIdMcTrack(int iR);
@@ -45,7 +48,7 @@ class StScfCluster
   void          setTotAdc(int rTotAdc);
   void          setFirstAdc(int rFirstAdc);
   void          setLastAdc(int rLastAdc);
-  void          setTotNoise(int rTotNoise);
+  void          setTotNoise(float rTotNoise);
   void          setStripMean(float rStripMean);
   void          setIdMcHit(int rIdMcHit, int iR);
   void          setIdMcTrack(int rIdMcTrack, int iR);
@@ -60,7 +63,7 @@ private:
   int           mTotAdc;
   int           mFirstAdc;
   int           mLastAdc;
-  int           mTotNoise;
+  float         mTotNoise;
   float         mStripMean;
   int          *mIdMcHit;
   int          *mIdMcTrack;

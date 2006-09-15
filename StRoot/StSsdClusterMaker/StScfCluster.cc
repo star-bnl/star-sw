@@ -1,6 +1,9 @@
-// $Id: StScfCluster.cc,v 1.4 2005/11/22 03:57:05 bouchet Exp $
+// $Id: StScfCluster.cc,v 1.5 2006/09/15 21:04:49 bouchet Exp $
 //
 // $Log: StScfCluster.cc,v $
+// Revision 1.5  2006/09/15 21:04:49  bouchet
+// noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
+//
 // Revision 1.4  2005/11/22 03:57:05  bouchet
 // id_mctrack is using for setIdTruth
 //
@@ -58,7 +61,7 @@ void  StScfCluster::setFirstAdc(int rFirstAdc)
 void  StScfCluster::setLastAdc(int rLastAdc)
 {  this->mLastAdc = rLastAdc;}
 
-void  StScfCluster::setTotNoise(int rTotNoise)
+void  StScfCluster::setTotNoise(float rTotNoise)
 {  this->mTotNoise = rTotNoise;}
 
 void  StScfCluster::setStripMean(float rStripMean)
@@ -91,7 +94,7 @@ int StScfCluster::getFirstAdc()
 int StScfCluster::getLastAdc()
 {  return this->mLastAdc;}
 
-int StScfCluster::getTotNoise()
+float StScfCluster::getTotNoise()
 {  return this->mTotNoise;}
 
 float StScfCluster::getStripMean()
@@ -129,7 +132,7 @@ void StScfCluster::update(StScfStrip *ptr,float rWeight,int iSide)
 {
   int tmpTotAdc = this->mTotAdc;
   this->mTotAdc += (int)(ptr->getDigitSig()*rWeight);
-  this->mTotNoise += (int)(ptr->getSigma()*rWeight);
+  this->mTotNoise +=(ptr->getSigma()*rWeight);
   if(ptr->getNStrip()<this->mFirstStrip) 
     {
       this->mFirstStrip = ptr->getNStrip();
