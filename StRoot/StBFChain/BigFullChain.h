@@ -668,20 +668,27 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
 #endif
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
-
+#if 0
   {"GenericHit","","","StEvent","StGenericHitMaker","StGenericHitMaker","test GenericHitCollection",kFALSE},
+#endif
   {"pixFastSim","","","StMcEvent,StEvent",
                                    "StPixelFastSimMaker","StPixelFastSimMaker","FastPixelSimulator",kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
-  {"ssd_daq"     ,"","","ssddb,St_svt"               ,"StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
+  {"ssd_daq"  ,"SpaStrip","","ssddb,St_svt,-sls,-spa","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
+#ifndef __CLEANUP__1
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
+#else
+  {"ssd"         ,"","","sls,spa,spt"                        ,"","","SSD full chain for simulation",kFALSE},
+#endif
   {"sls"         ,"","","tls,Simu,St_tpc,St_svt,SvtCL","St_sls_Maker","StSsdSimulationMaker",
                                                                            "... SSD slow simulator",kFALSE},
-  {"spa"         ,"","","tls,Simu,St_tpc,St_svt,SvtCL","St_spa_Maker","StSsdSimulationMaker",
+  {"spa"         ,"SpaStrip","","tls,Simu,St_tpc,St_svt,SvtCL","St_spa_Maker","StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
+#ifndef __CLEANUP__1
   {"scf"        ,"","","St_svt,St_tpc" ,"St_scf_Maker","StSsdClusterMaker","... SSD cluster finder",kFALSE},
   {"scm"        ,"","","St_svt,St_tpc" ,"St_scm_Maker","StSsdClusterMaker",
                                                               "... SSD Cluster Matcher (both side)",kFALSE},
+#endif
   {"spt"         ,"","","St_svt"       ,"StSsdPointMaker","StSsdPointMaker","... SSD Point Creator",kFALSE},
   {"sce"         ,"","","St_tpc,St_svt"       ,"St_sce_Maker","StSsdEvalMaker", "... SSD Evaluator",kFALSE},
     
