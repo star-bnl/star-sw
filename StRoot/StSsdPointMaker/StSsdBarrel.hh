@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.hh,v 1.7 2005/04/23 08:56:20 lmartin Exp $
+// $Id: StSsdBarrel.hh,v 1.8 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdBarrel.hh,v $
+// Revision 1.8  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.7  2005/04/23 08:56:20  lmartin
 // physics and pedestal data processing separated
 //
@@ -30,6 +33,8 @@ class StSsdClusterControl;
 class StSsdDynamicControl;
 class StSsdLadder;
 
+class StSsdWafer;
+
 class StSsdHitCollection;
 
 class StSsdBarrel
@@ -51,7 +56,9 @@ class StSsdBarrel
   int   writeNoiseToFile(St_ssdPedStrip *pedStrip, char myLabel[]);
   int   readClusterFromTable(St_scf_cluster *scf_cluster);
   int   writeClusterToTable(St_scf_cluster *cluster);
-  int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);   
+  int   writeClusterToTable(St_scf_cluster *scf_cluster,St_spa_strip *spa_strip);
+  int   writePointToContainer(St_scm_spt *scm_spt,StSsdHitCollection *ssdHitColl);
+  int   writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster);    
   void  doSideClusterisation(int *numberOfCluster,StSsdClusterControl *clusterControl);   
   int   doClusterMatching(ssdDimensions_st *dimensions,StSsdClusterControl *clusterControl);
   void  convertDigitToAnalog(StSsdDynamicControl *dynamicControl);

@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.15 2005/09/26 15:49:55 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.16 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.16  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.15  2005/09/26 15:49:55  bouchet
 // adding a method to the point maker to check which ssdStripCalib is picked
 //
@@ -117,7 +120,7 @@ class StSsdPointMaker : public StMaker {
  private:
   StDbManager* mDbMgr;           //!
   StDbConfigNode* maccess;      //!
-  St_DataSet* DbConnector;
+  TDataSet* DbConnector;
   ssdWafersPosition_st  *position;
   ssdDimensions_st      *dimensions;
   ssdConfiguration_st   *config;
@@ -208,7 +211,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.15 2005/09/26 15:49:55 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.16 2006/09/15 21:03:14 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
