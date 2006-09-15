@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.cc,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+// $Id: StSpaListNoise.cc,v 1.3 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSpaListNoise.cc,v $
+// Revision 1.3  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.2  2005/05/13 08:39:32  lmartin
 // CVS tags added
 //
@@ -155,14 +158,19 @@ void StSpaListNoise::exchangeTwoNoise(StSpaNoise *ptr1,StSpaNoise *ptr2)
   ptr2->setSigma(ptrTmp->getSigma());
   ptr2->setNoiseValue(ptrTmp->getNoiseValue());
   ptr2->setIsActive(ptrTmp->getIsActive());
+
+  delete ptrTmp;
 }
 
 void StSpaListNoise::sortStrip()
 {
   int localSize=this->getSize();
+  int temp = 0;
   if (localSize<2) return;
-  
   StSpaNoise *ptCurr = this->first();
+  StSpaNoise *ptNext;
+  temp++;
+  ptNext = this->next(ptCurr);
   ptCurr = this->next(ptCurr);
   for ( ; ptCurr!=0 ; )
     {
@@ -175,7 +183,7 @@ void StSpaListNoise::sortStrip()
 	  if (ptB2->getNStrip() > ptB1->getNStrip())
 	    {
 	      this->exchangeTwoNoise(ptB1,ptB2);
-	      ptB1 = ptB2;
+		  ptB1 = ptB2;
 	    }
 	  else
 	    {
@@ -183,38 +191,43 @@ void StSpaListNoise::sortStrip()
 	    }
 	}
       ptCurr = this->next(ptCurr);
+      temp++;
     }
   return;
 }
 
 void StSpaListNoise::addSignal(StSpaListStrip *ptr,
-			       long NElectronInAMip,long A128Dynamic)
+			       long nElectronInAMip,long a128Dynamic)
 {
-  const int NSaturationSignal = (int)A128Dynamic*NElectronInAMip;
+  const int NSaturationSignal = (int)a128Dynamic*nElectronInAMip;
   int size1                     = this->getSize();
   
   if (!size1) return;
-  StSpaNoise *ptr1 = this->first();
+  StSpaNoise *ptr1 = this->first();  
   StSpaStrip *ptr2 = ptr->first();
+  //printf("SpaNoise first Id=%d  SpaStrip first Id=%d\n",ptr1->getNStrip(),ptr2->getNStrip());
   int tmpNoiseValue = 0;
   while (ptr2)
     {
+      if(!ptr1)return;
       while((ptr1)&&(ptr2->getNStrip() != ptr1->getNStrip()))
-	{
+      	{
 	  ptr1 = this->next(ptr1);
 	}
       if(ptr1) 
 	{
 	  tmpNoiseValue = ptr1->getNoiseValue();
 	  ptr1->setNoiseValue(ptr2->getDigitSig() + tmpNoiseValue);
-	  ptr2 = ptr->next(ptr2);  
+	  ptr2 = ptr->next(ptr2);
+	  ptr1=this->first(); 
 	}
       else
 	{
 	  cout<<"signal and noise not matched !"<<endl;
+	  ptr1=this->first();
+	  ptr2 = ptr->next(ptr2); 
 	}
     }
-  
   ptr1 = this->first();
   while (ptr1)
     {
@@ -246,11 +259,11 @@ void StSpaListNoise::substractPedestal()
     }
 }
 
-void StSpaListNoise::convertAnalogToDigit(long NElectronInAMip,long ADCDynamic,
-					  long NBitEncoding, float DAQCutValue)
+void StSpaListNoise::convertAnalogToDigit(long nElectronInAMip,long adcDynamic,
+					  long nbitEncoding, float daqCutValue)
 {
-  const int     NAdcChannel             = (int)pow(2.0,NBitEncoding*1.0);
-  const float   conversionFactor = (float)(NAdcChannel)/(ADCDynamic*NElectronInAMip);
+  const int     NAdcChannel             = (int)pow(2.0,nbitEncoding*1.0);
+  const float   conversionFactor = (float)(NAdcChannel)/(adcDynamic*nElectronInAMip);
 
   int localSize  = this->getSize();
   if (!localSize) return;
@@ -261,7 +274,7 @@ void StSpaListNoise::convertAnalogToDigit(long NElectronInAMip,long ADCDynamic,
       if (curr->getNoiseValue() > (NAdcChannel-1)) curr->setNoiseValue(NAdcChannel-1);
       curr->setPedestal((int)((curr->getPedestal()*conversionFactor)+0.5));
       if (curr->getPedestal()    > (NAdcChannel-1)) curr->setPedestal(NAdcChannel-1);
-      curr->setSigma((int)(((curr->getSigma()*conversionFactor)*DAQCutValue)+0.5));
+      curr->setSigma((int)(((curr->getSigma()*conversionFactor)*(daqCutValue+2))+0.5));
       if (curr->getSigma()       > (NAdcChannel-1)) curr->setSigma(NAdcChannel-1); //Now sigma is the DAQ cut...
       
       curr = this->next(curr);

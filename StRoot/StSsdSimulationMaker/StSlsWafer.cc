@@ -1,6 +1,9 @@
-// $Id: StSlsWafer.cc,v 1.2 2005/05/13 08:39:31 lmartin Exp $
+// $Id: StSlsWafer.cc,v 1.3 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSlsWafer.cc,v $
+// Revision 1.3  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.2  2005/05/13 08:39:31  lmartin
 // CVS tags added
 //
@@ -39,7 +42,7 @@ StSlsWafer::~StSlsWafer()
 }
 
 
-void StSlsWafer::init(int rId, float *rD, float *rT, float *rN, float *rX)
+void StSlsWafer::init(int rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX)
 {
   if (rId != mId)
     cout<<" Can not initialize wafer number : "<<mId<<endl;
@@ -78,10 +81,10 @@ int StSlsWafer::convertGlobalToLocal()
       xtemp[0] = temp->getXg(0) - mX[0];
       xtemp[1] = temp->getXg(1) - mX[1];
       xtemp[2] = temp->getXg(2) - mX[2];
-	
-      temp->setXl((xtemp[0] * mD[0]) + (xtemp[1] * mD[1]) + (xtemp[2] * mD[2]), 0) ;
-      temp->setXl((xtemp[0] * mT[0]) + (xtemp[1] * mT[1]) + (xtemp[2] * mT[2]), 1) ;
-      temp->setXl((xtemp[0] * mN[0]) + (xtemp[1] * mN[1]) + (xtemp[2] * mN[2]), 2) ;
+      // sign (-) of B[0] : temporarily fixed - order of strip readout has to be reversed 	
+      temp->setXl(-((xtemp[0] * mD[0]) + (xtemp[1] * mD[1]) + (xtemp[2] * mD[2])), 0) ;
+      temp->setXl(  (xtemp[0] * mT[0]) + (xtemp[1] * mT[1]) + (xtemp[2] * mT[2]),  1) ;
+      temp->setXl(  (xtemp[0] * mN[0]) + (xtemp[1] * mN[1]) + (xtemp[2] * mN[2]),  2) ;
       
       temp = mPoint->next(temp);
     }
@@ -122,24 +125,24 @@ StSlsListPoint* StSlsWafer::getDeadHits(float ActiveLargeEdge, float ActiveSmall
   
 void StSlsWafer::convertToStrip(float Pitch, 
 				int nStripPerSide,
-				double PairCreationEnergy,
-				int NStripInACluster,
-				double ParDiffP,
-				double ParDiffN,
-				double ParIndRightP,
-				double ParIndRightN,
-				double ParIndLeftP,
-				double ParIndLeftN)
+				double pairCreationEnergy,
+				int nstripInACluster,
+				double parDiffP,
+				double parDiffN,
+				double parIndRightP,
+				double parIndRightN,
+				double parIndLeftP,
+				double parIndLeftN)
 {
   this->convertHitToStrip(Pitch, nStripPerSide,
-			  NStripInACluster,
-			  ParDiffP,
-			  ParDiffN,
-			  ParIndRightP,
-			  ParIndRightN,
-			  ParIndLeftP,
-			  ParIndLeftN);
-  this->convertAnalogToDigit(PairCreationEnergy);
+			  nstripInACluster,
+			  parDiffP,
+			  parDiffN,
+			  parIndRightP,
+			  parIndRightN,
+			  parIndLeftP,
+			  parIndLeftN);
+  this->convertAnalogToDigit(pairCreationEnergy);
   (this->mStripP)->sortStrip();
   (this->mStripN)->sortStrip();
 }
@@ -235,20 +238,20 @@ double StSlsWafer::myErf(double x)
 
 void StSlsWafer::convertHitToStrip(float Pitch, 
 				   int nStripPerSide,
-				   int NStripInACluster,
-				   double ParDiffP,
-				   double ParDiffN,
-				   double ParIndRightP,
-				   double ParIndRightN,
-				   double ParIndLeftP,
-				   double ParIndLeftN)
+				   int nstripInACluster,
+				   double parDiffP,
+				   double parDiffN,
+				   double parIndRightP,
+				   double parIndRightN,
+				   double parIndLeftP,
+				   double parIndLeftN)
 {
-  const double parDiff[2]={ParDiffP/Pitch,ParDiffN/Pitch};
-  const double parIndRight[2]={ParIndRightP,ParIndRightN};
-  const double parIndLeft[2]={ParIndLeftP,ParIndLeftN};
+  const double parDiff[2]={parDiffP/Pitch,parDiffN/Pitch};
+  const double parIndRight[2]={parIndRightP,parIndRightN};
+  const double parIndLeft[2]={parIndLeftP,parIndLeftN};
 
-  int   *tabInd   = new int[NStripInACluster];
-  float *tabDe    = new float[NStripInACluster];
+  int   *tabInd   = new int[nstripInACluster];
+  float *tabDe    = new float[nstripInACluster];
 
   StSlsPoint *ptr = (this->mPoint)->first();
   int localSize = (this->mPoint)->getSize();
@@ -256,7 +259,7 @@ void StSlsWafer::convertHitToStrip(float Pitch,
     {
       for (int iSide = 0; iSide < 2; iSide++)
 	{
-	  for (int v = 0 ; v < NStripInACluster; v++) 
+	  for (int v = 0 ; v < nstripInACluster; v++) 
 	    {
 	      tabInd[v] = 0 ;
 	      tabDe[v]  = 0.;
@@ -278,7 +281,7 @@ void StSlsWafer::convertHitToStrip(float Pitch,
 	  TmpDe1 = tabDe[0]*parIndRight[iSide];
 	  tabDe[0] += TmpDe0;
 	  tabDe[1] += TmpDe1;
-	  for (int st = 0; st <  NStripInACluster; st++)
+	  for (int st = 0; st <  nstripInACluster; st++)
 	    {
 	      if ( tabInd[st] > 0 && tabInd[st] < nStripPerSide+1 )
 		{
@@ -302,9 +305,9 @@ void StSlsWafer::convertHitToStrip(float Pitch,
   delete [] tabDe;
 }
 
-void StSlsWafer::convertAnalogToDigit(double PairCreationEnergy)
+void StSlsWafer::convertAnalogToDigit(double pairCreationEnergy)
 {
-  const double ConversionFactor = 1./PairCreationEnergy;//GeV
+  const double ConversionFactor = 1./pairCreationEnergy;//GeV
 
   int localSize    = (this->mStripP)->getSize();
   StSlsStrip *curr = (this->mStripP)->first();

@@ -1,6 +1,9 @@
-// $Id: StSpaWafer.cc,v 1.2 2005/05/13 08:39:33 lmartin Exp $
+// $Id: StSpaWafer.cc,v 1.3 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSpaWafer.cc,v $
+// Revision 1.3  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.2  2005/05/13 08:39:33  lmartin
 // CVS tags added
 //
@@ -66,12 +69,12 @@ void StSpaWafer::sortStrip()
   (this->mStripN)->sortStrip();
 }
 
-void StSpaWafer::addNoiseToStripSignal(long NElectronInAMip,long A128Dynamic)
+void StSpaWafer::addNoiseToStripSignal(long nElectronInAMip,long a128Dynamic)
 {
   (this->mNoiseP)->addSignal(this->mStripP, 
-			     NElectronInAMip, A128Dynamic);
+			     nElectronInAMip, a128Dynamic);
   (this->mNoiseN)->addSignal(this->mStripN, 
-			     NElectronInAMip, A128Dynamic);
+			     nElectronInAMip, a128Dynamic);
 }
 
 void StSpaWafer::pedestalSubstraction()
@@ -86,13 +89,13 @@ void StSpaWafer::zeroSubstraction()
   (this->mNoiseN)->zeroSubstraction();
 }
 
-void StSpaWafer::convertAnalogToDigit(long NElectronInAMip,long ADCDynamic,
-				      long NBitEncoding, float DAQCutValue)
+void StSpaWafer::convertAnalogToDigit(long nElectronInAMip,long adcDynamic,
+				      long nbitEncoding, float daqCutValue)
 {
-  (this->mNoiseP)->convertAnalogToDigit(NElectronInAMip, ADCDynamic,
-					NBitEncoding,DAQCutValue);
-  (this->mNoiseN)->convertAnalogToDigit(NElectronInAMip, ADCDynamic,
-					NBitEncoding,DAQCutValue);
+  (this->mNoiseP)->convertAnalogToDigit(nElectronInAMip, adcDynamic,
+					nbitEncoding,daqCutValue);
+  (this->mNoiseN)->convertAnalogToDigit(nElectronInAMip, adcDynamic,
+					nbitEncoding,daqCutValue);
 }
 
 void StSpaWafer::updateListStrip()
@@ -100,3 +103,4 @@ void StSpaWafer::updateListStrip()
   (this->mStripP)->updateListStrip(this->mNoiseP); 
   (this->mStripN)->updateListStrip(this->mNoiseN); 
 }
+

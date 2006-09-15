@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.9 2005/05/13 15:08:58 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.10 2006/09/15 21:09:52 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.10  2006/09/15 21:09:52  bouchet
+ * read the noise and pedestal from ssdStripCalib
+ *
  * Revision 1.9  2005/05/13 15:08:58  bouchet
  * reading svt/ssd tables
  *
@@ -25,7 +28,7 @@
 #include <stdlib.h>
 #include "St_sls_Maker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "TFile.h"
 #include "StMessMgr.h"
 
@@ -33,9 +36,9 @@
 #include "tables/St_sls_strip_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_ssd_hit_Table.h"
-#include "tables/St_sdm_geom_par_Table.h"
-//#include "tables/St_svg_geom_Table.h"
-#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+//#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_slsCtrl_Table.h"
 
 ClassImp(St_sls_Maker)
 //_____________________________________________________________________________
@@ -52,25 +55,29 @@ St_sls_Maker::~St_sls_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Init(){
-  if (Debug())  gMessMgr->Debug() << "In St_sls_Maker::Make() ... "
-                               << GetName() << endm;
-// 		Create tables
-  St_DataSet *svtparams = GetInputDB("svt/ssd");
-  St_DataSetIter       local(svtparams);
-
+   return StMaker::Init();
+}
+//_____________________________________________________________________________
+Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
 // 		geometry parameters
-  m_geom_par    = (St_sdm_geom_par*)local("sdm_geom_par");
-  m_ctrl        = (St_sls_ctrl    *)local("sls_ctrl");
-  svtparams = GetInputDB("svt/ssd");
-  local.Reset(svtparams);
-  m_geom        = (St_svg_geom    *)local("geom");
-  if ((!m_geom_par)||(!m_geom)) {
-    gMessMgr->Error() << "No  access to geometry parameters" << endm;
-  }   
+  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
+  if (! ssdparams) {
+    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
+    return kStErr;
+  }
+  TDataSetIter    local(ssdparams);
+  m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
+  m_geom_par    = (St_ssdDimensions     *)local("ssdDimensions");
+  m_geom        = (St_ssdWafersPosition *)local("ssdWafersPosition");
   if (!m_ctrl) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
+    return kStErr;
   }   
-   return StMaker::Init();
+  if ((!m_geom_par)||(!m_geom)) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+    return kStErr;
+  }   
+  return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Make()
@@ -80,12 +87,12 @@ Int_t St_sls_Maker::Make()
    St_sls_strip  *sls_strip = new St_sls_strip("sls_strip",40000);
    m_DataSet->Add(sls_strip);
 
-   St_DataSetIter geant(GetInputDS("geant"));
+   TDataSetIter geant(GetInputDS("geant"));
    St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
    St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
 
-   sdm_geom_par_st *geom_par = m_geom_par->GetTable();
-   sls_ctrl_st *ctrl = m_ctrl->GetTable();
+   ssdDimensions_st *geom_par = m_geom_par->GetTable();
+   slsCtrl_st *ctrl = m_ctrl->GetTable();
 
    cout<<"#################################################"<<endl;
    cout<<"####       START OF SSD LAZY SIMULATOR       ####"<<endl;

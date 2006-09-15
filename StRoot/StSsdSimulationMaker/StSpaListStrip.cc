@@ -1,6 +1,9 @@
-// $Id: StSpaListStrip.cc,v 1.2 2005/05/13 08:39:32 lmartin Exp $
+// $Id: StSpaListStrip.cc,v 1.3 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSpaListStrip.cc,v $
+// Revision 1.3  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.2  2005/05/13 08:39:32  lmartin
 // CVS tags added
 //
@@ -152,6 +155,7 @@ void StSpaListStrip::exchangeTwoStrips(StSpaStrip *ptr1,StSpaStrip *ptr2)
 void StSpaListStrip::sortStrip()
 {
   int localSize=this->getSize();
+  //printf("Size of spaListStrip=%d\n",localSize);
   if (localSize<2) return;
   
   StSpaStrip *ptCurr = this->first();

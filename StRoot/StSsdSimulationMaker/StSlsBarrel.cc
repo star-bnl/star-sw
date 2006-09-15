@@ -1,6 +1,9 @@
-// $Id: StSlsBarrel.cc,v 1.3 2005/05/13 09:28:23 lmartin Exp $
+// $Id: StSlsBarrel.cc,v 1.4 2006/09/15 21:09:52 bouchet Exp $
 //
 // $Log: StSlsBarrel.cc,v $
+// Revision 1.4  2006/09/15 21:09:52  bouchet
+// read the noise and pedestal from ssdStripCalib
+//
 // Revision 1.3  2005/05/13 09:28:23  lmartin
 // geant information read from g2t_ssd_hit table
 //
@@ -13,12 +16,12 @@
 // #include "StSSDdcs.hh"
 // #include "StSSDcalibRun.hh"
 
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_sls_strip_Table.h"
 
-StSlsBarrel::StSlsBarrel(sdm_geom_par_st *geom_par)
+StSlsBarrel::StSlsBarrel(ssdDimensions_st *geom_par)
 {
   this->setSsdParameters(geom_par);
 
@@ -39,29 +42,28 @@ StSlsBarrel::~StSlsBarrel()
     { delete mWafers[iWaf]; }
 }
 
-void StSlsBarrel::setSsdParameters(sdm_geom_par_st *geom_par)
+void StSlsBarrel::setSsdParameters(ssdDimensions_st *geom_par)
 {
-  mSsdLayer            = geom_par[0].N_layer; // all layers : 1->7
-  mDetectorLargeEdge   = 2.*geom_par[0].L_wafer_act_l;
-  mDetectorSmallEdge   = 2.*geom_par[0].L_wafer_act_w;
-  mNLadder             = geom_par[0].N_ladder;
-  mNWaferPerLadder     = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide       = geom_par[0].N_strip_per_side;
-  mStripPitch          = geom_par[0].L_strip_pitch;
-  mTheta               = geom_par[0].L_stereo_angle;
+  mSsdLayer            = 7; // all layers : 1->7
+  mDetectorLargeEdge   = 2.*geom_par[0].waferHalfActLength;
+  mDetectorSmallEdge   = 2.*geom_par[0].waferHalfActWidth;
+  mNLadder             = 20;
+  mNWaferPerLadder     = geom_par[0].wafersPerLadder;
+  mNStripPerSide       = geom_par[0].stripPerSide;
+  mStripPitch          = geom_par[0].stripPitch;
+  mTheta               = geom_par[0].stereoAngle;
 }
 
-void StSlsBarrel::initWafers(St_svg_geom *geom_class)
+void StSlsBarrel::initWafers(St_ssdWafersPosition *geom_class)
 {
-  svg_geom_st *geom = geom_class->GetTable();
+  ssdWafersPosition_st *geom = geom_class->GetTable();
 
-  for (int i = 0; i < geom_class->GetNRows(); i++)
-    {
-      if (geom[i].id > mSsdLayer*1000)
-	{
-	  mWafers[idWaferToWaferNumb(geom[i].id)]->init(geom[i].id, geom[i].d, geom[i].t, geom[i].n, geom[i].x);
-	}
+  for (int i = 0; i < geom_class->GetNRows(); i++) {
+    if (geom[i].id > mSsdLayer*1000) {
+      mWafers[idWaferToWaferNumb(geom[i].id)]->
+	init(geom[i].id, geom[i].driftDirection, geom[i].transverseDirection, geom[i].normalDirection,geom[i].centerPosition);
     }
+  }
 }
 
 int StSlsBarrel::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit)
@@ -321,20 +323,20 @@ void StSlsBarrel::renumHitAfterRemove()
     }
 }
 
-void StSlsBarrel::chargeSharingOverStrip(sls_ctrl_st  *ctrl)
+void StSlsBarrel::chargeSharingOverStrip(slsCtrl_st  *ctrl)
 {
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder ; iWaf++)
     {
       mWafers[iWaf]->convertToStrip(mStripPitch, 
 				 mNStripPerSide,
-				 ctrl[0].PairCreationEnergy,
-				 ctrl[0].NStripInACluster,
-				 ctrl[0].ParDiffP,
-				 ctrl[0].ParDiffN,
-				 ctrl[0].ParIndRightP,
-				 ctrl[0].ParIndRightN,
-				 ctrl[0].ParIndLeftP,
-				 ctrl[0].ParIndLeftN);
+				 ctrl[0].pairCreationEnergy,
+				 ctrl[0].nstripInACluster,
+				 ctrl[0].parDiffP,
+				 ctrl[0].parDiffN,
+				 ctrl[0].parIndRightP,
+				 ctrl[0].parIndRightN,
+				 ctrl[0].parIndLeftP,
+				 ctrl[0].parIndLeftN);
     }
 }
 

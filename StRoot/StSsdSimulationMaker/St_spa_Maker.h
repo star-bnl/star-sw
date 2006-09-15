@@ -20,39 +20,45 @@
 #include "StMaker.h"
 #endif
 class St_sdm_condition_par;
-class St_sdm_geom_par;
+class St_ssdDimensions;
 class St_sdm_calib_par;
 class St_sdm_calib_db;
 class St_sdm_condition_db;
-class St_sls_ctrl;
+class St_slsCtrl;
+class St_ssdStripCalib;
 
 class St_spa_Maker : public StMaker {
  private:
   St_sdm_condition_par *m_cond_par;//!
-  St_sdm_geom_par      *m_geom_par;//!
+  St_ssdDimensions      *m_geom_par;//!
   St_sdm_calib_par     *m_cal_par;//!
-  St_sdm_calib_db      *m_noise;//!
+  St_ssdStripCalib      *m_noise;//!
   St_sdm_condition_db  *m_condition;//!
-  St_sls_ctrl          *m_ctrl;//!
+  St_slsCtrl          *m_ctrl;//!
+
  public: 
                   St_spa_Maker(const char *name="spa_strip");
    virtual       ~St_spa_Maker();
    virtual Int_t  Init();
+   virtual Int_t  InitRun(Int_t runumber);
    virtual Int_t  Make();
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
     virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.7 2005/05/13 08:39:34 lmartin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.8 2006/09/15 21:09:52 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_spa_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
- * $Id: St_spa_Maker.h,v 1.7 2005/05/13 08:39:34 lmartin Exp $
+ * $Id: St_spa_Maker.h,v 1.8 2006/09/15 21:09:52 bouchet Exp $
  *
  * $Log: St_spa_Maker.h,v $
+ * Revision 1.8  2006/09/15 21:09:52  bouchet
+ * read the noise and pedestal from ssdStripCalib
+ *
  * Revision 1.7  2005/05/13 08:39:34  lmartin
  * CVS tags added
  *
