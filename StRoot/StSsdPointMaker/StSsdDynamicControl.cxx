@@ -1,6 +1,9 @@
-// $Id: StSsdDynamicControl.cxx,v 1.4 2005/03/18 14:22:40 lmartin Exp $
+// $Id: StSsdDynamicControl.cxx,v 1.5 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdDynamicControl.cxx,v $
+// Revision 1.5  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.4  2005/03/18 14:22:40  lmartin
 // missing CVS header added
 //
@@ -18,19 +21,19 @@ Basic constructor. The members are filled in the code
 
 StSsdDynamicControl::StSsdDynamicControl()
 {
-//   mNElectronInAMip      =   22500; 
-//   mADCDynamic           =      20;
-//   mA128Dynamic          =      12;    
-//   mNBitEncoding         =      10; 
-//   mNStripInACluster     =       4;
-//   mPairCreationEnergy   = 3.6e-09;
+//   mnElectronInAMip      =   22500; 
+//   madcDynamic           =      20;
+//   ma128Dynamic          =      12;    
+//   mnbitEncoding         =      10; 
+//   mnstripInACluster     =       4;
+//   mpairCreationEnergy   = 3.6e-09;
 //   mparDiffP             = 0.00123;
 //   mparDiffN             = 0.00094; 
 //   mparIndRightP         =   0.021; 
 //   mparIndRightN         =   0.026; 
 //   mparIndLeftP	        =   0.013; 
 //   mparIndLeftN	        =    0.01; 
-//   mDAQCutValue          =       4;
+//   mdaqCutValue          =       4;
 }
 /*!
 Constructor loading the parameters from the Db table
@@ -41,19 +44,19 @@ StSsdDynamicControl::StSsdDynamicControl(St_slsCtrl * slsCtrl)
   if (!control) gMessMgr->Error() << "No slsCtrl_st table available" << endm;
   else
     {
-      mNElectronInAMip      = control[0].nElectronInAMip;
-      mADCDynamic           = control[0].adcDynamic;
-      mA128Dynamic          = control[0].a128Dynamic;
-      mNBitEncoding         = control[0].nbitEncoding;
-      mNStripInACluster     = control[0].nstripInACluster;
-      mPairCreationEnergy   = control[0].pairCreationEnergy;
+      mnElectronInAMip      = control[0].nElectronInAMip;
+      madcDynamic           = control[0].adcDynamic;
+      ma128Dynamic          = control[0].a128Dynamic;
+      mnbitEncoding         = control[0].nbitEncoding;
+      mnstripInACluster     = control[0].nstripInACluster;
+      mpairCreationEnergy   = control[0].pairCreationEnergy;
       mparDiffP             = control[0].parDiffP;
       mparDiffN             = control[0].parDiffN;
       mparIndRightP         = control[0].parIndRightP;
       mparIndRightN         = control[0].parIndRightN;
       mparIndLeftP	    = control[0].parIndLeftP;
       mparIndLeftN          = control[0].parIndLeftN;
-      mDAQCutValue          = control[0].daqCutValue;
+      mdaqCutValue          = control[0].daqCutValue;
     }
 }
 /*!
@@ -68,12 +71,12 @@ Printing the major parameters
  */
 void  StSsdDynamicControl::printParameters(){
   cout<<"**** **** SSD Dynamic Control Parameters **** ****"<<endl;
-  cout<<"**** NElectronInAMip     = "<<this->getNElectronInAMip()<<" ****"<<endl;
-  cout<<"**** ADCDynamic          = "<<this->getADCDynamic()<<"      ****"<<endl;
-  cout<<"**** A128Dynamic         = "<<this->getA128Dynamic()<<"     ****"<<endl;
-  cout<<"**** NBitEncoding        = "<<this->getNBitEncoding()<<"    ****"<<endl;
-  cout<<"**** PairCreationEnergy  = "<<this->getPairCreationEnergy()<<"  ****"<<endl;
-  cout<<"**** DAQCutValue         = "<<this->getDAQCutValue()<<"  ****"<<endl;
+  cout<<"**** nElectronInAMip     = "<<this->getnElectronInAMip()<<" ****"<<endl;
+  cout<<"**** adcDynamic          = "<<this->getadcDynamic()<<"      ****"<<endl;
+  cout<<"**** a128Dynamic         = "<<this->geta128Dynamic()<<"     ****"<<endl;
+  cout<<"**** nbitEncoding        = "<<this->getnbitEncoding()<<"    ****"<<endl;
+  cout<<"**** pairCreationEnergy  = "<<this->getpairCreationEnergy()<<"  ****"<<endl;
+  cout<<"**** daqCutValue         = "<<this->getdaqCutValue()<<"  ****"<<endl;
   cout<<"**************************************"<<endl;
 }
 

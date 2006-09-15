@@ -1,6 +1,9 @@
-// $Id: StSsdBarrel.cc,v 1.21 2006/05/06 00:53:06 fisyak Exp $
+// $Id: StSsdBarrel.cc,v 1.22 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdBarrel.cc,v $
+// Revision 1.22  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.21  2006/05/06 00:53:06  fisyak
 // Add local coordinate to StEvent
 //
@@ -303,6 +306,7 @@ int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamic
 	iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
 	iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
 	iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+	//if(idWaf==7101)printf("id=%d stripId=%d  side=%d  waferId=%d  pedestal=%d  noise=%d\n",noise[i].id,nStrip,iSide,idWaf,noise[i].pedestals,noise[i].rms);
 	mLadders[iLad]->mWafers[iWaf]->setPedestalSigmaStrip(nStrip, iSide, noise[i].pedestals, noise[i].rms, dynamicControl);
 	NumberOfNoise++;
       }
@@ -419,6 +423,88 @@ int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster)
   return currRecord;
 }
 
+
+int  StSsdBarrel::writeClusterToTable(St_scf_cluster *scf_cluster,St_spa_strip *spa_strip)
+{
+  scf_cluster_st cluster;
+  spa_strip_st *on_strip = spa_strip->GetTable(); 
+  int currRecord  = 0;
+  int i           = 0;
+  for (int iLad = 0; iLad < mNLadder; iLad++)
+    for (int iWaf = 0; iWaf < mNWaferPerLadder ; iWaf++)
+      {
+	int idCurrentWaf = waferNumbToIdWafer(iWaf);
+	StSsdClusterList *clusterP = mLadders[iLad]->mWafers[iWaf]->getClusterP();
+	StSsdClusterList *clusterN = mLadders[iLad]->mWafers[iWaf]->getClusterN();
+	
+	StSsdCluster *pClusterP = clusterP->first();
+	while (pClusterP)
+	  {
+	    cluster.id              = currRecord + 1;
+	    cluster.id_cluster      = 10000*(10*pClusterP->getNCluster() + 0)+idCurrentWaf;
+	    cluster.first_strip     = 10000*(10*pClusterP->getFirstStrip()+ 0)+idCurrentWaf;
+	    cluster.n_strip         = pClusterP->getClusterSize();
+	    cluster.adc_count       = pClusterP->getTotAdc();
+	    cluster.first_adc_count = pClusterP->getFirstAdc();
+	    cluster.last_adc_count  = pClusterP->getLastAdc();
+	    cluster.noise_count     = pClusterP->getTotNoise();
+	    cluster.flag            = pClusterP->getFlag();
+	    cluster.strip_mean      = pClusterP->getStripMean();
+	    for (i = 0 ; i < 5 ; i++)
+	      {
+		cluster.id_mchit[i] = pClusterP->getIdMcHit(i);
+		if(cluster.id_mchit[i] == 0){
+		  cluster.id_mctrack[i]=0;
+		}
+		else{
+		  for(int j = 0 ; j < spa_strip->GetNRows(); j++){
+		    if(cluster.id_mchit[i] == on_strip[j].id_mchit[i]){
+		      cluster.id_mctrack[i] = on_strip[j].id_mctrack[i];
+		      //printf("ok, found idMcTrack=%d  i=%d   j=%d\n",on_strip[j].id_mctrack[i],i,j);
+		    }
+		  }
+		}
+	      }
+	    scf_cluster->AddAt(&cluster);
+	    currRecord++;
+	    pClusterP    = clusterP->next(pClusterP);
+	  }
+	
+	StSsdCluster *pClusterN = clusterN->first();
+	while (pClusterN)
+	  {
+	    cluster.id              = currRecord + 1;
+	    cluster.id_cluster      = 10000*(10*pClusterN->getNCluster() + 1)+idCurrentWaf;
+	    cluster.first_strip     = 10000*(10*pClusterN->getFirstStrip() + 1)+idCurrentWaf;
+	    cluster.n_strip         = pClusterN->getClusterSize();
+	    cluster.adc_count       = pClusterN->getTotAdc();
+	    cluster.first_adc_count = pClusterN->getFirstAdc();
+	    cluster.last_adc_count  = pClusterN->getLastAdc();
+	    cluster.noise_count     = pClusterN->getTotNoise();
+	    cluster.flag            = pClusterN->getFlag();
+	    cluster.strip_mean      = pClusterN->getStripMean();
+	    for (i = 0 ; i < 5 ; i++)
+	      {
+		cluster.id_mchit[i] = pClusterN->getIdMcHit(i);
+		if(cluster.id_mchit[i] == 0)cluster.id_mctrack[i]=0;
+		else{
+		  for(int j = 0 ; j < spa_strip->GetNRows(); j++){
+		    if(cluster.id_mchit[i] == on_strip[j].id_mchit[i]){
+		      cluster.id_mctrack[i] = on_strip[j].id_mctrack[i];
+		      //printf("ok, found idMcTrack=%d  i=%d   j=%d\n",on_strip[j].id_mctrack[i],i,j);
+		    }
+		  }
+		}
+	      }
+	    scf_cluster->AddAt(&cluster);
+	    currRecord++;
+	    pClusterN    = clusterN->next(pClusterN);
+	  }
+      }
+  return currRecord;
+}
+
+
 int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl)
 {
   scm_spt_st spt;
@@ -525,6 +611,144 @@ int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* 
   return inTable;
 }
 
+/***********************************************************/
+int StSsdBarrel::writePointToContainer(St_scm_spt *scm_spt, StSsdHitCollection* ssdHitColl,St_scf_cluster *scf_cluster)
+{
+  scm_spt_st spt;
+  StSsdHit *currentSsdHit;
+  
+  //scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
+  scf_cluster_st *on_cluster = scf_cluster->GetTable(); 
+  // table size is 148 bytes
+  int i = 0, inContainer = 0, inTable = 0 ;
+  StThreeVectorF gPos; StThreeVectorF gPosError; 
+  int hw; float q ; unsigned char c; 
+
+  for (int iLad = 0; iLad < mNLadder; iLad++)
+    for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
+      {
+	int idCurrentWaf = mSsdLayer*1000 + (iWaf+1)*100 + (iLad+1);
+	//printf("in wafer=%d   Ladder=%d   wafer=%d\n",idCurrentWaf,iLad,iWaf);
+	StSsdPointList *sptList = mLadders[iLad]->mWafers[iWaf]->getPoint();
+	StSsdPoint *pSpt = sptList->first();
+     
+	while (pSpt){
+	  //jb : we fill StEvent after getting the IdMctrack
+	  //jb : as it was done too for the strip and clusters --> see StSpaBarrel.cc and StScfBarrel.cc
+	  //printf("Now we find the idMcTrack from the cluster\n");
+	  for (i = 0 ; i < 5 ; i++)
+	    {	  
+	      spt.id_mchit[i]   = pSpt->getNMchit(i);
+	      spt.id_mctrack[i] = 0;
+	      spt.id_track[i]   = 0;
+	      //we look on the clusters table to get the IdMctrack info
+	      if (spt.id_mchit[i] == 0) spt.id_mctrack[i]=0;
+	      else {
+		for(int j = 0 ; j < scf_cluster->GetNRows(); j++){
+		  if(spt.id_mchit[i] == on_cluster[j].id_mchit[i]){
+		    spt.id_mctrack[i] = on_cluster[j].id_mctrack[i];
+		    //printf("ok, found idMcTrack=%d  i=%d   j=%d\n",on_cluster[j].id_mctrack[i],i,j);
+		  }
+		}
+	      }
+	    }
+	  
+	  //now we fill StEvent and get the correct IdTruth 
+	  if (ssdHitColl){ // If Available, Fill the StEvent Container
+	    for (i = 0 ; i < 3 ; i++){
+	      gPos[i]      =  pSpt->getXg(i);
+	      gPosError[i] =  0.0; 
+	    }
+	    hw = idCurrentWaf;
+	    q =  pSpt->getDe(0);
+	    currentSsdHit = new StSsdHit(gPos,gPosError,hw,q,c);
+	    // set quality = 100 for the IdTruth
+	    currentSsdHit->setIdTruth(spt.id_mctrack[0],100);// need to check first = most probable!
+	    // Start of Point Loop
+	    
+	    //currentSsdHit->setHardwarePosition(8+16*idWaferToWaferNumb(idCurrentWaf));
+	    //currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
+	    
+	    //looking for the correct clusters...
+	    int Id_P_Side = pSpt->getIdClusterP();
+	    int Id_N_Side = pSpt->getIdClusterN();
+	    
+            StSsdClusterList *currentListP_j = mLadders[iLad]->mWafers[iWaf]->getClusterP();
+            StSsdCluster     *cluster_P_j   = currentListP_j->first();
+            while(cluster_P_j)
+	    {
+	      if(cluster_P_j->getNCluster()==Id_P_Side) 
+                break;
+              cluster_P_j = currentListP_j->next(cluster_P_j);
+	    }
+
+
+            StSsdClusterList *currentListN_j = mLadders[iLad]->mWafers[iWaf]->getClusterN();
+            StSsdCluster *cluster_N_j       = currentListN_j->first();
+            while(cluster_N_j)
+	    {
+	      if(cluster_N_j->getNCluster()==Id_N_Side) 
+		break;
+	      cluster_N_j = currentListN_j->next(cluster_N_j);
+	    }
+
+	    // encode the hardware position
+	    // 2^3  detector ID number (8) 
+	    // 2^4  4-12 num_wafer (0-319)
+	    // 2^13 13-22 cebtral strip of the n-side cluster
+	    // 2^23 23-27 strip of the p-side cluster relat. to n-side (-15,+16)
+	    // 2^28 28-29 n-side cluster size(1-4) 
+	    // 2^30 30-31 p-side cluster size(1-4)
+	    hw  =         
+	                 8                                                                             
+  	      +         16 * idWaferToWaferNumb(idCurrentWaf)                                          
+ 	      +       8192 * (int)cluster_N_j->getStripMean()                                          
+  	      +    8388608 * ((int)cluster_P_j->getStripMean() - (int)cluster_N_j->getStripMean() +15)
+ 	      +  268435456 * (int)((cluster_N_j->getClusterSize() > 3) ? 3 : cluster_N_j->getClusterSize()-1)
+ 	      + 1073741824 * (int)((cluster_P_j->getClusterSize() > 3) ? 3 : cluster_P_j->getClusterSize()-1);
+  	    currentSsdHit->setHardwarePosition(hw);
+	    currentSsdHit->setLocalPosition(pSpt->getXl(0),pSpt->getXl(1));
+	    //printf("Local Position x =%f  Local Position y =%f\n",pSpt->getXl(0),pSpt->getXl(1));
+  	    inContainer += ssdHitColl->addHit(currentSsdHit);
+	  }// Container condition
+
+	  if (1) {//Jerome is Happy, Fill the Table
+	    spt.flag          = pSpt->getFlag();
+	    spt.id            = 10000*(pSpt->getNPoint())+idCurrentWaf;
+	    spt.id_cluster    = pSpt->getNCluster();
+	    spt.id_globtrk    = 0;
+	    spt.id_match      = pSpt->getNMatched();
+	    for (i = 0 ; i < 5 ; i++)
+	      {	  
+		spt.id_mchit[i]   = pSpt->getNMchit(i);
+		spt.id_mctrack[i] = 0;
+		spt.id_track[i]   = 0;
+	      }	  
+	    spt.id_wafer      = idCurrentWaf;
+	    for (i = 0 ; i < 3 ; i++)
+	      {	  
+		spt.cov[i]        = 0;
+		spt.res[i]        = 0;
+		spt.x[i]          = pSpt->getXg(i);
+		spt.xl[i]         = pSpt->getXl(i);
+	      }
+	    for (i = 0 ; i < 2 ; i++)
+	      {
+		spt.mom2[i]       = 0;
+		spt.de[i]         = pSpt->getDe(i);
+	      }
+	    scm_spt->AddAt(&spt);
+	  }
+	  inTable++;
+	  pSpt    = sptList->next(pSpt);
+	}// End of Point Loop
+      }
+  return inTable;
+}
+
+//***********************************************************/
+
+
 void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, StSsdClusterControl *clusterControl)
 {
   //  int *wafNumbOfCluster = new int[2];
@@ -564,12 +788,12 @@ int StSsdBarrel::doClusterMatching(ssdDimensions_st *dimensions, StSsdClusterCon
 
 void StSsdBarrel::convertDigitToAnalog(StSsdDynamicControl *dynamicControl)
 {
-  long   NElectronInAMip    = dynamicControl->getNElectronInAMip();
-  long   ADCDynamic         = dynamicControl->getADCDynamic();
-  double PairCreationEnergy = dynamicControl->getPairCreationEnergy();
+  long   nElectronInAMip    = dynamicControl->getnElectronInAMip();
+  long   adcDynamic         = dynamicControl->getadcDynamic();
+  double pairCreationEnergy = dynamicControl->getpairCreationEnergy();
 
-  const int NAdcChannel     = (int)pow(2.0,dynamicControl->getNBitEncoding());
-  const double convFactor   = (PairCreationEnergy*ADCDynamic*NElectronInAMip)/NAdcChannel;
+  const int NAdcChannel     = (int)pow(2.0,dynamicControl->getnbitEncoding());
+  const double convFactor   = (pairCreationEnergy*adcDynamic*nElectronInAMip)/NAdcChannel;
   for (int iLad = 0; iLad < mNLadder; iLad++)
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       mLadders[iLad]->mWafers[iWaf]->convertDigitToAnalog(convFactor);

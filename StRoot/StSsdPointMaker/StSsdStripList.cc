@@ -1,6 +1,9 @@
-// $Id: StSsdStripList.cc,v 1.5 2005/03/18 15:02:37 lmartin Exp $
+// $Id: StSsdStripList.cc,v 1.6 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdStripList.cc,v $
+// Revision 1.6  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.5  2005/03/18 15:02:37  lmartin
 // setPedestalSigma method added, setSigma removed
 //
@@ -193,8 +196,8 @@ int* StSsdStripList::getListAdc(int idStrip, int sizeCluster)
 
 void StSsdStripList::setPedestalSigma(int iStrip, int iPedestal, int iSigma, StSsdDynamicControl *dynamicControl)
 {
-  const int     NAdcChannel             = 1 << (dynamicControl->getNBitEncoding()); // 1 << x == 2^x 
-  //  const float   conversionFactor = (float)(NAdcChannel)/(dynamicControl->getADCDynamic()*dynamicControl->getNElectronInAMip());
+  const int     NAdcChannel             = 1 << (dynamicControl->getnbitEncoding()); // 1 << x == 2^x 
+  //  const float   conversionFactor = (float)(NAdcChannel)/(dynamicControl->getadcDynamic()*dynamicControl->getnElectronInAMip());
   const float   conversionFactor = 1./16.;
   StSsdStrip *currentStrip=this->first(); 
   while((currentStrip) && (currentStrip->getNStrip()!=iStrip))

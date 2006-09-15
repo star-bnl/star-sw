@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.26 2005/12/31 01:43:22 perev Exp $
+// $Id: StSsdPointMaker.cxx,v 1.27 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.27  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.26  2005/12/31 01:43:22  perev
 // Mack/Upack simplified
 //
@@ -80,7 +83,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "TNtuple.h"
 
@@ -293,7 +296,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
   //    maccess = mDbMgr->initConfig(dbGeometry,dbSsd);
 
 
-  St_DataSet *DbConnector = GetDataBase("Geometry/ssd");
+  TDataSet *DbConnector = GetDataBase("Geometry/ssd");
 
   if (DbConnector) 
     {
@@ -305,19 +308,19 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       else
 	{
 	  mDynamicControl = new StSsdDynamicControl();
-	  mDynamicControl -> setNElectronInAMip(control->nElectronInAMip);
-	  mDynamicControl -> setADCDynamic(control->adcDynamic);
-	  mDynamicControl -> setA128Dynamic(control->a128Dynamic);
-	  mDynamicControl -> setNBitEncoding(control->nbitEncoding);
-	  mDynamicControl -> setNStripInACluster(control->nstripInACluster);
-	  mDynamicControl -> setPairCreationEnergy(control->pairCreationEnergy);
-	  mDynamicControl -> setParDiffP(control->parDiffP);
-	  mDynamicControl -> setParDiffN(control->parDiffN);
-	  mDynamicControl -> setParIndRightP(control->parIndRightP);
-	  mDynamicControl -> setParIndRightN(control->parIndRightN);
-	  mDynamicControl -> setParIndLeftP(control->parIndLeftP);
-	  mDynamicControl -> setParIndLeftN(control->parIndLeftN);
-	  mDynamicControl -> setDAQCutValue(control->daqCutValue);
+	  mDynamicControl -> setnElectronInAMip(control->nElectronInAMip);
+	  mDynamicControl -> setadcDynamic(control->adcDynamic);
+	  mDynamicControl -> seta128Dynamic(control->a128Dynamic);
+	  mDynamicControl -> setnbitEncoding(control->nbitEncoding);
+	  mDynamicControl -> setnstripInACluster(control->nstripInACluster);
+	  mDynamicControl -> setpairCreationEnergy(control->pairCreationEnergy);
+	  mDynamicControl -> setparDiffP(control->parDiffP);
+	  mDynamicControl -> setparDiffN(control->parDiffN);
+	  mDynamicControl -> setparIndRightP(control->parIndRightP);
+	  mDynamicControl -> setparIndRightN(control->parIndRightN);
+	  mDynamicControl -> setparIndLeftP(control->parIndLeftP);
+	  mDynamicControl -> setparIndLeftN(control->parIndLeftN);
+	  mDynamicControl -> setdaqCutValue(control->daqCutValue);
 	  mDynamicControl -> printParameters();
 	}
     
@@ -337,11 +340,11 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 	  mClusterControl -> printParameters();
 	}      
 
-      //      St_DataSet *svtparams = GetInputDB("svt");
-      //      St_DataSetIter local(svtparams);
+      //      TDataSet *svtparams = GetInputDB("svt");
+      //      TDataSetIter local(svtparams);
       //      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
 
-      St_DataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
+      TDataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
       if (!CalibDbConnector) gMessMgr->Error()<<"InitRun: Can not found the calibration db.."<<endm;
       else
 	m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
@@ -419,8 +422,16 @@ Int_t StSsdPointMaker::Make()
   sprintf(myLabel,"%s%s",myDate,myTime);
 
  // two different tables can exist (physics data or pedestal data)
-  St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
-  St_ssdPedStrip *spa_ped_strip = (St_ssdPedStrip *)GetDataSet("ssdPedStrip");
+  
+  TDataSet *SpaStrip = GetDataSet("SpaStrip");
+  if (! SpaStrip) {
+    gMessMgr->Error() << "Make : no input data set, wrong chain option" << endm;
+    return kStErr;
+  }
+  St_spa_strip *spa_strip = dynamic_cast<St_spa_strip *> (SpaStrip->Find("spa_strip"));
+  St_ssdPedStrip *spa_ped_strip = dynamic_cast<St_ssdPedStrip *> (SpaStrip->Find("ssdPedStrip"));
+  
+
   if (!spa_strip || spa_strip->GetNRows()==0){
     gMessMgr->Warning("Make : no input (fired strip for the SSD)");
     gMessMgr->Warning("Make : looking for a pedestal/noise tables");
@@ -435,8 +446,10 @@ Int_t StSsdPointMaker::Make()
   
   St_scm_spt *scm_spt = new St_scm_spt("scm_spt",5000);
   m_DataSet->Add(scm_spt); 
-  //St_scf_cluster *scf_cluster = new St_scf_cluster("scf_cluster",5000);//22/10
-  //m_DataSet->Add(scf_cluster);
+  
+  St_scf_cluster *scf_cluster = new St_scf_cluster("scf_cluster",5000);//09/13
+  m_DataSet->Add(scf_cluster);
+  
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if(mCurrentEvent) 
     {
@@ -452,17 +465,18 @@ Int_t StSsdPointMaker::Make()
   
   cout<<"#################################################"<<endl;
   cout<<"####     START OF NEW SSD POINT MAKER        ####"<<endl;
-  cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;  
+  cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+  cout<<"####          BEGIN INITIALIZATION           ####"<<endl; 
   StSsdBarrel *mySsd = new StSsdBarrel(dimensions,config);
   //mySsd->initLadders(m_wafpos); 
   mySsd->initLadders(position,positionSize);
   //The full SSD object is built only if we are processing physics data
-  if((spa_ped_strip->GetNRows()==0) && (spa_strip->GetNRows()!=0))
+  if((! spa_ped_strip || spa_ped_strip->GetNRows()==0) && (spa_strip->GetNRows()!=0))
     {
       int stripTableSize = mySsd->readStripFromTable(spa_strip);
       cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
       mySsd->sortListStrip();
-      PrintStripSummary(mySsd);
+      //PrintStripSummary(mySsd);
       int noiseTableSize = 0;      
       if (!m_noise2) 
 	gMessMgr->Warning("Make : No pedestal and noise values (ssdStripCalib table missing), will use default values");
@@ -476,7 +490,10 @@ Int_t StSsdPointMaker::Make()
       cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
       cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
       mySsd->sortListCluster();
-      PrintClusterSummary(mySsd);
+      
+      int nClusterWritten = mySsd->writeClusterToTable(scf_cluster,spa_strip);
+      cout<<"####   -> "<<nClusterWritten<<" CLUSTERS WRITTEN INTO TABLE       ####"<<endl;
+      //PrintClusterSummary(mySsd);
       //      PrintStripDetails(mySsd,7406);
       //      PrintClusterDetails(mySsd,7406); 
       makeScfCtrlHistograms(mySsd);
@@ -485,9 +502,23 @@ Int_t StSsdPointMaker::Make()
       cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
       mySsd->convertDigitToAnalog(mDynamicControl);
       mySsd->convertUFrameToOther(dimensions);
-      PrintPointSummary(mySsd);
-      int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+      //PrintPointSummary(mySsd);
+      
+      //int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+      /*
+      for(int i=1;i<=20;i++)
+	{
+	  for(int j=1;j<=16;j++)
+	    {
+	      PrintStripDetails(mySsd,7000+(100*j)+i);
+	      PrintClusterDetails(mySsd,7000+(100*j)+i);
+	      PrintPointDetails(mySsd,7000+(100*j)+i);
+	    }
+	}
+      */
+      int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
       cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
+      
       if(mSsdHitColl) 
 	cout<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endl;
       else 
@@ -505,7 +536,7 @@ Int_t StSsdPointMaker::Make()
     }
   else
     {
-    if((spa_strip->GetNRows()==0)&&(spa_ped_strip->GetNRows()!=0))
+    if((spa_strip->GetNRows()==0)&&(spa_ped_strip && spa_ped_strip->GetNRows()!=0))
       { 
 	cout<<"###### WRITING SSD PEDESTAL HISTOGRAMS##########"<<endl;
 	mySsd->writeNoiseToFile(spa_ped_strip,myLabel);
@@ -528,7 +559,7 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 
   int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   int found;
-  Float_t convAdcToE = (mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip())/(pow(2.0,mDynamicControl->getNBitEncoding()));
+  Float_t convAdcToE = (mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip())/(pow(2.0,mDynamicControl->getnbitEncoding()));
   found=0;
   for (int i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
@@ -571,7 +602,7 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
   int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   int found;
   int conversion[11]={11,12,21,13,31,221,222,223,23,32,33};
-  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getNBitEncoding())/(mDynamicControl->getPairCreationEnergy()*mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip());
+  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   found=0;
   for (int i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
@@ -889,7 +920,7 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
   int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
   int found;
   int conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
-  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getNBitEncoding())/(mDynamicControl->getPairCreationEnergy()*mDynamicControl->getADCDynamic()*mDynamicControl->getNElectronInAMip());
+  Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   found=0;
   // gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Wafer "<<mywafer<< endm;  
   for (int i=0;i<20;i++) 
@@ -1106,7 +1137,7 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, int mywafer)
           else {
             gMessMgr->Info()<<"StSsdPointMaker::PrintPointDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()<<" hit(s) in this wafer "<< endm; 
  
-            gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN"<< endm;  
+            gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xl[0]/Xl[1]/Xl[2]/Xg[0]/Xg[1]/Xg[2"<< endm;  
             StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
             while (pSpt){
               gMessMgr->Info()<<"StSsdPointMaker::PrintPointDetails() - "
@@ -1115,6 +1146,17 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, int mywafer)
                               <<pSpt->getNMatched()<<" "
                               <<pSpt->getIdClusterP()<<" "
                               <<pSpt->getIdClusterN()<<" "
+			      <<pSpt->getNMchit(0)<<" "
+			      <<pSpt->getNMchit(1)<<" "
+			      <<pSpt->getNMchit(2)<<" "
+			      <<pSpt->getNMchit(3)<<" "
+			      <<pSpt->getNMchit(4)<<" "
+			      <<pSpt->getXg(0)    <<" "
+			      <<pSpt->getXg(1)    <<" "
+			      <<pSpt->getXg(2)    <<" "
+			      <<pSpt->getXl(0)    <<" "
+			      <<pSpt->getXl(1)    <<" "
+			      <<pSpt->getXl(2)    <<" "
                               <<endm;  
               pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
             }     

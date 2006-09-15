@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.hh,v 1.5 2005/03/18 14:59:32 lmartin Exp $
+// $Id: StSsdWafer.hh,v 1.6 2006/09/15 21:03:15 bouchet Exp $
 //
 // $Log: StSsdWafer.hh,v $
+// Revision 1.6  2006/09/15 21:03:15  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.5  2005/03/18 14:59:32  lmartin
 // setPedestalSigmaStrip method added, setSigmaStrip removed
 //
@@ -80,7 +83,7 @@ class StSsdWafer
   int               doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
   void              doStatPerfect(int nPerfectPoint, StSsdClusterControl *clusterControl);
   int               doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
-  int               convertDigitToAnalog(double PairCreationEnergy);
+  int               convertDigitToAnalog(double pairCreationEnergy);
   int               convertUFrameToLocal(ssdDimensions_st *dimensions);
   int               convertLocalToGlobal();
   int               printborder();

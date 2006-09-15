@@ -1,6 +1,9 @@
-// $Id: StSsdWafer.cc,v 1.13 2005/12/23 21:33:17 perev Exp $
+// $Id: StSsdWafer.cc,v 1.14 2006/09/15 21:03:14 bouchet Exp $
 //
 // $Log: StSsdWafer.cc,v $
+// Revision 1.14  2006/09/15 21:03:14  bouchet
+// id_mctrack is using for setIdTruth and propagated to the hit
+//
 // Revision 1.13  2005/12/23 21:33:17  perev
 // Some defence for 1/0 added
 //
@@ -2229,13 +2232,13 @@ int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl
   return nSolved;
 }
 
-int StSsdWafer::convertDigitToAnalog(double PairCreationEnergy)
+int StSsdWafer::convertDigitToAnalog(double pairCreationEnergy)
 {
   StSsdPoint *currentPoint = mPoint->first();
   while(currentPoint)
     {
-      currentPoint->setDe(currentPoint->getDe(0)*PairCreationEnergy,0);
-      currentPoint->setDe(currentPoint->getDe(1)*PairCreationEnergy,1);
+      currentPoint->setDe(currentPoint->getDe(0)*pairCreationEnergy,0);
+      currentPoint->setDe(currentPoint->getDe(1)*pairCreationEnergy,1);
       currentPoint = mPoint->next(currentPoint);
     }
   return 1;
