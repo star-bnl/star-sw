@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: MuEzSmdCalMaker.cxx,v 1.4 2005/09/29 13:57:57 balewski Exp $
+// $Id: MuEzSmdCalMaker.cxx,v 1.5 2006/09/15 01:45:34 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -159,11 +159,17 @@ MuEzSmdCalMaker::MakeEZtree(){
   //eETow->print(0);
   // eESmd->print(0);
   //  eHead->print();
+
+  StMuEvent *muEve = mMuDstMaker -> muDst() -> event();
+  assert(muEve);
+  StEventInfo &info=muEve->eventInfo();
+  int runId=info.runId();
+
   
   // .... process adata ......
   void *blob=eTrig->trgd->GetArray();
 
-  StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob);
+  StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob,runId);
   if(eETow->doTowerHeadCorruptionTest(trgAkio5.token())||
      eESmd->doMapmtHeadCorruptionTest(trgAkio5.token())
      ) {
@@ -517,6 +523,9 @@ MuEzSmdCalMaker::killTail( const  EEmcDbItem  *x, int iT) {
 
 //---------------------------------------------------
 // $Log: MuEzSmdCalMaker.cxx,v $
+// Revision 1.5  2006/09/15 01:45:34  balewski
+// add run# to trg-data unpaker
+//
 // Revision 1.4  2005/09/29 13:57:57  balewski
 // after SMD gains were rescaled
 //

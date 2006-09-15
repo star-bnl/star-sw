@@ -1,6 +1,6 @@
 // *-- Author :Jan Balewski
 // 
-// $Id: StTrigOnlyPanitkinMaker.cxx,v 1.1 2005/06/17 17:41:13 balewski Exp $
+// $Id: StTrigOnlyPanitkinMaker.cxx,v 1.2 2006/09/15 01:45:36 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -76,7 +76,10 @@ Int_t StTrigOnlyPanitkinMaker::Make(){
   assert(trgreader);
   void *blob=trgreader->GetTriggerData();
 
-  StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob);
+  int runNo=-999;
+  assert(runNo>0); //JB: I broke it, needs run# to be provided from somewhere???
+
+  StTriggerData2005 trgAkio5( (const TrgDataType2005 *)blob,runNo);
 
   //........ filter trigger -none
   nTrigEve++;
@@ -93,6 +96,9 @@ Int_t StTrigOnlyPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: StTrigOnlyPanitkinMaker.cxx,v $
+// Revision 1.2  2006/09/15 01:45:36  balewski
+// add run# to trg-data unpaker
+//
 // Revision 1.1  2005/06/17 17:41:13  balewski
 // *** empty log message ***
 //

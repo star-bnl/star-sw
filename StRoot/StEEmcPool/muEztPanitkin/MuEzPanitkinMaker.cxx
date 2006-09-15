@@ -1,6 +1,6 @@
 // *-- Author : Rene Fatemi
 // 
-// $Id: MuEzPanitkinMaker.cxx,v 1.3 2005/07/15 15:37:36 balewski Exp $
+// $Id: MuEzPanitkinMaker.cxx,v 1.4 2006/09/15 01:45:36 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -152,9 +152,15 @@ Int_t MuEzPanitkinMaker::Make(){
   
   // assert(trgAkio->token()!=0) ; // I want to see zer-token events, JB
 
+  StMuEvent *muEve = mMuDstMaker -> muDst() -> event();
+  assert(muEve);
+  StEventInfo &info=muEve->eventInfo();
+  int runId=info.runId();
+
+
   // .... process adata ......
   void *blob=eTrig->trgd->GetArray();
-  StTriggerData2005 trgAkio5x( (const TrgDataType2005 *)blob);
+  StTriggerData2005 trgAkio5x( (const TrgDataType2005 *)blob,runId);
   StTriggerData2005 *trgAkio5=&trgAkio5x;// this is ugly
   const unsigned char * dsm0inp= trgAkio5->getDsm0_EEMC();
   unsigned short int  * dsm1inp= trgAkio5->getDsm1_EEMC();
@@ -182,6 +188,9 @@ Int_t MuEzPanitkinMaker::Make(){
 
 //---------------------------------------------------
 // $Log: MuEzPanitkinMaker.cxx,v $
+// Revision 1.4  2006/09/15 01:45:36  balewski
+// add run# to trg-data unpaker
+//
 // Revision 1.3  2005/07/15 15:37:36  balewski
 // *** empty log message ***
 //
