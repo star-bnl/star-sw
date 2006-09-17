@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_scf_maker.cxx
  **************************************************************************
- * $Id: St_scf_Maker.cxx,v 1.12 2006/09/15 21:04:50 bouchet Exp $
+ * $Id: St_scf_Maker.cxx,v 1.13 2006/09/17 18:55:24 bouchet Exp $
  *
  * $Log: St_scf_Maker.cxx,v $
+ * Revision 1.13  2006/09/17 18:55:24  bouchet
+ * Correction in makeScfCtrlHistograms() : fill correctly the noise of p-clusters
+ *
  * Revision 1.12  2006/09/15 21:04:50  bouchet
  * noise of the strips and clusters coded as a float ; read the noise from ssdStripCalib
  *
@@ -259,7 +262,7 @@ void St_scf_Maker::makeScfCtrlHistograms()
 		ClusterNtuple[6]= (int)(dClus[iScf].first_strip/100000.);
 		ClusterNtuple[7]=dClus[iScf].adc_count*dClus[iScf].n_strip;
 		if (m_Mode)qHitNtuple->Fill(ClusterNtuple);
-		noisDisP->Fill(dClus[iScf].adc_count*dClus[iScf].n_strip);
+		noisDisP->Fill(dClus[iScf].noise_count/dClus[iScf].n_strip);
 		snRatioP->Fill((dClus[iScf].adc_count*dClus[iScf].n_strip)/dClus[iScf].noise_count);
 		stpClusP->Fill(dClus[iScf].n_strip);
 		totChrgP->Fill(convAdcToE*dClus[iScf].adc_count);
