@@ -1,6 +1,9 @@
-// $Id: St_SsdDb_Reader.hh,v 1.5 2005/06/20 14:21:39 lmartin Exp $
+// $Id: St_SsdDb_Reader.hh,v 1.6 2006/09/18 16:40:14 fisyak Exp $
 //
 // $Log: St_SsdDb_Reader.hh,v $
+// Revision 1.6  2006/09/18 16:40:14  fisyak
+// Add sim flag for ssdWafersPosition
+//
 // Revision 1.5  2005/06/20 14:21:39  lmartin
 // CVS tags added
 //
@@ -18,7 +21,7 @@
 #ifdef __ROOT__
 #include "TROOT.h"                         //
 #endif
-#include "St_DataSet.h"
+#include "TDataSet.h"
 
 class StSsdConfig;
 class StSsdGeometry;
@@ -35,7 +38,7 @@ class TString;
 class St_SsdDb_Reader 
 {
  private:
-  St_DataSet *ssdDb[2];        //!
+  TDataSet *ssdDb[2];        //!
   Text_t *mTimeStamp;            //!
   Int_t   mUnixTimeStamp;
   StSsdConfig* mSsdConfig;      //!
@@ -56,7 +59,7 @@ class St_SsdDb_Reader
   St_SsdDb_Reader();
   virtual ~St_SsdDb_Reader();
 
-  void setDataBase(St_DataSet *input, int number);
+  void setDataBase(TDataSet *input, int number);
 
   StSsdConfig* getConfiguration();
   StSsdGeometry* getGeometry();

@@ -1,6 +1,9 @@
-// $Id: StSsdDbWriter.cxx,v 1.4 2005/06/20 14:21:38 lmartin Exp $
+// $Id: StSsdDbWriter.cxx,v 1.5 2006/09/18 16:40:14 fisyak Exp $
 //
 // $Log: StSsdDbWriter.cxx,v $
+// Revision 1.5  2006/09/18 16:40:14  fisyak
+// Add sim flag for ssdWafersPosition
+//
 // Revision 1.4  2005/06/20 14:21:38  lmartin
 // CVS tags added
 //
@@ -17,7 +20,7 @@
 #include "StSsdDbWriter.hh"
 
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"
 
