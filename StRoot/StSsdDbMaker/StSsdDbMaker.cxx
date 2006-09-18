@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.7 2005/06/03 21:30:41 perev Exp $
+// $Id: StSsdDbMaker.cxx,v 1.8 2006/09/18 16:40:14 fisyak Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.8  2006/09/18 16:40:14  fisyak
+// Add sim flag for ssdWafersPosition
+//
 // Revision 1.7  2005/06/03 21:30:41  perev
 // Move configuration Init()==>InitRun()
 //
@@ -16,7 +19,7 @@
 #include "StSsdDbMaker.h"
 
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "St_ObjectSet.h"
 #include "StMessMgr.h"
 
@@ -60,9 +63,11 @@ StSsdDbMaker::~StSsdDbMaker()
 Int_t StSsdDbMaker::Init()
 {
   if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Init - Start - " << endm;
-
-
-
+  if( m_Mode == 1) {
+    gMessMgr->Message() << 
+      "StSsdDbMaker::Init setting WafersPostions to sim" << endm;
+    SetFlavor("sim","ssdWafersPosition");   
+  }
   gMessMgr->Info() << "StSsdDbMaker::Init() - Done - "<<endm;
   return StMaker::Init();
 
@@ -99,18 +104,6 @@ void StSsdDbMaker::setSsdDb_Reader() // called in INIT
 
   gMessMgr->Info() << " Finishing setSsdDirectDb_Reader..........."<<endm;
 }
-//_____________________________________________________________________________
-//void StSsdDbMaker::setSsdDbWriter(int unixTime)
-//{    
-  // mUnixTimeStamp = unixTime;
-  // mWriter        = new StSsdDbWriter(mUnixTimeStamp);
-//}
-//_____________________________________________________________________________
-//void StSvtDbMaker::setSvtDbWriter(Text_t *timestamp)
-//{
-//  mTimeStamp = timestamp;
-//  mWriter    = new StSvtDbWriter(mTimeStamp);
-//}
 //_____________________________________________________________________________
 void StSsdDbMaker::setSsdConfig()
 {    

@@ -1,6 +1,9 @@
-// $Id: St_SsdDb_Reader.cc,v 1.6 2005/06/21 15:06:02 lmartin Exp $
+// $Id: St_SsdDb_Reader.cc,v 1.7 2006/09/18 16:40:14 fisyak Exp $
 //
 // $Log: St_SsdDb_Reader.cc,v $
+// Revision 1.7  2006/09/18 16:40:14  fisyak
+// Add sim flag for ssdWafersPosition
+//
 // Revision 1.6  2005/06/21 15:06:02  lmartin
 // information from the ssdDimensions table added
 //
@@ -51,7 +54,7 @@ St_SsdDb_Reader::~St_SsdDb_Reader()
     delete mSsdGeom;
 }
 //_____________________________________________________________________________
-void St_SsdDb_Reader::setDataBase(St_DataSet *input, int number)
+void St_SsdDb_Reader::setDataBase(TDataSet *input, int number)
 {
 
   if (input)
