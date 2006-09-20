@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.13 2005/08/19 19:46:05 mvl Exp $
+ * $Id: StMuEvent.h,v 1.14 2006/09/20 01:50:35 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -8,6 +8,7 @@
 #define StMuEvent_h
 
 #include "TObject.h"
+#include "TArrayI.h"
 #include "StMuL3EventSummary.h"
 #include "StMuEmcCollection.h"
 #include "StMuTriggerIdCollection.h"
@@ -87,6 +88,8 @@ class StMuEvent : public TObject {
   ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
   StThreeVectorF primaryVertexPosition();
   StThreeVectorF primaryVertexErrors();
+  TArrayI& L2Result(); // Raw L2Result[] array
+
  protected:
   void clear();
   void fill(const StEvent*);
@@ -114,11 +117,13 @@ class StMuEvent : public TObject {
   Float_t mReactionPlanePtWgt[2];              
 
   StThreeVectorF mPrimaryVertexError;
+
+  TArrayI mL2Result; // Raw L2 info
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuMomentumShiftMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,6)
+  ClassDef(StMuEvent,7)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -156,11 +161,15 @@ inline double StMuEvent::ctbMultiplicity() {
 }
 inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.primaryVertexPosition();}
 inline StThreeVectorF StMuEvent::primaryVertexErrors() { return mPrimaryVertexError;}
+inline TArrayI &StMuEvent::L2Result() { return mL2Result; }
 
 #endif
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.14  2006/09/20 01:50:35  mvl
+ * Added data member and code for L2Result array (TArrayI).
+ *
  * Revision 1.13  2005/08/19 19:46:05  mvl
  * Further updates for multiple vertices. The main changes are:
  * 1) StMudst::primaryTracks() now returns a list (TObjArray*) of tracks
