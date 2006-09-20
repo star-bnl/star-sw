@@ -34,6 +34,12 @@ dumpL2info() {
       cout << "L2 trig " << i_trig << " :  isTrig " 
            << trgData->isL2Triggered((StL2AlgorithmId)i_trig) << endl;
     }
+    int L2ResSize=event->L2Result().GetSize();
+    int k;
+    cout << "\nL2result size="<<L2ResSize<<" dump raw values :"<<endl;
+    for(k=0;k<L2ResSize;k++) {
+      cout<<"k="<<k<<" val/dec="<<L2Res[k]<<endl;
+    } 
     delete trgData;
   }
 }
