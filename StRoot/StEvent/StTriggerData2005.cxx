@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2005.cxx,v 2.9 2006/09/19 22:53:55 ullrich Exp $
+ * $Id: StTriggerData2005.cxx,v 2.10 2006/09/20 00:44:56 ullrich Exp $
  *
  * Author: Akio Ogawa, Oct 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2005.cxx,v $
+ * Revision 2.10  2006/09/20 00:44:56  ullrich
+ * Modified method to return length of L2 results.
+ *
  * Revision 2.9  2006/09/19 22:53:55  ullrich
  * Added access method to L2 results.
  *
@@ -922,7 +925,7 @@ bool StTriggerData2005::isL2Triggered(StL2TriggerResultType id) const
   }
 }    
 
-unsigned int StTriggerData2005::l2ResultSizeInBytes() const
+unsigned int StTriggerData2005::l2ResultLength() const
 {
     return sizeof(mData->TrgSum.L2Result)/sizeof(unsigned int);
 }

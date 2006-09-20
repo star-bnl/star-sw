@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.15 2006/09/19 22:53:55 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.16 2006/09/20 00:44:56 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.16  2006/09/20 00:44:56  ullrich
+ * Modified method to return length of L2 results.
+ *
  * Revision 2.15  2006/09/19 22:53:55  ullrich
  * Added access method to L2 results.
  *
@@ -177,7 +180,7 @@ public:
     virtual unsigned short int * getDsm1_EEMC(int prepost=0) const =0;
     virtual unsigned short int * getDsm2_EMC()  const =0;
     virtual unsigned short int * getDsm3()      const =0;
-    virtual unsigned int         l2ResultSizeInBytes() const = 0;  // Length of raw info
+    virtual unsigned int         l2ResultLength() const = 0;  // Length of raw info
     virtual const unsigned int*  l2Result() const = 0;  // Pointer to raw info
 
 protected:
