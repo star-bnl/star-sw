@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.12 2006/09/19 22:53:55 ullrich Exp $
+ * $Id: StTriggerData2003.h,v 2.13 2006/09/20 00:44:55 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.13  2006/09/20 00:44:55  ullrich
+ * Modified method to return length of L2 results.
+ *
  * Revision 2.12  2006/09/19 22:53:55  ullrich
  * Added access method to L2 results.
  *
@@ -151,7 +154,7 @@ public:
     unsigned short int * getDsm1_EEMC(int prepost=0) const;
     unsigned short int * getDsm2_EMC()  const;
     unsigned short int * getDsm3()      const;
-    unsigned int         l2ResultSizeInBytes() const;
+    unsigned int         l2ResultLength() const;
     const unsigned int*  l2Result() const;
     
 protected:
