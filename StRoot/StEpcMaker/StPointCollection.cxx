@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.25  2006/09/20 13:44:28  kocolosk
+// fix autobuild warnings
+//
 // Revision 1.24  2006/03/24 19:31:15  suaide
 // fixed break segmentation error.
 //
@@ -388,7 +391,7 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
     Int_t ma=pvec.size();
     Float_t smin;
     Int_t mode=1;
-    Int_t Category;
+    Int_t Category=-1; //this one *always* changes to 0,1,2,3 in the if-block below
     Float_t EmcTot = 0;
     Float_t totAvg = 0;
     Int_t idw =Epc::nMaxNoOfClinBin;
@@ -447,10 +450,10 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
     //
     for(Int_t ie=0;ie<na;ie++)
     {
-        StEmcCluster *cl1;
+        StEmcCluster *cl1 = NULL;
         for(Int_t ip=0;ip<ma;ip++)
         {
-            StEmcCluster *cl2;
+            StEmcCluster *cl2 = NULL;
             switch (Category)
             {
             case 0:
@@ -471,9 +474,11 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
                 break;
             }
 
-            Float_t diff=TMath::Abs((cl1->energy())-(cl2->energy()));
-            Float_t summ= (cl1->energy())+(cl2->energy());
-            ep[ip][ie]=diff/summ;
+	    if(cl1 && cl2){
+            	Float_t diff=TMath::Abs((cl1->energy())-(cl2->energy()));
+            	Float_t summ= (cl1->energy())+(cl2->energy());
+            	ep[ip][ie]=diff/summ;
+	    }
         }
     }
 
@@ -543,6 +548,7 @@ Int_t StPointCollection::matchClusters(const StMatchVecClus mvec,
         StEmcCluster *bsmdp = NULL;
         Float_t fraction    = 1;
         Float_t eta, phi;
+	eta = phi = -999.; //these should always be initialized, but it would be nice to prove it
 
         switch (Category)
         {

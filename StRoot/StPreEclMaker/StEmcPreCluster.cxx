@@ -65,6 +65,8 @@ void StEmcPreCluster::update()
 
     Int_t m,e,s;
     Float_t E,P,energy,phi0;
+    phi0 = -999; //this is always initialized below if there are any hits at all
+    Bool_t firstHit = true;
     for(Int_t i = 0;i<nH;i++)
     {
         StEmcRawHit* hit = getHit(i);
@@ -78,10 +80,11 @@ void StEmcPreCluster::update()
             mGeom->getEta(m,e, E);
             mGeom->getPhi(m,s, P);
             // Rotate to the system of first hit
-            if(i==0)
+            if(firstHit)
             {
                 phi0 =  P;
                 P = 0.0;
+		firstHit = false;
             }
             else
                 P-=phi0;

@@ -468,6 +468,8 @@ Int_t StEmcSimulatorMaker::Make()
     }
 
     Int_t retBemc, retEemc;
+    retBemc = kStWarn;
+    retEemc = kStWarn;
     if(mBEMC)
         retBemc = makeBemc();
     if(mEEMC)
@@ -1234,8 +1236,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.33 2006/02/16 16:11:41 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.34 2006/09/20 13:44:25 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.34  2006/09/20 13:44:25  kocolosk
+// fix autobuild warnings
+//
 // Revision 1.33  2006/02/16 16:11:41  suaide
 // small modification in the way the calibration spread/offset is created
 //
