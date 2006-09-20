@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.11 2006/09/20 01:50:35 mvl Exp $
+ * $Id: StMuEvent.cxx,v 1.12 2006/09/20 17:23:39 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -114,7 +114,8 @@ void StMuEvent::fill(const StEvent* event){
   mRefMultFtpcEast = uncorrectedNumberOfFtpcEastPrimaries(*event);
   mRefMultFtpcWest = uncorrectedNumberOfFtpcWestPrimaries(*event); 
 
-  mL2Result.Set(event->triggerData()->l2ResultLength(),(const Int_t*) event->triggerData()->l2Result());
+  if (event->triggerData()) // MC has no triggerData
+    mL2Result.Set(event->triggerData()->l2ResultLength(),(const Int_t*) event->triggerData()->l2Result());
 } 
 
 unsigned short StMuEvent::refMultPos(int vtx_id) {
@@ -167,6 +168,9 @@ unsigned short StMuEvent::refMultFtpc(int vtx_id) {return refMultFtpcEast(vtx_id
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.12  2006/09/20 17:23:39  mvl
+ * Added protected for events with StTriggerData (e.g. simulation)
+ *
  * Revision 1.11  2006/09/20 01:50:35  mvl
  * Added data member and code for L2Result array (TArrayI).
  *
