@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.108 2006/06/19 23:26:03 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.109 2006/09/22 21:27:51 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.109  2006/09/22 21:27:51  potekhin
+// Added readout of hits for two R&D detectors,
+// GEM and HPD
+//
 // Revision 1.108  2006/06/19 23:26:03  potekhin
 // Need the correct handle on the IDT hits,
 // the previous tags were obsolete
@@ -422,8 +426,10 @@
 #include "g2t/St_g2t_svt_Module.h"
 #include "g2t/St_g2t_ssd_Module.h"
 #include "g2t/St_g2t_pix_Module.h"
+#include "g2t/St_g2t_hpd_Module.h"
 #include "g2t/St_g2t_ist_Module.h"
 #include "g2t/St_g2t_igt_Module.h"
+#include "g2t/St_g2t_gem_Module.h"
 #include "g2t/St_g2t_fst_Module.h"
 #include "g2t/St_g2t_fgt_Module.h"
 #include "g2t/St_g2t_tpc_Module.h"
@@ -883,6 +889,17 @@ Int_t St_geant_Maker::Make()
   }
   
   nhits = 0;
+  geant3->Gfnhit("HPDH","YPLA", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_hpd_hit *g2t_hpd_hit = new St_g2t_hpd_hit("g2t_hpd_hit",nhits);
+    m_DataSet->Add(g2t_hpd_hit);
+    
+    iRes = g2t_hpd(g2t_track,g2t_hpd_hit); if (Debug() > 1) g2t_hpd_hit->Print(0,10);
+    //	     ===============================
+  }
+
+  nhits = 0;
   geant3->Gfnhit("ISTH","IBSS", nhits);
   
   if (nhits>0) { 
@@ -893,6 +910,18 @@ Int_t St_geant_Maker::Make()
     //	     ===============================
   }
 
+  nhits = 0;
+  geant3->Gfnhit("GEMB","GMDI", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_gem_hit *g2t_gem_hit = new St_g2t_gem_hit("g2t_gem_hit",nhits);
+    m_DataSet->Add(g2t_gem_hit);
+    
+    iRes = g2t_gem(g2t_track,g2t_gem_hit); if (Debug() > 1) g2t_gem_hit->Print(0,10);
+    //	     ===============================
+  }
+
+  nhits = 0;
   geant3->Gfnhit("IGTH","IGAL", nhits);
   
   if (nhits>0) { 
