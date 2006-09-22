@@ -9,11 +9,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.23 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.24 2006/09/22 19:19:34 fisyak Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.cc,v $
+ * Revision 2.24  2006/09/22 19:19:34  fisyak
+ * Add generic access functions for tracking and calorimeter hits
+ *
  * Revision 2.23  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -53,8 +56,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
 
- * $Id: StMcTrack.cc,v 2.23 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcTrack.cc,v 2.24 2006/09/22 19:19:34 fisyak Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.24  2006/09/22 19:19:34  fisyak
+ * Add generic access functions for tracking and calorimeter hits
+ *
  * Revision 2.23  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -162,7 +168,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.23 2005/11/22 21:44:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.24 2006/09/22 19:19:34 fisyak Exp $";
 
 ClassImp(StMcTrack);
 
@@ -686,4 +692,74 @@ StParticleDefinition* StMcTrack::particleDefinition() {
   if (mParticleDefinition) return mParticleDefinition; 
   if (mPdgId)  mParticleDefinition = StParticleTable::instance()->findParticle(mPdgId);
   return mParticleDefinition;
+}
+//--------------------------------------------------------------------------------
+const StPtrVecMcHit *StMcTrack::Hits(StDetectorId Id) const {
+  StPtrVecMcHit *coll = 0;
+  switch (Id) {
+  case kTpcId:                  coll = (StPtrVecMcHit *) &mTpcHits; break; 	                
+  case kSvtId:       	  	coll = (StPtrVecMcHit *) &mSvtHits; break; 	    
+  case kRichId:      	  	coll = (StPtrVecMcHit *) &mRichHits; break;                 
+  case kFtpcWestId:  	  	
+  case kFtpcEastId:  	  	coll = (StPtrVecMcHit *) &mFtpcHits; break;             
+  case kTofId:       	  	coll = (StPtrVecMcHit *) &mTofHits; break; 	           	 
+  case kCtbId:       	  	coll = (StPtrVecMcHit *) &mCtbHits; break; 	           	 
+  case kSsdId:       	  	coll = (StPtrVecMcHit *) &mSsdHits; break; 	         
+  case kBarrelEmcTowerId:    	break; 
+  case kBarrelEmcPreShowerId:	break; 
+  case kBarrelSmdEtaStripId: 	break;
+  case kBarrelSmdPhiStripId: 	break;    
+  case kEndcapEmcTowerId:    	break;     
+  case kEndcapEmcPreShowerId:	break;     
+  case kEndcapSmdUStripId:   	break;    
+  case kEndcapSmdVStripId:   	break;
+  case kZdcWestId:           	
+  case kZdcEastId:   	  	break;                   
+  case kMwpcWestId:  	  	
+  case kMwpcEastId:  	  	break;              
+  case kPhmdCpvId:   	  	break;               
+  case kPhmdId:      	  	break;                  
+  case kHftId:     	  	coll = (StPtrVecMcHit *) &mPixelHits; break;       
+  case kIstId:       	  	coll = (StPtrVecMcHit *) &mIstHits; break;                  
+  case kIgtId:       	  	coll = (StPtrVecMcHit *) &mIgtHits; break;                  
+  case kFstId:   	  	coll = (StPtrVecMcHit *) &mFstHits; break;   
+  case kFgtId:  	        coll = (StPtrVecMcHit *) &mFgtHits; break;   
+  default:                      break;          
+  };
+  return coll;
+}
+//--------------------------------------------------------------------------------
+const StPtrVecMcCalorimeterHit *StMcTrack::CalorimeterHits(StDetectorId Id) const {
+  StPtrVecMcCalorimeterHit *coll = 0;
+  switch (Id) {
+  case kTpcId:                  break; 	                
+  case kSvtId:       	  	break; 	    
+  case kRichId:      	  	break;                 
+  case kFtpcWestId:  	  	
+  case kFtpcEastId:  	  	break;             
+  case kTofId:       	  	break; 	           	 
+  case kCtbId:       	  	break; 	           	 
+  case kSsdId:       	  	break; 	         
+  case kBarrelEmcTowerId:    	coll = (StPtrVecMcCalorimeterHit *) &mBemcHits;  break; 
+  case kBarrelEmcPreShowerId:	coll = (StPtrVecMcCalorimeterHit *) &mBprsHits;  break; 
+  case kBarrelSmdEtaStripId: 	coll = (StPtrVecMcCalorimeterHit *) &mBsmdeHits; break;
+  case kBarrelSmdPhiStripId: 	coll = (StPtrVecMcCalorimeterHit *) &mBsmdpHits; break;    
+  case kEndcapEmcTowerId:    	coll = (StPtrVecMcCalorimeterHit *) &mEemcHits;  break;     
+  case kEndcapEmcPreShowerId:	coll = (StPtrVecMcCalorimeterHit *) &mEprsHits;  break;     
+  case kEndcapSmdUStripId:   	coll = (StPtrVecMcCalorimeterHit *) &mEsmduHits; break;    
+  case kEndcapSmdVStripId:   	coll = (StPtrVecMcCalorimeterHit *) &mEsmdvHits; break;
+  case kZdcWestId:           	
+  case kZdcEastId:   	  	break;                   
+  case kMwpcWestId:  	  	
+  case kMwpcEastId:  	  	break;              
+  case kPhmdCpvId:   	  	break;               
+  case kPhmdId:      	  	break;                  
+  case kHftId:     	  	break;       
+  case kIstId:       	  	break;                  
+  case kIgtId:       	  	break;                  
+  case kFstId:   	  	break;   
+  case kFgtId:   	        break;   
+  default:                      break;          
+  };
+  return coll;
 }

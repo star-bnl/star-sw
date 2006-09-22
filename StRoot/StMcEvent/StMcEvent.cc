@@ -8,8 +8,11 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.24 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcEvent.cc,v 2.25 2006/09/22 19:19:34 fisyak Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.25  2006/09/22 19:19:34  fisyak
+ * Add generic access functions for tracking and calorimeter hits
+ *
  * Revision 2.24  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -143,8 +146,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.24 2005/11/22 21:44:51 fisyak Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.24 2005/11/22 21:44:51 fisyak Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.25 2006/09/22 19:19:34 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.25 2006/09/22 19:19:34 fisyak Exp $";
 ClassImp(StMcEvent);
 #if 0
 template<class T> void
@@ -308,76 +311,38 @@ StMcEvent::operator=(const StMcEvent&) { return *this;} // private
 
 StMcEvent::~StMcEvent()
 {
-    if (mTpcHits) delete mTpcHits;
-    mTpcHits=0;
-
-    if (mSvtHits) delete mSvtHits;
-    mSvtHits=0;
-
-    if (mSsdHits) delete mSsdHits;
-    mSsdHits=0;
-
-    if (mFtpcHits) delete mFtpcHits;
-    mFtpcHits=0;
-
-    if (mRichHits) delete mRichHits;
-    mRichHits=0;
-
-    if (mCtbHits) delete mCtbHits;
-    mCtbHits=0;
+  SafeDelete(mTpcHits);
+  SafeDelete(mSvtHits);
+  SafeDelete(mSsdHits);
+  SafeDelete(mFtpcHits);
+  SafeDelete(mRichHits);
+  SafeDelete(mCtbHits);
 #if 0    
-    if (mBemcHits) delete mBemcHits;
-    mBemcHits=0;
-
-    if (mBprsHits) delete mBprsHits;
-    mBprsHits=0;
-
-    if (mBsmdeHits) delete mBsmdeHits;
-    mBsmdeHits=0;
-
-    if (mBsmdpHits) delete mBsmdpHits;
-    mBsmdpHits=0;
-
-    if (mTofHits) delete mTofHits;
-    mTofHits=0;
-
-    if (mEemcHits) delete mEemcHits;
-    mEemcHits=0;
-
-     if (mEprsHits) delete mEprsHits;
-    mEprsHits=0;
-
-    if (mEsmduHits) delete mEsmduHits;
-    mEsmduHits=0;
-
-    if (mEsmdvHits) delete mEsmdvHits;
-    mEsmdvHits=0;
+  SafeDelete(mBemcHits);
+  SafeDelete(mBprsHits);
+  SafeDelete(mBsmdeHits);
+  SafeDelete(mBsmdpHits);
+  SafeDelete(mTofHits);
+  SafeDelete(mEemcHits);
+  SafeDelete(mEprsHits);
+  SafeDelete(mEsmduHits);
+  SafeDelete(mEsmdvHits);
 #endif    
-    if (mPixelHits) delete mPixelHits;
-    mPixelHits=0;
-    
-    if (mIstHits) delete mIstHits;
-    mIstHits=0;
-
-    if (mIgtHits) delete mIgtHits;
-    mIgtHits=0;
-
-    if (mFstHits) delete mFstHits;
-    mFstHits=0;
-    
-    if (mFgtHits) delete mFgtHits;
-    mFgtHits=0;
-    
-    for(StMcTrackIterator it=mTracks.begin();
-	it != mTracks.end(); it++)
-	delete *it;    
-    mTracks.clear();
-    
-    for(StMcVertexIterator iv=mVertices.begin();
-	iv != mVertices.end(); iv++)
-	delete *iv;
-    mVertices.clear();
-    
+  SafeDelete(mTofHits);
+  SafeDelete(mPixelHits);
+  SafeDelete(mIstHits);
+  SafeDelete(mIgtHits);
+  SafeDelete(mFstHits);
+  SafeDelete(mFgtHits);
+  for(StMcTrackIterator it=mTracks.begin();
+      it != mTracks.end(); it++)
+    delete *it;    
+  mTracks.clear();
+  
+  for(StMcVertexIterator iv=mVertices.begin();
+      iv != mVertices.end(); iv++)
+    delete *iv;
+  mVertices.clear();
 }
 
 int StMcEvent::operator==(const StMcEvent& e) const
