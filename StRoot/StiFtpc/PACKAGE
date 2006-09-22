@@ -1,5 +1,0 @@
-# $Id $
-# package StiFtpc
-# author: 
-Library:libStiFtpc.so:LIBS +=   -l_StEvent  -lStiGui -lGui -l_StMcEventMaker -lStChain -lSti
-#Library:libStiFtpc.so:LIBS +=   -lStEvent  -lStiGui  -lSti

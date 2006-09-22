@@ -1,4 +1,0 @@
-# $Id $
-# package StFlowMaker
-# author: 
-Library:libStFlowMaker.so:LIBS +=   -lStChain  -lStEvent  -lStEventUtilities  -lStHbtMaker  -lStMuDSTMaker  -lPhysics
