@@ -6,11 +6,14 @@
  *
  ***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.21 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcTrack.hh,v 2.22 2006/09/22 19:19:34 fisyak Exp $
  *
  ***************************************************************************
  *
  * $Log: StMcTrack.hh,v $
+ * Revision 2.22  2006/09/22 19:19:34  fisyak
+ * Add generic access functions for tracking and calorimeter hits
+ *
  * Revision 2.21  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -110,6 +113,7 @@
 #include "StLorentzVectorF.hh"
 #include "StMcContainers.hh"
 #include "StObject.h"
+#include "StEnumerations.h"
 class StParticleDefinition;
 class g2t_track_st;
 class particle_st;
@@ -187,6 +191,8 @@ public:
   const StPtrVecMcFgtHit& fgtHits() const { return mFgtHits; }
   StParticleDefinition* particleDefinition();
   const StParticleDefinition* particleDefinition() const { return mParticleDefinition; }
+  const StPtrVecMcHit *Hits(StDetectorId Id) const;
+  const StPtrVecMcCalorimeterHit *CalorimeterHits(StDetectorId Id) const;
   int isShower() const { return mIsShower; }
   long geantId() const { return mGeantId; }
   long pdgId() const { return mPdgId; }
