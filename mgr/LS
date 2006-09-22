@@ -1,0 +1,11 @@
+#
+# ls very big directory
+# "LS dirname" or "LS" for current one
+#root.exe -b -l "LS.C(\"${1}\")" -q
+
+root.exe -b -l  <<EOF
+.x LS.C("${1}")
+.q
+EOF
+
+exit
