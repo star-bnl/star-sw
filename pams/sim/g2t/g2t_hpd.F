@@ -1,5 +1,8 @@
-* $Id: g2t_hpd.F,v 1.1 2006/09/22 21:12:17 potekhin Exp $
+* $Id: g2t_hpd.F,v 1.2 2006/09/22 21:40:11 potekhin Exp $
 * $Log: g2t_hpd.F,v $
+* Revision 1.2  2006/09/22 21:40:11  potekhin
+* Fixed a typo
+*
 * Revision 1.1  2006/09/22 21:12:17  potekhin
 * Need tp add the HPD
 *
@@ -20,7 +23,7 @@
       g2t_hpd_hit_h.nok = 0
 
 
-      call G2R_GET_SYS ('HPDB','IBSS',Iprin,Idigi)
+      call G2R_GET_SYS ('HPDT','YPLA',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
        Local  = Idigi.ge.2
 
