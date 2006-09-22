@@ -9,8 +9,11 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.60 2005/10/07 20:39:02 fisyak Exp $
+ * $Id: StMcEventMaker.cxx,v 1.61 2006/09/22 19:21:52 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.61  2006/09/22 19:21:52  fisyak
+ * fill flag that the particle is coming from primary vertex
+ *
  * Revision 1.60  2005/10/07 20:39:02  fisyak
  * Restore comment field from particle table
  *
@@ -275,7 +278,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.60 2005/10/07 20:39:02 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.61 2006/09/22 19:21:52 fisyak Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -771,6 +774,7 @@ Int_t StMcEventMaker::Make()
 	    //	    if (particleTable[gtrk].isthep > 3) continue; // skip comment fields
 	    egTrk = new StMcTrack(&(particleTable[gtrk]));
 	    egTrk->setEventGenLabel(gtrk+1);
+	    egTrk->setPrimary(0);
 	    ttempParticle[gtrk] = egTrk;
 	    mCurrentMcEvent->tracks().push_back(egTrk); // adds track egTrk to master collection 
 	    usedTracksEvGen++;
@@ -819,6 +823,7 @@ Int_t StMcEventMaker::Make()
 	    v = vtemp[iStartVtxId].vtx; // This should already know the right vertex.
 	    
 	    t->setStartVertex(v);
+	    t->setPrimary(t->startVertex() == mCurrentMcEvent->primaryVertex() ? kTRUE : kFALSE);
 	    v->addDaughter(t);
 	    //cout << "Established relation btw track & START vertex" << endl;
 	    
