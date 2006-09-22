@@ -1,6 +1,9 @@
 struct g2t_track {
-  /* $Id: g2t_track.idl,v 1.11 2006/06/26 19:58:35 potekhin Exp $
+  /* $Id: g2t_track.idl,v 1.12 2006/09/22 20:16:42 potekhin Exp $
      $Log: g2t_track.idl,v $
+     Revision 1.12  2006/09/22 20:16:42  potekhin
+     Added HPD (R&D)
+
      Revision 1.11  2006/06/26 19:58:35  potekhin
      Include the gem barrel detector
 
@@ -29,6 +32,7 @@ struct g2t_track {
        long      hit_esm_p;  /* Id of first esm hit on track linked list */
        long      hit_ftp_p;  /* Id of first ftp hit on track linked list */
        long      hit_gem_p;  /* Id of first gem hit on track linked list */
+       long      hit_hpd_p;  /* Id of first hpd hit on track linked list */
        long      hit_ist_p;  /* Id of first ist hit on track linked list */
        long      hit_igt_p;  /* Id of first igt hit on track linked list */
        long      hit_fst_p;  /* Id of first fst hit on track linked list */
@@ -52,6 +56,7 @@ struct g2t_track {
        long      n_esm_hit;  /* Nhits in esm (endcap shower max) */
        long      n_ftp_hit;  /* Nhits in forward tpc */
        long      n_gem_hit;  /* Nhits in gem barrel */
+       long      n_hpd_hit;  /* Nhits in hpd */
        long      n_ist_hit;  /* Nhits in ist */
        long      n_igt_hit;  /* Nhits in igt */
        long      n_fst_hit;  /* Nhits in fst */
