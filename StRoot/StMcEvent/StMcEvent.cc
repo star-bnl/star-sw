@@ -8,10 +8,10 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.26 2006/09/25 14:20:43 fisyak Exp $
+ * $Id: StMcEvent.cc,v 2.27 2006/09/25 14:31:15 fisyak Exp $
  * $Log: StMcEvent.cc,v $
- * Revision 2.26  2006/09/25 14:20:43  fisyak
- * Add Hpd Hits
+ * Revision 2.27  2006/09/25 14:31:15  fisyak
+ * remove duplicated SafeDelete(mTofHits)
  *
  * Revision 2.24  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
@@ -148,8 +148,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.26 2006/09/25 14:20:43 fisyak Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.26 2006/09/25 14:20:43 fisyak Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.27 2006/09/25 14:31:15 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.27 2006/09/25 14:31:15 fisyak Exp $";
 ClassImp(StMcEvent);
 #if 0
 template<class T> void
@@ -332,7 +332,6 @@ StMcEvent::~StMcEvent()
   SafeDelete(mEsmduHits);
   SafeDelete(mEsmdvHits);
 #endif    
-  SafeDelete(mTofHits);
   SafeDelete(mPixelHits);
   SafeDelete(mIstHits);
   SafeDelete(mHpdHits);
