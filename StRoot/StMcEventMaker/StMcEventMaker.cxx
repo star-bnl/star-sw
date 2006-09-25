@@ -9,10 +9,10 @@
  *
  *************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.61 2006/09/22 19:21:52 fisyak Exp $
+ * $Id: StMcEventMaker.cxx,v 1.62 2006/09/25 14:21:46 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
- * Revision 1.61  2006/09/22 19:21:52  fisyak
- * fill flag that the particle is coming from primary vertex
+ * Revision 1.62  2006/09/25 14:21:46  fisyak
+ * Add Hpd Hits
  *
  * Revision 1.60  2005/10/07 20:39:02  fisyak
  * Restore comment field from particle table
@@ -259,6 +259,7 @@ using std::find;
 #include "tables/St_g2t_emc_hit_Table.h"
 #include "tables/St_g2t_pix_hit_Table.h"
 #include "tables/St_g2t_ist_hit_Table.h"
+#include "tables/St_g2t_hpd_hit_Table.h"
 #include "tables/St_g2t_igt_hit_Table.h"
 #include "tables/St_g2t_fst_hit_Table.h"
 #include "tables/St_g2t_fgt_hit_Table.h"
@@ -278,7 +279,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.61 2006/09/22 19:21:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.62 2006/09/25 14:21:46 fisyak Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -303,6 +304,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseEemc        (kTRUE),
     doUsePixel       (kTRUE),
     doUseIst         (kTRUE),
+    doUseHpd         (kTRUE),
     doUseIgt         (kTRUE),
     doUseFst         (kTRUE),
     doUseFgt         (kTRUE),
@@ -436,6 +438,7 @@ Int_t StMcEventMaker::Make()
     St_g2t_emc_hit *g2t_esm_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_esm_hit");
     St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_g2t_ist_hit *g2t_ist_hitTablePointer =  (St_g2t_ist_hit *) geantDstI("g2t_ist_hit");
+    St_g2t_hpd_hit *g2t_hpd_hitTablePointer =  (St_g2t_hpd_hit *) geantDstI("g2t_hpd_hit");
     St_g2t_igt_hit *g2t_igt_hitTablePointer =  (St_g2t_igt_hit *) geantDstI("g2t_igt_hit");
     St_g2t_fst_hit *g2t_fst_hitTablePointer =  (St_g2t_fst_hit *) geantDstI("g2t_fst_hit");
     St_g2t_fgt_hit *g2t_fgt_hitTablePointer =  (St_g2t_fgt_hit *) geantDstI("g2t_fgt_hit");
@@ -596,7 +599,13 @@ Int_t StMcEventMaker::Make()
 	    istHitTable = g2t_ist_hitTablePointer->GetTable();
 	else 
 	    if (Debug()) cerr << "Table g2t_ist_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-
+	// Hpd Hit Table
+	//
+	g2t_hpd_hit_st *hpdHitTable=0;
+	if (g2t_hpd_hitTablePointer)
+	    hpdHitTable = g2t_hpd_hitTablePointer->GetTable();
+	else 
+	    if (Debug()) cerr << "Table g2t_hpd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	//	
 	// Igt Hit Table
 	//
@@ -1368,6 +1377,38 @@ Int_t StMcEventMaker::Make()
 		if (Debug()) cout << "No Ist Hits in this event" << endl;
 	    }
 	}// do use ist
+	//
+	// HPD Hits
+	//
+	if (doUseHpd) {
+	    if (g2t_hpd_hitTablePointer) {    
+		StMcHpdHit* fh = 0;
+		long  NHits = g2t_hpd_hitTablePointer->GetNRows();
+		cout << "Found " << NHits << " hpd hits in McEventMaker "<< endl;
+		long  iTrkId = 0;
+		long ihit;
+		for(ihit=0; ihit<NHits; ihit++) {
+		    fh = new StMcHpdHit(&hpdHitTable[ihit]);
+		    //cout << *fh << endl;
+		    if (!mCurrentMcEvent->hpdHitCollection()->addHit(fh)){ 
+		      delete fh;
+			fh = 0;
+			continue;
+		    }
+		    // point hit to its parent and add it to collection
+		    // of the appropriate track
+		    iTrkId = (hpdHitTable[ihit].track_p) - 1;
+		    fh->setParentTrack(ttemp[iTrkId]);
+		    ttemp[iTrkId]->addHpdHit(fh);
+		}
+		if (Debug()) {
+		    cout << "Filled " << mCurrentMcEvent->hpdHitCollection()->numberOfHits() << " Hpd Hits" << endl;
+		}
+	    }
+	    else {
+		if (Debug()) cout << "No Hpd Hits in this event" << endl;
+	    }
+	}// do use hpd
 
 	//
 	// Igt Hits

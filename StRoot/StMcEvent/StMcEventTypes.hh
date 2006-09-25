@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.10 2005/11/22 21:44:51 fisyak Exp $
+ * $Id: StMcEventTypes.hh,v 2.11 2006/09/25 14:20:43 fisyak Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.11  2006/09/25 14:20:43  fisyak
+ * Add Hpd Hits
+ *
  * Revision 2.10  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -86,6 +89,9 @@
 #include "StMcIstHit.hh"
 #include "StMcIstHitCollection.hh"
 #include "StMcIstLayerHitCollection.hh"
+#include "StMcHpdHit.hh"
+#include "StMcHpdHitCollection.hh"
+#include "StMcHpdLayerHitCollection.hh"
 #include "StMcIgtHit.hh"
 #include "StMcIgtHitCollection.hh"
 #include "StMcIgtLayerHitCollection.hh"
