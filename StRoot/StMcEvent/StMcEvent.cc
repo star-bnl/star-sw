@@ -8,10 +8,10 @@
  *
  ***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.25 2006/09/22 19:19:34 fisyak Exp $
+ * $Id: StMcEvent.cc,v 2.26 2006/09/25 14:20:43 fisyak Exp $
  * $Log: StMcEvent.cc,v $
- * Revision 2.25  2006/09/22 19:19:34  fisyak
- * Add generic access functions for tracking and calorimeter hits
+ * Revision 2.26  2006/09/25 14:20:43  fisyak
+ * Add Hpd Hits
  *
  * Revision 2.24  2005/11/22 21:44:51  fisyak
  * Add compress Print for McEvent, add Ssd collections
@@ -124,6 +124,7 @@
 #include "StMcTofHitCollection.hh"
 #include "StMcPixelHitCollection.hh"
 #include "StMcIstHitCollection.hh"
+#include "StMcHpdHitCollection.hh"
 #include "StMcIgtHitCollection.hh"
 #include "StMcFstHitCollection.hh"
 #include "StMcFgtHitCollection.hh"
@@ -139,6 +140,7 @@
 #include "StMcTofHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcIstHit.hh"
+#include "StMcHpdHit.hh"
 #include "StMcIgtHit.hh"
 #include "StMcFstHit.hh"
 #include "StMcFgtHit.hh"
@@ -146,8 +148,8 @@
 #include "TDataSetIter.h"
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.25 2006/09/22 19:19:34 fisyak Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.25 2006/09/22 19:19:34 fisyak Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.26 2006/09/25 14:20:43 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.26 2006/09/25 14:20:43 fisyak Exp $";
 ClassImp(StMcEvent);
 #if 0
 template<class T> void
@@ -228,6 +230,7 @@ void StMcEvent::initToZero()
     mTofHits = 0;
     mPixelHits = 0;
     mIstHits = 0;
+    mHpdHits = 0;
     mIgtHits = 0;
     mFstHits = 0;
     mFgtHits = 0;
@@ -255,6 +258,7 @@ void StMcEvent::initToZero()
 #endif
     mPixelHits = new StMcPixelHitCollection();
     mIstHits = new StMcIstHitCollection();
+    mHpdHits = new StMcHpdHitCollection();
     mIgtHits = new StMcIgtHitCollection();
     mFstHits = new StMcFstHitCollection();
     mFgtHits = new StMcFgtHitCollection();
@@ -331,6 +335,7 @@ StMcEvent::~StMcEvent()
   SafeDelete(mTofHits);
   SafeDelete(mPixelHits);
   SafeDelete(mIstHits);
+  SafeDelete(mHpdHits);
   SafeDelete(mIgtHits);
   SafeDelete(mFstHits);
   SafeDelete(mFgtHits);
@@ -510,8 +515,14 @@ void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
 {
     if (mIstHits && mIstHits!= val) delete mIstHits;
     mIstHits = val;
-}   
-
+}
+   
+void StMcEvent::setHpdHitCollection(StMcHpdHitCollection* val)
+{
+    if (mHpdHits && mHpdHits!= val) delete mHpdHits;
+    mHpdHits = val;
+}
+ 
 void StMcEvent::setIgtHitCollection(StMcIgtHitCollection* val)
 {
     if (mIgtHits && mIgtHits!= val) delete mIgtHits;
@@ -746,6 +757,7 @@ void StMcEvent::Print(Option_t *option) const {
   PrintHitCollection(Tof,tof);
   PrintHitCollectionL(Pixel,pixel,layer,Layers);
   PrintHitCollectionL(Ist,ist,layer,Layers);
+  PrintHitCollectionL(Hpd,hpd,layer,Layers);
   PrintHitCollectionL(Igt,igt,layer,Layers);
   PrintHitCollectionL(Fst,fst,layer,Layers);
   PrintHitCollectionL(Fgt,fgt,layer,Layers);

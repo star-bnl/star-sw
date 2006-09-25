@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.21 2005/10/03 14:08:02 fisyak Exp $
+ * $Id: StMcEvent.hh,v 2.22 2006/09/25 14:20:43 fisyak Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.22  2006/09/25 14:20:43  fisyak
+ * Add Hpd Hits
+ *
  * Revision 2.21  2005/10/03 14:08:02  fisyak
  * fix memory leak with EmcHitCollections
  *
@@ -115,6 +118,7 @@ class StMcSsdHitCollection;
 class StMcTofHitCollection;
 class StMcPixelHitCollection;
 class StMcIstHitCollection;
+class StMcHpdHitCollection;
 class StMcIgtHitCollection;
 class StMcFstHitCollection;
 class StMcFgtHitCollection;
@@ -207,7 +211,9 @@ class StMcEvent : public TDataSet {
   StMcPixelHitCollection*      pixelHitCollection()       {return mPixelHits;}				
   const StMcPixelHitCollection*pixelHitCollection() const {return mPixelHits;}		
   StMcIstHitCollection*          istHitCollection()       {return mIstHits;}				
-  const StMcIstHitCollection*    istHitCollection() const {return mIstHits;}			
+  const StMcIstHitCollection*    istHitCollection() const {return mIstHits;}	  
+  StMcHpdHitCollection*          hpdHitCollection()       {return mHpdHits;}				
+  const StMcHpdHitCollection*    hpdHitCollection() const {return mHpdHits;}		
   StMcIgtHitCollection*          igtHitCollection()       {return mIgtHits;}				
   const StMcIgtHitCollection*    igtHitCollection() const {return mIgtHits;}			
   StMcFstHitCollection*          fstHitCollection()       {return mFstHits;}
@@ -255,7 +261,8 @@ class StMcEvent : public TDataSet {
   void setEsmdvHitCollection(StMcEmcHitCollection*);
 #endif
   void setPixelHitCollection(StMcPixelHitCollection*);       
-  void setIstHitCollection(StMcIstHitCollection*);       
+  void setIstHitCollection(StMcIstHitCollection*); 
+  void setHpdHitCollection(StMcHpdHitCollection*);
   void setIgtHitCollection(StMcIgtHitCollection*);       
   void setFstHitCollection(StMcFstHitCollection*);       
   void setFgtHitCollection(StMcFgtHitCollection*);       
@@ -304,6 +311,7 @@ class StMcEvent : public TDataSet {
 #endif
   StMcPixelHitCollection*        mPixelHits;
   StMcIstHitCollection*          mIstHits;
+  StMcHpdHitCollection*          mHpdHits;
   StMcIgtHitCollection*          mIgtHits;
   StMcFstHitCollection*          mFstHits;
   StMcFgtHitCollection*          mFgtHits;

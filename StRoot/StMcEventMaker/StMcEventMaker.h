@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.18 2005/09/28 21:30:51 fisyak Exp $
+ * $Id: StMcEventMaker.h,v 1.19 2006/09/25 14:21:46 fisyak Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.19  2006/09/25 14:21:46  fisyak
+ * Add Hpd Hits
+ *
  * Revision 1.18  2005/09/28 21:30:51  fisyak
  * Persistent StMcEvent
  *
@@ -94,7 +97,7 @@ public:
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.18 2005/09/28 21:30:51 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.19 2006/09/25 14:21:46 fisyak Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -114,6 +117,7 @@ public:
     Bool_t  doUseEemc;             //!
     Bool_t  doUsePixel;            //!
     Bool_t  doUseIst;              //!
+    Bool_t  doUseHpd;              //!
     Bool_t  doUseIgt;              //!
     Bool_t  doUseFst;              //!
     Bool_t  doUseFgt;              //!
