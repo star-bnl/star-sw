@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.29 2004/06/04 11:05:26 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.30 2006/09/25 14:03:42 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.30  2006/09/25 14:03:42  jcs
+// move the reconstruction parameters maxDcaVertex,minNumTracks from code to CodeParams
+//
 // Revision 1.29  2004/06/04 11:05:26  jcs
 // replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
 //
@@ -671,8 +674,8 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
     mHistoBins    = trackParsTable->histoBins;
     mHistoMin     = trackParsTable->histoMin * centimeter;
     mHistoMax     = trackParsTable->histoMax * centimeter;
-    mMaxDcaVertex = 100. * centimeter;
-    mMinNumTracks = 1;  // must be >0 !
+    mMaxDcaVertex = trackParsTable->maxDcaVertex * centimeter;
+    mMinNumTracks = trackParsTable->minNumTracks;  // must be >0 !
 
 
     // Tracker
