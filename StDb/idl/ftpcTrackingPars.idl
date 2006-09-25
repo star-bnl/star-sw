@@ -20,6 +20,8 @@
       long histoBins;
      float histoMin;
      float histoMax;
+     float maxDcaVertex; 
+      long minNumTracks;
      
      /* Tracker 
       */
