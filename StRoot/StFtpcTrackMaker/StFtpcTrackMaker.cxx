@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.76 2006/08/25 07:57:33 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.77 2006/09/27 11:00:31 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.77  2006/09/27 11:00:31  jcs
+// comment out ftpc vs. tpc vertex histogram definitions, they are defined and filled in St_QA_Maker
+//
 // Revision 1.76  2006/08/25 07:57:33  jcs
 // remove debug printout
 //
@@ -415,18 +418,18 @@ if (m_Mode%2 == 1) {
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
 }
 
-  m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", 
-			      "FTPC east vertex xy estimation with resp. to TPC vertex", 
-			      80, -2., 2., 80, -2., 2.);
-  m_vertex_east_z  = new TH1F("fpt_vertex_east_z", 
-			      "FTPC east vertex z estimation with resp. to TPC vertex", 
-			      100, -10., 10.);
-  m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", 
-			      "FTPC west vertex xy estimation with resp. to TPC vertex", 
-			      80, -2., 2., 80, -2., 2.);
-  m_vertex_west_z  = new TH1F("fpt_vertex_west_z", 
-			      "FTPC west vertex z estimation with resp. to TPC vertex",
-			      100, -10., 10.);
+//  m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", 
+//			      "FTPC east vertex xy estimation with resp. to TPC vertex", 
+//			      80, -2., 2., 80, -2., 2.);
+//  m_vertex_east_z  = new TH1F("fpt_vertex_east_z", 
+//			      "FTPC east vertex z estimation with resp. to TPC vertex", 
+//			      100, -10., 10.);
+//  m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", 
+//			      "FTPC west vertex xy estimation with resp. to TPC vertex", 
+//			      80, -2., 2., 80, -2., 2.);
+//  m_vertex_west_z  = new TH1F("fpt_vertex_west_z", 
+//			      "FTPC west vertex z estimation with resp. to TPC vertex",
+//			      100, -10., 10.);
 
   if (IAttr(".histos")) {
      m_theta        = new TH1F("fpt_theta", "FTPC theta", 100, -5.0, 5.0 );
@@ -870,7 +873,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.76 2006/08/25 07:57:33 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.77 2006/09/27 11:00:31 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
