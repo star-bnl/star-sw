@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRnDHit.h,v 2.1 2006/01/19 21:42:06 ullrich Exp $
+ * $Id: StRnDHit.h,v 2.2 2006/09/27 18:31:43 ullrich Exp $
  *
  * Author: Mike Miller and Andrew Rose, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRnDHit.h,v $
+ * Revision 2.2  2006/09/27 18:31:43  ullrich
+ * Fixed setDouble() interface. Was sooo wrong.
+ *
  * Revision 2.1  2006/01/19 21:42:06  ullrich
  * Initial Revision.
  *
@@ -63,11 +66,11 @@ public:
     void setKey(int);
     void setVolumeId(int);
     
-    double setDouble0() const;
-    double setDouble1() const;
-    double setDouble2() const;
-    double setDouble3() const;
-    double setDouble4() const;
+    void setDouble0(double);
+    void setDouble1(double);
+    void setDouble2(double);
+    void setDouble3(double);
+    void setDouble4(double);
 
     void* operator new(size_t sz,void *p)     { return p;}
     void* operator new(size_t)     { return mPool.alloc(); }
@@ -124,10 +127,10 @@ inline void StRnDHit::setExtraByte0(int v) {mExtraByte0=v;}
 inline void StRnDHit::setExtraByte1(int v) {mExtraByte1=v;}
 inline void StRnDHit::setKey(int v) {mKey = v;}
 inline void StRnDHit::setVolumeId(int v) {mVolumeId=v;}
-inline double StRnDHit::setDouble0() const {return mDouble0;}
-inline double StRnDHit::setDouble1() const {return mDouble1;}
-inline double StRnDHit::setDouble2() const {return mDouble2;}
-inline double StRnDHit::setDouble3() const {return mDouble3;}
-inline double StRnDHit::setDouble4() const {return mDouble4;}
+inline void StRnDHit::setDouble0(double val) {mDouble0 = val;}
+inline void StRnDHit::setDouble1(double val) {mDouble1 = val;}
+inline void StRnDHit::setDouble2(double val) {mDouble2 = val;}
+inline void StRnDHit::setDouble3(double val) {mDouble3 = val;}
+inline void StRnDHit::setDouble4(double val) {mDouble4 = val;}
 
 #endif
