@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.19 2004/09/27 14:17:02 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.20 2006/09/27 11:00:31 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.20  2006/09/27 11:00:31  jcs
+// comment out ftpc vs. tpc vertex histogram definitions, they are defined and filled in St_QA_Maker
+//
 // Revision 1.19  2004/09/27 14:17:02  jcs
 // pad vs. time histograms moved to St_QA_Maker
 //
@@ -112,13 +115,13 @@ class StFtpcTrackMaker : public StMaker {
        TH2F          *m_rres_vs_r_west;   //! r residuals vs. r west
        TH2F          *m_phires_vs_r_west; //! phi residuals vs. r west
 
-       TH2F          *m_vertex_east_xy;   //! vertex xy estimation east
-       TH1F          *m_vertex_east_z;    //! vertex z estimation east
+//       TH2F          *m_vertex_east_xy;   //! vertex xy estimation east
+//       TH1F          *m_vertex_east_z;    //! vertex z estimation east
        TH2F          *m_vertex_east_x_vs_sector; //! vertex x estimation east vs sector
        TH2F          *m_vertex_east_y_vs_sector; //! vertex y estimation east vs sector
        TH2F          *m_vertex_east_z_vs_sector; //! vertex z estimation east vs sector
-       TH2F          *m_vertex_west_xy;   //! vertex xy estimation west
-       TH1F          *m_vertex_west_z;    //! vertex z estimation west
+//       TH2F          *m_vertex_west_xy;   //! vertex xy estimation west
+//       TH1F          *m_vertex_west_z;    //! vertex z estimation west
        TH2F          *m_vertex_west_x_vs_sector; //! vertex x estimation west vs sector
        TH2F          *m_vertex_west_y_vs_sector; //! vertex y estimation west vs sector
        TH2F          *m_vertex_west_z_vs_sector; //! vertex z estimation west vs sector
@@ -132,7 +135,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.19 2004/09/27 14:17:02 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.20 2006/09/27 11:00:31 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor
