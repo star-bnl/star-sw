@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StMiniEmbed.C,v 1.8 2006/07/24 19:25:26 calderon Exp $
+// $Id: StMiniEmbed.C,v 1.9 2006/09/29 01:32:12 calderon Exp $
 // owner: Manuel Calderon de la Barca Sanchez
 //
 // what it does: reads .geant.root file from emedding data, produces minimc.root file 
@@ -10,6 +10,9 @@
 //       so if one needs to run elsewhere, and the output directory doesn't have the same
 //       lower level directory structure, no output files will be done.
 // $Log: StMiniEmbed.C,v $
+// Revision 1.9  2006/09/29 01:32:12  calderon
+// use event branch instead of dst branch.
+//
 // Revision 1.8  2006/07/24 19:25:26  calderon
 // Load EEmcUtil, needed by StMcEvent.
 //
@@ -114,8 +117,9 @@ void StMiniEmbed(Int_t nevents=2,
   ioMaker->SetIOMode("r");
   ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
   ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
-  ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
-  ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
+//   ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
+//   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
+  ioMaker->SetBranch("eventBranch",0,"r"); //activate runco Branch
   
   //     const char *mainDB = "MySQL:Geometry_tpc";
   //     St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
