@@ -642,7 +642,7 @@ void StEStructSigmas::PHistograms() {
     sigMPtHatErrors->Reset();
 
 
-    TH1D *hTotEvents[5];
+    TH1D *hTotEvents[6];
 
     TH1D *hNSum[16];
     TH1D *hNDiff[2];
@@ -650,7 +650,7 @@ void StEStructSigmas::PHistograms() {
     TH1D *hNMinus[5];
     TH1D *hNPlusMinus[8];
 
-    TH1D *hPSum[16];
+    TH1D *hPSum[19];
     TH1D *hPDiff[16];
     TH1D *hPPlus[11];
     TH1D *hPMinus[11];
@@ -666,6 +666,8 @@ void StEStructSigmas::PHistograms() {
     hTotEvents[3] = (TH1D *) gDirectory->Get(buffer);
     sprintf(buffer,"%sTotalPlusMinusEvents_%s", mpreFix, mKey);
     hTotEvents[4] = (TH1D *) gDirectory->Get(buffer);
+    sprintf(buffer, "%sTotalEventsForSig2Dyn_%s", mpreFix, mKey);
+    hTotEvents[5] = (TH1D *) gDirectory->Get(buffer);
 
 
     for (int jStat=0;jStat<16;jStat++) {
@@ -690,7 +692,7 @@ void StEStructSigmas::PHistograms() {
     }
 
 
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         sprintf(buffer,"%sPSum%s_%i", mpreFix, mKey, jStat);
         hPSum[jStat] = (TH1D *) gDirectory->Get(buffer);
     }
@@ -716,10 +718,10 @@ void StEStructSigmas::PHistograms() {
     for (int iPhi=1;iPhi<=mNPhiBins;iPhi++) {
         for (int iEta=1;iEta<=mNEtaBins;iEta++) {
             double NS[16], ND[2],  NP[5],  NM[5],  NC[8];
-            double PS[16], PD[16], PP[11], PM[11], PC[17];
+            double PS[19], PD[16], PP[11], PM[11], PC[17];
 
-            double pHat[3], pHat2[3];
-            double sigSq0, sigSq1, sigSq2, sigHat, DsigHat;
+            double pHat[3], pHat2[3], pHatSig2;
+            double sigSq0, sigSq1, sigSq2, sigHat, DsigHat, sigHatSig2;
             double Ss[] = {0, 0, 0}, nSs = 0, DSs = 0, nDSs = 0, hSs = 0, hDSs = 0;
             double Sd[] = {0, 0, 0}, nSd = 0, DSd = 0, nDSd = 0;
             double Sp[] = {0, 0, 0}, nSp = 0, DSp = 0, nDSp = 0, hSp = 0, hDSp = 0;
@@ -730,7 +732,7 @@ void StEStructSigmas::PHistograms() {
             double hatSp = 0;
             double hatSm = 0;
 
-            double totEvents, sumEvents, plusEvents, minusEvents, plusMinusEvents;
+            double totEvents, sumEvents, sig2Events, plusEvents, minusEvents, plusMinusEvents;
 
             mBin = (int) hnBins->GetBinContent(iPhi,iEta);
             oBin = (int) hoffset->GetBinContent(iPhi,iEta);
@@ -750,19 +752,30 @@ void StEStructSigmas::PHistograms() {
                 eta2 = eta1 + iEta * (mEtaMax-mEtaMin) / mNEtaBins;
                 totEvents = hTotEvents[0]->GetBinContent(iBin);
                 sumEvents = hTotEvents[1]->GetBinContent(iBin);
+                sig2Events = hTotEvents[5]->GetBinContent(iBin);
                 if (sumEvents > 0) {
+                    if (sig2Events > 0) {
+                        NS[15] = hNSum[15]->GetBinContent(iBin) * sumEvents / sig2Events;
+                        PS[9]  = hPSum[9]->GetBinContent(iBin)  * sumEvents / sig2Events;
+                        PS[10] = hPSum[10]->GetBinContent(iBin) * sumEvents / sig2Events;
+                        PS[11] = hPSum[11]->GetBinContent(iBin) * sumEvents / sig2Events;
+                        PS[16] = hPSum[16]->GetBinContent(iBin) * sumEvents / sig2Events;
+                        PS[17] = hPSum[17]->GetBinContent(iBin) * sumEvents / sig2Events;
+                        PS[18] = hPSum[18]->GetBinContent(iBin) * sumEvents / sig2Events;
+                    }
                     for (int jStat=0;jStat<16;jStat++) {
                         NS[jStat] = hNSum[jStat]->GetBinContent(iBin) / sumEvents;
                     }
                     for (int jStat=0;jStat<2;jStat++) {
                         ND[jStat] = hNDiff[jStat]->GetBinContent(iBin) / sumEvents;
                     }
-                    for (int jStat=0;jStat<16;jStat++) {
+                    for (int jStat=0;jStat<19;jStat++) {
                         PS[jStat] = hPSum[jStat]->GetBinContent(iBin) / sumEvents;
                     }
                     for (int jStat=0;jStat<16;jStat++) {
                         PD[jStat] = hPDiff[jStat]->GetBinContent(iBin) / sumEvents;
                     }
+                    double NSumSig2 = PS[16];
                     double NSum = NS[0] + NS[1];
                     double PSum = PS[1] + PS[2];
                     if (NSum > 0) {
@@ -781,6 +794,14 @@ void StEStructSigmas::PHistograms() {
                         }
                         pHat2[2] = pHat[2]*pHat[2];
 
+                        if (PS[16] > 0) {
+                            pHatSig2  = PS[17] / PS[16];
+                            sigHatSig2 = PS[18]/NSumSig2 - pHatSig2*pHatSig2;
+                        } else {
+                            pHatSig2 = 0;
+                            sigHatSig2 = 0;
+                        }
+
                         hatSs   += pHat[0];
                         sigHat   = PS[0]/NSum - pHat[0]*pHat[0];
                         hSs     += sigHat;
@@ -792,9 +813,11 @@ void StEStructSigmas::PHistograms() {
                         sigSq1   = PS[5] - 2*pHat[1]*PS[3] - 2*pHat[2]*PS[4]
                                      + pHat2[1]*NS[2] + 2*pHat[1]*pHat[2]*NS[3] + pHat2[2]*NS[4];
                         Ss[1]   += sigSq1/NSum - sigHat;
-                        sigSq2   = PS[11] - 2*pHat[1]*PS[9] - 2*pHat[2]*PS[10]
-                                     + pHat2[1]*NS[8] + 2*pHat[1]*pHat[2]*NS[9] + pHat2[2]*NS[10];
-                        Ss[2]   += NSum * (sigSq2 - sigHat*NS[15]);
+// Doing some tests for Jamie to alleive his concernes over nu_dynamical calculation.
+                        if (NSumSig2 > 0) {
+                            sigSq2   = PS[11] - 2*pHatSig2*PS[10] + pHatSig2*pHatSig2*PS[9];
+                            Ss[2]   += (NSumSig2 -1)* (sigSq2 - sigHatSig2*NS[15]);
+                        }
                         nSs     += 1;
                         bTuple.type     = 6;
                         bTuple.phiScale = iPhi;
@@ -1096,7 +1119,7 @@ void StEStructSigmas::PNHistograms() {
     TH1D *hNMinus[5];
     TH1D *hNPlusMinus[8];
 
-    TH1D *hPSum[16];
+    TH1D *hPSum[19];
     TH1D *hPDiff[16];
     TH1D *hPPlus[11];
     TH1D *hPMinus[11];
@@ -1135,7 +1158,7 @@ void StEStructSigmas::PNHistograms() {
     }
 
 
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         sprintf(buffer,"%sPSum%s_%i", mpreFix, mKey, jStat);
         hPSum[jStat] = (TH1D *) gDirectory->Get(buffer);
     }
@@ -1200,7 +1223,7 @@ void StEStructSigmas::PNHistograms() {
                     for (int jStat=0;jStat<2;jStat++) {
                         ND[jStat] = hNDiff[jStat]->GetBinContent(iBin) / sumEvents;
                     }
-                    for (int jStat=0;jStat<16;jStat++) {
+                    for (int jStat=0;jStat<19;jStat++) {
                         PS[jStat] = hPSum[jStat]->GetBinContent(iBin) / sumEvents;
                     }
                     for (int jStat=0;jStat<16;jStat++) {
