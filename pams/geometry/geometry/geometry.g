@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.127 2006/09/15 19:56:31 potekhin Exp $
+* $Id: geometry.g,v 1.128 2006/10/02 21:37:03 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.128  2006/10/02 21:37:03  potekhin
+* Added steering logic for the new tag UPGR05, which
+* includes the HFT (former pixel), HPD, IST and SSD,
+* but no SVT. GEM detectors are also excluded.
+*
 * Revision 1.127  2006/09/15 19:56:31  potekhin
 * Due to ongoing development, we need to create a new tag,
 * UPGR04, and steering logic for the new detector HPDT
@@ -2227,6 +2232,7 @@ If LL>1
 
                      svtt=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
+
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -2252,17 +2258,73 @@ If LL>1
                      SvttConfig = 4;
 
                   "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdConfig = 1;
+                     phmd=off;
+                     PhmdConfig = 0;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 23;
+                     SisdConfig = 35;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
                    hpdt=on;        " put the detector in"
                    HpdtConfig=1;   " base version"
                 }
+****************************************************************************************
+  on UPGR05   { New Tracking: HFT+HPD+IST+TPC-SVT
 
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 35;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HpdtConfig=1;   " base version"
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=2;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=off;  "new pixel based forward tracker"
+                   FstdConfig=0;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* the forward GEM disks
+                   igtd=on;
+                }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
@@ -2487,6 +2549,7 @@ If LL>1
 * Take care of the correction level and call the appropriate constructor:
   if(svtt) then
 
+	write(*,*) 'foooooooooooooooooooo ',svttconfig
 *   This applies to the newer versions of the svt code:
 *   we can now switch to a better description of the cone
 *   material (copper cables) thanks to a new measurement by
@@ -2675,8 +2738,12 @@ If LL>1
    if (pixl.and.PixlConfig==1) Call pixlgeo
    if (pixl.and.PixlConfig==2) Call pixlgeo1
    if (pixl.and.PixlConfig==3) Call pixlgeo2
+   if (pixl.and.PixlConfig==4) Call pixlgeo3
 
-   if (istb.and.IstbConfig>0)  Call istbgeo
+   if (istb.and.IstbConfig==1)  Call istbgeo
+   if (istb.and.IstbConfig==2)  Call istbgeo1
+
+
    if (gemb.and.GembConfig>0)  Call gembgeo
    if (fstd.and.FstdConfig>0)  Call fstdgeo
    if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
