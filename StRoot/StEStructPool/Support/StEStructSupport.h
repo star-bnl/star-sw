@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.6 2006/04/06 01:09:50 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.7 2006/10/02 22:26:53 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -64,8 +64,8 @@ public:
   TH1** buildCommonRFunctions(const char* name);
   TH1** buildCommon(const char* name, int opt=0);
 
-  TH1** buildPtCommon(const char* name, int opt=0);
-  TH1** buildPtMixCommon(const char* name, int opt=0);
+  TH1** buildNCommon(const char* name);
+  TH1** buildPtCommon(const char* name, int opt=0, int subtract=0);
 
   // LS, US, CD, CI
   TH1** buildChargeTypeRatios(const char* name);
@@ -73,8 +73,8 @@ public:
   TH1** buildChargeTypeRFunctions(const char* name);
   TH1** buildChargeTypes(const char* name, int opt, float* sf=0);
 
-  TH1** buildPtChargeTypes(const char* name, int opt=0);
-  TH1** buildPtMixChargeTypes(const char* name, int opt=0);
+  TH1** buildNChargeTypes(const char* name);
+  TH1** buildPtChargeTypes(const char* name, int opt=0, int subtract=0);
 
   
   void scaleBackGround(TH1* sib, TH1* mix, float sf=0);
@@ -100,8 +100,16 @@ inline bool StEStructSupport::applyDEtaFix()     { return mapplyDEtaFix; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.7  2006/10/02 22:26:53  prindle
+ * Hadd now symmetrizes histograms while adding them, so output is usable
+ * in Support as before. Need to load library for Correlation so we know
+ * how many bins there are.
+ * Added  alternative versions of methods to calculate Delta\sigma^2.
+ * Important for pt correlations where we need proper normalization before
+ * subtracting mixed reference.
+ *
  * Revision 1.6  2006/04/06 01:09:50  prindle
- * Calculating pt for each cut bin caused changes in HAdd.
+ *   Calculating pt for each cut bin caused changes in HAdd.
  * The splitting of +- into +- and -+ caused changes in Support.
  *
  * Revision 1.5  2006/04/04 22:14:10  porter
