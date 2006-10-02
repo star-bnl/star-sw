@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.4 2006/04/04 22:10:13 porter Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.5 2006/10/02 22:21:02 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -44,7 +44,7 @@ void StEStructPairCuts::initCuts(){
     mHBT[0]=mHBT[1]=mHBT[2]=mHBT[3]=0;
     mCoulomb[0]=mCoulomb[1]=mCoulomb[2]=mCoulomb[3]=0;
     mMerging[0]=mMerging[1]=0;
-    mCrossing[0]=mCrossing[1]=mCrossing[2]=0;
+    mCrossing[0]=mCrossing[1]=0;
     
     mdeltaPhiCut=mdeltaEtaCut=mdeltaMtCut=mqInvCut=mEntSepCut=mExitSepCut=mQualityCut=mMidTpcSepLSCut=mMidTpcSepUSCut=false;
     mHBTCut=mCoulombCut=mMergingCut=mCrossingCut = false;
@@ -174,10 +174,10 @@ bool StEStructPairCuts::loadBaseCuts(const char* name, const char** vals, int nv
   }
 
   if(!strcmp(name,mCrossingName.name)){
-    mCrossing[0]=atof(vals[0]); mCrossing[1]=atof(vals[1]); mCrossing[2]=atof(vals[2]);
-    //mCrossingName.idx=createCutHists(name,mCrossing,3);  // not making cut histograms
+    mCrossing[0]=atof(vals[0]); mCrossing[1]=atof(vals[1]);
+    //mCrossingName.idx=createCutHists(name,mCrossing,2);  // not making cut histograms
     mCrossingCut=true;
-    cout << " Loading Crossing cut with range of cuts = "<<mCrossing[0]<<","<<mCrossing[1]<<","<<mCrossing[2]<<endl;
+    cout << " Loading Crossing cut with range of cuts = "<<mCrossing[0]<<","<<mCrossing[1]<<endl;
     return true;
   }
 
@@ -270,7 +270,7 @@ void StEStructPairCuts::printCutStats(ostream& ofs){
     printCutCounts(ofs,cutTypes[1],mMergingCounter[2],mMergingCounter[3]);
   }
   if(mCrossingCut){
-    ofs<<mCrossingName.name<<","<<mCrossing[0]<<","<<mCrossing[1]<<","<<mCrossing[2]<<"\t\t"<<" # pair Crossing cut"<<endl;
+    ofs<<mCrossingName.name<<","<<mCrossing[0]<<","<<mCrossing[1]<<"\t\t"<<" # pair Crossing cut"<<endl;
     printCutCounts(ofs,cutTypes[0],mCrossingCounter[0],mCrossingCounter[1]);
     printCutCounts(ofs,cutTypes[1],mCrossingCounter[2],mCrossingCounter[3]);
   }
@@ -312,6 +312,7 @@ int StEStructPairCuts::cutPair(){
 
 
 
+  if( cutMerging() || cutCrossing()) return 1;
   //  if( cutMerging() || cutCrossing() || cutCoulomb() || cutHBT() ) return 1;
 
   if(!mdeltaEta) mdeltaEta=DeltaEta();  // may have been set above
@@ -546,6 +547,16 @@ StEStructPairCuts::MidTpcZSeparation() const {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.5  2006/10/02 22:21:02  prindle
+ * Store only quadrant of eta_Delta - phi_Delta array/histogram.
+ * Store half of eta_Sigma - phi_Delta array/histogram.
+ * This required modifications in Binning.
+ * I had a bug in the pair loop (which left +- not fully symmetrized)
+ * and had to make changes in cut bins for mode 5 (and 3 I think)
+ * when I fixed this.
+ * Also change crossing cut to use only two parameters, the sign of
+ * the magnetic field being taken from the MuDst.
+ *
  * Revision 1.4  2006/04/04 22:10:13  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own

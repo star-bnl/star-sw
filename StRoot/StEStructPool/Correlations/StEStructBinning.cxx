@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.7 2006/04/10 23:42:32 porter Exp $
+ * $Id: StEStructBinning.cxx,v 1.8 2006/10/02 22:20:57 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -32,10 +32,12 @@ StEStructBinning::StEStructBinning(){
   nPhi  = ESTRUCT_PHI_BINS-1;
   dPhi  = (maxPhi-minPhi)/(float)nPhi;
 
-  maxDPhi=maxPhi*1.5;// 2.0*maxPhi;
-  minDPhi=minPhi*0.5;// 0.0; //2*minPhi;
+  // NOTE: We store delta_phi from 0 to pi in an array, but when we
+  //       copy to histogram this is unfolded and "shifted" so histogram
+  //       is from -pi/2 to 3pi/2. If you want to do something else
+  //       you will need to change some of the routines.
   nDPhi = ESTRUCT_DPHI_BINS-1;
-  dDPhi=(maxDPhi-minDPhi)/(float)nDPhi;
+  dDPhi = M_PI/((float)nDPhi-1.0);
 
   maxSPhi=2*maxPhi;
   minSPhi=2*minPhi;
@@ -53,7 +55,7 @@ StEStructBinning::StEStructBinning(){
   dYt = (maxYt-minYt)/(float)nYt;
 
   maxDYt=4.;//maxYt;
-  minDYt=-4.;//-maxYt;// 0; //-maxYt;
+  minDYt=0.;//-maxYt;// 0; //-maxYt;
   nDYt= ESTRUCT_DYT_BINS-1;
   dDYt=(maxDYt-minDYt)/(float)nDYt; 
 
@@ -136,9 +138,9 @@ void StEStructBinning::setEtaRange(float xmin, float xmax){
   dEta= (maxEta-minEta)/(float)nEta;
 
   maxDEta=2*maxEta;//2*maxEta;
-  minDEta=2*minEta;//0; //2*minEta;
+  minDEta=0.;//0; //2*minEta;
   nDEta=ESTRUCT_DETA_BINS-1;
-  dDEta=(maxDEta-minDEta)/(float)nDEta;
+  dDEta=(maxDEta-minDEta)/((float)nDEta-0.5);
 
   calculateDEtaWeights(); // --> MUST do whenever setEtaRange is called!!!!
 
@@ -151,30 +153,40 @@ void StEStructBinning::setEtaRange(float xmin, float xmax){
 
 
 //------------------------------------------------------------
-void StEStructBinning::calculateDEtaWeights(){
+void StEStructBinning::calculateDEtaWeights() {
 
-  // init to 0
-  for(int i=0;i<ESTRUCT_DETA_BINS;i++) {
-    mdetaWeights.x.deta[i]=0.;
-  }
+    // init to 0
+    for(int i=0;i<ESTRUCT_DETA_BINS;i++) {
+      mdetaWeights.x.deta[i]=0.;
+    }
 
-  // check if even or odd (0 if even 1 if odd)
-  int ic=(ESTRUCT_DETA_BINS-1)%2; 
+    // Assume first bin will be centered on 0.
+    // (Depends on ideta(), detaVal() and minDEta.)
 
-  // calculate weight at cent of bin unless it is a center bin
-  // then use 1/4 shift ...
-  for(int i=0;i<ESTRUCT_DETA_BINS-1;i++){
-    double fdeta0 = fabs(detaVal(i));
-    if(ic==1 && i==((ESTRUCT_DETA_BINS/2)-1)) fdeta0=dDEta/4.0;
-    mdetaWeights.x.deta[i]  = 1.0/(1.0 - (fdeta0/maxDEta));
-  }
-
+    // calculate weight at cent of bin unless it is a center bin
+    // then use 1/4 shift ...
+    double fdeta0 = dDEta/4.0;
+    mdetaWeights.x.deta[0]  = 1.0/(1.0 - (fdeta0/maxDEta));
+    for(int i=1;i<ESTRUCT_DETA_BINS-1;i++){
+        fdeta0 = fabs(detaVal(i));
+        mdetaWeights.x.deta[i]  = 1.0/(1.0 - (fdeta0/maxDEta));
+    }
 }	
    
 
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.8  2006/10/02 22:20:57  prindle
+ * Store only quadrant of eta_Delta - phi_Delta array/histogram.
+ * Store half of eta_Sigma - phi_Delta array/histogram.
+ * This required modifications in Binning.
+ * I had a bug in the pair loop (which left +- not fully symmetrized)
+ * and had to make changes in cut bins for mode 5 (and 3 I think)
+ * when I fixed this.
+ * Also change crossing cut to use only two parameters, the sign of
+ * the magnetic field being taken from the MuDst.
+ *
  * Revision 1.7  2006/04/10 23:42:32  porter
  * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
  * and added the eta_delta weighting as a binned correctin defined by the eta-limits in

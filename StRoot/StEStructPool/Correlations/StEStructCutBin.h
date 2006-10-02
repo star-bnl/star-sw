@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.5 2006/04/06 01:01:20 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.6 2006/10/02 22:21:01 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -41,8 +41,9 @@ class StEStructCutBin : public TObject {
   int getCutBinMode3(StEStructPairCuts *pc);
   int getCutBinMode4(StEStructPairCuts *pc);
   int getCutBinMode5(StEStructPairCuts *pc);
-  int switchBins5(StEStructPairCuts *pc);
-  int symmetrizeBins5(StEStructPairCuts *pc);
+  int ignorePair5(StEStructPairCuts *pc);
+  int symmetrizeYt5(StEStructPairCuts *pc);
+  int switchYt5(StEStructPairCuts *pc);
 
   void initPtBinMode0();
   void initPtBinMode1();
@@ -63,8 +64,9 @@ class StEStructCutBin : public TObject {
   int  getNumBins();
   int  getNumQABins();
   int  getCutBin(StEStructPairCuts *pc);
-  int  switchBins(StEStructPairCuts *pc);
-  int  symmetrizeBins(StEStructPairCuts *pc);
+  int  ignorePair(StEStructPairCuts *pc);
+  int  symmetrizeYt(StEStructPairCuts *pc);
+  int  switchYt(StEStructPairCuts *pc);
   int*  getPtBins(float pt);
   int   getdEdxPID(const StEStructTrack *t);
   char* printCutBinName();
@@ -126,22 +128,30 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
  }
  return retVal;
 }
-inline int StEStructCutBin::switchBins(StEStructPairCuts *pc){
-  if (mcutMode != 5) {
-      return 1;
-  }
-  return switchBins5(pc);
+inline int StEStructCutBin::ignorePair(StEStructPairCuts *pc) {
+    if (mcutMode != 5) {
+        if ( (-1 == pc->Track1()->Charge()) &&
+             (+1 == pc->Track2()->Charge()) ) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    return ignorePair5(pc);
 }
-inline int StEStructCutBin::symmetrizeBins(StEStructPairCuts *pc){
-  if (mcutMode != 5) {
-      if (pc->Track1()->Charge() == pc->Track2()->Charge()) {
-          return 1;
-      } else {
-          return 0;
-      }
-  } else {
-      return symmetrizeBins5(pc);
-  }
+inline int StEStructCutBin::symmetrizeYt(StEStructPairCuts *pc) {
+    if (mcutMode != 5) {
+        return 1;
+    } else {
+        return symmetrizeYt5(pc);
+    }
+}
+inline int StEStructCutBin::switchYt(StEStructPairCuts *pc) {
+    if (mcutMode != 5) {
+        return 0;
+    } else {
+        return switchYt5(pc);
+    }
 }
 
 //-----------------------------------------------------------
@@ -168,8 +178,19 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.6  2006/10/02 22:21:01  prindle
+ * Store only quadrant of eta_Delta - phi_Delta array/histogram.
+ * Store half of eta_Sigma - phi_Delta array/histogram.
+ * This required modifications in Binning.
+ * I had a bug in the pair loop (which left +- not fully symmetrized)
+ * and had to make changes in cut bins for mode 5 (and 3 I think)
+ * when I fixed this.
+ * Also change crossing cut to use only two parameters, the sign of
+ * the magnetic field being taken from the MuDst.
+ *
  * Revision 1.5  2006/04/06 01:01:20  prindle
- * New mode in CutBin, 5, to do pid correlations. There is still an issue
+ *
+ *   New mode in CutBin, 5, to do pid correlations. There is still an issue
  * of how to set the pt ranges allowed for the different particle types.
  * For data we probably want to restrict p to below 1GeV for pi and K, but
  * for Hijing and Pythia we can have perfect pid. Currently cuts are type

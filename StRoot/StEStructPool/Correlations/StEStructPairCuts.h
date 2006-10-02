@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.10 2006/04/10 23:42:32 porter Exp $
+ * $Id: StEStructPairCuts.h,v 1.11 2006/10/02 22:21:04 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -51,7 +51,7 @@ protected:
   float mHBT[4];
   float mCoulomb[4];
   float mMerging[2];
-  float mCrossing[3];
+  float mCrossing[2];
 
   bool  mdeltaPhiCut,    mdeltaEtaCut,    mdeltaMtCut;
   bool  mqInvCut,        mEntSepCut,      mExitSepCut,   mQualityCut;
@@ -67,6 +67,7 @@ protected:
   float  mdeltaPhi, mdeltaEta, mdeltaMt;
   float  mqInvarient,  mEntranceSeparation, mExitSeparation, mQualityVal;
   float  mMidTpcSeparationLS, mMidTpcSeparationUS;
+  float  mBField;                   // magnetic field (kilogauss as MuDst)
 
   int  mType;
   unsigned long mapMask0;
@@ -96,6 +97,9 @@ public:
   virtual void loadUserCuts(const char* name, const char** vals, int nvals);
   virtual void printCutStats(ostream& ofs);
   virtual void printCutCounts(ostream& ofs, char* cutType,int c1, int c2);
+
+  float BField() const { return mBField; };
+  void SetBField(const float bfield){ mBField=bfield; };
 
   // StEStructPairCuts stuff
 
@@ -448,7 +452,7 @@ inline int StEStructPairCuts::cutCrossing(){
     float dphi = mTrack1->Phi()-mTrack2->Phi(); // signed DeltaPhi
     float dpt =  mTrack1->Pt()- mTrack2->Pt();  // signed DeltaPt
     if (mType==1 || mType==3) {   // US pair
-      if(mCrossing[2]>=0) { // pos field
+      if(mBField>=0) { // pos field
 	if (mTrack1->Charge()>0 && dphi>0)  mretVal = 1;  // + -
 	if (mTrack1->Charge()<0 && dphi<0)  mretVal = 1;  // - + currently does not occur
       } else {              // rev field
@@ -456,7 +460,7 @@ inline int StEStructPairCuts::cutCrossing(){
         if (mTrack1->Charge()<0 && dphi>0)  mretVal = 1;  // rev -+ : same as +- above
       } 
     } else {                      // LS pair
-      if(mCrossing[2]>=0) { // pos field
+      if(mBField>=0) { // pos field
 	if (mTrack1->Charge()>0 && dphi*dpt<0)  mretVal = 1;  // + +
 	if (mTrack1->Charge()<0 && dphi*dpt>0)  mretVal = 1;  // - -
       } else {              // rev field
@@ -586,6 +590,16 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.11  2006/10/02 22:21:04  prindle
+ * Store only quadrant of eta_Delta - phi_Delta array/histogram.
+ * Store half of eta_Sigma - phi_Delta array/histogram.
+ * This required modifications in Binning.
+ * I had a bug in the pair loop (which left +- not fully symmetrized)
+ * and had to make changes in cut bins for mode 5 (and 3 I think)
+ * when I fixed this.
+ * Also change crossing cut to use only two parameters, the sign of
+ * the magnetic field being taken from the MuDst.
+ *
  * Revision 1.10  2006/04/10 23:42:32  porter
  * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
  * and added the eta_delta weighting as a binned correctin defined by the eta-limits in

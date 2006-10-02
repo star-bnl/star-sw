@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.6 2006/04/10 23:42:32 porter Exp $
+ * $Id: StEStructCutBin.cxx,v 1.7 2006/10/02 22:21:00 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -450,10 +450,6 @@ void StEStructCutBin::initPtBinMode4(){
 //
 // To check on charge symmetry we have split out the -+ from the +-
 // in the other parts of the Correlation code.
-// For identical particles use only +-, leave -+ histos empty.
-// For non-identical particls order by pi, K, p. So for example
-// histograms will store K+,p- or K-,p+. For some pairs we will
-// need to switch the order to accomplish this.
 
 int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
 
@@ -504,45 +500,85 @@ int StEStructCutBin::getCutBinMode5(StEStructPairCuts* pc){
   }
   return  idedp + 2*ipid;
 }
-int StEStructCutBin::switchBins5(StEStructPairCuts* pc){
+int StEStructCutBin::ignorePair5(StEStructPairCuts* pc) {
 
  /*
-   Want to keep track of different particle types.
-   This routine returns a 1 when the second particle of the
-   pair should be first in a 2D histogram.
-   pions come before Kaons which come before protons.
-   If one of the particles is not identified return 0.
+  * Accept pair if charges are the same.
   */
-  int it1 = getdEdxPID( pc->Track1() );
-  int it2 = getdEdxPID( pc->Track2() );
-  if (0 == it1 || 0 == it2) {
-      return 0;
-  }
-  if ((it1 != 1) && (it2 == 1)) {
-      return 1;
-  } else if ((it1 == 3) && (it2 == 2)) {
-      return 1;
-  }
-  return 0;
-}
-int StEStructCutBin::symmetrizeBins5(StEStructPairCuts* pc){
-
- /*
-   Same type and same sign particles need to be entered into
-   etaeta, phiphi, deta and dphi arrays twice.
-  */
-  if ( pc->Track1()->Charge() != pc->Track2()->Charge() ) {
-      return 0;
-        }
-  int it1 = getdEdxPID( pc->Track1() );
-  int it2 = getdEdxPID( pc->Track2() );
-  if (0 == it1 || 0 == it2) {
-      return 1;
-  } else if (it1 == it2) {
-      return 1;
-  } else {
-      return 0;
+    int ic1 = pc->Track1()->Charge();
+    int ic2 = pc->Track2()->Charge();
+    if ( ic1 == ic2 ) {
+        return 0;
     }
+
+ /*
+  * Ignore particles with the same pid and opposite charge when the first
+  * charge is negative.
+  * In the main track pair loop every pair will come up twice, the
+  * second time in reversed order and we only want it one time.
+  */
+    int ip1 = getdEdxPID( pc->Track1() );
+    int ip2 = getdEdxPID( pc->Track2() );
+    if (ip1 == ip2) {
+        if (-1 == ic1) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+ /*
+  * For particles with different pid and opposite charge we only want
+  * pair if pi is before K or p or else K is before p.
+  */
+    if (1 == ip1) {
+        if ((2 == ip2) || (3 == ip2)) {
+            return 0;
+        }
+    } else if (2 == ip1) {
+        if (3 == ip2) {
+            return 0;
+        }
+    }
+    return 1;
+}
+int StEStructCutBin::symmetrizeYt5(StEStructPairCuts* pc) {
+
+ /*
+  * If particle types and charges are the same we symmetrize.
+  */
+    if ( pc->Track1()->Charge() != pc->Track2()->Charge() ) {
+        return 0;
+    }
+    if (getdEdxPID( pc->Track1() ) != getdEdxPID( pc->Track2() )) {
+        return 0;
+    }
+    return 1;
+}
+int StEStructCutBin::switchYt5(StEStructPairCuts* pc) {
+
+ /*
+  * For different pid want pi before K and p, K before p.
+  * For same pid want + before -.
+  */
+    int ipid1 = getdEdxPID( pc->Track1() );
+    int ipid2 = getdEdxPID( pc->Track2() );
+    if (ipid1 == ipid2) {
+        if ( (-1 == pc->Track1()->Charge()) &&
+             (+1 == pc->Track2()->Charge()) ) {
+            return 1;
+        }
+        return 0;
+    }
+    if (1 == ipid2) {
+        if ( (2 == ipid1) || (3 == ipid1) ) {
+            return 1;
+        }
+    } else if (2 == ipid2) {
+        if (3 == ipid1) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 /*
@@ -565,16 +601,14 @@ void StEStructCutBin::initPtBinMode5(){
   mPtBinMax[3]=9999.;
   // For data we want to exclude relativistic rise region which
   // might possibly give us a few tracks.
-/*
-  mPtBinMin[0] =    0.;
-  mPtBinMax[0] = 9999.;
-  mPtBinMin[1] =    0.;
-  mPtBinMax[1] =    1.;
-  mPtBinMin[2] =    0.;
-  mPtBinMax[2] =    1.;
-  mPtBinMin[3] =    0.;
+  mPtBinMin[0] =    0.0;
+  mPtBinMax[0] = 9999.0;
+  mPtBinMin[1] =    0.0;
+  mPtBinMax[1] =    1.0;
+  mPtBinMin[2] =    0.0;
+  mPtBinMax[2] =    1.0;
+  mPtBinMin[3] =    0.0;
   mPtBinMax[3] =    1.5;
- */
 }
 
 // pi  -> 1
@@ -582,7 +616,15 @@ void StEStructCutBin::initPtBinMode5(){
 // p   -> 3
 // Everything else
 //     -> 0
+//
+// June 8, 2006 djp If track is within 1sigma of electron we
+//                  exclude it as pi, K, p. (Tried 2sigma and
+//                  visually that looks really bad.)
 int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
+  float e  = fabs(t->PIDe());
+  if (e < 1) {
+      return 0;
+  }
   float ptot = t->Ptot();
   float pi = fabs(t->PIDpi());
   float k  = fabs(t->PIDk());
@@ -602,6 +644,16 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.7  2006/10/02 22:21:00  prindle
+ * Store only quadrant of eta_Delta - phi_Delta array/histogram.
+ * Store half of eta_Sigma - phi_Delta array/histogram.
+ * This required modifications in Binning.
+ * I had a bug in the pair loop (which left +- not fully symmetrized)
+ * and had to make changes in cut bins for mode 5 (and 3 I think)
+ * when I fixed this.
+ * Also change crossing cut to use only two parameters, the sign of
+ * the magnetic field being taken from the MuDst.
+ *
  * Revision 1.6  2006/04/10 23:42:32  porter
  * Added sameSide() & awaySide() methods to PairCut (so only defined in 1 place)
  * and added the eta_delta weighting as a binned correctin defined by the eta-limits in
