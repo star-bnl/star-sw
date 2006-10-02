@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.11 2006/04/25 21:03:57 msd Exp $
+ * $Id: StEStructBinning.h,v 1.12 2006/10/02 22:20:58 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -32,9 +32,9 @@
 #define ESTRUCT_PT_BINS 31
 #define ESTRUCT_XT_BINS 26
 
-#define ESTRUCT_DPHI_BINS 29
-#define ESTRUCT_DETA_BINS 26
-#define ESTRUCT_DYT_BINS 26
+#define ESTRUCT_DPHI_BINS 15
+#define ESTRUCT_DETA_BINS 15
+#define ESTRUCT_DYT_BINS 15
 #define ESTRUCT_DPT_BINS 31
 
 #define ESTRUCT_SPHI_BINS 26
@@ -149,7 +149,7 @@ protected:
   float maxPt, minPt, dPt;        //! mt (x) bins
   int   nPhi, nEta, nYt, nPt, nXt;//! n-bins
 
-  float maxDPhi, minDPhi, dDPhi; //! delta phi bins
+  float dDPhi; //! delta phi bins
   float maxDEta, minDEta, dDEta; //! delta eta bins
   float maxDYt, minDYt, dDYt;    //! delta yt (x) bins
   float maxDPt, minDPt, dDPt;    //! delta mt (x) bins
@@ -225,7 +225,7 @@ public:
   int idyt(float yt);
   int idpt(float pt);
   
-  float dphiVal(int idphi);
+  float dphiVal(int idphi, int which);
   float detaVal(int ideta);
   float dytVal(int idyt);
   float dptVal(int idpt);
@@ -281,15 +281,25 @@ public:
   float getBinWidthPtot() { return dPtot; }
   int   PtotBins() { return nPtot; }
 
-  float dphiMax()   { return maxDPhi; }
-  float dphiMin()   { return minDPhi; }
+  // Thse dphi* and deta* are used to size histograms.
+  // For now symmetrize the histograms here.
+  float dphiMax()   { return 3*M_PI/2; }
+  float dphiMin()   { return -M_PI/2; }
   float getBinWidthDPhi() { return dDPhi; }
   int   dphiBins() { return nDPhi; }
+  int   hdphiBins() {
+      if (nDPhi%2 > 0) {
+          return 2*nDPhi-1;
+      } else {
+          return 2*(nDPhi-1);
+      }
+  }
 
   float detaMax()   { return maxDEta; }
-  float detaMin()   { return minDEta; }
+  float detaMin()   { return -maxDEta; }
   float getBinWidthDEta() { return dDEta; }
   int   detaBins() { return nDEta; };
+  int   hdetaBins() { return 2*nDEta-1; };
 
   float dytMax()    { return maxDYt; }
   float dytMin()    { return minDYt; }
@@ -374,12 +384,14 @@ inline int StEStructBinning::iphi(float phi){
   return (j > ESTRUCT_PHI_BINS - 2) ? ESTRUCT_PHI_BINS - 1 : j;
 }
 
-inline int StEStructBinning::idphi(float phi){
-  if(phi<minDPhi)phi+=2*M_PI;
-  if(phi>maxDPhi)phi-=2*M_PI;
-  if( phi < minDPhi ) return ESTRUCT_DPHI_BINS - 1;
-  int j = (int)((phi-minDPhi)/dDPhi);
-  return (j > ESTRUCT_DPHI_BINS - 2) ? ESTRUCT_DPHI_BINS - 1 : j;
+inline int StEStructBinning::idphi(float dphi){
+    dphi = fabs(dphi);
+    if (dphi>M_PI) {
+        dphi = 2*M_PI - dphi;
+    }
+    if( dphi < 0 ) return ESTRUCT_DPHI_BINS - 1;
+    int j = (int)((dphi + dDPhi/2)/dDPhi);
+    return (j > ESTRUCT_DPHI_BINS - 2) ? ESTRUCT_DPHI_BINS - 1 : j;
 }
 
 inline int StEStructBinning::isphi(float phi){
@@ -396,8 +408,21 @@ inline float StEStructBinning::sphiVal(int isphi){
   return minSPhi+isphi*dSPhi+dSPhi/2;
 }
 
-inline float StEStructBinning::dphiVal(int idphi){
-  return minDPhi+idphi*dDPhi+dDPhi/2;
+inline float StEStructBinning::dphiVal(int idphi, int which) {
+    float dphi = idphi*dDPhi;
+    if (1 == which) {
+        return dphi;
+    } else if (2 == which) {
+        if ((dphiBins()%2 > 0) && (idphi == (dphiBins()-1)/2)) {
+            return 99;
+        }
+        if (dphi < M_PI/2) {
+            return -dphi;
+        } else {
+            return 2*M_PI - dphi;
+        }
+    }
+    return 99;
 }
 
 inline int StEStructBinning::ieta(float eta){
@@ -406,10 +431,11 @@ inline int StEStructBinning::ieta(float eta){
   return (j > ESTRUCT_ETA_BINS - 2) ? ESTRUCT_ETA_BINS - 1 : j;  
 }
 
-inline int StEStructBinning::ideta(float eta){
-  if( eta < minDEta ) return ESTRUCT_DETA_BINS - 1;
-  int j = (int)( (eta-minDEta)/dDEta );
-  return (j > ESTRUCT_DETA_BINS - 2) ? ESTRUCT_DETA_BINS - 1 : j;
+inline int StEStructBinning::ideta(float eta) {
+    eta = fabs(eta);
+    if( eta < minDEta ) return ESTRUCT_DETA_BINS - 1;
+    int j = (int)( (eta + dDEta/2 - minDEta)/dDEta );
+    return (j > ESTRUCT_DETA_BINS - 2) ? ESTRUCT_DETA_BINS - 1 : j;
 }
 
 inline int StEStructBinning::iseta(float eta){
@@ -427,7 +453,7 @@ inline float StEStructBinning::setaVal(int iseta){
 }
 
 inline float StEStructBinning::detaVal(int ideta){
-  return minDEta+ideta*dDEta+dDEta/2;
+  return minDEta+ideta*dDEta;
 }
 
 inline int StEStructBinning::iyt(float yt){
@@ -437,8 +463,9 @@ inline int StEStructBinning::iyt(float yt){
 }
 
 inline int StEStructBinning::idyt(float yt){
+  yt = fabs(yt);
   if( yt < minDYt ) return ESTRUCT_DYT_BINS - 1;
-  int j = (int)((yt-minDYt)/dDYt);
+  int j = (int)((yt+dDYt/2-minDYt)/dDYt);
   return (j > ESTRUCT_DYT_BINS - 2) ? ESTRUCT_DYT_BINS-1 : j;
 }
 
@@ -456,8 +483,12 @@ inline float StEStructBinning::sytVal(int isyt){
   return minSYt+isyt*dSYt+dSYt/2;
 }
 
-inline float StEStructBinning::dytVal(int idyt){
-  return minDYt+idyt*dDYt+dDYt/2;
+inline float StEStructBinning::dytVal(int idyt) {
+    if (0 ==idyt) {
+        return 0;
+    } else {
+        return minDYt+idyt*dDYt;
+    }
 }
 
 /*inline int StEStructBinning::iDeltaYt(float yt){
@@ -563,6 +594,16 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.12  2006/10/02 22:20:58  prindle
+ * Store only quadrant of eta_Delta - phi_Delta array/histogram.
+ * Store half of eta_Sigma - phi_Delta array/histogram.
+ * This required modifications in Binning.
+ * I had a bug in the pair loop (which left +- not fully symmetrized)
+ * and had to make changes in cut bins for mode 5 (and 3 I think)
+ * when I fixed this.
+ * Also change crossing cut to use only two parameters, the sign of
+ * the magnetic field being taken from the MuDst.
+ *
  * Revision 1.11  2006/04/25 21:03:57  msd
  * Fixed bugs in ideta and iseta
  *
