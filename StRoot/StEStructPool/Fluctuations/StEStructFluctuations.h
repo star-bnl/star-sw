@@ -48,25 +48,25 @@ class StEStructFluct {
   // Accumulating into histograms is very slow, so I
   // accumulate into arrays. Copy to histograms for
   // writing at the end.
-    double *TotEvents[5];
+    double *TotEvents[6];
     double *NSum[16];
     double *NDiff[2];
     double *NPlus[5];
     double *NMinus[5];
     double *NPlusMinus[8];
-    double *PSum[16];
+    double *PSum[19];
     double *PDiff[16];
     double *PPlus[11];
     double *PMinus[11];
     double *PPlusMinus[17];
 
-    TH1D *hTotEvents[5];
+    TH1D *hTotEvents[6];
     TH1D *hNSum[16];
     TH1D *hNDiff[2];
     TH1D *hNPlus[5];
     TH1D *hNMinus[5];
     TH1D *hNPlusMinus[8];
-    TH1D *hPSum[16];
+    TH1D *hPSum[19];
     TH1D *hPDiff[16];
     TH1D *hPPlus[11];
     TH1D *hPMinus[11];

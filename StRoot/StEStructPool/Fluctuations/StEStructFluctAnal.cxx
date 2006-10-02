@@ -753,8 +753,8 @@ void StEStructFluctAnal::deleteHistograms() {
     }
 }
 float StEStructFluctAnal::etaOffset( float vz ) {
-    
-    double eta1 = -log(tan(atan(160.0/(200+vz))/2));
-    double eta2 = -log(tan(atan(160.0/(200-vz))/2));
-    return (eta2-eta1)/2;
+    return 0;
+//    double eta1 = -log(tan(atan(160.0/(200+vz))/2));
+//    double eta2 = -log(tan(atan(160.0/(200-vz))/2));
+//    return (eta2-eta1)/2;
 }

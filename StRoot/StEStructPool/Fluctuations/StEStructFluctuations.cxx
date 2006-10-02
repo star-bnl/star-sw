@@ -53,6 +53,7 @@ void StEStructFluct::AddToBin( int    jBin,
     double sqm = sqrt(Nminus);
     double r;
 
+// Doing some tests for Jamie to alleive his concernes over nu_dynamical calculation.
     if (Nsum > 0) {
         TotEvents[1][jBin]++;
 
@@ -71,7 +72,6 @@ void StEStructFluct::AddToBin( int    jBin,
         NSum[12][jBin] += Nplus*sqs;
         NSum[13][jBin] += Nminus/sqs;
         NSum[14][jBin] += Nminus*sqs;
-        NSum[15][jBin] += 1/Nsum;
 
         r  = Ptsum*Ptsum/Nsum;
         PSum[0][jBin] += PtSqsum;
@@ -83,9 +83,6 @@ void StEStructFluct::AddToBin( int    jBin,
         PSum[6][jBin] += Nplus*Ptsum/Nsum;
         PSum[7][jBin] += Nminus*Ptsum/Nsum;
         PSum[8][jBin] += Ptsum*Ptsum/Nsum;
-        PSum[9][jBin] += Nplus*Ptsum/(Nsum*Nsum);
-        PSum[10][jBin] += Nminus*Ptsum/(Nsum*Nsum);
-        PSum[11][jBin] += Ptsum*Ptsum/(Nsum*Nsum);
         PSum[12][jBin] += r*Ptsum/Nsum;
         PSum[13][jBin] += r*r/Nsum;
         PSum[14][jBin] += Ptsum/sqs;
@@ -114,6 +111,16 @@ void StEStructFluct::AddToBin( int    jBin,
         PDiff[13][jBin] += r1*r3/Nsum;
         PDiff[14][jBin] += r2*r3/Nsum;
         PDiff[15][jBin] += r3*r3/Nsum;
+    }
+    if (Nsum > 1) {
+        TotEvents[5][jBin]++;
+        NSum[15][jBin] += 1.0/(Nsum-1.0);
+        PSum[9][jBin]  += Nsum/(Nsum-1.0);
+        PSum[10][jBin] += Ptsum/(Nsum-1.0);
+        PSum[11][jBin] += Ptsum*Ptsum/(Nsum*(Nsum-1.0));
+        PSum[16][jBin] += Nsum;
+        PSum[17][jBin] += Ptsum;
+        PSum[18][jBin] += PtSqsum;
     }
 
     if (Nplus > 0) {
@@ -280,7 +287,7 @@ void StEStructFluct::writeHistograms() {
     initHistograms();
     fillHistograms();
 
-    for (int jStat=0;jStat<5;jStat++) {
+    for (int jStat=0;jStat<6;jStat++) {
         hTotEvents[jStat]->Write();
     }
 
@@ -297,7 +304,7 @@ void StEStructFluct::writeHistograms() {
     for (int jStat=0;jStat<8;jStat++) {
         hNPlusMinus[jStat]->Write();
     }
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         hPSum[jStat]->Write();
     }
     for (int jStat=0;jStat<16;jStat++) {
@@ -315,7 +322,7 @@ void StEStructFluct::fillHistograms() {
 
     // Here I copy from arrays top histograms so I can write the histograms.
 
-    for (int jStat=0;jStat<5;jStat++) {
+    for (int jStat=0;jStat<6;jStat++) {
         for (int jBin=0;jBin<mTotBins;jBin++) {
              hTotEvents[jStat]->SetBinContent(jBin+1,TotEvents[jStat][jBin]);
         }
@@ -342,7 +349,7 @@ void StEStructFluct::fillHistograms() {
             hNPlusMinus[jStat]->SetBinContent(jBin+1,NPlusMinus[jStat][jBin]);
         }
     }
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         for (int jBin=0;jBin<mTotBins;jBin++) {
             hPSum[jStat]->SetBinContent(jBin+1,PSum[jStat][jBin]);
         }
@@ -476,7 +483,7 @@ void StEStructFluct::initArrays() {
     etaMinus = new TH1F(line,line,100,mEtaMin,mEtaMax);
 
     printf("Allocating arrays to store info.\n");
-    for (int jStat=0;jStat<5;jStat++) {
+    for (int jStat=0;jStat<6;jStat++) {
         TotEvents[jStat] = new double[mTotBins];
         memset(TotEvents[jStat], 0, sizeof(double)*mTotBins );
     }
@@ -499,7 +506,7 @@ void StEStructFluct::initArrays() {
         NPlusMinus[jStat] = new double[mTotBins];
         memset(NPlusMinus[jStat], 0, sizeof(double)*mTotBins );
     }
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         PSum[jStat]   = new double[mTotBins];
         memset(PSum[jStat], 0, sizeof(double)*mTotBins );
     }
@@ -558,7 +565,7 @@ void StEStructFluct::deleteArrays() {
     delete etaMinus;
 
     printf("freeing Arrays.\n");
-    for (int jStat=0;jStat<5;jStat++) {
+    for (int jStat=0;jStat<6;jStat++) {
         delete [] TotEvents[jStat];
     }
 
@@ -575,7 +582,7 @@ void StEStructFluct::deleteArrays() {
     for (int jStat=0;jStat<8;jStat++) {
         delete [] hNPlusMinus[jStat];
     }
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         delete [] PSum[jStat];
     }
     for (int jStat=0;jStat<16;jStat++) {
@@ -605,6 +612,8 @@ void StEStructFluct::initHistograms() {
     hTotEvents[3] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
     sprintf( line, "TotalPlusMinusEvents_%s", mKey);
     hTotEvents[4] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
+    sprintf( line, "TotalEventsForSig2Dyn_%s", mKey);
+    hTotEvents[5] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
 
     for (int jStat=0;jStat<16;jStat++) {
         sprintf( line, "NSum%s_%i", mKey, jStat );
@@ -624,7 +633,7 @@ void StEStructFluct::initHistograms() {
         sprintf( line, "NPlusMinus%s_%i", mKey, jStat );
         hNPlusMinus[jStat] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
     }
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         sprintf( line, "PSum%s_%i", mKey, jStat );
         hPSum[jStat] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
     }
@@ -648,7 +657,7 @@ void StEStructFluct::initHistograms() {
 void StEStructFluct::deleteHistograms() {
 
     printf("freeing h Array histograms.\n");
-    for (int jStat=0;jStat<5;jStat++) {
+    for (int jStat=0;jStat<6;jStat++) {
         delete hTotEvents[jStat];
     }
 
@@ -665,7 +674,7 @@ void StEStructFluct::deleteHistograms() {
     for (int jStat=0;jStat<8;jStat++) {
         delete hNPlusMinus[jStat];
     }
-    for (int jStat=0;jStat<16;jStat++) {
+    for (int jStat=0;jStat<19;jStat++) {
         delete hPSum[jStat];
     }
     for (int jStat=0;jStat<16;jStat++) {
