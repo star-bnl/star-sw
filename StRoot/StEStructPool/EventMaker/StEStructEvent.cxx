@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.9 2006/04/26 18:49:55 dkettler Exp $
+ * $Id: StEStructEvent.cxx,v 1.10 2006/10/02 22:24:02 prindle Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -155,7 +155,6 @@ TVector2 StEStructEvent::Q() {
   else { */
     //int    selN  = pFlowSelect->Sel();
     //int    harN  = pFlowSelect->Har();
-    int selN = -1;
     int harN = 1;
     double order = (double)(harN + 1);
 
@@ -181,7 +180,7 @@ TVector2 StEStructEvent::Q() {
       mQx += phiWgt * cos(phi * order);
       mQy += phiWgt * sin(phi * order);
     }
-    itr.~StEStructTrackIterator();
+//    itr.~StEStructTrackIterator(); djp
 //  } //else
 
   mQ.Set(mQx, mQy);
@@ -206,7 +205,7 @@ void StEStructEvent::CalculatePsi() {
 
 //  return psi;
   mPsi = psi;
-  mQ.~TVector2();
+//  mQ.~TVector2();   djp
 }
 
 //-------------------------------------------------------
@@ -236,24 +235,29 @@ void StEStructEvent::ShiftPhi() {
       if(phi<-pi) {phi += twopi;}
       pTrack->SetPhi(phi);
     }
-    itr.~StEStructTrackIterator();
+//    itr.~StEStructTrackIterator(); djp
 }
 
 //-------------------------------------------------------
 void StEStructEvent::SetPhiWgt(const char* weightFile) {
   TFile* tf=new TFile(weightFile);
   TString hname("PhiWgt");
-  mPhiWgt = tf->Get(hname.Data());
+  mPhiWgt = (TH1F *) tf->Get(hname.Data());
 
   // delete phiWgt;
-  hname.~TString();
-  tf->~TFile();
+//  hname.~TString(); djp
+//  tf->~TFile(); djp
+  delete tf;
 }
 
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.10  2006/10/02 22:24:02  prindle
+ * Removed a few destructors that I think caused crashes.
+ *
  * Revision 1.9  2006/04/26 18:49:55  dkettler
+ *
  * Added reaction plane determination for the analysis
  *
  * Added reaction plane angle calculation
