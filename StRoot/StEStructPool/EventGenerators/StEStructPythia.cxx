@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.11 2006/04/11 17:51:39 prindle Exp $
+ * $Id: StEStructPythia.cxx,v 1.12 2006/10/02 22:22:50 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -136,23 +136,23 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
         eTrack->SetBzGlobal(gdca[2]);
         delete [] gdca;
 
-        eTrack->SetPIDe(0);
-        eTrack->SetPIDpi(0);
-        eTrack->SetPIDk(0);
-        eTrack->SetPIDp(0);
-        eTrack->SetPIDd(0);
+        eTrack->SetPIDe(10);
+        eTrack->SetPIDpi(10);
+        eTrack->SetPIDk(10);
+        eTrack->SetPIDp(10);
+        eTrack->SetPIDd(10);
         if ((pid == 7) || (pid == 8)) {
-            eTrack->SetPIDe(1);
+            eTrack->SetPIDe(0);
         } else if ((pid == -211) || (pid == 211)) {
-            eTrack->SetPIDpi(1);
+            eTrack->SetPIDpi(0);
         } else if ((pid == -321) || (pid == 321)) {
-            eTrack->SetPIDk(1);
+            eTrack->SetPIDk(0);
         } else if ((pid == -2212) || (pid == 2212)) {
-            eTrack->SetPIDp(1);
+            eTrack->SetPIDp(0);
         } else if (pid ==95) {
             // No anti-deuteron. I think Hijing does not make deuterons and
             // this pid code is only intended for use with GEANT?
-            eTrack->SetPIDd(1);
+            eTrack->SetPIDd(0);
         }
 
         eTrack->SetPx(p[0]);
@@ -282,8 +282,12 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts) {
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.12  2006/10/02 22:22:50  prindle
+ * Changed the values stored in PID for different particle types so I can
+ * use same cuts for Pythia (and Hijing) as I do for data.
+ *
  * Revision 1.11  2006/04/11 17:51:39  prindle
- * Remove inChain from constructor arguments (no longer used in macro)
+ *   Remove inChain from constructor arguments (no longer used in macro)
  *
  * Revision 1.10  2006/04/06 01:03:32  prindle
  *
