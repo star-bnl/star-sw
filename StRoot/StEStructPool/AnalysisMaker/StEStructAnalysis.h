@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructAnalysis.h,v 1.3 2006/04/04 22:05:03 porter Exp $
+ * $Id: StEStructAnalysis.h,v 1.4 2006/10/02 22:14:05 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,6 +14,7 @@
 
 #include "TROOT.h"
 #include "Stiostream.h"
+#include "StEStructPool/AnalysisMaker/StEStructQAHists.h"
 
 class StEStructEvent;
 class TFile;
@@ -26,10 +27,12 @@ class StEStructAnalysis {
 
  public:
 
+  StEStructQAHists*      mQAHists;       //! for QA histogramming
   StEStructAnalysis();
   virtual ~StEStructAnalysis() {};
 
   virtual void setOutputFileName(const char* outFileName) = 0;
+  void  setQAHists(StEStructQAHists* qaHists);
   virtual bool doEvent(StEStructEvent* event) = 0;
   virtual void finish()  = 0;
 
@@ -49,12 +52,18 @@ class StEStructAnalysis {
 
 inline void StEStructAnalysis::setAnalysisIndex(int i){ manalysisIndex=i; };
 inline int StEStructAnalysis::analysisIndex(){ return manalysisIndex; };
+inline void StEStructAnalysis::setQAHists(StEStructQAHists* qahists){
+  mQAHists = qahists;
+}
 
 #endif
 
 /***********************************************************************
  *
  * $Log: StEStructAnalysis.h,v $
+ * Revision 1.4  2006/10/02 22:14:05  prindle
+ * Changed for QA histograms. Also addition of ppMinBiasYear5 as a data sample.
+ *
  * Revision 1.3  2006/04/04 22:05:03  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers

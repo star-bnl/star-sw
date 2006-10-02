@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEventCuts.cxx,v 1.8 2006/04/25 21:02:50 msd Exp $
+ * $Id: StEStructEventCuts.cxx,v 1.9 2006/10/02 22:14:08 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -97,6 +97,12 @@ bool StEStructEventCuts::loadBaseCuts(const char* name, const char** vals, int n
         mtWord[1] = 2010;
         validRun = 1;
       }
+      else if (!strcmp("ppMinBiasYear5",mRunPeriod)) {
+        // ...
+        mtWord[0] =  96011; // untested  
+        mtWord[1] = 106011;
+        validRun = 1;
+      }
       if (validRun) {
 	mtWordName.idx=createCutHists(name,mtWord);
 	mtrgByRunPeriod=true;
@@ -157,6 +163,9 @@ void StEStructEventCuts::printCutStats(ostream& ofs){
 /***********************************************************************
  *
  * $Log: StEStructEventCuts.cxx,v $
+ * Revision 1.9  2006/10/02 22:14:08  prindle
+ * Changed for QA histograms. Also addition of ppMinBiasYear5 as a data sample.
+ *
  * Revision 1.8  2006/04/25 21:02:50  msd
  * Added AuAu200GeVCentral2001 and dAu200GeVMinBias2003
  *
