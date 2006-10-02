@@ -5,6 +5,8 @@ void selectAllM5(const char* dirName, const char* inFile){
   // root.exe -q -b selectAllM5.C("dirContainingFinal.rootFile","inFile")
   //
 
+  gROOT->LoadMacro("load2ptLibs.C");
+  load2ptLibs();
   TString dir(dirName);
   dir+="/";
   dir+=inFile;
