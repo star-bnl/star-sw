@@ -1,17 +1,21 @@
-void selectAllM3(const char* dirname){
+void selectAllM3(const char* dirname, const char *fileBase ){
 
   // -- example for recombining histograms by selection in new root file 
   //
   // root.exe -q -b selectASNS.C'("dirContainingFinal.rootFile")
   //
 
-  TString dir(dirname);
-  dir+="/final.root";
+  gROOT->LoadMacro("load2ptLibs.C");
+  load2ptLibs();
+  TString inFile(dirname);
+  inFile+="/";
+  inFile+=fileBase;
+  inFile+=".root";
   gSystem->Load("StEStructPoolSupport.so");
 
   StEStructHAdd adder;
 
-  TFile * tf=new TFile(dir.Data());
+  TFile * tf=new TFile(inFile.Data());
 
   if(!tf){
     cout<<"error opening file "<<endl;
@@ -45,6 +49,7 @@ int num[12]={16,8,8,4,2,2,4,2,2,4,2,2};
 
     TString fname(dirname);
     fname+="/";
+    fname+=fileBase;
     fname+=oname[k];
     fname+=".root";
     adder.addCuts(fname.Data(),tf,ndata,nin);
