@@ -112,9 +112,11 @@ public:
    virtual void         PrintInfo();
    virtual void         NotifyMe(const char *about,const void *ptr){;}
    virtual void         AddMaker (StMaker *mk);
-
+#if 0
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
-
+#else
+   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE) {}
+#endif
    ///  User methods
    virtual TDataSet   *AddData (TDataSet *data=0,const char *dir=".data");
    virtual TObjectSet *AddObj  (TObject *obj,const char *dir);
@@ -223,7 +225,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.77 2005/12/18 23:17:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.78 2006/10/04 18:51:26 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -284,8 +286,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.77 2005/12/18 23:17:43 perev Exp $
+// $Id: StMaker.h,v 1.78 2006/10/04 18:51:26 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.78  2006/10/04 18:51:26  fisyak
+// Add new geometry tags: upgr04 and upgr04, remove rference to xdf
+//
 // Revision 1.77  2005/12/18 23:17:43  perev
 // uint attributes fix
 //

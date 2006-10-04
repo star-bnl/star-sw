@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.177 2006/08/07 22:44:38 fisyak Exp $
+// $Id: StMaker.cxx,v 1.178 2006/10/04 18:51:25 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -25,7 +25,9 @@
 #include "TClass.h"
 #include "TROOT.h"
 #include "TError.h"
+#if 0
 #include "THtml.h"
+#endif
 #include "TH1.h"
 
 #include "TChain.h"
@@ -161,7 +163,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr01",      20190101,     4, "upgr01",   ""},
   {"upgr02",      20190101,     5, "upgr02",   ""},
   {"upgr03",      20190101,     6, "upgr03",   ""},
-
+  {"upgr04",      20190101,     7, "upgr04",   ""},
+  {"upgr05",      20190101,     8, "upgr05",   ""},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1055,7 +1058,7 @@ void StMaker::PrintTimer(Option_t *option)
            ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
 #endif
 }
-
+#if 0
 //_____________________________________________________________________________
 static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0)
 {
@@ -1189,9 +1192,6 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  * MakeDoc - creates the HTML doc for this class and for the base classes
  *           (if baseClasses == kTRUE):
  *
-#ifndef __noXDF__
- *         *  St_XDFFile   
-#endif
  *         *                 St_Module      TTable       * 
  *         *  TDataSet   St_DataSetIter St_FileSet       *
  *         *  StMaker      StChain        StEvent        *
@@ -1206,12 +1206,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  *            $(stardir)
  *            $(stardir) + "StRoot/St_base"
  *            $(stardir) + "StRoot/StChain"
-#ifndef __noXDF__
- *            $(stardir) + "StRoot/xdf2root"
-#endif
  *            $(stardir) + "StRoot/StarClassLibrary"
  *            $(stardir) + "StRoot/StEvent"
- *            $(stardir) + ".share/tables"
  *            $(stardir) + "include",
  *            $(stardir) + "include/tables",
  *            $(stardir) + "StRoot/<this class name>",
@@ -1246,14 +1242,10 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   //                       | ----------------------  | ------------  | ------------------ |
   const Char_t *source[] = {"StRoot/St_base"         , "TDataSet"  ,      "St_base"
                            ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
-#ifndef __noXDF__
-			    ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
-#endif
 			    //,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
                            ,"StRoot/StarClassLibrary", ""            ,    ""
                            ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
                            ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
-                           ,".share/tables"          , ""            ,     ""
                            ,"include"                , ""            ,     ""
                            ,"include/tables"         , ""            ,     ""
                            };
@@ -1306,9 +1298,6 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   // Create the list of the classes defined with the loaded DLL's to be documented
 
   Char_t *classes[] = { 
-#ifndef __noXDF__
-    "St_XDFFile",
-#endif
 			"St_Module",      "TTable"
                        ,"TDataSet",    "TDataSetIter",   "TFileSet"
                        ,"StMaker",     "StChain"
@@ -1348,7 +1337,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
          maker->MakeDoc(stardir,outdir,kFALSE);
    }
 }
-
+#endif
 //_____________________________________________________________________________
 static void doPs(const char *who, const char *where)
 {
@@ -1733,6 +1722,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.178  2006/10/04 18:51:25  fisyak
+// Add new geometry tags: upgr04 and upgr04, remove rference to xdf
+//
 // Revision 1.177  2006/08/07 22:44:38  fisyak
 // Assert => R__ASSERT for ROOT 5.12
 //
