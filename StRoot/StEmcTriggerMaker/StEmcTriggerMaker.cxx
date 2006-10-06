@@ -22,6 +22,7 @@
 //      StEmcTriggerMaker* trigger=new StEmcTriggerMaker("bemctrigger");
 //      trigger->SetHistFileName(outfile);
 //
+//   Updated by Renee Fatemi 2004-2006
 //////////////////////////////////////////////////////////////////////////
 
 #include <Stiostream.h>
@@ -61,7 +62,8 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     mIs2005HT2=-1;
     mIs2005JP2=-1;
     mIs2005ADJ=-1;
-    for (int i=0;i<10;i++)
+    mIs2005JPSI=-1;
+    for (int i=0;i<11;i++)
     {
         isTrig[i]=-1;
     }
@@ -96,13 +98,11 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
         DsmAdc[i] = -1;
     }
 
-   
-
-    for (int i=0;i<12;i++){
+    for (int i=0;i<kNJet;i++){
       JP12005array[i]=-1;
       JP22005array[i]=-1;
     }
-    for (int i=0; i<4800; i++){
+    for (int i=0; i<kNTowers; i++){
       HT12005array[i]=-1;
       HT22005array[i]=-1;
     }
@@ -110,12 +110,16 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
       numHT[i]=-1;
       numJP[i]=-1;
     }
+    for (int i=0;i<kNJet;i++){
+
+    }
 
 }
 
 //____________________________________________________________________________
 StEmcTriggerMaker::~StEmcTriggerMaker()
 {}
+
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Init()
 {
@@ -162,7 +166,8 @@ Int_t StEmcTriggerMaker::Make()
     int* HT22005array = mBemcTrigger->getHT22005array();
     int* JP12005array = mBemcTrigger->getJP12005array();
     int* JP22005array = mBemcTrigger->getJP22005array();
-
+    int* JPSI2005adc  = mBemcTrigger->getJPSI2005adc();
+    int* JPSI2005id   = mBemcTrigger->getJPSI2005id();
 
     //2003 HT1 ==  1101
     mIs2003HT1=isTrig[0];
@@ -229,6 +234,13 @@ Int_t StEmcTriggerMaker::Make()
     mIs2005ADJ=isTrig[9];
     ADJ_ID_2005=TowJetId[9];
     ADJ_DSM_2005=DsmAdc[9];
+
+    //2005 JPSI = 20
+    mIs2005JPSI=isTrig[10];
+    for (int i=0;i<kNJet; i++){
+      JPSI_2005_ADC[i]=JPSI2005adc[i];
+      JPSI_2005_ID[i]=JPSI2005id[i];
+    }
 
 
     //access TP 6 bit DSMsum
@@ -308,22 +320,32 @@ void StEmcTriggerMaker::saveHistograms(char* file)
 
 void StEmcTriggerMaker::get2005HT1_TOWS(int index, int *id){
   *id=-1;
-  if (index<4800) *id=HT1_2005_array[index];
+  if (index<kNTowers) *id=HT1_2005_array[index];
 }
 
 void StEmcTriggerMaker::get2005HT2_TOWS(int index, int *id){
   *id=-1;
-  if (index<4800) *id=HT2_2005_array[index];
+  if (index<kNTowers) *id=HT2_2005_array[index];
 }
 
 void StEmcTriggerMaker::get2005JP1_PATCHES(int index, int *id){
   *id=-1;
-  if (index<12) *id=JP1_2005_array[index];
+  if (index<kNJet) *id=JP1_2005_array[index];
 }
 
 void StEmcTriggerMaker::get2005JP2_PATCHES(int index, int *id){
   *id=-1;
-  if (index<12) *id=JP2_2005_array[index];
+  if (index<kNJet) *id=JP2_2005_array[index];
+}
+
+void StEmcTriggerMaker::get2005JPSI_ADC(int index, int *id){
+  *id=-1;
+  if (index<kNJet) *id=JPSI_2005_ADC[index];
+}
+
+void StEmcTriggerMaker::get2005JPSI_ID(int index, int *id){
+  *id=-1;
+  if (index<kNJet) *id=JPSI_2005_ID[index];
 }
 
 

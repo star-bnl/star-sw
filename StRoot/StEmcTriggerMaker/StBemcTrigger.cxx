@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.19 2006/07/27 15:22:13 kocolosk Exp $
+// $Id: StBemcTrigger.cxx,v 1.20 2006/10/06 19:48:52 rfatemi Exp $
 //
 //
 
@@ -59,7 +59,8 @@ void StBemcTrigger::resetConf(){
     mIs2005HT2=-1;
     mIs2005JP2=-1;
     mIs2005ADJ=-1;
-    for (int i=0;i<10;i++)
+    mIs2005JPSI=-1;
+    for (int i=0;i<11;i++)
     {
         mIsTrig[i]=-1;
     }
@@ -115,6 +116,7 @@ void StBemcTrigger::zero()
     for(int i=0;i<kNPatches;i++)
     {
         mTrigger.HT[i] = 0;
+	mTrigger.HTID[i]=0;
         mTrigger.Patch[i]= 0;
     }
 
@@ -285,10 +287,17 @@ int StBemcTrigger::makeTrigger()
     mTowJetId[9]=ADJ_ID_2005;
     mDsmAdc[9]  =ADJ_DSM_2005;
 
+    //2005 JPSI
+    mIsTrig[10] =mIs2005JPSI;
+    for (int i=0;i<kNJet;i++){
+      mJPSI2005adc[i]=JPSI_2005_ADC[i];
+      mJPSI2005id[i]=JPSI_2005_ID[i];
+    }
+
     for (int z=0;z<10;z++){
-		LOG_INFO << Form("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]) << endm;
-	}
- 
+      LOG_INFO << Form("i=%d, isTrig=%d, TowJetId=%d, DsmAdc=%d",z,mIsTrig[z],mTowJetId[z],mDsmAdc[z]) << endm;
+    }
+    
     return kStOK;
 }
 
@@ -735,7 +744,9 @@ int StBemcTrigger::get2005Trigger()
 
     zero();
 
-    const int HT1_TH_2005 = 13;//bht0=5,bht1=13,bht2=17
+
+    const int JJSI_TH_2005 = 5;//bht0=5,bht1=13,bht2=17
+    const int HT1_TH_2005 = 13;
     const int HT2_TH_2005 = 17;
     const int JP1_TH_2005 = 66;//bjp0=46,bjp1=66,bjp2=84
     const int JP2_TH_2005 = 84;
@@ -806,6 +817,8 @@ int StBemcTrigger::get2005Trigger()
       JP2_2005_array[i]=-1;
       mJP12005array[i]=-1;
       mJP22005array[i]=-1;
+      mJPSI2005adc[i]=-1;
+      mJPSI2005id[i]=-1;
      }
 
     numHT1_2005=0;
@@ -956,10 +969,11 @@ int StBemcTrigger::get2005Trigger()
             int B5  = 0;
             if(HTH>0) B5 = 1;
             mTrigger.HT[i] = HTL+(B5<<5);
+	    mTrigger.HTID[i] = HTID;
             if(mPrint)
 			{
 	      LOG_INFO <<"Patch number "<<i
-		   <<" Tower id = "<<HTID
+		   <<" Tower id = "<<mTrigger.HTID[i]
 		   <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
 		   <<" adc08 = "<<adc08[HTID-1]
 		   <<" HT10 = "<<HT<<" PA12 = "<<PA
@@ -1046,8 +1060,6 @@ int StBemcTrigger::get2005Trigger()
           numJP2_2005++;
         }
 
-
-
     }
 
     if (JPmax>JP1_TH_2005)
@@ -1075,6 +1087,46 @@ int StBemcTrigger::get2005Trigger()
         JP2_ID_2005=JPid;
         JP2_DSM_2005=JPmax;
     }
+
+
+    // making Jpsi trigger
+    int JpsiPatch[kNJet];
+    for(int i = 0;i<kNJet; i++)
+    {
+        int p0 = 0;
+        int p1 = p0+25;
+
+        JPSI_2005_ADC[i]=0;
+	JPSI_2005_ID[i]=0;
+	JpsiPatch[i]=0;
+        for (int j=p0;j<p1;j++)
+        {
+            int k=JP_TP[i][j];
+	    if (mTrigger.HT[k]>JPSI_2005_ADC[i]) {
+	      JPSI_2005_ADC[i]=mTrigger.HT[k];
+	      JPSI_2005_ID[i]=mTrigger.HTID[k];
+	    }
+	    LOG_INFO<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2005_ADC="<<JPSI_2005_ADC[i]<<endm;
+        }
+	if  (JPSI_2005_ADC[i]>JJSI_TH_2005) {
+	  JpsiPatch[i]=1;
+	}
+	LOG_INFO<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2005_ID[i]<<"  with ADC= "<<JPSI_2005_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
+    }
+
+    if ((JpsiPatch[0]&&(JpsiPatch[2]||JpsiPatch[3]||JpsiPatch[4])) ||
+	(JpsiPatch[1]&&(JpsiPatch[3]||JpsiPatch[4]||JpsiPatch[5])) ||
+	(JpsiPatch[2]&&(JpsiPatch[4]||JpsiPatch[5])) ||
+	(JpsiPatch[3]&&JpsiPatch[5]) )
+      {
+	
+	mIs2005JPSI=1;
+      }
+    else
+      {
+	mIs2005JPSI=0;
+      }
+    
 
     delete mDecoder;
     return kStOK;
