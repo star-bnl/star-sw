@@ -17,6 +17,11 @@
 #include "StBemcTrigger.h"
 #include "StEmcUtil/database/StBemcTables.h"
 
+#define kNPatches 300
+#define kNJet 12
+#define kNTowers 4800
+#define k12bits 4096
+
 class StEvent;
 
 class StEmcTriggerMaker : public StMaker
@@ -26,7 +31,7 @@ private:
     bool              mSaveStEvent;
     bool              mPrint;
 
-    int               isTrig[10];
+    int               isTrig[11];
     int               TowJetId[10];
     int               DsmAdc[10];
     int               numHT[5];
@@ -35,7 +40,8 @@ private:
     int               HT22005array[kNTowers];//array of towers which pass trigger
     int               JP12005array[kNJet];//array of JP's which pass trigger
     int               JP22005array[kNJet];//array of JP's which pass trigger
-
+    int               JPSI2005adc[kNJet];//array of adc for highest tower in JP
+    int               JPSI2005id[kNJet];//array of id for highest tower in JP
 
     TH2F*             mHTBefore;
     TH2F*             mPABefore;
@@ -54,6 +60,7 @@ private:
     int mIs2005HT2;
     int mIs2005JP2;
     int mIs2005ADJ;
+    int mIs2005JPSI;
 
     int HT1_ID_2003;
     int HT1_ID_2004;
@@ -87,6 +94,8 @@ private:
     int JP1_2005_array[12];
     int JP2_2005_array[12];
     int ADJ_2005_array[12];
+    int JPSI_2005_ADC[12];
+    int JPSI_2005_ID[12];
 
 protected:
 public:
@@ -113,6 +122,7 @@ public:
     int               is2005JP1() {return mIs2005JP1;}
     int               is2005JP2() {return mIs2005JP2;}
     int               is2005ADJ() {return mIs2005ADJ;}
+    int               is2005JPSI() {return mIs2005JPSI;}
 
     int               get2003HT1_ID() {return HT1_ID_2003;}//tower/JP id of trigger
     int               get2004HT1_ID() {return HT1_ID_2004;}
@@ -146,6 +156,8 @@ public:
     int               get2005JP1_NPATCHES() {return numJP1_2005;}//# patches passing JP1_2005
     int               get2005JP2_NPATCHES() {return numJP2_2005;}//# patches passing JP2_2005
 
+    void              get2005JPSI_ADC(int, int*);//array of HT adc for each JP
+    void              get2005JPSI_ID(int, int*);//array of HT id for each JP
 
     StBemcTrigger*    getTrigger()
     {
