@@ -1,5 +1,10 @@
-* $Id: igtdgeo.g,v 1.2 2006/06/26 17:51:33 potekhin Exp $
+* $Id: igtdgeo.g,v 1.3 2006/10/06 23:07:02 potekhin Exp $
 * $Log: igtdgeo.g,v $
+* Revision 1.3  2006/10/06 23:07:02  potekhin
+* An extraneous Denstity=1.7 in one of the G10
+* references caused and extr material to be created,
+* which is in fact a bug. Fixed that.
+*
 * Revision 1.2  2006/06/26 17:51:33  potekhin
 * Added a comment to clarify the configuration of the detector:
 * there are currently a fwe GEM devices described, so we need
@@ -228,7 +233,7 @@ endblock
 
 * -----------------------------------------------------------------------------
 Block IGRL describes the readout layer
-      Material G10    Dens=1.7
+      Material G10
       Attribute IGRL  Seen=1  colo=3
 
       Shape TUBE Rmin=rin Rmax=rout Dz=thk
