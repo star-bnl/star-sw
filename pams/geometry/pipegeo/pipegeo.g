@@ -3,9 +3,14 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.11 2005/07/14 22:11:22 potekhin Exp $
+* $Id: pipegeo.g,v 1.12 2006/10/06 22:33:42 potekhin Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.12  2006/10/06 22:33:42  potekhin
+* Remove the pipe and svt shields that are unnecessary
+* in the RandD "upgr" geometries. Done based on the config
+* flag. Crude but effective.
+*
 * Revision 1.11  2005/07/14 22:11:22  potekhin
 * Added a thinner version of the already customized pipe
 * for the pixel detector, which will require an exoskeleton
@@ -274,8 +279,10 @@ Block PIPE is the STAR beam pipe mother volume
       Create and Position PFLT z=Z2                      " 2nd set of flanges "
       Create and Position PIPS z=Z3-pipg_S4Leng          " 5 inch steel sectn "
       Create and position PRIS z=(Z1+Z2)/2               " Steel Bellow Ribs  "
-      Create and position PWRP z=pipg_WrpLeng/2          " beampipe wrap "
-      Create and position PSLD z=pipg_SldLeng/2          " svt beam shield "
+      if(PIPV_pipeConfig.ne.4) then
+          Create and position PWRP z=pipg_WrpLeng/2          " beampipe wrap "
+          Create and position PSLD z=pipg_SldLeng/2          " svt beam shield "
+      endif
 endblock
 * -----------------------------------------------------------------------------
 
