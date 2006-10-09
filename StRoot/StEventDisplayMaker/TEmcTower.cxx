@@ -1,4 +1,4 @@
-// @(#)root/g3d:$Name:  $:$Id: TEmcTower.cxx,v 1.1 2006/08/23 21:24:47 fine Exp $
+// @(#)root/g3d:$Name:  $:$Id: TEmcTower.cxx,v 1.2 2006/10/09 20:33:46 fine Exp $
 // Author: Valeri Fine    22/12/04
 
 
@@ -288,7 +288,7 @@ void TEmcTower::Paint(Option_t *option)
    Bool_t touch = CheckTowerParameters();
    if (touch) {
       if (option && option[0] && strstr(option,"MakeShape")) {
-         //  printf(" TEmcTower::Paint %s\n", GetName());
+         // printf(" TEmcTower::Paint %s\n", GetName());
          SetVisibility(1);
       } else {
          TPadView3D *view3D = (TPadView3D*)gPad->GetView3D();
@@ -345,6 +345,7 @@ Bool_t   TEmcTower::CheckTowerParameters()
 //______________________________________________________________________________
 void  TEmcTower::ResetProviders()
 {
+   printf(" --------- Resetting provider \n");
    if (fColorDataProvider)  fColorDataProvider->ResetCounter();
    if (fSizeDataProvider)   fSizeDataProvider->ResetCounter ();   //!
    if (fStyleDataProvider)  fStyleDataProvider->ResetCounter();  //!

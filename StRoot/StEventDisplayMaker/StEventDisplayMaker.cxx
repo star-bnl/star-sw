@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.115 2006/08/24 23:38:21 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.116 2006/10/09 20:33:46 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -112,6 +112,8 @@
 #  include <qpixmap.h>
 #  include <qbuttongroup.h>
 #  include <qtooltip.h>
+#  include "TQtRootViewer3D.h"
+#  include "TGQt.h"
     StEventControlPanel *fEventControlPanel=0;  //!
 #endif 
 
@@ -187,7 +189,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   m_VolumeList       = 0;
   mFilterList        = 0;
   memset(fColCash,0,sizeof(fColCash));
-  
+  f3DViewer= 0;
+  fNeedsClear3DView = kFALSE;
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) {
@@ -401,9 +404,13 @@ void StEventDisplayMaker::ClearEvents()
 {
   if (m_Mode == 2) return;
   // Clear picture
+  if (f3DViewer) fNeedsClear3DView  = kTRUE;
   if (m_EventsNode) {
     if (!GetEventPad()) CreateCanvas();
     else                m_PadBrowserCanvas->Clear();
+
+    TEmcTowers *emchits = dynamic_cast<TEmcTowers *>(GetDataSet("emchits"));
+    if (emchits) emchits->ResetProviders();
 
     delete m_EventsView;
     m_EventsView = 0;
@@ -458,6 +465,28 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
       m_PadBrowserCanvas->ResetView3D(0);
       m_PadBrowserCanvas->SetFillColor(kBlack);
       // Add three TPad's for GetRunNumber/GetEventNumber()/GetDateTime/
+#ifdef R__QT      
+#ifdef CAN_RENDER_PAD_DIRECTLY           
+      f3DViewer = 0; // (TQtRootViewer3D*)TVirtualViewer3D::Viewer3D(0,"ogl");
+   
+      if (f3DViewer) {
+         // Create Open GL viewer
+         TGQt::SetCoinFlag(0);
+         f3DViewer->BeginScene(m_PadBrowserCanvas);
+         f3DViewer->EndScene();
+#if 0         
+         TQtGLViewerImp *viewerImp = f3DViewer->GetViewerImp();
+         if (viewerImp) 
+         {
+         
+             connect(viewerImp,SIGNAL( ObjectSelected(TObject *, const QPoint&))
+                , this, SLOT(ObjectSelected(TObject *, const QPoint &)));
+             connect(viewerImp,SIGNAL(destroyed()), this, SLOT(Disconnect3DViewer()));
+         }
+#endif         
+      }
+#endif         
+#endif      
    }
 
    char buffer[100];
@@ -479,12 +508,54 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
    m_PadBrowserCanvas->SetTitle(buffer);
 
    if (!m_ShortView) BuildGeometry();
-   if (m_ShortView) m_ShortView->Draw();
+   if (m_ShortView) { DrawObject(m_ShortView); }
    TDataSet *ds = GetDataSet("emchitsView");
-   if (ds) ds->Draw();
+   if (ds) {
+      TEmcTowers *emchits = dynamic_cast<TEmcTowers *>(GetDataSet("emchits"));
+      if (emchits) emchits->ResetProviders();
+#ifdef EMCHITS      
+      DrawObject(ds);
+#endif      
+   }
    m_PadBrowserCanvas->Modified();
    m_PadBrowserCanvas->Update();
    return m_PadBrowserCanvas;
+}
+//_____________________________________________________________________________
+void StEventDisplayMaker::DrawObject(TObject *object,Option_t *option,Bool_t first)
+{
+  // Draw object directly to 3D viewer if present
+  if (object) {
+    if ( !f3DViewer) 
+    {
+        if (first && m_PadBrowserCanvas)
+          m_PadBrowserCanvas->GetListOfPrimitives()->AddFirst( object );
+        else {
+           object->Draw(option);
+        }
+     }
+    else 
+    {
+        if (fNeedsClear3DView) {
+#ifdef CAN_RENDER_PAD_DIRECTLY           
+           f3DViewer->BeginScene(0);
+#endif           
+           fNeedsClear3DView=kFALSE;
+        }
+        if (object->InheritsFrom(TCollection::Class())){
+           TIter next((TCollection*)object);
+           TObject *addMe  = 0;
+           while ( (addMe = next())  ) DrawObject(addMe,option,first);
+        } else {
+#ifdef CAN_RENDER_PAD_DIRECTLY           
+           if (first)
+               f3DViewer ->AddObjectFirst(object, option);
+           else
+               f3DViewer ->AddObject(object, option);
+#endif
+        }
+     }
+  }
 }
 
 //_____________________________________________________________________________
@@ -643,7 +714,7 @@ void  StEventDisplayMaker::MakeEmcTowers()
 {
    // Create Emc towers geometry
    TEmcTowers *towers = 0;
-#ifdef EMCTOWER   
+#ifndef EMCTOWER   
    towers = new TEmcTowers("emchits","emchits",251,  292.1,    20,   60);
    TVolumeView *towersview = new TVolumeView(*towers);
    towersview->SetName("emchitsView");
@@ -689,7 +760,9 @@ public:
        Int_t  daqId = 0;
        Int_t  tdc = -1;
        Int_t report = 0;
+       if (fIndex > 4800) fIndex = 0;
        int towerId = fIndex+1;fIndex++;
+       // printf(" towerid size attr = %d\n", towerId);
        if ( towerId > 61*40 && towerId <=  62*40)  return 2; // STAR has no East-end emc tower yet !!!
        if ( towerId > 72*40 && towerId <=  73*40)  return 31; // STAR has no East-end emc tower yet !!!
        if ( towerId > 103*40 && towerId <= 104*40) return 44; // STAR has no East-end emc tower yet !!!
@@ -700,7 +773,7 @@ public:
        if ( towerId > 43*40 && towerId <=  44*40) return 44; // STAR has no East-end emc tower yet !!!
        if ( towerId > 58*40 && towerId <=  59*40) return 49; // STAR has no East-end emc tower yet !!!
 
-       return 99;
+       return  towerId/10;
        if (  towerId <= 1200)                        return  100; // 0  
        if ( (towerId > 2400) && ( towerId < 3600) )  return  100; // 0
        if ( (towerId >= 1200) && (towerId < 2400) )  return 20;
@@ -745,9 +818,12 @@ public:
     virtual Int_t NextAttribute() { 
        Int_t  daqId = 0;
        Int_t colorResponce = 0;
+       if (fIndex > 4800) fIndex = 0;
        int towerId = fIndex+1;fIndex++;
+       return  towerId/100;
+       // printf(" towerid = %d\n", towerId);
        // UInt_t colorCode = ReportValue((fDataSource[daqId])) ;
-       if ( towerId >  1*40 && towerId <=   2*40)  return kBlue;    // STAR has no East-end emc tower yet !!!
+       if ( towerId >  1*40 && towerId <=   2*40) return kBlue;    // STAR has no East-end emc tower yet !!!
        if ( towerId > 28*40 && towerId <=  29*40) return kGreen;   // STAR has no East-end emc tower yet !!!
        if ( towerId > 43*40 && towerId <=  44*40) return kYellow;  // STAR has no East-end emc tower yet !!!
        if ( towerId > 58*40 && towerId <=  59*40) return kRed;     // STAR has no East-end emc tower yet !!!
@@ -1300,6 +1376,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.116  2006/10/09 20:33:46  fine
+// Fix to make it work under ROOT 4.04 and ROOT 5.12
+//
 // Revision 1.115  2006/08/24 23:38:21  fine
 // Add the EmsTowers a component of the Detector Geometry (still disabled
 //

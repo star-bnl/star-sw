@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.37 2006/08/24 19:03:43 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.38 2006/10/09 20:33:46 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.38  2006/10/09 20:33:46  fine
+// Fix to make it work under ROOT 4.04 and ROOT 5.12
+//
 // Revision 1.37  2006/08/24 19:03:43  fine
 // Add the fake the Emc tower dataprovider to test
 //
@@ -94,10 +97,11 @@ class StFilterABC;
 class StGlobalFilterABC;
 class StPoints3DABC;
 class StEventDisplayInfo;
+class TQtRootViewer3D;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.37 2006/08/24 19:03:43 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.38 2006/10/09 20:33:46 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -130,13 +134,15 @@ static StEventDisplayInfo *fgInfo;
     TList*        mFilterList;		//! list of filters for StEvent
 
     TVolume *fColCash[kCOLORS];
-    
+    TQtRootViewer3D *f3DViewer; //! external 3D viewer;
+    Bool_t          fNeedsClear3DView;
 
+    void          DrawObject(TObject *,Option_t *option="",Bool_t first=kFALSE);
     Int_t         MakeTable(const char   **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const char   *keyColumn,const char   *keyPositions[]);
     void          MakeEmcTowers();
     static Int_t  ParseName(char   *inName, char   *position[]);
- 
+
  public: 
                   StEventDisplayMaker(const char *name="EventDisplay");
    virtual       ~StEventDisplayMaker();
@@ -153,6 +159,8 @@ static StEventDisplayInfo *fgInfo;
    virtual Int_t  MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter);
    virtual Int_t  MakeEvent(const TObject *event,const char** positions);
            void   DrawIt(StPoints3DABC *pnt,const char *opt,Color_t col,Style_t sty,Size_t siz);
+   void Set3DViewer( TQtRootViewer3D *viewer) {  f3DViewer = viewer;}
+   TQtRootViewer3D  *Get3DViewer() const { return f3DViewer; }
 
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
@@ -204,7 +212,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.37 2006/08/24 19:03:43 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.38 2006/10/09 20:33:46 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

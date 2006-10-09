@@ -2,7 +2,7 @@
 #define ROOT_Stt_PolyLine3D
 
 // ***********************************************************************
-// $Id: St_PolyLine3D.h,v 1.2 2004/08/08 22:05:37 fisyak Exp $ 
+// $Id: St_PolyLine3D.h,v 1.3 2006/10/09 20:33:46 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -78,7 +78,9 @@ public:
         virtual Int_t     SetPoints(Int_t n, Float_t *p=0, Option_t *option="") {return fPoints ? fPoints->SetPoints(n,p,option): 0;}
 
 #ifndef __CINT__
-# if ROOT_VERSION_CODE >= ROOT_VERSION(4,01,0)
+# if ROOT_VERSION_CODE >= ROOT_VERSION(5,12,0)
+                void      SetPoints(Double_t* buffer) const {TShape::SetPoints(buffer);}
+#elif ROOT_VERSION_CODE >= ROOT_VERSION(4,01,0)
                 void      SetPoints(Double_t* buffer){TShape::SetPoints(buffer);}
 # else                
                 void      SetPoints(Float_t* buffer) {TShape::SetPoints(buffer);}
@@ -90,6 +92,9 @@ public:
 };
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.h,v $
+// Revision 1.3  2006/10/09 20:33:46  fine
+// Fix to make it work under ROOT 4.04 and ROOT 5.12
+//
 // Revision 1.2  2004/08/08 22:05:37  fisyak
 // Valery's correction for ROOT > 4.01.00
 //

@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterTest.cxx,v 1.6 2005/06/16 19:38:25 perev Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.7 2006/10/09 20:33:46 fine Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -118,7 +118,7 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
 	  printf("***Problem***	tmp=%g,s[0]=%g, s[2]=%g\n",tmp,s[0],s[2]);
 	  printf("MyHit	= %g, %g, %g\n",myHit[0],myHit[1],myHit[2]);
           myHlx[0].Print();
-//	Assert(noProblem);
+//	R__ASSERT(noProblem);
         }
       }
       double wt0 = pow(s[0],3);
