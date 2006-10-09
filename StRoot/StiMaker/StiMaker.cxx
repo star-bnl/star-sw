@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.170  2006/10/09 15:51:28  fisyak
+// Remove Ftpc
+//
 // Revision 1.169  2006/08/01 03:51:00  perev
 // Return from Make() for too many hits
 //
@@ -242,11 +245,9 @@
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiMasterDetectorBuilder.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
-#include "StiFtpc/StiFtpcDetectorGroup.h"
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiSsd/StiSsdDetectorGroup.h"
-#include "StiEmc/StiEmcDetectorGroup.h"
 #include "StiPixel/StiPixelDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiKalmanTrack.h"
@@ -408,12 +409,6 @@ Int_t StiMaker::InitDetectors()
 	  _toolkit->add(group = new StiSsdDetectorGroup(IAttr("activeSsd"),SAttr("ssdInputFile")));
 	  group->setGroupId(kSsdId);
       }
-  if (IAttr("useFtpc"))
-    {
-      cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
-      _toolkit->add(group = new StiFtpcDetectorGroup(IAttr("activeFtpc"),SAttr("ftpcInputFile")));
-      group->setGroupId(kFtpcWestId);
-    }
   if (IAttr("usePixel"))
     {
       cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
