@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.178 2006/10/04 18:51:25 fisyak Exp $
+// $Id: StMaker.cxx,v 1.179 2006/10/09 19:39:52 fisyak Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -151,6 +151,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005b",      20041101,     0, "y2005b",   ""},                   //       {"y2005b",      20041101,     0}
   {"y2005c",      20041201,     0, "y2005c",   ""},                   //       {"y2005c",      20041201,     0}
   {"y2005d",      20041201,     1, "y2005d",   "y2005c + new SVT"},   //       {"y2005c",      20041201,     0}
+  {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005c",      20041201,     0}
 
   // incoming, not advertized 
   {"y2006",       20051201,     0, "y2006",    "base geometry for y2006"},
@@ -1722,6 +1723,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.179  2006/10/09 19:39:52  fisyak
+// Add geometry y2005e
+//
 // Revision 1.178  2006/10/04 18:51:25  fisyak
 // Add new geometry tags: upgr04 and upgr04, remove rference to xdf
 //
