@@ -13,7 +13,6 @@
 //#pragma link C++ class StiCompositeTreeNode;
 #pragma link C++ class StiConicalShape;
 #pragma link C++ class StiCylindricalShape;
-#pragma link C++ class StiDedxCalculator;
 //#pragma link C++ class StiDefaultHitAssociationFilter;
 #pragma link C++ class StiDefaultHitFilter;
 //#pragma link C++ class StiDefaultMutableTreeNode;

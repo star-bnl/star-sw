@@ -287,8 +287,9 @@ class StiKalmanTrack : public StiTrack
   int  refitL();
   void reserveHits();
   StiTrackNode *extendToVertex(StiHit* vertex);
+#if 0
   bool extendToVertex(StiHit* vertex, const StiDetector*alternate);
-
+#endif
   void setFlag(long v);
   long getFlag() const;
 

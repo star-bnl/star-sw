@@ -148,7 +148,7 @@ void StiHit::setGlobal(const StiDetector * detector,
       double dif = myAngle-centerAngle;
       if (dif > 180) dif-=360;
       if (dif <-180) dif+=360;
-      if (fabs(dif) > 1.1*15) {
+      if (fabs(dif) > 1.1*22) {
 printf("**** StiHit.%s wrong angle: hitAng=%f ctrAng=%g dif=%g ****\n"
       ,detector->getName().c_str(),myAngle,centerAngle,dif);
       }

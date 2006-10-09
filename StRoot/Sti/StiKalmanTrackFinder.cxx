@@ -783,7 +783,9 @@ int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
    int ians;
    ians = qaBest.pits-qaTry.pits;
+   //#ifdef VP
    if (qaBest.pits+qaTry.pits==1) 			return ians;
+   //#endif
    ians =-ians;				if (ians)	return ians;
    ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
    ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;

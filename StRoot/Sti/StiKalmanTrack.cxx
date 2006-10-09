@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.86 2006/05/31 03:58:06 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.86 2006/05/31 03:58:06 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.87 2006/10/09 15:47:06 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.87 2006/10/09 15:47:06 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.87  2006/10/09 15:47:06  fisyak
+ * take out Central represantation, remove StiDedxCalculator
+ *
  * Revision 2.86  2006/05/31 03:58:06  fisyak
  * Add Victor's dca track parameters, clean up
  *
@@ -1011,6 +1014,7 @@ void StiKalmanTrack::reserveHits()
   runtime_error exceptions which are NOT caught here...</li>
   </ul>
 */
+#if 0
 //_____________________________________________________________________________
 bool StiKalmanTrack::extendToVertex(StiHit *vertex, const StiDetector * alternate)
 {
@@ -1026,7 +1030,7 @@ bool StiKalmanTrack::extendToVertex(StiHit *vertex, const StiDetector * alternat
   cout << "propagate status:"<<status<<endl;
   return false;
 }
-
+#endif
 
 //_____________________________________________________________________________
 StiTrackNode *StiKalmanTrack::extendToVertex(StiHit* vertex)
