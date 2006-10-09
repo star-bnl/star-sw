@@ -9,7 +9,7 @@
 StiIstDetectorGroup::StiIstDetectorGroup(bool active, const string & inputFile)
     : StiDetectorGroup<StEvent>("Ist",
 					  active?new StiIstHitLoader():0,
-					  new StiIstDetectorBuilder(active,inputFile),0,0)
+					  new StiIstDetectorBuilder(active,inputFile),0)
 {}
 
 StiIstDetectorGroup::~StiIstDetectorGroup()
