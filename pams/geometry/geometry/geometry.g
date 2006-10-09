@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.128 2006/10/02 21:37:03 potekhin Exp $
+* $Id: geometry.g,v 1.129 2006/10/09 16:19:17 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.129  2006/10/09 16:19:17  potekhin
+* Due to the ongoing SSD studies, we need to refine the 2005 tag,
+* so as to include Lilian's code that were checked into CVS in
+* early 2006 but were valid in 2005 as well. We have therefore created
+* the tag Y2005E, which is an improvement over Y2005D (more precise SSD),
+* bigger SVT shield (to accomodate the SSD) and a full barrel calorimeter.
+*
 * Revision 1.128  2006/10/02 21:37:03  potekhin
 * Added steering logic for the new tag UPGR05, which
 * includes the HFT (former pixel), HPD, IST and SSD,
@@ -1815,6 +1822,73 @@ If LL>1
                 }
 
 ****************************************************************************************
+  on Y2005E    { Better SVT, bigger shield and SSD on top of Y2005C, and full barrel calorimeter
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+* note the full barrel same as in y2003x:
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 35; "second version, full barrel with corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+
+                }
+
+****************************************************************************************
   on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -2549,7 +2623,6 @@ If LL>1
 * Take care of the correction level and call the appropriate constructor:
   if(svtt) then
 
-	write(*,*) 'foooooooooooooooooooo ',svttconfig
 *   This applies to the newer versions of the svt code:
 *   we can now switch to a better description of the cone
 *   material (copper cables) thanks to a new measurement by
