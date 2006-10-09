@@ -673,25 +673,27 @@ Bfc_st BFC2[] = { // ITTF Chains
 #endif
   {"pixFastSim","","","StMcEvent,StEvent",
                                    "StPixelFastSimMaker","StPixelFastSimMaker","FastPixelSimulator",kFALSE},
+  {"ssdUtil",    ,"","","",                                         ,"","StSsdUtil","Ssd utilities",kFALSE},
   {"ssddat"      ,"","","ssd_daq"                             ,"","","SSD full chain for Real Data",kFALSE},
-  {"ssd_daq"  ,"SpaStrip","","ssddb,St_svt,-sls,-spa","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
-#ifndef __CLEANUP__1
+  {"ssd_daq","SpaStrip","","ssddb,St_svt,-sls,-spa,ssdUtil","StSsdDaqMaker","StSsdDaqMaker","... SSD Daq",kFALSE},
+#ifndef __CLEANUP__
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                ,"","","SSD full chain for simulation",kFALSE},
 #else
   {"ssd"         ,"","","sls,spa,spt"                        ,"","","SSD full chain for simulation",kFALSE},
 #endif
   {"sls"         ,"","","tls,Simu,St_tpc,St_svt,SvtCL","St_sls_Maker","StSsdSimulationMaker",
                                                                            "... SSD slow simulator",kFALSE},
-  {"spa"         ,"SpaStrip","","tls,Simu,St_tpc,St_svt,SvtCL","St_spa_Maker","StSsdSimulationMaker",
+  {"spa"         ,"SpaStrip","","tls,Simu,St_tpc,St_svt,SvtCL,ssdUtil","St_spa_Maker","StSsdSimulationMaker",
                                                                      "... SSD Pedestal Annihilator",kFALSE},
-#ifndef __CLEANUP__1
+#ifndef __CLEANUP__
   {"scf"        ,"","","St_svt,St_tpc" ,"St_scf_Maker","StSsdClusterMaker","... SSD cluster finder",kFALSE},
   {"scm"        ,"","","St_svt,St_tpc" ,"St_scm_Maker","StSsdClusterMaker",
                                                               "... SSD Cluster Matcher (both side)",kFALSE},
 #endif
-  {"spt"         ,"","","St_svt"       ,"StSsdPointMaker","StSsdPointMaker","... SSD Point Creator",kFALSE},
+  {"spt"        ,"","","St_svt,ssdUtil","StSsdPointMaker","StSsdPointMaker","... SSD Point Creator",kFALSE},
+#ifndef __CLEANUP__
   {"sce"         ,"","","St_tpc,St_svt"       ,"St_sce_Maker","StSsdEvalMaker", "... SSD Evaluator",kFALSE},
-    
+#endif    
   {"emcDY2"   ,"emcRaw","emcY2",
      "daq,eemcDb,EEmcUtil,emc_T,EmcUtil,StEvent,PreEcl,Epc","StEmcRawMaker","StEmcRawMaker",
                                                                         "B/E EMC data common maker",kFALSE},
@@ -710,7 +712,7 @@ Bfc_st BFC2[] = { // ITTF Chains
                                                                            ,"Generic Vertex Finder",kFALSE},
   {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
   {"Sti"      ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb,StiUtil","StiMaker",
-                "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd,StiEmc,StiFtpc" ,"ITTF tracker",kFALSE},
+                               "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd" ,"ITTF tracker",kFALSE},
   {"StiPixel" ,"","","Sti",                           "","StiPixel", "Load StiPixel shared library",kFALSE},
   {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker"
