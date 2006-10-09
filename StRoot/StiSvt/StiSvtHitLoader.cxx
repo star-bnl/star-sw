@@ -1,7 +1,7 @@
 #include "Stiostream.h"
 #include <cmath>
 #include <stdio.h>
-
+#include "StiSvtLayerLadder.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "Sti/Base/Factory.h"
@@ -47,15 +47,15 @@ void StiSvtHitLoader::loadHits(StEvent* source,
   for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel)
   {
     StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
-    if (!barrelhits) break;
+    if (!barrelhits) continue;
     for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder)
     {
       StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
-      if (!ladderhits) break;
+      if (!ladderhits) continue;
       for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer)
       {
         StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
-        if (!waferhits) break;
+        if (!waferhits) continue;
         const StSPtrVecSvtHit& hits = waferhits->hits();
         StiHitTest hitTest;
         for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it)
@@ -65,9 +65,9 @@ void StiSvtHitLoader::loadHits(StEvent* source,
           if (!hit) throw runtime_error("StiSvtHitLoader::loadHits() -W- hit==0!");
           int svtLayer = hit->layer();
           int svtLadder = hit->ladder();
-          int layer = getLayer(svtLayer);
-          int ladder = getLadder(svtLayer,svtLadder);
-          detector = _detector->getDetector(layer,ladder);
+          int stilayer = getLayer(svtLayer);
+          int stiladder = getLadder(svtLayer,svtLadder);
+          detector = _detector->getDetector(stilayer,stiladder);
           if (!detector) throw runtime_error("StiSvtHitLoader::loadHits() -W- detector==0!");
           if (hit->flag()>=4) continue;
           if (hit->flag()< 0) continue;
@@ -94,7 +94,7 @@ void StiSvtHitLoader::loadHits(StEvent* source,
   cout <<"StiSvtHitLoader::loadHits() -I- Done"<<endl;
 }
 
-
+#if 0
 int StiSvtHitLoader::getLayer(int svtLayer) const
 {
   int layer;
@@ -192,3 +192,4 @@ int StiSvtHitLoader::getLadder(int svtLayer,int svtLadder) const
     }
   return ladder;
 }
+#endif

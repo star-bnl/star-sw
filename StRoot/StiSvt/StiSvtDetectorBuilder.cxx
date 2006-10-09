@@ -2,12 +2,13 @@
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StDbUtilities/StSvtLocalCoordinate.hh"
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
-#include "StiSvt/StiSvtDetectorBuilder.h" 
+#include "StiSvtDetectorBuilder.h" 
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSvtDbMaker/St_SvtDb_Reader.hh"
+#include "StDbUtilities/St_svtRDOstrippedC.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
@@ -15,13 +16,13 @@
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiToolkit.h"
-#include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "StiSvt/StiSvtIsActiveFunctor.h"
+#include "StiIsSvtActiveFunctor.h"
 #include "Sti/StiElossCalculator.h"
 #include <stdio.h>
 #include "tables/St_HitError_Table.h"
-
+#include "StiSvtLayerLadder.h"
+#include "StThreeVectorD.hh"
 /*
   Geant names: SVTT the mother of all SVT volumes
                SFMO: is the mother of all Silicon Strip Detector volumes
@@ -87,7 +88,6 @@
     6     13       5     6
     6     15       5     7
  */
-
 StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Svt",active,inputFile), _siMat(0), _hybridMat(0)
 {
@@ -117,14 +117,9 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   if (!_geometry) throw runtime_error("StiSvtDetectorBuilder::loadDb() -E- _geometry==0");
   nRows = 2* _config->getNumberOfBarrels();
   setNRows(nRows);
-  if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
   
   cout << "SVT Number of  Rows : "<<2* _config->getNumberOfBarrels()<<endl
 			 << "  Layer#  numberOfLadders      Radius" << endl;
-  for (int layer=0;layer<nRows;layer++)
-		cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
-				 << _geometry->getBarrelRadius(layer+1) << endl;
-
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Materials" << endl;
   if (! _gasMat) 
     _gasMat    = add(new StiMaterial("Air",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
@@ -135,102 +130,92 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;
 
   double ionization = _siMat->getIonization();
-  StiElossCalculator * siElossCalculator = new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
-  int nLayers = nRows;
-  for(int layer = 0; layer<nLayers; layer++)
-    {
-      int nWafers = _config->getNumberOfWafers(1+layer/2);
-      // Si wafer
-      sprintf(name, "Svt/Layer_%d/Wafers", layer);
-      _waferShape[layer] = new StiPlanarShape(name,
-					      nWafers*_geometry->getWaferLength(),
-					      2.*_geometry->getWaferThickness(),
-					      _geometry->getWaferWidth() );
-      add(_waferShape[layer]);
-#if 0
-      // Hybrids
-      sprintf(name, "Svt/Layer_%d/Hybrids", layer);
-      _hybridShape[layer] = new StiPlanarShape(name,nWafers*_geometry->getWaferLength(),0.1, 1.);
-      add(_hybridShape[layer]);
-#endif
-    } // for layer
-  
-  for (int layer=0;layer<nRows;layer++)
-    {
-      int nSectors = _config->getNumberOfLadders(1+layer/2)/2;
-      setNSectors(layer,nSectors); 
-      // calculate generic params for this layer
-      // number of ladders per layer (not barrel) & phi increment between ladders
-      float fDeltaPhi = M_PI/nSectors;
-      // width of gap between the edges of 2 adjacent ladders:
-      //   first, the angle subtended by 1/2 of the ladder
-      float fLadderRadius  = _geometry->getBarrelRadius(layer+1);
-      if (fLadderRadius<=0)	throw runtime_error("StiSvtDetectorBuilder::buildDetectors() - FATAL - fLadderRadius<=0");
-      float fHalfLadderPhi = atan2(_waferShape[layer]->getHalfWidth(),fLadderRadius);
-      float fHalfGapPhi    = fDeltaPhi - fHalfLadderPhi;    
-      // then the distance from the origin to  the gap center
-      // != the layer radius bc the layer width differs from the gap width,
-      // i.e. not a regular polygon.
-      float fGapRadius = fLadderRadius*cos(fHalfGapPhi)/cos(fHalfLadderPhi);
-      //   finally half the gap distance
-      //      float fHalfGap = fGapRadius*tan(fHalfGapPhi);
-      // determine the radius for the detector (ladders + hybrids)
-      float fLayerRadius = (fLadderRadius + fGapRadius)/2.;
-
-      double x,y,z,rc,rn, nx,ny,nz,dx,dy,dz;
-      StSvtWaferGeometry* waferGeom;
-      float fLadderPhi;
-      float phiC, phiN, dPhi;
-      for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)
-	{
-	  //detector wafers placement 
-	  if (layer==0 || layer==2 || layer==4)
-	    waferGeom = (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(1+layer/2,2*ladder+2,1));		
-	  else
-	    waferGeom = (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(1+layer/2,2*ladder+1,1));		
-	  x = waferGeom->x(0);
-	  y = waferGeom->x(1);
-	  z = waferGeom->x(2);
-	  nx = waferGeom->n(0);
-	  ny = waferGeom->n(1);
-	  nz = waferGeom->n(2);
-	  double nt = sqrt(nx*nx+ny*ny);
-	  dx = waferGeom->d(0);
-	  dy = waferGeom->d(1);
-	  dz = waferGeom->d(2);
-	  rc = sqrt(x*x+y*y);
-	  rn = (x*nx+y*ny)/nt;
-	  dPhi = acos((x*nx+y*ny)/(rc*nt));
-	  phiC = fLadderPhi = atan2(y,x);
-	  phiN = atan2(ny,nx);
-	  dPhi = phiC-phiN;
-	  StiPlacement *pPlacement = new StiPlacement;
-	  pPlacement->setZcenter(0.);
-	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setLayerAngle(fLadderPhi);
-	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setCenterRep(phiC, rc, -dPhi); 
-	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
-	  StiDetector *pLadder = _detectorFactory->getInstance();
-	  pLadder->setName(name);
-	  pLadder->setIsOn(true);
-	  pLadder->setIsActive(new StiIsActiveFunctor(_active));
-	  pLadder->setIsContinuousMedium(true);
-	  pLadder->setIsDiscreteScatterer(true);
-	  pLadder->setGas(_gasMat);
-	  pLadder->setMaterial(_siMat);
-	  pLadder->setShape(_waferShape[layer]);
-	  pLadder->setPlacement(pPlacement); 
-	  pLadder->setHitErrorCalculator(&_calc);
-	  pLadder->setKey(1,layer);
-	  pLadder->setKey(2,ladder);
-	  pLadder->setElossCalculator(siElossCalculator);
-
-	  add(layer,ladder,pLadder);
-	} // for ladder
-    } // for layer
+  StiElossCalculator * siElossCalculator = 
+    new StiElossCalculator(_siMat->getZOverA(), ionization*ionization, _siMat->getA(), _siMat->getZ(), _siMat->getDensity());
+  for (int layer=0;layer<nRows;layer++)    {
+    cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
+	 << _geometry->getBarrelRadius(layer+1) << endl;
+    Int_t svtLayer = layer+1;
+    Int_t svtBarrel = getSvtBarrel(svtLayer);
+    int nWafers = _config->getNumberOfWafers(svtBarrel);
+    // Si wafer
+    sprintf(name, "Svt/Layer_%d/Wafers", layer);
+    _waferShape[layer] = new StiPlanarShape(name,
+					    nWafers*_geometry->getWaferLength(),
+					    2.*_geometry->getWaferThickness(),
+					    _geometry->getWaferWidth() );
+    add(_waferShape[layer]);
+    int nSectors = _config->getNumberOfLadders(svtBarrel)/2;
+    setNSectors(layer,nSectors); 
+    // calculate generic params for this layer
+    // number of ladders per layer (not barrel) & phi increment between ladders
+    float fDeltaPhi = M_PI/nSectors;
+    // width of gap between the edges of 2 adjacent ladders:
+    //   first, the angle subtended by 1/2 of the ladder
+    float fLadderRadius  = _geometry->getBarrelRadius(svtLayer);
+    if (fLadderRadius<=0)	throw runtime_error("StiSvtDetectorBuilder::buildDetectors() - FATAL - fLadderRadius<=0");
+    StSvtWaferGeometry* waferGeom;
+    Int_t index1, index2;
+    StSvtWaferGeometry* waferGeom2;
+    for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)	{
+      Int_t svtLadder = 2*(ladder+1) - (svtLayer-1)%2;
+      Int_t wafer = nWafers/2+1;
+      index1 = _geometry->getWaferIndex(svtBarrel,svtLadder,wafer);
+      assert (index1 >= 0);
+      waferGeom = (StSvtWaferGeometry*) _geometry->at(index1);
+      StThreeVectorD centerVector(waferGeom->x(0), waferGeom->x(1), waferGeom->x(2) );
+      if (2*wafer == nWafers) {
+	index2 = _geometry->getWaferIndex(svtBarrel,svtLadder,wafer-1);
+	assert(index2 >= 0);
+	waferGeom2 = (StSvtWaferGeometry*) _geometry->at(index2);
+	StThreeVectorD centerVector2(waferGeom2->x(0), waferGeom2->x(1), waferGeom2->x(2) );
+	centerVector += centerVector2;
+	centerVector *= 0.5;
+      }
+      StThreeVectorD normalVector(waferGeom->n(0), waferGeom->n(1), waferGeom->n(2) );
+      Double_t prod = centerVector*normalVector;
+      if (prod < 0) normalVector *= -1;
+      double phi  = centerVector.phi();
+      double phiD = normalVector.phi();
+      double r = centerVector.perp();
+      cout <<"Det Nber = "<<waferGeom->getID()<<"\tcv\t:"<<centerVector<<"\tphi:\t"<<phi<<"\tr:\t"<<r<<endl;
+      StiPlacement *pPlacement = new StiPlacement;
+      pPlacement->setZcenter(centerVector.z());
+      pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
+      pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
+      pPlacement->setRegion(StiPlacement::kMidRapidity);
+      pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
+      sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
+      StiDetector *pLadder = _detectorFactory->getInstance();
+      pLadder->setName(name);
+      pLadder->setIsOn(true);
+      pLadder->setIsActive(new StiIsSvtActiveFunctor(svtBarrel,svtLadder, nWafers, _geometry->getWaferWidth(), _geometry->getWaferLength(), _active));
+      pLadder->setIsContinuousMedium(true);
+      pLadder->setIsDiscreteScatterer(true);
+      pLadder->setGas(_gasMat);
+      pLadder->setMaterial(_siMat);
+      pLadder->setShape(_waferShape[layer]);
+      pLadder->setPlacement(pPlacement); 
+      pLadder->setHitErrorCalculator(&_calc);
+      pLadder->setKey(1,layer);
+      pLadder->setKey(2,ladder);
+      pLadder->setElossCalculator(siElossCalculator);
+      add(layer,ladder,pLadder);
+    } // for ladder
+  } // for layer
+  if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
+  if (debug()) {
+    cout << "StiSvtDetectorBuilder::buildDetectors list of built detectors" << endl;
+    Int_t nlayers = _detectors.size(); 
+    for (Int_t layer = 0; layer < nlayers; layer++) {
+      Int_t nLadders = _detectors[layer].size();
+      for (Int_t ladder = 0; ladder < nLadders; ladder++) {
+	cout << "layer " << layer << "\tladder = " << ladder << "\t" << _detectors[layer][ladder]->getName() << endl;
+      }
+    }
+  }
 }
-
+//________________________________________________________________________________
 void StiSvtDetectorBuilder::loadFS(ifstream& iFile)
 {
 	cout << "StiSvtDetectorBuilder::loadFS(ifstream& iFile) -I- Started" << endl;
@@ -322,22 +307,6 @@ void StiSvtDetectorBuilder::useVMCGeometry() {
     {"SOER", "outer end ring","HALL_1/CAVE_1/SVTT_1/SOER_1-2/*","",""},
     {"SIRT", "inner end ring tube piece ","HALL_1/CAVE_1/SVTT_1/SIRT_1-2","",""},
     {"SIRP", "inner end ring polygon piece ","HALL_1/CAVE_1/SVTT_1/SIRP_1-2","",""},
-#ifndef __SsdInChain__
-    // SSD
-    //  {"SFMO", "the mother of all Silicon Strip Detector volumes","HALL_1/CAVE_1/SVTT_1/SFMO_1","",""},
-    {"SCMP","SSD mounting plate inserted in the cone","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCMP_1-8","",""},
-    {"SCVM","SSD V-shape mouting piece","HALL_1/CAVE_1/SVTT_1/SFMO_1/SCVM_1-8/*","",""},
-    {"SSLT","the linking (sector to the cone) tube","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLT_1-8","",""},
-    {"SSLB","the linking (sector to the cone)","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSLB_1-8","",""},
-    {"SSRS","the side of the small rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRS_1-4","",""},
-    {"SSRT","the top of the side rib","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSRT_1-4","",""},
-    {"SSSS","Side parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSSS_1-4","",""},
-    {"SSST","Top parts of the small sectors","HALL_1/CAVE_1/SVTT_1/SFMO_1/SSST_1-4","",""},
-    //  {"SFLM","the mother of the ladder","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/*","",""}, 
-    {"SFSM","the structure mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFSM_1/*","",""},
-    {"SFDM","the detectors and adcs mother volume","HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/*","",""},
-    {"SFSD","the strip detector",      "HALL_1/CAVE_1/SVTT_1/SFMO_1/SFLM_1-20/SFDM_1/SFSW_1-16/SFSD_1","ssd",""},// <+++
-#endif
     {"STAC", "twinax cable approximation, copper","HALL_1/CAVE_1/SVTT_1/SCON_1/STAC_1-2","",""}
   };
   Int_t NoSvtVols = sizeof(SvtVolumes)/sizeof(VolumeMap_t);
