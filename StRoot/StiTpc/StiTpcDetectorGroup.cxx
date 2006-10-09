@@ -7,7 +7,7 @@
 StiTpcDetectorGroup::StiTpcDetectorGroup(bool active, const string & inputFile)
   : StiDetectorGroup<StEvent>("TPC",
 			      active?new StiTpcHitLoader():0,
-			      new StiTpcDetectorBuilder(active,inputFile),0,0)
+			      new StiTpcDetectorBuilder(active,inputFile),0)
 {}
 
 StiTpcDetectorGroup::~StiTpcDetectorGroup()
