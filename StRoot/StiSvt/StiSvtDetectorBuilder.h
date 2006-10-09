@@ -21,8 +21,6 @@ class StiSvtDetectorBuilder : public StiDetectorBuilder
 	void    setHybridMat(StiMaterial *m) {_hybridMat = m;}
 	StiMaterial *getSiMat()    {return _siMat;}
 	StiMaterial *getHybridMat(){return _hybridMat;}
-	static void setDebug(int m = 0) {_debug = m;}
-	static int  debug() {return _debug;}
  protected:
 	StiMaterial    * _siMat;
 	StiMaterial    * _hybridMat;
@@ -31,6 +29,5 @@ class StiSvtDetectorBuilder : public StiDetectorBuilder
 	StSvtConfig    * _config;
 	StSvtGeometry  * _geometry;
 	StiDefaultHitErrorCalculator  _calc;
-	static int       _debug;
 };
 #endif 

@@ -28,9 +28,10 @@ public:
 	virtual void loadHits(StEvent* source,
 			      Filter<StiTrack> * trackFilter, 
 			      Filter<StiHit> * hitFilter);
+#if 0
 	int getLayer(int svtLayer) const;
 	int getLadder(int svtLayer, int svtLadder) const;
-	
+#endif	
 };
 
 #endif
