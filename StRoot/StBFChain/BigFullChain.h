@@ -479,9 +479,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"SvtIT"       ,""  ,"","",""                                    ,"","ITTF: track using SVT geom",kFALSE},
   {"SsdIT"       ,""  ,"","",""                                    ,"","ITTF: track using SSD geom",kFALSE},
-  {"FtpcIT"      ,""  ,"","",""                                    ,"","ITTF: track with FTPC geom",kFALSE},
+  {"HpdIT"       ,""  ,"","StiPixel",""                            ,"","ITTF: track using Hpd geom",kFALSE}
   {"PixelIT"     ,""  ,"","StiPixel",""                          ,"","ITTF: track using Pixel geom",kFALSE},
-  {"IstIT"       ,""  ,"","StiPixel",""                          ,"","ITTF: track using Ist geom",kFALSE},
+  {"IstIT"       ,""  ,"","StiPixel",""                            ,"","ITTF: track using Ist geom",kFALSE},
 #endif /* __BFC2__ */
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
