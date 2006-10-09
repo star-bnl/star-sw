@@ -8,7 +8,6 @@ StiStarDetectorGroup::StiStarDetectorGroup(bool active, const string & inputFile
   : StiDetectorGroup<StEvent>("STAR",
 			      0,
 			      new StiStarDetectorBuilder(active,inputFile),
-			      0,
 			      0)
 {}
 

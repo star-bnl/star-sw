@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.100 2006/05/31 03:58:06 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.101 2006/10/09 15:47:07 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.101  2006/10/09 15:47:07  fisyak
+ * take out Central represantation, remove StiDedxCalculator
+ *
  * Revision 2.100  2006/05/31 03:58:06  fisyak
  * Add Victor's dca track parameters, clean up
  *
@@ -831,7 +834,11 @@ Break(nCall);
 bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,int dir)
 {
   setState(parentNode);
-  if (debug()) ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
+  if (debug()) {
+    if (parentNode->getDetector()) 
+      ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
+    else ResetComment("Unknown Detector");
+  }
   if (propagate(0., kPlanar,dir) < 0) return false; // track does not reach vertex "plane"
   propagateError();
   if (debug() & 8) { PrintpT("B");}

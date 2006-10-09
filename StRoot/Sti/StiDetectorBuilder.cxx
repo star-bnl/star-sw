@@ -11,7 +11,7 @@
 #include "Sti/StiElossCalculator.h"
 #include "StThreeVector.hh"
 #include "StMaker.h"
-
+#include "StThreeVectorD.hh"
 StiDetectorBuilder* StiDetectorBuilder::fCurrentDetectorBuilder = 0;
 int StiDetectorBuilder::_debug = 0;
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active, const string & inputFile)
@@ -186,33 +186,20 @@ void StiDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
 			      box->GetDY());  // halfWidth
       add(sh);
     }
-    // rot = {r0, r1, r2,
-    //        r3, r4, r5,
-    //        r6, r7, r8}
-    double nx = rot[3];// 
-    double ny = rot[4];
-    //      double nz = rot[5];
-    double nt = sqrt(nx*nx+ny*ny);
-    double xc = xyz[0];
-    double yc = xyz[1];
-    double zc = xyz[2];
-    double rc = sqrt(xc*xc+yc*yc);
-    //    double rn = (xc*nx + yc*ny)/nt;
-    // create unique detector properties (placement & name)
-    Double_t  dPhi = acos((xc*nx+yc*ny)/(rc*nt));
-    Double_t  phiC = atan2(yc,xc);
-    Double_t  phiN = atan2(ny,nx);
-    dPhi = phiC-phiN; //  in [-pi/2, pi/2]
-    if (dPhi <= -M_PI/2) dPhi += M_PI;
-    if (dPhi >   M_PI/2) dPhi -= M_PI;
-    //    Double_t yOff = sqrt(rc*rc-rn*rn);
+    StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
+    StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
+    Double_t prod = centerVector*normalVector;
+    if (prod < 0) normalVector *= -1;
+    Double_t phi  = centerVector.phi();
+    Double_t phiD = normalVector.phi();
+    Double_t r = centerVector.perp();
     pPlacement = new StiPlacement;
-    pPlacement->setZcenter(zc);
-    pPlacement->setLayerRadius(rc);
-    pPlacement->setLayerAngle(phiC);
+    pPlacement->setZcenter(xyz[2]);
+    pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
+    pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
     pPlacement->setRegion(StiPlacement::kMidRapidity);
-    pPlacement->setCenterRep(phiC, rc, -dPhi); 
-  }
+    pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
+ }
   assert(pPlacement);
   StiDetector *pDetector = getDetectorFactory()->getInstance();
   TString nameP(nodeP->GetName());

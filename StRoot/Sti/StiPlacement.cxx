@@ -11,9 +11,13 @@ StiPlacement::StiPlacement(){
     centerOrientation=0;  
     layerRadius=0;
     zCenter=0;
+#if 0
   setCenterRep(0., 0., 0.);
+#else
+  setNormalRep(0., 0., 0.);
+#endif
 }// StiPlacement()
-
+#if 0
 void StiPlacement::setCenterRep(float refAngle_, float radius_, 
                                 float orientation_){
 
@@ -47,7 +51,7 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
   }
 #endif
 }// setCenterRep()
-
+#endif
 void StiPlacement::setNormalRep(float refAngle_, float radius_, 
                                 float yOffset_){
 
