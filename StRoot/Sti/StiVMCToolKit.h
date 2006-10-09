@@ -30,7 +30,6 @@ struct VolumeMap_t {
   Char_t *set;
   Char_t *det;
 };
-#define __SsdInChain__
 namespace StiVMCToolKit {
   void              PrintShape(TGeoShape *shape);							 
   Double_t          GetShapeVolume(TGeoShape *shape);						 
