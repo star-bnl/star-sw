@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.47 2006/06/09 16:02:16 jeromel Exp $
+// $Id: rootlogon.C,v 1.48 2006/10/10 14:00:02 jeromel Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -107,7 +107,8 @@
 
   // This will help tracing failure on XrdOpen() if any
   gEnv->SetValue("XNet.DebugTimestamp","1"); 
-
+  gEnv->SetValue("XNet.ConnectDomainAllowRE","rcf.bnl.gov|usatlas.bnl.gov");
+  gEnv->SetValue("XNet.RedirDomainAllowRE","rcf.bnl.gov"); 
 
   //  Print version
   namespace _rootlogon_ {
