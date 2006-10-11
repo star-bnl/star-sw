@@ -1,6 +1,9 @@
 ***************************************************************************
-* $Id: hpdtgeo.g,v 1.1 2006/09/15 19:55:10 potekhin Exp $
+* $Id: hpdtgeo.g,v 1.2 2006/10/11 17:52:05 potekhin Exp $
 * $Log: hpdtgeo.g,v $
+* Revision 1.2  2006/10/11 17:52:05  potekhin
+* Corrected the angular offset, 60 instead of 70
+*
 * Revision 1.1  2006/09/15 19:55:10  potekhin
 * New pixle detector requires new code.
 *
@@ -54,7 +57,7 @@ Module HPDTGEO is the geometry of the STAR pixel detector
 *
       r           =  9.1        ! 1st ladder nominal radius
       a           =  3.75       ! 1st ladder nominal position angle
-      aOffset     = 70.0       ! Angular offset      
+      aOffset     = 60.0       ! Angular offset      
       numberladder= 48         ! Number of ladders   
       numbercell  = 20           ! Number of cells 
 *
