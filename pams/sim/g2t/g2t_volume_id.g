@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.53 2005/07/01 15:10:01 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.54 2006/10/11 18:01:39 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.54  2006/10/11 18:01:39  potekhin
+* Added a clause for HPD (Sevil)
+*
 * Revision 1.53  2005/07/01 15:10:01  potekhin
 * Adding the GEM barrel tracker
 *
@@ -596,6 +599,9 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *21*                                 Gerrit van Nieuwenhuizen
       else If (Csys=='igt') then
+        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+*22*                                 Sevil Salur
+      else If (Csys=='hpd') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
       else
