@@ -212,7 +212,7 @@ void StiKalmanTrackFinder::extendSeeds(double rMin)
 static int nCall=0;nCall++;
   StiKalmanTrack *track;
   int nTTot=0,nTSeed=0,nTAdd=0,nTFail=0,nTFilt=0,extend=0,status;
-  int nTpcHits=0,nSvtHits=0;
+  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nIstHits=0,nHftHits=0,nHpdHits=0;
 
   while (true ){
 // 		obtain track seed from seed finder
@@ -243,6 +243,10 @@ static int nCall=0;nCall++;
         track->reserveHits();
         nTpcHits+=track->getFitPointCount(kTpcId);
         nSvtHits+=track->getFitPointCount(kSvtId);
+        nSsdHits+=track->getFitPointCount(kSsdId);
+        nIstHits+=track->getFitPointCount(kIstId);
+        nHpdHits+=track->getFitPointCount(kHpdId);
+        nHftHits+=track->getFitPointCount(kHftId);
 	//cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
       }while((iBreak=0));
       if (!iBreak) continue;
@@ -250,7 +254,8 @@ static int nCall=0;nCall++;
     }
    printf("***extendSeeds***:nTTot=%d nbSeed=%d nTFail=%d nTFilt=%d nTAdd=%d\n", 
      nTTot,nTSeed,nTFail,nTFilt,nTAdd);
-   printf("***extendSeeds***:nTpcHits=%d nSvtHits=%d\n",nTpcHits,nSvtHits);
+   printf("***extendSeeds***:nTpcHits=%d nSvtHits=%d  nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d\n",
+	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits);
 }
 //______________________________________________________________________________
 void StiKalmanTrackFinder::extendTracks(double rMin)
@@ -259,7 +264,7 @@ static int nCall=0;nCall++;
 
   int nTKeep=0;
   int ntr = _trackContainer->size();
-  int nTpcHits=0,nSvtHits=0,extended=0;
+  int nTpcHits=0,nSvtHits=0,nSsdHits=0,nHftHits=0,nIstHits=0,nHpdHits=0, extended=0;
   
   for ( int itr=0;itr < ntr;itr++) {	//Track loop
     StiKalmanTrack *track = (StiKalmanTrack*)(*_trackContainer)[itr];
@@ -287,11 +292,15 @@ static int nCall=0;nCall++;
     nTKeep++;
     nTpcHits+=track->getFitPointCount(kTpcId);
     nSvtHits+=track->getFitPointCount(kSvtId);
+    nSsdHits+=track->getFitPointCount(kSsdId);
+    nHftHits+=track->getFitPointCount(kHftId);
+    nHpdHits+=track->getFitPointCount(kHpdId);
+    nIstHits+=track->getFitPointCount(kIstId);
     track->reserveHits();
-
   }// end track loop
    printf("***extendTracks***: nTKeep=%d \n", nTKeep);
-   printf("***extendTracks***: nTpcHits=%d nSvtHits=%d\n",nTpcHits,nSvtHits);
+   printf("***extendTracks***: nTpcHits=%d nSvtHits=%d nSsdHits=%d nHftHits=%d nIstHits=%d nHpdHits=%d\n",
+	nTpcHits,nSvtHits,nSsdHits,nHftHits,nIstHits,nHpdHits);
 }
 //______________________________________________________________________________
 int StiKalmanTrackFinder::extendTrack(StiKalmanTrack *track,double rMin)
@@ -631,7 +640,6 @@ static  const double ref1a  = 110.*degToRad;
 	if (debug() > 2) cout << "TRACK DOES NOT REACH CURRENT volume"<<endl;
 	continue; // will try the next available volume on this layer
       }
-
       if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
       assert(testNode.isValid());
       testNode.setDetector(tDet);
@@ -639,7 +647,6 @@ static  const double ref1a  = 110.*degToRad;
 
       if (debug() > 2) cout << " vol active:" << active<<endl;
       double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
-
 
       StiHitContino hitCont;
 
@@ -783,9 +790,7 @@ int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
 {
    int ians;
    ians = qaBest.pits-qaTry.pits;
-   //#ifdef VP
    if (qaBest.pits+qaTry.pits==1) 			return ians;
-   //#endif
    ians =-ians;				if (ians)	return ians;
    ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
    ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
