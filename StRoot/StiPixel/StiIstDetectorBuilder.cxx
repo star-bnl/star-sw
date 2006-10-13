@@ -1,175 +1,264 @@
+// $Id: StiIstDetectorBuilder.cxx,v 1.9 2006/10/13 18:36:43 mmiller Exp $
+// 
+// $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.9  2006/10/13 18:36:43  mmiller
+// Committing Willie's changes to make perfect hits in IST work for UPGR02 geometry using VMC geometry in HitLoader and DetectorBuilder
+//
+// Revision 1.23  2006/06/28 18:51:46  fisyak
+// Add loading of tracking and hit error parameters from DB
+//
+// Revision 1.22  2006/05/31 04:00:02  fisyak
+// remove SSD ladder mother volume
+//
+// Revision 1.21  2005/06/21 16:35:01  lmartin
+// DetectorBuilder updated with the correct methods from StSsdUtil
+//
+// Revision 1.20  2005/06/21 15:31:47  lmartin
+// CVS tags added
+//
+/*!
+ * \class StiSsdDetectorBuilder
+ * \author Christelle Roy
+ * \date 02/27/04
+ */
+
 #include <stdio.h>
+#include <map>
+using namespace std;
 #include <stdexcept>
+#include "StMessMgr.h"
+#include "StThreeVectorD.hh"
+
+#include "Sti/Base/Messenger.h"
+#include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
 #include "Sti/StiMaterial.h"
 #include "Sti/StiPlacement.h"
 #include "Sti/StiDetector.h"
-#include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
+#include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "StiIstDetectorBuilder.h" 
-#include "StiIstIsActiveFunctor.h"
-#include "StGetConfigValue.hh"
+#include "StiPixel/StiIstIsActiveFunctor.h" 
+#include "StiPixel/StiIstDetectorBuilder.h" 
 #include "Sti/StiElossCalculator.h"
-#include "TMath.h"
+//#include "StSsdUtil/StSsdConfig.hh"
+//#include "StSsdUtil/StSsdGeometry.hh"
+//#include "StSsdUtil/StSsdWaferGeometry.hh"
+//#include "StSsdDbMaker/StSsdDbMaker.h"
+//#include "StSsdDbMaker/St_SsdDb_Reader.hh"
 
 StiIstDetectorBuilder::StiIstDetectorBuilder(bool active, const string & inputFile)
-    : StiDetectorBuilder("Ist",active,inputFile)
+    : StiDetectorBuilder("Ist",active,inputFile), _siMat(0), _hybridMat(0)
 {
-    //Parameterized hit error calculator.  Given a track (dip, cross, pt, etc) returns average error
-    //once you actually want to do tracking, the results depend strongly on the numbers below.
-    //here I plug in 10.micron resolution in both local x and y coordinates
-    //I also put no dependence on either crossing angle or dip angle of track
-    _trackingParameters.setName("IstTrackingParameters");
-    _calculator.setName("IstHitErrors");
-    //_calculator = new StiDefaultHitErrorCalculator();
-    _calculator.set(1.e-2, 0., 0., 1.e-2, 0., 0.);
-    //StiTrackingParameters * trackingPars = getTrackingParameters();
-
-
-    ifstream inF("IstBuilder_pars.txt");
-    if (inF)
-      {
-	_trackingParameters.loadFS(inF);
-	cout << "StiIstDetectorBuilder:: -I-  New tracking parameters from file" << endl;
-      }
-    else
-      {
-	_trackingParameters.setMaxChi2ForSelection(30.);
-	_trackingParameters.setMinSearchWindow(0.2);
-	_trackingParameters.setMaxSearchWindow(0.8);
-	_trackingParameters.setSearchWindowScaling(10.);
-	cout << "Loading default parameters" << endl;
-      }
+    // Hit error parameters : it is set to 20 microns, in both x and y coordinates 
+    _trackingParameters.setName("ssdTrackingParameters");
+    _hitCalculator.setName("ssdHitError");
+    _hitCalculator.set(1.0, 0., 0.,1.0, 0., 0.);
 }
 
 StiIstDetectorBuilder::~StiIstDetectorBuilder()
-{}
+{} 
 
-/// Build all detector components of the Ist detector.
-void StiIstDetectorBuilder::buildDetectors(StMaker&source)
+
+void StiIstDetectorBuilder::buildDetectors(StMaker & source)
 {
-    char name[50];
-    cout << "StiIstDetectorBuilder::buildDetectors() -I- Started" << endl;
-    const unsigned int nRows=3;
-    setNRows(nRows);
-    int nsectors[3];
-    //const char* detectorParamFile = "/star/u/wleight/fromMike/params.txt";
-    /*const char* detectorParamFile = "$STAR/StRoot/StiPixel/IstGeomParams.txt";
-    cout <<"get input values from file:\t"<<detectorParamFile<<endl;
-    StGetConfigValue(detectorParamFile,"nLadder1",nsectors[0]);
-    StGetConfigValue(detectorParamFile,"nLadder2",nsectors[1]);
-    StGetConfigValue(detectorParamFile,"nLadder3",nsectors[2]);
-    setNSectors(0,nsectors[0]);
-    setNSectors(1,nsectors[1]);
-    setNSectors(2,nsectors[2]);*/
-    setNSectors(0,11);
-    setNSectors(1,19);
-    setNSectors(2,27);
-
-    cout <<"create gasses"<<endl;
-    //_gas is the gas that the ist detector lives in
-    _gas            = add(new StiMaterial("IstAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
-    //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
-    _fcMaterial     = add(new StiMaterial("IstSi", 14.,      28.0855,   2.33,     21.82,           5.) );
-
-    double ionization=_fcMaterial->getIonization();
-    StiElossCalculator* fcMatElossCalculator=new StiElossCalculator(_fcMaterial->getZOverA(),ionization*ionization,_fcMaterial->getA(),_fcMaterial->getZ(),_fcMaterial->getDensity());
-
-    double radii[nRows];
-    /*StGetConfigValue(detectorParamFile,"r1",radii[0]);
-    StGetConfigValue(detectorParamFile,"r2",radii[1]);
-    StGetConfigValue(detectorParamFile,"r3",radii[2]);*/
-    radii[0]=7.0;
-    radii[1]=12.0;
-    radii[2]=17.0;
-    double dphi[nRows];
-
-    for(int zzz=0;zzz<nRows;zzz++)
-      dphi[zzz]=2.*TMath::Pi()/getNSectors(zzz);
+    char name[50];  
+    int nRows = 1 ;
+    gMessMgr->Info() << "StiIstDetectorBuilder::buildDetectors() - I - Started "<<endm;
+    //load(_inputFile, source);
     
-    double tiltAngle;
-    //StGetConfigValue(detectorParamFile,"aOffset",tiltAngle);
-    tiltAngle=81.0;
-    tiltAngle=M_PI*(90.-tiltAngle)/180.;
-    double perOffset;
-    //StGetConfigValue(detectorParamFile,"pPerOffset",perOffset);
-    perOffset=.238;
-    double parOffset;
-    //StGetConfigValue(detectorParamFile,"pParOffset",parOffset);
-    parOffset=1.5;
-    double depth[nRows];
-    /*StGetConfigValue(detectorParamFile,"length1",depth[0]);
-    StGetConfigValue(detectorParamFile,"length2",depth[1]);
-    StGetConfigValue(detectorParamFile,"length3",depth[2]);*/
-    depth[0]=28.0;
-    depth[1]=40.0;
-    depth[2]=52.0;
-
-    cout <<"begin loop on rows to build detectors"<<endl;
-    StiPlanarShape *pShape;
-    for (unsigned int row=0; row<nRows; row++)
-	{
-	    pShape = new StiPlanarShape;
-	    if (!pShape) throw runtime_error("StiIstDetectorBuilder::buildDetectors() - FATAL - pShape==0||ifcShape==0");
-	    sprintf(name, "Ist/Layer_%d", row);
-	    pShape->setName(name);
-	    //double Thickness;
-	    //StGetConfigValue(detectorParamFile,"ladder thickness",Thickness);
-	    //pShape->setThickness(Thickness); //cm
-	    pShape->setThickness(.3686);
-	    pShape->setHalfDepth( depth[row]/2. ); //extent in z
-	    //double sWidth;
-	    //StGetConfigValue(detectorParamFile,"sensor width",sWidth);
-	    //pShape->setHalfWidth(sWidth/2.); //length or a plane
-	    pShape->setHalfWidth(2.0);
-	    for(unsigned int sector = 0; sector<getNSectors(row); sector++)	
-		{      
-		    StiPlacement *pPlacement = new StiPlacement;
-		    pPlacement->setZcenter(0.);
-
-		    //double anglepos = static_cast<double>(sector+1)*dphi[row]-atan(parOffset/(radii[row]+perOffset));
-		    double anglepos=static_cast<double>(sector+1)*dphi[row];
-		    //double rlad = radii[row]+perOffset;
-		    //double tilt = atan(1.5/(radii[row]+.238))+tiltAngle[row];
-
-		    //double psi = phi + tilt;
-		    //double rtrue = sqrt(rlad*rlad + parOffset*parOffset);
-
-		    //pPlacement->setCenterRep(anglepos,radii[row],tiltAngle);
-		    pPlacement->setNormalRep(anglepos-tiltAngle,
-					     radii[row]*cos(tiltAngle),
-					     radii[row]*sin(tiltAngle)) ;
-		    pPlacement->setLayerRadius(radii[row]*cos(tiltAngle));
-		    
-		    pPlacement->setRegion(StiPlacement::kMidRapidity);
-      		    pPlacement->setLayerAngle(anglepos);
-
-		    sprintf(name, "Ist/Layer_%d/Ladder_%d", row, sector);
-		    cout<<"\tbuild detector with name:\t "<<name<<endl;
-		    StiDetector *pDetector = _detectorFactory->getInstance();
-		    pDetector->setName(name);
-		    pDetector->setIsOn(true);
-		    pDetector->setIsActive(new StiIstIsActiveFunctor);
-		    pDetector->setIsContinuousMedium(true);
-		    pDetector->setIsDiscreteScatterer(true);
-		    pDetector->setMaterial(_fcMaterial);
-		    pDetector->setGas(_gas);
-		    pDetector->setShape(pShape);
-		    pDetector->setPlacement(pPlacement);
-		    pDetector->setHitErrorCalculator(&_calculator);
-		    pDetector->setElossCalculator(fcMatElossCalculator);
-		    pDetector->setKey(1,row);
-		    pDetector->setKey(2,sector);
-
-		    //Put in container
-		    add(row, sector, pDetector);
-		}
-	}
-    cout << "StiIstDetectorBuilder::buildDetectors() -I- Done" << endl;
+    setNRows(nRows);
+    if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
 }
 
+//________________________________________________________________________________
+void StiIstDetectorBuilder::useVMCGeometry() {
+  cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
+  SetCurrentDetectorBuilder(this);
+  struct Material_t {
+    Char_t *name;
+    StiMaterial    **p;
+  };
+  Material_t map[] = {
+    {"AIR", &_gasMat},
+    {"SILICON", &_siMat},
+    {"SILICON", &_hybridMat}
+  };
+  Int_t M = sizeof(map)/sizeof(Material_t);
+  for (Int_t i = 0; i < M; i++) {
+    const TGeoMaterial *mat =  gGeoManager->GetMaterial(map[i].name); 
+    if (! mat) continue;
+    Double_t PotI = StiVMCToolKit::GetPotI(mat);
+    *map[i].p = add(new StiMaterial(mat->GetName(),
+				    mat->GetZ(),
+				    mat->GetA(),
+				    mat->GetDensity(),
+				    mat->GetDensity()*mat->GetRadLen(),
+				    PotI));
+  }
+  const VolumeMap_t IstVolumes[] = { 
+  // SSD
+  {"IBSS", "the mother of each wafer","HALL_1/CAVE_1/IBMO_1","",""},
+  };
+  Int_t NoIstVols = sizeof(IstVolumes)/sizeof(VolumeMap_t);
+  TString pathT("HALL_1/CAVE_1/IBMO_1");
+  TString path("");
+  for (Int_t i = 0; i < NoIstVols; i++) {
+    gGeoManager->RestoreMasterVolume(); 
+    gGeoManager->CdTop();
+    gGeoManager->cd(pathT); path = pathT;
+    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+    if (! nodeT) continue;;
+    //StiVMCToolKit::SetDebug(1);
+    StiVMCToolKit::LoopOverNodes(nodeT, path, IstVolumes[i].name, MakeAverageVolume);
+  }
+}
 
+void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
+  if (debug()) {cout << "StiDetectorBuilder::AverageVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;}
+  // decode detector ------------------------------
+  TString nameP(nodeP->GetName());
+  nameP.ReplaceAll("HALL_1/CAVE_1/","");
+  TString temp=nameP;
+  temp.ReplaceAll("/IBMO_1/IBA","");
+  int q=temp.Index("_");
+  temp.Replace(0,q+1,"");
+  TString num1=temp(0,2);
+  if(!num1.IsDigit()) num1=temp(0,1);
+  int ladder=num1.Atoi();
+  int layer = 1;
+  if (ladder > 11) layer = 2;
+  if (ladder > 30) layer = 3;
+  Int_t nWafers = 7;
+  if (layer == 2) nWafers = 10;
+  if (layer == 3) nWafers = 13;
+  q=temp.Index("_");
+  temp.Replace(0,q+1,"");
+  TString num2=temp(0,2);
+  if(!num2.IsDigit()) num2=temp(0,1);
+  int wafer=num2.Atoi();
+  q=temp.Index("_");
+  temp.Replace(0,q+1,"");
+  TString num3=temp(0,1);
+  int side=num3.Atoi();
+  if (wafer != 1) return;
+  StiDetector *pDetector = 0;
+  //  if (_detectors.size() && _detectors[2*(layer-1)+side-1] getDetector(2*(layer-1)+side-1,0);
+  //  if (pDetector) return;
+  //----------------------------------------
+  TGeoVolume   *volP   = nodeP->GetVolume();
+  TGeoMaterial *matP   = volP->GetMaterial(); if (debug()) matP->Print("");
+  TGeoShape    *shapeP = nodeP->GetShape();   if (debug()) {cout << "New Shape\t"; StiVMCToolKit::PrintShape(shapeP);}
+  TGeoHMatrix  *hmat   = nodeP->GetMatrix();  if (debug()) hmat->Print("");
+  Double_t PotI = StiVMCToolKit::GetPotI(matP);
+  static StiMaterial *matS = 0;
+  if (! matS) matS = add(new StiMaterial(matP->GetName(),
+					 matP->GetZ(),
+					 matP->GetA(),
+					 matP->GetDensity(),
+					 matP->GetDensity()*matP->GetRadLen(),
+					 PotI));
+  Double_t ionization = matS->getIonization();
+  StiElossCalculator *ElossCalculator = new StiElossCalculator(matS->getZOverA(), ionization*ionization, matS->getA(), matS->getZ(),matS->getDensity());
+  StiShape     *sh     = findShape(volP->GetName());
+  Double_t     *xyz    = hmat->GetTranslation();
+  Double_t     *rot    = hmat->GetRotationMatrix();
+  Double_t      Phi    = 0;
+  //  Double_t xc,yc,zc,rc,rn, nx,ny,nz,yOff;
+  StiPlacement *pPlacement = 0;
+  if (xyz[0]*xyz[0] + xyz[1]*xyz[1] < 1.e-3 && 
+      TMath::Abs(rot[0]*rot[0] + rot[4]*rot[4] + rot[8]*rot[8] - 3) < 1e-5 &&
+      (shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg) ||
+       shapeP->TestShapeBit(TGeoShape::kGeoTube))) {
+    Double_t paramsBC[3];
+    shapeP->GetBoundingCylinder(paramsBC);
+    TGeoTube *shapeC = (TGeoTube *) shapeP;
+    Double_t Rmax = shapeC->GetRmax();
+    Double_t Rmin = shapeC->GetRmin();
+    Double_t dZ   = shapeC->GetDz();
+    Double_t radius = (Rmin + Rmax)/2;
+    Double_t dPhi = 2*TMath::Pi();
+    Double_t dR   = Rmax - Rmin;
+    dR = TMath::Min(0.2*dZ, dR);
+    if (dR < 0.1) dR = 0.1;
+    int Nr = (int) ((Rmax - Rmin)/dR);
+    if (Nr <= 0) Nr = 1;
+    dR = (Rmax - Rmin)/Nr;
+    if(shapeP->TestShapeBit(TGeoShape::kGeoTubeSeg)) {
+      TGeoTubeSeg *shapeS = (TGeoTubeSeg *) shapeP;
+      Phi =  TMath::DegToRad()*(shapeS->GetPhi2() + shapeS->GetPhi1())/2;
+      Phi =  StiVMCToolKit::Nice(Phi);
+      dPhi = TMath::DegToRad()*(shapeS->GetPhi2() - shapeS->GetPhi1());
+    }
+    for (Int_t ir = 0; ir < Nr; ir++) {
+      TString Name(volP->GetName());
+      if (ir > 0) {
+	Name += "__";
+	Name += ir;
+      }
+      sh     = findShape(Name.Data());
+      if (! sh) {// I assume that the shape name is unique
+	sh = new StiCylindricalShape(volP->GetName(), // Name
+				     dZ,      // halfDepth nWafers*
+				     dR,              // thickness
+				     Rmin + (ir+1)*dR,// outerRadius
+				     dPhi);           // openingAngle
+	add(sh);
+      }
+      pPlacement = new StiPlacement;
+      pPlacement->setZcenter(xyz[2]);
+      pPlacement->setLayerRadius(Rmin + (ir+0.5)*dR);
+      pPlacement->setLayerAngle(Phi);
+      pPlacement->setRegion(StiPlacement::kMidRapidity);
+      pPlacement->setNormalRep(Phi,radius, 0); 
+    }
+  }
+  else {// BBox
+    shapeP->ComputeBBox();
+    TGeoBBox *box = (TGeoBBox *) shapeP;
+    if (! sh) {
+      sh = new StiPlanarShape(volP->GetName(),// Name
+			      nWafers*box->GetDZ(),   // halfDepth
+			      box->GetDY(),   // thickness
+			      box->GetDX());  // halfWidth
+      add(sh);
+    }
+    // rot = {r0, r1, r2,
+    //        r3, r4, r5,
+    //        r6, r7, r8}
+    //  double nx = rot[3];// 
+    //  double ny = rot[4];
+    StThreeVectorD centerVector(xyz[0],xyz[1],xyz[2]);
+    StThreeVectorD normalVector(rot[1],rot[4],rot[7]);
+    Double_t phi  = centerVector.phi();
+    Double_t phiD = normalVector.phi();
+    Double_t r = centerVector.perp();
+    pPlacement = new StiPlacement;
+    //    pPlacement->setZcenter(xyz[2]);
+    pPlacement->setZcenter(0);
+    pPlacement->setLayerRadius(r); //this is only used for ordering in detector container...
+    pPlacement->setLayerAngle(phi); //this is only used for ordering in detector container...
+    pPlacement->setRegion(StiPlacement::kMidRapidity);
+    //	  pPlacement->setNormalRep(phi, r*TMath::Cos(phi), r*TMath::Sin(phi)); 
+    //    pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), -r*TMath::Sin(phi-phiD)); 
+    pPlacement->setNormalRep(phiD, r*TMath::Cos(phi-phiD), r*TMath::Sin(phi-phiD)); 
+  }
+  assert(pPlacement);
+  pDetector = getDetectorFactory()->getInstance();
+  pDetector->setName(nameP.Data());
+  pDetector->setIsOn(false);
+  if(side==1) pDetector->setIsActive(new StiIstIsActiveFunctor);
+  else pDetector->setIsActive(new StiNeverActiveFunctor);
+  pDetector->setIsContinuousMedium(false);
+  pDetector->setIsDiscreteScatterer(true);
+  pDetector->setShape(sh);
+  pDetector->setPlacement(pPlacement); 
+  pDetector->setGas(GetCurrentDetectorBuilder()->getGasMat());
+  pDetector->setMaterial(matS);
+  pDetector->setElossCalculator(ElossCalculator);
+  pDetector->setHitErrorCalculator(&_hitCalculator);
+  add(2*(layer-1)+side-1,ladder,pDetector);
+}
 
