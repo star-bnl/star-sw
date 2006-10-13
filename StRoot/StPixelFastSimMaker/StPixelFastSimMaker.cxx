@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.3 2006/02/17 21:44:29 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.4 2006/10/13 20:15:45 fisyak Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.4  2006/10/13 20:15:45  fisyak
+ * Add Hpd fast simulation (Sevil)
+ *
  * Revision 1.3  2006/02/17 21:44:29  andrewar
  * Remover streaming of each Pixel hit.
  *
@@ -28,6 +31,7 @@
 #include "StMcEvent.hh"
 #include "StMcHit.hh"
 #include "StMcIstHit.hh"
+#include "StMcHpdHit.hh"
 #include "StMcPixelHit.hh"
 #include "StMcEventTypes.hh"
 
@@ -91,7 +95,7 @@ Int_t StPixelFastSimMaker::Make()
 	      }								 
 	}									 
       cout <<"StPixelFastSimMaker::Make() -I- Loaded "
-			 <<nhits<<"pixel hits. "<<endl;
+	   <<nhits<<"pixel hits. "<<endl;
     }
   else
     {
@@ -101,7 +105,7 @@ Int_t StPixelFastSimMaker::Make()
     const StMcIstHitCollection* istHitCol = mcEvent->istHitCollection();					
     if (istHitCol)							
     {									
-      Int_t nhits = istHitCol->numberOfHits();				
+      Int_t nhits = istHitCol->numberOfHits();
       if (nhits)								
 	{									
 	  Int_t id = 0;							
@@ -110,8 +114,8 @@ Int_t StPixelFastSimMaker::Make()
 	  for (UInt_t k=0; k<istHitCol->numberOfLayers(); k++)		       
 	    if (istHitCol->layer(k))						
 	      {								
-		UInt_t nh = istHitCol->layer(k)->hits().size();		
-		for (UInt_t i = 0; i < nh; i++) {
+		UInt_t nh = istHitCol->layer(k)->hits().size();	
+		for (UInt_t i = 0; i < nh; i++) { 
 		  StMcHit *mcH = istHitCol->layer(k)->hits()[i];
 		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		  tempHit->setDetectorId(kIstId); 
@@ -127,10 +131,53 @@ Int_t StPixelFastSimMaker::Make()
 		  }                                                         
 		  col->addHit(tempHit);                                 
 		}                                                           
-	      }								 
-	}									 
+	      }	
+	  }							 
+     
+      cout <<"StPixelFastSimMaker::Make() -I- Loaded Ist  "
+	   <<nhits<<"pixel hits. "<<endl;
+    }									 
+  else
+    {
+      cout <<"No Ist hits found."<<endl;
     }
-
+    const StMcHpdHitCollection* hpdHitCol = mcEvent->hpdHitCollection();	       			
+    if (hpdHitCol)							
+    {									
+      Int_t nhits = hpdHitCol->numberOfHits();
+      if (nhits)								
+	{									
+	  Int_t id = 0;							
+	 
+	  for (UInt_t k=0; k<hpdHitCol->numberOfLayers(); k++){	
+	    if (hpdHitCol->layer(k))						
+	      {								
+		UInt_t nh = hpdHitCol->layer(k)->hits().size();	
+		for (UInt_t i = 0; i < nh; i++) { 
+		  StMcHit *mcH = hpdHitCol->layer(k)->hits()[i];
+		  StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
+		  tempHit->setDetectorId(kHpdId); 
+		  tempHit->setVolumeId(mcH->volumeId());                   
+		  tempHit->setKey(mcH->key());                             
+		                                                 
+		  StMcHpdHit *mcI = dynamic_cast<StMcHpdHit*>(mcH); 
+		  if(mcI){
+		    tempHit->setLayer(mcI->layer());           
+		    tempHit->setLadder(mcI->ladder());                   
+		  }                                                         
+		  col->addHit(tempHit);                                 
+		}                                                           
+	      }	
+	  }							 
+	}									 
+     
+     cout <<"StPixelFastSimMaker::Make() -I- Loaded Hpd  "
+			 <<nhits<<" hpd hits. "<<endl;
+    }
+  else
+    {
+      cout <<"No hpd hits found."<<endl;
+    }
    const StMcIgtHitCollection* igtHitCol= mcEvent->igtHitCollection();					
     
       if (igtHitCol)							
