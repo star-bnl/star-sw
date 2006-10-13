@@ -121,6 +121,8 @@ void StEStructFluct::AddToBin( int    jBin,
         PSum[16][jBin] += Nsum;
         PSum[17][jBin] += Ptsum;
         PSum[18][jBin] += PtSqsum;
+        PSum[19][jBin] += PtSqsum/(Nsum*(Nsum-1.0));
+        PSum[20][jBin] += Ptsum/(Nsum*(Nsum-1.0));
     }
 
     if (Nplus > 0) {
@@ -304,7 +306,7 @@ void StEStructFluct::writeHistograms() {
     for (int jStat=0;jStat<8;jStat++) {
         hNPlusMinus[jStat]->Write();
     }
-    for (int jStat=0;jStat<19;jStat++) {
+    for (int jStat=0;jStat<21;jStat++) {
         hPSum[jStat]->Write();
     }
     for (int jStat=0;jStat<16;jStat++) {
@@ -349,7 +351,7 @@ void StEStructFluct::fillHistograms() {
             hNPlusMinus[jStat]->SetBinContent(jBin+1,NPlusMinus[jStat][jBin]);
         }
     }
-    for (int jStat=0;jStat<19;jStat++) {
+    for (int jStat=0;jStat<21;jStat++) {
         for (int jBin=0;jBin<mTotBins;jBin++) {
             hPSum[jStat]->SetBinContent(jBin+1,PSum[jStat][jBin]);
         }
@@ -506,7 +508,7 @@ void StEStructFluct::initArrays() {
         NPlusMinus[jStat] = new double[mTotBins];
         memset(NPlusMinus[jStat], 0, sizeof(double)*mTotBins );
     }
-    for (int jStat=0;jStat<19;jStat++) {
+    for (int jStat=0;jStat<21;jStat++) {
         PSum[jStat]   = new double[mTotBins];
         memset(PSum[jStat], 0, sizeof(double)*mTotBins );
     }
@@ -582,7 +584,7 @@ void StEStructFluct::deleteArrays() {
     for (int jStat=0;jStat<8;jStat++) {
         delete [] hNPlusMinus[jStat];
     }
-    for (int jStat=0;jStat<19;jStat++) {
+    for (int jStat=0;jStat<21;jStat++) {
         delete [] PSum[jStat];
     }
     for (int jStat=0;jStat<16;jStat++) {
@@ -633,7 +635,7 @@ void StEStructFluct::initHistograms() {
         sprintf( line, "NPlusMinus%s_%i", mKey, jStat );
         hNPlusMinus[jStat] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
     }
-    for (int jStat=0;jStat<19;jStat++) {
+    for (int jStat=0;jStat<21;jStat++) {
         sprintf( line, "PSum%s_%i", mKey, jStat );
         hPSum[jStat] = new TH1D(line,line,mTotBins,0.5,mTotBins+0.5);
     }
@@ -674,7 +676,7 @@ void StEStructFluct::deleteHistograms() {
     for (int jStat=0;jStat<8;jStat++) {
         delete hNPlusMinus[jStat];
     }
-    for (int jStat=0;jStat<19;jStat++) {
+    for (int jStat=0;jStat<21;jStat++) {
         delete hPSum[jStat];
     }
     for (int jStat=0;jStat<16;jStat++) {

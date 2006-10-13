@@ -438,6 +438,7 @@ void StEStructFluctAnal::AddEvent() {
             pminus += pMinus;
         }
     }
+
     if (jPtCent >= 0) {
         for (int jPt=0;jPt<mnPts;jPt++) {
             double np, nm, pp, pm;

@@ -42,7 +42,7 @@ class StEStructSigmas {
     // First is based on \Delta\sigma^2.
     // Second is based on \Phi_{p_\perp}.
     // Third is based on \sigma^2_{dynamic}.
-    TH2D *PSig[3];
+    TH2D *PSig[4];
     TH2D *PDel[3];
     TH2D *PPlus[3];
     TH2D *PMinus[3];
