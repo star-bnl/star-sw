@@ -55,7 +55,7 @@ void StiIstHitLoader::loadHits(StEvent* source,
     }
     StSPtrVecRnDHit& vec = col->hits();
 
-    cout <<"StiIstHitLoader: Ist Hits: "<<vec.size()<<endl;
+    //cout <<"StiIstHitLoader: Ist Hits: "<<vec.size()<<endl;
     
     for(unsigned int j=0; j<vec.size(); j++) {
 
@@ -65,8 +65,16 @@ void StiIstHitLoader::loadHits(StEvent* source,
 
 	if (hit->detector()!=kIstId) continue;
 	if(hit->extraByte0()==1){
+	  //                             ladder    module           side    
+	  //        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 	  cout <<"retrieve detector"<<endl;
-	  StiDetector* detector = _detector->getDetector(hit->layer()-1, hit->ladder()-1);
+	  int ladder=hit->volumeId()/1000000;
+	  int layer = 1;
+	  if (ladder > 11) layer = 2;
+	  if (ladder > 30) layer = 3;
+	  int wafer=(hit->volumeId()/10000)%100;
+	  int side=((hit->volumeId()/100)%100);
+	  StiDetector* detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
 	  if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
 	  assert(detector);
 	  cout <<"add hit to detector:\t"<<detector->getName()<<endl;
