@@ -54,7 +54,7 @@ class StEStructFluct {
     double *NPlus[5];
     double *NMinus[5];
     double *NPlusMinus[8];
-    double *PSum[19];
+    double *PSum[21];
     double *PDiff[16];
     double *PPlus[11];
     double *PMinus[11];
@@ -66,7 +66,7 @@ class StEStructFluct {
     TH1D *hNPlus[5];
     TH1D *hNMinus[5];
     TH1D *hNPlusMinus[8];
-    TH1D *hPSum[19];
+    TH1D *hPSum[21];
     TH1D *hPDiff[16];
     TH1D *hPPlus[11];
     TH1D *hPMinus[11];
