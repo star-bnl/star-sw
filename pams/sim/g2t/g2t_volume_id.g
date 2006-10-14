@@ -1,5 +1,10 @@
-* $Id: g2t_volume_id.g,v 1.54 2006/10/11 18:01:39 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.55 2006/10/14 19:41:45 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.55  2006/10/14 19:41:45  potekhin
+* Implemented a temporary solution for the IST volume numbering,
+* the coding scheme being final and some logic to be added shortly.
+* To be used in conjunction with istbgeo2.g
+*
 * Revision 1.54  2006/10/11 18:01:39  potekhin
 * Added a clause for HPD (Sevil)
 *
@@ -107,7 +112,7 @@
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
-      Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/
+      Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -125,6 +130,7 @@
       	                         int Netfirst, int Netsecon}
 *         
       Structure  EMCG { Version, int Onoff, int fillMode}
+      Structure  ISVR { Version, code}
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -141,6 +147,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/CALB/CALG  stat=ical
           USE  /DETM/VPDD/VPDG  stat=ivpd
           USE  /DETM/ECAL/EMCG  stat=ieem
+          USE  /DETM/ISTB/ISVR  stat=istb
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
@@ -150,6 +157,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
           if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
                                ' onoff   =',emcg_onoff,emcg_FillMode
+          if (istb>=0) print *,'              : ISTB code=',isvr_code
       endif
 *
       volume_id = 0
@@ -587,9 +595,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='pix') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 
-*18*                                 Kai Schweda
+*18*                                 Maxim Potekhin
       else If (Csys=='ist') then
-        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+*	   write(*,*) ISVR_code,'+_+_+_+_+_+_+_+_+_+',numbv(1),' ',numbv(2),' ',numbv(3),' ',numbv(4)
+        volume_id = (numbv(1)+1)*1000000 + numbv(2)*10000 + 100*numbv(3)  + numbv(4)
 *19*                                 Kai Schweda
       else If (Csys=='fst') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
