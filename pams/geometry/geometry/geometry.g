@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.129 2006/10/09 16:19:17 potekhin Exp $
+* $Id: geometry.g,v 1.130 2006/10/14 19:42:44 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.130  2006/10/14 19:42:44  potekhin
+* Switch to a Correct version of ISTB in the tag UPGR05
+*
 * Revision 1.129  2006/10/09 16:19:17  potekhin
 * Due to the ongoing SSD studies, we need to refine the 2005 tag,
 * so as to include Lilian's code that were checked into CVS in
@@ -2386,7 +2389,7 @@ If LL>1
                    HpdtConfig=1;   " base version"
 * Inner STAR tracker barrel
                    istb=on;  "new pixel based inner tracker"
-                   IstbConfig=2;
+                   IstbConfig=3;
 * Inner STAR GEM barrel
                    gemb=off;  
                    GembConfig=0;
@@ -2815,6 +2818,7 @@ If LL>1
 
    if (istb.and.IstbConfig==1)  Call istbgeo
    if (istb.and.IstbConfig==2)  Call istbgeo1
+   if (istb.and.IstbConfig==3)  Call istbgeo2
 
 
    if (gemb.and.GembConfig>0)  Call gembgeo
