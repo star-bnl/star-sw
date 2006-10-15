@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.171  2006/10/15 05:10:10  fisyak
+// Add Hpd
+//
 // Revision 1.170  2006/10/09 15:51:28  fisyak
 // Remove Ftpc
 //
@@ -246,6 +249,7 @@
 #include "Sti/StiMasterDetectorBuilder.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
 #include "StiTpc/StiTpcDetectorGroup.h"
+#include "StiTpc/StiTpcHitLoader.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiSsd/StiSsdDetectorGroup.h"
 #include "StiPixel/StiPixelDetectorGroup.h"
@@ -266,6 +270,7 @@
 #include "StiSvt/StiSvtDetectorBuilder.h"
 #include "Sti/StiHitErrorCalculator.h"
 #include "StiPixel/StiIstDetectorGroup.h"
+#include "StiPixel/StiHpdDetectorGroup.h"  //added for the Y-Pixel detector
 #include "StiUtilities/StiDebug.h"
 #include "StiUtilities/StiPullEvent.h"
 #include "TDataSet.h"
@@ -396,6 +401,12 @@ Int_t StiMaker::InitDetectors()
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
       _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
       group->setGroupId(kTpcId);
+#ifdef __NOT_READY_YET__
+      if (IAttr("useSvt") || IAttr("useSsd")) {// skip 1 row 
+	((StiTpcHitLoader*)group->hitLoader())->setMinRow(2);
+	cout << "StiMaker::InitDetectors() -I- Ignore hits in the first pad row"<<endl;
+      }
+#endif
     }
   if (IAttr("useSvt"))
     {
@@ -417,10 +428,16 @@ Int_t StiMaker::InitDetectors()
     }
  if (IAttr("useIst"))
     {
-      cout<<"StiMaker::Init() -I- Adding detector group:IST"<<endl;
+      cout<<"StiMaker::Init() -I- Adding detector group:Ist"<<endl;  
       _toolkit->add(group = new StiIstDetectorGroup(IAttr("activeIst"),SAttr("istInputFile")));
-      group->setGroupId(kIstId);
+      group->setGroupId(kIstId);  
     }
+  if (IAttr("useHpd"))
+    {
+      cout<<"StiMaker::Init() -I- Adding detector group:Hpd"<<endl;
+      _toolkit->add(group = new StiHpdDetectorGroup(IAttr("activeHpd"),SAttr("hpdInputFile")));
+      group->setGroupId(kHpdId);
+    }  //Added but removed later to make the IST hits the tracking...
   return kStOk;
 }
 
