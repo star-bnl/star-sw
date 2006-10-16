@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.172  2006/10/16 20:30:42  fisyak
+// Clean dependencies from Sti useless classes
+//
 // Revision 1.171  2006/10/15 05:10:10  fisyak
 // Add Hpd
 //
@@ -401,12 +404,10 @@ Int_t StiMaker::InitDetectors()
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
       _toolkit->add(group = new StiTpcDetectorGroup(IAttr("activeTpc"),SAttr("tpcInputFile")));
       group->setGroupId(kTpcId);
-#ifdef __NOT_READY_YET__
-      if (IAttr("useSvt") || IAttr("useSsd")) {// skip 1 row 
+      if (IAttr("activeSvt") || IAttr("activeSsd") || IAttr("skip1row")) {// skip 1 row 
 	((StiTpcHitLoader*)group->hitLoader())->setMinRow(2);
 	cout << "StiMaker::InitDetectors() -I- Ignore hits in the first pad row"<<endl;
       }
-#endif
     }
   if (IAttr("useSvt"))
     {

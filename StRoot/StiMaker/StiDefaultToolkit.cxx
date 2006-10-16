@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.35 2006/07/19 18:39:22 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.36 2006/10/16 20:30:42 fisyak Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.36  2006/10/16 20:30:42  fisyak
+ * Clean dependencies from Sti useless classes
+ *
  * Revision 2.35  2006/07/19 18:39:22  perev
  * Max NHits=2000000
  *
@@ -106,7 +109,6 @@
  */
 
 #include "StiDefaultToolkit.h"
-#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/Base/EditableParameter.h"
@@ -173,8 +175,6 @@ StiDefaultToolkit::StiDefaultToolkit()
   _finderTrackFilter(0)
 {
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Started"<<endl;
-  Messenger::init(0);
-  //Messenger::setRoutingMask(0);
   _detectorGroups = new StiDetectorGroups<StEvent>("StarDetectorGroups","StarDetectorGroups");
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Done"<<endl;
 };
@@ -187,7 +187,6 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _detectorFactory;
   delete _detectorContainer;
   StiDetectorFinder::kill(); 
-  Messenger::kill();
   delete _trackNodeFactory;
   delete _trackNodeExtFactory;
   delete _trackContainer;
