@@ -1,9 +1,12 @@
 /**************************************************************************
  * Class      : St_sce_maker.cxx
  ***************************************************************************
- * $Id: St_sce_Maker.cxx,v 1.14 2005/12/23 14:48:16 fisyak Exp $
+ * $Id: St_sce_Maker.cxx,v 1.15 2006/10/16 19:54:45 fisyak Exp $
  *
  * $Log: St_sce_Maker.cxx,v $
+ * Revision 1.15  2006/10/16 19:54:45  fisyak
+ * St_DataSet => TDataSet
+ *
  * Revision 1.14  2005/12/23 14:48:16  fisyak
  * Add protections versus division by 0
  *
@@ -37,7 +40,7 @@
 #include <stdlib.h>
 #include "St_sce_Maker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "TH1.h"
 #include "TFile.h"
 #include "StMessMgr.h"
@@ -49,7 +52,7 @@
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sce_dspt_Table.h"
 
-#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
 #include "tables/St_sce_ctrl_Table.h"
 
 ClassImp(St_sce_Maker)
@@ -68,18 +71,26 @@ St_sce_Maker::~St_sce_Maker(){
 Int_t St_sce_Maker::Init(){
 
 // 		Create tables
-  St_DataSet *svtparams = GetInputDB("svt");
-  St_DataSetIter       local(svtparams);
-
-// 		Geometry parameters
-   m_geom_par    = (St_sdm_geom_par*)local("ssd/sdm_geom_par");
-   m_geom        = (St_svg_geom    *)local("ssd/geom");
-   m_ctrl        = (St_sce_ctrl    *)local("ssd/sce_ctrl");
-
-   
+  TDataSet *ssdparams = GetInputDB("Geometry/ssd");
+  if (! ssdparams) {
+    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
+    return kStErr;
+  }
+  TDataSetIter       local(ssdparams);
+  m_geom_par    = (St_ssdDimensions     *)local("ssdDimensions");
+  m_geom        = (St_ssdWafersPosition *)local("ssdWafersPosition");
   if ((!m_geom_par)||(!m_geom)) {
     gMessMgr->Error() << "No  access to geometry parameters" << endm;
+    return kStErr;
   }   
+// 		Geometry parameters
+  ssdparams = GetInputDB("svt/ssd");
+  if (! ssdparams) {
+    gMessMgr->Error() << "No  access to svt/ssd parameters" << endm;
+    return kStErr;
+  }
+  m_ctrl        = (St_sce_ctrl    *) ssdparams->Find("sce_ctrl");
+  
   if (!m_ctrl) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
@@ -121,7 +132,7 @@ Int_t St_sce_Maker::Make()
   int res = 0;
 
   // Looking for the geant SSD hit table. If absent, looking for the SVT table
-  St_DataSetIter geant(GetInputDS("geant"));
+  TDataSetIter geant(GetInputDS("geant"));
   St_g2t_ssd_hit *g2t_ssd_hit = (St_g2t_ssd_hit *) geant("g2t_ssd_hit");
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
 
@@ -133,7 +144,7 @@ Int_t St_sce_Maker::Make()
   St_sce_dspt *sce_dspt = new St_sce_dspt("sce_dspt",5000);
   m_DataSet->Add(sce_dspt);
 
-  sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
+  ssdDimensions_st  *geom_par = m_geom_par->GetTable();
 
   sce_ctrl_st  *ctrl;
  
@@ -372,7 +383,7 @@ void St_sce_Maker::showScmStats()
 //_____________________________________________________________________________
 void St_sce_Maker::makeScmHistograms()
 {
-  St_DataSetIter sce_iter(m_DataSet);
+  TDataSetIter sce_iter(m_DataSet);
   St_sce_dspt *sce_dspt = 0;
   sce_dspt = (St_sce_dspt *) sce_iter.Find("sce_dspt"); 
   gMessMgr->Info()<< "In St_sce_Maker::makeScmHistograms() : sce_dspt nrows= "<<sce_dspt->GetNRows()<<endm;
@@ -397,7 +408,7 @@ void St_sce_Maker::makeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.14 2005/12/23 14:48:16 fisyak Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.15 2006/10/16 19:54:45 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

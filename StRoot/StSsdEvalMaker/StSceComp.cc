@@ -1,13 +1,16 @@
-// $Id: StSceComp.cc,v 1.2 2005/05/12 08:22:09 lmartin Exp $
+// $Id: StSceComp.cc,v 1.3 2006/10/16 19:54:45 fisyak Exp $
 //
 // $Log: StSceComp.cc,v $
+// Revision 1.3  2006/10/16 19:54:45  fisyak
+// St_DataSet => TDataSet
+//
 // Revision 1.2  2005/05/12 08:22:09  lmartin
 // cvs tags added and histograms in the .hist branch
 //
 
 #include "StSceComp.hh"
 
-StSceComp::StSceComp(int rComp, int rProb, int rGhostOrTrue, int rKindPackage, int rIdMatch, int rIdWaf, float *rD2e, float *rDxg, float *rDxl)
+StSceComp::StSceComp(int rComp, int rProb, int rGhostOrTrue, int rKindPackage, int rIdMatch, int rIdWaf, Double_t *rD2e, Double_t *rDxg, Double_t *rDxl)
 {
   int e            = 0;
 
@@ -18,12 +21,12 @@ StSceComp::StSceComp(int rComp, int rProb, int rGhostOrTrue, int rKindPackage, i
   mIdMatch         = rIdMatch;
   mIdWaf           = rIdWaf;
 
-  mD2e             = new float[2];
+  mD2e             = new Double_t[2];
   for (e = 0; e < 2; e++)
     mD2e[e]        = rD2e[e];
 
-  mDxg             = new float[3];
-  mDxl             = new float[3];
+  mDxg             = new Double_t[3];
+  mDxl             = new Double_t[3];
   for (e = 0; e < 3; e++)
     {
       mDxg[e]      = rDxg[e];
@@ -59,13 +62,13 @@ void StSceComp::setIdMatch(int rIdMatch)
 void StSceComp::setIdWaf(int rIdWaf)
 {  mIdWaf = rIdWaf; }
 
-void StSceComp::setD2e(float rD2e, int iR)
+void StSceComp::setD2e(Double_t rD2e, int iR)
 {  mD2e[iR] = rD2e; }
 
-void StSceComp::setDxg(float rDxg, int iR)
+void StSceComp::setDxg(Double_t rDxg, int iR)
 {  mDxg[iR] = rDxg; }
 
-void StSceComp::setDxl(float rDxl, int iR)
+void StSceComp::setDxl(Double_t rDxl, int iR)
 {  mDxl[iR] = rDxl; }
 
 
@@ -94,13 +97,13 @@ int StSceComp::getIdMatch()
 int StSceComp::getIdWaf()
 {  return mIdWaf; }
 
-float StSceComp::getD2e(int iR)
+Double_t StSceComp::getD2e(int iR)
 {  return mD2e[iR]; }
 
-float StSceComp::getDxg(int iR)
+Double_t StSceComp::getDxg(int iR)
 {  return mDxg[iR]; }
 
-float StSceComp::getDxl(int iR)
+Double_t StSceComp::getDxl(int iR)
 {  return mDxl[iR]; }
 
 

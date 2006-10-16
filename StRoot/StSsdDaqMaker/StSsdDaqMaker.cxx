@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.10 2005/12/07 20:40:06 perev Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.11 2006/10/16 19:52:26 fisyak Exp $
 //
 // $log$
 //
@@ -27,7 +27,7 @@
             
 #include "StSsdDaqMaker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "StMessMgr.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StSSDReader.h"
@@ -35,8 +35,6 @@
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdPedStrip_Table.h"
-#include "StSsdDbMaker/StSsdDbMaker.h"
-#include "StSsdDbMaker/St_SsdDb_Reader.hh"
 #include "StSsdUtil/StSsdConfig.hh"
 #include "TH1.h"
 #include "TH2.h"
@@ -119,7 +117,7 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
 
   gMessMgr->Info() << " StSsdDaqMaker::InitRun(int runumber) - Read now Databases " << endm;
 
-  St_DataSet *DbConnector = GetDataBase("Geometry/ssd");
+  TDataSet *DbConnector = GetDataBase("Geometry/ssd");
   if (!DbConnector){
     gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - DbConnector==0");
     return 0;
@@ -199,7 +197,7 @@ Int_t StSsdDaqMaker::Make(){
   // mConfig->getNumberOfWafers()=16;
   maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
 
-  St_DataSet *daq = GetDataSet("StDAQReader");                 
+  TDataSet *daq = GetDataSet("StDAQReader");                 
   if (!daq) {
     gMessMgr->Warning() << "StSsdDaqMaker:Make : StDAQReader Dataset not found - Skipping the event" << endm;
     return kStWarn;

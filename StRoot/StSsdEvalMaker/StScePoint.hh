@@ -1,6 +1,9 @@
-// $Id: StScePoint.hh,v 1.2 2005/05/12 08:22:11 lmartin Exp $
+// $Id: StScePoint.hh,v 1.3 2006/10/16 19:54:45 fisyak Exp $
 //
 // $Log: StScePoint.hh,v $
+// Revision 1.3  2006/10/16 19:54:45  fisyak
+// St_DataSet => TDataSet
+//
 // Revision 1.2  2005/05/12 08:22:11  lmartin
 // cvs tags added and histograms in the .hist branch
 //
@@ -10,12 +13,12 @@
 #include <Stiostream.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include "Rtypes.h"
 class StScePoint
 {
  public:
-  StScePoint (int rPoint, int rIdMcHit, int rIdMcTrack, int rIdWaf, float *rXg, float rDe, float *rAngle);
-  StScePoint(int rFlag , int rPoint, int rIdCluster, int rIdGlobTrk, int rIdMatch, int *rIdMcHit, int *rIdMcTrack, int *rIdTrack, int rIdWaf, float *rCov , float *rRes, float *rXg, float *rXl, float *rMom2, float *rDe);
+  StScePoint (int rPoint, int rIdMcHit, int rIdMcTrack, int rIdWaf, Float_t *rXg, Float_t rDe, Float_t *rAngle);
+  StScePoint(int rFlag , int rPoint, int rIdCluster, int rIdGlobTrk, int rIdMatch, int *rIdMcHit, int *rIdMcTrack, int *rIdTrack, int rIdWaf, Float_t *rCov , Float_t *rRes, Float_t *rXg, Float_t *rXl, Float_t *rMom2, Float_t *rDe);
   ~StScePoint();
   void        setFlag(int rFlag);
   void        setNPoint(int rPoint);
@@ -71,14 +74,14 @@ class StScePoint
   int        *mIdMcTrack;
   int        *mIdTrack;
   int         mIdWaf;
-  float      *mCov;
-  float      *mRes;
-  float      *mXg;
-  float      *mXl;
-  float      *mMom2;
-  float      *mDe;
-  float      *mUpos;
-  float      *mAngle;
+  Float_t      *mCov;
+  Float_t      *mRes;
+  Float_t      *mXg;
+  Float_t      *mXl;
+  Float_t      *mMom2;
+  Float_t      *mDe;
+  Float_t      *mUpos;
+  Float_t      *mAngle;
 
   StScePoint *mPrevPoint;
   StScePoint *mNextPoint;

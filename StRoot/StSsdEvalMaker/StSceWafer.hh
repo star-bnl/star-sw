@@ -1,6 +1,9 @@
-// $Id: StSceWafer.hh,v 1.3 2005/05/13 14:29:29 lmartin Exp $
+// $Id: StSceWafer.hh,v 1.4 2006/10/16 19:54:45 fisyak Exp $
 //
 // $Log: StSceWafer.hh,v $
+// Revision 1.4  2006/10/16 19:54:45  fisyak
+// St_DataSet => TDataSet
+//
 // Revision 1.3  2005/05/13 14:29:29  lmartin
 // tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
 //
@@ -27,10 +30,10 @@ class StSceWafer
                   StSceWafer(int id);
                   ~StSceWafer();
 
-  void            init(int rId, float *rD, float *rT, float *rN, float *rX);
-  void            addHit(int rNId , int rMcHit, int rMcTrack, float *rXg , float rDe, float *p);
+  void            init(int rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX);
+  void            addHit(int rNId , int rMcHit, int rMcTrack, Float_t *rXg , Float_t rDe, Float_t *p);
   int             convertGlobalToLocal();
-  int             convertLocalToUFrame(float ActiveLargeEdge, float ActiveSmallEdge, float Theta);
+  int             convertLocalToUFrame(Double_t ActiveLargeEdge, Double_t ActiveSmallEdge, Double_t Theta);
   void            addCluster(StSceCluster *ptr, int iSide);
   void            addRecPoint(StScePoint *ptr);
   void            addComPoint(StSceComp  *ptr);
@@ -45,16 +48,16 @@ class StSceWafer
 
  private:
   int              mId;
-  float            *mD;
-  float            *mT;
-  float            *mN;
-  float            *mX;
+  Double_t            *mD;
+  Double_t            *mT;
+  Double_t            *mN;
+  Double_t            *mX;
   StSceListPoint   *mPoint;
   StSceListPoint   *mRecPoint;
   StSceListCluster *mClusterP;
   StSceListCluster *mClusterN;
   StSceListComp    *mComPoint;
 
-  float*          findAngle(float *p, float *alpha);
+  Float_t*          findAngle(Float_t *p, Float_t *alpha);
 };  
 #endif
