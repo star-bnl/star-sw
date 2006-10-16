@@ -23,8 +23,6 @@
 #include <vector>
 using namespace std;
 //Sti
-#include "Sti/Base/Messenger.h"
-#include "Sti/Base/MessageType.h"
 #include "Sti/Base/Factory.h"
 #include "StiKTNIterator.h"
 #include "StiTrack.h"
@@ -37,7 +35,6 @@ class StiKalmanTrackNode;
 class StiKalmanTrackFinderParameters;
 class StiKalmanTrackFitterParameters;
 
-#define TRACKMESSENGER *(Messenger::instance(MessageType::kTrackMessage))
 /*! 
   \class StiKalmanTrack
   \brief Definition of Kalman Track

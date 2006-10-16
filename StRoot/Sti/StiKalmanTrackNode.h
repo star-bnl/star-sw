@@ -18,7 +18,6 @@
 #include "StiMaterial.h"
 class StiDetector;
 class StiMaterial;
-class Messenger;
 class StiElossCalculator;
   
 typedef enum {

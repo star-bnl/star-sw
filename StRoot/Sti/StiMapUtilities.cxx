@@ -12,7 +12,6 @@
 #include "StGetConfigValue.hh"
 
 //Sti
-#include "Sti/Base/Messenger.h"
 #include "StiHit.h"
 #include "StiMapUtilities.h"
 #include "StiCompositeTreeNode.h"
@@ -53,16 +52,14 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
 
 
 bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<StiDetector> * lhs,
-						  const StiCompositeTreeNode<StiDetector> * rhs) const
-{
-    if (lhs->getData()==0 || rhs->getData()==0) {
-	*(Messenger::instance(MessageType::kHitMessage)) <<"StiDetectorNodeLessThan::operator(). ERROR:\t";
-	*(Messenger::instance(MessageType::kHitMessage)) <<"null data.  Return false"<<endl;
-    }
-    StiPlacement* lhsp = lhs->getData()->getPlacement();
-    StiPlacement* rhsp = rhs->getData()->getPlacement();
-
-    return lhsp->getNormalRadius()<rhsp->getNormalRadius();
+						  const StiCompositeTreeNode<StiDetector> * rhs) const {
+  if (lhs->getData()==0 || rhs->getData()==0) 
+    cout <<"StiDetectorNodeLessThan::operator(). ERROR:\t" <<"null data.  Return false"<<endl;
+  
+  StiPlacement* lhsp = lhs->getData()->getPlacement();
+  StiPlacement* rhsp = rhs->getData()->getPlacement();
+  
+  return lhsp->getNormalRadius()<rhsp->getNormalRadius();
 }
 
 //----------------------- Detector Map Utilities ------------------------------------

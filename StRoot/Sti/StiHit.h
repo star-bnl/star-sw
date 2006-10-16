@@ -48,10 +48,6 @@
 #include "StMeasuredPoint.h"
 #include "StThreeVectorF.hh"
 #include "StMatrixF.hh"
-#define HITMESSENGER *(Messenger::instance(MessageType::kHitMessage))
-
-
-
 class StiHit 
 {
 public: 

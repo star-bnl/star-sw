@@ -6,7 +6,6 @@
 #include <fstream>
 #include <math.h>
 #include <algorithm>
-#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Filter.h"
 #include "StiKalmanTrackNode.h"
 #include "StiHit.h"

@@ -29,24 +29,6 @@ struct ElemV_t {
 };
 static Int_t m_Debug = 0;
 static const Int_t NoElemMax = 10000;
-#if 0
-static VolumeMap_t VolumesToBePut[] = {
-  {"PIPE","Star/Pipe/Sector_?","","",""},         // Star
-  {"","Emc/PreShower","","",""},                  // Emc
-  {"","Emc/ShowerMax","","",""},
-  {"","Emc/Tower","","",""},
-  //                                    // Ftpc
-  {"","Pixel/Layer_?/Ladder_?","","",""},        // Pixel
-  {"","Ssd/Layer_?/Ladder_?/Wafers","","",""},   // Ssd
-  {"","Svt/Layer_%d/Wafers","","",""},           // Svt
-  {"","Svt/Layer_%d/Hybrids","","",""},
-  {"","Svt/Layer_%d/Ladder_%d/Wafers","","",""},
-  {"","Svt/Layer_%d/Ladder_%d/Hybrids_1","","",""},
-  {"","Svt/Layer_%d/Ladder_%d/Hybrids_2","","",""},
-  {"","TPC/Ifc/Sector_%d","","",""},             // Tpc
-  {"","Tpc/Padrow_%d/Sector_%d","","",""}
-};
-#endif
 static VolumeMap_t VolumesToBeAveraged[] = { 
   {"PIPE","the STAR beam pipe mother volume","HALL_1/CAVE_1/PIPE_1-2/*","",""},
   {"PIPC","the Central Beam PIPe Volum","HALL_1/CAVE_1/PIPE_1-2/PIPC_1/*","",""},
@@ -525,11 +507,6 @@ Double_t StiVMCToolKit::GetWeight(TGeoNode *nodeT, TString pathT,
   Double_t Weight  = 0;
   Double_t WeightT = 0;
   if (! nodeT) {
-#if 0
-    if (TString(gDirectory->GetName()) == "Rint") 
-      TFile::Open("$STAR/StarDb/VMCGeometry/Geometry.y2005x.root");
-    if (! gGeoManager) gDirectory->Get("Geometry");
-#endif
     if (! gGeoManager) return Weight;
     gGeoManager->RestoreMasterVolume(); 
     gGeoManager->CdTop();
@@ -738,13 +715,7 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   newshape = shapeT;
   if (iShape == 1)  newshape = new TGeoBBox(dx, dy, dz);
   else if (iShape == 2) {
-#if 0
-    Double_t Phi1 = 0;
-    Double_t Phi2 = 360.;
-    newshape = new TGeoTubeSeg(rmin, rmax, dz, Phi1, Phi2);
-#else
     newshape = new TGeoTube(rmin, rmax, dz);
-#endif
   }
   delete [] ElementList;
 }
@@ -805,8 +776,8 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   if (listP) {
     Int_t N = listP->GetEntries();
     for (Int_t i = 0; i < N; i++) {
-      TGeoPhysicalNode *nod = (TGeoPhysicalNode *) listP->At(i);
-      if (TString(nod->GetName()) == TString(pathT)) {
+      TGeoPhysicalNode *nod = dynamic_cast<TGeoPhysicalNode *> (listP->At(i));
+      if (nod && TString(nod->GetName()) == TString(pathT)) {
 	nodeP = nod; break;
       }
     }
@@ -906,12 +877,6 @@ void StiVMCToolKit::MakeVolume(TGeoPhysicalNode *nodeP) {
     TGeoMaterial *matP   = volP->GetMaterial(); matP->Print("");
     TGeoShape    *shapeP = nodeP->GetShape(); cout << "New Shape\t"; PrintShape(shapeP);
     TGeoHMatrix  *hmat   = nodeP->GetMatrix(); hmat->Print("");
-#if 0
-    TGeoNode     *node   = nodeP->GetNode();
-    TGeoVolume   *vol    = node->GetVolume();
-    TGeoShape    *shape  = vol->GetShape();   cout << "Old Shape\t"; PrintShape(shape);
-    TGeoMaterial *mat    = vol->GetMaterial(); mat->Print("");
-#endif
   }
 }
 //________________________________________________________________________________

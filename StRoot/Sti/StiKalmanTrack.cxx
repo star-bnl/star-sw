@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.87 2006/10/09 15:47:06 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.87 2006/10/09 15:47:06 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.88 2006/10/16 20:29:35 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.88 2006/10/16 20:29:35 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.88  2006/10/16 20:29:35  fisyak
+ * Clean up useless classes
+ *
  * Revision 2.87  2006/10/09 15:47:06  fisyak
  * take out Central represantation, remove StiDedxCalculator
  *
@@ -357,34 +360,6 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 }
 
 
-#if 0
-/*!
-  Add a hit to this track.
-  <p>
-  If the current lastNode is non null, 
-  <ol>
-  <li>Insert the given hit in a StiKalmanTrackNode instance.</li>
-  <li>Add the new node as a child to the current last node.</li>
-  <li>Make the new node the last node of this track.</li>
-  </ol>
-  else
-  <ol>
-  <li>Insert the given hit in a StiKalmanTrackNode instance.</li>
-  </ol>
-*/
-//_____________________________________________________________________________
-StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction)
-{
-  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Started"<<endl;
-  StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  n->initialize(h,alpha,eta,curvature,tanl);
-  
-  add(n,direction);
-  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Done"<<endl;
-  return n;
-}
-#endif //0
-
 
 //_____________________________________________________________________________
 /*! Initialization of this kalman track from external parameters.
@@ -418,40 +393,6 @@ StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, dou
 <li>Throws a logic error exception if hits do not have a valid pointer to a detector object.</li>
 </OL>
 */
-#if 0 //VP obsolete, does not work for zero field
-void StiKalmanTrack::initialize(double curvature,
-				double tanl,
-				const StThreeVectorD& origin,
-				const vector<StiHit*> & hits)
-{
-  //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
-  reset();
-  //StiKalmanTrackNode * node  = 0;
-  double eta   =-99999.;
-  double alphaP=-99999.;
-  double alpha;
-  StThreeVectorD temp;
-  const StiDetector* detector=0;
-  int nhits = hits.size();
-  for (int ihit=0;ihit<nhits;ihit++)
-    {
-      StiHit *hit = hits[ihit];
-      detector = hit->detector();
-      assert(!detector);
-      // if alpha is same, avoid recalculating eta
-      alpha = detector->getPlacement()->getNormalRefAngle();
-      if (alphaP!=alpha)
-	{
-	  temp = origin;
-	  temp.rotateZ(-alpha);
-	  eta = curvature*temp.x();
-	  alphaP=alpha;
-	}
-      add(hit,alpha,eta,curvature,tanl,kOutsideIn);
-    }
-   //cout << "StiKalmanTrack::initialize() -I- Done"<<endl;
-}
-#endif //0
 
 //_____________________________________________________________________________
 int StiKalmanTrack::initialize(const std::vector<StiHit*> &hits)
@@ -792,7 +733,7 @@ double StiKalmanTrack::getTrackRadLength() const
       if (x2> (x1+x3)) x2 = x2 - x1 - x3; //x2 is now the gap distance
       else x2=0.;
 
-      TRACKMESSENGER
+      cout
 	   <<"getTrackRadLength:"
 	   <<"\n\tIn Detector: "<<thisNode->getDetector()->getName()
 	   <<"\n\t\tMaterial: "<<thisNode->getDetector()->getMaterial()
@@ -1014,23 +955,6 @@ void StiKalmanTrack::reserveHits()
   runtime_error exceptions which are NOT caught here...</li>
   </ul>
 */
-#if 0
-//_____________________________________________________________________________
-bool StiKalmanTrack::extendToVertex(StiHit *vertex, const StiDetector * alternate)
-{
-  if (!alternate)
-    return extendToVertex(vertex);
-  cout << " alternate propagate =========="<<endl;
-  cout << *alternate<<endl;
-  cout << "lastNode:"<<*lastNode<<endl;
-  StiKalmanTrackNode *lastGoodNode = getInnOutMostNode(0,0);
-  StiKalmanTrackNode * tNode = trackNodeFactory->getInstance();
-  tNode->reset();
-  int status = tNode->propagate(lastGoodNode,alternate,kOutsideIn);
-  cout << "propagate status:"<<status<<endl;
-  return false;
-}
-#endif
 
 //_____________________________________________________________________________
 StiTrackNode *StiKalmanTrack::extendToVertex(StiHit* vertex)
