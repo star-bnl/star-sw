@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.506 2006/10/09 23:39:46 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.507 2006/10/16 20:01:56 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -323,7 +323,7 @@ Int_t StBFChain::Instantiate()
       }
 
       if (GetOption("StiPulls"))  mk->SetAttr("makePulls"  ,kTRUE);
-
+      if (GetOption("skip1row"))  mk->SetAttr("skip1row"   ,kTRUE);
       mk->PrintAttr();
     }
 //		Sti(ITTF) end
