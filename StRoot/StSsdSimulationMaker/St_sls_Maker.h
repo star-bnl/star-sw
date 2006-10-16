@@ -19,16 +19,33 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
+class StSsdBarrel;
 class St_ssdDimensions;
 class St_ssdWafersPosition;
 class St_slsCtrl;
-
+class slsCtrl_st;
+class StSsdBarrel;
+class St_g2t_ssd_hit;
+class St_g2t_svt_hit;
+class St_sls_strip;
+class ssdConfiguration_st;
 class St_sls_Maker : public StMaker {
  private:
-  St_ssdDimensions *m_geom_par;//!
-  St_ssdWafersPosition     *m_geom;//!
-  St_slsCtrl     *m_ctrl;//!
+  St_ssdDimensions      *m_dimensions;//!
+  St_ssdWafersPosition  *m_positions;//!
+  ssdConfiguration_st   *m_config;//!
+  St_slsCtrl            *m_ctrl;//!
+  StSsdBarrel           *mySsd;//!
+  
+  Int_t readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit);
+  Int_t readPointFromTable(St_g2t_svt_hit *g2t_svt_hit) {
+    return readPointFromTable((St_g2t_ssd_hit *) g2t_svt_hit);}
+  Int_t   removeInactiveHitInTable(St_g2t_ssd_hit *g2t_ssd_hit);
+  Int_t   removeInactiveHitInTable(St_g2t_svt_hit *g2t_svt_hit) {
+    return removeInactiveHitInTable((St_g2t_ssd_hit *) g2t_svt_hit);}
+  void  chargeSharingOverStrip(slsCtrl_st  *ctrl);
+  Int_t   writeStripToTable(St_sls_strip *sls_strip);
+
  public: 
 	          St_sls_Maker(const char *name="sls_strip");
    virtual       ~St_sls_Maker();
@@ -39,7 +56,7 @@ class St_sls_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.8 2006/09/15 21:09:52 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sls_Maker.h,v 1.9 2006/10/16 16:36:08 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 
@@ -48,9 +65,12 @@ class St_sls_Maker : public StMaker {
 #endif
 
  /**************************************************************************
- * $Id: St_sls_Maker.h,v 1.8 2006/09/15 21:09:52 bouchet Exp $
+ * $Id: St_sls_Maker.h,v 1.9 2006/10/16 16:36:08 bouchet Exp $
  *
  * $Log: St_sls_Maker.h,v $
+ * Revision 1.9  2006/10/16 16:36:08  bouchet
+ * Unify classes : Remove StSlsStrip, StSlsPoint, StSpaStrip, StSpaNoise by the same classes used in StSsdPointMaker (StSsdStrip,StSsdPoint) ; The methods for these classes are in StSsdUtil
+ *
  * Revision 1.8  2006/09/15 21:09:52  bouchet
  * read the noise and pedestal from ssdStripCalib
  *

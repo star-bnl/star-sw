@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.8 2006/09/15 21:09:52 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.9 2006/10/16 16:36:08 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.9  2006/10/16 16:36:08  bouchet
+ * Unify classes : Remove StSlsStrip, StSlsPoint, StSpaStrip, StSpaNoise by the same classes used in StSsdPointMaker (StSsdStrip,StSsdPoint) ; The methods for these classes are in StSsdUtil
+ *
  * Revision 1.8  2006/09/15 21:09:52  bouchet
  * read the noise and pedestal from ssdStripCalib
  *
@@ -30,7 +33,7 @@
 #include "TFile.h"
 #include "StMessMgr.h"
 
-#include "StSpaBarrel.hh"
+#include "StSsdUtil/StSsdBarrel.hh"
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_sls_strip_Table.h"
 #include "tables/St_ssdDimensions_Table.h"
@@ -38,6 +41,9 @@
 #include "tables/St_slsCtrl_Table.h"
 #include "tables/St_sdm_calib_db_Table.h"
 #include "tables/St_ssdStripCalib_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_ssdConfiguration_Table.h"
 ClassImp(St_spa_Maker)
   
 //_____________________________________________________________________________
@@ -48,8 +54,9 @@ m_geom_par(0),
 m_cal_par(0),
 m_noise(0),
 m_condition(0),
-m_ctrl(0)
-
+m_ctrl(0),
+m_config(0),
+mySsd(0)
 {
 }
 //_____________________________________________________________________________
@@ -95,11 +102,20 @@ Int_t St_spa_Maker::InitRun(Int_t runnumber){
   m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
   if (!m_ctrl) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
+    return kStFatal;
   } 
   m_geom_par    = (St_ssdDimensions     *)local("ssdDimensions");
   if (!m_geom_par) {
     gMessMgr->Error() << "No  access to geometry parameters" << endm;
+    return kStFatal;
   }   
+  St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
+  if (!configTable) {
+    gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
+    return kStFatal;
+  }
+  //mConfig = new StSsdConfig();
+  m_config = (ssdConfiguration_st*) configTable->GetTable() ; 
 
   return kStOK;
 }
@@ -117,13 +133,12 @@ Int_t St_spa_Maker::Make()
   m_DataSet->Add(spa_strip);
   
   ssdDimensions_st  *geom_par =  m_geom_par->GetTable();
-  sdm_calib_par_st *cal_par  =  m_cal_par->GetTable();
   slsCtrl_st      *ctrl     =  m_ctrl->GetTable(); 
 
   cout<<"#################################################"<<endl;
   cout<<"####    START OF SSD PEDESTAL ANNIHILATOR    ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
-  StSpaBarrel *mySsd = new StSpaBarrel(geom_par, cal_par);
+  mySsd = new StSsdBarrel(geom_par, m_config);
   mySsd->readStripFromTable(sls_strip);
   cout<<"####        NUMBER OF SLS STRIPS "<<sls_strip->GetNRows()<<"       ####"<<endl;
   mySsd->readNoiseFromTable(m_noise);
@@ -133,8 +148,8 @@ Int_t St_spa_Maker::Make()
   mySsd->addNoiseToStrip(ctrl);
   cout<<"####           DO DAQ SIMULATION             ####"<<endl;
   mySsd->doDaqSimulation(ctrl);
-  int nSsdStrips = mySsd->writeStripToTable(spa_strip,sls_strip);
-  //int nSsdStrips = mySsd->writeStripToTable(spa_strip);
+  Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip,sls_strip);
+  //Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip);
   spa_strip->Purge();
   cout<<"####       NUMBER OF SPA STRIP "<<nSsdStrips<<"          ####"<<endl;
   delete mySsd;
