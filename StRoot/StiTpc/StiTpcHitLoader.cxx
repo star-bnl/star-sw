@@ -15,20 +15,14 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
 #include "Sti/StiHitTest.h"
-
-StiTpcHitLoader::StiTpcHitLoader()
-: StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader")
-{}
-
+//________________________________________________________________________________
+StiTpcHitLoader::StiTpcHitLoader(): StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader"), _minRow(1), _maxRow(45) {}
+//________________________________________________________________________________
 StiTpcHitLoader::StiTpcHitLoader(StiHitContainer* hitContainer,
                                  Factory<StiHit>*hitFactory,
                                  StiDetectorBuilder * detector)
-: StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector)
-{}
-
-StiTpcHitLoader::~StiTpcHitLoader()
-{}
-
+: StiHitLoader<StEvent,StiDetectorBuilder>("TpcHitLoader",hitContainer,hitFactory,detector), _minRow(1), _maxRow(45) {}
+//________________________________________________________________________________
 void StiTpcHitLoader::loadHits(StEvent* source,
                                Filter<StiTrack> * trackFilter,
                                Filter<StiHit> * hitFilter)
@@ -44,24 +38,20 @@ void StiTpcHitLoader::loadHits(StEvent* source,
   const StTpcHitCollection* tpcHits = source->tpcHitCollection();
   if (!tpcHits) return;
   unsigned int stiSector;
-  for (unsigned int sector=0; sector<24; sector++)
-    {
+  for (unsigned int sector=0; sector<24; sector++)    {
 #if 0
-      stiSector = sector;
+    stiSector = sector;
 #else
-    if (sector<12)
-      stiSector = sector;
-    else
-      stiSector = 11 - (sector-11)%12;
+    if (sector<12)      stiSector = sector;
+    else                stiSector = 11 - (sector-11)%12;
 #endif
     const StTpcSectorHitCollection* secHits = tpcHits->sector(sector);
-    if (!secHits)
-      {
+    if (!secHits) {
       cout << "StiTpcHitLoader::loadHits(StEvent* source) -W- no hits for sector:"<<sector<<endl;
       break;
-      }
-    for (unsigned int row=0; row<45; row++)
-      {
+    }
+    //    for (unsigned int row=0; row<45; row++)
+    for (unsigned int row=_minRow-1; row<_maxRow; row++) {
       //cout << "StiTpcHitLoader:loadHits() -I- Loading row:"<<row<<" sector:"<<sector<<endl;
       const StTpcPadrowHitCollection* padrowHits = secHits->padrow(row);
       if (!padrowHits) break;
@@ -71,8 +61,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
       if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
       const_StTpcHitIterator iter;
       StiHitTest hitTest;
-      for (iter = hitvec.begin();iter != hitvec.end();++iter)
-        {
+      for (iter = hitvec.begin();iter != hitvec.end();++iter)        {
         StTpcHit*hit=*iter;
         if(!_hitFactory) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- _hitFactory==0");
         stiHit = _hitFactory->getInstance();
@@ -81,13 +70,14 @@ void StiTpcHitLoader::loadHits(StEvent* source,
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
         hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
         _hitContainer->add( stiHit );
-        }
+      }
       if (hitTest.width()>0.1) {
-  	  printf("**** TPC hits too wide (%g) sector=%d row%d\n"
-	        ,hitTest.width(),sector,row);
+	printf("**** TPC hits too wide (%g) sector=%d row%d\n"
+	       ,hitTest.width(),sector,row);
       }
-  
-      }
+      
     }
+  }
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done" << endl;
 }
+//________________________________________________________________________________

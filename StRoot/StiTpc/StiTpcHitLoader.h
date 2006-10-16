@@ -23,10 +23,16 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StiDetectorBuilder>
   StiTpcHitLoader(StiHitContainer * hitContainer,
 		  Factory<StiHit> * hitFactory,
 		  StiDetectorBuilder * detector);
-  virtual ~StiTpcHitLoader();
+  virtual ~StiTpcHitLoader() {}
   virtual void loadHits(StEvent* source,
 			Filter<StiTrack> * trackFilter, 
 			Filter<StiHit> * hitFilter);
+  void         setMinRow(int r= 1) {_minRow = r;}
+  void         setMaxRow(int r=45) {_maxRow = r;}
+  
+ protected:
+  int         _minRow;
+  int         _maxRow;
 };
 
 #endif
