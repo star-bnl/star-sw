@@ -9,7 +9,6 @@
 #include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSvtDbMaker/St_SvtDb_Reader.hh"
 #include "StDbUtilities/St_svtRDOstrippedC.h"
-#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiMaterial.h"

@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.24 2006/10/09 15:47:59 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.25 2006/10/16 20:31:17 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.25  2006/10/16 20:31:17  fisyak
+// Clean dependencies from Sti useless classes
+//
 // Revision 1.24  2006/10/09 15:47:59  fisyak
 // use Normal represantation, remove StiDedxCalculator
 //
@@ -33,7 +36,6 @@ using namespace std;
 #include "tables/St_ssdConfiguration_Table.h"
 #include "tables/St_ssdWafersPosition_Table.h"
 
-#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
