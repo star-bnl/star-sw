@@ -1,5 +1,0 @@
-# $Id $
-# package StSsdEvalMaker
-# author: 
-Library:libStSsdEvalMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lsvt_Tables
-#Library:libStSsdEvalMaker.so:LIBS +=   -lsim_Tables  -lStChain  -lsvt_Tables
