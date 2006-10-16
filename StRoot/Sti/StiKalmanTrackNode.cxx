@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.101 2006/10/09 15:47:07 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.102 2006/10/16 20:29:35 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.102  2006/10/16 20:29:35  fisyak
+ * Clean up useless classes
+ *
  * Revision 2.101  2006/10/09 15:47:07  fisyak
  * take out Central represantation, remove StiDedxCalculator
  *
@@ -350,7 +353,6 @@ static const int    idx66[6][6] =
   ,{ 6, 7, 8, 9,13,18},{10,11,12,13,14,19},{15,16,17,18,19,20}};
 
 bool StiKalmanTrackNode::useCalculatedHitError = true;
-#define MESSENGER *(Messenger::instance(MessageType::kNodeMessage))
 TString StiKalmanTrackNode::comment("");
 TString StiKalmanTrackNode::commentdEdx(""); 
 //debug vars

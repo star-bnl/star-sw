@@ -8,8 +8,8 @@
 class StiStarDetectorBuilder : public StiDetectorBuilder
 {
  public:
-  StiStarDetectorBuilder(bool active, const string & inputFile);
-  virtual ~StiStarDetectorBuilder(); 
+  StiStarDetectorBuilder(bool active, const string & inputFile) : StiDetectorBuilder("StarBuilder",active,inputFile) {}
+  virtual ~StiStarDetectorBuilder() {}
   virtual void buildDetectors(StMaker&s);	
   void         useVMCGeometry();
  protected:

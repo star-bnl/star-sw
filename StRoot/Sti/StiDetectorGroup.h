@@ -31,6 +31,7 @@ class StiDetectorGroup : public Named
   StiElossCalculator * getElossCalculator();
   void setGroupId(int id);
   int  getGroupId() const;
+  StiHitLoader<Event,StiDetectorBuilder> *hitLoader() {return _hitLoader;}
 
  protected:
 

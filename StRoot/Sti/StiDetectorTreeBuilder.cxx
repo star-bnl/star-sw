@@ -7,7 +7,6 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <stdexcept>
-#include "Sti/Base/Messenger.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiCompositeTreeNode.h"

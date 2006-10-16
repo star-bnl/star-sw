@@ -105,7 +105,6 @@
 #include "Sti/Base/Described.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/Base/Factory.h"
-#include "Sti/Base/VectorizedFactory.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/StiHit.h"
 #include "Sti/StiDetector.h"

@@ -2,7 +2,6 @@
 #define StiHitLoader_H
 
 #include "Sti/Base/Factory.h"
-#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Filter.h"
 #include "Sti/StiDetectorFinder.h"
