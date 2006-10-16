@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.16 2006/09/15 21:03:14 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.17 2006/10/16 16:27:49 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.17  2006/10/16 16:27:49  bouchet
+// Unify classes ; Methods for all classes (StSsdStrip, StSsdCluster, StSsdPoint) are now in StSsdUtil
+//
 // Revision 1.16  2006/09/15 21:03:14  bouchet
 // id_mctrack is using for setIdTruth and propagated to the hit
 //
@@ -68,37 +71,28 @@
  */
 #ifndef STAR_StSsdPointMaker
 #define STAR_StSsdPointMaker
-
+#include "Riostream.h"
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "StDbLib/StDbDefs.hh"
+#include "StSsdUtil/StSsdDynamicControl.h"
+#include "StSsdUtil/StSsdClusterControl.h"
 
-class StChain;
-class StDbManager;
-class StDbConfigNode;
 class TFile;
 class TH1F;
 class TH1S;
 class TH2S;
 class TNtuple;
 
-class St_sdm_calib_db;
-class St_sdm_condition_db;
 class St_ssdDimensions;
 class St_ssdConfiguration;
 class St_ssdWafersPosition;
-class St_ssdLaddersPosition;
-class St_ssdSectorsPosition;
-class St_ssdBarrelPosition;
 class St_ssdStripCalib;
 
 class StEvent;
 class StSsdHitCollection;
-class StSsdDynamicControl;
-class StSsdClusterControl;
-class StSsdBarrel;
 
+class StSsdBarrel;
 class StSsdLadder;
 class StSsdWafer;
 class StSsdStrip;
@@ -117,26 +111,26 @@ class StEventInfo;
 
 
 class StSsdPointMaker : public StMaker {
+ public:
+  StSsdPointMaker(const char *name="SsdPoint") : StMaker(name), position(0), dimensions(0), config(0),
+    m_noise2(0), m_dimensions(0), m_configuration(0), m_wafpos(0) {}
+  virtual       ~StSsdPointMaker() {}
+  virtual Int_t  Init();
+  virtual Int_t  InitRun(Int_t runumber);
+  virtual Int_t  Make();
+  virtual Int_t  Finish();
+  virtual void   PrintInfo();
  private:
-  StDbManager* mDbMgr;           //!
-  StDbConfigNode* maccess;      //!
   TDataSet* DbConnector;
-  ssdWafersPosition_st  *position;
+  St_ssdWafersPosition  *position;
   ssdDimensions_st      *dimensions;
   ssdConfiguration_st   *config;
-  int positionSize;
-  St_sdm_calib_db       *m_noise;         //!< Pointer to the calib_db table (noise values) 
   St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
-  St_sdm_condition_db   *m_condition_db;  //!< Pointer to the condition_db table (active/inactive strip)
   St_ssdDimensions      *m_dimensions;    //!< Pointer to the ssdDimensions table (wafer size)
   St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
-  //  St_ssdWafersPosition  *position;        //!< Pointer to the ssdWaferPosition table (wafer positions)
-  St_ssdLaddersPosition *m_ladpos;        //!< Pointer to the ssdLadderPosition table (ladder positions)
-  St_ssdSectorsPosition *m_secpos;        //!< Pointer to the ssdSectorPosition table (sector positions)
-  St_ssdBarrelPosition  *m_barpos;        //!< Pointer to the ssdBarrelPosition table (barrel positions)
-  float ClusterNtuple[10];
-  float hitNtuple[9];    
+  Float_t ClusterNtuple[10];
+  Float_t hitNtuple[9];    
   TFile *nFile;
   TNtuple* nHitNtuple;
   TFile *mFile;
@@ -144,17 +138,17 @@ class StSsdPointMaker : public StMaker {
 
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
-  void DeclareNtuple(int *flag);
+  void DeclareNtuple(Int_t *flag);
   void debugUnPeu(StSsdBarrel *mySsd); 
   void PrintStripSummary(StSsdBarrel *mySsd); //!
   void PrintClusterSummary(StSsdBarrel *mySsd); //!
   void PrintPointSummary(StSsdBarrel *mySsd); //!
   void WriteScfTuple(StSsdBarrel *mySsd);
   void WriteScmTuple(StSsdBarrel *mySsd);
-  void PrintStripDetails(StSsdBarrel *mySsd, int mywafer); //!
-  void PrintClusterDetails(StSsdBarrel *mySsd, int mywafer); //!
-  void PrintPointDetails(StSsdBarrel *mySsd, int mywafer); //!
-  void PrintPackageDetails(StSsdBarrel *mySsd, int mywafer); //!
+  void PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
+  void PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
+  void PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
+  void PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void Read_Strip(St_ssdStripCalib *strip_calib);
   
  protected:
@@ -199,19 +193,11 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_18;    //! (1p-1n) packages control matching
   TH2S  *matchisto_19;    //! (1p-1n) packages control matching  
   TH2S  *matchisto_20;    //! (1p-1n) packages control matching.
-  int flag ;
+  Int_t flag ;
   
- public:
-                  StSsdPointMaker(const char *name="SsdPoint");
-   virtual       ~StSsdPointMaker();
-   virtual Int_t  Init();
-   virtual Int_t  InitRun(int runumber);
-   virtual Int_t  Make();
-   virtual Int_t  Finish();
-   virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.16 2006/09/15 21:03:14 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.17 2006/10/16 16:27:49 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

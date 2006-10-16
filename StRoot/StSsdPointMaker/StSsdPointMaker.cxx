@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.27 2006/09/15 21:03:14 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.28 2006/10/16 16:27:49 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.28  2006/10/16 16:27:49  bouchet
+// Unify classes ; Methods for all classes (StSsdStrip, StSsdCluster, StSsdPoint) are now in StSsdUtil
+//
 // Revision 1.27  2006/09/15 21:03:14  bouchet
 // id_mctrack is using for setIdTruth and propagated to the hit
 //
@@ -17,7 +20,7 @@
 // add a 0 to myTime if GetTime()<100000
 //
 // Revision 1.22  2005/09/26 15:49:54  bouchet
-// adding a method to the point maker to check which ssdStripCalib is picked
+// adding a method to the poInt_t maker to check which ssdStripCalib is picked
 //
 // Revision 1.21  2005/08/11 13:51:39  lmartin
 // PrintStripDetails, PrintPackageDetails and PrintPointDetails methods added
@@ -87,27 +90,17 @@
 #include "StMessMgr.h"
 #include "TNtuple.h"
 
-#include "StDbLib/StDbManager.hh"                      // Database Libraries
-#include "StDbLib/StDbConfigNode.hh"                   //
-#include "StDbLib/StDbTable.h"                         //
-
-#include "StSsdBarrel.hh"
-#include "StSsdLadder.hh"
-#include "StSsdWafer.hh"
-#include "StSsdStrip.hh"
-#include "StSsdStripList.hh"
-#include "StSsdCluster.hh"
-#include "StSsdClusterList.hh"
-#include "StSsdPointList.hh"
-#include "StSsdPoint.hh"
-#include "StSsdPackageList.hh"
-#include "StSsdPackage.hh"
-#include "StEvent.h"
-#include "StEventInfo.h"
-#include "StRunInfo.h"
-#include "StSsdHitCollection.h"
-#include "StSsdDynamicControl.h"
-#include "StSsdClusterControl.h"
+#include "StSsdUtil/StSsdPoint.hh"
+#include "StSsdUtil/StSsdPackage.hh"
+#include "StSsdUtil/StSsdCluster.hh"
+#include "StSsdUtil/StSsdStripList.hh"
+#include "StSsdUtil/StSsdClusterList.hh"
+#include "StSsdUtil/StSsdPointList.hh"
+#include "StSsdUtil/StSsdPackageList.hh"
+#include "StSsdUtil/StSsdWafer.hh"
+#include "StSsdUtil/StSsdLadder.hh"
+#include "StSsdUtil/StSsdBarrel.hh"
+#include "StSsdUtil/StSsdStrip.hh"
 #include "tables/St_spa_strip_Table.h" 
 #include "tables/St_ssdPedStrip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
@@ -120,28 +113,13 @@
 #include "tables/St_ssdLaddersPosition_Table.h"
 #include "tables/St_ssdSectorsPosition_Table.h"
 #include "tables/St_ssdBarrelPosition_Table.h"
-
 #include "tables/St_ssdStripCalib_Table.h"
 
-ClassImp(StSsdPointMaker)
-//_____________________________________________________________________________
-StSsdPointMaker::StSsdPointMaker(const char *name):
-StMaker(name),
-m_noise(0),
-m_noise2(0),
-m_condition_db(0),
-m_dimensions(0),
-m_configuration(0),
-m_wafpos(0),
-m_ladpos(0),
-m_secpos(0),
-m_barpos(0)
+#include "StEvent.h"
+#include "StSsdHitCollection.h"
 
-{
-}
-//_____________________________________________________________________________
-StSsdPointMaker::~StSsdPointMaker(){
-}
+ClassImp(StSsdPointMaker)
+
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Init(){
   gMessMgr->Info() << "Init() : Defining the histograms" << endm;
@@ -288,7 +266,7 @@ Int_t StSsdPointMaker::Init(){
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t StSsdPointMaker::InitRun(int runumber)
+Int_t StSsdPointMaker::InitRun(Int_t runumber)
 {
   //    mDbMgr = StDbManager::Instance();
   //    mDbMgr->setVerbose(false);
@@ -356,20 +334,19 @@ Int_t StSsdPointMaker::InitRun(int runumber)
       Read_Strip(m_noise2); 
       }
       // Get once the information for configuration, wafersposition and dimensions
-      St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration");
+      St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration"); 
       config  = (ssdConfiguration_st*) configTable->GetTable() ;
-      if (!config) 
+      if (!config) {
         gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
-      //mConfig = new StSsdConfig();
-  
-      St_ssdWafersPosition* positionTable = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
-      positionSize = 0;
-      position  = (ssdWafersPosition_st*) positionTable->GetTable() ;
-      if (!position) 
+	return kStFatal;
+      }
+       
+      position = (St_ssdWafersPosition*) DbConnector->Find("ssdWafersPosition");
+      if (!position) {
         gMessMgr->Error() << "InitRun : No access to ssdWafersPosition database" << endm;
-      else
-        positionSize= positionTable->GetNRows();
-
+	return kStFatal;
+      }
+      
       St_ssdDimensions* dimensionsTable = (St_ssdDimensions*) DbConnector->Find("ssdDimensions");
       dimensions  = (ssdDimensions_st*) dimensionsTable->GetTable() ;
       if (!dimensions) 
@@ -392,7 +369,7 @@ Int_t StSsdPointMaker::InitRun(int runumber)
 
 //_____________________________________________________________________________
 
-void StSsdPointMaker::DeclareNtuple(int *flag){
+void StSsdPointMaker::DeclareNtuple(Int_t *flag){
   mFile = new TFile("PhysicsFile.root","RECREATE");
   string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg";
   mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
@@ -469,21 +446,21 @@ Int_t StSsdPointMaker::Make()
   cout<<"####          BEGIN INITIALIZATION           ####"<<endl; 
   StSsdBarrel *mySsd = new StSsdBarrel(dimensions,config);
   //mySsd->initLadders(m_wafpos); 
-  mySsd->initLadders(position,positionSize);
+  mySsd->initLadders(position);
   //The full SSD object is built only if we are processing physics data
   if((! spa_ped_strip || spa_ped_strip->GetNRows()==0) && (spa_strip->GetNRows()!=0))
     {
-      int stripTableSize = mySsd->readStripFromTable(spa_strip);
+      Int_t stripTableSize = mySsd->readStripFromTable(spa_strip);
       cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
       mySsd->sortListStrip();
       //PrintStripSummary(mySsd);
-      int noiseTableSize = 0;      
+      Int_t noiseTableSize = 0;      
       if (!m_noise2) 
 	gMessMgr->Warning("Make : No pedestal and noise values (ssdStripCalib table missing), will use default values");
       else
 	noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
       cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
-      int nClusterPerSide[2];
+      Int_t nClusterPerSide[2];
       nClusterPerSide[0] = 0;
       nClusterPerSide[1] = 0;
       mySsd->doSideClusterisation(nClusterPerSide,mClusterControl);
@@ -491,24 +468,24 @@ Int_t StSsdPointMaker::Make()
       cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
       mySsd->sortListCluster();
       
-      int nClusterWritten = mySsd->writeClusterToTable(scf_cluster,spa_strip);
+      Int_t nClusterWritten = mySsd->writeClusterToTable(scf_cluster,spa_strip);
       cout<<"####   -> "<<nClusterWritten<<" CLUSTERS WRITTEN INTO TABLE       ####"<<endl;
       //PrintClusterSummary(mySsd);
       //      PrintStripDetails(mySsd,7406);
       //      PrintClusterDetails(mySsd,7406); 
       makeScfCtrlHistograms(mySsd);
       //debugUnPeu(mySsd);
-      int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
+      Int_t nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
       cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
       mySsd->convertDigitToAnalog(mDynamicControl);
       mySsd->convertUFrameToOther(dimensions);
       //PrintPointSummary(mySsd);
       
-      //int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
+      //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
       /*
-      for(int i=1;i<=20;i++)
+      for(Int_t i=1;i<=20;i++)
 	{
-	  for(int j=1;j<=16;j++)
+	  for(Int_t j=1;j<=16;j++)
 	    {
 	      PrintStripDetails(mySsd,7000+(100*j)+i);
 	      PrintClusterDetails(mySsd,7000+(100*j)+i);
@@ -516,7 +493,7 @@ Int_t StSsdPointMaker::Make()
 	    }
 	}
       */
-      int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
+      Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
       cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
       
       if(mSsdHitColl) 
@@ -557,17 +534,13 @@ Int_t StSsdPointMaker::Make()
 void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 {
 
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  int found;
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t found;
   Float_t convAdcToE = (mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip())/(pow(2.0,mDynamicControl->getnbitEncoding()));
   found=0;
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
-	//if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
-	  //gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
-	//}
-	//else {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	  StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
 	  while (pClusterP)
 	    {  
@@ -577,10 +550,6 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 	      snRatioP->Fill((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
 	      pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);	
 	    }
-	  //if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
-	    //gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the N-side of this wafer "<< endm;  
-	  //}
-	  //else {
 	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
 	    while (pClusterN)
 	      {
@@ -599,14 +568,14 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 
 void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 {
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  int found;
-  int conversion[11]={11,12,21,13,31,221,222,223,23,32,33};
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t found;
+  Int_t conversion[11]={11,12,21,13,31,221,222,223,23,32,33};
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   found=0;
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
 	  //gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
 	}
@@ -725,7 +694,7 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 		  }
 		}
 	    
-	    for(int k=0;k<=11;k++)
+	    for(Int_t k=0;k<=11;k++)
 	      {
 		if(pSpt->getNMatched()==conversion[k])
 		  {
@@ -745,11 +714,11 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
 
 void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
 {
-  int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  for (int i=0;i<20;i++) 
+  Int_t ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  Int_t ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	ladderCountP[i]=ladderCountP[i]+mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize();
 	ladderCountN[i]=ladderCountN[i]+mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize();
       }
@@ -757,7 +726,7 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
   
   gMessMgr->Info() <<"PrintStripSummary : Number of raw data in the SSD" << endm;
   gMessMgr->Info() << "PrintStripSummary : Active Ladders : ";
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr<<i+1;
@@ -765,14 +734,14 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
   
   *gMessMgr<<endm;
   gMessMgr->Info() << "PrintStripSummary : Counts (p-side): ";
-  for (int i=0;i<20;i++)
+  for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountP[i];
     }
   *gMessMgr<<endm;
   gMessMgr->Info() << "PrintStripSummary : Counts (n-side): ";
-  for (int i=0;i<20;i++)
+  for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountN[i];
@@ -783,7 +752,7 @@ void StSsdPointMaker::PrintStripSummary(StSsdBarrel *mySsd)
 //_____________________________________________________________________________
 void StSsdPointMaker::debugUnPeu(StSsdBarrel *mySsd)
 {
-  int monladder,monwafer;
+  Int_t monladder,monwafer;
   monladder=7;
   monwafer=6;
   mySsd->debugUnPeu(monladder,monwafer);
@@ -792,11 +761,11 @@ void StSsdPointMaker::debugUnPeu(StSsdBarrel *mySsd)
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
 {
-  int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  for (int i=0;i<20;i++) 
+  Int_t ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  Int_t ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	ladderCountP[i]=ladderCountP[i]+mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize();
 	ladderCountN[i]=ladderCountN[i]+mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize();
       }
@@ -804,7 +773,7 @@ void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
   
   gMessMgr->Info() <<"PrintClusterSummary : Number of clusters in the SSD" << endm;
   gMessMgr->Info() << "PrintClusterSummary : Active Ladders : ";
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr<<i+1;
@@ -812,14 +781,14 @@ void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
   
   *gMessMgr<<endm;
   gMessMgr->Info() << "PrintClusterSummary : Counts (p-side): ";
-  for (int i=0;i<20;i++)
+  for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountP[i];
     }
   *gMessMgr<<endm;
   gMessMgr->Info() << "PrintClusterSummary : Counts (n-side): ";
-  for (int i=0;i<20;i++)
+  for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCountN[i];
@@ -829,11 +798,11 @@ void StSsdPointMaker::PrintClusterSummary(StSsdBarrel *mySsd)
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
 {
-  int ladderCount[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  int ladderCount11[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
-  for (int i=0;i<20;i++) 
+  Int_t ladderCount[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  Int_t ladderCount11[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+  for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	ladderCount[i]=ladderCount[i]+mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize();
 	StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
 	while (pSpt){	
@@ -845,7 +814,7 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
   
   gMessMgr->Info() <<"PrintPointSummary : Number of hits in the SSD" << endm;
   gMessMgr->Info() << "PrintPointSummary : Active Ladders : ";
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr<<i+1;
@@ -853,14 +822,14 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
   
   *gMessMgr<<endm;
   gMessMgr->Info() << "PrintPointSummary : Counts         : ";
-  for (int i=0;i<20;i++)
+  for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCount[i];
     }
   *gMessMgr<<endm;
   gMessMgr->Info() << "PrintPointSummary : Counts  (11)   : ";
-  for (int i=0;i<20;i++)
+  for (Int_t i=0;i<20;i++)
     if (mySsd->isActiveLadder(i)>0) {
       gMessMgr->width(5);
       *gMessMgr <<ladderCount11[i];
@@ -872,20 +841,15 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
 void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
 {
 
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  int found;
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t found;
   found=0;
-    for (int i=0;i<20;i++) 
+    for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
-	//Looking for the P-side cluster informations
-	//  if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
-	    //  gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
-	// }
-	// else {
-	    StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
-	    while (pClusterP)
-	      {   
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	while (pClusterP)
+	  {   
 		ClusterNtuple[0]=0;
 		ClusterNtuple[1]=i+1;
 		ClusterNtuple[2]=j+1;
@@ -917,15 +881,15 @@ void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 {
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
-  int found;
-  int conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  Int_t found;
+  Int_t conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   found=0;
   // gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Wafer "<<mywafer<< endm;  
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	  if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
 	    //   gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
 	  }
@@ -939,7 +903,7 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 	      hitNtuple[1]=b;
 	      hitNtuple[2]=i+1;
 	      hitNtuple[3]=j+1;
-	      for(int k=0;k<=11;k++)
+	      for(Int_t k=0;k<=11;k++)
 		{
 		  if(pSpt->getNMatched()==conversion[k])
 		    {
@@ -959,14 +923,14 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 
 
 //_____________________________________________________________________________
-void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, int mywafer)
+void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  int found;
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
+  Int_t found;
   gMessMgr->Info() <<"StSsdPointMaker::PrintStripDetails() - Wafer "<<mywafer<< endm;  
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
         if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
           found=1;
           //Looking for the P-side strip informations
@@ -1015,14 +979,14 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, int mywafer)
 }
 
 //_____________________________________________________________________________
-void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, int mywafer)
+void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  int found;
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
+  Int_t found;
   gMessMgr->Info() <<"StSsdPointMaker::PrintClusterDetails() - Wafer "<<mywafer<< endm;  
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
         if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
           found=1;
           //Looking for the P-side cluster informations
@@ -1081,16 +1045,16 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, int mywafer)
 }
 
 //_____________________________________________________________________________
-void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, int mywafer)
+void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  int found;
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
+  Int_t found;
 
   found=0;
   gMessMgr->Info() <<"StSsdPointMaker::PrintPackageDetails() - Wafer "<<mywafer<< endm;  
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
         if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
           found=1;
           if (mySsd->mLadders[i]->mWafers[j]->getPackage()->getSize()==0) {
@@ -1105,7 +1069,7 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, int mywafer)
               gMessMgr->Info()<<"StSsdPointMaker::PrintPackageDetails() - "<<pPack->getNPackage()<<" "
                               <<pPack->getKind()<<" "
                               <<pPack->getSize()<<" "<<endm;
-              for (int k=0;k<pPack->getSize();k++) {
+              for (Int_t k=0;k<pPack->getSize();k++) {
                 gMessMgr->Info()<<"StSsdPointMaker::PrintPackageDetails() - "<<k<<" "<<pPack->getMatched(k)<<" "<<pPack->getMatched(k)->getNCluster()<<endm;
               }
               pPack    = mySsd->mLadders[i]->mWafers[j]->getPackage()->next(pPack);
@@ -1119,16 +1083,16 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, int mywafer)
 }
 
 //_____________________________________________________________________________
-void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, int mywafer)
+void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
-  int LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
-  int found;
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
+  Int_t found;
 
   found=0;
   gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Wafer "<<mywafer<< endm;  
-  for (int i=0;i<20;i++) 
+  for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
-      for (int j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
         if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
           found=1;
           if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
@@ -1137,7 +1101,7 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, int mywafer)
           else {
             gMessMgr->Info()<<"StSsdPointMaker::PrintPointDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()<<" hit(s) in this wafer "<< endm; 
  
-            gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xl[0]/Xl[1]/Xl[2]/Xg[0]/Xg[1]/Xg[2"<< endm;  
+            gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xg[0]/Xg[1]/Xg[2]/Xl[0]/Xl[1]/Xl[2]"<< endm;  
             StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
             while (pSpt){
               gMessMgr->Info()<<"StSsdPointMaker::PrintPointDetails() - "
@@ -1178,18 +1142,18 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
 {
     ssdStripCalib_st *noise = strip_calib->GetTable();
 
-  int  mSsdLayer = 7;
+  Int_t  mSsdLayer = 7;
 
-  int idWaf  = 0;
-  int iWaf   = 0;
-  int iLad   = 0;
-  int nStrip = 0;
-  int iSide  = 0;
-  int iOver = 0;
-  int iZero = 0;
-  int iUnder = 0;
-  int iGood = 0;
-  for (int i = 0 ; i < strip_calib->GetNRows(); i++)
+  Int_t idWaf  = 0;
+  Int_t iWaf   = 0;
+  Int_t iLad   = 0;
+  Int_t nStrip = 0;
+  Int_t iSide  = 0;
+  Int_t iOver = 0;
+  Int_t iZero = 0;
+  Int_t iUnder = 0;
+  Int_t iGood = 0;
+  for (Int_t i = 0 ; i < strip_calib->GetNRows(); i++)
     {
       if (noise[i].id>0 && noise[i].id<=76818620) {
 	nStrip  = (int)(noise[i].id/100000.);
