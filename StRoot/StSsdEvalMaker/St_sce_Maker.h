@@ -20,14 +20,14 @@
 
 class TFile;
 class TH1F;
-class St_sdm_geom_par;
-class St_svg_geom;
+class St_ssdDimensions;
+class St_ssdWafersPosition;
 class St_sce_ctrl;
 
 class St_sce_Maker : public StMaker {
  private:
-            St_sdm_geom_par *m_geom_par;//!
-	    St_svg_geom     *m_geom;//!
+            St_ssdDimensions *m_geom_par;//!
+	    St_ssdWafersPosition     *m_geom;//!
 	    St_sce_ctrl     *m_ctrl;//!
  	    void resetSceStats(); //!
  	    void makeScfStats(); //!
@@ -55,17 +55,20 @@ class St_sce_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.10 2005/05/13 15:13:50 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_sce_Maker.h,v 1.11 2006/10/16 19:54:45 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
-/* $Id: St_sce_Maker.h,v 1.10 2005/05/13 15:13:50 bouchet Exp $
+/* $Id: St_sce_Maker.h,v 1.11 2006/10/16 19:54:45 fisyak Exp $
  *
  */
  /**************************************************************************
  *
  * $Log: St_sce_Maker.h,v $
+ * Revision 1.11  2006/10/16 19:54:45  fisyak
+ * St_DataSet => TDataSet
+ *
  * Revision 1.10  2005/05/13 15:13:50  bouchet
  * reading ssd/geom and no more writeScmHistograms methods
  *

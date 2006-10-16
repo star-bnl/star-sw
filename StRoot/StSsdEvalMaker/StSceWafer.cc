@@ -1,6 +1,9 @@
-// $Id: StSceWafer.cc,v 1.3 2005/05/13 14:29:29 lmartin Exp $
+// $Id: StSceWafer.cc,v 1.4 2006/10/16 19:54:45 fisyak Exp $
 //
 // $Log: StSceWafer.cc,v $
+// Revision 1.4  2006/10/16 19:54:45  fisyak
+// St_DataSet => TDataSet
+//
 // Revision 1.3  2005/05/13 14:29:29  lmartin
 // tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
 //
@@ -13,10 +16,10 @@
 StSceWafer::StSceWafer(int nid)
 {
   mId       = nid;
-  mD        = new float[3];
-  mT        = new float[3];
-  mN        = new float[3];
-  mX        = new float[3];
+  mD        = new Double_t[3];
+  mT        = new Double_t[3];
+  mN        = new Double_t[3];
+  mX        = new Double_t[3];
   mPoint    = new StSceListPoint();
   mRecPoint = new StSceListPoint();
   mClusterP = new StSceListCluster();
@@ -45,7 +48,7 @@ StSceWafer::~StSceWafer()
   delete    mComPoint;
 }
 
-void StSceWafer::init(int rId, float *rD, float *rT, float *rN, float *rX)
+void StSceWafer::init(int rId, Double_t *rD, Double_t *rT, Double_t *rN, Double_t *rX)
 {
   if (rId != mId)
     cout<<" Can not initialize wafer number : "<<mId<<endl;
@@ -61,15 +64,12 @@ void StSceWafer::init(int rId, float *rD, float *rT, float *rN, float *rX)
     }
 }
 
-void StSceWafer::addHit(int rNId , int rMcHit, int rMcTrack, float *rXg , float rDe, float *p)
+void StSceWafer::addHit(int rNId , int rMcHit, int rMcTrack, Float_t *rXg , Float_t rDe, Float_t *p)
 {
-  float *alpha = new float[2];
-  alpha[0]  = 0.;
-  alpha[1]  = 0.;
+  Float_t alpha[2] = {0, 0};
 // next has to be modified:
   StScePoint *tmpPoint = new StScePoint(rNId, rMcHit, rMcTrack, mId, rXg, rDe, this->findAngle(p,alpha));
   (this->mPoint)->addNewPoint(tmpPoint);
-  delete [] alpha;
 }
   
 int StSceWafer::convertGlobalToLocal()
@@ -78,7 +78,7 @@ int StSceWafer::convertGlobalToLocal()
 
   if (!localSize) return 0;
 
-  float *xtemp = new float[3];  
+  Double_t *xtemp = new Double_t[3];  
   StScePoint *temp = mPoint->first();
   for (int i = 0; i < localSize; i++)
     {
@@ -96,7 +96,7 @@ int StSceWafer::convertGlobalToLocal()
   return 1;
 }
 
-int StSceWafer::convertLocalToUFrame(float ActiveLargeEdge, float ActiveSmallEdge, float Theta) 
+int StSceWafer::convertLocalToUFrame(Double_t ActiveLargeEdge, Double_t ActiveSmallEdge, Double_t Theta) 
 {
   int localSize = (this->mPoint)->getSize();
   if (!localSize) return 0;
@@ -234,7 +234,7 @@ int StSceWafer::doEvaluateCluster(St_sce_ctrl *myctrl){
    ctrl->TrueClusterN  = Cumulated_n_true;
    ctrl->GhostClusterN = Cumulated_n_ghost;
    ctrl->LostClusterN  = Cumulated_n_lost;
-   myctrl->AddAt(ctrl,0);
+   //   myctrl->AddAt(ctrl,0);
 
    return nEvaluatedCluster;
  }
@@ -256,10 +256,10 @@ int StSceWafer::doEvaluateSpt(St_sce_ctrl *myctrl){
   int prob           = 0;
   int ghostOrTrue    = 0;
   int idHit          = 0;
-  float *d2e         = new float[2];
+  Double_t *d2e         = new Double_t[2];
   for (e = 0; e < 2; e++)   d2e[e] = 0;
-  float *dXg         = new float[3];
-  float *dXl         = new float[3];
+  Double_t *dXg         = new Double_t[3];
+  Double_t *dXl         = new Double_t[3];
   for (e = 0; e < 3; e++)
     { dXg[e] = 0;
       dXl[e] = 0; }
@@ -1164,7 +1164,7 @@ int StSceWafer::doEvaluateSpt(St_sce_ctrl *myctrl){
    ctrl->TrueSpt33  = Cumulated_TrueSpt33;
    ctrl->GhostSpt33 = Cumulated_GhostSpt33;
    ctrl->LostSpt33  = Cumulated_LostSpt33;
-   myctrl->AddAt(ctrl,0);
+   //   myctrl->AddAt(ctrl,0);
 
    delete [] d2e;
    delete [] dXg;
@@ -1173,19 +1173,19 @@ int StSceWafer::doEvaluateSpt(St_sce_ctrl *myctrl){
  }
 
 
-float* StSceWafer::findAngle(float *p, float *alpha)
+Float_t* StSceWafer::findAngle(Float_t *p, Float_t *alpha)
 {
   int i = 0;
 
-  float pT[3],pN[3],pD[3];
+  Float_t pT[3],pN[3],pD[3];
 
-  float spT = 0.;
-  float spN = 0.;
-  float spD = 0.;
+  Float_t spT = 0.;
+  Float_t spN = 0.;
+  Float_t spD = 0.;
 
-  float npT = 0.;
-  float npN = 0.;
-  float npD = 0.;
+  Float_t npT = 0.;
+  Float_t npN = 0.;
+  Float_t npD = 0.;
 
   for (i = 0; i < 3; i++)
     {
@@ -1204,12 +1204,12 @@ float* StSceWafer::findAngle(float *p, float *alpha)
   npD = sqrt(pD[0]*pD[0]+pD[1]*pD[1]+pD[2]*pD[2]);
   npN = sqrt(pN[0]*pN[0]+pN[1]*pN[1]+pN[2]*pN[2]);
 
-//   float np    = sqrt(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-  float npDN  = sqrt((pN[0]+pD[0])*(pN[0]+pD[0])+(pN[1]+pD[1])*(pN[1]+pD[1])+(pN[2]+pD[2])*(pN[2]+pD[2]));
-  float npTD  = sqrt((pT[0]+pD[0])*(pT[0]+pD[0])+(pT[1]+pD[1])*(pT[1]+pD[1])+(pT[2]+pD[2])*(pT[2]+pD[2]));
+//   Float_t np    = sqrt(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
+  Float_t npDN  = sqrt((pN[0]+pD[0])*(pN[0]+pD[0])+(pN[1]+pD[1])*(pN[1]+pD[1])+(pN[2]+pD[2])*(pN[2]+pD[2]));
+  Float_t npTD  = sqrt((pT[0]+pD[0])*(pT[0]+pD[0])+(pT[1]+pD[1])*(pT[1]+pD[1])+(pT[2]+pD[2])*(pT[2]+pD[2]));
 
   alpha[0] = acos(npN/npDN);
-  float sSign = 0.;
+  Float_t sSign = 0.;
   sSign = pD[0]*pN[0]+pD[1]*pN[1]+pD[2]*pN[2]+npN*npN;
   if (sSign<0.) alpha[0] = -1.*alpha[0];
 

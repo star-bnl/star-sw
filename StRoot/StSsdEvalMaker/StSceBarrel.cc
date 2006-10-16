@@ -1,6 +1,9 @@
-// $Id: StSceBarrel.cc,v 1.4 2005/05/13 14:29:28 lmartin Exp $
+// $Id: StSceBarrel.cc,v 1.5 2006/10/16 19:54:45 fisyak Exp $
 //
 // $Log: StSceBarrel.cc,v $
+// Revision 1.5  2006/10/16 19:54:45  fisyak
+// St_DataSet => TDataSet
+//
 // Revision 1.4  2005/05/13 14:29:28  lmartin
 // tg2t_ssd_hit table used, doEvalCluster and doEvalSpt modified
 //
@@ -10,15 +13,15 @@
 
 #include "StSceBarrel.hh"
 
-#include "tables/St_sdm_geom_par_Table.h"
-#include "tables/St_svg_geom_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_ssd_hit_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sce_dspt_Table.h"
 
-StSceBarrel::StSceBarrel(sdm_geom_par_st  *geom_par)
+StSceBarrel::StSceBarrel(ssdDimensions_st  *geom_par)
 {
   this->setSsdParameters(geom_par);
 
@@ -39,27 +42,27 @@ StSceBarrel::~StSceBarrel()
     delete mWafers[i];
 }
 
-void StSceBarrel::setSsdParameters(sdm_geom_par_st  *geom_par)
+void StSceBarrel::setSsdParameters(ssdDimensions_st  *geom_par)
 {
-  mSsdLayer            = geom_par[0].N_layer; // all layers : 1->7
-  mDetectorLargeEdge   = 2.*geom_par[0].L_wafer_act_l;
-  mDetectorSmallEdge   = 2.*geom_par[0].L_wafer_act_w;
-  mNLadder             = geom_par[0].N_ladder;
-  mNWaferPerLadder     = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide       = geom_par[0].N_strip_per_side;
-  mStripPitch          = geom_par[0].L_strip_pitch;
-  mTheta               = geom_par[0].L_stereo_angle;
+  mSsdLayer            = 7; // all layers : 1->7
+  mDetectorLargeEdge   = 2.*geom_par[0].waferHalfActLength;
+  mDetectorSmallEdge   = 2.*geom_par[0].waferHalfActWidth;
+  mNLadder             = 20;
+  mNWaferPerLadder     = geom_par[0].wafersPerLadder;
+  mNStripPerSide       = geom_par[0].stripPerSide;
+  mStripPitch          = geom_par[0].stripPitch;
+  mTheta               = geom_par[0].stereoAngle;
 }
 
-void StSceBarrel::initWafers(St_svg_geom *svg_geom)
+void StSceBarrel::initWafers(St_ssdWafersPosition *ssdWafersPosition)
 {
-  svg_geom_st *geom = svg_geom->GetTable();
+  ssdWafersPosition_st *geom = ssdWafersPosition->GetTable();
   
-  for (int i = 0; i < svg_geom->GetNRows() ; i++)
+  for (int i = 0; i < ssdWafersPosition->GetNRows() ; i++)
     {
       if (geom[i].id > mSsdLayer*1000)
 	{
- 	  mWafers[idWaferToWaferNumb(geom[i].id)]->init(geom[i].id, geom[i].d, geom[i].t, geom[i].n, geom[i].x);
+ 	  mWafers[idWaferToWaferNumb(geom[i].id)]->init(geom[i].id, geom[i].driftDirection, geom[i].transverseDirection, geom[i].normalDirection,geom[i].centerPosition);
 	}
     }
 }
@@ -74,8 +77,7 @@ int StSceBarrel::readPointFromTable(St_g2t_svt_hit *g2t_svt_hit)
    int counter     = 0;
    int i           = 0 ;
    int j           = 0 ;
-   //   float *p        = new float[3];
-   float p[3]      = {0,0,0};
+   Float_t p[3]      = {0,0,0};
    for (i = 0; i< g2t_svt_hit->GetNRows() ; i++)
     {
       currWafId=g2t[i].volume_id;
@@ -87,7 +89,6 @@ int StSceBarrel::readPointFromTable(St_g2t_svt_hit *g2t_svt_hit)
  	  mWafers[currWafNumb]->addHit(g2t[i].id, g2t[i].id, g2t[i].track_p, g2t[i].x, g2t[i].de, p);
 	}
     }
-   //   delete [] p;
    return counter;
  }
 
@@ -101,8 +102,7 @@ int StSceBarrel::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit)
    int counter     = 0;
    int i           = 0 ;
    int j           = 0 ;
-   //   float *p        = new float[3];
-   float p[3]      = {0,0,0};
+   Float_t p[3]      = {0,0,0};
    for (i = 0; i< g2t_ssd_hit->GetNRows() ; i++)
     {
       currWafId=g2t[i].volume_id;
@@ -114,7 +114,6 @@ int StSceBarrel::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit)
  	  mWafers[currWafNumb]->addHit(g2t[i].id, g2t[i].id, g2t[i].track_p, g2t[i].x, g2t[i].de, p);
 	}
     }
-   //   delete [] p;
    return counter;
  }
 
@@ -165,7 +164,7 @@ int StSceBarrel::readClusterFromTable(St_scf_cluster *scf_cluster)
   int nLastAdc        = 0;
   int nAdcCount       = 0;
   int nNoiseCount     = 0;
-  float nStripMean    = 0;
+  Double_t nStripMean    = 0;
   int nFlag           = 0;
 
   for (int i = 0 ; i < scf_cluster->GetNRows(); i++)
@@ -226,19 +225,19 @@ int StSceBarrel::readRecPointFromTable(St_scm_spt *rec_spt)
   int idMcTrack[5]= {0,0,0,0,0};
   int idTrack[5]  = {0,0,0,0,0};
 
-//   float *Cov      = new float[3];
-//   float *Res      = new float[3];
-//   float *Xg       = new float[3];
-//   float *Xl       = new float[3];
-  float Cov[3]    = {0,0,0};
-  float Res[3]    = {0,0,0};
-  float Xg[3]     = {0,0,0};
-  float Xl[3]     = {0,0,0};
+//   Float_t *Cov      = new Float_t[3];
+//   Float_t *Res      = new Float_t[3];
+//   Float_t *Xg       = new Float_t[3];
+//   Float_t *Xl       = new Float_t[3];
+  Float_t Cov[3]    = {0,0,0};
+  Float_t Res[3]    = {0,0,0};
+  Float_t Xg[3]     = {0,0,0};
+  Float_t Xl[3]     = {0,0,0};
 
-//   float *Mom2     = new float[2];
-//   float *De       = new float[2];
-  float Mom2[2]   = {0,0};
-  float De[2]     = {0,0};
+//   Float_t *Mom2     = new Float_t[2];
+//   Float_t *De       = new Float_t[2];
+  Float_t Mom2[2]   = {0,0};
+  Float_t De[2]     = {0,0};
 
   for (int i = 0; i < rec_spt->GetNRows(); i++)
     {
