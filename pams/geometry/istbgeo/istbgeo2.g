@@ -1,5 +1,10 @@
-* $Id: istbgeo2.g,v 1.1 2006/10/14 19:45:11 potekhin Exp $
+* $Id: istbgeo2.g,v 1.2 2006/10/16 17:19:12 potekhin Exp $
 * $Log: istbgeo2.g,v $
+* Revision 1.2  2006/10/16 17:19:12  potekhin
+* Corrected the wrong version of the ISRR
+* structure being used (needs to be based on the
+* layer number, too, as opposed to static)
+*
 * Revision 1.1  2006/10/14 19:45:11  potekhin
 * The code istbgeo1 by Gerrit was fine except it didn't allow
 * for consistent volume numbering within our (imperfect infrastructure).
@@ -222,6 +227,7 @@ Block IBMO is the mother of the ISTB detector
       do istLayer=2,3
         USE ISMG Layer=istLayer
         USE ISBG Layer=istLayer
+        USE ISRR Layer=istLayer
         Create   IBMY
         Position IBMY
       enddo
@@ -284,7 +290,6 @@ Block IBMY is the mother of the inner IST layer
       enddo
 
 *     place 2 support rings at both ends of the ladders
-      USE ISRR Layer=2
       Create   ISRI
       Position ISRI x =  0.0 _
                     y =  0.0 _
