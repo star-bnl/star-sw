@@ -1,6 +1,9 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.9 2006/10/13 18:36:43 mmiller Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.10 2006/10/17 19:32:05 fisyak Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
+// Revision 1.10  2006/10/17 19:32:05  fisyak
+// Remove reference to dead Sti/Base/Messenger.h class
+//
 // Revision 1.9  2006/10/13 18:36:43  mmiller
 // Committing Willie's changes to make perfect hits in IST work for UPGR02 geometry using VMC geometry in HitLoader and DetectorBuilder
 //
@@ -29,7 +32,6 @@ using namespace std;
 #include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 
-#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -72,7 +74,6 @@ void StiIstDetectorBuilder::buildDetectors(StMaker & source)
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
 }
-
 //________________________________________________________________________________
 void StiIstDetectorBuilder::useVMCGeometry() {
   cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
