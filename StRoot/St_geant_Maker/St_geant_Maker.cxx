@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.109 2006/09/22 21:27:51 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.110 2006/10/17 19:24:30 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.110  2006/10/17 19:24:30  fisyak
+// Mode initialization after open input fz-file
+//
 // Revision 1.109  2006/09/22 21:27:51  potekhin
 // Added readout of hits for two R&D detectors,
 // GEM and HPD
@@ -608,9 +611,6 @@ Int_t St_geant_Maker::Init(){
     csets  = (Gcsets_t *) geant3->Gcsets();
   }
   TString InputFile(fInputFile);
-  if (mInitialization != "") {
-    Do(mInitialization.Data()); 
-  }
   if (fInputFile != "") {//check that first word contains .fz then add "gfile p" 
     //                                       -"-          .nt then add "user/input user" 
     TObjArray *obj = InputFile.Tokenize(" ");
@@ -634,7 +634,10 @@ Int_t St_geant_Maker::Init(){
       InputFile = "";
     }
   }
-  if (! ifz) Geometry();
+  if (mInitialization != "") {
+    Do(mInitialization.Data()); 
+    Geometry();
+  }
   Do("gclose all");
   Agstroot();
   m_geom_gdat = (St_geom_gdat *) Find(".const/geom/geom_gdat");
