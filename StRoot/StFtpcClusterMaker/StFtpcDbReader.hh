@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.25 2006/03/13 19:26:59 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.26 2006/10/17 19:11:43 fisyak Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.26  2006/10/17 19:11:43  fisyak
+// Add definition of mPadPitch
+//
 // Revision 1.25  2006/03/13 19:26:59  jcs
 // add constructor StFtpcCalibMaker
 //
@@ -197,7 +200,6 @@ protected:
   //SlowSimulator parameters
   Float_t mPadLength;
   Float_t mPadPitch;
-  Float_t mPhiEnd;
 
 private:
 
