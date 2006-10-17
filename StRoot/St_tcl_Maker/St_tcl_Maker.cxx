@@ -1,7 +1,7 @@
-// $Id: St_tcl_Maker.cxx,v 1.75 2006/10/17 19:26:36 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.76 2006/10/17 20:17:18 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
-// Revision 1.75  2006/10/17 19:26:36  fisyak
-// Directly fill StEvent if it exists
+// Revision 1.76  2006/10/17 20:17:18  fisyak
+// remove direct filling of StEvent, StEvent is not ready yet
 //
 // Revision 1.74  2006/08/11 19:42:32  fisyak
 // Comment #include St_XDFFile.h
@@ -94,11 +94,6 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "TH1.h"
 
-#include "StEvent.h"
-#include "StEvent/StTpcHitCollection.h"
-#include "StEvent/StTpcHit.h"
-#include "StThreeVectorF.hh"
-
 ClassImp(St_tcl_Maker)
   
 //_____________________________________________________________________________
@@ -183,9 +178,9 @@ Int_t St_tcl_Maker::InitRun(int runnumber) {
   m_tfs_fsctrl= NULL;
   m_tfs_fsctrl= (St_tfs_fsctrl*) tfspars->Find("tfs_fsctrl");
 
-  if (Debug()) 
-    InitHistograms(); // book histograms
 
+  //		Histograms     
+  InitHistograms(); // book histograms
   return kStOK;
 
 }
@@ -482,29 +477,12 @@ Int_t St_tcl_Maker::Make() {
 	    //            cout << "Global Coordinates: " << global << endl;
 	  }
   }
-  if (Debug()) 
-    MakeHistograms(); // clustering histograms
+  
+//		Histograms     
+  MakeHistograms(); // clustering histograms
+
   gMessMgr->Info() << "Got through St_tcl_Maker OK." << endm;
-  StEvent *mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
-  if (mStEvent && m_Mode == 1) {// directly fill StEvent
-    StTpcHitCollection *mTpcHitColl = new StTpcHitCollection();
-    mStEvent->setTpcHitCollection(mTpcHitColl);
-    Int_t Nhit = tphit->GetNRows();
-    tcl_tphit_st *hit = tphit -> GetTable() ;
-    for ( Int_t i = 0 ; i < Nhit ; i++ , hit++ )	  {
-      StThreeVectorF p(hit->x,hit->y,hit->z);
-      StThreeVectorF e(hit->dx,hit->dy,hit->dz);
-      unsigned int hw = kTpcId;         // detid_tpc
-      hw += (hit->row/100 << 4);   // sector
-      hw += (hit->row%100 << 9);   // row
-      hw += (hit->npads   << 15);  // npads
-      hw += (hit->ntmbk   << 22);  // ntmbks...
-      mTpcHitColl->addHit(new StTpcHit(p,e,hw,hit->q, 0, // = mTrackRefCount
-				       hit->id_simtrk,hit->id_quality, hit->cluster,
-				       hit->minpad,hit->maxpad,hit->mintmbk,hit->maxtmbk));
-    }
-    SafeDelete(tphit);
-  }
+
   return kStOK;
 }
 
@@ -512,7 +490,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.75 2006/10/17 19:26:36 fisyak Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.76 2006/10/17 20:17:18 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
