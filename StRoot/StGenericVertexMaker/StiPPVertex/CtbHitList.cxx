@@ -7,7 +7,6 @@
 #include <StMessMgr.h>
 
 #include <tables/St_g2t_ctf_hit_Table.h>
-#include <St_trg_Maker/St_trg_Maker.h>
 #include <StTriggerData.h>
 
 
@@ -135,7 +134,7 @@ CtbHitList::bin2EtaLeft(int iEta){
 //==========================================================
 //==========================================================
 void   
-CtbHitList::buildFromMC(St_DataSet *gds) {
+CtbHitList::buildFromMC(TDataSet *gds) {
 
   // CTB clibration: 2 MeV==5 ADC
   gMessMgr->Message("","I") <<" CtbHitList::buildFromMC thr/MeV="<<mCtbThres_mev<<endm;

@@ -7,7 +7,6 @@
 //#include <StGlobals.hh>
 
 
-#include "St_trg_Maker/St_trg_Maker.h"
 #include <StTriggerData.h>
 
 // This needs cleanup of the mapping code
