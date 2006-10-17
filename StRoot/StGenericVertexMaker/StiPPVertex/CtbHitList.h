@@ -3,7 +3,7 @@
 
 #include "ScintHitList.h"
 class StTriggerData;
-
+class TDataSet;
 class CtbHitList : public ScintHitList {
  private:
 
@@ -21,7 +21,7 @@ class CtbHitList : public ScintHitList {
   ~CtbHitList();
   void clear();
   void initRun(float fac=1.); 
-  void buildFromMC(St_DataSet *gds);
+  void buildFromMC(TDataSet *gds);
   void buildFromData(StTriggerData *trgD);
   virtual int etaBin(float eta);
   virtual float bin2EtaLeft(int iEta);

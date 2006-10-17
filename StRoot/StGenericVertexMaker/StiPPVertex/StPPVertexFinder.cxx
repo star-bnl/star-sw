@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPPVertexFinder.cxx,v 1.24 2006/07/31 17:57:54 balewski Exp $
+ * $Id: StPPVertexFinder.cxx,v 1.25 2006/10/17 13:38:03 fisyak Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -30,7 +30,6 @@
 #include "Sti/StiKalmanTrackNode.h"
 #include "StiMaker/StiMaker.h"
 #include "Sti/StiTrackContainer.h"
-#include "Sti/StiTrackToTrackMap.h"
 
 #include "St_db_Maker/St_db_Maker.h"
 #include "StIOMaker/StIOMaker.h" //tmp
@@ -1122,6 +1121,9 @@ StPPVertexFinder::matchTrack2Membrane(const StiKalmanTrack* track,TrackData &t){
 /**************************************************************************
  **************************************************************************
  * $Log: StPPVertexFinder.cxx,v $
+ * Revision 1.25  2006/10/17 13:38:03  fisyak
+ * Remove dependencies from dead classes
+ *
  * Revision 1.24  2006/07/31 17:57:54  balewski
  * cleanup before 2006 prod, no changes in algo, CTB stays out all the time
  *
