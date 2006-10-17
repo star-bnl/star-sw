@@ -1,6 +1,9 @@
-// $Id: StiSsdDetectorBuilder.cxx,v 1.25 2006/10/16 20:31:17 fisyak Exp $
+// $Id: StiSsdDetectorBuilder.cxx,v 1.26 2006/10/17 20:18:05 fisyak Exp $
 // 
 // $Log: StiSsdDetectorBuilder.cxx,v $
+// Revision 1.26  2006/10/17 20:18:05  fisyak
+// Add handle when SVTT mother volume is missing
+//
 // Revision 1.25  2006/10/16 20:31:17  fisyak
 // Clean dependencies from Sti useless classes
 //
@@ -68,6 +71,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
 {
     char name[50];  
     int nRows = 1 ;
+    assert(StiVMCToolKit::GetVMC());
     gMessMgr->Info() << "StiSsdDetectorBuilder::buildDetectors() - I - Started "<<endm;
     load(_inputFile, source);
     
@@ -165,7 +169,7 @@ void StiSsdDetectorBuilder::buildDetectors(StMaker & source)
       pLadder->setElossCalculator(siElossCalculator);
       add(layer,ladder-1,pLadder); 
     }
-    if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
+    useVMCGeometry();
 }
 void StiSsdDetectorBuilder::loadDS(TDataSet& ds)
 {
@@ -230,14 +234,22 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
   };
   Int_t NoSsdVols = sizeof(SsdVolumes)/sizeof(VolumeMap_t);
   TString pathT("HALL_1/CAVE_1/SVTT_1/SFMO_1");
+  gGeoManager->RestoreMasterVolume(); 
+  gGeoManager->CdTop();
+  // Check that SVTT_1/SFMO_1 exist
+  if (! gGeoManager->cd(pathT)) {
+    pathT = "HALL_1/CAVE_1/SFMO_1";
+  }
   TString path("");
   for (Int_t i = 0; i < NoSsdVols; i++) {
     gGeoManager->RestoreMasterVolume(); 
     gGeoManager->CdTop();
-    gGeoManager->cd(pathT); path = pathT;
-    TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-    if (! nodeT) continue;;
-    StiVMCToolKit::LoopOverNodes(nodeT, path, SsdVolumes[i].name, MakeAverageVolume);
+    if (gGeoManager->cd(pathT)) {
+      path = pathT;
+      TGeoNode *nodeT = gGeoManager->GetCurrentNode();
+      if (! nodeT) continue;;
+      StiVMCToolKit::LoopOverNodes(nodeT, path, SsdVolumes[i].name, MakeAverageVolume);
+    } else gMessMgr->Info() << "StiSsdDetectorBuilder::useVMCGeometry skip node " << pathT.Data() << endm;
   }
 }
 //________________________________________________________________________________
