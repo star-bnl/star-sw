@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.36 2006/03/13 19:26:58 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.37 2006/10/17 19:11:43 fisyak Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.37  2006/10/17 19:11:43  fisyak
+// Add definition of mPadPitch
+//
 // Revision 1.36  2006/03/13 19:26:58  jcs
 // add constructor StFtpcCalibMaker
 //
@@ -296,6 +299,7 @@ Int_t StFtpcDbReader::FtpcDimensions(St_ftpcDimensions *dimensions)
     mPhiPerSector               = dimensionsTable->phiPerSector;
     mNumberOfPads               = dimensionsTable->numberOfPadsPerSector;
     mPadLength                  = dimensionsTable->padLength;
+    mPadPitch                   = dimensionsTable->padPitch;
     mRadiansPerPad              = dimensionsTable->radiansPerPad;
     mRadiansPerBoundary         = dimensionsTable->radiansPerGap;
     mNumberOfTimebins           = dimensionsTable->numberOfTimebinsPerSector;
