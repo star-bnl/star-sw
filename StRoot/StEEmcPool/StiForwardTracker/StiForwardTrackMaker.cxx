@@ -1,6 +1,6 @@
 // -- Author : Victor Perevoztchikov
 // 
-// $Id: StiForwardTrackMaker.cxx,v 1.8 2006/08/06 23:29:44 perev Exp $
+// $Id: StiForwardTrackMaker.cxx,v 1.9 2006/10/17 18:47:49 fisyak Exp $
 
 #include "TFile.h"
 #include "StMessMgr.h"
@@ -14,7 +14,6 @@
 #include "Sti/StiKalmanTrackNode.h"
 #include "StiMaker/StiMaker.h"
 #include "Sti/StiTrackContainer.h"
-#include "Sti/StiTrackToTrackMap.h"
 
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
@@ -25,7 +24,7 @@
 
 #include "StDetectorId.h"
 #include "StHit.h"
-
+#include "TFile.h"
 #define xG(t)   (t->x_g())
 #define yG(t)   (t->y_g())
 #define zG(t)   (t->z_g())
@@ -412,6 +411,9 @@ StiForwardTrackMaker::addVertex(float z, float ez){
 }
 
 // $Log: StiForwardTrackMaker.cxx,v $
+// Revision 1.9  2006/10/17 18:47:49  fisyak
+// Remove reference to dead classes
+//
 // Revision 1.8  2006/08/06 23:29:44  perev
 // ROOT5 corrs
 //
