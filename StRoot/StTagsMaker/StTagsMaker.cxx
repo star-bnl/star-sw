@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.16 2006/03/24 14:34:50 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.17 2006/10/17 19:18:39 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.17  2006/10/17 19:18:39  fisyak
+// add Check that this chain is BFC one
+//
 // Revision 1.16  2006/03/24 14:34:50  fisyak
 // Remove new TClass(name.Data(),1,StEvtHddr.h,StEvtHddr.h);This new forces to call Notify which cleans up all ROOT interanl pointer and prevent to write into TTRe more than 1 event. This bug found by Victor and Valery
 //
@@ -271,11 +274,14 @@ EDataSetPass StTagsMaker::GetTags (TDataSet* ds)
 //_____________________________________________________________________________
 Int_t StTagsMaker::InitTags() {
   if (!fTree) {
-    TFile *f = ((StBFChain* )GetChain())->GetTFile();
-    if (f) {
-      f->cd();
-      fTree = new TTree("Tag","BFC chain Tags");
-      GetChain()->Pass(GetTags);
+    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    if (chain) {
+      TFile *f = chain->GetTFile();
+      if (f) {
+	f->cd();
+	fTree = new TTree("Tag","BFC chain Tags");
+	GetChain()->Pass(GetTags);
+      }
     }
   }
   return 0;
