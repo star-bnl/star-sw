@@ -191,14 +191,7 @@ Bfc_st BFC2[] = { // ITTF Chains
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 #ifdef __BFC2__
   {"Idst"        ,""  ,"",              "dst,event,compend,EventQA"   ,"","","Turn on DST for ITTF",kFALSE},
-#ifndef __CLEANUP__
-  {"IAna"        ,""  ,"",   
-              "dEdxY2,Kink2,xi2,svtdEdx,CMuDst,analysis","","","Turn on User Maker, dEdx and MuDst",kFALSE},
-
-#else
   {"IAna"    ,""  ,"","dEdxY2,Kink2,xi2,CMuDst,analysis","","","Turn on User Maker, dEdx and MuDst",kFALSE},
-#endif            
-
   {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,l0,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,"","","B2003I,IAna,CtbMatchVtx,Corr2,ppOpt,l3onl,ToF,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
@@ -479,9 +472,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"NoSvtIT"     ,""  ,"","-SvtIT",""                    ,"","ITTF: track with switch off SVT geom",kFALSE},
   {"SvtIT"       ,""  ,"","",""                                    ,"","ITTF: track using SVT geom",kFALSE},
   {"SsdIT"       ,""  ,"","",""                                    ,"","ITTF: track using SSD geom",kFALSE},
-  {"HpdIT"       ,""  ,"","StiPixel",""                            ,"","ITTF: track using Hpd geom",kFALSE}
-  {"PixelIT"     ,""  ,"","StiPixel",""                          ,"","ITTF: track using Pixel geom",kFALSE},
-  {"IstIT"       ,""  ,"","StiPixel",""                            ,"","ITTF: track using Ist geom",kFALSE},
+  {"HpdIT"       ,""  ,"","StiRnD",""                              ,"","ITTF: track using Hpd geom",kFALSE}
+  {"PixelIT"     ,""  ,"","StiRnD",""                            ,"","ITTF: track using Pixel geom",kFALSE},
+  {"IstIT"       ,""  ,"","StiRnD",""                              ,"","ITTF: track using Ist geom",kFALSE},
   {"skip1row"    ,""  ,"","",""                           ,"","ITTF: skip the first pad row in TPC",kFALSE},
 #endif /* __BFC2__ */
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -660,14 +653,8 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   // StEvent,St_global,St_dst_Maker,
 
-#ifndef __CLEANUP__
-  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
-                                                                         "Regular dEdx calculation",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
-#else
   {"dEdx"        ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},   
   {"svtdEdx"     ,"","","",                              "","","WARNING *** Option is OBSOLETE ***",kFALSE},
-#endif
   {"Event",  "","","StEvent,tpcDB,detDb","StEventMaker","StEventMaker","<StEvent creation/filling>",kFALSE},
 #if 0
   {"GenericHit","","","StEvent","StGenericHitMaker","StGenericHitMaker","test GenericHitCollection",kFALSE},
@@ -702,7 +689,7 @@ Bfc_st BFC2[] = { // ITTF Chains
   {"StiUtil"  ,"","","",                              "","StiUtilities","Load StiUtilities library",kFALSE},
   {"Sti"      ,"Sti","","SCL,StEvent,tables,TpcDb,SvtDb,ssdDb,StiUtil","StiMaker",
                                "StEventUtilities,Sti,StiMaker,StiTpc,StiSvt,StiSsd" ,"ITTF tracker",kFALSE},
-  {"StiPixel" ,"","","Sti",                           "","StiPixel", "Load StiPixel shared library",kFALSE},
+  {"StiRnD" ,"","","Sti",                                 "","StiRnD", "Load StiRnD shared library",kFALSE},
   {"StiPulls" ,"","","Sti",                                      "","", "Request to make Sti Pulls",kFALSE},
   {"BeamBack" ,"","","StEvent","StBeamBackMaker","StBeamBackMaker"
                                                               ,"Beam background tracker in the TPC",kFALSE},
