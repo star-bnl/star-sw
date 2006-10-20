@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.5 2004/04/07 17:11:54 perev Exp $
+ * $Id: TDirIter.cxx,v 1.6 2006/10/20 19:08:12 perev Exp $
  *
  ***************************************************************************
  *
@@ -46,7 +46,11 @@ void TDirIter::Reset(const char *path,Int_t maxlev)
       fSele = -2; return;}
     char buf[1024];
     while ( fgets(buf,1024,in) ) {
-      if (*buf == '!') continue;
+      if (*buf == '!') continue;	//commented
+      if (*buf == '#') continue;	//commented
+
+      char *c = strchr(buf,' ');
+      if (c) *c=0;			//blank is the end of file name
       fFull += buf; fFull += ""; }
     fclose(in);}
   else {
