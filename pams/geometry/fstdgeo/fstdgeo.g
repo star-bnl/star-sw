@@ -1,5 +1,10 @@
-* $Id: fstdgeo.g,v 1.9 2005/02/11 20:26:48 nieuwhzs Exp $
+* $Id: fstdgeo.g,v 1.10 2006/10/20 19:15:18 potekhin Exp $
 * $Log: fstdgeo.g,v $
+* Revision 1.10  2006/10/20 19:15:18  potekhin
+* Added the 'MANY' option to the positioning (necessary due
+* to overlaps in the upgrade geometries) and made the mother
+* volume visible (to aid in resolution of same)
+*
 * Revision 1.9  2005/02/11 20:26:48  nieuwhzs
 * Moved the silicon sensors to their proper positions, i.e. flush with the
 * front faces of the hybrids.
@@ -147,12 +152,11 @@ Module FSTDGEO is the geometry of the forward silicon tracker pixel detector
       depth =(FSTG_Zmax-FSTG_Zmin)
 
       Create   FSMO
-      Position FSMO in CAVE z=+center
-*      Position FSMO in CAVE z=-center ThetaZ=180
+      Position FSMO in CAVE z=+center in CAVE kOnly='MANY'
 * -----------------------------------------------------------------------------
 Block FSMO is the mother of one endcap of FSTD
       Material  Air
-      Attribute FSMO  Seen=0  colo=6
+      Attribute FSMO  Seen=1  colo=6
 
       Shape     TUBE Rmin=FSTG_Rmin _
                      Rmax=FSTG_Rmax _
