@@ -68,13 +68,19 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	  //                             ladder    module           side    
 	  //        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
 	  cout <<"retrieve detector"<<endl;
-	  int ladder=hit->volumeId()/1000000;
+	  /*int ladder=hit->volumeId()/1000000;
 	  int layer = 1;
 	  if (ladder > 11) layer = 2;
-	  if (ladder > 30) layer = 3;
-	  int wafer=(hit->volumeId()/10000)%100;
-	  int side=((hit->volumeId()/100)%100);
+	  if (ladder > 30) layer = 3;*/
+	  int layer=hit->layer();
+	  int ladder=hit->ladder();
+	  int wafer=hit->wafer();
+	  int side=hit->extraByte0();
+	  cout<<"hit vol id: "<<hit->volumeId()<<endl;
+	  cout<<"hit layer/ladder/wafer/side: "<< layer << "/" << ladder<<"/"<<wafer<<"/"<<side<<endl;
+	  cout<<"passed: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
 	  StiDetector* detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
+	  //     StiDetector* detector=_detector->getDetector(2*ladder-3+side,0);
 	  if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
 	  assert(detector);
 	  cout <<"add hit to detector:\t"<<detector->getName()<<endl;
@@ -84,7 +90,7 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	  stiHit->reset();
 	  stiHit->setGlobal(detector, hit, hit->position().x(),hit->position().y(),hit->position().z(),hit->charge());
 	  _hitContainer->add( stiHit );
-	}
+	  }
     }
     
     cout << "StiIstHitLoader::loadHits(StEvent*) -I- Done" << endl;

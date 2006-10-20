@@ -1,11 +1,8 @@
-// $Id: StiIstDetectorBuilder.cxx,v 1.10 2006/10/17 19:32:05 fisyak Exp $
+// $Id: StiIstDetectorBuilder.cxx,v 1.11 2006/10/20 18:43:12 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.cxx,v $
-// Revision 1.10  2006/10/17 19:32:05  fisyak
-// Remove reference to dead Sti/Base/Messenger.h class
-//
-// Revision 1.9  2006/10/13 18:36:43  mmiller
-// Committing Willie's changes to make perfect hits in IST work for UPGR02 geometry using VMC geometry in HitLoader and DetectorBuilder
+// Revision 1.11  2006/10/20 18:43:12  wleight
+// Changes to make perfect hits in the IST work with UPGR05
 //
 // Revision 1.23  2006/06/28 18:51:46  fisyak
 // Add loading of tracking and hit error parameters from DB
@@ -27,11 +24,13 @@
 
 #include <stdio.h>
 #include <map>
+#include <exception>
 using namespace std;
 #include <stdexcept>
 #include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 
+//#include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -74,6 +73,7 @@ void StiIstDetectorBuilder::buildDetectors(StMaker & source)
     setNRows(nRows);
     if (StiVMCToolKit::GetVMC()) {useVMCGeometry();}
 }
+
 //________________________________________________________________________________
 void StiIstDetectorBuilder::useVMCGeometry() {
   cout << "StiIstDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
@@ -123,18 +123,18 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   TString nameP(nodeP->GetName());
   nameP.ReplaceAll("HALL_1/CAVE_1/","");
   TString temp=nameP;
-  temp.ReplaceAll("/IBMO_1/IBA","");
+  temp.ReplaceAll("/IBMO_1/IBMY","");
   int q=temp.Index("_");
+  temp.Replace(0,q+1,"");
+  TString num0=temp(0,1);
+  int layer=num0.Atoi();
+  q=temp.Index("_");
   temp.Replace(0,q+1,"");
   TString num1=temp(0,2);
   if(!num1.IsDigit()) num1=temp(0,1);
   int ladder=num1.Atoi();
-  int layer = 1;
-  if (ladder > 11) layer = 2;
-  if (ladder > 30) layer = 3;
-  Int_t nWafers = 7;
-  if (layer == 2) nWafers = 10;
-  if (layer == 3) nWafers = 13;
+  int nWafers=10;
+  if(layer==2) nWafers=13;
   q=temp.Index("_");
   temp.Replace(0,q+1,"");
   TString num2=temp(0,2);
@@ -250,8 +250,10 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector = getDetectorFactory()->getInstance();
   pDetector->setName(nameP.Data());
   pDetector->setIsOn(false);
-  if(side==1) pDetector->setIsActive(new StiIstIsActiveFunctor);
-  else pDetector->setIsActive(new StiNeverActiveFunctor);
+  if(side==1)
+    pDetector->setIsActive(new StiIstIsActiveFunctor);
+  else 
+    pDetector->setIsActive(new StiNeverActiveFunctor);
   pDetector->setIsContinuousMedium(false);
   pDetector->setIsDiscreteScatterer(true);
   pDetector->setShape(sh);
@@ -260,6 +262,10 @@ void StiIstDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP) {
   pDetector->setMaterial(matS);
   pDetector->setElossCalculator(ElossCalculator);
   pDetector->setHitErrorCalculator(&_hitCalculator);
-  add(2*(layer-1)+side-1,ladder,pDetector);
+  //  add(2*(layer-1)+side-1,wafer-1,pDetector);
+  add(2*(layer-1)+side-1,ladder,pDetector);  
+  //add(2*ladder-3+side,0,pDetector);
+  cout<<"layer/ladder/wafer/side "<< layer << "/" << ladder << "/" << wafer << "/" << side << endl;
+  cout<<"the numbers defining this volume are 2*(layer-1)+side-1: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
 }
 

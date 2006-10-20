@@ -1,8 +1,8 @@
-// $Id: StiIstDetectorBuilder.h,v 1.2 2006/10/13 18:36:43 mmiller Exp $
+// $Id: StiIstDetectorBuilder.h,v 1.3 2006/10/20 18:43:12 wleight Exp $
 // 
 // $Log: StiIstDetectorBuilder.h,v $
-// Revision 1.2  2006/10/13 18:36:43  mmiller
-// Committing Willie's changes to make perfect hits in IST work for UPGR02 geometry using VMC geometry in HitLoader and DetectorBuilder
+// Revision 1.3  2006/10/20 18:43:12  wleight
+// Changes to make perfect hits in the IST work with UPGR05
 //
 // Revision 1.10  2006/06/28 18:51:46  fisyak
 // Add loading of tracking and hit error parameters from DB
