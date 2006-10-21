@@ -1,6 +1,11 @@
 *
-* $Id: pixlgeo3.g,v 1.1 2006/10/02 21:37:38 potekhin Exp $
+* $Id: pixlgeo3.g,v 1.2 2006/10/21 18:09:57 potekhin Exp $
 * $Log: pixlgeo3.g,v $
+* Revision 1.2  2006/10/21 18:09:57  potekhin
+* Decreased the radius of the "active" part of the detector as per
+* Jim's instructions, employed the 'ONLY' version to insure we don't
+* lose hits in case there is intersection with other volumes.
+*
 * Revision 1.1  2006/10/02 21:37:38  potekhin
 * An updated version of the HFT geometry
 *
@@ -27,8 +32,8 @@ Module PIXLGEO3 is the the STAR pixel detector and beam pipe support
 *
    Fill PIXG                   ! Pixel detector data
       Ladder     =  1          ! ladder index
-      Rin        =  2.4       ! Inner radius
-      Rout       =  8.95       ! Outer radius
+      Rin        =  2.4        ! Inner radius
+      Rout       =  8.3        ! Outer radius
       TotalLength=  20.0       ! Overal length of the detector
 *
       LadderWidth=  2.00       ! Ladder Width
@@ -135,14 +140,14 @@ Module PIXLGEO3 is the the STAR pixel detector and beam pipe support
 
       write(*,*) '=======  Constructing the Pixel Detector with Beam Pipe Support ========'
       Create   PXMO
-      Position PXMO in CAVE   Konly='MANY'
+      Position PXMO in CAVE   Konly='ONLY'
 
       Create   PXBX
       Position PXBX in CAVE
 * -----------------------------------------------------------------------------
 Block PXMO is the mother of the pixel detector volumes
       Material  Air
-      Attribute PXMO  Seen=0  colo=6
+      Attribute PXMO  Seen=1  colo=6
 
       Shape TUBE Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0
 
@@ -158,7 +163,7 @@ endblock
 * -----------------------------------------------------------------------------
 Block PXBX is the exoskeleton of the beampipe
       Material  Berillium
-      Attribute PXBX  Seen=1  colo=1
+      Attribute PXBX  Seen=1  colo=3
 
       Shape TUBE Rmin=PXBG_Rin Rmax=PXBG_Rin+PXBG_Thk Dz=PXBG_Length/2.0
 EndBlock
