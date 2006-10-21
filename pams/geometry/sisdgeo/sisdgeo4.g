@@ -1,5 +1,9 @@
-* $Id: sisdgeo4.g,v 1.1 2006/10/20 19:17:00 potekhin Exp $
+* $Id: sisdgeo4.g,v 1.2 2006/10/21 18:18:27 potekhin Exp $
 * $Log: sisdgeo4.g,v $
+* Revision 1.2  2006/10/21 18:18:27  potekhin
+* Add "ONLY" option, to not lose hits in possible
+* clash with the periphery of the FST
+*
 * Revision 1.1  2006/10/20 19:17:00  potekhin
 * The improved code by Lilian contained minor inaccuracies: the
 * support structure was protruding out of the mother volume.
@@ -416,7 +420,7 @@ Module  SISDGEO4  is the Silicon Strip Detector
          Create and Position SFMO in SVTT
       else
          write(*,*) '*** Positioining the Silicon Strip Detector in CAVE'
-         Create and Position SFMO in CAVE kOnly='MANY'
+         Create and Position SFMO in CAVE kOnly='ONLY'
       endif
 *******************************************************************************
 *
