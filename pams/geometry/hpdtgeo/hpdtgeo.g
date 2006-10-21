@@ -1,6 +1,9 @@
 ***************************************************************************
-* $Id: hpdtgeo.g,v 1.2 2006/10/11 17:52:05 potekhin Exp $
+* $Id: hpdtgeo.g,v 1.3 2006/10/21 18:38:03 potekhin Exp $
 * $Log: hpdtgeo.g,v $
+* Revision 1.3  2006/10/21 18:38:03  potekhin
+* Added a small safety margin on Rin, used 'ONLY' option to keep hits
+*
 * Revision 1.2  2006/10/11 17:52:05  potekhin
 * Corrected the angular offset, 60 instead of 70
 *
@@ -32,7 +35,7 @@ Module HPDTGEO is the geometry of the STAR pixel detector
 * -----------------------------------------------------------------------------
 *
    Fill YPXG                   ! Pixel detector data
-      Rin        =  8.6        ! Inner radius in x or y 
+      Rin        =  8.61       ! Inner radius in x or y 
       Rout       =  11.        ! Outer radius in x or y 
       TotalLength=  49.5       ! Overal length of the detector z direction
       AcLength   =  28.288     ! Active length of the detector z direction
@@ -73,12 +76,12 @@ Module HPDTGEO is the geometry of the STAR pixel detector
       anglesep= 360/YPXG_numberladder 
       
       Create   YPXM  ! create the object for the position in the cave for the detector
-      Position YPXM in CAVE Konly='MANY'
+      Position YPXM in CAVE Konly='ONLY'
 
 * -----------------------------------------------------------------------------
 Block YPXM is the mother of the pixel detector volumes  !!define each object
       Material  Air
-      Attribute YPXM  Seen=1  colo=6
+      Attribute YPXM  Seen=1  colo=2
 
       Shape TUBE Rmin=YPXG_Rin Rmax=YPXG_Rout Dz=YPXG_TotalLength/2.0
 
