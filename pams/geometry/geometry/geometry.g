@@ -1,7 +1,10 @@
-* $Id: geometry.g,v 1.130 2006/10/14 19:42:44 potekhin Exp $
+* $Id: geometry.g,v 1.131 2006/10/21 18:14:21 potekhin Exp $
 * $Log: geometry.g,v $
-* Revision 1.130  2006/10/14 19:42:44  potekhin
-* Switch to a Correct version of ISTB in the tag UPGR05
+* Revision 1.131  2006/10/21 18:14:21  potekhin
+* a) Added steering for the TUP support structure
+* b) optionally change the radius of the FSTD (to better fit with
+* the rest of TUP
+* c) using a more precise version of SSD code in UPGR05
 *
 * Revision 1.129  2006/10/09 16:19:17  potekhin
 * Due to the ongoing SSD studies, we need to refine the 2005 tag,
@@ -602,7 +605,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad,mutd,igtd,hpdt
+              shld,quad,mutd,igtd,hpdt,itsp
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -727,7 +730,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt,itsp} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -2379,7 +2382,7 @@ If LL>1
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 35;
+                     SisdConfig = 45;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
                    pixl=on;        " put the pixel detector in"
@@ -2394,13 +2397,15 @@ If LL>1
                    gemb=off;  
                    GembConfig=0;
 * Forward STAR tracker disk
-                   fstd=off;  "new pixel based forward tracker"
-                   FstdConfig=0;
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
 * Forward STAR tracker disk
                    fgtd=off;  "GEM forward tracker"
                    FgtdConfig=0;
-* the forward GEM disks
+* Forward GEM disks in this tag
                    igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
@@ -2560,6 +2565,7 @@ If LL>1
    dcay={210,210,0.1,0.01}
    If LL>1 { call AgDETP new ('Trac'); call AgDETP add ('TracDCAY',dcay,4) }
 
+
    write(*,*) '****** ATTENTION ACHTUNG ATTENZIONE VNIMANIE UVAGA WEI ******'
    write(*,*) '******* THESE FLAGS ARE USED TO GENERATE THE GEOMETRY *******'
    write(*,*) '                 BtofConfig: ',BtofConfig
@@ -2677,6 +2683,8 @@ If LL>1
             call sisdgeo2
          elseif (sisd_level.eq.3) then
             call sisdgeo3
+         elseif (sisd_level.eq.4) then
+            call sisdgeo4
          else ! Unimplemented level
             write(*,*) '******************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ******************'
             if (IPRIN==0) stop 'You better stop here to avoid problems'     
@@ -2822,11 +2830,21 @@ If LL>1
 
 
    if (gemb.and.GembConfig>0)  Call gembgeo
-   if (fstd.and.FstdConfig>0)  Call fstdgeo
+
+   if (fstd.and.FstdConfig>0)  then
+      if(FstdConfig==2) then
+         call AgDETP new ('FSTD')
+         call AgDETP add ('fstg.Rmax=',22.3,1)
+      endif
+        Call fstdgeo
+   endif
+
    if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
    if (igtd)                   Call igtdgeo
 
    if (hpdt.and.HpdtConfig>0)  Call hpdtgeo
+
+   if (itsp)                   Call itspgeo
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
