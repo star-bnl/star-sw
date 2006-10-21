@@ -1,5 +1,8 @@
-* $Id: istbgeo2.g,v 1.2 2006/10/16 17:19:12 potekhin Exp $
+* $Id: istbgeo2.g,v 1.3 2006/10/21 18:08:13 potekhin Exp $
 * $Log: istbgeo2.g,v $
+* Revision 1.3  2006/10/21 18:08:13  potekhin
+* Updated simensions form Gerrit
+*
 * Revision 1.2  2006/10/16 17:19:12  potekhin
 * Corrected the wrong version of the ISRR
 * structure being used (needs to be based on the
@@ -48,14 +51,14 @@ Module ISTBGEO2 is the geometry of the Inner Silicon Tracker
 * -------------------------------------------------------
    Fill ISMG                   ! Mother volume whole detector
       Layer      =  1          ! version
-      Rin        =  11.00      ! Inner radius
+      Rin        =  11.10      ! Inner radius
       Rout       =  18.00      ! Outer radius
-      TotalLength=  56.00      ! Overal length of the detector
+      TotalLength=  54.50      ! Overal length of the detector
    EndFill
 
    Fill ISMG                   ! Mother volume inner layer
       Layer      =  2          ! version
-      Rin        =  11.00      ! Inner radius
+      Rin        =  11.10      ! Inner radius
       Rout       =  14.00      ! Outer radius
       TotalLength=  44.00      ! Overal length of the layer
    EndFill
@@ -64,7 +67,7 @@ Module ISTBGEO2 is the geometry of the Inner Silicon Tracker
       Layer      =  3          ! version
       Rin        =  15.00      ! Inner radius
       Rout       =  18.00      ! Outer radius
-      TotalLength=  56.00      ! Overal length of the layer
+      TotalLength=  54.50      ! Overal length of the layer
    EndFill
 
 *--------------------------------------------------------
@@ -167,7 +170,7 @@ Module ISTBGEO2 is the geometry of the Inner Silicon Tracker
 
    Fill ISRR                   ! Support ring for layer 2
       Layer      =  2          ! Layer  
-      Rin        =  11.00      ! Inner radius
+      Rin        =  11.10      ! Inner radius
       Rout       =  14.00      ! Outer radius
       Length     =   2.00      ! Thickness of the ring
    EndFill
@@ -176,7 +179,7 @@ Module ISTBGEO2 is the geometry of the Inner Silicon Tracker
       Layer      =  3          ! Layer  
       Rin        =  15.00      ! Inner radius
       Rout       =  18.00      ! Outer radius
-      Length     =   2.00      ! Thickness of the ring
+      Length     =   1.25      ! Thickness of the ring
    EndFill
 * -------------------------------------------------------
    Fill ISCC                   ! Interconnect between support rings 2 and 3
@@ -202,10 +205,12 @@ Module ISTBGEO2 is the geometry of the Inner Silicon Tracker
 
       Create   IBMO
       Position IBMO in CAVE
+
+      write (*,*) 'ISTB mother - IBMO - created'
 * -------------------------------------------------------
 Block IBMO is the mother of the ISTB detector
       Material  Air
-      Attribute IBMO  Seen=0  colo=2
+      Attribute IBMO  Seen=1  colo=1
 
       Shape TUBE Rmin = ISMG_Rin             _
                  Rmax = ISMG_Rout            _
@@ -250,14 +255,14 @@ endblock
 * -------------------------------------------------------
 Block IBMY is the mother of the inner IST layer
      Material  Air
-     Attribute IBMY  Seen=0  colo=2 serial=istLayer
+     Attribute IBMY  Seen=0  colo=6 serial=istLayer
 
      Shape TUBE Rmin = ISMG_Rin             _
                 Rmax = ISMG_Rout            _
                 Dz   = ISMG_TotalLength/2.0
 
 
-     write(*,*) '===>GEOINFO/istbgeo: Creating IST layer', ISBG_Layer
+     write(*,*) '===>GEOINFO/istbgeo: Creating IST layer', ISBG_Layer,' Rin=',ISMG_Rin,' Rout=',ISMG_Rout
      do nl=1,ISBG_nLadder ! inner loop over ladders (which consist of sensors)
 
         angle = (360.0/ISBG_nLadder)*nl  ! Base tilt, to be further corrected
