@@ -1,5 +1,9 @@
-* $Id: igtdgeo.g,v 1.3 2006/10/06 23:07:02 potekhin Exp $
+* $Id: igtdgeo.g,v 1.4 2006/10/21 18:16:35 potekhin Exp $
 * $Log: igtdgeo.g,v $
+* Revision 1.4  2006/10/21 18:16:35  potekhin
+* Add 'MANY' option to ensure correct material
+* taken into account when working with the new support structure
+*
 * Revision 1.3  2006/10/06 23:07:02  potekhin
 * An extraneous Denstity=1.7 in one of the G10
 * references caused and extr material to be created,
@@ -132,12 +136,12 @@ Module IGTDGEO is the geometry of the inner GEM tracking detector
       center = IGTG_Zstart + length / 2.0
 
       Create   IGMO
-      Position IGMO in CAVE z=+center
+      Position IGMO in CAVE z=+center kOnly='MANY'
 
 * -----------------------------------------------------------------------------
 Block IGMO is the mother volume for the IGTD
       Material  Air
-      Attribute IGMO  Seen=0  colo=6
+      Attribute IGMO  Seen=1  colo=6
 
       Shape     TUBE Rmin=rmn Rmax=rmx Dz=length/2.0
 
