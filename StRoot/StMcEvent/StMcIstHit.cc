@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcIstHit.cc,v 2.6 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcIstHit.cc,v 2.7 2006/10/23 21:13:46 calderon Exp $
  * $Log: StMcIstHit.cc,v $
+ * Revision 2.7  2006/10/23 21:13:46  calderon
+ * Updates to layer(), wafer() and side() methods from Willie L.
+ *
  * Revision 2.6  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -34,10 +37,11 @@
  **************************************************************************/
 #include "StThreeVectorF.hh"
 
+
 #include "StMcIstHit.hh"
 #include "tables/St_g2t_ist_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.6 2005/11/22 21:44:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcIstHit.cc,v 2.7 2006/10/23 21:13:46 calderon Exp $";
 #ifdef POOL
 StMemoryPool StMcIstHit::mPool(sizeof(StMcIstHit));
 #endif
@@ -72,46 +76,24 @@ ostream&  operator<<(ostream& os, const StMcIstHit& h)
 unsigned long
 StMcIstHit::layer() const
 {    
-  unsigned long iModule = mVolumeId/1000000;
-  unsigned long iLayer = 0;
-  if (0 < iModule && iModule <=11)
-    {
-      iLayer = 1;
-    }
-  else if (iModule <=30)
-    {
-      iLayer = 2;
-    }
-  else if (iModule <=57)
-    {
-      iLayer = 3;
-    }
+  unsigned long iLayer = mVolumeId/1000000;
+  unsigned long layer;
+  if(iLayer<4) layer=iLayer-1;
   else 
     {
       cout << "StMcIstHit::layer() -E- volumeId not known!" << endl;
-      iLayer = 10000; 
+      layer = 10000; 
     }
   
-  return iLayer;
+  return layer;
 }
 
 unsigned long
 StMcIstHit::ladder() const
 {
-  unsigned long iModule = mVolumeId/1000000;
+  unsigned long iModule = (mVolumeId%1000000)/10000;
   unsigned long iLadder = 0;
-  if (0 < iModule && iModule <=11)
-    {
-      iLadder = iModule;
-    }
-  else if (iModule <=30)
-    {
-      iLadder = iModule - 11;
-    }
-  else if (iModule <=57)
-    {
-      iLadder = iModule - 30;
-    }
+  if(iModule<=27) iLadder=iModule;
   else 
     {
       cout << "StMcIstHit::ladder() -E- volumeId not known!" << endl;
