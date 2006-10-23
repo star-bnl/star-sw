@@ -1,6 +1,10 @@
 *
-* $Id: pixlgeo3.g,v 1.2 2006/10/21 18:09:57 potekhin Exp $
+* $Id: pixlgeo3.g,v 1.3 2006/10/23 00:10:03 potekhin Exp $
 * $Log: pixlgeo3.g,v $
+* Revision 1.3  2006/10/23 00:10:03  potekhin
+* The opening angle of the sector needs to be increased (one ladder
+* was sticking outside.
+*
 * Revision 1.2  2006/10/21 18:09:57  potekhin
 * Decreased the radius of the "active" part of the detector as per
 * Jim's instructions, employed the 'ONLY' version to insure we don't
@@ -171,7 +175,7 @@ EndBlock
 Block PSEC is a group of ladders
       Material  Air
       Attribute PSEC   Seen=1  colo=5
-      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-11.0 Phi2=118.0
+      Shape TUBS  Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0 Phi1=-11.0 Phi2=122.0
 
 
        do nLadder=1,11 ! Inner loop, create ladders inside the sector
