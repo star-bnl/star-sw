@@ -13,7 +13,7 @@ StChain *chain=0;
 int rdMu2spinTest( char* Rrun    ="R6172038",
 		   Int_t nFiles  = 20,
 		   char* inDir   = "./lis/",
-		   int nEve=10)
+		   int nEve=500)
 {
 
     #define  USE_DB  
@@ -27,9 +27,15 @@ int rdMu2spinTest( char* Rrun    ="R6172038",
   TString fileL=Rrun; fileL+=".lis";
   int runNo=atoi(Rrun+1);
 
-  // tmp
-  //  inDir   = "/star/data05/scratch/balewski/2005-muDst/173/";
-  //fileL="st_physics_6173021_raw_2020006.MuDst.root";
+  // tmp : 2006
+   inDir   = "/star/data05/scratch/balewski/2006-prod-muDst/7097090/";
+   fileL="st_physics_7097090_raw_1010001.MuDst.root";
+
+  // tmp : 2005
+  // inDir   = "/star/data05/scratch/balewski/2005-prod-muDst/6174052/";
+  // fileL="st_physics_6174068_raw_2030018.MuDst.root";
+ 
+
   // runNo=999; Rrun="R999";
 
 #ifdef USE_DB

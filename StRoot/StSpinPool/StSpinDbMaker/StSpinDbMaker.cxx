@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StSpinDbMaker.cxx,v 1.10 2006/01/05 18:21:24 balewski Exp $
+// $Id: StSpinDbMaker.cxx,v 1.11 2006/10/24 20:19:37 balewski Exp $
  
 
 #include <time.h>
@@ -157,9 +157,9 @@ void  StSpinDbMaker::optimizeTables  (){
     int spin4 =-1;
     if( (yNib==nibZ && bNib==nibZ) ||  (yNib==nibE && bNib==nibE) )
       spin4=0;
-    else if ( yNib==nibE && bNib==nibP )  spin4=1;
+    else if ( yNib==nibE && bNib==nibP )  spin4=4;
     else if ( yNib==nibE && bNib==nibN )  spin4=2;
-    else if ( yNib==nibP && bNib==nibE )  spin4=4;
+    else if ( yNib==nibP && bNib==nibE )  spin4=1;
     else if ( yNib==nibP && bNib==nibP )  spin4=5;
     else if ( yNib==nibN && bNib==nibP )  spin4=6;
     else if ( yNib==nibN && bNib==nibE )  spin4=8;
@@ -324,15 +324,6 @@ StSpinDbMaker::isBXfilledUsingBX48(int bx48){
   return  ((spin8bits[bx] & 0x11)==0x11);
 }
 
-//--------------------------------------------------
-//--------------------------------------------------
-int
-StSpinDbMaker::BXstarUsingBX48(int bx48){
-  LOG_WARN << GetName()<<"::BXstarUsingBX48() is deprecaited, use BXyellow.. instead,JB"<<endm;
-  return BXyellowUsingBX48(bx48);
-}
-
-
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -367,13 +358,6 @@ StSpinDbMaker::offsetBX48minusBX7(int bx48, int bx7){
   if(diff<0) diff+=SPINDbMaxBXings;
   return diff;
 }
-//--------------------------------------------------
-//--------------------------------------------------
-bool
-StSpinDbMaker::isBXfilledUsingBXstar(int bxStar){
-  LOG_WARN << GetName()<<"::isBXfilledUsingBXyellow() is deprecaited, use BXyellow.. instead,JB"<<endm;
-  return isBXfilledUsingBXyellow(bxStar);
-}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -384,13 +368,6 @@ StSpinDbMaker::isBXfilledUsingBXyellow(int bxStar){
    return  ((spin8bits[bxStar] & 0x11)==0x11);
 }
 
-//--------------------------------------------------
-//--------------------------------------------------
-bool
-StSpinDbMaker::isBXmaskedUsingBXstar(int bxStar){
-  LOG_WARN << GetName()<<"::isBXmaskedUsingBXyellow() is deprecaited, use BXyellow.. instead,JB"<<endm;
-  return isBXmaskedUsingBXyellow(bxStar);
-}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -436,15 +413,6 @@ int
 StSpinDbMaker::BX7offset(){
   if(!isValid()) return -1;
   return mTabSpinStar->bXoff7;
-}
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-int
-StSpinDbMaker::BXstarUsingBX7(int bx7){
- LOG_WARN << GetName()<<"::BXstarUsingBX7() is deprecaited, use BXyellow.. instead,JB"<<endm;
-  return BXyellowUsingBX7(bx7);
 }
 
 
@@ -574,6 +542,9 @@ StSpinDbMaker::auxilairyVariables(){
 
 
 // $Log: StSpinDbMaker.cxx,v $
+// Revision 1.11  2006/10/24 20:19:37  balewski
+// cleanup: - spin4 for abort gaps, drop STARbXing
+//
 // Revision 1.10  2006/01/05 18:21:24  balewski
 // added get: cadPollPatt, nFillBunch
 // changed BXstar --> BXyellow
