@@ -1,4 +1,4 @@
-// $Id: StSpinDbMaker.h,v 1.5 2006/06/08 00:37:02 balewski Exp $
+// $Id: StSpinDbMaker.h,v 1.6 2006/10/24 20:19:37 balewski Exp $
 
 /*! \class StSpinDbMaker 
 \author Jan Balewski
@@ -24,7 +24,7 @@ class StSpinDbMaker : public StMaker {
   spinDbStar_st   *mTabSpinStar;
   spinDbBXmask_st *mTabSpinBXmask;
 
-  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.5 2006/06/08 00:37:02 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StSpinDbMaker.h,v 1.6 2006/10/24 20:19:37 balewski Exp $";
 
   void clearTables(); /// clear local lookup tables
   void requestDataBase(); /// reads tables from STAR-DB
@@ -56,7 +56,6 @@ class StSpinDbMaker : public StMaker {
 
   int   spin8usingBX48(int bx48); /// 8bit spin information
   int   spin4usingBX48(int bx48); /// 4bit spin information
-  int   BXstarUsingBX48(int bx48); /// depreciated, will go away in Feb'06
   int   BXyellowUsingBX48(int bx48); /// bXing at STAR IP, [0,119]
 
   int   BX48offset(); /// STAR==yellow bXing=(bx48+48off)%120
@@ -65,7 +64,6 @@ class StSpinDbMaker : public StMaker {
 
   int   spin8usingBX7(int bx7); /// 8bit spin information
   int   spin4usingBX7(int bx7); /// 4bit spin information
-  int   BXstarUsingBX7(int bx7); ///  depreciated, will go away in Feb'06
   int   BXyellowUsingBX7(int bx7); /// bXing at STAR IP, [0,119]
   int   BX7offset(); /// STAR==yellow bXing=(bx7+7off)%120
   bool  isBXfilledUsingBX7(int bx7);
@@ -73,9 +71,7 @@ class StSpinDbMaker : public StMaker {
   int   offsetBX48minusBX7(int bx48, int bx7); ///should be zero for every run
   bool  isBXfilledUsingBXyellow(int bxStar);
   bool  isBXmaskedUsingBXyellow(int bxStar);
-  bool  isBXfilledUsingBXstar(int bxStar);/// depreciated, will go away in Feb'06
-  bool  isBXmaskedUsingBXstar(int bxStar);/// depreciated, will go away in Feb'06
-
+  //BXstarUsingBX7() is deprecaited, use BXyellow.. instead,JB
   int   numberOfFilledBunchesBlue() { return numberOfFilledBunches(blueRing); }
 
   int   numberOfFilledBunchesYellow(){ return numberOfFilledBunches(yellRing);}
@@ -93,7 +89,7 @@ class StSpinDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.5 2006/06/08 00:37:02 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSpinDbMaker.h,v 1.6 2006/10/24 20:19:37 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -104,6 +100,9 @@ class StSpinDbMaker : public StMaker {
 #endif
 
 // $Log: StSpinDbMaker.h,v $
+// Revision 1.6  2006/10/24 20:19:37  balewski
+// cleanup: - spin4 for abort gaps, drop STARbXing
+//
 // Revision 1.5  2006/06/08 00:37:02  balewski
 // wrong  ifdef was used
 //
