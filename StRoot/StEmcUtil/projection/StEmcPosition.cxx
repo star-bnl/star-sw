@@ -21,6 +21,9 @@
 #include "StEventTypes.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
+//StMuDstMaker:
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+
 ClassImp(StEmcPosition)
 
 //------------------------------------------------------------------------------
@@ -34,6 +37,59 @@ StEmcPosition::StEmcPosition():TObject()
 //------------------------------------------------------------------------------
 StEmcPosition::~StEmcPosition()
 {
+}
+//------------------------------------------------------------------------------
+Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
+								StMuTrack* track, double magField, double radius, int option)
+{
+    StThreeVectorD Zero(0,0,0);
+    *atFinal=Zero;
+    *momentumAtFinal=Zero;
+	
+    /* this was for StTrack
+		const StThreeVectorF& origin = track->geometry()->origin();
+	const StThreeVectorF& momentum = track->geometry()->momentum();
+	double charge = track->geometry()->charge();
+	StPhysicalHelixD helix(momentum, origin, magField*tesla, charge);
+    */
+    StPhysicalHelixD helix = track->outerHelix();
+    const StThreeVectorF momentum = track->momentum();
+    pairD pathLength = helix.pathLength(radius);
+    double charge = track->charge();
+	
+    double s,s1,s2; 
+    s=0;
+    s1 = pathLength.first;
+    s2 = pathLength.second;
+	
+    Bool_t goProj;
+    goProj = kFALSE;
+	
+    if (finite(s1) == 0 && finite(s2) == 0) { return kFALSE;} // Track couldn't be projected!
+	
+    if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
+					  // first point of track. The smaller solution is taken when both are positive
+	{
+	    if (s1 >= 0 && s2 >= 0) {s = s1; goProj = kTRUE; }
+	    if (s1 >= 0 && s2 < 0) { s = s1; goProj = kTRUE; }
+	    if (s1 < 0 && s2 >= 0) { s = s2; goProj = kTRUE; }
+	}
+	
+    if (option == -1) // Selects negative path lenght to project track backwards along its helix relative to
+					  // first point of track. The smaller absolute solution is taken when both are negative 
+	{
+	    if (s1 <= 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
+	    if (s1 <= 0 && s2 > 0) { s = s1; goProj = kTRUE; }
+	    if (s1 > 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
+	}
+	
+    if (goProj) 
+	{
+	    *atFinal = helix.at( s );
+	    *momentumAtFinal = helix.momentumAt( s, magField*tesla );
+	    if (charge == 0) *momentumAtFinal = momentum;
+	}
+    return goProj;
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
@@ -174,6 +230,41 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
     if (charge == 0) *momentumAtFinal = momentum;
   }
   return goProj;
+}
+//------------------------------------------------------------------------------
+Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum, StMuTrack* track, double magField, double emcRadius )
+{  
+    // There's no check for primary or secondary tracks
+	
+    /* this was for StTrack
+	if (!track->geometry()) return kFALSE;  
+	const StThreeVectorD& origin = track->geometry()->origin();
+    */
+    StPhysicalHelixD helix = track->outerHelix();
+    const StThreeVectorD& origin = helix.origin();
+	
+    
+    float xO = origin.x();
+    float yO = origin.y();
+    float distToOrigin = ::sqrt( ::pow(xO, 2) + ::pow(yO, 2) );    
+    if ( distToOrigin < emcRadius )
+	{
+		//		LOG_DEBUG << "inside emcRadius" << endm;
+	    Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
+	    if ( projTrackOk )  
+		{
+			//			LOG_DEBUG << "projTrackOk==1" << endm;
+		    int m = 0, e = 0, s = 0;
+		    float phi = position->phi();
+		    float eta = position->pseudoRapidity();
+			//			LOG_DEBUG << "eta,phi = "<<eta<<","<<phi<<endm;
+			//			LOG_DEBUG << mGeom[0]->getBin(phi, eta, m, e, s) << endm;
+			//			LOG_DEBUG <<"m:e:s = "<<m<<":"<<e<<":"<<s<<endm;
+		    if ( mGeom[0]->getBin(phi, eta, m, e, s) == 0  && s != -1 ) return kTRUE;      
+		}
+	} 
+	
+    return kFALSE;
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* momentum,
@@ -384,6 +475,20 @@ StThreeVectorF StEmcPosition::getPosFromVertex( StVertex* vertex,Int_t TowerId )
   return PositionFromVertex;
 }
 //------------------------------------------------------------------------------
+StThreeVectorF StEmcPosition::getPosFromVertex( const StThreeVectorF& position,int TowerId )
+{
+    StThreeVectorF Zero(0,0,0);
+    if(TowerId<1 || TowerId>4800) return Zero;
+	
+    float xTower,yTower,zTower;
+    //StThreeVectorF position = vertex->position(); //modified to work with StMuDst instead of StEvent
+    mGeom[0]->getXYZ(TowerId, xTower, yTower, zTower);
+    StThreeVectorF towerPosition(xTower, yTower, zTower);
+    StThreeVectorF PositionFromVertex = towerPosition - position;
+	
+    return PositionFromVertex;
+}
+//------------------------------------------------------------------------------
 StThreeVectorF StEmcPosition::getPosFromVertex( StMcVertex* vertex,Int_t TowerId )
 {
   StThreeVectorF Zero(0,0,0);
@@ -404,6 +509,12 @@ Float_t StEmcPosition::getThetaFromVertex( StVertex* vertex,Int_t TowerId )
   return p.theta();
 }
 //------------------------------------------------------------------------------
+Float_t StEmcPosition::getThetaFromVertex( const StThreeVectorF& vertex,int TowerId )
+{
+    StThreeVectorF p=getPosFromVertex(vertex,TowerId );
+    return p.theta();
+}
+//------------------------------------------------------------------------------
 Float_t StEmcPosition::getThetaFromVertex( StMcVertex* vertex,Int_t TowerId )
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
@@ -416,6 +527,12 @@ Float_t StEmcPosition::getEtaFromVertex( StVertex* vertex,Int_t TowerId )
   return p.pseudoRapidity();
 }
 //------------------------------------------------------------------------------
+Float_t StEmcPosition::getEtaFromVertex( const StThreeVectorF& vertex,int TowerId )
+{
+    StThreeVectorF p=getPosFromVertex(vertex,TowerId );
+    return p.pseudoRapidity();
+}
+//------------------------------------------------------------------------------
 Float_t StEmcPosition::getEtaFromVertex( StMcVertex* vertex,Int_t TowerId )
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
@@ -426,6 +543,12 @@ Float_t StEmcPosition::getPhiFromVertex( StVertex* vertex,Int_t TowerId )
 {
   StThreeVectorF p=getPosFromVertex(vertex,TowerId );
   return p.phi();
+}
+//------------------------------------------------------------------------------
+Float_t StEmcPosition::getPhiFromVertex( const StThreeVectorF& vertex,int TowerId )
+{
+    StThreeVectorF p=getPosFromVertex(vertex,TowerId );
+    return p.phi();
 }
 //------------------------------------------------------------------------------
 Float_t StEmcPosition::getPhiFromVertex( StMcVertex* vertex,Int_t TowerId )
