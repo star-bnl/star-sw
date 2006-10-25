@@ -1,5 +1,5 @@
 # $Name:  $
-# $Id: Makefile,v 1.1.1.1 2004/01/12 23:49:36 potekhin Exp $
+# $Id: Makefile,v 1.2 2006/10/25 00:57:03 jeromel Exp $
 ######################################################################
 .SILENT:
 .SUFFIXES:
@@ -63,6 +63,11 @@ lib:	 $(WRK_DIR)/libstarsim.a
 $(WRK_DIR)/libstarsim.a:  $(atlsim_OBJ) 
 	 ar -ruc $(WRK_DIR)/libstarsim.a  $(atlsim_OBJ) 
 
+#
+# WARNING: 
+#  -Wl,-Bstatic may not work under gcc 4
+#  There may be a need to switchon CXX_VERSION (and gcc)
+#
 exe:    $(WRK_DIR)/atlsim.exe 
 $(WRK_DIR)/atlsim.exe:  $(WRK_DIR)/libstarsim.a 
 	gcc -w -g -O2 -export-dynamic -rdynamic \
