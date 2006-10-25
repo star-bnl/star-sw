@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.90 2006/08/17 17:01:30 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.91 2006/10/25 00:31:54 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -297,83 +297,6 @@
 	$SOFLAGS       = "-shared -u*";
         $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
         $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-    } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/ || $STAR_HOST_SYS =~ /^sl/) {
-        #
-        # Case linux
-        #
-      $CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-      $CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
-#      print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
-        $CXX_VERSION  = `$CXX -dumpversion`;
-        chomp($CXX_VERSION);
-      ($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;#  print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n"; 
-        $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
-	my $optflags = "";
-        if ($CXX_VERSION < 3) {
-	  $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
-	}
-      else {
-            # ansi works only with gcc3.2 actually ... may be removed later ...
-	$CXXFLAGS    .= " -ansi";
-      }
-
-      if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } # -fpermissive ?
-      #	  else {
-      #	  print "CXXFLAGS = $CXXFLAGS\n"; die;
-      #	}
-      $CXXFLAGS    .= " -Wno-long-long"; 
-	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-	  $DEBUG = "-O -g";
-	  $FDEBUG = "-O -g";
-	  if ($CXX_VERSION < 3){
-	    $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
-	  } else {
-	    # this na1ming convention starts at gcc 3.2 which happens to
-	    # have a change in the options
-	    $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
-	  }
-	  print "set DEBUG = $DEBUG\n" unless ($param::quiet);
-	}
-	if ($optflags) {
-	  $CFLAGS   .= " " . $optflags;
-	  $CXXFLAGS .= " " . $optflags;
-	  $G77FLAGS .= " " . $optflags;
-	}
-        $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
-        $SOFLAGS   = "-shared -Wl,-Bdynamic";
-#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
-#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
-#        $SOFLAGS   = "-shared -Wl,--no-define-common";
-
-	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
-	$CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
-
-        $THREAD    = "-lpthread";
-        $CRYPTLIBS = "-lcrypt";
-        $SYSLIBS   = "-lm -ldl -rdynamic";
-
-        if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
-            print "Use INSURE++\n";
-            $CC  = "insure -g -Zoi \"compiler_c gcc\"";
-            $CPP = "gcc -E -P";
-            $CXX = "insure -g -Zoi \"compiler_cpp g++\"";
-            $LD  = $CXX;
-            $SO  = $CXX;
-	    $F77LD         = $LD;
-        }
-        if ($PGI) {
-	  $FC    = "pgf77";
-	  $FFLAGS = "";
-	  $FEXTEND = "-Mextend";
-	}
-	else {
-	  $FC = $G77;
-	  $FFLAGS = $G77FLAGS;
-	  $FEXTEND = $G77EXTEND;
-#	  $FCCOM  = $FCviaAGETOFCOM;
-	}
-        $F77LIBS = " -lg2c -lnsl";
-        $FLIBS .= $F77LIBS;
 
 
     } elsif (/^alpha_dux/) {
@@ -473,6 +396,106 @@
             $SO  = $CXX;
 	    $F77LD         = $LD;
         }
+
+	# ATTENTION 
+	# - Below is a generic gcc support
+	# - Any platform specific support needs to appear prior to this
+    } elsif ($STAR_HOST_SYS =~ /^i386_/ || 
+	     $STAR_HOST_SYS =~ /^rh/    || 
+	     $STAR_HOST_SYS =~ /^sl/    ||
+	     $STAR_HOST_SYS =~ /gcc/    ) { 
+        #
+        # Case linux
+        #
+	$CERNLIB_FPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+	$CERNLIB_CPPFLAGS .= " -DCERNLIB_LINUX  -DCERNLIB_BLDLIB -DCERNLIB_CZ -DCERNLIB_QMGLIBC";
+#       print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
+        $CXX_VERSION  = `$CXX -dumpversion`;
+        chomp($CXX_VERSION);
+	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;#  print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n"; 
+        $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
+	my $optflags = "";
+
+        if ($CXX_VERSION < 3) {
+	    $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
+	} else {
+            # ansi works only with gcc3.2 actually ... may be removed later ...
+	    $CXXFLAGS    .= " -ansi";
+	}
+
+	if ($CXX_MAJOR == 3 and $CXX_MINOR < 4) {$CXXFLAGS    .= " -pedantic"; } # -fpermissive ?
+	#	  else {
+	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
+	#	}
+
+	$CXXFLAGS    .= " -Wno-long-long"; 
+	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
+	  $DEBUG = "-O -g";
+	  $FDEBUG = "-O -g";
+	  if ($CXX_VERSION < 3){
+	    $optflags = "-malign-loops=2 -malign-jumps=2 -malign-functions=2";
+	  } else {
+	    # this na1ming convention starts at gcc 3.2 which happens to
+	    # have a change in the options
+	    $optflags = "-falign-loops=2 -falign-jumps=2 -falign-functions=2";
+	  }
+	  print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	}
+	if ($optflags) {
+	  $CFLAGS   .= " " . $optflags;
+	  $CXXFLAGS .= " " . $optflags;
+	  $G77FLAGS .= " " . $optflags;
+	}
+        $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
+        $SOFLAGS   = "-shared -Wl,-Bdynamic";
+#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
+#        $SOFLAGS   = "-shared -Wl,-Bdynamic -rdynamic -Wl,--export-dynamic";#-Wl,--export-dynamic
+#        $SOFLAGS   = "-shared -Wl,--no-define-common";
+
+	$XLIBS     = "-L/usr/X11R6/$LLIB -lXpm -lX11";
+
+        $THREAD    = "-lpthread";
+        $CRYPTLIBS = "-lcrypt";
+
+	if ($CXX_VERSION >= 4){
+	    # Either a version 4 issue but made thisfor Mac
+	    $SYSLIBS   = "-lm -ldl -dynamiclib -single_module ";
+	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -dynamiclib -single_module ";
+	} else {
+	    $SYSLIBS   = "-lm -ldl -rdynamic";
+	    $CLIBS    .= " -L/usr/X11R6/$LLIB -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
+	}
+	# print "*** $CXX_VERSION $SYSLIBS\n";
+
+        if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
+            print "Use INSURE++\n";
+            $CC  = "insure -g -Zoi \"compiler_c gcc\"";
+            $CPP = "gcc -E -P";
+            $CXX = "insure -g -Zoi \"compiler_cpp g++\"";
+            $LD  = $CXX;
+            $SO  = $CXX;
+	    $F77LD         = $LD;
+        }
+
+        if ($PGI) {
+	  $FC    = "pgf77";
+	  $FFLAGS = "";
+	  $FEXTEND = "-Mextend";
+
+	} else {
+	  $FC      = $G77;
+	  $FFLAGS  = $G77FLAGS;
+	  $FEXTEND = $G77EXTEND;
+	}
+	if ($CXX_VERSION >= 4){
+	    # Same coment, not sure if V4 or a Mac issue
+	    $F77LIBS = " -lg2c";
+	} else {
+	    $F77LIBS = " -lg2c -lnsl";
+	}
+        $FLIBS  .= $F77LIBS;
+
+
     } else {
       die "Unsupported platform $STAR_HOST_SYS\n";
     }
@@ -608,6 +631,7 @@
 		  'CCCOM'         =>
 		  '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
 		  'CXX'            => $CXX,
+	          'CXX_VERSION'    => $CXX_VERSION,
 		  'CXXFLAGS'       => $CXXFLAGS,
 		  'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
 		  'CXXCOM'         => $CXXCOM,
