@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.91 2006/10/25 00:31:54 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.92 2006/10/25 00:37:04 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -80,7 +80,7 @@
     }
     if ($#List >= 0) {
       $ROOTCFLAGS = " " . join ' ', @List;
-    } 
+    }
 # print "ROOTCFLAGS = $ROOTCFLAGS\n";
 # die;
     $SRPDIR   = $ROOTSYS . "/lib";
@@ -397,13 +397,13 @@
 	    $F77LD         = $LD;
         }
 
-	# ATTENTION 
+	# ATTENTION
 	# - Below is a generic gcc support
 	# - Any platform specific support needs to appear prior to this
-    } elsif ($STAR_HOST_SYS =~ /^i386_/ || 
-	     $STAR_HOST_SYS =~ /^rh/    || 
+    } elsif ($STAR_HOST_SYS =~ /^i386_/ ||
+	     $STAR_HOST_SYS =~ /^rh/    ||
 	     $STAR_HOST_SYS =~ /^sl/    ||
-	     $STAR_HOST_SYS =~ /gcc/    ) { 
+	     $STAR_HOST_SYS =~ /gcc/    ) {
         #
         # Case linux
         #
@@ -412,7 +412,7 @@
 #       print "CERNLIB_FPPFLAGS = $CERNLIB_FPPFLAGS\n";
         $CXX_VERSION  = `$CXX -dumpversion`;
         chomp($CXX_VERSION);
-	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;#  print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n"; 
+	($CXX_MAJOR,$CXX_MINOR) = split '\.', $CXX_VERSION;#  print "CXX_VERSION : $CXX_VERSION MAJOR = $CXX_MAJOR MINOR = $CXX_MINOR\n";
         $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";
 	my $optflags = "";
 
@@ -428,7 +428,7 @@
 	#	  print "CXXFLAGS = $CXXFLAGS\n"; die;
 	#	}
 
-	$CXXFLAGS    .= " -Wno-long-long"; 
+	$CXXFLAGS    .= " -Wno-long-long";
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
 	  $DEBUG = "-O -g";
 	  $FDEBUG = "-O -g";
@@ -556,7 +556,7 @@
 	if (-r "/usr/$LLIB/libcrypto.a"   ) {$MYSQLLIB .= " -lcrypto";}
 	$MYSQLLIB .= " -lz";
     }
-    print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n" 
+    print "Use MYSQLINCDIR = $MYSQLINCDIR MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n"
  if $MYSQLLIBDIR && ! $param::quiet;
     # QT
     if ( defined($QTDIR) && -d $QTDIR) {
