@@ -105,28 +105,17 @@ void runEEmcA2EMaker( Int_t nevents = 50,
   //--
   mEEanalysis=new StEEmcA2EMaker("AandE");
   mEEanalysis->database("eemcDb");          // sets db connection
-//mEEanalysis->source("MuDst",1);           // sets mudst as input
-//mEEanalysis->threshold(3.0,0);            // tower threshold
-//mEEanalysis->threshold(3.0,1);            // pre1 threshold 
-//mEEanalysis->threshold(3.0,2);            // pre2 threshold
-//mEEanalysis->threshold(3.0,3);            // post threshold
-//mEEanalysis->threshold(4,5.0);            // smdu threshold
-//mEEanalysis->threshold(5,5.0);            // smdv threshold
+  mEEanalysis->source("MuDst",1);           // sets mudst as input
+//mEEanalysis->source("StEvent",2);         // sets StEvent as input
+//mEEanalysis->threshold(3.0,0);            // tower threshold, adc > 3.0*sigma + ped 
+//mEEanalysis->threshold(3.0,1);            // pre1 threshold, adc > 3.0*sigma + ped 
+//mEEanalysis->threshold(3.0,2);            // pre2 threshold, adc > 3.0*sigma + ped 
+//mEEanalysis->threshold(3.0,3);            // post threshold, adc > 3.0*sigma + ped 
+//mEEanalysis->threshold(3.0,4);            // smdu threshold, adc > 3.0*sigma + ped 
+//mEEanalysis->threshold(3.0,5);            // smdv threshold, adc > 3.0*sigma + ped 
 #ifdef MONTE_CARLO
   mEEanalysis->scale(1.2);                  // scale energies by x1.2
 #endif 
-
-   
-  //--
-  //-- Some simple QA histograms
-  //--
-  StEEmcQAMaker *eemcQA=new StEEmcQAMaker("eeqa");
-  eemcQA->analysis("AandE");
-  eemcQA->mudst("MuDst");
-//eemcQA->trigger(96261);      // add specified trigger to list  
-  eemcQA->nVertexMin=0;        // cut on min number of verticies
-  eemcQA->nVertexMax=999;      // cut on max number of verticies
-
 
   mChain->ls(3);
   mChain->Init();
