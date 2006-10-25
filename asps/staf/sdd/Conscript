@@ -20,13 +20,19 @@ if ($env->{ENV}->{STAR_SYS} =~ /i386/) {
   $LEX = "flex";
   $LEXLIB = "-lfl";
 }
+
+my $CXX_VERSION= $env->{CXX_VERSION};
+
 $CPPPATH = "#" . $Dir . "/src" .  $main::PATH_SEPARATOR . $ObjDir . "/src";
 my $LD        = $env->{LD}; #!
 if ($LD eq 'g++') {
   $LD = "gcc";
 }
 my $LDFLAGS   = $env->{LDFLAGS};
-if ($LD eq 'gcc' and $STAR_SYS !~ /^sl4/) {$LDFLAGS = "-Wl,-Bstatic";}
+# if ($LD eq 'gcc' and $STAR_SYS !~ /^sl4/) {$LDFLAGS = "-Wl,-Bstatic";}
+if ($LD eq 'gcc' and $CXX_VERSION < 4) {
+    $LDFLAGS = "-Wl,-Bstatic";
+}
 
 $env2 = $env->clone('CPPPATH'      => $CPPPATH, 
 		    'LD'           => $LD,
