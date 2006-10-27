@@ -40,7 +40,7 @@ void GeomDrawUsage() {
           printf("   if you want to print the image to the paper\n");
           printf("---------------\n"); 
           
-          printf("\n$Id: GeomDraw.C,v 1.8 2004/08/09 17:43:43 fine Exp $\n");
+          printf("\n$Id: GeomDraw.C,v 1.9 2006/10/27 16:48:54 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomDraw(const char *fzFile="complete",Float_t bombFactor=1.4, const char *out = "")
@@ -65,19 +65,19 @@ void GeomDraw(const char *fzFile="complete",Float_t bombFactor=1.4, const char *
    }
    
   // Workaroung of STAR bug with ROOT 4.00.04
-  TString unixLDPath = "$ROOT/$ROOT_LEVEL.qt/.$STAR_HOST_SYS/rootdeb/lib:";
-  unixLDPath += gEnv->GetValue("Root.DynamicPath","");
-  gEnv->SetValue("Root.DynamicPath",unixLDPath.Data());
-  gSystem->Load("$ROOT/$ROOT_LEVEL.qt/.$STAR_HOST_SYS/rootdeb/lib/libRQTGL.so");
-  // end of workaroung
+  //- TString unixLDPath = "$ROOT/$ROOT_LEVEL.qt/.$STAR_HOST_SYS/rootdeb/lib:";
+  //-  unixLDPath += gEnv->GetValue("Root.DynamicPath","");
+  //- gEnv->SetValue("Root.DynamicPath",unixLDPath.Data());
+  //- gSystem->Load("$ROOT/$ROOT_LEVEL.qt/.$STAR_HOST_SYS/rootdeb/lib/libRQTGL.so");
+  //- end of workaroung
   
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("St_g2t.so");
-  gSystem->Load("St_geant_Maker");
+  gSystem->Load("StarMagField");
+  gSystem->Load("St_geant_Maker");  
   gSystem->Load("StUtilities");
-
   chain = new StChain(); 
   geant = new St_geant_Maker();
   geant->SetActive(kFALSE);
