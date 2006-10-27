@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.12 2006/10/02 22:26:51 prindle Exp $
+ * $Id: StEStructSupport.cxx,v 1.13 2006/10/27 00:05:32 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -239,6 +239,11 @@ TH1** StEStructSupport::buildCommonRFunctions(const char* name){
 }
 
 //---------------------------------------------------------
+// Note that I (djp) modified the analysis code so that we only fill the -+
+// histograms for identified, different particles. So we get it for
+// pi-K+ as an example but not for unidentified particles (as in mode 1
+// and mode 3) where we don't know what the particle types are.
+// That might affect the utility of this routine.
 TH1** StEStructSupport::buildCommon(const char* name, int opt){
 
   /* builds hist types = ++,+-,-+,-- */
@@ -260,7 +265,11 @@ TH1** StEStructSupport::buildCommon(const char* name, int opt){
   }
 
 // normalize by integral
-  for(int i=0;i<8;i++)hlocal[i]->Scale(1.0/hlocal[i]->Integral());
+  for(int i=0;i<8;i++) {
+      if (0 != hlocal[i]->Integral()) {
+          hlocal[i]->Scale(1.0/hlocal[i]->Integral());
+      }
+  }
 
 // if requested, scale bg to require correlations>=0 where statistics are large
 
@@ -530,7 +539,13 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
   if(mnpairs){
     for(int i=0;i<8;i++) hlocal[i]->Scale(1.0/mnpairs[i]);
   } else {
-     for(int i=0;i<8;i++) hlocal[i]->Scale(1.0/hlocal[i]->Integral());
+     // Exclude 2 and 6 since for some cases those integrals are 0.
+     for(int i=0;i<8;i++) {
+         if (2 == i  ||  6 == i) {
+             continue;
+         }
+         hlocal[i]->Scale(1.0/hlocal[i]->Integral());
+     }
   }
 
 
@@ -563,7 +578,7 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
       retVal[i]->Divide(hlocal[i+4]);  // delta-rho/rho_mix
     } else if(opt>=2){                 // delta-rho/sqrt(rho_mix)
       TH1 *tmp;
-      if (ilim<2) {
+      if (ilim<3) {                    // had ilim<2 here. I'm not sure whats happening here, but I think that was wrong.
         tmp = getSqrt(hlocal[i+4]);
       } else {
         tmp = getSqrt(hlocal[i+5]);
@@ -944,13 +959,11 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
- * Revision 1.12  2006/10/02 22:26:51  prindle
- * Hadd now symmetrizes histograms while adding them, so output is usable
- * in Support as before. Need to load library for Correlation so we know
- * how many bins there are.
- * Added  alternative versions of methods to calculate Delta\sigma^2.
- * Important for pt correlations where we need proper normalization before
- * subtracting mixed reference.
+ * Revision 1.13  2006/10/27 00:05:32  prindle
+ * Modified buildChargeTypes to handle case where the -+ histogram is
+ * empty. Also tried making buildCommonTypes work, but there one of the
+ * output histograms was intended to be -+ and most of the time that
+ * will be empty.
  *
  * Revision 1.11  2006/04/26 18:52:12  dkettler
  *
