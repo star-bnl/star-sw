@@ -715,15 +715,36 @@ void StEStructSigmas::PHistograms() {
     }
 
     int mBin, oBin;
+    int nBad = 0;
+
+    // Currently working with `small' event samples and calculating \hat{p_t}
+    // for small bins of peripheral events is problematic. Since we are dealing
+    // with Hijing I try using an inclusive \hat{p_t}
+    // Maybe bad for data where mean p_t may depend on detector location.
+
+    
+    int iBinFS = (int) (hnBins->GetBinContent(mNPhiBins,mNEtaBins)+hoffset->GetBinContent(mNPhiBins,mNEtaBins));
+    double nScaleSum  = (double) (hNSum[0]->GetBinContent(iBinFS) + hNSum[1]->GetBinContent(iBinFS));
+    double nScaleBins = (double) hTotEvents[0]->GetBinContent(iBinFS);
+    double nplus  = (double) hNSum[0]->GetBinContent(iBinFS);
+    double nminus = (double) hNSum[1]->GetBinContent(iBinFS);
+    double pplus  = (double) hPSum[1]->GetBinContent(iBinFS);
+    double pminus = (double) hPSum[2]->GetBinContent(iBinFS);
+    double psq    = (double) hPSum[0]->GetBinContent(iBinFS);
+    double psig   = (double) hPSum[17]->GetBinContent(iBinFS);
+    double nsig   = (double) hPSum[16]->GetBinContent(iBinFS);
+    double psigsq = (double) hPSum[18]->GetBinContent(iBinFS);
+    double nsum = nplus + nminus;
+    double psum = pplus + pminus;
 
     for (int iPhi=1;iPhi<=mNPhiBins;iPhi++) {
         for (int iEta=1;iEta<=mNEtaBins;iEta++) {
             double NS[16], ND[2],  NP[5],  NM[5],  NC[8];
             double PS[21], PD[16], PP[11], PM[11], PC[17];
 
-            double pHat[3], pHat2[3], pHatSig2;
-            double sigSq0, sigSq1, sigSq2, sigHat, DsigHat, sigHatSig2;
-            double Ss[] = {0, 0, 0, 0}, nSs = 0, DSs = 0, nDSs = 0, hSs = 0, hDSs = 0;
+            double pHat[3], pHat2[3], pHatSig2, sigHatSig2;
+            double sigSq0, sigSq1, sigSq2, sigHat, DsigHat;
+            double Ss[] = {0, 0, 0, 0}, nSs = 0, nS1 = 0, nS3 = 0, DSs = 0, nDSs = 0, hSs = 0, hDSs = 0;
             double Sd[] = {0, 0, 0}, nSd = 0, DSd = 0, nDSd = 0;
             double Sp[] = {0, 0, 0}, nSp = 0, DSp = 0, nDSp = 0, hSp = 0, hDSp = 0;
             double Sm[] = {0, 0, 0}, nSm = 0, DSm = 0, nDSm = 0, hSm = 0, hDSm = 0;
@@ -741,6 +762,7 @@ void StEStructSigmas::PHistograms() {
             int iEtaBin = 0, iPhiBin = 1;
             int nEtaBin = getNumEtaBins(iEta);
             float phi1, phi2, eta1, eta2;
+            double nTracksTotal = 0, nBinsTotal = 0;
             for (int iBin=oBin+1;iBin<=oBin+mBin;iBin++) {
                 iEtaBin++;
                 if (iEtaBin > nEtaBin) {
@@ -755,58 +777,70 @@ void StEStructSigmas::PHistograms() {
                 sumEvents = hTotEvents[1]->GetBinContent(iBin);
                 sig2Events = hTotEvents[5]->GetBinContent(iBin);
                 if (sumEvents > 0) {
-                    if (sig2Events > 0) {
-                        NS[15] = hNSum[15]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[9]  = hPSum[9]->GetBinContent(iBin)  * sumEvents / sig2Events;
-                        PS[10] = hPSum[10]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[11] = hPSum[11]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[16] = hPSum[16]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[17] = hPSum[17]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[18] = hPSum[18]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[19] = hPSum[19]->GetBinContent(iBin) * sumEvents / sig2Events;
-                        PS[20] = hPSum[20]->GetBinContent(iBin) * sumEvents / sig2Events;
-                    }
                     for (int jStat=0;jStat<16;jStat++) {
-                        NS[jStat] = hNSum[jStat]->GetBinContent(iBin) / sumEvents;
+                        NS[jStat] = hNSum[jStat]->GetBinContent(iBin);
                     }
                     for (int jStat=0;jStat<2;jStat++) {
-                        ND[jStat] = hNDiff[jStat]->GetBinContent(iBin) / sumEvents;
+                        ND[jStat] = hNDiff[jStat]->GetBinContent(iBin);
                     }
                     for (int jStat=0;jStat<21;jStat++) {
-                        PS[jStat] = hPSum[jStat]->GetBinContent(iBin) / sumEvents;
+                        PS[jStat] = hPSum[jStat]->GetBinContent(iBin);
                     }
                     for (int jStat=0;jStat<16;jStat++) {
-                        PD[jStat] = hPDiff[jStat]->GetBinContent(iBin) / sumEvents;
+                        PD[jStat] = hPDiff[jStat]->GetBinContent(iBin);
                     }
                     double NSumSig2 = PS[16];
-                    double NSum = NS[0] + NS[1];
-                    double PSum = PS[1] + PS[2];
+                    double NPlus  = NS[0];
+                    double PPlus  = PS[1];
+                    double NMinus = NS[1];
+                    double PMinus = PS[2];
+                    double NSum   = NPlus + NMinus;
+                    double PSum   = PPlus + PMinus;
+                    double PSig   = PS[17];
+                    double NSig   = PS[16];
+                    nTracksTotal += NSum;
+                    nBinsTotal   += totEvents;
                     if (NSum > 0) {
-                        pHat[0]  = PSum / NSum;
-                        pHat2[0] = pHat[0]*pHat[0];
-                        if (NS[0] > 0) {
-                            pHat[1]  = PS[1] / NS[0];
-                        } else {
-                            pHat[1] = 0;
-                        }
-                        pHat2[1] = pHat[1]*pHat[1];
-                        if (NS[1] > 0) {
-                            pHat[2]  = PS[2] / NS[1];
-                        } else {
-                            pHat[2] = 0;
-                        }
-                        pHat2[2] = pHat[2]*pHat[2];
+                        // Lower case values are for largest bin at this centrality.
+                        // Upper case are for the current bin.
+                        if (nsum > 0) {
+//                            pHat[0]  = PSum / NSum;
+                            pHat[0]  = psum / nsum;
+                            pHat2[0] = pHat[0]*pHat[0];
+                            if (nplus > 0) {
+//                                pHat[1]  = PPlus / NPlus;
+                                pHat[1]  = pplus / nplus;
+                            } else {
+                                pHat[1] = 0;
+                            }
+                            pHat2[1] = pHat[1]*pHat[1];
+                            if (nminus > 0) {
+//                                pHat[2]  = PMinus / NMinus;
+                                pHat[2]  = pminus / nminus;
+                            } else {
+                                pHat[2] = 0;
+                            }
+                            pHat2[2] = pHat[2]*pHat[2];
+                            // Using all tracks for this centrality in calculating \sigma^2_{\hat{p_t}}
+                            // is fine when we sum over all bins.
+                            sigHat   = psq/nsum - (psum/nsum)*(psum/nsum);
 
-                        if (PS[16] > 0) {
-                            pHatSig2  = PS[17] / PS[16];
-                            sigHatSig2 = PS[18]/NSumSig2 - pHatSig2*pHatSig2;
-                        } else {
-                            pHatSig2 = 0;
-                            sigHatSig2 = 0;
+//                            if (NSig > 0) {
+//                                pHatSig2   = PSig / NSig;
+//                            } else {
+//                                pHatSig2 = 0;
+//                            }
+                            if (nsig > 0) {
+                                pHatSig2   = psig / nsig;
+                                sigHatSig2 = psigsq / nsig - (psig/nsig)*(psig/nsig);
+                            } else {
+                                pHatSig2 = 0;
+                                sigHatSig2 = 0;
+                            }
                         }
+
 
                         hatSs   += pHat[0];
-                        sigHat   = PS[0]/NSum - pHat[0]*pHat[0];
                         hSs     += sigHat;
                         DsigHat  = 4*pHat2[0]*sigHat / (NSum*sumEvents);
                         hDSs    += DsigHat;
@@ -815,8 +849,15 @@ void StEStructSigmas::PHistograms() {
                         Ss[0]   += sigSq0 - sigHat;
                         sigSq1   = PS[5] - 2*pHat[1]*PS[3] - 2*pHat[2]*PS[4]
                                      + pHat2[1]*NS[2] + 2*pHat[1]*pHat[2]*NS[3] + pHat2[2]*NS[4];
-                        Ss[1]   += sigSq1/NSum - sigHat;
-// Doing some tests for Jamie to alleive his concernes over nu_dynamical calculation.
+                        // Create \Delta^\sigma^2 / \bar n to compare with <dpt dpt>
+                        if (NSum > 1) {
+                            Ss[1]   += sigSq1/NSum - sigHat;
+//                            Ss[1]   += (sigSq1/NSum - sigHat) / (NSum/totEvents);
+                            nS1    += 1;
+                        } else {
+                            nBad += 1;
+                        }
+// Doing some tests for Jamie to alleive his concerns over nu_dynamical calculation.
 // My original comparison in 2004 was reasonable, but in comparing to to EbyE
 // energy dependence paper I should have used their newer definition, which
 // here I am calling 2005.
@@ -824,10 +865,13 @@ void StEStructSigmas::PHistograms() {
                             sigSq2   = PS[11] - 2*pHatSig2*PS[10] + pHatSig2*pHatSig2*PS[9];
                             Ss[2]   += (NSumSig2 -1)* (sigSq2 - sigHatSig2*NS[15]);
                         }
-                        if (NSumSig2 > 0) {  // Here is calculation with 2005 reference.
+                        if (NSumSig2 > 1) {  // Here is calculation with 2005 reference.
+                            // Create <dpt dpt> histograms with or without \bar{n} normalization.
+                            // Choose global or local pHat when calculating pHatSig2 above.
                             sigSq2   = PS[11] - 2*pHatSig2*PS[10] + pHatSig2*pHatSig2*PS[9];
-                            Ss[3]   += (NSumSig2 -1)*(sigSq2 - 
-                                       (PS[19] -2*pHatSig2*PS[20] + pHatSig2*pHatSig2*NS[15]));
+//                            Ss[3]   += (NSum/totEvents)*(sigSq2 - (PS[19] -2*pHatSig2*PS[20] + pHatSig2*pHatSig2*NS[15]))/sig2Events;
+                            Ss[3]   += (sigSq2 - (PS[19] -2*pHatSig2*PS[20] + pHatSig2*pHatSig2*NS[15]))/sig2Events;
+                            nS3 += 1;
                         }
                         nSs     += 1;
                         bTuple.type     = 6;
@@ -1050,13 +1094,18 @@ void StEStructSigmas::PHistograms() {
 
             if (nSs > 0) {
                 PSig[0]->SetBinContent(iPhi,iEta,Ss[0]/nSs);
-                PSig[1]->SetBinContent(iPhi,iEta,Ss[1]/nSs);
-                PSig[2]->SetBinContent(iPhi,iEta,Ss[2]/nSs);
-                PSig[3]->SetBinContent(iPhi,iEta,Ss[3]/nSs);
                 PSigErrors->SetBinContent(iPhi,iEta,sqrt(DSs)/nDSs);
                 SPtHat->SetBinContent(iPhi,iEta,hatSs/nSs);
                 sigSPtHat->SetBinContent(iPhi,iEta,hSs/nSs);
                 sigSPtHatErrors->SetBinContent(iPhi,iEta,sqrt(hDSs)/nDSs);
+            }
+            if (nS1 > 0) {
+                PSig[1]->SetBinContent(iPhi,iEta,Ss[1]/nS1);
+//                PSig[1]->SetBinContent(iPhi,iEta,(Ss[1]/nS1)*1.0/(nTracksTotal/nBinsTotal));
+            }
+            if (nS3 > 0) {
+                PSig[2]->SetBinContent(iPhi,iEta,Ss[2]/nSs);
+                PSig[3]->SetBinContent(iPhi,iEta,Ss[3]/nS3);
             }
             if (nSd > 0) {
                 PDel[0]->SetBinContent(iPhi,iEta,Sd[0]/nSd);
@@ -1197,7 +1246,7 @@ void StEStructSigmas::PNHistograms() {
     for (int iPhi=1;iPhi<=mNPhiBins;iPhi++) {
         for (int iEta=1;iEta<=mNEtaBins;iEta++) {
             double NS[16], ND[2],  NP[5],  NM[5],  NC[8];
-            double PS[16], PD[16], PP[11], PM[11], PC[17];
+            double PS[21], PD[16], PP[11], PM[11], PC[17];
 
             double sigSq0, sigSq1, sigSq2, pHat[3];
             double Ss[] = {0, 0, 0}, nSs = 0;
