@@ -40,7 +40,7 @@ void GeomDrawUsage() {
           printf("   if you want to print the image to the paper\n");
           printf("---------------\n"); 
           
-          printf("\n$Id: GeomDraw.C,v 1.9 2006/10/27 16:48:54 fine Exp $\n");
+          printf("\n$Id: GeomDraw.C,v 1.10 2006/10/27 21:33:33 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomDraw(const char *fzFile="complete",Float_t bombFactor=1.4, const char *out = "")
@@ -118,7 +118,7 @@ void GeomDraw(const char *fzFile="complete",Float_t bombFactor=1.4, const char *
        outFile.Close();      
     }   
   } else {
-     fprintf(stderr,"\n\n, ** Error **, No suitable STAR geonmetry has been found. Abort !!! \n");   
+     fprintf(stderr,"\n\n, ** Error **, No suitable STAR geometry has been found. Abort !!! \n");   
   }
 //  delete chain; chain = 0;
 }
