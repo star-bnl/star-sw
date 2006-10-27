@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
-// $Id: SetQtEnv.C,v 1.1 2006/10/27 20:31:02 fine Exp $
+// $Id: SetQtEnv.C,v 1.2 2006/10/27 20:51:12 fine Exp $
 // This macro sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file also
 
@@ -9,8 +9,8 @@
   {
     fprintf(stderr," plugin %s  lib = %s", plugin, lib);
     Int_t success = 0;
-    TString fullName  = Form("lib%s",lib);
-    TString  fullValue = Form(full,lib);
+    TString fullName;
+    TString  fullValue;
     if (full) {
       fprintf(stderr," full = %s", full);
       fullName  = Form("lib%s",lib);
@@ -81,7 +81,7 @@ void SetQtEnv() {
       if (SetRootResource(plugins[iPlugin++],plugins[iPlugin++],plugins[iPlugin++])) {
        // Set Qt extentsion
        // skip Qt-layer setting
-       iPlugin++;iPlugin++;iPlugin++;
+        iPlugin++;iPlugin++;iPlugin++;
       } else {
          // Set Qt-layer
          SetRootResource(plugins[iPlugin++],plugins[iPlugin++],plugins[iPlugin++]); 
