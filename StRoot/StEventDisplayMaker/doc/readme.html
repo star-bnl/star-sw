@@ -35,10 +35,20 @@
             and bfc.C </A>
       STAR macros
       <P>Since the maker uses  the <a href="http://root.bnl.gov">Qt-layer  
-            of ROOT GUI</a> to turn it <b>ON</b> one needs a custom <a href="rootrc"><code> <b>.rootrc</b><code></a> 
+            of ROOT GUI</a> to turn it <b>ON</b> one needs a custom 
+            <a href="rootrc"><code><b>.rootrc</b></code></a> 
             ROOT resource file in his/her working (or home) directory:
          <OL>
-            <LI>
+           <LI> Run <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/SetQtEnv.C?rev=1.4">
+             <code><b>SetQtEnv.C</b></code></a> ROOT macro: 
+                <code><pre>
+root.exe -b -l $STAR/StRoot/macros/SetQtEnv.C
+                        </pre>
+            </code>
+            The macro tests whether your ".rootrc" activates the Qt-layer and creates the 
+            the correct ROOT resource file to fix things if needed.
+            <P>
+<!--            <LI>
                Copy the the custom version of <a href="rootrc">".rootrc"</a> file into your working directory 
                 <small><code><pre>
       Gui.Backend:                qt
@@ -51,15 +61,14 @@
       ln -s $STAR/StRoot/StEventDisplayMaker/.rootrc .
                         </pre></small>
             </CODE>
-            
+-->            
             <LI>
                run <A href="readme1.html">doEvents.C</A>
-               <p>
-                  <small>
+               <p>                  
                      <bold><code><pre>                     
- .x doEvents.C(1,"026/st_physics_4026006_raw_0040047.event.root","display")
+.x doEvents.C(1,"026/st_physics_4026006_raw_0040047.event.root","display")
                </pre>
-                  </code></BOLD></SMALL>
+                  </code></BOLD>
                   <OL>
                   </OL>
                <P>&nbsp;</P>
