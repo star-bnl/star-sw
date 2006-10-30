@@ -1,7 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
-// $Id: SetQtEnv.C,v 1.3 2006/10/30 19:45:14 fine Exp $
+//
+// $Id: SetQtEnv.C,v 1.4 2006/10/30 20:38:01 fine Exp $
 // This macro sets the Qt/Root environment "on fly" and 
-// generates the correct ROOT resource ".rootrc" file also
+// generates the correct ROOT resource ".rootrc" file 
+// also
 //__________________________________________________________________
 FILE *OpeFileName(const char *fileNamePrototype)
 {
@@ -33,7 +35,7 @@ Int_t SetRootResource(FILE *file, const char *plugin,
                        const char *lib,
                        const char *full=0,Bool_t append=kFALSE) 
 {
-   fprintf(stderr," plugin %s from the lib = %s", plugin, lib);
+   fprintf(stderr," Testing the plugin <%s> from the lib = <%s>\n", plugin, lib);
    Int_t success = 0;
    TString fullName;
    TString  fullValue;
@@ -44,14 +46,15 @@ Int_t SetRootResource(FILE *file, const char *plugin,
    } else {
       fullValue = lib;
    }
-   fprintf(stderr,"\n ------- \n");
+   fprintf(stderr," ------- \n");
     
 
    if ( !full || gSystem->DynamicPathName(fullName.Data(),kTRUE) ) {
       // Check plugin
        success = 1;
        TString currentPlugin = gEnv->GetValue(plugin,"none");
-       if ( !currentPlugin.Contains(lib) ) 
+       TPRegexp exp(Form("\\b%s\\b",lib));
+       if ( !currentPlugin.Contains(exp) ) 
        {
           TString p = "+"; 
           if (append) {
@@ -63,6 +66,8 @@ Int_t SetRootResource(FILE *file, const char *plugin,
           if (file) {
              fputs(Form("%s %s\n",plugin,fullValue.Data()), file);
           }
+       } else {
+         // fprintf(stderr, "Found %s with <%s>\n", currentPlugin.Data(), Form("\\s+?%s\\s+?",lib));
        }
     }
     return success;
@@ -111,7 +116,7 @@ void SetQtEnv() {
     // Check Qt-extension
     if (c+=SetRootResource(f,plugins[iPlugin++],plugins[iPlugin++],plugins[iPlugin++])) {
       if (c+=SetRootResource(f,plugins[iPlugin++],plugins[iPlugin++],plugins[iPlugin++])) {
-       // Set Qt extentsion
+       // Set Qt extension
        // skip Qt-layer setting
         iPlugin++;iPlugin++;iPlugin++;
       } else {
@@ -130,21 +135,31 @@ void SetQtEnv() {
        } else {
           fprintf( stderr, "\"Coin3d\" shared libraies has not beed detected\n");
           fprintf( stderr, "Please, run \"source $STAR/QtRoot/qtgl/qtcoin/setup.csh\" script to set the Coin3D env.\n");
-       }
-     }
-   }
- }
+ } } } }
  
  fclose(f);
  if (c == 0) {
-    fprintf(stderr," No shared library to actibvate the Qt-layter has been detected.\n Please talk with your SysAdmin\n");
+    fprintf(stderr," No shared library to activate the Qt-layer has been detected.\n Please talk to your SysAdmin\n");
     gSystem->Unlink(fileName.Data());
  }  else {
-    fprintf(stderr," ----------------------------------------------------------\n");
-    fprintf(stderr," The new version of ROOT resource file has been created: <%s>.\n",fileName.Data());
-    fprintf(stderr," To active the Qt-layer - create a symlink \"ln -s %s .rootrc \" \n", fileName.Data());
-    fprintf(stderr," and re-satrt your application\n");
-    fprintf(stderr," ----------------------------------------------------------\n");    
+    Long_t id; Long_t size; Long_t flags; Long_t modtime;
+    gSystem->GetPathInfo(fileName.Data(), &id, &size, &flags, &modtime);
+    if (size == 0) {
+       fprintf(stderr," ----------------------------------------------------------\n");
+       fprintf(stderr," The correct Qt/Root env has been detected.\n");
+       fprintf(stderr," ----------------------------------------------------------\n");
+       gSystem->Unlink(fileName.Data());
+    } else {
+       fprintf(stderr," ----------------------------------------------------------\n");
+       fprintf(stderr," The new version of ROOT resource file has been created: <%s>.\n",fileName.Data());
+       if (gSystem->AccessPathName(".rootrc")) {
+          fprintf(stderr," To active the Qt-layer - create a symlink \"ln -s %s .rootrc \" \n", fileName.Data());
+       } else { 
+          fprintf(stderr," To active the Qt-layer - merge the existen \".rootrc\" file with  \"%s\" \n", fileName.Data());
+       }          
+       fprintf(stderr," and re-start your application\n");
+       fprintf(stderr," ----------------------------------------------------------\n");    
+ }
  }
  //  gEnv->Print();
  //  gEnv->SaveLevel(kEnvLocal);
