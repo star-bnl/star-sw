@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.110 2006/10/17 19:24:30 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.111 2006/10/31 23:54:13 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.111  2006/10/31 23:54:13  potekhin
+// Corrected a typo in the GEMB hit readout -- credit goes to Ross Corliss
+//
 // Revision 1.110  2006/10/17 19:24:30  fisyak
 // Mode initialization after open input fz-file
 //
@@ -914,7 +917,7 @@ Int_t St_geant_Maker::Make()
   }
 
   nhits = 0;
-  geant3->Gfnhit("GEMB","GMDI", nhits);
+  geant3->Gfnhit("GEMH","GMDI", nhits);
   
   if (nhits>0) { 
     St_g2t_gem_hit *g2t_gem_hit = new St_g2t_gem_hit("g2t_gem_hit",nhits);
