@@ -1,13 +1,15 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
 //
-// $Id: StCheckQtEnv.cxx,v 1.1 2006/10/31 22:51:29 fine Exp $
+// $Id: StCheckQtEnv.cxx,v 1.2 2006/11/01 19:10:10 fine Exp $
 // This class sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file 
 // also
 
 #include "StCheckQtEnv.h"
 #include "TSystem.h"
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)
 #include "TPRegexp.h"
+#endif
 #include "TEnv.h"
 
 //__________________________________________________________________
@@ -60,7 +62,11 @@ Int_t StCheckQtEnv::SetRootResource(FILE *file, const char *plugin,
       // Check plugin
        success = 1;
        TString currentPlugin = gEnv->GetValue(plugin,"none");
-       TPRegexp exp(Form("\\b%s\\b",lib));
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)
+        TPRegexp exp(Form("\\b%s\\b",lib));
+#else
+        TString exp(Form(" %s ",lib));
+#endif                
        if ( !currentPlugin.Contains(exp) ) 
        {
           TString p = "+"; 
