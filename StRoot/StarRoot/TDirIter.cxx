@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.6 2006/10/20 19:08:12 perev Exp $
+ * $Id: TDirIter.cxx,v 1.7 2006/11/01 20:16:31 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -43,18 +43,32 @@ void TDirIter::Reset(const char *path,Int_t maxlev)
     FILE *in = fopen(path+1,"r");
     if (!in) { 
       fprintf(stderr,"*** TDirIter::Reset failed to open %s ***\n",path+1);
-      fSele = -2; return;}
+      fSele = -2; 
+      return;
+    }
+
     char buf[1024];
     while ( fgets(buf,1024,in) ) {
       if (*buf == '!') continue;	//commented
       if (*buf == '#') continue;	//commented
 
       char *c = strchr(buf,' ');
-      if (c) *c=0;			//blank is the end of file name
-      fFull += buf; fFull += ""; }
-    fclose(in);}
-  else {
-    fFull = path;}
+      if (c){
+	// If space, take first part but don't forget to restore \n
+	*c= '\0';
+	fFull += buf; 
+	fFull += "\n"; 
+      } else {
+	fFull += buf; 
+      }
+    }
+    fclose(in);
+
+  } else {
+    fFull = path;
+
+  }
+  // printf("DEBUG --> [%s] [%s]\n",path,fFull.Data());
       
   fSkip = strspn(fFull.Data()," \t\n");
   ResetQQ(fFull.Data()+fSkip);
