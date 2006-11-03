@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.180 2006/11/03 15:06:56 jeromel Exp $
+// $Id: StMaker.cxx,v 1.181 2006/11/03 16:24:56 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -157,7 +157,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2006",       20051201,     0, "y2006",    "base geometry for y2006"},
 
   // in preparation
-  {"y2007",       20061101,     0, "y2007",    "base geometry for y2007"},
+  {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
 
   // development tags
   {"dev2005",     20190101,     0, "dev2005",  "non-production"},
@@ -1726,6 +1726,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.181  2006/11/03 16:24:56  jeromel
+// Oops. hard-coded should be greater than advertized.
+//
 // Revision 1.180  2006/11/03 15:06:56  jeromel
 // Added y2007 placeholder - timestamp for new run will start at 20061101 (simu)
 //
