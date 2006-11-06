@@ -18,7 +18,7 @@ memset(&row,0,tableSet->GetRowSize());
   row.histoBins = 300;
   row.histoMin  = -75.0;  // in cm
   row.histoMax  = +75.0;  // in cm
-  row.maxDcaVertex = 100.0;  // in cm
+  row.maxDcaVertex = 2.0;  // in cm
   row.minNumTracks = 1;      // must be >0 
 
   // Tracker
