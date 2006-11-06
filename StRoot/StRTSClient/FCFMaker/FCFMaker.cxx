@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.30 2006/04/10 15:38:52 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.31 2006/11/06 21:35:33 fisyak Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.31  2006/11/06 21:35:33  fisyak
+ * Set hasSim definition to SetMode method, reduce debug print outs
+ *
  * Revision 1.30  2006/04/10 15:38:52  fisyak
  * Fix case when no hit coming from g2t_tpc_hit table in simu mode (found by Tonko)
  *
@@ -273,7 +276,7 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 
   ignoreFileClusters = false;
   ignoreRawData = false;
-
+  hasSim = 0;
   mDp = .1;             // hardcoded errors
   mDt = .2;
   mDperp = .1;
@@ -324,28 +327,10 @@ StTPCReader *tpcReader;
 
 void StRTSClientFCFMaker::SetMode(Int_t mode)
 {
-  switch(mode) {
-  case 0x0:
-    ignoreFileClusters = true;
-    ignoreRawData = true;
-    break;
-
-  case 0x1:
-    ignoreFileClusters = true;
-    ignoreRawData = false;
-    break;
-
-  case 0x2:
-    ignoreFileClusters = false;
-    ignoreRawData = true;
-    break;
-
-  case 0x3:
-    ignoreFileClusters = false;
-    ignoreRawData = false;
-    break;
-  }
-
+  m_Mode = mode;
+  if (m_Mode & 0x1) ignoreFileClusters = true;
+  if (m_Mode & 0x2) ignoreRawData = true;
+  hasSim = m_Mode & 0x4;
   if(ignoreRawData)
     printf("FCFMaker::SetMode Not calculating clusters from raw data\n");
   else
@@ -355,6 +340,10 @@ void StRTSClientFCFMaker::SetMode(Int_t mode)
     printf("FCFMaker::SetMode Not reading clusters from data file\n");
   else
     printf("FCFMaker::SetMode Will read clusters from data file if present\n");
+  if(hasSim) 
+    printf("<FCFMaker:SetMode> event has simulation information\n");
+  else
+    printf("<FCFMaker:SetMode> no simulation information\n");
 }
 
 Int_t StRTSClientFCFMaker::Init()
@@ -443,24 +432,8 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
 
 Int_t StRTSClientFCFMaker::Make()
 {
-  hasSim = 0;
   int t1,t2;
   t1 = time(NULL);
-
-  //St_DataSet *geant = (St_DataSet *)GetInputDS("geant");
-  StMaker *mk = StMaker::GetChain();
-  StMaker *geant = mk->Maker("geant");  
-  if(geant) {
-    St_g2t_tpc_hit *hit = (St_g2t_tpc_hit *) geant->DataSet("g2t_tpc_hit");
-    if (hit) {
-      hasSim = 1;
-    }
-  }
- 
-  if(hasSim) 
-    printf("<FCFMaker:Make> event has simulation information\n");
-  else
-    printf("<FCFMaker:Make> no simulation information\n");
 
   t2 = time(NULL);
   //printf("<FCFMaker:Make>: Tested for geant (%d): %d secs\n",hasSim, t2-t1);
@@ -791,7 +764,7 @@ Int_t StRTSClientFCFMaker::Make()
   if(simu_resptr) free(simu_resptr);
 
   t2 = time(NULL);
-  printf("<FCFMaker::Make> Done with make (%d secs)\n",t2-t1);
+  if (Debug()) printf("<FCFMaker::Make> Done with make (%d secs)\n",t2-t1);
 
   return kStOK;
 }
@@ -1832,11 +1805,11 @@ int StRTSClientFCFMaker::build_croat_clusters(u_int s,
     int sz2;	
     
     sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in, sectorIdx);
-    if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner\n", sectorIdx);
+    if(sz2 == -1 && Debug()) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner\n", sectorIdx);
     else sz += sz2;
     
     sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out, sectorIdx);
-    if(sz2 == -1) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer\n", sectorIdx);
+    if(sz2 == -1 && Debug()) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer\n", sectorIdx);
     else sz += sz2;
   }
 
