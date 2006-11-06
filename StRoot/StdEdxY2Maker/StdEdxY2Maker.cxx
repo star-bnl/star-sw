@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.54 2005/07/19 22:41:51 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.55 2006/11/06 20:42:06 perev Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -259,8 +259,8 @@ Int_t StdEdxY2Maker::Make(){
   static StTimer timer;
   StTpcLocalSectorCoordinate        localSect[4], lNext;
 #ifdef dChargeCorrection
-  static TH3D Charge("Charge","total charge for sector/row integrated  over drift length",
-		     24,1.,25.,45,1.,46.,450,-15.,210.);
+  static TH3D &Charge= *(new TH3D("Charge","total charge for sector/row integrated  over drift length",
+		     24,1.,25.,45,1.,46.,450,-15.,210.));
   static TAxis *Zax = Charge.GetZaxis();
 #endif
 #ifdef __DoDistortion__
