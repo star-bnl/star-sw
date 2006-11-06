@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppGeant.cxx,v 1.3 2003/09/11 18:14:18 thenry Exp $
+// $Id: StppGeant.cxx,v 1.4 2006/11/06 20:39:18 perev Exp $
 // $Log: StppGeant.cxx,v $
+// Revision 1.4  2006/11/06 20:39:18  perev
+// using std added
+//
 // Revision 1.3  2003/09/11 18:14:18  thenry
 // *** empty log message ***
 //
@@ -16,6 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include <iostream>
+using namespace std;
 #include <math.h>
 #include "StppGeant.h"
 #include "StppParticle.h"
