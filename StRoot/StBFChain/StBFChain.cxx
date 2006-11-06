@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.507 2006/10/16 20:01:56 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.508 2006/11/06 21:36:22 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -568,6 +568,7 @@ Int_t StBFChain::Instantiate()
       if ( GetOption("onlcl") && ! GetOption("onlraw") )  DMode = DMode | 0x2;
       // use the TPC raw hit information
       if ( GetOption("onlraw")&& ! GetOption("onlcl")  )  DMode = DMode | 0x1;
+      if ( GetOption("Simu")                           )  DMode = DMode | 0x4;
       if (DMode) mk->SetMode(DMode);                 // set flag (matches tcpdaqMk->SetDAQFlag())
     }
 
@@ -918,8 +919,8 @@ Int_t StBFChain::kOpt (const TString *tag, Bool_t Check) const {
     nopt += opt;
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
-    opt = TString(fBFC[i].Maker); //check full maker name2
-    nopt = TString("-");
+    opt   = fBFC[i].Maker; //check full maker name2
+    nopt  = "-";
     nopt += opt;
     if       (Tag ==  opt) {return  i;}
     else {if (Tag == nopt) {return -i;}}
