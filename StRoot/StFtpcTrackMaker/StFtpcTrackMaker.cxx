@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.77 2006/09/27 11:00:31 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.78 2006/11/09 13:58:37 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.78  2006/11/09 13:58:37  jcs
+// bfc option fdbg selected if m_Mode>=2
+//
 // Revision 1.77  2006/09/27 11:00:31  jcs
 // comment out ftpc vs. tpc vertex histogram definitions, they are defined and filled in St_QA_Maker
 //
@@ -413,7 +416,7 @@ Int_t StFtpcTrackMaker::Init()
 
   // Create Histograms
 
-if (m_Mode%2 == 1) {
+if (m_Mode >= 2) {
    gMessMgr->Warning() << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
 }
@@ -625,7 +628,7 @@ Int_t StFtpcTrackMaker::Make()
     tracker.TrackingInfo();
   }
 
-if (m_Mode%2 == 1) {
+if (m_Mode >= 2) {
   Double_t vertexPos[3];
   if (m_Mode%2 == 0) {
      vertexPos[0] = vertex.GetX();
@@ -873,7 +876,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.77 2006/09/27 11:00:31 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.78 2006/11/09 13:58:37 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
