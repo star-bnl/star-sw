@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.88  2006/11/09 13:55:34  jcs
+// bfc option fdbg selected if m_Mode>=2
+//
 // Revision 1.87  2006/08/23 09:25:36  jcs
 // Return with kStWarn if error occurs accessing Calibrations_ftpc/ftpcVoltageStatus
 // StDetectorState is set only for events with FTPC data
@@ -476,7 +479,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
-  if (m_Mode == 2) gMessMgr->Info() << "StFtpcClusterMaker running with cluster/laser analysis turned on"<<endm;
+  if (m_Mode >= 2) gMessMgr->Info() << "StFtpcClusterMaker running with cluster/laser analysis turned on"<<endm;
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
@@ -721,7 +724,7 @@ Int_t StFtpcClusterMaker::Make()
       
     int searchresult;
 
-    if (m_Mode == 2) {
+    if (m_Mode >= 2) {
        StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
        cldebug.fillRun((int) GetRunNumber(), (int) mDbMaker->GetDateTime().GetDate(), (int) mDbMaker->GetDateTime().GetTime(), microsecondsPerTimebin, paramReader.adjustedAirPressureWest()-paramReader.standardPressure(), paramReader.adjustedAirPressureEast()-paramReader.standardPressure());
 
