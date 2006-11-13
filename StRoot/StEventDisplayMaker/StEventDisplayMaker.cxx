@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.116 2006/10/09 20:33:46 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.117 2006/11/13 05:13:30 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -757,8 +757,8 @@ public:
     }
     //________________________________________________________________
     virtual Int_t NextAttribute() { 
-       Int_t  daqId = 0;
-       Int_t  tdc = -1;
+//       Int_t  daqId = 0;
+//       Int_t  tdc = -1;
        Int_t report = 0;
        if (fIndex > 4800) fIndex = 0;
        int towerId = fIndex+1;fIndex++;
@@ -816,8 +816,8 @@ public:
     }
     //________________________________________________________________
     virtual Int_t NextAttribute() { 
-       Int_t  daqId = 0;
-       Int_t colorResponce = 0;
+//       Int_t  daqId = 0;
+//       Int_t colorResponce = 0;
        if (fIndex > 4800) fIndex = 0;
        int towerId = fIndex+1;fIndex++;
        return  towerId/100;
@@ -1376,6 +1376,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.117  2006/11/13 05:13:30  fine
+// remove the compilation warnings
+//
 // Revision 1.116  2006/10/09 20:33:46  fine
 // Fix to make it work under ROOT 4.04 and ROOT 5.12
 //

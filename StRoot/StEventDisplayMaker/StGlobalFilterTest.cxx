@@ -1,4 +1,4 @@
-// $Id: StGlobalFilterTest.cxx,v 1.8 2006/11/13 04:00:27 fine Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.9 2006/11/13 05:13:32 fine Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
@@ -62,8 +62,8 @@ void StGlobalFilterTest::Filter(TObjArray *eArr,int flag)
 //    if (nhits<10) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     nTot++;
     StTrackHelper th(trk);
-    double len = th.GetLength();
-    double mom  = th.GetMom().mag();
+//    double len = th.GetLength();
+//    double mom  = th.GetMom().mag();
 //    if (mom<0.3) 		{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
     if (th.GetFlag()<0) 	{(*eArr)[ioj]=0;(*eArr)[ioj+1]=0;continue;}
 //   Only bad tracks
