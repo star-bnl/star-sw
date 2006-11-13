@@ -1,8 +1,12 @@
-// $Id: StGlobalFilterRand.cxx,v 1.3 2005/06/16 19:38:25 perev Exp $
+// $Id: StGlobalFilterRand.cxx,v 1.4 2006/11/13 04:00:27 fine Exp $
 #include "TError.h"
 #include "TRandom.h"
 #include "TSystem.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "StGlobalFilterRand.h"
 #include "TObjArray.h"
 #include "StEventHelper.h"

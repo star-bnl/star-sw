@@ -1,10 +1,14 @@
-// $Id: StGlobalFilterTest.cxx,v 1.7 2006/10/09 20:33:46 fine Exp $
+// $Id: StGlobalFilterTest.cxx,v 1.8 2006/11/13 04:00:27 fine Exp $
 #include "TError.h"
 #include "TSystem.h"
 #include "TCanvas.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#if ROOT_VERSION_CODE < 331013
 #include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
 #include "StGlobalFilterTest.h"
 #include "TObjArray.h"
 #include "StEventHelper.h"
