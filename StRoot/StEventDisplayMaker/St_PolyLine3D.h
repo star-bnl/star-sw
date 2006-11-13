@@ -2,7 +2,7 @@
 #define ROOT_Stt_PolyLine3D
 
 // ***********************************************************************
-// $Id: St_PolyLine3D.h,v 1.3 2006/10/09 20:33:46 fine Exp $ 
+// $Id: St_PolyLine3D.h,v 1.4 2006/11/13 04:00:28 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -50,7 +50,13 @@ public:
         virtual void      Copy(TObject &polyline) const;
         virtual Int_t     DistancetoPrimitive(Int_t px, Int_t py);
         virtual void      DrawPolyLine(Int_t n, Float_t *p, Option_t *option="");
+#ifndef __CINT__        
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)        
+        virtual void      SavePrimitive(ostream &out, Option_t *option);
+#else        
         virtual void      SavePrimitive(ofstream &out, Option_t *option);
+#endif        
+#endif        
         virtual void      SetPolyLine(Int_t n, Float_t *p=0, Option_t *option="");
         virtual Int_t     GetAttributeI(const Char_t *attribName) const;
         virtual Float_t   GetAttributeF(const Char_t *attribName) const;
@@ -92,6 +98,9 @@ public:
 };
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.h,v $
+// Revision 1.4  2006/11/13 04:00:28  fine
+// Update SavePrimitive interface signature
+//
 // Revision 1.3  2006/10/09 20:33:46  fine
 // Fix to make it work under ROOT 4.04 and ROOT 5.12
 //

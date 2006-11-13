@@ -1,6 +1,6 @@
 //*CMZ :          29/04/99  16.26.07  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine     17/08/95
-// $Id: St_PolyLine3D.cxx,v 1.1 2004/08/08 21:50:47 fisyak Exp $ 
+// $Id: St_PolyLine3D.cxx,v 1.2 2006/11/13 04:00:28 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -201,7 +201,13 @@ void St_PolyLine3D::DrawPolyLine(Int_t, Float_t *p, Option_t *option)
 }
   
 //______________________________________________________________________________
-void St_PolyLine3D::SavePrimitive(ofstream &out, Option_t *)
+void St_PolyLine3D::SavePrimitive(
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,00,0)        
+      ostream &out
+#else      
+      ofstream &out
+#endif      
+      , Option_t *)
 {
     // Save primitive as a C++ statement(s) on output stream out
  
@@ -431,6 +437,9 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 }   
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.cxx,v $
+// Revision 1.2  2006/11/13 04:00:28  fine
+// Update SavePrimitive interface signature
+//
 // Revision 1.1  2004/08/08 21:50:47  fisyak
 // Eliminate Star2Root library, move St_PolyLine3D to StEventDisplayMaker
 //
