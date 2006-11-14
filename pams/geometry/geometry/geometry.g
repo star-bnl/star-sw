@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.132 2006/11/01 00:21:09 potekhin Exp $
+* $Id: geometry.g,v 1.133 2006/11/14 00:21:03 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.133  2006/11/14 00:21:03  potekhin
+* Improved steering for the IGTD (gem disks), in order to
+* provide the possibility of a proper versioning. This is
+* done now via the IgtdConfig variable
+*
 * Revision 1.132  2006/11/01 00:21:09  potekhin
 * As discussed in appropriate fora, we need to introduce a HPD-less
 * tag for our TUP study. Let there be UPGR07.
@@ -639,7 +644,7 @@
    Integer    DensConfig, SvttConfig, BtofConfig, VpddConfig, FpdmConfig, SisdConfig, PipeConfig,
               CalbConfig, PixlConfig, IstbConfig, GembConfig, FstdConfig, FtroConfig, ConeConfig,
               FgtdConfig, TpceConfig, PhmdConfig, SvshConfig, SupoConfig, FtpcConfig, CaveConfig,
-              ShldConfig, QuadConfig, MutdConfig, HpdtConfig
+              ShldConfig, QuadConfig, MutdConfig, HpdtConfig, IgtdConfig
 
 *             DensConfig, ! TPC gas density correction
 *             SvttConfig, ! SVTT version
@@ -653,6 +658,7 @@
 *             HpdtConfig, ! Heavy Flavor Tracker
 *             IstbConfig, ! Integrated Silicon Tracker
 *             GembConfig, ! Inner GEM barrel tracker 
+*             IgtdConfig, ! GEM disks
 *             FstdConfig, ! Forward Silicon tracker Disks
 *             FtroConfig, ! FTPC Readout Electronics
 *             ConeConfig, ! SVTT support cones and cables
@@ -711,6 +717,7 @@ replace[;ON#{#;] with [
    FtpcConfig  = 0 ! 0  version, 1=gas correction
    HpdtConfig  = 0 ! 0=no, >1=version
    IstbConfig  = 0 ! 0=no, >1=version
+   IgtdConfig  = 1 ! 1=old radii etc, 2=new ones
    GembConfig  = 0 ! 0=no, >1=version
    MutdConfig  = 0 ! same
    PhmdConfig  = 0 ! No Photon multiplicity detectorby default
@@ -2893,7 +2900,14 @@ If LL>1
    endif
 
    if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
-   if (igtd)                   Call igtdgeo
+
+   if (igtd) then
+       if(IgtdConfig==2) then
+           call AgDETP new ('IGTD')
+           call AgDETP add ('igtv.Config=',IgtdConfig ,1)
+       endif
+       Call igtdgeo
+   endif
 
    if (hpdt.and.HpdtConfig>0)  Call hpdtgeo
 
