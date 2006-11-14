@@ -1,5 +1,10 @@
-* $Id: g2t_hpd.F,v 1.2 2006/09/22 21:40:11 potekhin Exp $
+* $Id: g2t_hpd.F,v 1.3 2006/11/14 17:22:32 potekhin Exp $
 * $Log: g2t_hpd.F,v $
+* Revision 1.3  2006/11/14 17:22:32  potekhin
+* Removed a gratuitously rich print statement
+* which was clogging the log files. Commented out,
+* moved to the end of source.
+*
 * Revision 1.2  2006/09/22 21:40:11  potekhin
 * Fixed a typo
 *
@@ -28,11 +33,6 @@
        Local  = Idigi.ge.2
 
        Do While (G2R_GET_HIT('hpd') .eq. 0)
-          print *,i,id,trac,next,volume,
-     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
-     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
-     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
-
          i=i+1
          g2t_hpd_hit_h.nok            = i
          g2t_hpd_hit(i).id            = i
@@ -67,5 +67,10 @@
     
  99   RETURN
       END
+************************************************************************
+*          print *,i,id,trac,next,volume,
+*                 x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
+*                 p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
+*                 Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
 
 
