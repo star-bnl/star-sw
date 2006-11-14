@@ -1,5 +1,9 @@
-* $Id: igtdgeo.g,v 1.4 2006/10/21 18:16:35 potekhin Exp $
+* $Id: igtdgeo.g,v 1.5 2006/11/14 00:18:52 potekhin Exp $
 * $Log: igtdgeo.g,v $
+* Revision 1.5  2006/11/14 00:18:52  potekhin
+* Allow for a modified set of parameters as per recent change
+* in the IGT geometry (Ross, Bernd)
+*
 * Revision 1.4  2006/10/21 18:16:35  potekhin
 * Add 'MANY' option to ensure correct material
 * taken into account when working with the new support structure
@@ -58,30 +62,49 @@ Module IGTDGEO is the geometry of the inner GEM tracking detector
 * Declare the blocks to be defined in the code.
       Content   IGMO, IGDO, IGFO, IGIS, IGOS, IGRL, IGAL
 
+      Structure IGTV {version,  int Config}
+
 * Declare the structure IGTG which defines the detector geometry.
-      Structure IGTG { Layer, RI(4), RO(4), Zstart, Z(4), FThk(4), SThk(4), SR, RThk }
+      Structure IGTG { Config, RI(4), RO(4), Zstart, Z(4), FThk(4), SThk(4), SR, RThk }
 
 * -----------------------------------------------------------------------------
 
-* Fill IGTG structure with values for variables.
+   Fill IGTV    !  IGT geometry version
+      version    =  1    ! geometry version - dummy
+      Config =  1    ! config
+   EndFill
 
    Fill IGTG                   ! Inner GEM Tracker Geometry data
-      Layer  =  1                            ! layer index (reserved)
-      RI     = { 15.0, 20.0, 25.0, 30.0 }    ! inner radii for each GEM
-      RO     = { 45.0, 45.0, 45.0, 45.0 }    ! outer radii for each GEM
-      Zstart = 55.0                          ! starting position along Z axis
-      Z      =  {0.0, 30.0, 60.0, 90.0}      ! Z positions for GEM front face
-      FThk   = { 0.05, 0.05, 0.05, 0.05 }    ! foil thicknesses inside GEM
-      SThk   = { 0.4, 0.3, 0.3, 0.4 }        ! support/spacing thicknesses
-      SR     = 1.0                           ! radial size for support
-      RThk   = 0.3                           ! readout plane thickness
+      Config  =  1                            ! Version
+      RI      = { 15.0, 20.0, 25.0, 30.0 }    ! inner radii for each GEM
+      RO      = { 45.0, 45.0, 45.0, 45.0 }    ! outer radii for each GEM
+      Zstart  = 55.0                          ! starting position along Z axis
+      Z       = { 0.0, 30.0, 60.0, 90.0}      ! Z positions for GEM front face
+      FThk    = { 0.05, 0.05, 0.05, 0.05 }    ! foil thicknesses inside GEM
+      SThk    = { 0.4, 0.3, 0.3, 0.4 }        ! support/spacing thicknesses
+      SR      = 1.0                           ! radial size for support
+      RThk    = 0.3                           ! readout plane thickness
+   EndFill
+
+   Fill IGTG                   ! Inner GEM Tracker Geometry data
+      Config  =  2                            ! Version
+      RI      = { 15.0, 20.0, 25.0, 30.0 }    ! inner radii for each GEM. 
+      RO      = { 43.0, 43.0, 43.0, 43.0 }    ! outer radii for each GEM
+      Zstart  = 58.0                          ! starting position along Z axis. rcc 55.0 originally
+      Z       = { 0.0, 30.0, 60.0, 90.0}      ! Z positions for GEM front face
+      FThk    = { 0.05, 0.05, 0.05, 0.05 }    ! foil thicknesses inside GEM
+      SThk    = { 0.4, 0.3, 0.3, 0.4 }        ! support/spacing thicknesses
+      SR      = 1.0                           ! radial size for support
+      RThk    = 0.3                           ! readout plane thickness
    EndFill
 
 *******************************************************************************
 
 * Calculate some parameters from the input variables.
 
-      USE IGTG
+      USE IGTV
+      USE IGTG  config=IGTV_Config;
+      write(*,*) 'IGTD Version:',IGTV_Config
 
 * use aluminized mylar mixture instead of kapton
       Component C5  A=12    Z=6  W=5
