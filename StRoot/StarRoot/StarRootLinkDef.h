@@ -33,3 +33,5 @@
 #pragma link C++ function operator<<(ostream &, const TRMatrix &);
 #pragma link C++ function operator<<(ostream &, const TRSymMatrix &);
 #pragma link C++ function operator<<(ostream &, const TRVector &);
+
+#pragma link C++ class StCheckQtEnv;
