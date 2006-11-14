@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.11 2003/09/02 17:58:08 perev Exp $
+// $Id: StDefaultFilter.cxx,v 1.12 2006/11/14 01:51:15 fine Exp $
 #include "Stiostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -182,7 +182,7 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
   Int_t color = -1;
   size = 1;
   // SubChannel to provide a selections for St_dst_track tracks.
-  Double_t trackColor;
+  Double_t trackColor=0;
   if (mDedx) {
     const St_dst_dedx &t = *(St_dst_dedx *)mDedx->GetTable();
     trackColor = t.GetTable((*mDedx)[rowNumber-1])->dedx[0];   
@@ -276,6 +276,9 @@ void StDefaultFilter::Distribution(St_dst_track *track,TH1F &de)
 }
 //_____________________________________________________________________________
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.12  2006/11/14 01:51:15  fine
+// The fix the compilation warning
+//
 // Revision 1.11  2003/09/02 17:58:08  perev
 // gcc 3.2 updates + WarnOff
 //
