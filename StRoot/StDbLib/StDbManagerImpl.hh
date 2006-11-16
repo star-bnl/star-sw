@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.4 2006/08/17 02:58:57 deph Exp $
+ * $Id: StDbManagerImpl.hh,v 1.5 2006/11/16 21:50:40 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.5  2006/11/16 21:50:40  deph
+ * additional files needed for db load balancing
+ *
  * Revision 1.4  2006/08/17 02:58:57  deph
  * updated load balancer - removing hard-coded nodes from API to xml
  *
@@ -51,6 +54,7 @@
 #include "StDbConfigNode.hh"
 #include "StDbTable.h"
 #include "StDbLogger.hh"
+#include "StDbServiceBroker.h"
 
 /********* helper classes (c-structs) *************/
 class dbType{
@@ -212,11 +216,11 @@ public:
 
   virtual void printTimeStats();
 
-  // MLK added for load balancing:
-
-  std::vector<std::string> xmlServerList;
 
   short xmlInputSource;
+
+  // MLK added for load balacing:
+  StDbServiceBroker* myServiceBroker;
 
 protected:
   // initializers for standard types & domains

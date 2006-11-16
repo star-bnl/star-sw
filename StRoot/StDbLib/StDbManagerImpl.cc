@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.21 2006/08/17 02:58:57 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.22 2006/11/16 21:50:40 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.22  2006/11/16 21:50:40  deph
+ * additional files needed for db load balancing
+ *
  * Revision 1.21  2006/08/17 02:58:57  deph
  * updated load balancer - removing hard-coded nodes from API to xml
  *
@@ -222,6 +225,7 @@ StDbManagerImpl::StDbManagerImpl(): StDbManager(), dbTypeFree(dbTUser1), dbDomai
   initTypes(); 
   initDomains(); 
   mfactory = new StDbTableFactory();
+  myServiceBroker = 0;
 };
 
 ////////////////////////////////////////////////////////////////
@@ -234,7 +238,10 @@ StDbManagerImpl::~StDbManagerImpl(){
   delete mfactory;
   delete Messenger;
   mInstance=0;
-
+  if (myServiceBroker)
+    {
+      delete myServiceBroker;
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -439,10 +446,39 @@ StDbManagerImpl::deleteTypes(){
 void StDbManagerImpl::lookUpServers(){
 #define __METHOD__ "lookUpServer()"
 
- char* xmlFile[3]={NULL,NULL,NULL};
-// dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
- dbFindServerMode mode[3]={serverEnvVar,userHome,starDefault};
+  /* MLK: I considered changing the mode numbering and concluded that its semantics is 
+     different. It numbers locations of a particular config file only.
+     We add a different file.
+  */
+  
+/*
+  string dbLoadBalancerConfig = 
+    (string)getenv("STAR")+"/StDb/servers/dbLoadBalancerConfig.xml";
+  */
 
+  string dbLoadBalancerConfig = 
+    "/star/u/deph/servers/dbLoadBalancerConfig.xml";
+
+/*
+  string dbLoadBalancerConfig = 
+    (string)getenv("HOME")+"/dbLoadBalancerConfig.xml";
+  */
+
+  myServiceBroker = new StDbServiceBroker(dbLoadBalancerConfig);
+  short SBStatus = myServiceBroker->GetStatus();
+  if (SBStatus == st_db_service_broker::NO_ERROR)
+    {
+      mhasServerList = true;
+    }
+  else
+    {
+      delete myServiceBroker;
+      myServiceBroker = 0;
+      cerr << "StDbManagerImpl::lookUpServers() StDbServiceBroker error "<<SBStatus<<"\n";
+    }
+
+ char* xmlFile[3]={NULL,NULL,NULL};
+ dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
 
  StString cos;
  cos<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
@@ -481,20 +517,12 @@ void StDbManagerImpl::findServersXml(ifstream& is){
 
   char* stardatabase=NULL;
 
-  /* Take only the relevant server names from the XML file.
-What determines the relevance:
-1) whether the user belongs to the group authorized to use either production or analysis class of service
-2) whether the time of the day allows a particular server to be used
+  /*
+MLK: changes to undo load-balancing private confuguration. 
+Only basic (as before May 2006) private XML configuration is
+supported. Central load-balancing configuration file is being introduced with this version.
   */
 
-  struct tm *tp;  
-  time_t timeNow;
-  timeNow = time(NULL);
-  tp = localtime(&timeNow);
-  /*
-  char* whoami = getenv("USER");
-  if (!whoami) whoami = getenv("LOGNAME");
-  */
   while(!is.eof()){
 
   stardatabase = findServerString(is); 
@@ -514,58 +542,6 @@ What determines the relevance:
   char* hostName = mparser.getString(stardatabase,(char*)bhost,(char*)ehost);
   char* uSocket = mparser.getString(stardatabase,(char*)bsock,(char*)esock);
   char* portNumber = mparser.getString(stardatabase,(char*)bport,(char*)eport);
-
- char* bcos = "<cos>"; char* ecos = "</cos>";
- char* bfrom = "<from_time>"; char* efrom = "</from_time>";
- char* bto = "<to_time>"; char* eto = "</to_time>";
- char* buser = "<user>"; char* euser = "</user>";
- char* production_cos = "production";
- char* analysis_cos = "analysis";
-
- /*
- char* user = mparser.getString(stardatabase,buser,euser);
- if (user)
-   {
-     if (strcmp(user,whoami)!=0) continue;
-   }
- */
-
- char* cos = mparser.getString(stardatabase,bcos,ecos);
- char* from_time = mparser.getString(cos,bfrom,efrom);
- char* to_time = mparser.getString(cos,bto,eto);
-
- if (from_time==NULL) from_time = "0";
- if (to_time==NULL) to_time = "0";
-
- int from_time_i = atoi(from_time);
- int to_time_i = atoi(to_time);
-
- bool unknown_cos = true;
-
-
- if (cos) // support pre-"cos" XML format
-   {
-     if (xmlInputSource == userHome)  
-       {
-	 if (!strstr(cos,analysis_cos)) continue;
-       }
-     else
-       {
-	 if (!strstr(cos,production_cos)) continue;
-       }
-   }
-
-
- if (from_time_i!=0 || to_time_i!=0)
-   {
-     if (tp->tm_hour < from_time_i && tp->tm_hour > to_time_i)
-       {
-	 continue;
-       }
-   }
-
-
- xmlServerList.push_back(hostName);
 
   if(portNumber)portNum = atoi(portNumber);
 
