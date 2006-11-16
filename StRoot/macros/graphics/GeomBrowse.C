@@ -14,23 +14,25 @@ void GeomDrawUsage() {
           printf("                                    It is usually useless to apply bombFactor < 1.0 \n");
           printf("---------------\n"); 
           
-          printf("\n$Id: GeomBrowse.C,v 1.2 2006/11/16 00:41:48 fine Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.3 2006/11/16 21:36:11 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomBrowse(const char *fzFile="complete",Float_t bombFactor=1.4, const char *out = "")
 {
-  gROOT->ProcessLine("StCheckQtEnv::SetQtEnv();") ;
-  GeomDrawUsage();
- // gSystem->Load("libGeomBrowser");  
-       gSystem->Load("St_base");
-       gSystem->Load("StChain");
-       gSystem->Load("St_Tables");
-       gSystem->Load("St_g2t.so");
-       gSystem->Load("StarMagField");
-       gSystem->Load("St_geant_Maker");
-       gSystem->Load("StUtilities");
-  gSystem->Load("St_geom_Maker");  
-  StGeomBrowser *a = new StGeomBrowser;
-  a->SetFile(fzFile); 
-  a->Show();
+   GeomDrawUsage();
+  // gSystem->Load("libGeomBrowser");  
+   gSystem->Load("St_base");
+   if (!StCheckQtEnv::SetQtEnv()) 
+   {
+      gSystem->Load("StChain");
+      gSystem->Load("St_Tables");
+      gSystem->Load("St_g2t.so");
+      gSystem->Load("StarMagField");
+      gSystem->Load("St_geant_Maker");
+      gSystem->Load("StUtilities");
+      gSystem->Load("St_geom_Maker");  
+      StGeomBrowser *a = new StGeomBrowser;
+      a->SetFile(fzFile); 
+      a->Show();
+   }
 }
