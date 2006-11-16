@@ -1,6 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
 //
-// $Id: StCheckQtEnv.cxx,v 1.1 2006/11/15 14:37:24 fine Exp $
+// $Id: StCheckQtEnv.cxx,v 1.2 2006/11/16 21:54:34 fine Exp $
 // This class sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file 
 // also
@@ -87,9 +87,13 @@ Int_t StCheckQtEnv::SetRootResource(FILE *file, const char *plugin,
 }
 
 //__________________________________________________________________
-void StCheckQtEnv::SetQtEnv() {
+Long_t  StCheckQtEnv::SetQtEnv() {
   //------------------
   // Check GED library
+  // Return value:
+  //        -1 - Wrong Qt env. need SysAdmit to fix it
+  //         0 - Correct env. 
+  //       > 0 - Wrong env. The user should fix his/her env.
   //------------------
   const char *plugins[] = {
                    "Plugin.TVirtualX"
@@ -120,7 +124,7 @@ void StCheckQtEnv::SetQtEnv() {
                  , "", "", ""
           };
   Int_t iPlugin = 0;
-  Int_t c = 0;
+  Long_t c = 0;
   TString fileName = GetNewFileName("rootrc");
   FILE *f =  fopen((const char *)fileName, "w");
   // Check Qt-layer 
@@ -154,17 +158,25 @@ void StCheckQtEnv::SetQtEnv() {
           iPlugin+=3;
           c+=SetRootResource(f,plugins[iPlugin],plugins[iPlugin+1],plugins[iPlugin+2],kTRUE);
        } else {
-          fprintf( stderr, "\"Coin3d\" shared libraies has not beed detected\n");
-          fprintf( stderr, "Please, run \"source $STAR/QtRoot/qtgl/qtcoin/setup.csh\" script to set the Coin3D env.\n");
+          fprintf(stderr," ----------------------------------------------------------\n");
+          fprintf(stderr,"                        ATTENTION :                        \n");
+          fprintf(stderr,"\"Coin3d\" shared libraries has not beed detected\n");
+          fprintf(stderr,"Please, run:\n"); 
+          fprintf(stderr,"=====  \"source $STAR/QtRoot/qtgl/qtcoin/setup.csh\"  =====\n");
+          fprintf(stderr,"script to set the Coin3D env.\n");
+          fprintf(stderr," ----------------------------------------------------------\n");
  } } } }
  
  fclose(f);
  if (c == 0) {
-    fprintf(stderr," No shared library to activate the Qt-layer has been detected.\n Please talk to your SysAdmin\n");
+    fprintf(stderr," No shared library to activate the Qt-layer has been detected.\n");
+    fprintf(stderr," Please talk to your SysAdmin\n");
     gSystem->Unlink(fileName.Data());
+    c = -1;
  }  else {
     Long_t id; Long_t size; Long_t flags; Long_t modtime;
     gSystem->GetPathInfo(fileName.Data(), &id, &size, &flags, &modtime);
+    c = size;
     if (size == 0) {
        fprintf(stderr," ----------------------------------------------------------\n");
        fprintf(stderr," The correct Qt/Root env has been detected.\n");
@@ -172,16 +184,19 @@ void StCheckQtEnv::SetQtEnv() {
        gSystem->Unlink(fileName.Data());
     } else {
        fprintf(stderr," ----------------------------------------------------------\n");
+       fprintf(stderr,"                        ATTENTION :                        \n");
        fprintf(stderr," The new version of ROOT resource file has been created: <%s>.\n",fileName.Data());
        if (gSystem->AccessPathName(".rootrc")) {
-          fprintf(stderr," To active the Qt-layer - create a symlink \"ln -s %s .rootrc \" \n", fileName.Data());
+          fprintf(stderr," To active the Qt-layer - create a symlink:\n"); 
+          fprintf(stderr,"============  \"ln -s %s .rootrc \" ====================\n", fileName.Data());
        } else { 
-          fprintf(stderr," To active the Qt-layer - merge the existen \".rootrc\" file with  \"%s\" \n", fileName.Data());
+          fprintf(stderr," To active the Qt-layer - **merge** the existen \".rootrc\" file with  \"%s\" \n", fileName.Data());
        }          
        fprintf(stderr," and re-start your application\n");
        fprintf(stderr," ----------------------------------------------------------\n");    
+    }
  }
- }
+ return c;
  //  gEnv->Print();
  //  gEnv->SaveLevel(kEnvLocal);
 }
