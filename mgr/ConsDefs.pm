@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.92 2006/10/25 00:37:04 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.93 2006/11/16 19:54:38 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -257,8 +257,8 @@
 	$CC            = "icc";
 	$CXX           = "icc";
 	$CPP           = $CC . " -EP";
-	$CXXFLAGS      = "-w -ansi -fpic";
-	$CFLAGS        = "-restrict -w -fpic";# -Wall
+	$CXXFLAGS      = "-w -ansi -fPIC -wd1476"; #-fpstkchk";
+	$CFLAGS        = "-restrict -w -fPIC";# -fpstkchk";# -restrict";# -Wall
 	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; rm  /tmp/icc_version;`;
         $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; rm  /tmp/icc_version;`;
 	chomp($ICC_MAJOR); chomp($ICC_MINOR);
@@ -515,7 +515,7 @@
     $CERNINO = $CERN_ROOT . "/include";
 
     $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
-    $CPPPATH .= $main::PATH_SEPARATOR;# . $CERNINO;
+#    $CPPPATH .= $main::PATH_SEPARATOR ."#";# . $CERNINO;
 
     my $pwd = cwd();
     my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";
@@ -528,8 +528,8 @@
     # MySQL
     #my $os_name = `uname`;
     #chomp($os_name);
-    my ($MYSQLINCDIR,$mysqlheader) =
-	script::find_lib($MYSQL . " " .
+    my ($MYSQLINCDIR,$mysqlheader) = 
+	script::find_lib( $MYSQL . " " .
 			 "/include /usr/include ".
 			 "/usr/include/mysql  ".
 			 "/usr/mysql/include  ".
@@ -543,8 +543,7 @@
     my ($mysqllibdir)=$MYSQLINCDIR;
 
     $mysqllibdir =~ s/include/$LLIB/;
-
-    #print "DEBUG :: $mysqllibdir\n";
+#    print "DEBUG :: $mysqllibdir\n";
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/$LLIB/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
@@ -586,7 +585,19 @@
 	print "Use LoggerLIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
 	    if $LoggerLIBDIR && ! $param::quiet;
     }
-
+ # xml2
+    my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
+    my ($xml) =  script::find_lib("/usr/bin", "xml2-config");
+    if ($xml) {
+      $xml .= "/xml2-config";
+      $XMLINCDIR = `$xml --cflags`;
+      chomp($XMLINCDIR);
+      $XMLINCDIR =~ s/-I//;
+      my $XML = `$xml --libs`; print "$XML\n";
+      ($XMLLIBDIR,$XMLLIBS) = split ' ', $XML;
+      $XMLLIBDIR =~ s/-L//;
+      print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS\n"; #if $XMLLIBDIR && ! $param::quiet;
+    }
     my @params = (
 		  'Package'       => 'None',
 		  'CPP'           => $CPP,
@@ -713,7 +724,8 @@
 		      'STAR_VERSION'    => $STAR_VERSION,
 		      'PERL5LIB'        => $PERL5LIB,
 		      'OPTSTAR'         => $OPTSTAR,
-		      'QTDIR'           => $QTDIR
+		      'QTDIR'           => $QTDIR,
+		      'HOME'            => $HOME
 		      },
 		  'Packages' => {
           		'ROOT' => {
@@ -745,6 +757,11 @@
 			    'LIBDIR'=> $QTLIBDIR,
 			    'LIBS'  => $QTLIBS
 			    },
+		       'XML' => {
+			   'LIBDIR'=> $XMLLIBDIR,
+			   'INCDIR'=> $XMLINCDIR,
+			   'LIBS'  => $XMLLIBS
+			   },
 			 'Logger' => {
 			     'INCDIR'=> $LoggerINCDIR,
 			     'LIBDIR'=> $LoggerLIBDIR,
