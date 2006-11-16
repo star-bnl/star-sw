@@ -9,10 +9,10 @@ void GeomDrawUsage() {
           printf("            example: root4star \'GeomDraw.C(\"year2003\")\'\n");                
           printf("\n");                
           printf("        2. ROOT macros that instantiates the geometry object\n");
-          printf("            example: root4star \'GeomDraw.C(\"Geometry.root\")\'\n");                
+          printf("            example: root4star \'GeomDraw.C(\"$STAR/StarDb/VmcGeometry/Geometry.year2000.C\")\'\n");                
           printf("\n");                
           printf("        3. ROOT file  that contains the geometry object\n");
-          printf("            example: root4star \'GeomDraw.C(\"$STAR/StarDb/VmcGeometry/Geometry.year2000.C\")\'\n");                
+          printf("            example: root4star \'GeomDraw.C(\"Geometry.root\")\'\n");                
           printf("\n");                
           printf("        4. the proper ZEBRA fz file, for example \n");
           printf("            example: root4star \'GeomDraw.C(\"/star/u/potekhin/gstardata/y2003x_complete.fz \")\'\n\n"); 
@@ -20,7 +20,7 @@ void GeomDrawUsage() {
           printf("One always can select the geometry from the \"file menu\" of the GUI interface later on too\n");          
           printf("\n");                
           printf("---------------\n"); 
-          printf("\n$Id: GeomBrowse.C,v 1.4 2006/11/16 21:44:15 fine Exp $\n");
+          printf("\n$Id: GeomBrowse.C,v 1.5 2006/11/16 21:46:11 fine Exp $\n");
 }                 
 //_____________________________________________________________________________________________________________
 void GeomBrowse(const char *fzFile="complete")
