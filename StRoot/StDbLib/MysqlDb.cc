@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.38 2006/08/17 02:58:56 deph Exp $
+ * $Id: MysqlDb.cc,v 1.39 2006/11/16 21:50:40 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.39  2006/11/16 21:50:40  deph
+ * additional files needed for db load balancing
+ *
  * Revision 1.38  2006/08/17 02:58:56  deph
  * updated load balancer - removing hard-coded nodes from API to xml
  *
@@ -236,54 +239,6 @@ if(mdbName)  delete [] mdbName;
 
 }
 //////////////////////////////////////////////////////////////////////// 
-
-vector<string>::iterator MysqlDb::RecommendedServer(vector<string>* MyServerList, char* sock, int port)
-{
-  vector<string>::iterator rtrn = MyServerList->begin();
-  
-  std::vector<std::string>::iterator I = MyServerList->begin();
-  
-  unsigned long nproc_min = ULONG_MAX;
-  while (I!=MyServerList->end())
-    {
-      conn = mysql_init(0);
-      
-      if (conn==0)
-	{
-	  cout << "StDbManagerImpl::RecommendedServer() mysql_init(0) failed \n";
-	  return rtrn;
-	}
-      
-      if (mysql_real_connect(conn,(*I).c_str(), "loadbalancer","lbdb","test",port,sock,0)==NULL)
-	{
-	  cout << "StDbManagerImpl::RecommendedServer() mysql_real_connect "<< conn << " "<<(*I).c_str()<<
-	    " "<<port<<" "<<sock<<" failed\n";
-	  mysql_close(conn);
-	  return rtrn;
-	}
-      
-      if (mysql_query(conn, "show processlist") != 0 )
-	{
-	  cout <<"StDbManagerImpl::RecommendedServer() show processlist failed\n";
-	  return rtrn;
-	}
-      
-      MYSQL_RES *res_set = mysql_store_result(conn);
-      unsigned long nproc = mysql_num_rows(res_set);
-       cout <<" Server "<<(*I).c_str()<< " "<< nproc << " processes \n";
-      mysql_close(conn);
-
-      if (nproc<nproc_min) 
-	{
-	  nproc_min = nproc;
-	  rtrn = I;
-	}
-      ++I;
-    }
-
-  return rtrn;
-}
-////////////////////////////////////////////////////////////////
 bool MysqlDb::reConnect(){
 #define __METHOD__ "reConnect()"
 
@@ -347,12 +302,25 @@ strcpy(mdbhost,aHost);
  double lbtime;
   start = clock();
 
-  std::vector<std::string>::iterator  myserver = RecommendedServer(&(my_manager->xmlServerList), NULL, mdbPort);
-  strcpy(mdbhost,(*myserver).c_str());
+  //  std::vector<std::string>::iterator  myserver = RecommendedServer(&(my_manager->xmlServerList), NULL, mdbPort);
 
+  if (my_manager->myServiceBroker)
+    {
+      my_manager->myServiceBroker->DoLoadBalancing();
+      short mSBStatus = my_manager->myServiceBroker->GetStatus();
+      if (mSBStatus==st_db_service_broker::NO_ERROR)
+	{
+	  strcpy(mdbhost,(my_manager->myServiceBroker->GiveHostName()).c_str());
+	  mdbPort = my_manager->myServiceBroker->GiveHostPort();
+	}
+      else
+	{
+	  cerr << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<"\n";
+	}
+    }
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
-  cout << " Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
+  cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
 
   if(mdbName) {
     delete [] mdbName;
