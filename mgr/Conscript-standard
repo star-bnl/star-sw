@@ -76,6 +76,8 @@ foreach my $Rep(@Repo) {
 my @idlML    = script::find_idlM($Dir);
 my @srcL     = script::find_sources($Dir);
 my @h_filesL = script::find_hfiles($Dir);
+my @uiQT     = script::find_ui($Dir);
+my @xpmQT     = script::find_xpm($Dir);
 
 print "idlL = @idlL\n" if $param::debug;
 
@@ -138,11 +140,29 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   @src     = script::sortu(@srcL);
   @h_files = script::sortu(@h_filesL);
   @idlM    = script::sortu(@idlML);
-#  if (-r $Dir . "/.includes_for_export.flg") {
-#    if ($#h_files >= 0) {Install $env $INCLUDE, @h_files;}
-#    if ($#idlM    >= 0) {Install $env $INCLUDE, @idlM;}
-#    if ($#idlT    >= 0) {Install $env $INCLUDE, @idlT;}
-#  }
+  #ui     /opt/star/sl305_gcc323/qt/bin/uic GeomBrowser.ui -i GeomBrowser.h -o .ui/GeomBrowser.cpp
+  #xpm    /opt/star/sl305_gcc323/qt/bin/uic  -embed -o .ui/qmake_image_collection.cpp
+  my $uic = $env->{Packages}->{QT}->{BINDIR} . "/uic";
+  my @QtDefs = ();
+  my @uih = ();#   print "h_files: @h_files\n";
+  foreach my $h (@h_files) {if ($h =~ /ui\.h$/) {push @uih, $h;}}# print "uih : @uih\n";
+  foreach my $ui (@uiQT) {
+    my $dir =  File::Basename::dirname( $ui );
+    my $stem = File::Basename::basename( $ui, ".ui" );
+    my $uilocal =  File::Basename::basename( $ui );
+    my @out = ($stem . ".cxx", $stem . ".h");# print "out : @out ==> $uilocal\n";
+    my @dep = ($uilocal, @uih);
+    Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
+    Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
+    push @src, $out[0];
+    push @QtDefs, $out[1];
+  }
+  if ($#xpmQT >= 0) {
+    my $out = $PKG . "_image_collection.cxx";
+    my @xpm = map (File::Basename::basename( $_), @xpmQT);
+    Command $env [$out], @xpm, qq($uic -embed %< -o %> );
+    push @src, $out
+  }
   $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};
   $SO_PKG_PLAIN = $SO_PKG;
   if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; @PlainObj = @src; $SO_PKG = $PKG . "." . $env1->{SUFSOLIB};}
@@ -159,7 +179,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   # Search path depth for Makers.
   #-
   print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
-  if ( $pkg =~ m/^StEventDisplay/){
+  if ( $pkg =~ m/^StEventDisplay/ || $#uiQT >= 0){
     # This make requires both ROOT Qt and QT libraries
     if ( defined($env1->{Packages}->{QT}->{DIR}) && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
       #print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
@@ -171,6 +191,11 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     }
   } elsif ( $pkg =~ m/^St.*Db/ or $pkg =~ m/^StStarLogger/) {
     $CPPPATH .= $main::PATH_SEPARATOR .  $env1->{Packages}->{MYSQL}->{INCDIR};
+    if ($pkg eq 'StDbLib') {
+      $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{INCDIR};
+      $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{LIBDIR};
+      $LIBS .=  " " . $env1->{Packages}->{XML}->{LIBS};
+    }
     print "CPPPATH = $CPPPATH\n" if $param::debug;
     
   } elsif ( $pkg =~ m/^apythia$/ ) {
@@ -437,7 +462,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
   print "DIR = $DIR\n" if $param::debug;
   my $line;
   my @Defs = ();
-  my @QtDefs = ();
   if ( $#idlM > -1 ) {
     my $include = $INCLUDE . "/" . $pkg;
     print "include = $include\n" if $param::debug;
@@ -476,9 +500,10 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       push @Defs, $modH;
     }
   } else {
-    foreach $h(@h_files) {
+    foreach $h(@h_files) {#print "h: $h\n";
       if ( $h =~ /LinkDef/) { push @LinkDefs, $h;}
       if ( $h =~ /LinkDef/ || $h =~ /Stypes/ ) { push @Defs, $h; next; }
+#     if ( $h =~ /DetectorGroup/ || $h =~ /HitLoader/) { push @Defs, $h; next; }
       my $hh = $Dir . "/" . $h;
       if ( -r $hh ) {
 	open( In, $hh ) or die "Can't open $hh";
@@ -599,6 +624,7 @@ if ( $#idlL > -1 ) {
     $CPPPATH = "";
     if ( $env1->{CPPPATH} ) { $CPPPATH .=  $main::PATH_SEPARATOR . $env1->{CPPPATH};}
     $CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+#    if ($#QtDefs >= 0) {$CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{QTDIR} . "/include";}
     $env3 = $env1->clone('DEBUG'   => $env1->{NOOPT},
 			 'CPPPATH' => $CPPPATH,
 			 'ObjDir'  => $tobj_dir,
