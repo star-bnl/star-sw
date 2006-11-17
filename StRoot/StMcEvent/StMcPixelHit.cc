@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.7 2005/11/22 21:44:52 fisyak Exp $
+ * $Id: StMcPixelHit.cc,v 2.8 2006/11/17 16:54:58 didenko Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.8  2006/11/17 16:54:58  didenko
+ * fixes from Willie for upgr05
+ *
  * Revision 2.7  2005/11/22 21:44:52  fisyak
  * Add compress Print for McEvent, add Ssd collections
  *
@@ -33,7 +36,7 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.7 2005/11/22 21:44:52 fisyak Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.8 2006/11/17 16:54:58 didenko Exp $";
 
 #ifdef POOL
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
@@ -72,18 +75,21 @@ ostream&  operator<<(ostream& os, const StMcPixelHit& h)
 unsigned long
 StMcPixelHit::layer() const
 {
-  // 6 modules of 4 ladders each; 3 outer and 1 inner ladder per module
-  // layer 1 : ladder 1 -  6
-  // layer 2 : ladder 1 - 18
+  // 3 modules of 11 ladders each; 8 outer and 3 inner ladder per module
+  // layer 1 : ladder 1 -  9
+  // layer 2 : ladder 1 - 24
   unsigned long iLadder = (mVolumeId%1000000)/10000;
   unsigned long iLayer = 0;
+
+  //inner ladders now declared first (numbered 1-3 in sector)
   if (iLadder<4)
     {
-      iLayer = 2;
+      iLayer = 1;
     }
+  //otherwise, outer layer
   else
     {
-      iLayer = 1;
+      iLayer = 2;
     }
 
   return iLayer;
@@ -92,20 +98,23 @@ StMcPixelHit::layer() const
 unsigned long
 StMcPixelHit::ladder() const
 {
-  // 6 modules of 4 ladders each; 3 outer and 1 inner ladder per module
-  // layer 1 : ladder 1 -  6
-  // layer 2 : ladder 1 - 18
- unsigned long iModule = mVolumeId/1000000;
+  // 3 modules of 11 ladders each; 8 outer and 3 inner ladder per module
+  // layer 1 : ladder 1 -  9
+  // layer 2 : ladder 1 - 24
+  unsigned long iModule = mVolumeId/1000000;
   unsigned long iLadder = (mVolumeId%1000000)/10000;
-  if (iLadder<4)
+  //cout<<"volume id: "<<mVolumeId<<endl;
+  //cout<<"iModule: "<<iModule<<endl;
+  //cout<<"iLadder: "<<iLadder<<endl;
+  if (iLadder>3) // outer: 3*(4-11) to 1-24 
     {
-      iLadder = (iModule-1)*3 + (iLadder);
+      iLadder=(iModule-1)*8+iLadder-3;
     }
   else
     {
-      iLadder = (iModule);
+      iLadder = (iModule-1)*3 + (iLadder);
     }
-
+  //cout<<"final iLadder: "<<iLadder<<endl;
   return iLadder;
 }
 //________________________________________________________________________________
