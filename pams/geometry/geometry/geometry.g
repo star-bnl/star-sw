@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.133 2006/11/14 00:21:03 potekhin Exp $
+* $Id: geometry.g,v 1.134 2006/11/18 02:56:17 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.134  2006/11/18 02:56:17  potekhin
+* Rewrote UPGR01 to better conform with
+* other UPGR0X tags in terms of actual code
+* (same version of SSD, identical flags in most
+* places). UPGR01 is HFT+SSD in central tracking,
+* and nothing else.
+*
 * Revision 1.133  2006/11/14 00:21:03  potekhin
 * Improved steering for the IGTD (gem disks), in order to
 * provide the possibility of a proper versioning. This is
@@ -2113,78 +2120,55 @@ If LL>1
                      CaveConfig = 3;
                 }
 ****************************************************************************************
-  on UPGR01    { R and D geometry: TPC+SSD+HFT-SVT
-                  "svt: 3 layers ";
-                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
-                     wfr=0  " numbering is in the code   ";
-                     wdm=0  " width is in the code      ";
+  on UPGR01   { R and D geometry: TPC+SSD+HFT-SVT
 
-                     ConeConfig=2 " new cable weight estimate ";
-
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
-
                   "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
-* NEW CONFIG!
-                     BtofConfig=8;
-
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
                   "calb" 
                      ems=on
-                     CalbConfig = 1
-* remember that with this config, the following parameters have
-* a different meaning because we have to (unfortunately) switch
-* from divisions to copies and introduce a map, which DOES
-* control the configuration
-                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
-
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
                   "ecal"
-                     ecal_config=1   " one ecal patch, west "
+                     ecal_config=1   " west wheel "
                      ecal_fill=3     " all sectors filled "
-
                   "beam-beam counter "
                      bbcm=on
-
                   "forward pion detector "
                      fpdm=on
-                     FpdmConfig  = 1 "switch to a different lead glass source code"
-
-                  "pseudo Vertex Position Detector"
-                     vpdd=on;
-                     VpddConfig=4;
-
                   "field version "
                      Mf=4;      "tabulated field, with correction "
 
-* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
-
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 5; "SVTT version"
+                     SvshConfig = 0; "SVT shield"
                      DensConfig = 1; "gas density correction"
-                     FtpcConfig = 1; "ftpc configuration"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdConfig = 2;
-
+                     PhmdConfig = 1;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 24; "second version, full barrel with corrected radii"
-
-
-                  "FTPC Readout barrel "
-                     ftro=on;
-                     FtroConfig = 1;
-
+                     SisdConfig = 45;
 * careful! Achtung!
-                   pipeConfig=5;   " thinner pipe "
-                   pixl=on;        " activate "
-                   PixlConfig=3;   " source version "
-
-                  "New version of the TPC backplane "
-                     TpceConfig = 3;
-
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+* HPD, IST off
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
                 }
 ****************************************************************************************
   on UPGR02    { R and D geometry: TPC+IST+HFT-SVT
