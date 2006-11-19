@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.93 2006/11/16 19:54:38 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.94 2006/11/19 00:28:34 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -587,7 +587,8 @@
     }
  # xml2
     my  ($XMLINCDIR,$XMLLIBDIR,$XMLLIBS) = ("","","");
-    my ($xml) =  script::find_lib("/usr/bin", "xml2-config");
+    my ($xml) =  script::find_lib($OPTSTAR . "/bin /usr/bin",
+				  "xml2-config");
     if ($xml) {
       $xml .= "/xml2-config";
       $XMLINCDIR = `$xml --cflags`;
