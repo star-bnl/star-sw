@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.134 2006/11/18 02:56:17 potekhin Exp $
+* $Id: geometry.g,v 1.135 2006/11/22 17:41:49 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.135  2006/11/22 17:41:49  potekhin
+* Added a tag which will be used exclusively for the material
+* balance effect study, i.e. it won't contains any realistic
+* detectors in the center of STAR, and feature a variable
+* thickness cylinder instead.
+*
 * Revision 1.134  2006/11/18 02:56:17  potekhin
 * Rewrote UPGR01 to better conform with
 * other UPGR0X tags in terms of actual code
@@ -621,7 +627,7 @@
               btof,vpdd,magp,calb,ecal,upst,
               rich,zcal,mfld,bbcm,fpdm,phmd,
               pixl,istb,gemb,fstd,ftro,fgtd,
-              shld,quad,mutd,igtd,hpdt,itsp
+              shld,quad,mutd,igtd,hpdt,itsp,dumm
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -748,7 +754,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt,itsp} = off;
+   {bbcm,fpdm,phmd,pixl,istb,gemb,fstd,sisd,ftro,fgtd,shld,quad,mutd,igtd,hpdt,itsp,dumm} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -2120,6 +2126,45 @@ If LL>1
                      CaveConfig = 3;
                 }
 ****************************************************************************************
+  on DUMM01   { R and D geometry: TPC+DUMM
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=off;
+                     PhmdConfig = 0;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 0;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   dumm=on;        " put the dummy in"
+                }
+****************************************************************************************
   on UPGR01   { R and D geometry: TPC+SSD+HFT-SVT
 
                      svtt=off; "no SVT  at all in this configuration"
@@ -2907,6 +2952,11 @@ If LL>1
       call phmdgeo
    endif
 
+
+********************************************************************
+   if(dumm) then
+      call dummgeo
+   endif
 ****************  Magnetic Field  ********************************
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
