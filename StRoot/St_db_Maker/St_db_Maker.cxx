@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.99 2006/08/15 21:42:20 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.100 2006/11/23 01:55:44 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.100  2006/11/23 01:55:44  perev
+// Non init variable fixed. Thanks Yuri
+//
 // Revision 1.99  2006/08/15 21:42:20  jeromel
 // Fix rhic -> rhic.bnl.gov
 //
@@ -539,6 +542,7 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
      && val->fTimeMax.Get() >  uevent) 		return kPrune;
 
     //	Start loop
+static int nCall=0; nCall++;
   
 
 
@@ -549,6 +553,8 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   par->Remove(val->fDat);
 
   int kase = 0;
+  valsSQL[0].Set(kMinTime,0);
+  valsSQL[1].Set(kMaxTime,0);
   if (mk->fDBBroker && val->fDat && par->GetUniqueID() < kUNIXOBJ) {	// Try to load from MySQL
     int ierr = mk->UpdateTable(par->GetUniqueID(),(TTable*)val->fDat, valsSQL );
     if (!ierr) kase = 1;
@@ -559,21 +565,25 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   TDataSet *newGuy=0;
 SWITCH:  switch (kase) {
   
-    case 0:   val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1];  
+    case 0:   // No SQL or CINT objects
+              val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1];  
               kase=4; goto SWITCH;
     
-    case 1:   val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1]; 
+    case 1:   // Only SQL object
+              val->fTimeMin = valsSQL[0];  val->fTimeMax = valsSQL[1]; 
               ds->GetParent()->AddFirst(val->fDat);
               kase=4; goto SWITCH;
 
-    case 2:   newGuy = mk->LoadTable(left);
+    case 2:   // Only CINT object
+              newGuy = mk->LoadTable(left);
               if (!val->fDat) { val->fDat = newGuy; val->AddFirst(newGuy);}
               else            { val->fDat->Update(newGuy); delete newGuy;}
               val->fTimeMin = valsCINT[0];  val->fTimeMax = valsCINT[1];
               ds->GetParent()->AddFirst(val->fDat);
               kase=4; goto SWITCH;
   
-    case 3:   if (valsCINT[0].Get()>=valsSQL[0].Get()) {
+    case 3:   // Both SQL and CINT objects
+              if (valsCINT[0].Get()>=valsSQL[0].Get()) {
                 kase = 2; 
                 if (valsCINT[1].Get()>valsSQL[1].Get()) valsCINT[1] = valsSQL[1];   
               } else {
@@ -583,7 +593,7 @@ SWITCH:  switch (kase) {
               goto SWITCH;
 
     case 4:   
-      if( ! ((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent) )){
+      if( ! ((val->fTimeMin.Get()<= uevent) && (uevent<val->fTimeMax.Get()) )){
 	(void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
 		      ds->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
 	(void) printf("\tTimeMin "); val->fTimeMin.Print();
