@@ -5,8 +5,8 @@
  * This class is designed to represent clusters of smd strips in the endcap.
  *
  * \author Jason C. Webb
- * $Date: 2006/11/27 22:30:16 $
- * $Revision: 1.2 $
+ * $Date: 2006/11/27 22:52:34 $
+ * $Revision: 1.3 $
  *
  * \section steemcsmdcluster_conventions
  *
@@ -215,4 +215,5 @@ ostream& operator<<(ostream &out, const StEEmcSmdCluster &c)
       << c.size() << " "
       << c.mean() << " "
       << c.sigma();
+  return out;
 }
