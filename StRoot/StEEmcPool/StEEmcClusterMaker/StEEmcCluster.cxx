@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2006/07/24 21:49:50 $
- * $Revision: 1.2 $
+ * $Date: 2006/11/27 22:46:09 $
+ * $Revision: 1.3 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -29,16 +29,49 @@
 
 #include <iostream>
 
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
+
 ClassImp(StEEmcCluster);
 
 // ----------------------------------------------------------------------------
-StEEmcCluster::StEEmcCluster()
+StEEmcCluster::StEEmcCluster() : StEEmcBaseCluster()
 {
 
   mEmcCluster=0;
   mKey=0;
   mEnergy=0.;
+  mfPhibin=0.0;
+  mfEtabin=0.0;
+  mSumEta2W=0.;
+  mSumEtaW=0.;
+  mSumPhi2W=0.;
+  mSumPhiW=0.;
+}
 
+// copy constructor
+StEEmcCluster::StEEmcCluster( const StEEmcCluster &other )
+{
+  mEmcCluster=other.mEmcCluster;
+  mKey=other.mKey;
+
+  //  printf("copy constructor E=%5.2f\n",other.mEnergy);
+
+  mEnergy=other.mEnergy;
+  mfPhibin=other.mfPhibin;
+  mfEtabin=other.mfEtabin;
+  mSumEta2W=other.mSumEta2W;
+  mSumEtaW=other.mSumEtaW;
+  mSumPhi2W=other.mSumPhi2W;
+  mSumPhiW=other.mSumPhi2W;
+
+  mTowers=other.mTowers;
+  mWeights=other.mWeights;
+
+  mEnergy=other.mEnergy;
+  mMomentum=other.mMomentum;
+  mPosition=other.mPosition;
+  mMatched=other.mMatched;
 }
 
 // ----------------------------------------------------------------------------
@@ -52,6 +85,36 @@ void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
   Float_t energy = weight * tower.energy();
   mEnergy+=energy;
 
+  mfEtabin+=energy*weight*tower.etabin();
+  int myphi = (tower.phibin() - mTowers[0].phibin());
+  mfPhibin+=energy*weight*myphi;
+
+  mSumEta2W = (tower.etabin()*tower.etabin())*tower.energy()*weight;
+  mSumPhi2W = (myphi*myphi)*tower.energy()*weight;
+  mSumEtaW  = (tower.etabin())*tower.energy()*weight;
+  mSumPhiW  = (myphi)*tower.energy()*weight;
+
+  static EEmcGeomSimple geom=EEmcGeomSimple::Instance();
+  mMomentum += energy * geom.getTowerCenter( (UInt_t)tower.sector(), (UInt_t)tower.subsector(), (UInt_t)tower.etabin() );
+  mPosition = mMomentum.Unit();
+  mPosition *= ( kEEmcZSMD / mMomentum.CosTheta() );
+
+  if ( TMath::Abs(mPosition.Eta())>100.0 ) {
+    Warning("add","Cluster eta is crazy!");
+    print();
+  }
+
+  mNumberOfElements=mTowers.size();
+
+}
+
+Float_t StEEmcCluster::fracEtabin()
+{
+  return mfEtabin/mEnergy;
+}
+Float_t StEEmcCluster::fracPhibin()
+{
+  return mfPhibin/mEnergy+mTowers[0].phibin();
 }
 
 StEEmcCluster::~StEEmcCluster(){
@@ -92,8 +155,8 @@ void StEEmcCluster::print()
   std::cout << "cluster key: " << mKey << std::endl;
   std::cout << "seed tower:  " << mTowers[0].name() << std::endl;
   std::cout << "ntowers:     " << mTowers.size() << std::endl;
-  std::cout << "eta:         " << mMomentum.Eta() << std::endl;
-  std::cout << "phi:         " << mMomentum.Phi() << std::endl;
+  std::cout << "feta:        " << fracEtabin() << std::endl;
+  std::cout << "fphi:        " << fracPhibin() << std::endl;
   std::cout << "energy:      " << mEnergy << std::endl;
   std::cout << "pt:          " << mMomentum.Perp() << std::endl;
   for ( UInt_t i=0;i<mTowers.size();i++ )
@@ -102,8 +165,53 @@ void StEEmcCluster::print()
     }
 
 }
+//<<<<<<< StEEmcCluster.cxx
+
+Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower ) 
+{
+
+  for ( UInt_t i=0;i<mTowers.size();i++ )
+    {
+      StEEmcTower myTower=mTowers[i];
+      if ( myTower.isNeighbor(tower) ) return true;
+    }
+
+  return false;
+
+}
+
+Bool_t StEEmcCluster::hasTower( StEEmcTower &tower )
+{
+
+  for ( UInt_t i=0;i<mTowers.size();i++ )
+    {
+      if ( tower.index() == mTowers[i].index() ) return true;
+    }
+  return false;
+}
+
+Float_t StEEmcCluster::sigmaE()
+{
+  Float_t sumE=0.;
+  Float_t sumE2=0.;
+  Float_t sumw=0.;
+  for ( UInt_t i=0;i<mTowers.size();i++ )
+    {
+      StEEmcTower t=mTowers[i];
+      Float_t     w=mWeights[i];
+      sumE += t.energy()*w;
+      sumE2 += t.energy()*t.energy()*w;
+      sumw+=w;
+    }
+  Float_t mean=sumE/sumw;
+  Float_t var=sumE2/sumw-mean*mean;
+  return TMath::Sqrt(var);
+  
+}
+//=======
 
 // ----------------------------------------------------------------------------
+/***
 Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower ) 
 {
   
@@ -116,3 +224,5 @@ Bool_t StEEmcCluster::isNeighbor( StEEmcTower tower )
   return false;
   
 }
+***/ 
+//>>>>>>> 1.2
