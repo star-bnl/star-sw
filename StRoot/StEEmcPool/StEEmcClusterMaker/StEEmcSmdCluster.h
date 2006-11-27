@@ -1,13 +1,53 @@
 #ifndef __StEEmcSmdCluster_h__
 #define __StEEmcSmdCluster_h__
 
+/*!
+ *
+ * \class StEEmcSmdCluster
+ * \author Jason C. Webb <Jason.Webb@Valpo.edu>
+ *
+ * Class which represents an SMD cluster.  This
+ * class derives from StEEmcBaseCluster, which allows matching of clusters
+ * between layers by storing a unique cluster ID.
+ *
+ * To build a cluster, one uses something like the following recipe
+ *
+ * \code
+ *
+ * StEEmcSmdClusterVec_t list_of_clusters;
+ * StEEmcSmdCluster cluster;
+ *
+ * // Get the seed strip from StEEmcA2EMaker 0=tower 1=pre1 2=pre2 3=post
+ * Int_t plane = 0;
+ * StEEmcStrip seed = mEEanalysis -> strip( sector, plane, index_of_seed_strip );
+ *
+ * cluster.add( seed );
+ *
+ * // Next, loop over all hit strips and add any which satisfy your clustering
+ * // criteria by using cluster.add(strip).
+ *
+ * // Finally, add the cluster to storage
+ * list_of_clusters.push_back(cluster);
+ *
+ * \endcode
+ *
+ * The energy, mean and sigma of the cluster are calculated in flight.
+ * One _can_ override this by calling the energy(e), mean(m) and sigma(s)
+ * methods.
+ *
+ * Strips can be added with a weight.
+ *
+ */
+
 #include <TObject.h>
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcStrip.h"
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
 
+#include "StEEmcBaseCluster.h"
+
 class StEmcCluster;
 
-class StEEmcSmdCluster : public TObject {
+class StEEmcSmdCluster : public StEEmcBaseCluster {
 
  public:
 
@@ -21,16 +61,7 @@ class StEEmcSmdCluster : public TObject {
   /// specified weight
   void add( StEEmcStrip strip, Float_t weight=1.0 );
 
-  /// Return a unique key assigned by the cluster maker
-  Int_t key(){ return mKey; }
-  /// Return a unique key assigned by the cluster maker
-  Int_t key()const { return mKey; }
-
-  /// Set a unique id for this cluster... k>=0 is intended to
-  /// be assigned within the cluster maker.  k<0 intended for
-  /// error flags to kill off clusters.
-  void  key(Int_t k){ mKey=k; }
-  
+ 
   /// Return the energy of this cluster
   Float_t energy();
   /// Return the energy of this cluster
@@ -58,15 +89,9 @@ class StEEmcSmdCluster : public TObject {
   /// As above, but returns sigma instead of energy
   Float_t sigma( Int_t nmax, Option_t *opts="mean" );
 
-  /*
-  Float_t energy3(){ return energy(3,"seed"); }
-  Float_t energy5(){ return energy(5,"seed"); }
-  Float_t sigma3(){ return sigma(3,"seed"); }
-  Float_t sigma5(){ return sigma(5,"seed"); }
-  */
-
   /// Return the size (number of strips) of the cluster
   Int_t size();
+  Int_t size()const;
 
   /// Return list of towers matching this cluster
   StEEmcTowerVec_t towers();
@@ -77,13 +102,16 @@ class StEEmcSmdCluster : public TObject {
 
   /// One cluster is greater than another if energy
   /// is greater than the other.
-  Bool_t operator>( StEEmcSmdCluster &other );
+  Bool_t operator<( const StEEmcSmdCluster &other ) const { return this->energy() < other.energy(); }
+  Bool_t operator>( const StEEmcSmdCluster &other ) const { return this->energy() > other.energy(); }
+
 
   /// Returns the number of SMD strips in the cluster
   Int_t numberOfStrips(){ return (Int_t)mStrips.size(); }
 
   /// Returns the specified smd strip w/in the cluster
   StEEmcStrip strip(Int_t s){ return mStrips[s]; }
+  StEEmcStrip strip(Int_t s)const{ return mStrips[s]; }
 
   /// Returns the seed strip (by convention, the first
   /// strip added to the cluster).
@@ -105,13 +133,15 @@ class StEEmcSmdCluster : public TObject {
   void stemc( StEmcCluster *c ){ mEmcCluster = c; }
   /// print
   void print();
+  void printLine();
+
+  /// return the index of the next strip in the specified direction.
+  /// \param: direct, negative is left, positive is right
+  Int_t next(Int_t direct){ if(direct>0) return mRight; else if(direct<0) return mLeft; else return -999; }
 
  private:
  protected:
   
-  /// Unique key
-  Int_t mKey;
-
   /// Vector of strips belonging to this SMD cluster
   StEEmcStripVec_t mStrips;         //!
   /// Vector of strip weights
@@ -119,9 +149,6 @@ class StEEmcSmdCluster : public TObject {
 
   /// Kludge so that root will store number of smd strips 
   Int_t mSize;  
-
-  /// Energy of this SMD cluster
-  Float_t mEnergy;
 
   /// Running sums to calculate mean, sigma of cluster
   Float_t mSumXW;
@@ -140,6 +167,11 @@ class StEEmcSmdCluster : public TObject {
   /// Vector of hit towers above this SMD cluster
   StEEmcTowerVec_t mMatchedTowers;  //! 
 
+  /// index of next strip to the left
+  Int_t mLeft;
+  /// index of next strip to the right
+  Int_t mRight;
+
   /// POinter to EMC cluster
   StEmcCluster *mEmcCluster;
 
@@ -157,11 +189,12 @@ inline Float_t StEEmcSmdCluster::mean()const{ return mMean; }
 inline Float_t StEEmcSmdCluster::sigma()const{ return mSigma; }
 
 inline Int_t StEEmcSmdCluster::size(){ return (Int_t)mSize; }
+inline Int_t StEEmcSmdCluster::size()const{ return (Int_t)mSize; }
 
 inline StEEmcTowerVec_t StEEmcSmdCluster::towers(){ return mMatchedTowers; }
 inline Int_t            StEEmcSmdCluster::numberOfMatchedTowers(){ return (Int_t)mMatchedTowers.size(); }
 inline StEEmcTower      StEEmcSmdCluster::tower(Int_t t){ return mMatchedTowers[t]; }
-inline Bool_t           StEEmcSmdCluster::operator>(StEEmcSmdCluster &other){ return (this->energy() > other.energy()); }
+//inline Bool_t           StEEmcSmdCluster::operator>(StEEmcSmdCluster &other){ return (energy() > other.energy()); }
 
 
 /// use to sort smd clusters from inner to outer
@@ -173,8 +206,8 @@ inline Bool_t Energy( const StEEmcSmdCluster &me, const StEEmcSmdCluster &you) {
 /// based on key value
 inline Bool_t Key( const StEEmcSmdCluster &me, const StEEmcSmdCluster &you) { return me.key()<you.key(); }
 
-
-
 typedef std::vector<StEEmcSmdCluster> StEEmcSmdClusterVec_t;
+
+ostream& operator<<(ostream &out, const StEEmcSmdCluster &c );
 
 #endif

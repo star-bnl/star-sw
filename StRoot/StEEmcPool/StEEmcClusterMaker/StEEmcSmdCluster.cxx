@@ -5,8 +5,8 @@
  * This class is designed to represent clusters of smd strips in the endcap.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 16:58:45 $
- * $Revision: 1.1 $
+ * $Date: 2006/11/27 22:30:16 $
+ * $Revision: 1.2 $
  *
  * \section steemcsmdcluster_conventions
  *
@@ -22,20 +22,32 @@
 ClassImp(StEEmcSmdCluster);
 
 // ----------------------------------------------------------------------------
-StEEmcSmdCluster::StEEmcSmdCluster()
+StEEmcSmdCluster::StEEmcSmdCluster() : StEEmcBaseCluster()
 {
   mEnergy=0.;
   mSumXW=0.;
   mSumX2W=0.;
   mEmcCluster = 0;
+  mLeft=999;
+  mRight=-999;
 }
 
 void StEEmcSmdCluster::print()
 {
-  //  std::cout << "smd cluster plane=" << plane() << std::endl;
-  std::cout << "key=" << key() << std::endl;
-  std::cout << "energy=" << energy() << std::endl;
-  std::cout << "mean=" << mean() << std::endl;
+  const Char_t *names[]={"u","v"};
+  std::cout << "smd cluster plane=" << names[plane()] << std::endl;
+  std::cout << "key   = " << key() << std::endl;
+  std::cout << "energy= " << energy() << std::endl;
+  std::cout << "mean  = " << mean() << std::endl;
+}
+
+void StEEmcSmdCluster::printLine()
+{
+  std::cout << strip(0).name() << " " 
+	    << energy() << " "
+	    << mStrips.size() << " "
+	    << mean() << " "
+	    << sigma() << std::endl;
 }
 
 StEEmcSmdCluster::StEEmcSmdCluster( const StEEmcSmdCluster &c )
@@ -79,6 +91,10 @@ void StEEmcSmdCluster::add( StEEmcStrip strip, Float_t weight )
   mSigma = TMath::Sqrt(mSigma);
 
   mSize=(Int_t)mStrips.size(); 
+  mNumberOfElements=mSize;
+
+  if ( strip.index()<=mLeft  ) mLeft=strip.index()-1;
+  if ( strip.index()>=mRight ) mRight=strip.index()+1;
 
 }
 
@@ -185,4 +201,18 @@ Float_t StEEmcSmdCluster::sigma(Int_t nmax, Option_t *opts)
 
   return sig;
 
+}
+
+// ----------------------------------------------------------------------------
+
+ostream& operator<<(ostream &out, const StEEmcSmdCluster &c)
+{
+  out << "seed=" 
+      << c.strip(0).name() << " " 
+      << "key=" 
+      << c.key() << " "
+      << c.energy() << " "
+      << c.size() << " "
+      << c.mean() << " "
+      << c.sigma();
 }
