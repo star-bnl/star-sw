@@ -24,6 +24,8 @@ StEEmcPoint::StEEmcPoint()
   for ( Int_t i=0;i<4;i++ ) mEnergy[i]=0.; 
   mResidueU=0.;
   mResidueV=0.;
+  StEEmcClusterVec_t temp;
+  for ( Int_t i=0;i<4;i++ ) mTowerClusters.push_back(temp);
 }
 
 // ----------------------------------------------------------------------------
@@ -40,6 +42,7 @@ StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
   mSmdClusters[1] = p.mSmdClusters[1];
   mEmcPoint       = p.mEmcPoint;
   mRelatives      = p.mRelatives;
+  mTowerClusters  = p.mTowerClusters;
 
   mSector = p.mSector;
   mSigma  = p.mSigma;
