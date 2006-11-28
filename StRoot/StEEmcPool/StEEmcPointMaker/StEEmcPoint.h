@@ -1,10 +1,22 @@
 #ifndef __StEEmcPoint_h__
 #define __StEEmcPoint_h__
+/*!
+ *
+ * \class StEEmcPoint
+ * \date 1/1/05
+ * \author Jason C. Webb <Jason.Webb@Valpo.edu>
+ *
+ * Base class representing an EEMC point.  Points store the energy and position
+ * of gamma and electron candidates, along with additional information provided
+ * by the cluster and points makers.
+ *
+ */
 
 #include "TObject.h"
 #include "TVector3.h"
 
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcTower.h"
+#include "StEEmcPool/StEEmcClusterMaker/StEEmcCluster.h"
 #include "StEEmcPool/StEEmcClusterMaker/StEEmcSmdCluster.h"
 
 class StEmcPoint;
@@ -28,7 +40,13 @@ class StEEmcPoint : public TObject {
   /// Add a tower with specified weight to the point
   void tower( StEEmcTower t, Float_t w=1. ) { mTowers.push_back(t); mWeights.push_back(w); }
   /// Add an smd cluster to this point
-  void cluster( StEEmcSmdCluster c, Int_t plane ){mSmdClusters[plane]=c;mSector=c.sector();}
+  void cluster( StEEmcSmdCluster c, Int_t plane );
+
+  /// Add a tower cluster to this point
+  void cluster( StEEmcCluster c, Int_t layer){ mTowerClusters[layer].push_back(c); }
+
+  /// Returns tower clusters for the specified layer 0=T, 1=P, 2=Q, 3=R, 4+=crash
+  StEEmcClusterVec_t clusters(Int_t layer){ return mTowerClusters[layer]; }
 
   /// Set the number of other points which share tower energy 
   void numberOfRelatives( Int_t r ){ mRelatives=r; }
@@ -88,7 +106,6 @@ class StEEmcPoint : public TObject {
   /// Set the residual in the V plane
   void residueV(Float_t r){ mResidueV=r; }
   
-
   /// print
   void print();
   
@@ -96,6 +113,12 @@ class StEEmcPoint : public TObject {
   Bool_t operator<( const StEEmcPoint &other ) const; 
   /// Chi2 sort method
   Bool_t chiSquare( const StEEmcPoint &other ) const;
+
+  Int_t key(){ return mKey; }
+  void  key( Int_t k ) { mKey = k; }
+
+  Float_t asymmetry();
+  Float_t asymmetry()const;
 
  private:
  protected:
@@ -123,6 +146,9 @@ class StEEmcPoint : public TObject {
   /// Smd clusters associated with this point
   StEEmcSmdCluster mSmdClusters[2];
 
+  /// Tower clusters in each layer
+  std::vector< StEEmcClusterVec_t > mTowerClusters;
+
   /// Towers associated with this point, and associated
   /// weights for each tower.
   StEEmcTowerVec_t mTowers;       //!
@@ -134,6 +160,8 @@ class StEEmcPoint : public TObject {
 
   /// Pointer to corresponding StEmcPoint (StEvent only)
   StEmcPoint *mEmcPoint;
+
+  Int_t mKey;
 
   /// Makes class available to root
   ClassDef(StEEmcPoint,1);
@@ -147,4 +175,29 @@ inline Bool_t chiSquare( const StEEmcPoint &me, const StEEmcPoint &other ) { ret
 
 //line Int_t StEEmcPoint::sector(){ if ( mSmdClusters[0].sector()==mSmdClusters[1].sector() ) return mSmdClusters[0].sector(); else return -1; }
 
+inline void StEEmcPoint::cluster(StEEmcSmdCluster c, Int_t plane){
+  mSmdClusters[plane]=c;
+  mSector=c.sector();
+  if (plane==0)
+    mU=c.mean();
+  else
+    mV=c.mean();
+}
+
+inline Float_t StEEmcPoint::asymmetry()const
+{ 
+  return asymmetry(); 
+}
+inline Float_t StEEmcPoint::asymmetry()
+{
+  Float_t esum=cluster(0).energy()+cluster(1).energy();
+  Float_t edif=cluster(0).energy()-cluster(1).energy();
+  if(esum>0.)
+    return edif/esum;
+  return 9.0E9;
+}
+
+inline Bool_t Asymmetry( const StEEmcPoint &me, const StEEmcPoint &other ){ 
+  return TMath::Abs(me.asymmetry()) < TMath::Abs(other.asymmetry()); 
+}
 #endif
