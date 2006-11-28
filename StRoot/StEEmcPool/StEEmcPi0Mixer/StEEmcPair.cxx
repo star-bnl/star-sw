@@ -19,6 +19,9 @@
 
 #include "StEEmcPair.h"
 #include <iostream>
+
+#include "StMessMgr.h"
+
 ClassImp(StEEmcPair);
 
 // ----------------------------------------------------------------------------
@@ -68,12 +71,19 @@ void StEEmcPair::Kinematics()
 
   /// Determine energy of candidate meson
   mEnergy=mPoint[0].energy() + mPoint[1].energy();
+
+  gMessMgr->Debug()<<"StEEmcPair -I- energy=" << mEnergy << endm;
+
   if ( mEnergy <= 0. ) {
     mMass=-1.0;
     return;
   }
+
   /// Energy sharing
   mZgg=TMath::Abs( mPoint[0].energy()-mPoint[1].energy() ) / mEnergy;
+
+  gMessMgr->Debug()<<"StEEmcPair -I- zgg=" << mZgg << endm;
+
   /// Momenta of each gamma
   TVector3 momentum1=( mPoint[0].position() - mVertex1 ).Unit();
   momentum1 *= mPoint[0].energy();
@@ -91,6 +101,7 @@ void StEEmcPair::Kinematics()
   /// Calculate invariant mass
   mMass = mEnergy * TMath::Sin(mPhigg/2.0) * TMath::Sqrt( 1.0 - mZgg*mZgg );
 
+  gMessMgr->Debug()<<"StEEmcPair -I- mass=" << mMass << endm;
   
 }
 
@@ -99,16 +110,15 @@ StEEmcPair::StEEmcPair( const StEEmcPair &old )
 {
   mVertex1=old.mVertex1;
   mVertex2=old.mVertex2;
+  mVertex=old.mVertex;
   mPoint[0]=old.mPoint[0];
   mPoint[1]=old.mPoint[1];
   /// initialize to zero
-  mMass=0.;
-  mEnergy=0.;
-  mZgg=0.;
-  mPhigg=0.;
-  mMomentum=TVector3(0,0,0);
-  /// kompute kinematics
-  Kinematics();
+  mMass=old.mMass;
+  mEnergy=old.mEnergy;
+  mZgg=old.mZgg;
+  mPhigg=old.mPhigg;
+  mMomentum=old.mMomentum;
 }
 
 // ----------------------------------------------------------------------------
