@@ -1,13 +1,13 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.5 2006/11/28 21:29:13 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.6 2006/11/28 22:37:42 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
- * Revision 1.5  2006/11/28 21:29:13  wleight
- * Added smearing for Hpd and Ist and a switch to turn it on and off
+ * Revision 1.6  2006/11/28 22:37:42  wleight
+ * Fixed minor smearing bug
  *
  * Revision 1.4  2006/10/13 20:15:45  fisyak
  * Add Hpd fast simulation (Sevil)
@@ -234,7 +234,7 @@ Int_t StPixelFastSimMaker::Make()
 		    local.setZ(distortHit(local.z(), resZHpd, 2*waferLengthHpd));
 		    StThreeVectorF global = local2GlobalHpd(local, mcI->ladder()-1);
     
-		    StRnDHit* tempHit = new StRnDHit(mcH->position(), mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
+		    StRnDHit* tempHit = new StRnDHit(global, mHitError, 1, 1., 0, 1, 1, id++, kHpdId);  
 		    tempHit->setDetectorId(kHpdId); 
 		    tempHit->setVolumeId(mcH->volumeId());                   
 		    tempHit->setKey(mcH->key());     
