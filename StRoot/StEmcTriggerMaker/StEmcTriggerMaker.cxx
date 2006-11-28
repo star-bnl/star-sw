@@ -1,41 +1,37 @@
-//////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
 //
-// StEmcTriggerMaker A. A. P. Suaide (C) 2001
 //
-//   Update: 22-Feb-2002
-//	     J.L. Klay (LBNL)
+// StEmcTriggerMaker R. Fatemi (Oct 26, 2006)
 //
-//   This class now creates histograms of the (10-bit to 6-bit compressed)
-//   DAQ data and the TRG 6-bit ADC data so that comparisons
-//   can be made.
+// The structure of this class was first developed by J.Klay and A. Suaide in 2001.
+// It was originally designed to fill StEvent with the simulated L0 trigger response
+// but to my understanding was never fully implemented 
 //
-//   In order to run on *event.root files, just load the library and call:
-//     StEmcTriggerMaker* trigger=new StEmcTriggerMaker("bemctrigger");
-//     trigger->SetHistFileName(outfile);
+// Early in 2005, using code originally developed by Alex Stopolsky to emulate the BEMC
+// FEE output, I expanded the code to return full BEMC L0 trigger emulation. This code
+// was motivated by the need to run the same trigger algorithm over data and simulation.
+// All DSM outputs are stored, for data only, in StTriggerDetector class. The ultimate
+// design vision is that StEmcTriggerMaker serves as access to the StBemcTrigger and
+// StEemcTrigger classes which mock up the BEMC/EEMC FEE + L0 DSM trigger algorithms.
+// Interface to L2 should also take place in this class.
 //
-//   In order to run on *.daq files, make sure to load the St_trg_Maker
-//   and StEmcCalibrationMaker libraries and then to call them in this
-//   order:
-//   	St_trg_Maker* trg=new St_trg_Maker("trigger");
-//      trg->SetMode(1);
-//      StEmcPreCalibrationMaker* precalib=new StEmcPreCalibrationMaker("precalib",1);
-//      StEmcTriggerMaker* trigger=new StEmcTriggerMaker("bemctrigger");
-//      trigger->SetHistFileName(outfile);
 //
-//   Updated by Renee Fatemi 2004-2006
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Stiostream.h>
-#include <math.h>
+#include "StMessMgr.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TFile.h"
+#include <math.h>
+
 #include "StMaker.h"
-#include "StEmcTriggerMaker.h"
+#include "St_DataSetIter.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
-#include "TFile.h"
 #include "StEmcUtil/database/StBemcTables.h"
-#include "StMessMgr.h"
+
+#include "StEmcTriggerMaker.h"
+
 
 ClassImp(StEmcTriggerMaker)
 
@@ -45,12 +41,6 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     mBemcTrigger = new StBemcTrigger();
     mSaveStEvent = true;
     mPrint = false;
-    mHTBefore = NULL;
-    mPABefore = NULL;
-    mHT = NULL;
-    mPA = NULL;
-    mHTCorrel = NULL;
-    mPACorrel = NULL;
 
     mIs2003HT1=-1;
     mIs2004HT1=-1;
@@ -63,7 +53,12 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     mIs2005JP2=-1;
     mIs2005ADJ=-1;
     mIs2005JPSI=-1;
-    for (int i=0;i<11;i++)
+    mIs2006JP1=-1;
+    mIs2006HT2=-1;
+    mIs2006JP2=-1;
+    mIs2006JPSI=-1;
+    mIs2006HTTP=-1;
+    for (int i=0;i<16;i++)
     {
         isTrig[i]=-1;
     }
@@ -78,7 +73,10 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     JP1_ID_2005=-1;
     JP2_ID_2005=-1;
     ADJ_ID_2005=-1;
-    for (int i=0;i<10;i++)
+    HT2_ID_2006=-1;
+    JP1_ID_2006=-1;
+    JP2_ID_2006=-1;
+    for (int i=0;i<13;i++)
     {
         TowJetId[i] = -1;
     }
@@ -93,7 +91,11 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     JP1_DSM_2005=-1;
     JP2_DSM_2005=-1;
     ADJ_DSM_2005=-1;
-    for (int i=0;i<10;i++)
+    HT2_DSM_2006=-1;
+    JP1_DSM_2006=-1;
+    JP2_DSM_2006=-1;
+    BETOT_DSM_2006=-1;
+    for (int i=0;i<14;i++)
     {
         DsmAdc[i] = -1;
     }
@@ -101,18 +103,29 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
     for (int i=0;i<kNJet;i++){
       JP12005array[i]=-1;
       JP22005array[i]=-1;
+      JP12006array[i]=-1;
+      JP22006array[i]=-1;
     }
     for (int i=0; i<kNTowers; i++){
       HT12005array[i]=-1;
       HT22005array[i]=-1;
+      HT22006array[i]=-1;
     }
-    for (int i=0; i<5; i++) {
-      numHT[i]=-1;
-      numJP[i]=-1;
-    }
-    for (int i=0;i<kNJet;i++){
+
+    for (int i=0; i<kNPatches; i++){
+      HTTP2006arrayTP[i]=-1;
+      HTTP2006arrayTPADC[i]=-1;
+      HTTP2006arrayHT[i]=-1;
+      HTTP2006arrayHTADC[i]=-1;
 
     }
+
+    for (int i=0; i<7; i++) {
+      numHT[i]=-1;
+      numJP[i]=-1;
+      numHTTP[i]=-1;
+    }
+
 
 }
 
@@ -123,19 +136,11 @@ StEmcTriggerMaker::~StEmcTriggerMaker()
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Init()
 {
-    tables=new StBemcTables();
-
-    LOG_INFO <<"StEmcTriggerMaker::Init()"<<endm;
-    if (IAttr(".histos"))
-    {
-        mHTBefore = new TH2F("HighTower_DSM","High Tower trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
-        mPABefore = new TH2F("Patch_DSM","Patch trigger in DSM",300,-0.5,299.5,64,-0.5,63.5);
-        mHT       = new TH2F("HighTower","High Tower trigger",300,-0.5,299.5,64,-0.5,63.5);
-        mPA       = new TH2F("Patch","Patch trigger",300,-0.5,299.5,64,-0.5,63.5);
-        mHTCorrel = new TH2F("HighTower_Correl","High Tower trigger correlation",64,-0.5,63.5,64,-0.5,63.5);
-        mPACorrel = new TH2F("Patch_Correl","Patch trigger correlation",64,-0.5,63.5,64,-0.5,63.5);
-    }
-    return StMaker::Init();
+  tables=new StBemcTables();
+  
+  LOG_INFO <<"StEmcTriggerMaker::Init()"<<endm;
+  
+  return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Make()
@@ -147,8 +152,7 @@ Int_t StEmcTriggerMaker::Make()
     setTableMaker(tables);
 
     StEvent* event=(StEvent*)GetInputDS("StEvent");
-    if(!event)
-        return kStOk;
+    if(!event) return kStOk;
 
     mBemcTrigger->setPrint(mPrint);
     mBemcTrigger->setEvent(event);
@@ -162,12 +166,22 @@ Int_t StEmcTriggerMaker::Make()
     int* DsmAdc = mBemcTrigger->getTowPatchDSM();
     int* numHT = mBemcTrigger->getNHT();
     int* numJP = mBemcTrigger->getNJP();
+    int* numHTTP =mBemcTrigger->getNHTTP();
     int* HT12005array = mBemcTrigger->getHT12005array();
     int* HT22005array = mBemcTrigger->getHT22005array();
     int* JP12005array = mBemcTrigger->getJP12005array();
     int* JP22005array = mBemcTrigger->getJP22005array();
     int* JPSI2005adc  = mBemcTrigger->getJPSI2005adc();
     int* JPSI2005id   = mBemcTrigger->getJPSI2005id();
+    int* HT22006array = mBemcTrigger->getHT22006array();
+    int* JP12006array = mBemcTrigger->getJP12006array();
+    int* JP22006array = mBemcTrigger->getJP22006array();
+    int* JPSI2006adc  = mBemcTrigger->getJPSI2006adc();
+    int* JPSI2006id   = mBemcTrigger->getJPSI2006id();
+    int *HTTP2006arrayHT = mBemcTrigger->getHTTP2006arrayHT();
+    int *HTTP2006arrayHTADC = mBemcTrigger->getHTTP2006arrayHTADC();
+    int *HTTP2006arrayTP = mBemcTrigger->getHTTP2006arrayTP();
+    int *HTTP2006arrayTPADC = mBemcTrigger->getHTTP2006arrayTPADC();
 
     //2003 HT1 ==  1101
     mIs2003HT1=isTrig[0];
@@ -241,6 +255,53 @@ Int_t StEmcTriggerMaker::Make()
       JPSI_2005_ADC[i]=JPSI2005adc[i];
       JPSI_2005_ID[i]=JPSI2005id[i];
     }
+    
+    //2006 HT2=
+    mIs2006HT2=isTrig[11];
+    HT2_ID_2006=TowJetId[11];
+    HT2_DSM_2006=DsmAdc[11];
+    numHT2_2006=numHT[5];
+    for (int i=0;i<numHT2_2006;i++){
+      HT2_2006_array[i]=HT22006array[i];
+    }      
+
+    //2006 JP1=
+    mIs2006JP1=isTrig[12];
+    JP1_ID_2006=TowJetId[12];
+    JP1_DSM_2006=DsmAdc[12];
+    numJP1_2006=numJP[5];
+    for (int i=0;i<numJP1_2006;i++){
+      JP1_2006_array[i]=JP12006array[i];
+    }
+
+    //2006 JP2=
+    mIs2006JP2=isTrig[13];
+    JP2_ID_2006=TowJetId[13];
+    JP2_DSM_2006=DsmAdc[13];
+    numJP2_2006=numJP[6];
+    for (int i=0;i<numJP2_2006;i++){
+      JP2_2006_array[i]=JP22006array[i];
+    }
+
+    //2006 JPSI 
+    mIs2006JPSI=isTrig[14];
+    for (int i=0;i<kNJet; i++){
+      JPSI_2006_ADC[i]=JPSI2006adc[i];
+      JPSI_2006_ID[i]=JPSI2006id[i];
+    }
+
+    //2006 HTTP && UPSILON
+    mIs2006HTTP=isTrig[15];
+    numHTTP_2006=numHTTP[0];
+    for (int i=0; i<numHTTP_2006; i++){
+      HTTP_2006_arrayTP[i]=HTTP2006arrayTP[i];
+      HTTP_2006_arrayHT[i]=HTTP2006arrayHT[i];
+      HTTP_2006_arrayTP_ADC[i]=HTTP2006arrayTPADC[i];
+      HTTP_2006_arrayHT_ADC[i]=HTTP2006arrayHTADC[i];
+    }
+
+    //2006 BETOT
+    BETOT_DSM_2006=DsmAdc[14];
 
 
     //access TP 6 bit DSMsum
@@ -250,72 +311,14 @@ Int_t StEmcTriggerMaker::Make()
         trigPatch[j]=mBemcTrigger->trgPatch[j];
     }
 
-    if (IAttr(".histos"))
-    {
-        fillHistograms(event);
-    }
-
-    if(mSaveStEvent)
-        fillStEvent(event);
 
     return kStOK;
 }
-//_____________________________________________________________________________
+
+							  
 Int_t StEmcTriggerMaker::Finish()
 {
     return StMaker::Finish();
-}
-//_____________________________________________________________________________
-void StEmcTriggerMaker::fillHistograms(StEvent *event)
-{
-    emcTrigger emcTrg = mBemcTrigger->getTrigger();
-    for(int i=0;i<300;i++)
-    {
-        if (mHT)
-            mHT->Fill(i,emcTrg.HT[i]);
-        if (mPA)
-            mPA->Fill(i,emcTrg.Patch[i]);
-    }
-
-    // comparison with existing data in StTriggerData
-    if(!event)
-        return;
-    StTriggerData* trg=event->triggerData();
-    if(trg)
-    {
-        for(int i=0;i<300;i++)
-        {
-            if (mHTBefore)
-                mHTBefore->Fill(i,trg->bemcHighTower(i));
-            if (mPABefore)
-                mPABefore->Fill(i,trg->bemcJetPatch(i));
-            if (mHTCorrel)
-                mHTCorrel->Fill(emcTrg.HT[i],trg->bemcHighTower(i));
-            if (mPACorrel)
-                mPACorrel->Fill(emcTrg.Patch[i],trg->bemcJetPatch(i));
-        }
-    }
-    return;
-}
-//_____________________________________________________________________________
-void StEmcTriggerMaker::saveHistograms(char* file)
-{
-    TFile *f = new TFile(file,"RECREATE");
-    if (mHT)
-        mHT->Write();
-    if (mPA)
-        mPA->Write();
-    if (mHTBefore)
-        mHTBefore->Write();
-    if (mPABefore)
-        mPABefore->Write();
-    if (mHTCorrel)
-        mHTCorrel->Write();
-    if (mPACorrel)
-        mPACorrel->Write();
-    f->Close();
-    delete f;
-    return;
 }
 
 void StEmcTriggerMaker::get2005HT1_TOWS(int index, int *id){
@@ -348,27 +351,51 @@ void StEmcTriggerMaker::get2005JPSI_ID(int index, int *id){
   if (index<kNJet) *id=JPSI_2005_ID[index];
 }
 
-
-//_____________________________________________________________________________
-void StEmcTriggerMaker::fillStEvent(StEvent *event)
-{
-    if(!event)
-        return;
-    StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
-    if(!trg)
-    {
-        trg = new StTriggerDetectorCollection();
-        event->setTriggerDetectorCollection(trg);
-    }
-    StEmcTriggerDetector emc=trg->emc();
-    emcTrigger emcTrg = mBemcTrigger->getTrigger();
-    for(int i=0;i<300;i++)
-    {
-        emc.setHighTower(i,emcTrg.HT[i]);
-        emc.setPatch(i,emcTrg.Patch[i]);
-    }
-    return;
+void StEmcTriggerMaker::get2006HT2_TOWS(int index, int *id){
+  *id=-1;
+  if (index<kNTowers) *id=HT2_2006_array[index];
 }
+
+void StEmcTriggerMaker::get2006JP1_PATCHES(int index, int *id){
+  *id=-1;
+  if (index<kNJet) *id=JP1_2006_array[index];
+}
+
+void StEmcTriggerMaker::get2006JP2_PATCHES(int index, int *id){
+  *id=-1;
+  if (index<kNJet) *id=JP2_2006_array[index];
+}
+
+void StEmcTriggerMaker::get2006JPSI_ADC(int index, int *id){
+  *id=-1;
+  if (index<kNJet) *id=JPSI_2006_ADC[index];
+}
+
+void StEmcTriggerMaker::get2006JPSI_ID(int index, int *id){
+  *id=-1;
+  if (index<kNJet) *id=JPSI_2006_ID[index];
+}
+
+void StEmcTriggerMaker::get2006HTTP_TP(int index, int *id){
+  *id=-1;
+  if (index<kNPatches) *id=HTTP_2006_arrayTP[index];
+}
+
+void StEmcTriggerMaker::get2006HTTP_TP_ADC(int index, int *id){
+  *id=-1;
+  if (index<kNPatches) *id=HTTP_2006_arrayTP_ADC[index];
+}
+
+void StEmcTriggerMaker::get2006HTTP_HT(int index, int *id){
+  *id=-1;
+  if (index<kNPatches) *id=HTTP_2006_arrayHT[index];
+}
+
+void StEmcTriggerMaker::get2006HTTP_HT_ADC(int index, int *id){
+  *id=-1;
+  if (index<kNPatches) *id=HTTP_2006_arrayHT_ADC[index];
+}
+
 
 
 
