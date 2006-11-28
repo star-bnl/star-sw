@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.135 2006/11/22 17:41:49 potekhin Exp $
+* $Id: geometry.g,v 1.136 2006/11/28 00:02:09 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.136  2006/11/28 00:02:09  potekhin
+* Added Y2007 and set it up to include the new FMS (FPD)
+*
 * Revision 1.135  2006/11/22 17:41:49  potekhin
 * Added a tag which will be used exclusively for the material
 * balance effect study, i.e. it won't contains any realistic
@@ -2126,6 +2129,77 @@ If LL>1
                      CaveConfig = 3;
                 }
 ****************************************************************************************
+  on Y2007    { Year 2006 baseline which is Y2006+FMS
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+* Full barrel in 2006
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 3 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 35; "third version, full barrel newly corrected radii"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need a bigger Cave"
+                     CaveConfig = 3;
+                }
+****************************************************************************************
   on DUMM01   { R and D geometry: TPC+DUMM
 
                      svtt=off; "no SVT  at all in this configuration"
@@ -2902,6 +2976,7 @@ If LL>1
    if (fpdm.and.FpdmConfig==0) Call fpdmgeo
    if (fpdm.and.FpdmConfig==1) Call fpdmgeo1
    if (fpdm.and.FpdmConfig==2) Call fpdmgeo2
+   if (fpdm.and.FpdmConfig==3) Call fpdmgeo3
 
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
