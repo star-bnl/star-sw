@@ -12,6 +12,9 @@ class EEmcSectorFit : public TMinuit
   /// Constructor
   /// \param maxGammas: Maximum number of gammas which we will attempt to fit.
   EEmcSectorFit(Int_t maxGammas=10);
+
+
+
   /// Destructor
   ~EEmcSectorFit();
 
@@ -41,7 +44,10 @@ class EEmcSectorFit : public TMinuit
   /// \param x: strip index, [0,288)
   /// \param plane: smd plane, 0=u, 1=v
   /// \param dx: number of strips on either side to sum over
-  Double_t Residual( Int_t x, Int_t plane, Int_t dx); 
+  /// \param side: 0=both, 1=left, 2=right
+  Double_t Residual( Int_t x, Int_t plane, Int_t dx, Int_t side=0); 
+
+
 
 
   /// Find maximum residual strip in specified plane.  Returns strip index.
@@ -77,6 +83,9 @@ class EEmcSectorFit : public TMinuit
   Double_t chi2(){ return mChi2; }
   /// Return the number of degrees of freedom
   Int_t ndf(){ return mNDF; }  
+
+  /// Adds TF1 to histogram
+  void AddFits(TH1F *u, TH1F *v);
 
   /// Flag to determine if we test all permutations or not
   Bool_t doPermutations;

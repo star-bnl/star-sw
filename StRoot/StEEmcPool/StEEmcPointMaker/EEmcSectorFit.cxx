@@ -7,8 +7,8 @@
  * planes.
  *
  * \author Jason C. Webb
- * $Date: 2005/08/23 18:00:38 $
- * $Revision: 1.1 $
+ * $Date: 2006/11/28 18:14:09 $
+ * $Revision: 1.2 $
  *
  */
 
@@ -20,6 +20,7 @@
 #include "TString.h"
 #include <iostream>
 #include <algorithm>
+#include "TLine.h"
 
 ClassImp(EEmcSectorFit);
 
@@ -36,11 +37,12 @@ EEmcSectorFit::EEmcSectorFit(Int_t max) : TMinuit(4*max)
   mNDF=0;
   mChi2=0.; 
 }
+
+
 EEmcSectorFit::~EEmcSectorFit()
 {
-  if ( mSMD[0] ) delete mSMD[0];
-  if ( mSMD[1] ) delete mSMD[1];
 }
+
 // ----------------------------------------------------------------------------
 Double_t EEmcSectorFit::FitFunc( Double_t x, Int_t plane )
 {
@@ -113,28 +115,45 @@ Int_t EEmcSectorFit::Eval(Int_t np,Double_t* gr,Double_t& chi2,Double_t* par,Int
 // ----------------------------------------------------------------------------
 Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane )
 {
-    // zero residual if x is w/in +/- 2 strips of another gamma
-    for ( UInt_t i=0;i<yield.size();i++ )
-      {
-	Double_t xx=(plane==0)?umean[i]:vmean[i];
-	if ( TMath::Abs(xx-(Double_t)x-0.5) <= 1.0 ) return 0.;
-      }
-    TH1F *histo=mSMD[plane];
-    Int_t bin = x + 1;  
-    Double_t r = histo->GetBinContent(bin) - FitFunc( (Double_t)x+0.5, plane );
-    return r;
+  // zero residual if x is w/in +/- 2 strips of another gamma
+  for ( UInt_t i=0;i<yield.size();i++ )
+    {
+      Double_t xx=(plane==0)?umean[i]:vmean[i];
+      if ( TMath::Abs(xx-(Double_t)x-0.5) <= 1.0 ) return 0.;
+    }
+  TH1F *histo=mSMD[plane];
+  Int_t bin = x + 1;  
+  Double_t r = histo->GetBinContent(bin) - FitFunc( (Double_t)x+0.5, plane );
+  return r;
 }
 // ----------------------------------------------------------------------------
-Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane, Int_t dx )
+Double_t EEmcSectorFit::Residual( Int_t x, Int_t plane, Int_t dx, Int_t side )
 {
-    Int_t min=TMath::Max(x-dx,0);
-    Int_t max=TMath::Min(x+dx,288);
-    Double_t r=0.; 
-    for ( Int_t xx=min;xx<=max;xx++ )
+
+
+  Int_t min;//=TMath::Max(x-dx,0);
+  Int_t max;//=TMath::Min(x+dx,288);
+
+  
+  min=TMath::Max(x-dx,0);
+  max=TMath::Min(x+dx,288);
+  
+  if ( side==1 ) 
     {
-	r += Residual( xx, plane );
+      min=TMath::Max(x,0);
     }
-    return r;
+  else if ( side==2 )
+    {
+      max=TMath::Min(x,288);
+    }
+
+    
+  Double_t r=0.; 
+  for ( Int_t xx=min;xx<=max;xx++ )
+    {
+      r += Residual( xx, plane );
+    }
+  return r;
 } 
 // ----------------------------------------------------------------------------
 Int_t EEmcSectorFit::MaxStrip(Int_t plane)
@@ -160,6 +179,12 @@ void EEmcSectorFit::AddCandidate(Double_t y, Double_t s, Double_t u, Double_t v)
   sigma.push_back(s);
   umean.push_back(u);
   vmean.push_back(v);
+#if 0
+  TLine *lU = new TLine(u,0.,u,y);lU->SetLineColor(2);
+  TLine *lV = new TLine(v,0.,v,y);lV->SetLineColor(2);
+  mSMD[0]->GetListOfFunctions()->Add(lU);
+  mSMD[1]->GetListOfFunctions()->Add(lV);
+#endif
   /// initialize parameters
   InitParameters();
 }
@@ -181,7 +206,7 @@ void EEmcSectorFit::InitParameters()
 // ----------------------------------------------------------------------------
 void EEmcSectorFit::Draw(Option_t *opts)
 {
-  TCanvas *canvas = new TCanvas("c1","c1",800,400);
+  //  TCanvas *canvas = new TCanvas("c1","c1",800,400);
   /*
   TPad *canvas=gPad;
   if ( !gPad ) {
@@ -190,7 +215,7 @@ void EEmcSectorFit::Draw(Option_t *opts)
     canvas=gPad;
   }
   */
-  canvas->Divide(2);
+  //  canvas->Divide(2);
 
   /*
   mSMD[0]->GetListOfFunctions()->Delete();
@@ -245,10 +270,11 @@ void EEmcSectorFit::Draw(Option_t *opts)
     mSMD[1]->GetXaxis()->SetRangeUser(vmin-20.,vmax+20.);
 
 
-  canvas->cd(1);
-  mSMD[0]->Draw(opts);
-  canvas->cd(2);
-  mSMD[1]->Draw(opts);
+  //  canvas->cd(1);
+  //  mSMD[0]->Draw(opts);
+  //  canvas->cd(2);
+  //  mSMD[1]->Draw(opts);
+
 }
 // ----------------------------------------------------------------------------
 void EEmcSectorFit::TryPermutations()
@@ -337,4 +363,57 @@ void EEmcSectorFit::Clear(Option_t *opts)
   umean.clear();
   vmean.clear();
   Command("CLEAR");
+}
+// ----------------------------------------------------------------------------
+void EEmcSectorFit::AddFits( TH1F *uu, TH1F *vv )
+{
+
+  assert(uu);
+  assert(vv);
+
+  Double_t umin=999.;
+  Double_t vmin=888.;
+  Double_t umax=-1.;
+  Double_t vmax=-1.;
+
+  /// add fits to histograms
+  for ( UInt_t i=0;i<yield.size();i++ )
+    {
+      TString uname="fitu";uname+=i;      
+      TString vname="fitv";vname+=i;
+      TF1 *fitu=new TF1(uname,eeSinglePeak,0.,288.,5);
+      TF1 *fitv=new TF1(vname,eeSinglePeak,0.,288.,5);
+      fitu->SetLineColor(4);
+      fitv->SetLineColor(4);
+      fitu->SetLineWidth(1);
+      fitv->SetLineWidth(1);
+      fitu->SetParameter(0, yield[i] );
+      fitu->SetParameter(1, umean[i] );
+      fitu->SetParameter(2, sigma[i] );
+      fitu->SetParameter(3, 0.2 );
+      fitu->SetParameter(4, 3.5 );
+      fitv->SetParameter(0, yield[i] );
+      fitv->SetParameter(1, vmean[i] );
+      fitv->SetParameter(2, sigma[i] );
+      fitv->SetParameter(3, 0.2 );
+      fitv->SetParameter(4, 3.5 );
+      uu->GetListOfFunctions()->Add( fitu );
+      vv->GetListOfFunctions()->Add( fitv );
+      umin=TMath::Min( fitu->GetParameter(1), umin );
+      umax=TMath::Max( fitu->GetParameter(1), umax );
+      vmin=TMath::Min( fitv->GetParameter(1), vmin );
+      vmax=TMath::Max( fitv->GetParameter(1), vmax );      
+    }
+
+  umin=TMath::Max(umin,1.0);
+  umax=TMath::Min(umax,287.0);
+  vmin=TMath::Max(vmin,1.0);
+  vmax=TMath::Min(vmax,287.0);
+
+  if ( umin < umax )
+    uu->GetXaxis()->SetRangeUser(umin-20.,umax+20.);
+  if ( vmin < vmax )
+    vv->GetXaxis()->SetRangeUser(vmin-20.,vmax+20.);
+
+
 }
