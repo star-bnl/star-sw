@@ -88,7 +88,7 @@ Int_t StMyPointMaker::Make()
 	  // NOTE-- this is the slowest way possible to do this, O(N!).  
 	  //
 
-	  Int_t count = 0;
+	  //Int_t count = 0;
 	  Bool_t go = true;
 	  while ( go )
 	    {
@@ -314,10 +314,10 @@ Bool_t StMyPointMaker::split( StEEmcSmdCluster &in1,  // first resolved cluster 
   if ( in1.plane()  == out1.plane()  ) return false;
   
   /// get a pointer to the smd geometry class
-  EEmcSmdGeom *geom = EEmcSmdGeom::instance();
+  //EEmcSmdGeom *geom = EEmcSmdGeom::instance();
 
-  Int_t nstrips_in  = (Int_t)geom -> getEEmcSector( in1.plane(), in1.sector() ).stripPtrVec.size();
-  Int_t nstrips_out = (Int_t)geom -> getEEmcSector( out1.plane(), out1.sector() ).stripPtrVec.size();
+  //Int_t nstrips_in  = (Int_t)geom -> getEEmcSector( in1.plane(), in1.sector() ).stripPtrVec.size();
+  //Int_t nstrips_out = (Int_t)geom -> getEEmcSector( out1.plane(), out1.sector() ).stripPtrVec.size();
 
   /// determine size of the cluster we will attempt to split
   Int_t size = out1.size();
@@ -327,26 +327,6 @@ Bool_t StMyPointMaker::split( StEEmcSmdCluster &in1,  // first resolved cluster 
   Int_t id_min = seed.index() - size/2;
   Int_t id_max = seed.index() + size/2;
 
-  /***
-  printf("** attempting to split cluster key=%i *****************************\n",out1.key());
-  printf("\n");
-  printf("seed   = %i\n", seed.index());
-  printf("size   = %i\n", size);
-  printf("id_min = %i\n", id_min);
-  printf("id_max = %i\n", id_max);
-  printf("\n");
-
-  printf("merged cluster\n");
-  for ( Int_t ii=0;ii<out1.size();ii++ )
-    printf("index=%i E=%5.2f MeV\n",out1.strip(ii).index(),1000.0*out1.strip(ii).energy());
-  printf("resolved cluster 1\n");
-  for ( Int_t ii=0;ii<in1.size();ii++ )
-    printf("index=%i E=%5.2f MeV\n",in1.strip(ii).index(),1000.0*in1.strip(ii).energy());
-  printf("resolved cluster 2\n");
-  for ( Int_t ii=0;ii<in2.size();ii++ )
-    printf("index=%i E=%5.2f MeV\n",in2.strip(ii).index(),1000.0*in2.strip(ii).energy());
-  ***/
-  
 
   ///
   /// We will be doing a chi^2 minimization using the two clusters in the resolved
