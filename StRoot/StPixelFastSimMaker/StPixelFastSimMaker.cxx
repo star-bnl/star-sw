@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.6 2006/11/28 22:37:42 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.7 2006/11/29 21:42:07 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.7  2006/11/29 21:42:07  andrewar
+ * Update with Pixel resolution smearing.
+ *
  * Revision 1.6  2006/11/28 22:37:42  wleight
  * Fixed minor smearing bug
  *
@@ -97,10 +100,17 @@ Int_t StPixelFastSimMaker::Make()
     if (! rcEvent) {cout << "No StEvent on input" << endl; return kStWarn;}
     StMcEvent* mcEvent = (StMcEvent *) GetInputDS("StMcEvent");
     if (! mcEvent) {cout << "No StMcEvent on input" << endl; return kStWarn;}
-    if (! gGeoManager) GetDataBase("VmcGeometry");  
+    if (! gGeoManager) GetDataBase("VmcGeometry");
+
+    
     // Store hits into RnD Hit Collection until we have our own
     StRnDHitCollection *col = new StRnDHitCollection;
-    
+    if (!col ) 
+      {
+        printf("StPixelFastSimMaker -E- no RnDHitCollection!\n");
+        abort();
+      }
+
     // Don't use realistic hit errors for now. When we transit to smeared
     // hits, this would be a good place to store offset info
     StThreeVectorF mHitError(0.,0.,0.);
@@ -118,9 +128,16 @@ Int_t StPixelFastSimMaker::Make()
 	      {								
 		UInt_t nh = pixHitCol->layer(k)->hits().size();		
 		for (UInt_t i = 0; i < nh; i++) {
-		  StMcHit *mcH = pixHitCol->layer(k)->hits()[i];          
+		  
+		  StMcHit *mcH = pixHitCol->layer(k)->hits()[i];
+		  if (!mcH) continue;
+
+		  StThreeVectorD mRndHitError(0.,0.,0.);
+		  smearGaus(mRndHitError, 8.6, 8.6);
+		  //8.6 is the design resolution of the detector
+
 		  StRnDHit* tempHit = new StRnDHit(mcH->position(), 
-						   mHitError, 1, 1., 0, 
+						   mRndHitError, 1, 1., 0, 
 						   1, 1, id++, kHftId);
 		  //cout <<"StPixelFastSimMaker::Make() -I- Pix Hit: "
 		  //     <<*tempHit<<endl;
@@ -149,7 +166,7 @@ Int_t StPixelFastSimMaker::Make()
     {									
       Int_t nhits = istHitCol->numberOfHits();
       if (nhits)								
-	{									
+	{						 			
 	  Int_t id = 0;							
 	  //StSPtrVecHit *cont = new StSPtrVecHit();				
 	  //rcEvent->addHitCollection(cont, # Name );				
@@ -457,3 +474,34 @@ StThreeVectorF StPixelFastSimMaker::local2GlobalHpd(const StThreeVectorF& local,
 
 }
 
+
+
+void StPixelFastSimMaker::smearGaus(StThreeVectorD &mError, 
+                                    double sigma1, double sigma2)
+{
+
+    // smear hit in transverse plane, 
+    // sigma's are in microns
+    double u1, u2, v1, v2;
+    double r = 2.;
+    double z1 = 10.;
+    double z2 = 10.;
+    while(fabs(z1)>2. || fabs(z2)>2.) // sigma
+      {
+         r = 2.;
+         while(r>1.)
+           {
+              u1 = rand()/double(RAND_MAX); 
+              u2 = rand()/double(RAND_MAX);
+              v1 = 2*u1 - 1.;  
+              v2 = 2*u2 - 1.; 
+              r = pow(v1,2) + pow(v2,2);
+           }
+           z1 = v1*sqrt(-2.*log(r)/r);  z2 = v2*sqrt(-2.*log(r)/r);
+       }
+
+    //set to be cumulative with other transforms 
+    mError.setX(mError.x()+z1*sigma1/1.e04);
+    mError.setY(mError.y()+z1*sigma1/1.e04);
+    mError.setZ(mError.z()+z2*sigma2/1.e04);
+}
