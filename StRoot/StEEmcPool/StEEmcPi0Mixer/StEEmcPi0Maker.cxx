@@ -95,6 +95,7 @@ Int_t StEEmcPi0Maker::Make()
 	  if (ipoint>=jpoint) continue;
 	  StEEmcPoint p2=points[jpoint];
 
+#if 0
 	  /*
 	   * Weihong's energy correction
 	   */
@@ -104,7 +105,6 @@ Int_t StEEmcPi0Maker::Make()
 	  Float_t r2=e2/(e1+e2);
 	  Float_t sum = 0.;
 
-#if 0
 	  Float_t epre1[720]; for ( Int_t ii=0;ii<720;ii++ ) epre1[ii]=0.;
 	  Float_t epre2[720]; for ( Int_t ii=0;ii<720;ii++ ) epre2[ii]=0.;
 	  StEEmcTower t1=p1.tower(0);
@@ -131,11 +131,11 @@ Int_t StEEmcPi0Maker::Make()
 	    sum += epre1[ii];
 	    sum += epre2[ii];
 	  }
-#endif
+
 
 	  Float_t energy=e1+e2+18.0*sum;
 
-#if 0
+
 	  /*
 	   * Add in SMD energy
 	   */

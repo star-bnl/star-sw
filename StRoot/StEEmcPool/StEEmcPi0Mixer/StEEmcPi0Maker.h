@@ -12,8 +12,6 @@ class TH2F;
 class TTree;
 class TClonesArray;
 
-
-#include "StEEmcPi0Event.h"
 #include "StEEmcPair.h"
 
 class StEEmcPi0Maker : public StMaker
