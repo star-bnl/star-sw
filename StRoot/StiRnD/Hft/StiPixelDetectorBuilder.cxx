@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.14 2006/11/17 15:39:03 wleight Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.15 2006/11/29 00:44:04 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.15  2006/11/29 00:44:04  andrewar
+ * Added call to get tracking parameters from DBase.
+ *
  * Revision 1.14  2006/11/17 15:39:03  wleight
  * Changes to make HFT hits work with UPGR05 geometry
  *
@@ -39,15 +42,18 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
 						 const string & inputFile)
   : StiDetectorBuilder("Pixel",active,inputFile)
 {
-	//Parameterized hit error calculator.  Given a track (dip, cross, pt, etc) returns average error
-	//once you actually want to do tracking, the results depend strongly on the numbers below.
-	//here I plug in 4micron resolution in both local x and y coordinates
-	//I also put no dependence on either crossing angle or dip angle of track
+	//Parameterized hit error calculator.  Given a track (dip, cross, pt, etc)
+        //returns average error once you actually want to do tracking, the results
+        //depend strongly on the numbers below. 
     _trackingParameters.setName("PixelTrackingParameters");
     _calculator.setName("PixelHitErrors");
 
     //_calculator = new StiDefaultHitErrorCalculator();
-    _calculator.set(6e-5, 0., 0., 6e-5, 0., 0.);
+    TDataSet  *set = GetDataBase("Calibrations/tracker");
+
+    //             in your case it should be
+    St_HitError *table =  set->Find("hftHitError");   
+    _calculator.set(table.coeff[1], 0., 0., table.coeff[4], 0., 0.);
   
     ifstream inF("PixelBuilder_pars.txt");
     if (inF)
