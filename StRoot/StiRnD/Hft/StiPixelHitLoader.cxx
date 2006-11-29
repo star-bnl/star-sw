@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.15 2006/11/17 15:39:03 wleight Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.16 2006/11/29 04:19:23 andrewar Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.16  2006/11/29 04:19:23  andrewar
+ * Added smearing to hit loader.
+ *
  * Revision 1.15  2006/11/17 15:39:03  wleight
  * Changes to make HFT hits work with UPGR05 geometry
  *
@@ -82,11 +85,12 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 
 	//detector= _detector->getDetector(hftH->layer()-1, hftH->ladder()-1);
 	int ittfLadder;
-	//cout<<"hit layer: "<<hftH->layer()<<endl;
-	//cout<<"hit ladder: "<<hftH->ladder()<<endl;
-	if(hftH->layer()==1) ittfLadder= ( 2* int( (hftH->ladder()-1.) /3. ) +1)*3 - hftH->ladder();
-	else ittfLadder=( 2* int( (hftH->ladder()-1.) /8. ) +1)*8 - hftH->ladder();
-	//cout<<"ittfLadder: "<<ittfLadder<<endl;
+	printf("hit layer: %i ladder: %i\n",hftH->layer(), hftH->ladder());
+	if(hftH->layer()==1)
+	  ittfLadder= ( 2* int( (hftH->ladder()-1.) /3. ) +1)*3 - hftH->ladder();
+	else
+	  ittfLadder=( 2* int( (hftH->ladder()-1.) /8. ) +1)*8 - hftH->ladder();
+	printf("ittfLadder: %i\n",ittfLadder);
 	detector= _detector->getDetector(hftH->layer()-1, ittfLadder);
 
 
@@ -99,9 +103,26 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 	if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
 	stiHit->reset();
 
+	double dCos = cos(detector->getPlacement()->getNormalRefAngle());
+	double dSin = sin(detector->getPlacement()->getNormalRefAngle());
+        double x = hftH->position().x() * dCos - hftH->position().y() * dSin;
+        double y = hftH->position().x() * -1.*dSin + hftH->position().y() * dCos;
+	double z = hftH->position().z();
+
+	y = y + hftH->positionError().y();
+
+	double xg = dCos * x - dSin * y;
+	double yg = dSin * x + dCos * y;
+	double zg = z + hftH->positionError().z();
+
+	const StThreeVectorF newPos(xg,yg,zg);
+	hftH->setPosition(newPos);
+
+	
 	stiHit->setGlobal(detector, hftH,
-                          hftH->position().x(), hftH->position().y(), hftH->position().z(),
-                          hftH->charge());
+                          hftH->position().x(), hftH->position().y(),
+			  hftH->position().z(), hftH->charge());
+		
 	_hitContainer->add(stiHit);
 
 	//done loop over hits
