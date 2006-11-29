@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.15 2006/11/29 00:44:04 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.16 2006/11/29 04:02:01 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.16  2006/11/29 04:02:01  andrewar
+ * Make use of pre-existing STAR DB inteface.
+ *
  * Revision 1.15  2006/11/29 00:44:04  andrewar
  * Added call to get tracking parameters from DBase.
  *
@@ -35,6 +38,8 @@
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 
+#include "TDataSetIter.h"
+#include "tables/St_HitError_Table.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
 
@@ -48,13 +53,6 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
     _trackingParameters.setName("PixelTrackingParameters");
     _calculator.setName("PixelHitErrors");
 
-    //_calculator = new StiDefaultHitErrorCalculator();
-    TDataSet  *set = GetDataBase("Calibrations/tracker");
-
-    //             in your case it should be
-    St_HitError *table =  set->Find("hftHitError");   
-    _calculator.set(table.coeff[1], 0., 0., table.coeff[4], 0., 0.);
-  
     ifstream inF("PixelBuilder_pars.txt");
     if (inF)
       {
@@ -78,8 +76,15 @@ StiPixelDetectorBuilder::~StiPixelDetectorBuilder()
 /// Build all detector components of the Pixel detector.
 void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 {
+
   char name[50];
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
+
+
+    //Now pulling values from the DBase for the tracking parameters
+    loadM(source);
+
+
   unsigned int nRows=1;
 
   // 2 real rows, but we have detector elements and support elements. 
@@ -403,4 +408,9 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     p->setKey(1, layer);
     p->setKey(2, ladder);
     add(layer,ladder, p);
+}
+
+void StiPixelDetectorBuilder::loadDS(TDataSet &ds)
+{
+  _calculator.loadDS(ds);
 }
