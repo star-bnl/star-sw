@@ -1,6 +1,9 @@
-// $Id: StDetectorDbTriggerID.cxx,v 1.11 2006/05/04 17:44:34 dunlop Exp $
+// $Id: StDetectorDbTriggerID.cxx,v 1.12 2006/11/29 20:53:37 fisyak Exp $
 //
 // $Log: StDetectorDbTriggerID.cxx,v $
+// Revision 1.12  2006/11/29 20:53:37  fisyak
+// Fix for icc
+//
 // Revision 1.11  2006/05/04 17:44:34  dunlop
 // moved $LOG
 //
@@ -375,7 +378,7 @@ char* StDetectorDbTriggerID::getTrigL3ExpandedL2TriggerResultType(unsigned int e
 char* StDetectorDbTriggerID::getTrigL3ExpandedName(unsigned int entry){
     char* value = 0;
     if(mTrigL3Expanded && entry < this->getTrigL3ExpandedNumRows() )
-	value = mTrigL3Expanded[entry].name;
+      value = (char *) mTrigL3Expanded[entry].name;
     return value;
 };
 
