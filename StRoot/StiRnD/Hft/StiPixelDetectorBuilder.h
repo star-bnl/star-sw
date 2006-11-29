@@ -20,6 +20,8 @@ public:
     double radiusForPixelSector(unsigned int iSector) const;
     double psiForPixelSector(unsigned int iSector) const;
 
+    void loadDS(TDataSet&ds);
+    
  protected:
     StiMaterial * _fcMaterial;
     StiDefaultHitErrorCalculator _calculator;
