@@ -1,7 +1,12 @@
 /*
- * $Id: StiPixelDetectorBuilder.cxx,v 1.16 2006/11/29 04:02:01 andrewar Exp $
+ * $Id: StiPixelDetectorBuilder.cxx,v 1.17 2006/11/30 16:37:19 andrewar Exp $
  *
  * $Log: StiPixelDetectorBuilder.cxx,v $
+ * Revision 1.17  2006/11/30 16:37:19  andrewar
+ * Removed call to dbase for tracking parameter loading for the review. Dynamic
+ * access will be debugged and restored after the STAR review. Hit errors are
+ * forced to 60um.
+ *
  * Revision 1.16  2006/11/29 04:02:01  andrewar
  * Make use of pre-existing STAR DB inteface.
  *
@@ -52,6 +57,7 @@ StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active,
         //depend strongly on the numbers below. 
     _trackingParameters.setName("PixelTrackingParameters");
     _calculator.setName("PixelHitErrors");
+    _calculator.set(6e-5, 0., 0., 6e-5, 0., 0.);
 
     ifstream inF("PixelBuilder_pars.txt");
     if (inF)
@@ -80,9 +86,8 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
   char name[50];
   cout << "StiPixelDetectorBuilder::buildDetectors() -I- Started" << endl;
 
-
-    //Now pulling values from the DBase for the tracking parameters
-    loadM(source);
+  //Now pulling values from the DBase for the tracking parameters
+  //loadM(source);
 
 
   unsigned int nRows=1;
@@ -125,11 +130,11 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker &source)
 	  double phi = phiForPixelSector(sector) + psiForPixelSector(sector);
 	  double r = radiusForPixelSector(sector)* cos(psiForPixelSector(sector)) - 0.0040; // note 40 microns offset
 	  double dY = radiusForPixelSector(sector)*sin(psiForPixelSector(sector));
-	  cout << " sector:"<<sector
-	       << "    phi:"<<phi*180/3.1415
+	  /*printf(" sector: %g phi: %g radius: %g normal: %g dY: %g\n",sector
+	       ,phi*180/3.1415
 	       << " radius:"<<radiusForPixelSector(sector)
 	       << " normal r:"<<r
-	       << "     dY:"<<dY<<endl;
+	       << "     dY:"<<dY<<endl;*/
 	  pPlacement->setNormalRep(phi, r, dY); 
 	  pPlacement->setLayerRadius(r);
 	  pPlacement->setLayerAngle(phi);
@@ -401,8 +406,8 @@ void StiPixelDetectorBuilder::AverageVolume(TGeoPhysicalNode *nodeP)
     gMessMgr->Info() <<"StiPixelDetectorBuilder: -I- built detector "
 		     << p->getName()
 		     << " from " << nameP.Data()<<endl;
-    printf("StiPixelDetectorBuilder: -I- built detector %s from %s\n", 
-	   p->getName().c_str(), nameP.Data());
+    printf("StiPixelDetectorBuilder: -I- built detector %s from %s at phi: %g\n", 
+	   p->getName().c_str(), nameP.Data(), centerVector.phi());
 
 
     p->setKey(1, layer);
