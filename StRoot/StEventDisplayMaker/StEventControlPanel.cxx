@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.14 2004/11/16 04:33:04 perev Exp $
+// $Id: StEventControlPanel.cxx,v 1.15 2006/11/30 23:03:02 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -125,8 +125,8 @@ void StEventControlPanel::Build()
          "SVT"	 ,"StEvent(Svt Unused Hits)"	, 
          " "	 ,"StEvent(Ssd Used Hits)"	   , 
          "SSD"	 ,"StEvent(Ssd Unused Hits)"	, 
-         " " 	 ,"StEvent(Rich Used Hits)"	   ,
-         "RICH" ,"StEvent(Rich Unused Hits)"	, 
+         " " 	 ,"StEvent(RnD Used Hits)"	   ,
+         "RnD"  ,"StEvent(RnD Unused Hits)"	, 
          " "	 ,"StEvent(Emc Used Hits)"	   , 
          "EMC"	 ,"StEvent(Emc Unused Hits)"	, 
          " "	 ,"StEvent(Tof Used Hits)"    	, 
@@ -199,7 +199,7 @@ void StEventControlPanel::Build()
          "FTPC" ,"SCON"	, 
          "SVT"	 ,"STSI"	, 
          "SSD"	 ,"SSD"	, 
-         "RICH" ,"RICH"	, 
+         "RnD"  ,"RICH"	, 
          "EMC"	 ,"CALB"	, 
          "TOF"	 ,"BTOF"	
       };
