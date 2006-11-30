@@ -1,7 +1,10 @@
 /*
- * $Id: StiPixelHitLoader.cxx,v 1.16 2006/11/29 04:19:23 andrewar Exp $
+ * $Id: StiPixelHitLoader.cxx,v 1.17 2006/11/30 20:42:46 andrewar Exp $
  *
  * $Log: StiPixelHitLoader.cxx,v $
+ * Revision 1.17  2006/11/30 20:42:46  andrewar
+ * Fixed sign error in pixel smearing.
+ *
  * Revision 1.16  2006/11/29 04:19:23  andrewar
  * Added smearing to hit loader.
  *
@@ -105,7 +108,7 @@ void StiPixelHitLoader::loadHits(StEvent* source,
 
 	double dCos = cos(detector->getPlacement()->getNormalRefAngle());
 	double dSin = sin(detector->getPlacement()->getNormalRefAngle());
-        double x = hftH->position().x() * dCos - hftH->position().y() * dSin;
+        double x = hftH->position().x() * dCos + hftH->position().y() * dSin;
         double y = hftH->position().x() * -1.*dSin + hftH->position().y() * dCos;
 	double z = hftH->position().z();
 
