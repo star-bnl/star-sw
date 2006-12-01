@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.136 2006/11/28 00:02:09 potekhin Exp $
+* $Id: geometry.g,v 1.137 2006/12/01 19:26:58 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.137  2006/12/01 19:26:58  potekhin
+* Removing the SSD from the R&D geometry UPGR05, resulting
+* in a new configuration, UPGR08
+*
 * Revision 1.136  2006/11/28 00:02:09  potekhin
 * Added Y2007 and set it up to include the new FMS (FPD)
 *
@@ -2569,6 +2573,65 @@ If LL>1
 
                    igtd=on; "Forward GEM disks in this tag"
                    itsp=on; "prototype of the Inner Tracker SuPport structure"
+                }
+****************************************************************************************
+  on UPGR08   { New Tracking: HFT+HPD+IST+TPC-SVT-SSD
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 0;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HpdtConfig=1;   " base version"
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=3;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
