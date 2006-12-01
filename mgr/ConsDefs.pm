@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.94 2006/11/19 00:28:34 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.95 2006/12/01 21:44:50 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -594,10 +594,15 @@
       $XMLINCDIR = `$xml --cflags`;
       chomp($XMLINCDIR);
       $XMLINCDIR =~ s/-I//;
-      my $XML = `$xml --libs`; print "$XML\n";
+      my $XML = `$xml --libs`;# print "$XML\n";
       ($XMLLIBDIR,$XMLLIBS) = split ' ', $XML;
       $XMLLIBDIR =~ s/-L//;
-      print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS\n"; #if $XMLLIBDIR && ! $param::quiet;
+      my $XMLVersion = `$xml --version`;#      print "XMLVersion = $XMLVersion\n";
+      my ($major,$minor) = split '\.', $XMLVersion;# print "major = $major,minor = $minor\n";
+      $XMLCPPFlag = "";#-DXmlTreeReader";
+      if ($major < 2 or $major == 2 and $minor < 5) {$XMLCPPFlag = "-DNoXmlTreeReader";}
+
+      print "Use xml $xml XMLLIBDIR = $XMLLIBDIR \tXMLINCDIR = $XMLINCDIR \tXMLLIBS = $XMLLIBS XMLCPPFlag =$XMLCPPFlag\n" if $XMLLIBDIR && ! $param::quiet;
     }
     my @params = (
 		  'Package'       => 'None',
@@ -761,7 +766,8 @@
 		       'XML' => {
 			   'LIBDIR'=> $XMLLIBDIR,
 			   'INCDIR'=> $XMLINCDIR,
-			   'LIBS'  => $XMLLIBS
+			   'LIBS'  => $XMLLIBS,
+			   'CPP'   => $XMLCPPFlag
 			   },
 			 'Logger' => {
 			     'INCDIR'=> $LoggerINCDIR,
