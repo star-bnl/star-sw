@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.182 2006/11/21 16:34:38 fisyak Exp $
+// $Id: StMaker.cxx,v 1.183 2006/12/01 17:50:14 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -169,7 +169,9 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr03",      20190101,     6, "upgr03",   ""},
   {"upgr04",      20190101,     7, "upgr04",   ""},
   {"upgr05",      20190101,     8, "upgr05",   ""},
+  // what happened to 6? Historical not re-used
   {"upgr07",      20190101,     9, "upgr07",   ""},
+  {"upgr08",      20190101,    10, "upgr08",   ""},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1727,6 +1729,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.183  2006/12/01 17:50:14  jeromel
+// upgr08 added
+//
 // Revision 1.182  2006/11/21 16:34:38  fisyak
 // remove geometry pix1 and add upgr07
 //
