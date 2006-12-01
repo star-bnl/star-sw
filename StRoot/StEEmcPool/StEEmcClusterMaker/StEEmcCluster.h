@@ -66,8 +66,12 @@ class StEEmcCluster : public StEEmcBaseCluster {
   /// Get the energy of the seed tower
   Float_t seedEnergy();
 
-  /// Get the momentum of this cluster
+  /// Get the momentum of this cluster.  The internally calculated
+  /// momentum assumes z=0.
   TVector3 momentum();
+
+  /// Get the position of this cluster on the endcap.  But see note
+  /// for StEEmcCluster::momentum( TVector3 p ).
   TVector3 position();
 
   /// Get the number of towers in cluster
@@ -86,7 +90,10 @@ class StEEmcCluster : public StEEmcBaseCluster {
   /// Get the vector of towers in this cluster
   StEEmcTowerVec_t towers();
 
-  /// Set the momentum of this cluster
+  /// Set the momentum of this cluster.  This overrides the momentum
+  /// computed internally as towers are added to the cluster.  If the
+  /// momentum is changed before all towers are added, the position()
+  /// of the cluster will become unreliable.
   void momentum( TVector3 p);
 
   /// Create and return an StEmcCluster using this cluster's
