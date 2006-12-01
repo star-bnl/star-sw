@@ -195,6 +195,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       $CPPPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{INCDIR};
       $LIBPATH .= $main::PATH_SEPARATOR . $env1->{Packages}->{XML}->{LIBDIR};
       $LIBS .=  " " . $env1->{Packages}->{XML}->{LIBS};
+      if ($env1->{Packages}->{XML}->{CPP}) {
+	$EXTRA_CPPFLAGS .= $env1->{Packages}->{XML}->{CPP};
+      }
     }
     print "CPPPATH = $CPPPATH\n" if $param::debug;
     
