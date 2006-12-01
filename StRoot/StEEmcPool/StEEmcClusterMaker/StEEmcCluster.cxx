@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2006/11/27 22:46:09 $
- * $Revision: 1.3 $
+ * $Date: 2006/12/01 18:56:37 $
+ * $Revision: 1.4 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -39,7 +39,6 @@ StEEmcCluster::StEEmcCluster() : StEEmcBaseCluster()
 {
 
   mEmcCluster=0;
-  mKey=0;
   mEnergy=0.;
   mfPhibin=0.0;
   mfEtabin=0.0;
@@ -47,6 +46,7 @@ StEEmcCluster::StEEmcCluster() : StEEmcBaseCluster()
   mSumEtaW=0.;
   mSumPhi2W=0.;
   mSumPhiW=0.;
+  mMomentum=TVector3(0,0,0);
 }
 
 // copy constructor
@@ -54,9 +54,7 @@ StEEmcCluster::StEEmcCluster( const StEEmcCluster &other )
 {
   mEmcCluster=other.mEmcCluster;
   mKey=other.mKey;
-
   //  printf("copy constructor E=%5.2f\n",other.mEnergy);
-
   mEnergy=other.mEnergy;
   mfPhibin=other.mfPhibin;
   mfEtabin=other.mfEtabin;
@@ -95,7 +93,7 @@ void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
   mSumPhiW  = (myphi)*tower.energy()*weight;
 
   static EEmcGeomSimple geom=EEmcGeomSimple::Instance();
-  mMomentum += energy * geom.getTowerCenter( (UInt_t)tower.sector(), (UInt_t)tower.subsector(), (UInt_t)tower.etabin() );
+  mMomentum += energy * ( geom.getTowerCenter( (UInt_t)tower.sector(), (UInt_t)tower.subsector(), (UInt_t)tower.etabin() ).Unit() );
   mPosition = mMomentum.Unit();
   mPosition *= ( kEEmcZSMD / mMomentum.CosTheta() );
 
