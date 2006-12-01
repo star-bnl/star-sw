@@ -34,12 +34,14 @@ Int_t               stat          = 0;
 
 Int_t prescale = 1; 
 
+#include <vector>
+
 void runEEmcClusterMaker( Int_t nevents = -1, 
 			 //			 Char_t *name = "6149020.lis", 
 			 //			 Char_t *ofile= "6149020.root",
-			 Char_t *name="mc.list",
+			 Char_t *name="test.MuDst.root",
 			 Char_t *ofile="mc.root",
-			 Char_t *path = "", 
+			 Char_t *path = "./", 
 			 Int_t trigID=96261,
 			 Int_t nfiles = 100
 			 )
@@ -94,7 +96,7 @@ void runEEmcClusterMaker( Int_t nevents = -1,
   mEEmcDatabase = new StEEmcDbMaker("eemcDb");
   //mEEmcDatabase -> setSectors(1,7); 
 
-  gMessMgr -> SwitchOn("D");
+  gMessMgr -> SwitchOff("D");
   gMessMgr -> SwitchOn("I");
 
 
@@ -248,6 +250,53 @@ void runEEmcClusterMaker( Int_t nevents = -1,
 	printf("%s nhits=%2i nclusters=%2i\n",lay[i],nhits[i],ncl[i]);
       }
 
+
+    //--
+    //-- Example code to find the highest-energy tower cluster in
+    //-- the endcap. 
+    //--
+    StEEmcCluster gamma_candidate;
+    for ( Int_t sector = 0; sector < 12; sector++ )
+      {
+
+	Int_t nclusters = mEEclusters->numberOfClusters( sector, 0 );
+	for ( Int_t ic=0;ic<nclusters;ic++ )
+	  {
+	    StEEmcCluster cluster = mEEclusters->cluster(sector,0,ic);
+	    Float_t pt = cluster.momentum().Perp();
+	    Float_t old = gamma_candidate.momentum().Perp();
+	    if ( pt > old )
+	      {
+		gamma_candidate = cluster;
+	      }
+	  }
+      }
+
+    // verify cluster is valid
+    if ( gamma_candidate.key() >= 0 )
+      gamma_candidate.print();
+    else {
+      std::cout << "no gamma candidate found" << std::endl;
+      continue;
+    }
+
+    Int_t nu = mEEclusters->numberOfMatchingSmdClusters( gamma_candidate, 0 );
+    Int_t nv = mEEclusters->numberOfMatchingSmdClusters( gamma_candidate, 1 );
+    
+    std::cout << "Number of matching u=" << nu << " v=" << nv << std::endl;
+    for ( Int_t iu=0;iu<nu;iu++ )
+      {
+	StEEmcSmdCluster smdu=mEEclusters->matchingSmdCluster( gamma_candidate, 0, iu );
+	smdu.printLine();
+      }
+    for ( Int_t iv=0;iv<nv;iv++ )
+      {
+	StEEmcSmdCluster smdv=mEEclusters->matchingSmdCluster( gamma_candidate, 1, iv );
+	smdv.printLine();
+      }
+    
+
+    
 
 	    
   }
