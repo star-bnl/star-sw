@@ -79,7 +79,8 @@ Int_t StEmcOfflineCalibrationMaker::Init()
 	emcTrigMaker	= dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); assert(emcTrigMaker);
 
 	
-	mTables = new StBemcTables(kTRUE);
+//	mTables = new StBemcTables(kTRUE);
+	mTables = mADCtoEMaker->getBemcData()->getTables();
 	mEmcGeom = StEmcGeom::instance("bemc");
 
 	LOG_INFO << "StEmcOfflineCalibrationMaker::Init() == kStOk" << endm;
@@ -132,8 +133,21 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		preshowerSlopes[2] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,500,-49.5,450.5);	
 	}
 	
+	return StMaker::InitRun(run);
+}
+
+Int_t StEmcOfflineCalibrationMaker::Make()
+{		
+	//get pointers to useful objects
+	TChain* chain				= muDstMaker->chain(); assert(chain);
+	StMuDst* muDst				= muDstMaker->muDst(); assert(muDst);
+	StMuEvent* event			= muDst->event(); assert(event);
+	StRunInfo* runInfo			= &(event->runInfo()); assert(runInfo);
+//	TrgDataType2005* trgData	= (TrgDataType2005*)event->triggerData()->getTriggerStructure(); assert(trgData);
+	
+	LOG_DEBUG << "general pointer assertions OK" << endm;
+	
 	//pedestals, rms, status	
-	mTables->loadTables((StMaker*)this);
 	for (int id=1; id<=4800; id++) {
 		float pedestal, rms;
 		int status;
@@ -150,24 +164,8 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		mPedRMS[BPRS-1][id-1]	= rms;
 		mStatus[BPRS-1][id-1]	= status;		
 	}
-	
-	LOG_INFO << "got peds and status for R" << run << endm;
-	
-	return StMaker::InitRun(run);
-}
 
-Int_t StEmcOfflineCalibrationMaker::Make()
-{		
-	//get pointers to useful objects
-	TChain* chain				= muDstMaker->chain(); assert(chain);
-	StMuDst* muDst				= muDstMaker->muDst(); assert(muDst);
-	StMuEvent* event			= muDst->event(); assert(event);
-	StRunInfo* runInfo			= &(event->runInfo()); assert(runInfo);
-//	TrgDataType2005* trgData	= (TrgDataType2005*)event->triggerData()->getTriggerStructure(); assert(trgData);
-	
-
-	
-	LOG_DEBUG << "general pointer assertions OK" << endm;
+	LOG_DEBUG << "got peds and status in Make()" << endm;
 	
 	//triggers
 	const StTriggerId& trigs = event->triggerIdCollection().nominal();
