@@ -1,6 +1,9 @@
-// $Id: StSpaListNoise.cc,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSpaListNoise.cc,v 1.2 2006/12/01 22:04:12 bouchet Exp $
 //
 // $Log: StSpaListNoise.cc,v $
+// Revision 1.2  2006/12/01 22:04:12  bouchet
+// get back to previous daqCutValue
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -278,7 +281,7 @@ void StSpaListNoise::convertAnalogToDigit(long nElectronInAMip,long adcDynamic,
       if (curr->getNoiseValue() > (NAdcChannel-1)) curr->setNoiseValue(NAdcChannel-1);
       curr->setPedestal((int)((curr->getPedestal()*conversionFactor)+0.5));
       if (curr->getPedestal()    > (NAdcChannel-1)) curr->setPedestal(NAdcChannel-1);
-      curr->setSigma((int)(((curr->getSigma()*conversionFactor)*(daqCutValue+2))+0.5));
+      curr->setSigma((int)(((curr->getSigma()*conversionFactor)*daqCutValue)+0.5));
       if (curr->getSigma()       > (NAdcChannel-1)) curr->setSigma(NAdcChannel-1); //Now sigma is the DAQ cut...
       
       curr = this->next(curr);
