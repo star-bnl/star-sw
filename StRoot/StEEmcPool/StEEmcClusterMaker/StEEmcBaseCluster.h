@@ -45,7 +45,7 @@ class StEEmcBaseCluster : public TObject {
  private: 
  protected:
 
-  Int_t mKey;                                        /**< a unique id assigned to each cluster */
+  Int_t mKey;                                        /**< a unique id assigned to each cluster, (initialized to -1 to indicate an invalid cluster. */
   std::vector< std::vector< Int_t > > mMatched;      /**< keys for matching clusters in each layer */
 
   Float_t mEnergy; /**< energy of the cluster */
