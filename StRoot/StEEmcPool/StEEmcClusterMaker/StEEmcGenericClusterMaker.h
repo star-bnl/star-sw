@@ -121,11 +121,28 @@ class StEEmcGenericClusterMaker : public StMaker
   StEEmcSmdClusterVec_t smdclusters( Int_t sec, Int_t plane );
 
   /// Return a specific cluster from a given sector, layer
-  StEEmcCluster cluster(Int_t sec, Int_t layer, Int_t index);
+  /// @param sector specifies the sector id [0,11]
+  /// @param layer specifies which layer 0=T 1=P 2=Q 3=R
+  /// @param index specifies which cluster to return
+  StEEmcCluster cluster(Int_t sector, Int_t layer, Int_t index);
 
   /// return a specific cluster from a given sector, plane
-  StEEmcSmdCluster smdcluster(Int_t sec, Int_t plane, Int_t index);
+  /// @param sector specifies the sector id [0,11]
+  /// @param plane specifies which smd plane 0=U 1=V (note difference from "layer" definition)
+  /// @param index specifies which cluster to return
+  StEEmcSmdCluster smdcluster(Int_t sector, Int_t plane, Int_t index);
 
+  /// returns the total number of clusters in a given sector, layer 
+  /// @param sector specifies the sector id [0,11]
+  /// @param layer specifies which layer 0=T 1=P 2=Q 3=R 4=U 5=V
+  Int_t numberOfClusters(Int_t sector, Int_t layer){
+    if ( layer < 4 ) 
+      return (Int_t)mTowerClusters[ sector ][ layer ].size();
+    else if ( layer < 6 )
+      return (Int_t)mSmdClusters[ sector ][ layer-4 ].size();
+    else
+      return -1;
+  }
   /// returns the total number of clusters in a given layer
   Int_t numberOfClusters(Int_t layer){ return mNumberOfClusters[layer]; }
   /// returns the total number of clusters summed over all layers
@@ -149,6 +166,17 @@ class StEEmcGenericClusterMaker : public StMaker
 
   /// Returns the current largest cluster ID
   Int_t lastClusterId(){ return mClusterId; }
+
+  /// Returns the number of matching SMD clusters for the given tower cluster and plane
+  /// @param cluster a tower cluster
+  /// @param plane 0=U 1=V  
+  Int_t numberOfMatchingSmdClusters( StEEmcCluster &cluster, Int_t plane );
+
+  /// Returns a specific SMD cluster which matches the tower clster
+  /// @param cluster a tower cluster
+  /// @param plane 0=U 1=V  
+  /// @param index index of the SMD cluster
+  StEEmcSmdCluster matchingSmdCluster ( StEEmcCluster &cluster, Int_t plane, Int_t index );
 
  private:
  protected:
@@ -227,7 +255,13 @@ inline StEEmcSmdClusterVec_t StEEmcGenericClusterMaker::smdclusters(Int_t s, Int
 inline StEEmcCluster StEEmcGenericClusterMaker::cluster(Int_t s, Int_t l, Int_t i) { return mTowerClusters[s][l][i]; }
 
 // returns an individual smd cluster
-inline StEEmcSmdCluster StEEmcGenericClusterMaker::smdcluster(Int_t s,Int_t p,Int_t i) { return mSmdClusters[s][p][i]; }
+inline StEEmcSmdCluster StEEmcGenericClusterMaker::smdcluster(Int_t s,Int_t p,Int_t i) 
+{ 
+  if ( p < 2 )
+    return mSmdClusters[s][p][i];
+  else
+    assert(0); /* please specify an smd plane 0=U or 1=V */
+}
 
 // adds a tower/pre/postshower cluster
 //$$$inline void StEEmcGenericClusterMaker::add( StEEmcCluster &c ) { c.key(nextClusterId()); mTowerClusters[ c.tower(0).sector() ][ c.tower(0).layer() ].push_back(c); mNumberOfClusters[c.tower(0).layer()]++; }

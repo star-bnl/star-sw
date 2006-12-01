@@ -398,4 +398,15 @@ Bool_t StEEmcGenericClusterMaker::match( StEEmcSmdCluster &c1, StEEmcSmdCluster 
 }
 
 // ----------------------------------------------------------------------------
+Int_t StEEmcGenericClusterMaker::numberOfMatchingSmdClusters( StEEmcCluster &cluster, Int_t plane )
+{
+  EEmatch matches = clusterMatch( cluster );
+  return (plane==0)? (Int_t)matches.smdu.size() : (Int_t)matches.smdv.size();
+}
+
+StEEmcSmdCluster StEEmcGenericClusterMaker::matchingSmdCluster ( StEEmcCluster &cluster, Int_t plane, Int_t index )
+{
+   EEmatch matches = clusterMatch( cluster ); 
+   return (plane==0)? matches.smdu[index] : matches.smdv[index];
+}
 
