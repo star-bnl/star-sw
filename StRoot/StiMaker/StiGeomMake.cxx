@@ -1,10 +1,9 @@
-// $Id: StiGeomMake.cxx,v 2.1 2006/12/03 17:53:55 fine Exp $
+// $Id: StiGeomMake.cxx,v 2.2 2006/12/03 18:18:13 fine Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiGeomMake.h"
 
 #include "TVolumePosition.h"
-#include "TVolume.h"
 #include "TRotMatrix.h"
 #include "TTUBS.h"
 #include "TBRIK.h"
@@ -108,7 +107,7 @@ TVolume *StiGeomMake::MakeVolume(StiDetectorBuilder &builder)
      StiPlacement *place = next->getPlacement();
      TVolumePosition * postion =
         detectorVolume->Add(
-                        new TVolume((const char*)next->getName().c_str(),"StiDetector",shape)
+                        new StiDetectorVolume(*next,(const char*)next->getName().c_str(),"StiDetector",shape)
                         , 0
                         , place ? place->getNormalRadius()              : 0
                         , place ? place->getZcenter()                   : 0
@@ -118,3 +117,31 @@ TVolume *StiGeomMake::MakeVolume(StiDetectorBuilder &builder)
   }
   return detectorVolume;
 }
+
+ClassImp(StiDetectorVolume)
+
+   // class TVolume decorator for StiDetector's
+//_____________________________________________________________________________
+StiDetectorVolume::StiDetectorVolume(StiDetector &detector) :
+ TVolume(),fDetector(detector) {}
+
+//_____________________________________________________________________________
+StiDetectorVolume::StiDetectorVolume(StiDetector &detector,const Text_t* name, const Text_t* title, const Text_t* shapename, Option_t* option):
+TVolume( name, title, shapename, option),fDetector(detector) {}
+
+//_____________________________________________________________________________
+StiDetectorVolume::StiDetectorVolume(StiDetector &detector,const Text_t* name, const Text_t* title, TShape* shape, Option_t* option):
+ TVolume(name,title,shape,option ),fDetector(detector) {}
+      
+//_____________________________________________________________________________
+void   StiDetectorVolume::Browse(TBrowser *b) 
+{
+   TVolume::Browse(b);
+}
+//_____________________________________________________________________________
+char *StiDetectorVolume::GetObjectInfo(Int_t px, Int_t py) const
+{
+ return TVolume::GetObjectInfo(px, py);
+}
+      
+
