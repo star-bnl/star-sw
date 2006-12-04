@@ -1,6 +1,7 @@
-// $Id: StiGenericDetectorGroup.cxx,v 2.1 2006/12/04 02:37:03 fine Exp $
+// $Id: StiGenericDetectorGroup.cxx,v 2.2 2006/12/04 03:31:33 fine Exp $
 // Author: Valeri Fine, Dec 2006
 
+#include <stdexcept>
 #include "StiGenericDetectorGroup.h"
 #include "Sti/StiDetectorBuilder.h"
 
