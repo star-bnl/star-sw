@@ -1,6 +1,8 @@
 #ifndef StiDetectorGroup_H_INCLUDED
 #define StiDetectorGroup_H_INCLUDED
 
+#include <stdexcept>
+
 #include "Sti/StiGenericDetectorGroup.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
@@ -66,7 +68,7 @@ StiHitLoader<Event,StiDetectorBuilder> * StiDetectorGroup<Event>::getHitLoader()
     {
       string message = "StiDetectorGroup::getHitLoader() - ERROR - Hit loader requested for non active detector:";
       message += getName();
-      throw logic_error(message.c_str());
+//      throw logic_error(message.c_str());
     }
   /*  if (_hitLoader==0)
     {
