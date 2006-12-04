@@ -1,7 +1,7 @@
 #ifndef StiDetectorGroup_H_INCLUDED
 #define StiDetectorGroup_H_INCLUDED
 
-#include "Sti/StiGenericlDetectorGroup.h"
+#include "Sti/StiGenericDetectorGroup.h"
 #include "Sti/Base/Factory.h"
 #include "Sti/StiToolkit.h"
 template<class Event,class Detector> class StiHitLoader;
