@@ -38,7 +38,7 @@ public:
   // common object containers
   virtual StiMasterDetectorBuilder *getDetectorBuilder();
   virtual StiDetectorContainer     *getDetectorContainer();
-  virtual StiDetectorGroups<StEvent> *getDetectorGroups();
+  virtual StiDetectorGroups        *getDetectorGroups();
   virtual StiHitContainer          *getHitContainer();
   virtual StiTrackContainer        *getTrackContainer();
   
@@ -84,7 +84,7 @@ public:
   // common object containers 
   StiMasterDetectorBuilder     *_detectorBuilder;
   StiDetectorContainer         *_detectorContainer;
-  StiDetectorGroups<StEvent> *_detectorGroups;  
+  StiDetectorGroups            *_detectorGroups;  
   StiHitContainer              *_hitContainer;
   StiTrackContainer            *_trackContainer;
   
