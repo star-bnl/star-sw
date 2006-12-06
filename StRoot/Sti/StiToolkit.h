@@ -27,7 +27,8 @@ class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
 //#include "Sti/StiDetectorGroups.h"
 template<class Event> class StiDetectorGroup;
-template<class EVENT> class StiDetectorGroups;
+//template<class EVENT> class StiDetectorGroups;
+class StiDetectorGroups;
 //??class   StiMaker;
 template<class Factorized> class Factory;
 template<class Filtered>   class EditableFilter;
@@ -72,7 +73,7 @@ public:
   // common object containers 
   virtual StiMasterDetectorBuilder * getDetectorBuilder()=0;
   virtual StiDetectorContainer  * getDetectorContainer()=0;
-  virtual StiDetectorGroups<StEvent> * getDetectorGroups()=0;
+  virtual StiDetectorGroups     * getDetectorGroups()=0;
   virtual StiHitContainer       * getHitContainer()=0;
   virtual StiTrackContainer     * getTrackContainer()=0;
   
