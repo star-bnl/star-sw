@@ -1,6 +1,6 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/10/2006
 //
-// $Id: StCheckQtEnv.cxx,v 1.5 2006/12/06 23:15:52 fine Exp $
+// $Id: StCheckQtEnv.cxx,v 1.6 2006/12/06 23:22:33 fine Exp $
 // This class sets the Qt/Root environment "on fly" and 
 // generates the correct ROOT resource ".rootrc" file 
 // also
@@ -160,7 +160,7 @@ Long_t  StCheckQtEnv::SetQtEnv() {
           fprintf(stderr," ----------------------------------------------------------\n");
           fprintf(stderr,"                        ATTENTION :                        \n");
           fprintf(stderr,"\"Coin3d\" shared libraries has not beed detected\n");
-          fprintf(stderr,"  Please, run:\n\n"); 
+          fprintf(stderr," Please, file the STAR bug report, switch to \".dev\" environment, run:\n\n"); 
           fprintf(stderr,"=====  \"source $STAR/QtRoot/qtgl/qtcoin/setup.csh\"  =====\n\n");
           fprintf(stderr,"  script to set the Coin3D env.\n");
           fprintf(stderr," ----------------------------------------------------------\n");
