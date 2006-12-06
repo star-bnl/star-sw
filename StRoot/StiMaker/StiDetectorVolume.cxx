@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.1 2006/12/06 00:47:52 fine Exp $
+// $Id: StiDetectorVolume.cxx,v 2.2 2006/12/06 20:15:41 fine Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -54,17 +54,17 @@ ClassImp(StiDetectorVolume)
 
 // class TVolume decorator for StiDetector's
 //_____________________________________________________________________________
-StiDetectorVolume::StiDetectorVolume(StiToolkit &tool ) :
- TVolume("RnD","Sti",(TShape*)0),fDetector(0) 
+StiDetectorVolume::StiDetectorVolume(StiToolkit &tool, const TString &detectorName, unsigned int select)
+ :  TVolume("RnD","Sti",(TShape*)0),fDetector(0) 
 { 
-   MakeDetector(tool);
+   MakeDetector(tool,detectorName, select);
 }
  
 //_____________________________________________________________________________
-StiDetectorVolume::StiDetectorVolume(const StiDetectorBuilder &builder) :
+StiDetectorVolume::StiDetectorVolume(const StiDetectorBuilder &builder, unsigned int select) :
  TVolume(builder.getName().c_str(),"StiDetectorBuilder",(TShape *)0),fDetector(0) 
 { 
-   MakeVolume(builder);
+   MakeVolume(builder,select);
 }
  
 //_____________________________________________________________________________
@@ -90,18 +90,24 @@ char *StiDetectorVolume::GetObjectInfo(Int_t px, Int_t py) const
    return TVolume::GetObjectInfo(px, py);
 }
 //_____________________________________________________________________________
-void StiDetectorVolume::MakeDetector(StiToolkit &tool)
+void StiDetectorVolume::MakeDetector(StiToolkit &tool, const TString &detectorName, unsigned int select)
 {
    // Conststruct the TVolume from the StToolKit
    StiDetectorGroups *groups=tool.getDetectorGroups();
    vector<StiGenericDetectorGroup *>::iterator it = groups->begin();
    for (; it != groups->end(); ++it) {
       StiGenericDetectorGroup *group = *it;
-      Add(new  StiDetectorVolume(*group->getDetectorBuilder()));
+      const StiDetectorBuilder &builder = *group->getDetectorBuilder();
+      TString builderName = (const char*)builder.getName().c_str();
+      if ( detectorName.IsNull() || (builderName.BeginsWith(detectorName,TString::kIgnoreCase)) ) 
+                     Add(new  StiDetectorVolume(builder,select));
+      else {
+         printf("Skip %s detecor\n", (const char*)builder.getName().c_str());
+      }
    }
 }
 //_____________________________________________________________________________
-void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder)
+void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned int select)
 {
   // Conststruct the TVolume from the StDetectorBuilder
   unsigned int nRows = builder.getNRows();
@@ -111,6 +117,10 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder)
      for (unsigned int j=0;j<nSectors;j++) 
      {
         StiDetector *next = builder.getDetector(i,j) ;
+        if (select  &&  (    ( select == kActive   && !next->isActive()) 
+                         ||  
+                             ( select == kPassivie && next->isActive() )
+                        ) ) continue;
         const StiShape *stiShape = next->getShape();
         TShape     *shape = MakeShape(stiShape
                         ,(const char*)next->getMaterial()->getName().c_str() ); 
