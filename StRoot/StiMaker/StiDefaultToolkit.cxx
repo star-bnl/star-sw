@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.36 2006/10/16 20:30:42 fisyak Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.37 2006/12/06 00:47:40 fine Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.37  2006/12/06 00:47:40  fine
+ * rename StiGeomMake to StiDetectorVolume
+ *
  * Revision 2.36  2006/10/16 20:30:42  fisyak
  * Clean dependencies from Sti useless classes
  *
@@ -175,7 +178,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   _finderTrackFilter(0)
 {
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Started"<<endl;
-  _detectorGroups = new StiDetectorGroups<StEvent>("StarDetectorGroups","StarDetectorGroups");
+  _detectorGroups = new StiDetectorGroups("StarDetectorGroups","StarDetectorGroups");
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Done"<<endl;
 };
 
@@ -275,7 +278,7 @@ Factory<StiNodeExt>* StiDefaultToolkit::getTrackNodeExtFactory()
   return _trackNodeExtFactory;	
 }
 
-StiDetectorGroups<StEvent> * StiDefaultToolkit::getDetectorGroups()
+StiDetectorGroups  *StiDefaultToolkit::getDetectorGroups()
 {
   return _detectorGroups;
 }
@@ -283,7 +286,7 @@ StiDetectorGroups<StEvent> * StiDefaultToolkit::getDetectorGroups()
 
 void StiDefaultToolkit::add(StiDetectorGroup<StEvent>* detectorGroup)
 {
-  _detectorGroups->push_back(detectorGroup);
+  _detectorGroups->push_back((StiGenericDetectorGroup *)detectorGroup);
   StiMasterHitLoader<StEvent,StiDetectorBuilder> * masterLoader;
   masterLoader = static_cast<StiMasterHitLoader<StEvent,StiDetectorBuilder> *>(getHitLoader());
   StiHitLoader<StEvent,StiDetectorBuilder> * loader = detectorGroup->getHitLoader();
