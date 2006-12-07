@@ -560,6 +560,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       else { push @defs, "#" . $Dir . "/" . $def; }
     }
     Depends $env2 [@CintFiles], @h_files;
+    Depends $env2 [@CintFiles], ($env2->{Packages}->{ROOT}->{ROOTCINT});
     Command $env2 [@CintFiles], @defs,
       qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
 #    if ($#LinkDefs < 0) { push @LinkDefs, "LinkDef.h";}
