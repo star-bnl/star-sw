@@ -6,8 +6,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StMicky.cxx,v 1.6 2003/09/02 17:59:24 perev Exp $
+// $Id: StMicky.cxx,v 1.7 2006/12/08 17:51:12 fine Exp $
 // $Log: StMicky.cxx,v $
+// Revision 1.7  2006/12/08 17:51:12  fine
+// prepare the test are to move to ROOT CVS
+//
 // Revision 1.6  2003/09/02 17:59:24  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -37,9 +40,6 @@
 inline double dabs(double d){ return d>0?d: -d;}
 inline int min(int n1, int n2){ return n1 < n2 ? n1 : n2;}
 
-#ifdef __ROOT__
-ClassImp(StMicky)
-#endif
 
 //___________________________________________________________________________
 StMicky::StMicky(){ Minit(); }

@@ -4,8 +4,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f112/top.html 
 //
-// $Id: TTrF112.cxx,v 1.5 2003/09/02 17:59:25 perev Exp $
+// $Id: TTrF112.cxx,v 1.6 2006/12/08 17:51:15 fine Exp $
 // $Log: TTrF112.cxx,v $
+// Revision 1.6  2006/12/08 17:51:15  fine
+// prepare the test are to move to ROOT CVS
+//
 // Revision 1.5  2003/09/02 17:59:25  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -23,7 +26,11 @@
 //
 
 #include "StMicky.h"
-#include "TCL.h"
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,13,0)
+#  include "TCL.h"
+#else
+#  include "TCernLib.h"
+#endif
 #include <Stiostream.h>
 
 //____________________________________________________________________________________
