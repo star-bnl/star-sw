@@ -11,6 +11,12 @@
 
 #include "StMessMgr.h"
 
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
+
 ClassImp(StEEmcGenericClusterMaker);
 
 // ----------------------------------------------------------------------------
@@ -51,6 +57,20 @@ StEEmcGenericClusterMaker::StEEmcGenericClusterMaker( const Char_t *name, StEEmc
   for ( Int_t i = 0; i < 12; i++ ) mSmdClusters.push_back(planes);
 
   mSmdMatchRange = 40;
+
+  
+  
+  /// Tracks will be matched to clusters if they fall within a user-specified
+  /// distance between the track extrapolated to the layer containing the 
+  /// cluster.  (Tracks are extrapolated to the smd layer when matching
+  /// tower clusters).
+  mClusterTrackSeparation[0] = 0.05;  /**< default parameter: tower, dr<0.05 where dr=sqrt(deta^2+dphi^2) */
+  mClusterTrackSeparation[1] = 0.075; /**< default parameter: preshower 1 dr<0.075 */
+  mClusterTrackSeparation[2] = 0.075; /**< default parameter: preshower 2 dr<0.075 */
+  mClusterTrackSeparation[3] = 0.075; /**< default parameter: postshower  dr<0.075 */
+  mClusterTrackSeparation[4] = 3.0;   /**< default parameter: smd u 3.0 strips */
+  mClusterTrackSeparation[5] = 3.0;   /**< default parameter: smd v 3.0 strips */
+
   Clear();
 
 }
@@ -65,24 +85,6 @@ Int_t StEEmcGenericClusterMaker::Init()
   if (!mEEanalysis) mEEanalysis=(StEEmcA2EMaker*)GetMaker("EEmcAdc2Energy");
   assert(mEEanalysis);// no input calib maker
 
-  // book QA histograms
-  const Char_t *layers[]={"T","P","Q","R","U","V"};
-  const Char_t *names[]={"tower","preshower 1","preshower 2","postshower","smdu","smdv"};
-  const Float_t max[]={50.0,200.0,400.0,200.0,2500.0,2500.0};
-  for ( Int_t i=0;i<6;i++ )
-    {
-
-      hNumberOfClusters[i] = 
-	new TH1F(TString("hNumberOfClusters")+layers[i],
-		 TString("Number of ")+names[i]+" clusters",
-		 20,0.,20.);
-
-      hClusterSpectra[i] = 
-	new TH1F(TString("hClusterSpectra")+layers[i],
-		 TString(names[i])+" cluster energy spectra",
-		 50,0.,max[i]);
-    }
-
   return StMaker::Init();
 }
 
@@ -91,6 +93,7 @@ Int_t StEEmcGenericClusterMaker::Make() // runs after user's Make()
 {
  
   makeClusterMap();
+  makeTrackMap();
   makeStEvent();
   makeHistograms();
 
@@ -123,25 +126,8 @@ Int_t StEEmcGenericClusterMaker::Make() // runs after user's Make()
 
 void StEEmcGenericClusterMaker::makeHistograms()
 {
-  /*
-   * Fill QA histograms
-   */
-  for ( Int_t layer=0;layer<4;layer++ )
-    {
-
-      hNumberOfClusters[layer] -> Fill( mNumberOfClusters[layer] );
-      for ( Int_t sec=0;sec<12;sec++ ) 
-	for ( UInt_t i=0;i<mTowerClusters[sec][layer].size(); i++ ) 
-	  {
-	    StEEmcCluster cluster=mTowerClusters[sec][layer][i];
-	    hClusterSpectra[layer]->Fill( cluster.energy() );
-	  }
-
-    }
-  
-
-
-  
+ 
+ 
 }
 
 void StEEmcGenericClusterMaker::makeClusterMap()
@@ -253,6 +239,102 @@ void StEEmcGenericClusterMaker::makeClusterMap()
 
 }
 
+void StEEmcGenericClusterMaker::makeTrackMap()
+{
+
+  gMessMgr->Info() << GetName() << " -I- entering makeTrackMap()" << endm;
+
+  StMuDstMaker *maker = (StMuDstMaker*)GetMaker("MuDst");
+  if ( !maker )
+    {
+      gMessMgr->Info() << GetName() << " -I- mudst maker not in chain?" << endm;
+      return;
+    }
+
+  StMuDst *mudst = maker->muDst();
+
+  //--
+  //-- Match primary tracks to tower, pre/postshower clusters
+  //--
+  Int_t nprimary = (Int_t)mudst->numberOfPrimaryTracks();
+  for ( Int_t iprimary = 0; iprimary < nprimary; iprimary++ )
+    {
+      StMuTrack *track = mudst->primaryTracks(iprimary);
+      if (!track)continue;
+      
+      /// loop over sectors
+      for ( Int_t sec=0;sec<12;sec++ )
+	{
+
+	  /// loop over layers
+	  for ( Int_t layer = 0; layer < 4; layer++ )
+	    {
+	  
+	      for ( Int_t ii=0;ii<numberOfClusters(sec,layer); ii++ )
+		{
+		  StEEmcCluster mycluster = cluster(sec,layer,ii);
+		  if ( match(mycluster, track) )
+		    {
+		      gMessMgr->Info() << GetName() << " -I- matched cluster to track in layer=" << layer << endm;		  
+		      //mycluster.print();
+		      //std::cout << "cluster: eta=" << mycluster.momentum().Eta() << " phi=" << mycluster.momentum().Phi() << std::endl;
+		      //std::cout << "track:   eta=" << track->eta() << " phi=" << track->phi() << std::endl;
+		      mClusterTrackMap[ mycluster.key() ].push_back( track );
+		    }
+		}
+
+	    }
+	}
+
+    }
+
+
+  
+  //--
+  //-- Match global tracks flagged as background to tower, pre/postshower
+  //-- clusters
+  //--
+  Int_t nglobal = (Int_t)mudst->numberOfGlobalTracks();
+  for ( Int_t iglobal = 0; iglobal < nglobal; iglobal++ )
+    {
+      StMuTrack *track = mudst->globalTracks(iglobal);
+      if (!track) continue;
+
+      // verify track from background tracker
+      if (! (track->flag()==901) ) continue;
+
+      /// loop over sectors
+      for ( Int_t sec=0;sec<12;sec++ )
+	{
+
+	  /// loop over layers
+	  for ( Int_t layer = 0; layer < 4; layer++ )
+	    {
+	  
+	      for ( Int_t ii=0;ii<numberOfClusters(sec,layer); ii++ )
+		{
+		  StEEmcCluster mycluster = cluster(sec,layer,ii);
+		  if ( matchBackgroundTrack(mycluster, track) )
+		    {
+		      gMessMgr->Info() << GetName() << " -I- matched cluster to background track in layer=" << layer << endm;		  
+		      //mycluster.print();
+		      //std::cout << "cluster: eta=" << mycluster.momentum().Eta() << " phi=" << mycluster.momentum().Phi() << std::endl;
+		      //std::cout << "track:   eta=" << track->eta() << " phi=" << track->phi() << std::endl;
+		      mBackgroundTrackMap[ mycluster.key() ].push_back( track );
+		    }
+		}
+
+	    }
+	}
+
+    }
+  
+  
+
+}
+
+
+
 void StEEmcGenericClusterMaker::makeStEvent()
 {
 
@@ -321,6 +403,8 @@ void StEEmcGenericClusterMaker::Clear(Option_t *opts)
 
   // clear the cluster map
   mClusterMap.clear();
+  mClusterTrackMap.clear();
+  mBackgroundTrackMap.clear();
   
   // reset the cluster id
   mClusterId = 0;
@@ -345,6 +429,11 @@ void StEEmcGenericClusterMaker::add( StEEmcCluster &c )
   EEmatch match;
   match.tower.push_back(c);
   mClusterMap[ key ] = match;
+
+  // add this cluster to the cluster track map
+  std::vector< StMuTrack* > v, u;
+  mClusterTrackMap[ key ] = v;
+  mBackgroundTrackMap[ key ] = u;
 
   mNumberOfClusters[c.tower(0).layer()]++;
 
@@ -397,6 +486,101 @@ Bool_t StEEmcGenericClusterMaker::match( StEEmcSmdCluster &c1, StEEmcSmdCluster 
 
 }
 
+Bool_t StEEmcGenericClusterMaker::match( StEEmcCluster &cluster, StMuTrack *track )
+{
+
+  const StPhysicalHelixD helix = track -> outerHelix();
+  const Float_t match_at_z[]={ 
+    kEEmcZSMD,  // match tower clusters at smd
+    kEEmcZPRE1, // match pre1 at pre1
+    kEEmcZPRE2, // match pre2 at pre2
+    kEEmcZPOST  // match post at post
+  };
+
+  Int_t layer = cluster.tower(0).layer();
+
+  TVector3 r(0.,0.,-1.);
+  if ( extrapolateToZ( helix, match_at_z[ layer ], r ) )
+    {
+      TVector3 position = cluster.position();
+      Float_t dphi = fmod( position.Phi() - r.Phi(), TMath::TwoPi() );
+      Float_t deta =       position.Eta() - r.Eta();
+      Float_t dr=TMath::Sqrt(deta*deta+dphi*dphi);      
+
+      if ( dr < mClusterTrackSeparation[layer] ) return true;
+
+    }
+
+  return false;
+  
+}
+
+Bool_t StEEmcGenericClusterMaker::extrapolateToZ( const StPhysicalHelixD helix, const double   z, TVector3 &r)
+{
+  const double kMinDipAngle   = 1.0e-13;
+  double             dipAng = helix.dipAngle();
+  double             z0     = helix.origin().z();
+  if(dipAng<kMinDipAngle) 
+    return kFALSE;
+  double s  = ( z - z0 ) / sin(dipAng)  ;
+  StThreeVectorD hit = helix.at(s);
+  r.SetXYZ(hit.x(),hit.y(),hit.z());
+  return   kTRUE;   
+}
+
+
+Bool_t StEEmcGenericClusterMaker::matchBackgroundTrack( StEEmcCluster &cluster, StMuTrack *track )
+{
+
+  //
+  // First and last point on the background tracks are stored as the
+  // origin points of the inner and outer helix.
+  //
+  StPhysicalHelixD outer = track -> outerHelix();
+  StPhysicalHelixD inner = track -> helix();
+  StThreeVectorD p1 = inner.origin();
+  StThreeVectorD p2 = outer.origin();
+
+  Int_t layer = cluster.tower(0).layer();
+
+  Double_t z1 = p1.z();
+  Double_t z2 = p2.z();
+
+  if ( z2 <= z1 ) return false;
+  
+  const Float_t match_at_z[]={ 
+    kEEmcZSMD,  // match tower clusters at smd
+    kEEmcZPRE1, // match pre1 at pre1
+    kEEmcZPRE2, // match pre2 at pre2
+    kEEmcZPOST  // match post at post
+  };
+
+  Double_t zmatch = match_at_z[ layer ];
+
+  //
+  // Compute the intersection point with the track (assume straight line)
+  // extrapolated to the layer where we want to make the match
+  //
+  Double_t scale = zmatch - z1;
+  scale /= z2 - z1;
+
+  StThreeVectorD myposition = p1 + scale * (p2 - p1);
+
+  // Compare position 
+  TVector3 r(myposition.x(),myposition.y(),myposition.z());
+  TVector3 position = cluster.position();
+
+  Float_t dphi = fmod( position.Phi() - r.Phi(), TMath::TwoPi() );
+  Float_t deta =       position.Eta() - r.Eta();
+  Float_t dr=TMath::Sqrt(deta*deta+dphi*dphi);      
+  
+  if ( dr < mClusterTrackSeparation[layer] ) return true;
+    
+  return false;
+ 
+}
+
+
 // ----------------------------------------------------------------------------
 Int_t StEEmcGenericClusterMaker::numberOfMatchingSmdClusters( StEEmcCluster &cluster, Int_t plane )
 {
@@ -410,3 +594,6 @@ StEEmcSmdCluster StEEmcGenericClusterMaker::matchingSmdCluster ( StEEmcCluster &
    return (plane==0)? matches.smdu[index] : matches.smdv[index];
 }
 
+
+
+// ----------------------------------------------------------------------------
