@@ -5,8 +5,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: TMxF110.cxx,v 1.5 2003/09/02 17:59:24 perev Exp $
+// $Id: TMxF110.cxx,v 1.6 2006/12/08 17:51:14 fine Exp $
 // $Log: TMxF110.cxx,v $
+// Revision 1.6  2006/12/08 17:51:14  fine
+// prepare the test are to move to ROOT CVS
+//
 // Revision 1.5  2003/09/02 17:59:24  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -31,8 +34,12 @@
 //
 
 #include "StMicky.h"
-#include <TCL.h>
-#include <Stiostream.h>
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,13,0)
+#include "TCL.h"
+#else
+#include "TCernLib.h"
+#endif
+#include "Stiostream.h"
 
 //____________________________________________________________________________________
 void StMicky::Tmxm()
@@ -53,89 +60,118 @@ void StMicky::Tmxm()
 	char e_4[4];
 	} equiv_30 = { 1000, {'X', 'M', 'P', 'Y'}, 0, {'3', '2', '4', ' '} };
 
+#ifndef tinf
 #define tinf ((int *)&equiv_30)
-
-    static struct {
+#endif
+   
+   static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_31 = { {'X', 'M', 'A', 'D'}, 0 };
-
+   
+   
+#ifndef tinfa
 #define tinfa (*(int *)&equiv_31)
+#endif 
 
-    static struct {
+      static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_32 = { {'X', 'M', 'U', 'B'}, 0 };
-
+   
+#ifndef tinfu
 #define tinfu (*(int *)&equiv_32)
+#endif
 
-    static struct {
+   static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_33 = { {'M', 'P', 'Y', '1'}, 0 };
-
+   
+#ifndef tinfy1
 #define tinfy1 (*(int *)&equiv_33)
+#endif
 
-    static struct {
+   static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_34 = { {'M', 'A', 'D', '1'}, 0 };
-
+   
+#ifndef tinfa1
 #define tinfa1 (*(int *)&equiv_34)
+#endif
 
-    static struct {
+   static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_35 = { {'M', 'U', 'B', '1'}, 0 };
 
+#ifndef tinfu1
 #define tinfu1 (*(int *)&equiv_35)
+#endif
 
     static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_36 = { {'M', 'P', 'Y', '2'}, 0 };
 
+#ifndef tinfy2
 #define tinfy2 (*(int *)&equiv_36)
+#endif
+
 
     static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_37 = { {'M', 'A', 'D', '2'}, 0 };
 
+#ifndef tinfa2
 #define tinfa2 (*(int *)&equiv_37)
+#endif
 
     static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_38 = { {'M', 'U', 'B', '2'}, 0 };
 
+#ifndef tinfu2
 #define tinfu2 (*(int *)&equiv_38)
-
-    static struct {
+#endif
+   
+   static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_39 = { {'M', 'P', 'Y', '3'}, 0 };
 
+#ifndef tinfy3
 #define tinfy3 (*(int *)&equiv_39)
+#endif
 
     static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_40 = { {'M', 'A', 'D', '3'}, 0 };
 
+#ifndef tinfa3
 #define tinfa3 (*(int *)&equiv_40)
+#endif
 
     static struct {
 	char e_1[4];
 	int e_2;
 	} equiv_41 = { {'M', 'U', 'B', '3'}, 0 };
 
+#ifndef tinfu3
 #define tinfu3 (*(int *)&equiv_41)
+#endif
 
     static int j;
     static int ntimes;
 
     /* Local variables */
+#ifndef  _LOCALMICKYVARS_
+#define  _LOCALMICKYVARS_
+    
 #define amin   ((float *)&_BLNK__1 + 1399)
 #define dmin__ ((float *)&_BLNK__1 + 1699)
 #define amin2  ((float *)&_BLNK__1 + 1599)
@@ -148,6 +184,8 @@ void StMicky::Tmxm()
 #define act    ((float *)&_BLNK__1 + 1099)
 #define bct    ((float *)&_BLNK__1 + 1199)
 #define zer    ((float *)&_BLNK__1 + 1000)
+
+#endif
 
 //_______________________________________________________
     param_1.zerlev = param_1.zerov[1];
@@ -396,3 +434,16 @@ L300:
     Mverif(11, _BLNK__1.a, _BLNK__1.b, 16);
 
 } /* tmxm_ */
+#undef tinf
+#undef tinfa
+#undef tinfu
+#undef tinfy1
+#undef tinfa1
+#undef tinfu1
+#undef tinfy2
+#undef tinfa2
+#undef tinfu2
+#undef tinfy3
+#undef tinfa3
+#undef tinfu3
+

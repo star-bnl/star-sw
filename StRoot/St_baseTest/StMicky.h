@@ -1,9 +1,14 @@
-//*-- Author :    Valery Fine(fine@bnl.gov)   25/09/99  
+#ifndef ROOT_StMicky
+#define ROOT_StMicky
+//Author :    Valery Fine(fine@bnl.gov)   25/09/99  
 //  This class is to provide "micky" test for RMath.h methods
 //  derived from CERNLIB 
 //  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
-// $Id: StMicky.h,v 1.6 1999/09/30 15:50:22 fine Exp $
+// $Id: StMicky.h,v 1.7 2006/12/08 17:51:14 fine Exp $
 // $Log: StMicky.h,v $
+// Revision 1.7  2006/12/08 17:51:14  fine
+// prepare the test are to move to ROOT CVS
+//
 // Revision 1.6  1999/09/30 15:50:22  fine
 // ClassDef has been introduced
 //
@@ -26,9 +31,7 @@
 // test system for RMath class has been introduced
 //
 
-#ifdef __ROOT__
 #include "Rtypes.h"
-#endif
 
 typedef struct {
          int iqbitw, iqchaw, itb, nlines, itimes;
@@ -57,17 +60,16 @@ typedef struct {
      void Newguy(const char *t1, const char *t2);
      void Prtest();
      PARAM &Param() { return *(&param_1);}
-     void Timing(int *) const; 
-     void Timed(float *)  const; 
+     void Timing(int *) const{;} 
+     void Timed(float *)  const{;} 
 //--  tests:
 //--  test F110
      void Tmxm();
 //--  test F112
      int ttrinv();
      int ttrla();
-     int ttrcho();
-#ifdef __ROOT__
-     ClassDef(StMicky,0)
-#endif
+     int ttrcho();     
  };
 
+
+#endif
