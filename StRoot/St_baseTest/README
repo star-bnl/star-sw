@@ -5,7 +5,7 @@
 To run this test one needs to launch a ROOT session
 as follows:
 
- root.exe -b -q micky.C++
+	 > root.exe -b -q micky.C++
 
 root.exe [0] gSystem->Load("St_base"); gSystem->Load("St_baseTest"); StMicky a;
  MICKY executing.
@@ -58,8 +58,11 @@ root.exe [5]
 
      Valery Fine September, 23, 1999
 
- $Id: README,v 1.5 2006/12/08 17:51:11 fine Exp $
+ $Id: README,v 1.6 2006/12/08 17:53:04 fine Exp $
  $Log: README,v $
+ Revision 1.6  2006/12/08 17:53:04  fine
+ prepare the test area to move to ROOT CVS
+
  Revision 1.5  2006/12/08 17:51:11  fine
  prepare the test are to move to ROOT CVS
 
