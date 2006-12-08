@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.9 2005/04/13 16:03:29 dongx Exp $
+ * $Id: StTofSimMaker.cxx,v 1.10 2006/12/08 18:55:26 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.10  2006/12/08 18:55:26  dongx
+ * Update to avoid zero tdc value in denominator - modified by Jing Liu
+ *
  * Revision 1.9  2005/04/13 16:03:29  dongx
  * corresponding changes because of the update of StTofData structure
  *
@@ -401,8 +404,9 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     // do a rough cts-style calibration
     float tdcOffset = mCalibDb->slat(slatId).offset_tdc
                       + random.shoot() * mCalibDb->slat(slatId).ods_tdc;
-    unsigned short tdc = (unsigned short)((float)tt/
-                              (mCalibDb->slat(slatId).cc_tdc)+ tdcOffset);
+    float cctdc = mCalibDb->slat(slatId).cc_tdc;
+    if(cctdc==0) cctdc=0.0001;
+    unsigned short tdc = (unsigned short)((float)tt/cctdc+ tdcOffset);
     float adcOffset = mCalibDb->slat(slatId).offset_adc
                       + random.shoot() * mCalibDb->slat(slatId).ods_adc;
     unsigned short adc =  (unsigned short)((float)numberOfPhotoelectrons
