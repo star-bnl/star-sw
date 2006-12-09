@@ -36,7 +36,7 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 const StiDefaultHitErrorCalculator & operator=(const HitError_st & error);
    ~StiDefaultHitErrorCalculator();
    virtual void calculateError(const StiNodePars*,double&,double&) const; 
-   void set(double intrinsicX, double driftX, double crossX
+   void set(double intrinsicY, double driftY, double crossY
            ,double intrinsicZ, double driftZ, double crossZ);
 
    	 virtual void loadDS(TDataSet&ds);
@@ -45,8 +45,8 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 friend ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c);
 
  private:
-   double coeff[6];              //0:intrinsicZ  1: driftZ   2: crossZ
-                                 //3:intrinsicX  4: driftX   5: crossX
+   double coeff[6];              //0:intrinsicY  1: driftY   2: crossY
+                                 //3:intrinsicZ  4: driftZ   5: crossZ
 };
 
 #endif
