@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.1 2006/12/06 15:18:47 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.2 2006/12/09 17:13:48 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -668,7 +668,7 @@ void GeomBrowser::SetVisibility( TQtObjectListItem * item, TVolume::ENodeSEEN vi
 
 
 //_____________________________________________________________________________
-void GeomBrowser::viewCoin3D()
+TVirtualViewer3D *GeomBrowser::viewCoin3D()
 {
 // 
 #if  ROOT_VERSION_CODE >= ROOT_VERSION(4,03,3)   
@@ -690,6 +690,7 @@ void GeomBrowser::viewCoin3D()
     } else {
          editView_Coin3DAction->setEnabled(false);
     }
+    return viewer;
 #else  
    if (! glViewerLoadFlag) glViewerLoadFlag = !gQt->LoadQt("libRQTGL");
    if (glViewerLoadFlag) {
@@ -983,4 +984,21 @@ void GeomBrowser::fileOpenZebra( const QString &fileName )
    }
    comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
    QApplication::restoreOverrideCursor();
+}
+
+
+//_____________________________________________________________________________
+void GeomBrowser::fileOpenInventor( const QString &fileName )
+{
+   // Open the new Coin widget and feed the IV file there
+   if (editView_Coin3DAction->isEnabled() ) {
+      TVirtualViewer3D *viewer = viewCoin3D(); 
+      if (viewer) {
+         TQtRootViewer3D *v  = (TQtRootViewer3D*)(viewer);
+         if (v) {
+            TGLViewerImp *viewerImp = v->GetViewerImp();
+            if (viewerImp) {}
+         }
+      }
+   }
 }
