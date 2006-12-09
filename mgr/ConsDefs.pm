@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.95 2006/12/01 21:44:50 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.96 2006/12/09 02:26:58 fine Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -576,6 +576,29 @@
 	}
     }
 
+    # Coin3D
+    if ( !defined($IVROOT) || -d $IVROOT) {
+      $IVROOT   = $ROOT . "/5.99.99/Coin2/.$STAR_HOST_SYS"; # the temporary place with the coin package 
+    }
+    if ( defined($IVROOT) &&  -d $IVROOT) {
+      if (-e $IVROOT . "/bin/coin-config") {
+         $COIN3DIR     = $IVROOT;
+	      $COIN3DBINDIR = $COIN3DIR . "/lib";
+	      $COIN3DLIBDIR = $COIN3DIR . "/bin";
+      }
+	   if ($COIN3DBINDIR) {
+	     $COIN3DINCDIR = $COIN3DIR . "/include";
+	     $COIN3DFLAGS  = ""; # "-DR__QT";#-DQT_THREAD_SUPPORT";
+	     $COIN3DLIBS   = "-lCoin -lSmallChange -lSoQt -lsimage";
+#	    if ($main::_WIN32) {
+#     		$QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " .
+#		    $ROOTSYS . "/lib/libGraf.lib " .
+#		    $ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";}
+	    print "Use COIN3DLIBDIR = $COIN3DLIBDIR \tCOIN3DINCDIR = $COIN3DINCDIR \tCOIN3DFLAGS = $COIN3DFLAGS \tCOIN3DLIBS = $COIN3DLIBS\n"
+		  if $COIN3DLIBDIR && ! $param::quiet;
+	   }
+   }
+
     # Logger
     $LoggerDir = $OPTSTAR . "/include/log4cxx";
     if (-d $LoggerDir) {
@@ -731,6 +754,8 @@
 		      'PERL5LIB'        => $PERL5LIB,
 		      'OPTSTAR'         => $OPTSTAR,
 		      'QTDIR'           => $QTDIR,
+		      'COIN3DIR'        => $COIN3DIR,
+            'IVROOT'          => $IVROOT,
 		      'HOME'            => $HOME
 		      },
 		  'Packages' => {
@@ -762,6 +787,14 @@
 			    'FLAGS' => $QTFLAGS,
 			    'LIBDIR'=> $QTLIBDIR,
 			    'LIBS'  => $QTLIBS
+			    },
+		        'COIN3D' => {
+			    'DIR'   => $COIN3DIR,
+			    'INCDIR'=> $COIN3DINCDIR,
+			    'BINDIR'=> $COIN3DBINDIR,
+			    'FLAGS' => $COIN3DFLAGS,
+			    'LIBDIR'=> $COIN3DLIBDIR,
+			    'LIBS'  => $COIN3DLIBS
 			    },
 		       'XML' => {
 			   'LIBDIR'=> $XMLLIBDIR,
