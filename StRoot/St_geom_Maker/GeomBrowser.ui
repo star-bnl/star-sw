@@ -54,8 +54,8 @@
                     </property>
                     <property name="minimumSize">
                         <size>
-                            <width>204</width>
-                            <height>96</height>
+                            <width>242</width>
+                            <height>115</height>
                         </size>
                     </property>
                     <property name="frameShape">
@@ -1154,6 +1154,7 @@
     <forward>class TGeoManager</forward>
     <forward>class St_geant_Maker</forward>
     <forward>class StChain</forward>
+    <forward>class TVirtualViewer3D</forward>
 </forwards>
 <variables>
     <variable>bool glViewerLoadFlag;</variable>
@@ -1200,7 +1201,7 @@
     <slot>listView1_collapsed( QListViewItem * item )</slot>
     <slot>listView1_doubleClicked( QListViewItem * item )</slot>
     <slot access="protected">drawItem( QListViewItem * item, int depth, TQtWidget * view )</slot>
-    <slot>viewCoin3D()</slot>
+    <slot returnType="TVirtualViewer3D *">viewCoin3D()</slot>
     <slot>OpenInventorConvertor( TVolume * volume )</slot>
     <slot>OpenInventorConvertor( TGeoVolume * volume )</slot>
     <slot>fileOpenRoot( const QString &amp; fileName )</slot>
@@ -1208,6 +1209,7 @@
     <slot>ObjectSelected( TObject * obj, const QPoint &amp; )</slot>
     <slot>STAR_geometry_activated( const QString &amp; geoVersion )</slot>
     <slot>fileOpenZebra( const QString &amp; fileName )</slot>
+    <slot>fileOpenInventor( const QString &amp; fileName )</slot>
 </slots>
 <functions>
     <function access="protected">SetVisibility( TQtObjectListItem * item, TVolume::ENodeSEEN vis )</function>
