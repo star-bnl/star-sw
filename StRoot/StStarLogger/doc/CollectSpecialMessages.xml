@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration>
-<!-- $Name:  $Id: CollectSpecialMessages.xml,v 1.4 2006/06/01 15:44:15 fine Exp $  -->
+<!-- $Name:  $Id: CollectSpecialMessages.xml,v 1.5 2006/06/01 15:45:51 fine Exp $  -->
 
 <configuration xmlns='http://logging.apache.org/'>
 
@@ -8,7 +8,7 @@
 <!--     Concurently it instructs the logger to direct all messages to the stdout as well  --> 
     
 
-  <!--  Print all messages to the console   -->
+<!--  Print all messages to the console   -->
   <appender name="stdout" class="org.apache.log4j.ConsoleAppender">
   <layout class="org.apache.log4j.PatternLayout">
       <param name="ConversionPattern" value="%-3c{2}:%-5p - %m%n" /> 
@@ -24,7 +24,7 @@
      </layout>
 
  <!--  Define the pattern to select the following STAR QA messages:
-       -------------------------------------------------------------
+ 
 QA :INFO  - StAnalysisMaker,  Reading Event: 4  Type: NONE  Run: 6080011
 QA :INFO  - # track nodes:      454:    globals with NFitP>=15: 249:    Ftpc tracks :   86
 QA :INFO  - # primary vertex(0):        -0.640632       0.220706        31.8405
