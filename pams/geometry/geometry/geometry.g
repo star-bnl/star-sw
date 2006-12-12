@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.137 2006/12/01 19:26:58 potekhin Exp $
+* $Id: geometry.g,v 1.138 2006/12/12 22:32:19 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.138  2006/12/12 22:32:19  potekhin
+* a) enable a cleaner barrel EMC code in Y2007
+* b) re-instate UPGR06 for the upcoming simulation
+*
 * Revision 1.137  2006/12/01 19:26:58  potekhin
 * Removing the SSD from the R&D geometry UPGR05, resulting
 * in a new configuration, UPGR08
@@ -2153,9 +2157,8 @@ If LL>1
 * Full barrel in 2006
                   "calb" 
                      ems=on ;
+                     CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
-
-
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
@@ -2514,6 +2517,59 @@ If LL>1
 * Inner STAR GEM barrel
                    gemb=off;  
                    GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
+                }
+****************************************************************************************
+  on UPGR06   { New Tracking: HFT+HPD+SSD
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 45;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HpdtConfig=1;   " base version"
 * Forward STAR tracker disk
                    fstd=on;  "new pixel based forward tracker"
                    FstdConfig=2;
@@ -3006,12 +3062,23 @@ If LL>1
 
 
    if (calb) then ! Pick the version:
-       if(CalbConfig==0) Call calbgeo
+
+       if(CalbConfig==0) then
+           write(*,*) '************** Creating the 1996-2003 version of the Barrel Calorimeter'
+           Call calbgeo
+       endif
+
        if(CalbConfig==1) then
-           write(*,*) '************** Creating the new version of the Barrel Calorimeter'
+           write(*,*) '************** Creating the 2004-2006 version of the Barrel Calorimeter'
            Call calbgeo1
        endif
-   endif
+
+       if(CalbConfig==2) then
+           write(*,*) '************** Creating the 2007-     version of the Barrel Calorimeter'
+           Call calbgeo2
+       endif
+
+  endif
 ******************************************************************
 *  - Set up the parameters for the RICH counter
    if (LL>1 & rich) then
