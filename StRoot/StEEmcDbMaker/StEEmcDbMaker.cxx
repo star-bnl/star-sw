@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.50 2005/12/15 16:05:11 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.51 2006/12/12 20:29:09 balewski Exp $
  
 
 #include <time.h>
@@ -307,6 +307,15 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
 
 
   // exportAscii(); //tmp
+
+  int icr;
+  for(icr=0;icr<getNFiber();icr++)
+    {
+      const EEmcDbCrate *fiber=getFiber(icr);
+      printf(" eemcDB : ");
+      fiber->print();
+    }
+  
 
   gMessMgr->Message("","I") << GetName()<<"::InitRun("<<runNumber<<")  Found "<< nFound<<" EEMC related tables "<<endm;
 
@@ -1095,6 +1104,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.51  2006/12/12 20:29:09  balewski
+// added hooks for Endcap embedding
+//
 // Revision 1.50  2005/12/15 16:05:11  balewski
 // printouts with more details
 //
