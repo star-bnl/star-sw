@@ -1,5 +1,5 @@
 //
-// $Id: StEmcRawMaker.cxx,v 1.10 2006/08/01 14:45:31 balewski Exp $
+// $Id: StEmcRawMaker.cxx,v 1.11 2006/12/12 20:29:17 balewski Exp $
 
 #include <math.h>
 
@@ -116,17 +116,6 @@ Int_t StEmcRawMaker::InitRun(Int_t runNumber)
         //eeStDb->exportAscii();
     }
     mEemcRaw->setDb(eeStDb);
-
-    if(eeStDb)
-    {
-        int icr;
-        for(icr=0;icr<eeStDb->getNFiber();icr++)
-        {
-            const EEmcDbCrate *fiber=eeStDb-> getFiber(icr);
-            printf(" eemcDB : ");
-            fiber->print();
-        }
-    }
 
     return StMaker::InitRun(runNumber);
 }
@@ -315,6 +304,9 @@ void StEmcRawMaker::fillHistograms()
 }
 
 // $Log: StEmcRawMaker.cxx,v $
+// Revision 1.11  2006/12/12 20:29:17  balewski
+// added hooks for Endcap embedding
+//
 // Revision 1.10  2006/08/01 14:45:31  balewski
 // clear EmcRawData for eveID%555!=0 to reduce footprint of StEvent, for B+E-EMC
 //

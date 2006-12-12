@@ -1,10 +1,11 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 1.4 2006/08/07 18:50:11 balewski Exp $
+// $Id: StEEmcSlowMaker.cxx,v 1.5 2006/12/12 20:29:14 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
 #include <TRandom.h>
+#include <StMessMgr.h>
 
 #include "StEventTypes.h"
 #include "StMuDSTMaker/COMMON/StMuTypes.hh"
@@ -12,6 +13,7 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 
+#include "StEEmcFastMaker.h"
 #include "StEEmcSlowMaker.h"
 
 ClassImp(StEEmcSlowMaker)
@@ -34,6 +36,7 @@ StEEmcSlowMaker::StEEmcSlowMaker( const char* self ,const char* muDstMakerName) 
   /// By default, overwrite ADC in muDst
   mOverwrite = true;
 
+  mIsEmbeddingMode=false;
   /// By default, source is MuDst
   mSource = kMuDst;
 }
@@ -48,7 +51,19 @@ StEEmcSlowMaker::~StEEmcSlowMaker(){
 //________________________________________________
 //________________________________________________
 Int_t StEEmcSlowMaker::Init(){
+ LOG_INFO<<Form("%s::Init(), mIsEmbeddingMode=%d",GetName(),mIsEmbeddingMode)<<endm;
+
+  if(mIsEmbeddingMode) {
+    setDropBad(0);   // 0=no action, 1=drop chn marked bad in db
+    setAddPed(0);    // 0=no action, 1=ped offset from db
+    setSmearPed(0);  // 0=no action, 1=gaussian ped, width from db
+    setOverwrite(1); // 
+    setSource("StEvent");
+  }
+
+
   eeDb=(StEEmcDbMaker*)GetMaker("eemcDb");
+  if(eeDb==0) eeDb=(StEEmcDbMaker*)GetMaker("eeDb"); // try another name
   assert( eeDb);
   if ( mHList ) InitHisto();
   if ( mSmearPed && !mAddPed) {
@@ -132,7 +147,7 @@ Int_t StEEmcSlowMaker::Finish(){
 Int_t StEEmcSlowMaker::Make(){
   nInpEve++;
 
-  gMessMgr->Debug() << GetName() << "::Make() is called , iEve" << nInpEve << endm;
+  LOG_INFO << GetName() << "::Make() is called , iEve " << nInpEve << " mSource="<<mSource<<endm;
   
   mKSigma = eeDb -> KsigOverPed;
 
@@ -163,19 +178,30 @@ Int_t StEEmcSlowMaker::Make(){
     break;
 
   case kStEvent:
-    /// Acces to StEvent .......................
+    /// Acces to StEvent, automatic detection if in Embedding mode .....................
     {
-      StEvent* event = (StEvent*)GetInputDS("StEvent");
 
-      if (!event) {
-	gMessMgr->Debug("No StEvent");
-	return kStOk;
+      StEmcCollection *emc =0; 
+      if(mIsEmbeddingMode) {
+	StEEmcFastMaker *fast = (StEEmcFastMaker*)GetMaker("EEmcFastSim");
+	if(fast==0) {
+	  LOG_WARN << GetName() << "::Make()  no EEmcFastSim in the chain, ignore Endcap"<< endm;
+	  return kStOk;
+	}
+	emc = fast->GetLocalEmcCollection();
+      } else { // it is not Embedding mode
+	
+	StEvent* event = (StEvent*)GetInputDS("StEvent");
+	if (!event) {
+	  LOG_WARN << GetName() << "::Make()  no StEvent"<< endm;
+	  return kStOk;
+	}
+	emc = event->emcCollection();
       }
-
-      StEmcCollection* emc = event->emcCollection();
-
+      // now emc-collection should be accessible one way or another
+      
       if (!emc) {
-	gMessMgr->Debug("No StEmcCollection");
+	LOG_WARN << GetName() << "::Make()  no emcCollection()" << endm;
 	return kStOk;
       }
 
@@ -191,7 +217,7 @@ Int_t StEEmcSlowMaker::Make(){
     break;
 
   default:
-    gMessMgr->Debug() << "Unknown source type " << mSource << " for this event" << endm;
+    LOG_ERROR<< "Unknown source type " << mSource << " for this event" << endm;
     break;
   }
 
@@ -414,7 +440,7 @@ void StEEmcSlowMaker::MakePrePost(StEmcCollection* emc)
 {
   StEmcDetector* det = emc->detector(kEndcapEmcPreShowerId);
   if (!det) {
-    gMessMgr->Debug("No kEndcapEmcPreShowerId");
+    LOG_WARN<<Form("No kEndcapEmcPreShowerId");
     return;
   }
 
@@ -564,6 +590,9 @@ void StEEmcSlowMaker::MakeSMD(StEmcCollection* emc)
 }
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 1.5  2006/12/12 20:29:14  balewski
+// added hooks for Endcap embedding
+//
 // Revision 1.4  2006/08/07 18:50:11  balewski
 // added capabilty to run on StEvent, use se-method, see macros/ for example
 //

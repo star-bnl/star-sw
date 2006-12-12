@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.7 2005/06/09 20:04:23 balewski Exp $
+// $Id: StEEmcFastMaker.h,v 1.8 2006/12/12 20:29:13 balewski Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -113,7 +113,7 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
   bool mEmcCollectionIsLocal;
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.7 2005/06/09 20:04:23 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.8 2006/12/12 20:29:13 balewski Exp $";
   
  protected:
  public: 
@@ -126,10 +126,10 @@ class StEEmcFastMaker : public StMaker {
   void SetLocalStEvent();
   void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
   void SetEmcCollectionLocal(bool x=true){mEmcCollectionIsLocal=x;}
-  StEmcCollection * GetEmcCollection() { return mLocalStEmcCollection;}
+  StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.7 2005/06/09 20:04:23 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.8 2006/12/12 20:29:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -140,6 +140,9 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.8  2006/12/12 20:29:13  balewski
+// added hooks for Endcap embedding
+//
 // Revision 1.7  2005/06/09 20:04:23  balewski
 // upgrade for embedding
 //
