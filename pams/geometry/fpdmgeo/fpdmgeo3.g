@@ -1,15 +1,14 @@
 ******************************************************************************
-* $Id: fpdmgeo3.g,v 1.2 2006/12/12 21:05:09 potekhin Exp $
+* $Id: fpdmgeo3.g,v 1.3 2006/12/12 21:08:26 potekhin Exp $
 * $Name:  $
 * $Log: fpdmgeo3.g,v $
-* Revision 1.2  2006/12/12 21:05:09  potekhin
-* Waypoint check-in, work in progress. The area in the vicinity
-* of the beampipe will need to be refined, and the remaining
-* hardcoded values removed.
+* Revision 1.3  2006/12/12 21:08:26  potekhin
+* Previous check-in accidentally was done from Braidot's
+* directory, this one from the principal working area
+* in gstardata, differences mainly cosmetic
 *
 * Revision 1.1  2006/11/28 00:02:42  potekhin
 * First version of the FMS (FPD) that still needs work.
-*
 *
 *
 ******************************************************************************
@@ -208,7 +207,6 @@ EndFill
 
         USE FPOS iMod=m
         USE FBXD Type=FPOS_iType
-*        print *,FPOS_iType
 
         if(FBXD_Type.eq.1) then
            USE FLGG Type=1
@@ -264,7 +262,6 @@ EndFill
         endif
         if(m.ne.7) then
         Create and Position FBOX in CAVE x=xx y=yy z=zz AlphaY=FPOS_AY   
-*        print *,m,xx,yy,zz,FPOS_AY
         endif
       enddo
 
@@ -307,7 +304,6 @@ Block FBOX is one Pb-Glass fpd detector
              x1=x1+wid2
            else
              Create and Position FTOW x=x1 y=y1 z=z1        
-*   !!          write(*,'(2I3,3F12.6)') i,j,x1,y1,z1
                x1=x1+wid2
            endif
    	    enddo
@@ -369,7 +365,6 @@ Block FBOX is one Pb-Glass fpd detector
                   x1=x1+wid2            
                else              
                   Create and Position FLXF x=x1 y=y1 z=z1             
-*c!!                  write(*,'(2I3,3F12.6)') i,j,x1,y1,z1
                   x1=x1+wid2
                endif
             enddo
