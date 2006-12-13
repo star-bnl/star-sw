@@ -19,7 +19,7 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "StEmcRawMaker/StEemcRaw.h"
 
-#include "StEEmcPrint.h"
+#include "StEmcRawMaker/StEEmcPrint.h"
 
 
 ClassImp(StEEmcMixerMaker)
@@ -265,8 +265,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.1 2006/12/12 20:29:13 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.2 2006/12/13 13:24:38 balewski Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.2  2006/12/13 13:24:38  balewski
+// fix wrong header path
+//
 // Revision 1.1  2006/12/12 20:29:13  balewski
 // added hooks for Endcap embedding
 //
