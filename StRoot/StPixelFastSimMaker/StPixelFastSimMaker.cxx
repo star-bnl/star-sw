@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.7 2006/11/29 21:42:07 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.8 2006/12/13 19:05:15 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.8  2006/12/13 19:05:15  wleight
+ * Changed Ist smearing so the resolution is good in r-phi for layer 1 and z for layer 2
+ *
  * Revision 1.7  2006/11/29 21:42:07  andrewar
  * Update with Pixel resolution smearing.
  *
@@ -184,29 +187,21 @@ Int_t StPixelFastSimMaker::Make()
 		  //		  char path[100];
 		  TString Path("");
 		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  cout<<"about to try to move between local+global coords with VMC"<<endl;
 		  if(mcI->layer()==1) Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
 		  else                Path = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
-		  cout<<"path: "<<Path.Data()<<endl;
 		  if(!gGeoManager) cout<<"no gGeoManager?"<<endl;
-		  cout<<"RMV"<<endl;
 		  gGeoManager->RestoreMasterVolume();
-		  cout<<"go to path"<<endl;
 		  gGeoManager->cd(Path);
-		  cout<<"get node"<<endl;
 		  TGeoNode* node=gGeoManager->GetCurrentNode();
-		  cout<<"hit location: "<<mcH->position()<<endl;
 		  double pos[3]={mcH->position().x(),mcH->position().y(),mcH->position().z()};
 		  double localpos[3]={0,0,0};
 		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
-		  cout<<"local hit location: "<<localpos[0]<<" "<<localpos[1]<<" "<<localpos[2]<<endl;
-		  localpos[0]=distortHit(localpos[0],.0017,100);
-		  //localpos[1]=distortHit(localpos[1],.055);
+		  if(mcI->layer()==1) localpos[0]=distortHit(localpos[0],.0017,100);
+		  else localpos[0]=distortHit(localpos[0],.055,100);
 		  gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
-		  cout<<"hit location after 1 smear: "<<pos[0]<<" "<<pos[1]<<" "<<pos[2]<<endl;
-		  pos[2]=distortHit(pos[2],.055,100);
+		  if(mcI->layer()==1) pos[2]=distortHit(pos[2],.055,100);
+		  else pos[2]=distortHit(pos[2],.0017,100);
 		  StThreeVectorF smearedpos(pos);
-		  cout<<"smeared hit location: "<<smearedpos<<endl;
 		  StRnDHit* tempHit = new StRnDHit(smearedpos, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
 		  tempHit->setDetectorId(kIstId); 
 		  tempHit->setVolumeId(mcH->volumeId());                   
