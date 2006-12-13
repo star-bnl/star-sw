@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration>
-<!-- $Name:  $Id: SkipMessages.xml,v 1.1 2006/06/01 15:39:20 fine Exp $  -->
+<!-- $Name:  $Id: SkipMessages.xml,v 1.2 2006/06/01 15:45:51 fine Exp $  -->
 
 <configuration xmlns='http://logging.apache.org/'>
 
@@ -19,7 +19,6 @@
      </filter>
 </appender>
 
-     <filter class="StringMatchFilter">
  <root>
    <priority value="DEBUG" /> 
    <appender-ref ref="stdout" /> 
