@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #change the following to your own environment
-  outDir=/star/data05/scratch/$USER/2005
+  outDir=/star/institutions/ucla/$USER/bemc/
   outDirlog=$outDir/log
 
 # #############################################################################

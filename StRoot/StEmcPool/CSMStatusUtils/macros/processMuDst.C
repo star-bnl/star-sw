@@ -1,13 +1,16 @@
-void processMuDst( Char_t *jobId= "5117072.",
+void processMuDst( //Char_t *jobId= "7121003.",
+		  Char_t *jobId= "7129031.",
                  Char_t *dir="",
-                 Char_t *file="/star/data35/reco/productionPP/ReversedFullField/DEV/2004/117/st_physics_5117072_raw_*.MuDst.root",
-                 Char_t *scratchDir ="/star/data05/scratch/relyea/2005") {
+		   //Char_t *file="/star/data35/reco/productionPP/ReversedFullField/DEV/2004/117/st_physics_5117072_raw_*.MuDst.root",
+		   //Char_t *file="/star/data54/reco/ppProductionTrans/FullField/P06ie/2006/129/7129031/st_physics_7129031_raw_1030003.MuDst.root",
+		  Char_t *file="/star/data52/reco/ppProductionTrans/FullField/P06ie/2006/129/7129027/st_physics_adc_7129027_raw_1060001.MuDst.root",
+                 Char_t *scratchDir ="/star/u/staszak/working/bemc/") {
   
   Int_t numberOfFilesInt = 1;
   
 
-//  cout << "RUNNING job " << jobId << ": reading " << numberOfFilesInt << " and writing output to "
-//       << scratchDir << endl;
+  cout << "RUNNING job " << jobId << ": reading " << numberOfFilesInt << " and writing output to "
+       << scratchDir << " - dir: " << dir  << " - file: " << file << endl;
   
   // load shared libraries
   // first MuDst libs.
