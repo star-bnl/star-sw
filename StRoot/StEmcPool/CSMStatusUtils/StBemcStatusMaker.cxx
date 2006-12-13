@@ -21,6 +21,10 @@
 
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
+#include "StDbManager.hh" // D.Staszak
+#include "StDbConfigNode.hh"
+#include "StDataBaseI.hh"
+
 StBemcStatusMaker::StBemcStatusMaker(StMuDstMaker* maker) 
   : StMaker("bemcStatus"), mMuDstMaker(maker) {
   mOutputDirectory = "/tmp";
@@ -49,7 +53,6 @@ Int_t StBemcStatusMaker::Init() {
 }
 
 Int_t StBemcStatusMaker::Make() {
-  
   StMuEvent *muEvent = mMuDstMaker->muDst()->event();
   Int_t runnumber=muEvent->eventInfo().runId();
 //  Int_t otherrunnumber = GetRunNumber();
@@ -60,10 +63,8 @@ Int_t StBemcStatusMaker::Make() {
   bool isGood=false;
   uint i;
   for(i = 0; i < trgId.size() ; i++){
-//    if(trgId[i]==10 || trgId[i]==45010 || trgId[i]==45020) isGood=true;
-//    if(trgId[i]==23) isGood=true;
-    if(trgId[i]==96011 || trgId[i]==106011) isGood=true;
-//    if(trgId[i]==66501 || trgId[i]==66502) isGood=true;
+    //if(trgId[i]==96011 || trgId[i]==106011 || trgId[i]==117001) isGood=true;
+    if(trgId[i]==117001 || trgId[i]==117811 || trgId[i]==147001) isGood=true; //2006 mb and mb-fast(200GeV), mb (62GeV)
   }
   if (!isGood) {
 //    cout <<" wrong triggers!"<<endl;
@@ -74,7 +75,7 @@ Int_t StBemcStatusMaker::Make() {
     //following line.
     //line put back
     
-    return kStOk;
+    //return kStOk;
   }
 
   StEvent* event = static_cast<StEvent*>(GetInputDS("StEvent"));
@@ -109,10 +110,10 @@ Int_t StBemcStatusMaker::Make() {
 //make histograms to be saved
     
   TH2F* bemcAdcHist = getBemcAdcHist(runnumber);
-  TH2F* bemcEnergyHist = getBemcEnergyHist(runnumber);
-  TH2F* eemcAdcHist = getEemcAdcHist(runnumber);
+  //  TH2F* bemcEnergyHist = getBemcEnergyHist(runnumber);
+  //  TH2F* eemcAdcHist = getEemcAdcHist(runnumber);
   //  TH2F* eemcEnergyHist = getEemcEnergyHist(event->runId());
-  if (!bemcAdcHist || !bemcEnergyHist || !eemcAdcHist 
+  if (!bemcAdcHist  //|| !eemcAdcHist || !bemcEnergyHist
   //      || !eemcEnergyHist
       ) {
     cout <<"Problems with Histo"<<endl;
@@ -130,7 +131,7 @@ Int_t StBemcStatusMaker::Make() {
 	       StEmcGeom* geom = StEmcGeom::instance("bemc");
 	       geom->getId((*hit)->module(),(*hit)->eta(),(*hit)->sub(),id);
 	       bemcAdcHist->Fill(id,(*hit)->adc());
-	       bemcEnergyHist->Fill(id,(*hit)->energy());
+	       //bemcEnergyHist->Fill(id,(*hit)->energy());
       }
     }
   } 
@@ -149,12 +150,34 @@ Int_t StBemcStatusMaker::Make() {
         cout << "i is " << i << " and id is " << id << endl;
         assert(id-i+1);
       }
-	    eemcAdcHist->Fill(id,rawadc);
+      // eemcAdcHist->Fill(id,rawadc); //D.Staszak
     } 
   }
   if(mFirstEvent) {
-    mTheDate = GetDate();
-    mTheTime = GetTime();
+
+    // Query the Db to find the run start time and date --- D.Staszak
+    StDbManager* mgr=StDbManager::Instance();
+    StDbConfigNode* node=mgr->initConfig("RunLog_onl");
+    StDbTable* tab=node->addDbTable("beamInfo");
+    StDataBaseI* filldb=mgr->findDb("RunLog_onl");
+    unsigned int ts;
+    char queryStr[128];
+    sprintf(queryStr," where runNumber='%d' and deactive=0",runnumber);
+    cout << queryStr << endl;
+    ts = filldb->QueryDb(tab,queryStr);
+    cout << ts << endl;
+    if (ts) {
+      char* start = tab->getBeginDateTime();
+      int startTime = atoi(&(start[8]));
+      start[8] = 0;
+      mTheDate = atoi(start);
+      if (start[12] == '0') 
+	mTheTime = startTime - 50;
+      else 
+	mTheTime = startTime - 10;
+      //cout << "theTime: " << mTheTime << "\ttheDate: " << mTheDate << endl;
+    }
+    
     mFillNumber=muEvent->runInfo().beamFillNumber(yellow);
     for(int i=0; i<720; i++) {
       muemcColl->getEndcapTowerADC(i,rawadc,sec,sub,etabin);
@@ -188,7 +211,9 @@ TH2F* StBemcStatusMaker::getBemcAdcHist(Int_t runNumber) {
   if (!hist) {
     Char_t title[255];
     snprintf(title,254,"BEMC tower adc run %d",runNumber);
-    hist = new TH2F(name, title,4801,-0.5,4800.5,150,0,150);
+    //hist = new TH2F(name, title,4801,-0.5,4800.5,150,0,150);
+    //hist = new TH2F(name, title,4801,-0.5,4800.5,750,0,750);
+    hist = new TH2F(name, title,4801,-0.5,4800.5,3000,0,3000);
     hist->GetXaxis()->SetTitle("tower id");
     hist->GetYaxis()->SetTitle("adc");
   }

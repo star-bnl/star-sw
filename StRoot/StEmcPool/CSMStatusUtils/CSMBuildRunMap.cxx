@@ -31,6 +31,8 @@ using namespace std;
 Int_t 
 CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
 
+  cout << "CSMBuilRunMap::buildRunMap" << endl;
+
   std::map<Int_t,std::set<std::string> > runFileMap;
   if (!directory || !filter) return 0;
   void *dir = NULL;
@@ -44,6 +46,7 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
       if (!strstr(buffer,filter)) continue;
       TFile *file = new TFile(buffer,"READ");
       if (file) {
+	cout << "Read File buffer Initiatiated" << endl;
         TList *keys = file->GetListOfKeys();
         if (keys) {
           TIterator* iter = keys->MakeIterator();
@@ -54,7 +57,7 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
               Short_t keyCycle;
               file->DecodeNameCycle(key->GetName(),name,keyCycle);
               Char_t *runNumberString = name+14;
-              //cout << runNumberString << endl;
+              cout << runNumberString << endl;
               string s(name);
               Int_t runNumber = atoi(runNumberString);
               runFileMap[runNumber].insert(string(buffer));
@@ -67,17 +70,17 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
     }
   }
 //this just couts the entire map you just acquired
-//  cout << "found histograms for " << runFileMap.size() << " runs" << endl;
-//  cout << "dumping run->file map" << endl;
-//  for (std::map<Int_t,std::set<std::string> >::const_iterator iter = runFileMap.begin();
-//        iter != runFileMap.end(); ++iter) {
-//    cout << "run number " << iter->first << endl;
-//    for (set<string>::const_iterator files = iter->second.begin();
-//          files != iter->second.end(); ++files) {
-//      cout << *files << endl;
-//    }
-//  }
-
+  cout << "found histograms for " << runFileMap.size() << " runs" << endl;
+  cout << "dumping run->file map" << endl;
+  for (std::map<Int_t,std::set<std::string> >::const_iterator iter = runFileMap.begin();
+       iter != runFileMap.end(); ++iter) {
+    cout << "run number " << iter->first << endl;
+    for (set<string>::const_iterator files = iter->second.begin();
+	 files != iter->second.end(); ++files) {
+      cout << *files << endl;
+    }
+  }
+  
   Int_t runDate, runTime, minirunDate, minirunTime;
   Float_t runFillNumber, minirunFillNumber;
   for (std::map<Int_t,set<string> >::const_iterator iter = runFileMap.begin();
@@ -89,6 +92,7 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
     sprintf(tempola,"/run%d.cal.total.hist.root",iter->first);
     strcat(buffer,tempola);
     TFile* outFile = new TFile(buffer,"RECREATE");
+    if (outFile) cout << "outFile buffer initiated" << endl;
     TTree* runTree = new TTree("calinfo","Extraneous Information");
     runTree->Branch("fillnum",&runFillNumber,"fillnum/F");
     runTree->Branch("thedate",&runDate,"thedate/I");
@@ -104,11 +108,11 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
     string EEMChistName(buffer);
     sprintf(buffer,"eemcStatusEnergy_%d",iter->first);
     string EEMCenergyHistName(buffer);
-//    cout << "reading " << bemchistName << " and " << bemcenergyHistName << endl;
-    TH2F* myEEMCRunHist = NULL;
-    TH2F* myEEMCEnergyRunHist = NULL;
+    //cout << "reading " << bemchistName << " and " << bemcenergyHistName << endl;
+    //    TH2F* myEEMCRunHist = NULL; //D.Staszak
+    //    TH2F* myEEMCEnergyRunHist = NULL;
     TH2F* myBEMCRunHist = NULL;
-    TH2F* myBEMCEnergyRunHist = NULL;
+    //    TH2F* myBEMCEnergyRunHist = NULL;
     for (set<string>::const_iterator filenames = iter->second.begin();
           filenames != iter->second.end(); ++filenames) {
       TFile *file = new TFile(filenames->c_str(),"READ");
@@ -131,6 +135,7 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
         runFillNumber = minirunFillNumber;
         TH2F* BEMChist = dynamic_cast<TH2F*>(file->Get(BEMChistName.c_str()));
         if (BEMChist) {
+	  if (BEMChist->Integral(3,BEMChist->GetXaxis()->GetNbins(),1,2) >1e5) cout << "File " << filenames->c_str() << "  has a ton of 0's" << endl; // D.Staszak
           if (!myBEMCRunHist) {
             outFile->cd();
             myBEMCRunHist = new TH2F(BEMChistName.c_str(),BEMChistName.c_str(),
@@ -146,6 +151,7 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
           cerr << "Didn't find histogram " << BEMChistName << " ???" << endl;
           cerr << "in file " << filenames->c_str() << " ???" << endl;
         }
+	/*
         TH2F* BEMCenergyHist = dynamic_cast<TH2F*>(file->Get(BEMCenergyHistName.c_str()));
         if (BEMCenergyHist) {
           if (!myBEMCEnergyRunHist) {
@@ -177,14 +183,18 @@ CSMBuildRunMap::buildRunMap(const Char_t *directory, const Char_t* filter) {
           myEEMCRunHist->Add(EEMChist);
         } else {
           cerr << "Didn't find histogram " << EEMChistName << " ???" << endl;
-        }
+	  }
+	*/
       }
       file->Close();
       delete file;
     }
     runTree->Fill();
+    cout << "Writing myBEMCRunHist" << endl;
     myBEMCRunHist->Write();
-    myEEMCRunHist->Write();
+    //    cout << "Writing myEEMCRunHist" << endl;
+    //    myEEMCRunHist->Write();
+    cout << "Writing outFile" << endl;
     outFile->Write();
     outFile->Close();
     delete outFile;

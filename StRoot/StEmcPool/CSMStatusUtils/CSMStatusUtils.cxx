@@ -373,7 +373,7 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
       status = (*statusVector)[i];
       if(badChannelsInRun > 0.5 * mDetectorActualSize && oldstatus != status)
         statuscounter[i] -= 1;
-    }        
+    }
     preiter = iter;
     firstone = kFALSE;
   } //runs
@@ -406,7 +406,7 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
       if ( firstone && (statuscounter[i]/mRunStatusMapPtr->size() > 0.1 ) && mRunStatusMapPtr->size() > 3) {
 //account for the fake zero
         
-//cout << "statcou is " << statuscounter[i] << " for channel " << i << " and size is " << mRunStatusMapPtr->size() << endl;
+	cout << "statcou is " << statuscounter[i] << " for channel " << i << " and size is " << mRunStatusMapPtr->size() << endl;
         if(totalStatusVector[i] & fakeZero) ofs << i << "\t" << "0" << endl;    
         else ofs << i << "\t" << totalStatusVector[i] << endl;        
 //otherwise, only write down the status if this is the first run,
@@ -416,6 +416,13 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(TString directory) {
         ofs << i << "\t" << status << endl;
         numberofchangedchannels++;
       }
+      //Optional if statement to print these flickering status towers as permanently bad in .root files --- D.Staszak 11/06
+      /*if ((statuscounter[i]/mRunStatusMapPtr->size() > 0.1 ) && mRunStatusMapPtr->size() > 3) {
+	emcstatus->Status[i-1]=totalStatusVector[i];
+      } else {
+	emcstatus->Status[i-1]=status;
+	}*/
+      //Original version - line below:
       emcstatus->Status[i-1]=status; //indexed from 0
     }
     ofs << numberofchangedchannels << " channels changed" << endl;
@@ -493,13 +500,16 @@ CSMStatusUtils::makeStatusPlots(TString plotDir) {
   c2->Draw();
 
 //set up output html file
-  tmpstr = plotDir + "/" + mDetectorFlavor + "Status.html";
-//  ofstream htmlSummary(tmpstr.Data());
-//  writeHtmlHeaderSummary(htmlSummary);
+  tmpstr = plotDir + mDetectorFlavor + "Status.html";
+  cout << "htmlSummary: " << tmpstr << endl;
+  ofstream htmlSummary(tmpstr.Data());   //
+  if (!htmlSummary) cout << "htmlSummary isn't defined!" << endl;
+  writeHtmlHeaderSummary(htmlSummary);   //
   
   Char_t buffer[2048];
 
   findFillEnds();
+
   
   TH2F* priorHist = NULL;
   TH2F* currentHist = NULL;
@@ -530,6 +540,7 @@ cout << "doing file " << iter->second.c_str() << endl;
 outputlog << " it opened" << endl;
 cout << " it opened" << endl;
       runnumber = iter->first;
+      //      cout << "note - iter->first: " << iter->first;
       runnumberstring = "";
       runnumberstring += runnumber;
       hottowerPlotNameIter++;
@@ -555,6 +566,17 @@ cout << "it's the first good run" << endl;
       }
       
       setDateTimeInfo(runnumber,myTree);
+
+      //Keep track of the fill number D.Staszak 8/06
+      Float_t runFillNum;
+      myTree->SetBranchAddress("fillnum",&runFillNum);
+      myTree->GetEvent(0);
+      //if(runFillNum==0) {
+      //cout << iter->second.c_str() << endl;
+        cout<<"runfillnumb is " << runFillNum << endl;
+	//}
+	//assert(runFillNum);
+
       
       if(runnumber < currentRunNumber) currentRunNumber = runnumber;
       runnumberstring = "";
@@ -582,6 +604,7 @@ cout << "it's the first good run" << endl;
       hHotTower->GetXaxis()->SetTitle("Tower Id");
       hHotTower->GetYaxis()->SetTitle("Number of Hits Above Pedestal");
 
+
       // analyze
       goodTowers = analyseStatusHistogram(currentHist,plotDir,averageNumberHitsPerChan,
           currentDateStamp,currentTimeStamp,
@@ -590,20 +613,22 @@ cout << "it's the first good run" << endl;
       if(averageNumberHitsPerChan > 100) {
 //set prior RI to current RI; clear current RI
 outputlog << " good statistics!" << endl;
-cout << " good statistics!" << endl;
-        priorHist->Reset();
-        tmpHist = priorHist;
-        priorHist = currentHist;
-        currentHist = tmpHist;
-        priorTimeStamp = currentTimeStamp;
-        currentTimeStamp = 99999999;
-        priorDateStamp = currentDateStamp;
-        currentDateStamp = 99999999;
-        priorRunNumber = currentRunNumber;
-        currentRunNumber = 99999999;
+ cout << " good statistics!" << endl << endl;
+        //------For Single Run, to use html comment out below-------//
+         priorHist->Reset();
+	 tmpHist = priorHist;
+	 priorHist = currentHist;
+	 currentHist = tmpHist;
+	 priorTimeStamp = currentTimeStamp;
+	 currentTimeStamp = 99999999;
+	 priorDateStamp = currentDateStamp;
+	 currentDateStamp = 99999999;
+	 priorRunNumber = currentRunNumber;
+	 currentRunNumber = 99999999;
+	//----------------------------------------------//
       } else if(mFillEndMap[runnumber]) {
-outputlog << "end of fill and poor statistics!" << endl;
-cout << "end of fill and poor statistics!" << endl;
+outputlog << "end of fill and poor statistics!    average: " << averageNumberHitsPerChan << endl;
+cout << "end of fill and poor statistics!     average: " << averageNumberHitsPerChan << endl << endl;
         currentHist->Add(priorHist);
         if(priorRunNumber < currentRunNumber) currentRunNumber = priorRunNumber;
         runnumberstring = "";
@@ -630,9 +655,9 @@ cout << "end of fill and poor statistics!" << endl;
         goodTowers = analyseStatusHistogram(currentHist,plotDir,averageNumberHitsPerChan,
                   currentDateStamp,currentTimeStamp,
                   *statusVector,*pedestalmean,*pedestalwidth,*pedestalchi,hHotTower);
-        if(averageNumberHitsPerChan < 50) {
+	  if(averageNumberHitsPerChan < 50) {
 outputlog << " fill has ended and stats suck!  Number is " << averageNumberHitsPerChan << endl;
-cout << " fill has ended and stats suck!  Number is " << averageNumberHitsPerChan << endl;
+cout << " fill has ended and stats suck!  Number is " << averageNumberHitsPerChan << endl << endl;
           priorHist->Reset();
           currentHist->Reset();
           priorTimeStamp = 99999999;
@@ -649,10 +674,10 @@ cout << " fill has ended and stats suck!  Number is " << averageNumberHitsPerCha
           file->Close();
           delete file;
           continue;
-        }          
+	  }         
       } else {
-outputlog << " poor statistics!" << endl;
-cout << " poor statistics!" << endl;
+outputlog << " poor statistics!    average: " << averageNumberHitsPerChan << endl;
+cout << " poor statistics!    average: " << averageNumberHitsPerChan << endl;
         delete statusVector;
         delete pedestalmean;
         delete pedestalwidth;
@@ -661,30 +686,34 @@ cout << " poor statistics!" << endl;
         file->Close();
         delete file;
         continue;
-      }
+	}
       
       if(mFillEndMap[runnumber]) {
 outputlog << " fill has ended!" << endl;
-cout << " fill has ended!" << endl;
-        priorHist->Reset();
+ cout << " fill has ended!" << endl << endl;
+        //-----For Single Run, to use html comment out below---------// 
+        //priorHist->Reset();  // Comment this out for multi-run Fill running
         currentHist->Reset();
         priorTimeStamp = 99999999;
-        currentTimeStamp = 99999999;
-        priorDateStamp = 99999999;
-        currentDateStamp = 99999999;
-        priorRunNumber = 99999999;
-        currentRunNumber = 99999999;
+	currentTimeStamp = 99999999;
+	priorDateStamp = 99999999;
+	currentDateStamp = 99999999;
+	priorRunNumber = 99999999;
+	currentRunNumber = 99999999;
+	//-----------------------------------------------//
       }
+
+      cout << "Got here? 1 " << endl;
 
 //if the RI has less than 10% of the towers functioning
 //ignore the html file
-      if (goodTowers < 0.05 * mDetectorSize) {
+/*      if (goodTowers < 0.05 * mDetectorSize) {
 outputlog<<"special case - everything sucks!" << endl;
-cout<<"special case - everything sucks!" << endl;
-//         htmlSummary << "<tr> <td>" << runnumber << "</td>" 
-//                    << "<td> BAD </td> <td> - </td> <td> - </td>"
-//              << "<td> - </td> <td> - </td> <td> - </td> </tr><br>"
-//              << endl;
+ cout<<"special case - everything sucks!" << endl;
+ htmlSummary << "<tr> <td>" << runnumber << "</td>"          //
+	     << "<td> BAD </td> <td> - </td> <td> - </td>"     //
+	     << "<td> - </td> <td> - </td> <td> - </td> </tr><br>"  //
+	     << endl;    //
         delete statusVector;
         delete pedestalmean;
         delete pedestalwidth;
@@ -693,7 +722,7 @@ cout<<"special case - everything sucks!" << endl;
         file->Close();
         delete file;
         continue;
-      }
+	}*/
 
       (*mRunStatusMapPtr)[savedCurrentRunNumber] = statusVector;
 //write out pedestals for this run
@@ -714,80 +743,140 @@ cout<<"special case - everything sucks!" << endl;
       c1->SaveAs(tmpstr.Data());
       delete hHotTower;
 
-//      htmlSummary << "<tr>" << endl 
-//                  << "<td> " << "Run " << savedCurrentRunNumber << " </td> " << endl 
-//                  << "<td> " << goodTowers << " good towers" << " </td>" << endl
-//                  << "<td> " << getNumberOfChangedTowers(savedCurrentRunNumber) << " towers changed from previous run"//run #
-//                  << " </td>" << endl;
+      htmlSummary << "<tr>" << endl    //
+		  << "<td>" << "Fill " << runFillNum << "</td>" << ", " << endl // 
+                  << "<td> " << "Run " << savedCurrentRunNumber << " </td> " << endl   //
+                  << "<td> " << goodTowers << " good towers" << " </td>" << endl   //
+                  << "<td> " << getNumberOfChangedTowers(savedCurrentRunNumber) << " towers changed from previous run"//run #  //
+                  << " </td>" << endl;   // 
 
       tmpstr = "./run" + runnumberstring + "_" + mDetectorFlavor + "_badTowers.html";
-//      htmlSummary << "<td> <a href=\"" << tmpstr.Data() << "\"> list </a></td><br>" 
-//                  << endl;
+      htmlSummary << "<td> <a href=\"" << tmpstr.Data() << "\"> list </a></td><br>"   // 
+                  << endl;   //
 
 // save tower status bits to the htmlfile
 
       tmpstr = plotDir + "/run" + runnumberstring + "_" + mDetectorFlavor + "_badTowers.html";
-//      ofstream htmlout(tmpstr.Data());
-//      writeHtmlHeaderBadTowerList(htmlout,savedCurrentRunNumber);
+      ofstream htmlout(tmpstr.Data());    //
+      writeHtmlHeaderBadTowerList(htmlout,savedCurrentRunNumber);  //
         
+
 // check if first run - if yes plot every bad tower
 // if a previous run exists just plot towers which changed status to bad,
 // unless there are more than 25 bad towers, in which case, don't,
 // since disk space is apparently "important"
       for (Int_t i=1; i<=mDetectorSize; i++) {
-        if ((*statusVector)[i] != 1) {
-//          htmlout << "<tr> <td> " << i << " </td> <td> "
-//                 << (*statusVector)[i] << " </td> <td> " << endl;
+	if ((*statusVector)[i] != 1 && (*statusVector)[i] != 18 && (*statusVector)[i] != 0) {
 
+          htmlout << "<tr> <td> " << i << " </td> <td> "           ///
+		  << (*statusVector)[i] << " </td> <td> " << endl;  ///
+	  
           IntToPtrVecShortConstIter statusIter;
           statusIter = mRunStatusMapPtr->find(savedCurrentRunNumber);
-          if (statusIter != mRunStatusMapPtr->begin()) {
+	  
+          if (statusIter != mRunStatusMapPtr->begin()) {  //checking to make sure not the first run
             IntToPtrVecShortConstIter preIter = statusIter;
             preIter--;
-            if ((*(statusIter->second))[i] == (*(preIter->second))[i] ||
-                (*(statusIter->second))[i] == 1 || //good channel
-                (*(statusIter->second))[i] == 0) { //no need to plot dead channels
-//              htmlout << "- </td> </tr><br>" << endl;
+ 
+	    if ((*(statusIter->second))[i] == (*(preIter->second))[i] ||
+		(*(statusIter->second))[i] == 1 || //good channel
+		(*(statusIter->second))[i] == 0) { //no need to plot dead channels
+	      htmlout << "- </td> </tr><br>" << endl;  ///
               continue;
-            }
-            if(getNumberOfChangedTowers(runnumber) > 25) continue;
-          }
-          Int_t bin = currentHist->GetXaxis()->FindFixBin(i);
-          TH1D *hTemp = currentHist->ProjectionY("projTemp",bin,bin);
-          c2->cd();
+	    }
+            if(getNumberOfChangedTowers(runnumber) > 25) {
+	      //cout << ">25 changed towers --- " << endl;
+	      htmlout << "- </td> </tr><br>" << endl;  ///
+	      continue;   
+	    }
+	  }
+	  
+	  // For single running, use currentHist to ouput plots
+	  //Int_t bin = currentHist->GetXaxis()->FindFixBin(i);
+	  //TH1D *hTemp = currentHist->ProjectionY("projTemp",bin,bin);
+	  
+	  // For multi-run fills, use priorHist to output plots, also, comment out reset above
+	  Int_t bin = priorHist->GetXaxis()->FindFixBin(i);
+	  TH1D *hTemp = priorHist->ProjectionY("projTemp",bin,bin);
+	  c2->cd();
           c2->Clear();
-//            hTemp->GetXaxis()->SetTitle("adc");
-//            hTemp->Draw();
-//            c2->Update();
-//            sprintf(buffer,"%s/run%dtower%d_adc.gif",plotDir,iter->first,i);
-//            c2->SaveAs(buffer);
-          sprintf(buffer,"./run%dtower%d_adc.gif",savedCurrentRunNumber,i);
-//          htmlout << "<a href=\"" << buffer << "\" > plot </a>" 
-//              << "</td> </tr>" << endl;
+	  hTemp->GetXaxis()->SetTitle("adc");   ///
+	  hTemp->GetXaxis()->SetRange(0,150);
+	  hTemp->Draw();     ///
+	  c2->Update();    ///
+	  sprintf(buffer,"%s/run%dtower%d_adc.gif",plotDir.Data(),iter->first,i);   ///   // Simple fix plotDir -> plotDir.Data() D.Staszak
+	  c2->SaveAs(buffer);   /// 
+	  sprintf(buffer,"./run%dtower%d_adc.gif",savedCurrentRunNumber,i);
+	    
+	  htmlout << "<a href=\"" << buffer << "\" > plot </a>"   ///
+		  << "</td> </tr>" << endl;    ///
           delete hTemp;
         }
       }
-//      writeHtmlFooterSummary(htmlout);
-//      htmlSummary << "</tr>" << endl;
-//     htmlout.close();
-//        cout << "I got here and there is no problem yet" << endl;
-//        exit(1);
+
+            
+// Now output a default of 5 good towers for comparison (for the first run in group/fill only)  D.Staszak 6.06
+      IntToPtrVecShortConstIter statusIter;
+      statusIter = mRunStatusMapPtr->find(savedCurrentRunNumber);
+      if (statusIter == mRunStatusMapPtr->begin()) {  //checking that it's the first run 
+	 
+	htmlout << "</tbody>" << endl;
+ 	htmlout << "</table>" << endl;
+	htmlout << "<br><br> <div>Partial Good Tower List for Comparison</div><br>" << endl;
+	htmlout << "<table border=\"1\">" << endl;
+	htmlout << "<tbody>" << endl;
+	htmlout << "<tr> <th width=\"50\"> Tower ID </th> <th width=\"50\"> Status Code </th> <th width=\"100\"> ADC plot </th> </tr>" << endl;	
+	
+	Int_t good_toplot = 1;
+	for (Int_t i=100; i<mDetectorSize && good_toplot<10; i = i+100) {  // Set good_toplot to iterate below to restrict number of good plots printed
+	  if ((*statusVector)[i] == 1) {
+	    htmlout << "<tr> <td> " << i << " </td> <td> "           ///
+		    << (*statusVector)[i] << " </td> <td> " << endl;  ///
+	    
+	    //Int_t bin = currentHist->GetXaxis()->FindFixBin(i);
+	    //TH1D *hTemp = currentHist->ProjectionY("projTemp",bin,bin);
+	    Int_t bin = priorHist->GetXaxis()->FindFixBin(i);
+	    TH1D *hTemp = priorHist->ProjectionY("projTemp",bin,bin);
+	    //hTemp->GetXaxis()->SetRange(0,150);
+	    c2->cd();
+	    c2->Clear();
+	    hTemp->GetXaxis()->SetTitle("adc");   ///
+	    hTemp->Draw();     ///
+	    c2->Update();    ///
+	    
+	    sprintf(buffer,"%s/run%dtower%d_adc.gif",plotDir.Data(),iter->first,i);   ///   // Simple fix plotDir -> plotDir.Data() D.Staszak
+	    c2->SaveAs(buffer);   /// 
+	    sprintf(buffer,"./run%dtower%d_adc.gif",savedCurrentRunNumber,i);
+	    htmlout << "<a href=\"" << buffer << "\" > plot </a>"   ///
+ 		    << "</td> </tr>" << endl;    ///
+	    delete hTemp;
+	  }
+	  good_toplot++;
+	  
+	}
+      }
+      writeHtmlFooterSummary(htmlout);   ///
+      htmlSummary << "</tr>" << endl;    /// 
+      htmlout.close();                   ///
+      //        cout << "I got here and there is no problem yet" << endl;
+      //        exit(1);
+ 
     }
     file->Close();
     delete file;
   }
-//  htmlSummary.close();
+  htmlSummary.close();   ///
   outputlog.close();
-//  writeHtmlFooterSummary(htmlSummary);
+  writeHtmlFooterSummary(htmlSummary);   ///
   TH2F* statusHist = makeStatusVersusTimePlot();
   if (statusHist) {
     c1->cd();
     c1->SetLogy(kFALSE);
     c1->Clear();
-    statusHist->GetXaxis()->SetRangeUser(0.5,2400.5);
+    //statusHist->GetXaxis()->SetRangeUser(0.5,2400.5);
     statusHist->Draw("colz");
-//    sprintf(buffer,"%s/bemcStatusPlot.gif",plotDir);
-//    c1->SaveAs(buffer);
+    sprintf(buffer,"%s/bemcStatusPlot.gif",plotDir.Data());  ///     //Same fix as above  D.Staszak
+    c1->SaveAs(buffer);  ///
 //    sprintf(buffer,"%s/bemcStatusPlot.svg",plotDir);
 //    c1->SaveAs(buffer);
     delete statusHist;
@@ -841,7 +930,8 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 // find maximum, which should be the pedestal peak
       Int_t maxBin = 0;
       Float_t maxValue = -1;
-      for (Int_t j = 1; j < proj->GetXaxis()->GetNbins(); j++) {
+      //      for (Int_t j = 1; j < proj->GetXaxis()->GetNbins(); j++) {
+      for (Int_t j = 2; j < proj->GetXaxis()->GetNbins(); j++) {  // Trying this out D.Staszak
         if (proj->GetBinContent(j) > maxValue) {
           maxBin = j;
           maxValue = proj->GetBinContent(j);
@@ -849,18 +939,31 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       }
       Float_t pedMean = proj->GetXaxis()->GetBinCenter(maxBin);
 
-//pedestal mean test
-      if (mDetectorFlavor=="bemc" && (pedMean < 4 || pedMean > 145) ||
-          mDetectorFlavor=="eemc" && (pedMean < 3 || pedMean > 145)) 
-        statusVector[chanId] |= 4;
+//pedestal mean test  --- Modified this test to allow some below pedMean of 4, see below --- D.Staszak
+//      if (mDetectorFlavor=="bemc" && (pedMean < 4 || pedMean > 145) ||
+//          mDetectorFlavor=="eemc" && (pedMean < 3 || pedMean > 145)) {	
+//	statusVector[chanId] |= 4;
+//	cout << "Before fit - Mean too low --- Id:  " << chanId << "  mean: " << pedMean << endl;
+//      }
+
+// D.Staszak - Need to be careful about the influence of 0 bin on mean fit measurement.
+// In 2006pp, many runs have multiple towers filled with a lot of 0 ADC counts. Other
+// than this, the data is fine...so we just need to worry how it is affecting pedMean
+      // --- Comment this out when not running files with '0's --- 
+      //Float_t zero_chk = pedMean - 11;
 
       // fit a gaussian to the pedestal peak
       gaus->SetParameter(0,maxValue);
       gaus->SetParameter(1,pedMean);
       gaus->SetParameter(2,3.5);
+      // --- Comment this out when not running files with '0's --- 
+      //if (zero_chk < 1)
+      //	gaus->SetRange(pedMean-(10.0+zero_chk),pedMean+(10.0+zero_chk));
+      //else       
+      // --- End comment ---
       gaus->SetRange(pedMean-10,pedMean+10);
       proj->Fit(gaus,"0RQ");
-
+      
       if(hPedMean) hPedMean->Fill(gaus->GetParameter(1));
       if(hPedWidth) hPedWidth->Fill(gaus->GetParameter(2));
       
@@ -870,9 +973,31 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 
 //pedestal width test
 //SHOULD THIS BE DIFFERENT FOR THE EEMC???
-      if (pedestalwidth[chanId] <= 0.5 || pedestalwidth[chanId] > 2.8)
-        statusVector[chanId] |= 4+32;
-      
+//      if (chanId==1010) cout << "Chan 1010: width: " << pedestalwidth[chanId] << "  mean: " << pedestalmean[chanId] 
+//			     << endl;
+
+      if (pedestalwidth[chanId] <= 0.5 || pedestalwidth[chanId] > 2.8) {
+	//cout << "In wide ped, Id: " << chanId << "   width: " << pedestalwidth[chanId] << "   mean:   " << pedestalmean[chanId] << endl;
+	statusVector[chanId] |= 4+32;
+      }
+  
+//pedestal mean test again
+      //if (mDetectorFlavor=="bemc" && (pedestalmean[chanId] < 4 || pedestalmean[chanId] > 145)) {
+      //	cout << "After fit - Mean too low --- Id:  " << chanId << "  mean: " << pedestalmean[chanId] << "  width:  " << pedestalwidth[chanId] << endl;
+      //}
+
+//pedestal mean test
+      if (mDetectorFlavor=="bemc" && (pedestalmean[chanId] < 4 || pedestalmean[chanId] > 145)) {
+	if (pedestalmean[chanId] > 2.6 && pedestalwidth[chanId] < 1.5) {  //allow lower mean with thin width
+	  //cout << "Saved: " << chanId << "  mean - " << pedestalmean[chanId] << "  width - "  << pedestalwidth[chanId] << endl;
+	} else {
+	  statusVector[chanId] |= 4;
+	  //cout << "After fit - Still didn't make it " << chanId << endl;
+	}
+      }
+
+
+
 //preparation for hot tower/cold tower test
 //using a threshold of 10 sigma above pedestal
 //FIRST PART OF COLD TOWER TEST DONE HERE NOW
@@ -880,14 +1005,29 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       maxBin = proj->GetXaxis()->GetNbins() - 1;
       Int_t hottowerthreshold = minBin;
       if(hHotTower) {
+
         Float_t nHitsAbovePedestal = proj->Integral(hottowerthreshold,maxBin);
+
         if(nHitsAbovePedestal==0) {
           nHitsAbovePedestal=1; //(just for log plot sakes)
 
+
+	  // Quick Fix to cold channels being labelled dead, D.Staszak
+	  Float_t deadorno = proj->Integral(2,maxBin);
+	  if (deadorno) {
+	    nHitsAbovePedestal=2;  // Set at 2 because of a >2 cut above...again, quick fix here
+	  }
+	  else {
           statusVector[chanId] |= mZerobit;
+	  //cout << chanId << "   has zero counts!" << endl;
+	  }
+	  //if (proj->Integral(1,maxBin) == 0) cout << chanId << "  truly has no counts!" << endl;
+
         }
         hHotTower->AddAt(nHitsAbovePedestal,chanId);
       }
+
+
 
 //stuck bit test (off & on!)
 //brief rant here - for checking whether or not bits are stuck on,
@@ -934,15 +1074,23 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
         }
       }
       
-      if((bitoff & bitcompare) != bitcompare && numberofnonzerohits > 10)
+      if((bitoff & bitcompare) != bitcompare && numberofnonzerohits > 10) {
+	cout << "136: " << chanId << "  bitoff: " << bitoff << endl;
         statusVector[chanId] = statusVector[chanId] | (8+128);
-      if(biton != 0 && numberofnonzerohits > 10)
+      }
+      if(biton != 0 && numberofnonzerohits > 10) {
+	cout << "72: " << chanId << "   biton: " << biton << endl;
         statusVector[chanId] = statusVector[chanId] | (8+64);
+      }
 
-      if((bitoff & 16) != 16 && typec && numberofnonzerohits > 10)
+      if((bitoff & 16) != 16 && typec && numberofnonzerohits > 10) {
+	cout << "136: " << chanId << "  16" << endl;
         statusVector[chanId] = statusVector[chanId] | (8+128);
-      if((sixteenbiton & 16) != 0 && typec && numberofnonzerohits > 10)
+      }
+      if((sixteenbiton & 16) != 0 && typec && numberofnonzerohits > 10) {
+	cout << "72: " << chanId << "   16" << endl;
         statusVector[chanId] = statusVector[chanId] | (8+64);
+      }
 
       for(Short_t bin=1; bin<maxBin; bin++) {
         if(proj->GetBinContent(bin) > 0) {
@@ -952,19 +1100,44 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
         }
       }
       
-      
-      
 //total number of hits test
       Float_t entries = proj->Integral(1,proj->GetXaxis()->GetNbins());
       if (entries == 0) {
         statusVector[chanId] |= mZerobit;  //channel has no pedestal?
+	if (chanId==50 || chanId==139) cout << "entries=0   " << chanId << "   Status: " << statusVector[chanId] << endl;
       }
-      
+
+
+// D.Staszak --- I know it seems a bit ad-hoc, but a lot of entries in the zero
+// bin is an indication of one type of problem seen with crates, also this finds
+// towers with a lot counts below the pedestal peak -- calling towers flagged 
+// by this test a stuck bit
+    // --- Comment out for running with 0's present: ---
+      /*
+      if ( (proj->GetBinContent(1) > 10 && (proj->GetBinContent(2)<10 || proj->GetBinContent(3)<10 ) && (proj->Integral(2,proj->GetXaxis()->GetNbins()) > 0)) ||
+          (proj->GetBinContent(1) > 50 && (proj->GetBinContent(2)<50 || proj->GetBinContent(3)<50 ) && (proj->Integral(2,proj->GetXaxis()->GetNbins()) > 0))
+	   ) {
+	if (pedestalmean[chanId] < 15.0) {
+	  //cout << "Ignoring - Caught with entries in 0: " << chanId << "    Ped-mean: " << pedestalmean[chanId] << endl;
+	} else {
+	  //cout << "Caught with entries in 0: " << chanId << "    Ped-mean: " << pedestalmean[chanId] << endl;
+	  statusVector[chanId] = statusVector[chanId] | (8+64);
+	}
+      } 
+      */
+    //--- End comment ----
+
+
+      //Don't like doing this, but has to be done --- problem tower in 2006pp (stuck bit ~2500 ADC)
+      if (chanId==3407) statusVector[chanId] = 8+64;
+
+
       delete proj;
     } else {
 //lack of histogram test
       statusVector[chanId] |= mZerobit;
     }
+ 
   }
   
   unsigned int date = dateStamp;
@@ -1041,9 +1214,19 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 //individual channel tests
     averageNumberOfHitsPerChannel = sumofhits/nbinhits;
     for(int i=1; i<mDetectorSize+1; i++) {
-      if(hHotTower->GetBinContent(i) > 10*averageNumberOfHitsPerChannel) statusVector[i] |= 2;
+      if ( i==509 || i==533 || i==1306 || i==1397 || i==1503 || i==1892 || i==1893 || i==2074 || i==2075 )  cout << i << "   Avg numberHits/chan= " << averageNumberOfHitsPerChannel << "  for this tower: " << hHotTower->GetBinContent(i) << endl;
+      
+      //if(hHotTower->GetBinContent(i) > 10*averageNumberOfHitsPerChannel) {
+      //if(hHotTower->GetBinContent(i) > 5*averageNumberOfHitsPerChannel) {
+      if( (hHotTower->GetBinContent(i) > 8*averageNumberOfHitsPerChannel) 
+	  || (i==1503 && (hHotTower->GetBinContent(i) > 5*averageNumberOfHitsPerChannel)) // a couple channels in 06 that were ugly and missed often
+	  || (i==1612 && (hHotTower->GetBinContent(i) > 5*averageNumberOfHitsPerChannel)) ) {
+	statusVector[i] |= 2;
+	cout << "ID: " << i << " average: " << averageNumberOfHitsPerChannel << "  this tower: " << hHotTower->GetBinContent(i) << endl;
+      }
       if(hHotTower->GetBinContent(i) < averageNumberOfHitsPerChannel/40) statusVector[i] |= 2+16;
     }
+
 //crate tests
 //(tighter cold tower test for whole crates to catch timing problems)
 //
@@ -1105,14 +1288,17 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
     for(int i=1; i<mDetectorSize+1; i++) {
       if(statusVector[i] == 0) {
         statusVector[i]=1;
+	if (i==50 || i==139) cout << "status=1   " << i << "   Status: " << statusVector[i] << endl;
         goodTowers++;
       } else if(statusVector[i] & mZerobit) {
         statusVector[i]=0;
+	if (i==50 || i==139) cout << "statusVec & mZerobit   " << i << "   Status: " << statusVector[i] << endl;
       }
     }
   } else {
     for(int i=1; i<mDetectorSize+1; i++) {
       statusVector[i]=0;
+      if (i==50 || i==139) cout << "nbinhits=0   " << i << "   Status: " << statusVector[i] << endl;
     }
   }
   delete gaus;
@@ -1160,6 +1346,7 @@ CSMStatusUtils::getDateTimeString(int runnumber,TTree* ttree) {
 //that, my friends, is how to pad a TString without using sprintf
   
   TString datetimestring = "." + thedatestring + "." + tmpstr + thetimestring + ".";
+  cout << datetimestring << endl;
   return datetimestring;
 }
 
@@ -1236,7 +1423,6 @@ CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
 //write out pedestals to the text and root pedestalfiles
   TString pedtxtfilename = directory + "/pedestals/";
 
-
 //create the pedestal directory, if it doesn't exist
   void* dir = NULL;
   if ((dir = gSystem->OpenDirectory(pedtxtfilename.Data())) == NULL)
@@ -1255,11 +1441,12 @@ CSMStatusUtils::writePedestals(Int_t runNumber, TString directory,
 
   St_emcPed *bemc_ped=new St_emcPed("bemcPed",1);
   emcPed_st t_ped;
+  cout <<  t_ped.Status[367] << endl;
   TString datetimestring = getDateTimeString(runNumber);
   TString pedrootfilename = directory + "/pedestals/" + mDetectorFlavor
       + "Ped" + datetimestring + "root";
   TFile* fout_status = new TFile(pedrootfilename.Data(),"RECREATE");
-
+ 
   Short_t shortpedmean,shortpedwidth;
   for (UInt_t i = 1; i < statusVector.size(); i++) {
     shortpedmean = TMath::Nint(100*pedestalmean[i]);
@@ -1337,6 +1524,7 @@ CSMStatusUtils::findFillEnds() {
 
 TH2F* 
 CSMStatusUtils::makeStatusVersusTimePlot() {
+  gStyle->SetPalette(1,0);
   Int_t runs = mRunStatusMapPtr->size();
   TH2F* hist;
   if(mDetectorFlavor=="bemc")
@@ -1431,8 +1619,8 @@ void CSMStatusUtils::writeHtmlHeaderSummary(ofstream& out) {
 void CSMStatusUtils::writeHtmlFooterSummary(ofstream& out) {
   out << "</tbody>" << endl;
   out << "</table>" << endl;
-  out << "<address> David Relyea (taken from Thorsten Kollegger) - last updated";
-  out << " 10/31/2004";
+  out << "<address> David Staszak (taken from David Relyea, Thorsten Kollegger) - last updated";
+  out << " 8/20/2006";
   out << "</address>" << endl;
   out << "</body>" << endl;
   out << "</html>" << endl;  

@@ -1,4 +1,5 @@
-void saveAbbreviatedFiles(const Char_t *dir="/star/u/relyea/star/2005/2005/") {
+void saveAbbreviatedFiles(//const Char_t *dir="/star/institutions/ucla/staszak/bemc2006pp_pass2/trans3/test_root/") {
+			  const Char_t *dir="/star/data07/EMC/staszak/2006pp/trans/test/") {
   //
   // load shared libs
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -30,8 +31,8 @@ void saveAbbreviatedFiles(const Char_t *dir="/star/u/relyea/star/2005/2005/") {
   myUtils.setDetectorFlavor("bemc");
   myUtils.readTablesFromASCII(dir,".txt");  
   myUtils.saveAbbreviatedStatusTablesToASCII(dir);  
-  CSMStatusUtils myUtils2;
-  myUtils2.setDetectorFlavor("eemc");
-  myUtils2.readTablesFromASCII(dir,".txt");  
-  myUtils2.saveAbbreviatedStatusTablesToASCII(dir);  
+  //CSMStatusUtils myUtils2;
+  //myUtils2.setDetectorFlavor("eemc");
+  //myUtils2.readTablesFromASCII(dir,".txt");  
+  //myUtils2.saveAbbreviatedStatusTablesToASCII(dir);  
 }

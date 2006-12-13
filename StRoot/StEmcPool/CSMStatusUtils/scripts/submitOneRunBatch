@@ -10,12 +10,13 @@ for runline in $runlist ; do
   mufile=`echo $runline | awk 'BEGIN{FS="::"}{print $2}'`
   firsthalf=`echo $mufile | awk 'BEGIN{FS="_raw_"}{print $1}'`
   runsuffix=`echo $mufile | awk 'BEGIN{FS="_raw_"}{print $2}' | cut -c1-7`
-  clippedrun=`echo $firsthalf | awk 'BEGIN{FS="_6"}{print $2}'`
+  clippedrun=`echo $firsthalf | awk 'BEGIN{FS="_7"}{print $2}'`
   
-  run=6$clippedrun-$runsuffix
+  run=7$clippedrun-$runsuffix
   
   echo $firsthalf, $clippedrun, $run
   echo outDir=$outDir  histDir=$histDir
+  echo inpDir=$inpDir  mufile=$mufile
 
   log=log.$mufile
   blog=blog.$mufile

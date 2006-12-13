@@ -1,5 +1,7 @@
 void createRunStatusHistograms(const Char_t* directory =
-"/star/u/relyea/star/2005/2005/",  const Char_t* filter = "cal.minirun.root") {
+			       //"/star/institutions/ucla/staszak/bemc2006pp_pass2/longpost3/day154/special/test/",
+			       "/star/data07/EMC/staszak/2006pp/longpre/day092/",
+			       const Char_t* filter = "cal.minirun.root") {
 
   // load shared libs
   Bool_t useStarLibs = kTRUE;
