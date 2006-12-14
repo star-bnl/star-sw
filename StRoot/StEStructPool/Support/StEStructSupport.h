@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.7 2006/10/02 22:26:53 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.8 2006/12/14 20:07:15 prindle Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,6 +25,8 @@ class TFile;
 
 class StEStructSupport : public TObject {
 
+public:
+
   TFile* mtf;
   float mNbar;
   float* mnpairs; //! for normalization comparing different cuts 
@@ -40,8 +42,6 @@ class StEStructSupport : public TObject {
   char* swapIn(const char* name, const char* s1, const char* s2);
 
   StEStructSupport(){};   
-
-public:
 
   StEStructSupport(TFile* tf, int bgmode, float* npairs=0, float nbar=1.);
   virtual ~StEStructSupport();
@@ -73,7 +73,9 @@ public:
   TH1** buildChargeTypeRFunctions(const char* name);
   TH1** buildChargeTypes(const char* name, int opt, float* sf=0);
 
+  TH1** buildNChargeTypes_Old(const char* name);
   TH1** buildNChargeTypes(const char* name);
+  TH1** buildPtChargeTypes_Old(const char* name, int opt=0, int subtract=0);
   TH1** buildPtChargeTypes(const char* name, int opt=0, int subtract=0);
 
   
@@ -100,6 +102,14 @@ inline bool StEStructSupport::applyDEtaFix()     { return mapplyDEtaFix; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.8  2006/12/14 20:07:15  prindle
+ * I was calculating \Delta\rho/sqrt(rho) for ++, +-, -+ and --
+ * and then combining those into LS, US, CD and CI. The was wrong
+ * and now I am doing it correctly. For CI this makes only a slight
+ * change, it seems the amplitude is decreased a little. For CD
+ * this is a bigger change. I left the old versions (with _Old appended)
+ * for now.
+ *
  * Revision 1.7  2006/10/02 22:26:53  prindle
  * Hadd now symmetrizes histograms while adding them, so output is usable
  * in Support as before. Need to load library for Correlation so we know
