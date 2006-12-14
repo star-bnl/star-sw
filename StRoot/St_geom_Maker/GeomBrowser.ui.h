@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.3 2006/12/14 01:03:43 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.4 2006/12/14 23:36:21 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -924,7 +924,7 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
       } else {          
          fChain->Init(); Geant3Init = 1;     
       }
-      comboBox2->setEnabled(FALSE); // we can acommuicate GEAT one time ony :(
+      // comboBox2->setEnabled(FALSE); // we can acommuicate GEAT one time ony :(
       TVolume *v = dynamic_cast<TVolume *>(Geant().GetDataSet("HALL"));
       if (v) {
          // Make CAVE invisible
