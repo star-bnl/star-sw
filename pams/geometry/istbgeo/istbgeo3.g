@@ -1,3 +1,8 @@
+* $Id: istbgeo3.g,v 1.2 2006/12/14 21:38:20 potekhin Exp $
+* $Log: istbgeo3.g,v $
+* Revision 1.2  2006/12/14 21:38:20  potekhin
+* Add CVS tags for this new config (outer layer only)
+*
 *****************************************************************
 * HFT+HPD+IST2 configuration
 *****************************************************************
