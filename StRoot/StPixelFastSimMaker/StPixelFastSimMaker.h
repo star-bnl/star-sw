@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.3 2006/11/29 21:42:20 andrewar Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.4 2006/12/14 23:52:52 andrewar Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.4  2006/12/14 23:52:52  andrewar
+ * Added Sevil's hit error db loader.
+ *
  * Revision 1.3  2006/11/29 21:42:20  andrewar
  * Update with Pixel resolution smearing.
  *
@@ -76,6 +79,9 @@ class StPixelFastSimMaker : public StMaker {
   /* \brief Init method is not currently used. */
   virtual int Init();
 
+ /* \brief InitRun method is not currently used. */
+  virtual int InitRun( int);
+
   /* \brief Clear method is not currently used. */
   virtual void Clear(Option_t *option="");
 
@@ -103,7 +109,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.3 2006/11/29 21:42:20 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.4 2006/12/14 23:52:52 andrewar Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
