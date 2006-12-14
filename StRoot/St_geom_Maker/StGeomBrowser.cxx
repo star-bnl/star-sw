@@ -6,9 +6,11 @@
 //----------------------------
 //  STAR geom browser:
 //----------------------------
-// ZEBRA files  - .fz extension
-// ROOT  files  - .root extension
-// ROOT  macros - .C extension
+// ZEBRA files        - .fz   extension
+// ROOT  files        - .root extension
+// ROOT  macros       - .C    extension
+// OpenInvetor2 scene - .iv   extension
+// VRML scene         - .wrl  extension
 // STAR  geometry descriptor - 
 // as defined by http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html
 //______________________________________________________________
@@ -28,6 +30,10 @@ void StGeomBrowser::SetFile(const char *fileName)
                 fBrowser->fileOpenRoot(fFileName.Data()); 
    } else if (fFileName.EndsWith(".fz") ) {         
         if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenZebra(fFileName.Data()); 
+   } else if (fFileName.EndsWith(".iv") ) {         
+        if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
+   } else if (fFileName.EndsWith(".wrl") ) {         
+        if (!gSystem->AccessPathName(fFileName.Data())) fBrowser->fileOpenInventor(fFileName.Data()); 
    }  else if ( (fFileName(0) == 'y' && fFileName.Length() <= 8) ||fFileName == "complete") {
        // STAR geometry version
        fBrowser->STAR_geometry_activated(fFileName.Data());

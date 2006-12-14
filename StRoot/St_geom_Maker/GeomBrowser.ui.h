@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.2 2006/12/09 17:13:48 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.3 2006/12/14 01:03:43 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -997,7 +997,7 @@ void GeomBrowser::fileOpenInventor( const QString &fileName )
          TQtRootViewer3D *v  = (TQtRootViewer3D*)(viewer);
          if (v) {
             TGLViewerImp *viewerImp = v->GetViewerImp();
-            if (viewerImp) {}
+            if (viewerImp) viewerImp->ReadInputFile((const char*)fileName);
          }
       }
    }
