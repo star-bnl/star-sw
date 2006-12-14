@@ -1,4 +1,4 @@
-#include <stdio.h>
+ #include <stdio.h>
 #include <stdexcept>
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
@@ -23,9 +23,9 @@ StiHpdDetectorBuilder::StiHpdDetectorBuilder(bool active, const string & inputFi
     //here I plug in 10.micron resolution in both local x and y coordinates
     //I also put no dependence on either crossing angle or dip angle of track
     _trackingParameters.setName("HpdTrackingParameters");
-    _calculator.setName("HpdHitErrors");
-    //_calculator = new StiDefaultHitErrorCalculator();
-    _calculator.set(1.e-2, 0., 0., 4.e-2, 0., 0.);
+    _calculator.setName("hpdHitError");
+    // _calculator = new StiDefaultHitErrorCalculator();
+    //_calculator.set(1, 0., 0., 1., 0., 0.);
     //StiTrackingParameters * trackingPars = getTrackingParameters();
 
 
@@ -53,6 +53,7 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
 {
     char name[50];
     cout << "StiHpdDetectorBuilder::buildDetectors() -I- Started" << endl;
+    load(_inputFile, source);
     const unsigned int nRows=1;
     setNRows(nRows);
     int nsectors[1];
@@ -160,4 +161,10 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
 }
 
 
-
+void StiHpdDetectorBuilder::loadDS(TDataSet& ds)
+{
+	cout << "StiHpdDetectorBuilder::loadDS(TDataSet* ds) -I- Started" << endl;
+	//	_trackingParameters.loadDS(ds);
+	_calculator.loadDS(ds);
+	cout << "StiHpdDetectorBuilder::loadDS(TDataSet* ds) -I- Done" << endl;
+}
