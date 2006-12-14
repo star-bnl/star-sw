@@ -1,6 +1,10 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.13 2006/10/27 00:05:32 prindle Exp $
+<<<<<<< StEStructSupport.cxx
+ * $Id: StEStructSupport.cxx,v 1.14 2006/12/14 20:07:11 prindle Exp $
+=======
+ * $Id: StEStructSupport.cxx,v 1.14 2006/12/14 20:07:11 prindle Exp $
+>>>>>>> 1.13
  *
  * Author: Jeff Porter 
  *
@@ -475,7 +479,7 @@ TH1** StEStructSupport::buildPtCommon(const char* name, int opt, int subtract){
   for (int i=1;i<4;i++) {
       delete tmpVal[i];
   }
-  for(int i=0;i<_pair_totalmax;i++) {
+  for(int i=0;i<_pair_totalmax*4;i++) {
     delete hlocal[i];
   }
   delete [] hlocal;
@@ -604,7 +608,7 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
 }
 
 //---------------------------------------------------------
-TH1** StEStructSupport::buildNChargeTypes(const char* name){
+TH1** StEStructSupport::buildNChargeTypes_Old(const char* name){
 
   if(!mtf) return (TH1**)NULL;
   TH1F *hNEventsSame = (TH1F *)mtf->Get("NEventsSame");
@@ -673,9 +677,95 @@ TH1** StEStructSupport::buildNChargeTypes(const char* name){
   return retVal;
 
 }
-//---------------------------------------------------------
-TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtract){
+TH1** StEStructSupport::buildNChargeTypes(const char* name) {
 
+  if(!mtf) return (TH1**)NULL;
+  TH1F *hNEventsSame = (TH1F *)mtf->Get("NEventsSame");
+  double nEventsSame = hNEventsSame->GetEntries();
+  TH1F *hNEventsMixed = (TH1F *)mtf->Get("NEventsMixed");
+  double nEventsMixed = hNEventsMixed->GetEntries();
+
+  // -- here we get 8 hists: 
+  //    (Sibpp,Sibpm,Sibmp,Sibmm,Mixpp,Mixpm,Mixmp,Mixmm) 
+  //    All are number.
+
+  TH1** hlocal=getLocalClones(name);
+
+  // four temporary histograms
+  TH1** tmpVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
+  // four returned hists
+  TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
+  const char* nm[4]={"LS","US","CD","CI"};
+  const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
+
+  // Form LS, US, CI and CD combinations before calculating \Delta\rho
+  //  and \Delta\rho/sqrt(\rho_{ref}).
+  for(int i=0;i<4;i++){
+    tmpVal[i]=(TH1*)hlocal[i+4]->Clone();
+    retVal[i]=(TH1*)hlocal[i]->Clone();
+    retVal[i]->SetName(swapIn(hlocal[i]->GetName(),"Sibpp",nm[i]));
+    retVal[i]->SetTitle(swapIn(hlocal[i]->GetTitle(),"Sibling : +.+",tit[i])); 
+  }
+  retVal[0]->Add(retVal[3]);
+  retVal[1]->Add(retVal[2]);
+  retVal[2]->Add(retVal[0],retVal[1],1.0,-1.0);
+  retVal[3]->Add(retVal[0],retVal[1],1.0,1.0);
+  tmpVal[0]->Add(tmpVal[3]);
+  tmpVal[1]->Add(tmpVal[2]);
+  tmpVal[2]->Add(tmpVal[0],tmpVal[1],1.0,-1.0);
+  tmpVal[3]->Add(tmpVal[0],tmpVal[1],1.0,1.0);
+
+  // Subtract mixed from sibling to get \Delta\rho, scaling to same
+  //  number of pairs in mixed as sibling.
+  //  Then normalize both \Delta\rho and \rho by number of events.
+  //  We want to subtract mixed CD from sibling CD but the number of
+  //  pairs in CD is given by the integral of the CI histograms.
+  double scale[4];
+  scale[0] = retVal[0]->Integral() / tmpVal[0]->Integral();
+  scale[1] = retVal[1]->Integral() / tmpVal[1]->Integral();
+  scale[2] = retVal[3]->Integral() / tmpVal[3]->Integral();
+  scale[3] = retVal[3]->Integral() / tmpVal[3]->Integral();
+  for(int i=0;i<4;i++){
+    retVal[i]->Add(tmpVal[i],-scale[i]);
+    retVal[i]->Scale(1.0/nEventsSame);
+    tmpVal[i]->Scale(1.0/nEventsMixed);
+  }
+
+  // Calculate \Delta\rho/\sqrt(\rho_{ref})
+  tmpVal[2]->Scale(0);
+  tmpVal[2]->Add(tmpVal[3]);
+  for(int i=0;i<4;i++){
+    for(int ix=1;ix<=retVal[i]->GetNbinsX();ix++){
+      for(int iy=1;iy<=retVal[i]->GetNbinsY();iy++){
+        double drho = retVal[i]->GetBinContent(ix, iy);   // \Delta\rho
+        double mixn = tmpVal[i]->GetBinContent(ix, iy); // \rho_{ref}
+        if (mixn <= 0) {
+            mixn = 1;
+        }
+        retVal[i]->SetBinContent(ix, iy, drho/sqrt(mixn) );
+      }
+    }
+  }
+
+  // Free local histograms.
+  for(int i=0;i<4;i++) {
+    delete tmpVal[i];
+  }
+  for(int i=0;i<_pair_totalmax;i++) {
+    delete hlocal[i];
+  }
+  delete [] hlocal;
+
+  return retVal;
+
+}
+//---------------------------------------------------------
+TH1** StEStructSupport::buildPtChargeTypes_Old(const char* name, int opt, int subtract){
+  // I appears I made the same mistake in this routine as I did in the
+  // buildNChargeTypes above, namely calculate \Delta\rho/sqrt(rho_{ref}) for
+  // ++, +-, -+ and -- and then adding them together.
+  // I of course want to calculate \Delta\rho and rho_{ref} for LS, US, CD and CI,
+  // then calculate the ratio.
   if(!mtf) return (TH1**)NULL;
   TH1F *hptInclusiveA = (TH1F *)mtf->Get("pta");
   double ptHatA = hptInclusiveA->GetMean();
@@ -783,7 +873,126 @@ TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtra
   for (int i=1;i<4;i++) {
       delete tmpVal[i];
   }
-  for(int i=0;i<_pair_totalmax;i++) {
+  for(int i=0;i<_pair_totalmax*4;i++) {
+    delete hlocal[i];
+  }
+  delete [] hlocal;
+
+  return retVal;
+
+}
+TH1** StEStructSupport::buildPtChargeTypes(const char* name, int opt, int subtract){
+
+  if(!mtf) return (TH1**)NULL;
+  TH1F *hptInclusiveA = (TH1F *)mtf->Get("pta");
+  double ptHatA = hptInclusiveA->GetMean();
+  TH1F *hptInclusiveB = (TH1F *)mtf->Get("ptb");
+  double ptHatB = hptInclusiveB->GetMean();
+  TH1F *hNEventsSame = (TH1F *)mtf->Get("NEventsSame");
+  double nEventsSame = hNEventsSame->GetEntries();
+  TH1F *hNEventsMixed = (TH1F *)mtf->Get("NEventsMixed");
+  double nEventsMixed = hNEventsMixed->GetEntries();
+
+  // -- here we get 32 hists: 
+  //    4 groups of 8 (Sibpp,Sibpm,Sibmp,Sibmm,Mixpp,Mixpm,Mixmp,Mixmm) 
+  //    1st 8 are number, 2nd 8 are pt1*pt2, 3rd 8 are pt1 and 4th 8 are pt2
+
+  TH1** hlocal=getPtClones(name);
+
+  // four returned hists
+  TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
+  const char* nm[4]={"LS","US","CD","CI"};
+  const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
+  TH1* tmpVal[4]; // ++,+-,-+,--
+
+  for(int i=0;i<4;i++){
+    retVal[i]=(TH1*)hlocal[0]->Clone();
+    retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
+    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i])); 
+    retVal[i]->Scale(0.); // zero the hists
+    tmpVal[i]=(TH1*)hlocal[0]->Clone();
+    tmpVal[i]->Scale(0.); // zero the hists 
+  }
+
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,32);
+
+    for(int i=0;i<4;i++){
+        double r;
+        if (0 == hlocal[i+4]->Integral()) {
+            r = 0;
+        } else {
+            r = hlocal[i]->Integral() / hlocal[i+4]->Integral();
+        }
+        if (subtract) {
+            hlocal[i]->Add(hlocal[i+4],-r);
+            hlocal[i+8]->Add(hlocal[i+12],-r);
+            hlocal[i+16]->Add(hlocal[i+20],-r);
+            hlocal[i+24]->Add(hlocal[i+28],-r);
+        }
+        hlocal[i]->Scale(1.0/nEventsSame);
+        hlocal[i+8]->Scale(1.0/nEventsSame);
+        hlocal[i+16]->Scale(1.0/nEventsSame);
+        hlocal[i+24]->Scale(1.0/nEventsSame);
+        hlocal[i+4]->Scale(1.0/nEventsMixed);
+        switch(opt){
+            case 0: {
+                retVal[i]->Add(hlocal[i+8]);
+                retVal[i]->Add(hlocal[i+16],-ptHatB);
+                retVal[i]->Add(hlocal[i+24],-ptHatA);
+                retVal[i]->Add(hlocal[i],ptHatA*ptHatB);
+                break;
+            } 
+            case 1: {
+                retVal[i]->Add(hlocal[i+8]);
+                break;
+            }
+            case 2: {
+                retVal[i]->Add(hlocal[i+16],-ptHatB);
+                retVal[i]->Add(hlocal[i+24],-ptHatA);
+                break;
+            }
+            case 4: {
+                retVal[i]->Add(hlocal[i],ptHatA*ptHatB);
+                break;
+            }
+            default: {
+                retVal[i]->Add(hlocal[i+8]);
+                retVal[i]->Add(hlocal[i+16],-ptHatB);
+                retVal[i]->Add(hlocal[i+24],-ptHatA);
+                retVal[i]->Add(hlocal[i],ptHatA*ptHatB);
+                break;
+            }
+        }
+    }
+
+    retVal[0]->Add(retVal[3]);
+    retVal[1]->Add(retVal[2]);
+    retVal[2]->Add(retVal[0],retVal[1],1.0,-1.0);
+    retVal[3]->Add(retVal[0],retVal[1],1.0,1.0);
+    tmpVal[0]->Add(hlocal[4],hlocal[7]);
+    tmpVal[1]->Add(hlocal[5],hlocal[6]);
+    tmpVal[2]->Add(tmpVal[0],tmpVal[1],1.0,1.0);
+    tmpVal[3]->Add(tmpVal[0],tmpVal[1],1.0,1.0);
+
+    for(int i=0;i<4;i++){
+        for(int ix=1;ix<=retVal[i]->GetNbinsX();ix++){
+            for(int iy=1;iy<=retVal[i]->GetNbinsY();iy++){
+                double drho = retVal[i]->GetBinContent(ix, iy); // \Delta\rho
+                double mixn = tmpVal[i]->GetBinContent(ix, iy); // \rho_{ref}
+                if (mixn <= 0) {
+                    mixn = 1;
+                }
+                retVal[i]->SetBinContent(ix, iy, drho/sqrt(mixn) );
+            }
+        }
+    }
+
+
+  // Free local histograms.
+  for (int i=1;i<4;i++) {
+      delete tmpVal[i];
+  }
+  for(int i=0;i<_pair_totalmax*4;i++) {
     delete hlocal[i];
   }
   delete [] hlocal;
@@ -959,12 +1168,23 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.14  2006/12/14 20:07:11  prindle
+ * I was calculating \Delta\rho/sqrt(rho) for ++, +-, -+ and --
+ * and then combining those into LS, US, CD and CI. The was wrong
+ * and now I am doing it correctly. For CI this makes only a slight
+ * change, it seems the amplitude is decreased a little. For CD
+ * this is a bigger change. I left the old versions (with _Old appended)
+ * for now.
+ *
+<<<<<<< StEStructSupport.cxx
+=======
  * Revision 1.13  2006/10/27 00:05:32  prindle
- * Modified buildChargeTypes to handle case where the -+ histogram is
+ *   Modified buildChargeTypes to handle case where the -+ histogram is
  * empty. Also tried making buildCommonTypes work, but there one of the
  * output histograms was intended to be -+ and most of the time that
  * will be empty.
  *
+>>>>>>> 1.13
  * Revision 1.11  2006/04/26 18:52:12  dkettler
  *
  * Added reaction plane determination for the analysis
