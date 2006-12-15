@@ -15,25 +15,35 @@ void RunJetReader(int nevents=10,
     cout <<"Jet tree file:\t"<<jetInFile<<endl;
     //abort();
     
-    if (gClassTable->GetID("TTable") < 0) {
-	gSystem->Load("libStar");
-	gSystem->Load("libPhysics");
-    }
-    gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-    loadSharedLibraries();
-    gSystem->Load("StMagF");
-    gSystem->Load("StTpcDb");
-    gSystem->Load("StDbUtilities");
-    gSystem->Load("StDaqLib");
-    gSystem->Load("StEmcRawMaker");
-    gSystem->Load("StEmcADCtoEMaker");
-    gSystem->Load("StEpcMaker");
-    gSystem->Load("StDbLib");
-    gSystem->Load("StDbBroker");
-    gSystem->Load("St_db_Maker");
-    gSystem->Load("StJetFinder");
-    gSystem->Load("StJetMaker");
-
+	if (gClassTable->GetID("TTable") < 0) {
+		gSystem->Load("libStar");
+		gSystem->Load("libPhysics");
+	}
+	gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+	loadSharedLibraries();
+	gSystem->Load("StTpcDb");
+	gSystem->Load("StDbUtilities");
+	gSystem->Load("StMcEvent");
+	gSystem->Load("StMcEventMaker");
+	gSystem->Load("StDaqLib");
+	gSystem->Load("StEmcRawMaker");
+	gSystem->Load("StEmcADCtoEMaker");
+	gSystem->Load("StPreEclMaker");
+	gSystem->Load("StEpcMaker");
+	gSystem->Load("StEmcSimulatorMaker");
+	gSystem->Load("StEmcUtil");
+	gSystem->Load("StDbLib");
+	gSystem->Load("StDbBroker");
+	gSystem->Load("StDetectorDbMaker");
+	gSystem->Load("St_db_Maker");
+	gSystem->Load("StEEmcDbMaker");
+	gSystem->Load("StSpinDbMaker");
+	gSystem->Load("StEEmcUtil");
+	gSystem->Load("StJetFinder");
+	gSystem->Load("StJetMaker");
+	
+    cout << " loading done " << endl;
+	
     double pi = atan(1.0)*4.0;
     cout << " loading done " << endl;
    
@@ -42,7 +52,7 @@ void RunJetReader(int nevents=10,
 
     //Instantiate the MuDstReader
     StMuDebug::setLevel(1); 
-    StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10,"MuDst");
+    StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,dir,file,filter,10000000,"MuDst");
 
     //StMuDbReader...
     StMuDbReader* db = StMuDbReader::instance();

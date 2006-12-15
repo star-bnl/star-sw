@@ -31,6 +31,7 @@
 #include "StJetMaker/StJet.h"
 #include "StJetMaker/StJets.h"
 #include "StJetMaker/StJetReader.h"
+#include "StJetMaker/StJetSkimEvent.h"
 
 ClassImp(StJetReader)
 
@@ -50,7 +51,8 @@ double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track)
 }
 
 StJetReader::StJetReader(const char* name, StMuDstMaker* uDstMaker)
-    : StMaker(name), mFile(0), mTree(0), mDstMaker(uDstMaker), mCounter(0), mOfstream(0)
+: StMaker(name), mFile(0), mTree(0), mSkimFile(0), mSkimTree(0), 
+mDstMaker(uDstMaker), mCounter(0), mValid(false), mSkimEvent(0), mOfstream(0)
 {
     cout <<"StJetReader::StJetReader()"<<endl;
 }
@@ -68,54 +70,77 @@ Int_t StJetReader::Init()
 void StJetReader::InitFile(const char* file)
 {
     cout <<"StJetReader::InitFile()"<<endl;
-
+	
     cout <<"open file:\t"<<file<<"\tfor reading"<<endl;
     mFile = new TFile(file,"READ");
     assert(mFile);
-
+	
     cout <<"recover tree"<<endl;
     TObject* tree = mFile->Get("jet");
     TTree* t = dynamic_cast<TTree*>(tree);
     assert(t);
     mTree = t;
-
+	
     cout <<"\tset tree pointer"<<endl;
     cout <<"Number of entries in tree:\t"<<t->GetEntries();
     
     cout <<"\tGet Branches"<<endl;
     TObjArray* branches = t->GetListOfBranches();
     if (!branches) {cout <<"StJetReader::InitFile().  Null branches"<<endl; abort();}
-
+	
     cout <<"\tLoop on branches"<<endl;
     
     for (int i=0; i<branches->GetLast()+1; ++i) {
-	TBranch* branch = dynamic_cast<TBranch*>((*branches)[i]);
-	if (!branch) {cout <<"StJetReader::InitFile().  Null branch"<<endl; abort();}
-	string bname( branch->GetName() );
-	cout <<"\t--- Found branch:\t"<<bname<<endl;
-	
-	if ( (bname.find("jet")!=bname.npos) || (bname.find("Jet")!=bname.npos) ) {
-	    cout <<"\t\tcreate StJets object for branch:\t"<<bname<<endl;
-
-	    //create StJets object here, put in map:
-	    StJets* jets = new StJets();
-	    jets->Clear();
-	    mStJetsMap[bname] = jets;
-	    cout <<"\t\tset branch address for branch:\t"<<bname.c_str()<<endl;
-	    t->SetBranchStatus(bname.c_str(), 1);
-	    t->SetBranchAddress(bname.c_str(), &jets);
-	}
+		TBranch* branch = dynamic_cast<TBranch*>((*branches)[i]);
+		if (!branch) {cout <<"StJetReader::InitFile().  Null branch"<<endl; abort();}
+		string bname( branch->GetName() );
+		cout <<"\t--- Found branch:\t"<<bname<<endl;
+		
+		if ( (bname.find("jet")!=bname.npos) || (bname.find("Jet")!=bname.npos) ) {
+			cout <<"\t\tcreate StJets object for branch:\t"<<bname<<endl;
+			
+			//create StJets object here, put in map:
+			StJets* jets = new StJets();
+			jets->Clear();
+			mStJetsMap[bname] = jets;
+			cout <<"\t\tset branch address for branch:\t"<<bname.c_str()<<endl;
+			t->SetBranchStatus(bname.c_str(), 1);
+			t->SetBranchAddress(bname.c_str(), &jets);
+		}
     }
-
+	
     if (0) {
-	string jetCheck(file);
-	jetCheck += ".read.txt";
-	mOfstream = new ofstream(jetCheck.c_str());
+		string jetCheck(file);
+		jetCheck += ".read.txt";
+		mOfstream = new ofstream(jetCheck.c_str());
     }
     
     cout <<"\tfinished!"<<endl;
-
+	
     return ;
+}
+
+void StJetReader::InitJetSkimFile(const char* file)
+{
+	cout <<" StJetReader::InitJetSkimFile(const char* file)"<<endl;
+	cout <<"open file:\t"<<file<<"\tfor reading"<<endl;
+	
+	mSkimFile = new TFile(file,"READ");
+	assert(mSkimFile);
+	
+	TObject* t = mSkimFile->Get("jetSkimTree");
+	assert(t);
+	
+	mSkimTree = dynamic_cast<TTree*>(t);
+	assert(mSkimTree);
+	
+	mSkimEvent = new StJetSkimEvent();
+	
+	//set branch status
+	mSkimTree->SetBranchStatus("skimEventBranch", 1);
+	mSkimTree->SetBranchAddress("skimEventBranch", &mSkimEvent);
+
+	cout <<"successfully recovered tree from file."<<endl;
 }
 
 void StJetReader::InitTree(TTree* tree)
@@ -167,27 +192,51 @@ void StJetReader::InitTree(TTree* tree)
     return ;
 }
 
+int StJetReader::preparedForDualRead()
+{
+	cout <<"StJetReader::preparedForDualRead()"<<endl;
+	int jetStatus = (mTree) ? 1 : 0;
+	int skimStatus = (mSkimTree) ? 1 : 0;
+	cout <<"jet tree status:\t"<<jetStatus<<endl;
+	cout <<"skim tree status:\t"<<skimStatus<<endl;
+	assert(mTree);
+	assert(mSkimTree);
+	
+	int nJetEvents = mTree->GetEntries();
+	int nSkimEvents = mSkimTree->GetEntries();
+	cout <<"nJetEvents:\t"<<nJetEvents<<endl;
+	cout <<"nSkimEvents:\t"<<nSkimEvents<<endl;
+	assert(nJetEvents==nSkimEvents);
+	assert(mSkimEvent);
+	
+	cout <<"Congratulations, you are ready to process events!"<<endl;
+	mValid = true;
+	return 1;
+}
+
 Int_t StJetReader::Make()
 {
-    if (mTree) { //handle the reading ourselves...
-	int status = mTree->GetEntry(mCounter++);
+	int status = mTree->GetEntry(mCounter);
 	if (status<0) {
-	    cout <<"StJetReader::getEvent(). ERROR:\tstatus<0.  return null"<<endl;
+		cout <<"StJetReader::getEvent(). ERROR:\tstatus<0.  return null"<<endl;
 	}
-    }
-    else {
-	//the MuDst did the reading...
-    }
+	
+	if (mSkimTree) {
+		status = mSkimTree->GetEntry(mCounter);
+	}
+	
+	mCounter++;
+	
     if (mDstMaker) {//double check consistency:
-	StMuDst* mudst = mDstMaker->muDst();
-	for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
-	    StJets* j = (*it).second;
-	    
-	    if ( !j->isSameEvent(mudst) ) {
-		cout <<"StJetReader::Maker() ERROR:\tisSameEvent()==false.  abort"<<endl;
-		abort();
-	    }
-	}
+		StMuDst* mudst = mDstMaker->muDst();
+		for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
+			StJets* j = (*it).second;
+			
+			if ( !j->isSameEvent(mudst) ) {
+				cout <<"StJetReader::Maker() ERROR:\tisSameEvent()==false.  abort"<<endl;
+				abort();
+			}
+		}
     }
     return kStOk;
 }
@@ -195,10 +244,10 @@ Int_t StJetReader::Make()
 Int_t StJetReader::Finish()
 {
     if (mOfstream) {
-	delete mOfstream;
-	mOfstream=0;
+		delete mOfstream;
+		mOfstream=0;
     }
-
+	
     return kStOk;
 }
 
@@ -209,16 +258,16 @@ string idString(TrackToJetIndex* t)
     string idstring;
     StDetectorId mDetId = t->detectorId();
     if (mDetId==kTpcId) {
-	idstring = "kTpcId";
+		idstring = "kTpcId";
     }
     else if (mDetId==kBarrelEmcTowerId) {
-	idstring = "kBarrelEmcTowerId";
+		idstring = "kBarrelEmcTowerId";
     }
     else if (mDetId==kEndcapEmcTowerId) {
-	idstring = "kEndcapEmcTowerId";
+		idstring = "kEndcapEmcTowerId";
     }
     else {
-	idstring = "kUnknown";
+		idstring = "kUnknown";
     }
     return idstring;
 }
@@ -232,7 +281,7 @@ bool verifyJet(StJets* stjets, int ijet)
     
     StThreeVectorD j3(pj->Px(), pj->Py(), pj->Pz());
     StLorentzVectorD j4(pj->E(),j3 );
-
+	
     //cout <<"\tjet:\t"<<ijet<<"\t4mom:\t"<<j4<<endl;
 	
     StLorentzVectorD jetMom(0., 0., 0., 0.);
@@ -241,107 +290,161 @@ bool verifyJet(StJets* stjets, int ijet)
     FourpList particles = stjets->particles(ijet);
     
     for (FourpList::iterator it=particles.begin(); it!=particles.end(); ++it) {
-	TLorentzVector* v = *it;
-	StThreeVectorD v3(v->Px(), v->Py(), v->Pz() );
-	StLorentzVectorD v4(v->E(), v3 );
-	jetMom += v4;
-	//cout <<"\t\t4p:\t"<<v4<<endl;
+		TLorentzVector* v = *it;
+		StThreeVectorD v3(v->Px(), v->Py(), v->Pz() );
+		StLorentzVectorD v4(v->E(), v3 );
+		jetMom += v4;
+		//cout <<"\t\t4p:\t"<<v4<<endl;
     }
     //cout <<"\t\t\tcheck:\t"<<jetMom<<endl;
     StLorentzVectorD diff = j4-jetMom;
     if (abs(diff)>1.e-6) { //they have to be the same to 1 eV
-	cout <<"verifyJet.  assert will fail for jet:\t"<<ijet<<"\t4p:\t"<<j4<<"\tcompared to sum_particles:\t"<<jetMom<<endl;
-	return false;
+		cout <<"verifyJet.  assert will fail for jet:\t"<<ijet<<"\t4p:\t"<<j4<<"\tcompared to sum_particles:\t"<<jetMom<<endl;
+		return false;
     }
     else {
-	return true;
+		return true;
     }
 }
 
-void StJetReader::doJetAssoc()
+
+void StJetReader::exampleFastAna()
 {
-    cout <<"StJetReader::doJetAssoc()"<<endl;
-
-    //get pointer to pythia StJets object:
-    JetBranchesMap::iterator where1 = mStJetsMap.find("PythiaKtJet");
-    assert(where1!=mStJetsMap.end());
-    StJets* pythiaJets = (*where1).second;
-    assert(pythiaJets);
-    
-    //get pointer to reco StJets object:
-    JetBranchesMap::iterator where2 = mStJetsMap.find("KtJet");
-    assert(where2!=mStJetsMap.end());
-    StJets* recoJets = (*where2).second;
-    assert(recoJets);
-
-    //int nJets = stjets->nJets();
-    //cout <<"Found\t"<<nJets<<"\tjets from:\t"<<(*it).first<<endl;
-    
-    //TClonesArray* jets = stjets->jets();
-
-    //for(int ijet=0; ijet<nJets; ++ijet){
+	cout <<"StJetReader::exampleEventAna()"<<endl;
+	
+	StJetSkimEvent* skEv = skimEvent();
 	    
-    //loop on jets
-    //StJet* j = static_cast<StJet*>( (*jets)[ijet] );
+	//basic information:
+	cout <<"fill/run/event:\t"<<skEv->fill()<<"\t"<<skEv->runId()<<"\t"<<skEv->eventId()<<endl;
+	
+	//some spin info:
+	cout <<"bx48:\t"<<skEv->bx48()<<"\tspinBits:\t"<<skEv->spinBits()<<endl;
+	
+	//some event info:
+	cout <<"Ebbc:\t"<<skEv->eBbc()<<"\tWbbc:\t"<<skEv->wBbc()<<"\tbbcTimeBin:\t"<<skEv->bbcTimeBin()<<endl;
+	
+	//best vertex info:
+	const float* bestPos = skEv->bestVert()->position();
+	cout <<"best Vertex (x,y,z):\t"<<bestPos[0]<<"\t"<<bestPos[1]<<"\t"<<bestPos[2]<<endl;
+	
+	//trigger info:
+	const TClonesArray* trigs = skEv->triggers();
+	assert(trigs);
+	int nTrigs = trigs->GetLast()+1;
+	for (int i=0; i<nTrigs; ++i) {
+		StJetSkimTrig* trig = static_cast<StJetSkimTrig*>( (*trigs)[i] );
+		assert(trig);
+		if (trig->isSatisfied != 0) {
+			cout <<"\tTriggerd:\t"<<trig->trigId<<"\twith prescale:\t"<<trig->prescale<<endl;
+		}
+	}
+		
+	//vertex info:
+	const TClonesArray* verts = skEv->vertices();
+	assert(verts);
+	int nVerts = verts->GetLast()+1;
+	for (int i=0; i<nVerts; ++i) {
+		StJetSkimVert* vert = static_cast<StJetSkimVert*>( (*verts)[i] );
+		assert(vert);
+		const float* vertPos = vert->position();
+		cout <<"vert:\t"<<i<<"\t at z:\t"<<vertPos[2]<<"\tranking:\t"
+			<<vert->ranking()<<"\tnTracks:\t"<<vert->nTracksUsed()<<endl;
+	}
+	
+	
+	//And then access to jets from different algorithms...
+	cout <<"\nLoop on jet branches"<<endl;
+    for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
+		
+		StJets* stjets = (*it).second;
+		int nJets = stjets->nJets();
+		cout <<"Found\t"<<nJets<<"\tjets from:\t"<<(*it).first<<endl;
+		
+		//first make sure that we have the same run/event:
+		assert(stjets->runId()==skEv->runId());
+		assert(stjets->eventId()==skEv->eventId());
+
+		TClonesArray* jets = stjets->jets();
+		
+		
+		for(int ijet=0; ijet<nJets; ++ijet){ 
+			
+			//loop on jets
+			StJet* j = static_cast<StJet*>( (*jets)[ijet] );
+			assert(j);
+			assert(verifyJet(stjets, ijet));
+			
+			cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
+			
+			//look at 4-momenta in the jet:
+			typedef vector<TrackToJetIndex*> TrackToJetVec;
+			TrackToJetVec particles = stjets->particles(ijet);
+			
+		}
+    }	
 }
 
 void StJetReader::exampleEventAna()
 {
     cout <<"StJetReader::exampleEventAna()"<<endl;
-
+	
     //Get pointers to retreive the emc info
+	/*
     StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
     StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
     assert(adc2e);
     StBemcData* data = adc2e->getBemcData();
+	 */
     //int numHits = data->NTowerHits;
     //cout << "Number Hits: " << numHits;
 	
     StMuDst* muDst = 0;
     if (mDstMaker!=0) {
-	muDst = mDstMaker->muDst();
-	cout <<"nPrimary:\t"<<muDst->primaryTracks()->GetLast()+1;
+		muDst = mDstMaker->muDst();
+		cout <<"nPrimary:\t"<<muDst->primaryTracks()->GetLast()+1;
     }
     
     for (JetBranchesMap::iterator it=mStJetsMap.begin(); it!=mStJetsMap.end(); ++it) {
-
-	StJets* stjets = (*it).second;
-	int nJets = stjets->nJets();
-	cout <<"Found\t"<<nJets<<"\tjets from:\t"<<(*it).first<<endl;
-	
-	TClonesArray* jets = stjets->jets();
-
-	//Dylan, here's a nice check...
-	if (0) {
-	    if (stjets->nJets()>0) {
-		dumpProtojetToStream(muDst->event()->eventId(), *mOfstream, stjets);
-	    }
-	}
-	
-	for(int ijet=0; ijet<nJets; ++ijet){ 
-	    
-	    //loop on jets
-	    StJet* j = static_cast<StJet*>( (*jets)[ijet] );
-	    assert(j);
-	    assert(verifyJet(stjets, ijet));
-	    
-	    cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
-
-	    //look at 4-momenta in the jet:
-	    typedef vector<TrackToJetIndex*> TrackToJetVec;
-	    TrackToJetVec particles = stjets->particles(ijet);
-
-	    for (TrackToJetVec::iterator it=particles.begin(); it!=particles.end(); ++it) {
-		TrackToJetIndex* t2j = (*it); //remember, TrackToJetIndex inherits from TLorentzVector, so it _is_ the 4p of a track/tower
-		assert(t2j);
-		double dphi = gDeltaPhi(j->Phi(), t2j->Phi());
-		double deta = j->Eta()-t2j->Eta();
-		double dR = sqrt(dphi*dphi + deta*deta);
-
-		cout <<"\tPt_part:\t"<<t2j->Pt()<<"\tEta_part:\t"<<t2j->Eta()<<"\tPhi_part:\t"<<t2j->Phi()<<"\tdR:\t"<<dR<<"\t"<<idString(t2j)<<endl;
 		
-	    }
-	}
+		StJets* stjets = (*it).second;
+		int nJets = stjets->nJets();
+		cout <<"Found\t"<<nJets<<"\tjets from:\t"<<(*it).first<<endl;
+		
+		TClonesArray* jets = stjets->jets();
+		
+		//Dylan, here's a nice check...
+		if (0) {
+			if (stjets->nJets()>0) {
+				dumpProtojetToStream(muDst->event()->eventId(), *mOfstream, stjets);
+			}
+		}
+		
+		for(int ijet=0; ijet<nJets; ++ijet){ 
+			
+			//loop on jets
+			StJet* j = static_cast<StJet*>( (*jets)[ijet] );
+			assert(j);
+			assert(verifyJet(stjets, ijet));
+			
+			cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
+			
+			//look at 4-momenta in the jet:
+			typedef vector<TrackToJetIndex*> TrackToJetVec;
+			TrackToJetVec particles = stjets->particles(ijet);
+			
+			/*
+			for (TrackToJetVec::iterator it=particles.begin(); it!=particles.end(); ++it) {
+				TrackToJetIndex* t2j = (*it); //remember, TrackToJetIndex inherits from TLorentzVector, so it _is_ the 4p of a track/tower
+				assert(t2j);
+				double dphi = gDeltaPhi(j->Phi(), t2j->Phi());
+				double deta = j->Eta()-t2j->Eta();
+				double dR = sqrt(dphi*dphi + deta*deta);
+				
+				cout <<"\tPt_part:\t"<<t2j->Pt()<<"\tEta_part:\t"<<t2j->Eta()<<"\tPhi_part:\t"<<t2j->Phi()<<"\tdR:\t"<<dR<<"\t"<<idString(t2j)<<endl;
+				
+			}
+			 */
+		}
     }
 }
 
