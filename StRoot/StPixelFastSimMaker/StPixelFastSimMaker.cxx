@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.9 2006/12/14 23:52:51 andrewar Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.10 2006/12/15 02:17:20 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.10  2006/12/15 02:17:20  wleight
+ * Ist now gets hit smearing parameters from the database
+ *
  * Revision 1.9  2006/12/14 23:52:51  andrewar
  * Added Sevil's hit error db loader.
  *
@@ -93,6 +96,7 @@ int StPixelFastSimMaker::Init()
   mSmear=1;
   return kStOk;
 }
+
 //____________________________________________________________
 int StPixelFastSimMaker::InitRun(int RunNo)
 {
@@ -104,10 +108,19 @@ int StPixelFastSimMaker::InitRun(int RunNo)
   resXHpd = sqrt(hitError->coeff[0]);
   resZHpd = sqrt(hitError->coeff[3]);
   cout << "Smearing HPD hits by " << resXHpd << " " << resZHpd << " cm in the HPD " << endl;
+  St_HitError *ist1TableSet = (St_HitError *)set->Find("ist1HitError");
+  St_HitError *ist2TableSet = (St_HitError *)set->Find("ist2HitError");
+  HitError_st* ist1HitError = ist1TableSet->GetTable();
+  resXIst1 = sqrt(ist1HitError->coeff[0]);
+  resZIst1 = sqrt(ist1HitError->coeff[3]);
+  HitError_st* ist2HitError = ist2TableSet->GetTable();
+  resXIst2 = sqrt(ist2HitError->coeff[0]);
+  resZIst2 = sqrt(ist2HitError->coeff[3]);
 
   return kStOk;
 }
 //____________________________________________________________
+
 void StPixelFastSimMaker::Clear(Option_t *option){ /*noop*/}
 //____________________________________________________________
 int StPixelFastSimMaker::Finish(){return kStOk;}
@@ -204,27 +217,20 @@ Int_t StPixelFastSimMaker::Make()
 		  //		  char path[100];
 		  TString Path("");
 		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  cout<<"about to try to move between local+global coords with VMC"<<endl;
 		  if(mcI->layer()==1) Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
 		  else                Path = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
-		  cout<<"path: "<<Path.Data()<<endl;
-		  if(!gGeoManager) cout<<"no gGeoManager?"<<endl;
-		  cout<<"RMV"<<endl;
 		  gGeoManager->RestoreMasterVolume();
-		  cout<<"go to path"<<endl;
 		  gGeoManager->cd(Path);
-		  cout<<"get node"<<endl;
 		  TGeoNode* node=gGeoManager->GetCurrentNode();
 		  cout<<"hit location: "<<mcH->position()<<endl;
 		  double pos[3]={mcH->position().x(),mcH->position().y(),mcH->position().z()};
 		  double localpos[3]={0,0,0};
 		  gGeoManager->GetCurrentMatrix()->MasterToLocal(pos,localpos);
-		  cout<<"local hit location: "<<localpos[0]<<" "<<localpos[1]<<" "<<localpos[2]<<endl;
-		  localpos[0]=distortHit(localpos[0],.0017,100);
-		  //localpos[1]=distortHit(localpos[1],.055);
+		  if(mcI->layer()==1) localpos[0]=distortHit(localpos[0],resXIst1,100);
+		  else localpos[0]=distortHit(localpos[0],resXIst2,100);
 		  gGeoManager->GetCurrentMatrix()->LocalToMaster(localpos,pos);
-		  cout<<"hit location after 1 smear: "<<pos[0]<<" "<<pos[1]<<" "<<pos[2]<<endl;
-		  pos[2]=distortHit(pos[2],.055,100);
+		  if(mcI->layer()==1) pos[2]=distortHit(pos[2],resZIst1,100);
+		  else pos[2]=distortHit(pos[2],resZIst2,100);
 		  StThreeVectorF smearedpos(pos);
 		  cout<<"smeared hit location: "<<smearedpos<<endl;
 		  StRnDHit* tempHit = new StRnDHit(smearedpos, mHitError, 1, 1., 0, 1, 1, id++, kIstId);  
