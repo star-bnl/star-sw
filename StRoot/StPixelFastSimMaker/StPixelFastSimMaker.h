@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.h,v 1.4 2006/12/14 23:52:52 andrewar Exp $
+ * $Id: StPixelFastSimMaker.h,v 1.5 2006/12/15 02:17:20 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.h,v $
+ * Revision 1.5  2006/12/15 02:17:20  wleight
+ * Ist now gets hit smearing parameters from the database
+ *
  * Revision 1.4  2006/12/14 23:52:52  andrewar
  * Added Sevil's hit error db loader.
  *
@@ -109,7 +112,7 @@ class StPixelFastSimMaker : public StMaker {
   */
   virtual const char *GetCVS() const
   {
-    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.4 2006/12/14 23:52:52 andrewar Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPixelFastSimMaker.h,v 1.5 2006/12/15 02:17:20 wleight Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -117,6 +120,10 @@ class StPixelFastSimMaker : public StMaker {
   StRandom* myRandom;
   double resXHpd;
   double resZHpd;
+  double resXIst1;
+  double resZIst1;
+  double resXIst2;
+  double resZIst2;
   double tiltAngleHpd;
   double rotAngleHpd;
   double offsetAngleHpd;
