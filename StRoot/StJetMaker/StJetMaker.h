@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.4 2004/10/12 18:17:37 mmiller Exp $
+ * $Id: StJetMaker.h,v 1.5 2006/12/15 23:25:32 mmiller Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.5  2006/12/15 23:25:32  mmiller
+ * First release of StJetSkimEvent and StJetSkimEventMaker to allow for
+ * a MuDst'less analysis once the jet finding pass is completed.
+ * See updated version of StJetMaker/macros/RunJetFinder2.C and
+ * RunFastJetReader.C for the creation and use of StJetSkimEvent.
+ *
  * Revision 1.4  2004/10/12 18:17:37  mmiller
  * Organized into subdirectories, add StPythia, StJetSimuUtil, and StEmcHitMakers
  *
@@ -68,6 +74,7 @@
  ***************************************************************************/
 #ifndef StJetMaker_h
 #define StJetMaker_h
+
 #include "StMaker.h"
 #include "StppJetAnalyzer.h"
 #include <string>
