@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.35 2006/08/07 20:38:13 fisyak Exp $
+ * $Id: StMagUtilities.h,v 1.36 2006/12/16 23:46:25 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.36  2006/12/16 23:46:25  jhthomas
+ * Add ManualShortedRing() for Gene, and protect against B=0 ... set to a minimum of 0.25 gauss instead
+ *
  * Revision 1.35  2006/08/07 20:38:13  fisyak
  * TMatrix is typedef to TMatrixT<Float_t> now, with ROOT 5,12
  *
@@ -108,7 +111,8 @@
 
 #include "TSystem.h"
 #include "TROOT.h"        // Stop at this point and put further includes in .cxx file
-#include "TMatrix.h"
+#include "TMatrix.h"      // TMatrix keeps changing ... keep it here until proven otherwise.
+
 #define  nZ               57            // Standard STAR B field Map. Number of Z points in table
 #define  nR               28            // Number of R points in table
 #define  nPhi             37            // Number of Phi points in table
@@ -299,25 +303,28 @@ class StMagUtilities {
 					       const unsigned int RowMask2 = 0x1FFFFF,
 					       const Float_t VertexError = 0.0200 ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion (Int_t   Charge, 
-						Float_t Pt, 
-						Float_t VertexZ, 
-						Float_t PseudoRapidity, 
-						Float_t DCA,  
-						const unsigned int RowMask1, 
-						const unsigned int RowMask2, 
-						Float_t &pSpace ) ;
+  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   Charge, 
+						 Float_t Pt, 
+						 Float_t VertexZ, 
+						 Float_t PseudoRapidity, 
+						 Float_t DCA,  
+						 const unsigned int RowMask1, 
+						 const unsigned int RowMask2, 
+						 Float_t &pSpace ) ;
 
-  virtual Int_t   PredictSpaceChargeDistortion (Int_t   Charge, 
-						Float_t Pt, 
-						Float_t VertexZ, 
-						Float_t PseudoRapidity, 
-						Float_t DCA,  
-						const unsigned int RowMask1, 
-						const unsigned int RowMask2, 
-						Float_t RowMaskErrorR[64], 
-						Float_t RowMaskErrorRPhi[64], 
-						Float_t &pSpace ) ;
+  virtual Int_t   PredictSpaceChargeDistortion ( Int_t   Charge, 
+						 Float_t Pt, 
+						 Float_t VertexZ, 
+						 Float_t PseudoRapidity, 
+						 Float_t DCA,  
+						 const unsigned int RowMask1, 
+						 const unsigned int RowMask2, 
+						 Float_t RowMaskErrorR[64], 
+						 Float_t RowMaskErrorRPhi[64], 
+						 Float_t &pSpace ) ;
+
+  virtual void    ManualShortedRing ( Int_t EastWest, Int_t InnerOuter, 
+				      Float_t RingNumber, Float_t MissingRValue, Float_t ExtraRValue) ;
 
   virtual Int_t    GetSpaceChargeMode();
   virtual void     ManualSpaceCharge(Double_t SpcChg)   { SpaceCharge   = SpcChg ; fSpaceCharge   = 0 ; }
