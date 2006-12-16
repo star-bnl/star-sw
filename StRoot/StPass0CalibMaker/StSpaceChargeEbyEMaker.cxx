@@ -91,7 +91,8 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
   schist->SetDirectory(0);
   for (int i=0;i<HN;i++){
     schists[i] = new TH1F(Form("SpCh%d",i),"Space Charge",80,SCL,SCH);
-    schists[i]->SetDirectory(0);}
+    schists[i]->SetDirectory(0);
+  }
 }
 //_____________________________________________________________________________
 StSpaceChargeEbyEMaker::~StSpaceChargeEbyEMaker() {
@@ -173,6 +174,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     m_ExB = new StMagUtilities(
       ((StTpcDbMaker*) tpcDbMaker)->tpcDbInterface(),RunLog,(kSpaceChargeR2 | kGridLeak));
   }
+  lastsc = m_ExB->CurrentSpaceChargeR2();
 
   // Get StEvent and related info, determine if things are OK
   event = (StEvent*) GetInputDS("StEvent");
@@ -180,6 +182,20 @@ Int_t StSpaceChargeEbyEMaker::Make() {
     gMessMgr->Warning("StSpaceChargeEbyEMaker: no StEvent; skipping event.");
     return kStWarn;
   }
+  // Get runinfo, determine if the magnetic field is nonzero 
+  // EbyE maker not currently able to handle zero B field
+  runinfo = event->runInfo();
+  if ((!runinfo) || (runinfo->magneticField() == 0)) {
+    gMessMgr->Error("StSpaceChargeEbyEMaker: cannot run due to zero or unknown mag field!");
+    // Look for any errant zero field SC values as a warning
+    //   for processing even without EbyE
+    if ((lastsc != 0) && (runinfo) && (runinfo->magneticField() == 0))
+      gMessMgr->Warning() << "BE AWARE THAT A NONZERO VALUE OF SPACECHARGE\n"
+        << "    WAS RETURNED BY DB CALL!\n    (could be a local DB file or"
+        << " in the actual database)" << endm;
+    return kStFatal;
+  }
+
   // Select the highest ranked vertex
   StPrimaryVertex* pvtx = 0; float rank = -1e6;
   for (unsigned int l=0; l<event->numberOfPrimaryVertices(); l++) {
@@ -192,14 +208,6 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   unsigned int nnodes = theNodes.size();
   if (!nnodes) return kStOk;
-  runinfo = event->runInfo();
-  if ((!runinfo) || (runinfo->magneticField() == 0)) {
-    if (PrePassmode) {
-      gMessMgr->Warning("StSpaceChargeEbyEMaker: No PrePass for zero or unknown mag field");
-      return kStFatal;
-    }
-    return kStOk;
-  }
 
   // Store and setup event-wise info
   evt++;
@@ -233,7 +241,6 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   else evtsnow = 1;
   evtstbin[curhist] = evtsnow;
 
-  lastsc = m_ExB->CurrentSpaceChargeR2();
   if (QAmode) {
     gMessMgr->Info()
       << "StSpaceChargeEbyEMaker: used (for this event) SpaceCharge = "
@@ -897,8 +904,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.12 2006/08/15 23:40:59 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.13 2006/12/16 01:00:58 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.13  2006/12/16 01:00:58  genevb
+// Better handling of zero magnetic field
+//
 // Revision 1.12  2006/08/15 23:40:59  genevb
 // Averaging was done improperly in DontReset mode
 //
