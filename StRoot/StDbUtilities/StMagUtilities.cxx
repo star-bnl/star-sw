@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.68 2006/08/07 20:38:13 fisyak Exp $
+ * $Id: StMagUtilities.cxx,v 1.69 2006/12/16 23:45:38 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.69  2006/12/16 23:45:38  jhthomas
+ * Add ShortedManualRing() for Gene, and protect against B=0 field ... instead set to 0.25 gauss as minimum
+ *
  * Revision 1.68  2006/08/07 20:38:13  fisyak
  * TMatrix is typedef to TMatrixT<Float_t> now, with ROOT 5,12
  *
@@ -328,7 +331,6 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetOmegaTau ()        ;    // Get Omega Tau parameters
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB
-  //ManualSpaceChargeR2(0.01); //JT test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
@@ -338,17 +340,18 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
 /// StMagUtilities constructor not using the DataBase
 StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t mode )       
 { 
-  gFactor = factor    ;      // Manually selected magnetic field scale factor
-  gMap    = map       ;      // Select the type of field (mapped field shape or constant field)
-  thedb2  = 0         ;      // Do not get MagFactor from the DB       - use manual selection above
-  thedb   = 0         ;      // Do not get TPC parameters from the DB  - use defaults in CommonStart
-  fTpcVolts      =  0 ;      // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
-  fOmegaTau      =  0 ;      // Do not get OmegaTau out of the DB      - use defaults in CommonStart
-  ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults inserted here.
-  ManualSpaceChargeR2(0);    // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
-  //ManualSpaceChargeR2(0.01); //JT test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
-  fGridLeak      =  0 ;      // Do not get Grid Leak data from the DB  - use defaults in CommonStart
-  CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
+  gMap    = map         ;        // Select the type of field (mapped field shape or constant field)
+  thedb2  = 0           ;        // Do not get MagFactor from the DB       - use manual selection above
+  thedb   = 0           ;        // Do not get TPC parameters from the DB  - use defaults in CommonStart
+  gFactor = factor      ;        // Manually selected magnetic field scale factor
+  fTpcVolts      =  0   ;        // Do not get TpcVoltages out of the DB   - use defaults in CommonStart
+  fOmegaTau      =  0   ;        // Do not get OmegaTau out of the DB      - use defaults in CommonStart
+  ManualSpaceCharge(0)  ;        // Do not get SpaceCharge out of the DB   - use defaults inserted here.
+  ManualSpaceChargeR2(0);        // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  //ManualSpaceChargeR2(0.01) ;  // JT test - Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  ManualShortedRing(0,0,0,0,0) ; // No shorted rings
+  fGridLeak      =  0   ;        // Do not get Grid Leak data from the DB  - use defaults in CommonStart
+  CommonStart( mode )   ;        // Read the Magnetic and Electric Field Data Files, set constants
 }
 
 
@@ -425,6 +428,30 @@ Bool_t StMagUtilities::UpdateShortedRing ()
   return update;
 }
 
+/// Manually setup a shorted ring in the TPC
+/*! Insert one shorted ring of your choice
+    Side(E=0/W=1)  Cage(IFC=0/OFC=1)  Ring(# from CM)  MissingResistance(MOhm)  ExtraResistance(MOhm)
+    For addtional information, see the comments associated with UndoShortedRing().
+ */
+void StMagUtilities::ManualShortedRing ( Int_t EastWest, Int_t InnerOuter, 
+					 Float_t RingNumber, Float_t MissingRValue, Float_t ExtraRValue )
+{
+  // Insert one shorted ring of your choice.  Manually testing more than one shorted ring requires editing the code (below).
+  ShortTableRows       =  1             ;              // Number of rows in the shorted ring table
+  Side[0]              =  EastWest      ;              // Side of the TPC (E=0/W=1) 
+  Cage[0]              =  InnerOuter    ;              // Field Cage (IFC=0/OFC=1 )
+  Ring[0]              =  RingNumber    ;              // Ring Number (# from CM)
+  MissingResistance[0] =  MissingRValue ;              // Missing Resistance due to short (MOhm)
+  Resistor[0]          =  ExtraRValue   ;              // Extra Resistance added as compensation for the short (MOhm)
+  if ( ( Side[0] + Cage[0] + Ring[0] + TMath::Abs(MissingResistance[0]) + TMath::Abs(Resistor[0]) ) == 0.0 ) ShortTableRows = 0 ;
+  // JT Test of shorted ring repair ... uncomment and expand this section if you need to test more than one shorted ring 
+  // ShortTableRows = 1 ;
+  // Ring[0] = 182.5 ; Ring[1] = 0.0 ; Ring[2] = 0.0 ;
+  // MissingResistance[0] = 2.0 ; MissingResistance[1] = 0.0 ; MissingResistance[2] = 0.0 ;
+  // Resistor[0] = 0.0 ;  Resistor[1] = 0.0 ; Resistor[2] = 0.0 ;
+  // End JT Test 
+}
+
 void StMagUtilities::GetOmegaTau ()
 {
   fOmegaTau  =  StDetectorDbTpcOmegaTau::instance();
@@ -465,13 +492,13 @@ void StMagUtilities::GetGridLeak ()
 {
    fGridLeak   =  StDetectorDbGridLeak::instance()  ;
    InnerGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLinner )  ;  // Relative strength of the Inner grid leak
-   InnerGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLinner )  ;  // Location (in local Y coordinates) of the Inner grid leak 
+   InnerGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLinner )  ;  // Location (in local Y coordinates) of Inner grid leak 
    InnerGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLinner )  ;  // Half-width of the Inner grid leak.  
    MiddlGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLmiddl )  ;  // Relative strength of the Middle grid leak
-   MiddlGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLmiddl )  ;  // Location (in local Y coordinates) of the Middl grid leak
+   MiddlGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLmiddl )  ;  // Location (in local Y coordinates) of Middl grid leak
    MiddlGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLmiddl )  ;  // Half-width of the Middle grid leak.  
    OuterGridLeakStrength  =  fGridLeak -> getGridLeakStrength ( kGLouter )  ;  // Relative strength of the Outer grid leak
-   OuterGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLouter )  ;  // Location (in local Y coordinates) of the Outer grid leak 
+   OuterGridLeakRadius    =  fGridLeak -> getGridLeakRadius   ( kGLouter )  ;  // Location (in local Y coordinates) of Outer grid leak 
    OuterGridLeakWidth     =  fGridLeak -> getGridLeakWidth    ( kGLouter )  ;  // Half-width of the Outer grid leak.  
 }
 
@@ -515,18 +542,6 @@ void StMagUtilities::CommonStart ( Int_t mode )
     { 
       CathodeV    = -27950.0 ;      // Cathode Voltage (volts)
       GG          =   -115.0 ;      // Gating Grid voltage (volts)
-      ShortTableRows = 0 ;          // Number of rows in the shorted rings table
-      for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Side[i] = 0 ;
-      for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Cage[i] = 0 ; 
-      for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Ring[i] = 0 ; 
-      for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) MissingResistance[i] = 0 ; 
-      for ( Int_t i = 0 ; i < ShortTableRows ; i++ ) Resistor[i] = 0 ;
-      // JT Test of shorted ring repair
-      // ShortTableRows = 1 ;
-      // Ring[0] = 182.5 ; Ring[1] = 0.0 ; Ring[2] = 0.0 ;
-      // MissingResistance[0] = 2.0 ; MissingResistance[1] = 0.0 ; MissingResistance[2] = 0.0 ;
-      // Resistor[0] = 0.0 ;  Resistor[1] = 0.0 ; Resistor[2] = 0.0 ;
-      // End JT Test 
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ;
     } 
   else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
@@ -1711,29 +1726,33 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 */
 void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
 { 
-
+  
   const   Float_t R0        = 2.130 ;            // First resistor (R0) between CM and ring number one (Mohm)
   const   Float_t R182      = 0.310 ;            // Last resistor in the IFC chain
   const   Float_t RStep     = 2.000 ;            // Resistor chain value (except the first one) (Mohm)
   const   Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
   const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
-
-  static  Int_t NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
-
+  
+  static  Bool_t DoOnce = true ;  // Note that this is the reverse logic compared to DoOnce elsewhere in StMagUtilities.
+  static  Int_t  NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
+  
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  if ( UpdateShortedRing() )
-    {
-      NumberOfEastInnerShorts = 0; NumberOfEastOuterShorts = 0 ; NumberOfWestInnerShorts = 0; NumberOfWestOuterShorts = 0 ;
+  if (fTpcVolts) DoOnce = UpdateShortedRing() ;
 
+  if ( DoOnce )  // Note reversed logic compared to other methods in StMagUtilities
+    {
       // Parse the Table and separate out the four different resistor chains
-      // Definition: A "missing" resistor is a shorted resistor, an "extra" resistor is a compensating resistor added at the end of the string
+      // Definition: A "missing" resistor is a shorted resistor, an "extra" resistor is a compensating resistor added at the end
+
       Float_t EastInnerMissingSum = 0,     EastOuterMissingSum = 0,      WestInnerMissingSum = 0,     WestOuterMissingSum = 0 ; 
-      Float_t EastInnerExtraSum = 0,       EastOuterExtraSum = 0,        WestInnerExtraSum = 0,       WestOuterExtraSum = 0 ;   
+      Float_t EastInnerExtraSum   = 0,     EastOuterExtraSum   = 0,      WestInnerExtraSum   = 0,     WestOuterExtraSum   = 0 ;   
       Float_t EastInnerMissingOhms[10],    EastOuterMissingOhms[10],     WestInnerMissingOhms[10],    WestOuterMissingOhms[10] ; 
       Float_t EastInnerShortZ[10],         EastOuterShortZ[10],          WestInnerShortZ[10],         WestOuterShortZ[10] ;
       
+      NumberOfEastInnerShorts = 0; NumberOfEastOuterShorts = 0 ; NumberOfWestInnerShorts = 0; NumberOfWestOuterShorts = 0 ;
+
       for ( Int_t i = 0 ; i < ShortTableRows ; i++ )
 	{
 	  if ( ( Side[i] + Cage[i] + Ring[i] + TMath::Abs(MissingResistance[i]) + TMath::Abs(Resistor[i]) ) == 0.0 ) continue ;
@@ -1758,6 +1777,8 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
       // Don't fill the tables if there aren't any shorts
       if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
 	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ;  return ; }
+
+      cout << "StMagUtilities::UndoShort  Please wait for the tables to fill ... ~10 seconds" << endl ;
 
       Float_t Rtot   =  R0 + 181*RStep + R182     ;    // Total resistance of the (normal) resistor chain
       Float_t Rfrac  =  RStep*TPC_Z0/(Rtot*Pitch) ;    // Fraction of full resistor chain inside TPC drift volume (~1.0)
@@ -1826,6 +1847,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 	      shortEr[i][j] = IntegralOverZ ;
  	    }
 	}
+      DoOnce = false ;     // Note reversed logic compared to other methods in StMabUtilies
     }
   
   if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
@@ -2128,9 +2150,10 @@ void StMagUtilities::Interpolate2DBfield( const Float_t r, const Float_t z, Floa
 
   Float_t fscale ;
 
-  fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
+  fscale = 0.001*gFactor*gRescale ;                 // Scale STAR maps to work in kGauss, cm
+  if ( TMath::Abs(fscale) < 1e-7 ) fscale = 1e-7 ;  // Zero field is unphysical, set it to Earths Field (~0.25 gauss)
 
-  const   Int_t ORDER = 1  ;                      // Linear interpolation = 1, Quadratic = 2        
+  const   Int_t ORDER = 1  ;                        // Linear interpolation = 1, Quadratic = 2        
   static  Int_t jlow=0, klow=0 ;                            
   Float_t save_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1] ;
@@ -2159,9 +2182,10 @@ void StMagUtilities::Interpolate3DBfield( const Float_t r, const Float_t z, cons
 
   Float_t fscale ;
 
-  fscale = 0.001*gFactor*gRescale ;               // Scale STAR maps to work in kGauss, cm
+  fscale = 0.001*gFactor*gRescale ;                 // Scale STAR maps to work in kGauss, cm
+  if ( TMath::Abs(fscale) < 1e-7 ) fscale = 1e-7 ;  // Zero field is unphysical, set it to Earths Field (~0.25 gauss)
 
-  const   Int_t ORDER = 1 ;                       // Linear interpolation = 1, Quadratic = 2   
+  const   Int_t ORDER = 1 ;                         // Linear interpolation = 1, Quadratic = 2   
   static  Int_t ilow=0, jlow=0, klow=0 ;
   Float_t save_Br[ORDER+1],   saved_Br[ORDER+1] ;
   Float_t save_Bz[ORDER+1],   saved_Bz[ORDER+1] ;
