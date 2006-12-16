@@ -37,10 +37,10 @@ StiHpdDetectorBuilder::StiHpdDetectorBuilder(bool active, const string & inputFi
       }
     else
       {
-	_trackingParameters.setMaxChi2ForSelection(30.);
-	_trackingParameters.setMinSearchWindow(0.2);
-	_trackingParameters.setMaxSearchWindow(0.8);
-	_trackingParameters.setSearchWindowScaling(10.);
+	_trackingParameters.setMaxChi2ForSelection(10.);
+	_trackingParameters.setMinSearchWindow(1.);
+	_trackingParameters.setMaxSearchWindow(5.);
+	_trackingParameters.setSearchWindowScaling(4.);
 	cout << "Loading default parameters" << endl;
       }
 }
@@ -64,9 +64,11 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
     setNSectors(0,48);
     cout <<"create gasses"<<endl;
     //_gas is the gas that the hpd detector lives in
-    _gas            = add(new StiMaterial("HpdAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
+//oldvalues    _gas            = add(new StiMaterial("HpdAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
+    _gas            = add(new StiMaterial("HpdAir",    7.3,  14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9) );
     //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
-    _fcMaterial     = add(new StiMaterial("HpdSi", 14.,      28.0855,   2.33,     21.82,           5.) );
+//oldvalues    _fcMaterial     = add(new StiMaterial("HpdSi", 14.,      28.0855,   2.33,     21.82,           5.) );
+    _fcMaterial     = add(new StiMaterial("HpdSi", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
 
     double ionization=_fcMaterial->getIonization();
     StiElossCalculator* fcMatElossCalculator=new StiElossCalculator(_fcMaterial->getZOverA(),ionization*ionization,_fcMaterial->getA(),_fcMaterial->getZ(),_fcMaterial->getDensity());
