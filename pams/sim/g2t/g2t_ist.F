@@ -1,5 +1,10 @@
-* $Id: g2t_ist.F,v 1.3 2006/06/26 17:56:21 potekhin Exp $
+* $Id: g2t_ist.F,v 1.4 2006/12/17 22:45:10 potekhin Exp $
 * $Log: g2t_ist.F,v $
+* Revision 1.4  2006/12/17 22:45:10  potekhin
+* Commented out gratuitous print statements
+* left over from
+* debugging.
+*
 * Revision 1.3  2006/06/26 17:56:21  potekhin
 * Added CVS tags
 *
@@ -23,10 +28,10 @@
        Local  = Idigi.ge.2
 
        Do While (G2R_GET_HIT('ist') .eq. 0)
-          print *,i,id,trac,next,volume,
-     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
-     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
-     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
+*          print *,i,id,trac,next,volume,
+*     >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
+*     >            p(1),p(2),p(3),p(4),r,rr,phi,the,eta,tdr,tof,
+*     >            Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
 
          i=i+1
          g2t_ist_hit_h.nok            = i
