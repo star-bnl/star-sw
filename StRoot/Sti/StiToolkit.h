@@ -22,6 +22,7 @@ class   StiTrack;
 class   StiKalmanTrack;
 class   StiKalmanTrackNode;
 class   StiNodeExt;
+class   StiNodeInf;
 class   StiHit;
 class   StiDetectorBuilder;
 class   StiMasterDetectorBuilder;
@@ -65,6 +66,7 @@ public:
   virtual Factory<StiKalmanTrack> * getTrackFactory()=0;
   virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory()=0;
   virtual Factory<StiNodeExt>         * getTrackNodeExtFactory()=0;
+  virtual Factory<StiNodeInf>         * getTrackNodeInfFactory()=0;
   virtual Factory<StiDetector>  * getDetectorFactory()=0;
   virtual Factory<StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory()=0;
   virtual Factory<EditableParameter>  * getParameterFactory()=0;
