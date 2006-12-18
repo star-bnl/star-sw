@@ -1,5 +1,10 @@
-* $Id: istbgeo3.g,v 1.2 2006/12/14 21:38:20 potekhin Exp $
+* $Id: istbgeo3.g,v 1.3 2006/12/18 02:36:49 potekhin Exp $
 * $Log: istbgeo3.g,v $
+* Revision 1.3  2006/12/18 02:36:49  potekhin
+* Added a code field to the main stata structure,
+* in order to properly version volume id. Same festure
+* incorporated in files 4 and 5
+*
 * Revision 1.2  2006/12/14 21:38:20  potekhin
 * Add CVS tags for this new config (outer layer only)
 *
@@ -20,7 +25,7 @@ Module ISTBGEO3 is the geometry of the Inner Silicon Tracker
       Content   IBMO,IBLM,IBAM,IBSS,ISTP,ISKH,ISCL,ISSC,ISXA,ISLB,ISRI,ISCO,
                 IBMY
 
-      Structure ISMG {Layer, Rin,            Rout,        TotalLength}
+      Structure ISMG {Layer, Rin,            Rout,        TotalLength, code}
       Structure ISBG {Layer,   nLadder,        nUnit,       Length,
                       LadderWidth, LadderThk,  SensAThk,    Spacing,
                       SensorWidth, SensorThk,  SensorLngth,
@@ -41,6 +46,7 @@ Module ISTBGEO3 is the geometry of the Inner Silicon Tracker
       Rin        =  15.00      ! Inner radius
       Rout       =  18.00      ! Outer radius
       TotalLength=  54.50      ! Overal length of the detector
+      code       =   3.00      ! file version
    EndFill
 
    Fill ISMG                   ! Mother volume inner layer
@@ -179,8 +185,8 @@ Module ISTBGEO3 is the geometry of the Inner Silicon Tracker
    EndFill
 * -------------------------------------------------------
    Fill ISVR                   ! code version for g2t_volume_id
-      Version    =   2         ! Version
-      code       =   2         ! Version
+      Version    =   3         ! Version
+      code       =   3         ! code
    EndFill
 * -------------------------------------------------------
 
@@ -188,7 +194,7 @@ Module ISTBGEO3 is the geometry of the Inner Silicon Tracker
       raddeg = 3.14159265/180.0
 * -------------------------------------------------------
       USE ISMG Layer=1
-      USE ISVR
+*      USE ISVR
 
       Create   IBMO
       Position IBMO in CAVE
