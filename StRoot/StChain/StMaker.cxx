@@ -1,4 +1,9 @@
-// $Id: StMaker.cxx,v 1.184 2006/12/14 23:44:09 fisyak Exp $
+// $Id: StMaker.cxx,v 1.185 2006/12/18 23:34:58 potekhin Exp $
+// $Log: StMaker.cxx,v $
+// Revision 1.185  2006/12/18 23:34:58  potekhin
+// Adding the tags UPGR10 and UPGR11, recently
+// introduced in the geometry.
+//
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -173,6 +178,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr07",      20190101,    10, "upgr07",   ""},
   {"upgr08",      20190101,    11, "upgr08",   ""},
   {"upgr09",      20190101,    12, "upgr09",   ""},
+  {"upgr10",      20190101,    13, "upgr10",   ""},
+  {"upgr11",      20190101,    14, "upgr11",   ""},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1730,6 +1737,10 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.185  2006/12/18 23:34:58  potekhin
+// Adding the tags UPGR10 and UPGR11, recently
+// introduced in the geometry.
+//
 // Revision 1.184  2006/12/14 23:44:09  fisyak
 // Add upgr06 and upgr09
 //
