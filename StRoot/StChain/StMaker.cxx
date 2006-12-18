@@ -1,8 +1,4 @@
-// $Id: StMaker.cxx,v 1.185 2006/12/18 23:34:58 potekhin Exp $
-// $Log: StMaker.cxx,v $
-// Revision 1.185  2006/12/18 23:34:58  potekhin
-// Adding the tags UPGR10 and UPGR11, recently
-// introduced in the geometry.
+// $Id: StMaker.cxx,v 1.186 2006/12/18 23:36:34 potekhin Exp $
 //
 //
 /*!
@@ -1737,6 +1733,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.186  2006/12/18 23:36:34  potekhin
+// Removed an extraneous CVS tag from top
+//
 // Revision 1.185  2006/12/18 23:34:58  potekhin
 // Adding the tags UPGR10 and UPGR11, recently
 // introduced in the geometry.
