@@ -10,7 +10,7 @@ template<class Filtered>class Filter;
 class StiTrackFinder 
 {
 public:
-   StiTrackFinder(){mComb=0;}
+   StiTrackFinder(){mComb=1;}
   /// Initialize the finder
   virtual void initialize()=0;
   /// Find all tracks of the currently loaded event
@@ -40,7 +40,7 @@ public:
   
 
 protected:
-  int mComb; //0=no combinatoric
+  int mComb; //0=no combinatoric , no tree search
 
 
 };
