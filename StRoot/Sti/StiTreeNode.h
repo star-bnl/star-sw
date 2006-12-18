@@ -56,7 +56,7 @@ class StiTreeNode
   void reset();
   void unset(){;}
   void remove(int childIndex) ;
-  StiTreeNode *disconnect(); 
+  StiTreeNode *disconnect(int all=0); 
   void cutTail(int direction) ;
   void setParent(StiTreeNode *  newParent) ;
   StiTreeNode *getParent() 	const;
