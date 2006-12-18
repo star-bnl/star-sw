@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.23 2006/08/29 22:18:37 fisyak Exp $
+ * $Id: StiStEventFiller.h,v 2.24 2006/12/18 01:30:52 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.24  2006/12/18 01:30:52  perev
+ * fillPulls reorganized
+ *
  * Revision 2.23  2006/08/29 22:18:37  fisyak
  * move filling of StTrackDetectorInfo into fillTrack
  *
@@ -188,10 +191,11 @@ public:
     void setPullEvent(StiPullEvent *pe) 		{mPullEvent=pe;}
 private:
  void fillResHack(StHit *hh,const StiHit *stiHit, const StiKalmanTrackNode *node);
- void fillPull   (StHit *hh,const StiHit *stiHit
+ void fillPulls  (StHit *hh,const StiHit *stiHit
                  ,const StiKalmanTrackNode *node
 		 ,const StiKalmanTrack     *track
-		 ,int dets[1][3]);
+		 ,int dets[1][3],int gloPri);
+ void fillPulls  (StiKalmanTrack *ktrack,int gloPri);
  bool accept(StiKalmanTrack* kTrack);
  void FillStHitErr(StHit *hh,const StiKalmanTrackNode *node);
 private:

@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.77 2006/08/31 03:25:58 fisyak Exp $
+ * $Id: StiStEventFiller.cxx,v 2.78 2006/12/18 01:30:39 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.78  2006/12/18 01:30:39  perev
+ * fillPulls reorganized
+ *
  * Revision 2.77  2006/08/31 03:25:58  fisyak
  * Make cut for EEMC pointing track based on StTrackDetectorInfo instead of StTrackFitTraits
  *
@@ -608,6 +611,7 @@ void StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 //VP	    throw runtime_error("StiStEventFiller::fillEvent() StTrack::bad() non zero");
           }
 	  fillTrackCount2++;
+          fillPulls(kTrack,0);
           if (gTrack->numberOfPossiblePoints()<10) continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
 	  fillTrackCountG++;
@@ -703,6 +707,7 @@ void StiStEventFiller::fillEventPrimaries()
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
+      fillPulls(kTrack,1); 
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       pTrack->setKey( gTrack->key());
 
@@ -773,7 +778,6 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
 // 	Fill StHit errors for Gene
       FillStHitErr(hh,node);
 
-      fillPull   (hh,stiHit,node,track,dets);
       if (!detector) 		continue;
       if (!hh) 			continue;
       assert(detector->getGroupId()==hh->detector());
@@ -1141,134 +1145,6 @@ double StiStEventFiller::impactParameter(StTrack* track, StThreeVectorD &vertex)
 
 }
 //_____________________________________________________________________________
- void StiStEventFiller::fillPull(StHit *stHit,const StiHit *stiHit
-                                ,const StiKalmanTrackNode *node
-				,const StiKalmanTrack     *track
-                                ,int dets[1][3])
-{
-  double x,y,z,r,xp,yp,zp,rp;
-  float  hitErrs[6],fitErrs[6],pulErrs[3];
-
-  if (!mPullEvent) return;
-  StiPullHit aux;
-// local frame
-// local HIT
-  aux.lXHit = stiHit->x();
-  aux.lYHit = stiHit->y();
-  aux.lZHit = stiHit->z();
-  TCL::ucopy(node->hitErrs(),hitErrs,6);
-  aux.lYHitErr = sqrt(hitErrs[2]);
-  aux.lZHitErr = sqrt(hitErrs[5]);
-  aux.lHitEmx[0] = hitErrs[2];
-  aux.lHitEmx[1] = hitErrs[4];
-  aux.lHitEmx[2] = hitErrs[5];
-
-// local FIT
-  aux.lXFit = node->getX();
-  aux.lYFit = node->getY();
-  aux.lZFit = node->getZ();
-  TCL::ucopy(node->fitErrs().A,fitErrs,6);
-  aux.lYFitErr = sqrt(fitErrs[2]);
-  aux.lZFitErr = sqrt(fitErrs[5]);
-  aux.lFitEmx[0] = fitErrs[2];
-  aux.lFitEmx[1] = fitErrs[4];
-  aux.lFitEmx[2] = fitErrs[5];
-
-
-// local Pull
-  xp = aux.lXHit;
-  yp = node->unTouched().mPar[0];
-  zp = node->unTouched().mPar[1];
-  aux.lYPul = aux.lYHit-yp;
-  aux.lZPul = aux.lZHit-zp;
-  if (fabs(aux.lYPul)>10) StiDebug::Break(-1);
-  if (fabs(aux.lZPul)>10) StiDebug::Break(-1);
-  TCL::ucopy(node->unTouched().mErr,pulErrs,3);
-  TCL::vadd(pulErrs,aux.lHitEmx,aux.lPulEmx,3);
-  aux.lYPulErr = sqrt(aux.lPulEmx[0]);
-  aux.lZPulErr = sqrt(aux.lPulEmx[2]);
-
-  aux.lPsi  = node->fitPars()._eta;
-  aux.lDip  = atan(node->fitPars()._tanl);
-
-// global frame
-  double alfa = node->getAlpha();
-  float F[2][2];
-
-//		global Hit
-  x = stiHit->x(); y = stiHit->y(); z = stiHit->z();
-  r = sqrt(x*x+y*y);
-
-  aux.gRHit = r;
-  aux.gPHit = atan2(stiHit->y_g(),stiHit->x_g());
-  aux.gZHit = stiHit->z_g();
-  memset(F[0],0,sizeof(F));
-  F[0][0]=  x/(r*r);
-  F[1][1]= 1;
-  TCL::trasat(F[0],aux.lHitEmx,aux.gHitEmx,2,2);
-  aux.gPHitErr = sqrt(aux.gHitEmx[0]);
-  aux.gZHitErr = sqrt(aux.gHitEmx[2]);
-
-
-//		global Fit
-  x = node->getX(); y = node->getY();z = node->getZ();
-  r = sqrt(x*x+y*y);
-  aux.gRFit = r;
-  aux.gPFit = NICE(atan2(y,x)+alfa);
-  aux.gZFit = node->z_g();
-
-  memset(F[0],0,sizeof(F));
-  F[0][0]=  x/(r*r);
-  F[1][1]= 1;
-  TCL::trasat(F[0],aux.lFitEmx,aux.gFitEmx,2,2);
-  aux.gPFitErr = sqrt(aux.gFitEmx[0]);
-  aux.gZFitErr = sqrt(aux.gFitEmx[2]);
-  
-//		global Pull
-  rp = sqrt(xp*xp+yp*yp);
-  aux.gPPul = ((aux.gPHit-alfa)-atan2(yp,xp))*rp;
-  aux.gZPul = aux.lZHit-zp;
-  memset(F[0],0,sizeof(F));
-  F[0][0]=  xp/(rp*rp);
-  F[1][1]= 1;
-  TCL::trasat(F[0],pulErrs,aux.gPulEmx,2,2);
-  TCL::vadd(aux.gHitEmx,aux.gPulEmx,aux.gPulEmx,3);
-// 	Now account that Phi ==> R*Phi  
-  aux.gPulEmx[0]*= rp*rp;
-  aux.gPulEmx[1]*= rp;
-  aux.gPPulErr = sqrt(aux.gPulEmx[0]);
-  aux.gZPulErr = sqrt(aux.gPulEmx[2]);
-
-  aux.gPsi  = node->getPsi();
-  aux.gDip  = node->getDipAngle();
-
-  // invariant
-  aux.mCurv   = node->getCurvature();
-  aux.mPt     = node->getPt();
-  aux.mChi2   = node->getChi2();
-  aux.mNormalRefAngle = alfa;
-  aux.mHardwarePosition=0;
-  aux.mDetector=0;
-  aux.mTrackNumber=mTrackNumber;
-  aux.nAllHits  = dets[0][2];
-  aux.nTpcHits  = dets[kTpcId][2];
-  aux.nSvtHits  = dets[kSvtId][2];
-  aux.nSsdHits  = dets[kSsdId][2];
-  const StiDetector *stiDet = stiHit->detector();
-  if (stiDet) 		{
-    aux.mHardwarePosition=stHit->hardwarePosition();
-    aux.mDetector=stHit->detector();
-    const StiPlacement *place = stiDet->getPlacement();
-    aux.mNormalRadius   = place->getNormalRadius();
-    aux.mNormalYOffset  = place->getNormalYoffset();
-    aux.mZCenter        = 0;
-  }
-
-  mPullEvent->Add(aux,mGloPri);
-  
-
-}
-//_____________________________________________________________________________
 void StiStEventFiller::fillDca(StTrack* stTrack, StiKalmanTrack* track)
 {
   StGlobalTrack *gTrack = dynamic_cast<StGlobalTrack*>(stTrack);
@@ -1304,4 +1180,173 @@ void StiStEventFiller::FillStHitErr(StHit *hh,const StiKalmanTrackNode *node)
   TCL::trasat(T[0],stiErr,stErr,3,3);
   StThreeVectorF f3(sqrt(stErr[0]),sqrt(stErr[2]),sqrt(stErr[5]));
   hh->setPositionError(f3);
+}
+//_____________________________________________________________________________
+void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri) 
+{
+  //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
+  if (!mPullEvent) return;
+  int dets[kMaxDetectorId][3];
+  track->getAllPointCount(dets,kMaxDetectorId-1);
+
+  StiKTNIterator tNode = track->rbegin();
+  StiKTNIterator eNode = track->rend();
+  for (;tNode!=eNode;++tNode) 
+  {
+      StiKalmanTrackNode *node = &(*tNode);
+      if(!node->isValid()) 	continue;
+
+      StiHit *stiHit = node->getHit();
+      if (!stiHit)		continue;
+
+      if (node->getChi2()>1000) continue;
+      if (!node->isFitted()) 	continue;
+
+      const StiDetector *detector = node->getDetector();
+      assert(detector == stiHit->detector());
+      assert(!detector || stiHit->timesUsed());
+      StHit *hh = (StHit*)stiHit->stHit();
+      fillPulls(hh,stiHit,node,track,dets,gloPri);
+      if (gloPri) continue;
+      fillPulls(hh,stiHit,node,track,dets,2);
+  }
+}
+//_____________________________________________________________________________
+ void StiStEventFiller::fillPulls(StHit *stHit,const StiHit *stiHit
+                                 ,const StiKalmanTrackNode *node
+				 ,const StiKalmanTrack     *track
+                                 ,int dets[1][3],int gloPriRnd)
+{
+  double x,y,z,r,xp,yp,zp,rp;
+  float  untErrs[3];
+
+  const StiNodeInf *inf = 0;
+  if (gloPriRnd==2) {
+    inf = node->getInfo();
+    if (!inf)	return;
+  }
+  const StiNodeErrs &mFE = (inf)? inf->mPE : node->fitErrs();
+  const StiNodePars &mFP = (inf)? inf->mPP : node->fitPars(); 
+  StiHitErrs  mHrr;
+  memcpy(mHrr.A, (inf)? inf->mHrr.A : node->hitErrs(),sizeof(StiHitErrs));
+
+  StiPullHit aux;
+// local frame
+// local HIT
+  aux.nHitCand = node->getHitCand();
+  aux.iHitCand = node->getIHitCand();
+  if (!aux.nHitCand)  aux.nHitCand=1;
+  aux.lXHit = stiHit->x();
+  aux.lYHit = stiHit->y();
+  aux.lZHit = stiHit->z();
+  aux.lYHitErr = sqrt(mHrr.hYY);
+  aux.lZHitErr = sqrt(mHrr.hZZ);
+  aux.lHitEmx[0] = mHrr.hYY;
+  aux.lHitEmx[1] = mHrr.hZY;
+  aux.lHitEmx[2] = mHrr.hZZ;
+
+// local FIT
+  aux.lXFit = mFP._x;
+  aux.lYFit = mFP._y;
+  aux.lZFit = mFP._z;
+  aux.lYFitErr = sqrt(mFE._cYY);
+  aux.lZFitErr = sqrt(mFE._cZZ);
+  aux.lFitEmx[0] = mFE._cYY;
+  aux.lFitEmx[1] = mFE._cZY;
+  aux.lFitEmx[2] = mFE._cZZ;
+//  assert(fabs(aux.lYFit-aux.lYHit)>1e-10 || fabs(aux.lXHit)<4);
+
+// local Pull
+  xp = aux.lXHit;
+  yp = (inf)? mFP._y: (double)node->unTouched().mPar[0];
+  zp = (inf)? mFP._z: (double)node->unTouched().mPar[1];
+  aux.lYPul = aux.lYHit-yp;
+  aux.lZPul = aux.lZHit-zp;
+  if (fabs(aux.lYPul)>10) StiDebug::Break(-1);
+  if (fabs(aux.lZPul)>10) StiDebug::Break(-1);
+  if (!inf) {TCL::ucopy(node->unTouched().mErr,untErrs,3);}
+  else      {TCL::ucopy(aux.lFitEmx           ,untErrs,3);}
+  assert(untErrs[0]>0);
+  assert(untErrs[2]>0);
+  TCL::vadd(untErrs,aux.lHitEmx,aux.lPulEmx,3);
+  aux.lYPulErr = sqrt(aux.lPulEmx[0]);
+  aux.lZPulErr = sqrt(aux.lPulEmx[2]);
+
+  aux.lPsi  = mFP._eta;
+  aux.lDip  = atan(mFP._tanl);
+
+// global frame
+  double alfa = node->getAlpha();
+  float F[2][2];
+
+//		global Hit
+  x = stiHit->x(); y = stiHit->y(); z = stiHit->z();
+  r = sqrt(x*x+y*y);
+
+  aux.gRHit = r;
+  aux.gPHit = atan2(stiHit->y_g(),stiHit->x_g());
+  aux.gZHit = stiHit->z_g();
+  memset(F[0],0,sizeof(F));
+  F[0][0]=  x/(r*r);
+  F[1][1]= 1;
+  TCL::trasat(F[0],aux.lHitEmx,aux.gHitEmx,2,2);
+  aux.gPHitErr = sqrt(aux.gHitEmx[0]);
+  aux.gZHitErr = sqrt(aux.gHitEmx[2]);
+
+
+//		global Fit
+  x = mFP._x; y = mFP._y;z = mFP._z;
+  r = sqrt(x*x+y*y);
+  aux.gRFit = r;
+  aux.gPFit = NICE(atan2(y,x)+alfa);
+  aux.gZFit = z;
+
+  memset(F[0],0,sizeof(F));
+  F[0][0]=  x/(r*r);
+  F[1][1]= 1;
+  TCL::trasat(F[0],aux.lFitEmx,aux.gFitEmx,2,2);
+  aux.gPFitErr = sqrt(aux.gFitEmx[0]);
+  aux.gZFitErr = sqrt(aux.gFitEmx[2]);
+  
+//		global Pull
+  rp = sqrt(xp*xp+yp*yp);
+  aux.gPPul = ((aux.gPHit-alfa)-atan2(yp,xp))*rp;
+  aux.gZPul = aux.lZHit-zp;
+  memset(F[0],0,sizeof(F));
+  F[0][0]=  xp/(rp*rp);
+  F[1][1]= 1;
+  TCL::trasat(F[0],untErrs,aux.gPulEmx,2,2);
+  TCL::vadd(aux.gHitEmx,aux.gPulEmx,aux.gPulEmx,3);
+// 	Now account that Phi ==> R*Phi  
+  aux.gPulEmx[0]*= rp*rp;
+  aux.gPulEmx[1]*= rp;
+  aux.gPPulErr = sqrt(aux.gPulEmx[0]);
+  aux.gZPulErr = sqrt(aux.gPulEmx[2]);
+
+  aux.gPsi  = node->getPsi();
+  aux.gDip  = node->getDipAngle();
+
+  // invariant
+  aux.mCurv   = mFP._curv;
+  aux.mPt     = 1./mFP._ptin;
+  aux.mChi2   = node->getChi2();
+  aux.mNormalRefAngle = alfa;
+  aux.mHardwarePosition=0;
+  aux.mDetector=0;
+  aux.mTrackNumber=mTrackNumber;
+  aux.nAllHits  = dets[0][2];
+  aux.nTpcHits  = dets[kTpcId][2];
+  aux.nSvtHits  = dets[kSvtId][2];
+  aux.nSsdHits  = dets[kSsdId][2];
+  const StiDetector *stiDet = stiHit->detector();
+  if (stiDet) 		{
+    aux.mHardwarePosition=stHit->hardwarePosition();
+    aux.mDetector=stHit->detector();
+    const StiPlacement *place = stiDet->getPlacement();
+    aux.mNormalRadius   = place->getNormalRadius();
+    aux.mNormalYOffset  = place->getNormalYoffset();
+    aux.mZCenter        = 0;
+  }
+  mPullEvent->Add(aux,gloPriRnd);
+
 }
