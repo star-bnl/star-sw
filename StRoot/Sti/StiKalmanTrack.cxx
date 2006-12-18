@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.88 2006/10/16 20:29:35 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.88 2006/10/16 20:29:35 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.89 2006/12/18 01:14:08 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.89 2006/12/18 01:14:08 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.89  2006/12/18 01:14:08  perev
+ * operator= added
+ *
  * Revision 2.88  2006/10/16 20:29:35  fisyak
  * Clean up useless classes
  *
@@ -343,7 +346,7 @@ static int mIdCount = 0;
   mFlag  = 0;
   _dca   = 0;
   _vChi2=-2;
-  StiDebug::Break(mId);
+  StiDebug::Break(mIdDb);
 }
 
  
@@ -1523,3 +1526,28 @@ double diff(const StiNodePars &p1,const StiNodeErrs &e1
   }
   return est;
 }
+//_____________________________________________________________________________
+StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
+{
+  StiTrack::operator=(tk);
+  firstNode=0;
+  lastNode=0;
+
+  mSeedHitCount=tk.mSeedHitCount; 	//number of points used to seed the track
+  mFlag        =tk.mFlag;         	//A flag to pack w/ topo info
+  m            =tk.m;             	// mass hypothesis
+  _dca	       =tk._dca;
+  _vChi2       =tk._vChi2;		//
+
+  StiKTNBidirectionalIterator it;
+  for (it=tk.begin();it!=tk.end();it++){
+    const StiKalmanTrackNode *node = &(*it);
+    if (!node->isValid()) continue;
+    StiKalmanTrackNode *myNode=trackNodeFactory->getInstance();
+    *myNode=*node;
+    add(myNode,kOutsideIn);
+  }
+  return *this;
+}
+
+
