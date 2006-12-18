@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.37 2006/12/06 00:47:40 fine Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.38 2006/12/18 01:26:32 perev Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.38  2006/12/18 01:26:32  perev
+ * StiNodeInf factory added
+ *
  * Revision 2.37  2006/12/06 00:47:40  fine
  * rename StiGeomMake to StiDetectorVolume
  *
@@ -150,6 +153,7 @@
 #include "StarClassLibrary/StMCTruth.h"
 
 
+//______________________________________________________________________________
 StiDefaultToolkit::StiDefaultToolkit()
   :
   _evaluatorEnabled(false),
@@ -182,6 +186,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Done"<<endl;
 };
 
+//______________________________________________________________________________
 StiDefaultToolkit::~StiDefaultToolkit()
 {
   delete _trackFilterFactory;
@@ -201,6 +206,7 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete _trackMerger;
 }
 
+//______________________________________________________________________________
 Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
 {
   if (_trackFilterFactory)
@@ -211,6 +217,7 @@ Factory< Filter<StiTrack>   >  * StiDefaultToolkit::getTrackFilterFactory()
   return _trackFilterFactory;
 }
 
+//______________________________________________________________________________
 Factory<EditableParameter>  * StiDefaultToolkit::getParameterFactory()
 {
   if (_parameterFactory)
@@ -219,6 +226,7 @@ Factory<EditableParameter>  * StiDefaultToolkit::getParameterFactory()
   return _parameterFactory;
 }
 
+//______________________________________________________________________________
 Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
   if (_hitFactory) return _hitFactory;
@@ -228,6 +236,7 @@ Factory<StiHit>* StiDefaultToolkit::getHitFactory()
   return _hitFactory;
 }
 
+//______________________________________________________________________________
 Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
 {
   if (_trackFactory) return _trackFactory;
@@ -238,6 +247,7 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
 }
 
 
+//______________________________________________________________________________
 Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
 {
   if (_detectorFactory)
@@ -247,6 +257,7 @@ Factory<StiDetector>* StiDefaultToolkit::getDetectorFactory()
   return _detectorFactory;
 }
 
+//______________________________________________________________________________
 Factory< StiCompositeTreeNode<StiDetector>  >* StiDefaultToolkit::getDetectorNodeFactory()
 {
   if (_detectorNodeFactory)
@@ -257,6 +268,7 @@ Factory< StiCompositeTreeNode<StiDetector>  >* StiDefaultToolkit::getDetectorNod
 }
 
 
+//______________________________________________________________________________
 Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
 {
   if (_trackNodeFactory)
@@ -268,6 +280,7 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
   return _trackNodeFactory;	
 }
 
+//______________________________________________________________________________
 Factory<StiNodeExt>* StiDefaultToolkit::getTrackNodeExtFactory()
 {
   if (_trackNodeExtFactory)
@@ -277,13 +290,25 @@ Factory<StiNodeExt>* StiDefaultToolkit::getTrackNodeExtFactory()
   _trackNodeExtFactory->setFastDelete();
   return _trackNodeExtFactory;	
 }
+//______________________________________________________________________________
+Factory<StiNodeInf>* StiDefaultToolkit::getTrackNodeInfFactory()
+{
+  if (_trackNodeInfFactory)
+    return _trackNodeInfFactory;
+  _trackNodeInfFactory= StiFactory<StiNodeInf,StiNodeInf>::myInstance();
+  _trackNodeInfFactory->setMaxIncrementCount(4000000);
+  _trackNodeInfFactory->setFastDelete();
+  return _trackNodeInfFactory;	
+}
 
+//______________________________________________________________________________
 StiDetectorGroups  *StiDefaultToolkit::getDetectorGroups()
 {
   return _detectorGroups;
 }
 
 
+//______________________________________________________________________________
 void StiDefaultToolkit::add(StiDetectorGroup<StEvent>* detectorGroup)
 {
   _detectorGroups->push_back((StiGenericDetectorGroup *)detectorGroup);
@@ -310,6 +335,7 @@ void StiDefaultToolkit::add(StiDetectorGroup<StEvent>* detectorGroup)
     cout << "StiDefaultToolkit::add() -I- Not adding builder for detector group:"<< detectorGroup->getName()<<endl;
 }
 
+//______________________________________________________________________________
 StiMasterDetectorBuilder * StiDefaultToolkit::getDetectorBuilder()
 {  
   if (_detectorBuilder)
@@ -318,6 +344,7 @@ StiMasterDetectorBuilder * StiDefaultToolkit::getDetectorBuilder()
   return _detectorBuilder;
 }
 
+//______________________________________________________________________________
 StiDetectorContainer  * StiDefaultToolkit::getDetectorContainer()
 {
   if (_detectorContainer)
@@ -328,6 +355,7 @@ StiDetectorContainer  * StiDefaultToolkit::getDetectorContainer()
   return _detectorContainer;
 }
 
+//______________________________________________________________________________
 StiHitContainer       * StiDefaultToolkit::getHitContainer()
 {
   if (_hitContainer)
@@ -338,6 +366,7 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
 
 
 
+//______________________________________________________________________________
 StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
 {	
   if (_trackContainer)
@@ -347,6 +376,7 @@ StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
 }
 
 
+//______________________________________________________________________________
 StiDetectorFinder    * StiDefaultToolkit::getDetectorFinder()
 {
   if (_detectorFinder)
@@ -355,6 +385,7 @@ StiDetectorFinder    * StiDefaultToolkit::getDetectorFinder()
   return _detectorFinder;
 }
 
+//______________________________________________________________________________
 StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {
   if (_trackSeedFinder)
@@ -367,6 +398,7 @@ StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
   return _trackSeedFinder;
 }
 
+//______________________________________________________________________________
 StiTrackFinder       * StiDefaultToolkit::getTrackFinder()
 {
   if (_trackFinder)
@@ -377,6 +409,7 @@ StiTrackFinder       * StiDefaultToolkit::getTrackFinder()
   return _trackFinder;
 }
 
+//______________________________________________________________________________
 StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
 {
   if (_trackFitter)
@@ -386,6 +419,7 @@ StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
   return _trackFitter;
 }
 
+//______________________________________________________________________________
 StiTrackMerger       * StiDefaultToolkit::getTrackMerger()
 {
   if (_trackMerger)
@@ -394,6 +428,7 @@ StiTrackMerger       * StiDefaultToolkit::getTrackMerger()
   return _trackMerger;
 }
 
+//______________________________________________________________________________
 StiVertexFinder * StiDefaultToolkit::getVertexFinder()
 {
   cout << "StiDefaultToolkit::getVertexFinder() -I- Started"<<endl;
@@ -404,6 +439,7 @@ StiVertexFinder * StiDefaultToolkit::getVertexFinder()
 }
 
 
+//______________________________________________________________________________
 StiHitLoader<StEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
 {
   if (_hitLoader)
@@ -415,47 +451,56 @@ StiHitLoader<StEvent,StiDetectorBuilder>    * StiDefaultToolkit::getHitLoader()
   return _hitLoader;
 }
 
+//______________________________________________________________________________
 void StiDefaultToolkit::setEvaluatorEnabled(bool evaluatorEnabled)
 {
 	_evaluatorEnabled = evaluatorEnabled;
 }
 
+//______________________________________________________________________________
 bool StiDefaultToolkit::isEvaluatorEnabled() const
 {
 	return _evaluatorEnabled;
 }
 
 
+//______________________________________________________________________________
 EditableFilter<StiHit>   * StiDefaultToolkit::getLoaderHitFilter()
 {
   return _loaderHitFilter;
 }
 
+//______________________________________________________________________________
 EditableFilter<StiTrack> * StiDefaultToolkit::getLoaderTrackFilter()
 {
   return _loaderTrackFilter;
 }
 
+//______________________________________________________________________________
 EditableFilter<StiTrack> * StiDefaultToolkit::getFinderTrackFilter()
 {
   return _finderTrackFilter;
 }
 
+//______________________________________________________________________________
 void StiDefaultToolkit::setLoaderHitFilter(EditableFilter<StiHit>   * loaderHitFilter)
 {
   _loaderHitFilter = loaderHitFilter;
 }
 
+//______________________________________________________________________________
 void StiDefaultToolkit::setLoaderTrackFilter(EditableFilter<StiTrack> * loaderTrackFilter)
 {
   _loaderTrackFilter = loaderTrackFilter;
 }
 
+//______________________________________________________________________________
 void StiDefaultToolkit::setFinderTrackFilter(EditableFilter<StiTrack> * finderTrackFilter)
 {
   _finderTrackFilter = finderTrackFilter;
 }
 
+//______________________________________________________________________________
 int StiDefaultToolkit::getTruth(const StiHit *stiHit)
 {
   if (!stiHit->detector()) return 0;
