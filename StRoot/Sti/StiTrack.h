@@ -132,7 +132,7 @@ public:
   //	virtual bool extendToVertex(StiHit* vertex, const StiDetector * alternate)=0;
   virtual int  refit()=0;
   virtual int  refitL()=0;
-
+  StiTrack &operator=(const StiTrack &tk);
  protected:
   static StiTrackFinder * trackFinder;
   static StiTrackFitter * trackFitter;
