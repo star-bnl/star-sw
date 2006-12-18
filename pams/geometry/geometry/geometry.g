@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.139 2006/12/14 21:36:25 potekhin Exp $
+* $Id: geometry.g,v 1.140 2006/12/18 23:28:33 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.140  2006/12/18 23:28:33  potekhin
+* Introduced geometry tags UPGR10 and UPGR11 (as discussed
+* in appropriate fora) which utilize source files istbgeo4 and 5.
+* Made some cosmetic changes to the code layout.
+*
 * Revision 1.139  2006/12/14 21:36:25  potekhin
 * Add tag UPGR09 with sttering logic
 * for the ISTB with only the outer layer...
@@ -2753,6 +2758,123 @@ If LL>1
                    itsp=on;
                 }
 ****************************************************************************************
+  on UPGR10   { New Tracking: HFT+innerLayerIST+TPC-SVT+SSD
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 0;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                  "Silicon Strip Detector Version "
+                   sisd=on;
+                   SisdConfig = 45;
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=5;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
+                }
+****************************************************************************************
+  on UPGR11   { New Tracking: HFT+2LayerIST+TPC-SVT+SSD
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                  "Silicon Strip Detector Version "
+                   sisd=on;
+                   SisdConfig = 45;
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=6;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
+                }
+****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -3163,16 +3285,16 @@ If LL>1
 ******************************************************************
 * The rest of steering:
 
-   if (ecal) Call ecalgeo
-   if (bbcm) Call bbcmgeo
+   if (ecal)                   Call ecalgeo
+   if (bbcm)                   Call bbcmgeo
 
    if (fpdm.and.FpdmConfig==0) Call fpdmgeo
    if (fpdm.and.FpdmConfig==1) Call fpdmgeo1
    if (fpdm.and.FpdmConfig==2) Call fpdmgeo2
    if (fpdm.and.FpdmConfig==3) Call fpdmgeo3
 
-   if (zcal) Call zcalgeo
-   if (magp) Call magpgeo
+   if (zcal)                   Call zcalgeo
+   if (magp)                   Call magpgeo
 
    if (mutd.and.MutdConfig==1) Call mutdgeo
 
@@ -3181,10 +3303,12 @@ If LL>1
    if (pixl.and.PixlConfig==3) Call pixlgeo2
    if (pixl.and.PixlConfig==4) Call pixlgeo3
 
-   if (istb.and.IstbConfig==1)  Call istbgeo
-   if (istb.and.IstbConfig==2)  Call istbgeo1
-   if (istb.and.IstbConfig==3)  Call istbgeo2
-   if (istb.and.IstbConfig==4)  Call istbgeo3
+   if (istb.and.IstbConfig==1) Call istbgeo
+   if (istb.and.IstbConfig==2) Call istbgeo1
+   if (istb.and.IstbConfig==3) Call istbgeo2
+   if (istb.and.IstbConfig==4) Call istbgeo3
+   if (istb.and.IstbConfig==5) Call istbgeo4
+   if (istb.and.IstbConfig==6) Call istbgeo5
 
 
    if (gemb.and.GembConfig>0)  Call gembgeo
