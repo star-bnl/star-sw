@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.173  2006/12/18 01:29:00  perev
+// +noTreeSearch flag & pulls
+//
 // Revision 1.172  2006/10/16 20:30:42  fisyak
 // Clean dependencies from Sti useless classes
 //
@@ -229,6 +232,65 @@
 // Revision 1.96  2002/06/04 19:45:31  pruneau
 // including changes for inside out tracking
 //
+/*!
+
+\class StiMaker 
+
+\author M.L. Miller 5/00
+\author C Pruneau 3/02
+\author V Perev 2005
+
+A maker StiMaker is a steering maker for Sti package.
+<br>
+Main tasks:				
+<ul>
+<li> Create StiHits;			
+<li> Make tracks;				
+<li> Make Primary vertices;		
+<li> Make Primary tracks;			
+<li> Save produced data into StEvent.	
+</ul>
+More detailed: 				<br>
+<ul>
+<li>On Init:				
+<ul>
+<li> Detectors initialization. 
+     SetAttr("useTpc"  ,1) && SetAttr("activeTpc"  ,1) 	// default
+     SetAttr("useSvt",  1) && SetAttr("activeSvt"  ,0) 	// default
+     SetAttr("useSsd"  ,0) && SetAttr("activeSsd"  ,0)	// default Off
+     SetAttr("usePixel",0) && SetAttr("activePixel",0)	// default Off
+     SetAttr("useIst"  ,0) && SetAttr("activeIst"  ,0)	// default Off
+     SetAttr("useHpd"  ,0) && SetAttr("activeHpd"  ,0)	// default Off
+
+     SetAttr("useEventFiller"      ,kTRUE);		// default On
+     SetAttr("useTracker"          ,kTRUE);		// default On
+     SetAttr("useVertexFinder"     ,kTRUE);		// default On
+     SetAttr("makePulls"           ,kFALSE);		// default Off
+
+     SetAttr("noTreeSearch",kFALSE);	// treeSearch default ON
+     SetAttr("svtSelf",,kFALSE);	// Svt self align default OFF
+</ul>
+ 
+<li>On InitRun:				
+<ul>
+ <li> Build detectors;			
+ <li> Init seed finder;			
+ <li> Init hit loader;			
+ <li> Init tracker;  			
+ <li> Init StEvent filler;			 
+ <li> Init vertex finder;			 
+</ul>
+<li>In Make:				
+<ul>
+ <li> Load hits; 
+ <li> Find seeds; 
+ <li> Create global tracks; 
+ <li> Save tracks into StEvent;
+ <li> Find vertecies; 
+ <li> Create and assign primaries tracks; 
+ <li> Save primary tracks into StEvent;
+
+*/
 #include <Stiostream.h>
 #include <math.h>
 #include <string>
@@ -310,6 +372,7 @@ StiMaker::StiMaker(const Char_t *name) :
 {
   cout <<"StiMaker::StiMaker() -I- Starting"<<endl;
   mPullFile=0; mPullEvent=0;mPullTTree=0;
+  memset(mPullHits,0,sizeof(mPullHits));
 
   if (!StiToolkit::instance()) new StiDefaultToolkit;
   _toolkit = StiToolkit::instance();
@@ -462,9 +525,11 @@ Int_t StiMaker::InitRun(int run)
       _tracker=0;
       if (IAttr("useTracker")) {
         _tracker = dynamic_cast<StiKalmanTrackFinder *>(_toolkit->getTrackFinder());
-      _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
-			_tracker->load("trackFinderPars.dat",*this);
-			_fitter->load("trackFitterPars.dat",*this);
+        _fitter  = dynamic_cast<StiKalmanTrackFitter *>(_toolkit->getTrackFitter());
+	_tracker->load("trackFinderPars.dat",*this);
+	_fitter->load("trackFitterPars.dat",*this);
+        if (IAttr("noTreeSearch")) _tracker->setComb(0);
+
       }
       _eventFiller=0;
       if (IAttr("useEventFiller")) {
@@ -562,11 +627,14 @@ Int_t StiMaker::Make()
 	    }
 	}
     }
-  if (mPullTTree) FillPulls();
+  int iAns=kStOK,iAnz;
+  if (mPullTTree) {iAns = FillPulls();}
   cout<< "StiMaker::Make() -I- Done"<<endl;
-  StMaker::Make();
+  iAnz = StMaker::Make();
 
   MyClear();
+  if (iAns) return iAns;
+  if (iAnz) return iAnz;
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -577,6 +645,7 @@ void StiMaker::MyClear()
       _toolkit->getHitFactory()->clear();
       _toolkit->getTrackNodeFactory()->clear();
       _toolkit->getTrackNodeExtFactory()->clear();
+      _toolkit->getTrackNodeInfFactory()->clear();
       _toolkit->getTrackFactory()->clear();
 //      TMemStat::PrintMem("After  StiFactory clear()");
 }
@@ -613,7 +682,7 @@ Int_t StiMaker::FillPulls()
   mPullEvent->mEvt  = hddr->GetEventNumber();
   mPullEvent->mDate = hddr->GetDateTime();	//DAQ time (GMT)
   StiHit *vertex   = _vertexFinder->getVertex(0);
-  if (!vertex) return kStWarn;
+  if (!vertex) return 0;
   mPullEvent->mChi2 = 0;	
   
   mPullEvent->mVtx[0] = vertex->x_g();
@@ -621,5 +690,12 @@ Int_t StiMaker::FillPulls()
   mPullEvent->mVtx[2] = vertex->z_g();
   TCL::ucopy(vertex->errMtx(),mPullEvent->mEtx,6);
   mPullTTree->Fill();
-  return 0;  
+  for (int i=0; i<3; i++) {mPullHits[i]+=mPullEvent->mNHits[i];}
+  if (! IAttr(".Privilege")) return kStOK;
+
+  int k;for (k=2; k>=0; k--) {if (mPullHits[k]) break;}
+  if (k<0) return kStOK;
+  k = mPullHits[k]<<(k*3);
+  if (k>1000000) return kStSTOP;
+  return kStOK;  
 }  
