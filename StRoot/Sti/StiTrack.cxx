@@ -13,11 +13,13 @@
 StiTrackFinder * StiTrack::trackFinder = 0;
 StiTrackFitter * StiTrack::trackFitter = 0;
 
+//______________________________________________________________________________
 StiTrack::StiTrack()
 {
   mId = 0;		
 }
 
+//______________________________________________________________________________
 ostream& operator<<(ostream& os, const StiTrack& track)
 {
   try 
@@ -44,38 +46,45 @@ ostream& operator<<(ostream& os, const StiTrack& track)
   return os;
 }
 
+//______________________________________________________________________________
 void StiTrack::setTrackFinder(StiTrackFinder * finder)
 {
   trackFinder = finder;
 }
 
+//______________________________________________________________________________
 void StiTrack::setTrackFitter(StiTrackFitter * fitter)
 {
   trackFitter = fitter;
 }
 
+//______________________________________________________________________________
 StiTrackFinder * StiTrack::getTrackFinder()
 {
   return trackFinder;
 }
 
+//______________________________________________________________________________
 StiTrackFitter * StiTrack::getTrackFitter()
 {
   return trackFitter;
 }
 
 
+//______________________________________________________________________________
 int StiTrack::fit(int direction)
 {
   return trackFitter->fit(this,direction);
 }
 
+//______________________________________________________________________________
 bool StiTrack::find(int direction)
 {
   return trackFinder->find(this,direction);
 }
 
 
+//______________________________________________________________________________
 double StiTrack::getValue(int key) const
 {
   double value;
@@ -105,3 +114,11 @@ double StiTrack::getValue(int key) const
     }
   return value;  
 }
+//______________________________________________________________________________
+StiTrack &StiTrack::operator=(const StiTrack &tk)
+{
+  mId = tk.mId;
+  return *this;
+}
+
+
