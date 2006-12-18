@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.102 2006/10/16 20:29:35 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.103 2006/12/18 01:17:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.103  2006/12/18 01:17:41  perev
+ * Info block added and filled for pulls
+ *
  * Revision 2.102  2006/10/16 20:29:35  fisyak
  * Clean up useless classes
  *
@@ -385,14 +388,20 @@ int StiKalmanTrackNode::_debug = 0;
 //______________________________________________________________________________
 void StiKalmanTrackNode::reset()
 { 
+static int myCount=0;
 
   StiTrackNode::reset();
   memset(_beg,0,_end-_beg+1);
-  hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
-static int myCount=0;
+  _ext=0; _inf=0;
   mId = ++myCount; 
 
   Break(mId);
+}
+//______________________________________________________________________________
+void StiKalmanTrackNode::unset()
+{ 
+  reduce();
+  if (_inf) BFactory::Free(_inf); _inf=0;
 }
 //______________________________________________________________________________
 void StiKalmanTrackNode::resetError(double fak)
@@ -1788,7 +1797,7 @@ void StiKalmanTrackNode::initialize(StiHit *h)
 //______________________________________________________________________________
 StiKalmanTrackNode::StiKalmanTrackNode(const StiKalmanTrackNode &n)
 {
-   _ext=0; reset(); *this = n;
+   reset(); *this = n;
 }
 //______________________________________________________________________________
 const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode &n)
@@ -1796,7 +1805,9 @@ const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode
   StiTrackNode::operator=(n);
   memcpy(_beg,n._beg,_end-_beg+1);
   if (n._ext) { extend();*_ext = *n._ext;}
-  else        { if(_ext) _ext->reset();}
+  else        { if(_ext) _ext->reset();  }
+  if (n._inf) { extinf();*_inf = *n._inf;}
+  else        { if(_inf) _inf->reset();  }
   return *this;
 }
 //______________________________________________________________________________
@@ -2048,10 +2059,36 @@ static StiFactory<StiNodeExt,StiNodeExt> *extFactory=0;
   return extFactory->getInstance();
 }    
 //________________________________________________________________________________
+StiNodeInf *StiKalmanTrackNode::nodeInfInstance()
+{    
+static StiFactory<StiNodeInf,StiNodeInf> *infFactory=0;
+  if (!infFactory) {
+    infFactory = StiFactory<StiNodeInf,StiNodeInf>::myInstance();
+    infFactory->setMaxIncrementCount(40000);
+    infFactory->setFastDelete();
+  }
+  return infFactory->getInstance();
+}    
+//________________________________________________________________________________
 void StiKalmanTrackNode::extend()
 {
   if(_ext) return;
   _ext =  nodeExtInstance();
+}
+//________________________________________________________________________________
+void StiKalmanTrackNode::extinf()
+{
+  if(_inf) return;
+  _inf =  nodeInfInstance();
+}
+//________________________________________________________________________________
+void StiKalmanTrackNode::saveInfo(int kase)
+{
+  if (kase){};
+  extinf();
+  _inf->mPP = mPP();
+  _inf->mPE = mPE();
+  _inf->mHrr = mHrr;
 }
 
 //________________________________________________________________________________

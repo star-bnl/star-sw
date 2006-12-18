@@ -48,6 +48,16 @@ public:
   StiNodeErrs mPE;
 };
 
+class StiNodeInf {
+public:
+void reset(){mPP.reset();mPE.reset();mHrr.reset();}
+void unset(){;}
+public:
+  StiNodePars mPP; 
+  StiNodeErrs mPE;
+  StiHitErrs  mHrr;
+};
+
 
 
 
@@ -75,7 +85,7 @@ public:
   static double mcs2(double relRadThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
-  void unset(){reduce();}
+  void unset();
   /// Resets errors for refit
   void resetError(double fak=0);
   /// Initialize this node with the given hit information
@@ -148,6 +158,10 @@ public:
   char  &getContigHitCount ()  		{return contiguousHitCount ;}
   char  &getContigNullCount()  		{return contiguousNullCount;}
 
+  void   setHitCand(int nhits)		{mHitCand = nhits;}
+  void   setIHitCand(int ihit)		{mIHitCand = ihit;}
+  int    getHitCand()const		{return mHitCand;}
+  int    getIHitCand()const		{return mIHitCand;}
   static void Break(int kase);
   static void PrintStep();
   StThreeVector<double>getPoint() const;
@@ -178,6 +192,8 @@ public:
   int  propagate(double x,int option,int dir);
   void propagateMtx();
   void propagateError();
+  void saveInfo(int kase=1);
+const StiNodeInf *getInfo() const 	{return _inf;}
   int  testError(double *emx,int begend);
   void numeDeriv(double val,int kind,int shape=0,int dir=0);
   int  testDeriv(double *der);
@@ -231,9 +247,11 @@ public:
   int   print(const char *opt) const;
   
  private:   
+  void   extinf();				//add inf block
   void static saveStatics(double *sav);
   void static backStatics(double *sav);
   static StiNodeExt *nodeExtInstance();
+  static StiNodeInf *nodeInfInstance();
   void propagateCurv(const StiKalmanTrackNode *parent);
 
 //  Extended members 
@@ -267,8 +285,11 @@ public:
   char contiguousHitCount;
   char contiguousNullCount;
   char mFlipFlop;
+  char mHitCand;
+  char mIHitCand;
   char   _end[1];
   StiNodeExt *_ext;
+  StiNodeInf *_inf;
   static StiKalmanTrackFinderParameters * pars;
 
   static StiNodeStat  mgP;
