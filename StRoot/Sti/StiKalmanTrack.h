@@ -300,6 +300,7 @@ class StiKalmanTrack : public StiTrack
   void print(const char *opt="") const;
   static void setDebug(int m = 0) {_debug = m;}
   static int  debug() {return _debug;}
+  StiKalmanTrack &operator=(const StiKalmanTrack &tk);
 
 protected:
   friend ostream& operator<<(ostream& os, const StiKalmanTrack& track);
