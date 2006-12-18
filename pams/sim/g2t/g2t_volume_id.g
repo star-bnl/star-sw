@@ -1,5 +1,9 @@
-* $Id: g2t_volume_id.g,v 1.55 2006/10/14 19:41:45 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.56 2006/12/18 02:39:18 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.56  2006/12/18 02:39:18  potekhin
+* Need to instroduce versioning for the multiple
+* IST configurations
+*
 * Revision 1.55  2006/10/14 19:41:45  potekhin
 * Implemented a temporary solution for the IST volume numbering,
 * the coding scheme being final and some logic to be added shortly.
@@ -113,6 +117,7 @@
       Integer          module,layer
       Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/,istb/0/
+      Integer          istVersion/0/,istLayer/0/
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -130,7 +135,7 @@
       	                         int Netfirst, int Netsecon}
 *         
       Structure  EMCG { Version, int Onoff, int fillMode}
-      Structure  ISVR { Version, code}
+      Structure  ISMG { Layer, Rin,            Rout,        TotalLength, code}
 
       logical    first/.true./
       logical    printOnce/.true./
@@ -147,7 +152,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/CALB/CALG  stat=ical
           USE  /DETM/VPDD/VPDG  stat=ivpd
           USE  /DETM/ECAL/EMCG  stat=ieem
-          USE  /DETM/ISTB/ISVR  stat=istb
+          USE  /DETM/ISTB/ISMG  stat=istb
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
@@ -157,7 +162,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
           if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
                                ' onoff   =',emcg_onoff,emcg_FillMode
-          if (istb>=0) print *,'              : ISTB code=',isvr_code
+          if (istb>=0) then
+             print *,'              : ISTB version of code=', ismg_code
+             istVersion=ismg_code
+          endif
       endif
 *
       volume_id = 0
@@ -597,8 +605,21 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *18*                                 Maxim Potekhin
       else If (Csys=='ist') then
-*	   write(*,*) ISVR_code,'+_+_+_+_+_+_+_+_+_+',numbv(1),' ',numbv(2),' ',numbv(3),' ',numbv(4)
-        volume_id = (numbv(1)+1)*1000000 + numbv(2)*10000 + 100*numbv(3)  + numbv(4)
+        if(istVersion.ne.3.and.istVersion.ne.4) then
+            istLayer=numbv(1)+1
+            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(2),' ',numbv(3),' ',numbv(4)
+            volume_id = istLayer*1000000 + numbv(2)*10000 + 100*numbv(3)  + numbv(4)
+        endif
+        if(istVersion.eq.3) then
+            istLayer=3
+            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
+            volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
+        endif
+        if(istVersion.eq.4) then
+            istLayer=2
+            write(*,*) istVersion,'+_+_+_+_+_+_+_+_+_+',istLayer,' ',numbv(1),' ',numbv(2),' ',numbv(3)
+            volume_id = istLayer*1000000 + numbv(1)*10000 + 100*numbv(2)  + numbv(3)
+        endif
 *19*                                 Kai Schweda
       else If (Csys=='fst') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
