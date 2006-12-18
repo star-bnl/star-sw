@@ -46,13 +46,15 @@ void StiTreeNode::remove(int childIndex)
   BFactory::Free(node);
 }
 //______________________________________________________________________________
-StiTreeNode *StiTreeNode::disconnect() 
+StiTreeNode *StiTreeNode::disconnect(int all) 
 {
   StiTreeNode *node =0;
   node = parent; parent=0;
   if (!node) 			return 0;
   assert(node->children[0]==this);
   assert(!children[1]);
+  node->children[0]=0;
+  if (all) return node;
   node->children[0]=children[0];
   if (children[0]) children[0]->parent=node;
   children[0]=0; 
