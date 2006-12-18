@@ -52,7 +52,7 @@ static StiHit *vpHit = 0;
 
 #endif //ASSIGNVP
 
-
+static const double kRMinTpc =55;
 int StiKalmanTrackFinder::_debug = 0;
 ostream& operator<<(ostream&, const StiTrack&);
 int gLevelOfFind = 0;
@@ -673,12 +673,12 @@ static  const double ref1a  = 110.*degToRad;
 	}// for (hitIter)
       }//if(active)
 
-      int nHits = 0;
-      if (direction) {
+      int nHits = hitCont.getNHits();
+      testNode.setHitCand(nHits);
+      if (direction || useComb()==0) {
         nHits=1;
       } else {
-        nHits=hitCont.getNHits();
-        if (testNode.getX()< 55 || !nHits) nHits++;
+        if (testNode.getX()< kRMinTpc || !nHits) nHits++; //No hits considered out of tpc
       }
 #ifdef ASSIGNVP
       do {
@@ -721,10 +721,13 @@ static  const double ref1a  = 110.*degToRad;
         status = 0;
         do {//fake do
           if (!stiHit) break;
+          node->setIHitCand(jHit);
+          assert(node->getHitCand());
           node->setHit(stiHit);
           status = node->updateNode();
           if (status)  break;
           node->setChi2(hitCont.getChi2(jHit));
+          if (!direction && node->getX()< kRMinTpc) node->saveInfo(); //Save info for pulls 
 	  if (debug() & 8) {cout << Form("%5d ",status); StiKalmanTrackNode::PrintStep();}
         }while(0);
         if (status)  {_trackNodeFactory->free(node); continue;}
