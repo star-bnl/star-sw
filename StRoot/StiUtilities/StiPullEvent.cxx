@@ -1,14 +1,17 @@
 #include "StiPullEvent.h"
 #include "TCL.h"
-
+#include "StEvent/StEnumerations.h"
 ClassImp(StiPullHit)
 ClassImp(StiPullEvent)
 
 //_____________________________________________________________________________
  StiPullEvent::StiPullEvent()
- :mHitsG("StiPullHit",100),mHitsP("StiPullHit",100)
+ :mHitsG("StiPullHit",100)
+ ,mHitsP("StiPullHit",100)
+ ,mHitsR("StiPullHit",100)
  {
- mHitsG.SetOwner(0);mHitsP.SetOwner(0);
+ mHitsG.SetOwner(0); mHitsP.SetOwner(0); mHitsR.SetOwner(0);
+ memset(mNHits,0,sizeof(mNHits));
  };
  
  
@@ -71,18 +74,34 @@ int StiPullHit::TestIt()
 //_____________________________________________________________________________
 void StiPullEvent::Add(StiPullHit &hit,int gloPrim)
 {
-  TClonesArray *hits = (!gloPrim)? &mHitsG:&mHitsP;
+  TClonesArray *hits = &mHitsG+gloPrim;
   int iHit = hits->GetLast()+1;
   StiPullHit *kHit = (StiPullHit*)hits->New(iHit);
   *kHit = hit;
+  if (gloPrim) 	return;
+  if (!hit.mDetector)	return;
+  int i = 4;
+  if (hit.mDetector==kTpcId) i=1;
+  if (hit.mDetector==kSvtId) i=2;
+  if (hit.mDetector==kSsdId) i=3;
+  if (!i || i>3)return;
+  ++mNHits[i-1];
+}
+//_____________________________________________________________________________
+
+const int *StiPullEvent::GetNHits() const
+{
+  return mNHits;
 }
 //_____________________________________________________________________________
 void StiPullEvent::Clear(const char*)
 {
-  mHitsG.Clear();mHitsP.Clear();
+  mHitsG.Clear();mHitsP.Clear();mHitsR.Clear();
   memset(mVtx,0,sizeof(mVtx));
   memset(mEtx,0,sizeof(mEtx));
   mRun=0; mEvt=0;
+  memset(mNHits,0,sizeof(mNHits));
+  
 }
   
   

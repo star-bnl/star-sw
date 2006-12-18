@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.1 2006/04/07 17:34:41 perev Exp $
+ * $Id: StiPullEvent.h,v 1.2 2006/12/18 01:33:35 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.2  2006/12/18 01:33:35  perev
+ * + branch mHitsR(nd) +nHitCand +iHitCand
+ *
  * Revision 1.1  2006/04/07 17:34:41  perev
  * StiPullEvent class added
  *
@@ -39,11 +42,14 @@ int TestIt();
 public:
 char mBeg[1];
 short mTrackNumber; 		//track number of hit
-short nAllHits; 		//number of all hits in track
-short nTpcHits; 		//number of tpc hits in track
-short nSvtHits; 		//number of svt hits in track
-short nSsdHits; 		//number of ssd hits in track
-short mDetector;		//see StHit.h
+unsigned char nAllHits; 	//number of all hits in track
+unsigned char nTpcHits; 	//number of tpc hits in track
+unsigned char nSvtHits; 	//number of svt hits in track
+unsigned char nSsdHits; 	//number of ssd hits in track
+unsigned char mDetector;	//see StHit.h
+unsigned char nHitCand;	        //number of Hit Candidates
+unsigned char iHitCand;	        //number of selected  Hit Candidate.
+				// 0=smallest Xi2
 
 
 UInt_t mHardwarePosition;	//see StHit.h
@@ -111,6 +117,7 @@ public:
   ~StiPullEvent()			{;}
 void Clear(const char *opt = "");	
 void Add(StiPullHit &ph,int gloPrim);
+const int *GetNHits() const;
 public:
    int   mRun;
    int   mEvt;
@@ -119,10 +126,12 @@ public:
    float mVtx[3];	//Primary vertex position in global frame
    float mEtx[6];	//errors xx,yx,yy,zx,zy,zz
    float mChi2;         //Chi square of vertex fit
+   int   mNHits[4];     //nTpc,nSvt,nSsd,nRnd hits
 
 TClonesArray mHitsG;	//StiPullHits for global  tracks
 TClonesArray mHitsP;	//StiPullHits for primary tracks
-  ClassDef(StiPullEvent,1);
+TClonesArray mHitsR;	//StiPullHits for Rnd detectors
+  ClassDef(StiPullEvent,3);
 };
 
   
