@@ -439,6 +439,21 @@
             </item>
             <item>
                 <property name="text">
+                    <string>UPGR11</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>UPGR10</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>UPGR09</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
                     <string>UPGR08</string>
                 </property>
             </item>
