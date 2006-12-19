@@ -763,8 +763,10 @@ void StiKalmanTrackFinder::nodeQA(StiKalmanTrackNode *node, int position
     const StiDetector *detector = hit->detector();
     qa.sum += node->getChi2() + log(node->getDeterm());
     qa.hits++; qa.qa=1;
-    if (detector->getGroupId() == kSvtId)  qa.pits++;
-    if (detector->getGroupId() == kSsdId)  qa.pits+=2; //to force alone ssd hit added 2
+    if (node->getRxy() < kRMinTpc) {
+      qa.pits++;
+      if (detector->getGroupId() == kSsdId)  qa.pits++; //double count to force alone ssd hit2
+    }
     node->getHitCount()++;
     node->getContigHitCount()++;
     if (node->getContigHitCount()>_pars.minContiguousHitCountForNullReset)
@@ -794,10 +796,15 @@ int StiKalmanTrackFinder::compQA(QAFind &qaBest,QAFind &qaTry,double maxChi2)
    int ians;
    ians = qaBest.pits-qaTry.pits;
    if (qaBest.pits+qaTry.pits==1) 			return ians;
+#if 0
+   if (qaBest.sum*qaTry.hits  <= qaTry.sum*qaBest.hits) return -1;
+#endif
+#if 1
    ians =-ians;				if (ians)	return ians;
    ians =  qaTry.hits-qaBest.hits;	if (ians)	return ians;
    ians = qaBest.nits- qaTry.nits;	if (ians)	return ians;
    if (qaBest.sum  <= qaTry.sum ) 			return -1;
+#endif
    							return  1;
 }
 
