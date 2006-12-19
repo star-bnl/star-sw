@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.89 2006/12/18 01:14:08 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.89 2006/12/18 01:14:08 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.90 2006/12/19 19:50:01 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.90 2006/12/19 19:50:01 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.90  2006/12/19 19:50:01  perev
+ * method getPoint added
+ *
  * Revision 2.89  2006/12/18 01:14:08  perev
  * operator= added
  *
@@ -1548,6 +1551,13 @@ StiKalmanTrack &StiKalmanTrack::operator=(const StiKalmanTrack &tk)
     add(myNode,kOutsideIn);
   }
   return *this;
+}
+
+//_____________________________________________________________________________
+StThreeVector<double> StiKalmanTrack::getPoint(int firstLast) const
+{
+  const StiKalmanTrackNode* node = getInnOutMostNode(firstLast,3);
+  return StThreeVector<double>(node->x_g(),node->y_g(),node->z_g());
 }
 
 
