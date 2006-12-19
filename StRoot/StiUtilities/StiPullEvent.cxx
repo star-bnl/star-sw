@@ -1,18 +1,37 @@
 #include "StiPullEvent.h"
 #include "TCL.h"
 #include "StEvent/StEnumerations.h"
+ClassImp(StiPullTrk)
 ClassImp(StiPullHit)
 ClassImp(StiPullEvent)
 
 //_____________________________________________________________________________
  StiPullEvent::StiPullEvent()
- :mHitsG("StiPullHit",100)
+ :mTrksG("StiPullTrk",100)
+ ,mTrksP("StiPullTrk",100)
+ ,mHitsG("StiPullHit",100)
  ,mHitsP("StiPullHit",100)
  ,mHitsR("StiPullHit",100)
  {
  mHitsG.SetOwner(0); mHitsP.SetOwner(0); mHitsR.SetOwner(0);
  memset(mNHits,0,sizeof(mNHits));
  };
+//_____________________________________________________________________________
+void StiPullTrk::Clear(const char*)
+{
+   memset(mBeg,0,mEnd-mBeg+1);
+}
+//_____________________________________________________________________________
+StiPullTrk::StiPullTrk()
+{
+   Clear();
+}
+//_____________________________________________________________________________
+void StiPullTrk::Print(const char* option) const
+{
+  if (!option) option="";
+  printf("StiPullTrk::Print(%s)\n",option);
+}
  
  
 //_____________________________________________________________________________
@@ -86,6 +105,15 @@ void StiPullEvent::Add(StiPullHit &hit,int gloPrim)
   if (hit.mDetector==kSsdId) i=3;
   if (!i || i>3)return;
   ++mNHits[i-1];
+}
+//_____________________________________________________________________________
+void StiPullEvent::Add(StiPullTrk &trk,int gloPrim)
+{
+  TClonesArray *trks = &mTrksG+gloPrim;
+  int iTrk = trks->GetLast()+1;
+  StiPullTrk *kTrk = (StiPullTrk*)trks->New(iTrk);
+  *kTrk = trk;
+  ++mNTrks[gloPrim];
 }
 //_____________________________________________________________________________
 
