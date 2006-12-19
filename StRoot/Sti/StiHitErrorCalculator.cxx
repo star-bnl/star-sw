@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.32 2006/07/18 19:09:42 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.33 2006/12/19 20:06:04 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.33  2006/12/19 20:06:04  perev
+ * 210 along z to 200
+ *
  * Revision 2.32  2006/07/18 19:09:42  perev
  * Remove the mess in xy and z errs
  *
@@ -207,7 +210,7 @@ static const double tenMicrons = 1e-3;
 static const double min2Err = tenMicrons*tenMicrons;
 static const double max2Err = 1.;
 
-  double dz = (210.-fabs(pars->_z))/100.;
+  double dz = (200.-fabs(pars->_z))/100.;
   double cosCA = pars->_cosCA;
   double sinCA = pars->_sinCA;
   if (cosCA<0.01) cosCA=0.01;
