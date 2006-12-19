@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.78 2006/12/18 01:30:39 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.79 2006/12/19 19:46:09 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.79  2006/12/19 19:46:09  perev
+ * Filling pull tracks added
+ *
  * Revision 2.78  2006/12/18 01:30:39  perev
  * fillPulls reorganized
  *
@@ -1188,6 +1191,24 @@ void StiStEventFiller::fillPulls(StiKalmanTrack* track, int gloPri)
   if (!mPullEvent) return;
   int dets[kMaxDetectorId][3];
   track->getAllPointCount(dets,kMaxDetectorId-1);
+  StiPullTrk aux;
+  aux.mTrackNumber=mTrackNumber;
+  aux.nAllHits = dets[0][2];
+  aux.nTpcHits = dets[kTpcId][2];
+  aux.nSvtHits = dets[kSvtId][2];
+  aux.nSsdHits = dets[kSsdId][2];
+  aux.mL       = (unsigned char)track->getTrackLength();
+  aux.mChi2    = track->getChi2();
+  aux.mCurv    = track->getCurvature();
+  aux.mPt      = track->getPt();
+  aux.mPsi     = track->getPhi();
+  aux.mDip     = atan(track->getTanL());
+  StThreeVectorD v3 = track->getPoint();
+  aux.mRxy     = v3.perp();
+  aux.mPhi     = v3.phi();
+  aux.mZ       = v3.z();
+  mPullEvent->Add(aux,gloPri);
+
 
   StiKTNIterator tNode = track->rbegin();
   StiKTNIterator eNode = track->rend();
