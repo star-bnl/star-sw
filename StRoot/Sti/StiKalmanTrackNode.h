@@ -137,6 +137,7 @@ public:
   double x() const 			{ return mFP._x;}
   double y() const 			{ return mFP._y;}  
   double z() const 			{ return mFP._z;}
+  double getRxy() const 		{ return sqrt(mFP._x*mFP._x+mFP._y*mFP._y);}
   
   double getEta  () const 		{return mFP._eta;  }
   double getSin  () const 		{return mFP._sinCA;}
