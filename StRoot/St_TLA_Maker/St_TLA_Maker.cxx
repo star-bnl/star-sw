@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.15 2002/04/28 01:28:36 jeromel Exp $
+// $Id: St_TLA_Maker.cxx,v 1.16 2006/12/19 21:59:16 fine Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.16  2006/12/19 21:59:16  fine
+// replace the class StMessMgr forward declaration with the real declaration and adjust St_TLA_Maker to show how to use logger
+//
 // Revision 1.15  2002/04/28 01:28:36  jeromel
 // Reshaped comments for doxygen. Hopefully, users will propagate this good
 // habit.
@@ -22,7 +25,7 @@
 
 #include "St_TLA_Maker.h"
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 
 
@@ -89,7 +92,7 @@ Int_t St_TLA_Maker::Make(){
        int ans =  tr->getPedestals(sec,padrow,pad,nArray,Array);
        if (ans<=0) continue;
        if (!Array) continue;
-       printf(" %d %d %d %d\n",sec,padrow,pad,nArray);
+       { LOG_INFO << Form(" %d %d %d %d\n",sec,padrow,pad,nArray) << endm; }
 
  } } }
 

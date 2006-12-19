@@ -20,6 +20,7 @@
 #include <TClonesArray.h>
 #endif
 #include <TStopwatch.h>
+#include "StMessMgr.h" 
 
 #ifndef __CINT__
 #if ROOT_VERSION_CODE >= ROOT_VERSION(3,05,04)
@@ -35,7 +36,6 @@ class TTable;
 class TMemStat;
 class StEvtHddr;
 
-class StMessMgr;
 class StTurnLogger;
 
 class StTestMaker;
@@ -225,7 +225,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.78 2006/10/04 18:51:26 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.79 2006/12/19 21:59:15 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -286,8 +286,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.78 2006/10/04 18:51:26 fisyak Exp $
+// $Id: StMaker.h,v 1.79 2006/12/19 21:59:15 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.79  2006/12/19 21:59:15  fine
+// replace the class StMessMgr forward declaration with the real declaration and adjust St_TLA_Maker to show how to use logger
+//
 // Revision 1.78  2006/10/04 18:51:26  fisyak
 // Add new geometry tags: upgr04 and upgr04, remove rference to xdf
 //
