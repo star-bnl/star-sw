@@ -247,26 +247,18 @@ class StiKalmanTrack : public StiTrack
    void  setFirstLastNode(StiKalmanTrackNode *n);   
    
    
-#if 0
-   /// Method used to add a hit to this track
-   virtual StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl,int direction);
-#endif   
    /// Add a kalman track node to this track as a child to the last node of the track
    /// Return the added node 
    virtual void add(StiTrackNode * node,int direction);
+
   /// Convenience method to initialize a track based on seed information 
-#if 0
-  void initialize(double curvature,
-		  double tanl,
-		  const StThreeVectorD& origin,
-		  const vector<StiHit*> &);
-#endif  
   int initialize(const vector<StiHit*> &);
 
     /// Method to return the pointer to the fitter parameters.
     StiKalmanTrackFitterParameters* fitPars() const {return fitpars;}
   
    StThreeVector<double> getMomentumAtOrigin() const;
+   StThreeVector<double> getPoint(int firstLast=0) const;
 
    virtual vector<StiHit*> getHits();
    virtual vector<const StMeasuredPoint*> stHits() const;
@@ -275,7 +267,7 @@ class StiKalmanTrack : public StiTrack
 
   double  getMass() const;   // mass when pid known
   int     getCharge()const;   // charge of the particle
-  double  getChi2() const;   // chi2 of fit
+  double  getChi2() const;   // chi2/ndf of fit 
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
