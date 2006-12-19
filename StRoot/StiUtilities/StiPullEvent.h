@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StiPullEvent.h,v 1.2 2006/12/18 01:33:35 perev Exp $
+ * $Id: StiPullEvent.h,v 1.3 2006/12/19 19:44:41 perev Exp $
  *
  * Author: Victor Perev, Jan 2006
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StiPullEvent.h,v $
+ * Revision 1.3  2006/12/19 19:44:41  perev
+ * tracks added
+ *
  * Revision 1.2  2006/12/18 01:33:35  perev
  * + branch mHitsR(nd) +nHitCand +iHitCand
  *
@@ -31,6 +34,34 @@
 #include "TClonesArray.h"
 #include "TDatime.h"
 
+
+class StiPullTrk : public TObject {
+public:
+    StiPullTrk();
+   ~StiPullTrk(){}
+    void Clear(const char *opt = "");
+    void Print(const char* option = "") const;
+int TestIt();
+public:
+char mBeg[1];
+short mTrackNumber; 		//track number of hit
+unsigned char nAllHits; 	//number of all hits in track
+unsigned char nTpcHits; 	//number of tpc hits in track
+unsigned char nSvtHits; 	//number of svt hits in track
+unsigned char nSsdHits; 	//number of ssd hits in track
+unsigned char mL; 		//Length of track
+
+float mChi2;
+float mCurv;        		//curvature
+float mPt;        		//pt
+float mPsi;			//track Psi(around beam)  in global  Sti frame
+float mDip;			//track Dip in global  Sti frame
+float mRxy;			//Rxy of track begining 
+float mPhi;			//Phi angle of track begining
+float mZ;
+char mEnd[1];
+  ClassDef(StiPullTrk,1);
+};
 
 class StiPullHit : public TObject {
 public:
@@ -117,6 +148,7 @@ public:
   ~StiPullEvent()			{;}
 void Clear(const char *opt = "");	
 void Add(StiPullHit &ph,int gloPrim);
+void Add(StiPullTrk &pt,int gloPrim=0);
 const int *GetNHits() const;
 public:
    int   mRun;
@@ -126,12 +158,15 @@ public:
    float mVtx[3];	//Primary vertex position in global frame
    float mEtx[6];	//errors xx,yx,yy,zx,zy,zz
    float mChi2;         //Chi square of vertex fit
+   int   mNTrks[2];     //N glob,N Prim tracks 
    int   mNHits[4];     //nTpc,nSvt,nSsd,nRnd hits
 
+TClonesArray mTrksG;	//global  tracks
+TClonesArray mTrksP;	//primary  tracks
 TClonesArray mHitsG;	//StiPullHits for global  tracks
 TClonesArray mHitsP;	//StiPullHits for primary tracks
 TClonesArray mHitsR;	//StiPullHits for Rnd detectors
-  ClassDef(StiPullEvent,3);
+  ClassDef(StiPullEvent,4);
 };
 
   
