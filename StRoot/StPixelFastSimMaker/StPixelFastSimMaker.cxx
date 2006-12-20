@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.10 2006/12/15 02:17:20 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.11 2006/12/20 16:50:21 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.11  2006/12/20 16:50:21  wleight
+ * Added fix for UPGR09 problem with layer number mismatch
+ *
  * Revision 1.10  2006/12/15 02:17:20  wleight
  * Ist now gets hit smearing parameters from the database
  *
@@ -66,6 +69,7 @@ using namespace std;
 #include "Sti/StiVMCToolKit.h"
 #include "StarClassLibrary/StRandom.hh"
 #include "tables/St_HitError_Table.h"
+#include "StBFChain.h"
 
 ClassImp(StPixelFastSimMaker)
 
@@ -217,8 +221,13 @@ Int_t StPixelFastSimMaker::Make()
 		  //		  char path[100];
 		  TString Path("");
 		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  if(mcI->layer()==1) Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
-		  else                Path = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
+		  if(((StBFChain *)GetChain())->GetOption("UPGR09")){
+		    Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",1,mcI->ladder(),mcI->wafer(),mcI->side());
+		  }
+		  else{
+		    if(mcI->layer()==1) Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
+		    else                Path = Form("HALL_1/CAVE_1/IBMO_1/IBMY:IBM1_%i/IBAM:IBA1_%i/IBLM:IBL1_%i/IBSS:IBS1_%i",mcI->layer(),mcI->ladder(),mcI->wafer(),mcI->side());
+		  }
 		  gGeoManager->RestoreMasterVolume();
 		  gGeoManager->cd(Path);
 		  TGeoNode* node=gGeoManager->GetCurrentNode();
