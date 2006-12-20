@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.76 2006/09/10 00:58:43 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.77 2006/12/20 21:53:15 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -606,6 +606,7 @@ int StMuDstMaker::openRead() {
 void StMuDstMaker::read(){
   if (!mChain){
     DEBUGMESSAGE2("ATTENTION: No StMuChain ... results won't be exciting (nothing to do)");
+    throw StMuExceptionNullPointer("No input files",__PRETTYF__);
     return;
   }
 
@@ -1264,6 +1265,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.77  2006/12/20 21:53:15  mvl
+ * Added warning when file list not found (read mode)
+ *
  * Revision 1.76  2006/09/10 00:58:43  mvl
  * Roll-back of previous changes for ROOT 5.12. Problem has been resolved inside ROOT.
  *
