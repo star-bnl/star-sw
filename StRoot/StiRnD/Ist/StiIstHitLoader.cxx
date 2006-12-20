@@ -19,6 +19,10 @@
 #include "StMcEvent/StMcIstHit.hh"
 #include "StMcEvent/StMcIstHitCollection.hh"
 #include "StMcEvent/StMcIstLayerHitCollection.hh"
+#include "StBFChain.h"
+#include "StChain.h"
+#include "StMaker.h"
+#include "StPixelFastSimMaker/StPixelFastSimMaker.h"
 
 StiIstHitLoader::StiIstHitLoader()
     : StiHitLoader<StEvent,StiDetectorBuilder>("IstHitLoader")
@@ -79,8 +83,9 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	  cout<<"hit vol id: "<<hit->volumeId()<<endl;
 	  cout<<"hit layer/ladder/wafer/side: "<< layer << "/" << ladder<<"/"<<wafer<<"/"<<side<<endl;
 	  cout<<"passed: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
-	  StiDetector* detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
-	  //     StiDetector* detector=_detector->getDetector(2*ladder-3+side,0);
+	  StiDetector* detector=0;
+	  if(((StBFChain *)StMaker::GetChain())->GetOption("UPGR09")) detector=_detector->getDetector(side-1,ladder);
+	  else detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
 	  if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
 	  assert(detector);
 	  cout <<"add hit to detector:\t"<<detector->getName()<<endl;
