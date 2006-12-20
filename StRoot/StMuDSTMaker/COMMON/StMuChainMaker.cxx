@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.26 2006/06/22 23:30:55 mvl Exp $
+ * $Id: StMuChainMaker.cxx,v 1.27 2006/12/20 21:53:15 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -140,6 +140,11 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
   else {
     FORCEDDEBUGMESSAGE("ATTENTION: don't know how to read input (you may have used a bogus constructor syntax)");
     return NULL;
+  }
+ 
+  if ( mFileList.size() == 0 ) {
+    DEBUGMESSAGE("No files found");
+    return 0;
   }
 
   add( mFileList );
@@ -324,17 +329,16 @@ void StMuChainMaker::fromFileCatalog(string list) {
 //-----------------------------------------------------------------------
 void StMuChainMaker::fromList(string list) {
   DEBUGMESSAGE2("");
-  ifstream* inputStream = new ifstream;
-  inputStream->open(list.c_str());
-  if (!(inputStream)) {
-    DEBUGMESSAGE("can not open list file");
+  ifstream inputStream(list.c_str());
+  if (!(inputStream.good())) {
+     cout << "ERROR: Cannot open list file " << list << endl;
   }
   char line[512];
   char name[500];
-  DEBUGVALUE(inputStream->good());
-  for (;inputStream->good();) {
-      inputStream->getline(line,512);
-      if  ( inputStream->good() ) {
+  DEBUGVALUE(inputStream.good());
+  for (;inputStream.good();) {
+      inputStream.getline(line,512);
+      if  ( inputStream.good() ) {
 	  int numberOfEvents = TChain::kBigNumber;
 	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
           if(iret) {/*warnOff*/}
@@ -343,7 +347,6 @@ void StMuChainMaker::fromList(string list) {
 	  }
       }
   }   
-  delete inputStream;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -371,6 +374,9 @@ void StMuChainMaker::fromFile(string file) {
  /***************************************************************************
   *
   * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.27  2006/12/20 21:53:15  mvl
+  * Added warning when file list not found (read mode)
+  *
   * Revision 1.26  2006/06/22 23:30:55  mvl
   * Minor change to prevent reading all files during initialisation.
   * Files ar enow added with TChain::Add(filename,kBigNumber) if no event count is available.
