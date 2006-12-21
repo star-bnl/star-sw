@@ -84,7 +84,7 @@ void StiIstHitLoader::loadHits(StEvent* source,
 	  cout<<"hit layer/ladder/wafer/side: "<< layer << "/" << ladder<<"/"<<wafer<<"/"<<side<<endl;
 	  cout<<"passed: "<<2*(layer-1)+side-1<<" and "<<ladder<<endl;
 	  StiDetector* detector=0;
-	  if(((StBFChain *)StMaker::GetChain())->GetOption("UPGR09")) detector=_detector->getDetector(side-1,ladder);
+	  if(((StBFChain *)StMaker::GetChain())->GetOption("UPGR09",kFALSE)) detector=_detector->getDetector(side-1,ladder);
 	  else detector=_detector->getDetector(2*(layer-1)+side-1,ladder);
 	  if (!detector) cout <<"no detector found for hit:\t"<<*hit<<endl;
 	  assert(detector);
