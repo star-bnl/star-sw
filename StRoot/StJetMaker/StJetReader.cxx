@@ -339,6 +339,23 @@ void StJetReader::exampleFastAna()
 		}
 	}
 		
+	//L2 Info:
+	cout <<"\n--- Non-zero L2 Results:"<<endl;
+	/*
+	const int* l2Results = skEv->l2Result();
+	for (int i=0; i<32; ++i) {
+		cout <<i<<"\t"<<l2Results[i]<<endl;
+	}
+	 */
+	const TArrayI& l2Results = skEv->l2Result();
+	for (int i=0; i<l2Results.GetSize(); ++i) {
+		int val = l2Results[i];
+		if (val>0) {
+			cout <<i<<"\t"<<val<<endl;
+		}
+	}
+	
+	
 	//vertex info:
 	const TClonesArray* verts = skEv->vertices();
 	assert(verts);

@@ -42,6 +42,8 @@ void StJetSkimVert::setError(float* x)
 	mPosError[2] = x[2];
 }
 
+
+
 void StJetSkimVert::clear()
 {
 	for (int i=0; i<3; ++i) {
@@ -59,6 +61,10 @@ mBestVert(new StJetSkimVert())
 	mFill = mRunId = mEventId = mbx7 = mbx48 = mSpinBits = 0;
 	mEbbc = mWbbc = mBbcTimeBin = 0;
 	mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;
+	//for (int i=0; i<32; ++i) {
+	for (int i=0; i<mL2Result.GetSize(); ++i) {
+		mL2Result[i] = 0;
+	}	
 	
 }
 
@@ -74,7 +80,22 @@ void StJetSkimEvent::clear()
 	mTriggers->Clear();
 	mVertices->Clear();
 	mBestVert->clear();
+	//for (int i=0; i<32; ++i) {
+	for (int i=0; i<mL2Result.GetSize(); ++i) {
+		mL2Result[i] = 0;
+	}
+	//mL2Result.Clear();
+	
 }
+/*
+void StJetSkimEvent::setL2Result(int* vals)
+{
+	assert(vals);
+	for (int i=0; i<32; ++i) {
+		mL2Result[i] = vals[i];
+	}
+}
+*/
 
 void StJetSkimEvent::setTrig(const StJetSkimTrig& t)
 {

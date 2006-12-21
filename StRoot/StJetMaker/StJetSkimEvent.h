@@ -7,6 +7,7 @@
 
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "TArrayI.h"
 
 class StJetSkimTrig : public TObject
 {
@@ -133,6 +134,9 @@ public:
 	void setOffsetBx48minusBX7(int i) {mOffsetBx48minusBX7 = i;}
 	void setSpin4UsingBx48(int i) {mSpin4usingBx48 = i;}
 	
+	//!void setL2Result(int* vals);
+	void setL2Result(const TArrayI& rhs) {mL2Result=rhs;}
+	
 	//gets
 	float fill() const {return mFill;}
 	int runId() const {return mRunId;}
@@ -158,6 +162,8 @@ public:
 	const TClonesArray* triggers() const {return mTriggers;}
 	const TClonesArray* vertices() const {return mVertices;}
 	StJetSkimVert* bestVert() {return mBestVert;}
+	//!const int* l2Result() const {return mL2Result;}
+	const TArrayI& l2Result() const {return mL2Result;}
 
 private:
 	
@@ -186,6 +192,11 @@ private:
 	int mIsMaskedUsingBx48;
 	int mOffsetBx48minusBX7;
 	int mSpin4usingBx48;
+	
+	///L2 Trigger array:
+	///Direct copy from StMuEvent::L2Result()
+	//!int mL2Result[32]; 
+	TArrayI mL2Result;
 	
 	ClassDef(StJetSkimEvent,1)
 };
