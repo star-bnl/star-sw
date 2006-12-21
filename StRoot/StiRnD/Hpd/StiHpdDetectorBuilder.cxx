@@ -64,10 +64,8 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
     setNSectors(0,48);
     cout <<"create gasses"<<endl;
     //_gas is the gas that the hpd detector lives in
-//oldvalues    _gas            = add(new StiMaterial("HpdAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
     _gas            = add(new StiMaterial("HpdAir",    7.3,  14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9) );
     //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
-//oldvalues    _fcMaterial     = add(new StiMaterial("HpdSi", 14.,      28.0855,   2.33,     21.82,           5.) );
     _fcMaterial     = add(new StiMaterial("HpdSi", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
 
     double ionization=_fcMaterial->getIonization();
@@ -80,20 +78,18 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
     double dphi[nRows];
 
     for(size_t zzz=0;zzz<nRows;zzz++)
-      //dphi[zzz]=2.*M_PI/nsectors[zzz];
+     
     dphi[zzz]=2.*TMath::Pi()/getNSectors(zzz);
     double tiltAngle;
     tiltAngle =30;
-    //StGetConfigValue(detectorParamFile,"aOffset",tiltAngle);
-    tiltAngle=M_PI*(tiltAngle)/180.;
-    // double perOffset=0;
-    //    StGetConfigValue(detectorParamFile,"pPerOffset",perOffset);
-    //double parOffset=0;
-    //    StGetConfigValue(detectorParamFile,"pParOffset",parOffset);
+    
+    tiltAngle=TMath::Pi()*(tiltAngle)/180.;
+    
     double depth[nRows];
     depth[0]=49.5;
-    //StGetConfigValue(detectorParamFile,"length",depth[0]);
- 
+    double shiftangle=3.75;
+    shiftangle=TMath::Pi()*(shiftangle)/180.;
+     
     cout <<"begin loop on rows to build detectors"<<endl;
     StiPlanarShape *pShape;
     for (unsigned int row=0; row<nRows; row++)
@@ -114,22 +110,10 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
 		StiPlacement *pPlacement = new StiPlacement;
 		pPlacement->setZcenter(0.);
 		
-		//double anglepos = static_cast<double>(sector+1)*dphi[row]-atan(parOffset/(radii[row]+perOffset));
-		//double anglepos=static_cast<double>(sector)*dphi[row]+(dphi[row]/2.);
-		double anglepos=static_cast<double>(sector+1)*dphi[row];
-		//double z=atan((radii[row]*cos(anglepos)+sin(anglepos-tiltAngle))/(radii[row]*sin(anglepos)+cos(anglepos-tiltAngle)));
-	
-		//cout<<"z value: "<<z<<endl;
-		//double rlad = radii[row]+perOffset;
-		//double tilt = atan(1.5/(radii[row]+.238))+tiltAngle[row];
-		
-		//double psi = phi + tilt;
-		//double rtrue = sqrt(rlad*rlad + parOffset*parOffset);
-		
-		//	pPlacement->setCenterRep(anglepos,radii[row],tiltAngle);
-			pPlacement->setNormalRep(anglepos-tiltAngle,
-						 radii[row]*cos(tiltAngle),
-						 radii[row]*sin(tiltAngle)) ;
+		double anglepos=static_cast<double>(sector+1)*dphi[row]-shiftangle;
+		pPlacement->setNormalRep(anglepos-tiltAngle,
+					 radii[row]*cos(tiltAngle),
+					 radii[row]*sin(tiltAngle)) ;
 		pPlacement->setLayerRadius(radii[row]);
 		
 		pPlacement->setRegion(StiPlacement::kMidRapidity);
