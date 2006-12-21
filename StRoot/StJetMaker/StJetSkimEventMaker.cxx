@@ -104,6 +104,16 @@ Int_t StJetSkimEventMaker::Make()
 		mEvent->setTrig(skimTrig);
 		//cout <<"filled with:\t"<<skimTrig.trigId<<"\t"<<skimTrig.prescale<<"\t"<<skimTrig.isSatisfied<<endl;
 	}
+	
+	//then get L2Results:
+	TArrayI& l2Array = muEvent->L2Result();
+	cout <<"l2Size:\t"<<l2Array.GetSize()<<endl;
+	/*
+	assert(l2Array.GetSize()==32);
+	mEvent->setL2Result(l2Array.GetArray());
+	 */
+	mEvent->setL2Result(l2Array);
+
 		
 	//basic event/run info
 	mEvent->setFill( runInfo->beamFillNumber(blue));
