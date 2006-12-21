@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.186 2006/12/18 23:36:34 potekhin Exp $
+// $Id: StMaker.cxx,v 1.187 2006/12/21 23:13:06 potekhin Exp $
 //
 //
 /*!
@@ -176,6 +176,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr09",      20190101,    12, "upgr09",   ""},
   {"upgr10",      20190101,    13, "upgr10",   ""},
   {"upgr11",      20190101,    14, "upgr11",   ""},
+  {"upgr12",      20190101,    15, "upgr12",   ""},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1733,6 +1734,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.187  2006/12/21 23:13:06  potekhin
+// Included the upgr12 tag (corrected IGT)
+//
 // Revision 1.186  2006/12/18 23:36:34  potekhin
 // Removed an extraneous CVS tag from top
 //
