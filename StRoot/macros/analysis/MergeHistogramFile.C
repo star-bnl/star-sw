@@ -1,6 +1,6 @@
 /*
 
- * $Id: MergeHistogramFile.C,v 3.4 2006/07/26 01:34:12 fine Exp $
+ * $Id: MergeHistogramFile.C,v 3.5 2006/12/21 19:12:20 fine Exp $
   Author: Valeri Fine fine@bnl.gov
   Date:   25.06.2006
 
@@ -37,7 +37,8 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
         while ( (obj = *file) ) {
            if ( obj->IsA()->InheritsFrom( "TH1" ) ) {
               // descendant of TH1 -> merge it
-              //      cout << "Merging histogram " << obj->GetName() << endl;
+              // printf("Merging histogram: %s\n",obj->GetName() ); 
+//              std::cout << "Merging histogram " << obj->GetName() << std::endl;
               TH1 *h1 = (TH1*)obj;
               TH1 *dstHistogram = 0;
               // Check whether we found the new histogram
@@ -52,9 +53,12 @@ void MergeHistogramFile( const Char_t *TargetName=0, const Char_t *inputFilesPat
                 printf(" The new Histogram found: %s \n", h1->GetName() );
                 histogramCounter++;
               }
-              ++file;
+           } else {
+              // printf("Skipping object: %s\n",obj->GetName() ); 
            }
+           ++file;
         }
+              
      }
      printf("\n Finishing  . . . \n");
      outFile->ls();
