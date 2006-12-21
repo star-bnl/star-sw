@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.140 2006/12/18 23:28:33 potekhin Exp $
+* $Id: geometry.g,v 1.141 2006/12/21 23:06:17 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.141  2006/12/21 23:06:17  potekhin
+* Previous versions of UPGRxx geometries were deficient
+* is that there was a clash between the IGT disks and
+* other elements of the central tracker system. This lead
+* to a loss of hits in the IGT, a problem which was mitigated
+* in private versions of the code. To avoid prolifirations
+* of the latter, we need to introduce a corrected tag,
+* which is UPGR12, based on UPGR05 but with different
+* disk radii.
+*
 * Revision 1.140  2006/12/18 23:28:33  potekhin
 * Introduced geometry tags UPGR10 and UPGR11 (as discussed
 * in appropriate fora) which utilize source files istbgeo4 and 5.
@@ -2871,6 +2881,66 @@ If LL>1
                    FgtdConfig=0;
 * Forward GEM disks in this tag
                    igtd=on;
+* prototype of the Inner Tracker SuPport structure
+                   itsp=on;
+                }
+****************************************************************************************
+  on UPGR12   { New Tracking: HFT+HPD+IST+TPC+IGT*newRadii
+
+                     svtt=off; "no SVT  at all in this configuration"
+                     ftpc=off; "no FTPC at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=1   " west wheel "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                     SvshConfig = 0; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 0;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 45;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;        " put the pixel detector in"
+                   PixlConfig=4;   " newest version by Andrew Rose"
+
+                   hpdt=on;        " put the Hybrid Pixel detector in"
+                   HpdtConfig=1;   " base version"
+* Inner STAR tracker barrel
+                   istb=on;  "new pixel based inner tracker"
+                   IstbConfig=3;
+* Inner STAR GEM barrel
+                   gemb=off;  
+                   GembConfig=0;
+* Forward STAR tracker disk
+                   fstd=on;  "new pixel based forward tracker"
+                   FstdConfig=2;
+* Forward STAR tracker disk
+                   fgtd=off;  "GEM forward tracker"
+                   FgtdConfig=0;
+* Forward GEM disks in this tag
+                   igtd=on;
+                   IgtdConfig=2;
 * prototype of the Inner Tracker SuPport structure
                    itsp=on;
                 }
