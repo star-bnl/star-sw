@@ -1,11 +1,14 @@
 /*
- * $Id: StPixelFastSimMaker.cxx,v 1.11 2006/12/20 16:50:21 wleight Exp $
+ * $Id: StPixelFastSimMaker.cxx,v 1.12 2006/12/21 18:11:59 wleight Exp $
  *
  * Author: A. Rose, LBL, Y. Fisyak, BNL, M. Miller, MIT
  *
  * 
  **********************************************************
  * $Log: StPixelFastSimMaker.cxx,v $
+ * Revision 1.12  2006/12/21 18:11:59  wleight
+ * Fixed UPGR09 compatibility so it works with all versions
+ *
  * Revision 1.11  2006/12/20 16:50:21  wleight
  * Added fix for UPGR09 problem with layer number mismatch
  *
@@ -221,7 +224,7 @@ Int_t StPixelFastSimMaker::Make()
 		  //		  char path[100];
 		  TString Path("");
 		  StMcIstHit *mcI = dynamic_cast<StMcIstHit*>(mcH); 
-		  if(((StBFChain *)GetChain())->GetOption("UPGR09")){
+		  if(((StBFChain *)GetChain())->GetOption("UPGR09",kFALSE)){
 		    Path = Form("/HALL_1/CAVE_1/IBMO_1/IBMY_%i/IBAM_%i/IBLM_%i/IBSS_%i",1,mcI->ladder(),mcI->wafer(),mcI->side());
 		  }
 		  else{
