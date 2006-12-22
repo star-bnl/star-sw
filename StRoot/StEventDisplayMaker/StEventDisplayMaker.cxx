@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.118 2006/11/30 23:03:02 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.119 2006/12/22 00:54:27 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -167,6 +167,8 @@ ClassImp(StEventDisplayMaker)
 //_____________________________________________________________________________
 StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 {
+   // check the Qt env
+  gROOT->ProcessLine("StCheckQtEnv::SetQtEnv();") ;
   mRedraw    =  0;
   mEventHelper    =  0;
   m_Hall          =  0;  
@@ -1380,6 +1382,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.119  2006/12/22 00:54:27  fine
+// Add Qt env test
+//
 // Revision 1.118  2006/11/30 23:03:02  fine
 // replace the obsolete RHIC detecor button with the RnD
 //
