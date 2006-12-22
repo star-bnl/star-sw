@@ -236,24 +236,14 @@ into the first StEmcCollection in event for all EEMC subdetectors
       // printf("mixMid idet=%d sect=%d Nhit A=%d B=%d\n",det,secID,rawHitA.size(),myHitB.size());
     
  
-     //  2) copy all remining hits from collection B to A, expected none
-  
+      /*  2) verify no hits remain in  collection B.
+	  some hits may be left for real events:
+	  * in 2004 or earlier (due to the code implementation)
+	  * in 2005+ if a crate is masked out due to any form of corruption or being OFF
+	  */
+
      if(myHitB.size())
-       LOG_ERROR<<GetName() <<"::Make() For real events in 2005+ should be NO leftover hits,\n is="<<myHitB.size()
-		<<" StDetId="<<det<<" sect="<<secID
-		<<" sth is very Wrong, Jan B. "<<endm;
-     
-     for( hitB=myHitB.begin() ; hitB< myHitB.end(); hitB++) {
-       
-       const EEmcDbItem *x=mEEDb->StBarrelIndex2Item(det,(*hitB)->module(),(*hitB)->eta(),(*hitB)->sub());
-       if(!x) continue;// DB info not avaliable, drop secondary hit 
-	 int adc=(*hitB)->adc();
-       if(adc<=0) continue;
-       float ene=666.555;// ADC2E-maker to get energy
-       StEmcRawHit* hit 
-	 =  new StEmcRawHit(id,(*hitB)->module(),(*hitB)->eta(),(*hitB)->sub(),adc,ene);
-       detectorA->addHit(hit);
-     }
+       LOG_WARN<<Form("%s::Make() merging:  %d  hits in  collB  for sect=%d are dropped\n since those channels are not avaliable in collA, \n a create is probably masked out\n",GetName(), myHitB.size(),secID)<<endm;
      // printf("mixEnd idet=%d sect=%d Nhit A=%d B=%d\n",det,secID,rawHitA.size(),myHitB.size());
      
     } // loop over sector
@@ -265,8 +255,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.2 2006/12/13 13:24:38 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.3 2006/12/22 15:20:45 balewski Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.3  2006/12/22 15:20:45  balewski
+// ignore M-C hits for crates masked for real events, as suggested by Wei-Ming
+//
 // Revision 1.2  2006/12/13 13:24:38  balewski
 // fix wrong header path
 //
