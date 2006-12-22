@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.10 2006/07/21 14:15:09 balewski Exp $
+// $Id: StEemcRaw.cxx,v 1.11 2006/12/22 15:20:59 balewski Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -132,16 +132,18 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token, int runId)
         if(!fiber->useIt)
             continue; // drop masked out crates
 
-        if(raw->sizeHeader(icr)<=0)
-            continue;  //drop cartes not present in data blocks
-        //printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
+        if(raw->sizeHeader(icr)<=0) {
+	 gMessMgr->Message("","W") <<Form("StEemcRaw::headersAreSick() sizeHeader(icr=%d)<=0,  crID=%d, skip it\n",icr,fiber->crID)<<endm;
+	  continue;  //drop cartes not present in data blocks
+	}
+	// printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
 
         int isOff=EztEmcRawData::isCrateOFF(raw->header(icr));
         // printf("AAA icr=%d isOff=%d\n",icr,isOff);
         if(isOff)
         { // kill this fiber for the rest of this job
             mDb->setFiberOff(icr);
-            gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() detected icr="<<icr<< "="<<fiber->name<<" to be OFF,\n this fiber is ignored till the end of this job" << endm;
+            gMessMgr->Message("","W") << "StEemcRaw::headersAreSick() detected icr="<<icr<< ", name="<<fiber->name<<" is OFF,\n this fiber will ignored till the end of this job" << endm;
             continue;
         }
         nOn++;
@@ -379,6 +381,9 @@ void StEemcRaw::initHisto()
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.11  2006/12/22 15:20:59  balewski
+// more printouts
+//
 // Revision 1.10  2006/07/21 14:15:09  balewski
 // less printouts
 //
