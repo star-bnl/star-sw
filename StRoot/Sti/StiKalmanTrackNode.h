@@ -77,7 +77,7 @@ class StiKalmanTrackNode : public StiTrackNode
 {
 friend class StiTrackNodeHelper;
 public:
-  StiKalmanTrackNode(){_ext=0; reset();}
+  StiKalmanTrackNode(){_inf=0; _ext=0; reset();}
   StiKalmanTrackNode(const StiKalmanTrackNode &node);
   virtual ~StiKalmanTrackNode(){reduce();mId=-1;};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode &node);  
