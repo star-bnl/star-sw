@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.103 2006/12/18 01:17:41 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.104 2006/12/24 02:16:36 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.104  2006/12/24 02:16:36  perev
+ * _inf=0 added in copy constructor
+ *
  * Revision 2.103  2006/12/18 01:17:41  perev
  * Info block added and filled for pulls
  *
@@ -389,7 +392,6 @@ int StiKalmanTrackNode::_debug = 0;
 void StiKalmanTrackNode::reset()
 { 
 static int myCount=0;
-
   StiTrackNode::reset();
   memset(_beg,0,_end-_beg+1);
   _ext=0; _inf=0;
@@ -1797,7 +1799,7 @@ void StiKalmanTrackNode::initialize(StiHit *h)
 //______________________________________________________________________________
 StiKalmanTrackNode::StiKalmanTrackNode(const StiKalmanTrackNode &n)
 {
-   reset(); *this = n;
+   _ext=0; _inf=0 ; *this = n;
 }
 //______________________________________________________________________________
 const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode &n)
@@ -1807,7 +1809,7 @@ const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode
   if (n._ext) { extend();*_ext = *n._ext;}
   else        { if(_ext) _ext->reset();  }
   if (n._inf) { extinf();*_inf = *n._inf;}
-  else        { if(_inf) _inf->reset();  }
+  else        { if(_inf) {BFactory::Free(_inf); _inf=0;}}
   return *this;
 }
 //______________________________________________________________________________
