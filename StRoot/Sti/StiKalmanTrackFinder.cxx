@@ -629,7 +629,7 @@ static  const double ref1a  = 110.*degToRad;
 	     <<" this angle:" << radToDeg*(*d)->getPlacement()->getNormalRefAngle()<<endl;
       }
       //begin tracking here...
-      testNode.reset();
+      testNode.reduce();testNode.reset();
       testNode.setChi2(1e55);
       position = testNode.propagate(leadNode,tDet,direction);
       if (position == kEnded) { gLevelOfFind--; return;}
