@@ -77,12 +77,10 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
     //    StGetConfigValue(detectorParamFile,"radius",radii[0]);
     double dphi[nRows];
 
-    for(size_t zzz=0;zzz<nRows;zzz++)
-     
-    dphi[zzz]=2.*TMath::Pi()/getNSectors(zzz);
+    for(size_t zzz=0;zzz<nRows;zzz++){
+      dphi[zzz]=2.*TMath::Pi()/getNSectors(zzz);
     double tiltAngle;
-    tiltAngle =30;
-    
+    tiltAngle =30;    
     tiltAngle=TMath::Pi()*(tiltAngle)/180.;
     
     double depth[nRows];
@@ -102,7 +100,7 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
 	  //	  StGetConfigValue(detectorParamFile,"ladder thickness",Thickness);
 	  pShape->setThickness(Thickness); //cm
 	    pShape->setHalfDepth( depth[0]/2. ); //extent in z
-	    double sWidth=1.68;
+	    double sWidth=1.28;//1.68;
 	    //StGetConfigValue(detectorParamFile,"sensor width",sWidth);
 	    pShape->setHalfWidth(sWidth/2.); //length or a plane
 	    for(unsigned int sector = 0; sector<getNSectors(row); sector++)	
@@ -110,7 +108,7 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
 		StiPlacement *pPlacement = new StiPlacement;
 		pPlacement->setZcenter(0.);
 		
-		double anglepos=static_cast<double>(sector+1)*dphi[row]-shiftangle;
+		double anglepos=static_cast<double>(sector)*dphi[row]+shiftangle;
 		pPlacement->setNormalRep(anglepos-tiltAngle,
 					 radii[row]*cos(tiltAngle),
 					 radii[row]*sin(tiltAngle)) ;
@@ -143,6 +141,7 @@ void StiHpdDetectorBuilder::buildDetectors(StMaker&source)
 		add(row, sector, pDetector);
 	      }
 	}
+    }
     cout << "StiHpdDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
 
