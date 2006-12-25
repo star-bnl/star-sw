@@ -39,15 +39,14 @@
             <a href="rootrc"><code><b>.rootrc</b></code></a> 
             ROOT resource file in his/her working (or home) directory:
          <OL>
-           <LI> Run <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/SetQtEnv.C?rev=1.4">
-             <code><b>SetQtEnv.C</b></code></a> ROOT macro: 
+           <LI> Run <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/QtRoot/qtgl/qtcoin/setup.csh?rev=HEAD">
+             <code><b>setup.csh</b></code></a> ROOT macro: 
                 <code><pre>
-root.exe -b -l $STAR/StRoot/macros/SetQtEnv.C
+source $STAR/QtRoot/qtgl/qtcoin/setup.csh
                         </pre>
             </code>
-            The macro tests whether your ".rootrc" activates the Qt-layer and creates the 
-            the correct ROOT resource file to fix things if needed.
-            <P>
+            To define the optional Coin3D-based ROOT plugin.
+ <P>
 <!--            <LI>
                Copy the the custom version of <a href="rootrc">".rootrc"</a> file into your working directory 
                 <small><code><pre>
@@ -69,6 +68,9 @@ root.exe -b -l $STAR/StRoot/macros/SetQtEnv.C
 .x doEvents.C(1,"026/st_physics_4026006_raw_0040047.event.root","display")
                </pre>
                   </code></BOLD>
+      The macro tests whether your ".rootrc" activates the Qt-layer and creates the 
+      the correct ROOT resource file to fix things if needed.
+
                   <OL>
                   </OL>
                <P>&nbsp;</P>
@@ -80,13 +82,16 @@ root.exe -b -l $STAR/StRoot/macros/SetQtEnv.C
          If you are not happy with the filter provided by default you always 
          can <a href="how2customize.html">create</a> and add one of your own.
 
-         <h2><a href="how2drawgeometry.html">How to draw the STAR geometry alone:</a></h2>
+         <h2><a href="http://www.star.bnl.gov/STAR/comp/vis/STAR_GeometryBrowser.12.06.2006.htm">How to draw the STAR geometry alone:</a></h2>
          Sometimes the only thing one wants to see is the GEANT3 definition of the STAR geometry alone.
-         To do that the simple ROOT macro GeomDraw.C has been introduced. It is as simple as type:
+         To do that the simple ROOT macro GeomBrowse.C has been introduced. It is as 
+         <a href="http://www.star.bnl.gov/STAR/comp/vis/STAR_GeometryBrowser.12.06.2006_files/slide0010.htm">simple as type</a>:
          
     <small>
                      <bold><code><pre>
-         root4star GeomDraw.C
+            stardev 
+            source $STAR/QtRoot/qtgl/qtcoin/setup.csh
+            root4star GeomBrowse.C
                </pre>
                   </code></BOLD></SMALL>     
 
