@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.4 2006/12/14 23:36:21 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.5 2006/12/26 20:51:31 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -982,7 +982,7 @@ void GeomBrowser::fileOpenZebra( const QString &fileName )
    } else {
       fChain->Init(); Geant3Init = 1;
    }
-   comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
+   // comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
    QApplication::restoreOverrideCursor();
 }
 
