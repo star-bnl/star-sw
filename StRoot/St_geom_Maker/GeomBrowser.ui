@@ -54,8 +54,8 @@
                     </property>
                     <property name="minimumSize">
                         <size>
-                            <width>242</width>
-                            <height>115</height>
+                            <width>204</width>
+                            <height>96</height>
                         </size>
                     </property>
                     <property name="frameShape">
@@ -592,7 +592,6 @@
                     <string>y2003c</string>
                 </property>
             </item>
-
             <item>
                 <property name="text">
                     <string>y2003b</string>
@@ -1233,6 +1232,7 @@
     <forward>class TVirtualViewer3D</forward>
 </forwards>
 <variables>
+    <variable>TVirtualViewer3D *fCurrentViewer;</variable>
     <variable>bool glViewerLoadFlag;</variable>
     <variable>QListViewItem * fCurrentDrawn;</variable>
     <variable>TQtInspectImp *fInspector;</variable>
