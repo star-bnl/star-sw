@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.5 2006/12/26 20:51:31 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.6 2006/12/27 01:46:43 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -68,7 +68,11 @@ void GeomBrowser::fileOpen()
 {
    static QString thisCintCommand;
    static QString filetypes = "STAR Geometry macro (*.C);"
-                              ";ROOT files (*.root);;GEANT3 Zebra file (*.fz)";
+                              ";ROOT files (*.root);"
+#ifdef  NO_GEANT_MAKER
+                              ";GEANT3 Zebra file (*.fz)"
+#endif
+                              ;
    QString selectedFilter;
    QString dir = fSaveFileName;
    if (dir.isEmpty()) dir = gSystem->WorkingDirectory();
@@ -373,6 +377,10 @@ void GeomBrowser::init()
 
    }
 #endif
+#ifdef  NO_GEANT_MAKER
+   comboBox2->setEnabled(FALSE);
+   comboBox2->hide();
+#endif
    // remove tmp Coin file
    QFileInfo tmpInfo(QDir::currentDirPath() ,"GeomBrowser_tmp.iv");
    QFile tmp(tmpInfo.absFilePath ());
@@ -384,6 +392,7 @@ void GeomBrowser::init()
    fContextMenu     = 0;
    fCurrentDrawn    = 0;
    fGeoManager2Delete = 0;
+   fCurrentViewer     = 0;
    glViewerLoadFlag = false;
    fFile            = 0;
    fIconSet = Action->iconSet();
@@ -671,14 +680,16 @@ void GeomBrowser::SetVisibility( TQtObjectListItem * item, TVolume::ENodeSEEN vi
 TVirtualViewer3D *GeomBrowser::viewCoin3D()
 {
 // 
-#if  ROOT_VERSION_CODE >= ROOT_VERSION(4,03,3)   
-   TVirtualViewer3D *viewer = TVirtualViewer3D::Viewer3D(tQtWidget1->GetCanvas(),"oiv");
-   if (viewer) {
+#if  ROOT_VERSION_CODE >= ROOT_VERSION(4,03,3) 
+   if (fCurrentViewer) 
+      ((TQtRootViewer3D*)fCurrentViewer)->DisconnectPad();
+   fCurrentViewer = TVirtualViewer3D::Viewer3D(tQtWidget1->GetCanvas(),"oiv");
+   if (fCurrentViewer) {
        // Create Open GL viewer
        TGQt::SetCoinFlag(1);
-       viewer->BeginScene();
-       viewer->EndScene();
-       TQtRootViewer3D *v  = (TQtRootViewer3D*)(viewer);
+       fCurrentViewer->BeginScene();
+       fCurrentViewer->EndScene();
+       TQtRootViewer3D *v  = (TQtRootViewer3D*)(fCurrentViewer);
        if (v) {
            TGLViewerImp *viewerImp = v->GetViewerImp();
            if (viewerImp) 
@@ -690,7 +701,7 @@ TVirtualViewer3D *GeomBrowser::viewCoin3D()
     } else {
          editView_Coin3DAction->setEnabled(false);
     }
-    return viewer;
+    return fCurrentViewer;
 #else  
    if (! glViewerLoadFlag) glViewerLoadFlag = !gQt->LoadQt("libRQTGL");
    if (glViewerLoadFlag) {
@@ -908,6 +919,7 @@ static int Geant3Init = 0;
 //_____________________________________________________________________________
 void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
 {
+#ifndef NO_GEANT_MAKER
    QString kuipCmd  = "detp geometry ";
    kuipCmd         +=  geoVersion;
    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -945,11 +957,13 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
       }
    }
    QApplication::restoreOverrideCursor();
+#endif
 }
 
 //_____________________________________________________________________________
 St_geant_Maker & GeomBrowser::Geant() 
 {
+#ifndef NO_GEANT_MAKER
     if (!fGeant) {
        gSystem->Load("St_base");
        gSystem->Load("StChain");
@@ -963,6 +977,7 @@ St_geant_Maker & GeomBrowser::Geant()
        fGeant = new St_geant_Maker();
        // fChain->Init();
     }
+#endif 
     return *fGeant;
 }
 
@@ -971,6 +986,7 @@ St_geant_Maker & GeomBrowser::Geant()
 void GeomBrowser::fileOpenZebra( const QString &fileName )
 {
    // fprintf(stderr,"fileOpenZebra <%s>\n", (const char*)kuipCmd );
+#ifndef NO_GEANT_MAKER
    QString kuipCmd  = "gfile p  ";
    kuipCmd         +=  fileName;
    QApplication::setOverrideCursor( QCursor(Qt::WaitCursor) );
@@ -982,8 +998,11 @@ void GeomBrowser::fileOpenZebra( const QString &fileName )
    } else {
       fChain->Init(); Geant3Init = 1;
    }
-   // comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
+   comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
    QApplication::restoreOverrideCursor();
+#else
+   comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
+#endif
 }
 
 
