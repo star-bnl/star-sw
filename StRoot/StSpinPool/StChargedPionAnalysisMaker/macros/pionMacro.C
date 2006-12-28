@@ -1,7 +1,7 @@
 void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
-			   const char* name  = "test.root",
+			   const char* name  = "test",
 			   const char* filelist = "myfiles.list",
-			   int nFiles = 100,
+			   int nFiles = 1,
 			   int nEvents = 200000000)
 {
 	gROOT->LoadMacro("$STAR/StRoot/macros/LoadLogger.C");
@@ -28,6 +28,8 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 	gSystem->Load("StEmcTriggerMaker");
 	gSystem->Load("StSpinDbMaker");
 		
+	gSystem->Load("StJetFinder");
+	gSystem->Load("StJetMaker");
 	gSystem->Load("StChargedPionAnalysisMaker");
 	
 	StChain* chain = new StChain("StChain");
@@ -45,9 +47,17 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 	StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
 	emcTrig->setDbMaker(dbMaker);
 	
+	TString jetSkimFile(dir);
+	jetSkimFile += "/";
+	jetSkimFile += name;
+	jetSkimFile += ".jetskim";
+	jetSkimFile += ".root";
+	StJetSkimEventMaker *jetSkim = new StJetSkimEventMaker("jetSkimMaker",muDstMaker,jetSkimFile.Data());
+		
 	TString outfile(dir);
 	outfile += "/";
 	outfile += name;
+	outfile += ".root";
 	StChargedPionAnalysisMaker* pionMaker = new StChargedPionAnalysisMaker("pionMaker",outfile.Data());
 	pionMaker->isRealData = true;
 	
