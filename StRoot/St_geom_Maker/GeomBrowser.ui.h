@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.6 2006/12/27 01:46:43 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.7 2007/01/03 18:54:56 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -69,7 +69,7 @@ void GeomBrowser::fileOpen()
    static QString thisCintCommand;
    static QString filetypes = "STAR Geometry macro (*.C);"
                               ";ROOT files (*.root);"
-#ifdef  NO_GEANT_MAKER
+#ifndef  NO_GEANT_MAKER
                               ";GEANT3 Zebra file (*.fz)"
 #endif
                               ;
@@ -915,7 +915,9 @@ void GeomBrowser::ObjectSelected( TObject *obj, const QPoint &)
    }
 }
 
-static int Geant3Init = 0;
+#ifndef NO_GEANT_MAKER
+  static int Geant3Init = 0;
+#endif
 //_____________________________________________________________________________
 void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
 {
@@ -957,6 +959,8 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
       }
    }
    QApplication::restoreOverrideCursor();
+#else
+  if   (geoVersion.isEmpty() ){}    
 #endif
 }
 
@@ -998,9 +1002,10 @@ void GeomBrowser::fileOpenZebra( const QString &fileName )
    } else {
       fChain->Init(); Geant3Init = 1;
    }
-   comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
+   // comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
    QApplication::restoreOverrideCursor();
 #else
+   if (fileName.isEmpty()) {}
    comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
 #endif
 }
