@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.29 2006/05/18 16:38:03 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.30 2007/01/03 19:03:41 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.30  2007/01/03 19:03:41  genevb
+// Patch for hist titles removed after migration to Root vers. 5
+//
 // Revision 2.29  2006/05/18 16:38:03  genevb
 // Introduce StHistUtil::GetRunYear()
 //
@@ -541,28 +544,6 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
             }
 	    else hobj->Draw();
 	  }
-
-// Temporary patch for missing titles; should not need in Root vers. 5.X
-// Find the hist title's TPaveText object and change the alignment
-          TString ntitle = obj->GetTitle();
-          if (((m_PadColumns>1) && (ntitle.Length() > 60)) ||
-              ((m_PadColumns>2) && (ntitle.Length() > 38))) {
-            gPad->Draw();
-            TList* list = gPad->GetListOfPrimitives();
-            TPaveText* pp=0;
-            int li = 0;
-            while (!pp) {
-              if (li == list->GetSize()) {
-                printf("StHistUtil:: ERROR with hist title patch!!!\n");
-                return histCounter;
-              }
-              TObject* lobj = list->At(li++);
-              if ((lobj->IsA() == TPaveText::Class()) &&
-                  (!strcmp(lobj->GetName(),"title"))) pp = (TPaveText*) lobj;
-            }
-            pp->SetTextAlign(12); // better than pp->AddText("");
-          }
-// end patch
 
 	  if (!padAdvance) padCount--;
 	  else if (gPad) gPad->Update();
