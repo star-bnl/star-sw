@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.97 2007/01/03 01:38:12 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.98 2007/01/03 01:42:01 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -218,9 +218,11 @@
 
 	# A small sanity check in case user redefines improperly CERN_ROOT
 	if ( $CERN_ROOT eq "") {
-	    print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n";
+	    print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n"
+		unless ($param::quiet); 
 	} elsif ( ! -d "$CERN_ROOT/lib"){
-	    print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n";
+	    print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n"
+		unless ($param::quiet); 
 	} 
 	
 	# now check
@@ -235,7 +237,8 @@
 	    $cernl = "cernlib";
 	  }
 	} else {
-	    print "WARNING: using cernlib from the default path\n";
+	    print "WARNING: using cernlib from the default path\n"
+		unless ($param::quiet); 
 	    $cernl = "cernlib -s";
 	    $packl = "packlib";
 	    $kernl = "kernlib";
@@ -397,7 +400,7 @@
         $SOFLAGS    = "-G -ptr%ObjDir";
 
         if ( defined( $ARG{INSURE} ) ) {
-            print "***Use INSURE++***\n";
+            print "***Use INSURE++***\n" unless ($param::quiet);
             $CC  = "insure -g -Zoi \"compiler_c cc\"";
             $CPP = "insure -g -Zoi \"compiler_c CC\"";
             $CXX = "insure -g -Zoi \"compiler_cpp CC\"";
@@ -477,7 +480,7 @@
 	# print "*** $CXX_VERSION $SYSLIBS\n";
 
         if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
-            print "Use INSURE++\n";
+            print "Use INSURE++\n" unless ($param::quiet);
             $CC  = "insure -g -Zoi \"compiler_c gcc\"";
             $CPP = "gcc -E -P";
             $CXX = "insure -g -Zoi \"compiler_cpp g++\"";
