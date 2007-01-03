@@ -8,9 +8,14 @@
 #
 
 $CERNL = $ENV{CERN_LEVEL};
+$CERN  = $ENV{CERN};
 
 if ( ! defined($CERNL) ){
     die "No CERN_LEVEL defined. Cannot proceed.\n";
+}
+if ( ! defined($CERN) ){
+    print "CERN defined as /cern\n";
+    $CERN = "/cern";
 }
 
 if ( ! -e "config/Makefile.config"){
@@ -46,8 +51,8 @@ if ( ! -e "config/Makefile.config"){
 
 
 
-if ( ! -e "/cern/$CERNL/lib/libpacklib_noshift.a"){
-    die "/cern/$CERNL/lib/libpacklib_noshift.a does not exist. Would not know what to do...\n";
+if ( ! -e "$CERN/$CERNL/lib/libpacklib_noshift.a"){
+    die "$CERN/$CERNL/lib/libpacklib_noshift.a does not exist. Would not know what to do...\n";
 }
 
 
@@ -59,8 +64,8 @@ $done = 0;
 while ( defined($line = <FI>) ){
     chomp($line);
     if ($line =~ m/CERNLIBS\s+:=\s*$/){
-	print FO "CERNLIBS := /cern/$CERNL/lib/libpacklib_noshift.a /cern/$CERNL/lib/libkernlib.a\n";
-	print    "CERNLIBS := /cern/$CERNL/lib/libpacklib_noshift.a /cern/$CERNL/lib/libkernlib.a\n";
+	print FO "CERNLIBS := $CERN/$CERNL/lib/libpacklib_noshift.a $CERN/$CERNL/lib/libkernlib.a\n";
+	print    "CERNLIBS := $CERN/$CERNL/lib/libpacklib_noshift.a $CERN/$CERNL/lib/libkernlib.a\n";
 	$done = 1;
     } elsif ( $line =~ m/BUILDHBOOK/){
 	# Introduced at ROOT 4.04.02
