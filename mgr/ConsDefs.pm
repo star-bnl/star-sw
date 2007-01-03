@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.96 2006/12/09 02:26:58 fine Exp $
+# $Id: ConsDefs.pm,v 1.97 2007/01/03 01:38:12 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -215,6 +215,15 @@
 	my($packl,$cernl,$kernl,$strip);
 
 	$strip = "";
+
+	# A small sanity check in case user redefines improperly CERN_ROOT
+	if ( $CERN_ROOT eq "") {
+	    print "WARNING: CERN_ROOT is not defined (you may define it as \$CERN/\$CERN_LEVEL)\n";
+	} elsif ( ! -d "$CERN_ROOT/lib"){
+	    print "WARNING: $CERN_ROOT/lib does not exists (may have CERN_ROOT ill-defined)\n";
+	} 
+	
+	# now check
 	if ( -e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
 	     -e "$CERN_ROOT/lib/libkernlib_noshift.a") {
 	  $packl = "packlib_noshift";
@@ -605,7 +614,9 @@
 	$LoggerINCDIR = $OPTSTAR . "/include";
 	$LoggerLIBDIR = $OPTSTAR . "/lib";
 	$LoggerLIBS   = "-llog4cxx";
-	print "Use LoggerLIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
+	print 
+	    "Use Logger  ",
+	    "LIBDIR = $LoggerLIBDIR \tLoggerINCDIR = $LoggerINCDIR \tLoggerLIBS = $LoggerLIBS\n"
 	    if $LoggerLIBDIR && ! $param::quiet;
     }
  # xml2
