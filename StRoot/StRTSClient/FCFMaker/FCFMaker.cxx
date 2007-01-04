@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.31 2006/11/06 21:35:33 fisyak Exp $
+ * $Id: FCFMaker.cxx,v 1.32 2007/01/04 02:51:45 jeromel Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.32  2007/01/04 02:51:45  jeromel
+ * Lots of printf and gMessMgr transformed ino LOGger format
+ *
  * Revision 1.31  2006/11/06 21:35:33  fisyak
  * Set hasSim definition to SetMode method, reduce debug print outs
  *
@@ -267,7 +270,7 @@ static class fcfAfterburner fcf_after;
 
 StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 {
-  gMessMgr->Debug() << "Constructor for StRTSClientFCFMaker()" << endm;
+  LOG_DEBUG << "Constructor for StRTSClientFCFMaker()" << endm;
   fcf = NULL;
   mCTransform = NULL;
 
@@ -296,10 +299,10 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   m_WestOff = false;
   m_EastOff = false;
 
-  // gMessMgr->Info() << "dpad=" <<mDp<<endm;
-  // gMessMgr->Info() << "dperp="<<mDperp<<endm;
-  // gMessMgr->Info() << "dt="<<mDt<<endm;
-  // gMessMgr->Info() << "splitRows="<<splitRows<<" (Are rows to be split as on i960's)"<<endm;
+  // LOG_INFO << "dpad=" <<mDp<<endm;
+  // LOG_INFO << "dperp="<<mDperp<<endm;
+  // LOG_INFO << "dt="<<mDt<<endm;
+  // LOG_INFO << "splitRows="<<splitRows<<" (Are rows to be split as on i960's)"<<endm;
 }
 
 StRTSClientFCFMaker::~StRTSClientFCFMaker() 
@@ -308,7 +311,8 @@ StRTSClientFCFMaker::~StRTSClientFCFMaker()
   if(gainCorr) free(gainCorr);
   if(t0Corr) free(t0Corr);
 
-  gMessMgr->Debug() << "Destructor for StRTSClientFCFMaker()" << endm;
+  LOG_DEBUG << "Destructor for StRTSClientFCFMaker()" << endm;
+
   if(fcf != NULL)
   {
     delete fcf;
@@ -422,11 +426,11 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
     daqReader = (StDAQReader *)(dr->GetObject());
 
   if(daqReader == NULL) {
-    printf("FCFMaker::InitRun No daqReader available...\n");
+    LOG_INFO << "FCFMaker::InitRun No daqReader available..." << endm;
   }
  
   t2 = time(NULL);
-  printf("<FCFMaker>: Done with InitRun: %d secs\n",t2-t1);
+  LOG_INFO << Form("<FCFMaker>: Done with InitRun: %d secs",t2-t1) << endm;
   return kStOK ;
 }
 
@@ -452,13 +456,13 @@ Int_t StRTSClientFCFMaker::Make()
 
       t0Corr = (t0_corr_t *)malloc(sizeof(t0_corr_t));
       if(!t0Corr) {
-	printf("<FCFMaker:Make>: Not enough memory for t0 corrections!\n");
+	LOG_FATAL << "<FCFMaker:Make>: Not enough memory for t0 corrections!" << endm;
 	assert(false);
       }
       
       gainCorr = (gain_corr_t *)malloc(sizeof(gain_corr_t));
       if(!gainCorr) {
-	printf("<FCFMaker:Make>: Not enough memory for gain corrections!\n");
+	LOG_FATAL << "<FCFMaker:Make>: Not enough memory for gain corrections!" << endm;
 	assert(false);
       }
       
@@ -471,7 +475,7 @@ Int_t StRTSClientFCFMaker::Make()
       }
 
       t2 = time(NULL);
-      printf("<FCFMaker>: Got T0/gain corrections: %d secs\n",t2-t1);
+      LOG_INFO << Form("<FCFMaker>: Got T0/gain corrections: %d secs",t2-t1) << endm;
     }
   }
 
@@ -496,12 +500,12 @@ Int_t StRTSClientFCFMaker::Make()
   if(doCroat) {
     croat_out = (croat_out_t *)malloc(sizeof(croat_out_t));
     if(!croat_out) {
-      printf("Not enough memory for croat_out (%d bytes)",sizeof(croat_out_t));
+      LOG_FATAL << Form("Not enough memory for croat_out (%d bytes)",sizeof(croat_out_t)) << endm;
       assert(false);
     }
     croat_resptr = (resptr_t *)malloc(sizeof(resptr_t));
     if(!croat_resptr) {
-      printf("Not enough memory for croat_resptr (%d bytes)",sizeof(resptr_t));
+      LOG_FATAL << Form("Not enough memory for croat_resptr (%d bytes)",sizeof(resptr_t)) << endm;
       assert(false);
     }
   }
@@ -509,12 +513,12 @@ Int_t StRTSClientFCFMaker::Make()
   if(doFile) {
     daq_file_out = (daq_out_t *)malloc(sizeof(daq_out_t));
     if(!daq_file_out) {
-      printf("Not enough memory for daq_file_out (%d bytes)",sizeof(daq_out_t));
+      LOG_FATAL << Form("Not enough memory for daq_file_out (%d bytes)",sizeof(daq_out_t)) << endm;
       assert(false);
     }
     daq_file_resptr = (resptr_t *)malloc(sizeof(resptr_t));
     if(!daq_file_resptr) {
-      printf("Not enough memory for daq_file_resptr (%d bytes)",sizeof(resptr_t));
+      LOG_FATAL << Form("Not enough memory for daq_file_resptr (%d bytes)",sizeof(resptr_t)) << endm;
       assert(false);
     }  
   }
@@ -522,12 +526,12 @@ Int_t StRTSClientFCFMaker::Make()
   if(hasSim) {
     simu_out = (croat_out_t *)malloc(sizeof(croat_out_t));
     if(!simu_out) {
-      printf("Not enough memory for croat_resptr (%d bytes)",sizeof(croat_out_t));
+      LOG_FATAL << Form("Not enough memory for croat_resptr (%d bytes)",sizeof(croat_out_t)) << endm;
       assert(false);
     }
     simu_resptr = (resptr_t *)malloc(sizeof(resptr_t));
     if(!simu_resptr) {
-      printf("Not enough memory for simu_resptr (%d bytes)",sizeof(resptr_t));
+      LOG_FATAL << Form("Not enough memory for simu_resptr (%d bytes)",sizeof(resptr_t)) << endm;
       assert(false);
     }
   }
@@ -544,12 +548,13 @@ Int_t StRTSClientFCFMaker::Make()
   do_annot = 1 ;
 #endif
 
-  printf("<FCFMaker::Make> Making event %d, annotation %d...\n",Event_counter,do_annot);
+  LOG_INFO << Form("<FCFMaker::Make> Making event %d, annotation %d...",Event_counter,do_annot) 
+	   << endm;
   
   // Coordinate transformer
   if(!gStTpcDb)
   {
-    gMessMgr->Error() << "There is no gStTpcDb pointer\n" << endm;
+    LOG_FATAL << "There is no gStTpcDb pointer" << endm;
     exit(0);
   }
 
@@ -560,7 +565,7 @@ Int_t StRTSClientFCFMaker::Make()
   }
 
   mDriftVelocity = gStTpcDb->DriftVelocity();
-  // gMessMgr->Info() << "The drift velocity used = " << mDriftVelocity << endm;
+  // LOG_INFO << "The drift velocity used = " << mDriftVelocity << endm;
 
 
   // Get StEvent / tphit table
@@ -570,10 +575,10 @@ Int_t StRTSClientFCFMaker::Make()
 
   mStEvent = dynamic_cast<StEvent *> (GetInputDS("StEvent"));
   if(mStEvent) {
-    printf("<FCFMaker::Make> StEvent exists.  Not filling tphit table\n");
+    LOG_INFO << "<FCFMaker::Make> StEvent exists.  Not filling tphit table" << endm;
   }
   else {
-    printf("<FCFMaker::Make> No StEvent yet.  Use tphit table\n");
+    LOG_INFO << "<FCFMaker::Make> No StEvent yet.  Use tphit table" << endm;
 
     St_DataSetIter outputDataSet(m_DataSet);
     mT_tphit = (St_tcl_tphit *)outputDataSet("tphit");
@@ -648,9 +653,9 @@ Int_t StRTSClientFCFMaker::Make()
 	 (n_daq_file_cl_sector > 0)) {
 
 	if(hasSim) {
-	  printf("FCFMaker: have simulated data as well as daq file clusters. disabling comparison between calculated and file clusters\n");
-	}
-	else {
+	  LOG_INFO << "FCFMaker: have simulated data as well as daq file clusters. disabling comparison between calculated and file clusters" 
+		   << endm;
+	} else {
 	  int e = fcf_after.compare(daq_file_resptr->v[pr],
 				    croat_resptr->v[pr]);
 	  
@@ -695,30 +700,36 @@ Int_t StRTSClientFCFMaker::Make()
     
     // If no compare this is not satisfied...
     if(mismatch_sector != 0) {
-      printf("<FCFMaker::Make> There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)\n",sector+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector);
+      LOG_INFO << Form("<FCFMaker::Make> There were mismatches between file & calculated clusters (sector=%02d mismatches=%6d nfile=%6d nraw=%6d)",
+		       sector+1,mismatch_sector,n_burned_daq_file_cl_sector,n_burned_croat_cl_sector) 
+	       << endm;
     }
   }
   
   if(doFile) {
-    printf("<FCFMaker::Make> Merged %d of %d file clusters\n",n_daq_file_cl-n_burned_daq_file_cl,n_daq_file_cl);
+    LOG_INFO << Form("<FCFMaker::Make> Merged %d of %d file clusters",
+		     n_daq_file_cl-n_burned_daq_file_cl,n_daq_file_cl) 
+	     << endm;
   }
   
   if(doCroat) {
-    printf("<FCFMaker::Make> Merged %d of %d calculated clusters\n",n_croat_cl-n_burned_croat_cl,n_croat_cl);
+    LOG_INFO << Form("<FCFMaker::Make> Merged %d of %d calculated clusters",
+		     n_croat_cl-n_burned_croat_cl,n_croat_cl) 
+	     << endm;
   }
 
   // Poor mans comparison....
   if(!doFile && !doCroat) 
   {
-    printf("<FCFMaker::Make> No clusters available\n");
+    LOG_INFO << "<FCFMaker::Make> No clusters available" << endm;
   }
   else if(doCroat && !doFile)
   {
-    printf("<FCFMaker::Make> Only raw data available.  No daq file clusters\n");
+    LOG_INFO << "<FCFMaker::Make> Only raw data available.  No daq file clusters" << endm;
   }
   else if(doFile && !doCroat) 
   {
-    printf("<FCFMaker::Make> Only daq file clusters available.  No raw data\n");
+    LOG_INFO << "<FCFMaker::Make> Only daq file clusters available.  No raw data" << endm;
   }
   else 
   {
@@ -764,7 +775,9 @@ Int_t StRTSClientFCFMaker::Make()
   if(simu_resptr) free(simu_resptr);
 
   t2 = time(NULL);
-  if (Debug()) printf("<FCFMaker::Make> Done with make (%d secs)\n",t2-t1);
+  if (Debug()){
+    LOG_DEBUG << Form("<FCFMaker::Make> Done with make (%d secs)",t2-t1) << endm;
+  }
 
   return kStOK;
 }
@@ -815,7 +828,10 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
 	
 	if( (r>45) || (p>184) || (raw_s>31) ||
 	    (r<1)  || (p<1)   || (raw_s<0)) {
-	  gMessMgr->Error() << "got an illegal sequence row=" << r << ", pad=" << p << ", seq=" << raw_s << endm;
+	  LOG_ERROR << "got an illegal sequence row=" << r 
+		    << ", pad=" << p 
+		    << ", seq=" << raw_s 
+		    << endm;
 	}
 
 // 	if(n==0) {
@@ -842,7 +858,9 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
 	}
 	else {
 	  if(cpp[r-1].r[p-1][merged_s-1].length % 31 != 0) {
-	    printf("FCFMaker: What is going on? merging short sequence len=%d\n",cpp[r-1].r[p-1][merged_s-1].length);
+	    LOG_INFO << Form("FCFMaker: What is going on? merging short sequence len=%d",
+			     cpp[r-1].r[p-1][merged_s-1].length) 
+		     << endm;
 	  }
 
 	  cpp[r-1].r[p-1][merged_s-1].length += n+1;
@@ -1133,14 +1151,15 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 #ifdef FCF_DEBUG_OUTPUT
   struct Hit_t *ht = getHitInfo(hit.row/100,hit.row%100,hit.id_simtrk) ;
   
-  fprintf(ff,"%d %d %d %d %d %d %f %f %f %f %d %d %d %d %d %d ",Event_counter, hit.row/100, hit.row%100, hit.id, hit.id_simtrk,hit.id_quality,
-	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_x,cl_t,cl_f,cl_c,p2-p1+1,t2-t1+1) ;
+  fprintf(ff,"%d %d %d %d %d %d %f %f %f %f %d %d %d %d %d %d ",
+	  Event_counter, hit.row/100, hit.row%100, hit.id, hit.id_simtrk,hit.id_quality,
+	  hit.x,hit.y,hit.z,hit.q*1000000.0,cl_x,cl_t,cl_f,cl_c,p2-p1+1,t2-t1+1) ;
 
   if(!ht) {
-	fprintf(ff,"0.0 0.0 0.0 0.0\n") ;
+    fprintf(ff,"0.0 0.0 0.0 0.0\n") ;
   }
   else {
-	fprintf(ff,"%f %f %f %f\n",ht->x,ht->y,ht->z,ht->charge*1000000.0) ;
+    fprintf(ff,"%f %f %f %f\n",ht->x,ht->y,ht->z,ht->charge*1000000.0) ;
   }
 
 #endif
@@ -1432,14 +1451,14 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 
     if((int)wrow != row+1)
     {
-      gMessMgr->Error() << "Fatal error: padrow "<<wrow<<" does not match "<< row+1 << endm;
+      LOG_ERROR << "Fatal error: padrow "<< wrow <<" does not match "<< row+1 << endm;
       exit(0);
     }
 
     if((nclusters * 2 + 2 != words) &&
        (nclusters != 0))
     {
-      gMessMgr->Error() << "Fatal error: nclusters="<<nclusters<<" words="<<words<<endm;
+      LOG_ERROR << "Fatal error: nclusters="<< nclusters <<" words="<< words << endm;
       exit(0);
     }
 
@@ -1489,20 +1508,20 @@ int StRTSClientFCFMaker::anyClustersInFile()
 u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *len)
 {
   if(!daqReader) {
-    //printf("FCFMaker: No daq reader\n");  // already printed in initrun!
+    //LOG_WARN << "FCFMaker: No daq reader" << endm;  // already printed in initrun!
     return NULL;
   }
   
   tpcReader = daqReader->getTPCReader();
   if(!tpcReader) {
-    printf("FCFMaker: No tpc reader\n");
+    LOG_WARN << "FCFMaker: No tpc reader" << endm;
     return NULL;
   }
   
   u_int *tpcp = (u_int *)tpcReader->ptrTPCP;
   
   if(memcmp("TPCP", (char *)tpcp, 4) != 0) {
-    printf("FCFMaker: Bad tpcp bank (%s)\n",(char *)tpcp);
+    LOG_WARN << Form("FCFMaker: Bad tpcp bank (%s)",(char *)tpcp) << endm;
     return NULL;
   }
   
@@ -1514,7 +1533,7 @@ u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *l
   
   u_int *tpcsecp = tpcp + off;
   if(memcmp("TPCSECP", (char *)tpcsecp, 7) != 0)  {
-    printf("FCFMaker: Bad tpcsecp bank (%s)\n",(char *)tpcsecp);
+    LOG_WARN << Form("FCFMaker: Bad tpcsecp bank (%s)",(char *)tpcsecp) << endm;
     return NULL;
   }
 
@@ -1529,14 +1548,15 @@ u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *l
   
   u_int *tpcseclp = tpcsecp + off;
   if(memcmp("TPCSECLP", (char *)tpcseclp, 8) != 0) {
-    printf("FCFMaker: Bad tpcseclp bank (%s)\n",(char *)tpcseclp);
+    LOG_WARN << Form("FCFMaker: Bad tpcseclp bank (%s)",(char *)tpcseclp) << endm;
     return NULL;
   }
   u_int swap_tpcseclp = checkSwap(tpcseclp[5]);
   if((hsector+1) != swap32(swap_tpcseclp, tpcseclp[3])) {
-    printf("FCFMaker: Bad tpcseclp sector %d vs %d\n",
-	   swap32(swap_tpcseclp, tpcseclp[3]),
-	   hsector+1);
+    LOG_WARN << Form("FCFMaker: Bad tpcseclp sector %d vs %d",
+		     swap32(swap_tpcseclp, tpcseclp[3]),
+		     hsector+1) 
+	     << endm;
     return NULL;
   }
     
@@ -1546,7 +1566,8 @@ u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *l
     
   u_int *tpcrbclp = tpcseclp + off;
   if(memcmp("TPCRBCLP", tpcrbclp, 8) != 0) {
-    printf("FCFMaker: Bad TPCRBCLP bank (%s)", (char *)tpcrbclp);
+    LOG_WARN << Form("FCFMaker: Bad TPCRBCLP bank (%s)", (char *)tpcrbclp) 
+	     << endm;
     return NULL;
   }
   int swap_tpcrbclp = checkSwap(tpcrbclp[5]);
@@ -1557,7 +1578,8 @@ u_int *StRTSClientFCFMaker::getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *l
   
   u_int *tpcmzcld = tpcrbclp + off;
   if(memcmp("TPCMZCLD", tpcmzcld, 8) != 0) {
-    printf("FCFMaker: Bad TPCMZCLD bank (%s)", (char *)tpcmzcld);
+    LOG_WARN << Form("FCFMaker: Bad TPCMZCLD bank (%s)", (char *)tpcmzcld) 
+	     << endm;
     return NULL;
   }
 
@@ -1603,7 +1625,8 @@ int StRTSClientFCFMaker::build_daq_file_clusters(u_int sector,daq_out_t *daq_fil
 	
 	u_int pr = swap32(swap_tpcmzcld, *curr);
 	if(pr > 45) {
-	  printf("FCFMaker: Bad padrow %d\n",pr);
+	  LOG_WARN << Form("FCFMaker: Bad padrow %d",pr) 
+		   << endm;
 	}
 	
 	u_int ncl = swap32(swap_tpcmzcld, *(curr+1));
@@ -1612,8 +1635,9 @@ int StRTSClientFCFMaker::build_daq_file_clusters(u_int sector,daq_out_t *daq_fil
 	//printf("FCFMaker: \t\s=%d r=%d pr=%d -- %d clusters (tot=%d)\n",s,r,pr,ncl,nClusters);
 
 	if(pr > 45) {
-	  printf("FCFMaker: Bad padrow s=%d, rb=%d, mz=%d pr=%d\n",
-		 sector+1,r,mz,pr);
+	  LOG_WARN << Form("FCFMaker: Bad padrow s=%d, rb=%d, mz=%d pr=%d",
+			   sector+1,r,mz,pr)
+		   << endm;
 	  return -1;
 	}
 
@@ -1624,8 +1648,9 @@ int StRTSClientFCFMaker::build_daq_file_clusters(u_int sector,daq_out_t *daq_fil
 	  if(resptr[j] == NULL) break;
 	}
 	if(j >= 3) {
-	  printf("FCFMaker: All three resptr already filled! s=%d, rb=%d mz=%d pr=%d\n",
-		 sector+1,r,mz,pr);
+	  LOG_WARN << Form("FCFMaker: All three resptr already filled! s=%d, rb=%d mz=%d pr=%d",
+			   sector+1,r,mz,pr)
+		   << endm;
 	  return -1;
 	}
 	
@@ -1775,7 +1800,7 @@ int StRTSClientFCFMaker::build_croat_clusters(u_int s,
     
     if(hasSim) {
       if(!Ttrk_in || !Ttrk_out) {
-	printf("<FCFMaker> didn't find pixel_indx tables, but simulation are on\n");
+	LOG_INFO << "<FCFMaker> didn't find pixel_indx tables, but simulation are on" << endm;
       }
 
       trk_in = (unsigned short *)Ttrk_in->GetTable();
@@ -1785,7 +1810,7 @@ int StRTSClientFCFMaker::build_croat_clusters(u_int s,
     }
     else {
       if(Ttrk_in || Ttrk_out) {
-	printf("<FCFMaker> found pixel_indx tables, but simulations are off\n");
+	LOG_INFO << "<FCFMaker> found pixel_indx tables, but simulations are off" << endm;
       }
       trk_in = NULL;
       trk_out = NULL;
@@ -1805,11 +1830,19 @@ int StRTSClientFCFMaker::build_croat_clusters(u_int s,
     int sz2;	
     
     sz2 = BuildCPP(Trow_in->GetNRows(), row_in, pad_in, seq_in, sectorIdx);
-    if(sz2 == -1 && Debug()) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner\n", sectorIdx);
+    if(sz2 == -1 && Debug()){
+      LOG_DEBUG << Form("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, inner", 
+			sectorIdx) 
+		<< endm;
+    }
     else sz += sz2;
     
     sz2 = BuildCPP(Trow_out->GetNRows(), row_out, pad_out, seq_out, sectorIdx);
-    if(sz2 == -1 && Debug()) printf("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer\n", sectorIdx);
+    if(sz2 == -1 && Debug()){
+      LOG_DEBUG << Form("<StRTSClientFCFMaker::build_croat_clusters> No data for sector %d, outer", 
+			sectorIdx)
+		<< endm;
+    }
     else sz += sz2;
   }
 
