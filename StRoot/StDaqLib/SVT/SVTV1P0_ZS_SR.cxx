@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ZS_SR.cxx,v 1.5 2003/09/02 17:55:33 perev Exp $
+ * $Id: SVTV1P0_ZS_SR.cxx,v 1.6 2007/01/04 21:27:51 jml Exp $
  *      
  * Author: J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0_ZS_SR.cxx,v $
+ * Revision 1.6  2007/01/04 21:27:51  jml
+ * zero suppressed reader no longer uses adcx, only seqd.  Fixes bug from early 2005
+ *
  * Revision 1.5  2003/09/02 17:55:33  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -203,6 +206,9 @@ SVTV1P0_ZS_SR::SVTV1P0_ZS_SR(int b, int l, int w, SVTV1P0_Reader *det)
 
 int SVTV1P0_ZS_SR::initialize()
 {
+//   printf("zs init\n");
+//   fflush(stdout);
+
   for (int hyb=0; hyb<SVT_HYBRIDS; hyb++) {
     for (int anode=0; anode<SVT_ANODES; anode++) {
       Anode_array[hyb][anode].nseq = 0;
@@ -216,179 +222,164 @@ int SVTV1P0_ZS_SR::initialize()
     if (detector->ercpy->verbose) printf("found ADCD RB%d MZ%d\n",rcb,mezz);
     fflush(stdout);
   }
-  adcx_p = detector->getBankSVTADCX(hyperSector, rcb, mezz);
-  if ((void *)adcx_p != NULL) {
-    if (detector->ercpy->verbose) printf("found ADCX RB%d MZ%d\n",rcb,mezz);
-    fflush(stdout);
-  }
+
   seqd_p = detector->getBankSVTSEQD(hyperSector, rcb, mezz);
+
   if ((void *)seqd_p != NULL) {
     if (detector->ercpy->verbose) printf("found SEQD RB%d MZ%d\n",rcb,mezz);
     fflush(stdout);
   }
 
-  /***************************************************/
-  // now go through the ( possibly found) SVTADCX bank
-  // and see if our hybridIDs are in it
-  /***************************************************/
-  if (adcx_p == (classname(Bank_SVTADCX) *)NULL) {
-    if (detector->ercpy->verbose)
-      printf("SVTADCX for HS %d, Receiver %d, Mezz %d does not exist\n",
-	     hyperSector, rcb, mezz);
-    fflush(stdout);
-    // SVTADCX bank doesn't exist
-    // set up data pointers to raw data
-    /* JS: this still needs to be done */
-
+  if((adcd_p == NULL) || (seqd_p == NULL)) {  // perfectly valid, just no data...
+    return TRUE;
   }
-  else { // SVTADCX bank exists
-    // number of entries in SVTADCX bank
-    int banklen = adcx_p->header.BankLength - (sizeof(Bank_Header)/4);
-    int numXEntries = banklen/3;
-    // number of entries in SVTSEQD bank
-    banklen = seqd_p->header.BankLength - (sizeof(Bank_Header)/4);
-    int numseq = (4*banklen)/sizeof(short);
 
-    // now loop through the hybrids of this wafer
-    for (int hybrid=1; hybrid<=SVT_HYBRIDS; hybrid++) {
-      INT32 hybridID = 
-	hybrid | 
-	(wafer << 2) |
-	(transitionBoard << 5);
-      int i;
-      for (i=0; i<numXEntries; i++)
-	if (adcx_p->entry[i].hybrid == hybridID) break;
-      if (i == numXEntries) {
-	// Commented Feb 20 2003 by Herb Ward on request of
-        // Jerome Lauret printf("HybridID 0x%x not found in ADCX bank\n", hybridID);
-	continue;
-      }
+//   printf("got banks  (adcd_p = 0x%x seqd = 0x%x)\n",adcd_p,seqd_p);
+//   fflush(stdout);
 
-      // Found entry for this hybridID, process offsets
-      int adcd_offset = adcx_p->entry[i].SVTADCD_offset;
-      int seqd_offset = adcx_p->entry[i].SVTSEQD_offset;
+  // number of entries in SVTSEQD bank
+  int banklen = seqd_p->header.BankLength - (sizeof(Bank_Header)/4);
+  int numseq = (4*banklen)/sizeof(short);
 
-      // seqd_offset is in bytes, sequence entries are shorts, correct:
-      seqd_offset = seqd_offset / sizeof(short);
+  // now loop through the hybrids of this wafer
+  for (int hybrid=1; hybrid<=SVT_HYBRIDS; hybrid++) {
+    INT32 hybridID = 
+      hybrid | 
+      (wafer << 2) |
+      (transitionBoard << 5);
+    int i;
 
-      /********************************************/
-      // go through the SEQD twice:
-      // First:  malloc the Sequence arrays needed
-      // Second: fill in the Sequence structs
-      /********************************************/
-      i = seqd_offset;
-      int anode = -1, oldstart=0;
-      while (i < numseq) { 
-	if (seqd_p->sequence[i] < 0) { // s_an_number word found
-	  anode = (seqd_p->sequence[i])& 0xff;
-	  INT32 seq_hybridID = (seqd_p->sequence[i]>>8)& 0x7f;
-	  if (seq_hybridID != hybridID) break; //start of the next hybrid
-	  anode = (seqd_p->sequence[i]) & 0xff;
-	  oldstart = 0;
-	  i++;
+    int adcd_offset = 0;
+    int seqd_offset = 0;
+    int found = 0;
+    for(i=0;i<numseq;i++) {
+      unsigned short x = seqd_p->sequence[i];
+
+      if(x & 0x8000) {    // This is an index entry...
+//  	printf("[%d] index %d/%d\n",
+//  	       i,(x & 0x7fff)/256,(x&0x7fff)%256);
+// 	fflush(stdout);
+
+	if((x & 0x7fff) / 256 == hybridID) {
+	  found = 1;
+	  seqd_offset = i;
+	  break;
 	}
-	else { // normal sequence word found
-	  unsigned short work = seqd_p->sequence[i];
-	  int start = work>>6;
-	  int len = work & 0x1f; if(len){/*nothing*/}
-	  if (start >= oldstart) { // still on same pad
-	    Anode_array[hybrid-1][anode-1].nseq++;
-	    oldstart = start;
-	    if (work & 0x20 ) { // last sequence ?
-	      int nseq = Anode_array[hybrid-1][anode-1].nseq;
-	      if (nseq) { // only if there are sequences on this anode
-		// allocate memory for Sequence arrays
-		if (Anode_array[hybrid-1][anode-1].seq) {
-		  printf("ERROR DETECTED: Anode_array[%d][%d] already malloced\n",
-			 hybrid-1, anode-1);
-		  return FALSE;
-		}
-		Anode_array[hybrid-1][anode-1].seq = 
-		  (Sequence *)malloc(nseq * sizeof(Sequence));
-		if (Anode_array[hybrid-1][anode-1].seq == NULL) {
-		  cout << "failed to malloc() Sequence structures " << endl;
-		  return FALSE;
-		}
-	      }
-	      anode++; // default to next anode in this hybrid
-	      oldstart=0;
-	    }
-	    i++;
-	    continue;
-	  } // still on same pad
- 	  else {     // starting new pad without bit 5 set!
-	    if (detector->ercpy->verbose) printf("new pad detected with bit 5 clear!\n");
+      }
+      else {              // This is a sequence entry...
+//  	printf("[%d] seq %d %d %d\n",
+//  	       i,
+//  	       (x & 0x7fc0)>>6, 
+//  	       x & 0x20, 
+//  	       x & 0x1f);
+// 	fflush(stdout);
+
+	adcd_offset += x & 0x1f;   // in adc counts...
+      }
+    }
+
+
+
+ //    printf("hybridID = %d  found = %d  adcd_off = %d,  seqd_off = %d\n",
+//  	   hybridID, found, adcd_offset, seqd_offset);
+//     fflush(stdout);
+   
+
+    if(!found) continue;
+
+
+    /********************************************/
+    // go through the SEQD twice:
+    // First:  malloc the Sequence arrays needed
+    // Second: fill in the Sequence structs
+    /********************************************/
+    i = seqd_offset;
+    int anode = -1, oldtb=0;
+    while (i < numseq) { 
+      if (seqd_p->sequence[i] & 0x8000) { // index descriptor
+	anode = (seqd_p->sequence[i])& 0xff;
+	INT32 seq_hybridID = (seqd_p->sequence[i]>>8)& 0x7f;
+
+	if (seq_hybridID != hybridID) break; //start of the next hybrid
+	if (anode == 255) break;
+	oldtb=0;
+      }
+      else { // sequence descriptor
+	unsigned short work = seqd_p->sequence[i];
+	int tb = (work>>6) & 0xff;
+	int len = work & 0x1f;
+	int last = work & 0x20;
+
+	if(oldtb > tb) {
+	  printf("Time bins are messed up old=%d, new=%d\n",oldtb,tb);
+	}
+
+	oldtb = tb;
+
+	Anode_array[hybrid-1][anode-1].nseq++;
+	if(last) {
+	  char *t = (char *)malloc(Anode_array[hybrid-1][anode-1].nseq *
+			   sizeof(Sequence));
+      
+	  Anode_array[hybrid-1][anode-1].seq = (Sequence *)t;
+
+	  if(!t) {
+	    printf("Failed to malloc() sequence structures\n");
 	    fflush(stdout);
-	    
-	    while ((seqd_p->sequence[i]>0) && (i<numseq)) i++; // skip until "switch=1"
-	    
-	    int nseq = Anode_array[hybrid-1][anode-1].nseq;
-	    if (nseq) { // only if there are sequences on this pad
-	      // allocate memory for Sequence arrays
-	      // make sure we don't do it more than once
-	      if (Anode_array[hybrid-1][anode-1].seq == NULL) {
-		Anode_array[hybrid-1][anode-1].seq = 
-		  (Sequence *)malloc(nseq*sizeof(Sequence));
-		if (Anode_array[hybrid-1][anode-1].seq == NULL) {
-		  cout << "failed to malloc() Sequence structures " << endl;
-		  return FALSE;
-		}
-	      }
-	    }  // if (nseq)
-	  }    //  else { ...starting new pad without bit 5 set
-	} // ...else { normal sequence word found
-      }   // ...while (i < numseq
-
-      /************************************************************/
-      /* Now process SVTSEQD again to fill in the sequence arrays */
-      /************************************************************/
-
-      u_char *adc_locn = (u_char *)&(adcd_p->ADC[adcd_offset]);
-      int anode_seq;
-      i = seqd_offset;
-      while (i < numseq) {
-	if (seqd_p->sequence[i] < 0) { // anode specifier word
-	  anode = (seqd_p->sequence[i])& 0xff;
-	  if (anode == 255) break; // anode 255 is the last word as a filler
-	  INT32 seq_hybridID = (seqd_p->sequence[i]>>8)& 0x7f;
-	  if (seq_hybridID != hybridID) break; //start of the next hybrid
-	  anode_seq = 0;
-	  oldstart = 0;
-	  i++;
-	} // ...if (seqd_p->sequence[i] < 0
-	else { // actual sequence word
-	  unsigned short work = seqd_p->sequence[i];
-	  int start = work>>6;
-	  int len = work & 0x1f;
-	  if (start >= oldstart) { // still on same pad
-	    if (anode_seq >= Anode_array[hybrid-1][anode-1].nseq)
-	      printf("sequence overrun %s %d hybrid %d anode %d seq %d\n",
-		     __FILE__,__LINE__,hybrid,anode,anode_seq);
-	    Anode_array[hybrid-1][anode-1].seq[anode_seq].startTimeBin = start;
-	    Anode_array[hybrid-1][anode-1].seq[anode_seq].Length = len;
-	    Anode_array[hybrid-1][anode-1].seq[anode_seq].FirstAdc = adc_locn;
-	    adc_locn +=len;
-	    anode_seq++;
-	    oldstart = start;
-	    if (work & 0x20) { //last sequence ?
-	      anode++;    // default to next pad in this padrow
-	      anode_seq = 0;
-	      oldstart=0;
-	    }
-	    i++;
+	    return FALSE;
 	  }
-	  else {    // starting new pad without bit 5 set!
-	    if (detector->ercpy->verbose) {
-	      printf("new pad detected with bit 5 clear!\n");
-	      fflush(stdout);
-	    }
-	    // skip until next "switch=1"
-	    while (seqd_p->sequence[i]>0 && i<numseq) i++; 
-	  }  // ...new anode starting with bit 5 set
-	}    // ...else {  actual sequence word
-      }      // ...while (i < numseq
-    }        // ...for (int hybrid=1...
-  }          // ...else {  SVTADCX bank exists
+
+	  anode++;
+	  oldtb = 0;
+	}
+      }
+      i++;
+    }
+
+//     printf("pass1 done\n");
+//     fflush(stdout);
+
+    /************************************************************/
+    /* Now process SVTSEQD again to fill in the sequence arrays */
+    /************************************************************/
+    
+    u_char *adc_locn = (u_char *)&(adcd_p->ADC[adcd_offset]);
+    i = seqd_offset;
+    int anode_seq = 0;
+    while (i < numseq) {
+      if (seqd_p->sequence[i] & 0x8000) { // index element
+	anode = (seqd_p->sequence[i])& 0xff;
+	INT32 seq_hybridID = (seqd_p->sequence[i]>>8)& 0x7f;
+
+	if (anode == 255) break; // anode 255 is the last word as a filler
+	if (seq_hybridID != hybridID) break; //start of the next hybrid
+
+	anode_seq = 0;
+      } // ...if (seqd_p->sequence[i] < 0
+      else { // sequence descriptor element
+	unsigned short work = seqd_p->sequence[i];
+	int tb = (work>>6) & 0xff;
+	int len = work & 0x1f;
+	int last = work & 0x20;
+
+	Anode_array[hybrid-1][anode-1].seq[anode_seq].startTimeBin = tb;
+	Anode_array[hybrid-1][anode-1].seq[anode_seq].Length = len;
+	Anode_array[hybrid-1][anode-1].seq[anode_seq].FirstAdc = adc_locn;
+	adc_locn +=len;
+	anode_seq++;
+
+      
+	if(last) { //last sequence ?
+	  anode++;    // default to next pad in this padrow
+	  anode_seq = 0;
+	}
+      }   
+      i++;
+    }
+
+//     printf("pass 2 done\n");
+//     fflush(stdout);
+  }
 
   return TRUE;
 }
@@ -427,7 +418,6 @@ int SVTV1P0_ZS_SR::getSequences(int Hybrid, int Anode, int *nSeq,
 {
   *nSeq = Anode_array[Hybrid-1][Anode-1].nseq; // number of sequences this anode
   *SeqData = Anode_array[Hybrid-1][Anode-1].seq; // pass back pointer to Sequence array
-
   return 0;
 }
 
@@ -459,10 +449,11 @@ int SVTV1P0_ZS_SR::getSpacePts(int Hybrid, int *nSpacePts, SpacePt **SpacePts)
 
   if (cld == (classname(Bank_SVTMZCLD) *)NULL) {
     // SVTMZCLD bank doesn't exist
-    if (detector->ercpy->verbose)
+    if (detector->ercpy->verbose) {
       printf("SVTMZCLD for HS %d, Receiver %d, Mezz %d does not exist\n",
 	     hyperSector, rcb, mezz);
-    fflush(stdout);
+      fflush(stdout);
+    }
   }
   else { // SVTMZCLD bank exists
     int numHybrids = cld->NumHybrids;

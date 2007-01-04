@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.cxx,v 1.3 2001/05/04 18:05:23 jschamba Exp $
+ * $Id: SVTV1P0.cxx,v 1.4 2007/01/04 21:27:50 jml Exp $
  *      
  * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.cxx,v $
+ * Revision 1.4  2007/01/04 21:27:50  jml
+ * zero suppressed reader no longer uses adcx, only seqd.  Fixes bug from early 2005
+ *
  * Revision 1.3  2001/05/04 18:05:23  jschamba
  * Corrected several instances of wrong counting representation for hypersector
  * and mezzanine (internal counting from 0, physical from 1)
@@ -390,6 +393,8 @@ int SVTV1P0_Reader::MemUsed()
 
 classname(Bank_SVTSECP) *SVTV1P0_Reader::getBankSVTSECP(int hypersector)
 {
+  //printf("getbankSVTSECP %d\n",hypersector);
+
   if((hypersector < 1 ) || (hypersector > 4))
   {
     char str0[40];
@@ -635,11 +640,14 @@ classname(Bank_SVTSEQD) *SVTV1P0_Reader::getBankSVTSEQD(int hypersector, int rb,
   errnum = 0;
   errstr0[0] = '\0';
 
+
+  //printf("get mzp\n");
   classname(Bank_SVTMZP) *mzp = getBankSVTMZP(hypersector, rb, mz);
   if(!mzp) return NULL;
 
-//   printf(" hypersector: %d  RB: %d  MZ: %d\n", hypersector, rb, mz);
-//   mzp->print();
+  //printf("mzp hypersector: %d  RB: %d  MZ: %d\n", hypersector, rb, mz);
+  //mzp->print();
+  
 
   if((!mzp->SVTSEQD.offset) || (!mzp->SVTSEQD.length))
   { 
@@ -652,6 +660,7 @@ classname(Bank_SVTSEQD) *SVTV1P0_Reader::getBankSVTSEQD(int hypersector, int rb,
   classname(Bank_SVTSEQD) *ptr = (classname(Bank_SVTSEQD) *)
                       (((INT32 *)mzp) +
 		       mzp->SVTSEQD.offset);
+
 
   if(strncmp(ptr->header.BankType,"SVTSEQD",7)) {
     char str0[40];
@@ -669,7 +678,6 @@ classname(Bank_SVTSEQD) *SVTV1P0_Reader::getBankSVTSEQD(int hypersector, int rb,
     ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
   }
   ptr->header.CRC = 0;
-
   return ptr;}
 
 classname(Bank_SVTADCX) *SVTV1P0_Reader::getBankSVTADCX(int hypersector, int rb, int mz)
