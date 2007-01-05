@@ -1,6 +1,37 @@
-// $Id: StarMCSimplePrimaryGenerator.cxx,v 1.1 2005/06/09 20:13:47 fisyak Exp $
+// $Id: StarMCSimplePrimaryGenerator.cxx,v 1.2 2007/01/05 21:27:58 potekhin Exp $
 #include "StarMCSimplePrimaryGenerator.h"
 ClassImp(StarMCSimplePrimaryGenerator);
+//_____________________________________________________________________________
+StarMCSimplePrimaryGenerator::StarMCSimplePrimaryGenerator(Int_t nprim,      Int_t Id,
+							   Double_t pT_min,  Double_t pT_max ,
+							   Double_t Eta_min, Double_t Eta_max,
+							   Double_t Phi_min, Double_t Phi_max,
+							   Double_t Z_min,   Double_t Z_max,
+							   const Char_t *option): StarMCPrimaryGenerator()
+{
+  PreSet(); 
+  SetGenerator(nprim, Id, pT_min, pT_max, Eta_min, Eta_max, 
+	       Phi_min, Phi_max,  Z_min, Z_max, option);
+}
+//_____________________________________________________________________________
+StarMCSimplePrimaryGenerator::StarMCSimplePrimaryGenerator(const Char_t *fileName):StarMCPrimaryGenerator() {
+  Int_t     nprim=0,    Id=0;
+  Double_t  pT_min=0.0, pT_max=0.0, Eta_min=0.0, Eta_max=0.0, Phi_min=0.0, Phi_max=0.0, Z_min=0.0, Z_max=0.0;
+  TString   option;
+
+  ifstream inputFile;
+  inputFile.open(fileName);
+
+  SetDebug(1);
+  inputFile >> nprim   >> Id
+	    >> pT_min  >> pT_max
+	    >> Eta_min >> Eta_max
+	    >> Phi_min >> Phi_max
+	    >> Z_min   >> Z_max
+	    >> option;
+
+  SetGenerator(nprim, Id, pT_min, pT_max, Eta_min, Eta_max, Phi_min, Phi_max,  Z_min, Z_max, option);
+}
 //_____________________________________________________________________________
 void StarMCSimplePrimaryGenerator::PreSet() {
   fStack = 0;
@@ -11,27 +42,33 @@ void StarMCSimplePrimaryGenerator::PreSet() {
   fOrigin = TVector3(0,0,0);
 }
 //_____________________________________________________________________________
-void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim, Int_t Id, 
-						Double_t pT_min,Double_t pT_max,
+void StarMCSimplePrimaryGenerator::SetGenerator(Int_t nprim,      Int_t Id, 
+						Double_t pT_min,  Double_t pT_max,
 						Double_t Eta_min, Double_t Eta_max, 
 						Double_t Phi_min, Double_t Phi_max, 
-						Double_t Z_min, Double_t Z_max, const Char_t *option) {
-  fNofPrimaries = nprim; fId = Id;  
-  fpT_min = pT_min; 
-  fpT_max = pT_max; 
-  fEta_min = Eta_min; 
-  fEta_max = Eta_max; 
-  fPhi_min = Phi_min; 
-  fPhi_max = Phi_max; 
-  fZ_min = Z_min; 
-  fZ_max = Z_max; 
-  fOption = option; 
+						Double_t Z_min,   Double_t Z_max, const Char_t *option) {
+  fNofPrimaries = nprim;
+  fId           = Id;
+  fpT_min       = pT_min; 
+  fpT_max       = pT_max; 
+  fEta_min      = Eta_min; 
+  fEta_max      = Eta_max; 
+  fPhi_min      = Phi_min; 
+  fPhi_max      = Phi_max; 
+  fZ_min        = Z_min; 
+  fZ_max        = Z_max; 
+  fOption       = option; 
+
   if (! fOption.CompareTo("G",TString::kIgnoreCase)) fId = TDatabasePDG::Instance()->ConvertGeant3ToPdg(fId);
-  cout << "Generate " << fNofPrimaries << " primary tracks of type " << fId << endl;
-  cout << fpT_min << " <  pT < " << fpT_max << endl;
-  cout << fEta_min  << " < eta < " << fEta_max  << endl;
-  cout << fPhi_min<< " < phi < " << fPhi_max<< endl;
-  cout << fZ_min  << " < zVer< " << fZ_max  << endl;
+
+  if(Debug()) {
+    cout << "Generate " << fNofPrimaries << " primary tracks of PDG particle " << fId << " (input type "<<Id<<")"<<endl;
+    cout << fpT_min     << " < pT  < "   << fpT_max  << endl;
+    cout << fEta_min    << " < eta < "   << fEta_max << endl;
+    cout << fPhi_min    << " < phi < "   << fPhi_max << endl;
+    cout << fZ_min      << " < zVer< "   << fZ_max   << endl;
+  }
+
   fgInstance = this;
 }
 //_____________________________________________________________________________
