@@ -1,19 +1,16 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)  04/01/2006
 //
-// $Id: DialogsQ.C,v 1.1 2007/01/05 01:28:04 fine Exp $
+// $Id: DialogsQ.C,v 1.2 2007/01/05 03:51:17 fine Exp $
 //
-// This file contains the set of function to use class QInputDialog class
-// See $ROOTSYS/macros/Dialogs.C for the ROOT GUI-based counterpart
-//
-// This file contains also some utility functions that use
-// the QInputDialog class static methods 
+// This file contains the set of functions to use class QInputDialog
 //     http://doc.trolltech.com/3.3/qinputdialog.html
-// to either get a string, integer or floating point number. 
+// static methods  to either get a string, integer or floating point number. 
 //
-// The QInputDialog static methods prompts for an input string 
-// using a simple dialog box. 
-// There are also two functions showing
-// how to use the file open and save dialogs.
+// (see $ROOTSYS/macros/Dialogs.C for the ROOT GUI-based counterpart )
+//
+//
+// The functions  prompt for an input string using a simple dialog box. 
+// There are also two functions showing how to use the file open and save dialogs.
 // see: http://doc.trolltech.com/3.3/qfiledialog.html#getOpenFileName 
 //
 // The utility functions are:
@@ -26,6 +23,7 @@
 //
 // To use the QInputDialog Qt class and the utility functions you just
 // have to load the DialogsQ.C file as follows:
+//
 // .x DialogsQ.C
 //
 // Now you can use them like:
@@ -38,16 +36,17 @@
 //
 
 //--- Utility Functions --------------------------------------------------------
+//______________________________________________________________________
 void DialogsQ() {
-   // Load the Qt dictionary
+   // Load the Qt ROOT dictionary
    gSystem->Load("qtcint");
 }
+//______________________________________________________________________
 const char *OpenFileDialog()
 {
-   // Prompt for file to be opened. Depending on navigation in
-   // dialog the current working directory can be changed.
-   // The returned file name is always with respect to the
-   // current directory.
+   // Prompt for file to be opened. 
+   // http://doc.trolltech.com/3.3/qfiledialog.html#getOpenFileName
+   
    QString filter =
        "Macro files (*.C);"
       ";ROOT files (*.root);"
@@ -63,13 +62,12 @@ const char *OpenFileDialog()
    return (const char*)fFilename;
 }
 
+//______________________________________________________________________
 const char *SaveFileDialog()
 {
-   // Prompt for file to be saved. Depending on navigation in
-   // dialog the current working directory can be changed.
-   // The returned file name is always with respect to the
-   // current directory.
-
+   // Prompt for file to be saved.
+   // http://doc.trolltech.com/3.3/qfiledialog.html#getSaveFileNamehttp://doc.trolltech.com/3.3/qfiledialog.html#getSaveFileName 
+   
    QString filter =
       ";Macro files (*.C);"
       ";ROOT files (*.root);"
@@ -85,35 +83,40 @@ const char *SaveFileDialog()
    return (const char*)fFilename;
 }
 
+//______________________________________________________________________
 const char *GetStringDialog(const char *prompt, const char *defval)
 {
    // Prompt for string. The typed in string is returned.
-
+   // http://doc.trolltech.com/3.3/qinputdialog.html#getText
+   
    static QString answer;
 
    answer = QInputDialog::getText(
-            "Enter text", prompt, QLineEdit::Normal,
-            defval);
+            "Enter text", prompt, QLineEdit::Normal,defval);
 
    return (const char *)answer;
 }
 
+//______________________________________________________________________
 Int_t GetIntegerDialog(const char *prompt, Int_t defval
                       ,int minValue = -2147483647, int maxValue = 2147483647
                       , int step = 1)
 {
     // Prompt for integer. The typed in integer is returned.
-    int res = QInputDialog::getInteger("Enter integer", prompt, defval
-                                       , minValue,maxValue, int step);
-    return res;
+    // http://doc.trolltech.com/3.3/qinputdialog.html#getInteger
+   
+    return QInputDialog::getInteger("Enter integer", prompt, defval
+                                    ,minValue, maxValue, step);
 }
 
+//______________________________________________________________________
 Double_t GetFloatDialog(const char *prompt, Double_t defval
                        , double minValue = -2147483647, double maxValue = 2147483647
                        , int decimals = 1)
 {
    // Prompt for float. The typed in float is returned.
-   Double_t res = QInputDialog::getDouble("Enter double", prompt, defval
-                                           ,minValue, maxValue, decimals);
-   return res;
+   // http://doc.trolltech.com/3.3/qinputdialog.html#getDouble
+   //
+   return QInputDialog::getDouble("Enter double", prompt, defval
+                                  ,minValue, maxValue, decimals);
 }
