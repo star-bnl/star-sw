@@ -3,6 +3,10 @@
 #include "Stiostream.h"
 #include "StarVMCApplication.h"
 #include "StarMCHits.h"
+
+//please be patient and don't get confused here  :)
+#include "StarMCHit.h"
+
 #include "TGeoManager.h"
 #include "TCL.h"
 #include "TDataSetIter.h"
@@ -14,8 +18,8 @@
 #include "TClass.h"
 #include "TROOT.h"
 #include "TRandom.h"
-#include "TLorentzVector.h"
 #include "TFile.h"
+#include "TLorentzVector.h"
 #ifdef __ROOT__
 #include "StMaker.h"
 #endif
@@ -131,18 +135,29 @@ static const Detector_G2T_t g2t[kALL] = {
   { kTPAD,"TPAD","g2t_tpc_hit","g2t_tpc_hit","TPCE","tpce_tpcg"}, // +
   { kVRAD,"VRAD","g2t_vpd_hit","g2t_vpd_hit","VPDD","vpdd_vpdg"} // +
 };
+
+
+Int_t      StarMCHit::count = 0;
+StarMCHit* StarMCHit::lastHit = NULL;
+
 //________________________________________________________________________________
 StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) : 
-  TDataSet(name,title),  fDetectors(0),fGeoData(0),  fDetList(0), 
-  fVolUserInfo(0), fCurrentDetector(0), fDebug(0), fSeed(0), fEventNumber(0)
+  TDataSet(name,title), fDetectors(0),fGeoData(0),  fDetList(0), 
+  fVolUserInfo(0), fCurrentDetector(0), fDebug(0), fLegacy(0), fSeed(0), fEventNumber(0)
 { 
-  fgInstance = this; fHitHolder = this; 
+  fgInstance = this;
+  fHitHolder = this; 
+  fHitCollection = new StarMCHitCollection();
 }
 //________________________________________________________________________________
 Int_t StarMCHits::Init() {
+
   cout << "StarMCHits::Init() -I- Get Detectors" <<endl;
+
   if (! fDetectors ) delete fDetectors;
+
   fDetectors = 0;
+
 #ifdef __ROOT__
   if (! StMaker::GetChain()) {
 #endif
@@ -162,6 +177,7 @@ Int_t StarMCHits::Init() {
     fGeoData   = StMaker::GetChain()->GetDataBase("VmcGeometry/geom");
  }
 #endif
+
   assert(fDetectors);
   // Make list of detector elements
   TDataSetIter next( fDetectors , 99);
@@ -222,23 +238,112 @@ Int_t StarMCHits::Init() {
     cout << endl;
 #endif
   }
+  SetDebug(1);
   return 0;
 }
 //________________________________________________________________________________
 void StarMCHits::Step() {
-  //  static Int_t Idevt0 = -1;
-  static Double_t Gold = 0;
+
+  if(Legacy()) StepLegacy(); // revert to the legacy step routine
+
+  TGeoNode *nodeT        = gGeoManager->GetCurrentNode();  assert(nodeT);
+  TGeoVolume *volT       = nodeT->GetVolume();             assert(volT);
+  const TGeoMedium  *med = volT->GetMedium(); 
+
+  // -- RETURN POINT 1: NON SENSITIVE VOLUME
+  Int_t Isvol = (Int_t) med->GetParam(0);
+  if (Isvol <= 0) return;
+
+  // if we are entering a volume, we've got to create a new hit; if not, pick the current hit
+  StarMCHit* hit = gMC->IsTrackEntering() ? new StarMCHit() : StarMCHit::LastHit();
+  assert(hit);
+
+  cout<<StarMCHit::Count()<<" hits created so far"<<endl; //  cout<<StarMCHitCollection::Count()<<" in collection"<<endl;
+
+  TGeoHMatrix  *matrixC = gGeoManager->GetCurrentMatrix();
+  gMC->TrackPosition(hit->currentPointGlobal);
+  hit->getLocal(matrixC);
+
+  // -- RETURN POINT 2: SET ENTRY POINT AND LEAVE
+  if (gMC->IsTrackEntering()) {
+    cout<<"Entering "<<volT->GetName()<<endl;
+    hit->setEntry();
+
+
+    TString GeoManagerPath(gGeoManager->GetPath());
+    TString LogicalPath(volT->GetTitle());
+
+    static const TString GeoManagerSeparator("/_");
+    TObjArray *GeoManagerPathNodes  = GeoManagerPath.Tokenize(GeoManagerSeparator);
+    Int_t      GeoManagerPathLength = GeoManagerPathNodes->GetEntriesFast();
+
+    static const TString LogicalSeparator("/");
+    TObjArray *LogicalPathNodes = LogicalPath.Tokenize(LogicalSeparator);
+
+    Int_t i=0,j=0;
+
+    cout << "Geo Path: " << GeoManagerPath << " Logical Path:"<< LogicalPath<< endl;
+
+    //    TString numPath="";
+
+    for (i = 0; i < GeoManagerPathLength; i+=2) {
+      TString GeoManagerString = ((TObjString*) GeoManagerPathNodes->At(i))->GetString();
+      TString LogicalString    = ((TObjString*) LogicalPathNodes->At(j))   ->GetString();
+      if(GeoManagerString.Contains(LogicalString)) {
+	cout<<"Found:"<< GeoManagerString << " " << LogicalString << endl;
+	TString stringN = ((TObjString*) GeoManagerPathNodes->At(i+1))->GetString();
+        Int_t n = stringN.Atoi();
+
+	hit->setPathAt(j++,(Short_t) n);	// numPath+="/";numPath+=stringN;
+      }
+    }
+    //    cout<<"NumPath:"<<numPath<<endl; for(int i=0;i<StarMCHit::MaxDepth();i++) {cout<<" "<<hit->getPathAt(i);} cout<<endl;
+
+    Int_t iPart  = gMC->TrackPid();
+    Int_t iTrack = StarVMCApplication::Instance()->GetStack()->GetCurrentTrackId();
+    hit->setTrack(iTrack);
+    hit->setPid(iPart);
+    return;
+  }
+
+  Double_t dedx = gMC->Edep();
+  Double_t step = gMC->TrackStep();
+
+  cout<<"Track "<<hit->getTrack()<<", particle "<<hit->getPid()<<", dE:"<<dedx<<", step:"<<step<<endl;
+  hit->AddDedx(dedx);
+  hit->AddStep(step);
+
+  // -- RETURN POINT 3: KEEP GOING THROUGH THE VOLUME
+  if (! gMC->IsTrackExiting() && ! gMC->IsTrackStop()) {
+    cout<<"Propagating in "<<volT->GetName()<<endl;
+    return;
+  }
+
+
+  // -- RETURN POINT 4: FINALIZE THE HIT
+
+  hit->setActive(false);
+  hit->setExit();
+  HitCollection()->Add(hit);
+  cout<<"Leaving "<<volT->GetName()<<endl;
+
+  return;
+}
+//________________________________________________________________________________
+void StarMCHits::StepLegacy() {
+
+  static Double_t    Gold  = 0;
   static St_det_user *user = 0;
   static St_det_path *path = 0;
   static St_det_hit  *hit  = 0;
 
-  //  cout << "Call StarMCHits::Step" << endl;
-  TGeoNode *nodeT = gGeoManager->GetCurrentNode();
-  assert(nodeT);
-  TGeoVolume *volT = nodeT->GetVolume();
-  assert(volT);
+  TGeoNode *nodeT  = gGeoManager->GetCurrentNode();  assert(nodeT);
+  TGeoVolume *volT = nodeT->GetVolume();             assert(volT);
+
   fCurrentDetector = (StHitDescriptor *) fVolUserInfo->At(volT->GetNumber());
+
   const TGeoMedium   *med = volT->GetMedium(); 
+
   /*   fParams[0] = isvol;
        fParams[1] = ifield;
        fParams[2] = fieldm;
@@ -247,7 +352,10 @@ void StarMCHits::Step() {
        fParams[5] = deemax;
        fParams[6] = epsil;
        fParams[7] = stmin; */
+
   Int_t Isvol = (Int_t) med->GetParam(0);
+  cout << "StarMCHits::Step - volT:"<<volT->GetName()<<"  Isvol " << Isvol<<endl;
+
   if (Isvol <= 0 && ! fCurrentDetector) return;
   if (Isvol && ! fCurrentDetector ) {
     if (Debug())
@@ -399,6 +507,12 @@ St_g2t_Chair *StarMCHits::NewChair(const Char_t *type, const Char_t *name) {
 //________________________________________________________________________________
 void StarMCHits::FinishEvent() {
   static const Double_t pEMax = 1 - 1.e-10;
+
+  if(!Legacy()) {
+    cout<<"Number of added hits: "<<HitCollection()->GetEntriesFast()<<endl;
+    return;
+  }
+
   TDataSet *m_DataSet = StarMCHits::instance()->GetHitHolder();
   if (! m_DataSet) return;
   St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
