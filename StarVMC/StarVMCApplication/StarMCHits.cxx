@@ -1,3 +1,8 @@
+// $Id: StarMCHits.cxx,v 1.8 2007/01/05 21:38:58 potekhin Exp $
+// $Log: StarMCHits.cxx,v $
+// Revision 1.8  2007/01/05 21:38:58  potekhin
+// Add CVS tags
+//
 #include <assert.h>
 #include <stdio.h>
 #include "Stiostream.h"
