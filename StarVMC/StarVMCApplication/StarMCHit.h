@@ -1,3 +1,8 @@
+// $Id: StarMCHit.h,v 1.2 2007/01/05 21:37:08 potekhin Exp $
+// $Log: StarMCHit.h,v $
+// Revision 1.2  2007/01/05 21:37:08  potekhin
+// Add CVS tags
+//
 #ifndef StarMCHit_h
 #define StarMCHit_h
 

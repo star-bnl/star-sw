@@ -1,3 +1,8 @@
+// $Id: StarMCHits.h,v 1.6 2007/01/05 21:37:42 potekhin Exp $
+// $Log: StarMCHits.h,v $
+// Revision 1.6  2007/01/05 21:37:42  potekhin
+// Add CVS tags
+//
 #ifndef StarMCHits_h
 #define StarMCHits_h
 #include "St_g2t_Chair.h"
