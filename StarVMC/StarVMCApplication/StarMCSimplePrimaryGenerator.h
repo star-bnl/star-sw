@@ -1,5 +1,9 @@
-// $Id: StarMCSimplePrimaryGenerator.h,v 1.1 2005/06/09 20:13:47 fisyak Exp $
+// $Id: StarMCSimplePrimaryGenerator.h,v 1.2 2007/01/05 21:27:10 potekhin Exp $
 // $Log: StarMCSimplePrimaryGenerator.h,v $
+// Revision 1.2  2007/01/05 21:27:10  potekhin
+// Added a constructor which takes a filename
+// (for phase space parameters)
+//
 // Revision 1.1  2005/06/09 20:13:47  fisyak
 // It looks like that all hits in place (calorimeters have to be check for volumeid)
 //
@@ -17,16 +21,15 @@
 class StarMCSimplePrimaryGenerator : public StarMCPrimaryGenerator  {
  public:
   StarMCSimplePrimaryGenerator(TVirtualMCStack* stack) : StarMCPrimaryGenerator() { PreSet(); fStack = stack; }
-  StarMCSimplePrimaryGenerator(Int_t    nprim=1,     Int_t    Id=6, 
+  StarMCSimplePrimaryGenerator(Int_t    nprim=1,     Int_t    Id=6,
 			       Double_t pT_min =  0, Double_t pT_max = 10,
 			       Double_t Eta_min=-10, Double_t Eta_max=10, 
 			       Double_t Phi_min = 0, Double_t Phi_max= 2*TMath::Pi(), 
 			       Double_t Z_min=0,     Double_t Z_max=0, 
-			       const Char_t *option = "G"): StarMCPrimaryGenerator() {
-					 PreSet(); 
-					 SetGenerator(nprim, Id, pT_min, pT_max, Eta_min, Eta_max, 
-						      Phi_min, Phi_max,  Z_min, Z_max, option);
-				       }
+			       const Char_t *option = "G");
+
+  StarMCSimplePrimaryGenerator(const Char_t *fileName);
+
   virtual ~StarMCSimplePrimaryGenerator() {}
   
   static StarMCSimplePrimaryGenerator* Instance() {return (StarMCSimplePrimaryGenerator*) StarMCPrimaryGenerator::Instance();}
