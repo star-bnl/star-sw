@@ -1,6 +1,9 @@
-// $Id: StSsdClusterList.cc,v 1.1 2006/10/16 16:43:29 bouchet Exp $
+// $Id: StSsdClusterList.cc,v 1.2 2007/01/08 18:14:06 bouchet Exp $
 //
 // $Log: StSsdClusterList.cc,v $
+// Revision 1.2  2007/01/08 18:14:06  bouchet
+// correction in the clusters splitting : the size (number of strips) of the clusters found after splitting the original cluster in several are not successively
+//
 // Revision 1.1  2006/10/16 16:43:29  bouchet
 // StSsdUtil regroups now methods for the classes StSsdStrip, StSsdCluster and StSsdPoint
 //
@@ -247,7 +250,8 @@ Int_t StSsdClusterList::splitCluster(StSsdClusterControl *clusterControl, StSsdC
   Int_t maxRight =0;
   Int_t localFirstStrip = CurrentCluster->getFirstStrip();
   Float_t weight = 1.;
-
+  Int_t strip_offset = 0;//JB : 01/08/2007 : update the current strip when the splitting of clusters is done
+  Int_t strip_diff   = 0;
   for (iMaxima = 0; iMaxima<nMaxima-1 ; iMaxima++)
     {
       maxLeft  = maxima[iMaxima];
@@ -270,7 +274,7 @@ Int_t StSsdClusterList::splitCluster(StSsdClusterControl *clusterControl, StSsdC
       Int_t addRight = 0;
       Int_t nStripInTheGroup = 1;
       Float_t meanAdc = (float)ListAdc[minima[iMinima]];
-      localFirstStrip = CurrentCluster->getFirstStrip();
+      localFirstStrip = CurrentCluster->getFirstStrip()+strip_offset;
       weight = 1.;
 
       while(!theEnd)
@@ -330,7 +334,8 @@ Int_t StSsdClusterList::splitCluster(StSsdClusterControl *clusterControl, StSsdC
 		{		  
 		  newCluster->update(currentStripList->getStrip(currentStrip),weight);
 		  weight=1.;
-		  localFirstStrip=currentStrip+1;	     
+		  localFirstStrip=currentStrip+1;
+		  strip_diff++;	     
 		}
 	      this->addNewCluster(newCluster);
 	    }
@@ -344,6 +349,7 @@ Int_t StSsdClusterList::splitCluster(StSsdClusterControl *clusterControl, StSsdC
 		  newCluster->update(currentStripList->getStrip(currentStrip),weight);
 		  weight=1.;
 		  localFirstStrip=currentStrip+1;
+		  strip_diff++;
 		}
 	      weight=0.5;
 	      newCluster->update(currentStripList->getStrip(localFirstStrip),weight);//last strip
@@ -351,6 +357,7 @@ Int_t StSsdClusterList::splitCluster(StSsdClusterControl *clusterControl, StSsdC
 	    }
 	  nSubCluster++;
 	}
+      strip_offset = strip_diff;
     }
 
     if(nSubCluster)
