@@ -99,7 +99,7 @@ StiFactory<Concrete,Abstract>::StiFactory():Factory<Abstract>("")
 {
   fHTop=0;fBTop=0;
   setName(typeid(*this).name());
-  printf("*** Factory created *** %s\n",getName().c_str());
+  printf("*** Factory created *** %s\n",this->getName().c_str());
 }
 template <class Concrete, class Abstract>
 StiFactory<Concrete,Abstract>* StiFactory<Concrete,Abstract>::myInstance() 
@@ -114,11 +114,11 @@ Abstract *StiFactory<Concrete,Abstract>::getInstance()
 {
   enum {FENCE = sizeof(double)+2*sizeof(long)+1};
   if (!fHTop)  {
-    if (fCurCount >= fMaxCount) {
+    if (this->fCurCount >= this->fMaxCount) {
     throw runtime_error("StiFactory::getInstance() - Too many instances");
     }
-    assert(fCurCount < fMaxCount);  
-    if (fFastDel)    {
+    assert(this->fCurCount < this->fMaxCount);  
+    if (this->fFastDel)    {
        int   nBuf = sizeof(StiBlock<Concrete>) + FENCE;
        char *cBuf = new char[nBuf];
        cBuf[nBuf-1]=46;
@@ -127,15 +127,15 @@ Abstract *StiFactory<Concrete,Abstract>::getInstance()
     } else {
        new StiBlock<Concrete>(&fBTop,&fHTop,   0);
     }
-    fCurCount += fBTop->getSize();
-    fgTotal   += sizeof(StiBlock<Concrete>)*1e-6;
+    this->fCurCount += fBTop->getSize();
+    this->fgTotal   += sizeof(StiBlock<Concrete>)*1e-6;
   }
-  fInstCount++;
+  this->fInstCount++;
   StiHolder<Concrete> *h = fHTop;
   fHTop = h->fNext;
   h->fNext=0;
   h->fObj.reset();
-  fUseCount++;
+  this->fUseCount++;
   h->fLong= ((long)this)+1;		//set factory addres+1
   return &h->fObj;  
 }  
@@ -147,7 +147,7 @@ void StiFactory<Concrete,Abstract>::free(Abstract *obj)
   obj->unset();
   StiHolder<Concrete>* h = (StiHolder<Concrete>*)((char*)obj-shift);
   assert((h->fLong-1)== (long)this);
-  h->fNext = fHTop; fHTop=h; fUseCount--; fFreeCount++;
+  h->fNext = fHTop; fHTop=h; this->fUseCount--; this->fFreeCount++;
 }
 
 //______________________________________________________________________________
@@ -159,20 +159,21 @@ void StiFactory<Concrete,Abstract>::clear()
   while (b) {
     StiBlock<Concrete>* d = b;
     b=b->fNext;
-    if (fFastDel) {delete [] d->fBuff;} else { delete d;}
+    if (this->fFastDel) {delete [] d->fBuff;} else { delete d;}
     sz += sizeof(StiBlock<Concrete>);
-    fgTotal -= sizeof(StiBlock<Concrete>)*1e-6;
+    this->fgTotal -= sizeof(StiBlock<Concrete>)*1e-6;
   }
-  fBTop=0; fHTop=0; fCurCount=0; fUseCount=0;
+  fBTop=0; fHTop=0; this->fCurCount=0; this->fUseCount=0;
   printf("*** %s::clear() %g MegaBytes Total %g Inst/Free=%d %d\n"
-        ,getName().c_str(),sz*1e-6,fgTotal,fInstCount,fFreeCount);
-  fInstCount=0; fFreeCount=0;
+        ,this->getName().c_str(),sz*1e-6
+	,this->fgTotal,this->fInstCount,this->fFreeCount);
+  this->fInstCount=0; this->fFreeCount=0;
 }
 //______________________________________________________________________________
 template <class Concrete, class Abstract>
 void StiFactory<Concrete,Abstract>::reset()
 {
-  if (!fUseCount) return;
+  if (!this->fUseCount) return;
   
   typedef StiBlock<Concrete> B_t;
   B_t* b = fBTop;
@@ -182,6 +183,6 @@ void StiFactory<Concrete,Abstract>::reset()
     b->reset(&fBTop,&fHTop);
     b=n;
   }
-  fUseCount=0;
+  this->fUseCount=0;
 }
 #endif
