@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManagerImpl.hh,v 1.5 2006/11/16 21:50:40 deph Exp $
+ * $Id: StDbManagerImpl.hh,v 1.6 2007/01/09 16:27:40 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.hh,v $
+ * Revision 1.6  2007/01/09 16:27:40  deph
+ * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
+ *
  * Revision 1.5  2006/11/16 21:50:40  deph
  * additional files needed for db load balancing
  *
@@ -220,7 +223,9 @@ public:
   short xmlInputSource;
 
   // MLK added for load balacing:
+#ifndef NoXmlTreeReader
   StDbServiceBroker* myServiceBroker;
+#endif
 
 protected:
   // initializers for standard types & domains

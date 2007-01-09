@@ -1,3 +1,4 @@
+#ifndef NoXmlTreeReader
 #include <iostream>
 #include "StlXmlTree.h"
 #include "ChapiStringUtilities.h"
@@ -57,7 +58,6 @@ StlXmlTree::StlXmlTree(const string xmlfilename, StlXmlTree* filter) :
 	  printf("StlXmlTree::StlXmlTree: failed to parse %s\n", xmlfilename.c_str());
 	  MyStatus = BAD_XML;
 	}
-
     } 
   else 
     {
@@ -237,7 +237,7 @@ void StlXmlTree::ProcessNode()
       cut_string_after_sub(XmlTreeNodeName,sep);
     }
 
-  if (NodeType==XML_READER_TYPE_ELEMENT || NodeValue !="" )
+  if ((NodeType==XML_READER_TYPE_ELEMENT || NodeValue !="") && NodeType != XML_READER_TYPE_COMMENT )
     {
       if (NodeType==XML_READER_TYPE_ELEMENT)
 	{
@@ -301,6 +301,8 @@ bool StlXmlTree::SkipBasedOnValue(const string key, const string value)
   /*  skip if all  values mismatch  the key  <==> if  there is  even a
 single match, take it.  If there is no key, take it !*/
 
+
+
   if (b!=e)
     {
       for (MMCI i=b; i!=e; ++i)
@@ -311,20 +313,13 @@ single match, take it.  If there is no key, take it !*/
 
 	  for (MCI ii = f.begin(); ii != f.end(); ++ii)
 	    {
-	      
-	      MCI mykey = m.find((*ii).first);
+	      string search_key = (*ii).first;
+
+	      cout << " search_key " << search_key <<"\n";
+	      MCI mykey = m.find(search_key);
 	      
 	      if (mykey!=m.end())
 		{
-		  //  cout << (*ii).first << " " <<(*ii).second << " " << (*mykey).first << " "<<(*mykey).second << "\n";
-		  /* // works for structureless attribute 
-		  if ((*mykey).second != (*ii).second) 
-		    {
-		      cout << " mismatch \n";
-		      return true;
-		    }
-		  */
-		      
 		      /* generalizing for the attribute which is in itself a comma-separated sequence. 
 			 In that case, split into comma-separated elements and match element-by-element.
 			 Return true if not a single match is found. 
@@ -333,7 +328,7 @@ single match, take it.  If there is no key, take it !*/
 		      vector<string> mykey_v = slice((*mykey).second,",");
 		      vector<string> f_v = slice((*ii).second,",");
 
-			  rtrn = true;
+		      rtrn = true;
 			  VCI m_v_i = mykey_v.begin();
 			  while (m_v_i != mykey_v.end() && rtrn)
 			    {
@@ -341,6 +336,9 @@ single match, take it.  If there is no key, take it !*/
 			      
 			      while (f_v_i != f_v.end() && rtrn)
 				{
+#ifdef DEBUG
+				  cout <<" compare " <<*m_v_i <<" and "<<*f_v_i <<"\n";
+#endif
 				  if (*m_v_i == *f_v_i) 
 				    {
 				      rtrn = false;
@@ -349,6 +347,14 @@ single match, take it.  If there is no key, take it !*/
 				  ++f_v_i;
 				}
 			      ++m_v_i;
+			    }
+
+			  if (rtrn) 
+			    {
+#ifdef DEBUG
+			      cout << "StlXmlTree::SkipBasedOnValue "<< rtrn <<"\n";
+#endif
+			      return rtrn;
 			    }
 		}
 	    }
@@ -359,9 +365,12 @@ single match, take it.  If there is no key, take it !*/
       rtrn = false; /* otherwise will need to have a prototype structure in 
 		       a filter file to enable parsing*/
     }
+
 #ifdef DEBUG
-  cout << "StlXmlTree::SkipBasedOnValue "<< rtrn <<"\n";
+			      cout << "StlXmlTree::SkipBasedOnValue "<< rtrn <<"\n";
 #endif
   return rtrn;
 }
+
+#endif
 

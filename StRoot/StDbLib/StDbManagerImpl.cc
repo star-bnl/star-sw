@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.22 2006/11/16 21:50:40 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.23 2007/01/09 16:27:40 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.23  2007/01/09 16:27:40  deph
+ * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
+ *
  * Revision 1.22  2006/11/16 21:50:40  deph
  * additional files needed for db load balancing
  *
@@ -225,7 +228,9 @@ StDbManagerImpl::StDbManagerImpl(): StDbManager(), dbTypeFree(dbTUser1), dbDomai
   initTypes(); 
   initDomains(); 
   mfactory = new StDbTableFactory();
+#ifndef NoXmlTreeReader
   myServiceBroker = 0;
+#endif
 };
 
 ////////////////////////////////////////////////////////////////
@@ -238,10 +243,12 @@ StDbManagerImpl::~StDbManagerImpl(){
   delete mfactory;
   delete Messenger;
   mInstance=0;
+#ifndef NoXmlTreeReader
   if (myServiceBroker)
     {
       delete myServiceBroker;
     }
+#endif
 }
 
 ////////////////////////////////////////////////////////////////
@@ -451,18 +458,14 @@ void StDbManagerImpl::lookUpServers(){
      We add a different file.
   */
   
-/*
-  string dbLoadBalancerConfig = 
-    (string)getenv("STAR")+"/StDb/servers/dbLoadBalancerConfig.xml";
-  */
-
-  string dbLoadBalancerConfig = 
-    "/star/u/deph/servers/dbLoadBalancerConfig.xml";
-
-/*
+#ifndef NoXmlTreeReader
+#ifdef DEBUG
   string dbLoadBalancerConfig = 
     (string)getenv("HOME")+"/dbLoadBalancerConfig.xml";
-  */
+#else
+  string dbLoadBalancerConfig = 
+    "/star/u/deph/servers/dbLoadBalancerConfig.xml";
+#endif
 
   myServiceBroker = new StDbServiceBroker(dbLoadBalancerConfig);
   short SBStatus = myServiceBroker->GetStatus();
@@ -476,6 +479,7 @@ void StDbManagerImpl::lookUpServers(){
       myServiceBroker = 0;
       cerr << "StDbManagerImpl::lookUpServers() StDbServiceBroker error "<<SBStatus<<"\n";
     }
+#endif
 
  char* xmlFile[3]={NULL,NULL,NULL};
  dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
