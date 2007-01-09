@@ -1,3 +1,4 @@
+#ifndef NoXmlTreeReader
 #include <libxml/xmlreader.h>
 /*! \class StlXmlTree
 * 
@@ -226,6 +227,7 @@
 #define StlXmlTree_h
 #include <vector>
 #include <map>
+#include <string>
 
 namespace stl_xml_tree
 {
@@ -277,4 +279,5 @@ public:
   void InsertKeyValuePair(std::string key, std::string value);
   inline short GetStatus() {return MyStatus;};
 };
+#endif
 #endif

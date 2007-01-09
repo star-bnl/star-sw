@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.25 2006/08/17 02:58:56 deph Exp $
+ * $Id: MysqlDb.h,v 1.26 2007/01/09 16:27:39 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.26  2007/01/09 16:27:39  deph
+ * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
+ *
  * Revision 1.25  2006/08/17 02:58:56  deph
  * updated load balancer - removing hard-coded nodes from API to xml
  *
@@ -136,8 +139,8 @@ typedef  int MYSQL_FIELD;
 #include "StDbLogger.hh"
 #include "parseXmlString.hh"
 #include "StDbManagerImpl.hh"
-#include <vector.h>
-#include <string.h>
+
+#include <string>
 
 #ifdef HPUX
 #define freeze(i) str()
@@ -214,8 +217,6 @@ private:
   bool  isBlob[200];
   bool  isBinary[200];
   bool  isSpecialType[200];
-
-  std::vector<std::string>::iterator RecommendedServer(std::vector<std::string>* ListToUse, char* socket, int port);
 
 public:
 

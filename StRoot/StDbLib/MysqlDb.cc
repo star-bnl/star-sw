@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.39 2006/11/16 21:50:40 deph Exp $
+ * $Id: MysqlDb.cc,v 1.40 2007/01/09 16:27:39 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.40  2007/01/09 16:27:39  deph
+ * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
+ *
  * Revision 1.39  2006/11/16 21:50:40  deph
  * additional files needed for db load balancing
  *
@@ -302,8 +305,7 @@ strcpy(mdbhost,aHost);
  double lbtime;
   start = clock();
 
-  //  std::vector<std::string>::iterator  myserver = RecommendedServer(&(my_manager->xmlServerList), NULL, mdbPort);
-
+#ifndef NoXmlTreeReader
   if (my_manager->myServiceBroker)
     {
       my_manager->myServiceBroker->DoLoadBalancing();
@@ -318,6 +320,7 @@ strcpy(mdbhost,aHost);
 	  cerr << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<"\n";
 	}
     }
+#endif
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
   cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";

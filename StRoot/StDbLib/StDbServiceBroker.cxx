@@ -1,3 +1,4 @@
+#ifndef NoXmlTreeReader
 #include "StDbServiceBroker.h"
 #include "ChapiStringUtilities.h"
 #include "mysql.h"
@@ -10,6 +11,7 @@ typedef vector<string>::const_iterator VCI;
 using st_db_service_broker::MyScatalogVersion; 
 using st_db_service_broker::NO_USER;
 using st_db_service_broker::NO_DOMAIN;
+using st_db_service_broker::NO_HOSTS;
 using st_db_service_broker::NightBegins;  
 using st_db_service_broker::NightEnds;  
 
@@ -17,11 +19,11 @@ using stl_xml_tree::sep;
 
 string nn[] = 
   {
-    "SCATALOG",
-    "SITE",
-    "SERVER",
-    "HOST",
-    "ACCESS"
+    "Scatalog",
+    "Site",
+    "Server",
+    "Host",
+    "Access"
   };
 
 enum 
@@ -33,11 +35,14 @@ enum
     ACCESS
   };
 
-string NAME = "NAME";
-string DBNAME = "DBNAME";
-string PORT = "PORT";
-string USER = "USER";
-string WHEN_ACTIVE = "WHEN_ACTIVE";
+string NAME = "name";
+string PORT = "port";
+string USER = "user";
+string SCOPE = "scope";
+string WHEN_ACTIVE = "whenActive";
+string ACCESS_MODE = "accessMode";
+string WRITER = "writer";
+
 static MYSQL *conn;
 
 char* Socket = 0;
@@ -85,15 +90,21 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
       return;
     }
 
+  char* access_mode = getenv("DB_ACCESS_MODE");
+  if (!access_mode)  
+    {
+      access_mode = "read";
+    }
+
   StlXmlTree* f = new StlXmlTree();
   string ScatalogKey = sep+nn[SCATALOG];
   f->InsertKeyValuePair(ScatalogKey, MyScatalogVersion);
 
   string QualifiedScatalog = sep + StlXmlTree::QualifyParent(nn[SCATALOG],MyScatalogVersion);
   string SiteKey = QualifiedScatalog + sep + nn[SITE];
-  f->InsertKeyValuePair(SiteKey, "NAME="+site+";");
+  f->InsertKeyValuePair(SiteKey, NAME+"="+site+";");
 
-  string QualifiedSite = StlXmlTree::QualifyParent(SiteKey,"NAME="+site+";");
+  string QualifiedSite = StlXmlTree::QualifyParent(SiteKey, NAME+"="+site+";");
   string ServerKey = QualifiedSite + sep + nn[SERVER];
 
   struct tm *tp;  
@@ -111,7 +122,16 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
       DayOrNight = "night";
     }
 
-  f->InsertKeyValuePair(ServerKey, USER+"="+(string)whoami+";"+WHEN_ACTIVE+"="+DayOrNight+";");
+  string ServerAttr =  USER+"="+(string)whoami+";"+WHEN_ACTIVE+"="+DayOrNight+";"+ACCESS_MODE+"="+access_mode;
+  if (strcmp(whoami,"starreco")==0)
+  {
+    ServerAttr = SCOPE+"=Production;"+ServerAttr;
+  }
+  else
+    {
+      ServerAttr = SCOPE+"=Analysis;"+ServerAttr;
+    }
+  f->InsertKeyValuePair(ServerKey, ServerAttr);
 
 #ifdef DEBUG
   f->ShowTree();
@@ -130,6 +150,7 @@ StDbServiceBroker::StDbServiceBroker(const string xmlbase) :
 
   xmlCleanupParser();
   delete f;
+  FormHostList();
 }
 //////////////////////////////////////////////////////
 StDbServiceBroker::StDbServiceBroker
@@ -143,11 +164,12 @@ StDbServiceBroker::StDbServiceBroker
   ParsedXml.ShowTree();
   xmlCleanupParser();
   delete f;
+  FormHostList();
 }
 //////////////////////////////////////////////////////
 void StDbServiceBroker::DoLoadBalancing()
 {
-  FormHostList();
+
 #ifdef DEBUG
   PrintHostList();
 #endif
@@ -192,6 +214,8 @@ We expect:
 		// error: non-numeric port string
 		port = DefaultPort;
 	      }
+
+	      cout << " setting host = "<<host_data[NAME]<<" port "<<port <<"\n";
 	      ChapiDbHost host_entry = ChapiDbHost(host_data[NAME],port);
 	      MyHostList.push_back(host_entry);
 	    }
@@ -201,6 +225,14 @@ We expect:
 	  cut_string_after_sub(key,">");
 	  cut_string_after_sub(key,"(");
     }
+
+  if (MyHostList.size()==0)
+    {
+      MyStatus = NO_HOSTS;
+      cerr<<" StDbServiceBroker::RecommendHost() has no hosts to choose from !\n";
+      return;
+    }
+
 }
 //////////////////////////////////////////////////////
 void StDbServiceBroker::PrintHostList()
@@ -215,9 +247,10 @@ void StDbServiceBroker::PrintHostList()
 void StDbServiceBroker::RecommendHost()
 {
   unsigned long nproc_min = ULONG_MAX;
-  if (MyHostList.size()==0)
+
+  if (MyHostList.size()==1)
     {
-      cerr<<" StDbServiceBroker::RecommendHost() has no hosts to choose from !\n";
+      MyBestHost = MyHostList.begin();
       return;
     }
   for (vector<ChapiDbHost>::const_iterator I=MyHostList.begin(); I!=MyHostList.end(); ++I)
@@ -234,7 +267,7 @@ void StDbServiceBroker::RecommendHost()
 	  (conn,((*I).HostName).c_str(), "loadbalancer","lbdb","test",(*I).Port,Socket,0)==NULL)
         {
           cerr << "StDbServiceBroker::RecommendHost() mysql_real_connect "<< 
-	    conn << " "<<((*I).HostName).c_str()<<" "<<DefaultPort<<" failed\n";
+	    conn << " "<<((*I).HostName).c_str()<<" "<<(*I).Port <<" failed\n";
           mysql_close(conn);
           continue;
         }
@@ -270,3 +303,4 @@ short StDbServiceBroker::GiveHostPort()
   return (*MyBestHost).Port;
 }
 ////////////////////////////////////////////////////////////////
+#endif

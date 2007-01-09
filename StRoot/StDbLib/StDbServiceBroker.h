@@ -1,3 +1,4 @@
+#ifndef NoXmlTreeReader
 /*! \class StDbServiceBroker
 * 
 * Name: StDbServiceBroker
@@ -23,7 +24,7 @@
 
 namespace st_db_service_broker
 {
-  const std::string MyScatalogVersion = "VERSION=1.0.1;"; 
+  const std::string MyScatalogVersion = "version=1.0.1;"; 
   const short NightEnds = 8;
   const short NightBegins = 22;
   const short DayBegins = NightEnds;
@@ -34,7 +35,8 @@ namespace st_db_service_broker
       NO_ERROR,
       NO_XML_BASE,
       NO_USER,
-      NO_DOMAIN
+      NO_DOMAIN,
+      NO_HOSTS
     };
 }
 
@@ -63,4 +65,5 @@ class StDbServiceBroker
   std::string GiveUserPassword();
   inline short GetStatus(){return MyStatus;};
 };
+#endif
 #endif
