@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.23 2007/01/09 16:27:40 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.24 2007/01/09 16:36:57 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.24  2007/01/09 16:36:57  deph
+ * differnt config file name for seamless autobuild
+ *
  * Revision 1.23  2007/01/09 16:27:40  deph
  * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
  *
@@ -464,7 +467,8 @@ void StDbManagerImpl::lookUpServers(){
     (string)getenv("HOME")+"/dbLoadBalancerConfig.xml";
 #else
   string dbLoadBalancerConfig = 
-    "/star/u/deph/servers/dbLoadBalancerConfig.xml";
+    //    "/star/u/deph/servers/dbLoadBalancerConfig.xml";  Switch back to this name next release
+    "/star/u/deph/servers/dbLoadBalancerConfig.new";
 #endif
 
   myServiceBroker = new StDbServiceBroker(dbLoadBalancerConfig);
