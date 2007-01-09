@@ -1,5 +1,8 @@
-// $Id: StarMCHits.h,v 1.6 2007/01/05 21:37:42 potekhin Exp $
+// $Id: StarMCHits.h,v 1.7 2007/01/09 04:51:17 potekhin Exp $
 // $Log: StarMCHits.h,v $
+// Revision 1.7  2007/01/09 04:51:17  potekhin
+// Init legacy mode
+//
 // Revision 1.6  2007/01/05 21:37:42  potekhin
 // Add CVS tags
 //
@@ -24,6 +27,7 @@ class StarMCHits : public TDataSet {
   }
   virtual TDataSet  	  *Instance() const {return (TDataSet *) fgInstance;}
   virtual Int_t     	   Init();
+  virtual Int_t     	   InitLegacy();
   virtual void      	   Clear(const Option_t* opt = "");
   virtual void      	   Step();
   virtual void      	   StepLegacy();
