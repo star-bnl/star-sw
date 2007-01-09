@@ -1,9 +1,9 @@
 //*-- Author : Yuri Fisyak
 // 
-// $Id: StVMCMaker.cxx,v 1.5 2006/08/17 13:38:50 fisyak Exp $
+// $Id: StVMCMaker.cxx,v 1.6 2007/01/09 04:53:20 potekhin Exp $
 // $Log: StVMCMaker.cxx,v $
-// Revision 1.5  2006/08/17 13:38:50  fisyak
-// Clean up
+// Revision 1.6  2007/01/09 04:53:20  potekhin
+// New input modes
 //
 // Revision 1.4  2005/09/13 21:34:29  fisyak
 // Move initialization from Init to InitRun, add conversion TGeoVolume to TVolume for StEventDisplayMaker and TofMatchers
@@ -80,6 +80,7 @@ StVMCMaker::Make
 #include "StarMCHits.h"
 #include "StarMCSimplePrimaryGenerator.h"
 #include "StarMCHBPrimaryGenerator.h"
+#include "StarMCRootPrimaryGenerator.h"
 #include "TGeoDrawHelper.h"
 #include "StMessMgr.h"
 
@@ -135,14 +136,38 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
       fEvtHddr->SetProdDateTime();
     }
     StarMCPrimaryGenerator *generator = 0;
-    if (fInputFile != "") generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
-    //                                                             Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax
-    //  else              generator = new StarMCSimplePrimaryGenerator( 1, 5,    1.,   1.,0.1, 0.1, 0.57,  0.57,  0.,   0., "G");
-    else                  generator = new StarMCSimplePrimaryGenerator(80, 6,    1.,   1.,-4.,  4.,    0,  6.28,  0.,   0., "G");
+    if (fInputFile != "") {
+      if(fInputMode=="rootInput") {
+	//	cout<<"ROOT -------------------------------- INPUT"<<endl;
+	generator = new StarMCRootPrimaryGenerator(fInputFile,m_DataSet);
+      }
+
+      if(fInputMode=="hbookInput") {
+	//	cout<<"HBOOK-------------------------------- INPUT"<<endl;
+	generator = new StarMCHBPrimaryGenerator(fInputFile,m_DataSet);
+      }
+
+      if(fInputMode=="phaseSpace") {
+	//	cout<<"PHASESPACE-------------------------------- INPUT"<<endl;
+	generator = new StarMCSimplePrimaryGenerator(fInputFile);
+	generator->SetDebug(1);
+      }
+    }
+    //                                            Ntrack Id Ptmin Ptmax Ymin Ymax Phimin Phimax Zmin Zmax OptionForParticleID(GEANT)
+    else
+      generator = new StarMCSimplePrimaryGenerator(1,    6,    1.,   1., -1.,  1.,   0,  6.28,   0.,   0., "G");
+
     assert(generator);
-    if (Debug()) generator->SetDebug(Debug());
+
+    if (Debug()) generator->SetDebug(1);
     fgStarVMCApplication->SetPrimaryGenerator(generator);
+
+    // Create the important HITS object:
     StarMCHits *hits = StarMCHits::instance();
+    hits->SetLegacy(1);
+
+    if(fInputMode=="phaseSpace") hits->SetLegacy(0);
+
     hits->SetHitHolder(m_DataSet);
     fgStarVMCApplication->SetStepping(hits);
   }
@@ -180,7 +205,6 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
   }
   
   fgStarVMCApplication->InitMC();
-  fgStarVMCApplication->SetDebug(Debug());
   if (Debug() > 1) {
     fgGeant3->SetDEBU(1,1,100);
     fgGeant3->SetSWIT(1,2);
@@ -195,6 +219,7 @@ Int_t StVMCMaker::InitRun  (Int_t runumber){
 Int_t StVMCMaker::Make(){
   if (! fInitRun) InitRun(fRunNo);
   fEventNo++;
+  cout<<"StVMCMaker::Make()"<<endl;
   if (fEvtHddr) {
     fEvtHddr->SetRunNumber(fRunNo);
     fEvtHddr->SetEventNumber(fEventNo);
@@ -204,7 +229,9 @@ Int_t StVMCMaker::Make(){
   }  
   if ((m_Mode/10)%10 != 1) {// Active  mode 
     TStopwatch sw;
+    cout<<"++++++++++++++  VMC trig ++++++++++++++++++++++++++++"<<endl;
     fgStarVMCApplication->RunMC(1);
+    cout<<"->RunMC(1)"<<endl;
     if (Debug())   sw.Print();
   }
   return kStOK;
