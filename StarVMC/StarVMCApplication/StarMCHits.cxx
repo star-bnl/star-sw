@@ -1,5 +1,8 @@
-// $Id: StarMCHits.cxx,v 1.8 2007/01/05 21:38:58 potekhin Exp $
+// $Id: StarMCHits.cxx,v 1.9 2007/01/09 04:51:43 potekhin Exp $
 // $Log: StarMCHits.cxx,v $
+// Revision 1.9  2007/01/09 04:51:43  potekhin
+// Added legacy mode
+//
 // Revision 1.8  2007/01/05 21:38:58  potekhin
 // Add CVS tags
 //
@@ -157,6 +160,25 @@ StarMCHits::StarMCHits(const Char_t *name,const Char_t *title) :
 //________________________________________________________________________________
 Int_t StarMCHits::Init() {
 
+  if(Legacy()) return InitLegacy(); // revert to the legacy Init
+
+  if (!fDetectors ) delete fDetectors;
+  fDetectors = 0;
+
+  if (! StMaker::GetChain()) {
+    cout << "StarMCHits::Init() -I- There is no chain." <<endl;
+    assert(StMaker::GetChain());
+  }
+  else {
+    fGeoData   = StMaker::GetChain()->GetDataBase("VmcGeometry/geom");
+  }
+
+  SetDebug(1);
+  return 0;
+}
+//________________________________________________________________________________
+Int_t StarMCHits::InitLegacy() {
+
   cout << "StarMCHits::Init() -I- Get Detectors" <<endl;
 
   if (! fDetectors ) delete fDetectors;
@@ -249,7 +271,10 @@ Int_t StarMCHits::Init() {
 //________________________________________________________________________________
 void StarMCHits::Step() {
 
-  if(Legacy()) StepLegacy(); // revert to the legacy step routine
+  if(Legacy()) {
+    StepLegacy(); // revert to the legacy step routine
+    return;
+  }
 
   TGeoNode *nodeT        = gGeoManager->GetCurrentNode();  assert(nodeT);
   TGeoVolume *volT       = nodeT->GetVolume();             assert(volT);
@@ -603,14 +628,16 @@ void StarMCHits::FinishEvent() {
 }
 //________________________________________________________________________________
 void StarMCHits::Clear(const Option_t* opt) {
-  TObjArrayIter next(fVolUserInfo);
-  StHitDescriptor *desc = 0;
-  St_g2t_Chair *chair = 0;
-  while ((desc = (StHitDescriptor *) next())) {
-    chair = desc->GetChair();
-    if (chair) {
-      delete chair;
-      desc->SetChair(0);
+  if(Legacy()) {
+    TObjArrayIter next(fVolUserInfo);
+    StHitDescriptor *desc = 0;
+    St_g2t_Chair *chair = 0;
+    while ((desc = (StHitDescriptor *) next())) {
+      chair = desc->GetChair();
+      if (chair) {
+	delete chair;
+	desc->SetChair(0);
+      }
     }
   }
   if (gRandom) fSeed = gRandom->GetSeed();
