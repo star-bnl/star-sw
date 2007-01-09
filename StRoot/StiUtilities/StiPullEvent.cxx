@@ -125,6 +125,7 @@ const int *StiPullEvent::GetNHits() const
 void StiPullEvent::Clear(const char*)
 {
   mHitsG.Clear();mHitsP.Clear();mHitsR.Clear();
+  mTrksG.Clear();mTrksP.Clear();
   memset(mVtx,0,sizeof(mVtx));
   memset(mEtx,0,sizeof(mEtx));
   mRun=0; mEvt=0;
