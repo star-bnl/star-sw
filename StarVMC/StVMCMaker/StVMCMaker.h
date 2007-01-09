@@ -1,4 +1,4 @@
-// $Id: StVMCMaker.h,v 1.4 2005/09/13 21:34:29 fisyak Exp $
+// $Id: StVMCMaker.h,v 1.5 2007/01/09 04:53:52 potekhin Exp $
 
 #ifndef STAR_StVMCMaker
 #define STAR_StVMCMaker
@@ -35,6 +35,7 @@ class StVMCMaker : public StMaker {
   virtual void   SetRunNo(Int_t m ) {fRunNo = m < 1 || m >= 1000000 ? 1 : m;}
   virtual void   Skip(Int_t nskip);
   virtual void   SetInputFile(const Char_t *fileName) {fInputFile = fileName;}
+  virtual void   SetInputMode(const Char_t *fileMode) {fInputMode = fileMode;}
   const Char_t  *InputFile() const {return fInputFile.Data();}
   static StarVMCApplication* GetStarVMCApplication() {return fgStarVMCApplication;}
   static TGeant3TGeo*        GetGeant3()             {return fgGeant3;}
@@ -53,11 +54,13 @@ class StVMCMaker : public StMaker {
   Int_t                      fRunNo;
   StEvtHddr                 *fEvtHddr;//! pointer to Event Header
   TString                    fInputFile;
+  TString                    fInputMode;
   Int_t                      fInitRun;
   TDataSet*                  fVolume;   //!
+
  public:
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.4 2005/09/13 21:34:29 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StVMCMaker.h,v 1.5 2007/01/09 04:53:52 potekhin Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -68,6 +71,9 @@ class StVMCMaker : public StMaker {
 
 
 // $Log: StVMCMaker.h,v $
+// Revision 1.5  2007/01/09 04:53:52  potekhin
+// Add new methods
+//
 // Revision 1.4  2005/09/13 21:34:29  fisyak
 // Move initialization from Init to InitRun, add conversion TGeoVolume to TVolume for StEventDisplayMaker and TofMatchers
 //
