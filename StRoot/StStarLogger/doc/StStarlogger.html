@@ -53,17 +53,17 @@ Table of Contents:
   it was only a matter of creating another implementation of 
   the STAR messenger interface - 
      <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
-     <b><code>StLoggerManager</code></b><a>. 
+     <b><code>StLoggerManager</code></b></a>. 
   Additionally, to meet 
   the STAR production needs, a standard set of the logger 
   appender and filter features were either developed or enhanced. 
   We added one extra appender to communicate with the STAR 
   production MySQL database, namely
   <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
-     <b><code>StMySQLAppender</code></b><a>, 
+     <b><code>StMySQLAppender</code></b></a>, 
    and created a custom logger filter, 
   <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger">
-     <b><code>StarOptionFilter</code></b><a>.     
+     <b><code>StarOptionFilter</code></b></a>.     
   to be able to select/suspend the messages according to the 
   STAR production manager's criteria. Once again, and due to 
   the already existing OO messenger implementation in the 
@@ -305,25 +305,25 @@ environment variable as well.
 <!-- ------------------------------------------------------------------------------ -->
 <a name="#fileExample"></a>
 <!-- ------------------------------------------------------------------------------ -->
-For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml</code></b></a> 
+For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml"</code></b></a> 
 defines the "Console output" for entire STAR production chain and the <b><code>"Debug"</code></b> level of the messages.
 
 <p>
 
-"Jakarta log4j" is a community-supported project that includes the log4cxx,
+"Jakarta log4j" is a community-supported project that includes the log4cxx, 
  log4c, and log4perl packages (thereby supporting multiple computing languages) 
  
- The output media and format and level are configured by providing the set of the different parameters
- via the external configuration file 
- (of course we do provide the reasonable default. If one is happy with that no extra file is required).
- For all STAR StMaker subclass at once or /and for each separate subclass
+ The output media and format and level are configured by providing the set of the different parameters 
+ via the external configuration file  
+ (of course we do provide the reasonable default. If one is happy with that no extra file is required). 
+ For all STAR StMaker subclass at once or /and for each separate subclass 
  one may define the desirable output by combining 4 different logger components:
  
-<ul>
+<ul> 
 <li>	<a href="http://logging.apache.org/log4cxx/manual/Introduction.html#LoggersAppendersAndLayouts">loggers</a>
-<li>	<a href="http://logging.apache.org/log4cxx/manual/Introduction.html#AppendersAndLayouts">appenders</a>
-<li>	<a href="http://logging.apache.org/log4cxx/manual/Introduction.html#AppendersAndLayouts">layouts</a>
-<li>	<a href="http://logging.apache.org/log4cxx/manual/classlog4cxx_1_1spi_1_1Filter.html">filters</a>
+<li>    <a href="http://logging.apache.org/log4cxx/manual/Introduction.html#AppendersAndLayouts">appenders</a>
+<li>    <a href="http://logging.apache.org/log4cxx/manual/Introduction.html#AppendersAndLayouts">layouts</a>
+<li>    <a href="http://logging.apache.org/log4cxx/manual/classlog4cxx_1_1spi_1_1Filter.html">filters</a>
 </ul>
 
 These four types are necessary to empower the developers with the capabilities 
@@ -350,7 +350,7 @@ The layout may be supplied with <a href="http://logging.apache.org/log4j/docs/ap
 the custom format string</a>.
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name=#formats"></a>
+<a name="#formats"></a>
 <!-- ------------------------------------------------------------------------------ -->
    <b><code>
    <pre>
@@ -635,7 +635,7 @@ One is advised to remove the invocations of these functions from his/her code an
      <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=3"> 
      <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=2">
      <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=1">
-     <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=0:w"> -th 
+     <IMG src="/cgi-bin/counter.cgi?counter=StarLogger&digit=0&w"> -th 
      visitors.
    </center>
  </small>
