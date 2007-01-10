@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.3 2004/11/30 19:01:42 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.4 2007/01/10 19:18:45 mmiller Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.4  2007/01/10 19:18:45  mmiller
+ * Fixed a compiler warning in depricated code (StEmcTpcFourpMaker, which is no longer used).
+ *
  * Revision 1.3  2004/11/30 19:01:42  mmiller
  * Back compatibility for pre P04k bemc corrupt events
  *
@@ -430,7 +433,7 @@ public:
 protected:
     StThreeVectorD mVertex;
     binCircleList binchecklist;
-    StEmcTpcBinMap() {};
+    StEmcTpcBinMap() : phiBins(0), thetaBins(0), phiRadius(0), thetaRadius(0) {};
 
 public:
     StEmcTpcBinMap(long pBins, long tBins, double pR, double tR)
