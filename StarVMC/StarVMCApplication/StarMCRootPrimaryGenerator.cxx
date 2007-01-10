@@ -1,6 +1,5 @@
-// $Id: StarMCRootPrimaryGenerator.cxx,v 1.1 2007/01/09 18:57:36 potekhin Exp $
+// $Id: StarMCRootPrimaryGenerator.cxx,v 1.2 2007/01/10 16:37:52 potekhin Exp $
 #include "StarMCRootPrimaryGenerator.h"
-#include "StarVMCEventInput.h"
 #include "tables/St_particle_Table.h"
 #include "TDatabasePDG.h"
 
@@ -35,7 +34,7 @@ StarMCRootPrimaryGenerator::StarMCRootPrimaryGenerator(const Char_t *rootFile, T
   //    cout<<"Not found!"<<endl;
   //  }
 
-  eInput = new StarVMCEventInput(rootFile);
+  //  eInput = new StarVMCEventInput(rootFile);
   exit(1);
 
 
