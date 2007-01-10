@@ -1,5 +1,8 @@
-// $Id: StarMCRootPrimaryGenerator.h,v 1.1 2007/01/09 18:57:15 potekhin Exp $
+// $Id: StarMCRootPrimaryGenerator.h,v 1.2 2007/01/10 16:37:44 potekhin Exp $
 // $Log: StarMCRootPrimaryGenerator.h,v $
+// Revision 1.2  2007/01/10 16:37:44  potekhin
+// Removed an extraneous header file reference
+//
 // Revision 1.1  2007/01/09 18:57:15  potekhin
 // Header file for the ROOT-format event reader
 //
@@ -16,7 +19,6 @@
 #ifndef StarMCRootPrimaryGenerator_h
 #define StarMCRootPrimaryGenerator_h
 #include "StarMCPrimaryGenerator.h"
-#include "StarVMCEventInput.h"
 #include "TDataSet.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -48,7 +50,7 @@ class StarMCRootPrimaryGenerator : public StarMCPrimaryGenerator {
   Int_t              fHbtId;
   TDataSet          *fData;
 
-  StarVMCEventInput *eInput;
+  //  StarVMCEventInput *eInput;
 
   ClassDef(StarMCRootPrimaryGenerator,1)  //StarMCRootPrimaryGenerator
 };
