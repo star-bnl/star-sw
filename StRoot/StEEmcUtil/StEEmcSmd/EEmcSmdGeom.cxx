@@ -2,7 +2,7 @@
 
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.4 2004/06/03 23:01:06 jwebb Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.5 2007/01/12 23:53:14 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -27,6 +27,10 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.5  2007/01/12 23:53:14  jwebb
+ * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
+ * method.
+ *
  * Revision 1.4  2004/06/03 23:01:06  jwebb
  * Fixed memory leak reported by Bob.  Fixed another memory leak.
  *
@@ -61,6 +65,10 @@ static const double     radian      = 1.;
 static const double     pi          = M_PI; // from <math.h>
 static const double     degree      = (M_PI/180.0)*radian;
 #endif
+
+
+#include "StMessMgr.h"
+
 
 /// defaulty constructor
 ClassImp(EEmcSmdGeom)
@@ -654,24 +662,32 @@ TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId ) {
 
 }
 
+
+TVector3 EEmcSmdGeom::getIntersection ( Int_t sector, Int_t uId, Int_t vId, TVector3 vert ) {
+
+  return getIntersection ( getStripPtr( uId, 0, sector ),
+			   getStripPtr( vId, 1, sector ), vert );
+
+}
+
+
+/*********************************************************/ 
 TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
-						StructEEmcStrip *v ) {
-
-
- 
-
+					StructEEmcStrip *v,
+					TVector3 vertex )
+{
   // The strips are arranged sensibly, so that the ID's and the
   // widths of the strips basically tell us the position of the
   // crossing point.  However, we need to know a few things:
-
+                                                                                                                                                             
   Int_t uSectorId = u -> stripStructId.sectorId;   // This would be easier if
   Int_t vSectorId = v -> stripStructId.sectorId;   // we were dealing with a
   //Int_t uPlaneId  = u -> stripStructId.planeId;  // class instead of a struct
-  //Int_t vPlaneId  = v -> stripStructId.planeId;  // 
-
+  //Int_t vPlaneId  = v -> stripStructId.planeId;  //
+                                                                                                                                                             
   Int_t uId = u -> stripStructId.stripId;
   Int_t vId = v -> stripStructId.stripId;
-
+                                                                                                                                                             
   // Get vectors pointing to the start of the u and v strips in question,
   //   as well as the ends.  NOTE: We pass uId - 1 to getStripPtr, because
   //   that routine expects the c++ _index_... (the convention in this
@@ -680,42 +696,110 @@ TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
   //   from 1...)
   TVector3 u0 = getStripPtr ( uId-1, 0, uSectorId-1 ) -> end1;
   TVector3 v0 = getStripPtr ( vId-1, 1, vSectorId-1 ) -> end1;
+  
 
   TVector3 uF = getStripPtr ( uId-1, 0, uSectorId-1 ) -> end2;
   TVector3 vF = getStripPtr ( vId-1, 1, vSectorId-1 ) -> end2;
+  
 
-  TVector3 uu = (uF - u0);
-  TVector3 vv = (vF - v0);
+  TVector3 u0p=(u0-vertex);  // uOp is vector from vertex to beginning of first strip from vertex 
+  TVector3 uFp=(uF-vertex);  // uFp is vector from vertex to end of first strip from vertex
+  TVector3 v0p=(v0-vertex);  // vOp is vector from vertex to beginning of first strip from vertex
+  TVector3 vFp=(vF-vertex);  // vFp is vector from vertex to end of first strip from vertex
 
-  Double_t u_x = uu * TVector3(1.,0.,0.);
-  Double_t u_y = uu * TVector3(0.,1.,0.);
-  Double_t v_x = vv * TVector3(1.,0.,0.); // This is wrong somehow...
-  Double_t v_y = vv * TVector3(0.,1.,0.);
+  ///////////////////////////////////////////////////
+  //          U then V!  return point on V strip
+  ///////////////////////////////////////////////////
 
-  Double_t d_x = ( v0 - u0 ) * TVector3(1.,0.,0.);
-  Double_t d_y = ( v0 - u0 ) * TVector3(0.,1.,0.);
+  // N is normal vector to plane
+  TVector3 Nv = u0p.Cross(uFp);
 
-  // Calculate the positions along u and v (i.e. a*u and b*v) where the
-  //   two vectors are at closest approach.  Since the two SMD planes
-  //   are nominally parallel, we can get away with doing this in only
-  //   two dimensions.  Just work out the algebra for the condition
-  //   u0 + au = v0 + bv, for the x and y components to obtain:
+  // use components of N to establish D in plane of form A(x-x0)+B(y-y0)+C(z-z0)+D=0, use vertex for point
+  Float_t Dv = (Nv.X()*vertex.X() + Nv.Y()*vertex.Y() + Nv.Z()*vertex.Z());
+
+  // scale determines how far along vector from v0 to vF to go to get point 
+  // of intersection with plane.  If it's <0 or >1, then the point of 
+  // intersection is off the physical size of the strip.  Return an error
+  // value
+  Float_t scale_numerv = (Nv.X()*v0.X() + Nv.Y()*v0.Y() + Nv.Z()*v0.Z() - Dv);
+  Float_t scale_denomv = (Nv.X()*(v0.X()-vF.X()) + Nv.Y()*(v0.Y()-vF.Y()) + Nv.Z()*(v0.Z()-vF.Z()));
+  Float_t scalev=scale_numerv/scale_denomv;
+  if (scalev < 0 || scalev > 1) {
+
+    TVector3 ErrorVector(1.,1.,-999.);
+    LOG_WARN<<GetName()<<"::getIntersection( ) passed non-intersecting SMD strips " << *u << " " << *v << endm;
+    return ErrorVector;
+  }  
+  
+  
+  // Rv is the vector to the final point from the origin ON V STRIP
+  TVector3 Rv = (v0 + scalev*(vF-v0));
 
 
-  Double_t b = ( d_y * u_x / u_y - d_x ) / ( v_x - v_y * u_x / u_y );
-  Double_t a = ( d_x + b * v_x ) / u_x;
+    
+  // S is the vector that would go from vertex to end point
+  // TVector3 S = (R-z0);
+  
+  ///////////////////////////////////////////////
+  //       V THEN U! returns point on u strip
+  ///////////////////////////////////////////////
+  // N is normal vector to plane
+  TVector3 Nu = v0p.Cross(vFp);
+  
+  // use components of N to establish D in plane of form A(x-x0)+B(y-y0)+C(z-z0)+D=0, use vertex for point
+  Float_t Du = (Nu.X()*vertex.X() + Nu.Y()*vertex.Y() + Nu.Z()*vertex.Z());
+  
+  // scale determines how far along vector from v0 to vF to go to get point of intersection with plane
+  Float_t scale_numeru = (Nu.X()*u0.X() + Nu.Y()*u0.Y() + Nu.Z()*u0.Z() - Du);
+  Float_t scale_denomu = (Nu.X()*(u0.X()-uF.X()) + Nu.Y()*(u0.Y()-uF.Y()) + Nu.Z()*(u0.Z()-uF.Z()));
+  Float_t scaleu=scale_numeru/scale_denomu;
+  if (scaleu < 0 || scaleu > 1) {
+    TVector3 ErrorVector(1.,1.,-999.);
+    return ErrorVector;
+  }
+  
+  
+  // Ru is the vector to the final point from the origin ON U STRIP
+  TVector3 Ru = (u0 + scaleu*(uF-u0));
+  
+  
+  // gives us vector direction FROM THE VERTEX
+  TVector3 R = ((Rv+Ru)*0.5);
+  
+  return R;
+                                                                                                                                                  
 
-  TVector3 uCross = u0 + a*uu;
-  TVector3 vCross = v0 + b*vv;
-
-  TVector3 uv;
-
-  for ( Int_t i = 0; i < 3; i++ ) 
-    uv[i] = 0.5 * ( uCross[i] + vCross[i] );
-
-  return uv;
 
 }
+
+/*********************************************************/ 
+
+
+TVector3 EEmcSmdGeom::getIntersection ( StructEEmcStrip *u,
+					StructEEmcStrip *v
+					) {
+
+  return getIntersection( u, v, TVector3(0,0,0) );
+
+}
+
+
+/****************************************************************************/
+
+// output strip for smd strips
+ostream& operator<<(ostream &os, const StructEEmcStrip strip)
+{
+  const Char_t *nameUV[]={"U","V"};
+  TString stripname="";
+  if ( strip.stripStructId.sectorId < 10 ) stripname+="0"; stripname+=strip.stripStructId.sectorId;
+  stripname += nameUV[ strip.stripStructId.UVId-1 ];
+  if ( strip.stripStructId.stripId < 10 ) stripname+="0";
+  if ( strip.stripStructId.stripId < 100 ) stripname+="0";
+  stripname+=strip.stripStructId.stripId;
+  os << stripname << " depth=" << strip.stripStructId.planeId;
+  return os;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 /*******************************************************************
