@@ -1,6 +1,6 @@
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.3 2004/07/01 15:35:50 jwebb Exp $
+ * $Id: EEmcSmdGeom.h,v 1.5 2007/01/12 23:53:14 jwebb Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -25,6 +25,10 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.5  2007/01/12 23:53:14  jwebb
+ * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
+ * method.
+ *
  * Revision 1.3  2004/07/01 15:35:50  jwebb
  * Added placeholder method getIntersection(Int_t,Float_t,Float_t).  For now
  * it just calls the getIntersection with strips converted to integers.
@@ -49,7 +53,7 @@
 
 #include "TObject.h"
 #include "TVector3.h"
-
+#include "TString.h"
 
 #include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
@@ -79,6 +83,8 @@ struct StructEEmcStrip{
   float length;                    // length of strip 
 };
 
+ostream& operator<<(ostream &os, const StructEEmcStrip strip);
+
 // Define vector of strip pointers and its Iterator
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<int> intVec;  
@@ -107,6 +113,7 @@ class EEmcSmdGeom : public TObject {
   EEmcSmdGeom();
   virtual ~EEmcSmdGeom(); 
 
+
  protected:
 
   StructEEmcSmdParam     mEEmcSmdParam;  //! general geometry variables
@@ -126,83 +133,73 @@ class EEmcSmdGeom : public TObject {
 
   void init();         // init the dbase
 
-  // build mStripPtrVector   
+  /// build mStripPtrVector   
   void buildStripPtrVector();
 
-  // set sectors for partial EEMC
+  /// set sectors for partial EEMC
   void setSectors(const intVec sectorIdVec); 
   
-  // return sector status   
+  /// return sector status   
   bool IsSectorIn(const Int_t iSec) const; 
   
-  // instance and initialize a strip 
+  /// instance and initialize a strip 
   StructEEmcStrip initStrip();
 
-  //
-  // geometry access members
-  //
-
-  // return SMD geometry parameters  
+  /// return SMD geometry parameters  
   StructEEmcSmdParam getEEmcSmdParam() const; 
 
-  // return structure-sector from iUV and iSec 
+  /// return structure-sector from iUV and iSec 
   StructEEmcSmdSector getEEmcSector(const Int_t iUV, const Int_t iSec) const;
 
-  // return index of a sector from a point in a plane 
+  /// return index of a sector from a point in a plane 
   Int_t getEEmcISec(const Int_t iPlane, const TVector3& point) const;
   
-  // return a strip pointer from indices   
+  /// return a strip pointer from indices   
   StructEEmcStrip* getStripPtr(const Int_t iStrip, const Int_t iUV, const Int_t iSec);
 
-  // return a DCA strip pointer from a point (float *dca carries sign)  
+  /// return a DCA strip pointer from a point (float *dca carries sign)  
   StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const TVector3& point, Float_t* dca);
   StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const TVector3& point, Float_t* dca);
   
-  /////////////////////////////////////////////////////////////////////////////
-  //
-  // Given two strips (alternatively sector and strip Id's), return a 
-  //   vector pointing to the center of the trapezoid formed by their
-  //   crossing.  These functions may return non-physical locations,
-  //   for instance, when a U,V pair does not cross within the 
-  //   fiducial area of the detector.  Note: the z-component returned
-  //   will be the average z of the U and V detector planes.
-  //
-  // For now, ignore fractional position w/in strip.  Placeholder code
-  //   for when we do it right.
-  //
+  /// In a given sector, return the vector from the specified vertex
+  /// along the line defined by the intersection of the two planes
+  /// defined by the two SMD strips.  If two strips do not intersect,
+  /// a warning is issued and -999 returned in the third component.
+  /// @param iSec sector number [0,12)
+  /// @param iUStrip index of the U strip [0,nstrips)
+  /// @param iVStrip index of the V strip [0,nstrips)
+  /// @param vertex the event vertex
+  TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip, TVector3 vertex );
+
+  /// Return the vector from the specified vertex
+  /// along the line defined by the intersection of the two planes
+  /// defined by the two SMD strips.  If two strips do not intersect,
+  /// a warning is issued and -999 returned in the third component.
+  /// @param u a pointer to the structure which defines the smd-u strip
+  /// @param v a pointer to the structure which defines the smd-v strip
+  /// @param vertex the event vertex
+  TVector3 getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v, TVector3 vertex );
+
+  /// Assumes nominal vertex (0,0,0)
   TVector3 getIntersection ( Int_t iSec, Int_t iUStrip, Int_t iVStrip );
+  /// Assumes nominal vertex (0,0,0)
   TVector3 getIntersection ( Int_t iSec, Float_t iUStrip, Float_t iVStrip )
     { return getIntersection( iSec, (Int_t)iUStrip, (Int_t)iVStrip ); }
+  /// Assumes nominal vertex (0,0,0)
   TVector3 getIntersection ( StructEEmcStrip *u, StructEEmcStrip *v );
-  // 
-  // Return the number of strips for the specified orientation for this
-  //   sector
-  //
+
+
+  /// Returns the number of SMD strips in the specified sector and plane
+  /// @param iSec eemc sector number [0,12)
+  /// @param iUV eemc smd plane number 0=U 1=V
   Int_t getNStrips ( Int_t iSec, Int_t iUV ) { return getEEmcSector(iUV,iSec).stripPtrVec.size();  }
-  //
-  /////////////////////////////////////////////////////////////////////////////
 
-  // match two strips 
+  /// match two strips 
   bool matchStrips(const StructEEmcStripId stripStructId1, const StructEEmcStripId stripStructId2, Int_t nTolerance);
-
-
-  // Will need to move to StRoot-enabled version
-#if 0
-  //
-  // three methods for ITTF
-  //
-
-  // return phiMin and phiMax of a sector including empty sector 
-  pairD getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec);
-  // return delta_phi of a sector including empty sector 
-  float getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec);
-  // return center phi of a sector including empty sector 
-  float getEEmcSmdCenterPhi(const Int_t iPlane, const Int_t iSec);
-#endif
 
   // mehtod for C-scripts
 
-  // return strip-end of 3D-vector   
+  /// return strip-end of 3D-vector   
   TVector3  getstripEnd(const StructEEmcStrip strip, const Int_t endId);
 
   //
@@ -229,6 +226,9 @@ inline StructEEmcSmdParam EEmcSmdGeom::getEEmcSmdParam()
 inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV, 
 	   	                                        const Int_t iSec) 
        const {return mEEmcSector[iUV][iSec];}
+
+
+
 
 #endif
  
