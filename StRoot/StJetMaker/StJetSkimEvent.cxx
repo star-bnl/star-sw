@@ -58,6 +58,7 @@ StJetSkimEvent::StJetSkimEvent()
 : TObject(), mTriggers(new TClonesArray("StJetSkimTrig",100)), mVertices(new TClonesArray("StJetSkimVert",100)),
 mBestVert(new StJetSkimVert())
 {
+	mMudstFileName = "Undefined";
 	mFill = mRunId = mEventId = mbx7 = mbx48 = mSpinBits = 0;
 	mEbbc = mWbbc = mBbcTimeBin = 0;
 	mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;
@@ -65,7 +66,6 @@ mBestVert(new StJetSkimVert())
 	for (int i=0; i<mL2Result.GetSize(); ++i) {
 		mL2Result[i] = 0;
 	}	
-	
 }
 
 StJetSkimEvent::~StJetSkimEvent()
@@ -74,6 +74,7 @@ StJetSkimEvent::~StJetSkimEvent()
 
 void StJetSkimEvent::clear()
 {
+	mMudstFileName = "Undefined";
 	mFill = mRunId = mEventId =  mbx7 = mbx48 = mSpinBits = 0;
 	mEbbc = mWbbc = mBbcTimeBin = 0;
 	mIsValid = mIsPolLong = mIsPolTrans = mIsMaskedUsingBx48 = mOffsetBx48minusBX7 = mSpin4usingBx48 = 0;

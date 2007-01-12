@@ -8,6 +8,7 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "TArrayI.h"
+#include "TObjString.h"
 
 class StJetSkimTrig : public TObject
 {
@@ -118,6 +119,7 @@ public:
 	void setFill(float i) {mFill = i;}
 	void setRunId(int i) {mRunId = i;}
 	void setEventId(int i) {mEventId = i;}
+	void setMudstFileName(const TObjString& i) {mMudstFileName = i;}
 	
 	void setBx7(int i) {mbx7 = i;}
 	void setBx48(int i) {mbx48 = i;}
@@ -141,6 +143,7 @@ public:
 	float fill() const {return mFill;}
 	int runId() const {return mRunId;}
 	int eventId() const {return mEventId;}
+	TObjString mudstFileName() const {return mMudstFileName;}
 	
 	int bx7() const {return mbx7;}
 	int bx48() const {return mbx48;}
@@ -170,6 +173,7 @@ private:
 	float mFill;
 	int mRunId;
 	int mEventId;
+	TObjString mMudstFileName;
 	
 	TClonesArray* mTriggers;
 	TClonesArray* mVertices;
