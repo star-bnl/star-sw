@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.15 2005/06/09 20:04:23 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.16 2007/01/12 23:57:13 jwebb Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -40,31 +40,12 @@ StEEmcFastMaker::StEEmcFastMaker(const char *name):StMaker(name){
   mevIN= new EEmcMCData;
   meeve=new EEeventDst;
 
-  //--
-  //-- Define the sampling fraction and set the gains for converting
-  //-- geant energy response to ADC response.
-  //--
-  //-- NOTE: Gains can be changed after the fact by using the 
-  //-- StMuEEmcSimuReMaker to "remake" the ADC response of a muDst
-  //-- in a chain before any analysis on Monte Carlo is performed.
-  //-- 
-  //--
-  msamplingFraction=0.05; 
-  // towers are gain matched to fixed E_T
-  maxAdc=4095;
-  maxEtot=60;  // in GeV
-  const float feta[kEEmcNumEtas]= {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115}; 
-  
-  int i;
   
   mfixTgain=new float [kEEmcNumEtas];
-  for (i=0;i<kEEmcNumEtas;i++) {
-    mfixTgain[i]=maxAdc/maxEtot/cosh(feta[i])/msamplingFraction;
+  for (Int_t i=0;i<kEEmcNumEtas;i++) {
+    mfixTgain[i]=getTowerGains()[i];
   }
 
-
-  mfixSMDgain=23000;
-  mfixPgain=23000;
 
 
 }
@@ -188,7 +169,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
 	  int eta=t->eta();
 	  int sub=t->sub()-'A'+1;
-	  int adc= (int) (t->energy()* mfixPgain);
+	  int adc= (int) (t->energy()* getPreshowerGain());
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	   if(Debug()) printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
@@ -199,7 +180,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
 	  int eta=t->eta();
 	  int sub=t->sub()-'A'+5+1;
-	  int adc= (int) (t->energy()* mfixPgain);
+	  int adc= (int) (t->energy()* getPreshowerGain());
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	    if(Debug())printf("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
@@ -210,7 +191,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  EEtwHitDst* t = (EEtwHitDst *)(* tca)[j];
 	  int eta=t->eta();
 	  int sub=t->sub()-'A'+10+1;
-	  int adc= (int) (t->energy()* mfixPgain);
+	  int adc= (int) (t->energy()* getPreshowerGain());
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	   if(Debug()) printf("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
@@ -224,7 +205,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
 	  int eta=t->strip();
 	  int sub=1;
-	  int adc= (int) (t->energy()* mfixPgain);
+	  int adc= (int) (t->energy()* getSmdGain());
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  if(Debug()) printf("SMDU     %d  %d %f\n",t->strip(),adc,t->energy());
@@ -238,7 +219,7 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  EEsmdHitDst* t = (EEsmdHitDst *)(* tca)[j];
 	  int eta=t->strip();
 	  int sub=1;
-	  int adc= (int) (t->energy()* mfixSMDgain);
+	  int adc= (int) (t->energy()*getSmdGain());
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  if(Debug())  printf("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy());
 	  d->addHit(h);
@@ -260,34 +241,50 @@ Float_t StEEmcFastMaker::getSamplingFraction()
 {
   // Returns the sampling fraction used by the fast simulator
   // to simulate ADC response of the towers.
-  return msamplingFraction;
+  return 0.05;
 }
 
 Float_t *StEEmcFastMaker::getTowerGains()
 {
   // Returns the array of tower gains used by the fast simulator
   // to simulate ADC response of the towers.
-  return mfixTgain;
+
+  // towers are gain matched to fixed E_T: ADC=4096 --> ET=60 GeV
+  const float feta[kEEmcNumEtas]= {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115}; 
+  //  static Float_t mygains[kEEmcNumEtas];  
+  Float_t *mygains=new Float_t[kEEmcNumEtas]; // small memory leak
+  int i;  
+  Float_t msamplingFraction = getSamplingFraction();
+  Int_t maxEtot=getMaxET();
+  Int_t maxAdc=getMaxAdc();
+  for (i=0;i<kEEmcNumEtas;i++) {
+    mygains[i]=maxAdc/maxEtot/cosh(feta[i])/msamplingFraction;
+  }
+  return mygains;
 }
 
 Float_t StEEmcFastMaker::getSmdGain()
 {
   // Returns the (single) constant "gain" used to convert geant
   // energy to ADC response in the SMD.
-  return mfixSMDgain;
+  return 23000; //(adc=g*de )
 }
 
 Float_t StEEmcFastMaker::getPreshowerGain()
 {
   // Returns the (single) constant "gain" used to convert geant
   // energy in the Pre- and Postshower detectors.
-  return mfixPgain;
+   return 23000; //(adc=g*de )
 }
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.16  2007/01/12 23:57:13  jwebb
+// Calculation of ideal gains moved into static member function getTowerGains()
+// to allow slow simulator to access them.
+//
 // Revision 1.15  2005/06/09 20:04:23  balewski
 // upgrade for embedding
 //

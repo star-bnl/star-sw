@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.8 2006/12/12 20:29:13 balewski Exp $
+// $Id: StEEmcFastMaker.h,v 1.9 2007/01/12 23:57:12 jwebb Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -87,33 +87,27 @@ class StEEmcFastMaker : public StMaker {
 
  public:
    
-  Float_t   getSamplingFraction();
-  Float_t  *getTowerGains();
-  Float_t   getSmdGain();
-  Float_t   getPreshowerGain();
+  static Float_t   getSamplingFraction();
+  static Float_t  *getTowerGains();
+  static Float_t   getSmdGain();///< (adc=g*de ) fixed gain for SMD
+  static Float_t   getPreshowerGain();///< (adc=g*de ) fixed gain for pre/post shower
 
-  Int_t getMaxAdc() { return maxAdc; } // [ADC channels]
-  Int_t getMaxET() { return maxEtot; } // [GeV]
+  static  Int_t getMaxAdc() { return 4095; } // [ADC channels]
+  static  Int_t getMaxET() { return 60 ; } // [GeV]
 
  private:
-
-  Int_t maxAdc;
-  Int_t maxEtot;
 
   EEmcMCData  *mevIN; ///< decoded raw .fzd event
   EEeventDst *meeve;    ///<  result stored in TTRee 
 
   void mEE2ST(EEeventDst*, StEmcCollection* emcC); ///< TTree-->StEvent
 
-  float msamplingFraction; ///< for Towers
   float * mfixTgain; ///<  (adc=g*de )ideal gains for Towers
-  float mfixPgain; ///< (adc=g*de ) fixed gain for pre/post shower
-  float mfixSMDgain; ///< (adc=g*de ) fixed gain for SMD
 
   StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
   bool mEmcCollectionIsLocal;
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.8 2006/12/12 20:29:13 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.9 2007/01/12 23:57:12 jwebb Exp $";
   
  protected:
  public: 
@@ -124,12 +118,11 @@ class StEEmcFastMaker : public StMaker {
   virtual void Clear(Option_t *option="");
  
   void SetLocalStEvent();
-  void SetSamplingFraction(float x){ msamplingFraction=x;}; ///<default 0.05
   void SetEmcCollectionLocal(bool x=true){mEmcCollectionIsLocal=x;}
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.8 2006/12/12 20:29:13 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.9 2007/01/12 23:57:12 jwebb Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -140,6 +133,10 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.9  2007/01/12 23:57:12  jwebb
+// Calculation of ideal gains moved into static member function getTowerGains()
+// to allow slow simulator to access them.
+//
 // Revision 1.8  2006/12/12 20:29:13  balewski
 // added hooks for Endcap embedding
 //
