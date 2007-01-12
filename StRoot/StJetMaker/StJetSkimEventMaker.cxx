@@ -5,6 +5,7 @@
 //root
 #include "TFile.h"
 #include "TTree.h"
+#include "TChain.h"
 
 //StEmc
 #include "StEmcClusterCollection.h"
@@ -107,7 +108,7 @@ Int_t StJetSkimEventMaker::Make()
 	
 	//then get L2Results:
 	TArrayI& l2Array = muEvent->L2Result();
-	cout <<"l2Size:\t"<<l2Array.GetSize()<<endl;
+	//cout <<"l2Size:\t"<<l2Array.GetSize()<<endl;
 	/*
 	assert(l2Array.GetSize()==32);
 	mEvent->setL2Result(l2Array.GetArray());
@@ -119,6 +120,10 @@ Int_t StJetSkimEventMaker::Make()
 	mEvent->setFill( runInfo->beamFillNumber(blue));
     mEvent->setRunId( muEvent->runId() );
 	mEvent->setEventId( muEvent->eventId() );
+	TChain* chain = muDstMaker->chain(); 
+	assert(chain);
+	TObjString inputfile(chain->GetFile()->GetName());
+	mEvent->setMudstFileName(inputfile);
 	
 	//bbc info:
 	mEvent->setBbcTimeBin( muEvent->bbcTriggerDetector().onlineTimeDifference() );
@@ -146,7 +151,7 @@ Int_t StJetSkimEventMaker::Make()
 	mEvent->setOffsetBx48minusBX7( spDbMaker->offsetBX48minusBX7(bx48, bx7) );	
 	mEvent->setSpin4UsingBx48( spDbMaker->spin4usingBX48(bx48) );
 	
-	cout <<"sdb:\t"<<mEvent->isValid()<<"\t"<<mEvent->isPolLong()<<"\t"<<mEvent->isPolTrans()<<"\t"<<mEvent->isMaskedUsingBx48()<<"\t"<<mEvent->offsetBx48minusBX7()<<endl;
+	//cout <<"sdb:\t"<<mEvent->isValid()<<"\t"<<mEvent->isPolLong()<<"\t"<<mEvent->isPolTrans()<<"\t"<<mEvent->isMaskedUsingBx48()<<"\t"<<mEvent->offsetBx48minusBX7()<<endl;
 	
 	//vertex information:
 	int nVertices = muDst->numberOfPrimaryVertices();

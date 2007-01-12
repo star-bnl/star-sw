@@ -316,6 +316,7 @@ void StJetReader::exampleFastAna()
 	    
 	//basic information:
 	cout <<"fill/run/event:\t"<<skEv->fill()<<"\t"<<skEv->runId()<<"\t"<<skEv->eventId()<<endl;
+	cout <<"fileName:\t"<<skEv->mudstFileName().GetString()<<endl;
 	
 	//some spin info:
 	cout <<"bx48:\t"<<skEv->bx48()<<"\tspinBits:\t"<<skEv->spinBits()<<endl;
