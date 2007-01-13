@@ -1,0 +1,7 @@
+#Inventor V2.1 ascii
+Rotor {
+        rotation 1 0 1  0.2
+        speed 0.2
+        on TRUE
+    }
+
