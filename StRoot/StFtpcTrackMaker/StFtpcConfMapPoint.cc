@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.9 2004/04/06 18:36:12 oldi Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.10 2007/01/15 08:23:01 jcs Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.10  2007/01/15 08:23:01  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.9  2004/04/06 18:36:12  oldi
 // New data mebers for pad and time position and pad and time sigma added.
 // Reference to StFtpcHit added.
@@ -271,7 +274,7 @@ void StFtpcConfMapPoint::SetAngles()
   if (r2dim == 0.) {
     // If r2dim == 0 the pseudorapidity eta cannot be calculated (division by zero)!
     // This can only happen if the point is lying on the z-axis and this should never be possible.
-    gMessMgr->Message("The pseudorapidity cannot be calculated! (2-dim radius is zero and set to 1.e-10.)", "W", "OS");
+    LOG_WARN << "The pseudorapidity cannot be calculated! (2-dim radius is zero and set to 1.e-10.)" << endm;
     r2dim = 1.e-10;
   }
   

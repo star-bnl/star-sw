@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.78 2006/11/09 13:58:37 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.79 2007/01/15 08:23:02 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.79  2007/01/15 08:23:02  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.78  2006/11/09 13:58:37  jcs
 // bfc option fdbg selected if m_Mode>=2
 //
@@ -369,7 +372,7 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run) {
   TDataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
 
   if (!ftpcCalibrationsDb){
-    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
+    LOG_WARN << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
     assert(ftpcCalibrationsDb);
 
     return kStWarn;
@@ -399,7 +402,7 @@ Int_t StFtpcTrackMaker::Init()
   TDataSet *ftpcGeometryDb = GetDataBase("Geometry/ftpc");
 
   if (!ftpcGeometryDb){
-    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
+    LOG_WARN << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
     assert(ftpcGeometryDb);
 
     return kStWarn;
@@ -417,7 +420,7 @@ Int_t StFtpcTrackMaker::Init()
   // Create Histograms
 
 if (m_Mode >= 2) {
-   gMessMgr->Warning() << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
+   LOG_WARN << "StFtpcTrackMaker writing to DEBUGFILE" << endm;
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
 }
 
@@ -487,16 +490,16 @@ Int_t StFtpcTrackMaker::Make()
 {
   // Setup and tracking.
   
-  gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) started..." << endm;
+  LOG_INFO << "Tracking (FTPC) started..." << endm;
 
   TObjectSet* objSet = (TObjectSet*)GetDataSet("ftpcClusters");
   if (!objSet) {
-    gMessMgr->Warning() << "StFtpcTrackMaker::Make(): TObjectSet of ftpc clusters is missing." << endm;
+    LOG_WARN << "StFtpcTrackMaker::Make(): TObjectSet of ftpc clusters is missing." << endm;
     return kStWarn;
   }
   TObjArray *ftpcHits = (TObjArray*)objSet->GetObject();
   if (!ftpcHits) {
-    gMessMgr->Message("", "W", "OS") << "No FTPC clusters available!" << endm;
+    LOG_WARN << "No FTPC clusters available!" << endm;
     return kStWarn;
   }  
 
@@ -552,11 +555,11 @@ Int_t StFtpcTrackMaker::Make()
   
   else if (m_Mode%2 == 0) {
     tracker.TwoCycleTracking();
-    gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
+    LOG_INFO << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
   }
   else if (m_Mode%2 == 1) {
     tracker.LaserTracking();
-    gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
+    LOG_INFO << "StFtpcTrackMaker: Using LaserTracking"<<endm;
   }
   
   // for the line above you have these possibilities
@@ -619,12 +622,15 @@ Int_t StFtpcTrackMaker::Make()
   trackToStEvent.FillEventPrimaries(event, tracker.GetTracks());
   
   if (Debug()) {
-    gMessMgr->Message("", "I", "OS") << "Total time consumption         " << tracker.GetTime() << " s." << endm;
+    LOG_INFO << "Total time consumption         " << tracker.GetTime() << " s." << endm;
     StFtpcTrackingParams::Instance()->PrintParams();
     tracker.TrackingInfo();
   }
   
   else {
+    //tracker.SettingInfo();
+    // Cuts only set for laser tracking
+    //tracker.CutInfo();
     tracker.TrackingInfo();
   }
 
@@ -634,22 +640,23 @@ if (m_Mode >= 2) {
      vertexPos[0] = vertex.GetX();
      vertexPos[1] = vertex.GetY();
      vertexPos[2] = vertex.GetZ();
-     cout<<"TWOCYCLETRACKING: vertexPos[0] = "<<vertexPos[0]<<" vertexPos[1] = "<<vertexPos[1]<<" vertexPos[2] = "<<vertexPos[2]<<endl;
+     LOG_INFO<<"TWOCYCLETRACKING: vertexPos[0] = "<<vertexPos[0]<<" vertexPos[1] = "<<vertexPos[1]<<" vertexPos[2] = "<<vertexPos[2]<<endm;
   }
   if (m_Mode%2 == 1) {
      vertexPos[0] = 0.;
      vertexPos[1] = 0.;
      vertexPos[2] = 0.;
-     cout<<"LASER : No FTPC to global transformation !!!"<<endl;
+     LOG_INFO<<"LASER : No FTPC to global transformation !!!"<<endm;
   }
     StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
-    //cout<<"Debug fill tracktree"<<endl;
+    //LOG_INFO<<"Debug fill tracktree"<<endm;
     cldebug.filltracktree(tracker.GetTracks(),vertexPos);
     //if (cldebug.drawvertexhisto!=0)
        //cldebug.drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
 }
   
-  /*
+  
+/*
   // Track Display
   
   // Uncomment this block if you want to see (I mean see!) the found tracks.
@@ -672,7 +679,7 @@ if (m_Mode >= 2) {
   TDataSet *ftpc_data = GetDataSet("ftpc_hits");
 
   if (!ftpc_data) {
-    gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
+    LOG_WARN << "No FTPC data available!" << endm;
     return kStWarn;
   }
 
@@ -695,7 +702,7 @@ if (m_Mode >= 2) {
   }
   
   
-  gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) completed." << endm;
+  LOG_INFO << "Tracking (FTPC) completed." << endm;
   
   return kStOK;;
 }
@@ -875,9 +882,9 @@ void StFtpcTrackMaker::PrintInfo()
 {
   // Prints information.
   
-  gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.78 2006/11/09 13:58:37 jcs Exp $ *" << endm;
-  gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
+  LOG_INFO << "******************************************************************" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.79 2007/01/15 08:23:02 jcs Exp $ *" << endm;
+  LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
     StMaker::PrintInfo();

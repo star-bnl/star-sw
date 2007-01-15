@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.35 2005/02/05 01:04:38 perev Exp $
+// $Id: StFtpcTracker.cc,v 1.36 2007/01/15 08:23:02 jcs Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.36  2007/01/15 08:23:02  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.35  2005/02/05 01:04:38  perev
 // test for 1/0
 //
@@ -410,17 +413,17 @@ void StFtpcTracker::CalcEnergyLoss()
   Int_t n_untracked;
   
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 8) {      
-    gMessMgr->Message("", "I", "OS") << " No track = " << GetNumberOfTracks() << endm;
-    gMessMgr->Message("", "I", "OS") << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
-    gMessMgr->Message("", "I", "OS") << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
-    gMessMgr->Message("", "I", "OS") << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
-    gMessMgr->Message("", "I", "OS") << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
+    LOG_INFO << " No track = " << GetNumberOfTracks() << endm;
+    LOG_INFO << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
+    LOG_INFO << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
+    LOG_INFO << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
+    LOG_INFO << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
     
-    gMessMgr->Message("", "I", "OS") << " name= (no name), nok = (" << GetNumberOfClusters() 
+    LOG_INFO << " name= (no name), nok = (" << GetNumberOfClusters() 
 				      << "), maxlen = (" << GetNumberOfClusters() << ")" << endm;
-    gMessMgr->Message("", "I", "OS") << " name= (no mane), nok = (" << GetNumberOfTracks() 
+    LOG_INFO << " name= (no mane), nok = (" << GetNumberOfTracks() 
 				      << "), maxlen = (" << GetNumberOfTracks() << ")" << endm;
-    //gMessMgr->Message("", "I", "OS") << " name= (" << fdepar_h->name << "), nok = (" << fdepar_h->nok 
+    //LOG_INFO << " name= (" << fdepar_h->name << "), nok = (" << fdepar_h->nok 
     //				      << "), maxlen = (" << fdepar_h->maxlen << ")" << endm;
   }
   
@@ -454,8 +457,8 @@ void StFtpcTracker::CalcEnergyLoss()
 	n_tracked++;
 
 	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
-	  gMessMgr->Message("", "I", "OS") << "total_charge = " << total_charge << ", hit_p = " << hit_p 
-					    << ", de = " << hit->GetCharge() << endm;
+	  LOG_INFO << "total_charge = " << total_charge << ", hit_p = " << hit_p 
+		   << ", de = " << hit->GetCharge() << endm;
 	}
       }
     }
@@ -463,7 +466,7 @@ void StFtpcTracker::CalcEnergyLoss()
     if (all_hit < StFtpcTrackingParams::Instance()->MinHit() || all_hit > StFtpcTrackingParams::Instance()->MaxHit()) {
       
       if (StFtpcTrackingParams::Instance()->DebugLevel() < 5) {  // level = 10 debugging
-	gMessMgr->Message("", "I", "OS") << " number of hits = " << all_hit << endm;
+	LOG_INFO << " number of hits = " << all_hit << endm;
       }
       
       continue;              // skip if unacceptable no. hits
@@ -503,10 +506,10 @@ void StFtpcTracker::CalcEnergyLoss()
 	} 
 	   
 	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
-	  gMessMgr->Message("", "I", "OS") << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
-					    << cos_lambda << ");  cross= " << 180./3.14159 * TMath::ACos(cos_alpha) 
-					    << "(" << cos_alpha << ") [deg]; P=(" << px << ", " << py << ", " 
-					    << pz << endm;
+	  LOG_INFO << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
+		   << cos_lambda << ");  cross= " << 180./3.14159 * TMath::ACos(cos_alpha) 
+		   << "(" << cos_alpha << ") [deg]; P=(" << px << ", " << py << ", " 
+		   << pz << endm;
 	}
 	   
 	if ( cos_alpha == 0. || cos_lambda == 0. ) {
@@ -517,8 +520,8 @@ void StFtpcTracker::CalcEnergyLoss()
 	  dedx_arr[ihit] = hit->GetCharge() * cos_alpha*cos_lambda;
 
 	  if(dedx_arr[ihit]<0) {
-	    gMessMgr->Message("", "I", "OS") << dedx_arr[ihit] << " " << hit->GetCharge() 
-					      << " " << cos_alpha << " " << cos_lambda << endm;
+	    LOG_INFO << dedx_arr[ihit] << " " << hit->GetCharge() 
+		     << " " << cos_alpha << " " << cos_lambda << endm;
 	  }
 	}
 	
@@ -548,8 +551,8 @@ void StFtpcTracker::CalcEnergyLoss()
     track->SetNumdEdxHits(acc_hit);
     
     if(track->GetdEdx() == 0) {
-      gMessMgr->Message("", "I", "OS") << "track " << itrk << " dedx " << track->GetdEdx() 
-					<< " ndedx " << track->GetNumdEdxHits() << endm;
+      LOG_INFO << "track " << itrk << " dedx " << track->GetdEdx() 
+	       << " ndedx " << track->GetNumdEdxHits() << endm;
     }
     
     itrk_ok++;
@@ -557,7 +560,7 @@ void StFtpcTracker::CalcEnergyLoss()
   } // end loop itrk 
 
   if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
-    gMessMgr->Message("", "I", "OS") << "Using truncated mean over whole chamber method by R. Witt." << endm;
+    LOG_INFO << "Using truncated mean over whole chamber method by R. Witt." << endm;
     int nClusters = GetNumberOfClusters();
     if (weightedT.GetSize() <nClusters)  weightedT.Set(nClusters);
     weighted =weightedT.GetArray();
@@ -696,8 +699,8 @@ void StFtpcTracker::CalcEnergyLoss()
   } 
 
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 11) {
-    gMessMgr->Message("", "I", "OS") << " total charges in 2 FTPCs " << total_charge << endm;
-    gMessMgr->Message("", "I", "OS") << " processed tracks = " << itrk_ok << endm;
+    LOG_INFO << " total charges in 2 FTPCs " << total_charge << endm;
+    LOG_INFO << " processed tracks = " << itrk_ok << endm;
   }
       
   return;
@@ -901,7 +904,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     } // end loop itrk 
 
     if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
-      gMessMgr->Message("", "I", "OS") << "Using truncated mean over whole chamber method by R. Witt." << endm;
+      LOG_INFO << "Using truncated mean over whole chamber method by R. Witt." << endm;
       int nClusters=GetNumberOfClusters();
       if (weightedT.GetSize()<nClusters) weightedT.Set(nClusters);
       weighted = weightedT.GetArray();
@@ -1047,7 +1050,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 
     if(mBench) {
       mBench->Stop("fit");
-      gMessMgr->Message("", "I", "OS") << "Fit and dE/dx calc. finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      LOG_INFO << "Fit and dE/dx calc. finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
 
@@ -1058,11 +1061,11 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     
     if(mBench) {
       mBench->Stop("fit");
-      gMessMgr->Message("", "I", "OS") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      LOG_INFO << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
     
-    gMessMgr->Message("", "W", "OS") << "Tracks not written (No tracks found!)." << endm;
+    LOG_WARN << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
 }

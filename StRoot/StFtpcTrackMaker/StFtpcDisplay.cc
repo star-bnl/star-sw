@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.17 2003/09/16 15:27:01 jcs Exp $
+// $Id: StFtpcDisplay.cc,v 1.18 2007/01/15 08:23:01 jcs Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.18  2007/01/15 08:23:01  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.17  2003/09/16 15:27:01  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -512,6 +515,7 @@ void StFtpcDisplay::TrackInfo()
 
   StFtpcTrack *track;
  
+// The following cout's are online prompts - not Logger messages!
 
  while (kTRUE) {
     
@@ -520,9 +524,12 @@ void StFtpcDisplay::TrackInfo()
 
     switch (mode) {
       
+    // Mode  =  s   skip this event
     case 's':
       return;
       
+    // Mode  =  t   display track
+    //              Number = number of track to be displayed
     case 't':
       cout << "Number: ";
       cin >> number;
@@ -612,6 +619,8 @@ void StFtpcDisplay::TrackInfo()
       //delete eta_track;
       continue;
 
+    // Mode  =  p   display point on track
+    //              Address = address of point to be dislayed
     case 'p':
       cout << "Address: ";
       cin >> address;

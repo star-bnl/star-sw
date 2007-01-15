@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.21 2004/09/10 13:39:39 jcs Exp $
+// $Id: StFtpcPoint.cc,v 1.22 2007/01/15 08:23:01 jcs Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.22  2007/01/15 08:23:01  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.21  2004/09/10 13:39:39  jcs
 // correct bit allocation error for FTPC HardwarePosition
 //
@@ -340,7 +343,7 @@ void StFtpcPoint::TransformFtpc2Global()
   
   else {
     // hit is in global coordinates already
-    gMessMgr->Message("", "W", "OS") << "Hit is in global coordinates already! Not transformed." << endm;
+    LOG_WARN << "Hit is in global coordinates already! Not transformed." << endm;
   }
   
   return;
@@ -383,7 +386,7 @@ void StFtpcPoint::TransformGlobal2Ftpc()
   
   else {
     // hit is in local (FTPC) coordinates already
-    gMessMgr->Message("", "W", "OS") << "Hit is in local (FTPC) coordinates already! Not transformed." << endm;
+    LOG_WARN << "Hit is in local (FTPC) coordinates already! Not transformed." << endm;
   }
   
   return;
@@ -410,7 +413,7 @@ void StFtpcPoint::SetStFtpcHitCoord()
   StFtpcHit *hit = GetStFtpcHit();
 
   if (!hit) {
-    gMessMgr->Message("", "W", "OS") << "StFtpcPoint: StFtpcHit does not exist! No changes done." << endm;
+    LOG_WARN << "StFtpcPoint: StFtpcHit does not exist! No changes done." << endm;
     return;
   }
 
@@ -455,7 +458,7 @@ Int_t StFtpcPoint::GetDetectorId() const
   if (mPadRow >= 1 && mPadRow <= 10) return kFtpcWestId;
   else if (mPadRow >= 11 && mPadRow <= 20) return kFtpcEastId;
   else {
-    gMessMgr->Message("", "I", "OS") << "StFtpcPoint.mPadRow  = " << mPadRow << " is out of range"<< endm;
+    LOG_INFO << "StFtpcPoint.mPadRow  = " << mPadRow << " is out of range"<< endm;
     return -1;
   }
 }

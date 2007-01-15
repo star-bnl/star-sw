@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.32 2004/02/12 19:37:10 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.33 2007/01/15 08:23:02 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.33  2007/01/15 08:23:02  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.32  2004/02/12 19:37:10  oldi
 // *** empty log message ***
 //
@@ -904,13 +907,13 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   //gMessMgr->precision(16);
     
   if (debug) {
-    gMessMgr->Message("", "I", "OS") << "from circle fitting program" << endm;
+    LOG_INFO << "from circle fitting program" << endm;
   }
   
   for(i=0;i<num;i++) {
       
     if (debug) { 
-      gMessMgr->Message("", "I", "OS") << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] << endm;
+      LOG_INFO << "x: " << x[i] << " y: " << y[i] << "xw: " << xw[i] << " yw: " << yw[i] << endm;
     }
 
     x[i] = x[i] - xav;
@@ -981,7 +984,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
   Double_t xc = 0., yc = 0.;
   
   if (debug) { 
-    gMessMgr->Message("", "I", "OS") << "Solving by Newton method" << endm;
+    LOG_INFO << "Solving by Newton method" << endm;
   }
   
   for(i = 0; i < MaxIter; i++) {
@@ -990,7 +993,7 @@ Int_t StFtpcTrack::CircleFit(Double_t x[],Double_t y[], Double_t xw[], Double_t 
     wNew = w - f / fp;
     
     if (debug) { 
-      gMessMgr->Message("", "I", "OS") << "Iteration Number" << i << endm;
+      LOG_INFO << "Iteration Number" << i << endm;
     }
     
     if ((wNew-w) < 10e-16 && (w-wNew) < 10e-16) {

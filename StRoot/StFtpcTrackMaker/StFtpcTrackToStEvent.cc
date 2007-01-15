@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.13 2005/12/01 23:28:43 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.14 2007/01/15 08:23:02 jcs Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -49,7 +49,7 @@ StFtpcTrackToStEvent::StFtpcTrackToStEvent() : mEvent(0), mTrackStore(0), mTrkNo
 
 StFtpcTrackToStEvent::~StFtpcTrackToStEvent()
 {
-  //cout <<"StFtpcTrackToStEvent::~StFtpcTrackToStEvent()"<<endl;
+  //LOG_INFO <<"StFtpcTrackToStEvent::~StFtpcTrackToStEvent()"<<endm;
 }
 
 /*! 
@@ -84,8 +84,8 @@ StFtpcTrackToStEvent::~StFtpcTrackToStEvent()
 StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
   
   if (e==0 || t==0) {
-    cout <<"StFtpcTrackToStEvent::FillEvent(). ERROR:\t"
-	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endl;
+    LOG_WARN <<"StFtpcTrackToStEvent::FillEvent(). ERROR:"
+	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endm;
     return 0;
   }
 
@@ -123,21 +123,21 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
       FillTopologyMap(gTrack, kTrack);
       mTrkNodeMap.insert(map<StFtpcTrack*,StTrackNode*>::value_type (kTrack, trNodeVec.back()));
       if (trackNode->entries(global)<1) {
-	cout << "StFtpcTrackToStEvent::FillEvent() - ERROR - Track Node has no entries!" << endl;
+	LOG_WARN << "StFtpcTrackToStEvent::FillEvent() - ERROR - Track Node has no entries!" << endm;
       }
       
       fillTrackCount2++;
     }
     
     catch (runtime_error & rte ) {
-      cout << "StFtpcTrackToStEvent::FillEvent() -W- runtime-e filling track"<<rte.what() << endl;
+      LOG_WARN << "StFtpcTrackToStEvent::FillEvent() -W- runtime-e filling track"<<rte.what() << endm;
       delete trackNode;
       delete detInfo;
       delete gTrack;
     }
 
     catch (...) {
-      cout << "StFtpcTrackToStEvent::FillEvent() - WARNING - Unknown exception filling track."<<endl;
+      LOG_WARN << "StFtpcTrackToStEvent::FillEvent() - WARNING - Unknown exception filling track."<<endm;
       delete trackNode;
       delete detInfo;
       delete gTrack;
@@ -145,7 +145,7 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
   }
   
   if (errorCount>4) {
-    cout << "There were "<<errorCount<<"runtime_error while filling StEvent"<<endl;
+    LOG_WARN << "There were "<<errorCount<<"runtime_errors while filling StEvent"<<endm;
   }
   
   return mEvent;
@@ -155,14 +155,14 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
 StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
 
   if (!mTrkNodeMap.size()) {
-    cout <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:\t"
-	 << "Mapping between the StTrackNodes and the StFtpcTracks is empty.  Exit." << endl;
+    LOG_WARN <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:"
+	 << "Mapping between the StTrackNodes and the StFtpcTracks is empty.  Exit." << endm;
     return 0;
   }
   
   if (e==0 || t==0) {
-    cout <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:\t"
-	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endl;
+    LOG_WARN <<"StFtpcTrackToStEvent::FillEventPrimaries(). ERROR:"
+	 <<"Null StEvent ("<<e<<") || TObjArray of tracks ("<<t<<").  Exit"<<endm;
     return 0;
   }
 
@@ -172,7 +172,7 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
 
   if(!vertex) {
-    cout <<"Failed to find a primary vertex. No primary FTPC tracks written to StEvent."<<endl;
+    LOG_WARN <<"Failed to find a primary vertex. No primary FTPC tracks written to StEvent."<<endm;
     return (StEvent*)NULL;
   }
   
@@ -231,21 +231,21 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
       }
 	
       catch (runtime_error & rte ) {
-	cout << "StFtpcTrackToStEvent::FillEventPrimaries() - runtime exception, filling track: "
-	     << rte.what() << endl;
+	LOG_WARN << "StFtpcTrackToStEvent::FillEventPrimaries() - runtime exception, filling track: "
+	     << rte.what() << endm;
 	delete detInfo;
 	delete pTrack;
       }
 	
       catch (...) {
-	cout << "StFtpcTrackToStEvent::FillEventPrimaries() - Unknown exception, filling track."<<endl;
+	LOG_WARN << "StFtpcTrackToStEvent::FillEventPrimaries() - Unknown exception, filling track."<<endm;
 	delete detInfo;
 	delete pTrack;
       }
     } //end if primary
   } // Ftpc track loop
   
-  if (skippedCount>0) cout << "StFtpcTrackToStEvent::FillEventPrimaries() -I- A total of "<<skippedCount<<" StFtpcTracks were skipped"<<endl;
+  if (skippedCount>0) LOG_WARN << "StFtpcTrackToStEvent::FillEventPrimaries() -I- A total of "<<skippedCount<<" StFtpcTracks were skipped"<<endm;
   mTrkNodeMap.clear();  // need to reset for the next event
   return mEvent;
 }
@@ -313,7 +313,7 @@ void StFtpcTrackToStEvent::FillGeometry(StTrack* gTrack, StFtpcTrack* track, boo
   if (!finite(origin.x()) ||
       !finite(origin.y()) ||
       !finite(origin.z()) || !finite(track->curvature())) {
-    cout << "StFtpcTrackToStEvent::FillGeometry() Encountered non-finite numbers!!!! Bail out completely!!! " << endl;
+    LOG_ERROR << "StFtpcTrackToStEvent::FillGeometry() Encountered non-finite numbers!!!! Bail out completely!!! " << endm;
     
     abort();
   }
@@ -392,14 +392,14 @@ void StFtpcTrackToStEvent::FilldEdxInfo(StTrack* gTrack, StFtpcTrack* track) {
     dEdx = 9999;
     errordEdx = dEdx;
     nPoints = 0;
-    cout <<"StFtpcTrackToStEvent::Error: dEdx non-finite."<<endl;
+    LOG_WARN <<"StFtpcTrackToStEvent::Error: dEdx non-finite."<<endm;
   }
   
   else if(!finite(errordEdx)) {
     dEdx = 9999;
     errordEdx = dEdx;
     nPoints=0;
-    cout <<"StFtpcTrackToStEvent::Error: errordEdx non-finite."<<endl;
+    LOG_WARN <<"StFtpcTrackToStEvent::Error: errordEdx non-finite."<<endm;
   }
   
   StTrackPidTraits* pidTrait = new StDedxPidTraits(track->GetDetectorId(),
