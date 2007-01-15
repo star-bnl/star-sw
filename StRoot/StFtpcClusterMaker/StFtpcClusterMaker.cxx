@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.89  2007/01/15 07:49:22  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.88  2006/11/09 13:55:34  jcs
 // bfc option fdbg selected if m_Mode>=2
 //
@@ -382,9 +385,9 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   mDbMaker     = (St_db_Maker*)GetMaker("db");
   Int_t dbDate = mDbMaker->GetDateTime().GetDate();
   Int_t dbTime = mDbMaker->GetDateTime().GetTime();
-  cout<<"StFtpcClusterMaker: dbDate = "<<dbDate<<" dbTime = "<<dbTime<<" Run Number = "<<GetRunNumber()<<endl;
+  LOG_INFO<<"dbDate = "<<dbDate<<" dbTime = "<<dbTime<<" Run Number = "<<GetRunNumber()<<endm;
   
-  gMessMgr->Info() << "StFtpcClusterMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
+  LOG_INFO << "InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
   
   // Load the correct FTPC drift maps depending on magnetic field
 
@@ -394,35 +397,35 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffp10kv","ftpcdVDriftdP");
      SetFlavor("ffp10kv","ftpcDeflection");
      SetFlavor("ffp10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffp10kv"<<endm;
+     LOG_INFO << "Ftpc drift map flavor set to ffp10kv"<<endm;
   }
   else if ( gFactor > 0.2 ) {
      SetFlavor("hfp10kv","ftpcVDrift");
      SetFlavor("hfp10kv","ftpcdVDriftdP");
      SetFlavor("hfp10kv","ftpcDeflection");
      SetFlavor("hfp10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to hfp10kv"<<endm;
+     LOG_INFO << "Ftpc drift map flavor set to hfp10kv"<<endm;
   }
   else if ( gFactor > -0.2 ) {
      SetFlavor("zf10kv","ftpcVDrift");
      SetFlavor("zf10kv","ftpcdVDriftdP");
      SetFlavor("zf10kv","ftpcDeflection");
      SetFlavor("zf10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to zf10kv"<<endm;
+     LOG_INFO << "Ftpc drift map flavor set to zf10kv"<<endm;
   }
   else if ( gFactor > -0.8 ) {
      SetFlavor("hfn10kv","ftpcVDrift");
      SetFlavor("hfn10kv","ftpcdVDriftdP");
      SetFlavor("hfn10kv","ftpcDeflection");
      SetFlavor("hfn10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to hfn10kv"<<endm;
+     LOG_INFO << "Ftpc drift map flavor set to hfn10kv"<<endm;
   }
   else {
      SetFlavor("ffn10kv","ftpcVDrift");
      SetFlavor("ffn10kv","ftpcdVDriftdP");
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcClusterMaker::InitRun: flavor set to ffn10kv"<<endm;
+     LOG_INFO << "Ftpc drift map flavor set to ffn10kv"<<endm;
   }     
 
   // calculate microsecondsPerTimebin from RHIC clock frequency for current run 
@@ -439,7 +442,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
-     gMessMgr->Warning() << "StFtpcClusterMaker::InitRun Error Getting FTPC offline database Geometry/ftpc"<<endm;
+     LOG_WARN << "InitRun  - error Getting FTPC offline database Geometry/ftpc"<<endm;
      return kStWarn;
   }
 
@@ -455,7 +458,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
-     gMessMgr->Warning() << "StFtpcClusterMaker::InitRun Error getting FTPC offline database Calibrations/ftpc"<<endm;
+     LOG_WARN <<"InitRun - error getting FTPC offline database Calibrations/ftpc"<<endm;
      return kStWarn;
   }
 
@@ -479,7 +482,9 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
-  if (m_Mode >= 2) gMessMgr->Info() << "StFtpcClusterMaker running with cluster/laser analysis turned on"<<endm;
+  if (m_Mode >= 2) {
+    LOG_INFO << "Running with cluster/laser analysis turned on"<<endm;
+  }
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
@@ -525,7 +530,6 @@ Int_t StFtpcClusterMaker::Init(){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Make()
 {
-  int iMake=kStOK;
 
   int using_FTPC_slow_simulator = 0;
 
@@ -548,10 +552,12 @@ Int_t StFtpcClusterMaker::Make()
 
   // create parameter reader
   StFtpcParamReader paramReader(m_clusterpars,m_fastsimgas,m_fastsimpars);
+
+  if ( paramReader.returnCode != kStOK ) {
+     LOG_ERROR << "Exiting - error constructing StFtpcParamReader (paramReader.returnCode = "<<paramReader.returnCode<<")"<<endm;
+     return kStERR;
+  }
   
- // cout<<"paramReader.gasTemperatureWest() = "<<paramReader.gasTemperatureWest()<<endl;
- // cout<<"paramReader.gasTemperatureEast() = "<<paramReader.gasTemperatureEast()<<endl;
- 
   // create FTPC data base reader
   StFtpcDbReader dbReader(m_dimensions,
                           m_padrow_z,
@@ -570,31 +576,30 @@ Int_t StFtpcClusterMaker::Make()
 			  m_cathode,
 			  m_clustergeo);	
 
-  if ( dbReader.returnCode != 0 ) {
-     gMessMgr->Warning() << "StFtpcClusterMaker::Error Constructing StFtpcDbReader "<<endm;
-     return kStWarn;
+  if ( dbReader.returnCode != kStOK ) {
+     LOG_ERROR << "Exiting - error constructing StFtpcDbReader (dbReader.returnCode = "<<dbReader.returnCode<<")"<<endm;
+     return kStERR;
   }
-
 
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
      dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
-     cout<<"Using the following values from database:"<<endl;
-     cout<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<endl;
-     cout<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endl;
-     cout<<"          Asic2EastNotInverted      = "<<dbReader.Asic2EastNotInverted()<<endl;
-     cout<<"          tzero                     = "<<dbReader.tZero()<<endl;
-     cout<<"          temperatureDifference     = "<<dbReader.temperatureDifference()<<endl;
-     cout<<"          defaultTemperatureWest    = "<<dbReader.defaultTemperatureWest()<<endl;
-     cout<<"          defaultTemperatureEast    = "<<dbReader.defaultTemperatureEast()<<endl;
-     cout<<"          adjustAverageWest         = "<<dbReader.adjustAverageWest()<<endl;
-     cout<<"          adjustAverageEast         = "<<dbReader.adjustAverageEast()<<endl;
-     cout<<"          magboltzVDrift(0,0)       = "<<dbReader.magboltzVDrift(0,0)<<endl;
-     cout<<"          magboltzDeflection(0,0)   = "<<dbReader.magboltzDeflection(0,0)<<endl;
-     cout<<"          offsetCathodeWest         = "<<dbReader.offsetCathodeWest()<<endl;
-     cout<<"          offsetCathodeEast         = "<<dbReader.offsetCathodeEast()<<endl;
-     cout<<"          angleOffsetWest           = "<<dbReader.angleOffsetWest()<<endl;
-     cout<<"          angleOffsetEast           = "<<dbReader.angleOffsetEast()<<endl;
-     cout<<"          minChargeWindow           = "<<dbReader.minChargeWindow()<<endl;
+     LOG_INFO<<"Using the following values from database:"<<endm;
+     LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<endm;
+     LOG_INFO<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endm;
+     LOG_INFO<<"          Asic2EastNotInverted      = "<<dbReader.Asic2EastNotInverted()<<endm;
+     LOG_INFO<<"          tzero                     = "<<dbReader.tZero()<<endm;
+     LOG_INFO<<"          temperatureDifference     = "<<dbReader.temperatureDifference()<<endm;
+     LOG_INFO<<"          defaultTemperatureWest    = "<<dbReader.defaultTemperatureWest()<<endm;
+     LOG_INFO<<"          defaultTemperatureEast    = "<<dbReader.defaultTemperatureEast()<<endm;
+     LOG_INFO<<"          adjustAverageWest         = "<<dbReader.adjustAverageWest()<<endm;
+     LOG_INFO<<"          adjustAverageEast         = "<<dbReader.adjustAverageEast()<<endm;
+     LOG_INFO<<"          magboltzVDrift(0,0)       = "<<dbReader.magboltzVDrift(0,0)<<endm;
+     LOG_INFO<<"          magboltzDeflection(0,0)   = "<<dbReader.magboltzDeflection(0,0)<<endm;
+     LOG_INFO<<"          offsetCathodeWest         = "<<dbReader.offsetCathodeWest()<<endm;
+     LOG_INFO<<"          offsetCathodeEast         = "<<dbReader.offsetCathodeEast()<<endm;
+     LOG_INFO<<"          angleOffsetWest           = "<<dbReader.angleOffsetWest()<<endm;
+     LOG_INFO<<"          angleOffsetEast           = "<<dbReader.angleOffsetEast()<<endm;
+     LOG_INFO<<"          minChargeWindow           = "<<dbReader.minChargeWindow()<<endm;
   }
 
   St_DataSet *daqDataset;
@@ -603,14 +608,14 @@ Int_t StFtpcClusterMaker::Make()
   daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
-      gMessMgr->Message("", "I", "OS") << "Using StDAQReader to get StFTPCReader" << endm;
+      LOG_INFO << "Using StDAQReader to get StFTPCReader" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
 
       if (!ftpcReader || !ftpcReader->checkForData()) {
-	gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
+	LOG_WARN << "No FTPC data available!" << endm;
 	return kStWarn;
       }
 
@@ -618,7 +623,7 @@ Int_t StFtpcClusterMaker::Make()
        
       StDetectorDbFTPCGas *gas = StDetectorDbFTPCGas::instance();
       if ( !gas ){
-          gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcGasOut"<<endm;
+          LOG_WARN << "Error getting FTPC Offline database: Calibrations_ftpc/ftpcGasOut"<<endm;
           return kStWarn;
       }	      
 
@@ -650,7 +655,7 @@ Int_t StFtpcClusterMaker::Make()
             // default values change depending on SVT high voltage on/off
             // currently using daqReader->SVTPresent() to test but may need
             // access to Conditions_svt/svtInterLocks
-         cout<<"daqReader->SVTPresent() = "<<daqReader->SVTPresent()<<endl;
+         LOG_INFO << "daqReader->SVTPresent() = " << daqReader->SVTPresent() << endm;
 	 returnCode = gasUtils.defaultTemperatureWest(dbDate,daqReader->SVTPresent());
       }	 
 
@@ -665,17 +670,17 @@ Int_t StFtpcClusterMaker::Make()
             // default values change depending on SVT high voltage on/off
             // currently using daqReader->SVTPresent() to test but may need
             // access to Conditions_svt/svtInterLocks
-         cout<<"daqReader->SVTPresent() = "<<daqReader->SVTPresent()<<endl;
+         LOG_INFO << "daqReader->SVTPresent() = " << daqReader->SVTPresent() << endm;
 	 returnCode = gasUtils.defaultTemperatureEast(dbDate,daqReader->SVTPresent());
       }	 
 
 
-      gMessMgr->Message("", "I", "OS") << " Using normalizedNowPressure = "<<paramReader.normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader.gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader.gasTemperatureEast()<<endm; 
+      LOG_INFO << " Using normalizedNowPressure = "<<paramReader.normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader.gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader.gasTemperatureEast()<<endm; 
 
        paramReader.setAdjustedAirPressureWest(paramReader.normalizedNowPressure()*((dbReader.baseTemperature()+STP_Temperature)/(paramReader.gasTemperatureWest()+STP_Temperature)));
-      gMessMgr->Info() <<" paramReader.setAdjustedAirPressureWest = "<<paramReader.adjustedAirPressureWest()<<endm;
+      LOG_INFO << " paramReader.setAdjustedAirPressureWest = "<<paramReader.adjustedAirPressureWest()<<endm;
       paramReader.setAdjustedAirPressureEast(paramReader.normalizedNowPressure()*((dbReader.baseTemperature()+STP_Temperature)/(paramReader.gasTemperatureEast()+STP_Temperature)));
-     gMessMgr->Info() <<" paramReader.setAdjustedAirPressureEast = "<<paramReader.adjustedAirPressureEast()<<endm;
+     LOG_INFO << " paramReader.setAdjustedAirPressureEast = "<<paramReader.adjustedAirPressureEast()<<endm;
 
     }
 
@@ -702,7 +707,7 @@ Int_t StFtpcClusterMaker::Make()
 				  (char *) fcl_ftpcadc->GetTable(),
 				  fcl_ftpcadc->GetNRows());
 
-      gMessMgr->Message("", "I", "OS") << "created StFTPCReader from tables" << endm;
+      LOG_INFO << "created StFTPCReader from tables" << endm;
       using_FTPC_slow_simulator = 1;
   
       // Set gas temperature to default values so that database values printed only once
@@ -710,19 +715,19 @@ Int_t StFtpcClusterMaker::Make()
       paramReader.setGasTemperatureEast(dbReader.defaultTemperatureEast());
     }
     else {
-      
-      gMessMgr->Message("", "I", "OS") <<"StFtpcClusterMaker: Tables are not found:" 
-					<< " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
-					<< " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
+      LOG_INFO << "Tables are not found:" 
+               << " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
+	       << " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
     }
   }
 
   if(ftpcReader) {
 
-
-    if(Debug()) gMessMgr->Message("", "I", "OS") << "start running StFtpcClusterFinder" << endm;
+    if(Debug()) {
+       LOG_INFO << "start running StFtpcClusterFinder" << endm;
+    }
       
-    int searchresult;
+    Int_t searchResult = kStOK;
 
     if (m_Mode >= 2) {
        StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
@@ -739,7 +744,9 @@ Int_t StFtpcClusterMaker::Make()
                                                        m_chargestep_West,
                                                        m_chargestep_East,
 						       &cldebug);
-          searchresult=fcl.search();
+          if (Debug()) fcl.DebugOn=kTRUE;
+          else fcl.DebugOn=kFALSE;
+          searchResult = fcl.search();
     }
 
     else {
@@ -753,15 +760,12 @@ Int_t StFtpcClusterMaker::Make()
                                             m_csteps,
                                             m_chargestep_West,
                                             m_chargestep_East);
-          searchresult=fcl.search();
+          if (Debug()) fcl.DebugOn=kTRUE;
+          else fcl.DebugOn=kFALSE;
+          searchResult = fcl.search();
     }
     
-    
-    if (searchresult == 0)
-      {
-	iMake=kStWarn;
-      }
-	
+    if (searchResult == kStERR) return kStERR;
 
     if (using_FTPC_slow_simulator) delete ftpcReader;
   }
@@ -777,14 +781,18 @@ Int_t StFtpcClusterMaker::Make()
 							     g2t_track,
 							     g2t_ftp_hit);
 
-      if(Debug()) gMessMgr->Message("", "I", "OS") << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
+      if(Debug()) {
+        LOG_INFO << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
+      }
       
       StFtpcFastSimu  ffs                     (&geantReader,
 					       &paramReader,
                                                &dbReader,
 					       mHitArray,
 					       &ghitarray);
-      if(Debug()) gMessMgr->Message("", "I" "OS") << "finished running StFtpcFastSimu" << endm;
+      if(Debug()) {
+        LOG_INFO << "finished running StFtpcFastSimu" << endm;
+      }
     }
   }
 
@@ -802,7 +810,7 @@ Int_t StFtpcClusterMaker::Make()
        
   StDetectorDbFTPCVoltageStatus *voltageStatus = StDetectorDbFTPCVoltageStatus::instance();
   if ( !voltageStatus) {
-      gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
+      LOG_WARN << "Error getting FTPC Offline database: Calibrations_ftpc/ftpcVoltageStatus"<<endm;
       return kStWarn;
    }
   // if mVoltageStatus  and StEvent exists, set StDetectorState
@@ -837,7 +845,7 @@ Int_t StFtpcClusterMaker::Make()
   // Fill FTPC cluster maker histograms
   MakeHistograms(); 
 
-  return iMake;
+  return kStOK;
 }
 
 
@@ -847,7 +855,7 @@ void StFtpcClusterMaker::MakeHistograms()
 {
   if (!mHitArray) return;
 
-  //cout<<"*** NOW MAKING HISTOGRAMS FOR fcl ***"<<endl;
+  //LOG_INFO<<"*** NOW MAKING HISTOGRAMS ***"<<endm;
 
   for (Int_t i=0; i<mHitArray->GetEntriesFast();i++) {
     StFtpcPoint *hit = (StFtpcPoint*)mHitArray->At(i);

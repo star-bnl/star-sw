@@ -117,7 +117,7 @@ static RAW raw;
 StFtpcClusterDebug::StFtpcClusterDebug()
 {
   // default constructor
-  //cout << "StFtpcClusterDebug constructed" << endl; 
+  //LOG_INFO << "StFtpcClusterDebug constructed" << endm; 
   hardsecold=-1; hardrowold=-1; clusterhisto=new TH2F(),clusterhisto2=new TH2F();
 }
 
@@ -145,7 +145,7 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
   ini.open("./debug.ini",ios::in);
   char fname[25]; 
   ini>>fname;ini>>drawclhisto;ini>>drawvertexhisto;
-  //cout << "StFtpcClusterDebug constructed" << endl;
+  //LOG_INFO << "StFtpcClusterDebug constructed" << endm;
   char histodatei[50];
   sprintf(histodatei,"run_%d_%s.root",run,fname);
 
@@ -154,10 +154,8 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
   if (!(test->IsOpen()))
     {
       fileopen=false;
-      cout<<"histodatei = "<<histodatei<<endl;
+      LOG_INFO << "histodatei = " << histodatei << endm;
       histofile=new TFile(histodatei,"RECREATE","FTPC Cluster Finder histograms");
-      cout<<"DEBUG : Create histograms for seeing clusters in Root-file..."<<endl;
-      cout<<"DEBUG : Create Tree..."<<endl;
 
         drtree=new TTree("rinfo","Run calibration information");
         drtree->Branch("Run",&Run,"run/I:date/I:time/I:micropertimebin/F:deltapW/F:deltapE/F");
@@ -186,8 +184,6 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
     {
       fileopen=true;
       histofile=new TFile(histodatei,"UPDATE","histogramme fuer fcl");
-      cout<<"DEBUG : Update histograms for seeing clusters in Root-file..."<<endl;
-      cout<<"DEBUG : Update Tree..."<<endl;
 
          drtree=(TTree*) histofile->Get("rinfo");
          bRun=drtree->GetBranch("Run");
@@ -209,7 +205,6 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       btevent=dttree->GetBranch("event");
       btevent->SetAddress(&tevent);
 
-      //cout<<"for trtree"<<endl;
       dtrtree=(TTree*) histofile->Get("tr");
       btrevent=dtrtree->GetBranch("event");
       btrevent->SetAddress(&trevent);
@@ -222,7 +217,6 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
       bclusterraw=dtreeraw->GetBranch("cl_raw");
       bclusterraw->SetAddress(&raw);
 
-      //cout<<"nach trtree"<<endl;
       histofile->Delete("rinfo;1");
       histofile->Delete("cl;1");
       histofile->Delete("clot;1");
@@ -237,24 +231,19 @@ StFtpcClusterDebug::StFtpcClusterDebug(int grun, int gevent)
 
 StFtpcClusterDebug::~StFtpcClusterDebug()
 {
-  //cout << "StFtpcClusterDebug deconstructed" << endl;
+  //LOG_INFO << "StFtpcClusterDebug deconstructed" << endm;
   histofile->Write();
   delete clusterhisto;
   delete vertex_west; delete vertex_east; delete vertex_both;
-  //cout<<"Nach vertex histos"<<endl;
   //if (fileopen)
   //{
   //delete bhit; delete bcluster; delete bevent; 
   //delete btcluster; delete bthit; delete btevent;
   //delete btrevent; delete btrack; delete btrvertex;
-  //cout<<"nach branch"<<endl;
   //  }
   delete dtree; delete dttree; delete dtrtree; // bei sim hier seg. violat.(auch ab > 2300003) !???
-  //cout<<"nach tree"<<endl;
   histofile->Close();
   delete histofile; // ???? (auch ab > 2300003)
-  //cout<<"nach delete histofile"<<endl;
-  cout<<"DEBUG : Root-File saved in current directory."<<endl;
 }
 
 void StFtpcClusterDebug::backup()
@@ -291,7 +280,7 @@ void StFtpcClusterDebug::drawgainhisto(int hardsec, int hardrow,int iPad, float 
 
   //fill gain-data pad vs time histograms for each sector and row
 
-  //cout<<gainfac<<endl;
+  //LOG_INFO << "Using gainfac = " << gainfac << endm;
 
   for(int iIndex=0; iIndex<HSequence.Length; iIndex++)
     {
@@ -300,7 +289,7 @@ void StFtpcClusterDebug::drawgainhisto(int hardsec, int hardrow,int iPad, float 
 	  clusterhisto2->Fill(iPad,HSequence.startTimeBin+iIndex-1,(((float)(unsigned int)(HSequence.FirstAdc[iIndex]))*gainfac));
 	  //clusterhisto2->Fill(iPad,iPad);
 	  // check fuer zero supressed !
-	  //if (((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<4) cout<<((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<<endl;
+	  //if (((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<4) LOG_INFO<<((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<<endm;
 	  //clusterhisto->Fill(iPad,HSequence.startTimeBin+iIndex-1); //ohne ADC fuer contour-plot !!!
 	}
     }
@@ -341,7 +330,7 @@ void StFtpcClusterDebug::drawhisto(int hardsec, int hardrow, int iPad, TPCSequen
 	{
 	  clusterhisto->Fill(iPad,HSequence.startTimeBin+iIndex-1,((float)(unsigned int)(HSequence.FirstAdc[iIndex])));
 	  // check fuer zero supressed !
-	  //if (((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<4) cout<<((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<<endl;
+	  //if (((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<4) LOG_INFO<<((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<<endm;
 	  //clusterhisto->Fill(iPad,HSequence.startTimeBin+iIndex-1); //ohne ADC fuer contour-plot !!!
 	}
     }
@@ -371,12 +360,11 @@ void StFtpcClusterDebug::fillraw(int hardsec, int hardrow, int iPad, TPCSequence
 	      raw.pad=iPad;
 	      raw.time=HSequence.startTimeBin+iIndex-1;
 	      raw.adc=((float)(unsigned int)(HSequence.FirstAdc[iIndex]));
-	      //cout<<hardsec<<" "<<HSequence.startTimeBin+iIndex-1<<endl;
 	      dtreeraw->Fill();
 	    }
 	  //clusterhisto->Fill(iPad,HSequence.startTimeBin+iIndex-1,((float)(unsigned int)(HSequence.FirstAdc[iIndex])));
 	  // check fuer zero supressed !
-	  //if (((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<4) cout<<((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<<endl;
+	  //if (((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<4) LOG_INFO<<((float)(unsigned int)(HSequence.FirstAdc[iIndex]))<<endm;
 	  //clusterhisto->Fill(iPad,HSequence.startTimeBin+iIndex-1); //ohne ADC fuer contour-plot !!!
 	}
     }

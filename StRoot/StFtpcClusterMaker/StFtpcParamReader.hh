@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.27 2006/03/13 19:26:59 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.28 2007/01/15 07:49:22 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.28  2007/01/15 07:49:22  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.27  2006/03/13 19:26:59  jcs
 // add constructor StFtpcCalibMaker
 //
@@ -84,7 +87,8 @@
 #ifndef STAR_StFtpcParamReader
 #define STAR_StFtpcParamReader
 
-#include <sys/types.h>
+#include "StMaker.h"
+
 #include "TObject.h"
 
 #include "tables/St_ftpcClusterPars_Table.h"
@@ -93,15 +97,12 @@
 #include "tables/St_ftpcFastSimGas_Table.h"
 #include "tables/St_ftpcFastSimPars_Table.h"
 
-#define TRUE 1
-#define FALSE 0
-
 class StFtpcParamReader : public TObject 
 {
   
 protected:
-  //STAF table pointers stored for writing back in destructor
-  //set to 0 if not set in constructor
+
+  // table pointer stored for writing back in destructor
   ftpcClusterPars_st *mClusterParsTable;
 
   //ClusterFinder parameters (also used by other classes)
@@ -178,6 +179,14 @@ protected:
   Float_t mUnfoldLimit;      
   Float_t mUnfoldFailedLimit;
   
+private:
+
+Int_t FtpcClusterPars(St_ftpcClusterPars *det);
+Int_t FtpcFastSimGas(St_ftpcFastSimGas *gaspar);
+Int_t FtpcFastSimPars(St_ftpcFastSimPars *param);
+Int_t FtpcSlowSimGas(St_ftpcSlowSimGas  *gas);
+Int_t FtpcSlowSimPars(St_ftpcSlowSimPars *param);
+
 public:
   // constructor used by StFtpcClusterMaker:
   StFtpcParamReader(St_ftpcClusterPars *det,
@@ -191,6 +200,8 @@ public:
   StFtpcParamReader(St_ftpcClusterPars *det);
 
   ~StFtpcParamReader();
+
+  Int_t returnCode;
 
   Float_t padDiffusionErrors(Int_t i); 
   Float_t timeDiffusionErrors(Int_t i); 
