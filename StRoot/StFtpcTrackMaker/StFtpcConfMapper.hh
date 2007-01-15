@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.hh,v 1.19 2004/02/12 19:37:10 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.20 2007/01/15 08:23:01 jcs Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.20  2007/01/15 08:23:01  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.19  2004/02/12 19:37:10  oldi
 // *** empty log message ***
 //
@@ -322,7 +325,7 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
 
   // Information
   void  SettingInfo();  // displays settings
-  void  CutInfo();      // displays cust
+  void  CutInfo();      // displays cuts
   void  TrackingInfo(); // displays information about the tracking process (e.g. difficulties during the tracking)
 
   ClassDef(StFtpcConfMapper, 1)  // Ftpc conformal mapper class

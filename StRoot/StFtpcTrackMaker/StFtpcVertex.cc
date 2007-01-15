@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.21 2004/04/06 18:59:21 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.22 2007/01/15 08:23:02 jcs Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.22  2007/01/15 08:23:02  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.21  2004/04/06 18:59:21  oldi
 // New constructor which takes input data from StVertex added.
 //
@@ -275,7 +278,7 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
       SetX((Double_t) vertex->ge_x[0]);
       SetY((Double_t) vertex->ge_x[1]);
       SetZ((Double_t) vertex->ge_x[2]);
-      gMessMgr->Message("Using primary vertex coordinates (Geant): ", "I", "OS");
+      LOG_INFO << "Using primary vertex coordinates (Geant): " << endm;
     }
     
     else {
@@ -283,7 +286,7 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
       SetX(dummy);
       SetY(dummy);
       SetZ(dummy);
-      gMessMgr->Message("Using primary vertex coordinates (Default): ", "I", "OS");
+      LOG_INFO << "Using primary vertex coordinates (Default): " << endm;
     }
 
     SetXerr(0.);
@@ -515,22 +518,22 @@ Int_t StFtpcVertex::CheckVertex()
 
   if (GetIFlag() == 1) {
     // TPC  Vertex used
-    gMessMgr->Message("", "I", "OS") << "Using primary vertex from StEvent (" << *this <<  ") for Ftpc tracking." << endm;
+    LOG_INFO << "Using primary vertex from StEvent (" << *this <<  ") for Ftpc tracking." << endm;
   }
   
   else if (GetIFlag() == 101) {
     // TPC  preVertex used
-    gMessMgr->Message("", "I", "OS") << "Using Tpc preVertex estimation (" << *this << ") for Ftpc tracking."   << endm;
+    LOG_INFO << "Using Tpc preVertex estimation (" << *this << ") for Ftpc tracking."   << endm;
   }
   
   else if (GetIFlag() == 0) {
     //  No vertex found, therefore set to (0., 0., 0.) to make FTPC tracking possible.
-    gMessMgr->Message("", "W", "OS") << "No vertex found. Use (" << *this << ")." << endm;    
+    LOG_WARN << "No vertex found. Use (" << *this << ")." << endm;    
   }
   
   // Check for the position of the main vertex
   if (CoordIsNan()) {
-    gMessMgr->Message("", "W", "OS") << "Error in vertex calculation - no tracking." << endm;
+    LOG_WARN << "Error in vertex calculation - no tracking." << endm;
 
     // No tracking!
     return 1;
@@ -541,32 +544,32 @@ Int_t StFtpcVertex::CheckVertex()
   if (GetAbsZ() > StFtpcTrackingParams::Instance()->MaxVertexPosZWarning()) {
     
     if (GetAbsZ() > StFtpcTrackingParams::Instance()->PadRowPosZ(0)) {
-      gMessMgr->Message("Found vertex lies inside of one Ftpc. No Ftpc tracking possible.", "E", "OTS");
+      LOG_ERROR <<  "Found vertex lies inside of one Ftpc. No Ftpc tracking possible." << endm;
       
       // No tracking!
       return 1;   
     }
     
     else if (GetAbsZ() > StFtpcTrackingParams::Instance()->MaxVertexPosZError()) {
-      gMessMgr->Message("", "E", "OS") << "Found vertex is more than " 
-					<< StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
-					<< " cm off from z = 0. Ftpc tracking makes no sense." << endm;
+      LOG_ERROR << "Found vertex is more than " 
+		<< StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
+		<< " cm off from z = 0. Ftpc tracking makes no sense." << endm;
       // No tracking!
       return 1;
     }
     
     else {
-      gMessMgr->Message("", "W", "OS") << "Found vertex is more than " 
-					<< StFtpcTrackingParams::Instance()->MaxVertexPosZWarning() 
-					<< " cm off from z = 0 but Ftpc tracking is still possible." << endm;
+      LOG_WARN << "Found vertex is more than " 
+	       << StFtpcTrackingParams::Instance()->MaxVertexPosZWarning() 
+	       << " cm off from z = 0 but Ftpc tracking is still possible." << endm;
       // Do tracking.
     }
   }
   
   if (GetRadius2() >= StFtpcTrackingParams::Instance()->InnerRadius()) {
-    gMessMgr->Message("", "E", "OS") << "Found vertex x-z-position is greater than " 
-				      << StFtpcTrackingParams::Instance()->InnerRadius()
-				      << " cm (inner Ftpc radius). No Ftpc tracking possible." << endm;
+    LOG_ERROR << "Found vertex x-z-position is greater than " 
+	      << StFtpcTrackingParams::Instance()->InnerRadius()
+	      << " cm (inner Ftpc radius). No Ftpc tracking possible." << endm;
     // No tracking!
     return 1;
   }

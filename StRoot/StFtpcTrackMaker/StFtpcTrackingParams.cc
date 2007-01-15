@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.30 2006/09/25 14:03:42 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.31 2007/01/15 08:23:02 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.31  2007/01/15 08:23:02  jcs
+// replace printf, cout and gMesMgr with Logger commands
+//
 // Revision 1.30  2006/09/25 14:03:42  jcs
 // move the reconstruction parameters maxDcaVertex,minNumTracks from code to CodeParams
 //
@@ -467,7 +470,7 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
 
   // magnetic field
   mMagFieldFactor = magFieldFactor;
-  gMessMgr->Message("", "I", "OS") << "Initializing StMagUtilities for FTPC!" << endm;
+  LOG_INFO << "Initializing StMagUtilities for FTPC!" << endm;
   mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
 
   // transformation due to rotated and displaced TPC
@@ -493,9 +496,9 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
   
   if (ierr!=0) { 
-    gMessMgr->Message("", "E", "OS") << "Cant invert rotation matrix!" << endm;
-    gMessMgr->Message("", "E", "OS") << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
-    gMessMgr->Message("", "E", "OS") << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
+    LOG_ERROR << "Cant invert rotation matrix!" << endm;
+    LOG_ERROR << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+    LOG_ERROR << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
   }
     
   // internal FTPC rotation [has do be done before local -> global]
@@ -562,11 +565,11 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
     (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix Y!" << endm;
-      else *gMessMgr << " west rotation matrix Y!" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
+      LOG_ERROR << "Can't invert FTPC ";
+      if (i == 0) { LOG_ERROR << " east rotation matrix Y!" << endm; }
+      else { LOG_ERROR << " west rotation matrix Y!" << endm; }
+      LOG_INFO << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      LOG_INFO << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -619,11 +622,11 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
     (*mFtpcRotationXInverse[i]) = (*mFtpcRotationX[i]).inverse(ierr);
 
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix X !" << endm;
-      else *gMessMgr << " west rotation matrix X !" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
+      LOG_ERROR << "Can't invert FTPC ";
+      if (i == 0) {LOG_ERROR << " east rotation matrix X !" << endm;}
+      else {LOG_ERROR << " west rotation matrix X !" << endm;}
+      LOG_INFO << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      LOG_INFO << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -633,11 +636,11 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
 
 
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix!" << endm;
-      else *gMessMgr << " west rotation matrix!" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
+      LOG_ERROR << "Can't invert FTPC ";
+      if (i == 0) {LOG_ERROR << " east rotation matrix!" << endm;}
+      else {LOG_ERROR << " west rotation matrix!" << endm;}
+      LOG_INFO << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
+      LOG_INFO << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
   }
 }
@@ -722,7 +725,7 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
   }
   
   else {
-    gMessMgr->Message("No data in table class St_TrackingPars.", "E", "OS");
+    LOG_ERROR <<  "No data in table class St_TrackingPars." << endm;
     assert(trackParsTable);
     
     return 0;
@@ -749,7 +752,7 @@ Int_t StFtpcTrackingParams::InitdEdx(ftpcdEdxPars_st *dEdxParsTable) {
   }
   
   else {
-    gMessMgr->Message("No data in table class St_ftpcdEdxPars.", "E", "OS");
+    LOG_ERROR << "No data in table class St_ftpcdEdxPars." << endm;
     assert(dEdxParsTable);
     
     return 0;
@@ -776,7 +779,7 @@ Int_t StFtpcTrackingParams::InitDimensions(ftpcDimensions_st* dimensionsTable) {
   }
   
   else {
-    gMessMgr->Message("No data in table class St_ftpcDimensions.", "E", "OS");
+    LOG_ERROR << "No data in table class St_ftpcDimensions." << endm;
     assert(dimensionsTable);
     
     return 0;
@@ -798,7 +801,7 @@ Int_t StFtpcTrackingParams::InitPadRows(ftpcPadrowZ_st* padrowzTable) {
   } 
   
   else {
-    gMessMgr->Message("No data in table class St_ftpcPadrowZ.", "E", "OS");
+    LOG_ERROR <<  "No data in table class St_ftpcPadrowZ." << endm;
     assert(padrowzTable);
     
     return 0;
@@ -835,25 +838,25 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
     if ((mObservedVertexOffsetY[0] != oldY[0] || mObservedVertexOffsetY[1] != oldY[1]) && 
 	(oldY[0] < -9990. || oldY[1] < -9990.)) {
       
-      gMessMgr->Message("", "I", "OS") << "Observed vertex offset in y direction has changed. Changed from " 
-					<< oldY[0] << " to " <<  mObservedVertexOffsetY[0] << " (east) and from " 
-					<< oldY[1] << " to " <<  mObservedVertexOffsetY[1] << " (west)." << endm;
+      LOG_INFO << "Observed vertex offset in y direction has changed. Changed from " 
+               << oldY[0] << " to " <<  mObservedVertexOffsetY[0] << " (east) and from " 
+	       << oldY[1] << " to " <<  mObservedVertexOffsetY[1] << " (west)." << endm;
     }   
     
 
     if ((mObservedVertexOffsetX[0] != oldX[0] || mObservedVertexOffsetX[1] != oldX[1]) && 
 	(oldX[0] < -9990. || oldX[1] < -9990.)) {
       
-      gMessMgr->Message("", "I", "OS") << "Observed vertex offset in x direction has changed. Changed from " 
-					<< oldX[0] << " to " <<  mObservedVertexOffsetX[0] << " (east) and from " 
-					<< oldX[1] << " to " <<  mObservedVertexOffsetX[1] << " (west)." << endm;
+      LOG_INFO << "Observed vertex offset in x direction has changed. Changed from " 
+	       << oldX[0] << " to " <<  mObservedVertexOffsetX[0] << " (east) and from " 
+	       << oldX[1] << " to " <<  mObservedVertexOffsetX[1] << " (west)." << endm;
     }
 
     return 1;
   }
   
   else {
-    gMessMgr->Message("No data in table class St_ftpcCoordTrans.", "E", "OS");
+    LOG_ERROR << "No data in table class St_ftpcCoordTrans." << endm;
     assert(ftpcCoordTrans);
     
     return 0;
@@ -886,9 +889,9 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
     
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Cant invert rotation matrix!" << endm;
-      gMessMgr->Message("", "E", "OS") << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
-      gMessMgr->Message("", "E", "OS") << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
+      LOG_ERROR << "Cant invert rotation matrix!" << endm;
+      LOG_ERROR << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endm;
+      LOG_ERROR << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
     }
     
     mTpcPositionInGlobal.setX(gStTpcDb->GlobalPosition()->TpcCenterPositionX() * centimeter);
@@ -897,7 +900,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
   }
   
   else {
-    gMessMgr->Message("", "E", "OS") << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
+    LOG_ERROR << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endm;
     assert(gStTpcDb->GlobalPosition());
   }
   
@@ -957,11 +960,11 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     (*mFtpcRotationYInverse[i]) = (*mFtpcRotationY[i]).inverse(ierr);
     
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix! Y" << endm;
-      else *gMessMgr << " west rotation matrix! Y" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
+      LOG_ERROR << "Can't invert FTPC ";
+      if (i == 0) {LOG_ERROR << " east rotation matrix! Y" << endm;}
+      else {LOG_ERROR << " west rotation matrix! Y" << endm;}
+      LOG_INFO << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      LOG_INFO << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -1011,11 +1014,11 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     (*mFtpcRotationXInverse[i]) = (*mFtpcRotationX[i]).inverse(ierr);
 
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix X !" << endm;
-      else *gMessMgr << " west rotation matrix X !" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
+      LOG_ERROR << "Can't invert FTPC ";
+      if (i == 0) {LOG_ERROR << " east rotation matrix X !" << endm;}
+      else {LOG_ERROR << " west rotation matrix X !" << endm;}
+      LOG_INFO << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      LOG_INFO << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -1025,11 +1028,11 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 
 
     if (ierr!=0) { 
-      gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix!" << endm;
-      else *gMessMgr << " west rotation matrix!" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
+      LOG_ERROR << "Can't invert FTPC ";
+      if (i == 0) {LOG_ERROR << " east rotation matrix!" << endm;}
+      else {LOG_ERROR << " west rotation matrix!" << endm;}
+      LOG_INFO << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
+      LOG_INFO << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
 
   }
@@ -1056,18 +1059,18 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
       
       if (mMagFieldFactor == -9999.) { // field will be set the first time
 	mMagFieldFactor = newFactor;
-	gMessMgr->Message("", "I", "OS") << "Initializing StMagUtilities for FTPC!" << endm;
+	LOG_INFO << "Initializing StMagUtilities for FTPC!" << endm;
         delete mMagField;
 	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);  
 	// I hope this is ok. Should be the same as the table in the database.
       }
       
       else { // field has been set before
-	gMessMgr->Message("", "I", "OS") << "Magnetic field has changed. Reset magnetic field table and the field factor from " 
+	LOG_INFO << "Magnetic field has changed. Reset magnetic field table and the field factor from " 
 					  << mMagFieldFactor << " to " << newFactor << "." << endm;
 	mMagFieldFactor = newFactor;
 	delete mMagField;
-	gMessMgr->Message("", "I", "OS") << "Initializing StMagUtilities for FTPC!" << endm;
+	LOG_INFO << "Initializing StMagUtilities for FTPC!" << endm;
 	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
       }
     }
@@ -1084,136 +1087,136 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
 void StFtpcTrackingParams::PrintParams() {
   // prints params to sreen
 
-  gMessMgr->Message("", "I", "OS") << endm;
+  LOG_INFO << endm;
 
-  gMessMgr->Message("", "I", "OS") << "Used parameters for FTPC tracking" << endm;
-  gMessMgr->Message("", "I", "OS") << "---------------------------------" << endm;
+  LOG_INFO << "Used parameters for FTPC tracking" << endm;
+  LOG_INFO << "---------------------------------" << endm;
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Magnetic field factor: " << mMagFieldFactor << endm;
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC geometry" << endm;
-  gMessMgr->Message("", "I", "OS") << "Inner radius (cm)...........: " << mInnerRadius << endm; 
-  gMessMgr->Message("", "I", "OS") << "Outer radius (cm)...........: " << mOuterRadius << endm; 
-  gMessMgr->Message("", "I", "OS") << "Total number of padows......: " << mNumberOfPadRows << endm; 
-  gMessMgr->Message("", "I", "OS") << "Number of padows per FTPC...: " << mNumberOfPadRowsPerSide << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Magnetic field factor: " << mMagFieldFactor << endm;
+  LOG_INFO << endm;
+  LOG_INFO << "FTPC geometry" << endm;
+  LOG_INFO << "Inner radius (cm)...........: " << mInnerRadius << endm; 
+  LOG_INFO << "Outer radius (cm)...........: " << mOuterRadius << endm; 
+  LOG_INFO << "Total number of padows......: " << mNumberOfPadRows << endm; 
+  LOG_INFO << "Number of padows per FTPC...: " << mNumberOfPadRowsPerSide << endm; 
   
   for (Int_t i = 0; i < NumberOfPadRows(); i++) {
-    gMessMgr->Message("", "I", "OS") << "z-position of padrow ";
-    if (i<10) *gMessMgr << " ";
-    *gMessMgr << i << " (cm): " << PadRowPosZ(i) << endm;
+    LOG_INFO << "z-position of padrow ";
+    if (i<10) {LOG_INFO << "z-position of padrow  "<< i << " (cm): " << PadRowPosZ(i) << endm;}
+    else {LOG_INFO << "z-position of padrow "<< i << " (cm): " << PadRowPosZ(i) << endm;}
   }
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Vertex position" << endm;
-  gMessMgr->Message("", "I", "OS") << "Max. vertex z-position to do tracking w/o warning (cm): " << mMaxVertexPosZWarning << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. vertex z-position to do tracking at all (cm).....: " << mMaxVertexPosZError << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Vertex position" << endm;
+  LOG_INFO << "Max. vertex z-position to do tracking w/o warning (cm): " << mMaxVertexPosZWarning << endm; 
+  LOG_INFO << "Max. vertex z-position to do tracking at all (cm).....: " << mMaxVertexPosZError << endm; 
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Vertex reconstruction (with FTPC hits)" << endm;
-  gMessMgr->Message("", "I", "OS") << "# of histogram bins.............: " << mHistoBins << endm; 
-  gMessMgr->Message("", "I", "OS") << "lower boundary of histogram (cm): " << mHistoMin << endm; 
-  gMessMgr->Message("", "I", "OS") << "upper boundary of histogram (cm): " << mHistoMax << endm; 
-  gMessMgr->Message("", "I", "OS") << "Dca cut (cm)....................: " << mMaxDcaVertex << endm; 
-  gMessMgr->Message("", "I", "OS") << "min. # of tracks required.......: " << mMinNumTracks << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Vertex reconstruction (with FTPC hits)" << endm;
+  LOG_INFO << "# of histogram bins.............: " << mHistoBins << endm; 
+  LOG_INFO << "lower boundary of histogram (cm): " << mHistoMin << endm; 
+  LOG_INFO << "upper boundary of histogram (cm): " << mHistoMax << endm; 
+  LOG_INFO << "Dca cut (cm)....................: " << mMaxDcaVertex << endm; 
+  LOG_INFO << "min. # of tracks required.......: " << mMinNumTracks << endm; 
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Tracker settings" << endm;
-  gMessMgr->Message("", "I", "OS") << "# of row segments: " << mRowSegments << endm; 
-  gMessMgr->Message("", "I", "OS") << "# of phi segments: " << mPhiSegments << endm; 
-  gMessMgr->Message("", "I", "OS") << "# of eta segments: " << mEtaSegments << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Tracker settings" << endm;
+  LOG_INFO << "# of row segments: " << mRowSegments << endm; 
+  LOG_INFO << "# of phi segments: " << mPhiSegments << endm; 
+  LOG_INFO << "# of eta segments: " << mEtaSegments << endm; 
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Settings for tracking" << endm;
-  gMessMgr->Message("", "I", "OS") << "Tracking method    main vtx  non vtx  no fld  laser" << endm;
-  gMessMgr->Message("", "I", "OS") << "Laser tracking switch: " << (Int_t)mLaser[0] << "        " 
-				    << (Int_t)mLaser[1] << "        " << (Int_t)mLaser[2] << "      " 
-				    << (Int_t)mLaser[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Vertex constraint....: " << (Int_t)mVertexConstraint[0] << "        " 
-				    << (Int_t)mVertexConstraint[1] << "        " << (Int_t)mVertexConstraint[2] << "      " 
-				    << (Int_t)mVertexConstraint[3] << endm;  
-  gMessMgr->Message("", "I", "OS") << "Max. tracklet length.: " << mMaxTrackletLength[0] << "        " 
-				    << mMaxTrackletLength[1] << "       " << mMaxTrackletLength[2] << "     " 
-				    << mMaxTrackletLength[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Min. track length....: " << mMinTrackLength[0] << "        " 
-				    << mMinTrackLength[1] << "        " << mMinTrackLength[2] << "      " 
-				    << mMinTrackLength[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Tracklet row scope...: " << mRowScopeTracklet[0] << "        " 
-				    << mRowScopeTracklet[1] << "        " << mRowScopeTracklet[2] << "      " 
-				    << mRowScopeTracklet[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Track row scope......: " << mRowScopeTrack[0] << "        " 
-				    << mRowScopeTrack[1] << "        " << mRowScopeTrack[2] << "      " 
-				    << mRowScopeTrack[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Phi scope............: " << mPhiScope[0] << "        " 
-				    << mPhiScope[1] << "        " << mPhiScope[2] << "      " 
-				    << mPhiScope[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Eta scope............: " << mEtaScope[0] << "        " 
-				    << mEtaScope[1] << "        " << mEtaScope[2] << "     " 
-				    << mEtaScope[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. DCA (cm)........: " << mMaxDca[0] << "       " 
-				    << mMaxDca[1] << "        " << mMaxDca[2] << "      " 
-				    << mMaxDca[3] << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Settings for tracking" << endm;
+  LOG_INFO << "Tracking method    main vtx  non vtx  no fld  laser" << endm;
+  LOG_INFO << "Laser tracking switch: " << (Int_t)mLaser[0] << "        " 
+	    << (Int_t)mLaser[1] << "        " << (Int_t)mLaser[2] << "      " 
+	    << (Int_t)mLaser[3] << endm; 
+  LOG_INFO << "Vertex constraint....: " << (Int_t)mVertexConstraint[0] << "        " 
+	    << (Int_t)mVertexConstraint[1] << "        " << (Int_t)mVertexConstraint[2] << "      " 
+	    << (Int_t)mVertexConstraint[3] << endm;  
+  LOG_INFO << "Max. tracklet length.: " << mMaxTrackletLength[0] << "        " 
+	    << mMaxTrackletLength[1] << "       " << mMaxTrackletLength[2] << "     " 
+	    << mMaxTrackletLength[3] << endm; 
+  LOG_INFO << "Min. track length....: " << mMinTrackLength[0] << "        " 
+	    << mMinTrackLength[1] << "        " << mMinTrackLength[2] << "      " 
+	    << mMinTrackLength[3] << endm; 
+  LOG_INFO << "Tracklet row scope...: " << mRowScopeTracklet[0] << "        " 
+	    << mRowScopeTracklet[1] << "        " << mRowScopeTracklet[2] << "      " 
+	    << mRowScopeTracklet[3] << endm; 
+  LOG_INFO << "Track row scope......: " << mRowScopeTrack[0] << "        " 
+	    << mRowScopeTrack[1] << "        " << mRowScopeTrack[2] << "      " 
+	    << mRowScopeTrack[3] << endm; 
+  LOG_INFO << "Phi scope............: " << mPhiScope[0] << "        " 
+	    << mPhiScope[1] << "        " << mPhiScope[2] << "      " 
+	    << mPhiScope[3] << endm; 
+  LOG_INFO << "Eta scope............: " << mEtaScope[0] << "        " 
+	    << mEtaScope[1] << "        " << mEtaScope[2] << "     " 
+	    << mEtaScope[3] << endm; 
+  LOG_INFO << "Max. DCA (cm)........: " << mMaxDca[0] << "       " 
+	    << mMaxDca[1] << "        " << mMaxDca[2] << "      " 
+	    << mMaxDca[3] << endm; 
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Cuts for tracking" << endm;
-  gMessMgr->Message("", "I", "OS") << "Tracking method                 main vtx  non vtx  no fld  laser" << endm;
-  gMessMgr->Message("", "I", "OS") << "Max. tracklet angle (rad).......: " << mMaxAngleTracklet[0] << "     " 
-				    << mMaxAngleTracklet[1] << "    " << mMaxAngleTracklet[2] << "   " 
-				    << mMaxAngleTracklet[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. track angle (rad)..........: " << mMaxAngleTrack[0] << "     " 
-				    << mMaxAngleTrack[1] << "    " << mMaxAngleTrack[2] << "  " 
-				    << mMaxAngleTrack[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. dist. in circle fit (1/cm).: " << mMaxCircleDist[0] << "     " 
-				    << mMaxCircleDist[1] << "     " << mMaxCircleDist[2] << "   " 
-				    << mMaxCircleDist[3] << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. dist. in length fit (cm)...: " << mMaxLengthDist[0] << "       " 
-				    << mMaxLengthDist[1] << "       " << mMaxLengthDist[2] << "     " 
-				    << mMaxLengthDist[3] << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Cuts for tracking" << endm;
+  LOG_INFO << "Tracking method                 main vtx  non vtx  no fld  laser" << endm;
+  LOG_INFO << "Max. tracklet angle (rad).......: " << mMaxAngleTracklet[0] << "     " 
+	    << mMaxAngleTracklet[1] << "    " << mMaxAngleTracklet[2] << "   " 
+	    << mMaxAngleTracklet[3] << endm; 
+  LOG_INFO << "Max. track angle (rad)..........: " << mMaxAngleTrack[0] << "     " 
+	    << mMaxAngleTrack[1] << "    " << mMaxAngleTrack[2] << "  " 
+	    << mMaxAngleTrack[3] << endm; 
+  LOG_INFO << "Max. dist. in circle fit (1/cm).: " << mMaxCircleDist[0] << "     " 
+	    << mMaxCircleDist[1] << "     " << mMaxCircleDist[2] << "   " 
+	    << mMaxCircleDist[3] << endm; 
+  LOG_INFO << "Max. dist. in length fit (cm)...: " << mMaxLengthDist[0] << "       " 
+	    << mMaxLengthDist[1] << "       " << mMaxLengthDist[2] << "     " 
+	    << mMaxLengthDist[3] << endm; 
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "Settings for split track merging" << endm;
-  gMessMgr->Message("", "I", "OS") << "Max. distance (cm): " << mMaxDist << endm; 
-  gMessMgr->Message("", "I", "OS") << "Min. point ratio..: " << mMinPointRatio << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. point ratio..: " << mMaxPointRatio << endm; 
+  LOG_INFO << endm;
+  LOG_INFO << "Settings for split track merging" << endm;
+  LOG_INFO << "Max. distance (cm): " << mMaxDist << endm; 
+  LOG_INFO << "Min. point ratio..: " << mMinPointRatio << endm; 
+  LOG_INFO << "Max. point ratio..: " << mMaxPointRatio << endm; 
   
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "dE/dx" << endm;
-  gMessMgr->Message("", "I", "OS") << "Debugging level..............: " << mDebugLevel << endm; 
-  gMessMgr->Message("", "I", "OS") << "Method Id....................: " << mIdMethod << endm; 
-  gMessMgr->Message("", "I", "OS") << "Switch for dip/cross angles..: " << mNoAngle << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. allowable hits per track: " << mMaxHit << endm; 
-  gMessMgr->Message("", "I", "OS") << "Min. no. of hits required....: " << mMinHit << endm; 
-  gMessMgr->Message("", "I", "OS") << "Max. no. of tracks to be used: " << mMaxTrack << endm; 
-  gMessMgr->Message("", "I", "OS") << "Length of pad (us/keV).......: " << mPadLength << endm; 
-  gMessMgr->Message("", "I", "OS") << "Fraction for trunc. mean.....: " << mFracTrunc << endm; 
-  gMessMgr->Message("", "I", "OS") << "a i p (GeV)..................: " << mAip << endm; 
-  gMessMgr->Message("", "I", "OS") << "A large number...............: " << mALargeNumber << endm;
+  LOG_INFO << endm;
+  LOG_INFO << "dE/dx" << endm;
+  LOG_INFO << "Debugging level..............: " << mDebugLevel << endm; 
+  LOG_INFO << "Method Id....................: " << mIdMethod << endm; 
+  LOG_INFO << "Switch for dip/cross angles..: " << mNoAngle << endm; 
+  LOG_INFO << "Max. allowable hits per track: " << mMaxHit << endm; 
+  LOG_INFO << "Min. no. of hits required....: " << mMinHit << endm; 
+  LOG_INFO << "Max. no. of tracks to be used: " << mMaxTrack << endm; 
+  LOG_INFO << "Length of pad (us/keV).......: " << mPadLength << endm; 
+  LOG_INFO << "Fraction for trunc. mean.....: " << mFracTrunc << endm; 
+  LOG_INFO << "a i p (GeV)..................: " << mAip << endm; 
+  LOG_INFO << "A large number...............: " << mALargeNumber << endm;
 
-  gMessMgr->Message("", "I", "OS") << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC to global transformation" << endm;
-  gMessMgr->Message("", "I", "OS") << "Installation point x, y, z (east, cm).: " << InstallationPointX(0) << ", "<<InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Installation point x, y, z (west, cm).: " << InstallationPointX(1) << ", "<< InstallationPointY(1) << ", " << InstallationPointZ(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Observed vertex offset y (east, cm): " << ObservedVertexOffsetY(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Observed vertex offset x (east, cm): " << ObservedVertexOffsetX(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Observed vertex offset x (west, cm): " << ObservedVertexOffsetX(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation Y: " << FtpcRotationY(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation Y: " << FtpcRotationYInverse(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation Y: " << FtpcRotationY(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation Y: " << FtpcRotationYInverse(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation X: " << FtpcRotationX(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation X: " << FtpcRotationXInverse(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation X: " << FtpcRotationX(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation X: " << FtpcRotationXInverse(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation: " << FtpcRotation(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation: " << FtpcRotationInverse(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation: " << FtpcRotation(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation: " << FtpcRotationInverse(1) << endm;
+  LOG_INFO << endm;
+  LOG_INFO << "FTPC to global transformation" << endm;
+  LOG_INFO << "Installation point x, y, z (east, cm).: " << InstallationPointX(0) << ", "<<InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
+  LOG_INFO << "Installation point x, y, z (west, cm).: " << InstallationPointX(1) << ", "<< InstallationPointY(1) << ", " << InstallationPointZ(1) << endm;
+  LOG_INFO << "Observed vertex offset y (east, cm): " << ObservedVertexOffsetY(0) << endm;
+  LOG_INFO << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << endm;
+  LOG_INFO << "Observed vertex offset x (east, cm): " << ObservedVertexOffsetX(0) << endm;
+  LOG_INFO << "Observed vertex offset x (west, cm): " << ObservedVertexOffsetX(1) << endm;
+  LOG_INFO << "FTPC east to global rotation Y: " << FtpcRotationY(0) << endm;
+  LOG_INFO << "Global to FTPC east rotation Y: " << FtpcRotationYInverse(0) << endm;
+  LOG_INFO << "FTPC west to global rotation Y: " << FtpcRotationY(1) << endm;
+  LOG_INFO << "Global to FTPC west rotation Y: " << FtpcRotationYInverse(1) << endm;
+  LOG_INFO << "FTPC east to global rotation X: " << FtpcRotationX(0) << endm;
+  LOG_INFO << "Global to FTPC east rotation X: " << FtpcRotationXInverse(0) << endm;
+  LOG_INFO << "FTPC west to global rotation X: " << FtpcRotationX(1) << endm;
+  LOG_INFO << "Global to FTPC west rotation X: " << FtpcRotationXInverse(1) << endm;
+  LOG_INFO << "FTPC east to global rotation: " << FtpcRotation(0) << endm;
+  LOG_INFO << "Global to FTPC east rotation: " << FtpcRotationInverse(0) << endm;
+  LOG_INFO << "FTPC west to global rotation: " << FtpcRotation(1) << endm;
+  LOG_INFO << "Global to FTPC west rotation: " << FtpcRotationInverse(1) << endm;
     
-  gMessMgr->Message("", "I", "OS") << "TPC to global transformation" << endm;
-  gMessMgr->Message("", "I", "OS") << "Position of TPC (cm)..: " << TpcPositionInGlobal() <<endm;
-  gMessMgr->Message("", "I", "OS") << "TPC to global rotation: " << TpcToGlobalRotation() << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to TPC rotation: " << GlobalToTpcRotation()<< endm;
+  LOG_INFO << "TPC to global transformation" << endm;
+  LOG_INFO << "Position of TPC (cm)..: " << TpcPositionInGlobal() <<endm;
+  LOG_INFO << "TPC to global rotation: " << TpcToGlobalRotation() << endm;
+  LOG_INFO << "Global to TPC rotation: " << GlobalToTpcRotation()<< endm;
 
   return;
 }
