@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.37 2006/10/17 19:11:43 fisyak Exp $
+// $Id: StFtpcDbReader.cc,v 1.38 2007/01/15 07:49:22 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.38  2007/01/15 07:49:22  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.37  2006/10/17 19:11:43  fisyak
 // Add definition of mPadPitch
 //
@@ -164,7 +167,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcInnerCathode(cathode);
   returnCode += FtpcClusterGeom(clustergeo);
 
-  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcClusterMaker"  ,"I"); 
+  //LOG_INFO << "StFtpcDbReader constructed for StFtpcClusterMaker" << endm;
 
 }
 
@@ -202,7 +205,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcTimeOffset(timeoffset);
   returnCode += FtpcInnerCathode(cathode);
 
-  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcSlowSimMaker"  ,"I"); 
+  //LOG_INFO << "StFtpcDbReader constructed for StFtpcSlowSimMaker" << endm;
 }
 
 // for StFtpcDriftMapMaker
@@ -229,7 +232,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
-  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcDriftMapMaker"  ,"I"); 
+  //LOG_INFO << "StFtpcDbReader constructed for StFtpcDriftMapMaker" << endm;
 }
 
 // for StFtpcCalibMaker
@@ -258,7 +261,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcGas(gas);
   returnCode += FtpcDriftField(driftfield);
 
-  //gMessMgr->Message("StFtpcDbReader constructed for StFtpcCalibMaker"  ,"I"); 
+  //LOG_INFO << "StFtpcDbReader constructed for StFtpcCalibMaker" << endm;
 }
 ///////////////////////////////////////////////////////////////////////////////////////
 // for Sti/StFtpcDetectorBuilder
@@ -271,13 +274,13 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   returnCode += FtpcDimensions(dimensions);
   returnCode += FtpcPadrowZ(zrow);
 
-  //gMessMgr->Message("StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder"  ,"I"); 
+  //LOG_INFO << "StFtpcDbReader constructed for Sti/StFtpcDetectorBuilder" << endm;
  
 }
 
 StFtpcDbReader::~StFtpcDbReader()
 {
-//   cout << "StFtpcDbReader destructed" << endl;
+//   LOG_INFO << "StFtpcDbReader destructed" << endm;
 }
 
 //===============================================================
@@ -308,8 +311,8 @@ Int_t StFtpcDbReader::FtpcDimensions(St_ftpcDimensions *dimensions)
     mSensitiveVolumeOuterRadius = dimensionsTable->outerRadiusSensitiveVolume;
    return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcDimensions","E");
-    return kStWarn;
+    LOG_ERROR << " No data in table class St_ftpcDimensions" << endm;
+    return kStERR;
   }
 }
 
@@ -324,8 +327,8 @@ Int_t StFtpcDbReader::FtpcPadrowZ(St_ftpcPadrowZ *zrow)
      mPadrowZPosition = (Float_t *)padrowzTable->z;
      return kStOK;
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcPadrowZ","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcPadrowZ" << endm;
+     return kStERR;
   }
 }
 
@@ -341,8 +344,8 @@ Int_t StFtpcDbReader::FtpcAsicMap(St_ftpcAsicMap *asicmap)
      mAsic2EastNotInverted = asicmapTable->Asic2EastNotInverted;
      return kStOK;
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcAsicMap","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcAsicMap" << endm;
+     return kStERR;
   }
 }
 
@@ -357,8 +360,8 @@ Int_t StFtpcDbReader::FtpcEField(St_ftpcEField *efield)
      mMagboltzEField = (Float_t *)efieldTable->e;
      return kStOK;
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcEField","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcEField" << endm;
+     return kStERR;
   }
 }
 
@@ -372,8 +375,8 @@ Int_t StFtpcDbReader::FtpcVDrift(St_ftpcVDrift *vdrift)
      mMagboltzVDrift = (Float_t *)vdriftTable->v;
      return kStOK;
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcVDrift","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcVDrift" << endm;
+     return kStERR;
   }
 }
 //----------------------------------------------------------------------------
@@ -386,8 +389,8 @@ Int_t StFtpcDbReader::FtpcDeflection(St_ftpcDeflection *deflection)
      mMagboltzDeflection = (Float_t *)deflectionTable->psi;
      return kStOK; 
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcDeflection","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcDeflection" << endm;
+     return kStERR;
   }
 }
 
@@ -401,8 +404,8 @@ Int_t StFtpcDbReader::FtpcdVDriftdP(St_ftpcdVDriftdP *dvdriftdp)
      mMagboltzdVDriftdP = (Float_t *)dvriftdpTable->dv_dp;
      return kStOK; 
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcdVDriftdP","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcdVDriftdP" << endm;
+     return kStERR;
   }
 }
 
@@ -416,8 +419,8 @@ Int_t StFtpcDbReader::FtpcdDeflectiondP(St_ftpcdDeflectiondP *ddeflectiondp)
      mMagboltzdDeflectiondP = (Float_t *)ddeflectiondpTable->dpsi_dp;
      return kStOK; 
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcdDeflectiondP","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcdDeflectiondP" << endm;
+     return kStERR;
   }
 }
 
@@ -428,8 +431,8 @@ Int_t StFtpcDbReader::FtpcAmpSlope(St_ftpcAmpSlope *ampslope)
   //  just copy AmpSlope table start to pointer
   ampslopeTable = (ftpcAmpSlope_st*)ampslope->GetTable();
   if(!ampslopeTable){
-     gMessMgr->Message( " No data in table class St_ftpcAmpSlope","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcAmpSlope" << endm;
+     return kStERR;
   }
   return kStOK; 
 }
@@ -441,8 +444,8 @@ Int_t StFtpcDbReader::FtpcAmpOffset(St_ftpcAmpOffset *ampoffset)
   //  just copy AmpOffset table start to pointer
   ampoffsetTable = (ftpcAmpOffset_st*)ampoffset->GetTable();
   if(!ampoffsetTable){
-     gMessMgr->Message( " No data in table class St_ftpcAmpOffset","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcAmpOffset" << endm;
+     return kStERR;
   }
   return kStOK;
 }
@@ -454,8 +457,8 @@ Int_t StFtpcDbReader::FtpcTimeOffset(St_ftpcTimeOffset *timeoffset)
   //  just copy TimeOffset table start to pointer
   timeoffsetTable = (ftpcTimeOffset_st*)timeoffset->GetTable();
   if(!timeoffsetTable){
-    gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
-    return kStWarn;
+    LOG_ERROR << " No data in table class St_ftpcTimeOffset" << endm;
+    return kStERR;
   }
   return kStOK;
 }
@@ -474,8 +477,8 @@ Int_t StFtpcDbReader::FtpcDriftField(St_ftpcDriftField *driftfield)
     mRadiusTimesField   = driftfieldTable->radiusTimesField;
     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
-    return kStWarn;
+    LOG_ERROR << " No data in table class St_ftpcDriftField" << endm;
+    return kStERR;
   }
 }
 
@@ -506,8 +509,8 @@ Int_t StFtpcDbReader::FtpcGas(St_ftpcGas *gas)
    mAdjustAverageEast      = gasTable->adjustAverageEast;
    return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcGas","E");
-    return kStWarn;
+    LOG_ERROR << " No data in table class St_ftpcGas" << endm;
+    return kStERR;
   }
 }
 
@@ -522,8 +525,8 @@ Int_t StFtpcDbReader::FtpcElectronics(St_ftpcElectronics *electronics)
        mMicrosecondsPerTimebin = electronicsTable->uSecondsPerTimebin;
      return kStOK;
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcElectronics" << endm;
+     return kStERR;
   }
 }
 
@@ -539,8 +542,8 @@ Int_t StFtpcDbReader::FtpcInnerCathode(St_ftpcInnerCathode *cathode)
      mAngleOffsetEast   = cathodeTable->angleOffsetEast;
      return kStOK;
   } else {
-     gMessMgr->Message( " No data in table class St_ftpcInnerCathode","E");
-     return kStWarn;
+     LOG_ERROR << " No data in table class St_ftpcInnerCathode"<< endm;
+     return kStERR;
   }    
 }
 
@@ -565,8 +568,8 @@ Int_t StFtpcDbReader::FtpcClusterGeom(St_ftpcClusterGeom *clustergeo)
     mMinChargeWindow = clustergeoTable->minChargeWindow;
     return kStOK;
   } else {
-    gMessMgr->Message( " No data in table class St_ftpcClusterGeom","E");
-    return kStWarn;
+    LOG_ERROR << " No data in table class St_ftpcClusterGeom" << endm;
+    return kStERR;
   }
 }
 //===============================================================
@@ -579,7 +582,7 @@ Float_t StFtpcDbReader::padrowZPosition(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: padrowZPosition index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: padrowZPosition index out of range, using 0" << endm;
       return mPadrowZPosition[0];
     }
 }
@@ -593,7 +596,7 @@ Float_t StFtpcDbReader::magboltzEField(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzEField index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzEField index out of range, using 0" << endm;
       return mMagboltzEField[0];
     }
 }
@@ -606,7 +609,7 @@ Float_t StFtpcDbReader::magboltzVDrift(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzVDrift index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzVDrift index out of range, using 0" << endm;
       return mMagboltzVDrift[0];
     }
 }
@@ -619,7 +622,7 @@ Float_t StFtpcDbReader::magboltzDeflection(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzDeflection index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzDeflection index out of range, using 0" << endm;
       return mMagboltzDeflection[0];
     }
 }
@@ -632,7 +635,7 @@ Float_t StFtpcDbReader::magboltzdVDriftdP(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdVDriftdP index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzdVDriftdP index out of range, using 0" << endm;
       return mMagboltzdVDriftdP[0];
     }
 }
@@ -645,7 +648,7 @@ Float_t StFtpcDbReader::magboltzdDeflectiondP(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzdDeflectiondP index out of range, using 0" << endm;
       return mMagboltzdDeflectiondP[0];
     }
 }
@@ -658,17 +661,15 @@ Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
        // numbering in FTPC East, we invert the sector numbering when accessing
        // the gain table
        if (padrow>=10) {
-           //cout<<" padrow = "<<padrow<<" i = "<<i;
            Int_t isec = (i-1)/numberOfPads();
            Int_t ipad = i -isec*numberOfPads();
            i = (5-isec)*numberOfPads()+ipad;
-           //cout<<" isec = "<<isec<<" ipad = "<<ipad<<" i =  "<<i<<endl;;
        }
        return ampslopeTable[padrow].slope[i-1];
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: amplitudeSlope index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: amplitudeSlope index out of range, using 0" << endm;
       return ampslopeTable[0].slope[0];
     }
 }
@@ -681,7 +682,7 @@ Float_t StFtpcDbReader::amplitudeOffset(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: amplitudeOffset index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: amplitudeOffset index out of range, using 0" << endm;
       return ampoffsetTable[0].offset[0];
     }
 }
@@ -694,7 +695,7 @@ Float_t StFtpcDbReader::timeOffset(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: timeOffset index out of range, using 0", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: timeOffset index out of range, using 0" << endm;
       return timeoffsetTable[0].offset[0];
     }
 }
@@ -709,7 +710,7 @@ Int_t StFtpcDbReader::setMagboltzEField(Int_t i, Float_t newvalue)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzEField index out of range, not changed", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzEField index out of range, not changed" << endm;
       return 0;
     }
 }
@@ -723,7 +724,7 @@ Int_t StFtpcDbReader::setMagboltzVDrift(Int_t i, Int_t padrow, Float_t newvalue)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzVDrift index out of range, not changed", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzVDrift index out of range, not changed" << endm;
       return 0;
     }
 }
@@ -737,7 +738,7 @@ Int_t StFtpcDbReader::setMagboltzDeflection(Int_t i, Int_t padrow, Float_t newva
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzDeflection index out of range, not changed", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzDeflection index out of range, not changed" << endm;
       return 0;
     }
 }
@@ -751,7 +752,7 @@ Int_t StFtpcDbReader::setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t newval
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdVDriftdP index out of range, not changed", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzdVDriftdP index out of range, not changed" << endm;
       return 0;
     }
 }
@@ -765,7 +766,7 @@ Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t ne
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, not changed", "W", "OS");
+      LOG_WARN << "StFtpcDbReader: magboltzdDeflectiondP index out of range, not changed" << endm;
       return 0;
     }
 }
@@ -774,10 +775,10 @@ Int_t StFtpcDbReader::setMicrosecondsPerTimebin(Float_t newvalue)
 {
    if ( newvalue > 0.0 ) {
      mMicrosecondsPerTimebin = newvalue;
-     gMessMgr->Info()<<"mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" calculated from RHIC Clock Frequency"<<endm;
+     LOG_INFO << "mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" calculated from RHIC Clock Frequency"<<endm;
    }
    else  {
-     gMessMgr->Info()<<"mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" default value from database"<<endm;
+     LOG_INFO << "mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" default value from database"<<endm;
    }
    return 0;
 }

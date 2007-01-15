@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.71 2006/05/04 06:18:48 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.72 2007/01/15 07:49:21 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.72  2007/01/15 07:49:21  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.71  2006/05/04 06:18:48  jcs
 // remove old debug statement
 //
@@ -250,7 +253,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH1F *histoW,
                                          TH1F *histoE)
 {
-   cout << "StFtpcClusterFinder constructed for production" << endl;  
+  LOG_INFO << "StFtpcClusterFinder constructed for production" << endm;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
@@ -309,7 +312,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH1F *histoE,
 					 StFtpcClusterDebug *cldebug)
 {
-   cout << "StFtpcClusterFinder constructed for calibration" << endl;  
+  LOG_INFO << "StFtpcClusterFinder constructed for calibration" << endm;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
@@ -370,7 +373,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
 
 StFtpcClusterFinder::~StFtpcClusterFinder()
 {
-//   cout << "StFtpcClusterFinder destructed" << endl;
+//   LOG_INFO << "StFtpcClusterFinder destructed" << endm;
 }
 
 int StFtpcClusterFinder::search()
@@ -411,10 +414,10 @@ int StFtpcClusterFinder::search()
 
   if(pradius == 0 || pdeflection == 0)
     {
-      gMessMgr->Message("", "E", "OS") << "Padtrans memory allocation failed, exiting!" << endm;
+      LOG_ERROR << "Padtrans memory allocation failed, exiting!" << endm;
       if (pradius != 0) delete[] pradius;        // release the pradius array
       if (pdeflection != 0) delete[] pdeflection;   // release the pdeflection array
-      return 0;
+      return kStERR;
     }
 
 // Loop over FTPC West and East individually
@@ -428,30 +431,30 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
    if ( iftpc == 0 ) {
       deltaAirPressure = mParam->adjustedAirPressureWest() - mParam->standardPressure();
       firstPadrowToSearch = mDb->firstPadrowToSearch() - 1;
-      gMessMgr->Info() <<"Ftpc West: deltaAirPressure = "<<deltaAirPressure<<endm;
+      LOG_INFO <<"Ftpc West: deltaAirPressure = "<<deltaAirPressure<<endm;
    }
    if ( iftpc == 1 ) {
       deltaAirPressure = mParam->adjustedAirPressureEast() - mParam->standardPressure();
       firstPadrowToSearch = mDb->firstPadrowToSearch() - 1 + mDb->numberOfPadrowsPerSide();
-      gMessMgr->Info() <<"Ftpc East: deltaAirPressure = "<<deltaAirPressure<<endm;
+      LOG_INFO <<"Ftpc East: deltaAirPressure = "<<deltaAirPressure<<endm;
    }
 
   /* integrate padtrans table from magboltz database */
   if(!calcpadtrans(pradius, pdeflection,deltaAirPressure))
     {
-      gMessMgr->Message("", "E", "OS") << "Couldn't calculate padtrans table, exiting!" << endm;
+      LOG_ERROR << "Couldn't calculate padtrans table, exiting!" << endm;
       delete[] pradius;        // release the pradius array
       delete[] pdeflection;   // release the pdeflection array
-      return 0;
+      return kStERR;
     }
 
   /* initialize CUC memory handling */
   if(!cucInit(CUCMemory, CUCMemoryArray, &CUCMemoryPtr))
     {
-      gMessMgr->Message("", "E", "OS") << "Couldn't initialize CUC memory, exiting!" << endm;
+      LOG_ERROR <<  "Couldn't initialize CUC memory, exiting!" << endm;
       delete[] pradius;        // release the pradius array
       delete[] pdeflection;   // release the pdeflection array
-      return 0;
+      return kStERR;
     }
 
   /* calculate fastlog lookup */
@@ -491,9 +494,9 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	  iHardSec = mDb->numberOfSectors()*(int)(iRow/2) + iSec + 1;
 	  iHardRow = iRow%2 + 1;
 
-#ifdef DEBUG
-	  printf("Cluster Finder: Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
-#endif
+          if (DebugOn) {
+	     LOG_DEBUG<<"Cluster Finder: Now on Sector "<<iSec<<", Row "<<iRow<<" (iHardSec "<<iHardSec<<", iHardRow "<<iHardRow<<")"<<endm;
+          }
 
 	  // get list of occupied pads in sector
 	  unsigned char *(padlist[2]);
@@ -511,7 +514,6 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
       for(iThPad=0; iThPad<iOccPads; iThPad++)
       {
          iPad=padlist[iHardRow-1][iThPad];
-//cout<<"iPad=padlist["<<iHardRow-1<<"]["<<iThPad<<"] = "<<iPad<<endl;
          if ( mDb->Asic2EastNotInverted() && iRow>=10 && (iPad>=65 && iPad<=96))
              newpadlist[padkey[iPad-1]-1] = iPad; 
          else
@@ -521,7 +523,6 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 //===============================================================
 	  for(iThPad=0; iThPad<160; iThPad++)
 	    {
-//cout<<"newpadlist["<<iThPad<<"] = "<<newpadlist[iThPad]<<endl;
               if (newpadlist[iThPad] == 0 ) continue;
 	      iPad=iThPad+1;
 
@@ -546,9 +547,9 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 					 fastlog)
 			       )
 			      {
-#ifdef DEBUG
-				printf("Hitfinder failed! Cluster is lost.\n");
-#endif
+                                if (DebugOn) {
+				   LOG_DEBUG<<"Hitfinder failed! Cluster is lost"<<endm;
+                                }
 			      }
 			}
 		      DeleteCUC=CurrentCUC;
@@ -566,10 +567,10 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 		      if(!cucFree(CUCMemory, CUCMemoryArray, 
 				  &CUCMemoryPtr, DeleteCUC))
 			{
-			  gMessMgr->Message("", "E", "OS") << "Fatal memory management error."  << endm;
+			  LOG_ERROR << "Fatal memory management error."  << endm;
                           delete[] pradius;        // release the pradius array
                           delete[] pdeflection;   // release the pdeflection array
-			  return 0;
+			  return kStERR;
 			}
 		    }
 		  LastCUC=CurrentCUC;
@@ -603,13 +604,11 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 		  iNewSeqIndex++)
 		{
 if (mcldebug){
-//#ifdef DEBUGFILE			
 		  if (mcldebug->drawclhisto!=0)
 		  {
 		     mcldebug->drawhisto(iHardSec,iHardRow,iPad,NewSequences[iNewSeqIndex]);
 	             mcldebug->drawgainhisto(iHardSec,iHardRow,iPad,((float)(mDb->amplitudeSlope((iSec*mDb->numberOfPads()+iPad),iRow))),NewSequences[iNewSeqIndex]);
                   }
-//#endif	   	     
 }
 //+++++++++++++++++++ fill charge step histograms +++++++++++++++
 		  // This loop is running already, but the running variable is called iNewSeqIndex instead of iSeqIndex .
@@ -772,13 +771,13 @@ if (mcldebug){
 			      if(CurrentCUC == 0)
 				{
 				  // no free memory, overwrite last CUC
-#ifdef DEBUG
-				  printf("Previous cluster is now lost.\n");
-#endif
+                                  if (DebugOn) {
+				     LOG_DEBUG<<"Previous cluster is now lost"<<endm;
+                                  }
 				  CurrentCUC=LastCUC;
                                   delete[] pradius;        // release the pradius array
                                   delete[] pdeflection;   // release the pdeflection array
-                                  return 0;
+                                  return kStWarn;
 				}
 			      else
 				{
@@ -883,9 +882,9 @@ if (mcldebug){
 			       fastlog)
 		       )
 		      {
-#ifdef DEBUG
-			printf("Hitfinder failed! Cluster is lost.\n");
-#endif
+                        if (DebugOn) {
+			   LOG_DEBUG<<"Hitfinder failed! Cluster is lost"<<endm;
+                        }
 		      }
 		}
 	      DeleteCUC=CurrentCUC;
@@ -903,10 +902,10 @@ if (mcldebug){
 	      if(!cucFree(CUCMemory, CUCMemoryArray, 
 			  &CUCMemoryPtr, DeleteCUC))
 		{
-		  gMessMgr->Message("", "E", "OS") << "Fatal memory management error." << endm;
+		  LOG_ERROR << "Fatal memory management error." << endm;
                   delete[] pradius;        // release the pradius array
                   delete[] pdeflection;   // release the pdeflection array
-		  return 0;
+		  return kStERR;
 		}
 	      LastCUC=CurrentCUC;
 	    }
@@ -917,23 +916,19 @@ if (mcldebug){
   if (iftpc == 0 ) {
   	  if (mFtpcMon) mFtpcMon->n_clus_ftpc[1] = clusters;
 	  westHits = mPoint->GetEntriesFast();
-	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " << westHits << " hits in Ftpc West." << endm;
+	  LOG_INFO << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " << westHits << " hits in Ftpc West." << endm;
   }	  
   if (iftpc == 1 ) {
 	  if (mFtpcMon) mFtpcMon->n_clus_ftpc[0] = clusters;
 	  eastHits = mPoint->GetEntriesFast() - westHits;
-	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  eastHits << " hits in Ftpc East." << endm;
+	  LOG_INFO << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  eastHits << " hits in Ftpc East." << endm;
   }
 }  // end of: for(iftpc
   
   delete[] pradius;        // release the pradius array
   delete[] pdeflection;   // release the pdeflection array
   
-#ifdef DEBUG 
-  cout<<"finished running cluster search"<<endl;
-#endif
-  int dummy=1;
-  return dummy;
+  return kStOK;
 }
 
 bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
@@ -987,11 +982,6 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
   int i,k;
 
   bool PeakFound;
-
-
-#ifdef DEBUG
-  printf("starting hitfinder\n");
-#endif
 
   TPeak *Peaks = 0;
   Peaks = new TPeak[MAXPEAKS];
@@ -1105,9 +1095,9 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
   if(!fitPoints(Cluster, iRow, iSec, pRadius, pDeflection, Peaks, 
 		iNumPeaks, fastlog))
     {
-#ifdef DEBUG
-      printf("Point fitting failed! Cluster is lost.\n");
-#endif
+      if (DebugOn) {
+         LOG_DEBUG<<"Point fitting failed! Cluster is lost."<<endm;
+      }
       delete[] Peaks;
       return FALSE;
     }
@@ -1147,9 +1137,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 
   if(iNumPeaks == 0)
     {
-#ifdef DEBUG
-      printf("Cluster starting %d, %d has no peak!\n", Cluster->StartPad, Cluster->Sequence->startTimeBin);
-#endif
+      if (DebugOn) {
+         LOG_DEBUG<<"Cluster starting "<<Cluster->StartPad<<", "<<Cluster->Sequence->startTimeBin<<" has no peak!"<<endm;
+      }
       return FALSE;
     }
 
@@ -1314,7 +1304,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
       {
       if (Peak->x == 0. && Peak->y == 0.) {
 	// This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
-	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OS");
+	LOG_WARN << "Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)" << endm;
       }
 
 /*
@@ -1411,9 +1401,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    / (pRadius[10]-pRadius[20]);
 
 if (mcldebug){
-//#ifdef DEBUGFILE
           mcldebug->fillclustertree(Peak,Cluster,ChargeSum,iHardSec,iHardRow,fRadError,fPhiError,0,0,iNumPeaks);
-//#endif	  
 }
 
 	  thispoint->SetXerr(::sqrt(fRadError*cos(Peak->Phi)
@@ -1429,15 +1417,15 @@ if (mcldebug){
 	}
       else
 	{
-#ifdef DEBUG
-	  printf("Cluster fitting error. Point not stored.\n");
-#endif
+          if (DebugOn) {
+	     LOG_DEBUG<<"Cluster fitting error. Point not stored"<<endm;
+          }
 	}
      }
 	else{
-#ifdef DEBUG
-	  printf("Peak position can't be transformed!\n");
-#endif
+          if (DebugOn) {
+	     LOG_DEBUG<<"Peak position can't be transformed"<<endm;
+          } 
 	}
     } /* end of: if(iNumPeaks == 1) */
   else
@@ -1763,10 +1751,9 @@ if (mcldebug){
 		      }
 		  }
 	    }
-#ifdef DEBUG
-	  printf("unfold failed!\n");
-#endif
-	  
+          if (DebugOn) {
+	     LOG_DEBUG<<"unfold failed!"<<endm;
+          }
 	} /* end of: if(SumDeltaPos > UNFOLDFAILEDLIMIT ... */
 
       /* write unfolded peaks to point table */
@@ -1778,7 +1765,7 @@ if (mcldebug){
           {
 	  if (Peak[iPeakIndex].x == 0. && Peak[iPeakIndex].y == 0.) {
 	    // This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
-	    gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OS");
+	    LOG_WARN << "Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)" << endm;
 	  }
 	  
 	  /* in very complicated clusters some hits may have been unfolded
@@ -1891,9 +1878,7 @@ if (mcldebug){
 		/ (pRadius[10]-pRadius[20]);
 
 if (mcldebug){
-//#ifdef DEBUGFILE
               mcldebug->fillclustertree(Peak[iPeakIndex],Cluster,ChargeSum*Peak[iPeakIndex].PeakHeight/PeakHeightSum,iHardSec,iHardRow,fRadError,fPhiError,10,0,iNumPeaks);
-//#endif
 }	      
 
 	      thispoint->SetXerr(::sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
@@ -1910,9 +1895,9 @@ if (mcldebug){
          }
             else
 	    {
-#ifdef DEBUG
-	      printf("Peak position can't be transformed!\n");
-#endif
+              if (DebugOn) {
+	         LOG_DEBUG<<"Peak position can't be transformed!"<<endm;
+              }
 	    }
 	} /* end of: for(iPeakIndex=0;... */
     } /*end of: if(iNumPeaks==1) ... else { */
@@ -2087,12 +2072,8 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
   step_size=((float) mDb->numberOfTimebins()
 	     / (float) mParam->numberOfDriftSteps());
 
-  gMessMgr->Info() <<"deltap = "<<deltap<<endm;
+  LOG_INFO <<"deltap = "<<deltap<<endm;
   
-#ifdef DEBUG
-  printf("integrating padtrans table...\n");
-#endif
-
   for (padrow=0; padrow<mDb->numberOfPadrowsPerSide(); padrow++)
     {
       /* determine starting values */
@@ -2106,7 +2087,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	    && mDb->magboltzEField(j) < e_now; j++);
       if(j<1 || j>mDb->numberOfMagboltzBins())
 	{
-	  gMessMgr->Message("", "E", "OS") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
+	  LOG_ERROR << "calcpadtrans error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	  return FALSE;
 	}
       v_buf=j-1;
@@ -2140,7 +2121,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  
 	  if(j<1 || j>mDb->numberOfMagboltzBins())
 	    {
-	      gMessMgr->Message("", "E", "OS") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
+	      LOG_ERROR << "calcpadtrans error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	      return FALSE;
 	    }
 	  
@@ -2171,10 +2152,9 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  t_last=t_next;
 	  r_last=r_next;
 	}
-#ifdef DEBUG
-      printf("%d steps calculated, padrow %d\n", i, padrow);
-#endif
-      
+      if (DebugOn) {
+         LOG_DEBUG<<i<<" steps calculated, padrow "<<padrow<<endm;
+      }
     }
   return TRUE;
 }
@@ -2202,9 +2182,9 @@ TClusterUC *StFtpcClusterFinder::cucAlloc(TClusterUC memory[MAXNUMCUC], int Real
     }
   else
     {
-#ifdef DEBUG
-      printf("CUC memory exhausted! requested %d CUCs\n", *pointer);
-#endif
+      if (DebugOn) {
+         LOG_DEBUG<<"CUC memory exhausted! requested "<<*pointer<<" CUCs"<<endm;
+      }
       return 0;
     }
 }
@@ -2219,9 +2199,9 @@ int StFtpcClusterFinder::cucFree(TClusterUC memory[MAXNUMCUC], int RealMemory[MA
     }
   else
     {
-#ifdef DEBUG
-      printf("CUC memory management confused!\n");
-#endif
+      if (DebugOn) {
+         LOG_DEBUG<<"CUC memory management confused!"<<endm;
+      }
       return FALSE;
     }
 }

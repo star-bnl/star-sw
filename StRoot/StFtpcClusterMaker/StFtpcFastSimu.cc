@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.31 2004/02/12 19:38:46 oldi Exp $
+// $Id: StFtpcFastSimu.cc,v 1.32 2007/01/15 07:49:22 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.32  2007/01/15 07:49:22  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.31  2004/02/12 19:38:46  oldi
 // Removal of intermediate tables.
 //
@@ -198,7 +201,7 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
 
 StFtpcFastSimu::~StFtpcFastSimu()
 {
-  //gMessMgr->Message("", "I", "OS") << "StFtpcFastSimu destructed" << endm;
+  //LOG_INFO << "StFtpcFastSimu destructed" << endm;
 }
 
 int StFtpcFastSimu::ffs_gen_padres()
@@ -523,21 +526,21 @@ int StFtpcFastSimu::ffs_ini()
     err_azi[2] = 0;
     err_azi[3] = 0;
     
-    gMessMgr->Message("", "I", "OS") << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endm;
-    gMessMgr->Message("", "I", "OS") << "Parametrization for vd, Td, sig_rad and sig_azi, err_rad and err_azi:" << endm;
-    gMessMgr->Message("", "I", "OS") << "vd=" << Vhm[0]<<"+"<<Vhm[1]<<"x+"<<Vhm[2]<<"xx+"
+    LOG_INFO << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endm;
+    LOG_INFO << "Parametrization for vd, Td, sig_rad and sig_azi, err_rad and err_azi:" << endm;
+    LOG_INFO << "vd=" << Vhm[0]<<"+"<<Vhm[1]<<"x+"<<Vhm[2]<<"xx+"
 	 <<Vhm[3]<<"xxx" << endm;
-    gMessMgr->Message("", "I", "OS") << "Td="<<Tbm[0]<<"+"<<Tbm[1]<<"x+"<<Tbm[2]<<"xx+"<<Tbm[3]
+    LOG_INFO << "Td="<<Tbm[0]<<"+"<<Tbm[1]<<"x+"<<Tbm[2]<<"xx+"<<Tbm[3]
 	 <<"xxx" << endm;
-    gMessMgr->Message("", "I", "OS") << "sig_rad="<<s_rad[0]<<"+"<<s_rad[1]<<"x+"<<s_rad[2]
+    LOG_INFO << "sig_rad="<<s_rad[0]<<"+"<<s_rad[1]<<"x+"<<s_rad[2]
 	 <<"xx+"<<s_rad[3]<<"xxx" << endm;
-    gMessMgr->Message("", "I", "OS") << "sig_azi="<<s_azi[0]<<"+"<<s_azi[1]<<"x+"<<s_azi[2]
+    LOG_INFO << "sig_azi="<<s_azi[0]<<"+"<<s_azi[1]<<"x+"<<s_azi[2]
 	 <<"xx+"<<s_azi[3]<<"xxx" << endm;
-    gMessMgr->Message("", "I", "OS") << "err_rad="<<err_rad[0]<<"+"<<err_rad[1]<<"x+"<<err_rad[2]
+    LOG_INFO << "err_rad="<<err_rad[0]<<"+"<<err_rad[1]<<"x+"<<err_rad[2]
 	 <<"xx+"<<err_rad[3]<<"xxx" << endm;
-    gMessMgr->Message("", "I", "OS") << "err_azi="<<err_azi[0]<<"+"<<err_azi[1]<<"x+"<<err_azi[2]
+    LOG_INFO << "err_azi="<<err_azi[0]<<"+"<<err_azi[1]<<"x+"<<err_azi[2]
 	 <<"xx+"<<err_azi[3]<<"xxx" << endm;
-    gMessMgr->Message("", "I", "OS") << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endm;
+    LOG_INFO << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endm;
     
     // Drift velocity at anode (Ranode = ra from/ftpc_params/ ) [cm/microsec]
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
@@ -682,7 +685,7 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
     rem_count2=0;
 
     // now remove merged clusters and those on sector border
-    // gMessMgr->Message("", "I", "OS") << "remove merged and cut-off hits" << endm;
+    // LOG_INFO << "remove merged and cut-off hits" << endm;
     id_1 = 0;
     id_2 = 0;
     n_gepoints = 0;
@@ -760,9 +763,9 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
 	
     nPoints = n_gepoints;
       
-    gMessMgr->Message("", "I", "OS") << "Deleted " << rem_count1 << " merged clusters" << endm;
-    gMessMgr->Message("", "I", "OS") << "Deleted " << rem_count2 << " clusters on sector limit" << endm;
-    gMessMgr->Message("", "I", "OS") << " " << nPoints<< " clusters found" << endm;
+    LOG_INFO << "Deleted " << rem_count1 << " merged clusters" << endm;
+    LOG_INFO << "Deleted " << rem_count2 << " clusters on sector limit" << endm;
+    LOG_INFO << " " << nPoints<< " clusters found" << endm;
       
     delete [] sigazi;
     delete [] sigrad;

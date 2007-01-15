@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.21 2006/03/19 19:29:45 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.22 2007/01/15 07:49:22 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.22  2007/01/15 07:49:22  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.21  2006/03/19 19:29:45  jcs
 // Move cluster struct definitions to StFtpcClustersStructures.hh
 // Create DEBUGFILE with bfc option 'fdbg'
@@ -162,6 +165,7 @@ class StFtpcClusterFinder
 		      StFtpcClusterDebug *cldebug);
 
   ~StFtpcClusterFinder();
+  Bool_t DebugOn;
   int search();
   int findHits(TClusterUC *Cluster, int, int, double*, double*, float *);//!
   int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, float*);//!
