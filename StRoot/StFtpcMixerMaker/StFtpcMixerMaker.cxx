@@ -61,7 +61,7 @@ StMaker(name),
  mConfig1(kind1),
 mConfig2(kind2)  
 {
-  gMessMgr->Info() << "StFtpcMixerMaker constructed" <<endm;
+  LOG_INFO << "StFtpcMixerMaker constructed" <<endm;
 }
 
 
@@ -78,7 +78,7 @@ Int_t StFtpcMixerMaker::InitRun(int RunId) {
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
-    gMessMgr->Warning() << "StFtpcMixerMaker::Error Getting FTPC database: Geometry"<<endm;
+    LOG_WARN << "StFtpcMixerMaker::Error Getting FTPC database: Geometry"<<endm;
     return kStWarn;
   }
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
@@ -90,7 +90,7 @@ Int_t StFtpcMixerMaker::InitRun(int RunId) {
   
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
-    gMessMgr->Warning() << "StFtpcMixerMaker::Error Getting FTPC database: Calibrations"<<endm;
+    LOG_WARN << "StFtpcMixerMaker::Error Getting FTPC database: Calibrations"<<endm;
     return kStWarn;
   }
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
@@ -124,7 +124,7 @@ Int_t StFtpcMixerMaker::Make() {
   Int_t reader1Created = 0;
   Int_t reader2Created = 0;
 
-  gMessMgr->Info() << "StFtpcMixerMaker starting..." <<endm;
+  LOG_INFO << "StFtpcMixerMaker starting..." <<endm;
 
   // create FTPC data base reader
   StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
@@ -135,45 +135,45 @@ Int_t StFtpcMixerMaker::Make() {
 
   if(!strcmp(getConfig1(),"daq")) {
     // DAQ
-    gMessMgr->Info() << "StFtpcMixerMaker: Getting dataset 1 (DAQ)" << endm;
+    LOG_INFO << "StFtpcMixerMaker: Getting dataset 1 (DAQ)" << endm;
     St_DataSet *dataset1;
     dataset1=GetDataSet("Input1");               // get DataSet from chain1
     if (!dataset1) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(dataset1);
     }
     daqr1=(StDAQReader*)(dataset1->GetObject()); // get DAQReader
     if (!daqr1) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(daqr1);
     }
     ftpcr1=daqr1->getFTPCReader();               // get FTPCReader
     if (!ftpcr1) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(ftpcr1);
     }
 
     if (!ftpcr1->checkForData()) {
-      gMessMgr->Warning() << "No FTPC DAQ data available!" << endm;
+      LOG_WARN << "No FTPC DAQ data available!" << endm;
 	return kStWarn;
     }
     else {
-      gMessMgr->Info() << "FTPC DAQ Dataset found!" <<endm;
+      LOG_INFO << "FTPC DAQ Dataset found!" <<endm;
     }
 
   } else {
 
     // FTPC SlowSimulator:
-    gMessMgr->Info() << "StFtpcMixerMaker: Getting dataset 1 (SlowSimulator)" << endm;
+    LOG_INFO << "StFtpcMixerMaker: Getting dataset 1 (SlowSimulator)" << endm;
     St_DataSet *dataset1;
     dataset1=GetDataSet("Input1");               // get DataSet from chain1
     if (!dataset1) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(dataset1);
     }
     St_DataSet *raw = GetDataSet("ftpc_raw");
     if (raw) {
-      gMessMgr->Info() << "FTPC SlowSimulator Dataset found!"<<endm;
+      LOG_INFO << "FTPC SlowSimulator Dataset found!"<<endm;
       //                  FCL
       St_DataSetIter get(raw);
 
@@ -188,63 +188,63 @@ Int_t StFtpcMixerMaker::Make() {
 				    fcl_ftpcadc->GetNRows());
 
 	reader1Created = 1;
-	gMessMgr->Info() << "created StFTPCReader from tables" << endm;
+	LOG_INFO << "created StFTPCReader from tables" << endm;
       }
       else {
 
-	 gMessMgr->Info() <<"StFtpcMixerMaker: Tables are not found:"
+	 LOG_INFO <<"StFtpcMixerMaker: Tables are not found:"
 					  << " fcl_ftpcsqndx = " << fcl_ftpcsqndx
 					  << " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
-	 gMessMgr->Warning() << "StFtpcMixerMaker exiting... "<<endm;
+	 LOG_WARN << "StFtpcMixerMaker exiting... "<<endm;
 	return kStOK;
       }
     }
     else {
-      gMessMgr->Warning() << "Error getting FTPC SlowSimulator Dataset!" << endm;
+      LOG_WARN << "Error getting FTPC SlowSimulator Dataset!" << endm;
     }
 
    }
 
   if(!strcmp(getConfig2(),"daq")) {
     // DAQ
-    gMessMgr->Info() << "StFtpcMixerMaker: Getting dataset 2 (DAQ)" << endm;
+    LOG_INFO << "StFtpcMixerMaker: Getting dataset 2 (DAQ)" << endm;
     St_DataSet *dataset2;
     dataset2=GetDataSet("Input2");               // get DataSet from chain1
     if (!dataset2) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(dataset2);
     }
     daqr2=(StDAQReader*)(dataset2->GetObject()); // get DAQReader
     if (!daqr2) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(daqr2);
     }
     ftpcr2=daqr2->getFTPCReader();               // get FTPCReader
     if (!ftpcr2) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(ftpcr2);
     }
 
     if (!ftpcr2->checkForData()) {
-        gMessMgr->Warning()  << "No FTPC DAQ data available!" << endm;
+        LOG_WARN << "No FTPC DAQ data available!" << endm;
 	return kStWarn;
     }
     else {
-      gMessMgr->Info() << "FTPC DAQ Dataset found!" <<endm;
+      LOG_INFO << "FTPC DAQ Dataset found!" <<endm;
     }
 
   } else {
     // FTPC SlowSimulator:
-    gMessMgr->Info() << "StFtpcMixerMaker: Getting dataset 2 (SlowSimulator)" << endm;
+    LOG_INFO << "StFtpcMixerMaker: Getting dataset 2 (SlowSimulator)" << endm;
     St_DataSet *dataset2;
     dataset2=GetDataSet("Input2");               // get DataSet from chain1
     if (!dataset2) {
-      gMessMgr->Warning() << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
+      LOG_WARN << "StFtpcMixerMaker: Missing Data! Bailing out..." <<endm;
       assert(dataset2);
     }
     St_DataSet *raw = GetDataSet("ftpc_raw");
     if (raw) {
-      gMessMgr->Info() << "FTPC SlowSimulator Dataset found!" << endm;
+      LOG_INFO << "FTPC SlowSimulator Dataset found!" << endm;
       //                  FCL
       St_DataSetIter get(raw);
 
@@ -261,19 +261,19 @@ Int_t StFtpcMixerMaker::Make() {
 				    fcl_ftpcadc->GetNRows());
 
 	reader2Created = 1;
-	gMessMgr->Info() << "created StFTPCReader from tables" << endm;
+	LOG_INFO << "created StFTPCReader from tables" << endm;
       }
       else {
 
-	gMessMgr->Info() <<"StFtpcMixerMaker: Tables are not found:"
+	LOG_INFO <<"StFtpcMixerMaker: Tables are not found:"
 					  << " fcl_ftpcsqndx = " << fcl_ftpcsqndx
 					  << " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
-	gMessMgr->Warning() << "StFtpcMixerMaker exiting... " << endm;
+	LOG_WARN << "StFtpcMixerMaker exiting... " << endm;
 	return kStOK;
       }
     }
     else {
-      gMessMgr->Warning() << "Error getting FTPC SlowSimulator Dataset!" << endm;
+      LOG_WARN << "Error getting FTPC SlowSimulator Dataset!" << endm;
     }
 
   }
@@ -364,7 +364,7 @@ Int_t StFtpcMixerMaker::Make() {
 
   // Embedding done, now write out the Sequences
 
-  gMessMgr->Info() << "FTPC Embedding done... "<< endm;
+  LOG_INFO << "FTPC Embedding done... "<< endm;
 
   St_DataSetIter local(m_DataSet);
 
@@ -375,7 +375,7 @@ Int_t StFtpcMixerMaker::Make() {
   St_fcl_ftpcadc *fcl_ftpcadc_out = new St_fcl_ftpcadc("fcl_ftpcadc", 2000000);
   local.Add(fcl_ftpcadc_out);
 
-  gMessMgr->Info() << "Output sequences created..." << endm;
+  LOG_INFO << "Output sequences created..." << endm;
 
   // create StFtpcSequencer to write ADC data to sequences (zero suppressed)
   StFtpcSequencer *ftpcSequencer = new StFtpcSequencer(fcl_ftpcndx_out, fcl_ftpcsqndx_out, fcl_ftpcadc_out);
@@ -389,7 +389,7 @@ Int_t StFtpcMixerMaker::Make() {
   if (reader2Created) delete ftpcr2;
   delete[] iADC;
 
-  gMessMgr->Info() << "FtpcMixerMaker done..." << endm;
+  LOG_INFO << "FtpcMixerMaker done..." << endm;
 
   return kStOK;
 } // Make()
@@ -410,9 +410,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.5 2004/03/04 15:49:00 jcs Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.6 2007/01/15 15:02:12 jcs Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.6  2007/01/15 15:02:12  jcs
+ * replace printf, cout and gMesMgr with Logger
+ *
  * Revision 1.5  2004/03/04 15:49:00  jcs
  * remove unnecessary fcl_fppoint include
  *

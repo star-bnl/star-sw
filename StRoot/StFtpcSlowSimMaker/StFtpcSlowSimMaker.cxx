@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.32 2006/03/01 17:25:40 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.33 2007/01/15 15:02:20 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.33  2007/01/15 15:02:20  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.32  2006/03/01 17:25:40  jcs
 // move all database initialization to InitRun
 //
@@ -190,9 +193,9 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
 
    mDbMaker     = (St_db_Maker*)GetMaker("db");
    Int_t dbDate = mDbMaker->GetDateTime().GetDate();
-   cout<<"StFtpcSlowSimMaker: dbDate = "<<dbDate<<endl;
+   LOG_INFO<<"dbDate = "<<dbDate<<endm;
 
-  gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
+   LOG_INFO << "StFtpcSlowSimMaker::InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
 
   // Load the correct FTPC drift maps depending on magnetic field
 
@@ -202,35 +205,35 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
      SetFlavor("ffp10kv","ftpcdVDriftdP");
      SetFlavor("ffp10kv","ftpcDeflection");
      SetFlavor("ffp10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to ffp10kv"<<endm;
+     LOG_INFO << "StFtpcSlowSimMaker::InitRun: flavor set to ffp10kv"<<endm;
   }
   else if ( gFactor > 0.2 ) {
      SetFlavor("hfp10kv","ftpcVDrift");
      SetFlavor("hfp10kv","ftpcdVDriftdP");
      SetFlavor("hfp10kv","ftpcDeflection");
      SetFlavor("hfp10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to hfp10kv"<<endm;
+     LOG_INFO << "StFtpcSlowSimMaker::InitRun: flavor set to hfp10kv"<<endm;
   }
   else if ( gFactor > -0.2 ) {
      SetFlavor("zf10kv","ftpcVDrift");
      SetFlavor("zf10kv","ftpcdVDriftdP");
      SetFlavor("zf10kv","ftpcDeflection");
      SetFlavor("zf10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to zf10kv"<<endm;
+     LOG_INFO << "StFtpcSlowSimMaker::InitRun: flavor set to zf10kv"<<endm;
   }
   else if ( gFactor > -0.8 ) {
      SetFlavor("hfn10kv","ftpcVDrift");
      SetFlavor("hfn10kv","ftpcdVDriftdP");
      SetFlavor("hfn10kv","ftpcDeflection");
      SetFlavor("hfn10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to hfn10kv"<<endm;
+     LOG_INFO << "StFtpcSlowSimMaker::InitRun: flavor set to hfn10kv"<<endm;
   }
   else {
      SetFlavor("ffn10kv","ftpcVDrift");
      SetFlavor("ffn10kv","ftpcdVDriftdP");
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcSlowSimMaker::InitRun: flavor set to ffn10kv"<<endm;
+     LOG_INFO << "StFtpcSlowSimMaker::InitRun: flavor set to ffn10kv"<<endm;
   }    
 
   // calculate microsecondsPerTimebin from RHIC clock frequency for current run
@@ -245,7 +248,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
-     gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC database: Geometry"<<endm;
+     LOG_WARN << "StFtpcSlowSimMaker::Error Getting FTPC database: Geometry"<<endm;
      return kStWarn;
   }
   St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
@@ -257,7 +260,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
-     gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC database: Calibrations"<<endm;
+     LOG_WARN << "StFtpcSlowSimMaker::Error Getting FTPC database: Calibrations"<<endm;
      return kStWarn;
   }
   St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
@@ -297,31 +300,19 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
   				 (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ"));
 
 
-
-  //cout << "Global Dbs read...\n";
- 
-  //cout << "Getting local Db ..\n";
   St_DataSet *ftpclocal = GetDataBase("ftpc");  // zum Verwenden der lokalen DB
   if ( !ftpclocal ){
-     gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting local FTPC database: Calibrations"<<endm;
+     LOG_WARN << "StFtpcSlowSimMaker::Error Getting local FTPC database: Calibrations"<<endm;
      return kStWarn;
   } //assert(ftpc);
-  // cout << "Local Db found, creating iterator...\n";
  
   St_DataSetIter       local(ftpclocal);
   
-  //cout << "Iterator created ...\n";
-
   //m_timeoffset = (St_ftpcTimeOffset *)local("ftpcTimeOffset");
  
   m_clusterpars  = (St_ftpcClusterPars *)local("ftpcClusterPars");
   m_slowsimgas   = (St_ftpcSlowSimGas  *)local("ftpcSlowSimGas");
   m_slowsimpars  = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
-
-  //cout << "Local Dbs read...\n";
- 
-
-
 
   return 0;
 }
@@ -353,13 +344,13 @@ Int_t StFtpcSlowSimMaker::Make(){
     St_fcl_ftpcadc   *fcl_ftpcadc  = new St_fcl_ftpcadc("fcl_ftpcadc",2000000);
     local.Add(fcl_ftpcadc);
 
-    //cout <<" create data reader \n";
+    if (Debug()) {LOG_DEBUG <<"create data reader" << endm;}
 
    // create data reader
     StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
 							   g2t_track,
 							   g2t_ftp_hit);
-     //cout << "create FTPC database reader\n";
+     if (Debug()) {LOG_DEBUG <<"create FTPC database reader" << endm;}
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
 		                                m_asicmap,
@@ -377,39 +368,38 @@ Int_t StFtpcSlowSimMaker::Make(){
 						m_cathode);
 
     if ( dbReader->returnCode != 0 ) {
-       gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Constructing StFtpcDbReader "<<endm;
+       LOG_WARN << "StFtpcSlowSimMaker::Error Constructing StFtpcDbReader "<<endm;
        return kStWarn;
     }
 
-    //cout << "create parameter reader\n";
+    if (Debug()) { LOG_DEBUG << "create parameter reader" << endm;}
     // create parameter reader
     StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
                                                            m_slowsimgas,
                                                            m_slowsimpars);
 
-//  cout<<"paramReader->gasTemperatureWest() = "<<paramReader->gasTemperatureWest()<<endl;
-//  cout<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endl;
+//  LOG_INFO<<"paramReader->gasTemperatureWest() = "<<paramReader->gasTemperatureWest()<<endm;
+//  LOG_INFO<<"paramReader->gasTemperatureEast() = "<<paramReader->gasTemperatureEast()<<endm;
 
     if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
        dbReader->setMicrosecondsPerTimebin(microsecondsPerTimebin);
-       cout<<"Using the following values from database:"<<endl;
-       cout<<"          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<endl;
-       cout<<"          EastIsInverted            = "<<dbReader->EastIsInverted()<<endl;
-       cout<<"          Asic2EastNotInverted      = "<<dbReader->Asic2EastNotInverted()<<endl;
-       cout<<"          tzero                     = "<<dbReader->tZero()<<endl;
-       cout<<"          temperatureDifference     = "<<dbReader->temperatureDifference()<<endl;
-       cout<<"          defaultTemperatureWest    = "<<dbReader->defaultTemperatureWest()<<endl;
-       cout<<"          defaultTemperatureEast    = "<<dbReader->defaultTemperatureEast()<<endl;
-       cout<<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endl;
-       cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
-    }
+       LOG_INFO << "Using the following values from database:" << endm;
 
-    // check db values for cathode offset and angle
-    cout << "StFtpcSlowSimulator with cathode offset, using the following parameters:"<<endl;
-    cout << "                    offsetCathodeWest  = " << dbReader->offsetCathodeWest() << endl;
-    cout << "                    angleOffsetWest    = " << dbReader->angleOffsetWest() << endl;
-    cout << "                    offsetCathodeEast  = " << dbReader->offsetCathodeEast() << endl;
-    cout << "                    angleOffsetEast    = " << dbReader->angleOffsetEast() << endl;
+       LOG_INFO << "          microsecondsPerTimebin    = "<<dbReader->microsecondsPerTimebin()<<endm;
+       LOG_INFO <<"          EastIsInverted            = "<<dbReader->EastIsInverted()<<endm;
+       LOG_INFO <<"          Asic2EastNotInverted      = "<<dbReader->Asic2EastNotInverted()<<endm;
+       LOG_INFO <<"          tzero                     = "<<dbReader->tZero()<<endm;
+       LOG_INFO <<"          temperatureDifference     = "<<dbReader->temperatureDifference()<<endm;
+       LOG_INFO <<"          defaultTemperatureWest    = "<<dbReader->defaultTemperatureWest()<<endm;
+       LOG_INFO <<"          defaultTemperatureEast    = "<<dbReader->defaultTemperatureEast()<<endm;
+       LOG_INFO <<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endm;
+       LOG_INFO <<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endm;
+       // check db values for cathode offset and angle
+       LOG_INFO <<"          offsetCathodeWest         = " << dbReader->offsetCathodeWest() << endm;
+       LOG_INFO <<"          angleOffsetWest           = " << dbReader->angleOffsetWest() << endm;
+       LOG_INFO <<"          offsetCathodeEast         = " << dbReader->offsetCathodeEast() << endm;
+       LOG_INFO <<"          angleOffsetEast           = " << dbReader->angleOffsetEast() << endm;
+    }
 
   // get temperatures from offline db, used for embedding!
   // as long as there is no daq data, standard temperatures are used!
@@ -420,14 +410,14 @@ Int_t StFtpcSlowSimMaker::Make(){
   daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
-      gMessMgr->Message("", "I", "OS") << "Using StDAQReader to get StFTPCReader in StFtpcSlowSimMaker for embedding" << endm;
+      LOG_INFO << "Using StDAQReader to get StFTPCReader in StFtpcSlowSimMaker for embedding" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
 
       if (!ftpcReader || !ftpcReader->checkForData()) {
-	gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
+	LOG_WARN << "No FTPC data available!" << endm;
         delete paramReader;
         delete dbReader;
 	return kStWarn;
@@ -437,7 +427,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 
       StDetectorDbFTPCGas * gas = StDetectorDbFTPCGas::instance();
       if ( !gas ){
-          gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC Online database: Conditions"<<endm;
+          LOG_WARN << "StFtpcSlowSimMaker::Error Getting FTPC Online database: Conditions"<<endm;
           delete paramReader;
           delete dbReader;
           return kStWarn;
@@ -471,7 +461,7 @@ Int_t StFtpcSlowSimMaker::Make(){
               // default values change depending on SVT high voltage on/off
 	      // currently using daqReader->SVTPresent() to test but may need
 	      // access to Conditions_svt/svtInterLocks
-	  cout<<"daqReader->SVTPresent() = "<<daqReader->SVTPresent()<<endl;
+	  LOG_INFO << "daqReader->SVTPresent() = " << daqReader->SVTPresent()<<endm;
 	  returnCode = gasUtils->defaultTemperatureWest(dbDate,daqReader->SVTPresent());
      }
 
@@ -486,21 +476,21 @@ Int_t StFtpcSlowSimMaker::Make(){
            // default values change depending on SVT high voltage on/off
            // currently using daqReader->SVTPresent() to test but may need
            // access to Conditions_svt/svtInterLocks
-        cout<<"daqReader->SVTPresent() = "<<daqReader->SVTPresent()<<endl;
+        LOG_INFO << "daqReader->SVTPresent() = " << daqReader->SVTPresent()<<endm;
         returnCode = gasUtils->defaultTemperatureEast(dbDate,daqReader->SVTPresent());
      }
      
-       gMessMgr->Message("", "I", "OS") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm;
+       LOG_INFO << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm;
        paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
-      gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
+      LOG_INFO <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
       paramReader->setAdjustedAirPressureEast(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureEast()+STP_Temperature)));
-     gMessMgr->Info() <<" paramReader->setAdjustedAirPressureEast = "<<paramReader->adjustedAirPressureEast()<<endm;
+     LOG_INFO <<" paramReader->setAdjustedAirPressureEast = "<<paramReader->adjustedAirPressureEast()<<endm;
 
      delete gasUtils;
     }
 
 
-    //cout <<" create data writer \n";
+    if (Debug()) {LOG_DEBUG <<" create data writer"<<endm;}
 
     // create data writer
     StFtpcRawWriter *dataWriter = new StFtpcRawWriter(fcl_ftpcndx,
@@ -509,7 +499,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 						      dbReader->Asic2EastNotInverted());
 
 
-    //cout <<"Create SlowSimulator \n";
+    if (Debug()) {LOG_DEBUG <<"Create SlowSimulator"<<endm;}
 
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
 							   paramReader,
@@ -517,7 +507,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 							   dataWriter);
 
 
-    gMessMgr->Info() << "FTPC SlowSimulator starting... " <<endm;
+    LOG_INFO << "FTPC SlowSimulator starting... " <<endm;
     Int_t Res_fss = slowsim->simulate();
 
     delete slowsim;
@@ -527,18 +517,18 @@ Int_t StFtpcSlowSimMaker::Make(){
     delete geantReader;
 
     if (Res_fss) {
-      if(Debug()) gMessMgr->Message("", "I", "OS") << "finished fss" << endm;
+      if(Debug()) {LOG_INFO << "finished fss" << endm;}
     }
   }
   MakeHistograms(); // FTPC slow simulator histograms
 
-  gMessMgr->Info() << "FTPC SlowSimulator done... " <<endm;
+  LOG_INFO << "FTPC SlowSimulator done... " <<endm;
   return kStOK;
 }
 //_____________________________________________________________________________
 void StFtpcSlowSimMaker::MakeHistograms() {
 
-   if(Debug()) gMessMgr->Message("", "I", "OS") << "*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***" << endm;
+   if(Debug()) {LOG_INFO << "*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***" << endm;}
 
    // Create an iterator
    St_DataSetIter ftpc_raw(m_DataSet);
@@ -553,7 +543,7 @@ void StFtpcSlowSimMaker::MakeHistograms() {
    // Fill histograms for FTPC slow simulator
    if (adc) {
      Float_t nadc = adc->GetNRows();
-     gMessMgr->Message("", "I", "OS") << "total # adcs = " << adc->GetNRows() << ", nadc = " << nadc << endm;
+     LOG_INFO << "total # adcs = " << adc->GetNRows() << ", nadc = " << nadc << endm;
      m_nadc->Fill(nadc);
    }
    if (ndx) {

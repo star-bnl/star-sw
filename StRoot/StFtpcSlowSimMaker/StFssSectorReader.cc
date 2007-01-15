@@ -1,6 +1,7 @@
 #include "StFssSectorReader.hh"
 
 #include <Stiostream.h>
+#include "StMessMgr.h"
 
 StFssSectorReader::StFssSectorReader(int sector,
 				     unsigned short *fcl_ftpcsqndx, int nSeq,
@@ -126,8 +127,8 @@ int StFssSectorReader::initialize()
 		}
 	      else 
 		{     // starting new pad without bit 5 set!
-		  printf("1: new pad detected with bit 5 clear!\n");
-		  cout << start << " < " << oldstart << endl;
+		  LOG_WARN << "1: new pad detected with bit 5 clear!" << endm;
+		  LOG_WARN << start << " < " << oldstart << endm;
 		  fflush(stdout);
 		  return FALSE;
 		}
@@ -147,7 +148,7 @@ int StFssSectorReader::initialize()
 	      Pad_array[row][pad].seq= (Sequence *)malloc(nseq*sizeof(Sequence));
 	      if (Pad_array[row][pad].seq==NULL) 
 		{
-		  cout << "failed to malloc() Sequence structures " << endl;
+		  LOG_ERROR << "failed to malloc() Sequence structures " << endm;
 		  return FALSE;
 		}
 	    }
@@ -221,8 +222,8 @@ int StFssSectorReader::initialize()
 	    }
 	  else 
 	    {    // starting new pad without bit 5 set!
-	      printf("2: new pad detected with bit 5 clear!\n");
-	      cout << start << " < " << oldstart << endl;
+	      LOG_WARN << "2: new pad detected with bit 5 clear!" << endm;
+	      LOG_WARN << start << " < " << oldstart << endm;
 	      fflush(stdout);
 	      return FALSE;
 	    }
