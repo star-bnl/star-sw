@@ -19,38 +19,35 @@ if ( ! defined($CERN) ){
 }
 
 if ( ! -e "config/Makefile.config"){
-    if ( -e "etc/system.rootrc"){
-	print "Will perform pre-make actions\n";
+    die "You are probably not in the proper directory\n";
 
-	#
-	# Additional task include cleaning up the etc/ directory
-	# and removing the links since the configure script will
-	# regenerate and screw up the global setup. However, it 
-	# will need to be re-created later
-	#
-	if ( -l "etc/system.rootrc"){ unlink("etc/system.rootrc");}
-	if ( -l "etc/root.mimes"){    unlink("etc/root.mimes");}
-	exit;
+} 
 
-    } else {
-	die "You are probably not in the proper directory\n";
-    }
-} else {
-    # we can then restore things undone before
-    print "Checking etc/ files\n";
-    foreach $file (("system.rootrc","root.mimes")){
-	if ( -l "etc/$file.new" && ! -l "etc/$file"){
-	    print "  Adjusting etc/$file\n";
-	    $link = readlink("etc/$file.new");
-	    $link =~ s/\.new//;
-	    if ( -f "etc/$file" ){  unlink("etc/$file");}
-	    system("/bin/ln -s $link etc/$file");
+
+# we can then restore things undone before
+print "Checking etc/ files\n";
+foreach $file (("system.rootrc","root.mimes")){
+    if ( -l "etc/$file.new" && ! -l "etc/$file"){
+	print "  Establishing etc/$file\n";
+	$link = readlink("etc/$file.new");
+	$link =~ s/\.new//;
+	if ( -f "etc/$file" ){  unlink("etc/$file");}
+	system("/bin/ln -s $link etc/$file");
+    } elsif ( -e "etc/$file"){
+	if ( ! -e "etc/$file.new"){
+	    print "  WARNING Could not find $file.new\n";
+	} else {
+	    print "  Unlinking $file\n";
+	    unlink("etc/$file");
 	}
     }
 }
 
 
 
+#
+# Now back on the shift stuff 
+#
 if ( ! -e "$CERN/$CERNL/lib/libpacklib_noshift.a"){
     die "$CERN/$CERNL/lib/libpacklib_noshift.a does not exist. Would not know what to do...\n";
 }
