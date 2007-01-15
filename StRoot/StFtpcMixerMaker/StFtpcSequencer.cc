@@ -30,7 +30,7 @@ StFtpcSequencer::StFtpcSequencer(St_fcl_ftpcndx *ftpcndxIn,
 {
   // make sure the sequences exist
   if ((!ftpcndxIn)||(!ftpcsqndxIn)||(!ftpcadcIn)) {
-    gMessMgr->Warning() << "StFtpcSequencer: Output sequences missing, bailing out!" << endm;
+    LOG_WARN << "StFtpcSequencer: Output sequences missing, bailing out!" << endm;
     return;
   }
 
@@ -57,7 +57,7 @@ StFtpcSequencer::~StFtpcSequencer()
     ftpcsqndx->SetNRows(numSqndx);
     ftpcadc->SetNRows(numAdc); 
      
-    gMessMgr->Info() << "FTPC Sequencer finishing: Setting NRows ndx " << numNdx << " sqndx " << numSqndx << " adc " << numAdc << endm; 
+    LOG_INFO << "FTPC Sequencer finishing: Setting NRows ndx " << numNdx << " sqndx " << numSqndx << " adc " << numAdc << endm; 
 
 }
 
@@ -71,11 +71,11 @@ int StFtpcSequencer::writeArray(const int *cArray,
 
   // make sure the array that is supposed to be written out exists
   if (!cArray) {
-    gMessMgr->Warning() << "FtpcSequencer: ADC array does not exist, bailing out!" << endm;
+    LOG_WARN << "FtpcSequencer: ADC array does not exist, bailing out!" << endm;
     return kStOk;
   }
   if ((!ftpcndx)||(!ftpcsqndx)||(!ftpcadc)) {
-    gMessMgr->Warning() << "StFtpcSequencer: Output sequences missing, bailing out!" << endm;
+    LOG_WARN << "StFtpcSequencer: Output sequences missing, bailing out!" << endm;
     return kStOk;
   }
 
@@ -105,7 +105,7 @@ int StFtpcSequencer::writeArray(const int *cArray,
   adcIndex=0;
   seqFlag=0;
 
-  gMessMgr->Info() << "FtpcSequencer  using threshold high:" << thHigh << " and threshold low "<< thLow<<endm;
+  LOG_INFO << "FtpcSequencer  using threshold high:" << thHigh << " and threshold low "<< thLow<<endm;
 	  
 
   // Fill sequences
@@ -159,7 +159,7 @@ int StFtpcSequencer::writeArray(const int *cArray,
 	    // beginning of second FTPC?
 	    if(row>=10 && ndx[1].index==0) {
 	      if(maxNdx<2) {
-		gMessMgr->Warning() << "ndx overflow!" << endm;
+		LOG_WARN << "ndx overflow!" << endm;
 	      }
 	      else {
 		// set index for second FTPC
@@ -176,7 +176,7 @@ int StFtpcSequencer::writeArray(const int *cArray,
 		if(seqIndex >= maxSqndx) {
 		  // reset overflow
 		  seqIndex=maxSqndx -1;
- 		  gMessMgr->Warning() << "sqndx overflow!" << endm;
+ 		  LOG_WARN << "sqndx overflow!" << endm;
 		}
 	
 		pixelPerSeq=0;
@@ -198,7 +198,7 @@ int StFtpcSequencer::writeArray(const int *cArray,
 		  if(seqIndex >= maxSqndx) {
 		    // reset overflow
 		    seqIndex=maxSqndx;
-		    gMessMgr->Warning() << "sqndx overflow!" << endm;
+		    LOG_WARN << "sqndx overflow!" << endm;
 		  }
 		}
 		lastPad=pad;
@@ -210,7 +210,7 @@ int StFtpcSequencer::writeArray(const int *cArray,
 	    if(adcIndex >= maxAdc) {
 	      // reset overflow
 	      adcIndex=maxAdc -1;
-	      gMessMgr->Warning() << "adc overflow!" << endm;
+	      LOG_WARN << "adc overflow!" << endm;
 	    }
 	    pixelPerSeq++;
 	    seqFlag=1;
@@ -235,10 +235,10 @@ int StFtpcSequencer::writeArray(const int *cArray,
     numAdc = adcIndex;
   }
   else {
-    gMessMgr->Warning() << "Error! No sequences filled!" << endm;
+    LOG_WARN << "Error! No sequences filled!" << endm;
   }
 
-  gMessMgr->Info() << "FtpcSequencer done, getting table sizes:  NRows ndx " << numNdx << " sqndx " << numSqndx << " adc " << numAdc << endm; 
+  LOG_INFO << "FtpcSequencer done, getting table sizes:  NRows ndx " << numNdx << " sqndx " << numSqndx << " adc " << numAdc << endm; 
 
 
   return kStOk;
@@ -246,9 +246,12 @@ int StFtpcSequencer::writeArray(const int *cArray,
 
  /***************************************************************************
  *
- * $Id: StFtpcSequencer.cc,v 1.3 2003/09/22 13:13:39 fsimon Exp $
+ * $Id: StFtpcSequencer.cc,v 1.4 2007/01/15 15:02:12 jcs Exp $
  *
  * $Log: StFtpcSequencer.cc,v $
+ * Revision 1.4  2007/01/15 15:02:12  jcs
+ * replace printf, cout and gMesMgr with Logger
+ *
  * Revision 1.3  2003/09/22 13:13:39  fsimon
  * Fixed code to eliminate compiler warning
  *

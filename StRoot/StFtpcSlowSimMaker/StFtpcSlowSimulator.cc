@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.17 2003/10/21 19:14:46 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.18 2007/01/15 15:02:20 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.18  2007/01/15 15:02:20  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.17  2003/10/21 19:14:46  jcs
 // use geantPlane function in debug printout
 //
@@ -96,7 +99,7 @@ int StFtpcSlowSimulator::simulate()
 {
     int i;
 
-    if(DEBUG) cout << "Begin Initialization..." << endl;
+    if(DEBUG) {LOG_DEBUG << "Begin Initialization..." << endm;}
 
     // setup fields
     StFtpcSlowSimField *field = new StFtpcSlowSimField(mParam, mDb); // define the field
@@ -115,7 +118,7 @@ int StFtpcSlowSimulator::simulate()
     /////////////////////////////////////
     // big loop over all the hit points
     /////////////////////////////////////
-    if (DEBUG) cout << "Looping over points..." << endl;
+    if (DEBUG) {LOG_DEBUG << "Looping over points..." << endm;}
 
     // tmp variables
     float electron;      
@@ -142,11 +145,11 @@ int StFtpcSlowSimulator::simulate()
     //create smearing function
     //TF1* noise = new TF1("noise","gaus",-2,2);
     //noise->SetParameters(1,0,0.035);
-    //cout << "Using gaussian smearing of GEANT hits  with a sigma of 350 um\n";
+    //LOG_INFO << "Using gaussian smearing of GEANT hits  with a sigma of 350 um" << endm;
 
     //create smearing function
     //TF1* kickout = new TF1("kickout","1",0,1);
-    //cout << "Using Probability Function to throw out a certain percentage of all hits\n";
+    //LOG_INFO << "Using Probability Function to throw out a certain percentage of all hits" << endm;
 
 
     for ( i=0; i<number_hits; ++i ) 
@@ -222,8 +225,9 @@ int StFtpcSlowSimulator::simulate()
 	  ++de_zero;
 	}
 
-	if(DEBUG)
-	  cout << "Now processing hit " << i << " with xx;yy;zz;px;py;pz :"<< xx << "; " <<yy <<"; "<< zz <<"; "<< px <<"; "<< py <<"; "<< pz << endl;
+	if(DEBUG) {
+	  LOG_DEBUG << "Now processing hit " << i << " with xx;yy;zz;px;py;pz :"<< xx << "; " <<yy <<"; "<< zz <<"; "<< px <<"; "<< py <<"; "<< pz << endm;
+        }
 
  
 	// angle between r and p vectors in xy plane:
@@ -234,16 +238,17 @@ int StFtpcSlowSimulator::simulate()
 	// momentum components with respect to r in xy plane:
 	float p_perp = pp * sin(alpha);
 	float p_rad = pp * cos(alpha);
-	if(DEBUG)
-	  cout << "alpha=" << alpha 
-               << " pperp=" << p_perp 
-               << " prad=" << p_rad 
-               << " xx = "<<xx
-               << " yy = "<<yy
-               << " zz = "<<zz
-               << " px = "<<px
-               << " py = "<<py
-               << " pz=" << pz << endl;
+	if(DEBUG) {
+	  LOG_DEBUG << "alpha=" << alpha 
+                    << " pperp=" << p_perp 
+                    << " prad=" << p_rad 
+                    << " xx = "<<xx
+                    << " yy = "<<yy
+                    << " zz = "<<zz
+                    << " px = "<<px
+                    << " py = "<<py
+                    << " pz=" << pz << endl;
+	}
 
 	//  dip angle with respect to plane defined by z- and phi- axes	
 	dip_ang   = atan(p_perp / pz);
@@ -279,8 +284,9 @@ int StFtpcSlowSimulator::simulate()
                 phi = 1.5*pi ;
         }
 	
-	if(DEBUG)
-	  cout << i << " " << xx << " " << yy << " " << zz << " " << rad << " " << phi << endl;
+	if(DEBUG) {
+	  LOG_DEBUG << i << " " << xx << " " << yy << " " << zz << " " << rad << " " << phi << endm;
+        }
 	
         // define cluster for each accepted hit point
         ++counter;
@@ -292,30 +298,30 @@ int StFtpcSlowSimulator::simulate()
 
 
         if (DEBUG) {
-            cout << " ##### Point i= " << i
-                 << " counter=" << counter
-                 << " nel=" << electron
-                 << " rad=" << rad
-                 << " phi=" << phi
-                 << endl;
-            cout << " #####            "
-                 << " rad_off=" << rad_off
-                 << " pad_off=" << pad_off
-                 << endl;
-           cout << " x = " << xx
-                << " y = " << yy
-                << " z = " << zz << endl;
-           cout << " px = " << px
-                << " py = " << py
-                << " pz = " << pz
-                << " pp = " << pp
-                << " de = " << de << endl;
-           cout << " dip_angle = " << dip_ang
-                << " cross_angle = " << cross_ang
-                << " row_id = " << mGeant->geantPlane(mGeant->geantVolume(i))-1
-                << " track_id = " << mGeant->track(i)+1
-                << " ge_pid = " << mGeant->trackPid(i)
-                << endl;
+            LOG_DEBUG << " ##### Point i= " << i
+                      << " counter=" << counter
+                      << " nel=" << electron
+                      << " rad=" << rad
+                      << " phi=" << phi
+                      << endm;
+            LOG_DEBUG << " #####            "
+                      << " rad_off=" << rad_off
+                      << " pad_off=" << pad_off
+                      << endm;
+            LOG_DEBUG << " x = " << xx
+                      << " y = " << yy
+                      << " z = " << zz << endm;
+            LOG_DEBUG << " px = " << px
+                      << " py = " << py
+                      << " pz = " << pz
+                      << " pp = " << pp
+                      << " de = " << de << endm;
+            LOG_DEBUG << " dip_angle = " << dip_ang
+                      << " cross_angle = " << cross_ang
+                      << " row_id = " << mGeant->geantPlane(mGeant->geantVolume(i))-1
+                      << " track_id = " << mGeant->track(i)+1
+                      << " ge_pid = " << mGeant->trackPid(i)
+                      << endm;
 	   }
 	StFtpcSlowSimCluster *clus = 
 	  new StFtpcSlowSimCluster(mParam, mDb, field, electron, rad_off, pad_off, 
@@ -336,12 +342,12 @@ int StFtpcSlowSimulator::simulate()
     } // end of loop over hit points
     
     if (DEBUG) {
-       cout << "Total number of hit points tested = " << number_hits << endl;
-       cout << "Number of hit points accepted = " << counter << endl;
-       cout << "Number of hit points rejected (radius test) = " << rad_rej << endl;
-       cout << "Number of hit points rejected (de=0 test) = " << de_zero << endl;
-       cout << "Number of hit points with cross_ang > cross_ang_max  = " << n_cross_ang_max << endl;
-       cout << "Writing out ADC array in raw data structure." << endl;
+       LOG_DEBUG << "Total number of hit points tested = " << number_hits << endm;
+       LOG_DEBUG << "Number of hit points accepted = " << counter << endm;
+       LOG_DEBUG << "Number of hit points rejected (radius test) = " << rad_rej << endm;
+       LOG_DEBUG << "Number of hit points rejected (de=0 test) = " << de_zero << endm;
+       LOG_DEBUG << "Number of hit points with cross_ang > cross_ang_max  = " << n_cross_ang_max << endm;
+       LOG_DEBUG << "Writing out ADC array in raw data structure." << endm;
     }
 
    rdout->OutputADC();

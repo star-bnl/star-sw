@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimLibs.cc,v 1.2 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcSlowSimLibs.cc,v 1.3 2007/01/15 15:02:20 jcs Exp $
 // $Log: StFtpcSlowSimLibs.cc,v $
+// Revision 1.3  2007/01/15 15:02:20  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.2  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -15,6 +18,7 @@
 
 #include <Stiostream.h>
 #include <math.h>
+#include "StMessMgr.h"
 
 
 int Locate(const int npt, const float* x, const float xx)
@@ -30,7 +34,7 @@ int Locate(const int npt, const float* x, const float xx)
 
     if (    rising  && (xx > x[jup] || xx < x[jlow])  ||
           (!rising) && (xx < x[jup] || xx > x[jlow]) ) {
-         cout << "Locate(): xx is out of range!" << endl;
+         LOG_WARN << "Locate(): xx is out of range!" << endm;
          return 0;
     }
 

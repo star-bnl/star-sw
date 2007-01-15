@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.18 2005/10/11 12:41:00 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.19 2007/01/15 15:02:20 jcs Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.19  2007/01/15 15:02:20  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.18  2005/10/11 12:41:00  jcs
 // If isec=6, set isec=0 to avoid segmentation violations
 //
@@ -167,8 +170,9 @@ void  StFtpcSlowSimReadout::PadResponse(const StFtpcSlowSimCluster *cl)
     float sig_phi = cl->GetSigPhi();
     pad_off = cl->GetPadOff();
       
-    if(DEBUG)
-      cout << "StFtpcSlowSimReadout::PadResponse: pad_off=" << pad_off <<  "sig_phi=" << sig_phi << endl;
+    if(DEBUG) {
+      LOG_DEBUG << "StFtpcSlowSimReadout::PadResponse: pad_off=" << pad_off <<  "sig_phi=" << sig_phi << endm;
+    }
     sigma_pad =  ::sqrt(sig_phi*sig_phi + prf*prf ); 
 }
 
@@ -183,16 +187,16 @@ void StFtpcSlowSimReadout::ShaperResponse(const StFtpcSlowSimCluster *cl)
   float sig_time = sig_rad * mInverseFinalVelocity;
   time_off = 10000*rad_off * mInverseFinalVelocity;
   
-  //cout << "ShaperResponse...\n";
-  if(DEBUG)
-    cout << "time_off=" << time_off <<  "sig_rad=" << sig_rad << endl;
+  if(DEBUG) {
+    LOG_DEBUG << "ShaperResponse: time_off=" << time_off <<  "sig_rad=" << sig_rad << endm;
+  }
   sigma_tim = ::sqrt( sig_time*sig_time + srf*srf) ;
 }
 
 void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int irow)
 {
   float n_sigmas_to_calc  = 5.0;        
-  // cout <<" StFtpcSlowSimReadout::Digitize...\n";
+  // LOG_INFO <<"StFtpcSlowSimReadout::Digitize..." << endm;
   // get the readout position in radial direction
   float time_slice = mDb->microsecondsPerTimebin()*1000;// into nsec
   float time       = cl->GetDriftTime()*1000.;       // into nsec
@@ -204,11 +208,11 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
   int isec, jsec, nsecs;
   int     ipad       = WhichPad(phi,isec);
 
-  //gMessMgr->Info()<< " FTPC SlowSimulator using time offset tables" << endm;
+  //LOG_INFO << "FTPC SlowSimulator using time offset tables" << endm;
 
   if (DEBUG) {  
-    cout << "Digitize using parameters: mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<" mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endl;
-    cout << " phiMin = "<< phiMin << " phiMax = " << phiMax <<endl;
+    LOG_DEBUG << "Digitize using parameters: mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<" mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endm;
+    LOG_DEBUG << " phiMin = "<< phiMin << " phiMax = " << phiMax <<endm;
   }
 
   
@@ -232,8 +236,9 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
       int n_sub_hits = (int) (2*hypo);
       int current_sub_hit;
       
-      if(DEBUG)
-	cout << "hypo=" << hypo << " mid_phi=" << mid_phi << " mid_time=" << mid_time << " phi_off=" << pad_off/mOuterRadius << " time_off=" << time_off << endl;
+      if(DEBUG) {
+	LOG_DEBUG << "hypo=" << hypo << " mid_phi=" << mid_phi << " mid_time=" << mid_time << " phi_off=" << pad_off/mOuterRadius << " time_off=" << time_off << endm;
+      }
       
       for(current_sub_hit=-n_sub_hits; current_sub_hit <= n_sub_hits; current_sub_hit++)
 	{
@@ -246,8 +251,9 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    }
 	  
 	  ipad       = WhichPad(phi,isec);
-	  if(DEBUG)
-	    cout << current_sub_hit << "th subhit at time " << time << " phi " << phi << " => padpos " << mOuterRadius*phi <<" ipad = "<<ipad <<endl;
+	  if(DEBUG) {
+	    LOG_DEBUG << current_sub_hit << "th subhit at time " << time << " phi " << phi << " => padpos " << mOuterRadius*phi <<" ipad = "<<ipad <<endm;
+          }
 	  int isec_min;
 	  int isec_max;
 	  int pad_max_save=0;
@@ -292,13 +298,17 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    // and calculate the time distribution 
 	    // include time offset database: subtract time offset!
 	    // move time center of cluster
-	    //cout <<" Shifting time by ";
-	    //cout << mDb->timeOffset(GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1, irow) << " from "<< time << " with parameters " 
-	    // << GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1<< " , "<< irow;
+            if (DEBUG) {
+	       LOG_DEBUG <<" Shifting time by " << endm;
+	       LOG_DEBUG << mDb->timeOffset(GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1, irow) << " from "<< time << " with parameters " 
+	     << GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1<< " , "<< irow << endm;
+            }
 	    
 	    time = time - mDb->timeOffset(GetHardSec(isec, irow)*mDb->numberOfPads()+GetHardPad(isec,ipad,irow)+1, irow)/(0.001/mDb->microsecondsPerTimebin());
 	    
-	    //cout << " to " << time << " for Sec "<< isec<<" ("<<GetHardSec(isec, irow)<<") pad "<< (ipad) <<" ("<<GetHardPad(isec,ipad,irow)<<") row " << irow <<endl;
+            if (DEBUG) {
+	       LOG_DEBUG << " to " << time << " for Sec "<< isec<<" ("<<GetHardSec(isec, irow)<<") pad "<< (ipad) <<" ("<<GetHardPad(isec,ipad,irow)<<") row " << irow <<endm;
+            }
 
 	    float width_tim = n_sigmas_to_calc*sigma_tim;
 	    int tim_min = WhichSlice(time - width_tim);
@@ -320,14 +330,16 @@ void StFtpcSlowSimReadout::Digitize(const StFtpcSlowSimCluster *cl, const int ir
 	    }  // end for loop
 	    
 	    // Now fill the mADCArray[irow,isec,pad,tim] array
-	    if(DEBUG)
-	      cout << current_sub_hit << "th subhit from time " << tim_min << " to " << tim_min+ntim << " pad " << pad_min << " to " << pad_min+npad << endl;
+	    if(DEBUG) {
+	      LOG_DEBUG << current_sub_hit << "th subhit from time " << tim_min << " to " << tim_min+ntim << " pad " << pad_min << " to " << pad_min+npad << endm;
+            }
 	    for (i=0; i<npad; ++i) 
 	      for (j=0; j<ntim; ++j) {
 		int k = irow*mDb->numberOfSectors()*mDb->numberOfPads()*mDb->numberOfTimebins()+isec*mDb->numberOfPads()*mDb->numberOfTimebins()+(i+pad_min)*mDb->numberOfTimebins() + (j+tim_min) ;
 		mADCArray[k] += (float)(mFinalElectrons * pad[i] * sca[j])/(2*n_sub_hits+1);
-		if(DEBUG)	
-		  cout << "Writing " <<  mADCArray[k] <<" to pad "<< (i+pad_min)<<endl;
+		if(DEBUG) {
+		  LOG_DEBUG << "Writing " <<  mADCArray[k] <<" to pad "<< (i+pad_min)<<endm;
+                }
 
 	      }
 	    
@@ -353,8 +365,8 @@ void StFtpcSlowSimReadout::OutputADC()
   // Gaussian distribution for Noise, Sigma 1.5 ADC channels
   TF1* noise = new TF1("noise","gaus",-5,5);
   noise->SetParameters(1,0,1.5);
-  gMessMgr->Info()<< " FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
-  gMessMgr->Info()<< " FTPC SlowSimulator using gain tables and amplitude offset" << endm;
+  LOG_INFO << "FTPC SlowSimulator using random noise with a sigma of 1.5" << endm;
+  LOG_INFO << "FTPC SlowSimulator using gain tables and amplitude offset" << endm;
 
 
   for (int row=0; row<mDb->numberOfPadrows(); row++) { 
@@ -370,7 +382,9 @@ void StFtpcSlowSimReadout::OutputADC()
 	    // include gainfactors 
 	    // remember that the Db access counts from 1 to 960 and not from 0 to 959 for the sector&pad index!
 	    mADCArray[i] = mADCArray[i] - mDb->amplitudeOffset(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row);
-	    //cout << "Using AmpSlope :" << mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row) <<endl;
+            if (DEBUG) {
+	      LOG_DEBUG << "Using AmpSlope :" << mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row) <<endm;
+            }
 	    if (mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row)!= 0)
 	      mADCArray[i] = mADCArray[i] / (mDb->amplitudeSlope(GetHardSec(sec, row)*mDb->numberOfPads()+GetHardPad(sec,pad,row)+1, row));
 	    else
@@ -398,11 +412,12 @@ void StFtpcSlowSimReadout::OutputADC()
     }
   }
  if (DEBUG) {
-  cout << "Occupancies:" << endl;
+  LOG_DEBUG << "Occupancies:" << endm;
   for(int lastloop=0; lastloop<11;lastloop++)
     {
-      if(num_pixels[lastloop]>0)
-      cout << "bin " << lastloop << " has occupancy" << num_pixels_occupied[lastloop]/(float) num_pixels[lastloop] << endl;
+      if(num_pixels[lastloop]>0) {
+        LOG_DEBUG << "bin " << lastloop << " has occupancy" << num_pixels_occupied[lastloop]/(float) num_pixels[lastloop] << endm;
+      }
     }
   }
  
@@ -486,21 +501,21 @@ int StFtpcSlowSimReadout::GetHardSec(const int daqsec, const int irow)
 void StFtpcSlowSimReadout::Print() const 
 {
     
-  cout << "StFtpcSlowSimReadout::Print \n";
-  cout << " Number of pad rows = " 
-       << mDb->numberOfPadrows() << endl;
-  cout << " Number of pad per row = " 
-       << mDb->numberOfPads() << endl;
-  cout << " Pad length = " 
-       << pad_length 
-       << " pitch = " 
-       << pad_pitch << " [cm]" << endl;
-  cout << " Shaping time = " 
-       << shaper_time << " [ns]" << endl;
-  cout << " Time slice = " 
-       << mDb->microsecondsPerTimebin()*1000 << " [ns]" << endl;
-  cout << " Pad response sigma = " 
-       << sigma_prf << " [um]" << endl;
+  LOG_INFO << "StFtpcSlowSimReadout::Print ";
+  LOG_INFO << " Number of pad rows = " 
+           << mDb->numberOfPadrows() << endm;
+  LOG_INFO << " Number of pad per row = " 
+           << mDb->numberOfPads() << endm;
+  LOG_INFO << " Pad length = " 
+           << pad_length 
+           << " pitch = " 
+           << pad_pitch << " [cm]" << endm;
+  LOG_INFO << " Shaping time = " 
+           << shaper_time << " [ns]" << endm;
+  LOG_INFO << " Time slice = " 
+           << mDb->microsecondsPerTimebin()*1000 << " [ns]" << endm;
+  LOG_INFO << " Pad response sigma = " 
+           << sigma_prf << " [um]" << endm;
                           
 }
 
@@ -531,7 +546,7 @@ void StFtpcSlowSimReadout::polya(const int ggnch, const float gglow,
 
     for (i=0; i<ggnch; ++i) {
         pcum[i] /= pcum[ggnch-1];             // renormalize it
-        //cout << "i=" << i << " pcum=" << pcum[i] << endl;
+        //LOG_INFO << "i=" << i << " pcum=" << pcum[i] << endm;
     }
 }
 
@@ -550,7 +565,7 @@ int StFtpcSlowSimReadout::sample_polya(const float gain)
       }
 
     int     ich = Locate(gnch, pcum, ran);
-    //cout << "ich = " << ich << endl;
+    //LOG_INFO << "ich = " << ich << endm;
     return  (int) ( gain * ( glow + ich * gdelta ) );
 
 }
@@ -600,9 +615,7 @@ float StFtpcSlowSimReadout::ranmar()
   cd = (float) 7654321./(float)16777216.;
   cm = (float)16777213./(float)16777216.;
   
-  /*
-    printf(" cd = %20.17f; cm = %20.17f \n", cd, cm);
-  */
+  // LOG_DEBUG << Form("cd = %20.17f; cm = %20.17f", cd, cm) << endm;
   
   uni = uc.u[i-1] - uc.u[j-1];
   if (uni < (float)0.0) uni += (float)1.0;
@@ -645,14 +658,13 @@ void StFtpcSlowSimReadout::rmarin(int ij, int kl)
   j = (ij) % 177 + 2;
   k = (kl/169) % 178 + 1;
   l = (kl) % 169;
-  // printf(" Ranmar initialized: %d %d %d %d %d %d \n",ij,kl,i,j,k,l);
   
-  cout << " Ranmar initialized:" << ij << " " 
+  LOG_INFO << "Ranmar initialized:" << ij << " " 
        << kl << " "
-                              << i << " "
+       << i << " "
        << j << " "
        << k << " "
-       << l << endl;
+       << l << endm;
   
   for(ii=0; ii<97; ii++) {
     
@@ -673,12 +685,12 @@ void StFtpcSlowSimReadout::rmarin(int ij, int kl)
     }
     
     uc.u[ii] = s;
-    // printf(" ii = %d s= %f \n", ii,s);
+    // LOG_DEBUG << "ii = " << ii << " s= " << s << endm;
   }
   
   uc.c = 362436./16777216.;
   
-  // printf(" c= %f \n", uc.c);
+  // LOG_DEBUG << "c= " << uc.c << endm;
 
 }
   

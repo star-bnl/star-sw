@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.9 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.10 2007/01/15 15:02:19 jcs Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.10  2007/01/15 15:02:19  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.9  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -43,6 +46,8 @@
 #include "StFtpcSlowSimField.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
+#include "StMessMgr.h"
+#include "StMessMgr.h"i
 
 StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
                                            StFtpcDbReader *dbReader,
@@ -84,7 +89,7 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
 {
 
 
-  //cout << "DriftDiffuse: Padrow: "<<original_padrow<<" Drift r = "<<currentRadius<<" ; phi = "<<currentPhi;
+  //LOG_INFO << "DriftDiffuse: Padrow: "<<original_padrow<<" Drift r = "<<currentRadius<<" ; phi = "<<currentPhi << endm;
   int i=0;
   while(currentRadius < outerRadius )
     {
@@ -125,17 +130,17 @@ void StFtpcSlowSimCluster::DriftDiffuse(StFtpcSlowSimField *field)
       // next step
       currentRadius += deltaRadius;
     }
-  //cout <<" ====> r = "<<currentRadius<<" ; phi = "<<currentPhi<<endl;
+  //LOG_INFO <<" ====> r = "<<currentRadius<<" ; phi = "<<currentPhi<<endm;
 
 }
 
 void StFtpcSlowSimCluster::Print() const
 {
-    cout << " Cluster parameter : " << endl;
-    cout << "number of electrons = " << electron << endl;
-    cout << "sigma_rad [um]      = " << ::sqrt(sigma_rad_squared) << endl;
-    cout << "sigma_phi [um]      = " << ::sqrt(sigma_phi_squared) << endl;
-    cout << "currentPhi [deg]   = " << currentPhi << endl;
-    cout << "currentRadius [cm]    = " << currentRadius << endl;
-    cout << "Td [usec]   = " << drift_time << endl;
+    LOG_INFO << " Cluster parameter : " << endm;
+    LOG_INFO << "number of electrons = " << electron << endm;
+    LOG_INFO << "sigma_rad [um]      = " << ::sqrt(sigma_rad_squared) << endm;
+    LOG_INFO << "sigma_phi [um]      = " << ::sqrt(sigma_phi_squared) << endm;
+    LOG_INFO << "currentPhi [deg]   = " << currentPhi << endm;
+    LOG_INFO << "currentRadius [cm]    = " << currentRadius << endm;
+    LOG_INFO << "Td [usec]   = " << drift_time << endm;
 }

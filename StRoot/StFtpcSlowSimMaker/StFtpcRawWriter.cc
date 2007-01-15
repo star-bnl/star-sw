@@ -1,5 +1,8 @@
-// $Id: StFtpcRawWriter.cc,v 1.8 2003/09/22 13:14:18 fsimon Exp $
+// $Id: StFtpcRawWriter.cc,v 1.9 2007/01/15 15:02:19 jcs Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.9  2007/01/15 15:02:19  jcs
+// replace printf, cout and gMesMgr with Logger
+//
 // Revision 1.8  2003/09/22 13:14:18  fsimon
 // Fixed code to eliminate compiler warning
 //
@@ -49,7 +52,7 @@ StFtpcRawWriter::StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
   adc=ftpcadc->GetTable();
   numAdc=ftpcadc->GetNRows();
   maxAdc=ftpcadc->GetTableSize();
-  gMessMgr->Info() << "FTPC RawWriter created with Asic2EastNotInverted = " << mAsic2EastNotInverted <<endm;
+  LOG_INFO << "FTPC RawWriter created with Asic2EastNotInverted = " << mAsic2EastNotInverted <<endm;
 }
 
 StFtpcRawWriter::~StFtpcRawWriter()
@@ -58,7 +61,7 @@ StFtpcRawWriter::~StFtpcRawWriter()
     ftpcsqndx->SetNRows(numSqndx);
     ftpcadc->SetNRows(numAdc); 
      
-    // cout <<"Printing... \n";
+    // LOG_INFO <<"Printing..."<< endm;
   
     //ftpcsqndx->Print(0, ftpcsqndx->GetNRows());
     //ftpcadc->Print(0, ftpcadc->GetNRows());
@@ -86,7 +89,7 @@ int StFtpcRawWriter::writeArray(float *array,
 			    *numberTimebins];      
   
 
-  // cout << " Creating copy array "<<numberPadrows<<"; "<<numberSectors<<"; "<<numberPads<<"; "<<numberTimebins<<endl;
+  // LOG_INFO << " Creating copy array "<<numberPadrows<<"; "<<numberSectors<<"; "<<numberPads<<"; "<<numberTimebins<<endm;
 
 
   // Correct different pad & sector numbering scheme for east & west FTPC
@@ -117,7 +120,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	      +numberTimebins*numberPads*(numberSectors-sec-1)
 	      +numberTimebins*numberPads*numberSectors*row;
 	  cArray[newi]=array[i];
-	  //if (array[i] >0.1) cout << "Copying value "<< array[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endl; 
+	  //if (array[i] >0.1) LOG_INFO << "Copying value "<< array[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endm; 
 	}
       }
     }
@@ -138,7 +141,7 @@ int StFtpcRawWriter::writeArray(float *array,
   adc_index=0;
   seq_flag=0;
 
-  //cout << "RawWriter using threshold high:" << th_high << " and threshold low "<< th_low<<endl;
+  //LOG_INFO << "RawWriter using threshold high:" << th_high << " and threshold low "<< th_low<<endl;
 	  
 
   // Fill sequences
@@ -155,7 +158,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	    +numberTimebins*pad
 	    +numberTimebins*numberPads*sec
 	    +numberTimebins*numberPads*numberSectors*row;
-	  //if (cArray[i] >1) cout << "Table value "<< cArray[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endl; 
+	  //if (cArray[i] >1) LOG_INFO << "Table value "<< cArray[i] <<" for pad "<<pad << " Sec: " << sec <<" Row: "<< row <<endm; 
 
 	  if((int) cArray[i] < th_low) {
 	    valid_seq = 0; 
@@ -165,7 +168,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	  
 	  if((int) cArray[i] >= th_low) {
 	    
-	    //cout <<"Over threshold, seq_index = "<<seq_index <<endl;
+	    //LOG_INFO <<"Over threshold, seq_index = "<<seq_index <<endm;
 	    
 	    // Check if sequence is valid, apply ASIC parameters
 	    if (!valid_seq){
@@ -186,7 +189,7 @@ int StFtpcRawWriter::writeArray(float *array,
 		  t = numberTimebins;
 		}
 	      }
-	      //if (valid_seq) cout << "Sequence "<<seq_index<< " validated! Pad " << pad << " nAboveLow "<<nAboveLow <<endl;
+	      //if (valid_seq) LOG_INFO << "Sequence "<<seq_index<< " validated! Pad " << pad << " nAboveLow "<<nAboveLow <<endm;
 	    }
 
 
@@ -195,7 +198,7 @@ int StFtpcRawWriter::writeArray(float *array,
 	    // beginning of second FTPC?
 	    if(row>=10 && ndx[1].index==0) {
 	      if(maxNdx<2) {
-		cout << "ndx overflow!" << endl;
+		LOG_WARN << "ndx overflow!" << endm;
 	      }
 	      else {
 		// set index for second FTPC
@@ -209,12 +212,12 @@ int StFtpcRawWriter::writeArray(float *array,
 	      if(pixel_per_seq > 0) {
 		// set index for previous sequence
 		sqndx[seq_index++].index = (pixel_per_seq-1) + (start_pixel<<6);
-		//cout << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endl;
-		//cout << "pixel_per_seq=" << pixel_per_seq << " start_pixel=" << start_pixel << endl;
+		//LOG_INFO << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
+		//LOG_INFO << "pixel_per_seq=" << pixel_per_seq << " start_pixel=" << start_pixel << endm;
 		if(seq_index >= maxSqndx) {
 		  // reset overflow
 		  seq_index=maxSqndx -1;
- 		  cout << "sqndx overflow!" << endl;
+ 		  LOG_WARN << "sqndx overflow!" << endm;
 		}
 	
 		pixel_per_seq=0;
@@ -229,16 +232,16 @@ int StFtpcRawWriter::writeArray(float *array,
 		// make previous sequence last sequence on pad
                 if(seq_index>0) {
 		  sqndx[seq_index-1].index += 32;
-		  //cout << "changed: sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endl;
+		  //LOG_INFO << "changed: sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
                 }
 		if(pad != last_pad+1) {
 		  // set index for new pad
 		  sqndx[seq_index++].index = 32768 + pad + 256*(6*row + sec);
-		  //cout << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endl;
+		  //LOG_INFO << "sqndx[" << seq_index-1 << "].index=" << sqndx[seq_index-1].index << endm;
 		  if(seq_index >= maxSqndx) {
 		    // reset overflow
 		    seq_index=maxSqndx;
-		    cout << "sqndx overflow!" << endl;
+		    LOG_WARN << "sqndx overflow!" << endm;
 		  }
 		}
 		last_pad=pad;
@@ -247,11 +250,11 @@ int StFtpcRawWriter::writeArray(float *array,
 	   
 	    
 	    adc[adc_index++].data=(char) cArray[i];
-	    //cout << "adc[" << adc_index-1 << "].data=" << (int) adc[adc_index-1].data << " at " <<row << " " << sec << " " << pad << " " << bin << endl;
+	    //LOG_INFO << "adc[" << adc_index-1 << "].data=" << (int) adc[adc_index-1].data << " at " <<row << " " << sec << " " << pad << " " << bin << endm;
 	    if(adc_index >= maxAdc) {
 	      // reset overflow
 	      adc_index=maxAdc -1;
-	      cout << "adc overflow!" << endl;
+	      LOG_WARN << "adc overflow!" << endm;
 	    }
 	    pixel_per_seq++;
 	    seq_flag=1;
@@ -280,7 +283,7 @@ int StFtpcRawWriter::writeArray(float *array,
     numAdc = adc_index;
   }
   else {
-    cout << "Error! No sequences filled!" << endl;
+    LOG_ERROR << "Error! No sequences filled!" << endm;
   }
 
   return 1;
