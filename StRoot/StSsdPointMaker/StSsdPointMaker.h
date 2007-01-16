@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.17 2006/10/16 16:27:49 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.18 2007/01/16 18:01:52 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.18  2007/01/16 18:01:52  bouchet
+// Replace printf,cout,gMessMgr with LOG statements
+//
 // Revision 1.17  2006/10/16 16:27:49  bouchet
 // Unify classes ; Methods for all classes (StSsdStrip, StSsdCluster, StSsdPoint) are now in StSsdUtil
 //
@@ -130,11 +133,11 @@ class StSsdPointMaker : public StMaker {
   St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
   Float_t ClusterNtuple[10];
-  Float_t hitNtuple[9];    
-  TFile *nFile;
-  TNtuple* nHitNtuple;
+  Float_t hitNtuple[9]; 
   TFile *mFile;
   TNtuple* mHitNtuple;
+  TFile *nFile;
+  TNtuple* nHitNtuple;
 
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
@@ -193,11 +196,11 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_18;    //! (1p-1n) packages control matching
   TH2S  *matchisto_19;    //! (1p-1n) packages control matching  
   TH2S  *matchisto_20;    //! (1p-1n) packages control matching.
-  Int_t flag ;
+  Int_t flag ;            
   
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.17 2006/10/16 16:27:49 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.18 2007/01/16 18:01:52 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
