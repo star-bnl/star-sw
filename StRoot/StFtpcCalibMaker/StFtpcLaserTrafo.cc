@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserTrafo.cc,v 1.3 2006/04/12 08:46:01 jcs Exp $
+// $Id: StFtpcLaserTrafo.cc,v 1.4 2007/01/16 15:04:17 jcs Exp $
 //
 // $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.4  2007/01/16 15:04:17  jcs
+// reolace "return FALSE" with "return false" as temporary fix so that dev compiles
+//
 // Revision 1.3  2006/04/12 08:46:01  jcs
 // initialize p0,p1,p2
 //
@@ -200,7 +203,7 @@ int StFtpcLaserTrafo::calcpadtrans()
       if(j<1 || j>mDb->numberOfMagboltzBins())
 	{
 	  gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
-	  return FALSE;
+	  return false;
 	}
       v_buf=j-1;
       v_now=((mDb->magboltzVDrift(v_buf, padrow)
@@ -267,7 +270,7 @@ int StFtpcLaserTrafo::calcpadtrans()
 	  if(j<1 || j>mDb->numberOfMagboltzBins())
 	    {
 	      gMessMgr->Message("", "E", "OST") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
-	      return FALSE;
+	      return false;
 	    }
 	  
 	  v_buf=j-1;
