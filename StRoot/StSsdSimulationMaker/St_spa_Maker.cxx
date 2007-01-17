@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_spa_maker.cxx
  **************************************************************************
- * $Id: St_spa_Maker.cxx,v 1.9 2006/10/16 16:36:08 bouchet Exp $
+ * $Id: St_spa_Maker.cxx,v 1.10 2007/01/17 18:14:37 bouchet Exp $
  *
  * $Log: St_spa_Maker.cxx,v $
+ * Revision 1.10  2007/01/17 18:14:37  bouchet
+ * replace printf, cout statements with LOG statements
+ *
  * Revision 1.9  2006/10/16 16:36:08  bouchet
  * Unify classes : Remove StSlsStrip, StSlsPoint, StSpaStrip, StSpaNoise by the same classes used in StSsdPointMaker (StSsdStrip,StSsdPoint) ; The methods for these classes are in StSsdUtil
  *
@@ -75,10 +78,10 @@ Int_t St_spa_Maker::Init(){
   m_condition = (St_sdm_condition_db  *)local("sdm_condition_db");
   
   if (!m_cond_par) {
-    gMessMgr->Error() << "No  access to condition parameters" << endm;
+    LOG_ERROR << "No  access to condition parameters" << endm;
   }   
   if (!m_cal_par) {
-    gMessMgr->Error() << "No  access to calibration parameters" << endm;
+    LOG_ERROR << "No  access to calibration parameters" << endm;
   }   
   return StMaker::Init();
 }
@@ -86,7 +89,7 @@ Int_t St_spa_Maker::Init(){
 Int_t St_spa_Maker::InitRun(Int_t runnumber){
   TDataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
   if (!CalibDbConnector) {
-    gMessMgr->Error()<<"InitRun: Can not found the calibration db.."<<endm;
+    LOG_ERROR<<"InitRun: Can not found the calibration db.."<<endm;
     return kStFATAL;
   }
   else{
@@ -95,23 +98,23 @@ Int_t St_spa_Maker::InitRun(Int_t runnumber){
   }
   TDataSet *ssdparams = GetInputDB("Geometry/ssd");
   if (! ssdparams) {
-    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
+    LOG_ERROR << "No  access to Geometry/ssd parameters" << endm;
     return kStErr;
   }
   TDataSetIter    local(ssdparams);
   m_ctrl        = (St_slsCtrl           *)local("slsCtrl");
   if (!m_ctrl) {
-    gMessMgr->Error() << "No  access to control parameters" << endm;
+    LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
   } 
   m_geom_par    = (St_ssdDimensions     *)local("ssdDimensions");
   if (!m_geom_par) {
-    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+    LOG_ERROR << "No  access to geometry parameters" << endm;
     return kStFatal;
   }   
   St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
   if (!configTable) {
-    gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
+    LOG_ERROR << "InitRun : No access to ssdConfiguration database" << endm;
     return kStFatal;
   }
   //mConfig = new StSsdConfig();
@@ -122,8 +125,7 @@ Int_t St_spa_Maker::InitRun(Int_t runnumber){
 //_____________________________________________________________________________
 Int_t St_spa_Maker::Make()
 {
-  if (Debug())  gMessMgr->Debug() << "In St_spa_Maker::Make() ... "
-                               << GetName() << endm;
+  if (Debug()==true)  {LOG_DEBUG << "Make() ..." << endm;}
   // 		Create output tables
   Int_t res = 0; 
   
@@ -135,29 +137,29 @@ Int_t St_spa_Maker::Make()
   ssdDimensions_st  *geom_par =  m_geom_par->GetTable();
   slsCtrl_st      *ctrl     =  m_ctrl->GetTable(); 
 
-  cout<<"#################################################"<<endl;
-  cout<<"####    START OF SSD PEDESTAL ANNIHILATOR    ####"<<endl;
-  cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+  LOG_INFO<<"#################################################"<<endm;
+  LOG_INFO<<"####    START OF SSD PEDESTAL ANNIHILATOR    ####"<<endm;
+  LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
   mySsd = new StSsdBarrel(geom_par, m_config);
   mySsd->readStripFromTable(sls_strip);
-  cout<<"####        NUMBER OF SLS STRIPS "<<sls_strip->GetNRows()<<"       ####"<<endl;
+  LOG_INFO<<"####        NUMBER OF SLS STRIPS "<<sls_strip->GetNRows()<<"       ####"<<endm;
   mySsd->readNoiseFromTable(m_noise);
-  cout<<"####       NUMBER OF DB ENTRIES "<<m_noise->GetNRows()<<"       ####"<<endl;
+  LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<m_noise->GetNRows()<<"       ####"<<endm;
   mySsd->readConditionDbFromTable(m_condition);
-  cout<<"####             ADD SPA NOISE               ####"<<endl;
+  LOG_INFO<<"####             ADD SPA NOISE               ####"<<endm;
   mySsd->addNoiseToStrip(ctrl);
-  cout<<"####           DO DAQ SIMULATION             ####"<<endl;
+  LOG_INFO<<"####           DO DAQ SIMULATION             ####"<<endm;
   mySsd->doDaqSimulation(ctrl);
   Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip,sls_strip);
   //Int_t nSsdStrips = mySsd->writeStripToTable(spa_strip);
   spa_strip->Purge();
-  cout<<"####       NUMBER OF SPA STRIP "<<nSsdStrips<<"          ####"<<endl;
+  LOG_INFO<<"####       NUMBER OF SPA STRIP "<<nSsdStrips<<"          ####"<<endm;
   delete mySsd;
-  cout<<"#################################################"<<endl;
+  LOG_INFO<<"#################################################"<<endm;
   if (nSsdStrips)  res =  kStOK;
 
   if(res!=kStOK){
-    gMessMgr->Warning("St_spa_Maker: no output");
+    LOG_WARN <<"no output"<<endm;
     return kStWarn;
   }
   
@@ -166,12 +168,11 @@ Int_t St_spa_Maker::Make()
 //_____________________________________________________________________________
 void St_spa_Maker::PrintInfo()
 {
-  if (Debug()) StMaker::PrintInfo();
+  if (Debug()==true){ StMaker::PrintInfo();}
 }
 //_____________________________________________________________________________
 Int_t St_spa_Maker::Finish() {
-  if (Debug()) gMessMgr->Debug() << "In St_spa_Maker::Finish() ... "
-                               << GetName() << endm; 
+  if (Debug()==true) {LOG_DEBUG << "Finish() ... " << endm; }
   return kStOK;
 }
 

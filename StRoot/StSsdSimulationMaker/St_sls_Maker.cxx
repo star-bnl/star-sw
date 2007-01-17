@@ -1,9 +1,12 @@
  /**************************************************************************
  * Class      : St_sls_maker.cxx
  **************************************************************************
- * $Id: St_sls_Maker.cxx,v 1.11 2006/10/16 16:36:08 bouchet Exp $
+ * $Id: St_sls_Maker.cxx,v 1.12 2007/01/17 18:14:37 bouchet Exp $
  *
  * $Log: St_sls_Maker.cxx,v $
+ * Revision 1.12  2007/01/17 18:14:37  bouchet
+ * replace printf, cout statements with LOG statements
+ *
  * Revision 1.11  2006/10/16 16:36:08  bouchet
  * Unify classes : Remove StSlsStrip, StSlsPoint, StSpaStrip, StSpaNoise by the same classes used in StSsdPointMaker (StSsdStrip,StSsdPoint) ; The methods for these classes are in StSsdUtil
  *
@@ -60,7 +63,7 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
 // 		geometry parameters
   TDataSet *ssdparams = GetInputDB("Geometry/ssd");
   if (! ssdparams) {
-    gMessMgr->Error() << "No  access to Geometry/ssd parameters" << endm;
+    LOG_ERROR << "No  access to Geometry/ssd parameters" << endm;
     return kStFatal;
   }
   TDataSetIter    local(ssdparams);
@@ -69,16 +72,16 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
   m_positions        = (St_ssdWafersPosition *)local("ssdWafersPosition");
   
   if (!m_ctrl) {
-    gMessMgr->Error() << "No  access to control parameters" << endm;
+    LOG_ERROR << "No  access to control parameters" << endm;
     return kStFatal;
   }   
   if ((!m_dimensions)||(!m_positions)) {
-    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+    LOG_ERROR << "No  access to geometry parameters" << endm;
     return kStFatal;
   }  
   St_ssdConfiguration* configTable = (St_ssdConfiguration*) local("ssdConfiguration");
   if (!configTable) {
-    gMessMgr->Error() << "InitRun : No access to ssdConfiguration database" << endm;
+    LOG_ERROR << "InitRun : No access to ssdConfiguration database" << endm;
     return kStFatal;
   }
   //mConfig = new StSsdConfig();
@@ -87,7 +90,8 @@ Int_t  St_sls_Maker::InitRun(Int_t runNumber) {
 }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Make()
-{
+{ 
+  if (Debug()==true)  {LOG_DEBUG << "Make() ..." << endm;}
   // 		Create output tables
    Int_t res = 0;
    St_sls_strip  *sls_strip = new St_sls_strip("sls_strip",40000);
@@ -100,11 +104,11 @@ Int_t St_sls_Maker::Make()
    ssdDimensions_st *dimensions = m_dimensions->GetTable();
    slsCtrl_st *ctrl = m_ctrl->GetTable();
 
-   cout<<"#################################################"<<endl;
-   cout<<"####       START OF SSD LAZY SIMULATOR       ####"<<endl;
-   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+   LOG_INFO<<"#################################################"<<endm;
+   LOG_INFO<<"####       START OF SSD LAZY SIMULATOR       ####"<<endm;
+   LOG_INFO<<"####        SSD BARREL INITIALIZATION        ####"<<endm;
    mySsd = new StSsdBarrel(dimensions, m_config);
-   cout<<"####        SSD WAFERS INITIALIZATION        ####"<<endl;
+   LOG_INFO<<"####        SSD WAFERS INITIALIZATION        ####"<<endm;
    //mySsd->initWafers(m_positions);
    //with this same constructor for spt with the ladder class
    mySsd->initLadders(m_positions);
@@ -120,7 +124,7 @@ Int_t St_sls_Maker::Make()
            nSsdHits = readPointFromTable( g2t_svt_hit);
          }
      }    
-   cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
+   LOG_INFO <<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endm;
    mySsd->convertGlobalFrameToOther();
    Int_t inactiveHit;
    if (g2t_ssd_hit)
@@ -134,38 +138,37 @@ Int_t St_sls_Maker::Make()
            inactiveHit = removeInactiveHitInTable(g2t_svt_hit);
          }
      }    
-   cout<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endl;
+   LOG_INFO<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endm;
    chargeSharingOverStrip(ctrl);
    Int_t nSsdStrips = writeStripToTable(sls_strip);
    sls_strip->Purge();
-   cout<<"####    -> "<<nSsdStrips<<" FIRED STRIPS INTO TABLE     ####"<<endl;
-   cout<<"####        END OF SSD LAZY SIMULATOR        ####"<<endl;
-   cout<<"#################################################"<<endl;
+   LOG_INFO<<"####    -> "<<nSsdStrips<<" FIRED STRIPS INTO TABLE     ####"<<endm;
+   LOG_INFO<<"####        END OF SSD LAZY SIMULATOR        ####"<<endm;
+   LOG_INFO<<"#################################################"<<endm;
    delete mySsd;
    if (nSsdStrips) res = kStOK;
 
    if(res!=kStOK){
-     gMessMgr->Warning("St_sls_Maker: no output");
+     LOG_WARN<<"no output"<<endm;
      return kStWarn;
    }
-   if(Debug())  gMessMgr->Debug() << "In St_sls_Maker::Make() ... "<< GetName() << endm;
+   if(Debug()==true){ LOG_DEBUG << "Make():end ... "<< endm;}
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_sls_Maker::PrintInfo() {
-  if (Debug()) StMaker::PrintInfo();
+  if (Debug()==true){ StMaker::PrintInfo();}
 }
 //_____________________________________________________________________________
 Int_t St_sls_Maker::Finish() {
-  if (Debug()) gMessMgr->Debug() << "In St_sls_Maker::Finish() ... "
-                               << GetName() << endm; 
+  if (Debug()==true){LOG_DEBUG << "Finish() ... " << endm;}
   return kStOK;
 }
 //________________________________________________________________________________
 Int_t St_sls_Maker::readPointFromTable(St_g2t_ssd_hit *g2t_ssd_hit) {
   g2t_ssd_hit_st *g2t = g2t_ssd_hit->GetTable();
 
-  // cout << "NumberOfRows = " <<  g2t_ssd_hit->GetNRows() << " size " <<  g2t_ssd_hit->GetTableSize() << endl ;
+  // LOG_INFO<< "NumberOfRows = " <<  g2t_ssd_hit->GetNRows() << " size " <<  g2t_ssd_hit->GetTableSize() << endm ;
   // g2t_ssd_hit->Print(0,g2t_ssd_hit->GetNRows());
 
   Int_t minWaf      = mySsd->getSsdLayer()*1000;
