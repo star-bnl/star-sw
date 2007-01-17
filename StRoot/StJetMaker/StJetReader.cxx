@@ -398,6 +398,10 @@ void StJetReader::exampleFastAna()
 			typedef vector<TrackToJetIndex*> TrackToJetVec;
 			TrackToJetVec particles = stjets->particles(ijet);
 			
+			for (TrackToJetVec::iterator partIt=particles.begin(); partIt!=particles.end(); ++partIt) {
+				const TrackToJetIndex* theParticle = *partIt;
+				cout <<"\tparticle \t pt:\t"<<theParticle->Pt()<<"\tnHitsFit:\t"<<theParticle->nHitsFit()<<endl;
+			}
 		}
     }	
 }

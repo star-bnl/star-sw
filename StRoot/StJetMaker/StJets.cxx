@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.9 2006/03/06 20:03:06 mmiller Exp $
+// $Id: StJets.cxx,v 1.10 2007/01/17 16:43:46 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.10  2007/01/17 16:43:46  mmiller
+// Added StMuTrack info on track charge, dedx, and hit information to StJets.h.  Updated exampleFastJetAna() accordingly.
+//
 // Revision 1.9  2006/03/06 20:03:06  mmiller
 // Added extra protection agains events with SumEmcEnergy>200 GeV (flag as corrupt, return w/o jet finding).  Also added nDylanPoints() and sumEmcE() methods to StJets.
 //
@@ -114,13 +117,18 @@ ClassImp(TrackToJetIndex)
 
 int* global_index;
 
+TrackToJetIndex::TrackToJetIndex(int ji, int ti, StDetectorId id) 
+: mJetIndex(ji), mTrackIndex(ti) , mDetId(id) , mCharge(0), mNhits(0), mNhitsPoss(0), mNhitsDedx(0), mNhitsFit(0), mNsigmaPion(0.)
+{
+}
+
 StJets::StJets()
-    : mJets( new TClonesArray("StJet",100)), mTrackToJetIndices( new TClonesArray("TrackToJetIndex",200)) 
+: mJets( new TClonesArray("StJet",100)), mTrackToJetIndices( new TClonesArray("TrackToJetIndex",200)) 
 {
     mEventId = mEventNumber = mRunId = mRunNumber = 0;
     mDylanPoints = 0;
     mSumEmcE = 0.;
-
+	
 }
 
 StJets::~StJets()
@@ -128,7 +136,7 @@ StJets::~StJets()
     mJets->Delete();
     delete mJets;
     mJets = 0;
-
+	
     mTrackToJetIndices->Delete();
     delete mTrackToJetIndices;
     mTrackToJetIndices = 0;
@@ -149,53 +157,65 @@ void StJets::addProtoJet(StProtoJet& pj)
     int jetIndex = mJets->GetLast()+1;
     
     StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.
-
+	
     //Make it here and update info as we go through tracks:
     StJet tempJet( pj.e(), pj.px(), pj.py(), pj.pz(), 0, 0 );
     tempJet.jetEt = pj.eT();
     tempJet.jetPt = tempJet.Pt();
     tempJet.jetEta = tempJet.Eta();
     tempJet.jetPhi = tempJet.Phi();
-
+	
     
     for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
-	StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
-	if (!track) {
-	    cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
-	    return;
-	}
-	int muTrackIndex = track->getIndex();
-	if (muTrackIndex <0) {
-	    cout <<"Error, muTrackIndex<0. abort()"<<endl;
-	    abort();
-	}
-	else {
-	    
-	    //cout <<"here's the track:\t"<<*track<<endl;
-    
-	    //add to trackToJetIndices
-	    int addAt = mTrackToJetIndices->GetLast()+1;
-	    TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
-	    t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
-	    //cout <<"here's the t2j:\t"<<t2j<<endl;
+		StMuTrackFourVec *track = dynamic_cast<StMuTrackFourVec*>(*it2);
+		if (!track) {
+			cout <<"StJets::addProtoJet(). ERROR:\tcast to StMuTrackFourVecFailed.  no action"<<endl;
+			return;
+		}
+		int muTrackIndex = track->getIndex();
+		if (muTrackIndex <0) {
+			cout <<"Error, muTrackIndex<0. abort()"<<endl;
+			abort();
+		}
+		else {
+			
+			//cout <<"here's the track:\t"<<*track<<endl;
+			
+			//add to trackToJetIndices
+			int addAt = mTrackToJetIndices->GetLast()+1;
+			TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
+			t2j.SetPxPyPzE(track->px(), track->py(), track->pz(), track->e() );
+			
+			//and cache some properties if it really came from a StMuTrack:
+			StMuTrack* muTrack = track->particle();
+			if (muTrack) {  //this will fail for calorimeter towers ;)
+				t2j.setCharge( muTrack->charge() );
+				t2j.setNhits( muTrack->nHits() );
+				t2j.setNhitsPoss( muTrack->nHitsPoss() );
+				t2j.setNhitsDedx( muTrack->nHitsDedx() );
+				t2j.setNhitsFit( muTrack->nHitsFit() );
+				t2j.setNsigmaPion( muTrack->nSigmaPion() );
+			}
 
-	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
-
-	    //ok, get track/tower properties here:
-	    StDetectorId mDetId = track->detectorId();
-	    if (mDetId==kTpcId) {
-		tempJet.nTracks++;
-		tempJet.tpcEtSum += track->eT();
-	    }
-	    else if (mDetId==kBarrelEmcTowerId) {
-		tempJet.nBtowers++;
-		tempJet.btowEtSum += track->eT();
-	    }
-	    else if (mDetId==kEndcapEmcTowerId) {
-		tempJet.nEtowers++;
-		tempJet.etowEtSum += track->eT();
-	    }
-	}
+			//cout <<"here's the t2j:\t"<<t2j<<endl;
+			
+			new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
+			
+			//ok, get track/tower properties here:
+			StDetectorId mDetId = track->detectorId();
+			if (mDetId==kTpcId) {
+				tempJet.nTracks++;
+				tempJet.tpcEtSum += track->eT();
+			}
+			else if (mDetId==kBarrelEmcTowerId) {
+				tempJet.nBtowers++;
+				tempJet.btowEtSum += track->eT();
+			}
+			else if (mDetId==kEndcapEmcTowerId) {
+				tempJet.nEtowers++;
+				tempJet.etowEtSum += track->eT();
+			}
+		}
     }
     //add in the jet container
     new((*mJets)[jetIndex]) StJet( tempJet );
@@ -207,10 +227,10 @@ vector<TrackToJetIndex*> StJets::particles(int jetIndex)
     vector<TrackToJetIndex*> vec;
     
     for (int i=0; i<size; ++i) {
-	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
-	if (id->jetIndex()==jetIndex) {
-	    vec.push_back(id);
-	}
+		TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
+		if (id->jetIndex()==jetIndex) {
+			vec.push_back(id);
+		}
     }
     return vec;
 }
@@ -220,26 +240,26 @@ StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
 {
     TrackVec vec;
     int size = mTrackToJetIndices->GetLast()+1;
-
+	
     TObjArray& tracks = *( event->primaryTracks() );
     Int_t maxNumTracks = tracks.GetLast()+1;
     
     for (int i=0; i<size; ++i) {
-	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
-	int trackIndex = id->trackIndex();
-	StDetectorId detId = id->detectorId();
-
-	if (detId != kTpcId) continue; 
-
-	if (trackIndex >= maxNumTracks) { //this should never happen!
-	    cout <<"StJets::jetParticles() ERROR:\tid==kTpcId but index out of bounds.  abort()"<<endl;
-	    cout <<"index\t"<<trackIndex<<"\tmaxNumTracks:\t"<<maxNumTracks<<endl;
-	    abort();
-	}
-	if (id->jetIndex() == jetIndex ) {
-	    StMuTrack* track = static_cast<StMuTrack*>( tracks[trackIndex] );
-	    vec.push_back( track );
-	}
+		TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
+		int trackIndex = id->trackIndex();
+		StDetectorId detId = id->detectorId();
+		
+		if (detId != kTpcId) continue; 
+		
+		if (trackIndex >= maxNumTracks) { //this should never happen!
+			cout <<"StJets::jetParticles() ERROR:\tid==kTpcId but index out of bounds.  abort()"<<endl;
+			cout <<"index\t"<<trackIndex<<"\tmaxNumTracks:\t"<<maxNumTracks<<endl;
+			abort();
+		}
+		if (id->jetIndex() == jetIndex ) {
+			StMuTrack* track = static_cast<StMuTrack*>( tracks[trackIndex] );
+			vec.push_back( track );
+		}
     }
     
     return vec;
@@ -314,12 +334,12 @@ bool StJets::isSameEvent(const StMuDst* muDst)
 {
     assert(muDst);
     StMuEvent* ev = muDst->event();
-
+	
     //cout <<"\n\n TEST!!!\t"<<mEventId<<"\t"<<mEventNumber<<"\t"<<mRunId<<"\t"<<mRunNumber<<endl;
-
+	
     
     return mEventId == ev->eventId()
-	&& mEventNumber == ev->eventNumber()
-	&& mRunId == ev->runId()
-	&& mRunNumber == ev->runNumber();
+		&& mEventNumber == ev->eventNumber()
+		&& mRunId == ev->runId()
+		&& mRunNumber == ev->runNumber();
 }

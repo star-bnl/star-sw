@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.8 2006/03/06 20:03:06 mmiller Exp $
+// $Id: StJets.h,v 1.9 2007/01/17 16:43:46 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.9  2007/01/17 16:43:46  mmiller
+// Added StMuTrack info on track charge, dedx, and hit information to StJets.h.  Updated exampleFastJetAna() accordingly.
+//
 // Revision 1.8  2006/03/06 20:03:06  mmiller
 // Added extra protection agains events with SumEmcEnergy>200 GeV (flag as corrupt, return w/o jet finding).  Also added nDylanPoints() and sumEmcE() methods to StJets.
 //
@@ -110,7 +113,8 @@ class StMuDst;
 class TrackToJetIndex : public TLorentzVector
 {
 public:
-    TrackToJetIndex(int ji=-1, int ti=-1, StDetectorId id=kUnknownId) : mJetIndex(ji), mTrackIndex(ti) , mDetId(id) {};
+    TrackToJetIndex(int ji=-1, int ti=-1, StDetectorId id=kUnknownId);
+	
     virtual ~TrackToJetIndex() {};
     
     void setJetIndex(int n) {mJetIndex=n;}
@@ -121,15 +125,39 @@ public:
     void setTrackIndex(int n) {mTrackIndex=n;}
     int trackIndex() const {return mTrackIndex;}
 
+	///Does this come from EEMC, BEMC, or TPC
     void setDetectorId(StDetectorId v) {mDetId=v;}
     StDetectorId detectorId() const {return mDetId;}
+	
+	///Cache extra info if it's from the TPC
+	void setCharge(Short_t v) {mCharge = v;}
+	void setNhits(unsigned short v) {mNhits = v;}
+	void setNhitsPoss(unsigned short v) {mNhitsPoss = v;}
+	void setNhitsDedx(unsigned short v) {mNhitsDedx = v;}
+	void setNhitsFit(unsigned short v) {mNhitsFit =v;}
+	void setNsigmaPion(double v) {mNsigmaPion = v;}
+	
+	Short_t charge() const {return mCharge;}
+	unsigned short nHits() const {return mNhits;}     ///< Return total number of hits on track.
+    unsigned short nHitsPoss() const {return mNhitsPoss;} ///< Return number of possible hits on track.
+    unsigned short nHitsDedx() const {return mNhitsDedx;} ///< Return number of hits used for dEdx. 
+    unsigned short nHitsFit() const {return mNhitsFit;}  ///< Return total number of hits used in fit. 
+    double nSigmaPion() const {return mNsigmaPion;}      ///< Rdistance to the calculated dE/dx band for pions in units of sigma.
+	
     
 private:
     int mJetIndex;
     int mTrackIndex;
     StDetectorId mDetId;
+	
+	Short_t mCharge;
+	unsigned short mNhits;
+	unsigned short mNhitsPoss;
+	unsigned short mNhitsDedx;
+	unsigned short mNhitsFit;
+	double mNsigmaPion;
     
-    ClassDef(TrackToJetIndex,1)
+    ClassDef(TrackToJetIndex,2)
 };
 
 inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
@@ -137,16 +165,16 @@ inline ostream& operator<<(ostream& os, const TrackToJetIndex& t)
     string idstring;
     StDetectorId mDetId = t.detectorId();
     if (mDetId==kTpcId) {
-	idstring = "kTpcId";
+		idstring = "kTpcId";
     }
     else if (mDetId==kBarrelEmcTowerId) {
-	idstring = "kBarrelEmcTowerId";
+		idstring = "kBarrelEmcTowerId";
     }
     else if (mDetId==kEndcapEmcTowerId) {
-	idstring = "kEndcapEmcTowerId";
+		idstring = "kEndcapEmcTowerId";
     }
     else {
-	idstring = "kUnknown";
+		idstring = "kUnknown";
     }
     
     return os <<"jetIndex:\t"<<t.jetIndex()<<"\ttrackIndex:\t"<<t.trackIndex()<<"\tdetId:\t"<<t.detectorId()<<"\t"<<idstring;
