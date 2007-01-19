@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserTrafo.cc,v 1.4 2007/01/16 15:04:17 jcs Exp $
+// $Id: StFtpcLaserTrafo.cc,v 1.5 2007/01/19 08:23:00 jcs Exp $
 //
 // $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.5  2007/01/19 08:23:00  jcs
+// replace true, false with kTRUE, kFALSE
+//
 // Revision 1.4  2007/01/16 15:04:17  jcs
 // reolace "return FALSE" with "return false" as temporary fix so that dev compiles
 //
@@ -203,7 +206,7 @@ int StFtpcLaserTrafo::calcpadtrans()
       if(j<1 || j>mDb->numberOfMagboltzBins())
 	{
 	  gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
-	  return false;
+	  return kFALSE;
 	}
       v_buf=j-1;
       v_now=((mDb->magboltzVDrift(v_buf, padrow)
@@ -270,7 +273,7 @@ int StFtpcLaserTrafo::calcpadtrans()
 	  if(j<1 || j>mDb->numberOfMagboltzBins())
 	    {
 	      gMessMgr->Message("", "E", "OST") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
-	      return false;
+	      return kFALSE;
 	    }
 	  
 	  v_buf=j-1;
@@ -325,7 +328,7 @@ int StFtpcLaserTrafo::calcpadtrans()
   //int wait;
   //cin>>wait;
   //cout<<wait<<endl;
-  return true;
+  return kTRUE;
 }
 
 //---------------------------------------------------------------
@@ -413,5 +416,5 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
     }
   */
 
-  return true;
+  return kTRUE;
 }
