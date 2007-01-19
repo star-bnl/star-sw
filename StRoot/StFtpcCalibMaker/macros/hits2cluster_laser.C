@@ -1,6 +1,9 @@
-// $Id: hits2cluster_laser.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: hits2cluster_laser.C,v 1.3 2007/01/19 08:23:07 jcs Exp $
 //
 // $Log: hits2cluster_laser.C,v $
+// Revision 1.3  2007/01/19 08:23:07  jcs
+// replace true, false with kTRUE, kFALSE
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -258,30 +261,30 @@ bool laser_sector(int whichftpc,int whichsec,int sec)
 	  case 0:
 	    // all sectors
 	    if (sec>30)
-	      return true;
+	      return kTRUE;
 	    break;
 	  case 1:
 	    if (sec==32 || sec==38 || sec==44 || sec==50 || sec==56)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 2:
 	    if (sec==34 || sec==40 || sec==46 || sec==52 || sec==58)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 3:
 	    if (sec==36 || sec==42 || sec==48 || sec==54 || sec==60)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  default :
 	    {
 	      cout<<"ERROR : Kein gueltiger Lasersector !"<<endl;
-	      return false;
+	      return kFALSE;
 	    }
 	  }
       }
@@ -292,35 +295,35 @@ bool laser_sector(int whichftpc,int whichsec,int sec)
 	case 0:
 	  // all sectors
 	  if (sec<31)
-	    return true;
+	    return kTRUE;
 	  break;
 	 case 1:
 	    if (sec==2 || sec==8 || sec==14 || sec==20 || sec==26)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 2:
 	    if (sec==4 || sec==10 || sec==16 || sec==22 || sec==28)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 3:
 	    if (sec==6 || sec==12 || sec==18 || sec==24 || sec==30)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break; 
 	default :
 	  {
 	    cout<<"ERROR : Kein gueltiger Lasersector !"<<endl;
-	    return false;
+	    return kFALSE;
 	  }
 	}
     }
   else
     cout<<"ERROR : Keine FTPC gewaehlt !"<<endl;
 
-  return false;
+  return kFALSE;
 }

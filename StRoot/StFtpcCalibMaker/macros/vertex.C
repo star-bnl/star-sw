@@ -1,6 +1,9 @@
-// $Id: vertex.C,v 1.2 2006/03/15 15:14:06 jcs Exp $
+// $Id: vertex.C,v 1.3 2007/01/19 08:23:07 jcs Exp $
 //
 // $Log: vertex.C,v $
+// Revision 1.3  2007/01/19 08:23:07  jcs
+// replace true, false with kTRUE, kFALSE
+//
 // Revision 1.2  2006/03/15 15:14:06  jcs
 // add lines for listing CVS update info
 //
@@ -173,7 +176,7 @@ void vertex(TString eingabe,int evt)
 
   Float_t radius[11],z[11];
 
-  Bool_t EndOfEvent=false;
+  Bool_t EndOfEvent=kFALSE;
   Int_t i=0;
   Int_t ntracksold=0;
   Int_t ntrack=0;
@@ -195,7 +198,7 @@ void vertex(TString eingabe,int evt)
        {
          if (i==0) break;
          tevent.nevent=evt;
-         EndOfEvent=true;
+         EndOfEvent=kTRUE;
        }
       if (tevent.nevent==evt)
 	{

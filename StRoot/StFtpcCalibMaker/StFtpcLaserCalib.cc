@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.4 2006/06/19 12:37:58 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.5 2007/01/19 08:22:59 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.5  2007/01/19 08:22:59  jcs
+// replace true, false with kTRUE, kFALSE
+//
 // Revision 1.4  2006/06/19 12:37:58  jcs
 // Use negative value of zfieldcage for FTPC east
 //
@@ -118,9 +121,9 @@ bool StFtpcLaserCalib::cut(int i)
 {
   //cout<<"in cut mit "<< z[i]<< " "<<hsec[i]<<endl;
   if ((z[i]>MINZ && z[i]<MAXZ) && (radius[i]>MINRAD && radius[i]<MAXRAD) && laser_sector(FTPC,LSEC,hsec[i]) )
-    return true;
+    return kTRUE;
   else
-    return false;
+    return kFALSE;
 }
 
 //______________________________________________________________________________

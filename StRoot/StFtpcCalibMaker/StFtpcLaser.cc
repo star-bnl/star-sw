@@ -1,6 +1,9 @@
-// $Id: StFtpcLaser.cc,v 1.3 2006/04/04 10:57:04 jcs Exp $
+// $Id: StFtpcLaser.cc,v 1.4 2007/01/19 08:22:58 jcs Exp $
 //
 // $Log: StFtpcLaser.cc,v $
+// Revision 1.4  2007/01/19 08:22:58  jcs
+// replace true, false with kTRUE, kFALSE
+//
 // Revision 1.3  2006/04/04 10:57:04  jcs
 // Fix memory leak
 //
@@ -101,30 +104,30 @@ bool StFtpcLaser::laser_sector(int whichftpc,int whichsec,int sec)
 
 	  case 0:
 	    // all sectors
-	    return true;
+	    return kTRUE;
 	    break;
 	  case 1:
 	    if (sec==32 || sec==38 || sec==44 || sec==50 || sec==56)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 2:
 	    if (sec==34 || sec==40 || sec==46 || sec==52 || sec==58)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 3:
 	    if (sec==36 || sec==42 || sec==48 || sec==54 || sec==60)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  default :
 	    {
 	      cout<<"ERROR : Kein gueltiger Lasersector !"<<endl;
-	      return false;
+	      return kFALSE;
 	    }
 	  }
       }
@@ -134,41 +137,41 @@ bool StFtpcLaser::laser_sector(int whichftpc,int whichsec,int sec)
 	{
 	case 0:
 	  // all sectors
-	  return true;
+	  return kTRUE;
 	  break;
 	 case 1:
 	    if (sec==2 || sec==8 || sec==14 || sec==20 || sec==26)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 2:
 	    if (sec==4 || sec==10 || sec==16 || sec==22 || sec==28)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break;
 	  case 3:
 	    if (sec==6 || sec==12 || sec==18 || sec==24 || sec==30)
-	      return true;
+	      return kTRUE;
 	    else
-	      return false;
+	      return kFALSE;
 	    break; 
 	default :
 	  {
 	    cout<<"ERROR : Kein gueltiger Lasersector !"<<endl;
-	    return false;
+	    return kFALSE;
 	  }
 	}
     }
   else if (whichftpc==0)
     {
       // take all tracks !!!
-      return true;
+      return kTRUE;
     }
       //cout<<"ERROR : Keine FTPC gewaehlt !"<<endl;
 
-  return false;
+  return kFALSE;
 }
 
 //---------------------------------------------------------------
@@ -184,7 +187,7 @@ int StFtpcLaser::laser_straight(float *rad,int max)
   else
     return 1;
   //else
-  //return false;
+  //return kFALSE;
 } 
 
 
