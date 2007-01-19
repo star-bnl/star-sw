@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.3 2006/04/04 14:34:39 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.4 2007/01/19 08:53:54 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.4  2007/01/19 08:53:54  jcs
+// replace gMessMgr with LOG
+//
 // Revision 1.3  2006/04/04 14:34:39  jcs
 // replace assert with a warning message and return kStWarn
 //
@@ -89,40 +92,40 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
      SetFlavor("ffp10kv","ftpcdVDriftdP");
      SetFlavor("ffp10kv","ftpcDeflection");
      SetFlavor("ffp10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcCalibMaker: flavor set to ffp10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker: flavor set to ffp10kv"<<endm;
   }
   else if ( mbfield > 0.2 ) {
      SetFlavor("hfp10kv","ftpcVDrift");
      SetFlavor("hfp10kv","ftpcdVDriftdP");
      SetFlavor("hfp10kv","ftpcDeflection");
      SetFlavor("hfp10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcCalibMaker: flavor set to hfp10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker: flavor set to hfp10kv"<<endm;
   }
   else if ( mbfield > -0.2 ) {
      SetFlavor("zf10kv","ftpcVDrift");
      SetFlavor("zf10kv","ftpcdVDriftdP");
      SetFlavor("zf10kv","ftpcDeflection");
      SetFlavor("zf10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcCalibMaker: flavor set to zf10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker: flavor set to zf10kv"<<endm;
   }
   else if ( mbfield > -0.8 ) {
      SetFlavor("hfn10kv","ftpcVDrift");
      SetFlavor("hfn10kv","ftpcdVDriftdP");
      SetFlavor("hfn10kv","ftpcDeflection");
      SetFlavor("hfn10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcCalibMaker: flavor set to hfn10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker: flavor set to hfn10kv"<<endm;
   }
   else {
      SetFlavor("ffn10kv","ftpcVDrift");
      SetFlavor("ffn10kv","ftpcdVDriftdP");
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
-     gMessMgr->Info() << "StFtpcCalibMaker: flavor set to ffn10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker: flavor set to ffn10kv"<<endm;
   }
   
   ftpc_db  = GetDataBase("ftpc");
   if (!ftpc_db) {
-     gMessMgr->Warning() << "StFtpcCalibMaker::DbInit  run parameter database StarDb/ftpc not found"<<endm;
+     LOG_WARN << "StFtpcCalibMaker::DbInit  run parameter database StarDb/ftpc not found"<<endm;
      return kStWarn;
   }
   St_DataSetIter local(ftpc_db);
