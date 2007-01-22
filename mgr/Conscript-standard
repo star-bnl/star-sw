@@ -155,7 +155,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     Command $env [$out[1]], @dep, qq(cd %1:d; $uic %1:f -o %>:f );
     Command $env [@out[0]], ($uilocal,$out[1]), qq(cd %1:d; $uic %1:f  -i %2:f -o %>:f);
     push @src, $out[0];
-    push @QtDefs, $out[1];
+    push @QtDefs, $out[1]; print "QtDefs from $ui  @QtDefs\n" if $param::debug;
   }
   if ($#xpmQT >= 0) {
     my $out = $PKG . "_image_collection.cxx";
@@ -516,8 +516,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	  if ( ( $line =~ /ClassDef/ || $line =~ /StCollectionDef/) ) {
 	    push @Defs, $h; # print "$h <==========\n";
 	    $classDefFlag = 0;
-	  } elsif ( $line =~ /Q_OBJECT/ && defined($env1->{Packages}->{QT}->{BINDIR}) ) {
-	    push @QtDefs, $h;
+	  } elsif ( $line =~ /Q_OBJECT/ && defined($env1->{Packages}->{QT}->{BINDIR}) && $qtFlag ) {
+	    
+	    push @QtDefs, $h; print "QtDefs from Q_OBJECT  @QtDefs\n" if $param::debug;
 	    $qtFlag = 0;
 	  }
 	  next if ( $classDefFlag + $qtFlag == 0 );
@@ -568,12 +569,13 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     my @objfiles = Objects $envCint ($CintFiles[0]);#
     #	push @src, $CintFiles[0];
     push @src, @objfiles[0];
-    print "+==========add $cint\n" if $param::debug;
+    print "+==========add cint $CintFiles[0]\n" if $param::debug;
   }
   
   if ( $#QtDefs > -1 ) {
     my $mocheaders = join $main::PATH_SEPARATOR, @QtDefs;
     my @mocs = script::MakeMoc( $env2, $pkg, $done, $mocheaders);
+    print "mocheaders: $mocheaders \tmocs: @mocs\n" if $param::debug;
     foreach $m(@mocs) { push @src, $m;}
   }
 }
