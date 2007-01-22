@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserTrafo.cc,v 1.5 2007/01/19 08:23:00 jcs Exp $
+// $Id: StFtpcLaserTrafo.cc,v 1.6 2007/01/22 13:08:15 jcs Exp $
 //
 // $Log: StFtpcLaserTrafo.cc,v $
+// Revision 1.6  2007/01/22 13:08:15  jcs
+// replace cout with LOG
+//
 // Revision 1.5  2007/01/19 08:23:00  jcs
 // replace true, false with kTRUE, kFALSE
 //
@@ -32,7 +35,7 @@ StFtpcLaserTrafo::StFtpcLaserTrafo()
 
 StFtpcLaserTrafo::StFtpcLaserTrafo(StFtpcDbReader *getdb,StFtpcParamReader *getparam,float getdeltat0,float getdeltagas, float getmicropertime, float getdeltap, float getmbfield, float getTZero)
 {
-  //cout<<"StFtpcLaserTrafo..."<<endl; 
+  LOG_INFO<<"StFtpcLaserTrafo..."<<endm; 
   mDb=getdb; mParam=getparam;
   
   mBField = getmbfield;
@@ -41,11 +44,11 @@ StFtpcLaserTrafo::StFtpcLaserTrafo(StFtpcDbReader *getdb,StFtpcParamReader *getp
   deltagas=getdeltagas;
   tZero = getTZero;
 
-  cout<<"d_t0 = "<<deltat0<<" | d_gas(Ar) = "<<(float) deltagas<<endl;
+  LOG_INFO<<"d_t0 = "<<deltat0<<" | d_gas(Ar) = "<<(float) deltagas<<endm;
   micropertime = getmicropertime;
-  cout<<"Microseconds per timebin = "<<micropertime<<endl;
-  cout<<"==============================="<<endl;
-  cout<<endl;
+  LOG_INFO<<"Microseconds per timebin = "<<micropertime<<endm;
+  LOG_INFO<<"==============================="<<endm;
+  LOG_INFO<<" "<<endm;
 
   deltap = getdeltap;
 
@@ -61,7 +64,7 @@ StFtpcLaserTrafo::~StFtpcLaserTrafo()
 {
   delete[] pradius;        // release the pradius array
   delete[] pdeflection;   // release the pdeflection array
-  //cout<<"StFtpcLaserTrafo deconstructed"<<endl; 
+  //LOG_DEBUG<<"StFtpcLaserTrafo deconstructed"<<endm; 
 }
 
 //---------------------------------------------------------------
@@ -177,20 +180,20 @@ int StFtpcLaserTrafo::calcpadtrans()
   double t_last, t_next, r_last, r_next, e_now, v_now, psi_now;
   double step_size;
   
-  cout<<"calcpadtrans ..."<<endl;
+  LOG_INFO<<"calcpadtrans ..."<<endm;
 
   step_size=((float) mDb->numberOfTimebins()
 	     / (float) mParam->numberOfDriftSteps());
 
 
-  cout<<"Pressure & temperature correction  = "<<deltap<<endl;
-  cout<<"======================================================"<<endl;
+  LOG_INFO<<"Pressure & temperature correction  = "<<deltap<<endm;
+  LOG_INFO<<"======================================================"<<endm;
 
 
-  cout<<"RadiusTimesField = "<<mDb->radiusTimesField()<<endl;
-  cout<<"vdrift(0,0)   = "<<mDb->magboltzVDrift(0,0)<<endl;
-  cout<<"lorangle(0,0) = "<<mDb->magboltzDeflection(0,0)<<endl;
-  cout<<endl;
+  LOG_INFO<<"RadiusTimesField = "<<mDb->radiusTimesField()<<endm;
+  LOG_INFO<<"vdrift(0,0)   = "<<mDb->magboltzVDrift(0,0)<<endm;
+  LOG_INFO<<"lorangle(0,0) = "<<mDb->magboltzDeflection(0,0)<<endm;
+  LOG_INFO<<" "<<endm;
 
   for (padrow=0; padrow<mDb->numberOfPadrowsPerSide(); padrow++)
     {
@@ -226,18 +229,18 @@ int StFtpcLaserTrafo::calcpadtrans()
 	       *(e_now-mDb->magboltzEField(v_buf)))
 	/(mDb->magboltzEField(j)-mDb->magboltzEField(v_buf));
 
-      //cout<<psi_now<<endl;
+      //LOG_DEBUG<<psi_now<<endm;
       
       // gas correction (only use by fullfield !)
       if (deltagas!=0)
 	{
-	  //cout<<v_now<<endl;
+	  //LOG_DEBUG<<"v_now before "<<v_now<<endm;
 	  v_now=v_now+vd_gas(r_last);
-	  //cout<<v_now<<endl;
-	  //cout<<psi_now<<endl;
-	  //cout<<Grad2Rad*lor_gas(r_last)<<" "<<lor_gas(r_last)<<endl;
+	  //LOG_DEBUG<<"v_now after "<<v_now<<endm;
+	  //LOG_DEBUG<<"pnow "<<psi_now<<endm;
+	  //LOG_DEBUG<<Grad2Rad*lor_gas(r_last)<<" "<<lor_gas(r_last)<<endm;
 	  //psi_now=psi_now+lor_gas(r_last);
-	  // 1. Neherung reversed FullField richtig !????
+	  // Is 1st approximation reversed FullField correct !????
 	  //psi_now=-(psi_now+lor_gas(r_last));
 
 	  if (mBField == -1 ) 
@@ -245,16 +248,16 @@ int StFtpcLaserTrafo::calcpadtrans()
           else if (mBField == 0 || mBField == 1 )
 	     psi_now=psi_now+lor_gas(r_last);   // B=0,B=+1
            else {
-             cout<<"psi_now not defined for mBField = "<<mBField<<endl;
+             LOG_ERROR<<"psi_now not defined for mBField = "<<mBField<<endm;
            }  
 
-	  //cout<<psi_now<<endl;
+	  //LOG_DEBUG<<"psi_now "<<psi_now<<endm;
 	  //v_now=v_now*cos(Grad2Rad*psi_now); 
 
 	  //***************************
 	  //* ??? so 1. Naeherung ??? *
 	  //***************************
-	  //cout<<v_now<<endl;
+	  //LOG_DEBUG<<"v_now "<<v_now<<endm;
 	}
 
       for (i=0; i<mParam->numberOfDriftSteps() 
@@ -307,16 +310,16 @@ int StFtpcLaserTrafo::calcpadtrans()
 
 	      psi_now=psi_now+lor_gas(r_last);   // B=0,B=+1
 	      //v_now=v_now*cos(Grad2Rad*psi_now);
-	      //cout<<(lor_gas(r_next)-lor_gar_nexts(r_last))*180/TMath::Pi()<<endl;
-	      //cout<<"r_last = "<<r_last<<" | r_next = "<<r_next<<endl;
+	      //LOG_DEBUG<<(lor_gas(r_next)-lor_gar_nexts(r_last))*180/TMath::Pi()<<endm;
+	      //LOG_DEBUG<<"r_last = "<<r_last<<" | r_next = "<<r_next<<endm;
 	    }
  
 	  /* correct r_next: */
 	  //r_next = r_last - v_now * step_size *mDb->microsecondsPerTimebin();
-	  //cout<<"r_last = "<<r_last<<" | r_next = "<<r_next<<" | r_next_new = "<< r_last - v_now * step_size * micropertime<<" | psi = "<<psi_now<<endl;
+	  //LOG_DEBUG<<"r_last = "<<r_last<<" | r_next = "<<r_next<<" | r_next_new = "<< r_last - v_now * step_size * micropertime<<" | psi = "<<psi_now<<endm;
 	  r_next = r_last - v_now * step_size * micropertime;
 	  pradius[padrow+mDb->numberOfPadrowsPerSide()*(i+1)]=r_next;
-	  //cout<<padrow+mDb->numberOfPadrowsPerSide()*(i+1)<<endl;
+	  //LOG_DEBUG<<padrow+mDb->numberOfPadrowsPerSide()*(i+1)<<endl;
 	  pdeflection[padrow+mDb->numberOfPadrowsPerSide()*(i+1)]
 	    =pdeflection[padrow+mDb->numberOfPadrowsPerSide()*i]
 	    +((r_last-r_next)*tan(degree * psi_now)/r_last);
@@ -325,9 +328,6 @@ int StFtpcLaserTrafo::calcpadtrans()
 	  r_last=r_next;
 	}     
     }
-  //int wait;
-  //cin>>wait;
-  //cout<<wait<<endl;
   return kTRUE;
 }
 
@@ -346,7 +346,7 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
 
   TimeCoordinate += (tZero+deltat0)/micropertime;
   
-  //cout<<TimeCoordinate<<" "<<padpos<<" "<<(*x1)<<" "<<(*y1)<<endl;
+  //LOG_DEBUG<<TimeCoordinate<<" "<<padpos<<" "<<(*x1)<<" "<<(*y1)<<endm;
 
   PadtransPerTimebin = (int) mParam->numberOfDriftSteps() / mDb->numberOfTimebins();
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
@@ -371,9 +371,9 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
     + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
     + mDb->radiansPerBoundary())+halfpi;
 
-  //cout<<"mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<endl;
-  //cout<<"mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endl;
-  //cout<<"mDb->numberOfPads() = "<<mDb->numberOfPads()<<endl;
+  //LOG_DEBUG<<"mDb->radiansPerBoundary() = "<<mDb->radiansPerBoundary()<<endm;
+  //LOG_DEBUG<<"mDb->radiansPerPad() = "<<mDb->radiansPerPad()<<endm;
+  //LOG_DEBUG<<"mDb->numberOfPads() = "<<mDb->numberOfPads()<<endm;
 
   /* 
   // macht Probleme bei fit usw. !??? auch wenn nur West !????
@@ -388,9 +388,9 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
   */
 
   // debug
-  //cout<<"====================================="<<endl;
-  //cout<<"Radius = "<<Rad<<" | Phi = "<<Phi<<endl;
-  //cout<<"====================================="<<endl;
+  //LOG_DEBUG<<"====================================="<<endm;
+  //LOG_DEBUG<<"Radius = "<<Rad<<" | Phi = "<<Phi<<endl;
+  //LOG_DEBUG<<"====================================="<<endm;
 
   // Anm : Pointer genauer !!!!!!!??????????
 
@@ -409,10 +409,10 @@ int StFtpcLaserTrafo::padtrans(int iRow,int iSec,float timepos, float padpos,flo
   /*
   if (iRow<10)
     {
-      cout<<iRow<<" "<<iSec<<" "<<timepos<<" "<<padpos<<endl;
-      cout<<pdeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]<<" "<<pdeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]<<endl;
-      cout<<PhiDeflect<<" "<<Phi<<" "<<Rad<<endl;
-      cout<<(*x1)<<" "<<(*y1)<<endl;
+      LOG_DEBUG<<iRow<<" "<<iSec<<" "<<timepos<<" "<<padpos<<endm;
+      LOG_DEBUG<<pdeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]<<" "<<pdeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]<<endm;
+      LOG_DEBUG<<PhiDeflect<<" "<<Phi<<" "<<Rad<<endm;
+      LOG_DEBUG<<(*x1)<<" "<<(*y1)<<endm;
     }
   */
 
