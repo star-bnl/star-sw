@@ -15,7 +15,6 @@
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "tables/St_emcStatus_Table.h"
 #include "tables/St_smdStatus_Table.h"
-#include <StMessMgr.h>  
                                                   
 ClassImp(StEmcMixerMaker)
 
@@ -27,7 +26,6 @@ StEmcMixerMaker::StEmcMixerMaker(const char *name):StMaker(name)
   mUseDB = kTRUE;
   mEmbedAll = kTRUE;
   mFakeTrackEmbed = kFALSE;
-  mDoPrint = kTRUE;
   for(Int_t i=0;i<NDETECTORS;i++) mGeom[i]=StEmcGeom::instance(i+1);
 }
 //_____________________________________________________________________________
@@ -57,7 +55,7 @@ Int_t StEmcMixerMaker::Make()
   clearPoints(); // clear EMC points
   clearClusters();  // clear EMC clusters
 
-  if(mAddHits) if(addHits()!=kStOk) { if(mDoPrint) gMessMgr->Warning()<<" error in addhits***"<<endm; return kStWarn; }
+  if(mAddHits){ if(addHits()!=kStOk) { LOG_WARN <<" error in addhits***"<<endm; return kStWarn; } }
   if(mFakeTrackEmbed) addTracks(); 
   return kStOK;
 }
@@ -87,8 +85,8 @@ Int_t StEmcMixerMaker::addHits()
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
     StEmcDetector* detector1=emccol1->detector(id);
     StEmcDetector* detector2=emccol2->detector(id);
-    if(!detector1) if(mDoPrint) gMessMgr->Warning()<<"detector1 not loaded"<<endm;
-    if(!detector2) if(mDoPrint) gMessMgr->Warning()<<"detector2 not loaded"<<endm;
+    if(!detector1){ LOG_WARN <<"detector1 not loaded"<<endm; }
+	if(!detector2){ LOG_WARN <<"detector2 not loaded"<<endm; }
    
     Float_t edep1_tot=0;
     Float_t edep2_tot=0;
@@ -140,12 +138,13 @@ Int_t StEmcMixerMaker::addHits()
         new_edep_tot+=new_edep;
         UInt_t calib = rawHit1[k1]->calibrationType();
         while(calib>127) calib-=128;
-        if(mDoPrint && edep_add>0) 
-          gMessMgr->Info() <<"EMBEDDED HIT -> det = "<<i+1<<"  m = "<<m1<<"  e = "<<e1<<"  s = "<<s1
+        if(edep_add>0) {
+          LOG_DEBUG <<"EMBEDDED HIT -> det = "<<i+1<<"  m = "<<m1<<"  e = "<<e1<<"  s = "<<s1
                            <<"  calib = "<<rawHit1[k1]->calibrationType()
                            <<"  new calib = "<<calib
                            <<"  oldE = "<<oldE<<" EADD = "<<edep_add
                            <<"  newE = "<<rawHit1[k1]->energy()<<endm;
+		}
         rawHit1[k1]->setCalibrationType(calib);
       }
       
@@ -237,21 +236,21 @@ Bool_t StEmcMixerMaker::getEvents()
       mEvent2 = new StEvent();
       mEvent2->setEmcCollection(ecol);
       AddData(mEvent2);
-    } else { if(mDoPrint) gMessMgr->Warning() <<"No second event to embed"<<endm; return kFALSE; }
+    } else { LOG_WARN <<"No second event to embed"<<endm; return kFALSE; }
   }
   else // no EMC simulator. Events come from another source
   {
     StMaker *m = GetMaker("embedIO");
-    if(!m) { if(mDoPrint) gMessMgr->Warning()<<"No embedIO maker"<<endm; return kFALSE; }
+	if(!m) { LOG_WARN <<"No embedIO maker"<<endm; return kFALSE; }
     mEvent2 = (StEvent*)m->GetInputDS("StEvent");
-    if(!mEvent2) { if(mDoPrint) gMessMgr->Warning() <<"No second event to embed"<<endm; return kFALSE; }
-    if(!mEvent2->emcCollection()) { if(mDoPrint) gMessMgr->Warning() <<"No second event to embed"<<endm; return kFALSE; }
+    if(!mEvent2) { LOG_WARN <<"No second event to embed"<<endm; return kFALSE; }
+    if(!mEvent2->emcCollection()) { LOG_WARN <<"No second event to embed"<<endm; return kFALSE; }
   }
   
-  if(mDoPrint) gMessMgr->Info()<<"Event 1 = "<<mEvent1<<"   Event 2 ="<<mEvent2<<endm;
+  LOG_DEBUG <<"Event 1 = "<<mEvent1<<"   Event 2 ="<<mEvent2<<endm;
   
   // StEvent pointers should be different.
-  if(mEvent1==mEvent2) { if(mDoPrint) gMessMgr->Warning() <<"Identical events"<<endm; return kFALSE;}
+  if(mEvent1==mEvent2) { LOG_DEBUG <<"Identical events"<<endm; return kFALSE; }
   return kTRUE;
 }
 //-------------------------------------------------------------------
@@ -264,14 +263,15 @@ void StEmcMixerMaker::printHits(StEvent *event)
   {  
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
     StEmcDetector* detector=emccol->detector(id);
-    if(mDoPrint) gMessMgr->Info()<<"****************** hits in detector "<< detname[i].Data()<<endm;
+    LOG_INFO <<"****************** hits in detector "<< detname[i].Data()<<endm;
     if(detector) for(UInt_t j=1;j<=NMODULES;j++) 
     {
       StEmcModule* module = detector->module(j);
       StSPtrVecEmcRawHit& rawHit=module->hits();
-      if(rawHit.size()>0) if(mDoPrint) gMessMgr->Info()<<"Number of hits for module "<<j<<" = "<<rawHit.size()<<endm;
-      for(UInt_t k=0;k<rawHit.size();k++)
-        if(mDoPrint) gMessMgr->Info()<<"Hit number = "<<k<<"  module = " << rawHit[k]->module()<<"  eta = "<<rawHit[k]->eta() << "  sub = "<< rawHit[k]->sub()<< "  adc = "<< rawHit[k]->adc() <<"  energy = "<<rawHit[k]->energy()<<endm;
+      if(rawHit.size()>0) { LOG_INFO <<"Number of hits for module "<<j<<" = "<<rawHit.size()<<endm; }
+      for(UInt_t k=0;k<rawHit.size();k++) {
+        LOG_INFO <<"Hit number = "<<k<<"  module = " << rawHit[k]->module()<<"  eta = "<<rawHit[k]->eta() << "  sub = "<< rawHit[k]->sub()<< "  adc = "<< rawHit[k]->adc() <<"  energy = "<<rawHit[k]->energy()<<endm;
+	  }
     }
   }
   
@@ -319,8 +319,9 @@ void StEmcMixerMaker::getDB()
   for(Int_t i=0;i<NDETECTORS;i++) 
     for(Int_t j=0;j<(EMCCHANNELS*(i<2)+SMDCHANNELS*(i>1));j++) 
       if(mStatus[i][j]==1) valid[i]++;
-  if(mDoPrint) cout <<"Date = "<<GetDate()<<"  time = "<<GetTime()<<endl;
-  if(mDoPrint) for(Int_t i=0;i<NDETECTORS;i++) cout <<"Number of valid channels for detector "<<i<<" = "<<valid[i]<<endl;
+  
+  LOG_DEBUG <<"Date = "<<GetDate()<<"  time = "<<GetTime()<<endm;
+  for(Int_t i=0;i<NDETECTORS;i++) { LOG_DEBUG <<"Number of valid channels for detector "<<i<<" = "<<valid[i]<<endm; }
 }
 //-------------------------------------------------------------------
 /*!

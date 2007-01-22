@@ -1,13 +1,11 @@
 #include "StEmcPmtSimulator.h"
 #include "StEmcUtil/others/emcInternalDef.h"
-#include "StMessMgr.h"
 
 ClassImp(StEmcPmtSimulator)
 
 StEmcPmtSimulator::StEmcPmtSimulator(UInt_t det=1):StEmcSimpleSimulator(det)
 {
     setControlDefault(det);
-    mPrint = kTRUE;
 }
 Bool_t StEmcPmtSimulator::setControlDefault(UInt_t det=1)
 {
@@ -32,7 +30,7 @@ Bool_t StEmcPmtSimulator::setControlDefault(UInt_t det=1)
         mControl[0].depMip     = 0.002;  // in GeV
         break;
     default:
-        gMessMgr->Error()<<"StEmcPmtSimulator::setControlDefault => wrong value of #det "<<mDetector<<endm;
+        LOG_ERROR <<"StEmcPmtSimulator::setControlDefault => wrong value of #det "<<mDetector<<endm;
         return kFALSE;
     }
 
@@ -71,14 +69,14 @@ void StEmcPmtSimulator::print()
     StEmcSimpleSimulator::print();
     if(mMode>=3)
     {
-        printf(" <I>  Addition infor for Pmt Simulator\n");
-        printf("     MIP deposit  energy   for eta      => %7.6f Gev\n",mDepMip);
-        printf("     Number of PHE for MIP for eta      => %7.1f\n", mNpheMip);
-        printf("     Type of PMT                        => %2i\n --\n", mTypeOfPmt);
-        printf("     Ideal calibration coefficient      => %8.3f\n", mC1);
-        printf("     Number of PHE on one Gev           => %7.1f\n", mC2);
-        printf("     Coefficient for calculation a gain => %7.6f\n", mC3);
-        printf("     Mode of %s simulation \n", cmode[mVer]);
+        LOG_INFO << Form(" Addition info for Pmt Simulator") << endm;
+        LOG_INFO << Form("     MIP deposit  energy   for eta      => %7.6f Gev",mDepMip) << endm;
+        LOG_INFO << Form("     Number of PHE for MIP for eta      => %7.1f", mNpheMip) << endm;
+        LOG_INFO << Form("     Type of PMT                        => %2i --", mTypeOfPmt) << endm;
+        LOG_INFO << Form("     Ideal calibration coefficient      => %8.3f", mC1) << endm;
+        LOG_INFO << Form("     Number of PHE on one Gev           => %7.1f", mC2) << endm;
+        LOG_INFO << Form("     Coefficient for calculation a gain => %7.6f", mC3) << endm;
+        LOG_INFO << Form("     Mode of %s simulation", cmode[mVer]) << endm;
     }
 }
 
@@ -122,8 +120,7 @@ Int_t StEmcPmtSimulator::getAdc(const Double_t de, const Double_t eta)
         ADC*= mC4;
         mAdc=(Int_t) ADC; // add gain uncertainty in the simulation. This is not considered when converting to energy
     }
-    else if(mPrint)
-        gMessMgr->Warning()<<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "<<mMode<<endm;
+    LOG_WARN <<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "<<mMode<<endm;
     return mAdc;
 }
 Float_t  StEmcPmtSimulator::getEnergy()
@@ -139,8 +136,11 @@ void  StEmcPmtSimulator::setParameters(const Float_t calibCoeff,const UInt_t typ
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.cxx,v 1.7 2005/03/21 21:36:38 suaide Exp $
+//  $Id: StEmcPmtSimulator.cxx,v 1.8 2007/01/22 19:13:39 kocolosk Exp $
 //  $Log: StEmcPmtSimulator.cxx,v $
+//  Revision 1.8  2007/01/22 19:13:39  kocolosk
+//  use STAR logger for all output
+//
 //  Revision 1.7  2005/03/21 21:36:38  suaide
 //  fixed problem with chain
 //

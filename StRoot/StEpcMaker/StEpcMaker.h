@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.11 2005/05/23 12:35:14 suaide Exp $
+// $Id: StEpcMaker.h,v 1.12 2007/01/22 19:13:50 kocolosk Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.12  2007/01/22 19:13:50  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.11  2005/05/23 12:35:14  suaide
 // New Point maker code
 //
@@ -43,6 +46,7 @@
 #ifndef STAR_StEpcMaker
 #define STAR_StEpcMaker
 #include "StMaker.h"
+#include "StMessMgr.h"
 #include <TH2.h>
 
 class StEvent;
@@ -71,7 +75,6 @@ protected:
     TH1F *m_emc_points[4];     //! //Emc Point multiplicity
 
     Bool_t mFillHisto;
-    Bool_t mPrint;
 
 public:
     StEpcMaker(const char *name="epc");
@@ -80,10 +83,10 @@ public:
     virtual Int_t Make();
     virtual Int_t Finish();
     virtual Int_t fillStEvent();
-    void  setPrint(Bool_t a)
+    void    setPrint(Bool_t a)
     {
-        mPrint = a;
-    }
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+    }///< Obsolete function; users can control messages with logger config file.
     void  setFillHisto(Bool_t a)
     {
         mFillHisto = a;
@@ -93,7 +96,7 @@ public:
     virtual const char *GetCVS() const
     {
         static const char cvs[]=
-            "Tag $Name:  $ $Id: StEpcMaker.h,v 1.11 2005/05/23 12:35:14 suaide Exp $ built "__DATE__" "__TIME__ ;
+            "Tag $Name:  $ $Id: StEpcMaker.h,v 1.12 2007/01/22 19:13:50 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 

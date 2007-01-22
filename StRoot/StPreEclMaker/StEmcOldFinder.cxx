@@ -7,6 +7,7 @@
 #include "StEmcPreCluster.h"
 #include <TTableSorter.h>
 #include "Stiostream.h"
+#include "StMessMgr.h"
 
 ClassImp(StEmcOldFinder)
 
@@ -65,8 +66,7 @@ Bool_t StEmcOldFinder::findClustersInDetector(StEmcDetector* detector)
     Int_t NM = detector->numberOfModules();
     for(Int_t m = 1; m<=NM; m++)
         findClustersInModule(det,detector->module(m));
-    if(mPrint)
-        cout <<"Number of clusters found for detector "<<det<<" = "<<mColl[det-1]->GetSize()<<endl;
+    LOG_INFO <<"Number of clusters found for detector "<<det<<" = "<<mColl[det-1]->GetSize()<<endm;
 
     return kTRUE;
 }

@@ -65,7 +65,7 @@ public:
     }
     Bool_t                    isCorrupted(); ///< Returns if BTOW is corrupted or not
 
-    void                      setPrint(Bool_t);  ///< Set it to kFALSE if youdo not want to print messages
+	void                      setPrint(Bool_t);  ///< Obsolete function; users can control messages with logger config file.
     void                      setEmbeddingMode(Bool_t a)
     {
         mEmbed = a;
@@ -79,7 +79,7 @@ public:
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.49 2006/01/16 11:12:22 suaide Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.50 2007/01/22 19:13:28 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 

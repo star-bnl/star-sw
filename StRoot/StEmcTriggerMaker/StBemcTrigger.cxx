@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.21 2006/11/28 14:13:33 rfatemi Exp $
+// $Id: StBemcTrigger.cxx,v 1.22 2007/01/22 19:13:43 kocolosk Exp $
 //
 //
 
@@ -13,7 +13,6 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "tables/St_emcPed_Table.h"
 #include "StEmcUtil/database/StBemcTables.h"
-#include "StMessMgr.h"
 
 ClassImp(StBemcTrigger);
 
@@ -23,7 +22,6 @@ StBemcTrigger::StBemcTrigger():TObject()
     mGeo=StEmcGeom::getEmcGeom("bemc");
     mEvent = NULL;
     mDecoder = NULL;
-    mPrint = true;
     resetConf();
 }
 //----------------------------------------------------
@@ -463,13 +461,7 @@ int StBemcTrigger::get2003Trigger()
             if(HTH>0)
                 B5 = 1; // IF top bits !=0 B5=1
             mTrigger.HT[i] = HTL+(B5<<5); // Or top bits
-            if(mPrint)
-			{
-                LOG_INFO <<"Patch number "<<i<<" Tower id = "<<HTID
-                <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
-                <<" HT = "<<mTrigger.HT[i]<<endm;
-			}
-
+			{ LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<HTID<<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]<<" HT = "<<mTrigger.HT[i]<<endm; }
             if (mTrigger.HT[i]>HTmax)
             {
                 HTmax=mTrigger.HT[i];
@@ -686,15 +678,9 @@ int StBemcTrigger::get2004Trigger()
             if(HTH>0)
                 B5 = 1;
             mTrigger.HT[i] = HTL+(B5<<5);
-            if(mPrint)
-			{
-                LOG_INFO <<"Patch number "<<i
-                <<" Tower id = "<<HTID
-                <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
-                <<" adc08 = "<<adc08[HTID-1]
-                <<" HT10 = "<<HT<<" PA12 = "<<PA
-                <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm;
-			}
+			{ LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<HTID<<" adc12 = "<<adc12[HTID-1]<<" adc10 = "
+				<<adc10[HTID-1]<<" adc08 = "<<adc08[HTID-1]<<" HT10 = "<<HT<<" PA12 = "<<PA
+				<<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm; }
             if (mTrigger.HT[i]>HTmax)
             {
                 HTmax=mTrigger.HT[i];
@@ -1023,15 +1009,9 @@ int StBemcTrigger::get2005Trigger()
             if(HTH>0) B5 = 1;
             mTrigger.HT[i] = HTL+(B5<<5);
 	    mTrigger.HTID[i] = HTID;
-            if(mPrint)
-			{
-	      LOG_INFO <<"Patch number "<<i
-		   <<" Tower id = "<<mTrigger.HTID[i]
-		   <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
-		   <<" adc08 = "<<adc08[HTID-1]
-		   <<" HT10 = "<<HT<<" PA12 = "<<PA
-		   <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm;
-			}
+		{ LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<mTrigger.HTID[i]<<" adc12 = "<<adc12[HTID-1]
+			<<" adc10 = "<<adc10[HTID-1]<<" adc08 = "<<adc08[HTID-1]<<" HT10 = "<<HT<<" PA12 = "<<PA
+			<<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm; }
 	    
             if (mTrigger.HT[i]>HTmax){
 	      HTmax=mTrigger.HT[i];
@@ -1041,13 +1021,13 @@ int StBemcTrigger::get2005Trigger()
 	    if (mTrigger.HT[i]>HT1_TH_2005){
 	      HT1_2005_array[numHT1_2005]=HTID;
 	      numHT1_2005++;
-	      LOG_INFO<<HTID<<" Passed HT1 threshold="<<numHT1_2005<<"  "<<HT1_2005_array[numHT1_2005-1]<<endm;
+	      LOG_DEBUG<<HTID<<" Passed HT1 threshold="<<numHT1_2005<<"  "<<HT1_2005_array[numHT1_2005-1]<<endm;
 	    }
 	    
 	    if (mTrigger.HT[i]>HT2_TH_2005){
 	      HT2_2005_array[numHT2_2005]=HTID;
 	      numHT2_2005++;
-	      LOG_INFO<<HTID<<" Passed HT2 threshold="<<numHT2_2005<<"  "<<HT2_2005_array[numHT2_2005-1]<<endm;
+	      LOG_DEBUG<<HTID<<" Passed HT2 threshold="<<numHT2_2005<<"  "<<HT2_2005_array[numHT2_2005-1]<<endm;
 	    }
 
         }
@@ -1159,12 +1139,12 @@ int StBemcTrigger::get2005Trigger()
 	      JPSI_2005_ADC[i]=mTrigger.HT[k];
 	      JPSI_2005_ID[i]=mTrigger.HTID[k];
 	    }
-	    LOG_INFO<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2005_ADC="<<JPSI_2005_ADC[i]<<endm;
+	    LOG_DEBUG<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2005_ADC="<<JPSI_2005_ADC[i]<<endm;
         }
 	if  (JPSI_2005_ADC[i]>JJSI_TH_2005) {
 	  JpsiPatch[i]=1;
 	}
-	LOG_INFO<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2005_ID[i]<<"  with ADC= "<<JPSI_2005_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
+	LOG_DEBUG<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2005_ID[i]<<"  with ADC= "<<JPSI_2005_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
     }
 
     if ((JpsiPatch[0]&&(JpsiPatch[2]||JpsiPatch[3]||JpsiPatch[4])) ||
@@ -1400,15 +1380,9 @@ int StBemcTrigger::get2006Trigger()
 	if(HTH>0) B5 = 1;
 	mTrigger.HT[i] = HTL+(B5<<5);
 	mTrigger.HTID[i] = HTID;
-	if(mPrint)
-	  {
-	    LOG_INFO <<"Patch number "<<i
-		     <<" Tower id = "<<mTrigger.HTID[i]
-		     <<" adc12 = "<<adc12[HTID-1]<<" adc10 = "<<adc10[HTID-1]
-		     <<" adc08 = "<<adc08[HTID-1]
-		     <<" HT10 = "<<HT<<" PA12 = "<<PA
-		     <<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm;
-	  }
+	{ LOG_DEBUG <<"Patch number "<<i<<" Tower id = "<<mTrigger.HTID[i]<<" adc12 = "<<adc12[HTID-1]
+		<<" adc10 = "<<adc10[HTID-1]<<" adc08 = "<<adc08[HTID-1]<<" HT10 = "<<HT<<" PA12 = "<<PA
+		<<" HT = "<<mTrigger.HT[i]<<" PA = "<<mTrigger.Patch[i]<<endm; }
 	
 	if (mTrigger.HT[i]>HTmax){
 	  HTmax=mTrigger.HT[i];
@@ -1568,12 +1542,12 @@ int StBemcTrigger::get2006Trigger()
 	      JPSI_2006_ADC[i]=mTrigger.HT[k];
 	      JPSI_2006_ID[i]=mTrigger.HTID[k];
 	    }
-	    LOG_INFO<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2006_ADC="<<JPSI_2006_ADC[i]<<endm;
+	    LOG_DEBUG<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2006_ADC="<<JPSI_2006_ADC[i]<<endm;
         }
 	if  (JPSI_2006_ADC[i]>JJSI_TH_2006) {
 	  JpsiPatch[i]=1;
 	}
-	LOG_INFO<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2006_ID[i]<<"  with ADC= "<<JPSI_2006_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
+	LOG_DEBUG<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2006_ID[i]<<"  with ADC= "<<JPSI_2006_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
     }
 
     if ((JpsiPatch[0]&&(JpsiPatch[2]||JpsiPatch[3]||JpsiPatch[4])) ||
@@ -1593,4 +1567,3 @@ int StBemcTrigger::get2006Trigger()
     delete mDecoder;
     return kStOK;
 }
-

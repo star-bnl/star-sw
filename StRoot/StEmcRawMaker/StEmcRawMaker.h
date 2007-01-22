@@ -1,4 +1,4 @@
-// $Id: StEmcRawMaker.h,v 1.5 2006/01/16 11:12:00 suaide Exp $
+// $Id: StEmcRawMaker.h,v 1.6 2007/01/22 19:13:37 kocolosk Exp $
 
 /*!\class StEmcRawMaker
 \author Alexandre A. P. Suaide
@@ -60,11 +60,11 @@ public:
     {
         return mBemcRaw;
     } ///< Return the StBemcRaw pointer
-    void                      setPrint(Bool_t a);///< Set it to kFALSE if you do not want to print messages
+    void                      setPrint(Bool_t a); ///< Obsolete function; users can control messages with logger config file.
 
     virtual const char *      GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.5 2006/01/16 11:12:00 suaide Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcRawMaker.h,v 1.6 2007/01/22 19:13:37 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -74,6 +74,9 @@ public:
 #endif
 
 // $Log: StEmcRawMaker.h,v $
+// Revision 1.6  2007/01/22 19:13:37  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.5  2006/01/16 11:12:00  suaide
 // tower map bug fixed and astyle run
 //

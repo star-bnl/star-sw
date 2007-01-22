@@ -31,7 +31,7 @@ StPmtSignal::StPmtSignal(Int_t iPmt)
         break;
     default:
         mPmt = 1;
-        gMessMgr->Error() << "StPmtSignal::StPmtSignal : Bad value of type of PMT \n" <<iPmt
+        LOG_ERROR << "StPmtSignal::StPmtSignal : Bad value of type of PMT \n" <<iPmt
         <<" , change to default value => "<<mPmt;
     }
 }
@@ -88,7 +88,7 @@ Int_t StPmtSignal::getAdc(Int_t nphe, Int_t iver) // See impsig
     Int_t adc;
     if(mPmt==0)
     {
-        printf("<I> Define PMT characteristics !!! \n");
+        LOG_ERROR << Form("Define PMT characteristics !!!") << endm;
         return -9999;
     }
     // Rykov's notation
@@ -133,10 +133,10 @@ Int_t StPmtSignal::getAdc(Int_t nphe, Int_t iver) // See impsig
 // _____________________________________________________________________
 void StPmtSignal::printParameters()
 {
-    printf("\n Coefficient for transition from number of phe to adc (gain) => %f \n",
-           mFromPheToAdc);
-    printf(" Mean value of ADC pedestal(adcped) (ADC-counts) %7.3f\n", mMeanAdcPed);
-    printf(" RMS  value of ADC pedestal(gnoise) (ADC-counts) %7.3f\n \n", mRmsAdcPed);
+    LOG_INFO << Form("Coefficient for transition from number of phe to adc (gain) => %f",
+           mFromPheToAdc) << endm;
+    LOG_INFO << Form(" Mean value of ADC pedestal(adcped) (ADC-counts) %7.3f", mMeanAdcPed) << endm;
+    LOG_INFO << Form(" RMS  value of ADC pedestal(gnoise) (ADC-counts) %7.3f", mRmsAdcPed) << endm; 
 }
 // _____________________________________________________________________
 void StPmtSignal::setAllParameters(Float_t gainw, Float_t adcpedw, Float_t gnoisew)
@@ -159,31 +159,36 @@ void StPmtSignal::setAllParameters(Float_t gainw, Float_t adcpedw, Float_t gnois
 void StPmtSignal::print(Int_t iprint=1)
 {
     Int_t i;
-    printf(" Type of PMT   => %30s Number %i \n",GetName(),mPmt);
-    printf(" Type of bases => %30s \n",GetTitle());
-    printf(" Number of dynodes %2i \n",mNumDynodes);
-    printf(" PMT Gain          %12.5e \n",mPmtGain);
-    printf(" Noise on photocathode(cnoise) %8.6f \n",mProbPhotoCatode);
-    printf(" Noise on       dynode(dnoise) %8.6f \n",mProbPhotoCatode);
-    printf(" Relative Voltage distribution (base) \n");
+    LOG_INFO << Form(" Type of PMT   => %30s Number %i",GetName(),mPmt) << endm;
+    LOG_INFO << Form(" Type of bases => %30s",GetTitle()) << endm;
+    LOG_INFO << Form(" Number of dynodes %2i",mNumDynodes) << endm;
+    LOG_INFO << Form(" PMT Gain          %12.5e",mPmtGain) << endm;
+    LOG_INFO << Form(" Noise on photocathode(cnoise) %8.6f",mProbPhotoCatode) << endm;
+    LOG_INFO << Form(" Noise on       dynode(dnoise) %8.6f",mProbPhotoCatode) << endm;
+    LOG_INFO << Form(" Relative Voltage distribution (base)") << endm;
     for(i=0;i<mNumDynodes;i++)
-        printf("     i %2i %4.1f \n",i+1,mNodeVoltage[i]);
+        LOG_INFO << Form("     i %2i %4.1f",i+1,mNodeVoltage[i]) << endm;
     if(iprint>=10)
     {  // Print also work arrays
-        printf(" sec  \n");
-        for(i=0; i<mNumDynodes; i++)
-            printf(" i %2i %20.7e \n",i,sec[i]);
-        printf(" dyngain  \n");
-        for(i=0; i<=mNumDynodes; i++)
-            printf(" i %2i %20.7e \n",i,dyngain[i]);
-        printf(" g1  \n");
-        for(i=0; i<=mNumDynodes; i++)
-            printf(" i %2i %20.7e \n",i,g1[i]);
-        printf(" gdyn  \n");
-        for(i=0; i<=mNumDynodes; i++)
-            printf(" i %2i %20.7e \n",i,gdyn[i]);
-        printf(" dnw  \n");
-        for(i=0; i<=mNumDynodes; i++)
-            printf(" i %2i %20.7e \n",i,dnw[i]);
+        LOG_INFO << Form(" sec ") << endm;
+        for(i=0; i<mNumDynodes; i++) {
+            LOG_INFO << Form(" i %2i %20.7e",i,sec[i]) << endm;
+		}
+        LOG_INFO << Form(" dyngain ") << endm;
+        for(i=0; i<=mNumDynodes; i++) {
+            LOG_INFO << Form(" i %2i %20.7e",i,dyngain[i]) << endm;
+		}
+        LOG_INFO << Form(" g1 ") << endm;
+        for(i=0; i<=mNumDynodes; i++) {
+            LOG_INFO << Form(" i %2i %20.7e",i,g1[i]) << endm;
+		}
+        LOG_INFO << Form(" gdyn ") << endm;
+        for(i=0; i<=mNumDynodes; i++) {
+            LOG_INFO << Form(" i %2i %20.7e",i,gdyn[i]) << endm;
+		}
+        LOG_INFO << Form(" dnw ") << endm;
+        for(i=0; i<=mNumDynodes; i++) {
+            LOG_INFO << Form(" i %2i %20.7e",i,dnw[i]) << endm;
+		}
     }
 }

@@ -28,6 +28,7 @@
 #include "StEmcSimpleSimulator.h"
 #include "tables/St_controlEmcPmtSimulator_Table.h"
 #include "StPmtSignal.h"
+#include "StMessMgr.h"
 
 class StEmcPmtSimulator : public StEmcSimpleSimulator
 {
@@ -45,8 +46,6 @@ protected:
     Double_t mC3;
     Int_t    mVer;
 
-    Bool_t mPrint;
-
 public:
     StEmcPmtSimulator(UInt_t det);
     virtual ~StEmcPmtSimulator()
@@ -61,16 +60,19 @@ public:
     virtual void    print();
     void            setPrint(Bool_t a)
     {
-        mPrint = a;
-    }
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+    }///< Obsolete function; users can control messages with logger config file.
 
     ClassDef(StEmcPmtSimulator, 1) // Emc simulator with accounting primary and secondary photostatistics
 };
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.h,v 1.5 2005/03/21 21:36:39 suaide Exp $
+//  $Id: StEmcPmtSimulator.h,v 1.6 2007/01/22 19:13:40 kocolosk Exp $
 //  $Log: StEmcPmtSimulator.h,v $
+//  Revision 1.6  2007/01/22 19:13:40  kocolosk
+//  use STAR logger for all output
+//
 //  Revision 1.5  2005/03/21 21:36:39  suaide
 //  fixed problem with chain
 //

@@ -1,6 +1,9 @@
 //
-// $Id: StBemcRaw.cxx,v 1.19 2006/08/07 02:29:16 kocolosk Exp $
+// $Id: StBemcRaw.cxx,v 1.20 2007/01/22 19:13:37 kocolosk Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.20  2007/01/22 19:13:37  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.19  2006/08/07 02:29:16  kocolosk
 // one more change to allow saving CAP==127||128 via control table
 //
@@ -129,18 +132,18 @@ StBemcRaw::~StBemcRaw()
 }
 void StBemcRaw::printConf()
 {
-    gMessMgr->Info()<<"Configuration for BEMC hit reconstruction "<<endm;
+    LOG_INFO <<"Configuration for BEMC hit reconstruction "<<endm;
     for(Int_t i=0;i<MAXDETBARREL;i++)
     {
-        gMessMgr->Info() <<"  Configuration for detector "<<detname[i].Data()<<endm;
-        gMessMgr->Info() <<"     switch for deducting pedestal     = "<<mControlADCtoE->DeductPedestal[i]<<endm;
-        gMessMgr->Info() <<"     switch for calibration            = "<<mControlADCtoE->Calibration[i]<<endm;
-        gMessMgr->Info() <<"     cutoff type                       = "<<mControlADCtoE->CutOffType[i]<<endm;
-        gMessMgr->Info() <<"     cutoff value                      = "<<mControlADCtoE->CutOff[i]<<endm;
-        gMessMgr->Info() <<"     save only calibrated hits         = "<<mControlADCtoE->OnlyCalibrated[i]<<endm;
-        gMessMgr->Info() <<"     save only if status is ok         = "<<mControlADCtoE->CheckStatus[i]<<endm;
-        gMessMgr->Info() <<"     save only if crate is ok          = "<<mControlADCtoE->CheckCrate[i]<<endm;
-        gMessMgr->Info() <<"     SAVE ALL FLAG (overwrites above)  = "<<(Int_t)mSaveAllStEvent<<endm;
+        LOG_INFO <<"  Configuration for detector "<<detname[i].Data()<<endm;
+        LOG_INFO <<"     switch for deducting pedestal     = "<<mControlADCtoE->DeductPedestal[i]<<endm;
+        LOG_INFO <<"     switch for calibration            = "<<mControlADCtoE->Calibration[i]<<endm;
+        LOG_INFO <<"     cutoff type                       = "<<mControlADCtoE->CutOffType[i]<<endm;
+        LOG_INFO <<"     cutoff value                      = "<<mControlADCtoE->CutOff[i]<<endm;
+        LOG_INFO <<"     save only calibrated hits         = "<<mControlADCtoE->OnlyCalibrated[i]<<endm;
+        LOG_INFO <<"     save only if status is ok         = "<<mControlADCtoE->CheckStatus[i]<<endm;
+        LOG_INFO <<"     save only if crate is ok          = "<<mControlADCtoE->CheckCrate[i]<<endm;
+        LOG_INFO <<"     SAVE ALL FLAG (overwrites above)  = "<<(Int_t)mSaveAllStEvent<<endm;
     }
 }
 void StBemcRaw::createDecoder(Int_t date, Int_t time)
@@ -249,33 +252,33 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
 {
     if(!DAQ)
     {
-        gMessMgr->Warning() <<"Could not find DAQ DataSet "<<endm;
+        LOG_ERROR <<"Could not find DAQ DataSet "<<endm;
         return kFALSE;
     }
     if(!RAW)
     {
-        gMessMgr->Warning() <<"Could not find StEmcRawData pointer for BEMC"<<endm;
+		LOG_ERROR <<"Could not find StEmcRawData pointer for BEMC"<<endm;
         return kFALSE;
     }
 
     StDAQReader* TheDataReader=(StDAQReader*)(DAQ->GetObject());
     if(!TheDataReader || !TheDataReader->EMCPresent())
     {
-        gMessMgr->Warning() <<"Data Reader is not present "<<endm;
+        LOG_ERROR <<"Data Reader is not present "<<endm;
         return kFALSE;
     }
 
     StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
     if(!TheEmcReader)
     {
-        gMessMgr->Warning() <<"Could not find BEMC Reader "<<endm;
+        LOG_ERROR <<"Could not find BEMC Reader "<<endm;
         return kFALSE;
     }
 
     EMC_Reader* reader = TheEmcReader->getBemcReader();
     if(!reader)
     {
-        gMessMgr->Warning() <<"Could not find Barrel Reader "<<endm;
+        LOG_ERROR <<"Could not find Barrel Reader "<<endm;
         return kFALSE;
     }
 
@@ -490,16 +493,16 @@ void StBemcRaw::updateStats(Int_t det,Int_t S,Int_t ADC, Float_t E)
 }
 void StBemcRaw::printStats(Int_t det)
 {
-    gMessMgr->Info() <<"Statistics for detector  "<<detname[det-1].Data()<<endm;
-    gMessMgr->Info() <<"   Total number of crates with header ok = "<<mNCRATESOK[det-1]<<endm;
-    gMessMgr->Info() <<"   Total number of hits                  = "<<mNTOTAL[det-1]<<endm;
-    gMessMgr->Info() <<"   Total hits removed because of crates  = "<<mNCRATE[det-1]<<endm;
-    gMessMgr->Info() <<"   Total hits removed because ADC = 0    = "<<mNZ[det-1]<<endm;
-    gMessMgr->Info() <<"   Total hits removed by Pedestal        = "<<mNPED[det-1]+mNRMS[det-1]<<endm;
-    gMessMgr->Info() <<"   Total hits removed by Status          = "<<mNSTATUS[det-1]<<endm;
-    gMessMgr->Info() <<"   Total number of hits saved            = "<<mNOK[det-1]<<endm;
-    gMessMgr->Info() <<"   Total ADCSUM of valid hits            = "<<mADCSUM[det-1]<<endm;
-    gMessMgr->Info() <<"   Total Energy of valid hits            = "<<mTOTALE[det-1]<<endm;
+    LOG_DEBUG <<"Statistics for detector  "<<detname[det-1].Data()<<endm;
+    LOG_DEBUG <<"   Total number of crates with header ok = "<<mNCRATESOK[det-1]<<endm;
+    LOG_DEBUG <<"   Total number of hits                  = "<<mNTOTAL[det-1]<<endm;
+    LOG_DEBUG <<"   Total hits removed because of crates  = "<<mNCRATE[det-1]<<endm;
+    LOG_DEBUG <<"   Total hits removed because ADC = 0    = "<<mNZ[det-1]<<endm;
+    LOG_DEBUG <<"   Total hits removed by Pedestal        = "<<mNPED[det-1]+mNRMS[det-1]<<endm;
+    LOG_DEBUG <<"   Total hits removed by Status          = "<<mNSTATUS[det-1]<<endm;
+    LOG_DEBUG <<"   Total number of hits saved            = "<<mNOK[det-1]<<endm;
+    LOG_DEBUG <<"   Total ADCSUM of valid hits            = "<<mADCSUM[det-1]<<endm;
+    LOG_DEBUG <<"   Total Energy of valid hits            = "<<mTOTALE[det-1]<<endm;
 }
 //_____________________________________________________________________________
 /*!
@@ -511,12 +514,12 @@ Int_t StBemcRaw::getBemcADCRaw(Int_t det, Int_t softId, StEmcRawData* RAW, Int_t
     CRATE = 0;
     if(!RAW)
     {
-        gMessMgr->Warning() <<"Could not find StEmcRawData pointer for BEMC "<<endm;
+        LOG_WARN <<"Could not find StEmcRawData pointer for BEMC det: " << det << " softId: " << softId <<endm;
         return 0;
     }
     if(!mDecoder)
     {
-        gMessMgr->Warning() <<"Could not find StEmcDecoderoder pointer "<<endm;
+        LOG_WARN <<"Could not find StEmcDecoder pointer for BEMC det: " << det << " softId: " << softId <<endm;
         return 0;
     }
     if(det==BTOW) // tower

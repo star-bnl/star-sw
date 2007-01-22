@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.h,v 1.9 2006/11/28 14:13:34 rfatemi Exp $
+// $Id: StBemcTrigger.h,v 1.10 2007/01/22 19:13:43 kocolosk Exp $
 //
 //
 
@@ -10,6 +10,8 @@
 #ifndef STAR_StBemcTrigger
 #define STAR_StBemcTrigger
 #include "TObject.h"
+
+#include "StMessMgr.h"
 
 #define kNPatches 300
 #define kNJet 12
@@ -45,7 +47,6 @@ private:
     St_db_Maker*   mDbMaker;
     StBemcTables*  mTables;
     emcTrigger     mTrigger;
-    bool           mPrint;
 
     int get2003Trigger();
     int get2004Trigger();
@@ -161,8 +162,8 @@ public:
     }
     void           setPrint(bool a)
     {
-        mPrint = a;
-    }
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+    }///< Obsolete function; users can control messages with logger config file.
     void           setDbMaker(St_db_Maker* dbMaker)
     {
         mDbMaker = dbMaker;

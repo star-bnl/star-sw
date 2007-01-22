@@ -23,6 +23,7 @@ can be turned off, if desired.
 #ifndef STAR_StEmcMixerMaker
 #define STAR_StEmcMixerMaker
 #include "StMaker.h"
+#include "StMessMgr.h"
 #include <TH1.h>
 #include <TH2.h>
 
@@ -50,7 +51,6 @@ class StEmcMixerMaker : public StMaker
     Bool_t        mAddHits;
     Bool_t        mUseDB;
     Bool_t        mFakeTrackEmbed;
-    Bool_t        mDoPrint;
     Bool_t        mEmbedAll;
 
     TH1F          *m_hit_1;
@@ -85,9 +85,9 @@ class StEmcMixerMaker : public StMaker
     void          setAddFlag(Bool_t a)      { mAddHits = a; } ///< Set kTRUE to embed hits
     void          setFakeTrack(Bool_t a)    { mFakeTrackEmbed = a; } ///< Set kTRUE to merge tracks
     void          setEmbedAll(Bool_t a)     { mEmbedAll = a; } ///< Set kTRUE to embedd all hits even if the first emcCollection has no hits
-    void          setPrint(Bool_t a)        { mDoPrint = a; } ///< Set kTRUE to print debug information
+	void          setPrint(Bool_t a)        { LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm; } ///< Obsolete function; users can control messages with logger config file.
     
-    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.4 2004/04/16 15:25:27 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.5 2007/01/22 19:13:34 kocolosk Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcMixerMaker,0) 
 };

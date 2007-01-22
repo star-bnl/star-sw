@@ -4,6 +4,7 @@
 #include "TMath.h"
 #include "StEmcUtil/others/emcInternalDef.h"
 #include "Stiostream.h"
+#include "StMessMgr.h"
 
 ClassImp(StEmcSimpleSimulator)
 
@@ -69,7 +70,7 @@ void StEmcSimpleSimulator::setControlDefault(UInt_t det=1)
         controlW.pedRMS           = 4.;
         break;
     default:
-        printf("<W> Wrong value of #det %i \n", mDetector);
+        LOG_WARN << Form("Wrong value of #det %i", mDetector) << endm;
     }
     mControl.AddAt(&controlW,0);
     init();
@@ -104,7 +105,7 @@ void StEmcSimpleSimulator::init()
     }
     else
     {
-        printf("StEmcSimpleSimulator::init() -> wrong parameter(s) \n");
+        LOG_FATAL << Form("StEmcSimpleSimulator::init() -> wrong parameter(s)") << endm;
         assert(0);
     }
 }
@@ -135,32 +136,32 @@ void StEmcSimpleSimulator::print()
 
     if(mMode==0 || mMode==1)
     {
-        printf(" <I> Simple Simulator for detector %i \n", mDetector);
-        printf(" Mode = %1i -> %s\n", mMode, tit[mMode]);
+        LOG_INFO << Form("Simple Simulator for detector %i", mDetector) << endm;
+        LOG_INFO << Form(" Mode = %1i -> %s", mMode, tit[mMode]) << endm;
     }
     switch (mKeySet)
     {
     case  0:
-        printf(" == No DB, ideal calibration , smoothing on eta ==\n");
-        printf("     Max Energy  %5.1f GeV (eta=0)\n", mMaxEnergy);
+        LOG_INFO << Form(" == No DB, ideal calibration , smoothing on eta ==") << endm;
+        LOG_INFO << Form("     Max Energy  %5.1f GeV (eta=0)", mMaxEnergy) << endm;
         break;
     case  1:
-        printf(" ==        DB in action    == \n");
-        printf("     Max Energy  %5.1f GeV \n", mMaxEnergy);
+        LOG_INFO << Form(" ==        DB in action    ==") << endm;
+        LOG_INFO << Form("     Max Energy  %5.1f GeV", mMaxEnergy) << endm;
         break;
     default:
-        printf(" ==  Bad case : cell is bad   == \n");
+		LOG_INFO << Form(" ==  Bad case : cell is bad   ==") << endm;
     }
-    printf("     Max Adc     %i \n", mMaxAdc);
-    printf("     reverse calibration coefficient %f -> %f \n", mC1, 1./mC1);
-    printf("     sample fraction function => %10.2f  %10.2f*x + %10.2f*x*x\n", mSF[0], mSF[1], mSF[2]);
+    LOG_INFO << Form("     Max Adc     %i", mMaxAdc) << endm;
+    LOG_INFO << Form("     reverse calibration coefficient %f -> %f", mC1, 1./mC1) << endm;
+    LOG_INFO << Form("     sample fraction function => %10.2f  %10.2f*x + %10.2f*x*x", mSF[0], mSF[1], mSF[2]) << endm;
     switch (mPedType)
     {
     case 1:
-        printf("     Pedestal distribution is GAUSS -> mean %7.2f rms %7.2f\n",  mPedMean, mPedRMS);
+        LOG_INFO << Form("     Pedestal distribution is GAUSS -> mean %7.2f rms %7.2f",  mPedMean, mPedRMS) << endm;
         break;
     default:
-        printf(" No pedestal \n");
+        LOG_INFO << Form(" No pedestal") << endm;
     }
 }
 
@@ -275,8 +276,11 @@ Double_t StEmcSimpleSimulator::getSinTheta(Double_t eta)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.10 2005/03/21 21:36:39 suaide Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.11 2007/01/22 19:13:40 kocolosk Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
+//  Revision 1.11  2007/01/22 19:13:40  kocolosk
+//  use STAR logger for all output
+//
 //  Revision 1.10  2005/03/21 21:36:39  suaide
 //  fixed problem with chain
 //
