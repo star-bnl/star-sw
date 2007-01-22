@@ -1,6 +1,9 @@
-// $Id: StFtpcLaserCalib.cc,v 1.5 2007/01/19 08:22:59 jcs Exp $
+// $Id: StFtpcLaserCalib.cc,v 1.6 2007/01/22 13:08:15 jcs Exp $
 //
 // $Log: StFtpcLaserCalib.cc,v $
+// Revision 1.6  2007/01/22 13:08:15  jcs
+// replace cout with LOG
+//
 // Revision 1.5  2007/01/19 08:22:59  jcs
 // replace true, false with kTRUE, kFALSE
 //
@@ -99,8 +102,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
   Double_t chisq = 0;
   Double_t deltaxz, deltayz;
-  //cout<<"in fcn vor for .."<<endl;
-  //cout<<nhits<<endl;
+  //LOG_DEBUG<<"in fcn vor for .."<<nhits<<" hits"<<endm;
 
   for (i=0;i<nhits; i++) 
     {
@@ -111,7 +113,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
       chisq += (deltaxz*deltaxz+deltayz*deltayz);
     }
 
-  //cout<<f<<endl;
+  //LOG_DEBUG<<" f = "<<f<<endm;
   f = chisq;
 }
 
@@ -119,7 +121,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 
 bool StFtpcLaserCalib::cut(int i)
 {
-  //cout<<"in cut mit "<< z[i]<< " "<<hsec[i]<<endl;
+  //LOG_DEBUG<<"in cut mit "<< z[i]<< " "<<hsec[i]<<endm;
   if ((z[i]>MINZ && z[i]<MAXZ) && (radius[i]>MINRAD && radius[i]<MAXRAD) && laser_sector(FTPC,LSEC,hsec[i]) )
     return kTRUE;
   else
@@ -130,16 +132,16 @@ bool StFtpcLaserCalib::cut(int i)
 
 void StFtpcLaserCalib::minuit_init()
 {
-  //cout<<"Minuit init ..."<<endl;
-  //mMinuit = new TMinuit(4); //???? warum fehelr beim linken !?
+  //LOG_DEBUG<<"Minuit init ..."<<endm;
+  //mMinuit = new TMinuit(4); //???? why is there a link error !?
   mMinuit->SetPrintLevel(-1);
   mMinuit->SetFCN(&fcn);
-  //cout<<"set fcn"<<endl;
+  //LOG_DEBUG<<"set fcn"<<endm;
   ierflg = 0;    
   arglist[0] = 1;
   
   mMinuit->mnexcm("SET ERR", arglist ,1,ierflg);
-  //cout<<"Minuit Error-Code : "<<ierflg<<endl;
+  //LOG_DEBUG<<"Minuit Error-Code : "<<ierflg<<endm;
 }
 
 //______________________________________________________________________________
@@ -147,7 +149,7 @@ void StFtpcLaserCalib::minuit_init()
 void StFtpcLaserCalib::minuit_set_par()
 {
   mMinuit->SetPrintLevel(-1);
-  //cout<<"Minuit set parameter ..."<<endl;
+  //LOG_DEBUG<<"Minuit set parameter ..."<<endm;
   //static Double_t vstart[4] = {1,1,1,1};
   Double_t vstart[4] = {1,1,1,1};
   // ggf. daten werte als Startparameter benutzen !
@@ -157,7 +159,7 @@ void StFtpcLaserCalib::minuit_set_par()
   mMinuit->mnparm(1, "bxz", vstart[1], step[1], 0,0,ierflg);
   mMinuit->mnparm(2, "myz", vstart[2], step[2], 0,0,ierflg);
   mMinuit->mnparm(3, "byz", vstart[3], step[3], 0,0,ierflg);
-  //cout<<"Minuit Error-Code : "<<ierflg<<endl;
+  //LOG_DEBUG<<"Minuit Error-Code : "<<ierflg<<endm;
 }
 
 //______________________________________________________________________________
@@ -167,10 +169,10 @@ void StFtpcLaserCalib::minuit_print()
   // Print results
   Double_t amin,edm,errdef;
   Int_t nvpar,nparx,icstat;
-  cout<<endl;
+  LOG_INFO<<"StFtpcLaserCalib::minuit_print():"<<endm;
   mMinuit->mnstat(amin,edm,errdef,nvpar,nparx,icstat);
   mMinuit->mnprin(5,amin);
-  cout<<endl;
+  LOG_INFO<<" "<<endm;
 }
 
 //______________________________________________________________________________
@@ -178,8 +180,8 @@ void StFtpcLaserCalib::minuit_print()
 
 void StFtpcLaserCalib::calc_res()
 {
-  //cout<<"Calculate residuals in x,y & r,phi  ..."<<endl;
-  //cout<<endl;
+  //LOG_DEBUG<<"Calculate residuals in x,y & r,phi  ..."<<endm;
+  //LOG_DEBUG<<" "<<endm;
 
   TF1 *fxz=new TF1("fxz","[0]*x+[1]",0,6);
   TF1 *fyz=new TF1("fyz","[0]*x+[1]",0,6); 
@@ -256,24 +258,25 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
 
   if ((deltat0!=0 || deltagas!=0) && nhits>0)
     {
-      //cout<<"In neu berechnen ..."<<endl;
+      //LOG_DEBUG<<"calculating new space point..."<<endm;
       for (int i=0;i<nhits;i++) // debug : <=nhits
 	{
 
-	  //cout<<sqrt(x[i]*x[i]+y[i]*y[i])<<endl;
-	  //cout<<softrow[i]<<" "<<softsec[i]<<" "<<timepos[i]<<" "<<ppos[i]<<" "<<x[i]<<" "<<y[i]<<endl;
+	  //LOG_DEBUG<<sqrt(x[i]*x[i]+y[i]*y[i])<<endm;
+	  //LOG_DEBUG<<softrow[i]<<" "<<softsec[i]<<" "<<timepos[i]<<" "<<ppos[i]<<" "<<x[i]<<" "<<y[i]<<endm;
 
 	  if (mtrafo->padtrans(softrow[i],softsec[i],timepos[i],ppos[i],&x[i],&y[i]))
 	    {
 	      
 	      radius[i]=sqrt(x[i]*x[i]+y[i]*y[i]);
-	      //cout<<radius[i]<<endl;
+	      //LOG_DEBUG<<"radius["<<i<<"] = "<<radius[i]<<endm;
 	      phi[i]=zyltrafo(x[i],y[i],z[i]);
 	    }
-	  else
-	    cout<<"ERROR padtrans !"<<endl;
+	  else {
+	    LOG_ERROR<<"ERROR padtrans !"<<endm;
+          }
 	}
-      //cout<<"nach neu berechnen !"<<endl;
+      //LOG_DEBUG<<"after new space point calculation !"<<endm;
     }
   
 #ifdef HELIX_FIT
@@ -298,14 +301,14 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
     {
       StFtpcPoint *mNewPoint=new StFtpcPoint(softrow[i],softsec[i],0,0,0,0,x[i],y[i],z[i],ex[i],ey[i],0,0,0,0);
       mTrackHits->AddLast(mNewPoint);
-      //cout<<mNewPoint->GetX()<<" "<<mNewPoint->GetY()<<" "<<mNewPoint->GetZ()<<endl;
+      //LOG_DEBUG<<mNewPoint->GetX()<<" "<<mNewPoint->GetY()<<" "<<mNewPoint->GetZ()<<endm;
       mLaserTrack->AddPoint((StFtpcPoint*) mTrackHits->Last());
       //delete mNewPoint;
     }
   
   // DEBUG :
-  //cout<<mLaserTrack->GetTrackNumber()<<" "<<mLaserTrack->GetNumberOfPoints()<<endl;
-  //cout<<laser_vertex->GetX()<<" "<<laser_vertex->GetY()<<" "<<laser_vertex->GetZ()<<endl;
+  //LOG_DEBUG<<mLaserTrack->GetTrackNumber()<<" "<<mLaserTrack->GetNumberOfPoints()<<endm;
+  //LOG_DEBUG<<laser_vertex->GetX()<<" "<<laser_vertex->GetY()<<" "<<laser_vertex->GetZ()<<endm;
   
   // ********************************
   // * Fit laser track with Helix ! *
@@ -314,14 +317,14 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
   mLaserTrack->Fit(laser_vertex,2.0,-1,magf);
   
   // DEBUG :
-  //cout<<"p = "<<mLaserTrack->GetP()<<" | pt = "<<mLaserTrack->GetPt()<<" | charge = "<<mLaserTrack->GetCharge()<<endl;
+  //LOG_DEBUG<<"p = "<<mLaserTrack->GetP()<<" | pt = "<<mLaserTrack->GetPt()<<" | charge = "<<mLaserTrack->GetCharge()<<endm;
 
   // get momentum and charge sign of Helix Fit !!!
   trcharge=mLaserTrack->GetCharge();
   p=mLaserTrack->GetP();
   pt=mLaserTrack->GetPt();
   //pt=1/(mLaserTrack->curvature());
-  //cout<<mLaserTrack->curvature()<<endl;
+  //LOG_DEBUG<<mLaserTrack->curvature()<<endm;
 
   // delete Hit Array and get residuals before ...
   for (int i=0;i<nhits;i++)
@@ -333,14 +336,14 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
       resphi2[i]=((StFtpcPoint*) mTrackHits->At(i))->GetPhiResidual();
       
       // DEBUG :
-      //cout<<i<<endl;
-      //cout<<((StFtpcPoint*) mTrackHits->At(i))->GetXS()<<" "<<((StFtpcPoint*) mTrackHits->At(i))->GetX()<<endl;
-      //cout<<((StFtpcPoint*) mTrackHits->At(i))->GetZS()<<" "<<((StFtpcPoint*) mTrackHits->At(i))->GetZ()<<endl; 
+      //LOG_DEBUG<<" i = "<<i<<endm;
+      //LOG_DEBUG<<((StFtpcPoint*) mTrackHits->At(i))->GetXS()<<" "<<((StFtpcPoint*) mTrackHits->At(i))->GetX()<<endm;
+      //LOG_DEBUG<<((StFtpcPoint*) mTrackHits->At(i))->GetZS()<<" "<<((StFtpcPoint*) mTrackHits->At(i))->GetZ()<<endm; 
       // noch nicht alle Punkte richtig !!!!
       // letzter Punkt wird nicht gesetzt (kleinstes z) vgl StFtpcTrack.cc !!!
       // nehme dann standard !!!
 
-      //cout<<x[i]-((StFtpcPoint*) mTrackHits->At(i))->GetXS()<<endl;
+      //LOG_DEBUG<<x[i]-((StFtpcPoint*) mTrackHits->At(i))->GetXS()<<endm;
 
       // create shiftet space position !!!
 
@@ -355,7 +358,7 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
 	  y_s[i]=((StFtpcPoint*) mTrackHits->At(i))->GetY();
 	}
 
-      //cout<<x_s[i]-x[i]<<endl;
+      //LOG_DEBUG<<x_s[i]-x[i]<<endm;
 
       // calc differenz as check !!!
       x_d[i]=x[i]-x_s[i];y_d[i]=y[i]-y_s[i];
@@ -397,9 +400,9 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
 
   if (nhits>0)
     {
-      //cout<<"gehe in fit"<<endl;
+      //LOG_DEBUG<<"start fit"<<endm;
       mMinuit->mnexcm("MIGRAD", arglist , 2 ,ierflg);
-      //cout<<"Minuit Error-Code : "<<ierflg<<endl;
+      //LOG_DEBUG<<"Minuit Error-Code : "<<ierflg<<endm;
       //check if fit okay !
       if (ierflg==0) 
 	{
@@ -414,11 +417,11 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
     }
   else
     {
-      //cout<<"ERROR : Number cluster on tracks = 0 !"<<endl;
+      LOG_ERROR<<"StFtpcLaserCalib::laser_fit - Number cluster on tracks = 0 !"<<endm;
       ierflg=-1;
     }
 
-  //cout<<"Minuit Error-Code : "<<ierflg<<endl;
+  //LOG_DEBUG<<"Minuit Error-Code : "<<ierflg<<endm;
 
   nhits=0;
   return ierflg;
@@ -430,14 +433,14 @@ int StFtpcLaserCalib::laser_fit(int getnhits)
 void StFtpcLaserCalib::defl_angle_transv()
 {  
   TSpectrum *specrad=new TSpectrum();
-  //cout<<"*******************************"<<endl;
-  //cout<<"Anzahl der Hits (rad) : "<<specrad->Search(hrad,3)<<endl;
-  cout<<"*******************************"<<endl;
+  //LOG_DEBUG<<"*******************************"<<endm;
+  //LOG_DEBUG<<"Anzahl der Hits (rad) : "<<specrad->Search(hrad,3)<<endm;
+  LOG_INFO<<"*******************************"<<endm;
   for (int i=0;i<specrad->Search(hrad,2.5);i++)
     {
-      cout<<"Radius "<<i<<" : "<<specrad->GetPositionX()[i]<<endl;
+      LOG_INFO<<"Radius "<<i<<" : "<<specrad->GetPositionX()[i]<<endm;
     }
-   cout<<"*******************************"<<endl;
+   LOG_INFO<<"*******************************"<<endm;
   specrad->Delete();
 }
 
@@ -606,12 +609,12 @@ void StFtpcLaserCalib::PositionLog()
   logfile.open(filename+".log",ios::out);
   
   TSpectrum *spec=new TSpectrum();
-  //cout<<endl;
-  //cout<<"Fitte Gaus um Radius Verteilung der "<<spec->Search(hrad,6)<<" rekonstruierten geraden Laserspuren..."<<endl;
-  //cout<<"-----------------------------------------------------------------------------"<<endl;
+  //LOG_DEBUG<<" "<<endm;
+  //LOG_DEBUG<<"Gaus fit to radius distribution of the "<<spec->Search(hrad,6)<<" reconstructed straight Laser tracks..."<<endm;
+  //LOG_DEBUG<<"-----------------------------------------------------------------------------"<<endm;
   for (int i=0;i<spec->Search(hrad,6);i++)
     {
-      //cout<<"Radius after Peakfinder : "<<(spec->GetPositionX())[i]<<endl;
+      //LOG_DEBUG<<"Radius after Peakfinder : "<<(spec->GetPositionX())[i]<<endm;
       logfile<<"Radius after Peakfinder : "<<(spec->GetPositionX())[i]<<endl;
       if (GAUSFIT==1)
 	{
@@ -621,16 +624,16 @@ void StFtpcLaserCalib::PositionLog()
 	  gausfit->SetParameter(1,(spec->GetPositionX())[i]);
 	  // ggf. ParLimits einfuehren um richtige Fehlerbehandlung !!!
 	  hrad->Fit(gausfit,"RQN");
-	  //cout<<"Radius after Gausfit : "<<gausfit->GetParameter(1)<<" +- "<<gausfit->GetParameter(2)<<endl;
+	  //LOG_DEBUG<<"Radius after Gausfit : "<<gausfit->GetParameter(1)<<" +- "<<gausfit->GetParameter(2)<<endm;
 	  logfile<<"Radius after Gausfit : "<<gausfit->GetParameter(1)<<" +- "<<gausfit->GetParameter(2)<<endl;
 	}
     }
-  //cout<<endl;
-  //cout<<"Fitte Gaus um Phi Verteilung der "<<spec->Search(hphi,2)<<" rekonstruierten geraden Laserspuren..."<<endl;
-  //cout<<"-----------------------------------------------------------------------------"<<endl;
+  //LOG_DEBUG<<" "<<endm;
+  //LOG_DEBUG<<"Gaus fit to phi distribution of the "<<spec->Search(hphi,2)<<" reconstructed straight Laser tracks..."<<endm;
+  //LOG_DEBUG<<"-----------------------------------------------------------------------------"<<endm;
   for (int i=0;i<spec->Search(hphi,6);i++)
     {
-      //cout<<"Phi after Peakfinder : "<<(spec->GetPositionX())[i]<<endl;
+      //LOG_DEBUG<<"Phi after Peakfinder : "<<(spec->GetPositionX())[i]<<endm;
       logfile<<"Phi after Peakfinder : "<<(spec->GetPositionX())[i]<<endl;
       if (GAUSFIT==1)
 	{
@@ -639,12 +642,11 @@ void StFtpcLaserCalib::PositionLog()
 	  TF1 *gausfit2=new TF1("gausfit2","gaus",min,max);
 	  gausfit2->SetParameter(1,(spec->GetPositionX())[i]);
 	  hphi->Fit(gausfit2,"RQN");
-	  //cout<<"Phi after Gausfit : "<<gausfit2->GetParameter(1)<<" +- "<<gausfit2->GetParameter(2)<<endl;
+	  //LOG_DEBUG<<"Phi after Gausfit : "<<gausfit2->GetParameter(1)<<" +- "<<gausfit2->GetParameter(2)<<endm;
 	  logfile<<"Phi after Gausfit : "<<gausfit2->GetParameter(1)<<" +- "<<gausfit2->GetParameter(2)<<endl;
 	}
     }
   logfile.close();
-  cout<<endl;
 }
 
 //______________________________________________________________________________
@@ -670,7 +672,7 @@ void StFtpcLaserCalib::fillarray(float tx,float ty,float tz,float tex,float tey,
   charge[n]=getcharge;
   maxadc[n]=getmaxadc;
 
-  //cout<<radius[n]<<" "<<maxadc[n]<<endl;
+  //LOG_DEBUG<<radius[n]<<" "<<maxadc[n]<<endm;
 }
 
 //______________________________________________________________________________
@@ -731,7 +733,7 @@ void StFtpcLaserCalib::Fill(int l)
 
 void StFtpcLaserCalib::MakePs()
 {
-  //cout<<"Erstelle (nicht) : "<<filename+".ps"<<endl;
+  LOG_INFO<<"Create "<<filename+".ps"<<endm;
 
   gStyle->SetPalette(1);
 
@@ -922,7 +924,7 @@ void StFtpcLaserCalib::MakeOutput(TString eingabe,char* t0, char* gas)
 
   filename=eingabe;
 
-  cout<<"Create file : "<<filename+".root"<<endl;
+  LOG_INFO<<"Create file : "<<filename+".root"<<endm;
   outfile=new TFile(filename+".root","RECREATE");
 
   hrad=new TH1F("rad","radius (straight) laser tracks",124*8,0.5,31.5);
@@ -1003,7 +1005,7 @@ void StFtpcLaserCalib::MakeOutput(TString eingabe,char* t0, char* gas)
   else
     defl_histograms_st(); 
 
-  //cout<<"For extrapolhistos"<<endl;
+  //LOG_DEBUG<<"For extrapolhistos"<<endm;
   extrapol_histograms();
   
 }
@@ -1020,7 +1022,7 @@ StFtpcLaserCalib::~StFtpcLaserCalib()
   
   delete mMinuit;
 
-  //cout<<"for normal histos"<<endl;
+  //LOG_DEBUG<<"for normal histos"<<endm;
   
   delete hrad;delete hradpol;delete hphi; delete hcalcrad;
   delete hcalcphi; delete hradz; delete hphiz;
@@ -1048,5 +1050,5 @@ StFtpcLaserCalib::~StFtpcLaserCalib()
 	{delete hpadcut[i];delete hradcut[i];}
     }
   outfile->Close();
-  //cout<<"StFtpcLaserCalib() deconstructed !"<<endl;
+  //LOG_DEBUG<<"StFtpcLaserCalib() deconstructed !"<<endm;
 }

@@ -1,6 +1,9 @@
-// $Id: StFtpcLaser.cc,v 1.4 2007/01/19 08:22:58 jcs Exp $
+// $Id: StFtpcLaser.cc,v 1.5 2007/01/22 13:08:15 jcs Exp $
 //
 // $Log: StFtpcLaser.cc,v $
+// Revision 1.5  2007/01/22 13:08:15  jcs
+// replace cout with LOG
+//
 // Revision 1.4  2007/01/19 08:22:58  jcs
 // replace true, false with kTRUE, kFALSE
 //
@@ -12,6 +15,7 @@
 //
 
 #include "StFtpcLaser.hh"
+#include "StMessMgr.h"
 
 //---------------------------------------------------------------
 
@@ -36,9 +40,9 @@ StFtpcLaser::StFtpcLaser()
 //{
 //
 //f=new TFile(filename);
-//cout<<"StFtpcLaser constructed"<<endl;
+//LOG_DEBUG<<"StFtpcLaser constructed"<<endm;
 //readtree(f);
-//cout<<"File : "<<filename<<" eingelesen !"<<endl;  
+//LOG_DEBUG<<"File : "<<filename<<" eingelesen !"<<endm;  
 //}
 
 //---------------------------------------------------------------
@@ -47,11 +51,11 @@ void StFtpcLaser::Init(TString filename)
 {
 
   f=new TFile(filename+".root");
-  cout<<"StFtpcLaser constructed"<<endl;
+  LOG_INFO<<"StFtpcLaser::Init..."<<endm;
   readtree(f);
-  cout<<endl;
-  cout<<"Read file   : "<<filename<<".root"<<endl; //" done !"<<endl;
-  cout<<"--------------"<<endl;
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"Read file   : "<<filename<<".root"<<endm;
+  LOG_INFO<<"--------------"<<endm;
 }
 
 //______________________________________________________________________________                                                                                
@@ -78,7 +82,7 @@ void StFtpcLaser::GetClusterTreeEntry(int k)
 StFtpcLaser::~StFtpcLaser()
 {
   f->Close();
-  //cout<<"StFtpcLaser deconstructed"<<endl; 
+  //LOG_DEBUG<<"StFtpcLaser deconstructed"<<endm; 
 }
 //---------------------------------------------------------------
 
@@ -126,7 +130,7 @@ bool StFtpcLaser::laser_sector(int whichftpc,int whichsec,int sec)
 	    break;
 	  default :
 	    {
-	      cout<<"ERROR : Kein gueltiger Lasersector !"<<endl;
+	      LOG_ERROR<<"ERROR : No valid Laser sector for Ftpc East!"<<endm;
 	      return kFALSE;
 	    }
 	  }
@@ -159,7 +163,7 @@ bool StFtpcLaser::laser_sector(int whichftpc,int whichsec,int sec)
 	    break; 
 	default :
 	  {
-	    cout<<"ERROR : Kein gueltiger Lasersector !"<<endl;
+	    LOG_ERROR<<"ERROR : No valid Laser sector for Ftpc West!"<<endm;
 	    return kFALSE;
 	  }
 	}
@@ -169,7 +173,7 @@ bool StFtpcLaser::laser_sector(int whichftpc,int whichsec,int sec)
       // take all tracks !!!
       return kTRUE;
     }
-      //cout<<"ERROR : Keine FTPC gewaehlt !"<<endl;
+      LOG_ERROR<<"ERROR : No FTPC chosen !"<<endm;
 
   return kFALSE;
 }

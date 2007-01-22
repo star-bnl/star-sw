@@ -1,6 +1,9 @@
-// $Id: StFtpcCalibMaker.cxx,v 1.4 2007/01/19 08:53:54 jcs Exp $
+// $Id: StFtpcCalibMaker.cxx,v 1.5 2007/01/22 13:08:15 jcs Exp $
 //
 // $Log: StFtpcCalibMaker.cxx,v $
+// Revision 1.5  2007/01/22 13:08:15  jcs
+// replace cout with LOG
+//
 // Revision 1.4  2007/01/19 08:53:54  jcs
 // replace gMessMgr with LOG
 //
@@ -64,7 +67,7 @@ void StFtpcCalibMaker::GetRunInfo(TString filename){
  
   j->Init(filename);
   j->GetTreeEntry(0);
-  //cout<<"GetRunInfo: j->Run.run = "<<j->Run.run<<" j->Run.date = "<<j->Run.date<<" j->Run.time = "<<j->Run.time<<" j->Run.micropertimebin = "<<j->Run.micropertimebin<<" j->Run.deltapW = "<<j->Run.deltapW<<" j->Run.deltapE = "<<j->Run.deltapE<<endl;
+  //LOG_DEBUG<<"StFtpcCalibMaker::GetRunInfo  j->Run.run = "<<j->Run.run<<" j->Run.date = "<<j->Run.date<<" j->Run.time = "<<j->Run.time<<" j->Run.micropertimebin = "<<j->Run.micropertimebin<<" j->Run.deltapW = "<<j->Run.deltapW<<" j->Run.deltapE = "<<j->Run.deltapE<<endm;
   date = j->Run.date;
   time = j->Run.time;
   micropertime = j->Run.micropertimebin;
@@ -92,40 +95,40 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
      SetFlavor("ffp10kv","ftpcdVDriftdP");
      SetFlavor("ffp10kv","ftpcDeflection");
      SetFlavor("ffp10kv","ftpcdDeflectiondP");
-     LOG_INFO << "StFtpcCalibMaker: flavor set to ffp10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker::DbInit - flavor set to ffp10kv"<<endm;
   }
   else if ( mbfield > 0.2 ) {
      SetFlavor("hfp10kv","ftpcVDrift");
      SetFlavor("hfp10kv","ftpcdVDriftdP");
      SetFlavor("hfp10kv","ftpcDeflection");
      SetFlavor("hfp10kv","ftpcdDeflectiondP");
-     LOG_INFO << "StFtpcCalibMaker: flavor set to hfp10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker::DbInit - flavor set to hfp10kv"<<endm;
   }
   else if ( mbfield > -0.2 ) {
      SetFlavor("zf10kv","ftpcVDrift");
      SetFlavor("zf10kv","ftpcdVDriftdP");
      SetFlavor("zf10kv","ftpcDeflection");
      SetFlavor("zf10kv","ftpcdDeflectiondP");
-     LOG_INFO << "StFtpcCalibMaker: flavor set to zf10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker::DbInit - flavor set to zf10kv"<<endm;
   }
   else if ( mbfield > -0.8 ) {
      SetFlavor("hfn10kv","ftpcVDrift");
      SetFlavor("hfn10kv","ftpcdVDriftdP");
      SetFlavor("hfn10kv","ftpcDeflection");
      SetFlavor("hfn10kv","ftpcdDeflectiondP");
-     LOG_INFO << "StFtpcCalibMaker: flavor set to hfn10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker::DbInit - flavor set to hfn10kv"<<endm;
   }
   else {
      SetFlavor("ffn10kv","ftpcVDrift");
      SetFlavor("ffn10kv","ftpcdVDriftdP");
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
-     LOG_INFO << "StFtpcCalibMaker: flavor set to ffn10kv"<<endm;
+     LOG_INFO << "StFtpcCalibMaker::DbInit - flavor set to ffn10kv"<<endm;
   }
   
   ftpc_db  = GetDataBase("ftpc");
   if (!ftpc_db) {
-     LOG_WARN << "StFtpcCalibMaker::DbInit  run parameter database StarDb/ftpc not found"<<endm;
+     LOG_WARN << "StFtpcCalibMaker::DbInit - run parameter database StarDb/ftpc not found"<<endm;
      return kStWarn;
   }
   St_DataSetIter local(ftpc_db);
@@ -153,7 +156,7 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
   // create parameter reader
   paramReader = new StFtpcParamReader(m_clusterpars);
 
-  //cout<<"Nach  parameter reader"<<endl;
+  //LOG_DEBUG<<"StFtpcCalibMaker::DbInit -  parameter reader created"<<endm;
 
   // create db reader
   dbReader = new StFtpcDbReader(m_dimensions,
@@ -167,7 +170,7 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
 				m_gas,
 				m_driftfield);
 
-  //cout<<"Nach db reader"<<endl;
+  //LOG_DEBUG<<"StFtpcCalibMaker::DbInit - Ftpc db reader created"<<endm;
  
   return kStOK;
 
@@ -182,8 +185,8 @@ Int_t StFtpcCalibMaker::DbInit(float mbfield)
 
 void StFtpcCalibMaker::DoLaserCalib(TString filename,int ftpc, int lsec, int straight, int gfit, int minz, int maxz, int minrad, int maxrad, char* t0, char* gas, float mbfield)
 {
-if (ftpc == 1) cout<<"StFtpcCalibMaker::DoLaserCalib entered for FTPC West"<<endl;
-if (ftpc == 2) cout<<"StFtpcCalibMaker::DoLaserCalib entered for FTPC East"<<endl;
+if (ftpc == 1) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC West"<<endm;
+if (ftpc == 2) LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - entered for FTPC East"<<endm;
   Int_t i=0;
   Int_t ntracksold=0;
   Int_t neventold=2;
@@ -197,26 +200,25 @@ if (ftpc == 2) cout<<"StFtpcCalibMaker::DoLaserCalib entered for FTPC East"<<end
   if (atof(t0)!=0 || atof(gas)!=0)
     {
       trafo=new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
-      if (trafo->calcpadtrans())
-        cout<<"calcpadtrans done !"<<endl;
-      else 
-	cout<<"ERROR calcpadtrans !"<<endl;
-      //if (trafo->padtrans(1,1,170,100));
-      //else
-      //cout<<"ERROR padtrans !"<<endl;
-      //delete trafo;
+      if (trafo->calcpadtrans()) {
+        LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib - calcpadtrans done !"<<endm;
+      }
+      else{ 
+	LOG_FATAL<<"StFtpcCalibMaker::DoLaserCalib - fatal error in calcpadtrans !"<<endm;
+        delete trafo;
+        return;
+      }
     }
 
-  cout<<"DoLaserCalib() ..."<<endl;
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() ..."<<endm;
 
   // for (int step=0;step<10;step++)
 
-  cout<<endl;
-  cout<<"Reading Magnetic-Field maps..."<<endl;
-  cout<<endl;
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - Reading Magnetic-Field maps..."<<endm;
+  LOG_INFO<<" "<<endm;
   StMagUtilities *m_magf=new StMagUtilities(kMapped,mbfield,0);
   // analoges Problem bei Magnetfeld 0 shift nicht machen in Track !!!
-  cout<<endl;
 
   StFtpcLaserCalib *l=new StFtpcLaserCalib(ftpc,lsec,straight,gfit,minz,maxz,minrad,maxrad,atof(t0),atof(gas),trafo,m_magf);
  
@@ -224,25 +226,27 @@ if (ftpc == 2) cout<<"StFtpcCalibMaker::DoLaserCalib entered for FTPC East"<<end
   l->MakeOutput(filename,t0,gas);
  
   Int_t maxentries=l->btcluster->GetEntries();
-  cout<<endl;
-  cout<<"Process Cluster-on-Track-Tree with "<<maxentries<<" clusters..."<<endl; 
-  cout<<endl;
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"StFtpcCalibMaker::DoLaserCalib() - processing Cluster-on-Track-Tree with "<<maxentries<<" clusters... please be patien"<<endm; 
+  LOG_INFO<<" "<<endm;
 
   for (int k=0;k<=maxentries;k++)
     {
-      if (k%(maxentries/10)==0 && k>0) cout<<"#"<<flush;//cout<<k<<" cluster on tracks processed"<<endl;
+      if (k%(maxentries/10)==0 && k>0) {
+        //LOG_DEBUG<<"StFtpcCalibMaker::DoLaserCalib() - "<<k<<" cluster on tracks processed"<<endm;
+      }
       l->GetTreeEntry(k);
       
       //calculate hardware sector
       int hardsec = 6*(int)((l->tcluster.row-1)/2) + l->tcluster.sec;
       
-      //cout<<" hardsec "<< hardsec<<endl;
+      //LOG_DEBUG<<"StFtpcCalibMaker::DoLaserCalib() -  hardsec "<< hardsec<<endm;
 
       // activate following code line to debug with 2 events
       //if (l->tevent.nevent>2) break;
 
-      //cout<<"l->tevent.run = "<<l->tevent.run<<" l->tevent.nevent = "<<l->tevent.nevent<<endl;
-      //cout<<"l->Run.run = "<<l->Run.run<<" l->Run.micropertimebin = "<<l->Run.micropertimebin<<" l->Run.deltapW = "<<l->Run.deltapW<<" l->Run.deltapE = "<<l->Run.deltapE<<endl;
+      //LOG_DEBUG<<"StFtpcCalibMaker::DoLaserCalib() - l->tevent.run = "<<l->tevent.run<<" l->tevent.nevent = "<<l->tevent.nevent<<endm;
+      //LOG_DEBUG<<"StFtpcCalibMaker::DoLaserCalib() - l->Run.run = "<<l->Run.run<<" l->Run.micropertimebin = "<<l->Run.micropertimebin<<" l->Run.deltapW = "<<l->Run.deltapW<<" l->Run.deltapE = "<<l->Run.deltapE<<endm;
 
       if (l->tevent.nevent==neventold)
 	{
@@ -290,9 +294,9 @@ if (ftpc == 2) cout<<"StFtpcCalibMaker::DoLaserCalib entered for FTPC East"<<end
 
   delete m_magf;
 
-  cout<<endl;
-  cout<<"Laser calibration done :-) !"<<endl;
-  cout<<endl;
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"Laser calibration done :-) !"<<endm;
+  LOG_INFO<<" "<<endm;
 }
 
 //_____________________________________________________________________________
@@ -306,10 +310,9 @@ if (ftpc == 2) cout<<"StFtpcCalibMaker::DoLaserCalib entered for FTPC East"<<end
 void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mbfield)
 {
 
-  cout<<"DoT0Calib entered with filename "<<filename<<" t0 "<<t0<<" gas "<<gas<<" mbfield "<<mbfield<<endl;
 
   tZero = dbReader->tZero();
-  cout<<"tZero = "<<tZero<<endl;
+  LOG_INFO<<"StFtpcCalibMaker::DoT0Calib entered with filename "<<filename<<" t0 "<<t0<<" gas "<<gas<<" mbfield "<<mbfield<<" and tZero = "<<tZero<<endm;
 
   if (atof(t0)!=0 || atof(gas)!=0)
   {
@@ -320,10 +323,14 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
 
       trafo = new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
 
-      if (trafo->calcpadtrans())
-         cout<<"calcpadtrans (west) done !"<<endl;
-      else
-         cout<<"ERROR calcpadtrans west !"<<endl;
+      if (trafo->calcpadtrans()) {
+         LOG_INFO<<"StFtpcCalibMaker::DoT0Calib - calcpadtrans (west) done !"<<endm;
+      }
+      else {
+         LOG_FATAL<<"StFtpcCalibMaker::DoT0Calib - fatal error in  calcpadtrans west !"<<endm;
+         delete trafo;
+         return;
+      }
 
       // FTPC East
 
@@ -331,15 +338,19 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
 
       trafo2 = new StFtpcLaserTrafo(dbReader,paramReader,atof(t0),atof(gas),micropertime,deltap,mbfield,tZero);
 
-       if (trafo2->calcpadtrans())
-         cout<<"calcpadtrans (east) done !"<<endl;
-      else
-         cout<<"ERROR calcpadtrans east!"<<endl;
+       if (trafo2->calcpadtrans()) {
+         LOG_INFO<<"StFtpcCalibMaker::DoT0Calib - calcpadtrans (east) done !"<<endm;
+       }
+      else {
+         LOG_FATAL<<"StFtpcCalibMaker::DoT0Calib - fatal error in  calcpadtrans east !"<<endm;
+         delete trafo2;
+         return;
+      }
 
   }
 
 
-  cout<<"DoT0Calib() ..."<<endl;
+  LOG_INFO<<"StFtpcCalibMaker::DoT0Calib() ..."<<endm;
 
   HistInit(4,filename,t0,gas);
 
@@ -349,17 +360,18 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
 
   Int_t maxentries=(int) l->bcluster->GetEntries();
 
-  cout<<endl;
-  cout<<"Process Cluster-Tree with "<<maxentries<<" clusters..."<<endl;
-  cout<<endl;
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"StFtpcCalibMaker::DoT0Calib() - processing Cluster-Tree with "<<maxentries<<" clusters... please be patient"<<endm; 
+  LOG_INFO<<" "<<endm;
 
   Float_t x,y,rad;//,phi;
 
   for (int k=0;k<=maxentries;k++)
     {
 
-      if (k%(maxentries/10)==0 && k>0) cout<<"#"<<flush;
-      //cout<<k<<" cluster on tracks processed"<<endl;
+      if (k%(maxentries/10)==0 && k>0) {
+         //LOG_DEBUG<<k<<" cluster on tracks processed"<<endm;
+      }
     
       l->GetClusterTreeEntry(k);
 
@@ -406,9 +418,9 @@ void StFtpcCalibMaker::DoT0Calib(TString filename, char* t0, char* gas, float mb
   anaf->Write();
   anaf->Close();
 
-  cout<<endl;
-  cout<<"T0 calibration done :-) !"<<endl;
-  cout<<endl;
+  LOG_INFO<<" "<<endm;
+  LOG_INFO<<"T0 calibration done :-) !"<<endm;
+  LOG_INFO<<" "<<endm;
 }
 
 //_____________________________________________________________________________
@@ -430,9 +442,9 @@ void StFtpcCalibMaker::HistInit(int nradbins,TString fname, char* t0, char* gas)
   outname +="_t0.root";
   
   // DEBUG :
-  //cout<<endl;cout<<"HistInit() ..."<<endl;cout<<endl;
+  //LOG_DEBUG<<" "<<endm;LOG_DEBUG<<"HistInit() ..."<<endm;LOG_DEBUG<<" "<<endm;
 
-  cout<<"Store histograms in ROOT-file : "<<outname<<endl;
+  LOG_INFO<<"StFtpcCalibMaker::HistInit - Store histograms in ROOT-file : "<<outname<<endm;
 
   anaf=new TFile(outname,"RECREATE");
 
@@ -465,11 +477,9 @@ void StFtpcCalibMaker::MakeT0Ps(int nradbins,TString psname, char* t0, char* gas
   outname +=gas;
   outname +="_t0.ps";
 
-  // DEBUG :
-  //cout<<endl;cout<<"MakePs ..."<<endl;cout<<endl;
-  cout<<endl;cout<<endl;
-  cout<<"Make PS-file : "<<outname<<endl;
-  cout<<endl;
+  LOG_INFO<<" "<<endl;
+  LOG_INFO<<"StFtpcCalibMaker::MakeT0Ps - make ps file "<<outname<<endm;
+  LOG_INFO<<" "<<endm;
 
   TCanvas *c1 = new TCanvas("c1","ps",200,10,700,500);
 
