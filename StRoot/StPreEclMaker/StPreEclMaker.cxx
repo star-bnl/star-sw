@@ -12,7 +12,6 @@ StPreEclMaker::StPreEclMaker(const char *name, const char *title):StMaker(name,t
 {
     mFinder = NULL;
     mAlg =  kEmcClDefault;
-    setPrint();
 }
 //_____________________________________________________________________________
 StPreEclMaker::~StPreEclMaker()
@@ -34,7 +33,6 @@ Int_t StPreEclMaker::Init()
         mFinder = new StEmcOldFinder(); // this is the default
         mAlg = kEmcClOld;
     }
-    mFinder->setPrint(mPrint);
     return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -42,8 +40,7 @@ Int_t StPreEclMaker::Make()
 {
     TStopwatch clock;
     clock.Start();
-    if(mPrint)
-        cout << "StPreEclMaker::Make()***********************************************************"<<endl;
+    LOG_DEBUG << "StPreEclMaker::Make()***********************************************************"<<endm;
 
     StEvent *ev = getEvent();
     if(!ev)
@@ -59,10 +56,8 @@ Int_t StPreEclMaker::Make()
     }
 
     clock.Stop();
-    if(mPrint)
-        cout <<"Time to run StPreEclMaker::Make() real = "<<clock.RealTime()<<"  cpu= "<<clock.CpuTime()<<endl;
-    if(mPrint)
-        cout << "*******************************************************************************"<<endl;
+    LOG_DEBUG <<"Time to run StPreEclMaker::Make() real = "<<clock.RealTime()<<"  cpu= "<<clock.CpuTime()<<endm;
+    LOG_DEBUG << "*******************************************************************************"<<endm;
     return kStOK;
 }
 //_____________________________________________________________________________

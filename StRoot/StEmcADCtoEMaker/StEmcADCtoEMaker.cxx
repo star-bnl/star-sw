@@ -52,7 +52,7 @@ Int_t StEmcADCtoEMaker::Init()
 Int_t StEmcADCtoEMaker::InitRun(Int_t run)
 {
     // Load DB and create decoder for the BEMC
-    gMessMgr->Info() <<"Getting database tables for the BEMC detector "<<endm;
+    LOG_INFO <<"Getting database tables for the BEMC detector "<<endm;
     mBemcData->createDecoder(GetDate(),GetTime());
     mBemcData->getTables()->loadTables((StMaker*)this);
 
@@ -74,16 +74,16 @@ Int_t StEmcADCtoEMaker::Make()
 {
     TStopwatch clock;
     clock.Start();
-    gMessMgr->Info() <<"StEmcADCtoEMaker::Make()******************************************************************"<<endm;
+    LOG_DEBUG <<"StEmcADCtoEMaker::Make()******************************************************************"<<endm;
     mTestedCorruption = kFALSE;
     if(!prepareEnvironment())
-        gMessMgr->Warning()<<"Could not prepare the proper environment"<<endm;
+		LOG_WARN <<"Could not prepare the proper environment"<<endm;
     if(!makeBemc())
-        gMessMgr->Warning()<<"Could not make BEMC detector"<<endm;
+        LOG_WARN <<"Could not make BEMC detector"<<endm;
     fillHistograms();
     clock.Stop();
-    gMessMgr->Info() <<"Time to run StEmcADCtoEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<endm;
-    gMessMgr->Info() <<"*******************************************************************************************"<<endm;
+    LOG_DEBUG <<"Time to run StEmcADCtoEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<endm;
+    LOG_DEBUG <<"*******************************************************************************************"<<endm;
 
     return kStOK;
 }
@@ -94,7 +94,7 @@ Int_t StEmcADCtoEMaker::Make()
 Bool_t StEmcADCtoEMaker::prepareEnvironment()
 {
     mEvent = 0;
-    gMessMgr->Info() <<"Get StEvent pointer and make it ready for filling"<<endm;
+    LOG_DEBUG <<"Get StEvent pointer and make it ready for filling"<<endm;
     ////////////////////////////////////////////////////////////
     // Get StEvent pointer and make it ready for filling
     //
@@ -144,7 +144,7 @@ Bool_t StEmcADCtoEMaker::makeBemc()
     TDataSet* TheData   = GetDataSet("StDAQReader");
     if(TheData)
     {
-        gMessMgr->Info() <<"Copying EMC information from DAQ structure "<<endm;
+        LOG_DEBUG <<"Copying EMC information from DAQ structure "<<endm;
         return mBemcData->make(TheData,mEvent);
     }
     // Try StEvent
@@ -156,11 +156,11 @@ Bool_t StEmcADCtoEMaker::makeBemc()
             if(!mEmbed) // try StEmcRawData
             {
                 StEmcRawData *BemcData = emc->bemcRawData();
-                gMessMgr->Info() <<"Copying EMC information from StEmcRadData "<<endm;
+                LOG_DEBUG <<"Copying EMC information from StEmcRawData "<<endm;
                 if(BemcData)
                     return mBemcData->make(BemcData,mEvent);
             }
-            gMessMgr->Info() <<"Copying EMC information from StEmcCollection "<<endm;
+            LOG_DEBUG <<"Copying EMC information from StEmcCollection "<<endm;
             return mBemcData->make(emc,mEvent);
         }
     }
@@ -172,7 +172,7 @@ Bool_t StEmcADCtoEMaker::makeBemc()
         StMuEmcCollection *muEmc = muDst->muEmcCollection();
         if(muEmc)
         {
-            gMessMgr->Info() <<"Copying EMC information from StEmcCollection "<<endm;
+            LOG_DEBUG <<"Copying EMC information from StEmcCollection "<<endm;
             Bool_t ok = mBemcData->make(muEmc,mEvent);
             if(ok)
             {
@@ -197,20 +197,7 @@ void StEmcADCtoEMaker::fillHistograms()
 }
 void StEmcADCtoEMaker::setPrint(Bool_t a)
 {
-    if(a)
-    {
-        gMessMgr->SwitchOn("D");
-        gMessMgr->SwitchOn("I");
-        gMessMgr->SwitchOn("W");
-        gMessMgr->SwitchOn("E");
-    }
-    else
-    {
-        gMessMgr->SwitchOff("D");
-        gMessMgr->SwitchOff("I");
-        gMessMgr->SwitchOff("W");
-        gMessMgr->SwitchOff("E");
-    }
+	LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
 }
 void StEmcADCtoEMaker::printMap(Int_t detector,char*file)
 {

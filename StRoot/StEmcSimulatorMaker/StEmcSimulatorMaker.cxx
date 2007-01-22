@@ -11,7 +11,6 @@
 #include <TRandom.h>
 #include <TBrowser.h>
 #include <TPad.h>
-#include <StMessMgr.h>
 #include "TList.h"
 #include "TObject.h"
 
@@ -64,7 +63,6 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
     mHistControl   = 1;  // Hist  on
     mCompare       = kFALSE;
     mDB            = 0;
-    mPrint         = kFALSE;
     mEmcCollection = NULL;
     mC1            = NULL;
     m_nhit         = 0;
@@ -96,7 +94,6 @@ StEmcSimulatorMaker::StEmcSimulatorMaker(const char *name):StMaker(name)
         mSimulator[i] = NULL;
         mGeom[i] = NULL;
     }
-    gMessMgr->SetLimit("StEmcSimulator",100);
 }
 void StEmcSimulatorMaker::Clear(const char *)
 {
@@ -135,7 +132,7 @@ Int_t StEmcSimulatorMaker::Init()
             }
         }
     }
-    gMessMgr->Info() <<"StEmcSimulatorMaker EMBEDDING mode = "<<(Int_t) mEmbed <<endm;
+    LOG_INFO <<"StEmcSimulatorMaker EMBEDDING mode = "<<(Int_t) mEmbed <<endm;
 
     //
     // Get data from StarDb ( if exist)
@@ -153,7 +150,6 @@ Int_t StEmcSimulatorMaker::Init()
             mEEMC        = controlTable->eemc;
             mHistControl = controlTable->hist;
             SetDebug(controlTable->debug);
-            gMessMgr->SetLimit("StEmcSimulator",Int_t(controlTable->messLimit));
 
             // Db for calibration
             Int_t detInDb=0;
@@ -183,7 +179,7 @@ Int_t StEmcSimulatorMaker::Init()
                 mGeom[i] = StEmcGeom::getEmcGeom(i+1);
             if(!mGeom[i])
             {
-                gMessMgr->Error() << "\n Geometry for detector "<<i+1<<" undefined \n " << endm;
+                LOG_FATAL << "Geometry for detector "<<i+1<<" undefined" << endm;
                 assert(0);
             }
             else if(Debug() == 1)
@@ -196,7 +192,6 @@ Int_t StEmcSimulatorMaker::Init()
                 {
                     StEmcPmtSimulator* pmt;
                     pmt = new StEmcPmtSimulator(i+1);
-                    pmt->setPrint(mPrint);
                     if(pmtTable)
                         pmt->setControl(pmtTable);
                     mSimulator[i] = pmt;
@@ -205,7 +200,6 @@ Int_t StEmcSimulatorMaker::Init()
                 {
                     StEmcSimpleSimulator* simple;
                     simple = new StEmcSimpleSimulator(i+1);
-                    simple->setPrint(mPrint);
                     if(pmtTable)
                         simple->setControl(pmtTable);
                     mSimulator[i] = simple;
@@ -228,18 +222,18 @@ Int_t StEmcSimulatorMaker::Init()
 }
 Int_t StEmcSimulatorMaker::InitRun(Int_t run)
 {
-    printf("\nStEmcSimulatorMaker info\n");
-    printf("\n========================================================\n");
+    LOG_INFO << "::InitRun() info" << endm;
+    LOG_INFO << "=========================================================" << endm;
     for(Int_t i=0; i<4; i++)
     {
-        printf("Flags for detector %2i\n",i+1);
-        printf("   keyDB       : %i\n", controlTable->keyDB[i]);
-        printf("   pedCutOff   : %f\n", controlTable->pedCutOff[i]);
-        printf("   makeFullDet : %i\n", controlTable->makeFullDet[i]);
-        printf("   calibOffSet : %f\n", controlTable->calibOffSet[i]);
-        printf("   calibSpread : %f\n\n", controlTable->calibSpread[i]);
+        LOG_INFO << Form("Flags for detector %2i",i+1) << endm;
+        LOG_INFO << Form("   keyDB       : %i", controlTable->keyDB[i]) << endm;
+        LOG_INFO << Form("   pedCutOff   : %f", controlTable->pedCutOff[i]) << endm;
+        LOG_INFO << Form("   makeFullDet : %i", controlTable->makeFullDet[i]) << endm;
+        LOG_INFO << Form("   calibOffSet : %f", controlTable->calibOffSet[i]) << endm;
+        LOG_INFO << Form("   calibSpread : %f", controlTable->calibSpread[i]) << endm;
     }
-    printf("\n========================================================\n");
+    LOG_INFO << "========================================================" << endm;
 
 
     // making gain fluctuations due to uncertainty in calibration in the
@@ -348,8 +342,7 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
                 xw = 0.99;
             xb[iw1] = +xw;
             xb[iw2] = -xw;
-            if(Debug()>=10)
-                printf(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,xb[iw1], iw2,xb[iw2], eb[ik]);
+            LOG_DEBUG << Form(" iw1 %i %f => iw2 %i %f => eta %f\n", iw1,xb[iw1], iw2,xb[iw2], eb[ik]) << endm;
         }
         // Be carefull with array size !!!
         m_hits[i]   = new TH2F(name_h,title_h, xb.GetSize()-1, xb.GetArray(), ny[i],rpiMin,rpiMax);
@@ -431,8 +424,7 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
                         mhSub[det-1]->Fill(Axis_t(s));
                 }
             }
-            else if(mPrint)
-                gMessMgr->Warning()<<"StEmcSimulatorMaker::makeHistograms=>bad index det "<<det<<" m "<<m<<" e "<<e<<" s "<<s<<endm;
+            LOG_WARN <<"StEmcSimulatorMaker::makeHistograms=>bad index det "<<det<<" m "<<m<<" e "<<e<<" s "<<s<<endm;
         }
         m_nhit->Fill(log10((Double_t)nhit), (Float_t)det);
         m_etot->Fill(log10((Double_t)energysum), (Float_t)det);
@@ -453,17 +445,13 @@ Int_t StEmcSimulatorMaker::Make()
         geaIn = GetDataSet(nameIn[i]);
         if(geaIn)
         {
-            if(Debug()>=2)
-                if(mPrint)
-                    printf("Type of file -> %s : GEANT directory -> %s\n", typeOfFile[i], nameIn[i]);
+            LOG_DEBUG << Form("Type of file -> %s : GEANT directory -> %s\n", typeOfFile[i], nameIn[i]) << endm;
             break;
         }
     }
     if (!geaIn)
     {
-        if(Debug()>=2)
-            if(mPrint)
-                gMessMgr->Error()<<"Geant Data didn't find in "<< nameIn[0]<<" or "<< nameIn[1]<<endm;
+        LOG_ERROR <<"Geant Data didn't find in "<< nameIn[0]<<" or "<< nameIn[1]<<endm;
         return kStWarn;
     }
 
@@ -497,25 +485,28 @@ Int_t StEmcSimulatorMaker::makeBemc()
     {
         if (g2t_emc_hit->GetNRows()>0)
             makeBemcAndBprsMcHits();
-        else if(mPrint)
-            gMessMgr->Warning()<< " makeBemc() => table g2t_emc_hit is empty " << endm;
+        else { 
+			LOG_WARN << " makeBemc() => table g2t_emc_hit is empty " << endm;
+		}
     }
-    else if(mPrint)
-        gMessMgr->Warning()<< " makeBemc() => table g2t_emc_hit isn't found " << endm;
+    else {
+        LOG_WARN << " makeBemc() => table g2t_emc_hit isn't found " << endm;
+	}
 
     g2t_smd_hit = (St_g2t_emc_hit *) geaIn->Find("g2t_smd_hit");
     if (g2t_smd_hit)
     {
         if (g2t_smd_hit->GetNRows()>0)
             makeBsmdeAndBsmdpMcHits();
-        else if(mPrint)
-            gMessMgr->Warning()<< " makeBemc() => table g2t_smd_hit is empty " << endm;
+        else {
+            LOG_WARN << " makeBemc() => table g2t_smd_hit is empty " << endm;
+		}
     }
-    else if(mPrint)
-        gMessMgr->Warning()<< " makeBemc() => table g2t_smd_hit isn't found " << endm;
+    else {
+        LOG_WARN << " makeBemc() => table g2t_smd_hit isn't found " << endm;
+	}
 
-    if(Debug() == 1)
-        for(UInt_t i=BEMC-1; i<BSMDP; i++)
+	for(UInt_t i=BEMC-1; i<BSMDP; i++)
             mEmcMcHits[i]->print();
 
     if(mBEMC >= 2)
@@ -556,8 +547,7 @@ void StEmcSimulatorMaker::addBemcAndBprsHit(Int_t module,Int_t eta,Int_t sub,Int
     {
         delete emchBemc;
         emchBprs = 0;
-        if(mPrint)
-            gMessMgr->Warning()<<" Bad hit in Bemc collection " << endm;
+        LOG_WARN <<" Bad hit in Bemc collection " << endm;
     }
 
     if(detector == BPRS && emchBprs)
@@ -641,8 +631,7 @@ void StEmcSimulatorMaker::addBsmdeAndBsmdpHit(Int_t module,Int_t eta,Int_t sub,I
     else if(bsmdNew == StMcEmcHitCollection::kErr)
     {
         delete emchBsmd;
-        if(mPrint)
-            gMessMgr->Warning()<<"StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits=>bad hit in Bsmd collection " << endm;
+        LOG_WARN <<"StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits=>bad hit in Bsmd collection " << endm;
     }
 }
 Int_t StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits()
@@ -682,8 +671,9 @@ Int_t StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits()
             }
             addBsmdeAndBsmdpHit(module,eta,sub,detector,de);
         }
-        else if(mPrint)
-            gMessMgr->Warning()<<" StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits=>Bad detector value in Bsmd collection =>" << detector <<endm;
+        else {
+			LOG_WARN <<" StEmcSimulatorMaker::makeBsmdeAndBsmdpMcHits=>Bad detector value in Bsmd collection =>" << detector <<endm;
+		}
     }
     for(Int_t i = 0;i<2;i++)
     {
@@ -753,8 +743,7 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                 }
                 else
                 {
-                    if(mPrint)
-                        printf("No status table for detector %i -> %s\n", i, detname[i].Data());
+                    LOG_FATAL << Form("No status table for detector %i -> %s", i, detname[i].Data()) << endm;
                     assert(0);
                 }
 
@@ -767,18 +756,12 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                         calibRec = ((St_emcCalib*)calib)->GetTable();
                     else
                         calibSmdRec = ((St_smdCalib*)calib)->GetTable();
-                    if(Debug()>=2)
-                    {
-                        if(mPrint)
-                            printf("Calibration table for %s keyDB %i\n", detname[i].Data(), controlTable->keyDB[i]); // ??
-                        controlMaker->Print(0,1);
-                    }
+                    LOG_DEBUG << Form("Calibration table for %s keyDB %i", detname[i].Data(), controlTable->keyDB[i]) << endm; // ??
+                    if(Debug()>=2) controlMaker->Print(0,1);
                 }
                 else
                 {
-                    if(Debug()>=2)
-                        if(mPrint)
-                            printf("No calibration table for detector %i -> %s\n", i, detname[i].Data());
+                    LOG_FATAL << Form("No calibration table for detector %i -> %s", i, detname[i].Data()) << endm;
                     assert(0);
                 }
 
@@ -795,18 +778,16 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                     }
                     else
                     {
-                        if(mPrint)
-                            printf("No pedestal table for detector %i -> %s\n", i, detname[i].Data());
+                        LOG_FATAL << Form("No pedestal table for detector %i -> %s", i, detname[i].Data()) << endm;
                         assert(0);
                     }
                 }
-                else if(GetEventNumber() <=1 )
-                    if(mPrint)
-                        gMessMgr->Info()<<"No pedestal DB for detector "<<i+1<< " keyDB "<< (Int_t)controlTable->keyDB[i]<< endm;
+                else if(GetEventNumber() <=1 ) {
+                    LOG_INFO <<"No pedestal DB for detector "<<i+1<< " keyDB "<< (Int_t)controlTable->keyDB[i]<< endm;
+				}
             }
 
-            if(mPrint)
-                printf("Number of modules for detector %i = %d\n", i, mEmcMcHits[i]->numberOfModules());
+            LOG_DEBUG << Form("Number of modules for detector %i = %d", i, mEmcMcHits[i]->numberOfModules()) << endm;
             for(m=0; m<mEmcMcHits[i]->numberOfModules(); m++)
             {
                 mf = m + 1; // m - C style index; mf - Fortran style index !!!!
@@ -843,12 +824,11 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                                     else
                                         calCoef = calibSmdRec[0].AdcToE[cellInd][1];
 
-                                    if(Debug()>=2)
-                                        if(mPrint)
-                                            printf("det %i cellID %4i m %3i eta %3i sub %2i AdcToE[0][0] %f AdcToE[1][0] %f \n",
-                                                   i+1, cellID, mf, eta, sub, calibRec->AdcToE[0][0], calibRec->AdcToE[1][0]); //VP
-                                    if(calCoef < 1.e-7 && mPrint)
-                                        printf("det %i cellID %4i m %3i eta %3i sub %2i c %f \n", i+1,cellID,mf,eta,sub,calCoef);
+                                    LOG_DEBUG << Form("det %i cellID %4i m %3i eta %3i sub %2i AdcToE[0][0] %f AdcToE[1][0] %f",
+                                                   i+1, cellID, mf, eta, sub, calibRec->AdcToE[0][0], calibRec->AdcToE[1][0]) << endm; //VP
+                                    if(calCoef < 1.e-7) {
+                                        LOG_DEBUG << Form("det %i cellID %4i m %3i eta %3i sub %2i c %f", i+1,cellID,mf,eta,sub,calCoef) << endm;
+									}
 
                                     if(ped)
                                     {
@@ -870,8 +850,9 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                                 }
                                 else
                                     continue; // skip this hit
-                            } else if(mPrint)
-                                gMessMgr->Info()<<"StEmcSimulatorMaker::makeAllRawHitsForBemc() => not using DB for det "<<i+1<<" status "<<status<<" calib "<<calib<<" ped "<<ped<<endm;
+                            } else {
+                                LOG_DEBUG <<"StEmcSimulatorMaker::makeAllRawHitsForBemc() => not using DB for det "<<i+1<<" status "<<status<<" calib "<<calib<<" ped "<<ped<<endm;
+							}
 
                             adc    = mSimulator[i]->getAdc((Double_t)de, (Double_t)rEta);
                             if(controlTable->pedCutOff[i]>0)
@@ -886,15 +867,17 @@ Int_t StEmcSimulatorMaker::makeAllRawHitsForBemc()
                                 rawHit.energy = energy;
                                 mEmcRawHits[i]->AddAt(&rawHit);
                             }
-                        } else if(mPrint)
-                            gMessMgr->Warning()<<"StEmcSimulatorMaker::makeAllRawHitsForBemc() Bad m "<<m<<" or eta "<<eta <<endm;
+                        } else {
+                            LOG_WARN <<"StEmcSimulatorMaker::makeAllRawHitsForBemc() Bad m "<<m<<" or eta "<<eta <<endm;
+						}
                     }
                 }
 
             }
         }
-        else if(mPrint)
-            gMessMgr->Warning()<<"StEmcSimulatorMaker -> no hits for detector " << i + 1 << endm;
+        else {
+            LOG_WARN <<"StEmcSimulatorMaker -> no hits for detector " << i + 1 << endm;
+		}
         ;
     }
     return kStOk;
@@ -966,10 +949,12 @@ TDataSet* StEmcSimulatorMaker::getStatus(const Int_t ind, TDataSet* dataset)
 
 void StEmcSimulatorMaker::printmBEMC()
 {
-    if(!mBEMC)
-        gMessMgr->Info()<<" BEMC out of CHAIN  mBEMC="<<mBEMC<<endm;
-    else
-        gMessMgr->Info()<<" BEMC     in CHAIN  mBEMC="<<mBEMC<<endl;
+    if(!mBEMC) {
+        LOG_INFO <<" BEMC out of CHAIN  mBEMC="<<mBEMC<<endm;
+	}
+    else {
+        LOG_INFO <<" BEMC     in CHAIN  mBEMC="<<mBEMC<<endm;
+	}
 }
 
 void StEmcSimulatorMaker::compareOldSimulator()
@@ -1014,8 +999,7 @@ void StEmcSimulatorMaker::compareOldSimulator()
                     goto ENDCYCLE;
                 }
             }
-            if(mPrint)
-                printf("<W> Did not find New hit for OLD !!!\n");
+            LOG_WARN << "Did not find New hit for OLD !!!" << endm;
 ENDCYCLE:
             continue;
         }
@@ -1113,8 +1097,9 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
         if(print)
             mC1->Print("ps/newSim/CompareOldNewDe.ps");
     }
-    else
-        printf("<I> Picture unavailable : mCompare is zero \n");
+    else {
+        LOG_INFO << "Picture unavailable : mCompare is zero" << endm;
+	}
 }
 
 void StEmcSimulatorMaker::printSimulator(Int_t det)
@@ -1134,13 +1119,15 @@ void StEmcSimulatorMaker::printSimulator(Int_t det)
         Int_t det = ind + 1;
         if(mSimulator[ind])
             mSimulator[ind]->print();
-        else
-            printf("Simulator for detector %1i undefined\n", det);
+        else {
+			LOG_INFO << Form("Simulator for detector %1i undefined", det) << endm;
+		}
     }
 }
 
 void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 {
+	TString printout = "";
     Int_t ind=det-1, detID, m, e, s, cellIn=0, cellOut=0;
     Float_t eta, phi;
     if(ind<0)
@@ -1173,24 +1160,21 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
             {
                 cellIn++;
                 mGeom[ind]->getBin(detID, m, e, s);
-                printf(" ID %4.4i m %2.2i e %2.2i s %1i    ", detID, m, e, s);
+                printout += Form(" ID %4.4i m %2.2i e %2.2i s %1i    ", detID, m, e, s);
                 if(hist)
                 {
                     mGeom[ind]->getEtaPhi(detID, eta, phi);
                     hIdStatus->Fill(eta, phi, 1.);
                 }
                 if(cellIn%3 == 0)
-                    printf("\n");
+                    printout += Form("\n");
             }
             else
             {
                 cellOut++;
-                if(Debug() >= 10)
-                {
-                    printf(" ID %4.4i -> status %i\n", detID, Int_t(statusEmcRec[0].Status[i]));
-                    if(cellIn%4 == 0)
-                        printf("\n");
-                }
+				printout += Form(" ID %4.4i -> status %i\n", detID, Int_t(statusEmcRec[0].Status[i]));
+                if(cellIn%4 == 0)
+					printout += Form("\n");
             }
         }
     }
@@ -1210,34 +1194,34 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
                     mGeom[ind]->getEtaPhi(detID, eta, phi);
                     hIdStatus->Fill(eta, phi, 1.);
                 }
-                printf(" ID %4.4i m %2.2i e %3.3i s %2.2i  ", detID, m, e, s);
+                printout += Form(" ID %4.4i m %2.2i e %3.3i s %2.2i  ", detID, m, e, s);
                 if(cellIn%4 == 0)
-                    printf("\n");
+                    printout += Form("\n");
             }
             else
             {
                 cellOut++;
-                if(Debug() >= 10)
-                {
-                    printf(" ID %4.4i -> status %i ", detID, Int_t(statusEmcRec[0].Status[i]));
-                    if(cellIn%4 == 0)
-                        printf("\n");
-                }
+                printout += Form(" ID %4.4i -> status %i ", detID, Int_t(statusEmcRec[0].Status[i]));
+                if(cellIn%4 == 0)
+					printout += Form("\n");
             }
         }
     }
-    printf("\n Table name %s : DB: date %i : time %i \n",
-           status->GetName(), controlTable->dateDB, controlTable->timeDB);
-    printf("Detector %i : cells(in) %i : cells(out) %i -> sum %i \n", det, cellIn, cellOut, cellIn+cellOut);
-    if(Debug()>=2)
-        controlMaker->Print(0,1);
+	LOG_INFO << printout << endm;
+    LOG_INFO << Form("Table name %s : DB: date %i : time %i",
+           status->GetName(), controlTable->dateDB, controlTable->timeDB) << endm;
+    LOG_INFO << Form("Detector %i : cells(in) %i : cells(out) %i -> sum %i", det, cellIn, cellOut, cellIn+cellOut) << endm;
+	if(Debug()>=2) controlMaker->Print(0,1);
     if(hist)
         hIdStatus->Draw();
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.34 2006/09/20 13:44:25 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.35 2007/01/22 19:13:40 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.35  2007/01/22 19:13:40  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.34  2006/09/20 13:44:25  kocolosk
 // fix autobuild warnings
 //

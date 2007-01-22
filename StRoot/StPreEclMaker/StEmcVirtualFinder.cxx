@@ -11,7 +11,6 @@ ClassImp(StEmcVirtualFinder)
 StEmcVirtualFinder::StEmcVirtualFinder():TObject()
 {
     TString name,title;
-    setPrint();
     for(Int_t i = 0; i<MAXDETBARREL; i++)
     {
         mColl[i] = new StEmcPreClusterCollection(i+1);

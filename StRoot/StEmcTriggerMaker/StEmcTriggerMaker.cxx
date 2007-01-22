@@ -19,7 +19,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Stiostream.h>
-#include "StMessMgr.h"
 #include "StChain.h"
 #include "TFile.h"
 #include <math.h>
@@ -40,7 +39,6 @@ StEmcTriggerMaker::StEmcTriggerMaker(const char *name):StMaker(name)
 {
     mBemcTrigger = new StBemcTrigger();
     mSaveStEvent = true;
-    mPrint = false;
 
     mIs2003HT1=-1;
     mIs2004HT1=-1;
@@ -154,7 +152,6 @@ Int_t StEmcTriggerMaker::Make()
     StEvent* event=(StEvent*)GetInputDS("StEvent");
     if(!event) return kStOk;
 
-    mBemcTrigger->setPrint(mPrint);
     mBemcTrigger->setEvent(event);
     if(mBemcTrigger->makeTrigger() != kStOK)
     {

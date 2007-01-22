@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.8  2007/01/22 19:13:50  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.7  2005/05/23 12:35:14  suaide
 // New Point maker code
 //
@@ -46,6 +49,7 @@
 #include "TDataSetIter.h"
 #include "TTableSorter.h"
 #include "StPi0Candidate.h"
+#include "StMessMgr.h"
 
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
@@ -128,8 +132,8 @@ public:
 
     void    setPrint(Bool_t a)
     {
-        mPrint = a;
-    }
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+    }///< Obsolete function; users can control messages with logger config file.
 
     ClassDef(StPointCollection,1)// Base class for electromagnetic calorimeter Point collection
 };

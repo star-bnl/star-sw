@@ -18,6 +18,7 @@ one for each detector and have basic QA histograms.
 #include "StEmcUtil/others/emcInternalDef.h"
 #include "StEmcRawMaker/defines.h"
 #include "TH2.h"
+#include "StMessMgr.h"
 
 #define NHIST1 5
 #define NHIST2 1
@@ -43,11 +44,10 @@ public:
     virtual Bool_t fillHistograms(StEvent*); ///< fills the QA histograms
     virtual Bool_t clear(StEvent*); ///< removes clusters and points from the StEvent object
     virtual Bool_t clear(); ///< clear the pre cluster collections
-    virtual void   setPrint(Bool_t a = kTRUE)
+    void    setPrint(Bool_t a)
     {
-        mPrint = a;
-    } ///< sets the printout mode
-
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+    }///< Obsolete function; users can control messages with logger config file.
 
     ClassDef(StEmcVirtualFinder,1)
 };

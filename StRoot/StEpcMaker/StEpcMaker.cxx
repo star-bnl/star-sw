@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.28 2005/05/23 12:35:14 suaide Exp $
+// $Id: StEpcMaker.cxx,v 1.29 2007/01/22 19:13:50 kocolosk Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.29  2007/01/22 19:13:50  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.28  2005/05/23 12:35:14  suaide
 // New Point maker code
 //
@@ -104,7 +107,6 @@ ClassImp(StEpcMaker)
 StEpcMaker::StEpcMaker(const char *name):StMaker(name)
 {
     mPoint = 0;
-    mPrint = kTRUE;
     for(int i=0;i<4;i++)
     {
         m_point_energy[i] = 0;   //! //Point Energy spectra
@@ -173,37 +175,33 @@ Int_t StEpcMaker::Make()
 
     if (!mEvent)
     {
-        if(mPrint)
-            cout << "No StEvent! Can not continue. " << endl;
+        LOG_ERROR << "No StEvent! Can not continue. " << endm;
         return kStOK; // If no event, we're done
     }
     mTheEmcCollection = mEvent->emcCollection();
     if(!mTheEmcCollection)
     {
-        if(mPrint)
-            cout<<" EPC:: No EmcCollection, Cannot continue**"<<endl;
+        LOG_ERROR <<" EPC:: No EmcCollection, Cannot continue**"<<endm;
         return kStOK;
     }
 
     // ******Creating StPointCollection and calling findPoints
     mPoint = new StPointCollection("point");
-    mPoint->setPrint(mPrint);
     m_DataSet->Add(mPoint);      // for convinience only
 
     if(mPoint->makeEmcPoints(mEvent) != 1)
     {
         return kStOk;
     }
-    else if(mPrint)
-        cout << "findEmcPoint == kStOK" << endl;
+    else {
+		LOG_DEBUG << "findEmcPoint == kStOK" << endm;
+	}
 
     MakeHistograms(); // Fill QA histgrams
-    if(mPrint)
-        cout << "Epc: ***  Filling StEvent ***" << endl;
+    LOG_DEBUG << "Epc: ***  Filling StEvent ***" << endm;
     if(fillStEvent() != kStOK)
     {
-        if(mPrint)
-            cout<< "StEvent filling is not OK"<<endl;
+        LOG_WARN << "StEvent filling is not OK"<<endm;
     }
     return kStOK;
 }
@@ -218,8 +216,7 @@ void StEpcMaker::MakeHistograms()
 
         if(nR>0)
         {
-            if(mPrint)
-                cout << "Number of Emc points " << nR << endl;
+            LOG_DEBUG << "Number of Emc points " << nR << endm;
             TIter next(mPoint->PointsReal());
             StEmcPoint *cl;
 
@@ -277,8 +274,7 @@ void StEpcMaker::MakeHistograms()
 Int_t
 StEpcMaker::fillStEvent()
 {
-    if(mPrint)
-        cout<<"Epc::fillStEvent() ***"<<endl;
+    LOG_DEBUG <<"Epc::fillStEvent() ***"<<endm;
 
     if(mPoint)
     {
@@ -286,8 +282,7 @@ StEpcMaker::fillStEvent()
 
         if(nR>0)
         {
-            if(mPrint)
-                cout << "Number of Emc points " << nR << endl;
+            LOG_DEBUG << "Number of Emc points " << nR << endm;
             TIter next(mPoint->PointsReal());
             StEmcPoint *cl;
 
@@ -298,8 +293,9 @@ StEpcMaker::fillStEvent()
             }
         }
     }
-    else if(mPrint)
-        cout << "There is no BEMC points in this event" <<endl;
+    else {
+		LOG_DEBUG << "There is no BEMC points in this event" <<endm;
+	}
     return kStOK;
 }
 //-------------------------------------------------------

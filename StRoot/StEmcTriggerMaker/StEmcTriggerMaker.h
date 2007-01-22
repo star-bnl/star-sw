@@ -29,6 +29,7 @@
 #include "emc_def.h"
 #include "StBemcTrigger.h"
 #include "StEmcUtil/database/StBemcTables.h"
+#include "StMessMgr.h"
 
 #define kNPatches 300
 #define kNJet 12
@@ -42,7 +43,6 @@ class StEmcTriggerMaker : public StMaker
 private:
     StBemcTrigger*    mBemcTrigger;
     bool              mSaveStEvent;
-    bool              mPrint;
 
     int               isTrig[16];
     int               TowJetId[13];
@@ -152,7 +152,7 @@ public:
     //void              fillHistograms(StEvent*);
     void              saveHistograms(char*);
     void              setSaveStEvent(bool a) {mSaveStEvent = a;}
-    void              setPrint(bool a){  mPrint = a;}
+    void              setPrint(bool a) { LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm; }///< Obsolete function; users can control messages with logger config file.
 
     int               is2003HT1() {return mIs2003HT1;}//1=true,0=false,-1=problem
     int               is2004HT1() {return mIs2004HT1;}

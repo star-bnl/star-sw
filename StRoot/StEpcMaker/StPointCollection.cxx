@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.26  2007/01/22 19:13:50  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.25  2006/09/20 13:44:28  kocolosk
 // fix autobuild warnings
 //
@@ -152,8 +155,7 @@ StPointCollection::Browse(TBrowser* b)
 //*************** FIND EMC POINTS **********************************
 Int_t StPointCollection::makeEmcPoints(StEvent* event)
 {
-    if(mPrint)
-        cout <<"Finding EMC Points ...\n";
+    LOG_DEBUG <<"Finding EMC Points ..." << endm;
     if(!event)
         return 0;
 
@@ -181,8 +183,7 @@ Int_t StPointCollection::makeEmcPoints(StEvent* event)
     findMatchedClusters(cluster[0],cluster[1],cluster[2],cluster[3]);
 
     //Sort BEMC, SMDe, SMDp, PRS clusters according to location
-    if(mPrint)
-        cout <<"Making points for non-matched clusters ...\n";
+    LOG_DEBUG <<"Making points for non-matched clusters ..." <<endm;
     ClusterSort(cluster[0],cluster[1],cluster[2],cluster[3]);
 
     // MATCHING BEMC detector clusters
@@ -210,8 +211,7 @@ Int_t StPointCollection::findMatchedClusters(StEmcClusterCollection* Bemccluster
         StEmcClusterCollection *Bsmdecluster,
         StEmcClusterCollection *Bsmdpcluster)
 {
-    if(mPrint)
-        cout <<"Making points for already matched clusters ...\n";
+    LOG_DEBUG <<"Making points for already matched clusters ..." <<endm;
     if(Bemccluster)
     {
         Int_t Ncluster0=Bemccluster->numberOfClusters();
@@ -270,8 +270,7 @@ StEmcPoint* StPointCollection::makePoint(StEmcCluster* btow,StEmcCluster* bprs,S
     if(!btow)
         return NULL;
 
-    if (mPrint)
-        cout <<"Making point"<<endl;
+    LOG_DEBUG <<"Making point"<< endm;
 
     Int_t Category = 0;
     if(btow)
@@ -637,8 +636,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
     // StEpcMaker will, in these cases, use the UniqueID as plain
     // matching information to create the corresponding points.
     const Int_t eta_shift_fix=1;
-    if(mPrint)
-        cout<<" I am inside PointCalc***"<<endl;
+    LOG_DEBUG <<" I am inside PointCalc***"<<endm;
     for(Int_t i1=0;i1<Epc::nModule;i1++)
     {
         for(Int_t i2=0;i2<Epc::nPhiBin;i2++)
@@ -662,8 +660,7 @@ void StPointCollection::ClusterSort(StEmcClusterCollection* Bemccluster,
             for(UInt_t i=0;i<emcclusters.size();i++)
             {
                 StEmcCluster *cl1=(StEmcCluster*)emcclusters[i];
-                if(mPrint)
-                    cout <<"BEMC cluster UniqueId = "<<cl1->GetUniqueID()<<endl;
+                LOG_DEBUG <<"BEMC cluster UniqueId = "<<cl1->GetUniqueID()<<endm;
                 if(cl1->GetUniqueID()==0)
                 {
                     Float_t eta_emc=cl1->eta();
@@ -848,8 +845,7 @@ Int_t StPointCollection::matchToTracks(StEvent* event)
     StEmcGeom* geom = StEmcGeom::instance("bemc");
     if(nR>0)
     {
-        if(mPrint)
-            cout << "Matching to tracks... NP = " << nR << endl;
+        LOG_DEBUG << "Matching to tracks... NP = " << nR << endm;
         StSPtrVecTrackNode& tracks=event->trackNodes();
         Int_t nTracks =  tracks.size();
         StThreeVectorD momentum,position;

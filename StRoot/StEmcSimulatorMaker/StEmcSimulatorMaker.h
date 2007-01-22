@@ -16,6 +16,7 @@
 #include "StEmcUtil/others/emcInternalDef.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 #include "tables/St_emc_hits_Table.h"
+#include "StMessMgr.h"
 
 #define EMCSIMNEW
 
@@ -44,7 +45,6 @@ private:
     StEmcGeom*              mGeom[MAXDET];    // Geometry
 
     Bool_t                  mCompare;
-    Bool_t                  mPrint;
     TCanvas*                mC1;              //
 
     Float_t                 mGain[MAXDET][18000];
@@ -169,15 +169,15 @@ public:
     }
     void                    setPrint(Bool_t a)
     {
-        mPrint = a;
-    }
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+	}///< Obsolete function; users can control messages with logger config file.
     void                    setHistControl(UInt_t key)
     {
         mHistControl = key;
     }
     virtual const char*     GetCVS() const
     {
-        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.15 2005/03/21 21:36:39 suaide Exp $ built "__DATE__" "__TIME__ ;
+        static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.16 2007/01/22 19:13:40 kocolosk Exp $ built "__DATE__" "__TIME__ ;
         return cvs;
     }
 
@@ -187,8 +187,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.15 2005/03/21 21:36:39 suaide Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.16 2007/01/22 19:13:40 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.16  2007/01/22 19:13:40  kocolosk
+// use STAR logger for all output
+//
 // Revision 1.15  2005/03/21 21:36:39  suaide
 // fixed problem with chain
 //

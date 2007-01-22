@@ -9,6 +9,7 @@ This is the BEMC cluster finder maker
 #define STAR_StPreEclMaker
 
 #include "StMaker.h"
+#include "StMessMgr.h"
 #include "StEmcVirtualFinder.h"
 #include "StEmcOldFinder.h"
 #include "StEmcUtil/others/emcInternalDef.h"
@@ -23,7 +24,6 @@ private:
     EmcClusterAlgorithm mAlg;
 
     StEvent*      getEvent();
-    Bool_t        mPrint;
 
 protected:
 public:
@@ -33,12 +33,10 @@ public:
     virtual Int_t Make();
     virtual Int_t Finish();
 
-    void  setPrint(Bool_t a = kTRUE)
+    void    setPrint(Bool_t a)
     {
-        mPrint = a;
-        if(mFinder)
-            mFinder->setPrint(a);
-    } ///< turns on/off the printout information
+		LOG_INFO << "::setPrint() is obsolete.  Use logger config file to set verbosity instead." << endm;
+    }///< Obsolete function; users can control messages with logger config file.
     void  setAlgorithm(EmcClusterAlgorithm a)
     {
         mAlg = a;
@@ -58,7 +56,7 @@ public:
     void SetClusterConditions(char*,Int_t, Float_t, Float_t, Float_t, Bool_t = kFALSE); ///< this is for background compatibility with the old finder
 
     virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.19 2006/03/29 03:20:50 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.20 2007/01/22 19:13:53 kocolosk Exp $ built "__DATE__" "__TIME__ ; 
       return cvs;
     }
 
