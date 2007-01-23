@@ -215,9 +215,21 @@ Int_t StEmcSimulatorMaker::Init()
 
     if(mEEMC)
     { /* nothing */
-    }
+    }	
 
     saveRunco();
+
+	//set new controlTable flags based on value of mEmbed
+	//idea is to get gains and status from DB but not peds if embedding
+	//will need to edit to add preshower
+	if(mEmbed) {
+		controlTable->keyDb[0] = 1;
+		controlTable->keyDb[1] = 0;
+		controlTable->keyDb[2] = 1;
+		controlTable->keyDb[3] = 1;
+		LOG_INFO << "StEmcSimulatorMaker controlTable flags have been configured for embedding mode" << emdm;
+	}		
+	
     return StMaker::Init();
 }
 Int_t StEmcSimulatorMaker::InitRun(Int_t run)
@@ -1219,8 +1231,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.36 2007/01/23 19:44:24 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.37 2007/01/23 20:14:21 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.37  2007/01/23 20:14:21  kocolosk
+// added code in Init() toautomatically set embedding mode controlTable flags if StEmcADCtoEMaker and/or StEmcMixerMaker.  Users do not need to do this in their own macros any more.
+//
 // Revision 1.36  2007/01/23 19:44:24  kocolosk
 // few additional logger fixes
 //
