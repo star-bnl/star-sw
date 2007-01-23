@@ -423,8 +423,10 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
                     if(mhSub[det-1])
                         mhSub[det-1]->Fill(Axis_t(s));
                 }
-            }
-            LOG_WARN <<"StEmcSimulatorMaker::makeHistograms=>bad index det "<<det<<" m "<<m<<" e "<<e<<" s "<<s<<endm;
+            } 
+			else {
+				LOG_WARN <<"StEmcSimulatorMaker::makeHistograms=>bad index det "<<det<<" m "<<m<<" e "<<e<<" s "<<s<<endm;
+			}
         }
         m_nhit->Fill(log10((Double_t)nhit), (Float_t)det);
         m_etot->Fill(log10((Double_t)energysum), (Float_t)det);
@@ -1217,8 +1219,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.35 2007/01/22 19:13:40 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.36 2007/01/23 19:44:24 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.36  2007/01/23 19:44:24  kocolosk
+// few additional logger fixes
+//
 // Revision 1.35  2007/01/22 19:13:40  kocolosk
 // use STAR logger for all output
 //
