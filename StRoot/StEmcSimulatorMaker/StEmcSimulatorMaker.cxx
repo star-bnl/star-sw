@@ -227,7 +227,7 @@ Int_t StEmcSimulatorMaker::Init()
 		controlTable->keyDB[1] = 0;
 		controlTable->keyDB[2] = 1;
 		controlTable->keyDB[3] = 1;
-		LOG_INFO << "StEmcSimulatorMaker controlTable flags have been configured for embedding mode" << emdm;
+		LOG_INFO << "StEmcSimulatorMaker controlTable flags have been configured for embedding mode" << endm;
 	}		
 	
     return StMaker::Init();
@@ -1231,8 +1231,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.38 2007/01/23 20:36:25 kocolosk Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.39 2007/01/23 20:38:59 kocolosk Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.39  2007/01/23 20:38:59  kocolosk
+// logger update
+//
 // Revision 1.38  2007/01/23 20:36:25  kocolosk
 // oops ... keyDb should have been keyDB in rev.1.37
 //
