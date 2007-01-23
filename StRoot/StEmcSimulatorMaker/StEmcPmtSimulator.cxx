@@ -120,7 +120,9 @@ Int_t StEmcPmtSimulator::getAdc(const Double_t de, const Double_t eta)
         ADC*= mC4;
         mAdc=(Int_t) ADC; // add gain uncertainty in the simulation. This is not considered when converting to energy
     }
-    LOG_WARN <<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "<<mMode<<endm;
+	else {
+		LOG_WARN <<"StEmcSimulatorMaker => StEmcPmtSimulator::getAdc => mode is wrong "<<mMode<<endm;
+	}
     return mAdc;
 }
 Float_t  StEmcPmtSimulator::getEnergy()
@@ -136,8 +138,11 @@ void  StEmcPmtSimulator::setParameters(const Float_t calibCoeff,const UInt_t typ
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.cxx,v 1.8 2007/01/22 19:13:39 kocolosk Exp $
+//  $Id: StEmcPmtSimulator.cxx,v 1.9 2007/01/23 19:44:24 kocolosk Exp $
 //  $Log: StEmcPmtSimulator.cxx,v $
+//  Revision 1.9  2007/01/23 19:44:24  kocolosk
+//  few additional logger fixes
+//
 //  Revision 1.8  2007/01/22 19:13:39  kocolosk
 //  use STAR logger for all output
 //
