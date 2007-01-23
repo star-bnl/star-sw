@@ -245,6 +245,8 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        filter = new StarOptionFilter();
        appender->addFilter(filter);
        root->addAppender(appender);
+       //Set the default threashold to be 
+       root->setLevel(Level::WARN);
     }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
@@ -462,7 +464,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.21 2006/07/01 01:19:17 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.22 2007/01/23 22:27:14 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -800,8 +802,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.21 2006/07/01 01:19:17 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.22 2007/01/23 22:27:14 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.22  2007/01/23 22:27:14  fine
+// Set the dwefault logger level to WARN
+//
 // Revision 1.21  2006/07/01 01:19:17  fine
 // Add new jiob tracking option code
 //
