@@ -772,7 +772,7 @@ void StSpaceChargeEbyEMaker::BuildHist(int i) {
 void StSpaceChargeEbyEMaker::SetTableName() {
   // Problem caused if first event comes later in time than other events.
   // Solution: subtract 10 seconds...
-  TDatime firsttime(GetDateTime().Convert()-10);
+  TDatime firsttime(GetDateTime().Convert(1)-10,kTRUE);
   int date = firsttime.GetDate();
   int time = firsttime.GetTime();
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event date = " << date << endm;
@@ -904,8 +904,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.13 2006/12/16 01:00:58 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.14 2007/01/24 21:42:22 perev Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.14  2007/01/24 21:42:22  perev
+// GMT conversion fixed
+//
 // Revision 1.13  2006/12/16 01:00:58  genevb
 // Better handling of zero magnetic field
 //
