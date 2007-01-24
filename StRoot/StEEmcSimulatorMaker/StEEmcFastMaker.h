@@ -1,4 +1,4 @@
-// $Id: StEEmcFastMaker.h,v 1.9 2007/01/12 23:57:12 jwebb Exp $
+// $Id: StEEmcFastMaker.h,v 1.10 2007/01/24 21:07:02 balewski Exp $
 
 
 /* \class StEEmcFastMaker        
@@ -107,7 +107,7 @@ class StEEmcFastMaker : public StMaker {
   StEmcCollection *mLocalStEmcCollection; // for special uses (embedding)
   bool mEmcCollectionIsLocal;
 
-  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.9 2007/01/12 23:57:12 jwebb Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcFastMaker.h,v 1.10 2007/01/24 21:07:02 balewski Exp $";
   
  protected:
  public: 
@@ -119,10 +119,11 @@ class StEEmcFastMaker : public StMaker {
  
   void SetLocalStEvent();
   void SetEmcCollectionLocal(bool x=true){mEmcCollectionIsLocal=x;}
+  void SetEmbeddingMode(){SetEmcCollectionLocal(true);}
   StEmcCollection * GetLocalEmcCollection() { return mLocalStEmcCollection;}
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.9 2007/01/12 23:57:12 jwebb Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcFastMaker.h,v 1.10 2007/01/24 21:07:02 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -133,6 +134,12 @@ class StEEmcFastMaker : public StMaker {
 
 
 // $Log: StEEmcFastMaker.h,v $
+// Revision 1.10  2007/01/24 21:07:02  balewski
+// 1) no cout or printf, only new Logger
+// 2) EndcapMixer:
+//    - no assert()
+//    - locks out on first fatal error til the end of the job
+//
 // Revision 1.9  2007/01/12 23:57:12  jwebb
 // Calculation of ideal gains moved into static member function getTowerGains()
 // to allow slow simulator to access them.

@@ -1,7 +1,7 @@
 #ifndef SlowSimUtil_h
 #define SlowSimUtil_h
 /*********************************************************************
- * $Id: SlowSimUtil.h,v 1.1 2004/12/15 17:02:56 balewski Exp $
+ * $Id: SlowSimUtil.h,v 1.2 2007/01/24 21:07:01 balewski Exp $
  *********************************************************************
  * Descripion:
  *   Adds Poisson statistical fluctuations to SMD, Pre- and Post-Shower
@@ -31,14 +31,18 @@ class SlowSimUtil {
  public:
 
   SlowSimUtil();
-  void set(float th, int nd, char uv0);
-  void print(int x=1);
 };
 
 
 #endif
 /*****************************************************************
  * $Log: SlowSimUtil.h,v $
+ * Revision 1.2  2007/01/24 21:07:01  balewski
+ * 1) no cout or printf, only new Logger
+ * 2) EndcapMixer:
+ *    - no assert()
+ *    - locks out on first fatal error til the end of the job
+ *
  * Revision 1.1  2004/12/15 17:02:56  balewski
  * try 2
  *
