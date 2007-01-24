@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.85 2005/10/06 20:21:28 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.86 2007/01/24 21:35:54 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.86  2007/01/24 21:35:54  perev
+// GMT conversion fixed
+//
 // Revision 1.85  2005/10/06 20:21:28  fisyak
 // Protection versus division by 0
 //
@@ -264,7 +267,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.85 2005/10/06 20:21:28 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.86 2007/01/24 21:35:54 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -457,8 +460,7 @@ Int_t  St_dst_Maker::Filler(){
     event.bunchXing[0] = EventHeader[0].bunchXing[0];
     event.bunchXing[1] = EventHeader[0].bunchXing[1];
   }
-  time_t tt  =  GetDateTime().Convert()-timezone; // UTC -> local uncorrected for daylight saving time
-  event.time = localtime(&tt)->tm_isdst ? tt+3600 : tt; // assign and correct for summer time
+  event.time = GetDateTime().Convert(1);
   event_header->AddAt(&event,0);
   St_dst_event_summary *event_summary = new St_dst_event_summary("event_summary",1);
   dstI.Add(event_summary);
