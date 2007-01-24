@@ -1,6 +1,6 @@
 // *-- Author : Hal Spinka
 // 
-// $Id: StEEmcSlowMaker.cxx,v 2.0 2007/01/13 00:03:04 jwebb Exp $
+// $Id: StEEmcSlowMaker.cxx,v 2.1 2007/01/24 21:07:03 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -604,6 +604,7 @@ void StEEmcSlowMaker::MakeTower(StEmcCollection* emc)
 
         }
 
+      int nTchange=0; // counts # of towers with ADC (int) values changed
       StSPtrVecEmcRawHit &tower_hits = det->module(sec)->hits();
       for ( UInt_t ihit=0;ihit<tower_hits.size();ihit++ )
         {
@@ -657,13 +658,15 @@ void StEEmcSlowMaker::MakeTower(StEmcCollection* emc)
           if ( mHList ) hA[5]->Fill(adc);
 
           if (mOverwrite) {
+	    if( (int)hit->adc() !=adc) nTchange++;
+
             LOG_DEBUG <<"overwriting tower=" << tower->name << " old adc=" << hit->adc() << " new adc=" << adc << endm;
             hit->setAdc( adc );
           }
 
         }
 
-
+      LOG_INFO <<Form(" Etow changed %d ADC values for sector=%d",nTchange, sec )<<endm;
     }// loop over sectors
 
 }
@@ -842,6 +845,12 @@ void StEEmcSlowMaker::setRelativeLightYield( Float_t pre1, Float_t pre2, Float_t
 void StEEmcSlowMaker::setEmbeddingMode(Bool_t x){ mIsEmbeddingMode=x;} 
 
 // $Log: StEEmcSlowMaker.cxx,v $
+// Revision 2.1  2007/01/24 21:07:03  balewski
+// 1) no cout or printf, only new Logger
+// 2) EndcapMixer:
+//    - no assert()
+//    - locks out on first fatal error til the end of the job
+//
 // Revision 2.0  2007/01/13 00:03:04  jwebb
 // Upgrade of the slow simulator.  The following changes have been made:
 //

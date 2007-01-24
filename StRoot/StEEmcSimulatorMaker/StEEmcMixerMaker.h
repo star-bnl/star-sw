@@ -29,35 +29,41 @@ class StEEmcDbMaker;
 class EEmcDbItem;
                                                
 class StEEmcMixerMaker : public  StMaker {
-  private:
-    Bool_t        mClear;
-    StEEmcDbMaker *mEEDb;
-
-//  Embedded object which can be used by other makers.  
-    StEmcCollection *mMixerEmcCollection;
-    
-    void    mergeADCs(StEmcCollection*A,StEmcCollection*B);   
-
-
-  public: 
-    StEEmcMixerMaker(const char *name="EEmcMixer");
-    virtual       ~StEEmcMixerMaker();
-    virtual Int_t Init();
-    virtual Int_t Make();
-    virtual Int_t Finish();
-    StEmcCollection *getMixerEmcCollection() { return mMixerEmcCollection; }
-
-
-   virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.1 2006/12/12 20:29:14 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
+ private:
+  Bool_t        panicOff; // once activated disables Endcap embedding
+  StEEmcDbMaker *mEEDb;
+  
+  //  Embedded object which can be used by other makers.  
+  StEmcCollection *mMixerEmcCollection;
+  
+  bool  mergeADCs(StEmcCollection*A,StEmcCollection*B);   
+  
+  
+ public: 
+  StEEmcMixerMaker(const char *name="EEmcMixer");
+  virtual       ~StEEmcMixerMaker();
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual Int_t Finish();
+  StEmcCollection *getMixerEmcCollection() { return mMixerEmcCollection; }
+  
+  
+  virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEEmcMixerMaker.h,v 1.2 2007/01/24 21:07:03 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  
   ClassDef(StEEmcMixerMaker,0) 
-};
+ };
 #endif
-
+    
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.h,v 1.1 2006/12/12 20:29:14 balewski Exp $
+// $Id: StEEmcMixerMaker.h,v 1.2 2007/01/24 21:07:03 balewski Exp $
 // $Log: StEEmcMixerMaker.h,v $
+// Revision 1.2  2007/01/24 21:07:03  balewski
+// 1) no cout or printf, only new Logger
+// 2) EndcapMixer:
+//    - no assert()
+//    - locks out on first fatal error til the end of the job
+//
 // Revision 1.1  2006/12/12 20:29:14  balewski
 // added hooks for Endcap embedding
 //

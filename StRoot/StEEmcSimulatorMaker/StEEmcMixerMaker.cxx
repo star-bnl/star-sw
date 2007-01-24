@@ -27,7 +27,7 @@ ClassImp(StEEmcMixerMaker)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 StEEmcMixerMaker::StEEmcMixerMaker(const char *name):StMaker(name){
-  
+    panicOff=false; // once activated disables Endcap embedding
 }
 
 //-------------------------------------------------------------------
@@ -49,9 +49,8 @@ StEEmcMixerMaker::Init(){
   mEEDb=(StEEmcDbMaker*)GetMaker("eemcDb");
   if(mEEDb==0) mEEDb=(StEEmcDbMaker*)GetMaker("eeDb"); // try another name
   if( mEEDb==0){
-    gMessMgr->Warning()<<GetName()<<
-      "::Init()\n\n Fatal Error - Eemc_DbMaker is not in the chain,\n aborting"<<endm;
-    //    exit(1);
+    panicOff=true;
+    LOG_FATAL<< "::Init()\n\n Fatal Error - Eemc_DbMaker is not in the chain,\n  panicOff="<<panicOff<<endm;
     return  kStErr;
   }
   return StMaker::Init();
@@ -65,18 +64,19 @@ StEEmcMixerMaker::Make(){
    Data input is daq file and MC is from EEmc fast Simulator StEEmcFastMaker. 
 */
 
-  LOG_INFO<<GetName() <<"::Make() "<<endm;
+  LOG_INFO <<"::Make() start...."<<endm;
   StEvent*  mEvent = (StEvent*)GetInputDS("StEvent");
-  assert(mEvent);
+  if(mEvent==0)  panicOff=true;
   StEmcCollection* ecolA =(StEmcCollection*)mEvent->emcCollection();
-  assert(ecolA);
-  if(ecolA==0)
-    {
-      gMessMgr->Message("","W") << GetName()<<"::raw2pixels() no emc collection, skip"<<endm;
-      return   kStErr;
-    }
+  if(ecolA==0)    {
+    LOG_WARN<<"::Make(), raw2pixels() no emc collection, skip"<<endm;
+    return   kStErr;
+  }
   
-  
+  if(panicOff) {
+       LOG_FATAL<< "::Make()\n\n Fatal Error was encounter earlier, Endcap embedding disabled  panicOff="<<panicOff<<endm;
+    return  kStErr;
+  }
 
 /*
    Fill data from StEEMCReader to StEmcRawData first, then from raw blocks 
@@ -92,11 +92,11 @@ StEEmcMixerMaker::Make(){
 */  
     
   StEEmcPrint eemcPrint;
-  eemcPrint.setMode(15);//bits 1:Tower, 2:Pre, 4:SmdU, 8:SmdV, 15:all
-  if(Debug()) {
-    gMessMgr->Info() <<GetName() <<"::Make() -------------- print data: Ecoll-A ---- real backg eve  ---------"<<endm;
-    eemcPrint.print(ecolA);
-  }
+  eemcPrint.setMode(15);//bits= 1:Tower, 2:Pre, 4:SmdU, 8:SmdV, 15:all
+  
+  LOG_DEBUG<<"::Make() -------------- print data: Ecoll-A ---- real backg eve  ---------"<<endm;
+  if(Debug()) eemcPrint.print(ecolA);
+    
   /* If the second source is the EEMC simulator,
      it owns the StEmcCollection from simulator.
   */
@@ -104,44 +104,42 @@ StEEmcMixerMaker::Make(){
   StEEmcFastMaker *sim = (StEEmcFastMaker*)GetMaker("EEmcFastSim");
   // one can use fast simu as the source even if slow simu is used, since slow simu is set up in the overwrite mode.
   if(!sim)  {
-    gMessMgr->Warning() <<GetName() <<"::Make() No fast EEmcSimulator found, nothing to embed"<<endm; return  kStWarn; }
+    LOG_WARN<<"::Make() No fast EEmcSimulator found, nothing to embed"<<endm; return  kStWarn; }
   ecolB = sim->GetLocalEmcCollection();
-
-  if(!ecolB) {
-    gMessMgr->Warning() <<GetName() <<"::Make() No second EmcCollection to embed"<<endm;   return kStWarn; }
   
-  if(Debug()) {
-    LOG_INFO <<GetName() <<"::Make() -------------- print data: Ecoll-B ----- M-C physics probe eve -----------"<<endm;      
-    eemcPrint.print(ecolB);
-  }
- 
-  LOG_INFO <<GetName() <<"::Make() -------------- print data: Ecoll-A+B ----- before mrging -----"<<endm;   
+  if(!ecolB) {
+    LOG_WARN<<"::Make() No second EmcCollection to embed"<<endm;   return kStWarn; }
+  
+  
+  LOG_DEBUG <<"::Make() -------------- print data: Ecoll-B ----- M-C physics probe eve -----------"<<endm;      
+  if(Debug()) eemcPrint.print(ecolB); 
+  
+  
+  LOG_DEBUG<<GetName() <<"::Make() -------------- print data: Ecoll-A+B ----- before mrging -----"<<endm;   
   eemcPrint.printChange(ecolA,ecolB,"before merging");
 
-  mergeADCs(ecolA,ecolB);
-
+  if(mergeADCs(ecolA,ecolB))    return  kStErr;
+  
   mMixerEmcCollection = ecolA;
   
-  if(Debug()) {
-    gMessMgr->Info() <<GetName() <<"::Make() --------------  print Ecoll-A after mixing ----------------"<<endm;
-    eemcPrint.print(ecolA);
-  }
+  LOG_DEBUG <<"::Make() --------------  print Ecoll-A after mixing ----------------"<<endm;
+  if(Debug())   eemcPrint.print(ecolA);
   
-  LOG_INFO <<GetName() <<"::Make() -------------- print data: Ecoll-A+B ----- after mrging -----"<<endm;   
-  eemcPrint.printChange(ecolA,ecolB,"after merging");
+  LOG_DEBUG <<"::Make() -------------- print data: Ecoll-A+B ----- after mrging -----"<<endm;   
+  if(Debug())    eemcPrint.printChange(ecolA,ecolB,"after merging");
   return kStOK; 
 }
 
 
 //--------------------------------------------------------------------
 //--------------------------------------------------------------------
-void
+bool
 StEEmcMixerMaker::mergeADCs(StEmcCollection*emccolA,StEmcCollection*emccolB){   
 /*!
 This method adds the ADCs from the the second StEmcCollection 
 into the first StEmcCollection in event for all EEMC subdetectors
 */
-  gMessMgr->Info()<<GetName() <<"::Make() merging ADCs ..."<<endm;
+  LOG_DEBUG  <<"::Make() merging ADCs ..."<<endm;
 
 /* 
  For EEMC, module = sector(1-12). 
@@ -158,9 +156,9 @@ into the first StEmcCollection in event for all EEMC subdetectors
     StEmcDetector* detectorA=emccolA->detector(id);
     StEmcDetector* detectorB=emccolB->detector(id);
     if(!detectorA) 
-      gMessMgr->Warning()<<"detectorA not loaded"<<endm;
+      LOG_WARN<<"detectorA not loaded"<<endm;
     if(!detectorB) 
-      gMessMgr->Warning()<<"detectorB not loaded"<<endm;
+      LOG_WARN<<"detectorB not loaded"<<endm;
     
     if(!detectorA  ||  !detectorB) continue;// nothing to mix for such leyer 
     for(int secID=1; secID<=kEEmcNumSectors; secID++){ 
@@ -175,7 +173,7 @@ into the first StEmcCollection in event for all EEMC subdetectors
       for(UInt_t k2=0;k2<rawHitB.size();k2++)  
 	myHitB.push_back(rawHitB[k2]);
       vector<StEmcRawHit*>::iterator hitB;
-     
+      
       // printf("\nmixIn idet=%d sect=%d Nhit A=%d B=%d\n",det,secID,rawHitA.size(),myHitB.size());
 
       /*....................
@@ -187,10 +185,9 @@ into the first StEmcCollection in event for all EEMC subdetectors
 	uint Bmod=rawHitA[k1]->module();
 
 	if((int)Bmod==!secID) {
-	  gMessMgr->Warning()<<GetName()<<
-	    "::Make()\n\n Fatal Error "<<Bmod<<"= Bmod==!secID ="<<secID<<" StEvent internal consistency failed - corrupted event file, abort"<<endm;
-	  // exit(1);
-	  return ;
+	  LOG_FATAL << "::Make()\n\n Fatal Error "<<Bmod<<"= Bmod==!secID ="<<secID<<" StEvent internal consistency failed - corrupted event file, abort"<<endm;
+	  panicOff=true;
+	  return false;
 
 	}
 
@@ -199,7 +196,7 @@ into the first StEmcCollection in event for all EEMC subdetectors
 	int  Bsub=rawHitA[k1]->sub();
 
 	// erase old energy for every hit, use ADC2E-maker to get energy back
-	rawHitA[k1]->setEnergy(654.3210); // just in case
+	rawHitA[k1]->setEnergy(-654.3210); // just in case, make more non-physical 
 		
 	for( hitB=myHitB.begin() ; hitB< myHitB.end(); hitB++) {
 	  if( (*hitB)->module()!=Bmod) continue;
@@ -249,14 +246,21 @@ into the first StEmcCollection in event for all EEMC subdetectors
     } // loop over sector
   } // loop over detectors
   
+  return true; // all finished w/o problems
 }
 
 
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.3 2006/12/22 15:20:45 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.4 2007/01/24 21:07:03 balewski Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.4  2007/01/24 21:07:03  balewski
+// 1) no cout or printf, only new Logger
+// 2) EndcapMixer:
+//    - no assert()
+//    - locks out on first fatal error til the end of the job
+//
 // Revision 1.3  2006/12/22 15:20:45  balewski
 // ignore M-C hits for crates masked for real events, as suggested by Wei-Ming
 //
