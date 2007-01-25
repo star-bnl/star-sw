@@ -79,8 +79,9 @@ class StMessageManager : public StMessMgr {
          {return messCounter->GetLimit(str);}
    virtual       void ListLimits() {messCounter->ListLimits();}
    virtual       void RemoveLimit(const char* str) {SetLimit(str,-1);}
-   virtual       void SetLevel(const char *loggerName, Int_t logLevel);
-   virtual      Int_t GetLevel(const char *loggerName, Int_t logLevel) const;
+   virtual       void SetLevel(Int_t logLevel);
+   virtual      Int_t GetLevel(Int_t logLevel) const;
+   virtual const char *GetName() const;
    virtual       void SwitchOff(const char* str) {SetLimit(str,0);}
    virtual       void SwitchOn(const char* str) {RemoveLimit(str);}
    virtual       void FixOn(const char* str) {SetLimit(str,-5);}
@@ -168,8 +169,11 @@ class StMessageManager : public StMessMgr {
 
 #endif
 
-// $Id: StMessageManager.h,v 1.26 2007/01/25 06:11:37 fine Exp $
+// $Id: StMessageManager.h,v 1.27 2007/01/25 06:28:06 fine Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.27  2007/01/25 06:28:06  fine
+// connect Logger and Maker debug levels
+//
 // Revision 1.26  2007/01/25 06:11:37  fine
 // Add the new StMess abstarct interfaces GetLevel/SetLevel
 //

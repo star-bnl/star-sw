@@ -126,8 +126,9 @@ protected:
    virtual        int GetLimit(const char* str);         
    virtual       void ListLimits();
    virtual       void RemoveLimit(const char* str);
-   virtual       void SetLevel(const char *, Int_t ) {;}
-   virtual      Int_t GetLevel(const char *, Int_t ) const {return 0;}
+   virtual       void SetLevel(Int_t ) {;}
+   virtual      Int_t GetLevel(Int_t ) const {return 0;}
+   virtual const char *GetName() const { return 0;}
    virtual       void SwitchOff(const char* str);
    virtual       void SwitchOn(const char* str);
    virtual       void FixOn(const char* str);
@@ -230,4 +231,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.7 2007/01/25 06:11:37 fine Exp $
+// $Id: StLoggerManager.h,v 1.8 2007/01/25 06:28:06 fine Exp $

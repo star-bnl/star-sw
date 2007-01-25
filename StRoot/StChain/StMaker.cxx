@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.187 2006/12/21 23:13:06 potekhin Exp $
+// $Id: StMaker.cxx,v 1.188 2007/01/25 06:28:02 fine Exp $
 //
 //
 /*!
@@ -1399,11 +1399,18 @@ StMaker *StMaker::New(const Char_t *classname, const Char_t *name, void *title)
   }
   return maker; 
 }
+//_____________________________________________________________________________
+void  StMaker::SetDebug(Int_t l)
+{
+   m_DebugLevel = l;
+   StMessMgr    *log = GetLogger();
+   if (log) log->SetLevel(m_DebugLevel);
+}
 
 //_____________________________________________________________________________
 void StMaker::SetDEBUG(Int_t l)
 {
-  m_DebugLevel = l;
+  SetDebug(l);
 //   Loop on all makers
    TList *tl = GetMakeList();
    if (!tl) return;
@@ -1734,6 +1741,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.188  2007/01/25 06:28:02  fine
+// connect Logger and Maker debug levels
+//
 // Revision 1.187  2006/12/21 23:13:06  potekhin
 // Included the upgr12 tag (corrected IGT)
 //

@@ -185,8 +185,8 @@ public:
    virtual Bool_t       TestBIT(EMakerStatus k)  {return TESTBIT(fStatus,k);}
    /// Setters for flags and switches
    virtual void         SetActive(Bool_t k=kTRUE) {if(k) SetBIT(kActive); else ResetBIT(kActive);} 
-   virtual void         SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
-   virtual void         SetDEBUG(Int_t l=1);                     // *MENU*
+   virtual void         SetDebug(Int_t l=1);          // *MENU*
+   virtual void         SetDEBUG(Int_t l=1);          // *MENU*
    virtual void         SetFlavor(const char *flav,const char *tabname);  //Set DB Flavor
    virtual void         SetMakeReturn(Int_t ret){m_MakeReturn=ret;}  
    virtual void         SetAlias(const char* log,const char* act,const char* dir=".aliases");
@@ -225,7 +225,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.79 2006/12/19 21:59:15 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.80 2007/01/25 06:28:04 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -286,8 +286,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.79 2006/12/19 21:59:15 fine Exp $
+// $Id: StMaker.h,v 1.80 2007/01/25 06:28:04 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.80  2007/01/25 06:28:04  fine
+// connect Logger and Maker debug levels
+//
 // Revision 1.79  2006/12/19 21:59:15  fine
 // replace the class StMessMgr forward declaration with the real declaration and adjust St_TLA_Maker to show how to use logger
 //
