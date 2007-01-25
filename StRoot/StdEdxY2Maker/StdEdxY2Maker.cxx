@@ -1,7 +1,9 @@
-// $Id: StdEdxY2Maker.cxx,v 1.55 2006/11/06 20:42:06 perev Exp $
-#define dChargeCorrection
-#define SpaceChargeQdZ
-#define CompareWithToF
+// $Id: StdEdxY2Maker.cxx,v 1.56 2007/01/25 00:58:05 fisyak Exp $
+//#define dChargeCorrection
+//#define SpaceChargeQdZ
+//#define SeparateSums
+//#define CompareWithToF
+//#define AnodeSum
 //#define UseInnerOuterGeometry
 //#define UseOuterGeometry
 #include <Stiostream.h>		 
@@ -34,6 +36,9 @@
 #include "StBFChain.h"
 // tables
 #include "tables/St_dst_dedx_Table.h"
+#ifdef AnodeSum
+#include "tables/St_TpcSCAnodeCurrent_Table.h"
+#endif
 // global
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
@@ -63,8 +68,11 @@ using namespace units;
 #include "THelixTrack.h"
 #endif /* __THELIX__ */
 const static StPidParticle NHYPS = kPidHe3;//kPidTriton;
-static Int_t tMin = 20010701;
-static Int_t tMax = 20050701;
+static Int_t tZero= 19950101;
+static Int_t tMin = 20060201;
+static Int_t tMax = 20060801;
+static TDatime t0(tZero,0);
+const static Int_t timeOffSet = t0.Convert(kTRUE);
 const static Int_t NdEdxMax  = 60;
 Int_t   StdEdxY2Maker::NdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::CdEdx = 0;
@@ -162,7 +170,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 	if (!m_trigDetSums->GetNRows()) gMessMgr->Error() << "StdEdxY2Maker:: trigDetSums has not data" << endm;
 	else {
 	  m_trig = m_trigDetSums->GetTable();
-	  UInt_t date = GetDateTime().Convert();
+	  UInt_t date = GetDateTime().Convert(kTRUE);
 	  if (date < m_trig->timeOffset) {
 	    gMessMgr->Error() << "StdEdxY2Maker:: Illegal time for scalers = " 
 			      << m_trig->timeOffset << "/" << date
@@ -657,13 +665,13 @@ Int_t StdEdxY2Maker::Make(){
 	if (row <= NumberOfInnerRows) kTpcOutIn = StTpcdEdxCorrection::kTpcInner;
 	// Corrections
 	CdEdx[NdEdx].Reset();
+	Double_t PreviousCharge = 0;
+	StTpcHit *NextTpcHit = 0;
 #ifdef SpaceChargeQdZ
 	// next hit
 	StTpcHit *currentTpcHit = tpcHit;
-	StTpcHit *NextTpcHit = 0;
 	//                            I    O
 	//	Int_t PadDif = row <= 13 ? 10 : 6;
-	Double_t PreviousCharge = 0;
 	while (currentTpcHit) {
 	  const StTpcHit *next = static_cast<const StTpcHit*>(currentTpcHit->nextHit());
 	  if (! next) break;
@@ -734,7 +742,7 @@ Int_t StdEdxY2Maker::Make(){
 	CdEdx[NdEdx].dCharge = TMath::Log10(dCharge);
 #endif
 	Int_t iok = m_TpcdEdxCorrection->dEdxCorrection(CdEdx[NdEdx]);
-	if (iok) {BadHit(5+iok, tpcHit->position()); continue;} 
+	if (iok) {BadHit(4+iok, tpcHit->position()); continue;} 
 	TrackLength         += CdEdx[NdEdx].dx;
 	//	if ((TESTBIT(m_Mode, kSpaceChargeStudy))) SpaceCharge(2,pEvent,&global,&CdEdx[NdEdx]);
 	if (fZOfGoodHits) fZOfGoodHits->Fill(tpcHit->position().z());
@@ -752,6 +760,7 @@ Int_t StdEdxY2Maker::Make(){
       Double_t I70 = 0, D70 = 0;
       Int_t N70 = NdEdx - (int) (0.3*NdEdx + 0.5); 
       if (N70 > 1) {
+#ifndef SeparateSums
 	Int_t k;
 	for (k = 0; k < N70; k++) {
 	  I70 += dEdxS[k].dEdx;
@@ -761,6 +770,49 @@ Int_t StdEdxY2Maker::Make(){
 	I70 /= N70; D70 /= N70;
 	D70  = TMath::Sqrt(D70 - I70*I70);
 	D70 /= I70;
+#else
+	Int_t k, l;
+	Int_t Nio[2] = {0, 0}; 
+	for (k = 0; k < NdEdx; k++) {
+	  if (dEdxS[k].row <= 13) Nio[StTpcdEdxCorrection::kTpcInner]++;
+	  else                    Nio[StTpcdEdxCorrection::kTpcOuter]++;
+	}
+	Int_t Nio70[2] = {0, 0};
+	for (l = 0; l < 2; l++) 	Nio70[l] = Nio[l] - (int) (0.3*Nio[l] + 0.5);
+	Double_t Iio70[2] = {0, 0};
+	Double_t Dio70[2] = {0, 0};
+	Int_t    nio70[2] = {0, 0};
+	for (k = 0; k < NdEdx; k++) {
+	  l = StTpcdEdxCorrection::kTpcOuter;
+	  if (dEdxS[k].row <= NumberOfInnerRows) l = StTpcdEdxCorrection::kTpcInner;
+	  if (nio70[l] < Nio70[l]) {
+	    Iio70[l] += dEdxS[k].dEdx;
+	    Dio70[l] += dEdxS[k].dEdx*dEdxS[k].dEdx;;
+	    TrackLength70 += dEdxS[k].dx;
+	    nio70[l]++;
+	  } 
+	}
+	Double_t W = 0;
+	for (l = 0; l < 2; l++) {
+	  if (nio70[l] > 1) {
+	    Iio70[l] /= nio70[l]; 
+	    Dio70[l] /= nio70[l]; 
+	    Dio70[l] = TMath::Sqrt(Dio70[l] - Iio70[l]*Iio70[l]); 
+	    if (Dio70[l] > 1e-7) {
+	      N70 += nio70[l];
+	      W   += 1./(Dio70[l]*Dio70[l]);
+	      I70 += Iio70[l]/(Dio70[l]*Dio70[l]);
+	    }
+	  }	 
+	}
+	if (W > 0) {
+	  I70 /= W;
+	  D70  = 1./TMath::Sqrt(W);
+	} else {
+	  N70 = 0;
+	  I70 = D70 = 0;
+	}
+#endif
 	dedx.id_track  =  Id;
 	dedx.det_id    =  kTpcId;    // TPC track 
 	dedx.method    =  kEnsembleTruncatedMeanId; // == kTruncatedMeanId+1;
@@ -946,14 +998,24 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   static TH2S **Adc3Ip = 0, **Adc3Op = 0;
   // end of AdcHistos
   static TH2S *ZdcCP = 0, *BBCP = 0, *L0P = 0, *MultiplicityPI = 0, *MultiplicityPO = 0;
+  //  static TH2S *ctbWest = 0, *ctbEast = 0, *ctbTOFp = 0, *zdcWest = 0, *zdcEast = 0;
+  static TH2S *bbcYellowBkg = 0, *bbcBlueBkg = 0;
   // Mip 
   static TH3S *SecRow3Mip = 0;
+  // Anode Currents
+#ifdef AnodeSum
+  static TH3S *AnodeI = 0, *AnodeO = 0;
+  static St_TpcSCAnodeCurrent *SCAnodeCurrent = 0;
+#endif
   // end of Mip
   static TH1F *hdEI = 0, *hdEUI = 0, *hdERI = 0, *hdEPI = 0, *hdETI = 0, *hdESI = 0, *hdEZI = 0, *hdEMI = 0;
   static TH1F *hdEO = 0, *hdEUO = 0, *hdERO = 0, *hdEPO = 0, *hdETO = 0, *hdESO = 0, *hdEZO = 0, *hdEMO = 0;
-  static TH2S *PointsB = 0, *Points70B = 0, *PointsBU = 0, *Points70BU = 0, *Points70BA = 0; 
-  static TH2S *TPointsB = 0, *TPoints70B = 0, *TPointsBU = 0, *TPoints70BU = 0, *TPoints70BA = 0;
-  static TH2S *MPointsB = 0, *MPoints70B = 0, *MPointsBU = 0, *MPoints70BU = 0, *MPoints70BA = 0;
+  //  static TH2S *PointsB = 0, *Points70B = 0, *PointsBU = 0, *Points70BU = 0, *Points70BA = 0; 
+  //  static TH2S *TPointsB = 0, *TPoints70B = 0, *TPointsBU = 0, *TPoints70BU = 0, *TPoints70BA = 0;
+  //  static TH2S *MPointsB = 0, *MPoints70B = 0, *MPointsBU = 0, *MPoints70BU = 0, *MPoints70BA = 0;
+  static TH2S *Points[25][5];
+  static TH2S *TPoints[25][5];
+  static TH2S *MPoints[25][5];
   static TH2S *hist70[NHYPS][2], *histz[NHYPS][2];
   static TH2S *hist70B[NHYPS][2], *histzB[NHYPS][2];
   static TH2S *hist70BT[NHYPS][2], *histzBT[NHYPS][2];
@@ -1094,6 +1156,19 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 		       numberOfSectors,1., numberOfSectors+1, NumberOfRows,1., NumberOfRows+1,nZBins,ZdEdxMin,ZdEdxMax);
     SecRow3A->SetXTitle("Sector number");
     SecRow3A->SetYTitle("Row number");
+#ifdef AnodeSum
+    AnodeI= new TH3S("AnodeI","<log(dEdx/Pion)> versus sum_curr_1 and row",
+		       80 ,0., 8., NumberOfRows,1., NumberOfRows+1,nZBins,ZdEdxMin,ZdEdxMax);
+    AnodeI->SetXTitle("sum_curr_1");
+    AnodeI->SetYTitle("Row number");
+
+    AnodeO= new TH3S("AnodeO","<log(dEdx/Pion)> versus sum_curr_0 and row",
+		       80 ,0., 8., NumberOfRows,1., NumberOfRows+1,nZBins,ZdEdxMin,ZdEdxMax);
+    AnodeO->SetXTitle("sum_curr_0");
+    AnodeO->SetYTitle("Row number");
+   
+#endif
+
     MultiplicityPI = new TH2S("MultiplicityPI","Multiplicity (log10) Inner",100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
     MultiplicityPO = new TH2S("MultiplicityPO","Multiplicity (log10) Outer",100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
     if ((TESTBIT(m_Mode, kAdcHistos))) {
@@ -1150,6 +1225,10 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     ZdcCP  = new TH2S("ZdcCP","ZdcCoincidenceRate (log10)",100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
     BBCP   = new TH2S("BBCP","BbcCoincidenceRate (log10)",100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
     L0P    = new TH2S("L0P","L0RateToRich (log10)",100,0,2,nZBins,ZdEdxMin,ZdEdxMax);
+    bbcYellowBkg = new TH2S("bbcYellowBkg","(BBC Eastdelayed) and (BBC West) (log10)",
+			    100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
+    bbcBlueBkg   = new TH2S("bbcBlueBkg","(BBC Westdelayed) and (BBC East) (log10)",
+			    100,0,10,nZBins,ZdEdxMin,ZdEdxMax);
     if ((TESTBIT(m_Mode, kMip))) {
       gMessMgr->Warning() << "StdEdxY2Maker::Histogramming Mip Histograms" << endm;
       SecRow3Mip = new TH3S
@@ -1167,21 +1246,31 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 		       480,-60,60, NumberOfRows,1., NumberOfRows+1,nZBins,ZdEdxMin,ZdEdxMax);
     Theta3D   = new TH3S("Theta3D","log(dEdx/Pion) versus Theta (direction) (degrees) and row",
 		       560,-60,80, NumberOfRows,1., NumberOfRows+1,nZBins,ZdEdxMin,ZdEdxMax);
-    PointsB    = new TH2S("PointsB","dEdx(fit)/sigma versus no. of measured points Bichsel",50,0,50., 500,-5.,20.);
-    PointsBU   = new TH2S("PointsBU","dEdx(fit)/sigma uncorrected versus no. of measured points Bichsel",50,0,50., 500,-5.,20.);
-    Points70B  = new TH2S("Points70B","dEdx(I70)/sigma versus no. of measured points Bichsel",50,0,50.,500,-5.,20.);
-    Points70BU = new TH2S("Points70BU","dEdx(I70)/sigma uncorrected versus no. of measured points Bichsel",50,0,50.,500,-5.,20.);
-    Points70BA = new TH2S("Points70BA","dEdx(I70A) uncorrected versus no. of measured points Bichsel",50,0,50.,500,-1.,4.);
-    TPointsB   = new TH2S("TPointsB","dEdx(fit) versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    TPointsBU  = new TH2S("TPointsBU","dEdx(fit) uncorrected versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    TPoints70B = new TH2S("TPoints70B","dEdx(I70) versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    TPoints70BU= new TH2S("TPoints70BU","dEdx(I70) uncorrected versus length Bichsel",150,10.,160., 500,-1.,4.);
-    TPoints70BA= new TH2S("TPoints70BA","dEdx(I70A) uncorrected versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    MPointsB   = new TH2S("MPointsB","dEdx_{MIP}(fit) versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    MPointsBU  = new TH2S("MPointsBU","dEdx_{MIP}(fit) uncorrected versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    MPoints70B = new TH2S("MPoints70B","dEdx_{MIP}(I70) versus length Bichsel", 150,10.,160., 500,-1.,4.);
-    MPoints70BU= new TH2S("MPoints70BU","dEdx_{MIP}(I70) uncorrected versus length Bichsel",150,10.,160., 500,-1.,4.);
-    MPoints70BA= new TH2S("MPoints70BA","dEdx_{MIP}(I70A) uncorrected versus length Bichsel", 150,10.,160., 500,-1.,4.);
+    const Char_t *N[5] = {"B","70B","BU","70BU","70BA"};
+    const Char_t *T[5] = {"dEdx(fit)/Pion",
+			  "dEdx(fit_uncorrected)/Pion ",
+			  "dEdx(I70)/Pion",
+			  "dEdx(I70_uncorrected)/Pion",
+			  "dEdx(I70A_uncorrected)/Pion"};
+    for (Int_t t = 0; t < 5; t++) {
+      for (Int_t z = 0; z < 25; z++) {
+	TString ZN("");
+	TString ZT("all");
+	if (z > 0) {
+	  ZN = Form("%02i",z);
+	  ZT = Form("Sector %02i",z);
+	}
+	Points[z][t]    = new TH2S(Form("Points%s%s",N[t],ZN.Data()),
+				   Form("%s/sigma versus no. of measured points for %s",T[t],ZT.Data()),
+				   50,0,50., 500,-5.,20.);
+	TPoints[z][t]   = new TH2S(Form("TPoints%s%s",N[t],ZN.Data()),
+				   Form("%s versus no. of measured points for %s",T[t],ZT.Data()),
+				   150,10,160., 500,-1.,4.);
+	MPoints[z][t]   = new TH2S(Form("MPoints%s%s",N[t],ZN.Data()),
+				   Form("%s versus no. of measured points for %s",T[t],ZT.Data()),
+				   150,10,160., 500,-1.,4.);
+      }
+    }
     if ((TESTBIT(m_Mode, kZBGX))) {
       gMessMgr->Warning() << "StdEdxY2Maker::Histogramming make zbgx histograms" << endm;
       zbgx = new TH3S*[2*NHYPS]; 
@@ -1251,11 +1340,11 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 	histBB[hyp][sCharge] = new TProfile(name.Data(),title.Data(),100,-1.,4.);
       }
     }
-    TDatime t1(tMin,0); /// min Time and
-    TDatime t2(tMax,0); /// max 
+    TDatime t1(tMin,0); // min Time and
+    TDatime t2(tMax,0); // max 
     
-    UInt_t i1 = t1.Convert();
-    UInt_t i2 = t2.Convert();
+    UInt_t i1 = t1.Convert(kTRUE) - timeOffSet;
+    UInt_t i2 = t2.Convert(kTRUE) - timeOffSet;
     Int_t Nt = (i2 - i1)/(3600); // each hour 
     Pressure   = new TH3S("Pressure","log(dE/dx)_{uncorrected} - log(I(pi)) versus Row & Log(Pressure)", 
 			  NumberOfRows,1., NumberOfRows+1,150, 6.84, 6.99,nZBins,ZdEdxMin,ZdEdxMax);
@@ -1373,6 +1462,12 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     }
     return;
   }
+#ifdef AnodeSum
+  if (! SCAnodeCurrent ) {
+    TDataSet *cond_tpc  = GetDataBase("Conditions/tpc"); 
+    if (cond_tpc) SCAnodeCurrent = (St_TpcSCAnodeCurrent *) cond_tpc->Find("TpcSCAnodeCurrent");
+  }
+#endif 
   // fill histograms 
   St_tpcGas           *tpcGas = 0;
   if ( m_TpcdEdxCorrection) tpcGas = m_TpcdEdxCorrection->tpcGas();
@@ -1381,7 +1476,6 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   Double_t Eta = g3.pseudoRapidity();
   Int_t sCharge = 0;
   if (gTrack->geometry()->charge() < 0) sCharge = 1;
-  Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints(kTpcId);
   //  StTpcDedxPidAlgorithm tpcDedxAlgo;
   // dE/dx
   //  StPtrVecTrackPidTraits traits = gTrack->pidTraits(kTpcId);
@@ -1390,13 +1484,14 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   StDedxPidTraits *pid, *pid70 = 0, *pidF = 0, *pid70U = 0, *pidFU = 0, *pid70A = 0;
   StProbPidTraits *pidprob = 0, *p = 0;
 #ifdef CompareWithToF
+  Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints(kTpcId);
   StTofPidTraits* pidTof  = 0;
+  static const Int_t IdxH[4] = {kPidProton,kPidKaon,kPidPion,kPidElectron};
 #endif
   Double_t I70 = 0, D70 = 0, I70U = 0, D70U = 0, I70A = 0, D70A = 0;
   Double_t fitZ = 0, fitdZ = 1e10, fitZU = 0, fitdZU = 1e10;
   Int_t N70 = 0, NF = 0, N70A = 0;
   Double_t TrackLength70 = 0, TrackLength = 0;
-  static const Int_t IdxH[4] = {kPidProton,kPidKaon,kPidPion,kPidElectron};
   if (size) {
     for (unsigned int i = 0; i < traits.size(); i++) {
       if (! traits[i]) continue;
@@ -1451,7 +1546,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   Double_t Pred[NHYPS],  Pred70[NHYPS];
   Double_t PredB[NHYPS], Pred70B[NHYPS];
   Double_t PredBMN[2], Pred70BMN[2]; 
-  Double_t date = GetDateTime().Convert();
+  Double_t date = GetDateTime().Convert(kTRUE) - timeOffSet;
   Double_t devZ[NHYPS], devZs[NHYPS], devToF[NHYPS];
   memset (devZ, 0, NHYPS*sizeof(Double_t));
   memset (devZs, 0, NHYPS*sizeof(Double_t));
@@ -1633,31 +1728,65 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 			<< " is wrong = " << Pred[kPidPion] << " <<<<<<<<<<<<<" << endl;
     return;
   };
+  Int_t zCase = -1;
+  for (Int_t k = 0; k < NdEdx; k++) {
+    if (zCase > 0) {
+      if (zCase == FdEdx[k].sector) continue;
+      zCase = -1; break;
+    } else {
+      zCase = FdEdx[k].sector;
+    }
+  }
   if (pidF) {
-    PointsB->Fill(NdEdx,(fitZ-TMath::Log(PredB[kPidPion]))/fitdZ);
-    TPointsB->Fill(TrackLength,fitZ-TMath::Log(PredB[kPidPion]));
-    if (pMomentum > pMomin && pMomentum < pMomax) MPointsB->Fill(TrackLength,fitZ-TMath::Log(PredB[kPidPion]));
+    Points[0][0]->Fill(NdEdx,(fitZ-TMath::Log(PredB[kPidPion]))/fitdZ);
+    TPoints[0][0]->Fill(TrackLength,fitZ-TMath::Log(PredB[kPidPion]));
+    if (pMomentum > pMomin && pMomentum < pMomax) MPoints[0][0]->Fill(TrackLength,fitZ-TMath::Log(PredB[kPidPion]));
+    if (zCase > 0) {
+      Points[zCase][0]->Fill(NdEdx,(fitZ-TMath::Log(PredB[kPidPion]))/fitdZ);
+      TPoints[zCase][0]->Fill(TrackLength,fitZ-TMath::Log(PredB[kPidPion]));
+      if (pMomentum > pMomin && pMomentum < pMomax) MPoints[zCase][0]->Fill(TrackLength,fitZ-TMath::Log(PredB[kPidPion]));
+    }
     FitPull->Fill(TrackLength,(fitZ - TMath::Log(PredB[kPidPion]))/fitdZ);
     if (pidFU) {
-      PointsBU->Fill(NdEdx,(fitZU-TMath::Log(PredB[kPidPion]))/fitdZ);
-      TPointsBU->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
-      if (pMomentum > pMomin && pMomentum < pMomax) MPointsBU->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
+      Points[0][2]->Fill(NdEdx,(fitZU-TMath::Log(PredB[kPidPion]))/fitdZ);
+      TPoints[0][2]->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
+      if (pMomentum > pMomin && pMomentum < pMomax) MPoints[0][2]->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
+      if (zCase > 0) {
+	Points[zCase][2]->Fill(NdEdx,(fitZU-TMath::Log(PredB[kPidPion]))/fitdZ);
+	TPoints[zCase][2]->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
+	if (pMomentum > pMomin && pMomentum < pMomax) MPoints[zCase][2]->Fill(TrackLength,fitZU-TMath::Log(PredB[kPidPion]));
+      }
     }
   }
   if (pid70) {
-    Points70B->Fill(N70,TMath::Log(I70/PredB[kPidPion])/D70);
-    TPoints70B->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
-    if (pMomentum > pMomin && pMomentum < pMomax) MPoints70B->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
+    Points[0][1]->Fill(N70,TMath::Log(I70/PredB[kPidPion])/D70);
+    TPoints[0][1]->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
+    if (pMomentum > pMomin && pMomentum < pMomax) MPoints[0][1]->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
+    if (zCase > 0) {
+      Points[zCase][1]->Fill(N70,TMath::Log(I70/PredB[kPidPion])/D70);
+      TPoints[zCase][1]->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
+      if (pMomentum > pMomin && pMomentum < pMomax) MPoints[zCase][1]->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion]));
+    }
     Pull70->Fill(TrackLength,TMath::Log(I70/Pred70B[kPidPion])/D70);
     if (pid70U) {
-      Points70BU->Fill(N70,TMath::Log(I70U/PredB[kPidPion])/D70);
-      TPoints70BU->Fill(TrackLength,TMath::Log(I70U/Pred70B[kPidPion]));
-      if (pMomentum > pMomin && pMomentum < pMomax) MPoints70BU->Fill(TrackLength,TMath::Log(I70U/Pred70B[kPidPion]));
+      Points[0][3]->Fill(N70,TMath::Log(I70U/PredB[kPidPion])/D70);
+      TPoints[0][3]->Fill(TrackLength,TMath::Log(I70U/Pred70B[kPidPion]));
+      if (pMomentum > pMomin && pMomentum < pMomax) MPoints[0][3]->Fill(TrackLength,TMath::Log(I70U/Pred70B[kPidPion]));
+      if (zCase > 0) {
+	Points[zCase][3]->Fill(N70,TMath::Log(I70U/PredB[kPidPion])/D70);
+	TPoints[zCase][3]->Fill(TrackLength,TMath::Log(I70U/Pred70B[kPidPion]));
+	if (pMomentum > pMomin && pMomentum < pMomax) MPoints[zCase][3]->Fill(TrackLength,TMath::Log(I70U/Pred70B[kPidPion]));
+      }
     }
     if (pid70A) {
-      Points70BA->Fill(N70A,TMath::Log(I70A/PredB[kPidPion])/D70);
-      TPoints70BA->Fill(TrackLength,TMath::Log(I70A/Pred70B[kPidPion]));
-      if (pMomentum > pMomin && pMomentum < pMomax) MPoints70BA->Fill(TrackLength,TMath::Log(I70A/Pred70B[kPidPion]));
+      Points[0][4]->Fill(N70A,TMath::Log(I70A/PredB[kPidPion])/D70);
+      TPoints[0][4]->Fill(TrackLength,TMath::Log(I70A/Pred70B[kPidPion]));
+      if (pMomentum > pMomin && pMomentum < pMomax) MPoints[0][4]->Fill(TrackLength,TMath::Log(I70A/Pred70B[kPidPion]));
+      if (zCase > 0) {
+	Points[zCase][4]->Fill(N70A,TMath::Log(I70A/PredB[kPidPion])/D70);
+	TPoints[zCase][4]->Fill(TrackLength,TMath::Log(I70A/Pred70B[kPidPion]));
+	if (pMomentum > pMomin && pMomentum < pMomax) MPoints[zCase][4]->Fill(TrackLength,TMath::Log(I70A/Pred70B[kPidPion]));
+      }
     }
   }
   if (TrackLength > 20) { 
@@ -1738,7 +1867,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 	  }
 	}
       } // AdcHistos
-      if (pMomentum > pMomin && pMomentum < pMomax) { // Momentum cut
+      if (pMomentum > pMomin && pMomentum < pMomax &&TrackLength > 40 ) { // Momentum cut
 	if (tpcGas) {
 	  if (inputTPCGasPressureP) inputTPCGasPressureP->Fill((*tpcGas)[0].inputTPCGasPressure,FdEdx[k].dEdxN);
 	  if (nitrogenPressureP) nitrogenPressureP->Fill((*tpcGas)[0].nitrogenPressure,FdEdx[k].dEdxN);
@@ -1761,6 +1890,10 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 	}
 	if (m_trig) {
 	  if (m_trig->zdcX > 0 && ZdcCP) ZdcCP->Fill(TMath::Log10(m_trig->zdcX), FdEdx[k].dEdxN);
+	  if (m_trig->bbcYellowBkg > 0 && bbcYellowBkg) 
+	    bbcYellowBkg->Fill(TMath::Log10(m_trig->bbcYellowBkg), FdEdx[k].dEdxN);
+	  if (m_trig->bbcBlueBkg > 0 && bbcBlueBkg) 
+	    bbcBlueBkg->Fill(TMath::Log10(m_trig->bbcBlueBkg), FdEdx[k].dEdxN);
 	  if (m_trig->bbcX > 0 && BBCP) BBCP->Fill(TMath::Log10(m_trig->bbcX), FdEdx[k].dEdxN);
 	  if (m_trig->L0   > 0 && L0P) L0P->Fill(TMath::Log10(m_trig->L0), FdEdx[k].dEdxN);
 	  if (m_trig->mult > 0) {
@@ -1778,6 +1911,13 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
 	if (SecRow3 )  SecRow3->Fill(FdEdx[k].sector+0.5,FdEdx[k].row+0.5,FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRow-1].dEdxN);
 	if (SecRow3A) SecRow3A->Fill(FdEdx[k].sector+0.5,FdEdx[k].row+0.5,FdEdx[k].C[StTpcdEdxCorrection::kTpcSecRow].dEdxN);
 	if (SecRow3C) SecRow3C->Fill(FdEdx[k].sector+0.5,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+#ifdef AnodeSum
+	if (SCAnodeCurrent && AnodeI && AnodeO) {
+	  TpcSCAnodeCurrent_st *row = SCAnodeCurrent->GetTable();
+	  AnodeI->Fill(row->SUM_CURR_1,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  AnodeO->Fill(row->SUM_CURR_0,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	}
+#endif	
 	//Double_t xyz[3]  = {FdEdx[k].xyz[0],FdEdx[k].xyz[1],FdEdx[k].xyz[2]};
 	Double_t xyzD[3] = {FdEdx[k].xyzD[0],FdEdx[k].xyzD[1],FdEdx[k].xyzD[2]};
 	//Double_t Phi  = 180./TMath::Pi()*TMath::ATan2(xyz[0],xyz[1]);
@@ -1869,6 +2009,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     }
     if ((TESTBIT(m_Mode, kCORRELATION))) Correlations();
   }
+#ifdef CompareWithToF
   // dE/dx tree
   if (NdEdx > 0  && ftrack && ftree && TrackLength70 > 20.0 && pidTof) {
     ftrack->Clear();
@@ -1910,6 +2051,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     }
     ftree->Fill();
   }
+#endif
   return;
 }
 //_____________________________________________________________________________
@@ -1928,6 +2070,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
   Double_t I70 = 0, I60 = 0;
   Double_t avrz = 0;
   for (int i=0; i< NdEdx; i++) {
+    dEdx = 0;
     if (iop == 0)      {pdEdx = &CdEdx[i]; dEdx = CdEdx[i].dEdx;}
     else if (iop == 1) {pdEdx = &FdEdx[i]; dEdx = FdEdx[i].dEdx;}
     else if (iop == 2) {pdEdx = &dEdxS[i]; dEdx = dEdxS[i].dEdx;}
@@ -2088,7 +2231,7 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   static TProfile *outputGasTemperature = 0, *flowRateArgon1 = 0, *flowRateArgon2 = 0, *flowRateMethane = 0;
   static TProfile *percentMethaneIn = 0, *ppmOxygenIn = 0, *flowRateExhaust = 0;
   static TProfile *ppmWaterOut = 0, *ppmOxygenOut = 0, *flowRateRecirculation = 0;
-  static TProfile *Center = 0, *Height = 0, *Width = 0,  *CenterPressure = 0;
+  //  static TProfile *Center = 0, *Height = 0, *Width = 0,  *CenterPressure = 0;
   static TH1F *Multiplicity; // mult rate 
   static TH2S *Zdc  = 0; // ZdcEastRate versus ZdcWestRate
   static TH1F *ZdcC = 0; // ZdcCoincidenceRate
@@ -2097,8 +2240,8 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   if (! iok && !BarPressure) {
     TDatime t1(tMin,0); /// min Time and
     TDatime t2(tMax,0); /// max 
-    UInt_t i1 = t1.Convert();
-    UInt_t i2 = t2.Convert();
+    UInt_t i1 = t1.Convert(kTRUE) - timeOffSet;
+    UInt_t i2 = t2.Convert(kTRUE) - timeOffSet;
     Int_t Nt = (i2 - i1)/(3600); // each hour 
     BarPressure           = new TProfile("BarPressure","barometricPressure (mbar) versus time",Nt,i1,i2);                    
     inputTPCGasPressure   = new TProfile("inputTPCGasPressure","inputTPCGasPressure (mbar) versus time",Nt,i1,i2);           
@@ -2115,10 +2258,10 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
     ppmWaterOut           = new TProfile("ppmWaterOut","ppmWaterOut (ppm) versus time",Nt,i1,i2);                             
     ppmOxygenOut          = new TProfile("ppmOxygenOut","ppmOxygenOut (ppm) versus time",Nt,i1,i2);
     flowRateRecirculation = new TProfile("flowRateRecirculation","flowRateRecirculation (liters/min) versus time",Nt,i1,i2);
-    CenterPressure        = new TProfile("CenterPressureP","log(center) vs log(Pressure)",150, 6.84, 6.99);
-    Center                = new TProfile("Center","Tpc Gain Monitor center versus Time",Nt,i1,i2);
-    Height 		  = new TProfile("Height","Tpc Gain Monitor height versus Time",Nt,i1,i2);
-    Width  		  = new TProfile("Width","Tpc Gain Monitor width versus Time",Nt,i1,i2);  
+//     CenterPressure        = new TProfile("CenterPressureP","log(center) vs log(Pressure)",150, 6.84, 6.99);
+//     Center                = new TProfile("Center","Tpc Gain Monitor center versus Time",Nt,i1,i2);
+//     Height 		  = new TProfile("Height","Tpc Gain Monitor height versus Time",Nt,i1,i2);
+//     Width  		  = new TProfile("Width","Tpc Gain Monitor width versus Time",Nt,i1,i2);  
     // trigDetSums histograms
     Zdc                   = new TH2S("Zdc","ZdcEastRate versus ZdcWestRate (log10)",100,0,10,100,0,10);
     ZdcC                  = new TH1F("ZdcC","ZdcCoincidenceRate (log10)",100,0,10);
@@ -2127,7 +2270,7 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
     L0                    = new TH1F("L0","L0RateToRich (log10)",100,0,2);
   }
   else {
-    UInt_t date = GetDateTime().Convert();
+    UInt_t date = GetDateTime().Convert(kTRUE) - timeOffSet;
     St_tpcGas             *tpcGas = 0;
     if (m_TpcdEdxCorrection)  tpcGas = m_TpcdEdxCorrection->tpcGas();
     if (tpcGas) {
@@ -2282,16 +2425,16 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       fZOfBadHits = new TH1F*[fNZOfBadHits];
       static Char_t *BadCaseses[fNZOfBadHits] = 
       {"it is not used in track fit",     // 0
-	 "it is flagged ",                // 1
-	 "track length is inf ",          // 2
-	 "it does not pass check ",       // 3
-	 "dx is out interval [0.5,25]",   // 4
-	 "Sector/Row gain < 0",           // 5 iok + 4
-	 "drift distance < min || drift distance > max", // 6
-	 "dE < 0 or dx < 0",              // 7
+       "it is flagged ",                  // 1
+       "track length is inf ",            // 2
+       "it does not pass check ",         // 3
+       "dx is out interval [0.5,25]",     // 4
+       "Sector/Row gain < 0",             // 5 iok + 4
+       "drift distance < min || drift distance > max", // 6
+       "dE < 0 or dx < 0",                // 7
        "Edge effect",                     // 8
-	 "Total no.of rejected clusters"  // 9
-	 };
+       "Total no.of rejected clusters"    // 9
+      };
       for (Int_t i = 0; i < fNZOfBadHits; i++) 
 	fZOfBadHits[i] = new TH1F(Form("ZOfBadHits%i",i),
 				  Form("Z of rejected clusters  because %s",BadCaseses[i]),
