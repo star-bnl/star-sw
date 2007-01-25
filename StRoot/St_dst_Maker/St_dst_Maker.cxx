@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.86 2007/01/24 21:35:54 perev Exp $
+// $Id: St_dst_Maker.cxx,v 1.87 2007/01/25 19:04:45 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.87  2007/01/25 19:04:45  perev
+// GMT fix
+//
 // Revision 1.86  2007/01/24 21:35:54  perev
 // GMT conversion fixed
 //
@@ -240,6 +243,7 @@
 #include "TClass.h"
 #include "TMath.h"
 
+#include "TUnixTime.h"
 #include "St_dst_Maker.h"
 
 #include "tables/St_particle_Table.h"
@@ -267,7 +271,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.86 2007/01/24 21:35:54 perev Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.87 2007/01/25 19:04:45 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -460,7 +464,8 @@ Int_t  St_dst_Maker::Filler(){
     event.bunchXing[0] = EventHeader[0].bunchXing[0];
     event.bunchXing[1] = EventHeader[0].bunchXing[1];
   }
-  event.time = GetDateTime().Convert(1);
+
+  event.time = TUnixTime::Convert(GetDateTime(),1);
   event_header->AddAt(&event,0);
   St_dst_event_summary *event_summary = new St_dst_event_summary("event_summary",1);
   dstI.Add(event_summary);

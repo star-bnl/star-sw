@@ -16,6 +16,7 @@
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "tables/St_spaceChargeCor_Table.h"
 #include "StEvent/StDcaGeometry.h"
+#include "TUnixTime.h"
 
 #include "TFile.h"
 #include "TH2.h"
@@ -772,9 +773,10 @@ void StSpaceChargeEbyEMaker::BuildHist(int i) {
 void StSpaceChargeEbyEMaker::SetTableName() {
   // Problem caused if first event comes later in time than other events.
   // Solution: subtract 10 seconds...
-  TDatime firsttime(GetDateTime().Convert(1)-10,kTRUE);
-  int date = firsttime.GetDate();
-  int time = firsttime.GetTime();
+  TUnixTime ux(GetDateTime(),1);
+  ux+=-10;
+  int date,time;
+  ux.GetGTime(date,time);
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event date = " << date << endm;
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event time = " << time << endm;
   tabname = Form("./StarDb/Calibrations/rich/spaceChargeCorR2.%08d.%06d.C",date,time);
@@ -904,8 +906,11 @@ void StSpaceChargeEbyEMaker::DetermineGapHelper(TH2F* hh,
   delete GapsRMS;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.14 2007/01/24 21:42:22 perev Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.15 2007/01/25 19:04:04 perev Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.15  2007/01/25 19:04:04  perev
+// GMT fix
+//
 // Revision 1.14  2007/01/24 21:42:22  perev
 // GMT conversion fixed
 //
