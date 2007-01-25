@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TUnixTime.cxx,v 1.1 2001/09/10 23:53:20 perev Exp $
+ * $Id: TUnixTime.cxx,v 1.2 2007/01/25 19:05:54 perev Exp $
  *
  ***************************************************************************
  *
@@ -13,6 +13,7 @@
 #include <time.h>
 #include <assert.h>
 #include "TUnixTime.h"
+#include "TDatime.h"
 
 
 ClassImp(TUnixTime)
@@ -23,23 +24,42 @@ TUnixTime::TUnixTime(UInt_t utime)
   if (!fUTime) fUTime = time(0);
 }
 //______________________________________________________________________________
-void TUnixTime::SetGTime(const struct tm *gt)
+TUnixTime::TUnixTime(Int_t date,Int_t time,int gmt)
 {
-  time_t ut,ug;
-  struct tm gtt;
-  gtt = *gt;
-  gtt.tm_isdst=-1;
-  ut =  mktime(&gtt);
-  gtt = *gmtime(&ut);
-  gtt.tm_isdst=-1;
-  ug = mktime(&gtt);
-  ug = ut + (ut-ug);
-  fUTime = ug;
-  gtt = *gmtime(&ug);
-  assert(gtt.tm_year==gt->tm_year);
-  assert(gtt.tm_mon ==gt->tm_mon );
-  assert(gtt.tm_mday==gt->tm_mday);
-  assert(gtt.tm_hour==gt->tm_hour);
+  if (gmt) SetGTime(date,time);
+  else     SetLTime(date,time);
+}
+//______________________________________________________________________________
+TUnixTime::TUnixTime(const TDatime &tdt,int gmt)
+{
+   if (gmt) {SetGTime(tdt.GetDate(),tdt.GetTime());}
+   else     {SetLTime(tdt.GetDate(),tdt.GetTime());}
+}
+//______________________________________________________________________________
+void TUnixTime::SetGTime(const struct tm *tm_gmt)
+{
+  int dif;
+  time_t ugmt;
+  struct tm tm_test;
+  tm_test = *tm_gmt;
+  tm_test.tm_isdst=-1;
+  ugmt = mktime(&tm_test)-timezone;
+  for (int iter=0;iter<24;iter++) {
+    tm_test = *gmtime(&ugmt);
+    tm_test.tm_isdst=-1;
+    dif = tm_test.tm_year - tm_gmt->tm_year;
+    if (dif) 	goto UPD;
+    dif = tm_test.tm_mon  - tm_gmt->tm_mon ;
+    if (dif)  	goto UPD;
+    dif = tm_test.tm_mday - tm_gmt->tm_mday;
+    if (dif)  	goto UPD;
+    dif = tm_test.tm_hour - tm_gmt->tm_hour;
+    if (!dif) 	goto OK;
+UPD: if (dif<0) ugmt+=3600;    
+     else       ugmt-=3600;
+  }
+  assert(0);
+OK: fUTime = ugmt;
 
 }
 //______________________________________________________________________________
@@ -67,8 +87,6 @@ static void DateTime2tm(struct tm *gt,Int_t idate, Int_t itime)
 //______________________________________________________________________________
 static void tm2DateTime(Int_t &idate, Int_t &itime,const struct tm *gt)
 {
-  if (idate < 19000000) idate +=19000000;
-  if (idate < 19500000) idate += 1000000;
   idate  = (gt->tm_year+1900)*10000 + (gt->tm_mon+1)*100 + gt->tm_mday;
   itime  =  gt->tm_hour*10000 + gt->tm_min*100 + gt->tm_sec;
 }
@@ -117,4 +135,21 @@ TString TUnixTime::GetGString()
   TString ts(asctime(gmtime((time_t*)&fUTime)));
   return ts;
 }  
-
+//______________________________________________________________________________
+void TUnixTime::SetLTime(const TDatime &loc)
+{
+  SetLTime(loc.GetDate(), loc.GetTime());
+}
+//______________________________________________________________________________
+void TUnixTime::SetGTime(const TDatime &gmt)
+{
+  SetGTime(gmt.GetDate(), gmt.GetTime());
+}
+//______________________________________________________________________________
+UInt_t TUnixTime::Convert(const TDatime &dt,int gmt)
+{
+   TUnixTime ux;
+   if (gmt) {ux.SetGTime(dt);}
+   else     {ux.SetLTime(dt);}
+   return ux.GetUTime();
+}
