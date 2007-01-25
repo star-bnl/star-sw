@@ -139,6 +139,8 @@ class StMessMgr : public ostrstream {
    virtual        int GetLimit(const char* str) =0;
    virtual       void ListLimits() =0;
    virtual       void RemoveLimit(const char* str) =0;
+   virtual       void SetLevel(const char *loggerName, Int_t logLevel)       =0;
+   virtual      Int_t GetLevel(const char *loggerName, Int_t logLevel) const =0;
    virtual       void SwitchOff(const char* str) =0;
    virtual       void SwitchOn(const char* str) =0;
    virtual       void FixOn(const char* str) =0;
@@ -314,4 +316,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.8 2006/06/05 00:20:18 fine Exp $
+// $Id: StMessMgr.h,v 1.9 2007/01/25 06:11:38 fine Exp $
