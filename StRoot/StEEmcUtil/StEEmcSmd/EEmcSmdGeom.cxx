@@ -2,7 +2,7 @@
 
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.5 2007/01/12 23:53:14 jwebb Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.6 2007/01/25 22:33:21 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -27,6 +27,11 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.6  2007/01/25 22:33:21  balewski
+ * add:
+ * - better writeup
+ * - new simpler to use method calculating dca fo track to strip, it is just a wrapper, some approximations were used, may fail at the sector boundary
+ *
  * Revision 1.5  2007/01/12 23:53:14  jwebb
  * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
  * method.
@@ -168,7 +173,7 @@ void EEmcSmdGeom::buildSmdGeom(){
     float x0Corr, y1Corr, y2Corr, lengthCorr; 
     float phi1, phi2, phiMin, phiMax;
     float r, rMin, rMax;
-
+  
     mEEmcSmdParam.zPlane[iPlane] = kEEmcZSMD + 
 	             (iPlane - kEEmcNumSmdPlanes + 2) * kEEmcSmdZPlaneShift ;
 // loop over UV
@@ -281,10 +286,22 @@ void EEmcSmdGeom::buildSmdGeom(){
     } // end of iUV loop
   } // end of iPlane loop
 
+
+  // build revers mapping (iUV,iSec) --> iPlane
+  memset(kEEmcSmdMap_iPlane,0,sizeof(kEEmcSmdMap_iPlane));
+  for (int iPlane = 0; iPlane < kEEmcNumSmdPlanes; iPlane++) 
+    for(int iSec=0; iSec<kEEmcNumSectors; iSec++) {
+      int iuv=kEEmcSmdMapUV[iPlane][iSec];
+      if(iuv<0 ) continue;
+      assert(iuv<kEEmcNumSmdUVs);
+      kEEmcSmdMap_iPlane[iuv][iSec]=iPlane;
+    }
+
   buildStripPtrVector();
 
 } // end of buildSmdGeom 
-
+//===========================================================
+//===========================================================
 
 // build mStripPtrVector with getEEmcSector()
 void EEmcSmdGeom::buildStripPtrVector() {
@@ -386,8 +403,11 @@ StructEEmcStrip* EEmcSmdGeom::getStripPtr(const Int_t iStrip,
     return  mStripPtrVector[i];
 }
 
+
+//==================================================================
 // get DCA strip pointer from a point  
-StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
+// iPlane=[0,1,2] - experts only, changes meaning form sector to sector
+const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
                const Int_t iSec, const TVector3& point, Float_t* dca) 
 {
   //    StructEEmcStrip* stripPtr;
@@ -433,21 +453,37 @@ StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
     else {
       StructEEmcStrip *stripPtr = new StructEEmcStrip;
       (*stripPtr) = initStrip();
-      std::cout << "NO dca strip found in plane (sector empty or not in)"                                                                  << std::endl;
+      //    std::cout << "NO dca strip found in plane (sector empty or not in)" << std::endl;  //silentium
       return stripPtr;
     }
 }
 
+//==================================================================
 // get DCA strip pointer from a point  
-StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
+// iPlane=[0,1,2] - experts only, changes meaning form sector to sector
+const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
 		         const TVector3& point, Float_t* dca) {
-    StructEEmcStrip* stripPtr;
-    //$$$  stripPtr = new StructEEmcStrip; //-- Not needed, JCW 03/06/04
-    int iSec = getEEmcISec(iPlane, point);
-    stripPtr = getDcaStripPtr(iPlane, iSec, point, dca); 
-    return stripPtr;
+  int iSec = getEEmcISec(iPlane, point);
+  return  getDcaStripPtr(iPlane, iSec, point, dca); 
 }
 
+
+//==================================================================
+// get DCA strip pointer from a point  
+// iUV=[0,1] , maps [U,V]
+const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV, 
+					   const TVector3& point, Float_t* dca) {
+  assert(iUV>=0 || iUV<kEEmcNumSmdUVs);
+  int iSec = getEEmcISec(0, point); //assuming the 1st SMD plane to get SectorID is good enough,
+  if(iSec<0)  getEEmcISec(1, point); // try next plane,  this is silly, Jan
+  assert(iSec>=0 && iSec<kEEmcNumSectors);
+  int iPlane= kEEmcSmdMap_iPlane[iUV][iSec];// now find  mapping iUV --> iPlane
+  assert(iPlane>=0 && iPlane<kEEmcNumSmdPlanes);
+  return  getDcaStripPtr(iPlane, iSec, point, dca); 
+}
+
+
+//==================================================================
 // match two strips  
   bool EEmcSmdGeom::matchStrips(const StructEEmcStripId stripStructId1, 
 		                      const StructEEmcStripId stripStructId2,
@@ -460,72 +496,6 @@ StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
     }
     return match;
 }
-
-
-#if 0
-
-// methods for ITTF
-// return phiMax and phiMax of a sector including empty sector 
-pairD EEmcSmdGeom::getEEmcSmdPhiMinMax(const Int_t iPlane, const Int_t iSec) 
-{
-     pairD phiMinMax;
-     float phiMin, phiMax;
-//     int iUV, antiClockUVId, clockUVId;
-     int iUV, antiClockIUV, clockIUV;
-     int antiClockISec, clockISec;
-
-     iUV = kEEmcSmdMapUV[iPlane][iSec];
-
-     if(iUV >= 0) {
-           phiMin = getEEmcSector(iUV, iSec).phiMin;
-           phiMax = getEEmcSector(iUV, iSec).phiMax;
-     }
-     else {  // emtry sector
-// find phiMax in anticlockwise adjacent sector 
-	  if(iSec != 0) antiClockISec = iSec - 1;
-	  else antiClockISec = 11; 
-	  antiClockIUV = kEEmcSmdMapUV[iPlane][antiClockISec];
-
-          phiMax = getEEmcSector(antiClockIUV,antiClockISec).phiMin;
-// find phiMin in clockwise adjacent sector 
-	  if(iSec != 11) clockISec = iSec + 1;
-	  else clockISec = 0; 
-	  clockIUV = kEEmcSmdMapUV[iPlane][clockISec];
-	  phiMin=getEEmcSector(clockIUV,clockISec).phiMax;
-     }
-     phiMinMax.first = (double) phiMin;	     
-     phiMinMax.second = (double) phiMax;	     
-
-     return phiMinMax;
-}
-
-// return delta_phi of a sector including empty sector 
-float EEmcSmdGeom::getEEmcSmdDelPhi(const Int_t iPlane, const Int_t iSec) 
-{
-     float delPhi;
-     pairD  phiMinMax = getEEmcSmdPhiMinMax(iPlane, iSec);
-     delPhi = (float) phiMinMax.second - (float)phiMinMax.first;
-     if(iSec  == kEEmcSmdSectorIdPhiCrossPi - 1) delPhi = 2*pi + delPhi; 
-
-     return delPhi;
-}
-
-// return center phi of a sector including empty sector 
-float EEmcSmdGeom::getEEmcSmdCenterPhi(const Int_t iPlane, 
-		                               const Int_t iSec)
-{
-     float centerPhi;
-     pairD phiMinMax = getEEmcSmdPhiMinMax(iPlane, iSec);
-     centerPhi = 0.5*((float) phiMinMax.second + (float)phiMinMax.first);
-     if(iSec  == kEEmcSmdSectorIdPhiCrossPi - 1) {
-	     if(centerPhi <= 0) centerPhi= M_PI + centerPhi; 
-	     else centerPhi = M_PI - centerPhi; 
-     }
-
-     return centerPhi;
-}
-#endif
-
 
 
 

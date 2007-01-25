@@ -3,12 +3,17 @@
 #ifndef EEmcGeom_EEmcDefs_h
 #define EEmcGeom_EEmcDefs_h
 /*********************************************************************
- * $Id: EEmcGeomDefs.h,v 1.5 2003/10/15 15:28:53 wzhang Exp $
+ * $Id: EEmcGeomDefs.h,v 1.6 2007/01/25 22:33:11 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Definitions (temp file)
  *********************************************************************
  * $Log: EEmcGeomDefs.h,v $
+ * Revision 1.6  2007/01/25 22:33:11  balewski
+ * add:
+ * - better writeup
+ * - new simpler to use method calculating dca fo track to strip, it is just a wrapper, some approximations were used, may fail at the sector boundary
+ *
  * Revision 1.5  2003/10/15 15:28:53  wzhang
  * updated for the new StEEmcSmdGeom
  *
@@ -51,7 +56,7 @@ const float kEEmcSmdZPlaneShift = 1.215;
 const float kEEmcSmdROffset[kEEmcNumSmdPlanes]={1.850,0.925,0.0};
 
 // The value of the map matrix(3x12) indicates if a EEMC SMD layer in a plane 
-// is a U (1), V (2), or void(0)  
+// is  U=0, V=1, or void=-1  
 
 const int   kEEmcSmdMapUV[kEEmcNumSmdPlanes][kEEmcNumSectors] = 
                                      {{1,0,-1,1,0,-1,1,0,-1,1,0,-1},
