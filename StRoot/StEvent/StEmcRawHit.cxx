@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.7 2004/07/20 17:07:49 perev Exp $
+ * $Id: StEmcRawHit.cxx,v 2.8 2007/01/25 02:52:35 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.8  2007/01/25 02:52:35  ullrich
+ * Changes to modEtaSub() and sub() implemented by Adam Kocoloski.
+ * sub() now returns 1 instead of -1.
+ *
  * Revision 2.7  2004/07/20 17:07:49  perev
  * Pavlinov corrs for TBrowser
  *
@@ -35,7 +39,7 @@
 #include "StEmcRawHit.h"
 #include "StEmcUtil/geometry/StEmcGeom.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.7 2004/07/20 17:07:49 perev Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.8 2007/01/25 02:52:35 ullrich Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -63,9 +67,9 @@ StEmcRawHit::StEmcRawHit(StDetectorId d, unsigned int m, unsigned int e, unsigne
 }
 
 StEmcRawHit::StEmcRawHit(const StEmcRawHit& h) : StObject(h){
-  mId = h.mId;
-  mAdc = h.mAdc;
-  mEnergy = h.mEnergy;
+    mId = h.mId;
+    mAdc = h.mAdc;
+    mEnergy = h.mEnergy;
 }
 
 StEmcRawHit::~StEmcRawHit() {/* noop */}
@@ -78,10 +82,10 @@ StEmcRawHit::bits(unsigned int bit, unsigned int nbits) const
 
 void
 StEmcRawHit::setCalibrationType(unsigned int t){
-  if(t<256){
-    mId = mId & 0xffffff;
-    mId += t << 24;
-  }
+    if(t<256){
+        mId = mId & 0xffffff;
+        mId += t << 24;
+    }
 }
 
 void
@@ -111,34 +115,35 @@ StEmcRawHit::eta() const {return bits( 4, 9);}  // bits 4-12
 unsigned int 
 StEmcRawHit::softId(int det) const
 {
-  mGeom = StEmcGeom::instance(det);
-  if(mGeom==0) return 0;
-
-  int id=0, m=0, e=0, s=0;
-  modEtaSub(m,e,s);
-  mGeom->getId(m, e, s, id);
-  return id;
+    mGeom = StEmcGeom::instance(det);
+    if(mGeom==0) return 0;
+    
+    int id=0, m=0, e=0, s=0;
+    modEtaSub(m,e,s);
+    mGeom->getId(m, e, s, id);
+    return id;
 }
 
 void StEmcRawHit::modEtaSub(int &m, int &e, int &s) const
 {
-  m = module();
-  e = eta();
-  s = sub();
-  if(detector() == kBarrelSmdEtaStripIdentifier) s = 1; 
+    m = module();
+    e = eta();
+    s = sub();
 }
 
 int
 StEmcRawHit::sub() const {
-  int sub;
-  switch(detector()){
-  case kBarrelSmdEtaStripId:                  // irrelevant case return negative
-  case kEndcapSmdUStripId: case kEndcapSmdVStripId:
-    sub = -1; break;
-  default:
-    sub = bits(0, 4);                         // bits 0-3
-  }
-  return sub;
+    int sub;
+    switch(detector()){
+    case kBarrelSmdEtaStripId:                  // sub is irrelevant for these
+    case kEndcapSmdUStripId:
+    case kEndcapSmdVStripId:
+        sub = 1;
+        break;
+    default:
+        sub = bits(0, 4);                         // bits 0-3
+    }
+    return sub;
 }
 
 unsigned int
