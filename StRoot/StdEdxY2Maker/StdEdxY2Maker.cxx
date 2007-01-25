@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.56 2007/01/25 00:58:05 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.57 2007/01/25 14:56:14 fisyak Exp $
 //#define dChargeCorrection
 //#define SpaceChargeQdZ
 //#define SeparateSums
@@ -72,7 +72,7 @@ static Int_t tZero= 19950101;
 static Int_t tMin = 20060201;
 static Int_t tMax = 20060801;
 static TDatime t0(tZero,0);
-const static Int_t timeOffSet = t0.Convert(kTRUE);
+const static Int_t timeOffSet = t0.Convert();
 const static Int_t NdEdxMax  = 60;
 Int_t   StdEdxY2Maker::NdEdx = 0;
 dEdxY2_t *StdEdxY2Maker::CdEdx = 0;
@@ -170,7 +170,7 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 	if (!m_trigDetSums->GetNRows()) gMessMgr->Error() << "StdEdxY2Maker:: trigDetSums has not data" << endm;
 	else {
 	  m_trig = m_trigDetSums->GetTable();
-	  UInt_t date = GetDateTime().Convert(kTRUE);
+	  UInt_t date = GetDateTime().Convert();
 	  if (date < m_trig->timeOffset) {
 	    gMessMgr->Error() << "StdEdxY2Maker:: Illegal time for scalers = " 
 			      << m_trig->timeOffset << "/" << date
@@ -1343,8 +1343,8 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
     TDatime t1(tMin,0); // min Time and
     TDatime t2(tMax,0); // max 
     
-    UInt_t i1 = t1.Convert(kTRUE) - timeOffSet;
-    UInt_t i2 = t2.Convert(kTRUE) - timeOffSet;
+    UInt_t i1 = t1.Convert() - timeOffSet;
+    UInt_t i2 = t2.Convert() - timeOffSet;
     Int_t Nt = (i2 - i1)/(3600); // each hour 
     Pressure   = new TH3S("Pressure","log(dE/dx)_{uncorrected} - log(I(pi)) versus Row & Log(Pressure)", 
 			  NumberOfRows,1., NumberOfRows+1,150, 6.84, 6.99,nZBins,ZdEdxMin,ZdEdxMax);
@@ -1546,7 +1546,7 @@ static TH3D *dCharge3 = 0, *dCharge3C = 0;
   Double_t Pred[NHYPS],  Pred70[NHYPS];
   Double_t PredB[NHYPS], Pred70B[NHYPS];
   Double_t PredBMN[2], Pred70BMN[2]; 
-  Double_t date = GetDateTime().Convert(kTRUE) - timeOffSet;
+  Double_t date = GetDateTime().Convert() - timeOffSet;
   Double_t devZ[NHYPS], devZs[NHYPS], devToF[NHYPS];
   memset (devZ, 0, NHYPS*sizeof(Double_t));
   memset (devZs, 0, NHYPS*sizeof(Double_t));
@@ -2240,8 +2240,8 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
   if (! iok && !BarPressure) {
     TDatime t1(tMin,0); /// min Time and
     TDatime t2(tMax,0); /// max 
-    UInt_t i1 = t1.Convert(kTRUE) - timeOffSet;
-    UInt_t i2 = t2.Convert(kTRUE) - timeOffSet;
+    UInt_t i1 = t1.Convert() - timeOffSet;
+    UInt_t i2 = t2.Convert() - timeOffSet;
     Int_t Nt = (i2 - i1)/(3600); // each hour 
     BarPressure           = new TProfile("BarPressure","barometricPressure (mbar) versus time",Nt,i1,i2);                    
     inputTPCGasPressure   = new TProfile("inputTPCGasPressure","inputTPCGasPressure (mbar) versus time",Nt,i1,i2);           
@@ -2270,7 +2270,7 @@ void StdEdxY2Maker::TrigHistos(Int_t iok) {
     L0                    = new TH1F("L0","L0RateToRich (log10)",100,0,2);
   }
   else {
-    UInt_t date = GetDateTime().Convert(kTRUE) - timeOffSet;
+    UInt_t date = GetDateTime().Convert() - timeOffSet;
     St_tpcGas             *tpcGas = 0;
     if (m_TpcdEdxCorrection)  tpcGas = m_TpcdEdxCorrection->tpcGas();
     if (tpcGas) {
