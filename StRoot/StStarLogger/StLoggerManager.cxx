@@ -464,7 +464,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.22 2007/01/23 22:27:14 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.23 2007/01/25 18:36:38 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -786,6 +786,51 @@ int StLoggerManager::ListTypes()
 _NO_IMPLEMENTATION_;   return 5;
 //   return messTypeList->ListTypes();                           
 }
+
+//_____________________________________________________________________________
+void StLoggerManager::SetLevel(Int_t level) 
+{
+   // Map STAR level to the logger level and set the logger level
+   switch (level) {
+      case kFatal:
+         fLogger->setLevel(Level::FATAL);
+         break;
+      case kError:
+         fLogger->setLevel(Level::ERROR);
+         break;
+      case kWarning:
+         fLogger->setLevel(Level::WARN);
+         break;
+      case kInfo:
+         fLogger->setLevel(Level::INFO);
+         break;
+      case kAll:
+      case kDebug:
+      case kDebug2: 
+         fLogger->setLevel(Level::DEBUG);
+         break;
+      case kDefault:
+         // restore the default level
+         break;
+      default:
+         fLogger->setLevel(Level::DEBUG);
+         break;            
+   };   
+}
+//_____________________________________________________________________________
+Int_t StLoggerManager::GetLevel(Int_t) const 
+{
+   // Map the current logger level to the STAR one
+#if 0   
+   const LevelPtr &level = fLogger->getLevel();
+        if (level == &Level::DEBUG)  return kDebug; 
+   else if (level == &Level::FATAL)  return kFatal;  
+   else if (level == &Level::ERROR)  return kError;
+   else if (level == &Level::WARN )  return kWarning;
+   else if (level == &Level::INFO )  return kInfo;
+#endif   
+   return kAll;
+}
 #if 0
 //_____________________________________________________________________________
 const char *GetName() 
@@ -802,8 +847,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.22 2007/01/23 22:27:14 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.23 2007/01/25 18:36:38 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.23  2007/01/25 18:36:38  fine
+// Acivate logger level StMaker level run-time adjustment
+//
 // Revision 1.22  2007/01/23 22:27:14  fine
 // Set the dwefault logger level to WARN
 //
