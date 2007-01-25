@@ -1,15 +1,9 @@
 /*****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.5 2007/01/12 23:53:14 jwebb Exp $
+ * $Id: EEmcSmdGeom.h,v 1.6 2007/01/25 22:33:21 balewski Exp $
  *
- * Author: Wei-Ming Zhang
+ * Author: Wei-Ming Zhang, Jason Webb
  * 
- * Revisions:
- *
- * 01/28/04 Jason Webb -- Renamed to EEmcSmdGeom, StRoot dependent code moved 
- * to a derived class StEEmcSmdGeom.  The user interface for StEEmcSmdGeom
- * should remain unchanged.  Revision history for StEEmcSmdGeom moved  to end
- * of header file.  
  *
  *****************************************************************************
  *
@@ -22,29 +16,15 @@
  * kEEmcNumEdgeStrips =283 (1: the shortes inner and 283: the shortest outer)
  * kEEmcNumSmdLayers  =  2 (1: U and 2: V) 
  *
- *****************************************************************************
  *
- * $Log: EEmcSmdGeom.h,v $
- * Revision 1.5  2007/01/12 23:53:14  jwebb
- * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
- * method.
- *
- * Revision 1.3  2004/07/01 15:35:50  jwebb
- * Added placeholder method getIntersection(Int_t,Float_t,Float_t).  For now
- * it just calls the getIntersection with strips converted to integers.
- * Later we will write code to handle fractional strips.
- *
- * Revision 1.2  2004/02/03 22:57:54  jwebb
- * Added StEEmcSmdGeom::instance(), which is sort of needed...
- *
- * Revision 1.1  2004/01/29 15:26:10  jwebb
- * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
- * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
- * all function calls in EEmcSmdGeom.  StThreeVectorD wrappers are provided
- * in StEEmcSmdGeom, for integration into Star framework.
- *
+ *  Valid range of arguments for ~all input params for methods in this class 
+ *    iSec=[0,11], maps sectors [1,12]
+ *    iUV=[0,1], maps SMD planes [U,V]
+ *    iPlane=[0,1,2] - experts only, changes meaning form sector to sector
+ *    iUStrip, iVStrip=[0,287], maps SMD strip ID [1,288]
  *
  *****************************************************************************/
+
 
 #ifndef EEMCSMDGEOM_H
 #define EEMCSMDGEOM_H
@@ -118,21 +98,28 @@ class EEmcSmdGeom : public TObject {
 
   StructEEmcSmdParam     mEEmcSmdParam;  //! general geometry variables
   StructEEmcSmdSector    mEEmcSector[kEEmcNumSmdUVs][kEEmcNumSectors]; //! storage for 2*12 sectors    
-  //StructEEmcStrip*       mStripPtrVector[kEEmcNumStrips*kEEmcNumSmdUVs*kEEmcNumSectors]; //! storage for all strip pointers  
+  //! storage for all strip pointers  
   EEmcStripPtrVec       mStripPtrVector; //! storage for all strip pointers  
   bool                   mIsSectorIn[kEEmcNumSectors];    //! sector status. 
+  int   kEEmcSmdMap_iPlane[kEEmcNumSmdUVs][kEEmcNumSectors];
 
   void buildSmdGeom();
 
   static EEmcSmdGeom* sInstance;
 
+  /// iPlane=[0,1,2] - experts only, changes meaning form sector to sector
+  /// return a DCA strip pointer from a point (float *dca carries sign)  
+  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const TVector3& point, Float_t* dca);
+  const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const TVector3& point, Float_t* dca);
+  
+  
  public:
-
+  
   static EEmcSmdGeom* instance();   // handle the only instance
   static EEmcSmdGeom* instance(intVec sectorIdVec);   
-
+  
   void init();         // init the dbase
-
+  
   /// build mStripPtrVector   
   void buildStripPtrVector();
 
@@ -156,10 +143,17 @@ class EEmcSmdGeom : public TObject {
   
   /// return a strip pointer from indices   
   StructEEmcStrip* getStripPtr(const Int_t iStrip, const Int_t iUV, const Int_t iSec);
+  
+  /// Returns a pointer to the eemc smd strip which is closest to the
+  /// given point in the specified SMD plane.
+  /// @param iUV 0=smd-u plane, 1=smd-v plane
+  /// @param point TVector3 specifying a point on the endcap
+  /// @param dca distance of closest approach to the strip
+  /// @And priori we do not know if the track is charged or not and how to extrapolate it.
+  /// @User must takes care to provide 'point' at the z-location he/she needs the cross point.
+  /// @Now I realize it is the chicken and egg problem if we want sub-mm accuracy. May be solved by iterations.
+  const  StructEEmcStrip* getDca2Strip(const Int_t iUV, const TVector3& point, Float_t* dca);
 
-  /// return a DCA strip pointer from a point (float *dca carries sign)  
-  StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const TVector3& point, Float_t* dca);
-  StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const TVector3& point, Float_t* dca);
   
   /// In a given sector, return the vector from the specified vertex
   /// along the line defined by the intersection of the two planes
@@ -234,21 +228,37 @@ inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV,
  
 /*******************************************************************
  *
- * Id: StEEmcSmdGeom.h,v 1.6 2003/12/05 00:06:11 jwebb Exp 
  *
- * Author: Wei-Ming Zhang
- *****************************************************************
+ * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.6  2007/01/25 22:33:21  balewski
+ * add:
+ * - better writeup
+ * - new simpler to use method calculating dca fo track to strip, it is just a wrapper, some approximations were used, may fail at the sector boundary
  *
- * Description: Interface to EEMC-SMD database
- * 
- * The following demensions are defined for SMD in EEmcGeomDefs.h
- * EEmcNumSectors     = 12 (The order follows numbering scheme of TPC sectors)
- * kEEmcNumSmdPlanes  =  3 (1: the innermost and 3: the outermost) 
- * kEEmcNumStrips     =288 (1: the shortes inner and 288: the shortest outer) 
- * kEEmcNumEdgeStrips =283 (1: the shortes inner and 283: the shortest outer)
- * kEEmcNumSmdLayers  =  2 (1: U and 2: V) 
+ * Revision 1.5  2007/01/12 23:53:14  jwebb
+ * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
+ * method.
  *
- *****************************************************************
+ * Revision 1.3  2004/07/01 15:35:50  jwebb
+ * Added placeholder method getIntersection(Int_t,Float_t,Float_t).  For now
+ * it just calls the getIntersection with strips converted to integers.
+ * Later we will write code to handle fractional strips.
+ *
+ * Revision 1.2  2004/02/03 22:57:54  jwebb
+ * Added StEEmcSmdGeom::instance(), which is sort of needed...
+ *
+ * Revision 1.1  2004/01/29 15:26:10  jwebb
+ * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
+ * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
+ * all function calls in EEmcSmdGeom.  StThreeVectorD wrappers are provided
+ * in StEEmcSmdGeom, for integration into Star framework.
+ *
+ * Revisions:
+ *
+ * 01/28/04 Jason Webb -- Renamed to EEmcSmdGeom, StRoot dependent code moved 
+ * to a derived class StEEmcSmdGeom.  The user interface for StEEmcSmdGeom
+ * should remain unchanged.  Revision history for StEEmcSmdGeom moved  to end
+ * of header file.  
  *
  * Log: StEEmcSmdGeom.h,v 
  * Revision 1.6  2003/12/05 00:06:11  jwebb

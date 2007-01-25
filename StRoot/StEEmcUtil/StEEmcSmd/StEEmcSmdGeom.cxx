@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.10 2004/02/03 22:57:55 jwebb Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.11 2007/01/25 22:33:21 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  *
@@ -73,7 +73,7 @@ Int_t StEEmcSmdGeom::getEEmcISec(const Int_t iPlane,
 // Returns a pointer to the strip which has the smallest DCA (distance of
 // closest approach) to the specified point.
 
-StructEEmcStrip* 
+const StructEEmcStrip* 
 StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
 			      const Int_t iSec, 
 			      const StThreeVectorD& point, 
@@ -84,7 +84,7 @@ StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 
 }
 
-StructEEmcStrip* 
+const StructEEmcStrip* 
 StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane, 
 			      StThreeVectorD& point, 
 			      Float_t* dca) {
