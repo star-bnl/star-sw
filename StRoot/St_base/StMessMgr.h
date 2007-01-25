@@ -115,6 +115,9 @@ class StMessMgr : public ostrstream {
    // fake operator= to follish the bug in the RootCint
   StMessMgr& operator=(const StMessMgr&){ return *this;}
  public: 
+    enum ESTARMakerErrorLevels {
+       kAll=-5, kFatal, kError, kWarning, kInfo, kDefault, kDebug, kDebug2 
+    }; 
    StMessMgr();
    StMessMgr(const StMessMgr&){;}
    virtual ~StMessMgr(){;}
@@ -317,4 +320,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.10 2007/01/25 06:28:07 fine Exp $
+// $Id: StMessMgr.h,v 1.11 2007/01/25 18:36:39 fine Exp $
