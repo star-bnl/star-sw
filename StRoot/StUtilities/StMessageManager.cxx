@@ -437,20 +437,26 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.45 2007/01/25 06:11:37 fine Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.46 2007/01/25 06:28:06 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
 //_____________________________________________________________________________
-void StMessageManager::SetLevel(const char *, Int_t)
+void StMessageManager::SetLevel(Int_t)
 { 
    fprintf(stderr,"StMessageManager class provides no implementation SetLevel method\n");
 } 
 //_____________________________________________________________________________
-Int_t StMessageManager::GetLevel(const char *, Int_t) const
+Int_t StMessageManager::GetLevel(Int_t) const
 {   
    fprintf(stderr,"StMessageManager class provides no implementation GetLevel method\n");
    return -999;
+} 
+//_____________________________________________________________________________
+const char *StMessageManager::GetName() const
+{   
+   fprintf(stderr,"StMessageManager class provides no implementation GetName method\n");
+   return 0;
 } 
 
 
@@ -461,8 +467,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.45 2007/01/25 06:11:37 fine Exp $
+// $Id: StMessageManager.cxx,v 1.46 2007/01/25 06:28:06 fine Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.46  2007/01/25 06:28:06  fine
+// connect Logger and Maker debug levels
+//
 // Revision 1.45  2007/01/25 06:11:37  fine
 // Add the new StMess abstarct interfaces GetLevel/SetLevel
 //
