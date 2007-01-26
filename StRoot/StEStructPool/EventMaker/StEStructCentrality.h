@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.h,v 1.6 2006/04/04 22:12:29 porter Exp $
+ * $Id: StEStructCentrality.h,v 1.7 2007/01/26 17:19:50 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -58,6 +58,8 @@ class StEStructCentrality {
   void setCentTypeNTracks();
   void setCentTypeImpact();
 
+  void Print();
+
   StEStructCentType getCentType();
 
   ClassDef(StEStructCentrality,1)
@@ -85,6 +87,9 @@ inline StEStructCentType StEStructCentrality::getCentType(){ return mCentType;};
 /***********************************************************************
  *
  * $Log: StEStructCentrality.h,v $
+ * Revision 1.7  2007/01/26 17:19:50  msd
+ * Added Print function.
+ *
  * Revision 1.6  2006/04/04 22:12:29  porter
  * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
  *

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCentrality.cxx,v 1.6 2006/04/04 22:12:29 porter Exp $
+ * $Id: StEStructCentrality.cxx,v 1.7 2007/01/26 17:19:49 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -193,10 +193,23 @@ double StEStructCentrality::ptCentralityLimit( const int index ) {
     }
     return mptcents[index];
 }
+void StEStructCentrality::Print() {
+  if(!mcentralities) {
+    cout << "Print::Centralities not initialized!" << endl;
+    return;
+  }
+  cout << "Centrality bin definitions:" << endl;
+  cout << "  bin\tmin\tmax" <<endl;
+  for(int i=0; i<numCentralities()-1; i++) cout << "  " << i << "\t" << minCentrality(i) << "\t" << maxCentrality(i) << endl;
+}
+  
 
 /***********************************************************************
  *
  * $Log: StEStructCentrality.cxx,v $
+ * Revision 1.7  2007/01/26 17:19:49  msd
+ * Added Print function.
+ *
  * Revision 1.6  2006/04/04 22:12:29  porter
  * Set up StEtructCentrality for use in event cut selection - includes impact para for generators
  *
