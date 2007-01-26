@@ -58,6 +58,14 @@ double chi2Eval(TH2D* h, TH2D* data, float beta, float sf, int rscale){
 //--------------------------------------------------------------------
 float* runChi2Min_SFEval(const char* dirName, float beta, int itype, const char* cmult=NULL, int rscale=1){
 
+  /* Notes from Jeff's 7/24 email to estruct
+ const char* dirName => input directory (excluding mult sub-dir)
+ float beta          => lagrange multiplier (typically ~10)
+ int itype           => side-index (all, awayside, sameside, ...)
+ const char* cmult   => multiplicity subdir
+ int rscale          => 0 do not apply, 1 apply  radialScaling.C
+  */
+
   const char* spaceName[]={"NSYtDYt","NYtYt"};
 
   TString dirname(dirName);
