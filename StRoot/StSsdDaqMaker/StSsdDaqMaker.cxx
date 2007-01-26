@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.11 2006/10/16 19:52:26 fisyak Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.12 2007/01/26 11:57:17 bouchet Exp $
 //
 // $log$
 //
@@ -78,61 +78,62 @@ Int_t StSsdDaqMaker::Init(){
   // table using the StSsdUtil and StSsdDbMaker...
 
 
-  gMessMgr->Info() << " StSsdDaqMaker::Init() - Read now Databases " << endm;
+  LOG_INFO << " - Read now Databases " << endm;
   //	Create SsdPedestal histograms
-    occupancy_wafer = new TH2S("occupancy_wafer","occupancy per wafer",40,0,40,20,0,20);
-    occupancy_chip = new TH2S("occupancy_chip","occupancy per chip",40,0,40,99,0,99);
-    noise_chip  = new TH2S("noise_chip","mean noise per chip",40,0,40,99,0,99);
-    noise_wafer  = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
-    noise_chip_P  = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
-    noise_chip_N  = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
-    pedestal_chip  = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
-    occupancy_wafer->SetXTitle("Ladder");
-    occupancy_wafer->SetYTitle("Wafer");  
-    occupancy_chip->SetXTitle("Ladder");
-    occupancy_chip->SetYTitle("Chip");  
-    noise_chip->SetXTitle("Ladder");
-    noise_chip->SetYTitle("Chip");
-    noise_chip_P->SetXTitle("Ladder");
-    noise_chip_N->SetXTitle("Ladder");
-    noise_chip_P->SetYTitle("Chip"); 
-    noise_chip_N->SetYTitle("Chip");   
-    noise_wafer->SetXTitle("Ladder");
-    noise_wafer->SetYTitle("Wafer"); 
-    pedestal_chip->SetXTitle("Ladder");
-    pedestal_chip->SetYTitle("Chip");
-    occupancy = new TH1F("deadStrips","number of dead strips",40,0,40);
-    occupancy->SetXTitle("Ladder");
-    occupancy->SetYTitle("#");
-    kind = new TH2S("status","status of the noise/pedestal",3,0,3,4,0,4);
-    kind->SetXTitle("pedestal");
-    kind->SetYTitle("noise");
-    gMessMgr->Info() << " StSsdDaqMaker::Init() - Done " << endm;
-   return StMaker::Init();
+  occupancy_wafer = new TH2S("occupancy_wafer","occupancy per wafer",40,0,40,20,0,20);
+  occupancy_chip  = new TH2S("occupancy_chip","occupancy per chip",40,0,40,99,0,99);
+  noise_chip      = new TH2S("noise_chip","mean noise per chip",40,0,40,99,0,99);
+  noise_wafer     = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
+  noise_chip_P    = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
+  noise_chip_N    = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
+  pedestal_chip   = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
+  occupancy_wafer->SetXTitle("Ladder");
+  occupancy_wafer->SetYTitle("Wafer");  
+  occupancy_chip->SetXTitle("Ladder");
+  occupancy_chip->SetYTitle("Chip");  
+  noise_chip->SetXTitle("Ladder");
+  noise_chip->SetYTitle("Chip");
+  noise_chip_P->SetXTitle("Ladder");
+  noise_chip_N->SetXTitle("Ladder");
+  noise_chip_P->SetYTitle("Chip"); 
+  noise_chip_N->SetYTitle("Chip");   
+  noise_wafer->SetXTitle("Ladder");
+  noise_wafer->SetYTitle("Wafer"); 
+  pedestal_chip->SetXTitle("Ladder");
+  pedestal_chip->SetYTitle("Chip");
+  occupancy = new TH1F("deadStrips","number of dead strips",40,0,40);
+  occupancy->SetXTitle("Ladder");
+  occupancy->SetYTitle("#");
+  kind = new TH2S("status","status of the noise/pedestal",3,0,3,4,0,4);
+  kind->SetXTitle("pedestal");
+  kind->SetYTitle("noise");
+  LOG_INFO << "Init() - Done " << endm;
+  return StMaker::Init();
 }
 
 //_____________________________________________________________________________
 Int_t StSsdDaqMaker::InitRun(int runumber){
 
 
-  gMessMgr->Info() << " StSsdDaqMaker::InitRun(int runumber) - Read now Databases " << endm;
-
+  LOG_INFO << " InitRun(int runumber) - Read now Databases " << endm;
+ 
+  
   TDataSet *DbConnector = GetDataBase("Geometry/ssd");
   if (!DbConnector){
-    gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - DbConnector==0");
+    LOG_ERROR << "InitRun(int runumber) - ERROR - DbConnector==0" << endm;
     return 0;
   }
-
-
+  
+  
   St_ssdConfiguration *configuration = (St_ssdConfiguration*)DbConnector->Find("ssdConfiguration");
   if (!configuration){
-    gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - ssdConfiguration==0");
+    LOG_ERROR << "StSsdDaqMaker::InitRun(int runumber) - ERROR - ssdConfiguration==0"<<endm;
     return 0;
   }
 
   ssdConfiguration_st *config  = (ssdConfiguration_st*) configuration->GetTable() ;
   if (!config){
-    gMessMgr->Error("StSsdDaqMaker::InitRun(int runumber) - ERROR - config==0");
+    LOG_ERROR << "StSsdDaqMaker::InitRun(int runumber) - ERROR - config==0" << endm;
     return 0;
   }
 
@@ -142,7 +143,7 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
 
   for (int ladder = 1; ladder<=config->nMaxLadders;ladder++) 
     {
-      gMessMgr->Info() <<" Run-IV : Ladder = "<< ladder 
+      LOG_INFO <<" Run-IV : Ladder = "<< ladder 
 	  << " on sector = " << config->ladderIsPresent[ladder-1] 
 	  << endm;
       if (config->ladderIsPresent[ladder-1] != 0)
@@ -150,7 +151,7 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
       mConfig->setLadderIsActive(ladder,config->ladderIsPresent[ladder-1]);
     }
 
-  gMessMgr->Info() << " Run-IV : totLadderPresent = "<<totLadderPresent<<endm;  
+  LOG_INFO << " Run-IV : totLadderPresent = "<<totLadderPresent<<endm;  
   mConfig->setNumberOfLadders(totLadderPresent);
   mConfig->setNumberOfWafers(config->nMaxWafers/config->nMaxLadders);
   mConfig->setNumberOfHybrids(2);
@@ -160,14 +161,14 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
 
   mConfig->setConfiguration();
 
-  gMessMgr->Info() << "______________________________________________" << endm;
-  gMessMgr->Info() << "StSsdDaqMaker...            Via  Datababase...." << endm;
-  gMessMgr->Info() << "SSDSsdDaqMaker : ...........numberOfSectors = " << config->nMaxSectors << endm;
-  gMessMgr->Info() << "SSDSsdDaqMaker : ...........numberOfLadders = " << totLadderPresent << endm;
-  gMessMgr->Info() << "SSDSsdDaqMaker : ..numberOfWafersPerLadder  = " << config->nMaxWafers/config->nMaxLadders << endm;
-  gMessMgr->Info() << "______________________________________________" << endm;
+  LOG_INFO << "______________________________________________" << endm;
+  LOG_INFO << "StSsdDaqMaker...            Via  Datababase..." << endm;
+  LOG_INFO << "SSDSsdDaqMaker : ...........numberOfSectors = " << config->nMaxSectors << endm;
+  LOG_INFO << "SSDSsdDaqMaker : ...........numberOfLadders = " << totLadderPresent << endm;
+  LOG_INFO << "SSDSsdDaqMaker : ..numberOfWafersPerLadder  = " << config->nMaxWafers/config->nMaxLadders << endm;
+  LOG_INFO << "______________________________________________" << endm;
 
-  gMessMgr->Info() << " StSsdDaqMaker::InitRun(int runumber) - Done " << endm;
+  LOG_INFO << " StSsdDaqMaker::InitRun(int runumber) - Done " << endm;
   return 0;
 
 }
@@ -199,25 +200,25 @@ Int_t StSsdDaqMaker::Make(){
 
   TDataSet *daq = GetDataSet("StDAQReader");                 
   if (!daq) {
-    gMessMgr->Warning() << "StSsdDaqMaker:Make : StDAQReader Dataset not found - Skipping the event" << endm;
+    LOG_WARN << "StSsdDaqMaker:Make : StDAQReader Dataset not found - Skipping the event" << endm;
     return kStWarn;
   }
   
   StDAQReader *daqReader = (StDAQReader*) (daq->GetObject()); 
   if (!daqReader) {
-    gMessMgr->Warning() << "StSsdDaqMaker:Make : StDAQReader Object not found - Skipping the event" << endm;
+    LOG_WARN << "StSsdDaqMaker:Make : StDAQReader Object not found - Skipping the event" << endm;
     return kStWarn;
   }
   
   if (!(daqReader->SSDPresent())) {
-    gMessMgr->Warning() << "StSsdDaqMaker:Make : The SSD was not in the data stream  - Skipping the event" << endm;
+    LOG_WARN << "StSsdDaqMaker:Make : The SSD was not in the data stream  - Skipping the event" << endm;
     return kStWarn;
   }
 
   StSSDReader *stssdreader  = daqReader->getSSDReader();   
   if(!stssdreader)
   {
-    gMessMgr->Warning() << "StSsdDaqMaker:Make : SSD reader not found - Skipping the event" << endm;
+    LOG_WARN << "StSsdDaqMaker:Make : SSD reader not found - Skipping the event" << endm;
     return kStWarn;
   }
   
@@ -271,8 +272,8 @@ Int_t StSsdDaqMaker::Make(){
 		      //strip number=1-mConfig->getNumberOfStrips()
 		      //id_side=0 for p side, 1 for n side
 		      if (data>0) {
-			if (id_side==1) my_channel=maxChannel-1-channel;//3/11 : decommenter
-				else my_channel=channel;                  //3/11 : decommenter
+			if (id_side==1) my_channel=maxChannel-1-channel;
+				else my_channel=channel;                  
 			// the ssd mapping tables are inverted at the moment so we have to scan 
 			// them to get the correct channel.
 			if (id_side==1) {
@@ -450,9 +451,9 @@ Int_t StSsdDaqMaker::Make(){
 	} // end for (ladder=0;ladder<mConfig->mConfig->getTotalNumberOfLadders();ladder++) 
     }  // end for (id_side=0;id_side<2;id_side++)
 
-  if (GetDebug()) {
-    gMessMgr->Info() <<"StSsdDaqMaker::Make()/Number of raw data in the SSD" << endm;
-    gMessMgr->Info() << "StSsdDaqMaker::Make()/Active Ladders:  ";
+  if (Debug()==true) {
+    LOG_INFO <<"StSsdDaqMaker::Make()/Number of raw data in the SSD" << endm;
+    LOG_INFO << "StSsdDaqMaker::Make()/Active Ladders:  ";
     for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
       if (mConfig->getLadderIsActive(i+1)>0) {
 	gMessMgr->width(5);
@@ -460,14 +461,14 @@ Int_t StSsdDaqMaker::Make(){
       }
     
     *gMessMgr<<endm;
-    gMessMgr->Info() << "StSsdDaqMaker::Make()/Counts (p-side): ";
+    LOG_INFO << "StSsdDaqMaker::Make()/Counts (p-side): "<<endm;
     for (int i=0;i<mConfig->getTotalNumberOfLadders();i++)
       if (mConfig->getLadderIsActive(i+1)>0) {
 	gMessMgr->width(5);
 	*gMessMgr <<ladderCountP[i]<<" ";
       }
     *gMessMgr<<endm;
-    gMessMgr->Info() << "StSsdDaqMaker::Make()/Counts (n-side): ";
+     LOG_INFO<< "StSsdDaqMaker::Make()/Counts (n-side): "<<endm;
     for (int i=0;i<mConfig->getTotalNumberOfLadders();i++)
       if (mConfig->getLadderIsActive(i+1)>0) {
 	gMessMgr->width(5);
@@ -483,18 +484,10 @@ Int_t StSsdDaqMaker::Make(){
 	occupancy->Fill((2*i)+1,(12288-ladderCountN[i]));
       }
     
-  gMessMgr->Info() << "StSsdDaqMaker::Make()/  spa_strip->NRows= "<<spa_strip->GetNRows()<<endm;
-  gMessMgr->Info() << "StSsdDaqMaker::Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm;
+  LOG_INFO << "StSsdDaqMaker::Make()/  spa_strip->NRows= "<<spa_strip->GetNRows()<<endm;
+  LOG_INFO << "StSsdDaqMaker::Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm;
  
   return kStOK;
     }
-
-
-
-
-
-
-
-
 
 
