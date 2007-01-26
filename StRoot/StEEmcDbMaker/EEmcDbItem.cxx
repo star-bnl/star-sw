@@ -1,9 +1,11 @@
-// $Id: EEmcDbItem.cxx,v 1.14 2005/09/19 21:43:32 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.15 2007/01/26 20:45:58 balewski Exp $
  
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#include "TString.h"
 
 #include "cstructs/eemcConstDB.hh"
 
@@ -38,13 +40,36 @@ void EEmcDbItem::print() const{
     printf(" item not defined ???\n");
     return;
   }
-
-  if(strchr(name,'U') || strchr(name,'V') )
+  if( isSMD() )
     printf(" %s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,sigPed,thr,stat,fail,tube,key);
   else
     printf(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,sigPed,thr,stat,fail,tube,key);
 }
 
+//----                                          ----
+//----                                          ----
+ostream &
+EEmcDbItem::print( ostream &out ) const
+{
+  out << "EEmcDbItem: ";
+  if ( isEmpty() ) { 
+    out << "item not defined"; 
+  }
+  else if ( isSMD() ){
+    out << Form("%s crate=%d chan=%3d sec=%2d plane=%c strip=%3d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x pix=%s key=%d\n",name,crate,chan,sec,plane,strip,gain,ped,sigPed,thr,stat,fail,tube,key);
+  }
+  else {
+    out << Form(" %s crate=%d chan=%3d sec=%2d sub=%c eta=%2d gain=%.3f  ped=%.2f sPed=%.2f ADC_thr=%.2f stat=0x%4.4x fail=0x%4.4x tube=%s key=%d\n",name,crate,chan,sec,sub,eta,gain,ped,sigPed,thr,stat,fail,tube,key);
+  }
+  return out;
+}
+
+//----                                          ----
+//----                                          ----
+ostream &operator<<(ostream &out, const EEmcDbItem &item )
+{
+  return item.print(out);
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -203,6 +228,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.15  2007/01/26 20:45:58  balewski
+// now we have pure new Logger, thanks Jason, Jan
+//
 // Revision 1.14  2005/09/19 21:43:32  balewski
 // I was wrong, there was no bug
 //

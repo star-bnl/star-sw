@@ -1,9 +1,10 @@
-// $Id: EEmcDbCrate.cxx,v 1.5 2004/04/04 06:10:36 balewski Exp $
+// $Id: EEmcDbCrate.cxx,v 1.6 2007/01/26 20:45:58 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "TString.h"
 
 #include "EEmcDbCrate.h"
 
@@ -33,6 +34,22 @@ void EEmcDbCrate::print() const{
   printf("%s crID=%3d crIDswitch=%3d fiber=%d nCh=%d nHead=%d type=%c useIt=%d\n",name, crID, crIDswitch,fiber,nCh,nHead,type,useIt);
 }
 
+ostream &
+EEmcDbCrate::print( ostream &out ) const
+{
+  out << "DbCrate: ";
+  if ( isEmpty() ) {
+    out << "crate not defined";
+    return out;
+  }
+  out << Form("%s crID=%3d crIDswitch=%3d fiber=%d nCh=%d nHead=%d type=%c useIt=%d",name, crID, crIDswitch,fiber,nCh,nHead,type,useIt);
+  return out;
+}
+
+ostream &operator<<(ostream &out, const EEmcDbCrate &crate )
+{
+  return crate.print(out);
+}
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbCrate::clear() {
@@ -116,6 +133,9 @@ int EEmcDbCrate::importAscii(FILE *fd){
 
 
 // $Log: EEmcDbCrate.cxx,v $
+// Revision 1.6  2007/01/26 20:45:58  balewski
+// now we have pure new Logger, thanks Jason, Jan
+//
 // Revision 1.5  2004/04/04 06:10:36  balewski
 // *** empty log message ***
 //
