@@ -589,11 +589,10 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
     static int nCount=0; nCount++;
     Complex cpnt(point[0]-fX[0],point[1]-fX[1]);
     Complex cdir(fP[0],fP[1]); cdir /=std::abs(cdir);
-    double step[3];
+    double step[3]={0,0,0};
 //		Z estimated step 
 
     int zStep=0;
-    step[1] = 0;
     if (fabs(fP[2]) > 0.01){ //Z approximation
       zStep = 1;
       step[1] = (point[2]-fX[2])/fP[2];
@@ -618,9 +617,13 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       step[2]/=fCosL;
     }
 
-    if (zStep && fabs(step[1]-step[2]) > GetPeriod()) {
-      int nperd = (int)((step[1]-step[2])/GetPeriod());
-      step[2] += nperd*GetPeriod();
+    if (zStep) {
+      double p = GetPeriod();
+      int nperd = (int)((step[1]-step[2])/p);
+      if (step[2]+nperd*p>step[1]) nperd--;
+      if (fabs(step[2]-step[1]+(nperd+0)*p)
+         >fabs(step[2]-step[1]+(nperd+1)*p)) nperd++;
+      step[2]+=(nperd)*p;
     }
     step[0] = step[2];
 
@@ -633,14 +636,14 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 
     double xnear[6],ss=0;  double* pnear=xnear+3;
 //		iterations
-    double dstep = 1.e+10,dztep;
+    double dstep = 1.e+10,oldStep=dstep,dztep;
     double lMax = step[0]+0.25*GetPeriod();
     double lMin = step[0]-0.25*GetPeriod();
 
     if (zStep) {
       lMax = (step[1]>step[2])? step[1]:step[2];
       lMin = (step[1]>step[2])? step[2]:step[1];}
-    int iter=40,icut=1;
+    int iter=99,icut=1;
     THelixTrack local(*this);
     local.Move(step[0]);
     lMax-=step[0];lMin-=step[0];
@@ -649,11 +652,11 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
     { 
       double diff = (icut)? lMax-lMin: fabs(dstep);
       if (diff < 0.1) {
-        if (diff < 1.e-5) 	break;
+        if (diff < 1.e-6) 	break;
         double tmp = 0;
         for (int i=0;i<3;i++) {tmp += fabs(point[i]-xnear[i]);}
         if (diff < tmp*1.e-4) 	break;
-        if (tmp < 1.e-5) 	break;
+        if (tmp < 1.e-6) 	break;
       }
       
       local.Step(ss,xnear,pnear);
@@ -661,13 +664,18 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
       for (int i=0;i<3;i++) {dstep += pnear[i]*(point[i]-xnear[i]);}
       if(dstep<0) {
         lMax = ss; dztep = -0.5*(lMax-lMin);
-	if (dstep<dztep) {icut=1;dstep = dztep;}
+	if (dstep<dztep || fabs(dstep)>0.7*oldStep) {icut=1;dstep = dztep;}
       } else {
         lMin = ss; dztep =  0.5*(lMax-lMin);
-	if (dstep>dztep) {icut=1;dstep = dztep;}
+	if (dstep>dztep || fabs(dstep)>0.7*oldStep) {icut=1;dstep = dztep;}
       }
       ss += dstep; 
+      oldStep=fabs(dstep);
     }
+//    printf("ITERS=%d dSTEP=%g \n",iter,dstep);
+    if (!iter){ printf("*** Problem in THElixTrack::Step(vtx) ***\n");
+                printf("double vtx[3]={%g,%g,%g};",point[0],point[1],point[2]);
+                Print();}
     assert(iter);
     step[0]+=ss;
     fDCA[0] = ((point[0]-xnear[0])*(-pnear[1]) +(point[1]-xnear[1])*(pnear[0]))/fCosL;
@@ -1632,7 +1640,7 @@ static int nCall=0; nCall++;
 	  }
 	  fG1 = xroot*g0;
 	  xnom = (g-fG1)*(f-fG1)-h*h;
-	  assert(xnom>1e-15);
+	  assert(xnom>3e-33);
 	  fXd = ( p*(g-fG1)-q*h      )/xnom;
 	  fYd = (-p*h      +q*(f-fG1))/xnom;
         }//end case 2
@@ -2751,7 +2759,7 @@ static TGraph  *ciGraph[2]  = {0,0};
 //______________________________________________________________________________
 /***************************************************************************
  *
- * $Id: THelixTrack.cxx,v 1.25 2006/08/10 04:09:50 perev Exp $
+ * $Id: THelixTrack.cxx,v 1.26 2007/01/26 19:56:24 perev Exp $
  *
  * Author: Victor Perev, Mar 2006
  * Rewritten Thomas version. Error hangling added
@@ -2767,6 +2775,9 @@ static TGraph  *ciGraph[2]  = {0,0};
  ***************************************************************************
  *
  * $Log: THelixTrack.cxx,v $
+ * Revision 1.26  2007/01/26 19:56:24  perev
+ * tune up
+ *
  * Revision 1.25  2006/08/10 04:09:50  perev
  * Test cleanup
  *
