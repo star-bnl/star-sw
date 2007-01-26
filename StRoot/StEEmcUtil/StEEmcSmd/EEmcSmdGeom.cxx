@@ -1,8 +1,10 @@
-
-
-/*****************************************************************************
+/*!
+ * \class EEmcSmdGeom
+ * \author Wei-Ming Zhangg, Jason Webb
+ * 
+ ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.6 2007/01/25 22:33:21 balewski Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.7 2007/01/26 00:51:08 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -27,6 +29,9 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.7  2007/01/26 00:51:08  balewski
+ * too strong protection
+ *
  * Revision 1.6  2007/01/25 22:33:21  balewski
  * add:
  * - better writeup
@@ -473,10 +478,11 @@ const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 // iUV=[0,1] , maps [U,V]
 const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV, 
 					   const TVector3& point, Float_t* dca) {
-  assert(iUV>=0 || iUV<kEEmcNumSmdUVs);
+  assert(iUV>=0 || iUV<kEEmcNumSmdUVs); 
   int iSec = getEEmcISec(0, point); //assuming the 1st SMD plane to get SectorID is good enough,
   if(iSec<0)  getEEmcISec(1, point); // try next plane,  this is silly, Jan
-  assert(iSec>=0 && iSec<kEEmcNumSectors);
+  if(iSec<0) return 0; // no crossing point
+  assert( iSec<kEEmcNumSectors);
   int iPlane= kEEmcSmdMap_iPlane[iUV][iSec];// now find  mapping iUV --> iPlane
   assert(iPlane>=0 && iPlane<kEEmcNumSmdPlanes);
   return  getDcaStripPtr(iPlane, iSec, point, dca); 
