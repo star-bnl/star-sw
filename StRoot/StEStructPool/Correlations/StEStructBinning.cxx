@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.cxx,v 1.8 2006/10/02 22:20:57 prindle Exp $
+ * $Id: StEStructBinning.cxx,v 1.9 2007/01/26 17:17:07 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -50,7 +50,7 @@ StEStructBinning::StEStructBinning(){
   //--> yt ranges <--
   
   minYt=0.9; //0.9; //0.15;
-  maxYt=5.0; //5.0;//4.5; // 0.925;
+  maxYt=4.5; //5.0;//4.5; // 0.925;
   nYt = ESTRUCT_YT_BINS-1;
   dYt = (maxYt-minYt)/(float)nYt;
 
@@ -74,6 +74,11 @@ StEStructBinning::StEStructBinning(){
 
   //--> pt ranges <--
   
+  minMeanPt= 0.0;
+  maxMeanPt=10.0;
+  nmeanPt = ESTRUCT_MEANPT_BINS-1;
+  dmeanPt = (maxMeanPt-minMeanPt)/(float)nmeanPt;
+
   minPt=0.15; //0.15;
   maxPt=6.0;//4.5; // 0.925;
   nPt = ESTRUCT_PT_BINS-1;
@@ -177,6 +182,9 @@ void StEStructBinning::calculateDEtaWeights() {
 /***********************************************************************
  *
  * $Log: StEStructBinning.cxx,v $
+ * Revision 1.9  2007/01/26 17:17:07  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.8  2006/10/02 22:20:57  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.

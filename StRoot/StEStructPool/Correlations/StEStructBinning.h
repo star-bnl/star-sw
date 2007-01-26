@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBinning.h,v 1.12 2006/10/02 22:20:58 prindle Exp $
+ * $Id: StEStructBinning.h,v 1.13 2007/01/26 17:17:08 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -29,11 +29,12 @@
 #define ESTRUCT_ETA_BINS 26
 #define ESTRUCT_YT_BINS 26
 //#define ESTRUCT_DELTAYT_BINS 26  //use dyt instead
+#define ESTRUCT_MEANPT_BINS 501
 #define ESTRUCT_PT_BINS 31
 #define ESTRUCT_XT_BINS 26
 
-#define ESTRUCT_DPHI_BINS 15
-#define ESTRUCT_DETA_BINS 15
+#define ESTRUCT_DPHI_BINS 14
+#define ESTRUCT_DETA_BINS 14
 #define ESTRUCT_DYT_BINS 15
 #define ESTRUCT_DPT_BINS 31
 
@@ -147,7 +148,8 @@ protected:
   float maxYt, minYt, dYt;        //! yt (x) bins
   float maxXt, minXt, dXt;        //! xt bins
   float maxPt, minPt, dPt;        //! mt (x) bins
-  int   nPhi, nEta, nYt, nPt, nXt;//! n-bins
+  float maxMeanPt, minMeanPt, dmeanPt;        //! mean pt bins
+  int   nPhi, nEta, nYt, nPt, nXt, nmeanPt;//! n-bins
 
   float dDPhi; //! delta phi bins
   float maxDEta, minDEta, dDEta; //! delta eta bins
@@ -198,6 +200,7 @@ public:
   int ieta(float eta);
   int iyt(float yt);
   int ixt(float xt);
+  int imeanpt(float pt);
   int ipt(float pt);
   int iq(float q);
   int isep(float sep);
@@ -211,6 +214,7 @@ public:
   float etaVal(int ieta);
   float ytVal(int iyt);
   float xtVal(int ixt);
+  float meanptVal(int ipt);
   float ptVal(int ipt);
   float qVal(int iq);
   float sepVal(int is);
@@ -266,6 +270,11 @@ public:
   float getBinWidthXt() { return dXt; }
   int   xtBins() { return nXt; }
 
+  float meanptMax()    { return maxMeanPt; }
+  float meanptMin()    { return minMeanPt; }
+  float getBinWidthMeanPt()  { return dmeanPt; }
+  int   meanptBins() { return nmeanPt; }
+
   float ptMax()    { return maxPt; }
   float ptMin()    { return minPt; }
   float getBinWidthPt()  { return dPt; }
@@ -283,8 +292,20 @@ public:
 
   // Thse dphi* and deta* are used to size histograms.
   // For now symmetrize the histograms here.
-  float dphiMax()   { return 3*M_PI/2; }
-  float dphiMin()   { return -M_PI/2; }
+  float dphiMax()   {
+      if (nDPhi%2 > 0) {
+	return 3*M_PI/2 + M_PI/(hdphiBins()-1);
+      } else {
+          return 3*M_PI/2;
+      }
+  }
+  float dphiMin()   {
+      if (nDPhi%2 > 0) {
+	return -M_PI/2 - M_PI/(hdphiBins()-1);
+      } else {
+          return -M_PI/2;
+      }
+  }
   float getBinWidthDPhi() { return dDPhi; }
   int   dphiBins() { return nDPhi; }
   int   hdphiBins() {
@@ -413,13 +434,13 @@ inline float StEStructBinning::dphiVal(int idphi, int which) {
     if (1 == which) {
         return dphi;
     } else if (2 == which) {
-        if ((dphiBins()%2 > 0) && (idphi == (dphiBins()-1)/2)) {
-            return 99;
-        }
+      //if ((dphiBins()%2 > 0) && (idphi == (dphiBins()-1)/2)) {
+      //      return 99;
+      //  }
         if (dphi < M_PI/2) {
             return -dphi;
         } else {
-            return 2*M_PI - dphi;
+	  return 2*M_PI - dphi;
         }
     }
     return 99;
@@ -501,6 +522,7 @@ inline float StEStructBinning::deltaYtVal(int ideltaYt){
   return minDeltaYt+ideltaYt*dDeltaYt+dDeltaYt/2;
   }*/
 
+
 inline int StEStructBinning::ixt(float xt){
   if( xt < minXt ) return ESTRUCT_XT_BINS - 1;
   int j = (int)((xt-minXt)/dXt);
@@ -511,6 +533,11 @@ inline float StEStructBinning::xtVal(int ixt){
   return minXt+ixt*dXt+dXt/2;
 }
 
+inline int StEStructBinning::imeanpt(float pt){
+  if( pt < 0 ) return ESTRUCT_MEANPT_BINS - 1;
+  int j = (int)((pt-minMeanPt)/dmeanPt);
+  return (j > ESTRUCT_MEANPT_BINS - 2) ? ESTRUCT_MEANPT_BINS - 1 : j;  
+}
 inline int StEStructBinning::ipt(float pt){
   if( pt < minPt ) return ESTRUCT_PT_BINS - 1;
   int j = (int)((pt-minPt)/dPt);
@@ -529,6 +556,9 @@ inline int StEStructBinning::ispt(float pt){
   return (j > ESTRUCT_SPT_BINS - 2) ? ESTRUCT_SPT_BINS-1 : j;
 }
 
+inline float StEStructBinning::meanptVal(int ipt){
+  return minMeanPt+ipt*dmeanPt+dmeanPt/2;
+}
 inline float StEStructBinning::ptVal(int ipt){
   return minPt+ipt*dPt+dPt/2;
 }
@@ -594,6 +624,9 @@ inline float StEStructBinning::qaptVal(int ipt){
 /***********************************************************************
  *
  * $Log: StEStructBinning.h,v $
+ * Revision 1.13  2007/01/26 17:17:08  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.12  2006/10/02 22:20:58  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.

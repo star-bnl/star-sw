@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStruct2ptCorrelations.cxx,v 1.19 2006/10/02 22:20:51 prindle Exp $
+ * $Id: StEStruct2ptCorrelations.cxx,v 1.20 2007/01/26 17:17:04 msd Exp $
  *
  * Author: Jeff Porter adaptation of Aya's 2pt-analysis
  *
@@ -69,7 +69,7 @@ StEStruct2ptCorrelations::StEStruct2ptCorrelations(StEStructPairCuts* pcuts, int
 //----------------------------------------------------------
 void  StEStruct2ptCorrelations::initInternalData(){
 
-  mPairCuts=NULL;
+  mPairCuts = NULL;
   mQAHists = NULL;
   mCurrentEvent = NULL;
   mMixingEvent = NULL;
@@ -81,8 +81,8 @@ void  StEStruct2ptCorrelations::initInternalData(){
   mdoPairDensityHistograms = false;
   mskipEtaDeltaWeight      = false;
 
-  mInit=false;
-  mDeleted=false;
+  mInit = false;
+  mDeleted = false;
   mHistosWritten = false;
   mlocalQAHists = false;
   manalysisIndex = -1;
@@ -139,28 +139,25 @@ void StEStruct2ptCorrelations::init(){
 
   for(int i=0;i<8;i++)numPairs[i]=numPairsProcessed[i]=mpossiblePairs[i]=0;
 
-//
   initArrays();
 // Try allocating histograms at start of job.
 // If we don't add histograms to directory we don't get the obnoxious
 //   Potential memory leak error.
   TH1::AddDirectory(kFALSE);
-  initHistograms();
+  //initHistograms();
 
   /* Event count via Nch distribution */
   mHNEvents[0]=new TH1D("NEventsSame","NEventsSame",1000,0.,2000.);
   mHNEvents[1]=new TH1D("NEventsMixed","NEventsMixed",1000,0.,2000.);
   
-
   StEStructCutBin* cb = StEStructCutBin::Instance();
   int ncutbins=cb->getNumBins();
   int nQAbins=cb->getNumQABins();
 
-
   /* QA histograms */
   if(!mQAHists) {
     mlocalQAHists = true;
-    cout<<"createing qa hists"<<endl;
+    cout<<"creating QA hists"<<endl;
     mQAHists = new StEStructQAHists(); // if not set .. assume data
     mQAHists->initTrackHistograms(nQAbins,analysisIndex());
   } else {
@@ -196,8 +193,9 @@ void StEStruct2ptCorrelations::finish(){
     return;
   }
 
-  if(!mInit){  // TEST 
+  if(!mInit){  
     cout<<" WARNING: init=false"<<endl;
+    cout<<"No events were processed, either there was a problem reading input files or cuts are too restrictive"<<endl;
     return;
   }
 
@@ -210,8 +208,10 @@ void StEStruct2ptCorrelations::finish(){
   if (mHistosWritten) {
       return;
   }
-//  initHistograms();
+  TH1::AddDirectory(kFALSE);
+  initHistograms();
   fillHistograms();
+  TH1::AddDirectory(kTRUE);
   TFile * tf=new TFile(moutFileName,"RECREATE");
   tf->cd();
   writeHistograms();
@@ -328,8 +328,10 @@ bool StEStruct2ptCorrelations::doEvent(StEStructEvent* event){
 
     for(StEStructTrackIterator iter = tc->begin(); iter != tc->end(); iter++) {
 
-     int i = cb->getdEdxPID((*iter));
-     mQAHists->fillTrackHistograms(*iter,i);
+      int i=0;
+      if (cb->getMode() == 5) i = cb->getdEdxPID((*iter));
+      if (cb->getMode() == 6) i = bufferIndex(); 
+      mQAHists->fillTrackHistograms(*iter,i);
 
     // Choose mass according to dEdx (in which case transverse and longitudinal
     // rapidities will be calculated as actual rapidities) or set mass to 0
@@ -661,6 +663,11 @@ void StEStruct2ptCorrelations::makePairs(StEStructEvent* e1, StEStructEvent* e2,
         if (!cb->ignorePair(&mPair)) {
 
           int icb=cb->getCutBin(&mPair);
+	  if(cb->getMode()==6) icb = bufferIndex();  // Has to be done here as a hack since event-level info not available inside cb
+	  if(icb>=ncutbins) {
+	    cout << "ERROR, got cutbin " << icb << " of " << ncutbins << " possible." << endl;
+	    return;
+	  }
           pt1   = mPair.Track1()->Pt();
           pt2   = mPair.Track2()->Pt();
           if (itpt[0][icb][it1] == 0) {
@@ -1756,6 +1763,9 @@ void StEStruct2ptCorrelations::createHist1D(TH1D*** h, const char* name, int ikn
 /***********************************************************************
  *
  * $Log: StEStruct2ptCorrelations.cxx,v $
+ * Revision 1.20  2007/01/26 17:17:04  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.19  2006/10/02 22:20:51  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.

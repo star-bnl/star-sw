@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.cxx,v 1.5 2006/10/02 22:21:02 prindle Exp $
+ * $Id: StEStructPairCuts.cxx,v 1.6 2007/01/26 17:17:10 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -286,7 +286,7 @@ int StEStructPairCuts::cutPair(){
   // return 0 to use pair, return 1 to cut pair 
 
   //  if(cutDeltaPhi() || cutDeltaEta() || cutDeltaMt()) return 1;
-  if(goodDeltaPhi() && goodDeltaEta() && goodDeltaMt()) return 0;
+  //if(goodDeltaPhi() && goodDeltaEta() && goodDeltaMt()) return 0;
   
   // *** new test ***
   /*  cout.precision(3);     
@@ -309,11 +309,7 @@ int StEStructPairCuts::cutPair(){
     }*/
   // *** 
 
-
-
-
-  if( cutMerging() || cutCrossing()) return 1;
-  //  if( cutMerging() || cutCrossing() || cutCoulomb() || cutHBT() ) return 1;
+  if( cutMerging() || cutCrossing() || cutCoulomb() || cutHBT() ) return 1;
 
   if(!mdeltaEta) mdeltaEta=DeltaEta();  // may have been set above
   
@@ -321,17 +317,17 @@ int StEStructPairCuts::cutPair(){
 
     //--> qInv and EntSep are combined for speed & small delta eta 
     if(cutqInvORNominalEntranceSep()) return 1;
-   
+    
     if(mType==1 || mType==3) {
        if(cutMidTpcSepUS()) return 1;
     } else {
-       if(cutMidTpcSepLS()) return 1;
+      if(cutMidTpcSepLS()) return 1;
     }
- 
+    
   }
-
+  
   if(cutQuality()) return 1;
-
+  
   //  if(cutExitSep() || cutQuality()) return 1;
   return 0;
 }
@@ -547,6 +543,9 @@ StEStructPairCuts::MidTpcZSeparation() const {
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.cxx,v $
+ * Revision 1.6  2007/01/26 17:17:10  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.5  2006/10/02 22:21:02  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.
