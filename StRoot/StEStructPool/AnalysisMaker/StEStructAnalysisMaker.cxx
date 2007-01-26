@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEStructAnalysisMaker.cxx,v 1.6 2006/05/01 17:49:57 msd Exp $
+ * $Id: StEStructAnalysisMaker.cxx,v 1.7 2007/01/26 17:09:25 msd Exp $
  *
  *************************************************************************
  *
@@ -145,7 +145,7 @@ StEStructAnalysisMaker::Make(){
 
 int StEStructAnalysisMaker::getAnalysisIndex(){
 
-  if(numAnalysis==1) return 0;
+  //if(numAnalysis==1) return 0;   // this was a bug, for jobs with 1 analysis centrality limits will be ignored
 
 //   currently all we index on is centrality, 
 //   but this method could be a switch statement
@@ -205,6 +205,9 @@ void StEStructAnalysisMaker::SetReactionPlaneAnalysis(char* weightFile) {
 /***********************************************************************
  *
  * $Log: StEStructAnalysisMaker.cxx,v $
+ * Revision 1.7  2007/01/26 17:09:25  msd
+ * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
+ *
  * Revision 1.6  2006/05/01 17:49:57  msd
  * Closed QA tfile
  *
