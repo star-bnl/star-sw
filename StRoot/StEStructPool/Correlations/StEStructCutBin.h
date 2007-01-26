@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.h,v 1.6 2006/10/02 22:21:01 prindle Exp $
+ * $Id: StEStructCutBin.h,v 1.7 2007/01/26 17:17:10 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -41,6 +41,7 @@ class StEStructCutBin : public TObject {
   int getCutBinMode3(StEStructPairCuts *pc);
   int getCutBinMode4(StEStructPairCuts *pc);
   int getCutBinMode5(StEStructPairCuts *pc);
+  int getCutBinMode6(StEStructPairCuts *pc);
   int ignorePair5(StEStructPairCuts *pc);
   int symmetrizeYt5(StEStructPairCuts *pc);
   int switchYt5(StEStructPairCuts *pc);
@@ -51,6 +52,7 @@ class StEStructCutBin : public TObject {
   void initPtBinMode3();
   void initPtBinMode4();
   void initPtBinMode5();
+  void initPtBinMode6();
 
  public:
 
@@ -120,6 +122,11 @@ inline int StEStructCutBin::getCutBin(StEStructPairCuts *pc){
 	retVal=getCutBinMode5(pc);
 	break;
       }
+ case 6:
+   {
+     retVal=getCutBinMode6(pc);
+     break;
+   }
   default:
       {
     
@@ -178,6 +185,9 @@ inline int* StEStructCutBin::getPtBins(float pt){
 /***********************************************************************
  *
  * $Log: StEStructCutBin.h,v $
+ * Revision 1.7  2007/01/26 17:17:10  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.6  2006/10/02 22:21:01  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.

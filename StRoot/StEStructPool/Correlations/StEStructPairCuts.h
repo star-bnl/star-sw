@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPairCuts.h,v 1.11 2006/10/02 22:21:04 prindle Exp $
+ * $Id: StEStructPairCuts.h,v 1.12 2007/01/26 17:17:11 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -412,8 +412,10 @@ inline int StEStructPairCuts::cutQuality(){
 
 inline int StEStructPairCuts::cutHBT(){
   if(!mHBTCut || mType==1 || mType==3) return 0;  // HBT applies only to LS pairs
-  float dpt = fabs(DeltaPt());  // DeltaPt is signed, DeltaEta and DeltaPhi aren't
-  if ( DeltaEta()<mHBT[0] && DeltaPhi()<mHBT[1] && dpt<mHBT[2] 
+  float dpt = fabs(DeltaPt());  // DeltaPt is signed,
+  float deta = fabs(DeltaEta());  // now DeltaEta and DeltaPhi are signed...
+  float dphi = fabs(DeltaPhi());  // 
+  if ( deta<mHBT[0] && dphi<mHBT[1] && dpt<mHBT[2] 
        && mTrack1->Pt()<mHBT[3] && mTrack2->Pt()<mHBT[3] )
     return ++(mHBTCounter[mType]);
   return 0;
@@ -421,8 +423,10 @@ inline int StEStructPairCuts::cutHBT(){
 
 inline int StEStructPairCuts::cutCoulomb(){
   if(!mCoulombCut) return 0;
-  float dpt = fabs(DeltaPt());  // DeltaPt is signed, DeltaEta and DeltaPhi aren't
-  if ( DeltaEta()<mCoulomb[0] && DeltaPhi()<mCoulomb[1] && dpt<mCoulomb[2]
+  float dpt = fabs(DeltaPt());  // DeltaPt is signed,
+  float deta = fabs(DeltaEta());  // now DeltaEta and DeltaPhi are signed...
+  float dphi = fabs(DeltaPhi());  //
+  if ( deta<mCoulomb[0] && dphi<mCoulomb[1] && dpt<mCoulomb[2]
        && mTrack1->Pt()<mCoulomb[3] && mTrack2->Pt()<mCoulomb[3] )
     return ++(mCoulombCounter[mType]);
   return 0;
@@ -454,7 +458,7 @@ inline int StEStructPairCuts::cutCrossing(){
     if (mType==1 || mType==3) {   // US pair
       if(mBField>=0) { // pos field
 	if (mTrack1->Charge()>0 && dphi>0)  mretVal = 1;  // + -
-	if (mTrack1->Charge()<0 && dphi<0)  mretVal = 1;  // - + currently does not occur
+	if (mTrack1->Charge()<0 && dphi<0)  mretVal = 1;  // - + 
       } else {              // rev field
 	if (mTrack1->Charge()>0 && dphi<0)  mretVal = 1;  // rev +- : same as -+ above
         if (mTrack1->Charge()<0 && dphi>0)  mretVal = 1;  // rev -+ : same as +- above
@@ -590,6 +594,9 @@ inline int StEStructPairCuts::correlationDepth(){
 /***********************************************************************
  *
  * $Log: StEStructPairCuts.h,v $
+ * Revision 1.12  2007/01/26 17:17:11  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.11  2006/10/02 22:21:04  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.

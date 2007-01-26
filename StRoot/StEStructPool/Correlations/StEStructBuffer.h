@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructBuffer.h,v 1.3 2006/04/04 22:10:12 porter Exp $
+ * $Id: StEStructBuffer.h,v 1.4 2007/01/26 17:17:09 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -16,7 +16,7 @@
 #include "StEStructBinning.h"
 
 #define MAXBUFFERSIZE 2  // now the actual buffer size
-#define DELTANMAX 100     // max multiplicity difference in mixed events
+#define DELTANMAX 50     // max multiplicity difference in mixed events
 
 class TFile;
 class StEStructEvent;
@@ -57,6 +57,9 @@ inline int StEStructBuffer::numEventsDeleted(){ return mnumDeleted; };
 /***********************************************************************
  *
  * $Log: StEStructBuffer.h,v $
+ * Revision 1.4  2007/01/26 17:17:09  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.3  2006/04/04 22:10:12  porter
  * a handful of changes (specific to correlations)
  *  - added StEStructQAHists so that if NOT input frm Maker, each analysis has its own

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructCutBin.cxx,v 1.7 2006/10/02 22:21:00 prindle Exp $
+ * $Id: StEStructCutBin.cxx,v 1.8 2007/01/26 17:17:09 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -86,6 +86,13 @@ void StEStructCutBin::setMode(int mode){
       mnumBins=14;
       strcpy(mcutModeName," same-side, away-side, identified particles, 14 bins");
       initPtBinMode5();
+      break;
+    }
+  case 6:
+    {
+      mnumBins=10;
+      strcpy(mcutModeName," event-wise z-vertex binning, 10 bins");
+      initPtBinMode6();
       break;
     }
   default:
@@ -641,9 +648,32 @@ int StEStructCutBin::getdEdxPID(const StEStructTrack *t) {
   }
   return 0;
 }
+
+//------------------------ Mode=6 -------------------------------------------
+//  Event-wise z-vertex binning
+//  This mode breaks the model of everything else, so it is a hack.
+//  pc object doesn't have event level info, so cutbin number is set in
+//    2ptanalysis by looking at mixing event buffer index.
+
+int StEStructCutBin::getCutBinMode6(StEStructPairCuts*){
+  // This function should never be used, can't access z-vertex position from here...
+  return 0;
+}
+
+void StEStructCutBin::initPtBinMode6(){
+  for(int i=0;i<10;i++){
+    mPtBinMin[i]=0.;
+    mPtBinMax[i]=999.;
+  }
+}
+  
+
 /***********************************************************************
  *
  * $Log: StEStructCutBin.cxx,v $
+ * Revision 1.8  2007/01/26 17:17:09  msd
+ * Implemented new binning scheme: dEta stored in array with bin centered at zero, dPhi array has bins centered at zero and pi.  Final DEtaDPhi has 25x25 bins with dPhi bin width of pi/12 so all major angles are centered in bins.
+ *
  * Revision 1.7  2006/10/02 22:21:00  prindle
  * Store only quadrant of eta_Delta - phi_Delta array/histogram.
  * Store half of eta_Sigma - phi_Delta array/histogram.
