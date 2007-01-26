@@ -1,6 +1,7 @@
 #ifndef EEMCDB_CRATE_H
 #define EEMCDB_CRATE_H
 
+#include "StMessMgr.h"
 
 class EEmcDbCrate {
  private:
@@ -25,7 +26,10 @@ class EEmcDbCrate {
   int isEmpty() const;
   void exportAscii(FILE *fd) const;
   //  int importAscii(FILE *fd);
+  ostream &print( ostream &out ) const;
 };
+
+ostream &operator<<(ostream &out, const EEmcDbCrate &crate );
 
 #endif 
 

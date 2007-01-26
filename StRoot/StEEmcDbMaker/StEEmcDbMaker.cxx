@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.52 2007/01/26 00:47:58 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.53 2007/01/26 20:45:58 balewski Exp $
  
 
 #include <time.h>
@@ -294,8 +294,9 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
   for(icr=0;icr<getNFiber();icr++)
     {
       const EEmcDbCrate *fiber=getFiber(icr);
-      printf(" eemcDB : ");
-      fiber->print();
+      //printf(" eemcDB : ");
+      //fiber->print();
+      LOG_INFO<<(*fiber)<<endm; //JCW 01/26
     }
   
 
@@ -418,7 +419,8 @@ int  StEEmcDbMaker::mOptimizeMapping(int is){
     assert(key>=0 && key<EEindexMax);
     EEmcDbItem *x=&byIndex[key];
     if(!x->isEmpty()) {
-      x->print(); // it is only on special error, never happends, too much changes needed
+      //x->print(); // it is only on special error, never happends, too much changes needed
+      LOG_INFO<<(*x)<<endm; // JCW 01/26
       assert(x->isEmpty());
     }
     x->crate=t->crate[j];
@@ -433,8 +435,10 @@ int  StEEmcDbMaker::mOptimizeMapping(int is){
     assert(byCrate[x->crate]);// ERROR: duplicated crate ID from DB
     if(byCrate[x->crate][x->chan]) {
       LOG_FATAL <<  "::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice \n\n Whole EEMC DB is erased from memory,\n  all data will be ignored,  FIX IT !, JB\n\n"<<endm;
-      byCrate[x->crate][x->chan]->print(); // first time
-      x->print(); // second time
+      //      byCrate[x->crate][x->chan]->print(); // first time
+      //      x->print(); // second time
+      LOG_FATAL<<(*byCrate[x->crate][x->chan])<<endm;// JCW 1/26
+      LOG_FATAL<<(*x)<<endm;// JCW 1/26
       clearItemArray();
       return -1;
     }
@@ -890,8 +894,10 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
     assert(byCrate[x->crate]); // ERROR: unsupported crate ID
     if(byCrate[x->crate][x->chan]) {
       LOG_FATAL<<Form("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",x->crate,x->chan)<<endm;
-      byCrate[x->crate][x->chan]->print(); // first time
-      x->print(); // second time
+      //      byCrate[x->crate][x->chan]->print(); // first time
+      //      x->print(); // second time
+      LOG_FATAL<<(*byCrate[x->crate][x->chan])<<endm;// JCW 1/26
+      LOG_FATAL<<(*x)<<endm;// JCW 1/26
       assert(1==2);
     }
     byCrate[x->crate][x->chan]=x;
@@ -1078,6 +1084,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.53  2007/01/26 20:45:58  balewski
+// now we have pure new Logger, thanks Jason, Jan
+//
 // Revision 1.52  2007/01/26 00:47:58  balewski
 // new logger only (almost)
 //
@@ -1248,42 +1257,3 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 // start DB interface for EEMC RELATED ROUTINES
 //
 
-
-#if 0  
-  // test of flavor
-  {
-    St_db_Maker* mydb = (St_db_Maker*)GetMaker("StarDb");
-    mydb->SetDateTime(20030814,0); // set ~day & ~hour by hand
-    printf("\nJB:test of flavor, use time stamp=");
-    (mydb->GetDateTime()).Print();
-
-    TDataSet *eedb1=GetDataBase("TestScheme/emc");
-    assert(eedb1);
-
-    St_eemcDbPMTcal *ds= (St_eemcDbPMTcal *)eedb1->Find("sector04/eemcPMTcal");
-    assert(ds);
-    eemcDbPMTcal_st *tab1=(eemcDbPMTcal_st *) ds->GetArray();
-    assert(tab1);
-    
-    printf("1) p=%p tab1->comment=%s\n",tab1,tab1->comment);    
-
-    printf("\n change flavor\n");
-    SetFlavor("setb","eemcPMTcal");
-    TDataSet *eedb2=GetDataBase("TestScheme/emc");
-    assert(eedb2);
-
-    ds= (St_eemcDbPMTcal *)eedb2->Find("sector04/eemcPMTcal");
-    assert(ds);
-    
-    eemcDbPMTcal_st *tab=(eemcDbPMTcal_st *) ds->GetArray();
-    assert(tab);
-
-    printf("2) p=%p tab->comment=%s\n",tab,tab->comment);
-    printf("1)\' p=%p tab1->comment=%s\n",tab1,tab1->comment);    
- 
-
-  }
-  // end of flavor test
-  assert(1==5);
-
-#endif

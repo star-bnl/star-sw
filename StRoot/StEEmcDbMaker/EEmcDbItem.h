@@ -1,6 +1,11 @@
 #ifndef EEMCDBITEM_H
 #define EEMCDBITEM_H
 
+#include "StMessMgr.h"
+#if !defined(ST_NO_NAMESPACES)
+using std::ostream;
+#endif
+
 
 #define StEEmcNameLen 16  // to avoid dependency on "cstructs/eemcConstDB.hh"
 //class FILE;
@@ -38,7 +43,12 @@ class EEmcDbItem {
   bool isTower() const;
   void exportAscii(FILE *fd) const;
   int  importAscii(FILE *fd);
+
+  ostream &print( ostream &out ) const;
+
 };
+
+ostream &operator<<(ostream &out, const EEmcDbItem &item );
 
 #endif 
 
