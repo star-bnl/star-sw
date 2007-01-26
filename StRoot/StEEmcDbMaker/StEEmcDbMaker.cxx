@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.51 2006/12/12 20:29:09 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.52 2007/01/26 00:47:58 balewski Exp $
  
 
 #include <time.h>
@@ -34,31 +34,13 @@
 
 #include <StMessMgr.h>
 
-/*
-http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StUtilities/doc/StMessMgr.html
-gMessMgr->Message("This is an error message.","E");
-
-The message type is specified with a single letter:
-"E" = "Error"
-"I" = "Info"
-"W" = "Warning"
-"D" = "Debug"
-"Q" = "QAInfo"
-
-gMessMgr->Message("","W") << big_num << " seems too big." << endm;
-
- char* myText = "hello";
-  gMessMgr->Message(myText);
-
-
-*/
 
 ClassImp(StEEmcDbMaker)
 
 //________________________________________________________
 //________________________________________________________
 StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
-  gMessMgr->Message("","D") <<GetName()<<endm;
+  LOG_DEBUG<<endm;
   mfirstSecID=mlastSecID=mNSector=0;
   myTimeStampDay=0;
   myTimeStampUnix=0;
@@ -122,7 +104,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
 void  StEEmcDbMaker::setTimeStampDay( int tD) {
 
   if(myTimeStampDay) {
-    gMessMgr->Message("","E") <<GetName()<<"::setTimeStampDay() Operator Fatal error :  redeclaration ofmyTimeStampDay "<<myTimeStampDay<<endm;
+    LOG_FATAL <<"::setTimeStampDay() Operator Fatal error :  redeclaration ofmyTimeStampDay "<<myTimeStampDay<<endm;
     exit(1);
   }
   myTimeStampDay=tD;
@@ -146,7 +128,7 @@ void  StEEmcDbMaker::setTimeStampDay( int tD) {
   //int tm_yday;     /* days since January 1 - [0,365] */
   myTimeStampUnix =(unsigned int) mktime(&t);
 
-  gMessMgr->Message("","W") <<GetName()<<"::setTimeStampDay() set to "<<myTimeStampDay<<" decoded as "<< ctime((const time_t *)&myTimeStampUnix)<< endm;
+  LOG_WARN <<"::setTimeStampDay() set to "<<myTimeStampDay<<" decoded as "<< ctime((const time_t *)&myTimeStampUnix)<< endm;
 
 }
 
@@ -154,7 +136,7 @@ void  StEEmcDbMaker::setTimeStampDay( int tD) {
 //------------------
 void StEEmcDbMaker::setThreshold(float x){
  KsigOverPed=x;
- gMessMgr->Message("","I") <<GetName()<<"::setThres KsigOverPed="<<KsigOverPed<<", threshold=ped+sig*KsigOverPed"<< endm;
+LOG_INFO <<"::setThres KsigOverPed="<<KsigOverPed<<", threshold=ped+sig*KsigOverPed"<< endm;
 }
 
 
@@ -163,7 +145,7 @@ void StEEmcDbMaker::setThreshold(float x){
 void StEEmcDbMaker::setPreferredFlavor(const char *flavor, const char *nameMask){
   strncpy(dbFlavor.flavor,flavor,DbFlavor::mx);
   strncpy(dbFlavor.nameMask,nameMask,DbFlavor::mx);
-  gMessMgr->Message("","I") << GetName()<<"::setPreferredFlavor(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
+ LOG_INFO <<  "::setPreferredFlavor(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
 }
 
 
@@ -199,7 +181,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
 
   clearItemArray();
 
-  gMessMgr->Message("","I") << GetName()<<":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
+ LOG_INFO <<  ":: Use sectors from "<< mfirstSecID<<" to "<< mlastSecID<<endm;
 
 }
 
@@ -219,7 +201,7 @@ const EEmcDbCrate* StEEmcDbMaker::getFiber(int icr) {
 
 void  StEEmcDbMaker::setFiberOff(int icr) {
   if(icr<0 || icr>=nFiber ) {
-    gMessMgr->Message("","W") << "StEEmcDbMaker::setFiberOff(icr="<<icr<< ") out of range, ignorred" << endm;
+    LOG_WARN << "::setFiberOff(icr="<<icr<< ") out of range, ignorred" << endm;
     return;
   }
   mDbFiber[icr].useIt=false;
@@ -282,7 +264,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
     Warning("InitRun","Database not reloaded for run number %i, values taken from %s",runNumber,mAsciiDbase.Data());
     return kStOK;
   }
-  gMessMgr->Message("","I") << GetName()<<"::InitRun  :use(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
+ LOG_INFO <<  "::InitRun  :use(flav='"<<dbFlavor.flavor <<"', mask='"<< dbFlavor.nameMask<<"')" <<endm;
 
  
 
@@ -293,7 +275,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
   int is;
   for(is=0; is< mNSector; is++) {
     if (  mOptimizeMapping(is) ) {
-      gMessMgr->Message("","F")<<"\n\n" << GetName()<<"::InitRun("<<runNumber<<")\n  Total failure, no DB info for Endcap was retrived,\n all ETOW channels will be cleared for every event,\n fix the problem, JB\n\n "<<endm;
+      LOG_FATAL<<"\n\n" <<  "::InitRun("<<runNumber<<")\n  Total failure, no DB info for Endcap was retrived,\n all ETOW channels will be cleared for every event,\n fix the problem, JB\n\n "<<endm;
       goto end;// on fatal error
     }
     mOptimizeOthers(is); 
@@ -317,7 +299,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
     }
   
 
-  gMessMgr->Message("","I") << GetName()<<"::InitRun("<<runNumber<<")  Found "<< nFound<<" EEMC related tables "<<endm;
+ LOG_INFO <<  "::InitRun("<<runNumber<<")  Found "<< nFound<<" EEMC related tables "<<endm;
 
  end:
 
@@ -338,34 +320,28 @@ void  StEEmcDbMaker::mRequestDataBase(){
   assert(mydb);
 
   if(myTimeStampDay==0) { // use oryginal timestamp of event   
-    
-#if 0
-    StEvent *stEvent= (StEvent *) GetInputDS("StEvent"); 
-    assert(stEvent);     
-    printf("StEvent time=%d, ID=%d, runID=%d\n",(int)stEvent->time(),(int)stEvent->id(),(int)stEvent->runId());
-#endif
-    
+        
     StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
     
-    gMessMgr->Message("","I") << GetName()<<"::RequestDataBase(), use EvtHddr actual event time stamp="<< (int)fEvtHddr->GetUTime()<< " , yyyy/mm/dd="<< fEvtHddr->GetDate()<<" hh/mm/ss="<<fEvtHddr->GetTime()<<endm;  
+   LOG_INFO <<  "::RequestDataBase(), use EvtHddr actual event time stamp="<< (int)fEvtHddr->GetUTime()<< " , yyyy/mm/dd="<< fEvtHddr->GetDate()<<" hh/mm/ss="<<fEvtHddr->GetTime()<<endm;  
 
     //  int time0; // (sec) GMT of the first event
     //  time0=fEvtHddr->GetUTime( ); //<<==== this is used by DB
 
   } else { // WARN only if you wish to overwrite the global time stamp 
-    gMessMgr->Message("","W") << GetName()<<"::RequestDataBase() replace  TimeStampDay to "<< myTimeStampDay<<endm;
+    LOG_WARN <<  "::RequestDataBase() replace  TimeStampDay to "<< myTimeStampDay<<endm;
     mydb->SetDateTime(myTimeStampDay,0); // set ~day & ~hour by hand
   }
   // mydb->SetDateTime(20021201,0); // set ~day & ~hour by hand
 
-  gMessMgr->Message("","I") << GetName()<<"::RequestDataBase(), access DB='"<<dbName<<"  use timeStamp="<< mydb->GetDateTime().AsString()<<endm;
+ LOG_INFO <<  "::RequestDataBase(), access DB='"<<dbName<<"  use timeStamp="<< mydb->GetDateTime().AsString()<<endm;
 
   int ifl;
   TString mask="";
   for(ifl=0;ifl<2;ifl++) { // loop over flavors
     if(ifl==1) {
       if( dbFlavor.flavor[0]==0) continue; // drop flavor change
-      gMessMgr->Message("","I") << GetName()<<"::RequestDataBase()-->ifl="<<ifl<<" try flavor='"<<dbFlavor.flavor <<"' for  mask='"<< dbFlavor.nameMask<<"')" <<endm;
+     LOG_INFO <<  "::RequestDataBase()-->ifl="<<ifl<<" try flavor='"<<dbFlavor.flavor <<"' for  mask='"<< dbFlavor.nameMask<<"')" <<endm;
       
       SetFlavor(dbFlavor.flavor,dbFlavor.nameMask);
       mask=dbFlavor.nameMask;
@@ -373,7 +349,7 @@ void  StEEmcDbMaker::mRequestDataBase(){
     
     TDataSet *eedb=GetDataBase(dbName );
     if(eedb==0) {
-      gMessMgr->Message("","E") << GetName()<<"::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
+      LOG_FATAL <<  "::RequestDataBase()  Could not find dbName ="<<dbName <<endm;
       return ;
       // down-stream makers should check for presence of dataset
     }
@@ -402,8 +378,7 @@ void  StEEmcDbMaker::mRequestDataBase(){
     
     getTable<St_kretDbBlobS,kretDbBlobS_st>(eedb,13,"eemcCrateConf",mask,&mDbFiberConfBlob);
     if(mDbFiberConfBlob) {
-      gMessMgr->Message("","D") << GetName()<<"::RequestDataBase()  eemcCrateConf dump "<<endm;
-      //  gMessMgr->Message(mDbFiberConfBlob->dataS,"D"); 
+     LOG_DEBUG<<  "::RequestDataBase()  eemcCrateConf dump "<<endm;
     }
 
   }// end of loop over flavors
@@ -422,13 +397,13 @@ void  StEEmcDbMaker::mRequestDataBase(){
 //--------------------------------------------------
 int  StEEmcDbMaker::mOptimizeMapping(int is){
 
-  gMessMgr->Message("","I") <<"\n  EEDB  conf ADC map for sector="<< mDbsectorID[is] <<endm;
+  LOG_INFO <<"\n  conf ADC map for sector="<< mDbsectorID[is] <<endm;
   assert(mDbsectorID[is]>0);
   
   eemcDbADCconf_st *t= mDbADCconf[is];
   
   if(t==0) return -2; // it is fatal error
-  gMessMgr->Message("","I") <<"      EEDB chanMap="<< t->comment <<endm;
+  LOG_INFO <<"      chanMap="<< t->comment <<endm;
   
   int j;
   for(j=0;j<EEMCDbMaxAdc; j++) { // loop over channels
@@ -443,7 +418,7 @@ int  StEEmcDbMaker::mOptimizeMapping(int is){
     assert(key>=0 && key<EEindexMax);
     EEmcDbItem *x=&byIndex[key];
     if(!x->isEmpty()) {
-      x->print();
+      x->print(); // it is only on special error, never happends, too much changes needed
       assert(x->isEmpty());
     }
     x->crate=t->crate[j];
@@ -457,7 +432,7 @@ int  StEEmcDbMaker::mOptimizeMapping(int is){
     assert(x->chan>=0 && x->chan<MaxAnyCh);
     assert(byCrate[x->crate]);// ERROR: duplicated crate ID from DB
     if(byCrate[x->crate][x->chan]) {
-      gMessMgr->Message("","E") << GetName()<<"::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice \n\n Whole EEMC DB is erased from memory,\n  all data will be ignored,  FIX IT !, JB\n\n"<<endm;
+      LOG_FATAL <<  "::Fatal Error of eemc DB records: the same crate="<<x->crate<<", ch="<<x->chan<<" entered twice \n\n Whole EEMC DB is erased from memory,\n  all data will be ignored,  FIX IT !, JB\n\n"<<endm;
       byCrate[x->crate][x->chan]->print(); // first time
       x->print(); // second time
       clearItemArray();
@@ -481,25 +456,25 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
   int ix1,ix2;
   EEindexRange(secID,ix1,ix2);
   
-  gMessMgr->Message("","D") <<"\n   EEDB EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
+ LOG_DEBUG<<"\n   EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
   
   //  if(dbg)printf(" Size: ped=%d cal=%d name=%d stat=%d \n",sizeof(ped->name)/EEMCDbMaxName,sizeof(cal->name)/EEMCDbMaxName,sizeof(tubeTw->name)/EEMCDbMaxName,sizeof(stat->name)/EEMCDbMaxName);
   
   assert(secID>0);
 
   eemcDbPMTcal_st  *calT=mDbPMTcal[is];  
-  if(calT)  gMessMgr->Message("","I") <<"      EEDB calTw="<<calT->comment<<endm;
+  if(calT)  LOG_INFO <<"    calibTw="<<calT->comment<<endm;
   eemcDbPMTname_st *tubeTw=mDbPMTname[is];
-  if(tubeTw) gMessMgr->Message("","I") <<"      EEDB tubeTw="<<tubeTw->comment<<endm;
+  if(tubeTw) LOG_INFO <<"  tubeName="<<tubeTw->comment<<endm;
 
   eemcDbPIXcal_st  *calM= mDbPIXcal[is];
-  if(calM) gMessMgr->Message("","I") <<"      EEDB calMAPMT="<<calM->comment<<endm;
+  if(calM) LOG_INFO <<"    calMAPMT="<<calM->comment<<endm;
 
   eemcDbPMTped_st  *ped=mDbPMTped[is];
-  if(ped) gMessMgr->Message("","I") <<"      EEDB ped="<<ped->comment<<endm;
+  if(ped) LOG_INFO <<"       pedAll="<<ped->comment<<endm;
 
   eemcDbPMTstat_st *stat=mDbPMTstat[is];
-  if(stat) gMessMgr->Message("","I") <<"      EEDB stat="<<stat->comment<<endm;
+  if(stat) LOG_INFO <<"     statAll="<<stat->comment<<endm;
   
   int key; 
   for(key=ix1;key<ix2; key++) { // loop  in this sector
@@ -583,7 +558,7 @@ void StEEmcDbMaker::mOptimizeOthers(int is){
 //--------------------------------------------------
 //--------------------------------------------------
 void StEEmcDbMaker::exportAscii(char *fname) const{
-  printf("EEmcDb::exportAscii(\'%s') ...\n",fname);
+  LOG_INFO<<Form("::exportAscii(\'%s') ...\n",fname)<<endm;
 
   FILE * fd=fopen(fname,"w");
   assert(fd);
@@ -612,7 +587,7 @@ void StEEmcDbMaker::exportAscii(char *fname) const{
     x->exportAscii(fd);
     nTot++;
   }
-  printf("        nTot=%d, done\n",nTot);
+  LOG_INFO<<Form("::exportAscii()     nTot=%d, done\n",nTot)<<endm;
   fclose(fd);
 }
 
@@ -626,7 +601,7 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
   int icr=0;
 
   if( mDbFiberConfBlob==0) {
-    gMessMgr->Message("","E") <<" EEDB EEMC  FiberConf not found"<<endm;
+    LOG_FATAL <<" EEMC  FiberConf not found"<<endm;
     goto fatal;
   }
   
@@ -654,7 +629,7 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
  
   blob=strtok(blob,";"); // init iterator
   if(strstr(blob,"<ver1>")==0) {
-    gMessMgr->Message("","E") <<" EEDB EEMC  FiberConf  missing opening key "<<endm;
+    LOG_FATAL <<" EEMC  FiberConf  missing opening key "<<endm;
     goto fatal;
   }
   
@@ -668,7 +643,7 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
     if(nFiber==0) {
       nFiber=atoi(blob);
       mDbFiber=new EEmcDbCrate[ nFiber];
-      gMessMgr->Message("","D") <<"\n  EEDB mOptimizeFibers() map start: , nFiber="<<nFiber<<endm;
+     LOG_DEBUG<<" mOptimizeFibers() map start: , nFiber="<<nFiber<<endm;
       icr=0;
       continue;
     }
@@ -680,17 +655,17 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
 
   }
   
-  gMessMgr->Message("","E") <<"\n  EEDB mOptimizeFibers() map missing/wrong terminating key "<<endm;
+  LOG_FATAL <<"\n  mOptimizeFibers() map missing/wrong terminating key "<<endm;
   
  fatal:
-    gMessMgr->Message("","E") <<"\n\n      EEDB EEMC  FiberConf  error,\n without it decoding of the _raw_ EEMC data from StEvent is not working\n(all data are dropped).\nHowever, this missing table is irreleveant for muDst analysis, JB\n\n"<<endm;
+    LOG_FATAL <<"\n\n     EEMC  FiberConf  error,\n without it decoding of the _raw_ EEMC data from StEvent is not working\n(all data are dropped).\nHowever, this missing table is irreleveant for muDst analysis, JB\n\n"<<endm;
     return;
 
  done:
-    gMessMgr->Message("","I") <<"\n  EEDB mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
+    LOG_INFO <<"\n   mOptimizeFibers() map found for nFiber="<<nFiber<<endm; 
    if(icr==nFiber)  return;
 
-    gMessMgr->Message("","E") <<"\n  EEDB mOptimizeFibers() map nFiber missmatch is="<<icr<<" should be="<<nFiber<<endm;
+    LOG_FATAL <<"\n   mOptimizeFibers() map nFiber missmatch is="<<icr<<" should be="<<nFiber<<endm;
 goto fatal;
 } 
 
@@ -701,7 +676,6 @@ goto fatal;
 
 Int_t StEEmcDbMaker::Make(){
   
-  //  printf("\n\nMake :::::: %s\n\n\n",GetName());
 
   return kStOK;
 
@@ -773,28 +747,28 @@ template <class St_T, class T_st> void StEEmcDbMaker
     sprintf(name,"misc/%s",tabName.Data());
 
   
-  gMessMgr->Message("","D") <<"EEDB request="<< name <<endm;
+ LOG_DEBUG<<" request="<< name <<endm;
 
   St_T *ds= (St_T *)eedb->Find(name);
   if(ds==0) {
-    gMessMgr->Message("","W") <<"EEDB sector="<<secID<<" table='"<< name <<" not Found in DB, continue "<<endm;
+    LOG_WARN <<" sector="<<secID<<" table='"<< name <<" not Found in DB, continue "<<endm;
     return ;
   }
 
   if(ds->GetNRows()!=1) {
-    gMessMgr->Message("","W") <<"EEDB sector="<<secID<<" table='"<< name <<" no records, continue "<<endm; 
+    LOG_WARN <<" sector="<<secID<<" table='"<< name <<" no records, continue "<<endm; 
     return ;
   }
   
   T_st *tab=(T_st *) ds->GetArray();
 
   if(tab==0) {
-    printf(" GetArray() failed\n");
+    LOG_WARN <<" GetArray() failed"<<endm;
     return  ;
   }
 
   *outTab=tab;
-  gMessMgr->Message("","D") <<"  EEDB map="<< (*outTab)->comment<<"'"<<endm;
+ LOG_DEBUG<<"   map="<< (*outTab)->comment<<"'"<<endm;
 
   nFound++;
   return ; // copy the whole s-struct to allow flavor change;
@@ -893,7 +867,7 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
     //-- Apply a sanity check on the item
     if(key!=item.key) {
-      printf("WARN: name='%s' key=%d!=inpKey=%d, inpKey ignored\n",item.name,key,item.key);
+      LOG_WARN<<Form(": name='%s' key=%d!=inpKey=%d, inpKey ignored\n",item.name,key,item.key)<<endm;
       item.key=key;
     }
     assert(key>=0 && key<EEindexMax);
@@ -915,7 +889,7 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
     assert(byCrate[x->crate]); // ERROR: unsupported crate ID
     if(byCrate[x->crate][x->chan]) {
-      printf("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",x->crate,x->chan);
+      LOG_FATAL<<Form("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",x->crate,x->chan)<<endm;
       byCrate[x->crate][x->chan]->print(); // first time
       x->print(); // second time
       assert(1==2);
@@ -933,7 +907,7 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
       
   //--
-  printf("setAsciiDataBase() done, found %d valid records\n",nd);
+  LOG_INFO<<Form("setAsciiDataBase() done, found %d valid records\n",nd)<<endm;
 
   return;
 
@@ -941,7 +915,7 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
   clearItemArray();
   //  assert(2==3);
-  printf("EEmcDb - no/corrupted input file, all cleared, continue\n");
+  LOG_FATAL<<Form("EEmcDb - no/corrupted input file, all cleared, continue\n")<<endm;
 
 }
 
@@ -973,7 +947,7 @@ void  StEEmcDbMaker::changeGainsAction(const char *fname) {
      empty lines are not permitted
   */
 
-  gMessMgr->Message("","W") <<"  EEDB ::changeGains('"<<fname<<"')"<<endm;
+  LOG_WARN <<"   ::changeGains('"<<fname<<"')"<<endm;
   FILE *fd=fopen(fname,"r");
   int nd=0,nl=0;
   const int mx=1000;
@@ -996,7 +970,7 @@ void  StEEmcDbMaker::changeGainsAction(const char *fname) {
     // printf("%s %p\n",cVal,x);
     if(x->isEmpty()) continue;
     // replace only initialized channels
-    if(xVal<=0)  printf("Warning ! buf=%s=\n",buf);
+    if(xVal<=0)   LOG_WARN<<Form("Warning ! buf=%s=\n",buf)<<endm;
     //    assert(xVal>0);
      x->gain=xVal;
      nd++;
@@ -1004,7 +978,7 @@ void  StEEmcDbMaker::changeGainsAction(const char *fname) {
   fclose(fd);
     
  end:
-  gMessMgr->Message("","I") <<"  EEDB ::changeGains('"<<fname<<"') done inpLines="<<nl<<" nChanged="<<nd<<endm;
+  LOG_INFO <<"   ::changeGains('"<<fname<<"') done inpLines="<<nl<<" nChanged="<<nd<<endm;
   return;
   
 } 
@@ -1019,7 +993,7 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
      empty lines are not permitted
   */
 
-  gMessMgr->Message("","I") <<"  EEDB ::changeMask('"<<fname<<"') "<<endm;
+  LOG_INFO <<"   ::changeMask('"<<fname<<"') "<<endm;
 
   FILE *fd=fopen(fname,"r");
 
@@ -1051,7 +1025,7 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
   fclose(fd);
 
  end:
- gMessMgr->Message("","I") <<"  EEDB ::changeMask('"<<fname<<"') done inpLines="<<nl<<" nChanged="<<nd<<endm;
+ LOG_INFO <<"   ::changeMask('"<<fname<<"') done inpLines="<<nl<<" nChanged="<<nd<<endm;
   return;
 
 }
@@ -1094,7 +1068,7 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
     x=getByStrip(sec,uv,strip); break;
 
   default:
-    gMessMgr->Warning()<<GetName() <<"::getDb(), wrong detectorId=" << StDetId << " \n It is fatal - bug in the code, fix it, JB"<<endm;
+    LOG_WARN <<"::getDb(), wrong detectorId=" << StDetId << " \n It is fatal - bug in the code, fix it, JB"<<endm;
     assert(1==2); // trap for bug in the code
   }
   
@@ -1104,6 +1078,9 @@ StEEmcDbMaker::StBarrelIndex2Item(int StDetId , int Bmod, int Beta, int  Bsub) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.52  2007/01/26 00:47:58  balewski
+// new logger only (almost)
+//
 // Revision 1.51  2006/12/12 20:29:09  balewski
 // added hooks for Endcap embedding
 //
