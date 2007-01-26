@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.h,v 1.6 2006/04/04 22:05:05 porter Exp $
+ * $Id: StEStructEmptyAnalysis.h,v 1.7 2007/01/26 17:09:28 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -26,14 +26,15 @@ class StEStructEmptyAnalysis : public StEStructAnalysis {
 
   char* moutFileName;
   
-  int mhm[14];        // Jeff had these in place for p-p analysis, probably don't need them anymore
-  TH1F** etaMean[3];
-  TH1F** phiMean[3];
-  TH1F** ytMean[3];
-  TH1F*  ptdist[15];
+  //int mhm[14];        // Jeff had these in place for p-p analysis, probably don't need them anymore
+  //TH1F** etaMean[3];
+  //TH1F** phiMean[3];
+  //TH1F** ytMean[3];
+  //TH1F*  ptdist[15];
   
   // Make some plots for determining centrality bins
-  TH1F* hNEvent;  // dNevent/dNch
+  TH1F* hNEvent;  // dNevent/dNch using Centrality
+  TH1F* hnt;      // dNevent/dNch using Ntrack
   TH1F* hvar;     //variable bins;  I'd like to use a TGraph instead of TH1F, but hadd doesn't support graphs...
 
  public:
@@ -63,6 +64,9 @@ inline void StEStructEmptyAnalysis::setCutFile(const char* cutFileName, StEStruc
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.h,v $
+ * Revision 1.7  2007/01/26 17:09:28  msd
+ * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
+ *
  * Revision 1.6  2006/04/04 22:05:05  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers

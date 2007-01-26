@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMuDstReader.cxx,v 1.9 2006/04/11 17:50:45 prindle Exp $
+ * $Id: StEStructMuDstReader.cxx,v 1.10 2007/01/26 17:09:29 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -268,7 +268,7 @@ int StEStructMuDstReader::countGoodTracks() {
         return 0;
     }
     for(int i=0; i<numPrimaries; i++) {
-        if (isTrackGood(muDst->primaryTracks(i))) {
+      if (isTrackGood(muDst->primaryTracks(i))) {
             mNumGoodTracks++;
         }
     }
@@ -330,8 +330,11 @@ void StEStructMuDstReader::fillEStructTrack(StEStructTrack* eTrack,StMuTrack* mT
 /***********************************************************************
  *
  * $Log: StEStructMuDstReader.cxx,v $
+ * Revision 1.10  2007/01/26 17:09:29  msd
+ * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
+ *
  * Revision 1.9  2006/04/11 17:50:45  prindle
- * Remove inChain from constructor arguments (no longer used in macro)
+ *   Remove inChain from constructor arguments (no longer used in macro)
  *
  * Revision 1.8  2006/04/06 00:54:01  prindle
  *   Tried to rationalize the way centrality is defined.

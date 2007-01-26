@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEmptyAnalysis.cxx,v 1.7 2006/04/04 22:05:04 porter Exp $
+ * $Id: StEStructEmptyAnalysis.cxx,v 1.8 2007/01/26 17:09:27 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -25,6 +25,7 @@ ClassImp(StEStructEmptyAnalysis)
 
 StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
 
+  /*  isn't being used
   const char* ctype[]={"Pos","Neg","All"};
 
   mhm[0]=mhm[1]=0;
@@ -58,13 +59,6 @@ StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
 
   }
 
-  hNEvent = new TH1F("hNEvent","dNevent/dNch",1200,0,1200);
-
-  float varxbins[1200];
-  varxbins[0]=0;
-  for(int i=1; i<1200; i++) varxbins[i]=pow(i,0.25)-0.00001;
-  hvar = new TH1F("hvar","var bin",1199,varxbins);
-
   float binx[35]={ .2, .3, .4, .5, .6, .7, .8, .9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.6, 2.8, 3.0, 3.35, 3.8, 4.4, 5.1, 6, 7, 8, 9, 10.}; 
 
   for(int i=0;i<14;i++){
@@ -74,7 +68,15 @@ StEStructEmptyAnalysis::StEStructEmptyAnalysis(): moutFileName(0) {
     //    ptdistTrg[i]=new TH1F(hn2.Data(),hn2.Data(),34,binx);
   }
   ptdist[14]=new TH1F("PtNch_all","PtNch_all",34,binx);
+  */
 
+  hNEvent = new TH1F("hNEvent","dNevent/dNch - Centrality",1200,0,1200);
+  hnt = new TH1F("hnt","dNevent/dNch - Ntrack",1200,0,1200);
+
+  float varxbins[1200];
+  varxbins[0]=0;
+  for(int i=1; i<1200; i++) varxbins[i]=pow(i,0.25)-0.00001;
+  hvar = new TH1F("hvar","var bin",1199,varxbins);
 
 };
 
@@ -82,13 +84,14 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
 
   if(!event) return false;
 
-  int mult = event->Ntrack();
+  //int mult = event->Ntrack();
+  int mult = (int)event->Centrality();
   //cout << " doing event " << event->EventID() << " with mult " << mult << endl; //***
   hNEvent->Fill(mult);
   hvar->Fill(pow(mult,0.25));
-  
+  hnt->Fill(event->Ntrack());
 
-  // Below is Jeff's p-p stuff; I'm tempted to just comment all this out...  
+  /*  unused
     int id=event->Ntrack();
   if(id>=1){
 
@@ -112,7 +115,7 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
       StEStructTrackIterator Iter;
       for(Iter=tcol->begin(); Iter!=tcol->end();++Iter){
 	if(*Iter) {
-	  npart[i]+=1.0;
+ 	  npart[i]+=1.0;
 	  etaSum[i]+=(*Iter)->Eta();
 	  phiSum[i]+=(*Iter)->Phi();
 	  ytSum[i]+=(*Iter)->Yt();
@@ -143,13 +146,13 @@ bool StEStructEmptyAnalysis::doEvent(StEStructEvent* event){
     }
 
     if( (npart[0]+npart[1])>0.){
-	etaMean[2][id]->Fill((etaSum[0]+etaSum[1])/(npart[0]+npart[1]));
+ 	etaMean[2][id]->Fill((etaSum[0]+etaSum[1])/(npart[0]+npart[1]));
 	phiMean[2][id]->Fill((phiSum[0]+phiSum[1])/(npart[0]+npart[1]));
 	ytMean[2][id]->Fill((ytSum[0]+ytSum[1])/(npart[0]+npart[1]));
     }
 
   }
-  
+  */
 
   delete event;
   return true;
@@ -167,6 +170,7 @@ void StEStructEmptyAnalysis::finish(){
   tf->cd();
 
   // Jeff's plots
+  /*
   for(int i=0;i<3;i++){
     for(int j=0;j<6;j++){
       etaMean[i][j]->Write();
@@ -174,14 +178,16 @@ void StEStructEmptyAnalysis::finish(){
       ytMean[i][j]->Write();
     }
   }
-
   for(int i=0;i<15;i++)ptdist[i]->Write();
-  
+  */
+
   // Centrality plots
   hNEvent->Write();
   
   for(int i=1; i<=hvar->GetNbinsX(); i++)  hvar->SetBinContent(i, hvar->GetBinContent(i)*4*pow(hvar->GetBinLowEdge(i),3) );
   hvar->Write();
+
+  hnt->Write();
 
   tf->Close();
 
@@ -190,6 +196,9 @@ void StEStructEmptyAnalysis::finish(){
 /**********************************************************************
  *
  * $Log: StEStructEmptyAnalysis.cxx,v $
+ * Revision 1.8  2007/01/26 17:09:27  msd
+ * Minor bug fix in AnalysisMaker, cleaned up EmptyAnalysis
+ *
  * Revision 1.7  2006/04/04 22:05:04  porter
  * a handful of changes:
  *  - changed the StEStructAnalysisMaker to contain 1 reader not a list of readers
