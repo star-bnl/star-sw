@@ -1,10 +1,6 @@
 /**********************************************************************
  *
-<<<<<<< StEStructSupport.cxx
- * $Id: StEStructSupport.cxx,v 1.14 2006/12/14 20:07:11 prindle Exp $
-=======
- * $Id: StEStructSupport.cxx,v 1.14 2006/12/14 20:07:11 prindle Exp $
->>>>>>> 1.13
+ * $Id: StEStructSupport.cxx,v 1.15 2007/01/26 17:20:58 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -171,7 +167,34 @@ float* StEStructSupport::getNorms(TH1** histArray){
 
   return retVal;
 }
+//-----------------------------------------------------
+void StEStructSupport::rescale(TH1** hists){
+  // Divides hists by bin widths, divides by Nevents, normalizes mix to sib
+  
+  if(!mtf) return;
 
+  TH1F* hNEventsSame = (TH1F*)mtf->Get("NEventsSame");
+  double nev = hNEventsSame->GetEntries();
+  
+  for(int i=0;i<4;i++){
+    if(hists[i]->Integral() > 0) {
+      double binFactor = 1.0;
+      double dx = (hists[i]->GetXaxis())->GetBinWidth(1);
+      double dy = (hists[i]->GetYaxis())->GetBinWidth(1);
+      binFactor = dx*dy; 
+      // divinding by ex*ey converts all input hists from counts to densities, so all operations and final result should also be density.
+      if(i==0) cout << "Scaling with Nevents " << nev << " and binFactor " << binFactor << endl;
+      hists[i]->Scale(1.0/(nev*binFactor));
+    }
+  }
+  
+  for(int i=0;i<4;i++){  // norm mix to sib
+    double rscale=hists[i]->Integral();
+    if(rscale>0) hists[i+4]->Scale(rscale/hists[i+4]->Integral()); 
+    else  hists[i+4]->Scale(0);
+  }
+  
+};
 //---------------------------------------------------------
 TH1** StEStructSupport::getLocalClones(const char* name){
 
@@ -500,17 +523,21 @@ TH1** StEStructSupport::buildChargeTypeCFunctions(const char* name){
 TH1** StEStructSupport::buildChargeTypeRFunctions(const char* name){
   return buildChargeTypes(name,2);
 }
-
 //---------------------------------------------------------
 TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
 
   // build hist types = LS, US, CD, CI
 
 
-  // eight input histograms ++,+-,-+,-- for Sib and Mix 
+  // eight input histograms ++,+-,-+,-- for Sib and Mix
   TH1** hlocal=getLocalClones(name);
   if(!hlocal) return hlocal;
 
+  if(mnpairs){  // manual scaling
+    for(int i=0;i<8;i++) hlocal[i]->Scale(1.0/mnpairs[i]);
+  } else rescale(hlocal);  // automatic scaling, norm sib to pairs per event, norm mix to sib
+
+  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,8); // does nothing unless mapplyDEtaFix is set
 
   // four returned hists
   TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
@@ -520,83 +547,55 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
   for(int i=0;i<4;i++){
     retVal[i]=(TH1*)hlocal[0]->Clone();
     retVal[i]->SetName(swapIn(hlocal[0]->GetName(),"Sibpp",nm[i]));
-    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i])); 
+    retVal[i]->SetTitle(swapIn(hlocal[0]->GetTitle(),"Sibling : +.+",tit[i]));
     retVal[i]->Scale(0.); // zero the hists
   }
 
-  hlocal[0]->Add(hlocal[3]);  // ++ + -- Sib
-  hlocal[1]->Add(hlocal[2]);  // +- + -+ Sib
-  hlocal[4]->Add(hlocal[7]);  // ++ + -- Mix
-  hlocal[5]->Add(hlocal[6]);  // +- + -+ Mix
-
-  // At this point I no longer need -- hists; hlocal[3] and hlocal[7]
-  // so I reuse these for alternative calculation of CD=LS-US.
-  // (Also don't need hlocal[2] and hlocal[6])
-
-  // 1st get the LS-US;
-  hlocal[3]->Scale(0.);
-  hlocal[7]->Scale(0.);
-  hlocal[3]->Add(hlocal[0]);
-  hlocal[7]->Add(hlocal[4]);
-
-  if(strstr(name,"DEta") || strstr(name,"SEta"))fixDEta((TH2**)hlocal,8);
-  if(mnpairs){
-    for(int i=0;i<8;i++) hlocal[i]->Scale(1.0/mnpairs[i]);
-  } else {
-     // Exclude 2 and 6 since for some cases those integrals are 0.
-     for(int i=0;i<8;i++) {
-         if (2 == i  ||  6 == i) {
-             continue;
-         }
-         hlocal[i]->Scale(1.0/hlocal[i]->Integral());
-     }
-  }
-
-
-  hlocal[3]->Add(hlocal[1],-1.0);
-  hlocal[7]->Add(hlocal[5],-1.0);
+  hlocal[0]->Add(hlocal[3]);                // ++ + -- Sib
+  if(hlocal[2]) hlocal[1]->Add(hlocal[2]);  // +- + -+ Sib, backward compatible
+  hlocal[4]->Add(hlocal[7]);                // ++ + -- Mix
+  if(hlocal[6]) hlocal[5]->Add(hlocal[6]);  // +- + -+ Mix
 
   float scf1=0.;
   float scf2=0.;
-    if(sf){
-      scf1=sf[0];
-      scf2=sf[1];
-    }      
-
-// if requested, scale bg to require correlations>=0 where statistics are large
+  if(sf){
+    scf1=sf[0];
+    scf2=sf[1];
+  }
+  // if requested, scale bg to require correlations>=0 where statistics are large
   if(1==mbgMode){
-   scaleBackGround(hlocal[0],hlocal[4],scf1);
-   scaleBackGround(hlocal[1],hlocal[5],scf2);
-   if(opt==3)scaleBackGround(hlocal[3],hlocal[7]);
+    scaleBackGround(hlocal[0],hlocal[4],scf1);
+    scaleBackGround(hlocal[1],hlocal[5],scf2);
+    if(opt==3)scaleBackGround(hlocal[3],hlocal[7]);
   }
 
-  retVal[0]->Add(hlocal[0]);
-  retVal[1]->Add(hlocal[1]);
-  retVal[2]->Add(hlocal[3]);
-  
-  int ilim=2;  
-  if(opt==3)ilim=3;
-  for(int i=0;i<ilim;i++){
-    retVal[i]->Add(hlocal[i+4],-1.0);  // delta-rho : if opt =1, we're done
-    if(0==opt) {
+  retVal[0]->Add(hlocal[0]);  // LS sib
+  retVal[1]->Add(hlocal[1]);  // US sib
+
+  // opt: 0 = delta-rho/rho_mix;  1 = delta-rho;  2 = delta-rho/sqrt(rho_mix)
+
+  for(int i=0;i<2;i++){  // loop over LS and US
+    retVal[i]->Add(hlocal[i+4],-1.0);  // delta-rho
+  }
+  retVal[2]->Add(retVal[0],retVal[1],1.,-1.);  // CD sib
+  retVal[3]->Add(retVal[0],retVal[1],1.,1.);   // CI sib
+
+  if(opt!=1) {  // retVal has LS, US, CD, CI sib; use hlocal to take ratios
+    hlocal[6]->Add(hlocal[4], hlocal[5]);
+    hlocal[7]->Add(hlocal[4], hlocal[5]);  // hlocal[4] starts mix for denominators
+
+    for(int i=0;i<4;i++) {  //2
       retVal[i]->Divide(hlocal[i+4]);  // delta-rho/rho_mix
-    } else if(opt>=2){                 // delta-rho/sqrt(rho_mix)
-      TH1 *tmp;
-      if (ilim<3) {                    // had ilim<2 here. I'm not sure whats happening here, but I think that was wrong.
-        tmp = getSqrt(hlocal[i+4]);
-      } else {
-        tmp = getSqrt(hlocal[i+5]);
-      }
-      retVal[i]->Divide(tmp);
-      delete tmp;
-    } // else opt==2                     
-  }
- 
-  if(opt<3)retVal[2]->Add(retVal[0],retVal[1],1.,-1.);  // CD
-  retVal[3]->Add(retVal[0],retVal[1],1.,1.);   // CI
+      // NOTE: now CI = (LS_sib + US_sib) / (LS_mix + US_mix), not sum of ratios
 
-  // scale with nbar if requested 
-  if(mNbar!=1.0)for(int i=0;i<4;i++) retVal[i]->Scale(mNbar); // Nbar scaling
+      if(opt>=2){    // delta-rho/sqrt(rho_mix)
+        TH1 *href;   // should be corrected rho_ref, for now take rho_mix
+        href = getSqrt(hlocal[i+4]);
+        retVal[i]->Multiply(href);
+        delete href;
+      }
+    }
+  }
 
   // Free local histograms.
   for(int i=0;i<_pair_totalmax;i++) {
@@ -606,7 +605,6 @@ TH1** StEStructSupport::buildChargeTypes(const char* name, int opt, float* sf){
 
   return retVal;
 }
-
 //---------------------------------------------------------
 TH1** StEStructSupport::buildNChargeTypes_Old(const char* name){
 
@@ -697,14 +695,15 @@ TH1** StEStructSupport::buildNChargeTypes(const char* name) {
   TH1** retVal= new TH1*[4]; // 0=LS 1=US 2=CD=LS-US 3=CI=LS+US
   const char* nm[4]={"LS","US","CD","CI"};
   const char* tit[4]={"LS : ++ + --","US : +- + -+","CD: ++ + -- - +- - -+","CI : ++ + -- + +- + -+"};
+  TString hname;
 
   // Form LS, US, CI and CD combinations before calculating \Delta\rho
   //  and \Delta\rho/sqrt(\rho_{ref}).
   for(int i=0;i<4;i++){
     tmpVal[i]=(TH1*)hlocal[i+4]->Clone();
     retVal[i]=(TH1*)hlocal[i]->Clone();
-    retVal[i]->SetName(swapIn(hlocal[i]->GetName(),"Sibpp",nm[i]));
-    retVal[i]->SetTitle(swapIn(hlocal[i]->GetTitle(),"Sibling : +.+",tit[i])); 
+    hname=nm[i];  hname+=name; retVal[i]->SetName(hname);
+    hname=tit[i]; hname+=name; retVal[i]->SetTitle(hname);
   }
   retVal[0]->Add(retVal[3]);
   retVal[1]->Add(retVal[2]);
@@ -728,7 +727,7 @@ TH1** StEStructSupport::buildNChargeTypes(const char* name) {
   for(int i=0;i<4;i++){
     retVal[i]->Add(tmpVal[i],-scale[i]);
     retVal[i]->Scale(1.0/nEventsSame);
-    tmpVal[i]->Scale(1.0/nEventsMixed);
+    tmpVal[i]->Scale(1.0/nEventsMixed); // **TEST**
   }
 
   // Calculate \Delta\rho/\sqrt(\rho_{ref})
@@ -1168,8 +1167,12 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.15  2007/01/26 17:20:58  msd
+ * Updated HAdd for new binning scheme.
+ * Improved Support::buildChargeTypes.
+ *
  * Revision 1.14  2006/12/14 20:07:11  prindle
- * I was calculating \Delta\rho/sqrt(rho) for ++, +-, -+ and --
+ *   I was calculating \Delta\rho/sqrt(rho) for ++, +-, -+ and --
  * and then combining those into LS, US, CD and CI. The was wrong
  * and now I am doing it correctly. For CI this makes only a slight
  * change, it seems the amplitude is decreased a little. For CD
