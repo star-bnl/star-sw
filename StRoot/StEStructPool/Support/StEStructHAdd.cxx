@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructHAdd.cxx,v 1.6 2006/10/02 22:26:48 prindle Exp $
+ * $Id: StEStructHAdd.cxx,v 1.7 2007/01/26 17:20:57 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -57,7 +57,8 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                 TH1* outhist=0;
                 TH2D *tmp=0;
                 for (int n=0;n<ntot;n++) {
-                    TString fullName(htype.Data()); fullName+=nlist[n];
+                    TString fullName(htype.Data()); 
+		    if(nlist[n]>=0) fullName+=nlist[n];  // allows cb mode 0 to be symmetrized
                     inFile->cd();
                     TH1* tmp=(TH1*)inFile->Get(fullName.Data());
                     if(!tmp){
@@ -100,6 +101,36 @@ void StEStructHAdd::addCuts(const char* outfile, TFile* inFile,
                                 tmp->Fill(eta2,phi2,val);
                             }
                         }
+			if(tmp->GetBinContent(1,1)==0) {  // fill the repeated bin
+			  for(int ieta=0;ieta<tmp->GetNbinsX();ieta++) tmp->SetBinContent(ieta+1,1, tmp->GetBinContent(ieta+1,tmp->GetNbinsY()));
+			}
+			// Create rotated view from -pi to pi for CD 
+			hname+="Rot"; htitle+="Rot";
+			TH2D* rot = new TH2D(hname.Data(),htitle.Data(),b->hdetaBins(),b->detaMin(),b->detaMax(),b->hdphiBins(),-M_PI-M_PI/24,M_PI+M_PI/24);
+                        for(int ieta=0;ieta<b->detaBins();ieta++){
+			  for(int iphi=0;iphi<b->dphiBins();iphi++){
+			    float eta1 = b->detaVal(ieta);
+			    float eta2 = -eta1;
+			    float phi1 = b->dphiVal(iphi,1);
+			    if (phi1>M_PI) phi1=2*M_PI - phi1;  // get phi1 to be [0..pi]
+			    float phi2 = -phi1;                 // phi2 [-pi..0]
+			    double val = outhist->GetBinContent(ieta+1,iphi+1);
+			    rot->Fill(eta1,phi1,val);
+			    rot->Fill(eta2,phi1,val);
+			    rot->Fill(eta1,phi2,val);
+			    rot->Fill(eta2,phi2,val);
+			  }
+                        }
+			int bin1 = rot->GetYaxis()->FindBin(M_PI); // need to double bin values at pi and -pi 
+			int bin2 = rot->GetYaxis()->FindBin(-M_PI);
+			for(int ieta=0;ieta<rot->GetNbinsX();ieta++) { 
+			  rot->SetBinContent(ieta+1,bin1, 2*rot->GetBinContent(ieta+1,bin1));
+			  rot->SetBinContent(ieta+1,bin2, 2*rot->GetBinContent(ieta+1,bin2));
+			}
+			outFile->cd();
+			rot->Write();
+			delete rot;
+			// end of rotated view
                         delete outhist;
                         outhist = tmp;
                     }
@@ -229,6 +260,10 @@ void StEStructHAdd::addCuts(const char* outfile, const char* infile,
 /***********************************************************************
  *
  * $Log: StEStructHAdd.cxx,v $
+ * Revision 1.7  2007/01/26 17:20:57  msd
+ * Updated HAdd for new binning scheme.
+ * Improved Support::buildChargeTypes.
+ *
  * Revision 1.6  2006/10/02 22:26:48  prindle
  * Hadd now symmetrizes histograms while adding them, so output is usable
  * in Support as before. Need to load library for Correlation so we know

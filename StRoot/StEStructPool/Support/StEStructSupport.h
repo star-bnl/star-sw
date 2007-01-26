@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.h,v 1.8 2006/12/14 20:07:15 prindle Exp $
+ * $Id: StEStructSupport.h,v 1.9 2007/01/26 17:20:59 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -40,6 +40,7 @@ public:
   const char* getChargeSignName(int ics);
   char* prepend(const char* name, const char* s1);
   char* swapIn(const char* name, const char* s1, const char* s2);
+  void rescale(TH1** hists);
 
   StEStructSupport(){};   
 
@@ -102,8 +103,12 @@ inline bool StEStructSupport::applyDEtaFix()     { return mapplyDEtaFix; };
 /***********************************************************************
  *
  * $Log: StEStructSupport.h,v $
+ * Revision 1.9  2007/01/26 17:20:59  msd
+ * Updated HAdd for new binning scheme.
+ * Improved Support::buildChargeTypes.
+ *
  * Revision 1.8  2006/12/14 20:07:15  prindle
- * I was calculating \Delta\rho/sqrt(rho) for ++, +-, -+ and --
+ *   I was calculating \Delta\rho/sqrt(rho) for ++, +-, -+ and --
  * and then combining those into LS, US, CD and CI. The was wrong
  * and now I am doing it correctly. For CI this makes only a slight
  * change, it seems the amplitude is decreased a little. For CD
