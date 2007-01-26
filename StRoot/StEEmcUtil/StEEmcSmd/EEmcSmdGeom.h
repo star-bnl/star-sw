@@ -1,8 +1,11 @@
-/*****************************************************************************
+/*!
+ * \class EEmcSmdGeom
+ * \author Wei-Ming Zhangg, Jason Webb
+ * 
+ *****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.6 2007/01/25 22:33:21 balewski Exp $
+ * $Id: EEmcSmdGeom.h,v 1.7 2007/01/26 00:51:08 balewski Exp $
  *
- * Author: Wei-Ming Zhang, Jason Webb
  * 
  *
  *****************************************************************************
@@ -230,6 +233,9 @@ inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV,
  *
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.7  2007/01/26 00:51:08  balewski
+ * too strong protection
+ *
  * Revision 1.6  2007/01/25 22:33:21  balewski
  * add:
  * - better writeup
