@@ -14,6 +14,7 @@
 #include "StEStructPool/AnalysisMaker/StEStructTrackCuts.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "TLorentzVector.h"
 
 StEStructAscii::StEStructAscii(): meventCount(0), meventsToDo(0), mAmDone(false), mECuts(0), mTCuts(0){};
 
@@ -23,7 +24,7 @@ StEStructAscii::StEStructAscii(int nevents, char* infile, StEStructEventCuts* ec
   mECuts=ecuts;
   mTCuts=tcuts;
 
-  cout << "Opening file " << infile << endl;
+  cout << "Opening ASCII file " << infile << endl;
   in.open(infile); 
   mlineNumber = 0;
 
@@ -56,6 +57,8 @@ StEStructEvent* StEStructAscii::generateEvent(){
   retVal = new StEStructEvent();
 
   fillTracks(retVal);
+
+  /*
   bool useEvent=mECuts->goodCentrality((float)mnumTracks);
   if(!useEvent){
     cout << "Cutting event with " << mnumTracks << " tracks." << endl; 
@@ -66,6 +69,14 @@ StEStructEvent* StEStructAscii::generateEvent(){
     meventCount++;
   }
   mECuts->fillHistogram(mECuts->centralityName(),(float)mnumTracks,useEvent);
+  */
+
+  retVal->FillChargeCollections();                                                                                                                                              
+  retVal->SetEventID(meventCount);
+  retVal->SetVertex(0,0,0);
+  retVal->SetBField(0);
+
+  meventCount++;                      
 
   return retVal;
 }   
@@ -73,17 +84,13 @@ StEStructEvent* StEStructAscii::generateEvent(){
 //--------------------------------------------------------------------------
 void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
 
-  // See protected/estruct/msd/humanic for this file format
-  // All we really read is momentum px,py,pz
-
   mnumTracks=0;
 
-  // Quantities read from input file; most of them are ignored
-  float x,y,z,t,mass,px,py,pz,tchem; 
-  int res;
+  float pt, eta, phi;
+  
 
-  int numParticles, temp;
-  in >> numParticles >> temp;  // Read # of particles in this event
+  int numParticles, charge;
+  in >> numParticles;  // Read # of particles in this event
   mlineNumber++;               // Increment line number
   if (in.eof())  {             // Do some error checking
     cout << "Found EOF" << endl;
@@ -95,73 +102,40 @@ void StEStructAscii::fillTracks(StEStructEvent* estructEvent){
   }
   //cout << "Reading " << numParticles << " particles" << endl;  // ***TEST***
 
+  estructEvent->SetCentrality(numParticles);
+
   StEStructTrack* eTrack= new StEStructTrack();
 
   for(int i=0;i<numParticles;i++){   // Loop over particles
     eTrack->SetInComplete();
 
-    in >> x >> y >> z >> t >> mass >> res >> px >> py >> pz;   // Read track data
-    in >> tchem; 
-    mlineNumber+=2;
-    //cout << "X: " << x << " pz: " << pz << endl;  // ***TEST***
+    // Making new format: pt, eta, phi, charge
+    in >> pt >> eta >> phi >> charge;
+    mlineNumber+=1;
     if (!in.good()) {   // Check for error
       cout << "WARNING: Read error near line" << mlineNumber << endl;
       return;
     }
 
-    float p[3];   // Set momentum, convert MeV to GeV
-    p[0] = px/1000;  p[1] = py/1000;  p[2] = pz/1000;  
-    mass /= 1000;
+    TLorentzVector track;  // for finding components
+    track.SetPtEtaPhiM(pt, eta, phi, 0.14);
 
-    float pt=sqrt(p[0]*p[0]+p[1]*p[1]);
-    //if(pt<0.15)continue;  // Letting the cut file handle this 
-
-    bool useTrack=true;
-    
-    float energy = sqrt( (p[0]*p[0]+p[1]*p[1]+p[2]*p[2]) + (mass*mass) );  // E^2 = p^2 + m^2
-    float num=energy+p[2];  // Calculate Eta
-    float den=energy-p[2];
-    float eta=-999.;  
-    if(den!=0.) { 
-       float arg=num/den;
-       if(arg>0.) eta=0.5*log(arg);
-    }
-    useTrack = (mTCuts->goodEta(eta) && useTrack);
-    float phi=atan2((double)p[1], (double)p[0]);  // Calculate Phi
-    useTrack=(mTCuts->goodPhi(phi) && useTrack);
-
-    useTrack=(mTCuts->goodPt(pt) && useTrack);
- 
-    float _r=pt/0.139;  // Calculate Yt
-    float yt=log(sqrt(1+_r*_r)+_r);
-    useTrack = (mTCuts->goodYt(yt) && useTrack);
-
-    if(useTrack)mnumTracks++;  
-
-    mTCuts->fillHistograms(useTrack);
-    
-    eTrack->SetBx(0);  // Unsure what to do with these...
-    eTrack->SetBy(0);
-    eTrack->SetBz(0);
-    eTrack->SetBxGlobal(0);
-    eTrack->SetByGlobal(0);
-    eTrack->SetBzGlobal(0);
-
-    //if (!useTrack) cout << "Tracked failed pt, eta, or phi.  Pt: " << pt << " Eta: " << eta << " Phi: " << phi << endl;  
-    if(!useTrack) continue;  
-  
-    eTrack->SetPx(p[0]);
-    eTrack->SetPy(p[1]);
-    eTrack->SetPz(p[2]);
+    eTrack->SetPx(track.Px());
+    eTrack->SetPy(track.Py());
+    eTrack->SetPz(track.Pz());
     eTrack->SetEta(eta);
     eTrack->SetPhi(phi);
+    eTrack->SetCharge(charge);
 
-    // We must assign charge randomly for this generator
-    temp = mnumTracks%2;  // alternate between + and -
-    if (temp==0) temp=-1;
-    //cout << "Setting Charge " << temp << endl;  // ***TEST***
-    eTrack->SetCharge(temp);
-    //cout << "Adding good track" << endl;  // ***TEST***
+    // Not doing any track or event cuts, but lets fill some cut hists
+    bool useTrack=true;
+    useTrack = (mTCuts->goodCharge(charge) && useTrack);
+    useTrack = (mTCuts->goodEta(eta) && useTrack);
+    useTrack = (mTCuts->goodPhi(phi) && useTrack);
+    useTrack = (mTCuts->goodPt(pt) && useTrack);
+    mTCuts->fillHistograms(true);
+
+    //cout << "Adding track:\t" << pt<<"\t"<< eta << "\t" << phi << "\t" << charge << endl;
     estructEvent->AddTrack(eTrack);
   } // for
 
@@ -191,6 +165,9 @@ void StEStructAscii::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructAscii.cxx,v $
+ * Revision 1.4  2007/01/26 17:19:33  msd
+ * Total rewrite.  Now uses simple input text file format of pt,eta,phi for each particle.
+ *
  * Revision 1.3  2006/02/22 22:05:33  prindle
  * Removed all references to multRef (?)
  *
