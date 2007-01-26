@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.29 2007/01/15 07:49:22 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.30 2007/01/26 12:46:06 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.30  2007/01/26 12:46:06  jcs
+// replace //LOG_INFO with LOG_DEBUG
+//
 // Revision 1.29  2007/01/15 07:49:22  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -116,7 +119,7 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
   mFssGasDiffusionZ = new Float_t[1];
   mFssGasLorentzAngle = new Float_t[1];
 
-//   LOG_INFO << "StFtpcParamReader constructed from StFtpcClusterMaker tables" << endm;  
+  LOG_DEBUG << "StFtpcParamReader constructed from StFtpcClusterMaker tables" << endm;  
 }
 
 // For StFtpcSlowSimMaker
@@ -132,7 +135,7 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
   returnCode += FtpcSlowSimGas(gas);
   returnCode += FtpcSlowSimPars(param);
 
-//   LOG_INFO << "StFtpcParamReader constructed from StFtpcSlowSimMaker tables" << endm;  
+  LOG_DEBUG << "StFtpcParamReader constructed from StFtpcSlowSimMaker tables" << endm;  
 }
 
 // For StFtpcCalibMaker
@@ -171,7 +174,7 @@ StFtpcParamReader::~StFtpcParamReader()
   delete[] mFssGasDiffusionZ;
   delete[] mFssGasLorentzAngle;
 
-//   LOG_INFO << "StFtpcParamReader destructed" << endm;
+  LOG_DEBUG << "StFtpcParamReader destructed" << endm;
 }
 
 //===============================================================
