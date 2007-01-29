@@ -120,6 +120,9 @@ class StEEmcPoint : public TObject {
   Float_t asymmetry();
   Float_t asymmetry()const;
 
+  Float_t chisquared();
+  Float_t chisquared()const;
+
  private:
  protected:
 
@@ -200,4 +203,16 @@ inline Float_t StEEmcPoint::asymmetry()
 inline Bool_t Asymmetry( const StEEmcPoint &me, const StEEmcPoint &other ){ 
   return TMath::Abs(me.asymmetry()) < TMath::Abs(other.asymmetry()); 
 }
+
+inline Float_t StEEmcPoint::chisquared()
+{
+  Float_t edif = ( mSmdClusters[0].energy() - mSmdClusters[1].energy() );
+  Float_t esum = ( mSmdClusters[0].energy() + mSmdClusters[1].energy() );
+  Float_t nmip = 1000.0*esum / 1.3;
+  if ( nmip > 0. ) return (edif*edif)/nmip;
+  return -1.0;
+}
+inline Float_t StEEmcPoint::chisquared()const{ return chisquared(); }
+
+
 #endif
