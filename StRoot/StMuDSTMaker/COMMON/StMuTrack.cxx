@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.27 2007/01/05 20:19:44 jeromel Exp $
+ * $Id: StMuTrack.cxx,v 1.28 2007/01/29 18:34:44 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -11,6 +11,7 @@
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StTrackGeometry.h"
 #include "StEvent/StPrimaryVertex.h"
+#include "StEvent/StDcaGeometry.h"
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StEvent/StTpcDedxPidAlgorithm.h"
 #include "StarClassLibrary/StThreeVectorD.hh"
@@ -18,6 +19,7 @@
 #include "StarClassLibrary/StParticleTypes.hh"
 #include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "THelixTrack.h"
 
 StuProbabilityPidAlgorithm* StMuTrack::mProbabilityPidAlgorithm=0;
 double StMuTrack::mProbabilityPidCentrality=0;
@@ -27,7 +29,7 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex *vertex, int index2Global, int index2RichSpectra, bool l3, TObjArray *vtxList) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.), mPt(0.), mEta(0.), mPhi(0.) {
 
-  const StTrack* globalTrack = track->node()->track(global);
+  const StGlobalTrack* globalTrack = dynamic_cast<const StGlobalTrack*>(track->node()->track(global));
 
   mId = track->key();
   mType = track->type();
@@ -126,9 +128,6 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
     //if (event->primaryVertex()) {
     if (vertex) {
       mP = momentumAtPrimaryVertex(event,track,vertex);
-      mPt = mP.perp();
-      mPhi = mP.phi();
-      mEta = mP.pseudoRapidity();
       Int_t vtx_id=vtxList->IndexOf(vertex);
       if (vtx_id >= 0) {
         mVertexIndex=vtx_id;
@@ -138,9 +137,40 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, const StVertex 
         mVertexIndex = -1;
         mDCA = StThreeVectorF(-999,-999,-999);
         mDCAGlobal = StThreeVectorF(-999,-999,-999);
+        mSigmaDcaD = -999;
+        mSigmaDcaZ = -999;
       }
       mDCA = dca(track, vertex);
-      if ( globalTrack ) mDCAGlobal = dca(globalTrack, vertex);
+      if (globalTrack && globalTrack->dcaGeometry()) {
+        const StDcaGeometry *dcaGeometry = globalTrack->dcaGeometry();
+        const StThreeVectorF &pvert = vertex->position();
+        Double_t        vtx[3] = {pvert[0],pvert[1],pvert[2]};
+        THelixTrack     thelix =  dcaGeometry->thelix();
+        thelix.Move(thelix.Path(vtx));
+        const Double_t *pos = thelix.Pos();
+        const Double_t *mom = thelix.Dir();
+        mDCAGlobal = StThreeVectorF(pos[0],pos[1],pos[2]) - vertex->position();
+        if (track->type() == global) {
+          mDCA = StThreeVectorF(pos[0],pos[1],pos[2]) -  vertex->position();
+          mP   = StThreeVectorF(mom[0],mom[1],mom[2]);
+          mP  *= dcaGeometry->momentum().mag();
+        }
+        double emxXY[6],emxSZ[3];
+        thelix.GetEmx(emxXY,emxSZ);
+//	THelixTrack::Dca(): cos(Lambda) **4 to account that we are in the nearest point
+        double cosl = sqrt(mom[0]*mom[0]+mom[1]*mom[1]);
+        emxSZ[0]*=pow(cosl,4);
+        if (emxXY[0] > 0) mSigmaDcaD = TMath::Sqrt(emxXY[0]);
+        if (emxSZ[0] > 0) mSigmaDcaZ = TMath::Sqrt(emxSZ[0]);
+      } else { // no DCA geometry, calculate DCA from helix
+        if ( globalTrack ) mDCAGlobal = dca(globalTrack, vertex);
+        mSigmaDcaD = -999;
+        mSigmaDcaZ = -999;
+      }
+
+      mPt = mP.perp();
+      mPhi = mP.phi();
+      mEta = mP.pseudoRapidity();
 
       if (!l3) { // L3TRACKS seem to break pid    
 	int charge = track->geometry()->charge();
@@ -235,6 +265,33 @@ unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
   default:
     return 0;
   }
+}
+
+Float_t StMuTrack::dcaD(Int_t vtx_id) const {
+  if ((vtx_id == -1 && mVertexIndex == StMuDst::currentVertexIndex()) ||
+       vtx_id == mVertexIndex) {
+    StThreeVectorF dir;
+    if (mType == global)
+      dir = mP;
+    else if (globalTrack())
+      dir = globalTrack()->p();
+    else
+      return -999; 
+    if (dir.mag() == 0)
+      return -999;
+    dir /= dir.mag();  
+    Float_t cosl = dir.perp();
+    return -dir[1]/cosl * mDCAGlobal[0] + dir[0]/cosl * mDCAGlobal[1]; 
+  }
+  else return -999;
+}
+
+Float_t StMuTrack::dcaZ(Int_t vtx_id) const {
+  if ((vtx_id == -1 && mVertexIndex == StMuDst::currentVertexIndex()) ||
+       vtx_id == mVertexIndex) {
+    return mDCAGlobal.z();
+  }
+  else return -999;
 }
 
 StThreeVectorF StMuTrack::dca(Int_t vtx_id) const {
@@ -342,6 +399,12 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.28  2007/01/29 18:34:44  mvl
+ * Updates to use StDcaGeometry for global DCA and momentum.
+ * Added helper functions for radial and Z component: dcaD and dcaZ.
+ * Uncertainties on those are stored in sigmaDcaD and sigmaDcaZ.
+ * dcaD and dcaZ only work for the primary vertex to which the track belongs (avoid long extrapolations).
+ *
  * Revision 1.27  2007/01/05 20:19:44  jeromel
  * helix(helix()) cannot be interpreted by gcc 3.4.6
  *

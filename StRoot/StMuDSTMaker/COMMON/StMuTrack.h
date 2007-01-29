@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.20 2006/07/27 18:55:42 fisyak Exp $
+ * $Id: StMuTrack.h,v 1.21 2007/01/29 18:34:44 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -47,7 +47,7 @@ class TObjArray;
 
 class StMuTrack : public TObject {
  public:
-    StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255) {/* no-op*/}; ///< default constructor
+    StMuTrack(): mVertexIndex(0), mNHitsPossInner(0), mNHitsFitInner(0), mNHitsPossTpc(255), mNHitsFitTpc(255), mSigmaDcaD(-999), mSigmaDcaZ(-999) {/* no-op*/}; ///< default constructor
     StMuTrack(const StEvent*, const StTrack*, const StVertex*, int index2Global=-2, int index2RichSpectra=-2, bool l3=false, TObjArray *vtx_list=0); ///< constructor from StEvent and StTrack
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
@@ -89,6 +89,10 @@ class StMuTrack : public TObject {
     StThreeVectorF momentum() const; ///< Returns 3-momentum at dca to primary vertex.
     StThreeVectorF dca(Int_t vtx_id=-1) const; ///< Returns 3D distance of closest approach to primary vertex.
     StThreeVectorF dcaGlobal(Int_t vtx_id=-1) const; ///< Returns 3D distance of closest approach to primary vertex of associated global track.
+    Float_t dcaD(Int_t vtx_id=-1) const; ///< Signed radial component of global DCA (projected)
+    Float_t dcaZ(Int_t vtx_id=-1) const; ///< Z component of global DCA
+    Float_t sigmaDcaD(Int_t vtx_id=-1) const; ///< Error on signed radial component of global DCA (projected)
+    Float_t sigmaDcaZ(Int_t vtx_id=-1) const; ///< Error on Z component of global DCA
     StThreeVectorF firstPoint() const; ///< Returns positions of first measured point.
     StThreeVectorF lastPoint() const; ///< Returns positions of last measured point.
     StPhysicalHelixD helix() const; ///< Returns inner helix (first measured point)
@@ -134,6 +138,8 @@ protected:
   StMuHelix mHelix;
   StMuHelix mOuterHelix;
   StMuProbPidTraits mProbPidTraits; ///< Class holding the new Yuri Fisyak pid probabilities.
+  Float_t mSigmaDcaD;
+  Float_t mSigmaDcaZ;
 
   void setIndex2Global(int i) {mIndex2Global=i;} ///< Set index of associated global track.
   void setIndex2RichSpectra(int i) {mIndex2RichSpectra=i;} ///< Set index of associated rich spectra.
@@ -148,7 +154,7 @@ protected:
   friend class StMuDst;
   friend class StMuDstFilterMaker;
   friend class StMuMomentumShiftMaker;
-  ClassDef(StMuTrack,8)
+  ClassDef(StMuTrack,9)
 };
 
 inline short StMuTrack::id() const {return mId;}
@@ -180,6 +186,20 @@ inline double StMuTrack::eta() const {return mEta;}
 inline double StMuTrack::phi() const {return mPhi;}
 inline StThreeVectorF StMuTrack::p() const {return mP;}
 inline StThreeVectorF StMuTrack::momentum() const {return mP;}
+inline float StMuTrack::sigmaDcaD(Int_t vtx_id) const {
+  if ((vtx_id == -1 && mVertexIndex == StMuDst::currentVertexIndex()) ||
+       vtx_id == mVertexIndex) 
+    return mSigmaDcaD;
+  else
+    return -999;
+}
+inline float StMuTrack::sigmaDcaZ(Int_t vtx_id) const {
+  if ((vtx_id == -1 && mVertexIndex == StMuDst::currentVertexIndex()) ||
+       vtx_id == mVertexIndex) 
+    return mSigmaDcaZ;
+  else
+    return -999;
+}
 inline StThreeVectorF StMuTrack::firstPoint() const {return mFirstPoint;}
 inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
@@ -197,6 +217,12 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.21  2007/01/29 18:34:44  mvl
+ * Updates to use StDcaGeometry for global DCA and momentum.
+ * Added helper functions for radial and Z component: dcaD and dcaZ.
+ * Uncertainties on those are stored in sigmaDcaD and sigmaDcaZ.
+ * dcaD and dcaZ only work for the primary vertex to which the track belongs (avoid long extrapolations).
+ *
  * Revision 1.20  2006/07/27 18:55:42  fisyak
  * Remove DCA hack used in SSD+SVT test production (P06id)
  *
