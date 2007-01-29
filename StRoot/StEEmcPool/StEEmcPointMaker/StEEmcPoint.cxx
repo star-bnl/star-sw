@@ -26,6 +26,7 @@ StEEmcPoint::StEEmcPoint()
   mResidueV=0.;
   StEEmcClusterVec_t temp;
   for ( Int_t i=0;i<4;i++ ) mTowerClusters.push_back(temp);
+  mKey=-1; // default invalid key
 }
 
 // ----------------------------------------------------------------------------
@@ -51,6 +52,8 @@ StEEmcPoint::StEEmcPoint( const StEEmcPoint &p )
 
   mResidueU = p.mResidueU;
   mResidueV = p.mResidueV;
+
+  mKey=p.mKey;
 
 }
 
