@@ -15,7 +15,8 @@
 using namespace std;
 
 
-#include <strstream>
+//#include <strstream>
+#include <Stsstream.h>
 
 #include "TObject.h"
 #include "TString.h"
