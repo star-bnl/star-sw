@@ -9,6 +9,8 @@
 //******************************************************************************
 
 #include "StEmcDbHandler.h"
+#include "TUnixTime.h"
+#include "StMessMgr.h"
 
 ClassImp(StEmcDbHandler)
 
@@ -33,36 +35,35 @@ StEmcDbHandler::~StEmcDbHandler()
 StDbTable* StEmcDbHandler::getDbTable()
 {
   StDbManager* dbMngr = StDbManager::Instance();
-  StDbConfigNode* node = dbMngr->initConfig(mTableNode.Data());
-  StDbTable* table = node->addDbTable(mTableName.Data());
-  dbMngr->setRequestTime(mTimeStamp.Data());
+  StDbTable* table = (dbMngr->initConfig(mTableNode.Data()))->addDbTable(mTableName.Data());
   
-  const char *entryTime, *begin;
-  char whereClause[256];  
-  entryTime = mMaxTime;
-  begin = mTimeStamp;
-  sprintf(whereClause, " where flavor='%s' and beginTime<='%s' and entryTime<='%s'  Order by beginTime desc limit 1",
-          mFlavor.Data(),begin,entryTime);   
-  char query[256];
-  ostrstream qs(query,256);
-  qs<<whereClause<<ends;  
-  dbMngr->fetchDbTable(table,whereClause);
-  //dbMngr->fetchDbTable(table);
-  TString time=timeToSqlTime(table->getBeginDateTime()); 
-  setTimeStamp((char*) time.Data());
+  //set beginTime
+  dbMngr->setRequestTime(mTimeStamp.Data());
+
+  //set flavor
+  table->setFlavor(mFlavor.Data());
+
+  //set maxEntryTime
+  UInt_t unixEntryTime = (dbMngr->findDb(mTableNode.Data()))->getUnixTime(mMaxTime.Data());
+  table->setProdTime(unixEntryTime);
+
+  dbMngr->fetchDbTable(table);
+
+  mTimeStamp = timeToSqlTime(table->getBeginDateTime()); 
   mTable = table;
-  return mTable;
+  
+  return mTable;  
 }
 //------------------------------------------------------------------------------
 /*! Return time stamp list of an EMC table within specified limits*/
 TString* StEmcDbHandler::getTimeStampList()
 {
   
-  for (UInt_t i=0; i< 1000; i++) mTimeStampList[i]="";
+/*  for (UInt_t i=0; i< 1000; i++) mTimeStampList[i]="";
   
   StDbManager* dbMngr = StDbManager::Instance();
-  StDbConfigNode* node = dbMngr->initConfig(mTableNode);
-  StDbTable* table = node->addDbTable(mTableName.Data());
+  StDbTable* table = (dbMngr->initConfig(mTableNode.Data()))->addDbTable(mTableName.Data());
+  
   dbMngr->setStoreTime(mMaxTime.Data());
   
   StDataBaseI* db=dbMngr->findDb(mTableNode.Data());
@@ -76,17 +77,19 @@ TString* StEmcDbHandler::getTimeStampList()
   sprintf(whereClause, " where flavor='%s' and beginTime<='%s' and beginTime>='%s' and entryTime<='%s' ", mFlavor.Data(), lStamp, fStamp, entryTime); 
   
   char query[256];
-  ostrstream qs(query,256);
-  qs<<whereClause<<ends;
-  cout<<"\n QUERY = "<<whereClause<<endl;
+//  ostrstream qs(query,256);
+//  qs<<whereClause<<ends;
+  LOG_INFO <<"\n QUERY = "<<whereClause<<endm;
   
   UInt_t* timeStampList;
-  timeStampList = db->QueryDbTimes(table,query,1);  // opt=1 means don't get any data!
+  timeStampList = db->QueryDbTimes(table,whereClause,1);  // opt=1 means don't get any data!
   
   int nRows=table->GetNRows();
   int nRows2;
   table->getElementID(nRows2);
-  if (nRows != nRows2) cout<<"problem"<<endl;
+  if (nRows != nRows2) {
+	  LOG_WARN<<"problem:  nRows!=nRows2"<<endm;
+  }
   
   mListSize = nRows;
   
@@ -100,13 +103,16 @@ TString* StEmcDbHandler::getTimeStampList()
 		      mTimeStampList[i](8,2)+":"+
 		      mTimeStampList[i](10,2)+":"+
 		      mTimeStampList[i](12,2);
+//	mTimeStampList[i] = timeToSqlTime((dbMngr->findDb(mTableNode.Data()))->getDateTime(timeStampList[i]));
   }
   
   
   delete [] timeStampList;
-  delete node;
+//  delete node;
   delete dbMngr;
-  
+*/  
+
+mTimeStampList[0] = "::getTimeStampList segfaulted when I tested it, so this function is disabled until further notice --Adam";
   return mTimeStampList;
   
 }
