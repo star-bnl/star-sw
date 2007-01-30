@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2006/12/01 18:56:37 $
- * $Revision: 1.4 $
+ * $Date: 2007/01/30 16:35:28 $
+ * $Revision: 1.5 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -63,13 +63,18 @@ StEEmcCluster::StEEmcCluster( const StEEmcCluster &other )
   mSumPhi2W=other.mSumPhi2W;
   mSumPhiW=other.mSumPhi2W;
 
-  mTowers=other.mTowers;
   mWeights=other.mWeights;
 
   mEnergy=other.mEnergy;
   mMomentum=other.mMomentum;
   mPosition=other.mPosition;
   mMatched=other.mMatched;
+
+  //  printf("copy ctor size=%i\n",other.mTowers.size());
+
+  for ( UInt_t ii=0;ii<other.mTowers.size();ii++ )
+    mTowers.push_back( other.mTowers[ii] );
+
 }
 
 // ----------------------------------------------------------------------------

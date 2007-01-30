@@ -202,8 +202,19 @@ class StEEmcGenericClusterMaker : public StMaker
   /// @param distance maximum separation in cm from the cluster centroid to the track for a match to be made.
   void setTrackMatching( Float_t distance, Int_t layer ){ mClusterTrackSeparation[layer] = distance; }
 
-  // extrapolates helix to position z (borrowed from StEEmcPool/TTM)
+  /// extrapolates helix to position z (borrowed from StEEmcPool/TTM)
   Bool_t extrapolateToZ( const StPhysicalHelixD helix, const double z, TVector3 &r);
+
+
+  /// Builds histograms for SMD clusters matching the specified tower cluster.  Histograms
+  /// will be stored in the .hist branch of this maker.  Histograms will follow a naming
+  /// convention h[TUV]cluster[key]_[event] where [TUV] ...
+  void buildHistograms( StEEmcCluster cluster );
+
+  /// Utility method to provide the "next" cluster id.  It's in public scope to allow 
+  /// later makers in the chain (i.e. the point maker) to form new clusters and assign
+  /// a unique cluster id (key).
+  Int_t nextClusterId(){ return mClusterId++; }
 
  private:
  protected:
@@ -216,8 +227,6 @@ class StEEmcGenericClusterMaker : public StMaker
   // Keeps track of clusters
   Int_t mClusterId;
 
-  // Utility method to provide the "next" cluster id
-  Int_t nextClusterId(){ return mClusterId++; }
 
   // mTowerClusters[sec][layer] provides list of tower
   // clusters at specified layer in the given sector,
@@ -279,7 +288,7 @@ class StEEmcGenericClusterMaker : public StMaker
   // Maximum distance between clusters and tracks where they will
   // be associtated.  TPQRUV
   Float_t mClusterTrackSeparation[6];
- 
+
   ClassDef(StEEmcGenericClusterMaker,1);
   
 };
@@ -306,7 +315,11 @@ inline StEEmcSmdCluster StEEmcGenericClusterMaker::smdcluster(Int_t s,Int_t p,In
 //$$$inline void StEEmcGenericClusterMaker::add( StEEmcCluster &c ) { c.key(nextClusterId()); mTowerClusters[ c.tower(0).sector() ][ c.tower(0).layer() ].push_back(c); mNumberOfClusters[c.tower(0).layer()]++; }
 
 // adds an smd cluster
-inline void StEEmcGenericClusterMaker::add( StEEmcSmdCluster &c ) { c.key(nextClusterId()); mSmdClusters[ c.sector() ][ c.plane() ].push_back( c ); mNumberOfClusters[c.strip(0).plane()+4]++; }
+inline void StEEmcGenericClusterMaker::add( StEEmcSmdCluster &c ) { 
+  c.key(nextClusterId()); 
+  mSmdClusters[ c.sector() ][ c.plane() ].push_back( c ); 
+  mNumberOfClusters[c.strip(0).plane()+4]++; 
+}
 
 inline StMuTrack *StEEmcGenericClusterMaker::track( StEEmcCluster &cluster, Int_t index ){ return mClusterTrackMap[ cluster.key() ][index]; }
 inline StMuTrack *StEEmcGenericClusterMaker::backgroundTrack( StEEmcCluster &cluster, Int_t index ){ return mBackgroundTrackMap[ cluster.key() ][index]; }
