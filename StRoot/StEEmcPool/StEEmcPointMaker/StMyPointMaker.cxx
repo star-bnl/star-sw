@@ -13,6 +13,8 @@ StMyPointMaker::StMyPointMaker(const Char_t *name, StEEmcA2EMaker *a2e, StEEmcGe
   StEEmcGenericPointMaker(name,a2e,cl)
 {
   mAllowSplitting=false;
+  mSplitMinimumET=0.0;
+  setSmdMinFraction(0.0);
 }
 
 // ---------------------------------------------------------------------
@@ -31,7 +33,6 @@ Int_t StMyPointMaker::Make()
   typedef StEEmcGenericClusterMaker::EEmatch EEmatch_t;
 
 
-
   ////////////////////////////////////////////////////////////////////
   //
   // loop over all sectors and determine the best set of points 
@@ -46,6 +47,12 @@ Int_t StMyPointMaker::Make()
       std::sort( clusters.begin(), clusters.end() );
       std::reverse( clusters.begin(), clusters.end() );
 
+      LOG_INFO << GetName() << " sector "<<sector+1
+	       <<" nclusters="<<clusters.size()
+	       <<" nu="<<mEEclusters->numberOfClusters(sector,4)
+	       <<" nv=" <<mEEclusters->numberOfClusters(sector,5)
+	       << endm;
+
 
       // loop over tower clusters and associate the matching SMD clusters
       // into points, based on which pairings minimize a chi^2-like energy
@@ -53,8 +60,8 @@ Int_t StMyPointMaker::Make()
       for ( UInt_t ic=0;ic<clusters.size();ic++ )
 	{
 
-
 	  StEEmcCluster cluster=clusters[ic];
+	  LOG_DEBUG<<GetName()<<" tower cluster at"<<cluster.tower(0).name()<<endm;
 
 	  EEmatch_t matches = mEEclusters->clusterMatch( cluster );
 
@@ -62,182 +69,94 @@ Int_t StMyPointMaker::Make()
 	  // matched to this tower cluster
 	  StEEmcSmdClusterVec_t clusters1 = 
 	    (matches.smdu.size()<matches.smdv.size()) ? matches.smdu : matches.smdv;
-	  if ( clusters1.size() == 0 ) continue;
 
 	  // clusters2 is the larger of the two lists of smd clusters
 	  // matched to this tower cluster
 	  StEEmcSmdClusterVec_t clusters2 = 
 	    (matches.smdu.size()<matches.smdv.size()) ? matches.smdv : matches.smdu;
+
+	  if ( clusters1.size() == 0 ) continue;
 	  if ( clusters2.size() == 0 ) continue;
-	  
 
-	  //	  // minimum point energy
-	  //	  Float_t energy_minmin = cluster.energy() * 0.014 * 0.10;
+	  /*
+	   * Test all permutations of the larger list of SMD clusters against
+	   * the smaller list of clusters to find the best matches (minimize
+	   * a chi^2-like function).
+	   */
+	  AssociateClusters( clusters1, clusters2 );
 
-	  // find the permutation of the larger list which minimizes
-	  // the sum of (Eu-Ev)^2/Nmips
-	  Float_t ediff_min = 9.0E9;
+	  StEEmcSmdClusterVec_t uclusters = ( clusters1[0].plane()==0 ) ? clusters1 : clusters2 ;
+	  StEEmcSmdClusterVec_t vclusters = ( clusters1[0].plane()==0 ) ? clusters2 : clusters1 ;
 
-	  // vector of clusters holding the best permutation of the larger vector
-	  StEEmcSmdClusterVec_t best;
-
-	FIND_POINTS:
-	  ediff_min = 9.0E9;
-
-	  //
-	  // NOTE-- this is the slowest way possible to do this, O(N!).  
-	  //
-
-	  //Int_t count = 0;
-	  Bool_t go = true;
-	  while ( go )
-	    {
-
-	      Float_t ediff = 0;
-	      for ( UInt_t ii=0;ii<clusters1.size();ii++ )
-		{
-		  
-		  if ( clusters1[ii].sector() != clusters2[ii].sector() ) 
-		    goto INVALID_PERMUTATION;
-
-		  Float_t e1=1000.0*clusters1[ii].energy(); /* energy in MeV */
-		  Float_t e2=1000.0*clusters2[ii].energy(); /* energy in MeV */
-		  Float_t nmip=(e1+e2)/1.3;
-
-		  if ( nmip <= 0. )
-		    goto INVALID_PERMUTATION;
-
-		  ediff += (e1-e2)*(e1-e2)/nmip;
-
-		}
-
-	      if ( ediff < ediff_min )
-		{
-		  ediff_min = ediff;
-		  best = clusters2; /* copy current permutation into best */		  
-		}
-
-	      // try the next permutation
-	      go = std::next_permutation( clusters2.begin(), clusters2.end() );
-	      continue;
-
-	    INVALID_PERMUTATION:
-	      // branch to this point if clusters cannot overlap
-	      gMessMgr->Debug()<<GetName()<<" -D- cluster pair is not valid" << endm;
-
-	      
-	    }// loop over tower clusters
-	  if ( best.size() == 0 ) continue;
-
-
-	  Float_t ediff=0.;
-	  for ( UInt_t ii=0;ii<clusters1.size();ii++ )
-	    {
-	      Float_t e1=1000.0*clusters1[ii].energy(); /* energy in MeV */
-	      Float_t e2=1000.0*best[ii].energy(); /* energy in MeV */
-	      Float_t nmip=(e1+e2)/1.3;
-	      ediff += (e1-e2)*(e1-e2)/nmip;
-	    }
-
-
-	  
-
-	  if ( mAllowSplitting && cluster.momentum().Perp()>6.0 )
-	    if ( clusters1.size()==1 &&
-		 best.size()==2 )
-	      {
-		
-		Float_t e1=1000.0*clusters1[0].energy();
-		Float_t e2=1000.0*(best[0].energy()+best[1].energy());
-		Float_t nmip=(e1+e2)/1.3;
-		Float_t ediff_split=(e1-e2)*(e1-e2)/nmip;
-		
-		if ( ediff_split < ediff )
-		  {
-		    
-		    
-		    std::sort( best.begin(), best.end() );
-		    std::reverse( best.begin(), best.end() );
-		    StEEmcSmdCluster tempa, tempb;
-		    //		  split ( clusters1[0], clusters1[1], best[0], temp );
-		    Float_t chi2_a=9.0E9, chi2_b = 9.0E9;
-		    
-		    StEEmcSmdCluster mergeda=clusters1[0];
-		    StEEmcSmdCluster mergedb=clusters1[0];
-		  
-		    Bool_t a=split( best[0], best[1], mergeda, tempa, chi2_a );
-		    Bool_t b=split( best[1], best[0], mergedb, tempb, chi2_b );
-		    //		    clusters1.push_back(temp);
-		    if ( a && b ) {
-		      if ( chi2_a <= chi2_b ) {
-			clusters1.push_back(tempa);
-			clusters1[0]=mergeda;
-		      }
-		      else {
-			clusters1.push_back(tempb);
-			clusters1[0]=mergedb;
-		      }
-		    }
-		    
-		    goto FIND_POINTS;/* ack this is bad */
-
-		  }
-
-	    }
-	  
-
-	  // determine which list is U and which is V
+	  // we will form this many points associated with this tower cluster
 	  UInt_t npoints = clusters1.size();
-	  StEEmcSmdClusterVec_t uclusters = (clusters1[0].plane()==0)? clusters1:best;
-	  StEEmcSmdClusterVec_t vclusters = (clusters1[0].plane()==1)? clusters1:best;
-
-
-	  for ( UInt_t ipoint=0;ipoint<npoints;ipoint++ )
+	  for ( UInt_t ipoint = 0; ipoint < npoints; ipoint++ )
 	    {
 
 	      StEEmcPoint p;
-
-	      p.cluster( cluster, 0 );              /* set tower cluster */
+	      p.cluster(cluster, 0 ); /* set tower cluster */
 
 	      StEEmcSmdCluster u=uclusters[ipoint];
 	      StEEmcSmdCluster v=vclusters[ipoint];
-
-	      p.cluster( u, 0 );        /* set smdu */
-	      p.cluster( v, 1 );        /* set smdv */
+	      p.cluster( u, 0 );
+	      p.cluster( v, 1 );
 	      
-	      // SMD energy based on an (approximate) 7% sampling fraction for the SMD
-	      Float_t energy = u.energy() + v.energy();
-	      p.energy( (Float_t)(energy/0.014 ));
+	      Float_t energy = ( u.energy() + v.energy() ) / 0.014; /* initial estimate assumes 1.4% s.f. */
+	      p.energy( energy );
 
-	      // width of the SMD distribution
-	      Float_t sigma = u.sigma() + v.sigma();
-	      sigma/=2.0;
+	      Float_t sigma  = ( u.sigma() + v.sigma() ) / 2.0;
 	      p.sigma( sigma );
 
-	      // set the position of the point
-	      TVector3 position=mEEsmd->getIntersection( p.sector(), u.mean(), v.mean() );
-	      p.position( position );
+	      TVector3 position = mEEsmd->getIntersection( u.sector(), u.mean(), v.mean() );
+	      if ( position.Z() < 0. )
+		{
+		  LOG_WARN<<GetName()<<" attempt to add point with invalid intersection"<<endm;
+		  LOG_WARN<<GetName()<<Form(" X=%5.1f Y=%5.1f sec=%i %i u=%5.1f v=%5.1f", 
+					    position.X(),position.Y(),u.sector(),v.sector(),u.mean(),v.mean());
+		  continue;
+		}
+	      p.position(position);
 
-	      // FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX 
-	      // get the tower the point sits under and skip if it's outside of the endcap
-	      // acceptance.  Note that when this happens, the cluster matching algorithm
-	      // messed up.  
-	      // FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX FIX 
+	      /*
+	       * Obtain a pointer to the tower which this point sits under, and copy
+	       * the tower data structure into the point.  In the unlikely event that
+	       * the tower is out of the acceptance of the endcap, then there is some-
+	       * thing wrong with the smd geometry class or the point maker.
+	       */
 	      StEEmcTower *tower = mEEanalysis->tower( position, 0 );
-	      if ( !tower ) continue; 
-	      //printf("set tower\n");
-	      p.tower( *tower );
+	      if ( !tower )
+		{
+		  LOG_WARN<<GetName()<<" attempt to add point which misses the EEMC towers"<<endm;
+		  LOG_WARN<<GetName()<<Form(" X=%5.1f Y=%5.1f sec=%i %i u=%5.1f v=%5.1f", 
+					    position.X(),position.Y(),u.sector(),v.sector(),u.mean(),v.mean());		  
+		  continue;
+		}
+	      p.tower(*tower);
 
-	      // add the point to the list of SMD points
-	      //printf("add the smd point\n");
+	      /*
+	       * If we've reached this point then, to get to the point of the matter
+	       * (sorry...)
+	       *
+	       * Add the point to the list of SMD points
+	       *
+	       */
 	      addSmdPoint( p );
 
-	      // kludge for now 
+	      /*
+	       * Something is screwy here, and we lose the tower cluster when addSmdPoint
+	       * is called.  Maybe a problem in the point's copy constructor?  Kludge it
+	       * for now.
+	       */
 	      mSmdPoints.back().cluster( cluster, 0 );
+               
 
 	    }
+	  
+	  
 	 	    
 	}// loop over tower clusters
+
+
 
     }// loop over sectors
   
@@ -290,6 +209,138 @@ Int_t StMyPointMaker::Make()
   
 
   return StEEmcGenericPointMaker::Make();
+}
+
+// ----------------------------------------------------------------------------
+Bool_t StMyPointMaker::AssociateClusters( StEEmcSmdClusterVec_t &list1, StEEmcSmdClusterVec_t &list2 )
+{
+
+  /*
+   * Sanity checks
+   */
+  if ( list1.size() == 1 && list2.size()==1 )
+    return true;
+
+  if ( list1.size() > list2.size() )
+    assert(2+2==5); // list1 should be smaller than list2
+
+  if ( list2.size() == 0 )
+    return false;
+
+  LOG_DEBUG<<GetName()<<" associating smd clusters"<<endm;
+
+
+  /*
+   * Index1 and index2 specify the order we take clusters from the list
+   */
+  std::vector<UInt_t> index1;
+  std::vector<UInt_t> index2;
+  for ( UInt_t i=0;i<list1.size();i++ ){ index1.push_back(i); }
+  for ( UInt_t i=0;i<list2.size();i++ ){ index2.push_back(i); }
+
+  std::vector<UInt_t> best1;
+  std::vector<UInt_t> best2;
+
+  /*
+   * Loop while Index2 has a permutation
+   */
+  Bool_t go = true;
+  Float_t ediff_min = 9.0E9;
+
+  Int_t count=0;
+  while ( go ) 
+    {
+
+      LOG_DEBUG<<GetName()<<" permutation = " << count++ << " ediff_min="<< ediff_min<< endm;
+      
+      // calculate energy chi^2 sum for the current order of 
+      // list 2 relative to list 1
+      Float_t ediff_sum = 0.0;
+      for ( UInt_t i=0;i<list1.size();i++ )
+	{
+
+	  // consider this pairing of clusters
+	  UInt_t i1 = index1[i];
+	  UInt_t i2 = index2[i];
+	  StEEmcSmdCluster cluster1 = list1[i1];
+	  StEEmcSmdCluster cluster2 = list2[i2];
+
+
+	  if ( cluster1.sector() != cluster2.sector() ) goto INVALID_PERM;
+	  if ( cluster1.plane () == cluster2.plane () ) goto INVALID_PERM;
+
+	  Float_t mean1 = cluster1.mean();
+	  Float_t mean2 = cluster2.mean();
+
+	  TVector3 hit = mEEsmd->getIntersection( cluster1.sector(), mean1, mean2 );
+	  if ( hit.Z() < -1.0 ) goto INVALID_PERM;
+
+	  Float_t echi2 = energyChi2( cluster1, cluster2 );
+	  if ( echi2 < 0. ) goto INVALID_PERM;
+
+	  ediff_sum += echi2;
+	  
+	}
+
+      
+      if ( ediff_sum < ediff_min )
+	{
+	  best1 = index1;
+	  best2 = index2;
+	  ediff_min = ediff_sum;
+	}
+      
+
+    INVALID_PERM:
+      go = std::next_permutation( index2.begin(), index2.end() );
+
+    }
+
+
+  // if we find a valid permuation, overwrite list2 with new
+  // ordering and return true
+  if ( best1.size() == index1.size() )
+    {
+
+      StEEmcSmdClusterVec_t temp2;
+
+      for ( UInt_t i=0;i<best2.size();i++ )
+	{
+
+	  temp2.push_back( list2[ best2[i] ] );
+
+	}
+
+      LOG_DEBUG<<GetName()<<Form(" ukey\tvkey\t\tvkey")<<endm;
+      LOG_DEBUG<<GetName()<<Form("     \t(initial)\t(final)")<<endm;
+      for ( UInt_t i=0;i<best1.size();i++ )
+	{
+	  LOG_DEBUG<<GetName()<<Form(" %i\t%i\t\t%i", list1[i].key(), list2[i].key(), temp2[i].key() )<<endm;
+	}
+
+      list2.clear();
+      list2=temp2;
+      return true;
+
+    }
+
+  /*
+   * If we reached this point, no valid points were found
+   */
+
+  return false;
+
+}
+
+Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 )
+{
+  Float_t e1 = c1.energy() * 1000.0;
+  Float_t e2 = c2.energy() * 1000.0;
+  Float_t esum = e1+e2;
+  Float_t edif = e1-e2;
+  Float_t nmip = esum/1.3;
+  if ( esum <= 0. ) return -1.;
+  return edif*edif/nmip;
 }
 
 // ---------------------------------------------------------------------
@@ -415,7 +466,8 @@ Bool_t StMyPointMaker::split( StEEmcSmdCluster &in1,  // first resolved cluster 
   /// Set keys equal to parent key so that we can tell that they have been 
   /// split from a cluster later in the chain
   my1.key( out1.key() );
-  my2.key( out1.key() );
+  //my2.key( out1.key() );
+  my2.key( mEEclusters->nextClusterId() );
 
   
   /// To keep with convention, we need to add the seed strip first
