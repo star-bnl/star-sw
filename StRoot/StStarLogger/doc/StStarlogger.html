@@ -22,10 +22,12 @@ Table of Contents:
 <li><a href="#logger">Integration log4j package for STAR framework</a>
 <li><a href="#makers">Logger for STAR Makers</a>
 <li><a href="#global">Global logger: "BFC" and "QA"</a>
+<li><a href="#default">The STAR logger default parameters</a>
 <li><a href="#macros">New macros</a>
 <li><a href="#use">How to use</a>
 <li><a href="#conf">How to configure</a>
 <li><a href="#print">"Print statement" transition</a>
+<li><a href="#runtime">Run time level control</a>
 <li><a href="#root">ROOT messages handling</a>
 <li><a href="#examples">"Examples (under construction yet)"</a>
 <li><a href="#stones">"Underwater stones"</a>
@@ -116,6 +118,30 @@ Table of Contents:
 
 Since both <b><code>"QA"</code></b> as well as <b><code>"BFC"</code></b> are the normal loggers 
 it can be provided with the dedicated filters, layouts, and appenders to <a href="#conf">customize</a> it output.
+<!-- ------------------------------------------------------------------------------ -->
+<a name="#default"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<h2>The STAR logger default parameters</h2>
+The default level of the messages for all STAR loggers but <b><code>QA</code></b>  is set to <b><code>WARN</code></b>. 
+The default level for the <b><code>QA</code></b> logger is <b><code>INFO</code></b>. 
+By default 
+<ul>
+<li>
+  <blockquota>
+    There is no active filter. 
+  </blockquota> 
+<li>
+  <blockquota>
+    The  appender for all loggers is the <code><b>"ConsoleAppender"</b></code>
+  </blockquota> 
+<li>
+  <blockquota>
+    The layout the <code><b>ConsoleAppender</b></code> is <code><b>"%-3c{2}:%-5p - %m%n"</b></code>
+  </blockquota> 
+</ul>
+
+The default value for the logger components can be set via 
+the optional logger <a href=#file>configuration XML file</a> also.
 
 <!-- ------------------------------------------------------------------------------ -->
 <a name="#macros"></a>
@@ -518,6 +544,36 @@ can be replaced with
    </pre>
    </code></b>
 and versa verse.
+<!-- ------------------------------------------------------------------------------ -->
+<a name="#runtime"></a>
+<!-- ------------------------------------------------------------------------------ -->
+<H2>Run time level control</H2>
+The default parameters of the loggers are provided  either by <a href="#default">default</a>
+or via the logger a href="#file">configuration file</a> at start time. 
+AT run-time the parameters can be changed with the log4cxx API.
+
+However the the level of the ogger associated with each StMaker instance can be set with 
+the StMaker::SetDebug method.
+<p>
+<center><b><code>
+<table border="1" cellspacing="0">
+<tr bgcolor="#aaaacc"><th align="center">StMaker::SetDebug parameter</th><th align="center">Logger level</th></tr>
+<tr bgcolor="#eeeeff"><td> &lt;-4</td><td>DEBUG</td></tr>
+<tr bgcolor="#ffffff"><td>kFatal=-4</td><td>FATAL</td></tr>
+<tr bgcolor="#eeeeff"><td>kError=-3</td><td>ERROR</td></tr>
+<tr bgcolor="#ffffff"><td>kWarning=-2</td><td>WARN</td></tr>
+<tr bgcolor="#eeeeff"><td>kInfo=-1</td><td>INFO</td></tr>
+<tr bgcolor="#ffffff"><td>kDefault=0</td><td><a href="#default">STAR default </a> </td></tr>
+<tr bgcolor="#eeeeff"><td>kDebug=1</td><td>DEBUG</td></tr>
+<tr bgcolor="#ffffff"><td>kDebug2=2</td><td>DEBUG</td></tr>
+<tr bgcolor="#eeeeff"><td> &gt; 2</td><td>DEBUG</td></tr>
+</table>
+</code></b></center>
+
+StMaker::SetDEBUG method is to propagate the message level to all its child Makers as 
+usually.
+
+
 <!-- ------------------------------------------------------------------------------ -->
 <a name="#root"></a>
 <!-- ------------------------------------------------------------------------------ -->
