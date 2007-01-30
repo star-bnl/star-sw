@@ -34,6 +34,13 @@ StMyClusterMaker::StMyClusterMaker(const Char_t *name, StEEmcA2EMaker *a2e, StMu
 
   mMuDst=mumk;
   //  assert(mumk);
+
+  setDoBreakInflection(0);
+  setDoBreakTruncation(0);
+  setDoBreakSize(0);
+
+  mUseFloor=false;
+  mFloorParams[0]=0.;mFloorParams[1]=0.;
   
 }
 // ----------------------------------------------------------------------------
@@ -72,7 +79,7 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
 
   const Char_t *clayers[]={"T","P","Q","R","U","V"};
 
-  gMessMgr->Info() << GetName() << " -I- build clusters for layer=" << clayers[layer] << endm;
+  LOG_INFO << " build clusters for layer=" << clayers[layer] << endm;
 
   // get list of hit towers
   StEEmcTowerVec_t hits=mEEanalysis->towers(layer);
@@ -82,13 +89,25 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
   // and reverse so it's descending
   std::reverse( hits.begin(), hits.end());
 
+  LOG_DEBUG<<"searching for seeds in layer "<<clayers[layer]<<endm;
+
   // loop over all hit towers and find seeds
   StEEmcTowerVec_t seeds;
-  for ( UInt_t i=0;i<hits.size();i++ )
-    if ( hits[i].energy() > mSeedEnergy[layer] ) 
-      seeds.push_back(hits[i]);
-    else
-      break;
+  for ( UInt_t i=0;i<hits.size();i++ ) 
+    {      
+
+      if ( hits[i].fail() ) continue;
+
+      if ( hits[i].energy() > mSeedEnergy[layer] ) 
+	seeds.push_back(hits[i]);
+      else
+	break;
+
+      LOG_DEBUG<<"+ "<<hits[i].name()<<" "<<hits[i].energy()<<endm;
+
+    }
+
+  LOG_DEBUG<<"clustering"<<endm;
 
   // next we form clusters around seeds.  clusters grow to
   // absorb all continuous energized towers.
@@ -117,7 +136,10 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
       for ( UInt_t j=0;j<hits.size();j++ )
 	{
 	  tow=hits[j];
+
 	  if ( used[ tow.index() ] ) continue; // next hit
+	  if ( tow.fail()          ) continue; // bad channel
+
 	  if ( tow.energy() < mMinEnergy[layer] ) break; // rest are not considered hit
 
 	  Int_t deta=TMath::Abs(etabin_seed - tow.etabin());
@@ -139,6 +161,7 @@ Int_t StMyClusterMaker::buildLayer(Int_t layer )
       if ( c.numberOfTowers() > size_old ) goto CLUSTERING;
 
       add(c); // add to the list of clusters
+      LOG_DEBUG<<"+ key="<<c.key()<<" seed="<<c.tower(0).name()<<" energy="<<c.energy()<<endm;
 
     }
 
@@ -172,7 +195,7 @@ Int_t StMyClusterMaker::buildPostshowerClusters()
 Int_t StMyClusterMaker::buildSmdClusters()
 {
 
-  gMessMgr->Info() << GetName() << " -I- building SMD clusters" << endm;
+  LOG_INFO << " building SMD clusters" << endm;
     
   for ( Int_t sector=0;sector<12;sector++ )
     for ( Int_t plane=0;plane<2;plane++ ) 
@@ -196,10 +219,10 @@ Int_t StMyClusterMaker::buildSmdClusters()
 	std::reverse(strips.begin(),strips.end());
 
 
-	gMessMgr->Debug() << GetName() << " -D- sector=" << sector 
-			  << " plane=" << plane 
-			  << " nhit strips=" << strips.size() 
-			  << endm;
+	LOG_DEBUG << " sector=" << sector 
+		  << " plane=" << plane 
+		  << " nhit strips=" << strips.size() 
+		  << endm;
 
 	StEEmcStripVec_t seeds;
 
@@ -241,10 +264,10 @@ Int_t StMyClusterMaker::buildSmdClusters()
 
 	
 	
-	gMessMgr->Debug() << GetName() << " -D- sector=" << sector
-                          << " plane=" << plane
-                          << " n seed strips=" << seeds.size()
-                          << endm;
+	LOG_DEBUG << " sector=" << sector
+		  << " plane=" << plane
+		  << " n seed strips=" << seeds.size()
+		  << endm;
 
 
 
@@ -271,6 +294,8 @@ Int_t StMyClusterMaker::buildSmdClusters()
 	    cluster.add( seed );
 
 	    Int_t break_inflection = 0;
+
+	    Int_t break_energy = 0;
 
 	    // add smd strips
 	    for ( Int_t j=1;j<=mMaxExtent;j++ )
@@ -307,6 +332,8 @@ Int_t StMyClusterMaker::buildSmdClusters()
 		      else
 			fail_count++;
 		    }
+		  else
+		    break_energy++;
 
 
 		} // to the right
@@ -341,21 +368,26 @@ Int_t StMyClusterMaker::buildSmdClusters()
 		      else
 			fail_count++;
                     }
+		  else
+		    break_energy++;
 
 		  
 		}
+
+		if ( break_energy ) break;
+
 
 		//
 		// terminate cluster when it doesn't grow enough
 		//
 		Float_t etruncate = ecluster;
 		etruncate *= ( mTruncateRatio - ( mTruncateRatio-1.0 ) * ( fail_count ) );
-		if ( cluster.energy() < etruncate ) break;		
+		if ( cluster.energy() < etruncate && mBreakTruncation ) break;		
 
 		//
 		// truncate the cluster if it reaches an inflection point
 		//
-		if ( break_inflection ) break;
+		if ( mBreakInflection && break_inflection ) break;
 
 	      }// done adding smd strips
 
@@ -363,18 +395,21 @@ Int_t StMyClusterMaker::buildSmdClusters()
 	    // add smd cluster to list of clusters
 	    if ( cluster.size() >= mMinStrips ) {
 	      add(cluster);
-	      gMessMgr->Info() << GetName() << " -I- adding " << cluster << endm;
+	      LOG_INFO << " adding " << cluster << endm;
 	      Int_t index=seed.index();
 	      // for narrow clusters, no additional seeds w/in +/- 3 smd strips are allowed
-	      for ( Int_t ii=index-3;ii<=index+3; ii++ ) if ( ii>=0 && ii<288 ) used[ii]=1;
+	      for ( Int_t ii=index-3;ii<=index+3; ii++ ) 
+		if ( ii>=0 && ii<288 ) used[ii]=1;
 
-	      /*
+	      
 	      // add a long distance "floor" 
-	      for ( Int_t ii=0;ii<288;ii++ )
-		{
-		  Float_t f = 2.0 * 0.20 * seed.energy() * TMath::Gaus( seed.index()-ii, 0., 3.5, true );
-		}
-	      */
+	      if ( mUseFloor )
+		for ( Int_t ii=0;ii<288;ii++ )
+		  {
+		    Float_t f = mFloorParams[0] * cluster.energy() * TMath::Gaus( seed.index()-ii, 0., mFloorParams[1] * cluster.sigma(), true );
+		    floor[ii]+=f;
+		  }
+	      
 
 	    }
 

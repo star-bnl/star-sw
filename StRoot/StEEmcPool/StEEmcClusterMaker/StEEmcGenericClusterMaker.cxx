@@ -2,6 +2,7 @@
 
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TLine.h"
 
 #include "StEEmcPool/StEEmcA2EMaker/StEEmcA2EMaker.h"
 
@@ -257,6 +258,9 @@ void StEEmcGenericClusterMaker::makeTrackMap()
   //-- Match primary tracks to tower, pre/postshower clusters
   //--
   Int_t nprimary = (Int_t)mudst->numberOfPrimaryTracks();
+
+  LOG_INFO<<" checking nprimary="<<nprimary<< " tracks"<<endm;
+
   for ( Int_t iprimary = 0; iprimary < nprimary; iprimary++ )
     {
       StMuTrack *track = mudst->primaryTracks(iprimary);
@@ -419,11 +423,15 @@ void StEEmcGenericClusterMaker::Clear(Option_t *opts)
 void StEEmcGenericClusterMaker::add( StEEmcCluster &c )
 {
 
+  assert( c.towers().size() ); // cluster with no towers?
+
   Int_t key    = nextClusterId();     /* next available cluster id */
   Int_t sector = c.tower(0).sector(); /* sector of seed tower      */
   Int_t layer  = c.tower(0).layer();  /* layer of the cluster      */
   c.key(key);
   mTowerClusters[sector][layer].push_back(c);
+
+  assert( mTowerClusters[sector][layer].back().towers().size() );
   
   // add this cluster to the cluster map
   EEmatch match;
@@ -436,6 +444,7 @@ void StEEmcGenericClusterMaker::add( StEEmcCluster &c )
   mBackgroundTrackMap[ key ] = u;
 
   mNumberOfClusters[c.tower(0).layer()]++;
+
 
 }
 
@@ -595,5 +604,3 @@ StEEmcSmdCluster StEEmcGenericClusterMaker::matchingSmdCluster ( StEEmcCluster &
 }
 
 
-
-// ----------------------------------------------------------------------------

@@ -33,6 +33,9 @@ class StEEmcBaseCluster : public TObject {
   Int_t key()const;   /**< returns the unique id for this cluster */
   void  key(Int_t k); /**< sets the unique id for this cluster */
 
+  Bool_t split(){ return mSplit; }
+  void   split( Bool_t s ){ mSplit=s; }
+
   void  addMatch( Int_t key, Int_t layer );           /**< associates another cluster with specified key in the specified layer */
   Int_t numberOfMatchingClusters( Int_t layer );      /**< returns the number of matching clusters in the specified layer */
   Int_t numberOfMatchingClusters( Int_t layer )const; /**< returns the number of matching clusters in the specified layer */
@@ -46,6 +49,7 @@ class StEEmcBaseCluster : public TObject {
  protected:
 
   Int_t mKey;                                        /**< a unique id assigned to each cluster, (initialized to -1 to indicate an invalid cluster. */
+  Bool_t mSplit;                                     /**< set true if the cluster is split from another cluster, false otherwise */
   std::vector< std::vector< Int_t > > mMatched;      /**< keys for matching clusters in each layer */
 
   Float_t mEnergy; /**< energy of the cluster */

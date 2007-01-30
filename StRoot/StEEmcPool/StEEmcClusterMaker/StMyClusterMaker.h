@@ -74,7 +74,18 @@
 #include "TH1F.h"
 #include "TH2F.h"
 
-class StMyClusterMaker : public StEEmcGenericClusterMaker
+#include <map>
+
+
+class StMyClusterParams 
+{
+ public:
+  StMyClusterParams(){ /* nada */ };
+  ~StMyClusterParams(){ /* nada */ };
+};
+
+
+class StMyClusterMaker : public StEEmcGenericClusterMaker, public StMyClusterParams
 {
 
  public:
@@ -96,6 +107,12 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker
   void setSmdTruncationRatio( Float_t t ) { mTruncateRatio = t; } 
   /// Set the minimum number of SMD strips to accept a cluster
   void setSmdMinimumStrips( Int_t m ) { mMinStrips = m; }
+  /// Sets inflection-point break
+  void setDoBreakInflection( Bool_t b ){ mBreakInflection=b; }
+  /// Sets energy ratio break
+  void setDoBreakTruncation( Bool_t b ){ mBreakTruncation=b; }
+  /// Sets maximimum size truncation
+  void setDoBreakSize( Bool_t b ){ mBreakSize=b; }
 
   /// Sets the maximum distance (in eta bins) from the seed tower
   void setEtaCut( Int_t nbins ){ mEtaCut = nbins; }
@@ -105,6 +122,10 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker
   void setSeedEnergy( Float_t e, Int_t layer=0 ){ mSeedEnergy[layer]=e; }
   /// Sets the minimum energy required to add a tower
   void setMinimumEnergy( Float_t e, Int_t layer=0 ){ mMinEnergy[layer]=e; }
+
+  /// Sets the (gaussian) parameters of the "floor" and sets the 
+  /// control flag which activates the cut.
+  void setFloor( Float_t relative_yield, Float_t width ){ mFloorParams[0]=relative_yield; mFloorParams[1]=width; }
 
  private:
  protected:
@@ -136,6 +157,12 @@ class StMyClusterMaker : public StEEmcGenericClusterMaker
 
   Float_t mSeedEnergy[6]; /**< Seed energy in each layer    */
   Float_t mMinEnergy[6];  /**< Minimum energy in each layer */
+
+  Bool_t mBreakSize;
+  Bool_t mBreakTruncation;
+  Bool_t mBreakInflection;
+  Bool_t mUseFloor;
+  Float_t mFloorParams[2];
 
   ClassDef(StMyClusterMaker,1);
 
