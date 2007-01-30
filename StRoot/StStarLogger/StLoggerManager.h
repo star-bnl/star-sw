@@ -62,6 +62,7 @@ class StLoggerManager : public StMessMgr {
    int   fLastRepeatCounter;
 #ifndef __CINT__
    log4cxx::varia::StarOptionFilterPtr  fStarOptionFilter;
+   log4cxx::LevelPtr fDefaultLevel;
 #endif
    // int building;
    // int remember;
@@ -231,4 +232,4 @@ inline log4cxx::varia::StarOptionFilterPtr&  StLoggerManager::GetStarOptionFilte
 #endif
 #endif
 
-// $Id: StLoggerManager.h,v 1.9 2007/01/25 18:36:38 fine Exp $
+// $Id: StLoggerManager.h,v 1.10 2007/01/30 19:25:51 fine Exp $
