@@ -182,7 +182,7 @@ StLoggerManager::StLoggerManager(const char *loggerName)
      fLineNumbers[i] = -1;
   }
   fLogger   = Logger::getLogger(_T(loggerName));
-  
+  fDefaultLevel = fLogger->getLevel();
   fCurType     = new char[ 2];  fCurType[0] = 0; fCurType[1] = 0;
   fCurOpt      = new char[32];  fCurOpt [0] = 0; 
   SwitchOff("D");
@@ -250,6 +250,8 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
+    //Almost all QA messages are on the info level
+    fgQALogger->setLevel(Level::INFO); 
     NDC::push(_T(":"));
 
     mInstance = StarLoggerInit("BFC");
@@ -464,7 +466,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.23 2007/01/25 18:36:38 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.24 2007/01/30 19:25:51 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -810,7 +812,8 @@ void StLoggerManager::SetLevel(Int_t level)
          fLogger->setLevel(Level::DEBUG);
          break;
       case kDefault:
-         // restore the default level
+         // restore the default level (defined the XML configuration if present)
+         fLogger->setLevel(fDefaultLevel);
          break;
       default:
          fLogger->setLevel(Level::DEBUG);
@@ -847,8 +850,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.23 2007/01/25 18:36:38 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.24 2007/01/30 19:25:51 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.24  2007/01/30 19:25:51  fine
+// Set the deafult level for QA to b INFO
+//
 // Revision 1.23  2007/01/25 18:36:38  fine
 // Acivate logger level StMaker level run-time adjustment
 //
