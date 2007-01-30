@@ -246,12 +246,11 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
        appender->addFilter(filter);
        root->addAppender(appender);
        //Set the default threashold to be 
-       root->setLevel(Level::WARN);
+       root->setLevel(Level::INFO);
     }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
     //Almost all QA messages are on the info level
-    fgQALogger->setLevel(Level::INFO); 
     NDC::push(_T(":"));
 
     mInstance = StarLoggerInit("BFC");
@@ -466,7 +465,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.24 2007/01/30 19:25:51 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.25 2007/01/30 20:48:57 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -850,8 +849,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.24 2007/01/30 19:25:51 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.25 2007/01/30 20:48:57 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.25  2007/01/30 20:48:57  fine
+// Make the deault level for all loggers INFO
+//
 // Revision 1.24  2007/01/30 19:25:51  fine
 // Set the deafult level for QA to b INFO
 //
