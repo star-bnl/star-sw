@@ -122,10 +122,12 @@ it can be provided with the dedicated filters, layouts, and appenders to <a href
 <a name="#default"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2>The STAR logger default parameters</h2>
-The default level of the messages for all STAR loggers but <b><code>QA</code></b>  is set to <b><code>WARN</code></b>. 
-The default level for the <b><code>QA</code></b> logger is <b><code>INFO</code></b>. 
 By default 
 <ul>
+<li>
+  <blockquota>
+    The message level is <b><code>INFO</code></b>
+  </blockquota> 
 <li>
   <blockquota>
     There is no active filter. 
@@ -136,11 +138,11 @@ By default
   </blockquota> 
 <li>
   <blockquota>
-    The layout the <code><b>ConsoleAppender</b></code> is <code><b>"%-3c{2}:%-5p - %m%n"</b></code>
+    The  <code><b>ConsoleAppender</b></code> layout is <code><b>"%-3c{2}:%-5p - %m%n"</b></code>
   </blockquota> 
 </ul>
 
-The default value for the logger components can be set via 
+The default values for the logger components can be set via 
 the optional logger <a href=#file>configuration XML file</a> also.
 
 <!-- ------------------------------------------------------------------------------ -->
@@ -549,16 +551,16 @@ and versa verse.
 <!-- ------------------------------------------------------------------------------ -->
 <H2>Run time level control</H2>
 The default parameters of the loggers are provided  either by <a href="#default">default</a>
-or via the logger a href="#file">configuration file</a> at start time. 
-AT run-time the parameters can be changed with the log4cxx API.
+or via the logger <a href="#file">configuration file</a> at start time. 
+At run-time the parameters can be changed with the log4cxx API.
 
-However the the level of the ogger associated with each StMaker instance can be set with 
-the StMaker::SetDebug method.
+However the the level of the logger associated with each StMaker instance can be set with 
+the <b><code>StMaker::SetDebug</code></b> method as well.
 <p>
 <center><b><code>
 <table border="1" cellspacing="0">
 <tr bgcolor="#aaaacc"><th align="center">StMaker::SetDebug parameter</th><th align="center">Logger level</th></tr>
-<tr bgcolor="#eeeeff"><td> &lt;-4</td><td>DEBUG</td></tr>
+<tr bgcolor="#eeeeff"><td> &lt;-4</td><td>FATAL</td></tr>
 <tr bgcolor="#ffffff"><td>kFatal=-4</td><td>FATAL</td></tr>
 <tr bgcolor="#eeeeff"><td>kError=-3</td><td>ERROR</td></tr>
 <tr bgcolor="#ffffff"><td>kWarning=-2</td><td>WARN</td></tr>
