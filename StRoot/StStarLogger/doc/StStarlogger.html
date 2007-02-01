@@ -35,7 +35,7 @@ Table of Contents:
                           of <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr">the old messager"</a>
 </ul>
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#logger"></a>
+<a name="logger"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2> Integration log4j package for STAR framework</h2>
 
@@ -79,7 +79,7 @@ Table of Contents:
   for the logger as needed. 
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#makers"></a>
+<a name="makers"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2> "Loggers" for STAR Makers  </h2>
 
@@ -97,7 +97,7 @@ Table of Contents:
   logger  matches the logger of the current active StMaker instance.
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#global"></a>
+<a name="global"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2>Global "Loggers": <b><code>"BFC"</code></b> and <b><code>"QA"</code></b></h2>
  The STAR software infrastructure provides two default global loggers. 
@@ -119,7 +119,7 @@ Table of Contents:
 Since both <b><code>"QA"</code></b> as well as <b><code>"BFC"</code></b> are the normal loggers 
 it can be provided with the dedicated filters, layouts, and appenders to <a href="#conf">customize</a> it output.
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#default"></a>
+<a name="default"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2>The STAR logger default parameters</h2>
 By default 
@@ -146,7 +146,7 @@ The default values for the logger components can be set via
 the optional logger <a href=#file>configuration XML file</a> also.
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#macros"></a>
+<a name="macros"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2> New macros </h2>
 
@@ -161,7 +161,7 @@ the CPP macros as follows:
   <li> <b><code>LOG_ERROR</code></a> </b>
   <li> <b><code>LOG_FATAL</code></a> </b>
 <!-- ------------------------------------------------------------------------------ -->
-  <a name="#log_qa_macros"></a>
+  <a name="log_qa_macros"></a>
 <!-- ------------------------------------------------------------------------------ -->
   <li> <b><code>LOG_QA</code></a> </b>
 </ul>
@@ -173,7 +173,7 @@ For example, to direct the message to the "error" logger on needs:
 </pre>  </code> </b>
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#nologgermacros"></a>
+<a name="nologgermacros"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <b>Attention !!! </b> Keep in mind the <b><code>LOG_ERROR </code> </b> 
 is a CPP macro with <b><code>if</code> </b> C++ statement inside.
@@ -249,7 +249,7 @@ Just add into your implementation the lines as follows:
 or something like this.
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#use"></a>
+<a name="use"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2> How to use the manager </h2>
 
@@ -299,12 +299,12 @@ To use the STAR message manager your code has to contain the STAR message manage
    All other features can be ordered with the configuration 
    file at run-time without any needs to change and re-compile the code.
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#conf"></a>
+<a name="conf"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2>How to configure</h2>
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#file"></a>
+<a name="file"></a>
 <!-- ------------------------------------------------------------------------------ -->
 To overwrite the STAR default output logger configuration one can provide 
 the <a href="#examples">custom configuration</a> with the file 
@@ -312,7 +312,7 @@ in <a href="http://wiki.apache.org/logging-log4j/Log4jXmlFormat">XML format</a>,
 <b><code>"log4j.xml"</code></b>,  in the current working directory.
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#env"></a>
+<a name="env"></a>
 <!-- ------------------------------------------------------------------------------ -->
 The custom name and directory for the logger configuration file can be provided via ROOT resource file.
 One may add to his/her <b><code>".rootrc"</code></b> file the line:
@@ -331,7 +331,7 @@ One can alternate the default configuration file name and its location via <b><c
 environment variable as well.
 <p>
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#fileExample"></a>
+<a name="fileExample"></a>
 <!-- ------------------------------------------------------------------------------ -->
 For example, <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/log4j.xml?rev=HEAD">the file <b><code>"log4j.xml"</code></b></a> 
 defines the "Console output" for entire STAR production chain and the <b><code>"Debug"</code></b> level of the messages.
@@ -378,7 +378,7 @@ The layout may be supplied with <a href="http://logging.apache.org/log4j/docs/ap
 the custom format string</a>.
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#formats"></a>
+<a name="formats"></a>
 <!-- ------------------------------------------------------------------------------ -->
    <b><code>
    <pre>
@@ -449,7 +449,7 @@ Examples:
 <p>
   
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#print"></a>
+<a name="print"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2> "Print statement" transition</h2>
  To enjoy the new logger feature one should replace the "regular" C++ I/O stream output statement 
@@ -465,7 +465,7 @@ Examples:
    </code></b>
 <p>
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#printCplus"></a>
+<a name="printCplus"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h3> "C++" output stream statements </h3>
  If you use the C++ output streams like <b><code>"cout"</code></b>, <b><code>"cerr"</code></b>  
@@ -495,7 +495,7 @@ with
 a simple addition</a>.
    
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#printCprintf"></a>
+<a name="printCprintf"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h3> "C"output subroutines</h3>
 
@@ -547,7 +547,7 @@ can be replaced with
    </code></b>
 and versa verse.
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#runtime"></a>
+<a name="runtime"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <H2>Run time level control</H2>
 The default parameters of the loggers are provided  either by <a href="#default">default</a>
@@ -577,7 +577,7 @@ usually.
 
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#root"></a>
+<a name="root"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <H2>ROOT messages handling</H2>
 The messages generated by the ROOT system are handled by the messagger also. 
@@ -607,7 +607,7 @@ Namely, one still can define it via "ROOT Environment" providing the line
  </pre></code></b>
 alike within his/her <a href="#conf">custom <b><code>".rootrc"</code></b> file</a>.  The ROOT rule is applied first.
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#examples"></a>
+<a name="examples"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <!-- <H2><a href="HowTo.html">"Examples</a> (under construction yet)"</H2>  -->
 <H2>Examples of the custom configuration files (under construction yet)</H2>
@@ -627,7 +627,7 @@ or from <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StStarLogger/
 </ul>
 SkipMessages.xml
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#stones"></a>
+<a name="stones"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2>Underwater stones</h2>
 
@@ -654,7 +654,7 @@ printed more then one time</a>.
 
 
 <!-- ------------------------------------------------------------------------------ -->
-<a name="#deprecated"></a>
+<a name="deprecated"></a>
 <!-- ------------------------------------------------------------------------------ -->
 <h2> Deprecated methods </h2>
 
