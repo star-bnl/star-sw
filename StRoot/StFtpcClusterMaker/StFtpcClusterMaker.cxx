@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.90  2007/02/01 11:57:04  jcs
+// move unessential output from INFO to DEBUG
+//
 // Revision 1.89  2007/01/15 07:49:22  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -385,9 +388,7 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
   mDbMaker     = (St_db_Maker*)GetMaker("db");
   Int_t dbDate = mDbMaker->GetDateTime().GetDate();
   Int_t dbTime = mDbMaker->GetDateTime().GetTime();
-  LOG_INFO<<"dbDate = "<<dbDate<<" dbTime = "<<dbTime<<" Run Number = "<<GetRunNumber()<<endm;
-  
-  LOG_INFO << "InitRun("<<runnumber<<") - 'flavor' FTPC drift maps for gFactor = "<<gFactor<<endm;
+  LOG_INFO<<"dbDate = "<<dbDate<<" dbTime = "<<dbTime<<" Run Number = "<<GetRunNumber()<<" gFactor = "<<gFactor<<endm;
   
   // Load the correct FTPC drift maps depending on magnetic field
 
@@ -397,35 +398,35 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
      SetFlavor("ffp10kv","ftpcdVDriftdP");
      SetFlavor("ffp10kv","ftpcDeflection");
      SetFlavor("ffp10kv","ftpcdDeflectiondP");
-     LOG_INFO << "Ftpc drift map flavor set to ffp10kv"<<endm;
+     LOG_DEBUG << "Ftpc drift map flavor set to ffp10kv"<<endm;
   }
   else if ( gFactor > 0.2 ) {
      SetFlavor("hfp10kv","ftpcVDrift");
      SetFlavor("hfp10kv","ftpcdVDriftdP");
      SetFlavor("hfp10kv","ftpcDeflection");
      SetFlavor("hfp10kv","ftpcdDeflectiondP");
-     LOG_INFO << "Ftpc drift map flavor set to hfp10kv"<<endm;
+     LOG_DEBUG << "Ftpc drift map flavor set to hfp10kv"<<endm;
   }
   else if ( gFactor > -0.2 ) {
      SetFlavor("zf10kv","ftpcVDrift");
      SetFlavor("zf10kv","ftpcdVDriftdP");
      SetFlavor("zf10kv","ftpcDeflection");
      SetFlavor("zf10kv","ftpcdDeflectiondP");
-     LOG_INFO << "Ftpc drift map flavor set to zf10kv"<<endm;
+     LOG_DEBUG << "Ftpc drift map flavor set to zf10kv"<<endm;
   }
   else if ( gFactor > -0.8 ) {
      SetFlavor("hfn10kv","ftpcVDrift");
      SetFlavor("hfn10kv","ftpcdVDriftdP");
      SetFlavor("hfn10kv","ftpcDeflection");
      SetFlavor("hfn10kv","ftpcdDeflectiondP");
-     LOG_INFO << "Ftpc drift map flavor set to hfn10kv"<<endm;
+     LOG_DEBUG << "Ftpc drift map flavor set to hfn10kv"<<endm;
   }
   else {
      SetFlavor("ffn10kv","ftpcVDrift");
      SetFlavor("ffn10kv","ftpcdVDriftdP");
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
-     LOG_INFO << "Ftpc drift map flavor set to ffn10kv"<<endm;
+     LOG_DEBUG << "Ftpc drift map flavor set to ffn10kv"<<endm;
   }     
 
   // calculate microsecondsPerTimebin from RHIC clock frequency for current run 
@@ -582,9 +583,13 @@ Int_t StFtpcClusterMaker::Make()
   }
 
   if ( paramReader.gasTemperatureWest() == 0 && paramReader.gasTemperatureEast() == 0) {
-     dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
      LOG_INFO<<"Using the following values from database:"<<endm;
-     LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<endm;
+     if (microsecondsPerTimebin > 0.0 ) {
+        dbReader.setMicrosecondsPerTimebin(microsecondsPerTimebin);
+        LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (calculated from RHIC Clock Frequency)"<<endm;
+     } else {
+        LOG_INFO<<"          microsecondsPerTimebin    = "<<dbReader.microsecondsPerTimebin()<<" (default value from database)"<<endm;
+     }
      LOG_INFO<<"          EastIsInverted            = "<<dbReader.EastIsInverted()<<endm;
      LOG_INFO<<"          Asic2EastNotInverted      = "<<dbReader.Asic2EastNotInverted()<<endm;
      LOG_INFO<<"          tzero                     = "<<dbReader.tZero()<<endm;
@@ -608,7 +613,7 @@ Int_t StFtpcClusterMaker::Make()
   daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
-      LOG_INFO << "Using StDAQReader to get StFTPCReader" << endm;
+      LOG_DEBUG << "Using StDAQReader to get StFTPCReader" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
@@ -655,7 +660,7 @@ Int_t StFtpcClusterMaker::Make()
             // default values change depending on SVT high voltage on/off
             // currently using daqReader->SVTPresent() to test but may need
             // access to Conditions_svt/svtInterLocks
-         LOG_INFO << "daqReader->SVTPresent() = " << daqReader->SVTPresent() << endm;
+         LOG_DEBUG << "daqReader->SVTPresent() = " << daqReader->SVTPresent() << endm;
 	 returnCode = gasUtils.defaultTemperatureWest(dbDate,daqReader->SVTPresent());
       }	 
 
@@ -670,17 +675,19 @@ Int_t StFtpcClusterMaker::Make()
             // default values change depending on SVT high voltage on/off
             // currently using daqReader->SVTPresent() to test but may need
             // access to Conditions_svt/svtInterLocks
-         LOG_INFO << "daqReader->SVTPresent() = " << daqReader->SVTPresent() << endm;
+         LOG_DEBUG << "daqReader->SVTPresent() = " << daqReader->SVTPresent() << endm;
 	 returnCode = gasUtils.defaultTemperatureEast(dbDate,daqReader->SVTPresent());
       }	 
 
 
-      LOG_INFO << " Using normalizedNowPressure = "<<paramReader.normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader.gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader.gasTemperatureEast()<<endm; 
-
+ 
+       // Calculate and set adjustedAirPressureWest
        paramReader.setAdjustedAirPressureWest(paramReader.normalizedNowPressure()*((dbReader.baseTemperature()+STP_Temperature)/(paramReader.gasTemperatureWest()+STP_Temperature)));
-      LOG_INFO << " paramReader.setAdjustedAirPressureWest = "<<paramReader.adjustedAirPressureWest()<<endm;
+
+       // Calculate and set adjustedAirPressureEast
       paramReader.setAdjustedAirPressureEast(paramReader.normalizedNowPressure()*((dbReader.baseTemperature()+STP_Temperature)/(paramReader.gasTemperatureEast()+STP_Temperature)));
-     LOG_INFO << " paramReader.setAdjustedAirPressureEast = "<<paramReader.adjustedAirPressureEast()<<endm;
+
+      LOG_INFO << " Using normalizedNowPressure = "<<paramReader.normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader.gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader.gasTemperatureEast()<< " to calculate and set adjustedAirPressureWest = "<<paramReader.adjustedAirPressureWest()<<" and adjustedAirPressureEast = "<<paramReader.adjustedAirPressureEast()<<endm;
 
     }
 
@@ -707,7 +714,7 @@ Int_t StFtpcClusterMaker::Make()
 				  (char *) fcl_ftpcadc->GetTable(),
 				  fcl_ftpcadc->GetNRows());
 
-      LOG_INFO << "created StFTPCReader from tables" << endm;
+      LOG_DEBUG << "created StFTPCReader from tables" << endm;
       using_FTPC_slow_simulator = 1;
   
       // Set gas temperature to default values so that database values printed only once
@@ -715,16 +722,17 @@ Int_t StFtpcClusterMaker::Make()
       paramReader.setGasTemperatureEast(dbReader.defaultTemperatureEast());
     }
     else {
-      LOG_INFO << "Tables are not found:" 
+      LOG_WARN << "Tables are not found:" 
                << " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
 	       << " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
+      return kStWarn;  
     }
   }
 
   if(ftpcReader) {
 
     if(Debug()) {
-       LOG_INFO << "start running StFtpcClusterFinder" << endm;
+       LOG_DEBUG << "start running StFtpcClusterFinder" << endm;
     }
       
     Int_t searchResult = kStOK;
@@ -782,7 +790,7 @@ Int_t StFtpcClusterMaker::Make()
 							     g2t_ftp_hit);
 
       if(Debug()) {
-        LOG_INFO << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
+        LOG_DEBUG << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
       }
       
       StFtpcFastSimu  ffs                     (&geantReader,
@@ -791,7 +799,7 @@ Int_t StFtpcClusterMaker::Make()
 					       mHitArray,
 					       &ghitarray);
       if(Debug()) {
-        LOG_INFO << "finished running StFtpcFastSimu" << endm;
+        LOG_DEBUG << "finished running StFtpcFastSimu" << endm;
       }
     }
   }
@@ -855,7 +863,7 @@ void StFtpcClusterMaker::MakeHistograms()
 {
   if (!mHitArray) return;
 
-  //LOG_INFO<<"*** NOW MAKING HISTOGRAMS ***"<<endm;
+  //LOG_DEBUG<<"*** NOW MAKING HISTOGRAMS ***"<<endm;
 
   for (Int_t i=0; i<mHitArray->GetEntriesFast();i++) {
     StFtpcPoint *hit = (StFtpcPoint*)mHitArray->At(i);
