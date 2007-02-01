@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.8 2007/02/01 13:47:39 balewski Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.9 2007/02/01 20:33:46 wzhang Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -29,6 +29,9 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.9  2007/02/01 20:33:46  wzhang
+ * dca initialized in getDcaStripPtr()
+ *
  * Revision 1.8  2007/02/01 13:47:39  balewski
  * bug fix in getDca2Strip(), more methodhs are public
  *
@@ -420,6 +423,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 {
   //    StructEEmcStrip* stripPtr;
   //    stripPtr = new StructEEmcStrip;
+    *dca = 1000.0;
     int iStrip = -1;
     //$$$    int iUV;
     float x1,y1,x2,y2,mu,d;
