@@ -8,8 +8,8 @@
  * elements.
  *
  * \author Jason C. Webb
- * $Date: 2007/01/30 16:35:28 $
- * $Revision: 1.5 $
+ * $Date: 2007/02/01 22:00:20 $
+ * $Revision: 1.6 $
  *
  * \section steemccluster_conventions Conventions
  *
@@ -37,7 +37,6 @@ ClassImp(StEEmcCluster);
 // ----------------------------------------------------------------------------
 StEEmcCluster::StEEmcCluster() : StEEmcBaseCluster()
 {
-
   mEmcCluster=0;
   mEnergy=0.;
   mfPhibin=0.0;
@@ -82,7 +81,8 @@ void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
 {
   
   if ( weight * tower.energy() <= 0. ) return;
-  mWeights.push_back(weight);
+
+  mWeights.push_back( weight );
   mTowers.push_back( tower );
   
   Float_t energy = weight * tower.energy();
@@ -97,8 +97,12 @@ void StEEmcCluster::add( StEEmcTower tower, Float_t weight )
   mSumEtaW  = (tower.etabin())*tower.energy()*weight;
   mSumPhiW  = (myphi)*tower.energy()*weight;
 
-  static EEmcGeomSimple geom=EEmcGeomSimple::Instance();
-  mMomentum += energy * ( geom.getTowerCenter( (UInt_t)tower.sector(), (UInt_t)tower.subsector(), (UInt_t)tower.etabin() ).Unit() );
+  //$$$  static EEmcGeomSimple geom=EEmcGeomSimple::Instance();
+
+  EEmcGeomSimple *geom=new EEmcGeomSimple();
+  mMomentum += energy * ( geom->getTowerCenter( (UInt_t)tower.sector(), (UInt_t)tower.subsector(), (UInt_t)tower.etabin() ).Unit() );
+  delete geom;
+
   mPosition = mMomentum.Unit();
   mPosition *= ( kEEmcZSMD / mMomentum.CosTheta() );
 
@@ -123,6 +127,8 @@ Float_t StEEmcCluster::fracPhibin()
 StEEmcCluster::~StEEmcCluster(){
   /// If we have created an StEmcCluster, delete it
   //$$$  if ( mEmcCluster != 0 ) delete mEmcCluster;
+  mTowers.clear();
+  mWeights.clear();
 }
 
 
@@ -208,10 +214,10 @@ Float_t StEEmcCluster::sigmaE()
     }
   Float_t mean=sumE/sumw;
   Float_t var=sumE2/sumw-mean*mean;
-  return TMath::Sqrt(var);
-  
+  return TMath::Sqrt(var);  
 }
 //=======
+
 
 // ----------------------------------------------------------------------------
 /***
