@@ -173,10 +173,11 @@ void makeEEmcDisplay( Int_t nevents = -1,
   //  ((StMyPointMaker*)mEEpoints)->setSplitMinimumET(6.0);
   ((StMyPointMaker*)mEEpoints)->setSmdMinFraction(0.00);
 
+  /***
   mEEpi0s = new StEEmcPi0Maker("mEEpi0s",mEEanalysis,mEEclusters,mEEpoints);
   mEEpi0s->addTrigger(96261); 
   mEEpi0s->setCheckTrigger(true); 
-
+****/ 
 
   mEEdisplay=new StEEmcDisplayMaker("mEEdisplay");
   mEEdisplay->adc2energy(mEEanalysis);
@@ -188,7 +189,7 @@ void makeEEmcDisplay( Int_t nevents = -1,
 
   // output file for histograms/ttrees
   file=new TFile(ofile,"RECREATE");
-  mEEpi0s->setFile(file);
+  //mEEpi0s->setFile(file);
   mEEdisplay->setFile(file);
 
 
@@ -230,7 +231,7 @@ void makeEEmcDisplay( Int_t nevents = -1,
     //-- Process the event through all makers 
     //--
     stat = mChain -> Make();
-    std::cout << "Number of pairs = " << mEEpi0s->numberOfPairs() << std::endl;
+    //std::cout << "Number of pairs = " << mEEpi0s->numberOfPairs() << std::endl;
 
     //--
     //-- Set to printout on every 10th event
@@ -311,8 +312,8 @@ void makeEEmcDisplay( Int_t nevents = -1,
   //-- Output the QA histograms to disk
   //--
   file->cd(); 
-  mEEpi0s->GetHistList()->Write(); 
-  mEEpi0s->GetHistList()->Print();
+  //mEEpi0s->GetHistList()->Write(); 
+  //mEEpi0s->GetHistList()->Print();
   mEEdisplay->tree()->Write();
   file->Close();
   delete file;
