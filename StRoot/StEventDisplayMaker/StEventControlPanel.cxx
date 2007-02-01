@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.15 2006/11/30 23:03:02 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.16 2007/02/01 22:41:00 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -70,6 +70,7 @@
 #include "StMaker.h"
 #include "StEventDisplayMaker.h"
 #include "StEventHelper.h"
+#include "TClass.h"
 // #include "StFilterABC.h"
 
 #include <qapplication.h>
@@ -199,7 +200,7 @@ void StEventControlPanel::Build()
          "FTPC" ,"SCON"	, 
          "SVT"	 ,"STSI"	, 
          "SSD"	 ,"SSD"	, 
-         "RnD"  ,"RICH"	, 
+         "RnD"  ,"STI"	, 
          "EMC"	 ,"CALB"	, 
          "TOF"	 ,"BTOF"	
       };

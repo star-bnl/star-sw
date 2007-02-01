@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.119 2006/12/22 00:54:27 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.120 2007/02/01 22:41:00 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -279,34 +279,54 @@ Int_t StEventDisplayMaker::Init(){
 Int_t StEventDisplayMaker::BuildGeometry()
 {
   // Create STAR sub-detector definition
-
-  m_Hall = (TVolume *)GetDataSet("HALL");
-  if (!m_Hall) return kStErr;
-  //
-  // Create an iterator to navigate STAR geometry
-  TDataSetIter volume(m_Hall,0);
-// ---  Create "standard" TPC and SVT views ----
-  TVolume *sector = 0;
-  while ( (sector = ( TVolume *)volume()) ){
-    Bool_t found = kFALSE;
-    found = (m_VolumeList && m_VolumeList->FindObject(sector->GetName()));
-    if (found) {
-      sector->SetVisibility(TVolume::kBothVisible);
-      sector->Mark();
-      if (sector->GetLineColor()==1 || sector->GetLineColor()==7) 
-              sector->SetLineColor(14);
-      TShape *myShape = sector->GetShape();
-      if (myShape->InheritsFrom(TTUBE::Class()) &&
-        strcmp(sector->GetName(),"TPSS")==0 ) {	 
-        ((TTUBE *)myShape)->SetNumberOfDivisions(1);
-      }
-    } else { 
-      sector->UnMark();
-      sector->SetVisibility(TVolume::kThisUnvisible);
-    }
+  m_Hall = 0;
+  Bool_t gotSti = kFALSE;
+  Int_t dipLevel=2;
+  if (m_VolumeList && m_VolumeList->FindObject("STI")) 
+  {
+     m_Hall = (TVolume *)GetDataSet("STIGEOM");
+     if (m_Hall) {
+        gotSti = kTRUE;
+        m_Hall->MarkAll(); // m_Hall->ls(0);
+        dipLevel = 10;
+     }
   }
-  m_Hall->SetVisibility(TVolume::kThisUnvisible);
-  m_ShortView = new TVolumeView(*m_Hall,2); 
+
+  TVolume *geantHall = 0;
+  if (!m_Hall) {
+    geantHall = (TVolume *)GetDataSet("HALL");
+    if (geantHall ) m_Hall = geantHall;
+  }
+  if (!m_Hall) return kStErr;
+  
+  // Create an iterator to navigate STAR geometry
+  if (geantHall) {
+     TDataSetIter volume(geantHall,0);
+// ---  Create "standard" TPC and SVT views ----
+     TVolume *sector = 0;
+     Int_t countMarked = 0;
+     while ( (sector = ( TVolume *)volume()) ){
+       Bool_t found = kFALSE;
+       found = (m_VolumeList && m_VolumeList->FindObject(sector->GetName()));
+       if (found) {
+          sector->SetVisibility(TVolume::kBothVisible);
+          sector->Mark(); countMarked++;
+          if (sector->GetLineColor()==1 || sector->GetLineColor()==7) 
+                  sector->SetLineColor(14);
+          TShape *myShape = sector->GetShape();
+          if (myShape->InheritsFrom(TTUBE::Class()) &&
+            strcmp(sector->GetName(),"TPSS")==0 ) {	 
+            ((TTUBE *)myShape)->SetNumberOfDivisions(1);
+          }
+        } else { 
+          sector->UnMark();
+          sector->SetVisibility(TVolume::kThisUnvisible);
+        }
+     }
+//     if (gotSti && countMarked)  m_Hall->Add(geantHall);
+     m_Hall->SetVisibility(TVolume::kThisUnvisible);
+  }
+  m_ShortView = new TVolumeView(*m_Hall,dipLevel); 
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
   MakeEmcTowers();
@@ -985,6 +1005,8 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     if (strstr(pos[1],word)) kase |= EHKindS[i];
   }
   
+  LOG_DEBUG << " Current selector \"kase\"= " << kase << endm;
+  
   TString sel("^StSPtrVec");
 
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
@@ -1382,6 +1404,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.120  2007/02/01 22:41:00  fine
+// Add Sti geometry to the Event Display
+//
 // Revision 1.119  2006/12/22 00:54:27  fine
 // Add Qt env test
 //
