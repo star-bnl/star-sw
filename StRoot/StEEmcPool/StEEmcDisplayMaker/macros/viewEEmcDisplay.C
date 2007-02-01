@@ -77,7 +77,7 @@ void load_prev()
   std::cout << entry << Form("\t") << display->GetTitle()<<endl;  
 }
 // ----------------------------------------------------------------------------
-void show_event() { towers=display->DrawPoints(); }
+void show_event() { towers=display->DrawPoints("box"); }
 // ----------------------------------------------------------------------------
 void show_sector( Int_t sector=-1, Option_t *topts="box", Option_t *sopts="" ) 
 {
@@ -92,7 +92,7 @@ void show_sector( Int_t sector=-1, Option_t *topts="box", Option_t *sopts="" )
   Float_t xmax = xmin+6.0;
   TCanvas *ctowers=display->getEEmc();
   ctowers->cd();
-  towers = display->DrawPoints();
+  towers = display->DrawPoints("box");
 
   //gROOT->GetListOfCanvases()->Modified();  /* refresh canvas */
   towers->GetXaxis()->SetRangeUser(xmin,xmax);
