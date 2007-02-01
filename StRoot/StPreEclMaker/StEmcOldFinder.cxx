@@ -66,7 +66,7 @@ Bool_t StEmcOldFinder::findClustersInDetector(StEmcDetector* detector)
     Int_t NM = detector->numberOfModules();
     for(Int_t m = 1; m<=NM; m++)
         findClustersInModule(det,detector->module(m));
-    LOG_INFO <<"Number of clusters found for detector "<<det<<" = "<<mColl[det-1]->GetSize()<<endm;
+    LOG_DEBUG <<"Number of clusters found for detector "<<det<<" = "<<mColl[det-1]->GetSize()<<endm;
 
     return kTRUE;
 }
