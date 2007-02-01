@@ -4,7 +4,7 @@
  * 
  *****************************************************************************
  *
- * $Id: EEmcSmdGeom.h,v 1.7 2007/01/26 00:51:08 balewski Exp $
+ * $Id: EEmcSmdGeom.h,v 1.8 2007/02/01 13:47:39 balewski Exp $
  *
  * 
  *
@@ -110,13 +110,12 @@ class EEmcSmdGeom : public TObject {
 
   static EEmcSmdGeom* sInstance;
 
+ public:
   /// iPlane=[0,1,2] - experts only, changes meaning form sector to sector
   /// return a DCA strip pointer from a point (float *dca carries sign)  
   const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const TVector3& point, Float_t* dca);
   const StructEEmcStrip* getDcaStripPtr(const Int_t iPlane, const Int_t iSec, const TVector3& point, Float_t* dca);
   
-  
- public:
   
   static EEmcSmdGeom* instance();   // handle the only instance
   static EEmcSmdGeom* instance(intVec sectorIdVec);   
@@ -233,6 +232,9 @@ inline StructEEmcSmdSector EEmcSmdGeom::getEEmcSector(const Int_t iUV,
  *
  *
  * $Log: EEmcSmdGeom.h,v $
+ * Revision 1.8  2007/02/01 13:47:39  balewski
+ * bug fix in getDca2Strip(), more methodhs are public
+ *
  * Revision 1.7  2007/01/26 00:51:08  balewski
  * too strong protection
  *

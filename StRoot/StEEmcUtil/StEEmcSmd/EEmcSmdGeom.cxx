@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.7 2007/01/26 00:51:08 balewski Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.8 2007/02/01 13:47:39 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -29,6 +29,9 @@
  *****************************************************************************
  *
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.8  2007/02/01 13:47:39  balewski
+ * bug fix in getDca2Strip(), more methodhs are public
+ *
  * Revision 1.7  2007/01/26 00:51:08  balewski
  * too strong protection
  *
@@ -480,7 +483,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV,
 					   const TVector3& point, Float_t* dca) {
   assert(iUV>=0 || iUV<kEEmcNumSmdUVs); 
   int iSec = getEEmcISec(0, point); //assuming the 1st SMD plane to get SectorID is good enough,
-  if(iSec<0)  getEEmcISec(1, point); // try next plane,  this is silly, Jan
+  if(iSec<0)  iSec = getEEmcISec(1, point); // try next plane,  this is silly, Jan
   if(iSec<0) return 0; // no crossing point
   assert( iSec<kEEmcNumSectors);
   int iPlane= kEEmcSmdMap_iPlane[iUV][iSec];// now find  mapping iUV --> iPlane
