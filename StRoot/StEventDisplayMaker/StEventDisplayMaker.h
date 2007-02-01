@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.38 2006/10/09 20:33:46 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.39 2007/02/01 22:40:08 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.39  2007/02/01 22:40:08  fine
+// Add TROOT header file
+//
 // Revision 1.38  2006/10/09 20:33:46  fine
 // Fix to make it work under ROOT 4.04 and ROOT 5.12
 //
@@ -81,7 +84,7 @@
 
 #include "StMaker.h"
 #include "StDefaultFilter.h"
-
+#include "TROOT.h"
 class    TVolume;
 class    TVolumeView;
 class    TTable;
@@ -101,7 +104,7 @@ class TQtRootViewer3D;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.38 2006/10/09 20:33:46 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.39 2007/02/01 22:40:08 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -212,7 +215,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.38 2006/10/09 20:33:46 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.39 2007/02/01 22:40:08 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
