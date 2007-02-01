@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.72 2007/01/15 07:49:21 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.73 2007/02/01 11:57:00 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.73  2007/02/01 11:57:00  jcs
+// move unessential output from INFO to DEBUG
+//
 // Revision 1.72  2007/01/15 07:49:21  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -253,7 +256,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH1F *histoW,
                                          TH1F *histoE)
 {
-  LOG_INFO << "StFtpcClusterFinder constructed for production" << endm;  
+  LOG_DEBUG << "StFtpcClusterFinder constructed for production" << endm;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
@@ -312,7 +315,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH1F *histoE,
 					 StFtpcClusterDebug *cldebug)
 {
-  LOG_INFO << "StFtpcClusterFinder constructed for calibration" << endm;  
+  LOG_DEBUG << "StFtpcClusterFinder constructed for calibration" << endm;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
@@ -373,7 +376,7 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
 
 StFtpcClusterFinder::~StFtpcClusterFinder()
 {
-//   LOG_INFO << "StFtpcClusterFinder destructed" << endm;
+//   LOG_DEBUG << "StFtpcClusterFinder destructed" << endm;
 }
 
 int StFtpcClusterFinder::search()
@@ -431,12 +434,12 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
    if ( iftpc == 0 ) {
       deltaAirPressure = mParam->adjustedAirPressureWest() - mParam->standardPressure();
       firstPadrowToSearch = mDb->firstPadrowToSearch() - 1;
-      LOG_INFO <<"Ftpc West: deltaAirPressure = "<<deltaAirPressure<<endm;
+      LOG_DEBUG <<"Ftpc West: deltaAirPressure = "<<deltaAirPressure<<endm;
    }
    if ( iftpc == 1 ) {
       deltaAirPressure = mParam->adjustedAirPressureEast() - mParam->standardPressure();
       firstPadrowToSearch = mDb->firstPadrowToSearch() - 1 + mDb->numberOfPadrowsPerSide();
-      LOG_INFO <<"Ftpc East: deltaAirPressure = "<<deltaAirPressure<<endm;
+      LOG_DEBUG <<"Ftpc East: deltaAirPressure = "<<deltaAirPressure<<endm;
    }
 
   /* integrate padtrans table from magboltz database */
@@ -2072,7 +2075,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
   step_size=((float) mDb->numberOfTimebins()
 	     / (float) mParam->numberOfDriftSteps());
 
-  LOG_INFO <<"deltap = "<<deltap<<endm;
+  LOG_DEBUG <<"StFtpcClusterFinder::calcpadtrans deltap = "<<deltap<<endm;
   
   for (padrow=0; padrow<mDb->numberOfPadrowsPerSide(); padrow++)
     {

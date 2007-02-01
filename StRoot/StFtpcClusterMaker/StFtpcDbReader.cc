@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.38 2007/01/15 07:49:22 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.39 2007/02/01 11:57:04 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.39  2007/02/01 11:57:04  jcs
+// move unessential output from INFO to DEBUG
+//
 // Revision 1.38  2007/01/15 07:49:22  jcs
 // replace printf, cout and gMesMgr with Logger
 //
@@ -773,12 +776,6 @@ Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t ne
 
 Int_t StFtpcDbReader::setMicrosecondsPerTimebin(Float_t newvalue)
 {
-   if ( newvalue > 0.0 ) {
-     mMicrosecondsPerTimebin = newvalue;
-     LOG_INFO << "mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" calculated from RHIC Clock Frequency"<<endm;
-   }
-   else  {
-     LOG_INFO << "mMicrosecondsPerTimebin = "<<mMicrosecondsPerTimebin<<" default value from database"<<endm;
-   }
+   mMicrosecondsPerTimebin = newvalue;
    return 0;
 }
