@@ -1,4 +1,4 @@
-// @(#)root/g3d:$Name:  $:$Id: TEmcTower.cxx,v 1.2 2006/10/09 20:33:46 fine Exp $
+// @(#)root/g3d:$Name:  $:$Id: TEmcTower.cxx,v 1.3 2007/02/01 22:39:16 fine Exp $
 // Author: Valeri Fine    22/12/04
 
 
@@ -10,7 +10,7 @@
 #include "TVolumePosition.h"
 #include "TGeometry.h"
 #include "TPadView3D.h"
-
+#include "TMath.h"
 
 ClassImp(TEmcTowers)
 
