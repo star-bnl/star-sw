@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.142 2007/02/02 17:18:40 potekhin Exp $
+* $Id: geometry.g,v 1.143 2007/02/02 18:20:46 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.143  2007/02/02 18:20:46  potekhin
+* The updated FMS code (fpdgeo) needs more space at the
+* end of the cave, so we need to add some. We will reflect
+* the more precise dimensions in cavegeo.g - here we just
+* add the requisite configuration flag for Y2007
+*
 * Revision 1.142  2007/02/02 17:18:40  potekhin
 * Added logic to include the updated SSD code
 *
@@ -753,7 +759,7 @@ replace[;ON#{#;] with [
 
    BtofConfig  = 1 ! ctb only
    CalbConfig  = 0 ! really make use of it starting in y2004
-   CaveConfig  = 1 ! also -  a modified cave for shielding studies (2), or wider cave for muon detector (3)
+   CaveConfig  = 1 ! custom for shielding studies=2, wider for muon detector=3, and longer=4
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
    FgtdConfig  = 0 ! 0=no, >1=version
@@ -2225,8 +2231,8 @@ If LL>1
                   "Muon Trigger System"
                      mutd = on;
                      MutdConfig = 1;
-                  "We need a bigger Cave"
-                     CaveConfig = 3;
+                  "We need an even bigger Cave"
+                     CaveConfig = 4;
                 }
 ****************************************************************************************
   on DUMM01   { R and D geometry: TPC+DUMM
