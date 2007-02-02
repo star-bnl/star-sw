@@ -17,6 +17,7 @@
 			<param name="StringToMatch" value="Schema evolution warning: row size mismatch: expected 236, read 228 bytes" /> 
 			<param name="AcceptOnMatch" value="false " /> 
 		</filter>
+		
 	</appender>
   
 	<root>
