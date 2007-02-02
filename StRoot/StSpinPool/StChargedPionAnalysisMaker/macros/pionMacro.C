@@ -4,10 +4,8 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 			   int nFiles = 1,
 			   int nEvents = 200000000)
 {
-	gROOT->LoadMacro("$STAR/StRoot/macros/LoadLogger.C");
-	LoadLogger();
-	gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
-    loadSharedLibraries();
+	gROOT->Macro("$STAR/StRoot/macros/LoadLogger.C");
+	gROOT->Macro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     gSystem->Load("StarMagField.so");
     gSystem->Load("StMagF");
     gSystem->Load("StTpcDb");
@@ -34,8 +32,8 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 	
 	StChain* chain = new StChain("StChain");
 	//chain->SetDebug();
-	
-	StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",filelist,"",nFiles);	
+		
+ 	StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",filelist,"",nFiles);	
 	St_db_Maker *dbMaker = new St_db_Maker("StarDb","MySQL:StarDb");
 	StSpinDbMaker* spDbMaker = new StSpinDbMaker("spinDb");
 	StDetectorDbMaker* detDbMaker = new StDetectorDbMaker();
@@ -47,20 +45,26 @@ void pionMacro(const char* dir="/star/institutions/mit/kocolosk/analysis/test",
 	StEmcTriggerMaker *emcTrig = new StEmcTriggerMaker("bemctrigger");
 	emcTrig->setDbMaker(dbMaker);
 	
+	cout<<"start adding locally compiled makers"<<endl;
+	
 	TString jetSkimFile(dir);
 	jetSkimFile += "/";
 	jetSkimFile += name;
-	jetSkimFile += ".jetskim";
-	jetSkimFile += ".root";
+	jetSkimFile += ".jetskim.root";
 	StJetSkimEventMaker *jetSkim = new StJetSkimEventMaker("jetSkimMaker",muDstMaker,jetSkimFile.Data());
 		
+	cout<<"add my maker"<<endl;
+	
 	TString outfile(dir);
 	outfile += "/";
 	outfile += name;
-	outfile += ".root";
-	StChargedPionAnalysisMaker* pionMaker = new StChargedPionAnalysisMaker("pionMaker",outfile.Data());
-	pionMaker->isRealData = true;
+	outfile += ".tracks.root";
+//	StChargedPionAnalysisMaker* pionMaker = new StChargedPionAnalysisMaker("pionMaker",outfile.Data());
+//	pionMaker->isRealData = true;
+	StChargedPionMaker* pionMaker = new StChargedPionMaker("chargedPionMaker",outfile.Data());
+
 	
+	cout<<"try to init"<<endl;
 	chain->Init();
 	cout<<"chain initialized"<<endl;
 	
