@@ -62,7 +62,7 @@ public:
 	unsigned short	nLowPtTracks;
 	TClonesArray*	lowPtTracks; //1<pt<2
 	
-	//multiple vertex support, hopefully it doesn't slow us down
+	//basic multiple vertex support, more info in StJetSkimEvent
 	unsigned short	nVertices;
 	float			vx[10];	//[nVertices]
 	float			vy[10];	//[nVertices]
