@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.18 2007/01/16 18:01:52 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.19 2007/02/02 20:24:15 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.19  2007/02/02 20:24:15  bouchet
+// WriteStripTuple method added, WriteScmTuple method updated
+//
 // Revision 1.18  2007/01/16 18:01:52  bouchet
 // Replace printf,cout,gMessMgr with LOG statements
 //
@@ -132,12 +135,15 @@ class StSsdPointMaker : public StMaker {
   St_ssdDimensions      *m_dimensions;    //!< Pointer to the ssdDimensions table (wafer size)
   St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
+  Float_t Strips_hits[15];
   Float_t ClusterNtuple[10];
-  Float_t hitNtuple[9]; 
-  TFile *mFile;
-  TNtuple* mHitNtuple;
-  TFile *nFile;
-  TNtuple* nHitNtuple;
+  Float_t hitNtuple[10]; 
+  TFile   *mFile;
+  TNtuple *mHitNtuple;
+  TFile   *nFile;
+  TNtuple *nHitNtuple;
+  TFile   *qFile;
+  TNtuple *qHitNtuple;
 
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
@@ -146,6 +152,7 @@ class StSsdPointMaker : public StMaker {
   void PrintStripSummary(StSsdBarrel *mySsd); //!
   void PrintClusterSummary(StSsdBarrel *mySsd); //!
   void PrintPointSummary(StSsdBarrel *mySsd); //!
+  void WriteStripTuple(StSsdBarrel *mySsd);
   void WriteScfTuple(StSsdBarrel *mySsd);
   void WriteScmTuple(StSsdBarrel *mySsd);
   void PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
@@ -200,7 +207,7 @@ class StSsdPointMaker : public StMaker {
   
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.18 2007/01/16 18:01:52 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.19 2007/02/02 20:24:15 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
