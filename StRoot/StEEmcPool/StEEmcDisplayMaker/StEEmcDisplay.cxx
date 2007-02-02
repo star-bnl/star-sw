@@ -273,7 +273,6 @@ TH2F *StEEmcDisplay::DrawLayer(Int_t layer, Option_t *opts)
     return 0;
   }
 
-  TCanvas *can[]={ eemc, pre1, pre2, post };
   TCanvas *mycanvas = 0;//can[layer];
 
   if ( layer==1 )
@@ -548,7 +547,7 @@ TH1F *StEEmcDisplay::DrawClusters( Int_t sector, Int_t plane, Option_t *opts )
 TH1F *StEEmcDisplay::DrawCluster( Int_t icluster, Option_t *opts )
 {
 
-  Int_t sector = mClusterSector[ icluster ];
+  //Int_t sector = mClusterSector[ icluster ];
   Int_t plane  = mClusterPlane [ icluster ];
 
   assert( (plane==0)?smdu:smdv );
