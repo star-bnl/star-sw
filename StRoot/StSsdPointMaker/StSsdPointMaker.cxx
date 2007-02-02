@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.30 2007/02/02 17:46:58 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.31 2007/02/02 20:24:15 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.31  2007/02/02 20:24:15  bouchet
+// WriteStripTuple method added, WriteScmTuple method updated
+//
 // Revision 1.30  2007/02/02 17:46:58  bouchet
 // Few changes for the new Logger
 //
@@ -374,11 +377,14 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber)
 
 void StSsdPointMaker::DeclareNtuple(Int_t *flag){
   mFile = new TFile("PhysicsFile.root","RECREATE");
-  string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg";
+  string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag";
   mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
   nFile = new TFile("Clusters.root","RECREATE");
   string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc";
-  nHitNtuple     = new TNtuple("ClusTuple","Clusters Ntuple",varlist3.c_str());
+  nHitNtuple     = new TNtuple("ClusTuple","Clusters Ntuple",varlist3.c_str()); 
+  qFile = new TFile("Strips_in_hits.root","RECREATE");
+  string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
+  qHitNtuple          = new TNtuple("Strips_hits","Strips in hitsNtuple",varlist4.c_str());
   *flag =  1;
 }
 
@@ -484,15 +490,15 @@ Int_t StSsdPointMaker::Make()
       
       //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
       /*
-      for(Int_t i=1;i<=20;i++)
+	for(Int_t i=1;i<=20;i++)
 	{
-	  for(Int_t j=1;j<=16;j++)
-	    {
-	      PrintStripDetails(mySsd,7000+(100*j)+i);
-	      PrintClusterDetails(mySsd,7000+(100*j)+i);
-	      PrintPointDetails(mySsd,7000+(100*j)+i);
-	      PrintPackageDetails(mySsd,7000+(100*j)+i);
-	    }
+	for(Int_t j=1;j<=16;j++)
+	{
+	PrintStripDetails(mySsd,7000+(100*j)+i);
+	PrintClusterDetails(mySsd,7000+(100*j)+i);
+	PrintPointDetails(mySsd,7000+(100*j)+i);
+	PrintPackageDetails(mySsd,7000+(100*j)+i);
+	}
 	}
       */
       Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl,scf_cluster);
@@ -508,6 +514,7 @@ Int_t StSsdPointMaker::Make()
 	makeScmCtrlHistograms(mySsd);
       }
       if(flag==1){ 
+	WriteStripTuple(mySsd);
 	WriteScfTuple(mySsd);
 	WriteScmTuple(mySsd);
       }
@@ -835,6 +842,44 @@ void StSsdPointMaker::PrintPointSummary(StSsdBarrel *mySsd)
     }
   *gMessMgr<<endm;
 }
+//_____________________________________________________________________________
+void StSsdPointMaker::WriteStripTuple(StSsdBarrel *mySsd)
+{
+  Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
+  Int_t found;
+  for (Int_t i=0;i<20;i++) 
+    if (LadderIsActive[i]>0) {
+      for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
+	StSsdStrip *pStripP = mySsd->mLadders[i]->mWafers[j]->getStripP()->first();
+	while (pStripP){
+	  
+	  Strips_hits[0] = 0;
+	  Strips_hits[1] = i+1;
+	  Strips_hits[2] = j+1;
+	  Strips_hits[3] = pStripP->getNStrip();
+	  Strips_hits[4] = pStripP->getPedestal();
+	  Strips_hits[5] = pStripP->getDigitSig();
+	  Strips_hits[6] = pStripP->getSigma();
+	  Strips_hits[7] = (float)(pStripP->getDigitSig()/pStripP->getSigma());
+	  qHitNtuple->Fill(Strips_hits);
+	  pStripP    = mySsd->mLadders[i]->mWafers[j]->getStripP()->next(pStripP);
+	}
+	StSsdStrip *pStripN = mySsd->mLadders[i]->mWafers[j]->getStripN()->first();
+	while (pStripN){
+	  Strips_hits[0] = 1;
+	  Strips_hits[1] = i+1;
+	  Strips_hits[2] = j+1;
+	  Strips_hits[3] = pStripN->getNStrip();
+	  Strips_hits[4] = pStripN->getPedestal();
+	  Strips_hits[5] = pStripN->getDigitSig();
+	  Strips_hits[6] = pStripN->getSigma();
+	  Strips_hits[7] = (float)(pStripN->getDigitSig()/pStripN->getSigma());
+	  qHitNtuple->Fill(Strips_hits);	   
+	  pStripN    = mySsd->mLadders[i]->mWafers[j]->getStripN()->next(pStripN);
+	}
+      }
+    }
+}
 
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
@@ -885,12 +930,10 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
   Int_t conversion[11]={11,12,21,13,31,221,222,223,23,32,33}; 
   Float_t convMeVToAdc = (int)pow(2.0,mDynamicControl->getnbitEncoding())/(mDynamicControl->getpairCreationEnergy()*mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip());
   found=0;
-  // gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	  if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
-	    //   gMessMgr->Info() <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
 	  }
 	  else {
 	    StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
@@ -912,6 +955,7 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 	      hitNtuple[5]=pSpt->getXg(0);
 	      hitNtuple[6]=pSpt->getXg(1);
 	      hitNtuple[7]=pSpt->getXg(2);
+	      hitNtuple[8]=pSpt->getFlag();
 	      mHitNtuple->Fill(hitNtuple);		 
 	      pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
 		} 
@@ -926,7 +970,7 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
   Int_t found;
-  LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - Wafer "<<mywafer<< endm;  
+  LOG_DEBUG <<"PrintStripDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -934,15 +978,15 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
           found=1;
           //Looking for the P-side strip informations
           if (mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize()==0) {
-            LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - No strip on the P-side of this wafer "<< endm;  
+            LOG_DEBUG <<"PrintStripDetails() - No strip on the P-side of this wafer "<< endm;  
           }
           else {
-            LOG_DEBUG<<"StSsdPointMaker::PrintStripDetails() - "
+            LOG_DEBUG<<"PrintStripDetails() - "
                             <<mySsd->mLadders[i]->mWafers[j]->getStripP()->getSize()<<" strip(s) on the P-side of this wafer "<< endm;  
-            LOG_DEBUG<<"StSsdPointMaker::PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
+            LOG_DEBUG<<"PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
             StSsdStrip *pStripP = mySsd->mLadders[i]->mWafers[j]->getStripP()->first();
             while (pStripP){
-              LOG_DEBUG<<"StSsdPointMaker::PrintStripDetails() - "
+              LOG_DEBUG<<"PrintStripDetails() - "
                               <<pStripP->getNStrip()<<" "
                               <<pStripP->getDigitSig()<<" "
                               <<pStripP->getPedestal()<<" "
@@ -953,15 +997,15 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
 	  }
           //Looking for the N-side strip informations
           if (mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize()==0) {
-            LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - No strip on the N-side of this wafer "<< endm;  
+            LOG_DEBUG <<"PrintStripDetails() - No strip on the N-side of this wafer "<< endm;  
           }
           else {
-            LOG_DEBUG<<"StSsdPointMaker::PrintStripDetails() - "
+            LOG_DEBUG<<"PrintStripDetails() - "
                             <<mySsd->mLadders[i]->mWafers[j]->getStripN()->getSize()<<" strip(s) on the N-side of this wafer "<< endm;  
-            gMessMgr->Info()<<"StSsdPointMaker::PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
+            LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - Strip/Adc/Ped/Noise"<< endm;  
             StSsdStrip *pStripN = mySsd->mLadders[i]->mWafers[j]->getStripN()->first();
             while (pStripN){
-              LOG_DEBUG<<"StSsdPointMaker::PrintStripDetails() - "
+              LOG_DEBUG<<"PrintStripDetails() - "
                               <<pStripN->getNStrip()<<" "
                               <<pStripN->getDigitSig()<<" "
                               <<pStripN->getPedestal()<<" "
@@ -974,7 +1018,7 @@ void StSsdPointMaker::PrintStripDetails(StSsdBarrel *mySsd, Int_t mywafer)
       }
     }
 
-  if (found==0) {LOG_DEBUG <<"StSsdPointMaker::PrintStripDetails() - Wafer not found !!!"<<endm;}
+  if (found==0) {LOG_DEBUG <<"PrintStripDetails() - Wafer not found !!!"<<endm;}
 }
 
 //_____________________________________________________________________________
@@ -982,7 +1026,7 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 {
   Int_t LadderIsActive[20]={1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1} ;
   Int_t found;
-  LOG_DEBUG <<"StSsdPointMaker::PrintClusterDetails() - Wafer "<<mywafer<< endm;  
+  LOG_DEBUG <<"PrintClusterDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
@@ -990,15 +1034,15 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
           found=1;
           //Looking for the P-side cluster informations
           if (mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()==0) {
-            LOG_DEBUG <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
+            LOG_DEBUG <<"PrintClusterDetails() - No cluster on the P-side of this wafer "<< endm;  
           }
           else {
-            LOG_DEBUG<<"StSsdPointMaker::PrintClusterDetails() - "
+            LOG_DEBUG<<"PrintClusterDetails() - "
                             <<mySsd->mLadders[i]->mWafers[j]->getClusterP()->getSize()<<" cluster(s) on the P-side of this wafer "<< endm;  
-            LOG_DEBUG<<"StSsdPointMaker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
+            LOG_DEBUG<<"PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
             StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
             while (pClusterP){
-              LOG_DEBUG<<"StSsdPointMaker::PrintClusterDetails() - "
+              LOG_DEBUG<<"PrintClusterDetails() - "
                               <<pClusterP->getNCluster()<<" "
                               <<pClusterP->getFlag()<<" "
                               <<pClusterP->getClusterSize()<<" "
@@ -1014,15 +1058,15 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
 	  }
           //Looking for the N-side cluster informations
           if (mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()==0) {
-            LOG_DEBUG <<"StSsdPointMaker::PrintClusterDetails() - No cluster on the N-side of this wafer "<< endm;  
+            LOG_DEBUG <<"PrintClusterDetails() - No cluster on the N-side of this wafer "<< endm;  
           }
           else {
-            LOG_DEBUG<<"StSsdPointMaker::PrintClusterDetails() - "
+            LOG_DEBUG<<"PrintClusterDetails() - "
                             <<mySsd->mLadders[i]->mWafers[j]->getClusterN()->getSize()<<" cluster(s) on the N-side of this wafer "<< endm;  
-            LOG_DEBUG<<"StSsdPointMaker::PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
+            LOG_DEBUG<<"PrintClusterDetails() - Cluster/Flag/Size/1st Strip/Strip Mean/TotAdc/1st Adc/Last Adc/TotNoise"<< endm;  
             StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
             while (pClusterN){
-              LOG_DEBUG<<"StSsdPointMaker::PrintClusterDetails() - "
+              LOG_DEBUG<<"PrintClusterDetails() - "
                               <<pClusterN->getNCluster()<<" "
                               <<pClusterN->getFlag()<<" "
                               <<pClusterN->getClusterSize()<<" "
@@ -1040,7 +1084,7 @@ void StSsdPointMaker::PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer)
       }
     }
 
-  if (found==0){ LOG_DEBUG <<"StSsdPointMaker::PrintClusterDetails() - Wafer not found !!!"<<endm; }
+  if (found==0){ LOG_DEBUG <<"PrintClusterDetails() - Wafer not found !!!"<<endm; }
 }
 
 //_____________________________________________________________________________
@@ -1050,25 +1094,25 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer)
   Int_t found;
 
   found=0;
-  LOG_DEBUG <<"StSsdPointMaker::PrintPackageDetails() - Wafer "<<mywafer<< endm;  
+  LOG_DEBUG <<"PrintPackageDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
         if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
           found=1;
           if (mySsd->mLadders[i]->mWafers[j]->getPackage()->getSize()==0) {
-            LOG_DEBUG <<"StSsdPointMaker::PrintPackageDetails() - No package in this wafer "<< endm;  
+            LOG_DEBUG <<"PrintPackageDetails() - No package in this wafer "<< endm;  
           }
           else {
-            LOG_DEBUG <<"StSsdPointMaker::PrintPackageDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPackage()->getSize()<<" package(s) in this wafer "<< endm;  
-            LOG_DEBUG <<"StSsdPointMaker::PrintPackageDetails() - Package/Kind/Size"<< endm;  
+            LOG_DEBUG <<"PrintPackageDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPackage()->getSize()<<" package(s) in this wafer "<< endm;  
+            LOG_DEBUG <<"PrintPackageDetails() - Package/Kind/Size"<< endm;  
             StSsdPackage *pPack = mySsd->mLadders[i]->mWafers[j]->getPackage()->first();
             while (pPack){
-              LOG_DEBUG<<"StSsdPointMaker::PrintPackageDetails() - "<<pPack->getNPackage()<<" "
+              LOG_DEBUG<<"PrintPackageDetails() - "<<pPack->getNPackage()<<" "
                               <<pPack->getKind()<<" "
                               <<pPack->getSize()<<" "<<endm;
               for (Int_t k=0;k<pPack->getSize();k++) {
-                LOG_DEBUG<<"StSsdPointMaker::PrintPackageDetails() - "<<k<<" "<<pPack->getMatched(k)<<" "<<pPack->getMatched(k)->getNCluster()<<endm;
+                LOG_DEBUG<<"PrintPackageDetails() - "<<k<<" "<<pPack->getMatched(k)<<" "<<pPack->getMatched(k)->getNCluster()<<endm;
               }
               pPack    = mySsd->mLadders[i]->mWafers[j]->getPackage()->next(pPack);
             }     
@@ -1077,7 +1121,7 @@ void StSsdPointMaker::PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer)
       }
     }
 
-  if (found==0){ LOG_DEBUG <<"StSsdPointMaker::PrintPackageDetails() - Wafer not found !!!"<<endm;}
+  if (found==0){ LOG_DEBUG <<"PrintPackageDetails() - Wafer not found !!!"<<endm;}
 }
 
 //_____________________________________________________________________________
@@ -1087,22 +1131,22 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
   Int_t found;
 
   found=0;
-  LOG_DEBUG <<"StSsdPointMaker::PrintPointDetails() - Wafer "<<mywafer<< endm;  
+  LOG_DEBUG <<"PrintPointDetails() - Wafer "<<mywafer<< endm;  
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
         if (mySsd->mLadders[i]->mWafers[j]->getIdWafer()==mywafer) {
           found=1;
           if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
-            LOG_DEBUG <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
+            LOG_DEBUG <<"PrintPointDetails() - No hit in this wafer "<< endm;  
           }
           else {
-            LOG_DEBUG<<"StSsdPointMaker::PrintPointDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()<<" hit(s) in this wafer "<< endm; 
+            LOG_DEBUG<<"PrintPointDetails() - "<<mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()<<" hit(s) in this wafer "<< endm; 
  
-            LOG_DEBUG <<"StSsdPointMaker::PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xg[0]/Xg[1]/Xg[2]/Xl[0]/Xl[1]/Xl[2]"<< endm;  
+            LOG_DEBUG<<"PrintPointDetails() - Hit/Flag/NMatched/IdClusP/IdClusN/idMcHit[0]/idMcHit[1]/idMcHit[2]/idMcHit[3]/idMcHit[4]/Xg[0]/Xg[1]/Xg[2]/Xl[0]/Xl[1]/Xl[2]"<<endm;  
             StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
             while (pSpt){
-              LOG_DEBUG<<"StSsdPointMaker::PrintPointDetails() - "
+              LOG_DEBUG<<"PrintPointDetails() - "
                               <<pSpt->getNPoint()<<" "
                               <<pSpt->getFlag()<<" "
                               <<pSpt->getNMatched()<<" "
@@ -1127,7 +1171,7 @@ void StSsdPointMaker::PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer)
       }
     }
 
-  if (found==0) {LOG_DEBUG <<"StSsdPointMaker::PrintPointDetails() - Wafer not found !!!"<<endm; }
+  if (found==0) {LOG_DEBUG <<"PrintPointDetails() - Wafer not found !!!"<<endm; }
 }
 
 //_____________________________________________________________________________
@@ -1193,7 +1237,9 @@ Int_t StSsdPointMaker::Finish() {
     mFile->Write();
     mFile->Close();  
     nFile->Write();
-    nFile->Close(); 
+    nFile->Close();
+    qFile->Write();
+    qFile->Close();  
       }
   return kStOK;
 }
