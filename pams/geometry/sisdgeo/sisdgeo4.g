@@ -1,5 +1,9 @@
-* $Id: sisdgeo4.g,v 1.2 2006/10/21 18:18:27 potekhin Exp $
+* $Id: sisdgeo4.g,v 1.3 2007/02/02 17:21:05 potekhin Exp $
 * $Log: sisdgeo4.g,v $
+* Revision 1.3  2007/02/02 17:21:05  potekhin
+* Corrected a typo in the diagnostic printout,
+* which preinted the wrong version.
+*
 * Revision 1.2  2006/10/21 18:18:27  potekhin
 * Add "ONLY" option, to not lose hits in possible
 * clash with the periphery of the FST
@@ -412,7 +416,7 @@ Module  SISDGEO4  is the Silicon Strip Detector
         Mixture   DELRIN   Dens=1.2
 
 
-      write(*,*) 'Level 3 of the SSD geometry, Configuration: ',SSDP_Config
+      write(*,*) 'Level 4 of the SSD geometry, Configuration: ',SSDP_Config
       write(*,*) 'WARNING: this geometry is only useable for 2005 and onward'
 
       if(ssdp_Placement==1) then
