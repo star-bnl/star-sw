@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.9 2007/02/01 20:33:46 wzhang Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.10 2007/02/02 02:11:11 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -25,44 +25,6 @@
  * kEEmcNumStrips     =288 (1: the shortes inner and 288: the shortest outer) 
  * kEEmcNumEdgeStrips =283 (1: the shortes inner and 283: the shortest outer)
  * kEEmcNumSmdLayers  =  2 (1: U and 2: V) 
- *
- *****************************************************************************
- *
- * $Log: EEmcSmdGeom.cxx,v $
- * Revision 1.9  2007/02/01 20:33:46  wzhang
- * dca initialized in getDcaStripPtr()
- *
- * Revision 1.8  2007/02/01 13:47:39  balewski
- * bug fix in getDca2Strip(), more methodhs are public
- *
- * Revision 1.7  2007/01/26 00:51:08  balewski
- * too strong protection
- *
- * Revision 1.6  2007/01/25 22:33:21  balewski
- * add:
- * - better writeup
- * - new simpler to use method calculating dca fo track to strip, it is just a wrapper, some approximations were used, may fail at the sector boundary
- *
- * Revision 1.5  2007/01/12 23:53:14  jwebb
- * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
- * method.
- *
- * Revision 1.4  2004/06/03 23:01:06  jwebb
- * Fixed memory leak reported by Bob.  Fixed another memory leak.
- *
- * Revision 1.3  2004/02/06 22:33:08  jwebb
- * Moved statement to fix warning.
- *
- * Revision 1.2  2004/01/29 16:37:25  jwebb
- * Removed dependence on StMaker.h and PhysicalConstants.h.  Should be fully
- * decoupled from Star environment now.
- *
- * Revision 1.1  2004/01/29 15:26:10  jwebb
- * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
- * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
- * all function calls in EEmcSmdGeom.  StThreeVectorD wrappers are provided
- * in StEEmcSmdGeom, for integration into Star framework.
- *
  *
  *****************************************************************************/
 
@@ -483,12 +445,14 @@ const StructEEmcStrip* EEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
 //==================================================================
 // get DCA strip pointer from a point  
 // iUV=[0,1] , maps [U,V]
+// Warn, this code does not handle well sector boundaries, it ignores possible tripple overlaps and uses only nominal U or V planes in a given sector
 const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV, 
 					   const TVector3& point, Float_t* dca) {
   assert(iUV>=0 || iUV<kEEmcNumSmdUVs); 
-  int iSec = getEEmcISec(0, point); //assuming the 1st SMD plane to get SectorID is good enough,
-  if(iSec<0)  iSec = getEEmcISec(1, point); // try next plane,  this is silly, Jan
-  if(iSec<0) return 0; // no crossing point
+  float phiDeg=atan2(point.y(),point.x())/3.1316*180.;
+  printf("phiDeg=%.1f  \n",phiDeg);
+  int iSec= ((int) ( 12.-(phiDeg-75.)/30.) )%12;
+  assert(iSec>=0);
   assert( iSec<kEEmcNumSectors);
   int iPlane= kEEmcSmdMap_iPlane[iUV][iSec];// now find  mapping iUV --> iPlane
   assert(iPlane>=0 && iPlane<kEEmcNumSmdPlanes);
@@ -785,17 +749,47 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 
 
 /////////////////////////////////////////////////////////////////////////////
-/*******************************************************************
+/*
+ * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.10  2007/02/02 02:11:11  balewski
+ * simplification of  EEmcSmdGeom::getDca2Strip(..)
  *
- * Id: StEEmcSmdGeom.cxx,v 1.8 2004/01/12 14:34:09 wzhang Exp 
+ * Revision 1.9  2007/02/01 20:33:46  wzhang
+ * dca initialized in getDcaStripPtr()
  *
- * Author: Wei-Ming Zhang 
- *****************************************************************
+ * Revision 1.8  2007/02/01 13:47:39  balewski
+ * bug fix in getDca2Strip(), more methodhs are public
  *
- * Description: Geometry definitions and utility class for EEMC-SMD
+ * Revision 1.7  2007/01/26 00:51:08  balewski
+ * too strong protection
  *
- *****************************************************************
+ * Revision 1.6  2007/01/25 22:33:21  balewski
+ * add:
+ * - better writeup
+ * - new simpler to use method calculating dca fo track to strip, it is just a wrapper, some approximations were used, may fail at the sector boundary
  *
+ * Revision 1.5  2007/01/12 23:53:14  jwebb
+ * Fix applied to eliminate parralax error in the EEmcSmdGeom::getIntersection()
+ * method.
+ *
+ * Revision 1.4  2004/06/03 23:01:06  jwebb
+ * Fixed memory leak reported by Bob.  Fixed another memory leak.
+ *
+ * Revision 1.3  2004/02/06 22:33:08  jwebb
+ * Moved statement to fix warning.
+ *
+ * Revision 1.2  2004/01/29 16:37:25  jwebb
+ * Removed dependence on StMaker.h and PhysicalConstants.h.  Should be fully
+ * decoupled from Star environment now.
+ *
+ * Revision 1.1  2004/01/29 15:26:10  jwebb
+ * The StEEmcSmdGeom class was split into two classes.  All StRoot-independent
+ * code has been moved to EEmcSmdGeom.  TVector3 replaces StThreeVectorD in
+ * all function calls in EEmcSmdGeom.  StThreeVectorD wrappers are provided
+ * in StEEmcSmdGeom, for integration into Star framework.
+ *
+ *
+ *****************************************************************************
  * Log: StEEmcSmdGeom.cxx,v 
  * Revision 1.8  2004/01/12 14:34:09  wzhang
  * Corrected the usage of EEmcStripPtrVecIter
