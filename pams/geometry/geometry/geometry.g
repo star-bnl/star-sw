@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.141 2006/12/21 23:06:17 potekhin Exp $
+* $Id: geometry.g,v 1.142 2007/02/02 17:18:40 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.142  2007/02/02 17:18:40  potekhin
+* Added logic to include the updated SSD code
+*
 * Revision 1.141  2006/12/21 23:06:17  potekhin
 * Previous versions of UPGRxx geometries were deficient
 * is that there was a clash between the IGT disks and
@@ -2210,7 +2213,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 35; "third version, full barrel newly corrected radii"
+                     SisdConfig = 55; "fifth version, corrected radii, gaps, dead material"
 
 
                   "FTPC Readout barrel "
@@ -3222,6 +3225,8 @@ If LL>1
             call sisdgeo3
          elseif (sisd_level.eq.4) then
             call sisdgeo4
+         elseif (sisd_level.eq.5) then
+            call sisdgeo5
          else ! Unimplemented level
             write(*,*) '******************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ******************'
             if (IPRIN==0) stop 'You better stop here to avoid problems'     
