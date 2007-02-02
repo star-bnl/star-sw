@@ -1,6 +1,11 @@
-* $Id: cavegeo.g,v 1.5 2006/03/22 00:17:00 potekhin Exp $
+* $Id: cavegeo.g,v 1.6 2007/02/02 18:22:41 potekhin Exp $
 *
 * $Log: cavegeo.g,v $
+* Revision 1.6  2007/02/02 18:22:41  potekhin
+* Extended the length of the main Cave volueme, to better
+* reflect the real size. This will be refined once the
+* more precise data becomes available.
+*
 * Revision 1.5  2006/03/22 00:17:00  potekhin
 * Need to expand the radius of the "CAVE" (which is an artificial
 * number in the first place) to accomodate teh mupn trigger system.
@@ -52,6 +57,15 @@ real      D1,D2,Z1
          Rmin    = 0             ! inner radius
          Rmax    = {450,100}          ! outer radius
          Dz      = {800,2000}         ! half length
+         Dconc   = 50                 ! concrete thickness
+      EndFill 
+
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Fill CAVE              !  STAR CAVE GEOMETRY
+         version = 4             ! geometry version
+         Rmin    = 0             ! inner radius
+         Rmax    = {450,100}          ! outer radius
+         Dz      = {850,2000}         ! half length
          Dconc   = 50                 ! concrete thickness
       EndFill 
 
