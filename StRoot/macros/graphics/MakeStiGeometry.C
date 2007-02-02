@@ -10,7 +10,7 @@ TVolume *MakeStiGeometry()
         StiToolkit *t = stiMk->getToolkit();
         if (t) {
            StiMasterDetectorBuilder *b = t->getDetectorBuilder();
-           if (b) v = StiDetectorVolume(*b);
+           if (b) v = new StiDetectorVolume(*b);
         }
      }
   }
