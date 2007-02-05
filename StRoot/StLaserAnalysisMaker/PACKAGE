@@ -1,0 +1,5 @@
+# $Id $
+# package StLaserAnalysisMaker
+# author: 
+Library:libStLaserAnalysisMaker.so:LIBS +=   -lg2t  -lStChain  -lStDAQMaker  -lSt_g2t  -ltpc_Tables
+#Library:libStLaserAnalysisMaker.so:LIBS +=   -lg2t  -lStChain  -lStDAQMaker  -lSt_g2t  -ltpc_Tables

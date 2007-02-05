@@ -1,42 +1,31 @@
+// $Id: StLaserAnalysisMaker.h,v 1.2 2007/02/05 15:30:06 fisyak Exp $
 #ifndef STAR_StLaserAnalysisMaker
 #define STAR_StLaserAnalysisMaker
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StLaserAnalysisMaker virtual base class for Maker                            //
-//                                                                      //
-//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
-//
-// Removed all CVS stuff
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#include "TClonesArray.h"
-class StDAQReader;
-class StTPCReader;
-class St_tpg_pad_plane;
-class St_tpg_detector;
-class TTree;
-class LEvent;
+#include "TTree.h"
 class StLaserAnalysisMaker : public StMaker {
  private:
-  Int_t             fNPrediction;   //!
-  LEvent           *fevent;         //!
-  TClonesArray     *fPredictions;   //!
-  StDAQReader      *fDAQReader;     //!
-  StTPCReader      *fTPCReader;     //!
-  St_tpg_pad_plane *ftpg_pad_plane; //!
-  St_tpg_detector  *ftpg_detector;  //!
-  TTree            *fTree;          //!
- protected:
+  TTree                *m_laser; //! Laser track-hit event Tree
+  
  public: 
-                  StLaserAnalysisMaker(const char *name="LaserAnalysis");
-   virtual       ~StLaserAnalysisMaker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
-   virtual TClonesArray *GetPredictions() const { return fPredictions; }
-   virtual Int_t OpenDAQ();
-   ClassDef(StLaserAnalysisMaker, 1)   //StF Achain virtual base class for Makers
+  StLaserAnalysisMaker(const char *name="Laser") : StMaker(name), m_laser(0){}
+  virtual      ~StLaserAnalysisMaker() {}
+  virtual Int_t Init();
+  virtual Int_t Make();
+  virtual Int_t InitRun  (int runumber); // Overload empty StMaker::InitRun 
+  virtual void  Clear(const Option_t *option="");
+  //virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
+  virtual Int_t        Finish();
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StLaserAnalysisMaker.h,v 1.2 2007/02/05 15:30:06 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+  ClassDef(StLaserAnalysisMaker,0)   //StAF chain virtual base class for Makers
 };
-
 #endif
+// $Log: StLaserAnalysisMaker.h,v $
+// Revision 1.2  2007/02/05 15:30:06  fisyak
+// Freeze a version for laser drift velocity calations
+//
