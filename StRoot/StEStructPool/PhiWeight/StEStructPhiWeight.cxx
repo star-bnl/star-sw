@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPhiWeight.cxx,v 1.1 2006/04/26 18:58:14 dkettler Exp $
+ * $Id: StEStructPhiWeight.cxx,v 1.2 2007/02/05 17:20:28 msd Exp $
  *
  * Author: David Kettler
  *
@@ -12,6 +12,7 @@
 #include "StEStructPhiWeight.h"
 
 #include "TH1F.h"
+#include "TFile.h"
 #include "PhysicalConstants.h"
 
 #include "StEStructPool/EventMaker/StEStructEvent.h"
@@ -72,7 +73,11 @@ void StEStructPhiWeight::finish(){
 /***********************************************************************
  *
  * $Log: StEStructPhiWeight.cxx,v $
+ * Revision 1.2  2007/02/05 17:20:28  msd
+ * Added include statement
+ *
  * Revision 1.1  2006/04/26 18:58:14  dkettler
+ *
  * Simple version of weight calculation analysis
  *
  *
