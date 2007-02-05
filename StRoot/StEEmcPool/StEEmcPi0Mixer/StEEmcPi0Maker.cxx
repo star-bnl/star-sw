@@ -7,6 +7,11 @@
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuPrimaryVertex.h"
+#include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
+
+#include "StEvent/StEvent.h"
+#include "StEvent/StTriggerIdCollection.h"
+#include "StEvent/StTriggerId.h"
 
 #include "StarClassLibrary/StThreeVectorF.hh"
 
@@ -27,6 +32,7 @@ StEEmcPi0Maker::StEEmcPi0Maker( const Char_t *name,
   mEEanalysis=a2e; assert(a2e);
   mEEclusters=cl;  assert(cl);
   mEEpoints=pt;    assert(pt);
+  mCheckTrigger=false;
 }
 
 // ---------------------------------------------------------------------------
@@ -77,12 +83,21 @@ Int_t StEEmcPi0Maker::Make()
   assert(mudst);
 
   hEvents->Fill("event",1.0);
+
+  if ( !checkTrigger() ) return kStOK;
+  hEvents->Fill("trigger",1.0);
   
   StThreeVectorF pv=mudst->muDst()->event()->primaryVertexPosition();
   TVector3 vertex( pv.x(), pv.y(), pv.z() );
+
+  if ( pv.z() < -150. || pv.z() > 150.0 || pv.z()==0.0 ) return kStOK;
+  hEvents->Fill("vertex",1.0);
   
   // get the points from the point maker
   StEEmcPointVec_t points = mEEpoints->points();
+
+  if ( points.size() < 2 ) return kStOK;
+  hEvents->Fill("two+ points",1.0);
 
   // loop over all pairs of points
   for ( UInt_t ipoint=0;ipoint<points.size();ipoint++ )
@@ -265,4 +280,54 @@ Int_t StEEmcPi0Maker::Make()
 void StEEmcPi0Maker::Clear(Option_t *opts)
 {
   mPairs.clear();
+}
+
+
+
+// ----------------------------------------------------------------------------                                                     
+void  StEEmcPi0Maker::setCheckTrigger(Bool_t t){ mCheckTrigger=t; }
+void  StEEmcPi0Maker::addTrigger(Int_t t){ mTriggerList.push_back(t); }
+
+Bool_t StEEmcPi0Maker::checkTrigger()
+{
+
+  /// If user didn't specify a trigger ID, always return true                                                                       
+  if ( mTriggerList.size() == 0 ) return 1;
+
+  StTriggerId nominal;
+
+  /// Get Trigger from MuDst if available, fallback to StEvent if not                                                              $
+  StMuDstMaker *mumk = (StMuDstMaker*)GetMaker("MuDst");
+  StEvent *event = (StEvent*)GetInputDS("StEvent");
+
+  if ( mumk )
+    {
+      nominal = mumk->muDst()->event()->triggerIdCollection().nominal();
+      goto CHECK_TRIGGER;
+    }
+
+  /// Get Trigger from StEvent if available                                                                                        $
+
+  if ( event )
+    {
+      nominal=*event->triggerIdCollection()->nominal();
+      goto CHECK_TRIGGER;
+    }
+
+  /// Bail out here because we don't have anything to do!                                                                          $
+  goto NO_DATA;
+
+
+ CHECK_TRIGGER:
+
+  for ( UInt_t ii=0;ii<mTriggerList.size();ii++ )
+    {
+      if ( nominal.isTrigger( mTriggerList[ii] ) ) return mTriggerList[ii];
+    }
+  return 0;
+
+ NO_DATA:
+  assert(2+2==5); // noooo data                                                                                                    $
+  return 0;
+
 }
