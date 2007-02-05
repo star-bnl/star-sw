@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.10 2006/10/02 22:24:02 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.11 2007/02/05 17:20:09 msd Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -17,6 +17,7 @@
 #include "PhysicalConstants.h"
 #include "TVector2.h"
 #include "TH1.h"
+#include "TFile.h"
 
 ClassImp(StEStructEvent)
 
@@ -253,6 +254,9 @@ void StEStructEvent::SetPhiWgt(const char* weightFile) {
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.11  2007/02/05 17:20:09  msd
+ * Added include statement
+ *
  * Revision 1.10  2006/10/02 22:24:02  prindle
  * Removed a few destructors that I think caused crashes.
  *
