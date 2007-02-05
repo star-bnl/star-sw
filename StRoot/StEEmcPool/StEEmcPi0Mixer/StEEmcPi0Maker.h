@@ -31,9 +31,19 @@ class StEEmcPi0Maker : public StMaker
 
   /// Return a copy of the list of diphoton candidates
   StEEmcPairVec_t pairs(){ return mPairs; }
+  Int_t numberOfPairs(){ return (Int_t) mPairs.size(); }
+  StEEmcPair pair( Int_t i ){ return mPairs[i]; }
+
+  void addTrigger( Int_t t );
+  void setCheckTrigger(Bool_t t);
+  Bool_t checkTrigger();
+
 
  private:
  protected:
+
+  std::vector<Int_t> mTriggerList;
+  Bool_t mCheckTrigger;
 
   StEEmcA2EMaker            *mEEanalysis; /**< endcap adc --> energy maker */
   StEEmcGenericClusterMaker *mEEclusters; /**< endcap cluster maker        */
