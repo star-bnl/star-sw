@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.188 2007/01/25 06:28:02 fine Exp $
+// $Id: StMaker.cxx,v 1.189 2007/02/05 20:57:10 potekhin Exp $
 //
 //
 /*!
@@ -151,11 +151,12 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2005",       20041030,     0, "y2005",    ""},                   //       {"y2005",       20041030,     0}
   {"y2005b",      20041101,     0, "y2005b",   ""},                   //       {"y2005b",      20041101,     0}
   {"y2005c",      20041201,     0, "y2005c",   ""},                   //       {"y2005c",      20041201,     0}
-  {"y2005d",      20041201,     1, "y2005d",   "y2005c + new SVT"},   //       {"y2005c",      20041201,     0}
-  {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005c",      20041201,     0}
+  {"y2005d",      20041201,     1, "y2005d",   "y2005c + new SVT"},   //       {"y2005d",      20041201,     0}
+  {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005e",      20041201,     0}
 
-  // incoming, not advertized 
-  {"y2006",       20051201,     0, "y2006",    "base geometry for y2006"},
+  // 
+  {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
+  {"y2006a",      20051201,     1, "y2006a",   "y2006+new FPD"},
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -177,6 +178,8 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr10",      20190101,    13, "upgr10",   ""},
   {"upgr11",      20190101,    14, "upgr11",   ""},
   {"upgr12",      20190101,    15, "upgr12",   ""},
+  // Future development:
+  {"simpletpc",   20200102,    16, "simpletpc",""},
   {0,                    0,     0,        0,    0}
 };
 
@@ -1741,6 +1744,11 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.189  2007/02/05 20:57:10  potekhin
+// a) corrected a few typos in the comments
+// b) added y2006a to the list of geometries
+// c) created a placeholder for the VMC test tag
+//
 // Revision 1.188  2007/01/25 06:28:02  fine
 // connect Logger and Maker debug levels
 //
