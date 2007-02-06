@@ -183,19 +183,23 @@ of another <b><code>if</code> </b> statement.
 For example:
 <b><code> <pre>
     if ( a > 0)
-       LOG_ERROR << "the varibale is positive" << endm;
+       LOG_ERROR << "the variable is positive" << endm;
      else 
        LOG_INFO << "the variable is Ok" << endm;
 </pre>  </code> </b>
 will not work as one expects. To get the desirable effect you need
 <b><code> <pre>
     if ( a > 0) {
-       LOG_ERROR << "the varibale is positive" << endm;
+       LOG_ERROR << "the variable is positive" << endm;
     } else {
        LOG_INFO << "the variable is Ok" << endm;
     }
 </pre>  </code> </b>
-instead.
+instead. 
+<P><small>
+Are you curious why very this implementation was chosen?  
+Please, read some <a href="http://logging.apache.org/log4cxx/manual/Introduction.html#Performance">extra pages</a>.
+</small>
 <p>
 The macros above provide an extra benefit to develop and 
 use your code with no logger at all.
