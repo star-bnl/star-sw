@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.36 2007/01/15 08:23:02 jcs Exp $
+// $Id: StFtpcTracker.cc,v 1.37 2007/02/06 11:42:16 jcs Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.37  2007/02/06 11:42:16  jcs
+// move unessential output messages from INFO to DEBUG
+//
 // Revision 1.36  2007/01/15 08:23:02  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -413,17 +416,17 @@ void StFtpcTracker::CalcEnergyLoss()
   Int_t n_untracked;
   
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 8) {      
-    LOG_INFO << " No track = " << GetNumberOfTracks() << endm;
-    LOG_INFO << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
-    LOG_INFO << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
-    LOG_INFO << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
-    LOG_INFO << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
+    LOG_DEBUG << " No track = " << GetNumberOfTracks() << endm;
+    LOG_DEBUG << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
+    LOG_DEBUG << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
+    LOG_DEBUG << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
+    LOG_DEBUG << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
     
-    LOG_INFO << " name= (no name), nok = (" << GetNumberOfClusters() 
+    LOG_DEBUG << " name= (no name), nok = (" << GetNumberOfClusters() 
 				      << "), maxlen = (" << GetNumberOfClusters() << ")" << endm;
-    LOG_INFO << " name= (no mane), nok = (" << GetNumberOfTracks() 
+    LOG_DEBUG << " name= (no mane), nok = (" << GetNumberOfTracks() 
 				      << "), maxlen = (" << GetNumberOfTracks() << ")" << endm;
-    //LOG_INFO << " name= (" << fdepar_h->name << "), nok = (" << fdepar_h->nok 
+    //LOG_DEBUG << " name= (" << fdepar_h->name << "), nok = (" << fdepar_h->nok 
     //				      << "), maxlen = (" << fdepar_h->maxlen << ")" << endm;
   }
   
@@ -457,7 +460,7 @@ void StFtpcTracker::CalcEnergyLoss()
 	n_tracked++;
 
 	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
-	  LOG_INFO << "total_charge = " << total_charge << ", hit_p = " << hit_p 
+	  LOG_DEBUG << "total_charge = " << total_charge << ", hit_p = " << hit_p 
 		   << ", de = " << hit->GetCharge() << endm;
 	}
       }
@@ -466,7 +469,7 @@ void StFtpcTracker::CalcEnergyLoss()
     if (all_hit < StFtpcTrackingParams::Instance()->MinHit() || all_hit > StFtpcTrackingParams::Instance()->MaxHit()) {
       
       if (StFtpcTrackingParams::Instance()->DebugLevel() < 5) {  // level = 10 debugging
-	LOG_INFO << " number of hits = " << all_hit << endm;
+	LOG_DEBUG << " number of hits = " << all_hit << endm;
       }
       
       continue;              // skip if unacceptable no. hits
@@ -506,7 +509,7 @@ void StFtpcTracker::CalcEnergyLoss()
 	} 
 	   
 	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
-	  LOG_INFO << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
+	  LOG_DEBUG << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
 		   << cos_lambda << ");  cross= " << 180./3.14159 * TMath::ACos(cos_alpha) 
 		   << "(" << cos_alpha << ") [deg]; P=(" << px << ", " << py << ", " 
 		   << pz << endm;
@@ -520,7 +523,7 @@ void StFtpcTracker::CalcEnergyLoss()
 	  dedx_arr[ihit] = hit->GetCharge() * cos_alpha*cos_lambda;
 
 	  if(dedx_arr[ihit]<0) {
-	    LOG_INFO << dedx_arr[ihit] << " " << hit->GetCharge() 
+	    LOG_DEBUG << dedx_arr[ihit] << " " << hit->GetCharge() 
 		     << " " << cos_alpha << " " << cos_lambda << endm;
 	  }
 	}
@@ -551,7 +554,7 @@ void StFtpcTracker::CalcEnergyLoss()
     track->SetNumdEdxHits(acc_hit);
     
     if(track->GetdEdx() == 0) {
-      LOG_INFO << "track " << itrk << " dedx " << track->GetdEdx() 
+      LOG_DEBUG << "track " << itrk << " dedx " << track->GetdEdx() 
 	       << " ndedx " << track->GetNumdEdxHits() << endm;
     }
     
@@ -560,7 +563,7 @@ void StFtpcTracker::CalcEnergyLoss()
   } // end loop itrk 
 
   if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
-    LOG_INFO << "Using truncated mean over whole chamber method by R. Witt." << endm;
+    LOG_DEBUG << "Using truncated mean over whole chamber method by R. Witt." << endm;
     int nClusters = GetNumberOfClusters();
     if (weightedT.GetSize() <nClusters)  weightedT.Set(nClusters);
     weighted =weightedT.GetArray();
@@ -699,8 +702,8 @@ void StFtpcTracker::CalcEnergyLoss()
   } 
 
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 11) {
-    LOG_INFO << " total charges in 2 FTPCs " << total_charge << endm;
-    LOG_INFO << " processed tracks = " << itrk_ok << endm;
+    LOG_DEBUG << " total charges in 2 FTPCs " << total_charge << endm;
+    LOG_DEBUG << " processed tracks = " << itrk_ok << endm;
   }
       
   return;
@@ -904,7 +907,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     } // end loop itrk 
 
     if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
-      LOG_INFO << "Using truncated mean over whole chamber method by R. Witt." << endm;
+      LOG_DEBUG << "Using truncated mean over whole chamber method by R. Witt." << endm;
       int nClusters=GetNumberOfClusters();
       if (weightedT.GetSize()<nClusters) weightedT.Set(nClusters);
       weighted = weightedT.GetArray();
@@ -1050,7 +1053,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 
     if(mBench) {
       mBench->Stop("fit");
-      LOG_INFO << "Fit and dE/dx calc. finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      LOG_DEBUG << "Fit and dE/dx calc. finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
 
@@ -1061,7 +1064,7 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     
     if(mBench) {
       mBench->Stop("fit");
-      LOG_INFO << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      LOG_DEBUG << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
     

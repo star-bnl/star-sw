@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.33 2007/01/15 08:23:01 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.34 2007/02/06 11:42:14 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.34  2007/02/06 11:42:14  jcs
+// move unessential output messages from INFO to DEBUG
+//
 // Revision 1.33  2007/01/15 08:23:01  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -277,7 +280,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *inputHits, MIntArray *good_hits, S
 
   if (mBench) {
     mBench->Stop("init");
-    LOG_INFO << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    LOG_DEBUG << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
     mTime += mBench->GetCpuTime("init");
   }
 }
@@ -333,7 +336,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   if (mBench) {
     mBench->Stop("init");
-    LOG_INFO << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+    LOG_DEBUG << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
     mTime += mBench->GetCpuTime("init");
   }
 }
@@ -381,7 +384,7 @@ void StFtpcConfMapper::MainVertexTracking()
  
   if (mBench) {
     mBench->Stop("main_vertex");
-    LOG_INFO << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
+    LOG_DEBUG << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
     mTime += mBench->GetCpuTime("main_vertex");
 
     mBench->Start("extend");
@@ -391,7 +394,7 @@ void StFtpcConfMapper::MainVertexTracking()
 
   if (mBench) {
     mBench->Stop("extend");
-    LOG_INFO << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    LOG_DEBUG << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
     mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
@@ -401,7 +404,7 @@ void StFtpcConfMapper::MainVertexTracking()
 
   if (mBench) {
     mBench->Stop("splits");
-    LOG_INFO << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    LOG_DEBUG << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
     mTime += mBench->GetCpuTime("splits");
   }
   
@@ -424,7 +427,7 @@ void StFtpcConfMapper::FreeTracking()
 
   if (mBench) {
     mBench->Stop("non_vertex");
-    LOG_INFO << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endm;
+    LOG_DEBUG << "Non vertex tracking finished  (" << mBench->GetCpuTime("non_vertex") << " s)." << endm;
     mTime += mBench->GetCpuTime("non_vertex");
   }
   
@@ -448,7 +451,7 @@ void StFtpcConfMapper::LaserTracking()
 
   if (mBench) {
     mBench->Stop("laser");
-    LOG_INFO << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
+    LOG_DEBUG << "Laser tracking finished       (" << mBench->GetCpuTime("laser") << " s)." << endm;
     mTime += mBench->GetCpuTime("laser");
     mBench->GetCpuTime("nofield");
 
@@ -459,7 +462,7 @@ void StFtpcConfMapper::LaserTracking()
   
   if (mBench) {
     mBench->Stop("extend");
-    LOG_INFO << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    LOG_DEBUG << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
     mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
@@ -469,7 +472,7 @@ void StFtpcConfMapper::LaserTracking()
 
   if (mBench) {
     mBench->Stop("splits");
-    LOG_INFO << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    LOG_DEBUG << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
     mTime += mBench->GetCpuTime("splits");
   }
 
@@ -493,7 +496,7 @@ void StFtpcConfMapper::NoFieldTracking()
 
   if (mBench) {
     mBench->Stop("no_field");
-    LOG_INFO << "No field tracking finished    (" << mBench->GetCpuTime("no_field") << " s)." << endm;
+    LOG_DEBUG << "No field tracking finished    (" << mBench->GetCpuTime("no_field") << " s)." << endm;
     mBench->GetCpuTime("no_field");
 
     mBench->Start("extend");
@@ -503,7 +506,7 @@ void StFtpcConfMapper::NoFieldTracking()
   
   if (mBench) {
     mBench->Stop("extend");
-    LOG_INFO << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
+    LOG_DEBUG << "Track extension finished      (" << mBench->GetCpuTime("extend") << " s)." << endm;
     mTime += mBench->GetCpuTime("extend");
 
     mBench->Start("splits");
@@ -513,7 +516,7 @@ void StFtpcConfMapper::NoFieldTracking()
 
   if (mBench) {
     mBench->Stop("splits");
-    LOG_INFO << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
+    LOG_DEBUG << "Split track merging finished  (" << mBench->GetCpuTime("splits") << " s)." << endm;
     mTime += mBench->GetCpuTime("splits");
   }
 
@@ -1000,7 +1003,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   track->SetRadius(TMath::Sqrt(a[0]*a[0] + 1.) / (2. * TMath::Abs(a[1])));
   track->CalcAndSetAlpha0();
 
-  //LOG_INFO << track->GetRadius() << " " << track->GetAlpha0() << endm;
+  //LOG_DEBUG << track->GetRadius() << " " << track->GetAlpha0() << endm;
 
   // Tracklength Fit
   Double_t s = 0.;
@@ -1054,7 +1057,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     s = TMath::Sqrt(TMath::Power(track->GetRadius() * angle_diff, 2.) 
 		    + TMath::Power(trackpoint->GetZv() , 2.));
 
-    //LOG_INFO << angle << " " << angle - track->GetAlpha0() << " " << s << endm;
+    //LOG_DEBUG << angle << " " << angle - track->GetAlpha0() << " " << s << endm;
 
     L11 += 1;
     L12 += trackpoint->GetZv();
@@ -1065,7 +1068,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     
   D = L11*L22 - L12*L12;
 
-  //LOG_INFO <<  endm;
+  //LOG_DEBUG <<  endm;
 
   a[2] = (g2*L11 - g1*L12)/D;
   a[3] = (g1*L22 - g2*L12)/D;
@@ -1410,8 +1413,8 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 	    CalcChiSquared(track, closest_hit, chi2);
 	    
 	    if (coeff[4]-chi2[0]>1.) {
-	    //LOG_INFO << coeff[4] << " - " << chi2[0] << " = " << coeff[4]-chi2[0] << endm;
-	    //LOG_INFO << coeff[5] << " - " << chi2[1] << " = " << coeff[5]-chi2[1] << endm << endm;
+	    //LOG_DEBUG << coeff[4] << " - " << chi2[0] << " = " << coeff[4]-chi2[0] << endm;
+	    //LOG_DEBUG << coeff[5] << " - " << chi2[1] << " = " << coeff[5]-chi2[1] << endm << endm;
 	    point = mMaxFtpcRow;
 	    }
 	    
@@ -1447,7 +1450,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       }      
       
       else {
-	//LOG_INFO << coeff[2] << endm;
+	//LOG_DEBUG << coeff[2] << endm;
 	CompleteTrack(track);
       }
       
