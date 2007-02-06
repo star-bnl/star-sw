@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.62 2006/07/06 17:03:53 posk Exp $
+// $Id: doFlowEvents.C,v 1.63 2007/02/06 19:06:39 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -36,7 +36,7 @@
 // doFlowEvents.C(nEvents)	   // default file
 // doFlowEvents.C()                // 2 events
 //
-// Parameters, RunType and OutPicoDir, may be passed from the calling LSF shell script
+// Parameters, RunType and OutPicoDir, may be passed from the calling shell script
 //   (see pdsf:: ~posk/doFlowSubmit.pl):
 //        root4star -b << eof >& $LOG
 //        Int_t RunType = $runNo;
@@ -270,14 +270,14 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     bool lyzMaker    = kFALSE;
   } else {
     bool phiWgtMaker = kFALSE;
-    //bool anaMaker  = kFALSE;
-    bool anaMaker    = kTRUE;
+    //bool anaMaker    = kFALSE;
+    bool anaMaker  = kTRUE;
     bool cumMaker    = kFALSE;
     //bool cumMaker  = kTRUE;
     bool spMaker     = kFALSE;
     //bool spMaker   = kTRUE;
-    bool lyzMaker    = kFALSE;
-    //bool lyzMaker  = kTRUE;
+    bool lyzMaker  = kFALSE;
+    //bool lyzMaker    = kTRUE;
   }
 
   Bool_t includeTpcTracks  = kTRUE;
@@ -292,6 +292,12 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   Float_t ptRange_for_vEta[2] = {0., 2.};
 //   Float_t etaRange_for_vPt[2] = {2.5, 4.}; // show only FTPC particles in v(pt)
   
+  // Set recentering FALSE except for LYZ maker
+  // If recentering is TRUE, pass zero will be run to calculate the recentering parameters
+  if (lyzMaker) { flowMaker->SetReCent(); }
+  else { flowMaker->SetReCent(kFALSE); }
+//   flowMaker->SetReCent(kFALSE); // even for LYZ
+
   // To calculate v1{EP1,EP2} use the following switch.
   // Since v1{EP1} doesn't work very well at RHIC energies, v1{EP1,EP2} is set to be 
   // the default.
@@ -364,7 +370,7 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   flowMaker->SetPicoEventDir(OutPicoDir);
 //   flowMaker->SetPicoEventDir("../");
 //   flowMaker->SetPicoEventDir("./");
-  
+
   // Set Debug status
 //  flowMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
@@ -402,8 +408,8 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
   StFlowCutEvent::SetVertexZ(-30., 30.);
-  StFlowCutEvent::SetEtaSymTpc(0., 0.);
-  StFlowCutEvent::SetEtaSymFtpc(0., 0.);
+//   StFlowCutEvent::SetEtaSymTpc(0., 0.);
+//   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
 //   StFlowCutEvent::SetTrigger(1); // necessary for year4, but default = 1
 //   StFlowCutEvent::SetTrigger(10); // necessary for mevSim data
    if (phiWgtOnly) { // all centralities
@@ -426,23 +432,23 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
    StFlowCutTrack::SetChiSqFtpc(0., 4.);
    StFlowCutTrack::SetDcaFtpc(0., 2.);
 //   StFlowCutTrack::SetDcaGlobalFtpc(0., 0.);
-   StFlowCutTrack::SetPtFtpc(0.15, 6.);
+//    StFlowCutTrack::SetPtFtpc(0.15, 6.);
    StFlowCutTrack::SetEtaFtpc(-5.0, 0., 0., 5.0);
 //   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
     // Harmonic 1 means odd, harmonic 2 means even
   // TPC
-//   StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
-//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
+   StFlowEvent::SetEtaTpcCut(0.5, 2., 0, 0);  // harmonic 1, selection 1
+//    StFlowEvent::SetEtaTpcCut(0.0, 1., 1, 0);  // harmonic 2, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
 //   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);    // for event plane
   // FTPC
 //   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 1, 0);  // harmonic 2, selection 1
-//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 0, 1);  // harmonic 1, selection 2
-//   StFlowEvent::SetEtaFtpcCut(-10. 0., 0., 10., 1, 1);  // harmonic 2, selection 2
+   StFlowEvent::SetEtaFtpcCut(-10., -9., 9., 10., 0, 1);  // harmonic 1, selection 2, no FTPC
+   StFlowEvent::SetEtaFtpcCut(-10., -9., 9., 10., 1, 1);  // harmonic 2, selection 2, no FTPC
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 0);   // harmonic 1, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 1, 0);   // harmonic 2, selection 1
 //   StFlowEvent::SetPtFtpcCut(0., 10., 0, 1);   // harmonic 1, selection 2
@@ -493,8 +499,6 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
   int istat = 0, iEvt = 1;
  EventLoop: if (iEvt <= nEvents && istat != 2) {
    
-//    cout << endl << "============================ Event " << iEvt
-// 	<< " start ============================" << endl;
    cout << "===== Event " << iEvt << " start ===== " << endl;
    
    chain->Clear();
@@ -547,9 +551,15 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
     }
   }
   if (lyzMaker) {
-    // combine the first and second pass outputs
+    // combine the zero, first, and second pass outputs
     TFile lyzFirstPassFile("flow.firstPassLYZ.root", "READ");
     if (lyzFirstPassFile.IsOpen()) { 
+      TFile lyzZeroPassFile("flow.reCent.root", "READ");
+      if (lyzZeroPassFile.IsOpen()) { 
+	lyzZeroPassFile.ReadAll();
+	TList* zeroPassList = lyzZeroPassFile.GetList();
+	//zeroPassList->ls();
+      }
       lyzFirstPassFile.ReadAll();
       TList* firstPassList = lyzFirstPassFile.GetList();
       //firstPassList->ls();
@@ -581,6 +591,9 @@ void doFlowEvents(Int_t nEvents, const Char_t **fileList, Bool_t phiWgtOnly, Boo
       //firstPassList->ls();
       TFile lyzFile("flow.LeeYangZeros.root", "UPDATE");
       if (lyzFile.IsOpen()) {
+	if (lyzZeroPassFile.IsOpen()) { 
+	  zeroPassList->Write();
+	}
 	firstPassList->Write();
 	lyzFile.Close();
       }
@@ -656,11 +669,11 @@ void doFlowEvents(Int_t nEvents, Bool_t phiWgtOnly, Bool_t GC) {
 
   // 200 GeV
 
-  // run 4
+  // run 4 P05ic
   // muDST files
-  Char_t* filePath="/dante3/starprod/reco/productionMinBias/FullField/P05ia/2004/054";
+  Char_t* filePath="/eliza12/starprod/reco/ProductionMinBias/FullField/P05ic/2004/028/";
   if (nEvents < 450) {
-    Char_t* fileExt="st_physics_5054076_raw_1010001.MuDst.root";
+    Char_t* fileExt="st_physics_5028057_raw_1010001.MuDst.root";
    } else {
      Char_t* fileExt="*.MuDst.root";
    }
@@ -772,8 +785,8 @@ int gcInit(const char *request)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.62  2006/07/06 17:03:53  posk
-// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+// Revision 1.63  2007/02/06 19:06:39  posk
+// In Lee Yang Zeros method, SetReCent() default is true. For other methods it is false.
 //
 // Revision 1.61  2006/03/22 22:15:26  posk
 // Updated to read the flow.firstPassLYZ.root files.
