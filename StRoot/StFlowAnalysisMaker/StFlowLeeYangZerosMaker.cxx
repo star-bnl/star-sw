@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.cxx,v 1.4 2006/07/10 21:03:57 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.cxx,v 1.5 2007/02/06 19:00:48 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //          with advice from Jean-Yves Ollitrault and Nicolas Borghini
@@ -17,6 +17,7 @@
 //               This treats the acceptance variations with theta as statistical
 //               Particles which would normally be correlated with the event plane are analyzed
 //               The event plane selections are not used
+//               The ZeroPass determines the recentering parameters
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -120,6 +121,10 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
+  StFlowMaker* pFlowMaker = NULL;
+  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  Bool_t reCentCalc = pFlowMaker->ReCent();
+
   const float multMin      =    0.;
   const float multMax      = 2000.;
 
@@ -127,8 +132,9 @@ Int_t StFlowLeeYangZerosMaker::Init() {
   };
 
   TString* histTitle;
+  mZeroPass  = kFALSE;
   mFirstPass = kFALSE;
-  mV1Mixed = kTRUE;
+  mV1Mixed   = kTRUE;
   
   // Make array of G(r) bins
   // Initial bin width is smaller than the mean bin width by the factor F
@@ -358,6 +364,37 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       histFull[k].histFullHar[j].mHistImDenom->SetYTitle("Im(Q^{#theta}e^{ir_{0}^{#theta}Q^{#theta}})");
       delete histTitle;
     
+      // Recenter
+      histTitle = new TString("FlowCentX_Sel");
+      *histTitle += k+1;
+      *histTitle += "_Har";
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistCentX = new TProfile(histTitle->Data(),
+        histTitle->Data(), 3, 0.5, 3.5);
+      histFull[k].histFullHar[j].mHistCentX->SetXTitle("TPCE, TPCW, TPC");
+      histFull[k].histFullHar[j].mHistCentX->SetYTitle("<cos n #phi>");
+      delete histTitle;
+    
+      histTitle = new TString("FlowCentY_Sel");
+      *histTitle += k+1;
+      *histTitle += "_Har";
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistCentY = new TProfile(histTitle->Data(),
+        histTitle->Data(), 3, 0.5, 3.5);
+      histFull[k].histFullHar[j].mHistCentY->SetXTitle("TPCE, TPCW, TPC");
+      histFull[k].histFullHar[j].mHistCentY->SetYTitle("<sin n #phi>");
+      delete histTitle;
+    
+      histTitle = new TString("FlowQCent_Sel");
+      *histTitle += k+1;
+      *histTitle += "_Har";
+      *histTitle += j+1;
+      histFull[k].histFullHar[j].mHistQCent = new TProfile(histTitle->Data(),
+        histTitle->Data(), 2, 0.5, 2.5);
+      histFull[k].histFullHar[j].mHistQCent->SetXTitle("X, Y");
+      histFull[k].histFullHar[j].mHistQCent->SetYTitle("<Q_{n}/M>");
+      delete histTitle;
+    
       // r0
       histTitle = new TString("FlowProLYZ_r0theta_Sel");
       *histTitle += k+1;
@@ -376,41 +413,49 @@ Int_t StFlowLeeYangZerosMaker::Init() {
       *histTitle += "_Har";
       *histTitle += j+1;
  
-      // Read the hists from the first pass file
-      TFile fileFirstPass("flow.firstPassLYZ.root","R");
-      if (fileFirstPass.IsOpen()) { // second pass
-	gMessMgr->Info("##### FlowLeeYangZero: Second Pass");
-	//fileFirstPass.ls();
-	TH1D* tempHist = 
-	  dynamic_cast<TH1D*>(fileFirstPass.Get(histTitleForReadIn->Data()));
-	if (!tempHist) {
-	  cout << "##### FlowLeeYangZeros: dynamic cast can't find " <<
-	    histTitleForReadIn->Data() << endl;
-	  return kFALSE;
-	} else if (tempHist->GetNbinsX() != Flow::nTheta) {
-	  cout << "##### FlowLeeYangZeros: nTheta of 1st pass not equal to 2nd pass" <<
-	    endl;
-	  PR(tempHist->GetNbinsX());
-	  PR(Flow::nTheta);
-	  return kStFatal;
-	}   
-	delete  histTitleForReadIn;
-	
-	for (Int_t Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
-	  mr0theta[k][j][Ntheta] = tempHist->GetBinContent(Ntheta+1);
-	  mr0theta[k][j+2][Ntheta] = tempHist->GetBinContent(Ntheta+1); // for higher harmonics
-	  //cout << k << " " << j << " " << Ntheta << " " << mr0theta[k][j][Ntheta] << endl;
+      // Zero pass for recenter paramerters?
+      TFile fileZeroPass("flow.reCent.root","R");
+      if (fileZeroPass.IsOpen() || !reCentCalc) { // not zero pass
+
+	// Read the hists from the first pass file
+	TFile fileFirstPass("flow.firstPassLYZ.root","R");
+	if (fileFirstPass.IsOpen()) { // second pass
+	  gMessMgr->Info("##### FlowLeeYangZero: Second Pass");
+	  //fileFirstPass.ls();
+	  TH1D* tempHist = 
+	    dynamic_cast<TH1D*>(fileFirstPass.Get(histTitleForReadIn->Data()));
+	  if (!tempHist) {
+	    cout << "##### FlowLeeYangZeros: dynamic cast can't find " <<
+	      histTitleForReadIn->Data() << endl;
+	    return kFALSE;
+	  } else if (tempHist->GetNbinsX() != Flow::nTheta) {
+	    cout << "##### FlowLeeYangZeros: nTheta of 1st pass not equal to 2nd pass" <<
+	      endl;
+	    PR(tempHist->GetNbinsX());
+	    PR(Flow::nTheta);
+	    return kStFatal;
+	  }   
+	  delete  histTitleForReadIn;
+	  
+	  for (Int_t Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
+	    mr0theta[k][j][Ntheta] = tempHist->GetBinContent(Ntheta+1);
+	    mr0theta[k][j+2][Ntheta] = tempHist->GetBinContent(Ntheta+1); // for higher harmonics
+	    //cout << k << " " << j << " " << Ntheta << " " << mr0theta[k][j][Ntheta] << endl;
+	  }
+	  fileFirstPass.Close();
+	} else {	
+	  gMessMgr->Info("##### FlowLeeYangZero: First Pass");
+	  mFirstPass = kTRUE;
 	}
-	fileFirstPass.Close();
       } else {	
-	gMessMgr->Info("##### FlowLeeYangZero: First Pass");
-	mFirstPass = kTRUE;
+	gMessMgr->Info("##### FlowLeeYangZero: Zero Pass");
+	mZeroPass = kTRUE;
       }
     } // j
   } // k
 
   gMessMgr->SetLimit("##### FlowLeeYangZero", 5);
-  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.4 2006/07/10 21:03:57 posk Exp $");
+  gMessMgr->Info("##### FlowLeeYangZero: $Id: StFlowLeeYangZerosMaker.cxx,v 1.5 2007/02/06 19:00:48 posk Exp $");
 
   return StMaker::Init();
 }
@@ -427,10 +472,10 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
 
   mNEvents++; // increment number of events
 
-  TVector2 Q;
+  TVector2 Q, q;
   Float_t theta, theta1, order, r0;
   TComplex expo, denom, Gtheta;
-  Double_t Qtheta, cosTheta12;
+  Double_t Qtheta, cosTheta12, mult;
   Int_t m;
 
   for (int k = 0; k < Flow::nSels; k++) {
@@ -447,12 +492,34 @@ Bool_t StFlowLeeYangZerosMaker::FillFromFlowEvent() {
       }
       order  = (double)((j+1)/m);
 
+      if (mZeroPass) {
+	// calculate recentering parameters
+	q = pFlowEvent->ReCentPar(pFlowSelect,"TPCE");
+	histFull[k].histFullHar[j].mHistCentX->Fill(1., q.X());
+	histFull[k].histFullHar[j].mHistCentY->Fill(1., q.Y());
+	q = pFlowEvent->ReCentPar(pFlowSelect,"TPCW");
+	histFull[k].histFullHar[j].mHistCentX->Fill(2., q.X());
+	histFull[k].histFullHar[j].mHistCentY->Fill(2., q.Y());
+	q = pFlowEvent->ReCentPar(pFlowSelect,"TPC");
+	histFull[k].histFullHar[j].mHistCentX->Fill(3., q.X());
+	histFull[k].histFullHar[j].mHistCentY->Fill(3., q.Y());
+
+	continue;;
+      }
+
       // event Q
       Q = pFlowEvent->QPart(pFlowSelect);
       if (Q.Mod() == 0.) return kFALSE; // to eliminate Q=0
       mQ[k][j]  += Q;                   // for chi calculation
       mQ2[k][j] += Q.Mod2();
      
+      if (!mZeroPass) {
+	// test recentering of Q per particle
+	mult = (double)(pFlowEvent->MultPart(pFlowSelect));
+	histFull[k].histFullHar[j].mHistQCent->Fill(1., Q.X()/mult);
+	histFull[k].histFullHar[j].mHistQCent->Fill(2., Q.Y()/mult);
+      }
+
       // for each theta
       for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
 	theta = ((float)Ntheta / (float)Flow::nTheta) * TMath::Pi()/order;
@@ -529,7 +596,8 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
   StFlowTrackIterator itr;
   
   Float_t theta, theta1, phi, eta, pt, m, r0;
-  Double_t order, wgt, wgt2, cosTerm;
+  TVector2 reCent, reCent2, reCent1;
+  Double_t order, wgt, wgt2, cosTerm, reCentTheta, reCentTheta2, reCentTheta1;
   TComplex expo, numer, cosTermComp;
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
@@ -574,25 +642,30 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
 
        	// Caculate numerator for all particles selected
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
+	  reCent = pFlowEvent->ReCent(k, j, pFlowTrack);
 	  for (int Ntheta = 0; Ntheta < Flow::nTheta; Ntheta++) {
 	    theta = ((float)Ntheta / (float)Flow::nTheta) * TMath::Pi()/order;
+	    reCentTheta = reCent.X() * cos(m*order*theta) + reCent.Y() * sin(m*order*theta);
 	    r0 = mr0theta[k][j][Ntheta];
 	    if (!k) {
 	      expo(0., r0 * mQtheta[k][j][Ntheta]);
-	      numer = cos(m*order*(phi - theta)) * TComplex::Exp(expo); // BP Eq. 12
+	      numer = (cos(m*order*(phi - theta)) - reCentTheta) * TComplex::Exp(expo); // BP Eq. 12
 	    } else {
 	      wgt = pFlowEvent->Weight(k, j, pFlowTrack);
 	      if (!j && mV1Mixed) { // for v1 mixed harmonic differential flow
 		theta = ((float)Ntheta / (float)Flow::nTheta) * TMath::Pi()/2.; // goes only to pi/2
 		r0 = mr0theta[k][1][Ntheta]; // use r0 for 2nd harmonic
 		wgt2 = pFlowEvent->Weight(k, 1, pFlowTrack); // weight for 2nd harmonic
-		double Gim2 = r0 * wgt2 * cos(2*(phi - theta));
+		reCent2 = pFlowEvent->ReCent(k, 1, pFlowTrack);  // for 2nd harmonic
+		reCentTheta2 = reCent2.X() * cos(2.*theta) + reCent2.Y() * sin(2.*theta);
+		double Gim2 = r0 * wgt2 * (cos(2*(phi - theta)) - reCentTheta2);
 		TComplex theta1Term(0.,0.);
 		for (int Ntheta1 = 0; Ntheta1 < Flow::nTheta1; Ntheta1++) { // loop over theta1
 		  theta1 = ((float)Ntheta1 / (float)Flow::nTheta1) * 2. * TMath::Pi();
-		  double Gim1 = r0 * Flow::epsV1 * wgt * cos(phi - theta1);
+		  reCentTheta1 = reCent.X() * cos(1.*theta1) + reCent.Y() * sin(1.*theta1); // for 1st harmonic
+		  double Gim1 = r0 * Flow::epsV1 * wgt * (cos(phi - theta1) - reCentTheta1);
 		  TComplex Gr0denom(1., Gim1+Gim2);
-		  TComplex Gr0neum(0., r0 * Flow::epsV1 * cos(phi - theta1));
+		  TComplex Gr0neum(0., r0 * Flow::epsV1 * (cos(phi - theta1)) - reCentTheta1);
 		  TComplex Gder_r0theta = mGV1r0theta[Ntheta1][Ntheta] * Gr0neum / Gr0denom; // DF Eq. 8
 		  Double_t cosTheta12 = cos(2.*(theta1 - theta));
 		  theta1Term += (cosTheta12 * Gder_r0theta);
@@ -601,7 +674,7 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
 	      } else if (j==2 && mV1Mixed) { // 3rd harmonic not defined for mixed
 	      	numer = 0.;
 	      } else {
-		cosTerm = cos(m*order*(phi - theta));
+		cosTerm = cos(m*order*(phi - theta)) - reCentTheta;
 		cosTermComp(1., r0*cosTerm);
 		numer = mGr0theta[k][j][Ntheta] * cosTerm / cosTermComp;  // PG Eq. 9
 	      }
@@ -641,15 +714,60 @@ void StFlowLeeYangZerosMaker::FillParticleHistograms() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowLeeYangZerosMaker::Finish() {
-  // In the first pass, from Gtheta find the first minimum to get r0(theta).
+  // In the zero pass write out the recentering parameters
+  // In the first pass, from Gtheta find the first minimum to get r0(theta) and write it out.
   // In the second pass calculate V(theta), average over theta, and then calculate v 
 //   timeFinish.start();
 
   TOrdCollection* savedHistNames          = new TOrdCollection(Flow::nSels * Flow::nHars);
-  TOrdCollection* savedHistFirstPassNames = new TOrdCollection(Flow::nSels * 2 * Flow::nTheta);
+  TOrdCollection* savedHistFirstPassNames = new TOrdCollection(Flow::nSels * Flow::nTheta * 3);
+  TOrdCollection* savedHistZeroPassNames  = new TOrdCollection(Flow::nSels * Flow::nHars * 2);
   TString* histTitle;
 
   cout << endl << "##### LeeYangZeros Maker:" << endl;
+
+  Float_t reCentX, reCentY;
+  if (mFirstPass) { cout << "Test of recentering of Q vector per particle:" << endl; }
+  for (int k = 0; k < Flow::nSels; k++) {
+    for (int j = 0; j < Flow::nHars; j++) {
+      if (mZeroPass) {
+	reCentX   = histFull[k].histFullHar[j].mHistCentX->GetBinContent(3);
+	reCentY   = histFull[k].histFullHar[j].mHistCentY->GetBinContent(3);
+	cout << setprecision(3) << "Sel = " << k+1 << ", Har = " << j+1 << " : reCent_x = " << reCentX
+	     << ", reCent_y = " << reCentY << endl;
+	reCentX   = histFull[k].histFullHar[j].mHistCentX->GetBinContent(1);
+	reCentY   = histFull[k].histFullHar[j].mHistCentY->GetBinContent(1);
+	cout << setprecision(3) << "Sel = " << k+1 << ", Har = " << j+1 << " : reCentE_x = " << reCentX
+	     << ", reCentE_y = " << reCentY << endl;
+	reCentX   = histFull[k].histFullHar[j].mHistCentX->GetBinContent(2);
+	reCentY   = histFull[k].histFullHar[j].mHistCentY->GetBinContent(2);
+	cout << setprecision(3) << "Sel = " << k+1 << ", Har = " << j+1 << " : reCentW_x = " << reCentX
+	     << ", reCentW_y = " << reCentY << endl;
+	savedHistZeroPassNames->AddLast(histFull[k].histFullHar[j].mHistCentX);
+	savedHistZeroPassNames->AddLast(histFull[k].histFullHar[j].mHistCentY);
+      } else if (mFirstPass) {
+	reCentX   = histFull[k].histFullHar[j].mHistQCent->GetBinContent(1);
+	reCentY   = histFull[k].histFullHar[j].mHistQCent->GetBinContent(2);
+	cout << setprecision(3) << "Sel = " << k+1 << ", Har = " << j+1 << " : reCentedQ_x = " << reCentX
+	     << ", reCentedQ_y = " << reCentY << endl;
+	savedHistFirstPassNames->AddLast(histFull[k].histFullHar[j].mHistQCent);
+      } else {
+	savedHistNames->AddLast(histFull[k].histFullHar[j].mHistQCent);
+      }
+    }
+  }
+  cout << endl;
+  if (mZeroPass) {
+    TFile fileZeroPass("flow.reCent.root", "RECREATE");
+    fileZeroPass.cd();
+    savedHistZeroPassNames->Write();
+    fileZeroPass.Close();
+    delete savedHistZeroPassNames;
+    delete pFlowSelect;
+    
+    return StMaker::Finish();
+  }
+  
   cout << "integrated flow: (errors just show variation with theta)" << endl;
 
   Float_t reG, imG, reNumer, imNumer, reDenom, imDenom, reDiv;
@@ -869,8 +987,9 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
       
       if (j <=1) {
 	// sigma2 and chi
-	mQ[k][j]  /= (float)mNEvents;
-	mQ2[k][j] /= (float)mNEvents;
+	mQ[k][j]      /= (float)mNEvents;
+	mQ2[k][j]     /= (float)mNEvents;
+
 	V = histFull[k].mHistPro_V->GetBinContent(j+1);
 	sigma2 = mQ2[k][j] - TMath::Power(mQ[k][j].X(), 2.) - TMath::Power(mQ[k][j].Y(), 2.)
 	  - TMath::Power(V, 2.); // BP Eq. 62
@@ -882,14 +1001,14 @@ Int_t StFlowLeeYangZerosMaker::Finish() {
 	vErr = histFull[k].mHistPro_vr0->GetBinError(j+1); // from the spread with theta
 	if (k && !j && mV1Mixed) {
 	  if (!mFirstPass) {
-	    cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	    cout << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
 	      " +/- " << vErr << ") %"<< " from mixed harmonics" << endl;
 	  }
 	} else if (mFirstPass) {
-	  cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	  cout << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
 	    " +/- " << vErr << ") %" << endl;
 	} else {
-	  cout  << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
+	  cout << setprecision(3) << "Sel = " << k+1 << ": v" << j+1 << " from r0 = (" << _v <<
 	    " +/- " << vErr << ") %  chiJYO = " << chi << endl;
 	}
       }

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.42 2004/12/09 23:43:34 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.43 2007/02/06 18:57:49 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,7 +33,7 @@ Bool_t  StFlowCutTrack::mTpcTrackCut          = kFALSE;
 Int_t   StFlowCutTrack::mFitPtsTpcCuts[2]     = {15, 50};
 Float_t StFlowCutTrack::mFitOverMaxCuts[2]    = {0.52, 1.05}; // greater than one!
 Float_t StFlowCutTrack::mChiSqTpcCuts[2]      = {0., 0.};
-Float_t StFlowCutTrack::mPtTpcCuts[2]         = {0.1, 12.};
+Float_t StFlowCutTrack::mPtTpcCuts[2]         = {0.15, 12.};
 Float_t StFlowCutTrack::mEtaTpcCuts[2]        = {-1.3, 1.3};
 Int_t   StFlowCutTrack::mChgTpcCuts[2]        = {0, 0};
 
@@ -42,7 +42,7 @@ Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {5, 11};     // FitPts DO NOT in
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]     = {0., 0.};
 Float_t StFlowCutTrack::mDcaFtpcCuts[2]       = {0., 0.};
 Float_t StFlowCutTrack::mDcaGlobalFtpcCuts[2] = {0., 2.};
-Float_t StFlowCutTrack::mPtFtpcCuts[2]        = {0.1, 8.};
+Float_t StFlowCutTrack::mPtFtpcCuts[2]        = {0.15, 6.};
 Float_t StFlowCutTrack::mEtaFtpcCuts[4]       = {-4.0, -2.5, 2.5, 4.0};
 Int_t   StFlowCutTrack::mChgFtpcCuts[2]       = {0, 0};
 
@@ -710,6 +710,10 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.43  2007/02/06 18:57:49  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.42  2004/12/09 23:43:34  posk
 // Minor changes in code formatting.
 //

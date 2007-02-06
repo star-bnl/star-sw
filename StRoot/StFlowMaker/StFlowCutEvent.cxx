@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.43 2006/07/06 20:29:45 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.44 2007/02/06 18:57:48 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -505,12 +505,10 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   const StThreeVectorF& vertex = pVertex->position();
   Float_t vertexZ = vertex.z();
   // Tpc
-  float etaSymZSlopeTpc = 0.003;
-  etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
+  etaSymTpc += (Flow::etaSymZSlopeTpc * vertexZ); // correction for acceptance
   etaSymTpc *= ::sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   // Ftpc
-  //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
-  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
+  etaSymFtpc += (Flow::etaSymZSlopeFtpc * vertexZ); // corrected for acceptance
   etaSymFtpc *= ::sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
   if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
@@ -557,12 +555,10 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
 
   Float_t vertexZ = pPicoEvent->VertexZ();
   // Tpc
-  float etaSymZSlopeTpc = 0.003;
-  etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
+  etaSymTpc += (Flow::etaSymZSlopeTpc * vertexZ); // correction for acceptance
   etaSymTpc *= ::sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   // Ftpc
-  //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
-  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
+  etaSymFtpc += (Flow::etaSymZSlopeFtpc * vertexZ); // correctly corrected for acceptance
   etaSymFtpc *= ::sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
   if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
@@ -610,12 +606,10 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
   const StThreeVectorF& vertex = pMuEvent->primaryVertexPosition();
   Float_t vertexZ = vertex.z();
   // Tpc
-  float etaSymZSlopeTpc = 0.003;
-  etaSymTpc += (etaSymZSlopeTpc * vertexZ); // correction for acceptance
+  etaSymTpc += (Flow::etaSymZSlopeTpc * vertexZ); // correction for acceptance
   etaSymTpc *= ::sqrt((double)(etaSymPosTpcN + etaSymNegTpcN)); // corrected for statistics
   // Ftpc
-  //float etaSymZSlopeFtpc = 0.003;  // Has to be evaluated, still, therefore ...
-  //etaSymFtpc += (etaSymZSlopeFtpc * vertexZ); // ... NOT correctly corrected for acceptance
+  etaSymFtpc += (Flow::etaSymZSlopeFtpc * vertexZ); // correction for acceptance
   etaSymFtpc *= ::sqrt((double)(etaSymPosFtpcN + etaSymNegFtpcN)); // corrected for statistics
 
   if (mEtaSymTpcCuts[1] > mEtaSymTpcCuts[0] && 
@@ -675,6 +669,10 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.44  2007/02/06 18:57:48  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.43  2006/07/06 20:29:45  posk
 // Changed the dynamic_cast of GetInputDS("MuDst") to a const cast.
 //

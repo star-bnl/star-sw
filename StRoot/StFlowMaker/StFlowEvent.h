@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.54 2006/07/06 16:56:01 posk Exp $
+// $Id: StFlowEvent.h,v 1.55 2007/02/06 18:57:54 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -56,6 +56,8 @@ public:
   TVector2       Q(StFlowSelection*);
   TVector2       NormQ(StFlowSelection* pFlowSelect);
   TVector2       QPart(StFlowSelection*);
+  TVector2       ReCentPar(StFlowSelection*, char*);
+  TVector2       ReCent(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Float_t        q(StFlowSelection*);
   Float_t        MeanPt(StFlowSelection*);
   Float_t        Qtheta(StFlowSelection*, Float_t theta);
@@ -134,6 +136,8 @@ public:
   void SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast); 
   void SetZDCSMD_PsiWeightFull(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtFull);
   void SetZDCSMD_BeamCenter(Double_t ex,Double_t ey,Double_t wx,Double_t wy);
+  void SetReCentX(const Flow::ReCent_t &pReCentX);
+  void SetReCentY(const Flow::ReCent_t &pReCentY);
 #endif
   static void SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
@@ -219,6 +223,8 @@ private:
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;		         //! ZDCSMD west Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;        		 //! ZDCSMD east Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtFull;                     //! ZDCSMD full Psi
+  Flow::ReCent_t      mReCentX;                                  //! recentering parameters
+  Flow::ReCent_t      mReCentY;                                  //! recentering parameters
 
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Float_t      mPtWgtSaturation;                          // saturation value for pt weighting
@@ -358,6 +364,12 @@ inline void StFlowEvent::SetZDCSMD_PsiWeightFull(const Flow::ZDCSMD_PsiWgt_t&  Z
  
 inline void StFlowEvent::SetZDCSMD_BeamCenter(Double_t ex,Double_t ey,Double_t wx,Double_t wy) {
   mZDCSMDCenterex = ex; mZDCSMDCenterey = ey; mZDCSMDCenterwx = wx; mZDCSMDCenterwy = wy;}
+
+inline void StFlowEvent::SetReCentX(const Flow::ReCent_t& pReCentX) {
+  memcpy (mReCentX, pReCentX, sizeof(Flow::ReCent_t)); }
+
+inline void StFlowEvent::SetReCentY(const Flow::ReCent_t& pReCentY) {
+  memcpy (mReCentY, pReCentY, sizeof(Flow::ReCent_t)); }
 #endif
 
 inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
@@ -492,6 +504,10 @@ inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.55  2007/02/06 18:57:54  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.54  2006/07/06 16:56:01  posk
 // Calculation of v1 for selection=2 is done with mixed harmonics.
 //

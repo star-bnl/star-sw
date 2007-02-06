@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.24 2006/07/06 16:55:59 posk Exp $
+// $Id: StFlowConstants.h,v 1.25 2007/02/06 18:57:47 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -46,11 +46,14 @@ class Flow{
   typedef Double_t PhiWgt_t[nSels][2][nPhiBins]; // only odd and even harmonics
   typedef Double_t PhiWgtFtpc_t[nSels][2][nPhiBinsFtpc];
   typedef Double_t ZDCSMD_PsiWgt_t[64];  
+  typedef Double_t ReCent_t[nSels][nHars][3];   // 3 TPCs
 
   static Float_t etaMin;
   static Float_t etaMax;
   static Float_t etaMinTpcOnly;
   static Float_t etaMaxTpcOnly;
+  static Float_t etaSymZSlopeTpc;
+  static Float_t etaSymZSlopeFtpc;
   static Float_t rMax;
   static Float_t j01;
   static Float_t epsV1;
@@ -79,6 +82,10 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.25  2007/02/06 18:57:47  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.24  2006/07/06 16:55:59  posk
 // Calculation of v1 for selection=2 is done with mixed harmonics.
 //

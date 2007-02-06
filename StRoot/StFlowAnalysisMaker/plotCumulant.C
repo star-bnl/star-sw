@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.10 2006/02/24 18:13:39 posk Exp $
+// $Id: plotCumulant.C,v 1.11 2007/02/06 19:00:52 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -16,7 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <math.h> 
-const  Int_t nHars    = 4; // 2
+const  Int_t nHars    = 2; // 2
 const  Int_t nOrders  = 2;
 Int_t  runNumber      = 0;
 char   runName[6];
@@ -31,6 +31,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
   if (orderN == 0) multiGraph = kTRUE;
+  bool mixGraph = kFALSE;
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
@@ -41,12 +42,15 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   const char* baseName[] = {
     "Flow_Cumul_v_Order2",
     "Flow_Cumul_v_Order4",
+    "Flow_CumulMix_v",
+    "Flow_CumulMix_vEta",
+    "Flow_CumulMix_vPt",
     "Flow_Cumul_vEta_Order",
     "Flow_Cumul_vPt_Order"
     //"Flow_Cumul_v2D_Order"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles =  2;
+  const int nSingles =  5;
   float Ycm = 0.0;
 
   // construct array of short names
@@ -103,6 +107,11 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   pageNumber--;
   cout << "  graph name= " << shortName[pageNumber] << endl;
 
+  if (strstr(shortName[pageNumber],"Mix")!=0) {            // Mixed harmonic v1
+    mixGraph = kTRUE;
+    harN = 1;
+  }
+
   // set row and column numbers
   int columns = nOrders;
   int rows = nHars;
@@ -146,15 +155,17 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
 
       // construct histName
       TString* histName = new TString(baseName[pageNumber]);
-      if (!singleGraph) {
+      if (multiGraph) {
 	histName->Append(*countOrder);
-	histName->Append("_Sel");
-	*histName += selN;
+      }
+      histName->Append("_Sel");
+      *histName += selN;
+      if (multiGraph) {
 	histName->Append("_Har");
 	*histName += j+1;
-      } else {
-	histName->Append("_Sel");
-	*histName += selN;
+      } else if (mixGraph && strcmp(shortName[pageNumber],"Flow_CumulMix_v") != 0) {
+	histName->Append("_Har");
+	*histName += j+1;
       }
       cout << " col= " << k+1 << " row= " << j+1 << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
@@ -245,6 +256,10 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.11  2007/02/06 19:00:52  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.10  2006/02/24 18:13:39  posk
 // Reduced number of histograms.
 //

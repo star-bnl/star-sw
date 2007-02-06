@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.14 2006/07/06 16:58:38 posk Exp $
+// $Id: minBias.C,v 1.15 2007/02/06 19:00:51 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
@@ -144,7 +144,7 @@ void minBias(Int_t firstRunNo, Int_t lastRunNo, Int_t outputRunNo=99) {
 	}
 	if (hist[0]) { cout << "hist name= " << histName->Data() << endl; }
 
-	const int lastHist = 3;
+	const int lastHist = nCens;
 	int nBins;      // set by 2D of centrality lastHist
 	if (!hist[lastHist]) continue;
 	int xBins = hist[lastHist]->GetNbinsX();
@@ -297,8 +297,9 @@ void minBias(Int_t firstRunNo, Int_t lastRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
-// Revision 1.14  2006/07/06 16:58:38  posk
-// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+// Revision 1.15  2007/02/06 19:00:51  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
 //
 // Revision 1.13  2006/03/22 22:02:07  posk
 // Updates to macros.
