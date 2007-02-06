@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.31 2007/01/15 08:23:02 jcs Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.32 2007/02/06 11:42:17 jcs Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.32  2007/02/06 11:42:17  jcs
+// move unessential output messages from INFO to DEBUG
+//
 // Revision 1.31  2007/01/15 08:23:02  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -568,8 +571,8 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
       LOG_ERROR << "Can't invert FTPC ";
       if (i == 0) { LOG_ERROR << " east rotation matrix Y!" << endm; }
       else { LOG_ERROR << " west rotation matrix Y!" << endm; }
-      LOG_INFO << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
-      LOG_INFO << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
+      LOG_ERROR << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      LOG_ERROR << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -625,8 +628,8 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
       LOG_ERROR << "Can't invert FTPC ";
       if (i == 0) {LOG_ERROR << " east rotation matrix X !" << endm;}
       else {LOG_ERROR << " west rotation matrix X !" << endm;}
-      LOG_INFO << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
-      LOG_INFO << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
+      LOG_ERROR << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      LOG_ERROR << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -639,8 +642,8 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
       LOG_ERROR << "Can't invert FTPC ";
       if (i == 0) {LOG_ERROR << " east rotation matrix!" << endm;}
       else {LOG_ERROR << " west rotation matrix!" << endm;}
-      LOG_INFO << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
-      LOG_INFO << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
+      LOG_ERROR << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
+      LOG_ERROR << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
   }
 }
@@ -838,7 +841,7 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
     if ((mObservedVertexOffsetY[0] != oldY[0] || mObservedVertexOffsetY[1] != oldY[1]) && 
 	(oldY[0] < -9990. || oldY[1] < -9990.)) {
       
-      LOG_INFO << "Observed vertex offset in y direction has changed. Changed from " 
+      LOG_DEBUG << "Observed vertex offset in y direction has changed. Changed from " 
                << oldY[0] << " to " <<  mObservedVertexOffsetY[0] << " (east) and from " 
 	       << oldY[1] << " to " <<  mObservedVertexOffsetY[1] << " (west)." << endm;
     }   
@@ -847,7 +850,7 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
     if ((mObservedVertexOffsetX[0] != oldX[0] || mObservedVertexOffsetX[1] != oldX[1]) && 
 	(oldX[0] < -9990. || oldX[1] < -9990.)) {
       
-      LOG_INFO << "Observed vertex offset in x direction has changed. Changed from " 
+      LOG_DEBUG << "Observed vertex offset in x direction has changed. Changed from " 
 	       << oldX[0] << " to " <<  mObservedVertexOffsetX[0] << " (east) and from " 
 	       << oldX[1] << " to " <<  mObservedVertexOffsetX[1] << " (west)." << endm;
     }
@@ -963,8 +966,8 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
       LOG_ERROR << "Can't invert FTPC ";
       if (i == 0) {LOG_ERROR << " east rotation matrix! Y" << endm;}
       else {LOG_ERROR << " west rotation matrix! Y" << endm;}
-      LOG_INFO << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
-      LOG_INFO << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
+      LOG_ERROR << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      LOG_ERROR << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -1017,8 +1020,8 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
       LOG_ERROR << "Can't invert FTPC ";
       if (i == 0) {LOG_ERROR << " east rotation matrix X !" << endm;}
       else {LOG_ERROR << " west rotation matrix X !" << endm;}
-      LOG_INFO << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
-      LOG_INFO << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
+      LOG_ERROR << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      LOG_ERROR << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -1031,8 +1034,8 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
       LOG_ERROR << "Can't invert FTPC ";
       if (i == 0) {LOG_ERROR << " east rotation matrix!" << endm;}
       else {LOG_ERROR << " west rotation matrix!" << endm;}
-      LOG_INFO << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
-      LOG_INFO << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
+      LOG_ERROR << "FTPC rotation matrix:" << (*mFtpcRotation[i]) << endm;
+      LOG_ERROR << "Inverse FTPC rotation matrix:" << (*mFtpcRotationInverse[i]) << endm;
     }
 
   }
@@ -1066,11 +1069,11 @@ Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
       }
       
       else { // field has been set before
-	LOG_INFO << "Magnetic field has changed. Reset magnetic field table and the field factor from " 
+	LOG_WARN << "Magnetic field has changed. Reset magnetic field table and the field factor from " 
 					  << mMagFieldFactor << " to " << newFactor << "." << endm;
 	mMagFieldFactor = newFactor;
 	delete mMagField;
-	LOG_INFO << "Initializing StMagUtilities for FTPC!" << endm;
+	LOG_DEBUG << "Initializing StMagUtilities for FTPC!" << endm;
 	mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
       }
     }
@@ -1102,9 +1105,9 @@ void StFtpcTrackingParams::PrintParams() {
   LOG_INFO << "Number of padows per FTPC...: " << mNumberOfPadRowsPerSide << endm; 
   
   for (Int_t i = 0; i < NumberOfPadRows(); i++) {
-    LOG_INFO << "z-position of padrow ";
-    if (i<10) {LOG_INFO << "z-position of padrow  "<< i << " (cm): " << PadRowPosZ(i) << endm;}
-    else {LOG_INFO << "z-position of padrow "<< i << " (cm): " << PadRowPosZ(i) << endm;}
+    LOG_DEBUG << "z-position of padrow ";
+    if (i<10) {LOG_DEBUG << "z-position of padrow  "<< i << " (cm): " << PadRowPosZ(i) << endm;}
+    else {LOG_DEBUG << "z-position of padrow "<< i << " (cm): " << PadRowPosZ(i) << endm;}
   }
   
   LOG_INFO << endm;
@@ -1179,18 +1182,18 @@ void StFtpcTrackingParams::PrintParams() {
   LOG_INFO << "Min. point ratio..: " << mMinPointRatio << endm; 
   LOG_INFO << "Max. point ratio..: " << mMaxPointRatio << endm; 
   
-  LOG_INFO << endm;
-  LOG_INFO << "dE/dx" << endm;
-  LOG_INFO << "Debugging level..............: " << mDebugLevel << endm; 
-  LOG_INFO << "Method Id....................: " << mIdMethod << endm; 
-  LOG_INFO << "Switch for dip/cross angles..: " << mNoAngle << endm; 
-  LOG_INFO << "Max. allowable hits per track: " << mMaxHit << endm; 
-  LOG_INFO << "Min. no. of hits required....: " << mMinHit << endm; 
-  LOG_INFO << "Max. no. of tracks to be used: " << mMaxTrack << endm; 
-  LOG_INFO << "Length of pad (us/keV).......: " << mPadLength << endm; 
-  LOG_INFO << "Fraction for trunc. mean.....: " << mFracTrunc << endm; 
-  LOG_INFO << "a i p (GeV)..................: " << mAip << endm; 
-  LOG_INFO << "A large number...............: " << mALargeNumber << endm;
+  LOG_DEBUG << endm;
+  LOG_DEBUG << "dE/dx" << endm;
+  LOG_DEBUG << "Debugging level..............: " << mDebugLevel << endm; 
+  LOG_DEBUG << "Method Id....................: " << mIdMethod << endm; 
+  LOG_DEBUG << "Switch for dip/cross angles..: " << mNoAngle << endm; 
+  LOG_DEBUG << "Max. allowable hits per track: " << mMaxHit << endm; 
+  LOG_DEBUG << "Min. no. of hits required....: " << mMinHit << endm; 
+  LOG_DEBUG << "Max. no. of tracks to be used: " << mMaxTrack << endm; 
+  LOG_DEBUG << "Length of pad (us/keV).......: " << mPadLength << endm; 
+  LOG_DEBUG << "Fraction for trunc. mean.....: " << mFracTrunc << endm; 
+  LOG_DEBUG << "a i p (GeV)..................: " << mAip << endm; 
+  LOG_DEBUG << "A large number...............: " << mALargeNumber << endm;
 
   LOG_INFO << endm;
   LOG_INFO << "FTPC to global transformation" << endm;
@@ -1200,23 +1203,23 @@ void StFtpcTrackingParams::PrintParams() {
   LOG_INFO << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << endm;
   LOG_INFO << "Observed vertex offset x (east, cm): " << ObservedVertexOffsetX(0) << endm;
   LOG_INFO << "Observed vertex offset x (west, cm): " << ObservedVertexOffsetX(1) << endm;
-  LOG_INFO << "FTPC east to global rotation Y: " << FtpcRotationY(0) << endm;
-  LOG_INFO << "Global to FTPC east rotation Y: " << FtpcRotationYInverse(0) << endm;
-  LOG_INFO << "FTPC west to global rotation Y: " << FtpcRotationY(1) << endm;
-  LOG_INFO << "Global to FTPC west rotation Y: " << FtpcRotationYInverse(1) << endm;
-  LOG_INFO << "FTPC east to global rotation X: " << FtpcRotationX(0) << endm;
-  LOG_INFO << "Global to FTPC east rotation X: " << FtpcRotationXInverse(0) << endm;
-  LOG_INFO << "FTPC west to global rotation X: " << FtpcRotationX(1) << endm;
-  LOG_INFO << "Global to FTPC west rotation X: " << FtpcRotationXInverse(1) << endm;
-  LOG_INFO << "FTPC east to global rotation: " << FtpcRotation(0) << endm;
-  LOG_INFO << "Global to FTPC east rotation: " << FtpcRotationInverse(0) << endm;
-  LOG_INFO << "FTPC west to global rotation: " << FtpcRotation(1) << endm;
-  LOG_INFO << "Global to FTPC west rotation: " << FtpcRotationInverse(1) << endm;
+  LOG_DEBUG << "FTPC east to global rotation Y: " << FtpcRotationY(0) << endm;
+  LOG_DEBUG << "Global to FTPC east rotation Y: " << FtpcRotationYInverse(0) << endm;
+  LOG_DEBUG << "FTPC west to global rotation Y: " << FtpcRotationY(1) << endm;
+  LOG_DEBUG << "Global to FTPC west rotation Y: " << FtpcRotationYInverse(1) << endm;
+  LOG_DEBUG << "FTPC east to global rotation X: " << FtpcRotationX(0) << endm;
+  LOG_DEBUG << "Global to FTPC east rotation X: " << FtpcRotationXInverse(0) << endm;
+  LOG_DEBUG << "FTPC west to global rotation X: " << FtpcRotationX(1) << endm;
+  LOG_DEBUG << "Global to FTPC west rotation X: " << FtpcRotationXInverse(1) << endm;
+  LOG_DEBUG << "FTPC east to global rotation: " << FtpcRotation(0) << endm;
+  LOG_DEBUG << "Global to FTPC east rotation: " << FtpcRotationInverse(0) << endm;
+  LOG_DEBUG << "FTPC west to global rotation: " << FtpcRotation(1) << endm;
+  LOG_DEBUG << "Global to FTPC west rotation: " << FtpcRotationInverse(1) << endm;
     
-  LOG_INFO << "TPC to global transformation" << endm;
+  LOG_DEBUG << "TPC to global transformation" << endm;
   LOG_INFO << "Position of TPC (cm)..: " << TpcPositionInGlobal() <<endm;
-  LOG_INFO << "TPC to global rotation: " << TpcToGlobalRotation() << endm;
-  LOG_INFO << "Global to TPC rotation: " << GlobalToTpcRotation()<< endm;
+  LOG_DEBUG << "TPC to global rotation: " << TpcToGlobalRotation() << endm;
+  LOG_DEBUG << "Global to TPC rotation: " << GlobalToTpcRotation()<< endm;
 
   return;
 }
