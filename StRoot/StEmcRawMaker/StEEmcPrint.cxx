@@ -1,5 +1,5 @@
 //*-- Author : Wei-Ming Zhang
-// $Id: StEEmcPrint.cxx,v 1.2 2007/01/24 21:11:07 balewski Exp $
+// $Id: StEEmcPrint.cxx,v 1.3 2007/02/06 16:06:40 balewski Exp $
 
 #include <iostream>
 #include <StMessMgr.h>
@@ -24,9 +24,15 @@ StEEmcPrint::print(StEmcCollection * emcCol) {
   for(int iDet = kEndcapEmcTowerId; iDet<=  kEndcapSmdVStripId; iDet++){
     if(!(mPrint & detBit[iDet - kEndcapEmcTowerId])) continue; 
     if(iDet == kEndcapSmdVStripId) uv++;
-    if(iDet == kEndcapEmcTowerId) LOG_DEBUG  << "EEmc Tower" << endm;
-    else if(iDet == kEndcapEmcPreShowerId) LOG_DEBUG  << "EEmc Pre/Post" << endm;
-    else  LOG_DEBUG  << "EEmc SMD-" << uv <<  endm;
+    if(iDet == kEndcapEmcTowerId) {
+      LOG_DEBUG  << "EEmc Tower" << endm;
+    }
+    else if(iDet == kEndcapEmcPreShowerId) {
+      LOG_DEBUG  << "EEmc Pre/Post" << endm;
+    }
+    else {
+      LOG_DEBUG  << "EEmc SMD-" << uv <<  endm;
+    }
    
     StDetectorId detId = StDetectorId(iDet);
     StEmcDetector* StEEmcDet = emcCol->detector(detId);
@@ -46,15 +52,17 @@ StEEmcPrint::print(StEmcCollection * emcCol) {
             float e = EEmcRawHits[i]->energy();
             int adc = EEmcRawHits[i]->adc();
 
-            if(iDet == kEndcapEmcTowerId) 
+            if(iDet == kEndcapEmcTowerId) { 
 	      LOG_DEBUG  <<Form("i=%d  Tower %2.2dT%c%2.2d: energy=%f adc=%d",i,sec,sub+'A'-1,eta,e,adc )<< endm;
+            }
             else if(iDet == kEndcapEmcPreShowerId) {
               int psub = (sub%5 == 0) ? 5:sub%5;
               int pre = (sub-1)/5 + 1; 
 	      LOG_DEBUG  <<Form("i=%d  pre/post(%d) %2.2d%c%c%2.2d : energy=%f adc=%d",i,pre,sec,pre+'P'-1,psub+'A'-1,eta,e,adc)<< endm;
             }
-            else 
+            else {
 	       LOG_DEBUG  <<Form("SMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d",uv,sec,uv,eta,e,adc)<< endm;
+            }
           }
         }
       }
@@ -77,9 +85,15 @@ StEEmcPrint::printChange(StEmcCollection * emcCol,StEmcCollection * emcColB,char
   for(int iDet = kEndcapEmcTowerId; iDet<=  kEndcapSmdVStripId; iDet++){
     if(!(mPrint & detBit[iDet - kEndcapEmcTowerId])) continue; 
     if(iDet == kEndcapSmdVStripId) uv++;
-    if(iDet == kEndcapEmcTowerId) LOG_DEBUG  << "EEmc Tower" << endm;
-    else if(iDet == kEndcapEmcPreShowerId) LOG_DEBUG  << "EEmc Pre/Post" << endm;
-    else  LOG_DEBUG  << "EEmc SMD-" << uv <<  endm;
+    if(iDet == kEndcapEmcTowerId) {
+      LOG_DEBUG  << "EEmc Tower" << endm;
+    }
+    else if(iDet == kEndcapEmcPreShowerId) {
+      LOG_DEBUG  << "EEmc Pre/Post" << endm;
+    }
+    else  {
+      LOG_DEBUG  << "EEmc SMD-" << uv <<  endm;
+    }
    
     StDetectorId detId = StDetectorId(iDet);
     StEmcDetector* StEEmcDet = emcCol->detector(detId);
@@ -130,8 +144,9 @@ StEEmcPrint::printChange(StEmcCollection * emcCol,StEmcCollection * emcColB,char
 	  int pre = (sub-1)/5 + 1; 
 	  LOG_DEBUG  << Form("\ti=%d  ecolA: pre/post(%d) %2.2d%c%c%2.2d : energy=%f adc=%d<--> %d=adc old in ecolB",i,pre,sec,pre+'P'-1,psub+'A'-1,eta,e,adc,adcB)<<endm;
 	}
-	else 
+	else { 
 	  LOG_DEBUG  << Form("\tSMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d <--> %d=adc old in ecolB",uv,sec,uv,eta,e,adc, adcB)<<endm;
+        }
       }
     }
   }
