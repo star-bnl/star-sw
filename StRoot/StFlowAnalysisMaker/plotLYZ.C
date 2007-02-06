@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotLYZ.C,v 1.3 2006/07/06 16:58:39 posk Exp $
+// $Id: plotLYZ.C,v 1.4 2007/02/06 19:00:53 posk Exp $
 //
 // Plot histograms from flow.LeeYang.Zeros.root
 //
@@ -15,11 +15,10 @@
 #include <iostream.h>
 #include <iomanip.h>
 
-void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
+void plotLYZ(TString fileName = "flow.hist.root", Bool_t firstPass = kFALSE, char* ext = "") {
 
-  Bool_t mevSim, firstPass, FTPC = kFALSE;
+  Bool_t mevSim, FTPC = kFALSE;
   //Bool_t mevSim = kTRUE;
-  //Bool_t firstPass = kTRUE;
   Bool_t FTPC = kTRUE;
 
   gROOT->SetStyle("Pub");                              // set style
@@ -87,6 +86,15 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   TCanvas *can_v = new TCanvas("v", "v");
   can_v->Divide(maxSel);
 
+  TCanvas *can_centX = new TCanvas("centX", "centX");
+  can_centX->Divide(maxSel, maxHarPlot);
+
+  TCanvas *can_centY = new TCanvas("centY", "centY");
+  can_centY->Divide(maxSel, maxHarPlot);
+
+  TCanvas *can_centQ = new TCanvas("centQ", "centQ");
+  can_centQ->Divide(maxSel, maxHarPlot);
+
   // Make the histograms
   TH1D *histMult = new TH1D;
   TH1F **hist_v = new TH1F*[maxSel];
@@ -97,6 +105,9 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   TH1D **hist_r0th = new TH1D*[maxSel*maxHarPlot];
   TH1F **histG = new TH1F*[maxSel*maxHarPlot*maxTheta];
   TH1F **histGZoom = new TH1F*[maxSel*maxHarPlot*maxTheta];
+  TH1D **hist_centX = new TH1D*[maxSel*maxHarPlot];
+  TH1D **hist_centY = new TH1D*[maxSel*maxHarPlot];
+  TH1D **hist_centQ = new TH1D*[maxSel*maxHarPlot];
 
   TLine **r0Line = new TLine*[maxSel*maxHarPlot*maxTheta];
   TLine **r0LineZoom = new TLine*[maxSel*maxHarPlot*maxTheta]; 
@@ -110,6 +121,8 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
   TLine *etaV1LinePos = new TLine(0., v1, 4.5, v1);
   TLine *etaV1LineNeg = new TLine(-4.5, -v1, 0., -v1);
   TLine *vLine = new TLine(0.5, 0., maxHar+0.5, 0.);
+  TLine *recentZeroLine = new TLine(0.5, 0., 3.5, 0.);
+  TLine *recentedZeroLine = new TLine(0.5, 0., 2.5, 0.);
 
   // Multiplicity
   TString histName("FlowLYZ_Mult");
@@ -182,6 +195,44 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
 	}
 	cout << setprecision(3) << "Sel=" << sel+1 << ", Har=" << har+1 <<": r0" << th << " = "
 	     << _v << " +/- " << vErr << endl;
+      }
+
+      if (!firstPass) {
+	TString histName("FlowCentX_Sel");
+	histName += sel+1;
+	histName += "_Har";
+	histName += har+1;
+	hist_centX[n] = (TH1D*)file->Get(histName);
+	if (hist_centX[n]) {
+	  cout << histName << endl;
+	  can_centX->cd(1+sel+har*maxSel);
+	  hist_centX[n]->Draw();
+	  recentZeroLine->Draw();
+	}
+	
+	TString histName("FlowCentY_Sel");
+	histName += sel+1;
+	histName += "_Har";
+	histName += har+1;
+	hist_centY[n] = (TH1D*)file->Get(histName);
+	if (hist_centY[n]) {
+	  cout << histName << endl;
+	  can_centY->cd(1+sel+har*maxSel);
+	  hist_centY[n]->Draw();
+	  recentZeroLine->Draw();
+	}
+      }
+
+      TString histName("FlowQCent_Sel");
+      histName += sel+1;
+      histName += "_Har";
+      histName += har+1;
+      hist_centQ[n] = (TH1D*)file->Get(histName);
+      if (hist_centQ[n]) {
+	cout << histName << endl;
+	can_centQ->cd(1+sel+har*maxSel);
+	hist_centQ[n]->Draw();
+	recentedZeroLine->Draw();
       }
 
       min = 0.00001;
@@ -279,6 +330,9 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
     can_vPt->SaveAs("FlowLYZ_vPt.ps");
     can_vr0->SaveAs("FlowLYZ_vro.ps");
     can_v->SaveAs("FlowLYZ_v.ps");
+    can_centX->SaveAs("FlowCentX.ps");
+    can_centY->SaveAs("FlowCentY.ps");
+    can_centQ->SaveAs("FlowCentQ.ps");
   } else if (strstr(ext,"gif")) {
     canGtheta->SaveAs("FlowLYZ_Gtheta.gif");
     canGthetaZoom->SaveAs("FlowLYZ_GthetaZoom.gif");
@@ -296,8 +350,9 @@ void plotLYZ(TString fileName = "flow.hist.root", char* ext = "") {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotLYZ.C,v $
-// Revision 1.3  2006/07/06 16:58:39  posk
-// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+// Revision 1.4  2007/02/06 19:00:53  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
 //
 // Revision 1.2  2006/03/22 22:02:14  posk
 // Updates to macros.

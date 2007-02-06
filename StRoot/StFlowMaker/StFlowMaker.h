@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.49 2006/02/22 19:25:39 posk Exp $
+//  $Id: StFlowMaker.h,v 1.50 2007/02/06 18:58:00 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -63,12 +63,14 @@ public:
   void          SetPicoEventFileName(StFileI* fileList);
   void          SetMuEventDir(const Char_t* name="./");
   void          SetMuEventFileName(StFileI* fileList);
+  void          SetReCent(Bool_t flag=kTRUE);
+  Bool_t        ReCent();
 
   void          FillFlowEvent(StHbtEvent* hbtEvent); //rcwells added this
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.49 2006/02/22 19:25:39 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.50 2007/02/06 18:58:00 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -85,9 +87,11 @@ protected:
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;	  //! ZDCSMD west Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;      //! ZDCSMD east Psi
   Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtFull;      //! ZDCSMD full Psi
-  Double_t      mZDCSMDCenterEx,mZDCSMDCenterEy;           //! ZDCSMD Beam Center
-  Double_t      mZDCSMDCenterWx,mZDCSMDCenterWy;           //! ZDCSMD Beam Center
-  Double_t      mZDCSMDPed[2][2][8];                       //! ZDCSMD pedestal
+  Double_t mZDCSMDCenterEx,mZDCSMDCenterEy;       //! ZDCSMD Beam Center
+  Double_t mZDCSMDCenterWx,mZDCSMDCenterWy;       //! ZDCSMD Beam Center
+  Double_t mZDCSMDPed[2][2][8];                   //! ZDCSMD pedestal
+  Flow::ReCent_t       mReCentX;                  //! Recentering parameters
+  Flow::ReCent_t       mReCentY;                  //! Recentering parameters
 
 private:
   TString          mEventFileName;            //! IO Maker file name
@@ -100,11 +104,13 @@ private:
   Bool_t           mPicoEventRead;            // switch for pico-DST
   Bool_t           mMuEventRead;              // switch for Mu-DST non GC
   Bool_t           mMuEventReadGC;            // switch for Mu-DST GC
+  Bool_t           mReCent;                   // switch for recentering
   UInt_t           mEventCounter;             // number of Bytes in pico event
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
   Int_t            ReadPhiWgtFile();          // get the weight file
   Int_t            ReadZDCSMDFile();	      // get the ZDCSMD constants
+  Int_t            ReadReCentFile();          // get the recenting parameter file
   Int_t            InitPicoEventWrite();      // open pico-DST
   Int_t            InitPicoEventRead();       // open pico-DST
   Int_t            InitMuEventRead();         // open Mu-DST
@@ -156,10 +162,10 @@ inline void StFlowMaker::PicoEventRead(Bool_t flag) {
   if (flag) mPicoEventWrite=kFALSE; }
 
 inline void StFlowMaker::MuEventRead(Bool_t flag) {
-  mMuEventRead=flag;}
+  mMuEventRead=flag; }
 
 inline void StFlowMaker::MuEventReadGC(Bool_t flag) {
-  mMuEventReadGC=flag;}
+  mMuEventReadGC=flag; }
 
 inline void StFlowMaker::SetPicoEventDir(const Char_t* name) {
   strncpy(mPicoEventDir, name, 63); mPicoEventDir[63] = '\0'; }
@@ -176,11 +182,21 @@ inline void StFlowMaker::SetMuEventFileName(StFileI* fileList) {
 inline StFlowSelection* StFlowMaker::FlowSelection() {
 	return pFlowSelect; }
 
+inline void StFlowMaker::SetReCent(Bool_t flag) {
+  mReCent=flag; }
+
+inline Bool_t StFlowMaker::ReCent() {
+  return mReCent; }
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.50  2007/02/06 18:58:00  posk
+//  In Lee Yang Zeros method, introduced recentering of Q vector.
+//  Reactivated eta symmetry cut.
+//
 //  Revision 1.49  2006/02/22 19:25:39  posk
 //  Changes needed for the MuDst
 //  Stopped using eventSummary()

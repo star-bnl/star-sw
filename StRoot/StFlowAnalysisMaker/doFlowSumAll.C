@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowSumAll.C,v 1.2 2006/07/06 16:58:37 posk Exp $
+// $Id: doFlowSumAll.C,v 1.3 2007/02/06 19:00:50 posk Exp $
 //
 // Makes root.files.<cenNo> files containing lists of flow.hist.root files
 // in all subdirectories of outDir, which is a link in this directory.
@@ -11,6 +11,7 @@
 // Thus, for LYZ do only one centrality at a time
 // Last file is the output file.
 // This macro must be in your working directory.
+// if just AnalysisMaker set nNames = 6
 //
 // by Art Poskanzer and Kirill Filimonov
 //
@@ -29,7 +30,6 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 
   const  int nSels = 2;
   const  int nHars = 4; // 4
-  //char*  dirName = "b8";
 
   char   rootFileName[80];
   char   logFileName[80];
@@ -54,6 +54,7 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
     "Flow_vEta_",
     "Flow_vPt_",
     "Flow_v_",
+    "Flow_q_",
     "Flow_v2D_ScalarProd_",
     "Flow_vEta_ScalarProd_",
     "Flow_vPt_ScalarProd_",
@@ -77,7 +78,8 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
     "FlowLYZ_Gtheta3_",
     "FlowLYZ_Gtheta4_"
   };
-  const int nNames = sizeof(baseName) / sizeof(char*);
+  //const int nNames = sizeof(baseName) / sizeof(char*);
+  const int nNames = 6; // if just AnalysisMaker
 
   // open the output log file
   sprintf(logOutName, "ana%2d.log", outputRunNo);
@@ -106,7 +108,9 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
       sprintf(phiWgtNewCommand, "test -f %sflowPhiWgtNew.hist.root", rootFileName);
       sprintf(secondPassCommand, "test -f %sflow.firstPassLYZNew.root", rootFileName);
       if (system(phiWgtNewCommand) && system(secondPassCommand)) {
+	cout << "####################################" << endl;
  	cout << "### No 2nd pass for " << rootFileName << endl;
+	cout << "####################################" << endl;
 	delete histFile[nFile];
 	continue;
       }
@@ -220,7 +224,8 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 	      pageNumber++;
 	      goto nextPage;
 	    } else {
-	      return;
+	      cout << endl;
+	      cout << "*** Error: Correct nNames in macro" << endl;
 	    }
 	  } else if (n == 0) {
 	    cout << "  hist name= " << histName << endl;
@@ -378,7 +383,7 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 		    pt = yieldPartHist[n]->GetYaxis()->GetBinCenter(bin);
 		    yieldPt->Fill(pt, yield);
 		  }
-		} else {                                        // _v_
+		} else {                                        // _v_ and _q_
 		  yield = yieldPartHist[n]->Integral();
 		}
 		v = hist[n]->GetBinContent(bin);
@@ -401,7 +406,7 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
     } // selN
     cout << endl;
   } // pageNumber
-  
+
   cout << endl;
   //histFile[nFiles]->ls();
   histFile[nFiles]->Write(0, TObject::kOverwrite);
@@ -414,8 +419,9 @@ void doFlowSumAll(Int_t firstCenNo, Int_t lastCenNo, char*  dirName = "", Int_t 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowSumAll.C,v $
-// Revision 1.2  2006/07/06 16:58:37  posk
-// Calculation of v1 for LYZ selection=2 is done with mixed harmonics.
+// Revision 1.3  2007/02/06 19:00:50  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
 //
 // Revision 1.1  2006/03/22 21:59:51  posk
 // Macro and shell script to sum the outputs of the second pass.

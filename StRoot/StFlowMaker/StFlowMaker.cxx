@@ -1,12 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.110 2006/07/06 20:29:48 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.111 2007/02/06 18:57:55 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //          ZDCSMD added by Aihong Tang, Dec 2004
-//
 //////////////////////////////////////////////////////////////////////
 //
 // Description:
@@ -35,6 +34,8 @@
 #include "TBranch.h"
 #include "TChain.h"
 #include "TText.h"
+#include "TH1.h"
+#include "TProfile.h"
 #include "StuRefMult.hh"
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
@@ -52,6 +53,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
+#include "TDatime.h"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
@@ -259,12 +261,13 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.110 2006/07/06 20:29:48 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.111 2007/02/06 18:57:55 posk Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
-  // Open PhiWgt file
+  // Open PhiWgt or ReCent  file
   ReadPhiWgtFile();
+  ReadReCentFile();
   Int_t kRETURN = kStOK;
 
   if (!mPicoEventRead || !mMuEventRead) {
@@ -302,6 +305,11 @@ Int_t StFlowMaker::Finish() {
   cout << endl;
   gMessMgr->Summary(3);
   cout << endl;
+
+  // Print the dtae of completion
+  TDatime now;
+  cout << "#######################################################" << endl;
+  cout << "#####  Finish time: " << now.AsString() << endl;
 
   // Print the selection object details
   pFlowSelect->PrintList();
@@ -504,6 +512,67 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 
 //-----------------------------------------------------------------------
 
+Int_t StFlowMaker::ReadReCentFile() {
+  // Read the recentering flow.reCent.root file
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: ReadReCentFile()" << endm;
+
+  StFlowMaker* pFlowMaker = NULL;
+  pFlowMaker = (StFlowMaker*)GetMaker("Flow");
+  Bool_t reCent = pFlowMaker->ReCent();
+
+  TDirectory* dirSave = gDirectory;
+  TFile* pReCentFile = new TFile("flow.reCent.root", "READ");
+  if (pReCentFile->IsOpen() && reCent) {
+    gMessMgr->Info("##### FlowMaker: ReCentering being done for LYZ Maker.");
+  } else if (reCent) {
+    gMessMgr->Info("##### FlowMaker: ReCentering parameters being calculated.");
+  } else {
+    gMessMgr->Info("##### FlowMaker: ReCent not requested. Will set shifts = 0.");
+  }
+  gDirectory = dirSave;
+
+  // Fill mReCent for each selection and harmonic
+  for (int k = 0; k < Flow::nSels; k++) {
+    for (int j = 0; j < Flow::nHars; j++) {
+
+      TString* histTitleTPC_x = new TString("FlowCentX_Sel");
+      *histTitleTPC_x += k+1;
+      *histTitleTPC_x += "_Har";
+      *histTitleTPC_x += j+1;
+      TString* histTitleTPC_y = new TString("FlowCentY_Sel");
+      *histTitleTPC_y += k+1;
+      *histTitleTPC_y += "_Har";
+      *histTitleTPC_y += j+1;
+
+      if (pReCentFile->IsOpen() && reCent) {
+	TProfile* histCentX = dynamic_cast<TProfile*>(pReCentFile->Get(histTitleTPC_x->Data()));
+	TProfile* histCentY = dynamic_cast<TProfile*>(pReCentFile->Get(histTitleTPC_y->Data()));
+
+	for (int n = 0; n < 3; n++) {
+	  mReCentX[k][j][n] = (histCentX) ? histCentX->GetBinContent(n+1) : 0.;
+	  mReCentY[k][j][n] = (histCentY) ? histCentY->GetBinContent(n+1) : 0.;
+	}
+      } else {
+	for (int n = 0; n < 3; n++) {
+	  mReCentX[k][j][n] = 0.;
+	  mReCentY[k][j][n] = 0.;
+	}	
+      }
+
+      delete histTitleTPC_x;
+      delete histTitleTPC_y;
+    }
+  }
+
+  // Close ReCent file
+  if (pReCentFile->IsOpen()) pReCentFile->Close();
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
 Int_t StFlowMaker::ReadZDCSMDFile() {
   // Read the ZDCSMD constants root file
 
@@ -602,6 +671,12 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
   pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,
 				   mZDCSMDCenterWy);
+
+  // fill ReCent array
+  pFlowEvent->SetReCentX(mReCentX);
+  pFlowEvent->SetReCentY(mReCentY);
+
+
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
   pFlowEvent->SetRunID((Int_t)(pEvent->runId()));
@@ -1125,6 +1200,10 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
   pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
+
+  // fill ReCent array
+  pFlowEvent->SetReCentX(mReCentX);
+  pFlowEvent->SetReCentY(mReCentY);
 
   // Recalculate MultEta for year=2 old pico tapes
   if (pPicoEvent->CenterOfMassEnergy()) {
@@ -1766,6 +1845,10 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
   pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
 
+  // fill ReCent array
+  pFlowEvent->SetReCentX(mReCentX);
+  pFlowEvent->SetReCentY(mReCentY);
+
   // Set centrality
   pFlowEvent->SetRunID(pMuEvent->runId());
   pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
@@ -2275,6 +2358,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.111  2007/02/06 18:57:55  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.110  2006/07/06 20:29:48  posk
 // Changed the dynamic_cast of GetInputDS("MuDst") to a const cast.
 //

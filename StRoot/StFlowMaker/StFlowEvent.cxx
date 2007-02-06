@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.59 2006/07/06 16:56:00 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.60 2007/02/06 18:57:52 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -63,12 +63,12 @@ Float_t  StFlowEvent::mEtaFtpcCuts[4][2][Flow::nSels] = {{{-4.0,-4.0},
 							 {{4.0,4.0},
 							  {4.0,4.0} }};
 
-Float_t  StFlowEvent::mPtTpcCuts[2][2][Flow::nSels] =  {{{0.1,0.1},
-							 {0.1,0.1} },
+Float_t  StFlowEvent::mPtTpcCuts[2][2][Flow::nSels] =  {{{0.15,0.15},
+							 {0.15,0.15} },
 							{{2.,2.},
 							 {2.,2.} }};
-Float_t  StFlowEvent::mPtFtpcCuts[2][2][Flow::nSels] =  {{{0.1,0.1},
-							  {0.1,0.1} },
+Float_t  StFlowEvent::mPtFtpcCuts[2][2][Flow::nSels] =  {{{0.15,0.15},
+							  {0.15,0.15} },
 							 {{2.,2.},
 							  {2.,2.} }};
 
@@ -344,8 +344,8 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
       if (pFlowSelect->Select(pFlowTrack)) {
 	double phiWgt = PhiWeight(selN, harN, pFlowTrack);
 	float phi = pFlowTrack->Phi();
-	mQx += phiWgt * cos(phi * order);
-	mQy += phiWgt * sin(phi * order);
+	mQx += phiWgt * cos(order * phi);
+	mQy += phiWgt * sin(order * phi);
       }
     }
   } //else
@@ -356,10 +356,77 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
 
 //-------------------------------------------------------------
 
+TVector2 StFlowEvent::ReCentPar(StFlowSelection* pFlowSelect, char* TPC) {
+  // Calculate weighted recentering vector per particle for each TPC
+  // TPC can be "TPC", "TPCE", or "TPCW"
+  // for all particles that could be correlated with the event plane
+ 
+  TVector2 mQ;
+  Double_t mQx=0., mQy=0., SumOfWeight=0.;
+
+  int    selN  = pFlowSelect->Sel();
+  int    harN  = pFlowSelect->Har();
+  double order = (double)(harN + 1);
+  StTrackTopologyMap map;
+  
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    if (pFlowSelect->SelectPart(pFlowTrack)) {
+      map = pFlowTrack->TopologyMap();
+      if ((!strcmp(TPC,"TPCE") && map.trackFtpcEast()) ||
+	  (!strcmp(TPC,"TPCW") && map.trackFtpcWest()) ||
+	  (!strcmp(TPC,"TPC") && map.hasHitInDetector(kTpcId))) {
+	float phi = pFlowTrack->Phi();
+	double wgt = fabs(Weight(selN, harN, pFlowTrack));
+	mQx += wgt * cos(order * phi);
+	mQy += wgt * sin(order * phi);
+	SumOfWeight += wgt;
+      }
+    }
+  }
+
+  if (SumOfWeight)
+    mQ.Set(mQx/SumOfWeight, mQy/SumOfWeight);
+  else mQ.Set(0.,0.);
+
+  return mQ;
+}
+
+//-------------------------------------------------------------
+
+TVector2 StFlowEvent::ReCent(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const {
+  // Get TVector2 for recentering.
+
+  TVector2 reCent;
+  Double_t reCentX, reCentY;
+  StTrackTopologyMap map = pFlowTrack->TopologyMap();
+  
+  if (map.hasHitInDetector(kTpcId)) {
+    reCentX = mReCentX[selN][harN][2];
+    reCentY = mReCentY[selN][harN][2];
+  } else if (map.trackFtpcEast()) {
+    reCentX = mReCentX[selN][harN][0];
+    reCentY = mReCentY[selN][harN][0];
+  } else if (map.trackFtpcWest()) {
+    reCentX = mReCentX[selN][harN][1];
+    reCentY = mReCentY[selN][harN][1];
+  } else {
+    reCentX = 0.;
+    reCentY = 0.;
+  }
+
+  reCent.Set(reCentX, reCentY);
+  return reCent;
+}
+
+//-------------------------------------------------------------
+
 TVector2 StFlowEvent::QPart(StFlowSelection* pFlowSelect) {
   // Event plane vector for LeeYangZeros method for all particles that could be correlated with the event plane
  
-  TVector2 mQ;
+  TVector2 reCent, mQ;
   Double_t mQx=0., mQy=0.;
 
   int    selN  = pFlowSelect->Sel();
@@ -373,8 +440,9 @@ TVector2 StFlowEvent::QPart(StFlowSelection* pFlowSelect) {
     if (pFlowSelect->SelectPart(pFlowTrack)) {
       double phiWgt = PhiWeight(selN, harN, pFlowTrack);
       float phi = pFlowTrack->Phi();
-      mQx += phiWgt * cos(phi * order);
-      mQy += phiWgt * sin(phi * order);
+      reCent = ReCent(selN, harN, pFlowTrack);
+      mQx += phiWgt * (cos(order * phi) - reCent.X());
+      mQy += phiWgt * (sin(order * phi) - reCent.Y());
     }
   }
   
@@ -405,8 +473,8 @@ TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) {
       SumOfWeightSqr += phiWgt*phiWgt;
 
       float phi = pFlowTrack->Phi();
-      mQx += phiWgt * cos(phi * order);
-      mQy += phiWgt * sin(phi * order);
+      mQx += phiWgt * cos(order * phi);
+      mQy += phiWgt * sin(order * phi);
     }
   }
   
@@ -434,14 +502,14 @@ Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    if (pFlowSelect->Select(pFlowTrack)) {
+    if (pFlowSelect->Select(pFlowTrack)) { // use event plane selections
       
       double phiWgt = PhiWeightRaw(selN, harN, pFlowTrack); // Raw
       SumOfWeightSqr += phiWgt*phiWgt;
 
       float phi = pFlowTrack->Phi();
-      mQx += phiWgt * cos(phi * order);
-      mQy += phiWgt * sin(phi * order);
+      mQx += phiWgt * cos(order * phi);
+      mQy += phiWgt * sin(order * phi);
     }
   }
   
@@ -489,9 +557,12 @@ Float_t StFlowEvent::Qtheta(StFlowSelection* pFlowSelect, Float_t theta) {
   // BP Eq. 3 (Nucl. Phys. A 727, 373 (2003))
 
   Float_t Qtheta = 0.;
+
   int    selN  = pFlowSelect->Sel();
   int    harN  = pFlowSelect->Har();
-  double order = (double)(harN + 1);  
+  double order = (double)(harN + 1);
+  double reCentTheta;
+  TVector2 reCent;  
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -500,7 +571,9 @@ Float_t StFlowEvent::Qtheta(StFlowSelection* pFlowSelect, Float_t theta) {
     if (pFlowSelect->SelectPart(pFlowTrack)) {
       double wgt = Weight(selN, harN, pFlowTrack);
       float phi = pFlowTrack->Phi();
-      Qtheta += wgt * cos(order * (phi - theta));
+      reCent = ReCent(selN, harN, pFlowTrack);
+      reCentTheta = reCent.X() * cos(order*theta) + reCent.Y() * sin(order*theta);
+      Qtheta += wgt * (cos(order * (phi - theta)) - reCentTheta);
     }
   }
 
@@ -517,6 +590,8 @@ TComplex StFlowEvent::Grtheta(StFlowSelection* pFlowSelect, Float_t r, Float_t t
   int    selN  = pFlowSelect->Sel();
   int    harN  = pFlowSelect->Har();
   double order = (double)(harN + 1);  
+  double reCentTheta;
+  TVector2 reCent;  
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -525,7 +600,9 @@ TComplex StFlowEvent::Grtheta(StFlowSelection* pFlowSelect, Float_t r, Float_t t
     if (pFlowSelect->SelectPart(pFlowTrack)) {
       double wgt = Weight(selN, harN, pFlowTrack);
       float phi  = pFlowTrack->Phi();
-      double Gim = r * wgt * cos(order * (phi - theta));
+      reCent = ReCent(selN, harN, pFlowTrack);
+      reCentTheta = reCent.X() * cos(order*theta) + reCent.Y() * sin(order*theta);
+      double Gim = r * wgt * (cos(order * (phi - theta)) - reCentTheta);
       TComplex G_i(1., Gim);
       G *= G_i;
     }
@@ -542,6 +619,8 @@ TComplex StFlowEvent::GV1r0theta(StFlowSelection* pFlowSelect, Float_t r0, Float
   // DF Eq. 1
  
   TComplex G = TComplex::One();
+  double reCentTheta;
+  TVector2 reCent;  
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -550,9 +629,15 @@ TComplex StFlowEvent::GV1r0theta(StFlowSelection* pFlowSelect, Float_t r0, Float
     if (pFlowSelect->SelectPart(pFlowTrack)) {
       double wgt1 = Weight(1, 0, pFlowTrack); // selection 2, harmonic 1
       double wgt2 = Weight(1, 1, pFlowTrack); // selection 2, harmonic 2
-      float phi  = pFlowTrack->Phi();
-      double Gim1 = r0 * Flow::epsV1 * wgt1 * cos(phi - theta1);
-      double Gim2 = r0 * wgt2 * cos(2*(phi - theta));
+      float  phi  = pFlowTrack->Phi();
+      //reCent = ReCent(1, 0, pFlowTrack); // selection 2, harmonic 1
+      reCent.Set(0.,0.);
+      reCentTheta = reCent.X() * cos(1.*theta1) + reCent.Y() * sin(1.*theta1);
+      double Gim1 = r0 * Flow::epsV1 * wgt1 * (cos(phi - theta1) - reCentTheta);
+      //reCent = ReCent(1, 1, pFlowTrack); // selection 2, harmonic 2
+      reCent.Set(0.,0.); // NOT recentered
+      reCentTheta = reCent.X() * cos(2.*theta) + reCent.Y() * sin(2.*theta);
+      double Gim2 = r0 * wgt2 * (cos(2*(phi - theta)) - reCentTheta);
       TComplex G_i(1., Gim1+Gim2);
       G *= G_i; 
     }
@@ -572,6 +657,8 @@ TComplex StFlowEvent::Gder_r0theta(StFlowSelection* pFlowSelect, Float_t r0, Flo
   int    selN  = pFlowSelect->Sel();
   int    harN  = pFlowSelect->Har();
   double order = (double)(harN + 1);  
+  double reCentTheta;
+  TVector2 reCent;  
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -580,7 +667,9 @@ TComplex StFlowEvent::Gder_r0theta(StFlowSelection* pFlowSelect, Float_t r0, Flo
     if (pFlowSelect->SelectPart(pFlowTrack)) {
       double wgt = Weight(selN, harN, pFlowTrack);
       float phi  = pFlowTrack->Phi();
-      double cosTerm = wgt * cos(order * (phi - theta));
+      reCent = ReCent(selN, harN, pFlowTrack);
+      reCentTheta = reCent.X() * cos(order*theta) + reCent.Y() * sin(order*theta);
+      double cosTerm = wgt * (cos(order * (phi - theta)) - reCentTheta);
       TComplex denom(1., r0*cosTerm);
       Gder += (cosTerm / denom);
     }
@@ -706,8 +795,8 @@ Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t 
 
       double phiWgt = Weight(selN, harN, pFlowTrack);      
       float phi = pFlowTrack->Phi();
-      theG *= (1. + (phiWgt/mult) * (2.* Zx * cos(phi * order) + 
-				     2.* Zy * sin(phi * order) ) );            
+      theG *= (1. + (phiWgt/mult) * (2.* Zx * cos(order * phi) + 
+				     2.* Zy * sin(order * phi) ) );            
     }
   }
 
@@ -774,8 +863,8 @@ Double_t StFlowEvent::G_Mix(StFlowSelection* pFlowSelect, Double_t Z1x, Double_t
       ptWgt = PtAbsWgtValue(pt);
       
       theG *= 
-	(1. + (phiWgt*etaWgt*detectorV1Wgt/mult) * (2.* Z1x * cos(phi * order) + 
-						    2.* Z1y * sin(phi * order) ) 
+	(1. + (phiWgt*etaWgt*detectorV1Wgt/mult) * (2.* Z1x * cos(order * phi) + 
+						    2.* Z1y * sin(order * phi) ) 
 	 + (phiWgt*ptWgt*detectorV2Wgt/mult) * (2.* Z2x * cos(phi * order*2.) + 
 						2.* Z2y * sin(phi * order*2.) ) );
           
@@ -1247,6 +1336,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.60  2007/02/06 18:57:52  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.59  2006/07/06 16:56:00  posk
 // Calculation of v1 for selection=2 is done with mixed harmonics.
 //

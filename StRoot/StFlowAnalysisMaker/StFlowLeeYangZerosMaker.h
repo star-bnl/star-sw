@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowLeeYangZerosMaker.h,v 1.3 2006/07/06 16:58:36 posk Exp $
+// $Id: StFlowLeeYangZerosMaker.h,v 1.4 2007/02/06 19:00:49 posk Exp $
 //
 // Authors: Markus Oldenberg and Art Poskanzer, LBNL
 //
@@ -64,10 +64,14 @@ private:
 
   Bool_t   FillFromFlowEvent();
   void     FillParticleHistograms();
+  Bool_t   mZeroPass;
   Bool_t   mFirstPass;
   static   Bool_t   mV1Mixed;        // flag for v1 mixed harmonic
 #ifndef __CINT__
   TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
+  TVector2 mqTPC[Flow::nSels][Flow::nHars];                  //! recentering vector
+  TVector2 mqTPCE[Flow::nSels][Flow::nHars];                 //! recentering vector
+  TVector2 mqTPCW[Flow::nSels][Flow::nHars];                 //! recentering vector
   Double_t mQ2[Flow::nSels][Flow::nHars];                    //! flow vector modulus square
   Float_t  mQtheta[Flow::nSels][Flow::nHars][Flow::nTheta];  //! Q^{\theta}
   Float_t  mr0theta[Flow::nSels][Flow::nHars][Flow::nTheta]; //! r_0^{\theta} from first pass
@@ -112,6 +116,9 @@ private:
     TH1D*       mHist_r0theta;
     TProfile*   mHistReDenom;
     TProfile*   mHistImDenom;
+    TProfile*   mHistCentX;
+    TProfile*   mHistCentY;
+    TProfile*   mHistQCent;
     struct histThetas histTheta[Flow::nTheta]; 
   };
 

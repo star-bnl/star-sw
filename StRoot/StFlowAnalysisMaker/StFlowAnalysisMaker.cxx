@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.96 2006/07/10 21:03:48 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.97 2007/02/06 19:00:39 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -538,7 +538,7 @@ Int_t StFlowAnalysisMaker::Init() {
   // CTB versus ZDC
   mHistCTBvsZDC2D = new TH2F("Flow_CTBvsZDC2D", "Flow_CTBvsZDC2D",
 			       125, 0, 500,
-			       125, 0, 50000);
+			       125, 0, 40000);
   mHistCTBvsZDC2D->SetXTitle("ZDC sum");
   mHistCTBvsZDC2D->SetYTitle("CTB sum");
 
@@ -1179,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.96 2006/07/10 21:03:48 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.97 2007/02/06 19:00:39 posk Exp $");
 
   return StMaker::Init();
 }
@@ -2315,6 +2315,10 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.97  2007/02/06 19:00:39  posk
+// In Lee Yang Zeros method, introduced recentering of Q vector.
+// Reactivated eta symmetry cut.
+//
 // Revision 1.96  2006/07/10 21:03:48  posk
 // For profile histograms of v, changed the limits to -1000, 1000.
 //
