@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.12 2004/12/20 18:04:22 potekhin Exp $
+* $Id: gstar_part.g,v 1.13 2007/02/06 16:48:21 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.13  2007/02/06 16:48:21  potekhin
+* Bring the particle definitions up to date,
+* with new Upsilon levels and strange lambda plus
+*
 * Revision 1.12  2004/12/20 18:04:22  potekhin
 * Corrected a typo (missing comma)
 *
@@ -66,11 +70,13 @@
 *    For D+, include only K0_S + pi+ decay mode  pmj 16/2/95
 * Particle D_plus    code=35  TrkTyp=4 mass=1.869  charge=1 tlife=1.057e-12,
 *                    pdg=411  bratio= { 1, }       mode= { 1608, }
+*    For D+, include only K- + 2 pi+ decay mode
+ Particle D_plus    code=35  TrkTyp=4 mass=1.869  charge=1 tlife=1.057e-12,
+                    pdg=411  bratio= { 1, }       mode= { 120808, }
  
 *    For D0, include only  K+ + pi- decay mode   pmj 16/2/95
-* Particle D0        code=37  TrkTyp=3 mass=1.865  charge=0 tlife=0.415e-12,
-*                    pdg=421  bratio= { 1, }       mode= { 1208, }
-
+ Particle D0        code=37  TrkTyp=3 mass=1.865  charge=0 tlife=0.415e-12,
+                    pdg=421  bratio= { 1, }       mode= { 1208, }
 
 * Heavy flavor embedding studies -- July 2003, M.Potekhin
 
@@ -80,9 +86,18 @@
   Particle Upsilon   code=161 TrkTyp=4 mass=9.460   charge=0  tlife=1.254e-20,
                      pdg=553  bratio= { 1, }       mode= { 203, }
 
+  Particle Ups2S     code=162 TrkTyp=4 mass=10.023  charge=0  tlife=1.545e-20,
+                     pdg=100553  bratio= { 1, }       mode= { 203, }
+
+  Particle Ups3S     code=163 TrkTyp=4 mass=10.355  charge=0  tlife=2.556e-20,
+                     pdg=200553  bratio= { 1, }       mode= { 203, }
+
+
   Particle LASERINO  code=170         TrkTyp=6 mass=0     charge=1 tlife=big
   Particle chasrino  code=171         TrkTyp=6 mass=0     charge=1 tlife=big
 
+  Particle Lac2      code=207       TrkTyp=3 mass=2.285   charge=1  tlife=0.206e-12,
+                     pdg=4122       bratio= { 1, }       mode= { 141208, }
 
 
   Particle S1385plus     code=701   TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23,
@@ -96,6 +111,8 @@
 
   Particle S1385barminus code=704   TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23,
                          pdg=-3224  bratio= { 1, }       mode= { 2609, }
+
+  Particle Monopole      code=800       TrkTyp=9 mass=1.0    charge=0 tlife=big
 
 * the Stranglet World, authored by Ron Longacre and remastered by M.Potekhin
 * As per Ron Longacre's recommendation, we assign PDG codes which do not
