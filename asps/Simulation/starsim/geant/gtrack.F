@@ -1,7 +1,11 @@
-* $Id: gtrack.F,v 1.1.1.1 2004/01/12 23:49:41 potekhin Exp $
+* $Id: gtrack.F,v 1.2 2007/02/06 16:21:18 potekhin Exp $
 *
 * $Log: gtrack.F,v $
+* Revision 1.2  2007/02/06 16:21:18  potekhin
+* Add ITRTYP=9 (monopole)
+*
 * Revision 1.1.1.1  2004/01/12 23:49:41  potekhin
+*
 *
 * Revision 1.3  2003/08/23 14:30:21  nevski
 * secondary saving may be controled in physics
@@ -280,6 +284,8 @@ C.    ------------------------------------------------------------------
          CALL GTCKOV
       ELSE IF (ITRTYP.EQ.8) THEN
          CALL GTHION
+      ELSE IF (ITRTYP.EQ.9) THEN
+         CALL GTMONP
       ENDIF
       IF(JGSTAT.NE.0) CALL GFSTAT(10+ITRTYP)
       STLOSS=STEP
