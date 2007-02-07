@@ -118,7 +118,7 @@ StEEmcMixerMaker::Make(){
   LOG_DEBUG<<GetName() <<"::Make() -------------- print data: Ecoll-A+B ----- before mrging -----"<<endm;   
   eemcPrint.printChange(ecolA,ecolB,"before merging");
 
-  if(mergeADCs(ecolA,ecolB))    return  kStErr;
+  if(!mergeADCs(ecolA,ecolB))    return  kStErr;
   
   mMixerEmcCollection = ecolA;
   
@@ -253,8 +253,11 @@ into the first StEmcCollection in event for all EEMC subdetectors
 
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEEmcMixerMaker.cxx,v 1.4 2007/01/24 21:07:03 balewski Exp $
+// $Id: StEEmcMixerMaker.cxx,v 1.5 2007/02/07 02:24:34 balewski Exp $
 // $Log: StEEmcMixerMaker.cxx,v $
+// Revision 1.5  2007/02/07 02:24:34  balewski
+// fix logic error found by Wei-Ming
+//
 // Revision 1.4  2007/01/24 21:07:03  balewski
 // 1) no cout or printf, only new Logger
 // 2) EndcapMixer:
