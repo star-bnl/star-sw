@@ -1,6 +1,10 @@
-* $Id: cavegeo.g,v 1.6 2007/02/02 18:22:41 potekhin Exp $
+* $Id: cavegeo.g,v 1.7 2007/02/07 20:45:33 potekhin Exp $
 *
 * $Log: cavegeo.g,v $
+* Revision 1.7  2007/02/07 20:45:33  potekhin
+* As advertised before, I'm changing the cave size as per
+* Akio and Ermes' request to make it larger, once more.
+*
 * Revision 1.6  2007/02/02 18:22:41  potekhin
 * Extended the length of the main Cave volueme, to better
 * reflect the real size. This will be refined once the
@@ -65,7 +69,7 @@ real      D1,D2,Z1
          version = 4             ! geometry version
          Rmin    = 0             ! inner radius
          Rmax    = {450,100}          ! outer radius
-         Dz      = {850,2000}         ! half length
+         Dz      = {950,2000}         ! half length
          Dconc   = 50                 ! concrete thickness
       EndFill 
 
