@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.42 2006/02/08 23:35:36 mvl Exp $
+ * $Id: StMuDstMaker.h,v 1.43 2007/02/07 07:53:09 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -76,6 +76,7 @@ class TFile;
 class TTree;
 class TChain;
 class TClonesArray;
+class TEventList;
 
 /**
    \class StMuDstMaker
@@ -103,7 +104,9 @@ class StMuDstMaker : public StIOInterFace {
   virtual int  Finish();
           void printArrays();
           void SetStatus(const char *arrType,int status);
-	    /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
+  /// Set event list for reading only preselected events (generate list using chain()->Draw()
+  void SetEventList( TEventList *e ) { mEventList = e; }
+  /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
   void setTrackFilter(StMuCut* c);
   StMuFilter* trackFilter();
   /// Set the track filter used for L3 tracks when creating muDsts from StEvent and writing to disk.
@@ -149,9 +152,10 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.42 2006/02/08 23:35:36 mvl Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.43 2007/02/07 07:53:09 mvl Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
+
 
 
 protected:
@@ -169,7 +173,6 @@ protected:
   */
   enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
-
   StEvent* mStEvent;
   StMuDst* mStMuDst;
   StStrangeMuDstMaker* mStStrangeMuDstMaker;
@@ -186,6 +189,8 @@ protected:
   string mFileName;
   string mFilter;
   int mMaxFiles;
+
+  TEventList *mEventList;
 
   unsigned int mTrackType;
   bool mReadTracks;
@@ -333,6 +338,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.43  2007/02/07 07:53:09  mvl
+ * Added SetEventList function to read only pre-selected events (by J. Webb)
+ *
  * Revision 1.42  2006/02/08 23:35:36  mvl
  * Added overloaded version for StIOInterface::GetFile() to return name
  * of current input or output file (depending on read or write mode)
