@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.77 2006/12/20 21:53:15 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.78 2007/02/07 07:53:09 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -71,6 +71,7 @@
 #include "TChain.h"
 #include "TStreamerInfo.h"
 #include "TClonesArray.h"
+#include "TEventList.h"
 
 #include "THack.h"
 ClassImp(StMuDstMaker)
@@ -103,7 +104,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
   mChain (0), mTTree(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mPmdCollectionArray(0), mPmdCollection(0)
+  mPmdCollectionArray(0), mPmdCollection(0), mEventList(0)
 {
   assignArrays();
 
@@ -250,7 +251,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mTrackFilter(0), mL3TrackFilter(0), mCurrentFile(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4),
   mProbabilityPidAlgorithm(0), mEmcCollectionArray(0), mEmcCollection(0),
-  mPmdCollectionArray(0), mPmdCollection(0)
+  mPmdCollectionArray(0), mPmdCollection(0), mEventList(0)
 {
   assignArrays();
   streamerOff();
@@ -614,12 +615,24 @@ void StMuDstMaker::read(){
   if (mChain->GetCurrentFile()) {
     DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
   }
-  int bytes = mChain->GetEntry(mEventCounter++);
-  while (bytes==0 ) {
-    DEBUGVALUE3(mEventCounter);
-    if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
-    bytes = mChain->GetEntry(mEventCounter++);
-    DEBUGVALUE3(bytes);
+
+  if ( !mEventList ) {
+    int bytes = mChain->GetEntry(mEventCounter++);
+    while (bytes==0 ) {
+      DEBUGVALUE3(mEventCounter);
+      if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
+      bytes = mChain->GetEntry(mEventCounter++);
+      DEBUGVALUE3(bytes);
+    }
+  }
+  else {
+    int bytes = mChain->GetEntry( mEventList->GetEntry( mEventCounter++ ) );
+    while ( bytes==0 ) {
+      DEBUGVALUE3(mEventCounter);
+      if ( mEventCounter >= mEventList->GetN() ) throw StMuExceptionEOF("end of event list",__PRETTYF__);
+      bytes = mChain->GetEntry( mEventList->GetEntry( mEventCounter++ ) );
+      DEBUGVALUE3(bytes);
+    }
   }
   if (GetDebug()>1) printArrays();
   mStMuDst->set(this);
@@ -1265,6 +1278,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.78  2007/02/07 07:53:09  mvl
+ * Added SetEventList function to read only pre-selected events (by J. Webb)
+ *
  * Revision 1.77  2006/12/20 21:53:15  mvl
  * Added warning when file list not found (read mode)
  *
