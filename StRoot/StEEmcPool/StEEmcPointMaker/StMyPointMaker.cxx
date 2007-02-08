@@ -190,7 +190,6 @@ Int_t StMyPointMaker::Make()
       StEEmcPoint point = smdPoint(ipoint);
       StEEmcTower tower = point.tower(0);
       Float_t epoint = 0.;
-
       Float_t w = sumw[tower.index()];
       if ( !tower.fail() && w>0. ) epoint+=tower.energy() * point.energy()/w;
      
@@ -202,6 +201,19 @@ Int_t StMyPointMaker::Make()
 	}
 
       point.energy(epoint);
+
+
+      // for now, associate energy of preshower element including point w/ the 
+      // point.
+      Int_t index = tower.index();
+      Float_t epre1 = mEEanalysis->tower(index,1).energy(); /* energy of pre1 */
+      Float_t epre2 = mEEanalysis->tower(index,2).energy(); /* energy of pre2 */
+      Float_t epost = mEEanalysis->tower(index,3).energy(); /* energy of post */
+
+      point.energy(epre1,1);
+      point.energy(epre2,2);
+      point.energy(epost,3);
+
       addPoint( point );
 
     }
