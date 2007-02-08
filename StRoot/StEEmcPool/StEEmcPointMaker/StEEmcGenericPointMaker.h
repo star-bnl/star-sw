@@ -98,6 +98,8 @@ class StEEmcGenericPointMaker : public StMaker
   void addTowerPoint( StEEmcPoint &point );
 
   StEEmcPointVec_t points( StEEmcCluster &cluster ) { return mCluster2points[ cluster.key() ]; }
+  Int_t numberOfPoints( StEEmcCluster &c ){ return (Int_t)mCluster2points[ c.key() ].size(); }
+
   StEEmcCluster    cluster( StEEmcPoint &point ){ return mPoint2cluster[ point.key() ]; }
 
  private:
