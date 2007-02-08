@@ -40,6 +40,7 @@ Int_t StEEmcGenericPointMaker::Make()
 // ----------------------------------------------------------------------------
 void StEEmcGenericPointMaker::addPoint( StEEmcPoint &p )
 {
+
   p.key(nextPointId());
   mPoints.push_back(p);
 
@@ -67,6 +68,9 @@ void StEEmcGenericPointMaker::addSmdPoint( StEEmcPoint &p )
   p.key(nextPointId());
   mSmdPoints.push_back(p);
 
+
+  /**** do not count smd points in maps
+
   StEEmcClusterVec_t myclusters = p.clusters(0);
   StEEmcCluster mycluster = myclusters[0];
   //  printf("gen pointmaker addingsmd key=%i E=%5.3f\n",mycluster.key(),mycluster.energy());
@@ -80,6 +84,8 @@ void StEEmcGenericPointMaker::addSmdPoint( StEEmcPoint &p )
   if ( !mCluster2points.count(key) ) mCluster2points[ key ] = mypoints;
   // add this point to the list of points associated with this cluster
   mCluster2points[ key ].push_back(p);
+
+  ****/
   
 }
 
@@ -89,6 +95,8 @@ void StEEmcGenericPointMaker::addTowerPoint( StEEmcPoint &p )
   mTowerPoints.push_back(p);
   mPoint2cluster[ p.key() ] = p.clusters(0)[0];
 
+  /**** do not count tower points in maps
+
   // get key to the tower cluster associated with this point
   Int_t key=p.clusters(0)[0].key();
   // if it's the first time this key is referenced, add a point vector to the map
@@ -96,6 +104,8 @@ void StEEmcGenericPointMaker::addTowerPoint( StEEmcPoint &p )
   if ( !mCluster2points.count(key) ) mCluster2points[ key ] = mypoints;
   // add this point to the list of points associated with this cluster
   mCluster2points[ key ].push_back(p);
+
+  ****/
 
 }
 
