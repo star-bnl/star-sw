@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.143 2007/02/02 18:20:46 potekhin Exp $
+* $Id: geometry.g,v 1.144 2007/02/09 22:04:37 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.144  2007/02/09 22:04:37  potekhin
+* a) added steering for new code and settings for TOF, upVPD and FPD/FMS
+* b) retired IST1 (commented out, to be deleted later)
+*
 * Revision 1.143  2007/02/02 18:20:46  potekhin
 * The updated FMS code (fpdgeo) needs more space at the
 * end of the cave, so we need to add some. We will reflect
@@ -905,57 +909,57 @@ If LL>1
                 }
 
 *************************************************************************************************************
-  on IST1   { New Tracking: TPC+CTB+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+ISTB+FSTD+FGTD;
-
-                     svtt=off; "no SVT  at all in this configuration"
-                     ftpc=off; "no FTPC at all in this configuration"
-                  "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
-                     pse=on " inner sector has pseudo padrows ";
-                  "ctb: central trigger barrer             ";
-                     Itof=2 " call btofgeo2 ";
-                     BtofConfig=5;
-                  "calb" 
-                     ems=on
-                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-                  "ecal"
-                     ecal_config=1   " west wheel "
-                     ecal_fill=3     " all sectors filled "
-                  "beam-beam counter "
-                     bbcm=on
-                  "forward pion detector "
-                     fpdm=on
-                  "field version "
-                     Mf=4;      "tabulated field, with correction "
+*  on IST1   { New Tracking: TPC+CTB+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+ISTB+FSTD+FGTD;
+*
+*                     svtt=off; "no SVT  at all in this configuration"
+*                     ftpc=off; "no FTPC at all in this configuration"
+*                  "tpc: standard, i.e.  "
+*                     mwc=on " Wultiwire chambers are read-out ";
+*                     pse=on " inner sector has pseudo padrows ";
+*                  "ctb: central trigger barrer             ";
+*                     Itof=2 " call btofgeo2 ";
+*                     BtofConfig=5;
+*                  "calb" 
+*                     ems=on
+*                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+*                  "ecal"
+*                     ecal_config=1   " west wheel "
+*                     ecal_fill=3     " all sectors filled "
+*                  "beam-beam counter "
+*                     bbcm=on
+*                  "forward pion detector "
+*                     fpdm=on
+*                  "field version "
+*                     Mf=4;      "tabulated field, with correction "
 *                    -- Obsoleted: CorrNum = 4;
-                     SvshConfig = 1; "SVT shield"
-                     DensConfig = 1; "gas density correction"
-                     SupoConfig = 1; "FTPC Support"
-                     SvttConfig = 4;
-
-                  "Photon Multiplicity Detector Version "
-                     phmd=on;
-                     PhmdConfig = 1;
-                  "Silicon Strip Detector Version "
-                     sisd=on;
-                     SisdConfig = 23;
+*                     SvshConfig = 1; "SVT shield"
+*                     DensConfig = 1; "gas density correction"
+*                     SupoConfig = 1; "FTPC Support"
+*                     SvttConfig = 4;
+*
+*                  "Photon Multiplicity Detector Version "
+*                     phmd=on;
+*                     PhmdConfig = 1;
+*                  "Silicon Strip Detector Version "
+*                     sisd=on;
+*                     SisdConfig = 23;
 * careful! Achtung!
-                   pipeConfig=4;   " provisional"
-                   pixl=on;        " put the pixel detector in"
-                   PixlConfig=2;   " newer version decoupled from SVT"
+*                   pipeConfig=4;   " provisional"
+*                   pixl=on;        " put the pixel detector in"
+*                   PixlConfig=2;   " newer version decoupled from SVT"
 * Inner STAR tracker barrel
-                   istb=on;  "new pixel based inner tracker"
-                   IstbConfig=1;
+*                   istb=on;  "new pixel based inner tracker"
+*                   IstbConfig=1;
 * Inner STAR GEM barrel
-                   gemb=on;  
-                   GembConfig=1;
+*                   gemb=on;  
+*                   GembConfig=1;
 * Forward STAR tracker disk
-                   fstd=on;  "new pixel based forward tracker"
-                   FstdConfig=1;
+*                   fstd=on;  "new pixel based forward tracker"
+*                   FstdConfig=1;
 * Forward STAR tracker disk
-                   fgtd=on;  "GEM forward tracker"
-                   FgtdConfig=1;
-                }
+*                   fgtd=on;  "GEM forward tracker"
+*                   FgtdConfig=1;
+*                }
 
 
 * corrected: MWC readout, RICH reconstructed position, no TOF 
@@ -2178,13 +2182,14 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
 
                   "ctb: central trigger barrer             ";
-                     Itof=4 " call btofgeo4 ";
+                     Itof=5 " call btofgeo5 ";
 * NEW CONFIG!
-                     BtofConfig=8;
+                     BtofConfig=10;
 
-* Full barrel in 2006
+* Full barrel in 2007
                   "calb" 
                      ems=on ;
+* important:
                      CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
                   "ecal"
@@ -2200,7 +2205,7 @@ If LL>1
 
                   "pseudo Vertex Position Detector"
                      vpdd=on;
-                     VpddConfig=4;
+                     VpddConfig=6;
 
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -3294,18 +3299,10 @@ If LL>1
    endif
 
    if(btof) then
-             if(Itof.eq.1) then
-                write(*,*) '***********  ATTENTION : OLD VERSION OF BTOF IS NO LONGER IMPLEMENTED **********'
-                write(*,*) '***********  NO BTOF WILL BE INSTANTIATED **************************************'
-             endif
-
-             if(Itof.eq.2) then
-                call btofgeo2
-             endif
-
-             if(Itof.eq.4) then
-                call btofgeo4
-             endif
+      if(Itof.eq.1) write(*,*) '*****  ATTENTION : OLD VERSION OF BTOF NOT IMPLEMENTED - NO TOF CREATED *****'
+      if(Itof.eq.2) call btofgeo2
+      if(Itof.eq.4) call btofgeo4
+      if(Itof.eq.5) call btofgeo5
    endif
      
    Call AGSFLAG('SIMU',1)
@@ -3315,7 +3312,8 @@ If LL>1
    If (LL>1 & vpdd) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-     call vpddgeo
+     if(VpddConfig<6) call vpddgeo
+     if(VpddConfig=6) call vpddgeo2
    endif
 
 ********************** BARREL CALORIMETER ************************
@@ -3402,7 +3400,12 @@ If LL>1
         Call fstdgeo
    endif
 
-   if (fgtd.and.FgtdConfig>0)  Call fgtdgeo
+   if (fgtd.and.FgtdConfig==1)    then
+      Call fgtdgeo
+   elseif(fgtd.and.FgtdConfig>1) then
+      write(*,*) '****** constructing the new Forward Gem Tracker geometry ***************'
+*  placeholder
+   endif
 
    if (igtd) then
        if(IgtdConfig==2) then
