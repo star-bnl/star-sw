@@ -85,6 +85,20 @@ Int_t StMyPointMaker::Make()
 	   */
 	  AssociateClusters( clusters1, clusters2 );
 
+	  /*
+	   * Attempt to split clusters and, if successful, rerun assocation
+	   */
+	  if ( mAllowSplitting )
+	    {
+	      if ( SplitClusters( clusters1, clusters2 ) )
+		{
+		  AssociateClusters( clusters1, clusters2 );
+		}
+	    }
+	
+	    
+
+
 	  StEEmcSmdClusterVec_t uclusters = ( clusters1[0].plane()==0 ) ? clusters1 : clusters2 ;
 	  StEEmcSmdClusterVec_t vclusters = ( clusters1[0].plane()==0 ) ? clusters2 : clusters1 ;
 
@@ -344,6 +358,92 @@ Bool_t StMyPointMaker::AssociateClusters( StEEmcSmdClusterVec_t &list1, StEEmcSm
 
 }
 
+// -----------------------------------------------------------------------------
+Bool_t StMyPointMaker::SplitClusters( StEEmcSmdClusterVec_t &list1,
+				      StEEmcSmdClusterVec_t &list2 )
+{
+
+
+  //
+  // Only split clusters if we have two clusters in list2
+  //
+  if ( list2.size() != 2 ) return false;
+
+  //
+  // Likewise, only split if we have one cluster in list 1
+  // 
+  if ( list1.size() != 1 ) return false;
+
+  
+  //
+  // energy difference for 1 + 2 case
+  //
+  Float_t ediff12 = energyChi2( list1[0], list2[0] );
+
+  //
+  // energy difference for 2 + 2 case
+  //
+  Float_t ediff22 = energyChi2( list1[0], list2[0], list2[1] );
+
+  //
+  // if "chi2" is better for the 2 + 2 case, then split list1[0]  
+  //
+  if ( ediff12 <= ediff22 ) return false;
+
+  StEEmcSmdCluster tempa, tempb;
+  Float_t chi2_a=9.0E9, chi2_b = 9.0E9;
+
+  StEEmcSmdCluster mergeda=list1[0];
+  StEEmcSmdCluster mergedb=list1[0];
+
+  Bool_t a = split( list2[0], list2[1], mergeda, tempa, chi2_a );
+  Bool_t b = split( list2[1], list2[0], mergedb, tempb, chi2_b );
+  
+  // case where either order is found
+  if ( a && b ) 
+    {
+      if ( chi2_a <= chi2_b ) {
+	tempa.key( mEEclusters->nextClusterId() );
+	mergeda.key( mEEclusters->nextClusterId() );
+	list1[0]=mergeda; 
+	list1.push_back( tempa );
+	return true;
+      }
+      else {
+	tempb.key( mEEclusters->nextClusterId() );
+	mergedb.key( mEEclusters->nextClusterId() );
+	list1[0]=mergedb; 
+	list1.push_back( tempb );
+	return true;
+      }
+
+    }
+  // only first orientation valid
+  else if ( a )
+    {
+	tempa.key( mEEclusters->nextClusterId() );
+	mergeda.key( mEEclusters->nextClusterId() );
+	list1[0]=mergeda; 
+	list1.push_back( tempa );
+	return true;
+    }
+  // only second orientation valid
+  else if ( b )
+    {
+	tempb.key( mEEclusters->nextClusterId() );
+	mergedb.key( mEEclusters->nextClusterId() );
+	list1[0]=mergedb; 
+	list1.push_back( tempb );
+	return true;
+    }
+  
+  
+
+  return true;
+}
+
+
+// ---------------------------------------------------------------------
 Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 )
 {
   Float_t e1 = c1.energy() * 1000.0;
@@ -354,6 +454,18 @@ Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 )
   if ( esum <= 0. ) return -1.;
   return edif*edif/nmip;
 }
+Float_t StMyPointMaker::energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2, StEEmcSmdCluster &c3 )
+{
+  Float_t e1 = c1.energy() * 1000.0;
+  Float_t e2 = c2.energy() * 1000.0;
+  Float_t e3 = c3.energy() * 1000.0;
+  Float_t esum = e1+e2+e3;
+  Float_t edif = e1-e2-e3;
+  Float_t nmip = esum/1.3;
+  if ( esum <= 0. ) return -1.;
+  return edif*edif/nmip;
+}
+
 
 // ---------------------------------------------------------------------
 void StMyPointMaker::Clear(Option_t *opts)
