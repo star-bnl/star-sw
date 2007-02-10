@@ -5,9 +5,10 @@
 ClassImp(StEEmcPi0Reader);
 
 // ----------------------------------------------------------------------------
-StEEmcPi0Reader::StEEmcPi0Reader(const Char_t *name):StMaker(name)
+StEEmcPi0Reader::StEEmcPi0Reader(const Char_t *name,const Char_t *bname):StMaker(name)
 {
   mChain=new TChain(name,"pi0 tree");
+  mBranchName=bname;
   index=0;
 }
 
@@ -15,7 +16,7 @@ StEEmcPi0Reader::StEEmcPi0Reader(const Char_t *name):StMaker(name)
 Int_t StEEmcPi0Reader::Init()
 { 
   mEvent=new StEEmcMixEvent();
-  mChain-> SetBranchAddress("MixEvent",&mEvent);
+  mChain-> SetBranchAddress(mBranchName,&mEvent);
   return StMaker::Init();
 }
 

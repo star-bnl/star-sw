@@ -5,13 +5,14 @@
 #include "StEEmcMixEvent.h"
 
 #include "TChain.h"
+#include "TString.h"
 
 class StEEmcPi0Reader : public StMaker
 {
 
  public:
 
-  StEEmcPi0Reader(const Char_t *name="mRealTree");
+  StEEmcPi0Reader(const Char_t *name="mRealTree", const Char_t *bname="MixEvent" );
   ~StEEmcPi0Reader(){ /* nada */ };
 
   void chainFile( const Char_t *name );
@@ -25,6 +26,8 @@ class StEEmcPi0Reader : public StMaker
   Long64_t getNumberOfEvents(){ return mChain->GetEntries(); }
   Int_t    getEvent(Int_t event);
 
+  TChain *chain(){ return mChain; }
+
  private:
  protected:
 
@@ -32,6 +35,7 @@ class StEEmcPi0Reader : public StMaker
   
   TChain *mChain; /**< real events chain */
   StEEmcMixEvent *mEvent; /**< pi0 event */
+  TString mBranchName; /**< name of the branch where StEEmcMixEvent is stored */
 
   ClassDef(StEEmcPi0Reader,1);
 
