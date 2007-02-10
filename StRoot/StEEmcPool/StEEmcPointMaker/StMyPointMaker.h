@@ -78,8 +78,13 @@ class StMyPointMaker : public StEEmcGenericPointMaker
   /// @param c2 a list of clusters in the u or v plane, whichever is larger
   Bool_t AssociateClusters( StEEmcSmdClusterVec_t &c1, StEEmcSmdClusterVec_t &c2 );
 
+
+  Bool_t SplitClusters( StEEmcSmdClusterVec_t &c1, StEEmcSmdClusterVec_t &c2 );
+
   /// Given two clusters, return (e1-e2)^2/nmips
   Float_t energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2 );
+  /// Given three clusters, return (e1-e2-e3)^2/nmips
+  Float_t energyChi2( StEEmcSmdCluster &c1, StEEmcSmdCluster &c2, StEEmcSmdCluster &c3 );
 
   ClassDef(StMyPointMaker,1);
 
