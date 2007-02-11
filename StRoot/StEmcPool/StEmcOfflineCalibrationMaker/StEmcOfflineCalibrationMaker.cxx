@@ -197,7 +197,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	getADCs(BTOW);
 	getADCs(BPRS);
 	for(int id=1; id<=4800; id++){
-		if(mADC[BTOW-1][id-1] != 0){
+		if((mADC[BTOW-1][id-1] != 0) && (mStatus[BTOW-1][id-1] == 1)){
 			/*if(myEvent->mbTrigger)*/ towerSlopes[0]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
 			/*if(myEvent->htTrigger) towerSlopes[1]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]); */
 		}
