@@ -24,7 +24,7 @@ void bemcCalibMacro(const char* dir="/star/data07/EMC/kocolosk/offline_tower_cal
     gSystem->Load("St_db_Maker");
 	gSystem->Load("libgeometry_Tables");
 	
-	gSystem->Load("StEmcTowerCalibrationMaker");
+	gSystem->Load("StEmcOfflineCalibrationMaker");
 	
 	StChain* chain = new StChain("StChain");
 	//chain->SetDebug();
@@ -46,17 +46,17 @@ void bemcCalibMacro(const char* dir="/star/data07/EMC/kocolosk/offline_tower_cal
 	TString outfile(dir);
 	outfile += "/";
 	outfile += name;
-	StEmcOfflineCalibrationMaker* btowCalibMaker = new StEmcOfflineCalibrationMaker("btowCalibMaker",outfile.Data());
-	btowCalibMaker->subtractPedestals = true;
+	StEmcOfflineCalibrationMaker* bemcCalibMaker = new StEmcOfflineCalibrationMaker("bemcCalibMaker",outfile.Data());
+	bemcCalibMaker->subtractPedestals = true;
 	
-	btowCalibMaker->addMinBiasTrigger(117001);
-	btowCalibMaker->addMinBiasTrigger(147001);
+	bemcCalibMaker->addMinBiasTrigger(117001);
+	bemcCalibMaker->addMinBiasTrigger(147001);
 	
-	btowCalibMaker->addHighTowerTrigger(117211);
-	btowCalibMaker->addHighTowerTrigger(117212);
-	btowCalibMaker->addHighTowerTrigger(127212);
-	btowCalibMaker->addHighTowerTrigger(127213);
-	btowCalibMaker->addHighTowerTrigger(137213);
+	bemcCalibMaker->addHighTowerTrigger(117211);
+	bemcCalibMaker->addHighTowerTrigger(117212);
+	bemcCalibMaker->addHighTowerTrigger(127212);
+	bemcCalibMaker->addHighTowerTrigger(127213);
+	bemcCalibMaker->addHighTowerTrigger(137213);
 	
 	
 	chain->Init();
