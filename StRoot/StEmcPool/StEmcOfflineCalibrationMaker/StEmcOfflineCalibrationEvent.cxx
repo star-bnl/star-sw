@@ -27,12 +27,14 @@ StEmcOfflineCalibrationEvent::StEmcOfflineCalibrationEvent()
 StEmcOfflineCalibrationEvent::~StEmcOfflineCalibrationEvent()
 {
 	tracks->Clear();
+	l2Result.Reset();
 }
 
 void StEmcOfflineCalibrationEvent::Clear(Option_t* option)
 {
 	tracks->Clear();
 	nTracks = 0;
+	l2Result.Reset();
 	for(int i=0; i<10; i++)	vx[i]=vy[i]=vz[i]=ranking[i]=0.;
 	
 	//shouldn't be caught with stale data in other vars -- either they're filled each event or not at all

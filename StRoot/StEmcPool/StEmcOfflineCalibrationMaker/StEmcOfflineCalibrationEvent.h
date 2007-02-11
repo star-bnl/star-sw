@@ -4,6 +4,10 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "TVector3.h"
+#include "TArrayI.h"
+
+#include <vector>
+using namespace std;
 
 class StEmcOfflineCalibrationTrack : public TObject
 {
@@ -43,6 +47,47 @@ public:
 	ClassDef(StEmcOfflineCalibrationTrack, 2)
 };
 
+//----------------------------------------------------------------------
+
+class StEmcOfflineCalibrationVertex : public TObject
+{
+public:
+	float mPosition[3];
+	float mPosError[3];
+	
+	int mVertexFinderId;
+	Float_t mRanking;
+	UShort_t mNTracksUsed;
+	UShort_t mNCTBMatch;
+	UShort_t mNBEMCMatch;
+	UShort_t mNEEMCMatch;
+	UShort_t mNCrossCentralMembrane;
+	Float_t mSumTrackPt;
+	Float_t mMeanDip;
+	Float_t mChiSquared;
+	
+	// RefMult fields
+	UShort_t mRefMultNeg;
+	UShort_t mRefMultPos;
+	UShort_t mRefMultFtpcWest;
+	UShort_t mRefMultFtpcEast;
+	
+	ClassDef(StEmcOfflineCalibrationVertex, 1)
+};
+
+//----------------------------------------------------------------------
+
+class StEmcOfflineCalibrationTrigger : public TObject
+{
+	int trigId;
+	float prescale;
+	int isSatisfied;
+	
+	ClassDef(StEmcOfflineCalibrationTrigger, 1)
+};
+
+//----------------------------------------------------------------------
+
 class StEmcOfflineCalibrationEvent : public TObject
 {
 public:
@@ -68,9 +113,8 @@ public:
 	float			ranking[10]; //[nVertices]
 	
 	//triggers (1 == trigger fired for this event)
-	unsigned short	mbTrigger;
-	unsigned short	htTrigger; //exclude http for now
-//	unsigned int	rawTriggerBlock;
+	vector<unsigned int>	triggerIds;
+	TArrayI			l2Result;
 	
 	int htTrigMaker[3]; //Yes/No ID DSM
 	
@@ -81,6 +125,6 @@ public:
 	
 	void addTrack(StEmcOfflineCalibrationTrack* track);
 	
-	ClassDef(StEmcOfflineCalibrationEvent,3)
+	ClassDef(StEmcOfflineCalibrationEvent,4)
 };	
 #endif
