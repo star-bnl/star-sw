@@ -1,4 +1,4 @@
-void btowCalibMacro(const char* dir="/star/data07/EMC/kocolosk/offline_tower_calibration/test",
+void bemcCalibMacro(const char* dir="/star/data07/EMC/kocolosk/offline_tower_calibration/test",
 			   const char* name  = "test.root",
 			   const char* filelist = "myfiles.list",
 			   int nFiles = 2,
