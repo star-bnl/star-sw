@@ -429,7 +429,7 @@ void StEmcOfflineCalibrationMaker::addHighTowerTrigger(unsigned int trigId){
 
 //this is a debugging function used to test possible swaps in the preshower
 //if a track projects to softId, we will take the preshower data from prsSignalId
-int getCorrectSignalForPRS(int softId)
+int StEmcOfflineCalibrationMaker::getCorrectSignalForPRS(int softId)
 {
 	int prsSignalId = softId;
 	
