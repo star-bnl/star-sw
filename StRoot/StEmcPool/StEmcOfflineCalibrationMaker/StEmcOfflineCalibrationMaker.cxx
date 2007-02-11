@@ -3,6 +3,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH2.h"
+#include "TH3.h"
 #include "TChain.h"
 
 //StMuDstMaker
@@ -55,9 +56,7 @@ StEmcOfflineCalibrationMaker::StEmcOfflineCalibrationMaker(const char* name, con
 	
 	towerSlopes[0] = NULL;
 	towerSlopes[1] = NULL;
-	preshowerSlopes[0] = NULL;
-	preshowerSlopes[1] = NULL;
-	preshowerSlopes[2] = NULL;
+	preshowerSlopes = NULL;
 	
 	mbTriggers.clear();
 	htTriggers.clear();
@@ -78,8 +77,6 @@ Int_t StEmcOfflineCalibrationMaker::Init()
 	mADCtoEMaker	= dynamic_cast<StEmcADCtoEMaker*>(GetMaker("Eread")); assert(mADCtoEMaker);
 	emcTrigMaker	= dynamic_cast<StEmcTriggerMaker*>(GetMaker("bemctrigger")); assert(emcTrigMaker);
 
-	
-//	mTables = new StBemcTables(kTRUE);
 	mTables = mADCtoEMaker->getBemcData()->getTables();
 	mEmcGeom = StEmcGeom::instance("bemc");
 
@@ -94,9 +91,7 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		myFile->cd();
 		towerSlopes[0]->Write();
 		towerSlopes[1]->Write();
-		preshowerSlopes[0]->Write();
-		preshowerSlopes[1]->Write();
-		preshowerSlopes[2]->Write();
+		preshowerSlopes->Write();
 	}
 	
 	//look for histograms from this run in the current file and switch to them if found, otherwise create them
@@ -108,14 +103,8 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		sprintf(name,"towerSlopes_HT_R%i",run);
 		myFile->GetObject(name,towerSlopes[1]);
 		
-		sprintf(name,"preshowerSlopes_0_R%i",run);
-		myFile->GetObject(name,preshowerSlopes[0]);
-		
-		sprintf(name,"preshowerSlopes_124_R%i",run);
-		myFile->GetObject(name,preshowerSlopes[1]);
-
-		sprintf(name,"preshowerSlopes_125_R%i",run);
-		myFile->GetObject(name,preshowerSlopes[2]);
+		sprintf(name,"preshowerSlopes_R%i",run);
+		myFile->GetObject(name,preshowerSlopes);
 	}
 	else{
 		towerSlopes[0] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,250,-49.5,200.5);
@@ -123,14 +112,8 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		sprintf(name,"towerSlopes_HT_R%i",run);
 		towerSlopes[1] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,250,-49.5,200.5);
 		
-		sprintf(name,"preshowerSlopes_0_R%i",run);		
-		preshowerSlopes[0] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,500,-49.5,450.5);
-
-		sprintf(name,"preshowerSlopes_124_R%i",run);
-		preshowerSlopes[1] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,500,-49.5,450.5);
-
-		sprintf(name,"preshowerSlopes_125_R%i",run);
-		preshowerSlopes[2] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,500,-49.5,450.5);	
+		sprintf(name,"preshowerSlopes_R%i",run);		
+		preshowerSlopes = new TH3D(name,"ADC vs. cap vs. towerID",4800,0.5,4800.5, 128,-0.5,127.5, 500,-49.5,450.5);
 	}
 	
 	return StMaker::InitRun(run);
@@ -173,30 +156,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	//toss out fpd1-tpcdead-fast triggers immediately
 	if(trigs.isTrigger(2) || trigs.isTrigger(117460) || trigs.isTrigger(137460) || trigs.isTrigger(147461)) return kStOK;
 	
-	//record if event satisfies trigger in a run-independent way
-	myEvent->mbTrigger = 0;
-	for(vector<unsigned int>::const_iterator it=mbTriggers.begin(); it!=mbTriggers.end(); it++){
-		if(trigs.isTrigger(*it)){
-			myEvent->mbTrigger = 1;
-			break;
-		}
-	}
-	
-	myEvent->htTrigger = 0;
-	for(vector<unsigned int>::const_iterator it=htTriggers.begin(); it!=htTriggers.end(); it++){
-		if(trigs.isTrigger(*it)){
-			myEvent->htTrigger = 1;
-			break;
-		}
-	}
-	
-//	myEvent->rawTriggerBlock = trgData->TrgSum.L2Sum[0];
-	
-//	myEvent->mbTrigger	= trigs.isTrigger(117001) || trigs.isTrigger(147001);
-//	myEvent->htTrigger	= trigs.isTrigger(117211) || trigs.isTrigger(117212) || trigs.isTrigger(127212) || trigs.isTrigger(127213) || trigs.isTrigger(137213);
-//	myEvent->jp0Trigger = trigs.isTrigger(117501) || trigs.isTrigger(127501) || trigs.isTrigger(137501);
-//	myEvent->jp1Trigger	= trigs.isTrigger(117221) || trigs.isTrigger(127221) || trigs.isTrigger(137221) || trigs.isTrigger(137222);
-//	myEvent->httpTrigger= trigs.isTrigger(117201) || trigs.isTrigger(117821) || trigs.isTrigger(127821) || trigs.isTrigger(137821); 	
+	myEvent->triggerIds = trigs.triggerIds();
+	myEvent->l2Result = event->L2Result();
 	
 	//basic event info
 	bool fillQA			= (runInfo->beamFillNumber(blue)==runInfo->beamFillNumber(yellow));
@@ -230,29 +191,22 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 		myEvent->vz[i] = stvertex.z();
 		myEvent->ranking[i] = muDst->primaryVertex(i)->ranking();
 	}
-	
-	LOG_DEBUG << "old code seems fine" << endm;
-	
+		
 	//fill ADC values from StEmcCollection obtained from MuDst
 	mEmcCollection = muDst->emcCollection();
 	getADCs(BTOW);
 	getADCs(BPRS);
 	for(int id=1; id<=4800; id++){
 		if(mADC[BTOW-1][id-1] != 0){
-			if(myEvent->mbTrigger) towerSlopes[0]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
-			if(myEvent->htTrigger) towerSlopes[1]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
+			/*if(myEvent->mbTrigger)*/ towerSlopes[0]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
+			/*if(myEvent->htTrigger) towerSlopes[1]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]); */
 		}
 		if(mADC[BPRS-1][id-1] != 0){		
-			switch(mCapacitor[id-1]){
-				case(125):	preshowerSlopes[2]->Fill(id,mADC[BPRS-1][id-1]-mPedestal[BPRS-1][id-1]);
-				case(124):	preshowerSlopes[1]->Fill(id,mADC[BPRS-1][id-1]-mPedestal[BPRS-1][id-1]);
-				default:	preshowerSlopes[0]->Fill(id,mADC[BPRS-1][id-1]-mPedestal[BPRS-1][id-1]);
-			}
+			preshowerSlopes->Fill(id, mCapacitor[id-1], mADC[BPRS-1][id-1]-mPedestal[BPRS-1][id-1]);
 		}
 	}
 	
 	LOG_DEBUG << "got ADCs" << endm;
-	
 	
 	//trigger maker
 	myEvent->htTrigMaker[0] = emcTrigMaker->is2006HT2();
@@ -296,7 +250,20 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 					myTrack->tower_pedestal[tower]		= mPedestal[BTOW-1][softid[tower]-1];
 					myTrack->tower_pedestal_rms[tower]	= mPedRMS[BTOW-1][softid[tower]-1];
 					myTrack->tower_status[tower]		= mStatus[BTOW-1][softid[tower]-1];
-					
+				}
+				
+				//recenter the array to test new PRS mapping hypotheses
+				softid[0] = getCorrectSignalForPRS(id);
+				softid[1] = mEmcPosition->getNextTowerId(softid[0],-1,-1);
+				softid[2] = mEmcPosition->getNextTowerId(softid[0],0,-1);
+				softid[3] = mEmcPosition->getNextTowerId(softid[0],1,-1);
+				softid[4] = mEmcPosition->getNextTowerId(softid[0],-1,0);
+				softid[5] = mEmcPosition->getNextTowerId(softid[0],1,0);
+				softid[6] = mEmcPosition->getNextTowerId(softid[0],-1,1);
+				softid[7] = mEmcPosition->getNextTowerId(softid[0],0,1);
+				softid[8] = mEmcPosition->getNextTowerId(softid[0],1,1);
+				
+				for(int tower=0; tower<9; tower++){
 					myTrack->preshower_adc[tower]			= mADC[BPRS-1][softid[tower]-1];
 					myTrack->preshower_pedestal[tower]		= mPedestal[BPRS-1][softid[tower]-1];
 					myTrack->preshower_pedestal_rms[tower]	= mPedRMS[BPRS-1][softid[tower]-1];
@@ -310,13 +277,6 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 				myTrack->tower_id_exit		= (getTrackTower(track, true)).first;
 				myTrack->highest_neighbor	= highestNeighbor(myTrack->tower_id[0]);
 				
-	//			myTrack->tower_id			= id;
-	//			myTrack->dR					= center_tower.second;
-	//			myTrack->tower_adc			= mADC[BTOW-1][id-1];
-	//			myTrack->tower_pedestal		= mPedestal[BTOW-1][id-1];
-	//			myTrack->tower_pedestal_rms = mPedRMS[BTOW-1][id-1];
-	//			myTrack->tower_status		= mStatus[BTOW-1][id-1];
-				
 				myTrack->nSigmaElectron		= track->nSigmaElectron();
 				myTrack->nHits				= track->nHits();
 				myTrack->nFitPoints			= track->nHitsFit();
@@ -324,7 +284,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 				myTrack->nHitsPossible		= track->nHitsPoss();
 				myTrack->dEdx				= track->dEdx();
 				
-				LOG_DEBUG<<"adding track for tower "<<myTrack->tower_id<<" with ADC "<<myTrack->tower_adc<<endm;
+//				LOG_DEBUG<<"adding track for tower "<<myTrack->tower_id<<" with ADC "<<myTrack->tower_adc<<endm;
 				myEvent->addTrack(myTrack);
 			}
 			
@@ -342,7 +302,7 @@ void StEmcOfflineCalibrationMaker::Clear(Option_t* option)
 	myEvent->Clear();
 	for(int i=0; i<2; i++){
 		for(int j=0; j<4800; j++){
-			mADC[i][j]		= 0;
+			mADC[i][j] = 0;
 		}
 	}
 }
@@ -352,9 +312,7 @@ Int_t StEmcOfflineCalibrationMaker::Finish()
 	myFile->cd();
 	towerSlopes[0]->Write();
 	towerSlopes[1]->Write();
-	preshowerSlopes[0]->Write();
-	preshowerSlopes[1]->Write();
-	preshowerSlopes[2]->Write();
+	preshowerSlopes->Write();
 	calibTree->Write();
 	myFile->Close();
 	LOG_INFO << "StEmcOfflineCalibrationMaker::Finish() == kStOk"<<endm;
@@ -467,4 +425,70 @@ void StEmcOfflineCalibrationMaker::addMinBiasTrigger(unsigned int trigId){
 
 void StEmcOfflineCalibrationMaker::addHighTowerTrigger(unsigned int trigId){ 
 	htTriggers.push_back(trigId);
+}
+
+//this is a debugging function used to test possible swaps in the preshower
+//if a track projects to softId, we will take the preshower data from prsSignalId
+int getCorrectSignalForPRS(int softId)
+{
+	int prsSignalId = softId;
+	
+	switch(softId){
+		//http://www4.rcf.bnl.gov/~rfc/web_20_chan/bad_map_20.txt
+		case(635):case(636):/*case(709):case(710):case(712):case(715):*/case(823):case(825):case(826):case(828):case(831):
+		case(834):case(839):case(840):case(1021):case(1022):case(1023):case(1024):case(1025):case(1026):case(1027):
+		case(1028):case(1061):case(1062):case(1064):case(1065):case(1066):case(1074):case(1220):case(1301):case(1303):
+		case(1313):case(1381):case(1382):case(1383):case(1384):case(1385):case(1386):case(1387):case(1388):case(1513):
+		case(1751):case(1752):case(1753):case(1754):case(1861):case(1862):case(1863):case(1864):case(1865):case(1866):
+		case(1867):case(1868):case(1869):case(1870):case(1871):case(1872):case(1873):case(1874):case(1875):case(1876):
+		case(1877):case(1878):case(1879):case(1880):case(2023):case(2024):case(2077):case(2078):case(2209):case(2773):
+		case(2906):case(3065):case(3066):case(3067):case(3070):case(3121):case(3178):case(3237):case(3279):case(3480):
+		case(3537):case(3538):case(3618):case(3657):case(3718):case(3720):case(3838):case(4195):case(4206):case(4217):
+		case(4547):case(4548):case(4550):
+			prsSignalId += 20; break;
+		case(655):case(656):/*case(729):case(730):case(732):case(735):*/case(843):case(845):case(846):case(848):case(851):
+		case(854):case(859):case(860):case(1041):case(1042):case(1043):case(1044):case(1045):case(1046):case(1047):
+		case(1048):case(1081):case(1082):case(1084):case(1085):case(1086):case(1094):case(1240):case(1321):case(1323):
+		case(1333):case(1401):case(1402):case(1403):case(1404):case(1405):case(1406):case(1407):case(1408):case(1533):
+		case(1771):case(1772):case(1773):case(1774):case(1881):case(1882):case(1883):case(1884):case(1885):case(1886):
+		case(1887):case(1888):case(1889):case(1890):case(1891):case(1892):case(1893):case(1894):case(1895):case(1896):
+		case(1897):case(1898):case(1899):case(1900):case(2043):case(2044):case(2097):case(2098):case(2229):case(2793):
+		case(2926):case(3085):case(3086):case(3087):case(3090):case(3141):case(3198):case(3257):case(3299):case(3500):
+		case(3557):case(3558):case(3638):case(3677):case(3738):case(3740):case(3848):case(4215):case(4226):case(4237):
+		case(4567):case(4568):case(4570):
+			prsSignalId -= 20; break;
+			
+			
+		//http://www.star.bnl.gov/protected/emc/wwjacobs/tmp/bprs_zoom_probs_west.txt
+		case(389): prsSignalId = 412; break;
+		case(390): prsSignalId = 411; break;
+		case(391): prsSignalId = 410; break;
+		case(392): prsSignalId = 409; break;
+			
+		case(409): prsSignalId = 392; break;
+		case(410): prsSignalId = 391; break;
+		case(411): prsSignalId = 390; break;
+		case(412): prsSignalId = 389; break;
+			
+		case(661):case(662):case(663):case(664):case(665):case(666):case(667):case(668):case(669):case(670):
+		case(671):case(672):case(673):case(674):case(675):case(676):case(677):case(678):case(679):case(680):
+		case(681):case(682):case(683):case(684):case(685):case(686):case(687):case(688):case(689):case(690):
+		case(691):case(692):case(693):case(694):case(695):case(696):case(697):case(698):case(699):case(700):
+			prsSignalId += 40; break;
+		case(701):case(702):case(703):case(704):case(705):case(706):case(707):case(708):case(709):case(710):
+		case(711):case(712):case(713):case(714):case(715):case(716):case(717):case(718):case(719):case(720):
+		case(721):case(722):case(723):case(724):case(725):case(726):case(727):case(728):case(729):case(730):
+		case(731):case(732):case(733):case(734):case(735):case(736):case(737):case(738):case(739):case(740):
+			prsSignalId -= 40; break;
+			
+		case(757):case(758):case(759):case(760):case(777):case(778):case(779):case(780):
+			prsSignalId += 40; break;
+		case(797):case(798):case(799):case(800):case(817):case(818):case(819):case(820):
+			prsSignalId -= 40; break;			
+			
+		case(1199):case(1219): prsSignalId += 40;
+		case(1239):case(1259): prsSignalId -= 40;
+	}
+	
+	return prsSignalId;
 }

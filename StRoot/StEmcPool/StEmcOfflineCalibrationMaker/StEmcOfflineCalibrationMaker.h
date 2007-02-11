@@ -4,6 +4,7 @@
 class TFile;
 class TTree;
 class TH2;
+class TH3;
 
 class StEmcOfflineCalibrationEvent;
 class StEmcOfflineCalibrationTrack;
@@ -27,7 +28,7 @@ private:
 	TFile* myFile;
 	TTree* calibTree;
 	TH2* towerSlopes[2]; //[MB][HT]
-	TH2* preshowerSlopes[3]; //check for problems with different capacitors
+	TH3* preshowerSlopes; 
 	StEmcOfflineCalibrationEvent* myEvent;
 	StEmcOfflineCalibrationTrack* myTrack;
 	
@@ -57,6 +58,7 @@ private:
 	float getTrackDeltaR(float track_eta, float track_phi, int id);
 	pair<float, float> getTrackDetaDphi(float track_eta, float track_phi, int id);
 	double highestNeighbor(int id);
+	int getCorrectSignalForPRS(int softId);
 	
 	
 public:
