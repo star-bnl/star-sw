@@ -113,9 +113,10 @@ Int_t StEmcOfflineCalibrationMaker::InitRun(int run)
 		towerSlopes[1] = new TH2D(name,"ADC vs. towerID",4800,0.5,4800.5,250,-49.5,200.5);
 		
 		sprintf(name,"preshowerSlopes_R%i",run);		
-		preshowerSlopes = new TH3D(name,"ADC vs. cap vs. towerID",4800,0.5,4800.5, 128,-0.5,127.5, 500,-49.5,450.5);
+		preshowerSlopes = new TH3F(name,"ADC vs. cap vs. towerID",4800,0.5,4800.5, 2,-0.5,127.5, 500,-49.5,450.5);
 	}
 	
+	LOG_DEBUG << "finished init run for " << run << endm;
 	return StMaker::InitRun(run);
 }
 
@@ -198,10 +199,12 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 	getADCs(BPRS);
 	for(int id=1; id<=4800; id++){
 		if((mADC[BTOW-1][id-1] != 0) && (mStatus[BTOW-1][id-1] == 1)){
-			/*if(myEvent->mbTrigger)*/ towerSlopes[0]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
-			/*if(myEvent->htTrigger) towerSlopes[1]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]); */
+			//if(myEvent->mbTrigger)
+			towerSlopes[0]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]);
+			//if(myEvent->htTrigger) towerSlopes[1]->Fill(id,mADC[BTOW-1][id-1]-mPedestal[BTOW-1][id-1]); 
 		}
 		if(mADC[BPRS-1][id-1] != 0){		
+	//		LOG_DEBUG << "filling preshower slopes histogram" << endm;
 			preshowerSlopes->Fill(id, mCapacitor[id-1], mADC[BPRS-1][id-1]-mPedestal[BPRS-1][id-1]);
 		}
 	}
@@ -242,7 +245,7 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 				softid[6] = mEmcPosition->getNextTowerId(id,-1,1);
 				softid[7] = mEmcPosition->getNextTowerId(id,0,1);
 				softid[8] = mEmcPosition->getNextTowerId(id,1,1);
-				
+								
 				//save EMC info for 3x3 tower block around track
 				for(int tower=0; tower<9; tower++){
 					myTrack->tower_id[tower]			= softid[tower];
@@ -262,6 +265,8 @@ Int_t StEmcOfflineCalibrationMaker::Make()
 				softid[6] = mEmcPosition->getNextTowerId(softid[0],-1,1);
 				softid[7] = mEmcPosition->getNextTowerId(softid[0],0,1);
 				softid[8] = mEmcPosition->getNextTowerId(softid[0],1,1);
+				
+				LOG_DEBUG << "BTOW id = " << id << " and BPRS id = " << softid[0] << endm;
 				
 				for(int tower=0; tower<9; tower++){
 					myTrack->preshower_adc[tower]			= mADC[BPRS-1][softid[tower]-1];
@@ -309,11 +314,13 @@ void StEmcOfflineCalibrationMaker::Clear(Option_t* option)
 
 Int_t StEmcOfflineCalibrationMaker::Finish()
 {
+	LOG_INFO << "cd to output file" << endm;
 	myFile->cd();
-	towerSlopes[0]->Write();
+	LOG_INFO << "write calibration tree" << calibTree->Write() << endm;
+	LOG_INFO << "write tower histogram" << towerSlopes[0]->Write() << endm;
 	towerSlopes[1]->Write();
-	preshowerSlopes->Write();
-	calibTree->Write();
+	LOG_INFO << "write preshower histogram" << preshowerSlopes->Write() << endm;
+	LOG_INFO << "close the output file" << endm;
 	myFile->Close();
 	LOG_INFO << "StEmcOfflineCalibrationMaker::Finish() == kStOk"<<endm;
 	return kStOk;
