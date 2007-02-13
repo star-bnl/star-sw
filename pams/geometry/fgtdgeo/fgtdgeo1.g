@@ -1,5 +1,10 @@
-* $Id: fgtdgeo1.g,v 1.1 2007/02/08 00:01:47 potekhin Exp $
+* $Id: fgtdgeo1.g,v 1.2 2007/02/13 20:41:03 potekhin Exp $
 * $Log: fgtdgeo1.g,v $
+* Revision 1.2  2007/02/13 20:41:03  potekhin
+* Remove the hit declaration just to make sure
+* there is no confusion downstream -- this version
+* if for material balance puprpose only.
+*
 * Revision 1.1  2007/02/08 00:01:47  potekhin
 * First cut of the "new" FGT which is identical to the previously
 * used IGT. Will soon be replaced by a newer version.
@@ -252,7 +257,8 @@ Block IGAL describes the active area
       Component Ar A=39.95   Z=18.   W=0.9
       Component C  A=12.01   Z=6.    W=0.1*1*12.01/44.01
       Component O  A=16.     Z=8.    W=0.1*2*16./44.01
-      Mixture   Ar_mix  Dens=0.0018015 Isvol=1
+      Mixture   Ar_mix  Dens=0.0018015
+* Isvol=1
 
       Material  Sensitive  Isvol=1
 
@@ -260,9 +266,9 @@ Block IGAL describes the active area
 
       Shape TUBE Rmin=rin+IGTG_SR Rmax=rout-IGTG_SR Dz=IGTG_SThk(1)/2.0
 
-      HITS    IGAL   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
-                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
-                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
+*      HITS    IGAL   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+*                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
+*                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 
 endblock
 
