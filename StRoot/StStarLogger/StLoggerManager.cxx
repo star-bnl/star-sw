@@ -95,17 +95,17 @@ if (gErrorIgnoreLevel == kUnset) {
    
 
    if (level >= kFatal) {
-        LOG_FATAL << msg << endm;
+        LOG_FATAL << location <<msg << endm;
      } else if (level >= kSysError) {
-        LOG_FATAL << msg << endm;  
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kBreak) {
-        LOG_FATAL << msg << endm;  
+        LOG_FATAL << location << " : " << msg << endm;  
      } else if (level >= kError) { 
-        LOG_ERROR << msg << endm;
+        LOG_ERROR << location << " : " << msg << endm;
 //   else if (level >= kWarning)
-//        LOG_WARN << msg << endm;
+//        LOG_WARN << location << " : " << msg << endm;
      } else if (level >= kInfo) {
-        LOG_INFO << msg << endm;
+        LOG_INFO << location << " : " << msg << endm;
      }
 
    if (abort) {
@@ -465,7 +465,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.25 2007/01/30 20:48:57 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.26 2007/02/13 22:07:26 perev Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -849,8 +849,11 @@ const char *GetName()
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.25 2007/01/30 20:48:57 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.26 2007/02/13 22:07:26 perev Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.26  2007/02/13 22:07:26  perev
+// Add the lost part of the ROOT message - location
+//
 // Revision 1.25  2007/01/30 20:48:57  fine
 // Make the deault level for all loggers INFO
 //
