@@ -449,9 +449,9 @@ int StEmcOfflineCalibrationMaker::getCorrectSignalForPRS(int softId)
 		case(1751):case(1752):case(1753):case(1754):case(1861):case(1862):case(1863):case(1864):case(1865):case(1866):
 		case(1867):case(1868):case(1869):case(1870):case(1871):case(1872):case(1873):case(1874):case(1875):case(1876):
 		case(1877):case(1878):case(1879):case(1880):case(2023):case(2024):case(2077):case(2078):case(2209):case(2773):
-		case(2906):case(3065):case(3066):case(3067):case(3070):case(3121):case(3178):case(3237):case(3279):case(3480):
+		case(2906):case(3065):case(3066):case(3067):case(3070):case(3121):/*case(3178):case(3237):case(3279):case(3480):
 		case(3537):case(3538):case(3618):case(3657):case(3718):case(3720):case(3838):case(4195):case(4206):case(4217):
-		case(4547):case(4548):case(4550):
+		case(4547):case(4548):case(4550):*/
 			prsSignalId += 20; break;
 		case(655):case(656):/*case(729):case(730):case(732):case(735):*/case(843):case(845):case(846):case(848):case(851):
 		case(854):case(859):case(860):case(1041):case(1042):case(1043):case(1044):case(1045):case(1046):case(1047):
@@ -460,9 +460,9 @@ int StEmcOfflineCalibrationMaker::getCorrectSignalForPRS(int softId)
 		case(1771):case(1772):case(1773):case(1774):case(1881):case(1882):case(1883):case(1884):case(1885):case(1886):
 		case(1887):case(1888):case(1889):case(1890):case(1891):case(1892):case(1893):case(1894):case(1895):case(1896):
 		case(1897):case(1898):case(1899):case(1900):case(2043):case(2044):case(2097):case(2098):case(2229):case(2793):
-		case(2926):case(3085):case(3086):case(3087):case(3090):case(3141):case(3198):case(3257):case(3299):case(3500):
+		case(2926):case(3085):case(3086):case(3087):case(3090):case(3141):/*case(3198):case(3257):case(3299):case(3500):
 		case(3557):case(3558):case(3638):case(3677):case(3738):case(3740):case(3848):case(4215):case(4226):case(4237):
-		case(4567):case(4568):case(4570):
+		case(4567):case(4568):case(4570):*/
 			prsSignalId -= 20; break;
 			
 			
@@ -495,6 +495,113 @@ int StEmcOfflineCalibrationMaker::getCorrectSignalForPRS(int softId)
 			
 		case(1199):case(1219): prsSignalId += 40;
 		case(1239):case(1259): prsSignalId -= 40;
+			
+		//http://www.star.bnl.gov/protected/emc/wwjacobs/tmp/bprs_zoom_probs_east.txt
+		case(3157):case(3158):case(3159):case(3160):
+			prsSignalId += 40; break;
+		case(3197):case(3198):case(3199):case(3200):
+			prsSignalId -= 40; break;
+
+		case(3177):case(3178):case(3179):case(3180):
+			prsSignalId += 40; break;
+		case(3217):case(3218):case(3219):case(3220):
+			prsSignalId -= 40; break;
+			
+		case(3181): prsSignalId = 3208; break;
+		case(3182): prsSignalId = 3207; break;
+		case(3183): prsSignalId = 3206; break;
+		case(3184): prsSignalId = 3205; break;
+		case(3185): prsSignalId = 3204; break;
+		case(3186): prsSignalId = 3203; break;
+		case(3187): prsSignalId = 3202; break;
+		case(3188): prsSignalId = 3201; break;
+			
+		case(3237):case(3238):case(3239):case(3240):
+			prsSignalId += 40; break;
+		case(3277):case(3278):case(3279):case(3280):
+			prsSignalId -= 40; break;
+			
+		case(3257):case(3258):case(3259):case(3260):
+			prsSignalId += 40; break;
+		case(3297):case(3298):case(3299):case(3300):
+			prsSignalId -= 40; break;
+			
+		case(3397):case(3398):case(3399):case(3400):
+			prsSignalId += 40; break;
+		case(3437):case(3438):case(3439):case(3440):
+			prsSignalId -= 40; break;
+	
+		case(3417):case(3418):case(3419):case(3420):
+			prsSignalId += 40; break;
+		case(3457):case(3458):case(3459):case(3460):
+			prsSignalId -= 40; break;
+			
+		case(3477):case(3478):case(3479):case(3480):
+			prsSignalId += 40; break;
+		case(3517):case(3518):case(3519):case(3520):
+			prsSignalId -= 40; break;
+			
+		case(3497):case(3498):case(3499):case(3500):
+			prsSignalId += 40; break;
+		case(3537):case(3538):case(3539):case(3540):
+			prsSignalId -= 40; break;
+			
+		case(3557):case(3558):case(3559):case(3560):
+			prsSignalId += 40; break;
+		case(3597):case(3598):case(3599):case(3600):
+			prsSignalId -= 40; break;
+			
+		case(3577):case(3578):case(3579):case(3580):
+			prsSignalId += 40; break;
+		case(3617):case(3618):case(3619):case(3620):
+			prsSignalId -= 40; break;
+			
+		case(3637):case(3638):case(3639):case(3640):
+			prsSignalId += 40; break;
+		case(3677):case(3678):case(3679):case(3680):
+			prsSignalId -= 40; break;
+			
+		case(3657):case(3658):case(3659):case(3660):
+			prsSignalId += 40; break;
+		case(3697):case(3698):case(3699):case(3700):
+			prsSignalId -= 40; break;
+			
+		case(3717):case(3718):case(3719):case(3720):
+			prsSignalId += 40; break;
+		case(3757):case(3758):case(3759):case(3760):
+			prsSignalId -= 40; break;
+			
+		case(3737):case(3738):case(3739):case(3740):
+			prsSignalId += 40; break;
+		case(3777):case(3778):case(3779):case(3780):
+			prsSignalId -= 40; break;
+			
+		case(3797):case(3798):case(3799):case(3800):
+			prsSignalId += 40; break;
+		case(3837):case(3838):case(3839):case(3840):
+			prsSignalId -= 40; break;
+			
+		case(3817):case(3818):case(3819):case(3820):
+			prsSignalId += 40; break;
+		case(3857):case(3858):case(3859):case(3860):
+			prsSignalId -= 40; break;
+			
+		case(4181):case(4182):case(4183):case(4184):case(4185):case(4186):case(4187):case(4188):case(4189):case(4190):
+		case(4191):case(4192):case(4193):case(4194):case(4195):case(4196):case(4197):case(4198):case(4199):case(4200):
+		case(4201):case(4202):case(4203):case(4204):case(4205):case(4206):case(4207):case(4208):case(4209):case(4210):
+		case(4211):case(4212):case(4213):case(4214):case(4215):case(4216):case(4217):case(4218):case(4219):case(4220):			
+			prsSignalId += 40; break;
+		case(4221):case(4222):case(4223):case(4224):case(4225):case(4226):case(4227):case(4228):case(4229):case(4230):			
+		case(4231):case(4232):case(4233):case(4234):case(4235):case(4236):case(4237):case(4238):case(4239):case(4240):			
+		case(4241):case(4242):case(4243):case(4244):case(4245):case(4246):case(4247):case(4248):case(4249):case(4250):			
+		case(4251):case(4252):case(4253):case(4254):case(4255):case(4256):case(4257):case(4258):case(4259):case(4260):			
+			prsSignalId -= 40; break;
+
+		case(4545):case(4546):case(4547):case(4548):
+			prsSignalId -= 20; break;
+
+		case(4565):case(4566):case(4567):case(4568):
+			prsSignalId -= 20; break;
 	}
 	
 	return prsSignalId;
