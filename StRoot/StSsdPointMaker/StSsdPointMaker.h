@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.19 2007/02/02 20:24:15 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.20 2007/02/14 11:49:16 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.20  2007/02/14 11:49:16  bouchet
+// Added control histograms and updated the Cluster and Point Tuple
+//
 // Revision 1.19  2007/02/02 20:24:15  bouchet
 // WriteStripTuple method added, WriteScmTuple method updated
 //
@@ -136,8 +139,8 @@ class StSsdPointMaker : public StMaker {
   St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
   Float_t Strips_hits[15];
-  Float_t ClusterNtuple[10];
-  Float_t hitNtuple[10]; 
+  Float_t ClusterNtuple[15];
+  Float_t hitNtuple[15]; 
   TFile   *mFile;
   TNtuple *mHitNtuple;
   TFile   *nFile;
@@ -178,36 +181,39 @@ class StSsdPointMaker : public StMaker {
   TH1F  *snRatioN;     //! n-side distribution of signal to noise ratio.
   TH1F  *stpClusN;     //! n-side distribution of strips per cluster.
   TH1F  *totChrgN;     //! n-side distribution of cluster total charge.
-
+  TH2S  *ClusNvsClusP; //! p-side clusters entries vs n-side clusters entries
+                       //  per wafer and event  
+  TH2S  *ClustMapP;    //! Map of number of clusters on the p-side ladders
+  TH2S  *ClustMapN;    //! Map of number of clusters on the n-side ladders
   TFile *ScmCtrlFile;  //!
   TH2S  *matchisto;    //! (1p-1n) packages control matching.
   TH1S  *orthoproj;    //! orthonormal projection and perfect matching deviation.
   TH1S  *kind;         //! kind of hits -->see StSsdWafer for definition
-  TH2S  *matchisto_1;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_2;    //! (1p-1n) packages control matching.
-  TH2S  *matchisto_3;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_4;    //! (1p-1n) packages control matching
-  TH2S  *matchisto_5;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_6;    //! (1p-1n) packages control matching.
-  TH2S  *matchisto_7;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_8;    //! (1p-1n) packages control matching
-  TH2S  *matchisto_9;    //! (1p-1n) packages control matching
-  TH2S  *matchisto_10;    //! (1p-1n) packages control matching
-  TH2S  *matchisto_11;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_12;    //! (1p-1n) packages control matching.
-  TH2S  *matchisto_13;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_14;    //! (1p-1n) packages control matching
-  TH2S  *matchisto_15;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_16;    //! (1p-1n) packages control matching.
-  TH2S  *matchisto_17;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_18;    //! (1p-1n) packages control matching
-  TH2S  *matchisto_19;    //! (1p-1n) packages control matching  
-  TH2S  *matchisto_20;    //! (1p-1n) packages control matching.
+  TH2S  *matchisto_1;  //! (1p-1n) packages control matching  
+  TH2S  *matchisto_2;  //! (1p-1n) packages control matching.
+  TH2S  *matchisto_3;  //! (1p-1n) packages control matching  
+  TH2S  *matchisto_4;  //! (1p-1n) packages control matching
+  TH2S  *matchisto_5;  //! (1p-1n) packages control matching  
+  TH2S  *matchisto_6;  //! (1p-1n) packages control matching.
+  TH2S  *matchisto_7;  //! (1p-1n) packages control matching  
+  TH2S  *matchisto_8;  //! (1p-1n) packages control matching
+  TH2S  *matchisto_9;  //! (1p-1n) packages control matching
+  TH2S  *matchisto_10; //! (1p-1n) packages control matching
+  TH2S  *matchisto_11; //! (1p-1n) packages control matching  
+  TH2S  *matchisto_12; //! (1p-1n) packages control matching.
+  TH2S  *matchisto_13; //! (1p-1n) packages control matching  
+  TH2S  *matchisto_14; //! (1p-1n) packages control matching
+  TH2S  *matchisto_15; //! (1p-1n) packages control matching  
+  TH2S  *matchisto_16; //! (1p-1n) packages control matching.
+  TH2S  *matchisto_17; //! (1p-1n) packages control matching  
+  TH2S  *matchisto_18; //! (1p-1n) packages control matching
+  TH2S  *matchisto_19; //! (1p-1n) packages control matching  
+  TH2S  *matchisto_20; //! (1p-1n) packages control matching.
   Int_t flag ;            
   
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.19 2007/02/02 20:24:15 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.20 2007/02/14 11:49:16 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
