@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.31 2007/02/02 20:24:15 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.32 2007/02/14 11:49:12 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.32  2007/02/14 11:49:12  bouchet
+// Added control histograms and updated the Cluster and Point Tuple
+//
 // Revision 1.31  2007/02/02 20:24:15  bouchet
 // WriteStripTuple method added, WriteScmTuple method updated
 //
@@ -134,16 +137,23 @@ ClassImp(StSsdPointMaker)
   LOG_INFO << "Init() : Defining the histograms" << endm;
   
   if (IAttr(".histos")) {
-    noisDisP = new TH1F("Noise_p","Noise Distribution",250,0,25);
-    snRatioP = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
-    stpClusP = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
-    totChrgP = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
-    
-    noisDisN = new TH1F("Noise_n","Noise Distribution",250,0,25);
-    snRatioN = new TH1F("SN_n","Signal/Noise",200,0,200);
-    stpClusN = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
-    totChrgN = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
-    
+    noisDisP  = new TH1F("Noise_p","Noise Distribution",250,0,25);
+    snRatioP  = new TH1F("SN_p","Signal/Noise (p)",200,0,200);
+    stpClusP  = new TH1F("NumberOfStrips_p","Strips per Cluster",8,0,8);
+    totChrgP  = new TH1F("ChargeElectron_p","Total Cluster Charge",100,0,300000);
+    ClusNvsClusP  = new TH2S("ClusNvsClusP","Number of clusters on the n-side vs Number of clusters on the p-side",200,0,200,200,0,200);
+    ClusNvsClusP->SetXTitle("Number of p-Side Clusters");
+    ClusNvsClusP->SetYTitle("Number of n-Side Clusters");
+    noisDisN  = new TH1F("Noise_n","Noise Distribution",250,0,25);
+    snRatioN  = new TH1F("SN_n","Signal/Noise",200,0,200);
+    stpClusN  = new TH1F("NumberOfStrips_n","Strips per Cluster",8,0,8);
+    totChrgN  = new TH1F("ChargeElectron_n","Total Cluster Charge",100,0,300000);
+    ClustMapP = new TH2S("ClustMapP","Number of clusters on the p-side per wafer and ladder",20,0,20,16,0,16);
+    ClustMapP->SetXTitle("Ladder id");
+    ClustMapP->SetYTitle("Wafer id");
+    ClustMapN = new TH2S("ClustMapN","Number of clusters on the n-side per wafer and ladder",20,0,20,16,0,16);
+    ClustMapN->SetXTitle("Ladder id");
+    ClustMapN->SetYTitle("Wafer id");
     // 		Create SCM histograms
     matchisto = new TH2S("matchingHisto","Matching Adc (1p-1n)",500,0,1000,500,0,1000);
     matchisto->SetXTitle("PSide ADC count");
@@ -377,10 +387,10 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber)
 
 void StSsdPointMaker::DeclareNtuple(Int_t *flag){
   mFile = new TFile("PhysicsFile.root","RECREATE");
-  string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag";
+  string varlist2 = "pulseP:pulseN:ladder:wafer:case:xg:yg:zg:flag:idClusP:idClusN";
   mHitNtuple     = new TNtuple("PhysNTuple","Physics Ntuple",varlist2.c_str());
   nFile = new TFile("Clusters.root","RECREATE");
-  string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc";
+  string varlist3 = "side:ladder:wafer:nstrip:snratio:noise:first_strip:TotAdc:FirstAdc:LastAdc:TotNoise";
   nHitNtuple     = new TNtuple("ClusTuple","Clusters Ntuple",varlist3.c_str()); 
   qFile = new TFile("Strips_in_hits.root","RECREATE");
   string varlist4     = "side:ladder:wafer:nstrip:pedestal:signal:noise:snratio";
@@ -474,7 +484,6 @@ Int_t StSsdPointMaker::Make()
       LOG_INFO<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endm;
       LOG_INFO<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endm;
       mySsd->sortListCluster();
-      
       Int_t nClusterWritten = mySsd->writeClusterToTable(scf_cluster,spa_strip);
       LOG_INFO<<"####   -> "<<nClusterWritten<<" CLUSTERS WRITTEN INTO TABLE       ####"<<endm;
       PrintClusterSummary(mySsd);
@@ -544,10 +553,25 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
   Int_t found;
   Float_t convAdcToE = (mDynamicControl->getadcDynamic()*mDynamicControl->getnElectronInAMip())/(pow(2.0,mDynamicControl->getnbitEncoding()));
   found=0;
+  Int_t ClustersP_tot = 0;
+  Int_t ClustersN_tot = 0;
+  Int_t pSize         = 0;
+  Int_t nSize         = 0;
   for (Int_t i=0;i<20;i++) 
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
-	  StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
+	StSsdClusterList *pList = mySsd->mLadders[i]->mWafers[j]->getClusterP();
+	pSize = pList->getSize();
+	ClustersP_tot+= pSize;
+	StSsdClusterList *nList = mySsd->mLadders[i]->mWafers[j]->getClusterN();
+	nSize = nList->getSize();
+	ClustersN_tot+= nSize;
+	ClusNvsClusP->Fill(pSize,nSize);
+	ClustMapP->Fill(i,j,pSize);
+	ClustMapN->Fill(i,j,nSize);
+	pSize = 0;
+	nSize = 0;
+	StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
 	  while (pClusterP)
 	    {  
 	      stpClusP->Fill(pClusterP->getClusterSize());
@@ -567,6 +591,7 @@ void StSsdPointMaker::makeScfCtrlHistograms(StSsdBarrel *mySsd)
 	      }	  
       }
     }
+  LOG_DEBUG <<"totclusters P="<<ClustersP_tot<<" totclusters N="<<ClustersN_tot<<endm;
 }
 
 
@@ -894,28 +919,34 @@ void StSsdPointMaker::WriteScfTuple(StSsdBarrel *mySsd)
 	StSsdCluster *pClusterP = mySsd->mLadders[i]->mWafers[j]->getClusterP()->first();
 	while (pClusterP)
 	  {   
-		ClusterNtuple[0]=0;
-		ClusterNtuple[1]=i+1;
-		ClusterNtuple[2]=j+1;
-		ClusterNtuple[3]=pClusterP->getClusterSize();
-		ClusterNtuple[4]=((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
-		ClusterNtuple[5]=pClusterP->getTotNoise()/pClusterP->getClusterSize();
-		ClusterNtuple[6]=pClusterP->getFirstStrip();
-		ClusterNtuple[7]=pClusterP->getTotAdc();
+		ClusterNtuple[0] = 0;
+		ClusterNtuple[1] = i+1;
+		ClusterNtuple[2] = j+1;
+		ClusterNtuple[3] = pClusterP->getClusterSize();
+		ClusterNtuple[4] = ((pClusterP->getTotAdc()*pClusterP->getClusterSize())/pClusterP->getTotNoise());
+		ClusterNtuple[5] = pClusterP->getTotNoise()/pClusterP->getClusterSize();
+		ClusterNtuple[6] = pClusterP->getFirstStrip();
+		ClusterNtuple[7] = pClusterP->getTotAdc();
+		ClusterNtuple[8] = pClusterP->getFirstAdc();
+		ClusterNtuple[9] = pClusterP->getLastAdc();
+		ClusterNtuple[10]= pClusterP->getTotNoise();
 		pClusterP    = mySsd->mLadders[i]->mWafers[j]->getClusterP()->next(pClusterP);
 		nHitNtuple->Fill(ClusterNtuple);	
 	      }
 	    StSsdCluster *pClusterN = mySsd->mLadders[i]->mWafers[j]->getClusterN()->first();
 	    while (pClusterN)
 	      {	
-		ClusterNtuple[0]=1;
-		ClusterNtuple[1]=i+1;
-		ClusterNtuple[2]=j+1;
-		ClusterNtuple[3]=pClusterN->getClusterSize();
-		ClusterNtuple[4]=((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());
-		ClusterNtuple[5]=pClusterN->getTotNoise()/pClusterN->getClusterSize();
-		ClusterNtuple[6]=pClusterN->getFirstStrip();
-		ClusterNtuple[7]=pClusterN->getTotAdc();	
+		ClusterNtuple[0] = 1;
+		ClusterNtuple[1] = i+1;
+		ClusterNtuple[2] = j+1;
+		ClusterNtuple[3] = pClusterN->getClusterSize();
+		ClusterNtuple[4] = ((pClusterN->getTotAdc()*pClusterN->getClusterSize())/pClusterN->getTotNoise());
+		ClusterNtuple[5] = pClusterN->getTotNoise()/pClusterN->getClusterSize();
+		ClusterNtuple[6] = pClusterN->getFirstStrip();
+		ClusterNtuple[7] = pClusterN->getTotAdc();
+		ClusterNtuple[8] = pClusterN->getFirstAdc();
+		ClusterNtuple[9] = pClusterN->getLastAdc();
+		ClusterNtuple[10]= pClusterN->getTotNoise();	
 		pClusterN    = mySsd->mLadders[i]->mWafers[j]->getClusterN()->next(pClusterN);
 		nHitNtuple->Fill(ClusterNtuple);
 	      }	  
@@ -941,10 +972,10 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 	      Float_t a = 0, b = 0;
 	      a = convMeVToAdc*(pSpt->getDe(0)+pSpt->getDe(1));
 	      b = convMeVToAdc*(pSpt->getDe(0)-pSpt->getDe(1));
-	      hitNtuple[0]=a;
-	      hitNtuple[1]=b;
-	      hitNtuple[2]=i+1;
-	      hitNtuple[3]=j+1;
+	      hitNtuple[0] = a;
+	      hitNtuple[1] = b;
+	      hitNtuple[2] = i+1;
+	      hitNtuple[3] = j+1;
 	      for(Int_t k=0;k<=11;k++)
 		{
 		  if(pSpt->getNMatched()==conversion[k])
@@ -952,10 +983,34 @@ void StSsdPointMaker::WriteScmTuple(StSsdBarrel *mySsd)
 		      hitNtuple[4]=k; 
 		    }
 		    }
-	      hitNtuple[5]=pSpt->getXg(0);
-	      hitNtuple[6]=pSpt->getXg(1);
-	      hitNtuple[7]=pSpt->getXg(2);
-	      hitNtuple[8]=pSpt->getFlag();
+	      hitNtuple[5] = pSpt->getXg(0);
+	      hitNtuple[6] = pSpt->getXg(1);
+	      hitNtuple[7] = pSpt->getXg(2);
+	      hitNtuple[8] = pSpt->getFlag();
+
+	      Int_t IdP = pSpt->getIdClusterP();
+	      Int_t IdN = pSpt->getIdClusterN();
+
+	      StSsdClusterList *currentListP_j = mySsd->mLadders[i]->mWafers[j]->getClusterP();
+	      StSsdCluster     *cluster_P_j   = currentListP_j->first();
+	      while(cluster_P_j)
+		{
+		  if(cluster_P_j->getNCluster()==IdP) 
+		    break;
+		  cluster_P_j = currentListP_j->next(cluster_P_j);
+		}
+ 
+	      StSsdClusterList *currentListN_j = mySsd->mLadders[i]->mWafers[j]->getClusterN();
+	      StSsdCluster *cluster_N_j       = currentListN_j->first();
+	      while(cluster_N_j)
+		{
+		  if(cluster_N_j->getNCluster()==IdN) 
+		    break;
+		  cluster_N_j = currentListN_j->next(cluster_N_j);
+		}
+	      
+	      hitNtuple[9] = cluster_P_j->getStripMean();
+	      hitNtuple[10]= cluster_N_j->getStripMean();
 	      mHitNtuple->Fill(hitNtuple);		 
 	      pSpt    = mySsd->mLadders[i]->mWafers[j]->getPoint()->next(pSpt);
 		} 
