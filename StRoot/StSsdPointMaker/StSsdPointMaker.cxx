@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.32 2007/02/14 11:49:12 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.33 2007/02/15 14:40:27 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.33  2007/02/15 14:40:27  bouchet
+// bug fixed for filling makeScmCtrlHistograms() method
+//
 // Revision 1.32  2007/02/14 11:49:12  bouchet
 // Added control histograms and updated the Cluster and Point Tuple
 //
@@ -514,13 +517,14 @@ Int_t StSsdPointMaker::Make()
       LOG_INFO<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endm;
       
       if(mSsdHitColl) {
-	LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;}
+	LOG_INFO<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endm;
+	makeScmCtrlHistograms(mySsd);
+      }
       else {
 	LOG_INFO<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endm;
 	scm_spt->Purge();
 	LOG_INFO<<"####        END OF SSD NEW POINT MAKER       ####"<<endm;
 	LOG_INFO<<"#################################################"<<endm;
-	makeScmCtrlHistograms(mySsd);
       }
       if(flag==1){ 
 	WriteStripTuple(mySsd);
@@ -608,7 +612,7 @@ void StSsdPointMaker::makeScmCtrlHistograms(StSsdBarrel *mySsd)
     if (LadderIsActive[i]>0) {
       for (Int_t j=0; j<mySsd->mLadders[i]->getWaferPerLadder();j++) {
 	if (mySsd->mLadders[i]->mWafers[j]->getPoint()->getSize()==0) {
-	  //LOG_INFO() <<"StSsdPointMaker::PrintPointDetails() - No hit in this wafer "<< endm;  
+	  //LOG_INFO <<"PrintPointDetails() - No hit in this wafer "<< endm;  
 	}
 	else {
 	  StSsdPoint *pSpt = mySsd->mLadders[i]->mWafers[j]->getPoint()->first();
