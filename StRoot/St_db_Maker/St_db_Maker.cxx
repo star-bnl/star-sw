@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.100 2006/11/23 01:55:44 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.101 2007/02/15 18:39:40 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.101  2007/02/15 18:39:40  perev
+// dbSnapshot fixes
+//
 // Revision 1.100  2006/11/23 01:55:44  perev
 // Non init variable fixed. Thanks Yuri
 //
@@ -188,21 +191,29 @@ int St_db_Maker::Snapshot (int flag)
      tfSnap = TFile::Open(fname,"READ");
      if (!tfSnap) 						return 0;
      if (tfSnap->IsZombie()) {delete tfSnap; 			return 0;}
+     
+     Info("Snapshot","Use DB from file %s\n",fname);
      ians = set.Read("dbSnapshot");
      fDataBase = (TDataSet*)set.GetObject();
+     set.DoOwner(0);
+     assert(fDataBase);
      break;
      
      case 1://Write
      if (!gSystem->AccessPathName(fname, kFileExists)) 		return 0;
 //// if (gSystem->AccessPathName(fname, kWritePermission))	return 0;
      tfSnap = TFile::Open(fname,"NEW");
-     if (!tfSnap) 						return 0;
-     if (tfSnap->IsZombie()) {delete tfSnap; 			return 0;}
+     if (!tfSnap || tfSnap->IsZombie()) {
+       Error("Snapshot","Can not open file for write");
+       return 0;
+     }
      TDataSet *parent = fDataBase->GetParent();
      fDataBase->Shunt(0);
      set.SetObject(fDataBase);
+     Info("Snapshot","Save DB to file %s\n",fname);
      ians = set.Write("dbSnapshot",TObject::kOverwrite);
      fDataBase->Shunt(parent);
+     tfSnap->Close();
      break;
    }
    delete tfSnap;
@@ -540,6 +551,13 @@ EDataSetPass St_db_Maker::UpdateDB(TDataSet* ds,void *user )
   // 		Check validity
     if (val->fTimeMin.Get() <= uevent 
      && val->fTimeMax.Get() >  uevent) 		return kPrune;
+
+    if (!mk->fDBBroker) {
+      mk->Error("UpdateDB","DbSnapshot mode: wrong validity for %s ignored(????)");
+      return kPrune;
+    }
+
+
 
     //	Start loop
 static int nCall=0; nCall++;
