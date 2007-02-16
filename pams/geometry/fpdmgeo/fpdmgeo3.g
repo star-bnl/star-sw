@@ -1,16 +1,18 @@
 ******************************************************************************
-* $Id: fpdmgeo3.g,v 1.4 2007/02/07 23:38:37 potekhin Exp $
+* $Id: fpdmgeo3.g,v 1.5 2007/02/16 23:24:53 potekhin Exp $
 * $Name:  $
 * $Log: fpdmgeo3.g,v $
+* Revision 1.5  2007/02/16 23:24:53  potekhin
+* Another round of code improvments by Ermes, aimed at
+* eliminating the hardcoded values and better code
+* structure.
+*
 * Revision 1.4  2007/02/07 23:38:37  potekhin
 * Further evolution of the code, with many improvements
 * by Ermes Braidot
 *
 * Revision 1.1  2006/11/28 00:02:42  potekhin
 * First version of the FMS (FPD) that still needs work.
-*
-*
-*
 ******************************************************************************
 Module FPDMGEO3 is the Forward Pion Detector Modules GEOmetry
 Created   27 Nov 2006
@@ -22,7 +24,7 @@ Author    Akio Ogawa
 *     
       Structure FMCG {Version,ChkvSim,PbPlate}
       Structure FPOS {iMod,iType,X,Y,Z,AY,AZ}
-      Structure FBXD {Type,Height,Depth,NX,NY,NXL,NYL,XOffset,ZOffset,PSOffset,SmdOff}
+      Structure FBXD {Type,Height,Depth,Width,NX,NY,NXL,NYL,XOffset,ZOffset,PSOffset,SmdOff}
       Structure FLGG {Type,Width,Depth,DGap,AlThick,PhCathDz,PhCathR,MuMetDz,MuMetR}
       Structure FLGM {Type,Density,RadLen,PbCont,CritEne,MoliereR}
       Structure PBPD {Z,Width,Height,Thick}
@@ -33,9 +35,12 @@ Author    Akio Ogawa
       integer    ChkvSim,iMod,iType,Type,PbPlate
       Integer    i,j,m,serN
 
-      Real       xx,yy,zz,x1,y1,z1,ztot,rtot,wid,wid2,bwid,x0
-      Real       ztotsmd,wtotsmd,xxx,yyy,zzz,wsmd
+      Real       xx,yy,zz,x1,y1,z1,ztot,rtot,wid,widx,widy,bwid,x0,widL
+      Real       ztotsmd,wtotsmd,zsmd,zsmd2,wsmd
+      Real       xsmdh,ysmdh,zsmdh,xsmdv,ysmdv,zsmdv
       Real       xlcOffSet, BZOffSet
+      Real       basewidth,distancer,xoffFECC,xoffFEDC
+      Real       xoffFENC,yoffFENC,zoffFENC,zoffFECC
 
       Integer    N
       Parameter (N=12)
@@ -121,6 +126,7 @@ Fill FBXD                           ! FPD Box Geometry
       Type=1                        ! Type (1=7*7+SMD+PreShower, 2=17*34+14*28)
       Height=100                    ! Box height
       Depth=96                      ! Box Depth
+      Width=0.0                     ! Box Width (only for FMS)
       NX=7                          ! Number of pbg in x
       NY=7                          ! number of pbg in y
       NXL=0                         ! Number of large pbg in x
@@ -135,6 +141,7 @@ Fill FBXD                           ! FPD Box Geometry
       Type=2                        ! Type (1=7*7+SMD+PreShower, 2=17*34+14*28)
       Height=210                    ! Box height
       Depth=98.425                  ! Box Depth
+      Width=127.0                   ! Box Width (only for FMS)
       NX=12                         ! Number of pbg in x
       NY=24                         ! number of pbg in y
       NXL=17                        ! Number of large pbg in x
@@ -224,7 +231,7 @@ EndFill
 
       prin1 fmcg_version; ('****************** FPDMGEO version ', F4.2)
 
-      do m=1,4  ! modules
+      do m=1,4  ! box modules for FMS
 
         USE FPOS iMod=m
         USE FBXD Type=FPOS_iType
@@ -245,7 +252,7 @@ EndFill
         endif
 
         if(m.ge.3) then
-           bwid=127.0/2.0 
+           bwid=FBXD_Width/2.0 
            if(FPOS_X.gt.0.0) then
              xx=FPOS_X+bwid
             elseif(FPOS_X.eq.0.0) then
@@ -253,7 +260,7 @@ EndFill
             else 
              xx=FPOS_X-bwid
            endif 
-         else 
+        else 
            if(FPOS_X.gt.0.0) then
              xx=FPOS_X+bwid
            elseif(FPOS_X.eq.0.0) then
@@ -282,7 +289,7 @@ EndFill
         if(m.eq.4)  then
           serN=1
         endif
-        if(m.ne.7) then
+        if(m.ne.7) then    ! just a check for the box number
         Create and Position FBOX in CAVE x=xx y=yy z=zz AlphaY=FPOS_AY  kOnly='MANY'
 *        print *,m,xx,yy,zz,FPOS_AY
         endif
@@ -294,48 +301,52 @@ Block FBOX is one Pb-Glass fpd detector
       Medium    standard
       Attribute FBOX seen=1 colo=2 serial=serN
       if(FBXD_Type.eq.2) then
-       shape box dx=127/2 dy=FBXD_Height/2 dz=FBXD_Depth/2
+       shape box dx=FBXD_Width/2 dy=FBXD_Height/2 dz=FBXD_Depth/2
       else
        shape box dx=bwid dy=FBXD_Height/2 dz=FBXD_Depth/2
       endif
 
 *Towers
+      USE FLGG Type=2
+      widL = FLGG_Width + FLGG_DGap + FLGG_AlThick*2              !large cell width
       USE FLGG Type=1
       USE FLGM Type=1
-      wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2
-      ztot = (FLGG_Depth + FLGG_AlThick + FLGG_MuMetDz)/2.0
+      wid  =  FLGG_Width + FLGG_DGap + FLGG_AlThick*2             !small cell width
+      ztot = (FLGG_Depth + FLGG_AlThick + FLGG_MuMetDz)/2.0       
       rtot = FBXD_NX*wid/2.0
       bwid = rtot+FBXD_XOffset
 
-      x0 =  rtot - FBXD_XOffset - wid/2
-      wid2 = -wid
-      if(FBXD_Type.eq.2 .and. FPOS_iMod.eq.4) then
-        x0 = - rtot + FBXD_XOffset + wid/2        
-        wid2=wid
+      Create FTOW
+      Create PBPT
+      Create FSHM
+      if(FBXD_Type.eq.2 .and. FPOS_iMod.eq.4) then                 
+        x0 = - rtot + FBXD_XOffset + wid/2                        ! x0 start from north9near beam) for 
+        widx = wid                                                ! WS (FMS-south) module
+      else 
+        x0 =  rtot - FBXD_XOffset - wid/2                         ! x0 start from south for north/top/bottom module
+        widx = -wid                                               ! since fpd is symmetric, true for ES module too
       endif
-      if(FBXD_Type.eq.2) then
-        y1 =  FBXD_NY*wid/2.0 - wid/2 + (16*5.812-24*3.822)/2    
-      else
-        y1 =  FBXD_NY*wid/2.0 - wid/2
+      if(FBXD_Type.eq.2) then                                     !this is to set the vertical gap between small cells
+        y1 =  FBXD_NY*wid/2.0 - wid/2 + (16*widL-FBXD_NY*wid)/2   !in order to correct the differences between  
+        widy = wid+(16*widL-FBXD_NY*wid)/23                       !3 small cells and 2 large ones (see again in 17 lines)  
+      else                                                        
+        y1 =  FBXD_NY*wid/2.0 - wid/2                          
+        widy = wid
       endif 
       z1 = -FBXD_Depth/2 + FBXD_ZOffset + ztot
       do i=1, FBXD_NY
         x1=x0
         do j=1, FBXD_NX
-           if(FBXD_Type.eq.2 .and. j.lt.6 .and.
-     +        i.gt.7 .and. i.lt.18) then
-             x1=x1+wid2
+           if(FBXD_Type.eq.2 .and. j.lt.6 .and.           
+     +        i.gt.7 .and. i.lt.18) then                    !hole in the small cell block
+             x1=x1+widx
            else
-             Create and Position FTOW x=x1 y=y1 z=z1        
+             Create and Position FTOW x=x1 y=y1 z=z1        !positioning the small cell block  
 *   !!          write(*,'(2I3,3F12.6)') i,j,x1,y1,z1
-               x1=x1+wid2
+               x1=x1+widx
            endif
    	    enddo
-        if(FBXD_Type.eq.2) then
-          y1 =  y1-wid-(16*5.812-24*3.822)/23
-        else
-          y1 =  y1-wid
-        endif                  
+        y1 =  y1-widy
       enddo
       
       if(FBXD_Type.eq.1) then
@@ -365,14 +376,14 @@ Block FBOX is one Pb-Glass fpd detector
          ztot = FLGG_Depth/2.0
          rtot = FBXD_NXL*wid/2.0
          bwid = rtot
-         xlcOffSet = (127.0-FBXD_NXL*wid)/2.0  ! Large Cells OffSet in X
+         xlcOffSet = (FBXD_Width-FBXD_NXL*wid)/2.0          ! Large Cells OffSet in X
  
-         if(FPOS_iMod.eq.4) then           
-           x0 =  -bwid + wid/2 - xlcOffSet + FPOS_X
-           wid2 = wid
+         if(FPOS_iMod.eq.4) then                            ! defining x0 for North and South
+           x0 =  -bwid + wid/2 - xlcOffSet + FPOS_X         
+           widx = wid
          elseif(FPOS_iMod.eq.3) then           
            x0 =  +bwid - wid/2 + xlcOffSet + FPOS_X 
-           wid2 = -wid
+           widx = -wid
          endif
          y1 =  FBXD_NYL*wid/2.0 - wid/2
          z1 = -FBXD_Depth/2 + FBXD_ZOffset + ztot
@@ -380,17 +391,17 @@ Block FBOX is one Pb-Glass fpd detector
             x1=x0            
             do j=1,FBXD_NXL
                if(j.lt.9 .and.
-     +            i.gt.9 .and. i.lt.26) then
-                  x1=x1+wid2 
-               elseif((i+j).ge.45) then
+     +            i.gt.9 .and. i.lt.26) then                   !hole in the large cells
+                  x1=x1+widx 
+               elseif((i+j).ge.45) then                        !bottom corners fill with plain lead cell
                   Create and Position FALU x=x1 y=y1 z=z1
-                  x1=x1+wid2     
-               elseif((j-i).ge.10) then
-                  x1=x1+wid2            
+                  x1=x1+widx     
+               elseif((j-i).ge.10) then                        !hole in the top corners
+                  x1=x1+widx            
                else              
-                  Create and Position FLXF x=x1 y=y1 z=z1             
+                  Create and Position FLXF x=x1 y=y1 z=z1      !positioning cells       
 *c!!                  write(*,'(2I3,3F12.6)') i,j,x1,y1,z1
-                  x1=x1+wid2
+                  x1=x1+widx
                endif
             enddo
             y1=y1-wid           
@@ -404,68 +415,78 @@ Block FBOX is one Pb-Glass fpd detector
          USE FLGM Type=2
          BZOffSet=0.0
          wid  = FLGG_Width + FLGG_DGap 
-         Create and Position FBAS x=FPOS_X  y=-(17*wid+3.4925/2.0) z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0
+         Create and Position FBAS x=FPOS_X  y=-(FBXD_NXL*wid+basewidth/2.0) z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0
         endif
 
-* Steel Insert
+* Steel Insert   
+        Create FENC
+        Create FEAC
+        Create FECC
+        Create FEDC
+        Create FEEC
+        distancer=INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt)
+        xoffFECC=(INSE_SheetDpt-FBXD_Width)/2.0
+        zoffFECC=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap
+        xoffFEDC=INSE_Width - INSE_SheetDpt
+        xoffFENC=(INSE_Width-FBXD_Width)/2.0
+        yoffFENC=(INSE_Height-INSE_SheetDpt)/2.0
+        zoffFENC=-FBXD_Depth/2.0 + BZOffSet + INSE_Depth/2.0 
         if(FBXD_Type.eq.2) then
-         if(FPOS_iMod.eq.4) then           
-          Create and Position FENC x=FPOS_X+(INSE_Width-127.0)/2.0  
-     +        y=(-INSE_Height+INSE_SheetDpt)/2.0 z=-FBXD_Depth/2 + BZOffSet + INSE_Depth/2.0 
-          Create and Position FENC x=FPOS_X+(INSE_Width-127.0)/2.0   
-     +        y=(INSE_Height-INSE_SheetDpt)/2.0 z=-FBXD_Depth/2 + BZOffSet + INSE_Depth/2.0 
-          Create and Position FEAC x=FPOS_X+INSE_Width-(127.0+INSE_SheetDpt)/2.0  
+         if(FPOS_iMod.eq.4) then    
+          Position FENC x=FPOS_X+xoffFENC  
+     +        y=-yoffFENC z=zoffFENC
+          Position FENC x=FPOS_X+xoffFENC   
+     +        y=yoffFENC z=zoffFENC 
+          Position FEAC x=FPOS_X+INSE_Width-(FBXD_Width+INSE_SheetDpt)/2.0  
      +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0
-          Create and Position FECC x=FPOS_X+(INSE_SheetDpt-127.0)/2.0 
-     +        y=(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth-INSE_GapDepth/2.0  
-          Create and Position FECC x=FPOS_X+(INSE_SheetDpt-127.0)/2.0  
-     +        y=(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Create and Position FECC x=FPOS_X+(INSE_SheetDpt-127.0)/2.0  
-     +        y=-(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth-INSE_GapDepth/2.0  
-          Create and Position FECC x=FPOS_X+(INSE_SheetDpt-127.0)/2.0  
-     +        y=-(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Create and Position FEDC x=FPOS_X+(INSE_Width - INSE_SheetDpt-127.0)/2.0 
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth/2.0  
-          Create and Position FEDC x=FPOS_X+(INSE_Width - INSE_SheetDpt-127.0)/2.0 
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth-INSE_GapDepth-INSE_GateDepth/2.0  
-          Create and Position FEDC x=FPOS_X+(INSE_Width - INSE_SheetDpt-127.0)/2.0 
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-2*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0  
+          Position FECC x=FPOS_X+xoffFECC 
+     +        y=distancer/2.0 
+     +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
+          Position FECC x=FPOS_X+xoffFECC  
+     +        y=distancer/2.0 
+     +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
+          Position FECC x=FPOS_X+xoffFECC  
+     +        y=-distancer/2.0 
+     +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
+          Position FECC x=FPOS_X+xoffFECC  
+     +        y=-distancer/2.0 
+     +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
+          Position FEDC x=FPOS_X+(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-INSE_GateDepth/2.0  
+          Position FEDC x=FPOS_X+(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-INSE_GateDepth-INSE_GapDepth-INSE_GateDepth/2.0  
+          Position FEDC x=FPOS_X+(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-2*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0  
 
       
          elseif(FPOS_iMod.eq.3) then           
-          Create and Position FENC x=FPOS_X-(INSE_Width-127.0)/2.0   
-     +        y=(-INSE_Height+INSE_SheetDpt)/2.0 z=-FBXD_Depth/2 + BZOffSet + INSE_Depth/2.0
-          Create and Position FENC x=FPOS_X-(INSE_Width-127.0)/2.0   
-     +        y=(INSE_Height-INSE_SheetDpt)/2.0 z=-FBXD_Depth/2 + BZOffSet + INSE_Depth/2.0     
-          Create and Position FEAC x=FPOS_X-INSE_Width+(127.0+INSE_SheetDpt)/2.0   
+          Position FENC x=FPOS_X-xoffFENC   
+     +        y=-yoffFENC z=zoffFENC
+          Position FENC x=FPOS_X-xoffFENC   
+     +        y=yoffFENC z=zoffFENC     
+          Position FEAC x=FPOS_X-INSE_Width+(FBXD_Width+INSE_SheetDpt)/2.0   
      +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth/2.0  
-          Create and Position FECC x=FPOS_X-(INSE_SheetDpt-127.0)/2.0  
-     +        y=(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth-INSE_GapDepth/2.0  
-          Create and Position FECC x=FPOS_X-(INSE_SheetDpt-127.0)/2.0  
-     +        y=(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Create and Position FECC x=FPOS_X-(INSE_SheetDpt-127.0)/2.0  
-     +        y=-(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth-INSE_GapDepth/2.0  
-          Create and Position FECC x=FPOS_X-(INSE_SheetDpt-127.0)/2.0  
-     +        y=-(INSE_GapHeight-(INSE_Height-2.0*INSE_SheetDpt))/2.0 
-     +        z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
-          Create and Position FEEC x=FPOS_X-(INSE_Width - INSE_SheetDpt-127.0)/2.0 
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth/2.0  
-          Create and Position FEEC x=FPOS_X-(INSE_Width - INSE_SheetDpt-127.0)/2.0 
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-INSE_GateDepth-INSE_GapDepth-INSE_GateDepth/2.0  
-          Create and Position FEEC x=FPOS_X-(INSE_Width - INSE_SheetDpt-127.0)/2.0 
-     +        y=0 z=-FBXD_Depth/2+BZOffSet+INSE_Depth-INSE_GateGap-2*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0 
+          Position FECC x=FPOS_X-xoffFECC  
+     +        y=distancer/2.0 
+     +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
+          Position FECC x=FPOS_X-xoffFECC  
+     +        y=distancer/2.0
+     +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
+          Position FECC x=FPOS_X-xoffFECC  
+     +        y=-distancer/2.0 
+     +        z=zoffFECC-INSE_GateDepth-INSE_GapDepth/2.0  
+          Position FECC x=FPOS_X-xoffFECC 
+     +        y=-distancer/2.0 
+     +        z=zoffFECC-2.0*INSE_GateDepth-3.0*INSE_GapDepth/2.0  
+          Position FEEC x=FPOS_X-(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-INSE_GateDepth/2.0  
+          Position FEEC x=FPOS_X-(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-INSE_GateDepth-INSE_GapDepth-INSE_GateDepth/2.0  
+          Position FEEC x=FPOS_X-(xoffFEDC-FBXD_Width)/2.0 
+     +        y=0 z=zoffFECC-2*(INSE_GateDepth+INSE_GapDepth)-INSE_GateDepth/2.0 
          
          endif
         endif
- 
-
 EndBlock
 * ----------------------------------------------------------------------------
 Block FTOW is one PbG Tower
@@ -532,8 +553,8 @@ Endblock
 * ----------------------------------------------------------------------------
 Block FBAS is Steel Base Plate
       material Iron 
-      Attribute FBAS  seen=1    colo=1     
-      Shape     box dz=INSE_Depth/2.0 dx=127.0/2.0 dy=3.4925/2.0
+      Attribute FBAS  seen=1    colo=1   
+      Shape     box dz=INSE_Depth/2.0 dx=FBXD_Width/2.0 dy=basewidth/2.0
     
 Endblock
 * ----------------------------------------------------------------------------
@@ -565,32 +586,50 @@ Endblock
 
 Block FEDC is Steel Enclosure part on south 
       material Iron
-      Attribute FEDC  seen=1    colo=5     
-      Shape     box dz=INSE_GateDepth/2.0 dx=(INSE_Width-INSE_SheetDpt)/2.0 dy=(INSE_Height-2.0*INSE_SheetDpt)/2.0
-        Create and Position FERC x=-(INSE_Width-INSE_SheetDpt)/2.0  y=0 z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Ra*0.25882  y=INSE_Ra*0.96593  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Ra*0.70711  y=INSE_Ra*0.70711  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Ra*0.96593  y=INSE_Ra*0.25882  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Ra*0.96593  y=-INSE_Ra*0.25882  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Ra*0.70711  y=-INSE_Ra*0.70711  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Ra*0.25882  y=-INSE_Ra*0.96593  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Rb*0.70711 y=INSE_Rb*0.70711  z=0.0
-        Create and Position FESC x=-(INSE_Width-INSE_SheetDpt)/2.0+INSE_Rb*0.70711 y=-INSE_Rb*0.70711 z=0.0      
+      Attribute FEDC  seen=1    colo=5             
+      Shape     box dz=INSE_GateDepth/2.0 dx=(xoffFEDC)/2.0 dy=(INSE_Height-2.0*INSE_SheetDpt)/2.0
+      Create and Position FERC x=-(xoffFEDC)/2.0  y=0 z=0.0
+      Create FESC
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Ra*cos(PI*5.0/12.0) 
+     +              y=INSE_Ra*sin(PI*5.0/12.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Ra*cos(PI/4.0) 
+     +              y=INSE_Ra*sin(PI/4.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Ra*cos(PI/12.0) 
+     +              y=INSE_Ra*sin(PI/12.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Ra*cos(PI/12.0) 
+     +              y=-INSE_Ra*sin(PI/12.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Ra*cos(PI/4.0) 
+     +              y=-INSE_Ra*sin(PI/4.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Ra*cos(PI*5.0/12.0)
+     +              y=-INSE_Ra*sin(PI*5.0/12.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Rb*cos(PI/4.0)
+     +              y=INSE_Rb*sin(PI/4.0)  z=0.0
+      Position FESC x=-(xoffFEDC)/2.0+INSE_Rb*cos(PI/4.0) 
+     +              y=-INSE_Rb*sin(PI/4.0) z=0.0      
 Endblock
 
 Block FEEC is Steel Enclosure part on north 
       material Iron
       Attribute FEEC  seen=1    colo=5     
-      Shape     box dz=INSE_GateDepth/2.0 dx=(INSE_Width - INSE_SheetDpt)/2.0 dy=(INSE_Height - 2.0*INSE_SheetDpt)/2.0
-        Create and Position FETC x=(INSE_Width-INSE_SheetDpt)/2.0  y=0 z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Ra*0.25882  y=INSE_Ra*0.96593  z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Ra*0.70711  y=INSE_Ra*0.70711  z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Ra*0.96593  y=INSE_Ra*0.25882  z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Ra*0.96593  y=-INSE_Ra*0.25882  z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Ra*0.70711  y=-INSE_Ra*0.70711  z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Ra*0.25882  y=-INSE_Ra*0.96593  z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Rb*0.70711 y=INSE_Rb*0.70711 z=0.0
-        Create and Position FESC x=(INSE_Width - INSE_SheetDpt)/2.0-INSE_Rb*0.70711 y=-INSE_Rb*0.70711 z=0.0
+      Shape     box dz=INSE_GateDepth/2.0 dx=(xoffFEDC)/2.0 dy=(INSE_Height - 2.0*INSE_SheetDpt)/2.0
+      Create and Position FETC x=(xoffFEDC)/2.0  y=0 z=0.0
+      Create FESC        
+      Position FESC x=(xoffFEDC)/2.0-INSE_Ra*cos(PI*5.0/12.0)  
+     +              y=INSE_Ra*sin(PI*5.0/12.0)  z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Ra*cos(PI/4.0) 
+     +              y=INSE_Ra*sin(PI/4.0)  z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Ra*cos(PI/12.0)  
+     +              y=INSE_Ra*sin(PI/12.0)  z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Ra*cos(PI/12.0) 
+     +              y=-INSE_Ra*sin(PI/12.0)  z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Ra*cos(PI/4.0)  
+     +              y=-INSE_Ra*sin(PI/4.0)  z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Ra*cos(PI*5.0/12.0) 
+     +              y=-INSE_Ra*sin(PI*5.0/12.0)  z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Rb*cos(PI/4.0) 
+     +              y=INSE_Rb*sin(PI/4.0) z=0.0
+      Position FESC x=(xoffFEDC)/2.0-INSE_Rb*cos(PI/4.0)
+     +              y=-INSE_Rb*sin(PI/4.0) z=0.0
 Endblock
 
 Block FETC is Air Enclosure part 
@@ -642,37 +681,38 @@ Block FSHM  is the SHower Max  section
       wsmd=FMXG_Sbase/2+FMXG_Sgap
       wtotsmd=(FMXG_Nstrip+1)*wsmd
 *G10 
-      zzz=-ztotsmd+FMXG_G10Thick/2
-      Create and Position FXGT x=0 y=0 z=zzz
+      zsmd=-ztotsmd+FMXG_G10Thick/2
+      Create and Position FXGT x=0 y=0 z=zsmd
 
 *SMD V-Plane
-      xxx=-wtotsmd/2-FMXG_Sgap/2+wsmd
-      yyy=0.0
-      zzz=zzz+FMXG_G10Thick/2+FMXG_Sapex/2
+      xsmdv=-wtotsmd/2-FMXG_Sgap/2+wsmd
+      ysmdv=0.0
+      zsmdv=zsmd+FMXG_G10Thick/2+FMXG_Sapex/2
       do i=1,FMXG_Nstrip
          if(mod(i,2)!= 0) then 
-           Create and Position FHMS x=xxx y=yyy z=zzz
+           Create and Position FHMS x=xsmdv y=ysmdv z=zsmdv
          else
-           Create and Position FHMS x=xxx y=yyy z=zzz AlphaX=180
+           Create and Position FHMS x=xsmdv y=ysmdv z=zsmdv AlphaX=180
          endif
-         xxx=xxx+wsmd
+         xsmdv=xsmdv+wsmd
       enddo
 
 *G10 
-      zzz=zzz+FMXG_G10Thick/2++FMXG_Sapex/2
-      Create and Position FXGT x=0 y=0 z=zzz
+      zsmd2=zsmdv+FMXG_G10Thick/2++FMXG_Sapex/2
+      Create and Position FXGT x=0 y=0 z=zsmd2
       
 *SMD H-Plane
-      xxx=0.0
-      yyy=-wtotsmd/2-FMXG_Sgap/2+wsmd
-      zzz=zzz+FMXG_G10Thick/2+FMXG_Sapex/2
+      xsmdh=0.0
+      ysmdh=-wtotsmd/2-FMXG_Sgap/2+wsmd
+      zsmdh=zsmd2+FMXG_G10Thick/2+FMXG_Sapex/2
+      Create FHMS
       do i=1,FMXG_Nstrip
          if(mod(i,2)!= 0) then
-           Create and Position FHMS x=xxx y=yyy z=zzz AlphaZ=90
+           Position FHMS x=xsmdh y=ysmdh z=zsmdh AlphaZ=90
          else
-           Create and Position FHMS x=xxx y=yyy z=zzz AlphaZ=90 AlphaX=180
+           Position FHMS x=xsmdh y=ysmdh z=zsmdh AlphaZ=90 AlphaX=180
          endif
-         yyy=yyy+wsmd
+         ysmdh=ysmdh+wsmd
       enddo
 
 EndBlock
