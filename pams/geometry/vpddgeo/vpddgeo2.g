@@ -1,8 +1,8 @@
-* $Id: vpddgeo2.g,v 1.1 2007/02/07 23:37:55 potekhin Exp $
+* $Id: vpddgeo2.g,v 1.2 2007/02/16 22:54:32 potekhin Exp $
 * $Log: vpddgeo2.g,v $
-* Revision 1.1  2007/02/07 23:37:55  potekhin
-* Adding the new cut of the code, to be used
-* in Y2007
+* Revision 1.2  2007/02/16 22:54:32  potekhin
+* Code improvements by Xin, aimed at a better code structure,
+* readability and removal of hardcoded values.
 *
 * Revision 1.2  2004/07/08 01:52:50  potekhin
 * Need to properly name the module here (different from
@@ -98,16 +98,39 @@ Created 21 June 2000
                       NumPMT,   PMTwall,  PMTrad,   PMTlen,
                       IBchoice, IBPosYc,  IBPosZc,  IBLeng,  IBthickH,
                       IBthickV, IBheight, IBwidth, 
-                      IBwlen,   IBwhghtF, IBwhghtB}
+                      IBwlen,   IBwhghtF, IBwhghtB,
+                      EWShift,  UDShift,  BoltShift }
      Structure VPDH { version,   zposEast, zposWest, rmin,   rmax, length,
                       detrad,    detlen,   pmtrad,   pmtlen,
                       detwall,   detfront, leadthick, scintthick,
                       ring1_ndet, ring1_rad, ring1_phi0, ring1_dphi, ring1_kproj,
                       ring2_ndet, ring2_rad, ring2_phi0, ring2_dphi, ring2_kproj,
-                      ring3_ndet, ring3_rad, ring3_phi0, ring3_dphi, ring3_kproj  }
+                      ring3_ndet, ring3_rad, ring3_phi0, ring3_dphi, ring3_kproj,
+                      EWShift,  UDShift,  BoltShift }
+     Structure VPDS { version, IBSAZc,  IBSAYc,  IBSAXc,
+                      IBSBZc,  IBSBYc,  IBSBXc,
+                      IBSCZc,  IBSCYc,  IBSCXc,
+                      IBSDZc1, IBSDZc2, IBSDYc1, IBSDYc2,  IBSDXc,
+                      IBSEZc1, IBSEZc2, IBSEYc,  IBSEXc,
+                      IBSFZc,  IBSFYc,  IBSFXc,
+                      IBSGZc1, IBSGZc2, IBSGZc3, IBSGYc,  IBSGXc,
+                      IBSHZc1, IBSHZc2, IBSHYc,  IBSHXc1, IBSHXc2, 
+                      BSALenX, BSALenY, BSALenZ,
+                      BAALenZ, BSBLenY, BSCLenX, BSCLenY,
+                      BSCLenZ, BACLenZ, BSDLenX,
+                      BSELenY, BSELenZ,
+                      BSFRmax, BSFLenZ, BSSLenZ,
+                      BSGRmax, BSGLenZ1, BSGLenZ2, BSGLenZ3,
+                      BSHLenZ,
+                      ElecWid, ElecThck, ElecLen,
+                      VFEEPosX, VFEEPosY, VFEEPosZ,
+                      VLEMPosX(15),  VLEMPosY,  VLEMPosZ(15),
+                      VLEMLenX,  VLEMLenY,  VLEMLenZ,
+                      VPIPPosX,  VPIPPosY,  VPIPPosZ,
+                      VPIPRmin,  VPIPRmax,  VPIPLenZ }
 *
      real ybase, ytop, convlength, detangle, strutheight, ydispl
-     real ElecThck, ElecWid, ElecLen, xloc, yloc,zloc,zpos,tempos
+     real xloc, yloc,zloc,zpos,tempos
      real zpose, zposw, EWshift, UDshift, BoltShift, locang, phiang, detzint
      integer isec
      integer kDetStyle, kIBeamStyle
@@ -176,6 +199,9 @@ Created 21 June 2000
         IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
         IBwhghtF  =    4.4489 ! IBeam vert. front piece height
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+        EWShift   =    0.0    ! east west z shift
+        UDShift   =    0.0    ! up down y shift
+        BoltShift =    0.0    ! Bolt additional y shift
      Endfill
 *
      FILL VPDG  ! pVPD basic dimensions
@@ -235,6 +261,9 @@ Created 21 June 2000
         IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
         IBwhghtF  =    4.4489 ! IBeam vert. front piece height
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+        EWShift   =    0.0    ! east west z shift
+        UDShift   =    0.0    ! up down y shift
+        BoltShift =    0.0    ! Bolt additional y shift
      Endfill
 *
      FILL VPDG  ! pVPD basic dimensions
@@ -294,6 +323,9 @@ Created 21 June 2000
         IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
         IBwhghtF  =    4.4489 ! IBeam vert. front piece height
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+        EWShift   =    0.0    ! east west z shift
+        UDShift   =    0.0    ! up down y shift
+        BoltShift =    0.0    ! Bolt additional y shift
      Endfill
 *
 *---- Version 4 is the star default setup for Y2004X,A,B....
@@ -354,6 +386,9 @@ Created 21 June 2000
         IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
         IBwhghtF  =    4.4489 ! IBeam vert. front piece height
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+        EWShift   =    0.0    ! east west z shift
+        UDShift   =    0.0    ! up down y shift
+        BoltShift =    0.0    ! Bolt additional y shift
      Endfill
 
 *---- Version 5/6 includes all Run-4/5 geometry plus add'l support structure for Y2004Y/Y2005 (WJL)
@@ -424,7 +459,10 @@ Created 21 June 2000
         IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
         IBwhghtF  =    4.4489 ! IBeam vert. front piece height
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
-     Endfill
+        EWShift   =    1.905  ! east west z shift (0.75*2.54)
+        UDShift   =    0.0    ! up down y shift
+        BoltShift =    0.0    ! Bolt additional y shift
+    Endfill
      FILL VPDG  ! pVPD basic dimensions
         version   =    6      ! geometry version    WJL ...used by Y2005, Y2006A, Y2006B
         zposEast  = 583.806   ! Z position East 	WJL from newer CADD: 220.720in+(18.25in/2)=229.845in  
@@ -482,10 +520,13 @@ Created 21 June 2000
         IBwlen    =   22.86   ! IBeam vert. front piece         (9inch)   
         IBwhghtF  =    4.4489 ! IBeam vert. front piece height
         IBwhghtB  =    8.3097 ! IBeam vert. front piece height
+        EWShift   =    1.905  ! east west z shift (0.75*2.54)
+        UDShift   =    0.0    ! up down y shift
+        BoltShift =    0.0    ! Bolt additional y shift
      Endfill
 
      FILL VPDH  ! upVPD basic dimensions
-        version   =    1       ! geometry version	WJL ...used by Y2006A
+        version   =    7       ! geometry version	WJL ...used by Y2006A --- and future 2007 run
         zposEast  =  571.45    ! Z position East	(more or less arbitrary)
         zposWest  =  571.45    ! Z position West	(more or less arbitrary)
         rmin      =    6.6675  ! mothervolume rmin	(2 5/8in)
@@ -499,24 +540,27 @@ Created 21 June 2000
         detfront  =    0.3175  ! det assy front and back plate thicknesses (1/8in)
         leadthick =    1.0     ! lead converter layer thickness (1cm)
         scintthick=    1.0     !   scintillator layer thickness (1cm)
-        ring1_ndet =  10       ! upVPD geo parameter
+        ring1_ndet =  10       ! upVPD number of tubes in ring 1
         ring1_rad  =  10.16    ! upVPD geo parameter (4in)
         ring1_phi0 = -49.      ! upVPD geo parameter
         ring1_dphi =  31.      ! upVPD geo parameter
         ring1_kproj=   0       ! upVPD geo parameter
-        ring2_ndet =   9       ! upVPD geo parameter
+        ring2_ndet =   9       ! upVPD number of tubes in ring 2
         ring2_rad  =  14.2875  ! upVPD geo parameter (5 5/8in)
         ring2_phi0 = -33.5     ! upVPD geo parameter
         ring2_dphi =  31.      ! upVPD geo parameter
         ring2_kproj=   0       ! upVPD geo parameter
-        ring3_ndet =   0       ! upVPD geo parameter
+        ring3_ndet =   0       ! upVPD number of tubes in ring 3
         ring3_rad  =  99.      ! upVPD geo parameter (5 5/8in)
         ring3_phi0 =  99.      ! upVPD geo parameter
         ring3_dphi =  99.      ! upVPD geo parameter
         ring3_kproj=   0       ! upVPD geo parameter
+        EWShift   =    1.905   ! east west z shift (0.75*2.54)
+        UDShift   =    0.0     ! up down y shift
+        BoltShift =    0.0     ! Bolt additional y shift
      Endfill
      FILL VPDH  ! upVPD basic dimensions
-        version   =    2       ! geometry version	WJL ...used by Y2006B
+        version   =    8       ! geometry version	WJL ...used by Y2006B
         zposEast  =  571.45    ! Z position East	(more or less arbitrary)
         zposWest  =  571.45    ! Z position West	(more or less arbitrary)
         rmin      =    6.6675  ! mothervolume rmin	(2 5/8in)
@@ -530,24 +574,27 @@ Created 21 June 2000
         detfront  =    0.3175  ! det assy front and back plate thicknesses (1/8in)
         leadthick =    1.0     ! lead converter layer thickness (1cm)
         scintthick=    1.0     !   scintillator layer thickness (1cm)
-        ring1_ndet =  11       ! upVPD geo parameter
+        ring1_ndet =  11       ! upVPD number of tubes in ring 1
         ring1_rad  =  9.5      ! upVPD geo parameter      (3.74in)
         ring1_phi0 = -73.6364  ! upVPD geo parameter      (360/11)
         ring1_dphi =  32.7272  ! upVPD geo parameter (-90+(360/11/2))
         ring1_kproj=   0       ! upVPD geo parameter
-        ring2_ndet =  11       ! upVPD geo parameter
+        ring2_ndet =  11       ! upVPD number of tubes in ring 2
         ring2_rad  =  13.7     ! upVPD geo parameter      (5.394in)
         ring2_phi0 = -90       ! upVPD geo parameter 
         ring2_dphi =  32.7272  ! upVPD geo parameter      (360/11)
         ring2_kproj=   0       ! upVPD geo parameter
-        ring3_ndet =   0       ! upVPD geo parameter
+        ring3_ndet =   0       ! upVPD number of tubes in ring 3
         ring3_rad  =  99.      ! upVPD geo parameter (5 5/8in)
         ring3_phi0 =  99.      ! upVPD geo parameter
         ring3_dphi =  99.      ! upVPD geo parameter
         ring3_kproj=   0       ! upVPD geo parameter
+        EWShift   =    1.905   ! east west z shift (0.75*2.54)
+        UDShift   =   -5.715   ! up down y shift
+        BoltShift =    1.0     ! Bolt additional y shift
      Endfill
      FILL VPDH  ! upVPD basic dimensions
-        version   =    3       ! geometry version	WJL ...used by Y2006C
+        version   =    9       ! geometry version	WJL ...used by Y2006C
         zposEast  =  571.45    ! Z position East	(more or less arbitrary)
         zposWest  =  571.45    ! Z position West	(more or less arbitrary)
         rmin      =    6.6675  ! mothervolume rmin	(2 5/8in)
@@ -561,24 +608,27 @@ Created 21 June 2000
         detfront  =    0.3175  ! det assy front and back plate thicknesses (1/8in)
         leadthick =    1.0     ! lead converter layer thickness (1cm)
         scintthick=    1.0     !   scintillator layer thickness (1cm)
-        ring1_ndet =  11       ! upVPD geo parameter
+        ring1_ndet =  11       ! upVPD number of tubes in ring 1
         ring1_rad  =  9.5      ! upVPD geo parameter      (3.74in)
         ring1_phi0 = -73.6364  ! upVPD geo parameter      (360/11)
         ring1_dphi =  32.7272  ! upVPD geo parameter (-90+(360/11/2))
         ring1_kproj=   0       ! upVPD geo parameter
-        ring2_ndet =  11       ! upVPD geo parameter
+        ring2_ndet =  11       ! upVPD number of tubes in ring 2
         ring2_rad  =  13.7     ! upVPD geo parameter      (5.394in)
         ring2_phi0 = -90       ! upVPD geo parameter 
         ring2_dphi =  32.7272  ! upVPD geo parameter      (360/11)
         ring2_kproj=   0       ! upVPD geo parameter
-        ring3_ndet =  11       ! upVPD geo parameter
+        ring3_ndet =  11       ! upVPD number of tubes in ring 3
         ring3_rad  =  16.8     ! upVPD geo parameter
         ring3_phi0 = -73.6364  ! upVPD geo parameter
         ring3_dphi =  32.7272  ! upVPD geo parameter
         ring3_kproj=   0       ! upVPD geo parameter
+        EWShift   =    1.905   ! east west z shift (0.75*2.54)
+        UDShift   =   -8.255   ! up down y shift
+        BoltShift =    1.5     ! Bolt additional y shift
      Endfill
      FILL VPDH  ! upVPD basic dimensions
-        version   =    4       ! geometry version	WJL ...used by Y2006D
+        version   =   10       ! geometry version	WJL ...used by Y2006D
         zposEast  =  571.45    ! Z position East	(more or less arbitrary)
         zposWest  =  571.45    ! Z position West	(more or less arbitrary)
         rmin      =    6.6675  ! mothervolume rmin	(2 5/8in)
@@ -592,56 +642,144 @@ Created 21 June 2000
         detfront  =    0.3175  ! det assy front and back plate thicknesses (1/8in)
         leadthick =    1.0     ! lead converter layer thickness (1cm)
         scintthick=    1.0     !   scintillator layer thickness (1cm)
-        ring1_ndet =  11       ! upVPD geo parameter
+        ring1_ndet =  11       ! upVPD number of tubes in ring 1
         ring1_rad  =  9.5      ! upVPD geo parameter      (3.74in)
         ring1_phi0 = -73.6364  ! upVPD geo parameter      (360/11)
         ring1_dphi =  32.7272  ! upVPD geo parameter (-90+(360/11/2))
         ring1_kproj=   1       ! upVPD geo parameter
-        ring2_ndet =  11       ! upVPD geo parameter
+        ring2_ndet =  11       ! upVPD number of tubes in ring 2
         ring2_rad  =  13.7     ! upVPD geo parameter      (5.394in)
         ring2_phi0 = -90       ! upVPD geo parameter 
         ring2_dphi =  32.7272  ! upVPD geo parameter      (360/11)
         ring2_kproj=   1       ! upVPD geo parameter
-        ring3_ndet =  11       ! upVPD geo parameter
+        ring3_ndet =  11       ! upVPD number of tubes in ring 3
         ring3_rad  =  16.8     ! upVPD geo parameter
         ring3_phi0 = -73.6364  ! upVPD geo parameter
         ring3_dphi =  32.7272  ! upVPD geo parameter
         ring3_kproj=   1       ! upVPD geo parameter
+        EWShift   =    1.905   ! east west z shift (0.75*2.54)
+        UDShift   =   -8.255   ! up down y shift
+        BoltShift =    1.5     ! Bolt additional y shift
+     Endfill
+
+*--- pVPD: pipe-support additional hardware defined...
+     FILL VPDS  ! pipe-support material
+        version = 1          ! first version in Year 2007
+        IBSAZc  = 692.91     ! IBSA position Z center
+        IBSAYc  = -60.10     ! IBSA position Y center
+        IBSAXc  = 24.11      ! IBSA position X center
+        IBSBZc  = 631.20     ! IBSB position Z center
+        IBSBYc  = -69.50     ! IBSB position Y center = (Yc + UDshift)
+        IBSBXc  = 24.11      ! IBSB position X center
+        IBSCZc  = 581.10     ! IBSC position Z center
+        IBSCYc  = -23.60     ! IBSC position Y center = (Yc + UDshift)
+        IBSCXc  = 0.00       ! IBSC position X center
+        IBSDZc1 = 397.70     ! IBSD position Z center 1
+        IBSDZc2 = 442.80     ! IBSD position Z center 2
+        IBSDYc1 = -11.01     ! IBSD position Y center 1 = (Yc+UDshift)
+        IBSDYc2 = -7.20      ! IBSD position Y center 2 
+        IBSDXc  = 0.00       ! IBSD position X center
+        IBSEZc1 = 397.70     ! IBSE position Z center 1
+        IBSEZc2 = 442.80     ! IBSE position Z center 2
+        IBSEYc  = -13.44     ! IBSE position Y center 
+        IBSEXc  = 6.99       ! IBSE position X center
+        IBSFZc  = 411.70     ! IBSF position Z center
+        IBSFYc  = -16.51     ! IBSF position Y center = (Yc + UDshift)
+        IBSFXc  = 0.00       ! IBSF position X center
+        IBSGZc1 = 397.70     ! IBSE position Z center 1
+        IBSGZc2 = 442.80     ! IBSE position Z center 2
+        IBSGZc3 = 2.54       ! IBSG position Z center offset
+        IBSGYc  = -17.57     ! IBSG position Y center = (Yc+UDshift+BoltShift)
+        IBSGXc  = 0.00       ! IBSG position X center
+        IBSHZc1 = 397.70     ! IBSH position Z center 1
+        IBSHZc2 = 442.80     ! IBSH position Z center 2
+        IBSHYc  = 0.00       ! IBSH position Y center
+        IBSHXc1 = 6.35       ! IBSH position X center 1
+        IBSHXc2 = 7.62       ! IBSH position X center 2
+        BSALenX = 7.62       ! IBSA X length
+        BSALenY = 84.00      ! IBSA Y length
+        BSALenZ = 7.62       ! IBSA Z length
+        BAALenZ = 0.95       ! IBAA Z length
+        BSBLenY = 142.4      ! IBSB Y length
+        BSCLenX = 40.64      ! IBSC X length
+        BSCLenY = 4.01       ! IBSC Y length
+        BSCLenZ = 10.16      ! IBSC Z length
+        BACLenZ = 0.64       ! IBAC Z length
+        BSDLenX = 20.32      ! IBSD X length
+        BSELenY = 8.26       ! IBSE Y length
+        BSELenZ = 6.35       ! IBSE Z length
+        BSFRmax = 0.95       ! IBSF Rmax
+        BSFLenZ = 182.88     ! IBSF Z length
+        BSSLenZ = 7.62       ! IBSS Z length
+        BSGRmax = 0.64       ! IBSG Rmax
+        BSGLenZ1 = 10.16     ! IBSG Z length 1 for vpdConfig<8
+        BSGLenZ2 = 12.70     ! IBSG Z length 2 for vpdConfig=8
+        BSGLenZ3 = 15.24     ! IBSG Z length 3 for vpdConfig else
+        BSHLenZ  = 5.08      ! IBSH Z length
+        ElecWid  = 20.3      ! Electronic box width
+        ElecThck = 0.17      ! Electronic box thickness
+        ElecLen  = 5.10      ! Electronic box length
+        VFEEPosX = 0.31      ! VFEE position X center
+        VFEEPosY = 0.45      ! VFEE position Y center
+        VFEEPosZ = -4.75     ! VFEE position Z center
+        VLEMPosX = { -7.0, -3.5, 0.0, 3.5, 7.0,
+                     -7.0, -3.5, 0.0, 3.5, 7.0,
+                     -6.0, -2.5, 1.0, 4.5, 8.0 }  ! VLEM position X center
+        VLEMPosY = 0.52      ! VLEM position Y center
+        VLEMPosZ = { 2.0, 2.0, 2.0, 2.0, 2.0,
+                     -2.0, -2.0, -2.0, -2.0, -2.0,
+                     -2.0, -2.0, -2.0, -2.0, -2.0 } ! VLEM position Z center
+        VLEMLenX = 0.86      ! VLEM X length
+        VLEMLenY = 0.68      ! VLEM Y length
+        VLEMLenZ = 3.8       ! VLEM Z length
+        VPIPPosX = 0.09      ! VPIP position X center
+        VPIPPosY = 0.0       ! VPIP position Y center
+        VPIPPosZ = 0.9       ! VPIP position Z center
+        VPIPRmin = 0.31      ! VPIP Rmin
+        VPIPRmax = 0.34      ! VPIP Rmax
+        VPIPLenZ = 2.0       ! VPIP Z length
      Endfill
 
      USE  VPDV
+     USE  VPDS
 
 *---- the detectors...
       print *,' pVPD: VPDV_vpdConfig =',VPDV_vpdConfig
       if (VPDV_vpdConfig<=4) then
        print *,' pVPD: Using the VPDG_ Geometry for the STAR-standard pVPD detector...'
        kDetStyle = 0
-       EWshift   = 0.
        USE VPDG version=VPDV_vpdConfig;
-       zposE=vpdg_zposEast
-       zposW=vpdg_zposWest
+       zposE     = vpdg_zposEast
+       zposW     = vpdg_zposWest
+       EWshift   = vpdg_EWShift
+       UDshift   = vpdg_UDShift
+       BoltShift = vpdg_BoltShift
       elseif (VPDV_vpdConfig==5.or.VPDV_vpdConfig==6) then
        print *,' pVPD: Using the VPDG_ Geometry for the improved pVPD & pipe-support structure...'
        kDetStyle = 1
-       EWshift   = 0.75*2.54
        USE VPDG version=VPDV_vpdConfig;
-       zposE=vpdg_zposEast
-       zposW=vpdg_zposWest
+       zposE     = vpdg_zposEast
+       zposW     = vpdg_zposWest
+       EWshift   = vpdg_EWShift
+       UDshift   = vpdg_UDShift
+       BoltShift = vpdg_BoltShift
       elseif (VPDV_vpdConfig>=7) then
        print *,'upVPD: Using the VPDG_ & VPDH_ Geometries for the Upgraded pVPD (upPVD) detector, W/ Ibeam lowering...'
        kDetStyle = 2
-       EWshift   = 0.75*2.54
        USE VPDG version=6;
-       USE VPDH version=VPDV_vpdConfig-6;
-       zposE=vpdh_zposEast
-       zposW=vpdh_zposWest
+       USE VPDH version=VPDV_vpdConfig;
+       zposE     = vpdh_zposEast
+       zposW     = vpdh_zposWest
+       EWshift   = vpdh_EWShift
+       UDshift   = vpdh_UDShift
+       BoltShift = vpdh_BoltShift
       endif
-      print *,' pVPD: Zpositions East and West:',zposE,' &',zposW,' cm'	
-      if (VPDV_vpdConfig==10) then
-        print *,'upVPD: Detector assemblies have faces pointing at X=Y=Z=0...'
-      else
-        print *,'upVPD: Detector assemblies have long axes parallel to Z-axis ...'
-      endif
+*      print *,' pVPD: Zpositions East and West:',zposE,' &',zposW,' cm'	
+*      if (VPDV_vpdConfig==10) then
+*        print *,'upVPD: Detector assemblies have faces pointing at X=Y=Z=0...'
+*      else
+*        print *,'upVPD: Detector assemblies have long axes parallel to Z-axis ...'
+*      endif
 
       Create VPDD
       zpos = zposW
@@ -650,22 +788,12 @@ Created 21 June 2000
       Position VPDD in Cave   z=-zpos ThetaZ=180 Konly='Many'
 
       kIBeamStyle=0
-      UDshift=0.
-      BoltShift=0.
       if (VPDG_IBchoice!=0) then
         kIBeamStyle=1
         if (VPDV_vpdConfig>4) then
           kIBeamStyle=2
           if (VPDV_vpdConfig>=8) then        
            kIBeamStyle=3
-           if (VPDV_vpdConfig==8) then       
-            UDshift   = -2.25*2.54
-            BoltShift = 1.0 
-           elseif (VPDV_vpdConfig>=9) then   
-            UDshift   = -3.25*2.54
-            BoltShift = 1.5
-           endif
-           print *,'upVPD: Lowering IBeam & related bracket pieces&bolts by (cm):',UDshift,BoltShift
           end if
         endif
       endif
@@ -674,110 +802,122 @@ Created 21 June 2000
 *- - - - the 4" I-Beam only (STAR default)
        Create and Position IBEM in Cave z=+(vpdg_IBPosZc) y=vpdg_IBposYc+UDshift
                   Position IBEM in Cave z=-(vpdg_IBPosZc+EWshift) y=vpdg_IBposYc+UDshift ThetaZ=180
-       print *,' pVPD: pipe-support I-Beam defined...'
-       print *,' IBEM West Z =',vpdg_IBPosZc
-       print *,' IBEM East Z =',-(vpdg_IBPosZc+EWshift)
+*       print *,' pVPD: pipe-support I-Beam defined...'
+*       print *,' IBEM West Z =',vpdg_IBPosZc
+*       print *,' IBEM East Z =',-(vpdg_IBPosZc+EWshift)
       if (kIBeamStyle>1) then
-       print *,' pVPD: pipe-support additional hardware defined...'
+*       print *,' pVPD: pipe-support additional hardware defined...'
 *- - - - vertical pcs of 3" Al Angle on balcony...
-       Create and Position IBSA in Cave z=+(700.7+(3.0*2.54/2.))-11.6 y=-60.1 x=+(20.3+(3.*2.54/2.)) 
-                  Position IBSA in Cave z=+(700.7+(3.0*2.54/2.))-11.6 y=-60.1 x=-(20.3+(3.*2.54/2.)),
+       Create and Position IBSA in Cave z=vpds_IBSAZc y=vpds_IBSAYc x=vpds_IBSAXc 
+                  Position IBSA in Cave z=vpds_IBSAZc y=vpds_IBSAYc x=-vpds_IBSAXc,
                          AlphaZ=180
-                  Position IBSA in Cave z=-(700.7+(3.0*2.54/2.)+EWshift)+11.6 y=-60.1 x=+(20.3+(3.*2.54/2.)), 
+                  Position IBSA in Cave z=-(vpds_IBSAZc+EWshift) y=vpds_IBSAYc x=vpds_IBSAXc, 
                          ThetaZ=180 
-                  Position IBSA in Cave z=-(700.7+(3.0*2.54/2.)+EWshift)+11.6 y=-60.1 x=-(20.3+(3.*2.54/2.)), 
+                  Position IBSA in Cave z=-(vpds_IBSAZc+EWshift) y=vpds_IBSAYc x=-vpds_IBSAXc, 
                          ThetaZ=180 AlphaZ=180 
 *- - - - diagonal pcs of 3" Al Angle from balcony to I-beam...
-       Create and Position IBSB in Cave z=+642.8-11.6 y=-69.5+UDshift x=+(20.3+(3.*2.54/2.)) AlphaX=45 
-                  Position IBSB in Cave z=+642.8-11.6 y=-69.5+UDshift x=-(20.3+(3.*2.54/2.)) AlphaX=45,
-                        ThetaX=270
-                  Position IBSB in Cave z=-(642.8+EWshift)+11.6 y=-69.5+UDshift x=+(20.3+(3.*2.54/2.)) AlphaX=-45,
-                        ThetaZ=180  
-                  Position IBSB in Cave z=-(642.8+EWshift)+11.6 y=-69.5+UDshift x=-(20.3+(3.*2.54/2.)) AlphaX=-45,
-                        ThetaX=270 ThetaZ=180 
+       Create and Position IBSB in Cave z=vpds_IBSBZc y=vpds_IBSBYc+UDshift x=vpds_IBSBXc,
+                                        AlphaX=45 
+                  Position IBSB in Cave z=vpds_IBSBZc y=vpds_IBSBYc+UDshift x=-vpds_IBSBXc,
+                                        AlphaX=45 ThetaX=270
+                  Position IBSB in Cave z=-(vpds_IBSBZc+EWshift) y=vpds_IBSBYc+UDshift,
+                                        x=vpds_IBSBXc AlphaX=-45 ThetaZ=180  
+                  Position IBSB in Cave z=-(vpds_IBSBZc+EWshift) y=vpds_IBSBYc+UDshift,
+                                        x=-vpds_IBSBXc AlphaX=-45 ThetaX=270 ThetaZ=180 
 *- - - - horizontal pcs of 4" channel+endcaps that connect diagonals and underside of I-beam...
-       Create and Position IBSC in Cave z=+(592.7)-11.6,
-                       y=(vpdg_IBposYc-(vpdg_IBheight/2.))-(1.58*2.54/2.)+UDshift
-                  Position IBSC in Cave z=-(592.7+EWshift)+11.6 ThetaZ=180,
-                       y=(vpdg_IBposYc-(vpdg_IBheight/2.))-(1.58*2.54/2.)+UDshift               
+       Create and Position IBSC in Cave z=vpds_IBSCZc y=vpds_IBSCYc+UDshift
+                  Position IBSC in Cave z=-(vpds_IBSCZc+EWshift) y=vpds_IBSCYc+UDshift,
+                                        ThetaZ=180
 *- - - - the horizontal plates on top of I-beam that each hold 2 pipe-support brackets...
-       Create and Position IBSD in Cave z=+(404.6+04.7)-11.6 x=0, 
-                                y=((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))+UDshift
-                  Position IBSD in Cave z=+(404.6+49.8)-11.6 x=0, 
-                                y=((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))+UDshift
-                  Position IBSD in Cave z=-(404.6+04.7+EWshift)+11.6 x=0 ThetaZ=180,
-                                y=((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))+UDshift
-                  Position IBSD in Cave z=-(404.6+49.8+EWshift)+11.6 x=0 ThetaZ=180,
-                                y=((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))+UDshift
-                  Position IBSD in Cave z=+(404.6+04.7)-11.6 x=0, 
-                                y=1.5*2.54+((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))
-                  Position IBSD in Cave z=+(404.6+49.8)-11.6 x=0, 
-                                y=1.5*2.54+((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))
-                  Position IBSD in Cave z=-(404.6+04.7+EWshift)+11.6 x=0 ThetaZ=180,
-                                y=1.5*2.54+((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))
-                  Position IBSD in Cave z=-(404.6+49.8+EWshift)+11.6 x=0 ThetaZ=180,
-                                y=1.5*2.54+((vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))-(0.25*2.54/2.))
+       Create and Position IBSD in Cave z=vpds_IBSDZc1 x=0 y=vpds_IBSDYc1+UDshift
+                  Position IBSD in Cave z=vpds_IBSDZc2 x=0 y=vpds_IBSDYc1+UDshift
+                  Position IBSD in Cave z=-(vpds_IBSDZc1+EWshift) x=0 y=vpds_IBSDYc1+UDshift,
+                                        ThetaZ=180
+                  Position IBSD in Cave z=-(vpds_IBSDZc2+EWshift) x=0 y=vpds_IBSDYc1+UDshift,
+                                        ThetaZ=180
+                  Position IBSD in Cave z=vpds_IBSDZc1 x=0 y=vpds_IBSDYc2
+                  Position IBSD in Cave z=vpds_IBSDZc2 x=0 y=vpds_IBSDYc2
+                  Position IBSD in Cave z=-(vpds_IBSDZc1+EWshift) x=0 y=vpds_IBSDYc2,
+                                        ThetaZ=180
+                  Position IBSD in Cave z=-(vpds_IBSDZc2+EWshift) x=0 y=vpds_IBSDYc2,
+                                        ThetaZ=180
 *- - - - the pipe-support brackets...
-       tempos = 1.5*2.54+(vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))
-       Create and Position IBSE in Cave z=+(404.6+04.7)-11.6 x=+2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2.
-                  Position IBSE in Cave z=+(404.6+04.7)-11.6 x=-2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2.
-                  Position IBSE in Cave z=+(404.6+49.8)-11.6 x=+2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2.
-                  Position IBSE in Cave z=+(404.6+49.8)-11.6 x=-2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2.
-                  Position IBSE in Cave z=-(404.6+04.7+EWshift)+11.6 x=+2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2.
-                  Position IBSE in Cave z=-(404.6+04.7+EWshift)+11.6 x=-2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2. 
-                  Position IBSE in Cave z=-(404.6+49.8+EWshift)+11.6 x=+2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2. 
-                  Position IBSE in Cave z=-(404.6+49.8+EWshift)+11.6 x=-2.54*(3.0/2.+1.25) y=tempos+3.25*2.54/2.
+       tempos = (vpdg_IBposYc+vpdg_IBthickH+(vpdg_IBheight/2.))
+       Create and Position IBSE in Cave z=vpds_IBSEZc1 x=+vpds_IBSEXc y=vpds_IBSEYc
+                  Position IBSE in Cave z=vpds_IBSEZc1 x=-vpds_IBSEXc y=vpds_IBSEYc
+                  Position IBSE in Cave z=vpds_IBSEZc2 x=+vpds_IBSEXc y=vpds_IBSEYc
+                  Position IBSE in Cave z=vpds_IBSEZc2 x=-vpds_IBSEXc y=vpds_IBSEYc
+                  Position IBSE in Cave z=-(vpds_IBSEZc1+EWshift) x=+vpds_IBSEXc y=vpds_IBSEYc
+                  Position IBSE in Cave z=-(vpds_IBSEZc1+EWshift) x=-vpds_IBSEXc y=vpds_IBSEYc 
+                  Position IBSE in Cave z=-(vpds_IBSEZc2+EWshift) x=+vpds_IBSEXc y=vpds_IBSEYc 
+                  Position IBSE in Cave z=-(vpds_IBSEZc2+EWshift) x=-vpds_IBSEXc y=vpds_IBSEYc
 *- - - - the long threaded rods for X-support of the IBeam
 * note this cuts through the IBEM mother, so two little pieces 'inside the ibeam' not defined!
-* need to place two small stubs inside ibem! (note draw's o.k., only see this w/ agpmater!!!)
-       Create and Position IBSF in Cave  z=+(404.6+4.7+14.0)-11.6 y=vpdg_IBposYc+UDshift alphay=90
-                  Position IBSF in Cave  z=-(404.6+4.7+14.0+EWshift)+11.6 y=vpdg_IBposYc+UDshift alphay=90
-       Create and Position IBSS in IBEM z=+((404.6+4.7+14.0)-11.6)-(vpdg_IBPosZc) y=0 alphay=90
-                  Position IBSS in IBEM z=-((404.6+4.7+14.0+EWshift)-11.6)+(vpdg_IBPosZc) y=0 alphay=90
+* need to place two small stubs inside ibem! (note draw's o.k., only see this w/ agpmater!!!)'
+       Create and Position IBSF in Cave  z=vpds_IBSFZc y=vpdg_IBposYc+UDshift alphay=90
+                  Position IBSF in Cave  z=-(vpds_IBSFZc+EWshift) y=vpdg_IBposYc+UDshift alphay=90
+       Create and Position IBSS in IBEM z=+(vpds_IBSFZc)-(vpdg_IBPosZc) y=0 alphay=90
+                  Position IBSS in IBEM z=-(vpds_IBSFZc+EWshift)+(vpdg_IBPosZc) y=0 alphay=90
 *- - - - the bolts in the pipe-support brackets...
-       Create and Position IBSG in Cave z=+(404.6+04.7-(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+04.7-(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+04.7+(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+04.7+(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+49.7-(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+49.8-(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+49.8+(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=+(404.6+49.8+(1.0*2.54))-11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+04.7-(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+04.7-(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+04.7+(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+04.7+(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+49.7-(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+49.8-(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+49.8+(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=+(3.5*2.54) alphax=90
-                  Position IBSG in Cave z=-(404.6+49.8+(1.0*2.54)+EWshift)+11.6 y=tempos+UDshift+BoltShift,
-                                        x=-(3.5*2.54) alphax=90
-       Create and Position IBSH in Cave z=+(404.6+04.7)-11.6 x=+((1.5+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=+(404.6+04.7)-11.6 x=-((1.5+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=-(404.6+04.7+EWshift)+11.6 x=+((1.5+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=-(404.6+04.7+EWshift)+11.6 x=-((1.5+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=+(404.6+49.8)-11.6 x=+((2.0+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=+(404.6+49.8)-11.6 x=-((2.0+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=-(404.6+49.8+EWshift)+11.6 x=+((2.0+1.0)*2.54) alphay=90
-                  Position IBSH in Cave z=-(404.6+49.8+EWshift)+11.6 x=-((2.0+1.0)*2.54) alphay=90
+       Create and Position IBSG in Cave z=vpds_IBSGZc1-vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc1-vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc1+vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc1+vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc2-vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc2-vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc2+vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=vpds_IBSGZc2+vpds_IBSGZc3,
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc1-vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc1-vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc1+vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc1+vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc2-vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc2-vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc2+vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=+vpds_IBSGXc alphax=90
+                  Position IBSG in Cave z=-(vpds_IBSGZc2+vpds_IBSGZc3+EWshift),
+                                        y=UDshift+BoltShift+vpds_IBSGYc,
+                                        x=-vpds_IBSGXc alphax=90
+       Create and Position IBSH in Cave z=+vpds_IBSHZc1 x=+vpds_IBSHXc1 alphay=90
+                  Position IBSH in Cave z=+vpds_IBSHZc1 x=-vpds_IBSHXc1 alphay=90
+                  Position IBSH in Cave z=-(vpds_IBSHZc1+EWshift) x=+vpds_IBSHXc1 alphay=90
+                  Position IBSH in Cave z=-(vpds_IBSHZc1+EWshift) x=-vpds_IBSHXc1 alphay=90
+                  Position IBSH in Cave z=+vpds_IBSHZc2 x=+vpds_IBSHXc2 alphay=90
+                  Position IBSH in Cave z=+vpds_IBSHZc2 x=-vpds_IBSHXc2 alphay=90
+                  Position IBSH in Cave z=-(vpds_IBSHZc2+EWshift) x=+vpds_IBSHXc2 alphay=90
+                  Position IBSH in Cave z=-(vpds_IBSHZc2+EWshift) x=-vpds_IBSHXc2 alphay=90
         endif     ! end check kIBeamStyle>=2
        else       !
-        print *,' pVPD: pipe-support structure not defined...'
+*        print *,' pVPD: pipe-support structure not defined...'
        endif      ! end check kIBeamStyle>=1 (equiv to star-standard IBchoice>0)
 
 *= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
@@ -866,11 +1006,11 @@ Block VPDD  is the whole VPPD assembly
 *WJL  note for run-4&5, the FEE box is on the side, not
 *WJL  the bottom as in run-2&3
      if (VPDV_vpdConfig < 4) then
-       print *,' pVPD: FEE box is below the bottom plate... (runs 2,3)'
+*       print *,' pVPD: FEE box is below the bottom plate... (runs 2,3)'
        Create and Position VPBX x=-(vpdg_BPwidth-vpdg_BXwidth)/2,
                                 y=(ybase-vpdg_BPthick/2-vpdg_BXheight/2)
      else
-       print *,' pVPD: FEE box is on a side strut... (runs 4,5)'
+*       print *,' pVPD: FEE box is on a side strut... (runs 4,5)'
        Create and Position VPBX x=-(vpdg_BPwidth+2.*vpdg_STthick+vpdg_BXheight)/2.,
                                 y=-4 ThetaX=150 AlphaZ=90
      endif
@@ -1031,13 +1171,9 @@ Block VPBI is the empty space inside of the FEE box
      Shape BOX  dx=(vpdg_BXwidth -vpdg_BXthick)/2,
                 dy=(vpdg_BXheight-vpdg_BXthick)/2,
                 dz=(vpdg_BXlength-vpdg_BXthick)/2
-     ElecWid=20.3
-     ElecThck=0.17
-     ElecLen=5.1
-*     Create VFEE  dx=ElecWid/2 dy=ElecThck/2 dz=ElecLen/2
-     Create and Position VFEE x=-(vpdg_BXwidth-vpdg_BXthick-ElecWid)/2+2.54,
-                   y=(vpdg_BXheight-vpdg_BXthick)/2-1.77,
-                   z=-(vpdg_BXlength-vpdg_BXthick-ElecLen)/2
+*     Create VFEE  dx=vpds_ElecWid/2 dy=vpds_ElecThck/2 dz=vpds_ElecLen/2
+     Create and Position VFEE x=vpds_VFEEPosX y=vpds_VFEEPosY,
+                   z=vpds_VFEEPosZ
 Endblock
 *
 * Note: the following blocks are copied from the TOFp FEE,
@@ -1051,34 +1187,33 @@ Block VFEE is the FEE inside the box
       Component O    A=16     Z=8    W=0.4*4*16./174.
       Mixture   G10  Dens=1.7
 *fg      Shape     BOX  dx=0 dy=0 dz=0
-      Shape     BOX   dx=ElecWid/2 dy=ElecThck/2 dz=ElecLen/2
+      Shape     BOX   dx=vpds_ElecWid/2 dy=vpds_ElecThck/2 dz=vpds_ElecLen/2
       Create    VLEM
-       ElecThck= 0.17 
-      Position  VLEM y=ElecThck+(0.7/2) x=-7.0 z=2 
-      Position  VLEM y=ElecThck+(0.7/2) x=-3.5 z=2 
-      Position  VLEM y=ElecThck+(0.7/2) x=0.   z=2 
-      Position  VLEM y=ElecThck+(0.7/2) x=3.5  z=2 
-*      Position  VLEM y=ElecThck+(0.7/2) x=7    z=2 
-      Position  VLEM y=ElecThck+(0.7/2) x=-7.0 z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=-3.5 z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=0.   z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=3.5  z=-2 alphax=180 
-*      Position  VLEM y=ElecThck+(0.7/2) x=7    z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=-6.0 z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=-2.5 z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=1.   z=-2 alphax=180 
-      Position  VLEM y=ElecThck+(0.7/2) x=4.5  z=-2 alphax=180 
-*      Position  VLEM y=ElecThck+(0.7/2) x=8.   z=-2 alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(1) z=vpds_VLEMPosZ(1) 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(2) z=vpds_VLEMPosZ(2) 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(3) z=vpds_VLEMPosZ(3) 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(4) z=vpds_VLEMPosZ(4) 
+*      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(5) z=vpds_VLEMPosZ(5) 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(6) z=vpds_VLEMPosZ(6) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(7) z=vpds_VLEMPosZ(7) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(8) z=vpds_VLEMPosZ(8) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(9) z=vpds_VLEMPosZ(9) alphax=180 
+*      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(10) z=vpds_VLEMPosZ(10) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(11) z=vpds_VLEMPosZ(11) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(12) z=vpds_VLEMPosZ(12) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(13) z=vpds_VLEMPosZ(13) alphax=180 
+      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(14) z=vpds_VLEMPosZ(14) alphax=180 
+*      Position  VLEM y=vpds_VLEMPosY x=vpds_VLEMPosX(15) z=vpds_VLEMPosZ(15) alphax=180 
 EndBlock
 *
 Block VLEM is a Lemo connector on the FEE boards
       Attribute VLEM seen=1   colo=3
 *fg      Shape     BOX   dx=0 dy=0 dz=0
-      Shape     BOX    dx=(0.68/2 + (0.9-0.72)/2),
-                       dy=(0.68/2),
-                       dz=(2.0/2 + (0.8+1.0)/2)
-      Create and Position    VPIP  x=(0.9-0.72)/2 y=0 z=(0.8+1.0)/2,
-                                   Rmin=0.62/2 Rmax=0.68/2 dz=2.0/2
+      Shape     BOX    dx=vpds_VLEMLenX/2.,
+                       dy=vpds_VLEMLenY/2.,
+                       dz=vpds_VLEMLenZ/2.
+      Create and Position    VPIP  x=vpds_VPIPPosX y=0 z=vpds_VPIPPosZ,
+                                   Rmin=vpds_VPIPRmin Rmax=vpds_VPIPRmax dz=vpds_VPIPLenZ/2
 EndBlock
 *
 Block VPIP  is the Long Pipe
@@ -1102,13 +1237,13 @@ Block VRNG  is a single pVPD Ring or the entire upVPD
        Shape TUBE rmin=vpdh_rmin rmax=vpdh_rmax dz=vpdh_length/2  
        Create VDET
        detzint = -(VPDH_detlen/2.0)+VPDH_detfront+(VPDH_leadthick+vpdh_scintthick)
-       print *,'upVPD: detzint = ',detzint
+*       print *,'upVPD: detzint = ',detzint
 *---- upVPD ring #1
        locang=0.
        if (VPDH_ring1_kproj>0) then
          locang=degrad*0.
          locang=ATAN((VPDH_ring1_rad)/(0.5*VPDH_zposWest+0.5*VPDH_zposEast+detzint))
-         print *,'upVPD: locang1 = ',locang/degrad
+*         print *,'upVPD: locang1 = ',locang/degrad
        endif
        do isec = 0,VPDH_ring1_ndet-1
         phiang = degrad*(VPDH_ring1_phi0 + isec*VPDH_ring1_dphi)
@@ -1123,7 +1258,7 @@ Block VRNG  is a single pVPD Ring or the entire upVPD
        if (VPDH_ring2_kproj>0) then
          locang=degrad*4.
          locang=ATAN((VPDH_ring2_rad)/(0.5*VPDH_zposWest+0.5*VPDH_zposEast+detzint))
-         print *,'upVPD: locang2 = ',locang/degrad
+*         print *,'upVPD: locang2 = ',locang/degrad
        endif
        do isec = 0,VPDH_ring2_ndet-1
         phiang = degrad*(VPDH_ring2_phi0 + isec*VPDH_ring2_dphi)
@@ -1135,11 +1270,11 @@ Block VRNG  is a single pVPD Ring or the entire upVPD
        end do
 *---- upVPD ring #3
        locang=0.
-       print *,'VPDH_ring3_kproj =',VPDH_ring3_kproj
+*       print *,'VPDH_ring3_kproj =',VPDH_ring3_kproj
        if (VPDH_ring3_kproj>0) then
          locang=degrad*8.
          locang=ATAN((VPDH_ring3_rad)/(0.5*VPDH_zposWest+0.5*VPDH_zposEast+detzint))
-         print *,'upVPD: locang3 = ',locang/degrad
+*         print *,'upVPD: locang3 = ',locang/degrad
        endif
        do isec = 0,VPDH_ring3_ndet-1
         phiang = degrad*(VPDH_ring3_phi0 + isec*VPDH_ring3_dphi)
@@ -1335,91 +1470,92 @@ EndBlock
 Block IBSA is the vertical post on the balcony (Envelope)
      Material  Air
      Attribute IBSA seen=0 colo=5
-     Shape     BOX  dx=3.0*2.54/2. dy=84.0/2. dz=3.0*2.54/2.
-     Create and Position IBAA x=0                    z=-(3.0-0.375)*2.54/2.
-                Position IBAA x=-(3.0-0.375)*2.54/2. z=0 AlphaY=90
+     Shape     BOX  dx=vpds_BSALenX/2. dy=vpds_BSALenY/2. dz=vpds_BSALenZ/2.
+     Create and Position IBAA x=0 z=-(vpds_BSALenX-vpds_BAALenZ)/2.
+                Position IBAA x=-(vpds_BSALenX-vpds_BAALenZ)/2. z=0 AlphaY=90
 EndBlock
 Block IBAA is the vertical post on the balcony (Aluminum)
      Material  Aluminium
      Attribute IBAA seen=1 colo=1 fill=0
-     Shape     BOX  dx=3.0*2.54/2. dy=84.0/2. dz=0.375*2.54/2.
+     Shape     BOX  dx=vpds_BSALenX/2. dy=vpds_BSALenY/2. dz=vpds_BAALenZ/2.
 EndBlock
 *
 Block IBSB is the diagonal post from the balcony (Envelope)
      Material  Air
      Attribute IBSB seen=0 colo=5
-     Shape     BOX  dx=3.0*2.54/2. dy=142.4/2. dz=3.0*2.54/2.
-     Create and Position IBAB x=0                     z=(3.0-0.375)*2.54/2.
-                Position IBAB x=-(3.0-0.375)*2.54/2.  z=0 AlphaY=90
+     Shape     BOX  dx=vpds_BSALenX/2. dy=vpds_BSBLenY/2. dz=vpds_BSALenZ/2.
+     Create and Position IBAB x=0 z=(vpds_BSALenX-vpds_BAALenZ)/2.
+                Position IBAB x=-(vpds_BSALenX-vpds_BAALenZ)/2. z=0 AlphaY=90
 EndBlock
 Block IBAB is the diagonal post from the balcony (Aluminum)
      Material  Aluminium
      Attribute IBAB seen=1 colo=1 fill=0
-     Shape     BOX  dx=3.0*2.54/2. dy=142.4/2. dz=0.375*2.54/2.
+     Shape     BOX  dx=vpds_BSALenX/2. dy=vpds_BSBLenY/2. dz=vpds_BAALenZ/2.
 EndBlock
 *
 Block IBSC is the cross post below the I-Beam (Envelope)
      Material  Air
      Attribute IBSC seen=0 colo=7
-     Shape     BOX  dx=16.0*2.54/2. dy=1.58*2.54/2. dz=4.0*2.54/2.
-     Create and Position IBAC x=0 y=0 z=+(2.0-0.25/2.)*2.54
-                Position IBAC x=0 y=0 z=-(2.0-0.25/2.)*2.54 
-	 Create and Position IBBC x=0 y=((1.58/2.)-(0.25/2.))*2.54 z=0
-     Create and Position IBCC x=+(20.3-(0.25*2.54/2.)) y=0 z=0
-     Create and Position IBCC x=-(20.3-(0.25*2.54/2.)) y=0 z=0
+     Shape     BOX  dx=vpds_BSCLenX/2. dy=vpds_BSCLenY/2. dz=vpds_BSCLenZ/2.
+     Create and Position IBAC x=0 y=0 z=+(vpds_BSCLenZ-vpds_BACLenZ)/2.
+                Position IBAC x=0 y=0 z=-(vpds_BSCLenZ-vpds_BACLenZ)/2.
+	 Create and Position IBBC x=0 y=(vpds_BSCLenY-vpds_BACLenZ)/2. z=0
+     Create and Position IBCC x=+(vpds_BSCLenX-vpds_BACLenZ)/2. y=0 z=0
+     Create and Position IBCC x=-(vpds_BSCLenX-vpds_BACLenZ)/2. y=0 z=0
 EndBlock
 Block IBAC is vertical parts of the cross post below the I-Beam (Aluminum)
      Material  Aluminium
      Attribute IBAC seen=1 colo=1 fill=0
-     Shape     BOX  dx=(16.0-2.*0.25)*2.54/2. dy=1.58*2.54/2 dz=0.25*2.54/2.
+     Shape     BOX  dx=vpds_BSCLenX/2.-vpds_BACLenZ dy=vpds_BSCLenY/2 dz=vpds_BACLenZ/2.
 EndBlock
 Block IBBC is the horizontal part of the cross post below the I-Beam (Aluminum)
      Material  Aluminium
      Attribute IBBC seen=1 colo=1 fill=0
-     Shape     BOX  dx=(16.0-2.*0.25)*2.54/2. dy=0.25*2.54/2. dz=4.0*2.54/2.
+     Shape     BOX  dx=vpds_BSCLenX/2.-vpds_BACLenZ dy=vpds_BACLenZ/2.,
+                    dz=vpds_BSCLenZ/2.
 EndBlock
 Block IBCC is the end caps on the cross post below the I-Beam (Aluminum)
      Material  Aluminium
      Attribute IBCC seen=1 colo=1 fill=0
-     Shape     BOX  dx=0.25*2.54/2. dy=1.58*2.54/2. dz=4.0*2.54/2.
+     Shape     BOX  dx=vpds_BACLenZ/2. dy=vpds_BSCLenY/2. dz=vpds_BSCLenZ/2.
 EndBlock
 *
 Block IBSD are the horizontal plates that hold the pipe-support brackets (Aluminum)
      Material Aluminium
      Attribute IBSD seen=1 colo=1 fill=0
-     Shape     BOX  dx=8.0*2.54/2. dy=0.25*2.54/2 dz=3.0*2.54/2.
+     Shape     BOX  dx=vpds_BSDLenX/2. dy=vpds_BACLenZ/2 dz=vpds_BSALenX/2.
 EndBlock
 Block IBSE are the vertical parts of the pipe-support brackets (Aluminum)
      Material  Aluminium
      Attribute IBSE seen=1 colo=1 fill=0
-     Shape     BOX  dx=0.375*2.54/2. dy=3.25*2.54/2 dz=2.5*2.54/2.
+     Shape     BOX  dx=vpds_BAALenZ/2. dy=vpds_BSELenY/2 dz=vpds_BSELenZ/2.
 EndBlock
 *
 Block IBSF are the long threaded rods for X-support of the I-beam
      Material  Iron
      Attribute IBSF seen=1 colo=4 
-     Shape     TUBE rmin=0 rmax=0.375*2.54 dz=3.*12.*2.54
+     Shape     TUBE rmin=0 rmax=vpds_BSFRmax dz=vpds_BSFLenZ/2.
 EndBlock
 Block IBSS are the long threaded rods for X-support of the I-beam, short stubs inside IBEM!
      Material  Iron
      Attribute IBSS seen=0 colo=4
-     Shape     TUBE rmin=0 rmax=0.375*2.54 dz=1.5*2.54
+     Shape     TUBE rmin=0 rmax=vpds_BSFRmax dz=vpds_BSSLenZ/2.
 EndBlock
 Block IBSG are the vertical bolts to the pipe-support brackets
      Material  Iron
      Attribute IBSG seen=1 colo=4 
      if (vpdv_vpdConfig<8) then
-      Shape     TUBE rmin=0 rmax=0.250*2.54 dz=4.0*2.54/2.
+      Shape     TUBE rmin=0 rmax=vpds_BSGRmax dz=vpds_BSGLenZ1/2.
      elseif (vpdv_vpdConfig==8) then
-      Shape     TUBE rmin=0 rmax=0.250*2.54 dz=5.0*2.54/2.
+      Shape     TUBE rmin=0 rmax=vpds_BSGRmax dz=vpds_BSGLenZ2/2.
      else 
-      Shape     TUBE rmin=0 rmax=0.250*2.54 dz=6.0*2.54/2.
+      Shape     TUBE rmin=0 rmax=vpds_BSGRmax dz=vpds_BSGLenZ3/2.
      endif
 EndBlock
 Block IBSH are the cross-bolts from the pipe-support brackets to the pipe
      Material  Iron
      Attribute IBSH seen=1 colo=4 
-     Shape     TUBE rmin=0 rmax=0.250*2.54 dz=2.0*2.54/2.
+     Shape     TUBE rmin=0 rmax=vpds_BSGRmax dz=vpds_BSHLenZ/2.
 EndBlock
 
 *=====================================================================-
