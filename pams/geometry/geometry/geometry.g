@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.145 2007/02/13 20:42:29 potekhin Exp $
+* $Id: geometry.g,v 1.146 2007/02/16 22:57:50 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.146  2007/02/16 22:57:50  potekhin
+* As per Xin's communications, the correct logic for year 2007
+* in the upVPD code is triggered when the config flag is set to 7.
+* I make this tweak in steering for Y2007.
+*
 * Revision 1.145  2007/02/13 20:42:29  potekhin
 * Along the lines previously discussed, replace the IGT
 * by the FGT in the UPGRXX tags; in this case, by creating
@@ -2211,7 +2216,7 @@ If LL>1
 
                   "pseudo Vertex Position Detector"
                      vpdd=on;
-                     VpddConfig=6;
+                     VpddConfig=7;
 
                   "field version "
                      Mf=4;      "tabulated field, with correction "
@@ -3369,8 +3374,8 @@ If LL>1
    If (LL>1 & vpdd) then
      call AgDETP new ('VPDD')
      call AgDETP add ('vpdv.vpdConfig=',VpddConfig,1);
-     if(VpddConfig<6) call vpddgeo
-     if(VpddConfig=6) call vpddgeo2
+     if(VpddConfig<7) call vpddgeo
+     if(VpddConfig=7) call vpddgeo2
    endif
 
 ********************** BARREL CALORIMETER ************************
