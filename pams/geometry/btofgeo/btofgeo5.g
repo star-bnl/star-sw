@@ -1,10 +1,10 @@
-* $Id: btofgeo5.g,v 1.1 2007/02/07 23:37:00 potekhin Exp $
+* $Id: btofgeo5.g,v 1.2 2007/02/16 22:56:01 potekhin Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo5.g,v $
-* Revision 1.1  2007/02/07 23:37:00  potekhin
-* First cut of the updated TOF code for Y2007,
-* which will need to be improved
+* Revision 1.2  2007/02/16 22:56:01  potekhin
+* Code improvements by Xin, aimed at better readability,
+* better code structure and elimination of hardcoded values.
 *
 * Revision 1.4  2005/08/04 23:37:37  potekhin
 * Jing must have forgotten to define a non-zero
@@ -79,7 +79,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
 *            04 Dec  2002 FG - modr structure changed. Position arrays
 *                             introduced for the TOFr geometry. Common
 *                             material definitions moved to the top.
-*            12 Feb  2004 WJL- modifications for run-4 TOFr' geometry
+*            12 Feb  2004 WJL- modifications for run-4 TOFr' geometry'
 *            23 Feb  2004 WJL- fine-tuning of run-4 geometry
 *                                 use choice==7 for run-4
 *                                 BTOG_posit1b reflects move of TOFp in run-IV
@@ -116,21 +116,25 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                        BaseLen,  BaseMaxR, BaseMinR, 
                        ElecThck, Wrap,     Shim   }
 *
-      Structure TOFF { BoxWidth, SlatLen, 
-                       Slat01z,  Slat02z,  Slat03z,  Slat04z,  Slat05z, 
-                       Slat06z,  Slat07z,  Slat08z,  Slat09z,  Slat10z, 
+      Structure TOFF { BoxWidth, SlatLen,  Slat5Z,
+                       Slatz(10), Slatx(10), SlatAy(10),
                        SlatThck, SlatWid,  SlatAng,
                        PmtLen,   PmtMaxR,  PmtMinR, 
                        BaseLen,  BaseMaxR, BaseMinR, SockLen,
                        CellWid,  CellHgt,
                        ElecHgt,  ElecThck, ElecWid,  ElecLen,
-                       Elec01z,  Elec02z,  Elec03z,  Elec04z,  Elec05z, 
-                       Elec06z,  Elec07z,  Elec08z,  Elec09z,  Elec10z, 
+                       Elecz(10), PlasPos,
                        RailThck, RailWid,
-                       CoolInnR, CoolOutR } 
+                       CoolInnR, CoolOutR,
+                       BconYLen, BconZLen,
+                       BconPLdx, BconPLdz,
+                       BLEMPosX, BLEMPosY(15), BLEMPosZ1, BLEMPosZ2,
+                       BLEMLenX, BLEMLenY, BLEMLenZ,
+                       BPIPPosX, BPIPPosY, BPIPPosZ,
+                       BPIPRmin, BPIPRmax, BPIPLenZ } 
 *
       Structure MODR { Height, Width, Length,Center, mrpcX(33), 
-                       mrpcZ(33), mrpcA(33),
+                       mrpcZ(33), mrpcA(33), X0Offset,
                        HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
                        MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
                        OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
@@ -138,7 +142,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                        FEEH,   HBWid,  NGap }
 *
       Structure MOD4 { Height, Width, Length, Center, mrpcX(32), 
-                       mrpcZ(32), mrpcA(32),
+                       mrpcZ(32), mrpcA(32), X0Offset,
                        HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
                        MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
                        OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
@@ -146,14 +150,14 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                        FEEH,   HBWid,  NGap, TrayEdgeZ }
 
       Structure MOD5 { Height, Width, Length, Center, mrpcX(32), 
-                       mrpcZ(32), mrpcA(32),
+                       mrpcZ(32), mrpcA(32), X0Offset,
                        HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
                        MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
                        OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
                        SPRMin, SPRMax, SPLen,  WGRMin, WGRMax, WGLen,
                        FEEH,   HBWid,  NGap, TrayEdgeZ }
       Structure MOD7 { Height, Width, Length, Center, mrpcX(32), 
-                       mrpcZ(32), mrpcA(32),
+                       mrpcZ(32), mrpcA(32), X0Offset,
                        HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
                        MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
                        OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
@@ -164,7 +168,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                 support_aile_width, support_aile_Ypos, 
                 xpos, ypos, zpos, totlen, sublen, subcen, x0, z0,
                 Y, Z, DTHgt
-      integer   i,is, choice, tof, iwid, igap
+      integer   i,is, choice, tof, iwid, igap, islat
 *
 * -------------------------------------------------------------------------
 *
@@ -173,9 +177,11 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
-         choice    = 8         ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
-                               ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV                               ! 8= Run-V 1 tray-TOFr
-         posit1    = {32,33}   ! TOFp tray position: (0) choice 4 or 5 -> run-2,3 posn,                        !                     (1) choice 7 -> run-4 posn
+         choice    = 10        ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
+*                               ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV
+*                               ! 8= Run-V 1 tray-TOFr, 9= Run-VI, 10= Run-VII
+         posit1    = {32,33}   ! TOFp tray position (0) choice 4 or 5 -> run-2,3 posn
+*                               !                    (1) choice 7 -> run-4 posn
          posit2    = 23        ! TOFr tray position for choice 5 -> run-4 posn
 		 posit3    = 33        ! TOFr tray position for choice 8,9,10 -> run-5,6,7 posn
 *
@@ -222,16 +228,13 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
       Fill TOFF ! time of flight stats
          BoxWidth  = 21.0875  ! width of the 5w box (BMTD)
          SlatLen   = 20.0     ! slat length
-         Slat01z   =  104.938 ! 5_wide_slat Z position for row 1 from AutoCAD
-         Slat02z   =   84.060 ! 4_wide_slat Z position for row 2 from AutoCAD
-         Slat03z   =   62.860 ! 4_wide_slat Z position for row 3 from AutoCAD
-         Slat04z   =   41.254 ! 4_wide_slat Z position for row 4 from AutoCAD
-         Slat05z   =   18.966 ! 4_wide_slat Z position for row 5 from AutoCAD
-         Slat06z   =   -3.954 ! 4_wide_slat Z position for row 6 from AutoCAD
-         Slat07z   =  -27.528 ! 4_wide_slat Z position for row 7 from AutoCAD
-         Slat08z   =  -51.254 ! 4_wide_slat Z position for row 8 from AutoCAD
-         Slat09z   =  -75.634 ! 4_wide_slat Z position for row 9 from AutoCAD
-         Slat10z   = -100.683 ! 4_wide_slat Z position for row 10 from AutoCAD
+         Slat5Z    = 15.5     ! 5_wide mother box z length/2.
+         Slatz     = { 104.938, 84.060, 62.860, 41.254, 18.966,
+                       -3.954, -27.528, -51.254, -75.634, -100.683 } ! (5)4_wide_slat Z position for 10 rows
+         Slatx     = { -1.7, -0.4, -0.2, -0.2, -0.2,
+                       -0.2, -0.2, -0.2, -0.2, -0.2 } ! Slat assembly X pos
+         SlatAy    = { 5.0, 10.0, 11.0, 11.0, 11.0,
+                       11.0, 11.0, 11.0, 11.0, 11.0 } ! Slat assembly alphay
          SlatThck  = 2.0      ! scintillator slab thicknesses
          SlatWid   = 3.81     ! scintillator slab width (4.0)
          SlatAng   = 11.5     ! slat assy. angle w.r.t. tray
@@ -248,20 +251,32 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
          ElecThck  = 0.17     ! FEE Board thickness (67 mils)
          ElecWid   = 20.3     ! FEE Board width (was 21)
          ElecLen   = 5.715    ! FEE Board length (was 16)
-         Elec01z   = 105.610  ! FEE Z position for row 1 from AutoCAD
-         Elec02z   =  84.573  ! FEE Z position for row 2 from AutoCAD
-         Elec03z   =  63.224  ! FEE Z position for row 3 from AutoCAD
-         Elec04z   =  41.667  ! FEE Z position for row 4 from AutoCAD
-         Elec05z   =  19.379  ! FEE Z position for row 5 from AutoCAD
-         Elec06z   =  -3.542  ! FEE Z position for row 6 from AutoCAD
-         Elec07z   = -27.165  ! FEE Z position for row 7 from AutoCAD
-         Elec08z   = -50.841  ! FEE Z position for row 8 from AutoCAD
-         Elec09z   = -75.170  ! FEE Z position for row 9 from AutoCAD
-         Elec10z   = -100.270 ! FEE Z position for row 10 from AutoCAD
+         Elecz     = { 105.610, 84.573, 63.224, 41.667, 19.379,
+                       -3.542, -27.165, -50.841, -75.170, -100.270} ! FEE Z position for 10 rows
+         PlasPos   = 3.0      ! Plastic angles (BPLA) Z center offset
          RailThck  = 0.2      ! Cooling loop rail thickness
          RailWid   = 1.5      ! Cooling loop rail width
          CoolOutR  = 0.635    ! Cooling loop pipe outer radius, 0.5in/2
          CoolInnR  = 0.561    ! Cooling loop pipe inner radius, (0.5in-0.058in)/2
+         BconYLen  = 2.50     ! BCON Y length for TOFp Slat assembly
+         BconZLen  = 1.20     ! BCON Z length for TOFp Slat assembly
+         BconPLdx  = 0.203    ! BCON dx for BPLA = 0.08*2.54 
+         BconPLdz  = 0.635    ! BCON dz for BPLA = 0.25*2.54
+         BLEMPosX  = 0.52     ! BLEM position X in BFEE = ElecThck + 0.7/2.0
+         BLEMPosY  = { -7.0, -3.5, 0.0, 3.5, 7.0,
+                       -7.0, -3.5, 0.0, 3.5, 7.0,
+                       -6.0, -2.5, 1.0, 4.5, 8.0 }  ! BLEM position Y in BFEE
+         BLEMPosZ1 = 2.0      ! BLEM position Z1 in BFEE
+         BLEMPosZ2 = -2.0     ! BLEM position Z2 in BFEE
+         BLEMLenX  = 0.86     ! BLEM X length
+         BLEMLenY  = 0.68     ! BLEM Y length
+         BLEMLenZ  = 3.80     ! BLEM Z length
+         BPIPPosX  = 0.09     ! BPIP position X in BLEM
+         BPIPPosY  = 0.00     ! BPIP position Y in BLEM
+         BPIPPosZ  = 0.90     ! BPIP posision Z in BLEM
+         BPIPRmin  = 0.31     ! BPIP Rmin
+         BPIPRmax  = 0.34     ! BPIP Rmax
+         BPIPLenZ  = 2.00     ! BPIP Z length
 *
       Fill MODR ! RUN3 MRPC TOF Module dimensions and positions
          Height    = 1.95     ! Module height (r)
@@ -284,6 +299,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                    33.00, 33.00, 33.00, 33.00, 33.00, 37.58,
                    37.58, 37.58, 37.58, 37.58, 37.58, 37.58,
                    37.58, 37.58, 37.58 } ! mrpc angles
+         X0Offset = -3.66 ! Tray inner surface to the center  
          HCHgt  =  0.466  ! HC->Height (r)
          HCWid  = 20.8    !  HC->Width (phi)
          HCLen  =  8.4    !   HC->Length (z)
@@ -331,6 +347,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                   16., 19., 19., 19., 19., 24., 24., 25., 
                   27., 29., 30., 30., 30., 30., 30., 30., 
                   30., 30., 30., 30., 30., 30., 30., 30. } ! mrpc angles
+         X0Offset = -3.66 ! Tray inner surface to the center  
          HCHgt  =  0.466  ! HC->Height (r)
          HCWid  = 20.8    !  HC->Width (phi)
          HCLen  =  8.4    !   HC->Length (z)
@@ -378,6 +395,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                    6., 6., 6., 6., 6., 6., 6., 6., 
 				   16., 16., 16., 16., 19., 19., 19., 19., 
 				   22., 22., 22., 22., 24., 24., 24., 24. } ! mrpc angles
+         X0Offset = -3.90 ! Tray inner surface to the center - new value from Jing
          HCHgt  =  0.466  ! HC->Height (r)
          HCWid  = 20.8    !  HC->Width (phi)
          HCLen  =  8.4    !   HC->Length (z)
@@ -427,6 +445,7 @@ Module  BTOFGEO5 is the Geometry of Barrel Trigger / Time Of Flight system
                    20., 22., 22., 22., 22., 22., 26., 26.,
 				   26., 26., 30., 30., 32., 32., 32., 32., 
 				   32., 32., 32., 32., 32., 32., 32., 32.} ! mrpc angles
+         X0Offset = -4.32 ! Tray inner surface to the center -tray_Height/2+tray_WallThk
          HCHgt  =  0.466  ! HC->Height (r)
          HCWid  = 20.8    !  HC->Width (phi)
          HCLen  =  8.4    !   HC->Length (z)
@@ -527,7 +546,8 @@ Block BTOH is a half of trigger system (west-east)
       Attribute BTOH      seen=0  colo=1  serial=choice
       Shape     Tube      dz=btog_dz/2
 
-      ! tof=0 means ctb, tof=1 means TOFp, tof=2 means TOFr, tof=3 means TOFr', tof=4 means TOFr5
+      ! tof=0 means ctb, tof=1 means TOFp, tof=2 means TOFr, tof=3 means TOFr', tof=4 means TOFr5 '
+      ! tof=5 means TOFr6 tray (not active), tof=6 means TOFr7 tray
       do is=1,60
          tof=0		                                !-> all CTB for choice=1                     
          if (choice==2)                      tof=1	!-> all TOFp
@@ -540,7 +560,7 @@ Block BTOH is a half of trigger system (west-east)
          if (choice==7 & is==btog_posit2)    tof=3	!      and one TOFrp tray)
 		 if (choice==8 & is==btog_posit3)    tof=4  !-> Run-5 (one TOFr5 tray)
 		 if (choice==9 & is==btog_posit3)    tof=5  !-> Run-6 (one TOFr6 tray)
-		 if (choice==10 & is==btog_posit3)    tof=6  !-> Run-7 (one TOFr7 tray)
+		 if (choice==10 & is==btog_posit3)   tof=6  !-> Run-7 (one TOFr7 tray)
 
 !         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
          Create and Position BSEC  alphaz = 102+6*is
@@ -662,14 +682,14 @@ Block BTTC  is  the Main Tray Cavity filled with the details for TOFp
                            dy=tray_Width/2-tray_WallThk,
                            dz=tray_Length/2-tray_WallThk
 *---- the 4wide mother box...
-      sublen             = ((toff_Slat02z+15.5)-(toff_Slat10z-15.5))
-      subcen             = (toff_Slat02z+15.5)-sublen/2.
+      sublen             = ((toff_Slatz(2)+toff_Slat5Z)-(toff_Slatz(10)-toff_Slat5Z))
+      subcen             = (toff_Slatz(2)+toff_Slat5Z)-sublen/2.
 
       iwid=4
       Create and Position BMAA  X=0   Z=subcen konly='MANY'
 *---- the 5wide mother box...
       iwid=5
-      Create and Position BMAA  X=0.0 Z=toff_Slat01z konly='MANY'
+      Create and Position BMAA  X=0.0 Z=toff_Slatz(1) konly='MANY'
 
 *---- interior cooling rails and tubing....
       Create and Position  BCOO X=0 Y=0 dx=0 dy=0 dz=0
@@ -677,28 +697,28 @@ Block BTTC  is  the Main Tray Cavity filled with the details for TOFp
       Create    BFEE       dx=toff_ElecThck/2, 
                            dy=toff_ElecWid/2, 
                            dz=toff_ElecLen/2
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec01z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec02z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec03z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec04z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec05z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec06z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec07z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec08z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec09z-toff_ElecLen/2 
-      Position  BFEE  X=toff_ElecHgt Z=toff_Elec10z-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(1)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(2)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(3)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(4)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(5)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(6)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(7)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(8)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(9)-toff_ElecLen/2 
+      Position  BFEE  X=toff_ElecHgt Z=toff_Elecz(10)-toff_ElecLen/2 
 *---- plastic angles...
       Create    BPLA
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec01z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec02z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec03z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec04z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec05z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec06z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec07z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec08z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec09z+3.0
-      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elec10z+3.0
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(1)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(2)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(3)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(4)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(5)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(6)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(7)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(8)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(9)+toff_PlasPos
+      Position  BPLA  X=toff_ElecHgt Y=0 Z=toff_Elecz(10)+toff_PlasPos
 EndBlock
 *------------------------------------------------------------------------------
 *
@@ -732,7 +752,7 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
 	if (tof==2) then
       z0 = tray_Length/2 - 0.05
 *      x0 = -(btog_Rmin+tray_SupFullH+tray_StripT+tray_Height/2) - 1.5
-      x0 = -3.66
+      x0 = modr_X0Offset
       do i=1,33
             Position BRMD  X=x0+modr_mrpcX(i) ,
                            Z=z0-modr_mrpcZ(i) ,
@@ -740,7 +760,7 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
       enddo
 	elseif (tof==3) then
       z0 = tray_Length/2 - 0.05 - mod4_TrayEdgeZ
-      x0 = -3.66
+      x0 = mod4_X0Offset
       do i=1,32
          if (i.le.20.or.(i.ge.25.and.i.le.28)) then
             Position BRMD  X=x0+mod4_mrpcX(i) ,
@@ -750,8 +770,7 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
       enddo
     elseif (tof==4) then
       z0 = tray_Length/2 - 0.05 - mod5_TrayEdgeZ
-*      x0 = -3.66
-      x0 = -3.90   ! liuj puts this new value
+      x0 = mod5_X0Offset
       do i=1,32
          Position BRMD  X=x0+mod5_mrpcX(i) ,
                         Z=z0-mod5_mrpcZ(i) ,
@@ -802,7 +821,7 @@ Block BMAA is a b1ox for a 4wide AND 5wide phi column of TOF Scintillators
 *---- the 5wide mother box...
          Shape  BOX    dx=tray_height/2-tray_WallThk,  
                        dy=toff_BoxWidth/2,
-                       dz=15.5 
+                       dz=toff_Slat5Z
       endif
       Create    BMTD  " dont need to positition it, because this is division" 
 EndBlock
@@ -813,17 +832,12 @@ Block BMTD is a 5wide phi column of TOF Scintillators
       Shape     division  Iaxis=2  Ndiv=iwid  
       Create BASS
       if (iwid==5) then
-        Position BASS X=-1.7                       alphay=5.0 konly='MANY'
+        Position BASS X=toff_Slatx(1) alphay=toff_SlatAy(1) konly='MANY'
       else
-        Position BASS X=-0.4 Z=toff_Slat02z-subcen alphay=10.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat03z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat04z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat05z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat06z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat07z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat08z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat09z-subcen alphay=11.0 konly='MANY'
-        Position BASS X=-0.2 Z=toff_Slat10z-subcen alphay=11.0 konly='MANY'
+        do islat=2,10
+            Position BASS X=toff_Slatx(islat) Z=toff_Slatz(islat)-subcen,
+                          alphay=toff_SlatAy(islat) konly='MANY'
+        enddo
      endif
 EndBlock
 * - - *
@@ -858,8 +872,8 @@ Block BASS is a single TOF Slat Assembly (slat+PMT+base)
       zpos = zpos + toff_BaseLen/2 - 0.6
       Create and Position BCON X=0 Y=0 Z=zpos,
                     dx=(toff_CellHgt-toff_ElecThck)/2,
-                    dy=1.25,
-                    dz=0.6
+                    dy=toff_BconYLen/2,
+                    dz=toff_BconZLen/2
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -936,16 +950,16 @@ Block BPLA is the plastic angle pieces that hold the upper foam supports...
       Attribute BPLA      seen=0   colo=4
       Material  polystyren 
       Shape     BOX       dx=0 dy=0 dz=0
-      Create and Position BCON  x=0 y=0 z=(-0.5*2.54)/2,
-                                dx=0.08*2.54/2,
+      Create and Position BCON  x=0 y=0 z=-toff_BconPLdz,
+                                dx=toff_BconPLdx/2,
                                 dy=tray_Width/2-tray_WallThk-0.5,
-                                dz=0.5*2.54/2
-      Position  BCON            x=(-0.08*2.54 - 0.25*2.54)/2,
+                                dz=toff_BconPLdz
+      Position  BCON            x=(-toff_BconPLdx - toff_BconPLdz)/2,
                                 y=0,
-                                z=(-0.08*2.54)/2,
-                                dx=0.25*2.54/2,
+                                z=(-toff_BconPLdx)/2,
+                                dx=toff_BconPLdz/2,
                                 dy=tray_Width/2-tray_WallThk-2.0,
-                                dz=0.08*2.54/2
+                                dz=toff_BconPLdx/2
 EndBlock
 Block BCON is a generic plastic block for various connectors, foam-support-angles, etc......
       Attribute BCON      seen=0   colo=6
@@ -958,33 +972,33 @@ Block BFEE is a G10 FrontEndElectronics board for TOF
       Material  G10
       Shape     BOX  dx=0  dy=0  dz=0
       Create    BLEM
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=2 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-3.5 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=0.   z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=3.5  z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=7    z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-6.0 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=-2.5 z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=1.   z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=4.5  z=-2 alphax=180 
-      Position  BLEM x=toff_ElecThck+(0.7/2) y=8.   z=-2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(1)  z=toff_BLEMPosZ1 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(2)  z=toff_BLEMPosZ1 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(3)  z=toff_BLEMPosZ1 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(4)  z=toff_BLEMPosZ1 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(5)  z=toff_BLEMPosZ1 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(6)  z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(7)  z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(8)  z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(9)  z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(10) z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(11) z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(12) z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(13) z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(14) z=toff_BLEMPosZ2 alphax=180 
+      Position  BLEM x=toff_BLEMPosX y=toff_BLEMPosY(15) z=toff_BLEMPosZ2 alphax=180 
 EndBlock
 Block BLEM is a Lemo connector on the FEE boards
       Attribute BLEM seen=0   colo=3
-      Shape     BOX   dx=(0.68/2 + (0.9-0.72)/2),
-                        dy=(0.68/2),
-                        dz=(2.0/2 + (0.8+1.0)/2)
+      Shape     BOX   dx=toff_BLEMLenX/2,
+                      dy=toff_BLEMLenY/2,
+                      dz=toff_BLEMLenZ/2
 **      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
 **      Create    BPIP  Rmin=0.62/2 Rmax=0.68/2 dz=1.0/2
 **      Position  BRAI  x=0            y=0 z=0
 **      Position  BPIP  x=(0.9-0.72)/2 y=0 z=(0.7+1.0)/2
-      Create and Position    BPIP  x=(0.9-0.72)/2 y=0 z=(0.8+1.0)/2,
-                                   Rmin=0.62/2 Rmax=0.68/2 dz=2.0/2
+      Create and Position    BPIP  x=toff_BPIPPosX y=0 z=toff_BPIPPosZ,
+                                   Rmin=toff_BPIPRmin Rmax=toff_BPIPRmax dz=toff_BPIPLenZ/2
 EndBlock
 *
 *******************************************************************************
@@ -1143,7 +1157,7 @@ EndBlock
 *   +    Wedges         BRWG
 *
 *  Note:
-*      1. PCB, short for "Printed Circuit Board
+*      1. PCB, short for Printed Circuit Board
 *      2. Separator(BRSP) and Wedge(BRWG) are not precisely positioned
 *
 *------------------------------------------------------------------------------
