@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.17 2007/01/24 21:07:01 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.18 2007/02/16 04:08:43 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -156,7 +156,8 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 
 	  // FAST SIMU:
 	  int adc=(int) (t->energy() * mfixTgain[eta-1]);
-	  
+	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  //	  printf("yyy secID=%d, id2=%d\n",isec,h->module());
@@ -170,6 +171,8 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int eta=t->eta();
 	  int sub=t->sub()-'A'+1;
 	  int adc= (int) (t->energy()* getPreshowerGain());
+	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  LOG_DEBUG<<  Form("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
@@ -181,6 +184,8 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int eta=t->eta();
 	  int sub=t->sub()-'A'+5+1;
 	  int adc= (int) (t->energy()* getPreshowerGain());
+	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  LOG_DEBUG<<  Form("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
@@ -192,6 +197,8 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int eta=t->eta();
 	  int sub=t->sub()-'A'+10+1;
 	  int adc= (int) (t->energy()* getPreshowerGain());
+	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  LOG_DEBUG<<  Form ("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy())<<endm;
@@ -206,6 +213,8 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int eta=t->strip();
 	  int sub=1;
 	  int adc= (int) (t->energy()* getSmdGain());
+	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  d->addHit(h);
 	  LOG_DEBUG<<  Form("SMDU     %d  %d %f\n",t->strip(),adc,t->energy())<<endm;
@@ -220,6 +229,8 @@ StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEmcCollection* emcC){
 	  int eta=t->strip();
 	  int sub=1;
 	  int adc= (int) (t->energy()*getSmdGain());
+	  if(adc<0) adc=0; if (adc> getMaxAdc()) adc=getMaxAdc();
+
 	  StEmcRawHit* h = new StEmcRawHit(id,secID,eta,sub,adc,t->energy());
 	  LOG_DEBUG<<  Form("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy())<<endm;
 	  d->addHit(h);
@@ -281,6 +292,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.18  2007/02/16 04:08:43  balewski
+// bug fix: adc was not limitted to [0,4095], fixed for all layers
+//
 // Revision 1.17  2007/01/24 21:07:01  balewski
 // 1) no cout or printf, only new Logger
 // 2) EndcapMixer:
