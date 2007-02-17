@@ -4,7 +4,7 @@
  * 
  ****************************************************************************
  *
- * $Id: EEmcSmdGeom.cxx,v 1.10 2007/02/02 02:11:11 balewski Exp $
+ * $Id: EEmcSmdGeom.cxx,v 1.11 2007/02/17 01:29:05 balewski Exp $
  *
  * Author: Wei-Ming Zhang
  * 
@@ -450,7 +450,7 @@ const StructEEmcStrip* EEmcSmdGeom::getDca2Strip(const Int_t iUV,
 					   const TVector3& point, Float_t* dca) {
   assert(iUV>=0 || iUV<kEEmcNumSmdUVs); 
   float phiDeg=atan2(point.y(),point.x())/3.1316*180.;
-  printf("phiDeg=%.1f  \n",phiDeg);
+  //printf("phiDeg=%.1f  \n",phiDeg);
   int iSec= ((int) ( 12.-(phiDeg-75.)/30.) )%12;
   assert(iSec>=0);
   assert( iSec<kEEmcNumSectors);
@@ -751,6 +751,9 @@ ostream& operator<<(ostream &os, const StructEEmcStrip strip)
 /////////////////////////////////////////////////////////////////////////////
 /*
  * $Log: EEmcSmdGeom.cxx,v $
+ * Revision 1.11  2007/02/17 01:29:05  balewski
+ * less printout
+ *
  * Revision 1.10  2007/02/02 02:11:11  balewski
  * simplification of  EEmcSmdGeom::getDca2Strip(..)
  *
