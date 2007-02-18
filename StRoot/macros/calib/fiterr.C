@@ -1180,20 +1180,26 @@ static int kount=0;
 
       } else if (nCut>MAXCUT[iAkt]) {//Cut step failed
         if (iAkt==0) Now=Best;
-        Best=Now; nCut=0; iAkt=1;
+        Best=Now; nCut=0; iAkt=1-iAkt;
 
       } else {
         nCut++;
         add*= 0.5;
         Now.Pars() = Best.Pars()+add;
+        continue;
       }
 	    
 //		SOLVING
 
-      if (Now.Saddle())iAkt=1;
-      TVectorD P0(nPars,&Best[0]),P1(P0);;
+//		Sometimes try grad method randomly
+static int rnd=0; rnd++;
+      if (!(rnd&3))  iAkt=1;
+
+//      if (Now.Saddle() && iter&1)iAkt=1;
+      TVectorD P0(nPars,&Best[0]);
       for (int jAkt=iAkt;jAkt<2;jAkt++) {
         iAkt = jAkt;
+        TVectorD P1(P0);
         con = xTCL::SqProgSimple(P1,Now.g,Now.G 
 		                ,TVectorD(nPars,&Now.Min(0))		   
 		                ,TVectorD(nPars,&Now.Max(0)),jAkt);
@@ -1205,7 +1211,7 @@ static int kount=0;
         Now.Pars() = Best.Pars()+add;
         break;
       } 
-      if (xTCL::vmaxa(add)<kAGREE) 	{Best=Now;ifail=0; break;}
+//??      if (xTCL::vmaxa(add)<kAGREE) 	{Best=Now;ifail=0; break;}
   }// End Iters
 
   if (ifail==0 || ifail==99) Best.MakeErrs();
@@ -2008,11 +2014,11 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.1 2007/02/17 19:49:37 perev Exp $
+* $Id: fiterr.C,v 1.2 2007/02/18 04:24:01 perev Exp $
 *
 * $Log: fiterr.C,v $
-* Revision 1.1  2007/02/17 19:49:37  perev
-* Hit error fitting utility
+* Revision 1.2  2007/02/18 04:24:01  perev
+* Iverting step sign for linear fit added(Saddle case)
 *
 * Revision 1.1.1.1  1996/04/01 15:02:13  mclareni
 * Mathlib gen
@@ -2132,8 +2138,11 @@ static int nCall=0; nCall++;
     if (iAkt==0 ) {
 
       double det=12345; S.Invert(&det);
-      if (det<0) iAkt=1;
-      else       add = (-1.)*(S*B);
+//      if (det<0) iAkt=1;
+//      else       add = (-1.)*(S*B);
+      add = (-1.)*(S*B);
+      double along = B*add;
+      if (along>0) add*=(-1.);
     }
 
     if (iAkt==1 ) {
