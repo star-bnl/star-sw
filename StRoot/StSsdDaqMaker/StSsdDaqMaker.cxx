@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.12 2007/01/26 11:57:17 bouchet Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.13 2007/02/18 15:57:32 bouchet Exp $
 //
 // $log$
 //
@@ -78,44 +78,47 @@ Int_t StSsdDaqMaker::Init(){
   // table using the StSsdUtil and StSsdDbMaker...
 
 
-  LOG_INFO << " - Read now Databases " << endm;
+  LOG_INFO << "Read now Databases " << endm;
   //	Create SsdPedestal histograms
-  occupancy_wafer = new TH2S("occupancy_wafer","occupancy per wafer",40,0,40,20,0,20);
-  occupancy_chip  = new TH2S("occupancy_chip","occupancy per chip",40,0,40,99,0,99);
-  noise_chip      = new TH2S("noise_chip","mean noise per chip",40,0,40,99,0,99);
-  noise_wafer     = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
-  noise_chip_P    = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
-  noise_chip_N    = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
-  pedestal_chip   = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
-  occupancy_wafer->SetXTitle("Ladder");
-  occupancy_wafer->SetYTitle("Wafer");  
-  occupancy_chip->SetXTitle("Ladder");
-  occupancy_chip->SetYTitle("Chip");  
-  noise_chip->SetXTitle("Ladder");
-  noise_chip->SetYTitle("Chip");
-  noise_chip_P->SetXTitle("Ladder");
-  noise_chip_N->SetXTitle("Ladder");
-  noise_chip_P->SetYTitle("Chip"); 
-  noise_chip_N->SetYTitle("Chip");   
-  noise_wafer->SetXTitle("Ladder");
-  noise_wafer->SetYTitle("Wafer"); 
-  pedestal_chip->SetXTitle("Ladder");
-  pedestal_chip->SetYTitle("Chip");
-  occupancy = new TH1F("deadStrips","number of dead strips",40,0,40);
-  occupancy->SetXTitle("Ladder");
-  occupancy->SetYTitle("#");
-  kind = new TH2S("status","status of the noise/pedestal",3,0,3,4,0,4);
-  kind->SetXTitle("pedestal");
-  kind->SetYTitle("noise");
+  if (IAttr(".histos")) {
+    occupancy_wafer = new TH2S("occupancy_wafer","occupancy per wafer",40,0,40,20,0,20);
+    occupancy_chip  = new TH2S("occupancy_chip","occupancy per chip",40,0,40,99,0,99);
+    noise_chip      = new TH2S("noise_chip","mean noise per chip",40,0,40,99,0,99);
+    noise_wafer     = new TH2S("noise_wafer","mean noise per wafer",40,0,40,20,0,20);
+    noise_chip_P    = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
+    noise_chip_N    = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
+    pedestal_chip   = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
+    occupancy_wafer->SetXTitle("Ladder");
+    occupancy_wafer->SetYTitle("Wafer");  
+    occupancy_chip->SetXTitle("Ladder");
+    occupancy_chip->SetYTitle("Chip");  
+    noise_chip->SetXTitle("Ladder");
+    noise_chip->SetYTitle("Chip");
+    noise_chip_P->SetXTitle("Ladder");
+    noise_chip_N->SetXTitle("Ladder");
+    noise_chip_P->SetYTitle("Chip"); 
+    noise_chip_N->SetYTitle("Chip");   
+    noise_wafer->SetXTitle("Ladder");
+    noise_wafer->SetYTitle("Wafer"); 
+    pedestal_chip->SetXTitle("Ladder");
+    pedestal_chip->SetYTitle("Chip");
+    occupancy = new TH1F("deadStrips","number of dead strips",40,0,40);
+    occupancy->SetXTitle("Ladder");
+    occupancy->SetYTitle("#");
+    kind = new TH2S("status","status of the noise/pedestal",3,0,3,4,0,4);
+    kind->SetXTitle("pedestal");
+    kind->SetYTitle("noise");
+  }
   LOG_INFO << "Init() - Done " << endm;
+  
   return StMaker::Init();
 }
 
 //_____________________________________________________________________________
-Int_t StSsdDaqMaker::InitRun(int runumber){
+Int_t StSsdDaqMaker::InitRun(int runumber)
+{
 
-
-  LOG_INFO << " InitRun(int runumber) - Read now Databases " << endm;
+  LOG_INFO <<"InitRun(int runumber) - Read now Databases"<<endm;
  
   
   TDataSet *DbConnector = GetDataBase("Geometry/ssd");
@@ -127,13 +130,13 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
   
   St_ssdConfiguration *configuration = (St_ssdConfiguration*)DbConnector->Find("ssdConfiguration");
   if (!configuration){
-    LOG_ERROR << "StSsdDaqMaker::InitRun(int runumber) - ERROR - ssdConfiguration==0"<<endm;
+    LOG_ERROR << "InitRun(int runumber) - ERROR - ssdConfiguration==0"<<endm;
     return 0;
   }
 
   ssdConfiguration_st *config  = (ssdConfiguration_st*) configuration->GetTable() ;
   if (!config){
-    LOG_ERROR << "StSsdDaqMaker::InitRun(int runumber) - ERROR - config==0" << endm;
+    LOG_ERROR <<"InitRun(int runumber) - ERROR - config==0"<<endm;
     return 0;
   }
 
@@ -161,15 +164,14 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
 
   mConfig->setConfiguration();
 
-  LOG_INFO << "______________________________________________" << endm;
-  LOG_INFO << "StSsdDaqMaker...            Via  Datababase..." << endm;
-  LOG_INFO << "SSDSsdDaqMaker : ...........numberOfSectors = " << config->nMaxSectors << endm;
-  LOG_INFO << "SSDSsdDaqMaker : ...........numberOfLadders = " << totLadderPresent << endm;
-  LOG_INFO << "SSDSsdDaqMaker : ..numberOfWafersPerLadder  = " << config->nMaxWafers/config->nMaxLadders << endm;
-  LOG_INFO << "______________________________________________" << endm;
-
-  LOG_INFO << " StSsdDaqMaker::InitRun(int runumber) - Done " << endm;
-  return 0;
+      LOG_INFO << "_____________________________" << endm;
+      LOG_INFO << "       Via  Datababase......." << endm;
+      LOG_INFO << ".......numberOfSectors =     " << config->nMaxSectors << endm;
+      LOG_INFO << ".......numberOfLadders =     " << totLadderPresent << endm;
+      LOG_INFO << " .numberOfWafersPerLadder =  " << config->nMaxWafers/config->nMaxLadders << endm;
+      LOG_INFO << "_____________________________" << endm;
+      LOG_INFO << "      InitRun() - Done       "<<endm;
+  return kStOk;
 
 }
 //_____________________________________________________________________________
@@ -182,7 +184,6 @@ Int_t StSsdDaqMaker::InitRun(int runumber){
 // 
 // 
 Int_t StSsdDaqMaker::Make(){
-
   int strip_number,id_wafer,id_side,count,my_channel;
   int ladderCountN[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
   int ladderCountP[20]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
@@ -197,31 +198,26 @@ Int_t StSsdDaqMaker::Make(){
   // mConfig->getNumberOfStrips()=768;
   // mConfig->getNumberOfWafers()=16;
   maxChannel=mConfig->getNumberOfStrips()*mConfig->getNumberOfWafers();
-
   TDataSet *daq = GetDataSet("StDAQReader");                 
   if (!daq) {
-    LOG_WARN << "StSsdDaqMaker:Make : StDAQReader Dataset not found - Skipping the event" << endm;
+    LOG_WARN << "Make : StDAQReader Dataset not found - Skipping the event" << endm;
     return kStWarn;
-  }
-  
+  } 
   StDAQReader *daqReader = (StDAQReader*) (daq->GetObject()); 
   if (!daqReader) {
-    LOG_WARN << "StSsdDaqMaker:Make : StDAQReader Object not found - Skipping the event" << endm;
+    LOG_WARN << "Make : StDAQReader Object not found - Skipping the event" << endm;
     return kStWarn;
   }
-  
   if (!(daqReader->SSDPresent())) {
-    LOG_WARN << "StSsdDaqMaker:Make : The SSD was not in the data stream  - Skipping the event" << endm;
+    LOG_WARN << "Make : The SSD was not in the data stream  - Skipping the event" << endm;
     return kStWarn;
-  }
-
+  } 
   StSSDReader *stssdreader  = daqReader->getSSDReader();   
   if(!stssdreader)
   {
-    LOG_WARN << "StSsdDaqMaker:Make : SSD reader not found - Skipping the event" << endm;
+    LOG_WARN << "Make : SSD reader not found - Skipping the event" << endm;
     return kStWarn;
   }
-  
   // creating the spa_strip and spa_ped_strip tables
   St_spa_strip *spa_strip = (St_spa_strip *) m_DataSet->Find("spa_strip");  
   if(!spa_strip)
@@ -229,24 +225,27 @@ Int_t StSsdDaqMaker::Make(){
     spa_strip   = new St_spa_strip("spa_strip",100000);
     m_DataSet->Add(spa_strip);
   }
-
   St_ssdPedStrip *ssdPedStrip = (St_ssdPedStrip *) m_DataSet->Find("ssdPedStrip");
   if(!ssdPedStrip)
   {
     ssdPedStrip = new St_ssdPedStrip("ssdPedStrip",100000);
     m_DataSet->Add(ssdPedStrip);
   }
-
-
   spa_strip_st   out_strip;
   ssdPedStrip_st out_ped_strip;
-
   count=1;
   // looping on the sides ...      
   for (id_side=0;id_side<2;id_side++)
     {
-      if (id_side == 0) EastWest='E'; // side = 0 = East = P-side
-      if (id_side == 1) EastWest='W'; // side = 1 = West = N-side
+      if (id_side == 0) {EastWest='E';} // side = 0 = East = P-side
+      if (id_side == 1) {EastWest='W';} // side = 1 = West = N-side
+      if(id_side==0){
+	LOG_DEBUG <<" process p-side ladders "<< endm;
+      }
+      else 
+	if(id_side==1){
+	  LOG_DEBUG <<" process n-side ladders "<< endm;
+	}
       for (ladder=0;ladder<mConfig->getTotalNumberOfLadders();ladder++) 
 	{
 	  if (mConfig->getLadderIsActive(ladder+1)>0)
@@ -273,7 +272,7 @@ Int_t StSsdDaqMaker::Make(){
 		      //id_side=0 for p side, 1 for n side
 		      if (data>0) {
 			if (id_side==1) my_channel=maxChannel-1-channel;
-				else my_channel=channel;                  
+			else my_channel=channel;                  
 			// the ssd mapping tables are inverted at the moment so we have to scan 
 			// them to get the correct channel.
 			if (id_side==1) {
@@ -291,7 +290,6 @@ Int_t StSsdDaqMaker::Make(){
 			  id_wafer=7000+100*(mConfig->getNumberOfWafers()-(my_channel/mConfig->getNumberOfStrips()))+ladder+1;
 			else
 			  id_wafer=7000+100*((my_channel/mConfig->getNumberOfStrips())+1)+ladder+1;
-
 			out_strip.id          = count;
 			out_strip.adc_count   = data;
 			out_strip.id_strip    = 10000*(10*strip_number+id_side)+id_wafer;
@@ -444,50 +442,59 @@ Int_t StSsdDaqMaker::Make(){
 				  }
 				   
 				    count++;
+				    for (int i=0;i<20;i++)
+				      {
+					occupancy->SetFillColor(2);
+					occupancy->Fill((2*i),(12288-ladderCountP[i]));
+					occupancy->Fill((2*i)+1,(12288-ladderCountN[i]));
+				      }
+				    //LOG_INFO << "Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm; 
 		      } // end if pedestal > 0
 		    } // end if(stssdreader->getSsdData(ladder,EastWest,channel,data,pedestal,noise)==0)  
-		} // end for (channel=0;channel<maxChannel;channel++) 
+		} // end for (channel=0;channel<maxChannel;channel++)
 	    } // end if (mConfig->getLadderIsActive(ladder)>0)
 	} // end for (ladder=0;ladder<mConfig->mConfig->getTotalNumberOfLadders();ladder++) 
-    }  // end for (id_side=0;id_side<2;id_side++)
-
-  if (Debug()==true) {
-    LOG_INFO <<"StSsdDaqMaker::Make()/Number of raw data in the SSD" << endm;
-    LOG_INFO << "StSsdDaqMaker::Make()/Active Ladders:  ";
-    for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
-      if (mConfig->getLadderIsActive(i+1)>0) {
-	gMessMgr->width(5);
-	*gMessMgr<<i+1<<" ";
-      }
-    
-    *gMessMgr<<endm;
-    LOG_INFO << "StSsdDaqMaker::Make()/Counts (p-side): "<<endm;
-    for (int i=0;i<mConfig->getTotalNumberOfLadders();i++)
-      if (mConfig->getLadderIsActive(i+1)>0) {
-	gMessMgr->width(5);
-	*gMessMgr <<ladderCountP[i]<<" ";
-      }
-    *gMessMgr<<endm;
-     LOG_INFO<< "StSsdDaqMaker::Make()/Counts (n-side): "<<endm;
-    for (int i=0;i<mConfig->getTotalNumberOfLadders();i++)
-      if (mConfig->getLadderIsActive(i+1)>0) {
-	gMessMgr->width(5);
-	*gMessMgr <<ladderCountN[i]<<" ";
-      }
-    *gMessMgr<<endm;
-  }
- 
-    for (int i=0;i<20;i++)
-      {
-	occupancy->SetFillColor(2);
-	occupancy->Fill((2*i),(12288-ladderCountP[i]));
-	occupancy->Fill((2*i)+1,(12288-ladderCountN[i]));
-      }
-    
-  LOG_INFO << "StSsdDaqMaker::Make()/  spa_strip->NRows= "<<spa_strip->GetNRows()<<endm;
-  LOG_INFO << "StSsdDaqMaker::Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm;
- 
-  return kStOK;
     }
+  // end for (id_side=0;id_side<2;id_side++)
+    
+  LOG_DEBUG <<"Make()/Number of raw data in the SSD ";
+  LOG_DEBUG << "Make()/Active Ladders: ";
+  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
+    if (mConfig->getLadderIsActive(i+1)>0) {
+      gMessMgr->width(5);
+      *gMessMgr <<i+1<<" ";
+    }
+  *gMessMgr<<endm;
+  LOG_DEBUG << "Make()/Counts (p-side): ";
+  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
+    if (mConfig->getLadderIsActive(i+1)>0) {
+      gMessMgr->width(5);
+      *gMessMgr <<ladderCountP[i]<<" ";
+    }
+  *gMessMgr<<endm;
+  LOG_DEBUG << "Make()/Counts (n-side): "; 
+  for (int i=0;i<mConfig->getTotalNumberOfLadders();i++) 
+    if (mConfig->getLadderIsActive(i+1)>0) {
+      gMessMgr->width(5);
+      *gMessMgr <<ladderCountN[i]<<" ";
+    }
+  *gMessMgr<<endm;
+  if((spa_strip->GetNRows()==0)&&(ssdPedStrip && ssdPedStrip->GetNRows()!=0)){
+    LOG_INFO << "Make()/ Read Pedestal & Noise"<< endm; 
+    LOG_INFO << "Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm; 
+  }
+  else 
+    if((! ssdPedStrip || ssdPedStrip->GetNRows()==0) && (spa_strip->GetNRows()!=0)){
+      LOG_INFO << "Make()/ Read Signal from Physics Run"<< endm; 
+      LOG_INFO << "Make()/  spa_strip->NRows= "<<spa_strip->GetNRows()<<endm;
+    }
+  return kStOK;
+}
 
-
+//_____________________________________________________________________________
+Int_t StSsdDaqMaker::Finish() 
+{
+  LOG_INFO << Form("Finish()") << endm;
+  return kStOK;
+}
+//_____________________________________________________________________________
