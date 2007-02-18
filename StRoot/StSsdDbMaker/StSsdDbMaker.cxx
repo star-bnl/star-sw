@@ -1,6 +1,9 @@
-// $Id: StSsdDbMaker.cxx,v 1.9 2006/10/16 19:53:24 fisyak Exp $
+// $Id: StSsdDbMaker.cxx,v 1.10 2007/02/18 13:32:35 bouchet Exp $
 //
 // $Log: StSsdDbMaker.cxx,v $
+// Revision 1.10  2007/02/18 13:32:35  bouchet
+// Changes for the new Logger
+//
 // Revision 1.9  2006/10/16 19:53:24  fisyak
 // Adjust for new Ssd chain
 //
@@ -31,19 +34,18 @@ ClassImp(StSsdDbMaker)
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::Init()
 {
-  if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Init - Start - " << endm;
+  LOG_DEBUG << "Init - Start - " << endm;
   if( m_Mode == 1) {
-    gMessMgr->Message() << 
-      "StSsdDbMaker::Init setting WafersPostions to sim" << endm;
+    LOG_INFO << "Init setting WafersPostions to sim" << endm;
     SetFlavor("sim","ssdWafersPosition");   
   }
-  if (Debug()) gMessMgr->Info() << "StSsdDbMaker::Init() - Done - "<<endm;
+  LOG_DEBUG << "StSsdDbMaker::Init() - Done - "<<endm;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::Make()
 {
-  if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Make" << endm;
+  LOG_DEBUG << "Make" << endm;
 
   return kStOK;
 }
@@ -51,13 +53,13 @@ Int_t StSsdDbMaker::Make()
 //_____________________________________________________________________________
 void StSsdDbMaker::Clear(const char*)
 {
-  if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Clear" << endm;
+  LOG_DEBUG << "Clear" << endm;
   StMaker::Clear();
 }
 
 //_____________________________________________________________________________
 Int_t StSsdDbMaker::Finish()
 {
-  if (Debug()) gMessMgr->Debug() << "StSsdDbMaker::Finish" << endm;
+  LOG_DEBUG << "Finish" << endm;
   return kStOK;
 }
