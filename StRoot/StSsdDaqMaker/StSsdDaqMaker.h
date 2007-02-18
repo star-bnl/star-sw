@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.3 2005/06/16 14:27:00 bouchet Exp $
+// $Id: StSsdDaqMaker.h,v 1.4 2007/02/18 15:57:33 bouchet Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.4  2007/02/18 15:57:33  bouchet
+// New Logger update and addition of Finish() function
+//
 // Revision 1.3  2005/06/16 14:27:00  bouchet
 // Pedestal Histos are filled in this Maker
 //
@@ -72,14 +75,14 @@ class StSsdDaqMaker : public StMaker {
   virtual       ~StSsdDaqMaker();
   virtual Int_t Init();
   virtual Int_t InitRun(int runumber);
-  virtual Int_t  Make();
-
+  virtual Int_t Make(); 
+  virtual Int_t Finish();
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.3 2005/06/16 14:27:00 bouchet Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.4 2007/02/18 15:57:33 bouchet Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 
