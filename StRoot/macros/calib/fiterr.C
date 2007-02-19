@@ -274,7 +274,7 @@ int fiterr(const char *opt)
 //  return;
   const int &run = th("mRun");
   const int &evt = th("mEvt");
-  const int   *&mNTrks   = th("mNTrks[2]");
+//const int   *&mNTrks   = th("mNTrks[2]");
   const int   &mTrksG    = th("mTrksG");
   const int   &nGlobs    = th("mHitsG");
   const float *&mCurv    = th("mHitsG.mCurv");
@@ -991,7 +991,7 @@ void LogErf::Test()
 void Init(HitPars_t &hiterr)
 {
   
-  hiterr[0] = 0.1;
+  hiterr[0] = 0.0;
   for (int iDet=0;iDet<kNDETS;iDet++) {
     if (numRes[iDet]<50) continue;
     int n = (iDet<=1)? 3:1;
@@ -1768,6 +1768,7 @@ static int TestIt=0;
       assert(fabs(dWW[i][j]-dWW[j][i])<1e-10);}}
   return Fcn;
 }
+#if 0
 //______________________________________________________________________________
 double HitPars_t::DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int maxTrk) 
 {
@@ -1804,6 +1805,44 @@ const double STUDY = 1./nSTUDY;
   sum +=double(mNTrks)*sumM;
   Di  +=double(mNTrks)*TiM ;
   Dij +=double(mNTrks)*TijM;
+  return sum;  
+}    
+#endif //0
+//______________________________________________________________________________
+double HitPars_t::DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int maxTrk) 
+{
+
+  Di.ResizeTo(mNPars);
+  Dij.ResizeTo(mNPars,mNPars);
+  Di = 0.; Dij=0.; mNTrks=0;
+  TVectorD Ti ,TiM (mNPars);
+  TMatrixD Tij,TijM(mNPars,mNPars);
+  int jl=0,trk=pt[0].trk; 
+  double sum=0,sumM=0;
+  
+  for (int jr=1; 1; jr++) {
+    if (jr<npt && pt[jr].trk==trk) continue;
+    int n = jr-jl;
+    if (n>15) {
+      double tsum = Deriv(n,pt+jl,Ti,Tij);
+      sum += tsum;
+      Di  += Ti ;
+      Dij += Tij;
+      mNTrks++;
+      if (mNTrks>=maxTrk) break;
+      if ((mNTrks%100)==99 ) {
+        sumM += sum; sum= 0.;
+        TiM  += Di ; Di = 0.;
+        TijM += Dij; Dij= 0.;
+      }
+    }
+    if (jr>=npt) break;
+    trk = pt[jr].trk;
+    jl = jr;
+  }
+  sum +=sumM;
+  Di  +=TiM ;
+  Dij +=TijM;
   return sum;  
 }    
 //______________________________________________________________________________
@@ -2014,11 +2053,11 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.2 2007/02/18 04:24:01 perev Exp $
+* $Id: fiterr.C,v 1.3 2007/02/19 01:30:18 perev Exp $
 *
 * $Log: fiterr.C,v $
-* Revision 1.2  2007/02/18 04:24:01  perev
-* Iverting step sign for linear fit added(Saddle case)
+* Revision 1.3  2007/02/19 01:30:18  perev
+* Sum calculation in DERIV improved
 *
 * Revision 1.1.1.1  1996/04/01 15:02:13  mclareni
 * Mathlib gen
