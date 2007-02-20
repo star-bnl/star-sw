@@ -1,6 +1,6 @@
 //*CMZ :          29/04/99  16.26.07  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine     17/08/95
-// $Id: St_PolyLine3D.cxx,v 1.2 2006/11/13 04:00:28 fine Exp $ 
+// $Id: St_PolyLine3D.cxx,v 1.3 2007/02/20 22:20:32 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -29,7 +29,11 @@
 #include "TClass.h"
 #include "TVirtualPad.h"
 #include "TView.h"
-#include "TPadView3D.h"
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,15,3)
+// 
+#else
+#  include "TPadView3D.h"
+#endif
 
 #include "St_PolyLine3D.h"
 #include "St_Points3D.h"
@@ -437,6 +441,9 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 }   
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.cxx,v $
+// Revision 1.3  2007/02/20 22:20:32  fine
+// Adjust for ROOT 5.15/03 API
+//
 // Revision 1.2  2006/11/13 04:00:28  fine
 // Update SavePrimitive interface signature
 //

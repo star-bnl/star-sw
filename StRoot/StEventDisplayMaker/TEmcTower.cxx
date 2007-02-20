@@ -1,4 +1,4 @@
-// @(#)root/g3d:$Name:  $:$Id: TEmcTower.cxx,v 1.3 2007/02/01 22:39:16 fine Exp $
+// @(#)root/g3d:$Name:  $:$Id: TEmcTower.cxx,v 1.4 2007/02/20 22:20:32 fine Exp $
 // Author: Valeri Fine    22/12/04
 
 
@@ -9,7 +9,11 @@
 #include "TRotMatrix.h"
 #include "TVolumePosition.h"
 #include "TGeometry.h"
-#include "TPadView3D.h"
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,15,3)
+// 
+#else
+#  include "TPadView3D.h"
+#endif
 #include "TMath.h"
 
 ClassImp(TEmcTowers)
@@ -291,11 +295,13 @@ void TEmcTower::Paint(Option_t *option)
          // printf(" TEmcTower::Paint %s\n", GetName());
          SetVisibility(1);
       } else {
+#if ROOT_VERSION_CODE < ROOT_VERSION(5,15,3)
          TPadView3D *view3D = (TPadView3D*)gPad->GetView3D();
          if (view3D) {
             TAttFill::Modify();
             view3D->SetLineAttr(GetLineColor(),GetLineWidth(),option);
          }
+#endif         
          TTUBS::Paint(option);
       }
    } else {
