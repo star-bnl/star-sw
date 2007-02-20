@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StPadControlPanel.cxx,v 1.2 2003/01/24 21:14:43 fine Exp $
+// $Id: StPadControlPanel.cxx,v 1.3 2007/02/20 22:20:31 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -349,7 +349,12 @@ void StPadControlPanel::MakeFourView(TVirtualPad *pad)
       TList *newPrimitives = gPad->GetListOfPrimitives();
       TObject *obj = 0;
       while ( (obj = next->Next()) ) newPrimitives->Add(obj);
-      TView *newView = new TView(system);
+      TView *newView =
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,15,3)
+             TView::CreateView(system);
+#else
+             new TView(system);
+#endif      
       newView->SetRange(min,max);
       next->Reset();
    }
