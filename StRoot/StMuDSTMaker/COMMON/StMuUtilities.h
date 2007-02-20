@@ -11,8 +11,6 @@
 #include <math.h>
 
 //* minimum and maximum functions */
-template<class T> inline T max(T a, T b) { return (a>b) ? a : b;} ///< max of two values
-template<class T> inline T min(T a, T b) { return (a<b) ? a : b;} ///< min of two values
 template<class T> inline T fabsMax(T a, T b)  { return (fabs(a)>fabs(b)) ? a : b;} ///< max of the absolut two values
 template<class T> inline T fabsMin(T a, T b)  { return (fabs(a)<fabs(b)) ? a : b;} ///< min of the absolut two values
 
@@ -49,6 +47,9 @@ inline double unPack(T v, U scale) {
 /***********************************************************************
  *
  * $Log: StMuUtilities.h,v $
+ * Revision 1.4  2007/02/20 18:31:14  mvl
+ * Removed templates for min() and max(), which conflict with STL (requested by Pibero Djawotho)
+ *
  * Revision 1.3  2002/09/11 21:02:42  laue
  * added cut on track encoded method for ITTF
  *
