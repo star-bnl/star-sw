@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.39 2007/02/01 22:40:08 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.40 2007/02/21 19:16:14 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.40  2007/02/21 19:16:14  fine
+// Add an extra control to choose between G3 and Sti detectors geometries
+//
 // Revision 1.39  2007/02/01 22:40:08  fine
 // Add TROOT header file
 //
@@ -104,7 +107,7 @@ class TQtRootViewer3D;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.39 2007/02/01 22:40:08 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.40 2007/02/21 19:16:14 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -139,6 +142,7 @@ static StEventDisplayInfo *fgInfo;
     TVolume *fColCash[kCOLORS];
     TQtRootViewer3D *f3DViewer; //! external 3D viewer;
     Bool_t          fNeedsClear3DView;
+    Int_t         fGeomType;  // Flag to define where the geom comes from G3/ STI
 
     void          DrawObject(TObject *,Option_t *option="",Bool_t first=kFALSE);
     Int_t         MakeTable(const char   **positions);
@@ -171,11 +175,12 @@ static StEventDisplayInfo *fgInfo;
    virtual TVirtualPad *CreateCanvas();
            TVirtualPad *GetEventPad();
    virtual Int_t  CreateTrackNodes();
-   virtual TVolume *GetHall()          { return m_Hall; }
-   virtual TVolumeView *GetFullView()  { return m_FullView;  }
-   virtual TVolumeView *GetShortView() { return m_ShortView; }
-   virtual TVolumeView *GetSensible()  { return m_Sensible;  }
-   virtual TVolume     *GetEventsNode(){ return m_EventsNode;}
+   virtual TVolume *GetHall()           const { return m_Hall; }
+   virtual TVolumeView *GetFullView()   const { return m_FullView;  }
+   virtual TVolumeView *GetShortView()  const { return m_ShortView; }
+   virtual TVolumeView *GetSensible()   const { return m_Sensible;  }
+   virtual TVolume     *GetEventsNode() const { return m_EventsNode;}
+   virtual Int_t        GeomType()      const  { return fGeomType;}
    virtual Color_t      GetColorAttribute(Int_t adc);
    virtual void         PrintFilterStatus(); // *MENU*
    virtual void         PrintNames();   // *MENU*
@@ -184,6 +189,7 @@ static StEventDisplayInfo *fgInfo;
    virtual Int_t        ReDraw(){ClearCanvas(); return Make();} // *MENU*
    virtual void         RemoveName(const char *name); // *MENU*
    virtual void         RemoveVolume(const char *name); // *MENU*
+   virtual void         SetGeomType(Int_t type=0) { fGeomType = type;} // *MENU*
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
    static  Int_t        MakeLoop(Int_t flag);
@@ -215,7 +221,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.39 2007/02/01 22:40:08 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.40 2007/02/21 19:16:14 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

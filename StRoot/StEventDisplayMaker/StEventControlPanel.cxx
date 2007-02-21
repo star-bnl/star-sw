@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.16 2007/02/01 22:41:00 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.17 2007/02/21 19:16:14 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -77,6 +77,7 @@
 #include <qbuttongroup.h>
 #include <qcheckbox.h>
 #include <qvbuttongroup.h>
+#include <qhbuttongroup.h> 
 #include <qpushbutton.h>
 #include <qobjectlist.h>
 #include <qvbox.h>
@@ -193,6 +194,14 @@ void StEventControlPanel::Build()
 
       label = new QLabel("Unused",panel);
       panel->Add(label,0,1);
+      QHButtonGroup *geomSrc = new QHButtonGroup("geom",panel);
+      panel->AddMulti(geomSrc,2,-1,0); geomSrc->setFlat(TRUE);
+      geomSrc->setExclusive(true);
+      QPushButton *geom = new QPushButton("G3",geomSrc);
+                   geom->setToggleButton(true);
+                   geom = new QPushButton("STI",geomSrc);
+                   geom->setToggleButton(true);
+      connect(geomSrc,SIGNAL(clicked(int)),this,SLOT(Clicked(int)));
 
       const char *detectorNames[] =
       {
@@ -200,7 +209,7 @@ void StEventControlPanel::Build()
          "FTPC" ,"SCON"	, 
          "SVT"	 ,"STSI"	, 
          "SSD"	 ,"SSD"	, 
-         "RnD"  ,"STI"	, 
+         "RnD"  ,  0	   , 
          "EMC"	 ,"CALB"	, 
          "TOF"	 ,"BTOF"	
       };
@@ -218,13 +227,14 @@ void StEventControlPanel::Build()
                QLabel *label =  new QLabel(listEvents[i],panel);
                panel->Add(label,n>>1,2,Qt::AlignLeft);
                // Add volume control buttons
-
-               box = new QCheckBox(panel,detectorNames[(2*nDetector++)+1]);
-               connect(box,SIGNAL(clicked()),this,SLOT(ClickedVolume()));
-               connect(all[2],SIGNAL(clicked()),box,SLOT(animateClick()));
-               panel->Add(box,n>>1,3);
+               const char *dName = detectorNames[(2*nDetector++)+1];
+               if (dName) {
+                  box = new QCheckBox(panel,dName);
+                  connect(box,SIGNAL(clicked()),this,SLOT(ClickedVolume()));
+                  connect(all[2],SIGNAL(clicked()),box,SLOT(animateClick()));
+                  panel->Add(box,n>>1,3);
+               }
             }
-
          }
          i += 2;
       }
@@ -260,13 +270,15 @@ void StEventControlPanel::Build()
          if (strstr(listEvents[i],"All")) {
             all[n&1]->setName(listEvents[i]);
          } else {
-            QCheckBox *box = new QCheckBox(panel,listEvents[i+1]);
-            panel->Add(box,n>>1,n&1);
-            connect(all[n&1],SIGNAL(clicked()),box,SLOT(animateClick()));
-            connect(box,SIGNAL(clicked()),this,SLOT(Clicked()));
-            if (n&1) {
-               QLabel *label =  new QLabel(listEvents[i],panel);
-               panel->Add(label,n>>1,2,Qt::AlignLeft);
+            if (listEvents[i+1]) {
+               QCheckBox *box = new QCheckBox(panel,listEvents[i+1]);
+               panel->Add(box,n>>1,n&1);
+               connect(all[n&1],SIGNAL(clicked()),box,SLOT(animateClick()));
+               connect(box,SIGNAL(clicked()),this,SLOT(Clicked()));
+               if (n&1) {
+                  QLabel *label =  new QLabel(listEvents[i],panel);
+                  panel->Add(label,n>>1,2,Qt::AlignLeft);
+               }
             }
          }
          i += 2;
@@ -313,7 +325,10 @@ void StEventControlPanel::Build()
 //_______________________________________________________________________________________
 /* public slot: */ 
 void StEventControlPanel::Clicked(int id) 
-{ }
+{ 
+    // Select the geometry Geant / Sti
+   if (fgDispMk) { fgDispMk->SetGeomType(id);}
+}
 //_______________________________________________________________________________________
 void StEventControlPanel::ClickedVolume() 
 { 
@@ -473,6 +488,7 @@ void StEventControlPanel::AddFilter(TObject *filter)
    if (!fFilter) fFilter = new TList();
    fFilter->Add(filter);
 }
+
 //_______________________________________________________________________________________
 void StEventControlPanel::Show()
 {
@@ -480,6 +496,7 @@ void StEventControlPanel::Show()
    Refresh();
    fBar->show();
 }
+
 //_______________________________________________________________________________________
 void StEventControlPanel::ShowFilter()
 {  // fFilter->Show();

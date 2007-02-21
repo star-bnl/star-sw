@@ -2,7 +2,7 @@
 ** Form interface generated from reading ui file 'Panel.ui'
 **
 ** Created: Wed Jan 8 14:32:05 2003
-**      by: The User Interface Compiler ($Id: StSimplePanel.h,v 1.1 2003/01/17 01:36:17 fine Exp $)
+**      by: The User Interface Compiler ($Id: StSimplePanel.h,v 1.2 2007/02/21 19:16:14 fine Exp $)
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -25,6 +25,8 @@ public:
     StSimplePanel( QWidget* parent = 0, const char* name = 0,int nColumns=3);
     ~StSimplePanel();
     void Add(QWidget *q, int col, int row =-1
+            , unsigned int aligment = Qt::AlignCenter);
+    void AddMulti(QWidget *q,int fromCol, int toCol=-1, int row =-1
             , unsigned int aligment = Qt::AlignCenter);
 
 protected:
