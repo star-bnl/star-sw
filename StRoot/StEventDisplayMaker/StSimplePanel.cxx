@@ -2,7 +2,7 @@
 ** Form implementation generated from reading ui file 'Panel.ui'
 **
 ** Created: Wed Jan 8 14:32:54 2003
-**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.3 2003/01/28 23:10:47 fine Exp $)
+**      by: The User Interface Compiler ($Id: StSimplePanel.cxx,v 1.4 2007/02/21 19:16:14 fine Exp $)
 **
 ** WARNING! All changes made in this file will be lost!
 ****************************************************************************/
@@ -52,4 +52,15 @@ void StSimplePanel::Add(QWidget *q, int pRow, int pCol, unsigned int aligment)
    if (pRow == -1) pRow = fLayout->numRows();
    fLayout->addWidget(q,pRow,pCol,aligment);
 }
+//______________________________________________________________________________
+void StSimplePanel::AddMulti(QWidget *q,int fromCol, int toCol, int pRow
+            , unsigned int aligment)
+{
+  //  Adds the widget w to the cell grid, spanning multiple rows/columns. 
+  //  The cell will span from fromRow, fromCol to toRow, toCol.
+  if (pRow == -1)  pRow = fLayout->numRows();
+  if (toCol == -1) toCol = fLayout->numCols()-1;
+  fLayout->addMultiCellWidget(q, pRow, pRow, fromCol,toCol,aligment);  
+}
+
 #endif

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.120 2007/02/01 22:41:00 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.121 2007/02/21 19:16:14 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -192,6 +192,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   mFilterList        = 0;
   memset(fColCash,0,sizeof(fColCash));
   f3DViewer= 0;
+  SetGeomType();
   fNeedsClear3DView = kFALSE;
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
@@ -282,7 +283,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
   m_Hall = 0;
   Bool_t gotSti = kFALSE;
   Int_t dipLevel=2;
-  if (m_VolumeList && m_VolumeList->FindObject("STI")) 
+//  if (m_VolumeList && m_VolumeList->FindObject("STI")) 
+  if (GeomType()) 
   {
      m_Hall = (TVolume *)GetDataSet("STIGEOM");
      if (m_Hall) {
@@ -290,6 +292,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
         m_Hall->MarkAll(); // m_Hall->ls(0);
         dipLevel = 10;
      }
+     Warning("BuildGeometry","No STI geometry was found. GEANT3 will be used insteed");
   }
 
   TVolume *geantHall = 0;
@@ -1404,6 +1407,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.121  2007/02/21 19:16:14  fine
+// Add an extra control to choose between G3 and Sti detectors geometries
+//
 // Revision 1.120  2007/02/01 22:41:00  fine
 // Add Sti geometry to the Event Display
 //
