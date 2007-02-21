@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.20 2007/02/14 11:49:16 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.21 2007/02/21 20:36:17 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.21  2007/02/21 20:36:17  bouchet
+// add a method WriteMatchedClusters :\ instead of WriteScfTuple() method that fill all the reconstructed clusters,\ this one store the clusters associated to the hits
+//
 // Revision 1.20  2007/02/14 11:49:16  bouchet
 // Added control histograms and updated the Cluster and Point Tuple
 //
@@ -140,6 +143,7 @@ class StSsdPointMaker : public StMaker {
   St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
   Float_t Strips_hits[15];
   Float_t ClusterNtuple[15];
+  Float_t ClustupleIn[15];
   Float_t hitNtuple[15]; 
   TFile   *mFile;
   TNtuple *mHitNtuple;
@@ -147,6 +151,8 @@ class StSsdPointMaker : public StMaker {
   TNtuple *nHitNtuple;
   TFile   *qFile;
   TNtuple *qHitNtuple;
+  TFile   *pFile;
+  TNtuple *pHitNtuple;
 
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
@@ -163,6 +169,7 @@ class StSsdPointMaker : public StMaker {
   void PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void Read_Strip(St_ssdStripCalib *strip_calib);
+  void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   
  protected:
 
@@ -209,11 +216,11 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_18; //! (1p-1n) packages control matching
   TH2S  *matchisto_19; //! (1p-1n) packages control matching  
   TH2S  *matchisto_20; //! (1p-1n) packages control matching.
-  Int_t flag ;            
+  Int_t flag ;         // this flag is used to switch on the filling of tuple   
   
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.20 2007/02/14 11:49:16 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.21 2007/02/21 20:36:17 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
