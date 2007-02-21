@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.22 2006/08/05 01:07:45 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.23 2007/02/21 23:19:36 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -8,6 +8,12 @@
  * \date   March 2001
  *
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.23  2007/02/21 23:19:36  calderon
+ * Remove the forcing of the Ghost loop to be "off" by checking the filename.
+ * This caused problems for embedding when the Ghost loop was requested (the check
+ * overrode the request).  Now, the check only displays a message in the log
+ * saying that the Ghost loop is turned on.
+ *
  * Revision 1.22  2006/08/05 01:07:45  calderon
  * Modified some debugging printouts.
  *
@@ -115,6 +121,12 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.23  2007/02/21 23:19:36  calderon
+ * Remove the forcing of the Ghost loop to be "off" by checking the filename.
+ * This caused problems for embedding when the Ghost loop was requested (the check
+ * overrode the request).  Now, the check only displays a message in the log
+ * saying that the Ghost loop is turned on.
+ *
  * Revision 1.22  2006/08/05 01:07:45  calderon
  * Modified some debugging printouts.
  *
@@ -218,7 +230,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.22 2006/08/05 01:07:45 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.23 2007/02/21 23:19:36 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -423,13 +435,7 @@ StMiniMcMaker::InitRun(int runID) {
       if (Debug()) cout << "\tStMiniMcMaker::InitRun StMiniMcEvent Already created" << endl;
   }
   if(mGhost) {
-    cout << "\tGhost loop on" << endl;
-    // double check that we really want the ghost flag
-    if(mInFileName.Contains("st_physics")){ // probably not
-      mGhost = kFALSE;
-      cout << "\tApparently we're looking at real data. " <<endl
-	   << "\tTurning off the ghost flag" << endl;
-    }
+    cout << "\tGhost loop is turned on." << endl;
   }
 
   //
