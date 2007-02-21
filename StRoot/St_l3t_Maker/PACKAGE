@@ -1,5 +1,0 @@
-# $Id $
-# package St_l3t_Maker
-# author: 
-Library:libSt_l3t_Maker.so:LIBS +=   -lglobal_Tables  -ll3_Tables  -lStChain  -l_StEvent -l_StTpcDb -l_St_l3  -lStl3Util  -ltpc_Tables
-#Library:libSt_l3t_Maker.so:LIBS +=   -lglobal_Tables  -ll3  -ll3_Tables  -lStChain  -lStEvent  -lSt_l3  -lStl3Util  -ltpc_Tables
