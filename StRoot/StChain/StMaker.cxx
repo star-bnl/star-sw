@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.189 2007/02/05 20:57:10 potekhin Exp $
+// $Id: StMaker.cxx,v 1.190 2007/02/22 22:50:18 potekhin Exp $
 //
 //
 /*!
@@ -147,16 +147,19 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"y2004b",      20031120,     4, "y2004b",   ""},                   //       {"y2004b",      20031120,     0}
   {"y2004c",      20031125,     0, "y2004c",   ""},                   //       {"y2004c",      20031125,     0}
   {"y2004d",      20031125,     1, "y2004d",   "new SVT"},
+  // Dead area in SSD, in version y2005f
   {"y2005x",      20041030,     0, "y2005x",   ""},                   //       {"y2005x",      20041030,     0}
   {"y2005",       20041030,     0, "y2005",    ""},                   //       {"y2005",       20041030,     0}
   {"y2005b",      20041101,     0, "y2005b",   ""},                   //       {"y2005b",      20041101,     0}
   {"y2005c",      20041201,     0, "y2005c",   ""},                   //       {"y2005c",      20041201,     0}
   {"y2005d",      20041201,     1, "y2005d",   "y2005c + new SVT"},   //       {"y2005d",      20041201,     0}
   {"y2005e",      20041201,     2, "y2005e",   "y2005d + new SSD"},   //       {"y2005e",      20041201,     0}
+  {"y2005f",      20041201,     3, "y2005f",   "y2005e + SSD5/CALB2"},//       {"y2005e",      20041201,     0}
 
-  // 
+  // Dead area in SSD, in version y2006b
   {"y2006",       20051201,     0, "y2006",    "base for y2006: y2005e+fixed TPC plane"},
   {"y2006a",      20051201,     1, "y2006a",   "y2006+new FPD"},
+  {"y2006b",      20051201,     2, "y2006b",   "y2006+new FPD+SSD5/CALB2"},// code versions indicated
 
   // in preparation
   {"y2007",       20061105,     0, "y2007",    "base geometry for y2007"}, // advertized simu 20061101
@@ -178,6 +181,7 @@ static const DbAlias_t fDbAlias[] = {// geometry  Comment            old
   {"upgr10",      20190101,    13, "upgr10",   ""},
   {"upgr11",      20190101,    14, "upgr11",   ""},
   {"upgr12",      20190101,    15, "upgr12",   ""},
+  {"upgr13",      20190101,    16, "upgr13",   ""},
   // Future development:
   {"simpletpc",   20200102,    16, "simpletpc",""},
   {0,                    0,     0,        0,    0}
@@ -1744,6 +1748,10 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.190  2007/02/22 22:50:18  potekhin
+// Added three geometry tags: Y2005F and Y2006B, due to the added dead area in the SSD,
+// and also incorporating the updated Barrel EMC code.
+//
 // Revision 1.189  2007/02/05 20:57:10  potekhin
 // a) corrected a few typos in the comments
 // b) added y2006a to the list of geometries
