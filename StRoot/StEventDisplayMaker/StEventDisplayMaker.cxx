@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.122 2007/02/22 02:43:50 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.123 2007/02/22 03:51:06 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -193,6 +193,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   memset(fColCash,0,sizeof(fColCash));
   f3DViewer= 0;
   SetGeomType();
+  fEventNeedRescan = kFALSE;
   fNeedsClear3DView = kFALSE;
   m_FilterArray   = new TObjArray(kEndOfEventList);
   Int_t i; 
@@ -768,6 +769,8 @@ Int_t StEventDisplayMaker::Make()
        m_ShortView->Add(m_EventsView);
      }
      printf(" updating view of %d objects\n",totalCounter);
+     if (!totalCounter) fEventNeedRescan=kFALSE;
+
      m_PadBrowserCanvas->Modified();
      m_PadBrowserCanvas->Update();
    }
@@ -1049,7 +1052,10 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   memset(fColCash,0,sizeof(fColCash));
 
   if (!mEventHelper) mEventHelper = new StEventHelper;
-  if (!mRedraw) mEventHelper->Reset(event,"StL3.*");
+  if (!mRedraw || fEventNeedRescan) {
+     mEventHelper->Reset(event,"StL3.*");
+     fEventNeedRescan=kFALSE;
+  }
   mEventHelper->ls();
 
   int keyLen = strchr(pos[1],' ') - pos[1];
@@ -1120,7 +1126,10 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   }
 
 
-  if (!stevs) return 0;
+  if (!stevs) {
+     fEventNeedRescan=kTRUE;
+     return 0;
+  }
   garbage.Add(stevs);
   TListIter nextGilter(StGlobalFilterABC::GetList());
   StGlobalFilterABC *gilt=0;
@@ -1133,7 +1142,10 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   stevs=0;
   Int_t trackCounter = 0;
 
-  if (!points ) return 0;
+  if (!points ) {
+//    fEventNeedRescan=kFALSE;
+    return 0;
+  }
 //  garbage.Add(points);
   int ntrk = points->GetLast()+1;
   if (!ntrk ) return 0;
@@ -1458,6 +1470,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.123  2007/02/22 03:51:06  fine
+// Rescan event if empty
+//
 // Revision 1.122  2007/02/22 02:43:50  fine
 // Activate G3/Sti geometry toggling
 //
