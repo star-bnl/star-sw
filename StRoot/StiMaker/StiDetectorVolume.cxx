@@ -1,4 +1,4 @@
-// $Id: StiDetectorVolume.cxx,v 2.2 2006/12/06 20:15:41 fine Exp $
+// $Id: StiDetectorVolume.cxx,v 2.3 2007/02/22 17:11:17 fine Exp $
 // Author: Valeri Fine, Dec 2006
 
 #include "StiDetectorVolume.h"
@@ -18,7 +18,7 @@
 #include "Sti/StiPlacement.h"
 #include "Sti/StiMaterial.h"
 #include "Sti/StiToolkit.h"
-//
+
 #if 0
 //_____________________________________________________________________________
 static Bool_t CompareMatrix(TRotMatrix &a,TRotMatrix &b)
@@ -92,7 +92,7 @@ char *StiDetectorVolume::GetObjectInfo(Int_t px, Int_t py) const
 //_____________________________________________________________________________
 void StiDetectorVolume::MakeDetector(StiToolkit &tool, const TString &detectorName, unsigned int select)
 {
-   // Conststruct the TVolume from the StToolKit
+   // Construct the TVolume from the StToolKit
    StiDetectorGroups *groups=tool.getDetectorGroups();
    vector<StiGenericDetectorGroup *>::iterator it = groups->begin();
    for (; it != groups->end(); ++it) {
@@ -102,14 +102,14 @@ void StiDetectorVolume::MakeDetector(StiToolkit &tool, const TString &detectorNa
       if ( detectorName.IsNull() || (builderName.BeginsWith(detectorName,TString::kIgnoreCase)) ) 
                      Add(new  StiDetectorVolume(builder,select));
       else {
-         printf("Skip %s detecor\n", (const char*)builder.getName().c_str());
+         LOG_INFO << "Skip " <<  (const char*)builder.getName().c_str() << " detector" << endm; 
       }
    }
 }
 //_____________________________________________________________________________
 void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned int select)
 {
-  // Conststruct the TVolume from the StDetectorBuilder
+  // Construct the TVolume from the StDetectorBuilder
   unsigned int nRows = builder.getNRows();
   for (unsigned int i=0; i < nRows; i++) {
      unsigned int nSectors = builder.getNSectors(i);
@@ -117,6 +117,10 @@ void StiDetectorVolume::MakeVolume(const StiDetectorBuilder &builder, unsigned i
      for (unsigned int j=0;j<nSectors;j++) 
      {
         StiDetector *next = builder.getDetector(i,j) ;
+        if (!next) {
+           LOG_ERROR << "The is no detector for row " << i <<" sector " << j << endm;
+           continue;
+        }
         if (select  &&  (    ( select == kActive   && !next->isActive()) 
                          ||  
                              ( select == kPassivie && next->isActive() )
