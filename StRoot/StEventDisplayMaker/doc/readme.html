@@ -22,12 +22,86 @@
             The informational widget <A href="InfoWidget.gif">"Info"</A>
          to represent the "maker" status information
          <LI>
-            Via &nbsp;<A href="MainWidget.html">MainWindow</A> View-&gt;OpenGL view one can 
+            Via &nbsp;<A href="MainWidget.html">MainWindow</A> <code><b>View-&gt;OpenGL view</code></b> menu one can 
             get the <A href="OpenGLPicture.html" width=100%>OpenGL </A>view of the MainWindow also
             <br>
-              This veiwer based on  <a href="http://www-imagis.imag.fr/Membres/Gilles.Debunne/CODE/QGLViewer">QGLVeiwer class</a>
+              There are two optional OpenGL viewers:
+              <ul>
+              <li> <a href="http://www.coin3d.org">Coin3D</a>-based viewer is the most powerful. The viewer features and capabilities 
+              were present (<a href="http://www.star.bnl.gov/STAR/comp/vis/STAR_GeometryBrowser.12.06.2006.htm">use Microsoft Explorer</a>) 12/6/2006 S&C meeting with  
+     <a href="http://www.star.bnl.gov/STAR/comp/vis/STAR_GeometryBrowser.12.06.2006.htm"> 
+      (see the  <a href="http://www.star.bnl.gov/STAR/comp/vis/STAR_GeometryBrowser.12.06.2006.ppt">PowerPoint</a> version 
+      of the presentation also) 
+                    <br> The based GUI interface of the viewer is combination of the  <code><bold>
+           <a href="http://doc.coin3d.org/SoQt/classSoQtExaminerViewer.html">SoQtExaminerViewer</a> </bold> </code> and
+           <code><bold>
+           <a href="http://doc.coin3d.org/SoQt/classSoQtPlaneViewer.html"> SoQtPlaneViewer</a>
+           </bold> </code>
+          <small>
+          <blockquote>
+         It has a convenient interface for repositioning and reorientation of the camera, 
+         by panning, rotating and zooming it's position. 
+         <P> The following controls can be used:
+         <ul>
+         <li>
+            hold down left mousebutton and move mouse pointer to rotate the camera 
+            around it's current focal point (the focal point can be changed by doing a seek operation)
+
+         <li>
+            hold middle mousebutton to pan (or a <code><b><large>CTRL</code></b></large>-key plus left mousebutton, 
+            or a SHIFT-key plus left mousebutton)
+
+
+         <li>
+            hold down left + middle mousebutton to zoom / dolly, or CTRL + middle mousebutton, 
+            or CTRL + SHIFT + the left mousebutton
+
+
+         <li>
+            click <code><b><large>'s'</code></b></large>, then pick with the left mousebutton to seek
+
+
+         <li>
+            right mousebutton opens the popup menu
+
+
+         <li>
+            click 'ESC' key to switch to and from 'camera interaction' mode 
+            and 'scenegraph interaction' mode (see setViewing() documentation)
+
+
+         <li>
+            'q' quits the application
+
+         <li>Hitting any of the <code><b><large>X, Y or Z</large></b></code> buttons in the panel on 
+              the right side of the render canvas will "flip" the current camera direction around it's focal point 
+              to point along the selected axis (towards negative infinity).
+
+         <li>Hitting any of the "cutted" <code><b><large>X, Y or Z</large></b></code> buttons in the panel on 
+              will position the so-called 
+              <a href="http://doc.coin3d.org/Coin/classSoClipPlaneManip.html">clip plane</a> 
+              at the center of the scene and orthogonal to the selected axis.
+
+          <li>The SoQtExaminerViewer provides a user decoration's button for toggling between orthographic or 
+              perspective camera view volumes and projection methods. This is the bottom-most click button on the right decoration border.
+
+          <li>It also inherits the decoration buttons from the 
+              <a href="http://doc.coin3d.org/SoQt/classSoQtFullViewer.html">SoQtFullViewer</a>:
+              <ul>
+              <li>the arrow for switching to "scenegraph interaction" mode, 
+              <li>the hand for setting back to "camera interaction" mode, 
+              <li>the house for "reset camera to home position", 
+              <li>the blueprint house for "set new camera home position", 
+              <li>the eye for "zoom camera out to view full scene" and 
+              <li>the flashlight for setting "click to seek" mode.
+          </ul>
+
+          </blockquote></small>
+              <li>
+              This viewer based on  <a href="http://www-imagis.imag.fr/Membres/Gilles.Debunne/CODE/QGLViewer">QGLVeiwer class</a>
               <br> One can find there the <a href="http://www-imagis.imag.fr/Membres/Gilles.Debunne/CODE/QGLViewer/mouse.html">mouse behaviour</a>
               and <a href="http://www-imagis.imag.fr/Membres/Gilles.Debunne/CODE/QGLViewer/shortcuts.html">the keyboard shorcuts</a> as well.
+              </ul>
          </LI>
       </UL>
       <P>New <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StEventDisplayMaker">
@@ -40,12 +114,12 @@
             ROOT resource file in his/her working (or home) directory:
          <OL>
            <LI> Run <a href="http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/QtRoot/qtgl/qtcoin/setup.csh?rev=HEAD">
-             <code><b>setup.csh</b></code></a> ROOT macro: 
+             <code><b>setup.csh</b></code></a> shell script: 
                 <code><pre>
 source $STAR/QtRoot/qtgl/qtcoin/setup.csh
                         </pre>
             </code>
-            To define the optional Coin3D-based ROOT plugin.
+            to define the optional Coin3D-based ROOT plugin.
  <P>
 <!--            <LI>
                Copy the the custom version of <a href="rootrc">".rootrc"</a> file into your working directory 
@@ -69,7 +143,7 @@ source $STAR/QtRoot/qtgl/qtcoin/setup.csh
                </pre>
                   </code></BOLD>
       The macro tests whether your ".rootrc" activates the Qt-layer and creates the 
-      the correct ROOT resource file to fix things if needed.
+      correct ROOT resource file to fix things if needed.
 
                   <OL>
                   </OL>
