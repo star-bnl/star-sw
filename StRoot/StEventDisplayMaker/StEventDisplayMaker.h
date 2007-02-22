@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.40 2007/02/21 19:16:14 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.41 2007/02/22 03:51:06 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.41  2007/02/22 03:51:06  fine
+// Rescan event if empty
+//
 // Revision 1.40  2007/02/21 19:16:14  fine
 // Add an extra control to choose between G3 and Sti detectors geometries
 //
@@ -107,7 +110,7 @@ class TQtRootViewer3D;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.40 2007/02/21 19:16:14 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.41 2007/02/22 03:51:06 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -143,7 +146,8 @@ static StEventDisplayInfo *fgInfo;
     TQtRootViewer3D *f3DViewer; //! external 3D viewer;
     Bool_t          fNeedsClear3DView;
     Int_t         fGeomType;  // Flag to define where the geom comes from G3/ STI
-
+    Bool_t        fEventNeedRescan; // Shoudl we rescan the event
+    
     void          DrawObject(TObject *,Option_t *option="",Bool_t first=kFALSE);
     Int_t         MakeTable(const char   **positions);
     Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const char   *keyColumn,const char   *keyPositions[]);
@@ -189,7 +193,7 @@ static StEventDisplayInfo *fgInfo;
    virtual Int_t        ReDraw(){ClearCanvas(); return Make();} // *MENU*
    virtual void         RemoveName(const char *name); // *MENU*
    virtual void         RemoveVolume(const char *name); // *MENU*
-   virtual void         SetGeomType(Int_t type=0) { fGeomType = type;} // *MENU*
+           void         SetGeomType(Int_t type=0) { fGeomType = type;} // *MENU*
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
    static  Int_t        MakeLoop(Int_t flag);
@@ -221,7 +225,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.40 2007/02/21 19:16:14 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.41 2007/02/22 03:51:06 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
