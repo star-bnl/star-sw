@@ -64,21 +64,21 @@ public:
   trgRawData         trgRaw;
 // Override default swap because of complicated structure of trg data bank.
   int swap();  
-  int swapHerb2bytes(short unsigned int *data,int number);
-  int swapHerb4bytes(unsigned int  *data,int number);
-  int swapHerb4bytes(unsigned long *data,int number);
+  int swapHerb2bytes(unsigned short *data,int number);
+  int swapHerb4bytes(unsigned int   *data,int number);
+  int swapHerb4bytes(unsigned long  *data,int number);
 
-  int swapHerb2bytes(short *data,int number)
+  int swapHerb2bytes(short *data, int number)
      {return swapHerb2bytes((unsigned short*)data,number);}
-  int swapHerb4bytes(int   *data,int number)
+  int swapHerb4bytes(int   *data, int number)
      {return swapHerb4bytes((unsigned int  *)data,number);}
-  int swapHerb4bytes(long  *data,int number)
+  int swapHerb4bytes(long  *data, int number)
      {return swapHerb4bytes((unsigned long *)data,number);}
   int HerbSwap();           //!
   int HerbSwap2000();       //!
   int HerbSwap2003(char*);  //!
   int HerbSwap2004(char*);  //!
-  int HerbSwap2005(char*);  //!
+  int HerbSwap2005(char*);  //! for 2007 and later see TRG_Reader::UnpackTrg below
   // void PrintAllTheData(FILE *ff);
   // void PrintDataCompact(FILE *ff);
   char *PrintHelp(char*,int);
@@ -88,7 +88,7 @@ class TRG_Reader {
   friend class EventReader;
 public:
   TRG_Reader(EventReader *er, Bank_TRGP *pTRGP);
-  ~TRG_Reader(){}; 
+  ~TRG_Reader(){ if(pBankUnp) delete[] pBankUnp; }; 
   Bank_TRGD *pBankTRGD;     // Making this public saves 2 large layers of accessor functions.
   int YearOfData(char *);   //!
   int S_mode;               //!
@@ -98,6 +98,9 @@ protected:
   EventReader *ercpy;       // copy of EventReader pointer
   Bank_TRGP *pBankTRGP;     // Bank Pointers
   int mErr;                 //!
+  char *pBankUnp;           //! Pointer to keep workspace for unpacked trigger struct
+  unsigned int sizeUnp;     //! Size of unpacked bank space
+  Bank_TRGD *pTRGD;         //! Dummy to use byte swap code
 
 private:
   void dumpWordsToScreenInHexAndExit(int); //!
@@ -106,5 +109,11 @@ private:
   void SanityCheck2003(char*, int);        //!
   void SanityCheck2004(char*, int);        //!
   void SanityCheck2005(char*, int);        //!
+  void SanityCheck2007(char*, int);        //!
+
+  int  UnpackTrg2007(Bank_TRGP*);          //!
+  int  Swap2007_DescSum(char*, int, int);  //!
+  int  Swap2007_Raw(char*);                //!
 };
+
 TRG_Reader *getTRGReader(EventReader *er);

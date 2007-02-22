@@ -15,6 +15,7 @@
 
 #include "TRG_Reader.hh"
 #include <assert.h>
+#include "trgStructures2007.h"
 #define PP printf(
 
 
@@ -57,6 +58,7 @@ int TRG_Reader::YearOfData(char *data) {
   if(*data==0x20) return 2003; // trgStructures.h versions (eg, trgStructures2003.h).
   if(*data==0x21) return 2004; // trgStructures.h versions (eg, trgStructures2004.h).
   if(*data==0x22) return 2005; // trgStructures.h versions (eg, trgStructures2005.h).
+  if(*data==0x30) return 2007; // trgStructures.h versions (eg, trgStructures2007.h).
   
   (void) printf("TRG_Reader::YearOfData : value %d=0x%x not treated\n",*data,*data);
   //assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
@@ -67,11 +69,14 @@ int TRG_Reader::YearOfData(char *data) {
 
 TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   mErr = 0;
+  pBankUnp=0;
+  sizeUnp=0;
   pBankTRGP=pTRGP; //copy into class data member for use by other methods
   ercpy=er;        // squirrel away pointer eventreader for our friends
   if(!pBankTRGP->test_CRC()) { 
     (void) printf("TRG_Reader::TRG_Reader: CRC error: %s %d\n",__FILE__,__LINE__); 
   }
+
   if(pBankTRGP->swap()<0) { 
     // Use default swap.
     mErr = 1;
@@ -140,14 +145,22 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
       }
       break;
 
+    case 2007:
+      S_mode = 0;
+      // Since 2007 run, trigger data has vvariable length. 
+      // Also byte swap accordingly
+      if(UnpackTrg2007(pTRGP) < 0){
+        mErr = 2007;
+        (void) printf("TRG_Reader::TRG_Reader: Swap error %s %d.\n",__FILE__,__LINE__);
+      }
+      break;
+
     default: 
       assert(0);
   }
   (void) printf("TRG_Reader::TRG_Reader: Trigger reader instantiated, distance to data = %d bytes.\n",
 		pBankTRGP->theData.offset);
 }
-
-
 
 void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {
   int i;
