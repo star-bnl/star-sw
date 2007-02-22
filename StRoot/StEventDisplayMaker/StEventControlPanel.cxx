@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.17 2007/02/21 19:16:14 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.18 2007/02/22 02:43:50 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -327,7 +327,10 @@ void StEventControlPanel::Build()
 void StEventControlPanel::Clicked(int id) 
 { 
     // Select the geometry Geant / Sti
-   if (fgDispMk) { fgDispMk->SetGeomType(id);}
+   if (fgDispMk) { 
+      fgDispMk->SetGeomType(id);
+      fgDispMk->ClearGeometry();
+   }
 }
 //_______________________________________________________________________________________
 void StEventControlPanel::ClickedVolume() 

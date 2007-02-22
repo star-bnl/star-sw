@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.121 2007/02/21 19:16:14 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.122 2007/02/22 02:43:50 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -275,7 +275,35 @@ Int_t StEventDisplayMaker::Init(){
    // Call the "standard" Init()
    return StMaker::Init();
 }
-
+//_____________________________________________________________________________
+static bool FindStiVolume(const char *name,TList *list) {
+   // Find STI volume by the prefix
+   // There are 3 (by now) Sti volume prefices:
+   // 1 - Tpc_
+   // 2 - Ssd_
+   // 3 - Svt_
+   // Extract it if any 
+   bool found = false;
+   if (list && name && name[0]) {
+      char *pos = 0;
+      if ((pos = strchr(name,'_'))) {
+         TString pre;
+         pre.Insert(0,name,pos-name);
+         // Look up
+         TIter next(list);
+         TObject *vol = 0;
+         while ( !found &&  (vol = next())) 
+         { 
+            /*printf("%s %s\n",vol->GetName(),pre.Data()); */ 
+            const char *g3name = vol->GetName();
+            if (!strcmp(g3name,"TPSS"))      g3name="TPC";
+            else if (!strcmp(g3name,"STSI")) g3name="SVT";
+            found = pre.BeginsWith(g3name,TString::kIgnoreCase);
+         }
+      }
+   }
+   return found;   
+}
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::BuildGeometry()
 {
@@ -283,16 +311,37 @@ Int_t StEventDisplayMaker::BuildGeometry()
   m_Hall = 0;
   Bool_t gotSti = kFALSE;
   Int_t dipLevel=2;
-//  if (m_VolumeList && m_VolumeList->FindObject("STI")) 
   if (GeomType()) 
   {
      m_Hall = (TVolume *)GetDataSet("STIGEOM");
      if (m_Hall) {
         gotSti = kTRUE;
         m_Hall->MarkAll(); // m_Hall->ls(0);
-        dipLevel = 10;
+        TDataSetIter volume(m_Hall,0);
+// ---  Create "standard" TPC and SVT views ----
+        TVolume *sector = 0;
+        Int_t countMarked = 0;
+        while ( (sector = ( TVolume *)volume()) ){
+          Bool_t found = kFALSE;
+          if (found = FindStiVolume(sector->GetName(),m_VolumeList)) {
+             sector->SetVisibility(TVolume::kBothVisible);
+             sector->Mark(); countMarked++;
+             if (sector->GetLineColor()==1 || sector->GetLineColor()==7) 
+                  sector->SetLineColor(14);
+          } else { 
+            sector->UnMark();
+            sector->SetVisibility(TVolume::kThisUnvisible);
+          }
+       }
+//     if (gotSti && countMarked)  m_Hall->Add(geantHall);
+       m_Hall->SetVisibility(TVolume::kThisUnvisible);
+       if (Debug()) 
+          m_Hall->ls(3);
+        
+//        dipLevel = 10;
+     } else {
+        Warning("BuildGeometry","No STI geometry was found. GEANT3 will be used insteed");
      }
-     Warning("BuildGeometry","No STI geometry was found. GEANT3 will be used insteed");
   }
 
   TVolume *geantHall = 0;
@@ -330,6 +379,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
      m_Hall->SetVisibility(TVolume::kThisUnvisible);
   }
   m_ShortView = new TVolumeView(*m_Hall,dipLevel); 
+  if (Debug()) 
+     m_ShortView->ls(0);
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
 //    if (strcmp(tpssNode->GetName(),"TPGV") && strcmp(tpssNode->GetName(),"TPSS")) continue;
   MakeEmcTowers();
@@ -1407,6 +1458,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.122  2007/02/22 02:43:50  fine
+// Activate G3/Sti geometry toggling
+//
 // Revision 1.121  2007/02/21 19:16:14  fine
 // Add an extra control to choose between G3 and Sti detectors geometries
 //
