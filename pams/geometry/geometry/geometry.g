@@ -1,13 +1,7 @@
-* $Id: geometry.g,v 1.147 2007/02/22 22:21:18 potekhin Exp $
+* $Id: geometry.g,v 1.148 2007/02/22 22:37:39 potekhin Exp $
 * $Log: geometry.g,v $
-* Revision 1.147  2007/02/22 22:21:18  potekhin
-* As stated in the S&C meeting, the recent correction
-* for the dead material in the SSD should be propagated
-* into earlier model-years, therefore creating new tags.
-* Only two such tags were necessary and have been created:
-* Y2005F and Y2006B. In addition to the SSD configuration,
-* they also feature a newer version of the CALB code,
-* which they share with Y2007.
+* Revision 1.148  2007/02/22 22:37:39  potekhin
+* Correcting a simple typo (accidentally hit delete)
 *
 * Revision 1.146  2007/02/16 22:57:50  potekhin
 * As per Xin's communications, the correct logic for year 2007
@@ -2002,6 +1996,7 @@ If LL>1
 * note the full barrel same as in y2003x:
                   "calb" 
                      ems=on ;
+                     CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
                   "ecal"
@@ -2114,7 +2109,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2006B   { Y2006A + improved SSD with dead area and gaps
+  on Y2006B   { Y2006A + improved SSD with dead area + improved CALB
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -2134,6 +2129,7 @@ If LL>1
 * Full barrel in 2006
                   "calb" 
                      ems=on ;
+                     CalbConfig = 2
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
 
 
