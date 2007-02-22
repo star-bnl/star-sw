@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.146 2007/02/16 22:57:50 potekhin Exp $
+* $Id: geometry.g,v 1.147 2007/02/22 22:21:18 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.147  2007/02/22 22:21:18  potekhin
+* As stated in the S&C meeting, the recent correction
+* for the dead material in the SSD should be propagated
+* into earlier model-years, therefore creating new tags.
+* Only two such tags were necessary and have been created:
+* Y2005F and Y2006B. In addition to the SSD configuration,
+* they also feature a newer version of the CALB code,
+* which they share with Y2007.
+*
 * Revision 1.146  2007/02/16 22:57:50  potekhin
 * As per Xin's communications, the correct logic for year 2007
 * in the upVPD code is triggered when the config flag is set to 7.
@@ -1973,6 +1982,73 @@ If LL>1
                 }
 
 ****************************************************************************************
+  on Y2005F    { Y2005E + corrected SSD with gaps and dead area
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+* note the full barrel same as in y2003x:
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 55; "fifth version, full barrel with corrected radii and dead area"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+
+                }
+
+****************************************************************************************
   on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
@@ -2037,6 +2113,77 @@ If LL>1
 
                 }
 
+****************************************************************************************
+  on Y2006B   { Y2006A + improved SSD with dead area and gaps
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=4 " call btofgeo4 ";
+* NEW CONFIG!
+                     BtofConfig=8;
+
+* Full barrel in 2006
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 2 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+* important: (1) new SVT version (2) FTPC gas correction tp Ar+C02 mix (3) SSD ladders raddi correction
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 6; "SVTT version"
+                     SvshConfig = 2; "SVT shield"
+                     DensConfig = 1; "gas density correction"
+                     FtpcConfig = 1; "ftpc configuration"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 55; "fifth version, full barrel newly corrected radii and dead area"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 3;
+                  "Muon Trigger System"
+                     mutd = on;
+                     MutdConfig = 1;
+                  "We need a bigger Cave"
+                     CaveConfig = 3;
+                }
 ****************************************************************************************
   on Y2006A   { Year 2006 baseline which is Y2005D+fixed TPC backplane+New SSD
                   "svt: 3 layers ";
