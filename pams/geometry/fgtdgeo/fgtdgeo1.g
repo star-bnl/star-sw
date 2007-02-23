@@ -1,5 +1,11 @@
-* $Id: fgtdgeo1.g,v 1.2 2007/02/13 20:41:03 potekhin Exp $
+* $Id: fgtdgeo1.g,v 1.3 2007/02/23 21:16:37 potekhin Exp $
 * $Log: fgtdgeo1.g,v $
+* Revision 1.3  2007/02/23 21:16:37  potekhin
+* Replacing a dummy version (a placeholder) of the FGT (formerly known
+* as IGT) code with a piece that supposedly works, and has 6 GEM disks.
+* All the structures and volumes were renames to comply with the new
+* naming convention (i.e. FGT, not IGT anymore).
+*
 * Revision 1.2  2007/02/13 20:41:03  potekhin
 * Remove the hit declaration just to make sure
 * there is no confusion downstream -- this version
@@ -25,13 +31,13 @@
 ******************************************************************************
 Module FGTDGEO1 is the geometry of the forward GEM tracking detector
   Created  2/7/07
-  Author   TUP Team
+  Author   TUP Tea
 ******************************************************************************
 +CDE,AGECOM,GCUNIT.
 
 * Declare variables used in the code.
 
-      real center                  ! centre of complete assembly along Z axis
+      real center                  ! center of complete assembly along Z axis
       real length                  ! length of complete assembly along Z axis
       real thick                   ! thickness in Z of a single GEM disk
       real rmn                     ! used to determine the minimum radius
@@ -45,51 +51,40 @@ Module FGTDGEO1 is the geometry of the forward GEM tracking detector
       integer layer                ! index fro counting over the layers in GEM
 
 * Declare the blocks to be defined in the code.
-      Content   IGMO, IGDO, IGFO, IGIS, IGOS, IGRL, IGAL
+      Content   FGMO, FGDO, FGFO, FGIS, FGOS, FGRL, FGSC
 
-      Structure IGTV {version,  int Config}
+      Structure FGTV {version,  int Config}
 
-* Declare the structure IGTG which defines the detector geometry.
-      Structure IGTG { Config, RI(4), RO(4), Zstart, Z(4), FThk(4), SThk(4), SR, RThk }
+* Declare the structure FGTG which defines the detector geometry.
+      Structure FGTG { Config, RI(6), RO(6), Zstart, Z(6), FThk(6), SThk(6), SR, RThk }
 
 * -----------------------------------------------------------------------------
+*      RI      = {  7.5,  7.5,  7.5, 16.5, 16.5, 16.5 }    ! inner radii for each GEM. ORG{3, 7.5, 12, 16.5, 21, 25.5} 
 
-   Fill IGTV    !  IGT geometry version
-      version    =  1    ! geometry version - dummy
-      Config =  1    ! config
+   Fill FGTV          ! FGT geometry version
+      version =  1    ! geometry version - dummy
+      Config  =  1    ! config
    EndFill
 
-   Fill IGTG                   ! Inner GEM Tracker Geometry data
-      Config  =  1                            ! Version
-      RI      = { 15.0, 20.0, 25.0, 30.0 }    ! inner radii for each GEM
-      RO      = { 45.0, 45.0, 45.0, 45.0 }    ! outer radii for each GEM
-      Zstart  = 55.0                          ! starting position along Z axis
-      Z       = { 0.0, 30.0, 60.0, 90.0}      ! Z positions for GEM front face
-      FThk    = { 0.05, 0.05, 0.05, 0.05 }    ! foil thicknesses inside GEM
-      SThk    = { 0.4, 0.3, 0.3, 0.4 }        ! support/spacing thicknesses
-      SR      = 1.0                           ! radial size for support
-      RThk    = 0.3                           ! readout plane thickness
-   EndFill
-
-   Fill IGTG                   ! Inner GEM Tracker Geometry data
-      Config  =  2                            ! Version
-      RI      = { 15.0, 20.0, 25.0, 30.0 }    ! inner radii for each GEM. 
-      RO      = { 43.0, 43.0, 43.0, 43.0 }    ! outer radii for each GEM
-      Zstart  = 58.0                          ! starting position along Z axis. rcc 55.0 originally
-      Z       = { 0.0, 30.0, 60.0, 90.0}      ! Z positions for GEM front face
-      FThk    = { 0.05, 0.05, 0.05, 0.05 }    ! foil thicknesses inside GEM
-      SThk    = { 0.4, 0.3, 0.3, 0.4 }        ! support/spacing thicknesses
-      SR      = 1.0                           ! radial size for support
-      RThk    = 0.3                           ! readout plane thickness
+   Fill FGTG  ! Inner GEM Tracker Geometry data
+      Config  =   1                                       ! Version
+      RI      = {  7.5,  7.5,  7.5,  7.5,  7.5,  7.5 }    ! inner radii for each GEM. ORG{3, 7.5, 12, 16.5, 21, 25.5} 
+      RO      = { 43.0, 43.0, 43.0, 43.0, 43.0, 43.0 }    ! outer radii for each GEM.
+      Zstart  =   60.0                                    ! starting position along Z axis
+      Z       = { 0.0, 18.0, 36.0, 54.0, 72.0, 90.0}      ! Z positions for GEM front face
+      FThk    = { 0.05, 0.05, 0.05, 0.05, 0.05, 0.05 }    ! foil thicknesses inside GEM
+      SThk    = { 0.4, 0.3, 0.3, 0.3, 0.3, 0.4 }          ! support/spacing thicknesses
+      SR      =   1.0                                     ! radial size for support
+      RThk    =   0.3                                     ! readout plane thickness
    EndFill
 
 *******************************************************************************
 
 * Calculate some parameters from the input variables.
 
-      USE IGTV
-      USE IGTG  config=IGTV_Config;
-      write(*,*) 'IGTD Version:',IGTV_Config
+      USE FGTV
+      USE FGTG  config=FGTV_Config;
+      write(*,*) 'FGTD Version:',FGTV_Config
 
 * use aluminized mylar mixture instead of kapton
       Component C5  A=12    Z=6  W=5
@@ -111,10 +106,10 @@ Module FGTDGEO1 is the geometry of the forward GEM tracking detector
       thick = 0.0
 
       do layer = 1, 4
-         thick = thick + IGTG_FThk(layer) + IGTG_SThk(layer)
+         thick = thick + FGTG_FThk(layer) + FGTG_SThk(layer)
       enddo
 
-      thick = thick + IGTG_RThk
+      thick = thick + FGTG_RThk
 
 * Loop over the GEM disks and determine the min and max radius and max Z.
 
@@ -122,18 +117,18 @@ Module FGTDGEO1 is the geometry of the forward GEM tracking detector
       rmx = - rmn
       length = 0.0
 
-      do disk = 1, 4
+      do disk = 1, 6
 
-         if( rmn .gt. IGTG_RI(disk) ) then
-            rmn = IGTG_RI(disk)
+         if( rmn .gt. FGTG_RI(disk) ) then
+            rmn = FGTG_RI(disk)
          endif
 
-         if( rmx .lt. IGTG_RO(disk) ) then
-            rmx = IGTG_RO(disk)
+         if( rmx .lt. FGTG_RO(disk) ) then
+            rmx = FGTG_RO(disk)
          endif
 
-         if( length .lt. IGTG_Z(disk) ) then
-            length = IGTG_Z(disk)
+         if( length .lt. FGTG_Z(disk) ) then
+            length = FGTG_Z(disk)
          endif
       enddo
 
@@ -141,36 +136,36 @@ Module FGTDGEO1 is the geometry of the forward GEM tracking detector
 
 * Calculate centre of assembly.
 
-      center = IGTG_Zstart + length / 2.0
+      center = FGTG_Zstart + length / 2.0
 
-      Create   IGMO
-      Position IGMO in CAVE z=+center kOnly='MANY'
+      Create   FGMO
+      Position FGMO in CAVE z=+center kOnly='MANY'
 
 * -----------------------------------------------------------------------------
-Block IGMO is the mother volume for the IGTD
+Block FGMO is the mother volume for the FGTD
       Material  Air
-      Attribute IGMO  Seen=1  colo=6
+      Attribute FGMO  Seen=0  colo=6
 
       Shape     TUBE Rmin=rmn Rmax=rmx Dz=length/2.0
 
 * Loop over the four GEM disks.
 
-      do disk=1,4
-         rin  = IGTG_RI(disk)
-         rout = IGTG_RO(disk)
-         Create and Position IGDO z=-length/2.0 + thick/2.0 + IGTG_Z(disk)
+      do disk=1,6
+         rin  = FGTG_RI(disk)
+         rout = FGTG_RO(disk)
+         Create and Position FGDO z=-length/2.0 + thick/2.0 + FGTG_Z(disk)
       enddo
 
 endblock
 
 * -----------------------------------------------------------------------------
-Block IGDO is the mother volume of the individual GEM disks
+Block FGDO is the mother volume of the individual GEM disks
       Component Ar A=39.95   Z=18.   W=0.9
       Component C  A=12.01   Z=6.    W=0.1*1*12.01/44.01
       Component O  A=16.     Z=8.    W=0.1*2*16./44.01
       Mixture   Ar_mix  Dens=0.0018015
 
-      Attribute IGDO  Seen=0  colo=6
+      Attribute FGDO  Seen=0  colo=6
 
       Shape TUBE Rmin=rin Rmax=rout Dz=thick/2.0
 
@@ -182,25 +177,25 @@ Block IGDO is the mother volume of the individual GEM disks
 
 * Create GEM foil.
 
-         thk = IGTG_FThk(layer)/2.0     ! half thickness of foil
+         thk = FGTG_FThk(layer)/2.0     ! half thickness of foil
          zsum = zsum + thk              ! position of foil centre
 
-         Create and Position IGFO z=zsum 
+         Create and Position FGFO z=zsum 
 
          zsum = zsum + thk              ! position of foil rear face
 
 * Create inner and outer spacer/support.
 
-         thk = IGTG_SThk(layer)/2.0     ! half thickness of spacer
+         thk = FGTG_SThk(layer)/2.0     ! half thickness of spacer
          zsum = zsum + thk              ! position of spacer centre
 
-         Create and Position IGIS z=zsum 
-         Create and Position IGOS z=zsum 
+         Create and Position FGIS z=zsum 
+         Create and Position FGOS z=zsum 
 
 * First gap is active volume -> create it.
 
          if( layer .eq. 1 ) then
-            Create and Position IGAL z=zsum
+            Create and Position FGSC z=zsum
          endif
 
          zsum = zsum + thk              ! position of spacer rear face
@@ -209,66 +204,64 @@ Block IGDO is the mother volume of the individual GEM disks
 
 * Create readout layer as last layer.
 
-      thk = IGTG_RThk/2.0               ! half thickness of readout layer
+      thk = FGTG_RThk/2.0               ! half thickness of readout layer
       zsum = zsum + thk                 ! position of readout layer centre
 
-      Create and Position IGRL z=zsum
+      Create and Position FGRL z=zsum
 
 endblock
 
 * -----------------------------------------------------------------------------
-Block IGFO describes the GEM foils
+Block FGFO describes the GEM foils
       Material ALKAP
-      Attribute IGFO  Seen=1 colo=4
+      Attribute FGFO  Seen=1 colo=4
 
       Shape TUBE Rmin=rin Rmax=rout Dz=thk
 
 endblock
 
 * -----------------------------------------------------------------------------
-Block IGIS describes the inner support or spacer
+Block FGIS describes the inner support or spacer
       Material G10
-      Attribute IGIS  Seen=1  colo=3
+      Attribute FGIS  Seen=1  colo=3
 
-      Shape TUBE Rmin=rin Rmax=rin+IGTG_SR Dz=thk
+      Shape TUBE Rmin=rin Rmax=rin+FGTG_SR Dz=thk
 
 endblock
 
 * -----------------------------------------------------------------------------
-Block IGOS describes the outer support or spacer
+Block FGOS describes the outer support or spacer
       Material G10
-      Attribute IGOS  Seen=1  colo=3
+      Attribute FGOS  Seen=1  colo=3
 
-      Shape TUBE Rmin=rout-IGTG_SR Rmax=rout Dz=thk
+      Shape TUBE Rmin=rout-FGTG_SR Rmax=rout Dz=thk
 
 endblock
 
 * -----------------------------------------------------------------------------
-Block IGRL describes the readout layer
+Block FGRL describes the readout layer
       Material G10
-      Attribute IGRL  Seen=1  colo=3
+      Attribute FGRL  Seen=1  colo=3
 
       Shape TUBE Rmin=rin Rmax=rout Dz=thk
 
 endblock
 
 * -----------------------------------------------------------------------------
-Block IGAL describes the active area
+Block FGSC describes the sensitive area
       Component Ar A=39.95   Z=18.   W=0.9
       Component C  A=12.01   Z=6.    W=0.1*1*12.01/44.01
       Component O  A=16.     Z=8.    W=0.1*2*16./44.01
-      Mixture   Ar_mix  Dens=0.0018015
-* Isvol=1
+      Mixture   Ar_mix  Dens=0.0018015 Isvol=1
 
       Material  Sensitive  Isvol=1
+      Attribute FGSC  Seen=1 colo=6
 
-      Attribute IGAL  Seen=1 colo=6
+      Shape TUBE Rmin=rin+FGTG_SR Rmax=rout-FGTG_SR Dz=FGTG_SThk(1)/2.0;
 
-      Shape TUBE Rmin=rin+IGTG_SR Rmax=rout-IGTG_SR Dz=IGTG_SThk(1)/2.0
-
-*      HITS    IGAL   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
-*                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
-*                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
+      HITS    FGSC   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+                     cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
+                     ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
 
 endblock
 
