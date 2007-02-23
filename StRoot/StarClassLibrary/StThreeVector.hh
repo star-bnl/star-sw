@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.18 2006/02/14 17:57:31 perev Exp $
+ * $Id: StThreeVector.hh,v 1.19 2007/02/23 17:36:19 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.19  2007/02/23 17:36:19  ullrich
+ * Added xyz() method.
+ *
  * Revision 1.18  2006/02/14 17:57:31  perev
  * x(),y(),z() return references now
  *
@@ -132,9 +135,10 @@ public:
     void setMag(T);
     void setMagnitude(T);
     
-const T& x()                       const;
-const T& y()                       const;
-const T& z()                       const;
+    const T& x()                   const;
+    const T& y()                   const;
+    const T& z()                   const;
+    const T* xyz()                 const;
     T   theta()                    const;
     T   cosTheta()                 const;
     T   phi()                      const;
@@ -270,6 +274,9 @@ inline const T& StThreeVector<T>::y() const {return mX2;}
 
 template<class T>
 inline const T& StThreeVector<T>::z() const {return mX3;}
+
+template<class T>
+inline const T* StThreeVector<T>::xyz() const {return &mX1;}
 
 template<class T>
 inline T StThreeVector<T>::theta() const
