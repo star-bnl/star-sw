@@ -22,15 +22,18 @@
 class StTinyRcTrack {
  public:
   StTinyRcTrack();
-  virtual ~StTinyRcTrack();
-  
+  virtual ~StTinyRcTrack() {}
+  void setValidGl() {mIsValidGl = 1;}
+  void setValidPr() {mIsValidPr = 1;}
   void setPtPr(Float_t val){ mPtPr=val; }
   void setPzPr(Float_t val){ mPzPr=val; }
   void setEtaPr(Float_t val) { mEtaPr=val; }
   void setPhiPr(Float_t val) { mPhiPr=val; }
   void setDcaPr(Float_t val) { mDcaPr=val; }
   void setDcaXYPr(Float_t val) { mDcaXYPr=val; }
-  void setDcaZPr(Float_t val) { mDcaZPr=val; }
+  void setDcaZPr(Float_t val) { mDcaZPrMcV=val; }
+  void setDcaXYPrMcV(Float_t val) { mDcaXYPrMcV=val; }
+  void setDcaZPrMcV(Float_t val) { mDcaZPr=val; }
   void setCurvPr(Float_t val) {mCurvPr=val; }
   void setTanLPr(Float_t val) {mTanLPr=val; }
   void setErrPr(Float_t val[5]) { for (short j=0; j<5; ++j) mErrP[j] = val[j]; }
@@ -46,6 +49,8 @@ class StTinyRcTrack {
   void setDcaGl(Float_t val) { mDcaGl=val; }
   void setDcaXYGl(Float_t val) { mDcaXYGl=val; }
   void setDcaZGl(Float_t val) { mDcaZGl=val; }
+  void setDcaXYGlMcV(Float_t val) { mDcaXYGlMcV=val; }
+  void setDcaZGlMcV(Float_t val) { mDcaZGlMcV=val; }
   void setCurvGl(Float_t val) { mCurvGl=val; }
   void setTanLGl(Float_t val) { mTanLGl=val; }
   void setErrGl(Float_t val[5]) { for (short j=0; j<5; ++j) mErrG[j] = val[j]; }
@@ -68,6 +73,7 @@ class StTinyRcTrack {
   void setFitPts(Short_t val) { mFitPts=val; }
   void setFitFtpc(Short_t val) { mFitFtpc=val; }
   void setFitSvt(Short_t val) { mFitSvt=val; }
+  void setFitSsd(Short_t val) { mFitSsd=val; }
   void setDedxPts(Short_t val) { mDedxPts=val; }
   void setAllPts(Short_t val) { mAllPts=val; }
   void setCharge(Short_t val) { mCharge=val; }
@@ -124,14 +130,16 @@ class StTinyRcTrack {
   short fitPts()     const { return mFitPts; }
   short fitPtsFtpc() const { return mFitFtpc; }
   short fitPtsSvt()  const { return mFitSvt; }
+  short fitPtsSsd()  const { return mFitSsd; }
   short dedxPts() const { return mDedxPts; }
   short allPts() const { return mAllPts; }
   short charge() const { return mCharge; }
   short nAssocMc() const { return mNAssocMc; }
   short nPossiblePts() const { return mNPossible; }
+  virtual void Print(Option_t *option="") const;
 private:
   // primary stuff
-  
+  Char_t     mIsValidGl;
   Float_t    mPtPr;
   Float_t    mPzPr;
   Float_t    mEtaPr;
@@ -139,6 +147,8 @@ private:
   Float_t    mDcaPr;
   Float_t    mDcaXYPr;
   Float_t    mDcaZPr;
+  Float_t    mDcaXYPrMcV;
+  Float_t    mDcaZPrMcV;
   Float_t    mCurvPr;
   Float_t    mTanLPr;
 
@@ -162,6 +172,8 @@ private:
   Float_t    mDcaGl;
   Float_t    mDcaXYGl;
   Float_t    mDcaZGl;
+  Float_t    mDcaXYGlMcV;
+  Float_t    mDcaZGlMcV;
   Float_t    mCurvGl;
   Float_t    mTanLGl;
   Float_t    mErrG[5];
@@ -192,6 +204,7 @@ private:
     
   Short_t      mFitPts;
   Short_t      mFitSvt;
+  Short_t      mFitSsd;
   Short_t      mFitFtpc;
   Short_t      mDedxPts;
   Short_t      mAllPts;
@@ -199,6 +212,7 @@ private:
     
   Short_t      mNAssocMc;
   Short_t      mNPossible;
+  Char_t       mIsValidPr;
 
   ClassDef(StTinyRcTrack,5)
 };
@@ -206,6 +220,9 @@ private:
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.7  2007/02/23 17:07:01  fisyak
+// Add Ssd and DCA
+//
 // Revision 1.6  2006/07/24 19:03:16  calderon
 // Added parent key data member to StTinyMcTrack.
 // Added reco key data member to StTinyRcTrack.
@@ -229,6 +246,9 @@ private:
 //
 // Revision 1.2  2002/06/06 18:58:30  calderon
 // Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.7  2007/02/23 17:07:01  fisyak
+// Added Add Ssd and DCA
+// Added
 // Added Revision 1.6  2006/07/24 19:03:16  calderon
 // Added Added parent key data member to StTinyMcTrack.
 // Added Added reco key data member to StTinyRcTrack.

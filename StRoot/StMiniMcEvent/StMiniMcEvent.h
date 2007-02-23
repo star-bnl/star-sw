@@ -18,10 +18,8 @@
 
 #include "TObject.h"
 #include "TClonesArray.h"
-class StTinyRcTrack;
-class StTinyMcTrack;
-class StMiniMcPair;
-class StContamPair;
+#include "StMiniMcPair.h"
+#include "StContamPair.h"
 
 enum Category { MC,MATCHED,MERGED,SPLIT,CONTAM,GHOST,MATGLOB};
 
@@ -31,10 +29,12 @@ class StMiniMcEvent : public TObject {
   virtual ~StMiniMcEvent();
   void Clear(Option_t *option=""); // clear the tracks
 
-  void addMcTrack(StTinyMcTrack*);
-  void addTrackPair(StMiniMcPair*, Category);
+  StTinyMcTrack* addMcTrack(StTinyMcTrack* mc=0);
+  StMiniMcPair*  addTrackPair(StMiniMcPair* pair=0, Category K=MATCHED);
+  StContamPair*  addContamPair(StContamPair* pair=0);
 
-  TClonesArray* tracks(Category);
+  //  TClonesArray* tracks(Category);
+  TClonesArray* tracks(Category) const;
 
   Int_t		eventId() 			const { return mEventId; }
   Int_t		runId() 			const { return mRunId; }
@@ -57,6 +57,7 @@ class StMiniMcEvent : public TObject {
   Float_t       vertexX() 			const { return mVertexX; }  
   Float_t       vertexY() 			const { return mVertexY; }
   Float_t       vertexZ() 			const { return mVertexZ; }
+  const Float_t*vertexCovMatrix()               const { return &mVertexCovMatrix[0];}
   Float_t       mcVertexX() 			const { return mMcVertexX; }
   Float_t       mcVertexY() 			const { return mMcVertexY; }
   Float_t       mcVertexZ() 			const { return mMcVertexZ; }
@@ -96,6 +97,7 @@ class StMiniMcEvent : public TObject {
   void setVertexX(Float_t val)				{ mVertexX=val; }
   void setVertexY(Float_t val)				{ mVertexY=val; }
   void setVertexZ(Float_t val)				{ mVertexZ=val; }
+  void setVertexCovMatrix(Float_t *cov) {for (Int_t i = 0; i < 6; i++) mVertexCovMatrix[i] = cov[i];}
   void setMcVertexX(Float_t val)			{ mMcVertexX=val; }
   void setMcVertexY(Float_t val)			{ mMcVertexY=val; }
   void setMcVertexZ(Float_t val)			{ mMcVertexZ=val; } 
@@ -113,7 +115,7 @@ class StMiniMcEvent : public TObject {
   void setNSplitPair(Int_t val)				{ mNSplitPair=val; }
   void setNGhostPair(Int_t val)				{ mNGhostPair=val; }
   void setNContamPair(Int_t val)			{ mNContamPair=val; }
-
+  virtual void Print(Option_t *option="") const;
 private:
   //
   // data members
@@ -142,6 +144,7 @@ private:
   Float_t       mVertexX;  
   Float_t       mVertexY;     // 
   Float_t       mVertexZ;
+  Float_t       mVertexCovMatrix[6];
   Float_t       mMcVertexX;
   Float_t       mMcVertexY;
   Float_t       mMcVertexZ;
@@ -186,6 +189,9 @@ private:
   
 //
 // $Log: StMiniMcEvent.h,v $
+// Revision 1.6  2007/02/23 17:07:00  fisyak
+// Add Ssd and DCA
+//
 // Revision 1.5  2004/01/26 13:58:18  calderon
 // Introduction of global matched branch.
 //
