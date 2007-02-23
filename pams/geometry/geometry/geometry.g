@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.149 2007/02/23 21:20:02 potekhin Exp $
+* $Id: geometry.g,v 1.150 2007/02/23 21:45:40 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.150  2007/02/23 21:45:40  potekhin
+* a) re-instated the calls to IGT codes to keep a degree
+* of backward compatibility (for early UPGRXX tags)
+* b) deleted the previosuly commented out IST1 tag (as
+* advertised earlier, it was officially retired)
+* c) put in the dead material version of SSD into UPGR13 (SSD5)
+*
 * Revision 1.149  2007/02/23 21:20:02  potekhin
 * In the R and D tag UPGR13, removed the prototype support
 * cone on the East side on Gerrit's request. Corrected the
@@ -936,61 +943,7 @@ If LL>1
                    pixl=on;    " put the pixel detector in"
                    PixlConfig=1;
                 }
-
-*************************************************************************************************************
-*  on IST1   { New Tracking: TPC+CTB+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+ISTB+FSTD+FGTD;
-*
-*                     svtt=off; "no SVT  at all in this configuration"
-*                     ftpc=off; "no FTPC at all in this configuration"
-*                  "tpc: standard, i.e.  "
-*                     mwc=on " Wultiwire chambers are read-out ";
-*                     pse=on " inner sector has pseudo padrows ";
-*                  "ctb: central trigger barrer             ";
-*                     Itof=2 " call btofgeo2 ";
-*                     BtofConfig=5;
-*                  "calb" 
-*                     ems=on
-*                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
-*                  "ecal"
-*                     ecal_config=1   " west wheel "
-*                     ecal_fill=3     " all sectors filled "
-*                  "beam-beam counter "
-*                     bbcm=on
-*                  "forward pion detector "
-*                     fpdm=on
-*                  "field version "
-*                     Mf=4;      "tabulated field, with correction "
-*                    -- Obsoleted: CorrNum = 4;
-*                     SvshConfig = 1; "SVT shield"
-*                     DensConfig = 1; "gas density correction"
-*                     SupoConfig = 1; "FTPC Support"
-*                     SvttConfig = 4;
-*
-*                  "Photon Multiplicity Detector Version "
-*                     phmd=on;
-*                     PhmdConfig = 1;
-*                  "Silicon Strip Detector Version "
-*                     sisd=on;
-*                     SisdConfig = 23;
-* careful! Achtung!
-*                   pipeConfig=4;   " provisional"
-*                   pixl=on;        " put the pixel detector in"
-*                   PixlConfig=2;   " newer version decoupled from SVT"
-* Inner STAR tracker barrel
-*                   istb=on;  "new pixel based inner tracker"
-*                   IstbConfig=1;
-* Inner STAR GEM barrel
-*                   gemb=on;  
-*                   GembConfig=1;
-* Forward STAR tracker disk
-*                   fstd=on;  "new pixel based forward tracker"
-*                   FstdConfig=1;
-* Forward STAR tracker disk
-*                   fgtd=on;  "GEM forward tracker"
-*                   FgtdConfig=1;
-*                }
-
-
+****************************************************************************************
 * corrected: MWC readout, RICH reconstructed position, no TOF 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
                   {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5; 
@@ -3132,7 +3085,7 @@ If LL>1
                      svtt=off; "no SVT  at all in this configuration"
                      ftpc=off; "no FTPC at all in this configuration"
                   "tpc: standard, i.e.  "
-                     mwc=on " Wultiwire chambers are read-out ";
+                     mwc=on " Multiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
@@ -3160,7 +3113,7 @@ If LL>1
                      PhmdConfig = 1;
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 45;
+                     SisdConfig = 55;
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
                    pixl=on;        " put the pixel detector in"
@@ -3627,14 +3580,13 @@ If LL>1
       Call fgtdgeo1
    endif
 
-* Preparing to retire the IGT
-*   if (igtd) then
-*       if(IgtdConfig==2) then
-*           call AgDETP new ('IGTD')
-*           call AgDETP add ('igtv.Config=',IgtdConfig ,1)
-*       endif
-*       Call igtdgeo
-*   endif
+   if (igtd) then
+       if(IgtdConfig==2) then
+           call AgDETP new ('IGTD')
+           call AgDETP add ('igtv.Config=',IgtdConfig ,1)
+       endif
+       Call igtdgeo
+   endif
 
    if (hpdt.and.HpdtConfig>0)  Call hpdtgeo
 
