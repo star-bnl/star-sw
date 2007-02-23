@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.7 2007/01/03 18:54:56 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.8 2007/02/23 00:07:18 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -72,7 +72,7 @@ void GeomBrowser::fileOpen()
 #ifndef  NO_GEANT_MAKER
                               ";GEANT3 Zebra file (*.fz)"
 #endif
-                              ;
+                              ";";
    QString selectedFilter;
    QString dir = fSaveFileName;
    if (dir.isEmpty()) dir = gSystem->WorkingDirectory();
