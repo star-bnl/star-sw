@@ -69,11 +69,11 @@
 
 #define RAW_MAX_LEN          272              /* Maximum length of any Chain Block Transfer */
 
-#define L2RESULTS_OFFSET_TRG         0
-#define L2RESULTS_OFFSET_EMC_PED     1 
-#define L2RESULTS_OFFSET_PIG         2
-#define L2RESULTS_OFFSET_UPS         6
-#define L2RESULTS_OFFSET_DISPVER    12
+#define L2RESULTS_2007_OFFSET_TRG         0
+#define L2RESULTS_2007_OFFSET_EMC_PED     1 
+#define L2RESULTS_2007_OFFSET_PIG         2
+#define L2RESULTS_2007_OFFSET_UPS         6
+#define L2RESULTS_2007_OFFSET_DISPVER    12
 
 #define ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
 #define ADD_BIT_FORCE          5              /* Force store of this event */
