@@ -1,7 +1,22 @@
-* $Id: geometry.g,v 1.148 2007/02/22 22:37:39 potekhin Exp $
+* $Id: geometry.g,v 1.149 2007/02/23 21:20:02 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.149  2007/02/23 21:20:02  potekhin
+* In the R and D tag UPGR13, removed the prototype support
+* cone on the East side on Gerrit's request. Corrected the
+* steering logic for the new FGT (former IGT) to integrate
+* the newer code obtained form Gerrit.
+*
 * Revision 1.148  2007/02/22 22:37:39  potekhin
 * Correcting a simple typo (accidentally hit delete)
+*
+* Revision 1.147  2007/02/22 22:21:18  potekhin
+* As stated in the S&C meeting, the recent correction
+* for the dead material in the SSD should be propagated
+* into earlier model-years, therefore creating new tags.
+* Only two such tags were necessary and have been created:
+* Y2005F and Y2006B. In addition to the SSD configuration,
+* they also feature a newer version of the CALB code,
+* which they share with Y2007.
 *
 * Revision 1.146  2007/02/16 22:57:50  potekhin
 * As per Xin's communications, the correct logic for year 2007
@@ -780,7 +795,7 @@ replace[;ON#{#;] with [
    CaveConfig  = 1 ! custom for shielding studies=2, wider for muon detector=3, and longer=4
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
    DensConfig  = 0 ! gas density correction
-   FgtdConfig  = 0 ! 0=no, >1=version
+   FgtdConfig  = 1 ! version
    FpdmConfig  = 0 ! 0 means the original source code
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
@@ -3160,8 +3175,8 @@ If LL>1
 * Forward STAR tracker disk
                    fgtd=on;  "GEM forward tracker"
                    FgtdConfig=2;
-
-                   itsp=on; "prototype of the Inner Tracker SuPport structure"
+* On Gerrit's request, we disable the cone:
+                   itsp=off; "prototype of the Inner Tracker SuPport structure"
                 }
 ****************************************************************************************
   on DEV2005    { THIS TAG IS RESERVED FOR THE 2005 DEVELOPMENT ONLY
@@ -3607,18 +3622,19 @@ If LL>1
 
    if (fgtd.and.FgtdConfig==1)    then
       Call fgtdgeo  ! old, decomissioned
-   elseif(fgtd.and.FgtdConfig>1) then
-      write(*,*) '****** constructing the new Forward Gem Tracker geometry ***************'
+   elseif(fgtd.and.FgtdConfig==2) then
+      write(*,*) '****** constructing the new 6-disk Forward Gem Tracker geometry ***********'
       Call fgtdgeo1
    endif
 
-   if (igtd) then
-       if(IgtdConfig==2) then
-           call AgDETP new ('IGTD')
-           call AgDETP add ('igtv.Config=',IgtdConfig ,1)
-       endif
-       Call igtdgeo
-   endif
+* Preparing to retire the IGT
+*   if (igtd) then
+*       if(IgtdConfig==2) then
+*           call AgDETP new ('IGTD')
+*           call AgDETP add ('igtv.Config=',IgtdConfig ,1)
+*       endif
+*       Call igtdgeo
+*   endif
 
    if (hpdt.and.HpdtConfig>0)  Call hpdtgeo
 
