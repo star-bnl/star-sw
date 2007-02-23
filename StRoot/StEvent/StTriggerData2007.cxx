@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StTriggerData2007.cxx,v 2.1 2007/02/22 20:31:23 ullrich Exp $
+ * $Id: StTriggerData2007.cxx,v 2.2 2007/02/23 17:16:38 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2007
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2007.cxx,v $
+ * Revision 2.2  2007/02/23 17:16:38  ullrich
+ * Changed L2RESULTS_... to L2RESULTS_2007_...
+ *
  * Revision 2.1  2007/02/22 20:31:23  ullrich
  * Initial Revision.
  *
@@ -825,11 +828,11 @@ int StTriggerData2007::L2ResultsOffset(StL2AlgorithmId id) const
     if(mRun<7000000) return -1;
     
     switch(id) {
-    case l2Diagnostic:      return L2RESULTS_OFFSET_TRG;
-    case l2EmcPedestal:     return L2RESULTS_OFFSET_EMC_PED;
-    case l2Pi0Gamma:        return L2RESULTS_OFFSET_PIG;
-    case l2Upsilon:         return L2RESULTS_OFFSET_UPS;
-    case l2DisplacedVertex: return L2RESULTS_OFFSET_DISPVER;
+    case l2Diagnostic:      return L2RESULTS_2007_OFFSET_TRG;
+    case l2EmcPedestal:     return L2RESULTS_2007_OFFSET_EMC_PED;
+    case l2Pi0Gamma:        return L2RESULTS_2007_OFFSET_PIG;
+    case l2Upsilon:         return L2RESULTS_2007_OFFSET_UPS;
+    case l2DisplacedVertex: return L2RESULTS_2007_OFFSET_DISPVER;
     default: return -999999999;
     }
 }
