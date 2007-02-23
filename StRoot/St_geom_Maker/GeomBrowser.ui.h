@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.9 2007/02/23 23:47:04 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.10 2007/02/23 23:49:10 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -388,7 +388,6 @@ void GeomBrowser::init()
    
    const char *found = gSystem->Which((const char*)path, (const char*)file);
    if (found) {
-      printf(" pgeom path found %s\n", found);
      if (found[0]) {
        QFile geomFile(found);
        if (geomFile.open(IO_ReadOnly)) {
