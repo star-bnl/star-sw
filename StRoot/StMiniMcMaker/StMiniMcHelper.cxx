@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcHelper.cxx,v 1.1 2006/05/22 18:55:14 calderon Exp $
+ * $Id: StMiniMcHelper.cxx,v 1.2 2007/02/23 17:07:41 fisyak Exp $
  * \file  Helper.cxx
  * \brief Assorted utility functions.  Helix DCA's(2D, 3D, signed), crossing angles, padrow propagation.
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi
  * \date   March 2001
  * $Log: StMiniMcHelper.cxx,v $
+ * Revision 1.2  2007/02/23 17:07:41  fisyak
+ * Resolve bug #682
+ *
  * Revision 1.1  2006/05/22 18:55:14  calderon
  * Changes from the original code by Bum to comply with STAR coding standards.
  * First thing is to change the name of the "Helper" file to something that is more in line with the file naming convention.
@@ -18,7 +21,7 @@
 
 #include "StMiniMcHelper.h"
 #include <cmath>
-
+#include "TMath.h"
 
 //#include "StPhysicalHelixD.hh"
 #include "TRandom.h"
