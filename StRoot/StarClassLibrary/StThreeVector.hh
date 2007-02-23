@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.19 2007/02/23 17:36:19 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.20 2007/02/23 22:41:42 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
+ * Revision 1.20  2007/02/23 22:41:42  ullrich
+ * Also add non-const version of xyz().
+ *
  * Revision 1.19  2007/02/23 17:36:19  ullrich
  * Added xyz() method.
  *
@@ -139,6 +142,7 @@ public:
     const T& y()                   const;
     const T& z()                   const;
     const T* xyz()                 const;
+          T* xyz();
     T   theta()                    const;
     T   cosTheta()                 const;
     T   phi()                      const;
@@ -277,6 +281,9 @@ inline const T& StThreeVector<T>::z() const {return mX3;}
 
 template<class T>
 inline const T* StThreeVector<T>::xyz() const {return &mX1;}
+
+template<class T>
+inline T* StThreeVector<T>::xyz() {return &mX1;}
 
 template<class T>
 inline T StThreeVector<T>::theta() const
