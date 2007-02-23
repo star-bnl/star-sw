@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcPair.h,v 1.3 2004/03/31 23:42:46 calderon Exp $
+ * $Id: StMiniMcPair.h,v 1.4 2007/02/23 17:07:00 fisyak Exp $
  * \file  StMiniMcPair.h
  * \brief  for simplicity, this contains both the rc and mc track information.
  * 
@@ -16,8 +16,8 @@
 
 class StMiniMcPair : public StTinyMcTrack, public StTinyRcTrack {
 public:
-    StMiniMcPair();
-    virtual ~StMiniMcPair();
+  StMiniMcPair() : mNCommonHit(0), mIsBestContam(0), mDominatrack(0), mDominCommonHit(0), mAvgQuality(0) {}
+  virtual ~StMiniMcPair() {}
     
     void setNCommonHit(Short_t val) { mNCommonHit=val; }
     void setIsBestContam(Short_t val ) {mIsBestContam=val ; }
@@ -36,12 +36,14 @@ public:
     int dominatrack() { return mDominatrack; }
     int dominCommonHits() { return mDominCommonHit; }
     float avgQuality() { return mAvgQuality; }
+    //    virtual void Print(Option_t *opt = "") const;
 private:
-    Short_t      mNCommonHit; /// Common Hits is now encoded, tpc + svt * 100
+    Short_t      mNCommonHit; /// Common Hits is now encoded, tpc + svt * 100 + ssd * 1000
     Bool_t     mIsBestContam;
     Short_t     mDominatrack;
-    Short_t  mDominCommonHit;
+    Short_t  mDominCommonHit;///            with IdTruth             -"-           
     Float_t      mAvgQuality;
+
   ClassDef(StMiniMcPair,3)
 };
   
@@ -49,6 +51,9 @@ private:
 
 //
 // $Log: StMiniMcPair.h,v $
+// Revision 1.4  2007/02/23 17:07:00  fisyak
+// Add Ssd and DCA
+//
 // Revision 1.3  2004/03/31 23:42:46  calderon
 // Adding info to evaluate idTruth information.
 // -Add key to StTinyMcTrack.h

@@ -1,5 +1,5 @@
 /**
- * $Id: StTinyMcTrack.h,v 1.6 2006/07/24 19:03:16 calderon Exp $
+ * $Id: StTinyMcTrack.h,v 1.7 2007/02/23 17:07:01 fisyak Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -19,7 +19,7 @@
 class StTinyMcTrack : public TObject {
  public:
   StTinyMcTrack();
-  virtual ~StTinyMcTrack();
+  virtual ~StTinyMcTrack() {}
 
   void setPtMc(Float_t val) { mPtMc=val; }
   void setPzMc(Float_t val) { mPzMc=val; }
@@ -27,6 +27,7 @@ class StTinyMcTrack : public TObject {
   void setPhiMc(Float_t val) { mPhiMc=val; }
   void setNHitMc(Short_t val) { mNHitMc=val; }
   void setNSvtHitMc(Short_t val) { mNSvtHitMc=val; }
+  void setNSsdHitMc(Short_t val) { mNSsdHitMc=val; }
   void setNFtpcHitMc(Short_t val) { mNFtpcHitMc=val; }
   void setGeantId(Short_t val) { mGeantId=val; }
   void setChargeMc(Short_t val) { mChargeMc=val; }
@@ -34,6 +35,8 @@ class StTinyMcTrack : public TObject {
   void setNAssocPr(Short_t val) { mNAssocPr=val; }
   void setStopR(Float_t val) { mStopR=val; }
   void setKey(Short_t val) { mKey=val; }
+  void setPrimary(Bool_t val) { mIsPrimary = val;}
+  void setValid() {mIsValid = 1;}
   void setParentKey(Short_t val) { mParentKey=val; }
     
   float ptMc() const { return mPtMc; }
@@ -45,6 +48,7 @@ class StTinyMcTrack : public TObject {
   float phiMc() const { return mPhiMc; }
   short nHitMc() const { return mNHitMc; }
   short nSvtHitMc() const { return mNSvtHitMc; }
+  short nSsdHitMc() const { return mNSsdHitMc; }
   short nFtpcHitMc() const { return mNFtpcHitMc; }
   short geantId() const { return mGeantId; }
   short chargeMc() const { return mChargeMc; }
@@ -52,17 +56,22 @@ class StTinyMcTrack : public TObject {
   short nAssocPr() const { return mNAssocPr; }
   float stopR() const { return mStopR; }
   short key() const { return mKey; }
+  Bool_t isPrimary() const {return mIsPrimary;}
+  Bool_t isValid() {return  mIsValid;}
+  virtual void Print(Option_t *option="") const;
   short parentKey() const { return mParentKey; }
     
 private:
   // mc stuff
     
+  Char_t     mIsValid;
   Float_t    mPtMc;
   Float_t    mPzMc;
   Float_t    mEtaMc;
   Float_t    mPhiMc;
   Short_t    mNHitMc;
   Short_t    mNSvtHitMc;
+  Short_t    mNSsdHitMc;
   Short_t    mNFtpcHitMc;
   Short_t    mGeantId;
   Short_t    mChargeMc;
@@ -73,6 +82,7 @@ private:
   // assoc stuff
   Short_t      mNAssocGl;
   Short_t      mNAssocPr;
+  Bool_t     mIsPrimary;
 
   ClassDef(StTinyMcTrack,4)
 };
@@ -80,6 +90,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.7  2007/02/23 17:07:01  fisyak
+// Add Ssd and DCA
+//
 // Revision 1.6  2006/07/24 19:03:16  calderon
 // Added parent key data member to StTinyMcTrack.
 // Added reco key data member to StTinyRcTrack.
