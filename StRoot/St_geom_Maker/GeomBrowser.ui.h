@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.8 2007/02/23 00:07:18 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.9 2007/02/23 23:47:04 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -380,6 +380,54 @@ void GeomBrowser::init()
 #ifdef  NO_GEANT_MAKER
    comboBox2->setEnabled(FALSE);
    comboBox2->hide();
+#else
+   // populate the standard geometry type   
+   // create the STAR search path
+   QString file("pams/geometry/geometry/geometry.g");
+   QString path(".:$STAR");
+   
+   const char *found = gSystem->Which((const char*)path, (const char*)file);
+   if (found) {
+      printf(" pgeom path found %s\n", found);
+     if (found[0]) {
+       QFile geomFile(found);
+       if (geomFile.open(IO_ReadOnly)) {
+       QString line;
+       QRegExp exp("^\\s+\\bon\\b.+");
+       while (geomFile.readLine(line, 40) >=0 ) 
+       {
+          if (line.contains( exp ) ) {
+             line = line.simplifyWhiteSpace ();
+             QString tag = line.section(' ',1,1);
+             // printf(" new tag found --<%s>-- \n --<%s>--\n",(const char*) line, (const char*)tag);
+             // remove "on"
+             tag.remove("on");
+             tag.stripWhiteSpace();
+             // exceptions:
+             //    " HELP NO_BREM LOW_EM TPC_ ONLY"
+             if (!(tag.isEmpty()
+                 || tag.contains("COMPLETE") 
+                 || tag.contains("HELP") 
+                 || tag.contains("_ON") 
+                 || tag.contains("_OFF") 
+                 || tag.contains("NO_BREM") 
+                 || tag.contains("LOW") 
+                 || tag.contains("TPC_")
+                 || tag.contains("DUMM")
+                 ||  tag.contains("ONLY") ) ) {
+              // add to the combo box
+                  comboBox2->insertItem(tag);
+                 // printf(" new tag found --<%s>--\n", (const char*)tag);
+             } 
+          }         
+       }
+     } else {
+        assert(0);
+     } 
+   }
+ }
+ delete [] found;
+
 #endif
    // remove tmp Coin file
    QFileInfo tmpInfo(QDir::currentDirPath() ,"GeomBrowser_tmp.iv");
