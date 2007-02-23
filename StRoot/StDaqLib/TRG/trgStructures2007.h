@@ -55,19 +55,19 @@
 #ifndef trgStructures2007_h
 #define trgStructures2007_h
 
-#define MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
-#define MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
-#define FORMAT_VERSION      0x30              /* Format Version number for trigger data */
-#define EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
-#define L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
-#define RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from DSM clients and QT boards */
-#define TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
+#define y7MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
+#define y7MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
+#define y7FORMAT_VERSION      0x30              /* Format Version number for trigger data */
+#define y7EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
+#define y7L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
+#define y7RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from DSM clients and QT boards */
+#define y7TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define L1_DATA_LEN  (EV_DESC_LEN+TRG_SUM_LEN) /* Size of data passed from L1ANA to L2 */ 
-#define TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
-#define TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to DAQ */
+#define y7L1_DATA_LEN  (EV_DESC_LEN+TRG_SUM_LEN) /* Size of data passed from L1ANA to L2 */ 
+#define y7TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
+#define y7TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to DAQ */
 
-#define RAW_MAX_LEN          272              /* Maximum length of any Chain Block Transfer */
+#define y7RAW_MAX_LEN          272              /* Maximum length of any Chain Block Transfer */
 
 #define L2RESULTS_2007_OFFSET_TRG         0
 #define L2RESULTS_2007_OFFSET_EMC_PED     1 
@@ -75,10 +75,10 @@
 #define L2RESULTS_2007_OFFSET_UPS         6
 #define L2RESULTS_2007_OFFSET_DISPVER    12
 
-#define ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
-#define ADD_BIT_FORCE          5              /* Force store of this event */
-#define ADD_BIT_L2_5           6              /* Level 2.5 abort */
-#define ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
+#define y7ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
+#define y7ADD_BIT_FORCE          5              /* Force store of this event */
+#define y7ADD_BIT_L2_5           6              /* Level 2.5 abort */
+#define y7ADD_BIT_SIM            7              /* Simulated event - used by DAQ */
 
 /********** Trigger Structures ***********/
 
@@ -196,14 +196,6 @@ typedef struct {
   unsigned int   QQTdata[1600];         /* data block for FMS.  New in version 3.0 */
 } RawTrgDet2007;           /* 8168  bytes total */
 
-/*  Trigger Event Structure */
-
-typedef struct TrgDataType2007{
-  EvtDescData2007    EvtDesc;               /* L1 Event Descriptor Data : 40 bytes */  
-  TrgSumData2007     TrgSum;                /* Summary data: 608 bytes */
-  RawTrgDet2007      rawTriggerDet[MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History: 11*3368 bytes */
-};         /* 90496  bytes */
-
 /*  Data block for DSMs and L1 to pass to L2 via myriMemcpy2 */
 
 typedef struct {
@@ -214,7 +206,16 @@ typedef struct {
   int numGroup;                         /* Number of DSMs in first group */
   int numDSM;                           /* Total number of DSMs */
   int dummy;                            /* Ensure alignment of long long */
-  long long dsmData[RAW_MAX_LEN*MAX_RAW_DATA_BLOCKS/8];  /* Make this 8-byte aligned */
+  long long dsmData[y7RAW_MAX_LEN*y7MAX_RAW_DATA_BLOCKS/8];  /* Make this 8-byte aligned */
 } dsmMemcpy2Buf2007;
+
+
+/*  Trigger Event Structure */
+
+typedef struct TrgDataType2007 {
+  EvtDescData2007    EvtDesc;                                 /* L1 Event Descriptor Data : 40 bytes */  
+  TrgSumData2007     TrgSum;                                  /* Summary data: 608 bytes */
+  RawTrgDet2007      rawTriggerDet[y7MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History: 11*3368 bytes */
+} ;                                                           /* 90496  bytes */
 
 #endif
