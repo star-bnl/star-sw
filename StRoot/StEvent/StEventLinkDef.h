@@ -85,11 +85,11 @@
 #pragma link C++ class L0_DSM_Data2005+;
 
 //IncFile=StDaqLib/TRG/trgStructures2007.h
-#pragma link C++ class TrgDataType2007+;
-#pragma link C++ class EvtDescData2007+;   
-#pragma link C++ class TrgSumData2007+;  
-#pragma link C++ class RawTrgDet2007+; 
-#pragma link C++ class L0_DSM_Data2007+;
+//#pragma link C++ class TrgDataType2007+;
+//#pragma link C++ class EvtDescData2007+;   
+//#pragma link C++ class TrgSumData2007+;  
+//#pragma link C++ class RawTrgDet2007+; 
+//#pragma link C++ class L0_DSM_Data2007+;
 
 #pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
 #pragma link C++ function operator<<(ostream&, const StMeasuredPoint&);        
