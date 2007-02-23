@@ -504,6 +504,11 @@
             </item>
             <item>
                 <property name="text">
+                    <string>y2006b</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
                     <string>y2006a</string>
                 </property>
             </item>
@@ -515,6 +520,11 @@
             <item>
                 <property name="text">
                     <string>y2005x</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>y2005f</string>
                 </property>
             </item>
             <item>
