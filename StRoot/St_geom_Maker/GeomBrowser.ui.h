@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.10 2007/02/23 23:49:10 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.11 2007/02/23 23:50:00 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -453,7 +453,7 @@ void GeomBrowser::init()
    // fTabCompValidator = new TQtTabValidator(comboBox1);
    // comboBox1->setValidator(fTabCompValidator);
 
-   // Predefine to ROOT command
+   // Predefine some ROOT commands
    comboBox1->insertItem("gGeometry->SetBomb(1.7);");
    comboBox1->insertItem("gPad->SetFillColor(kBlack);");
    comboBox1->insertItem("gPad->SetFillColor(kWhite);");
