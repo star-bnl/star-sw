@@ -209,7 +209,7 @@ typedef struct {
 
 /*  Trigger Event Structure */
 
-typedef struct TrgDataType2005 {
+struct TrgDataType2005 {
   EvtDescData2005  EvtDesc;                                 /* L1 Event Descriptor Data : 40 bytes */  
   TrgSumData2005   TrgSum;                                  /* Summary data: 480 bytes */
   RawTrgDet2005    rawTriggerDet[y5MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History: 11*1792 bytes */
