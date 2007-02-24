@@ -560,6 +560,22 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
       if ( $def =~ /^\#/ ) { push @defs, $def; }
       else { push @defs, "#" . $Dir . "/" . $def; }
     }
+    foreach my $def (@LinkDefs) {
+      open (In, $Dir . "/" . $def) or die "Can't open $def";
+      while (my $line = <In>) {
+	if (($line  =~ /^\/\/IncFile *=/))	{
+	  my @words = split /(=)/, $line;
+	  chomp(@words[2]);
+	  my $h = $words[2];
+	  if (! -r $Dir . "/" . $h) {
+	    $h = "#StRoot/" . $h;
+	  }
+	  print "Add $Dir ========= $h \n" if $param::debug;
+	  if (! -r $h) {push @defs, $h;}
+	}
+      }
+      close(in);
+    }
     Depends $env2 [@CintFiles], @h_files;
     Depends $env2 [@CintFiles], ($env2->{Packages}->{ROOT}->{ROOTCINT});
     Command $env2 [@CintFiles], @defs,
