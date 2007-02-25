@@ -1,4 +1,4 @@
-// $Id: StSsdDaqMaker.cxx,v 1.13 2007/02/18 15:57:32 bouchet Exp $
+// $Id: StSsdDaqMaker.cxx,v 1.14 2007/02/25 18:10:58 bouchet Exp $
 //
 // $log$
 //
@@ -88,6 +88,15 @@ Int_t StSsdDaqMaker::Init(){
     noise_chip_P    = new TH2S("noise_chip_P","mean noise per chip for the P Side ",20,0,20,96,0,96);
     noise_chip_N    = new TH2S("noise_chip_N","mean noise per chip for the N Side",20,0,20,96,0,96);
     pedestal_chip   = new TH2S("pedestal_chip","pedestal per chip",40,0,40,99,0,99);
+    ped_zero_ladP   = new TH2S("ped_zero_ladP","map of p-side wafers where strips have ped = 0",20,0,20,15,0,15);
+    ped_zero_ladN   = new TH2S("ped_zero_ladN","map of n-side wafers where strips have ped = 0",20,0,20,15,0,15);
+    ped_high_ladP   = new TH2S("ped_high_ladP","map of p-side wafers where strips have ped = 255",20,0,20,15,0,15);
+    ped_high_ladN   = new TH2S("ped_high_ladN","map of n-side wafers where strips have ped = 255",20,0,20,15,0,15);
+    noise_zero_ladP = new TH2S("noise_zero_ladP","map of p-side wafers where strips have noise = 0",20,0,20,15,0,15);
+    noise_zero_ladN = new TH2S("noise_zero_ladN","map of n-side wafers where strips have noise = 0",20,0,20,15,0,15);
+    noise_high_ladP = new TH2S("noise_high_ladP","map of p-side wafers where strips have noise = 255",20,0,20,15,0,15);
+    noise_high_ladN = new TH2S("noise_high_ladN","map of n-side wafers where strips have noise = 255",20,0,20,15,0,15);
+    occupancy       = new TH1F("deadStrips","number of dead strips",40,0,40);
     occupancy_wafer->SetXTitle("Ladder");
     occupancy_wafer->SetYTitle("Wafer");  
     occupancy_chip->SetXTitle("Ladder");
@@ -102,12 +111,25 @@ Int_t StSsdDaqMaker::Init(){
     noise_wafer->SetYTitle("Wafer"); 
     pedestal_chip->SetXTitle("Ladder");
     pedestal_chip->SetYTitle("Chip");
-    occupancy = new TH1F("deadStrips","number of dead strips",40,0,40);
     occupancy->SetXTitle("Ladder");
     occupancy->SetYTitle("#");
-    kind = new TH2S("status","status of the noise/pedestal",3,0,3,4,0,4);
-    kind->SetXTitle("pedestal");
-    kind->SetYTitle("noise");
+    ped_zero_ladP->SetXTitle("Ladder");
+    ped_zero_ladP->SetYTitle("Wafer"); 
+    ped_zero_ladN->SetXTitle("Ladder");
+    ped_zero_ladN->SetYTitle("Wafer");
+    ped_high_ladP->SetXTitle("Ladder");
+    ped_high_ladP->SetYTitle("Wafer"); 
+    ped_high_ladN->SetXTitle("Ladder");
+    ped_high_ladN->SetYTitle("Wafer");
+    noise_zero_ladP->SetXTitle("Ladder");
+    noise_zero_ladP->SetYTitle("Wafer");
+    noise_zero_ladN->SetXTitle("Ladder");
+    noise_zero_ladN->SetYTitle("Wafer");
+    noise_high_ladP->SetXTitle("Ladder");
+    noise_high_ladP->SetYTitle("Wafer");
+    noise_high_ladN->SetXTitle("Ladder");
+    noise_high_ladN->SetYTitle("Wafer");
+
   }
   LOG_INFO << "Init() - Done " << endm;
   
@@ -352,6 +374,10 @@ Int_t StSsdDaqMaker::Make(){
 			  noise_wafer->Fill(2*iLad,iWaf,(out_ped_strip.noise/(16.))); 
 			  noise_chip_P->Fill(iLad,chip,(out_ped_strip.noise/(16.)));
 			  pedestal_chip->Fill(2*iLad,chip,out_ped_strip.pedestal);
+			  if(pedestal==0)ped_zero_ladP->Fill(iLad,iWaf);
+			  if(pedestal==255)ped_high_ladP->Fill(iLad,iWaf);
+			  if(noise==0)noise_zero_ladP->Fill(iLad,iWaf);
+			  if(noise==255)noise_high_ladP->Fill(iLad,iWaf);
 			}
 			else {
 			  ladderCountN[ladder]++;
@@ -361,94 +387,19 @@ Int_t StSsdDaqMaker::Make(){
 			  noise_wafer->Fill((2*iLad)+1,iWaf,(out_ped_strip.noise/(16.)));
 			  noise_chip_N->Fill(iLad,chip,(out_ped_strip.noise/(16.)));
 			  pedestal_chip->Fill((2*iLad)+1,chip,out_ped_strip.pedestal);
-			}
-			if (pedestal==0)
+			  if(pedestal==0)ped_zero_ladN->Fill(iLad,iWaf);
+			  if(pedestal==255)ped_high_ladN->Fill(iLad,iWaf);
+			  if(noise==0)noise_zero_ladN->Fill(iLad,iWaf);
+			  if(noise==255)noise_high_ladN->Fill(iLad,iWaf);
+			}   
+			count++;
+			for (int i=0;i<20;i++)
 			  {
-			    switch(noise)
-			      {
-			      case 0 : 
-				{
-				  kind->Fill(0.,0.,1.);
-				  break;
-				}
-			      case 2 : 
-				{
-				  kind->Fill(0.,1.,1.);
-				  break;
-				}
-			      case 3 : 
-				{
-				  kind->Fill(0.,2.,1.);
-				  break;
-				}
-			      case 255 : 
-				{
-				  kind->Fill(0.,3.,1.);
-				  break;
-				}
-			      }
+			    occupancy->SetFillColor(2);
+			    occupancy->Fill((2*i),(12288-ladderCountP[i]));
+			    occupancy->Fill((2*i)+1,(12288-ladderCountN[i]));
 			  }
-			    if ((pedestal>0)&&(pedestal<255))
-			      {
-				switch(noise)
-				  {
-				  case 0 : 
-				    {
-				      kind->Fill(1.,0.,1.);
-				      break;
-				    }
-				  case 2 : 
-				    {
-				      kind->Fill(1.,1.,1.);
-				      break;
-				    }
-				  case 3 : 
-				    {
-				      kind->Fill(1.,2.,1.);
-				      break;
-				    }
-				  case 255 : 
-				    {
-				      kind->Fill(1.,3.,1.);
-				      break;
-				    }
-				  }
-			      }
-				if (pedestal==255)
-				  {
-				    switch(noise)
-				      {
-				      case 0 : 
-					{
-					  kind->Fill(2.,0.,1.);
-					  break;
-					}
-				      case 2 : 
-					{
-					  kind->Fill(2.,1.,1.);
-					  break;
-					}
-				      case 3 : 
-					{
-					  kind->Fill(2.,2.,1.);
-					  break;
-					}
-				      case 255 : 
-					{
-					  kind->Fill(2.,3.,1.);
-					  break;
-					}
-				      }
-				  }
-				   
-				    count++;
-				    for (int i=0;i<20;i++)
-				      {
-					occupancy->SetFillColor(2);
-					occupancy->Fill((2*i),(12288-ladderCountP[i]));
-					occupancy->Fill((2*i)+1,(12288-ladderCountN[i]));
-				      }
-				    //LOG_INFO << "Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm; 
+			//LOG_INFO << "Make()/ssdPedStrip->NRows= "<<ssdPedStrip->GetNRows()<<endm; 
 		      } // end if pedestal > 0
 		    } // end if(stssdreader->getSsdData(ladder,EastWest,channel,data,pedestal,noise)==0)  
 		} // end for (channel=0;channel<maxChannel;channel++)

@@ -1,6 +1,9 @@
-// $Id: StSsdDaqMaker.h,v 1.4 2007/02/18 15:57:33 bouchet Exp $
+// $Id: StSsdDaqMaker.h,v 1.5 2007/02/25 18:10:58 bouchet Exp $
 //
 // $Log: StSsdDaqMaker.h,v $
+// Revision 1.5  2007/02/25 18:10:58  bouchet
+// Remove a histogram and add more precise histograms for the particular status of strips : count the number of strips per wafer where pedestal = 0 or 255 (adc) and rms = 0 or 255 (adc)
+//
 // Revision 1.4  2007/02/18 15:57:33  bouchet
 // New Logger update and addition of Finish() function
 //
@@ -62,14 +65,22 @@ class StSsdDaqMaker : public StMaker {
   // Protected method if any
   StSsdConfig*  mConfig;
   TH2S *occupancy_wafer; //occupancy  per wafer for the ladders
-  TH2S *occupancy_chip; //occupancy per chip for the ladders
-  TH2S *noise_chip;// mean noise per chip
-  TH2S *noise_wafer;// mean noise per wafer
-  TH2S *noise_chip_P;// mean noise per chip of the P Side
-  TH2S *noise_chip_N;// mean noise per chip of the N Side
-  TH2S *pedestal_chip; //pedestal per chip for the ladders
-  TH1F *occupancy;//number of inactives strips per ladder
-  TH2S *kind;//differents cases of values noise/pedestal 
+  TH2S *occupancy_chip;  //occupancy per chip for the ladders
+  TH2S *noise_chip;      //mean noise per chip
+  TH2S *noise_wafer;     //mean noise per wafer
+  TH2S *noise_chip_P;    //mean noise per chip of the P Side
+  TH2S *noise_chip_N;    //mean noise per chip of the N Side
+  TH2S *pedestal_chip;   //pedestal per chip for the ladders
+  TH1F *occupancy;       //number of inactives strips per ladder
+  TH2S *ped_zero_ladP;   //number of strips of p-side wafers for which pedestal = 0
+  TH2S *ped_zero_ladN;   //number of strips of n-side wafers for which pedestal = 0
+  TH2S *ped_high_ladP;   //number of strips of p-side wafers for which pedestal = 255
+  TH2S *ped_high_ladN;   //number of strips of n-side wafers for which pedestal = 255
+  TH2S *noise_zero_ladP; //number of strips of p-side wafers for which noise = 0
+  TH2S *noise_zero_ladN; //number of strips of n-side wafers for which noise = 0
+  TH2S *noise_high_ladP; //number of strips of p-side wafers for which noise = 255
+  TH2S *noise_high_ladN; //number of strips of n-side wafers for which noise = 255
+
  public: 
   StSsdDaqMaker(const char *name="StSsdDaqMaker");
   virtual       ~StSsdDaqMaker();
@@ -82,7 +93,7 @@ class StSsdDaqMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.4 2007/02/18 15:57:33 bouchet Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSsdDaqMaker.h,v 1.5 2007/02/25 18:10:58 bouchet Exp $ built "__DATE__" "__TIME__; 
     return cvs;
   }
 
