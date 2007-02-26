@@ -172,7 +172,7 @@ public:
 	           {return Step(point,xyz,dir);}
         double Dca(const double point[3],double *dcaErr=0) const;
         double Path(double x,double y) const ;
-        double Dca(double x,double y,double *dcaErr=0) const ;
+//??        double Dca(double x,double y,double *dcaErr=0) const ;
         double Dca(const double point[3]
                   ,double &dcaXY,double &dcaZ,double dcaEmx[3]) const;
         double GetDCA  () const;
