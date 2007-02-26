@@ -1018,6 +1018,7 @@ void StEventQAMaker::MakeHistPrim() {
 	StPhysicalHelixD hx = geom->helix();
 	StPhysicalHelixD ohx = outerGeom->helix();
 	
+
 	StTrack *gtrack = primtrk->node()->track(estGlobal);
         if (!gtrack || gtrack->bad()) {
           gtrack = primtrk->node()->track(global);
@@ -1308,6 +1309,15 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
 	  hists->m_pnfptonpt_etaTS->Fill(eta,nfitntot);
 	  hists->m_ppsi_phiTS->Fill(orphi,psi);
+
+          // SVT drift plots
+          if (pT > 0.2) {
+            StPtrVecHit svt_hits = detInfo->hits(kSvtId);
+            for (UInt_t k=0; k<svt_hits.size(); k++) {
+              StSvtHit* svt_hit = (StSvtHit*) (svt_hits[k]);
+              hists->m_svt_loc->Fill(svt_hit->timebucket(),svt_hit->index());
+	    }
+	  }
 	}
 	
 	// now fill all FTPC East histograms ------------------------------------------
@@ -1726,11 +1736,11 @@ void StEventQAMaker::MakeHistVertex() {
       //hists->m_v_detid->Fill(kink->det_id); 
       hists->m_v_vtxid->Fill(kink->type());
       if (!isnan(double(kink->position().x())))
-        hists->m_v_x->Fill(kink->position().x());     
+        hists->m_v_x->Fill(kink->position().x());
       if (!isnan(double(kink->position().y())))
-        hists->m_v_y->Fill(kink->position().y());     
+        hists->m_v_y->Fill(kink->position().y());
       if (!isnan(double(kink->position().z())))
-        hists->m_v_z->Fill(kink->position().z());     
+        hists->m_v_z->Fill(kink->position().z());
       hists->m_v_pchi2->Fill(kink->chiSquared());
       hists->m_v_r->Fill(kink->position().x()*kink->position().x() +
 			 kink->position().y()*kink->position().y());
@@ -2211,8 +2221,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.71 2006/02/16 20:37:03 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.72 2007/02/26 20:45:01 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.72  2007/02/26 20:45:01  genevb
+// SVT drift hist
+//
 // Revision 2.71  2006/02/16 20:37:03  perev
 // 1/0
 //

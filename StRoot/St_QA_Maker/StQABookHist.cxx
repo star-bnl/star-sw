@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.51 2006/05/18 16:37:11 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.52 2007/02/26 20:45:01 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.52  2007/02/26 20:45:01  genevb
+// SVT drift hist
+//
 // Revision 2.51  2006/05/18 16:37:11  genevb
 // Change FTPC hist ranges
 //
@@ -1652,6 +1655,9 @@ void StQABookHist::BookHistPrim(){
   m_pnpoint_lengthFW = QAH::H2F("QaPtrkNPntLengthFW","primtrk: N pnts vs length, ftpcW",50,0.,300.,15,0.,15.);
     m_pnpoint_lengthFW->SetXTitle("trk length");
     m_pnpoint_lengthFW->SetYTitle("Npoints on trk");
+
+// 2D - SVT drift length
+  m_svt_loc = QAH::H2F("QaPtrkSvtLoc","primtrk: SVT hit time bins",256,0,128,432,-0.5,431.5);
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistDE(){

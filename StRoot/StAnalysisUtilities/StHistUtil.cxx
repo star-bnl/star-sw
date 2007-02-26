@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.30 2007/01/03 19:03:41 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.31 2007/02/26 20:45:00 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.31  2007/02/26 20:45:00  genevb
+// SVT drift hist
+//
 // Revision 2.30  2007/01/03 19:03:41  genevb
 // Patch for hist titles removed after migration to Root vers. 5
 //
@@ -484,7 +487,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
           chkdim = hobj->GetDimension();
 
           // actually draw,print
-          if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
+          if ((chkdim == 2) && (oName.EndsWith("SvtLoc"))) {
+            obj->Draw("col");
+          } else if ((chkdim == 2) && (!obj->InheritsFrom("StMultiH1F"))) {
             obj->Draw("box");
 	    if ((oName.EndsWith("trkGoodF"))||(oName.EndsWith("VtxSvtvsTpc"))) {
               ruler.SetLineColor(46);
