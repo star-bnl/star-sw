@@ -95,7 +95,7 @@ echo '*** STI Started *** Iter=' $iter >> sti.log
 root4star -b  <<EOF  >>& sti.log
 .L calib/fiterrSti.C
 int ans =13;
-ans =runsti("$daqFile",50,"${tpcOnly}");
+ans =runsti("$daqFile",200,"${tpcOnly}");
 if (ans != 99) exit(13);
 ans =chain->Finish(); 
 if (ans) exit(14);
