@@ -9,13 +9,18 @@
 #include "TH1.h"
 #include "TF1.h"
 #include "TCanvas.h"
+#include "TGraph.h"
 #include "TCL.h"
 #include "TMatrixD.h"
 #include "TRandom.h"
 #include "TVectorD.h"
+#include "TVector2.h"
+#include "TVector3.h"
 #include "StarRoot/TTreeIter.h"
 #include "TTable.h"
 #include "TInterpreter.h"
+#include "TPolinom.h"
+#include "THelixTrack.h"
 #include <vector>
 //#endif
 #define EXP_FAKE
@@ -25,7 +30,7 @@ enum {kNOBAGR=0,kNDETS=4};
 static const double WINDOW_NSTD=3;
 
 static const double kAGREE=1e-7,kSMALL=1e-9,kBIG=1.,kDAMPR=0.1;
-static const int    MinErr[4][2] = {{200,200},{200,200},{20,500},{20,20}};
+static const int    MinErr[4][2] = {{200,200},{200,200},{5,500},{20,20}};
 class MyPull;
 class HitPars_t;
 int fiterr(const char *opt);
@@ -81,6 +86,14 @@ double PredErr[2];
 
 class MyPull {
 public:
+float x_g() const { return grf*cos(gpf);}
+float y_g() const { return grf*sin(gpf);}
+float z_g() const { return gzf         ;}
+
+float xhg() const { return xyz[0]*cos(ang) - xyz[1]*sin(ang);}
+float yhg() const { return xyz[0]*sin(ang) + xyz[1]*cos(ang);}
+float zhg() const { return xyz[2]                           ;}
+public:
 int   trk;
 float xyz[3];
 float psi;
@@ -103,6 +116,7 @@ float dens;
 float grf;	//  Rxy of Fit  in global Sti frame
 float gpf;	//  Phi of Fit  in global Sti frame
 float gzf;	//  Z   of Fit  in global Sti frame
+float ang;	//  rotation angle
 };
 
 class HitPars_t {
@@ -141,8 +155,11 @@ double DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int maxTrk=999
 int    Test(int npt, const MyPull *pt) 	const;
 void   Print(const HitPars_t *init=0) 	const;
 double Diff (const HitPars_t &init) 	const;
+static void Prep(int npt, const MyPull *pt,TVectorD &Y,TVectorD &Z
+                ,TVectorD &S,TVectorD &cos2Psi);
 static int Test();
-static void HitPars_t::HitCond(const MyPull& myRes,HitAccr &acc);
+static void HitCond(const MyPull& myRes,HitAccr &acc);
+static void Show(int npt,const MyPull *pt);
 static double Dens(double rxy,int ntk); 
 static double Err(const double Pars[3],int nPars,const double A[3]); 
 static void   myDers( double fake, double wy, double wz, double dens
@@ -279,7 +296,8 @@ int fiterr(const char *opt)
   const int   &nGlobs    = th("mHitsG");
   const float *&mCurv    = th("mHitsG.mCurv");
   const float *&mPt      = th("mHitsG.mPt");
-  const short *&mTrackNumber = th("mHitsG.mTrackNumber");
+  const short *&mTrackNumber    = th("mHitsG.mTrackNumber");
+  const float *&mNormalRefAngle = th("mHitsG.mNormalRefAngle");
   const UChar_t *&nTpcHits = th("mHitsG.nTpcHits");
   const UChar_t *&nSsdHits = th("mHitsG.nSsdHits");
   const UChar_t *&nSvtHits = th("mHitsG.nSvtHits");
@@ -306,25 +324,38 @@ int fiterr(const char *opt)
   printf("&run=%p &evt=%p\n",&run,&evt);
   MyPull mp;   
   MyVect.clear();
+  int nTpc=0,nPre=0,iTk=-1,iTkSkip=-1;
   while (th.Next()) 
   {
 //  printf("serial = %d run=%d evt=%d nGlo = %d\n",n,run,evt,nGlobs);n++;
+  float rxy=0;
   for (int ih=0;ih<nGlobs;ih++) { 
-    if (nTpcHits[ih]    <25)   	continue;
-    if (fabs(mCurv[ih])>1./30) 	continue;
-    if (mPt[ih]/cos(lDip[ih])<0.5) 	continue;
-//    if (nSvtHits[ih]<2)   	continue;
-    if (nSsdHits[ih] && nSvtHits[ih]<1) continue;
+    if (mTrackNumber[ih]==iTkSkip) 		continue;
+    float rxy00 = rxy; rxy=lXHit[ih];
+    if (mTrackNumber[ih]!=iTk || rxy<rxy00) {
+      iTk = mTrackNumber[ih];
+      iTkSkip = iTk;
+      if (nTpcHits[ih]    <25)   		continue;
+      if (fabs(mCurv[ih])>1./200) 		continue;
+      if (fabs(mPt[ih]/cos(lDip[ih]))<0.5) 	continue;
+      int nSS = nSsdHits[ih]+nSvtHits[ih];
+      if (nSS && nSS<2) 			continue;
+      if (!nSS && nPre && nTpc>100 && nTpc>3*nPre) 	continue;
+      nTpc += (nSS==0);
+      nPre += (nSS!=0);
+      iTkSkip = -1;
+    }
+
     memset(&mp,0,sizeof(mp));
     mp.trk = mTrackNumber[ih];
     mp.pye = lYPulErr[ih];
     mp.pze = lZPulErr[ih];
     float uyy = (lYPulErr[ih]-lYHitErr[ih])*(lYHitErr[ih]+lYPulErr[ih]);
 //    printf ("yy = %g %g %g \n",yy,lYHitErr[ih],lYPulErr[ih]);
-    if (uyy <1e-8     ) continue;
+//    if (uyy <1e-8     ) continue;
     float uzz = (lZPulErr[ih]-lZHitErr[ih])*(lZHitErr[ih]+lZPulErr[ih]);
 //    printf ("zz = %g\n",zz);
-    if (uzz <1e-8     ) continue;
+//    if (uzz <1e-8     ) continue;
     mp.uyy = uyy;
     mp.uzz = uzz;
     mp.fye = lYFitErr[ih];
@@ -338,9 +369,9 @@ int fiterr(const char *opt)
     mp.psi    = lPsi[ih] ;
     mp.dip    = lDip[ih] ;
     mp.ypul =   lYPul[ih];
-    if (fabs(mp.ypul)<1e-8) continue;
+//    if (fabs(mp.ypul)<1e-8) continue;
     mp.zpul =   lZPul[ih];
-    if (fabs(mp.zpul)<1e-8) continue;
+//    if (fabs(mp.zpul)<1e-8) continue;
     mp.yfit =   lYFit[ih];
     mp.zfit =   lZFit[ih];
     mp.dens =   HitPars_t::Dens(mp.xyz[0],mTrksG);
@@ -348,8 +379,7 @@ int fiterr(const char *opt)
     mp.gpf  =   gPFit[ih];
     mp.gzf  =   gZFit[ih];
     mp.curv =   mCurv[ih];
-
-
+    mp.ang  =   mNormalRefAngle[ih];
 
     MyVect.push_back(mp);
 
@@ -357,6 +387,7 @@ int fiterr(const char *opt)
 //  printf("lYPul[0]=%g\n",lYPul[0]);
   }
   printf("fiterr:: %d hits accepted\n\n",MyVect.size());
+  printf("fiterr:: %d Tpc and %d Svt/Ssd tracks accepted\n\n",nTpc,nPre);
   AveRes();
   HFit();
   DbDflt();
@@ -1651,10 +1682,16 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
   HitAccr ha;
   Poli2 ply(2);
   Poli2 plz(1);
-  TVectorD wy(npt),wz(npt);
+  TVectorD wy(npt),wz(npt),cos2Psi(npt21);
   TMatrixD toPars(mNPars,npt21);
   toPars[0][0]=1;
+  cos2Psi=1.;
+  TPoliFitter pfy(2),pfz(1); //?????
+  TCircleFitter cf;
+//#define  NEWPOLIFIT
+#ifndef  NEWPOLIFIT
   double len = 0,oldCurv,oldXyz[3],nowXyz[3];
+  assert(pt[0].xyz[0]<pt[npt-1].xyz[0]);
   for (int ipt=0;ipt<npt;ipt++) {
     HitCond(pt[ipt],ha);
     double nowCurv=pt[ipt].curv;
@@ -1669,13 +1706,19 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
     }
 
     double dy = pt[ipt].xyz[1]-pt[ipt].yfit;
-    dy *= cos(pt[ipt].psi);
+    double cosPsi = cos(pt[ipt].psi);
+    cos2Psi[ipt+1] = cosPsi*cosPsi;
+    dy *= cosPsi;
     double dz = pt[ipt].xyz[2]-pt[ipt].zfit;
-    wy[ipt] = (1./Err(0,ha));
+    wy[ipt] = (1./Err(0,ha))/cos2Psi[ipt+1];
     wz[ipt] = (1./Err(1,ha));
     double fake = myFake( mDat[0],wy[ipt],wz[ipt],pt[ipt].dens,0,0);
     ply.Add(len,dy,wy[ipt]*fake);
     plz.Add(len,dz,wz[ipt]*fake);
+//    pfy.Add(len,dy,1./(wy[ipt]*fake));//????
+//    pfz.Add(len,dz,1./(wz[ipt]*fake));//????
+//    double emx[3]={1./(wy[ipt]*fake),0,1./(wy[ipt]*fake)};
+//    cf.Add(len,dy,emx);//????
     int n,ipar,iDet = ha.iDet;
     for (int jk=0;jk<2;jk++) { 
       int ip = 1 +ipt + jk*npt;
@@ -1685,13 +1728,44 @@ double HitPars_t::Deriv(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij) co
     memcpy(oldXyz,nowXyz,sizeof(oldXyz));
     oldCurv=nowCurv;
   }
+#endif //0
+#ifdef  NEWPOLIFIT
+  TVectorD Y,Z,S;
+  Prep(npt,pt,Y,Z,S,cos2Psi);
+  for (int ipt=0;ipt<npt;ipt++) {
+    HitCond(pt[ipt],ha);
+    wy[ipt] = (1./Err(0,ha))/cos2Psi[ipt+1];
+    wz[ipt] = (1./Err(1,ha));
+    double fake = myFake( mDat[0],wy[ipt],wz[ipt],pt[ipt].dens,0,0);
+    ply.Add(S[ipt],Y[ipt],wy[ipt]*fake);
+    plz.Add(S[ipt],Z[ipt],wz[ipt]*fake);
+    pfy.Add(S[ipt],Y[ipt],1./(wy[ipt]*fake));
+    pfz.Add(S[ipt],Z[ipt],1./(wz[ipt]*fake));
+    double emx[3]={1./(wy[ipt]*fake),0,1./(wy[ipt]*fake)};
+    cf.Add(S[ipt],Y[ipt],emx);
+    int n,ipar,iDet = ha.iDet;
+    for (int jk=0;jk<2;jk++) { 
+      int ip = 1 +ipt + jk*npt;
+      ipar = IPar(iDet,jk,&n);
+      for (int in=0;in<n;in++) {toPars[ipar+in][ip]+=ha.A[jk][in];}
+    } 
+  }
+#endif //0
   ply.Init();
   plz.Init();
-static int TestIt=0;
-  if (!TestIt++) {
-    ply.TestIt();
-    plz.TestIt();
-  }
+#if 0
+  double cfyXi2 = cf.Fit()*cf.Ndf();
+  double pfyXi2 = pfy.Fit()*pfy.Ndf();
+  double pfzXi2 = pfz.Fit()*pfz.Ndf();
+  double plyXi2 = ply.Xi2();
+  double plzXi2 = plz.Xi2();
+static int printIt=0;
+if (printIt)
+printf("Xi2Y = %g %g %g \tXi2Z =  %g %g\n",plyXi2,pfyXi2,cfyXi2,plzXi2,pfzXi2);
+#endif
+
+static int testIt=1;
+  if (testIt) {testIt--; ply.TestIt(); plz.TestIt(); }
   
   TVectorD dW(npt21),dWy(npt),dWz(npt);
   TMatrixD dWW(npt21,npt21),dWWy(npt,npt),dWWz(npt,npt);
@@ -1739,6 +1813,14 @@ static int TestIt=0;
         dWW[idx[i]][idx[j]] += (-Cdd[i][j]+Cd[i]*Cd[j]/C)/C;
   } } }
 
+//   	account Wy = wy/cos2Psi 
+  for (int ii=0;ii<npt21;ii++) {
+    if (ii && ii<=npt) wy[ii-1]*=cos2Psi[ii];
+    dW[ii] /=cos2Psi[ii];
+    for (int jj=0;jj<=ii;jj++) {
+      dWW[ii][jj]/=cos2Psi[ii]*cos2Psi[jj];
+  } }
+
 //   	change W to E where W=1/E
   TVectorD wt(npt21);
   wt.SetSub(1,wy); wt.SetSub(1+npt,wz);
@@ -1747,7 +1829,8 @@ static int TestIt=0;
     dW [ii]    *= -wi2;
     dWW[ii][0] *= -wi2;
     for (int jj=1;jj<=ii;jj++) {
-      dWW[ii][jj] *= wi2*wt[jj]*wt[jj];
+      double wj2 = wt[jj]*wt[jj];
+      dWW[ii][jj] *= wi2*wj2;
     }
     dWW[ii][ii] += -2*dW[ii]*wi;
   }
@@ -1768,46 +1851,6 @@ static int TestIt=0;
       assert(fabs(dWW[i][j]-dWW[j][i])<1e-10);}}
   return Fcn;
 }
-#if 0
-//______________________________________________________________________________
-double HitPars_t::DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int maxTrk) 
-{
-  enum {nSTUDY=32};
-const double STUDY = 1./nSTUDY;
-
-  Di.ResizeTo(mNPars);
-  Dij.ResizeTo(mNPars,mNPars);
-  Di = 0.; Dij=0.; mNTrks=0;
-  TVectorD Ti ,TiM (mNPars);
-  TMatrixD Tij,TijM(mNPars,mNPars);
-  int jl=0,trk=pt[0].trk; 
-  double sum=0,sumM=0;
-  for (int jr=1; 1; jr++) {
-    if (jr<npt && pt[jr].trk==trk) continue;
-    int n = jr-jl;
-    if (n>15) {
-      double tsum = Deriv(n,pt+jl,Ti,Tij);
-      sum += tsum-sumM;
-      Di  += Ti -TiM ;
-      Dij += Tij-TijM;
-      mNTrks++;
-      if (mNTrks>=maxTrk) break;
-      if (mNTrks == nSTUDY) {
-        sumM = sum*STUDY; sum = 0.;
-        TiM  = (STUDY*Di ); Di  = 0.;
-        TijM = (STUDY*Dij); Dij = 0.;
-      }
-    }
-    if (jr>=npt) break;
-    trk = pt[jr].trk;
-    jl = jr;
-  }
-  sum +=double(mNTrks)*sumM;
-  Di  +=double(mNTrks)*TiM ;
-  Dij +=double(mNTrks)*TijM;
-  return sum;  
-}    
-#endif //0
 //______________________________________________________________________________
 double HitPars_t::DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int maxTrk) 
 {
@@ -1818,10 +1861,13 @@ double HitPars_t::DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int
   TVectorD Ti ,TiM (mNPars);
   TMatrixD Tij,TijM(mNPars,mNPars);
   int jl=0,trk=pt[0].trk; 
+  double xl=0;
   double sum=0,sumM=0;
+  int NSave = (int)sqrt((npt/30.));
   
   for (int jr=1; 1; jr++) {
-    if (jr<npt && pt[jr].trk==trk) continue;
+    double xl0 = xl; xl = pt[jr].xyz[0];
+    if (jr<npt && pt[jr].trk==trk && xl0<xl) continue;
     int n = jr-jl;
     if (n>15) {
       double tsum = Deriv(n,pt+jl,Ti,Tij);
@@ -1830,7 +1876,7 @@ double HitPars_t::DERIV(int npt, const MyPull *pt,TVectorD &Di,TMatrixD &Dij,int
       Dij += Tij;
       mNTrks++;
       if (mNTrks>=maxTrk) break;
-      if ((mNTrks%100)==99 ) {
+      if (((mNTrks+1)%NSave)==0 ) {
         sumM += sum; sum= 0.;
         TiM  += Di ; Di = 0.;
         TijM += Dij; Dij= 0.;
@@ -1991,6 +2037,7 @@ static const double tenMicrons = 1e-3;
 static const double min2Err = tenMicrons*tenMicrons;
 static const double max2Err = 1.;
   double err = TCL::vdot(A,Pars,nPars);
+  if (nPars<=1) return err;
   if (err<min2Err) err=min2Err;
   if (err>max2Err) err=max2Err;
   return err;
@@ -2003,6 +2050,196 @@ void HitPars_t::Limit()
     if (mDat[i]>mMax[i]) mDat[i]=mMax[i];
   }
 }
+#if 0
+//______________________________________________________________________________
+void HitPars_t::Prep(int npt, const MyPull *pt,TVectorD &Y,TVectorD &Z
+                      ,TVectorD &S,TVectorD &cos2Psi)
+{
+static int myDebug=0;
+
+  Y.ResizeTo(npt);
+  Z.ResizeTo(npt);
+  S.ResizeTo(npt);
+  if (myDebug) Show(npt,pt);
+  int npt21 = npt*2+1;
+  cos2Psi.ResizeTo(npt21);cos2Psi = 1.;
+  TVector2 fst(pt[0].x_g(),pt[0].y_g());
+  TVector2 tst(fst.Rotate(-pt[0].ang));
+  assert(fabs(tst.X()-pt[0].xyz[0])+fabs(tst.Y()-pt[0].xyz[1])<1);
+  int l = npt-1;
+  TVector2 lst(pt[l].x_g(),pt[l].y_g());
+  tst = lst.Rotate(-pt[l].ang);
+  assert(fabs(tst.X()-pt[l].xyz[0])+fabs(tst.Y()-pt[l].xyz[1])<1);
+  double sA = fst.Mod();
+  double sB = lst.Mod();
+  double Z0 = pt[0].z_g();
+  double dZdS = (pt[l].z_g()-Z0)/(sB-sA);
+  TVector2 dir((lst-fst).Unit());
+
+  for (int ipt=0;ipt<npt;ipt++) {
+    TVector2 fstL(fst.Rotate(-pt[ipt].ang));
+    TVector2 dirL(dir.Rotate(-pt[ipt].ang));
+    TVector2 meas(pt[ipt].xyz[0],pt[ipt].xyz[1]);
+    meas -=fstL;
+    double s = (meas)*dirL;
+    TVector2 ort(-dirL.Y(),dirL.X());
+    double dy = meas*ort;
+    double dz = pt[ipt].xyz[2]-(Z0 + dZdS*(s));
+    S[ipt]=s;
+    Y[ipt]=dy;
+    Z[ipt]=dz;
+    cos2Psi[ipt+1]=dirL.X()*dirL.X();
+  }
+
+}
+#endif //0
+#if 1
+//______________________________________________________________________________
+void HitPars_t::Prep(int npt, const MyPull *pt,TVectorD &Y,TVectorD &Z
+                      ,TVectorD &S,TVectorD &cos2Psi)
+{
+static int myDebug=0;
+
+  Y.ResizeTo(npt);
+  Z.ResizeTo(npt);
+  S.ResizeTo(npt);
+  if (myDebug) Show(npt,pt);
+  int npt21 = npt*2+1;
+  cos2Psi.ResizeTo(npt21);cos2Psi = 1.;
+
+  THelixFitter helx;
+  for (int ipt=0;ipt<npt;ipt++) {
+    TVector3 point;
+    point[0] = pt[ipt].xhg();
+    point[1] = pt[ipt].yhg();
+    point[2] = pt[ipt].zhg();
+    helx.Add(point[0],point[1],point[2]);
+    double emx[3]={pow(pt[ipt].hye,2),0,pow(pt[ipt].hye,2)};
+    helx.AddErr(emx,pow(pt[ipt].hze,2));
+  }
+  helx.Fit();
+  THelixTrack move(helx);
+  double s = 0;
+  for (int ipt=0;ipt<npt;ipt++) {
+    TVector3 point;
+    point[0] = pt[ipt].xhg();
+    point[1] = pt[ipt].yhg();
+    point[2] = pt[ipt].zhg();
+    double ds = move.Path(point[0],point[1]);
+    if (ipt) s+=ds;
+    move.Move(ds);
+    TVector3 pos(move.Pos());
+    TVector3 dir(move.Dir());
+    TVector3 nor(dir[1],-dir[0],0.); nor = nor.Unit();
+    double dy = (point-pos)*nor;
+    double dz = point[2]-pos[2];
+    S[ipt]=s;
+    Y[ipt]=dy;
+    Z[ipt]=dz;
+    cos2Psi[ipt+1]=pow(cos(pt[ipt].psi),2);
+  }
+}
+#endif//1
+//______________________________________________________________________________
+void HitPars_t::Show(int npt, const MyPull *pt)
+{
+//  lev=0  draw all nodes
+//  lev=1  draw hit nodes
+//  lev=2  draw hits only 
+
+
+
+static TCanvas *myCanvas=0;
+static TGraph  *graph[3][3] = {{0,0,0},{0,0,0},{0,0,0}};
+//        P  G         P  G
+  float X[3][3][100],Y[3][3][100];
+  int   N[3][3];
+
+  if (!myCanvas) {myCanvas = new TCanvas("C1","",600,800);
+                  myCanvas->Divide(1,3);}
+  if(pt) { 
+    double curv = 0,xPrev,yPrev; int nCurv = 0;
+    for (int i=0;i<9;i++) {delete graph[0][i];graph[0][i]=0;}
+    for (int ig=0;ig<3;ig++) {
+      int n=0;
+      double s = 0;
+      xPrev = 3e33;
+      for (int ipt=0;ipt<npt;ipt++) {
+	const MyPull *node = pt+ipt;
+//	S calculation common based on node x,y for both hit and node
+        double xNode = node->x_g();
+        double yNode = node->y_g();
+	if (xPrev<3e33) {
+	  double ds = sqrt(pow(xNode-xPrev,2)+pow(yNode-yPrev,2));
+          double si = 0.5*ds*curv; if (si>0.99) si=0.99;
+          if (si>0.01) ds = 2*asin(si)/curv;
+	  s += ds;
+        }
+        xPrev = xNode;
+        yPrev = yNode;
+
+        if (ig==0) { curv += node->curv; nCurv++; continue;}
+	if (ig==1) {//draw nodes
+          X[0][ig][n] = node->x_g();
+          Y[0][ig][n] = node->y_g();
+          Y[2][ig][n] = node->z_g();
+	} else {//draw hits only
+          X[0][ig][n] = node->xhg();
+          Y[0][ig][n] = node->yhg();
+          Y[2][ig][n] = node->zhg();
+	}
+
+	if (n) {
+          float xh = X[0][ig][n]-X[0][ig][0];
+          float yh = Y[0][ig][n]-Y[0][ig][0];
+	  float rh = xh*xh+yh*yh+1E-10;
+	  X[1][ig][n-1] = xh/rh;
+	  Y[1][ig][n-1] = yh/rh;
+	}
+	X[2][ig][n]=s;
+	n++;
+      }//end for nodes
+      if (ig==0) { curv=fabs(curv)/nCurv; continue;}
+      N[0][ig] = n;
+      N[1][ig] = n-1;
+      N[2][ig] = n;
+    }//end for ig
+    
+    for (int ip=0;ip<3;ip++) {
+      double xMin=999,xMax=-999,yMin=999,yMax=-999;
+      for (int ig=1;ig<3;ig++) {
+        for (int j=0;j<N[ip][ig];j++) {
+           double x = X[ip][ig][j];
+	   if (xMin> x) xMin = x;
+	   if (xMax< x) xMax = x;
+           double y = Y[ip][ig][j];
+	   if (yMin> y) yMin = y;
+	   if (yMax< y) yMax = y;
+        }
+      }
+      X[ip][0][0] = xMin; Y[ip][0][0] = yMin;
+      X[ip][0][1] = xMin; Y[ip][0][1] = yMax;
+      X[ip][0][2] = xMax; Y[ip][0][2] = yMin;
+      X[ip][0][3] = xMax; Y[ip][0][3] = yMax;
+      N[ip][0] = 4;
+    }
+static const char *opt[]={"AP","Same CP","Same *"};  
+    for (int ip=0;ip<3;ip++) {
+      for (int ig =0;ig<3;ig++) {
+        graph[ip][ig]  = new TGraph(N[ip][ig]  , X[ip][ig], Y[ip][ig]);
+        if(ig==2) graph[ip][ig]->SetMarkerColor(kRed);
+        myCanvas->cd(ip+1); graph[ip][ig]->Draw(opt[ig]);
+      }//end for ig
+    }//end ip
+
+  }//end if
+
+
+  if (!myCanvas) return;
+  myCanvas->Modified();
+  myCanvas->Update();
+  while(!gSystem->ProcessEvents()){}; 
+}  
 //______________________________________________________________________________
 int   HitPars_t::Test()
 {
@@ -2053,11 +2290,11 @@ void xTCL::eigen2(const double err[3], double lam[2], double eig[2][2])
 }
 //______________________________________________________________________________
 /*
-* $Id: fiterr.C,v 1.3 2007/02/19 01:30:18 perev Exp $
+* $Id: fiterr.C,v 1.4 2007/02/27 03:44:08 perev Exp $
 *
 * $Log: fiterr.C,v $
-* Revision 1.3  2007/02/19 01:30:18  perev
-* Sum calculation in DERIV improved
+* Revision 1.4  2007/02/27 03:44:08  perev
+* Tuneup
 *
 * Revision 1.1.1.1  1996/04/01 15:02:13  mclareni
 * Mathlib gen
