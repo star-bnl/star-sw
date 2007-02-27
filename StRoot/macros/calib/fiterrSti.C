@@ -12,7 +12,7 @@ for (int god=2001;god <=2009;god++) {
 }
 opt +=",MakeEvent,ITTF,OShortR,OSpaceZ2,-dstout";
 int tpcOnly = myFlg.Contains("tpcOnly",TString::kIgnoreCase);
-if (!tpcOnly)  opt += ",ssddat,SvtIt,SsdIt";
+if (!tpcOnly)  opt += ",ssddat,SsdIt,spt,SvtIt";
 
 ians = bfc(-1,opt, daqFile,0,"pulls.root");
 if (ians) {printf("ERROR: bfc(-1,...) == %d\n",ians); return iAns;}
