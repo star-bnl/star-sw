@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.12 2005/04/12 17:31:56 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.13 2007/02/28 23:31:59 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,11 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.13  2007/02/28 23:31:59  dongx
+ * completion for Run V matching
+ *   - trailing tdc and leading tdc stored as adc and tdc in StTofCell
+ *   - multi-hit association cases use hit position priority
+ *
  * Revision 1.12  2005/04/12 17:31:56  dongx
  * update for year 5 data - not completed, leave as empty at present
  *
@@ -64,6 +69,7 @@
 #include "tables/St_tofPedestal_Table.h"
 #include "tables/St_tofConfig_Table.h"
 #include "tables/St_tofTrayConfig_Table.h"
+//#include "tables/St_tofr5INLtable_Table.h"
 #include "StTofUtil/tofPathLength.hh"
 #include "TH1.h"
 #include "TH2.h"
@@ -99,6 +105,7 @@ StTofrMatchMaker::StTofrMatchMaker(const Char_t *name): StMaker(name){
   setMaxDCA(9999.);
 
   setCreateHistoFlag(kFALSE);
+  setSaveGeometry(kFALSE);
   doPrintMemoryInfo = kFALSE;
   doPrintCpuInfo    = kFALSE;
 }
@@ -151,7 +158,7 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
   mYear2 = (runnumber<4000000);
   mYear3 = (runnumber>4000000&&runnumber<5000000);
   mYear4 = (runnumber>5000000&&runnumber<6000000);
-  mYear5 = (runnumber>6000000);
+  mYear5 = (runnumber>6000000&&runnumber<7000000);
 
   gMessMgr->Info("StTofrMatchMaker -- Initializing TofGeometry (InitRun)","OS");
   /////////////////////////////////////////////////////////////////////
@@ -165,8 +172,10 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
     mTofrGeom->Init(starHall);
   }
   // other makers can get this geometry
-//   if(TDataSet *geom = GetDataSet("tofrGeometry")) delete geom;
-//   AddConst(new TObjectSet("tofrGeometry",mTofrGeom)); 
+  if(mGeometrySave) {
+    if(TDataSet *geom = GetDataSet("tofrGeometry")) delete geom;
+    AddConst(new TObjectSet("tofrGeometry",mTofrGeom)); 
+  }
 
   if(Debug()) {
     gMessMgr->Info(" Test the TofrGeometry","OS");
@@ -209,83 +218,148 @@ Int_t StTofrMatchMaker::InitRun(Int_t runnumber){
   // TOFr Daq map initialization -- load from StTofUtil
   //////////////////////////////////////////////////////
   mDaqMap = new StTofrDaqMap();
-  mDaqMap->init(this);
-  //  AddConst(new TObjectSet("tofrDaqMap",mDaqMap));
-
-  if(Debug()) {
-    for(Int_t i=0;i<mNTOFR;i++) {
-      gMessMgr->Info("","OS") << i << " -- adc=" << mDaqMap->DaqChan2ADCChan(i) << " -- tdc=" << mDaqMap->DaqChan2TDCChan(i) << endm;
-      IntVec map = mDaqMap->DaqChan2Cell(i);
-      gMessMgr->Info("","OS") << "    tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
+  if(mYear2||mYear3||mYear4) {
+    mDaqMap->init(this);
+    //  AddConst(new TObjectSet("tofrDaqMap",mDaqMap));
+    gMessMgr->Info("","OS") << " Initialize Daq map for run 2,3,4 ... " << endm;
+    
+    if(Debug()) {
+      for(Int_t i=0;i<mNTOFR;i++) {
+	gMessMgr->Info("","OS") << i << " -- adc=" << mDaqMap->DaqChan2ADCChan(i) << " -- tdc=" << mDaqMap->DaqChan2TDCChan(i) << endm;
+	IntVec map = mDaqMap->DaqChan2Cell(i);
+	gMessMgr->Info("","OS") << "    tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
+      }
     }
-  }
+    
+    ///////////////////////////////////////////////////////
+      // Load configuration parameters from dbase
+      //    need "[shell] setenv Calibrations_tof reconV0"
+      ///////////////////////////////////////////////////////
+      gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
+      TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
+      if (!mDbDataSet){
+	gMessMgr->Error("unable to get TOF run parameters","OS");
+	//    assert(mDbDataSet);
+	return kStErr;
+      }
+      St_pvpdStrobeDef* pvpdStrobeDef = static_cast<St_pvpdStrobeDef*>(mDbDataSet->Find("pvpdStrobeDef"));
+      if (!pvpdStrobeDef){
+	gMessMgr->Error("unable to find pVPD strobe def parameters","OS");
+	//    assert(pvpdStrobeDef);
+	return kStErr;
+      }
+      pvpdStrobeDef_st *strobeDef = static_cast<pvpdStrobeDef_st*>(pvpdStrobeDef->GetArray());
+      Int_t numRows = pvpdStrobeDef->GetNRows();
+      if (mNPVPD != numRows) gMessMgr->Warning("#tubes inconsistency in dbase");
+      for (Int_t i=0;i<mNPVPD;i++){
+	Int_t ii = strobeDef[i].id - 1;
+	mStrobeTdcMin[ii] = strobeDef[i].strobeTdcMin;
+	mStrobeTdcMax[ii] = strobeDef[i].strobeTdcMax;
+	if (Debug())
+	  gMessMgr->Info("","OS") << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
+				  <<" max:"<< strobeDef[i].strobeTdcMax<< endm;
+      }
+      
+      //TOFr pedestals
+      St_tofPedestal* tofPed = static_cast<St_tofPedestal*>(mDbDataSet->Find("tofPedestal"));
+      if (!tofPed){
+	gMessMgr->Error("unable to find TOF pedestal table","OS");
+	return kStErr;
+	//    assert(tofPed);
+      }
+      tofPedestal_st *pedestal = static_cast<tofPedestal_st*>(tofPed->GetArray());
+      Int_t entries = (Int_t)(pedestal[0].entries);
+      if (mNTOFR>entries) gMessMgr->Warning("#TOFr channels inconsistency in dbase");
+      for (Int_t i=0;i<entries;i++) {
+	Int_t ii = pedestal[0].daqChannel[i];
+	Int_t adcChan = pedestal[0].adcChan[i];
+	if(adcChan>=60) 
+	  mPedTOFr[ii] = (Double_t)(pedestal[0].adcPedestal[i]);
+	if (Debug())
+	  gMessMgr->Info("","OS") << "daqChannel" << ii << " ped:" << pedestal[0].adcPedestal[i] <<endm;
+      }
+      
+      /*   only test
+      //TOFr configuration
+      St_tofTrayConfig* toftrayconfig = static_cast<St_tofTrayConfig*>(mDbDataSet->Find("tofTrayConfig"));
+      if(!toftrayconfig) {
+      gMessMgr->Error("unable to find TOF tray configuration parameters","OS");
+      //    assert(toftrayconfig);
+      return kStErr;    
+      }
+      tofTrayConfig_st *toftrayconf = static_cast<tofTrayConfig_st*>(toftrayconfig->GetArray());
+      entries = toftrayconf[0].entries;
+      for(Int_t i=0;i<entries;i++) {
+      Int_t iTray = toftrayconf[0].iTray[i];
+      Int_t nModules = toftrayconf[0].nModules[i];
+      if(Debug())
+      gMessMgr->Info("","OS") <<  "   " << iTray << " tray has " << nModules << " modules " << endm;
+      }
+      */
+      
+  } else if(mYear5) {
+    mDaqMap->initFromDbaseY5(this);
+    gMessMgr->Info("","OS") << " Initialize Daq map for run 5 ... " << endm;
+    
+    if(Debug()) {
+      //    if(0) {
+      for(Int_t i=0;i<mNTOFR5;i++) {
+	IntVec map = mDaqMap->Tofr5TDCChan2Cell(i);
+	gMessMgr->Info("","OS") << "InitRun():i="<<i<<" tray=" << map[0] << "  module=" << map[1] << "  cell=" << map[2] << endm;
+      }
+    }
+    
+    /* move INL calibration to StTofCalibMaker
+    // read INL table
+    gMessMgr->Info("","OS") << "read in INL table" << endm;
+    TDataSet *mDbTOFDataSet = this->GetDataBase("Calibrations/tof");
+    if(!mDbTOFDataSet) {
+      gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
+      //    assert(mDbTOFDataSet);
+      return kStErr;
+    }
+    
+    St_tofr5INLtable* tofr5INLtable = static_cast<St_tofr5INLtable*>(mDbTOFDataSet->Find("tofr5INLtable"));
+    if(!tofr5INLtable) {
+      gMessMgr->Error("unable to get tofr5 INL table parameters","OS");
+      //    assert(tofr5INLtable);
+      return kStErr;
+    }
+    tofr5INLtable_st* inltable = static_cast<tofr5INLtable_st*>(tofr5INLtable->GetArray());
+    Int_t numRows = tofr5INLtable->GetNRows();
+    
+    gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << endm;
+    
+    Char_t *boardName;
+    Short_t boardId;
+    Short_t tdcId;
+    Float_t INLcorr[1024];
+    
+    for (Int_t i=0;i<numRows;i++) {
+      boardName = "";
+      boardId = -1;
+      tdcId = -1;
+      for(int j=0;j<mTdcChannel;j++) {
+	INLcorr[j] = 0.0;
+      }
+      
+      boardName = (Char_t *)(inltable[i].boardID);
+      boardId = inltable[i].boardNumber;
+      tdcId = inltable[i].TDCID;
+      if(Debug())
+	gMessMgr->Info("","OS") << " name = " << boardName << " bId = " << boardId << " tdcId = " << tdcId << endm;
+      for(int j=0;j<mTdcChannel;j++) {
+	INLcorr[j] = inltable[i].INLcorrection[j];
+	if(Debug()&&j%100==0) gMessMgr->Info("","OS") << " j=" << j << " inlcorr=" << INLcorr[j] << endm;
+	mINLtable[boardId][tdcId][j] = INLcorr[j];
+      }
+            
+    }
+    */
 
-  ///////////////////////////////////////////////////////
-  // Load configuration parameters from dbase
-  //    need "[shell] setenv Calibrations_tof reconV0"
-  ///////////////////////////////////////////////////////
-  gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
-  TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
-  if (!mDbDataSet){
-    gMessMgr->Error("unable to get TOF run parameters","OS");
-    //    assert(mDbDataSet);
-    return kStErr;
-  }
-  St_pvpdStrobeDef* pvpdStrobeDef = static_cast<St_pvpdStrobeDef*>(mDbDataSet->Find("pvpdStrobeDef"));
-  if (!pvpdStrobeDef){
-    gMessMgr->Error("unable to find pVPD strobe def parameters","OS");
-    //    assert(pvpdStrobeDef);
-    return kStErr;
-  }
-  pvpdStrobeDef_st *strobeDef = static_cast<pvpdStrobeDef_st*>(pvpdStrobeDef->GetArray());
-  Int_t numRows = pvpdStrobeDef->GetNRows();
-  if (mNPVPD != numRows) gMessMgr->Warning("#tubes inconsistency in dbase");
-  for (Int_t i=0;i<mNPVPD;i++){
-    Int_t ii = strobeDef[i].id - 1;
-    mStrobeTdcMin[ii] = strobeDef[i].strobeTdcMin;
-    mStrobeTdcMax[ii] = strobeDef[i].strobeTdcMax;
-    if (Debug())
-      gMessMgr->Info("","OS") << "tube " << strobeDef[i].id << "  min:"<< strobeDef[i].strobeTdcMin
-	   <<" max:"<< strobeDef[i].strobeTdcMax<< endm;
+
   }
   
-  //TOFr pedestals
-  St_tofPedestal* tofPed = static_cast<St_tofPedestal*>(mDbDataSet->Find("tofPedestal"));
-  if (!tofPed){
-    gMessMgr->Error("unable to find TOF pedestal table","OS");
-    return kStErr;
-    //    assert(tofPed);
-  }
-  tofPedestal_st *pedestal = static_cast<tofPedestal_st*>(tofPed->GetArray());
-  Int_t entries = (Int_t)(pedestal[0].entries);
-  if (mNTOFR>entries) gMessMgr->Warning("#TOFr channels inconsistency in dbase");
-  for (Int_t i=0;i<entries;i++) {
-    Int_t ii = pedestal[0].daqChannel[i];
-    Int_t adcChan = pedestal[0].adcChan[i];
-    if(adcChan>=60) 
-      mPedTOFr[ii] = (Double_t)(pedestal[0].adcPedestal[i]);
-    if (Debug())
-      gMessMgr->Info("","OS") << "daqChannel" << ii << " ped:" << pedestal[0].adcPedestal[i] <<endm;
-  }
-
-  /*   only test
-  //TOFr configuration
-  St_tofTrayConfig* toftrayconfig = static_cast<St_tofTrayConfig*>(mDbDataSet->Find("tofTrayConfig"));
-  if(!toftrayconfig) {
-    gMessMgr->Error("unable to find TOF tray configuration parameters","OS");
-    //    assert(toftrayconfig);
-    return kStErr;    
-  }
-  tofTrayConfig_st *toftrayconf = static_cast<tofTrayConfig_st*>(toftrayconfig->GetArray());
-  entries = toftrayconf[0].entries;
-  for(Int_t i=0;i<entries;i++) {
-    Int_t iTray = toftrayconf[0].iTray[i];
-    Int_t nModules = toftrayconf[0].nModules[i];
-    if(Debug())
-      gMessMgr->Info("","OS") <<  "   " << iTray << " tray has " << nModules << " modules " << endm;
-  }
-  */
-
   return kStOK;
 }
 
@@ -993,6 +1067,626 @@ Int_t StTofrMatchMaker::processEventYear2to4(){
 //---------------------------------------------------------------------------
 Int_t StTofrMatchMaker::processEventYear5(){
   // leave as empty now
+
+  if(mHisto) mEventCounterHisto->Fill(0);
+  // event selection ...
+  mEvent = (StEvent *) GetInputDS("StEvent");
+  if (!validEvent(mEvent)){
+    gMessMgr->Info("StTofrMatchMaker -- nothing to do ... bye-bye","OS");
+    return kStOK;
+  }
+
+  // timing & memory info -only when requested-
+  StTimer timer;
+  if (doPrintCpuInfo) timer.start();
+  if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
+
+  //.........................................................................
+  // check for tofCollection and fill local copy with ADC and TDC data
+  StTofCollection *theTof = mEvent->tofCollection();
+  //  getTofData(theTof);
+  // year5
+  mSortTofRawData = new StSortTofRawData(theTof);
+
+  IntVec validchannel = mSortTofRawData->GetValidChannel();
+  // Any Hits in TOF+PVPD ?
+  if(validchannel.size()<=0) {
+    gMessMgr->Info("","OS") << " No hits in TOF or pVPD! " << endm;
+    // return kStOK;
+  } else {
+    gMessMgr->Info("","OS") << " Number of TOF+pVPD fired hits: " << validchannel.size() << endm;
+  }
+  if(Debug()) {
+    for(size_t iv=0;iv<validchannel.size();iv++) {
+      //if(validchannel[iv]<0||validchannel[iv]>=mNTOFR5) continue; // skip pvpd
+      gMessMgr->Info("","OS") << " channel = " << validchannel[iv]<<endm;
+      IntVec leTdc = mSortTofRawData->GetLeadingTdc(validchannel[iv]);
+      IntVec teTdc = mSortTofRawData->GetTrailingTdc(validchannel[iv]);
+      for(size_t iv1=0;iv1<leTdc.size();iv1++) {
+        gMessMgr->Info("","OS") << " leading Tdc = " << leTdc[iv1]<<endm;
+      }
+      for(size_t iv2=0;iv2<teTdc.size();iv2++) {
+        gMessMgr->Info("","OS") << " trailing Tdc = " << teTdc[iv2] << endm;
+      }
+    }
+  }   // end mdebug 
+    
+  // number of primary tracks
+  //  (note: different meaning in event.root and richtof.root)
+  Int_t refmult(0);
+  refmult = uncorrectedNumberOfPrimaries(*mEvent);
+  
+  if (Debug()){
+    gMessMgr->Info("","OS") << " #Tracks           :"      << mEvent->summary()->numberOfTracks()
+	 << "\n #goodPrimaryTracks:"    << mEvent->summary()->numberOfGoodPrimaryTracks()
+	 << "\n #uncorr.prim.tracks  :" << refmult << endm;
+  }
+
+  //.........................................................................
+  // A. build vector of candidate cells with valid ADC signals 
+  //  idVector validCellIdVec;
+  tofCellHitVector daqCellsHitVec;
+  //  daqCellsHitVec.clear();
+  idVector validModuleVec;
+
+  for(size_t ich=0;ich<validchannel.size();ich++) {
+    int ichan = validchannel[ich];
+    if(ichan<0||ichan>=mNTOFR5) continue; // tray
+    IntVec map = mDaqMap->Tofr5TDCChan2Cell(ichan);
+    if(map.size()!=3) continue;
+
+    Int_t IDtray = map[0];
+    Int_t IDmodule = map[1];
+    Int_t IDcell = map[2];
+    
+    StructCellHit aDaqCellHit;
+    aDaqCellHit.channel = ichan;
+    aDaqCellHit.tray = IDtray;
+    aDaqCellHit.module = IDmodule;
+    aDaqCellHit.cell = IDcell;
+    daqCellsHitVec.push_back(aDaqCellHit);
+
+    // additional valid number configuration
+    int id = IDtray*100+IDmodule;
+    bool ifind = kFALSE;
+    for(size_t iv=0;iv<validModuleVec.size();iv++) {
+      if(id==validModuleVec[iv]) {
+	ifind = kTRUE;
+	break;
+      }
+    }
+    if(!ifind) validModuleVec.push_back(id);
+  }
+
+  // end of Sect.A
+  if(Debug()) {
+    gMessMgr->Info("","OS") << "    total # of cells = " << daqCellsHitVec.size() << endm;
+    for(size_t iv = 0;iv<validModuleVec.size();iv++) {
+      gMessMgr->Info("","OS") << " module # " << validModuleVec[iv] << " Valid! " << endm;
+    }
+  }
+  if(mHisto) {
+    mCellsMultInEvent->Fill(daqCellsHitVec.size());
+    if(daqCellsHitVec.size()) mEventCounterHisto->Fill(6);
+  }
+  if(!daqCellsHitVec.size()) return kStOK;
+
+  //.........................................................................
+  // B. loop over global tracks and determine all cell-track matches
+  //
+  tofCellHitVector allCellsHitVec;
+  //  allCellsHitVec.clear();
+  StructCellHit cellHit;
+
+  StSPtrVecTrackNode& nodes = mEvent->trackNodes();
+  Int_t nAllTracks=0;
+  for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
+    tofCellHitVector cellHitVec;
+    //    cellHitVec.clear();
+    StTrack *theTrack = nodes[iNode]->track(global);
+
+    // make sure we have a track, a miniDST might have removed it...
+    if (validTrack(theTrack)){
+      nAllTracks++;
+      StPhysicalHelixD theHelix = trackGeometry(theTrack)->helix();
+
+      IntVec projTrayVec;
+      if(!mTofrGeom->projTrayVector(theHelix, projTrayVec)) continue;
+
+      IntVec idVec;
+      DoubleVec pathVec;
+      PointVec  crossVec;
+
+//       idVec.clear();
+//       pathVec.clear();
+//       crossVec.clear();
+
+      Int_t ncells = 0;
+      //      if(mTofrGeom->HelixCrossCellIds(theHelix,idVec,pathVec,crossVec) ) {
+      if(mTofrGeom->HelixCrossCellIds(theHelix, validModuleVec, projTrayVec, idVec, pathVec, crossVec)) {
+	Int_t cells = idVec.size();
+	for (Int_t i=0; i<cells; i++) {
+            Int_t icell,imodule,itray;
+            Double_t local[3],global[3];
+            for(Int_t i2=0;i2<3;i2++){
+                 local[i2]=0;
+            }
+            global[0]=crossVec[i].x();
+            global[1]=crossVec[i].y();
+            global[2]=crossVec[i].z();
+            mTofrGeom->DecodeCellId(idVec[i], icell, imodule, itray);
+	    cout << " decode " << idVec[i] << "  to tray#" << itray << " module#" << imodule << " cell#" << icell << endl;
+	    StTofrGeomSensor* sensor = 
+                  mTofrGeom->GetGeomSensor(imodule,itray);
+	    if(!sensor) {
+	      gMessMgr->Warning("","OS") << " No sensitive module in the projection??? -- Something weird!!! " << endm;
+	      continue;
+	    }
+            sensor->Master2Local(&global[0],&local[0]);
+            icell = sensor->FindCellIndex(local);
+	    //	    StThreeVectorD glo=sensor->GetCenterPosition();
+	    StThreeVectorD glo(global[0], global[1], global[2]);
+	    StThreeVectorD hitPos(local[0], local[1], local[2]);
+	    delete sensor;
+	    //	    if (local[2]<=3.4&&local[2]>=-2.7) {
+	      Int_t Iarray = mDaqMap->Tofr5Cell2TDCChan(itray, imodule, icell);
+	      if(Iarray>=mDAQOVERFLOW||Iarray<0) continue;
+	      ncells++;
+	      cellHit.channel = Iarray;
+	      cellHit.tray = itray;
+	      cellHit.module = imodule;
+	      cellHit.cell = icell;
+	      cellHit.trackIdVec.push_back(iNode);
+	      cellHit.hitPosition = glo;        // global position
+	      cellHit.zhit = (Float_t)hitPos.z();
+	      cellHit.yhit = (Float_t)hitPos.y();
+	      cellHitVec.push_back(cellHit);
+	      allCellsHitVec.push_back(cellHit);
+	      if(mHisto) {
+		mDaqOccupancyProj->Fill(Iarray);
+		mHitsPosition->Fill(hitPos.y(), hitPos.z());
+	      }
+	      
+	      if(Debug()) {
+		gMessMgr->Info("","OS") <<"B: nodeid=" << iNode << "  projected in " << " tray="<< itray << " module="<<imodule<<" cell="<<icell<<endm;
+		gMessMgr->Info("","OS") <<"   hit position " << hitPos << endm;
+	      }
+	      //	    }
+	} // for (Int_t i=0...)
+      } // endif(helixcross...)
+      if(ncells>0&&mHisto) mHitsMultPerTrack->Fill(ncells);
+
+    } // if(ValidTrack).. 
+  } // loop over nodes
+  if(Debug())
+    gMessMgr->Info("","OS") << "B:  matched/available/total #tracknodes: " <<allCellsHitVec.size() << "/" <<nAllTracks << "/" << nodes.size() << endm;
+  if(mHisto) {
+    mHitsMultInEvent->Fill(allCellsHitVec.size());
+    if(allCellsHitVec.size()) mEventCounterHisto->Fill(7);
+  }
+  // end of Sect.B
+  
+  //.........................................................................
+  // C. Match find Neighbours -- identify crosstalk
+  //
+  tofCellHitVector matchHitCellsVec;
+  //  matchHitCellsVec.clear();
+
+  tofCellHitVectorIter daqIter = daqCellsHitVec.begin();
+  for(unsigned int idaq=0;idaq<daqCellsHitVec.size();idaq++, daqIter++) {
+    tofCellHitVectorIter proIter = allCellsHitVec.begin();
+    for(unsigned int ipro=0;ipro<allCellsHitVec.size();ipro++, proIter++) {
+      if( (daqIter->tray==proIter->tray)&& 
+	  (daqIter->module==proIter->module) &&
+	  ( ( (proIter->cell==6)&&((proIter->cell==daqIter->cell) ||
+				   (proIter->cell==daqIter->cell+1)) )
+	    || ( (proIter->cell==1)&&((proIter->cell==daqIter->cell) ||
+				      (proIter->cell==daqIter->cell-1)) )
+	    || ( (proIter->cell>=2&&proIter->cell<=6) &&
+		 ( (proIter->cell==daqIter->cell) ||
+		   (proIter->cell==daqIter->cell-1) ||
+		   (proIter->cell==daqIter->cell+1) ) ) ) ) {
+	cellHit.channel = daqIter->channel;
+	cellHit.tray = daqIter->tray;
+	cellHit.module = daqIter->module;
+	cellHit.cell = daqIter->cell;
+	cellHit.hitPosition = proIter->hitPosition;
+	cellHit.trackIdVec = proIter->trackIdVec;
+	cellHit.zhit = proIter->zhit;
+	cellHit.yhit = proIter->yhit;
+	matchHitCellsVec.push_back(cellHit);
+      }
+    }
+  } //end {sec. C}
+  if(Debug()) {
+    gMessMgr->Info("","OS") << "C: before/after: " << allCellsHitVec.size() << "/" << matchHitCellsVec.size() << endm;
+  }
+  if(mHisto&&matchHitCellsVec.size()) mEventCounterHisto->Fill(8);
+
+  //.........................................................................
+  // D. sort hit vectors  and deal with (discard) cells matched by multiple tracks
+  //
+  Int_t nSingleHitCells(0);
+  Int_t nMultiHitsCells(0);
+
+  tofCellHitVector singleHitCellsVec;
+  tofCellHitVector multiHitsCellsVec;
+//   singleHitCellsVec.clear();
+//   multiHitsCellsVec.clear();
+
+  tofCellHitVector tempVec = matchHitCellsVec;
+  tofCellHitVector erasedVec = tempVec;
+  while (tempVec.size() != 0) {
+    Int_t nTracks = 0;
+    idVector trackIdVec;
+
+    tofCellHitVectorIter tempIter=tempVec.begin();
+    tofCellHitVectorIter erasedIter=erasedVec.begin();
+    while(erasedIter!= erasedVec.end()) {
+      if(tempIter->tray == erasedIter->tray &&
+	 tempIter->module == erasedIter->module &&
+	 tempIter->cell == erasedIter->cell) {
+	nTracks++;
+	trackIdVec.push_back(erasedIter->trackIdVec.back());  // merge
+	erasedVec.erase(erasedIter);
+	erasedIter--;
+      }
+      erasedIter++;
+    }
+
+    cellHit.channel = tempIter->channel;
+    cellHit.cell = tempIter->cell;
+    cellHit.module = tempIter->module;
+    cellHit.tray = tempIter->tray;
+    cellHit.hitPosition = tempIter->hitPosition;
+    cellHit.trackIdVec = trackIdVec;
+    cellHit.zhit = tempIter->zhit;
+    cellHit.yhit = tempIter->yhit;
+
+    Float_t ycenter = (tempIter->cell-1-2.5)*mWidthPad;
+    Float_t dy = tempIter->yhit - ycenter;
+    Float_t dz = tempIter->zhit;
+
+    if(mHisto) {
+      mTracksPerCellMatch1->Fill(trackIdVec.size());
+      mDaqOccupancyMatch1->Fill(tempIter->channel);
+      mDeltaHitMatch1->Fill(dy, dz);
+    }
+
+    if (nTracks==1){
+      nSingleHitCells++;      
+      singleHitCellsVec.push_back(cellHit);
+    } else if (nTracks>1){
+      nMultiHitsCells++;
+      multiHitsCellsVec.push_back(cellHit);
+      // for multiple hit cells either discard (yes) or
+      // find the most likely candidate.
+    } else {
+      gMessMgr->Info("","OS") << "D: no tracks extrapolate to matched cell ... should not happen!" << endm;
+    }
+    
+    if (Debug()) {
+      gMessMgr->Info("","OS") << "D: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+      idVectorIter ij=trackIdVec.begin();
+      while (ij != trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
+      gMessMgr->Info("","OS") <<endm;
+    }
+    
+    tempVec = erasedVec;
+  }
+  if(Debug())
+    gMessMgr->Info("","OS") << "D: before/after: " << matchHitCellsVec.size() << "/" << singleHitCellsVec.size() << endm;
+  //end of Sect.C
+  if(mHisto) {
+    mCellsPerEventMatch1->Fill(singleHitCellsVec.size()+multiHitsCellsVec.size());
+    if(singleHitCellsVec.size()) mEventCounterHisto->Fill(9);
+  } 
+
+  //.........................................................................
+  // E. sort and deal singleHitCellsVector for multiple cells associated to single tracks
+  //
+  tofCellHitVector FinalMatchedCellsVec;
+  //  FinalMatchedCellsVec.clear();
+  tempVec = singleHitCellsVec;
+  if(mHisto) {
+    mCellsPerEventMatch2->Fill(tempVec.size());
+    for(unsigned int ii=0;ii<tempVec.size();ii++) {
+      mTracksPerCellMatch2->Fill(tempVec[ii].trackIdVec.size());
+      mDaqOccupancyMatch2->Fill(tempVec[ii].channel);
+      Float_t ycenter = (tempVec[ii].cell-1-2.5)*mWidthPad;
+      Float_t dy = tempVec[ii].yhit-ycenter;
+      Float_t dz = tempVec[ii].zhit;
+      mDeltaHitMatch2->Fill(dy, dz);
+    }
+  }
+
+  erasedVec = tempVec;
+  while (tempVec.size() != 0) {
+    StructCellHit cellHit;
+    Int_t nCells = 0;
+    idVector vTrackId;
+    vector<StThreeVectorD> vPosition;
+    vector<Int_t> vchannel, vtray, vmodule, vcell;
+    vector<Float_t> vzhit, vyhit;
+
+    tofCellHitVectorIter tempIter=tempVec.begin();
+    tofCellHitVectorIter erasedIter=erasedVec.begin();
+    while(erasedIter!= erasedVec.end()) {
+      if(tempIter->trackIdVec.back() == erasedIter->trackIdVec.back()) {
+	nCells++;
+	vchannel.push_back(erasedIter->channel);
+	vtray.push_back(erasedIter->tray);
+	vmodule.push_back(erasedIter->module);
+	vcell.push_back(erasedIter->cell);
+	vPosition.push_back(erasedIter->hitPosition);
+	vTrackId.push_back(erasedIter->trackIdVec.back());
+	vzhit.push_back(erasedIter->zhit);
+	vyhit.push_back(erasedIter->yhit);
+
+	erasedVec.erase(erasedIter);
+	erasedIter--;
+      }
+      erasedIter++;
+    }
+
+    if (nCells==1){
+      // for singly hit cell, copy data in singleHitCellsVec
+      cellHit.channel = vchannel[0];
+      cellHit.tray = vtray[0];
+      cellHit.module = vmodule[0];
+      cellHit.cell = vcell[0];
+      cellHit.trackIdVec.push_back(vTrackId[0]);
+      cellHit.hitPosition = vPosition[0];
+      cellHit.matchFlag = 0; 
+      cellHit.zhit = vzhit[0];
+      cellHit.yhit = vyhit[0];
+
+      FinalMatchedCellsVec.push_back(cellHit);
+
+      // debugging output
+      if (Debug()) {
+	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:";
+	idVectorIter ij=vTrackId.begin();
+	while (ij != vTrackId.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
+	gMessMgr->Info("","OS") <<endm;
+      }
+    }
+    else if (nCells>1){   // for multiple hit cells  find the most likely candidate.
+      Int_t thiscandidate(-99);
+      Int_t thisMatchFlag(0);
+
+      // sort on hitposition
+      Float_t ss(99.);
+      vector<Int_t> ssCandidates;
+      thisMatchFlag = 2;
+      if (Debug()) gMessMgr->Info("","OS") << " ss " << endm;
+      for (Int_t i=0;i<nCells;i++){
+	Float_t yy = vyhit[i];
+	Float_t ycell = (vcell[i]-1-2.5)*mWidthPad;
+	Float_t ll = fabs(yy-ycell);
+	if(ll<ss) {
+	  ss = ll;
+	  ssCandidates.clear();
+	  ssCandidates.push_back(i);
+	}else if  (ll==ss)
+	  ssCandidates.push_back(i);	  
+      }
+      if (ssCandidates.size()==1){
+	thiscandidate = ssCandidates[0];
+	Int_t daqId = vchannel[thiscandidate];
+	if (Debug()) gMessMgr->Info("","OS") << "candidate =" << daqId << endm;
+      }
+      
+
+      if (thiscandidate>=0) {
+	cellHit.channel = vchannel[thiscandidate];
+	cellHit.tray = vtray[thiscandidate];
+	cellHit.module = vmodule[thiscandidate];
+	cellHit.cell = vcell[thiscandidate];
+	cellHit.trackIdVec.push_back(vTrackId[thiscandidate]);
+	cellHit.hitPosition = vPosition[thiscandidate];
+	cellHit.matchFlag = thisMatchFlag;
+	cellHit.zhit = vzhit[thiscandidate];
+	cellHit.yhit = vyhit[thiscandidate];
+
+	FinalMatchedCellsVec.push_back(cellHit);
+	
+	// debugging output
+	if (Debug()) {
+	gMessMgr->Info("","OS") << "E: itray=" << cellHit.tray << " imodule=" << cellHit.module << " icell=" << cellHit.cell << "\ttrackid:" << vTrackId[thiscandidate] << endm;
+	}
+      }
+
+    } else {
+      gMessMgr->Info("","OS") << "E: no cells belong to this track ... should not happen!" << endm;
+    }
+
+    tempVec = erasedVec;
+  }
+
+  gMessMgr->Info("","OS") << "E: before/after: " << singleHitCellsVec.size() << "/" << FinalMatchedCellsVec.size() << endm;
+  // end of Sect.E
+
+  //.........................................................................
+  // F. perform further selection and
+  //    fill valid track histograms, ntuples and CellCollection
+  //
+  tempVec.clear();
+  tempVec = FinalMatchedCellsVec;
+  if(mHisto) {
+    if(FinalMatchedCellsVec.size()) mEventCounterHisto->Fill(10);
+    mCellsPerEventMatch3->Fill(tempVec.size());
+    for(unsigned int ii=0;ii<tempVec.size();ii++) {
+      mTracksPerCellMatch3->Fill(tempVec[ii].trackIdVec.size());
+      mDaqOccupancyMatch3->Fill(tempVec[ii].channel);
+      Float_t ycenter = (tempVec[ii].cell-1-2.5)*mWidthPad;
+      Float_t dy = tempVec[ii].yhit - ycenter;
+      Float_t dz = tempVec[ii].zhit;
+      mDeltaHitMatch3->Fill(dy, dz);
+    }
+  }
+
+  StTofCellCollection *mCellCollection =  new StTofCellCollection;
+  Int_t nValidSingleHitCells(0), nValidSinglePrimHitCells(0);
+
+  for (size_t ii=0; ii < FinalMatchedCellsVec.size(); ii++){
+    Int_t daqId = FinalMatchedCellsVec[ii].channel;
+    Int_t jj = daqId;
+    Int_t tray = FinalMatchedCellsVec[ii].tray;
+    Int_t module = FinalMatchedCellsVec[ii].module;
+    Int_t cell = FinalMatchedCellsVec[ii].cell;
+
+    Float_t ycenter = (cell-1-2.5)*mWidthPad;
+    Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
+    if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
+      gMessMgr->Info("","OS") << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
+
+
+    /* move INL correction to calibration maker
+    // Read in Leading and Trailing edge TDC, apply on INL correction
+    int tmptdc = (mSortTofRawData->GetLeadingTdc(jj))[0];
+    // do inl correction
+    int bin = int(tmptdc)&0x03ff;
+    float tmptdc_f = tmptdc + GetINLcorr(4, jj, bin);
+    float letime  = tmptdc_f*25./1024; // ns
+
+    tmptdc=(mSortTofRawData->GetTrailingTdc(jj))[0];    
+    // do inl correction
+    bin = int(tmptdc)&0x0ff;
+    tmptdc_f = tmptdc + GetINLcorr(5, jj, bin);
+    float tetime  = tmptdc_f*100./1024; // ns
+    float tot = tetime - letime; // ns
+    */
+
+    int letdc = (mSortTofRawData->GetLeadingTdc(jj))[0];
+    int tetdc=(mSortTofRawData->GetTrailingTdc(jj))[0];
+
+    // get track-id from cell hit vector
+    unsigned int trackNode = FinalMatchedCellsVec[ii].trackIdVec[0];
+    StTrack *theTrack = nodes[trackNode]->track(primary);
+    StTrack *globalTrack = nodes[trackNode]->track(global);
+
+    // 2. continue only if the (primary) track exists
+    if (validTofTrack(theTrack) && fabs(dy)<1.9 ){
+      nValidSinglePrimHitCells++;
+
+      //--- store number of hits per track
+      Int_t nHitsPerTrack = theTrack->topologyMap().numberOfHits(kTpcId);
+	  
+      // select the apropriate track geometry
+      StTrackGeometry *theTrackGeometry = trackGeometry(theTrack);
+
+      //--- get momentum from track
+      const StThreeVectorF momentum = theTrackGeometry->momentum();
+	    
+      //--- calculate flight path
+      Double_t pathLength = tofPathLength(&mEvent->primaryVertex()->position(),
+					&FinalMatchedCellsVec[ii].hitPosition,
+					theTrackGeometry->helix().curvature());
+
+      //--- calculate local hit position on cell based first, last and middle plane
+      //    (middle plane is the average of first and last plane, which is mathematically
+      //     the same as CellHitVec.hitPosition ... )
+//       StThreeVectorD *pInnerLayer, *pOuterLayer;
+//       pInnerLayer =  FinalMatchedCellsVec[ii].layerHitPositions.begin();
+//       pOuterLayer =  FinalMatchedCellsVec[ii].layerHitPositions.end() - 1;
+      
+      //--- dig out from the dedx and rich pid traits
+      Float_t dedx(0.), cherang(0);
+      Int_t dedx_np(0), cherang_nph(0);
+      StSPtrVecTrackPidTraits& traits = theTrack->pidTraits();
+      for (unsigned int it=0;it<traits.size();it++){
+	if (traits[it]->detector() == kTpcId){
+	  StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[it]);
+	  if (pid && pid->method() ==kTruncatedMeanId){
+	    dedx    = pid->mean();
+	    dedx_np =  pid->numberOfPoints();
+	  }
+	} else if  (traits[it]->detector() == kRichId){
+	  StRichPidTraits *pid = dynamic_cast<StRichPidTraits*>(traits[it]);
+	  if (pid){ 
+	    StRichSpectra* pidinfo = pid->getRichSpectra();
+	    if (pidinfo && pidinfo->getCherenkovPhotons()>2){
+	      cherang     = pidinfo->getCherenkovAngle();
+	      cherang_nph = pidinfo->getCherenkovPhotons();
+	    }
+	  }
+	}
+      }
+      
+      //--- calculate local hit position on cell based on average hitposition
+      //      Float_t localHitPos = mTofGeom->cellHitPosition(&allMatchedCellsVec[ii].hitPosition);
+      
+      // Fill TOF Cell Collection
+      // year5, raw letdc and tetdc stored as "tdc" and "adc" in StTofCell
+      // 
+      //      StTofCell *tofCell = new StTofCell(tray, module, cell, daqId, (Int_t)(tot*1000.),(Int_t)(letime*1000.),theTrack,FinalMatchedCellsVec[ii].zhit,FinalMatchedCellsVec[ii].matchFlag,FinalMatchedCellsVec[ii].hitPosition);
+      StTofCell *tofCell = new StTofCell(tray, module, cell, daqId, tetdc,letdc,theTrack,FinalMatchedCellsVec[ii].zhit,FinalMatchedCellsVec[ii].matchFlag,FinalMatchedCellsVec[ii].hitPosition);
+      mCellCollection->push_back(tofCell);
+      
+      // dump debug data
+      if (Debug()){
+	gMessMgr->Info("","OS") << "F: itray=" << tray << " imodule=" << module << " icell=" << cell << "\tnodeid:";
+	idVectorIter ij=FinalMatchedCellsVec[ii].trackIdVec.begin();
+	while (ij != FinalMatchedCellsVec[ii].trackIdVec.end()) { gMessMgr->Info("","OS") << " " << *ij; ij++; }
+	gMessMgr->Info("","OS") << "\tR=" << 1/(theTrackGeometry->helix().curvature())
+	     << "\tpT=" << momentum.perp() << "\tp=" << momentum.mag()
+	     << "\thits="<< nHitsPerTrack << "\ts="<< pathLength
+	     << "\t#fitp=" <<theTrack->fitTraits().numberOfFitPoints(kTpcId)
+	  //	     << "\t#trkp=" <<theTrack->detectorInfo()->numberOfPoints(kTpcId)
+	     << " \tdedx=" << dedx
+	     << " \tdca="<< globalTrack->geometry()->helix().distance(mEvent->primaryVertex()->position())<<" and "<<theTrackGeometry->helix().distance(mEvent->primaryVertex()->position());
+	if (cherang!=0) cout  << " \trich="<< cherang << " (" << cherang_nph << ")";
+	gMessMgr->Info("","OS") << endm;
+      }
+
+    } // track exists 
+  }
+  
+  storeMatchData(mCellCollection,theTof);
+  delete mCellCollection;
+  
+  //check StEvent collections --
+  if (theTof->dataPresent())
+    gMessMgr->Info("","OS") << " TofCollection: raw data container present" << endm;
+  if (theTof->cellsPresent()){
+    gMessMgr->Info("","OS") << " TofCollection: cell container present."<<endm;
+    if (Debug()){
+      StSPtrVecTofCell& tmpCellTofVec = theTof->tofCells();
+      for (size_t i = 0; i < tmpCellTofVec.size(); i++) {
+	StTofCell* p = tmpCellTofVec[i];
+	gMessMgr->Info("","OS") << p->trayIndex() << " " << p->moduleIndex() << " " << p->cellIndex() << " " << p->adc() << " " << p->tdc() << " " << p->associatedTrack() << " " << p->matchFlag() << " " << p->position() << endm;
+      }
+    }
+  }
+  //-- end check
+  
+  gMessMgr->Info("","OS") << "F: before/after" << FinalMatchedCellsVec.size() << "/" <<nValidSinglePrimHitCells << endm;
+ // end of Sect.F
+
+  gMessMgr->Info("","OS") << "#(cell tracks): " << allCellsHitVec.size()
+       << " #(hit cells): " << FinalMatchedCellsVec.size()
+       << "\n#(single hits): " << nSingleHitCells 
+       << " #(single valid hits): " << nValidSingleHitCells
+       << " #(single prim valid hits): " << nValidSinglePrimHitCells
+       << endm;
+
+
+
+  if (doPrintMemoryInfo) {
+        StMemoryInfo::instance()->snapshot();
+        StMemoryInfo::instance()->print();
+  }
+  if (doPrintCpuInfo) {
+    timer.stop();
+    gMessMgr->Info("","OS") << "CPU time for StTofrMatchMaker::Make(): "
+	 << timer.elapsedTime() << " sec\n" << endm;
+  }
+
+  gMessMgr->Info("","OS") << "StTofrMatchMaker -- bye-bye" << endm;
+
+
+
   return kStOK;
 }
 

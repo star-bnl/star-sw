@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.h,v 1.7 2005/07/06 23:10:24 fisyak Exp $
+ * $Id: StTofrMatchMaker.h,v 1.8 2007/02/28 23:32:00 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,11 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.h,v $
+ * Revision 1.8  2007/02/28 23:32:00  dongx
+ * completion for Run V matching
+ *   - trailing tdc and leading tdc stored as adc and tdc in StTofCell
+ *   - multi-hit association cases use hit position priority
+ *
  * Revision 1.7  2005/07/06 23:10:24  fisyak
  * Use template StThreeVectorD
  *
@@ -50,9 +55,11 @@ class StTrack;
 class StHelix;
 #include "StThreeVectorD.hh"
 class StTrackGeometry;
+#include "StTofUtil/StSortTofRawData.h"
 class StTofrGeometry;
 class StTofCollection;
 class StTofCellCollection;
+class StTofRawDataCollection;
 class StTofDataCollection;
 class StSPtrVecTofData;
 class StTofrDaqMap;
@@ -89,6 +96,7 @@ public:
     void setMaxDCA(Float_t);
     void setHistoFileName(Char_t*);
     void setNtupleFileName(Char_t*);
+    void setSaveGeometry(Bool_t geomSave=kFALSE);
 
     Int_t processEventYear2to4();
     Int_t processEventYear5();
@@ -108,6 +116,10 @@ private:
     Bool_t validTrack(StTrack*);
     Bool_t validTofTrack(StTrack*);
 
+    // year5 moved to calibration maker
+    //    float GetINLcorr(int edgeid,int tempchan,int bin);
+    //
+
 public:
     Bool_t  doPrintMemoryInfo;     //! 
     Bool_t  doPrintCpuInfo;        //!
@@ -117,6 +129,7 @@ private:
     static const Int_t mNTOFP = 41;
     static const Int_t mNPVPD = 6;
     static const Int_t mNTOFR = 120;
+    static const Int_t mNTOFR5 = 192; 
     //    static const Float_t mWidthPad = 3.45;
 
     Float_t     mWidthPad;
@@ -125,6 +138,21 @@ private:
     Float_t	mPvpdAdc[mNPVPD];
     Float_t	mPvpdAdcLoRes[mNPVPD];
     Float_t	mPvpdTdc[mNPVPD];
+    //year 5
+    static const Int_t mTdigBoard = 10;
+    static const Int_t mTdcOnBoard = 4;
+    static const Int_t mTdcChannel = 1024;
+    Float_t	mPvpdToT[mNPVPD];
+    IntVec      mTofr5LdChan;
+    IntVec      mTofr5LdTdc;
+    IntVec      mTofr5TrChan;
+    IntVec      mTofr5TrTdc;
+    Float_t     mTofr5Tdc[mNTOFR5];
+    Float_t     mTofr5ToT[mNTOFR5]; // ToT as adc
+
+    // moved to calibration maker
+    //    Float_t     mINLtable[mTdigBoard][mTdcOnBoard][mTdcChannel];
+    //
     
     Int_t mStrobeTdcMin[mNPVPD]; //! lower strobe event range
     Int_t mStrobeTdcMax[mNPVPD]; //! upper strobe event range
@@ -133,6 +161,7 @@ private:
     StEvent *mEvent;
     StTofrGeometry *mTofrGeom; //! pointer to the TOFr geometry utility class
     StTofrDaqMap *mDaqMap; //! pointer to the TOFr daq map
+    StSortTofRawData *mSortTofRawData; // sorted TOFr5 raw data
     
     Bool_t mHisto; //! create, fill and write out histograms
     
@@ -141,6 +170,8 @@ private:
     Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
     Bool_t mYear5; //! STAR year5: pVPD+TOFr5
     Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
+    Bool_t mGeometrySave;
+
     string mHistoFileName; //! name of histogram file, if empty no write-out
     
     // event counters
@@ -160,6 +191,9 @@ private:
     unsigned int mMinFitPointsPerTrack; //! lower cut on #fitpoints per track
     Float_t mMaxDCA; //! upper cut (centimeters) on final (global) DCA
     
+
+    //
+
     // TOFr histograms
     TH2D* mADCTDCCorelation;
     
@@ -221,7 +255,7 @@ private:
     
     
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.7 2005/07/06 23:10:24 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofrMatchMaker.h,v 1.8 2007/02/28 23:32:00 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofrMatchMaker,1)
 };
@@ -249,6 +283,8 @@ inline void StTofrMatchMaker::setMaxDCA(Float_t maxdca){mMaxDCA=maxdca;}
 inline void StTofrMatchMaker::setHistoFileName(Char_t* filename){mHistoFileName=filename;}
 
 inline void StTofrMatchMaker::setCreateHistoFlag(Bool_t histos){mHisto = histos;}
+
+inline void StTofrMatchMaker::setSaveGeometry(Bool_t geomSave){mGeometrySave = geomSave; }
 
 inline Bool_t StTofrMatchMaker::validAdc(const Float_t adc){return((adc>=mMinValidAdc) && (adc<=mMaxValidAdc));}
 
