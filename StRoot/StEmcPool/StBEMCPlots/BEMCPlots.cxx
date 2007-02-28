@@ -296,7 +296,7 @@ void BEMCPlots::clear(const char *bemcStatus) {
 			this->mTowerData[softId - 1][1] = int(ped * 100.0);
 			int triggerPatch;
 			if ((maskTower == 0) && BEMCDecoder && BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
-			    if ((triggerPatch > 0) && (triggerPatch < 300)) {
+			    if ((triggerPatch >= 0) && (triggerPatch < 300)) {
 				this->mPatchData[triggerPatch][10] += 1;
 			    }
 			}
@@ -498,7 +498,7 @@ void BEMCPlots::processEvent( char *datap
 				    if (BEMCDecoder->GetTowerCrateFromDaqId(i, crate, crateSeq)) {
 					int triggerPatch;
 					if (BEMCDecoder->GetTriggerPatchFromCrate(crate, crateSeq, triggerPatch)) {
-					    if ((triggerPatch > 0) && (triggerPatch < 300)) {
+					    if ((triggerPatch >= 0) && (triggerPatch < 300)) {
 						int ht, pa;
 						if (triggerPatch == 27300) cout << "SoftId " << softId << " ";
 						simulateFEEaction(adc, this->mTowerData[softId - 1][2], this->mPatchData[triggerPatch][2], ht, pa, (triggerPatch == 27300));
