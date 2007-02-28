@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.79 2007/01/15 08:23:02 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.80 2007/02/28 13:31:27 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.80  2007/02/28 13:31:27  jcs
+// temporary fix: add explanation why accessing ftpcDimensions and ftpcPadRowZ
+// in Init doesn't cause problems
+//
 // Revision 1.79  2007/01/15 08:23:02  jcs
 // replace printf, cout and gMesMgr with Logger commands
 //
@@ -411,6 +415,13 @@ Int_t StFtpcTrackMaker::Init()
   TDataSetIter ftpcGeometry(ftpcGeometryDb);
 
   // get tracking parameters from database
+
+    //  Explanation: 
+    //  dbDate not yet set in Init but Geometry_ftpc/ftpcPadrowZ never changes
+    //  and only Geometry_ftpc/ftpcDimensions.sizeOfTimebin changed but it was
+    //  never used in StFtpcTrackMaker
+
+
   StFtpcTrackingParams::Instance(Debug(),
   				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
   				 (St_ftpcdEdxPars *)ftpcPars("ftpcdEdxPars"),
@@ -883,7 +894,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   LOG_INFO << "******************************************************************" << endm;
-  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.79 2007/01/15 08:23:02 jcs Exp $ *" << endm;
+  LOG_INFO << "* $Id: StFtpcTrackMaker.cxx,v 1.80 2007/02/28 13:31:27 jcs Exp $ *" << endm;
   LOG_INFO << "******************************************************************" << endm;
   
   if (Debug()) {
