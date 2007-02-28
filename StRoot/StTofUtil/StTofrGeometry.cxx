@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrGeometry.cxx,v 1.6 2004/05/03 23:07:49 dongx Exp $
+ * $Id: StTofrGeometry.cxx,v 1.7 2007/02/28 23:28:17 dongx Exp $
  * 
  * Authors: Shuwei Ye, Xin Dong
  *******************************************************************
@@ -10,6 +10,9 @@
  *
  *******************************************************************
  * $Log: StTofrGeometry.cxx,v $
+ * Revision 1.7  2007/02/28 23:28:17  dongx
+ * R_tof used for pre-match calculation updated to ~215cm
+ *
  * Revision 1.6  2004/05/03 23:07:49  dongx
  * -Introduce data members to save the Tray and Sensor geometries in the initialization.
  * -Optimize the HelixCrossCellIds() function to save CPU time
@@ -2360,7 +2363,7 @@ const
 Bool_t StTofrGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) const {
 
   trayVec.clear();
-  double R_tof = 220.;
+  double R_tof = 215.;
   double res = 5.0;
   double s1 = helix.pathLength(R_tof).first;
   if(s1<0.) s1 = helix.pathLength(R_tof).second;
