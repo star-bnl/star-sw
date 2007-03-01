@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.cxx,v 1.34 2007/02/21 20:36:17 bouchet Exp $
+// $Id: StSsdPointMaker.cxx,v 1.35 2007/03/01 22:19:21 bouchet Exp $
 //
 // $Log: StSsdPointMaker.cxx,v $
+// Revision 1.35  2007/03/01 22:19:21  bouchet
+// add a protection when ssdStripCalib is filled with empty values
+//
 // Revision 1.34  2007/02/21 20:36:17  bouchet
 // add a method WriteMatchedClusters :\ instead of WriteScfTuple() method that fill all the reconstructed clusters,\ this one store the clusters associated to the hits
 //
@@ -348,16 +351,26 @@ Int_t StSsdPointMaker::InitRun(Int_t runumber)
       //      m_noise2       = (St_ssdStripCalib*)local("ssd/ssdStripCalib");
       
       TDataSet *CalibDbConnector = GetDataBase("Calibrations/ssd");
-      if (!CalibDbConnector) {LOG_ERROR <<"InitRun: Can not found the calibration db.."<<endm;}
+      if (!CalibDbConnector)
+	{
+	  LOG_ERROR <<"InitRun: Can not found the calibration db.."<<endm;
+	}
       else
-	m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
-      
-      if (!m_noise2){
-        LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;}
-      if(m_noise2){
-	LOG_WARN<<"InitRun : printing few pedestal/noise values"<<endm;
-	Read_Strip(m_noise2); 
-      }
+	{
+	  m_noise2 = (St_ssdStripCalib*) CalibDbConnector->Find("ssdStripCalib");
+	  if (!m_noise2)
+	    {
+	      LOG_ERROR << "InitRun : No access to ssdStripCalib - will use the default noise and pedestal values" << endm;
+	    }
+	  else
+	    {
+	      if(m_noise2)
+		{
+		  LOG_WARN<<"InitRun : printing few pedestal/noise values"<<endm;
+		  Read_Strip(m_noise2,&Zero); 
+		}
+	    }
+	}
       // Get once the information for configuration, wafersposition and dimensions
       St_ssdConfiguration* configTable = (St_ssdConfiguration*) DbConnector->Find("ssdConfiguration"); 
       config  = (ssdConfiguration_st*) configTable->GetTable() ;
@@ -422,7 +435,6 @@ Int_t StSsdPointMaker::Make()
     sprintf(myTime,"0%d",GetTime());
   sprintf(myDate,"%d%s",GetDate(),".");
   sprintf(myLabel,"%s%s",myDate,myTime);
-  
   // two different tables can exist (physics data or pedestal data)
   
   TDataSet *SpaStrip = GetDataSet("SpaStrip");
@@ -479,11 +491,16 @@ Int_t StSsdPointMaker::Make()
       LOG_INFO<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endm;
       mySsd->sortListStrip();
       PrintStripSummary(mySsd);
-      Int_t noiseTableSize = 0;      
-      if (!m_noise2) 
-	{LOG_WARN << "Make : No pedestal and noise values (ssdStripCalib table missing), will use default values" <<endm;}
+      Int_t noiseTableSize = 0; 
+      printf("iZero=%d\n",Zero);     
+      if ((!m_noise2)||(Zero==491520) )
+	{
+	  LOG_WARN << "Make : No pedestal and noise values (ssdStripCalib table missing), will use default values" <<endm;
+	}
       else
-	noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
+	{
+	  noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
+	}
       LOG_INFO<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endm;
       Int_t nClusterPerSide[2];
       nClusterPerSide[0] = 0;
@@ -504,7 +521,6 @@ Int_t StSsdPointMaker::Make()
       mySsd->convertDigitToAnalog(mDynamicControl);
       mySsd->convertUFrameToOther(dimensions);
       PrintPointSummary(mySsd);
-      
       //Int_t nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
       /*
 	for(Int_t i=1;i<=20;i++)
@@ -512,9 +528,9 @@ Int_t StSsdPointMaker::Make()
 	for(Int_t j=1;j<=16;j++)
 	{
 	PrintStripDetails(mySsd,7000+(100*j)+i);
-	PrintClusterDetails(mySsd,7000+(100*j)+i);
-	PrintPointDetails(mySsd,7000+(100*j)+i);
-	PrintPackageDetails(mySsd,7000+(100*j)+i);
+	//PrintClusterDetails(mySsd,7000+(100*j)+i);
+	//PrintPointDetails(mySsd,7000+(100*j)+i);
+	//PrintPackageDetails(mySsd,7000+(100*j)+i);
 	}
 	}
       */
@@ -1245,7 +1261,7 @@ void StSsdPointMaker::PrintInfo()
   if (Debug()==true) StMaker::PrintInfo();
 }
 //_____________________________________________________________________________
-void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
+void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero)
 {
     ssdStripCalib_st *noise = strip_calib->GetTable();
 
@@ -1293,7 +1309,8 @@ void StSsdPointMaker::Read_Strip(St_ssdStripCalib *strip_calib)
     LOG_WARN <<"ReadStrip: Number of underf  : "<<iUnder<<endm;}
   if (iOver>0){
     LOG_WARN <<"ReadStrip: Number of overf   : "<<iOver<<endm;}
-}
+  *Zero = iZero;
+ }
 //_____________________________________________________________________________
 void StSsdPointMaker::WriteMatchedClusters(StSsdBarrel *mySsd)
 {
