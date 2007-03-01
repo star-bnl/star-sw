@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.21 2007/02/21 20:36:17 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.22 2007/03/01 22:19:21 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.22  2007/03/01 22:19:21  bouchet
+// add a protection when ssdStripCalib is filled with empty values
+//
 // Revision 1.21  2007/02/21 20:36:17  bouchet
 // add a method WriteMatchedClusters :\ instead of WriteScfTuple() method that fill all the reconstructed clusters,\ this one store the clusters associated to the hits
 //
@@ -153,7 +156,6 @@ class StSsdPointMaker : public StMaker {
   TNtuple *qHitNtuple;
   TFile   *pFile;
   TNtuple *pHitNtuple;
-
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
   void DeclareNtuple(Int_t *flag);
@@ -168,7 +170,7 @@ class StSsdPointMaker : public StMaker {
   void PrintClusterDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void PrintPointDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
-  void Read_Strip(St_ssdStripCalib *strip_calib);
+  void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
   
  protected:
@@ -217,10 +219,10 @@ class StSsdPointMaker : public StMaker {
   TH2S  *matchisto_19; //! (1p-1n) packages control matching  
   TH2S  *matchisto_20; //! (1p-1n) packages control matching.
   Int_t flag ;         // this flag is used to switch on the filling of tuple   
-  
+  Int_t Zero;
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.21 2007/02/21 20:36:17 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.22 2007/03/01 22:19:21 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
