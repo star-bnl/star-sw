@@ -1,6 +1,11 @@
-* $Id: gstar_part.g,v 1.14 2007/03/02 19:41:57 potekhin Exp $
+* $Id: gstar_part.g,v 1.15 2007/03/02 21:13:16 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.15  2007/03/02 21:13:16  potekhin
+* Corrected wrong masses for B-mesons, and adding the
+* omitted comment about moving the stranglet definitions
+* into a separate file in the same directory (stranglet.txt).
+*
 * Revision 1.14  2007/03/02 19:41:57  potekhin
 * Added D0bar, Dstar+-0 and 0 bar, B+-0 and 0bar
 *
@@ -85,19 +90,19 @@
 ************************************************************************************ 
 
 * decay into D_star_0_bar, positron and neutrino
-  Particle B_plus    code=70         TrkTyp=4 mass=1.869  charge=1 tlife=1.671e-12,
+  Particle B_plus    code=70         TrkTyp=4 mass=5.279  charge=1 tlife=1.671e-12,
                      pdg=521  bratio= { 1, }       mode= { 630204, }
 
 * decay into D_star_0,     electron and neutrino
-  Particle B_minus   code=71         TrkTyp=4 mass=1.869 charge=-1 tlife=1.671e-12,
+  Particle B_minus   code=71         TrkTyp=4 mass=5.279 charge=-1 tlife=1.671e-12,
                      pdg=-521 bratio= { 1, }       mode= { 620304, }
 
 * decay into D_star_minus, positron and neutrino
-  Particle B0        code=72         TrkTyp=4 mass=1.869  charge=0 tlife=1.536e-12,
+  Particle B0        code=72         TrkTyp=4 mass=5.279  charge=0 tlife=1.536e-12,
                      pdg=511  bratio= { 1, }       mode= { 610204, }
 
 * decay into D_star_plus,  electron and neutrino
-  Particle B0_bar    code=73         TrkTyp=4 mass=1.869  charge=0 tlife=1.536e-12,
+  Particle B0_bar    code=73         TrkTyp=4 mass=5.279  charge=0 tlife=1.536e-12,
                      pdg=-511  bratio= { 1, }      mode= { 600304, }
 
 ************************************************************************************ 
