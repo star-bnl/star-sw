@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.112 2007/03/03 00:35:42 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.113 2007/03/03 02:30:50 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.113  2007/03/03 02:30:50  fine
+// fix the geometry file name. Thanks P.Nebski
+//
 // Revision 1.112  2007/03/03 00:35:42  fine
 // Fix the leak of the ROOT objects and introduce the method to return the source code filename  for the arbitrary geometry node
 //
@@ -618,12 +621,14 @@ TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppM
                   LOG_DEBUG << "NO STAR geometry source directory has been found" << endm;
                   delete geoDir; geoDir = 0;
               } else {
-                 TString star("$STAR");
+                 TString star("$STAR/pams");
                  gSystem->ExpandPathName(star);
                  geoDir->SetTitle(star.Data()); 
               }
            } else {
-             geoDir->SetTitle(gSystem->WorkingDirectory()); 
+             TString wd = gSystem->WorkingDirectory();
+             wd += "/pams";
+             geoDir->SetTitle(wd.Data()); 
            }
            if (geoDir) {
               ((St_geant_Maker *)this)->fGeoDirectory = geoDir;              
