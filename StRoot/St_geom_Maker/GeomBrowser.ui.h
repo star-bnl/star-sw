@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.12 2007/03/03 00:33:49 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.13 2007/03/03 02:31:30 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -381,6 +381,10 @@ void GeomBrowser::init()
    comboBox2->setEnabled(FALSE);
    comboBox2->hide();
 #else
+   // Create a text editot
+   fTextEdit = new TextEdit(this);
+   fTextEdit->setCaption( "GEANT3 geometry editor" );
+   fTextEdit->resize( 640, 800 );
    // populate the standard geometry type   
    // create the STAR search path
    QString file("pams/geometry/geometry/geometry.g");
@@ -960,13 +964,15 @@ void GeomBrowser::ObjectSelected( TObject *obj, const QPoint &)
          listView1->setSelected((TQtObjectListItem *)selectedItem,TRUE );
      }
 #ifndef NO_GEANT_MAKER
-#if 0     
+#if 1    
      QString srcFile=(const char*)Geant().GetVolumeSrcFile(obj->GetName());
      if (!srcFile.isEmpty()) {
-        QRect itemRec = listView1->itemRect(listView1->selectedItem());
-        QPoint pos(itemRec.x(),itemRec.y());
-        pos = listView1->mapToGlobal(pos);
-        QWhatsThis::display(srcFile,pos);
+        fTextEdit->show();
+        fTextEdit->load(srcFile);
+//        QRect itemRec = listView1->itemRect(listView1->selectedItem());
+//        QPoint pos(itemRec.x(),itemRec.y());
+//        pos = listView1->mapToGlobal(pos);
+//        QWhatsThis::display(srcFile,pos);
       }
 #endif      
 #endif     
