@@ -1018,6 +1018,7 @@
     <include location="local" impldecl="in implementation">St_geant_Maker/St_geant_Maker.h</include>
     <include location="local" impldecl="in implementation">StChain.h</include>
     <include location="local" impldecl="in implementation">GeomBrowser.ui.h</include>
+    <include location="local" impldecl="in implementation">TextEdit.h</include>
 </includes>
 <forwards>
     <forward>class TFile</forward>
@@ -1031,6 +1032,7 @@
     <forward>class St_geant_Maker</forward>
     <forward>class StChain</forward>
     <forward>class TVirtualViewer3D</forward>
+    <forward>class TextEdit</forward>
 </forwards>
 <variables>
     <variable>TVirtualViewer3D *fCurrentViewer;</variable>
@@ -1048,6 +1050,7 @@
     <variable>St_geant_Maker *fGeant;</variable>
     <variable>bool fGeometryLoaded;</variable>
     <variable>StChain *fChain;</variable>
+    <variable>TextEdit *fTextEdit;</variable>
 </variables>
 <slots>
     <slot>fileNew()</slot>
