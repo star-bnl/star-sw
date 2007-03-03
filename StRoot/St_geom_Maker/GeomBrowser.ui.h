@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.11 2007/02/23 23:50:00 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.12 2007/03/03 00:33:49 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -959,6 +959,17 @@ void GeomBrowser::ObjectSelected( TObject *obj, const QPoint &)
          listView1->ensureItemVisible ((TQtObjectListItem *)selectedItem );
          listView1->setSelected((TQtObjectListItem *)selectedItem,TRUE );
      }
+#ifndef NO_GEANT_MAKER
+#if 0     
+     QString srcFile=(const char*)Geant().GetVolumeSrcFile(obj->GetName());
+     if (!srcFile.isEmpty()) {
+        QRect itemRec = listView1->itemRect(listView1->selectedItem());
+        QPoint pos(itemRec.x(),itemRec.y());
+        pos = listView1->mapToGlobal(pos);
+        QWhatsThis::display(srcFile,pos);
+      }
+#endif      
+#endif     
    }
 }
 
@@ -975,17 +986,20 @@ void GeomBrowser::STAR_geometry_activated( const QString &geoVersion )
    // fprintf(stderr,"STAR_geometry_activated <%s>\n", (const char*)kuipCmd );
    if (!fGeometryLoaded)  fGeometryLoaded = !gSystem->Load("geometry");
    if (fGeometryLoaded) {
+      // pre-define the kuipCommand to used within St_geant::Geometry method
       Geant().LoadGeometry((const char*)kuipCmd );
       if (Geant3Init) {
           Geant().Do("gdrop all"); // To allow calling Init more then one time;
           Geant().Do((const char *)kuipCmd); 
-          //Geant().Do("make geometry"); 
-          Geant().Geometry();
+          if (false) 
+             Geant().Do("make geometry"); 
+          else 
+             Geant().Geometry();
          // Geant().Do("gclose all");
       } else {          
          fChain->Init(); Geant3Init = 1;     
       }
-      // comboBox2->setEnabled(FALSE); // we can acommuicate GEAT one time ony :(
+      // comboBox2->setEnabled(FALSE); // we can communicate GEANT one time ony :(
       TVolume *v = dynamic_cast<TVolume *>(Geant().GetDataSet("HALL"));
       if (v) {
          // Make CAVE invisible
