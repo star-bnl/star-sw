@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.13 2007/03/03 02:31:30 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.14 2007/03/04 18:50:54 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -381,7 +381,7 @@ void GeomBrowser::init()
    comboBox2->setEnabled(FALSE);
    comboBox2->hide();
 #else
-   // Create a text editot
+   // Create a text editor
    fTextEdit = new TextEdit(this);
    fTextEdit->setCaption( "GEANT3 geometry editor" );
    fTextEdit->resize( 640, 800 );
@@ -389,7 +389,7 @@ void GeomBrowser::init()
    // create the STAR search path
    QString file("pams/geometry/geometry/geometry.g");
    QString path(".:$STAR");
-   
+   connect(fTextEdit,SIGNAL(textSaved(const QString &)),this,SLOT(RemakeGeom(const QString &)));
    const char *found = gSystem->Which((const char*)path, (const char*)file);
    if (found) {
      if (found[0]) {
@@ -1092,4 +1092,10 @@ void GeomBrowser::fileOpenInventor( const QString &fileName )
          }
       }
    }
+}
+
+//_____________________________________________________________________________
+void GeomBrowser::RemakeGeom( const QString &) 
+{
+   Geant().SetRemake(kTRUE); 
 }
