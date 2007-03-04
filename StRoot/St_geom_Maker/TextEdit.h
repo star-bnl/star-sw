@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: TextEdit.h,v 1.1 2007/03/03 02:31:30 fine Exp $
+** $Id: TextEdit.h,v 1.2 2007/03/04 18:50:55 fine Exp $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -26,6 +26,9 @@ class TextEdit : public QMainWindow
 public:
     TextEdit( QWidget *parent = 0, const char *name = 0 );
     void load( const QString &f );
+    
+signals:
+    void  textSaved(const QString &fileName); 
 
 private:
     void setupFileActions();
@@ -50,6 +53,7 @@ private slots:
     void editPaste();
 
     void textBold();
+    void textChanged();
     void textUnderline();
     void textItalic();
     void textFamily( const QString &f );
@@ -61,6 +65,9 @@ private slots:
     void colorChanged( const QColor &c );
     void alignmentChanged( int a );
     void editorChanged( QWidget * );
+    
+    void searchActivated( const QString &);
+    void searchContinue( const QString &);
 
 private:
     QAction *actionTextBold,
