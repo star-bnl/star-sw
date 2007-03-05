@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.11 2005/04/12 17:33:47 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.12 2007/03/05 18:51:02 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,12 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.12  2007/03/05 18:51:02  dongx
+ * updated for Run V CuCu calibration
+ *  - INL correction moved in this maker
+ *  - Tot Corr and Z Corr use new tables in data base
+ *  - pVPD calibrated information cannot be fully stored within current infrastructure, need update on TofCollection. Configurations better than (1,1) are all selected.
+ *
  * Revision 1.11  2005/04/12 17:33:47  dongx
  * update for year 5 data. not completed, leave as empty now.
  *
@@ -80,6 +86,10 @@
 #include "tables/St_tofCorrection_Table.h"
 #include "tables/St_tofAdcRange_Table.h"
 #include "tables/St_tofResolution_Table.h"
+
+#include "tables/St_tofr5INLtable_Table.h"
+#include "tables/St_tofTotCorr_Table.h"
+#include "tables/St_tofZCorr_Table.h"
 
 #include "StTofUtil/tofPathLength.hh"
 #include "StTofUtil/StTofDataCollection.h"
@@ -163,6 +173,31 @@ void StTofCalibMaker::resetPars()
   for(int i=0;i<mNPVPD;i++) {
     mPVPDRes[i] = 999.;
   }
+
+  // run5
+  for(int i=0;i<mTdigBoard;i++) {
+    for(int j=0;j<mTdcOnBoard;j++) {
+      for(int k=0;k<mTdcChannel;k++) {
+	mINLtable[i][j][k] = 0.0;
+      }
+    }
+  }
+
+  for(int i=0;i<mNTOFr5;i++) {
+    for(int j=0;j<mNBinMax;j++) {
+      mTofr5TotEdge[i][j] = 0.0;
+      mTofr5TotCorr[i][j] = 0.0;
+      mTofr5ZEdge[i][j] = 0.0;
+      mTofr5ZCorr[i][j] = 0.0;
+    }
+  }
+
+  for(int i=0;i<mNPVPD;i++) {
+    for(int j=0;j<mNBinMax;j++) {
+      mPVPDTotEdge[i][j] = 0.0;
+      mPVPDTotCorr[i][j] = 0.0;
+    }
+  }
 }
 
 //____________________________________________________________________________
@@ -192,16 +227,12 @@ void StTofCalibMaker::initFormulas()
 Int_t StTofCalibMaker::InitRun(int runnumber)
 {
   // tof run configurations
-  mYear2 = (runnumber<4000000);
-  mYear3 = (runnumber>4000000&&runnumber<5000000);
-  mYear4 = (runnumber>5000000&&runnumber<6000000);
-  mYear5 = (runnumber>6000000);
 
   mTofpGeom = new StTofGeometry();
   mTofpGeom->init(this);
 
   Int_t val = kStOK;
-  val = initParameters();
+  val = initParameters(runnumber);
   if(val==kStOK) {
     mValidCalibPar = kTRUE;
   } else {
@@ -226,8 +257,12 @@ Int_t StTofCalibMaker::InitRun(int runnumber)
 }
 
 //_____________________________________________________________________________
-Int_t StTofCalibMaker::initParameters()
+Int_t StTofCalibMaker::initParameters(int runnumber)
 {
+  mYear2 = (runnumber<4000000);
+  mYear3 = (runnumber>4000000&&runnumber<5000000);
+  mYear4 = (runnumber>5000000&&runnumber<6000000);
+  mYear5 = (runnumber>6000000&&runnumber<7000000);
   /// initialize the calibrations parameters from dbase
   /// read in and check the size
   gMessMgr->Info("    -- retrieving run parameters from Calibrations_tof","OS");
@@ -237,6 +272,8 @@ Int_t StTofCalibMaker::initParameters()
     return kStErr;
   }
 
+  if(mYear2||mYear3||mYear4) {
+    gMessMgr->Info("     loading parameters for Run II/III/IV","OS");
   // -- T0 parameters --
   St_tofTzero* tofT0 = static_cast<St_tofTzero*>(mDbDataSet->Find("tofTzero"));
   if(!tofT0) {
@@ -411,6 +448,121 @@ Int_t StTofCalibMaker::initParameters()
 	}
       }
     }
+  }
+  } else if(mYear5) {
+    gMessMgr->Info("     loading parameters for Run V","OS");
+
+    // read INL table
+    St_tofr5INLtable* tofr5INLtable = static_cast<St_tofr5INLtable*>(mDbDataSet->Find("tofr5INLtable"));
+    if(!tofr5INLtable) {
+      gMessMgr->Error("unable to get tofr5 INL table parameters","OS");
+      //    assert(tofr5INLtable);
+      return kStErr;
+    }
+    tofr5INLtable_st* inltable = static_cast<tofr5INLtable_st*>(tofr5INLtable->GetArray());
+    Int_t numRows = tofr5INLtable->GetNRows();
+    
+    if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for INL tables" << endm;
+    
+    Char_t *boardName;
+    Short_t boardId;
+    Short_t tdcId;
+    Float_t INLcorr[1024];
+    
+    for (Int_t i=0;i<numRows;i++) {
+      boardName = "";
+      boardId = -1;
+      tdcId = -1;
+      for(int j=0;j<mTdcChannel;j++) {
+	INLcorr[j] = 0.0;
+      }
+      
+      boardName = (Char_t *)(inltable[i].boardID);
+      boardId = inltable[i].boardNumber;
+      tdcId = inltable[i].TDCID;
+      if(Debug())
+	gMessMgr->Info("","OS") << " name = " << boardName << " bId = " << boardId << " tdcId = " << tdcId << endm;
+      for(int j=0;j<mTdcChannel;j++) {
+	INLcorr[j] = inltable[i].INLcorrection[j];
+	if(Debug()&&j%100==0) gMessMgr->Info("","OS") << " j=" << j << " inlcorr=" << INLcorr[j] << endm;
+	mINLtable[boardId][tdcId][j] = INLcorr[j];
+      }
+            
+    }
+
+    // read tofTotCorr table
+    St_tofTotCorr* tofTotCorr = static_cast<St_tofTotCorr*>(mDbDataSet->Find("tofTotCorr"));
+    if(!tofTotCorr) {
+      gMessMgr->Error("unable to get tofr5 TotCorr table parameters","OS");
+      //    assert(tofTotCorr);
+      return kStErr;
+    }
+    tofTotCorr_st* totCorr = static_cast<tofTotCorr_st*>(tofTotCorr->GetArray());
+    numRows = tofTotCorr->GetNRows();
+
+    if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for ToT correction" << endm;
+
+    if(numRows!=mNTOFr5+mNPVPD) {
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofTotCorr table! Return! " << endm;
+      return kStErr;
+    }
+
+    for (Int_t i=0;i<numRows;i++) {
+      short trayId = totCorr[i].trayId;
+      short moduleId = totCorr[i].moduleId;
+      short cellId = totCorr[i].cellId;
+      short tdcId = totCorr[i].tdcId;
+
+      if(Debug()) gMessMgr->Info("","OS") << " module " << moduleId << " cell " << cellId << " tdcId " << tdcId << endm;
+      for(Int_t j=0;j<mNBinMax;j++) {
+	if(trayId==-1||trayId==-2) { // pVPD east west
+	  mPVPDTotEdge[cellId-1][j] = totCorr[i].tot[j];
+	  mPVPDTotCorr[cellId-1][j] = totCorr[i].corr[j];
+	} else if(trayId==93) { // TOFr5 tray
+	  mTofr5TotEdge[(moduleId-1)*6+cellId-1][j] = totCorr[i].tot[j];
+	  mTofr5TotCorr[(moduleId-1)*6+cellId-1][j] = totCorr[i].corr[j];
+	  if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " tot " << mTofr5TotEdge[(moduleId-1)*6+cellId-1][j] << " corr " << mTofr5TotCorr[(moduleId-1)*6+cellId-1][j] << endm; 
+	} else { // wrong trayId
+	}
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+
+
+    // read tofZCorr table
+    St_tofZCorr* tofZCorr = static_cast<St_tofZCorr*>(mDbDataSet->Find("tofZCorr"));
+    if(!tofZCorr) {
+      gMessMgr->Error("unable to get tofr5 ZCorr table parameters","OS");
+      //    assert(tofZCorr);
+      return kStErr;
+    }
+    tofZCorr_st* zCorr = static_cast<tofZCorr_st*>(tofZCorr->GetArray());
+    numRows = tofZCorr->GetNRows();
+
+    if(Debug()) gMessMgr->Info("","OS") << " Number of rows read in: " << numRows << " for Z correction" << endm;
+
+    if(numRows!=mNTOFr5) {   // only for TOFr5 tray
+      gMessMgr->Warning("","OS") << " Mis-matched number of rows in tofZCorr table! Return! " << endm;
+      return kStErr;
+    }
+
+    for (Int_t i=0;i<numRows;i++) {
+      short trayId = zCorr[i].trayId;
+      short moduleId = zCorr[i].moduleId;
+      short cellId = zCorr[i].cellId;
+      short tdcId = zCorr[i].tdcId;
+
+      if(Debug()) gMessMgr->Info("","OS") << " module " << moduleId << " cell " << cellId << " tdcId " << tdcId << endm;
+      for(Int_t j=0;j<mNBinMax;j++) {
+	if(trayId==93) { // TOFr5 tray
+	  mTofr5ZEdge[(moduleId-1)*6+cellId-1][j] = zCorr[i].z[j];
+	  mTofr5ZCorr[(moduleId-1)*6+cellId-1][j] = zCorr[i].corr[j];
+	  if(Debug()&&j%10==0) gMessMgr->Info("","OS") << " j=" << j << " z " << mTofr5ZEdge[(moduleId-1)*6+cellId-1][j] << " corr " << mTofr5ZCorr[(moduleId-1)*6+cellId-1][j] << endm; 
+	} else { // wrong trayId
+	}
+      } // end j 0->mNBinMax
+    } // end i 0->numRows
+
+
   }
 
   return kStOK;
@@ -687,7 +839,215 @@ Int_t StTofCalibMaker::processEventYear2to4(){
 
 //____________________________________________________________________________
 Int_t StTofCalibMaker::processEventYear5(){
-  // leave as empty now
+
+  mEvent = (StEvent *) GetInputDS("StEvent");
+  
+  // event selection
+  if( !mEvent || !mEvent->primaryVertex() ||
+      !mEvent->tofCollection() ||
+      (!mEvent->tofCollection()->dataPresent() &&
+       !mEvent->tofCollection()->rawdataPresent()) ||
+      (!mEvent->tofCollection()->cellsPresent()) ) {
+    gMessMgr->Info("","OS") << "StTofCalibMaker -- nothing to do ... bye-bye" << endm;
+    return kStOK;
+  }
+  
+  StThreeVectorD vtx = mEvent->primaryVertex()->position();
+  Double_t vz = vtx.z();
+
+  //-------------------------------------------------
+  // pVPD calibration and calculate the start timing
+  //-------------------------------------------------
+  StTofCollection *theTof = mEvent->tofCollection();
+  mSortTofRawData = new StSortTofRawData(theTof);
+  IntVec validchannel = mSortTofRawData->GetValidChannel();
+
+  int used[mNPVPD]          = {0,0,0,0,0,0};
+  int channum[mNPVPD]       ={-1,-1,-1,-1,-1,-1};
+
+  for(unsigned int ich=0;ich<validchannel.size();ich++){
+    int chan = validchannel[ich];
+    if(chan<mNTOFr5) continue;       // need only pvpd 
+    int ichan = chan - mNTOFr5;
+    if(ichan<0||ichan>=mNPVPD) continue;
+    if(used[ichan]>0) continue;                   // skip multi hits
+    used[ichan]++;
+    // leading edge
+    int tmptdc = (mSortTofRawData->GetLeadingTdc(chan))[0];    
+    // do inl correction
+    int bin = int(tmptdc)&0x03ff;
+    float pvpdletdc = tmptdc + GetINLcorr(4,chan,bin);
+    mPVPDLeTime[ichan] = pvpdletdc * VHRBIN2PS/1000.;
+    // Trailing edge
+    tmptdc = (mSortTofRawData->GetTrailingTdc(chan))[0];    
+    // do inl correction
+    bin = int(tmptdc)&0x0ff;
+    float pvpdtetdc = tmptdc + GetINLcorr(5,chan,bin);
+    float tetime = pvpdtetdc * HRBIN2PS/1000.;
+    mPVPDTot[ichan] = tetime - mPVPDLeTime[ichan];
+    channum[ichan]=ichan;
+  }
+
+  // sort out the piled-up hit - remove those hits not from this event
+  int nPVPDFired = 0;
+  for(int i=0;i<mNPVPD;i++) {
+    if(channum[i]!=i) {
+      mPVPDLeTime[i] = 0.;
+      mPVPDTot[i] = 0.;
+    } else {
+      nPVPDFired++;
+    }
+  }
+  for(int i=0;i<mNPVPD;i++) {
+    if(channum[i]!=i) continue;
+    int n0 = 0;
+    for(int j=0;j<mNPVPD;j++) {
+      if(channum[j]!=j) continue;
+      float dt = mPVPDLeTime[j] - mPVPDLeTime[i];
+      if(fabs(dt)<200.) n0++;
+    }
+
+    if(n0>=nPVPDFired/2) {  // OK
+    } else { // not from this event
+      mPVPDLeTime[i] = 0.;
+      mPVPDTot[i] = 0.;
+    }
+  }
+  
+  mValidStartTime = kTRUE;
+  Double_t T0 = tstart5(mPVPDTot, mPVPDLeTime, vz);
+  if(T0<0.) {
+    gMessMgr->Info(" Not a good PVPD-required event!","OS");
+    mValidStartTime = kFALSE;
+    //    return kStOK;
+  } 
+  gMessMgr->Info("","OS") << " pVPD start timing T0 = " << T0 << endm;
+
+  StTofHitCollection *tofHit = new StTofHitCollection();
+
+  //---------------------------------------
+  // Tofr calibrations cells -> hits
+  //---------------------------------------
+  StSPtrVecTofCell &tofCell = theTof->tofCells();
+  Int_t ncells = tofCell.size();
+  gMessMgr->Info("","OS") << " TOFr matched cells : " << ncells << endm;
+  for(int i=0;i<ncells;i++) {
+    StTofHit *aHit = new StTofHit;
+    StTofCell *aCell = dynamic_cast<StTofCell*>(tofCell[i]);
+    aHit->setTrayIndex(aCell->trayIndex());
+    aHit->setModuleIndex(aCell->moduleIndex());
+    aHit->setCellIndex(aCell->cellIndex());
+    aHit->setCellCollIndex(i);
+
+    int daqId = aCell->daqIndex();
+    aHit->setDaqIndex(daqId);
+
+
+
+    Int_t letdc = (Int_t)aCell->tdc();
+    int bin = int(letdc)&0x03ff;
+    double tmptdc_f = letdc + GetINLcorr(4, daqId, bin);
+    double letime  = tmptdc_f * VHRBIN2PS / 1000.; // ns
+
+    Int_t tetdc = (Int_t)aCell->adc();
+    bin = int(tetdc)&0x0ff;
+    tmptdc_f = tetdc + GetINLcorr(5, daqId, bin);
+    double tetime = tmptdc_f * HRBIN2PS / 1000.; // ns
+
+    double tot = tetime - letime; // ns
+    double tof = letime - T0;
+    Double_t zhit = (Double_t)aCell->zHit();
+    
+    StTrack *thisTrack = aCell->associatedTrack();
+    aHit->setAssociatedTrack(thisTrack);
+    StTrackGeometry *theTrackGeometry = 
+      (mOuterGeometry)?thisTrack->outerGeometry():thisTrack->geometry();
+    Double_t L = tofPathLength(&vtx, &aCell->position(), theTrackGeometry->helix().curvature());
+    aHit->setPathLength((Float_t)L);
+
+    if(fabs(tof)>200.) { // +/-200 ns window 
+      gMessMgr->Info("","OS") << " the hit is not from this event!" << endm;
+      delete aHit;
+      continue;
+    }
+    if(mValidCalibPar&&mValidStartTime) {
+      int moduleChan = (aCell->moduleIndex()-1)*6 + (aCell->cellIndex()-1);
+      Double_t tofcorr = tofr5AllCorr(tof, tot, zhit, moduleChan);
+      aHit->setTimeOfFlight((Float_t)tofcorr);
+      
+      Double_t beta = L/(tofcorr*(C_C_LIGHT/1.e9));
+      aHit->setBeta((Float_t)beta);
+      
+      const StThreeVectorF momentum = thisTrack->geometry()->momentum();
+      Double_t ptot = momentum.mag();
+      Double_t tofe = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_ELECTRON*M_ELECTRON)/ptot;
+      Double_t tofpi = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS)/ptot;
+      Double_t tofk = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS)/ptot;
+      Double_t tofp = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_PROTON*M_PROTON)/ptot;
+      
+      aHit->setTofExpectedAsElectron((Float_t)tofe);
+      aHit->setTofExpectedAsPion((Float_t)tofpi);
+      aHit->setTofExpectedAsKaon((Float_t)tofk);
+      aHit->setTofExpectedAsProton((Float_t)tofp);
+
+      float sigmae = 999.;
+      float sigmapi = 999.;
+      float sigmak = 999.;
+      float sigmap = 999.;
+      float res = 0.095;  // 95 ps by default
+      if(fabs(res)>1.e-5) {
+	sigmae = (Float_t)((tofcorr-tofe)/res);
+	sigmapi = (Float_t)((tofcorr-tofpi)/res);
+	sigmak = (Float_t)((tofcorr-tofk)/res);
+	sigmap = (Float_t)((tofcorr-tofp)/res);
+      }
+      aHit->setSigmaElectron(sigmae);
+      aHit->setSigmaPion(sigmapi);
+      aHit->setSigmaKaon(sigmak);
+      aHit->setSigmaProton(sigmap);
+
+    } else {
+      aHit->setTimeOfFlight(9999.);
+      aHit->setBeta(9999.);
+    }
+
+    tofHit->push_back(aHit); 
+  }
+
+
+  // store the hit collection in StEvent
+  for (size_t j=0;j<tofHit->size();j++){
+    theTof->addHit(tofHit->getHit(j)); 
+    if (Debug())
+      gMessMgr->Info("","OS") << "storing " << j << "  " << "  tray:"
+			      << tofHit->getHit(j)->trayIndex() << "  module:"
+			      << tofHit->getHit(j)->moduleIndex() << "  cell:"
+			      << tofHit->getHit(j)->cellIndex() << endm;
+  }
+
+  // add the tof pidtraits
+  StSPtrVecTofHit& tofHitVec = theTof->tofHits();
+  StSPtrVecTrackNode& nodes = mEvent->trackNodes();
+  for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
+    StTrack *theTrack = nodes[iNode]->track(primary);
+    if(!theTrack) continue;
+    unsigned short trkId = theTrack->key();
+    for (size_t j=0;j<tofHitVec.size();j++){
+      StTrack *aTrack = tofHitVec[j]->associatedTrack();
+      if(!aTrack) continue;
+      if(aTrack->key()!=trkId) continue;
+      StTofPidTraits* pidTof = new StTofPidTraits(tofHitVec[j]->trayIndex(), tofHitVec[j]->moduleIndex(), tofHitVec[j]->cellIndex(), tofHitVec[j]->timeOfFlight(), tofHitVec[j]->pathLength(), tofHitVec[j]->beta());
+      pidTof->setSigmaElectron(tofHitVec[j]->sigmaElectron());
+      pidTof->setSigmaPion(tofHitVec[j]->sigmaPion());
+      pidTof->setSigmaKaon(tofHitVec[j]->sigmaKaon());
+      pidTof->setSigmaProton(tofHitVec[j]->sigmaProton());
+      
+      theTrack->addPidTraits(pidTof);
+    }
+  }
+
+  delete tofHit;
+  
   return kStOK;
 }
 
@@ -780,6 +1140,49 @@ Double_t StTofCalibMaker::tofpAllCorr(const Double_t tof, const Double_t T0, con
 }
 
 //_____________________________________________________________________________
+Double_t StTofCalibMaker::tofr5AllCorr(const Double_t tof, const Double_t tot, const Double_t z, const Int_t iModuleChan)
+{
+  int module = iModuleChan/6 + 1;
+  int cell = iModuleChan%6 + 1;
+  gMessMgr->Info("","OS") << "\nStTofCalibMaker::tofr5AllCorr: Tofr5 calibrating...\n" 
+			  << "\tDoing Calibration in TOFr5 Module " << module << " Cell " << cell
+			  << "\n\tinput tof = " << tof
+			  << "  TOT = " << tot << "  Zlocal = " << z 
+			  << "\n" << endm;
+  
+  Double_t tofcorr = tof;
+
+  int iTotBin = -1;
+  for(int i=0;i<mNBinMax-1;i++) {
+    if(tot>=mTofr5TotEdge[iModuleChan][i] && tot<mTofr5TotEdge[iModuleChan][i+1]) {
+      iTotBin = i;
+      break;
+    }
+  }
+  if(iTotBin>=0&&iTotBin<mNBinMax) {
+    tofcorr -= mTofr5TotCorr[iModuleChan][iTotBin];
+  } else {
+    tofcorr -= 0.;
+  }
+
+  int iZBin = -1;
+  for(int i=0;i<mNBinMax-1;i++) {
+    if(z>=mTofr5ZEdge[iModuleChan][i] && z<mTofr5ZEdge[iModuleChan][i+1]) {
+      iZBin = i;
+      break;
+    }
+  }
+  if(iZBin>=0&&iZBin<mNBinMax) {
+    tofcorr -= mTofr5ZCorr[iModuleChan][iZBin];
+  } else {
+    tofcorr -= 0.;
+  }
+
+  gMessMgr->Info("","OS") << "  Corrected tof: tofcorr = " << tofcorr << endm;
+  return tofcorr;
+}
+
+//_____________________________________________________________________________
 Double_t StTofCalibMaker::tstart(const Double_t *adc, const Double_t *tdc, const Double_t vz)
 {
   /// start timing calculation, default pVPD fired cut is 1,1
@@ -823,5 +1226,74 @@ Double_t StTofCalibMaker::tstart(const Double_t *adc, const Double_t *tdc, const
 
   return Tstart;
 }
+//_____________________________________________________________________________
+Double_t StTofCalibMaker::tstart5(const Double_t *tot, const Double_t *time, const Double_t vz)
+{
+  /// start timing calculation, default pVPD fired cut is 1,1
+  /// however, the calibration parameters are from 3,3 set
+  Double_t Tstart = -999999.;
 
+  Int_t Ieast = 0, Iwest = 0;
+  Double_t TSumEast = 0., TSumWest = 0.;
+  for(int i=0;i<3;i++) {
+    if(Debug()) gMessMgr->Info("","OS") << " East pVPD tot = " << tot[i] << " time = " << time[i] << endm;
+    if(Debug()) gMessMgr->Info("","OS") << " West pVPD tot = " << tot[i+3] << " time = " << time[i+3] << endm;
+
+    if( time[i]>0. ) {
+      int ibin = -1;
+      for(int j=0;j<mNBinMax-1;j++) {
+	if(tot[i]>=mPVPDTotEdge[i][j] && tot[i]<mPVPDTotEdge[i][j+1]) {
+	  ibin = j;
+	  break;
+	}
+      }
+      if(ibin>=0&&ibin<mNBinMax) {
+	Ieast++;
+	mPVPDLeTime[i] = time[i] - mPVPDTotCorr[i][ibin];
+	TSumEast += mPVPDLeTime[i];
+      }
+    }
+
+    if( time[i+3]>0. ) {
+      int ibin = -1;
+      for(int j=0;j<mNBinMax-1;j++) {
+	if(tot[i+3]>=mPVPDTotEdge[i+3][j] && tot[i+3]<mPVPDTotEdge[i+3][j+1]) {
+	  ibin = j;
+	  break;
+	}
+      }
+      if(ibin>=0&&ibin<mNBinMax) {
+	Iwest++;
+	mPVPDLeTime[i+3] = time[i+3] - mPVPDTotCorr[i+3][ibin];
+	TSumWest += mPVPDLeTime[i+3];
+      }
+    }
+  }
+
+  Double_t TSum = TSumEast + TSumWest;
+  
+  if ( Ieast>=mPVPDEastHitsCut && Iwest>=mPVPDWestHitsCut ) {
+    Tstart = (TSum-(Ieast-Iwest)*vz/(C_C_LIGHT/1.e9))/(Ieast+Iwest);
+  }
+
+  return Tstart;
+}
+
+//_____________________________________________________________________________
+Double_t StTofCalibMaker::GetINLcorr(const int edgeflag,const int tdcchan,const int bin)
+{
+  int iboard=tdcchan/24;
+  int chan = (tdcchan%24);
+  int itdc=0;
+  if(edgeflag==4) itdc = chan/8;  // leading edge
+  if(edgeflag==5) itdc = 3;       // trailing edge
+  if(tdcchan==192&&edgeflag==4) itdc=0;
+  if(tdcchan==193&&edgeflag==4) itdc=1;
+  if(tdcchan==194&&edgeflag==4) itdc=1;
+  if(tdcchan==195&&edgeflag==4) itdc=0;
+  if(tdcchan==196&&edgeflag==4) itdc=1;
+  if(tdcchan==197&&edgeflag==4) itdc=1;
+
+  return mINLtable[iboard][itdc][bin];
+}
 

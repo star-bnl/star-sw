@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.5 2005/04/12 17:33:48 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.6 2007/03/05 18:51:02 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,12 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.6  2007/03/05 18:51:02  dongx
+ * updated for Run V CuCu calibration
+ *  - INL correction moved in this maker
+ *  - Tot Corr and Z Corr use new tables in data base
+ *  - pVPD calibrated information cannot be fully stored within current infrastructure, need update on TofCollection. Configurations better than (1,1) are all selected.
+ *
  * Revision 1.5  2005/04/12 17:33:48  dongx
  * update for year 5 data. not completed, leave as empty now.
  *
@@ -39,6 +45,18 @@
 #include "TF1.h"
 #include "StMaker.h"
 
+#define VHRBIN2PS 24.414  // Very High resolution mode, pico-second per bin
+                          // 1000*25/1024 (ps/chn)
+#define HRBIN2PS 97.656   // High resolution mode, pico-second per bin
+                          // 97.65625= 1000*100/1024  (ps/chn)
+
+#include <string>
+#include <vector>
+#ifndef ST_NO_NAMESPACES
+using std::string;
+using std::vector;
+#endif
+
 class StEvent;
 class StTofGeometry;
 class StTofCollection;
@@ -46,6 +64,15 @@ class StTofDataCollection;
 class StTofCellCollection;
 class StTofSlatCollection;
 class StTofHitCollection;
+#include "StTofUtil/StSortTofRawData.h"
+
+#if !defined(ST_NO_TEMPLATE_DEF_ARGS) || defined(__CINT__)
+typedef vector<Int_t>  IntVec;
+typedef vector<Double_t>  DoubleVec;
+#else
+typedef vector<Int_t, allocator<Int_t>>  IntVec;
+typedef vector<Double_t, allocator<Double_t>>  DoubleVec;
+#endif
 
 class StTofCalibMaker : public StMaker{
 public:
@@ -67,7 +94,7 @@ public:
   /// Reset the calibration parameters
   void  resetPars();
   /// Initialize the calibration parameters from dbase
-  Int_t initParameters();
+  Int_t initParameters(int);
   /// Initialize the formulas of calibration functions
   void  initFormulas();
   /// Delete the calibration functions
@@ -107,6 +134,11 @@ public:
     
   // Start timing calculation function
   Double_t tstart(const Double_t *adc, const Double_t *tdc, const Double_t Vz);
+
+  // Run 5 ->
+  Double_t GetINLcorr(const int edgeid,const int tempchan,const int bin);
+  Double_t tstart5(const Double_t *tot, const Double_t *time, const Double_t Vz);
+  Double_t tofr5AllCorr(const Double_t tof, const Double_t tot, const Double_t zlocal, const Int_t iModuleChan);
     
 private:
     // to check the tables from dbase in proper size -- year 4
@@ -117,6 +149,12 @@ private:
     static Int_t const mNPVPD     = 6;     // pVPD daq channels
     static Int_t const mNMax      = 200;   // maximum channles
     static Int_t const mNPar      = 10;    // maximum correction parameters
+    // Run 5
+    static Int_t const mNTOFr5    = 192;   // TOFr daq channels in Run 5
+    static Int_t const mTdigBoard = 10;    // INL tables
+    static Int_t const mTdcOnBoard = 4;
+    static Int_t const mTdcChannel = 1024;
+    static Int_t const mNBinMax = 60;
 
     Double_t   mTDCBinWidth;
     Double_t   mTDCLowLimit;
@@ -140,7 +178,7 @@ private:
     Bool_t     mYear4;
     Bool_t     mYear5;
 
-    Bool_t     mEastPVPDValid; // 022-035 east pVPD dead
+    Bool_t     mEastPVPDValid; // 022-035 east pVPD dead Run 4
 
     Bool_t     mValidCalibPar;
     Bool_t     mValidStartTime;
@@ -169,14 +207,29 @@ private:
     TF1*       mTofpZCorr;
     TF1*       mPVPDSlewing;
 
+    // Run 5 ->
+    StSortTofRawData*     mSortTofRawData;
+    Double_t   mINLtable[mTdigBoard][mTdcOnBoard][mTdcChannel];
+
+    Double_t   mTofr5TotEdge[mNTOFr5][mNBinMax];
+    Double_t   mTofr5TotCorr[mNTOFr5][mNBinMax];
+    Double_t   mTofr5ZEdge[mNTOFr5][mNBinMax];
+    Double_t   mTofr5ZCorr[mNTOFr5][mNBinMax];
+
+    Double_t   mPVPDTotEdge[mNPVPD][mNBinMax];
+    Double_t   mPVPDTotCorr[mNPVPD][mNBinMax];
+
+    Double_t   mPVPDLeTime[mNPVPD];
+    Double_t   mPVPDTot[mNPVPD];
+
     StTofGeometry*    mTofpGeom; //! pointer to the TOF geometry utility class
     StEvent*          mEvent;
     Bool_t            mOuterGeometry;
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.5 2005/04/12 17:33:48 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.6 2007/03/05 18:51:02 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
-    ClassDef(StTofCalibMaker,2)
+    ClassDef(StTofCalibMaker,3)
 };
 
 inline void StTofCalibMaker::setTDCLimits(const Double_t tmin, const Double_t tmax) { mTDCLowLimit = tmin; mTDCHighLimit = tmax; }
