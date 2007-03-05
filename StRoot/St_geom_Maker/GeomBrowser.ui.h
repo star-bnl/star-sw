@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.14 2007/03/04 18:50:54 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.15 2007/03/05 22:04:22 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -966,7 +966,7 @@ void GeomBrowser::ObjectSelected( TObject *obj, const QPoint &)
 #ifndef NO_GEANT_MAKER
 #if 1    
      QString srcFile=(const char*)Geant().GetVolumeSrcFile(obj->GetName());
-     if (!srcFile.isEmpty()) {
+     if (!srcFile.isEmpty() && (EditGeoSrc->state() == QButton::On) ) {
         fTextEdit->show();
         fTextEdit->load(srcFile);
 //        QRect itemRec = listView1->itemRect(listView1->selectedItem());
@@ -1098,4 +1098,11 @@ void GeomBrowser::fileOpenInventor( const QString &fileName )
 void GeomBrowser::RemakeGeom( const QString &) 
 {
    Geant().SetRemake(kTRUE); 
+}
+//_____________________________________________________________________________
+void GeomBrowser::TurnGeomSrcEditor(bool on)
+{
+   // Turn on/off the source file seacth and look up
+   if (on) 
+      QWhatsThis::display("Select the 3D image of the detector volume to popu the text editor");
 }
