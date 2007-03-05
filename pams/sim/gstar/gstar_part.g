@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.15 2007/03/02 21:13:16 potekhin Exp $
+* $Id: gstar_part.g,v 1.16 2007/03/05 20:53:57 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.16  2007/03/05 20:53:57  potekhin
+* Corrected the B decay definitions as per Mark Heinz
+*
 * Revision 1.15  2007/03/02 21:13:16  potekhin
 * Corrected wrong masses for B-mesons, and adding the
 * omitted comment about moving the stranglet definitions
@@ -89,21 +92,21 @@
                      pdg=-423 bratio= { 0.62, 0.38}       mode= { 3807, 3801}
 ************************************************************************************ 
 
-* decay into D_star_0_bar, positron and neutrino
+* decay into D_star_0_bar, positron and neutrino, or D0_bar, positron and neutrino
   Particle B_plus    code=70         TrkTyp=4 mass=5.279  charge=1 tlife=1.671e-12,
-                     pdg=521  bratio= { 1, }       mode= { 630204, }
+                     pdg=521  bratio= { 0.75, 0.25}  mode= { 630204, 380204}
 
-* decay into D_star_0,     electron and neutrino
+* decay into D_star_0, electron and neutrino, or D0, electron and neutrino
   Particle B_minus   code=71         TrkTyp=4 mass=5.279 charge=-1 tlife=1.671e-12,
-                     pdg=-521 bratio= { 1, }       mode= { 620304, }
+                     pdg=-521 bratio= { 0.75, 0.25}  mode= { 620304, 370304}
 
-* decay into D_star_minus, positron and neutrino
+* decay into D_star_minus, positron and neutrino, or D-, positron and neutrino
   Particle B0        code=72         TrkTyp=4 mass=5.279  charge=0 tlife=1.536e-12,
-                     pdg=511  bratio= { 1, }       mode= { 610204, }
+                     pdg=511  bratio= { 0.72, 0.28}  mode= { 610204, 360204}
 
-* decay into D_star_plus,  electron and neutrino
+* decay into D_star_plus,  electron and neutrino, or D+, electron and neutrino
   Particle B0_bar    code=73         TrkTyp=4 mass=5.279  charge=0 tlife=1.536e-12,
-                     pdg=-511  bratio= { 1, }      mode= { 600304, }
+                     pdg=-511 bratio= { 0.72, 0.28}  mode= { 600304, 350304}
 
 ************************************************************************************ 
   Particle omega     code=150 TrkTyp=3 mass=.782   charge=0  tlife=7.79E-23,
