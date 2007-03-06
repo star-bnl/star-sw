@@ -23,7 +23,7 @@ OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 CFLAGS   = -Wall $(DEBUG) $(DEFINES) -fPIC $(ROOTCFLAGS)
 
 
-CXXFLAGS = $(CFLAGS)  -I../../../StRoot  -I/RTS/src/EVP_READER -I/RTS/include -I../../St_base
+CXXFLAGS = $(CFLAGS)  -I../../../StRoot  -I/RTS/src/EVP_READER -I/RTS/include -I../../St_base -I$(STAR)/StRoot -I$(STAR)/StRoot/St_base
 
 LDFLAGS  = -shared 
 

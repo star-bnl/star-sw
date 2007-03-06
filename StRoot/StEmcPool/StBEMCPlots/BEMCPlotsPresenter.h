@@ -26,11 +26,12 @@ public:
     // panel=3 "DSM Level-0 Input"
     // panel=4 "DSM Level-1 Input"
     // panel=5 "DSM level-2 Input"
-    // panel=6 "SMD FEE Sum"
+    // panel=6 "BSMD FEE Sum"
     // panel=7 "Trigger corruption"
-    // panel=8 "PSD FEE Sum"
+    // panel=8 "BPRS FEE Sum"
+    // panel=9 "BPRS ADC"
     static void displayTab(int tab, int panel, FileType *file, TPad *pad, int mDebug);
-    static void displayRawAdc(FileType *file, TPad *pad, int mDebug);
+    static void displayRawAdc(FileType *file, TPad *pad, bool psd, int mDebug);
     static void displayJetPatchHT(FileType *file, TPad *pad, int mDebug);
     static void displayJetPatchSum(FileType *file, TPad *pad, int mDebug);
     static void displayL0Input(FileType *file, TPad *pad, int mDebug);

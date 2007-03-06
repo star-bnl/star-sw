@@ -43,16 +43,16 @@ TH1 *GetHisto(FileType *fd, const char *name) {
     return hist;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
-    TH2F *HistRawAdc1 = (TH2F*)GetHisto(file, HistRawAdc1Name);
+    TH2F *HistRawAdc1 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd1Name : HistRawAdc1Name);
     if (!HistRawAdc1 || (mDebug >= 2)) cout << "HistRawAdc1 = " << HistRawAdc1 << endl;
-    TH2F *HistRawAdc2 = (TH2F*)GetHisto(file, HistRawAdc2Name);
+    TH2F *HistRawAdc2 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd2Name : HistRawAdc2Name);
     if (!HistRawAdc2 || (mDebug >= 2)) cout << "HistRawAdc2 = " << HistRawAdc2 << endl;
-    TH2F *HistRawAdc3 = (TH2F*)GetHisto(file, HistRawAdc3Name);
+    TH2F *HistRawAdc3 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd3Name : HistRawAdc3Name);
     if (!HistRawAdc3 || (mDebug >= 2)) cout << "HistRawAdc3 = " << HistRawAdc3 << endl;
-    TH2F *HistRawAdc4 = (TH2F*)GetHisto(file, HistRawAdc4Name);
+    TH2F *HistRawAdc4 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd4Name : HistRawAdc4Name);
     if (!HistRawAdc4 || (mDebug >= 2)) cout << "HistRawAdc4 = " << HistRawAdc4 << endl;
 
     if (!pad) return;
@@ -967,7 +967,7 @@ void BEMCPlotsPresenter::displayTab(int tab, int panel, FileType *file, TPad *pa
 
     if (tab == 0) {
 	if (panel == 0) {
-	    displayRawAdc(file, pad, mDebug);
+	    displayRawAdc(file, pad, false, mDebug);
 	} else if (panel == 1) {
 	    displayJetPatchHT(file, pad, mDebug);
 	} else if (panel == 2) {
@@ -984,6 +984,8 @@ void BEMCPlotsPresenter::displayTab(int tab, int panel, FileType *file, TPad *pa
 	    displayTriggerCorruption(file, pad, mDebug);
 	} else if (panel == 8) {
 	    displayPsdFeeSum(file, pad, mDebug);
+	} else if (panel == 9) {
+	    displayRawAdc(file, pad, true, mDebug);
 	}
     }
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
