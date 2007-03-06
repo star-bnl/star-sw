@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: TextEdit.cxx,v 1.3 2007/03/06 00:28:17 fine Exp $
+** $Id: TextEdit.cxx,v 1.4 2007/03/06 00:44:53 fine Exp $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -519,7 +519,6 @@ void TextEdit::findBlock(const QString &expr)
 {
    int para=0;
    int index=0; 
-   fprintf(stderr," TextEdit::findBlock  %s\n", (const char*)expr);
    if (QTextEdit *e = currentEditor())
    {
       e->setCursorPosition(0,0); 
@@ -528,16 +527,13 @@ void TextEdit::findBlock(const QString &expr)
          {   
             int paraFrom = para;
             int indexFrom = index; 
-            fprintf(stderr," TextEdit::findBlock %d %d \n",paraFrom, indexFrom);
             if (e->find(expr, false, true,true,&para,&index)) {
                if ( (para > paraFrom) || (index - indexFrom) > 6+(int)expr.length()) { 
                   para = paraFrom; index = indexFrom+6;
                   continue;
                }
-               fprintf(stderr," TextEdit::findBlock look for endblock\n");
                if (e->find("EndBlock", false, true,true,&para,&index)) {
                   e->setSelection(paraFrom,indexFrom, para, index);
-                  fprintf(stderr," TextEdit::findBlock select %d %d \n",para, index);
                   break;
                }
             }
