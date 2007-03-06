@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: TextEdit.h,v 1.2 2007/03/04 18:50:55 fine Exp $
+** $Id: TextEdit.h,v 1.3 2007/03/06 00:28:17 fine Exp $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -29,7 +29,8 @@ public:
     
 signals:
     void  textSaved(const QString &fileName); 
-
+public slots:
+    void findBlock(const QString & expr);
 private:
     void setupFileActions();
     void setupEditActions();
