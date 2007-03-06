@@ -100,11 +100,15 @@ BEMCPlots::BEMCPlots(TObjArray *list)
     this->mHistDsmL3InputJetPatchTopoBit = new TH1F(HistDsmL3InputJetPatchTopoBitName, "BEMC DSM L3 Input - JetPatch topology bit;JetPatch bit", 2, -0.5, 2-0.5);
     ADDHIST(mHistDsmL3InputJetPatchTopoBit)
 
-
       this->mHistRawAdc1 = new TH2F(HistRawAdc1Name, "BTOW ADC, 1 <= SoftId <= 1220;SoftId;ADC",    1220, 0000.5, 1220.5, 300, -0.5, 1000-0.5);
       this->mHistRawAdc2 = new TH2F(HistRawAdc2Name, "BTOW ADC, 1221 <= SoftId <= 2400;SoftId;ADC", 1180, 1220.5, 2400.5, 300, -0.5, 1000-0.5);
       this->mHistRawAdc3 = new TH2F(HistRawAdc3Name, "BTOW ADC, 2401 <= SoftId <= 3540;SoftId;ADC", 1140, 2400.5, 3540.5, 300, -0.5, 1000-0.5);
       this->mHistRawAdc4 = new TH2F(HistRawAdc4Name, "BTOW ADC, 3541 <= SoftId <= 4800;SoftId;ADC", 1260, 3540.5, 4800.5, 300, -0.5, 1000-0.5);
+
+      this->mHistRawAdcPsd1 = new TH2F(HistRawAdcPsd1Name, "BPRS ADC, 1 <= SoftId <= 1220;SoftId;ADC",    1220, 0000.5, 1220.5, 300, -0.5, 1000-0.5);
+      this->mHistRawAdcPsd2 = new TH2F(HistRawAdcPsd2Name, "BPRS ADC, 1221 <= SoftId <= 2400;SoftId;ADC", 1180, 1220.5, 2400.5, 300, -0.5, 1000-0.5);
+      this->mHistRawAdcPsd3 = new TH2F(HistRawAdcPsd3Name, "BPRS ADC, 2401 <= SoftId <= 3540;SoftId;ADC", 1140, 2400.5, 3540.5, 300, -0.5, 1000-0.5);
+      this->mHistRawAdcPsd4 = new TH2F(HistRawAdcPsd4Name, "BPRS ADC, 3541 <= SoftId <= 4800;SoftId;ADC", 1260, 3540.5, 4800.5, 300, -0.5, 1000-0.5);
 
       this->mHistSmdFeeSum = new TH2F(HistSmdFeeSumName, "SMD FEE Sum;Module;Sum", 120, 0.5, 120+0.5, 100, -0.5, 100000-0.5);
       this->mHistPsdFeeSum = new TH2F(HistPsdFeeSumName, "PSD FEE Sum;PMT Box;Sum", 60, 0.5, 60+0.5, 100, -0.5, 40000-0.5);
@@ -114,6 +118,10 @@ BEMCPlots::BEMCPlots(TObjArray *list)
       ADDHIST(mHistRawAdc2)
       ADDHIST(mHistRawAdc3)
       ADDHIST(mHistRawAdc4)
+      ADDHIST(mHistRawAdcPsd1)
+      ADDHIST(mHistRawAdcPsd2)
+      ADDHIST(mHistRawAdcPsd3)
+      ADDHIST(mHistRawAdcPsd4)
       ADDHIST(mHistSmdFeeSum)
       ADDHIST(mHistPsdFeeSum)
 #endif
@@ -188,6 +196,11 @@ BEMCPlots::~BEMCPlots() {
     if (this->mHistRawAdc3) delete this->mHistRawAdc3; this->mHistRawAdc3 = 0;
     if (this->mHistRawAdc4) delete this->mHistRawAdc4; this->mHistRawAdc4 = 0;
 
+    if (this->mHistRawAdcPsd1) delete this->mHistRawAdcPsd1; this->mHistRawAdcPsd1 = 0;
+    if (this->mHistRawAdcPsd2) delete this->mHistRawAdcPsd2; this->mHistRawAdcPsd2 = 0;
+    if (this->mHistRawAdcPsd3) delete this->mHistRawAdcPsd3; this->mHistRawAdcPsd3 = 0;
+    if (this->mHistRawAdcPsd4) delete this->mHistRawAdcPsd4; this->mHistRawAdcPsd4 = 0;
+
     if (this->mHistSmdFeeSum) delete this->mHistSmdFeeSum; this->mHistSmdFeeSum = 0;
     if (this->mHistPsdFeeSum) delete this->mHistPsdFeeSum; this->mHistPsdFeeSum = 0;
 
@@ -236,6 +249,11 @@ void BEMCPlots::clear(const char *bemcStatus) {
     if (this->mHistRawAdc2) this->mHistRawAdc2->Reset();
     if (this->mHistRawAdc3) this->mHistRawAdc3->Reset();
     if (this->mHistRawAdc4) this->mHistRawAdc4->Reset();
+
+    if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Reset();
+    if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Reset();
+    if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Reset();
+    if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Reset();
 
     if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Reset();
     if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Reset();
@@ -360,6 +378,11 @@ void BEMCPlots::saveHistograms(TFile *hfile) {
         if (this->mHistRawAdc2) this->mHistRawAdc2->Write();
         if (this->mHistRawAdc3) this->mHistRawAdc3->Write();
         if (this->mHistRawAdc4) this->mHistRawAdc4->Write();
+
+        if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Write();
+        if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Write();
+        if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Write();
+        if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Write();
 
         if (this->mHistSmdFeeSum) this->mHistSmdFeeSum->Write();
         if (this->mHistPsdFeeSum) this->mHistPsdFeeSum->Write();
@@ -576,12 +599,21 @@ void BEMCPlots::processEvent( char *datap
 	    for (int i = 0;i < 60;i++) pmtSum[i] = 0;
 	    for (int rdo = 0;rdo < 4;rdo++) {
 		for (int index = 0;index < 4800;index++) {
-		    int id, box, wire, Avalue;
-		    if (BEMCDecoder->GetPsdId(rdo, index, id, box, wire, Avalue)) {
+		    int softId, box, wire, Avalue;
+		    if (BEMCDecoder->GetPsdId(rdo, index, softId, box, wire, Avalue)) {
 			RDO = rdo + 8;
 			if ((RDO >= 0) && (RDO < 12) && (box >= 1) && (box <= 60)) {
     			    int adc = emc.bsmd[RDO][index];
 			    pmtSum[box - 1] += adc;
+			    if ((softId >= 1) && (softId <= 1220)) {
+			        if (this->mHistRawAdcPsd1) this->mHistRawAdcPsd1->Fill(softId, adc);
+			    } else if ((softId >= 1221) && (softId <= 2400)) {
+			        if (this->mHistRawAdcPsd2) this->mHistRawAdcPsd2->Fill(softId, adc);
+			    } else if ((softId >= 2401) && (softId <= 3540)) {
+			        if (this->mHistRawAdcPsd3) this->mHistRawAdcPsd3->Fill(softId, adc);
+			    } else if ((softId >= 3541) && (softId <= 4800)) {
+			        if (this->mHistRawAdcPsd4) this->mHistRawAdcPsd4->Fill(softId, adc);
+			    }
 			}
 		    }
 		}

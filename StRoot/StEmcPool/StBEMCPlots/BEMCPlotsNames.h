@@ -24,6 +24,11 @@
 #define HistRawAdc3Name "bemc_RawAdc3"
 #define HistRawAdc4Name "bemc_RawAdc4"
 
+#define HistRawAdcPsd1Name "bprs_RawAdc1"
+#define HistRawAdcPsd2Name "bprs_RawAdc2"
+#define HistRawAdcPsd3Name "bprs_RawAdc3"
+#define HistRawAdcPsd4Name "bprs_RawAdc4"
+
 #define HistSmdFeeSumName "bemc_SmdFeeSum"
 #define HistPsdFeeSumName "bemc_PsdFeeSum"
 

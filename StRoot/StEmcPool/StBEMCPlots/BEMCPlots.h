@@ -89,6 +89,11 @@ private:
     TH2F *mHistRawAdc2;
     TH2F *mHistRawAdc3;
     TH2F *mHistRawAdc4;
+    
+    TH2F *mHistRawAdcPsd1;
+    TH2F *mHistRawAdcPsd2;
+    TH2F *mHistRawAdcPsd3;
+    TH2F *mHistRawAdcPsd4;
 
     TH2F *mHistSmdFeeSum;
     TH2F *mHistPsdFeeSum;
