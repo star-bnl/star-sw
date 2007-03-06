@@ -207,7 +207,10 @@ void MembraneDip() {
   TCanvas *c1 = new TCanvas();
   c1->Divide(1,2);
   c1->cd(1)->SetLogz(1);
-  laser->Draw("1.e3*fTracks.fgeoIn.mDipAngle:fTracks.fgeoIn.mPsi>>DipPsiWW","fTracks.mSector<=12&&fTracks.Flag==2","colz");
+  TString Cut("fTracks.Flag==2&&(abs(fTracks.Vertex.mX3+7.3)<2||abs(fTracks.Vertex.mX3-6.8)<2)&&abs(fTracks.fgeoIn.mDipAngle)<0.010");
+  TString cut = Cut;
+  cut += "&&fTracks.mSector<=12";
+  laser->Draw("1.e3*fTracks.fgeoIn.mDipAngle:fTracks.fgeoIn.mPsi>>DipPsiWW",cut,"colz");
   TH2 *DipPsiWW = (TH2 *) gDirectory->Get("DipPsiWW");
   DipPsiWW->SetXTitle("#psi");
   DipPsiWW->SetYTitle("#lambda");
@@ -223,7 +226,9 @@ void MembraneDip() {
   w->AddEntry(DipPsiWW_1,"West");
   w->Draw();
   c1->cd(2)->SetLogz(1);
-  laser->Draw("1.e3*fTracks.fgeoIn.mDipAngle:fTracks.fgeoIn.mPsi>>DipPsiEE","fTracks.mSector>12&&fTracks.Flag==2","colz");
+  cut = Cut;
+  cut += "&&fTracks.mSector>12";
+  laser->Draw("1.e3*fTracks.fgeoIn.mDipAngle:fTracks.fgeoIn.mPsi>>DipPsiEE",cut,"colz");
   TH2 *DipPsiEE = (TH2 *) gDirectory->Get("DipPsiEE");
   DipPsiEE->SetXTitle("#psi");
   DipPsiEE->SetYTitle("#lambda");
