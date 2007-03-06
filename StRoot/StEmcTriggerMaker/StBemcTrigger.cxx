@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.22 2007/01/22 19:13:43 kocolosk Exp $
+// $Id: StBemcTrigger.cxx,v 1.23 2007/03/06 00:25:49 rfatemi Exp $
 //
 //
 
@@ -784,7 +784,7 @@ int StBemcTrigger::get2005Trigger()
     zero();
 
 
-    const int JJSI_TH_2005 = 5;//bht0=5,bht1=13,bht2=17
+    const int JPSI_TH_2005 = 5;//bht0=5,bht1=13,bht2=17
     const int HT1_TH_2005 = 13;
     const int HT2_TH_2005 = 17;
     const int JP1_TH_2005 = 66;//bjp0=46,bjp1=66,bjp2=84
@@ -1141,7 +1141,7 @@ int StBemcTrigger::get2005Trigger()
 	    }
 	    LOG_DEBUG<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2005_ADC="<<JPSI_2005_ADC[i]<<endm;
         }
-	if  (JPSI_2005_ADC[i]>JJSI_TH_2005) {
+	if  (JPSI_2005_ADC[i]>JPSI_TH_2005) {
 	  JpsiPatch[i]=1;
 	}
 	LOG_DEBUG<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2005_ID[i]<<"  with ADC= "<<JPSI_2005_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
@@ -1182,7 +1182,8 @@ int StBemcTrigger::get2006Trigger()
     const int JP1_TH_2006 = 58;
     const int JP2_TH_2006 = 110;
     //const int BEMC_ETOT_2006 =109;
-    const int JJSI_TH_2006 = 5;//asm as bht0
+    const int JPSI_WEST_TH_2006 = 5; // same as bht0
+    const int JPSI_EAST_TH_2006 = 5; // same as bht0
     const int pedestalTargetValue2006 = 24;
     
 
@@ -1525,7 +1526,10 @@ int StBemcTrigger::get2006Trigger()
       }
     BETOT_DSM_2006=mTrigger.Et;
 
-    // making Jpsi trigger
+    //
+    // Making Jpsi trigger
+    // See http://www.star.bnl.gov/STAR/html/trg_l/TSL/Software/EMC.pdf
+    //
     int JpsiPatch[kNJet];
     for(int i = 0;i<kNJet; i++)
     {
@@ -1544,25 +1548,36 @@ int StBemcTrigger::get2006Trigger()
 	    }
 	    LOG_DEBUG<<"Jet id="<<i<<" Patch id="<<j<<" PatchHT="<<mTrigger.HT[k]<<" PatchHTID="<<mTrigger.HTID[k]<<" JPSI_2006_ADC="<<JPSI_2006_ADC[i]<<endm;
         }
-	if  (JPSI_2006_ADC[i]>JJSI_TH_2006) {
-	  JpsiPatch[i]=1;
+	if (i < 6) {
+	  // BEMC West
+	  if (JPSI_2006_ADC[i]>JPSI_WEST_TH_2006) JpsiPatch[i]=1;
+	}
+	else {
+	  // BEMC East
+	  if (JPSI_2006_ADC[i]>JPSI_EAST_TH_2006) JpsiPatch[i]=1;
 	}
 	LOG_DEBUG<<"Final JetPatchHT for JP"<<i<<" is TowID="<<JPSI_2006_ID[i]<<"  with ADC= "<<JPSI_2006_ADC[i]<<" and flag="<<JpsiPatch[i]<<endm;
     }
 
-    if ((JpsiPatch[0]&&(JpsiPatch[2]||JpsiPatch[3]||JpsiPatch[4])) ||
-	(JpsiPatch[1]&&(JpsiPatch[3]||JpsiPatch[4]||JpsiPatch[5])) ||
-	(JpsiPatch[2]&&(JpsiPatch[4]||JpsiPatch[5])) ||
-	(JpsiPatch[3]&&JpsiPatch[5]) )
-      {
-	
-	mIs2006JPSI=1;
-      }
-    else
-      {
-	mIs2006JPSI=0;
-      }
-    
+    //
+    // The J/psi trigger fires if two opposite jet patches have high towers
+    // above selected thresholds.
+    // Follow convention in the DSM implementation where vector bits (0-5)
+    // correspond to positions 2,4,6,8,10,12 o'clock.
+    //
+    int ht_jpsi[6];
+
+    ht_jpsi[0] = JpsiPatch[5] || JpsiPatch[7];
+    ht_jpsi[1] = JpsiPatch[4] || JpsiPatch[8];
+    ht_jpsi[2] = JpsiPatch[3] || JpsiPatch[9];
+    ht_jpsi[3] = JpsiPatch[2] || JpsiPatch[10];
+    ht_jpsi[4] = JpsiPatch[1] || JpsiPatch[11];
+    ht_jpsi[5] = JpsiPatch[0] || JpsiPatch[6];
+
+    mIs2006JPSI = ((ht_jpsi[0] && (ht_jpsi[2] || ht_jpsi[3] || ht_jpsi[4])) ||
+		   (ht_jpsi[1] && (ht_jpsi[3] || ht_jpsi[4] || ht_jpsi[5])) ||
+		   (ht_jpsi[2] && (ht_jpsi[4] || ht_jpsi[5])) ||
+		   (ht_jpsi[3] &&  ht_jpsi[5]));
 
     delete mDecoder;
     return kStOK;
