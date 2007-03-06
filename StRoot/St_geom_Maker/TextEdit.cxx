@@ -1,5 +1,5 @@
 /****************************************************************************
-** $Id: TextEdit.cxx,v 1.2 2007/03/04 18:50:54 fine Exp $
+** $Id: TextEdit.cxx,v 1.3 2007/03/06 00:28:17 fine Exp $
 **
 ** Copyright (C) 1992-2000 Trolltech AS.  All rights reserved.
 **
@@ -199,6 +199,7 @@ void TextEdit::load( const QString &f )
       tabWidget->addTab( edit, QFileInfo( f ).fileName() );
       edit->setTextFormat(PlainText );
       edit->setFamily("Courier New");
+      fontChanged(edit->font());
       QFile file( f );
       if ( file.open( IO_ReadOnly ) ) {
         QTextStream ts( &file );
@@ -246,6 +247,7 @@ void TextEdit::fileNew()
     QTextEdit *edit = new QTextEdit( tabWidget );
     edit->setTextFormat( PlainText );
     edit->setFamily("Courier");
+    fontChanged(edit->font());
     doConnections( edit );
     tabWidget->addTab( edit, tr( "noname" ) );
     tabWidget->showPage( edit );
@@ -442,7 +444,7 @@ void TextEdit::textFamily(const QString &f)
 //______________________________________________________________________
 void TextEdit::textSize( const QString &p )
 {
-   if ( currentEditor()) {
+   if (currentEditor()) {
       currentEditor()->setPointSize( p.toInt() );
       currentEditor()->viewport()->setFocus();
    }
@@ -503,13 +505,46 @@ void TextEdit::alignmentChanged( int a )
 	actionAlignJustify->setOn( TRUE );
 }
 
+//______________________________________________________________________
 void TextEdit::editorChanged( QWidget * )
 {
-    if ( !currentEditor() )
-	return;
-    fontChanged( currentEditor()->currentFont() );
-    colorChanged( currentEditor()->color() );
-    alignmentChanged( currentEditor()->alignment() );
+   if (currentEditor()) {
+     fontChanged( currentEditor()->currentFont() );
+     colorChanged( currentEditor()->color() );
+     alignmentChanged( currentEditor()->alignment() );
+   }
+}
+//______________________________________________________________________
+void TextEdit::findBlock(const QString &expr) 
+{
+   int para=0;
+   int index=0; 
+   fprintf(stderr," TextEdit::findBlock  %s\n", (const char*)expr);
+   if (QTextEdit *e = currentEditor())
+   {
+      e->setCursorPosition(0,0); 
+      while (1) {
+         if (e->find("block",false,true,true,&para,&index))
+         {   
+            int paraFrom = para;
+            int indexFrom = index; 
+            fprintf(stderr," TextEdit::findBlock %d %d \n",paraFrom, indexFrom);
+            if (e->find(expr, false, true,true,&para,&index)) {
+               if ( (para > paraFrom) || (index - indexFrom) > 6+(int)expr.length()) { 
+                  para = paraFrom; index = indexFrom+6;
+                  continue;
+               }
+               fprintf(stderr," TextEdit::findBlock look for endblock\n");
+               if (e->find("EndBlock", false, true,true,&para,&index)) {
+                  e->setSelection(paraFrom,indexFrom, para, index);
+                  fprintf(stderr," TextEdit::findBlock select %d %d \n",para, index);
+                  break;
+               }
+            }
+         }
+         break;
+      } 
+   }
 }
 //______________________________________________________________________
 void  TextEdit::searchActivated( const QString &)

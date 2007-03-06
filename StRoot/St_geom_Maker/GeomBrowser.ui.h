@@ -12,7 +12,7 @@
 
 // Author: Valeri Fine   21/01/2002
 /****************************************************************************
-** $Id: GeomBrowser.ui.h,v 1.15 2007/03/05 22:04:22 fine Exp $
+** $Id: GeomBrowser.ui.h,v 1.16 2007/03/06 00:28:17 fine Exp $
 **
 ** Copyright (C) 2004 by Valeri Fine.  All rights reserved.
 **
@@ -969,6 +969,7 @@ void GeomBrowser::ObjectSelected( TObject *obj, const QPoint &)
      if (!srcFile.isEmpty() && (EditGeoSrc->state() == QButton::On) ) {
         fTextEdit->show();
         fTextEdit->load(srcFile);
+        fTextEdit->findBlock(QString(obj->GetName()));
 //        QRect itemRec = listView1->itemRect(listView1->selectedItem());
 //        QPoint pos(itemRec.x(),itemRec.y());
 //        pos = listView1->mapToGlobal(pos);
