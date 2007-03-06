@@ -25,6 +25,7 @@ using namespace std;
 
 TList *BEMCPlotsCleanUpHistoList = 0;
 StEmcDecoder *BEMCDecoderPresenter = 0;
+Bool_t useDecoderForBoundaries = false; // Use StEmcDecoder for showing ranges (the tower map bug fix mixes softIds between crates)
 
 //-------------------------------------------------------------------
 // Taken from EEMC EEqaPresenter
@@ -43,7 +44,7 @@ TH1 *GetHisto(FileType *fd, const char *name) {
     return hist;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int mDebug) {
+void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistRawAdc1 = (TH2F*)GetHisto(file, psd ? HistRawAdcPsd1Name : HistRawAdc1Name);
@@ -65,40 +66,52 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
     c->Divide(1, 4, 0.001, 0.001);
     
     // 12-19 are the grey shades dark-light
-    int linesColor = 16;
-    int crateMinSoftId[] = {4661, 2421, 2581, 2741, 2901, 3061, 3221, 3381, 3541, 3701, 3861, 4021, 4181, 4341, 4501, 2181, 2021, 1861, 1701, 1541, 1381, 1221, 1061,  901,  741,  581,  421,  261,  101,    1};
-    int crateMaxSoftId[] = {4800, 2580, 2740, 2900, 3060, 3220, 3380, 3540, 3700, 3860, 4020, 4180, 4340, 4500, 4660, 2340, 2180, 2020, 1860, 1700, 1540, 1380, 1220, 1060,  900,  740,  580,  420,  260,  100};
-    // Do not use StEmcDecoder for showing ranges because of the tower map bug fix which mixes softIds between crates
-    /*
-    int crateMinSoftId[30];
-    int crateMaxSoftId[30];
-    for (int crate = 0;crate < 30;crate++) {
-	crateMinSoftId[crate] = 4800;
-	crateMaxSoftId[crate] = 1;
-    }
-    for (int crate = 0;crate < 30;crate++) {
-        if (BEMCDecoderPresenter) {
-	    for (int crateSeq = 0;crateSeq < 160;crateSeq++) {
-		int softId;
-		if (BEMCDecoderPresenter->GetTowerIdFromCrate(crate + 1, crateSeq, softId)) {
-		    if (softId < crateMinSoftId[crate]) crateMinSoftId[crate] = softId;
-		    if (softId > crateMaxSoftId[crate]) crateMaxSoftId[crate] = softId;
+    Int_t linesColor = 16;
+    Int_t crateMinSoftId[] = {4661, 2421, 2581, 2741, 2901, 3061, 3221, 3381, 3541, 3701, 3861, 4021, 4181, 4341, 4501, 2181, 2021, 1861, 1701, 1541, 1381, 1221, 1061,  901,  741,  581,  421,  261,  101,    1};
+    Int_t crateMaxSoftId[] = {4800, 2580, 2740, 2900, 3060, 3220, 3380, 3540, 3700, 3860, 4020, 4180, 4340, 4500, 4660, 2340, 2180, 2020, 1860, 1700, 1540, 1380, 1220, 1060,  900,  740,  580,  420,  260,  100};
+    Int_t pmtbxMinSoftId[] = {2261, 2181, 2101, 2021, 1941, 1861, 1781, 1701, 1621, 1541, 1461, 1381, 1301, 1221, 1141, 1061,  981,  901,  821,  741,  661,  581,  501,  421,  341,  261,  181,  101,   21, 2341/*and from 1*/,
+			     4661, 4741, 2421, 2501, 2581, 2661, 2741, 2821, 2901, 2981, 3061, 3141, 3221, 3301, 3381, 3461, 3541, 3621, 3701, 3781, 3861, 3941, 4021, 4101, 4181, 4261, 4341, 4421, 4501, 4581
+			 	   /*and from 2401*/
+			     };
+    Int_t pmtbxMaxSoftId[] = {2340, 2260, 2180, 2100, 2020, 1940, 1860, 1780, 1700, 1620, 1540, 1460, 1380, 1300, 1220, 1140, 1060,  980,  900,  820,  740,  660,  580,  500,  420,  340,  260,  180,  100, 2400/*to 20*/,
+			     4740, 4800, 2500, 2580, 2660, 2740, 2820, 2900, 2980, 3060, 3140, 3220, 3300, 3380, 3460, 3540, 3620, 3700, 3780, 3860, 3940, 4020, 4100, 4180, 4260, 4340, 4420, 4500, 4580, 4660
+				   /*to 2420*/
+			     };
+    if (useDecoderForBoundaries && BEMCDecoderPresenter) {
+	for (Int_t crate = 0;crate < 30;crate++) {
+	    crateMinSoftId[crate] = 4800;
+	    crateMaxSoftId[crate] = 1;
+	}
+	for (Int_t crate = 0;crate < 30;crate++) {
+    	    if (BEMCDecoderPresenter) {
+		for (Int_t crateSeq = 0;crateSeq < 160;crateSeq++) {
+		    Int_t softId;
+		    if (BEMCDecoderPresenter->GetTowerIdFromCrate(crate + 1, crateSeq, softId)) {
+			if (softId < crateMinSoftId[crate]) crateMinSoftId[crate] = softId;
+			if (softId > crateMaxSoftId[crate]) crateMaxSoftId[crate] = softId;
+		    }
 		}
 	    }
 	}
+	//for (Int_t crate = 0;crate < 30;crate++) cout << "Crate " << (crate+1) << ": SoftId " << crateMinSoftId[crate] << " - " << crateMaxSoftId[crate] << endl;
+	// no PMT boxes numeration scheme in decoder
     }
-    */
-    //for (int crate = 0;crate < 30;crate++) cout << "Crate " << (crate+1) << ": SoftId " << crateMinSoftId[crate] << " - " << crateMaxSoftId[crate] << endl;
+
+    Int_t *boxMinSoftId = psd ? pmtbxMinSoftId : crateMinSoftId;
+    Int_t *boxMaxSoftId = psd ? pmtbxMaxSoftId : crateMaxSoftId;
+    const Char_t *boxLabelFormat = psd ? "%i" : "0x%.2X";
+    Int_t numBoxes = psd ? (sizeof(pmtbxMinSoftId)/sizeof(pmtbxMinSoftId[0])) : (sizeof(crateMinSoftId)/sizeof(crateMinSoftId));
+
     c->cd(1);
     if (HistRawAdc1) {
 	HistRawAdc1->SetStats(0);
 	HistRawAdc1->Draw("COLZ");
-	for (int crate = 0;crate < 30;crate++) {
-	    if (!((crateMaxSoftId[crate] < HistRawAdc1->GetXaxis()->GetBinLowEdge(1))
-		|| (crateMinSoftId[crate] > HistRawAdc1->GetXaxis()->GetBinUpEdge(HistRawAdc1->GetXaxis()->GetNbins())))
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc1->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc1->GetXaxis()->GetBinUpEdge(HistRawAdc1->GetXaxis()->GetNbins())))
 		) {
-		Float_t left = max(crateMinSoftId[crate], HistRawAdc1->GetXaxis()->GetBinCenter(1)) - 0.5;
-		Float_t right = 0.5 + min(crateMaxSoftId[crate], HistRawAdc1->GetXaxis()->GetBinCenter(HistRawAdc1->GetXaxis()->GetNbins()));
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc1->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc1->GetXaxis()->GetBinCenter(HistRawAdc1->GetXaxis()->GetNbins()));
 		TLine *lCrates = new TLine(left, HistRawAdc1->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc1->GetYaxis()->GetBinUpEdge(HistRawAdc1->GetYaxis()->GetNbins()));
 		if (lCrates) {
     		    lCrates->SetLineColor(linesColor); 
@@ -112,7 +125,7 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
 		    rCrates->Draw();
 		}
     		TString crateLabel;
-    		crateLabel = Form("0x%.2X", crate + 1);
+    		crateLabel = Form(boxLabelFormat, crate + 1);
 		TLatex *textCrate = new TLatex(left + 10, HistRawAdc1->GetYaxis()->GetBinUpEdge(HistRawAdc1->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
 		if (textCrate) {
 		    textCrate->SetTextColor(linesColor);
@@ -126,12 +139,12 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
     if (HistRawAdc2) {
 	HistRawAdc2->SetStats(0);
 	HistRawAdc2->Draw("COLZ");
-	for (int crate = 0;crate < 30;crate++) {
-	    if (!((crateMaxSoftId[crate] < HistRawAdc2->GetXaxis()->GetBinLowEdge(1))
-		|| (crateMinSoftId[crate] > HistRawAdc2->GetXaxis()->GetBinUpEdge(HistRawAdc2->GetXaxis()->GetNbins())))
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc2->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc2->GetXaxis()->GetBinUpEdge(HistRawAdc2->GetXaxis()->GetNbins())))
 		) {
-		Float_t left = max(crateMinSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(1)) - 0.5;
-		Float_t right = 0.5 + min(crateMaxSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(HistRawAdc2->GetXaxis()->GetNbins()));
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc2->GetXaxis()->GetBinCenter(HistRawAdc2->GetXaxis()->GetNbins()));
 		TLine *lCrates = new TLine(left, HistRawAdc2->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()));
 		if (lCrates) {
     		    lCrates->SetLineColor(linesColor); 
@@ -145,7 +158,7 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
 		    rCrates->Draw();
 		}
     		TString crateLabel;
-    		crateLabel = Form("0x%.2X", crate + 1);
+    		crateLabel = Form(boxLabelFormat, crate + 1);
 		TLatex *textCrate = new TLatex(left + 10, HistRawAdc2->GetYaxis()->GetBinUpEdge(HistRawAdc2->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
 		if (textCrate) {
 		    textCrate->SetTextColor(linesColor);
@@ -159,12 +172,12 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
     if (HistRawAdc3) {
 	HistRawAdc3->SetStats(0);
 	HistRawAdc3->Draw("COLZ");
-	for (int crate = 0;crate < 30;crate++) {
-	    if (!((crateMaxSoftId[crate] < HistRawAdc3->GetXaxis()->GetBinLowEdge(1))
-		|| (crateMinSoftId[crate] > HistRawAdc3->GetXaxis()->GetBinUpEdge(HistRawAdc3->GetXaxis()->GetNbins())))
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc3->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc3->GetXaxis()->GetBinUpEdge(HistRawAdc3->GetXaxis()->GetNbins())))
 		) {
-		Float_t left = max(crateMinSoftId[crate], HistRawAdc3->GetXaxis()->GetBinCenter(1)) - 0.5;
-		Float_t right = 0.5 + min(crateMaxSoftId[crate], HistRawAdc3->GetXaxis()->GetBinCenter(HistRawAdc3->GetXaxis()->GetNbins()));
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc3->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc3->GetXaxis()->GetBinCenter(HistRawAdc3->GetXaxis()->GetNbins()));
 		TLine *lCrates = new TLine(left, HistRawAdc3->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc3->GetYaxis()->GetBinUpEdge(HistRawAdc3->GetYaxis()->GetNbins()));
 		if (lCrates) {
     		    lCrates->SetLineColor(linesColor); 
@@ -178,7 +191,7 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
 		    rCrates->Draw();
 		}
     		TString crateLabel;
-    		crateLabel = Form("0x%.2X", crate + 1);
+    		crateLabel = Form(boxLabelFormat, crate + 1);
 		TLatex *textCrate = new TLatex(left + 10, HistRawAdc3->GetYaxis()->GetBinUpEdge(HistRawAdc3->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
 		if (textCrate) {
 		    textCrate->SetTextColor(linesColor);
@@ -192,12 +205,12 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
     if (HistRawAdc4) {
 	HistRawAdc4->SetStats(0);
 	HistRawAdc4->Draw("COLZ");
-	for (int crate = 0;crate < 30;crate++) {
-	    if (!((crateMaxSoftId[crate] < HistRawAdc4->GetXaxis()->GetBinLowEdge(1))
-		|| (crateMinSoftId[crate] > HistRawAdc4->GetXaxis()->GetBinUpEdge(HistRawAdc4->GetXaxis()->GetNbins())))
+	for (Int_t crate = 0;crate < numBoxes;crate++) {
+	    if (!((boxMaxSoftId[crate] < HistRawAdc4->GetXaxis()->GetBinLowEdge(1))
+		|| (boxMinSoftId[crate] > HistRawAdc4->GetXaxis()->GetBinUpEdge(HistRawAdc4->GetXaxis()->GetNbins())))
 		) {
-		Float_t left = max(crateMinSoftId[crate], HistRawAdc4->GetXaxis()->GetBinCenter(1)) - 0.5;
-		Float_t right = 0.5 + min(crateMaxSoftId[crate], HistRawAdc4->GetXaxis()->GetBinCenter(HistRawAdc4->GetXaxis()->GetNbins()));
+		Float_t left = max(boxMinSoftId[crate], HistRawAdc4->GetXaxis()->GetBinCenter(1)) - 0.5;
+		Float_t right = 0.5 + min(boxMaxSoftId[crate], HistRawAdc4->GetXaxis()->GetBinCenter(HistRawAdc4->GetXaxis()->GetNbins()));
 		TLine *lCrates = new TLine(left, HistRawAdc4->GetYaxis()->GetBinLowEdge(1), left, HistRawAdc4->GetYaxis()->GetBinUpEdge(HistRawAdc4->GetYaxis()->GetNbins()));
 		if (lCrates) {
     		    lCrates->SetLineColor(linesColor); 
@@ -211,7 +224,7 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
 		    rCrates->Draw();
 		}
     		TString crateLabel;
-    		crateLabel = Form("0x%.2X", crate + 1);
+    		crateLabel = Form(boxLabelFormat, crate + 1);
 		TLatex *textCrate = new TLatex(left + 10, HistRawAdc4->GetYaxis()->GetBinUpEdge(HistRawAdc4->GetYaxis()->GetNbins()) * 0.8, crateLabel.Data());
 		if (textCrate) {
 		    textCrate->SetTextColor(linesColor);
@@ -223,11 +236,11 @@ void BEMCPlotsPresenter::displayRawAdc(FileType *file, TPad *pad, bool psd, int 
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistHighTowerSpectrum[12];
-    for (int i = 0;i < 12;i++) {
+    for (Int_t i = 0;i < 12;i++) {
         TString name;
         name = Form(HistHighTowerSpectrumName "_%u", i);
         HistHighTowerSpectrum[i] = (TH1F*)GetHisto(file, (const char *)name);
@@ -242,7 +255,7 @@ void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, int mDebug
     c->cd(0);
     c->Divide(3, 4, 0.001, 0.001);
     
-    for (int jetPatch = 0;jetPatch < 12;jetPatch++) {
+    for (Int_t jetPatch = 0;jetPatch < 12;jetPatch++) {
 	c->cd(jetPatch+1);
 	if (HistHighTowerSpectrum[jetPatch]) {
 	    HistHighTowerSpectrum[jetPatch]->SetStats(0);
@@ -252,11 +265,11 @@ void BEMCPlotsPresenter::displayJetPatchHT(FileType *file, TPad *pad, int mDebug
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistPatchSumSpectrum[12];
-    for (int i = 0;i < 12;i++) {
+    for (Int_t i = 0;i < 12;i++) {
         TString name;
         name = Form(HistPatchSumSpectrumName "_%u", i);
 	HistPatchSumSpectrum[i] = (TH1F*)GetHisto(file, (const char*)name);
@@ -271,7 +284,7 @@ void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, int mDebu
     c->cd(0);
     c->Divide(3, 4, 0.001, 0.001);
     
-    for (int jetPatch = 0;jetPatch < 12;jetPatch++) {
+    for (Int_t jetPatch = 0;jetPatch < 12;jetPatch++) {
 	c->cd(jetPatch+1);
 	if (HistPatchSumSpectrum[jetPatch]) {
 	    HistPatchSumSpectrum[jetPatch]->SetStats(0);
@@ -281,7 +294,7 @@ void BEMCPlotsPresenter::displayJetPatchSum(FileType *file, TPad *pad, int mDebu
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistDsmL0InputHighTower = (TH2F*)GetHisto(file, HistDsmL0InputHighTowerName);
@@ -299,7 +312,7 @@ void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, int mDebug) {
     c->Divide(1, 2, 0.001, 0.001);
     
     // 12-19 are the grey shades dark-light
-    int linesColor = 16;
+    Int_t linesColor = 16;
     c->cd(1);
     if (HistDsmL0InputHighTower && BEMCDecoderPresenter) {
 	HistDsmL0InputHighTower->SetStats(0);
@@ -316,8 +329,8 @@ void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, int mDebug) {
     	    textCrates->SetTextSize(0.0333);
 	    textCrates->Draw();
 	}
-	for (int icrate = 1;icrate <= 30;icrate++) {
-	    int triggerPatchBegin, triggerPatchEnd;
+	for (Int_t icrate = 1;icrate <= 30;icrate++) {
+	    Int_t triggerPatchBegin, triggerPatchEnd;
 	    if (BEMCDecoderPresenter->GetTriggerPatchFromCrate(icrate, 0, triggerPatchBegin) && BEMCDecoderPresenter->GetTriggerPatchFromCrate(icrate, 159, triggerPatchEnd)) {
     		TLine *lCrateBegin = new TLine(triggerPatchBegin-0.5, 0, triggerPatchBegin-0.5, 50);
     		if (lCrateBegin) {
@@ -335,18 +348,18 @@ void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, int mDebug) {
 		}
 	    }
 	}
-	for (int ijp = 0;ijp < 12;ijp++) {
-	    int maxTriggerPatch = 0;
-	    int minTriggerPatch = 300;
-    	    for (int j = 0;j < 25;j++) {
-		int triggerPatch;
+	for (Int_t ijp = 0;ijp < 12;ijp++) {
+	    Int_t maxTriggerPatch = 0;
+	    Int_t minTriggerPatch = 300;
+    	    for (Int_t j = 0;j < 25;j++) {
+		Int_t triggerPatch;
 		if (BEMCDecoderPresenter->GetTriggerPatchFromJetPatch(ijp, j, triggerPatch)) {
 		    if (maxTriggerPatch < triggerPatch) maxTriggerPatch = triggerPatch;
 		    if (minTriggerPatch > triggerPatch) minTriggerPatch = triggerPatch;
 		}
 	    }
 	    maxTriggerPatch++;
-	    int height = (ijp%2) ? 55 : 60;
+	    Int_t height = (ijp%2) ? 55 : 60;
 	    TArrow *arrow = new TArrow(minTriggerPatch-0.5, height, maxTriggerPatch-0.5, height, 0.02, "<>");
 	    if (arrow) {
 		arrow->SetLineColor(linesColor);
@@ -367,8 +380,8 @@ void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, int mDebug) {
     if (HistDsmL0InputPatchSum) {
 	HistDsmL0InputPatchSum->SetStats(0);
 	HistDsmL0InputPatchSum->Draw("COLZ");
-	for (int icrate = 1;icrate <= 30;icrate++) {
-	    int triggerPatchBegin, triggerPatchEnd;
+	for (Int_t icrate = 1;icrate <= 30;icrate++) {
+	    Int_t triggerPatchBegin, triggerPatchEnd;
 	    if (BEMCDecoderPresenter->GetTriggerPatchFromCrate(icrate, 0, triggerPatchBegin) && BEMCDecoderPresenter->GetTriggerPatchFromCrate(icrate, 159, triggerPatchEnd)) {
     		TLine *lCrateBegin = new TLine(triggerPatchBegin-0.5, 0, triggerPatchBegin-0.5, 64);
     		if (lCrateBegin) {
@@ -390,7 +403,7 @@ void BEMCPlotsPresenter::displayL0Input(FileType *file, TPad *pad, int mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistDsmL1InputHighTowerBits = (TH2F*)GetHisto(file, HistDsmL1InputHighTowerBitsName);
@@ -408,7 +421,7 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
     c->Divide(1, 2, 0.001, 0.001);
     
     // 12-19 are the grey shades dark-light
-    int linesColor = 16;
+    Int_t linesColor = 16;
     c->cd(1);
     if (HistDsmL1InputHighTowerBits) {
 	HistDsmL1InputHighTowerBits->SetStats(0);
@@ -457,10 +470,10 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
 	    lDsms->SetLineWidth(1);
 	    lDsms->Draw();
 	}*/
-	int dsmL0 = 0;
-	int ch = 0;
-	for (int idsmL1 = 0;idsmL1 < 6;idsmL1++) {
-	    for (int idsmL1ch = 0;idsmL1ch < 6;idsmL1ch++) {		
+	Int_t dsmL0 = 0;
+	Int_t ch = 0;
+	for (Int_t idsmL1 = 0;idsmL1 < 6;idsmL1++) {
+	    for (Int_t idsmL1ch = 0;idsmL1ch < 6;idsmL1ch++) {		
     		TLine *lDsmL0Begin = new TLine(ch-0.5, 0, ch-0.5, 4.4);
     		if (lDsmL0Begin) {
 		    lDsmL0Begin->SetLineColor(linesColor);
@@ -468,9 +481,9 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
 		    lDsmL0Begin->Draw();
 		}
         	TString label;
-		int crate = 0, crateSeq = 0;
+		Int_t crate = 0, crateSeq = 0;
 		if (BEMCDecoderPresenter) {
-		    int triggerPatch = dsmL0 * 10;
+		    Int_t triggerPatch = dsmL0 * 10;
 		    BEMCDecoderPresenter->GetCrateAndSequenceFromTriggerPatch(triggerPatch, crate, crateSeq);
 		}
 		if (idsmL1 < 3) {
@@ -486,8 +499,8 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
 		}
         	/*TString labelCrate;
 		if (BEMCDecoderPresenter) {
-		    int triggerPatch = dsmL0 * 10;
-		    int crate, crateSeq;
+		    Int_t triggerPatch = dsmL0 * 10;
+		    Int_t crate, crateSeq;
 		    if (BEMCDecoderPresenter->GetCrateAndSequenceFromTriggerPatch(triggerPatch, crate, crateSeq)) {
 			labelCrate = Form("%.2X", crate);
 		    }
@@ -502,9 +515,9 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
 		if (idsmL1ch != 2) dsmL0++;
 	    }
 	}
-	for (int ijp = 0;ijp < 12;ijp++) {
-	    int maxCh = (ijp * 3) + 3;
-	    int minCh = (ijp * 3) + 0;
+	for (Int_t ijp = 0;ijp < 12;ijp++) {
+	    Int_t maxCh = (ijp * 3) + 3;
+	    Int_t minCh = (ijp * 3) + 0;
 	    Float_t height = (ijp%2) ? 4.7 : 4.7;
 	    TArrow *arrow = new TArrow(minCh-0.5, height, maxCh-0.5, height, 0.02, "<>");
 	    if (arrow) {
@@ -527,7 +540,7 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
     	    textDsmsL1->SetTextSize(0.0333);
 	    textDsmsL1->Draw();
 	}
-	for (int idsmL1 = 0;idsmL1 < 6;idsmL1++) {
+	for (Int_t idsmL1 = 0;idsmL1 < 6;idsmL1++) {
 	    TArrow *arrow = new TArrow((idsmL1 * 6)-0.5, -0.4, (idsmL1 * 6) + 6-0.5, -0.4, 0.02, "<>");
 	    if (arrow) {
 		arrow->SetLineColor(linesColor);
@@ -553,19 +566,19 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
     if (HistDsmL1InputPatchSum) {
 	HistDsmL1InputPatchSum->SetStats(0);
 	HistDsmL1InputPatchSum->Draw("COLZ");
-	int dsmL0 = 0;
-	int ch = 0;
-	for (int idsmL1 = 0;idsmL1 < 6;idsmL1++) {
-	    for (int idsmL1ch = 0;idsmL1ch < 6;idsmL1ch++) {		
+	Int_t dsmL0 = 0;
+	Int_t ch = 0;
+	for (Int_t idsmL1 = 0;idsmL1 < 6;idsmL1++) {
+	    for (Int_t idsmL1ch = 0;idsmL1ch < 6;idsmL1ch++) {		
     		TLine *lDsmL0Begin = new TLine(ch-0.5, 0, ch-0.5, 1024);
     		if (lDsmL0Begin) {
 		    lDsmL0Begin->SetLineColor(linesColor);
     		    lDsmL0Begin->SetLineWidth(1);
 		    lDsmL0Begin->Draw();
 		}
-		int crate = 0, crateSeq = 0;
+		Int_t crate = 0, crateSeq = 0;
 		if (BEMCDecoderPresenter) {
-		    int triggerPatch = dsmL0 * 10;
+		    Int_t triggerPatch = dsmL0 * 10;
 		    BEMCDecoderPresenter->GetCrateAndSequenceFromTriggerPatch(triggerPatch, crate, crateSeq);
 		}
         	TString label;
@@ -584,7 +597,7 @@ void BEMCPlotsPresenter::displayL1Input(FileType *file, TPad *pad, int mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistDsmL2InputHighTowerBits = (TH2F*)GetHisto(file, HistDsmL2InputHighTowerBitsName);
@@ -604,7 +617,7 @@ void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, int mDebug) {
     c->Divide(1, 3, 0.001, 0.001);
     
     // 12-19 are the grey shades dark-light
-    int linesColor = 16;
+    Int_t linesColor = 16;
     c->cd(1);
 
     if (HistDsmL2InputHighTowerBits) {
@@ -642,7 +655,7 @@ void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, int mDebug) {
     	    textDsmsL1->SetTextSize(0.05);
 	    textDsmsL1->Draw();
 	}
-	for (int ch = 0;ch < 12;ch += 2) {
+	for (Int_t ch = 0;ch < 12;ch += 2) {
     	    TLine *lDsmL1Begin = new TLine(ch-0.5, 0, ch-0.5, 5);
     	    if (lDsmL1Begin) {
 	        lDsmL1Begin->SetLineColor(linesColor);
@@ -694,7 +707,7 @@ void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, int mDebug) {
     	    textHT3->SetTextSize(0.05);
 	    textHT3->Draw();
 	}
-	for (int ch = 0;ch < 12;ch += 2) {
+	for (Int_t ch = 0;ch < 12;ch += 2) {
     	    TLine *lDsmL1Begin = new TLine(ch-0.5, 0, ch-0.5, 4);
     	    if (lDsmL1Begin) {
 	        lDsmL1Begin->SetLineColor(linesColor);
@@ -710,7 +723,7 @@ void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, int mDebug) {
 	//HistDsmL2InputPatchSum->GetXaxis()->SetNdivisions(0, false);
 	//HistDsmL2InputPatchSum->GetYaxis()->SetNdivisions(0, false);
 	HistDsmL2InputPatchSum->Draw("COLZ");
-	for (int ch = 0;ch < 6;ch++) {
+	for (Int_t ch = 0;ch < 6;ch++) {
     	    TLine *lDsmL1Begin = new TLine(ch-0.5, 0, ch-0.5, 256);
     	    if (lDsmL1Begin) {
 	        lDsmL1Begin->SetLineColor(linesColor);
@@ -723,7 +736,7 @@ void BEMCPlotsPresenter::displayL2Input(FileType *file, TPad *pad, int mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayL3Input(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayL3Input(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistDsmL3InputHighTowerBits = (TH1F*)GetHisto(file, HistDsmL3InputHighTowerBitsName);
@@ -762,7 +775,7 @@ void BEMCPlotsPresenter::displayL3Input(FileType *file, TPad *pad, int mDebug) {
 	
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistSmdFeeSum = (TH2F*)GetHisto(file, HistSmdFeeSumName);
@@ -772,17 +785,17 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, int mDebug)
     pad->cd(0);
     
     // 12-19 are the grey shades dark-light
-    int linesColor = 16;
+    Int_t linesColor = 16;
     TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
     c->Draw();
     c->cd();
     if (HistSmdFeeSum) {
 	HistSmdFeeSum->SetStats(0);
 	HistSmdFeeSum->Draw("COLZ");
-	int moduleRdo[120];
+	Int_t moduleRdo[120];
         if(BEMCDecoderPresenter) {
-	    int RDO, index;
-            for (int module = 1;module <= 120;module++) {
+	    Int_t RDO, index;
+            for (Int_t module = 1;module <= 120;module++) {
 		moduleRdo[module - 1] = -1;
 	        if (BEMCDecoderPresenter->GetSmdRDO(3, module, 1, 1, RDO, index)) {
 		    moduleRdo[module - 1] = RDO;
@@ -790,10 +803,10 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, int mDebug)
 //cout << "module " << module << ": RDO " << moduleRdo[module - 1] << endl;
 	    }
 	}
-	int curmod = 1;
-	int currdo = -1;
-	int beginrdo = -1;
-	int endrdo = -1;
+	Int_t curmod = 1;
+	Int_t currdo = -1;
+	Int_t beginrdo = -1;
+	Int_t endrdo = -1;
 	while (curmod <= 121) {
 //cout << "curmod = " << curmod << ", currdo = " << currdo << ", beginrdo = " << beginrdo << ", endrdo = " << endrdo << endl;
 	    if (((curmod <= 120) && (moduleRdo[curmod - 1] != currdo)) || (curmod == 121)) {
@@ -833,7 +846,7 @@ void BEMCPlotsPresenter::displaySmdFeeSum(FileType *file, TPad *pad, int mDebug)
     }
 }	
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH2F *HistPsdFeeSum = (TH2F*)GetHisto(file, HistPsdFeeSumName);
@@ -843,19 +856,19 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, int mDebug)
     pad->cd(0);
     
     // 12-19 are the grey shades dark-light
-    int linesColor = 16;
+    Int_t linesColor = 16;
     TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
     c->Draw();
     c->cd();
     if (HistPsdFeeSum) {
 	HistPsdFeeSum->SetStats(0);
 	HistPsdFeeSum->Draw("COLZ");
-	int pmtRdo[60];
-	for (int box = 0;box < 60;box++) pmtRdo[box] = -1;
+	Int_t pmtRdo[60];
+	for (Int_t box = 0;box < 60;box++) pmtRdo[box] = -1;
         if(BEMCDecoderPresenter) {
-            for (int rdo = 0;rdo < 4;rdo++) {
-        	for (int index = 0;index < 4800;index++) {
-	    	    int id, box, wire, Avalue;
+            for (Int_t rdo = 0;rdo < 4;rdo++) {
+        	for (Int_t index = 0;index < 4800;index++) {
+	    	    Int_t id, box, wire, Avalue;
 		    if (BEMCDecoderPresenter->GetPsdId(rdo, index, id, box, wire, Avalue)) {
 			if ((box >= 1) && (box <= 60)) {
 			    pmtRdo[box - 1] = rdo + 8;
@@ -864,10 +877,10 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, int mDebug)
 	        }
 	    }
 	}
-	int curmod = 1;
-	int currdo = -1;
-	int beginrdo = -1;
-	int endrdo = -1;
+	Int_t curmod = 1;
+	Int_t currdo = -1;
+	Int_t beginrdo = -1;
+	Int_t endrdo = -1;
 	while (curmod <= 61) {
 //cout << "curmod = " << curmod << ", currdo = " << currdo << ", beginrdo = " << beginrdo << ", endrdo = " << endrdo << endl;
 	    if (((curmod <= 60) && (pmtRdo[curmod - 1] != currdo)) || (curmod == 61)) {
@@ -907,7 +920,7 @@ void BEMCPlotsPresenter::displayPsdFeeSum(FileType *file, TPad *pad, int mDebug)
     }
 }	
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, Int_t mDebug) {
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
 
     TH1F *HistTriggerCorruptionHighTower = (TH1F*)GetHisto(file, HistTriggerCorruptionHighTowerName);
@@ -924,7 +937,7 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, int
     pad->cd(0);
     
     // 12-19 are the grey shades dark-light
-    //int linesColor = 16;
+    //Int_t linesColor = 16;
     TPad* c = new TPad("pad2", "apd2",0.0,0.1,1.,1.);
     c->Draw();
     c->cd(0);
@@ -952,7 +965,7 @@ void BEMCPlotsPresenter::displayTriggerCorruption(FileType *file, TPad *pad, int
     }
 }
 //-------------------------------------------------------------------
-void BEMCPlotsPresenter::displayTab(int tab, int panel, FileType *file, TPad *pad, int mDebug) {
+void BEMCPlotsPresenter::displayTab(Int_t tab, Int_t panel, FileType *file, TPad *pad, Int_t mDebug) {
 //mDebug = 10;
     if (mDebug >= 10) cout << __FILE__ << ":" << __LINE__ << endl;
     if (BEMCPlotsCleanUpHistoList) {
