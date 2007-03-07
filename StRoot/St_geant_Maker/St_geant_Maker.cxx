@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.113 2007/03/03 02:30:50 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.114 2007/03/07 16:46:04 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.114  2007/03/07 16:46:04  fine
+// Add the warning
+//
 // Revision 1.113  2007/03/03 02:30:50  fine
 // fix the geometry file name. Thanks P.Nebski
 //
@@ -1722,7 +1725,12 @@ void St_geant_Maker::Geometry() {
    // Move the becoming obsolete ROOT representations if any
    ClearRootGeoms();
    if (Remake()) {
-      Do("make geometry");
+      LOG_WARN << "The local version of the <libgeometry.so> shared library is to be re-built" << endm;
+      gSystem->Exec("cons +geometry");
+      LOG_WARN << "The local version of the <libgeometry.so> shared library has been re-built" << endm;
+      LOG_WARN << "One has to re-load Geometry browser to see the new geometry" << endm;
+      LOG_WARN << "Ask Pavel Nevski, \"Why?\"" << endm;      
+//      Do("make geometry");
       SetRemake(kFALSE);
    } else {
      geometry();
