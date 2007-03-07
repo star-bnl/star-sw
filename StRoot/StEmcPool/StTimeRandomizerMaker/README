@@ -52,8 +52,10 @@ timeRandomizer->setNormalizeEventsTotal(20000);
 // StEvent dataset name when running StIOMaker over event.root files
 timeRandomizer->setDatasetNameStEvent("IO_Root/.data/bfcTree/eventBranch/StEvent");
 // Seed for the random numbers generator
-// Note: default is zero, non-reproducable
+// Default is zero, non-reproducable
 timeRandomizer->setSeed(0);
+// Sarting ID for the event counting, default is zero
+timeRandomizer->setBaseEventId(0);
 
 // here we create St_db_Maker, it will use the generated event timestamps
 St_db_Maker *dbMaker = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
@@ -61,5 +63,9 @@ St_db_Maker *dbMaker = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
 
 TRandom3 is utilized with user defined seed (default is zero) in Init() for
 the Uniform() random numbers.
+
+Events are assigned a sequential IDs, starting from the user defined base ID.
+Set it to a different (large) number for each job if you want all events to
+have globally unique IDs.
 
 Originally released by Oleksandr Grebenyuk as part of the pi0 analysis code.
