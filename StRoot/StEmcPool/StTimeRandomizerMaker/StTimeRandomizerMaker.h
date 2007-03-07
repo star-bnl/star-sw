@@ -8,8 +8,6 @@ using std::list;
 
 #include <StMaker.h>
 
-#include "StTimeRandomizerMakerVersion.h"
-
 class StTimeRandomizerMaker : public StMaker {
 public:
     typedef StMaker inherited;
@@ -21,13 +19,26 @@ public:
     virtual Int_t Make();
     virtual Int_t Finish();
 
-    TString runTimesFilename; // text file with requested timestamps and corresponding statistics
-    Float_t normalizeEventsTotal; // if not zero, tells in how many events the requested list must be covered
-    TString datasetNameStEvent; // StEvent dataset name to use, default is "StEvent", one may also try "IO_Root/.data/bfcTree/eventBranch/StEvent"
+    const TString &getRunTimesFilename() const;
+    void setRunTimesFilename(const TString &filename);
 
-    ClassDef(StTimeRandomizerMaker, STTIMERANDOMIZERMAKER_VERSION);
+    Float_t getNormalizeEventsTotal() const;
+    void setNormalizeEventsTotal(Float_t evNum);
+
+    const TString &getDatasetNameStEvent() const;
+    void setDatasetNameStEvent(const TString &name);
+
+    UInt_t getSeed() const;
+    void setSeed(UInt_t seed);
+
+    ClassDef(StTimeRandomizerMaker, 1);
 
 protected:
+    TString mRunTimesFilename; // text file with requested timestamps and corresponding statistics
+    Float_t mNormalizeEventsTotal; // if not zero, tells in how many events the requested list must be covered
+    TString mDatasetNameStEvent; // StEvent dataset name to use, default is "StEvent", one may also try "IO_Root/.data/bfcTree/eventBranch/StEvent"
+    UInt_t mSeed; // random number generator seed to be used in Init()
+
     list<Int_t> mRunsUsed;
     list<Int_t> mRuns;
     list<Int_t> mDates;

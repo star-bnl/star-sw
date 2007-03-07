@@ -10,9 +10,10 @@ ClassImp(StTimeRandomizerMaker);
 //_____________________________________________________________________________
 StTimeRandomizerMaker::StTimeRandomizerMaker(const char *name)
     : inherited(name)
-    , runTimesFilename("")
-    , normalizeEventsTotal(0)
-    , datasetNameStEvent("StEvent")
+    , mRunTimesFilename("")
+    , mNormalizeEventsTotal(0)
+    , mDatasetNameStEvent("StEvent")
+    , mSeed(0)
     , mEventsTotal(0)
     , mEventNum(0)
     , mNormalizedEventsCounter(0)
@@ -25,49 +26,52 @@ StTimeRandomizerMaker::~StTimeRandomizerMaker() {
 
 //_____________________________________________________________________________
 Int_t StTimeRandomizerMaker::Init() {
-  {LOG_DEBUG << "Starting Init()" << endm;}
-  Int_t result = this->inherited::Init();
-  this->mEventNum = 0;
-  this->mRunsUsed.clear();
-  this->mRuns.clear();
-  this->mDates.clear();
-  this->mTimes.clear();
-  this->mEvents.clear();
-  this->mEventsTotal = 0;
-  if (this->runTimesFilename) {
-	TString filename = this->runTimesFilename;
-	if (filename != "") {
+    {LOG_DEBUG << "Starting Init()" << endm;}
+    Int_t result = this->inherited::Init();
+    this->mEventNum = 0;
+    this->mRunsUsed.clear();
+    this->mRuns.clear();
+    this->mDates.clear();
+    this->mTimes.clear();
+    this->mEvents.clear();
+    this->mEventsTotal = 0;
+    const TString &filename = this->getRunTimesFilename();
+    if (filename != "") {
 	    {LOG_INFO << "Reading timestamps from " << filename << "..." << endm;}
 	    ifstream str(filename);
-	    Int_t numRuns = 0;
-	    while (str.good()) {
-		Int_t run = -1, date = -1, time = -1;
-	        Float_t events = -1;
-		str >> run >> date >> time >> events;
-	        if (str.good() && (run != -1) && (date != -1) && (time != -1) && (events > 0)) {
-		    numRuns++;
-		    this->mRunsUsed.push_back(0);
-		    this->mRuns.push_back(run);
-		    this->mDates.push_back(date);
-		    this->mTimes.push_back(time);
-		    this->mEvents.push_back(events);
-		    this->mEventsTotal += events;
+	    if (str.good()) {
+		Int_t numRuns = 0;
+		while (str.good()) {
+		    Int_t run = -1, date = -1, time = -1;
+	    	    Float_t events = -1;
+		    str >> run >> date >> time >> events;
+	    	    if (str.good() && (run != -1) && (date != -1) && (time != -1) && (events > 0)) {
+			numRuns++;
+		        this->mRunsUsed.push_back(0);
+		        this->mRuns.push_back(run);
+		        this->mDates.push_back(date);
+			this->mTimes.push_back(time);
+		        this->mEvents.push_back(events);
+		        this->mEventsTotal += events;
+		    }
 		}
+		{LOG_INFO << "Read " << numRuns << " runs, " << this->mEventsTotal << " events" << endm;}
+	    } else {
+		{LOG_ERROR << "Cannot read file " << filename << endm;}
+		result = kStWarn;
 	    }
 	    str.close();
-	    {LOG_INFO << "Read " << numRuns << " runs, " << this->mEventsTotal << " events" << endm;}
-	} else {
-	    {LOG_ERROR << "File " << this->runTimesFilename << " not found!" << endm;}
-	    result = kStWarn;
-	}
-  }
-  this->mRandom.SetSeed(0);
-  this->mNormalizedEventsCounter = 0;
-  if (this->normalizeEventsTotal != 0) {
-	this->mNormalizedEventsCounter = this->mRandom.Uniform(0, this->mEventsTotal / this->normalizeEventsTotal);	
-  }
-  {LOG_DEBUG << "Finished Init()" << endm;}
-  return result;
+    } else {
+	{LOG_ERROR << "Timestamps file not specified: setRunTimesFilename(\"file.txt\")" << endm;}
+        result = kStWarn;
+    }
+    this->mRandom.SetSeed(this->getSeed());
+    this->mNormalizedEventsCounter = 0;
+    if (this->getNormalizeEventsTotal() != 0) {
+	this->mNormalizedEventsCounter = this->mRandom.Uniform(0, this->mEventsTotal / this->getNormalizeEventsTotal());
+    }
+    {LOG_DEBUG << "Finished Init()" << endm;}
+    return result;
 }
 
 //_____________________________________________________________________________
@@ -76,8 +80,8 @@ Int_t StTimeRandomizerMaker::Make() {
   Int_t result = this->inherited::Make();
   if ((this->mEventsTotal > 0) && (this->mDates.size() == this->mTimes.size()) && (this->mDates.size() == this->mEvents.size()) && (this->mDates.size() > 0)) {
     Float_t random = 0;
-    if (this->normalizeEventsTotal != 0) {
-	this->mNormalizedEventsCounter += this->mEventsTotal / this->normalizeEventsTotal;
+    if (this->getNormalizeEventsTotal() != 0) {
+	this->mNormalizedEventsCounter += this->mEventsTotal / this->getNormalizeEventsTotal();
 	while (this->mNormalizedEventsCounter >= this->mEventsTotal) this->mNormalizedEventsCounter -= this->mEventsTotal;
 	random = this->mNormalizedEventsCounter;
     } else {
@@ -103,12 +107,12 @@ Int_t StTimeRandomizerMaker::Make() {
     if ((run != -1) && (date != -1) && (time != -1)) {
 	{LOG_INFO << "Setting run " << run << ", date " << date << ", time " << time << endm;}
 	this->SetDateTime(date, time);
-	StEvent *event = (StEvent*)GetInputDS(this->datasetNameStEvent);
+	StEvent *event = (StEvent*)GetInputDS(this->getDatasetNameStEvent());
 	if (event) {
 	    event->setRunId(run);
 	    event->setId(this->mEventNum);
 	    this->mEventNum++;
-	} else {LOG_ERROR << "Cannot find StEvent at " << this->datasetNameStEvent << endm;}
+	} else {LOG_ERROR << "Cannot find StEvent at " << this->getDatasetNameStEvent() << endm;}
    	--runUsedIter;
    	*runUsedIter = (*runUsedIter) + 1;
     }
@@ -130,4 +134,44 @@ Int_t StTimeRandomizerMaker::Finish() {
   }
   {LOG_DEBUG << "Finished Finish()" << endm;}
   return result;
+}
+
+//______________________________________________________________________________
+const TString &StTimeRandomizerMaker::getRunTimesFilename() const {
+    return this->mRunTimesFilename;
+}
+
+//______________________________________________________________________________
+void StTimeRandomizerMaker::setRunTimesFilename(const TString &filename) {
+    this->mRunTimesFilename = filename;
+}
+
+//______________________________________________________________________________
+Float_t StTimeRandomizerMaker::getNormalizeEventsTotal() const {
+    return this->mNormalizeEventsTotal;
+}
+
+//______________________________________________________________________________
+void StTimeRandomizerMaker::setNormalizeEventsTotal(Float_t evNum) {
+    this->mNormalizeEventsTotal = evNum;
+}
+
+//______________________________________________________________________________
+const TString &StTimeRandomizerMaker::getDatasetNameStEvent() const {
+    return this->mDatasetNameStEvent;
+}
+
+//______________________________________________________________________________
+void StTimeRandomizerMaker::setDatasetNameStEvent(const TString &name) {
+    this->mDatasetNameStEvent = name;
+}
+
+//______________________________________________________________________________
+UInt_t StTimeRandomizerMaker::getSeed() const {
+    return this->mSeed;
+}
+
+//______________________________________________________________________________
+void StTimeRandomizerMaker::setSeed(UInt_t seed) {
+    this->mSeed = seed;
 }

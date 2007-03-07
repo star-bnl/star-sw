@@ -1,6 +1,0 @@
-#ifndef StTimeRandomizerMaker_StTimeRandomizerMakerVersion_H
-#define StTimeRandomizerMaker_StTimeRandomizerMakerVersion_H
-
-#define STTIMERANDOMIZERMAKER_VERSION 6
-
-#endif
