@@ -45,17 +45,21 @@ gSystem->Load("StTimeRandomizerMaker");
 // Create the time randomizer
 StTimeRandomizerMaker *timeRandomizer = new StTimeRandomizerMaker();
 // timestamps filename
-timeRandomizer->runTimesFilename = "timestamps.txt";
+timeRandomizer->setRunTimesFilename("timestamps.txt");
 // ~number of events normally processed per job, set to 0 to have
 // a random timestamp every event
-timeRandomizer->normalizeEventsTotal = 20000;
+timeRandomizer->setNormalizeEventsTotal(20000);
 // StEvent dataset name when running StIOMaker over event.root files
-timeRandomizer->datasetNameStEvent = "IO_Root/.data/bfcTree/eventBranch/StEvent";
+timeRandomizer->setDatasetNameStEvent("IO_Root/.data/bfcTree/eventBranch/StEvent");
+// Seed for the random numbers generator
+// Note: default is zero, non-reproducable
+timeRandomizer->setSeed(0);
 
 // here we create St_db_Maker, it will use the generated event timestamps
 St_db_Maker *dbMaker = new St_db_Maker("db", "MySQL:StarDb", "$STAR/StarDb");
 --------------------------------------------
 
-TRandom3 is used with zero seed in Init() for the Uniform() random numbers.
+TRandom3 is utilized with user defined seed (default is zero) in Init() for
+the Uniform() random numbers.
 
 Originally released by Oleksandr Grebenyuk as part of the pi0 analysis code.
