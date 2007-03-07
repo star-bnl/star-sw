@@ -106,18 +106,19 @@ Int_t StTimeRandomizerMaker::Make() {
 	++eventsIter;
     } while((random > (*eventsIter)) && (runUsedIter != this->mRunsUsed.end()) && (runIter != this->mRuns.end()) && (dateIter != this->mDates.end()) && (timeIter != this->mTimes.end()) && (eventsIter != this->mEvents.end()));
     if ((run != -1) && (date != -1) && (time != -1)) {
-	{LOG_INFO << "Setting run " << run << ", date " << date << ", time " << time << endm;}
+	Int_t eventId = this->getBaseEventId() + this->mEventNum;
+	{LOG_INFO << "Setting run " << run << ", date " << date << ", time " << time << ", event ID " << eventId << endm;}
 	this->inherited::SetDateTime(date, time);
 	StEvent *event = (StEvent*)this->inherited::GetInputDS(this->getDatasetNameStEvent());
 	if (event) {
 	    event->setRunId(run);
-	    event->setId(this->getBaseEventId() + this->mEventNum);
-	    this->mEventNum++;
+	    event->setId(eventId);
 	} else {LOG_ERROR << "Cannot find StEvent at " << this->getDatasetNameStEvent() << endm;}
    	--runUsedIter;
    	*runUsedIter = (*runUsedIter) + 1;
-    }
+    } else {LOG_ERROR << "Internal error when selecting timestamp" << endm;}
   } else {LOG_DEBUG << "Nothing to do" << endm;}
+  this->mEventNum++;
   {LOG_DEBUG << "Finished Make()" << endm;}
   return result;
 }
@@ -126,6 +127,7 @@ Int_t StTimeRandomizerMaker::Make() {
 Int_t StTimeRandomizerMaker::Finish() {
   {LOG_DEBUG << "Starting Finish()" << endm;}
   Int_t result = this->inherited::Finish();
+  {LOG_DEBUG << "Processed " << this->mEventNum << " events" << endm;}
   {
     list<Int_t>::const_iterator runIter = this->mRuns.begin();
     for (list<Int_t>::iterator runUsedIter = this->mRunsUsed.begin();runUsedIter != this->mRunsUsed.end();++runUsedIter) {
