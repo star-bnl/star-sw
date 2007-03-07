@@ -14,6 +14,7 @@ StTimeRandomizerMaker::StTimeRandomizerMaker(const char *name)
     , mNormalizeEventsTotal(0)
     , mDatasetNameStEvent("StEvent")
     , mSeed(0)
+    , mBaseEventId(0)
     , mEventsTotal(0)
     , mEventNum(0)
     , mNormalizedEventsCounter(0)
@@ -106,11 +107,11 @@ Int_t StTimeRandomizerMaker::Make() {
     } while((random > (*eventsIter)) && (runUsedIter != this->mRunsUsed.end()) && (runIter != this->mRuns.end()) && (dateIter != this->mDates.end()) && (timeIter != this->mTimes.end()) && (eventsIter != this->mEvents.end()));
     if ((run != -1) && (date != -1) && (time != -1)) {
 	{LOG_INFO << "Setting run " << run << ", date " << date << ", time " << time << endm;}
-	this->SetDateTime(date, time);
-	StEvent *event = (StEvent*)GetInputDS(this->getDatasetNameStEvent());
+	this->inherited::SetDateTime(date, time);
+	StEvent *event = (StEvent*)this->inherited::GetInputDS(this->getDatasetNameStEvent());
 	if (event) {
 	    event->setRunId(run);
-	    event->setId(this->mEventNum);
+	    event->setId(this->getBaseEventId() + this->mEventNum);
 	    this->mEventNum++;
 	} else {LOG_ERROR << "Cannot find StEvent at " << this->getDatasetNameStEvent() << endm;}
    	--runUsedIter;
@@ -174,4 +175,14 @@ UInt_t StTimeRandomizerMaker::getSeed() const {
 //______________________________________________________________________________
 void StTimeRandomizerMaker::setSeed(UInt_t seed) {
     this->mSeed = seed;
+}
+
+//______________________________________________________________________________
+Int_t StTimeRandomizerMaker::getBaseEventId() const {
+    return this->mBaseEventId;
+}
+
+//______________________________________________________________________________
+void StTimeRandomizerMaker::setBaseEventId(Int_t baseId) {
+    this->mBaseEventId = baseId;
 }

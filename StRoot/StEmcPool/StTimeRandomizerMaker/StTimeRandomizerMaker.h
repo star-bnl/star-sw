@@ -31,13 +31,17 @@ public:
     UInt_t getSeed() const;
     void setSeed(UInt_t seed);
 
-    ClassDef(StTimeRandomizerMaker, 1);
+    Int_t getBaseEventId() const;
+    void setBaseEventId(Int_t baseId);
+
+    ClassDef(StTimeRandomizerMaker, 2);
 
 protected:
     TString mRunTimesFilename; // text file with requested timestamps and corresponding statistics
     Float_t mNormalizeEventsTotal; // if not zero, tells in how many events the requested list must be covered
     TString mDatasetNameStEvent; // StEvent dataset name to use, default is "StEvent", one may also try "IO_Root/.data/bfcTree/eventBranch/StEvent"
     UInt_t mSeed; // random number generator seed to be used in Init()
+    Int_t mBaseEventId; // events are assigned sequential IDs starting from this number
 
     list<Int_t> mRunsUsed;
     list<Int_t> mRuns;
