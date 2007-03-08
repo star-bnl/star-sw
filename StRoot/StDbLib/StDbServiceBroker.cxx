@@ -2,6 +2,7 @@
 #include "StDbServiceBroker.h"
 #include "ChapiStringUtilities.h"
 #include "mysql.h"
+#include "math.h"
 
 using namespace std;
 using namespace chapi_string_utilities;
@@ -42,6 +43,7 @@ string SCOPE = "scope";
 string WHEN_ACTIVE = "whenActive";
 string ACCESS_MODE = "accessMode";
 string WRITER = "writer";
+string POWER = "machinePower";
 
 static MYSQL *conn;
 
@@ -169,7 +171,10 @@ StDbServiceBroker::StDbServiceBroker
 //////////////////////////////////////////////////////
 void StDbServiceBroker::DoLoadBalancing()
 {
-
+  if (MyStatus!=st_db_service_broker::NO_ERROR)
+    {
+      cout << " StDbServiceBroker::DoLoadBalancing() errors" <<MyStatus<<"\n";
+    }
 #ifdef DEBUG
   PrintHostList();
 #endif
@@ -191,7 +196,9 @@ We expect:
   MyHostList.clear();
   string key = StlXmlTree::MakeKey("",nn[SCATALOG]);
   vector<string> versions = ParsedXml.LookUpValueByKey(key);
+
   if (versions.size()!=1) return;
+
   string my_version = versions[0];
 
   vector<string> sites = ParsedXml.LookUpValueByKey(key,my_version,nn[SITE]);
@@ -215,8 +222,18 @@ We expect:
 		port = DefaultPort;
 	      }
 
-	      cout << " setting host = "<<host_data[NAME]<<" port "<<port <<"\n";
-	      ChapiDbHost host_entry = ChapiDbHost(host_data[NAME],port);
+	      double power;
+
+	      if (!from_string<double>(power,host_data[POWER],std::dec))
+	      {
+		// error: non-numeric port string
+#ifdef DEBUG
+		cout << "StDbServiceBroker::FormHostList(): using default power for host "<<*iii<<"\n";
+#endif
+		power = DefaultPower;
+	      }
+
+	      ChapiDbHost host_entry = ChapiDbHost(host_data[NAME],port,power);
 	      MyHostList.push_back(host_entry);
 	    }
 	  cut_string_after_sub(key,">");
@@ -225,6 +242,7 @@ We expect:
 	  cut_string_after_sub(key,">");
 	  cut_string_after_sub(key,"(");
     }
+
 
   if (MyHostList.size()==0)
     {
@@ -246,7 +264,7 @@ void StDbServiceBroker::PrintHostList()
 //////////////////////////////////////////////////////
 void StDbServiceBroker::RecommendHost()
 {
-  unsigned long nproc_min = ULONG_MAX;
+  double dproc_min = HUGE_VAL;
 
   if (MyHostList.size()==1)
     {
@@ -279,15 +297,16 @@ void StDbServiceBroker::RecommendHost()
         }
 
       MYSQL_RES *res_set = mysql_store_result(conn);
-      unsigned long nproc = mysql_num_rows(res_set);
+      unsigned int nproc = mysql_num_rows(res_set);
+      double dproc = nproc/(*I).Power;
 #ifdef DEBUG
-       cout <<" Server "<<((*I).HostName).c_str()<< " "<< nproc << " processes \n";
+      cout <<" Server "<<((*I).HostName).c_str()<< " actual "<< nproc << " effective "<< dproc <<" processes \n";
 #endif
       mysql_close(conn);
 
-      if (nproc<nproc_min)
+      if (dproc<dproc_min)
         {
-          nproc_min = nproc;
+          dproc_min = dproc;
 	  MyBestHost = I;
         }
     }
