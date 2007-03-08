@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.28 2005/11/28 19:09:55 deph Exp $
+ * $Id: StDbSql.cc,v 1.29 2007/03/08 21:54:40 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.29  2007/03/08 21:54:40  deph
+ * Added quotes to identifier `schema` for compatibility to mysql 5.0.x
+ *
  * Revision 1.28  2005/11/28 19:09:55  deph
  * small bug fix for a rare condition.
  *
@@ -863,10 +866,10 @@ if(table->hasDescriptor())return 1;
 
     if(descriptor->IsValid())return 1;
 
-    Db<<"SELECT  schema.schemaID, schema.name, schema.type, schema.length, ";
-    Db<<"schema.position from schema WHERE schema.structID="<<structID;
-    Db<<" AND schema.schemaID="<<requestSchemaID;
-    Db<<" ORDER by schema.position"<<endsql;
+    Db<<"SELECT  `schema`.schemaID, `schema`.name, `schema`.type, `schema`.length, ";
+    Db<<"`schema`.position from `schema` WHERE `schema`.structID="<<structID;
+    Db<<" AND `schema`.schemaID="<<requestSchemaID;
+    Db<<" ORDER by `schema`.position"<<endsql;
 
     sendMess(DbQInfo,Db.printQuery(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
