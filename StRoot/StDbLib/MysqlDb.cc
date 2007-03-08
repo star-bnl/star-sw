@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.40 2007/01/09 16:27:39 deph Exp $
+ * $Id: MysqlDb.cc,v 1.41 2007/03/08 22:08:41 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.41  2007/03/08 22:08:41  deph
+ * Load Balancer adjustments for machinePower features
+ *
  * Revision 1.40  2007/01/09 16:27:39  deph
  * Updates for load balancing "added 1)write privilege 2)xml comments 3)camelCase notation
  *
@@ -301,11 +304,12 @@ strcpy(mdbhost,aHost);
   mdbPort  = aPort;
   //  cout << "aHost = "<<mdbhost<<endl; 
   //cout << " Calling load balancer\n";
+
+
+#ifndef NoXmlTreeReader
   clock_t start,finish;
  double lbtime;
   start = clock();
-
-#ifndef NoXmlTreeReader
   if (my_manager->myServiceBroker)
     {
       my_manager->myServiceBroker->DoLoadBalancing();
@@ -320,10 +324,11 @@ strcpy(mdbhost,aHost);
 	  cerr << "MysqlDb::Connect: StDbServiceBroker error "<<mSBStatus<<"\n";
 	}
     }
-#endif
   finish = clock();
   lbtime = (double(finish)-double(start))/CLOCKS_PER_SEC*1000;
   cout << "MysqlDb::Connect: Load balancer took "<<lbtime<<" ms, will use "<<mdbhost<<" \n";
+#endif
+
 
   if(mdbName) {
     delete [] mdbName;
