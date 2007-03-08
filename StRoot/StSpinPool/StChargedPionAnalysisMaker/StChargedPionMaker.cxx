@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.cxx,v 1.1 2007/02/02 13:59:41 kocolosk Exp $
+* $Id: StChargedPionMaker.cxx,v 1.2 2007/03/08 22:13:59 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.cxx,v $
+* Revision 1.2  2007/03/08 22:13:59  kocolosk
+* stores StMuTracks directly
+*
 * Revision 1.1  2007/02/02 13:59:41  kocolosk
 * new Maker StChargedPionMaker intended to be used with StJetSkimEventMaker for spin analysis
 *
@@ -34,7 +37,6 @@
 #include "StMessMgr.h"
 
 //my headers
-#include "TChargedPionEvent.h"
 #include "StChargedPionMaker.h"
 
 ClassImp(StChargedPionMaker)
@@ -45,14 +47,14 @@ StChargedPionMaker::StChargedPionMaker(const char *name, const char *outputfile)
 	
 	mFile = new TFile(outputfile,"RECREATE");
 	mTree = new TTree("chargedPionTree","charged pions from data");
-	mTracks = new TClonesArray("TChargedPion",10);
-	mPion = new TChargedPion();
+	mPrimaries = new TClonesArray("StMuTrack",10);
+	mGlobals = new TClonesArray("StMuTrack",10);
 	
 	mTree->Branch("run",&mRun,"run/I");
 	mTree->Branch("event",&mEvent,"event/I");
-	mTree->Branch("fnumber",&mFileNumber,"fnumber/I");
 	mTree->Branch("ntracks",&mNTracks,"ntracks/I");
-	mTree->Branch("tracks",&mTracks);
+	mTree->Branch("primaries",&mPrimaries);
+	mTree->Branch("globals",&mGlobals);
 	Long64_t autosave = 1000000000; //1GB
 	autosave *= 10;
 	mTree->SetAutoSave(autosave);
@@ -66,8 +68,8 @@ StChargedPionMaker::~StChargedPionMaker()
 {
 	LOG_DEBUG << "calling destructor" << endm;
 	
-	mPion->Delete();
-	mTracks->Delete();
+	mPrimaries->Delete();
+	mGlobals->Delete();
 	mTree->Delete();
 	mFile->Delete();
 	
@@ -78,10 +80,9 @@ void StChargedPionMaker::Clear(const char*)
 {
 	mRun = -1;
 	mEvent = -1;
-	mFileNumber = -1;
 	mNTracks = 0;
-	mPion->Clear();
-	mTracks->Clear();
+	mPrimaries->Clear();
+	mGlobals->Clear();
 	
 	StMaker::Clear();
 }
@@ -105,11 +106,6 @@ Int_t StChargedPionMaker::Make()
 	mRun	= event->runNumber();
 	mEvent	= event->eventNumber();
 	
-	TString inputfile(chain->GetFile()->GetName());
-	int index1 = inputfile.Index(".MuDst");
-	TString filenumber(inputfile(index1-7,7));
-	mFileNumber = filenumber.Atoi();
-	
 	//now for the tracks
 	unsigned int nVertices = muDst->numberOfPrimaryVertices();
 	for(unsigned int vertex_index=0; vertex_index<nVertices; vertex_index++){
@@ -122,53 +118,20 @@ Int_t StChargedPionMaker::Make()
 		for(int i=0; i<nentries; i++){
 			track = muDst->primaryTracks(i);
 			global = track->globalTrack();
+			
 			if(!global){
 				LOG_WARN << "no global found for R"<<mRun<< ", event "<<mEvent<<", key "<<track->id()<<", so skip it"<<endm;
 				continue;
 			}
 			
-			if(track->pt()<1.) continue;
+			//cuts
+			if(track->pt() < 2.)					continue;
+			if(TMath::Abs(track->eta()) > 1.)		continue;
+			if(track->dca(vertex_index).mag() > 1.)	continue;
+			if(track->nHitsFit() < 20)				continue;
 			
-			//basics
-			mPion->pt			= track->pt();
-			mPion->eta			= track->eta();
-			mPion->phi			= track->phi();
-			mPion->nHits		= track->nHits();
-			mPion->nFitPoints	= track->nHitsFit();
-			mPion->nDedxPoints	= track->nHitsDedx();
-			mPion->nHitsPossible= track->nHitsPoss();
-			mPion->charge		= track->charge();
-			mPion->chi2			= track->chi2();
-			mPion->key			= track->id();
-			mPion->flag			= track->flag();
-			
-			//global info
-			mPion->globalPt		= global->pt();
-			mPion->globalEta	= global->eta();
-			mPion->globalPhi	= global->phi();
-			
-			//dedx info
-			mPion->dEdx			= track->dEdx();
-			mPion->nSigmaPion	= track->nSigmaPion();
-			mPion->nSigmaElectron= track->nSigmaElectron();
-			mPion->nSigmaProton	= track->nSigmaProton();
-			mPion->nSigmaKaon	= track->nSigmaKaon();
-			
-			mPion->vertexIndex = vertex_index;
-			
-			//TVector3 stuff (vertex,dca,first,last)
-			StThreeVectorF stdca = track->dcaGlobal(mPion->vertexIndex);
-			mPion->dca.SetXYZ(stdca.x(),stdca.y(),stdca.z());
-			
-			StThreeVectorF stfp = global->firstPoint();
-			mPion->firstPoint.SetXYZ(stfp.x(),stfp.y(),stfp.z());
-			
-			StThreeVectorF stlp = global->lastPoint();
-			mPion->lastPoint.SetXYZ(stlp.x(),stlp.y(),stlp.z());
-			
-			LOG_DEBUG<<"adding track with pt "<<mPion->pt<<endm;
-			new ( (*mTracks)[mTracks->GetLast()+1] ) TChargedPion(*mPion);
-			mPion->Clear();
+			new ( (*mPrimaries)[mPrimaries->GetLast()+1] )	StMuTrack(*track);
+			new ( (*mGlobals)[mGlobals->GetLast()+1] )		StMuTrack(*global);
 			mNTracks++;
 		}
 	}

@@ -1,6 +1,6 @@
 /***************************************************************************
 *
-* $Id: StChargedPionMaker.h,v 1.1 2007/02/02 13:59:42 kocolosk Exp $
+* $Id: StChargedPionMaker.h,v 1.2 2007/03/08 22:13:59 kocolosk Exp $
 *
 * Author:  Adam Kocoloski
 ***************************************************************************
@@ -11,6 +11,9 @@
 ***************************************************************************
 *
 * $Log: StChargedPionMaker.h,v $
+* Revision 1.2  2007/03/08 22:13:59  kocolosk
+* stores StMuTracks directly
+*
 * Revision 1.1  2007/02/02 13:59:42  kocolosk
 * new Maker StChargedPionMaker intended to be used with StJetSkimEventMaker for spin analysis
 *
@@ -25,9 +28,9 @@
 class TFile;
 class TTree;
 class TClonesArray;
-class TChargedPion;
 
 class StMuDstMaker;
+class StMuTrack;
 
 
 class StChargedPionMaker : public StMaker {
@@ -41,18 +44,17 @@ public:
 	virtual Int_t Finish();
 	
 	virtual const char* GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.1 2007/02/02 13:59:42 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StChargedPionMaker.h,v 1.2 2007/03/08 22:13:59 kocolosk Exp $ built "__DATE__" "__TIME__; return cvs;}
 	
 private:
-	TFile *mFile;			//!
-	TTree *mTree;			//!
+	TFile *mFile;				//!
+	TTree *mTree;				//!
 	
-	Int_t mRun;				//!
-	Int_t mEvent;			//!
-	Int_t mFileNumber;		//!
-	Int_t mNTracks;			//!
-	TChargedPion *mPion;	//!
-	TClonesArray *mTracks;	//!
+	Int_t mRun;					//!
+	Int_t mEvent;				//!
+	Int_t mNTracks;				//!
+	TClonesArray *mPrimaries;	//!
+	TClonesArray *mGlobals;		//!
 
 	//pointers to makers - get them in Init()
 	StMuDstMaker* muDstMaker;	//!
