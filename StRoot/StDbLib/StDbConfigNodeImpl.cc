@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.7 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.8 2007/03/08 22:07:22 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.8  2007/03/08 22:07:22  deph
+ * Fixed small memory leak in removeTable
+ *
  * Revision 1.7  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -278,6 +281,7 @@ StDbConfigNodeImpl::removeTable(StDbTable* table){
     for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
         myTable=*itr;
         if(myTable && compareTables(myTable,table)){
+                 delete *itr;
                  mTables.erase(itr);   break;
         }
         myTable=0;
