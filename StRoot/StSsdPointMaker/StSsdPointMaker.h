@@ -1,6 +1,9 @@
-// $Id: StSsdPointMaker.h,v 1.22 2007/03/01 22:19:21 bouchet Exp $
+// $Id: StSsdPointMaker.h,v 1.23 2007/03/08 23:04:42 bouchet Exp $
 //
 // $Log: StSsdPointMaker.h,v $
+// Revision 1.23  2007/03/08 23:04:42  bouchet
+// add WriteMatchedStrips() method : fill the characteristics of the strips from matched clusters ; Small change for the writing of tuples
+//
 // Revision 1.22  2007/03/01 22:19:21  bouchet
 // add a protection when ssdStripCalib is filled with empty values
 //
@@ -148,6 +151,7 @@ class StSsdPointMaker : public StMaker {
   Float_t ClusterNtuple[15];
   Float_t ClustupleIn[15];
   Float_t hitNtuple[15]; 
+  Float_t StripsIn[15]; 
   TFile   *mFile;
   TNtuple *mHitNtuple;
   TFile   *nFile;
@@ -156,6 +160,8 @@ class StSsdPointMaker : public StMaker {
   TNtuple *qHitNtuple;
   TFile   *pFile;
   TNtuple *pHitNtuple;
+  TFile   *rFile;
+  TNtuple *rHitNtuple;
   void makeScfCtrlHistograms(StSsdBarrel *mySsd);        //!
   void makeScmCtrlHistograms(StSsdBarrel *mySsd);        //!
   void DeclareNtuple(Int_t *flag);
@@ -172,7 +178,8 @@ class StSsdPointMaker : public StMaker {
   void PrintPackageDetails(StSsdBarrel *mySsd, Int_t mywafer); //!
   void Read_Strip(St_ssdStripCalib *strip_calib,Int_t *Zero);
   void WriteMatchedClusters(StSsdBarrel *mySsd);//! 
-  
+  void WriteMatchedStrips(StSsdBarrel *mySsd);//! 
+  void WriteTuple();
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -222,7 +229,7 @@ class StSsdPointMaker : public StMaker {
   Int_t Zero;
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.22 2007/03/01 22:19:21 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.23 2007/03/08 23:04:42 bouchet Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };
