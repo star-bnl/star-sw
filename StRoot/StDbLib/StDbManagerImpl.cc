@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.24 2007/01/09 16:36:57 deph Exp $
+ * $Id: StDbManagerImpl.cc,v 1.25 2007/03/08 22:01:44 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.25  2007/03/08 22:01:44  deph
+ * minor change (removed a break) to allow load balancer to be backward compatible with online migration code
+ *
  * Revision 1.24  2007/01/09 16:36:57  deph
  * differnt config file name for seamless autobuild
  *
@@ -468,9 +471,11 @@ void StDbManagerImpl::lookUpServers(){
 #else
   string dbLoadBalancerConfig = 
     //    "/star/u/deph/servers/dbLoadBalancerConfig.xml";  Switch back to this name next release
-    "/star/u/deph/servers/dbLoadBalancerConfig.new";
-#endif
+    "/star/u/deph/servers/dbLoadBalancerConfig.new"; 
+#endif 
 
+  //cout <<"****************HERE A ****************"<<endl;
+ 
   myServiceBroker = new StDbServiceBroker(dbLoadBalancerConfig);
   short SBStatus = myServiceBroker->GetStatus();
   if (SBStatus == st_db_service_broker::NO_ERROR)
@@ -486,36 +491,37 @@ void StDbManagerImpl::lookUpServers(){
 #endif
 
  char* xmlFile[3]={NULL,NULL,NULL};
- dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
+ // dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
+ dbFindServerMode mode[3]={serverEnvVar,userHome,starDefault};
 
  StString cos;
  cos<<stendl<<"******** Order of Files searched for dbServers ********* "<<stendl;
-
+ 
  for(int i=0;i<3; i++){
    xmlFile[i]=StDbDefaults::Instance()->getServerFileName(mode[i]);
-
    if(xmlFile[i]){
      ifstream is(xmlFile[i]);
      if(is){
 
-       cout << " looking at "<<xmlFile[i]<<"\n";
-       cos<<"  "<<i+1<<". "<< xmlFile[i] <<stendl;
-       findServersXml(is);
-       is.close();
+       cout << " looking at "<<i << " " << xmlFile[i]<< endl;
+        cos<<"  "<<i+1<<". "<< xmlFile[i] <<stendl;
+         findServersXml(is);
+	 is.close();
 
        xmlInputSource = mode[i];
-       break;
+       // break;  // THIS REMOVED TO SUPPORT MANY SERVERS USED IN ONLINE MIGRATION MACROS
+     } else {
+       cout << "There is no "<< i << "  " << xmlFile[i] << endl;
      }
      delete [] xmlFile[i];
      xmlFile[i]=NULL;
    }
  }
-
  cos <<"********************************************************" << stendl;
-
  printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 
- mhasServerList = true;
+ // cout <<"****************HERE B ****************"<<endl;
+mhasServerList = true;
 
 #undef __METHOD__
 }
@@ -552,10 +558,13 @@ supported. Central load-balancing configuration file is being introduced with th
   char* portNumber = mparser.getString(stardatabase,(char*)bport,(char*)eport);
 
   if(portNumber)portNum = atoi(portNumber);
-
+#ifndef NoXmlTreeReader
   StDbServerImpl* myserver = new StDbServerImpl(servName,hostName,uSocket,portNum);
   myserver->PointMysqlDb(this);
   StDbServer* server = myserver; 
+#else
+  StDbServer* server = new StDbServerImpl(servName,hostName,uSocket,portNum);
+#endif
 
   if(muserName) server->setUser(muserName,mpWord);
   delete [] servName; 
@@ -566,7 +575,10 @@ supported. Central load-balancing configuration file is being introduced with th
   server->setTimeLogging(misTimeLogged);
 
   char* dbNames = mparser.getString(stardatabase,(char*)bdb,(char*)edb);
+ 
+
   if( !dbNames && !mhasDefaultServer ){
+
 
     server->setIsDefaultServer();
     mhasDefaultServer = true;
@@ -752,8 +764,15 @@ return server;
 
 StDbServer* StDbManagerImpl::findDefaultServer(){
 
- if(!mhasServerList)lookUpServers();
+ 
+ if(!mhasServerList)
+   {
+     lookUpServers();
+    }
+
  StDbServer* server = 0;
+
+ 
 
 for(ServerList::iterator itr = mservers.begin(); itr != mservers.end(); ++itr){
    if((*itr)->isDefault()){
